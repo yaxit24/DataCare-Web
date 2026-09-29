@@ -143,8 +143,8 @@
       ],
       "formReferencedInWeb": true,
       "state": "implemented-unverified",
-      "evidence": "apps/web/test/reportSurfaceLinks.test.ts; apps/api/test/p9Reports.db.test.ts",
-      "note": "Implemented-unverified: exposed the existing RP_STK_MOVE-backed stock movement report as /reports/size-movement.",
+      "evidence": "apps/api/test/reportScreens.routes.db.test.ts",
+      "note": "Implemented-unverified: exposed the existing RP_STK_MOVE-backed stock movement report as /reports/size-movement. D3 fixed 2026-09-29: GET /reports/size-movement previously did not exist (screen 404, export only); it now calls the export builder. Engineering evidence only; see ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-eval-defects/contract.md.",
       "webSurface": {
         "kind": "route",
         "surface": "GET /reports/size-movement"
@@ -808,8 +808,8 @@
       ],
       "formReferencedInWeb": true,
       "state": "implemented-unverified",
-      "evidence": null,
-      "note": "differently-named card receipt mode. Shares this surface with 2 other menu entries: Transaction/Bank Received, Transaction/Cash Received.",
+      "evidence": "apps/api/test/financeBookFamily.db.test.ts; apps/api/test/financeBookSelection.routes.db.test.ts; apps/web/test/cash-receipt-payment.journey.mjs; apps/web/test/financeBooks.test.ts; desktop source MDI_FORM.cs:8052-8111 CurBookHelp, DC_Main.CurBookHelp, TR_CASH.cs, Ac_Ledr.cs:567-581",
+      "note": "differently-named card receipt mode. Shares this surface with 2 other menu entries: Transaction/Bank Received, Transaction/Cash Received. D1 fixed 2026-09-29 for the shared receipt form (card mode uses a BANK REC book); the desktop TR_CARD_REC CARD ADJUST form itself is not separately implemented. Engineering evidence only; see ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-eval-defects/contract.md.",
       "webSurface": {
         "kind": "route",
         "surface": "POST /receipts"
@@ -1838,8 +1838,8 @@
       ],
       "formReferencedInWeb": true,
       "state": "implemented-unverified",
-      "evidence": "apps/web/test/reportSurfaceLinks.test.ts; apps/api/test/p9Reports.db.test.ts",
-      "note": "Implemented-unverified: exposed the existing RP_BILL_PROFIT-backed report builder as /reports/bill-profit in the Reports menu.",
+      "evidence": "apps/api/test/reportScreens.routes.db.test.ts",
+      "note": "Implemented-unverified: exposed the existing RP_BILL_PROFIT-backed report builder as /reports/bill-profit in the Reports menu. D3 fixed 2026-09-29: GET /reports/bill-profit previously did not exist; it now calls the export builder with the screen date range. Engineering evidence only; see ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-eval-defects/contract.md.",
       "webSurface": {
         "kind": "route",
         "surface": "GET /reports/bill-profit"
@@ -1923,8 +1923,8 @@
       ],
       "formReferencedInWeb": true,
       "state": "implemented-unverified",
-      "evidence": "apps/web/test/reportSurfaceLinks.test.ts; apps/api/test/p9Reports.db.test.ts",
-      "note": "Implemented-unverified: exposed the existing RP_STK_LEVEL-backed item stock-level report as /reports/item-weight-levels.",
+      "evidence": "apps/api/test/reportScreens.routes.db.test.ts",
+      "note": "Implemented-unverified: exposed the existing RP_STK_LEVEL-backed item stock-level report as /reports/item-weight-levels. D3 fixed 2026-09-29: GET /reports/item-weight-levels previously did not exist; it now calls the export builder. Engineering evidence only; see ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-eval-defects/contract.md.",
       "webSurface": {
         "kind": "route",
         "surface": "GET /reports/item-weight-levels"
@@ -2220,8 +2220,8 @@
       ],
       "formReferencedInWeb": true,
       "state": "implemented-unverified",
-      "evidence": null,
-      "note": "order cancel adjustment.",
+      "evidence": "apps/web/app/(app)/txn/order-cancel/page.tsx; desktop source MDI_FORM.cs:8628-8639, TR_SL_ORD_ADJ.cs:2523",
+      "note": "order cancel adjustment. D5 fixed 2026-09-29: the page selects the SALES ORDER book and sends the complete scope to list, void (version-guarded) and refund. The desktop lists every order with an open advance; the web lists one order book at a time (open, X14). Engineering evidence only; see ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-eval-defects/contract.md.",
       "webSurface": {
         "kind": "route",
         "surface": "POST /sales-orders/:vchNo/cancel-refund"
@@ -3117,8 +3117,8 @@
       ],
       "formReferencedInWeb": true,
       "state": "implemented-unverified",
-      "evidence": null,
-      "note": "bank mode payment. Shares this surface with 1 other menu entry: Transaction/Cash Payment.",
+      "evidence": "apps/api/test/financeBookFamily.db.test.ts; apps/api/test/financeBookSelection.routes.db.test.ts; apps/web/test/cash-receipt-payment.journey.mjs; apps/web/test/financeBooks.test.ts; desktop source MDI_FORM.cs:8052-8111 CurBookHelp, DC_Main.CurBookHelp, TR_CASH.cs, Ac_Ledr.cs:567-581",
+      "note": "bank mode payment. Shares this surface with 1 other menu entry: Transaction/Cash Payment. D1 fixed 2026-09-29: bank modes list only BANK PAY (or web PAYMENT) books and post legs 07/08. Engineering evidence only; see ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-eval-defects/contract.md.",
       "webSurface": {
         "kind": "route",
         "surface": "POST /payments"
@@ -3136,8 +3136,8 @@
       ],
       "formReferencedInWeb": true,
       "state": "implemented-unverified",
-      "evidence": null,
-      "note": "bank mode receipt. Shares this surface with 2 other menu entries: ExtraTran/Card Rec, Transaction/Cash Received.",
+      "evidence": "apps/api/test/financeBookFamily.db.test.ts; apps/api/test/financeBookSelection.routes.db.test.ts; apps/web/test/cash-receipt-payment.journey.mjs; apps/web/test/financeBooks.test.ts; desktop source MDI_FORM.cs:8052-8111 CurBookHelp, DC_Main.CurBookHelp, TR_CASH.cs, Ac_Ledr.cs:567-581",
+      "note": "bank mode receipt. Shares this surface with 2 other menu entries: ExtraTran/Card Rec, Transaction/Cash Received. D1 fixed 2026-09-29: bank mode (and Ctrl+F8 ?mode=BANK) lists only BANK REC (or web RECEIPT) books; a cash receipt into a BANK REC book is refused. Engineering evidence only; see ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-eval-defects/contract.md.",
       "webSurface": {
         "kind": "route",
         "surface": "POST /receipts"
@@ -3193,8 +3193,8 @@
       ],
       "formReferencedInWeb": true,
       "state": "implemented-unverified",
-      "evidence": null,
-      "note": "cash mode payment. Shares this surface with 1 other menu entry: Transaction/Bank Payment.",
+      "evidence": "apps/api/test/financeBookFamily.db.test.ts; apps/api/test/financeBookSelection.routes.db.test.ts; apps/web/test/cash-receipt-payment.journey.mjs; apps/web/test/financeBooks.test.ts; desktop source MDI_FORM.cs:8052-8111 CurBookHelp, DC_Main.CurBookHelp, TR_CASH.cs, Ac_Ledr.cs:567-581",
+      "note": "cash mode payment. Shares this surface with 1 other menu entry: Transaction/Bank Payment. D1 fixed 2026-09-29: the form selects a configured CASH PAY (or web PAYMENT) book and date, saves and posts legs 05-08 with kasar against slot 2. Engineering evidence only; see ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-eval-defects/contract.md.",
       "webSurface": {
         "kind": "route",
         "surface": "POST /payments"
@@ -3212,8 +3212,8 @@
       ],
       "formReferencedInWeb": true,
       "state": "implemented-unverified",
-      "evidence": null,
-      "note": "cash mode receipt. Shares this surface with 2 other menu entries: ExtraTran/Card Rec, Transaction/Bank Received.",
+      "evidence": "apps/api/test/financeBookFamily.db.test.ts; apps/api/test/financeBookSelection.routes.db.test.ts; apps/web/test/cash-receipt-payment.journey.mjs; apps/web/test/financeBooks.test.ts; desktop source MDI_FORM.cs:8052-8111 CurBookHelp, DC_Main.CurBookHelp, TR_CASH.cs, Ac_Ledr.cs:567-581",
+      "note": "cash mode receipt. Shares this surface with 2 other menu entries: ExtraTran/Card Rec, Transaction/Bank Received. D1 fixed 2026-09-29: the form selects a configured CASH REC (or web RECEIPT) book and the voucher date, saves, posts legs 01-04 with kasar against BOOK_DETL slot 2 and prints; the server refuses a book outside the receipt family or the mode layout. Engineering evidence only; see ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-eval-defects/contract.md.",
       "webSurface": {
         "kind": "route",
         "surface": "POST /receipts"
@@ -3232,8 +3232,8 @@
       ],
       "formReferencedInWeb": true,
       "state": "implemented-unverified",
-      "evidence": null,
-      "note": "contra workflow.",
+      "evidence": "apps/api/test/financeBookSelection.routes.db.test.ts; apps/web/test/cash-receipt-payment.journey.mjs; desktop source MDI_FORM.cs:8100-8111 CurBookHelp(\"CONTRA\")",
+      "note": "contra workflow. D1 fixed 2026-09-29: the page selects a CONTRA book and saves; the rights alias Contra Entry now resolves. Engineering evidence only; see ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-eval-defects/contract.md.",
       "webSurface": {
         "kind": "route",
         "surface": "POST /contra"
@@ -3405,8 +3405,8 @@
       ],
       "formReferencedInWeb": true,
       "state": "implemented-unverified",
-      "evidence": null,
-      "note": "sales invoice workflow.",
+      "evidence": "packages/core/test/saleAmount.test.ts; apps/api/test/sales.lifecycle.db.test.ts; apps/api/test/saleAmountBasis.routes.db.test.ts; apps/web/test/lineRecalc.test.ts; apps/web/test/sale-amount-basis.journey.mjs; desktop source TR_SALE.cs:9161,10716-10936,12833,15432; MS_OPNCOMP.cs:881-888; Ac_Image.cs:6221",
+      "note": "sales invoice workflow. D6 fixed 2026-09-29: blank SL_AMT_TYPE prices net + ghat as the desktop does; per-line RtWith, P = pieces and RATE_TYPE 1/K/P follow CommPassTotal in the writer and the preview; only SALES books are offered. Engineering evidence only; see ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-eval-defects/contract.md.",
       "webSurface": {
         "kind": "route",
         "surface": "POST /sales"

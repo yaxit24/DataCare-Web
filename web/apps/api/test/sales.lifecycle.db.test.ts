@@ -1198,22 +1198,26 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
   // A suite that only exercises defaults tests one shop. `CO_SET.SL_AMT_TYPE` selects the weight the item rate
   // is multiplied by, so it changes the money on every line:
   //
-  //   ''  fine weight                     (pre-setting web behaviour, preserved deliberately)
+  //   ''  net + ghat   (blank is N: MS_OPNCOMP.cs:881-884, Ac_Image.cs:6221)
   //   'F' fine, or net+ghat when fine is 0
   //   'G' gross + ghat
   //   'N' net + ghat
-  //   'P' net + ghat  (same basis as N)
+  //   'P' pieces      (TR_SALE.cs:10909-10916)
   //
-  // `saleAmountBase` in settingsBehavior.ts. The fixture line below has gross 12.000, net 10.000 and touch
-  // 91.6, so fine is 9.160 and all three bases give different amounts - which is what makes the matrix able
-  // to fail.
+  // TR_SALE.cs CommPassTotal via `saleAmountBasis` (@datacare/core). The fixture line below has one piece,
+  // gross 12.000, net 10.000 and touch 91.6, so fine is 9.160 and the four bases give different amounts -
+  // which is what makes the matrix able to fail.
+  //
+  // Blank used to price fine (9160) and P net (10000). That was the web's own sentinel, not the desktop:
+  // PARITY-EVALUATION-2026-09-28 D6 and vectors D6-2 in
+  // parity-plan-2026-09-10/evidence/implementation-2026-09-29-eval-defects/contract.md.
   // ---------------------------------------------------------------------------------------------------
   it.each([
-    ['', 9160],
+    ['', 10000],
     ['F', 9160],
     ['G', 12000],
     ['N', 10000],
-    ['P', 10000],
+    ['P', 1000],
   ] as const)(
     'SL_AMT_TYPE=%s prices the line off the declared weight basis',
     async (type, expected) => {
@@ -1248,6 +1252,71 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
       );
     },
   );
+
+  // PARITY-EVALUATION-2026-09-28 D6, vectors D6-1/D6-3/D6-5. Each asserts the PERSISTED amount and the
+  // persisted RtWith, because the defect was in what reached SL_DETL, not in a helper's return value.
+  const pricedLine = async (
+    companyType: string | null,
+    line: Record<string, unknown>,
+  ): Promise<{ amt: number; rateWith: string }> => {
+    await owner.$executeRawUnsafe(
+      `UPDATE "CO_SET" SET "SL_AMT_TYPE"=$1 WHERE tenant_id=$2 AND "CO_CODE"=$3`,
+      companyType,
+      TENANT,
+      CO,
+    );
+    const created = await createSale(runtime, saleInput(), [
+      { itCode: 'GOLD', vchSrno: 1, ...line },
+    ] as never);
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT coalesce("ITM_AMT",0)::float amt, coalesce("RATE_WITH",'') "rateWith" FROM "SL_DETL"
+        WHERE tenant_id=$1 AND "VCH_NO"=$2 LIMIT 1`,
+      TENANT,
+      String(created.vchNo).padStart(5, '0'),
+    )) as { amt: number; rateWith: string }[];
+    return rows[0]!;
+  };
+
+  it('D6-1: a NULL SL_AMT_TYPE bills net as the desktop does (60,000, not 54,960) and stores RtWith N', async () => {
+    const row = await pricedLine(null, {
+      tagNo: 'TAG001',
+      pcs: 1,
+      grossWt: 10,
+      netWt: 10,
+      touch: 91.6,
+      rate: 6000,
+    });
+    expect(row.amt).toBeCloseTo(60000, 2);
+    // TR_SALE.cs:9161 seeds a new row's column 21 from the company type and :15432 saves it.
+    expect(row.rateWith).toBe('N');
+  });
+
+  it('D6-3: a line RtWith overrides the company type and is stored as given', async () => {
+    const row = await pricedLine('N', {
+      tagNo: 'TAG001',
+      pcs: 2,
+      grossWt: 12,
+      netWt: 10,
+      touch: 91.6,
+      rate: 1000,
+      rateWith: 'g',
+    });
+    expect(row.amt).toBeCloseTo(12000, 2);
+    expect(row.rateWith).toBe('G');
+  });
+
+  it('D6-5: an item RATE_TYPE K divides a per-kilogram rate', async () => {
+    const row = await pricedLine('N', {
+      tagNo: 'TAG001',
+      pcs: 1,
+      grossWt: 250,
+      netWt: 250,
+      touch: 100,
+      rate: 70000,
+      rateType: 'K',
+    });
+    expect(row.amt).toBeCloseTo(17500, 2);
+  });
 
   it('the amount bases are genuinely distinct, so the matrix can fail', async () => {
     // Guards the matrix itself. If gross, net and fine ever coincided in the fixture, every row above would
@@ -1296,8 +1365,10 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
         netWt: 10,
         touch: 91.6,
         // A rate chosen so 3% of the line lands beyond two decimals, which is what makes the precisions
-        // distinguishable at all.
-        rate: 7131.1,
+        // distinguishable at all. The blank company prices net (10 x 7131.11 = 71,311.10), so 3% is
+        // 2,139.333 and the 2dp tax is an odd 2,139.33. (7131.1 was tuned to the former fine basis; on net
+        // it gives 71,311.00 and an exact 2dp tax, which no precision can tell apart.)
+        rate: 7131.11,
       },
     ]);
     const vch = String(created.vchNo).padStart(5, '0');

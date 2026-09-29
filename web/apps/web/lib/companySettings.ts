@@ -52,11 +52,31 @@ export function companyFlag(
   blankDefault: 'Y' | 'N' = 'N',
 ): boolean {
   if (!values) return blankDefault === 'Y';
-  const raw = String(values[column] ?? '')
+  const raw = String(companySetting(values, column) ?? '')
     .trim()
     .toUpperCase();
   if (raw === '') return blankDefault === 'Y';
   return raw === 'Y';
+}
+
+/**
+ * One persisted CO_SET / CO_SET_NEW value, by column name.
+ *
+ * `GET /settings` keys its values by descriptor id (`CO_SET.SL_AMT_TYPE`, `CO_SET_NEW.LBR_WITH_GHT`),
+ * not by bare column name, because some columns (COUNTRY_ID) exist in both tables. Callers asked for
+ * the bare name and always got undefined. `LBR_WITH_GHT`, `SL_NWT_LOCK` and `ITM_FINE_LOCK` therefore
+ * fell back to their blank defaults whatever the company had configured.
+ *
+ * An exact key still wins, so a column held in both tables can be requested by its full id.
+ */
+export function companySetting(values: CompanySettingValues | null, column: string): unknown {
+  if (!values) return undefined;
+  if (Object.prototype.hasOwnProperty.call(values, column)) return values[column];
+  for (const table of ['CO_SET', 'CO_SET_NEW']) {
+    const id = `${table}.${column}`;
+    if (Object.prototype.hasOwnProperty.call(values, id)) return values[id];
+  }
+  return undefined;
 }
 
 /** Company setting values, or null until the first fetch resolves. */

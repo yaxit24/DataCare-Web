@@ -24,6 +24,18 @@ import {
   exerciseEInvoiceEntry,
   seedEInvoiceEntry,
 } from './e-invoice-entry.journey.mjs';
+import {
+  cashReceiptPaymentFixtureTables,
+  cleanupCashReceiptPayment,
+  exerciseCashReceiptPayment,
+  seedCashReceiptPayment,
+} from './cash-receipt-payment.journey.mjs';
+import {
+  cleanupSaleAmountBasis,
+  exerciseSaleAmountBasis,
+  saleAmountBasisFixtureTables,
+  seedSaleAmountBasis,
+} from './sale-amount-basis.journey.mjs';
 import { exerciseDesignCalculation } from './design-calculation.journey.mjs';
 import {
   seedDesignRepeat,
@@ -121,6 +133,8 @@ const tables = [
   ...mfgLotFixtureTables,
   ...creditNoteEntryFixtureTables,
   ...eInvoiceEntryFixtureTables,
+  ...cashReceiptPaymentFixtureTables,
+  ...saleAmountBasisFixtureTables,
   'COL_MAST',
   'CO_SET_NEW',
   'TAG_IMAGE_DATA',
@@ -523,6 +537,22 @@ try {
   } finally {
     await cleanupEInvoiceEntry(sql);
   }
+  await seedCashReceiptPayment(sql);
+  try {
+    result.cashReceiptPayment = await exerciseCashReceiptPayment(page, {
+      checkpoint,
+      owner,
+      tenantId,
+    });
+  } finally {
+    await cleanupCashReceiptPayment(sql);
+  }
+  await seedSaleAmountBasis(sql);
+  try {
+    result.saleAmountBasis = await exerciseSaleAmountBasis(page, { checkpoint, owner, tenantId });
+  } finally {
+    await cleanupSaleAmountBasis(sql);
+  }
   await seedSalesOrder(sql);
   await seedSalesOrderDesign(sql);
   result.salesOrderDesign = await exerciseSalesOrderDesign(page, { checkpoint, coBook: 'S41' });
@@ -579,6 +609,7 @@ try {
   assert.deepEqual(errors, [], 'browser runtime errors');
   const journeySummaries = [];
   result.journeys = [
+    ['cash-receipt-payment', result.cashReceiptPayment],
     ['column-settings', result.columnSettings],
     ['credit-note', result.creditNote],
     ['credit-note-entry', result.creditNoteEntry],
@@ -591,6 +622,7 @@ try {
     ['manufacturing-lot', result.mfgLot],
     ['order-images', result.orderImages],
     ['repair-image-conflict', result.repairImageConflict],
+    ['sale-amount-basis', result.saleAmountBasis],
     ['sales-order', result.salesOrder],
     ['sales-order-design', result.salesOrderDesign],
     ['sales-return-bill-replay', result.salesReturnBillReplay],
@@ -615,7 +647,7 @@ try {
   );
   result.status = 'passed';
   console.log(
-    'PARITY_REAL_STACK_PASSED: real login, Design Book calculation/repeat, Sales design selection and lifecycle, Tour Order lifecycle, credit-note browse, E CRNT create/print/edit/reopen/delete and E INVOICE create/IRN/cancel/reopen/delete, saved order and generic/repair images with conflicts, saved incoming Return metadata, Setting lot sources, family-qualified column settings, saved incoming Return calculation, bill and resolved labour preview; zero mocked requests',
+    'PARITY_REAL_STACK_PASSED: real login, Design Book calculation/repeat, Sales design selection and lifecycle, Tour Order lifecycle, credit-note browse, E CRNT create/print/edit/reopen/delete and E INVOICE create/IRN/cancel/reopen/delete, cash receipt/payment/contra with configured books, sale amount basis, saved order and generic/repair images with conflicts, saved incoming Return metadata, Setting lot sources, family-qualified column settings, saved incoming Return calculation, bill and resolved labour preview; zero mocked requests',
   );
 } catch (error) {
   result.status = 'failed';

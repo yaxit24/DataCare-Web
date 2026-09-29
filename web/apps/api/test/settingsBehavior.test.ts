@@ -78,8 +78,9 @@ describe('CO_SET behavior defaults', () => {
       dhrnIntType: 'M',
       dhrnCompound: true,
       fineStockType: '',
-      saleAmountType: '',
-      purchaseAmountType: '',
+      // MS_OPNCOMP.cs:881-888: blank SL_AMT_TYPE is N and blank PR_AMT_TYPE is F.
+      saleAmountType: 'N',
+      purchaseAmountType: 'F',
       purchaseWithLabour: true,
       ounceConversion: DEFAULT_OUNCE_CONVERSION,
       // MsRatePar defaults to per-gram when CO_SET.RATE_PAR is blank (MS_OPNCOMP.cs:747).
@@ -301,12 +302,14 @@ describe('book-driven interest type selection', () => {
 describe('batch-2 desktop setting decision tables', () => {
   const amountInput = { pcs: 2, grossWt: 12, netWt: 10, ghtWt: 1, fineWt: 9 };
 
+  // '' is not a company value (the loader maps blank to N); it is computeLine's legacy default for the
+  // Sale Return writer and keeps the fine basis. P is pieces (TR_SALE.cs:10909-10916).
   it.each([
     ['', 9],
     ['F', 9],
     ['G', 13],
     ['N', 11],
-    ['P', 11],
+    ['P', 2],
   ] as const)('SL_AMT_TYPE=%s selects sale amount base %s', (type, expected) => {
     expect(saleAmountBase(amountInput, type)).toBe(expected);
   });

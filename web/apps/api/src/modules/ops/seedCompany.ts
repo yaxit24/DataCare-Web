@@ -62,13 +62,38 @@ const BOOKS: {
   mainBook?: string;
   inout?: string;
   acCode: string;
+  /** BOOK_DETL slots when they differ from the sale-book layout (1 control, 2 cash, 3 round-off). */
+  slots?: Array<{ srNo: number; acCode: string }>;
 }[] = [
   { book: 'SL', name: 'Sales', workflow: 'SALES', acCode: 'SALES' },
   { book: 'PR', name: 'Purchase', workflow: 'PURCHASE', acCode: 'PURCHASE' },
   { book: 'SRT', name: 'Sales Return', workflow: 'SALES RETURN', acCode: 'SALES' },
   { book: 'PRT', name: 'Purchase Return', workflow: 'PURCHASE RETURN', acCode: 'PURCHASE' },
-  { book: 'RCT', name: 'Receipt', mainBook: 'RECEIPT', inout: 'I', acCode: 'CASH' },
-  { book: 'PAY', name: 'Payment', mainBook: 'PAYMENT', inout: 'O', acCode: 'CASH' },
+  // Cash books: slot 1 is the cash account and slot 2 the kasar write-off account
+  // (Ac_Ledr.cs:567-581, legs 01-08 join BOOK_DETL SR_NO 1 and SR_NO 2). The sale-book layout put CASH
+  // in slot 2 as well, which would post a write-off to cash.
+  {
+    book: 'RCT',
+    name: 'Receipt',
+    mainBook: 'RECEIPT',
+    inout: 'I',
+    acCode: 'CASH',
+    slots: [
+      { srNo: 1, acCode: 'CASH' },
+      { srNo: 2, acCode: 'KASAR' },
+    ],
+  },
+  {
+    book: 'PAY',
+    name: 'Payment',
+    mainBook: 'PAYMENT',
+    inout: 'O',
+    acCode: 'CASH',
+    slots: [
+      { srNo: 1, acCode: 'CASH' },
+      { srNo: 2, acCode: 'KASAR' },
+    ],
+  },
   { book: 'SOR', name: 'Sales Order', mainBook: 'SALES ORDER', inout: 'O', acCode: 'SALES' },
   { book: 'TUR', name: 'Approval Issue', mainBook: 'APPROVAL ISSUE', inout: 'O', acCode: 'OS' },
   { book: 'TRR', name: 'Approval Return', mainBook: 'APPROVAL RETURN', inout: 'I', acCode: 'OS' },
@@ -201,7 +226,7 @@ export async function seedCompany(
         // specific SR_NO. The sale path alone resolves three: 1 = the control/sales account, 2 = the
         // cash/bank account a settlement lands in, 3 = the round-off / kasar account. Creating only row 1
         // produced `book SL account row 2 is missing` on the first cash sale.
-        const legs: Array<{ srNo: number; acCode: string }> = [
+        const legs: Array<{ srNo: number; acCode: string }> = b.slots ?? [
           { srNo: 1, acCode: b.acCode },
           { srNo: 2, acCode: 'CASH' },
           { srNo: 3, acCode: 'ROUNDOFF' },
@@ -264,8 +289,12 @@ export async function seedCompany(
       year = true;
     }
     if (await absent('CO_SET', '"CO_CODE"=$2', coCode)) {
+      // The desktop never leaves the amount types NULL. The schema upgrade backfills them
+      // (Ac_Image.cs:6221 `SL_AMT_TYPE = 'N'`, :7101 `PR_AMT_TYPE = 'F'`) and company open repeats
+      // it in memory (MS_OPNCOMP.cs:881-888). The loader applies the same defaults to a blank
+      // value, but storing them here makes a web company's CO_SET read like a desktop one.
       await tx.$executeRawUnsafe(
-        `INSERT INTO "CO_SET"(tenant_id,"CO_CODE") VALUES ($1,$2)`,
+        `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","SL_AMT_TYPE","PR_AMT_TYPE") VALUES ($1,$2,'N','F')`,
         tenantId,
         coCode,
       );

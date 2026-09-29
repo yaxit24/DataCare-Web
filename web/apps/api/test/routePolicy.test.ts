@@ -59,8 +59,10 @@ describe('route policy registry', () => {
     // The labour preview adds exactly three read-only Sales Return routes; X15 adds the seven E CRNT
     // entry-config/entry/create/update/delete/print/IRN-cancel routes, and the E INVOICE mode of the same
     // form adds eleven /e-invoices routes (browse, read, TCS basis, entry lifecycle, print, IRN, cancel).
-    expect(routes).toHaveLength(574);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(574);
+    // The evaluation defects add six report screens: HUID, Item Stock Level, Bill Wise Profit, Physical
+    // Stock Verify and Stock Movement (D3, previously export-only), plus /reports/gstr1 (D4).
+    expect(routes).toHaveLength(580);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(580);
 
     const policies = routes.map((route) => ({
       ...route,

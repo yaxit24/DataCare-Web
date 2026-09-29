@@ -1,8 +1,14 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
 import { get, post, del, ApiError } from '../../../../lib/api';
+import { BookSelect } from '../../../../components/BookSelect';
+import { useBusinessScope } from '../../../../components/BusinessScope';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { EntityImagePanel } from '../../../../components/EntityImagePanel';
+import { salesOrderQuery } from '../../../../lib/salesOrderForm';
+
+/** The order book whose orders are listed; the list, void and refund all need its complete scope. */
+const ORDER_MAIN_BOOKS = ['SALES ORDER'];
 
 interface Order {
   vchNo: string;
@@ -18,6 +24,11 @@ const money = (n: number) =>
   Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export default function OrderCancelPage() {
+  // The page used to load `/sales-orders` with no scope at all, so it opened on a 400 "complete voucher
+  // scope" error, and Void sent neither the scope nor the saved version (PARITY-EVALUATION-2026-09-28 D5).
+  const scope = useBusinessScope();
+  const [coBook, setCoBook] = useState('');
+  const scopeQuery = salesOrderQuery(scope, coBook);
   const [orders, setOrders] = useState<Order[]>([]);
   // The party on the highlighted order owns the photograph.
   const [imageRow, setImageRow] = useState(0);
@@ -31,18 +42,23 @@ export default function OrderCancelPage() {
   const [kasarAmt, setKasarAmt] = useState('');
 
   const load = useCallback(async () => {
+    if (!coBook) {
+      setOrders([]);
+      return;
+    }
     setBusy(true);
     try {
-      setOrders(await get<Order[]>('/sales-orders'));
+      setOrders(await get<Order[]>(`/sales-orders?${scopeQuery}`));
     } catch (e) {
       setMsg({
         kind: 'err',
-        text: e instanceof ApiError ? e.body?.error || e.message : 'failed to load',
+        text:
+          e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed to load',
       });
     } finally {
       setBusy(false);
     }
-  }, []);
+  }, [coBook, scopeQuery]);
   useEffect(() => {
     void load();
   }, [load]);
@@ -65,7 +81,11 @@ export default function OrderCancelPage() {
     setCancelling(o.vchNo);
     setMsg(null);
     try {
-      await del(`/sales-orders/${encodeURIComponent(o.vchNo)}`);
+      // The delete is version-guarded, as on the Sales Order screen: read the saved order first so a
+      // concurrent edit is refused rather than silently overwritten.
+      const path = `/sales-orders/${encodeURIComponent(o.vchNo)}?${scopeQuery}`;
+      const saved = await get<{ version?: string }>(path);
+      await del(path, { expectedVersion: saved.version });
       setMsg({ kind: 'ok', text: `Order #${o.vchNo} voided` });
       await load();
     } catch (e) {
@@ -87,7 +107,7 @@ export default function OrderCancelPage() {
     setMsg(null);
     try {
       const r = await post<{ vchNo: number; refunded: number; kasar: number }>(
-        `/sales-orders/${encodeURIComponent(refundFor.vchNo)}/cancel-refund`,
+        `/sales-orders/${encodeURIComponent(refundFor.vchNo)}/cancel-refund?${scopeQuery}`,
         {
           paidAc: paidAc.trim() || 'CASH',
           paidAmt: Number(paidAmt || 0),
@@ -176,9 +196,18 @@ export default function OrderCancelPage() {
 
       <div className="panel" style={{ overflow: 'auto' }}>
         <div className="toolbar">
+          <div className="field" style={{ margin: 0 }}>
+            <label>Order book</label>
+            <BookSelect
+              key={`${scope.coCode}/${scope.lcCode}/${scope.coYear}`}
+              value={coBook}
+              onChange={setCoBook}
+              mainBooks={ORDER_MAIN_BOOKS}
+            />
+          </div>
           <h2>{orders.length} order(s)</h2>
           <span className="spacer" />
-          <button type="button" className="ghost" onClick={() => load()} disabled={busy}>
+          <button type="button" className="ghost" onClick={() => load()} disabled={busy || !coBook}>
             {busy ? 'Loading…' : 'Refresh'}
           </button>
         </div>
@@ -231,7 +260,7 @@ export default function OrderCancelPage() {
             {orders.length === 0 && !busy && (
               <tr>
                 <td colSpan={7} className="muted">
-                  No sales orders.
+                  {coBook ? 'No sales orders.' : 'Select the order book.'}
                 </td>
               </tr>
             )}

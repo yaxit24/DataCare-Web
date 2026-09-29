@@ -731,7 +731,7 @@ route('Reports/Old Gold / Exchange', ['GET /reports/old-gold-register']);
 route('Reports/Sales by Party', ['GET /reports/sales-by-party']);
 route('Reports/Sales by Item', ['GET /reports/sales-by-item']);
 route('Reports/Monthly Sales', ['GET /reports/monthly-sales']);
-route('Reports/GSTR-1', ['GET /gst/gstr1', 'GET /reports/gstr1-doc']);
+route('Reports/GSTR-1', ['GET /gst/gstr1', 'GET /reports/gstr1', 'GET /reports/gstr1-doc']);
 route('Reports/GSTR-3B', ['GET /reports/gstr3b', 'GET /reports/gstr3b-doc']);
 route('Reports/Report Layouts (Crystal)', [
   'GET /reports/layouts',

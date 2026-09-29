@@ -54,6 +54,89 @@ function keyOf(s: VoucherScope, vchNo: number, book: string): VoucherKey {
 }
 
 /**
+ * The `BOOK_DATA.MAIN_BOOK` values a receipt or payment may be written to, and which mode each allows.
+ *
+ * Desktop: each menu fixes the book family before the form opens (MDI_FORM.cs:8052-8099):
+ * - Cash Received → `CurBookHelp("CASH REC")`
+ * - Cash Payment → `"CASH PAY"`
+ * - Bank Received → `"BANK REC"`
+ * - Bank Payment → `"BANK PAY"`
+ *
+ * `CurBookHelp` lists only books of that MAIN_BOOK (DC_Main.cs:1489-1559), and the book decides the
+ * cash or bank layout (TR_CASH.cs:2629-2650). A receipt therefore cannot reach a sales book, and a cash
+ * receipt cannot reach a bank book.
+ *
+ * The web chooses the mode on the form, so the pairing is enforced here instead. Before this check
+ * any active book was accepted, and a receipt could be numbered and posted inside a SALES book.
+ *
+ * `RECEIPT` and `PAYMENT` are the generic books that web provisioning creates (seedCompany). They are
+ * not desktop MAIN_BOOK values, and they allow every mode.
+ */
+const FINANCE_BOOK_FAMILIES = {
+  receipt: { 'CASH REC': 'cash', 'BANK REC': 'bank', RECEIPT: 'any' },
+  payment: { 'CASH PAY': 'cash', 'BANK PAY': 'bank', PAYMENT: 'any' },
+} as const satisfies Record<'receipt' | 'payment', Record<string, 'cash' | 'bank' | 'any'>>;
+
+type FinanceDirection = keyof typeof FINANCE_BOOK_FAMILIES;
+
+/** Resolve the configured book and refuse one outside the receipt/payment family or the mode's layout. */
+async function financeBookTx(
+  tx: any,
+  scope: VoucherScope,
+  direction: FinanceDirection,
+  mode: PayMode,
+): Promise<Awaited<ReturnType<typeof configuredBookTx>>> {
+  const book = await configuredBookTx(tx, scope);
+  const mainBook = book.mainBook.toUpperCase();
+  const family = FINANCE_BOOK_FAMILIES[direction] as Record<string, 'cash' | 'bank' | 'any'>;
+  const allowed = family[mainBook];
+  if (!allowed) {
+    throw new FinanceValidationError(
+      `book ${scope.coBook} is a ${mainBook || 'unclassified'} book; a ${direction} needs a ${Object.keys(family).join(', ')} book`,
+    );
+  }
+  const wanted = mode === 'cash' ? 'cash' : 'bank';
+  if (allowed !== 'any' && allowed !== wanted) {
+    throw new FinanceValidationError(
+      `book ${scope.coBook} is a ${mainBook} book and cannot take a ${mode} ${direction}`,
+    );
+  }
+  return book;
+}
+
+/**
+ * The kasar (write-off) account: an explicit account, else BOOK_DETL slot 2 of the book.
+ *
+ * Ac_Ledr.cs:571-581 posts the kasar legs of CASH REC / CASH PAY (and, in the same shape, BANK REC /
+ * BANK PAY) by joining `BOOK_DETL ... B.SR_NO = 2 AND A.KASAR_AMT <> 0`.
+ *
+ * Before this, the web required the caller to send the account. The form had no field for it, so
+ * every write-off entered on screen was refused.
+ *
+ * Web adaptation: slot 2 is refused when it names the same account as the slot-1 settlement account.
+ * Web provisioning used to give cash books CASH in both slots, and a write-off posted to the cash
+ * account would overstate cash on hand.
+ */
+async function kasarAccountTx(
+  tx: any,
+  scope: VoucherScope,
+  explicit: unknown,
+  settlementAc: string,
+  kasar: number,
+): Promise<string> {
+  if (String(explicit ?? '').trim()) {
+    return requirePostingAccount('kasar', explicit, `book ${scope.coBook} writes off ${kasar}`);
+  }
+  const account = await resolveBookSlotAccountTx(tx, scope, 'kasar', 2);
+  if (account === settlementAc) {
+    throw new FinanceValidationError(
+      `book ${scope.coBook} slot 2 (kasar) names the settlement account ${account}; configure a kasar account in slot 2 before writing off ${kasar}`,
+    );
+  }
+  return account;
+}
+
+/**
  * Compatibility helper retained for callers/tests. Desktop PAN enforcement is a taxable-sale rule,
  * not a cash-payment override (TR_SALE.cs:15111-15128), so payment/receipt writers do not call it.
  */
@@ -276,6 +359,8 @@ export async function postReceipt(
   const tenantId = input.scope.tenantId;
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
   const write = async (tx: any, identity: VoucherIdentity): Promise<FinanceResult> => {
+    // The book first: a receipt must land in a receipt book whose layout matches the mode.
+    const configuredBook = await financeBookTx(tx, input.scope, 'receipt', mode);
     // The cash/bank account is the book's BOOK_DETL slot 1 unless the caller names one.
     //
     // P0-04: this used to end in the literal `'CASH'` returned by `settlementAc`, which is a placeholder
@@ -299,9 +384,10 @@ export async function postReceipt(
     }
     const vchNo = identity.vchNo;
     const key = keyOf(input.scope, vchNo, 'RCT');
-    const configuredBook = await configuredBookTx(tx, input.scope);
     const vchType = mode === 'cash' ? 'CREC' : 'BREC';
     const kasar = round2(Number(input.kasar ?? 0));
+    const kasarAc =
+      kasar > 0 ? await kasarAccountTx(tx, input.scope, input.kasarAc, recAcResolved, kasar) : '';
     const lbase = { ...key, VCH_TYPE: vchType };
     // A SELF-BALANCED PAIR PER MOVEMENT, with the party leg repeated - not one netted party credit.
     //
@@ -343,11 +429,6 @@ export async function postReceipt(
       },
     ];
     if (kasar > 0) {
-      const kasarAc = requirePostingAccount(
-        'kasar',
-        input.kasarAc,
-        `book ${input.scope.coBook} writes off ${kasar}`,
-      );
       ledger.push(
         {
           ...lbase,
@@ -402,10 +483,9 @@ export async function postReceipt(
       cashAmount: input.amount,
       direction: 'receipt',
       kasar,
-      // Blank rather than a literal when nothing is written off: buildCashRojmel emits its kasar rows only
-      // when BOTH the amount and the account are present, and the amount path above already refused a
-      // non-zero write-off without a configured account.
-      kasarAc: (input.kasarAc ?? '').trim(),
+      // Blank when nothing is written off: buildCashRojmel emits its kasar rows only when BOTH the
+      // amount and the account are present. A non-zero write-off has already resolved its account.
+      kasarAc,
     });
     const writes: VoucherWrite[] = [
       {
@@ -532,6 +612,8 @@ export async function postPayment(prisma: any, input: PaymentInput): Promise<Fin
 
   const tenantId = input.scope.tenantId;
   return withTenant(prisma, tenantId, async (tx: any) => {
+    // The book first, before numbering: a payment must land in a payment book matching the mode.
+    await financeBookTx(tx, input.scope, 'payment', mode);
     const vchNo = await nextVoucherNoTx(tx, input.scope);
     const key = keyOf(input.scope, vchNo, 'PAY');
     const vchType = mode === 'cash' ? 'CPAY' : 'BPAY';
@@ -584,12 +666,9 @@ export async function postPayment(prisma: any, input: PaymentInput): Promise<Fin
         SIGN: 'C',
       },
     ];
+    const kasarAc =
+      kasar > 0 ? await kasarAccountTx(tx, input.scope, input.kasarAc, payAcResolved, kasar) : '';
     if (kasar > 0) {
-      const kasarAc = requirePostingAccount(
-        'kasar',
-        input.kasarAc,
-        `book ${input.scope.coBook} writes off ${kasar}`,
-      );
       ledger.push(
         {
           ...lbase,
@@ -644,10 +723,9 @@ export async function postPayment(prisma: any, input: PaymentInput): Promise<Fin
       cashAmount: input.amount,
       direction: 'payment',
       kasar,
-      // Blank rather than a literal when nothing is written off: buildCashRojmel emits its kasar rows only
-      // when BOTH the amount and the account are present, and the amount path above already refused a
-      // non-zero write-off without a configured account.
-      kasarAc: (input.kasarAc ?? '').trim(),
+      // Blank when nothing is written off: buildCashRojmel emits its kasar rows only when BOTH the
+      // amount and the account are present. A non-zero write-off has already resolved its account.
+      kasarAc,
     });
     await postVoucherTx(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: ledger },
@@ -735,6 +813,7 @@ export async function postReceiptLines(
   const totalAmt = round2(lines.reduce((s, l) => s + Number(l.amount), 0));
   const totalKasar = round2(lines.reduce((s, l) => s + Number(l.kasar ?? 0), 0));
   return withTenant(prisma, tenantId, async (tx: any) => {
+    await financeBookTx(tx, input.scope, 'receipt', mode);
     // Resolved before the ceiling check and before numbering: the ceiling counts prior cash against THIS
     // account, so a placeholder would have measured the wrong ledger as well as posting to it.
     const recAcLines = await resolveBookSlotAccountTx(
@@ -776,6 +855,10 @@ export async function postReceiptLines(
     // instalment — so P0-04 removed it from all of them rather than from one.
     const recLineSuffix = (line: number, leg: number): string =>
       `${line}${String(leg).padStart(2, '0')}`.padStart(12, ' ');
+    const recKasarAc =
+      totalKasar > 0
+        ? await kasarAccountTx(tx, input.scope, input.kasarAc, recAcLines, totalKasar)
+        : '';
     const ledger: LedgerLine[] = [];
     lines.forEach((l, idx) => {
       const lineNo = idx + 1;
@@ -802,11 +885,7 @@ export async function postReceiptLines(
         },
       );
       if (lineKasar > 0) {
-        const kasarAc = requirePostingAccount(
-          'kasar',
-          input.kasarAc,
-          `book ${input.scope.coBook} writes off ${lineKasar}`,
-        );
+        const kasarAc = recKasarAc;
         ledger.push(
           {
             ...lbase,
@@ -851,10 +930,8 @@ export async function postReceiptLines(
           cashAmount: round2(Number(l.amount)),
           direction: 'receipt',
           kasar: round2(Number(l.kasar ?? 0)),
-          // Blank rather than a literal when nothing is written off: buildCashRojmel emits its kasar rows only
-          // when BOTH the amount and the account are present, and the amount path above already refused a
-          // non-zero write-off without a configured account.
-          kasarAc: (input.kasarAc ?? '').trim(),
+          // Blank when nothing is written off; buildCashRojmel needs both amount and account.
+          kasarAc: recKasarAc,
           lineNo: idx + 1,
         },
       ),
@@ -906,6 +983,7 @@ export async function postPaymentLines(
   const totalAmt = round2(lines.reduce((s, l) => s + Number(l.amount), 0));
   const totalKasar = round2(lines.reduce((s, l) => s + Number(l.kasar ?? 0), 0));
   return withTenant(prisma, tenantId, async (tx: any) => {
+    await financeBookTx(tx, input.scope, 'payment', mode);
     const vchNo = await nextVoucherNoTx(tx, input.scope);
     const key = keyOf(input.scope, vchNo, 'PAY');
     const vchType = mode === 'cash' ? 'CPAY' : 'BPAY';
@@ -929,6 +1007,10 @@ export async function postPaymentLines(
 
     const lineSuffix = (line: number, leg: number): string =>
       `${line}${String(leg).padStart(2, '0')}`.padStart(12, ' ');
+    const payKasarAc =
+      totalKasar > 0
+        ? await kasarAccountTx(tx, input.scope, input.kasarAc, payAcLinesResolved, totalKasar)
+        : '';
     const ledger: LedgerLine[] = [];
     lines.forEach((l, idx) => {
       const lineNo = idx + 1;
@@ -955,11 +1037,7 @@ export async function postPaymentLines(
         },
       );
       if (lineKasar > 0) {
-        const kasarAc = requirePostingAccount(
-          'kasar',
-          input.kasarAc,
-          `book ${input.scope.coBook} writes off ${lineKasar}`,
-        );
+        const kasarAc = payKasarAc;
         ledger.push(
           {
             ...lbase,
@@ -1009,10 +1087,8 @@ export async function postPaymentLines(
           cashAmount: round2(Number(l.amount)),
           direction: 'payment',
           kasar: round2(Number(l.kasar ?? 0)),
-          // Blank rather than a literal when nothing is written off: buildCashRojmel emits its kasar rows only
-          // when BOTH the amount and the account are present, and the amount path above already refused a
-          // non-zero write-off without a configured account.
-          kasarAc: (input.kasarAc ?? '').trim(),
+          // Blank when nothing is written off; buildCashRojmel needs both amount and account.
+          kasarAc: payKasarAc,
           lineNo: idx + 1,
         },
       ),

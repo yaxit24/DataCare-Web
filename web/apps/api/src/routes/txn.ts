@@ -682,6 +682,25 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       filters: readFilters(q),
     };
   };
+  // Operator inputs of the two fixed report screens whose exports are also slug-driven. They are shared
+  // so a CSV/XLSX export can never be built from different inputs than the screen it came from.
+  const balanceSheetOptions = (query: unknown) => {
+    // Desktop RP_BALANCE passes an operator-entered closing date and gold/silver rates into
+    // Ac_Final.Trading_Stock; without a rate the metal pass cannot value stock at all.
+    const q = (query ?? {}) as Record<string, string | undefined>;
+    const n = (v: string | undefined): number | undefined =>
+      v == null || v === '' ? undefined : Number(v);
+    return {
+      closingDate: q.closingDate || undefined,
+      goldRate: n(q.goldRate),
+      silverRate: n(q.silverRate),
+      ledgerFineGold: n(q.ledgerFineGold),
+      ledgerFineSilver: n(q.ledgerFineSilver),
+    };
+  };
+  const gstr1Options = (query: unknown) => ({
+    threshold: Number((query as Record<string, unknown> | undefined)?.threshold) || undefined,
+  });
   const guard = (
     req: FastifyRequest,
     reply: FastifyReply,
@@ -2527,6 +2546,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         mode: b.mode,
         bankAc: b.bankAc,
         chqNo: b.chqNo,
+        // The operator's voucher date (TR_CASH mVchDate); the writers default to today when absent.
+        vchDate: b.vchDate,
         cardCommissionPct: b.cardCommissionPct != null ? Number(b.cardCommissionPct) : undefined,
         bankName: b.bankName,
         upiId: b.upiId,
@@ -2547,6 +2568,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         mode: b.mode,
         bankAc: b.bankAc,
         chqNo: b.chqNo,
+        vchDate: b.vchDate,
         kasar: b.kasar != null ? Number(b.kasar) : undefined,
         kasarAc: b.kasarAc,
       }),
@@ -3993,11 +4015,15 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       stockLevelReport(prisma, scope.tenantId, { CO_CODE: scope.coCode })) as ReportBuilder,
     'scheme-monthly': ((prisma: any, scope: any) =>
       schemeMonthlyReport(prisma, scope)) as ReportBuilder,
+    // The report page's date range reaches the builder, which filters VCH_DATE by it (billProfitReport).
+    // readScope has already dropped anything that is not an ISO date.
     'bill-profit': ((prisma: any, scope: any) =>
-      billProfitReport(prisma, scope.tenantId, {
-        CO_CODE: scope.coCode,
-        LC_CODE: scope.lcCode,
-      })) as ReportBuilder,
+      billProfitReport(
+        prisma,
+        scope.tenantId,
+        { CO_CODE: scope.coCode, LC_CODE: scope.lcCode },
+        { from: scope.fromDate, to: scope.toDate },
+      )) as ReportBuilder,
     'physical-stock-verify': ((prisma: any, scope: any) =>
       physicalStockReport(prisma, scope.tenantId, {
         CO_CODE: scope.coCode,
@@ -4073,6 +4099,11 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     'top-items': topItems as ReportBuilder,
     'trial-balance': trialBalance as ReportBuilder,
     'trial-balance-full': trialBalanceFull as ReportBuilder,
+    // Their operator inputs (closing date and rates; the B2CL threshold) come from the query, so
+    // resolveReport passes them exactly as the screen routes do.
+    'balance-sheet': ((prisma: any, scope: any) =>
+      balanceSheet(prisma, scope, {})) as ReportBuilder,
+    gstr1: ((prisma: any, scope: any) => gstr1(prisma, scope, {})) as ReportBuilder,
   } satisfies Record<ReportSlug, ReportBuilder>;
 
   const REPORT_FAMILY_BUILDERS = {
@@ -4209,7 +4240,15 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
                                                 tagNo: q.tagNo || undefined,
                                                 direction: q.direction === 'Out' ? 'Out' : 'In',
                                               })
-                                            : await build(prisma, scope, range(req));
+                                            : slug === 'balance-sheet'
+                                              ? await balanceSheet(
+                                                  prisma,
+                                                  scope,
+                                                  balanceSheetOptions(q),
+                                                )
+                                              : slug === 'gstr1'
+                                                ? await gstr1(prisma, scope, gstr1Options(q))
+                                                : await build(prisma, scope, range(req));
     const rows: Record<string, unknown>[] = Array.isArray(result)
       ? result
       : Array.isArray(result?.rows)
@@ -4255,6 +4294,28 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       .header('content-disposition', `attachment; filename="${out.fileName}"`)
       .send(out.buffer);
   });
+
+  // Screens for five reports that were registered only in REPORT_BUILDERS. Their exports worked and the
+  // screens answered 404 (PARITY-EVALUATION-2026-09-28 D3).
+  // - Each screen calls the export's own builder with the export's own inputs, so the two cannot
+  //   disagree.
+  // - Their policies already existed (routePolicy.ts, 'Reports/HuId Report' and the four after it).
+  // - Literal paths, because routePolicy.test.ts reads them.
+  app.get('/reports/huid', auth, async (req) =>
+    REPORT_BUILDERS.huid(prisma, readScope(req), range(req)),
+  );
+  app.get('/reports/item-weight-levels', auth, async (req) =>
+    REPORT_BUILDERS['item-weight-levels'](prisma, readScope(req), range(req)),
+  );
+  app.get('/reports/bill-profit', auth, async (req) =>
+    REPORT_BUILDERS['bill-profit'](prisma, readScope(req), range(req)),
+  );
+  app.get('/reports/physical-stock-verify', auth, async (req) =>
+    REPORT_BUILDERS['physical-stock-verify'](prisma, readScope(req), range(req)),
+  );
+  app.get('/reports/size-movement', auth, async (req) =>
+    REPORT_BUILDERS['size-movement'](prisma, readScope(req), range(req)),
+  );
   // ---- Tag images (desktop BtnImgS / BtnImgC / BtnImgD, 24 forms) ----
   // One shared surface keyed on the tag instance, so every form that shows a tag can attach, replace,
   // enlarge and delete its photograph without repeating the plumbing.
@@ -6464,20 +6525,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       ledgerFineSilver: n(q.ledgerFineSilver),
     });
   });
-  app.get('/reports/balance-sheet', auth, async (req) => {
-    // Desktop RP_BALANCE passes an operator-entered closing date and gold/silver rates into
-    // Ac_Final.Trading_Stock; without a rate the metal pass cannot value stock at all.
-    const q = (req.query ?? {}) as Record<string, string | undefined>;
-    const n = (v: string | undefined): number | undefined =>
-      v == null || v === '' ? undefined : Number(v);
-    return balanceSheet(prisma, readScope(req), {
-      closingDate: q.closingDate || undefined,
-      goldRate: n(q.goldRate),
-      silverRate: n(q.silverRate),
-      ledgerFineGold: n(q.ledgerFineGold),
-      ledgerFineSilver: n(q.ledgerFineSilver),
-    });
-  });
+  app.get('/reports/balance-sheet', auth, async (req) =>
+    balanceSheet(prisma, readScope(req), balanceSheetOptions(req.query)),
+  );
   app.get('/reports/outstanding', auth, async (req) => outstandingReport(prisma, readScope(req)));
   app.get('/reports/bill-outstanding', auth, async (req) =>
     billOutstanding(prisma, readScope(req)),
@@ -7440,7 +7490,12 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   app.get('/reports/monthly-sales', auth, async (req) => monthlySales(prisma, readScope(req)));
   app.get('/gst/gstr1', auth, async (req) =>
-    gstr1(prisma, readScope(req), { threshold: Number((req.query as any).threshold) || undefined }),
+    gstr1(prisma, readScope(req), gstr1Options(req.query)),
+  );
+  // The same screen at the slug path every other generic report uses, so `gstr1` has a fixed route on
+  // the same form as its slug policy (reportAuthorization.test.ts) and the report page needs no special case.
+  app.get('/reports/gstr1', auth, async (req) =>
+    gstr1(prisma, readScope(req), gstr1Options(req.query)),
   );
   app.get('/reports/gstr1-doc', auth, async (req, reply) => {
     const q = req.query as any;

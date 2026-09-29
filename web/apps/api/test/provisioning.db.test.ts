@@ -79,8 +79,13 @@ d('company provisioning produces a postable company', () => {
       ),
     );
     expect(rows.length).toBe(14);
-    // Three legs per book: 1 = control/sales, 2 = cash/bank, 3 = round-off / kasar.
-    for (const r of rows) expect(Number(r.n)).toBe(3);
+    // Three legs per book (1 = control/sales, 2 = cash/bank, 3 = round-off), except the cash books.
+    // RCT and PAY carry the desktop cash-book layout, 1 = cash and 2 = kasar: Ac_Ledr.cs:567-581 joins
+    // BOOK_DETL SR_NO 1 and SR_NO 2 for legs 01-08. Their slot 2 used to be CASH, which would have posted
+    // a write-off to the cash account.
+    const legs = Object.fromEntries(rows.map((r) => [String(r.CO_BOOK), Number(r.n)]));
+    for (const [book, n] of Object.entries(legs))
+      expect(n, book).toBe(book === 'RCT' || book === 'PAY' ? 2 : 3);
   });
 
   /**
@@ -162,6 +167,6 @@ d('company provisioning produces a postable company', () => {
   it('is idempotent', async () => {
     const again = await seedCompany(prisma, tenantId, CO, { coName: 'Provision Test', lcCode: LC });
     expect(again.created.books).toBe(0);
-    expect(await count('BOOK_DETL')).toBe(42); // 14 books x 3 legs, not doubled
+    expect(await count('BOOK_DETL')).toBe(40); // 12 books x 3 legs + RCT/PAY x 2, not doubled
   });
 });
