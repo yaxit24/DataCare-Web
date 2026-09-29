@@ -1,0 +1,2 @@
+SCHEMA_READINESS_INFO runtime-DDL contract: tables 155/155, columns 3247/3343 (informational; over-claims 19 tables and misses 9 the installer creates)
+SCHEMA_READINESS_OK tables 145/145, columns 5231/5231 (100.0%), 0 baselined absent

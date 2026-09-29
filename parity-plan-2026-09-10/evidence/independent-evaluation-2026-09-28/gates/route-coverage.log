@@ -1,0 +1,6 @@
+routes discovered: 124
+rendered without error: 124 / 124
+
+ROUTE_COVERAGE_OK 124 route(s) rendered; 0 deferred pending a shaped stub
+  Covers server render, CLIENT render (after hydration), HTTP status and navigation, with the API stubbed
+  so a session exists and the error boundary is meaningful. It does NOT assert content or persistence.
