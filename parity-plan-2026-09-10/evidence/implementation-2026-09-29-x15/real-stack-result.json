@@ -1,0 +1,95 @@
+{
+  "startedAt": "2026-09-29T10:02:07.188Z",
+  "finishedAt": "2026-09-29T10:02:56.396Z",
+  "status": "passed",
+  "database": "disposable localhost:55433 / app_user",
+  "mockedRequests": 0,
+  "mockedResponses": 0,
+  "interceptionIndicators": 0,
+  "journeys": [
+    {
+      "journeyId": "column-settings",
+      "status": "passed"
+    },
+    {
+      "journeyId": "credit-note",
+      "status": "passed"
+    },
+    {
+      "journeyId": "credit-note-entry",
+      "status": "passed"
+    },
+    {
+      "journeyId": "design-book",
+      "status": "passed"
+    },
+    {
+      "journeyId": "design-calculations",
+      "status": "passed"
+    },
+    {
+      "journeyId": "design-repeat",
+      "status": "passed"
+    },
+    {
+      "journeyId": "generic-image-conflict",
+      "status": "passed"
+    },
+    {
+      "journeyId": "image-conflict",
+      "status": "passed"
+    },
+    {
+      "journeyId": "manufacturing-lot",
+      "status": "passed"
+    },
+    {
+      "journeyId": "order-images",
+      "status": "passed"
+    },
+    {
+      "journeyId": "repair-image-conflict",
+      "status": "passed"
+    },
+    {
+      "journeyId": "sales-order",
+      "status": "passed"
+    },
+    {
+      "journeyId": "sales-order-design",
+      "status": "passed"
+    },
+    {
+      "journeyId": "sales-return-bill-replay",
+      "status": "passed"
+    },
+    {
+      "journeyId": "sales-return-labour-replay",
+      "status": "passed"
+    },
+    {
+      "journeyId": "sales-return-replay",
+      "status": "passed"
+    },
+    {
+      "journeyId": "sales-return-saved",
+      "status": "passed"
+    },
+    {
+      "journeyId": "tour-order",
+      "status": "passed"
+    }
+  ],
+  "creditNoteEntry": {
+    "checks": [
+      "create through the entry form without fixture SL_DATA",
+      "live totals match the posted voucher",
+      "balanced AC_DATA, stock-in MAIN_STOCK and negative TAX_DATA",
+      "print original copy caption",
+      "edit recalculates and reposts",
+      "fresh-page browse reopen hydrates the entry form",
+      "delete removes the write set and writes DELETE_DATA"
+    ],
+    "boundary": "Engineering evidence on a synthetic fixture; not an independent desktop comparison, live GSP or physical print acceptance"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "source": "TR_SL_EBILL.cs CommPassTotal 4714-5844 and BILL_TOTAL 9062-9178; values derived by hand from the source formulas before the implementation was run",
+  "basePolicy": {
+    "amountDigits": 0,
+    "taxDigits": 2,
+    "labourRateDigits": 0,
+    "labourIncludesGhat": true,
+    "interState": false
+  },
+  "lines": [
+    {
+      "id": "L01-gram-gross-labour-half-even-net",
+      "note": "net 9.5; no touch so fine = net; 9.5*6000=57000; gross labour 10*500; taxable 62250; CGST/SGST 933.75; 64117.5 rounds half-even to 64118",
+      "input": { "pcs": 1, "grossWt": 10, "lessWt": 0.5, "rate": 6000, "rateType": "G", "labourType": "G", "labourRate": 500, "otherAmount": 250, "taxPercent": 3 },
+      "expect": { "netWt": 9.5, "ghatWt": 0, "fine": 9.5, "itemAmount": 57000, "labourAmount": 5000, "taxableAmount": 62250, "taxableRate": 6552.632, "cgst": 933.75, "sgst": 933.75, "igst": 0, "taxAmount": 1867.5, "netAmount": 64118 }
+    },
+    {
+      "id": "L02-pieces-no-gross-excludes-labour",
+      "note": "rate type P: 3*1234.5=3703.5 half-even 3704; gross 0 so taxable = item + other (labour 300 still saved); 3815.12 -> 3815",
+      "input": { "pcs": 3, "rate": 1234.5, "rateType": "P", "labourType": "P", "labourRate": 100, "taxPercent": 3 },
+      "expect": { "netWt": 0, "fine": 0, "itemAmount": 3704, "labourAmount": 300, "taxableAmount": 3704, "taxableRate": 1234.667, "cgst": 55.56, "sgst": 55.56, "taxAmount": 111.12, "netAmount": 3815 }
+    },
+    {
+      "id": "L03-inter-state-per-ten-gram-touch-net-labour",
+      "policy": { "interState": true },
+      "note": "fine 5*(91.6+2)/100=4.68; 4.68*6000=28080; net labour with ghat 5*450=2250; IGST 909.9; 31239.9 -> 31240",
+      "input": { "pcs": 1, "grossWt": 5, "touch": 91.6, "westPercent": 2, "rate": 60000, "rateType": "1", "labourType": "N", "labourRate": 450, "taxPercent": 3 },
+      "expect": { "netWt": 5, "fine": 4.68, "itemAmount": 28080, "labourAmount": 2250, "taxableAmount": 30330, "igst": 909.9, "cgst": 0, "sgst": 0, "netAmount": 31240 }
+    },
+    {
+      "id": "L04-mrp-overrides-taxable-negative-round-off",
+      "note": "MRP 1010 is the taxable; CGST/SGST 15.15; 1040.30 -> 1040 (round-off -0.30 at bill level)",
+      "input": { "pcs": 2, "grossWt": 4, "rate": 100, "rateType": "G", "mrp": 1010, "taxPercent": 3 },
+      "expect": { "itemAmount": 400, "taxableAmount": 1010, "taxableRate": 505, "cgst": 15.15, "sgst": 15.15, "netAmount": 1040 }
+    },
+    {
+      "id": "L05-ghat-kg-labour-and-percent-labour-rate",
+      "policy": { "labourRateDigits": 1 },
+      "note": "net 20; ghat 2% = 0.4; fine (20.4)*75/100=15.3; K rate 70000/1000 -> 15.3*70=1071; labour rate = 70000*1.25/100 = 875 (1dp); K labour = 20.4*875/1000 = 17.85 -> 18 (half-even of 17.85 at 0dp is 18)",
+      "input": { "pcs": 1, "grossWt": 20, "ghatPercent": 2, "touch": 75, "rate": 70000, "rateType": "K", "labourType": "K", "labourPercent": 1.25, "taxPercent": 0 },
+      "expect": { "netWt": 20, "ghatWt": 0.4, "fine": 15.3, "itemAmount": 1071, "labourRate": 875, "labourAmount": 18, "taxableAmount": 1089, "taxAmount": 0, "netAmount": 1089 }
+    },
+    {
+      "id": "L06-all-rounding-removed-two-decimals",
+      "policy": { "amountDigits": 2 },
+      "note": "ALL_ROF_REMOVE=Y keeps paise on item and labour amounts; 3.333*6123.45=20409.45885 -> 20409.46; labour 3.333*12.34=41.12922 -> 41.13; taxable 20450.59; CGST/SGST 306.75885 -> 306.76; line net still whole rupees: 21064.11 -> 21064",
+      "input": { "pcs": 1, "grossWt": 3.333, "rate": 6123.45, "rateType": "", "labourType": "", "labourRate": 12.34, "taxPercent": 3 },
+      "expect": { "itemAmount": 20409.46, "labourAmount": 41.13, "taxableAmount": 20450.59, "cgst": 306.76, "sgst": 306.76, "netAmount": 21064 }
+    }
+  ],
+  "bills": [
+    {
+      "id": "B01-two-lines-cash-positive-round-off",
+      "lineIds": ["L01-gram-gross-labour-half-even-net", "L02-pieces-no-gross-excludes-labour"],
+      "tender": { "cash": 10000 },
+      "note": "net 65954; CGST=SGST 989.31; total 67933; round-off 67933-67932.62=0.38; outstanding 57933",
+      "expect": { "netAmount": 65954, "cgst": 989.31, "sgst": 989.31, "igst": 0, "taxAmount": 1978.62, "labourAmount": 5300, "otherAmount": 250, "totalAmount": 67933, "roundOff": 0.38, "tdsAmount": 0, "outstanding": 57933 }
+    },
+    {
+      "id": "B02-negative-round-off-with-tds-and-cheque",
+      "lineIds": ["L04-mrp-overrides-taxable-negative-round-off"],
+      "tender": { "cheque": 40, "tdsPercent": 0.1 },
+      "note": "total 1040; round-off -0.30; TDS round(1010*0.1/100)=round(1.01)=1; outstanding 1040-1-40=999",
+      "expect": { "netAmount": 1010, "totalAmount": 1040, "roundOff": -0.3, "tdsAmount": 1, "outstanding": 999 }
+    }
+  ]
+}

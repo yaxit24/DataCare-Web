@@ -56,9 +56,10 @@ describe('route policy registry', () => {
   });
   it('classifies every declared endpoint and preserves the current exact route universe', () => {
     const routes = declaredRoutes();
-    // The labour preview adds exactly three read-only Sales Return routes.
-    expect(routes).toHaveLength(556);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(556);
+    // The labour preview adds exactly three read-only Sales Return routes; X15 adds the seven E CRNT
+    // entry-config/entry/create/update/delete/print/IRN-cancel routes.
+    expect(routes).toHaveLength(563);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(563);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -343,6 +344,24 @@ describe('route policy registry', () => {
       form: 'Transaction/E CrntNote',
       action: 'print',
     });
+  });
+
+  it('maps the E CRNT entry lifecycle to its own form rights (X15)', () => {
+    for (const [method, path, action] of [
+      ['GET', '/e-credit-notes/entry-config', 'read'],
+      ['GET', '/e-credit-notes/:vchNo/entry', 'read'],
+      ['POST', '/e-credit-notes', 'create'],
+      ['PUT', '/e-credit-notes/:vchNo', 'update'],
+      ['DELETE', '/e-credit-notes/:vchNo', 'delete'],
+      ['GET', '/e-credit-notes/:vchNo/print', 'print'],
+      ['POST', '/e-credit-notes/:vchNo/irn/cancel', 'print'],
+    ] as const)
+      expect(routePolicyFor(method, path)).toMatchObject({
+        kind: 'form',
+        form: 'Transaction/E CrntNote',
+        action,
+        businessScope: true,
+      });
   });
 
   it('maps the desktop Loan Received and Loan Issue transaction modes to their own rights', () => {

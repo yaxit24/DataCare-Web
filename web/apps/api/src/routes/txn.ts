@@ -185,6 +185,13 @@ import {
 } from '../modules/masters/designBook.js';
 import { getCreditNote, listCreditNotes } from '../modules/einvoice/creditNote.js';
 import {
+  creditNotePrintData,
+  deleteCreditNote,
+  getCreditNoteEntry,
+  getCreditNoteEntryConfig,
+  saveCreditNote,
+} from '../modules/einvoice/creditNoteWriter.js';
+import {
   deleteDiamondSizes,
   deleteItemStockLimits,
   getDiamondSizes,
@@ -719,7 +726,11 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         return reply.code(422).send({ error: e.name, code: e.code, message: e.message });
       if (e instanceof OrderImageError)
         return reply.code(422).send({ error: e.name, code: e.code, message: e.message });
-      if (n === 'DesignBookConflictError' || n === 'SalesOrderConflictError') {
+      if (
+        n === 'DesignBookConflictError' ||
+        n === 'SalesOrderConflictError' ||
+        n === 'CreditNoteConflictError'
+      ) {
         return reply.code(409).send({ error: n, message: e?.message });
       }
       if (n === 'PeriodLockValidationError') metrics.recordPeriodLockRejection();
@@ -7554,6 +7565,123 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     });
   });
   app.get('/e-credit-notes/provider', auth, async () => gspStatus());
+  // ---- E CRNT entry lifecycle (TR_SL_EBILL, card X15) ----
+  const creditNoteInput = (req: FastifyRequest, b: Record<string, any>) => ({
+    scope: scopeOf(req),
+    vchDate: b.vchDate,
+    partyCode: b.partyCode,
+    billNo: b.billNo,
+    ledgerCode: b.ledgerCode,
+    employeeCode: b.employeeCode,
+    description: b.description,
+    cashAmount: b.cashAmount,
+    chequeAmount: b.chequeAmount,
+    chequeAccount: b.chequeAccount,
+    chequeNo: b.chequeNo,
+    cardAmount: b.cardAmount,
+    cardAccount: b.cardAccount,
+    cardCommission: b.cardCommission,
+    kasarAmount: b.kasarAmount,
+    tdsCode: b.tdsCode,
+    tcsCode: b.tcsCode,
+    tcsAmount: b.tcsAmount,
+    lines: Array.isArray(b.lines) ? b.lines : [],
+    mainUser: sess(req).sub,
+    expectedRevision: b.expectedRevision,
+  });
+  app.get('/e-credit-notes/entry-config', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getCreditNoteEntryConfig(prisma, scopeOf(req)));
+  });
+  app.get('/e-credit-notes/:vchNo/entry', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const vchNo = String((req.params as any).vchNo);
+    const notFound = Symbol('not-found');
+    const outcome = await run(reply, 200, async () => {
+      const result = await getCreditNoteEntry(prisma, scopeOf(req), vchNo);
+      if (!result) throw notFound;
+      return result;
+    }).catch((error: unknown) => {
+      if (error === notFound) return reply.code(404).send({ error: 'credit-note-not-found' });
+      throw error;
+    });
+    return outcome;
+  });
+  app.post('/e-credit-notes', auth, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    return run(reply, 201, () => saveCreditNote(prisma, creditNoteInput(req, body(req))));
+  });
+  app.put('/e-credit-notes/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    return run(reply, 200, () =>
+      saveCreditNote(prisma, creditNoteInput(req, body(req)), String((req.params as any).vchNo)),
+    );
+  });
+  app.delete('/e-credit-notes/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    const b = body(req);
+    return run(reply, 200, () =>
+      deleteCreditNote(prisma, scopeOf(req), String((req.params as any).vchNo), {
+        deleteUser: sess(req).sub,
+        expectedRevision: b.expectedRevision ?? q.expectedRevision,
+      }),
+    );
+  });
+  app.get('/e-credit-notes/:vchNo/print', auth, async (req, reply) => {
+    if (!guard(req, reply, 'print')) return;
+    const q = req.query as any;
+    // TR_SL_EBILL BtnPrint_Click prints "ORIGINAL FOR RECIPIENT" and/or "DUPLICATE FOR SUPPLIER".
+    const copies: Record<string, string> = {
+      O: 'ORIGINAL FOR RECIPIENT',
+      D: 'DUPLICATE FOR SUPPLIER',
+    };
+    if (q.copy != null && q.copy !== '' && !copies[String(q.copy)])
+      return reply.code(400).send({ error: 'invalid-copy', message: 'copy must be O or D' });
+    let data: Awaited<ReturnType<typeof creditNotePrintData>> | undefined;
+    try {
+      data = await creditNotePrintData(prisma, scopeOf(req), String((req.params as any).vchNo));
+    } catch (error: any) {
+      if (/ValidationError|NumberingConfigurationError/.test(error?.name ?? ''))
+        return reply.code(400).send({ error: error.name, message: error.message });
+      throw error;
+    }
+    if (!data) return reply.code(404).send({ error: 'credit-note-not-found' });
+    const html = invoiceHtml(data.header, data.lines, {
+      company: data.company,
+      party: data.party,
+      title: 'Credit Note',
+      copy: q.copy ? copies[String(q.copy)] : undefined,
+    });
+    if (q.format === 'html') return reply.type('text/html').send(html);
+    let pdf: Buffer;
+    try {
+      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
+    } catch {
+      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
+    }
+    return reply
+      .header('content-type', 'application/pdf')
+      .header(
+        'content-disposition',
+        `inline; filename="ecrnt-${String((req.params as any).vchNo).replace(/[^\w.-]/g, '')}.pdf"`,
+      )
+      .send(pdf);
+  });
+  app.post('/e-credit-notes/:vchNo/irn/cancel', auth, async (req, reply) => {
+    if (!guard(req, reply, 'print')) return;
+    const b = body(req);
+    const scope = scopeOf(req);
+    return run(reply, 200, () =>
+      cancelIrnForSale(prisma, scope as any, {
+        coBook: String(scope.coBook ?? ''),
+        vchNo: (req.params as any).vchNo,
+        reason: b.reason,
+        remark: b.remark,
+        expectedMainBook: 'E CRNT',
+      }),
+    );
+  });
   app.get('/e-credit-notes', auth, async (req, reply) => {
     const q = req.query as any;
     return run(reply, 200, () =>

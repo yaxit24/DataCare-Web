@@ -184,3 +184,17 @@ export * from './saleReturnEffectContext.js';
 export * from './saleReturnOtherAmountReplay.js';
 export * from './saleReturnSaveGuards.js';
 export * from './saleReturnFinancialEffects.js';
+export {
+  calculateECreditNoteLine,
+  calculateECreditNoteBill,
+  eCreditNoteLineIsSaved,
+  eCreditNoteTaxDigits,
+  eCreditNoteLabourRateDigits,
+} from './eCreditNoteCalc.js';
+export type {
+  ECreditNotePolicy,
+  ECreditNoteLineInput,
+  ECreditNoteLineResult,
+  ECreditNoteTender,
+  ECreditNoteBillResult,
+} from './eCreditNoteCalc.js';

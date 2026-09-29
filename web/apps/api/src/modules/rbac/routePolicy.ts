@@ -251,8 +251,15 @@ route('Karigar/Tour Order', [
 route('Transaction/E CrntNote', [
   'GET /e-credit-notes',
   'GET /e-credit-notes/provider',
+  'GET /e-credit-notes/entry-config',
   'GET /e-credit-notes/:vchNo',
+  'GET /e-credit-notes/:vchNo/entry',
+  'GET /e-credit-notes/:vchNo/print',
+  'POST /e-credit-notes',
+  'PUT /e-credit-notes/:vchNo',
+  'DELETE /e-credit-notes/:vchNo',
   'POST /einvoice/credit-note/irn',
+  'POST /e-credit-notes/:vchNo/irn/cancel',
 ]);
 route('Sales/Order Cancel', [
   'POST /sales-orders/:vchNo/cancel-refund',
@@ -774,6 +781,8 @@ const PRINT_ROUTES = new Set([
   'GET /dhrn/khata',
   'GET /einvoice/export.xlsx',
   'POST /einvoice/credit-note/irn',
+  'POST /e-credit-notes/:vchNo/irn/cancel',
+  'GET /e-credit-notes/:vchNo/print',
   'GET /utilities/data-export/download',
   'GET /stock/tag-print/label',
   'POST /integrations/notify',

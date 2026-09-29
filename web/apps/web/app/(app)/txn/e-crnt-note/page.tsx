@@ -11,6 +11,7 @@ import {
   type CreditNoteDocument,
   type CreditNoteRow,
 } from '../../../../lib/creditNoteView';
+import { CreditNoteEntry } from './CreditNoteEntry';
 
 type Browse = { rows: CreditNoteRow[]; hasMore: boolean; offset: number; limit: number };
 type GspStatus = { mode: string; provider: string; configured: boolean };
@@ -47,6 +48,7 @@ export default function ECrntNotePage() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [gsp, setGsp] = useState<GspStatus | null>(null);
+  const [editVoucher, setEditVoucher] = useState<{ no: string; seq: number } | null>(null);
   const generation = useRef(0);
   const query = new URLSearchParams({ coBook, coYear });
   const scopeKey = JSON.stringify([coCode, lcCode, coYear, coBook]);
@@ -61,6 +63,7 @@ export default function ECrntNotePage() {
     setBrowse(null);
     setMessage('');
     setBusy(false);
+    setEditVoucher(null);
   }, [coCode, lcCode, coYear, coBook]);
 
   useEffect(() => {
@@ -132,7 +135,8 @@ export default function ECrntNotePage() {
     <div>
       <h1>E CrntNote</h1>
       <p className="muted">
-        Browse and review saved credit notes, then generate an IRN for the selected voucher.
+        Enter, edit, delete and print E CRNT credit notes; browse and review saved credit notes,
+        then generate an IRN for the selected voucher.
       </p>
       <div className="panel">
         <div className="row">
@@ -256,6 +260,17 @@ export default function ECrntNotePage() {
               onClick={() => void register()}
             >
               {registered ? 'IRN already generated' : 'Generate CRN IRN'}
+            </button>{' '}
+            <button
+              disabled={busy}
+              onClick={() =>
+                setEditVoucher((current) => ({
+                  no: String(document.header.VCH_NO),
+                  seq: (current?.seq ?? 0) + 1,
+                }))
+              }
+            >
+              Edit in entry form
             </button>
             {document.registration && <Fields row={document.registration} />}
           </div>
@@ -281,6 +296,18 @@ export default function ECrntNotePage() {
           ))}
         </section>
       )}
+      <CreditNoteEntry
+        key={scopeKey}
+        coBook={coBook}
+        coYear={coYear}
+        scopeKey={scopeKey}
+        editVoucherNo={editVoucher ? `${editVoucher.no}#${editVoucher.seq}` : null}
+        onSaved={(number) => void load(number)}
+        onDeleted={() => {
+          setDocument(null);
+          setBrowse(null);
+        }}
+      />
     </div>
   );
 }

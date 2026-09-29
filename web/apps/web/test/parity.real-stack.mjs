@@ -12,6 +12,12 @@ import {
 } from './parity-real-stack-evidence.mjs';
 import { exerciseTourOrder } from './tour-order.journey.mjs';
 import { exerciseCreditNote } from './credit-note.journey.mjs';
+import {
+  cleanupCreditNoteEntry,
+  creditNoteEntryFixtureTables,
+  exerciseCreditNoteEntry,
+  seedCreditNoteEntry,
+} from './credit-note-entry.journey.mjs';
 import { exerciseDesignCalculation } from './design-calculation.journey.mjs';
 import {
   seedDesignRepeat,
@@ -107,6 +113,7 @@ const tables = [
   ...salesReturnSavedFixtureTables,
   ...repairImageFixtureTables,
   ...mfgLotFixtureTables,
+  ...creditNoteEntryFixtureTables,
   'COL_MAST',
   'CO_SET_NEW',
   'TAG_IMAGE_DATA',
@@ -497,6 +504,12 @@ try {
   }
   result.tourOrder = await exerciseTourOrder(page, { checkpoint, owner, tenantId });
   result.creditNote = await exerciseCreditNote(page, { checkpoint });
+  await seedCreditNoteEntry(sql);
+  try {
+    result.creditNoteEntry = await exerciseCreditNoteEntry(page, { checkpoint, owner, tenantId });
+  } finally {
+    await cleanupCreditNoteEntry(sql);
+  }
   await seedSalesOrder(sql);
   await seedSalesOrderDesign(sql);
   result.salesOrderDesign = await exerciseSalesOrderDesign(page, { checkpoint, coBook: 'S41' });
@@ -555,6 +568,7 @@ try {
   result.journeys = [
     ['column-settings', result.columnSettings],
     ['credit-note', result.creditNote],
+    ['credit-note-entry', result.creditNoteEntry],
     ['design-book', result.designBook],
     ['design-calculations', result.designCalculations],
     ['design-repeat', result.designRepeat],
@@ -587,7 +601,7 @@ try {
   );
   result.status = 'passed';
   console.log(
-    'PARITY_REAL_STACK_PASSED: real login, Design Book calculation/repeat, Sales design selection and lifecycle, Tour Order lifecycle, credit-note browse, saved order and generic/repair images with conflicts, saved incoming Return metadata, Setting lot sources, family-qualified column settings, saved incoming Return calculation, bill and resolved labour preview; zero mocked requests',
+    'PARITY_REAL_STACK_PASSED: real login, Design Book calculation/repeat, Sales design selection and lifecycle, Tour Order lifecycle, credit-note browse and E CRNT create/print/edit/reopen/delete, saved order and generic/repair images with conflicts, saved incoming Return metadata, Setting lot sources, family-qualified column settings, saved incoming Return calculation, bill and resolved labour preview; zero mocked requests',
   );
 } catch (error) {
   result.status = 'failed';

@@ -14,7 +14,7 @@ const SOURCES: Record<string, { table: string; code: string; name: string; extra
     name: 'AC_NAME',
     extra: ['AC_GST_TYPE', 'AC_CITY', 'AC_MOBILE', 'AC_STATE'],
   },
-  items: { table: 'ITEM_MAST', code: 'IT_CODE', name: 'IT_NAME', extra: ['IT_TYPE'] },
+  items: { table: 'ITEM_MAST', code: 'IT_CODE', name: 'IT_NAME', extra: ['IT_TYPE', 'RATE_TYPE'] },
   groups: { table: 'GROUP_MAST', code: 'GR_CODE', name: 'GR_NAME' },
   'ac-groups': { table: 'AC_GROUP', code: 'AC_GR', name: 'AC_GR_NAME', extra: ['AC_MAIN_GR'] },
   products: { table: 'PRODUCT_MAST', code: 'PR_CODE', name: 'PR_NAME' },
