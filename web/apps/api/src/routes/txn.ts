@@ -53,6 +53,7 @@ import {
   updateSavedSaleReturnMetadata,
   SavedSaleReturnError,
 } from '../modules/sales/savedSaleReturn.js';
+import { updateSaleReturnNumeric } from '../modules/sales/saleReturnNumericUpdate.js';
 import {
   listSaleReturnSourceVouchers,
   getSaleReturnSourceItems,
@@ -1395,6 +1396,57 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       )),
       canUpdate: (await formMutationCapabilities(req, 'Sales/Sales Return')).canUpdate,
     }));
+  });
+  // Strict numeric Sale Return update (card X13, steps 8-9). This routes through the
+  // separately versioned updateSaleReturnNumeric coordinator (NOT the generic editSaleReturn
+  // and NOT the metadata-only path). RBAC is enforced by guard(...,'update') and the coordinator
+  // re-observes every trusted dependency inside its Serializable transaction; the caller's
+  // supplied fields grant no authority by themselves. The authenticated operator identity is
+  // taken from the session (never trusted from the body), and an explicit whole-second audit
+  // time is derived server-side. A stale document/context/master/guard version, a real
+  // Serializable (SSI) conflict, an ambiguous ledger key or a cross-year/alias/phantom row all
+  // map to a 4xx via SavedSaleReturnError; a fresh saved version is returned on success so the
+  // UI can adopt it and preserve draft/conflict state.
+  app.put('/sales-returns/:vchNo/incoming-numeric', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    reply.header('cache-control', 'no-store');
+    return run(reply, 200, async () => {
+      const s = sess(req);
+      const b = body(req);
+      if (typeof b.version !== 'string')
+        throw new SavedSaleReturnError(
+          400,
+          'invalid-input',
+          'Reload the saved Return and submit its version.',
+        );
+      if (typeof b.otherAmount !== 'string')
+        throw new SavedSaleReturnError(
+          400,
+          'invalid-input',
+          'An explicit c27 Other value is required.',
+        );
+      if (Object.keys(b).some((key) => !['version', 'otherAmount'].includes(key)))
+        throw new SavedSaleReturnError(
+          400,
+          'invalid-input',
+          'The numeric-update request contains unsupported fields.',
+        );
+      const auditTime = new Date().toISOString().slice(0, 19);
+      const result = await updateSaleReturnNumeric(
+        prisma,
+        savedReturnScope(req),
+        (req.params as { vchNo: string }).vchNo,
+        {
+          version: b.version,
+          otherAmount: b.otherAmount,
+          actor: { mainUser: s.sub, auditUser: s.sub, auditTime },
+        },
+      );
+      return {
+        ...result,
+        canUpdate: (await formMutationCapabilities(req, 'Sales/Sales Return')).canUpdate,
+      };
+    });
   });
   app.post('/sales-returns', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;

@@ -30,6 +30,13 @@ import {
   type SavedSaleReturnScope,
 } from '../src/modules/sales/savedSaleReturn.js';
 import { updateSaleReturnNumeric } from '../src/modules/sales/saleReturnNumericUpdate.js';
+import {
+  accountBalances,
+  accountLedger,
+  outstandingReport,
+  trialBalance,
+} from '../src/modules/reports/reports.js';
+import { salesReturnRegister } from '../src/modules/reports/reports4.js';
 
 const run = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 
@@ -694,5 +701,74 @@ run('sale return numeric write coordinator', () => {
         actor,
       }),
     ).rejects.toMatchObject({ statusCode: 422 });
+  });
+
+  // ---- Step 9: report reconciliation against the committed rows. ----
+  // Each builder below reads a table the numeric write touches (SL_DETL_RTN / AC_DATA), so after
+  // the Other 0->1 edit its scoped figures must move from 110 to 111 and the trial balance must
+  // stay tied. This proves the committed rows flow through to the account/return/outstanding
+  // read-models, not only that the ledger sums balance.
+  describe('report reconciliation (step 9)', () => {
+    const reportScope = { tenantId, coCode: CO, lcCode: LC, coYear: YEAR };
+
+    async function applyOtherOne() {
+      const saved = await get();
+      await updateSaleReturnNumeric(runtime, scope(), VCH, {
+        version: saved.version,
+        otherAmount: '1',
+        actor,
+      });
+    }
+
+    it('sales-return register reflects the updated SL_DETL_RTN net/total (110 -> 111)', async () => {
+      const before = await salesReturnRegister(runtime, reportScope);
+      const beforeRow = before.rows.find((r) => r.voucher === `${BOOK}/${VCH}`);
+      expect(beforeRow?.taxable).toBe(110);
+      expect(beforeRow?.total).toBe(110);
+
+      await applyOtherOne();
+
+      const after = await salesReturnRegister(runtime, reportScope);
+      const afterRow = after.rows.find((r) => r.voucher === `${BOOK}/${VCH}`);
+      expect(afterRow?.taxable).toBe(111);
+      expect(afterRow?.total).toBe(111);
+    });
+
+    it('trial balance stays tied and the customer/sale account balances move to 111', async () => {
+      await applyOtherOne();
+      const tb = await trialBalance(runtime, reportScope);
+      // The whole trial balance nets to zero (Dr total === Cr total).
+      const drTotal = tb.accounts.reduce((sum, row) => sum + row.dr, 0);
+      const crTotal = tb.accounts.reduce((sum, row) => sum + row.cr, 0);
+      expect(Math.round((drTotal - crTotal) * 100)).toBe(0);
+      // The customer account is credited 111 and the sale account debited 111 after the edit.
+      const party = tb.accounts.find((row) => row.acCode.trim() === PARTY);
+      const sale = tb.accounts.find((row) => row.acCode.trim() === SALE);
+      expect(party?.cr).toBe(111);
+      expect(sale?.dr).toBe(111);
+    });
+
+    it('account balances and account ledger reflect the committed 111 movement', async () => {
+      await applyOtherOne();
+      const balances = await accountBalances(runtime, reportScope);
+      const partyRow = balances.rows.find(
+        (row: any) => String(row.acCode ?? row.AC_CODE ?? '').trim() === PARTY,
+      );
+      // AC_DATA balance is Σ Dr − Σ Cr; the customer credit of 111 shows a −111 balance.
+      expect(Math.round(Number(partyRow?.balance ?? 0))).toBe(-111);
+
+      const ledger = await accountLedger(runtime, reportScope, PARTY);
+      expect(Math.round(ledger.closing)).toBe(-111);
+    });
+
+    it('outstanding report reflects the committed customer credit of 111', async () => {
+      await applyOtherOne();
+      const outstanding = await outstandingReport(runtime, reportScope);
+      const partyRow = outstanding.rows.find(
+        (row: any) => String(row.acCode ?? row.AC_CODE ?? '').trim() === PARTY,
+      );
+      expect(partyRow).toBeTruthy();
+      expect(Math.round(Math.abs(Number(partyRow?.balance ?? 0)))).toBe(111);
+    });
   });
 });

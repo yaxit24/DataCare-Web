@@ -56,9 +56,10 @@ describe('route policy registry', () => {
   });
   it('classifies every declared endpoint and preserves the current exact route universe', () => {
     const routes = declaredRoutes();
-    // The labour preview adds exactly three read-only Sales Return routes.
-    expect(routes).toHaveLength(556);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(556);
+    // The labour preview adds exactly three read-only Sales Return routes; the strict numeric
+    // Sale Return update (card X13 steps 8-9) adds one guarded PUT.
+    expect(routes).toHaveLength(557);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(557);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -93,6 +94,7 @@ describe('route policy registry', () => {
       ['POST', '/sales-returns/:vchNo/incoming-labour-observation', 'read'],
       ['POST', '/sales-returns/:vchNo/incoming-labour-replay', 'read'],
       ['PUT', '/sales-returns/:vchNo/incoming-metadata', 'update'],
+      ['PUT', '/sales-returns/:vchNo/incoming-numeric', 'update'],
     ] as const)
       expect(routePolicyFor(method, path)).toMatchObject({
         kind: 'form',

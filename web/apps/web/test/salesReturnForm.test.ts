@@ -250,6 +250,14 @@ describe('saved incoming Return observations and metadata', () => {
     );
     expect(path.pathname).toBe('/sales-returns/00001/incoming-metadata');
     expect(Object.fromEntries(path.searchParams)).toEqual(scope);
+    // The strict numeric-update path targets the dedicated coordinator endpoint, carrying the
+    // same explicit business scope and never the generic metadata/create surfaces.
+    const numeric = new URL(
+      savedReturnPath(document.scope, document.voucherNo, 'numeric'),
+      'http://localhost',
+    );
+    expect(numeric.pathname).toBe('/sales-returns/00001/incoming-numeric');
+    expect(Object.fromEntries(numeric.searchParams)).toEqual(scope);
     expect(new URL(savedReturnRecentPath(scope), 'http://localhost').pathname).toBe(
       '/sales-returns/incoming-recent',
     );

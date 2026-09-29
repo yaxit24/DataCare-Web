@@ -216,6 +216,7 @@ route('Sales/Sales Return', [
   'POST /sales-returns/:vchNo/incoming-labour-observation',
   'POST /sales-returns/:vchNo/incoming-labour-replay',
   'PUT /sales-returns/:vchNo/incoming-metadata',
+  'PUT /sales-returns/:vchNo/incoming-numeric',
   'POST /sales-returns',
   'GET /sales-returns/import',
   'GET /sales-returns/:vchNo',

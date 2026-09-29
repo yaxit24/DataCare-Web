@@ -97,14 +97,20 @@ function voucherIdentity(value: string): string {
   return value.replace(/^0+/, '') || '0';
 }
 
+const SAVED_RETURN_ACTIONS = {
+  read: 'incoming',
+  metadata: 'incoming-metadata',
+  numeric: 'incoming-numeric',
+} as const;
+
 export function savedReturnPath(
   scope: SavedReturnScope,
   voucherNo: string,
-  action: 'read' | 'metadata' = 'read',
+  action: 'read' | 'metadata' | 'numeric' = 'read',
 ): string {
   const voucher = voucherNo.trim();
   voucherIdentity(voucher);
-  return `/sales-returns/${encodeURIComponent(voucher)}/${action === 'metadata' ? 'incoming-metadata' : 'incoming'}?${savedReturnQuery(scope)}`;
+  return `/sales-returns/${encodeURIComponent(voucher)}/${SAVED_RETURN_ACTIONS[action]}?${savedReturnQuery(scope)}`;
 }
 
 export function savedReturnRecentPath(scope: SavedReturnScope): string {

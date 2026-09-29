@@ -96,6 +96,44 @@ const collected = collectRoutes(join(WEB_APP, 'app'));
 const routes = [...new Set(collected.filter((r) => r.route).map((r) => r.route))].sort();
 const unsampled = collected.filter((r) => !r.route);
 
+/**
+ * Registered-endpoint assertion for the strict Sale Return numeric-update surface (card X13,
+ * steps 8-9). This breadth harness discovers PAGE routes from the filesystem, so a new API
+ * endpoint reached only by a PUT-on-interaction is not otherwise observed here. Assert, source
+ * side and DB-independently, that the endpoint is wired end to end: the web lib emits the
+ * numeric path, the saved Return panel calls it, and the API registers the route through the
+ * dedicated coordinator (never the generic editSaleReturn or the metadata-only path).
+ */
+const NUMERIC_UPDATE_ENDPOINT = 'incoming-numeric';
+{
+  const { readFileSync } = await import('node:fs');
+  const lib = readFileSync(join(WEB_APP, 'lib', 'salesReturnForm.ts'), 'utf8');
+  const panel = readFileSync(join(WEB_APP, 'components', 'SaleReturnSavedPanel.tsx'), 'utf8');
+  const api = readFileSync(
+    resolve(REPO_WEB, 'apps', 'api', 'src', 'routes', 'txn.ts'),
+    'utf8',
+  );
+  const problems = [];
+  if (!lib.includes(`numeric: '${NUMERIC_UPDATE_ENDPOINT}'`))
+    problems.push('lib/salesReturnForm.ts does not emit the numeric endpoint path');
+  if (!panel.includes("'numeric'") || !panel.includes('saveNumeric'))
+    problems.push('SaleReturnSavedPanel.tsx does not call the numeric endpoint');
+  if (!api.includes(`/sales-returns/:vchNo/${NUMERIC_UPDATE_ENDPOINT}`))
+    problems.push('apps/api/src/routes/txn.ts does not register the numeric endpoint');
+  if (!api.includes('updateSaleReturnNumeric'))
+    problems.push('apps/api/src/routes/txn.ts does not route through updateSaleReturnNumeric');
+  if (/updateSaleReturnNumeric[\s\S]{0,400}editSaleReturn/.test(api))
+    problems.push('numeric endpoint must not fall through to the generic editSaleReturn');
+  if (problems.length) {
+    console.error('ROUTE_COVERAGE_FAILED numeric-update endpoint is not wired:');
+    for (const p of problems) console.error(`  ${p}`);
+    process.exit(1);
+  }
+  console.log(
+    `numeric-update endpoint wired: web lib + saved panel + API route all reference /sales-returns/:vchNo/${NUMERIC_UPDATE_ENDPOINT}`,
+  );
+}
+
 console.log(
   `routes discovered: ${routes.length}${unsampled.length ? ` (+${unsampled.length} unsampled)` : ''}`,
 );
@@ -244,6 +282,22 @@ async function installApiStubs(page) {
         registrationSpecificBranches: [],
       });
     if (path === '/einvoice/gsp-config') return json(200, { vars: {} });
+    // The strict Sale Return numeric-update endpoint (card X13 steps 8-9). It is a PUT invoked
+    // only on operator interaction, so page render never calls it; a shaped stub keeps the saved
+    // Return screen render deterministic if a future default fetch reaches it, and documents that
+    // the numeric surface routes through /sales-returns/:vchNo/incoming-numeric (NOT the generic
+    // metadata/create paths). See NUMERIC_UPDATE_ENDPOINT below for the registered-path assertion.
+    if (/^\/sales-returns\/[^/]+\/incoming-numeric$/.test(path))
+      return json(200, {
+        version: 'sale-return-numeric-update-coordinator-v1',
+        profile: 'saved-one-pi-n-sr1-c27-t-zero-tax-ordinary-other-v1',
+        committed: true,
+        voucherNo: '00001',
+        documentVersion: 'a'.repeat(64),
+        changes: [],
+        noOp: true,
+        canUpdate: true,
+      });
     if (path === '/integrations/status') return json(200, {});
     // A 404 for one missing image is meaningful to the page; the blanket [] below would look like data.
     if (path === '/stock/tag-image') return json(404, { error: 'tag-image-not-found' });

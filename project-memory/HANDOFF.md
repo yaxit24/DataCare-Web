@@ -8,6 +8,10 @@
 ## Active plan
 **Full-parity rebuild (52 tasks / 15 phases A–O)** — replicate the ENTIRE desktop (204 forms, 255 reports, full frontend+backend+DB) at 100% functional parity. The earlier 34-task plan delivered the verified backend CORE; this plan builds out the rest. Task graph = the session todo list (IDs 1–20 group the phases). Run continuously; checkpoint every task.
 
+## Latest slice (2026-09-29, Round 16 / FEAT-003) — X13 steps 8-9
+- Strict `PUT /sales-returns/:vchNo/incoming-numeric` routes through the FEAT-002 `updateSaleReturnNumeric` coordinator (never generic `editSaleReturn`); real UI Save on the saved Sale Return screen (`SaleReturnSavedPanel` numeric sub-panel) preserving draft/conflict state and adopting the fresh version. `nav.ts` unchanged (no unearned promotion). Route-coverage + unit + routePolicy coverage added; live smoke `apps/api/integration/sale-return-update.live.mjs` (e2e tenant); report reconciliation (register/trial-balance/account-balances/ledger/outstanding) added to the DB test.
+- DB-independent gate GREEN: typecheck 10/10, build 7/7, lint clean, core 26/1614, API pure 125 files/1901 tests 0 fail. DB-backed/live/browser proof authored-for-CI, NOT executed in-sandbox (no working PostgreSQL). **X13 is NOT closed** — finite c27 writer for the ordinary N/P/I/SR1 zero-tax Other 0->1 profile only. See `parity-plan-2026-09-10/43-implementation-progress-round16.md`.
+
 ## Where we are (session 4)
 - **T1 DONE** — schema is source-of-truth. `web-postgres-1` :5433 has **163 tables / 5878 cols**. `prisma db pull` regenerated `packages/db/prisma/schema.prisma` (162 models, **0 @@ignore** — all PKs present). Gate green; live auth+sales PASS. Backup `/tmp/schema.prisma.bak`.
 - **T4 DONE + most of T5** — **a REAL Next.js 15 / React 19 frontend now exists in `apps/web`** and is wired to the live API. Builds clean on Node 25; monorepo gate green (typecheck 10/10, test 10/10, build 7/7).
