@@ -57,9 +57,10 @@ describe('route policy registry', () => {
   it('classifies every declared endpoint and preserves the current exact route universe', () => {
     const routes = declaredRoutes();
     // The labour preview adds exactly three read-only Sales Return routes; X15 adds the seven E CRNT
-    // entry-config/entry/create/update/delete/print/IRN-cancel routes.
-    expect(routes).toHaveLength(563);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(563);
+    // entry-config/entry/create/update/delete/print/IRN-cancel routes, and the E INVOICE mode of the same
+    // form adds eleven /e-invoices routes (browse, read, TCS basis, entry lifecycle, print, IRN, cancel).
+    expect(routes).toHaveLength(574);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(574);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -344,6 +345,28 @@ describe('route policy registry', () => {
       form: 'Transaction/E CrntNote',
       action: 'print',
     });
+  });
+
+  it('maps the E INVOICE mode of TR_SL_EBILL to Transaction/E Invoice rights (X15)', () => {
+    for (const [method, path, action] of [
+      ['GET', '/e-invoices', 'read'],
+      ['GET', '/e-invoices/entry-config', 'read'],
+      ['GET', '/e-invoices/tcs-basis', 'read'],
+      ['GET', '/e-invoices/:vchNo', 'read'],
+      ['GET', '/e-invoices/:vchNo/entry', 'read'],
+      ['POST', '/e-invoices', 'create'],
+      ['PUT', '/e-invoices/:vchNo', 'update'],
+      ['DELETE', '/e-invoices/:vchNo', 'delete'],
+      ['GET', '/e-invoices/:vchNo/print', 'print'],
+      ['POST', '/e-invoices/:vchNo/irn', 'print'],
+      ['POST', '/e-invoices/:vchNo/irn/cancel', 'print'],
+    ] as const)
+      expect(routePolicyFor(method, path)).toMatchObject({
+        kind: 'form',
+        form: 'Transaction/E Invoice',
+        action,
+        businessScope: true,
+      });
   });
 
   it('maps the E CRNT entry lifecycle to its own form rights (X15)', () => {

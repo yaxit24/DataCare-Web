@@ -131,3 +131,66 @@ export async function seedECreditNoteFixture(
     BOOK,
   );
 }
+
+export const E_INVOICE_BOOK = 'EIN';
+
+/** The E CRNT fixture plus an outward E INVOICE book (slots 1-5), TCS 20, TDS 25 and code 00. */
+export async function seedEInvoiceFixture(
+  exec: Exec,
+  TENANT: string,
+  options: { companyType?: string; employeeMandatory?: boolean } = {},
+) {
+  await seedECreditNoteFixture(exec, TENANT, options);
+  const CO = E_CRNT_CO;
+  const LC = E_CRNT_LC;
+  await exec(
+    `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK",
+       "BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","BOOK_TBL_DETL","ITM_TYPE","DATA_TYPE","BOOK_SR_NAME")
+     VALUES ($1,$2,$3,$4,'E Invoice','EINV','E INVOICE','O','Y','SL_DATA','SL_DETL','A','A','INV')`,
+    TENANT,
+    CO,
+    LC,
+    E_INVOICE_BOOK,
+  );
+  for (const [srNo, ac] of [
+    [1, 'INV001'],
+    [2, 'CASH01'],
+    [3, 'KSR001'],
+    [4, 'ROF001'],
+    [5, 'ROF005'],
+  ] as const) {
+    await exec(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","DATA_TYPE","BOOK_TYPE","BOOK_INOUT")
+       VALUES ($1,$2,$3,$4,$5,$6,'E Invoice','EINV','E INVOICE','A','','O')`,
+      TENANT,
+      CO,
+      LC,
+      E_INVOICE_BOOK,
+      srNo,
+      ac,
+    );
+  }
+  for (const [code, name] of [
+    ['INV001', 'Sales Control'],
+    ['ROF005', 'Round Off Invoice'],
+    ['TCS001', 'TCS Payable'],
+    ['TDS001', 'TDS Receivable'],
+  ] as const) {
+    await exec(
+      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GST_TYPE") VALUES ($1,$2,$3,$4,$5,'L')`,
+      TENANT,
+      CO,
+      LC,
+      code,
+      name,
+    );
+  }
+  await exec(
+    `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_GROUP","TAX_NAME","TAX_PRC","TAX_AC") VALUES
+       ($1,$2,'20',0,'TCS','TCS 0.1%',0.1,'TCS001'),
+       ($1,$2,'25',0,'TDS','TDS 1%',1,'TDS001'),
+       ($1,$2,'00',0,'NIL','No TCS/TDS',0,'')`,
+    TENANT,
+    CO,
+  );
+}

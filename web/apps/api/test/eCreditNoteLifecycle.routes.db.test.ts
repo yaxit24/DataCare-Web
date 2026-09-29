@@ -164,7 +164,7 @@ const SECRET = 'e-crnt-route-test-signing-secret-over-thirty-two-characters';
       draft({ billNo: 'HTTP-3', expectedRevision: opened.revision }),
     );
     expect(stale.statusCode, stale.body).toBe(409);
-    expect(stale.json()).toMatchObject({ error: 'CreditNoteConflictError' });
+    expect(stale.json()).toMatchObject({ error: 'EBillConflictError' });
 
     const invalid = await request('POST', `/e-credit-notes?${qs()}`, draft({ partyCode: '' }));
     expect(invalid.statusCode).toBe(400);

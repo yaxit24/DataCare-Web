@@ -1,15 +1,16 @@
 import { createHash } from 'node:crypto';
 import { withTenant } from '@datacare/db';
 import {
-  calculateECreditNoteBill,
-  calculateECreditNoteLine,
+  calculateEBillLine,
+  calculateEBillTotals,
+  eBillLabourRateDigits,
+  eBillLineIsSaved,
+  eBillTaxDigits,
+  eInvoiceTcs,
   round,
-  eCreditNoteLabourRateDigits,
-  eCreditNoteLineIsSaved,
-  eCreditNoteTaxDigits,
-  type ECreditNoteBillResult,
-  type ECreditNoteLineResult,
-  type ECreditNotePolicy,
+  type EBillLineResult,
+  type EBillPolicy,
+  type EBillTotals,
 } from '@datacare/core';
 import { assertBalanced, assertPeriodOpen, insertRowTx } from '../posting/posting.js';
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
@@ -32,31 +33,36 @@ import {
 } from '../finance/lifecycle.js';
 
 /**
- * E CRNT (E Credit Note) create / edit / delete — TR_SL_EBILL in E CRNT mode (card X15).
+ * TR_SL_EBILL create / edit / delete in both of its modes (card X15):
  *
- * The complete source contract, including every deliberate web adaptation, is in
- * parity-plan-2026-09-10/evidence/implementation-2026-09-29-x15/ecrnt-lifecycle-contract.md.
- * This is NOT the Sale Return writer: the credit note has its own book family, posting helpers
- * (Ac_Ledr.EInvoice_Ledr, Ac_Rojmel.EInvoice_Rojmel, Ac_Stock.EInvoice_Stk, Ac_Tax.EInvoice_GST)
- * and delete set.
+ *   E CRNT     credit note on an inward book — stock back in, GST reversed (TAX_SIGN '-')
+ *   E INVOICE  outward e-invoice            — stock out, GST output (TAX_SIGN '+'), TCS/TDS
+ *
+ * The form, arithmetic and validations are shared; the posting helpers (Ac_Ledr.EInvoice_Ledr,
+ * Ac_Rojmel.EInvoice_Rojmel, Ac_Stock.EInvoice_Stk / Dm_Sale_eInv_Detl, Ac_Tax.EInvoice_GST and
+ * Vch_Remark) branch on BOOK_DATA.MAIN_BOOK. The source contract and every deliberate web adaptation
+ * are in parity-plan-2026-09-10/evidence/implementation-2026-09-29-x15/ecrnt-lifecycle-contract.md.
+ * This is NOT the ordinary Sale / Sale Return writer.
  */
 
-export class CreditNoteWriteValidationError extends Error {
+export type EBillFamily = 'E CRNT' | 'E INVOICE';
+
+export class EBillWriteValidationError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'CreditNoteWriteValidationError';
+    this.name = 'EBillWriteValidationError';
   }
 }
 
 /** A stale edit/delete: the saved voucher changed after the operator opened it. Mapped to 409. */
-export class CreditNoteConflictError extends Error {
+export class EBillConflictError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'CreditNoteConflictError';
+    this.name = 'EBillConflictError';
   }
 }
 
-export interface CreditNoteLineInput {
+export interface EBillEntryLineInput {
   oldSrNo?: number;
   itemCode?: string;
   remark?: string;
@@ -81,7 +87,7 @@ export interface CreditNoteLineInput {
   taxCode?: string;
 }
 
-export interface CreditNoteInput {
+export interface EBillEntryInput {
   scope: VoucherScope;
   vchDate: string | Date;
   partyCode: string;
@@ -97,10 +103,13 @@ export interface CreditNoteInput {
   cardAccount?: string;
   cardCommission?: number;
   kasarAmount?: number;
+  /** E INVOICE only: '' none, otherwise a TAX_MAST SR_NO 0 code (the desktop offers 25 / 00). */
   tdsCode?: string;
+  /** E INVOICE only: '' automatic threshold rule, '00' none, otherwise a picked code. */
   tcsCode?: string;
+  /** E INVOICE only: amount typed for a picked TCS code below the threshold on a new voucher. */
   tcsAmount?: number;
-  lines: CreditNoteLineInput[];
+  lines: EBillEntryLineInput[];
   mainUser?: string;
   /** Revision returned by the entry reader; when present a changed voucher is refused (409). */
   expectedRevision?: string;
@@ -109,15 +118,17 @@ export interface CreditNoteInput {
 type Row = Record<string, unknown>;
 type Account = { code: string; name: string; gstType: string };
 type BookSlot = BookSlotRow;
-type CreditBook = {
+type EBook = {
+  family: EBillFamily;
   coBook: string;
   configuredName: string;
   shortName: string;
-  mainBook: 'E CRNT';
+  mainBook: EBillFamily;
   inout: string;
   itemType: string;
   dataType: string;
   bookType: string;
+  tableName: string;
   slots: Map<number, BookSlot>;
 };
 type TaxComponent = { group: string; percent: number };
@@ -128,6 +139,7 @@ type LineTax = {
   cgst: TaxComponent | null;
   sgst: TaxComponent | null;
 };
+type TaxHead = { code: string; name: string; percent: number; account: string };
 type ResolvedLine = {
   srNo: number;
   oldSrNo: number;
@@ -142,7 +154,7 @@ type ResolvedLine = {
   hmId: string;
   bagWt: number;
   tax: LineTax;
-  calc: ECreditNoteLineResult;
+  calc: EBillLineResult;
 };
 type Resolved = {
   party: Account;
@@ -151,19 +163,56 @@ type Resolved = {
   interState: boolean;
   gstType: string;
   lines: ResolvedLine[];
-  bill: ECreditNoteBillResult;
+  bill: EBillTotals;
+  tcs: { code: string; percent: number; account: string; accountName: string };
+  tds: { code: string; percent: number; account: string };
   chequeAccount: string;
   chequeNo: string;
   cardAccount: string;
   cardCommission: number;
   cashAccount: string;
   kasarAccount: string;
-  roundOffAccount: string;
   taxAccount: string;
   taxAccountName: string;
 };
 
-const CREDIT_TABLES = [
+const FAMILY: Record<
+  EBillFamily,
+  {
+    inout: 'I' | 'O';
+    invoice: boolean;
+    label: string;
+    roundOffSlot: number;
+    roundOffSuffix: string;
+    stockType: string;
+    stockSign: string;
+    taxSign: string;
+  }
+> = {
+  'E CRNT': {
+    inout: 'I',
+    invoice: false,
+    label: 'credit note',
+    roundOffSlot: 4,
+    roundOffSuffix: '16',
+    stockType: 'I',
+    stockSign: '+',
+    taxSign: '-',
+  },
+  'E INVOICE': {
+    inout: 'O',
+    invoice: true,
+    label: 'e-invoice',
+    roundOffSlot: 5,
+    roundOffSuffix: '15',
+    stockType: 'S',
+    stockSign: '-',
+    taxSign: '+',
+  },
+};
+
+/** BtnDelete_Click (7880-7896) removes these; save rebuilds SAVE_TABLES. */
+const DELETE_TABLES = [
   'REMARK_DATA',
   'MAIN_STOCK',
   'AC_DATA',
@@ -176,7 +225,7 @@ const CREDIT_TABLES = [
   'SL_IDTL',
   'SL_PR_DETL',
 ] as const;
-/** Save deletes/re-inserts these (7493-7799); SL_ORD_ADJ/SL_PR_DETL/REMARK_DATA are delete-only. */
+/** Save deletes/re-inserts these (7493-7801, REMARK_DATA through Vch_Remark). */
 const SAVE_TABLES = [
   'SL_DATA',
   'SL_DETL',
@@ -186,6 +235,7 @@ const SAVE_TABLES = [
   'MAIN_STOCK',
   'TAX_DATA',
   'DM_DATA',
+  'REMARK_DATA',
 ] as const;
 
 const num = (value: unknown): number => {
@@ -197,11 +247,20 @@ const money = (value: unknown): number => round(Number(value ?? 0), 2);
 const nonNegative = (value: unknown, label: string): number => {
   const v = num(value);
   if (!Number.isFinite(v) || v < 0)
-    throw new CreditNoteWriteValidationError(`${label} must be a valid non-negative number`);
+    throw new EBillWriteValidationError(`${label} must be a valid non-negative number`);
   return v;
 };
 /** SQL Server STR(n): default width 10, right aligned (LEDR_KEY line suffixes). */
 const sqlStr = (value: number): string => String(value).padStart(10, ' ');
+const keyWhere = `tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`;
+const keyArgs = (scope: CompleteFinanceScope, voucherNo: string) => [
+  scope.tenantId,
+  scope.coCode,
+  scope.lcCode,
+  scope.coYear,
+  scope.coBook,
+  voucherNo,
+];
 
 function businessDate(value: string | Date, label = 'voucher date'): { date: Date; iso: string } {
   const raw = value instanceof Date ? value.toISOString().slice(0, 10) : text(value);
@@ -211,12 +270,17 @@ function businessDate(value: string | Date, label = 'voucher date'): { date: Dat
     Number.isNaN(date.getTime()) ||
     date.toISOString().slice(0, 10) !== raw
   ) {
-    throw new CreditNoteWriteValidationError(`${label} is missing or invalid`);
+    throw new EBillWriteValidationError(`${label} is missing or invalid`);
   }
   return { date, iso: raw };
 }
 
-async function resolveBookTx(tx: any, scope: CompleteFinanceScope): Promise<CreditBook> {
+async function resolveBookTx(
+  tx: any,
+  family: EBillFamily,
+  scope: CompleteFinanceScope,
+): Promise<EBook> {
+  const f = FAMILY[family];
   const rows: Row[] = await tx.$queryRawUnsafe(
     `SELECT "CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","BOOK_TBL_NAME","ITM_TYPE",
             "DATA_TYPE","BOOK_TYPE"
@@ -230,51 +294,53 @@ async function resolveBookTx(tx: any, scope: CompleteFinanceScope): Promise<Cred
     scope.coBook,
   );
   if (rows.length !== 1) {
-    throw new CreditNoteWriteValidationError(
+    throw new EBillWriteValidationError(
       rows.length
-        ? `credit-note book configuration is ambiguous: ${scope.coBook}`
-        : `Please Creat Book From E CRNT.... (book ${scope.coBook} not found)`,
+        ? `${f.label} book configuration is ambiguous: ${scope.coBook}`
+        : `Please Creat Book From ${family}.... (book ${scope.coBook} not found)`,
     );
   }
   const row = rows[0]!;
   const table = text(row.BOOK_TBL_NAME).toUpperCase();
   if (
-    text(row.MAIN_BOOK).toUpperCase() !== 'E CRNT' ||
-    text(row.BOOK_INOUT).toUpperCase() !== 'I'
+    text(row.MAIN_BOOK).toUpperCase() !== family ||
+    text(row.BOOK_INOUT).toUpperCase() !== f.inout
   ) {
-    throw new CreditNoteWriteValidationError(
-      `book ${scope.coBook} must be configured as E CRNT / I`,
+    throw new EBillWriteValidationError(
+      `book ${scope.coBook} must be configured as ${family} / ${f.inout}`,
     );
   }
   if (table && table !== 'SL_DATA') {
-    throw new CreditNoteWriteValidationError(`book ${scope.coBook} must write SL_DATA`);
+    throw new EBillWriteValidationError(`book ${scope.coBook} must write SL_DATA`);
   }
   // Ac_Ledr.EInvoice_Ledr posts the per-line sale rows only when BOOK_DATA.ITM_TYPE = 'A'; any
-  // other value would leave the party credit without its debit.
+  // other value would leave the party row without its counterpart.
   if (text(row.ITM_TYPE).toUpperCase() !== 'A') {
-    throw new CreditNoteWriteValidationError(
-      `book ${scope.coBook} must have item type A for E CRNT posting`,
+    throw new EBillWriteValidationError(
+      `book ${scope.coBook} must have item type A for ${family} posting`,
     );
   }
   // EInvoice_Ledr/Rojmel read VCH_TYPE, BOOK_NAME and DATA_TYPE from the BOOK_DETL slot row.
   const slots = await resolveBookSlotRowsTx(tx, scope, 'party-control');
   return {
+    family,
     coBook: text(row.CO_BOOK),
     configuredName: text(row.BOOK_NAME),
     shortName: text(row.BOOK_SNAME),
-    mainBook: 'E CRNT',
+    mainBook: family,
     inout: text(row.BOOK_INOUT).toUpperCase(),
     itemType: text(row.ITM_TYPE).toUpperCase(),
     dataType: text(row.DATA_TYPE),
     bookType: text(row.BOOK_TYPE),
+    tableName: text(row.BOOK_TBL_NAME),
     slots,
   };
 }
 
-function requireSlot(book: CreditBook, srNo: number, purpose: string): BookSlot {
+function requireSlot(book: EBook, srNo: number, purpose: string): BookSlot {
   const slot = book.slots.get(srNo);
   if (!slot || !slot.accountCode) {
-    throw new CreditNoteWriteValidationError(
+    throw new EBillWriteValidationError(
       `book ${book.coBook} BOOK_DETL slot ${srNo} (${purpose}) has no account`,
     );
   }
@@ -288,7 +354,7 @@ async function accountTx(
   label: string,
 ): Promise<Account> {
   const accountCode = text(code);
-  if (!accountCode) throw new CreditNoteWriteValidationError(`${label} is required`);
+  if (!accountCode) throw new EBillWriteValidationError(`${label} is required`);
   const rows: Row[] = await tx.$queryRawUnsafe(
     `SELECT "AC_CODE","AC_NAME","AC_GST_TYPE" FROM "AC_MAST"
       WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "AC_CODE"=$3
@@ -300,7 +366,7 @@ async function accountTx(
     scope.lcCode,
   );
   if (rows.length !== 1) {
-    throw new CreditNoteWriteValidationError(
+    throw new EBillWriteValidationError(
       rows.length ? `${label} is ambiguous: ${accountCode}` : `${label} not found: ${accountCode}`,
     );
   }
@@ -325,14 +391,14 @@ async function companySettingsTx(tx: any, scope: CompleteFinanceScope) {
   let taxDigits: number;
   let labourRateDigits: number;
   try {
-    taxDigits = eCreditNoteTaxDigits(row.TAX_ROF);
-    labourRateDigits = eCreditNoteLabourRateDigits(row.LBR_ROF);
+    taxDigits = eBillTaxDigits(row.TAX_ROF);
+    labourRateDigits = eBillLabourRateDigits(row.LBR_ROF);
   } catch (error) {
-    throw new CreditNoteWriteValidationError((error as Error).message);
+    throw new EBillWriteValidationError((error as Error).message);
   }
   const coType = text(row.co_type);
   if (coType.includes(',')) {
-    throw new CreditNoteWriteValidationError(`company ${scope.coCode} has conflicting CO_TYPE`);
+    throw new EBillWriteValidationError(`company ${scope.coCode} has conflicting CO_TYPE`);
   }
   return {
     behavior,
@@ -355,7 +421,7 @@ async function lineTaxTx(
   try {
     policy = await resolveTaxPolicyTx(tx, scope, { acCode: party.code, taxCode: code, taxPct: 0 });
   } catch (error) {
-    throw new CreditNoteWriteValidationError((error as Error).message);
+    throw new EBillWriteValidationError((error as Error).message);
   }
   const component = (srNo: number) => {
     const c = policy.components.get(srNo);
@@ -368,6 +434,42 @@ async function lineTaxTx(
     cgst: component(2),
     sgst: component(1),
   };
+}
+
+/** TAX_MAST head row (SR_NO 0), as the TCS/TDS/tax posting joins pin it. */
+async function taxHeadTx(tx: any, scope: VoucherScope, code: string): Promise<TaxHead | null> {
+  if (!code) return null;
+  const rows: Row[] = await tx.$queryRawUnsafe(
+    `SELECT t."TAX_CODE", t."TAX_NAME", t."TAX_PRC", t."TAX_AC", a."AC_NAME"
+       FROM "TAX_MAST" t
+       LEFT JOIN "AC_MAST" a ON a.tenant_id=t.tenant_id AND a."CO_CODE"=t."CO_CODE" AND a."AC_CODE"=t."TAX_AC"
+      WHERE t.tenant_id=$1 AND t."CO_CODE"=$2 AND t."TAX_CODE"=$3 AND coalesce(t."SR_NO",0)=0
+      LIMIT 2`,
+    scope.tenantId,
+    scope.coCode,
+    code,
+  );
+  if (rows.length > 1)
+    throw new EBillWriteValidationError(`tax code ${code} has more than one SR_NO 0 row`);
+  if (!rows.length) return null;
+  const r = rows[0]!;
+  return {
+    code: text(r.TAX_CODE),
+    name: text(r.TAX_NAME) || text(r.AC_NAME),
+    percent: Number(r.TAX_PRC ?? 0),
+    account: text(r.TAX_AC),
+  };
+}
+
+async function accountNameTx(tx: any, scope: VoucherScope, code: string): Promise<string> {
+  if (!code) return '';
+  const rows: Row[] = await tx.$queryRawUnsafe(
+    `SELECT "AC_NAME" FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "AC_CODE"=$3 LIMIT 1`,
+    scope.tenantId,
+    scope.coCode,
+    code,
+  );
+  return text(rows[0]?.AC_NAME);
 }
 
 async function itemTx(tx: any, scope: VoucherScope, code: string) {
@@ -383,7 +485,7 @@ async function itemTx(tx: any, scope: VoucherScope, code: string) {
     code,
   );
   if (rows.length !== 1) {
-    throw new CreditNoteWriteValidationError(
+    throw new EBillWriteValidationError(
       rows.length ? `item configuration is ambiguous: ${code}` : `item not found: ${code}`,
     );
   }
@@ -398,21 +500,52 @@ async function itemTx(tx: any, scope: VoucherScope, code: string) {
   };
 }
 
+/**
+ * AcTcsAmt (tAcCode_KeyDown 8417): the party's AC_DATA debits (DATA_TYPE 'A') since the year opened,
+ * across every book and branch of the company. Party 00045 is never read (the desktop keeps 0).
+ */
+async function priorPartyDebitsTx(
+  tx: any,
+  scope: CompleteFinanceScope,
+  partyCode: string,
+): Promise<number> {
+  if (partyCode === '00045') return 0;
+  const rows: Row[] = await tx.$queryRawUnsafe(
+    `SELECT coalesce(sum(a."DR_AMT"),0)::float8 AS debits
+       FROM "AC_DATA" a
+      WHERE a.tenant_id=$1 AND a."CO_CODE"=$2 AND a."AC_CODE"=$3 AND a."DATA_TYPE"='A'
+        AND a."VCH_DATE" >= (
+          SELECT left(y."OP_DATE"::text,10)::date FROM "YEAR_MAST" y
+           WHERE y.tenant_id=$1 AND y."CO_CODE"=$2
+             AND coalesce(nullif(btrim(y."CO_YEAR"::text),''),left(y."OP_DATE"::text,4))=$4
+           ORDER BY y.row_id LIMIT 1)`,
+    scope.tenantId,
+    scope.coCode,
+    partyCode,
+    scope.coYear,
+  );
+  const value = Number(rows[0]?.debits ?? 0);
+  if (!Number.isFinite(value))
+    throw new EBillWriteValidationError('party debit total is unreadable');
+  return round(value, 2);
+}
+
 async function resolveTx(
   tx: any,
   scope: CompleteFinanceScope,
-  book: CreditBook,
-  input: CreditNoteInput,
+  book: EBook,
+  input: EBillEntryInput,
   creating: boolean,
 ): Promise<Resolved> {
+  const f = FAMILY[book.family];
   const settings = await companySettingsTx(tx, scope);
   const partyCode = text(input.partyCode);
-  if (!partyCode) throw new CreditNoteWriteValidationError('Please Insert Party and try');
+  if (!partyCode) throw new EBillWriteValidationError('Please Insert Party and try');
   const party = await accountTx(tx, scope, partyCode, 'party account');
   const ledgerCode = text(input.ledgerCode);
   const ledger = ledgerCode ? await accountTx(tx, scope, ledgerCode, 'ledger account') : null;
   const interState = party.gstType === 'I';
-  const policy: ECreditNotePolicy = {
+  const policy: EBillPolicy = {
     amountDigits: settings.behavior.allRoundingRemoved ? 2 : 0,
     taxDigits: settings.taxDigits,
     labourRateDigits: settings.labourRateDigits,
@@ -420,20 +553,24 @@ async function resolveTx(
     interState,
   };
 
-  if (text(input.tcsCode) || num(input.tcsAmount)) {
-    throw new CreditNoteWriteValidationError(
-      'TCS is not supported on an E CRNT book: the desktop posts TCS to the ledger only for outward books',
-    );
-  }
-  if (text(input.tdsCode)) {
-    throw new CreditNoteWriteValidationError(
-      'TDS is not supported on an E CRNT book: the desktop posts the TDS ledger pair only for outward books',
-    );
+  const tcsCode = text(input.tcsCode);
+  const tdsCode = text(input.tdsCode);
+  if (!f.invoice) {
+    if (tcsCode || num(input.tcsAmount)) {
+      throw new EBillWriteValidationError(
+        'TCS is not supported on an E CRNT book: the desktop posts TCS to the ledger only for outward books',
+      );
+    }
+    if (tdsCode) {
+      throw new EBillWriteValidationError(
+        'TDS is not supported on an E CRNT book: the desktop posts the TDS ledger pair only for outward books',
+      );
+    }
   }
   if (!Array.isArray(input.lines) || input.lines.length === 0) {
-    throw new CreditNoteWriteValidationError('at least one credit-note line is required');
+    throw new EBillWriteValidationError(`at least one ${f.label} line is required`);
   }
-  if (input.lines.length > 500) throw new CreditNoteWriteValidationError('too many lines');
+  if (input.lines.length > 500) throw new EBillWriteValidationError('too many lines');
 
   const lines: ResolvedLine[] = [];
   const usedOldSrNos = new Set<number>();
@@ -444,8 +581,8 @@ async function resolveTx(
   for (const [index, raw] of input.lines.entries()) {
     const line = raw ?? {};
     if (text(line.tagNo) && text(line.tagNo).toUpperCase() !== 'N') {
-      throw new CreditNoteWriteValidationError(
-        `line ${index + 1}: tagged credit-note lines are not supported yet; leave the tag blank`,
+      throw new EBillWriteValidationError(
+        `line ${index + 1}: tagged ${f.label} lines are not supported yet; leave the tag blank`,
       );
     }
     for (const [key, label] of [
@@ -468,7 +605,7 @@ async function resolveTx(
     const item = itemCode ? await itemTx(tx, scope, itemCode) : null;
     const taxCode = line.taxCode === undefined ? '10' : text(line.taxCode);
     const tax = await lineTaxTx(tx, scope, party, taxCode);
-    const calc = calculateECreditNoteLine(
+    const calc = calculateEBillLine(
       {
         pcs: num(line.pcs),
         grossWt: num(line.grossWt),
@@ -487,25 +624,23 @@ async function resolveTx(
       },
       policy,
     );
-    if (!eCreditNoteLineIsSaved(itemCode, calc)) continue; // TR_SL_EBILL.cs 7614 skips the row
+    if (!eBillLineIsSaved(itemCode, calc)) continue; // TR_SL_EBILL.cs 7614 skips the row
     if (calc.netWt < 0) {
-      throw new CreditNoteWriteValidationError(
-        `line ${index + 1}: less weight exceeds gross weight`,
-      );
+      throw new EBillWriteValidationError(`line ${index + 1}: less weight exceeds gross weight`);
     }
     if (!item && !ledger) {
-      throw new CreditNoteWriteValidationError(
-        `line ${index + 1}: select an item (or a header ledger account for a non-item credit note)`,
+      throw new EBillWriteValidationError(
+        `line ${index + 1}: select an item (or a header ledger account for a non-item ${f.label})`,
       );
     }
     if (!ledger && !item!.saleAccount && calc.taxableAmount !== 0) {
-      throw new CreditNoteWriteValidationError(
-        `item ${item!.code} has no group sale account for the credit-note ledger row`,
+      throw new EBillWriteValidationError(
+        `item ${item!.code} has no group sale account for the ${f.label} ledger row`,
       );
     }
     // Ac_Tax.EInvoice_GST joins the component row (SR_NO 1/2/3); without it the tax is not reported.
     if (calc.taxAmount !== 0 && (interState ? !tax.igst : !tax.sgst || !tax.cgst)) {
-      throw new CreditNoteWriteValidationError(
+      throw new EBillWriteValidationError(
         `tax ${tax.code} has no ${interState ? 'IGST (SR_NO 3)' : 'SGST/CGST (SR_NO 1/2)'} component rows`,
       );
     }
@@ -532,17 +667,67 @@ async function resolveTx(
     });
   }
   if (!lines.length) {
-    throw new CreditNoteWriteValidationError('enter at least one line with a weight or an amount');
+    throw new EBillWriteValidationError('enter at least one line with a weight or an amount');
   }
 
   const chequeAmount = nonNegative(input.chequeAmount, 'cheque amount');
   const cardAmount = nonNegative(input.cardAmount, 'card amount');
   const cashAmount = nonNegative(input.cashAmount, 'cash amount');
   const kasarAmount = nonNegative(input.kasarAmount, 'kasar amount');
-  const bill = calculateECreditNoteBill(
-    lines.map((l) => l.calc),
-    { cash: cashAmount, cheque: chequeAmount, card: cardAmount, kasar: kasarAmount },
-  );
+  const tender = { cash: cashAmount, cheque: chequeAmount, card: cardAmount, kasar: kasarAmount };
+  const calcs = lines.map((l) => l.calc);
+  const gross = calculateEBillTotals(calcs, tender);
+
+  // TCS / TDS (BILL_TOTAL 9074-9138) — outward E INVOICE books only.
+  let tcs = { code: '', percent: 0, amount: 0, account: '', accountName: '' };
+  let tds = { code: '', percent: 0, account: '' };
+  if (f.invoice) {
+    const requested = tcsCode && tcsCode !== '00' ? await taxHeadTx(tx, scope, tcsCode) : null;
+    if (tcsCode && tcsCode !== '00' && !requested)
+      throw new EBillWriteValidationError(`TCS code not found: ${tcsCode}`);
+    const zeroHead = tcsCode === '00' ? await taxHeadTx(tx, scope, '00') : null;
+    const threshold = await taxHeadTx(tx, scope, '20');
+    let decided;
+    try {
+      decided = eInvoiceTcs({
+        creating,
+        netAmount: gross.netAmount,
+        igst: gross.igst,
+        cgst: gross.cgst,
+        sgst: gross.sgst,
+        priorDebits: creating ? await priorPartyDebitsTx(tx, scope, party.code) : 0,
+        requestedCode: tcsCode,
+        requestedPercent: requested?.percent ?? zeroHead?.percent ?? 0,
+        thresholdPercent: threshold ? threshold.percent : null,
+        typedAmount: nonNegative(input.tcsAmount, 'TCS amount'),
+      });
+    } catch (error) {
+      throw new EBillWriteValidationError((error as Error).message);
+    }
+    const head = decided.code === '20' ? threshold : decided.code === '00' ? zeroHead : requested;
+    if (decided.amount !== 0 && !head?.account) {
+      throw new EBillWriteValidationError(`TCS code ${decided.code} has no ledger account`);
+    }
+    tcs = {
+      code: decided.code,
+      percent: decided.percent,
+      amount: decided.amount,
+      account: head?.account ?? '',
+      accountName: head?.account ? await accountNameTx(tx, scope, head.account) : '',
+    };
+    if (tdsCode) {
+      const head2 = await taxHeadTx(tx, scope, tdsCode);
+      if (!head2) throw new EBillWriteValidationError(`TDS code not found: ${tdsCode}`);
+      if (head2.percent !== 0 && !head2.account)
+        throw new EBillWriteValidationError(`TDS code ${tdsCode} has no ledger account`);
+      tds = { code: head2.code, percent: head2.percent, account: head2.account };
+    }
+  }
+  const bill = calculateEBillTotals(calcs, {
+    ...tender,
+    tcsAmount: tcs.amount,
+    tdsPercent: tds.percent,
+  });
 
   // TR_SL_EBILL.cs 7366-7455, in desktop order.
   if (settings.behavior.cashLimit > 0 && party.code !== '00020') {
@@ -551,14 +736,14 @@ async function resolveTx(
       ? await partyCashReceivedTx(tx, scope, party.code, cashSlot.accountCode)
       : 0;
     if (money(bill.cash + prior) > settings.behavior.cashLimit) {
-      throw new CreditNoteWriteValidationError(
+      throw new EBillWriteValidationError(
         `Cash Recieved Limit Amount = ${settings.behavior.cashLimit} \r\nOld Ledr Value Is ${prior} \r\nAnd Total Cash Amount Is ${money(bill.cash + prior)} You Can Not Receive More Then Cash Limit ...`,
       );
     }
   }
   const employeeCode = text(input.employeeCode);
   if (settings.employeeMandatory && !employeeCode) {
-    throw new CreditNoteWriteValidationError('Please Select Employee Code and Try......');
+    throw new EBillWriteValidationError('Please Select Employee Code and Try......');
   }
   if (employeeCode) {
     const found: unknown[] = await tx.$queryRawUnsafe(
@@ -568,22 +753,22 @@ async function resolveTx(
       employeeCode,
     );
     if (found.length !== 1)
-      throw new CreditNoteWriteValidationError(`employee not found: ${employeeCode}`);
+      throw new EBillWriteValidationError(`employee not found: ${employeeCode}`);
   }
   const chequeAccount = text(input.chequeAccount);
   if (chequeAmount !== 0 && !chequeAccount) {
-    throw new CreditNoteWriteValidationError(
+    throw new EBillWriteValidationError(
       'Please Select Bank Account And Try Because Chq Rec Amt <> 0......',
     );
   }
   const cardAccount = text(input.cardAccount);
   if (cardAmount !== 0 && !cardAccount) {
-    throw new CreditNoteWriteValidationError(
+    throw new EBillWriteValidationError(
       'Please Select Card Bank Account And Try Because Card Amt <> 0......',
     );
   }
   if (creating && settings.companyType === 'B') {
-    throw new CreditNoteWriteValidationError(
+    throw new EBillWriteValidationError(
       'You Cant Save This Voucher Becouse This Company Type is B......',
     );
   }
@@ -591,34 +776,28 @@ async function resolveTx(
   if (cardAccount) await accountTx(tx, scope, cardAccount, 'card account');
   // 7496: the header is inserted only when MRP or pcs+gross+line net+kasar is non-zero.
   if (bill.mrpTotal === 0 && money(bill.pcs + bill.grossWt + bill.totalAmount + bill.kasar) === 0) {
-    throw new CreditNoteWriteValidationError('the credit note has no quantity or amount to save');
+    throw new EBillWriteValidationError(`the ${f.label} has no quantity or amount to save`);
   }
   if (bill.outstanding < 0) {
-    throw new CreditNoteWriteValidationError('payments exceed the credit-note total');
+    throw new EBillWriteValidationError(`payments exceed the ${f.label} total`);
   }
 
   requireSlot(book, 1, 'party control');
   const cashAccount = bill.cash !== 0 ? requireSlot(book, 2, 'cash').accountCode : '';
   const kasarAccount = bill.kasar !== 0 ? requireSlot(book, 3, 'kasar').accountCode : '';
-  const roundOffAccount = bill.roundOff !== 0 ? requireSlot(book, 4, 'round off').accountCode : '';
+  if (bill.roundOff !== 0) requireSlot(book, f.roundOffSlot, 'round off');
   let taxAccount = '';
   let taxAccountName = '';
   if (bill.taxAmount !== 0) {
     // EInvoice_Ledr/Rojmel row 03 always post to TAX_MAST code '10' SR_NO 0, whatever the line codes.
-    const taxRows: Row[] = await tx.$queryRawUnsafe(
-      `SELECT t."TAX_AC", a."AC_NAME" FROM "TAX_MAST" t
-         LEFT JOIN "AC_MAST" a ON a.tenant_id=t.tenant_id AND a."CO_CODE"=t."CO_CODE" AND a."AC_CODE"=t."TAX_AC"
-        WHERE t.tenant_id=$1 AND t."CO_CODE"=$2 AND t."TAX_CODE"='10' AND coalesce(t."SR_NO",0)=0 LIMIT 2`,
-      scope.tenantId,
-      scope.coCode,
-    );
-    if (taxRows.length !== 1 || !text(taxRows[0]!.TAX_AC)) {
-      throw new CreditNoteWriteValidationError(
-        'TAX_MAST code 10 (SR_NO 0) must name the GST ledger account used by E CRNT posting',
+    const head = await taxHeadTx(tx, scope, '10');
+    if (!head?.account) {
+      throw new EBillWriteValidationError(
+        `TAX_MAST code 10 (SR_NO 0) must name the GST ledger account used by ${book.family} posting`,
       );
     }
-    taxAccount = text(taxRows[0]!.TAX_AC);
-    taxAccountName = text(taxRows[0]!.AC_NAME);
+    taxAccount = head.account;
+    taxAccountName = await accountNameTx(tx, scope, head.account);
   }
   return {
     party,
@@ -628,13 +807,19 @@ async function resolveTx(
     gstType: party.gstType || 'L',
     lines,
     bill,
+    tcs: {
+      code: tcs.code,
+      percent: tcs.percent,
+      account: tcs.account,
+      accountName: tcs.accountName,
+    },
+    tds,
     chequeAccount,
     chequeNo: text(input.chequeNo).slice(0, 20),
     cardAccount,
     cardCommission: money(nonNegative(input.cardCommission, 'card commission')),
     cashAccount,
     kasarAccount,
-    roundOffAccount,
     taxAccount,
     taxAccountName,
   };
@@ -647,12 +832,7 @@ async function registrationTx(tx: any, scope: CompleteFinanceScope, voucherNo: s
             (SELECT max(length(btrim(coalesce(s."IRN_NO",'')))) FROM "SL_DATA" s WHERE s.tenant_id=$1
                AND s."CO_CODE"=$2 AND s."LC_CODE"=$3 AND s."CO_YEAR"=$4 AND s."CO_BOOK"=$5
                AND s."VCH_NO"=$6)::int AS irn_len`,
-    scope.tenantId,
-    scope.coCode,
-    scope.lcCode,
-    scope.coYear,
-    scope.coBook,
-    voucherNo,
+    ...keyArgs(scope, voucherNo),
   );
   return Number(rows[0]?.e_rows ?? 0) > 0 || Number(rows[0]?.irn_len ?? 0) > 10;
 }
@@ -663,14 +843,12 @@ async function revisionTx(
   scope: CompleteFinanceScope,
   voucherNo: string,
 ): Promise<string> {
-  const args = [scope.tenantId, scope.coCode, scope.lcCode, scope.coYear, scope.coBook, voucherNo];
-  const where = `tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`;
   const rows: Row[] = await tx.$queryRawUnsafe(
-    `SELECT coalesce((SELECT jsonb_agg(to_jsonb(a)-'tenant_id'-'row_id' ORDER BY row_id) FROM "SL_DATA" a WHERE ${where}),'[]')::text AS h,
-            coalesce((SELECT jsonb_agg(to_jsonb(a)-'tenant_id'-'row_id' ORDER BY "SR_NO",row_id) FROM "SL_DETL" a WHERE ${where}),'[]')::text AS d,
-            coalesce((SELECT jsonb_agg(to_jsonb(a)-'tenant_id'-'row_id' ORDER BY "SR_NO","ISR_NO",row_id) FROM "SL_IDTL" a WHERE ${where}),'[]')::text AS c,
-            (SELECT count(*) FROM "E_DATA" a WHERE ${where})::int AS e`,
-    ...args,
+    `SELECT coalesce((SELECT jsonb_agg(to_jsonb(a)-'tenant_id'-'row_id' ORDER BY row_id) FROM "SL_DATA" a WHERE ${keyWhere}),'[]')::text AS h,
+            coalesce((SELECT jsonb_agg(to_jsonb(a)-'tenant_id'-'row_id' ORDER BY "SR_NO",row_id) FROM "SL_DETL" a WHERE ${keyWhere}),'[]')::text AS d,
+            coalesce((SELECT jsonb_agg(to_jsonb(a)-'tenant_id'-'row_id' ORDER BY "SR_NO","ISR_NO",row_id) FROM "SL_IDTL" a WHERE ${keyWhere}),'[]')::text AS c,
+            (SELECT count(*) FROM "E_DATA" a WHERE ${keyWhere})::int AS e`,
+    ...keyArgs(scope, voucherNo),
   );
   const r = rows[0] ?? {};
   return createHash('sha256').update(`${r.h}|${r.d}|${r.c}|${r.e}`).digest('hex').slice(0, 32);
@@ -678,6 +856,7 @@ async function revisionTx(
 
 async function assertRevisionTx(
   tx: any,
+  book: EBook,
   scope: CompleteFinanceScope,
   voucherNo: string,
   expected: string | undefined,
@@ -685,8 +864,8 @@ async function assertRevisionTx(
   if (expected === undefined || expected === null || expected === '') return;
   const current = await revisionTx(tx, scope, voucherNo);
   if (current !== String(expected)) {
-    throw new CreditNoteConflictError(
-      `credit note ${voucherNo} was changed after it was opened; reopen it and try again`,
+    throw new EBillConflictError(
+      `${FAMILY[book.family].label} ${voucherNo} was changed after it was opened; reopen it and try again`,
     );
   }
 }
@@ -694,12 +873,14 @@ async function assertRevisionTx(
 async function writeTx(
   tx: any,
   scope: CompleteFinanceScope,
-  book: CreditBook,
+  book: EBook,
   identity: VoucherIdentity,
-  input: CreditNoteInput,
+  input: EBillEntryInput,
   r: Resolved,
   preservedChildren: Row[],
 ): Promise<void> {
+  const f = FAMILY[book.family];
+  const inv = f.invoice;
   const key = voucherKey(scope, identity.voucherNo);
   const date = identity.voucherDate;
   const time = identity.voucherTime;
@@ -707,6 +888,9 @@ async function writeTx(
   const billNo = text(input.billNo).slice(0, 20);
   const description = text(input.description).slice(0, 150);
   const b = r.bill;
+  /** The party side of a row: debit on an e-invoice, credit on a credit note (IIF(E INVOICE,..)). */
+  const partySide = (amount: number) => (inv ? { DR_AMT: amount } : { CR_AMT: amount });
+  const otherSide = (amount: number) => (inv ? { CR_AMT: amount } : { DR_AMT: amount });
 
   await insertHiddenIdentityTx(tx, scope, identity, book.configuredName);
   await insertRowTx(tx, 'SL_DATA', scope.tenantId, {
@@ -726,16 +910,16 @@ async function writeTx(
     IGST_TAX: b.igst,
     CGST_TAX: b.cgst,
     SGST_TAX: b.sgst,
-    TCS_CODE: '',
-    TCS_PRC: 0,
-    TCS_AMT: 0,
+    TCS_CODE: r.tcs.code,
+    TCS_PRC: r.tcs.percent,
+    TCS_AMT: b.tcsAmount,
     ROF_AMT: b.roundOff,
     LBR_AMT: b.labourAmount,
     OTH_AMT: b.otherAmount,
     TOT_AMT: b.totalAmount,
-    TDS_CODE: '',
-    TDS_PRC: 0,
-    TDS_AMT: 0,
+    TDS_CODE: r.tds.code,
+    TDS_PRC: r.tds.percent,
+    TDS_AMT: b.tdsAmount,
     CHQ_AMT: b.cheque,
     CARD_AMT: b.card,
     CARD_COM_AMT: r.cardCommission,
@@ -870,6 +1054,7 @@ async function writeTx(
   }
   // SL_IDTL: re-insert preserved children whose parent row (OLD_SRNO) survives (7715-7776).
   const parentByOld = new Map(r.lines.map((l) => [l.oldSrNo, l]));
+  const keptChildren: Row[] = [];
   for (const child of preservedChildren) {
     const parent = parentByOld.get(Number(child.SR_NO));
     if (!parent) continue;
@@ -878,17 +1063,19 @@ async function writeTx(
       row_id: _r,
       ...rest
     } = child as Row & { tenant_id?: unknown; row_id?: unknown };
-    await insertRowTx(tx, 'SL_IDTL', scope.tenantId, {
+    const row = {
       ...rest,
       ...common,
       SR_NO: parent.oldSrNo,
       TAG_NO: 'N',
       VCH_SRNO: 0,
       MAIN_USER: mainUser,
-    });
+    };
+    keptChildren.push({ ...row, parentItemCode: parent.itemCode });
+    await insertRowTx(tx, 'SL_IDTL', scope.tenantId, row);
   }
 
-  // ---- AC_DATA (Ac_Ledr.EInvoice_Ledr, E CRNT branch) ----
+  // ---- AC_DATA (Ac_Ledr.EInvoice_Ledr) ----
   const base = `${scope.coCode}${scope.lcCode}${scope.coYear}${scope.coBook}${identity.voucherNo}`;
   const slot1 = requireSlot(book, 1, 'party control');
   const ledgerRow = (suffix: string, slot: BookSlot | null, fields: Row) => ({
@@ -923,7 +1110,7 @@ async function writeTx(
       ledgerRow('01', slot1, {
         AC_CODE: r.party.code,
         LD_CODE: slot1.accountCode,
-        CR_AMT: b.totalAmount,
+        ...partySide(b.totalAmount),
         PARTY_AC_CODE: r.party.code,
         LDR_NAME: r.party.name,
       }),
@@ -936,13 +1123,43 @@ async function writeTx(
         BILL_NO: '',
         AC_CODE: r.ledger ? r.ledger.code : line.saleAccount,
         LD_CODE: r.party.code,
-        DR_AMT: line.calc.taxableAmount,
+        ...otherSide(line.calc.taxableAmount),
       }),
     );
   }
   if (b.taxAmount !== 0) {
     ledger.push(
-      ledgerRow('03', null, { AC_CODE: r.taxAccount, LD_CODE: r.party.code, DR_AMT: b.taxAmount }),
+      ledgerRow('03', null, {
+        AC_CODE: r.taxAccount,
+        LD_CODE: r.party.code,
+        ...otherSide(b.taxAmount),
+      }),
+    );
+  }
+  // 04/05/06 require BOOK_DATA.BOOK_INOUT = 'O' (only an E INVOICE book qualifies).
+  if (book.inout === 'O' && b.tcsAmount !== 0) {
+    ledger.push(
+      ledgerRow('04', null, {
+        AC_CODE: r.tcs.account,
+        LD_CODE: r.party.code,
+        ...otherSide(b.tcsAmount),
+      }),
+    );
+  }
+  if (book.inout === 'O' && b.tdsAmount !== 0) {
+    ledger.push(
+      ledgerRow('05', null, {
+        AC_CODE: r.party.code,
+        LD_CODE: r.tds.account,
+        ...otherSide(b.tdsAmount),
+      }),
+    );
+    ledger.push(
+      ledgerRow('06', null, {
+        AC_CODE: r.tds.account,
+        LD_CODE: r.party.code,
+        ...partySide(b.tdsAmount),
+      }),
     );
   }
   const pair = (
@@ -958,7 +1175,7 @@ async function writeTx(
       ledgerRow(first, slot, {
         AC_CODE: r.party.code,
         LD_CODE: contra,
-        DR_AMT: amount,
+        ...otherSide(amount),
         PARTY_AC_CODE: r.party.code,
       }),
     );
@@ -966,7 +1183,7 @@ async function writeTx(
       ledgerRow(second, slot, {
         AC_CODE: contra,
         LD_CODE: r.party.code,
-        CR_AMT: amount,
+        ...partySide(amount),
         LDR_NAME: secondName,
       }),
     );
@@ -976,22 +1193,25 @@ async function writeTx(
   if (b.cash) pair('11', '12', r.cashAccount, b.cash, requireSlot(book, 2, 'cash'), r.party.name);
   if (b.kasar) pair('13', '14', r.kasarAccount, b.kasar, requireSlot(book, 3, 'kasar'));
   if (b.roundOff !== 0) {
-    const slot4 = requireSlot(book, 4, 'round off');
-    // Desktop writes CR_AMT = ROF (negative) for a negative round-off, which unbalances the voucher;
-    // the web posts the absolute value (documented adaptation 1 in the X15 contract).
+    const slot = requireSlot(book, f.roundOffSlot, 'round off');
+    // The desktop writes the negative round-off itself into the column (DR for row 15, CR for row
+    // 16), which unbalances the voucher; the web posts the absolute value on that side (documented
+    // adaptations 1 and 7 in the X15 contract).
+    const positive = b.roundOff > 0 ? b.roundOff : 0;
+    const negative = b.roundOff < 0 ? -b.roundOff : 0;
     ledger.push(
-      ledgerRow('16', slot4, {
-        AC_CODE: r.roundOffAccount,
+      ledgerRow(f.roundOffSuffix, slot, {
+        AC_CODE: slot.accountCode,
         LD_CODE: r.party.code,
-        CR_AMT: b.roundOff < 0 ? -b.roundOff : 0,
-        DR_AMT: b.roundOff > 0 ? b.roundOff : 0,
+        CR_AMT: inv ? positive : negative,
+        DR_AMT: inv ? negative : positive,
       }),
     );
   }
   assertBalanced(ledger as any);
   for (const row of ledger) await insertRowTx(tx, 'AC_DATA', scope.tenantId, row);
 
-  // ---- ROJ_MEL_DATA (Ac_Rojmel.EInvoice_Rojmel, E CRNT branch) ----
+  // ---- ROJ_MEL_DATA (Ac_Rojmel.EInvoice_Rojmel) ----
   const rojmelRow = (suffix: string, slot: BookSlot, fields: Row) => ({
     ...key,
     LEDR_KEY: `${base}${suffix}`,
@@ -1031,7 +1251,7 @@ async function writeTx(
       rojmelRow(`01${sqlStr(line.srNo)}`, slot1, {
         AC_CODE: r.ledger ? r.ledger.code : line.saleAccount,
         LD_CODE: r.party.code,
-        DR_AMT: c.taxableAmount,
+        ...otherSide(c.taxableAmount),
         ITM_PCS: c.pcs,
         ITM_GWT: c.grossWt,
         ITM_NWT: c.netWt,
@@ -1051,7 +1271,7 @@ async function writeTx(
       rojmelRow('02', slot1, {
         AC_CODE: r.party.code,
         LD_CODE: slot1.accountCode,
-        CR_AMT: b.outstanding,
+        ...partySide(b.outstanding),
         AC_NAME: r.party.name,
       }),
     );
@@ -1061,21 +1281,49 @@ async function writeTx(
       rojmelRow('03', slot1, {
         AC_CODE: r.taxAccount,
         LD_CODE: r.party.code,
-        DR_AMT: b.taxAmount,
+        ...otherSide(b.taxAmount),
         AC_NAME: r.taxAccountName,
+      }),
+    );
+  }
+  if (b.tcsAmount !== 0) {
+    rojmel.push(
+      rojmelRow('04', slot1, {
+        AC_CODE: r.tcs.account,
+        LD_CODE: r.party.code,
+        ...otherSide(b.tcsAmount),
+        AC_NAME: r.tcs.accountName,
+      }),
+    );
+  }
+  if (b.tdsAmount !== 0) {
+    rojmel.push(
+      rojmelRow('05', slot1, {
+        AC_CODE: r.tds.account,
+        LD_CODE: r.party.code,
+        ...partySide(b.tdsAmount),
+        AC_NAME: `TDS - ${r.party.name}`.slice(0, 50),
       }),
     );
   }
   if (b.cheque) {
     rojmel.push(
-      rojmelRow('06', slot1, { AC_CODE: r.chequeAccount, LD_CODE: r.party.code, CR_AMT: b.cheque }),
+      rojmelRow('06', slot1, {
+        AC_CODE: r.chequeAccount,
+        LD_CODE: r.party.code,
+        ...partySide(b.cheque),
+      }),
     );
   }
   // 07 condition: CARD_ADJ = 'N' OR BOOK_DETL.BOOK_TYPE <> 'M'. SL_DATA.CARD_ADJ is saved as '0',
-  // so for E CRNT only the book type decides.
+  // so only the book type decides.
   if (b.card && slot1.bookType !== 'M') {
     rojmel.push(
-      rojmelRow('07', slot1, { AC_CODE: r.cardAccount, LD_CODE: r.party.code, CR_AMT: b.card }),
+      rojmelRow('07', slot1, {
+        AC_CODE: r.cardAccount,
+        LD_CODE: r.party.code,
+        ...partySide(b.card),
+      }),
     );
   }
   if (b.kasar) {
@@ -1084,14 +1332,35 @@ async function writeTx(
       rojmelRow('08', slot3, {
         AC_CODE: slot3.accountCode,
         LD_CODE: r.party.code,
-        CR_AMT: b.kasar,
+        ...partySide(b.kasar),
         AC_NAME: `KSR - ${r.party.name}`.slice(0, 50),
       }),
     );
   }
+  // 09 (slot 5) and 10 (slot 4) exist only for E INVOICE and keep the desktop's signed values.
+  if (inv && b.roundOff !== 0) {
+    for (const [suffix, srNo, positiveCr] of [
+      ['09', 5, true],
+      ['10', 4, false],
+    ] as const) {
+      const slot = book.slots.get(srNo);
+      if (!slot) continue;
+      const positive = b.roundOff > 0 ? b.roundOff : 0;
+      const negative = b.roundOff < 0 ? b.roundOff : 0;
+      rojmel.push(
+        rojmelRow(suffix, slot, {
+          AC_CODE: r.party.code,
+          LD_CODE: slot.accountCode,
+          CR_AMT: positiveCr ? positive : negative,
+          DR_AMT: positiveCr ? negative : positive,
+          AC_NAME: `ROF - ${r.party.name}`.slice(0, 50),
+        }),
+      );
+    }
+  }
   for (const row of rojmel) await insertRowTx(tx, 'ROJ_MEL_DATA', scope.tenantId, row);
 
-  // ---- MAIN_STOCK (Ac_Stock.EInvoice_Stk): E CRNT returns stock in ----
+  // ---- MAIN_STOCK (Ac_Stock.EInvoice_Stk) ----
   for (const line of r.lines) {
     const c = line.calc;
     await insertRowTx(tx, 'MAIN_STOCK', scope.tenantId, {
@@ -1107,8 +1376,8 @@ async function writeTx(
       TAG_NO: 'N',
       VCH_SRNO: 0,
       TBL_CODE: '',
-      TR_TYPE: 'I',
-      ITM_SIGN: '+',
+      TR_TYPE: f.stockType,
+      ITM_SIGN: f.stockSign,
       ITM_QTY: 1,
       ITM_PCS: c.pcs,
       ITM_GWT: c.grossWt,
@@ -1142,7 +1411,7 @@ async function writeTx(
     });
   }
 
-  // ---- TAX_DATA (Ac_Tax.EInvoice_GST, TAX_SIGN '-') ----
+  // ---- TAX_DATA (Ac_Tax.EInvoice_GST) ----
   for (const line of r.lines) {
     const c = line.calc;
     if (c.taxableAmount === 0) continue;
@@ -1160,7 +1429,7 @@ async function writeTx(
       TAX_AMT: amount,
       DISC_AMT: 0,
       TOT_AMT: c.netAmount,
-      TAX_SIGN: '-',
+      TAX_SIGN: f.taxSign,
       PARTY_NAME: r.party.name,
       R_CHARG: 'N',
       ISR_NO: line.srNo,
@@ -1181,24 +1450,83 @@ async function writeTx(
       await insertRowTx(tx, 'TAX_DATA', scope.tenantId, taxRow(line.srNo, c.igst, line.tax.igst));
     }
   }
+
+  // ---- DM_DATA (Ac_Stock.Dm_Sale_eInv_Detl): E INVOICE components marked OTH_DETL_POSTING ----
+  if (inv && keptChildren.length) {
+    const codes = [...new Set(keptChildren.map((c) => text(c.IT_CODE)).filter(Boolean))];
+    const posting: Row[] = codes.length
+      ? await tx.$queryRawUnsafe(
+          `SELECT "IT_CODE" FROM "ITEM_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2
+              AND "IT_CODE" = ANY($3::text[]) AND "OTH_DETL_POSTING"='Y'`,
+          scope.tenantId,
+          scope.coCode,
+          codes,
+        )
+      : [];
+    const postingCodes = new Set(posting.map((p) => text(p.IT_CODE)));
+    for (const child of keptChildren) {
+      if (!postingCodes.has(text(child.IT_CODE))) continue;
+      await insertRowTx(tx, 'DM_DATA', scope.tenantId, {
+        ...key,
+        MAIN_SRNO: 1,
+        SR_NO: child.SR_NO,
+        ISR_NO: child.ISR_NO,
+        VCH_DATE: date,
+        ENTRY_TYPE: 'S',
+        BOOK_NAME: book.shortName,
+        AC_CODE: r.party.code,
+        IT_CODE: child.IT_CODE,
+        DM_CODE: child.DM_CODE ?? null,
+        DM_ORIGIN: child.DM_ORIGIN ?? null,
+        DM_REMARK: child.DM_REMARK ?? null,
+        DM_SIZE: child.DM_SIZE ?? null,
+        DM_COLOR: child.DM_COLOR ?? null,
+        DM_LOT_NO: '',
+        DM_PCS: child.IT_PCS ?? 0,
+        DM_WT: child.IT_GWT ?? 0,
+        DM_SIGN: '-',
+        DM_RATE: child.IT_RATE ?? 0,
+        DM_AMT: child.IT_AMT ?? 0,
+        EMP_CODE: '',
+        TAG_NO: 'N',
+        VCH_SRNO: 0,
+        MAIN_IT_CODE: child.parentItemCode,
+        INOUT_TYPE: 'S',
+      });
+    }
+  }
+
+  // ---- REMARK_DATA (Ac_Tax.Vch_Remark mode 0) ----
+  if (description && book.tableName) {
+    await insertRowTx(tx, 'REMARK_DATA', scope.tenantId, {
+      ...key,
+      SR_NO: 0,
+      VCH_DATE: date,
+      AC_CODE: r.party.code,
+      AC_NAME: r.party.name,
+      MAIN_BOOK: book.mainBook,
+      VCH_REMARK: description,
+    });
+  }
 }
 
-export interface CreditNoteSaveResult {
+export interface EBillSaveResult {
   voucherNo: string;
   hiddenVoucherNo: string;
   created: boolean;
   lines: number;
-  totals: ECreditNoteBillResult;
+  totals: EBillTotals;
   revision: string;
 }
 
 async function saveTx(
   tx: any,
-  input: CreditNoteInput,
+  family: EBillFamily,
+  input: EBillEntryInput,
   requestedVoucherNo?: string,
-): Promise<CreditNoteSaveResult> {
+): Promise<EBillSaveResult> {
   const scope = completeFinanceScope(input.scope);
-  const book = await resolveBookTx(tx, scope);
+  const book = await resolveBookTx(tx, family, scope);
   const { date, iso } = businessDate(input.vchDate);
   await assertFiscalDateTx(tx, scope, iso);
   await assertPeriodOpen(tx, scope.tenantId, {
@@ -1220,21 +1548,15 @@ async function saveTx(
       scope,
       new Date(edited.persisted.VCH_DATE as any).toISOString().slice(0, 10),
     );
-    await assertRevisionTx(tx, scope, identity.voucherNo, input.expectedRevision);
+    await assertRevisionTx(tx, book, scope, identity.voucherNo, input.expectedRevision);
     if (await registrationTx(tx, scope, identity.voucherNo)) {
-      throw new CreditNoteWriteValidationError(
+      throw new EBillWriteValidationError(
         'You Cant Edit This Voucher Because Irn No Is Genrate..... (cancel the IRN first)',
       );
     }
     preservedChildren = await tx.$queryRawUnsafe(
-      `SELECT * FROM "SL_IDTL" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
-          AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO","ISR_NO",row_id`,
-      scope.tenantId,
-      scope.coCode,
-      scope.lcCode,
-      scope.coYear,
-      scope.coBook,
-      identity.voucherNo,
+      `SELECT * FROM "SL_IDTL" WHERE ${keyWhere} ORDER BY "SR_NO","ISR_NO",row_id`,
+      ...keyArgs(scope, identity.voucherNo),
     );
   } else {
     identity = await createIdentityTx(tx, scope, date, input.mainUser);
@@ -1254,18 +1576,20 @@ async function saveTx(
   };
 }
 
-export async function saveCreditNote(
+export async function saveEBill(
   prisma: any,
-  input: CreditNoteInput,
+  family: EBillFamily,
+  input: EBillEntryInput,
   requestedVoucherNo?: string,
-): Promise<CreditNoteSaveResult> {
+): Promise<EBillSaveResult> {
   return withTenant(prisma, input.scope.tenantId, (tx: any) =>
-    saveTx(tx, input, requestedVoucherNo),
+    saveTx(tx, family, input, requestedVoucherNo),
   );
 }
 
-export async function deleteCreditNote(
+export async function deleteEBill(
   prisma: any,
+  family: EBillFamily,
   scopeInput: VoucherScope,
   requestedVoucherNo: string,
   options: { deleteUser?: string; expectedRevision?: string } = {},
@@ -1273,7 +1597,7 @@ export async function deleteCreditNote(
   const scope = completeFinanceScope(scopeInput);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
   return withTenant(prisma, scope.tenantId, async (tx: any) => {
-    const book = await resolveBookTx(tx, scope);
+    const book = await resolveBookTx(tx, family, scope);
     const edited = await editIdentityTx(tx, {
       table: 'SL_DATA',
       scope,
@@ -1287,18 +1611,12 @@ export async function deleteCreditNote(
       scope,
       new Date(edited.persisted.VCH_DATE as any).toISOString().slice(0, 10),
     );
-    await assertRevisionTx(tx, scope, voucherNo, options.expectedRevision);
+    await assertRevisionTx(tx, book, scope, voucherNo, options.expectedRevision);
     if (await registrationTx(tx, scope, voucherNo)) {
-      throw new CreditNoteWriteValidationError(
+      throw new EBillWriteValidationError(
         'You Cant Delete This Voucher Because Irn No Is Genrate.....',
       );
     }
-    const names: Row[] = await tx.$queryRawUnsafe(
-      `SELECT "AC_NAME" FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "AC_CODE"=$3 LIMIT 1`,
-      scope.tenantId,
-      scope.coCode,
-      text(edited.persisted.AC_CODE),
-    );
     await insertDesktopDeleteAuditTx(tx, {
       scope,
       configuredBook: { name: book.configuredName.slice(0, 20), shortName: book.shortName },
@@ -1308,7 +1626,7 @@ export async function deleteCreditNote(
         {
           srNo: 0,
           acCode: edited.persisted.AC_CODE,
-          acName: names[0]?.AC_NAME ?? null,
+          acName: (await accountNameTx(tx, scope, text(edited.persisted.AC_CODE))) || null,
           valueDr: 0,
           valueCr: 0,
           fineType: 'A',
@@ -1318,14 +1636,15 @@ export async function deleteCreditNote(
         },
       ],
     });
-    await replaceWriteSetTx(tx, scope, voucherNo, edited.identity.hiddenVoucherNo, CREDIT_TABLES);
+    await replaceWriteSetTx(tx, scope, voucherNo, edited.identity.hiddenVoucherNo, DELETE_TABLES);
     return { deleted: true as const, voucherNo };
   });
 }
 
-/** Editable, camel-cased view of a saved credit note, with its revision and edit/delete locks. */
-export async function getCreditNoteEntry(
+/** Editable, camel-cased view of a saved voucher, with its revision and edit/delete locks. */
+export async function getEBillEntry(
   prisma: any,
+  family: EBillFamily,
   scopeInput: VoucherScope,
   requestedVoucherNo: string,
 ) {
@@ -1335,24 +1654,16 @@ export async function getCreditNoteEntry(
     prisma,
     scope.tenantId,
     async (tx: any) => {
-      await resolveBookTx(tx, scope);
-      const args = [
-        scope.tenantId,
-        scope.coCode,
-        scope.lcCode,
-        scope.coYear,
-        scope.coBook,
-        voucherNo,
-      ];
-      const where = `tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`;
+      await resolveBookTx(tx, family, scope);
+      const args = keyArgs(scope, voucherNo);
       const headers: Row[] = await tx.$queryRawUnsafe(
         `SELECT *, "VCH_DATE"::text AS "VCH_DAY", to_char("VCH_TIME",'HH24:MI:SS') AS "VCH_CLOCK"
-           FROM "SL_DATA" WHERE ${where}`,
+           FROM "SL_DATA" WHERE ${keyWhere}`,
         ...args,
       );
       if (!headers.length) return null;
       if (headers.length !== 1)
-        throw new CreditNoteWriteValidationError(`credit note is ambiguous: ${voucherNo}`);
+        throw new EBillWriteValidationError(`${FAMILY[family].label} is ambiguous: ${voucherNo}`);
       const h = headers[0]!;
       const lines: Row[] = await tx.$queryRawUnsafe(
         `SELECT d.*, coalesce(i."IT_NAME",'') AS "IT_NAME" FROM "SL_DETL" d
@@ -1362,11 +1673,16 @@ export async function getCreditNoteEntry(
         ...args,
       );
       const components: Row[] = await tx.$queryRawUnsafe(
-        `SELECT count(*)::int AS n FROM "SL_IDTL" WHERE ${where}`,
+        `SELECT count(*)::int AS n FROM "SL_IDTL" WHERE ${keyWhere}`,
         ...args,
       );
       const irnLocked = await registrationTx(tx, scope, voucherNo);
+      const registration: Row[] = await tx.$queryRawUnsafe(
+        `SELECT "IRN_NO","ACK_NO","ACK_DATE"::text AS "ACK_DATE" FROM "E_DATA" WHERE ${keyWhere}`,
+        ...args,
+      );
       return {
+        family,
         voucherNo,
         hiddenVoucherNo: text(h.HD_VCH_NO),
         vchDate: text(h.VCH_DAY).slice(0, 10),
@@ -1387,18 +1703,32 @@ export async function getCreditNoteEntry(
         cardAccount: text(h.CARD_AC),
         cardCommission: Number(h.CARD_COM_AMT ?? 0),
         kasarAmount: Number(h.KASAR_AMT ?? 0),
+        tcsCode: text(h.TCS_CODE),
+        tcsPercent: Number(h.TCS_PRC ?? 0),
+        tcsAmount: Number(h.TCS_AMT ?? 0),
+        tdsCode: text(h.TDS_CODE),
+        tdsPercent: Number(h.TDS_PRC ?? 0),
         totals: {
           netAmount: Number(h.NET_AMT ?? 0),
           igst: Number(h.IGST_TAX ?? 0),
           cgst: Number(h.CGST_TAX ?? 0),
           sgst: Number(h.SGST_TAX ?? 0),
           taxAmount: Number(h.TAX_AMT ?? 0),
+          tcsAmount: Number(h.TCS_AMT ?? 0),
+          tdsAmount: Number(h.TDS_AMT ?? 0),
           roundOff: Number(h.ROF_AMT ?? 0),
           totalAmount: Number(h.TOT_AMT ?? 0),
           outstanding: Number(h.BILL_OS ?? 0),
         },
         componentCount: Number(components[0]?.n ?? 0),
         irnLocked,
+        registration: registration[0]
+          ? {
+              irn: text(registration[0].IRN_NO),
+              ackNo: text(registration[0].ACK_NO),
+              ackDate: text(registration[0].ACK_DATE),
+            }
+          : null,
         revision: await revisionTx(tx, scope, voucherNo),
         lines: lines.map((l) => {
           const net = Number(l.ITM_NWT ?? 0);
@@ -1438,19 +1768,32 @@ export async function getCreditNoteEntry(
 }
 
 /** Everything the entry screen needs to calculate like the server: settings, slots and tax codes. */
-export async function getCreditNoteEntryConfig(prisma: any, scopeInput: VoucherScope) {
+export async function getEBillEntryConfig(
+  prisma: any,
+  family: EBillFamily,
+  scopeInput: VoucherScope,
+) {
   const scope = completeFinanceScope(scopeInput);
   return withTenant(prisma, scope.tenantId, async (tx: any) => {
-    const book = await resolveBookTx(tx, scope);
+    const book = await resolveBookTx(tx, family, scope);
     const settings = await companySettingsTx(tx, scope);
-    const taxCodes: Row[] = await tx.$queryRawUnsafe(
+    const heads: Row[] = await tx.$queryRawUnsafe(
       `SELECT "TAX_CODE","TAX_NAME","TAX_PRC" FROM "TAX_MAST"
-        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND coalesce("SR_NO",0)=0 AND "TAX_CODE" >= '10'
-        ORDER BY "TAX_CODE"`,
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND coalesce("SR_NO",0)=0 ORDER BY "TAX_CODE"`,
       scope.tenantId,
       scope.coCode,
     );
+    const list = (filter: (code: string) => boolean) =>
+      heads
+        .filter((t) => filter(text(t.TAX_CODE)))
+        .map((t) => ({
+          code: text(t.TAX_CODE),
+          name: text(t.TAX_NAME),
+          percent: Number(t.TAX_PRC ?? 0),
+        }));
+    const threshold = heads.find((t) => text(t.TAX_CODE) === '20');
     return {
+      family,
       book: {
         coBook: book.coBook,
         name: book.configuredName,
@@ -1467,35 +1810,57 @@ export async function getCreditNoteEntryConfig(prisma: any, scopeInput: VoucherS
       defaultTaxCode: '10',
       employeeMandatory: settings.employeeMandatory,
       cashLimit: settings.behavior.cashLimit,
-      taxCodes: taxCodes.map((t) => ({
-        code: text(t.TAX_CODE),
-        name: text(t.TAX_NAME),
-        percent: Number(t.TAX_PRC ?? 0),
-      })),
+      // Item GST help (TAX_CODE >= '10'); TCS help offers 20/00 and TDS help 25/00 (8826, 8892).
+      taxCodes: list((code) => code >= '10'),
+      tcsCodes: FAMILY[family].invoice ? list((code) => code === '20' || code === '00') : [],
+      tdsCodes: FAMILY[family].invoice ? list((code) => code === '25' || code === '00') : [],
+      tcsThresholdPercent:
+        FAMILY[family].invoice && threshold ? Number(threshold.TAX_PRC ?? 0) : null,
     };
   });
 }
 
-/** Scoped document data for the credit-note print (SalesBillA4Gst.RPT). */
-export async function creditNotePrintData(
+/** AcTcsAmt for the entry screen's live TCS preview; the server recomputes on save. */
+export async function eInvoiceTcsBasis(prisma: any, scopeInput: VoucherScope, partyCode: string) {
+  const scope = completeFinanceScope(scopeInput);
+  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+    await resolveBookTx(tx, 'E INVOICE', scope);
+    const party = await accountTx(tx, scope, partyCode, 'party account');
+    return { partyCode: party.code, priorDebits: await priorPartyDebitsTx(tx, scope, party.code) };
+  });
+}
+
+/** Refuse a second IRN before any provider call (BtnIrnGen_Click 9540-9545, 9712). */
+export async function assertEBillNotRegistered(
   prisma: any,
+  family: EBillFamily,
+  scopeInput: VoucherScope,
+  requestedVoucherNo: string,
+) {
+  const scope = completeFinanceScope(scopeInput);
+  const voucherNo = formatVoucherNo(requestedVoucherNo);
+  await withTenant(prisma, scope.tenantId, async (tx: any) => {
+    await resolveBookTx(tx, family, scope);
+    if (await registrationTx(tx, scope, voucherNo)) {
+      throw new EBillWriteValidationError('No Need to Generate eInvoice its Alrady Exciest ....');
+    }
+  });
+}
+
+/** Scoped document data for the voucher print (SalesBillA4Gst.RPT). */
+export async function eBillPrintData(
+  prisma: any,
+  family: EBillFamily,
   scopeInput: VoucherScope,
   requestedVoucherNo: string,
 ) {
   const scope = completeFinanceScope(scopeInput);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
   return withTenant(prisma, scope.tenantId, async (tx: any) => {
-    await resolveBookTx(tx, scope);
-    const args = [
-      scope.tenantId,
-      scope.coCode,
-      scope.lcCode,
-      scope.coYear,
-      scope.coBook,
-      voucherNo,
-    ];
+    await resolveBookTx(tx, family, scope);
+    const args = keyArgs(scope, voucherNo);
     const headers: Row[] = await tx.$queryRawUnsafe(
-      `SELECT *, "VCH_DATE"::text AS "VCH_DATE" FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
+      `SELECT *, "VCH_DATE"::text AS "VCH_DATE" FROM "SL_DATA" WHERE ${keyWhere}`,
       ...args,
     );
     if (headers.length !== 1) return null;

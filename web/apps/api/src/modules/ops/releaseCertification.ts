@@ -794,6 +794,7 @@ export const REQUIRED_REAL_BROWSER_JOURNEY_IDS: readonly string[] = Object.freez
   'design-book',
   'design-calculations',
   'design-repeat',
+  'e-invoice-entry',
   'generic-image-conflict',
   'image-conflict',
   'manufacturing-lot',

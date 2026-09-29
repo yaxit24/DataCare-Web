@@ -7,7 +7,7 @@ Private engineering repository for converting the DataCareNext Windows jewellery
 ## Start here
 
 1. **Current implementation status:** [parity-plan-2026-09-10/README.md](parity-plan-2026-09-10/README.md)
-2. **Latest implementation round (X15 E CRNT):** [parity-plan-2026-09-10/44-implementation-progress-x15-2026-09-29.md](parity-plan-2026-09-10/44-implementation-progress-x15-2026-09-29.md)
+2. **Latest implementation round (X15 E CRNT and E INVOICE):** [parity-plan-2026-09-10/44-implementation-progress-x15-2026-09-29.md](parity-plan-2026-09-10/44-implementation-progress-x15-2026-09-29.md)
 3. **Paused Round 15 continuation:** [parity-plan-2026-09-10/42-implementation-progress-round15.md](parity-plan-2026-09-10/42-implementation-progress-round15.md)
 4. **Full implementation plan:** [parity-plan-2026-09-10/02-implementation-plan.md](parity-plan-2026-09-10/02-implementation-plan.md)
 5. **Web handoff:** [web/docs/HANDOFF.md](web/docs/HANDOFF.md)

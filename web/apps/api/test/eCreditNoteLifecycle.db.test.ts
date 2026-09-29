@@ -1,12 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import {
-  deleteCreditNote,
-  getCreditNoteEntry,
-  getCreditNoteEntryConfig,
-  saveCreditNote,
-  type CreditNoteInput,
-} from '../src/modules/einvoice/creditNoteWriter.js';
+  deleteEBill,
+  getEBillEntry,
+  getEBillEntryConfig,
+  saveEBill,
+  type EBillEntryInput,
+} from '../src/modules/einvoice/eBillWriter.js';
 import { getCreditNote, listCreditNotes } from '../src/modules/einvoice/creditNote.js';
 import type { VoucherScope } from '../src/modules/vouchers/numbering.js';
 import { seedECreditNoteFixture } from './fixtures/eCreditNoteSeed.js';
@@ -78,7 +78,7 @@ const lineTwo = {
   labourRate: 100,
   taxCode: '10',
 };
-const input = (overrides: Partial<CreditNoteInput> = {}): CreditNoteInput => ({
+const input = (overrides: Partial<EBillEntryInput> = {}): EBillEntryInput => ({
   scope: scope(),
   vchDate: DAY,
   partyCode: 'CUST01',
@@ -114,7 +114,7 @@ databaseDescribe('X15 E CRNT lifecycle (TR_SL_EBILL E CRNT mode)', () => {
   });
 
   it('creates a credit note entirely through the writer with the desktop write set', async () => {
-    const saved = await saveCreditNote(runtime, input());
+    const saved = await saveEBill(runtime, 'E CRNT', input());
     expect(saved).toMatchObject({
       voucherNo: '00001',
       hiddenVoucherNo: '00001',
@@ -497,9 +497,23 @@ databaseDescribe('X15 E CRNT lifecycle (TR_SL_EBILL E CRNT mode)', () => {
       ),
     ).toEqual([{ VCH_NO: '00001', BOOK_NAME: 'E Credit Note' }]);
     expect(await query(`SELECT 1 FROM "DM_DATA" WHERE ${where()}`)).toEqual([]);
+    // Ac_Tax.Vch_Remark mode 0: the header narration is copied to REMARK_DATA.
+    expect(
+      await query(
+        `SELECT "SR_NO"::float AS "SR_NO","AC_CODE","AC_NAME","MAIN_BOOK","VCH_REMARK" FROM "REMARK_DATA" WHERE ${where()}`,
+      ),
+    ).toEqual([
+      {
+        SR_NO: 0,
+        AC_CODE: 'CUST01',
+        AC_NAME: 'Credit Customer',
+        MAIN_BOOK: 'E CRNT',
+        VCH_REMARK: 'rate difference',
+      },
+    ]);
 
     // Reopen through both readers.
-    const entry = await getCreditNoteEntry(runtime, scope(), '1');
+    const entry = await getEBillEntry(runtime, 'E CRNT', scope(), '1');
     expect(entry).toMatchObject({
       voucherNo: '00001',
       partyCode: 'CUST01',
@@ -535,9 +549,10 @@ databaseDescribe('X15 E CRNT lifecycle (TR_SL_EBILL E CRNT mode)', () => {
   });
 
   it('keeps the same voucher number in two E CRNT books independent', async () => {
-    await saveCreditNote(runtime, input());
-    const second = await saveCreditNote(
+    await saveEBill(runtime, 'E CRNT', input());
+    const second = await saveEBill(
       runtime,
+      'E CRNT',
       input({ scope: scope('147'), cashAmount: 0, lines: [lineTwo] }),
     );
     expect(second.voucherNo).toBe('00001');
@@ -550,13 +565,13 @@ databaseDescribe('X15 E CRNT lifecycle (TR_SL_EBILL E CRNT mode)', () => {
       ['146', 67933],
       ['147', 3815],
     ]);
-    await deleteCreditNote(runtime, scope('147'), '00001');
+    await deleteEBill(runtime, 'E CRNT', scope('147'), '00001');
     expect(await query(`SELECT 1 FROM "AC_DATA" WHERE ${where()}`)).toHaveLength(7);
   });
 
   it('edits in place, preserving identity and component rows, and refuses a stale revision', async () => {
-    await saveCreditNote(runtime, input());
-    const opened = await getCreditNoteEntry(runtime, scope(), '00001');
+    await saveEBill(runtime, 'E CRNT', input());
+    const opened = await getEBillEntry(runtime, 'E CRNT', scope(), '00001');
     const [before] = await query<{ VCH_TIME: Date; row_count: number }>(
       `SELECT "VCH_TIME" FROM "SL_DATA" WHERE ${where()}`,
     );
@@ -571,12 +586,13 @@ databaseDescribe('X15 E CRNT lifecycle (TR_SL_EBILL E CRNT mode)', () => {
       BOOK,
     );
     await expect(
-      saveCreditNote(runtime, input({ expectedRevision: opened!.revision }), '00001'),
-    ).rejects.toMatchObject({ name: 'CreditNoteConflictError' });
+      saveEBill(runtime, 'E CRNT', input({ expectedRevision: opened!.revision }), '00001'),
+    ).rejects.toMatchObject({ name: 'EBillConflictError' });
 
-    const reopened = await getCreditNoteEntry(runtime, scope(), '00001');
-    const edited = await saveCreditNote(
+    const reopened = await getEBillEntry(runtime, 'E CRNT', scope(), '00001');
+    const edited = await saveEBill(
       runtime,
+      'E CRNT',
       input({
         mainUser: 'someone-else',
         cashAmount: 0,
@@ -623,8 +639,9 @@ databaseDescribe('X15 E CRNT lifecycle (TR_SL_EBILL E CRNT mode)', () => {
   });
 
   it('balances a negative round-off by crediting its absolute value (documented adaptation)', async () => {
-    const saved = await saveCreditNote(
+    const saved = await saveEBill(
       runtime,
+      'E CRNT',
       input({
         cashAmount: 0,
         chequeAmount: 40,
@@ -668,8 +685,9 @@ databaseDescribe('X15 E CRNT lifecycle (TR_SL_EBILL E CRNT mode)', () => {
   });
 
   it('posts IGST for an inter-state party', async () => {
-    await saveCreditNote(
+    await saveEBill(
       runtime,
+      'E CRNT',
       input({
         partyCode: 'CUST02',
         cashAmount: 0,
@@ -707,7 +725,7 @@ databaseDescribe('X15 E CRNT lifecycle (TR_SL_EBILL E CRNT mode)', () => {
   });
 
   it('deletes with the desktop audit row and blocks edit/delete once an IRN exists', async () => {
-    await saveCreditNote(runtime, input());
+    await saveEBill(runtime, 'E CRNT', input());
     await exec(
       `INSERT INTO "E_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","IRN_NO","ACK_NO")
        VALUES ($1,$2,$3,$4,$5,'00001',$6,'123456789012')`,
@@ -718,12 +736,16 @@ databaseDescribe('X15 E CRNT lifecycle (TR_SL_EBILL E CRNT mode)', () => {
       BOOK,
       'x'.repeat(64),
     );
-    await expect(deleteCreditNote(runtime, scope(), '00001')).rejects.toThrow('Irn No Is Genrate');
-    await expect(saveCreditNote(runtime, input(), '00001')).rejects.toThrow('Irn No Is Genrate');
-    expect((await getCreditNoteEntry(runtime, scope(), '00001'))!.irnLocked).toBe(true);
+    await expect(deleteEBill(runtime, 'E CRNT', scope(), '00001')).rejects.toThrow(
+      'Irn No Is Genrate',
+    );
+    await expect(saveEBill(runtime, 'E CRNT', input(), '00001')).rejects.toThrow(
+      'Irn No Is Genrate',
+    );
+    expect((await getEBillEntry(runtime, 'E CRNT', scope(), '00001'))!.irnLocked).toBe(true);
     await exec(`DELETE FROM "E_DATA" WHERE tenant_id=$1`, TENANT);
 
-    await deleteCreditNote(runtime, scope(), '00001', { deleteUser: 'auditor' });
+    await deleteEBill(runtime, 'E CRNT', scope(), '00001', { deleteUser: 'auditor' });
     for (const table of [
       'SL_DATA',
       'SL_DETL',
@@ -765,22 +787,22 @@ databaseDescribe('X15 E CRNT lifecycle (TR_SL_EBILL E CRNT mode)', () => {
   });
 
   it('applies the desktop save validations and writes nothing on refusal', async () => {
-    const refusals: Array<[Partial<CreditNoteInput>, string]> = [
+    const refusals: Array<[Partial<EBillEntryInput>, string]> = [
       [{ partyCode: '' }, 'Please Insert Party and try'],
       [{ chequeAmount: 5 }, 'Please Select Bank Account'],
       [{ cardAmount: 5 }, 'Please Select Card Bank Account'],
       [{ tdsCode: 'TD' }, 'TDS is not supported'],
       [{ tcsCode: '20' }, 'TCS is not supported'],
-      [{ lines: [{ ...lineOne, tagNo: 'T0001' }] }, 'tagged credit-note lines'],
+      [{ lines: [{ ...lineOne, tagNo: 'T0001' }] }, 'tagged credit note lines'],
       [{ lines: [{ pcs: 0 }] }, 'enter at least one line'],
       [{ vchDate: '2026-01-01' }, 'outside fiscal year'],
       [{ cashAmount: 999999 }, 'payments exceed'],
     ];
     for (const [overrides, message] of refusals) {
-      await expect(saveCreditNote(runtime, input(overrides))).rejects.toThrow(message);
+      await expect(saveEBill(runtime, 'E CRNT', input(overrides))).rejects.toThrow(message);
     }
     await exec(`UPDATE "GROUP_MAST" SET "SALE_AC"='' WHERE tenant_id=$1`, TENANT);
-    await expect(saveCreditNote(runtime, input())).rejects.toThrow('no group sale account');
+    await expect(saveEBill(runtime, 'E CRNT', input())).rejects.toThrow('no group sale account');
     for (const table of [
       'SL_DATA',
       'SL_DETL',
@@ -797,20 +819,20 @@ databaseDescribe('X15 E CRNT lifecycle (TR_SL_EBILL E CRNT mode)', () => {
   it('refuses a new voucher for company type B and a missing mandatory employee', async () => {
     await wipe();
     await seed({ companyType: 'B', employeeMandatory: true });
-    await expect(saveCreditNote(runtime, input({ employeeCode: '' }))).rejects.toThrow(
+    await expect(saveEBill(runtime, 'E CRNT', input({ employeeCode: '' }))).rejects.toThrow(
       'Please Select Employee Code',
     );
-    await expect(saveCreditNote(runtime, input())).rejects.toThrow('Company Type is B');
+    await expect(saveEBill(runtime, 'E CRNT', input())).rejects.toThrow('Company Type is B');
   });
 
   it('exposes the calculation policy the entry screen needs', async () => {
-    const config = await getCreditNoteEntryConfig(runtime, scope());
+    const config = await getEBillEntryConfig(runtime, 'E CRNT', scope());
     expect(config).toMatchObject({
       policy: { amountDigits: 0, taxDigits: 2, labourRateDigits: 0, labourIncludesGhat: true },
       defaultLabourType: 'G',
       defaultTaxCode: '10',
       taxCodes: [{ code: '10', name: 'GST 3%', percent: 3 }],
     });
-    await expect(getCreditNoteEntryConfig(runtime, scope('999'))).rejects.toThrow('E CRNT');
+    await expect(getEBillEntryConfig(runtime, 'E CRNT', scope('999'))).rejects.toThrow('E CRNT');
   });
 });

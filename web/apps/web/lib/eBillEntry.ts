@@ -1,14 +1,20 @@
 import {
-  calculateECreditNoteBill,
-  calculateECreditNoteLine,
-  eCreditNoteLineIsSaved,
-  type ECreditNoteBillResult,
-  type ECreditNoteLineResult,
-  type ECreditNotePolicy,
+  calculateEBillLine,
+  calculateEBillTotals,
+  eBillLineIsSaved,
+  eInvoiceTcs,
+  type EBillLineResult,
+  type EBillPolicy,
+  type EBillTotals,
 } from '@datacare/core';
 
-/** E CRNT entry form state and the exact request the API writer accepts (card X15). */
-export type CreditNoteLineDraft = {
+/**
+ * TR_SL_EBILL entry form state (card X15) for both modes: E CRNT credit notes and E INVOICE
+ * e-invoices, and the exact request the API writer accepts.
+ */
+export type EBillFamily = 'E CRNT' | 'E INVOICE';
+
+export type EBillLineDraft = {
   oldSrNo?: number;
   itemCode: string;
   itemName: string;
@@ -33,7 +39,7 @@ export type CreditNoteLineDraft = {
   taxCode: string;
 };
 
-export type CreditNoteDraft = {
+export type EBillDraft = {
   vchDate: string;
   partyCode: string;
   partyName: string;
@@ -50,25 +56,36 @@ export type CreditNoteDraft = {
   cardAccount: string;
   cardCommission: number;
   kasarAmount: number;
-  lines: CreditNoteLineDraft[];
+  /** E INVOICE only. '' none. */
+  tdsCode: string;
+  /** E INVOICE only. '' automatic 50 lakh rule, '00' none, otherwise a picked code. */
+  tcsCode: string;
+  /** E INVOICE only: typed amount for a picked code below the threshold. */
+  tcsAmount: number;
+  lines: EBillLineDraft[];
 };
 
-export type CreditNoteEntryConfig = {
+type TaxHead = { code: string; name: string; percent: number };
+export type EBillEntryConfig = {
+  family?: EBillFamily;
   book: {
     coBook: string;
     name: string;
     shortName: string;
     slots: { srNo: number; accountCode: string }[];
   };
-  policy: Omit<ECreditNotePolicy, 'interState'>;
+  policy: Omit<EBillPolicy, 'interState'>;
   defaultLabourType: string;
   defaultTaxCode: string;
   employeeMandatory: boolean;
   cashLimit: number;
-  taxCodes: { code: string; name: string; percent: number }[];
+  taxCodes: TaxHead[];
+  tcsCodes?: TaxHead[];
+  tdsCodes?: TaxHead[];
+  tcsThresholdPercent?: number | null;
 };
 
-export type CreditNoteEntryView = {
+export type EBillEntryView = {
   voucherNo: string;
   hiddenVoucherNo: string;
   vchDate: string;
@@ -87,14 +104,14 @@ export type CreditNoteEntryView = {
   cardAccount: string;
   cardCommission: number;
   kasarAmount: number;
+  tcsCode?: string;
+  tcsAmount?: number;
+  tdsCode?: string;
   irnLocked: boolean;
   componentCount: number;
   revision: string;
-  lines: (Omit<CreditNoteLineDraft, 'itemName'> & {
-    itemName?: string;
-    srNo: number;
-    tagNo: string;
-  })[];
+  registration?: { irn: string; ackNo: string; ackDate: string } | null;
+  lines: (Omit<EBillLineDraft, 'itemName'> & { itemName?: string; srNo: number; tagNo: string })[];
 };
 
 export const RATE_TYPES = [
@@ -111,9 +128,9 @@ export const LABOUR_TYPES = [
 ] as const;
 
 /** TR_SL_EBILL CommPassAdd (4400-4418): a new row starts with 1 piece, the company labour basis and GST 10. */
-export function blankCreditNoteLine(
-  config?: Pick<CreditNoteEntryConfig, 'defaultLabourType' | 'defaultTaxCode'>,
-): CreditNoteLineDraft {
+export function blankEBillLine(
+  config?: Pick<EBillEntryConfig, 'defaultLabourType' | 'defaultTaxCode'>,
+): EBillLineDraft {
   return {
     itemCode: '',
     itemName: '',
@@ -139,10 +156,7 @@ export function blankCreditNoteLine(
   };
 }
 
-export function blankCreditNoteDraft(
-  today: string,
-  config?: CreditNoteEntryConfig,
-): CreditNoteDraft {
+export function blankEBillDraft(today: string, config?: EBillEntryConfig): EBillDraft {
   return {
     vchDate: today,
     partyCode: '',
@@ -160,11 +174,14 @@ export function blankCreditNoteDraft(
     cardAccount: '',
     cardCommission: 0,
     kasarAmount: 0,
-    lines: [blankCreditNoteLine(config)],
+    tdsCode: '',
+    tcsCode: '',
+    tcsAmount: 0,
+    lines: [blankEBillLine(config)],
   };
 }
 
-export function draftFromEntry(view: CreditNoteEntryView): CreditNoteDraft {
+export function draftFromEntry(view: EBillEntryView): EBillDraft {
   return {
     vchDate: view.vchDate,
     partyCode: view.partyCode,
@@ -182,6 +199,9 @@ export function draftFromEntry(view: CreditNoteEntryView): CreditNoteDraft {
     cardAccount: view.cardAccount,
     cardCommission: view.cardCommission,
     kasarAmount: view.kasarAmount,
+    tdsCode: view.tdsCode ?? '',
+    tcsCode: view.tcsCode ?? '',
+    tcsAmount: view.tcsAmount ?? 0,
     lines: view.lines.map(({ srNo: _srNo, tagNo: _tagNo, ...line }) => ({
       ...line,
       itemName: line.itemName ?? '',
@@ -189,42 +209,76 @@ export function draftFromEntry(view: CreditNoteEntryView): CreditNoteDraft {
   };
 }
 
-/** Live preview with the same core arithmetic the server uses; the server result is authoritative. */
-export function previewCreditNote(
-  draft: CreditNoteDraft,
-  config: CreditNoteEntryConfig | null,
-): { lines: (ECreditNoteLineResult & { saved: boolean })[]; bill: ECreditNoteBillResult } {
-  const policy: ECreditNotePolicy = {
+/**
+ * Live preview with the same core arithmetic the server uses; the server result is authoritative.
+ * `priorDebits` is the party's AcTcsAmt (GET /e-invoices/tcs-basis) and only matters for a new
+ * E INVOICE; `creating` selects the new-voucher threshold rule or the saved-voucher full base.
+ */
+export function previewEBill(
+  draft: EBillDraft,
+  config: EBillEntryConfig | null,
+  options: { family?: EBillFamily; creating?: boolean; priorDebits?: number } = {},
+): { lines: (EBillLineResult & { saved: boolean })[]; bill: EBillTotals } {
+  const family = options.family ?? config?.family ?? 'E CRNT';
+  const policy: EBillPolicy = {
     amountDigits: config?.policy.amountDigits ?? 0,
     taxDigits: config?.policy.taxDigits ?? 0,
     labourRateDigits: config?.policy.labourRateDigits ?? 0,
     labourIncludesGhat: config?.policy.labourIncludesGhat ?? true,
     interState: draft.partyGstType.trim().toUpperCase() === 'I',
   };
-  const percentOf = (code: string) =>
-    config?.taxCodes.find((t) => t.code === code.trim())?.percent ?? 0;
+  const percentOf = (list: TaxHead[] | undefined, code: string) =>
+    list?.find((t) => t.code === code.trim())?.percent ?? 0;
   const lines = draft.lines.map((line) => {
-    const calc = calculateECreditNoteLine(
-      { ...line, taxPercent: line.taxCode.trim() ? percentOf(line.taxCode) : 0 },
+    const calc = calculateEBillLine(
+      {
+        ...line,
+        taxPercent: line.taxCode.trim() ? percentOf(config?.taxCodes, line.taxCode) : 0,
+      },
       policy,
     );
-    return { ...calc, saved: eCreditNoteLineIsSaved(line.itemCode, calc) };
+    return { ...calc, saved: eBillLineIsSaved(line.itemCode, calc) };
   });
-  const bill = calculateECreditNoteBill(
-    lines.filter((l) => l.saved),
-    {
-      cash: draft.cashAmount,
-      cheque: draft.chequeAmount,
-      card: draft.cardAmount,
-      kasar: draft.kasarAmount,
-    },
-  );
-  return { lines, bill };
+  const saved = lines.filter((l) => l.saved);
+  const tender = {
+    cash: draft.cashAmount,
+    cheque: draft.chequeAmount,
+    card: draft.cardAmount,
+    kasar: draft.kasarAmount,
+  };
+  if (family !== 'E INVOICE') return { lines, bill: calculateEBillTotals(saved, tender) };
+  const gross = calculateEBillTotals(saved, tender);
+  let tcsAmount = 0;
+  try {
+    tcsAmount = eInvoiceTcs({
+      creating: options.creating ?? true,
+      netAmount: gross.netAmount,
+      igst: gross.igst,
+      cgst: gross.cgst,
+      sgst: gross.sgst,
+      priorDebits: options.priorDebits ?? 0,
+      requestedCode: draft.tcsCode,
+      requestedPercent: percentOf(config?.tcsCodes, draft.tcsCode),
+      thresholdPercent: config?.tcsThresholdPercent ?? null,
+      typedAmount: draft.tcsAmount,
+    }).amount;
+  } catch {
+    tcsAmount = 0; // the server reports the missing TAX_MAST code 20 on save
+  }
+  return {
+    lines,
+    bill: calculateEBillTotals(saved, {
+      ...tender,
+      tcsAmount,
+      tdsPercent: draft.tdsCode.trim() ? percentOf(config?.tdsCodes, draft.tdsCode) : 0,
+    }),
+  };
 }
 
-export function creditNoteRequest(
-  draft: CreditNoteDraft,
+export function eBillRequest(
+  draft: EBillDraft,
   coBook: string,
+  family: EBillFamily,
   expectedRevision?: string,
 ) {
   return {
@@ -243,6 +297,9 @@ export function creditNoteRequest(
     cardAccount: draft.cardAccount.trim(),
     cardCommission: draft.cardCommission,
     kasarAmount: draft.kasarAmount,
+    ...(family === 'E INVOICE'
+      ? { tdsCode: draft.tdsCode.trim(), tcsCode: draft.tcsCode.trim(), tcsAmount: draft.tcsAmount }
+      : {}),
     ...(expectedRevision ? { expectedRevision } : {}),
     lines: draft.lines.map(({ itemName: _itemName, ...line }) => ({
       ...line,

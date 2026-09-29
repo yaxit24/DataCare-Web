@@ -3249,7 +3249,7 @@
       ],
       "formReferencedInWeb": true,
       "state": "implemented-unverified",
-      "evidence": "apps/api/test/eCreditNoteLifecycle.db.test.ts; apps/api/test/eCreditNoteLifecycle.routes.db.test.ts; apps/web/test/credit-note-entry.journey.mjs; packages/core/test/eCreditNoteCalc.test.ts; apps/api/test/ecreditNoteIrn.db.test.ts; apps/api/test/einvoice.test.ts; apps/api/test/routePolicy.test.ts; apps/web/app/(app)/txn/e-crnt-note/page.tsx; desktop source MDI_FORM.cs CurBookHelp(\"E CRNT\"), TR_SL_EBILL BtnSave/BtnDelete/CommPassTotal/BILL_TOTAL, Ac_Ledr.EInvoice_Ledr, Ac_Rojmel.EInvoice_Rojmel, Ac_Stock.EInvoice_Stk, Ac_Tax.EInvoice_GST",
+      "evidence": "apps/api/test/eCreditNoteLifecycle.db.test.ts; apps/api/test/eCreditNoteLifecycle.routes.db.test.ts; apps/web/test/credit-note-entry.journey.mjs; packages/core/test/eBillCalc.test.ts; apps/api/test/ecreditNoteIrn.db.test.ts; apps/api/test/einvoice.test.ts; apps/api/test/routePolicy.test.ts; apps/web/app/(app)/txn/e-crnt-note/page.tsx; desktop source MDI_FORM.cs CurBookHelp(\"E CRNT\"), TR_SL_EBILL BtnSave/BtnDelete/CommPassTotal/BILL_TOTAL, Ac_Ledr.EInvoice_Ledr, Ac_Rojmel.EInvoice_Rojmel, Ac_Stock.EInvoice_Stk, Ac_Tax.EInvoice_GST",
       "note": "Implemented-unverified as of 2026-09-29 (X15 round): the page now creates, reopens, edits (with stale-revision refusal), deletes (DELETE_DATA audit), prints (ORIGINAL/DUPLICATE) and cancels the IRN of E CRNT vouchers, posting the source-derived SL_DATA/SL_DETL/SL_IDTL/TEMP_BOOK_DATA/AC_DATA/ROJ_MEL_DATA/MAIN_STOCK/TAX_DATA write set; IRN submission is retained. Documented web adaptations (negative round-off, IRN edit lock, TCS/TDS and tagged-line refusal) need business acceptance. See ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-x15/ecrnt-lifecycle-contract.md and X15 in ../parity-plan-2026-09-10/12-execution-addendum.md.",
       "webSurface": {
         "kind": "route",
@@ -3258,8 +3258,7 @@
       "sharedSurfaceWith": [],
       "availabilityState": "partial",
       "missingActions": [
-        "tagged-line stock return, TCS/TDS and amount-override (rate back-calculation) branches",
-        "REMARK_DATA Vch_Remark after save",
+        "tagged-line stock return, TCS/TDS (inward book) and amount-override (rate back-calculation) branches",
         "full LedrCash cross-year cash-limit aggregate",
         "independent desktop comparison of the write set and SalesBillA4Gst layout",
         "live GSP provider state (timeout/retry/cancel) and business acceptance of the documented adaptations"
@@ -3274,13 +3273,19 @@
       ],
       "formReferencedInWeb": true,
       "state": "implemented-unverified",
-      "evidence": null,
-      "note": "e-invoice IRN workflow.",
+      "evidence": "apps/api/test/eInvoiceLifecycle.db.test.ts; apps/api/test/eInvoiceLifecycle.routes.db.test.ts; apps/web/test/e-invoice-entry.journey.mjs; packages/core/test/eBillCalc.test.ts; apps/web/app/(app)/txn/e-invoice/page.tsx; desktop source MDI_FORM.cs CurBookHelp(\"E INVOICE\"), TR_SL_EBILL BILL_TOTAL TCS/TDS, Ac_Ledr.EInvoice_Ledr, Ac_Rojmel.EInvoice_Rojmel, Ac_Stock.EInvoice_Stk/Dm_Sale_eInv_Detl, Ac_Tax.EInvoice_GST/Vch_Remark",
+      "note": "Implemented-unverified as of 2026-09-29 (X15 continuation): Transaction/E Invoice now creates, reopens, edits (stale-revision refusal), deletes, prints and registers/cancels the IRN of outward E INVOICE vouchers with the 50 lakh TCS threshold, TDS, stock-out, output GST, DM_DATA and REMARK_DATA posting from TR_SL_EBILL. Negative round-off and the IRN edit lock are documented web adaptations. See ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-x15/ecrnt-lifecycle-contract.md.",
       "webSurface": {
         "kind": "route",
-        "surface": "POST /einvoice/irn"
+        "surface": "POST /e-invoices"
       },
-      "sharedSurfaceWith": []
+      "sharedSurfaceWith": [],
+      "availabilityState": "partial",
+      "missingActions": [
+        "tagged-line sale (BAR_DETL tag lookup and stock-out) and amount-override branches",
+        "independent desktop comparison of the write set, TCS threshold and EInvoice.RPT/SalesBillA4Gst layouts",
+        "live GSP provider state (timeout/retry/cancel) and business acceptance of the documented adaptations"
+      ]
     },
     {
       "tab": "Transaction",

@@ -261,6 +261,19 @@ route('Transaction/E CrntNote', [
   'POST /einvoice/credit-note/irn',
   'POST /e-credit-notes/:vchNo/irn/cancel',
 ]);
+route('Transaction/E Invoice', [
+  'GET /e-invoices',
+  'GET /e-invoices/entry-config',
+  'GET /e-invoices/tcs-basis',
+  'GET /e-invoices/:vchNo',
+  'GET /e-invoices/:vchNo/entry',
+  'GET /e-invoices/:vchNo/print',
+  'POST /e-invoices',
+  'PUT /e-invoices/:vchNo',
+  'DELETE /e-invoices/:vchNo',
+  'POST /e-invoices/:vchNo/irn',
+  'POST /e-invoices/:vchNo/irn/cancel',
+]);
 route('Sales/Order Cancel', [
   'POST /sales-orders/:vchNo/cancel-refund',
   'GET /sales-orders/:vchNo/adjustment',
@@ -783,6 +796,9 @@ const PRINT_ROUTES = new Set([
   'POST /einvoice/credit-note/irn',
   'POST /e-credit-notes/:vchNo/irn/cancel',
   'GET /e-credit-notes/:vchNo/print',
+  'POST /e-invoices/:vchNo/irn',
+  'POST /e-invoices/:vchNo/irn/cancel',
+  'GET /e-invoices/:vchNo/print',
   'GET /utilities/data-export/download',
   'GET /stock/tag-print/label',
   'POST /integrations/notify',

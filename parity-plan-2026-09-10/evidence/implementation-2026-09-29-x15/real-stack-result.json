@@ -1,6 +1,6 @@
 {
-  "startedAt": "2026-09-29T10:02:07.188Z",
-  "finishedAt": "2026-09-29T10:02:56.396Z",
+  "startedAt": "2026-09-29T11:26:09.340Z",
+  "finishedAt": "2026-09-29T11:27:00.711Z",
   "status": "passed",
   "database": "disposable localhost:55433 / app_user",
   "mockedRequests": 0,
@@ -17,6 +17,10 @@
     },
     {
       "journeyId": "credit-note-entry",
+      "status": "passed"
+    },
+    {
+      "journeyId": "e-invoice-entry",
       "status": "passed"
     },
     {
@@ -91,5 +95,17 @@
       "delete removes the write set and writes DELETE_DATA"
     ],
     "boundary": "Engineering evidence on a synthetic fixture; not an independent desktop comparison, live GSP or physical print acceptance"
+  },
+  "eInvoiceEntry": {
+    "checks": [
+      "create an outward e-invoice through the entry form",
+      "live TDS and Bill OS match the posted voucher",
+      "balanced AC_DATA with the TDS pair and stock-out MAIN_STOCK",
+      "IRN generation locks edit and delete",
+      "IRN cancel unlocks the voucher",
+      "fresh-page browse reopen hydrates TDS",
+      "delete removes the write set"
+    ],
+    "boundary": "Engineering evidence on a synthetic fixture with the fake-development IRN transport; not a live GSP, independent desktop or physical print acceptance"
   }
 }

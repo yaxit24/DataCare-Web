@@ -185,16 +185,20 @@ export * from './saleReturnOtherAmountReplay.js';
 export * from './saleReturnSaveGuards.js';
 export * from './saleReturnFinancialEffects.js';
 export {
-  calculateECreditNoteLine,
-  calculateECreditNoteBill,
-  eCreditNoteLineIsSaved,
-  eCreditNoteTaxDigits,
-  eCreditNoteLabourRateDigits,
-} from './eCreditNoteCalc.js';
+  calculateEBillLine,
+  calculateEBillTotals,
+  eBillLineIsSaved,
+  eBillTaxDigits,
+  eBillLabourRateDigits,
+  eInvoiceTcs,
+  E_INVOICE_TCS_THRESHOLD,
+} from './eBillCalc.js';
 export type {
-  ECreditNotePolicy,
-  ECreditNoteLineInput,
-  ECreditNoteLineResult,
-  ECreditNoteTender,
-  ECreditNoteBillResult,
-} from './eCreditNoteCalc.js';
+  EBillPolicy,
+  EBillLineInput,
+  EBillLineResult,
+  EBillTender,
+  EBillTotals,
+  EInvoiceTcs,
+  EInvoiceTcsInput,
+} from './eBillCalc.js';

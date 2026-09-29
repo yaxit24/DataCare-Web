@@ -2,7 +2,8 @@ import { Decimal } from 'decimal.js';
 import { round, roundHalfEven } from './money.js';
 
 /**
- * E CRNT (E Credit Note) line and bill arithmetic — TR_SL_EBILL.CommPassTotal / BILL_TOTAL.
+ * TR_SL_EBILL line and bill arithmetic for both of its modes — E CRNT (credit note) and E INVOICE
+ * (outward e-invoice). The form shares CommPassTotal / BILL_TOTAL; only posting direction differs.
  *
  * Source (unified/src/csharp/DataCareNext/TR_SL_EBILL.cs, sha256 in the X15 contract):
  *   weights / fine            5150-5275   Strings.Format "0.000"  → half-up (`round`)
@@ -12,22 +13,20 @@ import { round, roundHalfEven } from './money.js';
  *   taxable / taxable rate    5755-5830
  *   GST split                 5102, 5403, 5407  Math.Round(x, MsTaxRof)
  *   line net                  5431        Math.Round(txbl + taxes, 0)
- *   bill totals               9062-9178
+ *   bill totals, TCS, TDS     9062-9178
  *
  * Every Math.Round result is also displayed through Strings.Format "0.00", so a value rounded to more
  * than two places by a setting is then rounded half-up to two places, which is what the grid saves.
  *
  * Deliberate, documented limits of this profile (tracked as open X15 descendants):
  *   - operator overrides that back-compute a rate from a typed amount are not modelled;
- *   - TCS is not modelled (the E CRNT ledger only posts TCS for BOOK_INOUT='O' books, while the
- *     credit-note book is 'I', so a TCS amount would unbalance the desktop ledger);
  *   - the registration-specific DM035NPDM rounding branch is represented only through ALL_ROF_REMOVE.
  */
 
-export type ECreditNoteRateType = string; // 'P' pieces, '1' per 10 g, 'K' per kg, anything else per gram
-export type ECreditNoteLabourType = string; // 'P' pcs, 'N' net, 'K' kg (net+ghat), anything else gross
+export type EBillRateType = string; // 'P' pieces, '1' per 10 g, 'K' per kg, anything else per gram
+export type EBillLabourType = string; // 'P' pcs, 'N' net, 'K' kg (net+ghat), anything else gross
 
-export interface ECreditNotePolicy {
+export interface EBillPolicy {
   /** num5/digits: 0, or 2 when CO_SET.ALL_ROF_REMOVE = 'Y' (TR_SL_EBILL.cs 5123-5137). */
   amountDigits: 0 | 2;
   /** MsTaxRof from CO_SET.TAX_ROF (MS_OPNCOMP.cs 671/741-743). */
@@ -40,7 +39,7 @@ export interface ECreditNotePolicy {
   interState: boolean;
 }
 
-export interface ECreditNoteLineInput {
+export interface EBillLineInput {
   pcs?: number;
   grossWt?: number;
   lessWt?: number;
@@ -48,8 +47,8 @@ export interface ECreditNoteLineInput {
   touch?: number;
   westPercent?: number;
   rate?: number;
-  rateType?: ECreditNoteRateType;
-  labourType?: ECreditNoteLabourType;
+  rateType?: EBillRateType;
+  labourType?: EBillLabourType;
   labourRate?: number;
   labourPercent?: number;
   otherAmount?: number;
@@ -57,7 +56,7 @@ export interface ECreditNoteLineInput {
   taxPercent?: number;
 }
 
-export interface ECreditNoteLineResult {
+export interface EBillLineResult {
   pcs: number;
   grossWt: number;
   lessWt: number;
@@ -85,15 +84,17 @@ export interface ECreditNoteLineResult {
   netAmount: number;
 }
 
-export interface ECreditNoteTender {
+export interface EBillTender {
   cash?: number;
   cheque?: number;
   card?: number;
   kasar?: number;
   tdsPercent?: number;
+  /** TCS already decided by `eInvoiceTcs` (0 for E CRNT). */
+  tcsAmount?: number;
 }
 
-export interface ECreditNoteBillResult {
+export interface EBillTotals {
   netAmount: number;
   igst: number;
   cgst: number;
@@ -104,6 +105,7 @@ export interface ECreditNoteBillResult {
   totalAmount: number;
   roundOff: number;
   tdsAmount: number;
+  tcsAmount: number;
   cash: number;
   cheque: number;
   card: number;
@@ -117,17 +119,14 @@ export interface ECreditNoteBillResult {
 
 const n = (value: unknown): number => {
   const v = Number(value ?? 0);
-  if (!Number.isFinite(v)) throw new Error(`E CRNT calculation received a non-finite value`);
+  if (!Number.isFinite(v)) throw new Error(`E-bill calculation received a non-finite value`);
   return v;
 };
 const d = (value: number) => new Decimal(value);
 /** Math.Round(x, digits) displayed through Strings.Format "0.00". */
 const mathRound2 = (value: Decimal.Value, digits: number) => round(roundHalfEven(value, digits), 2);
 
-export function calculateECreditNoteLine(
-  input: ECreditNoteLineInput,
-  policy: ECreditNotePolicy,
-): ECreditNoteLineResult {
+export function calculateEBillLine(input: EBillLineInput, policy: EBillPolicy): EBillLineResult {
   const pcs = n(input.pcs);
   const grossWt = round(n(input.grossWt), 3);
   const lessWt = round(n(input.lessWt), 3);
@@ -254,7 +253,7 @@ export function calculateECreditNoteLine(
 }
 
 /** TR_SL_EBILL.cs 7614: a grid row is saved when it has an item with MRP, or any gross/labour/other/taxable value. */
-export function eCreditNoteLineIsSaved(itemCode: string, line: ECreditNoteLineResult): boolean {
+export function eBillLineIsSaved(itemCode: string, line: EBillLineResult): boolean {
   return (
     (String(itemCode ?? '').trim() !== '' && line.mrp !== 0) ||
     d(line.grossWt)
@@ -266,11 +265,11 @@ export function eCreditNoteLineIsSaved(itemCode: string, line: ECreditNoteLineRe
 }
 
 /** TR_SL_EBILL.cs MSG_TOT_FILL (4341) and BILL_TOTAL (9062-9178). */
-export function calculateECreditNoteBill(
-  lines: readonly ECreditNoteLineResult[],
-  tender: ECreditNoteTender = {},
-): ECreditNoteBillResult {
-  const sum = (pick: (line: ECreditNoteLineResult) => number, dp: number) =>
+export function calculateEBillTotals(
+  lines: readonly EBillLineResult[],
+  tender: EBillTender = {},
+): EBillTotals {
+  const sum = (pick: (line: EBillLineResult) => number, dp: number) =>
     round(
       lines.reduce((acc, line) => acc.plus(pick(line)), new Decimal(0)),
       dp,
@@ -281,7 +280,7 @@ export function calculateECreditNoteBill(
   const sgst = sum((l) => l.sgst, 2);
   const taxAmount = round(d(igst).plus(cgst).plus(sgst), 2);
   const lineNet = sum((l) => l.netAmount, 2);
-  const tcs = 0;
+  const tcs = round(n(tender.tcsAmount), 2);
   const totalAmount = round(d(lineNet).plus(tcs), 2);
   const roundOff = round(
     d(totalAmount).minus(d(netAmount).plus(tcs).plus(igst).plus(cgst).plus(sgst)),
@@ -311,6 +310,7 @@ export function calculateECreditNoteBill(
     totalAmount,
     roundOff,
     tdsAmount,
+    tcsAmount: tcs,
     cash,
     cheque,
     card,
@@ -324,7 +324,7 @@ export function calculateECreditNoteBill(
 }
 
 /** MS_OPNCOMP.cs 671/741-743: MsTaxRof = Math.Round(Val(TAX_ROF)); above 5 becomes 2. */
-export function eCreditNoteTaxDigits(raw: unknown): number {
+export function eBillTaxDigits(raw: unknown): number {
   const text = String(raw ?? '').trim();
   if (!text) return 0;
   const value = Number(text);
@@ -335,7 +335,7 @@ export function eCreditNoteTaxDigits(raw: unknown): number {
 }
 
 /** MS_OPNCOMP.cs 691/817-819: MsLbrRof = CInt(LBR_ROF); above 3 becomes 0. */
-export function eCreditNoteLabourRateDigits(raw: unknown): number {
+export function eBillLabourRateDigits(raw: unknown): number {
   const text = String(raw ?? '').trim();
   if (!text) return 0;
   const value = Number(text);
@@ -343,4 +343,78 @@ export function eCreditNoteLabourRateDigits(raw: unknown): number {
   const digits = roundHalfEven(value, 0);
   if (digits < 0) throw new Error(`CO_SET.LBR_ROF is negative: ${text}`);
   return digits > 3 ? 0 : digits;
+}
+
+/** TR_SL_EBILL BILL_TOTAL (9074-9127): the 50 lakh TCS threshold for a new voucher. */
+export const E_INVOICE_TCS_THRESHOLD = 5_000_000;
+
+export interface EInvoiceTcsInput {
+  /** New voucher (EntryMode "A"); a saved voucher recomputes on the full base. */
+  creating: boolean;
+  netAmount: number;
+  igst: number;
+  cgst: number;
+  sgst: number;
+  /** AcTcsAmt: the party's debits since the year opened (tAcCode_KeyDown 8417). */
+  priorDebits: number;
+  /** '' = automatic, '00' = no TCS, anything else = a code the operator picked. */
+  requestedCode: string;
+  /** TAX_PRC of the requested code (0 when none). */
+  requestedPercent: number;
+  /** TAX_PRC of TAX_MAST code 20, or null when the company has no code 20. */
+  thresholdPercent: number | null;
+  /** Amount typed by the operator for a picked code below the threshold. */
+  typedAmount: number;
+}
+
+export interface EInvoiceTcs {
+  code: string;
+  percent: number;
+  amount: number;
+  thresholdExceeded: boolean;
+}
+
+export function eInvoiceTcs(input: EInvoiceTcsInput): EInvoiceTcs {
+  const code = String(input.requestedCode ?? '').trim();
+  const base = d(n(input.netAmount)).plus(n(input.igst)).plus(n(input.cgst)).plus(n(input.sgst));
+  // The source compares AcTcsAmt + NET + IGST - CGST - SGST (sic) with the threshold.
+  const probe = d(n(input.priorDebits))
+    .plus(n(input.netAmount))
+    .plus(n(input.igst))
+    .minus(n(input.cgst))
+    .minus(n(input.sgst));
+  const thresholdExceeded = input.creating && probe.greaterThan(E_INVOICE_TCS_THRESHOLD);
+  if (code === '00')
+    return { code, percent: n(input.requestedPercent), amount: 0, thresholdExceeded };
+  if (!input.creating) {
+    const percent = n(input.requestedPercent);
+    const amount =
+      code && percent !== 0 && n(input.netAmount) !== 0
+        ? round(roundHalfEven(base.times(percent).div(100), 0), 2)
+        : 0;
+    return { code, percent: code ? percent : 0, amount, thresholdExceeded: false };
+  }
+  if (thresholdExceeded) {
+    if (input.thresholdPercent == null) {
+      throw new Error('TAX_MAST code 20 is required: the party has crossed the TCS threshold');
+    }
+    const percent = n(input.thresholdPercent);
+    const headroom = d(E_INVOICE_TCS_THRESHOLD).minus(n(input.priorDebits));
+    const taxable = headroom.greaterThan(0) ? base.minus(headroom) : base;
+    return {
+      code: '20',
+      percent,
+      amount: round(roundHalfEven(taxable.times(percent).div(100), 0), 2),
+      thresholdExceeded,
+    };
+  }
+  if (code) {
+    return {
+      code,
+      percent: n(input.requestedPercent),
+      amount: round(n(input.typedAmount), 2),
+      thresholdExceeded,
+    };
+  }
+  return { code: '', percent: 0, amount: 0, thresholdExceeded };
 }

@@ -1,22 +1,23 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { ApiError, del, get, getBlob, post, put } from '../../../../lib/api';
-import { LookupPicker } from '../../../../components/LookupPicker';
-import { useGridKeyboard } from '../../../../components/GridKeyboard';
+import { ApiError, del, get, getBlob, post, put } from '../lib/api';
+import { LookupPicker } from './LookupPicker';
+import { useGridKeyboard } from './GridKeyboard';
 import {
-  blankCreditNoteDraft,
-  blankCreditNoteLine,
-  creditNoteRequest,
+  blankEBillDraft,
+  blankEBillLine,
   draftFromEntry,
+  eBillRequest,
   LABOUR_TYPES,
-  previewCreditNote,
+  previewEBill,
   RATE_TYPES,
-  type CreditNoteDraft,
-  type CreditNoteEntryConfig,
-  type CreditNoteEntryView,
-  type CreditNoteLineDraft,
-} from '../../../../lib/creditNoteEntry';
+  type EBillDraft,
+  type EBillEntryConfig,
+  type EBillEntryView,
+  type EBillFamily,
+  type EBillLineDraft,
+} from '../lib/eBillEntry';
 
 type SaveResult = {
   voucherNo: string;
@@ -37,7 +38,7 @@ const errorText = (error: unknown) =>
       ? error.message
       : 'Request failed';
 
-const NUMERIC: Array<[keyof CreditNoteLineDraft, string, number]> = [
+const NUMERIC: Array<[keyof EBillLineDraft, string, number]> = [
   ['pcs', 'Pcs', 0],
   ['grossWt', 'Gross wt', 3],
   ['lessWt', 'Less wt', 3],
@@ -51,11 +52,35 @@ const NUMERIC: Array<[keyof CreditNoteLineDraft, string, number]> = [
   ['mrp', 'MRP', 2],
 ];
 
+const FAMILY_UI: Record<
+  EBillFamily,
+  { api: string; noun: string; Noun: string; region: string; book: string; ledgerNote: string }
+> = {
+  'E CRNT': {
+    api: '/e-credit-notes',
+    noun: 'credit note',
+    Noun: 'Credit note',
+    region: 'Credit note entry',
+    book: 'E CRNT',
+    ledgerNote: 'non-item credit',
+  },
+  'E INVOICE': {
+    api: '/e-invoices',
+    noun: 'e-invoice',
+    Noun: 'E-invoice',
+    region: 'E-invoice entry',
+    book: 'E INVOICE',
+    ledgerNote: 'non-item income',
+  },
+};
+
 /**
- * TR_SL_EBILL E CRNT entry: create, reopen, edit, delete and print a credit note. The browser
- * previews totals with the shared core arithmetic; the API recomputes and is authoritative.
+ * TR_SL_EBILL entry in either mode: create, reopen, edit, delete and print an E CRNT credit note or
+ * an E INVOICE e-invoice. The browser previews totals with the shared core arithmetic; the API
+ * recomputes and is authoritative.
  */
-export function CreditNoteEntry({
+export function EBillEntry({
+  family = 'E CRNT',
   coBook,
   coYear,
   scopeKey,
@@ -63,6 +88,7 @@ export function CreditNoteEntry({
   onSaved,
   onDeleted,
 }: {
+  family?: EBillFamily;
   coBook: string;
   coYear: string;
   scopeKey: string;
@@ -71,9 +97,12 @@ export function CreditNoteEntry({
   onSaved: (voucherNo: string) => void;
   onDeleted: () => void;
 }) {
-  const [config, setConfig] = useState<CreditNoteEntryConfig | null>(null);
-  const [draft, setDraft] = useState<CreditNoteDraft>(() => blankCreditNoteDraft(today()));
-  const [loaded, setLoaded] = useState<CreditNoteEntryView | null>(null);
+  const ui = FAMILY_UI[family];
+  const invoice = family === 'E INVOICE';
+  const [config, setConfig] = useState<EBillEntryConfig | null>(null);
+  const [draft, setDraft] = useState<EBillDraft>(() => blankEBillDraft(today()));
+  const [loaded, setLoaded] = useState<EBillEntryView | null>(null);
+  const [priorDebits, setPriorDebits] = useState(0);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const query = new URLSearchParams({ coBook, coYear }).toString();
@@ -84,11 +113,11 @@ export function CreditNoteEntry({
     setConfig(null);
     if (!coBook) return;
     let active = true;
-    get<CreditNoteEntryConfig>(`/e-credit-notes/entry-config?${query}`)
+    get<EBillEntryConfig>(`${ui.api}/entry-config?${query}`)
       .then((value) => {
         if (!active) return;
         setConfig(value);
-        setDraft(blankCreditNoteDraft(today(), value));
+        setDraft(blankEBillDraft(today(), value));
       })
       .catch((error) => active && setMessage(errorText(error)));
     return () => {
@@ -102,16 +131,19 @@ export function CreditNoteEntry({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editVoucherNo]);
 
-  const preview = useMemo(() => previewCreditNote(draft, config), [draft, config]);
+  const preview = useMemo(
+    () => previewEBill(draft, config, { family, creating: !loaded, priorDebits }),
+    [draft, config, family, loaded, priorDebits],
+  );
   const locked = Boolean(loaded?.irnLocked);
-  const set = (patch: Partial<CreditNoteDraft>) => setDraft((d) => ({ ...d, ...patch }));
-  const setLine = (index: number, patch: Partial<CreditNoteLineDraft>) =>
+  const set = (patch: Partial<EBillDraft>) => setDraft((d) => ({ ...d, ...patch }));
+  const setLine = (index: number, patch: Partial<EBillLineDraft>) =>
     setDraft((d) => ({
       ...d,
       lines: d.lines.map((l, i) => (i === index ? { ...l, ...patch } : l)),
     }));
   const addLine = () =>
-    setDraft((d) => ({ ...d, lines: [...d.lines, blankCreditNoteLine(config ?? undefined)] }));
+    setDraft((d) => ({ ...d, lines: [...d.lines, blankEBillLine(config ?? undefined)] }));
   const removeLine = (index: number) => {
     if (draft.lines.length === 1) return false;
     setDraft((d) => ({ ...d, lines: d.lines.filter((_, i) => i !== index) }));
@@ -138,19 +170,32 @@ export function CreditNoteEntry({
   }
   function reset() {
     setLoaded(null);
-    setDraft(blankCreditNoteDraft(today(), config ?? undefined));
+    setPriorDebits(0);
+    setDraft(blankEBillDraft(today(), config ?? undefined));
     setMessage('');
+  }
+  /** tAcCode_KeyDown 8417: the party's AcTcsAmt drives the new-voucher TCS threshold preview. */
+  async function loadTcsBasis(partyCode: string) {
+    if (!invoice || !partyCode.trim()) return setPriorDebits(0);
+    try {
+      const basis = await get<{ priorDebits: number }>(
+        `/e-invoices/tcs-basis?${query}&partyCode=${encodeURIComponent(partyCode.trim())}`,
+      );
+      setPriorDebits(Number(basis.priorDebits) || 0);
+    } catch {
+      setPriorDebits(0);
+    }
   }
   async function open(voucherNo: string) {
     await act(async () => {
-      const view = await get<CreditNoteEntryView>(
-        `/e-credit-notes/${encodeURIComponent(voucherNo)}/entry?${query}`,
+      const view = await get<EBillEntryView>(
+        `${ui.api}/${encodeURIComponent(voucherNo)}/entry?${query}`,
       );
       setLoaded(view);
       setDraft(draftFromEntry(view));
       if (view.irnLocked)
         setMessage(
-          'IRN is generated for this credit note: cancel the IRN before editing or deleting.',
+          `IRN is generated for this ${ui.noun}: cancel the IRN before editing or deleting.`,
         );
     });
   }
@@ -159,31 +204,28 @@ export function CreditNoteEntry({
     if (config?.employeeMandatory && !draft.employeeCode.trim())
       return setMessage('Please Select Employee Code and Try......');
     await act(async () => {
-      const body = creditNoteRequest(draft, coBook, loaded?.revision);
+      const body = eBillRequest(draft, coBook, family, loaded?.revision);
       const result = loaded
-        ? await put<SaveResult>(
-            `/e-credit-notes/${encodeURIComponent(loaded.voucherNo)}?${query}`,
-            body,
-          )
-        : await post<SaveResult>(`/e-credit-notes?${query}`, body);
-      const view = await get<CreditNoteEntryView>(
-        `/e-credit-notes/${encodeURIComponent(result.voucherNo)}/entry?${query}`,
+        ? await put<SaveResult>(`${ui.api}/${encodeURIComponent(loaded.voucherNo)}?${query}`, body)
+        : await post<SaveResult>(`${ui.api}?${query}`, body);
+      const view = await get<EBillEntryView>(
+        `${ui.api}/${encodeURIComponent(result.voucherNo)}/entry?${query}`,
       );
       setLoaded(view);
       setDraft(draftFromEntry(view));
-      setMessage(`${result.created ? 'Saved' : 'Updated'} credit note ${result.voucherNo}.`);
+      setMessage(`${result.created ? 'Saved' : 'Updated'} ${ui.noun} ${result.voucherNo}.`);
       onSaved(result.voucherNo);
     });
   }
   async function remove() {
     if (!loaded || !window.confirm('Are You Sure To Delete This Voucher now?')) return;
     await act(async () => {
-      await del(`/e-credit-notes/${encodeURIComponent(loaded.voucherNo)}?${query}`, {
+      await del(`${ui.api}/${encodeURIComponent(loaded.voucherNo)}?${query}`, {
         expectedRevision: loaded.revision,
       });
       const deleted = loaded.voucherNo;
       reset();
-      setMessage(`Delete Success. Credit note ${deleted} removed.`);
+      setMessage(`Delete Success. ${ui.Noun} ${deleted} removed.`);
       onDeleted();
     });
   }
@@ -191,7 +233,7 @@ export function CreditNoteEntry({
     if (!loaded) return;
     await act(async () => {
       const blob = await getBlob(
-        `/e-credit-notes/${encodeURIComponent(loaded.voucherNo)}/print?${query}&format=html${copy ? `&copy=${copy}` : ''}`,
+        `${ui.api}/${encodeURIComponent(loaded.voucherNo)}/print?${query}&format=html${copy ? `&copy=${copy}` : ''}`,
       );
       const url = URL.createObjectURL(blob);
       window.open(url, '_blank', 'noopener');
@@ -199,26 +241,43 @@ export function CreditNoteEntry({
     });
   }
   async function cancelIrn() {
-    if (!loaded || !window.confirm('Cancel the IRN registered for this credit note?')) return;
+    if (!loaded || !window.confirm(`Cancel the IRN registered for this ${ui.noun}?`)) return;
     await act(async () => {
-      await post(`/e-credit-notes/${encodeURIComponent(loaded.voucherNo)}/irn/cancel?${query}`, {
+      await post(`${ui.api}/${encodeURIComponent(loaded.voucherNo)}/irn/cancel?${query}`, {
         reason: '2',
-        remark: 'Cancelled from E CrntNote entry',
+        remark: `Cancelled from the ${family} entry`,
       });
       await open(loaded.voucherNo);
-      setMessage('IRN cancelled; the credit note can be edited again.');
+      setMessage(`IRN cancelled; the ${ui.noun} can be edited again.`);
+    });
+  }
+  /** BtnIrnGen_Click (E INVOICE page only; E CRNT keeps its saved-document IRN action). */
+  async function generateIrn() {
+    if (!loaded) return;
+    await act(async () => {
+      const result = await post<{ irn: string; mode: string }>(
+        `/e-invoices/${encodeURIComponent(loaded.voucherNo)}/irn?${query}`,
+        {},
+      );
+      const voucherNo = loaded.voucherNo;
+      await open(voucherNo);
+      setMessage(`IRN generated for e-invoice ${voucherNo} (${result.mode}).`);
     });
   }
 
   const b = preview.bill;
   return (
-    <section className="panel" aria-label="Credit note entry">
-      <h2>{loaded ? `Edit credit note ${loaded.voucherNo}` : 'New credit note'}</h2>
-      {!coBook && <p className="muted">Select an E CRNT book to enter a credit note.</p>}
+    <section className="panel" aria-label={ui.region}>
+      <h2>{loaded ? `Edit ${ui.noun} ${loaded.voucherNo}` : `New ${ui.noun}`}</h2>
+      {!coBook && (
+        <p className="muted">
+          Select an {ui.book} book to enter {invoice ? 'an' : 'a'} {ui.noun}.
+        </p>
+      )}
       <fieldset disabled={busy || !coBook || locked} style={{ border: 0, padding: 0 }}>
         <div className="row" style={{ flexWrap: 'wrap', gap: 12 }}>
           <div className="field">
-            <label htmlFor="crn-date">Credit note date</label>
+            <label htmlFor="crn-date">{ui.Noun} date</label>
             <input
               id="crn-date"
               type="date"
@@ -233,12 +292,13 @@ export function CreditNoteEntry({
               ariaLabel="Party account"
               value={draft.partyCode}
               onChange={(code) => set({ partyCode: code })}
-              onPick={(row) =>
+              onPick={(row) => {
                 set({
                   partyName: String(row.name ?? ''),
                   partyGstType: String(row.AC_GST_TYPE ?? ''),
-                })
-              }
+                });
+                if (!loaded) void loadTcsBasis(String(row.code ?? ''));
+              }}
             />
           </div>
           <div className="field">
@@ -266,7 +326,7 @@ export function CreditNoteEntry({
             />
           </div>
           <div className="field">
-            <label>Ledger (non-item credit)</label>
+            <label>Ledger ({ui.ledgerNote})</label>
             <LookupPicker
               entity="accounts"
               ariaLabel="Ledger account"
@@ -298,7 +358,7 @@ export function CreditNoteEntry({
         </p>
 
         <div style={{ overflowX: 'auto' }} onKeyDown={gridKeys}>
-          <table aria-label="Credit note lines">
+          <table aria-label={`${ui.Noun} lines`}>
             <thead>
               <tr>
                 <th>#</th>
@@ -328,7 +388,7 @@ export function CreditNoteEntry({
               {draft.lines.map((line, index) => {
                 const calc = preview.lines[index]!;
                 const numberCell = (
-                  key: keyof CreditNoteLineDraft,
+                  key: keyof EBillLineDraft,
                   label: string,
                   dp: number,
                   column: number,
@@ -344,7 +404,7 @@ export function CreditNoteEntry({
                       onChange={(e) =>
                         setLine(index, {
                           [key]: Number(e.target.value),
-                        } as Partial<CreditNoteLineDraft>)
+                        } as Partial<EBillLineDraft>)
                       }
                     />
                   </td>
@@ -457,7 +517,7 @@ export function CreditNoteEntry({
 
         <div className="row" style={{ flexWrap: 'wrap', gap: 12, marginTop: 12 }}>
           <div className="field">
-            <label htmlFor="crn-cash">Cash paid</label>
+            <label htmlFor="crn-cash">{invoice ? 'Cash received' : 'Cash paid'}</label>
             <input
               id="crn-cash"
               type="number"
@@ -525,15 +585,73 @@ export function CreditNoteEntry({
         </div>
       </fieldset>
 
-      <table aria-label="Credit note totals" style={{ marginTop: 12, maxWidth: 520 }}>
+      {invoice && (
+        <fieldset
+          disabled={busy || !coBook || locked}
+          className="row"
+          style={{ border: 0, padding: 0, gap: 12, flexWrap: 'wrap', marginTop: 12 }}
+        >
+          <div className="field">
+            <label htmlFor="crn-tcs">TCS</label>
+            <select
+              id="crn-tcs"
+              value={draft.tcsCode}
+              onChange={(e) => set({ tcsCode: e.target.value })}
+            >
+              <option value="">Automatic (50 lakh rule)</option>
+              {(config?.tcsCodes ?? []).map((t) => (
+                <option
+                  key={t.code}
+                  value={t.code}
+                >{`${t.code} · ${t.name || `${t.percent}%`}`}</option>
+              ))}
+            </select>
+          </div>
+          {!loaded && draft.tcsCode && draft.tcsCode !== '00' && (
+            <div className="field">
+              <label htmlFor="crn-tcs-amt">TCS amount (below threshold)</label>
+              <input
+                id="crn-tcs-amt"
+                type="number"
+                min={0}
+                value={draft.tcsAmount || ''}
+                onChange={(e) => set({ tcsAmount: Number(e.target.value) })}
+              />
+            </div>
+          )}
+          <div className="field">
+            <label htmlFor="crn-tds">TDS</label>
+            <select
+              id="crn-tds"
+              value={draft.tdsCode}
+              onChange={(e) => set({ tdsCode: e.target.value })}
+            >
+              <option value="">No TDS</option>
+              {(config?.tdsCodes ?? []).map((t) => (
+                <option
+                  key={t.code}
+                  value={t.code}
+                >{`${t.code} · ${t.name || `${t.percent}%`}`}</option>
+              ))}
+            </select>
+          </div>
+          <p className="muted" style={{ alignSelf: 'end' }}>
+            Party debits this year: {fmt(priorDebits)}
+          </p>
+        </fieldset>
+      )}
+
+      <table aria-label={`${ui.Noun} totals`} style={{ marginTop: 12, maxWidth: 520 }}>
         <tbody>
           {[
             ['Taxable amount', b.netAmount],
             ['IGST', b.igst],
             ['CGST', b.cgst],
             ['SGST', b.sgst],
+            ...(invoice ? [['TCS', b.tcsAmount]] : []),
             ['Round off', b.roundOff],
             ['Total', b.totalAmount],
+            ...(invoice ? [['TDS', b.tdsAmount]] : []),
             ['Cash / cheque / card / kasar', b.cash + b.cheque + b.card + b.kasar],
             ['Outstanding (Bill OS)', b.outstanding],
           ].map(([label, value]) => (
@@ -546,6 +664,12 @@ export function CreditNoteEntry({
           ))}
         </tbody>
       </table>
+      {loaded?.registration && (
+        <p className="muted">
+          IRN {loaded.registration.irn} · Ack {loaded.registration.ackNo}
+          {loaded.registration.ackDate ? ` · ${loaded.registration.ackDate}` : ''}
+        </p>
+      )}
       {loaded && loaded.componentCount > 0 && (
         <p className="muted">
           {loaded.componentCount} stone/component row(s) are kept with their parent line when you
@@ -559,10 +683,10 @@ export function CreditNoteEntry({
           disabled={busy || !coBook || locked}
           onClick={() => void save()}
         >
-          {loaded ? 'Update credit note' : 'Save credit note'}
+          {loaded ? `Update ${ui.noun}` : `Save ${ui.noun}`}
         </button>
         <button type="button" disabled={busy || !loaded || locked} onClick={() => void remove()}>
-          Delete credit note
+          Delete {ui.noun}
         </button>
         <button type="button" disabled={busy || !loaded} onClick={() => void print('O')}>
           Print original
@@ -570,13 +694,18 @@ export function CreditNoteEntry({
         <button type="button" disabled={busy || !loaded} onClick={() => void print('D')}>
           Print duplicate
         </button>
+        {invoice && loaded && !locked && (
+          <button type="button" disabled={busy} onClick={() => void generateIrn()}>
+            Generate IRN
+          </button>
+        )}
         {locked && (
           <button type="button" disabled={busy} onClick={() => void cancelIrn()}>
             Cancel IRN
           </button>
         )}
         <button type="button" disabled={busy} onClick={reset}>
-          New credit note
+          New {ui.noun}
         </button>
       </div>
       {message && (

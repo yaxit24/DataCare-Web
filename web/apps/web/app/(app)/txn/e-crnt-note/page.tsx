@@ -11,7 +11,7 @@ import {
   type CreditNoteDocument,
   type CreditNoteRow,
 } from '../../../../lib/creditNoteView';
-import { CreditNoteEntry } from './CreditNoteEntry';
+import { EBillEntry } from '../../../../components/EBillEntry';
 
 type Browse = { rows: CreditNoteRow[]; hasMore: boolean; offset: number; limit: number };
 type GspStatus = { mode: string; provider: string; configured: boolean };
@@ -296,7 +296,8 @@ export default function ECrntNotePage() {
           ))}
         </section>
       )}
-      <CreditNoteEntry
+      <EBillEntry
+        family="E CRNT"
         key={scopeKey}
         coBook={coBook}
         coYear={coYear}
