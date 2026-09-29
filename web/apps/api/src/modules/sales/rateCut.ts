@@ -524,7 +524,7 @@ export interface RateCutResult {
 // COMPUTE + LEG BUILD (pure, exported for unit tests)
 // ────────────────────────────────────────────────────────────────────────────
 
-export interface ComputedLine {
+export interface RateCutLineResult {
   netWt: number;
   ghtWt: number;
   fine: number;
@@ -553,7 +553,7 @@ export interface LineMath {
   side?: 'issue' | 'receive';
 }
 
-function fromWholesale(result: WholesaleLineResult, itType: 'G' | 'S'): ComputedLine {
+function fromWholesale(result: WholesaleLineResult, itType: 'G' | 'S'): RateCutLineResult {
   return {
     netWt: result.netWt,
     ghtWt: result.ghtWt,
@@ -575,7 +575,7 @@ export function computeLine(
   l: RateCutLine,
   voucherItType: 'G' | 'S',
   math: LineMath = {},
-): ComputedLine {
+): RateCutLineResult {
   const itType = l.itType ?? voucherItType;
   if (math.wholesale) {
     const input = {
@@ -655,7 +655,7 @@ export interface RateCutTotals {
   totalNet: number;
   totalTax: number;
   rate: number; // representative FINE_RATE for the metal leg (first line; single-rate is the common case)
-  computed: ComputedLine[];
+  computed: RateCutLineResult[];
 }
 
 /** Aggregate the computed lines into the voucher totals used by the ledger + header. */
@@ -671,7 +671,8 @@ export function rollup(
   math: LineMath = {},
 ): RateCutTotals {
   const computed = lines.map((l) => computeLine(l, voucherItType, math));
-  const sum = (f: (c: ComputedLine) => number): number => computed.reduce((s, c) => s + f(c), 0);
+  const sum = (f: (c: RateCutLineResult) => number): number =>
+    computed.reduce((s, c) => s + f(c), 0);
   // Metal leg FINE_RATE: the per-voucher rate. Common case = one rate; first line is representative. When no
   // line carries one, the voucher's own rate is used — see `RateCutInput.fineRate`.
   const rate = (computed.length ? computed[0]!.rate : 0) || num(voucherFineRate);
