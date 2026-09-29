@@ -184,3 +184,21 @@ export * from './saleReturnEffectContext.js';
 export * from './saleReturnOtherAmountReplay.js';
 export * from './saleReturnSaveGuards.js';
 export * from './saleReturnFinancialEffects.js';
+export {
+  calculateEBillLine,
+  calculateEBillTotals,
+  eBillLineIsSaved,
+  eBillTaxDigits,
+  eBillLabourRateDigits,
+  eInvoiceTcs,
+  E_INVOICE_TCS_THRESHOLD,
+} from './eBillCalc.js';
+export type {
+  EBillPolicy,
+  EBillLineInput,
+  EBillLineResult,
+  EBillTender,
+  EBillTotals,
+  EInvoiceTcs,
+  EInvoiceTcsInput,
+} from './eBillCalc.js';

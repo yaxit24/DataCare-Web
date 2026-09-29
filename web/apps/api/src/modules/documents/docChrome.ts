@@ -202,7 +202,12 @@ export function gstBillBody(header: any, lines: any[]): string {
   const hsn: Record<string, { taxable: number; cgst: number; sgst: number; igst: number }> = {};
   const rows = lines
     .map((l, i) => {
-      const taxable = num(l.ITM_AMT) + num(l.LBR_AMT) + num(l.GHT_AMT) + num(l.HM_AMT);
+      // A caller may supply the persisted taxable value (E CRNT stores it in SL_DETL.NET_AMT, which
+      // also includes other charges and MRP pricing); otherwise it is derived as before.
+      const taxable =
+        l.PRINT_TAXABLE != null
+          ? num(l.PRINT_TAXABLE)
+          : num(l.ITM_AMT) + num(l.LBR_AMT) + num(l.GHT_AMT) + num(l.HM_AMT);
       sPcs += num(l.ITM_PCS);
       sGwt += num(l.ITM_GWT);
       sNwt += num(l.ITM_NWT);

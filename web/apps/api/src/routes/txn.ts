@@ -183,7 +183,22 @@ import {
   listDesignBook,
   saveDesignBook,
 } from '../modules/masters/designBook.js';
-import { getCreditNote, listCreditNotes } from '../modules/einvoice/creditNote.js';
+import {
+  getCreditNote,
+  getEInvoice,
+  listCreditNotes,
+  listEInvoices,
+} from '../modules/einvoice/creditNote.js';
+import {
+  assertEBillNotRegistered,
+  deleteEBill,
+  eBillPrintData,
+  eInvoiceTcsBasis,
+  getEBillEntry,
+  getEBillEntryConfig,
+  saveEBill,
+  type EBillFamily,
+} from '../modules/einvoice/eBillWriter.js';
 import {
   deleteDiamondSizes,
   deleteItemStockLimits,
@@ -719,7 +734,11 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         return reply.code(422).send({ error: e.name, code: e.code, message: e.message });
       if (e instanceof OrderImageError)
         return reply.code(422).send({ error: e.name, code: e.code, message: e.message });
-      if (n === 'DesignBookConflictError' || n === 'SalesOrderConflictError') {
+      if (
+        n === 'DesignBookConflictError' ||
+        n === 'SalesOrderConflictError' ||
+        n === 'EBillConflictError'
+      ) {
         return reply.code(409).send({ error: n, message: e?.message });
       }
       if (n === 'PeriodLockValidationError') metrics.recordPeriodLockRejection();
@@ -7554,6 +7573,190 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     });
   });
   app.get('/e-credit-notes/provider', auth, async () => gspStatus());
+  // ---- TR_SL_EBILL entry lifecycle: E CRNT (/e-credit-notes) and E INVOICE (/e-invoices), card X15 ----
+  const eBillInput = (req: FastifyRequest, b: Record<string, any>) => ({
+    scope: scopeOf(req),
+    vchDate: b.vchDate,
+    partyCode: b.partyCode,
+    billNo: b.billNo,
+    ledgerCode: b.ledgerCode,
+    employeeCode: b.employeeCode,
+    description: b.description,
+    cashAmount: b.cashAmount,
+    chequeAmount: b.chequeAmount,
+    chequeAccount: b.chequeAccount,
+    chequeNo: b.chequeNo,
+    cardAmount: b.cardAmount,
+    cardAccount: b.cardAccount,
+    cardCommission: b.cardCommission,
+    kasarAmount: b.kasarAmount,
+    tdsCode: b.tdsCode,
+    tcsCode: b.tcsCode,
+    tcsAmount: b.tcsAmount,
+    lines: Array.isArray(b.lines) ? b.lines : [],
+    mainUser: sess(req).sub,
+    expectedRevision: b.expectedRevision,
+  });
+  // TR_SL_EBILL BtnPrint_Click prints "ORIGINAL FOR RECIPIENT" and/or "DUPLICATE FOR SUPPLIER".
+  const EBILL_COPIES: Record<string, string> = {
+    O: 'ORIGINAL FOR RECIPIENT',
+    D: 'DUPLICATE FOR SUPPLIER',
+  };
+  const eBillHandlers = (family: EBillFamily, title: string, file: string) => ({
+    entryConfig: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'view')) return;
+      return run(reply, 200, () => getEBillEntryConfig(prisma, family, scopeOf(req)));
+    },
+    entry: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'view')) return;
+      const vchNo = String((req.params as any).vchNo);
+      const notFound = Symbol('not-found');
+      const outcome = await run(reply, 200, async () => {
+        const result = await getEBillEntry(prisma, family, scopeOf(req), vchNo);
+        if (!result) throw notFound;
+        return result;
+      }).catch((error: unknown) => {
+        if (error === notFound) return reply.code(404).send({ error: 'voucher-not-found' });
+        throw error;
+      });
+      return outcome;
+    },
+    create: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'create')) return;
+      return run(reply, 201, () => saveEBill(prisma, family, eBillInput(req, body(req))));
+    },
+    update: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'update')) return;
+      return run(reply, 200, () =>
+        saveEBill(prisma, family, eBillInput(req, body(req)), String((req.params as any).vchNo)),
+      );
+    },
+    remove: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'delete')) return;
+      const q = (req.query ?? {}) as Record<string, string | undefined>;
+      const b = body(req);
+      return run(reply, 200, () =>
+        deleteEBill(prisma, family, scopeOf(req), String((req.params as any).vchNo), {
+          deleteUser: sess(req).sub,
+          expectedRevision: b.expectedRevision ?? q.expectedRevision,
+        }),
+      );
+    },
+    print: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'print')) return;
+      const q = req.query as any;
+      if (q.copy != null && q.copy !== '' && !EBILL_COPIES[String(q.copy)])
+        return reply.code(400).send({ error: 'invalid-copy', message: 'copy must be O or D' });
+      let data: Awaited<ReturnType<typeof eBillPrintData>> | undefined;
+      try {
+        data = await eBillPrintData(
+          prisma,
+          family,
+          scopeOf(req),
+          String((req.params as any).vchNo),
+        );
+      } catch (error: any) {
+        if (/ValidationError|NumberingConfigurationError/.test(error?.name ?? ''))
+          return reply.code(400).send({ error: error.name, message: error.message });
+        throw error;
+      }
+      if (!data) return reply.code(404).send({ error: 'voucher-not-found' });
+      const html = invoiceHtml(data.header, data.lines, {
+        company: data.company,
+        party: data.party,
+        title,
+        copy: q.copy ? EBILL_COPIES[String(q.copy)] : undefined,
+      });
+      if (q.format === 'html') return reply.type('text/html').send(html);
+      let pdf: Buffer;
+      try {
+        pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
+      } catch {
+        return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
+      }
+      return reply
+        .header('content-type', 'application/pdf')
+        .header(
+          'content-disposition',
+          `inline; filename="${file}-${String((req.params as any).vchNo).replace(/[^\w.-]/g, '')}.pdf"`,
+        )
+        .send(pdf);
+    },
+    cancelIrn: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'print')) return;
+      const b = body(req);
+      const scope = scopeOf(req);
+      return run(reply, 200, () =>
+        cancelIrnForSale(prisma, scope as any, {
+          coBook: String(scope.coBook ?? ''),
+          vchNo: (req.params as any).vchNo,
+          reason: b.reason,
+          remark: b.remark,
+          expectedMainBook: family,
+        }),
+      );
+    },
+  });
+  const crnt = eBillHandlers('E CRNT', 'Credit Note', 'ecrnt');
+  const inv = eBillHandlers('E INVOICE', 'Tax Invoice', 'einvoice');
+  app.get('/e-credit-notes/entry-config', auth, crnt.entryConfig);
+  app.get('/e-credit-notes/:vchNo/entry', auth, crnt.entry);
+  app.post('/e-credit-notes', auth, crnt.create);
+  app.put('/e-credit-notes/:vchNo', auth, crnt.update);
+  app.delete('/e-credit-notes/:vchNo', auth, crnt.remove);
+  app.get('/e-credit-notes/:vchNo/print', auth, crnt.print);
+  app.post('/e-credit-notes/:vchNo/irn/cancel', auth, crnt.cancelIrn);
+  app.get('/e-invoices/entry-config', auth, inv.entryConfig);
+  app.get('/e-invoices/:vchNo/entry', auth, inv.entry);
+  app.post('/e-invoices', auth, inv.create);
+  app.put('/e-invoices/:vchNo', auth, inv.update);
+  app.delete('/e-invoices/:vchNo', auth, inv.remove);
+  app.get('/e-invoices/:vchNo/print', auth, inv.print);
+  app.post('/e-invoices/:vchNo/irn/cancel', auth, inv.cancelIrn);
+  app.get('/e-invoices', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const q = req.query as any;
+    return run(reply, 200, () =>
+      listEInvoices(prisma, scopeOf(req), {
+        search: q.search,
+        offset: q.offset == null ? undefined : Number(q.offset),
+        limit: q.limit == null ? undefined : Number(q.limit),
+      }),
+    );
+  });
+  app.get('/e-invoices/tcs-basis', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const q = req.query as any;
+    return run(reply, 200, () => eInvoiceTcsBasis(prisma, scopeOf(req), String(q.partyCode ?? '')));
+  });
+  app.get('/e-invoices/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const notFound = Symbol('not-found');
+    const outcome = await run(reply, 200, async () => {
+      const result = await getEInvoice(prisma, scopeOf(req), (req.params as any).vchNo);
+      if (!result) throw notFound;
+      return result;
+    }).catch((error: unknown) => {
+      if (error === notFound) return reply.code(404).send({ error: 'voucher-not-found' });
+      throw error;
+    });
+    return outcome;
+  });
+  app.post('/e-invoices/:vchNo/irn', auth, async (req, reply) => {
+    if (!guard(req, reply, 'print')) return;
+    const scope = scopeOf(req);
+    const vchNo = String((req.params as any).vchNo);
+    return run(reply, 201, async () => {
+      await assertEBillNotRegistered(prisma, 'E INVOICE', scope, vchNo);
+      const res = await submitIrnForSale(prisma, scope as any, {
+        coBook: String(scope.coBook ?? ''),
+        vchNo,
+        docType: 'INV',
+        expectedMainBook: 'E INVOICE',
+      });
+      return { irn: res.Irn, ackNo: res.AckNo, mode: res.mode };
+    });
+  });
   app.get('/e-credit-notes', auth, async (req, reply) => {
     const q = req.query as any;
     return run(reply, 200, () =>
@@ -7582,8 +7785,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     if (!guard(req, reply, 'print')) return;
     const b = body(req);
     return run(reply, 201, async () => {
+      const coBook = scopeOf(req).coBook ?? '146';
+      await assertEBillNotRegistered(prisma, 'E CRNT', { ...scopeOf(req), coBook }, b.vchNo);
       const res = await submitIrnForCreditNote(prisma, scopeOf(req) as any, {
-        coBook: scopeOf(req).coBook ?? '146',
+        coBook,
         vchNo: b.vchNo,
       });
       return { irn: res.Irn, ackNo: res.AckNo, mode: res.mode };

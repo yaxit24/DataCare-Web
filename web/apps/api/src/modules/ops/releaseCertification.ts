@@ -790,9 +790,11 @@ wsale-034-00015`
 export const REQUIRED_REAL_BROWSER_JOURNEY_IDS: readonly string[] = Object.freeze([
   'column-settings',
   'credit-note',
+  'credit-note-entry',
   'design-book',
   'design-calculations',
   'design-repeat',
+  'e-invoice-entry',
   'generic-image-conflict',
   'image-conflict',
   'manufacturing-lot',

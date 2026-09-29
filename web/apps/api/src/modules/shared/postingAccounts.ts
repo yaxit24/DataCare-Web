@@ -51,6 +51,7 @@ export class PostingAccountValidationError extends Error {
  * the error message needs in order to be actionable.
  */
 export type PostingAccountRole =
+  | 'party-control'
   | 'cash-settlement'
   | 'bank-settlement'
   | 'kasar'
@@ -130,4 +131,53 @@ export async function resolveBookSlotAccountTx(
     );
   }
   return accounts[0] as string;
+}
+
+export interface BookSlotRow {
+  srNo: number;
+  accountCode: string;
+  shortName: string;
+  mainBook: string;
+  dataType: string;
+  bookType: string;
+}
+
+/**
+ * Every BOOK_DETL slot of a book with the per-slot metadata some desktop posting helpers read from
+ * BOOK_DETL rather than BOOK_DATA (e.g. Ac_Ledr.EInvoice_Ledr takes VCH_TYPE, BOOK_NAME and DATA_TYPE
+ * from the slot row). A duplicated slot fails closed; a missing or blank slot is the caller's decision,
+ * made through `requireBookSlot` only for the slots a voucher actually posts to.
+ */
+export async function resolveBookSlotRowsTx(
+  tx: any,
+  scope: VoucherScope,
+  role: PostingAccountRole,
+): Promise<Map<number, BookSlotRow>> {
+  const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+    `SELECT "SR_NO","AC_CODE","BOOK_SNAME","MAIN_BOOK","DATA_TYPE","BOOK_TYPE" FROM "BOOK_DETL"
+      WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4 ORDER BY "SR_NO",row_id`,
+    scope.tenantId,
+    scope.coCode,
+    scope.lcCode,
+    scope.coBook,
+  );
+  const slots = new Map<number, BookSlotRow>();
+  for (const row of rows) {
+    const srNo = Number(row.SR_NO);
+    if (slots.has(srNo)) {
+      throw new PostingAccountValidationError(
+        role,
+        `book ${scope.coBook} has more than one account in slot ${srNo}`,
+      );
+    }
+    slots.set(srNo, {
+      srNo,
+      accountCode: clean(row.AC_CODE),
+      shortName: clean(row.BOOK_SNAME),
+      mainBook: clean(row.MAIN_BOOK),
+      dataType: clean(row.DATA_TYPE),
+      bookType: clean(row.BOOK_TYPE),
+    });
+  }
+  return slots;
 }

@@ -8,7 +8,7 @@
     "implemented-elsewhere": "covered by a differently-named web feature; note must say which",
     "dead-in-dataset": "no real rows in Live24; note must carry the count",
     "scope-excluded": "deliberately out of scope; note must record the decision",
-    "absent": "visible on desktop but NO web surface exists; note must name the missing capability and the desktop form. Per plan \u00a711.2 every evaluated-visible entry must be verified or mapped, so an absent entry is a release blocker, not a classification of convenience"
+    "absent": "visible on desktop but NO web surface exists; note must name the missing capability and the desktop form. Per plan §11.2 every evaluated-visible entry must be verified or mapped, so an absent entry is a release blocker, not a classification of convenience"
   },
   "caveat": "formReferencedInWeb is a WEAK positive and a STRONG negative. A form named in a comment is not implemented, and a function can exist under another name. It orders the work; it does not classify it. Since classification, formReferencedInWeb has been shown wrong in both directions: 10 entries flagged false are implemented (e.g. Master/Labour Type, Other/Bank Reconcile) and 26 flagged true have no implementation. It remains an ordering signal only and must not be read as state.",
   "counts": {
@@ -3249,19 +3249,19 @@
       ],
       "formReferencedInWeb": true,
       "state": "implemented-unverified",
-      "evidence": "apps/api/test/ecreditNoteIrn.db.test.ts; apps/api/test/einvoice.test.ts; apps/api/test/routePolicy.test.ts; apps/web/app/(app)/txn/e-crnt-note/page.tsx; desktop source MDI_FORM.cs CurBookHelp(\"E CRNT\") and TR_SL_EBILL.JsonGen DocDtls.Typ=CRN",
-      "note": "Implemented-unverified, partial workflow as reviewed 2026-09-11: the current page submits a CRN IRN for an already existing E CRNT voucher with full scope validation and persistence. Desktop TR_SL_EBILL also provides entry/open/edit/delete/browse/print; these require completion and independent verification. Follow X15 in ../parity-plan-2026-09-10/12-execution-addendum.md.",
+      "evidence": "apps/api/test/eCreditNoteLifecycle.db.test.ts; apps/api/test/eCreditNoteLifecycle.routes.db.test.ts; apps/web/test/credit-note-entry.journey.mjs; packages/core/test/eBillCalc.test.ts; apps/api/test/ecreditNoteIrn.db.test.ts; apps/api/test/einvoice.test.ts; apps/api/test/routePolicy.test.ts; apps/web/app/(app)/txn/e-crnt-note/page.tsx; desktop source MDI_FORM.cs CurBookHelp(\"E CRNT\"), TR_SL_EBILL BtnSave/BtnDelete/CommPassTotal/BILL_TOTAL, Ac_Ledr.EInvoice_Ledr, Ac_Rojmel.EInvoice_Rojmel, Ac_Stock.EInvoice_Stk, Ac_Tax.EInvoice_GST",
+      "note": "Implemented-unverified as of 2026-09-29 (X15 round): the page now creates, reopens, edits (with stale-revision refusal), deletes (DELETE_DATA audit), prints (ORIGINAL/DUPLICATE) and cancels the IRN of E CRNT vouchers, posting the source-derived SL_DATA/SL_DETL/SL_IDTL/TEMP_BOOK_DATA/AC_DATA/ROJ_MEL_DATA/MAIN_STOCK/TAX_DATA write set; IRN submission is retained. Documented web adaptations (negative round-off, IRN edit lock, TCS/TDS and tagged-line refusal) need business acceptance. See ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-x15/ecrnt-lifecycle-contract.md and X15 in ../parity-plan-2026-09-10/12-execution-addendum.md.",
       "webSurface": {
         "kind": "route",
-        "surface": "POST /einvoice/credit-note/irn"
+        "surface": "POST /e-credit-notes"
       },
       "sharedSurfaceWith": [],
       "availabilityState": "partial",
       "missingActions": [
-        "complete E CRNT entry workflow",
-        "browser reopen/edit/delete",
-        "browse and document print lifecycle",
-        "independent desktop and live provider acceptance"
+        "tagged-line stock return, TCS/TDS (inward book) and amount-override (rate back-calculation) branches",
+        "full LedrCash cross-year cash-limit aggregate",
+        "independent desktop comparison of the write set and SalesBillA4Gst layout",
+        "live GSP provider state (timeout/retry/cancel) and business acceptance of the documented adaptations"
       ]
     },
     {
@@ -3273,13 +3273,19 @@
       ],
       "formReferencedInWeb": true,
       "state": "implemented-unverified",
-      "evidence": null,
-      "note": "e-invoice IRN workflow.",
+      "evidence": "apps/api/test/eInvoiceLifecycle.db.test.ts; apps/api/test/eInvoiceLifecycle.routes.db.test.ts; apps/web/test/e-invoice-entry.journey.mjs; packages/core/test/eBillCalc.test.ts; apps/web/app/(app)/txn/e-invoice/page.tsx; desktop source MDI_FORM.cs CurBookHelp(\"E INVOICE\"), TR_SL_EBILL BILL_TOTAL TCS/TDS, Ac_Ledr.EInvoice_Ledr, Ac_Rojmel.EInvoice_Rojmel, Ac_Stock.EInvoice_Stk/Dm_Sale_eInv_Detl, Ac_Tax.EInvoice_GST/Vch_Remark",
+      "note": "Implemented-unverified as of 2026-09-29 (X15 continuation): Transaction/E Invoice now creates, reopens, edits (stale-revision refusal), deletes, prints and registers/cancels the IRN of outward E INVOICE vouchers with the 50 lakh TCS threshold, TDS, stock-out, output GST, DM_DATA and REMARK_DATA posting from TR_SL_EBILL. Negative round-off and the IRN edit lock are documented web adaptations. See ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-x15/ecrnt-lifecycle-contract.md.",
       "webSurface": {
         "kind": "route",
-        "surface": "POST /einvoice/irn"
+        "surface": "POST /e-invoices"
       },
-      "sharedSurfaceWith": []
+      "sharedSurfaceWith": [],
+      "availabilityState": "partial",
+      "missingActions": [
+        "tagged-line sale (BAR_DETL tag lookup and stock-out) and amount-override branches",
+        "independent desktop comparison of the write set, TCS threshold and EInvoice.RPT/SalesBillA4Gst layouts",
+        "live GSP provider state (timeout/retry/cancel) and business acceptance of the documented adaptations"
+      ]
     },
     {
       "tab": "Transaction",
@@ -3553,9 +3559,9 @@
       "implemented-unverified": "a web surface was traced from the desktop form to a registered route, a dynamic master name, or a page file, and that surface is machine-verified to resolve by apps/api/test/completionRegister.test.ts. Nothing proves it MATCHES the desktop, which is exactly what this state means.",
       "absent": "no defensible web surface was found. Recorded rather than hidden under a softer state.",
       "verified": "DELIBERATELY UNUSED. The register defines it as compared or tested, but the plan means desktop-verified, and the controlling comparison is 0 of 66 matched (project-memory/parity/g5). Claiming verified from web-only tests would be the self-approval this project keeps finding.",
-      "implemented-elsewhere": "DELIBERATELY UNUSED. Every mapped entry here is reached through a web feature with a different name, so the label would apply to all 145 and distinguish nothing. The real signal \u2014 which entries collapse onto one shared surface \u2014 is recorded per item in sharedSurfaceWith instead.",
+      "implemented-elsewhere": "DELIBERATELY UNUSED. Every mapped entry here is reached through a web feature with a different name, so the label would apply to all 145 and distinguish nothing. The real signal — which entries collapse onto one shared surface — is recorded per item in sharedSurfaceWith instead.",
       "dead-in-dataset": "NOT USED. Requires Live24 row counts that were not available.",
-      "scope-excluded": "NOT USED. Requires an owner decision (plan \u00a78.1); a classifier cannot exclude scope on the business owner\u2019s behalf."
+      "scope-excluded": "NOT USED. Requires an owner decision (plan §8.1); a classifier cannot exclude scope on the business owner’s behalf."
     },
     "rejectedMethods": "Label matching reported 165 of 198 missing including Sales and Purchase; table-name grepping reported a hit for almost everything. Each entry was instead traced desktop form -> web implementation -> the exact registration site.",
     "whatThisDoesNotEstablish": "that any mapped surface behaves like the desktop. Modes are the known risk: 52 entries share 21 surfaces, and at least one collapsed pair is only half implemented (ExtraTran/Other Expenses is mapped while ExtraTran/Other Income is absent). WP-05 contracts must resolve each shared surface mode by mode."

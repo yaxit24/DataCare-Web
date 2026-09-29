@@ -203,6 +203,11 @@ button.primary {
   cursor: pointer;
   font-weight: 600;
 }
+button.primary:disabled,
+button.danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 button.ghost {
   background: #fff;
   color: var(--ink);
