@@ -505,12 +505,23 @@ async function runNumericUpdate(
       'unsupported-state',
       'The authenticated operator does not own this saved Return.',
     );
-  // 2) The binding LedrCash cash-guard obligation. Either the configured branch is inactive
-  //    (a proven zero configured limit or the special 00045 account) or we observe the exact
-  //    all-year customer / current-book aggregates and prove the limit is not exceeded.
+  // 2) The binding LedrCash cash-guard obligation. This is the coordinator's OWN decision, not
+  //    the pure guard's: the pure guard's frozen profile contract accepts this "ordinary"
+  //    profile ONLY when the guard-envelope cash limit is zero (a nonzero envelope limit is
+  //    `unsupported-cash-limit`) and the account is not the special `00045` ledger
+  //    (`special-account`). buildGuardInput therefore always presents a zero limit to the
+  //    guard so its frozen fixtures/contract stay intact, and the REAL configured
+  //    `CASH_LIMIT` from CO_SET is enforced HERE, where the plan's all-year LedrCash
+  //    observation actually runs. Because the guard already rejects the `00045` account, a
+  //    `status:'ready'` document never carries it; the coordinator needs no `00045` branch.
+  //    Either the configured cash limit is inactive (a proven zero configured limit) or we
+  //    observe the exact all-year customer / current-book aggregates and prove the observed
+  //    prior cash does not exceed the configured limit. Current cash being 0 does NOT remove
+  //    this obligation: the aggregate is over ALL years/dates/modes/books, and the observation
+  //    runs whenever a positive limit is configured.
   const cashLimit = Number(trimmed(config.cashLimit) || '0');
   const accountCode = trimmed(header.raw.AC_CODE);
-  if (cashLimit > 0 && accountCode !== '00045') {
+  if (cashLimit > 0) {
     const { priorCash } = await observeLedrCash(tx, scope, accountCode);
     // The received cash for this ordinary zero-tender Other edit is 0; the obligation is the
     // observed all-year prior cash. A configured positive limit that the observed prior cash
@@ -888,7 +899,14 @@ function buildGuardInput(args: {
         accountCode: trimmed(header.AC_CODE),
         rawFlag: 'N',
       }),
-      cashLimit: q(config.cashLimit),
+      // The pure guard's frozen "ordinary" profile requires a ZERO cash limit in its envelope
+      // (a nonzero limit is `unsupported-cash-limit` and would refuse before this coordinator
+      // could observe the LedrCash aggregate). The REAL configured CASH_LIMIT is enforced by
+      // the coordinator's own LedrCash ceiling check (observeLedrCash) AFTER the guard is
+      // ready, not inside the pure guard. Presenting '0' here keeps the guard's frozen
+      // fixtures/contract intact while leaving the cash obligation genuinely owned and
+      // reachable in the coordinator. See config.cashLimit / observeLedrCash above.
+      cashLimit: q('0'),
       bill: q({
         phase: 'post-events-before-save-fold',
         nAcCrAmt: final.bill.incomingRounded,

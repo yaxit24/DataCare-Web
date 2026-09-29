@@ -591,24 +591,48 @@ run('sale return numeric write coordinator', () => {
     expect(await snapshot()).toStrictEqual(before);
   });
 
-  it('refuses and leaves the database unchanged when a positive cash limit is exceeded', async () => {
+  it('refuses via the LedrCash ceiling (not the guard) when the observed all-year cash exceeds the configured limit', async () => {
     // Reseed with a positive configured cash limit and observed over-limit prior cash.
+    // The pure save-guard is presented a ZERO cash limit by the coordinator (its frozen
+    // "ordinary" profile requires it), so the guard is READY here; the refusal below is
+    // therefore owned by the coordinator's LedrCash ceiling check (observeLedrCash), NOT by
+    // the guard's zero-limit refusal. This case is what actually exercises observeLedrCash:
+    // if that block were reverted, this write would COMMIT and the assertions would fail.
     await clean();
     await seedMasters(50);
     await seedDocument();
     await seedSentinels();
-    // A prior all-year customer cash credit exceeding the 50 limit (LD00001 cash ledger).
+    // Prior all-year customer cash credits summing over the 50 limit (LD00001 cash ledger),
+    // spread across two different books/years so the aggregate — not a single row — decides.
     await insert(
       'AC_DATA',
       key({
         VCH_NO: '00050',
+        CO_BOOK: 'C01',
         VCH_TYPE: 'CR',
-        VCH_DATE: '2024-05-01',
-        LEDR_KEY: 'PRIORCASH',
+        VCH_DATE: '2023-05-01',
+        LEDR_KEY: 'PRIORCASH-A',
         BOOK_NAME: 'CASH',
         AC_CODE: PARTY,
         LD_CODE: 'LD00001',
-        CR_AMT: '5000.00',
+        CR_AMT: '40.00',
+        DR_AMT: '0.00',
+        IT_TYPE: 'A',
+        DATA_TYPE: 'B',
+      }),
+    );
+    await insert(
+      'AC_DATA',
+      key({
+        VCH_NO: '00051',
+        CO_BOOK: 'C02',
+        VCH_TYPE: 'CR',
+        VCH_DATE: '2024-05-01',
+        LEDR_KEY: 'PRIORCASH-B',
+        BOOK_NAME: 'CASH',
+        AC_CODE: PARTY,
+        LD_CODE: 'LD00001',
+        CR_AMT: '30.00',
         DR_AMT: '0.00',
         IT_TYPE: 'A',
         DATA_TYPE: 'B',
@@ -616,14 +640,65 @@ run('sale return numeric write coordinator', () => {
     );
     const saved = await get();
     const before = await snapshot();
+    // The refusal is the LedrCash ceiling message, proving observeLedrCash ran (the observed
+    // all-year cash 70 > the configured limit 50) rather than a guard-stage refusal.
     await expect(
       updateSaleReturnNumeric(runtime, scope(), VCH, {
         version: saved.version,
         otherAmount: '1',
         actor,
       }),
-    ).rejects.toMatchObject({ statusCode: 422 });
+    ).rejects.toMatchObject({
+      statusCode: 422,
+      message: 'The observed all-year cash credit exceeds the configured cash limit.',
+    });
     expect(await snapshot()).toStrictEqual(before);
+  });
+
+  it('admits the write when a positive cash limit is configured but the observed all-year cash is under it', async () => {
+    // Same reachable-LedrCash path as above, but on the ACCEPT side: the guard is ready
+    // (presented a zero envelope limit), observeLedrCash runs, and the observed all-year cash
+    // (30, net of the current book) is under the configured 50 limit, so the write commits.
+    // This proves observeLedrCash does not spuriously refuse a clean document and that the
+    // LedrCash observation is genuinely on the accepted path.
+    await clean();
+    await seedMasters(50);
+    await seedDocument();
+    await seedSentinels();
+    await insert(
+      'AC_DATA',
+      key({
+        VCH_NO: '00050',
+        CO_BOOK: 'C01',
+        VCH_TYPE: 'CR',
+        VCH_DATE: '2023-05-01',
+        LEDR_KEY: 'PRIORCASH-A',
+        BOOK_NAME: 'CASH',
+        AC_CODE: PARTY,
+        LD_CODE: 'LD00001',
+        CR_AMT: '30.00',
+        DR_AMT: '0.00',
+        IT_TYPE: 'A',
+        DATA_TYPE: 'B',
+      }),
+    );
+    const saved = await get();
+    const result = await updateSaleReturnNumeric(runtime, scope(), VCH, {
+      version: saved.version,
+      otherAmount: '1',
+      actor,
+    });
+    expect(result.committed).toBe(true);
+    expect(result.noOp).toBe(false);
+    // The trial balance for the edited voucher stays tied after the admitted write.
+    for (const table of ['AC_DATA', 'ROJ_MEL_DATA']) {
+      const [sums] = await query(
+        `SELECT SUM("CR_AMT")::text cr, SUM("DR_AMT")::text dr FROM "${table}" t WHERE tenant_id=$1 AND t."VCH_NO"=$2`,
+        tenantId,
+        VCH,
+      );
+      expect(Number(sums.cr)).toBe(Number(sums.dr));
+    }
   });
 
   it('refuses a non-owning operator and leaves the database unchanged', async () => {

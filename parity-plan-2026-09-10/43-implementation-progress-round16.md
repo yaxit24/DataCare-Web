@@ -127,6 +127,87 @@ compilation / syntax:
 These run for real in GitHub Actions CI (`.github/workflows/ci.yml` provides postgres:16-alpine
 with `RUN_DB_INTEGRITY_TESTS=1`).
 
+## Round 16 revision — semantic-review findings addressed (NEEDS_CHANGES)
+
+The 2026-09-29 semantic review (`2026-09-29-082715-review.md`, verdict NEEDS_CHANGES) raised
+five issues on the X13 numeric write slice. This revision addresses each; the DB-independent
+gate stays green and the pure guard's frozen contract is untouched.
+
+### Issue 1 (BLOCKING) — LedrCash cash obligation was unreachable in the ready path — FIXED
+
+Confirmed root cause: the coordinator passed the configured non-zero `CASH_LIMIT` into the
+pure guard (`buildGuardInput -> cashLimit: q(config.cashLimit)`), but the pure guard's frozen
+profile check refuses ANY non-zero cash limit with `unsupported-cash-limit` BEFORE the
+coordinator's `cashLimit > 0` `observeLedrCash` block could run. The two were mutually
+exclusive, so `observeLedrCash` (and the `00045` special case) were dead code and the
+plan-mandated all-year LedrCash obligation was never observed.
+
+Fix (review option **a** — preferred, keeps the pure guard's frozen contract intact):
+`buildGuardInput` now always presents a **zero** cash limit to the pure guard
+(`cashLimit: q('0')`), which is exactly what the guard's frozen "ordinary" profile requires,
+so all `saleReturnSaveGuards.test.ts` frozen fixtures stay green. The REAL configured
+`CASH_LIMIT` (read from `CO_SET` into `config.cashLimit`) is now enforced by the coordinator's
+OWN LedrCash ceiling check, which runs AFTER the guard is `ready`. That check
+(`if (cashLimit > 0) { observeLedrCash(...); ... }`) is therefore genuinely reachable and
+owns the cash decision. The dead `accountCode !== '00045'` sub-condition was removed from the
+coordinator block and documented: the pure guard already rejects the `00045` account
+(`special-account`), so a `status:'ready'` document never carries it and the coordinator needs
+no `00045` branch. `observeLedrCash` implements the binding round-14 aggregate unchanged
+(all-year positive customer cash CR sum minus current-book positive cash CR sum, each with its
+own positive-only HAVING).
+
+### Issue 2 — the cash-limit DB test proved the wrong gate — FIXED
+
+The over-limit DB case previously passed via the guard's zero-limit refusal, not via the
+LedrCash aggregate it seeded. `apps/api/test/saleReturnNumericUpdate.db.test.ts` now:
+
+- restructures the over-limit case to seed a positive configured limit (50) and a non-trivial
+  prior-cash aggregate spread across two books/years (40 + 30 = 70 > 50) so the **aggregate**,
+  not a single row, decides; it asserts the refusal carries the LedrCash ceiling message
+  (`'The observed all-year cash credit exceeds the configured cash limit.'`), proving
+  `observeLedrCash` ran (a guard-stage refusal would carry a different code). If the
+  `observeLedrCash` block were reverted, this write would commit and the assertion would fail.
+- adds a guard-clean ACCEPT case: positive configured limit (50) with observed all-year cash
+  under it (30), which is admitted and stays trial-balance-tied — proving the LedrCash
+  observation is genuinely on the accepted path and does not spuriously refuse.
+
+### Issue 3 — edition supplied as 'L' not 'E' — CONFIRMED SAFE, documented
+
+The coordinator supplies `edition: q('L')` to the pure guard because the guard treats `'E'`
+as `edition-audit-required`. This is a guard-ENVELOPE value only; it is never persisted. The
+coordinator writes NO `edition`/`USER_DATA` column (verified: the only persisted columns are
+the c27 line/header patches and the financial-effect patches; the actor identity is used only
+to verify ownership, not stamped as an edition marker). No downstream reader depends on a
+true edition-E marker on the persisted rows, because none is written and none is read for this
+profile. The "edition-E audit inputs" therefore honestly reduce to verifying the authenticated
+actor owns the saved document — retained as an explicit web audit adaptation, not desktop
+`USER_DATA` parity. This remains an open parity item, disclosed, not a defect.
+
+### Issue 4 — endpoint vs coordinator validation drift — documented as safe
+
+The endpoint (`txn.ts PUT /sales-returns/:vchNo/incoming-numeric`) performs only a
+superset-safe shape gate (both body fields present as strings; unknown keys rejected). The
+authoritative hex/length/charset BOUNDS live once in the coordinator's `validateRequest`,
+which denies fail-closed with the same `SavedSaleReturnError` pattern. Because the endpoint's
+checks are a strict subset of the coordinator's, they cannot drift into ACCEPTING anything the
+coordinator would reject (at worst an error message differs). A clarifying comment was added
+at the endpoint stating the coordinator is the single authoritative validator, so the split is
+safe and intentional rather than accidental. Centralizing further was judged unnecessary given
+the fail-closed coordinator.
+
+### Issue 5 — authored-for-CI proof — confirmed wired
+
+`.github/workflows/ci.yml` (job `quality`) runs `pnpm test` (= `turbo run test`, which runs
+the `@datacare/api` Vitest suite) with `RUN_DB_INTEGRITY_TESTS: '1'` and
+`RUN_DB_SECURITY_TESTS: '1'` against the `postgres:16-alpine` service on port 55433. The new
+`apps/api/test/saleReturnNumericUpdate.db.test.ts` is a standard `*.db.test.ts` picked up by
+that Vitest run and gated on `RUN_DB_INTEGRITY_TESTS==='1'`, so it executes for real in CI
+(including the restructured LedrCash cases and the report-reconciliation block). The live
+`apps/api/integration/sale-return-update.live.mjs` follows the existing `*.live.mjs` convention;
+like every other `*.live.mjs` in the repo it is a standalone smoke script and is NOT invoked by
+the CI workflow (only verified here by `node --check`). This is stated plainly rather than
+claimed as executed. No in-sandbox DB execution is claimed.
+
 ## Qualifications retained — X13 is NOT closed
 
 DB-backed, live and browser proof for this slice is authored-for-CI and was not executed in

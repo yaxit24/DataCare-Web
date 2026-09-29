@@ -1413,6 +1413,13 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     return run(reply, 200, async () => {
       const s = sess(req);
       const b = body(req);
+      // Endpoint-side gate is a SUPERSET-safe convenience only: it checks the two body fields
+      // are present strings and rejects unknown keys so an obviously malformed request fails
+      // fast with a clear message. It intentionally does NOT re-implement the hex/length/charset
+      // BOUNDS — those live once in the coordinator's validateRequest, which is the single
+      // authoritative validator and denies fail-closed. Because the endpoint's checks are a
+      // strict subset of the coordinator's, they cannot drift into ACCEPTING anything the
+      // coordinator would reject (at worst the error message differs), so the split is safe.
       if (typeof b.version !== 'string')
         throw new SavedSaleReturnError(
           400,
