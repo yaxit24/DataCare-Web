@@ -31,6 +31,35 @@ const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string }[] = [
   { code: 'FINEPURC', name: 'FINE METAL PURCHASE', gr: '21' },
   { code: 'DHRN', name: 'DHIRAN / LOAN', gr: '21' },
   { code: 'CAPITAL', name: 'CAPITAL A/C', gr: '25' },
+  // The wholesale / rate-cut slots (`Wh_Sales_Ledr`): labour income and expense, the silver twins of the sale
+  // and purchase controls, other charges and fine kasar — the roles of 00041/00056/00004/00009/00077/00098 on
+  // the real books 034/064.
+  { code: 'LBRINC', name: 'LABOUR INCOME A/C', gr: '23' },
+  { code: 'LBREXP', name: 'LABOUR EXPENSE A/C', gr: '22' },
+  { code: 'SLVSALE', name: 'SALES SILVER A/C', gr: '20' },
+  { code: 'SLVPURC', name: 'PURCHASE SILVER A/C', gr: '21' },
+  { code: 'OTHCHRG', name: 'OTHER CHARGES A/C', gr: '23' },
+  { code: 'FINEKSR', name: 'FINE KASAR A/C', gr: '31' },
+];
+
+/**
+ * BOOK_DETL of a TR_WH_SALE book, in the desktop's slot order (Ac_Ledr.cs:613-778 joins `B.SR_NO = n`; the real
+ * books 034/064 carry all twelve): 1 sale gold, 2 purchase gold, 3 cash, 4 kasar, 5 purchase kasar, 6 labour
+ * income, 7 labour expense, 8 sale silver, 9 purchase silver, 10 interest, 11 other charges, 12 fine kasar.
+ */
+const WHOLESALE_SLOTS: Array<{ srNo: number; acCode: string }> = [
+  { srNo: 1, acCode: 'SALES' },
+  { srNo: 2, acCode: 'PURCHASE' },
+  { srNo: 3, acCode: 'CASH' },
+  { srNo: 4, acCode: 'KASAR' },
+  { srNo: 5, acCode: 'KASAR' },
+  { srNo: 6, acCode: 'LBRINC' },
+  { srNo: 7, acCode: 'LBREXP' },
+  { srNo: 8, acCode: 'SLVSALE' },
+  { srNo: 9, acCode: 'SLVPURC' },
+  { srNo: 10, acCode: 'INTINC' },
+  { srNo: 11, acCode: 'OTHCHRG' },
+  { srNo: 12, acCode: 'FINEKSR' },
 ];
 
 /** Standard GST/TCS taxes (TAX_PRC is the total rate; the CGST/SGST↔IGST split is computed at posting). */
@@ -64,6 +93,10 @@ const BOOKS: {
   acCode: string;
   /** BOOK_DETL slots when they differ from the sale-book layout (1 control, 2 cash, 3 round-off). */
   slots?: Array<{ srNo: number; acCode: string }>;
+  /** BOOK_SNAME (the VCH_TYPE) when it is the desktop's, not the book code. */
+  shortName?: string;
+  /** BOOK_TBL_NAME, for the families that route by it. */
+  table?: string;
 }[] = [
   { book: 'SL', name: 'Sales', workflow: 'SALES', acCode: 'SALES' },
   { book: 'PR', name: 'Purchase', workflow: 'PURCHASE', acCode: 'PURCHASE' },
@@ -102,6 +135,29 @@ const BOOKS: {
   { book: 'ILT', name: 'Item Lot', mainBook: 'ITEM LOT', inout: 'I', acCode: 'PURCHASE' },
   { book: 'JV', name: 'Journal', mainBook: 'JOURNAL', inout: 'I', acCode: 'KASAR' },
   { book: 'CON', name: 'Contra', mainBook: 'CONTRA', inout: 'I', acCode: 'CASH' },
+  // Desktop TR_WH_SALE serves both: book 034 `WSALE` / `WH SALES` and book 064 `RCUT` / `RATE CUT`, each an OUT
+  // book over RATE_CUT_DATA. Without them a new company had no book either screen could post to, and the Rate
+  // Cut screen fell back to the cash Receipt book.
+  {
+    book: 'WHS',
+    name: 'Wholesale Sale',
+    mainBook: 'WH SALES',
+    inout: 'O',
+    acCode: 'SALES',
+    slots: WHOLESALE_SLOTS,
+    shortName: 'WSALE',
+    table: 'RATE_CUT_DATA',
+  },
+  {
+    book: 'RTC',
+    name: 'Rate Cut',
+    mainBook: 'RATE CUT',
+    inout: 'O',
+    acCode: 'SALES',
+    slots: WHOLESALE_SLOTS,
+    shortName: 'RCUT',
+    table: 'RATE_CUT_DATA',
+  },
 ];
 
 export interface SeedResult {
@@ -211,16 +267,17 @@ export async function seedCompany(
       ) {
         await tx.$executeRawUnsafe(
           `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME",
-             "MAIN_BOOK","BOOK_INOUT","CUR_USE")
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'Y')`,
+             "MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'Y',$9)`,
           tenantId,
           coCode,
           lcCode,
           b.book,
           b.name,
-          b.book,
+          b.shortName ?? b.book,
           mainBook,
           inout,
+          b.table ?? null,
         );
         // BOOK_DETL carries ONE ROW PER POSTING LEG, and `bookPolicy.resolveBookAccountTx` asks for a
         // specific SR_NO. The sale path alone resolves three: 1 = the control/sales account, 2 = the
@@ -242,7 +299,7 @@ export async function seedCompany(
             b.book,
             leg.srNo,
             b.name,
-            b.book,
+            b.shortName ?? b.book,
             mainBook,
             inout,
             leg.acCode,

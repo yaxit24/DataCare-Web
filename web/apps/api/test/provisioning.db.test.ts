@@ -68,7 +68,9 @@ d('company provisioning produces a postable company', () => {
   });
 
   it('creates the accounts the posting engine references by literal code', async () => {
-    expect(await count('AC_MAST')).toBe(19);
+    // 19 literal codes plus the six wholesale / rate-cut slot accounts (labour income and expense, silver
+    // sale and purchase, other charges, fine kasar).
+    expect(await count('AC_MAST')).toBe(25);
   });
 
   it('creates every book with its posting legs', async () => {
@@ -78,14 +80,43 @@ d('company provisioning produces a postable company', () => {
         CO,
       ),
     );
-    expect(rows.length).toBe(14);
+    expect(rows.length).toBe(16);
     // Three legs per book (1 = control/sales, 2 = cash/bank, 3 = round-off), except the cash books.
     // RCT and PAY carry the desktop cash-book layout, 1 = cash and 2 = kasar: Ac_Ledr.cs:567-581 joins
     // BOOK_DETL SR_NO 1 and SR_NO 2 for legs 01-08. Their slot 2 used to be CASH, which would have posted
-    // a write-off to the cash account.
+    // a write-off to the cash account. The TR_WH_SALE books carry the twelve slots Wh_Sales_Ledr joins.
     const legs = Object.fromEntries(rows.map((r) => [String(r.CO_BOOK), Number(r.n)]));
     for (const [book, n] of Object.entries(legs))
-      expect(n, book).toBe(book === 'RCT' || book === 'PAY' ? 2 : 3);
+      expect(n, book).toBe(
+        book === 'RCT' || book === 'PAY' ? 2 : book === 'WHS' || book === 'RTC' ? 12 : 3,
+      );
+  });
+
+  it('creates the wholesale and rate-cut books as the desktop classifies them', async () => {
+    const rows: any[] = await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT "CO_BOOK","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","BOOK_TBL_NAME" FROM "BOOK_DATA"
+          WHERE "CO_CODE"=$1 AND "CO_BOOK" IN ('WHS','RTC') ORDER BY "CO_BOOK"`,
+        CO,
+      ),
+    );
+    // Book 064 RCUT / RATE CUT and book 034 WSALE / WH SALES, both OUT books over RATE_CUT_DATA.
+    expect(rows).toEqual([
+      {
+        CO_BOOK: 'RTC',
+        BOOK_SNAME: 'RCUT',
+        MAIN_BOOK: 'RATE CUT',
+        BOOK_INOUT: 'O',
+        BOOK_TBL_NAME: 'RATE_CUT_DATA',
+      },
+      {
+        CO_BOOK: 'WHS',
+        BOOK_SNAME: 'WSALE',
+        MAIN_BOOK: 'WH SALES',
+        BOOK_INOUT: 'O',
+        BOOK_TBL_NAME: 'RATE_CUT_DATA',
+      },
+    ]);
   });
 
   /**
@@ -167,6 +198,7 @@ d('company provisioning produces a postable company', () => {
   it('is idempotent', async () => {
     const again = await seedCompany(prisma, tenantId, CO, { coName: 'Provision Test', lcCode: LC });
     expect(again.created.books).toBe(0);
-    expect(await count('BOOK_DETL')).toBe(40); // 12 books x 3 legs + RCT/PAY x 2, not doubled
+    // 12 books x 3 legs + RCT/PAY x 2 + the wholesale and rate-cut books x 12 slots, not doubled.
+    expect(await count('BOOK_DETL')).toBe(64);
   });
 });

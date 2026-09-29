@@ -210,3 +210,20 @@ export {
   saleItemAmount,
 } from './saleAmount.js';
 export type { SaleAmountLine, SaleAmountBasis } from './saleAmount.js';
+export { rateFactor, settleMoneyMetal, settlementBalance } from './settlement.js';
+export type { RateBasis, SettlementInput, SettlementResult } from './settlement.js';
+export {
+  wholesaleIssueLine,
+  wholesaleReceiveLine,
+  wholesaleGridTotals,
+  wholesaleBand,
+} from './wholesaleLine.js';
+export type {
+  WholesaleLineSettings,
+  WholesaleLineInput,
+  WholesaleLineResult,
+  WholesaleGridTotals,
+  WholesaleTender,
+  WholesaleBandInput,
+  WholesaleBand,
+} from './wholesaleLine.js';

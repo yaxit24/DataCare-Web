@@ -3368,8 +3368,8 @@
       ],
       "formReferencedInWeb": true,
       "state": "implemented-unverified",
-      "evidence": null,
-      "note": "price-fixing workflow.",
+      "evidence": "apps/api/test/wholesaleRateCutStock.db.test.ts; apps/api/test/wholesaleRateCut.routes.db.test.ts; apps/api/test/rateCutSettlement.db.test.ts; apps/api/test/rateCut.test.ts; packages/core/test/wholesaleLine.test.ts; apps/web/test/wholesaleVoucher.test.ts; apps/web/test/wholesale-rate-cut.journey.mjs; desktop source TR_WH_SALE.cs, Ac_Ledr.cs:613-778 Wh_Sales_Ledr, Ac_Stock.cs:146-176 Wh_Sale_Stk, MDI_FORM.cs:14188-14210 and 16107-16121 CurBookHelp",
+      "note": "price-fixing workflow. X16 2026-09-29: TR_WH_SALE on RATE CUT books only (/rate-cut, Ctrl+F6); the header rate settles the cut through BILL_TOTAL (Ac Amt / Ac Fine), header-only cuts post legs 08/09, 45/46, 51/52, and the shared form shows the desktop Payment (PR_*) / Received (SL_*) band. Engineering evidence only; see ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-x16/contract.md.",
       "webSurface": {
         "kind": "route",
         "surface": "POST /rate-cut"
@@ -3506,7 +3506,7 @@
       "formReferencedInWeb": true,
       "state": "implemented-unverified",
       "evidence": null,
-      "note": "TR_WH_SALE quotation mode partial. Shares this surface with 1 other menu entry: Transaction/Wh Sales.",
+      "note": "TR_WH_SALE quotation mode partial. Shares this surface with 1 other menu entry: Transaction/Wh Sales. X16 (2026-09-29) rebuilt the shared wholesale form; the quotation mode itself is not implemented by it.",
       "webSurface": {
         "kind": "page",
         "surface": "web/apps/web/app/(app)/txn/wholesale-sale/page.tsx"
@@ -3524,8 +3524,8 @@
       ],
       "formReferencedInWeb": true,
       "state": "implemented-unverified",
-      "evidence": null,
-      "note": "TR_WH_SALE wholesale page. Shares this surface with 1 other menu entry: Transaction/Wh Quotation.",
+      "evidence": "apps/api/test/wholesaleRateCutStock.db.test.ts; apps/api/test/wholesaleRateCut.routes.db.test.ts; apps/api/test/rateCutSettlement.db.test.ts; apps/api/test/rateCut.test.ts; packages/core/test/wholesaleLine.test.ts; apps/web/test/wholesaleVoucher.test.ts; apps/web/test/wholesale-rate-cut.journey.mjs; desktop source TR_WH_SALE.cs, Ac_Ledr.cs:613-778 Wh_Sales_Ledr, Ac_Stock.cs:146-176 Wh_Sale_Stk, MDI_FORM.cs:14188-14210 and 16107-16121 CurBookHelp",
+      "note": "TR_WH_SALE wholesale page. Shares this surface with 1 other menu entry: Transaction/Wh Quotation. X16 2026-09-29: WH SALES books only (/wholesale-sales, its own right); tags reserved per instance and moved in MAIN_STOCK (SR_NO 1 '-', received SR_NO 2 '+') and released on edit/delete; desktop Wh_Sales_Ledr legs; TR_WH_SALE grid arithmetic shared by the writer and the form's preview. Engineering evidence only; see ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-x16/contract.md.",
       "webSurface": {
         "kind": "page",
         "surface": "web/apps/web/app/(app)/txn/wholesale-sale/page.tsx"

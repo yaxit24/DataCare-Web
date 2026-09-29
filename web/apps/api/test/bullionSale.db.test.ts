@@ -27,6 +27,8 @@ d('bullion sale workflow over RATE_CUT_DATA', () => {
     'RATE_CUT_REC',
     'AC_DATA',
     'ROJ_MEL_DATA',
+    // A `BUL WH SALE` book with BOOK_INOUT 'O' moves stock (TR_BUL_SALE.cs:9116 calls Wh_Sale_Stk).
+    'MAIN_STOCK',
     'CO_SET',
     'SRNO_MAST',
     'BOOK_DATA',
@@ -108,6 +110,16 @@ d('bullion sale workflow over RATE_CUT_DATA', () => {
     return rows[0]!.adj;
   };
 
+  const stockRows = async (): Promise<Array<Record<string, unknown>>> =>
+    (await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT "SR_NO"::int AS "SR_NO","TR_TYPE","ITM_SIGN","IT_CODE","ITM_NWT"::float8 AS nwt
+           FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_BOOK"='BLS' AND "VCH_NO"='00001'
+          ORDER BY "SR_NO","ISR_NO"`,
+        tenantId,
+      ),
+    )) as Array<Record<string, unknown>>;
+
   const header = async (vchNo: number | string): Promise<Record<string, unknown>> => {
     const rows = (await withTenant(prisma, tenantId, (tx: any) =>
       tx.$queryRawUnsafe(
@@ -186,6 +198,11 @@ d('bullion sale workflow over RATE_CUT_DATA', () => {
     expect(ledgerRows).toEqual([{ VCH_TYPE: 'BSALE', BOOK_NAME: 'BUL WH SALE' }]);
     expect(await adjWt('00001')).toBeCloseTo(10, 3);
     expect(await adjWt('00002')).toBeCloseTo(5.5, 3);
+    // TR_BUL_SALE posts through Wh_Sale_Stk (TR_BUL_SALE.cs:9116): issued metal out, received metal in.
+    expect(await stockRows()).toEqual([
+      { SR_NO: 1, TR_TYPE: 'S', ITM_SIGN: '-', IT_CODE: 'GOLD', nwt: 10 },
+      { SR_NO: 2, TR_TYPE: 'P', ITM_SIGN: '+', IT_CODE: 'GOLD', nwt: 4 },
+    ]);
 
     const reopened = (await getBullionSale(prisma, saleScope, created.vchNo)) as any;
     expect(reopened.lines).toHaveLength(1);
@@ -258,6 +275,10 @@ d('bullion sale workflow over RATE_CUT_DATA', () => {
       receive_lines: 0,
       delete_rows: 0,
     });
+    // The edit rebuilt the stock rows from the new lines rather than adding to the old ones.
+    expect(await stockRows()).toEqual([
+      { SR_NO: 1, TR_TYPE: 'S', ITM_SIGN: '-', IT_CODE: 'GOLD', nwt: 5 },
+    ]);
 
     await deleteBullionSale(prisma, {
       scope: saleScope,
@@ -287,6 +308,7 @@ d('bullion sale workflow over RATE_CUT_DATA', () => {
       receive_lines: 0,
       delete_rows: 1,
     });
+    expect(await stockRows()).toEqual([]);
   }, 30_000);
 
   it('keeps bullion sale books out of the generic rate-cut workflow', async () => {

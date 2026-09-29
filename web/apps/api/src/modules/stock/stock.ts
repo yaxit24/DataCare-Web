@@ -91,9 +91,22 @@ async function availableBarTags(tx: any, key: TagKey): Promise<Record<string, un
     // BAR_DETL.KR_TOUCH and SL_DETL.KR_FINE equals BAR_DETL.KR_FINE, 102 of 102 for both. They are not derived
     // - `KR_NET_WT x KR_TOUCH/100` fits only 7 of 92 rows - so the tag is the only source, and omitting them
     // here silently wrote zeros even once the sale path was asking for them.
-    `SELECT b."CO_CODE",b."LC_CODE",b."TAG_NO",b."VCH_SRNO",b."IT_CODE",
-            b."ITM_PCS",b."ITM_GWT",b."ITM_NWT",b."ITM_FINE",b."TBL_CODE",
-            b."KR_NET_WT",b."KR_TOUCH",b."KR_FINE"
+    // The descriptive columns after KR_FINE are what TR_WH_SALE copies from the tag onto a wholesale line when
+    // the tag number is entered (TR_WH_SALE.cs:10641-10736): counter, design, size, hallmark, karigar, product,
+    // labour basis and rate type. Measured on the desktop rows of Next23 034/4-6 and Next25 034/1.
+    //
+    // ONE ROW PER INSTANCE, not per BAR_DETL row. A returned tag gets a second BAR_DETL row with the same
+    // (TAG_NO, VCH_SRNO, IT_CODE) — the wholesale return re-records it under the return voucher — and both rows
+    // share one stock balance. Listing each row made every returned tag "ambiguous" and unsellable. The desktop
+    // groups by the instance (TR_WH_SALE.cs:10601 `GROUP BY … HAVING SUM(…) > 0`) and then reads the first
+    // BAR_DETL row of that instance (:10633), which is what `DISTINCT ON … ORDER BY row_id` keeps.
+    `SELECT DISTINCT ON (coalesce(b."VCH_SRNO",0),coalesce(b."IT_CODE"::text,''))
+            b."CO_CODE",b."LC_CODE",b."TAG_NO",b."VCH_SRNO",b."IT_CODE",
+            b."ITM_PCS",b."ITM_GWT",b."ITM_OTH_WT",b."ITM_NWT",b."ITM_GHT_PRC",b."ITM_TOUCH",
+            b."ITM_WEST_PRC",b."ITM_FINE",b."TBL_CODE",b."KR_NET_WT",b."KR_TOUCH",b."KR_FINE",
+            b."DESIGN_NO",b."ITM_SIZE",b."HM_ID",b."HM_ID_WT",b."KR_NAME",b."PR_CODE",
+            b."LBR_TYPE",b."LBR_RATE",b."LBR_AMT",b."OTH_AMT",b."ITM_RATE",b."ITM_MRP",
+            b."KR_COST",b."RATE_TYPE"
        FROM "BAR_DETL" b
       WHERE ${filters.join(' AND ')}
         AND coalesce((
@@ -107,7 +120,7 @@ async function availableBarTags(tx: any, key: TagKey): Promise<Record<string, un
              AND coalesce(m."VCH_SRNO",0)=coalesce(b."VCH_SRNO",0)
              AND coalesce(m."IT_CODE"::text,'')=coalesce(b."IT_CODE"::text,'')
         ),0) > 0
-      ORDER BY coalesce(b."VCH_SRNO",0),b."IT_CODE",b.row_id`,
+      ORDER BY coalesce(b."VCH_SRNO",0),coalesce(b."IT_CODE"::text,''),b.row_id`,
     ...params,
   );
 }

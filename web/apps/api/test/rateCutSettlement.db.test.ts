@@ -91,14 +91,14 @@ d('rate-cut settlement persistence', () => {
        * missing: it previously fell back to invented codes such as 'SALEGOLD' that exist in no chart of
        * accounts, so every ledger row carried a contra pointing nowhere. SR positions are the desktop's,
        * measured on real books 034/064 — SR1 sale gold, SR2 purchase gold, SR3 cash, SR4 kasar,
-       * SR6 labour, SR11 other.
+       * SR6 labour income, SR7 labour expense (purchase labour, legs 19/20), SR11 other.
        */
       await tx.$executeRawUnsafe(
         `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE")
            VALUES ($1,$2,$3,'RCT',1,'SALEGOLD'),($1,$2,$3,'RCT',2,'PURCGOLD'),
                   ($1,$2,$3,'RCT',3,'CASH'),
                   ($1,$2,$3,'RCT',4,'KASAR'),($1,$2,$3,'RCT',6,'LABOUR'),
-                  ($1,$2,$3,'RCT',11,'OTHER')`,
+                  ($1,$2,$3,'RCT',7,'LBREXP'),($1,$2,$3,'RCT',11,'OTHER')`,
         tenantId,
         CO,
         LC,
@@ -278,17 +278,24 @@ d('rate-cut settlement persistence', () => {
       },
     } as any);
 
+    // The voucher handles 3.640 g of fine…
     expect(created.fine).toBeCloseTo(3.64, 3);
     expect(created.netAmt).toBe(25844);
 
     const h = (await header()) as any[];
     expect(Number(h[0].SL_FINE)).toBe(0);
     expect(Number(h[0].SL_ITM_AMT)).toBe(0);
-    expect(Number(h[0].PR_FINE)).toBeCloseTo(3.64, 3);
+    /**
+     * …but the line is PRICED, so its metal is settled in rupees (legs 08/09) and does not also move the party's
+     * fine balance: `TotCrFine += fine` only where the item amount is 0 (TR_WH_SALE.cs:7105-7107). This test
+     * previously expected PR_FINE 3.640 and a separate metal leg, which was the web's own arithmetic.
+     */
+    expect(Number(h[0].PR_FINE)).toBe(0);
     expect(Number(h[0].PR_ITM_AMT)).toBe(25844);
     expect(Number(h[0].PR_NET_AMT)).toBe(25844);
     expect(Number(h[0].PR_CHQ_AMT)).toBe(1000);
     expect(Number(h[0].PR_KASAR_AMT)).toBe(5);
+    // Derived, not typed: net 25844 − cheque 1000 − kasar 5 (the band's "Os Amt" row, TR_WH_SALE.cs:15641).
     expect(Number(h[0].PR_BILL_OS)).toBe(24839);
 
     const vchNo = String(created.vchNo).padStart(5, '0');
@@ -301,25 +308,16 @@ d('rate-cut settlement persistence', () => {
         vchNo,
       ),
     )) as Array<Record<string, unknown>>;
-    expect(acRows).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ AC_CODE: 'PURCGOLD', LD_CODE: 'CASH', dr: 25844, cr: 0 }),
-        expect.objectContaining({ AC_CODE: 'CASH', LD_CODE: 'PURCGOLD', dr: 0, cr: 25844 }),
-        expect.objectContaining({
-          AC_CODE: 'CASH',
-          LD_CODE: 'PURCGOLD',
-          IT_TYPE: 'G',
-          SIGN: '+',
-          fine: 3.64,
-          dr: 0,
-          cr: 0,
-        }),
-        expect.objectContaining({ AC_CODE: 'CASH', LD_CODE: 'BANK', dr: 1000, cr: 0 }),
-        expect.objectContaining({ AC_CODE: 'BANK', LD_CODE: 'CASH', dr: 0, cr: 1000 }),
-        expect.objectContaining({ AC_CODE: 'CASH', LD_CODE: 'KASAR', dr: 5, cr: 0 }),
-        expect.objectContaining({ AC_CODE: 'KASAR', LD_CODE: 'CASH', dr: 0, cr: 5 }),
-      ]),
-    );
+    // Wh_Sales_Ledr: 08 party Cr the purchase value (G '-' DR_FINE, here 0) / 09 slot 2 Dr; 37/38 the cheque
+    // paid; 51/52 the purchase kasar. No metal-only leg 29, because PR_FINE is 0.
+    expect(acRows).toEqual([
+      { AC_CODE: 'CASH', LD_CODE: 'PURCGOLD', IT_TYPE: 'G', SIGN: '-', fine: 0, dr: 0, cr: 25844 },
+      { AC_CODE: 'PURCGOLD', LD_CODE: 'CASH', IT_TYPE: 'A', SIGN: '', fine: 0, dr: 25844, cr: 0 },
+      { AC_CODE: 'CASH', LD_CODE: 'BANK', IT_TYPE: 'A', SIGN: '', fine: 0, dr: 1000, cr: 0 },
+      { AC_CODE: 'BANK', LD_CODE: 'CASH', IT_TYPE: 'A', SIGN: '', fine: 0, dr: 0, cr: 1000 },
+      { AC_CODE: 'CASH', LD_CODE: 'KASAR', IT_TYPE: 'A', SIGN: '', fine: 0, dr: 5, cr: 0 },
+      { AC_CODE: 'KASAR', LD_CODE: 'CASH', IT_TYPE: 'A', SIGN: '', fine: 0, dr: 0, cr: 5 },
+    ]);
 
     const rows = await rojmelRows();
     const types = rows.map((r) => String(r.LEDR_KEY).slice(21, 23));
@@ -331,10 +329,11 @@ d('rate-cut settlement persistence', () => {
     expect(reopened.lines).toHaveLength(0);
     expect(reopened.receivedLines).toHaveLength(1);
     expect(reopened.receivedTotals).toMatchObject({
-      fine: 3.64,
+      fine: 0,
       itemAmount: 25844,
       netAmount: 25844,
     });
+    expect(reopened.receivedLines[0].fine).toBeCloseTo(3.64, 3);
     expect(reopened.receivedPay).toMatchObject({
       chq: 1000,
       kasar: 5,
@@ -418,6 +417,31 @@ d('rate-cut settlement persistence', () => {
      * measured default. It no longer is.
      */
     expect(Number(h[0].CONV_RATE)).toBe(0);
+  });
+
+  it('keeps FINE_RATE the header rate only: a priced line without one leaves it 0 on the header and every leg', async () => {
+    /**
+     * `FINE_RATE` is `nFineRate`, typed or derived by BILL_TOTAL (TR_WH_SALE.cs:12975); the desktop never copies a
+     * line's rate there. The web used the first line's rate as a fallback, which put 7000 on the header and on
+     * legs 01/02 of a voucher whose header rate is blank.
+     */
+    await setBasis('G');
+    const created = await postRateCut(prisma, { scope, acCode: 'CASH', lines: [line] });
+    const h = (await header()) as any[];
+    expect(Number(h[0].FINE_RATE)).toBe(0);
+    const legs = (await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT right("LEDR_KEY",2) AS leg,"DR_AMT"::float8 dr,"CR_AMT"::float8 cr,"FINE_RATE"::float8 rate
+           FROM "AC_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2 ORDER BY "LEDR_KEY"`,
+        tenantId,
+        String(created.vchNo).padStart(5, '0'),
+      ),
+    )) as Array<Record<string, unknown>>;
+    // The priced line is sold for 10 × 7000 = 70000 on legs 01/02, at no header rate.
+    expect(legs).toEqual([
+      { leg: '01', dr: 70000, cr: 0, rate: 0 },
+      { leg: '02', dr: 0, cr: 70000, rate: 0 },
+    ]);
   });
 
   it('never overwrites an operator-supplied money leg', async () => {
@@ -762,17 +786,28 @@ d('rate-cut settlement persistence', () => {
       westPct: 1,
       lessTouch: 0.5,
       lessWt: 0.125,
-      rate: 7000,
-      amount: 7007,
+      /**
+       * TR_WH_SALE grid arithmetic (TR_WH_SALE.cs:9160-9860), evaluated by hand:
+       * - the line conversion decides the rate: Math.Round(7001 / 90.25 × 100, 2) = 7757.34;
+       * - per 10 g: Math.Round(10.635 × (7757.34 / 10)) = 8250;
+       * - net-wise labour with ghat (LBR_WITH_GHT blank = Y): Math.Round((10 + 1) × 37) = 407;
+       * - other charges quoted per 10 g become fine: 22 × 10 / 11 = 20.000;
+       * - net = labour + other + item amount = 407 + 22 + 8250 = 8679, with no tax back-out on the issue grid.
+       * The previous expectations (7007 / 111 / 6932) were the web's own arithmetic, not the desktop's.
+       */
+      rate: 7757.34,
+      amount: 8250,
       lbrType: 'N',
       lbrRate: 37,
-      lbrAmt: 111,
+      lbrAmt: 407,
       othAmt: 22,
       otherRate: 11,
-      otherFine: 0.33,
-      totalAmount: 7140,
+      otherFine: 20,
+      // TR_WH_SALE never computes grid column 43 for a new line, so `TOT_AMT` saves 0 while `NET_AMT` carries the
+      // value — Next25 034/1 holds TOT_AMT 0.00 beside NET_AMT 500.00 (contract C7).
+      totalAmount: 0,
       taxPct: 3,
-      netAmount: 6932,
+      netAmount: 8679,
       rateType: '1',
       convRate: 7001,
       convPct: 90.25,
@@ -786,7 +821,8 @@ d('rate-cut settlement persistence', () => {
       silverFine: 0.2,
       issueLcCode: LC,
     });
-    expect(reopened.lines[0].fine).toBeCloseTo(10.01, 3);
+    // (10 + 1) × (90 + 1) / 100 − less weight 0.125 + hallmark fine 0.75 (cols 24/25) = 10.635.
+    expect(reopened.lines[0].fine).toBeCloseTo(10.635, 3);
     expect(reopened.lines[0].isuRef).toMatchObject({
       yrcd: YEAR,
       dbcd: 'BUL',
@@ -811,17 +847,22 @@ d('rate-cut settlement persistence', () => {
       westPct: 2,
       lessTouch: 0.25,
       lessWt: 0.075,
-      rate: 6000,
-      amount: 23616,
+      /**
+       * Receive grid (CommPassTotal_Pr, TR_WH_SALE.cs:6857-7040): rate Math.Round(6001 / 80.75 × 100, 2) = 7431.58;
+       * Math.Round(3.924 × 7431.58) = 29162; gross-wise labour 5 × 12 = 60; other fine 25 / 9 = 2.778;
+       * total 60 + 25 + 29162 = 29247; with tax 5 %, net Math.Round(29247 / 105 × 100) = 27854.
+       */
+      rate: 7431.58,
+      amount: 29162,
       lbrType: 'G',
       lbrRate: 12,
-      lbrAmt: 50,
+      lbrAmt: 60,
       othAmt: 25,
       otherRate: 9,
-      otherFine: 0.11,
-      totalAmount: 23691,
+      otherFine: 2.778,
+      totalAmount: 29247,
       taxPct: 5,
-      netAmount: 22563,
+      netAmount: 27854,
       rateType: 'G',
       convRate: 6001,
       convPct: 80.75,
@@ -833,7 +874,8 @@ d('rate-cut settlement persistence', () => {
       silverFine: 0.1,
       issueLcCode: LC,
     });
-    expect(reopened.receivedLines[0].fine).toBeCloseTo(3.936, 3);
+    // (4 + 0.8) × (80 + 2 − less touch 0.25) / 100 = 3.924 (col 15).
+    expect(reopened.receivedLines[0].fine).toBeCloseTo(3.924, 3);
     expect(reopened.receivedLines[0].isuRef).toMatchObject({
       yrcd: YEAR,
       dbcd: 'BUL',

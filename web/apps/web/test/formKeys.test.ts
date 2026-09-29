@@ -108,6 +108,13 @@ describe('desktop global function-key decision table', () => {
       key: 'F6',
     });
     expect(actions.F6?.id).toBe('wholesale-sales');
+    // Both open TR_WH_SALE, each on its own book family: F6 on WH SALES (ShoF6WhSales_Click), Ctrl+F6 on
+    // RATE CUT (ShoCtrlF6RateCut_Click, `CurBookHelp("RATE CUT")`, MDI_FORM.cs:16107-16121).
+    const navigate = vi.fn();
+    const routed = desktopGlobalFormKeyActions(navigate);
+    routed.F6?.run();
+    routed['Ctrl+F6']?.run();
+    expect(navigate.mock.calls).toEqual([['/txn/wholesale-sale'], ['/txn/rate-cut']]);
     // F10 is NOT bound by the desktop: VK 121 has no branch. It must stay inert.
     expect(DESKTOP_BOUND_VK).not.toContain(121);
     expect(resolveFormKey({ key: 'F10', registeredKeys: FORM_KEYS })).toEqual({ type: 'none' });

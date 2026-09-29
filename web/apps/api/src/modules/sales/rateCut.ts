@@ -1,9 +1,21 @@
 import { withTenant } from '@datacare/db';
+import {
+  round,
+  roundHalfEven,
+  wholesaleBand,
+  wholesaleGridTotals,
+  wholesaleIssueLine,
+  wholesaleReceiveLine,
+  type WholesaleLineResult,
+  type WholesaleLineSettings,
+} from '@datacare/core';
 import { settleMoneyMetal, type SettlementResult } from './settlement.js';
 import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
 import { buildRateCutRojmel, rojmelMetalFor } from '../shared/rojmel.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
+import { voucherTimestamp } from '../vouchers/lifecycle.js';
 import { postVoucherTx, reverseVoucherTx, type LedgerLine } from '../posting/posting.js';
+import { issueTagTx, restoreTagTx, type ResolvedTagIdentity, type TagKey } from '../stock/stock.js';
 
 /**
  * RATE CUT (desktop book 064, VCH_TYPE `RCUT`, BOOK_NAME `RATE CUT`).
@@ -15,14 +27,17 @@ import { postVoucherTx, reverseVoucherTx, type LedgerLine } from '../posting/pos
  * web engine already uses (manufacturing/karigar.ts, finance/fineJv.ts).
  *
  * Header → RATE_CUT_DATA (95 cols, verified live), line items → RATE_CUT_ISU (94 cols, verified live),
- * ledger → AC_DATA via postVoucherTx (assertBalanced + period-lock run inside).
+ * ledger → AC_DATA via postVoucherTx (assertBalanced + period-lock run inside), stock → MAIN_STOCK.
  *
- * LEG STRUCTURE: this module follows the CANONICAL split-leg structure of
- * `Ac_Ledr.Wh_Sales_Ledr` (spec §3.4) — a separate money VALUE leg (IT_TYPE 'A') and a separate
- * metal-only leg (IT_TYPE 'G'/'S', DR=CR=0). It deliberately does NOT reproduce the older migrated
- * rows in this DB (spec §7.3), which folded money+metal onto one row and were produced by a
- * different/older ledger build. Money magnitudes still reconcile to the observed voucher
- * (14965 value / 15800 cash / 15 kasar ⇒ ΣDR = ΣCR = 30780).
+ * LEG STRUCTURE: `Ac_Ledr.Wh_Sales_Ledr` (Ac_Ledr.cs:613-778), leg for leg, keyed by the desktop's own
+ * two-digit leg codes. The value of fine that is CUT rides on the money leg itself — leg 01 is party Dr
+ * `DR_AMT + SL_ITM_AMT` with IT_TYPE 'G', SIGN '+' and FINE_WT `CR_FINE` — while the metal the voucher
+ * HANDLES has its own metal-only legs 23 (issued, '-') and 29 (received, '+'). An earlier revision posted a
+ * web-invented "value" leg (IT_TYPE 'A') plus a positional metal leg, which is no desktop leg at all.
+ *
+ * The observed Live24 voucher 064/00004 (spec §4.1: 14965 / 15800 / 15) is a PURCHASE-side cut, and its six
+ * rows are exactly legs 08/09 (Dr fine 2.050 × 7300), 45/46 (cash paid) and 51/52 (purchase kasar). Contract:
+ * parity-plan-2026-09-10/evidence/implementation-2026-09-29-x16/contract.md.
  *
  * ACCOUNT CONFIG — now sourced from BOOK_DETL, as the desktop does.
  *
@@ -61,12 +76,33 @@ const RCT_BOOK = 'RTC'; // distinct from cash-receipt book 'RCT' (avoid voucher-
 const RCT_BOOK_NAME = 'RATE CUT';
 const RCT_TYPE = 'RCUT';
 const BULLION_SALE_MAIN_BOOKS = new Set(['BUL WH SALE', 'BUL SALE']);
+/**
+ * Desktop TR_WH_SALE serves two books, and the MENU decides which: "Wh Sales" opens it on `WH SALES` (book 034)
+ * and "Rate Cut" on `RATE CUT` (book 064), each through `CurBookHelp` (MDI_FORM.cs:8038-8046, 8110-8118) and each
+ * under its own user right. Before, `/rate-cut` accepted any book — including the cash Receipt book `RCT`, which
+ * the Rate Cut screen preselected, so its cash/kasar slots received the metal value.
+ */
+const WORKFLOW_MAIN_BOOK = { 'rate-cut': 'RATE CUT', 'wholesale-sale': 'WH SALES' } as const;
+/** `Wh_Sale_Stk` moves stock for these books only, and only when `BOOK_INOUT` is 'O' (Ac_Stock.cs:151,153). */
+const STOCK_MAIN_BOOKS = new Set([
+  'WH SALES',
+  'RATE CUT',
+  'VP PARCEL',
+  'BUL WH SALE',
+  'TOUR SALES',
+]);
 
 /** Classification for one voucher, read from its own book row. */
 export interface BookClassification {
   vchType: string;
   bookName: string;
   inoutType: string;
+  /** `BOOK_DATA.DATA_TYPE`, which `Wh_Sale_Stk` stamps on every stock row (`B.DATA_TYPE`). */
+  dataType: string;
+  /** `BOOK_DATA.BOOK_NAME`, the display name the delete audit carries (TR_WH_SALE.cs:13569). */
+  displayName: string;
+  /** False when the book has no BOOK_DATA row and the classification is this module's fallback. */
+  configured: boolean;
 }
 
 /** Resolve VCH_TYPE/BOOK_NAME from BOOK_DATA, falling back to the rate-cut constants. */
@@ -77,29 +113,57 @@ export async function resolveBookClassification(
   lcCode: string,
   coBook: string,
 ): Promise<BookClassification> {
-  const rows: Array<{ sname: string | null; main: string | null; inout: string | null }> =
-    await tx.$queryRawUnsafe(
-      `SELECT "BOOK_SNAME" AS sname,"MAIN_BOOK" AS main,"BOOK_INOUT" AS inout FROM "BOOK_DATA"
+  const rows: Array<{
+    sname: string | null;
+    main: string | null;
+    inout: string | null;
+    dtype: string | null;
+    display: string | null;
+  }> = await tx.$queryRawUnsafe(
+    `SELECT "BOOK_SNAME" AS sname,"MAIN_BOOK" AS main,"BOOK_INOUT" AS inout,
+            "DATA_TYPE" AS dtype,"BOOK_NAME" AS display FROM "BOOK_DATA"
       WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4`,
-      tenantId,
-      coCode,
-      lcCode,
-      coBook,
-    );
+    tenantId,
+    coCode,
+    lcCode,
+    coBook,
+  );
   const r = rows[0];
   return {
     vchType: String(r?.sname ?? '').trim() || RCT_TYPE,
     bookName: String(r?.main ?? '').trim() || RCT_BOOK_NAME,
     inoutType: String(r?.inout ?? '').trim() || 'O',
+    dataType: String(r?.dtype ?? '').trim() || 'A',
+    displayName: String(r?.display ?? '').trim(),
+    configured: rows.length > 0,
   };
 }
 
-type RateCutBookGuard = 'rate-cut' | 'bullion-sale';
+type RateCutBookGuard = 'rate-cut' | 'wholesale-sale' | 'bullion-sale';
+/**
+ * Which desktop form writes the rows. Both post through the same three routines (`Wh_Sales_Ledr`,
+ * `Wh_Sales_Rojmel`, `Wh_Sale_Stk`), but their line rows and tax handling differ: TR_WH_SALE writes
+ * `TAX_PRC`/`SL_TAX_AMT` 0 and its own receive-row shape, TR_BUL_SALE carries GST and the booking references.
+ */
+type RateCutWorkflow = 'wholesale' | 'bullion';
 
 const normalizeMainBook = (value: unknown): string =>
   String(value ?? '')
     .trim()
     .toUpperCase();
+
+/**
+ * Whether this voucher moves stock: the `LEFT JOIN BOOK_DATA … WHERE MAIN_BOOK IN (…) AND BOOK_INOUT = 'O'` of
+ * `Wh_Sale_Stk`. A book with no BOOK_DATA row matches nothing there, so the fallback classification moves
+ * nothing either.
+ */
+export function bookMovesStock(classification: BookClassification): boolean {
+  return (
+    classification.configured &&
+    STOCK_MAIN_BOOKS.has(normalizeMainBook(classification.bookName)) &&
+    normalizeMainBook(classification.inoutType) === 'O'
+  );
+}
 
 function assertRateCutBookGuard(
   classification: BookClassification,
@@ -122,19 +186,42 @@ function assertRateCutBookGuard(
       `book ${coBook} is ${classification.bookName}; use the bullion sale workflow`,
     );
   }
+  if (mainBook !== WORKFLOW_MAIN_BOOK[guard]) {
+    const other = (Object.keys(WORKFLOW_MAIN_BOOK) as Array<keyof typeof WORKFLOW_MAIN_BOOK>).find(
+      (workflow) => WORKFLOW_MAIN_BOOK[workflow] === mainBook,
+    );
+    throw new RateCutValidationError(
+      other
+        ? `book ${coBook} is ${classification.bookName}; use the ${other === 'rate-cut' ? 'rate cut' : 'wholesale sale'} workflow`
+        : `book ${coBook} is ${classification.bookName || 'unclassified'}; use a ${
+            guard === 'rate-cut' ? 'rate cut' : 'wholesale sale'
+          } book`,
+    );
+  }
 }
 
 /**
- * BOOK_DETL SR_NO positions for the accounts this family posts to, as measured on books 034 and 064.
- * Keeping the numbers here rather than inline keeps the mapping checkable against the table.
+ * BOOK_DETL SR_NO positions for the accounts this family posts to, as measured on books 034 and 064 and as
+ * `Wh_Sales_Ledr` joins them (`B.SR_NO = n`). Keeping the numbers here rather than inline keeps the mapping
+ * checkable against the table.
  */
 const BOOK_DETL_SR = {
   goldAc: 1,
   purchaseAc: 2,
   cashAc: 3,
   kasarAc: 4,
+  /** KASAR AVAK on book 064 — the Rojmel's purchase-kasar row (type 26) names it. */
+  purchaseKasarAc: 5,
   lbrAc: 6,
+  /** LABOUR EXP — legs 19/20 (purchase labour). */
+  lbrExpAc: 7,
+  /** SALES SILVER — the silver twins of the sale legs (04/05, 13, 25/26). */
+  silverSaleAc: 8,
+  /** PURCHASE SILVER — the silver twins of the purchase legs (06, 11/12, 31/32). */
+  silverPurcAc: 9,
   othAc: 11,
+  /** FINE KASAR — the Rojmel's kasar-fine rows (types 07/08). */
+  fineKasarAc: 12,
 } as const;
 
 /**
@@ -296,17 +383,44 @@ export interface RateCutLine {
    */
   itemName?: string;
   tagNo?: string;
+  /**
+   * A fine that is already known — a tag's stored `ITM_FINE`, which TR_WH_SALE copies onto the line
+   * (TR_WH_SALE.cs:10697) and keeps unless the purity is changed or a hallmark fine is entered.
+   */
+  fine?: number;
+  /**
+   * The tag INSTANCE (`VCH_SRNO`) when a tag number exists more than once. Normally resolved from the tag
+   * itself; an ambiguous tag without it is refused rather than guessed.
+   */
+  vchSrno?: number;
+  /** `TBL_CODE` — the counter the piece stands on. A tag line takes it from the tag. */
+  tblCode?: string;
+  /** `ITM_SIZE`. A tag line takes it from the tag. */
+  itemSize?: string;
+  /** `HM_ID` / `HM_ID_WT` — hallmark id and its weight. A tag line takes them from the tag. */
+  hallmarkId?: string;
+  hallmarkIdWt?: number;
+  /** `KR_NAME` — the karigar who made the piece. A tag line takes it from the tag. */
+  karigarName?: string;
   designNo?: string;
   pcs?: number;
   grossWt?: number;
   othWt?: number;
   netWt?: number; // explicit net wt; if omitted, derived as gross − oth
   ghtPct?: number;
+  /**
+   * Explicit ghat WEIGHT (`ITM_GHT_WT`), winning over `ghtPct`. The receive grid types the weight (it has no
+   * ghat %), and a reopened line carries only the stored weight — without this an edit lost the ghat.
+   * Honoured by the TR_WH_SALE grid arithmetic (wholesale and rate cut); the bullion grid keeps `ghtPct`.
+   */
+  ghtWt?: number;
   touch?: number;
   westPct?: number; // → fine
   rate?: number;
   rateType?: 'P' | '1' | 'K' | 'G'; // → itmAmt
-  lbrType?: 'P' | 'N' | 'K' | 'G';
+  /** '' is a real value: a tag whose labour basis is blank keeps it blank (Next23 034/4). */
+  lbrType?: 'P' | 'N' | 'K' | 'G' | '';
+  /** With a rate, TR_WH_SALE computes the labour amount from the basis weight; the typed amount is replaced. */
   lbrRate?: number;
   lbrAmt?: number;
   othAmt?: number;
@@ -331,12 +445,17 @@ export interface RateCutPay {
 }
 
 export interface RateCutAccounts {
-  goldAc?: string; // metal VALUE contra (BOOK_DETL SR1) — default 'SALEGOLD'
-  purchaseAc?: string; // receive/purchase-side contra (BOOK_DETL SR2)
-  cashAc?: string; // BOOK_DETL SR3 — default 'CASH'
-  kasarAc?: string; // BOOK_DETL SR4 — default 'KASAR'
-  lbrAc?: string; // BOOK_DETL SR6 — default 'LABOUR'
-  othAc?: string; // BOOK_DETL SR11 — default 'OTHER'
+  goldAc?: string; // BOOK_DETL SR1 — sale (gold) control
+  purchaseAc?: string; // BOOK_DETL SR2 — purchase (gold) control
+  cashAc?: string; // BOOK_DETL SR3 — cash
+  kasarAc?: string; // BOOK_DETL SR4 — kasar
+  purchaseKasarAc?: string; // BOOK_DETL SR5 — purchase kasar (Rojmel type 26)
+  lbrAc?: string; // BOOK_DETL SR6 — labour income
+  lbrExpAc?: string; // BOOK_DETL SR7 — labour expense
+  silverSaleAc?: string; // BOOK_DETL SR8 — sale (silver) control
+  silverPurcAc?: string; // BOOK_DETL SR9 — purchase (silver) control
+  othAc?: string; // BOOK_DETL SR11 — other charges
+  fineKasarAc?: string; // BOOK_DETL SR12 — fine kasar (Rojmel types 07/08)
 }
 
 export interface RateCutInput {
@@ -348,6 +467,8 @@ export interface RateCutInput {
   mobile?: string;
   bankName?: string;
   scope: VoucherScope;
+  /** The acting user (`MAIN_USER`), taken from the session by the route — never from the request body. */
+  mainUser?: string;
   vchDate?: Date | string;
   acCode: string; // the customer / party
   acName?: string;
@@ -389,13 +510,15 @@ export interface RateCutResult {
   vchNo: number;
   fine: number;
   netAmt: number;
+  /** What the voucher settled, so a screen can show the derived side (e.g. 0.541 cut → ₹3517). */
+  settlement?: {
+    fineRate: number;
+    drAmt: number;
+    crAmt: number;
+    drFine: number;
+    crFine: number;
+  };
 }
-
-/**
- * No invented defaults. These codes do not exist in AC_MAST — writing them produced ledger rows whose contra
- * pointed nowhere. Accounts come from BOOK_DETL via resolveBookAccounts, or from explicit input.
- */
-const DEFAULT_ACCOUNTS: RateCutAccounts = {};
 
 // ────────────────────────────────────────────────────────────────────────────
 // COMPUTE + LEG BUILD (pure, exported for unit tests)
@@ -412,10 +535,81 @@ export interface ComputedLine {
   totAmt: number;
   netAmt: number;
   itType: 'G' | 'S';
+  /** OFine: other charges quoted per metal unit, converted into fine (TR_WH_SALE col 39 / receive col 28). */
+  otherFine: number;
+  /** The part of `othAmt` that became fine and so leaves the money totals (`SlOthAmtLess`). */
+  othAmtInFine: number;
 }
 
-/** Run the spec §2 per-line math for one grid row. */
-export function computeLine(l: RateCutLine, voucherItType: 'G' | 'S'): ComputedLine {
+/**
+ * Which grid arithmetic a line follows.
+ *
+ * `wholesale` is the TR_WH_SALE grid (`@datacare/core` wholesaleLine.ts), used by the Wholesale Sale and Rate
+ * Cut workflows. Without it the older generic rule applies; TR_BUL_SALE's own grid (McxRate, Premium, AdjWt) has
+ * not been derived yet, so the bullion workflow keeps that rule.
+ */
+export interface LineMath {
+  wholesale?: WholesaleLineSettings;
+  side?: 'issue' | 'receive';
+}
+
+function fromWholesale(result: WholesaleLineResult, itType: 'G' | 'S'): ComputedLine {
+  return {
+    netWt: result.netWt,
+    ghtWt: result.ghtWt,
+    fine: result.fine,
+    rate: result.rate,
+    itmAmt: result.itemAmount,
+    lbrAmt: result.labourAmount,
+    othAmt: result.otherAmount,
+    totAmt: result.totalAmount,
+    netAmt: result.netAmount,
+    itType,
+    otherFine: result.otherFine,
+    othAmtInFine: result.otherAmountInFine,
+  };
+}
+
+/** Run the per-line math for one grid row. */
+export function computeLine(
+  l: RateCutLine,
+  voucherItType: 'G' | 'S',
+  math: LineMath = {},
+): ComputedLine {
+  const itType = l.itType ?? voucherItType;
+  if (math.wholesale) {
+    const input = {
+      pcs: l.pcs,
+      grossWt: l.grossWt,
+      othWt: l.othWt,
+      netWt: l.netWt,
+      ghtPct: l.ghtPct,
+      ghtWt: hasValue(l.ghtWt) ? Number(l.ghtWt) : undefined,
+      touch: l.touch,
+      westPct: l.westPct,
+      lessWt: l.lessWt,
+      hallmarkFine: hasValue(l.hallmarkFine) ? Number(l.hallmarkFine) : undefined,
+      lessTouch: hasValue(l.lessTouch) ? Number(l.lessTouch) : undefined,
+      fine: l.fine,
+      rate: l.rate,
+      rateType: l.rateType,
+      convRate: hasValue(l.convRate) ? Number(l.convRate) : undefined,
+      convPct: hasValue(l.convPct) ? Number(l.convPct) : undefined,
+      lbrType: l.lbrType,
+      lbrRate: l.lbrRate,
+      lbrAmt: l.lbrAmt,
+      othAmt: l.othAmt,
+      otherRate: hasValue(l.otherRate) ? Number(l.otherRate) : undefined,
+      otherFine: hasValue(l.otherFine) ? Number(l.otherFine) : undefined,
+      taxPct: l.taxPct,
+    };
+    return fromWholesale(
+      math.side === 'receive'
+        ? wholesaleReceiveLine(input, math.wholesale)
+        : wholesaleIssueLine(input, math.wholesale),
+      itType,
+    );
+  }
   const nwt = l.netWt != null ? round3(num(l.netWt)) : netWtOf(num(l.grossWt), num(l.othWt));
   const ght = ghtWtOf(nwt, num(l.ghtPct));
   const f = fine(nwt, ght, num(l.touch), num(l.westPct));
@@ -435,17 +629,29 @@ export function computeLine(l: RateCutLine, voucherItType: 'G' | 'S'): ComputedL
     othAmt: oth,
     totAmt: tot,
     netAmt: net,
-    itType: l.itType ?? voucherItType,
+    itType,
+    otherFine: 0,
+    othAmtInFine: 0,
   };
 }
 
 export interface RateCutTotals {
   itType: 'G' | 'S';
+  /**
+   * SL_FINE / PR_FINE — the party's fine movement.
+   *
+   * On the TR_WH_SALE grid this is the fine of UNPRICED lines plus the other fine (`TotDrFine += fine` only where
+   * the item amount is 0, TR_WH_SALE.cs:8344-8346). A priced line is settled in rupees on leg 01; counting its
+   * metal on leg 23 as well charged the party twice.
+   */
   totalFine: number;
+  /** Every line's fine: the metal that moves in stock, priced or not. */
+  handledFine: number;
   totalItmAmt: number;
   totalLbr: number;
   totalOth: number;
   totalTot: number;
+  /** Σ line net, less other charges that became fine. */
   totalNet: number;
   totalTax: number;
   rate: number; // representative FINE_RATE for the metal leg (first line; single-rate is the common case)
@@ -462,171 +668,323 @@ export function rollup(
    * Optional and applied only as a fallback, so a voucher whose lines DO carry rates is unaffected.
    */
   voucherFineRate?: number,
+  math: LineMath = {},
 ): RateCutTotals {
-  const computed = lines.map((l) => computeLine(l, voucherItType));
+  const computed = lines.map((l) => computeLine(l, voucherItType, math));
   const sum = (f: (c: ComputedLine) => number): number => computed.reduce((s, c) => s + f(c), 0);
+  // Metal leg FINE_RATE: the per-voucher rate. Common case = one rate; first line is representative. When no
+  // line carries one, the voucher's own rate is used — see `RateCutInput.fineRate`.
+  const rate = (computed.length ? computed[0]!.rate : 0) || num(voucherFineRate);
+  if (math.wholesale) {
+    const grid = wholesaleGridTotals(
+      computed.map((c) => ({
+        netWt: c.netWt,
+        ghtWt: c.ghtWt,
+        fine: c.fine,
+        rate: c.rate,
+        itemAmount: c.itmAmt,
+        labourAmount: c.lbrAmt,
+        otherAmount: c.othAmt,
+        otherFine: c.otherFine,
+        otherAmountInFine: c.othAmtInFine,
+        totalAmount: c.totAmt,
+        netAmount: c.netAmt,
+      })),
+    );
+    return {
+      itType: voucherItType,
+      totalFine: grid.fine,
+      handledFine: grid.handledFine,
+      totalItmAmt: grid.itemAmount,
+      totalLbr: grid.labourAmount,
+      totalOth: grid.otherAmount,
+      totalTot: round(
+        sum((c) => c.totAmt),
+        2,
+      ),
+      totalNet: grid.netAmount,
+      // Only the receive grid backs tax out (col 33); an issued line's TOT_AMT is 0, so it carries no tax figure.
+      totalTax:
+        math.side === 'receive'
+          ? round(
+              sum((c) => c.totAmt - c.netAmt),
+              2,
+            )
+          : 0,
+      rate,
+      computed,
+    };
+  }
+  const totalFine = round3(sum((c) => c.fine));
   return {
     itType: voucherItType,
-    totalFine: round3(sum((c) => c.fine)),
+    totalFine,
+    handledFine: totalFine,
     totalItmAmt: round0(sum((c) => c.itmAmt)),
     totalLbr: round0(sum((c) => c.lbrAmt)),
     totalOth: round0(sum((c) => c.othAmt)),
     totalTot: round0(sum((c) => c.totAmt)),
     totalNet: round0(sum((c) => c.netAmt)),
     totalTax: round0(sum((c) => c.totAmt - c.netAmt)),
-    // Metal leg FINE_RATE: the per-voucher rate. Common case = one rate; first line is representative. When no
-    // line carries one, the voucher's own rate is used — see `RateCutInput.fineRate`.
-    rate: (computed.length ? computed[0]!.rate : 0) || num(voucherFineRate),
+    rate,
     computed,
   };
 }
 
+/**
+ * The RATE_CUT_DATA figures `Wh_Sales_Ledr` reads (Ac_Ledr.cs:613-778). Every leg is a function of these
+ * header columns and the book's BOOK_DETL slots — never of the lines directly — which is why a header-only
+ * rate cut (25 of 25 real vouchers on book 064) posts as completely as a lined wholesale sale.
+ */
+export interface RateCutPostingFigures {
+  /** Header `IT_TYPE`: 'G' posts the gold legs on slots 1/2, 'S' the silver twins on slots 8/9. */
+  itType: 'G' | 'S';
+  /** Header `FINE_RATE`, carried on the money legs 01/02 (04/05) and 08 (11). */
+  fineRate: number;
+  /** Settlement: `DR_AMT` (money for the fine cut) / `CR_AMT`, `CR_FINE` (fine cut) / `DR_FINE`. */
+  drAmt: number;
+  crAmt: number;
+  drFine: number;
+  crFine: number;
+  /** Metal the voucher handles: issued (`SL_FINE`) and received (`PR_FINE`) line fine. */
+  slFine: number;
+  prFine: number;
+  slItmAmt: number;
+  prItmAmt: number;
+  slLbrAmt: number;
+  slOthAmt: number;
+  prLbrAmt: number;
+  prOthAmt: number;
+  /** Received column of the settlement band (TR_WH_SALE.cs:14905). */
+  slChqAmt: number;
+  slCardAmt: number;
+  slCashAmt: number;
+  slKasarAmt: number;
+  /** Payment column of the settlement band (TR_WH_SALE.cs:14904). */
+  prChqAmt: number;
+  prCardAmt: number;
+  prCashAmt: number;
+  prKasarAmt: number;
+}
+
 interface LedgerCtx {
   customer: string;
-  itType: 'G' | 'S';
-  totals: RateCutTotals;
-  receivedTotals?: RateCutTotals;
-  pay: Required<Pick<RateCutPay, 'cash' | 'chq' | 'card' | 'kasar'>> & {
-    bankAc: string;
-    cardAc: string;
-  };
-  receivedPay?: Required<Pick<RateCutPay, 'cash' | 'chq' | 'card' | 'kasar'>> & {
-    bankAc: string;
-    cardAc: string;
-  };
-  accounts: Required<RateCutAccounts>;
+  figures: RateCutPostingFigures;
+  /** BOOK_DETL slots of the book. A slot is required only when a leg that uses it fires. */
+  accounts: RateCutAccounts;
+  /** Cheque / card accounts of the received (sale) side and of the payment (purchase) side. */
+  bankAc: string;
+  cardAc: string;
+  receivedBankAc: string;
+  receivedCardAc: string;
+  /** `CO_SET.TRAD_FINE` = 'Y' adds the mirrored fine legs 03/10/24/30 (06/13/26/32 for silver). */
+  tradeFine: boolean;
   vchDate: Date;
   /** Classification read from the voucher's own BOOK_DATA row, never a module constant. */
   vchType: string;
   bookName: string;
+  /** For the missing-slot message. */
+  coBook: string;
+  billNo?: string;
+  hdVchNo?: string;
 }
 
+/** Money to the paisa: the header columns are numeric(18,2). Half-up on the decimal value, not the float. */
+const money2 = (n: unknown): number => round(num(n), 2);
+
 /**
- * Build the balanced AC_DATA legs for a rate-cut voucher (canonical split-leg, spec §3.4).
+ * Build the AC_DATA legs of one wholesale / rate-cut voucher — `Ac_Ledr.Wh_Sales_Ledr`, leg for leg.
  *
- * Every economic event is double-posted as a contra pair (AC_CODE on the party row, LD_CODE = the
- * contra account, mirrored on the other row) — so Σ DR = Σ CR by construction and assertBalanced
- * always passes. LD_CODE is set EXPLICITLY so enrichLedgerLine (which only fills LD_CODE when null)
- * preserves the contra account instead of overwriting it with the line ordinal.
+ * P is the party, Sn the book's BOOK_DETL slot n. Gold legs fire for header IT_TYPE 'G'; silver twins use
+ * slots 8/9 for 'S'. TF legs fire only when `CO_SET.TRAD_FINE` is 'Y' (MS_OPNCOMP.cs:813-816: blank is N).
  *
- *   (a) VALUE  (money, IT_TYPE 'A'):   customer DR itmAmt   /   goldAc  CR itmAmt
- *   (b) METAL  (IT_TYPE 'G'/'S'):      customer SIGN '-' FINE_WT totalFine FINE_RATE rate (DR=CR=0)
- *   (c) CASH   (if > 0):               cashAc   DR cash     /   customer CR cash
- *   (c) CHEQUE (if > 0):               bankAc   DR chq      /   customer CR chq
- *   (c) CARD   (if > 0):               cardAc   DR card     /   customer CR card
- *   (d) KASAR  (if > 0):               customer DR kasar    /   kasarAc CR kasar
- *   (e) LABOUR (if > 0):               customer DR lbr      /   lbrAc   CR lbr
- *   (e) OTHER  (if > 0):               customer DR oth      /   othAc   CR oth
+ *   01/04  P Dr  DR_AMT+SL_ITM_AMT   G/S '+' CR_FINE, FINE_RATE   | 02/05  S1/S8 Cr same, FINE_RATE
+ *   03/06  TF  S2/S9 '-' CR_FINE                                  | 10/13  TF  S1/S8 '+' DR_FINE
+ *   08/11  P Cr  CR_AMT+PR_ITM_AMT   G/S '-' DR_FINE, FINE_RATE   | 09/12  S2/S9 Dr same, FINE_RATE 0
+ *   15/16  SL_LBR  P Dr / S6 Cr      17/18  SL_OTH  P Dr / S11 Cr
+ *   19/20  PR_LBR  P Cr / S7 Dr      21/22  PR_OTH  P Cr / S11 Dr
+ *   23/25  P '-' SL_FINE on S1/S8    (TF 24/26 S1/S8 '+')
+ *   29/31  P '+' PR_FINE on S2/S9    (TF 30/32 S2/S9 '-')
+ *   35/36  SL_CHQ  P Cr / bank Dr    37/38  PR_CHQ  P Dr / bank Cr
+ *   39/40  SL_CARD P Cr / card Dr    41/42  PR_CARD P Dr / card Cr
+ *   43/44  SL_CASH P Cr / S3 Dr      45/46  PR_CASH P Dr / S3 Cr
+ *   47/48  SL_KASAR > 0  P Cr / S4 Dr     49/50  SL_KASAR < 0  P Dr / S4 Cr (absolute)
+ *   51/52  PR_KASAR      P Dr / S4 Cr
  *
- * Worked example (spec §4.1): itmAmt 14965, cash 15800, kasar 15 ⇒
- *   Σ DR = 14965(cust) + 15800(cash) + 15(cust)  = 30780
- *   Σ CR = 14965(gold) + 15800(cust) + 15(kasar) = 30780   ✓ balanced
- * The customer's three legs net to the running-balance movement (DR 14965 + DR 15 − CR 15800 = CR 820),
- * i.e. value owed minus settlement, exactly the rate-cut model.
+ * `FINE_RATE` is carried only by 01/02 (04/05) and 08 (11); every other leg writes 0, including the metal-only
+ * legs — the web wrote the rate there (6500 on 034/5 where the desktop has 0). `PARTY_AC_CODE` is set by the
+ * caller passing `partyAc`: the party on its own legs, '' on contra legs.
+ *
+ * Money legs come in equal Dr/Cr pairs and metal-only legs carry no money, so Σ DR = Σ CR by construction.
+ * A slot is looked up only when a leg that uses it fires; a missing slot refuses the voucher, because the
+ * desktop's `INSERT … JOIN BOOK_DETL` would silently drop the leg and leave the voucher unbalanced.
+ *
+ * Deferred (contract "Open items"): 07/14 silver fine on a gold voucher, 27/28 and 33/34 fine kasar, 53/54
+ * interest fine, 55/56 tax, 57-60 silver amounts, 61-64 TDS and 65-68 amount-only vouchers.
  */
 export function buildRateCutLedger(key: VoucherKey, ctx: LedgerCtx): LedgerLine[] {
-  const { customer, itType, totals, receivedTotals, pay, receivedPay, accounts, vchDate } = ctx;
-  const base = { ...key, VCH_TYPE: ctx.vchType, VCH_DATE: vchDate };
-  const money = (acCode: string, ldCode: string, dr: number, cr: number): LedgerLine => ({
-    ...base,
-    AC_CODE: acCode,
-    LD_CODE: ldCode,
-    IT_TYPE: 'A',
-    DR_AMT: round0(dr),
-    CR_AMT: round0(cr),
-  });
+  const f = ctx.figures;
+  const P = ctx.customer;
+  const gold = f.itType !== 'S';
+  const code = (goldLeg: number, silverLeg: number): number => (gold ? goldLeg : silverLeg);
+  const saleSlot: keyof RateCutAccounts = gold ? 'goldAc' : 'silverSaleAc';
+  const purchaseSlot: keyof RateCutAccounts = gold ? 'purchaseAc' : 'silverPurcAc';
+  const slot = (field: keyof RateCutAccounts): string => {
+    const configured = String(ctx.accounts[field] ?? '').trim();
+    if (!configured) {
+      throw new RateCutValidationError(
+        `book ${ctx.coBook} has no BOOK_DETL account configured at SR_NO ${BOOK_DETL_SR[field]} (${field})`,
+      );
+    }
+    return configured;
+  };
+  const base = {
+    ...key,
+    VCH_TYPE: ctx.vchType,
+    VCH_DATE: ctx.vchDate,
+    ...(ctx.billNo ? { BILL_NO: ctx.billNo } : {}),
+    ...(ctx.hdVchNo ? { HD_VCH_NO: ctx.hdVchNo } : {}),
+  };
   const lines: LedgerLine[] = [];
-  const itmAmtT = totals.totalItmAmt;
-  const receivedItmAmt = receivedTotals?.totalItmAmt ?? 0;
-
-  // (a) VALUE — customer owes the fixed metal value; gold/sales account is the contra.
-  if (itmAmtT > 0) {
-    lines.push(money(customer, accounts.goldAc, itmAmtT, 0)); // customer DR
-    lines.push(money(accounts.goldAc, customer, 0, itmAmtT)); // goldAc  CR
-  }
-
-  // (b) METAL-ONLY (karigar-style) — the fixed fine leaves the customer's unfixed-gold position.
-  if (totals.totalFine > 0) {
+  const leg = (legType: number, row: Record<string, unknown>): void => {
     lines.push({
       ...base,
-      AC_CODE: customer,
-      LD_CODE: accounts.goldAc,
-      IT_TYPE: itType,
-      SIGN: '-',
-      FINE_WT: totals.totalFine,
-      FINE_RATE: totals.rate,
+      IT_TYPE: 'A',
+      SIGN: '',
+      FINE_WT: 0,
+      FINE_RATE: 0,
       DR_AMT: 0,
       CR_AMT: 0,
-    });
-  }
+      ...row,
+      legType,
+    } as LedgerLine);
+  };
+  /** A party-side money leg and its contra, in the desktop's order (party leg first). */
+  const pair = (
+    partyLeg: number,
+    contraLeg: number,
+    contra: string,
+    partySide: 'DR' | 'CR',
+    amount: number,
+  ): void => {
+    const value = money2(amount);
+    const partyCol = partySide === 'DR' ? 'DR_AMT' : 'CR_AMT';
+    const contraCol = partySide === 'DR' ? 'CR_AMT' : 'DR_AMT';
+    leg(partyLeg, { AC_CODE: P, LD_CODE: contra, [partyCol]: value });
+    leg(contraLeg, { AC_CODE: contra, LD_CODE: P, [contraCol]: value });
+  };
 
-  // Receive/purchase side. This mirrors the existing split-leg style used above while writing the
-  // purchase/control account from BOOK_DETL SR2. The desktop stores the receive material in
-  // RATE_CUT_REC and the header PR_* totals; without these AC_DATA legs a receive-only rate cut would
-  // reopen with rows but have no accounting movement.
-  if (receivedItmAmt > 0) {
-    lines.push(money(accounts.purchaseAc, customer, receivedItmAmt, 0));
-    lines.push(money(customer, accounts.purchaseAc, 0, receivedItmAmt));
-  }
-  if ((receivedTotals?.totalFine ?? 0) > 0) {
-    lines.push({
-      ...base,
-      AC_CODE: customer,
-      LD_CODE: accounts.purchaseAc,
-      IT_TYPE: itType,
+  // ---- the fine cut into money, and the priced lines (01/02, 04/05) ----------------------------------
+  const saleValue = money2(f.drAmt + f.slItmAmt);
+  if (saleValue !== 0) {
+    const account = slot(saleSlot);
+    leg(code(1, 4), {
+      AC_CODE: P,
+      LD_CODE: account,
+      DR_AMT: saleValue,
+      IT_TYPE: f.itType,
       SIGN: '+',
-      FINE_WT: receivedTotals!.totalFine,
-      FINE_RATE: receivedTotals!.rate,
-      DR_AMT: 0,
-      CR_AMT: 0,
+      FINE_WT: round3(f.crFine),
+      FINE_RATE: f.fineRate,
+    });
+    leg(code(2, 5), { AC_CODE: account, LD_CODE: P, CR_AMT: saleValue, FINE_RATE: f.fineRate });
+  }
+  if (ctx.tradeFine && f.crFine !== 0) {
+    leg(code(3, 6), {
+      AC_CODE: slot(purchaseSlot),
+      LD_CODE: P,
+      IT_TYPE: f.itType,
+      SIGN: '-',
+      FINE_WT: round3(f.crFine),
     });
   }
-  if ((receivedPay?.cash ?? 0) > 0) {
-    lines.push(money(customer, accounts.cashAc, receivedPay!.cash, 0));
-    lines.push(money(accounts.cashAc, customer, 0, receivedPay!.cash));
+
+  // ---- money paid for a fine received (08/09, 11/12) -------------------------------------------------
+  const purchaseValue = money2(f.crAmt + f.prItmAmt);
+  if (purchaseValue !== 0) {
+    const account = slot(purchaseSlot);
+    leg(code(8, 11), {
+      AC_CODE: P,
+      LD_CODE: account,
+      CR_AMT: purchaseValue,
+      IT_TYPE: f.itType,
+      SIGN: '-',
+      FINE_WT: round3(f.drFine),
+      FINE_RATE: f.fineRate,
+    });
+    leg(code(9, 12), { AC_CODE: account, LD_CODE: P, DR_AMT: purchaseValue });
   }
-  if ((receivedPay?.chq ?? 0) > 0) {
-    lines.push(money(customer, receivedPay!.bankAc, receivedPay!.chq, 0));
-    lines.push(money(receivedPay!.bankAc, customer, 0, receivedPay!.chq));
-  }
-  if ((receivedPay?.card ?? 0) > 0) {
-    lines.push(money(customer, receivedPay!.cardAc, receivedPay!.card, 0));
-    lines.push(money(receivedPay!.cardAc, customer, 0, receivedPay!.card));
-  }
-  if ((receivedPay?.kasar ?? 0) > 0) {
-    lines.push(money(customer, accounts.kasarAc, receivedPay!.kasar, 0));
-    lines.push(money(accounts.kasarAc, customer, 0, receivedPay!.kasar));
+  if (ctx.tradeFine && f.drFine !== 0) {
+    leg(code(10, 13), {
+      AC_CODE: slot(saleSlot),
+      LD_CODE: P,
+      IT_TYPE: f.itType,
+      SIGN: '+',
+      FINE_WT: round3(f.drFine),
+    });
   }
 
-  // (c) SETTLEMENT IN — contra account DR (asset in), customer CR (receivable down).
-  if (pay.cash > 0) {
-    lines.push(money(accounts.cashAc, customer, pay.cash, 0));
-    lines.push(money(customer, accounts.cashAc, 0, pay.cash));
+  // ---- labour and other charges (15-22) --------------------------------------------------------------
+  if (f.slLbrAmt !== 0) pair(15, 16, slot('lbrAc'), 'DR', f.slLbrAmt);
+  if (f.slOthAmt !== 0) pair(17, 18, slot('othAc'), 'DR', f.slOthAmt);
+  if (f.prLbrAmt !== 0) pair(19, 20, slot('lbrExpAc'), 'CR', f.prLbrAmt);
+  if (f.prOthAmt !== 0) pair(21, 22, slot('othAc'), 'CR', f.prOthAmt);
+
+  // ---- the metal the voucher handles (23-26 issued, 29-32 received) ----------------------------------
+  if (f.slFine !== 0) {
+    const account = slot(saleSlot);
+    const fineWt = round3(f.slFine);
+    leg(code(23, 25), {
+      AC_CODE: P,
+      LD_CODE: account,
+      IT_TYPE: f.itType,
+      SIGN: '-',
+      FINE_WT: fineWt,
+    });
+    if (ctx.tradeFine) {
+      leg(code(24, 26), {
+        AC_CODE: account,
+        LD_CODE: P,
+        IT_TYPE: f.itType,
+        SIGN: '+',
+        FINE_WT: fineWt,
+      });
+    }
   }
-  if (pay.chq > 0) {
-    lines.push(money(pay.bankAc, customer, pay.chq, 0));
-    lines.push(money(customer, pay.bankAc, 0, pay.chq));
-  }
-  if (pay.card > 0) {
-    lines.push(money(pay.cardAc, customer, pay.card, 0));
-    lines.push(money(customer, pay.cardAc, 0, pay.card));
+  if (f.prFine !== 0) {
+    const account = slot(purchaseSlot);
+    const fineWt = round3(f.prFine);
+    leg(code(29, 31), {
+      AC_CODE: P,
+      LD_CODE: account,
+      IT_TYPE: f.itType,
+      SIGN: '+',
+      FINE_WT: fineWt,
+    });
+    if (ctx.tradeFine) {
+      leg(code(30, 32), {
+        AC_CODE: account,
+        LD_CODE: P,
+        IT_TYPE: f.itType,
+        SIGN: '-',
+        FINE_WT: fineWt,
+      });
+    }
   }
 
-  // (d) KASAR — customer DR / kasar account CR (desktop/observed canonical direction).
-  if (pay.kasar > 0) {
-    lines.push(money(customer, accounts.kasarAc, pay.kasar, 0));
-    lines.push(money(accounts.kasarAc, customer, 0, pay.kasar));
-  }
-
-  // (e) LABOUR / OTHER charges — only when entered; customer DR / income account CR.
-  if (totals.totalLbr > 0) {
-    lines.push(money(customer, accounts.lbrAc, totals.totalLbr, 0));
-    lines.push(money(accounts.lbrAc, customer, 0, totals.totalLbr));
-  }
-  if (totals.totalOth > 0) {
-    lines.push(money(customer, accounts.othAc, totals.totalOth, 0));
-    lines.push(money(accounts.othAc, customer, 0, totals.totalOth));
-  }
+  // ---- settlement: Received (sale) and Payment (purchase) columns (35-52) ----------------------------
+  // Web adaptation kept from before: a cheque or card without its own account falls back to the cash slot.
+  const bank = (account: string): string => account.trim() || slot('cashAc');
+  if (f.slChqAmt !== 0) pair(35, 36, bank(ctx.bankAc), 'CR', f.slChqAmt);
+  if (f.prChqAmt !== 0) pair(37, 38, bank(ctx.receivedBankAc), 'DR', f.prChqAmt);
+  if (f.slCardAmt !== 0) pair(39, 40, bank(ctx.cardAc), 'CR', f.slCardAmt);
+  if (f.prCardAmt !== 0) pair(41, 42, bank(ctx.receivedCardAc), 'DR', f.prCardAmt);
+  if (f.slCashAmt !== 0) pair(43, 44, slot('cashAc'), 'CR', f.slCashAmt);
+  if (f.prCashAmt !== 0) pair(45, 46, slot('cashAc'), 'DR', f.prCashAmt);
+  // A positive received-side kasar is an allowance to the party (party Cr); a negative one is a charge.
+  if (f.slKasarAmt > 0) pair(47, 48, slot('kasarAc'), 'CR', f.slKasarAmt);
+  if (f.slKasarAmt < 0) pair(49, 50, slot('kasarAc'), 'DR', Math.abs(f.slKasarAmt));
+  if (f.prKasarAmt !== 0) pair(51, 52, slot('kasarAc'), 'DR', f.prKasarAmt);
 
   return lines;
 }
@@ -635,29 +993,101 @@ export function buildRateCutLedger(key: VoucherKey, ctx: LedgerCtx): LedgerLine[
 // PERSISTENCE ROWS (RATE_CUT_DATA header, RATE_CUT_ISU lines) — verified columns only
 // ────────────────────────────────────────────────────────────────────────────
 
-function buildHeader(
-  key: VoucherKey,
-  input: RateCutInput,
-  totals: RateCutTotals,
-  receivedTotals: RateCutTotals,
-  vchDate: Date,
-  rateBasis: 'G' | 'T' | 'K',
-  settlement: SettlementResult,
-): Record<string, unknown> {
+/** The header's derived totals — TR_WH_SALE.cs:12956-13050 and the band totals at :15633-15642. */
+export interface RateCutHeaderTotals {
+  /** `MSG2_TOTAL[1,4]` = round(DR_AMT + Σ issued NET_AMT): SL_NET_AMT and SL_TOT_AMT. */
+  slNetAmt: number;
+  /** `MSG2_TOTAL[1,3]` = round(CR_AMT + Σ received NET_AMT): PR_NET_AMT and PR_TOT_AMT. */
+  prNetAmt: number;
+  /** `MSG2_TOTAL[7,4]` = net − cheque − card − cash − kasar (the band's "Os Amt" row, derived, not typed). */
+  slBillOs: number;
+  prBillOs: number;
+  /** `TotDrFine + DR_FINE + KSR_FINE_DR` and `TotCrFine + CR_FINE + KSR_FINE_CR` (fine kasar not modelled: 0). */
+  totFineDr: number;
+  totFineCr: number;
+}
+
+/**
+ * Derive the header totals the desktop computes rather than accepts.
+ *
+ * `SL_BILL_OS` was taken from the request, and `SL_NET_AMT` from the lines alone. The desktop derives both: the
+ * outstanding is the band's net less what was settled, and the net includes the money for the fine cut. On
+ * Live24 064/00004 that gives `PR_BILL_OS` = 14965 − 15800 − 15 = −850, exactly the stored value.
+ */
+export function rateCutHeaderTotals(
+  figures: RateCutPostingFigures,
+  issuedNet: number,
+  receivedNet: number,
+): RateCutHeaderTotals {
+  /**
+   * The band arithmetic lives in `@datacare/core` (`wholesaleBand`) so the screen previews exactly what posts.
+   * The net is `Math.Round(…, 0)` — banker's, as the desktop rounds it — where this used to round half-up, so a
+   * 1000.50 net saved 1001 against the desktop's 1000.
+   */
+  const band = wholesaleBand({
+    settlement: {
+      drAmt: figures.drAmt,
+      crAmt: figures.crAmt,
+      drFine: figures.drFine,
+      crFine: figures.crFine,
+    },
+    issued: { fine: figures.slFine, netAmount: issuedNet },
+    received: { fine: figures.prFine, netAmount: receivedNet },
+    receivedTender: {
+      cash: figures.slCashAmt,
+      cheque: figures.slChqAmt,
+      card: figures.slCardAmt,
+      kasar: figures.slKasarAmt,
+    },
+    paymentTender: {
+      cash: figures.prCashAmt,
+      cheque: figures.prChqAmt,
+      card: figures.prCardAmt,
+      kasar: figures.prKasarAmt,
+    },
+  });
+  return {
+    slNetAmt: band.receivedNet,
+    prNetAmt: band.paymentNet,
+    slBillOs: band.receivedOs,
+    prBillOs: band.paymentOs,
+    totFineDr: band.totFineDr,
+    totFineCr: band.totFineCr,
+  };
+}
+
+interface HeaderCtx {
+  key: VoucherKey;
+  input: RateCutInput;
+  totals: RateCutTotals;
+  receivedTotals: RateCutTotals;
+  figures: RateCutPostingFigures;
+  headerTotals: RateCutHeaderTotals;
+  vchDate: Date;
+  vchTime: Date;
+  mainUser: string | null;
+  rateBasis: 'G' | 'T' | 'K';
+  settlement: SettlementResult;
+  workflow: RateCutWorkflow;
+}
+
+function buildHeader(ctx: HeaderCtx): Record<string, unknown> {
+  const { key, input, totals, receivedTotals, figures, headerTotals, vchDate } = ctx;
+  const { rateBasis, settlement, workflow } = ctx;
   const p = input.pay ?? {};
   const rp = input.receivedPay ?? {};
-  const fineRate = totals.rate || receivedTotals.rate;
+  const fineRate = figures.fineRate;
   /**
-   * The voucher's value when it is priced at the header: the fine being CUT, at the voucher's fine rate.
-   *
-   * `settleCrFine` is the quantity the voucher cuts (the desktop's `CR_FINE`); `totals.rate` is `FINE_RATE`,
-   * which now falls back to `input.fineRate` when no line carries a rate. Rounded to whole rupees like every other
-   * money column here.
+   * TR_WH_SALE writes no tax on a wholesale or rate-cut voucher: `SL_TAX_AMT`, `PR_TAX_AMT` and `TAX_PRC` are the
+   * literal 0 (TR_WH_SALE.cs:12992-13001). The bullion form carries GST (`Ac_Tax.Bul_Sales_GST`) and keeps the
+   * computed figures.
    */
-  const headerPricedAmount = round0(num(input.settleCrFine) * num(fineRate));
+  const wholesale = workflow === 'wholesale';
   return {
     ...key,
     VCH_DATE: vchDate,
+    VCH_TIME: ctx.vchTime,
+    MAIN_USER: txt(ctx.mainUser, 15),
     BILL_NO: input.billNo ?? null,
     HD_VCH_NO: input.hdVchNo ?? null,
     IT_TYPE: totals.itType,
@@ -683,69 +1113,56 @@ function buildHeader(
     // conversion, so an ordinary rate-cut voucher is unchanged.
     CONV_RATE: input.convRate == null ? null : Number(input.convRate),
     CONV_PRC: input.convPct == null ? null : Number(input.convPct),
+    /**
+     * The settlement's OWN results (`BILL_TOTAL`, TR_WH_SALE.cs:15369-15503), not the request figures.
+     *
+     * `CR_FINE` / `DR_FINE` are what the voucher SETTLES in metal; `SL_FINE` / `PR_FINE` are what it HANDLES. When
+     * the operator gives money and a rate, the desktop derives the fine and saves the derived value — so do we.
+     * `DR_AMT` was 0 on every web rate cut because the header fine rate never reached the engine; on 034/5 the
+     * desktop stores 3517 (0.541 × 6500) and on 034/6 32240 (4.960 × 6500).
+     */
     DR_AMT: settlement.drAmt,
     CR_AMT: settlement.crAmt,
+    CR_FINE: settlement.crFine,
+    DR_FINE: settlement.drFine,
     SL_FINE: totals.totalFine,
     PR_FINE: receivedTotals.totalFine,
     /**
-     * The SETTLEMENT fine legs, which are not the lines' total fine.
-     *
-     * Measured across the 15 captured headers:
-     *
-     *   `SL_FINE`     == the lines' total fine   14/15   (already correct)
-     *   `TOT_FINE_DR` == the lines' total fine   13/15   — the web wrote 0
-     *   `CR_FINE`     == 0                       14/15   — the web wrote the lines' total
-     *   `DR_FINE`     == 0                       14/15   (already correct)
-     *   `TOT_FINE_CR` == 0                       13/15   — the web wrote the lines' total
-     *
-     * The distinction matters: `SL_FINE` is the metal the voucher HANDLES, while `CR_FINE` is the metal it SETTLES.
-     * Writing the handled fine into the settlement column credited the party a metal balance for the whole
-     * consignment every time, when in 14 of 15 real vouchers nothing was settled in metal at all.
-     *
-     * `CR_FINE` now takes the caller's settlement value, so `wsale-034-00015` — the one voucher that does settle in
-     * metal — keeps its 11.06. The two non-zero `TOT_FINE_CR` values (21.064 and 50.19) have no derivable relation
-     * to any input available here, so that column defaults to 0 and those two remain open rather than guessed.
+     * `nTotFineDr` / `nTotFineCr` (TR_WH_SALE.cs:15633-15634): the handled fine PLUS the settled fine. The web
+     * wrote only `CR_FINE` into `TOT_FINE_CR` — 0.541 where the desktop has 24.541 on 034/5 (24.000 received plus
+     * 0.541 cut) — so the voucher list, which shows these columns, halved or zeroed real movements.
      */
-    CR_FINE: num(input.settleCrFine),
-    DR_FINE: num(input.settleDrFine),
-    TOT_FINE_CR: num(input.settleCrFine),
-    TOT_FINE_DR: totals.totalFine,
+    TOT_FINE_DR: headerTotals.totFineDr,
+    TOT_FINE_CR: headerTotals.totFineCr,
     SL_ITM_AMT: totals.totalItmAmt,
     SL_LBR_AMT: totals.totalLbr,
     SL_OTH_AMT: totals.totalOth,
     /**
-     * A voucher priced at the HEADER is valued from its fine rate, not left at zero.
-     *
-     * These totals are summed from the lines, which is right whenever the lines carry amounts. When they do not —
-     * `wsale-034-00015` has no `ITM_RATE` and no `ITM_AMT` on any of its six lines — the sum is 0 and a voucher
-     * worth ₹98,434 posted as nothing. The desktop's own arithmetic is explicit:
-     *
-     *     CR_FINE 11.06  ×  FINE_RATE 8900  =  98,434  =  SL_NET_AMT  =  SL_TOT_AMT
-     *
-     * So the fallback prices the fine being CUT at the voucher's rate. It applies only when the lines value at
-     * zero, so no voucher that works today can change.
+     * `MSG2_TOTAL[1,4]` = round(DR_AMT + Σ line NET_AMT). The web used the line sum alone, with a fallback that
+     * priced the cut fine only when the lines valued at zero — so a voucher with priced lines AND a cut lost the
+     * cut. `wsale-034-00015` (CR_FINE 11.06 × 8900 = 98,434) is unchanged: its lines are 0 and DR_AMT is 98,434.
      */
-    SL_TOT_AMT: totals.totalTot || headerPricedAmount,
-    SL_TAX_AMT: totals.totalTax,
-    SL_NET_AMT: totals.totalNet || headerPricedAmount,
-    SL_CASH_AMT: round0(num(p.cash)),
-    SL_CHQ_AMT: round0(num(p.chq)),
-    SL_CARD_AMT: round0(num(p.card)),
-    SL_KASAR_AMT: round0(num(p.kasar)),
-    SL_BILL_OS: round0(num(p.billOs)),
+    SL_TOT_AMT: headerTotals.slNetAmt,
+    SL_TAX_AMT: wholesale ? 0 : totals.totalTax,
+    SL_NET_AMT: headerTotals.slNetAmt,
+    SL_CASH_AMT: figures.slCashAmt,
+    SL_CHQ_AMT: figures.slChqAmt,
+    SL_CARD_AMT: figures.slCardAmt,
+    SL_KASAR_AMT: figures.slKasarAmt,
+    SL_BILL_OS: headerTotals.slBillOs,
     PR_ITM_AMT: receivedTotals.totalItmAmt,
     PR_LBR_AMT: receivedTotals.totalLbr,
     PR_OTH_AMT: receivedTotals.totalOth,
-    PR_TOT_AMT: receivedTotals.totalTot,
-    PR_TAX_AMT: receivedTotals.totalTax,
-    PR_NET_AMT: receivedTotals.totalNet,
-    PR_CASH_AMT: round0(num(rp.cash)),
-    PR_CHQ_AMT: round0(num(rp.chq)),
-    PR_CARD_AMT: round0(num(rp.card)),
-    PR_KASAR_AMT: round0(num(rp.kasar)),
-    PR_BILL_OS: round0(num(rp.billOs)),
+    PR_TOT_AMT: headerTotals.prNetAmt,
+    PR_TAX_AMT: wholesale ? 0 : receivedTotals.totalTax,
+    PR_NET_AMT: headerTotals.prNetAmt,
+    PR_CASH_AMT: figures.prCashAmt,
+    PR_CHQ_AMT: figures.prChqAmt,
+    PR_CARD_AMT: figures.prCardAmt,
+    PR_KASAR_AMT: figures.prKasarAmt,
+    PR_BILL_OS: headerTotals.prBillOs,
     TAX_CODE: p.taxCode ?? null,
-    TAX_PRC: num(p.taxPct),
+    TAX_PRC: wholesale ? 0 : num(p.taxPct),
     BANK_AC: p.bankAc ?? rp.bankAc ?? null,
     CHQ_NO: p.chqNo ?? rp.chqNo ?? null,
     CARD_AC: p.cardAc ?? rp.cardAc ?? null,
@@ -764,25 +1181,50 @@ function buildHeader(
   };
 }
 
+/** A line as it will be written: the request line with the tag's and the item's defaults applied. */
+export interface EffectiveLine {
+  line: RateCutLine;
+  /** The reserved tag instance, when the voucher moves stock and the line names a tag. */
+  tag?: ResolvedTagIdentity;
+}
+
+interface RowCtx {
+  key: VoucherKey;
+  input: RateCutInput;
+  cls: BookClassification;
+  vchDate: Date;
+  /** `VCH_DATE + mTime` (TR_WH_SALE.cs:13139): the same stamp on header, lines and stock. */
+  vchTime: Date;
+  mainUser: string | null;
+  workflow: RateCutWorkflow;
+  /** `CO_SET.LBR_TYPE` — the receive grid's labour basis when a line names none. */
+  companyLabourType: string;
+}
+
+const isTagged = (tagNo: unknown): boolean => {
+  const t = String(tagNo ?? '').trim();
+  return t !== '' && t.toUpperCase() !== 'N';
+};
+
 function buildLineRows(
-  key: VoucherKey,
-  input: RateCutInput,
+  ctx: RowCtx,
+  effective: EffectiveLine[],
   totals: RateCutTotals,
-  vchDate: Date,
-  cls: BookClassification,
 ): Record<string, unknown>[] {
-  return input.lines.map((l, i) => {
+  const { key, input, cls, vchDate } = ctx;
+  const wholesale = ctx.workflow === 'wholesale';
+  return effective.map(({ line: l, tag }, i) => {
     const c = totals.computed[i]!;
     const ref = l.isuRef ?? {};
+    const tagStock = tag?.stock ?? {};
     return {
       ...key,
       /**
-       * `VCH_SRNO` is 0 on a rate-cut line — 20 of 20 captured rows.
-       *
-       * It is a TAG identity, not a line ordinal: `SR_NO` and `OLD_SRNO` carry the ordinal. These lines are loose
-       * metal, so there is no tag instance to name, and the web's `i + 1` invented one.
+       * `VCH_SRNO` is the TAG INSTANCE — `Conversion.Val(mSG[i, 57])`, filled from the tag's own `VCH_SRNO`
+       * (TR_WH_SALE.cs:10095, :13136). The desktop rows of 034/4 carry 100312000009 and 100312000010; the web
+       * wrote 0, so a sold tag could not be traced back to its stock row. A loose line has no instance: 0.
        */
-      VCH_SRNO: 0,
+      VCH_SRNO: tag ? tag.VCH_SRNO : isTagged(l.tagNo) ? num(l.vchSrno) : 0,
       SR_NO: i + 1,
       // OLD_SRNO holds the line's own serial on original entry — measured equal to SR_NO on 20 of 20 real
       // RATE_CUT_ISU rows (and 103 of 103 PR_DETL rows). The web wrote 0, orphaning the back-reference.
@@ -800,9 +1242,22 @@ function buildLineRows(
       KR_FINE: c.netWt,
       BOOK_NAME: cls.bookName,
       AC_CODE: input.acCode,
-      TAG_NO: l.tagNo && l.tagNo.trim() !== '' ? l.tagNo : 'N',
-      IT_CODE: l.itCode ?? null,
+      TAG_NO: isTagged(l.tagNo) ? String(l.tagNo).trim() : 'N',
+      /** A tag line's item is the TAG's item (TR_WH_SALE.cs:10049): the stock identity includes it. */
+      IT_CODE: String(tag?.IT_CODE ?? '').trim() || l.itCode || null,
       DESIGN_NO: l.designNo ?? null,
+      /**
+       * Counter, size, hallmark and karigar the desktop copies from the tag onto the line (TR_WH_SALE.cs:10641-10736,
+       * saved at :13089-13133). Missing on every web row: `TBL_CODE` '001', `KR_NAME` KJ/AB/SJ/YT, `ITM_SIZE` 3,
+       * `HM_ID` UY76UY with its 12.000 g on the desktop rows of 034/4, 034/6 and Next25 034/1.
+       */
+      TBL_CODE: txt(l.tblCode, 3),
+      ITM_SIZE: txt(l.itemSize, 20),
+      HM_ID: txt(l.hallmarkId, 10),
+      HM_ID_WT: num(l.hallmarkIdWt),
+      KR_NAME: txt(l.karigarName, 5),
+      VCH_TIME: ctx.vchTime,
+      MAIN_USER: txt(ctx.mainUser, 15),
       ITM_PCS: num(l.pcs),
       ITM_GWT: num(l.grossWt),
       ITM_OTH_WT: num(l.othWt),
@@ -811,13 +1266,23 @@ function buildLineRows(
       ITM_TOUCH: num(l.touch),
       ITM_WEST_PRC: num(l.westPct),
       ITM_FINE: c.fine,
-      LBR_TYPE: l.lbrType ?? null,
+      /**
+       * A new grid row starts with the company's labour basis (`CommPassAdd`, TR_WH_SALE.cs:8362 col 34 =
+       * `MsLbrType`); a tag then replaces it with the tag's own, blank included (Next23 034/4 saves '').
+       */
+      LBR_TYPE: l.lbrType ?? (wholesale ? txt(ctx.companyLabourType, 1) : null),
       LBR_RATE: num(l.lbrRate),
       LBR_AMT: c.lbrAmt,
       OTH_AMT: c.othAmt,
       ITM_RATE: c.rate,
       ITM_AMT: c.itmAmt,
       ITM_MRP: num(l.mrp),
+      /**
+       * TR_WH_SALE never computes grid column 43 (`TotAmt`) for a new line — it is only loaded back from
+       * `TOT_AMT` on reopen — so a wholesale line saves 0 there while `NET_AMT` (column 41 = labour + other +
+       * item amount, :9834) carries the value. Next25 034/1: `TOT_AMT` 0.00 with `NET_AMT` 500.00. The rule
+       * lives in the grid arithmetic (`wholesaleIssueLine` returns `totalAmount: 0`), so the preview agrees.
+       */
       TOT_AMT: c.totAmt,
       TAX_PRC: num(l.taxPct),
       NET_AMT: c.netAmt,
@@ -851,12 +1316,13 @@ function buildLineRows(
       EMP_CODE: input.empCode ?? null,
       /**
        * The item's own name, which the desktop repeats on the line as a remark: 'BACHA KADALI - 916' (8 rows),
-       * 'FINE GOLD' (6), 'DHAL OG' (4). Sourced from the line's supplied description so the module does not have
-       * to read the item master mid-build.
+       * 'FINE GOLD' (6), 'DHAL OG' (4), 'L RING 916' and 'CHAIN 916' on Next23. The caller's description wins;
+       * otherwise it is `ITEM_MAST.IT_NAME`, as the grid fills it when the item is entered (TR_WH_SALE.cs:11113).
        */
       ITM_REMARK: txt(l.itemName, 255),
       PR_CODE: txt(l.prCode, 2),
-      FINE_CUT_PCS: num(l.pcs),
+      /** Not assigned by the TR_WH_SALE save (:13062-13141): 0 on Next25 034/1 where the web wrote the pieces. */
+      FINE_CUT_PCS: wholesale ? 0 : num(l.pcs),
       // TR_VP.cs stamps the full rate-cut basis on each line. Most of these are varchar(255) in the
       // restored schema, so they are written as text rather than coerced to numbers; LESS_WT, ADJ_WT,
       // TAG_COST, OLD_VCH_NO and NEW_VCH_NO are numeric.
@@ -870,7 +1336,8 @@ function buildLineRows(
       ITM_LOT: txt(l.itemLot, 255),
       LESS_TOUCH: Number(l.lessTouch) || 0,
       ITM_OTH_RATE: Number(l.otherRate) || 0,
-      ITM_OTH_FINE: Number(l.otherFine) || 0,
+      // OFine is derived on the TR_WH_SALE grid (col 39 = OthAmt / ORate); elsewhere it is as supplied.
+      ITM_OTH_FINE: wholesale ? c.otherFine : Number(l.otherFine) || 0,
       CONV_RATE: Number(l.convRate) || 0,
       CONV_PRC: Number(l.convPct) || 0,
       SILVER_FINE: Number(l.silverFine) || 0,
@@ -887,8 +1354,17 @@ function buildLineRows(
        * These were all zero before, because the builder only wrote what the caller passed and no caller passes a
        * tag weight for a loose line.
        */
-      TAG_GWT: hasValue(l.tagGrossWt) ? Number(l.tagGrossWt) : num(l.grossWt),
-      TAG_NWT: hasValue(l.tagNetWt) ? Number(l.tagNetWt) : c.netWt,
+      // A reserved tag's own weights, when the caller gives none (grid columns 98/99 come from the tag).
+      TAG_GWT: hasValue(l.tagGrossWt)
+        ? Number(l.tagGrossWt)
+        : tag && tagStock.ITM_GWT != null
+          ? num(tagStock.ITM_GWT)
+          : num(l.grossWt),
+      TAG_NWT: hasValue(l.tagNetWt)
+        ? Number(l.tagNetWt)
+        : tag && tagStock.ITM_NWT != null
+          ? num(tagStock.ITM_NWT)
+          : c.netWt,
       MCX_RATE: Number(l.mcxRate) || 0,
       HM_FINE: Number(l.hallmarkFine) || 0,
       OLD_VCH_NO: null,
@@ -897,19 +1373,31 @@ function buildLineRows(
   });
 }
 
+/**
+ * RATE_CUT_REC rows. The two desktop forms write different shapes, both measured:
+ *
+ *  - TR_WH_SALE (:13255-13320) writes `HM_ID_WT` 0, no `HM_ID2-4`, no `ISU_*` link, no `TAG_NWT`, no
+ *    `OLD_VCH_SRNO`, and `EMP_CODE` from the header; `LBR_TYPE` is the grid's, which a new row takes from the
+ *    company basis. The Next23/Next25 rows of 034/5, 034/6 and 034/2 show every one of these — `LBR_TYPE` G/N,
+ *    `HM_ID_WT` 0.000 (web: the gross weight), `HM_ID2-4` NULL (web ''), `ISU_LC_CODE` NULL (web '00'),
+ *    `EMP_CODE` 001 (web blank), `TAG_NWT` / `OLD_VCH_SRNO` 0 and `APR_ISU` / `EMP_ISU` 'N' (Next25).
+ *  - TR_BUL_SALE (:9026-9100) links each received line to its booking (`ISU_*`, `ISU_LC_CODE` = location) and
+ *    keeps the MCX quote; it is left as it was, apart from `HM_ID_WT`, which neither form fills from the weight.
+ */
 function buildReceivedLineRows(
-  key: VoucherKey,
-  input: RateCutInput,
+  ctx: RowCtx,
+  lines: RateCutLine[],
   totals: RateCutTotals,
-  vchDate: Date,
-  cls: BookClassification,
 ): Record<string, unknown>[] {
-  return (input.receivedLines ?? []).map((l, i) => {
-    const c = computeLine(l, totals.itType);
+  const { key, input, cls, vchDate } = ctx;
+  const wholesale = ctx.workflow === 'wholesale';
+  return lines.map((l, i) => {
+    const c = totals.computed[i]!;
     const ref = l.isuRef ?? {};
     return {
       ...key,
       VCH_DATE: vchDate,
+      VCH_TIME: ctx.vchTime,
       HD_VCH_NO: input.hdVchNo ?? null,
       AC_CODE: input.acCode,
       VCH_TYPE: cls.vchType,
@@ -919,9 +1407,10 @@ function buildReceivedLineRows(
       SR_NO: i + 1,
       OLD_SRNO: i + 1,
       VCH_SRNO: 0,
-      OLD_VCH_SRNO: i + 1,
+      OLD_VCH_SRNO: wholesale ? 0 : i + 1,
       IT_CODE: l.itCode ?? null,
       ITM_REMARK: txt(l.itemName, 50),
+      TBL_CODE: txt(l.tblCode, 3),
       TAG_NO: 'N',
       DESIGN_NO: txt(l.designNo, 15),
       LOT_NO: txt(l.lotNo, 15),
@@ -938,12 +1427,12 @@ function buildReceivedLineRows(
       ITM_FINE: c.fine,
       ADJ_WT: num(l.adjustWt),
       SILVER_FINE: Number(l.silverFine) || 0,
-      LBR_TYPE: l.lbrType ?? null,
+      LBR_TYPE: l.lbrType ?? (wholesale ? txt(ctx.companyLabourType, 1) : null),
       LBR_RATE: num(l.lbrRate),
       LBR_AMT: c.lbrAmt,
       OTH_AMT: c.othAmt,
       ITM_OTH_RATE: Number(l.otherRate) || 0,
-      ITM_OTH_FINE: Number(l.otherFine) || 0,
+      ITM_OTH_FINE: wholesale ? c.otherFine : Number(l.otherFine) || 0,
       CONV_RATE: Number(l.convRate) || 0,
       CONV_PRC: Number(l.convPct) || 0,
       MCX_RATE: Number(l.mcxRate) || 0,
@@ -956,22 +1445,20 @@ function buildReceivedLineRows(
       RATE_TYPE: l.rateType ?? 'G',
       IT_TYPE: c.itType,
       TAG_COST: num(l.tagCost),
-      TAG_NWT: hasValue(l.tagNetWt) ? Number(l.tagNetWt) : c.netWt,
+      TAG_NWT: hasValue(l.tagNetWt) ? Number(l.tagNetWt) : wholesale ? 0 : c.netWt,
       ISU_NO: ref.no ?? null,
-      ISU_LC_CODE: txt(l.issueLcCode, 2) ?? String(key.LC_CODE ?? ''),
+      ISU_LC_CODE: txt(l.issueLcCode, 2) ?? (wholesale ? null : String(key.LC_CODE ?? '')),
       ISU_YRCD: ref.yrcd ?? null,
       ISU_DBCD: ref.dbcd ?? null,
       ISU_SRNO: ref.srno ?? null,
       WITH_STOCK: 'Y',
-      MAIN_USER: null,
-      HM_ID2: '',
-      HM_ID3: '',
-      HM_ID4: '',
-      HM_ID_WT: num(l.grossWt),
+      MAIN_USER: txt(ctx.mainUser, 15),
+      ...(wholesale ? { EMP_CODE: input.empCode ?? null, APR_ISU: 'N', EMP_ISU: 'N' } : {}),
+      HM_ID_WT: 0,
       HM_ID2_WT: 0,
       HM_ID3_WT: 0,
       HM_ID4_WT: 0,
-      FINE_CUT_PCS: num(l.pcs),
+      FINE_CUT_PCS: wholesale ? 0 : num(l.pcs),
       FINE_CUT_GWT: 0,
       FINE_CUT_NWT: 0,
       FINE_CUT_FINE: 0,
@@ -980,19 +1467,116 @@ function buildReceivedLineRows(
   });
 }
 
+/**
+ * MAIN_STOCK rows — `Ac_Stock.Wh_Sale_Stk` (Ac_Stock.cs:146-176), built from the very rows written above so the
+ * two can never disagree, which is what the desktop's `INSERT … SELECT FROM RATE_CUT_ISU / RATE_CUT_REC` gives.
+ *
+ *   issued line   → SR_NO 1, TR_TYPE 'S', ITM_SIGN '-', the line's tag and tag instance, KR_* and TAG_COST
+ *   received line → SR_NO 2, TR_TYPE 'P', ITM_SIGN '+', TAG_NO 'N', VCH_SRNO 0, ITM_MRP 0, KR_* = the line's
+ *                   own net weight / touch / wastage / fine, KR_COST 0, ITM_LOT ''
+ *
+ * `ITM_NWT` is the net weight, except that old gold / old silver (`IT_CODE` OG / OS) takes the GROSS weight when
+ * `CO_SET_NEW.OLD_GOLD_TYPE` is 'G' (`MsOldGoldType`, blank → 'N', MS_OPNCOMP.cs:1132-1135).
+ *
+ * The web wrote no stock at all, so a sold tag stayed in stock and could be sold again, and received metal never
+ * reached the stock register. SR_NO 7 (approval return), 4 (tour) and 5/6 (tag weight difference) are deferred.
+ */
+function buildStockRows(
+  ctx: RowCtx,
+  issuedRows: Record<string, unknown>[],
+  receivedRows: Record<string, unknown>[],
+  oldGoldType: string,
+): Record<string, unknown>[] {
+  const { key, cls } = ctx;
+  const stockDate = ctx.vchDate.toISOString().slice(0, 10);
+  const netFor = (row: Record<string, unknown>): number => {
+    const itCode = String(row.IT_CODE ?? '')
+      .trim()
+      .toUpperCase();
+    return (itCode === 'OG' || itCode === 'OS') && oldGoldType === 'G'
+      ? num(row.ITM_GWT)
+      : num(row.ITM_NWT);
+  };
+  const common = (row: Record<string, unknown>) => ({
+    ...key,
+    ISR_NO: num(row.SR_NO),
+    VCH_DATE: ctx.vchDate,
+    STK_DATE: stockDate,
+    VCH_TYPE: txt(cls.vchType, 6),
+    BOOK_NAME: cls.bookName,
+    AC_CODE: row.AC_CODE ?? null,
+    IT_CODE: row.IT_CODE ?? null,
+    TBL_CODE: row.TBL_CODE ?? null,
+    ITM_QTY: 1,
+    ITM_PCS: num(row.ITM_PCS),
+    ITM_GWT: num(row.ITM_GWT),
+    ITM_NWT: netFor(row),
+    ITM_TOUCH: num(row.ITM_TOUCH),
+    ITM_WEST: num(row.ITM_WEST_PRC),
+    ITM_FINE: num(row.ITM_FINE),
+    ITM_RATE: num(row.ITM_RATE),
+    ITM_AMT: num(row.ITM_AMT),
+    LBR_RATE: num(row.LBR_RATE),
+    LBR_AMT: num(row.LBR_AMT),
+    OTH_AMT: num(row.OTH_AMT),
+    NET_AMT: num(row.NET_AMT),
+    KR_LBR_AMT: 0,
+    KR_OTH_AMT: 0,
+    EMP_CODE: txt(row.EMP_CODE, 3),
+    ENTRY_TIME: ctx.vchDate,
+    MAIN_USER: txt(row.MAIN_USER, 15),
+    DATA_TYPE: txt(cls.dataType, 1) ?? 'A',
+    DESIGN_NO: row.DESIGN_NO ?? null,
+    ITM_SIZE: txt(row.ITM_SIZE, 20),
+    ITM_DESC: txt(row.ITM_REMARK, 255),
+    GHT_PRC: 0,
+    ITM_DISC: '0',
+  });
+  return [
+    ...issuedRows.map((row) => ({
+      ...common(row),
+      SR_NO: 1,
+      TAG_NO: txt(row.TAG_NO, 15) ?? 'N',
+      VCH_SRNO: num(row.VCH_SRNO),
+      TR_TYPE: 'S',
+      ITM_SIGN: '-',
+      ITM_MRP: num(row.ITM_MRP),
+      KR_NWT: num(row.KR_NET_WT),
+      KR_TOUCH: num(row.KR_TOUCH),
+      KR_WEST: num(row.KR_WEST_PRC),
+      KR_FINE: num(row.KR_FINE),
+      KR_COST: num(row.TAG_COST),
+      ITM_LOT: txt(row.ITM_LOT, 255),
+    })),
+    ...receivedRows.map((row) => ({
+      ...common(row),
+      SR_NO: 2,
+      TAG_NO: 'N',
+      VCH_SRNO: 0,
+      TR_TYPE: 'P',
+      ITM_SIGN: '+',
+      ITM_MRP: 0,
+      KR_NWT: num(row.ITM_NWT),
+      KR_TOUCH: num(row.ITM_TOUCH),
+      KR_WEST: num(row.ITM_WEST_PRC),
+      KR_FINE: num(row.ITM_FINE),
+      KR_COST: 0,
+      ITM_LOT: '',
+    })),
+  ];
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // POST / DELETE
 // ────────────────────────────────────────────────────────────────────────────
 
 /**
- * Post a RATE CUT voucher. Numbering + ledger + table writes commit atomically in one tenant
- * transaction. assertBalanced (Σ DR = Σ CR) and the period-lock check run inside postVoucherTx.
+ * Post a RATE CUT / WHOLESALE voucher. Numbering, tag reservation, ledger and table writes commit atomically in
+ * one tenant transaction; assertBalanced (Σ DR = Σ CR) and the period-lock check run inside postVoucherTx.
  *
- * Phase-1 writes RATE_CUT_DATA (header) + RATE_CUT_ISU (lines) + the balanced AC_DATA ledger.
- * PHASE-2 TODO: project SL_IDTL (stone/diamond sub-lines), MAIN_STOCK
- * (ROJ_MEL_DATA is DONE — the sale-side day-book projection, types 03/04, from the real book-064 rows.)
- * (tag/stock movement) and DM_DATA (diamond stock) — deferred (spec §5.3). The delete path already
- * reverses those tables so a phase-2 voucher cleans up fully.
+ * Writes RATE_CUT_DATA (header), RATE_CUT_ISU / RATE_CUT_REC (lines), AC_DATA (`Wh_Sales_Ledr`), MAIN_STOCK
+ * (`Wh_Sale_Stk`, on a stock-moving book) and ROJ_MEL_DATA. Still open: SL_IDTL / DM_DATA from the tag's
+ * stones (`Dm_Wh_Tour_Sale_Detl`); the delete path already reverses those tables.
  */
 /**
  * Read a saved rate-cut voucher — plan item F2.1.
@@ -1033,6 +1617,7 @@ async function readRateCut(
     const head: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"HD_VCH_NO","BILL_NO","IT_TYPE","AC_CODE","AC_NAME",
               "RATE_PAR","FINE_RATE","CONV_RATE","CONV_PRC","TOT_FINE_DR","TOT_FINE_CR",
+              "DR_AMT","CR_AMT","DR_FINE","CR_FINE","SL_FINE","MAIN_USER",
               "SL_NET_AMT","SL_TOT_AMT","SL_CASH_AMT","SL_CHQ_AMT","SL_CARD_AMT","SL_KASAR_AMT",
               "SL_BILL_OS","PR_FINE","PR_ITM_AMT","PR_LBR_AMT","PR_OTH_AMT","PR_TAX_AMT",
               "PR_NET_AMT","PR_TOT_AMT","PR_CASH_AMT","PR_CHQ_AMT","PR_CARD_AMT","PR_KASAR_AMT",
@@ -1067,7 +1652,8 @@ async function readRateCut(
               "ITM_AMT","ITM_MRP","TOT_AMT","TAX_PRC","NET_AMT","RATE_TYPE",
               "CONV_RATE","CONV_PRC","TAG_COST","TAG_GWT","TAG_NWT",
               "PR_CODE","ADJ_WT","MCX_RATE","HM_FINE","SILVER_FINE","ISU_YRCD",
-              "ISU_DBCD","ISU_NO","ISU_SRNO","ISU_LC_CODE"
+              "ISU_DBCD","ISU_NO","ISU_SRNO","ISU_LC_CODE",
+              "TBL_CODE","ITM_SIZE","HM_ID","HM_ID_WT","KR_NAME"
          FROM "RATE_CUT_ISU" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
           AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO"`,
       scope.tenantId,
@@ -1111,6 +1697,12 @@ async function readRateCut(
       fineRate: n(h.FINE_RATE),
       fineDr: n(h.TOT_FINE_DR),
       fineCr: n(h.TOT_FINE_CR),
+      // The settlement as stored (BILL_TOTAL), so an edit round-trips what was typed or derived.
+      settleDrAmt: n(h.DR_AMT),
+      settleCrAmt: n(h.CR_AMT),
+      settleDrFine: n(h.DR_FINE),
+      settleCrFine: n(h.CR_FINE),
+      mainUser: t(h.MAIN_USER),
       convRate: n(h.CONV_RATE),
       convPct: n(h.CONV_PRC),
       netAmt: n(h.SL_NET_AMT) || n(h.SL_TOT_AMT) || n(h.PR_NET_AMT) || n(h.PR_TOT_AMT),
@@ -1159,6 +1751,11 @@ async function readRateCut(
         itCode: t(l.IT_CODE),
         itemName: t(l.ITM_REMARK),
         tagNo: t(l.TAG_NO),
+        tblCode: t(l.TBL_CODE),
+        itemSize: t(l.ITM_SIZE),
+        hallmarkId: t(l.HM_ID),
+        hallmarkIdWt: n(l.HM_ID_WT),
+        karigarName: t(l.KR_NAME),
         designNo: t(l.DESIGN_NO),
         lotNo: t(l.LOT_NO),
         itemLot: t(l.ITM_LOT),
@@ -1278,64 +1875,41 @@ async function writeRateCut(
 ): Promise<RateCutResult> {
   const customer = (input.acCode ?? '').toString().trim();
   if (!customer) throw new RateCutValidationError('rate-cut requires a party (customer) account');
-  const issuedLines = input.lines ?? [];
-  const receivedLines = input.receivedLines ?? [];
-  if (!issuedLines.length && !receivedLines.length) {
-    throw new RateCutValidationError('rate-cut requires at least one issued or received line');
-  }
-  const normalizedInput: RateCutInput = { ...input, lines: issuedLines, receivedLines };
-
-  const itType: 'G' | 'S' = input.itType ?? 'G';
+  const issuedInput = input.lines ?? [];
+  const receivedInput = input.receivedLines ?? [];
   /**
-   * Placeholder until BOOK_DETL is read inside the transaction. Resolution needs `tx`, so the real accounts
-   * and the book's own VCH_TYPE/BOOK_NAME are fetched below and assigned before any row is built.
+   * A HEADER-ONLY rate cut is a real voucher: all 25 rate cuts on Live24 book 064 have no detail rows at all and
+   * carry the cut entirely in `DR_FINE`/`CR_FINE` × `FINE_RATE`. `Wh_Sales_Ledr` posts them from the header
+   * alone (legs 01/02 and 08/09), so a voucher with no lines is accepted when it settles something.
    */
-  let accounts: RateCutAccounts = { ...DEFAULT_ACCOUNTS, ...(input.accounts ?? {}) };
-  let classification: BookClassification = {
-    vchType: RCT_TYPE,
-    bookName: RCT_BOOK_NAME,
-    inoutType: 'O',
-  };
-  const totals = rollup(issuedLines, itType, input.fineRate);
-  const receivedTotals = rollup(receivedLines, itType, input.fineRate);
-  if (
-    !(totals.totalFine > 0) &&
-    !(totals.totalItmAmt > 0) &&
-    !(receivedTotals.totalFine > 0) &&
-    !(receivedTotals.totalItmAmt > 0)
-  ) {
-    throw new RateCutValidationError('rate-cut voucher has no fine and no value to post');
+  const settles = [
+    input.settleDrAmt,
+    input.settleCrAmt,
+    input.settleDrFine,
+    input.settleCrFine,
+  ].some((value) => num(value) !== 0);
+  if (!issuedInput.length && !receivedInput.length && !settles) {
+    throw new RateCutValidationError(
+      'rate-cut requires at least one issued or received line, or a money/fine settlement',
+    );
   }
-
-  const p = input.pay ?? {};
-  /**
-   * The bank/card fallback is the book's cash account, so `pay` can only be finalised once BOOK_DETL has been
-   * read inside the transaction. Amounts are settled here; the two account fields are filled at that point.
-   */
-  const payAmounts = {
-    cash: round0(num(p.cash)),
-    chq: round0(num(p.chq)),
-    card: round0(num(p.card)),
-    kasar: round0(num(p.kasar)),
-  };
+  const workflow: RateCutWorkflow = options.bookGuard === 'bullion-sale' ? 'bullion' : 'wholesale';
+  const itType: 'G' | 'S' = input.itType === 'S' ? 'S' : 'G';
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
+  if (Number.isNaN(vchDate.getTime())) {
+    throw new RateCutValidationError(`invalid voucher date: ${String(input.vchDate)}`);
+  }
   const tenantId = input.scope.tenantId;
+  const p = input.pay ?? {};
+  const rp = input.receivedPay ?? {};
 
-  const vchNo = await withTenant(prisma, tenantId, async (tx: any) => {
+  return withTenant(prisma, tenantId, async (tx: any) => {
     // The metal-rate basis is a company setting, never a request field: it changes every derived figure.
     const behavior = await resolveSettingsBehaviorTx(tx, {
       tenantId,
       coCode: input.scope.coCode,
     });
-    const settlement = settleMoneyMetal({
-      convRate: input.convRate,
-      convPct: input.convPct,
-      drAmt: input.settleDrAmt,
-      crAmt: input.settleCrAmt,
-      drFine: input.settleDrFine,
-      crFine: input.settleCrFine,
-      ratePar: behavior.rateBasis,
-    });
+    const settings = await readWholesaleSettingsTx(tx, tenantId, input.scope.coCode);
     const no =
       options.vchNo == null ? await nextVoucherNoTx(tx, input.scope) : Number(options.vchNo);
     if (!Number.isSafeInteger(no) || no < 1) {
@@ -1347,7 +1921,7 @@ async function writeRateCut(
      * (064 `RCUT`/`RATE CUT`) share this code path via BOOK_TBL_NAME='RATE_CUT_DATA', so neither value may be
      * a module constant. Accounts come from BOOK_DETL rather than invented codes absent from AC_MAST.
      */
-    classification = await resolveBookClassification(
+    const classification = await resolveBookClassification(
       tx,
       tenantId,
       key.CO_CODE,
@@ -1355,23 +1929,26 @@ async function writeRateCut(
       key.CO_BOOK,
     );
     assertRateCutBookGuard(classification, key.CO_BOOK, options.bookGuard);
+    const movesStock = bookMovesStock(classification);
+
+    /**
+     * An EDIT is delete-and-rebuild in one transaction (TR_WH_SALE.cs:12756-13411). Its tags are given back
+     * first — a `TAG_STOCK`-only tag is re-inserted, a `BAR_DETL` tag is freed when its '-' row goes — so the
+     * rewrite can reserve the same tags again and a tag dropped from the voucher returns to stock. A reopened
+     * voucher keeps its own time and `MAIN_USER` (TR_WH_SALE.cs:12196, :12325).
+     */
+    let persistedClock: string | undefined;
+    let persistedUser: string | undefined;
     if (options.vchNo != null) {
+      const prior = await persistedHeaderTx(tx, tenantId, key);
+      persistedClock = prior?.VCH_CLOCK ? String(prior.VCH_CLOCK) : undefined;
+      persistedUser = String(prior?.MAIN_USER ?? '').trim() || undefined;
+      const restores = await releaseRateCutTagsTx(tx, tenantId, key);
       await applyBookingDrawDownTx(tx, tenantId, key, -1);
-      await reverseVoucherTx(tx, tenantId, {
-        tables: [
-          'RATE_CUT_DATA',
-          'RATE_CUT_ISU',
-          'RATE_CUT_REC',
-          'SL_IDTL',
-          'AC_DATA',
-          'ROJ_MEL_DATA',
-          'MAIN_STOCK',
-          'DM_DATA',
-        ],
-        key,
-      });
+      await reverseVoucherTx(tx, tenantId, { tables: RATE_CUT_WRITE_TABLES, key });
+      for (const tag of restores) await restoreTagTx(tx, tenantId, tag);
     }
-    accounts = await resolveBookAccounts(
+    const accounts = await resolveBookAccounts(
       tx,
       tenantId,
       key.CO_CODE,
@@ -1380,56 +1957,170 @@ async function writeRateCut(
       input.accounts,
     );
     /**
-     * Fail closed on an unconfigured book. Previously a missing BOOK_DETL row silently became 'SALEGOLD' — a
-     * code absent from AC_MAST — so the voucher posted and every report joining the contra dropped the row.
-     * A configuration gap must surface as a rejected voucher, not a silently unjoinable one.
+     * Choosing the party fills its name and mobile from the account master (TR_WH_SALE.cs:14621-14623,
+     * `tAcName = AC_NAME`, `tMobile = AC_MOBILE`); the address lines and city are typed. An explicit value wins.
+     * All three Next23 vouchers carry the party's mobile 9856525, which the web left blank.
      */
-    for (const [field, sr] of Object.entries(BOOK_DETL_SR) as Array<
-      [keyof RateCutAccounts, number]
-    >) {
-      if (!accounts[field]) {
-        throw new RateCutValidationError(
-          `book ${key.CO_BOOK} has no BOOK_DETL account configured at SR_NO ${sr} (${field})`,
-        );
-      }
-    }
-    const resolved = accounts as Required<RateCutAccounts>;
-    const pay = {
-      ...payAmounts,
-      bankAc: (p.bankAc && p.bankAc.trim()) || resolved.cashAc,
-      cardAc: (p.cardAc && p.cardAc.trim()) || resolved.cashAc,
+    const party = await readPartyTx(tx, tenantId, key.CO_CODE, key.LC_CODE, customer);
+    const voucherInput: RateCutInput = {
+      ...input,
+      acName: hasValue(input.acName) ? input.acName : (party?.name ?? input.acName),
+      mobile: hasValue(input.mobile) ? input.mobile : (party?.mobile ?? input.mobile),
     };
-    const receivedPayInput = input.receivedPay ?? {};
-    const receivedPay = {
-      cash: round0(num(receivedPayInput.cash)),
-      chq: round0(num(receivedPayInput.chq)),
-      card: round0(num(receivedPayInput.card)),
-      kasar: round0(num(receivedPayInput.kasar)),
-      bankAc: (receivedPayInput.bankAc && receivedPayInput.bankAc.trim()) || pay.bankAc,
-      cardAc: (receivedPayInput.cardAc && receivedPayInput.cardAc.trim()) || pay.cardAc,
-    };
-    const lines = buildRateCutLedger(key, {
-      customer,
+
+    // Reserve each issued tag instance inside this transaction, then apply the tag's and item's defaults.
+    const tags = movesStock
+      ? await reserveIssuedTagsTx(tx, key, issuedInput)
+      : issuedInput.map(() => undefined);
+    const items = await readItemsTx(tx, tenantId, key.CO_CODE, [
+      ...issuedInput.map((line) => String(line.itCode ?? '')),
+      ...tags.map((tag) => String(tag?.IT_CODE ?? '')),
+      ...receivedInput.map((line) => String(line.itCode ?? '')),
+    ]);
+    /**
+     * A new grid row starts on the company's labour basis — `CommPassAdd` col 34 and `CommPassAdd_Pr` col 23 are
+     * set to `MsLbrType` (TR_WH_SALE.cs:8362, :6324) — and its labour is computed on that basis. The web wrote the
+     * basis on the row but computed the labour gross-wise, so a company on net-wise labour posted gross-wise
+     * amounts. A tag's own basis, blank included, is applied first and wins (:10702).
+     */
+    const withLabourBasis = (line: RateCutLine): RateCutLine =>
+      workflow === 'wholesale' && line.lbrType == null
+        ? { ...line, lbrType: companyLabourType(behavior.labourType) as RateCutLine['lbrType'] }
+        : line;
+    const effective: EffectiveLine[] = issuedInput.map((line, index) => {
+      const tag = tags[index];
+      const itCode = String(tag?.IT_CODE ?? line.itCode ?? '').trim();
+      return {
+        line: withLabourBasis(withDesktopDefaults(line, 'issue', tag?.stock, items.get(itCode))),
+        ...(tag ? { tag } : {}),
+      };
+    });
+    const receivedLines = receivedInput.map((line) =>
+      withLabourBasis(
+        withDesktopDefaults(
+          line,
+          'receive',
+          undefined,
+          items.get(String(line.itCode ?? '').trim()),
+        ),
+      ),
+    );
+    const issuedLines = effective.map((entry) => entry.line);
+    // The TR_WH_SALE grid arithmetic (labour from its basis, conversion rate, less weight / hallmark fine, other
+    // fine) on the wholesale workflow; TR_BUL_SALE's grid is not derived yet and keeps the older rule.
+    const lineMath: LineMath =
+      workflow === 'wholesale'
+        ? {
+            wholesale: {
+              labourIncludesGhat: behavior.labourIncludesGhat,
+              companyLabourType: companyLabourType(behavior.labourType),
+            },
+          }
+        : {};
+    const totals = rollup(issuedLines, itType, input.fineRate, { ...lineMath, side: 'issue' });
+    const receivedTotals = rollup(receivedLines, itType, input.fineRate, {
+      ...lineMath,
+      side: 'receive',
+    });
+
+    // BILL_TOTAL: the header fine rate reaches the engine (it never did, so DR_AMT stayed 0 on every cut).
+    const settlement = settleMoneyMetal({
+      convRate: input.convRate,
+      convPct: input.convPct,
+      fineRate: input.fineRate,
+      drAmt: input.settleDrAmt,
+      crAmt: input.settleCrAmt,
+      drFine: input.settleDrFine,
+      crFine: input.settleCrFine,
+      ratePar: behavior.rateBasis,
+    });
+    const figures: RateCutPostingFigures = {
       itType,
-      totals,
-      receivedTotals,
-      pay,
-      receivedPay,
-      accounts: resolved,
+      /**
+       * `FINE_RATE` is the header rate `nFineRate` and nothing else (TR_WH_SALE.cs:12975, TR_BUL_SALE alike): it is
+       * typed or derived by BILL_TOTAL, never copied from a line. The web used the first line's rate when the
+       * header had none, which put a rate on legs 01/02 that the desktop leaves at 0.
+       */
+      fineRate: settlement.fineRate,
+      drAmt: settlement.drAmt,
+      crAmt: settlement.crAmt,
+      drFine: settlement.drFine,
+      crFine: settlement.crFine,
+      slFine: totals.totalFine,
+      prFine: receivedTotals.totalFine,
+      slItmAmt: totals.totalItmAmt,
+      prItmAmt: receivedTotals.totalItmAmt,
+      slLbrAmt: totals.totalLbr,
+      slOthAmt: totals.totalOth,
+      prLbrAmt: receivedTotals.totalLbr,
+      prOthAmt: receivedTotals.totalOth,
+      /**
+       * A band cell keeps what was typed, formatted "0.00" (`MSG2_TOTAL_LeaveCell`, TR_WH_SALE.cs:15041-15047),
+       * and is saved as `Val(cell)` (:12996-13014). These were rounded to whole rupees, so a cash receipt of
+       * 1000.50 posted 1001 on the ledger and the outstanding moved by the same 50 paise.
+       */
+      slChqAmt: money2(p.chq),
+      slCardAmt: money2(p.card),
+      slCashAmt: money2(p.cash),
+      slKasarAmt: money2(p.kasar),
+      prChqAmt: money2(rp.chq),
+      prCardAmt: money2(rp.card),
+      prCashAmt: money2(rp.cash),
+      prKasarAmt: money2(rp.kasar),
+    };
+    const postsSomething = [
+      figures.slFine,
+      figures.prFine,
+      totals.totalNet,
+      receivedTotals.totalNet,
+      figures.drAmt,
+      figures.crAmt,
+      figures.drFine,
+      figures.crFine,
+    ].some((value) => num(value) !== 0);
+    if (!postsSomething) {
+      throw new RateCutValidationError('rate-cut voucher has no fine and no value to post');
+    }
+    const headerTotals = rateCutHeaderTotals(figures, totals.totalNet, receivedTotals.totalNet);
+    const vchTime = voucherTimestamp(vchDate, persistedClock);
+    const mainUser = persistedUser ?? (String(input.mainUser ?? '').trim() || null);
+    const rowCtx: RowCtx = {
+      key,
+      input: voucherInput,
+      cls: classification,
+      vchDate,
+      vchTime,
+      mainUser,
+      workflow,
+      companyLabourType: companyLabourType(behavior.labourType),
+    };
+
+    const bankAc = String(p.bankAc ?? '').trim();
+    const cardAc = String(p.cardAc ?? '').trim();
+    const receivedBankAc = String(rp.bankAc ?? '').trim() || bankAc;
+    const receivedCardAc = String(rp.cardAc ?? '').trim() || cardAc;
+    const ledger = buildRateCutLedger(key, {
+      customer,
+      figures,
+      accounts,
+      bankAc,
+      cardAc,
+      receivedBankAc,
+      receivedCardAc,
+      tradeFine: settings.tradeFine,
       vchDate,
       vchType: classification.vchType,
       bookName: classification.bookName,
+      coBook: key.CO_BOOK,
+      billNo: txt(input.billNo, 30) ?? undefined,
+      hdVchNo: txt(input.hdVchNo, 10) ?? undefined,
     });
-    // The Rojmel (day book). This module books the SALE side of a rate cut - CR_FINE carries the fixed
-    // fine and DR_FINE is 0 - so it emits the sale-side row family: type 03 for the fine and 04 for the
-    // amount, plus the kasar-fine pair when kasar applies to the metal rather than the money.
-    //
-    // Row shapes are taken from the real desktop rows of book 064, NOT from Ac_Rojmel.cs, which is a
-    // later version and has the debit/credit assignment reversed on five of the nine live types. See
-    // modules/shared/rojmel.ts `buildRateCutRojmel` for the sampled rows and the account-order flip.
-    //
-    // The purchase-side types (01, 02, 13, 22, 26) come from RATE_CUT_REC / PR_* when the receive-side
-    // grid is populated.
+    const gold = itType === 'G';
+    // The Rojmel (day book), from the header's settlement figures. `buildRateCutRojmel` documents its inputs as
+    // the SETTLED fine (`DR_FINE` / `CR_FINE`) and the band's outstanding; it was handed the lines' total fine and
+    // the request's bill-outstanding instead. With the settled figures, header-only Live24 064/00004 gives its
+    // four real rows: 01 (Dr fine 2.050 at 7300), 02 (14965), 13 (overpaid 850) and 26 (purchase kasar 15).
+    // Remaining alignment for lined wholesale vouchers (types 05/06/14/27, the book-prefixed name) is open.
     const rojmelRows = buildRateCutRojmel(
       {
         scope: {
@@ -1443,74 +2134,451 @@ async function writeRateCut(
         vchDate,
         vchType: classification.vchType,
         bookName: classification.bookName,
-        partyName: input.acName ?? '',
+        partyName: voucherInput.acName ?? '',
         partyCode: customer,
       },
       {
         // BOOK_DETL slots are PER-BOOK: on the desktop's 064 slot 1 is 00003 and slot 2 is 00008, where
         // on book 026 slot 2 is 00001. Resolved rather than hardcoded for that reason.
-        saleAc: resolved.goldAc,
-        purchaseAc: resolved.purchaseAc,
-        kasarFineAc: resolved.kasarAc,
-        purchaseKasarAc: resolved.kasarAc,
-        bankAc: receivedPay.bankAc,
+        saleAc: String((gold ? accounts.goldAc : accounts.silverSaleAc) ?? ''),
+        purchaseAc: String((gold ? accounts.purchaseAc : accounts.silverPurcAc) ?? ''),
+        kasarFineAc: String(accounts.fineKasarAc ?? accounts.kasarAc ?? ''),
+        purchaseKasarAc: String(accounts.purchaseKasarAc ?? accounts.kasarAc ?? ''),
+        bankAc: receivedBankAc || String(accounts.cashAc ?? ''),
         metal: rojmelMetalFor(itType),
-        fineRate: num(totals.rate || receivedTotals.rate),
-        drFine: num(receivedTotals.totalFine),
-        crFine: num(totals.totalFine),
-        purchaseBillOs: num(receivedPayInput.billOs),
-        // billOs is on the raw payment payload; `pay` normalises only the settled amounts.
-        saleBillOs: num((p as Record<string, unknown>).billOs),
-        purchaseAmount: num(receivedTotals.totalItmAmt) + num(settlement.crAmt),
-        saleAmount: num(settlement.drAmt) + num(totals.totalItmAmt),
+        fineRate: figures.fineRate,
+        drFine: figures.drFine,
+        crFine: figures.crFine,
+        purchaseBillOs: headerTotals.prBillOs,
+        saleBillOs: headerTotals.slBillOs,
+        purchaseAmount: money2(figures.crAmt + figures.prItmAmt),
+        saleAmount: money2(figures.drAmt + figures.slItmAmt),
         kasarFineDr: 0,
         kasarFineCr: 0,
-        purchaseChequeAmount: receivedPay.chq,
-        purchaseKasarAmount: receivedPay.kasar,
+        purchaseChequeAmount: figures.prChqAmt,
+        purchaseKasarAmount: figures.prKasarAmt,
       },
     );
+    const issuedRows = buildLineRows(rowCtx, effective, totals);
+    const receivedRows = buildReceivedLineRows(rowCtx, receivedLines, receivedTotals);
+    const stockRows = movesStock
+      ? buildStockRows(rowCtx, issuedRows, receivedRows, settings.oldGoldType)
+      : [];
     await postVoucherTx(tx, tenantId, {
-      ledger: { table: 'AC_DATA', lines },
+      ledger: { table: 'AC_DATA', lines: ledger },
       bookName: classification.bookName,
+      // PARTY_AC_CODE is the party on its own legs and '' on contra legs (Wh_Sales_Ledr, every leg).
+      partyAc: customer,
       writes: [
         {
           table: 'RATE_CUT_DATA',
           rows: [
-            buildHeader(
+            buildHeader({
               key,
-              normalizedInput,
+              input: voucherInput,
               totals,
               receivedTotals,
+              figures,
+              headerTotals,
               vchDate,
-              behavior.rateBasis,
+              vchTime,
+              mainUser,
+              rateBasis: behavior.rateBasis,
               settlement,
-            ),
+              workflow,
+            }),
           ],
         },
-        {
-          table: 'RATE_CUT_ISU',
-          rows: buildLineRows(key, normalizedInput, totals, vchDate, classification),
-        },
-        {
-          table: 'RATE_CUT_REC',
-          rows: buildReceivedLineRows(key, normalizedInput, totals, vchDate, classification),
-        },
+        { table: 'RATE_CUT_ISU', rows: issuedRows },
+        { table: 'RATE_CUT_REC', rows: receivedRows },
+        ...(stockRows.length ? [{ table: 'MAIN_STOCK', rows: stockRows }] : []),
         ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
       ],
     });
     await applyBookingDrawDownTx(tx, tenantId, key, 1);
-    return no;
+    return {
+      vchNo: no,
+      // The metal on the voucher, issued plus received, priced or not.
+      fine: round3(totals.handledFine + receivedTotals.handledFine),
+      netAmt: round0(headerTotals.slNetAmt + headerTotals.prNetAmt),
+      settlement: {
+        fineRate: figures.fineRate,
+        drAmt: figures.drAmt,
+        crAmt: figures.crAmt,
+        drFine: figures.drFine,
+        crFine: figures.crFine,
+      },
+    };
   });
+}
 
+/**
+ * Every table the TR_WH_SALE delete clears (TR_WH_SALE.cs:13575-13588) that this family writes or may carry.
+ * `TEMP_BOOK_DATA` is not here: this module never writes it, and it has no `CO_YEAR` for the shared key.
+ */
+const RATE_CUT_WRITE_TABLES = [
+  'RATE_CUT_DATA',
+  'RATE_CUT_ISU',
+  'RATE_CUT_REC',
+  'SL_IDTL',
+  'AC_DATA',
+  'ROJ_MEL_DATA',
+  'MAIN_STOCK',
+  'DM_DATA',
+];
+
+/** `CO_SET.TRAD_FINE` (blank → N, MS_OPNCOMP.cs:813-816) and `CO_SET_NEW.OLD_GOLD_TYPE` (blank → N, :1132-1135). */
+async function readWholesaleSettingsTx(
+  tx: any,
+  tenantId: string,
+  coCode: string,
+): Promise<{ tradeFine: boolean; oldGoldType: string }> {
+  const rows: Array<{ trad_fine: string | null; old_gold_type: string | null }> =
+    await tx.$queryRawUnsafe(
+      `SELECT (SELECT upper(btrim(coalesce("TRAD_FINE"::text,''))) FROM "CO_SET"
+                WHERE tenant_id=$1 AND "CO_CODE"::text=$2::text ORDER BY row_id LIMIT 1) AS trad_fine,
+              (SELECT upper(btrim(coalesce("OLD_GOLD_TYPE"::text,''))) FROM "CO_SET_NEW"
+                WHERE tenant_id=$1 AND "CO_CODE"::text=$2::text LIMIT 1) AS old_gold_type`,
+      tenantId,
+      String(coCode),
+    );
+  const row = rows[0];
   return {
-    vchNo,
-    fine: round3(totals.totalFine + receivedTotals.totalFine),
-    netAmt: round0(totals.totalNet + receivedTotals.totalNet),
+    tradeFine: String(row?.trad_fine ?? '') === 'Y',
+    oldGoldType: String(row?.old_gold_type ?? '') || 'N',
   };
+}
+
+/** The party's name and mobile as the account master holds them (TR_WH_SALE.cs:14621-14623). */
+async function readPartyTx(
+  tx: any,
+  tenantId: string,
+  coCode: string,
+  lcCode: string,
+  acCode: string,
+): Promise<{ name?: string; mobile?: string } | undefined> {
+  const rows: Array<{ AC_NAME: string | null; AC_MOBILE: string | null; LC_CODE: string | null }> =
+    await tx.$queryRawUnsafe(
+      `SELECT "AC_NAME","AC_MOBILE","LC_CODE" FROM "AC_MAST"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "AC_CODE"=$3
+        ORDER BY ("LC_CODE"=$4) DESC, row_id LIMIT 1`,
+      tenantId,
+      coCode,
+      acCode,
+      lcCode,
+    );
+  const row = rows[0];
+  if (!row) return undefined;
+  const text = (value: unknown): string | undefined => String(value ?? '').trim() || undefined;
+  return { name: text(row.AC_NAME), mobile: text(row.AC_MOBILE) };
+}
+
+interface ItemInfo {
+  name: string;
+  prCode: string;
+  rateType: string;
+}
+
+/** The item master fields a grid row takes when the item is entered (TR_WH_SALE.cs:11109-11116). */
+async function readItemsTx(
+  tx: any,
+  tenantId: string,
+  coCode: string,
+  codes: string[],
+): Promise<Map<string, ItemInfo>> {
+  const wanted = [...new Set(codes.map((code) => code.trim()).filter(Boolean))];
+  const out = new Map<string, ItemInfo>();
+  if (!wanted.length) return out;
+  const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+    `SELECT "IT_CODE","IT_NAME","PR_CODE","RATE_TYPE" FROM "ITEM_MAST"
+      WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "IT_CODE" = ANY($3::text[])`,
+    tenantId,
+    coCode,
+    wanted,
+  );
+  const trim = (value: unknown): string => String(value ?? '').trim();
+  for (const row of rows) {
+    out.set(trim(row.IT_CODE), {
+      name: trim(row.IT_NAME),
+      prCode: trim(row.PR_CODE),
+      rateType: trim(row.RATE_TYPE).toUpperCase(),
+    });
+  }
+  return out;
+}
+
+const LABOUR_TYPES = new Set(['G', 'N', 'K', 'P']);
+const RATE_TYPES = new Set(['G', '1', 'K', 'P']);
+
+/** `MsLbrType` = `CO_SET.LBR_TYPE`, blank read as 'G' (MS_OPNCOMP.cs:664, :733-735). */
+function companyLabourType(value: unknown): string {
+  return (
+    String(value ?? '')
+      .trim()
+      .toUpperCase()
+      .slice(0, 1) || 'G'
+  );
+}
+
+/**
+ * Fill what the desktop grid fills when a tag or item is entered, leaving everything the caller supplied alone.
+ *
+ * A tag (TR_WH_SALE.cs:10641-10736) brings its weights, ghat %, touch, wastage and stored fine, its counter,
+ * design, size, hallmark, karigar and product, its labour basis, labour rate, labour and other amounts, its item
+ * rate, rate type, MRP and cost (`KR_COST` → TagCost, col 58). An item (:11109-11116) brings its name, product
+ * and rate type. So an API caller can sell a tag by number alone, as the operator does, and the rows carry the
+ * desktop's values instead of blanks. The receive grid has no tags and does not save a product (:13255-13320).
+ */
+function withDesktopDefaults(
+  line: RateCutLine,
+  side: 'issue' | 'receive',
+  tag: Record<string, unknown> | undefined,
+  item: ItemInfo | undefined,
+): RateCutLine {
+  const out: RateCutLine = { ...line };
+  const text = (value: unknown): string => String(value ?? '').trim();
+  if (tag) {
+    const weighed = line.grossWt != null || line.netWt != null;
+    if (!weighed) {
+      if (tag.ITM_GWT != null) out.grossWt = num(tag.ITM_GWT);
+      if (tag.ITM_NWT != null) out.netWt = num(tag.ITM_NWT);
+      if (line.othWt == null && tag.ITM_OTH_WT != null) out.othWt = num(tag.ITM_OTH_WT);
+    }
+    if (line.pcs == null && tag.ITM_PCS != null) out.pcs = num(tag.ITM_PCS);
+    if (line.ghtPct == null && tag.ITM_GHT_PRC != null) out.ghtPct = num(tag.ITM_GHT_PRC);
+    if (line.touch == null && tag.ITM_TOUCH != null) out.touch = num(tag.ITM_TOUCH);
+    if (line.westPct == null && tag.ITM_WEST_PRC != null) out.westPct = num(tag.ITM_WEST_PRC);
+    // The tag's stored fine stands while the operator changes neither weight nor purity (:10697).
+    if (
+      line.fine == null &&
+      !weighed &&
+      line.touch == null &&
+      line.westPct == null &&
+      line.ghtPct == null &&
+      line.ghtWt == null &&
+      tag.ITM_FINE != null
+    ) {
+      out.fine = num(tag.ITM_FINE);
+    }
+    if (line.lbrRate == null && tag.LBR_RATE != null) out.lbrRate = num(tag.LBR_RATE);
+    if (line.lbrAmt == null && tag.LBR_AMT != null) out.lbrAmt = num(tag.LBR_AMT);
+    if (line.othAmt == null && tag.OTH_AMT != null) out.othAmt = num(tag.OTH_AMT);
+    if (line.rate == null && tag.ITM_RATE != null) out.rate = num(tag.ITM_RATE);
+    if (line.mrp == null && tag.ITM_MRP != null) out.mrp = num(tag.ITM_MRP);
+    if (line.tagCost == null && tag.KR_COST != null) out.tagCost = num(tag.KR_COST);
+    if (!hasValue(line.tblCode) && text(tag.TBL_CODE)) out.tblCode = text(tag.TBL_CODE);
+    if (!hasValue(line.designNo) && text(tag.DESIGN_NO)) out.designNo = text(tag.DESIGN_NO);
+    if (!hasValue(line.itemSize) && text(tag.ITM_SIZE)) out.itemSize = text(tag.ITM_SIZE);
+    if (!hasValue(line.hallmarkId) && text(tag.HM_ID)) out.hallmarkId = text(tag.HM_ID);
+    if (line.hallmarkIdWt == null && tag.HM_ID_WT != null) out.hallmarkIdWt = num(tag.HM_ID_WT);
+    if (!hasValue(line.karigarName) && text(tag.KR_NAME)) out.karigarName = text(tag.KR_NAME);
+    if (!hasValue(line.prCode) && text(tag.PR_CODE)) out.prCode = text(tag.PR_CODE);
+    // The tag's basis replaces the row's company default, a blank one included (:10702, Next23 034/4 saves '').
+    const labourType = text(tag.LBR_TYPE).toUpperCase();
+    if (line.lbrType == null && (labourType === '' || LABOUR_TYPES.has(labourType))) {
+      out.lbrType = labourType as RateCutLine['lbrType'];
+    }
+    const rateType = text(tag.RATE_TYPE).toUpperCase();
+    if (line.rateType == null && RATE_TYPES.has(rateType)) {
+      out.rateType = rateType as RateCutLine['rateType'];
+    }
+  }
+  if (item) {
+    if (!hasValue(line.itemName) && item.name) out.itemName = item.name;
+    if (side === 'issue' && !tag && !hasValue(line.prCode) && item.prCode) {
+      out.prCode = item.prCode;
+    }
+    if (out.rateType == null && RATE_TYPES.has(item.rateType)) {
+      out.rateType = item.rateType as RateCutLine['rateType'];
+    }
+  }
+  return out;
+}
+
+/**
+ * Reserve every issued tag instance under its identity lock (`issueTagTx`): a `TAG_STOCK` row is removed, and
+ * a `BAR_DETL` tag becomes unavailable through the '-' row this voucher writes. A tag that is not in stock is
+ * refused (`TagNotAvailableError`, 400), and so is the same tag twice on one voucher — for a `BAR_DETL` tag the
+ * second reservation would otherwise pass, because the first line's '-' row is only written at the end.
+ */
+async function reserveIssuedTagsTx(
+  tx: any,
+  key: VoucherKey,
+  lines: RateCutLine[],
+): Promise<Array<ResolvedTagIdentity | undefined>> {
+  const asked = new Set<string>();
+  const reserved = new Set<string>();
+  const out: Array<ResolvedTagIdentity | undefined> = [];
+  for (const [index, line] of lines.entries()) {
+    if (!isTagged(line.tagNo)) {
+      out.push(undefined);
+      continue;
+    }
+    const tagNo = String(line.tagNo).trim();
+    const requested = `${tagNo}\u0000${line.vchSrno ?? ''}`;
+    if (asked.has(requested)) {
+      throw new RateCutValidationError(`tag ${tagNo} appears more than once on this voucher`);
+    }
+    asked.add(requested);
+    const lineItem = String(line.itCode ?? '').trim();
+    const identity = await issueTagTx(tx, {
+      CO_CODE: key.CO_CODE,
+      LC_CODE: key.LC_CODE,
+      TAG_NO: tagNo,
+      ...(Number.isFinite(Number(line.vchSrno)) && line.vchSrno != null
+        ? { VCH_SRNO: Number(line.vchSrno) }
+        : {}),
+      ...(lineItem ? { IT_CODE: lineItem } : {}),
+    });
+    const itCode = String(identity.IT_CODE ?? '').trim() || lineItem;
+    if (!itCode) {
+      throw new RateCutValidationError(
+        `tag ${tagNo} on line ${index + 1} has no item; enter the line's item code`,
+      );
+    }
+    const instance = `${tagNo}\u0000${identity.VCH_SRNO}\u0000${itCode}`;
+    if (reserved.has(instance)) {
+      throw new RateCutValidationError(`tag ${tagNo} appears more than once on this voucher`);
+    }
+    reserved.add(instance);
+    out.push({ ...identity, IT_CODE: itCode });
+  }
+  return out;
+}
+
+/**
+ * Give back the tags this voucher moved, before its rows are deleted (edit and delete).
+ *
+ * Only this voucher's own SR_NO 1 '-' stock rows count: a voucher saved before stock was written has none, and
+ * its tags were never reserved, so there is nothing to return. A `BAR_DETL` tag needs no action — deleting its
+ * '-' row makes it available again. A `TAG_STOCK`-only tag was removed on sale and is re-inserted with its own
+ * weights, as the retail sale's `releaseSaleReferencesTx` does; one already back in `TAG_STOCK` is left alone.
+ */
+async function releaseRateCutTagsTx(
+  tx: any,
+  tenantId: string,
+  key: VoucherKey,
+): Promise<Array<Record<string, unknown> & TagKey>> {
+  const moved: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+    `SELECT m."TAG_NO",coalesce(m."VCH_SRNO",0)::float8 AS vch_srno,m."IT_CODE",
+            i."ITM_PCS"::float8 AS pcs,i."TAG_GWT"::float8 AS tag_gwt,i."TAG_NWT"::float8 AS tag_nwt,
+            i."ITM_GWT"::float8 AS gwt,i."ITM_NWT"::float8 AS nwt,i."DESIGN_NO",i."ITM_SIZE",
+            i."PR_CODE",i."IT_TYPE",i."LBR_TYPE"
+       FROM "MAIN_STOCK" m
+       LEFT JOIN "RATE_CUT_ISU" i
+         ON i.tenant_id=m.tenant_id AND i."CO_CODE"=m."CO_CODE" AND i."LC_CODE"=m."LC_CODE"
+        AND i."CO_YEAR"=m."CO_YEAR" AND i."CO_BOOK"=m."CO_BOOK" AND i."VCH_NO"=m."VCH_NO"
+        AND i."SR_NO"=m."ISR_NO"
+      WHERE m.tenant_id=$1 AND m."CO_CODE"=$2 AND m."LC_CODE"=$3 AND m."CO_YEAR"=$4
+        AND m."CO_BOOK"=$5 AND m."VCH_NO"=$6 AND m."SR_NO"=1 AND m."ITM_SIGN"='-'
+        AND upper(coalesce(nullif(btrim(m."TAG_NO"::text),''),'N'))<>'N'
+      ORDER BY m."ISR_NO"
+      FOR UPDATE OF m`,
+    tenantId,
+    key.CO_CODE,
+    key.LC_CODE,
+    key.CO_YEAR,
+    key.CO_BOOK,
+    key.VCH_NO,
+  );
+  const restores: Array<Record<string, unknown> & TagKey> = [];
+  for (const row of moved) {
+    const tagNo = String(row.TAG_NO ?? '').trim();
+    const vchSrno = Number(row.vch_srno ?? 0);
+    const itCode = String(row.IT_CODE ?? '').trim();
+    const counts: Array<{ bar: number; stock: number }> = await tx.$queryRawUnsafe(
+      `SELECT (SELECT count(*)::int FROM "BAR_DETL" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+                AND "TAG_NO"::text=$4 AND coalesce("VCH_SRNO",0)=$5::numeric
+                AND coalesce("IT_CODE"::text,'')=$6) AS bar,
+              (SELECT count(*)::int FROM "TAG_STOCK" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+                AND "TAG_NO"::text=$4 AND coalesce("VCH_SRNO",0)=$5::numeric) AS stock`,
+      tenantId,
+      key.CO_CODE,
+      key.LC_CODE,
+      tagNo,
+      vchSrno,
+      itCode,
+    );
+    if (Number(counts[0]?.bar ?? 0) > 0 || Number(counts[0]?.stock ?? 0) > 0) continue;
+    const text = (value: unknown): string | undefined => String(value ?? '').trim() || undefined;
+    const restore: Record<string, unknown> & TagKey = {
+      CO_CODE: key.CO_CODE,
+      LC_CODE: key.LC_CODE,
+      TAG_NO: tagNo,
+      VCH_SRNO: vchSrno,
+      ITM_PCS: num(row.pcs),
+      ITM_GWT: num(row.tag_gwt) || num(row.gwt),
+      ITM_NWT: num(row.tag_nwt) || num(row.nwt),
+      STK_TYPE: 'R',
+    };
+    for (const [column, value] of [
+      ['DESIGN_NO', text(row.DESIGN_NO)],
+      ['ITM_SIZE', text(row.ITM_SIZE)],
+      ['PR_CODE', text(row.PR_CODE)],
+      ['IT_TYPE', text(row.IT_TYPE)],
+      ['LBR_TYPE', text(row.LBR_TYPE)],
+    ] as const) {
+      if (value) restore[column] = value;
+    }
+    restores.push(restore);
+  }
+  return restores;
+}
+
+/** The stored header of one voucher, locked for the rewrite or delete that follows. */
+async function persistedHeaderTx(
+  tx: any,
+  tenantId: string,
+  key: VoucherKey,
+): Promise<Record<string, unknown> | undefined> {
+  const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+    `SELECT "VCH_DATE","VCH_TIME",to_char("VCH_TIME",'HH24:MI:SS.MS') AS "VCH_CLOCK","MAIN_USER",
+            "AC_CODE","AC_NAME","SL_NET_AMT"::float8 AS sl_net,"PR_NET_AMT"::float8 AS pr_net,
+            "IT_TYPE","TOT_FINE_DR"::float8 AS tot_fine_dr,"TOT_FINE_CR"::float8 AS tot_fine_cr,
+            "HD_VCH_NO","VCH_DESC"
+       FROM "RATE_CUT_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+        AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6
+      ORDER BY row_id LIMIT 1 FOR UPDATE`,
+    tenantId,
+    key.CO_CODE,
+    key.LC_CODE,
+    key.CO_YEAR,
+    key.CO_BOOK,
+    key.VCH_NO,
+  );
+  return rows[0];
 }
 
 export async function postRateCut(prisma: any, input: RateCutInput): Promise<RateCutResult> {
   return writeRateCut(prisma, input, { bookGuard: 'rate-cut' });
+}
+
+/** Desktop "Wh Sales": the same TR_WH_SALE voucher, on a `WH SALES` book only. */
+export async function postWholesaleSale(prisma: any, input: RateCutInput): Promise<RateCutResult> {
+  return writeRateCut(prisma, input, { bookGuard: 'wholesale-sale' });
+}
+
+export async function editWholesaleSale(
+  prisma: any,
+  input: RateCutInput,
+  vchNo: number | string,
+): Promise<RateCutResult> {
+  return writeRateCut(prisma, input, { vchNo, bookGuard: 'wholesale-sale' });
+}
+
+export async function getWholesaleSale(
+  prisma: any,
+  scope: VoucherScope,
+  requestedVoucherNo: number | string,
+): Promise<Record<string, unknown>> {
+  return readRateCut(prisma, scope, requestedVoucherNo, { bookGuard: 'wholesale-sale' });
+}
+
+export async function deleteWholesaleSale(
+  prisma: any,
+  input: DeleteRateCutInput,
+): Promise<{ reversed: true }> {
+  return reverseRateCut(prisma, input, { bookGuard: 'wholesale-sale' });
 }
 
 export async function editRateCut(
@@ -1729,10 +2797,9 @@ export interface DeleteRateCutInput {
 }
 
 /**
- * Delete/reverse a RATE CUT voucher: remove its rows from every table it can touch (incl. the
- * phase-2 projections) by voucher key and write a DELETE_DATA audit row — all in one transaction.
- * Reversing tables that have no matching rows is a harmless no-op, so this is forward-compatible
- * with the phase-2 SL_IDTL/MAIN_STOCK/DM_DATA writes (ROJ_MEL_DATA is done).
+ * Delete/reverse a RATE CUT / WHOLESALE voucher (TR_WH_SALE.cs:13552-13594): give its tags back, release its
+ * booking draw-down, remove its rows from every table it can touch by voucher key and write the desktop's
+ * DELETE_DATA audit row — all in one transaction.
  */
 async function reverseRateCut(
   prisma: any,
@@ -1752,47 +2819,57 @@ async function reverseRateCut(
       key.CO_BOOK,
     );
     assertRateCutBookGuard(classification, key.CO_BOOK, options.bookGuard);
+    const header = await persistedHeaderTx(tx, tenantId, key);
+    // Give the voucher's tags back before its stock rows go (see `releaseRateCutTagsTx`).
+    const restores = await releaseRateCutTagsTx(tx, tenantId, key);
     // Release the booked weight BEFORE the reversal runs: the draw-down joins against
     // RATE_CUT_ISU, and `reverseVoucherTx` deletes those rows. Reversing after would match nothing
     // and silently leave the booking consumed forever.
     await applyBookingDrawDownTx(tx, tenantId, key, -1);
+    const now = new Date();
+    const text = (value: unknown, length: number): string =>
+      String(value ?? '')
+        .trim()
+        .slice(0, length);
     await reverseVoucherTx(tx, tenantId, {
-      tables: [
-        'RATE_CUT_DATA',
-        'RATE_CUT_ISU',
-        'RATE_CUT_REC',
-        'SL_IDTL',
-        'AC_DATA',
-        'ROJ_MEL_DATA',
-        'MAIN_STOCK',
-        'DM_DATA',
-        /**
-         * `TEMP_BOOK_DATA` was listed here and must not be.
-         *
-         * `reverseVoucherTx` builds one WHERE clause from the full voucher key — including
-         * `CO_YEAR` — and applies it to every table in this list. `TEMP_BOOK_DATA` has no `CO_YEAR`
-         * column (hidden numbering is keyed by company, location, book and number only), so the
-         * DELETE raised `42703 column "CO_YEAR" does not exist` and the whole transaction rolled
-         * back. Deleting a rate cut therefore failed outright on both routes that offer it, and no
-         * test called `deleteRateCut` to notice.
-         *
-         * Removing it rather than special-casing it is correct: this module never WRITES
-         * `TEMP_BOOK_DATA` — it has no `insertHiddenIdentityTx` call — so there is nothing to
-         * reverse. Modules that do write it reverse it through `deleteVoucherWriteSetTx`, which
-         * keys that table without the year (`vouchers/lifecycle.ts:164-173`).
-         */
-      ],
+      /**
+       * `TEMP_BOOK_DATA` is deliberately absent: `reverseVoucherTx` keys every table with `CO_YEAR`, which that
+       * table does not have (`42703`), and this module never writes it. See `RATE_CUT_WRITE_TABLES`.
+       */
+      tables: RATE_CUT_WRITE_TABLES,
       key,
+      /**
+       * The desktop's delete audit (TR_WH_SALE.cs:13569, identical in TR_BUL_SALE.cs:9200): one row, SR_NO 0,
+       * copied from the header — the voucher's own values, fines and user, the book's DISPLAY name cut to 20
+       * characters, and the deleting user and time. The web wrote only the key and the book, so a deleted
+       * wholesale voucher could not be told apart from any other in the delete register.
+       */
       deleteLog: {
         table: 'DELETE_DATA',
         row: {
           ...key,
-          VCH_TYPE: classification.vchType,
-          BOOK_NAME: classification.bookName,
-          DELETE_USER: input.deleteUser ?? 'system',
+          SR_NO: 0,
+          VCH_DATE: header?.VCH_DATE ?? null,
+          DELETE_DATE: now,
+          VCH_TYPE: text(classification.vchType, 6),
+          VCH_TIME: header?.VCH_TIME ?? null,
+          DELETE_TIME: now,
+          BOOK_NAME: text(classification.configured ? classification.displayName : '', 20),
+          AC_CODE: text(header?.AC_CODE, 8),
+          AC_NAME: text(header?.AC_NAME, 50),
+          VCH_VAL_DR: num(header?.sl_net),
+          VCH_VAL_CR: num(header?.pr_net),
+          FINE_TYPE: text(header?.IT_TYPE, 8),
+          VCH_FINE_DR: num(header?.tot_fine_dr),
+          VCH_FINE_CR: num(header?.tot_fine_cr),
+          HD_VCH_NO: text(header?.HD_VCH_NO, 8),
+          MAIN_USER: text(header?.MAIN_USER, 15),
+          DELETE_USER: text(input.deleteUser ?? 'system', 15),
+          VCH_DESC: text(header?.VCH_DESC, 150),
         },
       },
     });
+    for (const tag of restores) await restoreTagTx(tx, tenantId, tag);
     return { reversed: true };
   });
 }
