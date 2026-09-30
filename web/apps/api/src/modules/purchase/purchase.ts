@@ -668,11 +668,7 @@ async function writePurchaseTx(
   const bookPolicy = await resolveBookPolicyTx(
     tx,
     input.scope,
-    isPurchaseQuotation
-      ? 'PURCHASE QUOTATION'
-      : actualMainBook === 'CON PUR'
-        ? 'CONSIGNMENT PURCHASE'
-        : 'PURCHASE',
+    isPurchaseQuotation ? 'PURCHASE QUOTATION' : purchaseWorkflowFor(actualMainBook),
   );
   const roundingPolicy = await resolveRoundingPolicyTx(tx, input.scope);
 
@@ -1886,6 +1882,19 @@ function purchaseLinkFromInput(input: PurchaseInput): PurchaseSourceLink {
   };
 }
 
+/**
+ * The purchase workflow a configured book posts under. TR_PURC serves PURCHASE and CON PUR books; TR_PURC_HM
+ * also serves TAG PURCHASE books ("Tag Wise Purc", MDI_FORM.cs:8540-8541) and posts them through the same
+ * purchase routines. Anything else keeps the PURCHASE policy, which then refuses the book's MAIN_BOOK.
+ */
+function purchaseWorkflowFor(
+  mainBook: string,
+): 'PURCHASE' | 'TAG PURCHASE' | 'CONSIGNMENT PURCHASE' {
+  if (mainBook === 'CON PUR') return 'CONSIGNMENT PURCHASE';
+  if (mainBook === 'TAG PURCHASE') return 'TAG PURCHASE';
+  return 'PURCHASE';
+}
+
 async function purchaseMainBookTx(tx: any, scope: CompletePurchaseScope): Promise<string> {
   const rows: Array<{ MAIN_BOOK: unknown }> = await tx.$queryRawUnsafe(
     `SELECT "MAIN_BOOK" FROM "BOOK_DATA"
@@ -2692,12 +2701,9 @@ export async function deletePurchase(
   const voucherNo = formatVoucherNo(input.vchNo);
   const key = keyOf(scope, voucherNo);
   return withTenant(prisma, tenantId, async (tx: any) => {
-    const isConsignmentPurchase = (await purchaseMainBookTx(tx, scope)) === 'CON PUR';
-    const bookPolicy = await resolveBookPolicyTx(
-      tx,
-      scope,
-      isConsignmentPurchase ? 'CONSIGNMENT PURCHASE' : 'PURCHASE',
-    );
+    const deleteMainBook = await purchaseMainBookTx(tx, scope);
+    const isConsignmentPurchase = deleteMainBook === 'CON PUR';
+    const bookPolicy = await resolveBookPolicyTx(tx, scope, purchaseWorkflowFor(deleteMainBook));
     const configuredBookName = await configuredPurchaseBookNameTx(tx, scope);
     const header = await persistedPurchaseHeaderTx(tx, scope, voucherNo, [
       'AC_CODE',

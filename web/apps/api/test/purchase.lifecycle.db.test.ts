@@ -263,6 +263,71 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
     if (owner) await owner.$disconnect();
   });
 
+  /**
+   * G02 / N32. "Tag Wise Purc" opens TR_PURC_HM on a TAG PURCHASE book (MDI_FORM.cs:8540-8541) and the form
+   * posts it through the same Purc_Ledr / Purc_Rojmel / Purc_GST / Purc_Stk routines as a PURCHASE book
+   * (TR_PURC_HM.cs:8426-8441). The web purchase writer used to refuse every TAG PURCHASE book.
+   */
+  it('posts a TAG PURCHASE book exactly like a PURCHASE book, and supports reopen and delete', async () => {
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK",
+         "BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
+       VALUES ($1,$2,$3,'TPR','Tag Wise Purchase','CPB','TAG PURCHASE','I','Y','PR_DATA')`,
+      TENANT,
+      CO,
+      LC,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","MAIN_BOOK","BOOK_INOUT")
+       VALUES ($1,$2,$3,'TPR',1,'CTRL','TAG PURCHASE','I'),($1,$2,$3,'TPR',2,'CASH','TAG PURCHASE','I'),
+              ($1,$2,$3,'TPR',3,'ROUND','TAG PURCHASE','I')`,
+      TENANT,
+      CO,
+      LC,
+    );
+    const tagScope = { ...scope, coBook: 'TPR' };
+    const lines = [{ ...firstLines[1]! }];
+    const regular = await createPurchase(runtime, purchaseInput(), lines);
+    const tagged = await createPurchase(runtime, purchaseInput({ scope: tagScope }), lines);
+    const footprint = async (book: string, vchNo: number) => {
+      const out: Record<string, unknown[]> = {};
+      for (const table of [
+        'PR_DATA',
+        'PR_DETL',
+        'AC_DATA',
+        'TAX_DATA',
+        'MAIN_STOCK',
+        'ROJ_MEL_DATA',
+      ]) {
+        out[table] = (await owner.$queryRawUnsafe(
+          `SELECT to_jsonb(t) - ARRAY['row_id','CO_BOOK','VCH_NO','LEDR_KEY','HD_VCH_NO','VCH_TIME',
+                  'ENTRY_TIME','BOOK_NAME','MAIN_BOOK'] AS r
+             FROM "${table}" t WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3
+            ORDER BY to_jsonb(t) - ARRAY['row_id','CO_BOOK','VCH_NO','LEDR_KEY','HD_VCH_NO','VCH_TIME',
+                  'ENTRY_TIME','BOOK_NAME','MAIN_BOOK']`,
+          TENANT,
+          book,
+          String(vchNo).padStart(5, '0'),
+        )) as unknown[];
+      }
+      return out;
+    };
+    const a = await footprint('PUR', regular.vchNo);
+    const b = await footprint('TPR', tagged.vchNo);
+    expect(b.AC_DATA!.length).toBeGreaterThan(0);
+    expect(b).toEqual(a);
+    await expect(getPurchase(runtime, tagScope, tagged.vchNo)).resolves.toMatchObject({
+      acCode: 'SUPP',
+      lines: [{ itCode: 'LOOSE' }],
+    });
+    await deletePurchase(runtime, { scope: tagScope, vchNo: tagged.vchNo, deleteUser: 'tester' });
+    const [{ n }] = (await owner.$queryRawUnsafe(
+      `SELECT count(*)::int n FROM "PR_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TPR'`,
+      TENANT,
+    )) as Array<{ n: number }>;
+    expect(n).toBe(0);
+  });
+
   it('creates, opens and edits with independent numbering and preserved identity without delete audit', async () => {
     const created = await createPurchase(runtime, purchaseInput(), firstLines);
     expect(created.vchNo).toBe(8);
