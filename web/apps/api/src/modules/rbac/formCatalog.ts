@@ -318,6 +318,9 @@ const aliases: Record<string, readonly string[]> = {
   'Transaction/E Invoice': ['E Invoice', 'E INVOICE', 'TR_SL_EBILL'],
   'Cash / Bank/Receipt': ['Cash Received', 'Bank Received'],
   'Cash / Bank/Payment': ['Cash Payment', 'Bank Payment'],
+  // Desktop MENU_DATA SM_NAME is 'Contra Entry' (MDI_FORM.cs:8100 `case "Contra Entry"`), so that is
+  // the USER_SET right a migrated user holds.
+  'Cash / Bank/Contra': ['Contra Entry'],
   'Cash / Bank/Card / UPI Receipt': ['Card Received', 'UPI Received'],
   'Cash / Bank/Journal Voucher': ['Journal', 'JV Entry'],
   'Cash / Bank/Rate Cut (price fixing)': ['Rate Cut'],

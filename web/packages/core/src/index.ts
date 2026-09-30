@@ -202,3 +202,11 @@ export type {
   EInvoiceTcs,
   EInvoiceTcsInput,
 } from './eBillCalc.js';
+export {
+  saleRateWithCode,
+  companySaleAmountType,
+  effectiveSaleRateWith,
+  saleAmountBasis,
+  saleItemAmount,
+} from './saleAmount.js';
+export type { SaleAmountLine, SaleAmountBasis } from './saleAmount.js';

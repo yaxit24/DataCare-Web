@@ -9,7 +9,13 @@ import {
   type LedgerLine,
 } from '../posting/posting.js';
 import { billTotals, type BillTotals } from '@datacare/core';
-import { buildIncomeLegs, computeLine, type SaleLineInput, SaleValidationError } from './sales.js';
+import {
+  assertSaleTaxRate,
+  buildIncomeLegs,
+  computeLine,
+  type SaleLineInput,
+  SaleValidationError,
+} from './sales.js';
 import { payoutLegs } from '../finance/tender.js';
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
 import { resolveBookAccountTx, resolveBookPolicyTx } from '../shared/bookPolicy.js';
@@ -247,6 +253,7 @@ export async function createSaleReturn(
 ): Promise<SaleReturnResult> {
   if (!input.acCode) throw new SaleValidationError('customer account (acCode) is required');
   if (!lines?.length) throw new SaleValidationError('at least one return line is required');
+  assertSaleTaxRate(input.taxRatePct);
   const salesAc = input.salesAc ?? 'SALES';
   const fallbackTaxAc = input.taxAc ?? 'GST';
   const tenantId = input.scope.tenantId;

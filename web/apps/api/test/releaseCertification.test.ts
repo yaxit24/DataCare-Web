@@ -681,8 +681,9 @@ describe('release certification: exact real-browser journeys', () => {
     },
   });
 
-  it('pins the 19 production-stack journeys and keeps them frozen and unique', () => {
-    expect(REQUIRED_REAL_BROWSER_JOURNEY_IDS).toHaveLength(19);
+  it('pins the 21 production-stack journeys and keeps them frozen and unique', () => {
+    // 19 plus the evaluation-defect journeys cash-receipt-payment (D1) and sale-amount-basis (D6).
+    expect(REQUIRED_REAL_BROWSER_JOURNEY_IDS).toHaveLength(21);
     expect(new Set(REQUIRED_REAL_BROWSER_JOURNEY_IDS).size).toBe(
       REQUIRED_REAL_BROWSER_JOURNEY_IDS.length,
     );
@@ -716,13 +717,24 @@ describe('release certification: exact real-browser journeys', () => {
     expect(subset.reason).toContain('missing ids');
   });
 
-  it('rejects the former complete sixteen when the labour preview journey is missing', () => {
-    const previous = REQUIRED_REAL_BROWSER_JOURNEY_IDS.filter(
-      (id) =>
-        id !== 'sales-return-labour-replay' &&
-        id !== 'credit-note-entry' &&
-        id !== 'e-invoice-entry',
+  // Journeys added after each historical set; the reconstructions below remove them too.
+  const EVALUATION_DEFECT_JOURNEYS = ['cash-receipt-payment', 'sale-amount-basis'];
+  const before = (...added: string[]) =>
+    REQUIRED_REAL_BROWSER_JOURNEY_IDS.filter(
+      (id) => !added.includes(id) && !EVALUATION_DEFECT_JOURNEYS.includes(id),
     );
+
+  it('rejects the former nineteen when the evaluation-defect journeys are missing', () => {
+    const previous = before();
+    expect(previous).toHaveLength(19);
+    const verdict = evaluateGate(gate, observation(previous), ctx);
+    expect(verdict.outcome).toBe('red');
+    expect(verdict.reason).toContain('cash-receipt-payment');
+    expect(verdict.reason).toContain('sale-amount-basis');
+  });
+
+  it('rejects the former complete sixteen when the labour preview journey is missing', () => {
+    const previous = before('sales-return-labour-replay', 'credit-note-entry', 'e-invoice-entry');
     expect(previous).toHaveLength(16);
     const verdict = evaluateGate(gate, observation(previous), ctx);
     expect(verdict.outcome).toBe('red');
@@ -731,7 +743,7 @@ describe('release certification: exact real-browser journeys', () => {
   });
 
   it('rejects the former eighteen when the X15 e-invoice entry journey is missing', () => {
-    const previous = REQUIRED_REAL_BROWSER_JOURNEY_IDS.filter((id) => id !== 'e-invoice-entry');
+    const previous = before('e-invoice-entry');
     expect(previous).toHaveLength(18);
     const verdict = evaluateGate(gate, observation(previous), ctx);
     expect(verdict.outcome).toBe('red');
@@ -739,9 +751,7 @@ describe('release certification: exact real-browser journeys', () => {
   });
 
   it('rejects the former complete seventeen when the X15 credit-note entry journey is missing', () => {
-    const previous = REQUIRED_REAL_BROWSER_JOURNEY_IDS.filter(
-      (id) => id !== 'credit-note-entry' && id !== 'e-invoice-entry',
-    );
+    const previous = before('credit-note-entry', 'e-invoice-entry');
     expect(previous).toHaveLength(17);
     const verdict = evaluateGate(gate, observation(previous), ctx);
     expect(verdict.outcome).toBe('red');

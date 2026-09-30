@@ -1,0 +1,163 @@
+{
+  "ranAt": "2026-09-29",
+  "database": "disposable localhost:55433 / app_user",
+  "results": [
+    {
+      "id": "core-P-basis",
+      "status": "CAUGHT",
+      "exit": 1,
+      "summary": [
+        "\u00d7 TR_SALE item amount (CommPassTotal) > D6-2: company P prices the line at 1000 7ms",
+        "\u00d7 TR_SALE item amount (CommPassTotal) > D6-3: a line RtWith of P overrides company N 1ms",
+        "\u00d7 TR_SALE item amount (CommPassTotal) > can fail: each basis gives a different amount for the same line 1ms",
+        "Tests  3 failed | 19 passed (22)"
+      ]
+    },
+    {
+      "id": "core-blank-is-fine",
+      "status": "CAUGHT",
+      "exit": 1,
+      "summary": [
+        "\u00d7 company SL_AMT_TYPE and the line RtWith > blank company type is N, as MS_OPNCOMP.cs:881-884 sets it 6ms",
+        "\u00d7 company SL_AMT_TYPE and the line RtWith > a new line copies the company type; its own value wins once set (TR_SALE.cs:9161) 1ms",
+        "\u00d7 TR_SALE item amount (CommPassTotal) > D6-1: blank company prices net, not fine (60,000, previously 54,960 on the web) 2ms",
+        "\u00d7 TR_SALE item amount (CommPassTotal) > D6-2: company  prices the line at 10000 1ms"
+      ]
+    },
+    {
+      "id": "loader-blank-sentinel",
+      "status": "CAUGHT",
+      "exit": 1,
+      "summary": [
+        "\u00d7 database-backed sales voucher lifecycle > D6-1: a NULL SL_AMT_TYPE bills net as the desktop does (60,000, not 54,960) and stores RtWith N 249ms",
+        "Tests  1 failed | 20 skipped (21)",
+        "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+      ]
+    },
+    {
+      "id": "writer-ignores-line-rtwith",
+      "status": "CAUGHT",
+      "exit": 1,
+      "summary": [
+        "\u00d7 database-backed sales voucher lifecycle > D6-3: a line RtWith overrides the company type and is stored as given 235ms",
+        "Tests  1 failed | 20 skipped (21)",
+        "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+      ]
+    },
+    {
+      "id": "finance-no-family-check",
+      "status": "CAUGHT",
+      "exit": 1,
+      "summary": [
+        "\u00d7 D1 receipt/payment book family and slot-2 kasar > D1-5: a receipt or payment into a SALES book is refused and writes nothing 298ms",
+        "Tests  1 failed | 6 skipped (7)",
+        "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+      ]
+    },
+    {
+      "id": "kasar-slot-1",
+      "status": "CAUGHT",
+      "exit": 1,
+      "summary": [
+        "\u00d7 D1 receipt/payment book family and slot-2 kasar > D1-3: a receipt write-off with no explicit account posts legs 03/04 to slot 2 (00057) 313ms",
+        "Tests  1 failed | 6 skipped (7)",
+        "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+      ]
+    },
+    {
+      "id": "kasar-no-settlement-guard",
+      "status": "CAUGHT",
+      "exit": 1,
+      "summary": [
+        "\u00d7 D1 receipt/payment book family and slot-2 kasar > D1-7: a web book with CASH in slots 1 and 2 refuses a write-off instead of posting it to cash 310ms",
+        "Tests  1 failed | 6 skipped (7)",
+        "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+      ]
+    },
+    {
+      "id": "seed-no-kasar-slot",
+      "status": "CAUGHT",
+      "exit": 1,
+      "summary": [
+        "\u00d7 D1 receipts, payments and contra through HTTP > provisions desktop CO_SET amount types and a kasar account in slot 2 of the cash books 11ms",
+        "\u00d7 D1 receipts, payments and contra through HTTP > D1-1: a cash receipt with the book the form now sends is saved, posted and printable 98ms",
+        "Tests  2 failed | 3 passed (5)",
+        "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 2 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+      ]
+    },
+    {
+      "id": "report-screen-missing",
+      "status": "CAUGHT",
+      "exit": 1,
+      "summary": [
+        "\u00d7 D3/D4 report screens and slug exports > D3: /reports/huid has a screen, built by the export builder 8ms",
+        "\u00d7 D3/D4 report screens and slug exports > D3: a screen without the right is still refused (the new routes carry their policies) 4ms",
+        "Tests  2 failed | 7 passed (9)",
+        "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 2 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+      ]
+    },
+    {
+      "id": "report-slug-unmapped",
+      "status": "CAUGHT",
+      "exit": 1,
+      "summary": [
+        "\u00d7 D3/D4 report screens and slug exports > D4: balance-sheet filters resolve to their form (benign 404, not 403) and its exports work 9ms",
+        "Tests  1 failed | 8 passed (9)",
+        "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+      ]
+    },
+    {
+      "id": "labour-type-unguarded",
+      "status": "CAUGHT",
+      "exit": 1,
+      "summary": [
+        "\u00d7 D6 sale amount basis and 400-not-500 over HTTP > an unknown labour type is a 400 validation error, not a 500 TypeError 98ms",
+        "Tests  1 failed | 2 skipped (3)",
+        "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+      ]
+    },
+    {
+      "id": "tax-rate-unguarded",
+      "status": "CAUGHT",
+      "exit": 1,
+      "summary": [
+        "\u00d7 D6 sale amount basis and 400-not-500 over HTTP > a sale return without a tax rate is a 400 validation error, not a 500 DecimalError 90ms",
+        "Tests  1 failed | 2 skipped (3)",
+        "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+      ]
+    },
+    {
+      "id": "web-slug-strips-digits",
+      "status": "CAUGHT",
+      "exit": 1,
+      "summary": [
+        "\u00d7 report API slug (D2) > keeps the digits in real report slugs 6ms",
+        "\u00d7 report API slug (D2) > passes every report slug the navigation links to unchanged, so no screen can lose its route 2ms",
+        "Tests  2 failed | 1 passed (3)",
+        "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 2 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+      ]
+    },
+    {
+      "id": "web-preview-old-basis",
+      "status": "CAUGHT",
+      "exit": 1,
+      "summary": [
+        "\u00d7 lineRecalc agrees with the core primitives the server uses > D6-1: a blank line on a blank company previews net, the 60,000 the desktop bills 7ms",
+        "\u00d7 lineRecalc agrees with the core primitives the server uses > D6-2: company SL_AMT_TYPE  previews 10000 1ms",
+        "\u00d7 lineRecalc agrees with the core primitives the server uses > D6-2: company SL_AMT_TYPE G previews 12000 1ms",
+        "\u00d7 lineRecalc agrees with the core primitives the server uses > D6-2: company SL_AMT_TYPE N previews 10000 0ms"
+      ]
+    },
+    {
+      "id": "web-settings-bare-key",
+      "status": "CAUGHT",
+      "exit": 1,
+      "summary": [
+        "\u00d7 company settings are read by column name from descriptor-keyed values > finds CO_SET and CO_SET_NEW values by column name 4ms",
+        "Tests  1 failed | 11 passed (12)",
+        "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+      ]
+    }
+  ],
+  "verdict": "ALL_CAUGHT"
+}

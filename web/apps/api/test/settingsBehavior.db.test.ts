@@ -292,8 +292,9 @@ databaseDescribe('restricted-role CO_SET behavior integration', () => {
       dhrnIntType: 'M',
       dhrnCompound: true,
       fineStockType: '',
-      saleAmountType: '',
-      purchaseAmountType: '',
+      // MS_OPNCOMP.cs:881-888: a blank SL_AMT_TYPE is N and a blank PR_AMT_TYPE is F.
+      saleAmountType: 'N',
+      purchaseAmountType: 'F',
       purchaseWithLabour: true,
       ounceConversion: 31.1034768,
       rateBasis: 'G',
@@ -351,7 +352,7 @@ databaseDescribe('restricted-role CO_SET behavior integration', () => {
     });
   });
 
-  it('blank batch-2 settings preserve current persisted outcomes under the restricted role', async () => {
+  it('blank batch-2 settings resolve the desktop defaults under the restricted role', async () => {
     const behavior = await withTenant(runtime, TENANT, (tx: any) =>
       resolveSettingsBehaviorTx(tx, { tenantId: TENANT, coCode: CO }),
     );
@@ -365,6 +366,15 @@ databaseDescribe('restricted-role CO_SET behavior integration', () => {
     );
     await persistOutcome('ounce0', ounceRatePerGram(3000, 4, behavior.ounceConversion));
     await persistOutcome('round0', behavior.allRoundingRemoved);
+    // Blank SL_AMT_TYPE now resolves to the desktop N: net 10 + ghat 1 = 11, not the former fine 9.
+    // Blank PR_AMT_TYPE resolves to F, which prices the same fine 9 as before.
+    const stored = (await owner.$queryRawUnsafe(
+      `SELECT "BOOK_NAME" FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='S2'`,
+      TENANT,
+    )) as Array<{ BOOK_NAME: string }>;
+    expect(stored.map((row) => row.BOOK_NAME)).toEqual(
+      expect.arrayContaining(['sale0:11', 'purc0:9']),
+    );
   });
 
   it('each configured batch-2 setting changes a restricted-role persisted outcome', async () => {

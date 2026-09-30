@@ -788,6 +788,7 @@ wsale-034-00015`
  * the harness must expand this set and therefore changes the certification requirement fingerprint.
  */
 export const REQUIRED_REAL_BROWSER_JOURNEY_IDS: readonly string[] = Object.freeze([
+  'cash-receipt-payment',
   'column-settings',
   'credit-note',
   'credit-note-entry',
@@ -800,6 +801,7 @@ export const REQUIRED_REAL_BROWSER_JOURNEY_IDS: readonly string[] = Object.freez
   'manufacturing-lot',
   'order-images',
   'repair-image-conflict',
+  'sale-amount-basis',
   'sales-order',
   'sales-order-design',
   'sales-return-bill-replay',

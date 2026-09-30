@@ -1,11 +1,17 @@
 'use client';
 import { useState } from 'react';
 import { post, ApiError } from '../../../../lib/api';
+import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
+
+/** Desktop "Contra Entry" opens with `CurBookHelp("CONTRA")` (MDI_FORM.cs:8100-8111). */
+const CONTRA_MAIN_BOOKS = ['CONTRA'];
 
 /** Contra (bank↔cash / account transfer): a two-line Dr/Cr voucher. The Dr account receives, the Cr
  *  account gives; both amounts must be equal (a balanced transfer). Posts Dr toAc / Cr fromAc. */
 export default function ContraPage() {
+  // The CONTRA book the voucher is numbered in; postContra refuses a voucher without one.
+  const [coBook, setCoBook] = useState('');
   const [drAc, setDrAc] = useState('');
   const [crAc, setCrAc] = useState('');
   // P3: the receiving account's NAME, denormalised onto the voucher as the desktop does.
@@ -36,10 +42,15 @@ export default function ContraPage() {
       setErr('Dr total must equal Cr total');
       return;
     }
+    if (!coBook) {
+      setErr('select the configured contra book first');
+      return;
+    }
     setBusy(true);
     try {
       setRes(
         await post('/contra', {
+          coBook,
           toAc: drAc.trim(),
           fromAc: crAc.trim(),
           amount: n(drAmt),
@@ -51,7 +62,11 @@ export default function ContraPage() {
       setCrAmt('');
       setItDesc('');
     } catch (e) {
-      setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
+      setErr(
+        e instanceof ApiError
+          ? e.body?.message || e.body?.detail || e.body?.error || e.message
+          : 'failed',
+      );
     } finally {
       setBusy(false);
     }
@@ -65,6 +80,10 @@ export default function ContraPage() {
       <form onSubmit={submit}>
         <div className="panel">
           <div className="row">
+            <div className="field">
+              <label>Book</label>
+              <BookSelect value={coBook} onChange={setCoBook} mainBooks={CONTRA_MAIN_BOOKS} />
+            </div>
             <div className="field">
               <label>To A/c Name</label>
               <input value={toAcName} onChange={(e) => setToAcName(e.target.value)} />
@@ -103,11 +122,13 @@ export default function ContraPage() {
                     entity="accounts"
                     value={drAc}
                     onChange={setDrAc}
+                    ariaLabel="Dr account"
                     style={{ width: 200 }}
                   />
                 </td>
                 <td className="num">
                   <input
+                    aria-label="Dr amount"
                     value={drAmt}
                     onChange={(e) => setDrAmt(e.target.value)}
                     style={{ width: 120, textAlign: 'right' }}
@@ -126,6 +147,7 @@ export default function ContraPage() {
                     entity="accounts"
                     value={crAc}
                     onChange={setCrAc}
+                    ariaLabel="Cr account"
                     style={{ width: 200 }}
                   />
                 </td>
@@ -134,6 +156,7 @@ export default function ContraPage() {
                 </td>
                 <td className="num">
                   <input
+                    aria-label="Cr amount"
                     value={crAmt}
                     onChange={(e) => setCrAmt(e.target.value)}
                     style={{ width: 120, textAlign: 'right' }}
@@ -160,7 +183,7 @@ export default function ContraPage() {
               {equal ? 'Balanced ✓' : 'Dr must equal Cr'}
             </span>
             <span className="spacer" />
-            <button className="primary" disabled={busy || !equal}>
+            <button className="primary" disabled={busy || !equal || !coBook}>
               {busy ? 'Saving…' : 'Save Contra'}
             </button>
           </div>
