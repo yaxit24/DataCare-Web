@@ -22,6 +22,7 @@
  * by compilation under apps/api/tsconfig.test.json. It runs in GitHub Actions CI, which
  * provides postgres:16-alpine with RUN_DB_INTEGRITY_TESTS=1.
  */
+import { readFileSync } from 'node:fs';
 import { PrismaClient } from '@prisma/client';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { withTenant } from '@datacare/db';
@@ -37,6 +38,30 @@ import {
   trialBalance,
 } from '../src/modules/reports/reports.js';
 import { salesReturnRegister } from '../src/modules/reports/reports4.js';
+
+type RawRow = Record<string, string | null>;
+/**
+ * The frozen J01-shaped saved document the pure save composition was authored against (round 15):
+ * the complete saved header and incoming row, the seven financial effect rows and both N BAR
+ * companions. Seeding these literal rows (rather than a hand-picked subset of columns) is what makes
+ * the DB proof exercise the same strict hydration the pure modules require — a partial row leaves
+ * owned amount columns NULL and the replay correctly refuses it.
+ */
+const composition = JSON.parse(
+  readFileSync(
+    new URL(
+      '../../../packages/core/test/fixtures/saleReturnSaveComposition.independent.json',
+      import.meta.url,
+    ),
+    'utf8',
+  ),
+) as {
+  replayInput: { rawHeader: RawRow; rawIncoming: RawRow };
+  financial: {
+    observed: Record<'acData' | 'rojMel' | 'mainStock' | 'taxData', Array<{ raw: RawRow }>>;
+  };
+  bar: { observed: { barData: Array<{ raw: RawRow }>; barDetl: Array<{ raw: RawRow }> } };
+};
 
 const run = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 
@@ -92,6 +117,8 @@ run('sale return numeric write coordinator', () => {
     'YEAR_MAST',
     'CO_MAST',
     'CO_SET',
+    'CO_SET_NEW',
+    'COL_MAST',
   ];
 
   const sql = (statement: string, ...values: unknown[]) =>
@@ -100,13 +127,19 @@ run('sale return numeric write coordinator', () => {
     owner.$queryRawUnsafe<any[]>(statement, ...values);
   const insert = async (table: string, values: Record<string, unknown>) => {
     const t = String(values.tenant_id ?? tenantId);
-    const columns = Object.keys(values)
+    // JSON.stringify drops undefined values, so a key that is present but undefined would be
+    // listed as a column and selected as NULL from jsonb_populate_record — defeating the column
+    // default (e.g. the row_id identity) and violating NOT NULL. Only list defined keys.
+    const defined = Object.fromEntries(
+      Object.entries(values).filter(([, value]) => value !== undefined),
+    );
+    const columns = Object.keys(defined)
       .map((column) => `"${column}"`)
       .join(',');
     await withTenant(owner, t, (tx: any) =>
       tx.$executeRawUnsafe(
         `INSERT INTO "${table}" (${columns}) SELECT ${columns} FROM jsonb_populate_record(NULL::"${table}",$1::jsonb)`,
-        JSON.stringify(values),
+        JSON.stringify(defined),
       ),
     );
   };
@@ -139,20 +172,72 @@ run('sale return numeric write coordinator', () => {
 
   const get = () => getSavedSaleReturnIncoming(runtime, scope(), VCH);
 
+  // information_schema column sets, so a frozen literal row keeps exactly the columns this schema
+  // stores (the fixture's synthetic UNOWNED_*/FUTURE_* preservation probes are not DB columns).
+  // A NULL literal for a NOT NULL column with a default (e.g. SL_DATA.LDR_CODE DEFAULT '') is left
+  // to that default, which is what this schema can actually store for the saved document.
+  const columnCache = new Map<string, Map<string, { defaultedNotNull: boolean }>>();
+  async function columnsOf(table: string): Promise<Map<string, { defaultedNotNull: boolean }>> {
+    let columns = columnCache.get(table);
+    if (!columns) {
+      const found = await owner.$queryRawUnsafe<
+        Array<{ c: string; nullable: string; d: string | null }>
+      >(
+        `SELECT column_name AS c, is_nullable AS nullable, column_default AS d
+           FROM information_schema.columns WHERE table_schema='public' AND table_name=$1`,
+        table,
+      );
+      columns = new Map(
+        found.map((row) => [row.c, { defaultedNotNull: row.nullable === 'NO' && row.d !== null }]),
+      );
+      columnCache.set(table, columns);
+    }
+    return columns;
+  }
+  /** A complete source-shaped row bound to this test's tenant and owning operator. */
+  async function sourceRow(table: string, raw: RawRow, overrides: Record<string, unknown> = {}) {
+    const columns = await columnsOf(table);
+    const row: Record<string, unknown> = { tenant_id: tenantId };
+    for (const [column, value] of Object.entries(raw)) {
+      const info = columns.get(column);
+      if (column === 'tenant_id' || column === 'row_id' || !info) continue;
+      if (value === null && info.defaultedNotNull) continue;
+      row[column] = value;
+    }
+    if ('MAIN_USER' in row) row.MAIN_USER = MAIN_USER;
+    return { ...row, ...overrides };
+  }
+
   async function seedMasters(cashLimit = 0) {
-    await insert('CO_MAST', { tenant_id: tenantId, CO_CODE: CO, CO_NAME: 'X13 Co', CO_SNAME: 'IN' });
+    await insert('CO_MAST', {
+      tenant_id: tenantId,
+      CO_CODE: CO,
+      CO_NAME: 'X13 Co',
+      CO_SNAME: 'IN',
+    });
+    // The resolved incoming calculation policy (SL_AMT_TYPE N, labour rounding 2, no ghat, no
+    // generated labour rate) and the tax rounding (TAX_ROF 2) are OBSERVED by the writer through
+    // the same configuration resolvers as the saved preview, never assumed.
     await insert('CO_SET', {
       tenant_id: tenantId,
       CO_CODE: CO,
       LOCK_DATE: null,
       EMP_CODE_MANDATORY: 'N',
       CASH_LIMIT: cashLimit,
+      SL_AMT_TYPE: 'N',
+      LBR_ROF: '2',
+      LBR_RATE_GEN: 'N',
+      ALL_ROF_REMOVE: 'N',
+      LBR_TYPE: 'N',
+      TAX_ROF: '2',
     });
+    await insert('CO_SET_NEW', { tenant_id: tenantId, CO_CODE: CO, LBR_WITH_GHT: 'N' });
     await insert('YEAR_MAST', {
       tenant_id: tenantId,
       CO_CODE: CO,
       CO_YEAR: YEAR,
       OP_DATE: '2024-04-01',
+      CL_DATE: '2025-03-31',
     });
     await insert('BOOK_DATA', {
       tenant_id: tenantId,
@@ -181,7 +266,15 @@ run('sale return numeric write coordinator', () => {
       SR_NO: 1,
       AC_CODE: 'BOOKAC',
     });
-    await insert('ITEM_MAST', { tenant_id: tenantId, CO_CODE: CO, IT_CODE: ITEM, GR_CODE: 'G1' });
+    await insert('ITEM_MAST', {
+      tenant_id: tenantId,
+      CO_CODE: CO,
+      IT_CODE: ITEM,
+      IT_NAME: 'Gold',
+      GR_CODE: 'G1',
+      RATE_TYPE: 'N',
+      IT_TYPE: 'G',
+    });
     await insert('GROUP_MAST', { tenant_id: tenantId, CO_CODE: CO, GR_CODE: 'G1', SALE_AC: SALE });
     await insert('AC_MAST', {
       tenant_id: tenantId,
@@ -203,246 +296,30 @@ run('sale return numeric write coordinator', () => {
         TAX_GROUP: group,
         TAX_PRC: 0,
       });
-    await insert('EMP_MAST', { tenant_id: tenantId, CO_CODE: CO, EMP_CODE: '001', EMP_NAME: 'Emp' });
+    await insert('EMP_MAST', {
+      tenant_id: tenantId,
+      CO_CODE: CO,
+      EMP_CODE: '001',
+      EMP_NAME: 'Emp',
+    });
   }
 
   async function seedDocument() {
-    await insert(
-      'SL_DATA',
-      key({
-        VCH_DATE: '2024-07-10',
-        VCH_TIME: '2024-07-10T12:34:56',
-        HD_VCH_NO: HD,
-        AC_CODE: PARTY,
-        AC_NAME: ' Customer ',
-        EMP_CODE: '001',
-        VCH_DESC: null,
-        MAIN_USER,
-        TAX_CODE: '00',
-        AC_GST_TYPE: 'N',
-        RATE_UNFIX: 'N',
-        USER_UPDATE: 'N',
-        RTN_NET_AMT: 110,
-        RTN_TOT_AMT: 110,
-        RTN_BILL_OS: 110,
-      }),
-    );
-    await insert(
-      'SL_DETL_RTN',
-      key({
-        SR_NO: 1,
-        OLD_SRNO: 1,
-        VCH_DATE: '2024-07-10',
-        VCH_TIME: '2024-07-10T12:34:56',
-        VCH_TYPE: 'SR',
-        INOUT_TYPE: 'I',
-        ENTRY_TYPE: 'P',
-        BOOK_NAME: 'SALES RETURN',
-        AC_CODE: PARTY,
-        IT_CODE: ITEM,
-        TAG_NO: 'N',
-        TBL_CODE: '001',
-        ITM_PCS: '1.000',
-        ITM_GWT: '10.000',
-        ITM_NWT: '10.000',
-        ITM_TOUCH: '100.000',
-        ITM_WEST_PRC: '0.0000',
-        ITM_FINE: '10.000',
-        ITM_RATE: '10.00',
-        ITM_AMT: '100.00',
-        LBR_TYPE: 'N',
-        LBR_RATE: '1.00',
-        LBR_AMT: '10.00',
-        OTH_AMT: '0.00',
-        ITM_MRP: '0.00',
-        TOT_AMT: '110.00',
-        TAX_PRC: '0.0000',
-        NET_AMT: '110.00',
-        RATE_TYPE: 'N',
-        IT_TYPE: 'G',
-        HD_VCH_NO: HD,
-        MAIN_USER,
-        VCH_SRNO: 123,
-        TAG_TYPE: 'A',
-        EMP_CODE: '001',
-        APR_ISU: 'N',
-        EMP_ISU: 'N',
-        DATA_TYPE: 'A',
-      }),
-    );
-    // Seven existing financial effect rows.
-    await insert(
-      'AC_DATA',
-      key({
-        row_id: undefined,
-        VCH_TYPE: 'SR',
-        VCH_DATE: '2024-07-10',
-        LEDR_KEY: '01012024-2025R110001701         1',
-        BOOK_NAME: 'SALES RETURNE',
-        AC_CODE: PARTY,
-        LD_CODE: SALE,
-        CR_AMT: '110.00',
-        DR_AMT: '0.00',
-        IT_TYPE: 'A',
-        ENTRY_TIME: '2024-07-10T12:34:56',
-        HD_VCH_NO: HD,
-        DATA_TYPE: 'B',
-        DATA_TRFR: 'N',
-        MAIN_USER,
-        PARTY_AC_CODE: PARTY,
-      }),
-    );
-    await insert(
-      'AC_DATA',
-      key({
-        VCH_TYPE: 'SR',
-        VCH_DATE: '2024-07-10',
-        LEDR_KEY: '01012024-2025R110001702         1',
-        BOOK_NAME: 'SALES RETURNE',
-        AC_CODE: SALE,
-        LD_CODE: PARTY,
-        CR_AMT: '0.00',
-        DR_AMT: '110.00',
-        IT_TYPE: 'A',
-        ENTRY_TIME: '2024-07-10T12:34:56',
-        HD_VCH_NO: HD,
-        DATA_TYPE: 'B',
-        DATA_TRFR: 'N',
-        MAIN_USER,
-      }),
-    );
-    await insert(
-      'ROJ_MEL_DATA',
-      key({
-        LEDR_KEY: '01012024-2025R110001701',
-        VCH_DATE: '2024-07-10',
-        VCH_TYPE: 'RT',
-        BOOK_NAME: 'SALES RETURNE',
-        AC_CODE: PARTY,
-        LD_CODE: 'BOOKAC',
-        CR_AMT: '110.00',
-        DR_AMT: '0.00',
-        AC_NAME: '',
-        IT_TYPE: 'A',
-        DATA_TYPE: 'C',
-      }),
-    );
-    await insert(
-      'ROJ_MEL_DATA',
-      key({
-        LEDR_KEY: '01012024-2025R110001702',
-        VCH_DATE: '2024-07-10',
-        VCH_TYPE: 'RT',
-        BOOK_NAME: 'SALES RETURNE',
-        AC_CODE: PARTY,
-        LD_CODE: 'BOOKAC',
-        CR_AMT: '0.00',
-        DR_AMT: '110.00',
-        AC_NAME: 'RTN -  Customer ',
-        IT_TYPE: 'A',
-        DATA_TYPE: 'C',
-      }),
-    );
-    await insert(
-      'MAIN_STOCK',
-      key({
-        SR_NO: 2,
-        ISR_NO: 1,
-        VCH_SRNO: 123,
-        VCH_DATE: '2024-07-10',
-        STK_DATE: '2024-07-10',
-        VCH_TYPE: 'SR',
-        BOOK_NAME: 'SALES RETURNE',
-        AC_CODE: PARTY,
-        IT_CODE: ITEM,
-        TAG_NO: 'N',
-        TBL_CODE: '001',
-        TR_TYPE: 'I',
-        ITM_SIGN: '+',
-        ITM_QTY: '1.000',
-        ITM_PCS: '1.000',
-        ITM_GWT: '10.000',
-        ITM_NWT: '10.000',
-        ITM_TOUCH: '100.000',
-        ITM_WEST: '0.000',
-        ITM_FINE: '10.000',
-        ITM_RATE: '10.00',
-        ITM_AMT: '100.00',
-        LBR_RATE: '1.00',
-        LBR_AMT: '10.00',
-        OTH_AMT: '0.00',
-        ITM_MRP: '0.00',
-        NET_AMT: '110.00',
-        EMP_CODE: '001',
-        ENTRY_TIME: '2024-07-10',
-        MAIN_USER,
-        DATA_TYPE: 'A',
-        ITM_DISC: '0',
-      }),
-    );
-    for (const [sr, group] of [
-      [1, 'C'],
-      [2, 'S'],
-    ] as Array<[number, string]>)
-      await insert(
-        'TAX_DATA',
-        key({
-          SR_NO: sr,
-          BOOK_NAME: 'SALES RETURNE',
-          TRAN_TYPE: 'S',
-          VCH_DATE: '2024-07-10',
-          AC_CODE: PARTY,
-          TAX_CODE: '00',
-          TAX_TYPE: group,
-          TAX_PRC: '0.0000',
-          NET_AMT: '110.00',
-          TAX_AMT: '0.000',
-          DISC_AMT: '0.00',
-          TOT_AMT: '110.00',
-          TAX_SIGN: '-',
-          PARTY_NAME: ' Customer ',
-          R_CHARG: 'N',
-          ISR_NO: 0,
-          ZERO_RATED_AMT: '0',
-        }),
-      );
-    // Both N BAR companions (header + parent).
-    await insert(
-      'BAR_DATA',
-      key({
-        VCH_DATE: '2024-07-10',
-        VCH_TIME: '2024-07-10T12:34:56',
-        EMP_CODE: '001',
-        VCH_DESC: '',
-        MAIN_USER,
-        STK_IT_CODE: '',
-        DATA_TRFR: 'N',
-      }),
-    );
-    await insert(
-      'BAR_DETL',
-      key({
-        VCH_DATE: '2024-07-10',
-        VCH_TIME: '2024-07-10T12:34:56',
-        STK_DATE: '2024-07-10',
-        HD_VCH_NO: HD,
-        AC_CODE: PARTY,
-        VCH_TYPE: 'SR',
-        INOUT_TYPE: 'I',
-        BOOK_NAME: 'SALES RETURNE',
-        MAIN_USER,
-        ENTRY_TYPE: 'P',
-        DATA_TRFR: 'N',
-        SR_NO: 1,
-        OLD_SRNO: 1,
-        IT_CODE: ITEM,
-        TAG_NO: 'N',
-        VCH_SRNO: 123,
-        ITM_NWT: '10.000',
-        ITM_FINE: '10.000',
-        DATA_TYPE: 'A',
-      }),
-    );
+    const { rawHeader, rawIncoming } = composition.replayInput;
+    await insert('SL_DATA', await sourceRow('SL_DATA', rawHeader));
+    await insert('SL_DETL_RTN', await sourceRow('SL_DETL_RTN', rawIncoming));
+    // The seven existing financial effect rows (two ledger legs, two Rojmel rows, one stock row,
+    // two split-tax rows) and both N BAR companions (header + parent), exactly as frozen.
+    const effects: Array<[string, Array<{ raw: RawRow }>]> = [
+      ['AC_DATA', composition.financial.observed.acData],
+      ['ROJ_MEL_DATA', composition.financial.observed.rojMel],
+      ['MAIN_STOCK', composition.financial.observed.mainStock],
+      ['TAX_DATA', composition.financial.observed.taxData],
+      ['BAR_DATA', composition.bar.observed.barData],
+      ['BAR_DETL', composition.bar.observed.barDetl],
+    ];
+    for (const [table, rows] of effects)
+      for (const { raw } of rows) await insert(table, await sourceRow(table, raw));
     await insert('TEMP_BOOK_DATA', {
       tenant_id: tenantId,
       CO_CODE: CO,
@@ -457,7 +334,12 @@ run('sale return numeric write coordinator', () => {
     // Sibling voucher on the same book: must remain untouched.
     await insert('SL_DATA', key({ VCH_NO: '00099', AC_CODE: 'SIBLING', MAIN_USER }));
     // Foreign tenant, same natural key: must remain untouched.
-    await insert('CO_MAST', { tenant_id: otherTenant, CO_CODE: CO, CO_NAME: 'Foreign', CO_SNAME: 'FR' });
+    await insert('CO_MAST', {
+      tenant_id: otherTenant,
+      CO_CODE: CO,
+      CO_NAME: 'Foreign',
+      CO_SNAME: 'FR',
+    });
     await insert('SL_DATA', {
       tenant_id: otherTenant,
       CO_CODE: CO,
@@ -730,27 +612,29 @@ run('sale return numeric write coordinator', () => {
 
   it('rejects a cross-year scope with no such saved Return', async () => {
     await expect(
-      updateSaleReturnNumeric(
-        runtime,
-        { ...scope(), coYear: '2023-2024' },
-        VCH,
-        { version: 'a'.repeat(64), otherAmount: '1', actor },
-      ),
+      updateSaleReturnNumeric(runtime, { ...scope(), coYear: '2023-2024' }, VCH, {
+        version: 'a'.repeat(64),
+        otherAmount: '1',
+        actor,
+      }),
     ).rejects.toMatchObject({ statusCode: 404 });
   });
 
   it('rejects an aliased duplicate AC_DATA ledger key membership', async () => {
-    // Inject a duplicate customer-ledger key to simulate an ambiguous/alias membership.
+    // An exact duplicate LEDR_KEY is impossible: AC_DATA_tenant_ledr_key_key is unique per
+    // tenant. An ALIAS is not: the same customer-ledger key with trailing padding is a distinct
+    // stored value that trims to the same identity, i.e. an ambiguous membership the writer must
+    // refuse rather than silently merge.
     await insert(
       'AC_DATA',
       key({
         VCH_TYPE: 'SR',
         VCH_DATE: '2024-07-10',
-        LEDR_KEY: '01012024-2025R110001701         1',
+        LEDR_KEY: '01012024-2025R110001701         1 ',
         BOOK_NAME: 'SALES RETURNE',
         AC_CODE: PARTY,
         LD_CODE: SALE,
-        CR_AMT: '110.00',
+        CR_AMT: '0.00',
         DR_AMT: '0.00',
         IT_TYPE: 'A',
         DATA_TYPE: 'B',
@@ -759,6 +643,7 @@ run('sale return numeric write coordinator', () => {
       }),
     );
     const saved = await get();
+    const before = await snapshot();
     await expect(
       updateSaleReturnNumeric(runtime, scope(), VCH, {
         version: saved.version,
@@ -766,16 +651,25 @@ run('sale return numeric write coordinator', () => {
         actor,
       }),
     ).rejects.toMatchObject({ statusCode: 409 });
+    expect(await snapshot()).toStrictEqual(before);
   });
 
   it('rejects a phantom voucher that has no saved incoming rows', async () => {
+    // The sibling sentinel is a header-only voucher. Submit its REAL version so the refusal is
+    // the empty-incoming domain restriction (422), not the stale-version gate (409).
+    const phantom = await getSavedSaleReturnIncoming(runtime, scope(), '00099');
+    const before = await snapshot();
     await expect(
       updateSaleReturnNumeric(runtime, scope(), '00099', {
-        version: 'a'.repeat(64),
+        version: phantom.version,
         otherAmount: '1',
         actor,
       }),
-    ).rejects.toMatchObject({ statusCode: 422 });
+    ).rejects.toMatchObject({
+      statusCode: 422,
+      message: 'The saved voucher has no incoming Return rows.',
+    });
+    expect(await snapshot()).toStrictEqual(before);
   });
 
   // ---- Step 9: report reconciliation against the committed rows. ----

@@ -28,6 +28,11 @@ const NN = (c: string): string => `coalesce(NULLIF(${c}::text,'')::numeric,0)`;
  * party name from AC_MAST (SL_DETL_RTN carries only AC_CODE, no AC_NAME). SL_DETL_RTN's return-tax
  * column is RTN_IT_TAX_AMT (there is no TAX_AMT), and total falls back to taxable+tax when the line's
  * TOT_AMT is blank. Scoped by CO_CODE and the optional CO_YEAR.
+ *
+ * Desktop-shaped returns (TR_SALE_RTN on a configured book such as R11, VCH_TYPE 'SR') carry neither
+ * the web 'SRT' book nor 'SRTN'. The desktop SaleRtnReport selects them by the voucher header:
+ * `{SL_DATA.RTN_NET_AMT} <> 0` in the company/year/date window (RP_ALL.cs, SaleRtnReport branch). A
+ * voucher is therefore also included when its exact-key SL_DATA header has a non-zero RTN_NET_AMT.
  */
 export async function salesReturnRegister(prisma: any, s: ReportScope): Promise<ListReport> {
   return withTenant(prisma, s.tenantId, async (tx: any) => {
@@ -46,7 +51,11 @@ export async function salesReturnRegister(prisma: any, s: ReportScope): Promise<
                        ELSE ${NN('r."NET_AMT"')} + ${NN('r."RTN_IT_TAX_AMT"')} END) AS total
        FROM "SL_DETL_RTN" r
        LEFT JOIN "AC_MAST" m ON m."AC_CODE"::text=r."AC_CODE"::text AND m."CO_CODE"::text=r."CO_CODE"::text
-       WHERE r."CO_CODE"=$1${yr}${dt}${fl} AND (r."CO_BOOK"='SRT' OR r."VCH_TYPE"='SRTN')
+       WHERE r."CO_CODE"=$1${yr}${dt}${fl} AND (r."CO_BOOK"='SRT' OR r."VCH_TYPE"='SRTN'
+         OR EXISTS (SELECT 1 FROM "SL_DATA" h
+                     WHERE h.tenant_id=r.tenant_id AND h."CO_CODE"=r."CO_CODE" AND h."LC_CODE"=r."LC_CODE"
+                       AND h."CO_YEAR"=r."CO_YEAR" AND h."CO_BOOK"=r."CO_BOOK" AND h."VCH_NO"=r."VCH_NO"
+                       AND ${NN('h."RTN_NET_AMT"')} <> 0))
        GROUP BY r."CO_BOOK", r."VCH_NO" ORDER BY date, voucher`,
       ...params,
     );

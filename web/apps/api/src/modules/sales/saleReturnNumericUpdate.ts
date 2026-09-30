@@ -6,6 +6,7 @@ import {
   planSaleReturnFinancialEffects,
   matchSaleReturnNBarCompanions,
   evaluateSavedSaleReturnSaveGuards,
+  resolveSaleReturnBillTaxPolicy,
   type SaleReturnFinancialCandidate,
 } from '@datacare/core';
 import {
@@ -15,6 +16,7 @@ import {
   type SavedSaleReturnRaw,
   type SavedSaleReturnObservation,
 } from './savedSaleReturn.js';
+import { readSaleReturnIncomingConfigurationTx } from './saleReturnIncomingConfiguration.js';
 import { formatVoucherNo } from '../vouchers/numbering.js';
 import { resolveBookSlotRowTx } from '../shared/bookPolicy.js';
 
@@ -141,10 +143,7 @@ function validateRequest(input: unknown): SaleReturnNumericUpdateRequest {
     deny('A bounded authenticated main user is required.');
   if (typeof a.auditUser !== 'string' || !a.auditUser.trim() || a.auditUser.length > 15)
     deny('A bounded authenticated audit user is required.');
-  if (
-    typeof a.auditTime !== 'string' ||
-    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(a.auditTime)
-  )
+  if (typeof a.auditTime !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(a.auditTime))
     deny('An explicit whole-second audit timestamp is required.');
   return {
     version: request.version as string,
@@ -184,16 +183,15 @@ async function observeScoped(
   return rows.sort((a, b) => canonical(a).localeCompare(canonical(b)));
 }
 
-/** The financial planner and N BAR matcher want the ledger row's raw WITHOUT tenant_id but
- * WITH row_id (physical identity). Rojmel is keyed by LEDR_KEY, others by numeric row_id. */
-function financialObservation(rows: ObservedRow[], rojmel: boolean) {
+/** The financial planner wants each observed effect row's COMPLETE raw (tenant_id and, for
+ * row-keyed tables, row_id). Rojmel is keyed by LEDR_KEY, the others by numeric row_id. */
+function financialObservation(rows: ObservedRow[], rojmel: boolean, scope: SavedSaleReturnScope) {
   return rows.map((row) => {
     const physicalIdentity = rojmel ? (row.raw.LEDR_KEY ?? '') : (row.physicalId ?? '');
-    const rawWithoutTenant: Record<string, string | null> = { ...row.raw };
     return {
       physicalIdentity,
       version: createHash('sha256').update(canonical(row)).digest('hex'),
-      raw: rawWithoutTenant,
+      raw: bindTenant(row.raw, scope),
     };
   });
 }
@@ -287,8 +285,12 @@ async function runNumericUpdate(
       'version-conflict',
       'The saved Return changed. Reload before retrying.',
     );
-  if (observed.editReason)
-    throw new SavedSaleReturnError(422, 'unsupported-state', observed.editReason);
+  // Only the domain/date restrictions (no incoming rows, closed period) refuse here. The
+  // conservative metadata-path refusal of a stored USER_UPDATE=N does NOT apply: per the plan's
+  // Option A, this writer interprets the ordinary stored N through fresh normal-form Update
+  // rights (step 5 below) and the c27 replay profile itself requires the stored N.
+  if (observed.domainReason)
+    throw new SavedSaleReturnError(422, 'unsupported-state', observed.domainReason);
 
   // ---- Step 4: bind the whole document / header, masters, companions and references and
   // prove exact cardinality and alias absence before projection. ----
@@ -344,7 +346,8 @@ async function runNumericUpdate(
     'BAR_DETL',
   ] as const;
   const locked: Record<string, ObservedRow[]> = {};
-  for (const table of lockOrder) locked[table] = await observeScoped(tx, table, scope, voucherNo, true);
+  for (const table of lockOrder)
+    locked[table] = await observeScoped(tx, table, scope, voucherNo, true);
 
   // AC_DATA concatenated ledger key is tenant-unique; assert no cross-year / alias / phantom
   // collision (a foreign or ambiguous LEDR_KEY membership is rejected, not silently merged).
@@ -363,11 +366,14 @@ async function runNumericUpdate(
   const config = await loadNumericConfig(tx, scope, header.raw, line.raw);
 
   // ---- Step 2/6: replay the ordered c27 journal from freshly observed saved hydration. ----
+  // The saved-document observation exposes the header's physical row_id separately; the pure
+  // planners validate the complete SL_DATA current-schema raw, which includes it.
+  const headerRaw = { ...bindTenant(header.raw, scope), row_id: header.physicalId ?? null };
   const replay = replaySaleReturnOtherAmount({
     observationIdentity: observationId,
     rowIdentity,
-    rawHeader: strip(header.raw),
-    rawIncoming: strip(line.raw),
+    rawHeader: headerRaw,
+    rawIncoming: bindTenant(line.raw, scope),
     itemMasters: config.itemMasters,
     labels: { taxName: config.taxName, bankAccountName: null, cardAccountName: null },
     rowPolicy: config.rowPolicy,
@@ -375,7 +381,13 @@ async function runNumericUpdate(
     c27ColumnWidth: config.c27ColumnWidth,
     events: [request.otherAmount],
   });
-  if (replay.status !== 'ready' || !replay.candidate || !replay.opened || !replay.final || !replay.saveFold)
+  if (
+    replay.status !== 'ready' ||
+    !replay.candidate ||
+    !replay.opened ||
+    !replay.final ||
+    !replay.saveFold
+  )
     throw new SavedSaleReturnError(
       422,
       'unsupported-state',
@@ -420,13 +432,13 @@ async function runNumericUpdate(
     rowIdentity,
     documentVersion: observed.dto.version,
     context: { ...config.financialContext, storage: storage.storage },
-    before: { incoming: strip(line.raw), header: strip(header.raw) },
+    before: { incoming: bindTenant(line.raw, scope), header: headerRaw },
     after: { incoming: replay.candidate.afterIncoming, header: replay.candidate.afterHeader },
     observed: {
-      acData: financialObservation(locked.AC_DATA!, false),
-      rojMel: financialObservation(locked.ROJ_MEL_DATA!, true),
-      mainStock: financialObservation(locked.MAIN_STOCK!, false),
-      taxData: financialObservation(locked.TAX_DATA!, false),
+      acData: financialObservation(locked.AC_DATA!, false, scope),
+      rojMel: financialObservation(locked.ROJ_MEL_DATA!, true, scope),
+      mainStock: financialObservation(locked.MAIN_STOCK!, false, scope),
+      taxData: financialObservation(locked.TAX_DATA!, false, scope),
     },
   });
   if (financial.status !== 'ready' || !financial.candidatePlan)
@@ -454,12 +466,12 @@ async function runNumericUpdate(
       barData: locked.BAR_DATA!.map((row) => ({
         rowId: row.physicalId ?? '',
         version: createHash('sha256').update(canonical(row)).digest('hex'),
-        raw: strip(row.raw),
+        raw: bindTenant(row.raw, scope),
       })),
       barDetl: locked.BAR_DETL!.map((row) => ({
         rowId: row.physicalId ?? '',
         version: createHash('sha256').update(canonical(row)).digest('hex'),
-        raw: strip(row.raw),
+        raw: bindTenant(row.raw, scope),
       })),
     },
   });
@@ -544,11 +556,13 @@ async function runNumericUpdate(
     [];
 
   // Line + header patches come from the c27 replay candidate.
+  const columnTypes = new Map<string, string>();
   for (const [column, value] of Object.entries(replay.candidate.linePatch)) {
+    const type = await columnSqlType(tx, 'SL_DETL_RTN', column, columnTypes);
     const changed = await tx.$executeRawUnsafe(
-      `UPDATE "SL_DETL_RTN" t SET "${column}"=$7 WHERE t.tenant_id=$1 AND t."CO_CODE"=$2
+      `UPDATE "SL_DETL_RTN" t SET "${column}"=$7::${type} WHERE t.tenant_id=$1 AND t."CO_CODE"=$2
          AND t."LC_CODE"=$3 AND t."CO_YEAR"=$4 AND t."CO_BOOK"=$5 AND t."VCH_NO"=$6
-         AND t."SR_NO"::text=$8 AND t."${column}" IS DISTINCT FROM $7`,
+         AND t."SR_NO"::text=$8 AND t."${column}" IS DISTINCT FROM $7::${type}`,
       scope.tenantId,
       scope.coCode,
       scope.lcCode,
@@ -572,10 +586,11 @@ async function runNumericUpdate(
     });
   }
   for (const [column, value] of Object.entries(replay.candidate.headerPatch)) {
+    const type = await columnSqlType(tx, 'SL_DATA', column, columnTypes);
     const changed = await tx.$executeRawUnsafe(
-      `UPDATE "SL_DATA" t SET "${column}"=$7 WHERE t.tenant_id=$1 AND t."CO_CODE"=$2
+      `UPDATE "SL_DATA" t SET "${column}"=$7::${type} WHERE t.tenant_id=$1 AND t."CO_CODE"=$2
          AND t."LC_CODE"=$3 AND t."CO_YEAR"=$4 AND t."CO_BOOK"=$5 AND t."VCH_NO"=$6
-         AND t."${column}" IS DISTINCT FROM $7`,
+         AND t."${column}" IS DISTINCT FROM $7::${type}`,
       scope.tenantId,
       scope.coCode,
       scope.lcCode,
@@ -600,7 +615,7 @@ async function runNumericUpdate(
 
   // Financial effect patches: each candidate is row-qualified by its physical identity.
   for (const candidate of financial.candidatePlan) {
-    await applyFinancialPatch(tx, scope, voucherNo, candidate, changes);
+    await applyFinancialPatch(tx, scope, voucherNo, candidate, changes, columnTypes);
   }
 
   // ---- Step 7 (part 3): verify financial conservation / trial balance and stored
@@ -620,12 +635,15 @@ async function runNumericUpdate(
   });
 }
 
-/** Remove tenant_id from a raw row before handing it to a pure module that forbids it in a
- * scope comparison position, keeping row_id for physical-identity checks. */
-function strip(raw: SavedSaleReturnRaw): Record<string, string | null> {
-  const copy: Record<string, string | null> = {};
-  for (const [key, value] of Object.entries(raw)) if (key !== 'tenant_id') copy[key] = value;
-  return copy;
+/** The pure planners validate the COMPLETE current-schema raw, which includes tenant_id (their
+ * REQUIRED field sets and frozen composition fixtures carry it, and the N BAR matcher compares it
+ * to the context tenant). The observation projection drops the column, so re-bind the exact scope
+ * tenant every row was observed under (every observation filters tenant_id=$1). */
+function bindTenant(
+  raw: SavedSaleReturnRaw,
+  scope: SavedSaleReturnScope,
+): Record<string, string | null> {
+  return { ...raw, tenant_id: scope.tenantId };
 }
 
 async function applyFinancialPatch(
@@ -634,14 +652,16 @@ async function applyFinancialPatch(
   voucherNo: string,
   candidate: SaleReturnFinancialCandidate,
   changes: Array<{ table: string; physicalIdentity: string; column: string; value: string }>,
+  columnTypes: Map<string, string>,
 ): Promise<void> {
   // Rojmel is keyed by its LEDR_KEY identity; the other tables by numeric row_id.
   const keyColumn = candidate.table === 'ROJ_MEL_DATA' ? 'LEDR_KEY' : 'row_id';
   for (const [column, value] of Object.entries(candidate.patch)) {
+    const type = await columnSqlType(tx, candidate.table, column, columnTypes);
     const changed = await tx.$executeRawUnsafe(
-      `UPDATE "${candidate.table}" t SET "${column}"=$7 WHERE t.tenant_id=$1 AND t."CO_CODE"=$2
+      `UPDATE "${candidate.table}" t SET "${column}"=$7::${type} WHERE t.tenant_id=$1 AND t."CO_CODE"=$2
          AND t."LC_CODE"=$3 AND t."CO_YEAR"=$4 AND t."CO_BOOK"=$5 AND t."VCH_NO"=$6
-         AND t."${keyColumn}"::text=$8 AND t."${column}" IS DISTINCT FROM $7`,
+         AND t."${keyColumn}"::text=$8 AND t."${column}" IS DISTINCT FROM $7::${type}`,
       scope.tenantId,
       scope.coCode,
       scope.lcCode,
@@ -664,6 +684,39 @@ async function applyFinancialPatch(
       value,
     });
   }
+}
+
+const SQL_IDENTIFIER = /^[A-Za-z][A-Za-z0-9_]{0,62}$/;
+/** The exact stored SQL type of a planner-owned column. Prisma binds JS strings as text, so an
+ * uncast parameter cannot be assigned to (or IS DISTINCT FROM-compared with) a numeric, float or
+ * timestamp column; each planned value is therefore cast to its column's catalog type. The type
+ * text comes from format_type() over pg_attribute, never from input. */
+async function columnSqlType(
+  tx: any,
+  table: string,
+  column: string,
+  cache: Map<string, string>,
+): Promise<string> {
+  if (!SQL_IDENTIFIER.test(table) || !SQL_IDENTIFIER.test(column))
+    throw new SavedSaleReturnError(422, 'unsupported-state', 'An unsupported column was planned.');
+  const key = `${table}.${column}`;
+  const known = cache.get(key);
+  if (known) return known;
+  const rows: Array<{ type: string | null }> = await tx.$queryRawUnsafe(
+    `SELECT format_type(a.atttypid, a.atttypmod) AS type FROM pg_attribute a
+      WHERE a.attrelid = format('%I.%I', 'public', $1::text)::regclass
+        AND a.attname = $2 AND a.attnum > 0 AND NOT a.attisdropped`,
+    table,
+    column,
+  );
+  if (rows.length !== 1 || !rows[0]!.type)
+    throw new SavedSaleReturnError(
+      422,
+      'unsupported-state',
+      'A planned column is absent from the current schema.',
+    );
+  cache.set(key, rows[0]!.type);
+  return rows[0]!.type;
 }
 
 /** Financial conservation: the scoped AC_DATA and ROJ_MEL_DATA ledger rows for this voucher
@@ -728,7 +781,10 @@ async function loadNumericConfig(
   const itCode = trimmed(line.IT_CODE);
   const acCode = trimmed(header.AC_CODE);
   const taxCode = trimmed(header.TAX_CODE);
-  const rows = async (sql: string, ...params: unknown[]): Promise<Array<Record<string, string | null>>> =>
+  const rows = async (
+    sql: string,
+    ...params: unknown[]
+  ): Promise<Array<Record<string, string | null>>> =>
     (await tx.$queryRawUnsafe(sql, ...params)) as Array<Record<string, string | null>>;
 
   const book = await rows(
@@ -746,7 +802,12 @@ async function loadNumericConfig(
   const bookDetail = [
     await resolveBookSlotRowTx(
       tx,
-      { tenantId: scope.tenantId, coCode: scope.coCode, lcCode: scope.lcCode, coBook: scope.coBook },
+      {
+        tenantId: scope.tenantId,
+        coCode: scope.coCode,
+        lcCode: scope.lcCode,
+        coBook: scope.coBook,
+      },
       1,
     ),
   ];
@@ -767,6 +828,22 @@ async function loadNumericConfig(
           trimmed(item[0]!.GR_CODE),
         )
       : [];
+  // The c27 replay projects the saved row against the COMPLETE item master (RATE_TYPE, IT_TYPE,
+  // IT_NAME, ...), observed exactly as the saved incoming preview observes it; the financial
+  // context above only needs the GR_CODE projection.
+  const replayItemMasters = (
+    (await tx.$queryRawUnsafe(
+      `SELECT (SELECT jsonb_object_agg(e.key,e.value) FROM jsonb_each_text(to_jsonb(t)-'tenant_id'-'row_id') e) AS raw
+         FROM "ITEM_MAST" t WHERE t.tenant_id=$1
+          AND upper(btrim(t."CO_CODE"::text))=upper(btrim($2::text))
+          AND upper(btrim(t."IT_CODE"::text))=upper(btrim($3::text))`,
+      scope.tenantId,
+      scope.coCode,
+      itCode,
+    )) as Array<{ raw: Record<string, string | null> }>
+  )
+    .map(({ raw }) => raw)
+    .sort((a, b) => canonical(a).localeCompare(canonical(b)));
   const account = await rows(
     `SELECT "CO_CODE"::text,"AC_CODE"::text,"AC_GST_TYPE"::text FROM "AC_MAST" t
       WHERE t.tenant_id=$1 AND t."CO_CODE"=$2 AND btrim(t."AC_CODE"::text)=$3`,
@@ -802,12 +879,60 @@ async function loadNumericConfig(
     scope.coYear,
   );
 
+  // The calculation policy, the visible c27 (OthAmt) width and the tax rounding are the
+  // company's OBSERVED configuration, never assumed constants: the same resolver the saved
+  // incoming preview uses (CO_SET / CO_SET_NEW / COL_MAST / BOOK_DATA / YEAR_MAST) and the
+  // bill tax-policy resolver (CO_SET.TAX_ROF / ALL_ROF_REMOVE). Anything unresolved refuses.
+  const configuration = await readSaleReturnIncomingConfigurationTx(tx, scope);
+  if (!configuration.capabilities.canCalculate || !configuration.policy)
+    throw new SavedSaleReturnError(
+      422,
+      'unsupported-state',
+      configuration.diagnostics.find((d) => d.blocking)?.message ??
+        'The effective calculation configuration is unresolved.',
+    );
+  const saleAmountType = configuration.policy.saleAmountType;
+  const isProfileAmountType = (value: string): value is 'N' | 'G' | 'F' =>
+    value === 'N' || value === 'G' || value === 'F';
+  if (!isProfileAmountType(saleAmountType))
+    throw new SavedSaleReturnError(
+      422,
+      'unsupported-state',
+      'The configured sale amount type is outside this numeric profile.',
+    );
+  const otherColumn = configuration.columns.find((c) => c.id === 'x13.primary-incoming.c27');
+  if (!otherColumn || otherColumn.widthState !== 'nonzero' || !(otherColumn.nominalWidth > 0))
+    throw new SavedSaleReturnError(
+      422,
+      'unsupported-state',
+      'The Other amount column is hidden or its configured visibility is unresolved.',
+    );
+  const taxSettings = await rows(
+    `SELECT "CO_CODE"::text,"TAX_ROF"::text,"ALL_ROF_REMOVE"::text FROM "CO_SET" t
+      WHERE t.tenant_id=$1 AND t."CO_CODE"=$2`,
+    scope.tenantId,
+    scope.coCode,
+  );
+  const taxPolicy = resolveSaleReturnBillTaxPolicy(
+    taxSettings.length === 1
+      ? {
+          'CO_SET.TAX_ROF': taxSettings[0]!.TAX_ROF ?? null,
+          'CO_SET.ALL_ROF_REMOVE': taxSettings[0]!.ALL_ROF_REMOVE ?? null,
+        }
+      : undefined,
+  );
+  if (taxPolicy.status !== 'ready' || !taxPolicy.policy)
+    throw new SavedSaleReturnError(
+      422,
+      'unsupported-state',
+      taxPolicy.diagnostics?.[0]?.message ?? 'The company tax rounding policy is unresolved.',
+    );
   const rowPolicy = {
-    saleAmountType: 'N' as const,
-    labourRoundingDecimals: 2,
-    labourIncludesGhat: false,
-    generateLabourRate: false,
-    fineColumnWidth: 100,
+    saleAmountType,
+    labourRoundingDecimals: configuration.policy.labourRoundingDecimals,
+    labourIncludesGhat: configuration.policy.labourIncludesGhat,
+    generateLabourRate: configuration.policy.generateLabourRate,
+    fineColumnWidth: configuration.policy.fineColumnWidth,
   };
   const stockDateText = trimmed(line.VCH_DATE);
   const financialContext = {
@@ -836,18 +961,21 @@ async function loadNumericConfig(
     AC_CODE: trimmed(header.AC_CODE),
     VCH_TYPE: trimmed(line.VCH_TYPE),
     INOUT_TYPE: trimmed(line.INOUT_TYPE),
-    BOOK_NAME: trimmed(line.BOOK_NAME),
+    // Desktop TR_SALE_RTN writes the incoming SL_DETL_RTN row with BOOK_NAME=FormName ("SALES
+    // RETURN", :12551) but every companion/effect row, BAR_DETL included, with
+    // BOOK_NAME=FormMainBook = the book's MAIN_BOOK ("SALES RETURNE", :9916/:13276-14840).
+    BOOK_NAME: trimmed(book[0]?.MAIN_BOOK),
     VCH_TIME: (header.VCH_TIME ?? '').slice(0, 19),
     EMP_CODE: trimmed(header.EMP_CODE),
     VCH_DESC: header.VCH_DESC ?? '',
     MAIN_USER: trimmed(header.MAIN_USER),
   };
   return {
-    itemMasters: item,
+    itemMasters: replayItemMasters,
     taxName: null,
     rowPolicy,
-    taxRoundingDecimals: 2,
-    c27ColumnWidth: 100,
+    taxRoundingDecimals: taxPolicy.policy.taxRoundingDecimals,
+    c27ColumnWidth: otherColumn.nominalWidth,
     cashLimit: trimmed(companySettings[0]?.cash_limit) || '0',
     storageText: { stockDateText, stockDiscountText: '0', taxZeroRatedText: '0' },
     financialContext,
