@@ -62,8 +62,9 @@ describe('route policy registry', () => {
     // The evaluation defects add six report screens: HUID, Item Stock Level, Bill Wise Profit, Physical
     // Stock Verify and Stock Movement (D3, previously export-only), plus /reports/gstr1 (D4).
     // X16 adds the four /wholesale-sales lifecycle routes (desktop "Wh Sales", its own right).
-    expect(routes).toHaveLength(584);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(584);
+    // N18 adds list, tag source, read and update for each TR_TAG_CAN menu (tag cancel, tag transfer).
+    expect(routes).toHaveLength(592);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(592);
 
     const policies = routes.map((route) => ({
       ...route,

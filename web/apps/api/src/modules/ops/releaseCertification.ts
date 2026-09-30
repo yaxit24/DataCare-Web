@@ -808,6 +808,7 @@ export const REQUIRED_REAL_BROWSER_JOURNEY_IDS: readonly string[] = Object.freez
   'sales-return-labour-replay',
   'sales-return-replay',
   'sales-return-saved',
+  'tag-cancel-transfer',
   'tour-order',
   'wholesale-rate-cut',
 ]);

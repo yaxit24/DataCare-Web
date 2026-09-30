@@ -4,9 +4,6 @@ export const PARITY_CONTAINMENT_WORK_PACKAGE: 'WP-01';
 export const parityContainmentOperations: readonly [
   'logical-restore',
   'production-cutover-load',
-  'tag-opening-update',
-  'tag-transfer',
-  'tag-cancel',
   'tag-weight-difference',
   'tag-split',
 ];

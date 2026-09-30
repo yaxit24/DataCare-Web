@@ -1,0 +1,120 @@
+{
+ "startedAt": "2026-09-30T04:35:50.813Z",
+ "finishedAt": "2026-09-30T04:36:51.868Z",
+ "releaseSha": null,
+ "database": "disposable localhost:55433 / app_user",
+ "status": "passed",
+ "journeys": [
+  {
+   "journeyId": "cash-receipt-payment",
+   "status": "passed"
+  },
+  {
+   "journeyId": "column-settings",
+   "status": "passed"
+  },
+  {
+   "journeyId": "credit-note",
+   "status": "passed"
+  },
+  {
+   "journeyId": "credit-note-entry",
+   "status": "passed"
+  },
+  {
+   "journeyId": "e-invoice-entry",
+   "status": "passed"
+  },
+  {
+   "journeyId": "design-book",
+   "status": "passed"
+  },
+  {
+   "journeyId": "design-calculations",
+   "status": "passed"
+  },
+  {
+   "journeyId": "design-repeat",
+   "status": "passed"
+  },
+  {
+   "journeyId": "generic-image-conflict",
+   "status": "passed"
+  },
+  {
+   "journeyId": "image-conflict",
+   "status": "passed"
+  },
+  {
+   "journeyId": "manufacturing-lot",
+   "status": "passed"
+  },
+  {
+   "journeyId": "order-images",
+   "status": "passed"
+  },
+  {
+   "journeyId": "repair-image-conflict",
+   "status": "passed"
+  },
+  {
+   "journeyId": "sale-amount-basis",
+   "status": "passed"
+  },
+  {
+   "journeyId": "sales-order",
+   "status": "passed"
+  },
+  {
+   "journeyId": "sales-order-design",
+   "status": "passed"
+  },
+  {
+   "journeyId": "sales-return-bill-replay",
+   "status": "passed"
+  },
+  {
+   "journeyId": "sales-return-labour-replay",
+   "status": "passed"
+  },
+  {
+   "journeyId": "sales-return-replay",
+   "status": "passed"
+  },
+  {
+   "journeyId": "sales-return-saved",
+   "status": "passed"
+  },
+  {
+   "journeyId": "tag-cancel-transfer",
+   "status": "passed"
+  },
+  {
+   "journeyId": "tour-order",
+   "status": "passed"
+  },
+  {
+   "journeyId": "wholesale-rate-cut",
+   "status": "passed"
+  }
+ ],
+ "mockedRequests": 0,
+ "mockedResponses": 0,
+ "interceptionIndicators": 0,
+ "tagCancelTransfer": {
+  "checks": [
+   "each page offers only its own in-use book (TAG CANCEL / TAG TRFR) and the next voucher number",
+   "a picked tag fills its row, stone and photograph; ItCode, Counter, Pcs and KrCode are read-only on it",
+   "a typed tag resolves on leaving the cell; Duplicate Tag No, a sold tag and an ambiguous number are refused",
+   "the live instance picked by its serial is the one saved; the other instance stays in stock",
+   "a loose line recomputes net and fine on leaving each cell; the totals row equals the stored lines",
+   "register header, lines, stones, TEMP_BOOK_DATA, MAIN_STOCK and DM_DATA read back with the desktop values",
+   "an edit with Ctrl+D, a stone change and a touch change keeps the hidden number, clock, user and OLD_SRNO",
+   "reopen by number and the voucher list restore the saved voucher",
+   "delete writes DELETE_DATA per line, removes the write set and gives every tag back",
+   "a transfer recomputes the hidden labour, copies the transfer item to the next row, moves the metal to the loose item and conserves the fine",
+   "the source tags, their stones and their photograph never change"
+  ],
+  "boundary": "Engineering evidence on a synthetic fixture; not an independent desktop comparison or business acceptance"
+ }
+}

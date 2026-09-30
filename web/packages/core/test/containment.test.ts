@@ -12,11 +12,12 @@ import {
 const expectedOperations = [
   'logical-restore',
   'production-cutover-load',
-  'tag-transfer',
-  'tag-cancel',
   'tag-weight-difference',
   'tag-split',
 ] as const;
+
+/** Released with their own evidence (N18); they must never silently return to the registry. */
+const dischargedOperations = ['tag-opening-update', 'tag-transfer', 'tag-cancel'] as const;
 
 describe('WP-01 parity containment policy', () => {
   it('fails closed for every reviewed unsafe mutation with no environment bypass', () => {
@@ -59,6 +60,18 @@ describe('WP-01 parity containment policy', () => {
     expect(() => parityContainmentRule('unknown' as never)).toThrow(
       'Unknown parity containment operation',
     );
+  });
+
+  it('keeps discharged operations out of the registry, and cites their evidence', () => {
+    for (const operation of dischargedOperations) {
+      expect(parityContainmentOperations).not.toContain(operation);
+      expect(() => parityContainmentRule(operation as never)).toThrow(
+        'Unknown parity containment operation',
+      );
+    }
+    const registry = readFileSync(resolve(process.cwd(), 'containment.mjs'), 'utf8');
+    expect(registry).toContain('DISCHARGED — `tag-cancel` and `tag-transfer`');
+    expect(registry).toContain('implementation-2026-09-29-n18/contract.md');
   });
 
   it('guards the restore-drill CLI before database configuration or client construction', () => {

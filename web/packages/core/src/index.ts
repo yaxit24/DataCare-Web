@@ -227,3 +227,20 @@ export type {
   WholesaleBandInput,
   WholesaleBand,
 } from './wholesaleLine.js';
+export {
+  baselineFromCells,
+  tagCancelRecompute,
+  tagCancelStone,
+  tagCancelStoneEffect,
+  tagCancelTotals,
+  tagCancelLineQualifies,
+} from './tagCancelLine.js';
+export type {
+  TagCancelSettings,
+  TagCancelCells,
+  TagCancelBaseline,
+  TagCancelRecomputed,
+  TagCancelStoneCells,
+  TagCancelTotals,
+  TagCancelTotalsRow,
+} from './tagCancelLine.js';

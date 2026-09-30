@@ -37,6 +37,12 @@ import {
   wholesaleRateCutFixtureTables,
 } from './wholesale-rate-cut.journey.mjs';
 import {
+  cleanupTagCancelTransfer,
+  exerciseTagCancelTransfer,
+  seedTagCancelTransfer,
+  tagCancelTransferFixtureTables,
+} from './tag-cancel-transfer.journey.mjs';
+import {
   cleanupSaleAmountBasis,
   exerciseSaleAmountBasis,
   saleAmountBasisFixtureTables,
@@ -142,6 +148,7 @@ const tables = [
   ...cashReceiptPaymentFixtureTables,
   ...saleAmountBasisFixtureTables,
   ...wholesaleRateCutFixtureTables,
+  ...tagCancelTransferFixtureTables,
   'COL_MAST',
   'CO_SET_NEW',
   'TAG_IMAGE_DATA',
@@ -566,6 +573,16 @@ try {
   } finally {
     await cleanupWholesaleRateCut(sql);
   }
+  await seedTagCancelTransfer(sql);
+  try {
+    result.tagCancelTransfer = await exerciseTagCancelTransfer(page, {
+      checkpoint,
+      owner,
+      tenantId,
+    });
+  } finally {
+    await cleanupTagCancelTransfer(sql);
+  }
   await seedSalesOrder(sql);
   await seedSalesOrderDesign(sql);
   result.salesOrderDesign = await exerciseSalesOrderDesign(page, { checkpoint, coBook: 'S41' });
@@ -642,6 +659,7 @@ try {
     ['sales-return-labour-replay', result.salesReturnLabourReplay],
     ['sales-return-replay', result.salesReturnReplay],
     ['sales-return-saved', result.salesReturnSaved],
+    ['tag-cancel-transfer', result.tagCancelTransfer],
     ['tour-order', result.tourOrder],
     ['wholesale-rate-cut', result.wholesaleRateCut],
   ].map(([journeyId, detail]) => {
@@ -661,7 +679,7 @@ try {
   );
   result.status = 'passed';
   console.log(
-    'PARITY_REAL_STACK_PASSED: real login, Design Book calculation/repeat, Sales design selection and lifecycle, Tour Order lifecycle, credit-note browse, E CRNT create/print/edit/reopen/delete and E INVOICE create/IRN/cancel/reopen/delete, cash receipt/payment/contra with configured books, sale amount basis, wholesale sale tag/stock/ledger lifecycle and header-only rate cut, saved order and generic/repair images with conflicts, saved incoming Return metadata, Setting lot sources, family-qualified column settings, saved incoming Return calculation, bill and resolved labour preview; zero mocked requests',
+    'PARITY_REAL_STACK_PASSED: real login, Design Book calculation/repeat, Sales design selection and lifecycle, Tour Order lifecycle, credit-note browse, E CRNT create/print/edit/reopen/delete and E INVOICE create/IRN/cancel/reopen/delete, cash receipt/payment/contra with configured books, sale amount basis, wholesale sale tag/stock/ledger lifecycle and header-only rate cut, tag cancel and tag transfer lifecycle with stones, images and conserved metal, saved order and generic/repair images with conflicts, saved incoming Return metadata, Setting lot sources, family-qualified column settings, saved incoming Return calculation, bill and resolved labour preview; zero mocked requests',
   );
 } catch (error) {
   result.status = 'failed';

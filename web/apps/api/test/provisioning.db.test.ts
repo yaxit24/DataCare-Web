@@ -80,7 +80,7 @@ d('company provisioning produces a postable company', () => {
         CO,
       ),
     );
-    expect(rows.length).toBe(16);
+    expect(rows.length).toBe(17);
     // Three legs per book (1 = control/sales, 2 = cash/bank, 3 = round-off), except the cash books.
     // RCT and PAY carry the desktop cash-book layout, 1 = cash and 2 = kasar: Ac_Ledr.cs:567-581 joins
     // BOOK_DETL SR_NO 1 and SR_NO 2 for legs 01-08. Their slot 2 used to be CASH, which would have posted
@@ -115,6 +115,38 @@ d('company provisioning produces a postable company', () => {
         MAIN_BOOK: 'WH SALES',
         BOOK_INOUT: 'O',
         BOOK_TBL_NAME: 'RATE_CUT_DATA',
+      },
+    ]);
+  });
+
+  it('creates the Tag Cancel and Tag Transfer books TR_TAG_CAN opens', async () => {
+    const rows: any[] = await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT "CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","BOOK_TBL_NAME","CUR_USE"
+           FROM "BOOK_DATA" WHERE "CO_CODE"=$1 AND "CO_BOOK" IN ('TGC','TTR') ORDER BY "CO_BOOK"`,
+        CO,
+      ),
+    );
+    // MDI_FORM.cs:8586 CurBookHelp("TAG CANCEL") and :8664 CurBookHelp("TAG TRFR"); both number from
+    // BAR_CAN_DATA (MS_UPDATE.cs:7825). The desktop's short names are TGCAN and TAGTR.
+    expect(rows).toEqual([
+      {
+        CO_BOOK: 'TGC',
+        BOOK_NAME: 'Tag Cancel',
+        BOOK_SNAME: 'TGCAN',
+        MAIN_BOOK: 'TAG CANCEL',
+        BOOK_INOUT: 'O',
+        BOOK_TBL_NAME: 'BAR_CAN_DATA',
+        CUR_USE: 'Y',
+      },
+      {
+        CO_BOOK: 'TTR',
+        BOOK_NAME: 'Tag Transfer',
+        BOOK_SNAME: 'TAGTR',
+        MAIN_BOOK: 'TAG TRFR',
+        BOOK_INOUT: 'O',
+        BOOK_TBL_NAME: 'BAR_CAN_DATA',
+        CUR_USE: 'Y',
       },
     ]);
   });
@@ -198,7 +230,7 @@ d('company provisioning produces a postable company', () => {
   it('is idempotent', async () => {
     const again = await seedCompany(prisma, tenantId, CO, { coName: 'Provision Test', lcCode: LC });
     expect(again.created.books).toBe(0);
-    // 12 books x 3 legs + RCT/PAY x 2 + the wholesale and rate-cut books x 12 slots, not doubled.
-    expect(await count('BOOK_DETL')).toBe(64);
+    // 13 books x 3 legs + RCT/PAY x 2 + the wholesale and rate-cut books x 12 slots, not doubled.
+    expect(await count('BOOK_DETL')).toBe(67);
   });
 });
