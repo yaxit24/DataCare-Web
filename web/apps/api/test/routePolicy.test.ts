@@ -63,8 +63,9 @@ describe('route policy registry', () => {
     // Stock Verify and Stock Movement (D3, previously export-only), plus /reports/gstr1 (D4).
     // X16 adds the four /wholesale-sales lifecycle routes (desktop "Wh Sales", its own right).
     // N18 adds list, tag source, read and update for each TR_TAG_CAN menu (tag cancel, tag transfer).
-    expect(routes).toHaveLength(596);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(596);
+    // The strict numeric Sale Return update (card X13 steps 8-9) adds one guarded PUT.
+    expect(routes).toHaveLength(597);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(597);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -99,6 +100,7 @@ describe('route policy registry', () => {
       ['POST', '/sales-returns/:vchNo/incoming-labour-observation', 'read'],
       ['POST', '/sales-returns/:vchNo/incoming-labour-replay', 'read'],
       ['PUT', '/sales-returns/:vchNo/incoming-metadata', 'update'],
+      ['PUT', '/sales-returns/:vchNo/incoming-numeric', 'update'],
     ] as const)
       expect(routePolicyFor(method, path)).toMatchObject({
         kind: 'form',

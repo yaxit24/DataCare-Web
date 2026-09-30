@@ -109,9 +109,16 @@ describe('one supplied saved Return fixture across the separate pure Save prereq
   });
   it('retains every event while empty, same-value and round-trip journals leave all nine numeric target rows unchanged', () => {
     for (const events of [[], ['0'], ['1', '0']]) {
-      const r = calculate(sample(), events);
+      const x = sample();
+      const r = calculate(x, events);
       expect(r.replay.final!.row.journal).toHaveLength(events.length);
       expect(r.replay.candidate!.hasLineOrHeaderChanges).toBe(false);
+      // Exact no-op raw line/header equality: a whole-plan no-op reproduces the saved raw
+      // records byte-for-byte, including retained NULL/text/opaque extension fields.
+      expect(r.replay.candidate!.afterIncoming).toStrictEqual(x.replayInput.rawIncoming);
+      expect(r.replay.candidate!.afterHeader).toStrictEqual(x.replayInput.rawHeader);
+      expect(r.replay.candidate!.linePatch).toEqual({});
+      expect(r.replay.candidate!.headerPatch).toEqual({});
       expect(r.financial.status).toBe('ready');
       for (const p of r.financial.candidatePlan!) {
         expect(p.patch).toEqual({});
@@ -120,6 +127,40 @@ describe('one supplied saved Return fixture across the separate pure Save prereq
       expect(r.bar.status).toBe('matched');
       expect(r.guards.status).toBe('ready');
     }
+  });
+  it('preserves the exact ordered c27 journal kind/row/column/text sequence across a multi-event replay', () => {
+    const x = sample();
+    const events = ['1', '0', '2'];
+    const r = calculate(x, events);
+    expect(r.replay.status).toBe('ready');
+    const journal = r.replay.final!.row.journal;
+    expect(journal).toHaveLength(events.length);
+    expect(
+      journal.map((entry) => {
+        const event = entry.event as {
+          kind: string;
+          rowIdentity: string;
+          column: number;
+          text: string;
+        };
+        return {
+          kind: event.kind,
+          rowIdentity: event.rowIdentity,
+          column: event.column,
+          text: event.text,
+        };
+      }),
+    ).toEqual(
+      events.map((text) => ({
+        kind: 'leaveCell',
+        rowIdentity: x.replayInput.rowIdentity,
+        column: 27,
+        text,
+      })),
+    );
+    // The last event (2) leaves the retained numeric target rows in the +2 poststate.
+    expect(r.replay.candidate!.afterIncoming.OTH_AMT).toBe('2.00');
+    expect(r.replay.candidate!.afterHeader.RTN_NET_AMT).toBe('112');
   });
   it('does not treat ready financial projections as proof of a mismatched BAR companion', () => {
     const x = sample();

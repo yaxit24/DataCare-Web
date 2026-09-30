@@ -103,6 +103,10 @@ export function SaleReturnSavedPanel({
   const selectionRef = useRef<Selection | null>(selected);
   selectionRef.current = selected;
   const [voucher, setVoucher] = useState('');
+  // The strict numeric-update draft is a single ordered c27 "Other amount" editor value. It is
+  // kept separate from the metadata draft: the numeric write routes through the dedicated
+  // updateSaleReturnNumeric coordinator, never the metadata patch or the legacy create form.
+  const [numericOther, setNumericOther] = useState('');
   const [recent, setRecent] = useState<{ context: number; data: SavedReturnRecent } | null>(null);
   const [browseRequest, setBrowseRequest] = useState<SavedReturnRequestToken | null>(null);
   const [operation, setOperation] = useState<{
@@ -136,6 +140,7 @@ export function SaleReturnSavedPanel({
     setSelection(null);
     setRecent(null);
     setVoucher('');
+    setNumericOther('');
     setError(null);
     setNotice(null);
     previewOwner.current.clear();
@@ -346,6 +351,57 @@ export function SaleReturnSavedPanel({
         conflict: failure.conflict,
         text: failure.message,
       });
+    } finally {
+      if (guard.current.current(token)) {
+        operationRef.current = null;
+        setOperation(null);
+      }
+    }
+  }
+
+  async function saveNumeric() {
+    const current = selectionRef.current;
+    if (!current || !canEdit(current) || !numericOther.trim()) return;
+    const token = guard.current.begin('document');
+    operationRef.current = { token, kind: 'save' };
+    setOperation(operationRef.current);
+    setError(null);
+    setNotice(null);
+    let committed = false;
+    let dispatched = false;
+    try {
+      dispatched = true;
+      // Send only the observed document version and the single c27 Other editor value; the
+      // coordinator re-observes and re-locks every dependency and adopts a fresh saved version.
+      const response = await put<unknown>(
+        savedReturnPath(current.document.scope, current.document.voucherNo, 'numeric'),
+        { version: current.document.version, otherAmount: numericOther.trim() },
+      );
+      committed = true;
+      if (!guard.current.current(token)) return;
+      const fresh =
+        response && typeof response === 'object' && !Array.isArray(response)
+          ? String((response as Record<string, unknown>).documentVersion ?? '')
+          : '';
+      // Reload the saved return to adopt the fresh saved version and clear the numeric draft.
+      setNumericOther('');
+      setNotice({
+        context: token.context,
+        text: fresh
+          ? `Saved numeric update; adopted fresh version ${fresh.slice(0, 12)}…`
+          : 'Saved numeric update.',
+      });
+      if (guard.current.current(token)) {
+        operationRef.current = null;
+        setOperation(null);
+      }
+      void load(current.document.voucherNo, true);
+      return;
+    } catch (caught) {
+      if (!guard.current.current(token)) return;
+      const failure = savedReturnSaveFailure(caught, { committed, dispatched });
+      setSelection({ ...current, needsReload: failure.needsReload });
+      setError({ context: token.context, conflict: failure.conflict, text: failure.message });
     } finally {
       if (guard.current.current(token)) {
         operationRef.current = null;
@@ -646,6 +702,36 @@ export function SaleReturnSavedPanel({
             <span className="muted">
               Saved amounts, source identities and other fields remain read-only.
             </span>
+          </div>
+          <div className="panel" data-testid="sale-return-saved-numeric" style={{ marginTop: 12 }}>
+            <h3>Numeric update (contained profile)</h3>
+            <p className="muted">
+              Applies a single ordered "Other amount" (c27) editor value through the strict
+              numeric-update coordinator. Supported only for the ordinary saved single-primary
+              N/P/I/SR1 zero-tax profile; every other saved shape is refused server-side.
+            </p>
+            <div className="row" style={{ alignItems: 'end', flexWrap: 'wrap' }}>
+              <div className="field" style={{ maxWidth: 200 }}>
+                <label htmlFor="saved-return-numeric-other">Other amount (c27)</label>
+                <input
+                  id="saved-return-numeric-other"
+                  data-testid="sale-return-saved-numeric-other"
+                  value={numericOther}
+                  onChange={(event) => setNumericOther(event.target.value)}
+                  inputMode="decimal"
+                  disabled={!editable || dirty}
+                />
+              </div>
+              <button
+                type="button"
+                className="primary"
+                data-testid="sale-return-saved-numeric-save"
+                onClick={() => void saveNumeric()}
+                disabled={!editable || dirty || !numericOther.trim()}
+              >
+                {saving ? 'Saving…' : 'Save numeric update'}
+              </button>
+            </div>
           </div>
           {(previewKind === null || previewKind === 'row') && (
             <SaleReturnReplayPanel
