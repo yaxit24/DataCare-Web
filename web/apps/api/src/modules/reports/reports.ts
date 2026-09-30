@@ -156,20 +156,26 @@ async function registerFrom(
   s: ReportScope,
   table: string,
   r: DateRange,
-  excludeBook?: string,
+  mainBook?: string,
 ): Promise<Register> {
   return withTenant(prisma, s.tenantId, async (tx: any) => {
-    const w = whereScopeDate(s, r);
-    // excludeBook is an internal constant (never user input) — sanitized + inlined.
-    const extra = excludeBook
-      ? ` AND "CO_BOOK" <> '${excludeBook.replace(/[^A-Z0-9_]/g, '')}'`
+    const w = whereScopeDate(s, r, 'v');
+    // G06: classify by the book's MAIN_BOOK, not a literal CO_BOOK. The sales register is every voucher
+    // whose book is a SALES book; returns (MAIN_BOOK 'SALES RETURNE'), quotations and credit notes share
+    // SL_DATA but carry a different MAIN_BOOK, so the join excludes them for any company's book codes —
+    // the old `CO_BOOK <> 'SRT'` only worked for the one company whose return book was literally named SRT.
+    // mainBook is an internal constant (never user input); sanitized and inlined.
+    const join = mainBook
+      ? ` JOIN "BOOK_DATA" b ON b.tenant_id=v.tenant_id AND b."CO_CODE"=v."CO_CODE"
+           AND b."LC_CODE"=v."LC_CODE" AND b."CO_BOOK"=v."CO_BOOK"
+           AND b."MAIN_BOOK"='${mainBook.replace(/[^A-Z0-9_ ]/g, '')}'`
       : '';
     const rows: any[] = await tx.$queryRawUnsafe(
-      `SELECT "VCH_NO" AS "vchNo", "CO_BOOK" AS "coBook", "VCH_DATE" AS "vchDate", "BILL_NO" AS "billNo", "AC_CODE" AS "acCode", "AC_NAME" AS party,
-              ${NN('"NET_AMT"')}-${NN('"DISC_AMT"')} AS net, ${NN('"TAX_AMT"')} AS tax,
-              ${NN('"CGST_TAX"')} AS cgst, ${NN('"SGST_TAX"')} AS sgst, ${NN('"IGST_TAX"')} AS igst,
-              ${NN('"TOT_AMT"')} AS tot, ${NN('"BILL_OS"')} AS os
-       FROM ${quoteIdent(table)} WHERE ${w.sql}${extra} ORDER BY "VCH_DATE","VCH_NO"`,
+      `SELECT v."VCH_NO" AS "vchNo", v."CO_BOOK" AS "coBook", v."VCH_DATE" AS "vchDate", v."BILL_NO" AS "billNo", v."AC_CODE" AS "acCode", v."AC_NAME" AS party,
+              ${NN('v."NET_AMT"')}-${NN('v."DISC_AMT"')} AS net, ${NN('v."TAX_AMT"')} AS tax,
+              ${NN('v."CGST_TAX"')} AS cgst, ${NN('v."SGST_TAX"')} AS sgst, ${NN('v."IGST_TAX"')} AS igst,
+              ${NN('v."TOT_AMT"')} AS tot, ${NN('v."BILL_OS"')} AS os
+       FROM ${quoteIdent(table)} v${join} WHERE ${w.sql} ORDER BY v."VCH_DATE",v."VCH_NO"`,
       ...w.params,
     );
     return shapeRegister(
@@ -192,18 +198,18 @@ async function registerFrom(
   });
 }
 
-/** Sales register (SL_DATA) — Req 19. Excludes sales-return vouchers (CO_BOOK='SRT'). */
+/** Sales register (SL_DATA) — Req 19. SALES books only (returns/quotations/credit-notes are other MAIN_BOOKs). */
 export function salesRegister(prisma: any, s: ReportScope, r: DateRange = {}): Promise<Register> {
-  return registerFrom(prisma, s, 'SL_DATA', r, 'SRT');
+  return registerFrom(prisma, s, 'SL_DATA', r, 'SALES');
 }
 
-/** Purchase register (PR_DATA) — Req 19. Excludes purchase-return vouchers (CO_BOOK='PRT'). */
+/** Purchase register (PR_DATA) — Req 19. PURCHASE books only (returns are MAIN_BOOK 'PURC RETURN'). */
 export function purchaseRegister(
   prisma: any,
   s: ReportScope,
   r: DateRange = {},
 ): Promise<Register> {
-  return registerFrom(prisma, s, 'PR_DATA', r, 'PRT');
+  return registerFrom(prisma, s, 'PR_DATA', r, 'PURCHASE');
 }
 
 const round3 = (x: number): number => Math.round((x + Number.EPSILON) * 1000) / 1000;
