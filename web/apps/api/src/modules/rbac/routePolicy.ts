@@ -297,6 +297,14 @@ route('Sales/Tour / Approval Sale', [
   'POST /tour/:vchNo/bill',
 ]);
 route('Sales/Approval Return', ['POST /tour/return', 'DELETE /tour/return/:vchNo']);
+// Desktop menu "Wh Sales" opens TR_WH_SALE scoped to MAIN_BOOK 'WH SALES' (MDI_FORM.cs:8038-8046), under its
+// own right; "Rate Cut" opens the same form scoped to 'RATE CUT' (:8110-8118). One right no longer grants both.
+route('Sales/Wholesale Sale', [
+  'POST /wholesale-sales',
+  'GET /wholesale-sales/:vchNo',
+  'PUT /wholesale-sales/:vchNo',
+  'DELETE /wholesale-sales/:vchNo',
+]);
 route('Sales/Wholesale Sale Return', [
   'POST /sales/wholesale-sale-return',
   'GET /sales/wholesale-sale-return/:vchNo',
@@ -458,12 +466,27 @@ route('Inventory/Lot Management', [
   'DELETE /stock/item-lot/:vchNo',
 ]);
 route('Inventory/Stock Adjust', ['POST /stock/adjust', 'DELETE /stock/adjust/:vchNo']);
-route('Inventory/Tag Transfer', ['POST /stock/tag-transfer', 'DELETE /stock/tag-transfer/:vchNo']);
+// TR_TAG_CAN in its two menus (N18): each keeps its own form right, as the desktop menus check their own.
+route('Inventory/Tag Transfer', [
+  'GET /stock/tag-transfer',
+  'GET /stock/tag-transfer/source',
+  'GET /stock/tag-transfer/:vchNo',
+  'POST /stock/tag-transfer',
+  'PUT /stock/tag-transfer/:vchNo',
+  'DELETE /stock/tag-transfer/:vchNo',
+]);
 route('Inventory/Counter Transfer', [
   'POST /stock/counter-transfer',
   'DELETE /stock/counter-transfer/:vchNo',
 ]);
-route('Inventory/Tag Cancel', ['POST /stock/tag-cancel', 'DELETE /stock/tag-cancel/:vchNo']);
+route('Inventory/Tag Cancel', [
+  'GET /stock/tag-cancel',
+  'GET /stock/tag-cancel/source',
+  'GET /stock/tag-cancel/:vchNo',
+  'POST /stock/tag-cancel',
+  'PUT /stock/tag-cancel/:vchNo',
+  'DELETE /stock/tag-cancel/:vchNo',
+]);
 route('Inventory/Tag Adjust', [
   'POST /stock/tag-adjust',
   'GET /stock/tag-adjust/:vchNo',
@@ -474,7 +497,14 @@ route('Inventory/Tag Weight Diff', [
   'POST /stock/tag-weight-diff',
   'DELETE /stock/tag-weight-diff/:vchNo',
 ]);
-route('Inventory/Tag Split', ['POST /stock/tag-split', 'DELETE /stock/tag-split/:vchNo']);
+route('Inventory/Tag Split', [
+  'GET /stock/tag-split',
+  'GET /stock/tag-split/source',
+  'GET /stock/tag-split/:vchNo',
+  'POST /stock/tag-split',
+  'PUT /stock/tag-split/:vchNo',
+  'DELETE /stock/tag-split/:vchNo',
+]);
 route('Cash / Bank/Digital Gold Book', [
   'POST /finance/gold-book',
   'GET /finance/gold-book/:vchNo',

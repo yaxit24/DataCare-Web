@@ -22,6 +22,21 @@ export type {
   BillTotals,
   MoneyRoundingPolicy,
 } from './calc.js';
+export {
+  tagSplitChild,
+  tagSplitStone,
+  tagSplitStoneEffect,
+  tagSplitTotals,
+  tagSplitBalance,
+  tagSplitConserves,
+} from './tagSplitLine.js';
+export type {
+  TagSplitSettings,
+  TagSplitChildCells,
+  TagSplitStoneCells,
+  TagSplitTotals,
+  TagSplitBalance,
+} from './tagSplitLine.js';
 export { fineFor, round3, DEFAULT_FINE_WORKFLOW } from './finePolicy.js';
 export type { FineWorkflow, FineLine } from './finePolicy.js';
 export { orderLabourAmount, orderLabourTransition, orderLabourReplay } from './orderLabour.js';
@@ -210,3 +225,37 @@ export {
   saleItemAmount,
 } from './saleAmount.js';
 export type { SaleAmountLine, SaleAmountBasis } from './saleAmount.js';
+export { rateFactor, settleMoneyMetal, settlementBalance } from './settlement.js';
+export type { RateBasis, SettlementInput, SettlementResult } from './settlement.js';
+export {
+  wholesaleIssueLine,
+  wholesaleReceiveLine,
+  wholesaleGridTotals,
+  wholesaleBand,
+} from './wholesaleLine.js';
+export type {
+  WholesaleLineSettings,
+  WholesaleLineInput,
+  WholesaleLineResult,
+  WholesaleGridTotals,
+  WholesaleTender,
+  WholesaleBandInput,
+  WholesaleBand,
+} from './wholesaleLine.js';
+export {
+  baselineFromCells,
+  tagCancelRecompute,
+  tagCancelStone,
+  tagCancelStoneEffect,
+  tagCancelTotals,
+  tagCancelLineQualifies,
+} from './tagCancelLine.js';
+export type {
+  TagCancelSettings,
+  TagCancelCells,
+  TagCancelBaseline,
+  TagCancelRecomputed,
+  TagCancelStoneCells,
+  TagCancelTotals,
+  TagCancelTotalsRow,
+} from './tagCancelLine.js';

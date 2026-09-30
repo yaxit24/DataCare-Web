@@ -297,29 +297,29 @@ export const TAG_INVARIANT_COVERAGE: readonly TagInvariantCoverage[] = Object.fr
       'Sale, transfer, split, weight replacement and cancel serialise on one identity lock',
     enforcement: 'code-tested',
     evidence:
-      'issueTagTx takes pg_advisory_xact_lock on tag-issue|CO|LC|TAG_NO; concurrent double issue is covered by a database test. Transfer/split/weight/cancel are CONTAINED by WP-01, so they cannot contend today',
+      'issueTagTx takes pg_advisory_xact_lock on tag-issue|CO|LC|TAG_NO; tag cancel, tag transfer (tagCancel.ts) and tag split (tagSplit.ts) take the same lock for every tag they touch, in sorted order, before resolving any; double issue, cancel against sale, double cancel and a split racing a sale are covered by database tests (tagCancelLifecycle.db.test.ts, tagSplitLifecycle.db.test.ts). Weight change is still CONTAINED by WP-01',
   },
   {
     number: 5,
     invariant:
       'Parent split OUT equals children IN within approved tolerance, or posts the desktop absorption branch',
-    enforcement: 'blocked-owner-decision',
+    enforcement: 'code-tested',
     evidence:
-      'plan §8.1 item 3 — split conservation tolerance and absorbing account are undecided; split is contained',
+      'tagSplit.ts refuses a difference between the child net total and the parent net total (@datacare/core tagSplitConserves, tolerance 0.001) unless an absorbing account is given, in which case the residual posts the desktop Tag_Split_Ledr fine legs; asserted in tagSplitLifecycle.db.test.ts (V1 exact, V2 refused, V3 absorbed)',
   },
   {
     number: 6,
     invariant: 'Tag transfer conserves the desktop measures between tag OUT and target IN',
-    enforcement: 'contained',
+    enforcement: 'code-tested',
     evidence:
-      'WP-01 blocks tag transfer; conservation is unproved and the route returns 503 PARITY_CONTAINMENT',
+      "Ac_Stock.Tag_Can_Stk insert 2: the transfer item's '+' row carries the tag's '-' row pieces, gross, net, touch, wastage, fine and karigar figures (tagCancelRows.stockRows); asserted on create and edit in tagCancelLifecycle.db.test.ts",
   },
   {
     number: 7,
     invariant: 'A sold tag cannot be sold, split, transferred, changed or cancelled concurrently',
     enforcement: 'code-tested',
     evidence:
-      'TAG_STOCK row presence plus the atomic DELETE affected-row check; the other four operations are contained',
+      'TAG_STOCK row presence plus the atomic DELETE affected-row check; cancel, transfer and split resolve through the same issueTagTx under the identity lock (a sold or cancelled tag is not available), and split refuses a child that has already moved on before editing or deleting; weight change is still contained',
   },
   {
     number: 8,
@@ -341,14 +341,14 @@ export const TAG_INVARIANT_COVERAGE: readonly TagInvariantCoverage[] = Object.fr
       'Images, HUIDs, sub-details, source voucher and order links survive the approved lineage rules',
     enforcement: 'blocked-transition-model',
     evidence:
-      'plan §7 records that split/weight/cancel do not migrate image lineage; those paths are contained and the lineage rules are unwritten',
+      'cancel and transfer leave the source BAR_DETL, BAR_IDTL and image index untouched, as the desktop does (asserted row-for-row in tagCancelLifecycle.db.test.ts); tag split creates each child a full BAR_DETL/BAR_IDTL record and copies the parent TAG image to each child (tagSplit.copyTagImageTx), never modifying the parent (tagSplitLifecycle.db.test.ts); weight replacement image lineage is contained and unwritten',
   },
   {
     number: 11,
     invariant: 'Delete/edit restores the complete prior state or fails before any mutation',
     enforcement: 'code-tested',
     evidence:
-      'reverseVoucherTx and replaceWriteSetTx run inside one transaction; tag-opening update is contained by WP-01',
+      'reverseVoucherTx and replaceWriteSetTx run inside one transaction; tag cancel, transfer and split edit and delete run in one transaction and give back the tags they consumed, refusing when a child moved on (tagCancelLifecycle.db.test.ts, tagSplitLifecycle.db.test.ts); weight change remains contained by WP-01',
   },
   {
     number: 12,

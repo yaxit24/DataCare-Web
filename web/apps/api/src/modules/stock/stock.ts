@@ -91,9 +91,22 @@ async function availableBarTags(tx: any, key: TagKey): Promise<Record<string, un
     // BAR_DETL.KR_TOUCH and SL_DETL.KR_FINE equals BAR_DETL.KR_FINE, 102 of 102 for both. They are not derived
     // - `KR_NET_WT x KR_TOUCH/100` fits only 7 of 92 rows - so the tag is the only source, and omitting them
     // here silently wrote zeros even once the sale path was asking for them.
-    `SELECT b."CO_CODE",b."LC_CODE",b."TAG_NO",b."VCH_SRNO",b."IT_CODE",
-            b."ITM_PCS",b."ITM_GWT",b."ITM_NWT",b."ITM_FINE",b."TBL_CODE",
-            b."KR_NET_WT",b."KR_TOUCH",b."KR_FINE"
+    // The descriptive columns after KR_FINE are what TR_WH_SALE copies from the tag onto a wholesale line when
+    // the tag number is entered (TR_WH_SALE.cs:10641-10736): counter, design, size, hallmark, karigar, product,
+    // labour basis and rate type. Measured on the desktop rows of Next23 034/4-6 and Next25 034/1.
+    //
+    // ONE ROW PER INSTANCE, not per BAR_DETL row. A returned tag gets a second BAR_DETL row with the same
+    // (TAG_NO, VCH_SRNO, IT_CODE) — the wholesale return re-records it under the return voucher — and both rows
+    // share one stock balance. Listing each row made every returned tag "ambiguous" and unsellable. The desktop
+    // groups by the instance (TR_WH_SALE.cs:10601 `GROUP BY … HAVING SUM(…) > 0`) and then reads the first
+    // BAR_DETL row of that instance (:10633), which is what `DISTINCT ON … ORDER BY row_id` keeps.
+    `SELECT DISTINCT ON (coalesce(b."VCH_SRNO",0),coalesce(b."IT_CODE"::text,''))
+            b."CO_CODE",b."LC_CODE",b."TAG_NO",b."VCH_SRNO",b."IT_CODE",
+            b."ITM_PCS",b."ITM_GWT",b."ITM_OTH_WT",b."ITM_NWT",b."ITM_GHT_PRC",b."ITM_TOUCH",
+            b."ITM_WEST_PRC",b."ITM_FINE",b."TBL_CODE",b."KR_NET_WT",b."KR_TOUCH",b."KR_FINE",
+            b."DESIGN_NO",b."ITM_SIZE",b."HM_ID",b."HM_ID_WT",b."KR_NAME",b."PR_CODE",
+            b."LBR_TYPE",b."LBR_RATE",b."LBR_AMT",b."OTH_AMT",b."ITM_RATE",b."ITM_MRP",
+            b."KR_COST",b."RATE_TYPE"
        FROM "BAR_DETL" b
       WHERE ${filters.join(' AND ')}
         AND coalesce((
@@ -107,7 +120,7 @@ async function availableBarTags(tx: any, key: TagKey): Promise<Record<string, un
              AND coalesce(m."VCH_SRNO",0)=coalesce(b."VCH_SRNO",0)
              AND coalesce(m."IT_CODE"::text,'')=coalesce(b."IT_CODE"::text,'')
         ),0) > 0
-      ORDER BY coalesce(b."VCH_SRNO",0),b."IT_CODE",b.row_id`,
+      ORDER BY coalesce(b."VCH_SRNO",0),coalesce(b."IT_CODE"::text,''),b.row_id`,
     ...params,
   );
 }
@@ -844,143 +857,6 @@ export async function deleteStockAdjust(
       deleteLog: {
         table: 'DELETE_DATA',
         row: { ...key, VCH_TYPE: 'STADJ', DELETE_USER: input.deleteUser ?? 'system' },
-      },
-    });
-    return { reversed: true };
-  });
-}
-
-// ───────────────────────── Tag Transfer (TR_TAG_TRFR) ─────────────────────────
-export interface TagTransferLine {
-  tagNo: string;
-  fromItCode: string;
-  toItCode: string;
-  pcs?: number;
-  grossWt?: number;
-  netWt?: number;
-  touch?: number;
-  rate?: number;
-  tblCode?: string;
-  designNo?: string;
-  itmSize?: string;
-  lessWt?: number;
-  westPct?: number;
-}
-export interface TagTransferInput {
-  scope: VoucherScope;
-  vchDate?: Date | string;
-  lines: TagTransferLine[];
-}
-
-/**
- * Tag Transfer (desktop "Tag Transfer"): converts a barcoded tag into a bulk/loose item (e.g. a broken
- * chain → OLD GOLD). The tag is removed from barcode stock and its weight added to the target bulk item
- * (TrfrItm). Pure stock move, no money ledger: per line we emit two MAIN_STOCK legs — OUT the tagged item
- * (ITM_SIGN '-', TAG_NO=tag) and IN the target bulk item (ITM_SIGN '+', TAG_NO 'N') with the SAME net/fine
- * so the physical metal (fine) is conserved. Book 'TTR'. Reversible by voucher key.
- */
-export async function tagTransfer(
-  prisma: any,
-  input: TagTransferInput,
-): Promise<{ vchNo: number; lines: number }> {
-  if (!input.lines?.length)
-    throw new TagNotAvailableError('(tag transfer: at least one line required)');
-  for (const l of input.lines) {
-    if (!l.tagNo) throw new TagNotAvailableError('(tag transfer: tagNo is required on each line)');
-    if (!l.toItCode)
-      throw new TagNotAvailableError('(tag transfer: target item TrfrItm is required)');
-  }
-  const tenantId = input.scope.tenantId;
-  const N = (v: unknown): number => (v == null ? 0 : Number(v));
-  const r3 = (n: number): number => Math.round((n + 1e-9) * 1000) / 1000;
-  const r2 = (n: number): number => Math.round((n + 1e-9) * 100) / 100;
-  const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
-  return withTenant(prisma, tenantId, async (tx: any) => {
-    const no = await nextVoucherNoTx(tx, input.scope);
-    const key = {
-      CO_CODE: input.scope.coCode,
-      LC_CODE: input.scope.lcCode,
-      CO_YEAR: input.scope.coYear ?? '',
-      CO_BOOK: input.scope.coBook ?? 'TTR',
-      VCH_NO: formatVoucherNo(no),
-    };
-    const fineOf = (l: TagTransferLine): number =>
-      r3((N(l.netWt) * (N(l.touch) + N(l.westPct))) / 100);
-    const rows: any[] = [];
-    let sr = 0;
-    for (const l of input.lines) {
-      // Resolve the tag's real item (BAR_DETL) so the OUT leg removes the CORRECT item — never fall
-      // back to the target item, which would silently deplete the wrong stock line.
-      let fromCode = (l.fromItCode ?? '').trim();
-      if (!fromCode) {
-        const hit: Array<{ IT_CODE: string }> = await tx.$queryRawUnsafe(
-          `SELECT "IT_CODE" FROM "BAR_DETL" WHERE "CO_CODE"::text=$1 AND "TAG_NO"::text=$2 LIMIT 1`,
-          input.scope.coCode,
-          String(l.tagNo),
-        );
-        fromCode = hit.length ? String(hit[0]!.IT_CODE) : '';
-      }
-      if (!fromCode)
-        throw new TagNotAvailableError(
-          `(tag transfer: cannot resolve source item for tag ${l.tagNo} — supply fromItCode)`,
-        );
-      const fine = fineOf(l);
-      const amt = r2(fine * N(l.rate));
-      const base = {
-        ...key,
-        ISR_NO: 2,
-        VCH_DATE: vchDate,
-        STK_DATE: vchDate,
-        VCH_TYPE: 'TAGTR',
-        BOOK_NAME: 'TAG TRFR',
-        TBL_CODE: l.tblCode ?? '000',
-        TR_TYPE: 'A',
-        DESIGN_NO: l.designNo ?? null,
-        ITM_SIZE: l.itmSize ?? null,
-        ITM_WEST: N(l.westPct),
-        ITM_QTY: N(l.pcs) || 1,
-        ITM_PCS: N(l.pcs),
-        ITM_GWT: N(l.grossWt),
-        ITM_NWT: N(l.netWt),
-        ITM_TOUCH: N(l.touch),
-        ITM_FINE: fine,
-        ITM_RATE: N(l.rate),
-        ITM_AMT: amt,
-        NET_AMT: amt,
-      };
-      sr += 1;
-      rows.push({ ...base, SR_NO: sr, IT_CODE: fromCode, TAG_NO: l.tagNo, ITM_SIGN: '-' }); // OUT the tag (correct source item)
-      sr += 1;
-      rows.push({ ...base, SR_NO: sr, IT_CODE: l.toItCode, TAG_NO: 'N', ITM_SIGN: '+' }); // IN the bulk target
-    }
-    await postVoucherTx(tx, tenantId, {
-      ledger: { table: 'AC_DATA', lines: [] },
-      writes: [{ table: 'MAIN_STOCK', rows }],
-    });
-    return { vchNo: no, lines: input.lines.length };
-  });
-}
-
-/** Delete/reverse a tag-transfer voucher (removes its MAIN_STOCK rows by voucher key). */
-export async function deleteTagTransfer(
-  prisma: any,
-  input: { scope: VoucherScope; vchNo: number | string; book?: string; deleteUser?: string },
-): Promise<{ reversed: true }> {
-  const tenantId = input.scope.tenantId;
-  const key = {
-    CO_CODE: input.scope.coCode,
-    LC_CODE: input.scope.lcCode,
-    CO_YEAR: input.scope.coYear ?? '',
-    CO_BOOK: input.scope.coBook ?? input.book ?? 'TTR',
-    VCH_NO: formatVoucherNo(input.vchNo),
-  };
-  return withTenant(prisma, tenantId, async (tx: any) => {
-    await reverseVoucherTx(tx, tenantId, {
-      tables: ['MAIN_STOCK'],
-      key,
-      deleteLog: {
-        table: 'DELETE_DATA',
-        row: { ...key, VCH_TYPE: 'TAGTR', DELETE_USER: input.deleteUser ?? 'system' },
       },
     });
     return { reversed: true };

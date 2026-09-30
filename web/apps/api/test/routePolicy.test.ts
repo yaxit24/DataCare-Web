@@ -61,8 +61,10 @@ describe('route policy registry', () => {
     // form adds eleven /e-invoices routes (browse, read, TCS basis, entry lifecycle, print, IRN, cancel).
     // The evaluation defects add six report screens: HUID, Item Stock Level, Bill Wise Profit, Physical
     // Stock Verify and Stock Movement (D3, previously export-only), plus /reports/gstr1 (D4).
-    expect(routes).toHaveLength(580);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(580);
+    // X16 adds the four /wholesale-sales lifecycle routes (desktop "Wh Sales", its own right).
+    // N18 adds list, tag source, read and update for each TR_TAG_CAN menu (tag cancel, tag transfer).
+    expect(routes).toHaveLength(596);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(596);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -919,6 +921,14 @@ describe('route policy registry', () => {
       form: 'Cash / Bank/Rate Cut (price fixing)',
       action: 'update',
     });
+    // Desktop "Wh Sales" is its own menu and right (MDI_FORM.cs:8038-8046), not the Rate Cut right.
+    for (const [method, path, action] of [
+      ['POST', '/wholesale-sales', 'create'],
+      ['GET', '/wholesale-sales/:vchNo', 'read'],
+      ['PUT', '/wholesale-sales/:vchNo', 'update'],
+      ['DELETE', '/wholesale-sales/:vchNo', 'delete'],
+    ] as const)
+      expect(routePolicyFor(method, path)).toMatchObject({ form: 'Sales/Wholesale Sale', action });
   });
 
   it('maps the other-commission lifecycle to independent rights', () => {

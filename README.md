@@ -7,7 +7,7 @@ Private engineering repository for converting the DataCareNext Windows jewellery
 ## Start here
 
 1. **Current implementation status:** [parity-plan-2026-09-10/README.md](parity-plan-2026-09-10/README.md)
-2. **Latest implementation round (evaluation defects D1–D6):** [parity-plan-2026-09-10/45-implementation-progress-eval-defects-2026-09-29.md](parity-plan-2026-09-10/45-implementation-progress-eval-defects-2026-09-29.md); previous round X15: [44-implementation-progress-x15-2026-09-29.md](parity-plan-2026-09-10/44-implementation-progress-x15-2026-09-29.md)
+2. **Latest implementation round (N18 tag cancel and tag transfer):** [parity-plan-2026-09-10/47-implementation-progress-n18-2026-09-29.md](parity-plan-2026-09-10/47-implementation-progress-n18-2026-09-29.md); previous rounds: X16 wholesale sale and rate cut [46-implementation-progress-x16-2026-09-29.md](parity-plan-2026-09-10/46-implementation-progress-x16-2026-09-29.md), evaluation defects D1–D6 [45-implementation-progress-eval-defects-2026-09-29.md](parity-plan-2026-09-10/45-implementation-progress-eval-defects-2026-09-29.md) and X15 [44-implementation-progress-x15-2026-09-29.md](parity-plan-2026-09-10/44-implementation-progress-x15-2026-09-29.md)
 3. **Paused Round 15 continuation:** [parity-plan-2026-09-10/42-implementation-progress-round15.md](parity-plan-2026-09-10/42-implementation-progress-round15.md)
 4. **Full implementation plan:** [parity-plan-2026-09-10/02-implementation-plan.md](parity-plan-2026-09-10/02-implementation-plan.md)
 5. **Web handoff:** [web/docs/HANDOFF.md](web/docs/HANDOFF.md)

@@ -4,14 +4,27 @@ import { registerTxnRoutes } from '../src/routes/txn.js';
 
 const containedRoutes = [
   ['POST', '/backup/restore', 'logical-restore'],
-  ['POST', '/stock/tag-transfer', 'tag-transfer'],
-  ['DELETE', '/stock/tag-transfer/00001', 'tag-transfer'],
-  ['POST', '/stock/tag-cancel', 'tag-cancel'],
-  ['DELETE', '/stock/tag-cancel/00001', 'tag-cancel'],
   ['POST', '/stock/tag-weight-diff', 'tag-weight-difference'],
   ['DELETE', '/stock/tag-weight-diff/00001', 'tag-weight-difference'],
-  ['POST', '/stock/tag-split', 'tag-split'],
-  ['DELETE', '/stock/tag-split/00001', 'tag-split'],
+] as const;
+
+/** TR_TAG_CAN in both menus (N18) and TR_TAG_SPLIT (N19), released with their own evidence (containment.mjs). */
+const releasedRoutes = [
+  ['GET', '/stock/tag-cancel'],
+  ['GET', '/stock/tag-cancel/00001'],
+  ['POST', '/stock/tag-cancel'],
+  ['PUT', '/stock/tag-cancel/00001'],
+  ['DELETE', '/stock/tag-cancel/00001'],
+  ['GET', '/stock/tag-transfer'],
+  ['GET', '/stock/tag-transfer/00001'],
+  ['POST', '/stock/tag-transfer'],
+  ['PUT', '/stock/tag-transfer/00001'],
+  ['DELETE', '/stock/tag-transfer/00001'],
+  ['GET', '/stock/tag-split'],
+  ['GET', '/stock/tag-split/00001'],
+  ['POST', '/stock/tag-split'],
+  ['PUT', '/stock/tag-split/00001'],
+  ['DELETE', '/stock/tag-split/00001'],
 ] as const;
 
 async function containmentApp({
@@ -73,6 +86,19 @@ describe('WP-01 contained transaction routes', () => {
         });
       }
       expect(prismaAccess).not.toHaveBeenCalled();
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('no longer contains Tag Cancel or Tag Transfer: every lifecycle route reaches its writer', async () => {
+    const { app } = await containmentApp();
+    try {
+      for (const [method, url] of releasedRoutes) {
+        const response = await app.inject({ method, url, payload: {} });
+        expect(response.statusCode, `${method} ${url}`).not.toBe(503);
+        expect(response.body, `${method} ${url}`).not.toContain('parity-containment');
+      }
     } finally {
       await app.close();
     }

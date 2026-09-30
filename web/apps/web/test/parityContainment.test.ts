@@ -13,10 +13,10 @@ const source = (path: string) => readFileSync(resolve(process.cwd(), path), 'utf
 describe('WP-01 operator containment', () => {
   it('renders an accessible notice with reason, safe alternative, and exit gate', () => {
     const html = renderToStaticMarkup(
-      createElement(ParityContainmentNotice, { operation: 'tag-split' }),
+      createElement(ParityContainmentNotice, { operation: 'tag-weight-difference' }),
     );
     expect(html).toContain('role="alert"');
-    expect(html).toContain('data-operation="tag-split"');
+    expect(html).toContain('data-operation="tag-weight-difference"');
     expect(html).toContain('WP-01 parity safety gate');
     expect(html).toContain('Safe alternative:');
     expect(html).toContain('Exit gate:');
@@ -27,12 +27,16 @@ describe('WP-01 operator containment', () => {
     const active = renderToStaticMarkup(
       createElement(
         ParityContainmentFieldset,
-        { operation: 'tag-split', active: true, 'aria-label': 'Opening tag details' },
+        { operation: 'tag-weight-difference', active: true, 'aria-label': 'Weight change details' },
         child,
       ),
     );
     const inactive = renderToStaticMarkup(
-      createElement(ParityContainmentFieldset, { operation: 'tag-split', active: false }, child),
+      createElement(
+        ParityContainmentFieldset,
+        { operation: 'tag-weight-difference', active: false },
+        child,
+      ),
     );
     expect(active).toMatch(/<fieldset[^>]*disabled=""[^>]*>/);
     expect(active).toContain('<button type="button">Mutate</button>');
@@ -40,12 +44,7 @@ describe('WP-01 operator containment', () => {
   });
 
   it('wires every partial tag page to both a guarded handler and a disabled submit path', () => {
-    const cases = [
-      ['app/(app)/txn/tag-transfer/page.tsx', 'tag-transfer'],
-      ['app/(app)/txn/tag-cancel/page.tsx', 'tag-cancel'],
-      ['app/(app)/txn/tag-weight-diff/page.tsx', 'tag-weight-difference'],
-      ['app/(app)/txn/tag-split/page.tsx', 'tag-split'],
-    ] as const;
+    const cases = [['app/(app)/txn/tag-weight-diff/page.tsx', 'tag-weight-difference']] as const;
 
     for (const [path, operation] of cases) {
       const text = source(path);
@@ -78,6 +77,34 @@ describe('WP-01 operator containment', () => {
     expect(text).toContain('onClick={newVoucher}');
     // HUIDs must stay text; a Number() coercion here silently dropped every id containing a letter.
     expect(text).toContain('hallmarkId2: line.hallmarkId2?.trim() || undefined');
+  });
+
+  it('mounts the released TR_TAG_CAN form, with no containment left, on both tag pages', () => {
+    // These pages used to be read-only containment notices. N18 released both operations against their own
+    // exit gates (containment.mjs). Asserting the absence keeps the guarantee: re-introducing a block fails here.
+    for (const [path, mode] of [
+      ['app/(app)/txn/tag-cancel/page.tsx', 'cancel'],
+      ['app/(app)/txn/tag-transfer/page.tsx', 'transfer'],
+    ] as const) {
+      const text = source(path);
+      expect(text, path).toContain(`<TagCancelForm mode="${mode}"`);
+      expect(text, path).not.toContain('parityContainment');
+      expect(text, path).not.toContain('ParityContainmentNotice');
+    }
+    const form = source('components/TagCancelForm.tsx');
+    expect(form).not.toContain('parityContainment');
+    expect(form).not.toContain('containment.blocked');
+  });
+
+  it('mounts the released TR_TAG_SPLIT form, with no containment left, on the tag split page', () => {
+    // N19 released tag-split against its exit gate (containment.mjs). Re-introducing a block fails here.
+    const text = source('app/(app)/txn/tag-split/page.tsx');
+    expect(text).toContain('<TagSplitForm');
+    expect(text).not.toContain('parityContainment');
+    expect(text).not.toContain('ParityContainmentNotice');
+    const form = source('components/TagSplitForm.tsx');
+    expect(form).not.toContain('parityContainment');
+    expect(form).not.toContain('containment.blocked');
   });
 
   it('labels logical JSON backup as non-DR and restore as contained', () => {

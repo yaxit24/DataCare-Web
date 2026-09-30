@@ -307,12 +307,16 @@ import { deleteBillSettlement, listOpenBills, settleBills } from '../modules/fin
 import {
   deleteBullionSale,
   deleteRateCut,
+  deleteWholesaleSale,
   editBullionSale,
   editRateCut,
+  editWholesaleSale,
   getBullionSale,
   getRateCut,
+  getWholesaleSale,
   postBullionSale,
   postRateCut,
+  postWholesaleSale,
 } from '../modules/sales/rateCut.js';
 import {
   issueKarigar,
@@ -403,8 +407,6 @@ import {
   deleteItemLot,
   stockAdjust,
   deleteStockAdjust,
-  tagTransfer,
-  deleteTagTransfer,
   counterTransfer,
   deleteCounterTransfer,
   StockVoucherValidationError,
@@ -457,14 +459,24 @@ import {
   getOtherIncome,
   saveOtherIncome,
 } from '../modules/purchase/otherIncome.js';
+import { tagWeightDiff, deleteTagWeightDiff } from '../modules/stock/tagOps.js';
 import {
-  tagCancel,
-  tagWeightDiff,
   deleteTagCancel,
-  deleteTagWeightDiff,
-} from '../modules/stock/tagOps.js';
+  getTagCancel,
+  listTagCancel,
+  saveTagCancel,
+  tagCancelSource,
+  type TagCancelMode,
+} from '../modules/stock/tagCancel.js';
 import { deleteTagAdjust, getTagAdjust, saveTagAdjust } from '../modules/stock/tagAdjust.js';
-import { splitTag, deleteTagSplit } from '../modules/stock/tagSplit.js';
+import {
+  saveTagSplit,
+  deleteTagSplit,
+  getTagSplit,
+  listTagSplit,
+  tagSplitSource,
+  TagSplitConflictError,
+} from '../modules/stock/tagSplit.js';
 import { lookup } from '../modules/masters/lookup.js';
 import { postJournal, deleteJournal } from '../modules/finance/journal.js';
 import { postLedgerAdjust, deleteLedgerAdjust } from '../modules/finance/ledgerAdjust.js';
@@ -756,7 +768,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       if (
         n === 'DesignBookConflictError' ||
         n === 'SalesOrderConflictError' ||
-        n === 'EBillConflictError'
+        n === 'EBillConflictError' ||
+        n === 'TagCancelConflictError' ||
+        n === 'TagSplitConflictError'
       ) {
         return reply.code(409).send({ error: n, message: e?.message });
       }
@@ -862,6 +876,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   const rateCutInput = (req: FastifyRequest, b: Record<string, any>) => ({
     scope: scopeOf(req),
+    // MAIN_USER is the signed-in user (TR_WH_SALE.cs:12004), never a body field.
+    mainUser: sess(req).sub,
     vchDate: b.vchDate,
     acCode: b.acCode,
     acName: b.acName,
@@ -5079,24 +5095,69 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
-  app.post('/stock/tag-transfer', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    if (containMutation(reply, 'tag-transfer')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      tagTransfer(prisma, { scope: scopeOf(req), vchDate: b.vchDate, lines: b.lines ?? [] }),
-    );
+  // Tag Cancel (X19) and Tag Transfer (X18): desktop TR_TAG_CAN on a TAG CANCEL / TAG TRFR book. One writer
+  // (modules/stock/tagCancel.ts), one route family per menu, so each keeps its own form right.
+  const tagCancelInput = (req: FastifyRequest, b = body(req)) => ({
+    scope: scopeOf(req),
+    vchDate: b.vchDate,
+    empCode: b.empCode,
+    vchDesc: b.vchDesc,
+    mainUser: sess(req).sub,
+    lines: Array.isArray(b.lines) ? b.lines : [],
   });
-  app.delete('/stock/tag-transfer/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    if (containMutation(reply, 'tag-transfer')) return;
-    return run(reply, 200, () =>
-      deleteTagTransfer(prisma, {
-        scope: scopeOf(req),
-        vchNo: (req.params as any).vchNo,
-      }),
-    );
+  const tagCancelHandlers = (mode: TagCancelMode) => ({
+    list: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'view')) return;
+      return run(reply, 200, () => listTagCancel(prisma, mode, scopeOf(req)));
+    },
+    source: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'view')) return;
+      const q = (req.query ?? {}) as Record<string, string | undefined>;
+      return run(reply, 200, () =>
+        tagCancelSource(prisma, scopeOf(req), {
+          tagNo: q.tagNo,
+          vchSrno: q.vchSrno,
+          itCode: q.itCode,
+        }),
+      );
+    },
+    read: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'view')) return;
+      return run(reply, 200, () =>
+        getTagCancel(prisma, mode, scopeOf(req), (req.params as any).vchNo),
+      );
+    },
+    create: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'create')) return;
+      return run(reply, 201, () => saveTagCancel(prisma, mode, tagCancelInput(req)));
+    },
+    update: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'update')) return;
+      return run(reply, 200, () =>
+        saveTagCancel(prisma, mode, tagCancelInput(req), (req.params as any).vchNo),
+      );
+    },
+    remove: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'delete')) return;
+      return run(reply, 200, () =>
+        deleteTagCancel(prisma, mode, scopeOf(req), (req.params as any).vchNo, sess(req).sub),
+      );
+    },
   });
+  const tagTransferRoute = tagCancelHandlers('transfer');
+  app.get('/stock/tag-transfer', auth, tagTransferRoute.list);
+  app.get('/stock/tag-transfer/source', auth, tagTransferRoute.source);
+  app.get('/stock/tag-transfer/:vchNo', auth, tagTransferRoute.read);
+  app.post('/stock/tag-transfer', auth, tagTransferRoute.create);
+  app.put('/stock/tag-transfer/:vchNo', auth, tagTransferRoute.update);
+  app.delete('/stock/tag-transfer/:vchNo', auth, tagTransferRoute.remove);
+  const tagCancelRoute = tagCancelHandlers('cancel');
+  app.get('/stock/tag-cancel', auth, tagCancelRoute.list);
+  app.get('/stock/tag-cancel/source', auth, tagCancelRoute.source);
+  app.get('/stock/tag-cancel/:vchNo', auth, tagCancelRoute.read);
+  app.post('/stock/tag-cancel', auth, tagCancelRoute.create);
+  app.put('/stock/tag-cancel/:vchNo', auth, tagCancelRoute.update);
+  app.delete('/stock/tag-cancel/:vchNo', auth, tagCancelRoute.remove);
   app.post('/stock/counter-transfer', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
@@ -5111,19 +5172,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
         book: body(req).book,
-      }),
-    );
-  });
-  app.post('/stock/tag-cancel', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    if (containMutation(reply, 'tag-cancel')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      tagCancel(prisma, {
-        scope: scopeOf(req),
-        vchDate: b.vchDate,
-        book: b.book,
-        lines: b.lines ?? [],
       }),
     );
   });
@@ -5190,13 +5238,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         labourAc: b.labourAc,
         lines: b.lines ?? [],
       }),
-    );
-  });
-  app.delete('/stock/tag-cancel/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    if (containMutation(reply, 'tag-cancel')) return;
-    return run(reply, 200, () =>
-      deleteTagCancel(prisma, scopeOf(req) as any, (req.params as any).vchNo, body(req).book),
     );
   });
   app.delete('/stock/tag-weight-diff/:vchNo', auth, async (req, reply) => {
@@ -7199,6 +7240,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
         book: body(req).book,
+        // DELETE_DATA.DELETE_USER is the signed-in user (TR_WH_SALE.cs:13569 `MCo_User`).
+        deleteUser: sess(req).sub,
       }),
     );
   });
@@ -7209,6 +7252,35 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
         book: body(req).book,
+        deleteUser: sess(req).sub,
+      }),
+    );
+  });
+  // Desktop "Wh Sales" (TR_WH_SALE on a WH SALES book). Same voucher family as the rate cut; its own right.
+  app.post('/wholesale-sales', auth, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    const b = body(req);
+    return run(reply, 201, () => postWholesaleSale(prisma, rateCutInput(req, b)));
+  });
+  app.get('/wholesale-sales/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getWholesaleSale(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.put('/wholesale-sales/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      editWholesaleSale(prisma, rateCutInput(req, b), (req.params as any).vchNo),
+    );
+  });
+  app.delete('/wholesale-sales/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      deleteWholesaleSale(prisma, {
+        scope: scopeOf(req),
+        vchNo: (req.params as any).vchNo,
+        book: body(req).book,
+        deleteUser: sess(req).sub,
       }),
     );
   });
@@ -7222,24 +7294,55 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
+  // Tag Split (X20): desktop TR_TAG_SPLIT on a TAG SPLIT book. One writer (modules/stock/tagSplit.ts): the parent
+  // tags are consumed and child tags created, conserving metal. Literal routes so the route-count test can scan them.
+  const tagSplitInput = (req: FastifyRequest, b = body(req)) => ({
+    scope: scopeOf(req),
+    vchDate: b.vchDate,
+    empCode: b.empCode,
+    vchDesc: b.vchDesc,
+    acCode: b.acCode,
+    itType: b.itType,
+    drTouch: b.drTouch,
+    crTouch: b.crTouch,
+    crLbr: b.crLbr,
+    mainUser: sess(req).sub,
+    parents: Array.isArray(b.parents) ? b.parents : [],
+    children: Array.isArray(b.children) ? b.children : [],
+  });
+  app.get('/stock/tag-split', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => listTagSplit(prisma, scopeOf(req)));
+  });
+  app.get('/stock/tag-split/source', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      tagSplitSource(prisma, scopeOf(req), {
+        tagNo: q.tagNo,
+        vchSrno: q.vchSrno,
+        itCode: q.itCode,
+      }),
+    );
+  });
+  app.get('/stock/tag-split/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getTagSplit(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
   app.post('/stock/tag-split', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
-    if (containMutation(reply, 'tag-split')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      splitTag(prisma, {
-        scope: scopeOf(req),
-        vchDate: b.vchDate,
-        parent: b.parent,
-        children: b.children ?? [],
-      }),
+    return run(reply, 201, () => saveTagSplit(prisma, tagSplitInput(req)));
+  });
+  app.put('/stock/tag-split/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    return run(reply, 200, () =>
+      saveTagSplit(prisma, tagSplitInput(req), (req.params as any).vchNo),
     );
   });
   app.delete('/stock/tag-split/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
-    if (containMutation(reply, 'tag-split')) return;
     return run(reply, 200, () =>
-      deleteTagSplit(prisma, scopeOf(req) as any, (req.params as any).vchNo, body(req).book),
+      deleteTagSplit(prisma, scopeOf(req), (req.params as any).vchNo, sess(req).sub),
     );
   });
   app.get('/reports/party-statement', auth, async (req) =>
