@@ -55,11 +55,13 @@ const files = [
 
 /**
  * Adoption ceilings re-baselined on 2026-09-11 after the expanded parity implementation pass. These may fall and may never rise.
+ * 2026-09-29 (N18): rounding 128 -> 126 — the legacy Tag Transfer writer in stock/stock.ts took two module-local rounding
+ * helpers with it; its replacement (stock/tagCancel*.ts) rounds only through @datacare/core.
  *
  * `rounding` counts function-valued bindings (arrow or block-bodied) that round; `book-account` counts inline `BOOK_DETL` reads
  * outside the two shared resolvers.
  */
-const CEILINGS = { rounding: 128, 'book-account': 5 } as const;
+const CEILINGS = { rounding: 126, 'book-account': 5 } as const;
 
 /** The shape every module-local helper takes, reproduced here so the comparison is against the real thing. */
 const localEpsilon = (n: number): number => Math.round((n + Number.EPSILON) * 100) / 100;
@@ -163,7 +165,7 @@ describe('kernel adoption in this repository', () => {
   const report = auditKernelConformance(files, CEILINGS);
 
   it('holds the measured bypass counts so adoption cannot regress', () => {
-    expect(report.totals).toEqual({ rounding: 128, 'book-account': 5 });
+    expect(report.totals).toEqual({ rounding: 126, 'book-account': 5 });
     expect(report.regressions).toEqual([]);
     expect(report.verdict).toBe('ok');
   });

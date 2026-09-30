@@ -20,12 +20,30 @@ export const PARITY_CONTAINMENT_WORK_PACKAGE = 'WP-01';
  *
  * The remaining six rules stay blocked. Releasing this one does not weaken them, and the registry still
  * has intentionally no environment override.
+ *
+ * DISCHARGED — `tag-cancel` and `tag-transfer` (N18, cards X19 and X18), each against its own exit gate.
+ *
+ * Both menus open the desktop form TR_TAG_CAN on a book of their own MAIN_BOOK, so one writer serves both
+ * (`apps/api/src/modules/stock/tagCancel.ts`); the contract is
+ * `parity-plan-2026-09-10/evidence/implementation-2026-09-29-n18/contract.md`. Evidence for the gate clauses:
+ *   • exact live identity — every tag line resolves through the sale's resolver (`issueTagTx`): company,
+ *     location, TAG_NO and VCH_SRNO with a positive signed balance; two live instances without a serial are
+ *     refused, another location's tag and a sold tag are "not available" (tagCancelLifecycle.db.test.ts V4-V6)
+ *   • full detail and lineage — BAR_CAN_DATA / DETL / IDTL carry exactly the desktop's columns, the tag's
+ *     stones are copied from its own BAR_IDTL rows, and the source BAR_DETL / BAR_IDTL / image index are
+ *     byte-identical after cancel, edit and delete (V1, V3, V11; full-database diff)
+ *   • lifecycle / locks / reversal — list, read, edit and delete, with TEMP_BOOK_DATA, DM_DATA and the
+ *     desktop DELETE_DATA rows; every touched tag is locked in sorted order, a concurrent sale of the same tag
+ *     loses cleanly, and a failure part-way leaves nothing (V2, V3, V7, V8)
+ *   • transfer conservation — the tag's '-' row and the loose item's '+' row carry the same pieces, weights
+ *     and fine (T1-T4)
+ *   • desktop database diff — derived from the source; no desktop BAR_CAN_* rows were ever captured, so the
+ *     cards stay open until a desktop replay and business acceptance.
+ * Merging this change is the release decision for both operations.
  */
 export const parityContainmentOperations = Object.freeze([
   'logical-restore',
   'production-cutover-load',
-  'tag-transfer',
-  'tag-cancel',
   'tag-weight-difference',
   'tag-split',
 ]);
@@ -61,20 +79,6 @@ export const parityContainmentRules = Object.freeze({
     'The current loader uses a partial table list, unscoped source extraction, tenant-wide replacement, and false-pass statuses for missing or skipped data.',
     'Run only --dry-run diagnostics. Use no production load until the scope-safe shadow-load pipeline is independently certified.',
     'P0-08/WP-14A: signed ownership manifest, completeness-failing validation, two-company/two-year isolation, and two clean shadow loads.',
-  ),
-  'tag-transfer': rule(
-    'tag-transfer',
-    'Tag Transfer mutation',
-    'The current transfer does not preserve exact VCH_SRNO identity and lacks the desktop open/edit/lineage and shared-lock behavior.',
-    'Use tag lookup for inspection only; perform the business operation in the desktop application until the exact web lifecycle is certified.',
-    'P0-05/WP-09: exact identity, full lifecycle, conservation, concurrency, reversal, and desktop database diff.',
-  ),
-  'tag-cancel': rule(
-    'tag-cancel',
-    'Tag Cancellation mutation',
-    'The current cancel path can resolve historical availability instead of one live serial identity and omits required source and sub-detail lineage.',
-    'Use tag lookup for inspection only; perform cancellation in the desktop application until the exact web lifecycle is certified.',
-    'P0-05/WP-09: exact live identity, full cancel detail, lifecycle/locks/reversal, and desktop database diff.',
   ),
   'tag-weight-difference': rule(
     'tag-weight-difference',

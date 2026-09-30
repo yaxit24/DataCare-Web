@@ -131,7 +131,27 @@ const BOOKS: {
   { book: 'TUR', name: 'Approval Issue', mainBook: 'APPROVAL ISSUE', inout: 'O', acCode: 'OS' },
   { book: 'TRR', name: 'Approval Return', mainBook: 'APPROVAL RETURN', inout: 'I', acCode: 'OS' },
   { book: 'SAJ', name: 'Stock Adjust', mainBook: 'STOCK ADJUST', inout: 'I', acCode: 'KASAR' },
-  { book: 'TTR', name: 'Tag Transfer', mainBook: 'TAG TRANSFER', inout: 'O', acCode: 'KASAR' },
+  // Desktop TR_TAG_CAN serves both menus on its own MAIN_BOOK (MDI_FORM.cs:8586 "TAG CANCEL", :8664 "TAG TRFR"),
+  // numbered from BAR_CAN_DATA (MS_UPDATE.cs:7825). The desktop's own short names are TGCAN and TAGTR
+  // (`project-memory/parity/verify-stock-tags.md` §0). 'TAG TRANSFER', provisioned before, is no desktop MAIN_BOOK.
+  {
+    book: 'TGC',
+    name: 'Tag Cancel',
+    mainBook: 'TAG CANCEL',
+    inout: 'O',
+    acCode: 'KASAR',
+    shortName: 'TGCAN',
+    table: 'BAR_CAN_DATA',
+  },
+  {
+    book: 'TTR',
+    name: 'Tag Transfer',
+    mainBook: 'TAG TRFR',
+    inout: 'O',
+    acCode: 'KASAR',
+    shortName: 'TAGTR',
+    table: 'BAR_CAN_DATA',
+  },
   { book: 'ILT', name: 'Item Lot', mainBook: 'ITEM LOT', inout: 'I', acCode: 'PURCHASE' },
   { book: 'JV', name: 'Journal', mainBook: 'JOURNAL', inout: 'I', acCode: 'KASAR' },
   { book: 'CON', name: 'Contra', mainBook: 'CONTRA', inout: 'I', acCode: 'CASH' },

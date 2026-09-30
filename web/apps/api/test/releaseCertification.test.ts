@@ -681,10 +681,11 @@ describe('release certification: exact real-browser journeys', () => {
     },
   });
 
-  it('pins the 22 production-stack journeys and keeps them frozen and unique', () => {
-    // 19 plus the evaluation-defect journeys cash-receipt-payment (D1) and sale-amount-basis (D6), and X16's
-    // wholesale-rate-cut (TR_WH_SALE on its WH SALES and RATE CUT books).
-    expect(REQUIRED_REAL_BROWSER_JOURNEY_IDS).toHaveLength(22);
+  it('pins the 23 production-stack journeys and keeps them frozen and unique', () => {
+    // 19 plus the evaluation-defect journeys cash-receipt-payment (D1) and sale-amount-basis (D6), X16's
+    // wholesale-rate-cut (TR_WH_SALE on its WH SALES and RATE CUT books) and N18's tag-cancel-transfer (TR_TAG_CAN
+    // on its TAG CANCEL and TAG TRFR books).
+    expect(REQUIRED_REAL_BROWSER_JOURNEY_IDS).toHaveLength(23);
     expect(new Set(REQUIRED_REAL_BROWSER_JOURNEY_IDS).size).toBe(
       REQUIRED_REAL_BROWSER_JOURNEY_IDS.length,
     );
@@ -719,15 +720,31 @@ describe('release certification: exact real-browser journeys', () => {
   });
 
   // Journeys added after each historical set; the reconstructions below remove them too.
+  const N18_JOURNEYS = ['tag-cancel-transfer'];
   const X16_JOURNEYS = ['wholesale-rate-cut'];
-  const EVALUATION_DEFECT_JOURNEYS = ['cash-receipt-payment', 'sale-amount-basis', ...X16_JOURNEYS];
+  const EVALUATION_DEFECT_JOURNEYS = [
+    'cash-receipt-payment',
+    'sale-amount-basis',
+    ...X16_JOURNEYS,
+    ...N18_JOURNEYS,
+  ];
   const before = (...added: string[]) =>
     REQUIRED_REAL_BROWSER_JOURNEY_IDS.filter(
       (id) => !added.includes(id) && !EVALUATION_DEFECT_JOURNEYS.includes(id),
     );
 
+  it('rejects the former twenty-two when the N18 tag cancel / transfer journey is missing', () => {
+    const previous = REQUIRED_REAL_BROWSER_JOURNEY_IDS.filter((id) => !N18_JOURNEYS.includes(id));
+    expect(previous).toHaveLength(22);
+    const verdict = evaluateGate(gate, observation(previous), ctx);
+    expect(verdict.outcome).toBe('red');
+    expect(verdict.reason).toContain('tag-cancel-transfer');
+  });
+
   it('rejects the former twenty-one when the X16 wholesale / rate cut journey is missing', () => {
-    const previous = REQUIRED_REAL_BROWSER_JOURNEY_IDS.filter((id) => !X16_JOURNEYS.includes(id));
+    const previous = REQUIRED_REAL_BROWSER_JOURNEY_IDS.filter(
+      (id) => !X16_JOURNEYS.includes(id) && !N18_JOURNEYS.includes(id),
+    );
     expect(previous).toHaveLength(21);
     const verdict = evaluateGate(gate, observation(previous), ctx);
     expect(verdict.outcome).toBe('red');

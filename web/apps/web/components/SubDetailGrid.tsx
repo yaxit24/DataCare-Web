@@ -363,6 +363,13 @@ export interface SubDetailGridProps {
   /** Desktop form and grid this mirrors, e.g. `TR_PURC / MSG_IDTL (34 cols)`. */
   desktopSource?: string;
   disabled?: boolean;
+  /**
+   * Called when the operator leaves a cell — the desktop's `MSG_IDTL_LeaveCell`, where a form's stone arithmetic
+   * runs (TR_TAG_CAN `CommPassTotal_Idtl`). Forms without one keep the grid as plain entry.
+   */
+  onCellCommit?: (rowIndex: number, field: SubDetailField) => void;
+  /** Test-id prefix for the grid's inputs. */
+  testId?: string;
 }
 
 export default function SubDetailGrid({
@@ -372,6 +379,8 @@ export default function SubDetailGrid({
   parentLabel,
   desktopSource,
   disabled,
+  onCellCommit,
+  testId,
 }: SubDetailGridProps) {
   const setCell = (index: number, field: SubDetailField, value: string) =>
     onRowsChange(rows.map((row, i) => (i === index ? { ...row, [field]: value } : row)));
@@ -422,20 +431,25 @@ export default function SubDetailGrid({
                 const spec = SUB_DETAIL_COLUMNS[field];
                 return (
                   <td key={field} className={spec.numeric ? 'num' : undefined}>
-                    {spec.lookup ? (
-                      <LookupPicker
-                        entity={spec.lookup}
-                        value={row[field] ?? ''}
-                        onChange={(value) => setCell(index, field, value)}
-                        style={{ width: spec.width }}
-                      />
+                    {spec.lookup && !disabled ? (
+                      <span onBlur={() => onCellCommit?.(index, field)}>
+                        <LookupPicker
+                          entity={spec.lookup}
+                          value={row[field] ?? ''}
+                          onChange={(value) => setCell(index, field, value)}
+                          ariaLabel={`${spec.label} row ${index + 1}`}
+                          style={{ width: spec.width }}
+                        />
+                      </span>
                     ) : (
                       <input
                         value={row[field] ?? ''}
                         onChange={(event) => setCell(index, field, event.target.value)}
+                        onBlur={() => onCellCommit?.(index, field)}
                         style={{ width: spec.width }}
                         disabled={disabled}
                         aria-label={`${spec.label} row ${index + 1}`}
+                        data-testid={testId ? `${testId}-${field}-${index}` : undefined}
                       />
                     )}
                   </td>
@@ -445,6 +459,7 @@ export default function SubDetailGrid({
                 <button
                   type="button"
                   className="ghost"
+                  disabled={disabled}
                   onClick={() =>
                     onRowsChange(
                       rows.length === 1
@@ -465,6 +480,7 @@ export default function SubDetailGrid({
         type="button"
         className="ghost"
         style={{ marginTop: 6 }}
+        disabled={disabled}
         onClick={() => onRowsChange([...rows, blankSubDetailRow()])}
       >
         Add stone row

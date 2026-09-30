@@ -2335,19 +2335,17 @@
       "menu": "Tag Cancel",
       "visibleOnDesktop": true,
       "desktopForms": [
-        "UT_TAG_PRINT"
+        "TR_TAG_CAN"
       ],
       "formReferencedInWeb": true,
       "state": "implemented-unverified",
-      "evidence": null,
-      "note": "dispatches TR_TAG_CAN. Current review 2026-09-11: mutation remains blocked by the shared containment registry. Existing domain code/tests do not make it available or desktop-certified; complete the individual X18/X19/X20 gate.",
+      "evidence": "apps/api/test/tagCancelLifecycle.db.test.ts; apps/api/test/tagCancel.routes.db.test.ts; apps/api/test/tagCancelIdentity.db.test.ts; apps/api/test/tagCancelRows.test.ts; packages/core/test/tagCancelLine.test.ts; apps/web/test/tagCancelVoucher.test.ts; apps/web/test/tag-cancel-transfer.journey.mjs (real-stack journey tag-cancel-transfer, 23/23 with it); parity-plan-2026-09-10/evidence/implementation-2026-09-29-n18/ (contract K1-K16, mutation-checks.json 60/60, real-stack-result.json); desktop source TR_TAG_CAN.cs (BtnSave_Click 4942-5330, BtnDelete_Click 5331-5362, tag entry 3859-4090, CommPassTotal 3107-3680), Ac_Stock.cs:48-58 Tag_Can_Stk, Ac_Stock.cs:824-828 Dm_Tag_Cancel_Detl, MDI_FORM.cs:8586 and 8664 CurBookHelp",
+      "note": "TR_TAG_CAN TAG CANCEL mode (the menu opens TR_TAG_CAN, MDI_FORM.cs:8585-8594; the register previously named UT_TAG_PRINT, the next case). N18 2026-09-29: released from WP-01 containment against its own exit gate (packages/core/containment.mjs discharge note). One writer for both menus (modules/stock/tagCancel.ts) on TAG CANCEL books only: exact live instance through issueTagTx with sorted identity locks, desktop BAR_CAN_DATA/DETL/IDTL columns, the tag's own BAR_IDTL stones, TEMP_BOOK_DATA hidden number, MAIN_STOCK per Tag_Can_Stk, edit/delete with the desktop DELETE_DATA rows and tag release; Dm_Tag_Cancel_Detl posts the stones of OTH_DETL_POSTING items to DM_DATA. Routes GET/POST /stock/tag-cancel, GET/PUT/DELETE /stock/tag-cancel/:vchNo, GET /stock/tag-cancel/source; page /txn/tag-cancel (components/TagCancelForm.tsx). Implemented-unverified: no desktop BAR_CAN_* rows were ever captured, so the expected rows are source-derived; the card stays open until a desktop replay and business acceptance.",
       "webSurface": {
         "kind": "route",
         "surface": "POST /stock/tag-cancel"
       },
-      "sharedSurfaceWith": [],
-      "availabilityState": "contained",
-      "containmentOperation": "tag-cancel"
+      "sharedSurfaceWith": []
     },
     {
       "tab": "Other",
@@ -2392,15 +2390,13 @@
       ],
       "formReferencedInWeb": true,
       "state": "implemented-unverified",
-      "evidence": null,
-      "note": "TR_TAG_CAN transfer mode. Current review 2026-09-11: mutation remains blocked by the shared containment registry. Existing domain code/tests do not make it available or desktop-certified; complete the individual X18/X19/X20 gate.",
+      "evidence": "apps/api/test/tagCancelLifecycle.db.test.ts; apps/api/test/tagCancel.routes.db.test.ts; apps/api/test/tagCancelIdentity.db.test.ts; apps/api/test/tagCancelRows.test.ts; packages/core/test/tagCancelLine.test.ts; apps/web/test/tagCancelVoucher.test.ts; apps/web/test/tag-cancel-transfer.journey.mjs (real-stack journey tag-cancel-transfer, 23/23 with it); apps/api/test/tagTransferBookMigration.db.test.ts; parity-plan-2026-09-10/evidence/implementation-2026-09-29-n18/ (contract K1-K16, mutation-checks.json 60/60, real-stack-result.json); desktop source TR_TAG_CAN.cs (BtnSave_Click 4942-5330, BtnDelete_Click 5331-5362, tag entry 3859-4090, CommPassTotal 3107-3680), Ac_Stock.cs:48-58 Tag_Can_Stk, Ac_Stock.cs:824-828 Dm_Tag_Cancel_Detl, MDI_FORM.cs:8586 and 8664 CurBookHelp",
+      "note": "TR_TAG_CAN TAG TRFR mode. N18 2026-09-29: released from WP-01 containment against its own exit gate (packages/core/containment.mjs discharge note). One writer for both menus (modules/stock/tagCancel.ts) on TAG TRFR books only: exact live instance through issueTagTx with sorted identity locks, desktop BAR_CAN_DATA/DETL/IDTL columns, the tag's own BAR_IDTL stones, TEMP_BOOK_DATA hidden number, MAIN_STOCK per Tag_Can_Stk, edit/delete with the desktop DELETE_DATA rows and tag release; TrfrItm required; Tag_Can_Stk insert 2 moves the metal to the loose item (ISR_NO 2 '+', TAG_NO 'N', TBL_CODE 001) with the tag's pieces, weights and fine; no DM_DATA. Routes GET/POST /stock/tag-transfer, GET/PUT/DELETE /stock/tag-transfer/:vchNo, GET /stock/tag-transfer/source; page /txn/tag-transfer (components/TagCancelForm.tsx). Implemented-unverified: no desktop BAR_CAN_* rows were ever captured, so the expected rows are source-derived; the card stays open until a desktop replay and business acceptance.",
       "webSurface": {
         "kind": "route",
         "surface": "POST /stock/tag-transfer"
       },
-      "sharedSurfaceWith": [],
-      "availabilityState": "contained",
-      "containmentOperation": "tag-transfer"
+      "sharedSurfaceWith": []
     },
     {
       "tab": "Other",

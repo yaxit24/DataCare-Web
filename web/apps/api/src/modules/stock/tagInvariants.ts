@@ -297,7 +297,7 @@ export const TAG_INVARIANT_COVERAGE: readonly TagInvariantCoverage[] = Object.fr
       'Sale, transfer, split, weight replacement and cancel serialise on one identity lock',
     enforcement: 'code-tested',
     evidence:
-      'issueTagTx takes pg_advisory_xact_lock on tag-issue|CO|LC|TAG_NO; concurrent double issue is covered by a database test. Transfer/split/weight/cancel are CONTAINED by WP-01, so they cannot contend today',
+      'issueTagTx takes pg_advisory_xact_lock on tag-issue|CO|LC|TAG_NO; tag cancel and tag transfer (tagCancel.ts) take the same lock for every tag they touch, in sorted order, before resolving any; double issue, cancel against sale and double cancel are covered by database tests (tagCancelLifecycle.db.test.ts). Split and weight change are still CONTAINED by WP-01',
   },
   {
     number: 5,
@@ -310,16 +310,16 @@ export const TAG_INVARIANT_COVERAGE: readonly TagInvariantCoverage[] = Object.fr
   {
     number: 6,
     invariant: 'Tag transfer conserves the desktop measures between tag OUT and target IN',
-    enforcement: 'contained',
+    enforcement: 'code-tested',
     evidence:
-      'WP-01 blocks tag transfer; conservation is unproved and the route returns 503 PARITY_CONTAINMENT',
+      "Ac_Stock.Tag_Can_Stk insert 2: the transfer item's '+' row carries the tag's '-' row pieces, gross, net, touch, wastage, fine and karigar figures (tagCancelRows.stockRows); asserted on create and edit in tagCancelLifecycle.db.test.ts",
   },
   {
     number: 7,
     invariant: 'A sold tag cannot be sold, split, transferred, changed or cancelled concurrently',
     enforcement: 'code-tested',
     evidence:
-      'TAG_STOCK row presence plus the atomic DELETE affected-row check; the other four operations are contained',
+      'TAG_STOCK row presence plus the atomic DELETE affected-row check; cancel and transfer resolve through the same issueTagTx under the identity lock (a sold or cancelled tag is not available); split and weight change are still contained',
   },
   {
     number: 8,
@@ -341,14 +341,14 @@ export const TAG_INVARIANT_COVERAGE: readonly TagInvariantCoverage[] = Object.fr
       'Images, HUIDs, sub-details, source voucher and order links survive the approved lineage rules',
     enforcement: 'blocked-transition-model',
     evidence:
-      'plan §7 records that split/weight/cancel do not migrate image lineage; those paths are contained and the lineage rules are unwritten',
+      'cancel and transfer leave the source BAR_DETL, BAR_IDTL and image index untouched, as the desktop does (asserted row-for-row in tagCancelLifecycle.db.test.ts); plan §7 records that split and weight replacement do not migrate image lineage — those paths are contained and the lineage rules are unwritten',
   },
   {
     number: 11,
     invariant: 'Delete/edit restores the complete prior state or fails before any mutation',
     enforcement: 'code-tested',
     evidence:
-      'reverseVoucherTx and replaceWriteSetTx run inside one transaction; tag-opening update is contained by WP-01',
+      'reverseVoucherTx and replaceWriteSetTx run inside one transaction; tag cancel and transfer edit and delete run in one transaction and give back the tags they consumed (tagCancelLifecycle.db.test.ts); tag split and weight change remain contained by WP-01',
   },
   {
     number: 12,

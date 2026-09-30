@@ -407,8 +407,6 @@ import {
   deleteItemLot,
   stockAdjust,
   deleteStockAdjust,
-  tagTransfer,
-  deleteTagTransfer,
   counterTransfer,
   deleteCounterTransfer,
   StockVoucherValidationError,
@@ -461,12 +459,15 @@ import {
   getOtherIncome,
   saveOtherIncome,
 } from '../modules/purchase/otherIncome.js';
+import { tagWeightDiff, deleteTagWeightDiff } from '../modules/stock/tagOps.js';
 import {
-  tagCancel,
-  tagWeightDiff,
   deleteTagCancel,
-  deleteTagWeightDiff,
-} from '../modules/stock/tagOps.js';
+  getTagCancel,
+  listTagCancel,
+  saveTagCancel,
+  tagCancelSource,
+  type TagCancelMode,
+} from '../modules/stock/tagCancel.js';
 import { deleteTagAdjust, getTagAdjust, saveTagAdjust } from '../modules/stock/tagAdjust.js';
 import { splitTag, deleteTagSplit } from '../modules/stock/tagSplit.js';
 import { lookup } from '../modules/masters/lookup.js';
@@ -760,7 +761,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       if (
         n === 'DesignBookConflictError' ||
         n === 'SalesOrderConflictError' ||
-        n === 'EBillConflictError'
+        n === 'EBillConflictError' ||
+        n === 'TagCancelConflictError'
       ) {
         return reply.code(409).send({ error: n, message: e?.message });
       }
@@ -5085,24 +5087,69 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
-  app.post('/stock/tag-transfer', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    if (containMutation(reply, 'tag-transfer')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      tagTransfer(prisma, { scope: scopeOf(req), vchDate: b.vchDate, lines: b.lines ?? [] }),
-    );
+  // Tag Cancel (X19) and Tag Transfer (X18): desktop TR_TAG_CAN on a TAG CANCEL / TAG TRFR book. One writer
+  // (modules/stock/tagCancel.ts), one route family per menu, so each keeps its own form right.
+  const tagCancelInput = (req: FastifyRequest, b = body(req)) => ({
+    scope: scopeOf(req),
+    vchDate: b.vchDate,
+    empCode: b.empCode,
+    vchDesc: b.vchDesc,
+    mainUser: sess(req).sub,
+    lines: Array.isArray(b.lines) ? b.lines : [],
   });
-  app.delete('/stock/tag-transfer/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    if (containMutation(reply, 'tag-transfer')) return;
-    return run(reply, 200, () =>
-      deleteTagTransfer(prisma, {
-        scope: scopeOf(req),
-        vchNo: (req.params as any).vchNo,
-      }),
-    );
+  const tagCancelHandlers = (mode: TagCancelMode) => ({
+    list: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'view')) return;
+      return run(reply, 200, () => listTagCancel(prisma, mode, scopeOf(req)));
+    },
+    source: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'view')) return;
+      const q = (req.query ?? {}) as Record<string, string | undefined>;
+      return run(reply, 200, () =>
+        tagCancelSource(prisma, scopeOf(req), {
+          tagNo: q.tagNo,
+          vchSrno: q.vchSrno,
+          itCode: q.itCode,
+        }),
+      );
+    },
+    read: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'view')) return;
+      return run(reply, 200, () =>
+        getTagCancel(prisma, mode, scopeOf(req), (req.params as any).vchNo),
+      );
+    },
+    create: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'create')) return;
+      return run(reply, 201, () => saveTagCancel(prisma, mode, tagCancelInput(req)));
+    },
+    update: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'update')) return;
+      return run(reply, 200, () =>
+        saveTagCancel(prisma, mode, tagCancelInput(req), (req.params as any).vchNo),
+      );
+    },
+    remove: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'delete')) return;
+      return run(reply, 200, () =>
+        deleteTagCancel(prisma, mode, scopeOf(req), (req.params as any).vchNo, sess(req).sub),
+      );
+    },
   });
+  const tagTransferRoute = tagCancelHandlers('transfer');
+  app.get('/stock/tag-transfer', auth, tagTransferRoute.list);
+  app.get('/stock/tag-transfer/source', auth, tagTransferRoute.source);
+  app.get('/stock/tag-transfer/:vchNo', auth, tagTransferRoute.read);
+  app.post('/stock/tag-transfer', auth, tagTransferRoute.create);
+  app.put('/stock/tag-transfer/:vchNo', auth, tagTransferRoute.update);
+  app.delete('/stock/tag-transfer/:vchNo', auth, tagTransferRoute.remove);
+  const tagCancelRoute = tagCancelHandlers('cancel');
+  app.get('/stock/tag-cancel', auth, tagCancelRoute.list);
+  app.get('/stock/tag-cancel/source', auth, tagCancelRoute.source);
+  app.get('/stock/tag-cancel/:vchNo', auth, tagCancelRoute.read);
+  app.post('/stock/tag-cancel', auth, tagCancelRoute.create);
+  app.put('/stock/tag-cancel/:vchNo', auth, tagCancelRoute.update);
+  app.delete('/stock/tag-cancel/:vchNo', auth, tagCancelRoute.remove);
   app.post('/stock/counter-transfer', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
@@ -5117,19 +5164,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
         book: body(req).book,
-      }),
-    );
-  });
-  app.post('/stock/tag-cancel', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    if (containMutation(reply, 'tag-cancel')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      tagCancel(prisma, {
-        scope: scopeOf(req),
-        vchDate: b.vchDate,
-        book: b.book,
-        lines: b.lines ?? [],
       }),
     );
   });
@@ -5196,13 +5230,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         labourAc: b.labourAc,
         lines: b.lines ?? [],
       }),
-    );
-  });
-  app.delete('/stock/tag-cancel/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    if (containMutation(reply, 'tag-cancel')) return;
-    return run(reply, 200, () =>
-      deleteTagCancel(prisma, scopeOf(req) as any, (req.params as any).vchNo, body(req).book),
     );
   });
   app.delete('/stock/tag-weight-diff/:vchNo', auth, async (req, reply) => {

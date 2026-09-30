@@ -154,6 +154,15 @@ table.grid th.num {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
+/* Voucher grids carrying a desktop form's full column set (TR_TAG_CAN has 21): tighter cells, so the weight and
+   purity columns fit a 1600px screen before the grid scrolls sideways. */
+table.grid.dense th,
+table.grid.dense td {
+  padding: 3px 4px;
+}
+table.grid.dense input {
+  padding: 4px 5px;
+}
 .totals td {
   font-weight: 700;
   background: #eef4fb !important;

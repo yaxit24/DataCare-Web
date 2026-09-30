@@ -59,7 +59,12 @@ const PAGE_WRITER = {
   tour: 'tour/tour.ts',
   'tour-return': 'tour/tour.ts',
   'item-lot': 'stock/stockVoucherLifecycle.ts',
-  'tag-cancel': 'stock/tagOps.ts',
+  // Both mount components/TagCancelForm.tsx (desktop TR_TAG_CAN). Its grid has no `extendedLineFields` registry —
+  // every column is first-class — so this audit has nothing to read there; the column-to-writer evidence is
+  // apps/web/test/tagCancelVoucher.test.ts (every cell is sent) and apps/api/test/tagCancelRows.test.ts (every
+  // sent cell is replayed or refused, never ignored).
+  'tag-cancel': 'stock/tagCancel.ts',
+  'tag-transfer': 'stock/tagCancel.ts',
   'tag-opening': 'stock/stockVoucherLifecycle.ts',
 };
 

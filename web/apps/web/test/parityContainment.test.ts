@@ -41,8 +41,6 @@ describe('WP-01 operator containment', () => {
 
   it('wires every partial tag page to both a guarded handler and a disabled submit path', () => {
     const cases = [
-      ['app/(app)/txn/tag-transfer/page.tsx', 'tag-transfer'],
-      ['app/(app)/txn/tag-cancel/page.tsx', 'tag-cancel'],
       ['app/(app)/txn/tag-weight-diff/page.tsx', 'tag-weight-difference'],
       ['app/(app)/txn/tag-split/page.tsx', 'tag-split'],
     ] as const;
@@ -78,6 +76,23 @@ describe('WP-01 operator containment', () => {
     expect(text).toContain('onClick={newVoucher}');
     // HUIDs must stay text; a Number() coercion here silently dropped every id containing a letter.
     expect(text).toContain('hallmarkId2: line.hallmarkId2?.trim() || undefined');
+  });
+
+  it('mounts the released TR_TAG_CAN form, with no containment left, on both tag pages', () => {
+    // These pages used to be read-only containment notices. N18 released both operations against their own
+    // exit gates (containment.mjs). Asserting the absence keeps the guarantee: re-introducing a block fails here.
+    for (const [path, mode] of [
+      ['app/(app)/txn/tag-cancel/page.tsx', 'cancel'],
+      ['app/(app)/txn/tag-transfer/page.tsx', 'transfer'],
+    ] as const) {
+      const text = source(path);
+      expect(text, path).toContain(`<TagCancelForm mode="${mode}"`);
+      expect(text, path).not.toContain('parityContainment');
+      expect(text, path).not.toContain('ParityContainmentNotice');
+    }
+    const form = source('components/TagCancelForm.tsx');
+    expect(form).not.toContain('parityContainment');
+    expect(form).not.toContain('containment.blocked');
   });
 
   it('labels logical JSON backup as non-DR and restore as contained', () => {
