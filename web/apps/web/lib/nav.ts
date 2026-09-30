@@ -96,7 +96,7 @@ export const NAV: NavGroup[] = [
       { label: 'Purchase Return', href: '/txn/purchase-return', ready: true },
       { label: 'Hallmark Purchase', href: '/txn/purchase-hm', ready: true },
       { label: 'Consignment Purchase', href: '/txn/consi-purchase', ready: true },
-      { label: 'Other Purchase', href: '/txn/other-purchase', ready: true },
+      { label: 'Other Expenses', href: '/txn/other-purchase', ready: true },
       { label: 'Other Income', href: '/txn/other-income', ready: true },
       {
         label: 'Other Commission / Expense Voucher',

@@ -140,8 +140,6 @@ import {
   editPurchaseQuotation,
   deletePurchase,
   deletePurchaseQuotation,
-  createOtherPurchase,
-  deleteOtherPurchase,
   listOpenConsignmentPurchaseReceipts,
 } from '../modules/purchase/purchase.js';
 import { createPurchaseReturn, deletePurchaseReturn } from '../modules/purchase/purchaseReturn.js';
@@ -459,9 +457,10 @@ import {
   saveOtherCommission,
 } from '../modules/purchase/otherCommission.js';
 import {
-  deleteOtherIncome,
-  getOtherIncome,
-  saveOtherIncome,
+  deleteOtherPurc,
+  getOtherPurc,
+  saveOtherPurc,
+  type OtherPurcMode,
 } from '../modules/purchase/otherIncome.js';
 import { tagWeightDiff, deleteTagWeightDiff } from '../modules/stock/tagOps.js';
 import {
@@ -2389,43 +2388,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
 
-  // ---- Other / expense purchase (TR_OTH_PURC): non-stock purchase with GST input ----
-  app.post('/other-purchase', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      createOtherPurchase(prisma, {
-        scope: scopeOf(req),
-        acCode: b.acCode,
-        acName: b.acName,
-        billNo: b.billNo,
-        vchDate: b.vchDate,
-        taxRatePct: Number(b.taxRatePct || 0),
-        interState: !!b.interState,
-        taxAc: b.taxAc,
-        lines: b.lines ?? [],
-        cashAmt: b.cashAmt != null ? Number(b.cashAmt) : undefined,
-        chequeAmt: b.chequeAmt != null ? Number(b.chequeAmt) : undefined,
-        cardAmt: b.cardAmt != null ? Number(b.cardAmt) : undefined,
-        upiAmt: b.upiAmt != null ? Number(b.upiAmt) : undefined,
-        kasar: b.kasar != null ? Number(b.kasar) : undefined,
-        cashAc: b.cashAc,
-        bankAc: b.bankAc,
-        kasarAc: b.kasarAc,
-      }),
-    );
-  });
-  app.delete('/other-purchase/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
-      deleteOtherPurchase(prisma, {
-        scope: scopeOf(req),
-        vchNo: (req.params as any).vchNo,
-        deleteUser: sess(req).tenantId,
-      }),
-    );
-  });
-
   const otherIncomeInput = (req: FastifyRequest, b: Record<string, any>) => ({
     scope: scopeOf(req),
     vchDate: b.vchDate,
@@ -2449,30 +2411,88 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     lines: b.lines ?? [],
     mainUser: sess(req).sub,
   });
-  app.post('/other-income', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    return run(reply, 201, () => saveOtherIncome(prisma, otherIncomeInput(req, b)));
+  // Desktop TR_OTH_PURC in both modes (MDI_FORM.cs:8372-8394): "Other Expenses" on an OTH EXP book and
+  // "Other Income" on an OTH INC book. One writer posts both through the desktop's mirrored
+  // Oth_Purc_Ledr / Oth_Purc_Rojmel / Oth_Purc_GST routines; each menu keeps its own route and right.
+  const otherPurcHandlers = (mode: OtherPurcMode) => ({
+    create: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'create')) return;
+      const b = body(req);
+      return run(reply, 201, () => saveOtherPurc(prisma, mode, otherIncomeInput(req, b)));
+    },
+    read: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'view')) return;
+      return run(reply, 200, () =>
+        getOtherPurc(prisma, mode, readScope(req), String((req.params as any).vchNo)),
+      );
+    },
+    update: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'update')) return;
+      const b = body(req);
+      return run(reply, 200, () =>
+        saveOtherPurc(prisma, mode, otherIncomeInput(req, b), String((req.params as any).vchNo)),
+      );
+    },
+    remove: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'delete')) return;
+      return run(reply, 200, () =>
+        deleteOtherPurc(
+          prisma,
+          mode,
+          scopeOf(req),
+          String((req.params as any).vchNo),
+          sess(req).sub,
+        ),
+      );
+    },
+    // TR_OTH_PURC prints PaymentVch.RPT for both modes (TR_OTH_PURC.cs BtnPrint_Click): the same PAY_DATA /
+    // PAY_DETL voucher the payment screen prints. The book is validated against the mode before printing.
+    print: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'view')) return;
+      const q = req.query as any;
+      const scope = documentScope(req, reply);
+      if (!scope) return reply;
+      const vchNo = String((req.params as any).vchNo ?? '');
+      try {
+        await getOtherPurc(prisma, mode, scope, vchNo);
+      } catch (e: any) {
+        if (e?.name !== 'OtherIncomeValidationError') throw e;
+        return reply.code(404).send({ error: e.name, message: e.message });
+      }
+      const data = await financeVoucherData(prisma, 'payment', { ...scope, vchNo });
+      if (!data) return reply.code(404).send({ error: 'voucher-not-found' });
+      const html = financeVoucherHtml('payment', data.header, data.lines, {
+        company: data.company,
+        party: data.party,
+      });
+      if (q.format === 'html') return reply.type('text/html').send(html);
+      let pdf: Buffer;
+      try {
+        pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
+      } catch {
+        return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
+      }
+      return reply
+        .header('content-type', 'application/pdf')
+        .header(
+          'content-disposition',
+          `inline; filename="voucher-${vchNo.replace(/[^\w.-]/g, '')}.pdf"`,
+        )
+        .send(pdf);
+    },
   });
-  app.get('/other-income/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    return run(reply, 200, () =>
-      getOtherIncome(prisma, readScope(req), String((req.params as any).vchNo)),
-    );
-  });
-  app.put('/other-income/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'update')) return;
-    const b = body(req);
-    return run(reply, 200, () =>
-      saveOtherIncome(prisma, otherIncomeInput(req, b), String((req.params as any).vchNo)),
-    );
-  });
-  app.delete('/other-income/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
-      deleteOtherIncome(prisma, scopeOf(req), String((req.params as any).vchNo), sess(req).sub),
-    );
-  });
+  const otherExpense = otherPurcHandlers('OTH EXP');
+  app.post('/other-purchase', auth, otherExpense.create);
+  app.get('/other-purchase/:vchNo', auth, otherExpense.read);
+  app.put('/other-purchase/:vchNo', auth, otherExpense.update);
+  app.delete('/other-purchase/:vchNo', auth, otherExpense.remove);
+  app.get('/other-purchase/:vchNo/print', auth, otherExpense.print);
+  const otherIncome = otherPurcHandlers('OTH INC');
+  app.post('/other-income', auth, otherIncome.create);
+  app.get('/other-income/:vchNo', auth, otherIncome.read);
+  app.put('/other-income/:vchNo', auth, otherIncome.update);
+  app.delete('/other-income/:vchNo', auth, otherIncome.remove);
+  app.get('/other-income/:vchNo/print', auth, otherIncome.print);
 
   // ---- Purchase return ----
   app.post('/purchase-returns', auth, async (req, reply) => {

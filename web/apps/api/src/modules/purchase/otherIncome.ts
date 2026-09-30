@@ -56,14 +56,50 @@ export interface OtherIncomeInput {
   mainUser?: string;
 }
 
+/**
+ * The two modes of desktop TR_OTH_PURC. "Other Income" opens it on an OTH INC book and "Other Expenses" on an
+ * OTH EXP book (MDI_FORM.cs:8372-8394). One set of posting routines serves both and mirrors every amount on
+ * the book's MAIN_BOOK: Ac_Ledr.Oth_Purc_Ledr (Ac_Ledr.cs:1600) writes each leg with
+ * `CASE WHEN B.MAIN_BOOK = 'OTH INC' THEN <credit> ELSE <debit> END`, Ac_Rojmel.Oth_Purc_Rojmel
+ * (Ac_Rojmel.cs:693) does the same, and Ac_Tax.Oth_Purc_GST (Ac_Tax.cs:205) types income tax rows 'S' / '+'
+ * and expense tax rows 'P' / '-'.
+ */
+export type OtherPurcMode = 'OTH INC' | 'OTH EXP';
+
 type OtherIncomeBook = {
   coBook: string;
   configuredName: string;
   vchType: string;
-  mainBook: 'OTH INC';
-  inout: 'I';
+  mainBook: OtherPurcMode;
+  inout: 'I' | 'O';
   dataType: string;
 };
+
+const MODE_TEXT: Record<
+  OtherPurcMode,
+  { voucher: string; party: string; ledger: string; settle: string; fallbackName: string }
+> = {
+  'OTH INC': {
+    voucher: 'other-income',
+    party: 'customer account',
+    ledger: 'income ledger',
+    settle: 'receipt',
+    fallbackName: 'Other Income',
+  },
+  'OTH EXP': {
+    voucher: 'other-expense',
+    party: 'supplier account',
+    ledger: 'expense ledger',
+    settle: 'payment',
+    fallbackName: 'Other Expenses',
+  },
+};
+
+/** An amount on the side the income mode posts it; the expense mode posts the mirror (Oth_Purc_Ledr). */
+const side = (mode: OtherPurcMode, incomeSide: 'DR' | 'CR', amount: number) =>
+  (mode === 'OTH INC') === (incomeSide === 'DR')
+    ? { DR_AMT: amount, CR_AMT: 0 }
+    : { DR_AMT: 0, CR_AMT: amount };
 
 type Account = { code: string; name: string; gstType: string };
 type TaxComponent = { group: string; percent: number };
@@ -146,7 +182,11 @@ function businessDate(value: string | Date, label = 'voucher date'): { date: Dat
   return { date, iso: raw };
 }
 
-async function resolveBookTx(tx: any, scope: VoucherScope): Promise<OtherIncomeBook> {
+async function resolveBookTx(
+  tx: any,
+  scope: VoucherScope,
+  mode: OtherPurcMode,
+): Promise<OtherIncomeBook> {
   const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
     `SELECT "CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","BOOK_TBL_NAME","DATA_TYPE"
        FROM "BOOK_DATA"
@@ -161,26 +201,35 @@ async function resolveBookTx(tx: any, scope: VoucherScope): Promise<OtherIncomeB
   if (rows.length !== 1) {
     throw new OtherIncomeValidationError(
       rows.length
-        ? `other-income book configuration is ambiguous: ${scope.coBook}`
-        : `other-income book not found: ${scope.coBook}`,
+        ? `${MODE_TEXT[mode].voucher} book configuration is ambiguous: ${scope.coBook}`
+        : `${MODE_TEXT[mode].voucher} book not found: ${scope.coBook}`,
     );
   }
   const row = rows[0]!;
   const mainBook = text(row.MAIN_BOOK).toUpperCase();
   const inout = text(row.BOOK_INOUT).toUpperCase();
   const table = text(row.BOOK_TBL_NAME).toUpperCase();
-  if (mainBook !== 'OTH INC' || inout !== 'I') {
-    throw new OtherIncomeValidationError(`book ${scope.coBook} must be configured as OTH INC / I`);
+  // Income keeps its measured direction (book 375: OTH INC / I). The posting routines read only MAIN_BOOK, so
+  // an expense book keeps whatever direction it was configured with; blank is the payment side, 'O'.
+  if (
+    mainBook !== mode ||
+    (mode === 'OTH INC' ? inout !== 'I' : inout !== '' && inout !== 'I' && inout !== 'O')
+  ) {
+    throw new OtherIncomeValidationError(
+      mode === 'OTH INC'
+        ? `book ${scope.coBook} must be configured as OTH INC / I`
+        : `book ${scope.coBook} must be configured as OTH EXP`,
+    );
   }
   if (table && table !== 'PAY_DATA') {
     throw new OtherIncomeValidationError(`book ${scope.coBook} must write PAY_DATA`);
   }
   return {
     coBook: text(row.CO_BOOK),
-    configuredName: text(row.BOOK_NAME) || 'Other Income',
+    configuredName: text(row.BOOK_NAME) || MODE_TEXT[mode].fallbackName,
     vchType: text(row.BOOK_SNAME) || text(row.CO_BOOK),
-    mainBook: 'OTH INC',
-    inout: 'I',
+    mainBook: mode,
+    inout: mode === 'OTH INC' ? 'I' : inout === 'I' ? 'I' : 'O',
     dataType: text(row.DATA_TYPE) || 'A',
   };
 }
@@ -305,16 +354,21 @@ async function tdsTx(
   };
 }
 
-async function resolveInputTx(tx: any, input: OtherIncomeInput): Promise<ResolvedInput> {
+async function resolveInputTx(
+  tx: any,
+  input: OtherIncomeInput,
+  mode: OtherPurcMode,
+): Promise<ResolvedInput> {
+  const words = MODE_TEXT[mode];
   const partyCode = text(input.partyCode);
   if (!partyCode) throw new OtherIncomeValidationError('Please Insert Party and try');
   const ledgerCode = text(input.ledgerCode);
-  if (!ledgerCode) throw new OtherIncomeValidationError('income ledger is required');
-  const party = await oneAccountTx(tx, input.scope, partyCode, 'customer account');
-  const ledger = await oneAccountTx(tx, input.scope, ledgerCode, 'income ledger');
+  if (!ledgerCode) throw new OtherIncomeValidationError(`${words.ledger} is required`);
+  const party = await oneAccountTx(tx, input.scope, partyCode, words.party);
+  const ledger = await oneAccountTx(tx, input.scope, ledgerCode, words.ledger);
 
   if (!Array.isArray(input.lines) || input.lines.length === 0) {
-    throw new OtherIncomeValidationError('at least one other-income line is required');
+    throw new OtherIncomeValidationError(`at least one ${words.voucher} line is required`);
   }
   const lines: ResolvedLine[] = [];
   for (const line of input.lines) {
@@ -322,7 +376,7 @@ async function resolveInputTx(tx: any, input: OtherIncomeInput): Promise<Resolve
     const netAmount = positiveOrZero(line?.netAmount, 'line net amount');
     if (!itemName || netAmount === 0) {
       throw new OtherIncomeValidationError(
-        'every other-income line requires a description and amount',
+        `every ${words.voucher} line requires a description and amount`,
       );
     }
     const taxType = (text(line?.taxType).toUpperCase() || 'F') as 'F' | 'R';
@@ -412,7 +466,7 @@ async function resolveInputTx(tx: any, input: OtherIncomeInput): Promise<Resolve
     totalAmount - chequeAmount - cardAmount - cashAmount - kasarAmount,
   );
   if (outstandingAmount < 0) {
-    throw new OtherIncomeValidationError('receipt amounts exceed voucher total');
+    throw new OtherIncomeValidationError(`${words.settle} amounts exceed voucher total`);
   }
   return {
     party,
@@ -530,8 +584,7 @@ function addLedgerPair(
     ...ledgerBase(scope, book, identity, input, resolved, suffix),
     AC_CODE: partyCode,
     LD_CODE: contraCode,
-    CR_AMT: amount,
-    DR_AMT: 0,
+    ...side(book.mainBook, 'CR', amount),
     PARTY_AC_CODE: resolved.party.code,
   });
   ledger.push({
@@ -545,8 +598,7 @@ function addLedgerPair(
     ),
     AC_CODE: contraCode,
     LD_CODE: partyCode,
-    CR_AMT: 0,
-    DR_AMT: amount,
+    ...side(book.mainBook, 'DR', amount),
     PARTY_AC_CODE: '',
   });
 }
@@ -662,7 +714,7 @@ async function writeTx(
         ...key,
         SR_NO: taxRow.srNo,
         BOOK_NAME: book.mainBook,
-        TRAN_TYPE: 'S',
+        TRAN_TYPE: book.mainBook === 'OTH INC' ? 'S' : 'P',
         VCH_DATE: identity.voucherDate,
         AC_CODE: resolved.party.code,
         TAX_CODE: line.taxCode,
@@ -672,7 +724,7 @@ async function writeTx(
         TAX_AMT: taxRow.amount,
         DISC_AMT: 0,
         TOT_AMT: line.totalAmount,
-        TAX_SIGN: '+',
+        TAX_SIGN: book.mainBook === 'OTH INC' ? '+' : '-',
         PARTY_NAME: resolved.party.name,
         R_CHARG: 'N',
         ISR_NO: srNo,
@@ -688,15 +740,13 @@ async function writeTx(
       ...ledgerBase(scope, book, identity, input, resolved, '01'),
       AC_CODE: resolved.party.code,
       LD_CODE: resolved.ledger.code,
-      CR_AMT: 0,
-      DR_AMT: money(resolved.totalAmount + resolved.tdsAmount),
+      ...side(book.mainBook, 'DR', money(resolved.totalAmount + resolved.tdsAmount)),
     },
     {
       ...ledgerBase(scope, book, identity, input, resolved, '02'),
       AC_CODE: resolved.ledger.code,
       LD_CODE: resolved.party.code,
-      CR_AMT: money(resolved.totalAmount + resolved.tdsAmount - totalTax),
-      DR_AMT: 0,
+      ...side(book.mainBook, 'CR', money(resolved.totalAmount + resolved.tdsAmount - totalTax)),
       PARTY_AC_CODE: '',
     },
   ];
@@ -714,8 +764,7 @@ async function writeTx(
       ),
       AC_CODE: line.taxAccount,
       LD_CODE: resolved.party.code,
-      CR_AMT: lineTax,
-      DR_AMT: 0,
+      ...side(book.mainBook, 'CR', lineTax),
       PARTY_AC_CODE: '',
       HD_VCH_NO: identity.voucherNo,
     });
@@ -725,15 +774,13 @@ async function writeTx(
       ...ledgerBase(scope, book, identity, input, resolved, '05'),
       AC_CODE: resolved.party.code,
       LD_CODE: resolved.tdsAccount,
-      CR_AMT: resolved.tdsAmount,
-      DR_AMT: 0,
+      ...side(book.mainBook, 'CR', resolved.tdsAmount),
     });
     ledger.push({
       ...ledgerBase(scope, book, identity, input, resolved, '06'),
       AC_CODE: resolved.tdsAccount,
       LD_CODE: resolved.party.code,
-      CR_AMT: 0,
-      DR_AMT: resolved.tdsAmount,
+      ...side(book.mainBook, 'DR', resolved.tdsAmount),
       PARTY_AC_CODE: '',
     });
   }
@@ -794,8 +841,7 @@ async function writeTx(
       ...rojmelBase(scope, book, identity, input, '01'),
       AC_CODE: resolved.party.code,
       LD_CODE: resolved.ledger.code,
-      CR_AMT: 0,
-      DR_AMT: resolved.outstandingAmount,
+      ...side(book.mainBook, 'DR', resolved.outstandingAmount),
     });
   }
   if (resolved.totalAmount) {
@@ -803,8 +849,7 @@ async function writeTx(
       ...rojmelBase(scope, book, identity, input, '02'),
       AC_CODE: resolved.ledger.code,
       LD_CODE: resolved.ledger.code,
-      CR_AMT: money(resolved.totalAmount + resolved.tdsAmount),
-      DR_AMT: 0,
+      ...side(book.mainBook, 'CR', money(resolved.totalAmount + resolved.tdsAmount)),
     });
   }
   if (resolved.tdsAmount) {
@@ -812,8 +857,7 @@ async function writeTx(
       ...rojmelBase(scope, book, identity, input, '03'),
       AC_CODE: resolved.tdsAccount,
       LD_CODE: resolved.party.code,
-      CR_AMT: 0,
-      DR_AMT: resolved.tdsAmount,
+      ...side(book.mainBook, 'DR', resolved.tdsAmount),
     });
   }
   for (const [suffix, account, amount, name] of [
@@ -826,8 +870,7 @@ async function writeTx(
       ...rojmelBase(scope, book, identity, input, suffix),
       AC_CODE: account,
       LD_CODE: resolved.party.code,
-      CR_AMT: 0,
-      DR_AMT: amount,
+      ...side(book.mainBook, 'DR', amount),
       AC_NAME: name,
     });
   }
@@ -848,17 +891,18 @@ async function writeTx(
 
 async function saveTx(
   tx: any,
+  mode: OtherPurcMode,
   input: OtherIncomeInput,
   requestedVoucherNo?: string,
 ): Promise<{ voucherNo: string; hiddenVoucherNo: string; created: boolean; lines: number }> {
   const scope = completeFinanceScope(input.scope);
-  const book = await resolveBookTx(tx, scope);
+  const book = await resolveBookTx(tx, scope, mode);
   const { date, iso } = businessDate(input.vchDate);
   await assertFiscalDateTx(tx, scope, iso);
   await assertPeriodOpen(tx, scope.tenantId, {
     ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: date }] },
   });
-  const resolved = await resolveInputTx(tx, input);
+  const resolved = await resolveInputTx(tx, input, mode);
   const created = !requestedVoucherNo;
   let identity: VoucherIdentity;
   if (requestedVoucherNo) {
@@ -891,25 +935,40 @@ async function saveTx(
   };
 }
 
-export async function saveOtherIncome(
+/** Save a TR_OTH_PURC voucher in either mode; `requestedVoucherNo` edits the saved voucher in place. */
+export async function saveOtherPurc(
   prisma: any,
+  mode: OtherPurcMode,
   input: OtherIncomeInput,
   requestedVoucherNo?: string,
 ) {
   return withTenant(prisma, input.scope.tenantId, (tx: any) =>
-    saveTx(tx, input, requestedVoucherNo),
+    saveTx(tx, mode, input, requestedVoucherNo),
   );
 }
 
-export async function getOtherIncome(
+export const saveOtherIncome = (
   prisma: any,
+  input: OtherIncomeInput,
+  requestedVoucherNo?: string,
+) => saveOtherPurc(prisma, 'OTH INC', input, requestedVoucherNo);
+export const saveOtherExpense = (
+  prisma: any,
+  input: OtherIncomeInput,
+  requestedVoucherNo?: string,
+) => saveOtherPurc(prisma, 'OTH EXP', input, requestedVoucherNo);
+
+export async function getOtherPurc(
+  prisma: any,
+  mode: OtherPurcMode,
   scopeInput: VoucherScope,
   requestedVoucherNo: string,
 ) {
   const scope = completeFinanceScope(scopeInput);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
+  const words = MODE_TEXT[mode];
   return withTenant(prisma, scope.tenantId, async (tx: any) => {
-    await resolveBookTx(tx, scope);
+    await resolveBookTx(tx, scope, mode);
     const headers: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT p.*,p."VCH_DATE"::text AS "VCH_DAY",p."BILL_DATE"::text AS "BILL_DAY",
               to_char(p."VCH_TIME",'HH24:MI:SS.MS') AS "VCH_CLOCK",
@@ -932,8 +991,8 @@ export async function getOtherIncome(
     if (headers.length !== 1) {
       throw new OtherIncomeValidationError(
         headers.length
-          ? `other-income voucher is ambiguous: ${voucherNo}`
-          : `other-income voucher not found: ${voucherNo}`,
+          ? `${words.voucher} voucher is ambiguous: ${voucherNo}`
+          : `${words.voucher} voucher not found: ${voucherNo}`,
       );
     }
     const lines: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
@@ -1003,8 +1062,14 @@ export async function getOtherIncome(
   });
 }
 
-export async function deleteOtherIncome(
+export const getOtherIncome = (prisma: any, scope: VoucherScope, requestedVoucherNo: string) =>
+  getOtherPurc(prisma, 'OTH INC', scope, requestedVoucherNo);
+export const getOtherExpense = (prisma: any, scope: VoucherScope, requestedVoucherNo: string) =>
+  getOtherPurc(prisma, 'OTH EXP', scope, requestedVoucherNo);
+
+export async function deleteOtherPurc(
   prisma: any,
+  mode: OtherPurcMode,
   scopeInput: VoucherScope,
   requestedVoucherNo: string,
   deleteUser?: string,
@@ -1012,7 +1077,7 @@ export async function deleteOtherIncome(
   const scope = completeFinanceScope(scopeInput);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
   return withTenant(prisma, scope.tenantId, async (tx: any) => {
-    const book = await resolveBookTx(tx, scope);
+    const book = await resolveBookTx(tx, scope, mode);
     const edited = await editIdentityTx(tx, {
       table: 'PAY_DATA',
       scope,
@@ -1036,7 +1101,9 @@ export async function deleteOtherIncome(
       voucherNo,
     );
     if (!rows.length)
-      throw new OtherIncomeValidationError(`other-income voucher not found: ${voucherNo}`);
+      throw new OtherIncomeValidationError(
+        `${MODE_TEXT[mode].voucher} voucher not found: ${voucherNo}`,
+      );
     await insertDesktopDeleteAuditTx(tx, {
       scope,
       configuredBook: { name: book.configuredName.slice(0, 20), shortName: book.vchType },
@@ -1065,3 +1132,16 @@ export async function deleteOtherIncome(
     return { reversed: true, auditedLines: rows.length };
   });
 }
+
+export const deleteOtherIncome = (
+  prisma: any,
+  scope: VoucherScope,
+  requestedVoucherNo: string,
+  deleteUser?: string,
+) => deleteOtherPurc(prisma, 'OTH INC', scope, requestedVoucherNo, deleteUser);
+export const deleteOtherExpense = (
+  prisma: any,
+  scope: VoucherScope,
+  requestedVoucherNo: string,
+  deleteUser?: string,
+) => deleteOtherPurc(prisma, 'OTH EXP', scope, requestedVoucherNo, deleteUser);
