@@ -1,0 +1,4 @@
+
+> @datacare/core@0.0.0 build /Users/yakshitsavaliya/Documents/Codex/2026-09-29/https-github-com-yaxit24-datacare-web/work/DataCare-Web/web/packages/core
+> tsc -p tsconfig.json
+

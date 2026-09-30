@@ -1,0 +1,40 @@
+
+> @datacare/core@0.0.0 test /Users/yakshitsavaliya/Documents/Codex/2026-09-29/https-github-com-yaxit24-datacare-web/work/DataCare-Web/web/packages/core
+> vitest run
+
+
+ RUN  v2.1.9 /Users/yakshitsavaliya/Documents/Codex/2026-09-29/https-github-com-yaxit24-datacare-web/work/DataCare-Web/web/packages/core
+
+ ✓ test/saleReturnIncomingLabour.test.ts (73 tests) 74ms
+ ✓ test/saleReturnBillProjection.test.ts (84 tests) 112ms
+ ✓ test/saleReturnIncoming.review.test.ts (33 tests) 36ms
+ ✓ test/saleReturnIncoming.test.ts (72 tests) 138ms
+ ✓ test/saleReturnIncomingAggregate.test.ts (62 tests) 274ms
+ ✓ test/saleReturnIncomingLabourCompose.test.ts (53 tests) 706ms
+ ✓ test/saleReturnIncomingProjection.test.ts (53 tests) 241ms
+ ✓ test/designCalc.test.ts (36 tests) 37ms
+ ✓ test/saleReturnIncomingSaveProjection.test.ts (63 tests) 373ms
+ ✓ test/saleReturnNBarCompanions.test.ts (61 tests) 471ms
+ ✓ test/savedSaleReturnClock.test.ts (159 tests) 288ms
+ ✓ test/saleReturnBillTaxPolicy.test.ts (89 tests) 77ms
+ ✓ test/sessionLedgerMode.test.ts (104 tests) 3429ms
+   ✓ ledger-mode plain-data envelope containment > refuses an accepted-input boundary whose appended proof would exceed reread limits 3061ms
+ ✓ test/designRepeat.test.ts (11 tests) 12ms
+ ✓ test/saleReturnEffectContext.test.ts (89 tests) 162ms
+ ✓ test/saleReturnSaveGuards.test.ts (123 tests) 400ms
+ ✓ test/saleReturnOtherAmountReplay.test.ts (45 tests) 641ms
+ ✓ test/salesOrderDesign.test.ts (8 tests) 8ms
+ ✓ test/orderLabour.test.ts (23 tests) 35ms
+ ✓ test/orderLabourWithCache.test.ts (11 tests) 16ms
+ ✓ test/saleReturnHeaderFloat.test.ts (47 tests) 77ms
+ ✓ test/saleReturnSaveComposition.test.ts (6 tests) 481ms
+ ✓ test/saleReturnFinancialEffects.test.ts (291 tests) 3840ms
+ ✓ test/containment.test.ts (4 tests) 15ms
+ ✓ test/calc.test.ts (10 tests) 16ms
+ ✓ test/money.test.ts (3 tests) 5ms
+
+ Test Files  26 passed (26)
+      Tests  1613 passed (1613)
+   Start at  07:52:40
+   Duration  13.92s (transform 5.23s, setup 0ms, collect 7.58s, tests 11.96s, environment 54ms, prepare 7.96s)
+

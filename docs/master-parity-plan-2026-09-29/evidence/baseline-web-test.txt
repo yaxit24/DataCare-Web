@@ -1,0 +1,89 @@
+
+> @datacare/web@0.0.0 test /Users/yakshitsavaliya/Documents/Codex/2026-09-29/https-github-com-yaxit24-datacare-web/work/DataCare-Web/web/apps/web
+> node test/run-unit-tests.mjs
+
+
+ RUN  v2.1.8 /Users/yakshitsavaliya/Documents/Codex/2026-09-29/https-github-com-yaxit24-datacare-web/work/DataCare-Web/web/apps/web
+
+ ❯ test/salesOrderForm.test.ts (0 test)
+ ✓ test/salesReturnForm.test.ts (31 tests) 40ms
+ ✓ test/salesReturnReplay.test.ts (32 tests) 97ms
+ ✓ test/salesReturnBillReplay.test.ts (67 tests) 313ms
+ ✓ test/apiContext.test.ts (20 tests) 515ms
+ ✓ test/contextSelection.test.ts (53 tests) 839ms
+ ✓ test/salesReturnLabourReplay.test.ts (65 tests) 746ms
+ ✓ test/imageEditorSession.test.ts (20 tests) 108ms
+ ❯ test/designBookRepeat.test.ts (0 test)
+ ❯ test/tourOrderForm.test.ts (0 test)
+ ❯ test/tourOrderExactValues.test.ts (0 test)
+ ✓ test/columnSettings.test.ts (27 tests) 51ms
+ ✓ test/scaleCaptureContext.test.ts (9 tests) 718ms
+ ✓ test/directFetchContext.test.ts (8 tests) 67ms
+ ✓ test/formKeys.test.ts (7 tests) 8ms
+ ✓ test/pageContextSelectionPause.test.ts (7 tests) 33ms
+ ❯ test/designBookCalculation.test.ts (0 test)
+ ✓ test/pageContext.test.ts (37 tests) 80ms
+ ❯ test/lineRecalc.test.ts (0 test)
+ ✓ test/salesReturnLabourReplay.wire.test.ts (10 tests) 187ms
+ ❯ test/designBookPage.test.ts (0 test)
+ ✓ test/parityContainment.test.ts (5 tests) 37ms
+ ✓ test/rateCutSettlementPayload.test.ts (5 tests) 61ms
+ ✓ test/derivedValueSources.test.ts (4 tests) 53ms
+ ✓ test/subDetailGrid.test.ts (7 tests) 60ms
+ ✓ test/mfgLotView.test.ts (4 tests) 5ms
+ ✓ test/gridKeyboard.test.ts (5 tests) 4ms
+ ✓ test/masterSearch.test.ts (7 tests) 6ms
+ ✓ test/reportSurfaceLinks.test.ts (1 test) 7ms
+ ✓ test/cameraRequestGuard.test.ts (3 tests) 5ms
+ ✓ test/chequePrintPage.test.ts (2 tests) 5ms
+ ✓ test/wholesaleSalePayload.test.ts (2 tests) 3ms
+ ✓ test/textIdentifiers.test.ts (10 tests) 372ms
+ ✓ test/stockLimitPages.test.ts (1 test) 5ms
+ ✓ test/schemeInstallmentUpi.test.ts (1 test) 3ms
+ ✓ test/eInvoiceExcelPage.test.ts (2 tests) 4ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/designBookCalculation.test.ts [ test/designBookCalculation.test.ts ]
+ FAIL  test/designBookPage.test.ts [ test/designBookPage.test.ts ]
+ FAIL  test/designBookRepeat.test.ts [ test/designBookRepeat.test.ts ]
+ FAIL  test/tourOrderExactValues.test.ts [ test/tourOrderExactValues.test.ts ]
+ FAIL  test/tourOrderForm.test.ts [ test/tourOrderForm.test.ts ]
+Error: Failed to resolve entry for package "@datacare/core". The package may have incorrect main/module/exports specified in its package.json.
+  Plugin: vite:import-analysis
+  File: /Users/yakshitsavaliya/Documents/Codex/2026-09-29/https-github-com-yaxit24-datacare-web/work/DataCare-Web/web/apps/web/lib/designBookDraft.ts
+ ❯ packageEntryFailure ../../node_modules/.pnpm/vite@5.4.21_@types+node@22.10.5/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:46638:15
+ ❯ resolvePackageEntry ../../node_modules/.pnpm/vite@5.4.21_@types+node@22.10.5/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:46635:3
+ ❯ tryNodeResolve ../../node_modules/.pnpm/vite@5.4.21_@types+node@22.10.5/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:46451:16
+ ❯ ResolveIdContext.resolveId ../../node_modules/.pnpm/vite@5.4.21_@types+node@22.10.5/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:46201:19
+ ❯ PluginContainer.resolveId ../../node_modules/.pnpm/vite@5.4.21_@types+node@22.10.5/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49018:17
+ ❯ TransformPluginContext.resolve ../../node_modules/.pnpm/vite@5.4.21_@types+node@22.10.5/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49178:15
+ ❯ normalizeUrl ../../node_modules/.pnpm/vite@5.4.21_@types+node@22.10.5/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64300:26
+ ❯ ../../node_modules/.pnpm/vite@5.4.21_@types+node@22.10.5/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  test/lineRecalc.test.ts [ test/lineRecalc.test.ts ]
+ FAIL  test/salesOrderForm.test.ts [ test/salesOrderForm.test.ts ]
+Error: Failed to resolve entry for package "@datacare/core". The package may have incorrect main/module/exports specified in its package.json.
+  Plugin: vite:import-analysis
+  File: /Users/yakshitsavaliya/Documents/Codex/2026-09-29/https-github-com-yaxit24-datacare-web/work/DataCare-Web/web/apps/web/test/lineRecalc.test.ts
+ ❯ packageEntryFailure ../../node_modules/.pnpm/vite@5.4.21_@types+node@22.10.5/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:46638:15
+ ❯ resolvePackageEntry ../../node_modules/.pnpm/vite@5.4.21_@types+node@22.10.5/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:46635:3
+ ❯ tryNodeResolve ../../node_modules/.pnpm/vite@5.4.21_@types+node@22.10.5/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:46451:16
+ ❯ ResolveIdContext.resolveId ../../node_modules/.pnpm/vite@5.4.21_@types+node@22.10.5/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:46201:19
+ ❯ PluginContainer.resolveId ../../node_modules/.pnpm/vite@5.4.21_@types+node@22.10.5/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49018:17
+ ❯ TransformPluginContext.resolve ../../node_modules/.pnpm/vite@5.4.21_@types+node@22.10.5/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49178:15
+ ❯ normalizeUrl ../../node_modules/.pnpm/vite@5.4.21_@types+node@22.10.5/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64300:26
+ ❯ ../../node_modules/.pnpm/vite@5.4.21_@types+node@22.10.5/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ Test Files  7 failed | 29 passed (36)
+      Tests  452 passed (452)
+   Start at  07:52:40
+   Duration  15.05s (transform 6.29s, setup 0ms, collect 6.86s, tests 4.43s, environment 83ms, prepare 15.95s)
+
+/Users/yakshitsavaliya/Documents/Codex/2026-09-29/https-github-com-yaxit24-datacare-web/work/DataCare-Web/web/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @datacare/web@0.0.0 test: `node test/run-unit-tests.mjs`
+Exit status 1
