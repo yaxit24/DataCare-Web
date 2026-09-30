@@ -1,0 +1,3682 @@
+{
+  "schemaVersion": 1,
+  "mode": "dry-run",
+  "status": "passed",
+  "source": {
+    "host": "127.0.0.1",
+    "port": 11433,
+    "database": "Next23"
+  },
+  "target": {
+    "host": "127.0.0.1",
+    "port": 55433,
+    "database": "datacare",
+    "tenant": "mig-n23"
+  },
+  "tables": [
+    {
+      "table": "CO_MAST",
+      "status": "dry-run",
+      "sourceRows": 1,
+      "loadedRows": 0,
+      "skippedRows": 1,
+      "numericColumns": {},
+      "durationMs": 52.505
+    },
+    {
+      "table": "GROUP_MAST",
+      "status": "dry-run",
+      "sourceRows": 25,
+      "loadedRows": 0,
+      "skippedRows": 25,
+      "numericColumns": {
+        "GR_TOUCH": {
+          "source": 928,
+          "target": 928,
+          "matches": true
+        },
+        "GR_PURC_TOUCH": {
+          "source": 92,
+          "target": 0,
+          "matches": false
+        },
+        "MELTING_PRC": {
+          "source": 570,
+          "target": 570,
+          "matches": true
+        },
+        "GR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "WEST_PRC": {
+          "source": 10,
+          "target": 0,
+          "matches": false
+        },
+        "TAX_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "AVG_TOUCH": {
+          "source": 100,
+          "target": 391.23,
+          "matches": false
+        },
+        "AVG_FINE": {
+          "source": 48,
+          "target": 81.151,
+          "matches": false
+        },
+        "AVG_NWT": {
+          "source": 48,
+          "target": 91.21,
+          "matches": false
+        },
+        "DAY_OP_PCS": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DAY_OP_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DAY_CL_PCS": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DAY_CL_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OP_TOUCH": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OP_FINE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 16.717
+    },
+    {
+      "table": "AC_MAST",
+      "status": "dry-run",
+      "sourceRows": 99,
+      "loadedRows": 0,
+      "skippedRows": 99,
+      "numericColumns": {
+        "AC_CR_DAYS": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "AC_INT_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DPC_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "AMT_LIMIT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "GOLD_LIMIT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "SILVER_LIMIT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 22.787
+    },
+    {
+      "table": "ITEM_MAST",
+      "status": "dry-run",
+      "sourceRows": 36,
+      "loadedRows": 0,
+      "skippedRows": 36,
+      "numericColumns": {
+        "LBR_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_TOUCH": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_WEST": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OTH_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_LBR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_GHT_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "AVG_FINE": {
+          "source": 52,
+          "target": 81.148,
+          "matches": false
+        },
+        "AVG_NWT": {
+          "source": 48,
+          "target": 91.21,
+          "matches": false
+        },
+        "AVG_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "AVG_TOUCH": {
+          "source": 100,
+          "target": 491.23,
+          "matches": false
+        },
+        "CON_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DISC_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITEM_RATE": {
+          "source": 180,
+          "target": 180,
+          "matches": true
+        },
+        "IT_BAG_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "MIN_STK": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "MRP_DISC_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OP_FINE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OP_TOUCH": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OTHER_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 14.477
+    },
+    {
+      "table": "EMP_MAST",
+      "status": "dry-run",
+      "sourceRows": 1,
+      "loadedRows": 0,
+      "skippedRows": 1,
+      "numericColumns": {
+        "EMP_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TDS_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TDS_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "PF_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "PF_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DAY_HOURS": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 8.404
+    },
+    {
+      "table": "PRODUCT_MAST",
+      "status": "dry-run",
+      "sourceRows": 27,
+      "loadedRows": 0,
+      "skippedRows": 27,
+      "numericColumns": {},
+      "durationMs": 5.622
+    },
+    {
+      "table": "RATE_MAST",
+      "status": "dry-run",
+      "sourceRows": 0,
+      "loadedRows": 0,
+      "skippedRows": 0,
+      "numericColumns": {
+        "SR_NO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "FINE_GL_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "FINE_SL_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "GR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CASH_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DOLLAR_GL_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DOLLAR_SL_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "FINE_GL_PR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "FINE_SL_PR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "GR_PR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "GR_PR_TOUCH": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "GR_TAX_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "GR_TAX_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "GR_TOUCH": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OP_GL_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 8.126
+    },
+    {
+      "table": "TAX_MAST",
+      "status": "dry-run",
+      "sourceRows": 25,
+      "loadedRows": 0,
+      "skippedRows": 25,
+      "numericColumns": {
+        "SR_NO": {
+          "source": 30,
+          "target": 60,
+          "matches": false
+        },
+        "TAX_PRC": {
+          "source": 200.2,
+          "target": 400.375,
+          "matches": false
+        },
+        "ADD_TAX_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 7.676
+    },
+    {
+      "table": "BOOK_DATA",
+      "status": "dry-run",
+      "sourceRows": 205,
+      "loadedRows": 0,
+      "skippedRows": 205,
+      "numericColumns": {},
+      "durationMs": 11.07
+    },
+    {
+      "table": "LOCT_MAST",
+      "status": "dry-run",
+      "sourceRows": 1,
+      "loadedRows": 0,
+      "skippedRows": 1,
+      "numericColumns": {},
+      "durationMs": 4.992
+    },
+    {
+      "table": "DESIGN_MAST",
+      "status": "dry-run",
+      "sourceRows": 0,
+      "loadedRows": 0,
+      "skippedRows": 0,
+      "numericColumns": {},
+      "durationMs": 5.053
+    },
+    {
+      "table": "DM_MAST",
+      "status": "dry-run",
+      "sourceRows": 0,
+      "loadedRows": 0,
+      "skippedRows": 0,
+      "numericColumns": {
+        "SL_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "PR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 6.998
+    },
+    {
+      "table": "MODEL_MAST",
+      "status": "dry-run",
+      "sourceRows": 0,
+      "loadedRows": 0,
+      "skippedRows": 0,
+      "numericColumns": {},
+      "durationMs": 3.18
+    },
+    {
+      "table": "STATE_MAST",
+      "status": "dry-run",
+      "sourceRows": 37,
+      "loadedRows": 0,
+      "skippedRows": 37,
+      "numericColumns": {},
+      "durationMs": 3.666
+    },
+    {
+      "table": "POINT_MAST",
+      "status": "dry-run",
+      "sourceRows": 0,
+      "loadedRows": 0,
+      "skippedRows": 0,
+      "numericColumns": {
+        "SR_NO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "FIX_POINT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "SL_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "SL_POINT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "POINT_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "MIN_POINT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "GRM_POINT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 6.866
+    },
+    {
+      "table": "LBR_MAST",
+      "status": "dry-run",
+      "sourceRows": 0,
+      "loadedRows": 0,
+      "skippedRows": 0,
+      "numericColumns": {
+        "LBR_VAL": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 6.292
+    },
+    {
+      "table": "TOUCH_MAST",
+      "status": "dry-run",
+      "sourceRows": 3,
+      "loadedRows": 0,
+      "skippedRows": 3,
+      "numericColumns": {
+        "AC_TOUCH": {
+          "source": 276,
+          "target": 361,
+          "matches": false
+        },
+        "AC_WEST": {
+          "source": 13,
+          "target": 19,
+          "matches": false
+        },
+        "AC_GHAT_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "AC_LBR_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "AC_LBR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "AC_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 6.512
+    },
+    {
+      "table": "SL_DATA",
+      "status": "dry-run",
+      "sourceRows": 4,
+      "loadedRows": 0,
+      "skippedRows": 4,
+      "numericColumns": {
+        "NET_AMT": {
+          "source": 519510,
+          "target": 226400,
+          "matches": false
+        },
+        "DISC_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DISC_AMT": {
+          "source": 1400,
+          "target": 1400,
+          "matches": true
+        },
+        "TAX_PRC": {
+          "source": 9,
+          "target": 3,
+          "matches": false
+        },
+        "TAX_AMT": {
+          "source": 14043.3,
+          "target": 5250,
+          "matches": false
+        },
+        "ROF_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TOT_AMT": {
+          "source": 532153,
+          "target": 230250,
+          "matches": false
+        },
+        "ADV_AMT": {
+          "source": 328570,
+          "target": 0,
+          "matches": false
+        },
+        "OLD_GL_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OLD_SL_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CASH_AMT": {
+          "source": 50000,
+          "target": 50000,
+          "matches": true
+        },
+        "CARD_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CHQ_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "SCHM_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CASH_PAID": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KASAR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "BILL_OS": {
+          "source": 153583,
+          "target": 180250,
+          "matches": false
+        },
+        "OS_ADJ_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CR_DAYS": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OLD_GL": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OLD_SL": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IGST_TAX": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CGST_TAX": {
+          "source": 7021.65,
+          "target": 2625,
+          "matches": false
+        },
+        "SGST_TAX": {
+          "source": 7021.65,
+          "target": 2625,
+          "matches": false
+        },
+        "RTN_NET_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "RTN_TOT_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "RTN_CHQ_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "RTN_CARD_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "RTN_CASH_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "RTN_KASAR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "RTN_BILL_OS": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TCS_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TCS_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_TAX_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_TAX_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TDS_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TDS_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CARD_COM_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "POINT_VAL": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "UPI_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 10.988
+    },
+    {
+      "table": "SL_DETL",
+      "status": "dry-run",
+      "sourceRows": 6,
+      "loadedRows": 0,
+      "skippedRows": 6,
+      "numericColumns": {
+        "VCH_SRNO": {
+          "source": 200624000013,
+          "target": 0,
+          "matches": false
+        },
+        "IT_TAX_AMT": {
+          "source": 14043.3,
+          "target": 5292,
+          "matches": false
+        },
+        "SR_NO": {
+          "source": 8,
+          "target": 4,
+          "matches": false
+        },
+        "OLD_SRNO": {
+          "source": 8,
+          "target": 4,
+          "matches": false
+        },
+        "ITM_PCS": {
+          "source": 6,
+          "target": 3,
+          "matches": false
+        },
+        "BAG_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_GWT": {
+          "source": 87,
+          "target": 38,
+          "matches": false
+        },
+        "ITM_OTH_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_NWT": {
+          "source": 87,
+          "target": 38,
+          "matches": false
+        },
+        "ITM_GHT_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_TOUCH": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_WEST_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_FINE": {
+          "source": 87,
+          "target": 38,
+          "matches": false
+        },
+        "LBR_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "LBR_RATE": {
+          "source": 2110,
+          "target": 1000,
+          "matches": false
+        },
+        "LBR_AMT": {
+          "source": 24510,
+          "target": 14000,
+          "matches": false
+        },
+        "OTH_AMT": {
+          "source": 2200,
+          "target": 0,
+          "matches": false
+        },
+        "ITM_RATE": {
+          "source": 33600,
+          "target": 16600,
+          "matches": false
+        },
+        "ITM_AMT": {
+          "source": 492800,
+          "target": 212400,
+          "matches": false
+        },
+        "TAG_COST": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_MRP": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TOT_AMT": {
+          "source": 519510,
+          "target": 226400,
+          "matches": false
+        },
+        "TAX_PRC": {
+          "source": 0,
+          "target": 6,
+          "matches": false
+        },
+        "NET_AMT": {
+          "source": 519510,
+          "target": 226400,
+          "matches": false
+        },
+        "KR_NET_WT": {
+          "source": 87,
+          "target": 38,
+          "matches": false
+        },
+        "KR_TOUCH": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_WEST_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_FINE": {
+          "source": 19,
+          "target": 0,
+          "matches": false
+        },
+        "ISU_SRNO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_GHT_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "GHT_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID2_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID3_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID4_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_DISC_AMT": {
+          "source": 1400,
+          "target": 0,
+          "matches": false
+        },
+        "TAG_GWT": {
+          "source": 19,
+          "target": 0,
+          "matches": false
+        },
+        "TAG_NWT": {
+          "source": 19,
+          "target": 0,
+          "matches": false
+        },
+        "FINE_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DISC_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DISC_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAXABL_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_IGST_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_CGST_AMT": {
+          "source": 0,
+          "target": 2646,
+          "matches": false
+        },
+        "ITM_SGST_AMT": {
+          "source": 0,
+          "target": 2646,
+          "matches": false
+        },
+        "GRAND_TOTAL": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ORD_SRNO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 11.352
+    },
+    {
+      "table": "SL_IDTL",
+      "status": "dry-run",
+      "sourceRows": 0,
+      "loadedRows": 0,
+      "skippedRows": 0,
+      "numericColumns": {
+        "SR_NO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ISR_NO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "VCH_SRNO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_PCS": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_PCS_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_LESS_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_GWT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_CON_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_CON_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_LBR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_LBR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_NET_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_CON_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_CON_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_LBR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_LBR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_NET_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 9.219
+    },
+    {
+      "table": "PR_DATA",
+      "status": "dry-run",
+      "sourceRows": 1,
+      "loadedRows": 0,
+      "skippedRows": 1,
+      "numericColumns": {
+        "NET_AMT": {
+          "source": 11,
+          "target": 2011,
+          "matches": false
+        },
+        "DISC_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DISC_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAX_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAX_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ROF_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TOT_AMT": {
+          "source": 11,
+          "target": 2011,
+          "matches": false
+        },
+        "CASH_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CARD_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CHQ_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KASAR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "BILL_OS": {
+          "source": 11,
+          "target": 2011,
+          "matches": false
+        },
+        "OS_ADJ_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CR_DAYS": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IGST_TAX": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CGST_TAX": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "SGST_TAX": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "LBR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OTH_AMT": {
+          "source": 0,
+          "target": 2000,
+          "matches": false
+        },
+        "PARTY_FINE": {
+          "source": 0,
+          "target": 22.88,
+          "matches": false
+        },
+        "TCS_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TCS_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_TAX_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_TAX_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TDS_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TDS_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 8.282
+    },
+    {
+      "table": "PR_DETL",
+      "status": "dry-run",
+      "sourceRows": 1,
+      "loadedRows": 0,
+      "skippedRows": 1,
+      "numericColumns": {
+        "SR_NO": {
+          "source": 1,
+          "target": 2,
+          "matches": false
+        },
+        "OLD_SRNO": {
+          "source": 1,
+          "target": 2,
+          "matches": false
+        },
+        "ITM_PCS": {
+          "source": 0,
+          "target": 5,
+          "matches": false
+        },
+        "BAG_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_GWT": {
+          "source": 1,
+          "target": 27,
+          "matches": false
+        },
+        "ITM_OTH_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_NWT": {
+          "source": 1,
+          "target": 27,
+          "matches": false
+        },
+        "ITM_GHT_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_TOUCH": {
+          "source": 92,
+          "target": 177,
+          "matches": false
+        },
+        "ITM_WEST_PRC": {
+          "source": 4,
+          "target": 7,
+          "matches": false
+        },
+        "ITM_FINE": {
+          "source": 0.96,
+          "target": 23.84,
+          "matches": false
+        },
+        "LBR_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "LBR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "LBR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OTH_AMT": {
+          "source": 0,
+          "target": 2000,
+          "matches": false
+        },
+        "ITM_RATE": {
+          "source": 11,
+          "target": 11,
+          "matches": true
+        },
+        "ITM_AMT": {
+          "source": 11,
+          "target": 11,
+          "matches": true
+        },
+        "TAG_COST": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_MRP": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TOT_AMT": {
+          "source": 11,
+          "target": 2011,
+          "matches": false
+        },
+        "TAX_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "NET_AMT": {
+          "source": 11,
+          "target": 2011,
+          "matches": false
+        },
+        "ITM_OTH_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_OTH_FINE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CONV_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CONV_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_LESS_TCH": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_LOSS_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CONSI_SRNO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "SILVER_FINE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "VCH_SRNO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_GHT_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "COMM_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "COMM_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID2_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID3_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID4_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAG_FINE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAG_IT_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAG_IT_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAG_LBR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAG_LBR_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAG_LBR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAG_MARGIN_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAG_MRP": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAG_NWT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAG_OTH_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAG_OTH_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAG_SRNO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAG_TOT_COST": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAG_TOUCH": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAG_WEST_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 10.578
+    },
+    {
+      "table": "AC_DATA",
+      "status": "dry-run",
+      "sourceRows": 28,
+      "loadedRows": 0,
+      "skippedRows": 28,
+      "numericColumns": {
+        "CR_AMT": {
+          "source": 1101555,
+          "target": 451685,
+          "matches": false
+        },
+        "DR_AMT": {
+          "source": 1101555,
+          "target": 451685,
+          "matches": false
+        },
+        "FINE_WT": {
+          "source": 302.142,
+          "target": 220.978,
+          "matches": false
+        },
+        "FINE_RATE": {
+          "source": 26000,
+          "target": 39500,
+          "matches": false
+        }
+      },
+      "durationMs": 10.571
+    },
+    {
+      "table": "TAX_DATA",
+      "status": "dry-run",
+      "sourceRows": 4,
+      "loadedRows": 0,
+      "skippedRows": 4,
+      "numericColumns": {
+        "SR_NO": {
+          "source": 6,
+          "target": 6,
+          "matches": true
+        },
+        "TAX_PRC": {
+          "source": 6,
+          "target": 3,
+          "matches": false
+        },
+        "NET_AMT": {
+          "source": 700800,
+          "target": 450000,
+          "matches": false
+        },
+        "TAX_AMT": {
+          "source": 10470,
+          "target": 5250,
+          "matches": false
+        },
+        "DISC_AMT": {
+          "source": 2800,
+          "target": 2800,
+          "matches": true
+        },
+        "TOT_AMT": {
+          "source": 718940,
+          "target": 460500,
+          "matches": false
+        },
+        "ISR_NO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 6.337
+    },
+    {
+      "table": "TAG_STOCK",
+      "status": "source-table-missing",
+      "sourceRows": 0,
+      "loadedRows": 0,
+      "skippedRows": 0,
+      "numericColumns": {},
+      "durationMs": 1.736
+    },
+    {
+      "table": "KR_DATA",
+      "status": "dry-run",
+      "sourceRows": 2,
+      "loadedRows": 0,
+      "skippedRows": 2,
+      "numericColumns": {
+        "NET_AMT": {
+          "source": 0,
+          "target": 500,
+          "matches": false
+        },
+        "DISC_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DISC_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAX_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAX_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ROF_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TOT_AMT": {
+          "source": 0,
+          "target": 500,
+          "matches": false
+        },
+        "CASH_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CARD_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CHQ_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KASAR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "BILL_OS": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OS_ADJ_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CR_DAYS": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IGST_TAX": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CGST_TAX": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "SGST_TAX": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "LBR_AMT": {
+          "source": 0,
+          "target": 500,
+          "matches": false
+        },
+        "OTH_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "PARTY_FINE": {
+          "source": 103.14,
+          "target": 54.604,
+          "matches": false
+        },
+        "TCS_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TCS_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_TAX_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_TAX_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TDS_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TDS_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 8.103
+    },
+    {
+      "table": "KR_DETL",
+      "status": "dry-run",
+      "sourceRows": 2,
+      "loadedRows": 0,
+      "skippedRows": 2,
+      "numericColumns": {
+        "VCH_SRNO": {
+          "source": 0,
+          "target": 1,
+          "matches": false
+        },
+        "SR_NO": {
+          "source": 2,
+          "target": 7,
+          "matches": false
+        },
+        "OLD_SRNO": {
+          "source": 2,
+          "target": 7,
+          "matches": false
+        },
+        "ITM_PCS": {
+          "source": 10,
+          "target": 6,
+          "matches": false
+        },
+        "BAG_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_GWT": {
+          "source": 208,
+          "target": 59.19,
+          "matches": false
+        },
+        "ITM_OTH_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_NWT": {
+          "source": 208,
+          "target": 59.19,
+          "matches": false
+        },
+        "ITM_GHT_WT": {
+          "source": 0,
+          "target": 0.4,
+          "matches": false
+        },
+        "ITM_TOUCH": {
+          "source": 92,
+          "target": 552,
+          "matches": false
+        },
+        "ITM_WEST_PRC": {
+          "source": 3.5,
+          "target": 1.5,
+          "matches": false
+        },
+        "ITM_FINE": {
+          "source": 203.14,
+          "target": 54.604,
+          "matches": false
+        },
+        "LBR_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "LBR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "LBR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OTH_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAG_COST": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_MRP": {
+          "source": 0,
+          "target": 55000,
+          "matches": false
+        },
+        "TOT_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAX_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "NET_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_OTH_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_OTH_FINE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CONV_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CONV_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_LESS_TCH": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_LOSS_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "SILVER_FINE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CON_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CON_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "AVG_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "AVG_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CON_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_GHT_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "COMM_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "COMM_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID2_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID3_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID4_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 10.032
+    },
+    {
+      "table": "DHRN_ISU_DATA",
+      "status": "dry-run",
+      "sourceRows": 0,
+      "loadedRows": 0,
+      "skippedRows": 0,
+      "numericColumns": {
+        "DHRN_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DHRN_REC_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DHRN_MONTH": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "INT_MONTH": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "INT_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "INT_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "INT_REC_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "GOLD_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "GOLD_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "MONTH_INT_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "INT_DAYS": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OTH_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "GOLD_NWT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "SILVER_NWT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "UNCHAK_DHRN_REC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 9.316
+    },
+    {
+      "table": "DHRN_REC_DATA",
+      "status": "dry-run",
+      "sourceRows": 0,
+      "loadedRows": 0,
+      "skippedRows": 0,
+      "numericColumns": {
+        "DHRN_MONTH": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DHRN_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DHRN_ADJ_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DHRN_OS_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DHRN_REC_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DHRN_DAY": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "INT_MONTH": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "INT_DAY": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "INT_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "INT_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "INT_REC_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KASAR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "GOLD_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "GOLD_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "MONTH_INT_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "PAN_ADJ_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ADJ_INT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ADJ_DHRN": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ORNA_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "RCUT_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "RCUT_OS_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "RCUT_PAY_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "RCUT_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "UNCHAK_DHRN_REC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 6.771
+    },
+    {
+      "table": "SL_ORD_DATA",
+      "status": "dry-run",
+      "sourceRows": 1,
+      "loadedRows": 0,
+      "skippedRows": 1,
+      "numericColumns": {
+        "NET_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAX_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAX_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TOT_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ADV_AMT": {
+          "source": 600000,
+          "target": 0,
+          "matches": false
+        },
+        "ORD_ADJ_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OLD_GL_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OLD_SL_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CASH_AMT": {
+          "source": 600000,
+          "target": 0,
+          "matches": false
+        },
+        "CARD_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CHQ_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "SCHM_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OLD_GL": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ADJ_GOLD": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OLD_SL": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ADJ_SILVER": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "RCUT_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "RCUT_FINE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "RCUT_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "UPI_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 9.45
+    },
+    {
+      "table": "BILL_OS_DATA",
+      "status": "dry-run",
+      "sourceRows": 3,
+      "loadedRows": 0,
+      "skippedRows": 3,
+      "numericColumns": {
+        "SR_NO": {
+          "source": 3,
+          "target": 6,
+          "matches": false
+        },
+        "BILL_AMT": {
+          "source": 482153,
+          "target": 240261,
+          "matches": false
+        },
+        "REC_AMT": {
+          "source": 328570,
+          "target": 54500,
+          "matches": false
+        },
+        "KASAR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "BILL_GOLD": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "REC_GOLD": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KASAR_GOLD": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "BILL_SILVER": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "REC_SILVER": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KASAR_SILVER": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "BILL_SRNO": {
+          "source": 3,
+          "target": 2,
+          "matches": false
+        },
+        "OLD_ADJ_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OLD_ADJ_GOLD": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OLD_ADJ_SILVER": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 6.852
+    },
+    {
+      "table": "MAIN_STOCK",
+      "status": "dry-run",
+      "sourceRows": 28,
+      "loadedRows": 0,
+      "skippedRows": 28,
+      "numericColumns": {
+        "VCH_SRNO": {
+          "source": 1806161000167,
+          "target": 1,
+          "matches": false
+        },
+        "SR_NO": {
+          "source": 49,
+          "target": 13,
+          "matches": false
+        },
+        "ISR_NO": {
+          "source": 54,
+          "target": 2,
+          "matches": false
+        },
+        "ITM_QTY": {
+          "source": 28,
+          "target": 11,
+          "matches": false
+        },
+        "ITM_PCS": {
+          "source": 35,
+          "target": 15,
+          "matches": false
+        },
+        "ITM_GWT": {
+          "source": 487.96,
+          "target": 124.19,
+          "matches": false
+        },
+        "ITM_NWT": {
+          "source": 486.76,
+          "target": 124.19,
+          "matches": false
+        },
+        "ITM_TOUCH": {
+          "source": 1104,
+          "target": 729,
+          "matches": false
+        },
+        "ITM_WEST": {
+          "source": 37.5,
+          "target": 8.5,
+          "matches": false
+        },
+        "ITM_FINE": {
+          "source": 534.461,
+          "target": 116.444,
+          "matches": false
+        },
+        "ITM_RATE": {
+          "source": 22591,
+          "target": 16611,
+          "matches": false
+        },
+        "ITM_AMT": {
+          "source": 386836,
+          "target": 212411,
+          "matches": false
+        },
+        "LBR_RATE": {
+          "source": 1000,
+          "target": 0,
+          "matches": false
+        },
+        "LBR_AMT": {
+          "source": 14000,
+          "target": 14000,
+          "matches": true
+        },
+        "OTH_AMT": {
+          "source": 500,
+          "target": 2000,
+          "matches": false
+        },
+        "ITM_MRP": {
+          "source": 510,
+          "target": 0,
+          "matches": false
+        },
+        "NET_AMT": {
+          "source": 400411,
+          "target": 228411,
+          "matches": false
+        },
+        "KR_NWT": {
+          "source": 544.76,
+          "target": 27,
+          "matches": false
+        },
+        "KR_TOUCH": {
+          "source": 184,
+          "target": 177,
+          "matches": false
+        },
+        "KR_WEST": {
+          "source": 7.5,
+          "target": 7,
+          "matches": false
+        },
+        "KR_FINE": {
+          "source": 471.86,
+          "target": 23.84,
+          "matches": false
+        },
+        "KR_LBR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_OTH_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_COST": {
+          "source": 425,
+          "target": 0,
+          "matches": false
+        },
+        "GHT_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OTH_FINE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 9.176
+    },
+    {
+      "table": "BAR_DATA",
+      "status": "dry-run",
+      "sourceRows": 5,
+      "loadedRows": 0,
+      "skippedRows": 5,
+      "numericColumns": {},
+      "durationMs": 4.719
+    },
+    {
+      "table": "BAR_DETL",
+      "status": "dry-run",
+      "sourceRows": 14,
+      "loadedRows": 0,
+      "skippedRows": 14,
+      "numericColumns": {
+        "KR_LBR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_LBR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_COST": {
+          "source": 425,
+          "target": 0,
+          "matches": false
+        },
+        "KR_OTH_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "SR_NO": {
+          "source": 34,
+          "target": 1,
+          "matches": false
+        },
+        "OLD_SRNO": {
+          "source": 34,
+          "target": 0,
+          "matches": false
+        },
+        "ITM_PCS": {
+          "source": 14,
+          "target": 1,
+          "matches": false
+        },
+        "BAG_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_GWT": {
+          "source": 141.66,
+          "target": 10,
+          "matches": false
+        },
+        "ITM_OTH_WT": {
+          "source": 1.2,
+          "target": 0,
+          "matches": false
+        },
+        "ITM_NWT": {
+          "source": 140.46,
+          "target": 10,
+          "matches": false
+        },
+        "ITM_GHT_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_GHT_WT": {
+          "source": 0,
+          "target": 0.4,
+          "matches": false
+        },
+        "ITM_TOUCH": {
+          "source": 552,
+          "target": 92,
+          "matches": false
+        },
+        "ITM_WEST_PRC": {
+          "source": 12,
+          "target": 1.5,
+          "matches": false
+        },
+        "ITM_FINE": {
+          "source": 136.86,
+          "target": 9.35,
+          "matches": false
+        },
+        "LBR_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "LBR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "LBR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OTH_AMT": {
+          "source": 500,
+          "target": 0,
+          "matches": false
+        },
+        "ITM_RATE": {
+          "source": 180,
+          "target": 0,
+          "matches": false
+        },
+        "ITM_AMT": {
+          "source": 425,
+          "target": 0,
+          "matches": false
+        },
+        "TAG_COST": {
+          "source": 425,
+          "target": 0,
+          "matches": false
+        },
+        "ITM_MARGIN": {
+          "source": 20,
+          "target": 0,
+          "matches": false
+        },
+        "ITM_MRP": {
+          "source": 510,
+          "target": 55000,
+          "matches": false
+        },
+        "KR_OTH_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_NET_WT": {
+          "source": 140.46,
+          "target": 10,
+          "matches": false
+        },
+        "KR_GHT_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_GHT_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_TOUCH": {
+          "source": 0,
+          "target": 92,
+          "matches": false
+        },
+        "KR_WEST_PRC": {
+          "source": 0,
+          "target": 1.5,
+          "matches": false
+        },
+        "KR_FINE": {
+          "source": 140.46,
+          "target": 9.35,
+          "matches": false
+        },
+        "TAG_SRNO": {
+          "source": 48,
+          "target": 0,
+          "matches": false
+        },
+        "VCH_SRNO": {
+          "source": 1404913000139,
+          "target": 1,
+          "matches": false
+        },
+        "ORD_SRNO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID_WT": {
+          "source": 22,
+          "target": 0,
+          "matches": false
+        },
+        "HM_ID2_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID3_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID4_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "MAIN_MARGIN_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "MAIN_MRP": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "JDT_JDT_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "JDT_GHT_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "JDT_KUN_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "JDT_WAX_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_WAX_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "JDT_KUN_TOUCH": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "JDT_KUN_NET": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 13.712
+    },
+    {
+      "table": "BAR_IDTL",
+      "status": "dry-run",
+      "sourceRows": 2,
+      "loadedRows": 0,
+      "skippedRows": 2,
+      "numericColumns": {
+        "SR_NO": {
+          "source": 2,
+          "target": 0,
+          "matches": false
+        },
+        "ISR_NO": {
+          "source": 3,
+          "target": 0,
+          "matches": false
+        },
+        "VCH_SRNO": {
+          "source": 200806000026,
+          "target": 0,
+          "matches": false
+        },
+        "IT_PCS": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_PCS_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_WT": {
+          "source": 1.2,
+          "target": 0,
+          "matches": false
+        },
+        "KR_LESS_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_GWT": {
+          "source": 1.2,
+          "target": 0,
+          "matches": false
+        },
+        "IT_CON_PRC": {
+          "source": 1,
+          "target": 0,
+          "matches": false
+        },
+        "IT_CON_WT": {
+          "source": 1.2,
+          "target": 0,
+          "matches": false
+        },
+        "IT_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_LBR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_LBR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_NET_AMT": {
+          "source": 500,
+          "target": 0,
+          "matches": false
+        },
+        "KR_CON_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_CON_WT": {
+          "source": 1.2,
+          "target": 0,
+          "matches": false
+        },
+        "KR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_LBR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_LBR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_NET_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_ACT_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_ACT_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 9.928
+    },
+    {
+      "table": "SL_ORD_DETL",
+      "status": "dry-run",
+      "sourceRows": 0,
+      "loadedRows": 0,
+      "skippedRows": 0,
+      "numericColumns": {
+        "SR_NO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OLD_SRNO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_PCS": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "BAG_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_GWT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_OTH_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_NWT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_GHT_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_TOUCH": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_WEST_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_FINE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "LBR_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "LBR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "LBR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OTH_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAG_COST": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_MRP": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TOT_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "TAX_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "NET_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "VCH_SRNO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_NET_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_TOUCH": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_WEST_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_FINE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_GHT_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID2_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID3_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID4_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ORD_REC_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 9.142
+    },
+    {
+      "table": "SL_ORD_IDTL",
+      "status": "dry-run",
+      "sourceRows": 0,
+      "loadedRows": 0,
+      "skippedRows": 0,
+      "numericColumns": {
+        "SR_NO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ISR_NO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "VCH_SRNO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_PCS": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_PCS_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_LESS_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_GWT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_CON_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_CON_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_LBR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_LBR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IT_NET_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_CON_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_CON_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_LBR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_LBR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KR_NET_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 7.731
+    },
+    {
+      "table": "AD_ADJ",
+      "status": "dry-run",
+      "sourceRows": 0,
+      "loadedRows": 0,
+      "skippedRows": 0,
+      "numericColumns": {
+        "SR_NO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "MEMB_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "MEMB_BONUS": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "MEMB_LESS": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ADJ_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "SBILL_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "GOLD_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "GOLD_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "GOLD_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 6.157
+    },
+    {
+      "table": "SL_PR_DETL",
+      "status": "dry-run",
+      "sourceRows": 0,
+      "loadedRows": 0,
+      "skippedRows": 0,
+      "numericColumns": {
+        "SR_NO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_PCS": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_GWT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_NWT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_TOUCH": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_FINE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "NET_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_OTH_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID2_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID3_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "HM_ID4_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_OTH": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CON_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CON_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 8.386
+    },
+    {
+      "table": "CARD_DATA",
+      "status": "dry-run",
+      "sourceRows": 0,
+      "loadedRows": 0,
+      "skippedRows": 0,
+      "numericColumns": {
+        "BILL_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "BILL_ADJ_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "BILL_OS_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CARD_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CARD_COM_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CARD_COM_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CARD_REC_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CASH_PAID": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "BANK_COM_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "BANK_SCH_PRC": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "BANK_COMM_1": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "BANK_COMM_2": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "BANK_COM_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "BANK_NET_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 8.017
+    },
+    {
+      "table": "UPI_DATA",
+      "status": "dry-run",
+      "sourceRows": 0,
+      "loadedRows": 0,
+      "skippedRows": 0,
+      "numericColumns": {
+        "SR_NO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "UPI_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 6.503
+    },
+    {
+      "table": "MFG_ISU_REC",
+      "status": "dry-run",
+      "sourceRows": 0,
+      "loadedRows": 0,
+      "skippedRows": 0,
+      "numericColumns": {
+        "SR_NO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ISR_NO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IR_PCS": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IR_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DM_PCS": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DM_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_GWT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_NWT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_TOUCH": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_WEST": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_FINE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "KDM_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ADD_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "LESS_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "RTN_CHOL": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "RTN_KDM": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "RTN_GHIS": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_GHAT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "MINO_WT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_LOSS": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "RTN_MTRL": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "LBR_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "LBR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "OTH_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_RATE": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "ITM_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "CR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "DR_AMT": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        },
+        "IR_SRNO": {
+          "source": 0,
+          "target": 0,
+          "matches": true
+        }
+      },
+      "durationMs": 9.318
+    }
+  ],
+  "totals": {
+    "tables": 42,
+    "failedTables": 0,
+    "sourceRows": 561,
+    "loadedRows": 0,
+    "skippedRows": 561
+  },
+  "durationMs": 403.636
+}

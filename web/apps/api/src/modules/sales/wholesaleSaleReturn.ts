@@ -360,11 +360,23 @@ async function soldTagTx(
     );
   }
   const source = rows[0]!;
-  const balance: Array<{ bal: unknown }> = await tx.$queryRawUnsafe(
-    `SELECT coalesce(sum(CASE WHEN "ITM_SIGN"='+' THEN 1 ELSE -1 END),0)::int bal
+  /**
+   * "Currently sold" is decided by the tag's LATEST stock movement, not by a signed count.
+   *
+   * The count required exactly -1, which only holds for a tag that never had an inward row. A purchased or
+   * opening tag enters stock with a '+' row, so once the wholesale sale writes its '-' row (Wh_Sale_Stk SR_NO 1)
+   * the count is 0 and a genuinely sold tag was refused; an edited return of such a tag counts +1 and was
+   * refused too. The desktop's return help (TR_WH_SALE_RTN.cs:4775-4800) tests no balance at all. The latest
+   * movement answers the real question for every origin:
+   *   new return  → the latest row is the source wholesale voucher's '-' (sold, not yet returned);
+   *   edit        → the latest row is this return's own '+' (nothing has moved the tag since).
+   */
+  const latest: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+    `SELECT "CO_YEAR","CO_BOOK","VCH_NO","ITM_SIGN"
        FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
         AND "TAG_NO"=$4 AND coalesce("VCH_SRNO",0)=coalesce($5::numeric,0)
-        AND coalesce("IT_CODE"::text,'')=coalesce($6::text,'')`,
+        AND coalesce("IT_CODE"::text,'')=coalesce($6::text,'')
+      ORDER BY row_id DESC LIMIT 1`,
     scope.tenantId,
     scope.coCode,
     scope.lcCode,
@@ -372,29 +384,20 @@ async function soldTagTx(
     source.VCH_SRNO ?? 0,
     source.IT_CODE,
   );
-  const bal = n(balance[0]?.bal);
+  const last = latest[0];
+  const lastIs = (year: unknown, book: unknown, voucher: unknown, sign: string): boolean =>
+    !!last &&
+    text(last.CO_YEAR) === text(year) &&
+    text(last.CO_BOOK) === text(book) &&
+    text(last.VCH_NO) === text(voucher) &&
+    text(last.ITM_SIGN) === sign;
   if (currentVoucherNo) {
-    const owned: Array<{ n: unknown }> = await tx.$queryRawUnsafe(
-      `SELECT count(*)::int n FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_CODE"=$2
-        AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6
-        AND "TAG_NO"=$7 AND coalesce("VCH_SRNO",0)=coalesce($8::numeric,0)
-        AND "IT_CODE"=$9 AND "ITM_SIGN"='+'`,
-      scope.tenantId,
-      scope.coCode,
-      scope.lcCode,
-      scope.coYear,
-      scope.coBook,
-      currentVoucherNo,
-      source.TAG_NO,
-      source.VCH_SRNO ?? 0,
-      source.IT_CODE,
-    );
-    if (bal !== 0 || n(owned[0]?.n) !== 1) {
+    if (!lastIs(scope.coYear, scope.coBook, currentVoucherNo, '+')) {
       throw new WholesaleSaleReturnValidationError(
         `tag is not owned by this return or was moved again: ${tagNo}`,
       );
     }
-  } else if (bal !== -1) {
+  } else if (!lastIs(source.CO_YEAR, source.CO_BOOK, source.VCH_NO, '-')) {
     throw new WholesaleSaleReturnValidationError(
       `tag is not currently sold or was already returned: ${tagNo}`,
     );

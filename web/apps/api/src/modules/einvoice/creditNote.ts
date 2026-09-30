@@ -10,6 +10,9 @@ export class CreditNoteValidationError extends Error {
 
 type Row = Record<string, unknown>;
 type CompleteScope = VoucherScope & { coBook: string; coYear: string };
+/** TR_SL_EBILL saved-document families: credit notes (inward) and e-invoices (outward). */
+export type EBillDocumentFamily = 'E CRNT' | 'E INVOICE';
+const DIRECTION: Record<EBillDocumentFamily, 'I' | 'O'> = { 'E CRNT': 'I', 'E INVOICE': 'O' };
 
 function completeScope(scope: VoucherScope): CompleteScope {
   if (!scope.coBook?.trim() || !scope.coYear?.trim()) {
@@ -18,8 +21,12 @@ function completeScope(scope: VoucherScope): CompleteScope {
   return { ...scope, coBook: scope.coBook.trim(), coYear: scope.coYear.trim() };
 }
 
-/** TR_SL_EBILL opens the chosen E CRNT book, never a voucher number across SL_DATA. */
-async function creditBook(tx: any, scope: CompleteScope): Promise<Row> {
+/** TR_SL_EBILL opens the chosen E CRNT / E INVOICE book, never a voucher number across SL_DATA. */
+async function creditBook(
+  tx: any,
+  scope: CompleteScope,
+  family: EBillDocumentFamily = 'E CRNT',
+): Promise<Row> {
   const rows: Row[] = await tx.$queryRawUnsafe(
     `SELECT "CO_BOOK","BOOK_NAME","BOOK_SNAME","BOOK_SR_NAME","MAIN_BOOK","BOOK_INOUT",
             "BOOK_TBL_NAME","CUR_USE" FROM "BOOK_DATA"
@@ -35,16 +42,20 @@ async function creditBook(tx: any, scope: CompleteScope): Promise<Row> {
   if (
     String(row.MAIN_BOOK ?? '')
       .trim()
-      .toUpperCase() !== 'E CRNT' ||
+      .toUpperCase() !== family ||
     String(row.BOOK_INOUT ?? '')
       .trim()
-      .toUpperCase() !== 'I' ||
+      .toUpperCase() !== DIRECTION[family] ||
     String(row.CUR_USE ?? '')
       .trim()
       .toUpperCase() === 'N' ||
     (String(row.BOOK_TBL_NAME ?? '').trim() && String(row.BOOK_TBL_NAME).trim() !== 'SL_DATA')
   ) {
-    throw new CreditNoteValidationError('Selected book is not an active E Credit Note book.');
+    throw new CreditNoteValidationError(
+      family === 'E CRNT'
+        ? 'Selected book is not an active E Credit Note book.'
+        : 'Selected book is not an active E Invoice book.',
+    );
   }
   return row;
 }
@@ -56,6 +67,7 @@ export async function listCreditNotes(
   prisma: any,
   rawScope: VoucherScope,
   query: { search?: string; offset?: number; limit?: number } = {},
+  family: EBillDocumentFamily = 'E CRNT',
 ) {
   const scope = completeScope(rawScope);
   const limit = query.limit ?? 50;
@@ -79,7 +91,7 @@ export async function listCreditNotes(
     prisma,
     scope.tenantId,
     async (tx: any) => {
-      const book = await creditBook(tx, scope);
+      const book = await creditBook(tx, scope, family);
       const rows: Row[] = await tx.$queryRawUnsafe(
         `SELECT "VCH_NO", "VCH_DATE"::text AS "VCH_DATE", "BILL_NO", "AC_CODE", "AC_NAME",
               "NET_AMT", "TAX_AMT", "TOT_AMT", "BILL_OS", "IRN_NO", "ACK_NO"
@@ -100,14 +112,19 @@ export async function listCreditNotes(
 /** Complete persisted header, real parent/child rows, and registration state in one read snapshot.
  * Date/time values are serialized by PostgreSQL, so a browser's timezone cannot shift the business date.
  */
-export async function getCreditNote(prisma: any, rawScope: VoucherScope, voucherNo: unknown) {
+export async function getCreditNote(
+  prisma: any,
+  rawScope: VoucherScope,
+  voucherNo: unknown,
+  family: EBillDocumentFamily = 'E CRNT',
+) {
   const scope = completeScope(rawScope);
   const vchNo = formatVoucherNo(String(voucherNo ?? ''));
   return withTenant(
     prisma,
     scope.tenantId,
     async (tx: any) => {
-      const book = await creditBook(tx, scope);
+      const book = await creditBook(tx, scope, family);
       const args = [...scopeArgs(scope), vchNo];
       const headers: { data: Row }[] = await tx.$queryRawUnsafe(
         `SELECT to_jsonb(a)-'tenant_id'-'row_id' AS data FROM "SL_DATA" a WHERE ${WHERE} AND "VCH_NO"=$6 LIMIT 2`,
@@ -173,3 +190,11 @@ export async function getCreditNote(prisma: any, rawScope: VoucherScope, voucher
     { isolationLevel: 'RepeatableRead' },
   );
 }
+
+export const listEInvoices = (
+  prisma: any,
+  scope: VoucherScope,
+  query: { search?: string; offset?: number; limit?: number } = {},
+) => listCreditNotes(prisma, scope, query, 'E INVOICE');
+export const getEInvoice = (prisma: any, scope: VoucherScope, voucherNo: unknown) =>
+  getCreditNote(prisma, scope, voucherNo, 'E INVOICE');

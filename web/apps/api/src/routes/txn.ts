@@ -184,7 +184,22 @@ import {
   listDesignBook,
   saveDesignBook,
 } from '../modules/masters/designBook.js';
-import { getCreditNote, listCreditNotes } from '../modules/einvoice/creditNote.js';
+import {
+  getCreditNote,
+  getEInvoice,
+  listCreditNotes,
+  listEInvoices,
+} from '../modules/einvoice/creditNote.js';
+import {
+  assertEBillNotRegistered,
+  deleteEBill,
+  eBillPrintData,
+  eInvoiceTcsBasis,
+  getEBillEntry,
+  getEBillEntryConfig,
+  saveEBill,
+  type EBillFamily,
+} from '../modules/einvoice/eBillWriter.js';
 import {
   deleteDiamondSizes,
   deleteItemStockLimits,
@@ -293,12 +308,16 @@ import { deleteBillSettlement, listOpenBills, settleBills } from '../modules/fin
 import {
   deleteBullionSale,
   deleteRateCut,
+  deleteWholesaleSale,
   editBullionSale,
   editRateCut,
+  editWholesaleSale,
   getBullionSale,
   getRateCut,
+  getWholesaleSale,
   postBullionSale,
   postRateCut,
+  postWholesaleSale,
 } from '../modules/sales/rateCut.js';
 import {
   issueKarigar,
@@ -389,8 +408,6 @@ import {
   deleteItemLot,
   stockAdjust,
   deleteStockAdjust,
-  tagTransfer,
-  deleteTagTransfer,
   counterTransfer,
   deleteCounterTransfer,
   StockVoucherValidationError,
@@ -443,14 +460,24 @@ import {
   getOtherIncome,
   saveOtherIncome,
 } from '../modules/purchase/otherIncome.js';
+import { tagWeightDiff, deleteTagWeightDiff } from '../modules/stock/tagOps.js';
 import {
-  tagCancel,
-  tagWeightDiff,
   deleteTagCancel,
-  deleteTagWeightDiff,
-} from '../modules/stock/tagOps.js';
+  getTagCancel,
+  listTagCancel,
+  saveTagCancel,
+  tagCancelSource,
+  type TagCancelMode,
+} from '../modules/stock/tagCancel.js';
 import { deleteTagAdjust, getTagAdjust, saveTagAdjust } from '../modules/stock/tagAdjust.js';
-import { splitTag, deleteTagSplit } from '../modules/stock/tagSplit.js';
+import {
+  saveTagSplit,
+  deleteTagSplit,
+  getTagSplit,
+  listTagSplit,
+  tagSplitSource,
+  TagSplitConflictError,
+} from '../modules/stock/tagSplit.js';
 import { lookup } from '../modules/masters/lookup.js';
 import { postJournal, deleteJournal } from '../modules/finance/journal.js';
 import { postLedgerAdjust, deleteLedgerAdjust } from '../modules/finance/ledgerAdjust.js';
@@ -668,6 +695,25 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       filters: readFilters(q),
     };
   };
+  // Operator inputs of the two fixed report screens whose exports are also slug-driven. They are shared
+  // so a CSV/XLSX export can never be built from different inputs than the screen it came from.
+  const balanceSheetOptions = (query: unknown) => {
+    // Desktop RP_BALANCE passes an operator-entered closing date and gold/silver rates into
+    // Ac_Final.Trading_Stock; without a rate the metal pass cannot value stock at all.
+    const q = (query ?? {}) as Record<string, string | undefined>;
+    const n = (v: string | undefined): number | undefined =>
+      v == null || v === '' ? undefined : Number(v);
+    return {
+      closingDate: q.closingDate || undefined,
+      goldRate: n(q.goldRate),
+      silverRate: n(q.silverRate),
+      ledgerFineGold: n(q.ledgerFineGold),
+      ledgerFineSilver: n(q.ledgerFineSilver),
+    };
+  };
+  const gstr1Options = (query: unknown) => ({
+    threshold: Number((query as Record<string, unknown> | undefined)?.threshold) || undefined,
+  });
   const guard = (
     req: FastifyRequest,
     reply: FastifyReply,
@@ -720,7 +766,13 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         return reply.code(422).send({ error: e.name, code: e.code, message: e.message });
       if (e instanceof OrderImageError)
         return reply.code(422).send({ error: e.name, code: e.code, message: e.message });
-      if (n === 'DesignBookConflictError' || n === 'SalesOrderConflictError') {
+      if (
+        n === 'DesignBookConflictError' ||
+        n === 'SalesOrderConflictError' ||
+        n === 'EBillConflictError' ||
+        n === 'TagCancelConflictError' ||
+        n === 'TagSplitConflictError'
+      ) {
         return reply.code(409).send({ error: n, message: e?.message });
       }
       if (n === 'PeriodLockValidationError') metrics.recordPeriodLockRejection();
@@ -825,6 +877,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   const rateCutInput = (req: FastifyRequest, b: Record<string, any>) => ({
     scope: scopeOf(req),
+    // MAIN_USER is the signed-in user (TR_WH_SALE.cs:12004), never a body field.
+    mainUser: sess(req).sub,
     vchDate: b.vchDate,
     acCode: b.acCode,
     acName: b.acName,
@@ -2567,6 +2621,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         mode: b.mode,
         bankAc: b.bankAc,
         chqNo: b.chqNo,
+        // The operator's voucher date (TR_CASH mVchDate); the writers default to today when absent.
+        vchDate: b.vchDate,
         cardCommissionPct: b.cardCommissionPct != null ? Number(b.cardCommissionPct) : undefined,
         bankName: b.bankName,
         upiId: b.upiId,
@@ -2587,6 +2643,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         mode: b.mode,
         bankAc: b.bankAc,
         chqNo: b.chqNo,
+        vchDate: b.vchDate,
         kasar: b.kasar != null ? Number(b.kasar) : undefined,
         kasarAc: b.kasarAc,
       }),
@@ -4033,11 +4090,15 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       stockLevelReport(prisma, scope.tenantId, { CO_CODE: scope.coCode })) as ReportBuilder,
     'scheme-monthly': ((prisma: any, scope: any) =>
       schemeMonthlyReport(prisma, scope)) as ReportBuilder,
+    // The report page's date range reaches the builder, which filters VCH_DATE by it (billProfitReport).
+    // readScope has already dropped anything that is not an ISO date.
     'bill-profit': ((prisma: any, scope: any) =>
-      billProfitReport(prisma, scope.tenantId, {
-        CO_CODE: scope.coCode,
-        LC_CODE: scope.lcCode,
-      })) as ReportBuilder,
+      billProfitReport(
+        prisma,
+        scope.tenantId,
+        { CO_CODE: scope.coCode, LC_CODE: scope.lcCode },
+        { from: scope.fromDate, to: scope.toDate },
+      )) as ReportBuilder,
     'physical-stock-verify': ((prisma: any, scope: any) =>
       physicalStockReport(prisma, scope.tenantId, {
         CO_CODE: scope.coCode,
@@ -4113,6 +4174,11 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     'top-items': topItems as ReportBuilder,
     'trial-balance': trialBalance as ReportBuilder,
     'trial-balance-full': trialBalanceFull as ReportBuilder,
+    // Their operator inputs (closing date and rates; the B2CL threshold) come from the query, so
+    // resolveReport passes them exactly as the screen routes do.
+    'balance-sheet': ((prisma: any, scope: any) =>
+      balanceSheet(prisma, scope, {})) as ReportBuilder,
+    gstr1: ((prisma: any, scope: any) => gstr1(prisma, scope, {})) as ReportBuilder,
   } satisfies Record<ReportSlug, ReportBuilder>;
 
   const REPORT_FAMILY_BUILDERS = {
@@ -4249,7 +4315,15 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
                                                 tagNo: q.tagNo || undefined,
                                                 direction: q.direction === 'Out' ? 'Out' : 'In',
                                               })
-                                            : await build(prisma, scope, range(req));
+                                            : slug === 'balance-sheet'
+                                              ? await balanceSheet(
+                                                  prisma,
+                                                  scope,
+                                                  balanceSheetOptions(q),
+                                                )
+                                              : slug === 'gstr1'
+                                                ? await gstr1(prisma, scope, gstr1Options(q))
+                                                : await build(prisma, scope, range(req));
     const rows: Record<string, unknown>[] = Array.isArray(result)
       ? result
       : Array.isArray(result?.rows)
@@ -4295,6 +4369,28 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       .header('content-disposition', `attachment; filename="${out.fileName}"`)
       .send(out.buffer);
   });
+
+  // Screens for five reports that were registered only in REPORT_BUILDERS. Their exports worked and the
+  // screens answered 404 (PARITY-EVALUATION-2026-09-28 D3).
+  // - Each screen calls the export's own builder with the export's own inputs, so the two cannot
+  //   disagree.
+  // - Their policies already existed (routePolicy.ts, 'Reports/HuId Report' and the four after it).
+  // - Literal paths, because routePolicy.test.ts reads them.
+  app.get('/reports/huid', auth, async (req) =>
+    REPORT_BUILDERS.huid(prisma, readScope(req), range(req)),
+  );
+  app.get('/reports/item-weight-levels', auth, async (req) =>
+    REPORT_BUILDERS['item-weight-levels'](prisma, readScope(req), range(req)),
+  );
+  app.get('/reports/bill-profit', auth, async (req) =>
+    REPORT_BUILDERS['bill-profit'](prisma, readScope(req), range(req)),
+  );
+  app.get('/reports/physical-stock-verify', auth, async (req) =>
+    REPORT_BUILDERS['physical-stock-verify'](prisma, readScope(req), range(req)),
+  );
+  app.get('/reports/size-movement', auth, async (req) =>
+    REPORT_BUILDERS['size-movement'](prisma, readScope(req), range(req)),
+  );
   // ---- Tag images (desktop BtnImgS / BtnImgC / BtnImgD, 24 forms) ----
   // One shared surface keyed on the tag instance, so every form that shows a tag can attach, replace,
   // enlarge and delete its photograph without repeating the plumbing.
@@ -5058,24 +5154,69 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
-  app.post('/stock/tag-transfer', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    if (containMutation(reply, 'tag-transfer')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      tagTransfer(prisma, { scope: scopeOf(req), vchDate: b.vchDate, lines: b.lines ?? [] }),
-    );
+  // Tag Cancel (X19) and Tag Transfer (X18): desktop TR_TAG_CAN on a TAG CANCEL / TAG TRFR book. One writer
+  // (modules/stock/tagCancel.ts), one route family per menu, so each keeps its own form right.
+  const tagCancelInput = (req: FastifyRequest, b = body(req)) => ({
+    scope: scopeOf(req),
+    vchDate: b.vchDate,
+    empCode: b.empCode,
+    vchDesc: b.vchDesc,
+    mainUser: sess(req).sub,
+    lines: Array.isArray(b.lines) ? b.lines : [],
   });
-  app.delete('/stock/tag-transfer/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    if (containMutation(reply, 'tag-transfer')) return;
-    return run(reply, 200, () =>
-      deleteTagTransfer(prisma, {
-        scope: scopeOf(req),
-        vchNo: (req.params as any).vchNo,
-      }),
-    );
+  const tagCancelHandlers = (mode: TagCancelMode) => ({
+    list: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'view')) return;
+      return run(reply, 200, () => listTagCancel(prisma, mode, scopeOf(req)));
+    },
+    source: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'view')) return;
+      const q = (req.query ?? {}) as Record<string, string | undefined>;
+      return run(reply, 200, () =>
+        tagCancelSource(prisma, scopeOf(req), {
+          tagNo: q.tagNo,
+          vchSrno: q.vchSrno,
+          itCode: q.itCode,
+        }),
+      );
+    },
+    read: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'view')) return;
+      return run(reply, 200, () =>
+        getTagCancel(prisma, mode, scopeOf(req), (req.params as any).vchNo),
+      );
+    },
+    create: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'create')) return;
+      return run(reply, 201, () => saveTagCancel(prisma, mode, tagCancelInput(req)));
+    },
+    update: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'update')) return;
+      return run(reply, 200, () =>
+        saveTagCancel(prisma, mode, tagCancelInput(req), (req.params as any).vchNo),
+      );
+    },
+    remove: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'delete')) return;
+      return run(reply, 200, () =>
+        deleteTagCancel(prisma, mode, scopeOf(req), (req.params as any).vchNo, sess(req).sub),
+      );
+    },
   });
+  const tagTransferRoute = tagCancelHandlers('transfer');
+  app.get('/stock/tag-transfer', auth, tagTransferRoute.list);
+  app.get('/stock/tag-transfer/source', auth, tagTransferRoute.source);
+  app.get('/stock/tag-transfer/:vchNo', auth, tagTransferRoute.read);
+  app.post('/stock/tag-transfer', auth, tagTransferRoute.create);
+  app.put('/stock/tag-transfer/:vchNo', auth, tagTransferRoute.update);
+  app.delete('/stock/tag-transfer/:vchNo', auth, tagTransferRoute.remove);
+  const tagCancelRoute = tagCancelHandlers('cancel');
+  app.get('/stock/tag-cancel', auth, tagCancelRoute.list);
+  app.get('/stock/tag-cancel/source', auth, tagCancelRoute.source);
+  app.get('/stock/tag-cancel/:vchNo', auth, tagCancelRoute.read);
+  app.post('/stock/tag-cancel', auth, tagCancelRoute.create);
+  app.put('/stock/tag-cancel/:vchNo', auth, tagCancelRoute.update);
+  app.delete('/stock/tag-cancel/:vchNo', auth, tagCancelRoute.remove);
   app.post('/stock/counter-transfer', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
@@ -5090,19 +5231,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
         book: body(req).book,
-      }),
-    );
-  });
-  app.post('/stock/tag-cancel', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    if (containMutation(reply, 'tag-cancel')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      tagCancel(prisma, {
-        scope: scopeOf(req),
-        vchDate: b.vchDate,
-        book: b.book,
-        lines: b.lines ?? [],
       }),
     );
   });
@@ -5169,13 +5297,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         labourAc: b.labourAc,
         lines: b.lines ?? [],
       }),
-    );
-  });
-  app.delete('/stock/tag-cancel/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    if (containMutation(reply, 'tag-cancel')) return;
-    return run(reply, 200, () =>
-      deleteTagCancel(prisma, scopeOf(req) as any, (req.params as any).vchNo, body(req).book),
     );
   });
   app.delete('/stock/tag-weight-diff/:vchNo', auth, async (req, reply) => {
@@ -6504,20 +6625,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       ledgerFineSilver: n(q.ledgerFineSilver),
     });
   });
-  app.get('/reports/balance-sheet', auth, async (req) => {
-    // Desktop RP_BALANCE passes an operator-entered closing date and gold/silver rates into
-    // Ac_Final.Trading_Stock; without a rate the metal pass cannot value stock at all.
-    const q = (req.query ?? {}) as Record<string, string | undefined>;
-    const n = (v: string | undefined): number | undefined =>
-      v == null || v === '' ? undefined : Number(v);
-    return balanceSheet(prisma, readScope(req), {
-      closingDate: q.closingDate || undefined,
-      goldRate: n(q.goldRate),
-      silverRate: n(q.silverRate),
-      ledgerFineGold: n(q.ledgerFineGold),
-      ledgerFineSilver: n(q.ledgerFineSilver),
-    });
-  });
+  app.get('/reports/balance-sheet', auth, async (req) =>
+    balanceSheet(prisma, readScope(req), balanceSheetOptions(req.query)),
+  );
   app.get('/reports/outstanding', auth, async (req) => outstandingReport(prisma, readScope(req)));
   app.get('/reports/bill-outstanding', auth, async (req) =>
     billOutstanding(prisma, readScope(req)),
@@ -7189,6 +7299,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
         book: body(req).book,
+        // DELETE_DATA.DELETE_USER is the signed-in user (TR_WH_SALE.cs:13569 `MCo_User`).
+        deleteUser: sess(req).sub,
       }),
     );
   });
@@ -7199,6 +7311,35 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
         book: body(req).book,
+        deleteUser: sess(req).sub,
+      }),
+    );
+  });
+  // Desktop "Wh Sales" (TR_WH_SALE on a WH SALES book). Same voucher family as the rate cut; its own right.
+  app.post('/wholesale-sales', auth, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    const b = body(req);
+    return run(reply, 201, () => postWholesaleSale(prisma, rateCutInput(req, b)));
+  });
+  app.get('/wholesale-sales/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getWholesaleSale(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.put('/wholesale-sales/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      editWholesaleSale(prisma, rateCutInput(req, b), (req.params as any).vchNo),
+    );
+  });
+  app.delete('/wholesale-sales/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      deleteWholesaleSale(prisma, {
+        scope: scopeOf(req),
+        vchNo: (req.params as any).vchNo,
+        book: body(req).book,
+        deleteUser: sess(req).sub,
       }),
     );
   });
@@ -7212,24 +7353,55 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
+  // Tag Split (X20): desktop TR_TAG_SPLIT on a TAG SPLIT book. One writer (modules/stock/tagSplit.ts): the parent
+  // tags are consumed and child tags created, conserving metal. Literal routes so the route-count test can scan them.
+  const tagSplitInput = (req: FastifyRequest, b = body(req)) => ({
+    scope: scopeOf(req),
+    vchDate: b.vchDate,
+    empCode: b.empCode,
+    vchDesc: b.vchDesc,
+    acCode: b.acCode,
+    itType: b.itType,
+    drTouch: b.drTouch,
+    crTouch: b.crTouch,
+    crLbr: b.crLbr,
+    mainUser: sess(req).sub,
+    parents: Array.isArray(b.parents) ? b.parents : [],
+    children: Array.isArray(b.children) ? b.children : [],
+  });
+  app.get('/stock/tag-split', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => listTagSplit(prisma, scopeOf(req)));
+  });
+  app.get('/stock/tag-split/source', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      tagSplitSource(prisma, scopeOf(req), {
+        tagNo: q.tagNo,
+        vchSrno: q.vchSrno,
+        itCode: q.itCode,
+      }),
+    );
+  });
+  app.get('/stock/tag-split/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getTagSplit(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
   app.post('/stock/tag-split', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
-    if (containMutation(reply, 'tag-split')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      splitTag(prisma, {
-        scope: scopeOf(req),
-        vchDate: b.vchDate,
-        parent: b.parent,
-        children: b.children ?? [],
-      }),
+    return run(reply, 201, () => saveTagSplit(prisma, tagSplitInput(req)));
+  });
+  app.put('/stock/tag-split/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    return run(reply, 200, () =>
+      saveTagSplit(prisma, tagSplitInput(req), (req.params as any).vchNo),
     );
   });
   app.delete('/stock/tag-split/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
-    if (containMutation(reply, 'tag-split')) return;
     return run(reply, 200, () =>
-      deleteTagSplit(prisma, scopeOf(req) as any, (req.params as any).vchNo, body(req).book),
+      deleteTagSplit(prisma, scopeOf(req), (req.params as any).vchNo, sess(req).sub),
     );
   });
   app.get('/reports/party-statement', auth, async (req) =>
@@ -7480,7 +7652,12 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   app.get('/reports/monthly-sales', auth, async (req) => monthlySales(prisma, readScope(req)));
   app.get('/gst/gstr1', auth, async (req) =>
-    gstr1(prisma, readScope(req), { threshold: Number((req.query as any).threshold) || undefined }),
+    gstr1(prisma, readScope(req), gstr1Options(req.query)),
+  );
+  // The same screen at the slug path every other generic report uses, so `gstr1` has a fixed route on
+  // the same form as its slug policy (reportAuthorization.test.ts) and the report page needs no special case.
+  app.get('/reports/gstr1', auth, async (req) =>
+    gstr1(prisma, readScope(req), gstr1Options(req.query)),
   );
   app.get('/reports/gstr1-doc', auth, async (req, reply) => {
     const q = req.query as any;
@@ -7613,6 +7790,190 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     });
   });
   app.get('/e-credit-notes/provider', auth, async () => gspStatus());
+  // ---- TR_SL_EBILL entry lifecycle: E CRNT (/e-credit-notes) and E INVOICE (/e-invoices), card X15 ----
+  const eBillInput = (req: FastifyRequest, b: Record<string, any>) => ({
+    scope: scopeOf(req),
+    vchDate: b.vchDate,
+    partyCode: b.partyCode,
+    billNo: b.billNo,
+    ledgerCode: b.ledgerCode,
+    employeeCode: b.employeeCode,
+    description: b.description,
+    cashAmount: b.cashAmount,
+    chequeAmount: b.chequeAmount,
+    chequeAccount: b.chequeAccount,
+    chequeNo: b.chequeNo,
+    cardAmount: b.cardAmount,
+    cardAccount: b.cardAccount,
+    cardCommission: b.cardCommission,
+    kasarAmount: b.kasarAmount,
+    tdsCode: b.tdsCode,
+    tcsCode: b.tcsCode,
+    tcsAmount: b.tcsAmount,
+    lines: Array.isArray(b.lines) ? b.lines : [],
+    mainUser: sess(req).sub,
+    expectedRevision: b.expectedRevision,
+  });
+  // TR_SL_EBILL BtnPrint_Click prints "ORIGINAL FOR RECIPIENT" and/or "DUPLICATE FOR SUPPLIER".
+  const EBILL_COPIES: Record<string, string> = {
+    O: 'ORIGINAL FOR RECIPIENT',
+    D: 'DUPLICATE FOR SUPPLIER',
+  };
+  const eBillHandlers = (family: EBillFamily, title: string, file: string) => ({
+    entryConfig: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'view')) return;
+      return run(reply, 200, () => getEBillEntryConfig(prisma, family, scopeOf(req)));
+    },
+    entry: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'view')) return;
+      const vchNo = String((req.params as any).vchNo);
+      const notFound = Symbol('not-found');
+      const outcome = await run(reply, 200, async () => {
+        const result = await getEBillEntry(prisma, family, scopeOf(req), vchNo);
+        if (!result) throw notFound;
+        return result;
+      }).catch((error: unknown) => {
+        if (error === notFound) return reply.code(404).send({ error: 'voucher-not-found' });
+        throw error;
+      });
+      return outcome;
+    },
+    create: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'create')) return;
+      return run(reply, 201, () => saveEBill(prisma, family, eBillInput(req, body(req))));
+    },
+    update: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'update')) return;
+      return run(reply, 200, () =>
+        saveEBill(prisma, family, eBillInput(req, body(req)), String((req.params as any).vchNo)),
+      );
+    },
+    remove: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'delete')) return;
+      const q = (req.query ?? {}) as Record<string, string | undefined>;
+      const b = body(req);
+      return run(reply, 200, () =>
+        deleteEBill(prisma, family, scopeOf(req), String((req.params as any).vchNo), {
+          deleteUser: sess(req).sub,
+          expectedRevision: b.expectedRevision ?? q.expectedRevision,
+        }),
+      );
+    },
+    print: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'print')) return;
+      const q = req.query as any;
+      if (q.copy != null && q.copy !== '' && !EBILL_COPIES[String(q.copy)])
+        return reply.code(400).send({ error: 'invalid-copy', message: 'copy must be O or D' });
+      let data: Awaited<ReturnType<typeof eBillPrintData>> | undefined;
+      try {
+        data = await eBillPrintData(
+          prisma,
+          family,
+          scopeOf(req),
+          String((req.params as any).vchNo),
+        );
+      } catch (error: any) {
+        if (/ValidationError|NumberingConfigurationError/.test(error?.name ?? ''))
+          return reply.code(400).send({ error: error.name, message: error.message });
+        throw error;
+      }
+      if (!data) return reply.code(404).send({ error: 'voucher-not-found' });
+      const html = invoiceHtml(data.header, data.lines, {
+        company: data.company,
+        party: data.party,
+        title,
+        copy: q.copy ? EBILL_COPIES[String(q.copy)] : undefined,
+      });
+      if (q.format === 'html') return reply.type('text/html').send(html);
+      let pdf: Buffer;
+      try {
+        pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
+      } catch {
+        return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
+      }
+      return reply
+        .header('content-type', 'application/pdf')
+        .header(
+          'content-disposition',
+          `inline; filename="${file}-${String((req.params as any).vchNo).replace(/[^\w.-]/g, '')}.pdf"`,
+        )
+        .send(pdf);
+    },
+    cancelIrn: async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'print')) return;
+      const b = body(req);
+      const scope = scopeOf(req);
+      return run(reply, 200, () =>
+        cancelIrnForSale(prisma, scope as any, {
+          coBook: String(scope.coBook ?? ''),
+          vchNo: (req.params as any).vchNo,
+          reason: b.reason,
+          remark: b.remark,
+          expectedMainBook: family,
+        }),
+      );
+    },
+  });
+  const crnt = eBillHandlers('E CRNT', 'Credit Note', 'ecrnt');
+  const inv = eBillHandlers('E INVOICE', 'Tax Invoice', 'einvoice');
+  app.get('/e-credit-notes/entry-config', auth, crnt.entryConfig);
+  app.get('/e-credit-notes/:vchNo/entry', auth, crnt.entry);
+  app.post('/e-credit-notes', auth, crnt.create);
+  app.put('/e-credit-notes/:vchNo', auth, crnt.update);
+  app.delete('/e-credit-notes/:vchNo', auth, crnt.remove);
+  app.get('/e-credit-notes/:vchNo/print', auth, crnt.print);
+  app.post('/e-credit-notes/:vchNo/irn/cancel', auth, crnt.cancelIrn);
+  app.get('/e-invoices/entry-config', auth, inv.entryConfig);
+  app.get('/e-invoices/:vchNo/entry', auth, inv.entry);
+  app.post('/e-invoices', auth, inv.create);
+  app.put('/e-invoices/:vchNo', auth, inv.update);
+  app.delete('/e-invoices/:vchNo', auth, inv.remove);
+  app.get('/e-invoices/:vchNo/print', auth, inv.print);
+  app.post('/e-invoices/:vchNo/irn/cancel', auth, inv.cancelIrn);
+  app.get('/e-invoices', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const q = req.query as any;
+    return run(reply, 200, () =>
+      listEInvoices(prisma, scopeOf(req), {
+        search: q.search,
+        offset: q.offset == null ? undefined : Number(q.offset),
+        limit: q.limit == null ? undefined : Number(q.limit),
+      }),
+    );
+  });
+  app.get('/e-invoices/tcs-basis', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const q = req.query as any;
+    return run(reply, 200, () => eInvoiceTcsBasis(prisma, scopeOf(req), String(q.partyCode ?? '')));
+  });
+  app.get('/e-invoices/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const notFound = Symbol('not-found');
+    const outcome = await run(reply, 200, async () => {
+      const result = await getEInvoice(prisma, scopeOf(req), (req.params as any).vchNo);
+      if (!result) throw notFound;
+      return result;
+    }).catch((error: unknown) => {
+      if (error === notFound) return reply.code(404).send({ error: 'voucher-not-found' });
+      throw error;
+    });
+    return outcome;
+  });
+  app.post('/e-invoices/:vchNo/irn', auth, async (req, reply) => {
+    if (!guard(req, reply, 'print')) return;
+    const scope = scopeOf(req);
+    const vchNo = String((req.params as any).vchNo);
+    return run(reply, 201, async () => {
+      await assertEBillNotRegistered(prisma, 'E INVOICE', scope, vchNo);
+      const res = await submitIrnForSale(prisma, scope as any, {
+        coBook: String(scope.coBook ?? ''),
+        vchNo,
+        docType: 'INV',
+        expectedMainBook: 'E INVOICE',
+      });
+      return { irn: res.Irn, ackNo: res.AckNo, mode: res.mode };
+    });
+  });
   app.get('/e-credit-notes', auth, async (req, reply) => {
     const q = req.query as any;
     return run(reply, 200, () =>
@@ -7641,8 +8002,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     if (!guard(req, reply, 'print')) return;
     const b = body(req);
     return run(reply, 201, async () => {
+      const coBook = scopeOf(req).coBook ?? '146';
+      await assertEBillNotRegistered(prisma, 'E CRNT', { ...scopeOf(req), coBook }, b.vchNo);
       const res = await submitIrnForCreditNote(prisma, scopeOf(req) as any, {
-        coBook: scopeOf(req).coBook ?? '146',
+        coBook,
         vchNo: b.vchNo,
       });
       return { irn: res.Irn, ackNo: res.AckNo, mode: res.mode };

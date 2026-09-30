@@ -117,6 +117,12 @@ export const NAV: NavGroup[] = [
         ready: true,
         form: 'Transaction/E CrntNote',
       },
+      {
+        label: 'E Invoice',
+        href: '/txn/e-invoice',
+        ready: true,
+        form: 'Transaction/E Invoice',
+      },
     ],
   },
   {

@@ -1,0 +1,17 @@
+contracts: 11 (3 approved, 8 draft) | desktop sources: 204 | golden vectors: 27
+
+  TR_DHRN_REC.contract.md   draft    rules=  1 notEnforced= 1 computed=  7 blankVector=  7 citations=  0
+  TR_KR_ISU.contract.md     draft    rules=  0 notEnforced= 0 computed= 20 blankVector= 20 citations=  0
+  TR_MEMB_ENT.contract.md   draft    rules=  3 notEnforced= 3 computed=  4 blankVector=  4 citations=  0
+  TR_MLT_PRO.contract.md    approved rules=  8 notEnforced= 0 computed=  2 blankVector=  0 citations= 12
+  TR_PURC.contract.md       approved rules=  3 notEnforced= 0 computed= 23 blankVector=  0 citations=  0
+  TR_SALE.contract.md       approved rules=  4 notEnforced= 0 computed= 36 blankVector=  0 citations=  0
+  TR_SALE_ORD.contract.md   draft    rules=  6 notEnforced= 6 computed= 32 blankVector= 30 citations=  0
+  TR_SALE_RTN.contract.md   draft    rules=  1 notEnforced= 1 computed= 25 blankVector= 25 citations=  0
+  TR_TAG_OPBL.contract.md   draft    rules=  8 notEnforced= 8 computed= 34 blankVector= 33 citations=  0
+  TR_TOUR_SALE.contract.md  draft    rules=  5 notEnforced= 4 computed= 35 blankVector= 35 citations=  0
+  TR_WH_SALE.contract.md    draft    rules=  6 notEnforced= 5 computed= 30 blankVector= 30 citations=  0
+
+  totals: rules=37 authored+generated, notEnforced=28, computed=248, blankVector=184, blankTest=0, citations=12
+
+CONTRACTS_OK every citation resolves, every cited vector exists, and no contract claims approval while carrying open cells (17 draft debt line(s) recorded; pass --debt to list them)

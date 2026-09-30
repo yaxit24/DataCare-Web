@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  rateFactor,
-  settleMoneyMetal,
-  settlementBalance,
-} from '../src/modules/sales/settlement.js';
+import { rateFactor, settleMoneyMetal, settlementBalance } from '../src/settlement.js';
 
 /**
  * Money/metal settlement golden vectors.

@@ -1,0 +1,117 @@
+{
+  "startedAt": "2026-09-29T12:52:29.029Z",
+  "finishedAt": "2026-09-29T12:53:23.973Z",
+  "releaseSha": null,
+  "database": "disposable localhost:55433 / app_user",
+  "status": "passed",
+  "mockedRequests": 0,
+  "mockedResponses": 0,
+  "interceptionIndicators": 0,
+  "journeys": [
+    {
+      "journeyId": "cash-receipt-payment",
+      "status": "passed"
+    },
+    {
+      "journeyId": "column-settings",
+      "status": "passed"
+    },
+    {
+      "journeyId": "credit-note",
+      "status": "passed"
+    },
+    {
+      "journeyId": "credit-note-entry",
+      "status": "passed"
+    },
+    {
+      "journeyId": "e-invoice-entry",
+      "status": "passed"
+    },
+    {
+      "journeyId": "design-book",
+      "status": "passed"
+    },
+    {
+      "journeyId": "design-calculations",
+      "status": "passed"
+    },
+    {
+      "journeyId": "design-repeat",
+      "status": "passed"
+    },
+    {
+      "journeyId": "generic-image-conflict",
+      "status": "passed"
+    },
+    {
+      "journeyId": "image-conflict",
+      "status": "passed"
+    },
+    {
+      "journeyId": "manufacturing-lot",
+      "status": "passed"
+    },
+    {
+      "journeyId": "order-images",
+      "status": "passed"
+    },
+    {
+      "journeyId": "repair-image-conflict",
+      "status": "passed"
+    },
+    {
+      "journeyId": "sale-amount-basis",
+      "status": "passed"
+    },
+    {
+      "journeyId": "sales-order",
+      "status": "passed"
+    },
+    {
+      "journeyId": "sales-order-design",
+      "status": "passed"
+    },
+    {
+      "journeyId": "sales-return-bill-replay",
+      "status": "passed"
+    },
+    {
+      "journeyId": "sales-return-labour-replay",
+      "status": "passed"
+    },
+    {
+      "journeyId": "sales-return-replay",
+      "status": "passed"
+    },
+    {
+      "journeyId": "sales-return-saved",
+      "status": "passed"
+    },
+    {
+      "journeyId": "tour-order",
+      "status": "passed"
+    }
+  ],
+  "cashReceiptPayment": {
+    "checks": [
+      "cash receipt saved in the only CASH REC book, on the operator date, with a slot-2 kasar write-off",
+      "four balanced receipt legs 01-04 read back from AC_DATA",
+      "receipt voucher print opens for the saved book",
+      "bank mode and ?mode=BANK offer only the BANK REC book",
+      "cash payment saved in the CASH PAY book",
+      "contra saved in the CONTRA book"
+    ],
+    "boundary": "Engineering evidence on a synthetic fixture; not an independent desktop comparison or business acceptance"
+  },
+  "saleAmountBasis": {
+    "checks": [
+      "blank SL_AMT_TYPE prices a line on net + ghat (60,000) in the preview and the saved SL_DETL",
+      "a line RtWith of F prices fine (54,960) in the preview and the saved SL_DETL",
+      "SL_DETL.RATE_WITH stores the effective N / F",
+      "only SALES books are offered, and the only one is selected",
+      "balanced AC_DATA with 114,960 of sales income"
+    ],
+    "boundary": "Engineering evidence on a synthetic fixture; not an independent desktop comparison or business acceptance"
+  }
+}

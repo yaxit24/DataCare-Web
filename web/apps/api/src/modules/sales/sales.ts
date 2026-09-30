@@ -37,6 +37,9 @@ import {
   type LabourType,
   type BillTotals,
   lineTotalDesktop,
+  effectiveSaleRateWith,
+  saleAmountBasis,
+  saleItemAmount,
 } from '@datacare/core';
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
 import { orderAdvanceAvailableTx, adjustOrderIntoSaleTx } from './salesOrder.js';
@@ -66,6 +69,30 @@ export class SaleValidationError extends Error {
     this.name = 'SaleValidationError';
   }
 }
+
+/**
+ * The bill's GST rate is multiplied into the totals (`billTotals`).
+ *
+ * A request without it used to reach decimal.js as `undefined`. The result was an HTTP 500
+ * "[DecimalError] Invalid argument: undefined" rather than a validation error
+ * (PARITY-EVALUATION-2026-09-28 §5c, `POST /sales-returns` with no `taxRatePct`).
+ */
+export function assertSaleTaxRate(taxRatePct: unknown): void {
+  const value = typeof taxRatePct === 'string' ? Number(taxRatePct.trim()) : taxRatePct;
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+    throw new SaleValidationError(
+      `taxRatePct must be a non-negative number: ${String(taxRatePct)}`,
+    );
+  }
+}
+
+/** The labour types `labourCharge` implements (`@datacare/core` LabourType). */
+const SALE_LABOUR_TYPES: ReadonlySet<string> = new Set<LabourType>([
+  'per_gram',
+  'per_piece',
+  'percentage',
+  'fixed',
+]);
 
 export interface SaleLineInput {
   // ---- Return-line costing (SL_DETL_RTN) --------------------------------------------------------
@@ -257,15 +284,32 @@ export function computeLine(
   const fine = lineFine(line);
   const rate =
     line.rate == null ? undefined : policy ? policy.roundItemRate(line.rate) : Number(line.rate);
-  // TR_SALE.cs:18367-18417 selects the rate base from CO_SET.SL_AMT_TYPE; the request cannot
-  // provide this mode. An explicit metalAmount remains the desktop-style authoritative line value.
-  const amountBase = saleAmountBase({ ...line, fineWt: fine }, amountType);
-  const metal =
-    line.metalAmount != null
-      ? Number(line.metalAmount)
-      : amountBase > 0 && rate != null
-        ? metalAmount(amountBase, rate)
-        : 0;
+  // TR_SALE.cs CommPassTotal (10716-10936) prices each line by its OWN RtWith, which a new row
+  // copies from CO_SET.SL_AMT_TYPE (:9161), and by the item's RATE_TYPE (:12833). An explicit
+  // metalAmount is still the desktop-style authoritative line value.
+  //
+  // `amountType === ''` is the legacy default for callers that do not resolve CO_SET, which is the
+  // legacy Sale Return writer. That path keeps its fine basis (see saleAmountBase).
+  const metal = (() => {
+    if (line.metalAmount != null) return Number(line.metalAmount);
+    if (amountType === '') {
+      const legacyBase = saleAmountBase({ ...line, fineWt: fine }, '');
+      return legacyBase > 0 && rate != null ? metalAmount(legacyBase, rate) : 0;
+    }
+    const basis = saleAmountBasis(
+      { ...line, fineWt: fine },
+      effectiveSaleRateWith(line.rateWith, amountType),
+      line.rateType,
+    );
+    return basis.quantity > 0 && rate != null ? saleItemAmount(basis, rate) : 0;
+  })();
+  // An unknown type used to reach labourCharge's exhaustive switch and fail as a TypeError (HTTP 500,
+  // PARITY-EVALUATION-2026-09-28 §5c). It is an input error, so it is refused as one.
+  if (line.labourType && !SALE_LABOUR_TYPES.has(line.labourType)) {
+    throw new SaleValidationError(
+      `labourType must be one of ${[...SALE_LABOUR_TYPES].join(', ')}: ${String(line.labourType)}`,
+    );
+  }
   const labour = line.labourType
     ? labourCharge(
         line.labourType,
@@ -654,6 +698,7 @@ async function writeSaleTx(
   if (!input.acCode) throw new SaleValidationError('customer account (acCode) is required');
   if (!lines || lines.length === 0)
     throw new SaleValidationError('at least one line item is required');
+  assertSaleTaxRate(input.taxRatePct);
   completeSaleScope(input.scope);
 
   const salesAc = input.salesAc ?? 'SALES';
@@ -1126,7 +1171,9 @@ async function writeSaleTx(
       DISC_AMT: num(c.in.discountAmount),
       GHT_AMT: num(c.in.ghatAmount),
       OTH_AMT: num(c.in.otherAmount),
-      RATE_WITH: c.in.rateWith ?? '',
+      // The EFFECTIVE RtWith, as the desktop saves grid column 21 (TR_SALE.cs:15432), which a new
+      // row copies from the company type (:9161). A new line therefore stores 'N', not ''.
+      RATE_WITH: effectiveSaleRateWith(c.in.rateWith, behavior.saleAmountType),
       ITM_RATE: input.rateUnfix ? 0 : num(c.in.rate),
       ITM_AMT: c.calc.metal,
       ITM_MRP: num(c.in.mrp),

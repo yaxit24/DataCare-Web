@@ -1,0 +1,6 @@
+doc references: 35 document(s), 196 file citation(s), 14 with a line number, 1 verifiable claim(s)
+DOC_REFS_RED 4 problem(s)
+    parity-evidence/X11-design-components-2026-09-11.md: cited file does not exist -> test-results/parity-real-stack/result.json
+    parity-evidence/X11-repeat-keyboard-round3-contract-2026-09-11.md: cited file does not exist -> test-results/parity-real-stack-round3-verified/result.json
+    parity-evidence/X11-sales-design-selection-round4-contract-2026-09-11.md: cited file does not exist -> web/test-results/parity-real-stack-round4-blank-source/result.json
+    parity-evidence/X25-order-image-report-round3-2026-09-11.md: cited file does not exist -> test-results/parity-real-stack-round3-delete-confirmation/result.json

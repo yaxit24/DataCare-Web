@@ -50,9 +50,11 @@ async function seedDemo(prisma: PrismaClient, config: RuntimeConfig) {
     // carries a SALE_AC (income account) and a party to bill; seedCompany provisions neither, because a
     // real company enters its own. Without these the demo stops at
     // `account not found for tax policy` or an unmapped income account.
+    // A desktop item group names both income and expense heads. With only SALE_AC, the demo's first
+    // purchase failed with "missing GROUP_MAST.PURC_AC for item GOLD" (PARITY-EVALUATION-2026-09-28 §5b).
     await tx.$executeRawUnsafe(
-      `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","SALE_AC")
-       SELECT $1,'01','01','GOLD JEWELLERY','SALES'
+      `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","SALE_AC","PURC_AC")
+       SELECT $1,'01','01','GOLD JEWELLERY','SALES','PURCHASE'
         WHERE NOT EXISTS (SELECT 1 FROM "GROUP_MAST" WHERE "CO_CODE"='01' AND "GR_CODE"='01')`,
       config.demoTenant,
     );

@@ -1,0 +1,113 @@
+{
+ "startedAt": "2026-09-29T19:36:47.271Z",
+ "finishedAt": "2026-09-29T19:37:45.227Z",
+ "releaseSha": null,
+ "database": "disposable localhost:55433 / app_user",
+ "status": "passed",
+ "journeys": [
+  {
+   "journeyId": "cash-receipt-payment",
+   "status": "passed"
+  },
+  {
+   "journeyId": "column-settings",
+   "status": "passed"
+  },
+  {
+   "journeyId": "credit-note",
+   "status": "passed"
+  },
+  {
+   "journeyId": "credit-note-entry",
+   "status": "passed"
+  },
+  {
+   "journeyId": "e-invoice-entry",
+   "status": "passed"
+  },
+  {
+   "journeyId": "design-book",
+   "status": "passed"
+  },
+  {
+   "journeyId": "design-calculations",
+   "status": "passed"
+  },
+  {
+   "journeyId": "design-repeat",
+   "status": "passed"
+  },
+  {
+   "journeyId": "generic-image-conflict",
+   "status": "passed"
+  },
+  {
+   "journeyId": "image-conflict",
+   "status": "passed"
+  },
+  {
+   "journeyId": "manufacturing-lot",
+   "status": "passed"
+  },
+  {
+   "journeyId": "order-images",
+   "status": "passed"
+  },
+  {
+   "journeyId": "repair-image-conflict",
+   "status": "passed"
+  },
+  {
+   "journeyId": "sale-amount-basis",
+   "status": "passed"
+  },
+  {
+   "journeyId": "sales-order",
+   "status": "passed"
+  },
+  {
+   "journeyId": "sales-order-design",
+   "status": "passed"
+  },
+  {
+   "journeyId": "sales-return-bill-replay",
+   "status": "passed"
+  },
+  {
+   "journeyId": "sales-return-labour-replay",
+   "status": "passed"
+  },
+  {
+   "journeyId": "sales-return-replay",
+   "status": "passed"
+  },
+  {
+   "journeyId": "sales-return-saved",
+   "status": "passed"
+  },
+  {
+   "journeyId": "tour-order",
+   "status": "passed"
+  },
+  {
+   "journeyId": "wholesale-rate-cut",
+   "status": "passed"
+  }
+ ],
+ "mockedRequests": 0,
+ "mockedResponses": 0,
+ "interceptionIndicators": 0,
+ "wholesaleRateCut": {
+  "checks": [
+   "wholesale page offers only the WH SALES book and the rate-cut page only the RATE CUT book",
+   "party pick fills name and mobile; picked and typed tags fill weights, stored fine and labour",
+   "preview figures (fine, labour, derived Ac Amt Dr, band net/Os, tot fine, diff) equal the stored header",
+   "RATE_CUT_ISU, MAIN_STOCK SR_NO 1/2 and the ten Wh_Sales_Ledr legs read back from the database",
+   "edit dropping a tag returns it to stock and keeps DR_AMT and MAIN_USER",
+   "reopen by voucher number restores the form from the stored rows",
+   "delete removes every row, writes DELETE_DATA with the signed-in user and releases both tags",
+   "header-only rate cut derives Ac Amt Cr and posts legs 08/09, 45/46, 51/52 in the Payment column"
+  ],
+  "boundary": "Engineering evidence on a synthetic fixture; not an independent desktop comparison or business acceptance"
+ }
+}

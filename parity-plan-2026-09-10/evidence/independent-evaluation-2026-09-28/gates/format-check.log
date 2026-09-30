@@ -1,0 +1,6 @@
+
+> datacare-web-saas@0.0.0 format:check /projects/sandbox/DataCare-Web/web
+> prettier --check .
+
+Checking formatting...
+All matched files use Prettier code style!

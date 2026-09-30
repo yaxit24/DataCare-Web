@@ -134,4 +134,9 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20260912004500_session_context_epoch',
     checksum: 'b2ebec67672c219db30e547cb1b6b7346f49e94cc3c621a12610e1e54bf35b7d',
   },
+  {
+    // N18: web-provisioned Tag Transfer books move to the desktop's MAIN_BOOK 'TAG TRFR' / TAGTR (MDI_FORM.cs:8664).
+    name: '20260929010000_tag_transfer_book',
+    checksum: '2d2b1093737686d734ed7ae6117cba3cfefc3b48b5a55ea4d7cf8d3e3395c344',
+  },
 ];

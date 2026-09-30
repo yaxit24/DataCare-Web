@@ -12,6 +12,48 @@ import {
 } from './parity-real-stack-evidence.mjs';
 import { exerciseTourOrder } from './tour-order.journey.mjs';
 import { exerciseCreditNote } from './credit-note.journey.mjs';
+import {
+  cleanupCreditNoteEntry,
+  creditNoteEntryFixtureTables,
+  exerciseCreditNoteEntry,
+  seedCreditNoteEntry,
+} from './credit-note-entry.journey.mjs';
+import {
+  cleanupEInvoiceEntry,
+  eInvoiceEntryFixtureTables,
+  exerciseEInvoiceEntry,
+  seedEInvoiceEntry,
+} from './e-invoice-entry.journey.mjs';
+import {
+  cashReceiptPaymentFixtureTables,
+  cleanupCashReceiptPayment,
+  exerciseCashReceiptPayment,
+  seedCashReceiptPayment,
+} from './cash-receipt-payment.journey.mjs';
+import {
+  cleanupWholesaleRateCut,
+  exerciseWholesaleRateCut,
+  seedWholesaleRateCut,
+  wholesaleRateCutFixtureTables,
+} from './wholesale-rate-cut.journey.mjs';
+import {
+  cleanupTagCancelTransfer,
+  exerciseTagCancelTransfer,
+  seedTagCancelTransfer,
+  tagCancelTransferFixtureTables,
+} from './tag-cancel-transfer.journey.mjs';
+import {
+  cleanupTagSplit,
+  exerciseTagSplit,
+  seedTagSplit,
+  tagSplitFixtureTables,
+} from './tag-split.journey.mjs';
+import {
+  cleanupSaleAmountBasis,
+  exerciseSaleAmountBasis,
+  saleAmountBasisFixtureTables,
+  seedSaleAmountBasis,
+} from './sale-amount-basis.journey.mjs';
 import { exerciseDesignCalculation } from './design-calculation.journey.mjs';
 import {
   seedDesignRepeat,
@@ -107,6 +149,13 @@ const tables = [
   ...salesReturnSavedFixtureTables,
   ...repairImageFixtureTables,
   ...mfgLotFixtureTables,
+  ...creditNoteEntryFixtureTables,
+  ...eInvoiceEntryFixtureTables,
+  ...cashReceiptPaymentFixtureTables,
+  ...saleAmountBasisFixtureTables,
+  ...wholesaleRateCutFixtureTables,
+  ...tagCancelTransferFixtureTables,
+  ...tagSplitFixtureTables,
   'COL_MAST',
   'CO_SET_NEW',
   'TAG_IMAGE_DATA',
@@ -497,6 +546,56 @@ try {
   }
   result.tourOrder = await exerciseTourOrder(page, { checkpoint, owner, tenantId });
   result.creditNote = await exerciseCreditNote(page, { checkpoint });
+  await seedCreditNoteEntry(sql);
+  try {
+    result.creditNoteEntry = await exerciseCreditNoteEntry(page, { checkpoint, owner, tenantId });
+  } finally {
+    await cleanupCreditNoteEntry(sql);
+  }
+  await seedEInvoiceEntry(sql);
+  try {
+    result.eInvoiceEntry = await exerciseEInvoiceEntry(page, { checkpoint, owner, tenantId });
+  } finally {
+    await cleanupEInvoiceEntry(sql);
+  }
+  await seedCashReceiptPayment(sql);
+  try {
+    result.cashReceiptPayment = await exerciseCashReceiptPayment(page, {
+      checkpoint,
+      owner,
+      tenantId,
+    });
+  } finally {
+    await cleanupCashReceiptPayment(sql);
+  }
+  await seedSaleAmountBasis(sql);
+  try {
+    result.saleAmountBasis = await exerciseSaleAmountBasis(page, { checkpoint, owner, tenantId });
+  } finally {
+    await cleanupSaleAmountBasis(sql);
+  }
+  await seedWholesaleRateCut(sql);
+  try {
+    result.wholesaleRateCut = await exerciseWholesaleRateCut(page, { checkpoint, owner, tenantId });
+  } finally {
+    await cleanupWholesaleRateCut(sql);
+  }
+  await seedTagCancelTransfer(sql);
+  try {
+    result.tagCancelTransfer = await exerciseTagCancelTransfer(page, {
+      checkpoint,
+      owner,
+      tenantId,
+    });
+  } finally {
+    await cleanupTagCancelTransfer(sql);
+  }
+  await seedTagSplit(sql);
+  try {
+    result.tagSplit = await exerciseTagSplit(page, { checkpoint, owner, tenantId });
+  } finally {
+    await cleanupTagSplit(sql);
+  }
   await seedSalesOrder(sql);
   await seedSalesOrderDesign(sql);
   result.salesOrderDesign = await exerciseSalesOrderDesign(page, { checkpoint, coBook: 'S41' });
@@ -553,8 +652,11 @@ try {
   assert.deepEqual(errors, [], 'browser runtime errors');
   const journeySummaries = [];
   result.journeys = [
+    ['cash-receipt-payment', result.cashReceiptPayment],
     ['column-settings', result.columnSettings],
     ['credit-note', result.creditNote],
+    ['credit-note-entry', result.creditNoteEntry],
+    ['e-invoice-entry', result.eInvoiceEntry],
     ['design-book', result.designBook],
     ['design-calculations', result.designCalculations],
     ['design-repeat', result.designRepeat],
@@ -563,13 +665,17 @@ try {
     ['manufacturing-lot', result.mfgLot],
     ['order-images', result.orderImages],
     ['repair-image-conflict', result.repairImageConflict],
+    ['sale-amount-basis', result.saleAmountBasis],
     ['sales-order', result.salesOrder],
     ['sales-order-design', result.salesOrderDesign],
     ['sales-return-bill-replay', result.salesReturnBillReplay],
     ['sales-return-labour-replay', result.salesReturnLabourReplay],
     ['sales-return-replay', result.salesReturnReplay],
     ['sales-return-saved', result.salesReturnSaved],
+    ['tag-cancel-transfer', result.tagCancelTransfer],
+    ['tag-split', result.tagSplit],
     ['tour-order', result.tourOrder],
+    ['wholesale-rate-cut', result.wholesaleRateCut],
   ].map(([journeyId, detail]) => {
     const summary = summarizeJourneyEvidence(journeyId, detail);
     journeySummaries.push(summary);
@@ -587,7 +693,7 @@ try {
   );
   result.status = 'passed';
   console.log(
-    'PARITY_REAL_STACK_PASSED: real login, Design Book calculation/repeat, Sales design selection and lifecycle, Tour Order lifecycle, credit-note browse, saved order and generic/repair images with conflicts, saved incoming Return metadata, Setting lot sources, family-qualified column settings, saved incoming Return calculation, bill and resolved labour preview; zero mocked requests',
+    'PARITY_REAL_STACK_PASSED: real login, Design Book calculation/repeat, Sales design selection and lifecycle, Tour Order lifecycle, credit-note browse, E CRNT create/print/edit/reopen/delete and E INVOICE create/IRN/cancel/reopen/delete, cash receipt/payment/contra with configured books, sale amount basis, wholesale sale tag/stock/ledger lifecycle and header-only rate cut, tag cancel and tag transfer lifecycle with stones, images and conserved metal, saved order and generic/repair images with conflicts, saved incoming Return metadata, Setting lot sources, family-qualified column settings, saved incoming Return calculation, bill and resolved labour preview; zero mocked requests',
   );
 } catch (error) {
   result.status = 'failed';

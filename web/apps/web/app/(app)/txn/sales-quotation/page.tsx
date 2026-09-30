@@ -18,7 +18,7 @@ import { PartyBalance } from '../../../../components/PartyBalance';
 import { VoucherChrome } from '../../../../components/VoucherChrome';
 import { VoucherList } from '../../../../components/VoucherList';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
-import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
+import { companyFlag, useCompanySettings, companySetting } from '../../../../lib/companySettings';
 import { recalcLine } from '../../../../lib/lineRecalc';
 
 interface Line {
@@ -380,6 +380,8 @@ export default function SalesQuotationPage() {
   const calc = (l: Line) => {
     const r = recalcLine({ ...l, labourRate: l.making, labourType: 'G' }, 'sale', {
       labourIncludesGhat: companyFlag(companySettings, 'LBR_WITH_GHT', 'Y'),
+      // CO_SET.SL_AMT_TYPE: the basis a line without its own RtWith is priced on (blank = N).
+      saleAmountType: String(companySetting(companySettings, 'SL_AMT_TYPE') ?? ''),
     });
     return { fine: r.fineWt, metal: r.metalAmount, mk: r.netLabourAmount, net: r.totalAmount };
   };

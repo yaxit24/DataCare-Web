@@ -12,9 +12,14 @@ import {
 const expectedOperations = [
   'logical-restore',
   'production-cutover-load',
+  'tag-weight-difference',
+] as const;
+
+/** Released with their own evidence (N18/N19); they must never silently return to the registry. */
+const dischargedOperations = [
+  'tag-opening-update',
   'tag-transfer',
   'tag-cancel',
-  'tag-weight-difference',
   'tag-split',
 ] as const;
 
@@ -36,17 +41,17 @@ describe('WP-01 parity containment policy', () => {
   });
 
   it('returns a stable non-retryable HTTP problem without exposing an override', () => {
-    const problem = parityContainmentProblem('tag-split');
+    const problem = parityContainmentProblem('tag-weight-difference');
     expect(problem).toEqual({
       statusCode: 503,
       body: {
         error: 'parity-containment',
         code: PARITY_CONTAINMENT_CODE,
-        operation: 'tag-split',
-        message: parityContainmentMessage('tag-split'),
-        reason: parityContainmentRule('tag-split').reason,
-        safeAlternative: parityContainmentRule('tag-split').safeAlternative,
-        exitGate: parityContainmentRule('tag-split').exitGate,
+        operation: 'tag-weight-difference',
+        message: parityContainmentMessage('tag-weight-difference'),
+        reason: parityContainmentRule('tag-weight-difference').reason,
+        safeAlternative: parityContainmentRule('tag-weight-difference').safeAlternative,
+        exitGate: parityContainmentRule('tag-weight-difference').exitGate,
         workPackage: 'WP-01',
         retryable: false,
       },
@@ -59,6 +64,20 @@ describe('WP-01 parity containment policy', () => {
     expect(() => parityContainmentRule('unknown' as never)).toThrow(
       'Unknown parity containment operation',
     );
+  });
+
+  it('keeps discharged operations out of the registry, and cites their evidence', () => {
+    for (const operation of dischargedOperations) {
+      expect(parityContainmentOperations).not.toContain(operation);
+      expect(() => parityContainmentRule(operation as never)).toThrow(
+        'Unknown parity containment operation',
+      );
+    }
+    const registry = readFileSync(resolve(process.cwd(), 'containment.mjs'), 'utf8');
+    expect(registry).toContain('DISCHARGED — `tag-cancel` and `tag-transfer`');
+    expect(registry).toContain('implementation-2026-09-29-n18/contract.md');
+    expect(registry).toContain('DISCHARGED — `tag-split`');
+    expect(registry).toContain('implementation-2026-09-30-n19/contract.md');
   });
 
   it('guards the restore-drill CLI before database configuration or client construction', () => {

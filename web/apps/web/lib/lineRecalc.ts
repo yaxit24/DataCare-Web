@@ -1,6 +1,14 @@
 'use client';
 
-import { fineFor, labourCharge, metalAmount, round, PRECISION } from '@datacare/core';
+import {
+  effectiveSaleRateWith,
+  fineFor,
+  labourCharge,
+  round,
+  saleAmountBasis,
+  saleItemAmount,
+  PRECISION,
+} from '@datacare/core';
 import type { FineWorkflow } from '@datacare/core';
 
 /**
@@ -36,6 +44,8 @@ export interface RecalcLine {
   fineWt?: string | number;
   rate?: string | number;
   rateWith?: string;
+  /** The item's RATE_TYPE: G (gram, default), 1 (per 10 g), K (per kg) or P (pieces). */
+  rateType?: string;
   pcs?: string | number;
   labourType?: string;
   labourRate?: string | number;
@@ -103,11 +113,14 @@ const LABOUR_TYPES: Record<string, 'per_gram' | 'per_piece' | 'percentage' | 'fi
  * `labourIncludesGhat` mirrors the company's `LBR_WITH_GHT`, whose desktop blank default is 'Y'
  * (`MS_OPNCOMP.cs`); defaulting it false here would understate per-gram labour on any line carrying
  * ghat weight, which is the defect this project already fixed once on the server side.
+ *
+ * `saleAmountType` is the company's `CO_SET.SL_AMT_TYPE`. A line with no RtWith of its own takes it
+ * (TR_SALE.cs:9161), and blank means N (MS_OPNCOMP.cs:881-884).
  */
 export function recalcLine(
   line: RecalcLine,
   policy: RecalcPolicy = 'sale',
-  options: { labourIncludesGhat?: boolean } = {},
+  options: { labourIncludesGhat?: boolean; saleAmountType?: string } = {},
 ): RecalcResult {
   const gross = n(line.grossWt);
   const less = n(line.lessWt);
@@ -136,10 +149,19 @@ export function recalcLine(
         kunFine: n(line.kunFine),
       });
 
-  // The rate base follows RtWith: 'F' prices the fine weight, anything else prices the net weight
-  // (`TR_SALE.cs:10827-10932`).
-  const rateBase = (line.rateWith ?? 'F').toUpperCase() === 'F' ? fine : netWt;
-  const metal = metalAmount(rateBase, n(line.rate));
+  // The quantity the rate multiplies comes from the server's own `saleAmountBasis`
+  // (TR_SALE.cs CommPassTotal 10716-10936). The inputs are the line's RtWith (else the company type)
+  // and the item RATE_TYPE.
+  //
+  // This used to price 'F' on fine and everything else on net WITHOUT ghat, defaulting to F. So a blank
+  // line on a blank company previewed on net while the server saved on fine, and G, P, ghat and
+  // RATE_TYPE were ignored.
+  const basis = saleAmountBasis(
+    { pcs: n(line.pcs), grossWt: gross, netWt, ghtWt, fineWt: fine },
+    effectiveSaleRateWith(line.rateWith, options.saleAmountType),
+    line.rateType,
+  );
+  const metal = saleItemAmount(basis, n(line.rate));
 
   const labourType = LABOUR_TYPES[(line.labourType ?? 'G').toUpperCase()] ?? 'per_gram';
   const labour = labourCharge(labourType, {

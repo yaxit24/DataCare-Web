@@ -1,0 +1,333 @@
+{
+ "card": "N19 (X20) Tag Split \u2014 TR_TAG_SPLIT",
+ "generated": "mutation-check.py through /projects/local-test-env.sh (real PostgreSQL, RUN_DB_INTEGRITY_TESTS=1)",
+ "verdict": "ALL_CAUGHT",
+ "total": 27,
+ "caught": 27,
+ "mutations": [
+  {
+   "id": "book-other-main-book-accepted",
+   "file": "apps/api/src/modules/stock/tagSplit.ts",
+   "test": "test/tagSplit.routes.db.test.ts -t not in use",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N19 tag split through HTTP > refuses a book that is not a TAG SPLIT book, and a TAG SPLIT book not in use 101ms",
+    "Tests  1 failed | 5 skipped (6)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "book-not-in-use-accepted",
+   "file": "apps/api/src/modules/stock/tagSplit.ts",
+   "test": "test/tagSplitLifecycle.db.test.ts -t not in use",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N19 tag split (TR_TAG_SPLIT) \u2014 contract vectors > K1: the writer refuses a TAG SPLIT book that is not in use 314ms",
+    "Tests  1 failed | 10 skipped (11)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "duplicate-parent-accepted",
+   "file": "apps/api/src/modules/stock/tagSplit.ts",
+   "test": "test/tagSplitLifecycle.db.test.ts -t V6",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N19 tag split (TR_TAG_SPLIT) \u2014 contract vectors > V6: refuses a sold parent, a duplicate parent, and an ambiguous number 311ms",
+    "Tests  1 failed | 10 skipped (11)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "shared-resolver-picks-first",
+   "file": "apps/api/src/modules/stock/stock.ts",
+   "test": "test/tagSplitIdentity.db.test.ts -t ambiguous",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 tag split resolves one live serial identity > refuses an ambiguous tag number with two live instances instead of picking the first 258ms",
+    "Tests  1 failed | 5 skipped (6)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "parent-location-not-isolated",
+   "file": "apps/api/src/modules/stock/stock.ts",
+   "test": "test/tagSplitIdentity.db.test.ts -t another location",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 tag split resolves one live serial identity > refuses a parent that belongs to another location 241ms",
+    "Tests  1 failed | 5 skipped (6)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "conflict-not-recognised",
+   "file": "apps/api/src/modules/stock/tagSplit.ts",
+   "test": "test/tagSplit.routes.db.test.ts -t deadlock",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N19 tag split through HTTP > reports a deadlock with another writer as 409 Conflict, writes nothing and uses no number 1053ms",
+    "Tests  1 failed | 5 skipped (6)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "conflict-not-409",
+   "file": "apps/api/src/routes/txn.ts",
+   "test": "test/tagSplit.routes.db.test.ts -t deadlock",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N19 tag split through HTTP > reports a deadlock with another writer as 409 Conflict, writes nothing and uses no number 1052ms",
+    "Tests  1 failed | 5 skipped (6)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "short-split-without-account-accepted",
+   "file": "apps/api/src/modules/stock/tagSplit.ts",
+   "test": "test/tagSplitLifecycle.db.test.ts -t V2",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N19 tag split (TR_TAG_SPLIT) \u2014 contract vectors > V2: refuses a short split with no absorbing account, writing nothing 307ms",
+    "Tests  1 failed | 10 skipped (11)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "stock-parent-sign-plus",
+   "file": "apps/api/src/modules/stock/tagSplitRows.ts",
+   "test": "test/tagSplitLifecycle.db.test.ts -t V1:",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N19 tag split (TR_TAG_SPLIT) \u2014 contract vectors > V1: splits a parent into two children, conserving the fine; nothing else changes unexpectedly 400ms",
+    "Tests  1 failed | 10 skipped (11)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "child-bar-keeps-itm-sign",
+   "file": "apps/api/src/modules/stock/tagSplitRows.ts",
+   "test": "test/tagSplitLifecycle.db.test.ts -t V1:",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N19 tag split (TR_TAG_SPLIT) \u2014 contract vectors > V1: splits a parent into two children, conserving the fine; nothing else changes unexpectedly 430ms",
+    "Tests  1 failed | 10 skipped (11)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "dm-ignores-posting-flag",
+   "file": "apps/api/src/modules/stock/tagSplitRows.ts",
+   "test": "test/tagSplitLifecycle.db.test.ts -t V1:",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N19 tag split (TR_TAG_SPLIT) \u2014 contract vectors > V1: splits a parent into two children, conserving the fine; nothing else changes unexpectedly 488ms",
+    "Tests  1 failed | 10 skipped (11)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "dm-parent-stone-items-absent",
+   "file": "apps/api/src/modules/stock/tagSplit.ts",
+   "test": "test/tagSplitLifecycle.db.test.ts -t V1:",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N19 tag split (TR_TAG_SPLIT) \u2014 contract vectors > V1: splits a parent into two children, conserving the fine; nothing else changes unexpectedly 497ms",
+    "Tests  1 failed | 10 skipped (11)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "edit-new-hidden-number",
+   "file": "apps/api/src/modules/stock/tagSplit.ts",
+   "test": "test/tagSplit.routes.db.test.ts -t hidden number across an edit",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N19 tag split through HTTP > keeps a voucher hidden number across an edit even when a later voucher has a higher one 153ms",
+    "Tests  1 failed | 5 skipped (6)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "edit-takes-acting-user",
+   "file": "apps/api/src/modules/stock/tagSplit.ts",
+   "test": "test/tagSplit.routes.db.test.ts -t lifecycle",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N19 tag split through HTTP > runs the whole Tag Split lifecycle on the provisioned TSP book 1236ms",
+    "Tests  1 failed | 5 skipped (6)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "edit-resets-clock",
+   "file": "apps/api/src/modules/stock/tagSplit.ts",
+   "test": "test/tagSplit.routes.db.test.ts -t lifecycle",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N19 tag split through HTTP > runs the whole Tag Split lifecycle on the provisioned TSP book 1236ms",
+    "Tests  1 failed | 5 skipped (6)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "edit-does-not-release",
+   "file": "apps/api/src/modules/stock/tagSplit.ts",
+   "test": "test/tagSplit.routes.db.test.ts -t lifecycle",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N19 tag split through HTTP > runs the whole Tag Split lifecycle on the provisioned TSP book 1213ms",
+    "Tests  1 failed | 5 skipped (6)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "delete-no-audit",
+   "file": "apps/api/src/modules/stock/tagSplit.ts",
+   "test": "test/tagSplitLifecycle.db.test.ts -t V5",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N19 tag split (TR_TAG_SPLIT) \u2014 contract vectors > V5: delete writes DELETE_DATA, removes the write set and returns the database to its prior state 408ms",
+    "Tests  1 failed | 10 skipped (11)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "delete-audit-fine-is-fine",
+   "file": "apps/api/src/modules/stock/tagSplitRows.ts",
+   "test": "test/tagSplitLifecycle.db.test.ts -t V5",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N19 tag split (TR_TAG_SPLIT) \u2014 contract vectors > V5: delete writes DELETE_DATA, removes the write set and returns the database to its prior state 423ms",
+    "Tests  1 failed | 10 skipped (11)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "delete-audit-main-book",
+   "file": "apps/api/src/modules/stock/tagSplitRows.ts",
+   "test": "test/tagSplitLifecycle.db.test.ts -t V5",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N19 tag split (TR_TAG_SPLIT) \u2014 contract vectors > V5: delete writes DELETE_DATA, removes the write set and returns the database to its prior state 410ms",
+    "Tests  1 failed | 10 skipped (11)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "delete-ignores-lock-date",
+   "file": "apps/api/src/modules/stock/tagSplit.ts",
+   "test": "test/tagSplitLifecycle.db.test.ts -t V9",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N19 tag split (TR_TAG_SPLIT) \u2014 contract vectors > V9: the lock date refuses a save, and a delete of a voucher on or before the lock 358ms",
+    "Tests  1 failed | 10 skipped (11)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "seed-split-main-book",
+   "file": "apps/api/src/modules/ops/seedCompany.ts",
+   "test": "test/provisioning.db.test.ts -t Tag Split",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 company provisioning produces a postable company > creates the Tag Split book TR_TAG_SPLIT opens, with the absorption ledger slots 10ms",
+    "Tests  1 failed | 12 skipped (13)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "split-shares-cancel-right",
+   "file": "apps/api/src/modules/rbac/routePolicy.ts",
+   "test": "test/tagSplit.routes.db.test.ts -t own right",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N19 tag split through HTTP > keeps the screen to its own right 60ms",
+    "Tests  1 failed | 5 skipped (6)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "core-net-not-less-forced",
+   "file": "packages/core/src/tagSplitLine.ts",
+   "test": "test/tagSplitLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 tagSplitChild (CommPassTotal_Pr) > subtracts less weight and folds ghat into the purity fine 6ms",
+    "Tests  1 failed | 12 passed (13)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "core-fine-without-ghat",
+   "file": "packages/core/src/tagSplitLine.ts",
+   "test": "test/tagSplitLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 tagSplitChild (CommPassTotal_Pr) > subtracts less weight and folds ghat into the purity fine 5ms",
+    "Tests  1 failed | 12 passed (13)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "core-stone-net-not-moved",
+   "file": "packages/core/src/tagSplitLine.ts",
+   "test": "test/tagSplitLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 tagSplitStone (CommPassTotal_Rtn_Idtl) and its effect > moves stone conversion into the child less/net weight and net amount into OthAmt 7ms",
+    "Tests  1 failed | 12 passed (13)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "web-conserves-inverted",
+   "file": "apps/web/lib/tagSplitVoucher.ts",
+   "test": "test/tagSplitVoucher.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 child rows (CommPassTotal_Pr) > totals the children and reports conservation against the parent 5ms",
+    "Tests  1 failed | 9 passed (10)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "web-duplicate-counts-own-row",
+   "file": "apps/web/lib/tagSplitVoucher.ts",
+   "test": "test/tagSplitVoucher.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 parent fill > refuses a parent tag already on another row 5ms",
+    "Tests  1 failed | 9 passed (10)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  }
+ ]
+}

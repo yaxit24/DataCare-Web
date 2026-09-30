@@ -32,9 +32,10 @@ const genericPolicies = () => {
 };
 
 describe('generic report authorization contract', () => {
-  it('maps exactly 83 immutable report slugs to canonical form-catalog entries', () => {
-    expect(REPORT_SLUGS).toHaveLength(83);
-    expect(new Set(REPORT_SLUGS).size).toBe(83);
+  it('maps exactly 85 immutable report slugs to canonical form-catalog entries', () => {
+    // 83 plus balance-sheet and gstr1, whose filters and exports failed as `form: unresolved` (D4).
+    expect(REPORT_SLUGS).toHaveLength(85);
+    expect(new Set(REPORT_SLUGS).size).toBe(85);
     expect(Object.isFrozen(REPORT_FORM_BY_SLUG)).toBe(true);
     expect(Object.isFrozen(REPORT_SLUGS)).toBe(true);
 

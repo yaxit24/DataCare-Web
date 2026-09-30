@@ -1,0 +1,666 @@
+{
+ "kind": "datacare.parity-diff/1.0",
+ "comparedAt": "2026-09-28T22:25:33.724Z",
+ "desktop": {
+  "capturedAt": "2026-09-28T22:25:33.132Z",
+  "database": "Next25",
+  "engine": "sqlserver",
+  "appVersion": "Microsoft SQL Server 2022 (RTM-CU27) (KB5104824) - 16.0.4295.3 (X64) ",
+  "host": "127.0.0.1"
+ },
+ "web": {
+  "capturedAt": "2026-09-28T22:25:33.671Z",
+  "database": "datacare",
+  "engine": "postgres"
+ },
+ "matched": false,
+ "cases": [
+  {
+   "caseId": "n25-purc-035-00001",
+   "description": "",
+   "desktopVoucher": "035/00001",
+   "webVoucher": "035/00001",
+   "matched": false,
+   "tables": [
+    {
+     "table": "AC_DATA",
+     "presentOn": "both",
+     "desktopRows": 3,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [
+      "AC_CODE=000201 DR_AMT=0.00 CR_AMT=2000.00",
+      "AC_CODE=00008 DR_AMT=2000.00 CR_AMT=0.00"
+     ],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 25,
+     "fieldsExcluded": 4,
+     "differences": [
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000201 DR_AMT=0.00 CR_AMT=0.00",
+       "column": "LEDR_KEY",
+       "desktop": "01002025-202603500001         129",
+       "web": "01002025-202603500001         121",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "LOT_DETL",
+     "presentOn": "web-only",
+     "desktopRows": 0,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [
+      "content:"
+     ],
+     "missingColumns": [],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 0,
+     "differences": []
+    },
+    {
+     "table": "MAIN_STOCK",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 48,
+     "fieldsExcluded": 3,
+     "differences": [
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORG ITM_SIGN=+",
+       "column": "TBL_CODE",
+       "desktop": "001",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORG ITM_SIGN=+",
+       "column": "OTH_AMT",
+       "desktop": "2000.00",
+       "web": "0.00",
+       "scale": 2
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORG ITM_SIGN=+",
+       "column": "NET_AMT",
+       "desktop": "2000.00",
+       "web": "0.00",
+       "scale": 2
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORG ITM_SIGN=+",
+       "column": "ITM_LOT",
+       "desktop": "",
+       "web": "(null)",
+       "scale": 6
+      },
+      {
+       "table": "MAIN_STOCK",
+       "rowKey": "IT_CODE=ORG ITM_SIGN=+",
+       "column": "ITM_DISC",
+       "desktop": "0.000000",
+       "web": "(null)",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "PR_DATA",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 1,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [
+      "OTH_TAX_AMT",
+      "OTH_TAX_CODE",
+      "OTH_TAX_PRC",
+      "RE_TRFR",
+      "ZERO_RATED_AMT"
+     ],
+     "fieldsCompared": 65,
+     "fieldsExcluded": 8,
+     "differences": [
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "NET_AMT",
+       "desktop": "2000.00",
+       "web": "0.00",
+       "scale": 2
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "TOT_AMT",
+       "desktop": "2000.00",
+       "web": "0.00",
+       "scale": 2
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "BILL_OS",
+       "desktop": "2000.000000",
+       "web": "0.000000",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "EMP_CODE",
+       "desktop": "001",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "PR_DATA",
+       "rowKey": "single unmatched row",
+       "column": "OTH_AMT",
+       "desktop": "2000.00",
+       "web": "0.00",
+       "scale": 2
+      }
+     ]
+    },
+    {
+     "table": "PR_DETL",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [
+      "BAG_TOT",
+      "GRAND_TOTAL",
+      "ITM_CGST_AMT",
+      "ITM_IGST_AMT",
+      "ITM_REMARK",
+      "ITM_SGST_AMT",
+      "IT_TAX_AMT",
+      "RATE_WITH",
+      "TAXABL_RATE",
+      "TAX_CODE",
+      "TAX_FREE_AMT",
+      "TAX_RVRS",
+      "TAX_TYPE"
+     ],
+     "fieldsCompared": 105,
+     "fieldsExcluded": 6,
+     "differences": [
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "OTH_AMT",
+       "desktop": "2000.00",
+       "web": "0.00",
+       "scale": 2
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "TOT_AMT",
+       "desktop": "2000.00",
+       "web": "0.00",
+       "scale": 2
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "NET_AMT",
+       "desktop": "2000.00",
+       "web": "0.00",
+       "scale": 2
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "WITH_STOCK",
+       "desktop": "Y",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "IT_DESC",
+       "desktop": "GOLD ORNAMETNS",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "PR_DETL",
+       "rowKey": "SR_NO=1",
+       "column": "PR_CODE",
+       "desktop": "OR",
+       "web": "",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "ROJ_MEL_DATA",
+     "presentOn": "both",
+     "desktopRows": 3,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [
+      "LEDR_KEY=01002025-20260350000101         1",
+      "LEDR_KEY=01002025-20260350000113",
+      "LEDR_KEY=01002025-20260350000120         1"
+     ],
+     "extraRows": [
+      "LEDR_KEY=01002025-20260350000114         1"
+     ],
+     "missingColumns": [],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 1,
+     "differences": []
+    },
+    {
+     "table": "TEMP_BOOK_DATA",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 4,
+     "fieldsExcluded": 1,
+     "differences": []
+    }
+   ],
+   "totals": {
+    "tablesCompared": 6,
+    "tablesDesktopOnly": 0,
+    "tablesWebOnly": 1,
+    "rowsMissing": 5,
+    "rowsExtra": 2,
+    "fieldsCompared": 247,
+    "fieldsExcluded": 23,
+    "fieldDifferences": 17
+   }
+  },
+  {
+   "caseId": "n25-wh-034-00001",
+   "description": "",
+   "desktopVoucher": "034/00001",
+   "webVoucher": "034/00001",
+   "matched": false,
+   "tables": [
+    {
+     "table": "AC_DATA",
+     "presentOn": "both",
+     "desktopRows": 3,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [
+      "AC_CODE=000202 DR_AMT=500.00 CR_AMT=0.00",
+      "AC_CODE=00077 DR_AMT=0.00 CR_AMT=500.00"
+     ],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 25,
+     "fieldsExcluded": 4,
+     "differences": [
+      {
+       "table": "AC_DATA",
+       "rowKey": "AC_CODE=000202 DR_AMT=0.00 CR_AMT=0.00",
+       "column": "LEDR_KEY",
+       "desktop": "01002025-20260340000123",
+       "web": "01002025-20260340000151",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "MAIN_STOCK",
+     "presentOn": "desktop-only",
+     "desktopRows": 1,
+     "webRows": 0,
+     "forcedPairs": 0,
+     "missingRows": [
+      "IT_CODE=GR18K ITM_SIGN=-"
+     ],
+     "extraRows": [],
+     "missingColumns": [
+      "AC_CODE",
+      "BOOK_NAME",
+      "CO_BOOK",
+      "CO_CODE",
+      "CO_YEAR",
+      "DATA_TYPE",
+      "DESIGN_NO",
+      "EMP_CODE",
+      "GHT_PRC",
+      "ISR_NO",
+      "ITM_AMT",
+      "ITM_COLOR",
+      "ITM_DESC",
+      "ITM_DISC",
+      "ITM_FINE",
+      "ITM_GWT",
+      "ITM_LOT",
+      "ITM_MRP",
+      "ITM_NWT",
+      "ITM_PCS",
+      "ITM_QTY",
+      "ITM_RATE",
+      "ITM_SIGN",
+      "ITM_SIZE",
+      "ITM_TOUCH",
+      "ITM_WEST",
+      "IT_CODE",
+      "KR_COST",
+      "KR_FINE",
+      "KR_LBR_AMT",
+      "KR_NWT",
+      "KR_OTH_AMT",
+      "KR_TOUCH",
+      "KR_WEST",
+      "LBR_AMT",
+      "LBR_RATE",
+      "LC_CODE",
+      "NET_AMT",
+      "OTH_AMT",
+      "OTH_FINE",
+      "SR_NO",
+      "STK_DATE",
+      "TAG_NO",
+      "TBL_CODE",
+      "TR_TYPE",
+      "VCH_DATE",
+      "VCH_SRNO",
+      "VCH_TYPE"
+     ],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 3,
+     "differences": []
+    },
+    {
+     "table": "RATE_CUT_DATA",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 1,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [
+      "RE_TRFR"
+     ],
+     "fieldsCompared": 84,
+     "fieldsExcluded": 8,
+     "differences": [
+      {
+       "table": "RATE_CUT_DATA",
+       "rowKey": "single unmatched row",
+       "column": "SL_NET_AMT",
+       "desktop": "500.000000",
+       "web": "0.000000",
+       "scale": 6
+      },
+      {
+       "table": "RATE_CUT_DATA",
+       "rowKey": "single unmatched row",
+       "column": "SL_OTH_AMT",
+       "desktop": "500.000000",
+       "web": "0.000000",
+       "scale": 6
+      },
+      {
+       "table": "RATE_CUT_DATA",
+       "rowKey": "single unmatched row",
+       "column": "SL_TOT_AMT",
+       "desktop": "500.000000",
+       "web": "0.000000",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "RATE_CUT_ISU",
+     "presentOn": "both",
+     "desktopRows": 1,
+     "webRows": 1,
+     "forcedPairs": 1,
+     "missingRows": [],
+     "extraRows": [],
+     "missingColumns": [
+      "FIX_WEST_PRC"
+     ],
+     "fieldsCompared": 86,
+     "fieldsExcluded": 6,
+     "differences": [
+      {
+       "table": "RATE_CUT_ISU",
+       "rowKey": "single unmatched row",
+       "column": "TBL_CODE",
+       "desktop": "001",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "RATE_CUT_ISU",
+       "rowKey": "single unmatched row",
+       "column": "LBR_TYPE",
+       "desktop": "N",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "RATE_CUT_ISU",
+       "rowKey": "single unmatched row",
+       "column": "OTH_AMT",
+       "desktop": "500.00",
+       "web": "0.00",
+       "scale": 2
+      },
+      {
+       "table": "RATE_CUT_ISU",
+       "rowKey": "single unmatched row",
+       "column": "NET_AMT",
+       "desktop": "500.00",
+       "web": "0.00",
+       "scale": 2
+      },
+      {
+       "table": "RATE_CUT_ISU",
+       "rowKey": "single unmatched row",
+       "column": "ITM_REMARK",
+       "desktop": "GENTS RING 18K",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "RATE_CUT_ISU",
+       "rowKey": "single unmatched row",
+       "column": "VCH_SRNO",
+       "desktop": "100512000001.000000",
+       "web": "0.000000",
+       "scale": 6
+      },
+      {
+       "table": "RATE_CUT_ISU",
+       "rowKey": "single unmatched row",
+       "column": "KR_NAME",
+       "desktop": "YT",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "RATE_CUT_ISU",
+       "rowKey": "single unmatched row",
+       "column": "PR_CODE",
+       "desktop": "GR",
+       "web": "",
+       "scale": 6
+      },
+      {
+       "table": "RATE_CUT_ISU",
+       "rowKey": "single unmatched row",
+       "column": "FINE_CUT_PCS",
+       "desktop": "0.000000",
+       "web": "1.000000",
+       "scale": 6
+      }
+     ]
+    },
+    {
+     "table": "ROJ_MEL_DATA",
+     "presentOn": "both",
+     "desktopRows": 3,
+     "webRows": 1,
+     "forcedPairs": 0,
+     "missingRows": [
+      "LEDR_KEY=01002025-20260340000105         1",
+      "LEDR_KEY=01002025-20260340000127"
+     ],
+     "extraRows": [],
+     "missingColumns": [],
+     "fieldsCompared": 33,
+     "fieldsExcluded": 1,
+     "differences": [
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002025-20260340000103",
+       "column": "AC_NAME",
+       "desktop": "WSALE - SS",
+       "web": "SS",
+       "scale": 6
+      },
+      {
+       "table": "ROJ_MEL_DATA",
+       "rowKey": "LEDR_KEY=01002025-20260340000103",
+       "column": "ITM_FINE",
+       "desktop": "0.000",
+       "web": "10.793",
+       "scale": 3
+      }
+     ]
+    },
+    {
+     "table": "SL_IDTL",
+     "presentOn": "desktop-only",
+     "desktopRows": 1,
+     "webRows": 0,
+     "forcedPairs": 0,
+     "missingRows": [
+      "SR_NO=1 TAG_NO=GRG00001"
+     ],
+     "extraRows": [],
+     "missingColumns": [
+      "AC_CODE",
+      "BOOK_NAME",
+      "CO_BOOK",
+      "CO_CODE",
+      "CO_YEAR",
+      "DM_CODE",
+      "DM_COLOR",
+      "DM_LEB",
+      "DM_NAME",
+      "DM_ORIGIN",
+      "DM_REMARK",
+      "DM_SFNO",
+      "DM_SIZE",
+      "ENTRY_TYPE",
+      "INOUT_TYPE",
+      "ISR_NO",
+      "IT_AMT",
+      "IT_CODE",
+      "IT_CON_PRC",
+      "IT_CON_WT",
+      "IT_DISC_AMT",
+      "IT_DISC_PRC",
+      "IT_GWT",
+      "IT_LBR_AMT",
+      "IT_LBR_RATE",
+      "IT_NET_AMT",
+      "IT_PCS",
+      "IT_PCS_WT",
+      "IT_RATE",
+      "IT_RATE_TYPE",
+      "IT_TYPE",
+      "KR_AMT",
+      "KR_CON_PRC",
+      "KR_CON_WT",
+      "KR_LBR_AMT",
+      "KR_LBR_RATE",
+      "KR_LESS_PRC",
+      "KR_NET_AMT",
+      "KR_RATE",
+      "KR_RATE_TYPE",
+      "KR_WT",
+      "LC_CODE",
+      "SR_NO",
+      "TAG_NO",
+      "VCH_DATE",
+      "VCH_SRNO",
+      "VCH_TYPE"
+     ],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 5,
+     "differences": []
+    },
+    {
+     "table": "TEMP_BOOK_DATA",
+     "presentOn": "desktop-only",
+     "desktopRows": 1,
+     "webRows": 0,
+     "forcedPairs": 0,
+     "missingRows": [
+      "content:"
+     ],
+     "extraRows": [],
+     "missingColumns": [
+      "BOOK_NAME",
+      "CO_BOOK",
+      "CO_CODE",
+      "LC_CODE"
+     ],
+     "fieldsCompared": 0,
+     "fieldsExcluded": 1,
+     "differences": []
+    }
+   ],
+   "totals": {
+    "tablesCompared": 4,
+    "tablesDesktopOnly": 3,
+    "tablesWebOnly": 0,
+    "rowsMissing": 7,
+    "rowsExtra": 0,
+    "fieldsCompared": 228,
+    "fieldsExcluded": 28,
+    "fieldDifferences": 15
+   }
+  }
+ ],
+ "desktopOnlyCases": [],
+ "webOnlyCases": [],
+ "totals": {
+  "cases": 2,
+  "casesMatched": 0,
+  "tablesCompared": 10,
+  "tablesDesktopOnly": 3,
+  "tablesWebOnly": 1,
+  "rowsMissing": 12,
+  "rowsExtra": 2,
+  "fieldsCompared": 475,
+  "fieldsExcluded": 51,
+  "fieldDifferences": 32
+ }
+}

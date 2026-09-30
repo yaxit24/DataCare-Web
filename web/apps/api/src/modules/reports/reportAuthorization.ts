@@ -91,6 +91,10 @@ export const REPORT_FORM_BY_SLUG = Object.freeze({
   'top-items': 'Reports/Top Items',
   'trial-balance': 'Reports/Trial Balance',
   'trial-balance-full': 'Reports/Trial Balance (Full)',
+  // Both screens were missing from this map. Their filter request and their CSV/XLSX exports therefore
+  // failed with 403 `form: unresolved` (PARITY-EVALUATION-2026-09-28 D4).
+  'balance-sheet': 'Reports/Balance Sheet',
+  gstr1: 'Reports/GSTR-1',
 } as const satisfies Readonly<Record<string, CanonicalReportForm>>);
 
 export type ReportSlug = keyof typeof REPORT_FORM_BY_SLUG;

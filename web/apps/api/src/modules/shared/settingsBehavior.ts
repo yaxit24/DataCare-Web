@@ -1,3 +1,4 @@
+import { saleAmountBasis } from '@datacare/core';
 import type { VoucherScope } from '../vouchers/numbering.js';
 
 export const DEFAULT_CASH_LIMIT = 200000;
@@ -275,11 +276,16 @@ function ounceConversion(value: unknown): number {
  * :809-811 LOAN_INT_TYPE blank -> "M"; :841-843 DHIRN_COMPOUND blank -> "Y";
  * :857-859 PAN_CARD_VAL 0 -> 200000; :905-911 LAST_DAY_LOCK blank -> "N" and negative
  * CASH_LIMIT -> 0. CASH_LIMIT remains 200000 when blank to preserve the pre-setting web behaviour.
- * The six batch-2 settings use explicit blank sentinels where desktop defaults differ from today's web:
- * MS_OPNCOMP.cs:765-767 maps blank FINE_STK_TYPE to F (but RP_STOCK_FINE.cs:2963-2977 accepts
- * only A/N/G); :837-839 maps PURC_WITH_LBR to Y; :881-887 maps SL_AMT_TYPE to N and
- * PR_AMT_TYPE to F; :929-935 maps ALL_ROF_REMOVE to N and zero OZ_CON_VAL to 31.1035.
- * Configured values follow those desktop branches; truly blank values retain pre-setting web output.
+ * The batch-2 settings: MS_OPNCOMP.cs:765-767 maps blank FINE_STK_TYPE to F (but
+ * RP_STOCK_FINE.cs:2963-2977 accepts only A/N/G); :837-839 maps PURC_WITH_LBR to Y; :929-935 maps
+ * ALL_ROF_REMOVE to N and zero OZ_CON_VAL to 31.1035.
+ *
+ * SL_AMT_TYPE and PR_AMT_TYPE take the desktop defaults, blank -> N and blank -> F
+ * (MS_OPNCOMP.cs:881-888; the database backfills at Ac_Image.cs:6221 and :7101).
+ * - These previously kept a blank sentinel that priced a sale on fine weight. Every web-provisioned
+ *   company therefore billed 10 g at touch 91.6 and 6,000/g as 54,960, where the desktop bills 60,000
+ *   (PARITY-EVALUATION-2026-09-28 D6).
+ * - The purchase result does not change, because blank already priced fine.
  */
 export function resolveSettingsBehavior(values: Record<string, unknown>): SettingsBehavior {
   return {
@@ -313,8 +319,8 @@ export function resolveSettingsBehavior(values: Record<string, unknown>): Settin
      * returns the persisted fine for everything else, so 'F' and blank already computed identically.
      */
     fineStockType: enumValue(values.FINE_STK_TYPE, 'FINE_STK_TYPE', ['A', 'N', 'G', 'F'], ''),
-    saleAmountType: enumValue(values.SL_AMT_TYPE, 'SL_AMT_TYPE', ['N', 'G', 'F', 'P'], ''),
-    purchaseAmountType: enumValue(values.PR_AMT_TYPE, 'PR_AMT_TYPE', ['N', 'G', 'F', 'P'], ''),
+    saleAmountType: enumValue(values.SL_AMT_TYPE, 'SL_AMT_TYPE', ['N', 'G', 'F', 'P'], 'N'),
+    purchaseAmountType: enumValue(values.PR_AMT_TYPE, 'PR_AMT_TYPE', ['N', 'G', 'F', 'P'], 'F'),
     purchaseWithLabour: enumValue(values.PURC_WITH_LBR, 'PURC_WITH_LBR', ['Y', 'N'], 'Y') === 'Y',
     ounceConversion: ounceConversion(values.OZ_CON_VAL),
     // Desktop reads only the first character (UT_SETTING.cs:4914) and defaults to per-gram.
@@ -646,22 +652,31 @@ export interface AmountBasisInput {
 }
 
 /**
- * TR_SALE.cs:18367-18417: F uses fine (falling back to net+ghat when fine is zero), G uses
- * gross+ghat, and every other configured value (including desktop's P fall-through) uses net+ghat.
- * Blank deliberately returns fine to preserve the pre-setting web calculation.
+ * The quantity a retail sale line's rate multiplies, for the default gram RATE_TYPE.
+ *
+ * Uses the TR_SALE.cs `CommPassTotal` forward calculation (10716-10936), via
+ * `@datacare/core` `saleAmountBasis`:
+ * - F: fine (net + ghat when fine is 0)
+ * - G: gross + ghat
+ * - P: pieces
+ * - anything else: net + ghat
+ *
+ * This previously followed `NetAmtChange` (18367-18417), the reverse amount-to-rate path. That path
+ * prices P on net + ghat, which the forward calculation never does.
+ *
+ * `''` is not a company value: the loader maps blank to N. It remains only as the default of
+ * `computeLine` for callers that do not resolve CO_SET, which is the legacy Sale Return writer. It
+ * keeps the fine basis there; TR_SALE_RTN has its own grid rules (4915-4917, 6813-6821), and X13
+ * owns them.
  */
 export function saleAmountBase(input: AmountBasisInput, type: LineAmountType): number {
-  const fine = Number(input.fineWt ?? 0);
-  if (type === '') return fine;
-  const ghat = Number(input.ghtWt ?? 0);
-  if (type === 'F') return fine === 0 ? Number(input.netWt ?? 0) + ghat : fine;
-  if (type === 'G') return Number(input.grossWt ?? 0) + ghat;
-  return Number(input.netWt ?? 0) + ghat;
+  if (type === '') return Number(input.fineWt ?? 0);
+  return saleAmountBasis(input, type).quantity;
 }
 
 /**
- * TR_PURC.cs:7396: G uses gross, N uses net+ghat, and all other configured values (F/P) use fine.
- * Blank deliberately returns fine to preserve the pre-setting web calculation.
+ * TR_PURC.cs:7396: G uses gross, N uses net+ghat, and all other values (F/P) use fine.
+ * A blank company value is F (MS_OPNCOMP.cs:885-888), which also prices fine.
  */
 export function purchaseAmountBase(input: AmountBasisInput, type: LineAmountType): number {
   if (type === 'G') return Number(input.grossWt ?? 0);

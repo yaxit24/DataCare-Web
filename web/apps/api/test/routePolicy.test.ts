@@ -56,10 +56,16 @@ describe('route policy registry', () => {
   });
   it('classifies every declared endpoint and preserves the current exact route universe', () => {
     const routes = declaredRoutes();
-    // The labour preview adds exactly three read-only Sales Return routes; the strict numeric
-    // Sale Return update (card X13 steps 8-9) adds one guarded PUT.
-    expect(routes).toHaveLength(557);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(557);
+    // The labour preview adds exactly three read-only Sales Return routes; X15 adds the seven E CRNT
+    // entry-config/entry/create/update/delete/print/IRN-cancel routes, and the E INVOICE mode of the same
+    // form adds eleven /e-invoices routes (browse, read, TCS basis, entry lifecycle, print, IRN, cancel).
+    // The evaluation defects add six report screens: HUID, Item Stock Level, Bill Wise Profit, Physical
+    // Stock Verify and Stock Movement (D3, previously export-only), plus /reports/gstr1 (D4).
+    // X16 adds the four /wholesale-sales lifecycle routes (desktop "Wh Sales", its own right).
+    // N18 adds list, tag source, read and update for each TR_TAG_CAN menu (tag cancel, tag transfer).
+    // The strict numeric Sale Return update (card X13 steps 8-9) adds one guarded PUT.
+    expect(routes).toHaveLength(597);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(597);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -345,6 +351,46 @@ describe('route policy registry', () => {
       form: 'Transaction/E CrntNote',
       action: 'print',
     });
+  });
+
+  it('maps the E INVOICE mode of TR_SL_EBILL to Transaction/E Invoice rights (X15)', () => {
+    for (const [method, path, action] of [
+      ['GET', '/e-invoices', 'read'],
+      ['GET', '/e-invoices/entry-config', 'read'],
+      ['GET', '/e-invoices/tcs-basis', 'read'],
+      ['GET', '/e-invoices/:vchNo', 'read'],
+      ['GET', '/e-invoices/:vchNo/entry', 'read'],
+      ['POST', '/e-invoices', 'create'],
+      ['PUT', '/e-invoices/:vchNo', 'update'],
+      ['DELETE', '/e-invoices/:vchNo', 'delete'],
+      ['GET', '/e-invoices/:vchNo/print', 'print'],
+      ['POST', '/e-invoices/:vchNo/irn', 'print'],
+      ['POST', '/e-invoices/:vchNo/irn/cancel', 'print'],
+    ] as const)
+      expect(routePolicyFor(method, path)).toMatchObject({
+        kind: 'form',
+        form: 'Transaction/E Invoice',
+        action,
+        businessScope: true,
+      });
+  });
+
+  it('maps the E CRNT entry lifecycle to its own form rights (X15)', () => {
+    for (const [method, path, action] of [
+      ['GET', '/e-credit-notes/entry-config', 'read'],
+      ['GET', '/e-credit-notes/:vchNo/entry', 'read'],
+      ['POST', '/e-credit-notes', 'create'],
+      ['PUT', '/e-credit-notes/:vchNo', 'update'],
+      ['DELETE', '/e-credit-notes/:vchNo', 'delete'],
+      ['GET', '/e-credit-notes/:vchNo/print', 'print'],
+      ['POST', '/e-credit-notes/:vchNo/irn/cancel', 'print'],
+    ] as const)
+      expect(routePolicyFor(method, path)).toMatchObject({
+        kind: 'form',
+        form: 'Transaction/E CrntNote',
+        action,
+        businessScope: true,
+      });
   });
 
   it('maps the desktop Loan Received and Loan Issue transaction modes to their own rights', () => {
@@ -877,6 +923,14 @@ describe('route policy registry', () => {
       form: 'Cash / Bank/Rate Cut (price fixing)',
       action: 'update',
     });
+    // Desktop "Wh Sales" is its own menu and right (MDI_FORM.cs:8038-8046), not the Rate Cut right.
+    for (const [method, path, action] of [
+      ['POST', '/wholesale-sales', 'create'],
+      ['GET', '/wholesale-sales/:vchNo', 'read'],
+      ['PUT', '/wholesale-sales/:vchNo', 'update'],
+      ['DELETE', '/wholesale-sales/:vchNo', 'delete'],
+    ] as const)
+      expect(routePolicyFor(method, path)).toMatchObject({ form: 'Sales/Wholesale Sale', action });
   });
 
   it('maps the other-commission lifecycle to independent rights', () => {

@@ -1,7 +1,9 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { post, ApiError } from '../lib/api';
+import { financeMainBooks, initialFinanceMode } from '../lib/financeBooks';
+import { BookSelect } from './BookSelect';
 import { LookupPicker } from './LookupPicker';
 import { PartyBalance } from './PartyBalance';
 import { RateTicker } from './RateTicker';
@@ -24,6 +26,17 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
   const [partyName, setPartyName] = useState('');
   const [amount, setAmount] = useState('');
   const [mode, setMode] = useState('cash');
+  // The configured book the voucher is numbered and posted in. The desktop fixes it before the form
+  // opens (CurBookHelp by MAIN_BOOK). Without it every save was refused with HTTP 400
+  // (PARITY-EVALUATION-2026-09-28 D1).
+  const [coBook, setCoBook] = useState('');
+  // TR_CASH saves the operator's voucher date (mVchDate, TR_CASH.cs:3021). The form had no date field,
+  // so every receipt and payment was dated the moment it was saved.
+  const [vchDate, setVchDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const mainBooks = financeMainBooks(kind, mode);
+  useEffect(() => {
+    setMode(initialFinanceMode(window.location.search));
+  }, []);
   const [bankAc, setBankAc] = useState('');
   const [chqNo, setChqNo] = useState('');
   const [chqPrintName, setChqPrintName] = useState('');
@@ -48,7 +61,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
     },
     onEscape: () => {},
   });
-  const [res, setRes] = useState<any>(null);
+  const [res, setRes] = useState<{ vchNo: number; total?: number; coBook: string } | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const setM = (i: number, k: keyof MLine, v: string) =>
@@ -59,6 +72,10 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
     e.preventDefault();
     setErr('');
     setRes(null);
+    if (!coBook) {
+      setErr('select the configured book first');
+      return;
+    }
     setBusy(true);
     try {
       if (multi) {
@@ -75,17 +92,21 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
           setErr('add at least one line (party + amount)');
           return;
         }
-        const r = await post(`${ep}/multi`, {
+        const r = await post<{ vchNo: number; total?: number }>(`${ep}/multi`, {
+          coBook,
+          vchDate,
           mode,
           bankAc: bankAc || undefined,
           chqNo: chqNo || undefined,
           empCode: empCode || undefined,
           lines,
         });
-        setRes(r);
+        setRes({ ...r, coBook });
         setMlines([mblank()]);
       } else {
-        const r = await post(ep, {
+        const r = await post<{ vchNo: number; total?: number }>(ep, {
+          coBook,
+          vchDate,
           partyAc,
           partyName: partyName || undefined,
           amount: Number(amount),
@@ -104,10 +125,15 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
             ? { upiId: upiId || undefined, bankName: bankName || undefined }
             : {}),
         });
-        setRes(r);
+        setRes({ ...r, coBook });
       }
     } catch (e) {
-      setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
+      // `detail` carries the database reason behind an `invalid-data` refusal (txn.ts run()).
+      setErr(
+        e instanceof ApiError
+          ? e.body?.message || e.body?.detail || e.body?.error || e.message
+          : 'failed',
+      );
     } finally {
       setBusy(false);
     }
@@ -130,7 +156,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
         <div className="row">
           <div className="field">
             <label>Mode</label>
-            <select value={mode} onChange={(e) => setMode(e.target.value)}>
+            <select aria-label="Mode" value={mode} onChange={(e) => setMode(e.target.value)}>
               <option value="cash">CASH</option>
               <option value="bank">BANK</option>
               <option value="card">CARD</option>
@@ -138,10 +164,29 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
               <option value="cheque">CHEQUE</option>
             </select>
           </div>
+          <div className="field">
+            <label>Book</label>
+            <BookSelect value={coBook} onChange={setCoBook} mainBooks={mainBooks} />
+          </div>
+          <div className="field">
+            <label>Date</label>
+            <input
+              type="date"
+              aria-label="Voucher date"
+              value={vchDate}
+              onChange={(e) => setVchDate(e.target.value)}
+              required
+            />
+          </div>
           {bankNeeded && (
             <div className="field">
               <label>Bank AC</label>
-              <LookupPicker entity="accounts" value={bankAc} onChange={setBankAc} />
+              <LookupPicker
+                entity="accounts"
+                value={bankAc}
+                onChange={setBankAc}
+                ariaLabel="Bank account"
+              />
             </div>
           )}
           {mode === 'cheque' && (
@@ -172,6 +217,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
                   entity="accounts"
                   value={partyAc}
                   onChange={setPartyAc}
+                  ariaLabel="Party account"
                   onPick={(r) => {
                     const name = String(r.name || '');
                     setPartyName(name);
@@ -186,6 +232,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
               <div className="field">
                 <label>Amount</label>
                 <input
+                  aria-label="Amount"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   required={!multi}
@@ -224,7 +271,11 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
               </div>
               <div className="field">
                 <label>Kasar ₹ (write-off)</label>
-                <input value={kasar} onChange={(e) => setKasar(e.target.value)} />
+                <input
+                  aria-label="Kasar ₹ (write-off)"
+                  value={kasar}
+                  onChange={(e) => setKasar(e.target.value)}
+                />
               </div>
             </>
           )}
@@ -322,7 +373,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
           </div>
         )}
         <div style={{ marginTop: 10 }}>
-          <button className="primary" disabled={busy}>
+          <button className="primary" disabled={busy || !coBook}>
             {busy ? 'Saving…' : `Save ${title}`}
           </button>
         </div>
@@ -340,7 +391,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
               className="ghost"
               onClick={() =>
                 window.open(
-                  `/api/finance/${kind}-voucher?coBook=${kind === 'receipt' ? 'RCT' : 'PAY'}&vchNo=${encodeURIComponent(String(res.vchNo))}&format=html`,
+                  `/api/finance/${kind}-voucher?coBook=${encodeURIComponent(res.coBook)}&vchNo=${encodeURIComponent(String(res.vchNo))}&format=html`,
                   '_blank',
                 )
               }
