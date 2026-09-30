@@ -52,6 +52,20 @@ incomplete result in a supported branch; **S3** missing variant, parity detail o
 | G16 | S2 | Quotation conversion | Sales/purchase quotation feed invoices | No conversion path from `/sales-quotations` or `/purchase-quotations` | Explicit source selection and lineage into sale/purchase | N46 |
 | G17 | S2 | Other Income print | `EInvOthIncom.rpt` | No print route or button | Printable voucher | N43 |
 | G18 | S1 | CI integrity | — | `main` red on `depth:parity`; dead-cell gate hidden | Keep `main` green; every slice lands through a PR with all gates | N30 |
+| G19 | S2 | Book-less screens | Every writer reads its book from `BOOK_DATA` | Several screens post without `coBook` while their writer requires it (karigar issue/receive, job-work issue/receive, employee-jv, ledger-adjust, hallmark purchase); some writers hard-code literal books (counter-transfer `CTR`, tour-return `TRR`, membership `PNT`, stock-adjust `SAJ`, mfg order-issue `DIS`); karigar print hard-codes `coBook=KIS`; `seedCompany` omitted OTH EXP/OTH INC/TAG PURCHASE books so a fresh company saw "No active books" | Each screen sends the configured book; each writer resolves it; provisioning creates every book its screens post to | N32 |
+
+## 2b. Status update — 2026-10-01 (this PR's companion work)
+
+Landed on `main` since this register was written, each through its own green-CI PR:
+
+- **G18** — fixed by PR #10 (`main` CI green; `depth:parity` and dead-cell gates pass).
+- **G01 / N31** — printable documents read by the complete voucher key; print routes refuse a missing book. Evidence: `web/apps/api/src/modules/documents/voucherDocument.ts`, `web/apps/api/test/voucherDocumentScope.db.test.ts`.
+- **G03 / N33** and **G17** — Other Expenses posts through the shared desktop TR_OTH_PURC writer with full lifecycle and print for both OTH EXP and OTH INC. Evidence: `web/apps/api/src/modules/purchase/otherIncome.ts`, `web/apps/api/test/otherIncome.db.test.ts`, `web/apps/api/test/otherExpensesPrint.routes.db.test.ts`.
+- **G02 / N32** — hallmark purchase accepts TAG PURCHASE books with a full lifecycle. Evidence: `web/apps/api/test/purchase.lifecycle.db.test.ts`.
+- **G05 / N35** — Sales Return imports from the chosen SALES book; the Purchase Return page now sends `origBook`/`origVchNo`. Evidence: `web/apps/api/test/salesFamilyLifecycle.db.test.ts`.
+- **G19 (partial)** — provisioning now seeds OTH EXP, OTH INC and TAG PURCHASE books. Evidence: `web/apps/api/src/modules/ops/seedCompany.ts`, `web/apps/api/test/provisioning.db.test.ts`. The book-less screen writers and literal-book writers remain open.
+
+All of the above are `implemented-unverified`: DB/route tested with mutation checks and a real-stack browser pass for Other Expenses, but no slice is promoted to accepted. **G04 (Purchase Return day book / read-edit-print routes)** and the remaining gaps stay open.
 
 ## 3. New slices
 
