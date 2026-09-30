@@ -222,6 +222,13 @@ export type SavedSaleReturnObservation = {
   settings: SavedSaleReturnRaw[];
   /** Domain/date restriction only; it is independent of an operator's form rights. */
   editReason: string | null;
+  /**
+   * The same domain/date restriction WITHOUT the conservative stored USER_UPDATE=N refusal.
+   * The metadata/preview paths keep using `editReason`; the separately versioned numeric
+   * writer (card X13, Option A) interprets a stored USER_UPDATE=N through fresh normal-form
+   * Update rights instead, so it needs the remaining restrictions on their own.
+   */
+  domainReason: string | null;
 };
 async function snapshot(
   tx: any,
@@ -278,9 +285,9 @@ async function snapshot(
     header.EMP_CODE,
   );
   const lockReason = await periodReason(tx, scope, header);
+  const domainReason = emptyIncomingReason ?? lockReason;
   const globalReason =
-    emptyIncomingReason ??
-    lockReason ??
+    domainReason ??
     (trimmed(header.USER_UPDATE) === 'N' ? 'This saved voucher does not permit editing.' : null);
   const incoming = rawRows(tables.SL_DETL_RTN).sort((a, b) => Number(a.SR_NO) - Number(b.SR_NO));
   const lineReason = (row: SavedSaleReturnRaw): string | null => {
@@ -376,6 +383,7 @@ async function snapshot(
     tables,
     settings: rawRows(settingsRows),
     editReason: globalReason,
+    domainReason,
     dto: {
       scope: { ...scope },
       voucherNo,
