@@ -1,0 +1,655 @@
+{
+ "card": "X16",
+ "runner": "mutation-check.py (run through local-test-env.sh against disposable PostgreSQL 16, app_user, forced RLS)",
+ "mutations": 53,
+ "caught": 53,
+ "results": [
+  {
+   "id": "legs-positional",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/rateCut.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× Wh_Sales_Ledr legs against the desktop rows (contract V1-V6) > V1 Next23 034/4 — an issue-only tag sale posts leg 23 alone, with FINE_RATE 0 9ms",
+    "× Wh_Sales_Ledr legs against the desktop rows (contract V1-V6) > V2 Next23 034/5 — received 24.000, 0.541 cut at 6500, 3517 cash: legs 01, 02, 29, 43, 44 2ms",
+    "× Wh_Sales_Ledr legs against the desktop rows (contract V1-V6) > V3 Next23 034/6 — two tags, 20.000 received, 4.960 cut at 6500: legs 01, 02, 23, 29 2ms",
+    "× Wh_Sales_Ledr legs against the desktop rows (contract V1-V6) > V4 Next25 034/1 — other charges on a tag line post legs 17/18 on slot 11 1ms"
+   ]
+  },
+  {
+   "id": "fine-rate-on-every-leg",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/rateCut.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× Wh_Sales_Ledr legs against the desktop rows (contract V1-V6) > V2 Next23 034/5 — received 24.000, 0.541 cut at 6500, 3517 cash: legs 01, 02, 29, 43, 44 9ms",
+    "× Wh_Sales_Ledr legs against the desktop rows (contract V1-V6) > V3 Next23 034/6 — two tags, 20.000 received, 4.960 cut at 6500: legs 01, 02, 23, 29 2ms",
+    "× Wh_Sales_Ledr legs against the desktop rows (contract V1-V6) > V6 Live24 064/00004 — the header-only purchase-side cut is legs 08, 09, 45, 46, 51, 52 = 30780 2ms",
+    "× Wh_Sales_Ledr rules not visible on the captured vouchers (contract W4-W6) > a priced line folds into leg 01 with the handled fine on leg 23 1ms"
+   ]
+  },
+  {
+   "id": "settlement-without-fine-rate",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t V2",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > V2 034/5 — received 24.000 and 0.541 cut at 6500: DR_AMT 3517 and legs 01/02/29/43/44 274ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯",
+    "764|     // 0.541 × 6500 is 3516.5000000000005 in double arithmetic; Math.R…"
+   ]
+  },
+  {
+   "id": "tot-fine-cr-omits-received",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/rateCut.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× header totals are derived, as BILL_TOTAL derives them > SL_NET_AMT includes the cut money; bill outstanding is net less settlement; fine totals add both 7ms",
+    "Tests  1 failed | 20 passed (21)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "sale-kasar-old-direction",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/rateCut.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× Wh_Sales_Ledr rules not visible on the captured vouchers (contract W4-W6) > W6 kasar follows its sign: received +15 is 47/48, −15 is 49/50, payment 5 is 51/52 8ms",
+    "Tests  1 failed | 20 passed (21)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "no-stock-rows",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t V1",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > V1 034/4 — tags sold by number move out of stock with their identity, and post leg 23 alone 276ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "no-tag-reservation",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t W1",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > W1 a sold tag cannot be sold again, and one voucher cannot carry the same tag twice 235ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "tag-stock-not-restored-on-delete",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t TAG_STOCK-only",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > a TAG_STOCK-only tag is removed on sale and re-inserted with its weights on delete 286ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "duplicate-tag-accepted",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t W1",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > W1 a sold tag cannot be sold again, and one voucher cannot carry the same tag twice 295ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "guard-accepts-any-book",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t W9",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > W9 each menu posts only to its own book, as CurBookHelp scopes it (MDI_FORM.cs:8038-8118) 226ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "header-only-refused",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t V6",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > V6 Live24 064/00004 — a header-only purchase-side cut posts the six real legs and four real Rojmel rows 197ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "contra-legs-carry-party",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t V2",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > V2 034/5 — received 24.000 and 0.541 cut at 6500: DR_AMT 3517 and legs 01/02/29/43/44 275ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "bill-os-from-request",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t V3",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > V3 034/6 — two tags, 20.000 received, 4.960 cut at 6500: legs 01/02/23/29 and three stock rows 286ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "received-hallmark-weight-gross",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t V2",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > V2 034/5 — received 24.000 and 0.541 cut at 6500: DR_AMT 3517 and legs 01/02/29/43/44 276ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "wholesale-tot-amt-computed",
+   "file": "packages/core/src/wholesaleLine.ts",
+   "test": "test/wholesaleLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× issued-line rate, amounts and other fine > turns other charges quoted per metal unit into fine (col 39) and keeps MRP out of the net 7ms",
+    "Tests  1 failed | 18 passed (19)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "issued-tot-amt-is-net",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t V4",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > V4 Next25 034/1 — other charges on a tag: legs 17/18 on slot 11, NET_AMT 500 with TOT_AMT 0 269ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "stock-received-kr-from-kr",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t V2",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > V2 034/5 — received 24.000 and 0.541 cut at 6500: DR_AMT 3517 and legs 01/02/29/43/44 273ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "tag-defaults-ignored",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t V1",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > V1 034/4 — tags sold by number move out of stock with their identity, and post leg 23 alone 271ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "delete-audit-main-book",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t W3/W2",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > W3/W2 an edit gives back a dropped tag and keeps the clock and user; delete gives back the rest and audits 348ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "trade-fine-ignored",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t W5",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > W5 CO_SET.TRAD_FINE = Y adds the mirrored fine legs 386ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "rojmel-fed-line-fine",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t V6",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > V6 Live24 064/00004 — a header-only purchase-side cut posts the six real legs and four real Rojmel rows 260ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "return-counts-signs",
+   "file": "apps/api/src/modules/sales/wholesaleSaleReturn.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t W8",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > W8 a tag sold wholesale can be returned once, and is back in stock after the return 296ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "returned-tag-ambiguous",
+   "file": "apps/api/src/modules/stock/stock.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t W8",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > W8 a tag sold wholesale can be returned once, and is back in stock after the return 298ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "seed-wrong-main-book",
+   "file": "apps/api/src/modules/ops/seedCompany.ts",
+   "test": "test/wholesaleRateCut.routes.db.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× X16 wholesale sale and rate cut through HTTP > posts a wholesale sale that moves the tag out, cuts the balance fine into money, and reopens it 31ms",
+    "× X16 wholesale sale and rate cut through HTTP > refuses the sold tag, the other workflow’s book and the other workflow’s user with 400/403 30ms",
+    "× X16 wholesale sale and rate cut through HTTP > an edit that drops the tag returns it to stock; the delete audits the signed-in user 10ms",
+    "Tests  3 failed | 1 passed (4)"
+   ]
+  },
+  {
+   "id": "wholesale-rights-shared",
+   "file": "apps/api/src/modules/rbac/routePolicy.ts",
+   "test": "test/wholesaleRateCut.routes.db.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× X16 wholesale sale and rate cut through HTTP > posts a wholesale sale that moves the tag out, cuts the balance fine into money, and reopens it 22ms",
+    "× X16 wholesale sale and rate cut through HTTP > refuses the sold tag, the other workflow’s book and the other workflow’s user with 400/403 19ms",
+    "× X16 wholesale sale and rate cut through HTTP > an edit that drops the tag returns it to stock; the delete audits the signed-in user 9ms",
+    "Tests  3 failed | 1 passed (4)"
+   ]
+  },
+  {
+   "id": "core-less-weight-ignored",
+   "file": "packages/core/src/wholesaleLine.ts",
+   "test": "test/wholesaleLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× issued-line fine (TR_WH_SALE.cs:9436-9660) > takes less weight off and adds hallmark fine (cols 24 and 25) 8ms",
+    "× issued-line rate, amounts and other fine > prices by rate type, in the desktop operand order (:9690-9716) 1ms",
+    "Tests  2 failed | 17 passed (19)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "core-net-labour-without-ghat",
+   "file": "packages/core/src/wholesaleLine.ts",
+   "test": "test/wholesaleLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× issued-line rate, amounts and other fine > computes labour from its rate and basis (:9760-9800) 6ms",
+    "Tests  1 failed | 18 passed (19)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "core-kg-labour-basis-inverted",
+   "file": "packages/core/src/wholesaleLine.ts",
+   "test": "test/wholesaleLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× issued-line rate, amounts and other fine > computes labour from its rate and basis (:9760-9800) 5ms",
+    "Tests  1 failed | 18 passed (19)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "core-priced-line-fine-counted",
+   "file": "packages/core/src/wholesaleLine.ts",
+   "test": "test/wholesaleLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× grid totals (MSG_TOT_FILL / MSG_PR_TOT_FILL) > counts only unpriced lines in the fine balance, plus every other fine (:8344-8346) 7ms",
+    "Tests  1 failed | 18 passed (19)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "core-conversion-ignored",
+   "file": "packages/core/src/wholesaleLine.ts",
+   "test": "test/wholesaleLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× issued-line rate, amounts and other fine > a conversion decides the rate: Math.Round(ConRate / Con% × 100, 2) (:9591) 5ms",
+    "× issued-line rate, amounts and other fine > prices by rate type, in the desktop operand order (:9690-9716) 1ms",
+    "× received line (TR_WH_SALE.cs:6857-7040) > takes less touch off the purity and backs tax out of the net 3ms",
+    "Tests  3 failed | 16 passed (19)"
+   ]
+  },
+  {
+   "id": "core-receive-less-touch-ignored",
+   "file": "packages/core/src/wholesaleLine.ts",
+   "test": "test/wholesaleLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× received line (TR_WH_SALE.cs:6857-7040) > takes less touch off the purity and backs tax out of the net 8ms",
+    "× received line (TR_WH_SALE.cs:6857-7040) > takes the ghat as a typed weight: the receive grid has no ghat % (col 11, :6875) 1ms",
+    "Tests  2 failed | 17 passed (19)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "core-other-fine-stays-in-money",
+   "file": "packages/core/src/wholesaleLine.ts",
+   "test": "test/wholesaleLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× grid totals (MSG_TOT_FILL / MSG_PR_TOT_FILL) > counts only unpriced lines in the fine balance, plus every other fine (:8344-8346) 7ms",
+    "Tests  1 failed | 18 passed (19)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "core-receive-tax-not-backed-out",
+   "file": "packages/core/src/wholesaleLine.ts",
+   "test": "test/wholesaleLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× received line (TR_WH_SALE.cs:6857-7040) > takes less touch off the purity and backs tax out of the net 7ms",
+    "Tests  1 failed | 18 passed (19)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯",
+    "177|     // rate 6001 / 80.75 × 100 = 7431.58; 3.924 × 7431.58 = 29161.52 →…"
+   ]
+  },
+  {
+   "id": "core-stored-fine-ignored",
+   "file": "packages/core/src/wholesaleLine.ts",
+   "test": "test/wholesaleLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× issued-line fine (TR_WH_SALE.cs:9436-9660) > keeps a tag’s stored fine, until a hallmark fine forces the formula (:10697, :9540) 5ms",
+    "Tests  1 failed | 18 passed (19)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "core-money-half-up",
+   "file": "packages/core/src/wholesaleLine.ts",
+   "test": "test/wholesaleLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× issued-line rate, amounts and other fine > rounds money half-to-even, as Math.Round does 5ms",
+    "× settlement band (MSG2_TOTAL, BILL_TOTAL :15633-15667) > rounds the net half-to-even (Math.Round) and keeps paise in the tender (Format \"0.00\") 2ms",
+    "Tests  2 failed | 17 passed (19)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "wholesale-line-math-off",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t a tag brings its labour",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > a tag brings its labour, other charges, MRP, cost and stored fine; a priced line is settled in rupees 275ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "fine-rate-line-fallback",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/rateCutSettlement.db.test.ts -t FINE_RATE the header rate",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× rate-cut settlement persistence > keeps FINE_RATE the header rate only: a priced line without one leaves it 0 on the header and every leg 180ms",
+    "Tests  1 failed | 19 skipped (20)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "party-mobile-not-defaulted",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t a tag brings its labour",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > a tag brings its labour, other charges, MRP, cost and stored fine; a priced line is settled in rupees 279ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "tag-stored-fine-not-copied",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t a tag brings its labour",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > a tag brings its labour, other charges, MRP, cost and stored fine; a priced line is settled in rupees 284ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "tag-labour-rate-not-copied",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t a tag brings its labour",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > a tag brings its labour, other charges, MRP, cost and stored fine; a priced line is settled in rupees 286ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "available-tags-lists-sold",
+   "file": "apps/api/src/modules/masters/lookup.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t tag picker",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > the tag picker offers only tags that can be issued, with the figures the grid fills 289ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "available-tags-any-location",
+   "file": "apps/api/src/modules/masters/lookup.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t tag picker",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > the tag picker offers only tags that can be issued, with the figures the grid fills 281ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "available-tags-no-web-tags",
+   "file": "apps/api/src/modules/masters/lookup.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t tag picker",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > the tag picker offers only tags that can be issued, with the figures the grid fills 279ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "band-net-half-up",
+   "file": "packages/core/src/wholesaleLine.ts",
+   "test": "test/wholesaleLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× settlement band (MSG2_TOTAL, BILL_TOTAL :15633-15667) > rounds the net half-to-even (Math.Round) and keeps paise in the tender (Format \"0.00\") 7ms",
+    "Tests  1 failed | 18 passed (19)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "band-os-omits-kasar",
+   "file": "packages/core/src/wholesaleLine.ts",
+   "test": "test/wholesaleLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× settlement band (MSG2_TOTAL, BILL_TOTAL :15633-15667) > Live24 064/00004: Payment net 14965 less cash 15800 and kasar 15 leaves Os −850 7ms",
+    "Tests  1 failed | 18 passed (19)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "band-diff-side-inverted",
+   "file": "packages/core/src/wholesaleLine.ts",
+   "test": "test/wholesaleLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× settlement band (MSG2_TOTAL, BILL_TOTAL :15633-15667) > V2 034/5: 0.541 cut at 6500 is Received net 3517, owed by the party 7ms",
+    "× settlement band (MSG2_TOTAL, BILL_TOTAL :15633-15667) > Live24 064/00004: Payment net 14965 less cash 15800 and kasar 15 leaves Os −850 2ms",
+    "× settlement band (MSG2_TOTAL, BILL_TOTAL :15633-15667) > pays the party when the Payment outstanding is the larger 2ms",
+    "Tests  3 failed | 16 passed (19)"
+   ]
+  },
+  {
+   "id": "band-tot-fine-omits-settled",
+   "file": "packages/core/src/wholesaleLine.ts",
+   "test": "test/wholesaleLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× settlement band (MSG2_TOTAL, BILL_TOTAL :15633-15667) > V2 034/5: 0.541 cut at 6500 is Received net 3517, owed by the party 7ms",
+    "Tests  1 failed | 18 passed (19)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "core-ghat-weight-ignored",
+   "file": "packages/core/src/wholesaleLine.ts",
+   "test": "test/wholesaleLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× received line (TR_WH_SALE.cs:6857-7040) > takes the ghat as a typed weight: the receive grid has no ghat % (col 11, :6875) 7ms",
+    "Tests  1 failed | 18 passed (19)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "tender-rounded-to-rupees",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t paise",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > tender keeps its paise: cash 1000.50 and kasar 0.25 post exactly, and the outstanding follows 271ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "kasar-rounded-to-rupees",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t paise",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > tender keeps its paise: cash 1000.50 and kasar 0.25 post exactly, and the outstanding follows 276ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "company-labour-basis-ignored",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t company basis",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > a new row computes labour on the company basis, and a typed ghat weight survives reopen and edit 284ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "typed-ghat-weight-ignored",
+   "file": "apps/api/src/modules/sales/rateCut.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t company basis",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > a new row computes labour on the company basis, and a typed ghat weight survives reopen and edit 279ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  },
+  {
+   "id": "ambiguous-instances-unlabelled",
+   "file": "apps/api/src/modules/masters/lookup.ts",
+   "test": "test/wholesaleRateCutStock.db.test.ts -t shared tag number",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "× wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > lists each live instance of a shared tag number with its serial, and sells exactly the one picked 207ms",
+    "Tests  1 failed | 15 skipped (16)",
+    "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯"
+   ]
+  }
+ ]
+}

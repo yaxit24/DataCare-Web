@@ -307,12 +307,16 @@ import { deleteBillSettlement, listOpenBills, settleBills } from '../modules/fin
 import {
   deleteBullionSale,
   deleteRateCut,
+  deleteWholesaleSale,
   editBullionSale,
   editRateCut,
+  editWholesaleSale,
   getBullionSale,
   getRateCut,
+  getWholesaleSale,
   postBullionSale,
   postRateCut,
+  postWholesaleSale,
 } from '../modules/sales/rateCut.js';
 import {
   issueKarigar,
@@ -862,6 +866,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   const rateCutInput = (req: FastifyRequest, b: Record<string, any>) => ({
     scope: scopeOf(req),
+    // MAIN_USER is the signed-in user (TR_WH_SALE.cs:12004), never a body field.
+    mainUser: sess(req).sub,
     vchDate: b.vchDate,
     acCode: b.acCode,
     acName: b.acName,
@@ -7199,6 +7205,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
         book: body(req).book,
+        // DELETE_DATA.DELETE_USER is the signed-in user (TR_WH_SALE.cs:13569 `MCo_User`).
+        deleteUser: sess(req).sub,
       }),
     );
   });
@@ -7209,6 +7217,35 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
         book: body(req).book,
+        deleteUser: sess(req).sub,
+      }),
+    );
+  });
+  // Desktop "Wh Sales" (TR_WH_SALE on a WH SALES book). Same voucher family as the rate cut; its own right.
+  app.post('/wholesale-sales', auth, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    const b = body(req);
+    return run(reply, 201, () => postWholesaleSale(prisma, rateCutInput(req, b)));
+  });
+  app.get('/wholesale-sales/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getWholesaleSale(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.put('/wholesale-sales/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      editWholesaleSale(prisma, rateCutInput(req, b), (req.params as any).vchNo),
+    );
+  });
+  app.delete('/wholesale-sales/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      deleteWholesaleSale(prisma, {
+        scope: scopeOf(req),
+        vchNo: (req.params as any).vchNo,
+        book: body(req).book,
+        deleteUser: sess(req).sub,
       }),
     );
   });

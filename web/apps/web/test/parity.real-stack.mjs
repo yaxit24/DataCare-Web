@@ -31,6 +31,12 @@ import {
   seedCashReceiptPayment,
 } from './cash-receipt-payment.journey.mjs';
 import {
+  cleanupWholesaleRateCut,
+  exerciseWholesaleRateCut,
+  seedWholesaleRateCut,
+  wholesaleRateCutFixtureTables,
+} from './wholesale-rate-cut.journey.mjs';
+import {
   cleanupSaleAmountBasis,
   exerciseSaleAmountBasis,
   saleAmountBasisFixtureTables,
@@ -135,6 +141,7 @@ const tables = [
   ...eInvoiceEntryFixtureTables,
   ...cashReceiptPaymentFixtureTables,
   ...saleAmountBasisFixtureTables,
+  ...wholesaleRateCutFixtureTables,
   'COL_MAST',
   'CO_SET_NEW',
   'TAG_IMAGE_DATA',
@@ -553,6 +560,12 @@ try {
   } finally {
     await cleanupSaleAmountBasis(sql);
   }
+  await seedWholesaleRateCut(sql);
+  try {
+    result.wholesaleRateCut = await exerciseWholesaleRateCut(page, { checkpoint, owner, tenantId });
+  } finally {
+    await cleanupWholesaleRateCut(sql);
+  }
   await seedSalesOrder(sql);
   await seedSalesOrderDesign(sql);
   result.salesOrderDesign = await exerciseSalesOrderDesign(page, { checkpoint, coBook: 'S41' });
@@ -630,6 +643,7 @@ try {
     ['sales-return-replay', result.salesReturnReplay],
     ['sales-return-saved', result.salesReturnSaved],
     ['tour-order', result.tourOrder],
+    ['wholesale-rate-cut', result.wholesaleRateCut],
   ].map(([journeyId, detail]) => {
     const summary = summarizeJourneyEvidence(journeyId, detail);
     journeySummaries.push(summary);
@@ -647,7 +661,7 @@ try {
   );
   result.status = 'passed';
   console.log(
-    'PARITY_REAL_STACK_PASSED: real login, Design Book calculation/repeat, Sales design selection and lifecycle, Tour Order lifecycle, credit-note browse, E CRNT create/print/edit/reopen/delete and E INVOICE create/IRN/cancel/reopen/delete, cash receipt/payment/contra with configured books, sale amount basis, saved order and generic/repair images with conflicts, saved incoming Return metadata, Setting lot sources, family-qualified column settings, saved incoming Return calculation, bill and resolved labour preview; zero mocked requests',
+    'PARITY_REAL_STACK_PASSED: real login, Design Book calculation/repeat, Sales design selection and lifecycle, Tour Order lifecycle, credit-note browse, E CRNT create/print/edit/reopen/delete and E INVOICE create/IRN/cancel/reopen/delete, cash receipt/payment/contra with configured books, sale amount basis, wholesale sale tag/stock/ledger lifecycle and header-only rate cut, saved order and generic/repair images with conflicts, saved incoming Return metadata, Setting lot sources, family-qualified column settings, saved incoming Return calculation, bill and resolved labour preview; zero mocked requests',
   );
 } catch (error) {
   result.status = 'failed';

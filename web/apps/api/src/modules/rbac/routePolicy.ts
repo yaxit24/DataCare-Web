@@ -297,6 +297,14 @@ route('Sales/Tour / Approval Sale', [
   'POST /tour/:vchNo/bill',
 ]);
 route('Sales/Approval Return', ['POST /tour/return', 'DELETE /tour/return/:vchNo']);
+// Desktop menu "Wh Sales" opens TR_WH_SALE scoped to MAIN_BOOK 'WH SALES' (MDI_FORM.cs:8038-8046), under its
+// own right; "Rate Cut" opens the same form scoped to 'RATE CUT' (:8110-8118). One right no longer grants both.
+route('Sales/Wholesale Sale', [
+  'POST /wholesale-sales',
+  'GET /wholesale-sales/:vchNo',
+  'PUT /wholesale-sales/:vchNo',
+  'DELETE /wholesale-sales/:vchNo',
+]);
 route('Sales/Wholesale Sale Return', [
   'POST /sales/wholesale-sale-return',
   'GET /sales/wholesale-sale-return/:vchNo',
