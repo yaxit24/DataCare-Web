@@ -372,6 +372,10 @@ const SRNO = 100312000009;
     });
     const other = owner.$transaction(
       async (tx) => {
+        // The deadlock detector runs in whichever waiter reaches deadlock_timeout first and aborts
+        // THAT transaction. Give this helper a longer timeout than the server's default so the save
+        // under test is always the victim; otherwise a loaded runner can abort this helper instead.
+        await tx.$executeRawUnsafe("SET LOCAL deadlock_timeout = '10s'");
         await tx.$executeRawUnsafe('SELECT pg_advisory_xact_lock(hashtext($1))', key(SECOND));
         holding();
         for (let i = 0; i < 400 && (await waitingFor(SECOND)) === 0; i++)

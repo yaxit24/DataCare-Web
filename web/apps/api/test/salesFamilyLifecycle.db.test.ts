@@ -476,6 +476,55 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
     expect(dr).toBeCloseTo(cr, 6);
   });
 
+  it('persists every return-grid column the form offers instead of discarding it', async () => {
+    const created = await createSaleReturn(runtime, returnInput(), [
+      {
+        itCode: 'GOLD',
+        tagNo: 'TAGRT',
+        pcs: 1,
+        grossWt: 3,
+        netWt: 3,
+        touch: 100,
+        metalAmount: 300,
+        huid: 'HUID01',
+        hallmarkId2: 'HUID02',
+        hallmarkIdWt: 1.25,
+        ghtPct: 2.5,
+        itemLot: 'LOT7',
+        remark: 'returned ring',
+        discountPct: 1.5,
+        employeeCode: 'E1',
+        designImageId: 'IMG-9',
+        tagLabourPct: 4,
+        tagLabourRate: 120,
+        tagLabourAmount: 360,
+        tagOtherAmount: 15,
+      },
+    ] as any);
+    const [row] = (await owner.$queryRawUnsafe(
+      `SELECT "HM_ID","HM_ID2","HM_ID_WT"::text hm_wt,"ITM_GHT_PRC"::text ght,"ITM_LOT","ITM_REMARK",
+              "DISC_PRC"::text disc,"EMP_CODE","DESIGN_IMG_ID","TAG_LBR_PRC"::text tag_pct,
+              "TAG_LBR_RATE"::text tag_rate,"TAG_LBR_AMT"::text tag_amt,"TAG_OTH_AMT"::text tag_oth
+         FROM "SL_DETL_RTN" WHERE tenant_id=$1 AND "CO_BOOK"='SRT' AND "VCH_NO"=$2`,
+      TENANT,
+      String(created.vchNo).padStart(5, '0'),
+    )) as Array<Record<string, string | null>>;
+    expect(row).toMatchObject({
+      HM_ID: 'HUID01',
+      HM_ID2: 'HUID02',
+      ITM_LOT: 'LOT7',
+      ITM_REMARK: 'returned ring',
+      EMP_CODE: 'E1',
+      DESIGN_IMG_ID: 'IMG-9',
+    });
+    expect(Number(row!.hm_wt)).toBe(1.25);
+    expect(Number(row!.ght)).toBe(2.5);
+    expect(Number(row!.disc)).toBe(1.5);
+    expect([row!.tag_pct, row!.tag_rate, row!.tag_amt, row!.tag_oth].map(Number)).toEqual([
+      4, 120, 360, 15,
+    ]);
+  });
+
   it('rejects a persisted-date-locked sales-return edit without changing its write set', async () => {
     const created = await createSaleReturn(runtime, returnInput(), returnLines);
     const before = await getSaleReturn(runtime, scope('SRT'), created.vchNo);
