@@ -2514,9 +2514,25 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     print: async (req: FastifyRequest, reply: FastifyReply) => {
       if (!guard(req, reply, 'view')) return;
       const q = req.query as any;
-      const scope = documentScope(req, reply);
-      if (!scope) return reply;
-      const vchNo = String((req.params as any).vchNo ?? '');
+      // The voucher number is a PATH param here (/other-purchase/:vchNo/print), not a query param, so
+      // build the document scope from it rather than the query-based documentScope() helper.
+      const s = readScope(req);
+      let scope;
+      try {
+        scope = requireVoucherDocumentScope({
+          tenantId: s.tenantId,
+          coCode: s.coCode,
+          lcCode: s.lcCode,
+          coYear: s.coYear,
+          coBook: s.coBook,
+          vchNo: String((req.params as any).vchNo ?? ''),
+        });
+      } catch (e: any) {
+        if (e instanceof DocumentScopeError)
+          return reply.code(400).send({ error: e.name, field: e.field, message: e.message });
+        throw e;
+      }
+      const vchNo = String(scope.vchNo);
       try {
         await getOtherPurc(prisma, mode, scope, vchNo);
       } catch (e: any) {
