@@ -5,7 +5,6 @@ export const parityContainmentOperations: readonly [
   'logical-restore',
   'production-cutover-load',
   'tag-weight-difference',
-  'tag-split',
 ];
 
 export type ParityContainmentOperation = (typeof parityContainmentOperations)[number];

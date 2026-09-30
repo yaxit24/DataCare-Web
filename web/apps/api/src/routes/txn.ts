@@ -469,7 +469,14 @@ import {
   type TagCancelMode,
 } from '../modules/stock/tagCancel.js';
 import { deleteTagAdjust, getTagAdjust, saveTagAdjust } from '../modules/stock/tagAdjust.js';
-import { splitTag, deleteTagSplit } from '../modules/stock/tagSplit.js';
+import {
+  saveTagSplit,
+  deleteTagSplit,
+  getTagSplit,
+  listTagSplit,
+  tagSplitSource,
+  TagSplitConflictError,
+} from '../modules/stock/tagSplit.js';
 import { lookup } from '../modules/masters/lookup.js';
 import { postJournal, deleteJournal } from '../modules/finance/journal.js';
 import { postLedgerAdjust, deleteLedgerAdjust } from '../modules/finance/ledgerAdjust.js';
@@ -762,7 +769,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         n === 'DesignBookConflictError' ||
         n === 'SalesOrderConflictError' ||
         n === 'EBillConflictError' ||
-        n === 'TagCancelConflictError'
+        n === 'TagCancelConflictError' ||
+        n === 'TagSplitConflictError'
       ) {
         return reply.code(409).send({ error: n, message: e?.message });
       }
@@ -7286,24 +7294,55 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
+  // Tag Split (X20): desktop TR_TAG_SPLIT on a TAG SPLIT book. One writer (modules/stock/tagSplit.ts): the parent
+  // tags are consumed and child tags created, conserving metal. Literal routes so the route-count test can scan them.
+  const tagSplitInput = (req: FastifyRequest, b = body(req)) => ({
+    scope: scopeOf(req),
+    vchDate: b.vchDate,
+    empCode: b.empCode,
+    vchDesc: b.vchDesc,
+    acCode: b.acCode,
+    itType: b.itType,
+    drTouch: b.drTouch,
+    crTouch: b.crTouch,
+    crLbr: b.crLbr,
+    mainUser: sess(req).sub,
+    parents: Array.isArray(b.parents) ? b.parents : [],
+    children: Array.isArray(b.children) ? b.children : [],
+  });
+  app.get('/stock/tag-split', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => listTagSplit(prisma, scopeOf(req)));
+  });
+  app.get('/stock/tag-split/source', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () =>
+      tagSplitSource(prisma, scopeOf(req), {
+        tagNo: q.tagNo,
+        vchSrno: q.vchSrno,
+        itCode: q.itCode,
+      }),
+    );
+  });
+  app.get('/stock/tag-split/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getTagSplit(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
   app.post('/stock/tag-split', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
-    if (containMutation(reply, 'tag-split')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      splitTag(prisma, {
-        scope: scopeOf(req),
-        vchDate: b.vchDate,
-        parent: b.parent,
-        children: b.children ?? [],
-      }),
+    return run(reply, 201, () => saveTagSplit(prisma, tagSplitInput(req)));
+  });
+  app.put('/stock/tag-split/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    return run(reply, 200, () =>
+      saveTagSplit(prisma, tagSplitInput(req), (req.params as any).vchNo),
     );
   });
   app.delete('/stock/tag-split/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
-    if (containMutation(reply, 'tag-split')) return;
     return run(reply, 200, () =>
-      deleteTagSplit(prisma, scopeOf(req) as any, (req.params as any).vchNo, body(req).book),
+      deleteTagSplit(prisma, scopeOf(req), (req.params as any).vchNo, sess(req).sub),
     );
   });
   app.get('/reports/party-statement', auth, async (req) =>

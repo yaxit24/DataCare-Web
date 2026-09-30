@@ -43,6 +43,12 @@ import {
   tagCancelTransferFixtureTables,
 } from './tag-cancel-transfer.journey.mjs';
 import {
+  cleanupTagSplit,
+  exerciseTagSplit,
+  seedTagSplit,
+  tagSplitFixtureTables,
+} from './tag-split.journey.mjs';
+import {
   cleanupSaleAmountBasis,
   exerciseSaleAmountBasis,
   saleAmountBasisFixtureTables,
@@ -149,6 +155,7 @@ const tables = [
   ...saleAmountBasisFixtureTables,
   ...wholesaleRateCutFixtureTables,
   ...tagCancelTransferFixtureTables,
+  ...tagSplitFixtureTables,
   'COL_MAST',
   'CO_SET_NEW',
   'TAG_IMAGE_DATA',
@@ -583,6 +590,12 @@ try {
   } finally {
     await cleanupTagCancelTransfer(sql);
   }
+  await seedTagSplit(sql);
+  try {
+    result.tagSplit = await exerciseTagSplit(page, { checkpoint, owner, tenantId });
+  } finally {
+    await cleanupTagSplit(sql);
+  }
   await seedSalesOrder(sql);
   await seedSalesOrderDesign(sql);
   result.salesOrderDesign = await exerciseSalesOrderDesign(page, { checkpoint, coBook: 'S41' });
@@ -660,6 +673,7 @@ try {
     ['sales-return-replay', result.salesReturnReplay],
     ['sales-return-saved', result.salesReturnSaved],
     ['tag-cancel-transfer', result.tagCancelTransfer],
+    ['tag-split', result.tagSplit],
     ['tour-order', result.tourOrder],
     ['wholesale-rate-cut', result.wholesaleRateCut],
   ].map(([journeyId, detail]) => {
