@@ -146,3 +146,36 @@ export async function resolveBookAccountTx(
   }
   return accounts[0] as string;
 }
+
+/** The complete configured BOOK_DETL slot row, fail-closed exactly like resolveBookAccountTx.
+ * The Sale Return numeric write path needs the whole slot (BOOK_SNAME/DATA_TYPE as well as
+ * AC_CODE) to compose the Rojmel effect projection, so it reads it through THIS kernel module
+ * rather than duplicating an inline BOOK_DETL LIMIT 1 read that could silently take the first
+ * row. Missing, blank-account or duplicated slots refuse. */
+export async function resolveBookSlotRowTx(
+  tx: any,
+  scope: VoucherScope,
+  srNo: number,
+): Promise<Record<string, string | null>> {
+  const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+    `SELECT "CO_CODE"::text AS "CO_CODE","LC_CODE"::text AS "LC_CODE","CO_BOOK"::text AS "CO_BOOK",
+        "MAIN_BOOK"::text AS "MAIN_BOOK","BOOK_INOUT"::text AS "BOOK_INOUT","BOOK_TYPE"::text AS "BOOK_TYPE",
+        "BOOK_SNAME"::text AS "BOOK_SNAME","DATA_TYPE"::text AS "DATA_TYPE","SR_NO"::text AS "SR_NO",
+        "AC_CODE"::text AS "AC_CODE"
+       FROM "BOOK_DETL"
+      WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
+        AND coalesce("SR_NO",0)::numeric=$5::numeric
+      ORDER BY row_id LIMIT 2`,
+    scope.tenantId,
+    scope.coCode,
+    scope.lcCode,
+    scope.coBook,
+    srNo,
+  );
+  if (rows.length !== 1 || !String(rows[0]!.AC_CODE ?? '').trim()) {
+    throw new BookPolicyValidationError(
+      `book ${scope.coBook} account row ${srNo} is ${rows.length ? 'ambiguous or blank' : 'missing'}`,
+    );
+  }
+  return rows[0] as Record<string, string | null>;
+}
