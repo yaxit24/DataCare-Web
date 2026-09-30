@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { post, ApiError } from '../../../../lib/api';
+import { get, post, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
@@ -18,6 +18,8 @@ import {
 interface Line {
   itCode: string;
   tagNo: string;
+  /** The tag instance on the original purchase line. Server-owned identity; never typed by the operator. */
+  vchSrno?: number;
   pcs: string;
   grossWt: string;
   netWt: string;
@@ -150,9 +152,17 @@ const blank = (): Line => ({
 const n = (v: string) => Number(v || 0);
 const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
 
+/** Books a purchase return can come from: TR_PURC and TR_PURC_HM purchase books. */
+const ORIGINAL_PURCHASE_BOOKS = ['PURCHASE', 'TAG PURCHASE'];
+const str = (v: unknown) => (v == null || Number(v) === 0 ? '' : String(v));
+
 export default function PurchaseReturnPage() {
-  const { coYear } = useBusinessScope();
+  const { coYear, lcCode } = useBusinessScope();
   const [coBook, setCoBook] = useState('');
+  // The original purchase this return reverses. A tagged return must name it: the writer resolves each
+  // returned tag against that voucher's own lines (purchaseReturn.ts resolvePurchaseReturnTags).
+  const [origBook, setOrigBook] = useState('');
+  const [origVchNo, setOrigVchNo] = useState('');
   const [acCode, setAcCode] = useState('');
   const [acName, setAcName] = useState('');
   const [billNo, setBillNo] = useState('');
@@ -209,6 +219,53 @@ export default function PurchaseReturnPage() {
   const taxPrev = r2((taxable * n(taxRatePct)) / 100);
   const totalPrev = Math.round(taxable + taxPrev);
 
+  // Import the original purchase: supplier, tax and every line with its tag instance, so the operator
+  // returns what was bought instead of retyping it (desktop TR_KR_ISU source picker, :6850-6895).
+  async function importPurchase() {
+    if (!origBook || !origVchNo.trim()) {
+      setErr('select the original purchase book and voucher first');
+      return;
+    }
+    setErr('');
+    setBusy(true);
+    try {
+      const view = await get<any>(
+        `/purchases/${encodeURIComponent(origVchNo.trim())}?coBook=${encodeURIComponent(origBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}`,
+      );
+      setOrigVchNo(String(view.voucherNo));
+      setAcCode(String(view.acCode ?? ''));
+      setAcName(String(view.acName ?? ''));
+      setBillNo(String(view.billNo ?? ''));
+      setTaxRatePct(str(view.taxRatePct) || '0');
+      setInterState(!!view.interState);
+      const imported: Line[] = (view.lines ?? []).map((line: any) => ({
+        ...blank(),
+        itCode: String(line.itCode ?? ''),
+        tagNo: String(line.tagNo ?? ''),
+        vchSrno: Number(line.vchSrno ?? 0) || undefined,
+        pcs: str(line.pcs) || '1',
+        grossWt: str(line.grossWt),
+        netWt: str(line.netWt),
+        touch: str(line.touch),
+        rate: str(line.rate),
+        making: line.labourType === 'per_gram' ? str(line.labourRate) : '',
+        ghtWt: str(line.ghtWt),
+        westPct: str(line.westPct),
+        designNo: String(line.designNo ?? ''),
+        tblCode: String(line.tblCode ?? ''),
+        itDesc: String(line.itDesc ?? ''),
+        mrp: str(line.mrp),
+      }));
+      setLines(imported.length ? imported : [blank()]);
+    } catch (e) {
+      setErr(
+        e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'import failed',
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setErr('');
@@ -218,6 +275,8 @@ export default function PurchaseReturnPage() {
       const body = {
         coBook,
         coYear,
+        origBook: origVchNo.trim() ? origBook || undefined : undefined,
+        origVchNo: origVchNo.trim() || undefined,
         acCode,
         acName: acName || undefined,
         billNo: billNo || undefined,
@@ -229,6 +288,7 @@ export default function PurchaseReturnPage() {
           .map((l) => ({
             itCode: l.itCode,
             tagNo: l.tagNo || undefined,
+            vchSrno: l.tagNo ? l.vchSrno : undefined,
             pcs: n(l.pcs),
             grossWt: n(l.grossWt),
             netWt: n(l.netWt),
@@ -295,7 +355,29 @@ export default function PurchaseReturnPage() {
               <input value={acName} onChange={(e) => setAcName(e.target.value)} />
             </div>
             <div className="field">
-              <label>Orig Bill No</label>
+              <label>Orig Purchase Book</label>
+              <BookSelect
+                value={origBook}
+                onChange={setOrigBook}
+                mainBooks={ORIGINAL_PURCHASE_BOOKS}
+              />
+            </div>
+            <div className="field">
+              <label>Orig Voucher</label>
+              <div style={{ display: 'flex', gap: 4 }}>
+                <input
+                  aria-label="Original purchase voucher"
+                  value={origVchNo}
+                  onChange={(e) => setOrigVchNo(e.target.value)}
+                  placeholder="00001"
+                />
+                <button type="button" className="ghost" disabled={busy} onClick={importPurchase}>
+                  Import
+                </button>
+              </div>
+            </div>
+            <div className="field">
+              <label>Bill No</label>
               <input value={billNo} onChange={(e) => setBillNo(e.target.value)} />
             </div>
             <div className="field">
@@ -361,7 +443,14 @@ export default function PurchaseReturnPage() {
                       <LookupPicker
                         entity="tags"
                         value={l.tagNo}
-                        onChange={(v) => setLine(i, 'tagNo', v)}
+                        // A typed tag is a different instance: drop the serial imported with the old one.
+                        onChange={(v) =>
+                          setLines((ls) =>
+                            ls.map((l, j) =>
+                              j === i ? { ...l, tagNo: v, vchSrno: undefined } : l,
+                            ),
+                          )
+                        }
                         style={{ width: 110 }}
                         onPick={(r) =>
                           setLines((ls) =>

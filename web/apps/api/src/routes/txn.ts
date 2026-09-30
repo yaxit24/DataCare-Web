@@ -1566,14 +1566,19 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       ),
     );
   });
+  // G05: the original SALE book is the request's validated book. The page sends it as `coBook`; this
+  // route used to ignore that and read `qs.book ?? 'SAL'`, so every import came from a book named SAL.
   app.get('/sales-returns/import', auth, async (req, reply) => {
     const qs = (req.query as any) || {};
+    const scope = scopeOf(req);
+    if (!scope.coBook) {
+      return reply.code(400).send({
+        error: 'SaleValidationError',
+        message: 'Select the book of the original sale before importing it.',
+      });
+    }
     return run(reply, 200, () =>
-      saleForReturn(prisma, {
-        scope: scopeOf(req),
-        origVchNo: qs.vchNo,
-        origBook: qs.book ?? 'SAL',
-      }),
+      saleForReturn(prisma, { scope, origVchNo: qs.vchNo, origBook: scope.coBook }),
     );
   });
   app.delete('/sales-returns/:vchNo', auth, async (req, reply) => {

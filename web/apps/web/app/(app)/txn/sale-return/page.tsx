@@ -208,7 +208,9 @@ function LegacySaleReturnForm() {
   const [taxRatePct, setTaxRatePct] = useState('3');
   const [discountAmount, setDiscountAmount] = useState('');
   const [interState, setInterState] = useState(false);
-  const [origBook, setOrigBook] = useState('SAL');
+  // The original sale's book, chosen from the configured SALES books (G05). It used to be a free-text box
+  // defaulting to the literal 'SAL', which a desktop-shaped company does not have.
+  const [origBook, setOrigBook] = useState('');
   const [tender, setTender] = useState<Tender>({});
   const [lines, setLines] = useState<Line[]>([blank()]);
   const [fullGrid, setFullGrid] = useState(false);
@@ -234,8 +236,8 @@ function LegacySaleReturnForm() {
 
   // Import-from-bill: pull the original sale's customer + items so the return is a click away.
   async function importBill() {
-    if (!billNo.trim()) {
-      setErr('enter the original bill no first');
+    if (!origBook || !billNo.trim()) {
+      setErr('select the original sale book and enter its bill no first');
       return;
     }
     setErr('');
@@ -303,6 +305,7 @@ function LegacySaleReturnForm() {
         acName: acName || undefined,
         billNo: billNo || undefined,
         origVchNo: billNo || undefined,
+        origBook: billNo ? origBook || undefined : undefined,
         taxRatePct: Number(taxRatePct),
         interState,
         discountAmount: discountAmount ? Number(discountAmount) : undefined,
@@ -376,11 +379,7 @@ function LegacySaleReturnForm() {
             </div>
             <div className="field">
               <label>Orig Book</label>
-              <input
-                value={origBook}
-                onChange={(e) => setOrigBook(e.target.value)}
-                style={{ width: 64 }}
-              />
+              <BookSelect value={origBook} onChange={setOrigBook} mainBooks={['SALES']} />
             </div>
             <div className="field">
               <label>Orig Bill No</label>

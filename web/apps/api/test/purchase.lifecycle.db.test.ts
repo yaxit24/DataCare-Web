@@ -321,11 +321,11 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       lines: [{ itCode: 'LOOSE' }],
     });
     await deletePurchase(runtime, { scope: tagScope, vchNo: tagged.vchNo, deleteUser: 'tester' });
-    const [{ n }] = (await owner.$queryRawUnsafe(
+    const remaining = (await owner.$queryRawUnsafe(
       `SELECT count(*)::int n FROM "PR_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TPR'`,
       TENANT,
     )) as Array<{ n: number }>;
-    expect(n).toBe(0);
+    expect(remaining[0]?.n).toBe(0);
   });
 
   it('creates, opens and edits with independent numbering and preserved identity without delete audit', async () => {

@@ -20,6 +20,7 @@ import {
   deleteSaleReturn,
   editSaleReturn,
   getSaleReturn,
+  saleForReturn,
 } from '../src/modules/sales/salesReturn.js';
 import {
   deleteSchemeInstallment,
@@ -228,6 +229,7 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
          "BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
        VALUES
          ($1,$2,$3,'SAL','Sales','SALE','SALES','O','Y','SL_DATA'),
+         ($1,$2,$3,'SQT','Sales Quotation','SQTN','SALES QUOTATION','O','Y','SL_DATA'),
          ($1,$2,$3,'SRT','Sales Return','SRTN','SALES RETURNE','I','Y','SL_DATA'),
          ($1,$2,$3,'SOR','Sales Order','SORD','SALES ORDER','O','Y','SL_ORD_DATA'),
          ($1,$2,$3,'ORC','Order Cancel','SADJ','ORDER CANCEL','O','Y','SL_ORD_ADJ'),
@@ -266,6 +268,7 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
          tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","VCH_TIME","AC_CODE")
        VALUES
          ($1,$2,$3,$4,'SAL','00001',$5::date,$5::timestamp,'CUST'),
+         ($1,$2,$3,$4,'SQT','00001',$5::date,$5::timestamp,'CUST'),
          ($1,$2,$3,$4,'SRT','00007',$5::date,$5::timestamp,'CUST')`,
       TENANT,
       CO,
@@ -416,6 +419,27 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
     if (owner) await cleanup();
     if (runtime) await runtime.$disconnect();
     if (owner) await owner.$disconnect();
+  });
+
+  /**
+   * G05 / N35. Sales Return imports the original bill from the book the operator chose, resolved as a
+   * SALES book. The route used to read a literal 'SAL' and the writer defaulted origBook to 'SAL', so a
+   * company whose sales book is not named SAL could never import, and a quotation book that shares
+   * SL_DATA could be mistaken for a sale.
+   */
+  it('imports a return source from the chosen SALES book and refuses a non-SALES book', async () => {
+    const imported = await saleForReturn(runtime, {
+      scope: scope('SAL'),
+      origVchNo: 1,
+      origBook: 'SAL',
+    });
+    expect(imported).toMatchObject({ acCode: 'CUST' });
+    expect(imported.lines.length).toBeGreaterThan(0);
+
+    // The quotation book shares SL_DATA and the same voucher number, but it is not a sale.
+    await expect(
+      saleForReturn(runtime, { scope: scope('SQT'), origVchNo: 1, origBook: 'SQT' }),
+    ).rejects.toThrow(/SALES/i);
   });
 
   it('creates, gets and replaces a sales return while preserving identity and balance', async () => {
