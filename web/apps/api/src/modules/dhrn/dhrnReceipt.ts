@@ -1,4 +1,3 @@
-import { formatVoucherNo } from '../vouchers/numbering.js';
 import { withTenant } from '@datacare/db';
 import {
   docShell,
@@ -10,50 +9,40 @@ import {
   billFooter,
   type DocMeta,
 } from '../documents/docChrome.js';
+import {
+  documentCompanyTx,
+  documentPartyTx,
+  requireVoucherDocumentScope,
+  voucherKeyParams,
+  voucherKeyWhere,
+  type VoucherDocumentScope,
+} from '../documents/voucherDocument.js';
 
 /** Dhrn (pledge/gold-loan) ISSUE RECEIPT: DHRN_ISU_DATA header + DHRN_ISU_DETL pledged items.
  *  Mirrors desktop DhrnIssue.rpt — borrower, pledged collateral (pcs/gross/net wt + valuation),
  *  loan principal, interest rate + monthly interest, from/due date, packet no, amount in words. */
-export interface DhrnScope {
-  tenantId: string;
-  coCode: string;
-  coYear?: string;
-  coBook: string;
-  vchNo: string | number;
-}
+export type DhrnScope = VoucherDocumentScope;
 
 export async function dhrnIssueData(
   prisma: any,
-  s: DhrnScope,
+  scope: DhrnScope,
 ): Promise<{ header: any; lines: any[]; company: any; party: any } | null> {
+  const s = requireVoucherDocumentScope(scope);
   return withTenant(prisma, s.tenantId, async (tx: any) => {
-    const params = s.coYear
-      ? [s.coCode, s.coBook, formatVoucherNo(s.vchNo), s.coYear]
-      : [s.coCode, s.coBook, formatVoucherNo(s.vchNo)];
+    const params = voucherKeyParams(s);
     const h: any[] = await tx.$queryRawUnsafe(
-      `SELECT * FROM "DHRN_ISU_DATA" WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3${s.coYear ? ' AND "CO_YEAR"=$4' : ''} LIMIT 1`,
+      `SELECT * FROM "DHRN_ISU_DATA" WHERE ${voucherKeyWhere()} LIMIT 1`,
       ...params,
     );
     if (!h.length) return null;
     const header = h[0];
     const lines: any[] = await tx.$queryRawUnsafe(
-      `SELECT * FROM "DHRN_ISU_DETL" WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 ORDER BY "SR_NO"`,
-      s.coCode,
-      s.coBook,
-      formatVoucherNo(s.vchNo),
+      `SELECT * FROM "DHRN_ISU_DETL" WHERE ${voucherKeyWhere()} ORDER BY "SR_NO"`,
+      ...params,
     );
-    const co: any[] = await tx.$queryRawUnsafe(
-      `SELECT * FROM "CO_MAST" WHERE "CO_CODE"=$1 LIMIT 1`,
-      s.coCode,
-    );
-    const party: any[] = header.AC_CODE
-      ? await tx.$queryRawUnsafe(
-          `SELECT * FROM "AC_MAST" WHERE "CO_CODE"=$1 AND "AC_CODE"=$2 LIMIT 1`,
-          s.coCode,
-          header.AC_CODE,
-        )
-      : [];
-    return { header, lines, company: co[0] ?? null, party: party[0] ?? null };
+    const company = await documentCompanyTx(tx, s);
+    const party = await documentPartyTx(tx, s, header.AC_CODE);
+    return { header, lines, company, party };
   });
 }
 

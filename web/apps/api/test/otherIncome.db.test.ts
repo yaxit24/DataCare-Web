@@ -1,8 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import {
+  deleteOtherExpense,
   deleteOtherIncome,
+  getOtherExpense,
   getOtherIncome,
+  saveOtherExpense,
   saveOtherIncome,
   type OtherIncomeInput,
 } from '../src/modules/purchase/otherIncome.js';
@@ -353,5 +356,113 @@ databaseDescribe('database-backed TR_OTH_PURC Other Income mode', () => {
       BOOK,
     );
     expect(rows[0]).toMatchObject({ n: 0 });
+  });
+
+  /**
+   * "Other Expenses" is the OTH EXP mode of the same form. Ac_Ledr.Oth_Purc_Ledr (Ac_Ledr.cs:1600),
+   * Ac_Rojmel.Oth_Purc_Rojmel (Ac_Rojmel.cs:693) and Ac_Tax.Oth_Purc_GST (Ac_Tax.cs:205) write the same rows
+   * for both modes with every amount on the other side, and type expense tax 'P' / '-'. So the same voucher
+   * saved on an OTH EXP book must be the exact mirror of the income voucher, row for row.
+   */
+  it('OTH EXP posts the exact desktop mirror of the same OTH INC voucher', async () => {
+    await seedBook('OEX', 'OTH EXP', 'O');
+    const expenseScope = { ...scope, coBook: 'OEX' };
+    const income = await saveOtherIncome(runtime, input());
+    const expense = await saveOtherExpense(runtime, input({ scope: expenseScope }));
+    expect(expense).toMatchObject({ voucherNo: '00001', created: true, lines: 1 });
+
+    const rows = async (table: string, book: string, vchNo: string) =>
+      query<Record<string, unknown>>(
+        `SELECT substr("LEDR_KEY", length($3::text)+1) AS leg,"AC_CODE","LD_CODE",
+                "DR_AMT"::float dr,"CR_AMT"::float cr
+           FROM "${table}" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$4 ORDER BY 1`,
+        TENANT,
+        book,
+        `${CO}${LC}${YEAR}${book}${vchNo}`,
+        vchNo,
+      );
+    for (const table of ['AC_DATA', 'ROJ_MEL_DATA']) {
+      const inc = await rows(table, BOOK, income.voucherNo);
+      const exp = await rows(table, 'OEX', expense.voucherNo);
+      expect(exp.length, table).toBe(inc.length);
+      expect(exp, table).toEqual(inc.map((row) => ({ ...row, dr: row.cr, cr: row.dr })));
+    }
+    const [ledgerTotals] = await query<{ dr: number; cr: number }>(
+      `SELECT sum("DR_AMT")::float dr, sum("CR_AMT")::float cr FROM "AC_DATA"
+        WHERE tenant_id=$1 AND "CO_BOOK"='OEX' AND "VCH_NO"=$2`,
+      TENANT,
+      expense.voucherNo,
+    );
+    expect(ledgerTotals).toEqual({ dr: 1324, cr: 1324 });
+
+    const tax = await query<Record<string, unknown>>(
+      `SELECT "SR_NO"::int sr,"TRAN_TYPE","TAX_SIGN","TAX_AMT"::float amt,"BOOK_NAME"
+         FROM "TAX_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='OEX' AND "VCH_NO"=$2 ORDER BY 1`,
+      TENANT,
+      expense.voucherNo,
+    );
+    expect(tax).toEqual([
+      { sr: 1, TRAN_TYPE: 'P', TAX_SIGN: '-', amt: 81, BOOK_NAME: 'OTH EXP' },
+      { sr: 112, TRAN_TYPE: 'P', TAX_SIGN: '-', amt: 81, BOOK_NAME: 'OTH EXP' },
+    ]);
+    const [header] = await query<Record<string, unknown>>(
+      `SELECT "BOOK_NAME","INOUT_TYPE","TOT_AMT"::float total,"BILL_OS"::float os FROM "PAY_DATA"
+        WHERE tenant_id=$1 AND "CO_BOOK"='OEX' AND "VCH_NO"=$2`,
+      TENANT,
+      expense.voucherNo,
+    );
+    expect(header).toEqual({ BOOK_NAME: 'OTH EXP', INOUT_TYPE: 'O', total: 1022, os: 800 });
+
+    // Reopen, edit in place and delete through the expense mode; the write set is replaced exactly.
+    await expect(getOtherExpense(runtime, expenseScope, expense.voucherNo)).resolves.toMatchObject({
+      voucherNo: '00001',
+      partyCode: 'CUST01',
+      ledgerCode: 'INC001',
+      totalAmount: 1022,
+    });
+    await saveOtherExpense(
+      runtime,
+      input({
+        scope: expenseScope,
+        lines: [{ itemName: 'Freight', netAmount: 500, taxCode: 'T1', taxType: 'R' }],
+        chequeAmount: 0,
+        cardAmount: 0,
+        cashAmount: 0,
+        kasarAmount: 0,
+        tdsCode: '',
+      }),
+      expense.voucherNo,
+    );
+    const [edited] = await query<{ n: number; dr: number; cr: number; party_dr: number }>(
+      `SELECT count(*)::int n, sum("DR_AMT")::float dr, sum("CR_AMT")::float cr,
+              sum(CASE WHEN "AC_CODE"='CUST01' THEN "CR_AMT" ELSE 0 END)::float party_dr
+         FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='OEX' AND "VCH_NO"=$2`,
+      TENANT,
+      expense.voucherNo,
+    );
+    // Expense: the supplier is CREDITED with the bill (income debits the customer).
+    expect(edited).toEqual({ n: 3, dr: 500, cr: 500, party_dr: 500 });
+    await expect(
+      deleteOtherExpense(runtime, expenseScope, expense.voucherNo, 'deleter'),
+    ).resolves.toEqual({ reversed: true, auditedLines: 1 });
+    const [left] = await query<{ n: number }>(
+      `SELECT (SELECT count(*) FROM "PAY_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='OEX')
+            + (SELECT count(*) FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='OEX')
+            + (SELECT count(*) FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='OEX')
+            + (SELECT count(*) FROM "TAX_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='OEX') AS n`,
+      TENANT,
+    );
+    expect(Number(left!.n)).toBe(0);
+  });
+
+  it('each mode refuses the other mode’s book', async () => {
+    await seedBook('OEX', 'OTH EXP', 'O');
+    await expect(saveOtherExpense(runtime, input())).rejects.toThrow(
+      /must be configured as OTH EXP/,
+    );
+    await expect(
+      saveOtherIncome(runtime, input({ scope: { ...scope, coBook: 'OEX' } })),
+    ).rejects.toThrow(/OTH INC/);
+    await expect(getOtherExpense(runtime, scope, '00004')).rejects.toThrow(/OTH EXP/);
   });
 });

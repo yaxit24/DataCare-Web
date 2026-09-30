@@ -340,12 +340,19 @@ route('Purchase/Purchase Quotation', [
   'DELETE /purchase-quotations/:vchNo',
   'GET /purchase-quotations/quotation',
 ]);
-route('Purchase/Other Purchase', ['POST /other-purchase', 'DELETE /other-purchase/:vchNo']);
+route('Purchase/Other Purchase', [
+  'POST /other-purchase',
+  'GET /other-purchase/:vchNo',
+  'PUT /other-purchase/:vchNo',
+  'DELETE /other-purchase/:vchNo',
+  'GET /other-purchase/:vchNo/print',
+]);
 route('Purchase/Other Income', [
   'POST /other-income',
   'GET /other-income/:vchNo',
   'PUT /other-income/:vchNo',
   'DELETE /other-income/:vchNo',
+  'GET /other-income/:vchNo/print',
 ]);
 route('Purchase/Other Commission / Expense Voucher', [
   'POST /other-commission',
