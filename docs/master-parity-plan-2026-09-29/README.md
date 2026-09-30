@@ -19,6 +19,7 @@ This package is the new entry point for planning. It supplements all original re
 | [Previous-plan reconciliation](07-previous-plan-reconciliation.md) | How much of previous plans is accepted; all 83 original package dispositions |
 | [Decisions, delivery and acceptance](08-decisions-and-delivery.md) | Web adaptations, unresolved evidence, milestones, operational acceptance and handover |
 | [Retained surface register](09-surface-register.md) | Every enumerated retained desktop source unit, menu mapping, report reference, table and setting, with work routing; semantic discovery remains open |
+| [Gap register and amendment, 1 October 2026](10-gap-register-2026-10-01.md) | Current-state corrections after X15/X16/N18/N19 and the audited gaps G01–G18 with their new slices N31–N46 |
 | [Machine-readable execution backlog](execution-backlog.json) | Original packages, continuation cards, current evidence and new ordered slices |
 | [Requirement index](requirement-index.json) | Stable references to all retained grid, control, event, source, report, table, setting and menu records |
 | [Verification observations](evidence/verification-observations.json) | Commands actually run for this analysis, separate from future acceptance tests |
@@ -39,7 +40,9 @@ Run `python3 docs/master-parity-plan-2026-09-29/validate_plan.py` in the full re
 | Latest retained field/control proxy | 3,681 / 5,107 = 72.1% | Dated Round14 static heuristic, not a functional percentage |
 | Reliable full-product functional percentage | Not established | The semantic and transition denominator still needs closure |
 
-The new saved-return calculation path remains diagnostic, but legacy return creation still exists. Do not generalize its `canCommit:false` into a claim that every sales-return write is blocked. Four specific tag operations and two operational actions remain in the six-operation containment registry. Lot Setting issue/receipt is read-only. Dedicated E Credit Note lifecycle work remains separate from IRN operations on existing records.
+The new saved-return calculation path remains diagnostic, but legacy return creation still exists. Do not generalize its `canCommit:false` into a claim that every sales-return write is blocked. Lot Setting issue/receipt is read-only.
+
+**Amendment, 1 October 2026 (document 10).** Since this package's baseline, `main` gained the E Credit Note / E Invoice lifecycle (X15), the D1–D6 evaluation fixes, the rebuilt wholesale/rate-cut form (X16) and the tag cancel, transfer and split operations (N18/N19). The containment registry now holds **three** operations: logical restore, production cutover load and tag weight difference. These are engineering results; every acceptance count above is unchanged. Document 10 adds eighteen audited gaps (G01–G18) and slices N31–N46, which are executed before the remaining programme slices.
 
 ## Definition of the finished product
 

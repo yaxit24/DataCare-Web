@@ -32,6 +32,7 @@ required = ['README.md'] + [
     '01-current-assessment.md','02-execution-plan.md','03-shared-contracts.md',
     '04-verification-playbook.md','05-desktop-reference.md','06-module-detail.md',
     '07-previous-plan-reconciliation.md','08-decisions-and-delivery.md','09-surface-register.md',
+    '10-gap-register-2026-10-01.md',
     'desktop-form-reference.json','previous-package-reconciliation.json','execution-backlog.json',
     'requirement-index.json','evidence/verification-observations.json',
     'evidence/previous-plan-validation.json','evidence/source-comparison.json',
@@ -81,8 +82,24 @@ check({p['id'] for p in backlog['priorCards']}=={p['id'] for p in old_cards}, 'M
 check(all(p['acceptance']=='open' for p in backlog['priorPackages']), 'Invented parent acceptance')
 check(all(p['status']=='open' for p in backlog['priorCards']), 'Invented prior card closure')
 slices={p['id']:p for p in backlog['newSlices']}
-check(len(slices)==30, 'Expected 30 new ordered slices')
-check(all(p['status']=='planned' for p in slices.values()), 'Invented slice implementation')
+# N01-N30 are the original ordered slices; the 1 October 2026 amendment (document 10) adds N31-N46.
+check(sorted(slices)==[f'N{i:02}' for i in range(1,len(slices)+1)], 'Slice identities are not a contiguous N01.. sequence')
+check(len(slices)>=46, 'Expected at least 46 ordered slices (N01-N30 plus amendment N31-N46)')
+allowed_status={'planned','in-progress','implemented-unverified'}
+check(all(p['status'] in allowed_status for p in slices.values()), 'Invented slice acceptance or unknown slice status')
+for p in slices.values():
+    if p['status']!='planned':
+        evidence=p.get('evidence') or []
+        check(bool(evidence), 'Slice status without evidence: '+p['id'])
+        for item in evidence:
+            check((repo/item).exists(), 'Missing slice evidence path: '+p['id']+' '+item)
+gap_text=(here/'10-gap-register-2026-10-01.md').read_text()
+gap_ids=re.findall(r'^\| (G\d{2}) \|',gap_text,re.M)
+check(gap_ids==[f'G{i:02}' for i in range(1,len(gap_ids)+1)] and len(gap_ids)>=18, 'Gap register identities incomplete')
+for p in slices.values():
+    for gap in re.findall(r'G\d{2}',p.get('gapIds','')):
+        check(gap in gap_ids, 'Slice cites an unknown gap: '+p['id']+' '+gap)
+check(all(int(p['id'][1:])<=30 or p.get('gapIds') for p in slices.values()), 'Amendment slice without a gap reference')
 def visit(identity, trail):
     if identity in trail:
         errors.append('Slice start dependency cycle: '+' -> '.join(trail+[identity])); return

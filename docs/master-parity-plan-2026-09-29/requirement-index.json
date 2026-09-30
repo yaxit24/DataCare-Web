@@ -69,9 +69,15 @@
     {
       "kind": "menu",
       "path": "web/docs/COMPLETION-REGISTER.json",
-      "sha256": "53864274581403da71d2049f6571f1216475da7be1b9ace26e5161d5ccac427c",
+      "sha256": "d13c417b063266fb725ed6bf91949a2d26ed7d7207f2cccb38637e9de7fa9453",
       "count": 198,
-      "arrayPointer": "/items"
+      "arrayPointer": "/items",
+      "rebaselined": {
+        "date": "2026-10-01",
+        "fromSha256": "53864274581403da71d2049f6571f1216475da7be1b9ace26e5161d5ccac427c",
+        "atCommit": "c7d02c7a50a36ef5f3594b5d6855944adc240235",
+        "reason": "Register notes and evidence advanced on main (X15, D1-D6, X16, N18, N19). The 198 menu identities are unchanged and every entry remains implemented-unverified."
+      }
     }
   ],
   "recordCount": 12822,

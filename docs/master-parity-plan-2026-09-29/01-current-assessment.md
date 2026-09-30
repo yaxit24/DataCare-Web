@@ -63,3 +63,12 @@ The retained Round15 narrative reports only two of its 18 recipe checks complete
 There is meaningful reusable work in most modules: domain modules, schemas, forms, lifecycle handlers, configuration consumers, reports, a session model and many tests. There are also missing writes, narrower admitted profiles, unverified variants and absent original-runtime proof. A scalar average of menu mappings, fields or passing tests collapses these different conditions.
 
 Track five states independently for each semantic requirement: implemented, engineering-tested, desktop-matched, business-accepted, release-certified. A requirement can be implemented and unit-tested yet have an incorrect report footprint. A disabled mutation is neither usable nor complete. A retained source-derived test is not an original-runtime comparison. Only after the required semantic set has been reviewed can a completion ratio be reported against that named set and candidate.
+
+## 7. Status update — 1 October 2026
+
+Re-assessed against `main` at `c7d02c7`. The detailed register is [document 10](10-gap-register-2026-10-01.md).
+
+- Four slices of this plan now have engineering implementations on `main`: N16 (E CRNT/E INVOICE lifecycle, X15), N17 (wholesale/rate cut, X16), N18 (tag cancel/transfer) and the split half of N19. Their acceptance remains open; they are recorded as `implemented-unverified` in `execution-backlog.json`.
+- Containment is reduced from six operations to three (`logical-restore`, `production-cutover-load`, `tag-weight-difference`).
+- The Sales/Purchase audit found concrete defects that block daily work or print the wrong document: unscoped document readers (G01), hallmark and other-expense purchase screens that cannot save because they send no book (G02, G03), a purchase-return screen that cannot record a tagged return and omits Rojmel/diamond rows (G04), registers keyed on literal book codes (G06) and a hard-coded company name on the estimate print (G09). They are scheduled first, as slices N31–N36 and N39.
+- `main` CI is red on the depth gate; the fix is the first delivery (G18).

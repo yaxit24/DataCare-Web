@@ -70,6 +70,32 @@ These IDs are new delivery slices under the existing parents. Status for all is 
 | N29 | Run every module journey and cross-module normal/exception day with operators | P14-01/03, X33 | All exact required cases executed on current candidate; independent data/report differences resolved |
 | N30 | Strengthen exact semantic-leaf and mode enforcement, freeze release inputs, certify and perform controlled rollout | P14-02/04–06, X34 | No stale, absent, duplicate or waived full-product requirement; truthful handover |
 
+### 3a. Gap-closure slices added on 1 October 2026
+
+The audited gaps G01–G18 ([document 10](10-gap-register-2026-10-01.md)) add slices N31–N46. They run **before**
+the remaining programme slices N19 (weight difference) to N30, because several of them block a daily workflow
+or print a wrong document. N16, N17, N18 and the split half of N19 are `implemented-unverified` on `main`
+(engineering evidence only).
+
+| Slice | Required action and concrete target | Parent/card | Must prove before advancing |
+|---|---|---|---|
+| N31 | Scope sales/purchase/quotation/credit-note document readers by company, location, year and book; no literal book default | P10-01, P01-01, X05/X25 | Same voucher number in two locations/years prints only the selected one |
+| N32 | Hallmark/tag-wise purchase: configured book, reopen/edit/delete/print, then the TR_PURC_HM receive grid | P04-02, X12 | Screen save → reopen → edit → delete with column-level row comparison |
+| N33 | Other Expenses (OTH EXP): configured book, desktop grid, full lifecycle and print | P04-02, X12 | Forward/reverse tax, discount and inter/intra split match desktop arithmetic |
+| N34 | Purchase Return: original-purchase selector, remaining quantities, Rojmel and diamond rows, reopen/edit/print | P04-04, X12 | Tagged and partial returns accepted, over-return refused, reversal exact |
+| N35 | Sales Return original book from active SALES books | P05-03, X13 | Import from a non-default sales book; wrong family refused |
+| N36 | Registers classify by stored amounts and MAIN_BOOK, not literal book codes | P10-03, X26 | Desktop-shaped fixture totals equal the desktop rule |
+| N37 | Order Cancel as the desktop adjustment voucher (multi-order, bounds, ledger/Rojmel/stock/tag, lifecycle, print) | P05-04, X14 | Bounds refused atomically; full write set; reversal |
+| N38 | Wholesale quotation mode | P05-02/04, X13/X14 | No stock/ledger rows; print; conversion lineage |
+| N39 | Estimate document from the company master | P05-01, X13 | Two companies print their own headers |
+| N40 | Hallmark sale reopen/edit/delete | P05-01, X13 | Unchanged save preserves HUIDs and hallmark charge |
+| N41 | Line previews honour LBR_WITH_GHT | P02-05, X08 | Preview equals posted labour with the setting Y and N |
+| N42 | Enforce EMP_CODE_MANDATORY on sales | P05-01, X13 | Desktop message; no partial write |
+| N43 | Document template registry: sales/purchase variants, copies, HUID print, Other Income voucher | P10-05, X25 | Dataset equality then desktop layout review |
+| N44 | Sales Order tenders, old-metal advance and delivery allocation | P05-04, X14 | Advance consumed exactly once across deliveries |
+| N45 | Wholesale remaining branches listed in the X16 progress record | P05-02, P06-05, X16 | Each branch has a write-set test and journey |
+| N46 | Quotation → invoice conversion with lineage | P05-06, X14 | Source identity kept; repeated conversion refused |
+
 ## 4. Ready-to-implement definition for a feature
 
 Before coding a feature, its card must contain:
