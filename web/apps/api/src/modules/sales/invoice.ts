@@ -1,6 +1,13 @@
-import { formatVoucherNo } from '../vouchers/numbering.js';
 import { withTenant } from '@datacare/db';
 import { docShell, num, gstBillBody, billFooter, type DocMeta } from '../documents/docChrome.js';
+import {
+  documentCompanyTx,
+  documentPartyTx,
+  requireVoucherDocumentScope,
+  voucherKeyParams,
+  voucherKeyWhere,
+  type VoucherDocumentScope,
+} from '../documents/voucherDocument.js';
 
 export { rupeesInWords } from '../documents/docChrome.js';
 
@@ -9,51 +16,33 @@ export { rupeesInWords } from '../documents/docChrome.js';
  *  GST tax invoice — mirroring the desktop SalesBillA4Gst.rpt: company+party GSTIN/state, per-line
  *  HSN/weights/rate/making/taxable, intra (CGST+SGST) vs inter-state (IGST) split, HSN-wise summary,
  *  hallmark tax, round-off, grand total, amount in words, bank + signatory. */
-export interface InvoiceScope {
-  tenantId: string;
-  coCode: string;
-  coYear?: string;
-  coBook: string;
-  vchNo: string | number;
-}
+export type InvoiceScope = VoucherDocumentScope;
 
 export async function invoiceData(
   prisma: any,
-  s: InvoiceScope,
+  scope: InvoiceScope,
 ): Promise<{ header: any; lines: any[]; company: any; party: any } | null> {
+  const s = requireVoucherDocumentScope(scope);
   return withTenant(prisma, s.tenantId, async (tx: any) => {
-    const params = s.coYear
-      ? [s.coCode, s.coBook, formatVoucherNo(s.vchNo), s.coYear]
-      : [s.coCode, s.coBook, formatVoucherNo(s.vchNo)];
+    const params = voucherKeyParams(s);
     const h: any[] = await tx.$queryRawUnsafe(
-      `SELECT * FROM "SL_DATA" WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3${s.coYear ? ' AND "CO_YEAR"=$4' : ''} LIMIT 1`,
+      `SELECT * FROM "SL_DATA" WHERE ${voucherKeyWhere()} LIMIT 1`,
       ...params,
     );
     if (!h.length) return null;
     const header = h[0];
-    // lines enriched with HSN (ITEM_MAST → GROUP_MAST fallback)
+    // Lines of THIS voucher only, enriched with HSN (ITEM_MAST → GROUP_MAST fallback).
     const lines: any[] = await tx.$queryRawUnsafe(
       `SELECT d.*, COALESCE(NULLIF(i."HSN_CODE",''), g."HSN_CODE") AS "HSN_CODE"
          FROM "SL_DETL" d
-         LEFT JOIN "ITEM_MAST" i ON i."CO_CODE"=d."CO_CODE" AND i."IT_CODE"=d."IT_CODE"
-         LEFT JOIN "GROUP_MAST" g ON g."CO_CODE"=i."CO_CODE" AND g."GR_CODE"=i."GR_CODE"
-        WHERE d."CO_CODE"=$1 AND d."CO_BOOK"=$2 AND d."VCH_NO"=$3 ORDER BY d."SR_NO"`,
-      s.coCode,
-      s.coBook,
-      formatVoucherNo(s.vchNo),
+         LEFT JOIN "ITEM_MAST" i ON i.tenant_id=d.tenant_id AND i."CO_CODE"=d."CO_CODE" AND i."IT_CODE"=d."IT_CODE"
+         LEFT JOIN "GROUP_MAST" g ON g.tenant_id=i.tenant_id AND g."CO_CODE"=i."CO_CODE" AND g."GR_CODE"=i."GR_CODE"
+        WHERE ${voucherKeyWhere('d')} ORDER BY d."SR_NO"`,
+      ...params,
     );
-    const co: any[] = await tx.$queryRawUnsafe(
-      `SELECT * FROM "CO_MAST" WHERE "CO_CODE"=$1 LIMIT 1`,
-      s.coCode,
-    );
-    const party: any[] = header.AC_CODE
-      ? await tx.$queryRawUnsafe(
-          `SELECT * FROM "AC_MAST" WHERE "CO_CODE"=$1 AND "AC_CODE"=$2 LIMIT 1`,
-          s.coCode,
-          header.AC_CODE,
-        )
-      : [];
-    return { header, lines, company: co[0] ?? null, party: party[0] ?? null };
+    const company = await documentCompanyTx(tx, s);
+    const party = await documentPartyTx(tx, s, header.AC_CODE);
+    return { header, lines, company, party };
   });
 }
 

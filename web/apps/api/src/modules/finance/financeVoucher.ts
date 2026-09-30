@@ -1,4 +1,3 @@
-import { formatVoucherNo } from '../vouchers/numbering.js';
 import { withTenant } from '@datacare/db';
 import {
   docShell,
@@ -9,54 +8,44 @@ import {
   billFooter,
   type DocMeta,
 } from '../documents/docChrome.js';
+import {
+  documentCompanyTx,
+  documentPartyTx,
+  requireVoucherDocumentScope,
+  voucherKeyParams,
+  voucherKeyWhere,
+  type VoucherDocumentScope,
+} from '../documents/voucherDocument.js';
 
 /** Receipt / Payment voucher documents. Receipts live in CASH_DATA (VCH_TYPE CREC/BREC), payments in
  *  PAY_DATA (CPAY/BPAY); both keep per-party allocations in PAY_DETL (AC_CODE, IT_NAME, NET/TOT, IT_REMARK).
  *  Mirrors desktop CashBankBill.rpt (receipt) / PaymentVch.rpt (payment): received-from/paid-to party,
  *  on-account allocation table, mode/tender (cash/cheque/bank), amount in words, signatory. */
 export type VoucherKind = 'receipt' | 'payment';
-export interface FinanceVoucherScope {
-  tenantId: string;
-  coCode: string;
-  coYear?: string;
-  coBook: string;
-  vchNo: string | number;
-}
+export type FinanceVoucherScope = VoucherDocumentScope;
 
 export async function financeVoucherData(
   prisma: any,
   kind: VoucherKind,
-  s: FinanceVoucherScope,
+  scope: FinanceVoucherScope,
 ): Promise<{ header: any; lines: any[]; company: any; party: any } | null> {
   const headTable = kind === 'receipt' ? 'CASH_DATA' : 'PAY_DATA';
+  const s = requireVoucherDocumentScope(scope);
   return withTenant(prisma, s.tenantId, async (tx: any) => {
-    const params = s.coYear
-      ? [s.coCode, s.coBook, formatVoucherNo(s.vchNo), s.coYear]
-      : [s.coCode, s.coBook, formatVoucherNo(s.vchNo)];
+    const params = voucherKeyParams(s);
     const h: any[] = await tx.$queryRawUnsafe(
-      `SELECT * FROM "${headTable}" WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3${s.coYear ? ' AND "CO_YEAR"=$4' : ''} LIMIT 1`,
+      `SELECT * FROM "${headTable}" WHERE ${voucherKeyWhere()} LIMIT 1`,
       ...params,
     );
     if (!h.length) return null;
     const header = h[0];
     const lines: any[] = await tx.$queryRawUnsafe(
-      `SELECT * FROM "PAY_DETL" WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 ORDER BY "SR_NO"`,
-      s.coCode,
-      s.coBook,
-      formatVoucherNo(s.vchNo),
+      `SELECT * FROM "PAY_DETL" WHERE ${voucherKeyWhere()} ORDER BY "SR_NO"`,
+      ...params,
     );
-    const co: any[] = await tx.$queryRawUnsafe(
-      `SELECT * FROM "CO_MAST" WHERE "CO_CODE"=$1 LIMIT 1`,
-      s.coCode,
-    );
-    const party: any[] = header.AC_CODE
-      ? await tx.$queryRawUnsafe(
-          `SELECT * FROM "AC_MAST" WHERE "CO_CODE"=$1 AND "AC_CODE"=$2 LIMIT 1`,
-          s.coCode,
-          header.AC_CODE,
-        )
-      : [];
-    return { header, lines, company: co[0] ?? null, party: party[0] ?? null };
+    const company = await documentCompanyTx(tx, s);
+    const party = await documentPartyTx(tx, s, header.AC_CODE);
+    return { header, lines, company, party };
   });
 }
 

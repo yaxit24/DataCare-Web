@@ -106,6 +106,10 @@ import { purchaseBillData, purchaseBillHtml } from '../modules/purchase/purchase
 import { karigarIssueData, karigarIssueHtml } from '../modules/manufacturing/karigarVoucher.js';
 import { financeVoucherData, financeVoucherHtml } from '../modules/finance/financeVoucher.js';
 import { dhrnIssueData, dhrnIssueHtml } from '../modules/dhrn/dhrnReceipt.js';
+import {
+  DocumentScopeError,
+  requireVoucherDocumentScope,
+} from '../modules/documents/voucherDocument.js';
 import { schemePassbookData, schemePassbookHtml } from '../modules/scheme/passbook.js';
 import { renderGstr1Doc } from '../modules/gst/gstr1Doc.js';
 import {
@@ -693,6 +697,29 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       // decided by its registered FilterBinding, and an unsupported one is refused rather than dropped.
       filters: readFilters(q),
     };
+  };
+  // Printable documents read by the complete desktop voucher key (modules/documents/voucherDocument.ts):
+  // company, location and year from the authenticated scope, book and voucher from the request. There is
+  // deliberately no default book. A missing one is a 400, never another book's voucher with the same number.
+  const documentScope = (req: FastifyRequest, reply: FastifyReply) => {
+    const s = readScope(req);
+    const q = (req.query ?? {}) as Record<string, unknown>;
+    try {
+      return requireVoucherDocumentScope({
+        tenantId: s.tenantId,
+        coCode: s.coCode,
+        lcCode: s.lcCode,
+        coYear: s.coYear,
+        coBook: s.coBook,
+        vchNo: String(q.vchNo ?? ''),
+      });
+    } catch (e) {
+      if (e instanceof DocumentScopeError) {
+        void reply.code(400).send({ error: e.name, field: e.field, message: e.message });
+        return null;
+      }
+      throw e;
+    }
   };
   // Operator inputs of the two fixed report screens whose exports are also slug-driven. They are shared
   // so a CSV/XLSX export can never be built from different inputs than the screen it came from.
@@ -1732,14 +1759,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // ---- Invoice (HTML preview or PDF) for a sale ----
   app.get('/sales/invoice', auth, async (req, reply) => {
     const q = req.query as any;
-    const s = readScope(req);
-    const data = await invoiceData(prisma, {
-      tenantId: s.tenantId,
-      coCode: s.coCode,
-      coYear: s.coYear,
-      coBook: String(s.coBook ?? 'SAL'),
-      vchNo: String(q.vchNo ?? ''),
-    });
+    const scope = documentScope(req, reply);
+    if (!scope) return reply;
+    const data = await invoiceData(prisma, scope);
     if (!data) return reply.code(404).send({ error: 'invoice-not-found' });
     const copyLabel =
       (
@@ -1773,14 +1795,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // ---- Purchase ----
   app.get('/purchases/invoice', auth, async (req, reply) => {
     const q = req.query as any;
-    const s = readScope(req);
-    const data = await purchaseBillData(prisma, {
-      tenantId: s.tenantId,
-      coCode: s.coCode,
-      coYear: s.coYear,
-      coBook: String(s.coBook ?? 'PUR'),
-      vchNo: String(q.vchNo ?? ''),
-    });
+    const scope = documentScope(req, reply);
+    if (!scope) return reply;
+    const data = await purchaseBillData(prisma, scope);
     if (!data) return reply.code(404).send({ error: 'bill-not-found' });
     const html = purchaseBillHtml(data.header, data.lines, {
       company: data.company,
@@ -1804,22 +1821,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
 
   app.get('/purchase-quotations/quotation', auth, async (req, reply) => {
     const q = req.query as any;
-    const s = readScope(req);
-    const scope = {
-      tenantId: s.tenantId,
-      coCode: s.coCode,
-      lcCode: s.lcCode,
-      coYear: s.coYear,
-      coBook: String(s.coBook ?? ''),
-    };
-    await getPurchaseQuotation(prisma, scope, String(q.vchNo ?? ''));
-    const data = await purchaseBillData(prisma, {
-      tenantId: s.tenantId,
-      coCode: s.coCode,
-      coYear: s.coYear,
-      coBook: scope.coBook,
-      vchNo: String(q.vchNo ?? ''),
-    });
+    const scope = documentScope(req, reply);
+    if (!scope) return reply;
+    await getPurchaseQuotation(prisma, scope, scope.vchNo);
+    const data = await purchaseBillData(prisma, scope);
     if (!data) return reply.code(404).send({ error: 'quotation-not-found' });
     const html = purchaseBillHtml(data.header, data.lines, {
       company: data.company,
@@ -1847,14 +1852,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
 
   app.get('/karigar/issue-voucher', auth, async (req, reply) => {
     const q = req.query as any;
-    const s = readScope(req);
-    const data = await karigarIssueData(prisma, {
-      tenantId: s.tenantId,
-      coCode: s.coCode,
-      coYear: s.coYear,
-      coBook: String(s.coBook ?? 'KIS'),
-      vchNo: String(q.vchNo ?? ''),
-    });
+    const scope = documentScope(req, reply);
+    if (!scope) return reply;
+    const data = await karigarIssueData(prisma, scope);
     if (!data) return reply.code(404).send({ error: 'voucher-not-found' });
     const html = karigarIssueHtml(data.header, data.lines, {
       company: data.company,
@@ -1878,14 +1878,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
 
   app.get('/sales/credit-note', auth, async (req, reply) => {
     const q = req.query as any;
-    const s = readScope(req);
-    const data = await invoiceData(prisma, {
-      tenantId: s.tenantId,
-      coCode: s.coCode,
-      coYear: s.coYear,
-      coBook: String(s.coBook ?? 'SRT'),
-      vchNo: String(q.vchNo ?? ''),
-    });
+    const scope = documentScope(req, reply);
+    if (!scope) return reply;
+    const data = await invoiceData(prisma, scope);
     if (!data) return reply.code(404).send({ error: 'credit-note-not-found' });
     const html = invoiceHtml(data.header, data.lines, {
       company: data.company,
@@ -2134,14 +2129,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
 
   app.get('/sales/quotation', auth, async (req, reply) => {
     const q = req.query as any;
-    const s = readScope(req);
-    const data = await invoiceData(prisma, {
-      tenantId: s.tenantId,
-      coCode: s.coCode,
-      coYear: s.coYear,
-      coBook: String(s.coBook ?? 'SAL'),
-      vchNo: String(q.vchNo ?? ''),
-    });
+    const scope = documentScope(req, reply);
+    if (!scope) return reply;
+    const data = await invoiceData(prisma, scope);
     if (!data) return reply.code(404).send({ error: 'quotation-not-found' });
     const html = invoiceHtml(data.header, data.lines, {
       company: data.company,
@@ -2167,22 +2157,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
 
   app.get('/sales-quotations/quotation', auth, async (req, reply) => {
     const q = req.query as any;
-    const s = readScope(req);
-    const scope = {
-      tenantId: s.tenantId,
-      coCode: s.coCode,
-      lcCode: s.lcCode,
-      coYear: s.coYear,
-      coBook: String(s.coBook ?? ''),
-    };
-    await getSalesQuotation(prisma, scope, String(q.vchNo ?? ''));
-    const data = await invoiceData(prisma, {
-      tenantId: s.tenantId,
-      coCode: s.coCode,
-      coYear: s.coYear,
-      coBook: scope.coBook,
-      vchNo: String(q.vchNo ?? ''),
-    });
+    const scope = documentScope(req, reply);
+    if (!scope) return reply;
+    await getSalesQuotation(prisma, scope, scope.vchNo);
+    const data = await invoiceData(prisma, scope);
     if (!data) return reply.code(404).send({ error: 'quotation-not-found' });
     const html = invoiceHtml(data.header, data.lines, {
       company: data.company,
@@ -2208,14 +2186,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
 
   app.get('/finance/receipt-voucher', auth, async (req, reply) => {
     const q = req.query as any;
-    const s = readScope(req);
-    const data = await financeVoucherData(prisma, 'receipt', {
-      tenantId: s.tenantId,
-      coCode: s.coCode,
-      coYear: s.coYear,
-      coBook: String(s.coBook ?? 'RCT'),
-      vchNo: String(q.vchNo ?? ''),
-    });
+    const scope = documentScope(req, reply);
+    if (!scope) return reply;
+    const data = await financeVoucherData(prisma, 'receipt', scope);
     if (!data) return reply.code(404).send({ error: 'voucher-not-found' });
     const html = financeVoucherHtml('receipt', data.header, data.lines, {
       company: data.company,
@@ -2239,14 +2212,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
 
   app.get('/finance/payment-voucher', auth, async (req, reply) => {
     const q = req.query as any;
-    const s = readScope(req);
-    const data = await financeVoucherData(prisma, 'payment', {
-      tenantId: s.tenantId,
-      coCode: s.coCode,
-      coYear: s.coYear,
-      coBook: String(s.coBook ?? 'PAY'),
-      vchNo: String(q.vchNo ?? ''),
-    });
+    const scope = documentScope(req, reply);
+    if (!scope) return reply;
+    const data = await financeVoucherData(prisma, 'payment', scope);
     if (!data) return reply.code(404).send({ error: 'voucher-not-found' });
     const html = financeVoucherHtml('payment', data.header, data.lines, {
       company: data.company,
@@ -2732,14 +2700,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // ---- Dhrn (pledge loans) ----
   app.get('/dhrn/issue-receipt', auth, async (req, reply) => {
     const q = req.query as any;
-    const s = readScope(req);
-    const data = await dhrnIssueData(prisma, {
-      tenantId: s.tenantId,
-      coCode: s.coCode,
-      coYear: s.coYear,
-      coBook: String(s.coBook ?? 'DIS'),
-      vchNo: String(q.vchNo ?? ''),
-    });
+    const scope = documentScope(req, reply);
+    if (!scope) return reply;
+    const data = await dhrnIssueData(prisma, scope);
     if (!data) return reply.code(404).send({ error: 'dhrn-not-found' });
     const html = dhrnIssueHtml(data.header, data.lines, {
       company: data.company,
