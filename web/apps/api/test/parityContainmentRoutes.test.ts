@@ -6,11 +6,9 @@ const containedRoutes = [
   ['POST', '/backup/restore', 'logical-restore'],
   ['POST', '/stock/tag-weight-diff', 'tag-weight-difference'],
   ['DELETE', '/stock/tag-weight-diff/00001', 'tag-weight-difference'],
-  ['POST', '/stock/tag-split', 'tag-split'],
-  ['DELETE', '/stock/tag-split/00001', 'tag-split'],
 ] as const;
 
-/** TR_TAG_CAN in both menus, released by N18 with its own evidence (containment.mjs discharge note). */
+/** TR_TAG_CAN in both menus (N18) and TR_TAG_SPLIT (N19), released with their own evidence (containment.mjs). */
 const releasedRoutes = [
   ['GET', '/stock/tag-cancel'],
   ['GET', '/stock/tag-cancel/00001'],
@@ -22,6 +20,11 @@ const releasedRoutes = [
   ['POST', '/stock/tag-transfer'],
   ['PUT', '/stock/tag-transfer/00001'],
   ['DELETE', '/stock/tag-transfer/00001'],
+  ['GET', '/stock/tag-split'],
+  ['GET', '/stock/tag-split/00001'],
+  ['POST', '/stock/tag-split'],
+  ['PUT', '/stock/tag-split/00001'],
+  ['DELETE', '/stock/tag-split/00001'],
 ] as const;
 
 async function containmentApp({

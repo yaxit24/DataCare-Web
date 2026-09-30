@@ -152,6 +152,26 @@ const BOOKS: {
     shortName: 'TAGTR',
     table: 'BAR_CAN_DATA',
   },
+  // Desktop TR_TAG_SPLIT on a TAG SPLIT book (MDI_FORM.cs:8686 "Tag Split"), short name TGSPL, numbered from
+  // LBR_DATA (its header table). Ac_Ledr.Tag_Split_Ledr (Ac_Ledr.cs:1953-1982) posts the absorbing legs from
+  // BOOK_DETL slots 5 (labour), 6/7 (gold DR/CR fine) and 8/9 (silver DR/CR fine); provisioning wires them so a
+  // split with a difference and an absorbing account can post.
+  {
+    book: 'TSP',
+    name: 'Tag Split',
+    mainBook: 'TAG SPLIT',
+    inout: 'O',
+    acCode: 'KASAR',
+    shortName: 'TGSPL',
+    table: 'LBR_DATA',
+    slots: [
+      { srNo: 5, acCode: 'LBREXP' },
+      { srNo: 6, acCode: 'PURCHASE' },
+      { srNo: 7, acCode: 'SALES' },
+      { srNo: 8, acCode: 'PURCHASE' },
+      { srNo: 9, acCode: 'SALES' },
+    ],
+  },
   { book: 'ILT', name: 'Item Lot', mainBook: 'ITEM LOT', inout: 'I', acCode: 'PURCHASE' },
   { book: 'JV', name: 'Journal', mainBook: 'JOURNAL', inout: 'I', acCode: 'KASAR' },
   { book: 'CON', name: 'Contra', mainBook: 'CONTRA', inout: 'I', acCode: 'CASH' },

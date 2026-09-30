@@ -22,6 +22,21 @@ export type {
   BillTotals,
   MoneyRoundingPolicy,
 } from './calc.js';
+export {
+  tagSplitChild,
+  tagSplitStone,
+  tagSplitStoneEffect,
+  tagSplitTotals,
+  tagSplitBalance,
+  tagSplitConserves,
+} from './tagSplitLine.js';
+export type {
+  TagSplitSettings,
+  TagSplitChildCells,
+  TagSplitStoneCells,
+  TagSplitTotals,
+  TagSplitBalance,
+} from './tagSplitLine.js';
 export { fineFor, round3, DEFAULT_FINE_WORKFLOW } from './finePolicy.js';
 export type { FineWorkflow, FineLine } from './finePolicy.js';
 export { orderLabourAmount, orderLabourTransition, orderLabourReplay } from './orderLabour.js';

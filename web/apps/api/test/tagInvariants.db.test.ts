@@ -257,7 +257,7 @@ describe('tag invariant coverage map', () => {
     expect(dataChecks.map((c) => c.number)).toEqual([1, 2, 3, 9]);
 
     const blocked = TAG_INVARIANT_COVERAGE.filter((c) => c.enforcement.startsWith('blocked'));
-    expect(blocked.map((c) => c.number)).toEqual([5, 8, 10, 12]);
+    expect(blocked.map((c) => c.number)).toEqual([8, 10, 12]);
     for (const entry of blocked) {
       expect(entry.evidence, `invariant ${entry.number} must say what unblocks it`).toMatch(
         /§8\.1|§7|undecided|unwritten|WP-10/,
@@ -266,12 +266,12 @@ describe('tag invariant coverage map', () => {
   });
 
   it('records that the riskiest tag operations are contained rather than proved', () => {
-    // Split and weight change are blocked by WP-01 (cancel and transfer were released by N18 and are now
+    // Weight change is blocked by WP-01 (cancel and transfer were released by N18, split by N19, and are now
     // code-tested). The coverage map must say so, because "no violations observed" on a blocked path is not
     // evidence that the path is correct.
     const mentionsContainment = TAG_INVARIANT_COVERAGE.filter((c) =>
       /contain|CONTAIN|blocked by WP-01|WP-01/.test(c.evidence),
     );
-    expect(mentionsContainment.map((c) => c.number)).toEqual([4, 5, 7, 10, 11]);
+    expect(mentionsContainment.map((c) => c.number)).toEqual([4, 7, 10, 11]);
   });
 });

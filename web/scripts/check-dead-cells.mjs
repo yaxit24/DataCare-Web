@@ -65,6 +65,10 @@ const PAGE_WRITER = {
   // sent cell is replayed or refused, never ignored).
   'tag-cancel': 'stock/tagCancel.ts',
   'tag-transfer': 'stock/tagCancel.ts',
+  // components/TagSplitForm.tsx (desktop TR_TAG_SPLIT). Its grids have no `extendedLineFields` registry — every
+  // column is first-class — so this audit has nothing to read there; the column-to-writer evidence is
+  // apps/web/test/tagSplitVoucher.test.ts (every cell is sent) and apps/api/test/tagSplitRows.test.ts.
+  'tag-split': 'stock/tagSplit.ts',
   'tag-opening': 'stock/stockVoucherLifecycle.ts',
 };
 

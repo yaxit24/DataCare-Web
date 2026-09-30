@@ -40,12 +40,32 @@ export const PARITY_CONTAINMENT_WORK_PACKAGE = 'WP-01';
  *   • desktop database diff — derived from the source; no desktop BAR_CAN_* rows were ever captured, so the
  *     cards stay open until a desktop replay and business acceptance.
  * Merging this change is the release decision for both operations.
+ *
+ * DISCHARGED — `tag-split` (N19, card X20), against its exit gate ("atomic parent consume, child identity /
+ * detail / image creation, conservation, lifecycle, locks, and desktop database diff", P0-05/WP-09).
+ *
+ * The desktop form TR_TAG_SPLIT consumes one or more parent tags and creates child tags, conserving metal; one
+ * writer (`apps/api/src/modules/stock/tagSplit.ts`) implements it; the contract is
+ * `parity-plan-2026-09-10/evidence/implementation-2026-09-30-n19/contract.md`. Evidence for the gate clauses:
+ *   • atomic parent consume — each parent resolves through the shared resolver (`issueTagTx`) under a sorted tag
+ *     lock and leaves stock; a sold or ambiguous parent is refused; a failure part-way leaves nothing
+ *     (tagSplitLifecycle.db.test.ts V6, V8, V10; full-database diff)
+ *   • child identity and detail — every child gets an allocated TAG_NO / VCH_SRNO / SRNO_MAST row and a full
+ *     BAR_DETL / BAR_IDTL record, so it is a real, sellable tag (V1); the register is LBR_DATA / ISU_DETL /
+ *     ISU_IDTL / REC_DETL and MAIN_STOCK is built by Tag_Split_Stk (parent '-', child '+')
+ *   • conservation — the child net total equals the parent net total, or the difference posts the Tag_Split_Ledr
+ *     absorption legs against a configured account; a difference with no account is refused (V1, V2, V3)
+ *   • image lineage — each child copies the parent's TAG image; the parent's own image is never modified (V1)
+ *   • lifecycle / locks / reversal — list, read, edit and delete, with TEMP_BOOK_DATA and the desktop
+ *     DELETE_DATA audit; a child that was sold or split again blocks the edit and the delete (V4, V5, V7)
+ *   • desktop database diff — derived from the source; no desktop TAG SPLIT rows were ever captured, so the card
+ *     stays open until a desktop replay and business acceptance.
+ * Merging this change is the release decision.
  */
 export const parityContainmentOperations = Object.freeze([
   'logical-restore',
   'production-cutover-load',
   'tag-weight-difference',
-  'tag-split',
 ]);
 
 const rule = (operation, title, reason, safeAlternative, exitGate) =>
@@ -86,13 +106,6 @@ export const parityContainmentRules = Object.freeze({
     'The current path is a simplified net adjustment and omits desktop tag replacement, barcode detail, image, Rojmel, serial, and karigar branches.',
     'Use tag lookup for inspection only; perform weight change in the desktop application until every desktop branch is certified.',
     'P0-05/WP-09: complete branch matrix, configured accounts, lifecycle/locks/reversal, and desktop database diff.',
-  ),
-  'tag-split': rule(
-    'tag-split',
-    'Tag Split mutation',
-    'The current split writes stock movements only; it does not allocate child serials or create barcode detail, sub-detail, image, and parent-child lineage.',
-    'Use parent tag lookup for inspection only; perform splitting in the desktop application until exact child creation is certified.',
-    'P0-05/WP-09: atomic parent consume, child identity/detail/image creation, conservation, lifecycle, locks, and desktop database diff.',
   ),
 });
 

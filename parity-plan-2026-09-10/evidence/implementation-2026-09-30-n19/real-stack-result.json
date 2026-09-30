@@ -1,0 +1,33 @@
+{
+  "startedAt": "2026-09-30T07:31:28.059Z",
+  "releaseSha": null,
+  "database": "disposable localhost:55433 / app_user",
+  "imageObservations": [],
+  "cameraDevice": "Chromium synthetic video; no physical camera acceptance",
+  "status": "passed",
+  "tagSplit": {
+    "checks": [
+      "the page offers only its own in-use TAG SPLIT book and the next voucher number",
+      "a picked parent fills the read-only parent grid, its net and fine, and its photograph",
+      "each child cell recomputes net and fine on the same core arithmetic the API writes with",
+      "the conservation banner tracks parent net, children net and the short/surplus difference",
+      "a short split with no absorbing account is refused before anything is written",
+      "a conserving split saves: LBR_DATA (C), the parent line (O), two child lines and two child BAR_DETL tags (I)",
+      "MAIN_STOCK moves the parent out and each child in, conserving the fine; DM_DATA sends the parent stone out",
+      "the saved voucher reopens by number and appears in the voucher list with its child count",
+      "delete writes DELETE_DATA per parent line, removes the whole write set and gives the parent back",
+      "the source parent tag, its stone and its photograph never change"
+    ],
+    "boundary": "Engineering evidence on a synthetic fixture; not an independent desktop comparison or business acceptance"
+  },
+  "journeys": [
+    {
+      "journeyId": "tag-split",
+      "status": "passed"
+    }
+  ],
+  "mockedRequests": 0,
+  "mockedResponses": 0,
+  "interceptionIndicators": 0,
+  "finishedAt": "2026-09-30T07:31:32.460Z"
+}

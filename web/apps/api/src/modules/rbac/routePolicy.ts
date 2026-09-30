@@ -497,7 +497,14 @@ route('Inventory/Tag Weight Diff', [
   'POST /stock/tag-weight-diff',
   'DELETE /stock/tag-weight-diff/:vchNo',
 ]);
-route('Inventory/Tag Split', ['POST /stock/tag-split', 'DELETE /stock/tag-split/:vchNo']);
+route('Inventory/Tag Split', [
+  'GET /stock/tag-split',
+  'GET /stock/tag-split/source',
+  'GET /stock/tag-split/:vchNo',
+  'POST /stock/tag-split',
+  'PUT /stock/tag-split/:vchNo',
+  'DELETE /stock/tag-split/:vchNo',
+]);
 route('Cash / Bank/Digital Gold Book', [
   'POST /finance/gold-book',
   'GET /finance/gold-book/:vchNo',
