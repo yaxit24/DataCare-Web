@@ -1,6 +1,7 @@
 'use client';
-import { useState } from 'react';
-import { post, downloadPdf, ApiError } from '../../../../lib/api';
+import { useEffect, useState } from 'react';
+import { get, post, downloadPdf, ApiError } from '../../../../lib/api';
+import { useBusinessScope } from '../../../../components/BusinessScope';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import { fineFor, labourCharge } from '@datacare/core';
@@ -215,6 +216,23 @@ const n = (v: string) => Number(v || 0);
 const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
 
 export default function EstimatePage() {
+  // G09: the estimate header used to hard-code one shop's name ("DHAKAN JEWELLERS"), so every company
+  // printed the wrong letterhead. Take it from the company master of the active scope instead.
+  const { coCode } = useBusinessScope();
+  const [companyName, setCompanyName] = useState('');
+  useEffect(() => {
+    let live = true;
+    get<Array<{ CO_CODE: string; CO_NAME: string | null }>>('/context/companies')
+      .then((rows) => {
+        if (!live) return;
+        const mine = rows.find((r) => r.CO_CODE === coCode);
+        setCompanyName(String(mine?.CO_NAME ?? '').trim());
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [coCode]);
   const [acCode, setAcCode] = useState('');
   const [acName, setAcName] = useState('');
   const [taxRatePct, setTaxRatePct] = useState('3');
@@ -319,7 +337,7 @@ export default function EstimatePage() {
       )
       .join('');
     const t = res.totals;
-    const html = `<!doctype html><html><head><meta charset="utf-8"><style>body{font:12px Arial;padding:24px}h1{color:#0b5cab}table{border-collapse:collapse;width:100%}th,td{border:1px solid #bbb;padding:5px 7px;font-size:11px}th{background:#eef3f9}</style></head><body><h1>DHAKAN JEWELLERS</h1><div><b>ESTIMATE / QUOTATION</b> &middot; ${esc(acName || acCode || 'Customer')} &middot; ${new Date().toLocaleDateString('en-IN')}</div><table><thead><tr><th>#</th><th>Item</th><th>Metal</th><th>Labour</th><th>Net</th></tr></thead><tbody>${rows}</tbody></table><p style="text-align:right">Taxable: ${t.taxable} &nbsp; Tax: ${t.tax} &nbsp; <b>Total: ${t.total}</b></p><p class="muted">This is an estimate, not a tax invoice.</p></body></html>`;
+    const html = `<!doctype html><html><head><meta charset="utf-8"><style>body{font:12px Arial;padding:24px}h1{color:#0b5cab}table{border-collapse:collapse;width:100%}th,td{border:1px solid #bbb;padding:5px 7px;font-size:11px}th{background:#eef3f9}</style></head><body><h1>${esc(companyName || 'Estimate')}</h1><div><b>ESTIMATE / QUOTATION</b> &middot; ${esc(acName || acCode || 'Customer')} &middot; ${new Date().toLocaleDateString('en-IN')}</div><table><thead><tr><th>#</th><th>Item</th><th>Metal</th><th>Labour</th><th>Net</th></tr></thead><tbody>${rows}</tbody></table><p style="text-align:right">Taxable: ${t.taxable} &nbsp; Tax: ${t.tax} &nbsp; <b>Total: ${t.total}</b></p><p class="muted">This is an estimate, not a tax invoice.</p></body></html>`;
     downloadPdf(html, 'estimate');
   }
 

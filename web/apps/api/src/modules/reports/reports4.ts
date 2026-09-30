@@ -182,7 +182,8 @@ export async function karigarLedger(
 export function renderKarigarLedgerHtml(
   karigarAc: string,
   rep: ListReport & { karigarAc?: string },
-  company = 'DHAKAN JEWELLERS',
+  // G09: neutral default; the route passes the active company's CO_NAME. Never a specific shop.
+  company = 'Karigar Ledger',
 ): string {
   const esc = (v: unknown) =>
     String(v ?? '').replace(
