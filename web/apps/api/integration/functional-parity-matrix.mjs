@@ -142,10 +142,10 @@ const FAMILIES = [
     liveVouchers: 0,
   },
   {
-    name: 'Other purchase',
+    name: 'Other expenses',
     desktopForms: ['TR_OTH_PURC'],
     basePath: '/other-purchase',
-    module: 'purchase/purchase.ts',
+    module: 'purchase/otherIncome.ts',
     liveVouchers: 0,
   },
   {

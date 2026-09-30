@@ -12,6 +12,7 @@ export type BookWorkflow =
   | 'SALES ORDER'
   | 'TOUR ORDER'
   | 'PURCHASE'
+  | 'TAG PURCHASE'
   | 'PURCHASE QUOTATION'
   | 'CONSIGNMENT PURCHASE'
   | 'SALES RETURN'
@@ -40,6 +41,10 @@ export const workflowPolicy: Record<BookWorkflow, { mainBook: string; inout: 'I'
   'SALES ORDER': { mainBook: 'SALES ORDER', inout: 'O' },
   'TOUR ORDER': { mainBook: 'TOUR ORDER', inout: 'I' },
   PURCHASE: { mainBook: 'PURCHASE', inout: 'I' },
+  // "Tag Wise Purc" opens TR_PURC_HM on a TAG PURCHASE book (MDI_FORM.cs:8540-8541). The form posts it
+  // through the same Purc_Ledr / Purc_Rojmel / Purc_GST / Purc_Stk routines as a PURCHASE book
+  // (TR_PURC_HM.cs:8426-8441); only its grid differs (tag and hallmark columns).
+  'TAG PURCHASE': { mainBook: 'TAG PURCHASE', inout: 'I' },
   'PURCHASE QUOTATION': { mainBook: 'PR QUOT', inout: 'O' },
   'CONSIGNMENT PURCHASE': { mainBook: 'CON PUR', inout: 'I' },
   'SALES RETURN': { mainBook: 'SALES RETURNE', inout: 'I' },

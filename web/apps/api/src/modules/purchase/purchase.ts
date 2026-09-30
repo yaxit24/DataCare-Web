@@ -668,11 +668,7 @@ async function writePurchaseTx(
   const bookPolicy = await resolveBookPolicyTx(
     tx,
     input.scope,
-    isPurchaseQuotation
-      ? 'PURCHASE QUOTATION'
-      : actualMainBook === 'CON PUR'
-        ? 'CONSIGNMENT PURCHASE'
-        : 'PURCHASE',
+    isPurchaseQuotation ? 'PURCHASE QUOTATION' : purchaseWorkflowFor(actualMainBook),
   );
   const roundingPolicy = await resolveRoundingPolicyTx(tx, input.scope);
 
@@ -1886,6 +1882,19 @@ function purchaseLinkFromInput(input: PurchaseInput): PurchaseSourceLink {
   };
 }
 
+/**
+ * The purchase workflow a configured book posts under. TR_PURC serves PURCHASE and CON PUR books; TR_PURC_HM
+ * also serves TAG PURCHASE books ("Tag Wise Purc", MDI_FORM.cs:8540-8541) and posts them through the same
+ * purchase routines. Anything else keeps the PURCHASE policy, which then refuses the book's MAIN_BOOK.
+ */
+function purchaseWorkflowFor(
+  mainBook: string,
+): 'PURCHASE' | 'TAG PURCHASE' | 'CONSIGNMENT PURCHASE' {
+  if (mainBook === 'CON PUR') return 'CONSIGNMENT PURCHASE';
+  if (mainBook === 'TAG PURCHASE') return 'TAG PURCHASE';
+  return 'PURCHASE';
+}
+
 async function purchaseMainBookTx(tx: any, scope: CompletePurchaseScope): Promise<string> {
   const rows: Array<{ MAIN_BOOK: unknown }> = await tx.$queryRawUnsafe(
     `SELECT "MAIN_BOOK" FROM "BOOK_DATA"
@@ -2692,12 +2701,9 @@ export async function deletePurchase(
   const voucherNo = formatVoucherNo(input.vchNo);
   const key = keyOf(scope, voucherNo);
   return withTenant(prisma, tenantId, async (tx: any) => {
-    const isConsignmentPurchase = (await purchaseMainBookTx(tx, scope)) === 'CON PUR';
-    const bookPolicy = await resolveBookPolicyTx(
-      tx,
-      scope,
-      isConsignmentPurchase ? 'CONSIGNMENT PURCHASE' : 'PURCHASE',
-    );
+    const deleteMainBook = await purchaseMainBookTx(tx, scope);
+    const isConsignmentPurchase = deleteMainBook === 'CON PUR';
+    const bookPolicy = await resolveBookPolicyTx(tx, scope, purchaseWorkflowFor(deleteMainBook));
     const configuredBookName = await configuredPurchaseBookNameTx(tx, scope);
     const header = await persistedPurchaseHeaderTx(tx, scope, voucherNo, [
       'AC_CODE',
@@ -2864,285 +2870,6 @@ export async function deletePurchaseQuotation(
         VCH_DESC: `ItCode/${text(detail.IT_CODE)}`.slice(0, 150),
       });
     }
-    return { reversed: true };
-  });
-}
-
-// ───────────────────────── Other / expense purchase (TR_OTH_PURC) ─────────────────────────
-// A NON-STOCK purchase: buying expenses/services (packing, freight, repairs…) from a supplier,
-// with GST input credit. Ledger is purchase-sense (Dr expense + Dr input-GST + Dr round-off / Cr
-// supplier) but NO inventory is touched. Header → PAY_DATA (desktop TR_OTH_PURC), + TAX_DATA
-// (input register) + BILL_OS_DATA (payable). Book 'OPR', VCH_TYPE 'OPUR'.
-
-export interface OtherPurchaseLine {
-  expenseAc: string; // expense ledger to debit (required)
-  amount: number; // F: taxable base for this line; R: tax-inclusive gross
-  description?: string;
-  hsnCode?: string;
-  taxPct?: number; // per-line GST% (defaults to the bill taxRatePct)
-  taxType?: 'F' | 'R'; // F=forward (amount is taxable, tax added on top); R=reverse/inclusive (amount includes tax)
-}
-
-export interface OtherPurchaseInput {
-  scope: VoucherScope;
-  acCode: string; // supplier account (required)
-  acName?: string;
-  billNo?: string;
-  vchDate?: Date | string;
-  taxRatePct: number;
-  interState: boolean;
-  taxAc?: string; // GST input ledger (default 'GSTINPUT')
-  roundAc?: string;
-  lines: OtherPurchaseLine[];
-  cashAmt?: number;
-  chequeAmt?: number;
-  cardAmt?: number;
-  upiAmt?: number;
-  kasar?: number;
-  cashAc?: string;
-  bankAc?: string;
-  kasarAc?: string;
-}
-
-function otherKeyOf(s: VoucherScope, vchNo: number): VoucherKey {
-  return {
-    CO_CODE: s.coCode,
-    LC_CODE: s.lcCode,
-    CO_YEAR: s.coYear ?? '',
-    CO_BOOK: s.coBook ?? 'OPR',
-    VCH_NO: formatVoucherNo(vchNo),
-  };
-}
-
-export async function createOtherPurchase(
-  prisma: any,
-  input: OtherPurchaseInput,
-): Promise<PurchaseResult> {
-  if (!input.acCode) throw new PurchaseValidationError('supplier account (acCode) is required');
-  const lines = (input.lines ?? []).filter((l) => l && l.expenseAc && Number(l.amount) > 0);
-  if (!lines.length)
-    throw new PurchaseValidationError('at least one expense line (account + amount) is required');
-
-  const taxAc = input.taxAc ?? 'GSTINPUT';
-  const roundAc = input.roundAc ?? 'ROUNDOFF';
-  const tenantId = input.scope.tenantId;
-
-  return withTenant(prisma, tenantId, async (tx: any) => {
-    const vchNo = await nextVoucherNoTx(tx, input.scope);
-    const key = otherKeyOf(input.scope, vchNo);
-    const r2 = (x: number): number => Math.round((x + 1e-9) * 100) / 100;
-    const inter = !!input.interState;
-
-    // Per-line tax: F = forward (amount is the taxable base, tax added on top); R = reverse/inclusive
-    // (amount includes tax → taxable = amount×100/(100+rate)). Rate defaults to the bill taxRatePct.
-    const calc = lines.map((l) => {
-      const pct = l.taxPct != null ? Number(l.taxPct) : input.taxRatePct;
-      const amount = round2(Number(l.amount));
-      const isR = String(l.taxType ?? 'F').toUpperCase() === 'R';
-      const base = isR ? r2((amount * 100) / (100 + pct)) : amount;
-      const gross = isR ? amount : r2(amount * (1 + pct / 100));
-      const tax = r2(gross - base);
-      return {
-        ac: l.expenseAc,
-        pct,
-        base,
-        gross,
-        tax,
-        hsn: l.hsnCode ?? null,
-        itName: l.description ?? null,
-        type: isR ? 'R' : 'F',
-      };
-    });
-    const sumBase = r2(calc.reduce((s, c) => s + c.base, 0));
-    const sumTax = r2(calc.reduce((s, c) => s + c.tax, 0));
-    const total = Math.round(sumBase + sumTax);
-    const roundOff = r2(total - (sumBase + sumTax));
-    const cgst = inter ? 0 : r2(sumTax / 2);
-    const sgst = inter ? 0 : r2(sumTax - cgst);
-    const igst = inter ? sumTax : 0;
-    const totals = {
-      net: sumBase,
-      taxable: sumBase,
-      discount: 0,
-      tax: sumTax,
-      cgst,
-      sgst,
-      igst,
-      roundOff,
-      total,
-    } as unknown as BillTotals;
-
-    const byAc = new Map<string, number>();
-    for (const c of calc) byAc.set(c.ac, r2((byAc.get(c.ac) ?? 0) + c.base));
-
-    const base = { ...key, VCH_TYPE: 'OPUR' };
-    const ledger: LedgerLine[] = [
-      { ...base, AC_CODE: input.acCode, DR_AMT: 0, CR_AMT: total, SIGN: 'C' },
-    ]; // Cr supplier
-    for (const [ac, amount] of byAc)
-      if (amount !== 0) ledger.push({ ...base, AC_CODE: ac, DR_AMT: amount, CR_AMT: 0, SIGN: 'D' }); // Dr expense (taxable base)
-    if (sumTax !== 0)
-      ledger.push({ ...base, AC_CODE: taxAc, DR_AMT: sumTax, CR_AMT: 0, SIGN: 'D' }); // Dr input GST
-    if (roundOff !== 0)
-      ledger.push({ ...base, AC_CODE: roundAc, DR_AMT: roundOff, CR_AMT: 0, SIGN: 'D' });
-    assertBalanced(ledger);
-
-    const tender = payoutLegs(base, {
-      partyAc: input.acCode,
-      cashAmt: input.cashAmt,
-      chequeAmt: input.chequeAmt,
-      cardAmt: input.cardAmt,
-      upiAmt: input.upiAmt,
-      kasar: input.kasar,
-      cashAc: input.cashAc,
-      bankAc: input.bankAc,
-      kasarAc: input.kasarAc,
-    });
-    ledger.push(...tender.legs);
-
-    const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
-    const header = {
-      ...key,
-      VCH_TYPE: 'OPUR',
-      BILL_NO: input.billNo ?? formatVoucherNo(vchNo),
-      VCH_DATE: vchDate,
-      AC_CODE: input.acCode,
-      AC_NAME: input.acName ?? null,
-      NET_AMT: sumBase,
-      CGST_TAX: cgst,
-      SGST_TAX: sgst,
-      IGST_TAX: igst,
-      TOT_AMT: total,
-      CASH_AMT: tender.cashAmt,
-      CHQ_AMT: round2(num(input.chequeAmt)),
-      CARD_AMT: round2(num(input.cardAmt)),
-      KASAR_AMT: tender.kasar,
-      BANK_AC: input.bankAc ?? null,
-      BILL_OS: round2(total - tender.paidNow - tender.kasar),
-    };
-    // Per-line detail with HSN + F/R + CGST/SGST/IGST split (PAY_DETL).
-    const detl = calc.map((c, i) => {
-      const cg = inter ? 0 : r2(c.tax / 2);
-      const sg = inter ? 0 : r2(c.tax - cg);
-      const ig = inter ? c.tax : 0;
-      return {
-        ...key,
-        SR_NO: i + 1,
-        VCH_DATE: vchDate,
-        VCH_TYPE: 'OPUR',
-        BOOK_NAME: 'OTH PURC',
-        AC_CODE: c.ac,
-        HSN_CODE: c.hsn,
-        IT_NAME: c.itName,
-        TAX_TYPE: c.type,
-        TAX_PRC: c.pct,
-        TAXABLE_AMT: c.base,
-        NET_AMT: c.base,
-        CGST_PRC: inter ? 0 : r2(c.pct / 2),
-        CGST_TAX: cg,
-        SGST_PRC: inter ? 0 : r2(c.pct / 2),
-        SGST_TAX: sg,
-        IGST_PRC: inter ? c.pct : 0,
-        IGST_TAX: ig,
-        TOT_AMT: c.gross,
-      };
-    });
-    // TAX_DATA grouped per distinct rate (a bill may mix HSN rates).
-    const taxBase = {
-      ...key,
-      TRAN_TYPE: 'P',
-      BOOK_NAME: 'OTH PURC',
-      VCH_DATE: vchDate,
-      AC_CODE: input.acCode,
-      PARTY_NAME: input.acName ?? null,
-      TAX_SIGN: '-',
-    };
-    const byRate = new Map<number, { base: number; tax: number }>();
-    for (const c of calc) {
-      const e = byRate.get(c.pct) ?? { base: 0, tax: 0 };
-      e.base = r2(e.base + c.base);
-      e.tax = r2(e.tax + c.tax);
-      byRate.set(c.pct, e);
-    }
-    const taxRows: any[] = [];
-    let sr = 1;
-    for (const [pct, e] of byRate) {
-      if (e.tax === 0) continue;
-      if (inter)
-        taxRows.push({
-          ...taxBase,
-          SR_NO: sr++,
-          TAX_TYPE: 'IGST',
-          TAX_PRC: pct,
-          NET_AMT: e.base,
-          TAX_AMT: e.tax,
-          TOT_AMT: r2(e.base + e.tax),
-        });
-      else {
-        const cg = r2(e.tax / 2);
-        taxRows.push({
-          ...taxBase,
-          SR_NO: sr++,
-          TAX_TYPE: 'CGST',
-          TAX_PRC: r2(pct / 2),
-          NET_AMT: e.base,
-          TAX_AMT: cg,
-          TOT_AMT: r2(e.base + e.tax),
-        });
-        taxRows.push({
-          ...taxBase,
-          SR_NO: sr++,
-          TAX_TYPE: 'SGST',
-          TAX_PRC: r2(pct / 2),
-          NET_AMT: e.base,
-          TAX_AMT: r2(e.tax - cg),
-          TOT_AMT: r2(e.base + e.tax),
-        });
-      }
-    }
-    const osRow = {
-      ...key,
-      VCH_TYPE: 'OPUR',
-      INOUT_TYPE: 'I',
-      ENTRY_TYPE: 'N',
-      BOOK_NAME: 'OTH PURC',
-      SR_NO: 1,
-      VCH_DATE: vchDate,
-      AC_CODE: input.acCode,
-      BILL_AMT: total,
-      REC_AMT: tender.paidNow,
-      KASAR_AMT: tender.kasar,
-    };
-
-    await postVoucherTx(tx, tenantId, {
-      ledger: { table: 'AC_DATA', lines: ledger },
-      bookName: 'OTH PURC',
-      writes: [
-        { table: 'PAY_DATA', rows: [header] },
-        { table: 'PAY_DETL', rows: detl },
-        ...(taxRows.length ? [{ table: 'TAX_DATA', rows: taxRows }] : []),
-        { table: 'BILL_OS_DATA', rows: [osRow] },
-      ],
-    });
-    return { vchNo, totals };
-  });
-}
-
-export async function deleteOtherPurchase(
-  prisma: any,
-  input: { scope: VoucherScope; vchNo: number | string; deleteUser?: string },
-): Promise<{ reversed: true }> {
-  const tenantId = input.scope.tenantId;
-  const key = otherKeyOf(input.scope, Number(input.vchNo));
-  return withTenant(prisma, tenantId, async (tx: any) => {
-    await reverseVoucherTx(tx, tenantId, {
-      tables: ['PAY_DATA', 'PAY_DETL', 'AC_DATA', 'TAX_DATA', 'BILL_OS_DATA'],
-      key,
-      deleteLog: {
-        table: 'DELETE_DATA',
-        row: { ...key, VCH_TYPE: 'OPUR', DELETE_USER: input.deleteUser ?? 'system' },
-      },
-    });
     return { reversed: true };
   });
 }

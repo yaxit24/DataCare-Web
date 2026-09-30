@@ -63,9 +63,11 @@ describe('route policy registry', () => {
     // Stock Verify and Stock Movement (D3, previously export-only), plus /reports/gstr1 (D4).
     // X16 adds the four /wholesale-sales lifecycle routes (desktop "Wh Sales", its own right).
     // N18 adds list, tag source, read and update for each TR_TAG_CAN menu (tag cancel, tag transfer).
-    // The strict numeric Sale Return update (card X13 steps 8-9) adds one guarded PUT.
-    expect(routes).toHaveLength(597);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(597);
+    // 596 on the previous baseline. The strict numeric Sale Return update (card X13 steps 8-9) adds one
+    // guarded PUT; N33 replaces the web-only other-purchase create/delete pair with the full TR_OTH_PURC
+    // OTH EXP lifecycle (read, update, print) and adds the Other Income print: 596 + 1 - 2 + 5 + 1 = 601.
+    expect(routes).toHaveLength(601);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(601);
 
     const policies = routes.map((route) => ({
       ...route,

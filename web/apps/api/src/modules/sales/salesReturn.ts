@@ -622,6 +622,8 @@ export async function saleForReturn(
   const tenantId = input.scope.tenantId;
   const book = input.origBook ?? 'SAL';
   return withTenant(prisma, tenantId, async (tx: any) => {
+    // A return reverses a SALE. A quotation, order or credit-note book shares SL_DATA but is not a source.
+    await resolveBookPolicyTx(tx, { ...input.scope, coBook: book }, 'SALES');
     const hdr: any[] = await tx.$queryRawUnsafe(
       `SELECT "AC_CODE","AC_NAME","TAX_PRC","IGST_TAX","BILL_NO" FROM "SL_DATA"
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4

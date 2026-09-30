@@ -1,9 +1,13 @@
 'use client';
 import { useState } from 'react';
-import { post, ApiError } from '../../../../lib/api';
+import { del, get, post, put, ApiError } from '../../../../lib/api';
+import { BookSelect } from '../../../../components/BookSelect';
+import { useBusinessScope } from '../../../../components/BusinessScope';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { VoucherList } from '../../../../components/VoucherList';
+import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
-import SubDetailGrid, { useSubDetail } from '../../../../components/SubDetailGrid';
+import SubDetailGrid, { stoneRowFromApi, useSubDetail } from '../../../../components/SubDetailGrid';
 import { fineFor, labourCharge } from '@datacare/core';
 import {
   ExtendedBodyCells,
@@ -12,7 +16,13 @@ import {
 } from '../../../../components/ExtendedGrid';
 
 /** Hallmark Purchase (TR_PURC_HM) — buy items capturing HUID + a hallmarking charge & its input GST.
- *  Reuses the purchase engine (POST /purchases) with per-line huid + header hmAmount/hmTaxPct. */
+ *
+ *  The desktop opens TR_PURC_HM from "Tag Wise Purc" on a TAG PURCHASE book (MDI_FORM.cs:8540-8541) and
+ *  from "Purchase" on a PURCHASE book when the company buys with hallmark tax (MDI_FORM.cs:7865-7866), and
+ *  posts both through the purchase routines (TR_PURC_HM.cs:8426-8441). The page therefore selects a
+ *  configured PURCHASE or TAG PURCHASE book and uses the purchase lifecycle (/purchases) to save, reopen,
+ *  edit, delete and print. It used to send no book, so every save was refused.
+ */
 interface Row {
   itCode: string;
   tagNo: string;
@@ -188,8 +198,18 @@ const blank = (): Row => ({
 });
 const n = (v: string) => Number(v || 0);
 const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
+/** A saved zero is shown as an empty cell, as the entry grid does. */
+const str = (v: unknown) => (v == null || Number(v) === 0 ? '' : String(v));
+const HALLMARK_PURCHASE_BOOKS = ['PURCHASE', 'TAG PURCHASE'];
 
 export default function HallmarkPurchasePage() {
+  const { lcCode, coYear } = useBusinessScope();
+  const companySettings = useCompanySettings();
+  // Desktop MsLbrWithGht: per-gram labour is on (net + ghat) unless the company sets LBR_WITH_GHT='N'.
+  const labourWithGhat = companyFlag(companySettings, 'LBR_WITH_GHT', 'Y');
+  const [coBook, setCoBook] = useState('');
+  const [voucherLookup, setVoucherLookup] = useState('');
+  const [loadedVchNo, setLoadedVchNo] = useState('');
   const [f, setF] = useState({
     acCode: '',
     acName: '',
@@ -227,12 +247,11 @@ export default function HallmarkPurchasePage() {
 
   const calc = (r: Row) => {
     const fine = fineFor('purchaseItem', { netWt: n(r.netWt), touch: n(r.touch) });
-    // P5/P7: this grid now carries ghat, so per-gram labour is (net + ghat) x rate unless the company
-    // switches ghat off (LBR_WITH_GHT, desktop blank default 'Y').
+    // Per-gram labour is (net + ghat) x rate unless the company switches ghat off (LBR_WITH_GHT='N').
     const labour = labourCharge('per_gram', {
       netWt: n(r.netWt),
       ghatWt: n(r.ghtWt),
-      withGhat: true,
+      withGhat: labourWithGhat,
       rate: n(r.making),
     });
     return r2(fine * n(r.rate) + labour);
@@ -242,10 +261,106 @@ export default function HallmarkPurchasePage() {
   const tax = r2(((taxable + hmAmt) * n(f.taxRatePct)) / 100);
   const grand = Math.round(taxable + hmAmt + tax);
 
+  const scopeQuery = () =>
+    `coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}`;
+  const failure = (err: unknown) =>
+    err instanceof ApiError
+      ? err.body?.detail || err.body?.message || err.body?.error || 'failed'
+      : 'failed';
+
+  function newVoucher() {
+    setLoadedVchNo('');
+    setVoucherLookup('');
+    setRes(null);
+    setMsg(null);
+    setF({ acCode: '', acName: '', billNo: '', taxRatePct: '3', interState: false, hmCharge: '' });
+    setRows([blank()]);
+    sub.reset();
+  }
+
+  async function loadVoucher() {
+    if (!coBook || !voucherLookup.trim()) return;
+    setBusy(true);
+    setMsg(null);
+    try {
+      const view = await get<any>(
+        `/purchases/${encodeURIComponent(voucherLookup.trim())}?${scopeQuery()}`,
+      );
+      setLoadedVchNo(String(view.voucherNo));
+      setVoucherLookup(String(view.voucherNo));
+      setF({
+        acCode: String(view.acCode ?? ''),
+        acName: String(view.acName ?? ''),
+        billNo: String(view.billNo ?? ''),
+        taxRatePct: str(view.taxRatePct) || '0',
+        interState: !!view.interState,
+        hmCharge: str(view.hmAmount),
+      });
+      const loaded: Row[] = (view.lines ?? []).map((line: any) => ({
+        ...blank(),
+        itCode: String(line.itCode ?? ''),
+        tagNo: String(line.tagNo ?? ''),
+        huid: String(line.huid ?? ''),
+        pcs: str(line.pcs),
+        grossWt: str(line.grossWt),
+        netWt: str(line.netWt),
+        touch: str(line.touch),
+        rate: str(line.rate),
+        making: line.labourType === 'per_gram' ? str(line.labourRate) : '',
+        ghtWt: str(line.ghtWt),
+        westPct: str(line.westPct),
+        labourPct: str(line.labourPct),
+        labourAmount: line.labourType === 'per_gram' ? '' : str(line.labourAmount),
+        otherAmount: str(line.otherAmount),
+        otherFineWt: str(line.otherFineWt),
+        silverFineWt: str(line.silverFineWt),
+        itDesc: String(line.itDesc ?? ''),
+        tblCode: String(line.tblCode ?? ''),
+        designNo: String(line.designNo ?? ''),
+        bagWt: str(line.bagWt),
+        lessWt: str(line.lessWt),
+        mrp: str(line.mrp),
+        otherRate: str(line.otherRate),
+        commissionPct: str(line.commissionPct),
+      }));
+      setRows(loaded.length ? loaded : [blank()]);
+      // Reload the stones too, or an unchanged save would post none and delete them.
+      sub.load(
+        (view.lines ?? []).map((line: any) =>
+          (line.stones ?? []).map((stone: any) => stoneRowFromApi(stone)),
+        ),
+      );
+      setMsg({ kind: 'ok', text: `Loaded voucher #${view.voucherNo}` });
+    } catch (err) {
+      setMsg({ kind: 'err', text: failure(err) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function deleteVoucher() {
+    if (!loadedVchNo || !window.confirm(`Delete voucher ${loadedVchNo}?`)) return;
+    setBusy(true);
+    setMsg(null);
+    try {
+      await del(`/purchases/${encodeURIComponent(loadedVchNo)}?${scopeQuery()}`);
+      newVoucher();
+      setMsg({ kind: 'ok', text: 'Voucher deleted' });
+    } catch (err) {
+      setMsg({ kind: 'err', text: failure(err) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setMsg(null);
     setRes(null);
+    if (!coBook) {
+      setMsg({ kind: 'err', text: 'select a configured purchase book' });
+      return;
+    }
     if (!f.acCode.trim()) {
       setMsg({ kind: 'err', text: 'supplier is required' });
       return;
@@ -283,7 +398,10 @@ export default function HallmarkPurchasePage() {
     }
     setBusy(true);
     try {
-      const r = await post('/purchases', {
+      const payload = {
+        coBook,
+        coYear,
+        lcCode,
         acCode: f.acCode.trim(),
         acName: f.acName || undefined,
         billNo: f.billNo || undefined,
@@ -291,22 +409,20 @@ export default function HallmarkPurchasePage() {
         interState: f.interState,
         hmAmount: hmAmt || undefined,
         lines,
-      });
+      };
+      const r = loadedVchNo
+        ? await put<any>(`/purchases/${encodeURIComponent(loadedVchNo)}`, payload)
+        : await post<any>('/purchases', payload);
       setRes(r);
+      const savedNo = String(r.vchNo).padStart(5, '0');
+      setLoadedVchNo(savedNo);
+      setVoucherLookup(savedNo);
       setMsg({
         kind: 'ok',
         text: `Saved — voucher #${r.vchNo}, total ₹${Number(r.totals?.total ?? grand).toLocaleString('en-IN')}${hmAmt ? ` (+ HM ₹${hmAmt})` : ''}`,
       });
-      setRows([blank()]);
-      set('hmCharge', '');
     } catch (err) {
-      setMsg({
-        kind: 'err',
-        text:
-          err instanceof ApiError
-            ? err.body?.detail || err.body?.message || err.body?.error || 'failed'
-            : 'failed',
-      });
+      setMsg({ kind: 'err', text: failure(err) });
     } finally {
       setBusy(false);
     }
@@ -320,6 +436,54 @@ export default function HallmarkPurchasePage() {
       {msg && <div className={`msg ${msg.kind}`}>{msg.text}</div>}
       <form onSubmit={submit}>
         <div className="panel">
+          <div className="row">
+            <div className="field">
+              <label>Book</label>
+              <BookSelect value={coBook} onChange={setCoBook} mainBooks={HALLMARK_PURCHASE_BOOKS} />
+            </div>
+            <div className="field">
+              <label>Voucher No</label>
+              <input
+                aria-label="Voucher No"
+                value={voucherLookup}
+                onChange={(e) => setVoucherLookup(e.target.value)}
+                placeholder="00001"
+              />
+            </div>
+            <button
+              type="button"
+              className="ghost"
+              disabled={busy || !coBook}
+              onClick={loadVoucher}
+            >
+              Load
+            </button>
+            {loadedVchNo && (
+              <>
+                <span className="msg ok" data-testid="purchase-hm-loaded">
+                  Loaded #{loadedVchNo}
+                </span>
+                <button type="button" className="danger" disabled={busy} onClick={deleteVoucher}>
+                  Delete
+                </button>
+                <button
+                  type="button"
+                  className="ghost"
+                  onClick={() =>
+                    window.open(
+                      `/api/purchases/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(loadedVchNo)}&format=html`,
+                      '_blank',
+                    )
+                  }
+                >
+                  Print
+                </button>
+              </>
+            )}
+            <button type="button" className="ghost" disabled={busy} onClick={newVoucher}>
+              New
+            </button>
+          </div>
           <div className="row">
             <div className="field" style={{ flex: 2 }}>
               <label>Supplier</label>
@@ -527,11 +691,12 @@ export default function HallmarkPurchasePage() {
               + Add line
             </button>
             <span className="spacer" />
-            <span className="muted" style={{ marginRight: 12 }}>
-              POST /purchases (HM)
-            </span>
             <button className="primary" disabled={busy}>
-              {busy ? 'Saving…' : 'Save Hallmark Purchase'}
+              {busy
+                ? 'Saving…'
+                : loadedVchNo
+                  ? 'Update Hallmark Purchase'
+                  : 'Save Hallmark Purchase'}
             </button>
           </div>
           {res && (
@@ -544,6 +709,15 @@ export default function HallmarkPurchasePage() {
           )}
         </div>
       </form>
+      <VoucherList
+        table="PR_DATA"
+        book={coBook}
+        deleteBase="/purchases"
+        printHref={(v) =>
+          `/api/purchases/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(v)}&format=html`
+        }
+        reloadKey={res?.vchNo}
+      />
     </div>
   );
 }

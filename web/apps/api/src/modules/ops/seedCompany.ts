@@ -100,6 +100,35 @@ const BOOKS: {
 }[] = [
   { book: 'SL', name: 'Sales', workflow: 'SALES', acCode: 'SALES' },
   { book: 'PR', name: 'Purchase', workflow: 'PURCHASE', acCode: 'PURCHASE' },
+  // Desktop TR_PURC_HM 'Tag Wise Purc' book (MDI_FORM.cs:8540) — a TAG PURCHASE book posts through the
+  // same Purc_* routines as PURCHASE, so a fresh company can use the hallmark-purchase screen (G02).
+  {
+    book: 'TPR',
+    name: 'Hallmark Purchase',
+    mainBook: 'TAG PURCHASE',
+    inout: 'I',
+    acCode: 'PURCHASE',
+  },
+  // Desktop TR_OTH_PURC books: 375 OTINC 'OTH INC' (I) and 355 OTEXP 'OTH EXP' (O). Without them a fresh
+  // company opened Other Income / Other Expenses to "No active books" (G03/G17, provisioning gap).
+  {
+    book: 'OIN',
+    name: 'Other Income',
+    mainBook: 'OTH INC',
+    inout: 'I',
+    acCode: 'INTINC',
+    shortName: 'OTINC',
+    slots: [{ srNo: 1, acCode: 'INTINC' }],
+  },
+  {
+    book: 'OEX',
+    name: 'Other Expenses',
+    mainBook: 'OTH EXP',
+    inout: 'O',
+    acCode: 'OTHCHRG',
+    shortName: 'OTEXP',
+    slots: [{ srNo: 1, acCode: 'OTHCHRG' }],
+  },
   { book: 'SRT', name: 'Sales Return', workflow: 'SALES RETURN', acCode: 'SALES' },
   { book: 'PRT', name: 'Purchase Return', workflow: 'PURCHASE RETURN', acCode: 'PURCHASE' },
   // Cash books: slot 1 is the cash account and slot 2 the kasar write-off account
