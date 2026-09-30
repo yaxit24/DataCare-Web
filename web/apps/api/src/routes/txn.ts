@@ -6807,7 +6807,19 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const s = readScope(req);
     const ac = String((req.query as any).ac ?? '');
     const rep = await karigarLedger(prisma, s as any, ac);
-    return reply.type('text/html').send(renderKarigarLedgerHtml(ac, rep));
+    // G09: the letterhead is the active company's own name, not a hard-coded shop. Fall back to the
+    // renderer's default only when the company master carries no name.
+    const companyRows = (await withTenant(prisma, s.tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT "CO_NAME" FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 LIMIT 1`,
+        s.tenantId,
+        s.coCode,
+      ),
+    )) as Array<{ CO_NAME: string | null }>;
+    const coName = String(companyRows[0]?.CO_NAME ?? '').trim();
+    return reply
+      .type('text/html')
+      .send(coName ? renderKarigarLedgerHtml(ac, rep, coName) : renderKarigarLedgerHtml(ac, rep));
   });
   app.get('/reports/rate-list', auth, async (req) => rateList(prisma, readScope(req)));
   app.get('/reports/daily-sales', auth, async (req) => dailySalesSummary(prisma, readScope(req)));

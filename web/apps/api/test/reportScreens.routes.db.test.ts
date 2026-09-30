@@ -28,6 +28,7 @@ const RIGHTS = [
   'Movement',
   'Balance Sheet',
   'GSTR-1',
+  'Karigar Ledger',
 ];
 const D3_SCREENS = [
   'huid',
@@ -134,6 +135,14 @@ const D3_SCREENS = [
       }
     },
   );
+
+  it('G09: the karigar-ledger print letterhead is the company name, not a hard-coded shop', async () => {
+    const printed = await get(`/reports/karigar-ledger.print?ac=KARIGAR&coYear=${YEAR}`);
+    expect(printed.statusCode, printed.body).toBe(200);
+    // seedCompany defaults CO_NAME to 'Company 01'; the old code printed 'DHAKAN JEWELLERS' for everyone.
+    expect(printed.body).toContain('Company 01');
+    expect(printed.body).not.toContain('DHAKAN JEWELLERS');
+  });
 
   it('D4: /reports/gstr1 answers the same GSTR-1 datasets as /gst/gstr1', async () => {
     const legacy = await get(`/gst/gstr1?coYear=${YEAR}`);
