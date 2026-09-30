@@ -399,6 +399,25 @@ export async function createSaleReturn(
       TAG_SRNO: num(line.in.tagSrNo),
       TAG_TYPE: str(line.in.tagType).slice(0, 1) || null,
       TBL_CODE: line.in.tblCode ?? null,
+      // Desktop TR_SALE_RTN incoming-grid columns the web form offers (HmId, Ght%, "Receive Item",
+      // LDisc%, the lot/employee/image companions and the extra hallmark IDs with their weights).
+      // They were accepted and then silently discarded; the saved row now carries what the operator
+      // typed. Absent input stays NULL so an unchanged form keeps its exact write set. Widths are
+      // the live SL_DETL_RTN columns (HM_ID* 10, ITM_LOT 10, ITM_REMARK 50, EMP_CODE 5).
+      HM_ID: str(line.in.huid).slice(0, 10) || null,
+      HM_ID2: str(line.in.hallmarkId2).slice(0, 10) || null,
+      HM_ID3: str(line.in.hallmarkId3).slice(0, 10) || null,
+      HM_ID4: str(line.in.hallmarkId4).slice(0, 10) || null,
+      HM_ID_WT: line.in.hallmarkIdWt == null ? null : num(line.in.hallmarkIdWt),
+      HM_ID2_WT: line.in.hallmarkId2Wt == null ? null : num(line.in.hallmarkId2Wt),
+      HM_ID3_WT: line.in.hallmarkId3Wt == null ? null : num(line.in.hallmarkId3Wt),
+      HM_ID4_WT: line.in.hallmarkId4Wt == null ? null : num(line.in.hallmarkId4Wt),
+      ITM_GHT_PRC: line.in.ghtPct == null ? null : num(line.in.ghtPct),
+      ITM_LOT: str(line.in.itemLot).slice(0, 10) || null,
+      ITM_REMARK: str(line.in.remark).slice(0, 50) || null,
+      DISC_PRC: line.in.discountPct == null ? null : num(line.in.discountPct),
+      EMP_CODE: str(line.in.employeeCode).slice(0, 5) || null,
+      DESIGN_IMG_ID: str(line.in.designImageId).slice(0, 50) || null,
       VCH_TIME: vchDate,
       HD_VCH_NO: hdVchNo,
       MAIN_USER: mainUser,

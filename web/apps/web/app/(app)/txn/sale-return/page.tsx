@@ -24,14 +24,6 @@ interface Line {
   touch: string;
   rate: string;
   making: string;
-  ordNo: string;
-  ordYrcd: string;
-  ordDbcd: string;
-  ordSrno: string;
-  isuNo: string;
-  isuYrcd: string;
-  isuDbcd: string;
-  isuSrno: string;
   ghtWt: string;
   westPct: string;
   fineWt: string;
@@ -42,28 +34,22 @@ interface Line {
   huid: string;
   designNo: string;
   itmSize: string;
-  lessWt: string;
   tblCode: string;
   mrp: string;
-  bagWt: string;
-  tagGrossWt: string;
-  tagNetWt: string;
   ghtPct: string;
   itemLot: string;
   remark: string;
   discountPct: string;
-  ghatAmount: string;
   rateWith: string;
   rateType: string;
   tagCost: string;
-  karigarNetWt: string;
-  karigarTouch: string;
-  karigarWestPct: string;
-  karigarFine: string;
+  tagLabourPct: string;
+  tagLabourRate: string;
+  tagLabourAmount: string;
+  tagOtherAmount: string;
   karigarName: string;
   employeeCode: string;
   prCode: string;
-  orderTagStockAdd: string;
   designImageId: string;
   hallmarkId2: string;
   hallmarkId3: string;
@@ -74,14 +60,6 @@ interface Line {
   hallmarkId4Wt: string;
 }
 const extendedLineFields: Array<[keyof Line, string]> = [
-  ['ordNo', 'OrdNo'],
-  ['ordYrcd', 'OrdYr'],
-  ['ordDbcd', 'OrdBk'],
-  ['ordSrno', 'OrdSr'],
-  ['isuNo', 'IsuNo'],
-  ['isuYrcd', 'IsuYr'],
-  ['isuDbcd', 'IsuBk'],
-  ['isuSrno', 'IsuSr'],
   ['ghtWt', 'GhtWt'],
   ['westPct', 'West%'],
   ['fineWt', 'Fine'],
@@ -92,28 +70,23 @@ const extendedLineFields: Array<[keyof Line, string]> = [
   ['huid', 'HmId'],
   ['designNo', 'Design'],
   ['itmSize', 'Size'],
-  ['lessWt', 'LessWt'],
   ['tblCode', 'Counter'],
   ['mrp', 'RtnMrp'],
-  ['bagWt', 'BagWt'],
-  ['tagGrossWt', 'TagGwt'],
-  ['tagNetWt', 'TagNwt'],
   ['ghtPct', 'Ght%'],
   ['itemLot', 'ItmLot'],
   ['remark', 'Remark'],
   ['discountPct', 'LDisc%'],
-  ['ghatAmount', 'GhtAmt'],
   ['rateWith', 'RtWith'],
   ['rateType', 'RateType'],
   ['tagCost', 'TagCost'],
-  ['karigarNetWt', 'KrNwt'],
-  ['karigarTouch', 'KrTouch'],
-  ['karigarWestPct', 'KrWst%'],
-  ['karigarFine', 'KrFine'],
+  // Desktop TR_SALE_RTN MSG_PR tag-labour columns (c29-c32); the writer stores TAG_LBR_*/TAG_OTH_AMT.
+  ['tagLabourPct', 'Tag%'],
+  ['tagLabourRate', 'TagLRate'],
+  ['tagLabourAmount', 'TagLAmt'],
+  ['tagOtherAmount', 'TagOtAmt'],
   ['karigarName', 'KrCode'],
   ['employeeCode', 'EmpCod'],
   ['prCode', 'PrCost'],
-  ['orderTagStockAdd', 'OrdStk'],
   ['designImageId', 'Image'],
   ['hallmarkId2', 'HmId2'],
   ['hallmarkId3', 'HmId3'],
@@ -125,8 +98,6 @@ const extendedLineFields: Array<[keyof Line, string]> = [
 ];
 
 const NUMERIC_EXTENDED = new Set<string>([
-  'ordSrno',
-  'isuSrno',
   'ghtWt',
   'westPct',
   'fineWt',
@@ -134,19 +105,14 @@ const NUMERIC_EXTENDED = new Set<string>([
   'labourPct',
   'labourFixed',
   'otherAmount',
-  'lessWt',
   'mrp',
-  'bagWt',
-  'tagGrossWt',
-  'tagNetWt',
   'ghtPct',
   'discountPct',
-  'ghatAmount',
   'tagCost',
-  'karigarNetWt',
-  'karigarTouch',
-  'karigarWestPct',
-  'karigarFine',
+  'tagLabourPct',
+  'tagLabourRate',
+  'tagLabourAmount',
+  'tagOtherAmount',
   'hallmarkIdWt',
   'hallmarkId2Wt',
   'hallmarkId3Wt',
@@ -162,14 +128,6 @@ const blank = (): Line => ({
   touch: '',
   rate: '',
   making: '',
-  ordNo: '',
-  ordYrcd: '',
-  ordDbcd: '',
-  ordSrno: '',
-  isuNo: '',
-  isuYrcd: '',
-  isuDbcd: '',
-  isuSrno: '',
   ghtWt: '',
   westPct: '',
   fineWt: '',
@@ -180,28 +138,22 @@ const blank = (): Line => ({
   huid: '',
   designNo: '',
   itmSize: '',
-  lessWt: '',
   tblCode: '',
   mrp: '',
-  bagWt: '',
-  tagGrossWt: '',
-  tagNetWt: '',
   ghtPct: '',
   itemLot: '',
   remark: '',
   discountPct: '',
-  ghatAmount: '',
   rateWith: '',
   rateType: '',
   tagCost: '',
-  karigarNetWt: '',
-  karigarTouch: '',
-  karigarWestPct: '',
-  karigarFine: '',
+  tagLabourPct: '',
+  tagLabourRate: '',
+  tagLabourAmount: '',
+  tagOtherAmount: '',
   karigarName: '',
   employeeCode: '',
   prCode: '',
-  orderTagStockAdd: '',
   designImageId: '',
   hallmarkId2: '',
   hallmarkId3: '',
