@@ -80,7 +80,7 @@ d('company provisioning produces a postable company', () => {
         CO,
       ),
     );
-    expect(rows.length).toBe(18);
+    expect(rows.length).toBe(21);
     // Three legs per book (1 = control/sales, 2 = cash/bank, 3 = round-off), except the cash books.
     // RCT and PAY carry the desktop cash-book layout, 1 = cash and 2 = kasar: Ac_Ledr.cs:567-581 joins
     // BOOK_DETL SR_NO 1 and SR_NO 2 for legs 01-08. Their slot 2 used to be CASH, which would have posted
@@ -95,7 +95,11 @@ d('company provisioning produces a postable company', () => {
             ? 12
             : book === 'TSP'
               ? 5
-              : 3,
+              : // OTH INC / OTH EXP each carry a single configured expense/income slot (TR_OTH_PURC reads
+                // slot 1); TAG PURCHASE takes the standard three purchase legs like PURCHASE.
+                book === 'OIN' || book === 'OEX'
+                ? 1
+                : 3,
       );
   });
 
@@ -273,7 +277,8 @@ d('company provisioning produces a postable company', () => {
   it('is idempotent', async () => {
     const again = await seedCompany(prisma, tenantId, CO, { coName: 'Provision Test', lcCode: LC });
     expect(again.created.books).toBe(0);
-    // 14 books x 3 legs + RCT/PAY x 2 + the wholesale and rate-cut books x 12 slots + TSP x 5, not doubled.
-    expect(await count('BOOK_DETL')).toBe(72);
+    // 15 three-leg books (incl. TAG PURCHASE) + RCT/PAY x 2 + WHS/RTC x 12 + TSP x 5 + OIN/OEX x 1,
+    // not doubled.
+    expect(await count('BOOK_DETL')).toBe(77);
   });
 });
