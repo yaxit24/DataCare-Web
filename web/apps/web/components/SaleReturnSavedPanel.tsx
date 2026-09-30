@@ -703,11 +703,7 @@ export function SaleReturnSavedPanel({
               Saved amounts, source identities and other fields remain read-only.
             </span>
           </div>
-          <div
-            className="panel"
-            data-testid="sale-return-saved-numeric"
-            style={{ marginTop: 12 }}
-          >
+          <div className="panel" data-testid="sale-return-saved-numeric" style={{ marginTop: 12 }}>
             <h3>Numeric update (contained profile)</h3>
             <p className="muted">
               Applies a single ordered "Other amount" (c27) editor value through the strict

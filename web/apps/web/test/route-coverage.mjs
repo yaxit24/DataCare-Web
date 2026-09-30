@@ -109,10 +109,7 @@ const NUMERIC_UPDATE_ENDPOINT = 'incoming-numeric';
   const { readFileSync } = await import('node:fs');
   const lib = readFileSync(join(WEB_APP, 'lib', 'salesReturnForm.ts'), 'utf8');
   const panel = readFileSync(join(WEB_APP, 'components', 'SaleReturnSavedPanel.tsx'), 'utf8');
-  const api = readFileSync(
-    resolve(REPO_WEB, 'apps', 'api', 'src', 'routes', 'txn.ts'),
-    'utf8',
-  );
+  const api = readFileSync(resolve(REPO_WEB, 'apps', 'api', 'src', 'routes', 'txn.ts'), 'utf8');
   const problems = [];
   if (!lib.includes(`numeric: '${NUMERIC_UPDATE_ENDPOINT}'`))
     problems.push('lib/salesReturnForm.ts does not emit the numeric endpoint path');
@@ -122,7 +119,15 @@ const NUMERIC_UPDATE_ENDPOINT = 'incoming-numeric';
     problems.push('apps/api/src/routes/txn.ts does not register the numeric endpoint');
   if (!api.includes('updateSaleReturnNumeric'))
     problems.push('apps/api/src/routes/txn.ts does not route through updateSaleReturnNumeric');
-  if (/updateSaleReturnNumeric[\s\S]{0,400}editSaleReturn/.test(api))
+  // Inspect the registered handler itself (from its app.put(...) to the next route registration),
+  // not a fixed character window: the shared import list legitimately names both functions.
+  const handlerStart = api.indexOf(`app.put('/sales-returns/:vchNo/${NUMERIC_UPDATE_ENDPOINT}'`);
+  const handlerEnd = handlerStart < 0 ? -1 : api.indexOf('\n  app.', handlerStart + 1);
+  const handler =
+    handlerStart < 0 ? '' : api.slice(handlerStart, handlerEnd < 0 ? undefined : handlerEnd);
+  if (!handler.includes('updateSaleReturnNumeric('))
+    problems.push('the numeric endpoint handler does not call updateSaleReturnNumeric');
+  if (/\beditSaleReturn\(|\bupdateSavedSaleReturnMetadata\(/.test(handler))
     problems.push('numeric endpoint must not fall through to the generic editSaleReturn');
   if (problems.length) {
     console.error('ROUTE_COVERAGE_FAILED numeric-update endpoint is not wired:');

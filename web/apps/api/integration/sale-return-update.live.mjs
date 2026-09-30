@@ -486,7 +486,10 @@ async function main() {
     T,
     VCH,
   );
-  check('header persisted the whole-unit 111', header?.n === '111' && header?.t === '111' && header?.o === '111');
+  check(
+    'header persisted the whole-unit 111',
+    header?.n === '111' && header?.t === '111' && header?.o === '111',
+  );
 
   // Trial balance still balances after the write.
   check('AC_DATA trial balance tied', await ledgerBalanced('AC_DATA'));
@@ -499,15 +502,24 @@ async function main() {
     otherAmount: '0',
     actor,
   });
-  check('same-value event is a no-op', noop.committed === true && noop.noOp === true && noop.changes.length === 0);
+  check(
+    'same-value event is a no-op',
+    noop.committed === true && noop.noOp === true && noop.changes.length === 0,
+  );
 
   // A stale document version maps to a 409 version-conflict.
   const staleError = await named(() =>
-    updateSaleReturnNumeric(prisma, scope, VCH, { version: saved.version, otherAmount: '2', actor }),
+    updateSaleReturnNumeric(prisma, scope, VCH, {
+      version: saved.version,
+      otherAmount: '2',
+      actor,
+    }),
   );
   check(
     'stale version -> 409 version-conflict',
-    staleError !== 'NONE' && staleError.statusCode === 409 && staleError.code === 'version-conflict',
+    staleError !== 'NONE' &&
+      staleError.statusCode === 409 &&
+      staleError.code === 'version-conflict',
   );
 
   await cleanup();
