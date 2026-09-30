@@ -52,6 +52,23 @@ async function expectValue(locator, expected, what) {
   assert.equal(await locator.inputValue(), expected, `${what} must become "${expected}"`);
 }
 
+/**
+ * A book <select> fills its <option> list only after /context/books resolves. Reading the count the
+ * instant the element attaches races that fetch and flakes as `1 !== 2` on slower CI runners. Poll
+ * until the expected number of options is present, then assert, so a genuine wrong count still fails.
+ */
+async function expectOptionCount(locator, expected, what) {
+  for (let i = 0; i < 60; i += 1) {
+    if ((await locator.locator('option').count()) === expected) return;
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  assert.equal(
+    await locator.locator('option').count(),
+    expected,
+    `${what} must have ${expected} options`,
+  );
+}
+
 async function waitForServer() {
   for (let attempt = 0; attempt < 60; attempt += 1) {
     if (server.exitCode != null) throw new Error(`Next server exited early:\n${serverLog}`);
@@ -1013,7 +1030,7 @@ try {
   await page.getByRole('heading', { name: 'Repairing Received — Customer Receipt' }).waitFor();
   const repairBook = page.getByLabel('Configured book');
   await repairBook.waitFor();
-  assert.equal(await repairBook.locator('option').count(), 2);
+  await expectOptionCount(repairBook, 2, 'customer-receipt configured book');
   await expectValue(repairBook, 'RCR', 'configured book');
 
   const repairParty = page.getByTestId('repair-party').locator('input');
@@ -1108,7 +1125,7 @@ try {
   await page.getByRole('heading', { name: 'Repairing Issued — Karigar Issue' }).waitFor();
   const issueBook = page.getByLabel('Configured book');
   await issueBook.waitFor();
-  assert.equal(await issueBook.locator('option').count(), 2);
+  await expectOptionCount(issueBook, 2, 'repair karigar issue configured book');
   await expectValue(issueBook, 'RKI', 'configured book');
 
   const issueParty = page.getByTestId('repair-issue-party').locator('input');
@@ -1168,7 +1185,7 @@ try {
   await page.getByRole('heading', { name: 'Repairing Received — Karigar Receipt' }).waitFor();
   const krRecBook = page.getByLabel('Configured book');
   await krRecBook.waitFor();
-  assert.equal(await krRecBook.locator('option').count(), 2);
+  await expectOptionCount(krRecBook, 2, 'repair karigar receipt configured book');
   await expectValue(krRecBook, 'RKR', 'configured book');
 
   const krRecParty = page.getByTestId('repair-krrec-party').locator('input');
@@ -1232,7 +1249,7 @@ try {
   await page.getByRole('heading', { name: 'Repairing Delivered — Customer Issue' }).waitFor();
   const custIsuBook = page.getByLabel('Configured book');
   await custIsuBook.waitFor();
-  assert.equal(await custIsuBook.locator('option').count(), 2);
+  await expectOptionCount(custIsuBook, 2, 'repair customer issue configured book');
   await expectValue(custIsuBook, 'RCI', 'configured book');
 
   const custIsuParty = page.getByTestId('repair-custisu-party').locator('input');
