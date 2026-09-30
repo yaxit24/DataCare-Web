@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { get, post, downloadPdf, downloadCsv, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
+import { reportApiSlug } from '../../../../lib/reportSlug';
 
 const TITLES: Record<string, string> = {
   'last-visit': 'Last Visit',
@@ -94,7 +95,7 @@ function endpointFor(
     case 'account-ledger':
       return acCode ? `/reports/account-ledger/${encodeURIComponent(acCode)}${qy}` : null;
     default:
-      return `/reports/${slug.replace(/[^a-z-]/g, '')}${qy}`;
+      return `/reports/${reportApiSlug(slug)}${qy}`;
   }
 }
 

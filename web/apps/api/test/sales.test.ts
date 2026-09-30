@@ -22,14 +22,15 @@ describe('sales builders', () => {
     expect(c.labour).toBe(200);
     expect(c.net).toBe(1250);
   });
+  // P prices pieces (TR_SALE.cs:10909-10916), not net + ghat; the fixture carries 3 pieces so it can.
   it.each([
     ['F', 900],
     ['G', 1300],
     ['N', 1100],
-    ['P', 1100],
+    ['P', 300],
   ] as const)('computeLine applies SL_AMT_TYPE=%s to metal amount', (type, expected) => {
     const c = computeLine(
-      { itCode: 'I1', grossWt: 12, netWt: 10, ghtWt: 1, fineWt: 9, rate: 100 },
+      { itCode: 'I1', pcs: 3, grossWt: 12, netWt: 10, ghtWt: 1, fineWt: 9, rate: 100 },
       undefined,
       type,
     );

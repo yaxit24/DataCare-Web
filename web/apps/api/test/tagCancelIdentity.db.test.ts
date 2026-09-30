@@ -1,7 +1,8 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { PrismaClient } from '@prisma/client';
 import { withTenant } from '@datacare/db';
-import { deleteTagCancel, tagCancel, tagWeightDiff } from '../src/modules/stock/tagOps.js';
+import { tagWeightDiff } from '../src/modules/stock/tagOps.js';
+import { deleteTagCancel, saveTagCancel } from '../src/modules/stock/tagCancel.js';
 import { fineFor } from '@datacare/core';
 
 /**
@@ -21,6 +22,9 @@ import { fineFor } from '@datacare/core';
  *
  * The fix reuses `issueTagTx`, the same resolver a sale uses, so a cancel cannot disagree with a sale
  * about what "in stock" means. These tests therefore assert BEHAVIOUR at the boundary, not the query.
+ *
+ * N18 moved the cancel to `tagCancel.ts` (desktop TR_TAG_CAN, full lifecycle); the complete row-level and
+ * whole-database evidence is `tagCancelLifecycle.db.test.ts`. These identity cases keep running against it.
  */
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
@@ -80,14 +84,11 @@ async function liveTag(tagNo: string, lc: string, vchSrno: number): Promise<void
   );
 }
 
-const cancelLine = (tagNo: string) => ({
-  tagNo,
-  itCode: 'GOLD',
-  pcs: 1,
-  grossWt: 5.2,
-  netWt: 5,
-  touch: 91.6,
-});
+const cancelLine = (tagNo: string) => ({ tagNo });
+
+/** The TR_TAG_CAN writer, on the fixture's TAG CANCEL book. */
+const cancel = (lines: Array<Record<string, unknown>>) =>
+  saveTagCancel(runtime, 'cancel', { scope, vchDate: DAY, mainUser: 'operator', lines });
 
 const databaseDescribe = RUN ? describe : describe.skip;
 
@@ -129,37 +130,30 @@ databaseDescribe('tag cancel resolves one live serial identity', () => {
 
   it('cancels a live tag and records the out-movement against the resolved instance', async () => {
     await liveTag('TAG-A', LC, 7);
-    const result = await tagCancel(runtime, {
-      scope,
-      vchDate: DAY,
-      book: BOOK,
-      lines: [cancelLine('TAG-A')],
-    } as never);
-    expect(result.tags).toBe(1);
+    const result = await cancel([cancelLine('TAG-A')]);
+    expect(result.lines).toBe(1);
 
     const moves = (await owner.$queryRawUnsafe(
-      `SELECT "ITM_SIGN","VCH_SRNO" FROM "MAIN_STOCK"
-        WHERE tenant_id=$1 AND "TAG_NO"=$2 AND "VCH_TYPE"='TGCAN'`,
+      `SELECT "ITM_SIGN","VCH_SRNO","VCH_TYPE","BOOK_NAME" FROM "MAIN_STOCK"
+        WHERE tenant_id=$1 AND "TAG_NO"=$2 AND "CO_BOOK"=$3`,
       TENANT,
       'TAG-A',
+      BOOK,
     )) as Array<Record<string, unknown>>;
     expect(moves.length).toBe(1);
     expect(String(moves[0]!.ITM_SIGN)).toBe('-');
     // The out-movement must carry the RESOLVED instance, or it nets against nothing.
     expect(Number(moves[0]!.VCH_SRNO)).toBe(7);
+    // VCH_TYPE is the book's BOOK_SNAME and BOOK_NAME its MAIN_BOOK (Tag_Can_Stk), not a web literal.
+    expect([moves[0]!.VCH_TYPE, moves[0]!.BOOK_NAME]).toEqual(['TCN', 'TAG CANCEL']);
   });
 
   it('refuses a tag that belongs to another location', async () => {
     // The old guard had no LC_CODE, so branch 01 could cancel branch 02's stock.
     await liveTag('TAG-B', OTHER_LC, 3);
-    await expect(
-      tagCancel(runtime, {
-        scope,
-        vchDate: DAY,
-        book: BOOK,
-        lines: [cancelLine('TAG-B')],
-      } as never),
-    ).rejects.toThrow();
+    await expect(cancel([cancelLine('TAG-B')])).rejects.toMatchObject({
+      name: 'TagNotAvailableError',
+    });
   });
 
   it('cancels a tag that was sold and then returned, which the old guard refused forever', async () => {
@@ -186,13 +180,8 @@ databaseDescribe('tag cancel resolves one live serial identity', () => {
       YEAR,
       DAY_DATE,
     );
-    const result = await tagCancel(runtime, {
-      scope,
-      vchDate: DAY,
-      book: BOOK,
-      lines: [cancelLine('TAG-C')],
-    } as never);
-    expect(result.tags).toBe(1);
+    const result = await cancel([cancelLine('TAG-C')]);
+    expect(result.lines).toBe(1);
   });
 
   it('refuses a tag whose net stock is already zero', async () => {
@@ -208,64 +197,16 @@ databaseDescribe('tag cancel resolves one live serial identity', () => {
       YEAR,
       DAY_DATE,
     );
-    await expect(
-      tagCancel(runtime, {
-        scope,
-        vchDate: DAY,
-        book: BOOK,
-        lines: [cancelLine('TAG-D')],
-      } as never),
-    ).rejects.toThrow();
+    await expect(cancel([cancelLine('TAG-D')])).rejects.toMatchObject({
+      name: 'TagNotAvailableError',
+    });
   });
-  it('records the full desktop cancel-detail grid in the register', async () => {
-    // Second gate clause: "full cancel detail". BAR_CAN_DETL has 76 columns and the writer populated 17,
-    // so the audit trail for a cancelled tag held less than the tag itself. Asserting the DATABASE rather
-    // than the return value, because a field the writer ignores is indistinguishable from success.
-    await liveTag('TAG-E', LC, 11);
-    await tagCancel(runtime, {
-      scope,
-      vchDate: DAY,
-      book: BOOK,
-      lines: [
-        {
-          ...cancelLine('TAG-E'),
-          ghtWt: 0.3,
-          westPct: 0.75,
-          lessWt: 0.2,
-          tagLot: 'TL-1',
-          designNo: 'D-CAN-1',
-          tblCode: '006',
-          itmSize: '15',
-          itmStyle: 'ST-C',
-          itmColor: 'WG',
-          itmPolish: 'MATT',
-          itDesc: 'cancelled ring',
-          remark: 'damaged',
-          hallmarkId: 'HUID5CD',
-          itemType: 'G',
-          labourPct: 2.5,
-          labourType: 'G',
-          labourRate: 42,
-          labourAmount: 210,
-          otherAmount: 18,
-          mrp: 70000,
-          rate: 6050,
-          amount: 30250,
-          tagCost: 133,
-          tagNetWt: 5,
-          rateType: 'F',
-          prCode: 'P7',
-          karigarName: 'KR-C',
-          karigarNetWt: 4.9,
-          karigarTouch: 90,
-          karigarWestPct: 0.5,
-          karigarFine: 4.43,
-          designImageId: 'IMG-CAN-1',
-          toTblCode: '007',
-        },
-      ],
-    } as never);
 
+  it('writes the register from the tag itself, with the resolved instance stamped', async () => {
+    // The register row is the tag as the desktop grid loads it (TR_TAG_CAN.cs:4020-4085), not what a
+    // caller happened to send, and it carries the instance so it can say WHICH tag was cancelled.
+    await liveTag('TAG-E', LC, 11);
+    await cancel([cancelLine('TAG-E')]);
     const row = (
       (await owner.$queryRawUnsafe(
         `SELECT * FROM "BAR_CAN_DETL" WHERE tenant_id=$1 AND "TAG_NO"=$2`,
@@ -273,39 +214,22 @@ databaseDescribe('tag cancel resolves one live serial identity', () => {
         'TAG-E',
       )) as Array<Record<string, unknown>>
     )[0]!;
-
-    // The resolved instance must be stamped, or the register cannot say WHICH tag was cancelled.
     expect(Number(row.VCH_SRNO)).toBe(11);
-    // Alphanumeric HUID survives.
-    expect(String(row.HM_ID)).toBe('HUID5CD');
-    expect(String(row.DESIGN_NO)).toBe('D-CAN-1');
-    expect(String(row.TBL_CODE)).toBe('006');
-    expect(String(row.ITM_SIZE)).toBe('15');
-    expect(String(row.ITM_STYLE)).toBe('ST-C');
-    expect(String(row.ITM_POLISH)).toBe('MATT');
-    expect(String(row.IT_DESC)).toBe('cancelled ring');
-    expect(String(row.ITM_REMARK)).toBe('damaged');
-    expect(String(row.KR_NAME)).toBe('KR-C');
-    expect(String(row.PR_CODE)).toBe('P7');
-    expect(String(row.TO_TBL_CODE)).toBe('007');
-    expect(String(row.DESIGN_IMG_ID)).toBe('IMG-CAN-1');
-    expect(Number(row.ITM_OTH_WT)).toBe(0.2);
-    expect(Number(row.ITM_GHT_WT)).toBe(0.3);
-    expect(Number(row.ITM_WEST_PRC)).toBe(0.75);
-    expect(Number(row.LBR_RATE)).toBe(42);
-    expect(Number(row.LBR_AMT)).toBe(210);
-    expect(Number(row.OTH_AMT)).toBe(18);
-    expect(Number(row.ITM_MRP)).toBe(70000);
-    expect(Number(row.ITM_AMT)).toBe(30250);
-    expect(Number(row.TAG_COST)).toBe(133);
-    expect(Number(row.KR_FINE)).toBe(4.43);
-    // Wastage belongs in the fine base, so the cancel agrees with the tag it reverses.
-    expect(Number(row.ITM_FINE)).toBe(
-      fineFor('tagOpening', { netWt: 5, ghtWt: 0.3, touch: 91.6, westPct: 0.75 }),
-    );
+    expect([row.IT_CODE, row.ENTRY_TYPE, row.VCH_TYPE, row.BOOK_NAME]).toEqual([
+      'GOLD',
+      'T',
+      'TCN',
+      'TAG CANCEL',
+    ]);
+    expect([Number(row.ITM_GWT), Number(row.ITM_NWT), Number(row.ITM_TOUCH)]).toEqual([
+      5.2, 5, 91.6,
+    ]);
+    // The stored fine is kept while weight and purity are as they came.
+    expect(Number(row.ITM_FINE)).toBe(4.58);
   });
+
   it('restores a TAG_STOCK-only tag when the cancel is deleted, instead of losing it', async () => {
-    // Third gate clause: lifecycle/reversal. `tagCancel` resolves through `issueTagTx`, which DELETES the
+    // Third gate clause: lifecycle/reversal. The cancel resolves through `issueTagTx`, which DELETES the
     // TAG_STOCK row when the tag lives there. Reversing only MAIN_STOCK and the register left such a tag
     // in neither table — invisible to every availability query, so permanently lost.
     await exec(
@@ -317,12 +241,8 @@ databaseDescribe('tag cancel resolves one live serial identity', () => {
       CO,
       LC,
     );
-    const cancelled = await tagCancel(runtime, {
-      scope,
-      vchDate: DAY,
-      book: BOOK,
-      lines: [cancelLine('TAG-S')],
-    } as never);
+    // A web tag has no item code, so the line names one.
+    const cancelled = await cancel([{ tagNo: 'TAG-S', itCode: 'GOLD' }]);
 
     // Consumed: gone from TAG_STOCK while the cancel stands.
     const during = (await owner.$queryRawUnsafe(
@@ -331,7 +251,7 @@ databaseDescribe('tag cancel resolves one live serial identity', () => {
     )) as Array<{ n: number }>;
     expect(during[0]!.n).toBe(0);
 
-    await deleteTagCancel(runtime, scope, cancelled.vchNo, BOOK);
+    await deleteTagCancel(runtime, 'cancel', scope, cancelled.vchNo, 'operator');
 
     const after = (await owner.$queryRawUnsafe(
       `SELECT "VCH_SRNO","IT_TYPE","ITM_NWT" FROM "TAG_STOCK"
@@ -348,13 +268,8 @@ databaseDescribe('tag cancel resolves one live serial identity', () => {
     // movement, because availability is a net sum. Also restoring it into TAG_STOCK would make the same
     // physical tag issuable twice.
     await liveTag('TAG-F', LC, 2);
-    const cancelled = await tagCancel(runtime, {
-      scope,
-      vchDate: DAY,
-      book: BOOK,
-      lines: [cancelLine('TAG-F')],
-    } as never);
-    await deleteTagCancel(runtime, scope, cancelled.vchNo, BOOK);
+    const cancelled = await cancel([cancelLine('TAG-F')]);
+    await deleteTagCancel(runtime, 'cancel', scope, cancelled.vchNo, 'operator');
 
     const inStock = (await owner.$queryRawUnsafe(
       `SELECT count(*)::int AS n FROM "TAG_STOCK" WHERE tenant_id=$1 AND "TAG_NO"='TAG-F'`,
@@ -363,14 +278,7 @@ databaseDescribe('tag cancel resolves one live serial identity', () => {
     expect(inStock[0]!.n).toBe(0);
 
     // It must be cancellable again, which proves availability really was restored.
-    await expect(
-      tagCancel(runtime, {
-        scope,
-        vchDate: DAY,
-        book: BOOK,
-        lines: [cancelLine('TAG-F')],
-      } as never),
-    ).resolves.toMatchObject({ tags: 1 });
+    await expect(cancel([cancelLine('TAG-F')])).resolves.toMatchObject({ lines: 1 });
   });
   it('refuses a weight change on a tag that does not exist', async () => {
     // tagWeightDiff previously never looked the tag up: it wrote a MAIN_STOCK movement keyed on TAG_NO

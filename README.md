@@ -9,11 +9,12 @@ Private engineering repository for converting the DataCareNext Windows jewellery
 **29 September master planning review:** [Detailed current analysis and master parity implementation plan](docs/master-parity-plan-2026-09-29/README.md). Includes all 31 API modules, reconciliation of the 83 prior packages/34 cards, desktop source references, retained field/action registers and step-by-step end-to-end verification. This documentation update preserves the application and historical checkpoints; it does not claim full parity.
 
 1. **Current implementation status:** [parity-plan-2026-09-10/README.md](parity-plan-2026-09-10/README.md)
-2. **Paused Round 15 continuation:** [parity-plan-2026-09-10/42-implementation-progress-round15.md](parity-plan-2026-09-10/42-implementation-progress-round15.md)
-3. **Full implementation plan:** [parity-plan-2026-09-10/02-implementation-plan.md](parity-plan-2026-09-10/02-implementation-plan.md)
-4. **Web handoff:** [web/docs/HANDOFF.md](web/docs/HANDOFF.md)
-5. **Desktop resource center:** [unified/README.md](unified/README.md)
-6. **Repository/provenance map:** [REPOSITORY-MANIFEST.md](REPOSITORY-MANIFEST.md)
+2. **Latest implementation round (N18 tag cancel and tag transfer):** [parity-plan-2026-09-10/47-implementation-progress-n18-2026-09-29.md](parity-plan-2026-09-10/47-implementation-progress-n18-2026-09-29.md); previous rounds: X16 wholesale sale and rate cut [46-implementation-progress-x16-2026-09-29.md](parity-plan-2026-09-10/46-implementation-progress-x16-2026-09-29.md), evaluation defects D1–D6 [45-implementation-progress-eval-defects-2026-09-29.md](parity-plan-2026-09-10/45-implementation-progress-eval-defects-2026-09-29.md) and X15 [44-implementation-progress-x15-2026-09-29.md](parity-plan-2026-09-10/44-implementation-progress-x15-2026-09-29.md)
+3. **Paused Round 15 continuation:** [parity-plan-2026-09-10/42-implementation-progress-round15.md](parity-plan-2026-09-10/42-implementation-progress-round15.md)
+4. **Full implementation plan:** [parity-plan-2026-09-10/02-implementation-plan.md](parity-plan-2026-09-10/02-implementation-plan.md)
+5. **Web handoff:** [web/docs/HANDOFF.md](web/docs/HANDOFF.md)
+6. **Desktop resource center:** [unified/README.md](unified/README.md)
+7. **Repository/provenance map:** [REPOSITORY-MANIFEST.md](REPOSITORY-MANIFEST.md)
 
 ## Repository map
 

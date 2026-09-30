@@ -251,13 +251,13 @@ describe('tag invariant coverage map', () => {
 
   it('does not claim more than four are checked against data', () => {
     // The four data checks are the ones this suite exercises. Claiming any of the others as enforced would be
-    // the overstatement the coverage map exists to prevent: four are held only because WP-01 contains the
+    // the overstatement the coverage map exists to prevent: some are held only because WP-01 contains the
     // operation, and two wait on an owner decision.
     const dataChecks = TAG_INVARIANT_COVERAGE.filter((c) => c.enforcement === 'data-check');
     expect(dataChecks.map((c) => c.number)).toEqual([1, 2, 3, 9]);
 
     const blocked = TAG_INVARIANT_COVERAGE.filter((c) => c.enforcement.startsWith('blocked'));
-    expect(blocked.map((c) => c.number)).toEqual([5, 8, 10, 12]);
+    expect(blocked.map((c) => c.number)).toEqual([8, 10, 12]);
     for (const entry of blocked) {
       expect(entry.evidence, `invariant ${entry.number} must say what unblocks it`).toMatch(
         /§8\.1|§7|undecided|unwritten|WP-10/,
@@ -266,11 +266,12 @@ describe('tag invariant coverage map', () => {
   });
 
   it('records that the riskiest tag operations are contained rather than proved', () => {
-    // Split, transfer, weight change and cancel are blocked by WP-01. The coverage map must say so, because
-    // "no violations observed" on a blocked path is not evidence that the path is correct.
+    // Weight change is blocked by WP-01 (cancel and transfer were released by N18, split by N19, and are now
+    // code-tested). The coverage map must say so, because "no violations observed" on a blocked path is not
+    // evidence that the path is correct.
     const mentionsContainment = TAG_INVARIANT_COVERAGE.filter((c) =>
       /contain|CONTAIN|blocked by WP-01|WP-01/.test(c.evidence),
     );
-    expect(mentionsContainment.map((c) => c.number)).toEqual([4, 5, 6, 7, 10, 11]);
+    expect(mentionsContainment.map((c) => c.number)).toEqual([4, 7, 10, 11]);
   });
 });

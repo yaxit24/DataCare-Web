@@ -20,14 +20,52 @@ export const PARITY_CONTAINMENT_WORK_PACKAGE = 'WP-01';
  *
  * The remaining six rules stay blocked. Releasing this one does not weaken them, and the registry still
  * has intentionally no environment override.
+ *
+ * DISCHARGED — `tag-cancel` and `tag-transfer` (N18, cards X19 and X18), each against its own exit gate.
+ *
+ * Both menus open the desktop form TR_TAG_CAN on a book of their own MAIN_BOOK, so one writer serves both
+ * (`apps/api/src/modules/stock/tagCancel.ts`); the contract is
+ * `parity-plan-2026-09-10/evidence/implementation-2026-09-29-n18/contract.md`. Evidence for the gate clauses:
+ *   • exact live identity — every tag line resolves through the sale's resolver (`issueTagTx`): company,
+ *     location, TAG_NO and VCH_SRNO with a positive signed balance; two live instances without a serial are
+ *     refused, another location's tag and a sold tag are "not available" (tagCancelLifecycle.db.test.ts V4-V6)
+ *   • full detail and lineage — BAR_CAN_DATA / DETL / IDTL carry exactly the desktop's columns, the tag's
+ *     stones are copied from its own BAR_IDTL rows, and the source BAR_DETL / BAR_IDTL / image index are
+ *     byte-identical after cancel, edit and delete (V1, V3, V11; full-database diff)
+ *   • lifecycle / locks / reversal — list, read, edit and delete, with TEMP_BOOK_DATA, DM_DATA and the
+ *     desktop DELETE_DATA rows; every touched tag is locked in sorted order, a concurrent sale of the same tag
+ *     loses cleanly, and a failure part-way leaves nothing (V2, V3, V7, V8)
+ *   • transfer conservation — the tag's '-' row and the loose item's '+' row carry the same pieces, weights
+ *     and fine (T1-T4)
+ *   • desktop database diff — derived from the source; no desktop BAR_CAN_* rows were ever captured, so the
+ *     cards stay open until a desktop replay and business acceptance.
+ * Merging this change is the release decision for both operations.
+ *
+ * DISCHARGED — `tag-split` (N19, card X20), against its exit gate ("atomic parent consume, child identity /
+ * detail / image creation, conservation, lifecycle, locks, and desktop database diff", P0-05/WP-09).
+ *
+ * The desktop form TR_TAG_SPLIT consumes one or more parent tags and creates child tags, conserving metal; one
+ * writer (`apps/api/src/modules/stock/tagSplit.ts`) implements it; the contract is
+ * `parity-plan-2026-09-10/evidence/implementation-2026-09-30-n19/contract.md`. Evidence for the gate clauses:
+ *   • atomic parent consume — each parent resolves through the shared resolver (`issueTagTx`) under a sorted tag
+ *     lock and leaves stock; a sold or ambiguous parent is refused; a failure part-way leaves nothing
+ *     (tagSplitLifecycle.db.test.ts V6, V8, V10; full-database diff)
+ *   • child identity and detail — every child gets an allocated TAG_NO / VCH_SRNO / SRNO_MAST row and a full
+ *     BAR_DETL / BAR_IDTL record, so it is a real, sellable tag (V1); the register is LBR_DATA / ISU_DETL /
+ *     ISU_IDTL / REC_DETL and MAIN_STOCK is built by Tag_Split_Stk (parent '-', child '+')
+ *   • conservation — the child net total equals the parent net total, or the difference posts the Tag_Split_Ledr
+ *     absorption legs against a configured account; a difference with no account is refused (V1, V2, V3)
+ *   • image lineage — each child copies the parent's TAG image; the parent's own image is never modified (V1)
+ *   • lifecycle / locks / reversal — list, read, edit and delete, with TEMP_BOOK_DATA and the desktop
+ *     DELETE_DATA audit; a child that was sold or split again blocks the edit and the delete (V4, V5, V7)
+ *   • desktop database diff — derived from the source; no desktop TAG SPLIT rows were ever captured, so the card
+ *     stays open until a desktop replay and business acceptance.
+ * Merging this change is the release decision.
  */
 export const parityContainmentOperations = Object.freeze([
   'logical-restore',
   'production-cutover-load',
-  'tag-transfer',
-  'tag-cancel',
   'tag-weight-difference',
-  'tag-split',
 ]);
 
 const rule = (operation, title, reason, safeAlternative, exitGate) =>
@@ -62,33 +100,12 @@ export const parityContainmentRules = Object.freeze({
     'Run only --dry-run diagnostics. Use no production load until the scope-safe shadow-load pipeline is independently certified.',
     'P0-08/WP-14A: signed ownership manifest, completeness-failing validation, two-company/two-year isolation, and two clean shadow loads.',
   ),
-  'tag-transfer': rule(
-    'tag-transfer',
-    'Tag Transfer mutation',
-    'The current transfer does not preserve exact VCH_SRNO identity and lacks the desktop open/edit/lineage and shared-lock behavior.',
-    'Use tag lookup for inspection only; perform the business operation in the desktop application until the exact web lifecycle is certified.',
-    'P0-05/WP-09: exact identity, full lifecycle, conservation, concurrency, reversal, and desktop database diff.',
-  ),
-  'tag-cancel': rule(
-    'tag-cancel',
-    'Tag Cancellation mutation',
-    'The current cancel path can resolve historical availability instead of one live serial identity and omits required source and sub-detail lineage.',
-    'Use tag lookup for inspection only; perform cancellation in the desktop application until the exact web lifecycle is certified.',
-    'P0-05/WP-09: exact live identity, full cancel detail, lifecycle/locks/reversal, and desktop database diff.',
-  ),
   'tag-weight-difference': rule(
     'tag-weight-difference',
     'Tag Weight Difference mutation',
     'The current path is a simplified net adjustment and omits desktop tag replacement, barcode detail, image, Rojmel, serial, and karigar branches.',
     'Use tag lookup for inspection only; perform weight change in the desktop application until every desktop branch is certified.',
     'P0-05/WP-09: complete branch matrix, configured accounts, lifecycle/locks/reversal, and desktop database diff.',
-  ),
-  'tag-split': rule(
-    'tag-split',
-    'Tag Split mutation',
-    'The current split writes stock movements only; it does not allocate child serials or create barcode detail, sub-detail, image, and parent-child lineage.',
-    'Use parent tag lookup for inspection only; perform splitting in the desktop application until exact child creation is certified.',
-    'P0-05/WP-09: atomic parent consume, child identity/detail/image creation, conservation, lifecycle, locks, and desktop database diff.',
   ),
 });
 

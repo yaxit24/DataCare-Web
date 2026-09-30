@@ -167,9 +167,9 @@ export function desktopGlobalFormKeyActions(navigate: (href: string) => void): F
     F5: { id: 'sales-bill', label: 'Sales bill', run: () => navigate('/txn/sales') },
     /**
      * P1-4. The desktop binds VK 117 at MDI_FORM.cs:12486-12489 to `ShoF6WhSales_Click`, which
-     * opens `TR_WH_SALE` after checking the "Wh Sales" user right. The web page for that form is
-     * /txn/wholesale-sale, the same destination as Ctrl+F6 below — on the desktop both keys open
-     * TR_WH_SALE, one captioned "Wh Sales" and one "Rate cut".
+     * opens `TR_WH_SALE` after checking the "Wh Sales" user right, scoped to WH SALES books. Ctrl+F6
+     * below opens the same form scoped to RATE CUT books; the web serves the two scopes from one
+     * shared form on two pages (/txn/wholesale-sale and /txn/rate-cut).
      *
      * DELIBERATELY NOT ADDED: F10. The menu caption "F10 Reminder" exists
      * (MDI_FORM.cs:5571-5601), but the key handler binds only VK 113-120 and 122-123 — VK 121 is
@@ -207,10 +207,13 @@ export function desktopGlobalFormKeyActions(navigate: (href: string) => void): F
       label: 'Bill-wise receipt',
       run: () => navigate('/txn/bill-to-bill'),
     },
+    // ShoCtrlF6RateCut checks the "Rate Cut" right and opens TR_WH_SALE on a RATE CUT book
+    // (`CurBookHelp("RATE CUT")`, MDI_FORM.cs:16107-16121). The web keeps that book scope on its own page:
+    // /txn/wholesale-sale lists only WH SALES books and would not offer book 064 at all.
     'Ctrl+F6': {
       id: 'rate-cut',
       label: 'Rate cut',
-      run: () => navigate('/txn/wholesale-sale'),
+      run: () => navigate('/txn/rate-cut'),
     },
     // TR_CASH serves both; the desktop opens it in bank mode, which the web models as a mode on the
     // receipt/payment forms.

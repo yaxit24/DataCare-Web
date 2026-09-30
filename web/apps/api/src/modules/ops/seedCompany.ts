@@ -31,6 +31,35 @@ const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string }[] = [
   { code: 'FINEPURC', name: 'FINE METAL PURCHASE', gr: '21' },
   { code: 'DHRN', name: 'DHIRAN / LOAN', gr: '21' },
   { code: 'CAPITAL', name: 'CAPITAL A/C', gr: '25' },
+  // The wholesale / rate-cut slots (`Wh_Sales_Ledr`): labour income and expense, the silver twins of the sale
+  // and purchase controls, other charges and fine kasar — the roles of 00041/00056/00004/00009/00077/00098 on
+  // the real books 034/064.
+  { code: 'LBRINC', name: 'LABOUR INCOME A/C', gr: '23' },
+  { code: 'LBREXP', name: 'LABOUR EXPENSE A/C', gr: '22' },
+  { code: 'SLVSALE', name: 'SALES SILVER A/C', gr: '20' },
+  { code: 'SLVPURC', name: 'PURCHASE SILVER A/C', gr: '21' },
+  { code: 'OTHCHRG', name: 'OTHER CHARGES A/C', gr: '23' },
+  { code: 'FINEKSR', name: 'FINE KASAR A/C', gr: '31' },
+];
+
+/**
+ * BOOK_DETL of a TR_WH_SALE book, in the desktop's slot order (Ac_Ledr.cs:613-778 joins `B.SR_NO = n`; the real
+ * books 034/064 carry all twelve): 1 sale gold, 2 purchase gold, 3 cash, 4 kasar, 5 purchase kasar, 6 labour
+ * income, 7 labour expense, 8 sale silver, 9 purchase silver, 10 interest, 11 other charges, 12 fine kasar.
+ */
+const WHOLESALE_SLOTS: Array<{ srNo: number; acCode: string }> = [
+  { srNo: 1, acCode: 'SALES' },
+  { srNo: 2, acCode: 'PURCHASE' },
+  { srNo: 3, acCode: 'CASH' },
+  { srNo: 4, acCode: 'KASAR' },
+  { srNo: 5, acCode: 'KASAR' },
+  { srNo: 6, acCode: 'LBRINC' },
+  { srNo: 7, acCode: 'LBREXP' },
+  { srNo: 8, acCode: 'SLVSALE' },
+  { srNo: 9, acCode: 'SLVPURC' },
+  { srNo: 10, acCode: 'INTINC' },
+  { srNo: 11, acCode: 'OTHCHRG' },
+  { srNo: 12, acCode: 'FINEKSR' },
 ];
 
 /** Standard GST/TCS taxes (TAX_PRC is the total rate; the CGST/SGST↔IGST split is computed at posting). */
@@ -62,21 +91,113 @@ const BOOKS: {
   mainBook?: string;
   inout?: string;
   acCode: string;
+  /** BOOK_DETL slots when they differ from the sale-book layout (1 control, 2 cash, 3 round-off). */
+  slots?: Array<{ srNo: number; acCode: string }>;
+  /** BOOK_SNAME (the VCH_TYPE) when it is the desktop's, not the book code. */
+  shortName?: string;
+  /** BOOK_TBL_NAME, for the families that route by it. */
+  table?: string;
 }[] = [
   { book: 'SL', name: 'Sales', workflow: 'SALES', acCode: 'SALES' },
   { book: 'PR', name: 'Purchase', workflow: 'PURCHASE', acCode: 'PURCHASE' },
   { book: 'SRT', name: 'Sales Return', workflow: 'SALES RETURN', acCode: 'SALES' },
   { book: 'PRT', name: 'Purchase Return', workflow: 'PURCHASE RETURN', acCode: 'PURCHASE' },
-  { book: 'RCT', name: 'Receipt', mainBook: 'RECEIPT', inout: 'I', acCode: 'CASH' },
-  { book: 'PAY', name: 'Payment', mainBook: 'PAYMENT', inout: 'O', acCode: 'CASH' },
+  // Cash books: slot 1 is the cash account and slot 2 the kasar write-off account
+  // (Ac_Ledr.cs:567-581, legs 01-08 join BOOK_DETL SR_NO 1 and SR_NO 2). The sale-book layout put CASH
+  // in slot 2 as well, which would post a write-off to cash.
+  {
+    book: 'RCT',
+    name: 'Receipt',
+    mainBook: 'RECEIPT',
+    inout: 'I',
+    acCode: 'CASH',
+    slots: [
+      { srNo: 1, acCode: 'CASH' },
+      { srNo: 2, acCode: 'KASAR' },
+    ],
+  },
+  {
+    book: 'PAY',
+    name: 'Payment',
+    mainBook: 'PAYMENT',
+    inout: 'O',
+    acCode: 'CASH',
+    slots: [
+      { srNo: 1, acCode: 'CASH' },
+      { srNo: 2, acCode: 'KASAR' },
+    ],
+  },
   { book: 'SOR', name: 'Sales Order', mainBook: 'SALES ORDER', inout: 'O', acCode: 'SALES' },
   { book: 'TUR', name: 'Approval Issue', mainBook: 'APPROVAL ISSUE', inout: 'O', acCode: 'OS' },
   { book: 'TRR', name: 'Approval Return', mainBook: 'APPROVAL RETURN', inout: 'I', acCode: 'OS' },
   { book: 'SAJ', name: 'Stock Adjust', mainBook: 'STOCK ADJUST', inout: 'I', acCode: 'KASAR' },
-  { book: 'TTR', name: 'Tag Transfer', mainBook: 'TAG TRANSFER', inout: 'O', acCode: 'KASAR' },
+  // Desktop TR_TAG_CAN serves both menus on its own MAIN_BOOK (MDI_FORM.cs:8586 "TAG CANCEL", :8664 "TAG TRFR"),
+  // numbered from BAR_CAN_DATA (MS_UPDATE.cs:7825). The desktop's own short names are TGCAN and TAGTR
+  // (`project-memory/parity/verify-stock-tags.md` §0). 'TAG TRANSFER', provisioned before, is no desktop MAIN_BOOK.
+  {
+    book: 'TGC',
+    name: 'Tag Cancel',
+    mainBook: 'TAG CANCEL',
+    inout: 'O',
+    acCode: 'KASAR',
+    shortName: 'TGCAN',
+    table: 'BAR_CAN_DATA',
+  },
+  {
+    book: 'TTR',
+    name: 'Tag Transfer',
+    mainBook: 'TAG TRFR',
+    inout: 'O',
+    acCode: 'KASAR',
+    shortName: 'TAGTR',
+    table: 'BAR_CAN_DATA',
+  },
+  // Desktop TR_TAG_SPLIT on a TAG SPLIT book (MDI_FORM.cs:8686 "Tag Split"), short name TGSPL, numbered from
+  // LBR_DATA (its header table). Ac_Ledr.Tag_Split_Ledr (Ac_Ledr.cs:1953-1982) posts the absorbing legs from
+  // BOOK_DETL slots 5 (labour), 6/7 (gold DR/CR fine) and 8/9 (silver DR/CR fine); provisioning wires them so a
+  // split with a difference and an absorbing account can post.
+  {
+    book: 'TSP',
+    name: 'Tag Split',
+    mainBook: 'TAG SPLIT',
+    inout: 'O',
+    acCode: 'KASAR',
+    shortName: 'TGSPL',
+    table: 'LBR_DATA',
+    slots: [
+      { srNo: 5, acCode: 'LBREXP' },
+      { srNo: 6, acCode: 'PURCHASE' },
+      { srNo: 7, acCode: 'SALES' },
+      { srNo: 8, acCode: 'PURCHASE' },
+      { srNo: 9, acCode: 'SALES' },
+    ],
+  },
   { book: 'ILT', name: 'Item Lot', mainBook: 'ITEM LOT', inout: 'I', acCode: 'PURCHASE' },
   { book: 'JV', name: 'Journal', mainBook: 'JOURNAL', inout: 'I', acCode: 'KASAR' },
   { book: 'CON', name: 'Contra', mainBook: 'CONTRA', inout: 'I', acCode: 'CASH' },
+  // Desktop TR_WH_SALE serves both: book 034 `WSALE` / `WH SALES` and book 064 `RCUT` / `RATE CUT`, each an OUT
+  // book over RATE_CUT_DATA. Without them a new company had no book either screen could post to, and the Rate
+  // Cut screen fell back to the cash Receipt book.
+  {
+    book: 'WHS',
+    name: 'Wholesale Sale',
+    mainBook: 'WH SALES',
+    inout: 'O',
+    acCode: 'SALES',
+    slots: WHOLESALE_SLOTS,
+    shortName: 'WSALE',
+    table: 'RATE_CUT_DATA',
+  },
+  {
+    book: 'RTC',
+    name: 'Rate Cut',
+    mainBook: 'RATE CUT',
+    inout: 'O',
+    acCode: 'SALES',
+    slots: WHOLESALE_SLOTS,
+    shortName: 'RCUT',
+    table: 'RATE_CUT_DATA',
+  },
 ];
 
 export interface SeedResult {
@@ -186,22 +307,23 @@ export async function seedCompany(
       ) {
         await tx.$executeRawUnsafe(
           `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME",
-             "MAIN_BOOK","BOOK_INOUT","CUR_USE")
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'Y')`,
+             "MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'Y',$9)`,
           tenantId,
           coCode,
           lcCode,
           b.book,
           b.name,
-          b.book,
+          b.shortName ?? b.book,
           mainBook,
           inout,
+          b.table ?? null,
         );
         // BOOK_DETL carries ONE ROW PER POSTING LEG, and `bookPolicy.resolveBookAccountTx` asks for a
         // specific SR_NO. The sale path alone resolves three: 1 = the control/sales account, 2 = the
         // cash/bank account a settlement lands in, 3 = the round-off / kasar account. Creating only row 1
         // produced `book SL account row 2 is missing` on the first cash sale.
-        const legs: Array<{ srNo: number; acCode: string }> = [
+        const legs: Array<{ srNo: number; acCode: string }> = b.slots ?? [
           { srNo: 1, acCode: b.acCode },
           { srNo: 2, acCode: 'CASH' },
           { srNo: 3, acCode: 'ROUNDOFF' },
@@ -217,7 +339,7 @@ export async function seedCompany(
             b.book,
             leg.srNo,
             b.name,
-            b.book,
+            b.shortName ?? b.book,
             mainBook,
             inout,
             leg.acCode,
@@ -264,8 +386,12 @@ export async function seedCompany(
       year = true;
     }
     if (await absent('CO_SET', '"CO_CODE"=$2', coCode)) {
+      // The desktop never leaves the amount types NULL. The schema upgrade backfills them
+      // (Ac_Image.cs:6221 `SL_AMT_TYPE = 'N'`, :7101 `PR_AMT_TYPE = 'F'`) and company open repeats
+      // it in memory (MS_OPNCOMP.cs:881-888). The loader applies the same defaults to a blank
+      // value, but storing them here makes a web company's CO_SET read like a desktop one.
       await tx.$executeRawUnsafe(
-        `INSERT INTO "CO_SET"(tenant_id,"CO_CODE") VALUES ($1,$2)`,
+        `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","SL_AMT_TYPE","PR_AMT_TYPE") VALUES ($1,$2,'N','F')`,
         tenantId,
         coCode,
       );

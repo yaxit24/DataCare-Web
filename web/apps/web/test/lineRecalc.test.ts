@@ -105,6 +105,57 @@ describe('lineRecalc agrees with the core primitives the server uses', () => {
     expect(recalcLine({ ...base, rateWith: 'N' }).metalAmount).toBe(metalAmount(10, 100));
   });
 
+  // Vectors D6-1..D6-8 (contract in parity-plan-2026-09-10/evidence/implementation-2026-09-29-eval-defects).
+  // Literal figures worked by hand from TR_SALE.cs CommPassTotal, so the preview is checked against the
+  // desktop rather than against the server code it shares.
+  it('D6-1: a blank line on a blank company previews net, the 60,000 the desktop bills', () => {
+    const line = { pcs: '1', grossWt: '10', netWt: '10', touch: '91.6', rate: '6000' };
+    expect(recalcLine(line, 'sale', { saleAmountType: '' }).metalAmount).toBe(60000);
+  });
+
+  it.each([
+    ['', 10000],
+    ['F', 9160],
+    ['G', 12000],
+    ['N', 10000],
+    ['P', 1000],
+  ])('D6-2: company SL_AMT_TYPE %s previews %d', (company, expected) => {
+    const line = { pcs: '1', grossWt: '12', netWt: '10', touch: '91.6', rate: '1000' };
+    expect(recalcLine(line, 'sale', { saleAmountType: company }).metalAmount).toBe(expected);
+  });
+
+  it('D6-3/D6-4: the line RtWith overrides the company type and ghat joins net and gross', () => {
+    const line = {
+      pcs: '2',
+      grossWt: '12',
+      netWt: '10',
+      ghtWt: '0.5',
+      touch: '91.6',
+      rate: '1000',
+    };
+    expect(
+      recalcLine({ ...line, rateWith: 'G' }, 'sale', { saleAmountType: 'N' }).metalAmount,
+    ).toBe(12500);
+    expect(
+      recalcLine({ ...line, rateWith: 'P' }, 'sale', { saleAmountType: 'N' }).metalAmount,
+    ).toBe(2000);
+    expect(recalcLine(line, 'sale', { saleAmountType: 'N' }).metalAmount).toBe(10500);
+    expect(recalcLine(line, 'sale', { saleAmountType: 'F' }).metalAmount).toBe(9618);
+  });
+
+  it('D6-5/D6-6: the item RATE_TYPE divides a per-kg or per-10 g rate', () => {
+    expect(
+      recalcLine({ grossWt: '250', netWt: '250', rate: '70000', rateType: 'K' }, 'sale', {
+        saleAmountType: 'N',
+      }).metalAmount,
+    ).toBe(17500);
+    expect(
+      recalcLine({ grossWt: '10', netWt: '10', rate: '60000', rateType: '1' }, 'sale', {
+        saleAmountType: 'N',
+      }).metalAmount,
+    ).toBe(60000);
+  });
+
   it('routes rounding through the kernel, including the negative midpoint WP-06 caught', () => {
     // A local Math.round would give -1 here; the kernel's policy is what the server uses.
     expect(recalcLine({ grossWt: '-1.005', netWt: '-1.005', touch: '100' }).fineWt).toBe(

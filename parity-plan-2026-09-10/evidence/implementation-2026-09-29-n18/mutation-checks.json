@@ -1,0 +1,735 @@
+{
+ "slice": "N18 \u2014 Tag Cancel (X19) / Tag Transfer (X18), desktop TR_TAG_CAN",
+ "script": "parity-plan-2026-09-10/evidence/implementation-2026-09-29-n18/mutation-check.py",
+ "run": "/projects/local-test-env.sh python3 mutation-check.py (disposable PostgreSQL 16 on 127.0.0.1:55433, app_user, forced RLS), on the committed, Prettier-formatted sources",
+ "total": 60,
+ "caught": 60,
+ "note": "First run: 54/60 caught. The six survivors each exposed a missing test, now added: sorted tag-lock order (deterministic pg_locks probe), the stone save filter (stoneRows), a non-qualifying tag line (A2), the hidden number kept on edit with a later voucher present, ghat in the purity fine, and a typed net with unchanged gross. After Prettier two mutation targets were re-anchored to the formatted lines. Final run: 60/60.",
+ "results": [
+  {
+   "id": "book-other-mode-accepted",
+   "file": "apps/api/src/modules/stock/tagCancel.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t V12",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > V12: each menu accepts only its own in-use book 325ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "book-not-in-use-accepted",
+   "file": "apps/api/src/modules/stock/tagCancel.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t V12",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > V12: each menu accepts only its own in-use book 326ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "stock-data-type-blank",
+   "file": "apps/api/src/modules/stock/tagCancel.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t V1:",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > V1: writes exactly the desktop rows, and nothing else in the database changes 500ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "duplicate-tag-accepted",
+   "file": "apps/api/src/modules/stock/tagCancel.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t V5",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > V5: refuses the same tag number twice with the desktop message 328ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "shared-resolver-picks-first",
+   "file": "apps/api/src/modules/stock/stock.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t V4",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > V4: refuses an ambiguous tag number without a serial, writing nothing and using no number 386ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "tag-locks-unsorted",
+   "file": "apps/api/src/modules/stock/tagCancel.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t sorted order",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > K2.6: locks every tag in sorted order before resolving any, whatever the line order 306ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "tags-not-pre-locked",
+   "file": "apps/api/src/modules/stock/tagCancel.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t sorted order",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > K2.6: locks every tag in sorted order before resolving any, whatever the line order 329ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "conflict-not-recognised",
+   "file": "apps/api/src/modules/stock/tagCancel.ts",
+   "test": "test/tagCancel.routes.db.test.ts -t deadlock",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer through HTTP > reports a deadlock with another writer as 409 Conflict, writes nothing and uses no number 1043ms",
+    "Tests  1 failed | 4 skipped (5)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "conflict-not-409",
+   "file": "apps/api/src/routes/txn.ts",
+   "test": "test/tagCancel.routes.db.test.ts -t deadlock",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer through HTTP > reports a deadlock with another writer as 409 Conflict, writes nothing and uses no number 1057ms",
+    "Tests  1 failed | 4 skipped (5)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "kr-net-three-places",
+   "file": "apps/api/src/modules/stock/tagCancelRows.ts",
+   "test": "test/tagCancelRows.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 the tag fill (K3) > loads the grid with the desktop formats, verbatim text and a two-place karigar net 10ms",
+    "\u00d7 the desktop rows > writes TRFR_IT_CODE only in transfer mode, and stamps the book on every line 2ms",
+    "Tests  2 failed | 15 passed (17)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 2 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "karigar-purity-not-taken",
+   "file": "apps/api/src/modules/stock/tagCancelRows.ts",
+   "test": "test/tagCancelRows.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 the tag fill (K3) > takes the karigar touch, wastage and fine when the tag has no touch (:4043-4050) 7ms",
+    "Tests  1 failed | 16 passed (17)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "given-cells-not-stored",
+   "file": "apps/api/src/modules/stock/tagCancelRows.ts",
+   "test": "test/tagCancelRows.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 the operator edits replayed through CommPassTotal (K4) > consumes every cell the screen sends: a new value is stored or refused, never ignored (no dead cell) 7ms",
+    "Tests  1 failed | 16 passed (17)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "unchanged-cell-is-an-edit",
+   "file": "apps/api/src/modules/stock/tagCancelRows.ts",
+   "test": "test/tagCancelRows.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 the operator edits replayed through CommPassTotal (K4) > keeps an untouched tag exactly, and an unchanged cell is not an edit 10ms",
+    "Tests  1 failed | 16 passed (17)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "readonly-pcs-accepted",
+   "file": "apps/api/src/modules/stock/tagCancelRows.ts",
+   "test": "test/tagCancelRows.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 the operator edits replayed through CommPassTotal (K4) > refuses the read-only cells of a tag line and the other mode\u2019s columns 7ms",
+    "Tests  1 failed | 16 passed (17)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "transfer-labour-refused-again",
+   "file": "apps/api/src/modules/stock/tagCancelRows.ts",
+   "test": "test/tagCancelRows.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 the operator edits replayed through CommPassTotal (K4) > recomputes the Transfer grid\u2019s hidden labour amount on a weight edit and takes the screen\u2019s value 6ms",
+    "Tests  1 failed | 16 passed (17)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "stone-effect-skipped",
+   "file": "apps/api/src/modules/stock/tagCancelRows.ts",
+   "test": "test/tagCancelRows.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 the operator edits replayed through CommPassTotal (K4) > applies edited stones to the row after the gross weight 8ms",
+    "Tests  1 failed | 16 passed (17)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "stones-every-bar-row",
+   "file": "apps/api/src/modules/stock/tagCancel.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t V11",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > V11: copies the stones of the instance\u2019s first BAR_DETL row only 322ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "kept-line-loses-stones",
+   "file": "apps/api/src/modules/stock/tagCancel.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t V2",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > V2: edit keeps the hidden number, clock, user and kept lines; releases a dropped tag, reserves an added one 469ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "loose-line-stones-accepted",
+   "file": "apps/api/src/modules/stock/tagCancel.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t refuses what the desktop grid",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > refuses what the desktop grid would not accept 357ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "empty-stones-saved",
+   "file": "apps/api/src/modules/stock/tagCancelRows.ts",
+   "test": "test/tagCancelRows.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 the desktop rows > saves only the stones with pieces, weight or value (:5200), under the parent line OLD_SRNO 7ms",
+    "\u00d7 the desktop rows > posts DM_DATA for OTH_DETL_POSTING stones with a value, in cancel mode only 3ms",
+    "Tests  2 failed | 15 passed (17)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 2 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "trfr-item-in-cancel",
+   "file": "apps/api/src/modules/stock/tagCancelRows.ts",
+   "test": "test/tagCancelRows.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 the desktop rows > writes TRFR_IT_CODE only in transfer mode, and stamps the book on every line 6ms",
+    "Tests  1 failed | 16 passed (17)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "web-extra-column-written",
+   "file": "apps/api/src/modules/stock/tagCancelRows.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t V1:",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > V1: writes exactly the desktop rows, and nothing else in the database changes 482ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "loose-tag-not-n",
+   "file": "apps/api/src/modules/stock/tagCancelRows.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t V1:",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > V1: writes exactly the desktop rows, and nothing else in the database changes 497ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "non-qualifying-tag-skipped",
+   "file": "apps/api/src/modules/stock/tagCancel.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t refuses what the desktop grid",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > refuses what the desktop grid would not accept 411ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "stock-sign-plus",
+   "file": "apps/api/src/modules/stock/tagCancelRows.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t V1:",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > V1: writes exactly the desktop rows, and nothing else in the database changes 496ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "transfer-plus-row-missing",
+   "file": "apps/api/src/modules/stock/tagCancelRows.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t T1",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > T1: a transfer moves the tag to the loose item with the same pieces, weights and fine 479ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "transfer-plus-row-keeps-labour",
+   "file": "apps/api/src/modules/stock/tagCancelRows.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t T1",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > T1: a transfer moves the tag to the loose item with the same pieces, weights and fine 500ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "transfer-plus-row-keeps-tag",
+   "file": "apps/api/src/modules/stock/tagCancelRows.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t T1",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > T1: a transfer moves the tag to the loose item with the same pieces, weights and fine 479ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "dm-data-in-transfer",
+   "file": "apps/api/src/modules/stock/tagCancelRows.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t T1",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > T1: a transfer moves the tag to the loose item with the same pieces, weights and fine 476ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "dm-data-ignores-posting-flag",
+   "file": "apps/api/src/modules/stock/tagCancelRows.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t V1:",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > V1: writes exactly the desktop rows, and nothing else in the database changes 500ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "edit-new-hidden-number",
+   "file": "apps/api/src/modules/stock/tagCancel.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t hidden number",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > K9.2: an edit keeps its hidden number while later vouchers hold higher ones 233ms",
+    "Tests  1 failed | 1 passed | 20 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "edit-takes-acting-user",
+   "file": "apps/api/src/modules/stock/tagCancel.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t V2",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > V2: edit keeps the hidden number, clock, user and kept lines; releases a dropped tag, reserves an added one 472ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "edit-resets-clock",
+   "file": "apps/api/src/modules/stock/tagCancel.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t V2",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > V2: edit keeps the hidden number, clock, user and kept lines; releases a dropped tag, reserves an added one 492ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "kept-line-renumbered",
+   "file": "apps/api/src/modules/stock/tagCancel.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t V2",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > V2: edit keeps the hidden number, clock, user and kept lines; releases a dropped tag, reserves an added one 487ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "edit-does-not-release",
+   "file": "apps/api/src/modules/stock/tagCancel.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t V2",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > V2: edit keeps the hidden number, clock, user and kept lines; releases a dropped tag, reserves an added one 487ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "delete-no-audit",
+   "file": "apps/api/src/modules/stock/tagCancel.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t V3",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > V3: delete writes the desktop DELETE_DATA rows and returns every other table to its prior state 508ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "delete-audit-fine-is-fine",
+   "file": "apps/api/src/modules/stock/tagCancelRows.ts",
+   "test": "test/tagCancelRows.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 the desktop rows > writes one DELETE_DATA row per line, with the net weight as the fine and a 20-character book 8ms",
+    "Tests  1 failed | 16 passed (17)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "delete-audit-main-book",
+   "file": "apps/api/src/modules/stock/tagCancelRows.ts",
+   "test": "test/tagCancelRows.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 the desktop rows > writes one DELETE_DATA row per line, with the net weight as the fine and a 20-character book 8ms",
+    "Tests  1 failed | 16 passed (17)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "delete-keeps-hidden-number",
+   "file": "apps/api/src/modules/stock/tagCancel.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t V3",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > V3: delete writes the desktop DELETE_DATA rows and returns every other table to its prior state 526ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "tag-stock-not-restored",
+   "file": "apps/api/src/modules/stock/tagCancel.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t V10",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > V10: a web TAG_STOCK tag is consumed by the cancel and restored by the delete 328ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "delete-ignores-lock-date",
+   "file": "apps/api/src/modules/stock/tagCancel.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t V9",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > V9: the lock date refuses a save, an edit and a delete 430ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "transfer-item-optional",
+   "file": "apps/api/src/modules/stock/tagCancel.ts",
+   "test": "test/tagCancelLifecycle.db.test.ts -t T2",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer (TR_TAG_CAN) \u2014 contract vectors > T2: a transfer line needs a transfer item that exists 319ms",
+    "Tests  1 failed | 21 skipped (22)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "seed-transfer-main-book",
+   "file": "apps/api/src/modules/ops/seedCompany.ts",
+   "test": "test/provisioning.db.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 company provisioning produces a postable company > creates the Tag Cancel and Tag Transfer books TR_TAG_CAN opens 9ms",
+    "Tests  1 failed | 11 passed (12)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "transfer-shares-cancel-right",
+   "file": "apps/api/src/modules/rbac/routePolicy.ts",
+   "test": "test/tagCancel.routes.db.test.ts -t own right",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 N18 tag cancel and tag transfer through HTTP > keeps each menu to its own right 45ms",
+    "Tests  1 failed | 4 skipped (5)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "core-less-not-forced",
+   "file": "packages/core/src/tagCancelLine.ts",
+   "test": "test/tagCancelLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 tagCancelRecompute (CommPassTotal) > forces net = gross - less whenever both are set, even over a typed net 6ms",
+    "Tests  1 failed | 22 passed (23)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "core-fine-without-ghat",
+   "file": "packages/core/src/tagCancelLine.ts",
+   "test": "test/tagCancelLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 tagCancelRecompute (CommPassTotal) > prices the ghat weight into the fine with a purity: (net + ghat) \u00d7 (touch + wastage) / 100 6ms",
+    "Tests  1 failed | 22 passed (23)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af",
+    "FAIL  test/tagCancelLine.test.ts > tagCancelRecompute (CommPassTotal) > prices the ghat weight into the fine with a purity: (net + ghat) \u00d7 (touch + wastage) / 100"
+   ]
+  },
+  {
+   "id": "core-labour-ignores-lbr-with-ght",
+   "file": "packages/core/src/tagCancelLine.ts",
+   "test": "test/tagCancelLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 tagCancelRecompute (CommPassTotal) > computes labour by LType and LBR_WITH_GHT 6ms",
+    "Tests  1 failed | 22 passed (23)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "core-money-half-up",
+   "file": "packages/core/src/tagCancelLine.ts",
+   "test": "test/tagCancelLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 tagCancelRecompute (CommPassTotal) > prices the item amount by RATE_TYPE with Math.Round half-to-even 7ms",
+    "Tests  1 failed | 22 passed (23)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "core-tag-row-copies-karigar",
+   "file": "packages/core/src/tagCancelLine.ts",
+   "test": "test/tagCancelLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 tagCancelRecompute (CommPassTotal) > re-derives net, fine and labour from a changed gross and the karigar fine from its unset baseline 7ms",
+    "\u00d7 tagCancelRecompute (CommPassTotal) > derives the karigar net from KrOthWt on a tag row 1ms",
+    "Tests  2 failed | 21 passed (23)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 2 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "core-unchanged-gross-recomputes",
+   "file": "packages/core/src/tagCancelLine.ts",
+   "test": "test/tagCancelLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 tagCancelRecompute (CommPassTotal) > leaves a typed net alone while the gross is unchanged and there is no less weight (IL_0015 guard) 6ms",
+    "Tests  1 failed | 22 passed (23)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af",
+    "164|     expect(cells.fine).toBe(7.125); // 9.5 \u00d7 75 / 100"
+   ]
+  },
+  {
+   "id": "core-stone-p-by-weight",
+   "file": "packages/core/src/tagCancelLine.ts",
+   "test": "test/tagCancelLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 tagCancelStone (CommPassTotal_Idtl, one row) > prices P by pieces only when the rate rounds to a whole non-zero number 7ms",
+    "Tests  1 failed | 22 passed (23)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "core-stones-other-amount-ignored",
+   "file": "packages/core/src/tagCancelLine.ts",
+   "test": "test/tagCancelLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 tagCancelStoneEffect > moves the conversion weight into LsWt / NetWt and the stones net amount into OthAmt 7ms",
+    "Tests  1 failed | 22 passed (23)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "core-mrp-line-not-written",
+   "file": "packages/core/src/tagCancelLine.ts",
+   "test": "test/tagCancelLine.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 tagCancelLineQualifies (the save filter, :5099) > writes a named tag with an MRP even when it has no weight 7ms",
+    "Tests  1 failed | 22 passed (23)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "web-pcs-recomputes",
+   "file": "apps/web/lib/tagCancelVoucher.ts",
+   "test": "test/tagCancelVoucher.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 cell events (MSG_LeaveCell \u2192 CommPassTotal) > only stores the pieces (col 10) and formats them as a whole number 5ms",
+    "Tests  1 failed | 19 passed (20)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "web-stones-always-sent",
+   "file": "apps/web/lib/tagCancelVoucher.ts",
+   "test": "test/tagCancelVoucher.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 payload > sends every cell of the row, the tag it was filled from, and stones only when edited 6ms",
+    "Tests  1 failed | 19 passed (20)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "web-no-transfer-copy",
+   "file": "apps/web/lib/tagCancelVoucher.ts",
+   "test": "test/tagCancelVoucher.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 rows > gives a spare row put to use the previous row\u2019s transfer item (CommPassAdd, :2830) 7ms",
+    "Tests  1 failed | 19 passed (20)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "web-duplicate-counts-own-row",
+   "file": "apps/web/lib/tagCancelVoucher.ts",
+   "test": "test/tagCancelVoucher.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 the grid around the rows > refuses a tag already on another row (\"Duplicate Tag No\") 6ms",
+    "Tests  1 failed | 19 passed (20)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "web-retyped-tag-counts-as-resolved",
+   "file": "apps/web/lib/tagCancelVoucher.ts",
+   "test": "test/tagCancelVoucher.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 payload > never sends a retyped, unresolved tag with the old serial 6ms",
+    "Tests  1 failed | 19 passed (20)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "web-baseline-not-loaded",
+   "file": "apps/web/lib/tagCancelVoucher.ts",
+   "test": "test/tagCancelVoucher.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 rows > fills a tag row with the grid formats and keeps the row\u2019s place and transfer item 9ms",
+    "Tests  1 failed | 19 passed (20)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  },
+  {
+   "id": "web-payload-omits-karigar-fine",
+   "file": "apps/web/lib/tagCancelVoucher.ts",
+   "test": "test/tagCancelVoucher.test.ts",
+   "status": "CAUGHT",
+   "exit": 1,
+   "summary": [
+    "\u00d7 payload > sends every cell of the row, the tag it was filled from, and stones only when edited 9ms",
+    "Tests  1 failed | 19 passed (20)",
+    "\u23af\u23af\u23af\u23af\u23af\u23af\u23af Failed Tests 1 \u23af\u23af\u23af\u23af\u23af\u23af\u23af"
+   ]
+  }
+ ]
+}

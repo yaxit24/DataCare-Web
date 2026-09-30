@@ -788,23 +788,30 @@ wsale-034-00015`
  * the harness must expand this set and therefore changes the certification requirement fingerprint.
  */
 export const REQUIRED_REAL_BROWSER_JOURNEY_IDS: readonly string[] = Object.freeze([
+  'cash-receipt-payment',
   'column-settings',
   'credit-note',
+  'credit-note-entry',
   'design-book',
   'design-calculations',
   'design-repeat',
+  'e-invoice-entry',
   'generic-image-conflict',
   'image-conflict',
   'manufacturing-lot',
   'order-images',
   'repair-image-conflict',
+  'sale-amount-basis',
   'sales-order',
   'sales-order-design',
   'sales-return-bill-replay',
   'sales-return-labour-replay',
   'sales-return-replay',
   'sales-return-saved',
+  'tag-cancel-transfer',
+  'tag-split',
   'tour-order',
+  'wholesale-rate-cut',
 ]);
 
 /**

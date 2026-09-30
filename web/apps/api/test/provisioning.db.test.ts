@@ -68,7 +68,9 @@ d('company provisioning produces a postable company', () => {
   });
 
   it('creates the accounts the posting engine references by literal code', async () => {
-    expect(await count('AC_MAST')).toBe(19);
+    // 19 literal codes plus the six wholesale / rate-cut slot accounts (labour income and expense, silver
+    // sale and purchase, other charges, fine kasar).
+    expect(await count('AC_MAST')).toBe(25);
   });
 
   it('creates every book with its posting legs', async () => {
@@ -78,9 +80,118 @@ d('company provisioning produces a postable company', () => {
         CO,
       ),
     );
-    expect(rows.length).toBe(14);
-    // Three legs per book: 1 = control/sales, 2 = cash/bank, 3 = round-off / kasar.
-    for (const r of rows) expect(Number(r.n)).toBe(3);
+    expect(rows.length).toBe(18);
+    // Three legs per book (1 = control/sales, 2 = cash/bank, 3 = round-off), except the cash books.
+    // RCT and PAY carry the desktop cash-book layout, 1 = cash and 2 = kasar: Ac_Ledr.cs:567-581 joins
+    // BOOK_DETL SR_NO 1 and SR_NO 2 for legs 01-08. Their slot 2 used to be CASH, which would have posted
+    // a write-off to the cash account. The TR_WH_SALE books carry the twelve slots Wh_Sales_Ledr joins.
+    // TSP (Tag Split) carries the five Tag_Split_Ledr slots (5 labour, 6/7 gold DR/CR, 8/9 silver DR/CR).
+    const legs = Object.fromEntries(rows.map((r) => [String(r.CO_BOOK), Number(r.n)]));
+    for (const [book, n] of Object.entries(legs))
+      expect(n, book).toBe(
+        book === 'RCT' || book === 'PAY'
+          ? 2
+          : book === 'WHS' || book === 'RTC'
+            ? 12
+            : book === 'TSP'
+              ? 5
+              : 3,
+      );
+  });
+
+  it('creates the wholesale and rate-cut books as the desktop classifies them', async () => {
+    const rows: any[] = await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT "CO_BOOK","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","BOOK_TBL_NAME" FROM "BOOK_DATA"
+          WHERE "CO_CODE"=$1 AND "CO_BOOK" IN ('WHS','RTC') ORDER BY "CO_BOOK"`,
+        CO,
+      ),
+    );
+    // Book 064 RCUT / RATE CUT and book 034 WSALE / WH SALES, both OUT books over RATE_CUT_DATA.
+    expect(rows).toEqual([
+      {
+        CO_BOOK: 'RTC',
+        BOOK_SNAME: 'RCUT',
+        MAIN_BOOK: 'RATE CUT',
+        BOOK_INOUT: 'O',
+        BOOK_TBL_NAME: 'RATE_CUT_DATA',
+      },
+      {
+        CO_BOOK: 'WHS',
+        BOOK_SNAME: 'WSALE',
+        MAIN_BOOK: 'WH SALES',
+        BOOK_INOUT: 'O',
+        BOOK_TBL_NAME: 'RATE_CUT_DATA',
+      },
+    ]);
+  });
+
+  it('creates the Tag Cancel and Tag Transfer books TR_TAG_CAN opens', async () => {
+    const rows: any[] = await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT "CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","BOOK_TBL_NAME","CUR_USE"
+           FROM "BOOK_DATA" WHERE "CO_CODE"=$1 AND "CO_BOOK" IN ('TGC','TTR') ORDER BY "CO_BOOK"`,
+        CO,
+      ),
+    );
+    // MDI_FORM.cs:8586 CurBookHelp("TAG CANCEL") and :8664 CurBookHelp("TAG TRFR"); both number from
+    // BAR_CAN_DATA (MS_UPDATE.cs:7825). The desktop's short names are TGCAN and TAGTR.
+    expect(rows).toEqual([
+      {
+        CO_BOOK: 'TGC',
+        BOOK_NAME: 'Tag Cancel',
+        BOOK_SNAME: 'TGCAN',
+        MAIN_BOOK: 'TAG CANCEL',
+        BOOK_INOUT: 'O',
+        BOOK_TBL_NAME: 'BAR_CAN_DATA',
+        CUR_USE: 'Y',
+      },
+      {
+        CO_BOOK: 'TTR',
+        BOOK_NAME: 'Tag Transfer',
+        BOOK_SNAME: 'TAGTR',
+        MAIN_BOOK: 'TAG TRFR',
+        BOOK_INOUT: 'O',
+        BOOK_TBL_NAME: 'BAR_CAN_DATA',
+        CUR_USE: 'Y',
+      },
+    ]);
+  });
+
+  it('creates the Tag Split book TR_TAG_SPLIT opens, with the absorption ledger slots', async () => {
+    const rows: any[] = await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT "CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","BOOK_TBL_NAME","CUR_USE"
+           FROM "BOOK_DATA" WHERE "CO_CODE"=$1 AND "CO_BOOK"='TSP'`,
+        CO,
+      ),
+    );
+    // MDI_FORM.cs:8686 CurBookHelp("TAG SPLIT"); numbered from LBR_DATA; short name TGSPL.
+    expect(rows).toEqual([
+      {
+        CO_BOOK: 'TSP',
+        BOOK_NAME: 'Tag Split',
+        BOOK_SNAME: 'TGSPL',
+        MAIN_BOOK: 'TAG SPLIT',
+        BOOK_INOUT: 'O',
+        BOOK_TBL_NAME: 'LBR_DATA',
+        CUR_USE: 'Y',
+      },
+    ]);
+    // Ac_Ledr.Tag_Split_Ledr joins BOOK_DETL SR_NO 5 (labour), 6/7 (gold DR/CR), 8/9 (silver DR/CR).
+    const slots: any[] = await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT "SR_NO"::int AS sr,"AC_CODE" FROM "BOOK_DETL" WHERE "CO_CODE"=$1 AND "CO_BOOK"='TSP' ORDER BY "SR_NO"`,
+        CO,
+      ),
+    );
+    expect(slots).toEqual([
+      { sr: 5, AC_CODE: 'LBREXP' },
+      { sr: 6, AC_CODE: 'PURCHASE' },
+      { sr: 7, AC_CODE: 'SALES' },
+      { sr: 8, AC_CODE: 'PURCHASE' },
+      { sr: 9, AC_CODE: 'SALES' },
+    ]);
   });
 
   /**
@@ -162,6 +273,7 @@ d('company provisioning produces a postable company', () => {
   it('is idempotent', async () => {
     const again = await seedCompany(prisma, tenantId, CO, { coName: 'Provision Test', lcCode: LC });
     expect(again.created.books).toBe(0);
-    expect(await count('BOOK_DETL')).toBe(42); // 14 books x 3 legs, not doubled
+    // 14 books x 3 legs + RCT/PAY x 2 + the wholesale and rate-cut books x 12 slots + TSP x 5, not doubled.
+    expect(await count('BOOK_DETL')).toBe(72);
   });
 });

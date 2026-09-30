@@ -1014,7 +1014,7 @@ try {
   const repairBook = page.getByLabel('Configured book');
   await repairBook.waitFor();
   assert.equal(await repairBook.locator('option').count(), 2);
-  assert.equal(await repairBook.inputValue(), 'RCR');
+  await expectValue(repairBook, 'RCR', 'configured book');
 
   const repairParty = page.getByTestId('repair-party').locator('input');
   await repairParty.focus();
@@ -1109,7 +1109,7 @@ try {
   const issueBook = page.getByLabel('Configured book');
   await issueBook.waitFor();
   assert.equal(await issueBook.locator('option').count(), 2);
-  assert.equal(await issueBook.inputValue(), 'RKI');
+  await expectValue(issueBook, 'RKI', 'configured book');
 
   const issueParty = page.getByTestId('repair-issue-party').locator('input');
   await issueParty.focus();
@@ -1169,7 +1169,7 @@ try {
   const krRecBook = page.getByLabel('Configured book');
   await krRecBook.waitFor();
   assert.equal(await krRecBook.locator('option').count(), 2);
-  assert.equal(await krRecBook.inputValue(), 'RKR');
+  await expectValue(krRecBook, 'RKR', 'configured book');
 
   const krRecParty = page.getByTestId('repair-krrec-party').locator('input');
   await krRecParty.focus();
@@ -1233,7 +1233,7 @@ try {
   const custIsuBook = page.getByLabel('Configured book');
   await custIsuBook.waitFor();
   assert.equal(await custIsuBook.locator('option').count(), 2);
-  assert.equal(await custIsuBook.inputValue(), 'RCI');
+  await expectValue(custIsuBook, 'RCI', 'configured book');
 
   const custIsuParty = page.getByTestId('repair-custisu-party').locator('input');
   await custIsuParty.focus();
@@ -1290,7 +1290,7 @@ try {
   await page.getByRole('heading', { name: 'Melting Process — MLT PRO' }).waitFor();
   const meltingBook = page.getByLabel('Configured book');
   await meltingBook.waitFor();
-  assert.equal(await meltingBook.inputValue(), 'MLP');
+  await expectValue(meltingBook, 'MLP', 'configured book');
   await page.getByLabel('Lot no.').fill('LOT001');
   await page.getByLabel('Party account').fill('PARTY');
   await page.getByLabel('Material itCode 1').fill('SCRAP');
@@ -1318,7 +1318,7 @@ try {
   await page.getByRole('heading', { name: 'Physical Stock' }).waitFor();
   const physicalBook = page.getByLabel('Configured book');
   await physicalBook.waitFor();
-  assert.equal(await physicalBook.inputValue(), 'PHS');
+  await expectValue(physicalBook, 'PHS', 'configured book');
   await page.getByRole('button', { name: 'Load in-stock' }).click();
   await page.getByText('Gold Ornament').waitFor();
   const physicalScan = page.getByTestId('physical-stock-scan');
@@ -1401,7 +1401,7 @@ try {
   };
   await ctrlChord('F1', '/txn/daily-rate'); // F1CtrlDailyRate -> MS_RATE
   await ctrlChord('F5', '/txn/bill-to-bill'); // ShoCtrlF5BillRec -> TR_BILL_TO
-  await ctrlChord('F6', '/txn/wholesale-sale'); // ShoCtrlF6RateCut -> TR_WH_SALE
+  await ctrlChord('F6', '/txn/rate-cut'); // ShoCtrlF6RateCut -> TR_WH_SALE on a RATE CUT book
   await ctrlChord('F11', '/reports/cash-book'); // F11CtrlCashBank -> RP_CASH_BANK
   // These two were unmapped until their report families existed (MDI_FORM.cs:7147, :8994).
   await ctrlChord('F2', '/reports/order-lot-zoom'); // F2CtrlOrderZoom -> RP_ORDER

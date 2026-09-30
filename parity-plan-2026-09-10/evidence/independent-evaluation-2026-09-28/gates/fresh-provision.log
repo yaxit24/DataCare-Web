@@ -1,0 +1,1 @@
+FRESH_PROVISION_OK chain applies clean; 174 tenant-scoped tables all have forced RLS and a policy; schema matches the working database
