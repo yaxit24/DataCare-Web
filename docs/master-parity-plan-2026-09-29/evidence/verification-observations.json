@@ -1,0 +1,97 @@
+{
+  "kind": "datacare.master-plan-verification/1",
+  "observedDate": "2026-09-29",
+  "baseline": "03148fef5899224b8c4c9805ca07161a920efeb1",
+  "runtime": {
+    "node": "v25.8.0",
+    "pnpm": "9.15.4",
+    "platform": "darwin arm64"
+  },
+  "scope": "Planning review. Current pure/core/frontend and static checks only; no complete application/desktop parity certificate.",
+  "checks": [
+    {
+      "command": "pnpm install --frozen-lockfile --ignore-scripts",
+      "cwd": "web",
+      "exitCode": 0,
+      "meaning": "Exact lockfile local installation; lifecycle scripts disabled; no source edits."
+    },
+    {
+      "command": "pnpm --filter @datacare/core test",
+      "cwd": "web",
+      "exitCode": 0,
+      "testFiles": 26,
+      "tests": 1613,
+      "passed": 1613,
+      "log": "baseline-core-test.txt",
+      "logSha256": "498980aebee7ee40c39a8720fa8ebe8f46ec9a045462a491f860fb2a8d0c6bf4"
+    },
+    {
+      "command": "pnpm --filter @datacare/web test",
+      "attempt": 1,
+      "cwd": "web",
+      "exitCode": 1,
+      "filesPassed": 29,
+      "filesFailed": 7,
+      "testsPassed": 452,
+      "reason": "Core workspace package had not been built; seven suites failed to resolve its entry.",
+      "log": "baseline-web-test.txt",
+      "logSha256": "d8d8c1f7ed679bc9d3451946ffbe7836dd8beb8541a5e7962dcb46b1346616b5"
+    },
+    {
+      "command": "pnpm --filter @datacare/core build",
+      "cwd": "web",
+      "exitCode": 0,
+      "log": "baseline-core-build.txt",
+      "logSha256": "ededc6271ead5abe8d4e759507d35b3b34947a7b00a2f33b26bd086f4a363423"
+    },
+    {
+      "command": "pnpm --filter @datacare/web test",
+      "attempt": 2,
+      "cwd": "web",
+      "exitCode": 0,
+      "vitestFiles": 36,
+      "vitestTests": 522,
+      "vitestPassed": 522,
+      "nativeTests": 6,
+      "nativePassed": 6,
+      "log": "baseline-web-test-after-core-build.txt",
+      "meaning": "Frontend/helper unit and protocol tests; not a real browser business journey.",
+      "logSha256": "a4d55ef8991241998fc07e101e561dfde73ed05ca259fb3f66af4d3019e371da"
+    },
+    {
+      "command": "node scripts/check-completion-register.mjs --strict",
+      "cwd": "web",
+      "exitCode": 0,
+      "result": "REGISTER_OK; 198 implemented-unverified; referenced 175, never 14, unresolved labels 9",
+      "meaning": "Classification structure only; not behavior or runtime certification."
+    },
+    {
+      "command": "node scripts/check-completion-register.mjs --strict --release",
+      "cwd": "web",
+      "exitCode": 1,
+      "result": "REGISTER_RED 198 of 198 cannot be released",
+      "meaning": "Current register has no verified whole-menu acceptance."
+    },
+    {
+      "command": "node scripts/check-doc-references.mjs",
+      "cwd": "web",
+      "exitCode": 1,
+      "result": "DOC_REFS_RED 4 missing generated browser artifacts; 35 documents, 196 references, 14 line references, 1 verifiable claim checked",
+      "missingReferences": ["test-results/parity-real-stack/result.json", "test-results/parity-real-stack-round3-verified/result.json", "web/test-results/parity-real-stack-round4-blank-source/result.json", "test-results/parity-real-stack-round3-delete-confirmation/result.json"]
+    },
+    {
+      "command": "node --test scripts/test/request-field-trace.test.mjs scripts/test/ui-descriptors.test.mjs",
+      "cwd": "web",
+      "exitCode": 0,
+      "tests": 31,
+      "passed": 31,
+      "failed": 0,
+      "skipped": 0,
+      "meaning": "Scanner unit/fixture behavior only; not runtime parity."
+    }
+  ],
+  "notExecuted": ["Original Windows desktop replay", "API/real DB suite", "Full production build/lint/typecheck", "Strict core-test TypeScript recipe", "Real browser journeys", "Live devices/physical printing", "Provider actions", "Customer migration or restore", "Full release certificate"],
+  "sourceComparison": "source-comparison.json",
+  "previousCheckpointValidation": "previous-plan-validation.json",
+  "applicationSourceModified": false
+}
