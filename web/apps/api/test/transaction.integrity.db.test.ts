@@ -5,6 +5,7 @@ import { createPurchase, deletePurchase } from '../src/modules/purchase/purchase
 import {
   createPurchaseReturn,
   deletePurchaseReturn,
+  getPurchaseReturn,
 } from '../src/modules/purchase/purchaseReturn.js';
 import { createSale, deleteSale } from '../src/modules/sales/sales.js';
 import { createSaleReturn, deleteSaleReturn } from '../src/modules/sales/salesReturn.js';
@@ -118,6 +119,8 @@ databaseDescribe('database-backed transaction integrity', () => {
       ['PUR', 'Purchase', 'PVX', 'PURCHASE', 'I', 'PR_DATA'],
       ['SRT', 'Sales Return', 'SRX', 'SALES RETURNE', 'I', 'SL_DATA'],
       ['PRT', 'Purchase Return', 'PRX', 'PURC RETURN', 'O', 'PR_DATA'],
+      // Desktop-shaped arbitrary configured code: deletion/read must never fall back to literal PRT.
+      ['348', 'Purchase Return 348', 'P348', 'PURC RETURN', 'O', 'PR_DATA'],
     ]) {
       await owner.$executeRawUnsafe(
         `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
@@ -137,7 +140,8 @@ databaseDescribe('database-backed transaction integrity', () => {
       `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","MAIN_BOOK","BOOK_INOUT")
        SELECT $1,$2,$3,b.book,s.sr,s.ac,b.main,b.io
          FROM (VALUES ('SAL','SALES','O'),('S01','SALES','O'),('S02','SALES','O'),
-                      ('PUR','PURCHASE','I'),('SRT','SALES RETURNE','I'),('PRT','PURC RETURN','O')) b(book,main,io)
+                      ('PUR','PURCHASE','I'),('SRT','SALES RETURNE','I'),('PRT','PURC RETURN','O'),
+                      ('348','PURC RETURN','O')) b(book,main,io)
          CROSS JOIN (VALUES (1,'CTRL'),(2,'CASH'),(3,'ROUND')) s(sr,ac)`,
       TENANT,
       CO,
@@ -662,5 +666,129 @@ databaseDescribe('database-backed transaction integrity', () => {
     )[0]!;
     expect(String(detail.MAIN_USER)).toBe('prt-user');
     expect(String(detail.HD_VCH_NO)).toBe(String(header.HD_VCH_NO));
+  });
+
+  it('reads and fully deletes a configured non-literal Purchase Return book with its hidden identity', async () => {
+    const returnScope = scope('348');
+    const created = await createPurchaseReturn(
+      runtime,
+      {
+        scope: returnScope,
+        acCode: 'SUPP',
+        acName: 'Supplier',
+        vchDate: DAY,
+        taxRatePct: 0,
+        interState: false,
+        mainUser: 'return-user',
+      },
+      [
+        {
+          itCode: 'GOLD',
+          pcs: 1,
+          grossWt: 5,
+          netWt: 5,
+          touch: 90,
+          metalAmount: 450,
+        },
+      ],
+    );
+    await expect(getPurchaseReturn(runtime, returnScope, created.vchNo)).resolves.toMatchObject({
+      acCode: 'SUPP',
+      mainUser: 'return-user',
+      lines: [{ itCode: 'GOLD', netWt: 5 }],
+    });
+
+    const [identity] = (await owner.$queryRawUnsafe(
+      `SELECT p."HD_VCH_NO",
+              (SELECT count(*)::int FROM "TEMP_BOOK_DATA" t
+                WHERE t.tenant_id=p.tenant_id AND t."CO_CODE"=p."CO_CODE" AND t."LC_CODE"=p."LC_CODE"
+                  AND t."CO_BOOK"=p."CO_BOOK" AND t."VCH_NO"=p."HD_VCH_NO") temp_rows,
+              (SELECT count(*)::int FROM "ROJ_MEL_DATA" r
+                WHERE r.tenant_id=p.tenant_id AND r."CO_CODE"=p."CO_CODE" AND r."LC_CODE"=p."LC_CODE"
+                  AND r."CO_YEAR"=p."CO_YEAR" AND r."CO_BOOK"=p."CO_BOOK" AND r."VCH_NO"=p."VCH_NO") rojmel_rows
+         FROM "PR_DATA" p WHERE p.tenant_id=$1 AND p."CO_BOOK"='348' AND p."VCH_NO"=$2`,
+      TENANT,
+      String(created.vchNo).padStart(5, '0'),
+    )) as Array<{ HD_VCH_NO: string; temp_rows: number; rojmel_rows: number }>;
+    expect(identity?.temp_rows).toBe(1);
+    expect(identity?.rojmel_rows).toBeGreaterThan(0);
+
+    await deletePurchaseReturn(runtime, {
+      scope: returnScope,
+      vchNo: created.vchNo,
+      deleteUser: 'return-deleter',
+    });
+    const remaining = (await owner.$queryRawUnsafe(
+      `SELECT
+         (SELECT count(*)::int FROM "PR_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='348') pr,
+         (SELECT count(*)::int FROM "PR_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='348') detl,
+         (SELECT count(*)::int FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='348') rojmel,
+         (SELECT count(*)::int FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='348' AND "VCH_NO"=$2) temp,
+         (SELECT count(*)::int FROM "DELETE_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='348'
+            AND "VCH_TYPE"='P348' AND "DELETE_USER"='return-deleter') audit`,
+      TENANT,
+      identity?.HD_VCH_NO,
+    )) as Array<{ pr: number; detl: number; rojmel: number; temp: number; audit: number }>;
+    expect(remaining[0]).toEqual({ pr: 0, detl: 0, rojmel: 0, temp: 0, audit: 1 });
+  });
+
+  it('resolves a tagged return against the original purchase year, book and voucher', async () => {
+    const priorYear = '2023-2024';
+    const source = await createPurchase(
+      runtime,
+      {
+        scope: { ...scope('PUR'), coYear: priorYear },
+        acCode: 'SUPP',
+        vchDate: '2023-05-10',
+        taxRatePct: 0,
+        interState: false,
+      },
+      [
+        {
+          itCode: 'GOLD',
+          tagNo: 'TAGOLD',
+          pcs: 1,
+          grossWt: 3,
+          netWt: 3,
+          touch: 90,
+          metalAmount: 270,
+        },
+      ],
+    );
+    const ret = await createPurchaseReturn(
+      runtime,
+      {
+        scope: scope('PRT'),
+        acCode: 'SUPP',
+        origYear: priorYear,
+        origBook: 'PUR',
+        origVchNo: source.vchNo,
+        vchDate: DAY,
+        taxRatePct: 0,
+        interState: false,
+      },
+      [
+        {
+          itCode: 'GOLD',
+          tagNo: 'TAGOLD',
+          pcs: 1,
+          grossWt: 3,
+          netWt: 3,
+          touch: 90,
+          metalAmount: 270,
+        },
+      ],
+    );
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT "SL_BILL_YRCD","SL_BILL_DBCD","SL_BILL_NO" FROM "PR_DATA"
+        WHERE tenant_id=$1 AND "CO_BOOK"='PRT' AND "VCH_NO"=$2`,
+      TENANT,
+      String(ret.vchNo).padStart(5, '0'),
+    )) as Array<Record<string, unknown>>;
+    expect(rows[0]).toMatchObject({
+      SL_BILL_YRCD: priorYear,
+      SL_BILL_DBCD: 'PUR',
+      SL_BILL_NO: String(source.vchNo).padStart(5, '0'),
+    });
   });
 });

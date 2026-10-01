@@ -360,7 +360,12 @@ route('Purchase/Other Commission / Expense Voucher', [
   'PUT /other-commission/:vchNo',
   'DELETE /other-commission/:vchNo',
 ]);
-route('Purchase/Purchase Return', ['POST /purchase-returns', 'DELETE /purchase-returns/:vchNo']);
+route('Purchase/Purchase Return', [
+  'POST /purchase-returns',
+  'GET /purchase-returns/:vchNo',
+  'DELETE /purchase-returns/:vchNo',
+  'GET /purchase-returns/:vchNo/print',
+]);
 route('Purchase/Fine Settlement', ['POST /fine-sale', 'DELETE /fine-sale/:vchNo']);
 route('ExtraTran/Old Item Sales', [
   'POST /old-item-sales',
