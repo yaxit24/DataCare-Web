@@ -707,6 +707,14 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       // Shared RP_ALL panel dimensions. Bounded and trimmed here; whether a given report honours one is
       // decided by its registered FilterBinding, and an unsupported one is refused rather than dropped.
       filters: readFilters(q),
+      // HUID has desktop-specific controls outside the shared RP_ALL dimensions. Both the literal screen
+      // and generic exports receive this same object, so a filtered export cannot silently widen the report.
+      huidOptions: {
+        tab: q.tab,
+        itCode: q.itCode,
+        tblCode: q.tblCode,
+        hallmark: q.hallmark,
+      },
     };
   };
   // Printable documents read by the complete desktop voucher key (modules/documents/voucherDocument.ts):
@@ -4173,10 +4181,15 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     'order-lot-zoom': (prisma: any, scope: any) => orderLotZoom(prisma, scope, ''),
     // The HUID register needs a tenant + scope shape, so it is adapted to the shared signature here.
     huid: ((prisma: any, scope: any) =>
-      huidReport(prisma, scope.tenantId, {
-        CO_CODE: scope.coCode,
-        LC_CODE: scope.lcCode,
-      })) as ReportBuilder,
+      huidReport(
+        prisma,
+        scope.tenantId,
+        {
+          CO_CODE: scope.coCode,
+          LC_CODE: scope.lcCode,
+        },
+        scope.huidOptions,
+      )) as ReportBuilder,
     'item-weight-levels': ((prisma: any, scope: any) =>
       stockLevelReport(prisma, scope.tenantId, { CO_CODE: scope.coCode })) as ReportBuilder,
     'scheme-monthly': ((prisma: any, scope: any) =>
