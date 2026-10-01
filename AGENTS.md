@@ -9,7 +9,8 @@ The offline Windows jewellery ERP **DataCareNext** (decompiled in `unified/`) is
 
 - **Phase 1 — the desktop, in the web:** same menus, workflows, forms, prints and business results as the desktop.
   Plan: [`docs/master-parity-plan-2026-09-29/13-phase1-delivery-plan.md`](docs/master-parity-plan-2026-09-29/13-phase1-delivery-plan.md).
-- **Phase 2 — the SaaS product:** super admin, plans and billing, managed operations, scale.
+- **Phase 2 — the SaaS product:** super admin, plans and billing, managed operations, scale. **Not started until
+  Phase 1 is complete and certified (decision D28).**
   Plan: [`docs/master-parity-plan-2026-09-29/14-phase2-saas-plan.md`](docs/master-parity-plan-2026-09-29/14-phase2-saas-plan.md).
 - The boundary and the rule that SaaS changes never alter business results:
   [ADR-0004](project-memory/decisions/ADR-0004-two-phase-delivery.md).
@@ -19,8 +20,43 @@ The offline Windows jewellery ERP **DataCareNext** (decompiled in `unified/`) is
 1. Read [`project-memory/HANDOFF.md`](project-memory/HANDOFF.md).
 2. `git status`, `git fetch origin`, `git worktree list`: other sessions often work in parallel worktrees. Do not
    touch their branches or files; rebase before pushing because the backlog changes often.
-3. Find the work in `docs/master-parity-plan-2026-09-29/execution-backlog.json` (slices N01–N88) or
-   `phase2-backlog.json` (SP01–SP24), and the affected menus in `docs/handbook/menu-catalog.jsonl`.
+3. Take the next slice from document 13 §3 and check its status in
+   `docs/master-parity-plan-2026-09-29/execution-backlog.json` (slices N01–N88). Phase 2 slices in
+   `phase2-backlog.json` are not started until Phase 1 is certified (D28). Read the affected menus in
+   `docs/handbook/menu-catalog.jsonl`.
+
+## Which documents to follow
+
+The plan is one set: the folder `docs/master-parity-plan-2026-09-29/` (documents 01–14, `execution-backlog.json` and
+`phase2-backlog.json`) plus the handbooks in `docs/handbook/`. Documents 01–11 (29 September and 1 October) hold the
+slice specifications; documents 12–14 and the handbooks (1 October) add the delivery order, the newer slices and
+decisions, and how to build and test. Use them together:
+
+| Question | Where |
+|---|---|
+| Which slice is next? | Document 13 §3, then the slice's status in `execution-backlog.json` |
+| What exactly must the slice do? | Its specification — document 02 §4 with document 06 (N01–N30), 10 (N31–N46), 11 §6 (N47–N82), 12 §5 (N83–N88) — its gap rows, and the decisions it cites |
+| What rules apply to every slice? | Document 03 (shared contracts), document 04 (tests, journeys, acceptance), `docs/handbook/web/engineering-standards.md` |
+| What does the desktop do? | The desktop source, through the `datacare-desktop-authority` skill; document 05; `docs/handbook/desktop/` |
+| What is the state of a menu? | Its row in `docs/handbook/menu-catalog.jsonl` |
+| How do I build and test it? | `docs/handbook/web/` and the skills below |
+
+Do not plan or prioritise from older documents: the root plans and reports of August–September 2026,
+`parity-plan-2026-09-10/`, the plans in `web/docs/`, `web-implementation-spec/07_Build_Plan/` and the July plans in
+`project-memory/parity/`. Every open item in them is already carried into the backlog (`lineage-register.json`), and
+`docs/handbook/doc-register.md` labels each of them. Reference material — the video knowledge base, the catalogs,
+the table specifications in `web-implementation-spec/02_Data_Model/`, `web/docs/TECHNICAL-REFERENCE.md` — is still
+useful background.
+
+When documents disagree:
+
+1. Status: the backlog JSON wins over any prose.
+2. Plan content: the later document wins (12 over 11 over 10 over 01–09), and an accepted decision wins over the
+   text it decides.
+3. Business behaviour: the desktop source wins over every document.
+4. The code wins over a handbook's description of it; correct the handbook in the same pull request.
+5. A slice that needs a decision the owner has not accepted stops until the user decides. The decision tables in
+   documents 08 §1, 11 §4 and 12 §4 record which are accepted.
 
 ## Hard rules
 

@@ -24,7 +24,7 @@ shared screen components are described in [modules.md](modules.md); coding rules
 | Node.js | `engines: >=20`; CI and `web/Dockerfile.web` use Node 20 | **Node 20 reached end of life on 30 April 2026.** Node 24 is LTS until April 2028 (G72, N86) |
 | Web | Next.js 15.1.6, React 19.0.0 (`web/apps/web/package.json:16-18`) | **Inside the range of the December 2025 React Server Components advisory** (CVE-2025-55182 / CVE-2025-66478; fixed in Next.js 15.1.9 and React 19.0.1). 2026 security releases patch only Next.js 15.5 and 16 (G72, N86) |
 | API | Fastify 5.8.5, `@fastify/cookie` 11.0.2, `@fastify/rate-limit` 10.3.0 | Current |
-| Database access | Prisma 6.19.3 (`web/packages/db/package.json`) | Security fixes until 19 November 2026; Prisma 7 is current (D26) |
+| Database access | Prisma 6.19.3 (`web/packages/db/package.json`) | Security fixes until 19 November 2026; N86 moves to Prisma 7 before then (D26, accepted) |
 | Database | PostgreSQL 16 (`postgres:16-alpine`) | Supported; 18 is current |
 | Language | TypeScript 5.9.3 (web app 5.7.2) | Current |
 | Calculations | decimal.js 10.6.0 | Current |

@@ -8,10 +8,15 @@
 ## Active plan
 **Full-parity rebuild (52 tasks / 15 phases A–O)** — replicate the ENTIRE desktop (204 forms, 255 reports, full frontend+backend+DB) at 100% functional parity. The earlier 34-task plan delivered the verified backend CORE; this plan builds out the rest. Task graph = the session todo list (IDs 1–20 group the phases). Run continuously; checkpoint every task.
 
+## Latest planning update (2026-10-01, third) — owner decisions and the agent reading order
+- The owner accepted D23, D24, D26 and D27 as recommended and added **D28: nothing in Phase 2 starts, including its M0 decisions, until Phase 1 is complete and certified (N30)**. N86 now also lands Prisma 7 before 19 November 2026. Recorded in document 12 §4 and the ADR-0004 amendment; `validate_plan.py` enforces the Phase 2 gate.
+- Building agents follow "Which documents to follow" in `AGENTS.md`: the next slice from document 13 §3, its specification in document 02/06, 10, 11 or 12, status in the backlog. Older plans are history.
+- Still to approve: D15–D22 (document 11), needed before N50, N51 (version tokens), N52, N56, N58 and N72–N77; D01–D14 (document 08) as their waves begin. Next gap G84, slice N89, decision D29.
+
 ## Latest planning update (2026-10-01, second) — documentation hub, Phase 1 and Phase 2 plans
 - **Entry point is now `docs/README.md`** (hub). Desktop knowledge: `docs/handbook/desktop/`; web: `docs/handbook/web/` (architecture, module map, engineering standards, testing with the Chrome DevTools MCP visual protocol); every desktop menu: `docs/handbook/menu-catalog.md` (generated from `menu-catalog.jsonl`); every Markdown file classified in `docs/handbook/doc-register.md`. No historical file was moved. Agents: `AGENTS.md` and seven skills in `.kiro/skills/`.
 - **Lineage verified** (`docs/master-parity-plan-2026-09-29/12-lineage-verification-2026-10-01.md`, `lineage-register.json`): 228 earlier items — 32 closed, 176 carried, 14 new gaps (G69–G80), 4 superseded, 2 decisions (D23, D24). Gap numbers start at G69 because N53 (PR #29) took G68. G81 (client CSV export does not neutralise formulas, owned by N57) came from the independent review. New slices N83–N88; N87 (this documentation) implemented-unverified. Phase 1 plan: document 13; Phase 2 SaaS plan: document 14 with `phase2-backlog.json` (M0–M7, SP01–SP24). ADR-0004 records the two-phase boundary.
-- **Do next:** N86 (Next.js/React advisory range, Node 20 end of life) and the document 13 §3 first queue: N49 step 1, N53, N56, N51 milestone 1, N54 milestone 1, N40, N50 milestone 1 with its N88 route plugin, N48, N58, N83, N85. Owner decisions pending: D23, D24, D26, D27 and the Phase 2 M0 list (document 14 §15).
+- **Do next:** N86 (Next.js/React advisory range, Node 20 end of life) and the document 13 §3 first queue: N49 step 1, N53, N56, N51 milestone 1, N54 milestone 1, N40, N50 milestone 1 with its N88 route plugin, N48, N58, N83, N85. Owner decisions: see the third update above.
 - Checks: `python3 docs/tools/docs_check.py` and `validate_plan.py` both run in the blocking static-gates CI job. Acceptance unchanged (0/198, 0/83, 0/34).
 
 ## Latest planning update (2026-10-01) — full-stack audit converted into implementation slices

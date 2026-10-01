@@ -243,10 +243,10 @@
         {"id": "Req-17", "title": "GST and e-invoice", "disposition": "carried", "owners": ["X15", "X26", "N16"]},
         {"id": "Req-18", "title": "Membership and schemes", "disposition": "carried", "owners": ["X24", "P09-03"]},
         {"id": "Req-19", "title": "Reports and printable documents", "disposition": "carried", "owners": ["X25", "X26", "N74", "N75"]},
-        {"id": "Req-19.2", "title": "Partial invoice listing missing fields", "disposition": "decision", "owners": ["D23"]},
+        {"id": "Req-19.2", "title": "Partial invoice listing missing fields", "disposition": "carried", "owners": ["D23", "N74", "N75"], "note": "Decided 1 October 2026 (D23 accepted): never issue an incomplete legal document; refuse and list the missing fields."},
         {"id": "Req-20", "title": "WhatsApp, SMS, QR and tag printing", "disposition": "carried", "owners": ["X28", "N25", "N54"]},
         {"id": "Req-21", "title": "Behavioural parity verification", "disposition": "carried", "owners": ["X03", "X06", "X34", "N82"]},
-        {"id": "Req-21.1", "title": "Block a transaction when a parity check differs", "disposition": "decision", "owners": ["D24"]},
+        {"id": "Req-21.1", "title": "Block a transaction when a parity check differs", "disposition": "carried", "owners": ["D24", "N82"], "note": "Decided 1 October 2026 (D24 accepted): parity is enforced by tests and release gates, not by blocking live transactions."},
         {"id": "Req-22", "title": "Phased and incremental delivery", "disposition": "carried", "owners": ["X31", "X33", "N80", "N82", "D25"]},
         {"id": "Traceability", "title": "No requirement-to-plan mapping existed", "disposition": "new-gap", "owners": ["G73", "N87"]}
       ]

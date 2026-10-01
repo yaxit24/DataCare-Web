@@ -1,6 +1,6 @@
 ---
 name: datacare-implement-slice
-description: Implement one DataCare plan slice (N.. or SP..), gap (G..) or desktop menu end to end — desktop authority, tests first, implementation, verification, plan record and pull request. Use when asked to implement, continue or fix a slice, gap or menu in the DataCare-Web repository.
+description: Implement one DataCare plan slice (N.., or SP.. once Phase 1 is certified), gap (G..) or desktop menu end to end — desktop authority, tests first, implementation, verification, plan record and pull request. Use when asked to implement, continue or fix a slice, gap or menu in the DataCare-Web repository.
 ---
 
 # Implement a DataCare slice
@@ -19,10 +19,12 @@ when the desktop authority and the plan disagree.
 
 ## 1. Find the work
 
-1. The slice in `docs/master-parity-plan-2026-09-29/execution-backlog.json` (`newSlices`) or `phase2-backlog.json`:
-   status, `startAfter`, `gapIds`, `parentLabels`.
-2. Its specification: documents 10 (N31–N46), 11 (N47–N82, §6) or 12 (N83–N88) in
-   `docs/master-parity-plan-2026-09-29/`, and its gap rows.
+1. The slice in `docs/master-parity-plan-2026-09-29/execution-backlog.json` (`newSlices`): status, `startAfter`,
+   `gapIds`, `parentLabels`. Phase 2 slices (`phase2-backlog.json`) are not started until Phase 1 is certified (D28):
+   if the target is an SP slice, stop and tell the user.
+2. Its specification in `docs/master-parity-plan-2026-09-29/`: document 02 §4 with document 06 (N01–N30), 10
+   (N31–N46), 11 §6 (N47–N82) or 12 §5 (N83–N88); its gap rows; and the decisions it cites. If a decision it needs
+   is not marked accepted in document 08 §1, 11 §4 or 12 §4, stop and ask the user.
 3. The parent cards in `priorCards` (`existingFiles`, `currentRemainingGap`, `verificationCases`).
 4. The menus it touches: search `docs/handbook/menu-catalog.jsonl` for the slice ID; read those rows.
 5. If a `startAfter` slice is not done, say so and propose the order before continuing.
@@ -80,7 +82,7 @@ or ask; never point tests at a database that holds real data.
 ## 6. Record
 
 1. `datacare-plan-update` skill: slice status (`in-progress` or `implemented-unverified` only), `statusAsOf`,
-   `evidence` paths that exist, `statusNote`; document 11 §2 row; any new defect as a gap continuing at G82.
+   `evidence` paths that exist, `statusNote`; document 11 §2 row; any new defect as a gap continuing at G84.
 2. `datacare-docs-update` skill: update the menu-catalog rows whose web state changed and regenerate.
 
 ## 7. Commit and open the pull request

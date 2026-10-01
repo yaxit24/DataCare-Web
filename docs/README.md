@@ -10,7 +10,7 @@ documentation; every other document is reachable from here.
 | Phase | Outcome | Plan |
 |---|---|---|
 | **Phase 1 — the desktop, in the web** | Every in-scope desktop menu, workflow, form, print and business rule works in the browser, with the same database write sets, calculations and report data as the desktop. Layout parity is semantic (same regions, fields, order, keyboard flow), not pixel-exact. Desktop weaknesses are not ported. | [Phase 1 delivery plan](master-parity-plan-2026-09-29/13-phase1-delivery-plan.md) |
-| **Phase 2 — the SaaS product** | The certified web application becomes a product sold online to many jewellery businesses: super-admin console, tenant onboarding, plans and billing, managed operations, compliance and measured scaling. SaaS workflow changes ship behind per-tenant flags and never change business results. | [Phase 2 SaaS plan](master-parity-plan-2026-09-29/14-phase2-saas-plan.md) |
+| **Phase 2 — the SaaS product** | The certified web application becomes a product sold online to many jewellery businesses: super-admin console, tenant onboarding, plans and billing, managed operations, compliance and measured scaling. SaaS workflow changes ship behind per-tenant flags and never change business results. Starts only after Phase 1 is complete and certified (decision D28). | [Phase 2 SaaS plan](master-parity-plan-2026-09-29/14-phase2-saas-plan.md) |
 
 The boundary is recorded in [ADR-0004](../project-memory/decisions/ADR-0004-two-phase-delivery.md).
 
@@ -52,9 +52,9 @@ The boundary is recorded in [ADR-0004](../project-memory/decisions/ADR-0004-two-
   desktop menu joining the desktop form, behaviour, look, tables, web routes, capabilities, gaps and plan owners.
 - [Master plan](master-parity-plan-2026-09-29/README.md): assessment (01), execution waves (02), shared contracts
   (03), verification playbook and journeys J01–J28 (04), desktop reference (05), module detail (06), reconciliation
-  of earlier plans (07), decisions D01–D14 and delivery (08), surface register (09), gap registers G01–G81 (10, 11,
+  of earlier plans (07), decisions D01–D14 and delivery (08), surface register (09), gap registers G01–G83 (10, 11,
   12), the Phase 1 plan (13) and the Phase 2 plan (14).
-- Decisions: [ADRs](../project-memory/decisions/) 0001–0004 and plan decisions D01–D27 (documents 08, 11 and 12).
+- Decisions: [ADRs](../project-memory/decisions/) 0001–0004 and plan decisions D01–D28 (documents 08, 11 and 12).
 - Continuity: [`project-memory/HANDOFF.md`](../project-memory/HANDOFF.md), `project-memory/JOURNAL.md` and
   `project-memory/state.json`.
 - Agents: [`AGENTS.md`](../AGENTS.md), `.kiro/skills/` and `.kiro/steering/`.
@@ -84,7 +84,8 @@ closed, owned by a current plan identifier, or recorded as one of the new gaps G
 | What is the status of a piece of work? | `execution-backlog.json` and `phase2-backlog.json`, never prose |
 | Is anything accepted? | Only what [document 04](master-parity-plan-2026-09-29/04-verification-playbook.md) acceptance and the release certifier record |
 | Which document is current? | The [document register](handbook/doc-register.md) |
-| Where is a gap or decision defined? | Gaps G01–G19 in document 10, G20–G68 in 11, G69–G81 in 12; decisions D01–D14 in 08, D15–D22 in 11, D23–D27 in 12 |
+| Which plan does an agent build from? | This plan folder (documents 01–14 and its backlogs) with the handbooks, as set out in "Which documents to follow" in [`AGENTS.md`](../AGENTS.md#which-documents-to-follow); older plans are history |
+| Where is a gap or decision defined? | Gaps G01–G19 in document 10, G20–G68 in 11, G69–G83 in 12; decisions D01–D14 in 08, D15–D22 in 11, D23–D28 in 12 |
 
 ## Rules for documentation
 
