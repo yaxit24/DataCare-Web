@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { request as requestFactory } from 'playwright';
+import { expectRows } from './journeySql.mjs';
 
 const png = readFileSync(
   new URL('../../api/test/fixtures/order-design-portrait.png', import.meta.url),
@@ -70,8 +71,13 @@ export async function seedRepairImageConflict(sql) {
       nwt,
       issued,
     );
-  await sql(
-    `UPDATE "REP_DETL" SET "ISU_NO"='00021',"ISU_SRNO"=CASE WHEN "SR_NO"=17 THEN 42 ELSE 66 END,"ISU_LC"='01',"ISU_YRCD"='2024-2025',"ISU_DBCD"='R51',"ISU_AC_CODE"='R5KAR',"ISU_AC_NAME"='Repair image karigar',"ISU_HD_VCH_NO"='00081' WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01' AND "CO_YEAR"='2023-2024' AND "CO_BOOK"='R52' AND "VCH_NO"='00011' AND "SR_NO" IN (17,23)`,
+  // Both historical repair lines (SR_NO 17 and 23) must exist before they are re-pointed at the issue.
+  await expectRows(
+    2,
+    sql(
+      `UPDATE "REP_DETL" SET "ISU_NO"='00021',"ISU_SRNO"=CASE WHEN "SR_NO"=17 THEN 42 ELSE 66 END,"ISU_LC"='01',"ISU_YRCD"='2024-2025',"ISU_DBCD"='R51',"ISU_AC_CODE"='R5KAR',"ISU_AC_NAME"='Repair image karigar',"ISU_HD_VCH_NO"='00081' WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01' AND "CO_YEAR"='2023-2024' AND "CO_BOOK"='R52' AND "VCH_NO"='00011' AND "SR_NO" IN (17,23)`,
+    ),
+    'historical repair lines 17 and 23',
   );
   for (const [issueSr, sourceSr, name, gwt, nwt] of [
     [42, 17, 'Historical repair ring', 5.125, 4.125],

@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { request as requestFactory } from 'playwright';
+import { expectRows } from './journeySql.mjs';
 
 const scope = { coCode: '01', lcCode: '01', coYear: '2024-2025', coBook: 'R91' };
 const voucherNo = '00001';
@@ -48,13 +49,21 @@ export async function cleanupSalesReturnReplay(sql) {
 /** Run after the fourteen earlier journeys. Explicit company settings are part of this synthetic preview fixture. */
 export async function seedSalesReturnReplay(sql) {
   await cleanupSalesReturnReplay(sql);
-  await sql(
-    `UPDATE "CO_SET" SET "SL_AMT_TYPE"='N',"LBR_ROF"=2,"LBR_RATE_GEN"='N',"ALL_ROF_REMOVE"='N',"LBR_TYPE"='N',"EMP_CODE_MANDATORY"='N',"LOCK_DATE"=NULL WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+  await expectRows(
+    1,
+    sql(
+      `UPDATE "CO_SET" SET "SL_AMT_TYPE"='N',"LBR_ROF"=2,"LBR_RATE_GEN"='N',"ALL_ROF_REMOVE"='N',"LBR_TYPE"='N',"EMP_CODE_MANDATORY"='N',"LOCK_DATE"=NULL WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+    ),
+    'company 01 CO_SET row',
   );
-  await sql(
-    `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","LBR_WITH_GHT") SELECT $1,'01','N' WHERE NOT EXISTS(SELECT 1 FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"='01')`,
+  await expectRows(
+    1,
+    sql(
+      `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","LBR_WITH_GHT") VALUES($1,'01','N')
+       ON CONFLICT (tenant_id,"CO_CODE") DO UPDATE SET "LBR_WITH_GHT"=EXCLUDED."LBR_WITH_GHT"`,
+    ),
+    'company 01 CO_SET_NEW row',
   );
-  await sql(`UPDATE "CO_SET_NEW" SET "LBR_WITH_GHT"='N' WHERE tenant_id=$1 AND "CO_CODE"='01'`);
   await sql(
     `INSERT INTO "COL_MAST"(tenant_id,"CO_CODE","BOOK_NAME","COL_NAME","COL_NEW_NAME","YES_NO") VALUES($1,'01','SALES RETURNE','Rate','Preview rate','Y')`,
   );

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { expectRows } from './journeySql.mjs';
 
 /**
  * D6 real-browser journey (PARITY-EVALUATION-2026-09-28). A company with a blank CO_SET.SL_AMT_TYPE,
@@ -19,7 +20,11 @@ const BOOK = 'SLB';
 export async function seedSaleAmountBasis(sql) {
   await cleanupSaleAmountBasis(sql);
   // The harness CO_SET row has no SL_AMT_TYPE: the D6 condition.
-  await sql(`UPDATE "CO_SET" SET "SL_AMT_TYPE"=NULL WHERE tenant_id=$1 AND "CO_CODE"='01'`);
+  await expectRows(
+    1,
+    sql(`UPDATE "CO_SET" SET "SL_AMT_TYPE"=NULL WHERE tenant_id=$1 AND "CO_CODE"='01'`),
+    'company 01 CO_SET row',
+  );
   await sql(`INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","BOOK_TBL_DETL")
     VALUES($1,'01','01','${BOOK}','Browser Sales','SLB','SALES','O','Y','SL_DATA','SL_DETL')`);
   for (const [srNo, account] of [

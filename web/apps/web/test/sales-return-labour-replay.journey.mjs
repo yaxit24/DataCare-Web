@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
+import { expectRows } from './journeySql.mjs';
 
 const fixtureBytes = readFileSync(
   new URL('../../api/test/fixtures/saleReturnLabourReplay.independent.json', import.meta.url),
@@ -109,20 +110,23 @@ export async function cleanupSalesReturnLabourReplay(sql) {
 /** Runs after all existing journeys, using the runner's disposable tenant and owner only. */
 export async function seedSalesReturnLabourReplay(sql) {
   await cleanupSalesReturnLabourReplay(sql);
-  await sql(
-    'UPDATE "CO_SET" SET "SL_AMT_TYPE"=$2,"LBR_ROF"=2,"LBR_RATE_GEN"=$2,"ALL_ROF_REMOVE"=$2,"LBR_TYPE"=$2,"TAX_ROF"=2,"EMP_CODE_MANDATORY"=$2,"LOCK_DATE"=NULL WHERE tenant_id=$1 AND "CO_CODE"=$3',
-    'N',
-    '01',
+  await expectRows(
+    1,
+    sql(
+      'UPDATE "CO_SET" SET "SL_AMT_TYPE"=$2,"LBR_ROF"=2,"LBR_RATE_GEN"=$2,"ALL_ROF_REMOVE"=$2,"LBR_TYPE"=$2,"TAX_ROF"=2,"EMP_CODE_MANDATORY"=$2,"LOCK_DATE"=NULL WHERE tenant_id=$1 AND "CO_CODE"=$3',
+      'N',
+      '01',
+    ),
+    'company 01 CO_SET row',
   );
-  await sql(
-    'INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","LBR_WITH_GHT") SELECT $1,$2,$3 WHERE NOT EXISTS(SELECT 1 FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"=$2)',
-    '01',
-    'N',
-  );
-  await sql(
-    'UPDATE "CO_SET_NEW" SET "LBR_WITH_GHT"=$2 WHERE tenant_id=$1 AND "CO_CODE"=$3',
-    'N',
-    '01',
+  await expectRows(
+    1,
+    sql(
+      'INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","LBR_WITH_GHT") VALUES($1,$2,$3) ON CONFLICT (tenant_id,"CO_CODE") DO UPDATE SET "LBR_WITH_GHT"=EXCLUDED."LBR_WITH_GHT"',
+      '01',
+      'N',
+    ),
+    'company 01 CO_SET_NEW row',
   );
   // The existing GOLD fixture is reused only after the old journeys finish. Pin all observed
   // fields needed by this independent saved projection, with no duplicate current master.
@@ -608,10 +612,14 @@ export async function exerciseSalesReturnLabourReplay(
       before,
       'all successful and refused previews leave complete business/session/config/master rows unchanged',
     );
-    await sql(
-      'UPDATE "LBR_MAST" SET "LBR_VAL"="LBR_VAL" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LBR_CODE"=$3',
-      '01',
-      'BB',
+    await expectRows(
+      1,
+      sql(
+        'UPDATE "LBR_MAST" SET "LBR_VAL"="LBR_VAL" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LBR_CODE"=$3',
+        '01',
+        'BB',
+      ),
+      'labour master BB',
     );
     const afterMasterChange = await snap();
     const oldPrefix = structuredClone(current);
