@@ -925,12 +925,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     pay: b.pay,
     receivedPay: b.receivedPay,
     accounts: b.accounts,
-    // These are declared on RateCutInput and written by the desktop on every real voucher, but were
-    // not forwarded here, so the API silently discarded them. Measured over the 15 real Live24
-    // wholesale vouchers (book 034, the same RATE_CUT_DATA family): HD_VCH_NO 15/15, EMP_CODE 15/15,
-    // CONV_PRC 15/15, plus the DR_AMT/CR_AMT/DR_FINE/CR_FINE settlement legs.
+    // These desktop header fields are operator inputs. HD_VCH_NO is deliberately absent: the writer
+    // allocates it server-side from TEMP_BOOK_DATA and preserves it on edit.
     billNo: b.billNo,
-    hdVchNo: b.hdVchNo,
     empCode: b.empCode,
     vchDesc: b.vchDesc,
     convRate: b.convRate,

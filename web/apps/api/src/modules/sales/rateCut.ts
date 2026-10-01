@@ -13,8 +13,13 @@ import { settleMoneyMetal, type SettlementResult } from './settlement.js';
 import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
 import { buildRateCutRojmel, rojmelMetalFor } from '../shared/rojmel.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
-import { voucherTimestamp } from '../vouchers/lifecycle.js';
-import { postVoucherTx, reverseVoucherTx, type LedgerLine } from '../posting/posting.js';
+import { nextHiddenVoucherNoTx, voucherTimestamp } from '../vouchers/lifecycle.js';
+import {
+  insertRowTx,
+  postVoucherTx,
+  reverseVoucherTx,
+  type LedgerLine,
+} from '../posting/posting.js';
 import { issueTagTx, restoreTagTx, type ResolvedTagIdentity, type TagKey } from '../stock/stock.js';
 
 /**
@@ -1940,14 +1945,33 @@ async function writeRateCut(
      */
     let persistedClock: string | undefined;
     let persistedUser: string | undefined;
+    let hiddenVoucherNo = '';
     if (options.vchNo != null) {
       const prior = await persistedHeaderTx(tx, tenantId, key);
       persistedClock = prior?.VCH_CLOCK ? String(prior.VCH_CLOCK) : undefined;
       persistedUser = String(prior?.MAIN_USER ?? '').trim() || undefined;
+      hiddenVoucherNo = String(prior?.HD_VCH_NO ?? '').trim();
       const restores = await releaseRateCutTagsTx(tx, tenantId, key);
       await applyBookingDrawDownTx(tx, tenantId, key, -1);
       await reverseVoucherTx(tx, tenantId, { tables: RATE_CUT_WRITE_TABLES, key });
+      if (hiddenVoucherNo) {
+        await tx.$executeRawUnsafe(
+          `DELETE FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+            AND "CO_BOOK"=$4 AND "VCH_NO"=$5`,
+          tenantId,
+          key.CO_CODE,
+          key.LC_CODE,
+          key.CO_BOOK,
+          hiddenVoucherNo,
+        );
+      }
       for (const tag of restores) await restoreTagTx(tx, tenantId, tag);
+    }
+    if (!hiddenVoucherNo) {
+      const requested = String(input.hdVchNo ?? '').trim();
+      hiddenVoucherNo = requested
+        ? formatVoucherNo(requested)
+        : await nextHiddenVoucherNoTx(tx, { ...input.scope, coBook: key.CO_BOOK });
     }
     const accounts = await resolveBookAccounts(
       tx,
@@ -1965,6 +1989,7 @@ async function writeRateCut(
     const party = await readPartyTx(tx, tenantId, key.CO_CODE, key.LC_CODE, customer);
     const voucherInput: RateCutInput = {
       ...input,
+      hdVchNo: hiddenVoucherNo,
       acName: hasValue(input.acName) ? input.acName : (party?.name ?? input.acName),
       mobile: hasValue(input.mobile) ? input.mobile : (party?.mobile ?? input.mobile),
     };
@@ -2114,7 +2139,7 @@ async function writeRateCut(
       bookName: classification.bookName,
       coBook: key.CO_BOOK,
       billNo: txt(input.billNo, 30) ?? undefined,
-      hdVchNo: txt(input.hdVchNo, 10) ?? undefined,
+      hdVchNo: hiddenVoucherNo,
     });
     const gold = itType === 'G';
     // The Rojmel (day book), from the header's settlement figures. `buildRateCutRojmel` documents its inputs as
@@ -2165,6 +2190,13 @@ async function writeRateCut(
     const stockRows = movesStock
       ? buildStockRows(rowCtx, issuedRows, receivedRows, settings.oldGoldType)
       : [];
+    await insertRowTx(tx, 'TEMP_BOOK_DATA', tenantId, {
+      CO_CODE: key.CO_CODE,
+      LC_CODE: key.LC_CODE,
+      CO_BOOK: key.CO_BOOK,
+      VCH_NO: hiddenVoucherNo,
+      BOOK_NAME: classification.displayName || classification.bookName,
+    });
     await postVoucherTx(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: ledger },
       bookName: classification.bookName,
@@ -2215,7 +2247,8 @@ async function writeRateCut(
 
 /**
  * Every table the TR_WH_SALE delete clears (TR_WH_SALE.cs:13575-13588) that this family writes or may carry.
- * `TEMP_BOOK_DATA` is not here: this module never writes it, and it has no `CO_YEAR` for the shared key.
+ * `TEMP_BOOK_DATA` is not in this array because it has no `CO_YEAR`; create/edit/delete manage its
+ * hidden-voucher identity separately by company, location, book and HD_VCH_NO.
  */
 const RATE_CUT_WRITE_TABLES = [
   'RATE_CUT_DATA',
@@ -2834,8 +2867,8 @@ async function reverseRateCut(
         .slice(0, length);
     await reverseVoucherTx(tx, tenantId, {
       /**
-       * `TEMP_BOOK_DATA` is deliberately absent: `reverseVoucherTx` keys every table with `CO_YEAR`, which that
-       * table does not have (`42703`), and this module never writes it. See `RATE_CUT_WRITE_TABLES`.
+       * `TEMP_BOOK_DATA` is deliberately absent from reverseVoucherTx: it has no CO_YEAR, so it is
+       * removed separately below by the header's HD_VCH_NO.
        */
       tables: RATE_CUT_WRITE_TABLES,
       key,
@@ -2870,6 +2903,18 @@ async function reverseRateCut(
         },
       },
     });
+    const hiddenVoucherNo = String(header?.HD_VCH_NO ?? '').trim();
+    if (hiddenVoucherNo) {
+      await tx.$executeRawUnsafe(
+        `DELETE FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+          AND "CO_BOOK"=$4 AND "VCH_NO"=$5`,
+        tenantId,
+        key.CO_CODE,
+        key.LC_CODE,
+        key.CO_BOOK,
+        hiddenVoucherNo,
+      );
+    }
     for (const tag of restores) await restoreTagTx(tx, tenantId, tag);
     return { reversed: true };
   });
