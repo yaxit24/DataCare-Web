@@ -189,6 +189,41 @@ async function mfgBookPolicyTx(tx: any, scope: CompleteMfgScope): Promise<MfgBoo
   return { bookName, vchType, auditShape };
 }
 
+/**
+ * Route-level configured-book authority for a concrete MFG workflow. Generic MFG writers serve many
+ * desktop forms, so they cannot infer whether a caller meant JDTR ISU, JDTR REC, GHAT, DESIGN, etc.
+ * Adapters call this before any mutation/read, preventing a valid but wrong MFG book from crossing families.
+ */
+export async function requireMfgMainBook(
+  prisma: any,
+  scopeInput: VoucherScope,
+  expectedMainBook: string,
+): Promise<void> {
+  const scope = completeScope(scopeInput);
+  await withTenant(prisma, scope.tenantId, async (tx: any) => {
+    const rows: Array<{ MAIN_BOOK: unknown; BOOK_TBL_NAME: unknown }> = await tx.$queryRawUnsafe(
+      `SELECT "MAIN_BOOK","BOOK_TBL_NAME" FROM "BOOK_DATA"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
+        ORDER BY row_id LIMIT 2`,
+      scope.tenantId,
+      scope.coCode,
+      scope.lcCode,
+      scope.coBook,
+    );
+    const mainBook = String(rows[0]?.MAIN_BOOK ?? '')
+      .trim()
+      .toUpperCase();
+    const table = String(rows[0]?.BOOK_TBL_NAME ?? '')
+      .trim()
+      .toUpperCase();
+    if (rows.length !== 1 || mainBook !== expectedMainBook.toUpperCase() || table !== 'MFG_DATA') {
+      throw new MfgValidationError(
+        `book ${scope.coBook} is ${mainBook || 'unclassified'}, expected ${expectedMainBook}`,
+      );
+    }
+  });
+}
+
 async function tempBookRowTx(
   tx: any,
   scope: CompleteMfgScope,
@@ -1231,7 +1266,7 @@ export async function getMfg(prisma: any, scopeInput: VoucherScope, vchNoInput: 
       empCode: h.EMP_CODE,
       billNo: h.BILL_NO,
       vchDesc: h.VCH_DESC,
-      mode: String(h.INOUT_TYPE ?? '').toUpperCase() === 'R' ? 'receive' : 'issue',
+      mode: ['I', 'R'].includes(String(h.INOUT_TYPE ?? '').toUpperCase()) ? 'receive' : 'issue',
       labourAmt: Number(h.LBR_AMT ?? 0),
       lines,
     };
