@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
-import { post, ApiError } from '../../../../lib/api';
+import { get, post, put, del, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
+import { VoucherList } from '../../../../components/VoucherList';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import { fineFor, labourCharge } from '@datacare/core';
@@ -178,6 +179,7 @@ const extendedLineFields: Array<[keyof Line, string]> = [
   ['hallmarkId4Wt', 'HmId4Wt'],
 ];
 
+const str = (v: unknown) => (v == null || Number(v) === 0 ? '' : String(v));
 const blank = (): Line => ({
   itCode: 'GOLD',
   tagNo: '',
@@ -257,6 +259,10 @@ export default function HallmarkSalePage() {
   const [oldGoldNet, setOldGoldNet] = useState('');
   const [oldGoldTouch, setOldGoldTouch] = useState('');
   const [oldGoldRate, setOldGoldRate] = useState('');
+  // Reopen/edit/delete lifecycle (G10): a hallmark sale is a SL_DATA sale, so it uses the shared
+  // /sales/:vchNo read, update and delete routes just like the ordinary sales screen.
+  const [voucherLookup, setVoucherLookup] = useState('');
+  const [loadedVchNo, setLoadedVchNo] = useState('');
   const [lines, setLines] = useState<Line[]>([blank()]);
   const [fullGrid, setFullGrid] = useState(false);
   // Desktop grids are keyboard-driven: arrows move between cells, Enter advances and
@@ -309,6 +315,97 @@ export default function HallmarkSalePage() {
   const oldGoldVal = r2(((n(oldGoldNet) * n(oldGoldTouch)) / 100) * n(oldGoldRate));
   const paid = r2(n(cashAmt) + n(cardAmt) + n(upiAmt) + n(chequeAmt) + oldGoldVal);
   const balanceDue = r2(grandTotalPrev - paid);
+
+  function resetForm() {
+    setLoadedVchNo('');
+    setVoucherLookup('');
+    setResult(null);
+    setErr('');
+    setAcCode('WALKIN');
+    setAcName('');
+    setDiscountAmount('');
+    setHmCharge('');
+    setCashAmt('');
+    setCardAmt('');
+    setUpiAmt('');
+    setChequeAmt('');
+    setOldGoldNet('');
+    setOldGoldTouch('');
+    setOldGoldRate('');
+    setLines([blank()]);
+  }
+
+  async function loadSale(vchOverride?: string) {
+    if (!coBook) {
+      setErr('select the hallmark sale book first');
+      return;
+    }
+    const lookup = (vchOverride ?? voucherLookup).trim();
+    if (!lookup) return;
+    setBusy(true);
+    setErr('');
+    try {
+      const view = await get<any>(
+        `/sales/${encodeURIComponent(lookup)}?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}`,
+      );
+      setLoadedVchNo(String(view.voucherNo));
+      setVoucherLookup(String(view.voucherNo));
+      setResult(null);
+      setAcCode(String(view.acCode ?? ''));
+      setAcName(String(view.acName ?? ''));
+      setTaxRatePct(str(view.taxRatePct) || '0');
+      setDiscountAmount(str(view.discountAmount));
+      setInterState(!!view.interState);
+      setHmCharge(str(view.hallmarkAmount));
+      setCashAmt(str(view.cashAmt));
+      setCardAmt(str(view.cardAmt));
+      setUpiAmt(str(view.upiAmt));
+      setChequeAmt(str(view.chequeAmt));
+      const og = (view.oldGold ?? [])[0];
+      setOldGoldNet(str(og?.netWt));
+      setOldGoldTouch(str(og?.touch));
+      setOldGoldRate(str(og?.rate));
+      const loaded: Line[] = (view.lines ?? []).map((line: any) => ({
+        ...blank(),
+        itCode: String(line.itCode ?? ''),
+        tagNo: String(line.tagNo ?? ''),
+        huid: String(line.huid ?? ''),
+        pcs: str(line.pcs) || '1',
+        grossWt: str(line.grossWt),
+        netWt: str(line.netWt),
+        touch: str(line.touch),
+        rate: str(line.rate),
+        making: line.labourType === 'per_gram' ? str(line.labourRate) : '',
+        ghtWt: str(line.ghtWt),
+        westPct: str(line.westPct),
+        designNo: String(line.designNo ?? ''),
+        mrp: str(line.mrp),
+      }));
+      setLines(loaded.length ? loaded : [blank()]);
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'load failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function removeLoadedSale() {
+    if (!loadedVchNo || !window.confirm(`Delete hallmark sale ${loadedVchNo}?`)) return;
+    setBusy(true);
+    setErr('');
+    try {
+      await del(
+        `/sales/${encodeURIComponent(loadedVchNo)}?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}`,
+      );
+      resetForm();
+    } catch (e) {
+      setErr(
+        e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'delete failed',
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -368,7 +465,15 @@ export default function HallmarkSalePage() {
             ),
           })),
       };
-      setResult(await post('/sales', body));
+      if (loadedVchNo) {
+        const updated = await put<any>(`/sales/${encodeURIComponent(loadedVchNo)}`, body);
+        setLoadedVchNo(String(updated.vchNo));
+        setResult(updated);
+      } else {
+        const created = await post<any>('/sales', body);
+        setLoadedVchNo(String(created.vchNo));
+        setResult(created);
+      }
     } catch (e) {
       setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
     } finally {
@@ -387,6 +492,35 @@ export default function HallmarkSalePage() {
             <div className="field">
               <label>Book</label>
               <BookSelect value={coBook} onChange={setCoBook} preferred="HM" />
+            </div>
+            <div className="field">
+              <label>Voucher</label>
+              <div style={{ display: 'flex', gap: 4 }}>
+                <input
+                  aria-label="Hallmark sale voucher"
+                  value={voucherLookup}
+                  onChange={(e) => setVoucherLookup(e.target.value)}
+                  placeholder="00001"
+                  style={{ width: 90 }}
+                />
+                <button type="button" className="ghost" disabled={busy} onClick={() => loadSale()}>
+                  Load
+                </button>
+                <button type="button" className="ghost" disabled={busy} onClick={resetForm}>
+                  New
+                </button>
+                {loadedVchNo && (
+                  <button
+                    type="button"
+                    className="danger"
+                    disabled={busy}
+                    onClick={removeLoadedSale}
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
+              {loadedVchNo && <span className="muted">Editing #{loadedVchNo}</span>}
             </div>
             <div className="field">
               <label>Year</label>
@@ -632,7 +766,7 @@ export default function HallmarkSalePage() {
               · <b>Total ₹{grandTotalPrev.toLocaleString('en-IN')}</b>
             </span>
             <button className="primary" disabled={busy}>
-              {busy ? 'Saving…' : 'Save Hallmark Sale'}
+              {busy ? 'Saving…' : loadedVchNo ? 'Update Hallmark Sale' : 'Save Hallmark Sale'}
             </button>
           </div>
         </div>
@@ -665,6 +799,21 @@ export default function HallmarkSalePage() {
             ))}
           </div>
         </div>
+      )}
+      {coBook && (
+        <VoucherList
+          table="SL_DATA"
+          book={coBook}
+          deleteBase="/sales"
+          printHref={(v) =>
+            `/api/sales/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(v)}&format=html&copy=O`
+          }
+          onLoad={(v) => {
+            setVoucherLookup(v);
+            void loadSale(v);
+          }}
+          reloadKey={result?.vchNo}
+        />
       )}
     </div>
   );
