@@ -201,6 +201,14 @@ d('report date filtering', () => {
 
   it('applies the window to the sales-analysis family', async () => {
     await withTenant(prisma, tenantId, async (tx: any) => {
+      // The sales-analysis summaries classify by MAIN_BOOK='SALES', so the SL book must be a SALES book.
+      await tx.$executeRawUnsafe(
+        `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","MAIN_BOOK","BOOK_TBL_NAME")
+         VALUES ($1,$2,$3,'SL','Sales','SALES','SL_DATA')`,
+        tenantId,
+        CO,
+        LC,
+      );
       const sale = (vch: string, date: string, tot: number) =>
         tx.$executeRawUnsafe(
           `INSERT INTO "SL_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","AC_CODE",
