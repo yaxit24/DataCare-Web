@@ -4140,11 +4140,11 @@
     {
       "id": "N86",
       "status": "planned",
-      "action": "Supported runtime: patched Next.js 15.5 and React, Node 24 LTS in CI and images, advisory gate, Next 16 and Prisma 7 decision",
+      "action": "Supported runtime: patched Next.js 15.5 and React, Node 24 LTS in CI and images, advisory gate, Prisma 7 before 19 November 2026 and a Next.js 16 rehearsal (D26)",
       "parentLabels": "P00-04, P12-05, X31/X34",
       "startAfter": [],
       "entryDefinition": "02-execution-plan.md section 4",
-      "requiredProof": "No installed package inside a known critical or high advisory; CI and images on Node 24; D26 outcome recorded",
+      "requiredProof": "No installed package inside a known critical or high advisory; CI and images on Node 24; Prisma 7 in use (or a dated risk acceptance) before 19 November 2026; Next.js 16 rehearsal recorded",
       "gapIds": "G72",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
@@ -4173,7 +4173,7 @@
         "docs/master-parity-plan-2026-09-29/lineage-register.json",
         "docs/master-parity-plan-2026-09-29/12-lineage-verification-2026-10-01.md"
       ],
-      "statusNote": "Hub, Desktop and Web handbooks, the 198-row menu catalog (validated against MDI_FORM dispatch, page files, the 608 declared routes and plan identifiers), the document register classifying every Markdown file, the lineage register (228 items) and the Phase 1 and Phase 2 plans landed together; docs_check.py runs in the static-gates CI job. Independent catalog review and D23/D24 approval remain."
+      "statusNote": "Hub, Desktop and Web handbooks, the 198-row menu catalog (validated against MDI_FORM dispatch, page files, the 608 declared routes and plan identifiers), the document register classifying every Markdown file, the lineage register (228 items) and the Phase 1 and Phase 2 plans landed together; docs_check.py runs in the static-gates CI job. D23 and D24 were approved by the owner on 1 October 2026; the independent catalog review remains."
     },
     {
       "id": "N88",
@@ -4218,6 +4218,12 @@
       "mainBaseline": "4beba05",
       "evidence": "lineage-register.json",
       "meaning": "Lineage verification of every earlier plan, gap list, audit and requirement (228 items: 32 closed, 176 carried, 14 new gaps, 4 superseded, 2 decisions). Adds gaps G69-G81 (G81 from the independent review), decisions D23-D27 and slices N83-N88 (N87 implemented-unverified); Phase 2 gaps G75-G78 and G80 are owned by phase2-backlog.json. Corrects the stale X15 and X18 findings. No acceptance is closed."
+    },
+    {
+      "date": "2026-10-01",
+      "document": "12-lineage-verification-2026-10-01.md §4",
+      "mainBaseline": "93986ef",
+      "meaning": "Owner decisions: D23, D24, D26 and D27 accepted as recommended; D28 added: nothing in Phase 2, including its M0 decisions, starts until Phase 1 is complete and certified (N30), enforced by SP dependencies and validate_plan.py. N86 now lands Prisma 7 before 19 November 2026. Requirements 19.2 and 21.1 move from decision to carried in lineage-register.json. Builds on PR #33 (G82, G83). No acceptance is closed."
     }
   ],
   "releaseGates": [

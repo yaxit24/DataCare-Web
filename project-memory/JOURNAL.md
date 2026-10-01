@@ -4,6 +4,13 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-01 — Owner decisions D23–D28 recorded; agent reading order
+- **Asked:** accept the recommended positions for D23, D24, D26 and D27; defer all of Phase 2 until Phase 1 is complete and its validation passes; say which plans a building agent should follow.
+- **Did:** recorded the four decisions as accepted (document 12 §4) and added D28 (Phase 2, including M0, waits for Phase 1 certification, N30) with an ADR-0004 amendment; gated every Phase 2 slice on SP01 and SP01 on N30, and added the check to `validate_plan.py`; moved Prisma 7 into N86 (D26); moved requirements 19.2 and 21.1 from decision to carried; added "Which documents to follow" to `AGENTS.md`, the steering file, the hub and the implement-slice skill; fixed the next-gap pointers to G84 after PR #33 took G82 and G83.
+- **Open:** D15–D22 (document 11) and D01–D14 (document 08) still need the owner.
+
+---
+
 ## 2026-10-01 — Documentation hub, lineage verification, Phase 1 and Phase 2 plans, agent skills
 - **Asked:** verify that the 1 October plan carries every earlier plan, gap list and audit; centralise the documentation (desktop part, web part); plan Phase 1 (desktop parity, with unit/E2E/visual testing and agent skills) and Phase 2 (SaaS product) in detail.
 - **Did:** eight read-only research tracks (two lineage, desktop, web, three for the 198 menus, SaaS). Wrote the hub `docs/README.md`, Desktop handbook (`docs/handbook/desktop/`: overview, operation, navigation, business rules, 13-tab module guide), Web handbook (`docs/handbook/web/`: architecture, module map, engineering standards, testing incl. the Chrome DevTools MCP protocol and J01–J28 coverage), the 198-row menu catalog (JSONL source, generated Markdown), the document register (995 Markdown files classified by 64 rules), `docs/tools/docs_check.py`, documents 12–14, `lineage-register.json`, `phase2-backlog.json`, ADR-0004, `AGENTS.md`, seven `.kiro/skills` and `.kiro/steering/datacare.md`; extended `validate_plan.py`; added docs_check to the static-gates CI job.

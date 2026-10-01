@@ -32,7 +32,7 @@ release certificate are recorded on the parent packages.
 
 **For Phase 1.** All P1-core menus and the P1-edition menus of the pilot customers are done; journeys J01–J28 pass
 on the desktop and the web from the same data; two migration rehearsals reconcile (N79); a restore drill meets the
-agreed RPO and RTO (N80); the release certifier passes on one candidate (N82). No desktop weakness from the desktop
+agreed RPO and RTO (N80); the release certifier passes on one candidate (gates from N82, certification in N30). No desktop weakness from the desktop
 handbook §8 is reproduced.
 
 ## 2. Starting point
@@ -62,7 +62,7 @@ dependencies allow; changes to shared posting, numbering, scope and rounding cod
 
 | Stage | Purpose | Slices | Exit gate |
 |---|---|---|---|
-| 0 — Now | Remove known security exposure | N86 (runtime advisory, Node 24), N81 (secrets) | No installed package inside a known critical advisory; no credential in the delivery source |
+| 0 — Now | Remove known security exposure | N86 (runtime advisory, Node 24, Prisma 7 by 19 November 2026 — D26), N81 (secrets) | No installed package inside a known critical advisory; no credential in the delivery source |
 | A — Trustworthy build | Gates and harnesses green before more behaviour is claimed | N47, N48 (restore milestone), N49, N83, N85, N87 (status of each in the backlog) | Every engineering gate, the 24-journey suite and the documentation checks block in CI; the differential reports coverage per family |
 | B — Stop wrong documents and data loss | Small S1 fixes | N56, N53, N40, N51 milestone 1, N50 milestone 1, N54 milestone 1, N34 remainder | Printed dates carry the year; no observed 500; no edit loses data; the timeout test is stable |
 | C — Foundations | Contracts every workflow depends on | N50, N51, N52, N55, N58–N63, N84, N88 | Schemas, versions and idempotency on every financial path; desktop-shaped provisioning; no literal account fallbacks; route plugins and the shared voucher editor in use |
@@ -186,10 +186,11 @@ The `datacare-implement-slice` skill in `.kiro/skills/` encodes these steps for 
 
 ## 7. Exit and hand-over to Phase 2
 
-Phase 1 may be certified for a **pilot scope**: all P1-core menus plus the P1-edition menus of the first customers,
-decided under D01 and D21. Phase 2 product work starts after that certificate, except the preparations of
-ADR-0004 (N86, N88) and the Phase 2 decisions (milestone M0 in [document 14](14-phase2-saas-plan.md)). The Phase 1
-golden vectors, write-set tests, journeys and differential stay blocking for every later change.
+Phase 1 is complete when everything in §1 holds and the release is certified (N30). Its scope is all P1-core menus
+plus the P1-edition menus of the first customers, decided under D01 and D21. **Nothing in Phase 2 starts before
+that, including the Phase 2 decisions** (milestone M0 in [document 14](14-phase2-saas-plan.md)): decision D28, the
+owner's instruction of 1 October 2026. N86 and N88 are Phase 1 slices and are not affected. The Phase 1 golden
+vectors, write-set tests, journeys and differential stay blocking for every later change.
 
 ## 8. Risks and decisions
 
@@ -201,5 +202,5 @@ golden vectors, write-set tests, journeys and differential stay blocking for eve
 | Customer data leaks into the repository | Aggregate queries only; fixtures are synthetic; the documentation check scans for credential and phone patterns |
 | Edition scope grows without limit | D21 per customer, recorded in the catalog phase column |
 
-Decisions still needed before their slices start: D01, D05–D07, D09–D14 (document 08); D15–D22 (document 11); D23,
-D24, D26 and D27 (document 12).
+Decisions: D23–D28 (document 12) were accepted by the owner on 1 October 2026. Still to be approved before their
+slices start: D15–D22 (document 11), and the role-owned decisions D01–D14 of document 08 when their waves begin.

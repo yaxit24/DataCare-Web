@@ -129,7 +129,7 @@ Tests derive expected values independently and are hermetic (testing §8).
 ## 10. Documentation and plan records
 
 - Update `execution-backlog.json` (status, `statusAsOf`, evidence, note) and document 11 §2 in the same pull request
-  as the code; new defects become gaps in document 12 (continuing at G82).
+  as the code; new defects become gaps in document 12 (continuing at G84).
 - Update the [menu catalog](../menu-catalog.md) row of every menu whose web state changed, then run
   `python3 docs/tools/docs_check.py --write`.
 - Comments explain why, citing the desktop source line where the behaviour comes from.

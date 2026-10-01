@@ -1,6 +1,6 @@
 ---
 name: datacare-plan-update
-description: Update the DataCare master plan correctly — slice status and evidence in execution-backlog.json or phase2-backlog.json, new gaps (G82+), slices (N89+, SP25+) and decisions (D28+), status tables, lineage items — and keep validate_plan.py green. Use whenever work changes a slice's state or reveals a new defect.
+description: Update the DataCare master plan correctly — slice status and evidence in execution-backlog.json or phase2-backlog.json, new gaps (G84+), slices (N89+, SP25+) and decisions (D29+), status tables, lineage items — and keep validate_plan.py green. Use whenever work changes a slice's state or reveals a new defect.
 ---
 
 # Plan update
@@ -23,7 +23,7 @@ historical once written.
 
 ## 2. New gap
 
-1. Next ID: G82 onward, in the table of `12-lineage-verification-2026-10-01.md` §3, with the same columns:
+1. Next ID: G84 onward, in the table of `12-lineage-verification-2026-10-01.md` §3, with the same columns:
    `| ID | Sev | Area | Desktop authority | Web evidence | Required behaviour | Slice |`. Severity: S1 blocks a daily
    workflow, loses data, prints a wrong legal or financial document, or is a security exposure; S2 wrong or
    incomplete in a supported branch; S3 depth or ergonomics.
@@ -37,14 +37,16 @@ historical once written.
    `sourceAndModuleDetail`, `universalContract`, `verification`; plus a specification section in document 12 §5
    (gap, parents, severity, size, start after, steps, "Done when").
 2. Phase 2: next ID SP25 onward in `phase2-backlog.json` `slices`, with `milestone` (M0–M7), `size`, `title`,
-   `gapIds`, `startAfter`, `steps`, `tests`, `doneWhen`.
+   `gapIds`, `startAfter`, `steps`, `tests`, `doneWhen`. Every Phase 2 slice must depend on SP01, directly or through
+   other Phase 2 slices (D28; the validator checks it).
 3. Update the minimum counts in `validate_plan.py` (`len(slices)>=…`, `len(gap_ids)>=…`, decision count) in the same
    change.
 
 ## 4. New decision
 
-Next ID D28 onward in document 12 §4 with the columns `| ID | Decision and recommended position | Owner / deadline |
-Evidence |`. A decision is "accepted" only when the owner has said so; write the date and source.
+Next ID D29 onward in document 12 §4 with the columns `| ID | Decision and recommended position | Owner / deadline |
+Evidence |`. A decision is "accepted" only when the owner has said so: write "accepted" with the date in its Owner
+column (in document 08, 11 or 12, wherever it is defined) and add an entry to the backlog `amendments`.
 
 ## 5. Lineage
 
