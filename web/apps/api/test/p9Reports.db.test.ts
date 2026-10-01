@@ -114,30 +114,35 @@ databaseDescribe('P9 report workflows', () => {
     await runtime.$disconnect();
   });
 
-  it('lists hallmarked tags with their HUIDs, keeping ids as text', async () => {
+  it('defaults to desktop All and keeps alphanumeric HUIDs as text', async () => {
     await tag('TAG-H1', 1, 'HUID7AB');
     await tag('TAG-H2', 2, null); // not hallmarked
     const report = await huidReport(runtime, TENANT, { CO_CODE: CO, LC_CODE: LC });
-    // The register is about hallmarked stock, so the un-hallmarked tag is excluded by default.
-    expect(report.rows.map((r) => r.tagNo)).toEqual(['TAG-H1']);
+    expect(report.rows.map((r) => r.tagNo)).toEqual(['TAG-H1', 'TAG-H2']);
     // A HUID contains letters; reading it as a number would have destroyed it.
     expect(report.rows[0]!.huid).toBe('HUID7AB');
     expect(typeof report.rows[0]!.huid).toBe('string');
     expect(report.totals.hallmarkedTags).toBe(1);
-    // One id across the four slots.
     expect(report.totals.slots).toBe(1);
   });
 
-  it('returns every tag when hallmark filtering is turned off', async () => {
+  it('supports explicit With HUID and Without HUID modes', async () => {
     await tag('TAG-H1', 1, 'HUID7AB');
     await tag('TAG-H2', 2, null);
-    const report = await huidReport(
+    const withHuid = await huidReport(
       runtime,
       TENANT,
       { CO_CODE: CO, LC_CODE: LC },
-      { onlyHallmarked: false },
+      { hallmark: 'with' },
     );
-    expect(report.rows).toHaveLength(2);
+    const withoutHuid = await huidReport(
+      runtime,
+      TENANT,
+      { CO_CODE: CO, LC_CODE: LC },
+      { hallmark: 'without' },
+    );
+    expect(withHuid.rows.map((r) => r.tagNo)).toEqual(['TAG-H1']);
+    expect(withoutHuid.rows.map((r) => r.tagNo)).toEqual(['TAG-H2']);
   });
 
   it('reports item labour bands, which is what ItStk Level actually holds', async () => {

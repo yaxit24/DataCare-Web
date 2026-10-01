@@ -352,6 +352,11 @@ export default function ReportPage() {
   const [graphGroupCode, setGraphGroupCode] = useState('');
   const [graphLcCode, setGraphLcCode] = useState('');
   const [graphDataType, setGraphDataType] = useState('');
+  // RP_HUID-specific controls: desktop tabs plus All/With/Without HUID and item/counter filters.
+  const [huidTab, setHuidTab] = useState('all');
+  const [huidHallmark, setHuidHallmark] = useState('all');
+  const [huidItemCode, setHuidItemCode] = useState('');
+  const [huidCounter, setHuidCounter] = useState('');
   const [detailRows, setDetailRows] = useState<Record<string, any>[]>([]);
   const [detailErr, setDetailErr] = useState('');
   /**
@@ -494,6 +499,14 @@ export default function ReportPage() {
             withAdjScheme: withAdjScheme ? 'true' : 'false',
           }
         : {}),
+      ...(slug === 'huid'
+        ? {
+            tab: huidTab,
+            hallmark: huidHallmark,
+            itCode: huidItemCode,
+            tblCode: huidCounter,
+          }
+        : {}),
       ...(slug === 'balance-sheet'
         ? { closingDate, goldRate, silverRate, ledgerFineGold, ledgerFineSilver }
         : {}),
@@ -563,6 +576,10 @@ export default function ReportPage() {
     silverRate,
     ledgerFineGold,
     ledgerFineSilver,
+    huidTab,
+    huidHallmark,
+    huidItemCode,
+    huidCounter,
   ]);
 
   /**
@@ -1509,6 +1526,53 @@ export default function ReportPage() {
             </label>
           </>
         )}
+        {slug === 'huid' && (
+          <>
+            <div className="field" style={{ marginBottom: 0 }}>
+              <label htmlFor="huidTab">View</label>
+              <select
+                id="huidTab"
+                value={huidTab}
+                onChange={(e) => setHuidTab(e.target.value)}
+                style={{ width: 120 }}
+              >
+                <option value="all">All history</option>
+                <option value="stock">In stock</option>
+              </select>
+            </div>
+            <div className="field" style={{ marginBottom: 0 }}>
+              <label htmlFor="huidHallmark">HUID</label>
+              <select
+                id="huidHallmark"
+                value={huidHallmark}
+                onChange={(e) => setHuidHallmark(e.target.value)}
+                style={{ width: 120 }}
+              >
+                <option value="all">All</option>
+                <option value="with">With HUID</option>
+                <option value="without">Without HUID</option>
+              </select>
+            </div>
+            <div className="field" style={{ marginBottom: 0 }}>
+              <label htmlFor="huidItemCode">Item</label>
+              <input
+                id="huidItemCode"
+                value={huidItemCode}
+                onChange={(e) => setHuidItemCode(e.target.value)}
+                style={{ width: 100 }}
+              />
+            </div>
+            <div className="field" style={{ marginBottom: 0 }}>
+              <label htmlFor="huidCounter">Counter</label>
+              <input
+                id="huidCounter"
+                value={huidCounter}
+                onChange={(e) => setHuidCounter(e.target.value)}
+                style={{ width: 100 }}
+              />
+            </div>
+          </>
+        )}
         {/* RP_TAG_ESTMATE switches source between the tag ledger (In) and issued stock (Out). */}
         {slug === 'tag-estimate' && (
           <>
@@ -1642,6 +1706,12 @@ export default function ReportPage() {
                 Object.entries(filters).forEach(([key, value]) => {
                   if (value) q.set(key, value);
                 });
+                if (slug === 'huid') {
+                  q.set('tab', huidTab);
+                  q.set('hallmark', huidHallmark);
+                  if (huidItemCode) q.set('itCode', huidItemCode);
+                  if (huidCounter) q.set('tblCode', huidCounter);
+                }
                 if (slug === 'tag-estimate') {
                   if (direction) q.set('direction', direction);
                   if (tagNo) q.set('tagNo', tagNo);

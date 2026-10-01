@@ -27,6 +27,14 @@ import { PRECISION, round } from '@datacare/core';
  */
 export type HuidTab = 'all' | 'stock';
 
+export class HuidReportValidationError extends Error {
+  readonly statusCode = 400;
+  constructor(message: string) {
+    super(message);
+    this.name = 'HuidReportValidationError';
+  }
+}
+
 export interface HuidRow {
   vchType: string | null;
   vchNo: string | null;
@@ -85,9 +93,27 @@ export async function huidReport(
   prisma: any,
   tenantId: string,
   scope: { CO_CODE: string; LC_CODE: string },
-  options: { tab?: HuidTab; itCode?: string; tblCode?: string; onlyHallmarked?: boolean } = {},
+  options: {
+    tab?: HuidTab;
+    itCode?: string;
+    tblCode?: string;
+    /** Desktop filter: All (default), With HUID, Without HUID. */
+    hallmark?: 'all' | 'with' | 'without';
+    /** Backward-compatible alias: true=with, false=all. */
+    onlyHallmarked?: boolean;
+  } = {},
 ): Promise<HuidReport> {
-  const tab: HuidTab = options.tab ?? 'all';
+  const rawTab = String(options.tab ?? 'all')
+    .trim()
+    .toLowerCase();
+  if (rawTab !== 'all' && rawTab !== 'stock')
+    throw new HuidReportValidationError('tab must be all or stock');
+  const tab = rawTab as HuidTab;
+  const rawHallmark = String(options.hallmark ?? '')
+    .trim()
+    .toLowerCase();
+  if (rawHallmark && !['all', 'with', 'without'].includes(rawHallmark))
+    throw new HuidReportValidationError('hallmark must be all, with, or without');
   return withTenant(prisma, tenantId, async (tx: any) => {
     const params: unknown[] = [scope.CO_CODE, scope.LC_CODE];
     const filters = ['c."CO_CODE"::text=$1', 'c."LC_CODE"::text=$2'];
@@ -99,17 +125,13 @@ export async function huidReport(
       params.push(options.tblCode);
       filters.push(`c."TBL_CODE"::text=$${params.length}`);
     }
-    if (options.onlyHallmarked !== false) {
-      // The register is about hallmarked stock, so a tag with no id in any of the four slots is not a
-      // compliance row. Passing onlyHallmarked:false returns every tag, which is what the desktop's
-      // unfiltered variant shows.
-      filters.push(
-        `(NULLIF(btrim(coalesce(c."HM_ID"::text,'')),'') IS NOT NULL
+    const hallmarkMode = rawHallmark || (options.onlyHallmarked === true ? 'with' : 'all');
+    const hasHuid = `(NULLIF(btrim(coalesce(c."HM_ID"::text,'')),'') IS NOT NULL
           OR NULLIF(btrim(coalesce(c."HM_ID2"::text,'')),'') IS NOT NULL
           OR NULLIF(btrim(coalesce(c."HM_ID3"::text,'')),'') IS NOT NULL
-          OR NULLIF(btrim(coalesce(c."HM_ID4"::text,'')),'') IS NOT NULL)`,
-      );
-    }
+          OR NULLIF(btrim(coalesce(c."HM_ID4"::text,'')),'') IS NOT NULL)`;
+    if (hallmarkMode === 'with') filters.push(hasHuid);
+    if (hallmarkMode === 'without') filters.push(`NOT ${hasHuid}`);
     if (tab === 'stock') {
       // Availability is the NET of MAIN_STOCK signs for this tag instance — the same rule
       // `availableBarTags` applies for a sale. A simple "no '-' movement exists" test would wrongly
