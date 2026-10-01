@@ -123,16 +123,23 @@ d('company provisioning produces a postable company', () => {
     const rows: any[] = await withTenant(prisma, tenantId, (tx: any) =>
       tx.$queryRawUnsafe(
         `SELECT "CO_BOOK","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","BOOK_TBL_NAME" FROM "BOOK_DATA"
-          WHERE "CO_CODE"=$1 AND "CO_BOOK" IN ('WHS','RTC') ORDER BY "CO_BOOK"`,
+          WHERE "CO_CODE"=$1 AND "CO_BOOK" IN ('WHS','RTC','WHQ') ORDER BY "CO_BOOK"`,
         CO,
       ),
     );
-    // Book 064 RCUT / RATE CUT and book 034 WSALE / WH SALES, both OUT books over RATE_CUT_DATA.
+    // Book 064 RCUT / RATE CUT, 034 WSALE / WH SALES and 434 WHQUT / WH QUOT are OUT books over RATE_CUT_DATA.
     expect(rows).toEqual([
       {
         CO_BOOK: 'RTC',
         BOOK_SNAME: 'RCUT',
         MAIN_BOOK: 'RATE CUT',
+        BOOK_INOUT: 'O',
+        BOOK_TBL_NAME: 'RATE_CUT_DATA',
+      },
+      {
+        CO_BOOK: 'WHQ',
+        BOOK_SNAME: 'WHQUT',
+        MAIN_BOOK: 'WH QUOT',
         BOOK_INOUT: 'O',
         BOOK_TBL_NAME: 'RATE_CUT_DATA',
       },
@@ -144,6 +151,13 @@ d('company provisioning produces a postable company', () => {
         BOOK_TBL_NAME: 'RATE_CUT_DATA',
       },
     ]);
+    const slots: any[] = await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT count(*)::int n FROM "BOOK_DETL" WHERE "CO_CODE"=$1 AND "CO_BOOK"='WHQ'`,
+        CO,
+      ),
+    );
+    expect(slots[0]?.n).toBe(0);
   });
 
   it('creates the Tag Cancel and Tag Transfer books TR_TAG_CAN opens', async () => {

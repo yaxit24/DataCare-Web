@@ -315,16 +315,21 @@ import {
   deleteBullionSale,
   deleteRateCut,
   deleteWholesaleSale,
+  deleteWholesaleQuotation,
   editBullionSale,
   editRateCut,
   editWholesaleSale,
+  editWholesaleQuotation,
   getBullionSale,
   getRateCut,
   getWholesaleSale,
+  getWholesaleQuotation,
   postBullionSale,
   postRateCut,
   postWholesaleSale,
+  postWholesaleQuotation,
 } from '../modules/sales/rateCut.js';
+import { wholesaleQuotationHtml } from '../modules/sales/wholesaleQuotationDocument.js';
 import {
   issueKarigar,
   receiveKarigar,
@@ -7439,6 +7444,75 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     if (!guard(req, reply, 'delete')) return;
     return run(reply, 200, () =>
       deleteWholesaleSale(prisma, {
+        scope: scopeOf(req),
+        vchNo: (req.params as any).vchNo,
+        book: body(req).book,
+        deleteUser: sess(req).sub,
+      }),
+    );
+  });
+  // Desktop WH QUOT: same TR_WH_SALE document grids, but no financial or inventory posting.
+  app.post('/wholesale-quotations', auth, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    const b = body(req);
+    return run(reply, 201, () => postWholesaleQuotation(prisma, rateCutInput(req, b)));
+  });
+  app.get('/wholesale-quotations/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () =>
+      getWholesaleQuotation(prisma, scopeOf(req), (req.params as any).vchNo),
+    );
+  });
+  app.get('/wholesale-quotations/:vchNo/print', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const q = req.query as any;
+    const copy = standardDocumentCopy(q.copy, reply);
+    if (copy === null) return reply;
+    const scope = scopeOf(req);
+    const voucher = await getWholesaleQuotation(prisma, scope, (req.params as any).vchNo);
+    const context = await withTenant(prisma, scope.tenantId, async (tx: any) => {
+      const companies: any[] = await tx.$queryRawUnsafe(
+        `SELECT * FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 LIMIT 1`,
+        scope.tenantId,
+        scope.coCode,
+      );
+      const parties: any[] = await tx.$queryRawUnsafe(
+        `SELECT * FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "AC_CODE"=$3
+          ORDER BY ("LC_CODE"=$4) DESC,row_id LIMIT 1`,
+        scope.tenantId,
+        scope.coCode,
+        String(voucher.acCode ?? ''),
+        scope.lcCode,
+      );
+      return { company: companies[0], party: parties[0] };
+    });
+    const html = wholesaleQuotationHtml(voucher, { ...context, copy });
+    if (q.format === 'html') return reply.type('text/html').send(html);
+    let pdf: Buffer;
+    try {
+      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
+    } catch {
+      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
+    }
+    return reply
+      .header('content-type', 'application/pdf')
+      .header(
+        'content-disposition',
+        `inline; filename="wholesale-quotation-${String((req.params as any).vchNo).replace(/[^\w.-]/g, '')}.pdf"`,
+      )
+      .send(pdf);
+  });
+  app.put('/wholesale-quotations/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      editWholesaleQuotation(prisma, rateCutInput(req, b), (req.params as any).vchNo),
+    );
+  });
+  app.delete('/wholesale-quotations/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      deleteWholesaleQuotation(prisma, {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
         book: body(req).book,

@@ -27,14 +27,14 @@ import {
 } from '@datacare/core';
 import { companyFlag, companySetting, type CompanySettingValues } from './companySettings';
 
-export type WholesaleWorkflow = 'wholesale-sale' | 'rate-cut';
+export type WholesaleWorkflow = 'wholesale-sale' | 'rate-cut' | 'wholesale-quotation';
 
 export interface WholesaleWorkflowConfig {
   title: string;
   /** API resource. Each refuses a book of the other family (`assertRateCutBookGuard`). */
-  endpoint: '/wholesale-sales' | '/rate-cut';
+  endpoint: '/wholesale-sales' | '/rate-cut' | '/wholesale-quotations';
   /** `BOOK_DATA.MAIN_BOOK` the book picker offers. */
-  mainBook: 'WH SALES' | 'RATE CUT';
+  mainBook: 'WH SALES' | 'RATE CUT' | 'WH QUOT';
   /** Where the desktop opens it from. */
   desktop: string;
   testId: string;
@@ -54,6 +54,13 @@ export const WHOLESALE_WORKFLOWS: Record<WholesaleWorkflow, WholesaleWorkflowCon
     mainBook: 'RATE CUT',
     desktop: 'Rate Cut (Ctrl+F6)',
     testId: 'rate-cut',
+  },
+  'wholesale-quotation': {
+    title: 'Wholesale Quotation',
+    endpoint: '/wholesale-quotations',
+    mainBook: 'WH QUOT',
+    desktop: 'Wh Quotation — TR_WH_SALE',
+    testId: 'wholesale-quotation',
   },
 };
 

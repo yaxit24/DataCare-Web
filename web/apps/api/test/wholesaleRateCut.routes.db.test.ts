@@ -113,8 +113,9 @@ const DAY = `${startYear}-06-15`;
     );
     await login('wholesaler', ['Wh Sales']);
     await login('ratecutter', ['Rate Cut']);
+    await login('quoter', ['Wh Quotation']);
     app = await buildApp({ prisma: runtime, secret: SECRET, secureCookies: false });
-    for (const name of ['wholesaler', 'ratecutter']) {
+    for (const name of ['wholesaler', 'ratecutter', 'quoter']) {
       const response = await app.inject({
         method: 'POST',
         url: '/auth/login',
@@ -257,6 +258,44 @@ const DAY = `${startYear}-06-15`;
     ]);
   });
 
+  it('persists and prints a Wholesale Quotation only under its own right and WH QUOT book', async () => {
+    const quote = {
+      coBook: 'WHQ',
+      vchDate: DAY,
+      acCode: 'WHCUST',
+      acName: 'Wholesale Customer',
+      itType: 'G',
+      lines: [{ itCode: '999', itemName: '999 GOLD', grossWt: 5, netWt: 5, touch: 92, rate: 6400 }],
+      receivedLines: [
+        { itCode: '999', itemName: 'OLD GOLD', grossWt: 1, netWt: 1, touch: 90, rate: 6000 },
+      ],
+    };
+    const created = await request('quoter', 'POST', '/wholesale-quotations', quote);
+    expect(created.statusCode, created.body).toBe(201);
+    const vchNo = String(created.json().vchNo);
+    const opened = await request('quoter', 'GET', `/wholesale-quotations/${vchNo}?coBook=WHQ`);
+    expect(opened.statusCode, opened.body).toBe(200);
+    expect(opened.json()).toMatchObject({
+      acCode: 'WHCUST',
+      lines: [{ itCode: '999' }],
+      receivedLines: [{ itCode: '999' }],
+    });
+    const printed = await request(
+      'quoter',
+      'GET',
+      `/wholesale-quotations/${vchNo}/print?coBook=WHQ&format=html&copy=O`,
+    );
+    expect(printed.statusCode, printed.body).toBe(200);
+    expect(printed.body).toContain('Wholesale Quotation');
+    expect(printed.body).toContain('ORIGINAL FOR RECIPIENT');
+    expect(printed.body).toContain('999 GOLD');
+
+    const wrongRight = await request('wholesaler', 'POST', '/wholesale-quotations', quote);
+    expect(wrongRight.statusCode).toBe(403);
+    const removed = await request('quoter', 'DELETE', `/wholesale-quotations/${vchNo}?coBook=WHQ`);
+    expect(removed.statusCode, removed.body).toBe(200);
+  });
+
   it('an edit that drops the tag returns it to stock; the delete audits the signed-in user', async () => {
     const edited = await request('wholesaler', 'PUT', '/wholesale-sales/1', {
       ...sale,
@@ -282,7 +321,8 @@ const DAY = `${startYear}-06-15`;
     );
     expect(tempAfterDelete[0]?.n).toBe(0);
     const audit = await query<Array<Record<string, unknown>>>(
-      `SELECT "VCH_TYPE","BOOK_NAME","DELETE_USER","MAIN_USER" FROM "DELETE_DATA" WHERE tenant_id=$1`,
+      `SELECT "VCH_TYPE","BOOK_NAME","DELETE_USER","MAIN_USER" FROM "DELETE_DATA"
+        WHERE tenant_id=$1 AND "CO_BOOK"='WHS'`,
       tenantId,
     );
     expect(audit).toEqual([

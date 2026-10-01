@@ -259,6 +259,18 @@ const BOOKS: {
     shortName: 'WSALE',
     table: 'RATE_CUT_DATA',
   },
+  // Desktop book 434 WHQUT / WH QUOT uses TR_WH_SALE's document grids, while its posting routines
+  // exclude WH QUOT. Empty slots are deliberate: a quotation must not need or imply ledger accounts.
+  {
+    book: 'WHQ',
+    name: 'Wholesale Quotation',
+    mainBook: 'WH QUOT',
+    inout: 'O',
+    acCode: 'SALES',
+    slots: [],
+    shortName: 'WHQUT',
+    table: 'RATE_CUT_DATA',
+  },
   {
     book: 'RTC',
     name: 'Rate Cut',
