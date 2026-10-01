@@ -2947,7 +2947,7 @@
       "sourceAndModuleDetail": "06-module-detail.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
-      "gapIds": "G70"
+      "gapIds": "G83"
     },
     {
       "id": "N16",
@@ -3407,7 +3407,7 @@
         "web/apps/api/test/hallmarkSaleRoundTrip.routes.db.test.ts",
         "web/packages/core/test/hallmarkSaleForm.test.ts"
       ],
-      "statusNote": "G45 closed: the screen sends a loaded voucher back as loaded (every header and line field GET returns), overlays only the operator's changes, and drops a loaded fine/metal amount when an input it depends on changes. An unchanged reopen and save over HTTP leaves every voucher-table row identical; the old 13-field mapping re-dated the voucher to today and blanked HUID 2-4. Found G69 (tax master SR_NO) and G70 (old-metal posted vs valued amount). Delete reversal from PR #15."
+      "statusNote": "G45 closed: the screen sends a loaded voucher back as loaded (every header and line field GET returns), overlays only the operator's changes, and drops a loaded fine/metal amount when an input it depends on changes. An unchanged reopen and save over HTTP leaves every voucher-table row identical; the old 13-field mapping re-dated the voucher to today and blanked HUID 2-4. Found G82 (tax master SR_NO) and G83 (old-metal posted vs valued amount). Delete reversal from PR #15."
     },
     {
       "id": "N41",
@@ -3723,7 +3723,7 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "For the 17 desktop copy tables a fresh web company equals a desktop-created company; J01 without manual SQL",
-      "gapIds": "G38, G39, G69",
+      "gapIds": "G38, G39, G82",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"

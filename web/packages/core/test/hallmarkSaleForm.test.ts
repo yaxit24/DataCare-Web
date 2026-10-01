@@ -194,7 +194,7 @@ describe('hallmark sale lossless reopen (G45)', () => {
       ...scope,
       ...headerFields,
       // The one gold row carries the stored header total (25821.6), not its detail valuation (25810),
-      // so the header and ledger are posted exactly as before (G70).
+      // so the header and ledger are posted exactly as before (G83).
       oldGold: (viewOldGold as Array<Record<string, unknown>>).map((row) => ({
         ...row,
         amount: 25821.6,
