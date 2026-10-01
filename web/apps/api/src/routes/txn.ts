@@ -732,6 +732,20 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       throw e;
     }
   };
+  const standardDocumentCopy = (raw: unknown, reply: FastifyReply): string | null | undefined => {
+    const code = String(raw ?? '')
+      .trim()
+      .toUpperCase();
+    if (!code) return undefined;
+    if (code !== 'O' && code !== 'D' && code !== 'T') {
+      void reply.code(400).send({
+        error: 'DocumentCopyError',
+        message: 'copy must be O (original), D (duplicate supplier), or T (triplicate transporter)',
+      });
+      return null;
+    }
+    return ORDER_REPORT_COPIES[code];
+  };
   // Operator inputs of the two fixed report screens whose exports are also slug-driven. They are shared
   // so a CSV/XLSX export can never be built from different inputs than the screen it came from.
   const balanceSheetOptions = (query: unknown) => {
@@ -1834,14 +1848,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     if (!scope) return reply;
     const data = await invoiceData(prisma, scope);
     if (!data) return reply.code(404).send({ error: 'invoice-not-found' });
-    const copyLabel =
-      (
-        {
-          O: 'ORIGINAL FOR RECIPIENT',
-          D: 'DUPLICATE FOR TRANSPORTER',
-          T: 'TRIPLICATE FOR SUPPLIER',
-        } as Record<string, string>
-      )[String(q.copy ?? '').toUpperCase()] ?? (q.copy ? String(q.copy) : undefined);
+    const copyLabel = standardDocumentCopy(q.copy, reply);
+    if (copyLabel === null) return reply;
     const html = invoiceHtml(data.header, data.lines, {
       company: data.company,
       party: data.party,
@@ -1868,11 +1876,14 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const q = req.query as any;
     const scope = documentScope(req, reply);
     if (!scope) return reply;
+    const copyLabel = standardDocumentCopy(q.copy, reply);
+    if (copyLabel === null) return reply;
     const data = await purchaseBillData(prisma, scope);
     if (!data) return reply.code(404).send({ error: 'bill-not-found' });
     const html = purchaseBillHtml(data.header, data.lines, {
       company: data.company,
       party: data.party,
+      copy: copyLabel,
     });
     if (q.format === 'html') return reply.type('text/html').send(html);
     let pdf: Buffer;
@@ -1925,11 +1936,14 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const q = req.query as any;
     const scope = documentScope(req, reply);
     if (!scope) return reply;
+    const copyLabel = standardDocumentCopy(q.copy, reply);
+    if (copyLabel === null) return reply;
     const data = await karigarIssueData(prisma, scope);
     if (!data) return reply.code(404).send({ error: 'voucher-not-found' });
     const html = karigarIssueHtml(data.header, data.lines, {
       company: data.company,
       party: data.party,
+      copy: copyLabel,
     });
     if (q.format === 'html') return reply.type('text/html').send(html);
     let pdf: Buffer;
@@ -2625,6 +2639,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.get('/purchase-returns/:vchNo/print', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     const q = req.query as any;
+    const copyLabel = standardDocumentCopy(q.copy, reply);
+    if (copyLabel === null) return reply;
     const s = readScope(req);
     let scope;
     try {
@@ -2647,6 +2663,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const html = purchaseBillHtml(data.header, data.lines, {
       company: data.company,
       party: data.party,
+      copy: copyLabel,
       title: 'Purchase Return',
       partyCaption: 'Supplier',
       footerText: 'Purchase return — goods and value returned to supplier.',
