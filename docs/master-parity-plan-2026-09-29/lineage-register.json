@@ -1,0 +1,466 @@
+{
+  "kind": "lineage-register",
+  "asOf": "2026-10-01",
+  "mainBaseline": "675d845",
+  "document": "12-lineage-verification-2026-10-01.md",
+  "meaning": "Every work item, finding and requirement in the earlier plans, gap reports, audits and specifications, with its disposition in the current plan. 'carried' means a current identifier owns the remaining work; it does not mean the work is done. Closing a defect never closes a parent package or card; acceptance stays with documents 02 and 04.",
+  "dispositions": {
+    "closed": "Fixed in engineering; the evidence path shows the change, its test or the record that closed it.",
+    "carried": "Still open and owned by the listed current identifiers (P packages, X cards, N slices, G gaps, D decisions, SP Phase 2 slices).",
+    "new-gap": "Not owned by any current identifier before this review; recorded as a new gap in document 12 with a new slice.",
+    "superseded": "Replaced by a later plan structure; the listed identifiers carry the obligation.",
+    "decision": "Needs an owner decision recorded in document 12 section 4 before the work can be accepted."
+  },
+  "sources": [
+    {
+      "path": "FUNCTIONAL-PARITY-PLAN-2026-08-02.md",
+      "kind": "plan",
+      "items": [
+        {"id": "F1.1-F1.5", "title": "Correction workflow: create/open/edit/delete and day-book distinction", "disposition": "closed", "evidence": ["FUNCTIONAL-PARITY-PLAN-2026-08-02.md", "web/apps/api/test/correctionWorkflow.db.test.ts"]},
+        {"id": "F2.1", "title": "Saved vouchers reachable from the screens", "disposition": "closed", "evidence": ["FUNCTIONAL-PARITY-PLAN-2026-08-02.md"]},
+        {"id": "F2.2", "title": "Remaining saved-voucher reachability", "disposition": "carried", "owners": ["X05", "N51", "N63", "N67"]},
+        {"id": "F3.1-F3.4", "title": "Day book (Rojmel) projection for the main families", "disposition": "closed", "evidence": ["FUNCTIONAL-PARITY-PLAN-2026-08-02.md", "web/docs/PLAN-ROJMEL-FINAL-THREE.md"]},
+        {"id": "F3-remainder", "title": "Day-book rows of the two single-voucher families", "disposition": "carried", "owners": ["X06", "X16", "N45"]},
+        {"id": "F4.1-F4.4", "title": "Value reconciliation from the 66-voucher differential", "disposition": "carried", "owners": ["X06", "N13"]},
+        {"id": "F5.1", "title": "Replay builders for the remaining workflow families", "disposition": "new-gap", "owners": ["G69", "N83"]},
+        {"id": "F5.2-F5.3", "title": "Harness extension and dependency-ordered replay", "disposition": "carried", "owners": ["X06", "N49", "N83"]},
+        {"id": "F6", "title": "Statutory outputs and period close", "disposition": "carried", "owners": ["X26", "X27", "N24", "N60"]},
+        {"id": "F7/D-1-D-3", "title": "Owner decisions recorded by the August plan", "disposition": "carried", "owners": ["D01", "D05", "D06", "D07"]},
+        {"id": "D-4", "title": "Decision recorded and applied in the August plan", "disposition": "closed", "evidence": ["FUNCTIONAL-PARITY-PLAN-2026-08-02.md"]},
+        {"id": "W1-W9", "title": "Workflow-level assessments (retail, purchase, karigar, scheme, wholesale, close, correction, reporting, loans)", "disposition": "superseded", "owners": ["J01", "J04", "J08", "J12", "J13", "J19", "J20", "J22", "J27"]}
+      ]
+    },
+    {
+      "path": "PARITY-AND-GAP-REPORT-2026-08-02.md",
+      "kind": "audit",
+      "items": [
+        {"id": "C1", "title": "Fake e-invoice IRNs written onto real invoices", "disposition": "closed", "evidence": ["FIXES-AND-SCALED-COMPARISON-2026-08-02.md", "web/apps/api/src/modules/einvoice/einvoice.ts"]},
+        {"id": "C2", "title": "Wholesale sale posted as a retail sale", "disposition": "closed", "evidence": ["FIXES-AND-SCALED-COMPARISON-2026-08-02.md", "parity-plan-2026-09-10/46-implementation-progress-x16-2026-09-29.md"]},
+        {"id": "C3", "title": "Job-work vouchers posted as karigar vouchers", "disposition": "closed", "evidence": ["FIXES-AND-SCALED-COMPARISON-2026-08-02.md"]},
+        {"id": "C4", "title": "Two tables locked by RLS without policies", "disposition": "closed", "evidence": ["FIXES-AND-SCALED-COMPARISON-2026-08-02.md", "web/packages/db/prisma/rls.sql"]},
+        {"id": "C5", "title": "Admin settings authorisation weaker than the desktop", "disposition": "carried", "owners": ["X29", "X08", "N55"]},
+        {"id": "C6", "title": "GST returns not desktop-equivalent or filing-complete", "disposition": "carried", "owners": ["X26", "P10-03", "N24"]},
+        {"id": "R06", "title": "Resolve the 99-field single-voucher differential", "disposition": "carried", "owners": ["X06", "N13"]},
+        {"id": "R07", "title": "Purchase Rojmel over-post", "disposition": "carried", "owners": ["X06", "X12"]},
+        {"id": "R08", "title": "Scale the comparison beyond one voucher", "disposition": "carried", "owners": ["X06", "N83"]},
+        {"id": "R09", "title": "Report stale closure and ESLint with react-hooks rules", "disposition": "closed", "evidence": ["web/package.json"]},
+        {"id": "R10", "title": "Build UT_IMPORT so existing customers can be migrated", "disposition": "carried", "owners": ["X27", "X30", "N26", "N78"]},
+        {"id": "R11", "title": "GST from TAX_DATA with the date range, validated against the desktop", "disposition": "carried", "owners": ["X26", "N24"]},
+        {"id": "R12", "title": "RBAC alias migration for legacy USER_SET rows", "disposition": "carried", "owners": ["X29", "P11-04"]},
+        {"id": "R13", "title": "Database tests fail instead of skipping; fixed time zone", "disposition": "carried", "owners": ["X03", "N49"]},
+        {"id": "R14", "title": "Classify the 198 register items and run register:check strictly", "disposition": "closed", "evidence": ["web/docs/COMPLETION-REGISTER.json", "web/scripts/check-completion-register.mjs"], "note": "Classification exists; its mapping errors are the new gap G71."},
+        {"id": "R15", "title": "Run schema:readiness and type:parity instead of skipping", "disposition": "carried", "owners": ["X34", "N82"]},
+        {"id": "R16", "title": "Close the eight draft behaviour contracts", "disposition": "carried", "owners": ["X04", "P00-05", "N05"]},
+        {"id": "R17", "title": "Absent report launchers; unrecognised templates must fail", "disposition": "carried", "owners": ["X26", "N24", "N75"]},
+        {"id": "R18", "title": "UAE VAT, HUID register, TCS/TDS returns", "disposition": "carried", "owners": ["X32", "P13-01", "N43", "X26"]},
+        {"id": "R19", "title": "Exercise each integration against a real device or credential", "disposition": "carried", "owners": ["X28", "N25"]},
+        {"id": "R20", "title": "Second customer database to test the single-sample assumption", "disposition": "carried", "owners": ["X03", "P12-03", "N79"]}
+      ]
+    },
+    {
+      "path": "FIXES-AND-SCALED-COMPARISON-2026-08-02.md",
+      "kind": "progress-record",
+      "items": [
+        {"id": "S1-S2", "title": "Test hardening fixes recorded with C1-C4", "disposition": "closed", "evidence": ["FIXES-AND-SCALED-COMPARISON-2026-08-02.md"]},
+        {"id": "Rem-1", "title": "Header-only rate-cut vouchers unpostable", "disposition": "carried", "owners": ["X16", "N45"]},
+        {"id": "Rem-2", "title": "618 value mismatches concentrated in fine-metal quantities", "disposition": "carried", "owners": ["X06", "N13"]},
+        {"id": "Rem-3", "title": "1,441 desktop values that the web leaves zero", "disposition": "carried", "owners": ["X05", "X06", "N13", "N61"]},
+        {"id": "Rem-4", "title": "212 missing rows and 53 desktop-only tables", "disposition": "carried", "owners": ["X06", "X30", "N78"]},
+        {"id": "Rem-5", "title": "Family builders for the remaining replay families", "disposition": "new-gap", "owners": ["G69", "N83"]},
+        {"id": "Rem-6", "title": "Sales replay in dependency order", "disposition": "carried", "owners": ["X06", "N83"]},
+        {"id": "Rem-7", "title": "GST returns read SL_DATA/PR_DATA instead of TAX_DATA", "disposition": "carried", "owners": ["X26", "N24"]},
+        {"id": "Rem-8", "title": "Register unclassified; readiness and type gates skip", "disposition": "closed", "evidence": ["web/docs/COMPLETION-REGISTER.json"], "note": "Blocking type-parity certification remains with N82."},
+        {"id": "Rem-9", "title": "UAE VAT, HUID register and TCS/TDS outputs", "disposition": "carried", "owners": ["X32", "N43", "X26"]},
+        {"id": "Rem-10", "title": "No integration exercised against a real credential", "disposition": "carried", "owners": ["X28", "N25"]}
+      ]
+    },
+    {
+      "path": "EXACT-END-TO-END-PARITY-PLAN-2026-08-29.md",
+      "kind": "plan",
+      "items": [
+        {"id": "P0-01", "title": "Backup covers 53 of 170 models; restore clear deletes broadly", "disposition": "carried", "owners": ["X31", "N28", "N80"]},
+        {"id": "P0-02", "title": "Generic XLSX/CSV/filter routes inherit the wrong report rights", "disposition": "closed", "evidence": ["web/apps/api/src/modules/reports/reportAuthorization.ts"]},
+        {"id": "P0-03", "title": "Data Repair routes not admin-only", "disposition": "closed", "evidence": ["web/apps/api/src/modules/rbac/routePolicy.ts"]},
+        {"id": "P0-04", "title": "Literal CASH/KASAR/ROUNDOFF/LABOUR/STKADJ/WTDIFF account fallbacks", "disposition": "carried", "owners": ["G40", "N59"]},
+        {"id": "P0-05", "title": "Unsafe tag split/weight/cancel/transfer routes visible", "disposition": "closed", "evidence": ["web/packages/core/containment.mjs", "parity-plan-2026-09-10/47-implementation-progress-n18-2026-09-29.md", "parity-plan-2026-09-10/48-implementation-progress-n19-2026-09-30.md"], "note": "Weight difference stays contained; its completion is X21/N19."},
+        {"id": "P0-06", "title": "Tag Opening reopen returns basic fields and edit blanks rich data", "disposition": "carried", "owners": ["G46", "N63"]},
+        {"id": "P0-07", "title": "G5 non-blocking; strict register and type parity not gates", "disposition": "carried", "owners": ["X34", "N82"]},
+        {"id": "P0-08", "title": "Cutover uses a hard-coded partial table list", "disposition": "carried", "owners": ["G63", "N78"]},
+        {"id": "P1-01", "title": "G5 differential 0/66", "disposition": "carried", "owners": ["X06", "N13", "N83"]},
+        {"id": "P1-02", "title": "Lifecycle incomplete for most families", "disposition": "carried", "owners": ["X05", "N51", "N63", "N67", "N68"]},
+        {"id": "P1-03", "title": "Pure rate cut rejects header-only vouchers", "disposition": "carried", "owners": ["X16", "N45"]},
+        {"id": "P1-04", "title": "Tag lifecycle is not a coherent state machine", "disposition": "carried", "owners": ["X18", "P07-01"]},
+        {"id": "P1-05", "title": "Report screen and exports disagree", "disposition": "carried", "owners": ["G37", "N57"]},
+        {"id": "P1-06", "title": "Report baselines prove only deterministic web rendering", "disposition": "carried", "owners": ["X25", "N74", "N75"]},
+        {"id": "P1-07", "title": "Only 3 of 11 contracts approved", "disposition": "carried", "owners": ["X04", "N05"]},
+        {"id": "P1-08", "title": "Four desktop-written tables lack web writes", "disposition": "carried", "owners": ["X05", "X06", "N13"]},
+        {"id": "P1-09", "title": "HUID, statutory and report scope incomplete", "disposition": "carried", "owners": ["X26", "G13", "N43"]},
+        {"id": "P1-10", "title": "Rights not certified for every form and action", "disposition": "carried", "owners": ["X29", "P11-04"]},
+        {"id": "P2-01", "title": "About 73% of desktop controls represented", "disposition": "carried", "owners": ["X07", "N05", "N77"]},
+        {"id": "P2-02", "title": "Per-form keyboard, focus and scanner behaviour", "disposition": "carried", "owners": ["X07", "P02-04", "N77"]},
+        {"id": "P2-03", "title": "Scale, camera and tag images not hardware-certified", "disposition": "carried", "owners": ["X28", "N25"]},
+        {"id": "P2-04", "title": "External integrations not live-proven", "disposition": "carried", "owners": ["X28", "N25", "N54"]},
+        {"id": "P2-05", "title": "Multi-user scratch tables and serials not fully safe", "disposition": "carried", "owners": ["X05", "P01-05", "N52"]},
+        {"id": "P2-06", "title": "No production performance or error-budget proof", "disposition": "carried", "owners": ["X31", "N80", "SP18"]},
+        {"id": "P2-07", "title": "Migration, disaster recovery, pilot and rollback not certified", "disposition": "carried", "owners": ["X30", "X31", "N78", "N79", "N80"]},
+        {"id": "WP-00-WP-15", "title": "Ordered work packages of the August plan", "disposition": "superseded", "owners": ["P00-01", "X01", "X04", "X05", "X06", "X18", "X26", "X30", "X31", "X33", "X34"], "note": "Document 07 maps each work package to the 83 packages and 34 cards."}
+      ]
+    },
+    {
+      "path": "DESKTOP-PARITY-EXECUTION-PLAN-2026-08-30.md",
+      "kind": "plan",
+      "items": [
+        {"id": "Phase-0", "title": "Make parity measurable", "disposition": "carried", "owners": ["X02", "X03", "N47", "N49"]},
+        {"id": "Phase-1", "title": "Extend the oracle to every family", "disposition": "carried", "owners": ["X06", "N83"]},
+        {"id": "Phase-2", "title": "Close database parity", "disposition": "carried", "owners": ["X05", "X06", "N13", "N61"]},
+        {"id": "Phase-3", "title": "Workflow parity", "disposition": "carried", "owners": ["X33", "N29"]},
+        {"id": "Phase-4", "title": "Form parity", "disposition": "carried", "owners": ["X07", "N05", "N77"]},
+        {"id": "Phase-5", "title": "Report parity", "disposition": "carried", "owners": ["X25", "X26", "N24", "N74", "N75"]},
+        {"id": "Phase-6", "title": "The 53 absent menu entries", "disposition": "carried", "owners": ["X01", "X32", "N70", "N72"]},
+        {"id": "Part-E", "title": "Cross-cutting release gates", "disposition": "carried", "owners": ["X34", "N82"]}
+      ]
+    },
+    {
+      "path": "PARITY-GAP-ANALYSIS-2026-08-30.md",
+      "kind": "gap-report",
+      "items": [
+        {"id": "WP-09", "title": "Restore the parity oracle loop", "disposition": "carried", "owners": ["X06", "N49", "N83"]},
+        {"id": "WP-10", "title": "Column completeness per writer", "disposition": "carried", "owners": ["X05", "N13"]},
+        {"id": "WP-11", "title": "Denormalised copies", "disposition": "carried", "owners": ["G42", "N61"]},
+        {"id": "WP-12", "title": "Rows written and rows invented", "disposition": "carried", "owners": ["X06", "N13"]},
+        {"id": "WP-13", "title": "Constructed keys", "disposition": "carried", "owners": ["X05", "N13", "N51"]},
+        {"id": "WP-14", "title": "Rate cutting", "disposition": "carried", "owners": ["X16", "N45"]},
+        {"id": "WP-15", "title": "The 53 absent menu entries", "disposition": "carried", "owners": ["X01", "X32", "N70", "N72"]}
+      ]
+    },
+    {
+      "path": "REMAINING-WORK-AND-WEB-VERIFICATION-2026-08-31.md",
+      "kind": "plan",
+      "items": [
+        {"id": "W1", "title": "API-backed browser harness (stubbed)", "disposition": "closed", "evidence": ["web/apps/web/test/browser.smoke.mjs"]},
+        {"id": "W1b", "title": "Live-API browser workflow tests", "disposition": "carried", "owners": ["X03", "N49"], "note": "The zero-mock suite exists (web/apps/web/test/parity.real-stack.mjs); a hermetic blocking CI run is N49."},
+        {"id": "W2", "title": "One end-to-end workflow per family through the UI", "disposition": "carried", "owners": ["X33", "N29", "N49"]},
+        {"id": "W3", "title": "Field and grid parity per form", "disposition": "carried", "owners": ["X07", "N05", "N77"]},
+        {"id": "W4", "title": "Calculations in the browser", "disposition": "carried", "owners": ["X04", "P02-02", "N48"]},
+        {"id": "W5", "title": "Validations and refusals in the UI", "disposition": "carried", "owners": ["X07", "N50"]},
+        {"id": "W6", "title": "Keyboard and entry flow", "disposition": "carried", "owners": ["X07", "P02-04", "N77"]},
+        {"id": "W7", "title": "Reports", "disposition": "carried", "owners": ["X26", "N24", "N57"]}
+      ]
+    },
+    {
+      "path": "DESKTOP-PARITY-IMPLEMENTATION-PLAN-2026-09-01.md",
+      "kind": "plan",
+      "items": [
+        {"id": "P0-1-P0-3", "title": "Depth gate, round-trip depth harness and per-form budget", "disposition": "carried", "owners": ["X02", "N47"], "note": "depth:parity and depth:deadcells run in CI; the per-form budget is not yet a release gate."},
+        {"id": "P1-1", "title": "Dhiran interest always zero", "disposition": "closed", "evidence": ["DESKTOP-PARITY-IMPLEMENTATION-PLAN-2026-09-01.md"]},
+        {"id": "P1-2", "title": "Jobwork/karigar labour never derived", "disposition": "closed", "evidence": ["DESKTOP-PARITY-IMPLEMENTATION-PLAN-2026-09-01.md"]},
+        {"id": "P1-3", "title": "Karigar issue loses wastage", "disposition": "carried", "owners": ["X23", "N67"]},
+        {"id": "P1-4-P1-5", "title": "Function-key contract and GridKeyboard on operator grids", "disposition": "closed", "evidence": ["web/apps/web/components/FormKeys.tsx", "web/apps/web/components/GridKeyboard.tsx"]},
+        {"id": "P2-1", "title": "Shared sub-detail grid component", "disposition": "closed", "evidence": ["web/apps/web/components/SubDetailGrid.tsx"]},
+        {"id": "P2-2-P2-3", "title": "Adopt the sub-detail grid and add the missing API arrays", "disposition": "carried", "owners": ["X07", "P02-02", "G54", "N68"]},
+        {"id": "P3-0-P3-4", "title": "Wire every field the API already accepts", "disposition": "carried", "owners": ["X02", "P02-02"]},
+        {"id": "P4-0-P4-5", "title": "Honour the settings the UI offers", "disposition": "carried", "owners": ["X08", "P02-05"]},
+        {"id": "P5-1-P5-5", "title": "Per-cell recalculation kernel", "disposition": "carried", "owners": ["X04", "P02-03", "N48"]},
+        {"id": "P6-1/P6-3/P6-4", "title": "Discharge tag split, cancel and transfer containment", "disposition": "closed", "evidence": ["web/packages/core/containment.mjs", "parity-plan-2026-09-10/47-implementation-progress-n18-2026-09-29.md", "parity-plan-2026-09-10/48-implementation-progress-n19-2026-09-30.md"]},
+        {"id": "P6-2", "title": "Discharge tag weight-difference containment", "disposition": "carried", "owners": ["X21", "P07-05", "N19"]},
+        {"id": "P6-5-P6-6", "title": "Tag Opening update and retiring the containment rules", "disposition": "carried", "owners": ["G46", "N63", "X21"]},
+        {"id": "P7-0-P7-4", "title": "Grid column completion and the editable totals band", "disposition": "carried", "owners": ["X07", "X13", "N77"]},
+        {"id": "P8-1", "title": "Lot-based manufacturing", "disposition": "carried", "owners": ["X23", "P08-03", "N21"]},
+        {"id": "P8-2", "title": "Rate-cut receive side and booking integrity", "disposition": "carried", "owners": ["X16", "N45", "P06-04"]},
+        {"id": "P8-3", "title": "Sales-family imports and transfers", "disposition": "carried", "owners": ["X13", "P05-06"]},
+        {"id": "P8-4", "title": "Tour and approval family", "disposition": "carried", "owners": ["X17", "N22"]},
+        {"id": "P8-5", "title": "Missing print paths", "disposition": "carried", "owners": ["X25", "N74"]},
+        {"id": "P8-6", "title": "Scope decisions recorded, not drifting", "disposition": "carried", "owners": ["X32", "D21"]},
+        {"id": "P9-1-P9-3", "title": "Report workflows, parameter richness and report authorisation", "disposition": "carried", "owners": ["X26", "N24", "N57"]},
+        {"id": "P10-1-P10-4", "title": "Masters depth: child grids, calculations, validation, provisioning", "disposition": "carried", "owners": ["X10", "N58", "N69"]},
+        {"id": "P11-1-P11-3", "title": "Parity certification and record update", "disposition": "carried", "owners": ["X34", "N82", "N87"]}
+      ]
+    },
+    {
+      "path": "DESKTOP-VS-WEB-RICHNESS-GAP-REPORT-2026-09-01.md",
+      "kind": "gap-report",
+      "items": [
+        {"id": "Top-1", "title": "Lot-based manufacturing has no web route", "disposition": "carried", "owners": ["X23", "N21"]},
+        {"id": "Top-2", "title": "Stone and diamond sub-detail absent product-wide", "disposition": "carried", "owners": ["X07", "P02-02", "G54", "N68"]},
+        {"id": "Top-3", "title": "Five tag workflows returned 503", "disposition": "closed", "evidence": ["web/packages/core/containment.mjs"], "note": "Weight difference stays contained under X21/N19."},
+        {"id": "Top-4", "title": "74 settings do nothing on the web", "disposition": "carried", "owners": ["X08", "P02-05"]},
+        {"id": "Top-5", "title": "Rate cut had no receive side", "disposition": "carried", "owners": ["X16", "N45"]},
+        {"id": "Top-6", "title": "Bullion booking draw-down not reversed", "disposition": "carried", "owners": ["X16", "P06-04"]},
+        {"id": "Top-7", "title": "Dhiran auto-interest bypassed", "disposition": "closed", "evidence": ["DESKTOP-PARITY-IMPLEMENTATION-PLAN-2026-09-01.md"]},
+        {"id": "Top-8", "title": "Jobwork labour never derived", "disposition": "closed", "evidence": ["DESKTOP-PARITY-IMPLEMENTATION-PLAN-2026-09-01.md"]},
+        {"id": "Top-9", "title": "Karigar issue loses wastage", "disposition": "carried", "owners": ["X23", "N67"]},
+        {"id": "Top-10", "title": "18 report workflows missing", "disposition": "carried", "owners": ["X26", "N24"]},
+        {"id": "Close-11", "title": "Decide TR_PR_SL_UAE, TR_SALE_RTN_UAE and NextDm scope", "disposition": "carried", "owners": ["X32", "D01", "P13-01", "P13-02"]}
+      ]
+    },
+    {
+      "path": "PARITY-EVALUATION-2026-09-28.md",
+      "kind": "audit",
+      "items": [
+        {"id": "D1-D6", "title": "Running-app defects (finance books, sale basis, report slugs, order cancel scope, 400-on-bad-input)", "disposition": "closed", "evidence": ["parity-plan-2026-09-10/45-implementation-progress-eval-defects-2026-09-29.md"]},
+        {"id": "Rec-1-3", "title": "Fix the evaluation defects and rerun the real stack", "disposition": "closed", "evidence": ["parity-plan-2026-09-10/45-implementation-progress-eval-defects-2026-09-29.md"]},
+        {"id": "Rec-4", "title": "Remaining wholesale/rate-cut branches and a fresh differential", "disposition": "carried", "owners": ["X06", "X16", "N45"]},
+        {"id": "Rec-4-harness", "title": "Four known replay-input defects in the shipped harness", "disposition": "new-gap", "owners": ["G69", "N83"]},
+        {"id": "Rec-4-builders", "title": "Replay builders for karigar 050/052, orders 020 and estimate 032", "disposition": "new-gap", "owners": ["G69", "N83"]},
+        {"id": "Rec-5", "title": "Runtime request schemas", "disposition": "carried", "owners": ["G25", "N50"]},
+        {"id": "Rec-6", "title": "Desktop-shaped provisioning", "disposition": "carried", "owners": ["G38", "N58", "N59"]},
+        {"id": "Rec-7", "title": "Migration and cutover", "disposition": "carried", "owners": ["G63", "N78", "N79"]},
+        {"id": "Next25-columns", "title": "21 Next25 columns absent from the web schema", "disposition": "new-gap", "owners": ["G70", "N84"]},
+        {"id": "Return-cells", "title": "Sales Return grid cells that no writer consumes (32 after RATE_WITH)", "disposition": "carried", "owners": ["X13", "N50"]}
+      ]
+    },
+    {
+      "path": "report.md",
+      "kind": "audit",
+      "items": [
+        {"id": "Gap-1-7", "title": "Extraction gaps: runtime assets, reports, devices and UI semantics", "disposition": "carried", "owners": ["X32", "N25", "N74", "N75", "N76", "N77"]}
+      ]
+    },
+    {
+      "path": "req.md",
+      "kind": "requirements",
+      "items": [
+        {"id": "Baseline", "title": "Extraction-audit and web-rebuild requirements baseline", "disposition": "superseded", "owners": ["X01", "X34", "N87"], "note": "Restated as Requirements 1-22 in .kiro/specs/datacare-web-rebuild/requirements.md, traced below."}
+      ]
+    },
+    {
+      "path": ".kiro/specs/datacare-web-rebuild/requirements.md",
+      "kind": "requirements",
+      "items": [
+        {"id": "Req-01-04", "title": "Extraction audit, unified centre, completeness manifest, external blockers", "disposition": "closed", "evidence": ["unified/MANIFEST.md", "unified/README.md"]},
+        {"id": "Req-05", "title": "Multi-tenant data foundation with original keys", "disposition": "carried", "owners": ["P01-01", "X05"]},
+        {"id": "Req-06", "title": "Authentication and company/year selection", "disposition": "carried", "owners": ["X09", "N55"]},
+        {"id": "Req-07", "title": "Users and rights", "disposition": "carried", "owners": ["X29", "P11-04"]},
+        {"id": "Req-08", "title": "Masters", "disposition": "carried", "owners": ["X10", "P03-01", "P03-02", "N58", "N69"]},
+        {"id": "Req-09", "title": "Calculation engine", "disposition": "carried", "owners": ["X04", "P01-02", "N48"]},
+        {"id": "Req-10", "title": "Sales", "disposition": "carried", "owners": ["X13", "P05-01"]},
+        {"id": "Req-11", "title": "Purchase", "disposition": "carried", "owners": ["X12", "P04-01"]},
+        {"id": "Req-12", "title": "Stock and tags", "disposition": "carried", "owners": ["X18", "P07-01"]},
+        {"id": "Req-13", "title": "Manufacturing and karigar", "disposition": "carried", "owners": ["X23", "P08-01"]},
+        {"id": "Req-14", "title": "Dhiran and loans", "disposition": "carried", "owners": ["X24", "P09-01"]},
+        {"id": "Req-15", "title": "Finance, cash and bank", "disposition": "carried", "owners": ["X16", "P06-01"]},
+        {"id": "Req-16", "title": "Accounting and ledgers", "disposition": "carried", "owners": ["X16", "X26", "P06-06"]},
+        {"id": "Req-17", "title": "GST and e-invoice", "disposition": "carried", "owners": ["X15", "X26", "N16"]},
+        {"id": "Req-18", "title": "Membership and schemes", "disposition": "carried", "owners": ["X24", "P09-03"]},
+        {"id": "Req-19", "title": "Reports and printable documents", "disposition": "carried", "owners": ["X25", "X26", "N74", "N75"]},
+        {"id": "Req-19.2", "title": "Partial invoice listing missing fields", "disposition": "decision", "owners": ["D23"]},
+        {"id": "Req-20", "title": "WhatsApp, SMS, QR and tag printing", "disposition": "carried", "owners": ["X28", "N25", "N54"]},
+        {"id": "Req-21", "title": "Behavioural parity verification", "disposition": "carried", "owners": ["X03", "X06", "X34", "N82"]},
+        {"id": "Req-21.1", "title": "Block a transaction when a parity check differs", "disposition": "decision", "owners": ["D24"]},
+        {"id": "Req-22", "title": "Phased and incremental delivery", "disposition": "carried", "owners": ["X31", "X33", "N80", "N82", "D25"]},
+        {"id": "Traceability", "title": "No requirement-to-plan mapping existed", "disposition": "new-gap", "owners": ["G73", "N87"]}
+      ]
+    },
+    {
+      "path": "parity-plan-2026-09-10/01-current-state-and-gaps.md",
+      "kind": "gap-report",
+      "items": [
+        {"id": "GAP-01-GAP-07", "title": "Manufacturing, finance, design, masters, tags, contracts, forms, settings", "disposition": "carried", "owners": ["X23", "X16", "X11", "X10", "X18", "X19", "X20", "X21", "X04", "X07", "X08"]},
+        {"id": "GAP-08-GAP-12", "title": "Documents, reports, utilities, providers", "disposition": "carried", "owners": ["X25", "X26", "X27", "N26", "N54", "N74", "N75"]},
+        {"id": "GAP-13-GAP-18", "title": "Scanners, verification environment, differential, certification", "disposition": "carried", "owners": ["X02", "X03", "X04", "X06", "X26", "X34", "N47", "N49", "N82"]},
+        {"id": "GAP-19", "title": "Devices and editions", "disposition": "carried", "owners": ["X28", "X32", "N25"]}
+      ]
+    },
+    {
+      "path": "parity-plan-2026-09-10/02-implementation-plan.md",
+      "kind": "plan",
+      "items": [
+        {"id": "P00-01-P14-06", "title": "The 83 original work packages", "disposition": "carried", "owners": ["P00-01", "P14-06"], "note": "All 83 package IDs are kept unchanged in execution-backlog.json priorPackages; validate_plan.py proves none is lost and none is accepted."}
+      ]
+    },
+    {
+      "path": "parity-plan-2026-09-10/03-verification-and-release.md",
+      "kind": "plan",
+      "items": [
+        {"id": "R00-R14", "title": "Release gates and scenario anchors", "disposition": "carried", "owners": ["R00", "R14", "X34", "N82"]}
+      ]
+    },
+    {
+      "path": "parity-plan-2026-09-10/08-plan-reverification.md",
+      "kind": "audit",
+      "items": [
+        {"id": "RV-01-RV-08", "title": "Plan completeness re-verification findings", "disposition": "carried", "owners": ["X01", "X02", "X03", "X04", "X09", "X25", "X30", "X31", "X32", "X33", "X34", "N02", "N05", "N25", "N82"]}
+      ]
+    },
+    {
+      "path": "parity-plan-2026-09-10/11-current-completion-review.md",
+      "kind": "audit",
+      "items": [
+        {"id": "CR-01", "title": "Containment and tag workflows", "disposition": "carried", "owners": ["X01", "X18", "X21", "X31", "N19", "N27", "N28"], "note": "Backlog finding for X18 was stale; corrected by currentFindingCorrection on 1 October."},
+        {"id": "CR-02", "title": "E Credit Note document workflow", "disposition": "carried", "owners": ["X15", "X28", "N16", "N25"], "note": "Backlog finding for X15 was stale; corrected by currentFindingCorrection on 1 October."},
+        {"id": "CR-03", "title": "Tour Order fulfilment breadth", "disposition": "carried", "owners": ["X14", "N22", "N44"]},
+        {"id": "CR-04", "title": "Order and document identity", "disposition": "carried", "owners": ["X05", "X25", "N31"]},
+        {"id": "CR-05", "title": "Design components", "disposition": "carried", "owners": ["X11", "N14"]},
+        {"id": "CR-06", "title": "Lot manufacturing writes and journey", "disposition": "carried", "owners": ["X23", "N21", "N71"]},
+        {"id": "CR-07", "title": "Report and document binding", "disposition": "carried", "owners": ["X25", "X26", "N24", "N73", "N74", "N75"]},
+        {"id": "CR-08", "title": "Reproducible real stack and business journeys", "disposition": "carried", "owners": ["X03", "X33", "N04", "N29", "N49"]},
+        {"id": "CR-09", "title": "Scanner accuracy", "disposition": "carried", "owners": ["X02", "N05", "N47"]},
+        {"id": "CR-10", "title": "Behaviour contracts and vectors", "disposition": "carried", "owners": ["X04", "N05"]},
+        {"id": "CR-11", "title": "Form sessions and offline behaviour", "disposition": "carried", "owners": ["X09", "N62"]},
+        {"id": "CR-12", "title": "Exact-set certification", "disposition": "carried", "owners": ["X34", "N47"]},
+        {"id": "CR-13", "title": "Release-certification coverage", "disposition": "carried", "owners": ["X34", "G66", "N82"]},
+        {"id": "CR-14", "title": "Operations, migration and rollout", "disposition": "carried", "owners": ["X28", "X29", "X30", "X31", "X32", "X33", "X34", "N25", "N27", "N28", "N29", "N30", "N78", "N79", "N80", "N81", "N82"]}
+      ]
+    },
+    {
+      "path": "parity-plan-2026-09-10/12-execution-addendum.md",
+      "kind": "plan",
+      "items": [
+        {"id": "X01-X34", "title": "The 34 continuation cards", "disposition": "carried", "owners": ["X01", "X34"], "note": "All 34 card IDs are kept in execution-backlog.json priorCards; validate_plan.py proves none is lost or closed."}
+      ]
+    },
+    {
+      "path": "web/docs/GAP-ANALYSIS-AND-PLAN.md",
+      "kind": "gap-report",
+      "items": [
+        {"id": "Closed-8", "title": "Six scheme field/route defects, one retracted karigar false positive, rate-cut Rojmel", "disposition": "closed", "evidence": ["web/docs/GAP-ANALYSIS-AND-PLAN.md"]},
+        {"id": "Tables", "title": "COUNTRY, REM and image table ownership", "disposition": "carried", "owners": ["P01-01", "X05", "X30", "P12-01"]},
+        {"id": "Scheme", "title": "Scheme adjustment and passbook depth", "disposition": "carried", "owners": ["X24", "N23", "N66"]},
+        {"id": "Rojmel-report", "title": "Real Rojmel report and posting footprints", "disposition": "carried", "owners": ["X06", "X25", "X26", "N24", "N57"]},
+        {"id": "BAL_GR", "title": "Trading groups and final statements", "disposition": "carried", "owners": ["G44", "N60"]},
+        {"id": "Small-masters", "title": "Small masters", "disposition": "carried", "owners": ["N58", "N69", "N73"]},
+        {"id": "Type-checking", "title": "Test type checking", "disposition": "carried", "owners": ["G20", "N47"]},
+        {"id": "Wholesale", "title": "Wholesale sale remainder", "disposition": "carried", "owners": ["X16", "N45"]}
+      ]
+    },
+    {
+      "path": "web/docs/MIGRATION-COMPLETION-PLAN.md",
+      "kind": "plan",
+      "items": [
+        {"id": "Phase-0", "title": "Instruments: differ pairing, loud footprint failure, numeric types, classified register", "disposition": "closed", "evidence": ["web/docs/MIGRATION-COMPLETION-PLAN.md"]},
+        {"id": "Phase-1-2", "title": "Family parity and form classification", "disposition": "carried", "owners": ["X04", "X06", "X01", "X07", "X10", "X32", "N13", "N70", "N72", "N77"]},
+        {"id": "Phase-3-4", "title": "Reports and settings", "disposition": "carried", "owners": ["X25", "X26", "X08", "N57", "N73", "N74", "N75"]},
+        {"id": "Phase-5", "title": "Migration", "disposition": "carried", "owners": ["X30", "N78", "N79"]},
+        {"id": "Phase-6", "title": "Owner decisions", "disposition": "carried", "owners": ["D01", "D14", "D15", "D22"]},
+        {"id": "Phase-7", "title": "Integrations", "disposition": "carried", "owners": ["X28", "N25", "N54"]},
+        {"id": "Phase-8", "title": "Security, performance, operations and UAT", "disposition": "carried", "owners": ["X33", "X34", "N55", "N80", "N81", "N82"]},
+        {"id": "SaaS-product", "title": "Sellable multi-tenant product (control plane, plans, scale, compliance)", "disposition": "new-gap", "owners": ["G75", "G76", "G77", "G78", "SP04", "SP15", "SP09", "SP19"]}
+      ]
+    },
+    {
+      "path": "web/docs/STATE-OF-PARITY.md",
+      "kind": "status",
+      "items": [
+        {"id": "Open-list", "title": "Desktop diff, setting matrices, opening carry, report data, test typing, hardware, second sample", "disposition": "carried", "owners": ["X03", "X06", "X08", "X16", "X25", "X26", "X28", "X32", "N25", "N47", "N57", "N60", "N78", "N79"]}
+      ]
+    },
+    {
+      "path": "web/docs/MODULE-VERIFICATION-CATALOGUE.md",
+      "kind": "catalogue",
+      "items": [
+        {"id": "Unverified", "title": "Modules measured but not verified against the desktop", "disposition": "carried", "owners": ["X03", "X06", "X08", "X25", "X26", "N29"]}
+      ]
+    },
+    {
+      "path": "web/docs/PLAN-ROJMEL-FINAL-THREE.md",
+      "kind": "plan",
+      "items": [
+        {"id": "FineJV-Karigar", "title": "Fine JV and karigar receipt Rojmel projections", "disposition": "closed", "evidence": ["web/apps/api/src/modules/finance/fineJv.ts", "web/apps/api/src/modules/manufacturing/karigar.ts"]},
+        {"id": "Report-acceptance", "title": "Rojmel report and whole-family acceptance", "disposition": "carried", "owners": ["X06", "X16", "X23", "X26", "N24", "N45"]}
+      ]
+    },
+    {
+      "path": "web/docs/VALIDATION-PLAN.md",
+      "kind": "plan",
+      "items": [
+        {"id": "L1-L2", "title": "Calculation vectors and database footprints", "disposition": "carried", "owners": ["X04", "X05", "X06", "N48", "N50", "N51", "N52", "N53", "N63"]},
+        {"id": "L3-L4", "title": "Cross-application comparison and report data", "disposition": "carried", "owners": ["X03", "X06", "X25", "X26", "N29", "N57", "N74", "N75", "N82"]},
+        {"id": "L5-L6", "title": "UI and keyboard; settings", "disposition": "carried", "owners": ["X07", "X08", "N77"]},
+        {"id": "L7-L8", "title": "Security and load", "disposition": "carried", "owners": ["N53", "N54", "N55", "N80", "N81"]},
+        {"id": "L9-L11", "title": "Migration, devices and providers, business UAT", "disposition": "carried", "owners": ["X28", "X30", "X33", "N25", "N29", "N54", "N78", "N79", "N82"]}
+      ]
+    },
+    {
+      "path": "project-memory/contracts/README.md",
+      "kind": "contracts",
+      "items": [
+        {"id": "Draft-contracts", "title": "Eight draft form contracts with NOT ENFORCED validations and blank vectors", "disposition": "carried", "owners": ["X04", "P00-05", "X07"]}
+      ]
+    },
+    {
+      "path": "project-memory/decisions/ADR-0002-deferred-scaling.md",
+      "kind": "decision",
+      "items": [
+        {"id": "Deferred-levers", "title": "Autoscaling, read replicas, pooling tier, partitioning, multi-region without activation triggers", "disposition": "new-gap", "owners": ["G77", "SP24"]}
+      ]
+    },
+    {
+      "path": "project-memory/video-research/_kb/README.md",
+      "kind": "knowledge-base",
+      "items": [
+        {"id": "KB-transaction", "title": "Sales, receipts, returns, bank, orders, purchase, contra, approval, labour and bill allocation to-verify notes", "disposition": "carried", "owners": ["X12", "X13", "X14", "X16", "X17", "N22", "N33", "N37", "N44", "N46", "N63", "N64", "N68", "N74", "N77"]},
+        {"id": "KB-master", "title": "Company detail, rights, family/photo, auto item, rich tags and restore notes", "disposition": "carried", "owners": ["X10", "X29", "X31", "N28", "N58", "N69", "N80"]},
+        {"id": "KB-karigar", "title": "Karigar grids, tagging and labour settlement notes", "disposition": "carried", "owners": ["X23", "N67", "N71", "N77"]},
+        {"id": "KB-other", "title": "Tag print, physical stock, order cancel, reminders, daily rate and bank reconciliation notes", "disposition": "carried", "owners": ["X18", "X22", "X27", "X28", "N18", "N20", "N25", "N37"]}
+      ]
+    },
+    {
+      "path": "web-implementation-spec/06_Parity/README.md",
+      "kind": "risk-register",
+      "items": [
+        {"id": "R1", "title": "Signed on-hand stock including fine", "disposition": "closed", "evidence": ["web/apps/api/src/modules/stock/stock.ts"]},
+        {"id": "R8", "title": "Generic master update", "disposition": "closed", "evidence": ["web/apps/api/src/modules/masters/master.service.ts"]},
+        {"id": "R2-R7", "title": "Tags, dhiran, scheme, footprints, purchase, settings risks", "disposition": "carried", "owners": ["X18", "X06", "X24", "N65", "X12", "N32", "N34", "X08", "X16"]},
+        {"id": "R9-R14", "title": "Masters, providers, karigar/approval, identity, kernel and statement risks", "disposition": "carried", "owners": ["X10", "N58", "X28", "N25", "X16", "X17", "N67", "N70", "X05", "N51", "X04", "N48", "G44", "N60"]}
+      ]
+    },
+    {
+      "path": "web-implementation-spec/07_Build_Plan/README.md",
+      "kind": "plan",
+      "items": [
+        {"id": "Phases-0-12", "title": "Earlier build phases", "disposition": "superseded", "owners": ["P00-01", "N47", "N82"], "note": "Replaced by the master plan waves (document 02) and phases A-F (document 11)."}
+      ]
+    },
+    {
+      "path": "web/apps/api/SECURITY.md",
+      "kind": "security",
+      "items": [
+        {"id": "Checklist", "title": "TLS, rotation, rate limits, audit retention, DR, scanning, pen test, monitoring", "disposition": "carried", "owners": ["N54", "N55", "N80", "N81", "N82", "SP20"]}
+      ]
+    },
+    {
+      "path": "project-memory/parity/SECURITY-REVIEW.md",
+      "kind": "security",
+      "items": [
+        {"id": "SQL-static-rule", "title": "No rule rejects future unbound SQL interpolation", "disposition": "new-gap", "owners": ["G79", "N88"]},
+        {"id": "Rate-limit-origin", "title": "Global rate limits and origin/header checks", "disposition": "carried", "owners": ["G34", "N55"]}
+      ]
+    },
+    {
+      "path": "web/docs/COMPLETION-REGISTER.json",
+      "kind": "register",
+      "items": [
+        {"id": "Acceptance", "title": "198 menus implemented-unverified, none verified", "disposition": "carried", "owners": ["X01", "X34", "N29", "N30"]},
+        {"id": "Mapping-errors", "title": "20 rows with wrong desktop forms or web surfaces", "disposition": "new-gap", "owners": ["G71", "N85"]}
+      ]
+    },
+    {
+      "path": "web/docs/README.md",
+      "kind": "index",
+      "items": [
+        {"id": "Fragmentation", "title": "Several competing documentation entry points and stale status claims", "disposition": "new-gap", "owners": ["G74", "N87"]}
+      ]
+    },
+    {
+      "path": "web/package.json",
+      "kind": "dependencies",
+      "items": [
+        {"id": "Runtime-support", "title": "Next.js 15.1.6, React 19.0.0, Node 20 and Prisma 6 past or near end of support or inside advisory ranges", "disposition": "new-gap", "owners": ["G72", "N86", "D26"]}
+      ]
+    },
+    {
+      "path": "web/apps/api/src/routes/txn.ts",
+      "kind": "code",
+      "items": [
+        {"id": "Route-monolith", "title": "8,400-line route file with name-regex error mapping", "disposition": "new-gap", "owners": ["G79", "N88", "D27", "SP03"]}
+      ]
+    },
+    {
+      "path": "unified/src/csharp/DataCareNext/UT_BKP.cs",
+      "kind": "desktop-utility",
+      "items": [
+        {"id": "Desktop-only-utilities", "title": "Drive backup, HDD registry, global tiles, destructive import/export and renumber need SaaS-safe forms", "disposition": "new-gap", "owners": ["G80", "SP21", "D25"]}
+      ]
+    }
+  ]
+}

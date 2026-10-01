@@ -1,3 +1,7 @@
+> **1 October 2026.** The documentation entry point is now [`docs/README.md`](../docs/README.md) and work status lives
+> in the plan backlogs (`docs/master-parity-plan-2026-09-29/execution-backlog.json`). This file still defines the
+> continuity protocol for `HANDOFF.md`, `JOURNAL.md` and `state.json`.
+
 # Project Memory & Continuity Store
 
 This directory is the **single source of truth for project progress** across sessions.

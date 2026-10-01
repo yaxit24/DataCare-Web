@@ -66,6 +66,13 @@ jobs:
         if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
         run: python3 docs/master-parity-plan-2026-09-29/validate_plan.py
 
+      # Documentation hub (N87): menu catalog against MDI dispatch, pages, declared routes and plan IDs; every
+      # Markdown file classified; links, file citations and line ranges resolve; no credential-shaped strings.
+      # Needs only Python and the checkout, so it runs even when dependency setup failed.
+      - name: 'Gate: documentation hub, menu catalog and document register are consistent'
+        if: ${{ !cancelled() }}
+        run: python3 docs/tools/docs_check.py
+
   quality:
     runs-on: ubuntu-latest
     services:

@@ -1598,7 +1598,12 @@
         "source": "42-implementation-progress-round15.md",
         "qualification": "Remaining work or acceptance, not a claim that all code in this area is absent."
       },
-      "findingQualification": "Read with currentRemainingGap and implementationProgress; older CR counts are historical observations requiring current revalidation."
+      "findingQualification": "Read with currentRemainingGap and implementationProgress; older CR counts are historical observations requiring current revalidation.",
+      "currentFindingCorrection": {
+        "asOf": "2026-10-01",
+        "finding": "The E CRNT and E INVOICE create, edit, delete and print lifecycle exists (N16: modules/einvoice/eBillWriter.ts, /e-credit-notes, /e-invoices); desktop replay, provider acceptance and the Crystal layouts remain. The original finding above is kept as history.",
+        "source": "docs/master-parity-plan-2026-09-29/10-gap-register-2026-10-01.md"
+      }
     },
     {
       "id": "X16",
@@ -1782,7 +1787,12 @@
         "source": "42-implementation-progress-round15.md",
         "qualification": "Remaining work or acceptance, not a claim that all code in this area is absent."
       },
-      "findingQualification": "Read with currentRemainingGap and implementationProgress; older CR counts are historical observations requiring current revalidation."
+      "findingQualification": "Read with currentRemainingGap and implementationProgress; older CR counts are historical observations requiring current revalidation.",
+      "currentFindingCorrection": {
+        "asOf": "2026-10-01",
+        "finding": "Tag cancel and tag transfer were released by N18 and tag split by N19 (web/packages/core/containment.mjs); tag weight difference is still contained. The original finding above is kept as history.",
+        "source": "docs/master-parity-plan-2026-09-29/10-gap-register-2026-10-01.md"
+      }
     },
     {
       "id": "X19",
@@ -3694,7 +3704,7 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "No raw ISO timestamps; Indian grouping; screen, PDF and XLSX totals equal server totals",
-      "gapIds": "G37",
+      "gapIds": "G37, G81",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
@@ -4077,6 +4087,104 @@
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N83",
+      "status": "planned",
+      "action": "Replay harness: port the four known input corrections and add builders for karigar 050/052, sales order 020 and estimate 032",
+      "parentLabels": "P00-04, P01-03, X03/X06",
+      "startAfter": [
+        "N49"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Each builder replays a captured desktop voucher to an identical write set and a broken mapping fails; G5 reports coverage per family",
+      "gapIds": "G69",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N84",
+      "status": "planned",
+      "action": "Next25 edition columns: migration, writers, readers, import and differential for the 21 absent columns",
+      "parentLabels": "P01-01, P13-01, X05/X32",
+      "startAfter": [
+        "N47"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "A Next25 purchase and rate cut write the desktop column set; imports preserve the values",
+      "gapIds": "G70",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N85",
+      "status": "planned",
+      "action": "Correct the 20 wrong completion-register rows (forms and web surfaces), navigation labels and register:check against MDI dispatch",
+      "parentLabels": "P00-01, P00-03, X01",
+      "startAfter": [
+        "N47"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Register, navigation and menu catalog agree; register:check fails on a planted mismatch",
+      "gapIds": "G71",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N86",
+      "status": "planned",
+      "action": "Supported runtime: patched Next.js 15.5 and React, Node 24 LTS in CI and images, advisory gate, Next 16 and Prisma 7 decision",
+      "parentLabels": "P00-04, P12-05, X31/X34",
+      "startAfter": [],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "No installed package inside a known critical or high advisory; CI and images on Node 24; D26 outcome recorded",
+      "gapIds": "G72",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N87",
+      "status": "implemented-unverified",
+      "action": "Documentation hub, handbooks, generated menu catalog, document register, lineage register and requirement traceability with a blocking check",
+      "parentLabels": "P00-01, P14-06, X01/X34",
+      "startAfter": [
+        "N47"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "docs_check.py and validate_plan.py pass in CI and fail on a planted unclassified file, broken link or unknown owner; independent review of one catalog tab per wave",
+      "gapIds": "G73, G74",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-01",
+      "evidence": [
+        "docs/README.md",
+        "docs/handbook/menu-catalog.jsonl",
+        "docs/handbook/doc-register.json",
+        "docs/tools/docs_check.py",
+        "docs/master-parity-plan-2026-09-29/lineage-register.json",
+        "docs/master-parity-plan-2026-09-29/12-lineage-verification-2026-10-01.md"
+      ],
+      "statusNote": "Hub, Desktop and Web handbooks, the 198-row menu catalog (validated against MDI_FORM dispatch, page files, the 608 declared routes and plan identifiers), the document register classifying every Markdown file, the lineage register (228 items) and the Phase 1 and Phase 2 plans landed together; docs_check.py runs in the static-gates CI job. Independent catalog review and D23/D24 approval remain."
+    },
+    {
+      "id": "N88",
+      "status": "planned",
+      "action": "Module boundaries: per-module Fastify route plugins with schemas, typed error taxonomy, shared voucher editor, size budgets and import/SQL lint",
+      "parentLabels": "P00-05, P02-01, X04/X07",
+      "startAfter": [
+        "N47"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "routes/txn.ts shrinks with each moved family; budgets and lint fail on planted violations; screens on the shared editor pass unchanged-save tests",
+      "gapIds": "G79",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
     }
   ],
   "amendments": [
@@ -4099,6 +4207,13 @@
       "auditBaseline": "0da250a150d0f0a43c6326e8b6925910df41c2c7",
       "evidence": "evidence/audit-2026-10-01/observations.json",
       "meaning": "Full-stack audit (real PostgreSQL, zero-mock browser, desktop databases). Adds gaps G20-G66, decisions D15-D22 and slices N47-N82; corrects N32, N34, N36, N38, N39, N40, N43 and N45 to in-progress and N41, N42 to implemented-unverified with evidence. No acceptance is closed."
+    },
+    {
+      "date": "2026-10-01",
+      "document": "12-lineage-verification-2026-10-01.md",
+      "mainBaseline": "4beba05",
+      "evidence": "lineage-register.json",
+      "meaning": "Lineage verification of every earlier plan, gap list, audit and requirement (228 items: 32 closed, 176 carried, 14 new gaps, 4 superseded, 2 decisions). Adds gaps G69-G81 (G81 from the independent review), decisions D23-D27 and slices N83-N88 (N87 implemented-unverified); Phase 2 gaps G75-G78 and G80 are owned by phase2-backlog.json. Corrects the stale X15 and X18 findings. No acceptance is closed."
     }
   ],
   "releaseGates": [

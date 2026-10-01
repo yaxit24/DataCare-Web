@@ -1,3 +1,7 @@
+> **Superseded as the entry point (1 October 2026).** Start at the [documentation hub](../../docs/README.md). This
+> index of nine documents is kept as history; the [document register](../../docs/handbook/doc-register.md) labels each
+> of them as current, reference, historical or superseded.
+
 # Documentation index
 
 Nine documents. Read in this order depending on what you need.

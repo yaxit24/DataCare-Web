@@ -6,12 +6,15 @@ This repository is both an active application repository and a preservation base
 
 | Concern | Canonical path | Start document |
 |---|---|---|
-| Active web implementation | `web/` | `web/docs/HANDOFF.md` |
-| Current parity plan/status | `parity-plan-2026-09-10/` | `parity-plan-2026-09-10/README.md` |
-| Cross-session state and catalogs | `project-memory/` | `project-memory/README.md` |
-| Desktop extraction/resource center | `unified/` | `unified/README.md` |
+| Documentation entry point | `docs/` | `docs/README.md` |
+| Active web implementation | `web/` | `docs/handbook/web/README.md` (operating history: `web/docs/HANDOFF.md`) |
+| Current plan and status | `docs/master-parity-plan-2026-09-29/` | `docs/master-parity-plan-2026-09-29/README.md`; status in `execution-backlog.json` and `phase2-backlog.json` |
+| September plan, progress records and evidence | `parity-plan-2026-09-10/` | `parity-plan-2026-09-10/README.md` |
+| Cross-session state and catalogs | `project-memory/` | `project-memory/HANDOFF.md` |
+| Desktop extraction/resource center | `unified/` | `docs/handbook/desktop/README.md`, `unified/README.md` |
 | Web implementation specification | `web-implementation-spec/` | `web-implementation-spec/00_Overview/01_MASTER_INDEX.md` |
 | Desktop Windows build guidance | `docs/` and `unified/docs/` | `unified/docs/WINDOWS_BUILD_GUIDE.md` |
+| Agent instructions | repository root, `.kiro/` | `AGENTS.md` |
 
 ## Preserved raw inputs
 
@@ -44,11 +47,15 @@ The original `unified/MANIFEST.md` and project-memory completeness catalogs rema
 
 Use the documents in this order when resuming work:
 
-1. `parity-plan-2026-09-10/README.md`
-2. `parity-plan-2026-09-10/42-implementation-progress-round15.md`
-3. `parity-plan-2026-09-10/02-implementation-plan.md`
-4. `web/docs/HANDOFF.md`
-5. `project-memory/state.json`, `project-memory/JOURNAL.md`, and relevant ADRs/catalogs
+1. `docs/README.md` (documentation hub) and `AGENTS.md`
+2. `project-memory/HANDOFF.md`, then the top of `project-memory/JOURNAL.md`
+3. `docs/master-parity-plan-2026-09-29/13-phase1-delivery-plan.md` and the status in `execution-backlog.json`
+4. `docs/handbook/menu-catalog.md` for the menus you will touch
+5. Relevant ADRs in `project-memory/decisions/` and catalogs in `project-memory/catalogs/`
+
+The September documents (`parity-plan-2026-09-10/README.md`, `42-implementation-progress-round15.md`,
+`02-implementation-plan.md`) and `web/docs/HANDOFF.md` remain the historical record; `docs/handbook/doc-register.md`
+labels every document.
 
 Historical checkpoints are immutable evidence for their frozen inputs; they do not certify newer working-tree changes.
 

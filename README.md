@@ -6,6 +6,8 @@ Private engineering repository for converting the DataCareNext Windows jewellery
 
 ## Start here
 
+**Documentation hub (1 October 2026):** [docs/README.md](docs/README.md) is the single entry point. It explains the two phases — **Phase 1, the desktop in the web** ([delivery plan](docs/master-parity-plan-2026-09-29/13-phase1-delivery-plan.md)) and **Phase 2, the SaaS product** ([plan](docs/master-parity-plan-2026-09-29/14-phase2-saas-plan.md)) — and links the [Desktop handbook](docs/handbook/desktop/README.md), the [Web handbook](docs/handbook/web/README.md), the per-menu [menu catalog](docs/handbook/menu-catalog.md) and the [document register](docs/handbook/doc-register.md), which labels every older document as current, historical, superseded or evidence. The [lineage verification](docs/master-parity-plan-2026-09-29/12-lineage-verification-2026-10-01.md) shows every item of the earlier plans and audits carried into the current plan. AI agents: read [AGENTS.md](AGENTS.md).
+
 **29 September master planning review:** [Detailed current analysis and master parity implementation plan](docs/master-parity-plan-2026-09-29/README.md). Includes all 31 API modules, reconciliation of the 83 prior packages/34 cards, desktop source references, retained field/action registers and step-by-step end-to-end verification. This documentation update preserves the application and historical checkpoints; it does not claim full parity.
 
 **1 October full-stack audit and implementation plan:** [Audit results, gaps G20–G66 and slices N47–N82](docs/master-parity-plan-2026-09-29/11-audit-implementation-plan-2026-10-01.md) — what works end to end today, what is broken or missing, and the ordered, file-level work to make the web version production-ready for desktop users.
@@ -23,6 +25,8 @@ Private engineering repository for converting the DataCareNext Windows jewellery
 | Path | Purpose |
 |---|---|
 | `web/` | Active pnpm monorepo: Next.js UI, Fastify API, shared calculation/report packages, Prisma/PostgreSQL schema, migrations, tests, deployment files, and parity harnesses. |
+| `docs/README.md`, `docs/handbook/`, `docs/tools/` | Documentation hub, Desktop and Web handbooks, generated menu catalog and document register, and their check script. |
+| `AGENTS.md`, `.kiro/skills/`, `.kiro/steering/` | Instructions and skills for AI coding agents. |
 | `docs/master-parity-plan-2026-09-29/` | Current source-based planning review, master execution sequence, module detail, prior-plan reconciliation, source/requirement indexes and verification playbook. |
 | `parity-plan-2026-09-10/` | Current 83-package/34-card implementation and acceptance plan, progress records, immutable checkpoints, scripts, and evidence. |
 | `project-memory/` | Cross-session continuity store, ADRs, catalogs, contracts, raw parity captures/diffs, video research, journal, state, and handoff. |
