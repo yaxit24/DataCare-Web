@@ -585,13 +585,17 @@ databaseDescribe('database-backed transaction integrity', () => {
             AND "TAG_NO"='N' AND "VCH_SRNO"=0 AND "ITM_SIGN"='-') loose,
          (SELECT count(*) FROM "TAX_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='PRT'
             AND "BOOK_NAME"='PURC RETURN' AND "TRAN_TYPE"='P' AND "TAX_CODE"='10') tax,
-         (SELECT count(*) FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='PRT' AND "VCH_TYPE"='PRX') ledger`,
+         (SELECT count(*) FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='PRT' AND "VCH_TYPE"='PRX') ledger,
+         (SELECT count(*) FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='PRT'
+            AND "SIGN"='+' AND "CR_AMT"<>0) rojmel_money`,
       TENANT,
     )) as Array<Record<string, bigint>>;
     expect(Number(purchaseReturnRows[0]?.tagged)).toBe(1);
     expect(Number(purchaseReturnRows[0]?.loose)).toBe(1);
     expect(Number(purchaseReturnRows[0]?.tax)).toBe(2);
     expect(Number(purchaseReturnRows[0]?.ledger)).toBeGreaterThan(0);
+    // G04: the day book carries one money row per priced line, crediting the purchase account (SIGN '+').
+    expect(Number(purchaseReturnRows[0]?.rojmel_money)).toBe(2);
 
     await deletePurchaseReturn(runtime, { scope: scope('PRT'), vchNo: purchaseReturn.vchNo });
     await expect(

@@ -17,6 +17,7 @@ import {
   PurchaseValidationError,
 } from './purchase.js';
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
+import { buildPurchaseReturnRojmel, rojmelMetalFor } from '../shared/rojmel.js';
 import { resolveBookAccountTx, resolveBookPolicyTx } from '../shared/bookPolicy.js';
 import { resolveRoundingPolicyTx } from '../shared/roundingPolicyLoader.js';
 
@@ -263,7 +264,7 @@ export async function createPurchaseReturn(
 
     const itCodes = [...new Set(lines.map((line) => String(line.itCode).trim()))];
     const rows: any[] = await tx.$queryRawUnsafe(
-      `SELECT i."IT_CODE" ic,g."PURC_AC" pac FROM "ITEM_MAST" i
+      `SELECT i."IT_CODE" ic,i."IT_NAME" iname,i."IT_TYPE" itype,g."PURC_AC" pac FROM "ITEM_MAST" i
        LEFT JOIN "GROUP_MAST" g ON g.tenant_id=i.tenant_id
         AND g."CO_CODE"=i."CO_CODE" AND g."GR_CODE"=i."GR_CODE"
        WHERE i.tenant_id=$1 AND i."CO_CODE"=$2 AND i."IT_CODE"::text=ANY($3::text[])`,
@@ -272,10 +273,16 @@ export async function createPurchaseReturn(
       itCodes,
     );
     const purcAcByItem: Record<string, string> = {};
+    const itemNameByItem: Record<string, string> = {};
+    const itemTypeByItem: Record<string, string> = {};
     for (const row of rows) {
       const item = String(row.ic ?? '').trim();
       const account = String(row.pac ?? '').trim();
       if (item && account) purcAcByItem[item] = account;
+      if (item) {
+        itemNameByItem[item] = String(row.iname ?? '').trim();
+        itemTypeByItem[item] = String(row.itype ?? '').trim();
+      }
     }
     const missing = itCodes.filter((item) => !purcAcByItem[item]);
     if (missing.length)
@@ -518,6 +525,64 @@ export async function createPurchaseReturn(
       NET_AMT: line.calc.net,
     }));
 
+    // G04: the purchase-return day book (Ac_Rojmel.Purc_Rtn_Rojmel). A return credits the purchase
+    // account and sends metal back out to the supplier; the web wrote no ROJ_MEL_DATA at all, so a
+    // jeweller's day book was missing every return's money and metal movement.
+    const rojmelRows = buildPurchaseReturnRojmel(
+      {
+        scope: { coCode: input.scope.coCode, lcCode: input.scope.lcCode, coYear: key.CO_YEAR },
+        key,
+        coBook: key.CO_BOOK,
+        vchNo: key.VCH_NO,
+        vchDate,
+        vchType: bookPolicy.vchType,
+        bookName: bookPolicy.bookName,
+        partyName: input.acName ?? '',
+        partyCode: input.acCode,
+      },
+      computed.map((c, idx) => {
+        const item = String(c.in.itCode ?? '').trim();
+        return {
+          lineNo: idx + 1,
+          purcAc: purcAcByItem[item] ?? purchaseAc,
+          metal: rojmelMetalFor(itemTypeByItem[item]),
+          amount: round2(c.calc.metal + c.calc.labour + num(c.in.otherAmount)),
+          itemAmount: c.calc.metal,
+          labourRate: num(c.in.labourRate),
+          labourAmount: c.calc.labour,
+          otherAmount: num(c.in.otherAmount),
+          netAmount: c.calc.net,
+          pcs: num(c.in.pcs),
+          grossWt: num(c.in.grossWt),
+          netWt: num(c.in.netWt),
+          touch: num(c.in.touch),
+          wastage: num(c.in.westPct),
+          fine: c.calc.fine,
+          rate: num(c.in.rate),
+          itemCode: item,
+          itemName: itemNameByItem[item] ?? '',
+        };
+      }),
+      {
+        slot1Ac: controlAc,
+        slot3Ac: kasarAc,
+        slot5Ac: roundAc,
+        taxAc,
+        taxAmount: totals.tax,
+        // BILL_OS: what the return still leaves outstanding on the party.
+        billOutstanding: round2(totals.total - tender.paidNow - tender.kasar),
+        chequeAc: input.bankAc,
+        chequeAmount: round2(num(input.chequeAmt)),
+        // The purchase-return input carries no dedicated card account, so the card day-book row is only
+        // emitted when a bank account stands in; otherwise it is omitted rather than posted to a guess.
+        cardAc: input.bankAc,
+        cardAmount: round2(num(input.cardAmt)),
+        kasarAmount: tender.kasar,
+        discountAmount: round2(num(input.discountAmount)),
+        roundOff: totals.roundOff,
+      },
+    );
+
     await postVoucherTx(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: ledger },
       bookName: bookPolicy.bookName,
@@ -526,6 +591,7 @@ export async function createPurchaseReturn(
         { table: 'PR_DETL', rows: detl },
         { table: 'MAIN_STOCK', rows: mainStock },
         ...(taxRows.length ? [{ table: 'TAX_DATA', rows: taxRows }] : []),
+        ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
       ],
     });
     return { vchNo, totals };

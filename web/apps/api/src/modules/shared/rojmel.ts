@@ -105,6 +105,33 @@ export const ROJMEL_PURCHASE_ROW_TYPE = {
 
 export type RojmelRowType = (typeof ROJMEL_ROW_TYPE)[keyof typeof ROJMEL_ROW_TYPE];
 
+/**
+ * Row types for a PURCHASE RETURN day book, read directly from Ac_Rojmel.Purc_Rtn_Rojmel
+ * (Ac_Rojmel.cs:763-797). A purchase return is the mirror of a purchase: the metal GOES OUT back to the
+ * supplier (SIGN '-'), and the money leg CREDITS the purchase account (SIGN '+'). The codes are measured
+ * for THIS family only and are NOT interchangeable with the sale/purchase sets.
+ *
+ *   `01` item MONEY row: AC_CODE = group PURC_AC, LD_CODE = party, CR_AMT = ITM_AMT, SIGN '+',
+ *        carries pcs/gross/net/rate/amounts. Written when ITM_AMT <> 0.
+ *   `11` item METAL row: AC_CODE = party, LD_CODE = PURC_AC, no money, SIGN '-', carries
+ *        touch/west/ITM_FINE+ITM_OTH_FINE. Written when ITM_FINE <> 0 AND ITM_AMT = 0 (unpriced metal out).
+ *   `05` party row: AC_CODE = party, LD_CODE = book slot 1, DR_AMT = BILL_OS, when BILL_OS <> 0.
+ *   `03` tax, `08` kasar (slot 3), `06` cheque, `07` card, `09` discount (slot 5), `10` round-off (slot 5).
+ */
+export const ROJMEL_PURC_RETURN_ROW_TYPE = {
+  ITEM_MONEY: '01',
+  ITEM_METAL: '11',
+  PARTY: '05',
+  TAX: '03',
+  CHEQUE: '06',
+  CARD: '07',
+  KASAR: '08',
+  DISCOUNT: '09',
+  ROUND_OFF: '10',
+} as const;
+export type RojmelPurcReturnRowType =
+  (typeof ROJMEL_PURC_RETURN_ROW_TYPE)[keyof typeof ROJMEL_PURC_RETURN_ROW_TYPE];
+
 /** Metal classification for IT_TYPE. */
 export type RojmelMetal = 'G' | 'S' | 'O' | 'A';
 
@@ -152,6 +179,7 @@ export function rojmelLedrKey(
     // are why a shared enum still would not work: type `05` is a METAL row on book 050 and a MONEY row on
     // book 052, so the same code means different things depending on the book.
     | RojmelKarigarRowType
+    | RojmelPurcReturnRowType
     | (typeof ROJMEL_CASH_ROW_TYPE)[keyof typeof ROJMEL_CASH_ROW_TYPE],
   lineNo?: number,
 ): string {
@@ -1429,4 +1457,179 @@ export function buildJournalRojmel(
         CR_AMT: l.crAmt,
       };
     });
+}
+
+/** A purchase-return detail line projected into the day book. */
+export interface PurcReturnRojmelLine {
+  lineNo: number;
+  /** The group's PURC_AC the money row credits and the metal row references. */
+  purcAc: string;
+  metal: Exclude<RojmelMetal, 'A'>;
+  /** ITM_AMT + LBR_AMT + OTH_AMT — the money the return credits back. */
+  amount: number;
+  itemAmount: number;
+  labourRate?: number;
+  labourAmount?: number;
+  otherAmount?: number;
+  netAmount?: number;
+  pcs?: number;
+  grossWt?: number;
+  netWt?: number;
+  touch?: number;
+  wastage?: number;
+  /** ITM_FINE + ITM_OTH_FINE. The metal row exists to carry this when the line is unpriced. */
+  fine?: number;
+  rate?: number;
+  itemCode?: string;
+  itemName?: string;
+}
+
+export interface PurcReturnRojmelLegs {
+  /** Book slot-1 account (BOOK_DETL SR_NO 1), the party-row contra and settlement contra. */
+  slot1Ac: string;
+  /** Book slot-3 account (kasar) and slot-5 (discount/round-off). */
+  slot3Ac?: string;
+  slot5Ac?: string;
+  taxAc?: string;
+  taxAmount?: number;
+  /** BILL_OS — the outstanding the return leaves on the party. Party row only when non-zero. */
+  billOutstanding: number;
+  chequeAc?: string;
+  chequeAmount?: number;
+  cardAc?: string;
+  cardAmount?: number;
+  kasarAmount?: number;
+  discountAmount?: number;
+  roundOff?: number;
+}
+
+/**
+ * Project a PURCHASE RETURN into its ROJ_MEL_DATA rows, exactly as Ac_Rojmel.Purc_Rtn_Rojmel
+ * (Ac_Rojmel.cs:763-797). The web purchase-return writer wrote no day-book rows at all, so the metal and
+ * money movement a jeweller reads in the Rojmel was missing for every return. Each row is guarded on its
+ * amount being non-zero, as the desktop guards every insert.
+ */
+export function buildPurchaseReturnRojmel(
+  ctx: RojmelContext,
+  lines: PurcReturnRojmelLine[],
+  legs: PurcReturnRojmelLegs,
+): RojmelRow[] {
+  const T = ROJMEL_PURC_RETURN_ROW_TYPE;
+  const rows: RojmelRow[] = [];
+  const key = (type: RojmelPurcReturnRowType, lineNo?: number) =>
+    rojmelLedrKey(ctx.scope, ctx.coBook, ctx.vchNo, type, lineNo);
+
+  for (const l of lines) {
+    // 01 — the money row. CR_AMT = item+labour+other, on the PURC_AC; party is the contra. SIGN '+'.
+    if (l.amount) {
+      rows.push({
+        ...blank(ctx, key(T.ITEM_MONEY, l.lineNo)),
+        AC_CODE: l.purcAc,
+        LD_CODE: ctx.partyCode,
+        CR_AMT: l.amount,
+        DR_AMT: 0,
+        IT_TYPE: l.metal,
+        SIGN: '+',
+        ITM_PCS: l.pcs ?? 0,
+        ITM_GWT: l.grossWt ?? 0,
+        ITM_NWT: l.netWt ?? 0,
+        ITM_RATE: l.rate ?? 0,
+        ITM_AMT: l.itemAmount,
+        LBR_RATE: l.labourRate ?? 0,
+        LBR_AMT: l.labourAmount ?? 0,
+        OTH_AMT: l.otherAmount ?? 0,
+        NET_AMT: l.netAmount ?? l.amount,
+        IT_CODE: l.itemCode ?? '',
+        IT_DESC: l.itemName ?? '',
+      } as RojmelRow);
+    }
+    // 11 — the metal row, written ONLY for an unpriced line (fine but no money), carrying the weight out.
+    if ((l.fine ?? 0) !== 0 && !l.itemAmount) {
+      rows.push({
+        ...blank(ctx, key(T.ITEM_METAL, l.lineNo)),
+        AC_CODE: ctx.partyCode,
+        LD_CODE: l.purcAc,
+        CR_AMT: 0,
+        DR_AMT: 0,
+        IT_TYPE: l.metal,
+        SIGN: '-',
+        ITM_PCS: l.pcs ?? 0,
+        ITM_GWT: l.grossWt ?? 0,
+        ITM_NWT: l.netWt ?? 0,
+        ITM_TOUCH: l.touch ?? 0,
+        ITM_WEST: l.wastage ?? 0,
+        ITM_FINE: l.fine ?? 0,
+        IT_CODE: l.itemCode ?? '',
+        IT_DESC: l.itemName ?? '',
+      } as RojmelRow);
+    }
+  }
+
+  // 03 — tax leg (CR_AMT), on the tax account.
+  if (legs.taxAmount && legs.taxAc) {
+    rows.push({
+      ...blank(ctx, key(T.TAX)),
+      AC_CODE: legs.taxAc,
+      LD_CODE: ctx.partyCode,
+      CR_AMT: legs.taxAmount,
+    });
+  }
+  // 05 — party row, DR_AMT = BILL_OS, only when outstanding.
+  if (legs.billOutstanding) {
+    rows.push({
+      ...blank(ctx, key(T.PARTY)),
+      AC_CODE: ctx.partyCode,
+      LD_CODE: legs.slot1Ac,
+      DR_AMT: legs.billOutstanding,
+    });
+  }
+  // 06/07 — cheque/card settlements (DR_AMT), on their own accounts.
+  if (legs.chequeAmount && legs.chequeAc) {
+    rows.push({
+      ...blank(ctx, key(T.CHEQUE)),
+      AC_CODE: legs.chequeAc,
+      LD_CODE: ctx.partyCode,
+      DR_AMT: legs.chequeAmount,
+    });
+  }
+  if (legs.cardAmount && legs.cardAc) {
+    rows.push({
+      ...blank(ctx, key(T.CARD)),
+      AC_CODE: legs.cardAc,
+      LD_CODE: ctx.partyCode,
+      DR_AMT: legs.cardAmount,
+    });
+  }
+  // 08 — kasar (DR_AMT) on slot 3.
+  if (legs.kasarAmount && legs.slot3Ac) {
+    rows.push({
+      ...blank(ctx, key(T.KASAR)),
+      AC_CODE: legs.slot3Ac,
+      LD_CODE: ctx.partyCode,
+      DR_AMT: legs.kasarAmount,
+      IT_DESC: `KSR - ${ctx.partyName}`,
+    });
+  }
+  // 09 — discount (DR_AMT) on slot 5.
+  if (legs.discountAmount && legs.slot5Ac) {
+    rows.push({
+      ...blank(ctx, key(T.DISCOUNT)),
+      AC_CODE: legs.slot5Ac,
+      LD_CODE: ctx.partyCode,
+      DR_AMT: legs.discountAmount,
+      IT_DESC: `DISC - ${ctx.partyName}`,
+    });
+  }
+  // 10 — round-off, split on its own sign (CR when >0, DR when <0 with the raw negative preserved).
+  if (legs.roundOff && legs.slot5Ac) {
+    rows.push({
+      ...blank(ctx, key(T.ROUND_OFF)),
+      AC_CODE: ctx.partyCode,
+      LD_CODE: legs.slot5Ac,
+      CR_AMT: legs.roundOff > 0 ? Math.abs(legs.roundOff) : 0,
+      DR_AMT: legs.roundOff < 0 ? Math.abs(legs.roundOff) : 0,
+      IT_DESC: `ROF - ${ctx.partyName}`,
+    });
+  }
+  return rows;
 }
