@@ -391,7 +391,7 @@ export interface LoadedHallmarkSale {
  * `taxCode` is deliberately NOT passed back. This screen never chooses a tax code: create and edit both
  * resolve it from the tax rate, so an unchanged save stores the same code. Passing it back would send it
  * through the by-code resolver instead, which requires the desktop parent row (`TAX_MAST.SR_NO = 0`).
- * Web-provisioned companies hold their tax codes at `SR_NO = 1` (G69), so the edit would be refused.
+ * Web-provisioned companies hold their tax codes at `SR_NO = 1` (G82), so the edit would be refused.
  */
 const VIEW_HEADER_PASSTHROUGH = [
   'acCode',
@@ -526,7 +526,7 @@ export function hallmarkSaleCommand(input: {
     ? loadedOldGold.map((row) => ({ ...row }))
     : undefined;
   // The writer posts the header and ledger from each row's posted `amount`, but stores the detail row at its
-  // own valuation (G70), and the view returns the detail. With one gold row, the stored header total is that
+  // own valuation (G83), and the view returns the detail. With one gold row, the stored header total is that
   // row's posted amount, so send it back and an unchanged save posts what it posted before.
   const goldRows = (oldGold ?? []).filter((row) => (row.metal ?? 'G') === 'G');
   if (goldRows.length === 1 && typeof view.oldGoldAmount === 'number')
