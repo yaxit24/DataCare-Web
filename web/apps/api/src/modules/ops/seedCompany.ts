@@ -224,6 +224,26 @@ const BOOKS: {
     shortName: 'KRREC',
     table: 'KR_DATA',
   },
+  // Desktop Job-work/Jadtar dispatch is JDTR ISU / JDTR REC (MDI_FORM.cs:9717/9726), both over
+  // MFG_DATA/MFG_DETL (MS_UPDATE.cs:7913). The shared KarigarForm now sends the selected book.
+  {
+    book: 'JDI',
+    name: 'Jadtar Issue',
+    mainBook: 'JDTR ISU',
+    inout: 'O',
+    acCode: 'PURCHASE',
+    shortName: 'JDISU',
+    table: 'MFG_DATA',
+  },
+  {
+    book: 'JDR',
+    name: 'Jadtar Receipt',
+    mainBook: 'JDTR REC',
+    inout: 'I',
+    acCode: 'PURCHASE',
+    shortName: 'JDREC',
+    table: 'MFG_DATA',
+  },
   { book: 'JV', name: 'Journal', mainBook: 'JOURNAL', inout: 'I', acCode: 'KASAR' },
   { book: 'CON', name: 'Contra', mainBook: 'CONTRA', inout: 'I', acCode: 'CASH' },
   // Desktop TR_WH_SALE serves both: book 034 `WSALE` / `WH SALES` and book 064 `RCUT` / `RATE CUT`, each an OUT
