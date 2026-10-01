@@ -13,7 +13,7 @@
 ###############################################################################
 
 # ---- Stage 1: build the web app ----------------------------------------------
-FROM node:20-alpine AS build
+FROM node:24-alpine AS build
 
 RUN corepack enable
 WORKDIR /repo
@@ -34,7 +34,7 @@ ENV API_ORIGIN=${API_ORIGIN}
 RUN pnpm --filter @datacare/web run build
 
 # ---- Stage 2: runtime --------------------------------------------------------
-FROM node:20-alpine AS runtime
+FROM node:24-alpine AS runtime
 
 ENV NODE_ENV=production
 # Re-assert at runtime (no-op for the baked manifest, but correct if a future

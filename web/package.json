@@ -5,7 +5,7 @@
   "description": "DataCareNext jewelry/gold ERP — web SaaS rebuild (Next.js + NestJS + PostgreSQL).",
   "packageManager": "pnpm@9.15.4",
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "scripts": {
     "build": "turbo run build",
@@ -35,20 +35,33 @@
     "depth:parity": "node scripts/check-depth.mjs",
     "depth:audit": "node scripts/check-depth.mjs --audit",
     "test:routes": "pnpm --filter @datacare/web test:routes",
-    "depth:deadcells": "node scripts/check-dead-cells.mjs"
+    "depth:deadcells": "node scripts/check-dead-cells.mjs",
+    "advisories": "node scripts/check-advisories.mjs"
   },
   "devDependencies": {
-    "@types/node": "22.20.0",
+    "@types/node": "24.19.0",
     "eslint": "10.8.0",
     "eslint-plugin-react-hooks": "7.1.1",
     "prettier": "3.9.0",
     "turbo": "2.10.0",
     "typescript": "5.9.3",
     "typescript-eslint": "8.65.0",
-    "vitest": "2.1.9"
+    "vitest": "3.2.7"
   },
   "dependencies": {
     "mssql": "12.6.0",
     "tedious": "19.2.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "fast-uri": "3.1.8",
+      "find-my-way": "9.7.0",
+      "brace-expansion@>=5.0.0 <5.0.12": "5.0.12",
+      "nanoid@<3.3.19": "3.3.19",
+      "postcss@<8.5.28": "8.5.28",
+      "fflate@<0.8.3": "0.8.3",
+      "vite@<6.4.3": "6.4.3",
+      "deepmerge-ts@<8.0.0": "8.0.2"
+    }
   }
 }
