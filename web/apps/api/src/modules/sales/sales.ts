@@ -1336,11 +1336,29 @@ async function writeSaleTx(
   });
 
   const oldMetalRows = input.oldGold ?? [];
+  // G83: value each old-metal (exchange) row ONCE, the way TR_SALE.cs's mSG_OLD grid does, and use that one
+  // figure everywhere. The desktop stores the grid's recomputed amount (column 13) in BOTH SL_PR_DETL.NET_AMT
+  // and SL_DATA.OLD_GL_AMT, so the detail, the header, the settlement, the ledger and BILL_OS must all carry
+  // the SAME value. Previously the detail used this server valuation while the header/ledger/BILL_OS summed
+  // the raw client-posted `amount`, so a voucher entered BY RATE carried two different old-gold figures.
+  const valuedOldMetal = oldMetalRows.map((g) => {
+    const fine =
+      g.netWt != null && g.touch != null ? round2s((num(g.netWt) * num(g.touch)) / 100) : 0;
+    const valued = resolveOldGoldValuation({
+      netWt: num(g.netWt),
+      fineWt: fine,
+      conversionWt: num(g.conversionWt),
+      rate: num(g.rate),
+      amount: num(g.amount),
+      rateType: g.rateType,
+    });
+    return { metal: (g.metal ?? 'G') as string, fine, rate: valued.rate, amount: valued.amount };
+  });
   const oldGoldAmount = round2s(
-    oldMetalRows.filter((g) => (g.metal ?? 'G') === 'G').reduce((sum, g) => sum + num(g.amount), 0),
+    valuedOldMetal.filter((g) => g.metal === 'G').reduce((sum, g) => sum + g.amount, 0),
   );
   const oldSilverAmount = round2s(
-    oldMetalRows.filter((g) => g.metal === 'S').reduce((sum, g) => sum + num(g.amount), 0),
+    valuedOldMetal.filter((g) => g.metal === 'S').reduce((sum, g) => sum + g.amount, 0),
   );
   const oldGoldWeight = round3s(
     oldMetalRows.filter((g) => (g.metal ?? 'G') === 'G').reduce((sum, g) => sum + num(g.netWt), 0),
@@ -1616,8 +1634,7 @@ async function writeSaleTx(
 
   // Old-gold received from the customer: detail (SL_PR_DETL) + stock in-movement (MAIN_STOCK '+').
   const oldGoldDetl = oldMetalRows.map((g, i) => {
-    const fine =
-      g.netWt != null && g.touch != null ? round2s((num(g.netWt) * num(g.touch)) / 100) : 0;
+    const fine = valuedOldMetal[i]!.fine;
     return {
       ...key,
       SR_NO: i + 1,
@@ -1643,18 +1660,10 @@ async function writeSaleTx(
       // TR_SALE.cs values the exchange line server-side rather than trusting the posted amount:
       // rate type 'N' applies the rate to net weight, otherwise to fine (or to the conversion weight
       // when one is present), and `Math.Round(basis * rate, 0)` makes it whole rupees. When the
-      // operator supplies an amount and no rate, the desktop back-calculates the rate instead.
-      ...(() => {
-        const valued = resolveOldGoldValuation({
-          netWt: num(g.netWt),
-          fineWt: fine,
-          conversionWt: num(g.conversionWt),
-          rate: num(g.rate),
-          amount: num(g.amount),
-          rateType: g.rateType,
-        });
-        return { ITM_RATE: valued.rate, NET_AMT: valued.amount };
-      })(),
+      // operator supplies an amount and no rate, the desktop back-calculates the rate instead. This is
+      // the SAME per-row value the header, settlement, ledger and BILL_OS use (G83), computed once above.
+      ITM_RATE: valuedOldMetal[i]!.rate,
+      NET_AMT: valuedOldMetal[i]!.amount,
       ITM_RATE_TYPE: g.rateType ?? '',
       MAIN_USER: ctx.mainUser,
       HM_ID_WT: 0,
