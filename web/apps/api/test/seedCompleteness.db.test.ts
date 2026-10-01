@@ -75,17 +75,24 @@ databaseDescribe('provisioning leaves a company able to trade', () => {
     // The original bug in one line: books existed, their account rows did not.
     expect(await count('BOOK_DETL')).toBeGreaterThan(0);
 
-    // Every book that can post must have at least one account row, or its first voucher fails with
-    // `book <X> account row 1 is missing`.
+    // Every book that can post must have at least one account row. WH QUOT is deliberately document-only:
+    // Ac_Ledr/Ac_Rojmel/Ac_Stock exclude it, and its writer has a zero-economic-footprint DB test.
     const orphans = (await owner.$queryRawUnsafe(
       `SELECT d."CO_BOOK" FROM "BOOK_DATA" d
-        WHERE d.tenant_id=$1
+        WHERE d.tenant_id=$1 AND coalesce(d."MAIN_BOOK",'')<>'WH QUOT'
           AND NOT EXISTS (SELECT 1 FROM "BOOK_DETL" t
                            WHERE t.tenant_id=d.tenant_id AND t."CO_CODE"=d."CO_CODE"
                              AND t."CO_BOOK"=d."CO_BOOK")`,
       TENANT,
     )) as Array<{ CO_BOOK: string }>;
     expect(orphans.map((o) => o.CO_BOOK)).toEqual([]);
+    const documentOnly = (await owner.$queryRawUnsafe(
+      `SELECT d."CO_BOOK" FROM "BOOK_DATA" d WHERE d.tenant_id=$1 AND d."MAIN_BOOK"='WH QUOT'
+        AND NOT EXISTS (SELECT 1 FROM "BOOK_DETL" t WHERE t.tenant_id=d.tenant_id
+          AND t."CO_CODE"=d."CO_CODE" AND t."CO_BOOK"=d."CO_BOOK")`,
+      TENANT,
+    )) as Array<{ CO_BOOK: string }>;
+    expect(documentOnly.map((o) => o.CO_BOOK)).toEqual(['WHQ']);
   });
 
   it('provisions the accounts a sale posts to', async () => {

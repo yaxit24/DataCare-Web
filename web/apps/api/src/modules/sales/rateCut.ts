@@ -87,7 +87,11 @@ const BULLION_SALE_MAIN_BOOKS = new Set(['BUL WH SALE', 'BUL SALE']);
  * under its own user right. Before, `/rate-cut` accepted any book — including the cash Receipt book `RCT`, which
  * the Rate Cut screen preselected, so its cash/kasar slots received the metal value.
  */
-const WORKFLOW_MAIN_BOOK = { 'rate-cut': 'RATE CUT', 'wholesale-sale': 'WH SALES' } as const;
+const WORKFLOW_MAIN_BOOK = {
+  'rate-cut': 'RATE CUT',
+  'wholesale-sale': 'WH SALES',
+  'wholesale-quotation': 'WH QUOT',
+} as const;
 /** `Wh_Sale_Stk` moves stock for these books only, and only when `BOOK_INOUT` is 'O' (Ac_Stock.cs:151,153). */
 const STOCK_MAIN_BOOKS = new Set([
   'WH SALES',
@@ -144,7 +148,7 @@ export async function resolveBookClassification(
   };
 }
 
-type RateCutBookGuard = 'rate-cut' | 'wholesale-sale' | 'bullion-sale';
+type RateCutBookGuard = 'rate-cut' | 'wholesale-sale' | 'wholesale-quotation' | 'bullion-sale';
 /**
  * Which desktop form writes the rows. Both post through the same three routines (`Wh_Sales_Ledr`,
  * `Wh_Sales_Rojmel`, `Wh_Sale_Stk`), but their line rows and tax handling differ: TR_WH_SALE writes
@@ -195,12 +199,16 @@ function assertRateCutBookGuard(
     const other = (Object.keys(WORKFLOW_MAIN_BOOK) as Array<keyof typeof WORKFLOW_MAIN_BOOK>).find(
       (workflow) => WORKFLOW_MAIN_BOOK[workflow] === mainBook,
     );
+    const label = (value: keyof typeof WORKFLOW_MAIN_BOOK): string =>
+      value === 'rate-cut'
+        ? 'rate cut'
+        : value === 'wholesale-quotation'
+          ? 'wholesale quotation'
+          : 'wholesale sale';
     throw new RateCutValidationError(
       other
-        ? `book ${coBook} is ${classification.bookName}; use the ${other === 'rate-cut' ? 'rate cut' : 'wholesale sale'} workflow`
-        : `book ${coBook} is ${classification.bookName || 'unclassified'}; use a ${
-            guard === 'rate-cut' ? 'rate cut' : 'wholesale sale'
-          } book`,
+        ? `book ${coBook} is ${classification.bookName}; use the ${label(other)} workflow`
+        : `book ${coBook} is ${classification.bookName || 'unclassified'}; use a ${label(guard)} book`,
     );
   }
 }
@@ -1899,6 +1907,7 @@ async function writeRateCut(
       'rate-cut requires at least one issued or received line, or a money/fine settlement',
     );
   }
+  const quotation = options.bookGuard === 'wholesale-quotation';
   const workflow: RateCutWorkflow = options.bookGuard === 'bullion-sale' ? 'bullion' : 'wholesale';
   const itType: 'G' | 'S' = input.itType === 'S' ? 'S' : 'G';
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
@@ -1951,8 +1960,8 @@ async function writeRateCut(
       persistedClock = prior?.VCH_CLOCK ? String(prior.VCH_CLOCK) : undefined;
       persistedUser = String(prior?.MAIN_USER ?? '').trim() || undefined;
       hiddenVoucherNo = String(prior?.HD_VCH_NO ?? '').trim();
-      const restores = await releaseRateCutTagsTx(tx, tenantId, key);
-      await applyBookingDrawDownTx(tx, tenantId, key, -1);
+      const restores = quotation ? [] : await releaseRateCutTagsTx(tx, tenantId, key);
+      if (!quotation) await applyBookingDrawDownTx(tx, tenantId, key, -1);
       await reverseVoucherTx(tx, tenantId, { tables: RATE_CUT_WRITE_TABLES, key });
       if (hiddenVoucherNo) {
         await tx.$executeRawUnsafe(
@@ -1973,14 +1982,16 @@ async function writeRateCut(
         ? formatVoucherNo(requested)
         : await nextHiddenVoucherNoTx(tx, { ...input.scope, coBook: key.CO_BOOK });
     }
-    const accounts = await resolveBookAccounts(
-      tx,
-      tenantId,
-      key.CO_CODE,
-      key.LC_CODE,
-      key.CO_BOOK,
-      input.accounts,
-    );
+    const accounts = quotation
+      ? ({} as RateCutAccounts)
+      : await resolveBookAccounts(
+          tx,
+          tenantId,
+          key.CO_CODE,
+          key.LC_CODE,
+          key.CO_BOOK,
+          input.accounts,
+        );
     /**
      * Choosing the party fills its name and mobile from the account master (TR_WH_SALE.cs:14621-14623,
      * `tAcName = AC_NAME`, `tMobile = AC_MOBILE`); the address lines and city are typed. An explicit value wins.
@@ -2125,66 +2136,70 @@ async function writeRateCut(
     const cardAc = String(p.cardAc ?? '').trim();
     const receivedBankAc = String(rp.bankAc ?? '').trim() || bankAc;
     const receivedCardAc = String(rp.cardAc ?? '').trim() || cardAc;
-    const ledger = buildRateCutLedger(key, {
-      customer,
-      figures,
-      accounts,
-      bankAc,
-      cardAc,
-      receivedBankAc,
-      receivedCardAc,
-      tradeFine: settings.tradeFine,
-      vchDate,
-      vchType: classification.vchType,
-      bookName: classification.bookName,
-      coBook: key.CO_BOOK,
-      billNo: txt(input.billNo, 30) ?? undefined,
-      hdVchNo: hiddenVoucherNo,
-    });
+    const ledger = quotation
+      ? []
+      : buildRateCutLedger(key, {
+          customer,
+          figures,
+          accounts,
+          bankAc,
+          cardAc,
+          receivedBankAc,
+          receivedCardAc,
+          tradeFine: settings.tradeFine,
+          vchDate,
+          vchType: classification.vchType,
+          bookName: classification.bookName,
+          coBook: key.CO_BOOK,
+          billNo: txt(input.billNo, 30) ?? undefined,
+          hdVchNo: hiddenVoucherNo,
+        });
     const gold = itType === 'G';
     // The Rojmel (day book), from the header's settlement figures. `buildRateCutRojmel` documents its inputs as
     // the SETTLED fine (`DR_FINE` / `CR_FINE`) and the band's outstanding; it was handed the lines' total fine and
     // the request's bill-outstanding instead. With the settled figures, header-only Live24 064/00004 gives its
     // four real rows: 01 (Dr fine 2.050 at 7300), 02 (14965), 13 (overpaid 850) and 26 (purchase kasar 15).
     // Remaining alignment for lined wholesale vouchers (types 05/06/14/27, the book-prefixed name) is open.
-    const rojmelRows = buildRateCutRojmel(
-      {
-        scope: {
-          coCode: input.scope.coCode,
-          lcCode: input.scope.lcCode,
-          coYear: input.scope.coYear!,
-        },
-        key,
-        coBook: key.CO_BOOK,
-        vchNo: key.VCH_NO,
-        vchDate,
-        vchType: classification.vchType,
-        bookName: classification.bookName,
-        partyName: voucherInput.acName ?? '',
-        partyCode: customer,
-      },
-      {
-        // BOOK_DETL slots are PER-BOOK: on the desktop's 064 slot 1 is 00003 and slot 2 is 00008, where
-        // on book 026 slot 2 is 00001. Resolved rather than hardcoded for that reason.
-        saleAc: String((gold ? accounts.goldAc : accounts.silverSaleAc) ?? ''),
-        purchaseAc: String((gold ? accounts.purchaseAc : accounts.silverPurcAc) ?? ''),
-        kasarFineAc: String(accounts.fineKasarAc ?? accounts.kasarAc ?? ''),
-        purchaseKasarAc: String(accounts.purchaseKasarAc ?? accounts.kasarAc ?? ''),
-        bankAc: receivedBankAc || String(accounts.cashAc ?? ''),
-        metal: rojmelMetalFor(itType),
-        fineRate: figures.fineRate,
-        drFine: figures.drFine,
-        crFine: figures.crFine,
-        purchaseBillOs: headerTotals.prBillOs,
-        saleBillOs: headerTotals.slBillOs,
-        purchaseAmount: money2(figures.crAmt + figures.prItmAmt),
-        saleAmount: money2(figures.drAmt + figures.slItmAmt),
-        kasarFineDr: 0,
-        kasarFineCr: 0,
-        purchaseChequeAmount: figures.prChqAmt,
-        purchaseKasarAmount: figures.prKasarAmt,
-      },
-    );
+    const rojmelRows = quotation
+      ? []
+      : buildRateCutRojmel(
+          {
+            scope: {
+              coCode: input.scope.coCode,
+              lcCode: input.scope.lcCode,
+              coYear: input.scope.coYear!,
+            },
+            key,
+            coBook: key.CO_BOOK,
+            vchNo: key.VCH_NO,
+            vchDate,
+            vchType: classification.vchType,
+            bookName: classification.bookName,
+            partyName: voucherInput.acName ?? '',
+            partyCode: customer,
+          },
+          {
+            // BOOK_DETL slots are PER-BOOK: on the desktop's 064 slot 1 is 00003 and slot 2 is 00008, where
+            // on book 026 slot 2 is 00001. Resolved rather than hardcoded for that reason.
+            saleAc: String((gold ? accounts.goldAc : accounts.silverSaleAc) ?? ''),
+            purchaseAc: String((gold ? accounts.purchaseAc : accounts.silverPurcAc) ?? ''),
+            kasarFineAc: String(accounts.fineKasarAc ?? accounts.kasarAc ?? ''),
+            purchaseKasarAc: String(accounts.purchaseKasarAc ?? accounts.kasarAc ?? ''),
+            bankAc: receivedBankAc || String(accounts.cashAc ?? ''),
+            metal: rojmelMetalFor(itType),
+            fineRate: figures.fineRate,
+            drFine: figures.drFine,
+            crFine: figures.crFine,
+            purchaseBillOs: headerTotals.prBillOs,
+            saleBillOs: headerTotals.slBillOs,
+            purchaseAmount: money2(figures.crAmt + figures.prItmAmt),
+            saleAmount: money2(figures.drAmt + figures.slItmAmt),
+            kasarFineDr: 0,
+            kasarFineCr: 0,
+            purchaseChequeAmount: figures.prChqAmt,
+            purchaseKasarAmount: figures.prKasarAmt,
+          },
+        );
     const issuedRows = buildLineRows(rowCtx, effective, totals);
     const receivedRows = buildReceivedLineRows(rowCtx, receivedLines, receivedTotals);
     const stockRows = movesStock
@@ -2228,7 +2243,7 @@ async function writeRateCut(
         ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
       ],
     });
-    await applyBookingDrawDownTx(tx, tenantId, key, 1);
+    if (!quotation) await applyBookingDrawDownTx(tx, tenantId, key, 1);
     return {
       vchNo: no,
       // The metal on the voucher, issued plus received, priced or not.
@@ -2615,6 +2630,37 @@ export async function deleteWholesaleSale(
   return reverseRateCut(prisma, input, { bookGuard: 'wholesale-sale' });
 }
 
+/** Desktop WH QUOT: persisted TR_WH_SALE document with no ledger, Rojmel, stock or booking draw-down. */
+export async function postWholesaleQuotation(
+  prisma: any,
+  input: RateCutInput,
+): Promise<RateCutResult> {
+  return writeRateCut(prisma, input, { bookGuard: 'wholesale-quotation' });
+}
+
+export async function editWholesaleQuotation(
+  prisma: any,
+  input: RateCutInput,
+  vchNo: number | string,
+): Promise<RateCutResult> {
+  return writeRateCut(prisma, input, { vchNo, bookGuard: 'wholesale-quotation' });
+}
+
+export async function getWholesaleQuotation(
+  prisma: any,
+  scope: VoucherScope,
+  requestedVoucherNo: number | string,
+): Promise<Record<string, unknown>> {
+  return readRateCut(prisma, scope, requestedVoucherNo, { bookGuard: 'wholesale-quotation' });
+}
+
+export async function deleteWholesaleQuotation(
+  prisma: any,
+  input: DeleteRateCutInput,
+): Promise<{ reversed: true }> {
+  return reverseRateCut(prisma, input, { bookGuard: 'wholesale-quotation' });
+}
+
 export async function editRateCut(
   prisma: any,
   input: RateCutInput,
@@ -2842,6 +2888,7 @@ async function reverseRateCut(
 ): Promise<{ reversed: true }> {
   const tenantId = input.scope.tenantId;
   const key = keyOf(input.scope, Number(input.vchNo), input.book ?? RCT_BOOK);
+  const quotation = options.bookGuard === 'wholesale-quotation';
   return withTenant(prisma, tenantId, async (tx: any) => {
     // The audit row must record the voucher's OWN classification: this path serves both wholesale (034
     // WSALE) and rate-cut (064 RCUT), so a module constant would misfile every wholesale deletion.
@@ -2855,11 +2902,10 @@ async function reverseRateCut(
     assertRateCutBookGuard(classification, key.CO_BOOK, options.bookGuard);
     const header = await persistedHeaderTx(tx, tenantId, key);
     // Give the voucher's tags back before its stock rows go (see `releaseRateCutTagsTx`).
-    const restores = await releaseRateCutTagsTx(tx, tenantId, key);
+    const restores = quotation ? [] : await releaseRateCutTagsTx(tx, tenantId, key);
     // Release the booked weight BEFORE the reversal runs: the draw-down joins against
-    // RATE_CUT_ISU, and `reverseVoucherTx` deletes those rows. Reversing after would match nothing
-    // and silently leave the booking consumed forever.
-    await applyBookingDrawDownTx(tx, tenantId, key, -1);
+    // RATE_CUT_ISU, and `reverseVoucherTx` deletes those rows. Quotation never consumes a booking.
+    if (!quotation) await applyBookingDrawDownTx(tx, tenantId, key, -1);
     const now = new Date();
     const text = (value: unknown, length: number): string =>
       String(value ?? '')

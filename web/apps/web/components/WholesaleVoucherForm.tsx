@@ -740,9 +740,19 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
       <h1>{cfg.title}</h1>
       <p className="muted">
         Desktop <code>TR_WH_SALE</code> — {cfg.desktop}. Books of <code>MAIN_BOOK</code>{' '}
-        <code>{cfg.mainBook}</code> only; posts the rate-cut family (<code>RATE_CUT_DATA</code>,{' '}
-        <code>RATE_CUT_ISU</code>/<code>RATE_CUT_REC</code>, <code>MAIN_STOCK</code>,{' '}
-        <code>AC_DATA</code>, <code>ROJ_MEL_DATA</code>).
+        <code>{cfg.mainBook}</code> only;{' '}
+        {workflow === 'wholesale-quotation' ? (
+          <>
+            persists quotation rows only (<code>RATE_CUT_DATA</code>, <code>RATE_CUT_ISU</code>/
+            <code>RATE_CUT_REC</code>) with no ledger, Rojmel or stock movement.
+          </>
+        ) : (
+          <>
+            posts the rate-cut family (<code>RATE_CUT_DATA</code>, <code>RATE_CUT_ISU</code>/
+            <code>RATE_CUT_REC</code>, <code>MAIN_STOCK</code>, <code>AC_DATA</code>,{' '}
+            <code>ROJ_MEL_DATA</code>).
+          </>
+        )}
       </p>
 
       <div className="panel">
@@ -1007,6 +1017,21 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
         >
           Delete
         </button>
+        {workflow === 'wholesale-quotation' && loadedVoucherNo ? (
+          <button
+            type="button"
+            className="ghost"
+            onClick={() =>
+              window.open(
+                `/api/wholesale-quotations/${encodeURIComponent(loadedVoucherNo)}/print?coBook=${encodeURIComponent(coBook)}&format=html`,
+                '_blank',
+              )
+            }
+            disabled={busy}
+          >
+            Print
+          </button>
+        ) : null}
         <button type="button" className="ghost" onClick={reset} disabled={busy}>
           New
         </button>
