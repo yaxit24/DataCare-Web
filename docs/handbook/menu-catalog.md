@@ -744,8 +744,8 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Looks:** Voucher/party header, item, charge and old-metal grids, a 16-field tender panel, totals, item image and print controls.
 - **Writes:** SL_DATA, SL_DETL, SL_IDTL, SL_PR_DETL, MAIN_STOCK, DM_DATA, AC_DATA, ROJ_MEL_DATA, TAX_DATA, BILL_OS_DATA.
 - **Web:** `/txn/sales`, `/txn/hallmark-sale`; `POST /sales`, `GET /sales/:vchNo`, `PUT /sales/:vchNo`, `DELETE /sales/:vchNo`, `GET /sales/invoice`, `GET /vouchers/recent`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** Lossless reopen, configured companion columns and books, hallmark/tender/source branches, Crystal variants, COL_MAST layout and the printed date year remain.
-- **Owners:** X13, G46, N63, G45, N40, G42, N61, G43, N62, N56, N73, N74, N77.
+- **Remaining:** Lossless reopen on the Sales Invoice screen (the Hallmark Sale screen is lossless since N40), configured companion columns and books, tender/source branches, old-metal header vs detail valuation (G83), tax codes on web-provisioned companies (G82), Crystal variants, COL_MAST layout and the printed date year remain.
+- **Owners:** X13, G46, N63, G45, N40, G42, N61, G43, N62, N56, N73, N74, N77, G82, G83.
 - **Evidence:** [KB_transaction.md:43-109](../../project-memory/video-research/_kb/KB_transaction.md#L43-L109).
 
 ### Sales Order

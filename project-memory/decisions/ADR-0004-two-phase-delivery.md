@@ -38,3 +38,10 @@ utilities) being reproduced as-is.
 - Reviews can ask one question of every change: does it keep desktop-equivalent results?
 - Some desktop utilities are implemented twice: a faithful Phase 1 version for migrated customers and a managed
   Phase 2 replacement behind a flag (SP21).
+
+## Amendment — 1 October 2026 (decision D28)
+The owner decided that nothing in Phase 2 starts, including the M0 decisions, until Phase 1 is complete as defined
+in `docs/master-parity-plan-2026-09-29/13-phase1-delivery-plan.md` §1 and certified (N30). This replaces the first
+consequence above, which let the M0 decisions and a certified pilot scope start Phase 2 earlier. N86 and N88 remain
+Phase 1 slices. The plan enforces the gate: every Phase 2 slice depends on SP01, SP01 on N30, and the plan validator
+refuses a Phase 2 status other than `planned` while a Phase 1 slice it depends on is unfinished.

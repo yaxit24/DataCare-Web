@@ -8,8 +8,10 @@ scaling step waits for a measured trigger.
 - **Machine record:** [`phase2-backlog.json`](phase2-backlog.json) — milestones M0–M7 and slices SP01–SP24 with
   steps, tests and done-when criteria. Gaps G75–G78 and G80 ([document 12](12-lineage-verification-2026-10-01.md))
   are owned there; `validate_plan.py` checks the identifiers, dependencies and gap coverage.
-- **Entry gate:** the Phase 1 release certificate for a pilot scope (N82), or an owner-approved bounded pilot. Two
-  preparations start during Phase 1 (ADR-0004): the supported runtime (N86) and maintainability boundaries (N88).
+- **Entry gate (D28):** Phase 1 is complete as defined in [document 13](13-phase1-delivery-plan.md) §1 and certified
+  (N30). Nothing in this document starts earlier, including the M0 decisions (owner instruction, 1 October 2026).
+  Two Phase 1 slices prepare for it and are not affected: the supported runtime (N86) and maintainability
+  boundaries (N88).
 - **Rule that never changes:** Phase 1 golden vectors, write-set database tests, zero-mock journeys and the desktop
   differential stay blocking. A SaaS change to an operator workflow ships behind a per-tenant flag that defaults to
   desktop behaviour for migrated tenants and never changes an accounting, stock or tax result (D25).
@@ -31,7 +33,7 @@ Items below marked **proposal** are recommendations for the owner; facts cite th
 | Backup | Host `pg_dump` with local retention (`web/deploy/backup.sh`) | Managed point-in-time recovery and per-tenant restore (SP12) |
 | Audit | Method, path and status logged after the response (`web/apps/api/src/modules/ops/audit.ts`) | Durable, transactional platform audit (SP20) |
 | Maintainability | 8,400-line route file without schemas; no OpenAPI | Module route plugins with schemas (N88), OpenAPI and a contract package (SP03) |
-| Runtime | Node 20 (end of life), Next.js 15.1.6 and React 19.0.0 inside an advisory range, Prisma 6 (fixes end 19 November 2026) | N86 now; Next.js 16, Prisma 7 and PostgreSQL 18 in SP02 |
+| Runtime | Node 20 (end of life), Next.js 15.1.6 and React 19.0.0 inside an advisory range, Prisma 6 (fixes end 19 November 2026) | N86 now: patched Next.js 15.5, Node 24 and Prisma 7 by 19 November 2026 (D26); Next.js 16 and PostgreSQL 18 in SP02 |
 
 No plan, subscription, entitlement, usage, invoice, support-grant or data-request model exists in the schema or the
 route policy (gaps G75–G78).
@@ -237,7 +239,7 @@ tests at twice the forecast peak with one noisy tenant.
 
 | Milestone | Slices | Exit criteria |
 |---|---|---|
-| M0 Decisions | SP01 | Edition-to-plan matrix for all 198 menus; pricing, legal entity and GST, identity, provider, residency, SLO/RPO/RTO and offline decisions signed (ADR-0005 onward) |
+| M0 Decisions (after Phase 1, D28) | SP01 | Edition-to-plan matrix for all 198 menus; pricing, legal entity and GST, identity, provider, residency, SLO/RPO/RTO and offline decisions signed (ADR-0005 onward) |
 | M1 Supported, contract-first foundation | SP02, SP03 | Supported runtime and framework versions with green parity suites; every route in a module plugin with a schema; OpenAPI generated in CI |
 | M2 Tenant and identity control plane | SP04–SP08 | Trusted tenant resolution, platform realm and roles, tenant lifecycle, entitlements and flags, consented support access; isolation suite green |
 | M3 Cloud operations and onboarding | SP09–SP14, SP21 | Jobs, object storage, tenant secrets, managed backups with a verified per-tenant restore, the company wizard and migration service, SaaS utility replacements |
@@ -261,6 +263,8 @@ tests at twice the forecast peak with one noisy tenant.
 
 ## 15. Decisions the owner must make (M0)
 
+Deferred by D28: the owner takes these when Phase 1 is complete and certified, not before.
+
 1. Edition-to-plan mapping, bundled versus add-on modules, and grandfathering of migrated customers.
 2. Prices, terms, trial, discounts, overage, grace, refunds, reseller model and payment gateway.
 3. Legal entity, GST registration, SAC, rate, place-of-supply and e-invoice policy for subscription invoices.
@@ -275,6 +279,6 @@ tests at twice the forecast peak with one noisy tenant.
 
 ## 16. Keeping this record current
 
-Phase 2 slices continue at **SP25** in `phase2-backlog.json`; gaps continue in document 12 at G82. A slice moves to
+Phase 2 slices continue at **SP25** in `phase2-backlog.json`; gaps continue in document 12 at G84. A slice moves to
 `in-progress` or `implemented-unverified` only with evidence paths. Run `validate_plan.py` and `docs_check.py` before
 merging.

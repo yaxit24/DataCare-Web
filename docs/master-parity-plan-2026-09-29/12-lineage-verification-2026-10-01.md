@@ -2,8 +2,8 @@
 
 This document answers one question: **does the current plan account for every earlier plan, gap list, audit and
 requirement?** It records the method, the result per source, the items that no current identifier owned (new gaps
-G69–G80, plus G81 found by the independent review of this change), the decisions they need (D23–D27) and the
-slices that close them (N83–N88). It also records the
+G69–G80, plus G81 found by the independent review of this change), the decisions they need (D23–D28, all accepted by the owner on
+1 October 2026) and the slices that close them (N83–N88). It also records the
 documentation hub created in the same change.
 
 - **Baseline:** `main` at `675d845` (after PR #25, G67, and PR #26, N47).
@@ -35,17 +35,18 @@ owner, and 20 rows where `web/docs/COMPLETION-REGISTER.json` names the wrong for
 
 ## 2. Result
 
-<!-- lineage-counts: sources=37 items=228 closed=32 carried=176 new-gap=14 superseded=4 decision=2 -->
+<!-- lineage-counts: sources=37 items=228 closed=32 carried=178 new-gap=14 superseded=4 -->
 
-37 sources, 228 items: **32 closed, 176 carried, 14 new gaps, 4 superseded, 2 decisions.** Every new-gap item maps to
-one of the gaps G69–G80 below.
+37 sources, 228 items: **32 closed, 178 carried, 14 new gaps, 4 superseded.** The two items that needed an owner
+decision (requirements 19.2 and 21.1) were decided on 1 October 2026 (D23, D24) and are now carried. Every new-gap
+item maps to one of the gaps G69–G80 below.
 
 | Source group | Items | Closed | Carried | New gap | Other | Notes |
 |---|---:|---:|---:|---:|---:|---|
 | Root plans and reports, August–September (9 files) | 127 | 24 | 99 | 2 | 2 superseded | Already reconciled at package level by [document 07](07-previous-plan-reconciliation.md); this review checked item by item |
 | `PARITY-EVALUATION-2026-09-28.md` | 10 | 2 | 5 | 3 | — | Harness defects, missing builders and Next25 columns had no leaf owner |
 | `report.md`, `req.md` | 2 | — | 1 | — | 1 superseded | Extraction gaps carried by X32 and N74–N77 |
-| `.kiro` requirements 1–22 | 22 | 1 | 18 | 1 | 2 decisions | Requirements 1–4 closed by the extraction; traceability itself was missing |
+| `.kiro` requirements 1–22 | 22 | 1 | 20 | 1 | — | Requirements 1–4 closed by the extraction; traceability itself was missing; 19.2 and 21.1 decided by D23 and D24 |
 | September package (01, 02, 03, 08, 11, 12) | 22 | — | 22 | — | — | CR-01 and CR-02 findings in the backlog were stale; corrected (§6) |
 | `web/docs` plans, catalogue and status | 25 | 3 | 21 | 1 | — | Phase 2 SaaS product not owned anywhere |
 | `project-memory`, `web-implementation-spec`, security reviews | 14 | 2 | 9 | 2 | 1 superseded | ADR-0002 levers without triggers; SQL interpolation lint |
@@ -66,14 +67,14 @@ the authority for each item.
 | 9 Calculation engine | carried | X04, P01-02, N48 |
 | 10–15 Sales, purchase, stock, manufacturing, dhiran, finance | carried | X13, X12, X18, X23, X24, X16 with their packages |
 | 16–18 Accounting, GST/e-invoice, schemes | carried | X16, X26, X15, N16, X24 |
-| 19 Reports and documents | carried; 19.2 → D23 | X25, X26, N74, N75 |
+| 19 Reports and documents | carried; 19.2 decided by D23 (refuse and list the missing fields) | X25, X26, N74, N75 |
 | 20 Integrations | carried | X28, N25, N54 |
-| 21 Behavioural parity verification | carried; 21.1 → D24 | X03, X06, X34, N82 |
+| 21 Behavioural parity verification | carried; 21.1 decided by D24 (enforced by tests and release gates) | X03, X06, X34, N82 |
 | 22 Phased delivery | carried | X31, X33, N80, N82, D25 |
 
-## 3. Gap register G69–G81
+## 3. Gap register G69–G83
 
-Severity as in documents 10 and 11. G69–G74, G79 and G81 are Phase 1 (desktop parity in the web); G75–G78 and G80 are
+Severity as in documents 10 and 11. G69–G74, G79 and G81–G83 are Phase 1 (desktop parity in the web); G75–G78 and G80 are
 Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and are owned by its SP slices.
 
 | ID | Sev | Area | Desktop authority | Web evidence | Required behaviour | Slice |
@@ -91,19 +92,22 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G79 | S2 | Maintainability boundaries | — | `web/apps/api/src/routes/txn.ts` is 8,400 lines with 602 route declarations and maps errors by name pattern (lines 755–864); the largest pages are 1,867 and 1,485 lines; no OpenAPI or shared request contract (`web/packages/types/src/index.ts`); no rule rejects unbound SQL interpolation (`project-memory/parity/SECURITY-REVIEW.md:41-45`) | Per-module route plugins with schemas, typed error taxonomy, a shared voucher editor, size budgets and import/SQL lint (Phase 1); OpenAPI and contract package (Phase 2) | N88, SP03 |
 | G80 | S3 | Desktop-only utilities in a SaaS (Phase 2) | `UT_BKP.cs:1223-1271` (drive backup and restore), `UT_HDD.cs:748-765` (machine registry), `UT_WINDOW.cs:1434-1439` (global tiles), destructive import/export and renumber | Phase 1 reproduces them where safe; several are unsafe or meaningless for a hosted multi-tenant service | Managed, flagged replacements that keep business results unchanged (D25) | SP21 |
 | G81 | S2 | Client-side CSV export | — (the desktop exports through Crystal and Excel, not this path) | `downloadCsv` in `web/apps/web/lib/api.ts:204-212` only quotes values, and the generic report page uses it; the server encoder neutralises a leading `=`, `+`, `-` or `@` (`web/apps/api/src/modules/reports/reportCsv.ts:30-41`). Found by the independent review of this change | Every CSV the browser downloads is produced by the server encoder or encoded the same way; a test exports a cell containing `=1+1` | N57 |
+| G82 | S2 | Provisioned tax masters lack the parent row | `web/apps/api/src/modules/shared/taxPolicy.ts` resolves a tax code by its parent row, `TAX_MAST.SR_NO = 0`, as the desktop tax queries do (`AND D.SR_NO = 0`) | Found while implementing N40: `web/apps/api/src/modules/ops/seedCompany.ts` provisions each tax code as a single row at `SR_NO = 1`. A sale created by rate resolves; any save that names the code (`taxCode`) fails with "tax code is not configured: 10" on every web-provisioned company | Provisioning writes the desktop shape (parent at `SR_NO = 0`, components at 1..n) and existing provisioned companies are repaired | N58 |
+| G83 | S2 | Old-metal header and ledger use the posted amount | `unified/src/csharp/DataCareNext/TR_SALE.cs` totals the exchange grid (`MSG_OLD` column 13, :19336-19350) into `OLD_GL_AMT`; the web values the detail row server-side (`web/apps/api/src/modules/sales/sales.ts` `resolveOldGoldValuation`) | Found while implementing N40: `SL_PR_DETL.NET_AMT` is the server valuation (25,810 in the round-trip fixture) while `SL_DATA.OLD_GL_AMT`, `AC_DATA` and `BILL_OS` sum the client-posted `amount` (25,821.60), so one voucher carries two old-gold values | Header, ledger and detail use one valuation, chosen against the desktop grid source | N15 |
 
-## 4. Decisions D23–D27
+## 4. Decisions D23–D28
 
-They continue document 11 §4 and use the same rules. D25 is recorded as the owner's instruction of 1 October 2026;
-the others need approval before their slice starts.
+They continue document 11 §4 and use the same rules. All six were accepted by the owner on 1 October 2026: D25 and
+D28 as the owner's instructions, D23, D24, D26 and D27 as recommended.
 
 | ID | Decision and recommended position | Owner / deadline | Evidence |
 |---|---|---|---|
-| D23 | Requirement 19.2 (partial invoices). Never issue an incomplete legal document. When a template cannot be bound, refuse and list the missing fields — that satisfies "indicate which fields are missing". A watermarked draft preview is allowed for non-legal documents only | Product owner and finance, before N74 | `web/apps/api/src/modules/reports/reportBindingContract.ts` refuses unbound templates |
-| D24 | Requirement 21.1 (block on parity difference). Parity is enforced by verification and release gates (write-set database tests, the G5 differential, the release certifier), not by blocking live transactions; production records invariant failures and alerts | Product owner, before N82 | `GET /ops/invariants`, `web/apps/api/src/modules/ops/releaseCertification.ts` |
+| D23 | Requirement 19.2 (partial invoices). Never issue an incomplete legal document. When a template cannot be bound, refuse and list the missing fields — that satisfies "indicate which fields are missing". A watermarked draft preview is allowed for non-legal documents only | Product owner — accepted as recommended, 1 October 2026 | `web/apps/api/src/modules/reports/reportBindingContract.ts` refuses unbound templates |
+| D24 | Requirement 21.1 (block on parity difference). Parity is enforced by verification and release gates (write-set database tests, the G5 differential, the release certifier), not by blocking live transactions; production records invariant failures and alerts | Product owner — accepted as recommended, 1 October 2026 | `GET /ops/invariants`, `web/apps/api/src/modules/ops/releaseCertification.ts` |
 | D25 | Phase boundary. Phase 1 delivers desktop-equivalent business results and semantic layout (D20) and does not port desktop weaknesses (document 08). Phase 2 productizes. SaaS workflow changes ship behind per-tenant flags that default to desktop behaviour for migrated tenants and never change an accounting or stock result without a versioned, effective-dated decision. Accepted: owner instruction, 1 October 2026 | Product owner — accepted | [ADR-0004](../../project-memory/decisions/ADR-0004-two-phase-delivery.md) |
-| D26 | Runtime and framework target. Upgrade now to the latest Next.js 15.5 security release with the React 19 patch release it requires, and move CI, images and `engines` to Node 24 LTS; rehearse Next.js 16 and Prisma 7 on a branch with the full parity suite; finish Prisma 7 before 19 November 2026 or record a dated risk acceptance | Platform lead, immediately | G72 |
-| D27 | Route split timing. Strangler extraction: each N50 milestone moves its route family out of `web/apps/api/src/routes/txn.ts` into a Fastify plugin in its module, together with that family's schemas; no single large move; the exact route-universe test stays green throughout | API lead, with N50 milestone 1 | G79 |
+| D26 | Runtime and framework target. Upgrade now to the latest Next.js 15.5 security release with the React 19 patch release it requires, and move CI, images and `engines` to Node 24 LTS; rehearse Next.js 16 and Prisma 7 on a branch with the full parity suite; finish Prisma 7 before 19 November 2026 or record a dated risk acceptance | Product owner — accepted as recommended, 1 October 2026; platform lead implements it now (N86) | G72 |
+| D27 | Route split timing. Strangler extraction: each N50 milestone moves its route family out of `web/apps/api/src/routes/txn.ts` into a Fastify plugin in its module, together with that family's schemas; no single large move; the exact route-universe test stays green throughout | Product owner — accepted as recommended, 1 October 2026; API lead, with N50 milestone 1 | G79 |
+| D28 | Phase 2 timing. Nothing in Phase 2 starts, including the M0 decisions of document 14 §15, until Phase 1 is complete as defined in document 13 §1 and certified (N30). N86 and N88 are Phase 1 slices and continue. The plan enforces it: every Phase 2 slice depends on SP01, SP01 on N30, and `validate_plan.py` refuses a Phase 2 status other than `planned` while a Phase 1 slice it depends on is not `implemented-unverified` | Product owner — accepted (instruction), 1 October 2026 | [ADR-0004](../../project-memory/decisions/ADR-0004-two-phase-delivery.md) amendment |
 
 ## 5. Slices N83–N88
 
@@ -154,7 +158,7 @@ Done when: register, navigation and catalog agree, and the check fails on a plan
 
 #### N86 — Supported runtime and framework baseline
 
-Gap G72 · Parents P00-04, P12-05; X31, X34 · S1 · Size M · Start immediately
+Gap G72 · Parents P00-04, P12-05; X31, X34 · S1 · Size L · Start immediately
 
 Steps:
 1. Upgrade `next` to the latest 15.5 security release and `react`/`react-dom` to the patched version it requires;
@@ -163,11 +167,13 @@ Steps:
    API image runs Node 24.
 3. Add a dependency-advisory gate (audit against the lockfile, with reviewed exceptions by advisory identifier) to the
    static-gates CI job.
-4. Rehearse Next.js 16 and Prisma 7 on a branch with the full parity suite and record the D26 outcome before
-   19 November 2026.
+4. Upgrade Prisma to 7 with the full parity suite before 19 November 2026, when Prisma 6 security fixes end (D26).
+   If it cannot land in time, record a dated risk acceptance.
+5. Rehearse Next.js 16 on a branch with the full parity suite and record the result. If the 15.5 line stops
+   receiving security fixes before Phase 1 is complete, move to Next.js 16 in this slice.
 
-Done when: no installed package matches a known critical or high advisory, CI and images run Node 24, and the D26
-outcome is recorded.
+Done when: no installed package matches a known critical or high advisory, CI and images run Node 24, Prisma 7 is in
+use (or a dated risk acceptance is recorded) before 19 November 2026, and the Next.js 16 rehearsal is recorded.
 
 #### N87 — Documentation hub, lineage register and requirement traceability
 
@@ -182,7 +188,7 @@ Steps (delivered in the pull request that added this document):
    ([document 14](14-phase2-saas-plan.md)), agent skills under `.kiro/skills/` and `AGENTS.md`.
 
 Remaining before acceptance: an independent reviewer compares one tab of the catalog per wave with the desktop
-screens and tutorial keyframes, and the owner approves D23 and D24.
+screens and tutorial keyframes. (The owner approved D23 and D24 on 1 October 2026.)
 
 #### N88 — Module boundaries and static rules
 
@@ -217,6 +223,7 @@ the screens moved to the shared editor pass unchanged-save tests.
 | X15 `currentFinding` (CR-02) | Credit-note IRN assumes the document exists | E CRNT and E INVOICE create/edit/delete/print lifecycle exists (N16); provider and desktop acceptance remain. Recorded as `currentFindingCorrection` |
 | Completion register | 198 rows mapped | 20 rows mapped to the wrong form or surface (G71); the catalog carries the corrected view until N85 |
 | N87 | — | implemented-unverified, evidence in this change |
+| Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
 
@@ -233,7 +240,8 @@ the screens moved to the shared editor pass unchanged-save tests.
 
 ## 8. Keeping this record current
 
-- New gaps continue at **G82** (here or in document 11, keeping numbers unique); new slices continue at **N89**, Phase 2 slices at **SP25**.
+- New gaps continue at **G84** (here or in document 11, keeping numbers unique); new slices continue at **N89**, Phase 2
+  slices at **SP25**, decisions at **D29**.
   Update the thresholds in `validate_plan.py` in the same pull request.
 - When an item in `lineage-register.json` closes, change its disposition to `closed` with evidence; keep the row.
 - Run `python3 docs/master-parity-plan-2026-09-29/validate_plan.py`, `python3 docs/tools/docs_check.py` and

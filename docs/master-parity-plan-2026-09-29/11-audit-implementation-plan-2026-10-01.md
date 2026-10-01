@@ -44,7 +44,11 @@ evidence exists and named work remains. No slice is accepted.
 | N36 | planned | in-progress | Sales/purchase registers, GSTR-3B, by-party, daily and employee summaries classify by `MAIN_BOOK` (PRs #13, #14) | G48 |
 | N38 | planned | in-progress | Document-only Wholesale Quotation lifecycle: own WH QUOT book, rights, create, read, edit, delete and print, with no ledger, Rojmel or stock rows (PR #22) | Conversion lineage into wholesale sale (with N46) |
 | N39 | planned | in-progress | Estimate prints the active company name (PR #12) | G49: persisted estimate and full company header |
-| N40 | planned | in-progress | Hallmark Sale reopen, edit, delete and voucher list (PR #15) | G45: unchanged saves lose data |
+| N40 | planned | implemented-unverified | Reopen, edit, delete and voucher list (PR #15); lossless reopen through `@datacare/core` `hallmarkSaleForm`, with an HTTP round trip proving an unchanged save leaves every voucher row identical | Browser journey of the unchanged save; G82 and G83 recorded |
+| N47 | planned | implemented-unverified | Blocking static-gates CI job (PR #26); scratch PR #27 proved each gate fails CI when broken | — |
+| N49 | planned | in-progress | Hermetic journey seeds, all 24 journeys twice from a clean database (PR #28) | Steps 3–6: per-worktree ports and project, database identity checks, CI job |
+| N51 | planned | in-progress | Recent list scoped to the full voucher identity; Load and Delete by row identity (PR #30) | Version tokens (D17) |
+| N53 | planned | in-progress | Warm schema catalog, explicit budgets with `statement_timeout`, retryable 503, loyalty lock, metrics (PR #29) | Budgets for the remaining mutation coordinators |
 | N41 | planned | implemented-unverified | Labour previews read `LBR_WITH_GHT` (PR #14) | Desktop comparison |
 | N42 | planned | implemented-unverified | `EMP_CODE_MANDATORY` enforced with the desktop message (PR #14) | Desktop comparison |
 | N43 | planned | in-progress | Canonical O/D/T copy labels for sales, purchase, purchase return and karigar documents (PR #20) | Template registry and resolver (needs N73), HUID print, variants |
@@ -106,8 +110,6 @@ or is a security exposure; **S2** wrong or incomplete in a supported branch; **S
 | G66 | S2 | Release-certification coverage | Document 04 gates R02, R03, R08, R09, R12 | `ops/releaseCertification.ts` declares 19 gates; none covers test type compilation, documentation/plan integrity, the two additional real-browser suites, hardware/providers, migration continuation or business UAT | Exact-set, candidate-bound gates for each missing family | N82 |
 | G67 | S2 | `DM_DATA` counter column | `Ac_Stock.Dm_PrRtn_Detl` and `Dm_Purc_Detl` (`Ac_Stock.cs:774-790`) insert `TBL_CODE` on every diamond/detail row | Found while implementing N34: the PostgreSQL `DM_DATA` table had no `TBL_CODE`, so the first faithful insert failed with "column does not exist" and every writer silently omitted the counter | Additive nullable `TBL_CODE varchar(3)` (migration `20261001090000_dm_data_tbl_code`) written by every `DM_DATA` writer | N34 |
 | G68 | S2 | Lock waits ignore the transaction budget | — | Found while implementing N53: Prisma checks an interactive transaction's timeout only between statements, so a save queued behind another session's numbering lock waited for as long as that lock was held (measured: 9.9 s against a 1.5 s budget), then failed as an opaque 500 | Every budgeted transaction sets a transaction-local `statement_timeout` equal to its budget; a cancelled statement is a retryable 503 | N53 |
-| G69 | S2 | Provisioned tax masters lack the parent row | `taxPolicy.ts` resolves a tax code by its parent row, `TAX_MAST.SR_NO = 0`, as the desktop tax queries do (`AND D.SR_NO = 0`) | Found while implementing N40: `ops/seedCompany.ts` provisions each tax code as a single row at `SR_NO = 1`. A sale created by rate resolves; any save that names the code (`taxCode`) fails with "tax code is not configured: 10" on every web-provisioned company | Provisioning writes the desktop shape (parent at `SR_NO = 0`, components at 1..n) and existing provisioned companies are repaired | N58 |
-| G70 | S2 | Old-metal header and ledger use the posted amount | `TR_SALE.cs` totals the exchange grid (`MSG_OLD` column 13, :19336-19350) into `OLD_GL_AMT`; the web values the detail row server-side (`sales.ts` `resolveOldGoldValuation`) | Found while implementing N40: `SL_PR_DETL.NET_AMT` is the server valuation (25,810 in the round-trip fixture) while `SL_DATA.OLD_GL_AMT`, `AC_DATA` and `BILL_OS` sum the client-posted `amount` (25,821.60), so one voucher carries two old-gold values | Header, ledger and detail use one valuation, chosen against the desktop grid source | N15 |
 
 ## 4. Decisions D15–D22
 
@@ -1117,7 +1119,7 @@ recorded there, never on a slice.
 - Update slice status in `execution-backlog.json` in the same pull request as the code.
 - Run `python3 docs/master-parity-plan-2026-09-29/validate_plan.py` and `pnpm docs:refs` before merging.
 - A defect found during implementation becomes a new gap row here (continuing at G67) and a step or child slice.
-  G69–G81 are recorded in [document 12](12-lineage-verification-2026-10-01.md); the next new gap is G82 (in either
+  G69–G83 are recorded in [document 12](12-lineage-verification-2026-10-01.md); the next new gap is G84 (in either
   document), slices continue at N89 and Phase 2 slices at SP25. Keep the numbers unique across documents 10–12.
 - When a gap is fixed, keep its row and add the fixing pull request to the slice evidence: the register is
   historical, the backlog is current.

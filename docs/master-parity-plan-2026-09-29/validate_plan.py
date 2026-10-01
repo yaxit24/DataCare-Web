@@ -102,13 +102,13 @@ gap_ids=[]
 for register_doc in ('10-gap-register-2026-10-01.md','11-audit-implementation-plan-2026-10-01.md',
                      '12-lineage-verification-2026-10-01.md'):
     gap_ids+=re.findall(r'^\| (G\d{2}) \|',(here/register_doc).read_text(),re.M)
-check(gap_ids==[f'G{i:02}' for i in range(1,len(gap_ids)+1)] and len(gap_ids)>=81, 'Gap register identities incomplete')
+check(gap_ids==[f'G{i:02}' for i in range(1,len(gap_ids)+1)] and len(gap_ids)>=83, 'Gap register identities incomplete')
 # Decisions D01-D14 (document 08), D15-D22 (document 11) and D23 onward (document 12) form one sequence.
 decision_ids=[]
 for decision_doc in ('08-decisions-and-delivery.md','11-audit-implementation-plan-2026-10-01.md',
                      '12-lineage-verification-2026-10-01.md'):
     decision_ids+=re.findall(r'^\| (D\d{2}) \|',(here/decision_doc).read_text(),re.M)
-check(decision_ids==[f'D{i:02}' for i in range(1,len(decision_ids)+1)] and len(decision_ids)>=27,
+check(decision_ids==[f'D{i:02}' for i in range(1,len(decision_ids)+1)] and len(decision_ids)>=28,
       'Decision identities incomplete')
 cited=set()
 for p in slices.values():
@@ -140,6 +140,25 @@ def visit_sp(identity, trail):
     for dep in sp[identity]['startAfter']:
         if dep in sp: visit_sp(dep,trail+[identity])
 for identity in sp: visit_sp(identity,[])
+# Decision D28: Phase 2 waits for Phase 1. Every Phase 2 slice reaches SP01 through its dependencies, SP01 waits for
+# N30 (certify and roll out Phase 1), and no Phase 2 slice leaves 'planned' while a Phase 1 slice it depends on,
+# directly or through other Phase 2 slices, is not yet implemented-unverified.
+def sp_reach(identity, seen):
+    for dep in sp[identity]['startAfter']:
+        if dep not in seen:
+            seen.add(dep)
+            if dep in sp: sp_reach(dep, seen)
+    return seen
+check('N30' in sp.get('SP01',{}).get('startAfter',[]), 'Phase 2 gate (D28): SP01 must start after N30')
+for identity in sp:
+    reach=sp_reach(identity,set())
+    if identity!='SP01':
+        check('SP01' in reach, 'Phase 2 gate (D28): slice does not depend on SP01: '+identity)
+    if sp[identity]['status']!='planned':
+        for dep in sorted(reach):
+            if dep in slices:
+                check(slices[dep]['status']=='implemented-unverified',
+                      'Phase 2 gate (D28): '+identity+' started before Phase 1 slice '+dep+' is implemented')
 for gap in gap_ids:
     if int(gap[1:])>=20:
         check(gap in cited, 'Audit gap is not assigned to any slice: '+gap)
