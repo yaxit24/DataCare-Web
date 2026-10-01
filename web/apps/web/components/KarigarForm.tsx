@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { get, post, ApiError } from '../lib/api';
 import { LookupPicker } from './LookupPicker';
+import { BookSelect } from './BookSelect';
 import { EntityImagePanel } from './EntityImagePanel';
 import { useGridKeyboard } from './GridKeyboard';
 import SubDetailGrid, { SUB_DETAIL_COMPONENT, useSubDetail } from './SubDetailGrid';
@@ -170,6 +171,20 @@ export default function KarigarForm({
       ? `${label} Issue — metal OUT`
       : `${label} Receive — metal IN`;
   const rcv = mode === 'receive';
+  // G19: these screens post to a writer that resolves the voucher book from BOOK_DATA and refuses a
+  // book-less scope. The form used to send none, so a fresh company could not save a karigar/job-work
+  // voucher at all. Choose the configured book of the right MAIN_BOOK family and send it as coBook.
+  const bookFamilies =
+    family === 'jobwork'
+      ? mode === 'issue'
+        ? ['JOBWORK ISSUE']
+        : ['JOBWORK RECEIPT']
+      : oldItemSales
+        ? ['OLD ITEM SALES']
+        : mode === 'issue'
+          ? ['KARIGAR ISSUE', 'KARIGAR']
+          : ['KARIGAR RECEIPT', 'KARIGAR'];
+  const [coBook, setCoBook] = useState('');
   const showLabourTax = rcv && !oldItemSales;
   const [karigarAc, setKarigarAc] = useState('');
   const [karigarName, setKarigarName] = useState('');
@@ -255,6 +270,10 @@ export default function KarigarForm({
     e.preventDefault();
     setErr('');
     setRes(null);
+    if (!coBook) {
+      setErr('select the configured book first');
+      return;
+    }
     setBusy(true);
     try {
       const karigarLine = (l: Line, sourceIndex: number) => ({
@@ -352,6 +371,7 @@ export default function KarigarForm({
       });
 
       const body: any = {
+        coBook,
         billOutstanding: billOutstanding.trim() ? n(billOutstanding) : undefined,
         karigarAc,
         karigarName: karigarName || undefined,
@@ -388,6 +408,10 @@ export default function KarigarForm({
       <form onSubmit={submit}>
         <div className="panel">
           <div className="row">
+            <div className="field">
+              <label>Book</label>
+              <BookSelect value={coBook} onChange={setCoBook} mainBooks={bookFamilies} />
+            </div>
             <div className="field">
               <label>Bill Outstanding</label>
               <input value={billOutstanding} onChange={(e) => setBillOutstanding(e.target.value)} />
@@ -718,7 +742,7 @@ export default function KarigarForm({
                 className="ghost"
                 onClick={() =>
                   window.open(
-                    `/api/karigar/issue-voucher?coBook=KIS&vchNo=${encodeURIComponent(String(res.vchNo))}&format=html`,
+                    `/api/karigar/issue-voucher?coBook=${encodeURIComponent(coBook)}&vchNo=${encodeURIComponent(String(res.vchNo))}&format=html`,
                     '_blank',
                   )
                 }

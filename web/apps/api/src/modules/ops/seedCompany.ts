@@ -202,6 +202,28 @@ const BOOKS: {
     ],
   },
   { book: 'ILT', name: 'Item Lot', mainBook: 'ITEM LOT', inout: 'I', acCode: 'PURCHASE' },
+  // Desktop TR_KR_ISU karigar books (MDI_FORM.cs:9153 'KARIGAR ISSUE', :9165 'KARIGAR RECEIPT'), over
+  // KR_DATA. Issue sends metal out to the karigar; receipt takes finished metal back in. Without them a
+  // fresh company could not open Karigar Issue / Receive at all — the writer refuses a book-less scope
+  // ('company year and book are required'). G19.
+  {
+    book: 'KRI',
+    name: 'Karigar Issue',
+    mainBook: 'KARIGAR ISSUE',
+    inout: 'O',
+    acCode: 'PURCHASE',
+    shortName: 'KRISU',
+    table: 'KR_DATA',
+  },
+  {
+    book: 'KRR',
+    name: 'Karigar Receipt',
+    mainBook: 'KARIGAR RECEIPT',
+    inout: 'I',
+    acCode: 'PURCHASE',
+    shortName: 'KRREC',
+    table: 'KR_DATA',
+  },
   { book: 'JV', name: 'Journal', mainBook: 'JOURNAL', inout: 'I', acCode: 'KASAR' },
   { book: 'CON', name: 'Contra', mainBook: 'CONTRA', inout: 'I', acCode: 'CASH' },
   // Desktop TR_WH_SALE serves both: book 034 `WSALE` / `WH SALES` and book 064 `RCUT` / `RATE CUT`, each an OUT
