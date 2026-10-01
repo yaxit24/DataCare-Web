@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { post, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
+import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
@@ -242,6 +243,9 @@ const n = (v: string) => Number(v || 0);
 const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
 
 export default function HallmarkSalePage() {
+  // G11: per-gram labour is on (net + ghat) unless the company sets LBR_WITH_GHT='N' (blank default Y).
+  const companySettings = useCompanySettings();
+  const labourWithGhat = companyFlag(companySettings, 'LBR_WITH_GHT', 'Y');
   const { lcCode, coYear } = useBusinessScope();
   const [coBook, setCoBook] = useState('');
   const [acCode, setAcCode] = useState('WALKIN');
@@ -294,7 +298,7 @@ export default function HallmarkSalePage() {
     const mk = labourCharge('per_gram', {
       netWt: n(l.netWt),
       ghatWt: n(l.ghtWt),
-      withGhat: true,
+      withGhat: labourWithGhat,
       rate: n(l.making),
     });
     return { fine, metal, mk, net: r2(metal + mk) };
