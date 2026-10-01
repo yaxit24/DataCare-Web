@@ -1,0 +1,4 @@
+{
+  "//": "Reviewed exceptions for scripts/check-advisories.mjs. Only CRITICAL and HIGH advisories need one. Each entry: id (GHSA), package, reason, owner, expires (YYYY-MM-DD). Expired or stale entries fail the gate.",
+  "exceptions": []
+}
