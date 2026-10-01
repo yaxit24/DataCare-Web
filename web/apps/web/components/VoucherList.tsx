@@ -51,7 +51,10 @@ export function VoucherList({
     if (!confirm(`Delete voucher #${vchNo}? This reverses its ledger + stock.`)) return;
     setMsg('');
     try {
-      await del(`${deleteBase}/${encodeURIComponent(vchNo)}`);
+      // The recent list is scoped to this configured book; deletion must carry the same identity. Omitting
+      // it made writers fall back to mnemonic literals (for example Purchase Return -> PRT) and could not
+      // delete a real desktop-shaped book such as 348.
+      await del(`${deleteBase}/${encodeURIComponent(vchNo)}?coBook=${encodeURIComponent(book)}`);
       setMsg(`Deleted #${vchNo}`);
       await load();
     } catch (e) {

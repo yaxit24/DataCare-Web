@@ -6,6 +6,7 @@ import {
   postVoucherTx,
   reverseVoucherTx,
   assertBalanced,
+  insertRowTx,
   type LedgerLine,
 } from '../posting/posting.js';
 import { receiptLegs } from '../finance/tender.js';
@@ -13,6 +14,7 @@ import { billTotals, type BillTotals } from '@datacare/core';
 import {
   buildExpenseLegs,
   computeLine,
+  getPurchase,
   type PurchaseLineInput,
   PurchaseValidationError,
 } from './purchase.js';
@@ -28,6 +30,8 @@ export interface PurchaseReturnInput {
   billNo?: string;
   origVchNo?: string | number;
   origBook?: string;
+  /** Desktop source picker carries YearL + BookL + VchNo and permits a prior-year purchase. */
+  origYear?: string;
   vchDate?: Date | string;
   discountAmount?: number;
   taxRatePct: number;
@@ -157,6 +161,7 @@ async function resolvePurchaseReturnTags(
   if (input.origVchNo == null)
     throw new PurchaseValidationError('original purchase voucher is required for a tagged return');
   const originalBook = String(input.origBook ?? 'PUR').trim();
+  const originalYear = String(input.origYear ?? input.scope.coYear ?? '').trim();
   const originalNo = formatVoucherNo(input.origVchNo);
   const header: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
     `SELECT "AC_CODE" FROM "PR_DATA"
@@ -165,7 +170,7 @@ async function resolvePurchaseReturnTags(
     input.scope.tenantId,
     input.scope.coCode,
     input.scope.lcCode,
-    input.scope.coYear ?? '',
+    originalYear,
     originalBook,
     originalNo,
   );
@@ -182,7 +187,7 @@ async function resolvePurchaseReturnTags(
       input.scope.tenantId,
       input.scope.coCode,
       input.scope.lcCode,
-      input.scope.coYear ?? '',
+      originalYear,
       originalBook,
       originalNo,
       tagNo,
@@ -324,6 +329,8 @@ export async function createPurchaseReturn(
 
     const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
     const originalBook = input.origVchNo == null ? null : String(input.origBook ?? 'PUR').trim();
+    const originalYear =
+      input.origVchNo == null ? null : String(input.origYear ?? input.scope.coYear ?? '').trim();
     const originalNo = input.origVchNo == null ? null : formatVoucherNo(input.origVchNo);
     const detl = computed.map((line, index) => ({
       ...key,
@@ -404,7 +411,7 @@ export async function createPurchaseReturn(
       SL_BILL_NO: originalNo,
       SL_BILL_DBCD: originalBook,
       SL_BILL_LC: originalNo ? input.scope.lcCode : null,
-      SL_BILL_YRCD: originalNo ? (input.scope.coYear ?? '') : null,
+      SL_BILL_YRCD: originalNo ? originalYear : null,
       AC_CODE: input.acCode,
       AC_NAME: input.acName ?? null,
       VCH_DATE: vchDate,
@@ -583,6 +590,16 @@ export async function createPurchaseReturn(
       },
     );
 
+    // TR_KR_ISU uses a hidden voucher series and TEMP_BOOK_DATA exactly like Purchase. The return writer
+    // allocated HD_VCH_NO but never persisted its identity, so document/day-book joins could not resolve it.
+    await insertRowTx(tx, 'TEMP_BOOK_DATA', tenantId, {
+      CO_CODE: input.scope.coCode,
+      LC_CODE: input.scope.lcCode,
+      CO_BOOK: key.CO_BOOK,
+      VCH_NO: hdVchNo,
+      BOOK_NAME: bookPolicy.bookName,
+    });
+
     await postVoucherTx(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: ledger },
       bookName: bookPolicy.bookName,
@@ -598,6 +615,29 @@ export async function createPurchaseReturn(
   });
 }
 
+/**
+ * Reopen a Purchase Return using the same lossless PR_DATA/PR_DETL/PR_IDTL projection as Purchase,
+ * after validating that the selected configured book is actually a PURCHASE RETURN book.
+ */
+export async function getPurchaseReturn(
+  prisma: any,
+  scope: VoucherScope,
+  requestedVoucherNo: number | string,
+): Promise<Record<string, unknown>> {
+  if (!scope.coYear || !scope.coBook)
+    throw new PurchaseValidationError('company year and book are required');
+  await withTenant(prisma, scope.tenantId, (tx: any) =>
+    resolveBookPolicyTx(tx, scope, 'PURCHASE RETURN'),
+  );
+  const view = await getPurchase(prisma, scope, requestedVoucherNo);
+  return {
+    ...view,
+    origVchNo: view.saleBillNo,
+    origBook: view.saleBillBook,
+    origYear: view.saleBillYear,
+  };
+}
+
 export interface DeletePurchaseReturnInput {
   scope: VoucherScope;
   vchNo: number | string;
@@ -609,9 +649,24 @@ export async function deletePurchaseReturn(
   input: DeletePurchaseReturnInput,
 ): Promise<{ reversed: true }> {
   const tenantId = input.scope.tenantId;
+  if (!input.scope.coYear || !input.scope.coBook)
+    throw new PurchaseValidationError('company year and book are required');
   const key = keyOf(input.scope, Number(input.vchNo));
   const params = [tenantId, key.CO_CODE, key.LC_CODE, key.CO_YEAR, key.CO_BOOK, key.VCH_NO];
   return withTenant(prisma, tenantId, async (tx: any) => {
+    const bookPolicy = await resolveBookPolicyTx(tx, input.scope, 'PURCHASE RETURN');
+    const headers: Array<{ HD_VCH_NO: unknown }> = await tx.$queryRawUnsafe(
+      `SELECT "HD_VCH_NO" FROM "PR_DATA"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+          AND "CO_BOOK"=$5 AND "VCH_NO"=$6 FOR UPDATE`,
+      ...params,
+    );
+    if (headers.length !== 1)
+      throw new PurchaseValidationError(
+        headers.length
+          ? `purchase return is ambiguous: ${key.VCH_NO}`
+          : `purchase return not found: ${key.VCH_NO}`,
+      );
     const tags: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "TAG_NO","VCH_SRNO","IT_CODE","ITM_PCS","ITM_GWT","ITM_NWT"
          FROM "PR_DETL"
@@ -652,13 +707,41 @@ export async function deletePurchaseReturn(
         });
     }
     await reverseVoucherTx(tx, tenantId, {
-      tables: ['PR_DATA', 'PR_DETL', 'AC_DATA', 'TAX_DATA', 'MAIN_STOCK'],
+      // Current writer owns Rojmel; PR_IDTL/DM_DATA are included now so the next child-detail slice cannot
+      // create undeletable satellites. Every table uses the complete voucher key.
+      tables: [
+        'PR_DATA',
+        'PR_DETL',
+        'PR_IDTL',
+        'DM_DATA',
+        'AC_DATA',
+        'TAX_DATA',
+        'MAIN_STOCK',
+        'ROJ_MEL_DATA',
+      ],
       key,
       deleteLog: {
         table: 'DELETE_DATA',
-        row: { ...key, VCH_TYPE: 'PRTN', DELETE_USER: input.deleteUser ?? 'system' },
+        row: {
+          ...key,
+          VCH_TYPE: bookPolicy.vchType,
+          BOOK_NAME: bookPolicy.bookName,
+          DELETE_USER: input.deleteUser ?? 'system',
+        },
       },
     });
+    const hiddenVoucherNo = String(headers[0]?.HD_VCH_NO ?? '').trim();
+    if (hiddenVoucherNo) {
+      await tx.$executeRawUnsafe(
+        `DELETE FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+          AND "CO_BOOK"=$4 AND "VCH_NO"=$5`,
+        tenantId,
+        key.CO_CODE,
+        key.LC_CODE,
+        key.CO_BOOK,
+        hiddenVoucherNo,
+      );
+    }
     for (const tag of legacy) await restoreTagTx(tx, tenantId, tag);
     return { reversed: true };
   });
