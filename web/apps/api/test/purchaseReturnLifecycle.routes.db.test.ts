@@ -174,7 +174,7 @@ const DAY = `${startYear}-06-15`;
         VCH_SRNO: 0,
         MAIN_IT_CODE: 'GOLD',
         INOUT_TYPE: 'O',
-        TBL_CODE: '',
+        TBL_CODE: null,
       },
     ]);
 

@@ -572,7 +572,8 @@ export async function createPurchaseReturn(
           VCH_SRNO: 0,
           MAIN_IT_CODE: item,
           INOUT_TYPE: 'O',
-          TBL_CODE: String(line.in.tblCode ?? '').trim(),
+          // The desktop copies A.TBL_CODE from PR_DETL, so mirror that stored value exactly.
+          TBL_CODE: text(line.in.tblCode).slice(0, 3) || null,
         },
       ];
     });
