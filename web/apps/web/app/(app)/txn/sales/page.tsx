@@ -16,7 +16,7 @@ import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import { RateTicker } from '../../../../components/RateTicker';
 import { PartyBalance } from '../../../../components/PartyBalance';
 import { VoucherChrome } from '../../../../components/VoucherChrome';
-import { VoucherList } from '../../../../components/VoucherList';
+import { VoucherList, type VoucherIdentity } from '../../../../components/VoucherList';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { companyFlag, useCompanySettings, companySetting } from '../../../../lib/companySettings';
 import { recalcLine } from '../../../../lib/lineRecalc';
@@ -457,12 +457,25 @@ export default function SalesEntryPage() {
   }
 
   async function loadSale() {
-    if (!voucherLookup.trim()) return;
+    await openSale({ coBook, coYear, lcCode, vchNo: voucherLookup });
+  }
+
+  /**
+   * Open a voucher by its complete identity. The recent list passes the identity of the row clicked (N51),
+   * so the page switches to that row's book before loading, instead of looking the number up in whichever
+   * book happens to be selected.
+   */
+  async function openSale(
+    identity: Pick<VoucherIdentity, 'coBook' | 'coYear' | 'lcCode' | 'vchNo'>,
+  ) {
+    const vchNo = identity.vchNo.trim();
+    if (!vchNo || !identity.coBook) return;
+    if (identity.coBook !== coBook) setCoBook(identity.coBook);
     setBusy(true);
     setErr('');
     try {
       const view = await get<any>(
-        `/sales/${encodeURIComponent(voucherLookup.trim())}?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}`,
+        `/sales/${encodeURIComponent(vchNo)}?coBook=${encodeURIComponent(identity.coBook)}&coYear=${encodeURIComponent(identity.coYear || coYear)}&lcCode=${encodeURIComponent(identity.lcCode || lcCode)}`,
       );
       setLoadedVchNo(String(view.voucherNo));
       setVoucherLookup(String(view.voucherNo));
@@ -1475,6 +1488,7 @@ export default function SalesEntryPage() {
         table="SL_DATA"
         book={coBook}
         deleteBase="/sales"
+        onLoad={(_vchNo, identity) => void openSale(identity)}
         printHref={(v) =>
           `/api/sales/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(v)}&format=html&copy=O`
         }

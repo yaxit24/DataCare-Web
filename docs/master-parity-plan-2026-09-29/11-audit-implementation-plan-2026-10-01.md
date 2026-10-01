@@ -1117,5 +1117,7 @@ recorded there, never on a slice.
 - Update slice status in `execution-backlog.json` in the same pull request as the code.
 - Run `python3 docs/master-parity-plan-2026-09-29/validate_plan.py` and `pnpm docs:refs` before merging.
 - A defect found during implementation becomes a new gap row here (continuing at G67) and a step or child slice.
+  G69–G81 are recorded in [document 12](12-lineage-verification-2026-10-01.md); the next new gap is G82 (in either
+  document), slices continue at N89 and Phase 2 slices at SP25. Keep the numbers unique across documents 10–12.
 - When a gap is fixed, keep its row and add the fixing pull request to the slice evidence: the register is
   historical, the backlog is current.
