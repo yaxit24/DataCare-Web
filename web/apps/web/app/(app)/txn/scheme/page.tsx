@@ -37,8 +37,10 @@ export default function SchemePage() {
     refCode: '',
     nomineeName: '',
     idProof: '',
+    phone: '',
     phone2: '',
     mobile2: '',
+    pin: '',
     email: '',
     district: '',
     birthDate: '',
@@ -112,7 +114,9 @@ export default function SchemePage() {
       refCode: enroll.refCode.trim() || undefined,
       nomineeName: enroll.nomineeName.trim() || undefined,
       idProof: enroll.idProof.trim() || undefined,
+      phone: enroll.phone.trim() || undefined,
       phone2: enroll.phone2.trim() || undefined,
+      pin: enroll.pin.trim() || undefined,
       mobile2: enroll.mobile2.trim() || undefined,
       email: enroll.email.trim() || undefined,
       district: enroll.district.trim() || undefined,
@@ -150,8 +154,10 @@ export default function SchemePage() {
         refCode: '',
         nomineeName: '',
         idProof: '',
+        phone: '',
         phone2: '',
         mobile2: '',
+        pin: '',
         email: '',
         district: '',
         birthDate: '',
@@ -379,6 +385,13 @@ export default function SchemePage() {
             </div>
             <div className="row">
               <div className="field">
+                <label>Phone</label>
+                <input
+                  value={enroll.phone}
+                  onChange={(e) => setEnroll((s) => ({ ...s, phone: e.target.value }))}
+                />
+              </div>
+              <div className="field">
                 <label>Phone 2</label>
                 <input
                   value={enroll.phone2}
@@ -401,6 +414,13 @@ export default function SchemePage() {
               </div>
             </div>
             <div className="row">
+              <div className="field">
+                <label>PIN</label>
+                <input
+                  value={enroll.pin}
+                  onChange={(e) => setEnroll((s) => ({ ...s, pin: e.target.value }))}
+                />
+              </div>
               <div className="field">
                 <label>District</label>
                 <input

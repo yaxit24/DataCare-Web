@@ -246,8 +246,16 @@ describe('page-pinned API transport (controlled fetch; no real HTTP/browser acce
     fetcher.mockResolvedValueOnce(pdf);
     const createElement = vi.fn();
     vi.stubGlobal('document', { createElement });
-    const pending = settle(api.downloadPdf('<p>private old report</p>', 'order'));
+    const pending = settle(
+      api.downloadPdf('/reports/sales-register/export.pdf?coYear=2024-2025', 'order'),
+    );
     await reading.promise;
+    // N54: the browser requests a server-built PDF by URL and sends no HTML.
+    expect(fetcher.mock.calls.at(-1)?.[0]).toBe(
+      '/api/reports/sales-register/export.pdf?coYear=2024-2025',
+    );
+    expect(fetcher.mock.calls.at(-1)?.[1]).toMatchObject({ method: 'GET' });
+    expect(fetcher.mock.calls.at(-1)?.[1]?.body).toBeUndefined();
     api.resetPageContextForNavigation();
     api.pinPageContext(B);
     held.resolve(new Blob(['old-pdf']));

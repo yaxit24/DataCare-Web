@@ -1752,7 +1752,7 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Does:** Shows account opening, movements and closing in money, gold and silver with voucher drill-down.
 - **Looks:** Account/group/date/location/city/area filters with account, detail, voucher and month/ageing grids.
 - **Reads:** AC_DATA, AC_MAST, MAIN_STOCK, FINE_DATA, LEDR_AC_DATA, BOOK_DATA, LDR_ADJ_DATA.
-- **Web:** `/reports/account-ledger`; `GET /reports/account-ledger/:acCode`. Can: print, list.
+- **Web:** `/reports/account-ledger`; `GET /reports/account-ledger/:acCode`, `GET /reports/account-ledger/:acCode/export.pdf`. Can: print, list.
 - **Remaining:** A basic ledger exists; metal/time/ageing/purchase modes, zero/sign semantics, nested drill-down and many Crystal variants remain.
 - **Owners:** N24, X26, P10-02, N57, N75.
 - **Evidence:** [RP_LEDR.cs:4658-7694](../../unified/src/csharp/DataCareNext/RP_LEDR.cs#L4658-L7694).

@@ -28,7 +28,8 @@ const genericPolicies = () => {
   const filters = routePolicyFor('GET', '/reports/:report/filters')!;
   const csv = routePolicyFor('GET', '/reports/:report/export.csv')!;
   const xlsx = routePolicyFor('GET', '/reports/:report/export.xlsx')!;
-  return { filters, csv, xlsx };
+  const pdf = routePolicyFor('GET', '/reports/:report/export.pdf')!;
+  return { filters, csv, xlsx, pdf };
 };
 
 describe('generic report authorization contract', () => {
@@ -57,13 +58,26 @@ describe('generic report authorization contract', () => {
   });
 
   it('resolves every filter to view and every CSV/XLSX export to print on its own form', () => {
-    const { filters, csv, xlsx } = genericPolicies();
+    const { filters, csv, xlsx, pdf } = genericPolicies();
     expect(filters).toMatchObject({ kind: 'form', form: '@report', action: 'read' });
     expect(csv).toMatchObject({ kind: 'form', form: '@report', action: 'print' });
     expect(xlsx).toMatchObject({ kind: 'form', form: '@report', action: 'print' });
+    // N54: the server-built PDF follows the same rule as the other exports.
+    expect(pdf).toMatchObject({ kind: 'form', form: '@report', action: 'print' });
+    expect(routePolicyFor('GET', '/reports/account-ledger/:acCode/export.pdf')).toMatchObject({
+      kind: 'form',
+      form: 'Reports/Account Ledger',
+      action: 'print',
+    });
+    expect(routePolicyFor('POST', '/estimate/pdf')).toMatchObject({
+      kind: 'form',
+      form: 'Sales/Estimate',
+      action: 'print',
+    });
+    expect(routePolicyFor('POST', '/render/pdf')).toBeUndefined();
 
     for (const [slug, form] of Object.entries(REPORT_FORM_BY_SLUG)) {
-      for (const policy of [filters, csv, xlsx]) {
+      for (const policy of [filters, csv, xlsx, pdf]) {
         expect(resolvePolicyForm(policy, { report: slug }), slug).toBe(form);
       }
     }

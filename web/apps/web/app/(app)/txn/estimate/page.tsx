@@ -1,7 +1,6 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { get, post, downloadPdf, ApiError } from '../../../../lib/api';
-import { useBusinessScope } from '../../../../components/BusinessScope';
+import { useState } from 'react';
+import { post, downloadPdf, ApiError } from '../../../../lib/api';
 import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
@@ -220,23 +219,7 @@ export default function EstimatePage() {
   // G11: per-gram labour is on (net + ghat) unless the company sets LBR_WITH_GHT='N' (blank default Y).
   const companySettings = useCompanySettings();
   const labourWithGhat = companyFlag(companySettings, 'LBR_WITH_GHT', 'Y');
-  // G09: the estimate header used to hard-code one shop's name ("DHAKAN JEWELLERS"), so every company
-  // printed the wrong letterhead. Take it from the company master of the active scope instead.
-  const { coCode } = useBusinessScope();
-  const [companyName, setCompanyName] = useState('');
-  useEffect(() => {
-    let live = true;
-    get<Array<{ CO_CODE: string; CO_NAME: string | null }>>('/context/companies')
-      .then((rows) => {
-        if (!live) return;
-        const mine = rows.find((r) => r.CO_CODE === coCode);
-        setCompanyName(String(mine?.CO_NAME ?? '').trim());
-      })
-      .catch(() => {});
-    return () => {
-      live = false;
-    };
-  }, [coCode]);
+  // G09: the letterhead is the active company's own CO_NAME; the server reads it when it builds the PDF.
   const [acCode, setAcCode] = useState('');
   const [acName, setAcName] = useState('');
   const [taxRatePct, setTaxRatePct] = useState('3');
@@ -282,6 +265,39 @@ export default function EstimatePage() {
   const taxPrev = r2((taxable * n(taxRatePct)) / 100);
   const totalPrev = Math.round(taxable + taxPrev);
 
+  /** The typed estimate request: the compute preview and the PDF use the same one. */
+  function estimateRequest() {
+    return {
+      acCode: acCode || undefined,
+      acName: acName || undefined,
+      taxRatePct: Number(taxRatePct),
+      interState,
+      discountAmount: discountAmount ? Number(discountAmount) : undefined,
+      lines: lines
+        .filter((l) => l.itCode && (l.netWt || l.rate))
+        .map((l) => ({
+          // P7: writer-verified extended columns. A blank cell is OMITTED, never sent as 0 — an
+          // explicit zero is an override at the writer and defeats the server's own derivation.
+          ...Object.fromEntries(
+            extendedLineFields
+              .map(([key]) => [
+                key,
+                String((l as unknown as Record<string, unknown>)[key] ?? '').trim(),
+              ])
+              .filter(([, v]) => v !== '')
+              .map(([key, v]) => [key, NUMERIC_EXTENDED.has(key as string) ? Number(v) : v]),
+          ),
+          itCode: l.itCode,
+          pcs: n(l.pcs),
+          grossWt: n(l.grossWt),
+          netWt: n(l.netWt),
+          touch: n(l.touch),
+          rate: n(l.rate),
+          ...(l.making ? { labourType: 'per_gram', labourRate: n(l.making) } : {}),
+        })),
+    };
+  }
+
   async function compute(e: React.FormEvent) {
     e.preventDefault();
     setErr('');
@@ -289,37 +305,7 @@ export default function EstimatePage() {
     setBusy(true);
     try {
       // compute-only preview — POST /estimate saves no voucher and writes no ledger
-      setRes(
-        await post('/estimate', {
-          acCode: acCode || undefined,
-          acName: acName || undefined,
-          taxRatePct: Number(taxRatePct),
-          interState,
-          discountAmount: discountAmount ? Number(discountAmount) : undefined,
-          lines: lines
-            .filter((l) => l.itCode && (l.netWt || l.rate))
-            .map((l) => ({
-              // P7: writer-verified extended columns. A blank cell is OMITTED, never sent as 0 — an
-              // explicit zero is an override at the writer and defeats the server's own derivation.
-              ...Object.fromEntries(
-                extendedLineFields
-                  .map(([key]) => [
-                    key,
-                    String((l as unknown as Record<string, unknown>)[key] ?? '').trim(),
-                  ])
-                  .filter(([, v]) => v !== '')
-                  .map(([key, v]) => [key, NUMERIC_EXTENDED.has(key as string) ? Number(v) : v]),
-              ),
-              itCode: l.itCode,
-              pcs: n(l.pcs),
-              grossWt: n(l.grossWt),
-              netWt: n(l.netWt),
-              touch: n(l.touch),
-              rate: n(l.rate),
-              ...(l.making ? { labourType: 'per_gram', labourRate: n(l.making) } : {}),
-            })),
-        }),
-      );
+      setRes(await post('/estimate', estimateRequest()));
     } catch (e) {
       setErr(e instanceof ApiError ? e.body?.message || e.body?.error || 'failed' : 'failed');
     } finally {
@@ -329,20 +315,11 @@ export default function EstimatePage() {
 
   function pdf() {
     if (!res) return;
-    const esc = (s: any) =>
-      String(s ?? '').replace(
-        /[&<>]/g,
-        (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c] as string,
-      );
-    const rows = res.lines
-      .map(
-        (l: any) =>
-          `<tr><td>${l.sr}</td><td>${esc(l.itCode)}</td><td style="text-align:right">${l.metal}</td><td style="text-align:right">${l.labour}</td><td style="text-align:right">${l.net}</td></tr>`,
-      )
-      .join('');
-    const t = res.totals;
-    const html = `<!doctype html><html><head><meta charset="utf-8"><style>body{font:12px Arial;padding:24px}h1{color:#0b5cab}table{border-collapse:collapse;width:100%}th,td{border:1px solid #bbb;padding:5px 7px;font-size:11px}th{background:#eef3f9}</style></head><body><h1>${esc(companyName || 'Estimate')}</h1><div><b>ESTIMATE / QUOTATION</b> &middot; ${esc(acName || acCode || 'Customer')} &middot; ${new Date().toLocaleDateString('en-IN')}</div><table><thead><tr><th>#</th><th>Item</th><th>Metal</th><th>Labour</th><th>Net</th></tr></thead><tbody>${rows}</tbody></table><p style="text-align:right">Taxable: ${t.taxable} &nbsp; Tax: ${t.tax} &nbsp; <b>Total: ${t.total}</b></p><p class="muted">This is an estimate, not a tax invoice.</p></body></html>`;
-    downloadPdf(html, 'estimate');
+    // N54: the server builds the PDF from the same typed request; the browser sends no HTML.
+    void downloadPdf('/estimate/pdf', 'estimate', {
+      method: 'POST',
+      body: estimateRequest(),
+    }).catch((e) => setErr(e instanceof ApiError ? e.body?.error || 'pdf failed' : 'pdf failed'));
   }
 
   return (

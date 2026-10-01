@@ -3655,7 +3655,7 @@
     },
     {
       "id": "N54",
-      "status": "planned",
+      "status": "in-progress",
       "action": "Remove client-HTML PDF rendering, sandbox and isolate Chromium, and make messaging fail closed in production",
       "parentLabels": "P10-05, P11-03, X25/X28",
       "startAfter": [
@@ -3666,7 +3666,16 @@
       "gapIds": "G32, G33",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-01",
+      "evidence": [
+        "web/apps/api/src/modules/reports/render.ts",
+        "web/apps/api/src/modules/reports/reportPdf.ts",
+        "web/apps/api/test/reportPdf.routes.db.test.ts",
+        "web/apps/api/test/pdfRenderer.chromium.test.ts",
+        "web/apps/api/test/reportPdf.test.ts"
+      ],
+      "statusNote": "Milestone 1: POST /render/pdf removed; report PDFs (GET /reports/:report/export.pdf and the account ledger's /reports/account-ledger/:acCode/export.pdf) and the estimate PDF (POST /estimate/pdf, typed input, 64 KB) are built on the server and need the form's print right. Renderer: JavaScript off, offline, every request aborted, size/time/concurrency limits with 413/422/503. Remaining: OS sandbox (opt-in PDF_RENDERER_SANDBOX=1 until the deployment image is verified), step 4 messaging fail-closed, schema validation through N50."
     },
     {
       "id": "N55",
@@ -3798,7 +3807,7 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "An unchanged browser save is a no-op on every listed page",
-      "gapIds": "G46",
+      "gapIds": "G46, G84",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
@@ -4102,7 +4111,7 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "Each builder replays a captured desktop voucher to an identical write set and a broken mapping fails; G5 reports coverage per family",
-      "gapIds": "G69",
+      "gapIds": "G69, G85",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
