@@ -166,6 +166,7 @@ export default function PurchaseReturnPage() {
   // The original purchase this return reverses. A tagged return must name it: the writer resolves each
   // returned tag against that voucher's own lines (purchaseReturn.ts resolvePurchaseReturnTags).
   const [origBook, setOrigBook] = useState('');
+  const [origYear, setOrigYear] = useState(coYear);
   const [origVchNo, setOrigVchNo] = useState('');
   const [acCode, setAcCode] = useState('');
   const [acName, setAcName] = useState('');
@@ -234,7 +235,7 @@ export default function PurchaseReturnPage() {
     setBusy(true);
     try {
       const view = await get<any>(
-        `/purchases/${encodeURIComponent(origVchNo.trim())}?coBook=${encodeURIComponent(origBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}`,
+        `/purchases/${encodeURIComponent(origVchNo.trim())}?coBook=${encodeURIComponent(origBook)}&coYear=${encodeURIComponent(origYear)}&lcCode=${encodeURIComponent(lcCode)}`,
       );
       setOrigVchNo(String(view.voucherNo));
       setAcCode(String(view.acCode ?? ''));
@@ -280,6 +281,7 @@ export default function PurchaseReturnPage() {
         coBook,
         coYear,
         origBook: origVchNo.trim() ? origBook || undefined : undefined,
+        origYear: origVchNo.trim() ? origYear || undefined : undefined,
         origVchNo: origVchNo.trim() || undefined,
         acCode,
         acName: acName || undefined,
@@ -336,7 +338,12 @@ export default function PurchaseReturnPage() {
           <div className="row">
             <div className="field">
               <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} preferred="PRT" />
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                mainBooks={['PURC RETURN']}
+                preferred="PRT"
+              />
             </div>
             <div className="field">
               <label>Year</label>
@@ -357,6 +364,15 @@ export default function PurchaseReturnPage() {
             <div className="field">
               <label>Supplier Name</label>
               <input value={acName} onChange={(e) => setAcName(e.target.value)} />
+            </div>
+            <div className="field">
+              <label>Orig Purchase Year</label>
+              <input
+                aria-label="Original purchase year"
+                value={origYear}
+                onChange={(e) => setOrigYear(e.target.value)}
+                placeholder="2024-2025"
+              />
             </div>
             <div className="field">
               <label>Orig Purchase Book</label>
@@ -580,6 +596,9 @@ export default function PurchaseReturnPage() {
         table="PR_DATA"
         book={coBook}
         deleteBase="/purchase-returns"
+        printHref={(v) =>
+          `/api/purchase-returns/${encodeURIComponent(v)}/print?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}&format=html`
+        }
         reloadKey={result?.vchNo}
       />
       {/* Desktop BtnImgS / BtnImgC / BtnImgD photograph the tag on the current grid row. */}

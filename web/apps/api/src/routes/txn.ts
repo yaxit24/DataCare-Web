@@ -143,7 +143,11 @@ import {
   deletePurchaseQuotation,
   listOpenConsignmentPurchaseReceipts,
 } from '../modules/purchase/purchase.js';
-import { createPurchaseReturn, deletePurchaseReturn } from '../modules/purchase/purchaseReturn.js';
+import {
+  createPurchaseReturn,
+  deletePurchaseReturn,
+  getPurchaseReturn,
+} from '../modules/purchase/purchaseReturn.js';
 import {
   postReceipt,
   postPayment,
@@ -2588,7 +2592,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
           billNo: b.billNo,
           origVchNo: b.origVchNo,
           origBook: b.origBook,
+          origYear: b.origYear,
           vchDate: b.vchDate,
+          mainUser: sess(req).sub,
           discountAmount: b.discountAmount,
           taxRatePct: b.taxRatePct,
           taxCode: b.taxCode,
@@ -2606,13 +2612,63 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       ),
     );
   });
+  app.get('/purchase-returns/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () =>
+      getPurchaseReturn(prisma, scopeOf(req), (req.params as any).vchNo),
+    );
+  });
+  app.get('/purchase-returns/:vchNo/print', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const q = req.query as any;
+    const s = readScope(req);
+    let scope;
+    try {
+      scope = requireVoucherDocumentScope({
+        tenantId: s.tenantId,
+        coCode: s.coCode,
+        lcCode: s.lcCode,
+        coYear: s.coYear,
+        coBook: s.coBook,
+        vchNo: String((req.params as any).vchNo ?? ''),
+      });
+    } catch (e: any) {
+      if (e instanceof DocumentScopeError)
+        return reply.code(400).send({ error: e.name, field: e.field, message: e.message });
+      throw e;
+    }
+    await getPurchaseReturn(prisma, scope, scope.vchNo);
+    const data = await purchaseBillData(prisma, scope);
+    if (!data) return reply.code(404).send({ error: 'purchase-return-not-found' });
+    const html = purchaseBillHtml(data.header, data.lines, {
+      company: data.company,
+      party: data.party,
+      title: 'Purchase Return',
+      partyCaption: 'Supplier',
+      footerText: 'Purchase return — goods and value returned to supplier.',
+    });
+    if (q.format === 'html') return reply.type('text/html').send(html);
+    let pdf: Buffer;
+    try {
+      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
+    } catch {
+      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
+    }
+    return reply
+      .header('content-type', 'application/pdf')
+      .header(
+        'content-disposition',
+        `inline; filename="purchase-return-${String(scope.vchNo).replace(/[^\w.-]/g, '')}.pdf"`,
+      )
+      .send(pdf);
+  });
   app.delete('/purchase-returns/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
     return run(reply, 200, () =>
       deletePurchaseReturn(prisma, {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
-        deleteUser: sess(req).tenantId,
+        deleteUser: sess(req).sub,
       }),
     );
   });
