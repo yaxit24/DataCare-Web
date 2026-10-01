@@ -2218,6 +2218,7 @@ model DM_DATA {
   VCH_SRNO     Float?
   INOUT_TYPE   String?   @db.VarChar(255)
   MAIN_IT_CODE String?   @db.VarChar(255)
+  TBL_CODE      String?   @db.VarChar(3)
 
   @@id([tenantId, CO_CODE, LC_CODE, CO_YEAR, CO_BOOK, VCH_NO, MAIN_SRNO, SR_NO, ISR_NO])
   @@map("DM_DATA")
