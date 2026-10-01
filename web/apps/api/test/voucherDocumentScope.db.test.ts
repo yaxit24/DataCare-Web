@@ -221,6 +221,19 @@ const families: Array<{
         );
       }
       await owner.$executeRawUnsafe(
+        `INSERT INTO "PR_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","AC_CODE","AC_NAME","NET_AMT","TOT_AMT")
+         VALUES ($1,'01','01',$2,'PR','00001','SUPP','Purchase supplier',100,100),
+                ($1,'01','01',$2,'PRT','00001','SUPP','Return supplier',50,50)`,
+        tenantId,
+        YEAR,
+      );
+      await owner.$executeRawUnsafe(
+        `INSERT INTO "KR_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","AC_CODE","AC_NAME","NET_AMT")
+         VALUES ($1,'01','01',$2,'KRI','00001','KAR','Karigar party',25)`,
+        tenantId,
+        YEAR,
+      );
+      await owner.$executeRawUnsafe(
         `INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED")
        VALUES($1,'01','printer',$2,'ADMIN','Y','Y','Y','N')`,
         tenantId,
@@ -281,6 +294,26 @@ const families: Array<{
       expect(response.statusCode, response.body).toBe(200);
       expect(response.body).toContain('Branch one sale');
       expect(response.body).not.toContain('Branch two sale');
+    });
+
+    it('uses the canonical desktop O/D/T copy labels on every core voucher document', async () => {
+      const cases = [
+        ['/sales/invoice?coBook=SL&vchNo=1&format=html&copy=D', 'DUPLICATE FOR SUPPLIER'],
+        ['/purchases/invoice?coBook=PR&vchNo=1&format=html&copy=T', 'TRIPLICATE FOR TRANSPORTER'],
+        [
+          '/purchase-returns/1/print?coBook=PRT&coYear=' + YEAR + '&lcCode=01&format=html&copy=O',
+          'ORIGINAL FOR RECIPIENT',
+        ],
+        ['/karigar/issue-voucher?coBook=KRI&vchNo=1&format=html&copy=D', 'DUPLICATE FOR SUPPLIER'],
+      ] as const;
+      for (const [url, label] of cases) {
+        const response = await get(url);
+        expect(response.statusCode, `${url}: ${response.body}`).toBe(200);
+        expect(response.body, url).toContain(label);
+      }
+      const invalid = await get('/sales/invoice?coBook=SL&vchNo=1&format=html&copy=OTHER');
+      expect(invalid.statusCode).toBe(400);
+      expect(invalid.json()).toMatchObject({ error: 'DocumentCopyError' });
     });
   },
 );
