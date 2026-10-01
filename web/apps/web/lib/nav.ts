@@ -70,6 +70,7 @@ export const NAV: NavGroup[] = [
       { label: 'Sales Invoice', href: '/txn/sales', ready: true },
       { label: 'Hallmark Sale', href: '/txn/hallmark-sale', ready: true },
       { label: 'Wholesale Sale', href: '/txn/wholesale-sale', ready: true },
+      { label: 'Wholesale Quotation', href: '/txn/wholesale-quotation', ready: true },
       {
         label: 'Wholesale Sale Return',
         href: '/txn/wholesale-sale-return',

@@ -67,8 +67,9 @@ describe('route policy registry', () => {
     // guarded PUT; N33 replaces the web-only other-purchase create/delete pair with the full TR_OTH_PURC
     // OTH EXP lifecycle (read, update, print) and adds the Other Income print: 596 + 1 - 2 + 5 + 1 = 601.
     // N34 adds full-scope Purchase Return GET and print routes: 601 + 2 = 603.
-    expect(routes).toHaveLength(603);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(603);
+    // N38 gives WH QUOT its own create/read/update/delete/print resource: 603 + 5 = 608.
+    expect(routes).toHaveLength(608);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(608);
 
     const policies = routes.map((route) => ({
       ...route,

@@ -306,6 +306,13 @@ route('Sales/Wholesale Sale', [
   'PUT /wholesale-sales/:vchNo',
   'DELETE /wholesale-sales/:vchNo',
 ]);
+route('Sales/Wholesale Quotation', [
+  'POST /wholesale-quotations',
+  'GET /wholesale-quotations/:vchNo',
+  'GET /wholesale-quotations/:vchNo/print',
+  'PUT /wholesale-quotations/:vchNo',
+  'DELETE /wholesale-quotations/:vchNo',
+]);
 route('Sales/Wholesale Sale Return', [
   'POST /sales/wholesale-sale-return',
   'GET /sales/wholesale-sale-return/:vchNo',
