@@ -1,0 +1,17 @@
+{
+  "//": "Strict compile of every core test (document 04 §5 recipe options). Vitest transpiles without type-checking, so this is the only gate that catches a type error in a core test.",
+  "compilerOptions": {
+    "noEmit": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "isolatedModules": true,
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "types": ["node"]
+  },
+  "include": ["src", "test/**/*.ts"]
+}

@@ -76,3 +76,7 @@ These are deliberate preservation differences **pending desktop/business accepta
 Open X11 work still includes diamond and descriptive child master selectors, Design-specific style/group/Karigar lookup variants and source registration conditions, Book F1/global Escape equivalents, downstream Design-to-Order design/component/image transfer, broader registration/customer/configuration matrices, exact desktop-observed replay and business signoff. The rich lifecycle, calculation and repeat slices do not establish complete X11 parity or a production conversion percentage.
 
 For a subsequent bounded Design-to-Order task, first trace the actual desktop selection handler and parent/component identity projection, then pair it with the existing order API and image-source ownership contract. Do not copy image IDs or child rows between entities based only on matching design text. Keep that task separate from concurrent Tour Order UI work.
+
+<!-- not-retained: test-results/parity-real-stack-round3-verified/result.json -->
+
+The run output `test-results/parity-real-stack-round3-verified/result.json` was written to the gitignored `test-results/` directory and is not retained in the repository.

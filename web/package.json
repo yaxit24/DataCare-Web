@@ -2,7 +2,7 @@
   "name": "datacare-web-saas",
   "private": true,
   "version": "0.0.0",
-  "description": "DataCareNext jewelry/gold ERP \u2014 web SaaS rebuild (Next.js + NestJS + PostgreSQL).",
+  "description": "DataCareNext jewelry/gold ERP — web SaaS rebuild (Next.js + NestJS + PostgreSQL).",
   "packageManager": "pnpm@9.15.4",
   "engines": {
     "node": ">=20"
@@ -29,7 +29,7 @@
     "register:check": "node scripts/check-completion-register.mjs",
     "release:certify": "node scripts/release-certify.mjs",
     "docs:refs": "node scripts/check-doc-references.mjs",
-    "typecheck:tests": "cd apps/api && NODE_OPTIONS=--max-old-space-size=6144 tsc -p tsconfig.test.json --noEmit",
+    "typecheck:tests": "cd apps/api && NODE_OPTIONS=--max-old-space-size=6144 tsc -p tsconfig.test.json --noEmit && cd ../.. && pnpm --filter @datacare/core typecheck:tests",
     "lint:eslint": "eslint .",
     "parity:measure": "node scripts/parity-measure.mjs",
     "depth:parity": "node scripts/check-depth.mjs",

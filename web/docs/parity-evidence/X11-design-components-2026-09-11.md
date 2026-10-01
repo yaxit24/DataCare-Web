@@ -127,3 +127,7 @@ subsequent focused run covering those test-only edits.
 
 Desktop evidence: **not captured for this slice**. Business acceptance: **pending**. Production
 acceptance: **pending**. Required X11 descendants remain open despite the passing lifecycle tests.
+
+<!-- not-retained: test-results/parity-real-stack/result.json -->
+
+The run output `test-results/parity-real-stack/result.json` was written to the gitignored `test-results/` directory and is not retained in the repository.
