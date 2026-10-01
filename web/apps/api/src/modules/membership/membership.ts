@@ -1,4 +1,5 @@
 import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 
 /**
@@ -93,9 +94,12 @@ export async function postPoints(
   const inout = p.type === 'redeem' ? 'O' : 'I';
   const pts = numv(p.points);
   if (!(pts > 0)) throw new MembershipError('points must be positive');
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
+    // Lock the member row BEFORE reading the balance (N53 / G31). Without it two sessions could each read
+    // 100 points and each redeem 80. The second session now waits here and then reads the first one's
+    // committed redemption. Earning takes the same lock, so a balance is never read mid-update.
     const mem: unknown[] = await tx.$queryRawUnsafe(
-      `SELECT 1 FROM "POINT_MEMB" WHERE "CO_CODE"=$1 AND "POINT_CODE"=$2 AND "MEMB_CODE"=$3 LIMIT 1`,
+      `SELECT 1 FROM "POINT_MEMB" WHERE "CO_CODE"=$1 AND "POINT_CODE"=$2 AND "MEMB_CODE"=$3 FOR UPDATE`,
       scope.coCode,
       pointCode,
       p.membCode,
