@@ -62,6 +62,14 @@ const D3_SCREENS = [
     await wipe();
     await seedCompany(runtime, tenantId, '01');
     await exec(
+      `INSERT INTO "BAR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO",
+         "TAG_NO","VCH_SRNO","IT_CODE","ITM_PCS","ITM_GWT","ITM_NWT","HM_ID")
+       VALUES ($1,'01','01',$2,'PR','00001',1,'HUID-TAG',1,'GOLD',1,2,2,'AB12CD'),
+              ($1,'01','01',$2,'PR','00001',2,'PLAIN-TAG',2,'GOLD',1,3,3,NULL)`,
+      tenantId,
+      YEAR,
+    );
+    await exec(
       `INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED")
        VALUES($1,'01',$2,$3,'USER','N','N','Y','N')`,
       tenantId,
@@ -105,6 +113,31 @@ const D3_SCREENS = [
     expect(body.totals, `${slug} screen returns totals`).toBeTypeOf('object');
     const csv = await get(`/reports/${slug}/export.csv?coYear=${YEAR}`);
     expect(csv.statusCode, csv.body).toBe(200);
+  });
+
+  it('G13: HUID screen defaults to All and forwards With/Without query modes', async () => {
+    const all = await get(`/reports/huid?coYear=${YEAR}`);
+    expect(all.statusCode, all.body).toBe(200);
+    expect(
+      all
+        .json()
+        .rows.map((row: any) => row.tagNo)
+        .sort(),
+    ).toEqual(['HUID-TAG', 'PLAIN-TAG']);
+
+    const withHuid = await get(`/reports/huid?coYear=${YEAR}&hallmark=with`);
+    const withoutHuid = await get(`/reports/huid?coYear=${YEAR}&hallmark=without`);
+    expect(withHuid.statusCode, withHuid.body).toBe(200);
+    expect(withoutHuid.statusCode, withoutHuid.body).toBe(200);
+    expect(withHuid.json().rows.map((row: any) => row.tagNo)).toEqual(['HUID-TAG']);
+    expect(withoutHuid.json().rows.map((row: any) => row.tagNo)).toEqual(['PLAIN-TAG']);
+    const csv = await get(`/reports/huid/export.csv?coYear=${YEAR}&hallmark=with`);
+    expect(csv.statusCode, csv.body).toBe(200);
+    expect(csv.body).toContain('HUID-TAG');
+    expect(csv.body).not.toContain('PLAIN-TAG');
+
+    const invalid = await get(`/reports/huid?coYear=${YEAR}&hallmark=maybe`);
+    expect(invalid.statusCode).toBe(400);
   });
 
   it('D3: a screen without the right is still refused (the new routes carry their policies)', async () => {

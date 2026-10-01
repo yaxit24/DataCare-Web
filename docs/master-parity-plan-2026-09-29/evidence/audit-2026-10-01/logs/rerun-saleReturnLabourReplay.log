@@ -1,0 +1,67 @@
+ Network datacare-parity-test_default Creating 
+ Network datacare-parity-test_default Created 
+ Container datacare-parity-test-postgres-1 Creating 
+ Container datacare-parity-test-postgres-1 Created 
+ Container datacare-parity-test-postgres-1 Starting 
+ Container datacare-parity-test-postgres-1 Started 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+30 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+ RUN  v2.1.9 <repo>/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ✓ test/saleReturnLabourReplay.db.test.ts (17 tests) 35896ms
+   ✓ session-bound saved labour preview in PostgreSQL > preserves old DTO/hash and complete literal loaded/opened states with no writes 2897ms
+   ✓ session-bound saved labour preview in PostgreSQL > lookup neither copies nor appends; BB then AA preserves exact bill tax history 2925ms
+   ✓ session-bound saved labour preview in PostgreSQL > interleaves money and labour at every bill prefix 2354ms
+   ✓ session-bound saved labour preview in PostgreSQL > qualifies AA c13 and matches every independently expected cell 915ms
+   ✓ session-bound saved labour preview in PostgreSQL > qualifies TA c29 and matches every independently expected cell 2496ms
+   ✓ session-bound saved labour preview in PostgreSQL > qualifies C3 c13 and matches every independently expected cell 1554ms
+   ✓ session-bound saved labour preview in PostgreSQL > qualifies ZZ c13 and matches every independently expected cell 3583ms
+   ✓ session-bound saved labour preview in PostgreSQL > retains repeated same-code events and deterministic retry without persistence 1142ms
+   ✓ session-bound saved labour preview in PostgreSQL > refuses missing, case alias, unsupported category and NULL value without falling back 2411ms
+   ✓ session-bound saved labour preview in PostgreSQL > refuses checked candidate change and historical master change before new lookup 2178ms
+   ✓ session-bound saved labour preview in PostgreSQL > detects present-row ABA and delete/recreate while ignoring unrelated master changes 3263ms
+   ✓ session-bound saved labour preview in PostgreSQL > checks the base token before now-malformed saved numeric projection 959ms
+   ✓ session-bound saved labour preview in PostgreSQL > refuses forged prefix, unknown identity and hidden configured labour field 1145ms
+   ✓ session-bound saved labour preview in PostgreSQL > reads an empty saved header but offers no candidate capability 456ms
+   ✓ session-bound saved labour preview in PostgreSQL > checks fresh read rights and context rather than reusing old request permission 650ms
+   ✓ session-bound saved labour preview in PostgreSQL > preserves the exact accepted prefix after copy succeeds but the bill rejects 5655ms
+   ✓ session-bound saved labour preview in PostgreSQL > keeps scope detached and all reads in one RR snapshot during a concurrent master change 1180ms
+
+ Test Files  1 passed (1)
+      Tests  17 passed (17)
+   Start at  05:04:18
+   Duration  38.38s (transform 794ms, setup 0ms, collect 1.27s, tests 35.90s, environment 0ms, prepare 162ms)
+

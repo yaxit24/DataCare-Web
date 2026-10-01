@@ -20,6 +20,7 @@ This package is the new entry point for planning. It supplements all original re
 | [Decisions, delivery and acceptance](08-decisions-and-delivery.md) | Web adaptations, unresolved evidence, milestones, operational acceptance and handover |
 | [Retained surface register](09-surface-register.md) | Every enumerated retained desktop source unit, menu mapping, report reference, table and setting, with work routing; semantic discovery remains open |
 | [Gap register and amendment, 1 October 2026](10-gap-register-2026-10-01.md) | Current-state corrections after X15/X16/N18/N19 and the audited gaps G01–G18 with their new slices N31–N46 |
+| [Audit implementation plan, 1 October 2026](11-audit-implementation-plan-2026-10-01.md) | Full-stack audit results; gaps G20–G66, decisions D15–D22 and implementable slices N47–N82 with steps, tests and acceptance; status corrections; execution order |
 | [Machine-readable execution backlog](execution-backlog.json) | Original packages, continuation cards, current evidence and new ordered slices |
 | [Requirement index](requirement-index.json) | Stable references to all retained grid, control, event, source, report, table, setting and menu records |
 | [Verification observations](evidence/verification-observations.json) | Commands actually run for this analysis, separate from future acceptance tests |
@@ -43,6 +44,8 @@ Run `python3 docs/master-parity-plan-2026-09-29/validate_plan.py` in the full re
 The new saved-return calculation path remains diagnostic, but legacy return creation still exists. Do not generalize its `canCommit:false` into a claim that every sales-return write is blocked. Lot Setting issue/receipt is read-only.
 
 **Amendment, 1 October 2026 (document 10).** Since this package's baseline, `main` gained the E Credit Note / E Invoice lifecycle (X15), the D1–D6 evaluation fixes, the rebuilt wholesale/rate-cut form (X16) and the tag cancel, transfer and split operations (N18/N19). The containment registry now holds **three** operations: logical restore, production cutover load and tag weight difference. These are engineering results; every acceptance count above is unchanged. Document 10 adds eighteen audited gaps (G01–G18) and slices N31–N46, which are executed before the remaining programme slices.
+
+**Second amendment, 1 October 2026 (document 11).** A full-stack audit ran the current application on an isolated database, drove it in a real browser, crawled all 239 routes and compared it with the desktop databases. The core retail cycle works on a fresh web company, but the audit found red gates, request crashes, missing concurrency and idempotency controls, printed dates without the year, empty final statements, provisioning and identity conventions that differ from the desktop, incomplete lifecycles and template coverage, no migration path and no production hardening. Document 11 records gaps G20–G66 and decisions D15–D22, converts them into slices N47–N82 with file-level steps, tests and acceptance, corrects the status of ten slices that landed since document 10, and fixes the execution order (phases A–F). Acceptance counts are unchanged.
 
 ## Definition of the finished product
 

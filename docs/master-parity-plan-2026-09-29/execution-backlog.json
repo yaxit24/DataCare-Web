@@ -3219,7 +3219,7 @@
     },
     {
       "id": "N32",
-      "status": "implemented-unverified",
+      "status": "in-progress",
       "action": "Hallmark/tag-wise purchase: configured book, reopen/edit/delete/print, then the TR_PURC_HM receive grid",
       "parentLabels": "P04-02, X12",
       "startAfter": [
@@ -3233,8 +3233,11 @@
       "verification": "04-verification-playbook.md",
       "evidence": [
         "web/apps/api/test/purchase.lifecycle.db.test.ts",
-        "web/apps/api/src/modules/ops/seedCompany.ts"
-      ]
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/apps/api/test/jobworkBook.routes.db.test.ts"
+      ],
+      "statusAsOf": "2026-10-01",
+      "statusNote": "TAG PURCHASE book lifecycle and karigar/jobwork books landed (PR #11, PR #16, PR #19). The 95-column TR_PURC_HM receive band and lossless reopen (G46) remain; see document 11 §2."
     },
     {
       "id": "N33",
@@ -3258,7 +3261,7 @@
     },
     {
       "id": "N34",
-      "status": "planned",
+      "status": "in-progress",
       "action": "Purchase Return: original-purchase selector with remaining quantities, Rojmel and diamond rows, reopen/edit/print",
       "parentLabels": "P04-04, X12",
       "startAfter": [
@@ -3266,10 +3269,16 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "Tagged and partial returns accepted, over-return refused, Rojmel/DM rows present, reversal exact",
-      "gapIds": "G04",
+      "gapIds": "G04, G47",
       "sourceAndModuleDetail": "10-gap-register-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-01",
+      "evidence": [
+        "web/apps/api/src/modules/purchase/purchaseReturn.ts",
+        "web/apps/api/test/purchaseReturnLifecycle.routes.db.test.ts"
+      ],
+      "statusNote": "Day book (PR #17), full-scope GET and print, complete reversal and source-year lineage (PR #18). Edit lifecycle, PR_IDTL/DM_DATA writes and residual-limited selection remain (G47)."
     },
     {
       "id": "N35",
@@ -3291,7 +3300,7 @@
     },
     {
       "id": "N36",
-      "status": "planned",
+      "status": "in-progress",
       "action": "Sales/purchase/GST/daily/employee registers classify by stored amounts and MAIN_BOOK, not literal book codes",
       "parentLabels": "P10-03, X26",
       "startAfter": [
@@ -3299,10 +3308,15 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "Desktop-shaped fixture with configured book codes, quotations and credit notes totals equal the desktop rule",
-      "gapIds": "G06",
+      "gapIds": "G06, G48",
       "sourceAndModuleDetail": "10-gap-register-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-01",
+      "evidence": [
+        "web/apps/api/test/registerClassify.db.test.ts"
+      ],
+      "statusNote": "Registers, GSTR-3B and sales summaries classify by MAIN_BOOK (PRs #13, #14). Remaining report queries are listed in G48."
     },
     {
       "id": "N37",
@@ -3321,7 +3335,7 @@
     },
     {
       "id": "N38",
-      "status": "planned",
+      "status": "in-progress",
       "action": "Wholesale quotation mode of the shared TR_WH_SALE form",
       "parentLabels": "P05-02/04, X13/X14",
       "startAfter": [
@@ -3332,11 +3346,17 @@
       "gapIds": "G08",
       "sourceAndModuleDetail": "10-gap-register-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-01",
+      "evidence": [
+        "web/apps/api/src/modules/sales/wholesaleQuotationDocument.ts",
+        "web/apps/api/test/wholesaleQuotation.db.test.ts"
+      ],
+      "statusNote": "Document-only WH QUOT lifecycle with its own book, rights, CRUD and print, and no ledger, Rojmel or stock rows (PR #22). Conversion lineage remains (with N46)."
     },
     {
       "id": "N39",
-      "status": "planned",
+      "status": "in-progress",
       "action": "Estimate document headers from the company master; record persisted-estimate decision",
       "parentLabels": "P05-01, X13",
       "startAfter": [
@@ -3344,14 +3364,19 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "Two companies print their own headers",
-      "gapIds": "G09",
+      "gapIds": "G09, G49",
       "sourceAndModuleDetail": "10-gap-register-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-01",
+      "evidence": [
+        "web/apps/web/app/(app)/txn/estimate/page.tsx"
+      ],
+      "statusNote": "Estimate prints the active company name (PR #12). Persisted estimate book mode and the full company header remain (G49)."
     },
     {
       "id": "N40",
-      "status": "planned",
+      "status": "in-progress",
       "action": "Hallmark sale reopen/edit/delete",
       "parentLabels": "P05-01, X13",
       "startAfter": [
@@ -3359,14 +3384,19 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "Unchanged save preserves HUIDs and hallmark charge; delete reverses every effect",
-      "gapIds": "G10",
+      "gapIds": "G10, G45",
       "sourceAndModuleDetail": "10-gap-register-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-01",
+      "evidence": [
+        "web/apps/web/app/(app)/txn/hallmark-sale/page.tsx"
+      ],
+      "statusNote": "Reopen, edit, delete and voucher list landed (PR #15). An unchanged save loses HUID 2-4, weights, source references and descriptors (G45)."
     },
     {
       "id": "N41",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Line previews honour LBR_WITH_GHT exactly as the writers do",
       "parentLabels": "P02-05, X08",
       "startAfter": [
@@ -3377,11 +3407,16 @@
       "gapIds": "G11",
       "sourceAndModuleDetail": "10-gap-register-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-01",
+      "evidence": [
+        "web/apps/web/app/(app)/txn/purchase/page.tsx"
+      ],
+      "statusNote": "Labour previews read LBR_WITH_GHT (PR #14). Desktop comparison remains."
     },
     {
       "id": "N42",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Enforce EMP_CODE_MANDATORY on sales with the desktop message",
       "parentLabels": "P05-01, X13",
       "startAfter": [
@@ -3392,11 +3427,16 @@
       "gapIds": "G12",
       "sourceAndModuleDetail": "10-gap-register-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-01",
+      "evidence": [
+        "web/apps/api/test/desktopMessages.db.test.ts"
+      ],
+      "statusNote": "EMP_CODE_MANDATORY enforced on sales with the desktop message (PR #14). Desktop comparison remains."
     },
     {
       "id": "N43",
-      "status": "planned",
+      "status": "in-progress",
       "action": "Document template registry: sales/purchase print variants, copies, HUID print, Other Income voucher",
       "parentLabels": "P10-05, X25",
       "startAfter": [
@@ -3408,7 +3448,12 @@
       "gapIds": "G13, G17",
       "sourceAndModuleDetail": "10-gap-register-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-01",
+      "evidence": [
+        "web/apps/api/test/voucherDocumentScope.db.test.ts"
+      ],
+      "statusNote": "Canonical O/D/T copy labels for sales, purchase, purchase return and karigar documents (PR #20). Template registry and resolver (after N73), HUID print and variants remain."
     },
     {
       "id": "N44",
@@ -3427,7 +3472,7 @@
     },
     {
       "id": "N45",
-      "status": "planned",
+      "status": "in-progress",
       "action": "Wholesale remaining branches from the X16 open list",
       "parentLabels": "P05-02, P06-05, X16",
       "startAfter": [
@@ -3438,7 +3483,12 @@
       "gapIds": "G15",
       "sourceAndModuleDetail": "10-gap-register-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-01",
+      "evidence": [
+        "web/apps/api/test/wholesaleRateCut.routes.db.test.ts"
+      ],
+      "statusNote": "Hidden voucher identity and TEMP_BOOK_DATA owned and persisted (PR #21). The remaining X16 branches stay open."
     },
     {
       "id": "N46",
@@ -3452,6 +3502,548 @@
       "requiredProof": "Converted lines keep source identity; repeated conversion refused",
       "gapIds": "G16",
       "sourceAndModuleDetail": "10-gap-register-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N47",
+      "status": "planned",
+      "action": "Restore red engineering gates (test types, documentation claims, plan validator) and run them in CI",
+      "parentLabels": "P00-04, P00-05, X03/X34",
+      "startAfter": [],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Each gate exits 0 on main and fails CI when deliberately broken",
+      "gapIds": "G20, G21",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N48",
+      "status": "planned",
+      "action": "Kernel conformance by site identity: one shared baseline, additions refused, restore to 108, burn down to zero",
+      "parentLabels": "P01-02, P00-05, X04/X06",
+      "startAfter": [
+        "N47"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Script and test report identical site IDs; CI blocks any new rounding or book-account bypass",
+      "gapIds": "G22",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N49",
+      "status": "planned",
+      "action": "Hermetic, per-worktree isolated database and browser harness; zero-mock suites blocking in CI",
+      "parentLabels": "P00-04, X03",
+      "startAfter": [
+        "N47"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "All 24 journeys and both additional suites pass twice from a clean volume; container identity asserted",
+      "gapIds": "G23, G24",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N50",
+      "status": "planned",
+      "action": "Runtime JSON Schemas on every mutation route; malformed input is a 400; sales-return admissibility",
+      "parentLabels": "P01-04, P02-06, X05/X13",
+      "startAfter": [
+        "N47"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "288/288 mutation routes have schemas enforced at startup; no malformed request yields a 5xx; zero-value return refused",
+      "gapIds": "G25, G26",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N51",
+      "status": "planned",
+      "action": "Version tokens required on every voucher update and delete; complete identity in recent lists",
+      "parentLabels": "P01-04/05, X05",
+      "startAfter": [
+        "N50"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Stale update or delete is a 409 with no write; recent lists act only on the complete key",
+      "gapIds": "G27, G28",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N52",
+      "status": "planned",
+      "action": "Idempotent financial commands with a transactional command receipt",
+      "parentLabels": "P01-05, X05",
+      "startAfter": [
+        "N50"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Concurrent duplicates create one voucher; same key with a different payload is a 409; replays are visible",
+      "gapIds": "G29",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N53",
+      "status": "planned",
+      "action": "Explicit transaction budgets, startup schema-metadata warm-up, timeout mapping and loyalty redemption locking",
+      "parentLabels": "P01-05, P09-04, X05/X24",
+      "startAfter": [
+        "N47"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "No posting transaction queries information_schema; timeouts are retryable 503 with full rollback; concurrent redemption cannot overspend",
+      "gapIds": "G30, G31",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N54",
+      "status": "planned",
+      "action": "Remove client-HTML PDF rendering, sandbox and isolate Chromium, and make messaging fail closed in production",
+      "parentLabels": "P10-05, P11-03, X25/X28",
+      "startAfter": [
+        "N50"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "No client HTML reaches the renderer; renderer is sandboxed with network blocked; production never reports simulated delivery",
+      "gapIds": "G32, G33",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N55",
+      "status": "planned",
+      "action": "Authentication hardening (Argon2id parameters, persistent throttle, origin checks, mandatory tenant) and transactional audit",
+      "parentLabels": "P11-04, P12-05, X29/X31",
+      "startAfter": [
+        "N50"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Controls active and tested; every committed mutation has one immutable audit event",
+      "gapIds": "G34, G35",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N56",
+      "status": "planned",
+      "action": "Canonical date transport and dd/MM/yyyy display on every document and list",
+      "parentLabels": "P10-05, P02-05, X25",
+      "startAfter": [
+        "N47"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "No document or list prints a date without its year; date conformance rule at zero",
+      "gapIds": "G36",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N57",
+      "status": "planned",
+      "action": "Typed report grid with authoritative totals and identical PDF, CSV and XLSX output",
+      "parentLabels": "P10-02, P10-06, X26",
+      "startAfter": [
+        "N56"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "No raw ISO timestamps; Indian grouping; screen, PDF and XLSX totals equal server totals",
+      "gapIds": "G37",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N58",
+      "status": "planned",
+      "action": "Desktop-equivalent company provisioning from a hash-pinned seed template or a source company, location 00",
+      "parentLabels": "P03-04, P03-01/02, X10",
+      "startAfter": [
+        "N49"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "For the 17 desktop copy tables a fresh web company equals a desktop-created company; J01 without manual SQL",
+      "gapIds": "G38, G39",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N59",
+      "status": "planned",
+      "action": "Configured accounts, books and locations only: remove literal fallbacks and the location 01 defaults",
+      "parentLabels": "P01-03, P03-04, X06/X10",
+      "startAfter": [
+        "N58"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Literal-identity static test green; desktop-shaped and migrated companies post, edit and delete in every family",
+      "gapIds": "G40, G41",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N60",
+      "status": "planned",
+      "action": "Profit and loss, balance sheet and closing stock classified by AC_GROUP and BAL_GR",
+      "parentLabels": "P06-06, P10-03, X16/X26",
+      "startAfter": [
+        "N58"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Statements populated and balanced on a template company; equal to desktop datasets of the fixture",
+      "gapIds": "G44",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N61",
+      "status": "planned",
+      "action": "Server-side descriptive companion columns resolved inside the posting transaction",
+      "parentLabels": "P01-03, X06",
+      "startAfter": [
+        "N59"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Blank-companion class of the corrected differential field summary is empty",
+      "gapIds": "G42",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N62",
+      "status": "planned",
+      "action": "Book selectors filtered by workflow family on every transaction screen, enforced by the server",
+      "parentLabels": "P02-01, P03-04, X07/X10",
+      "startAfter": [
+        "N58"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Each screen lists exactly its eligible books; wrong family refused before numbering",
+      "gapIds": "G43",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N63",
+      "status": "planned",
+      "action": "Lossless reopen/edit adapters for sales, quotations, purchases, consignment, hallmark purchase and tag opening",
+      "parentLabels": "P01-04, P02-01, X05/X07/X12/X13",
+      "startAfter": [
+        "N51"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "An unchanged browser save is a no-op on every listed page",
+      "gapIds": "G46",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N64",
+      "status": "planned",
+      "action": "Cash and bank receipt and payment reopen, edit, delete and reprint (single and multi-line)",
+      "parentLabels": "P06-01, X16",
+      "startAfter": [
+        "N51",
+        "N52"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Every saved receipt and payment can be reopened, edited, deleted and reprinted from its screen",
+      "gapIds": "G50",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N65",
+      "status": "planned",
+      "action": "Dhiran and loan lifecycles for all five modes with packet residuals and interest preview",
+      "parentLabels": "P09-01/02, X24",
+      "startAfter": [
+        "N51"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Journey J19 passes for all five modes",
+      "gapIds": "G51",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N66",
+      "status": "planned",
+      "action": "Scheme-member master (AD_MEMB) and scheme-entry lifecycle, separated from loyalty points",
+      "parentLabels": "P09-03/04, X24",
+      "startAfter": [
+        "N51"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Scheme part of J20 passes; loyalty data never answers scheme-member reads",
+      "gapIds": "G52",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N67",
+      "status": "planned",
+      "action": "Wire existing lifecycle APIs into Bullion Sale, karigar issue/receive and party master screens",
+      "parentLabels": "P05-02, P08-02, P03-01, X13/X23/X10",
+      "startAfter": [
+        "N63"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "The three screens complete their desktop lifecycle from the UI",
+      "gapIds": "G53",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N68",
+      "status": "planned",
+      "action": "Missing lifecycle services: bullion booking, bill-to-bill, stock in/out print, tag-opening label print",
+      "parentLabels": "P06-03/04, P07-02, X16/X18",
+      "startAfter": [
+        "N51"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Each listed screen can reopen, edit and print",
+      "gapIds": "G54",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N69",
+      "status": "planned",
+      "action": "Auto Item and labour-update semantics equal to MS_AUTO_ITEM",
+      "parentLabels": "P03-02, X10",
+      "startAfter": [
+        "N58"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Outputs equal the desktop for the fixtures",
+      "gapIds": "G55",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N70",
+      "status": "planned",
+      "action": "Missing desktop menus: Tour Sales, Card Adjust, CRM customer entry; correct register mappings",
+      "parentLabels": "P05-05, P06-01, P11-05, X17/X16/X29",
+      "startAfter": [
+        "N63"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Each menu opens a workflow matching its desktop form",
+      "gapIds": "G56",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N71",
+      "status": "planned",
+      "action": "Manufacturing books validated by family everywhere; MFG order issue as the APR-family writer",
+      "parentLabels": "P08-01/04, X23",
+      "startAfter": [
+        "N59"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "No manufacturing writer uses a literal book; order issue matches the desktop write set",
+      "gapIds": "G57",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N72",
+      "status": "planned",
+      "action": "Scope decision and implementation for desktop screens outside the menu table",
+      "parentLabels": "P00-01, P13-01, P08-01, X01/X32/X23",
+      "startAfter": [
+        "N71"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Every family has a recorded decision; pilot customers must-have families implemented",
+      "gapIds": "G58",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N73",
+      "status": "planned",
+      "action": "PRINT_MAST natural key, single default per print type and book type, administration screen and seed",
+      "parentLabels": "P10-05, X25",
+      "startAfter": [
+        "N58"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Registry represents the desktop seed exactly; N43 resolves against it",
+      "gapIds": "G59",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N74",
+      "status": "planned",
+      "action": "Crystal binding wave A: daily sales, purchase, cash, payment and contra documents",
+      "parentLabels": "P10-05, P10-01, X25",
+      "startAfter": [
+        "N73",
+        "N43"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Wave A bound with zero unexplained dataset differences, approved layout and wired print actions",
+      "gapIds": "G60",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N75",
+      "status": "planned",
+      "action": "Crystal binding waves B-D: accounts and statutory, stock and labels, service and finance documents",
+      "parentLabels": "P10-02/03/04/05, X25/X26",
+      "startAfter": [
+        "N74"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Waves B-D certified; remaining templates owned under N24",
+      "gapIds": "G60",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N76",
+      "status": "planned",
+      "action": "Internationalisation with reviewed Gujarati and Hindi catalogues, per-user UI and per-template print language",
+      "parentLabels": "P11-05, P10-05, X29/X25",
+      "startAfter": [
+        "N57"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Top workflows and customer prints complete in reviewed gu-IN and hi-IN catalogues",
+      "gapIds": "G61",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N77",
+      "status": "planned",
+      "action": "Semantic layout, tab order and COL_MAST grid parity for the top 20 desktop forms",
+      "parentLabels": "P02-01, P02-04, X07",
+      "startAfter": [
+        "N63"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "No unexplained missing or reordered control or column on the 20 forms; operators sign off",
+      "gapIds": "G62",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N78",
+      "status": "planned",
+      "action": "Signed migration ownership manifest for all 145 desktop tables and a fail-closed cutover validator",
+      "parentLabels": "P12-01, X30",
+      "startAfter": [
+        "N58",
+        "N59"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Manifest covers 145/145 tables with reviewed dispositions; validator fails closed",
+      "gapIds": "G63",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N79",
+      "status": "planned",
+      "action": "Scoped shadow loading, reconciliation, historical continuation and two clean rehearsals",
+      "parentLabels": "P12-02/03, X30",
+      "startAfter": [
+        "N78"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Two clean rehearsals with zero unexplained differences; containment exit gate met",
+      "gapIds": "G63",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N80",
+      "status": "planned",
+      "action": "Production deployment hardening, encrypted off-host backups, scheduled restore drill and upgrade/rollback runbook",
+      "parentLabels": "P12-04/05, X31",
+      "startAfter": [
+        "N49"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Only 443 public; restore drill meets approved RPO/RTO; upgrade and rollback rehearsed",
+      "gapIds": "G64",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N81",
+      "status": "planned",
+      "action": "Sanitized delivery source, credential rotation and CI secret scanning",
+      "parentLabels": "P12-05, P14-02, X31/X34",
+      "startAfter": [
+        "N47"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Deployments built only from the sanitized source; credentials rotated; CI blocks new secrets",
+      "gapIds": "G65",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N82",
+      "status": "planned",
+      "action": "Release-certification gates for test types, plan integrity, complete browser suites, hardware, migration and UAT",
+      "parentLabels": "P14-02, X34",
+      "startAfter": [
+        "N47",
+        "N49"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Certifier refuses every manipulated evidence set; owner approves the new requirement-set digest",
+      "gapIds": "G66",
+      "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
     }
@@ -3468,6 +4060,14 @@
       "document": "10-gap-register-2026-10-01.md §2b",
       "mainBaseline": "14ce35e",
       "meaning": "G18 fixed on main (PR #10). N31/N32/N33/N35 landed on main (PR #3, PR #11) and are implemented-unverified with evidence; G17 (Other Income print) and partial G19 (book provisioning) shipped with them. Adds gap G19 (book-less screens). No acceptance is closed; G04 and the remaining gaps stay open."
+    },
+    {
+      "date": "2026-10-01",
+      "document": "11-audit-implementation-plan-2026-10-01.md",
+      "mainBaseline": "fd6c82d",
+      "auditBaseline": "0da250a150d0f0a43c6326e8b6925910df41c2c7",
+      "evidence": "evidence/audit-2026-10-01/observations.json",
+      "meaning": "Full-stack audit (real PostgreSQL, zero-mock browser, desktop databases). Adds gaps G20-G66, decisions D15-D22 and slices N47-N82; corrects N32, N34, N36, N38, N39, N40, N43 and N45 to in-progress and N41, N42 to implemented-unverified with evidence. No acceptance is closed."
     }
   ],
   "releaseGates": [

@@ -1,0 +1,228 @@
+{
+ "reports": {
+  "trial-balance": {
+   "apiStatus": 200,
+   "screenRows": 6,
+   "sample": [
+    "CASH 30000 0 30000",
+    "CUST01 60255 152982 -92727",
+    "GST 0 1755 -1755",
+    "GSTINPUT 3582 0 3582",
+    "PURCHASE 119400 0 119400",
+    "SALES 0 58500 -58500"
+   ]
+  },
+  "account-ledger": {
+   "apiStatus": null,
+   "screenRows": 0,
+   "sample": [],
+   "text": "Account Ledger YEAR ACCOUNT CODE FROM TO Run Download PDF"
+  },
+  "rojmel": {
+   "apiStatus": 200,
+   "screenRows": 7,
+   "sample": [
+    "00001 PR PR PURCHASE PURCHASE CUST01 G + 119400 0 1 20 20 0",
+    "00001 PR PR PURCHASE CUST01 PURCHASE A 0 122982 0 0 0 0",
+    "00001 PR PR PURCHASE GSTINPUT CUST01 A 3582 0 0 0 0 0",
+    "00001 SL SL SALES SALES CUST01 G - 0 58500 1 9 9 0",
+    "00001 SL SL SALES CUST01 SALES A 40255 0 0 0 0 0",
+    "00001 SL SL SALES GST CUST01 A 0 1755 0 0 0 0"
+   ]
+  },
+  "sales-register": {
+   "apiStatus": 200,
+   "screenRows": 1,
+   "sample": [
+    "00001 SL 2026-10-01T00:00:00.000Z 00001 CUST01 58500 1755 877.5 877.5 0 60255 40255"
+   ]
+  },
+  "purchase-register": {
+   "apiStatus": 200,
+   "screenRows": 1,
+   "sample": [
+    "00001 PR 2026-10-01T00:00:00.000Z CUST01 DEMO CUSTOMER 119400 3582 1791 1791 0 122982 122982"
+   ]
+  },
+  "gstr1": {
+   "apiStatus": null,
+   "screenRows": 2,
+   "sample": [
+    "3 58500 877.5 877.5 0",
+    "GOLD 1 58500 877.5 877.5 0"
+   ]
+  },
+  "gstr3b": {
+   "apiStatus": 200,
+   "screenRows": 0,
+   "sample": [],
+   "text": "GSTR-3B Summary YEAR FROM TO Run Download PDF Statutory Document outwardTaxable 58500 outwardTax 1755 outwardCGST 877.5 outwardSGST 877.5 outwardIGST 0"
+  },
+  "gstr2": {
+   "apiStatus": 200,
+   "screenRows": 1,
+   "sample": [
+    "119400 3582 1791 1791 0"
+   ]
+  },
+  "balance-sheet": {
+   "apiStatus": 200,
+   "screenRows": 0,
+   "sample": [],
+   "text": "Balance Sheet YEAR CLOSING DATE GOLD RATE /10G SILVER RATE /10G LEDGER FINE GOLD LEDGER FINE SILVER FROM TO Run Download PDF Statement Document ledgerDr 213237 ledgerCr 213237 closingStock 0 closingStockMode computed balanceSheetType A metalValued false totalA"
+  },
+  "profit-loss": {
+   "apiStatus": 200,
+   "screenRows": 0,
+   "sample": [],
+   "text": "Profit and Loss YEAR FROM TO Run Download PDF Rows CSV Excel No rows."
+  },
+  "outstanding": {
+   "apiStatus": 200,
+   "screenRows": 6,
+   "sample": [
+    "PURCHASE PURCHASE A/C 119400 Receivable",
+    "CASH CASH ON HAND 30000 Receivable",
+    "GSTINPUT GST INPUT CREDIT 3582 Receivable",
+    "GST GST OUTPUT (PAYABLE) -1755 Payable",
+    "SALES SALES A/C -58500 Payable",
+    "CUST01 DEMO CUSTOMER -92727 Payable"
+   ]
+  },
+  "bill-outstanding": {
+   "apiStatus": 200,
+   "screenRows": 2,
+   "sample": [
+    "CUST01 DEMO CUSTOMER Payable 1 122982 0 122982",
+    "CUST01 DEMO CUSTOMER Receivable 1 60255 20000 40255"
+   ]
+  },
+  "cash-book": {
+   "apiStatus": 200,
+   "screenRows": 2,
+   "sample": [
+    "2026-10-01T00:00:00.000Z RCT/00001 CASH ON HAND 10000 0",
+    "2026-10-01T00:00:00.000Z SL/00001 CASH ON HAND 20000 0"
+   ]
+  },
+  "item-stock-ledger": {
+   "apiStatus": 200,
+   "screenRows": 1,
+   "sample": [
+    "GOLD 19.9 8.244 11.656 1 1 2"
+   ]
+  },
+  "tag-stock": {
+   "apiStatus": 200,
+   "screenRows": 1,
+   "sample": [
+    "No tags for this view."
+   ]
+  },
+  "stock-valuation": {
+   "apiStatus": 200,
+   "screenRows": 0,
+   "sample": [],
+   "text": "Stock Valuation YEAR PARTY LOCATION BOOK GROUP PRODUCT ITEM TYPE FROM TO Run Download PDF Rows CSV Excel No rows."
+  },
+  "hsn-summary": {
+   "apiStatus": 200,
+   "screenRows": 1,
+   "sample": [
+    "3 1 58500 1755"
+   ]
+  },
+  "daily-sales": {
+   "apiStatus": 200,
+   "screenRows": 1,
+   "sample": [
+    "2026-10-01T00:00:00.000Z 1 58500 1755 60255"
+   ]
+  },
+  "huid": {
+   "apiStatus": 200,
+   "screenRows": 0,
+   "sample": [],
+   "text": "HUID Report YEAR FROM TO Run Download PDF tab all Rows CSV Excel No rows."
+  },
+  "bill-profit": {
+   "apiStatus": 200,
+   "screenRows": 0,
+   "sample": [],
+   "text": "Bill Wise Profit YEAR FROM TO Run Download PDF Rows CSV Excel No rows."
+  },
+  "item-weight-levels": {
+   "apiStatus": 200,
+   "screenRows": 0,
+   "sample": [],
+   "text": "Item Stock Level YEAR FROM TO Run Download PDF Rows CSV Excel No rows."
+  },
+  "size-movement": {
+   "apiStatus": 200,
+   "screenRows": 0,
+   "sample": [],
+   "text": "Stock Movement YEAR FROM TO Run Download PDF mode item Rows CSV Excel No rows."
+  },
+  "physical-stock-verify": {
+   "apiStatus": 200,
+   "screenRows": 0,
+   "sample": [],
+   "text": "Physical Stock Verify YEAR FROM TO Run Download PDF Rows CSV Excel No rows."
+  }
+ },
+ "ctxHeadersCaptured": true,
+ "containment": {
+  "tagWeightDiff": {
+   "status": 409,
+   "body": "{\"error\":\"book-unavailable\"}"
+  },
+  "logicalRestore": {
+   "status": 503,
+   "body": "{\"error\":\"parity-containment\",\"code\":\"PARITY_CONTAINMENT\",\"operation\":\"logical-restore\",\"message\":\"Logical company restore is disabled by the WP-01 parity safety gate.\",\"reason\":\"The v2 company-scoped restore has passed WP-02A engineering verification, but des"
+  }
+ },
+ "validation": {
+  "saleLineNull": {
+   "status": 400,
+   "body": "{\"error\":\"SaleValidationError\",\"message\":\"taxRatePct must be a non-negative number: undefined\"}"
+  },
+  "saleRateText": {
+   "status": 400,
+   "body": "{\"error\":\"SaleValidationError\",\"message\":\"taxRatePct must be a non-negative number: undefined\"}"
+  },
+  "saleDiscountText": {
+   "status": 400,
+   "body": "{\"error\":\"SaleValidationError\",\"message\":\"taxRatePct must be a non-negative number: undefined\"}"
+  },
+  "estimateBadOther": {
+   "status": 500,
+   "body": "{\"statusCode\":500,\"error\":\"Internal Server Error\",\"message\":\"[DecimalError] Invalid argument: zz\"}"
+  },
+  "salesReturnIncomplete": {
+   "status": 400,
+   "body": "{\"error\":\"SaleValidationError\",\"message\":\"taxRatePct must be a non-negative number: undefined\"}"
+  },
+  "purchaseWrongBookFamily": {
+   "status": 400,
+   "body": "{\"error\":\"PurchaseValidationError\",\"message\":\"purchase requires a numeric taxRatePct; received nothing\"}"
+  },
+  "receiptIntoSalesBook": {
+   "status": 400,
+   "body": "{\"error\":\"FinanceValidationError\",\"message\":\"party account is required\"}"
+  }
+ },
+ "duplicateReceipt": [
+  {
+   "status": 400,
+   "body": "{\"error\":\"FinanceValidationError\",\"message\":\"party account is required\"}"
+  },
+  {
+   "status": 400,
+   "body": "{\"error\":\"FinanceValidationError\",\"message\":\"party account is required\"}"
+  }
+ ],
+ "deleteFlow": {
+  "loadedVoucher": true,
+  "deleteStatus": 400
+ }
+}
