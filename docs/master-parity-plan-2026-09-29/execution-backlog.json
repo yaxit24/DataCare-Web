@@ -4133,7 +4133,7 @@
     },
     {
       "id": "N85",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Correct the 20 wrong completion-register rows (forms and web surfaces), navigation labels and register:check against MDI dispatch",
       "parentLabels": "P00-01, P00-03, X01",
       "startAfter": [
@@ -4144,7 +4144,15 @@
       "gapIds": "G71",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-01",
+      "evidence": [
+        "web/docs/COMPLETION-REGISTER.json",
+        "web/scripts/check-completion-register.mjs",
+        "web/apps/api/test/completionRegisterCheck.test.ts",
+        "web/apps/web/lib/nav.ts"
+      ],
+      "statusNote": "Register revision N85: 26 rows corrected to the dispatch-verified menu catalog (the 20 listed plus 6 found by the new check); five menus with no web workflow are absent instead of mapped to another workflow; requirement-index hash and menu forms rebaselined. Navigation: Style opens Models, the loyalty screen is labelled Loyalty Points, HuId Report already used /reports/huid. register:check requires agreement with the catalog, runs in static-gates, and fails on a planted wrong form or surface."
     },
     {
       "id": "N86",

@@ -292,12 +292,17 @@ def render_catalog(rows: list[dict]) -> str:
     out.append(f'| **All** | **{len(rows)}** | ' + ' | '.join(f'**{total_status[s]}**' for s in STATUSES) + ' | '
                + ' | '.join(f'**{total_phase[p]}**' for p in ('P1-core', 'P1-edition', 'defer')) + ' |')
     fixes = [r for r in rows if r.get('fix')]
-    out += ['', '## Completion-register corrections', '',
-            f'{len(fixes)} rows of `web/docs/COMPLETION-REGISTER.json` name the wrong desktop form or web surface. '
-            'The register is a hashed source of the requirement index, so it is corrected by slice N85 (gap G71), '
-            'not edited in place. Until then this catalog is the corrected view.', '',
-            '| Menu | Correction |', '|---|---|']
-    out += [f'| {r["id"]} | {r["fix"]} |' for r in fixes]
+    out += ['', '## Completion-register corrections', '']
+    if fixes:
+        out += [f'{len(fixes)} rows of `web/docs/COMPLETION-REGISTER.json` name the wrong desktop form or web surface. '
+                'The register is a hashed source of the requirement index, so it is corrected in its own revision, '
+                'not edited in place. Until then this catalog is the corrected view.', '',
+                '| Menu | Correction |', '|---|---|']
+        out += [f'| {r["id"]} | {r["fix"]} |' for r in fixes]
+    else:
+        out += ['None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register:check` (web) '
+                'now fails when a register row names a form the dispatch does not open or a surface the menu does '
+                'not use.']
     for tab in tabs:
         out += ['', f'## {tab}', '', '| Menu | Desktop form | Web screen | C R E D P L | Status | Phase |',
                 '|---|---|---|---|---|---|']

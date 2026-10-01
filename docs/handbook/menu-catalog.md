@@ -37,30 +37,7 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 
 ## Completion-register corrections
 
-20 rows of `web/docs/COMPLETION-REGISTER.json` name the wrong desktop form or web surface. The register is a hashed source of the requirement index, so it is corrected by slice N85 (gap G71), not edited in place. Until then this catalog is the corrected view.
-
-| Menu | Correction |
-|---|---|
-| Company/Main Menu | Register maps a web dashboard to a caption that dispatches no desktop form; record it as a web addition. |
-| Company/Year Select | Register lists no desktop form; the dispatch opens MS_OPNCOMP. |
-| Master/Design Book | Register lists MS_PRODUCT; the dispatch opens MS_DESIGN_BOOK. |
-| Master/Lot Opening | Register lists MS_PRODUCT; the dispatch opens TR_ITM_LOT. |
-| Master/Style | Register maps master 'styles' (COL_MAST, configs.ts:470); MS_STYLE writes MODEL_MAST, which is master 'models' (configs.ts:455). |
-| Master/Tag Opening | Register lists no desktop form; the dispatch opens TR_TAG_OPBL. |
-| Transaction/Sales Return | Register lists no desktop form; the dispatch opens TR_SALE_RTN or TR_SALE_RTN_UAE. |
-| ExtraTran/Card Rec | Register maps the generic receipt (POST /receipts); TR_CARD_REC writes CARD_DATA and needs its own workflow. |
-| Karigar/Tour Order | Register lists TR_SALE_ORD; the dispatch opens TR_TOUR_ORD. |
-| Karigar/Tour Sales | Register lists TR_TOUR and maps the approval bill bridge (POST /tour/:vchNo/bill); the dispatch opens TR_TOUR_SALE. |
-| Dhiran/Loan Intrest | Register maps POST /dhrn/interest, which posts pledge (Dhiran) interest only. |
-| Scheme/Member Mast | Register maps POST /members (loyalty POINT_MEMB); the scheme member master MS_MEMB writes AD_MEMB. |
-| Crm/Cust Entry | Register lists RP_CUST_CRM and maps GET /reports/customer-crm; the dispatch opens UT_CUST_ENTRY. |
-| Other/Ledger Adjust | Register lists UT_E_INVOICE; the dispatch opens TR_LEDR_ADJ. |
-| Other/Only Tag Entry | Register lists no desktop form; the dispatch opens TR_TAG_OPBL with book family TAG GEN. |
-| Other/Physical Stock | Register lists no desktop form; the dispatch opens TR_PHYSTK with book family PHY STOCK. |
-| Other/Tag Wt Change | Register lists no desktop form; the dispatch opens TR_TAG_WT_DIFF. |
-| Report/HuId Report | Register maps the stale alias GET /reports/tag-stock; the dedicated GET /reports/huid exists. |
-| Report/Reminder Rpt | Register lists MS_RATE as well as RP_REMINDER; only RP_REMINDER is dispatched. |
-| Report/Stock Report | Register aliases GET /reports/tag-stock; RP_STOCK needs its own dimension summaries (item-group-stock and stock-by-location are partial candidates). |
+None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register:check` (web) now fails when a register row names a form the dispatch does not open or a surface the menu does not use.
 
 ## Company
 
@@ -178,7 +155,6 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Web:** `/dashboard`; `GET /reports/sales-register`, `GET /reports/trial-balance`. Can: none.
 - **Remaining:** No desktop contract exists; keep the dashboard and record the exclusion in the inventory.
 - **Owners:** N02, X01, X29, G71, N85.
-- **Register correction:** Register maps a web dashboard to a caption that dispatches no desktop form; record it as a web addition.
 - **Evidence:** [page.tsx:7-69](../../web/apps/web/app/%28app%29/dashboard/page.tsx#L7-L69).
 
 ### Menu Set
@@ -255,7 +231,6 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Web:** `/select`; `POST /context/select`, `GET /context/companies`, `GET /context/locations`, `GET /context/years`. Can: reopen, edit, list.
 - **Remaining:** The desktop closes conflicting forms first; web draft/context handling, two-tab behaviour and outage recovery need acceptance.
 - **Owners:** X09, X29, P02-06, G71, N85.
-- **Register correction:** Register lists no desktop form; the dispatch opens MS_OPNCOMP.
 - **Evidence:** [KB_master.md:47-62](../../project-memory/video-research/_kb/KB_master.md#L47-L62).
 
 ## Master
@@ -328,7 +303,6 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Web:** `/masters/design-book`; `GET /masters/design-book`, `POST /masters/design-book`, `PUT /masters/design-book`, `DELETE /masters/design-book`, `GET /masters/design-book/image`. Can: create, reopen, edit, delete, list.
 - **Remaining:** Source-triggered calculations, configured grid defaults, downstream specification and image transfer, legacy migration and Print remain.
 - **Owners:** X11, G46, N63, N77, X25, G71, N85.
-- **Register correction:** Register lists MS_PRODUCT; the dispatch opens MS_DESIGN_BOOK.
 - **Evidence:** [page.tsx:406-517](../../web/apps/web/app/%28app%29/masters/design-book/page.tsx#L406-L517).
 
 ### Diamond
@@ -461,7 +435,6 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Web:** `/txn/item-lot`; `POST /stock/item-lot`, `GET /stock/item-lot/:vchNo`, `PUT /stock/item-lot/:vchNo`, `DELETE /stock/item-lot/:vchNo`. Can: create, reopen, edit, delete.
 - **Remaining:** Label print, versions, recent list, lot lineage and hidden fields remain.
 - **Owners:** X18, G27, N51, X25, N77, G71, N85.
-- **Register correction:** Register lists MS_PRODUCT; the dispatch opens TR_ITM_LOT.
 - **Evidence:** [TR_ITM_LOT.md:1-19](../../project-memory/catalogs/forms/TR_ITM_LOT.md#L1-L19).
 
 ### Party
@@ -517,7 +490,6 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Web:** `/masters/models`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
 - **Remaining:** The menu points at column settings instead of MODEL_MAST; after the correction, Print, help and layout remain.
 - **Owners:** G71, N85, X10, X29, N77.
-- **Register correction:** Register maps master 'styles' (COL_MAST, configs.ts:470); MS_STYLE writes MODEL_MAST, which is master 'models' (configs.ts:455).
 - **Evidence:** [MS_STYLE.cs:1103-1110](../../unified/src/csharp/DataCareNext/MS_STYLE.cs#L1103-L1110).
 
 ### Tag Opening
@@ -529,7 +501,6 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Web:** `/txn/tag-opening`; `POST /stock/tag-opening`, `GET /stock/tag-opening/:vchNo`, `PUT /stock/tag-opening/:vchNo`, `DELETE /stock/tag-opening/:vchNo`. Can: create, reopen, edit, delete.
 - **Remaining:** An unchanged save loses fields; no label print or recent list; book selector and COL_MAST layout remain.
 - **Owners:** X18, G46, N63, G54, N68, N62, N77, G71, N85.
-- **Register correction:** Register lists no desktop form; the dispatch opens TR_TAG_OPBL.
 - **Evidence:** [KB_master.md:187-217](../../project-memory/video-research/_kb/KB_master.md#L187-L217).
 
 ### Tax
@@ -768,7 +739,6 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Web:** `/txn/sale-return`; `POST /sales-returns`, `GET /sales-returns/:vchNo`, `DELETE /sales-returns/:vchNo`, `GET /sales-returns/import`, `PUT /sales-returns/:vchNo/incoming-metadata`, `PUT /sales-returns/:vchNo/incoming-numeric`, `GET /sales/credit-note`. Can: create, reopen, edit, delete, print, list.
 - **Remaining:** Saved edit covers bounded metadata and one numeric path; create exceeded the 5 s transaction budget in the audit; lossless edit, admissibility, residuals and UAE branches remain.
 - **Owners:** X13, G26, N50, G46, N63, G30, N53, N51, N77, G71, N85.
-- **Register correction:** Register lists no desktop form; the dispatch opens TR_SALE_RTN or TR_SALE_RTN_UAE.
 - **Evidence:** [KB_transaction.md:144-171](../../project-memory/video-research/_kb/KB_transaction.md#L144-L171).
 
 ### Sl Quotation
@@ -927,7 +897,6 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Web:** no screen; no API. Can: none.
 - **Remaining:** No CARD ADJUST workflow: commission bands, bill/loan settlement, CARD_DATA writes and the voucher lifecycle are absent.
 - **Owners:** G56, N70, X16, P06-01, G71, N85.
-- **Register correction:** Register maps the generic receipt (POST /receipts); TR_CARD_REC writes CARD_DATA and needs its own workflow.
 - **Evidence:** [TR_CARD_REC.initcomp.json](../../web/apps/api/form-specs/TR_CARD_REC.initcomp.json).
 
 ### Consi Isu
@@ -1243,7 +1212,6 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Web:** `/txn/tour-order`; `GET /tour-orders`, `POST /tour-orders`, `GET /tour-orders/:vchNo`, `PUT /tour-orders/:vchNo`, `DELETE /tour-orders/:vchNo`, `GET /tour-orders/confirmation`. Can: create, reopen, edit, delete, print, list.
 - **Remaining:** The saved lifecycle is strong; calculations, tenders and old metal, reservation, partial delivery, production conversion and business acceptance remain.
 - **Owners:** X14, P05-04, N22, N44, G71, N85.
-- **Register correction:** Register lists TR_SALE_ORD; the dispatch opens TR_TOUR_ORD.
 - **Evidence:** [TR_TOUR_ORD.initcomp.json](../../web/apps/api/form-specs/TR_TOUR_ORD.initcomp.json).
 
 ### Tour Report
@@ -1265,7 +1233,6 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Web:** no screen; no API. Can: none.
 - **Remaining:** The approval billing bridge is not TR_TOUR_SALE; entry, lifecycle, tenders, stock and accounting effects and the document are absent.
 - **Owners:** G56, N70, X17, P05-05, G71, N85.
-- **Register correction:** Register lists TR_TOUR and maps the approval bill bridge (POST /tour/:vchNo/bill); the dispatch opens TR_TOUR_SALE.
 - **Evidence:** [TR_TOUR_SALE.initcomp.json](../../web/apps/api/form-specs/TR_TOUR_SALE.initcomp.json).
 
 ### Tour Tag
@@ -1392,7 +1359,6 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Web:** no screen; no API. Can: none.
 - **Remaining:** The shared web page posts pledge interest only; the LOAN INT ENTRY direction, settings, saved lifecycle and document are absent.
 - **Owners:** G51, N65, X24, G71, N85.
-- **Register correction:** Register maps POST /dhrn/interest, which posts pledge (Dhiran) interest only.
 - **Evidence:** [TR_DHRN_INTREC.cs:4265-4365](../../unified/src/csharp/DataCareNext/TR_DHRN_INTREC.cs#L4265-L4365).
 
 ### Loan Issue
@@ -1517,7 +1483,6 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Web:** `/txn/scheme`; `POST /scheme/enroll`, `DELETE /scheme/enroll`. Can: create.
 - **Remaining:** Enrolment can create a member, but there is no AD_MEMB master list, edit, delete or print; the web 'Members' list shows loyalty POINT data.
 - **Owners:** G52, N66, X24, G71, N85.
-- **Register correction:** Register maps POST /members (loyalty POINT_MEMB); the scheme member master MS_MEMB writes AD_MEMB.
 - **Evidence:** [MS_MEMB.initcomp.json](../../web/apps/api/form-specs/MS_MEMB.initcomp.json).
 
 ### Monthly Report
@@ -1732,7 +1697,6 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Web:** `/reports/huid`; `GET /reports/huid`. Can: print, list.
 - **Remaining:** PR #23 added the HUID filters; exact tabs, remaining filters and the TagHuIdRpt layout remain uncertified.
 - **Owners:** G13, N43, N24, X26, N57, N75, G71, N85.
-- **Register correction:** Register maps the stale alias GET /reports/tag-stock; the dedicated GET /reports/huid exists.
 - **Evidence:** [RP_HUID.cs:1752-2189](../../unified/src/csharp/DataCareNext/RP_HUID.cs#L1752-L2189).
 
 ### Item InOut
@@ -1821,7 +1785,6 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Web:** `/utilities/reminders`, `/txn/reminders`; `GET /reminders`, `GET /reminders/overdue`, `GET /reminders/birthdays`. Can: print, list.
 - **Remaining:** Web reminders do not prove every desktop dataset and button, due rule, update side effect or the Reminder layout.
 - **Owners:** N24, X26, X29, P11-05, N57, N75, G71, N85.
-- **Register correction:** Register lists MS_RATE as well as RP_REMINDER; only RP_REMINDER is dispatched.
 - **Evidence:** [KB_other.md:550-584](../../project-memory/video-research/_kb/KB_other.md#L550-L584).
 
 ### Rojmel
@@ -1866,7 +1829,6 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Web:** `/reports/tag-stock`; `GET /reports/tag-stock`. Can: print, list.
 - **Remaining:** Tag Stock is not RP_STOCK: group/product/item/design/safe/table/trading summaries, gross-weight options and drill-down are missing.
 - **Owners:** N24, X26, P10-04, N57, N75, G71, N85.
-- **Register correction:** Register aliases GET /reports/tag-stock; RP_STOCK needs its own dimension summaries (item-group-stock and stock-by-location are partial candidates).
 - **Evidence:** [RP_STOCK.cs:4277-5160](../../unified/src/csharp/DataCareNext/RP_STOCK.cs#L4277-L5160).
 
 ### Stock With Fine
@@ -2311,7 +2273,6 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Web:** `/txn/ledger-adjust`; `POST /ledger-adjust`, `DELETE /ledger-adjust/:vchNo`. Can: create.
 - **Remaining:** Create only; configured-book enforcement, saved read/edit/delete/print and the desktop write-set comparison remain.
 - **Owners:** X16, P06-02, G40, G41, N59, G71, N85.
-- **Register correction:** Register lists UT_E_INVOICE; the dispatch opens TR_LEDR_ADJ.
 - **Evidence:** [TR_LEDR_ADJ.initcomp.json](../../web/apps/api/form-specs/TR_LEDR_ADJ.initcomp.json).
 
 ### Only Tag Entry
@@ -2323,7 +2284,6 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Web:** `/txn/tag-opening`; `POST /stock/tag-opening`, `GET /stock/tag-opening/:vchNo`, `PUT /stock/tag-opening/:vchNo`, `DELETE /stock/tag-opening/:vchNo`. Can: create, reopen, edit, delete.
 - **Remaining:** The lifecycle exists, but an unchanged save loses fields and label print is missing.
 - **Owners:** G46, N63, G54, N68, X18, G71, N85.
-- **Register correction:** Register lists no desktop form; the dispatch opens TR_TAG_OPBL with book family TAG GEN.
 - **Evidence:** [TR_TAG_OPBL.md](../../project-memory/catalogs/forms/TR_TAG_OPBL.md).
 
 ### Order Cancel
@@ -2346,7 +2306,6 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Web:** `/txn/physical-stock`; `POST /stock/physical-stock`, `GET /stock/physical-stock/:vchNo`, `PUT /stock/physical-stock/:vchNo`, `DELETE /stock/physical-stock/:vchNo`. Can: create, reopen, edit, delete.
 - **Remaining:** Count vouchers exist; snapshot/finalisation policy, Out/Approval classification, reset/reversal and report consistency are not accepted.
 - **Owners:** N20, X22, P07-06, G71, N85.
-- **Register correction:** Register lists no desktop form; the dispatch opens TR_PHYSTK with book family PHY STOCK.
 - **Evidence:** [KB_other.md:214-276](../../project-memory/video-research/_kb/KB_other.md#L214-L276).
 
 ### Reminder Entry
@@ -2457,7 +2416,6 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Web:** `/txn/tag-weight-diff`; `POST /stock/tag-weight-diff`, `DELETE /stock/tag-weight-diff/:vchNo`. Can: none.
 - **Remaining:** Mutation is blocked by the tag-weight-difference containment; replacement, components/images, absorption, payment, lifecycle and the sale-driven SL_TAG_WT_DIFF branch remain.
 - **Owners:** N19, X21, P07-05, G71, N85.
-- **Register correction:** Register lists no desktop form; the dispatch opens TR_TAG_WT_DIFF.
 - **Evidence:** [KB_other.md:326-374](../../project-memory/video-research/_kb/KB_other.md#L326-L374).
 
 ### Vch ReNumber
@@ -2498,7 +2456,6 @@ Capabilities: C create, R reopen a saved voucher, E edit it, D delete it, P prin
 - **Web:** no screen; no API. Can: none.
 - **Remaining:** No web equivalent of the UT_CUST_ENTRY create/reopen/edit/delete/print workflow; the register maps a report instead.
 - **Owners:** G56, N70, X29, P11-05, G71, N85.
-- **Register correction:** Register lists RP_CUST_CRM and maps GET /reports/customer-crm; the dispatch opens UT_CUST_ENTRY.
 - **Evidence:** [UT_CUST_ENTRY.cs:1944-2110](../../unified/src/csharp/DataCareNext/UT_CUST_ENTRY.cs#L1944-L2110).
 
 ### Cust Report

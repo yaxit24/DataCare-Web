@@ -223,7 +223,7 @@ the screens moved to the shared editor pass unchanged-save tests.
 |---|---|---|
 | X18 `currentFinding` (CR-01) | Tag transfer remains contained | Tag cancel, transfer and split released by N18 and N19; weight difference still contained. Recorded as `currentFindingCorrection` |
 | X15 `currentFinding` (CR-02) | Credit-note IRN assumes the document exists | E CRNT and E INVOICE create/edit/delete/print lifecycle exists (N16); provider and desktop acceptance remain. Recorded as `currentFindingCorrection` |
-| Completion register | 198 rows mapped | 20 rows mapped to the wrong form or surface (G71); the catalog carries the corrected view until N85 |
+| Completion register | 198 rows mapped | Corrected by N85: 26 rows (the 20 listed plus 6 found by the catalog-agreement check); 193 implemented-unverified and 5 absent (Card Rec, Tour Sales, Loan Intrest, Dhrn Os Letter, Cust Entry); `register:check` blocks disagreement |
 | N87 | — | implemented-unverified, evidence in this change |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 

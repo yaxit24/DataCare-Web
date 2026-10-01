@@ -16,8 +16,8 @@
   "formReferenced": 175,
   "formNeverReferenced": 14,
   "unresolvedLabel": 9,
-  "implemented-unverified": 198,
-  "absent": 0,
+  "implemented-unverified": 193,
+  "absent": 5,
   "unclassified": 0,
   "verified": 0,
   "implemented-elsewhere": 0,
@@ -167,7 +167,6 @@
     "surface": "GET /reports/tag-stock"
    },
    "sharedSurfaceWith": [
-    "Report/HuId Report",
     "Report/Stock Report",
     "Report/Tag Stock"
    ]
@@ -319,7 +318,7 @@
    "formReferencedInWeb": null,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "unresolved form dashboard inference.",
+   "note": "Web addition: the desktop caption dispatches no form; the dashboard is the web landing page. Corrected by N85 (G71).",
    "webSurface": {
     "kind": "page",
     "surface": "web/apps/web/app/(app)/dashboard/page.tsx"
@@ -438,11 +437,13 @@
    "tab": "Company",
    "menu": "Year Select",
    "visibleOnDesktop": true,
-   "desktopForms": [],
+   "desktopForms": [
+    "MS_OPNCOMP"
+   ],
    "formReferencedInWeb": null,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "unresolved form explicit context switch.",
+   "note": "unresolved form explicit context switch. Desktop form or web surface corrected by N85 (G71).",
    "webSurface": {
     "kind": "route",
     "surface": "POST /context/select"
@@ -454,19 +455,14 @@
    "menu": "Cust Entry",
    "visibleOnDesktop": true,
    "desktopForms": [
-    "RP_CUST_CRM"
+    "UT_CUST_ENTRY"
    ],
    "formReferencedInWeb": true,
-   "state": "implemented-unverified",
+   "state": "absent",
    "evidence": null,
-   "note": "shared CRM form report surface. Shares this surface with 1 other menu entry: Crm/Cust Report.",
-   "webSurface": {
-    "kind": "route",
-    "surface": "GET /reports/customer-crm"
-   },
-   "sharedSurfaceWith": [
-    "Crm/Cust Report"
-   ]
+   "note": "No web surface: UT_CUST_ENTRY has no web screen; GET /reports/customer-crm is the CRM report, not customer entry. Desktop form(s): UT_CUST_ENTRY. Corrected by N85 (G71).",
+   "webSurface": null,
+   "sharedSurfaceWith": []
   },
   {
    "tab": "Crm",
@@ -483,9 +479,7 @@
     "kind": "route",
     "surface": "GET /reports/customer-crm"
    },
-   "sharedSurfaceWith": [
-    "Crm/Cust Entry"
-   ]
+   "sharedSurfaceWith": []
   },
   {
    "tab": "Dhiran",
@@ -549,13 +543,10 @@
     "TR_DHRN_INTREC"
    ],
    "formReferencedInWeb": true,
-   "state": "implemented-unverified",
+   "state": "absent",
    "evidence": null,
-   "note": "differently-named outstanding letter.",
-   "webSurface": {
-    "kind": "route",
-    "surface": "GET /dhrn/khata"
-   },
+   "note": "No web surface: the outstanding letter (CurBookHelp('OS LETTER')) has no web workflow; GET /dhrn/khata is the pledge khata, not the letter. Desktop form(s): TR_DHRN_INTREC. Corrected by N85 (G71).",
+   "webSurface": null,
    "sharedSurfaceWith": []
   },
   {
@@ -630,9 +621,7 @@
     "kind": "route",
     "surface": "POST /dhrn/interest"
    },
-   "sharedSurfaceWith": [
-    "Dhiran/Loan Intrest"
-   ]
+   "sharedSurfaceWith": []
   },
   {
    "tab": "Dhiran",
@@ -642,16 +631,11 @@
     "TR_DHRN_INTREC"
    ],
    "formReferencedInWeb": true,
-   "state": "implemented-unverified",
+   "state": "absent",
    "evidence": null,
-   "note": "shared interest form mode. Shares this surface with 1 other menu entry: Dhiran/Intrest Rec.",
-   "webSurface": {
-    "kind": "route",
-    "surface": "POST /dhrn/interest"
-   },
-   "sharedSurfaceWith": [
-    "Dhiran/Intrest Rec"
-   ]
+   "note": "No web surface: POST /dhrn/interest posts pledge (Dhiran) interest only; loan interest has no web workflow. Desktop form(s): TR_DHRN_INTREC. Corrected by N85 (G71).",
+   "webSurface": null,
+   "sharedSurfaceWith": []
   },
   {
    "tab": "Dhiran",
@@ -807,17 +791,11 @@
     "TR_CARD_REC"
    ],
    "formReferencedInWeb": true,
-   "state": "implemented-unverified",
+   "state": "absent",
    "evidence": "apps/api/test/financeBookFamily.db.test.ts; apps/api/test/financeBookSelection.routes.db.test.ts; apps/web/test/cash-receipt-payment.journey.mjs; apps/web/test/financeBooks.test.ts; desktop source MDI_FORM.cs:8052-8111 CurBookHelp, DC_Main.CurBookHelp, TR_CASH.cs, Ac_Ledr.cs:567-581",
-   "note": "differently-named card receipt mode. Shares this surface with 2 other menu entries: Transaction/Bank Received, Transaction/Cash Received. D1 fixed 2026-09-29 for the shared receipt form (card mode uses a BANK REC book); the desktop TR_CARD_REC CARD ADJUST form itself is not separately implemented. Engineering evidence only; see ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-eval-defects/contract.md.",
-   "webSurface": {
-    "kind": "route",
-    "surface": "POST /receipts"
-   },
-   "sharedSurfaceWith": [
-    "Transaction/Bank Received",
-    "Transaction/Cash Received"
-   ]
+   "note": "No web surface: TR_CARD_REC writes CARD_DATA; the generic receipt (POST /receipts) is a different workflow. Desktop form(s): TR_CARD_REC. Corrected by N85 (G71).",
+   "webSurface": null,
+   "sharedSurfaceWith": []
   },
   {
    "tab": "ExtraTran",
@@ -1282,12 +1260,12 @@
    "menu": "Tour Order",
    "visibleOnDesktop": true,
    "desktopForms": [
-    "TR_SALE_ORD"
+    "TR_TOUR_ORD"
    ],
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": "apps/api/test/tourOrder.db.test.ts; apps/api/test/routePolicy.test.ts; apps/web/app/(app)/txn/tour-order/page.tsx; desktop source MDI_FORM.cs CurBookHelp(\"TOUR ORDER\") and MS_UPDATE.cs BOOK_DATA 510",
-   "note": "Partial implementation advanced 2026-09-11: configured books and real browser create/reopen/edit/delete, independent components, stable serials, stale-write refusal, ghat-aware labour base, and Tour-owned scoped printing. Full order calculation, settlement, conversion/delivery and desktop/business acceptance remain open under X14/X05/X25.",
+   "note": "Partial implementation advanced 2026-09-11: configured books and real browser create/reopen/edit/delete, independent components, stable serials, stale-write refusal, ghat-aware labour base, and Tour-owned scoped printing. Full order calculation, settlement, conversion/delivery and desktop/business acceptance remain open under X14/X05/X25. Desktop form or web surface corrected by N85 (G71).",
    "webSurface": {
     "kind": "route",
     "surface": "POST /tour-orders"
@@ -1325,16 +1303,13 @@
    "menu": "Tour Sales",
    "visibleOnDesktop": true,
    "desktopForms": [
-    "TR_TOUR"
+    "TR_TOUR_SALE"
    ],
    "formReferencedInWeb": true,
-   "state": "implemented-unverified",
+   "state": "absent",
    "evidence": null,
-   "note": "dispatch bills tour stock.",
-   "webSurface": {
-    "kind": "route",
-    "surface": "POST /tour/:vchNo/bill"
-   },
+   "note": "No web surface: TR_TOUR_SALE has no web workflow; the approval bill bridge (POST /tour/:vchNo/bill) bills a tour, it is not Tour Sales. Desktop form(s): TR_TOUR_SALE. Corrected by N85 (G71).",
+   "webSurface": null,
    "sharedSurfaceWith": []
   },
   {
@@ -1410,12 +1385,12 @@
    "menu": "Design Book",
    "visibleOnDesktop": true,
    "desktopForms": [
-    "MS_PRODUCT"
+    "MS_DESIGN_BOOK"
    ],
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "Design Book parent/component lifecycle implemented with versioned replacement/deletion, stable identities, style/text/null preservation and dedicated saved-image permissions. Source-triggered calculations, configured grid behavior, downstream transfer and legacy image migration remain open under X11.",
+   "note": "Design Book parent/component lifecycle implemented with versioned replacement/deletion, stable identities, style/text/null preservation and dedicated saved-image permissions. Source-triggered calculations, configured grid behavior, downstream transfer and legacy image migration remain open under X11. Desktop form or web surface corrected by N85 (G71).",
    "webSurface": {
     "kind": "route",
     "surface": "GET /masters/design-book"
@@ -1629,12 +1604,12 @@
    "menu": "Lot Opening",
    "visibleOnDesktop": false,
    "desktopForms": [
-    "MS_PRODUCT"
+    "TR_ITM_LOT"
    ],
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "dispatches TR_ITM_LOT.",
+   "note": "dispatches TR_ITM_LOT. Desktop form or web surface corrected by N85 (G71).",
    "webSurface": {
     "kind": "route",
     "surface": "POST /stock/item-lot"
@@ -1719,10 +1694,10 @@
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "dynamic styles master.",
+   "note": "dynamic styles master. Desktop form or web surface corrected by N85 (G71).",
    "webSurface": {
     "kind": "master",
-    "surface": "styles"
+    "surface": "models"
    },
    "sharedSurfaceWith": []
   },
@@ -1730,11 +1705,13 @@
    "tab": "Master",
    "menu": "Tag Opening",
    "visibleOnDesktop": true,
-   "desktopForms": [],
+   "desktopForms": [
+    "TR_TAG_OPBL"
+   ],
    "formReferencedInWeb": null,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "unresolved form explicit dispatch. Shares this surface with 1 other menu entry: Other/Only Tag Entry.",
+   "note": "unresolved form explicit dispatch. Shares this surface with 1 other menu entry: Other/Only Tag Entry. Desktop form or web surface corrected by N85 (G71).",
    "webSurface": {
     "kind": "route",
     "surface": "POST /stock/tag-opening"
@@ -2182,12 +2159,12 @@
    "menu": "Ledger Adjust",
    "visibleOnDesktop": true,
    "desktopForms": [
-    "UT_E_INVOICE"
+    "TR_LEDR_ADJ"
    ],
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "dispatches TR_LEDR_ADJ.",
+   "note": "dispatches TR_LEDR_ADJ. Desktop form or web surface corrected by N85 (G71).",
    "webSurface": {
     "kind": "route",
     "surface": "POST /ledger-adjust"
@@ -2198,11 +2175,13 @@
    "tab": "Other",
    "menu": "Only Tag Entry",
    "visibleOnDesktop": true,
-   "desktopForms": [],
+   "desktopForms": [
+    "TR_TAG_OPBL"
+   ],
    "formReferencedInWeb": null,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "unresolved form explicit dispatch. Shares this surface with 1 other menu entry: Master/Tag Opening.",
+   "note": "unresolved form explicit dispatch. Shares this surface with 1 other menu entry: Master/Tag Opening. Desktop form or web surface corrected by N85 (G71).",
    "webSurface": {
     "kind": "route",
     "surface": "POST /stock/tag-opening"
@@ -2232,11 +2211,13 @@
    "tab": "Other",
    "menu": "Physical Stock",
    "visibleOnDesktop": true,
-   "desktopForms": [],
+   "desktopForms": [
+    "TR_PHYSTK"
+   ],
    "formReferencedInWeb": null,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "unresolved form explicit dispatch.",
+   "note": "unresolved form explicit dispatch. Desktop form or web surface corrected by N85 (G71).",
    "webSurface": {
     "kind": "route",
     "surface": "POST /stock/physical-stock"
@@ -2402,11 +2383,13 @@
    "tab": "Other",
    "menu": "Tag Wt Change",
    "visibleOnDesktop": true,
-   "desktopForms": [],
+   "desktopForms": [
+    "TR_TAG_WT_DIFF"
+   ],
    "formReferencedInWeb": null,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "unresolved form explicit dispatch. Current review 2026-09-11: the tag weight-difference mutation remains blocked by the shared containment registry. Complete X21 branch/lifecycle/conservation/desktop verification before individual release.",
+   "note": "unresolved form explicit dispatch. Current review 2026-09-11: the tag weight-difference mutation remains blocked by the shared containment registry. Complete X21 branch/lifecycle/conservation/desktop verification before individual release. Desktop form or web surface corrected by N85 (G71).",
    "webSurface": {
     "kind": "route",
     "surface": "POST /stock/tag-weight-diff"
@@ -2436,11 +2419,14 @@
    "tab": "Other",
    "menu": "Whatsapp",
    "visibleOnDesktop": true,
-   "desktopForms": [],
+   "desktopForms": [
+    "UT_WAPP_WITH_API",
+    "UT_WHATSAPP"
+   ],
    "formReferencedInWeb": null,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "unresolved form WhatsApp dispatch. Shares this surface with 1 other menu entry: Other/Sms.",
+   "note": "unresolved form WhatsApp dispatch. Shares this surface with 1 other menu entry: Other/Sms. Desktop form or web surface corrected by N85 (G71).",
    "webSurface": {
     "kind": "route",
     "surface": "POST /integrations/notify"
@@ -2556,12 +2542,13 @@
    "menu": "Gst Report",
    "visibleOnDesktop": true,
    "desktopForms": [
+    "RP_GST",
     "RP_TAX"
    ],
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": "apps/api/src/modules/reports/gstLauncherReport.ts; apps/api/test/routePolicy.test.ts; apps/api/test/reportAuthorization.test.ts; apps/web/test/reportSurfaceLinks.test.ts",
-   "note": "Implemented-unverified: added /reports/gst-report launcher mapping RP_TAX buttons to the existing Sales GST, GST Input, GSTR-1, GSTR-2, HSN summary and GSTR-3B web reports.",
+   "note": "Implemented-unverified: added /reports/gst-report launcher mapping RP_TAX buttons to the existing Sales GST, GST Input, GSTR-1, GSTR-2, HSN summary and GSTR-3B web reports. Desktop form or web surface corrected by N85 (G71).",
    "webSurface": {
     "kind": "route",
     "surface": "GET /reports/gst-report"
@@ -2578,16 +2565,12 @@
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "differently-named HUID tag listing. Shares this surface with 3 other menu entries: Analysis/Tag Detail, Report/Stock Report, Report/Tag Stock.",
+   "note": "differently-named HUID tag listing. Shares this surface with 3 other menu entries: Analysis/Tag Detail, Report/Stock Report, Report/Tag Stock. Desktop form or web surface corrected by N85 (G71).",
    "webSurface": {
     "kind": "route",
-    "surface": "GET /reports/tag-stock"
+    "surface": "GET /reports/huid"
    },
-   "sharedSurfaceWith": [
-    "Analysis/Tag Detail",
-    "Report/Stock Report",
-    "Report/Tag Stock"
-   ]
+   "sharedSurfaceWith": []
   },
   {
    "tab": "Report",
@@ -2722,13 +2705,12 @@
    "menu": "Reminder Rpt",
    "visibleOnDesktop": false,
    "desktopForms": [
-    "MS_RATE",
     "RP_REMINDER"
    ],
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "reminder report query.",
+   "note": "reminder report query. Desktop form or web surface corrected by N85 (G71).",
    "webSurface": {
     "kind": "route",
     "surface": "GET /reminders"
@@ -2800,14 +2782,13 @@
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "catalog aliases stock report. Shares this surface with 3 other menu entries: Analysis/Tag Detail, Report/HuId Report, Report/Tag Stock.",
+   "note": "Partial: GET /reports/tag-stock covers tag stock only; RP_STOCK dimension summaries remain (item-group-stock and stock-by-location are partial candidates). Corrected by N85 (G71).",
    "webSurface": {
     "kind": "route",
     "surface": "GET /reports/tag-stock"
    },
    "sharedSurfaceWith": [
     "Analysis/Tag Detail",
-    "Report/HuId Report",
     "Report/Tag Stock"
    ]
   },
@@ -2879,7 +2860,6 @@
    },
    "sharedSurfaceWith": [
     "Analysis/Tag Detail",
-    "Report/HuId Report",
     "Report/Stock Report"
    ]
   },
@@ -3029,10 +3009,10 @@
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "member master workflow.",
+   "note": "member master workflow. Desktop form or web surface corrected by N85 (G71).",
    "webSurface": {
     "kind": "route",
-    "surface": "POST /members"
+    "surface": "POST /scheme/enroll"
    },
    "sharedSurfaceWith": []
   },
@@ -3139,7 +3119,6 @@
     "surface": "POST /receipts"
    },
    "sharedSurfaceWith": [
-    "ExtraTran/Card Rec",
     "Transaction/Cash Received"
    ]
   },
@@ -3215,7 +3194,6 @@
     "surface": "POST /receipts"
    },
    "sharedSurfaceWith": [
-    "ExtraTran/Card Rec",
     "Transaction/Bank Received"
    ]
   },
@@ -3343,12 +3321,13 @@
    "menu": "Purchase Rtn",
    "visibleOnDesktop": true,
    "desktopForms": [
-    "TR_KR_ISU"
+    "TR_KR_ISU",
+    "TR_SALE_RTN_UAE"
    ],
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "purchase return workflow.",
+   "note": "purchase return workflow. Desktop form or web surface corrected by N85 (G71).",
    "webSurface": {
     "kind": "route",
     "surface": "POST /purchase-returns"
@@ -3397,12 +3376,13 @@
    "menu": "Sales",
    "visibleOnDesktop": true,
    "desktopForms": [
+    "TR_SALE",
     "TR_SALE_HM"
    ],
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": "packages/core/test/saleAmount.test.ts; apps/api/test/sales.lifecycle.db.test.ts; apps/api/test/saleAmountBasis.routes.db.test.ts; apps/web/test/lineRecalc.test.ts; apps/web/test/sale-amount-basis.journey.mjs; desktop source TR_SALE.cs:9161,10716-10936,12833,15432; MS_OPNCOMP.cs:881-888; Ac_Image.cs:6221",
-   "note": "sales invoice workflow. D6 fixed 2026-09-29: blank SL_AMT_TYPE prices net + ghat as the desktop does; per-line RtWith, P = pieces and RATE_TYPE 1/K/P follow CommPassTotal in the writer and the preview; only SALES books are offered. Engineering evidence only; see ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-eval-defects/contract.md.",
+   "note": "sales invoice workflow. D6 fixed 2026-09-29: blank SL_AMT_TYPE prices net + ghat as the desktop does; per-line RtWith, P = pieces and RATE_TYPE 1/K/P follow CommPassTotal in the writer and the preview; only SALES books are offered. Engineering evidence only; see ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-eval-defects/contract.md. Desktop form or web surface corrected by N85 (G71).",
    "webSurface": {
     "kind": "route",
     "surface": "POST /sales"
@@ -3430,11 +3410,14 @@
    "tab": "Transaction",
    "menu": "Sales Return",
    "visibleOnDesktop": true,
-   "desktopForms": [],
+   "desktopForms": [
+    "TR_SALE_RTN",
+    "TR_SALE_RTN_UAE"
+   ],
    "formReferencedInWeb": null,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "unresolved form explicit dispatch.",
+   "note": "unresolved form explicit dispatch. Desktop form or web surface corrected by N85 (G71).",
    "webSurface": {
     "kind": "route",
     "surface": "POST /sales-returns"
@@ -3502,14 +3485,12 @@
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "TR_WH_SALE quotation mode partial. Shares this surface with 1 other menu entry: Transaction/Wh Sales. X16 (2026-09-29) rebuilt the shared wholesale form; the quotation mode itself is not implemented by it.",
+   "note": "TR_WH_SALE quotation mode partial. Shares this surface with 1 other menu entry: Transaction/Wh Sales. X16 (2026-09-29) rebuilt the shared wholesale form; the quotation mode itself is not implemented by it. Desktop form or web surface corrected by N85 (G71).",
    "webSurface": {
     "kind": "page",
-    "surface": "web/apps/web/app/(app)/txn/wholesale-sale/page.tsx"
+    "surface": "web/apps/web/app/(app)/txn/wholesale-quotation/page.tsx"
    },
-   "sharedSurfaceWith": [
-    "Transaction/Wh Sales"
-   ]
+   "sharedSurfaceWith": []
   },
   {
    "tab": "Transaction",
@@ -3526,9 +3507,7 @@
     "kind": "page",
     "surface": "web/apps/web/app/(app)/txn/wholesale-sale/page.tsx"
    },
-   "sharedSurfaceWith": [
-    "Transaction/Wh Quotation"
-   ]
+   "sharedSurfaceWith": []
   },
   {
    "tab": "Transaction",
@@ -3568,5 +3547,39 @@
   "meaning": "198 declared surfaces is menu mapping, not complete functioning or certified parity. Existing legacy states retained; see availability and missing-action notes.",
   "endToEndImplementationPercentage": null,
   "verifiedMenuEntries": 0
+ },
+ "revision": {
+  "date": "2026-10-01",
+  "slice": "N85",
+  "gap": "G71",
+  "summary": "Corrected 26 rows to the MDI_FORM.cs dispatch and the real web surfaces in the menu catalog: the 20 the catalog listed and 6 more the new catalog-agreement check found. Five menus with no web workflow are now absent instead of mapped to a different workflow: ExtraTran/Card Rec, Karigar/Tour Sales, Dhiran/Loan Intrest, Dhiran/Dhrn Os Letter, Crm/Cust Entry.",
+  "corrected": [
+   "Company/Main Menu",
+   "Company/Year Select",
+   "Crm/Cust Entry",
+   "Dhiran/Dhrn Os Letter",
+   "Dhiran/Loan Intrest",
+   "ExtraTran/Card Rec",
+   "Karigar/Tour Order",
+   "Karigar/Tour Sales",
+   "Master/Design Book",
+   "Master/Lot Opening",
+   "Master/Style",
+   "Master/Tag Opening",
+   "Other/Ledger Adjust",
+   "Other/Only Tag Entry",
+   "Other/Physical Stock",
+   "Other/Tag Wt Change",
+   "Other/Whatsapp",
+   "Report/Gst Report",
+   "Report/HuId Report",
+   "Report/Reminder Rpt",
+   "Report/Stock Report",
+   "Scheme/Member Mast",
+   "Transaction/Purchase Rtn",
+   "Transaction/Sales",
+   "Transaction/Sales Return",
+   "Transaction/Wh Quotation"
+  ]
  }
 }
