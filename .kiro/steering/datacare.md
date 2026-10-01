@@ -14,5 +14,8 @@
   acceptance.
 - Before finishing: `python3 docs/master-parity-plan-2026-09-29/validate_plan.py`, `python3 docs/tools/docs_check.py`,
   and the web gates in `AGENTS.md`.
+- Start with `kiro-cli chat --agent datacare` (`.kiro/agents/datacare.json`): it loads the plan and handbooks,
+  runs `docs/tools/session_status.py` to show other sessions, and blocks pushing to `main`.
 - Skills: `datacare-implement-slice`, `datacare-desktop-authority`, `datacare-write-set-test`, `datacare-e2e-visual`,
-  `datacare-code-review`, `datacare-plan-update`, `datacare-docs-update`.
+  `datacare-code-review`, `datacare-plan-update`, `datacare-docs-update`, `datacare-test-first`, `datacare-debug`,
+  `datacare-verify-before-done`.

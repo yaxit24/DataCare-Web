@@ -17,9 +17,14 @@ The offline Windows jewellery ERP **DataCareNext** (decompiled in `unified/`) is
 
 ## Start of every session
 
-1. Read [`project-memory/HANDOFF.md`](project-memory/HANDOFF.md).
-2. `git status`, `git fetch origin`, `git worktree list`: other sessions often work in parallel worktrees. Do not
-   touch their branches or files; rebase before pushing because the backlog changes often.
+1. Start with `kiro-cli chat --agent datacare` from the repository root: it loads this file, the handbooks, the
+   handoff and the Phase 1 plan, and runs the session-status check (step 2) for you. Then read
+   [`project-memory/HANDOFF.md`](project-memory/HANDOFF.md).
+2. See what other sessions are doing: `python3 docs/tools/session_status.py` (the `datacare` agent runs it on
+   start). It lists active kiro-cli sessions and what each is doing, the worktrees, open pull requests, recently
+   pushed branches, and whether the test database port is busy. Never take a slice another session, worktree or open
+   PR already has; do not touch their branches or files. Rebase before pushing, because the backlog changes often.
+   If main's CI is red and nobody is fixing it, fix that first.
 3. Take the next slice from document 13 §3 and check its status in
    `docs/master-parity-plan-2026-09-29/execution-backlog.json` (slices N01–N88). Phase 2 slices in
    `phase2-backlog.json` are not started until Phase 1 is certified (D28). Read the affected menus in
@@ -87,6 +92,12 @@ When documents disagree:
 | `datacare-code-review` | Review a change against the engineering standards |
 | `datacare-plan-update` | Record status, gaps, slices and decisions in the plan |
 | `datacare-docs-update` | Keep the menu catalog, register and handbooks current |
+| `datacare-test-first` | Write the test before the code, with desktop-derived expected values |
+| `datacare-debug` | Find a bug's root cause before fixing it |
+| `datacare-verify-before-done` | Run the gates and quote the output before claiming success |
+
+The last three are DataCare adaptations of [Superpowers](https://github.com/obra/superpowers) skills (MIT); see
+`.kiro/skills/third-party/README.md`.
 
 ## Commands
 
@@ -101,7 +112,19 @@ pnpm docs:refs
 # at the repository root
 python3 docs/master-parity-plan-2026-09-29/validate_plan.py
 python3 docs/tools/docs_check.py            # add --write to regenerate the generated views
+python3 docs/tools/session_status.py        # what other sessions, worktrees and PRs are in flight
 ```
+
+## Agent and optional tools
+
+- **Project agent:** `.kiro/agents/datacare.json`. `kiro-cli chat --agent datacare` loads this file, the handbooks,
+  the handoff and the Phase 1 plan, runs the session-status check on start, keeps your global MCP servers
+  (`chrome-devtools`, `browsermcp`), and blocks pushing to `main`, force-push, `git reset --hard`, `git clean -f`,
+  `--no-verify` and `gh pr merge`.
+- **Context7 (optional, off by default):** an MCP server that gives up-to-date, version-specific library
+  documentation (useful for the Next.js, React and Prisma 7 upgrade in N86). It sends your questions to Upstash's
+  service, so turn it on only with the owner's agreement and never send code, data or secrets through it. To enable
+  it, add it to your global `~/.kiro/settings/mcp.json`, not to a committed file.
 
 ## Definition of done for a change
 
