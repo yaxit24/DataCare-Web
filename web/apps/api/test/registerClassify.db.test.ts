@@ -1,6 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { salesRegister, purchaseRegister } from '../src/modules/reports/reports.js';
+import {
+  salesRegister,
+  purchaseRegister,
+  gstr3b,
+  salesByParty,
+} from '../src/modules/reports/reports.js';
+import { dailySalesSummary, employeeSales } from '../src/modules/reports/reports5.js';
 
 /**
  * G06 / N36. The sales and purchase registers must classify vouchers by their book's MAIN_BOOK, not by
@@ -99,6 +105,22 @@ databaseDescribe('registers classify by MAIN_BOOK, not literal book codes', () =
     const reg = await salesRegister(runtime, scope);
     expect(reg.rows.map((r) => `${r.coBook}/${r.vchNo}`)).toEqual(['SL/00001']);
     expect(reg.totals.netAmt).toBe(1000);
+  });
+
+  it('GSTR-3B outward summary and sales-by-party count only SALES books (G06 remainder)', async () => {
+    const g = await gstr3b(runtime, scope);
+    // Only the SL/00001 bill of 1000; the RTX return (200) and SQT quotation (500) are not sales.
+    expect(g.outwardTaxable).toBe(1000);
+    const byParty = await salesByParty(runtime, scope);
+    expect(byParty.totals.total).toBe(1000);
+  });
+
+  it('daily and employee sales summaries exclude returns and quotations (G06 remainder)', async () => {
+    const daily = await dailySalesSummary(runtime, scope);
+    expect(daily.totals.total ?? daily.totals.gross ?? daily.totals.net).toBe(1000);
+    const emp = await employeeSales(runtime, scope);
+    const empTotal = emp.rows.reduce((t: number, r: any) => t + (r.gross ?? r.total ?? 0), 0);
+    expect(empTotal).toBe(1000);
   });
 
   it('purchase register counts only PURCHASE-book vouchers, excluding a PRTX return', async () => {

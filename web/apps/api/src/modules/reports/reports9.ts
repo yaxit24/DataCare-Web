@@ -43,7 +43,7 @@ export async function customerCrm(prisma: any, s: ReportScope): Promise<ListRepo
               max(m."AC_MOBILE") AS mobile, count(DISTINCT sd."VCH_NO")::int AS bills,
               max(sd."VCH_DATE") AS "lastVisit", sum(${NN('sd."TOT_AMT"')}) AS "totalValue"
        FROM "SL_DATA" sd LEFT JOIN "AC_MAST" m ON m."CO_CODE"=sd."CO_CODE" AND m."AC_CODE"=sd."AC_CODE"
-       WHERE sd."CO_CODE"=$1${yr}${dt} AND sd."CO_BOOK"<>'SRT'
+       WHERE sd."CO_CODE"=$1${yr}${dt} AND sd."CO_BOOK" IN (SELECT b."CO_BOOK" FROM "BOOK_DATA" b WHERE b."CO_CODE"=sd."CO_CODE" AND b."MAIN_BOOK"='SALES')
        GROUP BY sd."AC_CODE" ORDER BY "totalValue" DESC LIMIT 200`,
       ...params,
     );

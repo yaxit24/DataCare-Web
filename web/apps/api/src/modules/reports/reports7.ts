@@ -19,7 +19,7 @@ const num = (v: unknown): number => Number(v ?? 0);
 const NN = (c: string): string => `coalesce(NULLIF(${c}::text,'')::numeric,0)`;
 
 /**
- * Monthly GST sales summary (SL_DATA grouped by VCH_DATE month, excl returns book 'SRT'):
+ * Monthly GST sales summary (SL_DATA grouped by VCH_DATE month, SALES books only):
  * taxable = Σ NET_AMT, the CGST/SGST/IGST split, and tax = Σ TAX_AMT per YYYY-MM.
  * Optional fiscal-year scope ("CO_YEAR").
  */
@@ -32,7 +32,7 @@ export async function salesGstMonthly(prisma: any, s: ReportScope): Promise<List
       `SELECT to_char("VCH_DATE"::timestamp,'YYYY-MM') AS month,
               sum(${NN('"NET_AMT"')}) AS taxable, sum(${NN('"CGST_TAX"')}) AS cgst,
               sum(${NN('"SGST_TAX"')}) AS sgst, sum(${NN('"IGST_TAX"')}) AS igst, sum(${NN('"TAX_AMT"')}) AS tax
-       FROM "SL_DATA" WHERE "CO_CODE"=$1${yr}${dt} AND "CO_BOOK"<>'SRT' AND "VCH_DATE" IS NOT NULL
+       FROM "SL_DATA" WHERE "CO_CODE"=$1${yr}${dt} AND "CO_BOOK" IN (SELECT b."CO_BOOK" FROM "BOOK_DATA" b WHERE b."CO_CODE"=$1 AND b."MAIN_BOOK"='SALES') AND "VCH_DATE" IS NOT NULL
        GROUP BY 1 ORDER BY 1`,
       ...params,
     );

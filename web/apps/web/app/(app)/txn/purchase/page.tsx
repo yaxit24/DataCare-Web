@@ -171,6 +171,8 @@ export default function PurchaseEntryPage() {
    */
   const companySettings = useCompanySettings();
   const fineLocked = companyFlag(companySettings, 'ITM_FINE_LOCK', 'N');
+  // G11: per-gram labour is on (net + ghat) unless the company sets LBR_WITH_GHT='N' (blank default Y).
+  const labourWithGhat = companyFlag(companySettings, 'LBR_WITH_GHT', 'Y');
   // Desktop TR_PURC carries TWO sub-detail grids: MSG_IDTL (34 cols, tag side) and MSG_PR_IDTL
   // (25 cols, purchase side). `purchase.ts:133` already accepts `stones` per line and persists it
   // at `:953`; this page sent nothing, so the whole stone workflow was unreachable.
@@ -249,7 +251,7 @@ export default function PurchaseEntryPage() {
     const mk = labourCharge('per_gram', {
       netWt: n(l.netWt),
       ghatWt: n(l.ghtWt),
-      withGhat: true,
+      withGhat: labourWithGhat,
       rate: n(l.making),
     });
     return { fine, metal, mk, net: r2(metal + mk) };

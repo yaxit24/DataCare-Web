@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { get, post, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
+import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { TenderPanel, type Tender } from '../../../../components/TenderPanel';
@@ -157,6 +158,9 @@ const ORIGINAL_PURCHASE_BOOKS = ['PURCHASE', 'TAG PURCHASE'];
 const str = (v: unknown) => (v == null || Number(v) === 0 ? '' : String(v));
 
 export default function PurchaseReturnPage() {
+  // G11: per-gram labour is on (net + ghat) unless the company sets LBR_WITH_GHT='N' (blank default Y).
+  const companySettings = useCompanySettings();
+  const labourWithGhat = companyFlag(companySettings, 'LBR_WITH_GHT', 'Y');
   const { coYear, lcCode } = useBusinessScope();
   const [coBook, setCoBook] = useState('');
   // The original purchase this return reverses. A tagged return must name it: the writer resolves each
@@ -209,7 +213,7 @@ export default function PurchaseReturnPage() {
     const mk = labourCharge('per_gram', {
       netWt: n(l.netWt),
       ghatWt: n(l.ghtWt),
-      withGhat: true,
+      withGhat: labourWithGhat,
       rate: n(l.making),
     });
     return { fine, metal, mk, net: r2(metal + mk) };

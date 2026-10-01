@@ -754,6 +754,21 @@ async function writeSaleTx(
   // MS_OPNCOMP.cs:1144-1147 defaults blank OS_BILL_ORNA_ISU to Y.
   const osBillOrnamentIssue =
     (text(saleFlagRows[0]?.OS_BILL_ORNA_ISU).toUpperCase() || 'Y') === 'Y';
+  // G12 / TR_SALE.cs:15028: a sale bill refuses to save without a salesperson when the company sets
+  // CO_SET.EMP_CODE_MANDATORY='Y'. The other writers already enforce this (eBillWriter.ts:745,
+  // locationAmount.ts:227); the sale writer did not. A quotation is not a bill, so it is exempt — the
+  // desktop runs this guard in the bill save path only.
+  if (!isSalesQuotation) {
+    const empRows: Array<{ EMP_CODE_MANDATORY: unknown }> = await tx.$queryRawUnsafe(
+      `SELECT "EMP_CODE_MANDATORY" FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"::text=$2::text`,
+      tenantId,
+      input.scope.coCode,
+    );
+    const employeeMandatory = text(empRows[0]?.EMP_CODE_MANDATORY).toUpperCase() === 'Y';
+    if (employeeMandatory && !String(input.empCode ?? '').trim()) {
+      throw new SaleValidationError('Please Select Employee Code and Try......');
+    }
+  }
   const configuredBookName = await configuredSaleBookNameTx(tx, input.scope);
   const taxPolicy = await resolveTaxPolicyTx(tx, input.scope, {
     acCode: input.acCode,
