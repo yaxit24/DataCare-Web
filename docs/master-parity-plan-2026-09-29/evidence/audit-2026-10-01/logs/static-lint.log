@@ -1,0 +1,99 @@
+=== db:validate ===
+
+> @datacare/db@0.0.0 db:validate <repo>/web/packages/db
+> prisma validate --schema prisma/schema.prisma
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+The schema at prisma/schema.prisma is valid 🚀
+=== db:generate ===
+
+> @datacare/db@0.0.0 db:generate <repo>/web/packages/db
+> prisma generate --schema prisma/schema.prisma
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+┌─────────────────────────────────────────────────────────┐
+│  Update available 6.19.3 -> 8.0.0-rc.19                 │
+│                                                         │
+│  This is a major update - please follow the guide at    │
+│  https://pris.ly/d/major-version-upgrade                │
+│                                                         │
+│  Run the following to update                            │
+│    npm i --save-dev prisma@latest                       │
+│    npm i @prisma/client@latest                          │
+└─────────────────────────────────────────────────────────┘
+
+✔ Generated Prisma Client (v6.19.3) to ./../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client in 1.55s
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Interested in query caching in just a few lines of code? Try Accelerate today! https://pris.ly/tip-3-accelerate
+
+=== lint (workspace lint + eslint + turbo typecheck) ===
+
+> datacare-web-saas@0.0.0 lint <repo>/web
+> node scripts/lint-workspace.mjs && eslint . && turbo run typecheck
+
+Workspace lint passed: 982 source files parsed, 8 manifests checked, 0 policy violations.
+• turbo 2.10.0
+
+   • Packages in scope: @datacare/api, @datacare/core, @datacare/db, @datacare/parity, @datacare/reports, @datacare/types, @datacare/web
+   • Running typecheck in 7 packages
+   • Remote caching disabled
+
+@datacare/core:typecheck: cache miss, executing 6914bea2b8b9b4dd
+@datacare/db:typecheck: cache miss, executing a030eaee164bfbf8
+@datacare/db:build: cache miss, executing 23a0c5255ce47c08
+@datacare/parity:typecheck: cache hit, replaying logs f4c88e5cd9351d8b
+@datacare/parity:typecheck: 
+@datacare/parity:typecheck: > @datacare/parity@0.0.0 typecheck <repo>/web/packages/parity
+@datacare/parity:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/parity:typecheck: 
+@datacare/core:build: cache miss, executing a556f8c34f6660e2
+@datacare/reports:typecheck: cache hit, replaying logs 7e34a26f440a8a06
+@datacare/reports:typecheck: 
+@datacare/reports:typecheck: > @datacare/reports@0.0.0 typecheck <repo>/web/packages/reports
+@datacare/reports:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/reports:typecheck: 
+@datacare/types:typecheck: cache hit, replaying logs f2fd982e1a5a7b6b
+@datacare/types:typecheck: 
+@datacare/types:typecheck: > @datacare/types@0.0.0 typecheck <repo>/web/packages/types
+@datacare/types:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/types:typecheck: 
+@datacare/types:build: cache hit, replaying logs e4fdc400d95edad1
+@datacare/types:build: 
+@datacare/types:build: > @datacare/types@0.0.0 build <repo>/web/packages/types
+@datacare/types:build: > tsc -p tsconfig.json
+@datacare/types:build: 
+@datacare/db:build: 
+@datacare/db:build: > @datacare/db@0.0.0 build <repo>/web/packages/db
+@datacare/db:build: > tsc -p tsconfig.json
+@datacare/db:build: 
+@datacare/core:typecheck: 
+@datacare/core:typecheck: > @datacare/core@0.0.0 typecheck <repo>/web/packages/core
+@datacare/core:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/core:typecheck: 
+@datacare/core:build: 
+@datacare/core:build: > @datacare/core@0.0.0 build <repo>/web/packages/core
+@datacare/core:build: > tsc -p tsconfig.json
+@datacare/core:build: 
+@datacare/db:typecheck: 
+@datacare/db:typecheck: > @datacare/db@0.0.0 typecheck <repo>/web/packages/db
+@datacare/db:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/db:typecheck: 
+@datacare/web:typecheck: cache miss, executing 6713340d7353ce28
+@datacare/web:typecheck: 
+@datacare/web:typecheck: > @datacare/web@0.0.0 typecheck <repo>/web/apps/web
+@datacare/web:typecheck: > tsc --noEmit
+@datacare/web:typecheck: 
+@datacare/api:typecheck: cache miss, executing 5b7786cdbe7bf530
+@datacare/api:typecheck: 
+@datacare/api:typecheck: > @datacare/api@0.0.0 typecheck <repo>/web/apps/api
+@datacare/api:typecheck: > tsc -p tsconfig.json --noEmit
+@datacare/api:typecheck: 
+
+ Tasks:    10 successful, 10 total
+Cached:    4 cached, 10 total
+  Time:    39.132s 
+

@@ -1,0 +1,867 @@
+{
+ "startedAt": "2026-10-01T06:48:58.396Z",
+ "releaseSha": null,
+ "database": "disposable localhost:55433 / app_user",
+ "imageObservations": [
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=01_BROWSER_01_D-001&instance=0&imageType=D",
+   "status": 200,
+   "version": "e13d294a0610134a0387930e01fc6a6bdfe067f3aff7eb37ca924137a447f04a",
+   "image": {
+    "state": "absent"
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=01_BROWSER_01_D-001&instance=0&imageType=D",
+   "status": 200,
+   "version": "e13d294a0610134a0387930e01fc6a6bdfe067f3aff7eb37ca924137a447f04a",
+   "image": {
+    "state": "absent"
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=01_BROWSER_01_D-001&instance=0&imageType=D",
+   "status": 200,
+   "version": "a0103aa56b51bbaef58442c4922a4eb00eabcc7102ba9e9befeadec821c3e396",
+   "image": {
+    "state": "absent"
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=01_BROWSER_01_D-001&instance=0&imageType=D",
+   "status": 200,
+   "version": "a72b3e7fb814f9ee284531e9c3da402fecdeac0735a429e2e2206d70b7b84b8c",
+   "image": {
+    "state": "present",
+    "data": "92 base64 characters",
+    "mimeType": "image/png",
+    "size": 68
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=01_BROWSER_01_D-001&instance=0&imageType=D",
+   "status": 200,
+   "version": "55685c6680cbd2ab12cca71a7bde6e51243affb0d6c938ae4f3254a5c75ee29e",
+   "image": {
+    "state": "present",
+    "data": "92 base64 characters",
+    "mimeType": "image/png",
+    "size": 68
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=01_BROWSER_01_D-001&instance=0&imageType=D",
+   "status": 200,
+   "version": "340392238632d9d161f96c55f161f0ce497f5185b1ad1596e0ae347a828bbf4b",
+   "image": {
+    "state": "present",
+    "data": "92 base64 characters",
+    "mimeType": "image/png",
+    "size": 68
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=01_BROWSER_01_D-001&instance=0&imageType=D",
+   "status": 200,
+   "version": "ee14a0690af3feae2c82563808cd34aa95c934d1affc8779c215a89e72babd5d",
+   "image": {
+    "state": "absent"
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=01_CALC+WEB_01_CALC-1&instance=0&imageType=D",
+   "status": 200,
+   "version": "7cae7951031289129a31e62b55497dc75704548b9f2ee9e7a7a3d64e75143d40",
+   "image": {
+    "state": "absent"
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=01_CALC+WEB_01_CALC-1&instance=0&imageType=D",
+   "status": 200,
+   "version": "e7b06cd566d69566c55e32e42e612e798584e1a7aef75273ae73e48b25915da1",
+   "image": {
+    "state": "absent"
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=01_CALC+WEB_01_CALC-1&instance=0&imageType=D",
+   "status": 200,
+   "version": "f0dbac74ca87002e1eb5de8cac76ca3dec0c85d1ab165cd500b8ccad98c8a271",
+   "image": {
+    "state": "absent"
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=repeat-saved-image&instance=0&imageType=D",
+   "status": 200,
+   "version": "794a935db088a497801dc7ba8893707e31fed8917f3c3062d5e0dc18e27c6a4b",
+   "image": {
+    "state": "absent"
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=repeat-saved-image&instance=0&imageType=D",
+   "status": 200,
+   "version": "61208afc97eed9c5615cec5fb4a87170c7d8a77d7aeffa36b361ee0dd9b90233",
+   "image": {
+    "state": "absent"
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=01_REPEAT+WEB_01_REPEATED&instance=0&imageType=D",
+   "status": 200,
+   "version": "0aea8ab6bc678e722a7dc8052f12398408c9795b325ca829a84157040fbbf36a",
+   "image": {
+    "state": "absent"
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=repeat-saved-image&instance=0&imageType=D",
+   "status": 200,
+   "version": "61208afc97eed9c5615cec5fb4a87170c7d8a77d7aeffa36b361ee0dd9b90233",
+   "image": {
+    "state": "absent"
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=repeat-saved-image&instance=0&imageType=D",
+   "status": 200,
+   "version": "8eff3cb97ada5b9bd0d2319e62ae3f742772f7f164f2b260d44f74d03f45eed4",
+   "image": {
+    "state": "absent"
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=01_REPEAT+FIX_01_FIXED&instance=0&imageType=D",
+   "status": 200,
+   "version": "52b65cc7adfc9860920d042b9c359176f8caddeaa72d15b4b91ff7ea5c4a9025",
+   "image": {
+    "state": "absent"
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=R5_DESIGN_CONFLICT_A&instance=0&imageType=D",
+   "status": 200,
+   "version": "0eee9e22d27de0f37e736fc47c530c413e1af8429b26ab8f4dded76d08072023",
+   "image": {
+    "state": "present",
+    "data": "3228 base64 characters",
+    "mimeType": "image/png",
+    "size": 2420
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=R5_DESIGN_CONFLICT_A&instance=0&imageType=D",
+   "status": 200,
+   "version": "0d8c5ea3d05c62434129d398cf14c099c434a6f02dca3820e3f00617898d0a54",
+   "image": {
+    "state": "present",
+    "data": "3968 base64 characters",
+    "mimeType": "image/jpeg",
+    "size": 2974
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=R5_DESIGN_CONFLICT_A&instance=0&imageType=D",
+   "status": 200,
+   "version": "af8b9031aa2abd82b17cba5a83acc44139c8446a8b8a17ff581067d9aada0896",
+   "image": {
+    "state": "present",
+    "data": "3228 base64 characters",
+    "mimeType": "image/png",
+    "size": 2420
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=R5_DESIGN_CONFLICT_A&instance=0&imageType=D",
+   "status": 200,
+   "version": "0d6d2a09a7e2773354273ce05e4d876b5a7deb3a3fde40f6f5f5b060c2d063ce",
+   "image": {
+    "state": "present",
+    "data": "3968 base64 characters",
+    "mimeType": "image/jpeg",
+    "size": 2974
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=R5_DESIGN_CONFLICT_A&instance=0&imageType=D",
+   "status": 200,
+   "version": "062082b5efb7a04b930940d4f7ab0e5d8faa303eb09bccc9cda6dfcc932b1423",
+   "image": {
+    "state": "absent"
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=R5_DESIGN_CONFLICT_A&instance=0&imageType=D",
+   "status": 200,
+   "version": "3dd051e8625c90da1308776ab47b9c7277376169114f9600e59780ebb9d1d17a",
+   "image": {
+    "state": "present",
+    "data": "3228 base64 characters",
+    "mimeType": "image/png",
+    "size": 2420
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=R5_DESIGN_CONFLICT_B&instance=0&imageType=D",
+   "status": 200,
+   "version": "4d8ba8181c305fa2183e84eaa6d8eec81f42f5d7d2886d46b3a7a569a80fffce",
+   "image": {
+    "state": "present",
+    "data": "3968 base64 characters",
+    "mimeType": "image/jpeg",
+    "size": 2974
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=R5_DESIGN_CONFLICT_A&instance=0&imageType=D",
+   "status": 200,
+   "version": "71a0ab4fff8e67f32b6844489d889e49c34d8b686c8d4b31a2f1839e4941989d",
+   "image": {
+    "state": "present",
+    "data": "3968 base64 characters",
+    "mimeType": "image/jpeg",
+    "size": 2974
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=R5_DESIGN_CONFLICT_A&instance=0&imageType=D",
+   "status": 200,
+   "version": "71a0ab4fff8e67f32b6844489d889e49c34d8b686c8d4b31a2f1839e4941989d",
+   "image": {
+    "state": "present",
+    "data": "3968 base64 characters",
+    "mimeType": "image/jpeg",
+    "size": 2974
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=R5_DESIGN_CONFLICT_A&instance=0&imageType=D",
+   "status": 200,
+   "version": "71a0ab4fff8e67f32b6844489d889e49c34d8b686c8d4b31a2f1839e4941989d",
+   "image": {
+    "state": "present",
+    "data": "3968 base64 characters",
+    "mimeType": "image/jpeg",
+    "size": 2974
+   },
+   "canUpdate": true,
+   "canDelete": true
+  },
+  {
+   "path": "/api/masters/design-book/image/state",
+   "query": "?coCode=01&lcCode=01&coYear=2024-2025&entityType=DESIGN&entityKey=R5_DESIGN_CONFLICT_A&instance=0&imageType=D",
+   "status": 200,
+   "version": "08fa0d6e4d71cec4a1b70edd39c7e85e0b03f97c72909caf78bbf9d4ff8cec50",
+   "image": {
+    "state": "present",
+    "data": "10808 base64 characters",
+    "mimeType": "image/jpeg",
+    "size": 8104
+   },
+   "canUpdate": true,
+   "canDelete": true
+  }
+ ],
+ "cameraDevice": "Chromium synthetic video; no physical camera acceptance",
+ "status": "failed",
+ "designBook": {
+  "checks": [
+   "browser create/reload",
+   "two components",
+   "style and text page number",
+   "unchanged edit",
+   "saved image upload/read/delete",
+   "changed component",
+   "stale edit409 retains form",
+   "browser deletion"
+  ]
+ },
+ "designCalculations": {
+  "checks": [
+   "new-book configured item defaults",
+   "ordered cell leaves",
+   "invalid numeric refresh retains draft with field validation and no page error",
+   "customer/karigar conversion and labour",
+   "component-only aggregate trigger",
+   "explicit parent refresh",
+   "whole-amount bankers rounding",
+   "transient margin and saved MRP",
+   "server replay save/reopen",
+   "unchanged snapshot without replay",
+   "zero-rate manual amount retention",
+   "IL P-basis 0.50/0.51 boundary",
+   "wide grids scroll inside their panels while heading and book controls stay visible",
+   "delete calculated design"
+  ]
+ },
+ "designRepeat": {
+  "checks": [
+   "configured parent and component repeat without calculation",
+   "hidden repeated cost and independent parent image identity",
+   "Gross Enter focuses the active parent last component",
+   "Net Amount Enter appends with stable noncontiguous IDs",
+   "Ctrl+D confirm/cancel and no deleted ID reuse",
+   "invalid Enter retains focus/draft and blocks child allocation",
+   "blank Item Enter returns to the invoking parent and discards only an untouched placeholder",
+   "parent focus updates component context without mutating saved data",
+   "complete unchanged save after focus preserves the saved snapshot",
+   "item Enter waits for scoped defaults before moving focus",
+   "Weight Enter uses prior zero weight and current scoped fixed amount",
+   "cleared rate persists as source Conversion.Val zero",
+   "real save/reopen/delete and no unhandled page errors",
+   "parent and component context/actions remain visible when their grids scroll"
+  ]
+ },
+ "genericImageConflict": {
+  "mockedResponses": 0,
+  "imageRequests": 17,
+  "browserMutationAttempts": 6,
+  "camera": {
+   "simulatedDevice": true,
+   "physicalDeviceAcceptance": false
+  },
+  "checks": [
+   "independent authenticated HTTP client changes the actual saved Design photo",
+   "stale browser upload receives409 and preserves newer bytes and revision",
+   "readable upload conflict offers Reload image without automatic resend",
+   "explicit retained-file Retry upload saves with the refreshed token",
+   "stale browser Delete receives409 without deleting newer photo",
+   "Reload followed by explicit Delete removes only the current image and advances its tombstone",
+   "switching saved parent discards conflicted pending bytes and preserves the other parent photo",
+   "changing the selected book hides the previous saved photo and its actions",
+   "all image requests preserve selected company/location/year and exact saved image identity",
+   "all parent/component values, noncontiguous identities and business versions remain unchanged",
+   "synthetic camera capture through actual video/canvas/HTTP/PostgreSQL; no physical-device acceptance"
+  ]
+ },
+ "repairImageConflict": {
+  "mockedResponses": 0,
+  "imageRequests": 13,
+  "checks": [
+   "actual saved Karigar Issue hydrates noncontiguous rows and original receipt year/book/serial",
+   "initial source-photo state and browser upload use the original saved receipt identity",
+   "independent authenticated client replacement causes stale browser upload409 without data loss",
+   "readable conflict reloads only; explicit retained-file Retry upload saves current version",
+   "stale confirmed Delete is refused; Reload then explicit confirmed Delete succeeds",
+   "sibling, other-year and current-stage photo bytes and versions remain unchanged",
+   "image operations preserve the complete saved issue DTO and all source references",
+   "Customer Receipt loads image with imported savedSR17 rather than visible row index1",
+   "Cancel during a real database-delayed receipt read prevents its late response restoring the voucher or photo",
+   "all production image requests preserve authenticated scope and explicit original image identity"
+  ]
+ },
+ "salesReturnSaved": {
+  "status": "passed",
+  "scope": {
+   "coCode": "01",
+   "lcCode": "01",
+   "coYear": "2024-2025",
+   "coBook": "R61"
+  },
+  "voucherNo": "00001",
+  "checks": [
+   "Configured SALES RETURNE books and fully scoped saved browse",
+   "Exact saved identities, source year/book/voucher, raw nulls/blanks/decimals/microseconds, known item fallback without false missing-master diagnostics, hidden hallmark/image values and two incoming children",
+   "HUID-only real PUT and authoritative reopen preserve complete database write-set and unchanged NULL description",
+   "Independent real HTTP edit causes409; readable conflict keeps browser draft and blocks automatic replay",
+   "Explicit discard/reload only reads; deliberate revised save preserves all other raw rows and values",
+   "Same voucher in another configured book stays isolated; historical admitted tag instance is visible with metadata writes explicitly denied",
+   "Real held database reads cannot revive cancelled or A\u2192B\u2192A obsolete observations",
+   "Every browser request carries exact scope; metadata bodies exclude numeric/source replacements; no page errors"
+  ],
+  "browserRequests": 15,
+  "mockedResponses": 0,
+  "desktopAcceptance": false
+ },
+ "tourOrder": {
+  "voucherNo": "00001",
+  "scope": {
+   "coCode": "01",
+   "lcCode": "01",
+   "coYear": "2024-2025",
+   "coBook": "Z09",
+   "acCode": "TOURAC",
+   "itemCode": "GOLD",
+   "componentCode": "STONE"
+  },
+  "requests": [
+   {
+    "method": "GET",
+    "pathname": "/api/tour-orders",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "GET",
+    "pathname": "/api/tour-orders",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "POST",
+    "pathname": "/api/tour-orders",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "GET",
+    "pathname": "/api/tour-orders",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "GET",
+    "pathname": "/api/tour-orders/00001",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "PUT",
+    "pathname": "/api/tour-orders/00001",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "GET",
+    "pathname": "/api/tour-orders",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "GET",
+    "pathname": "/api/tour-orders/00001",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "PUT",
+    "pathname": "/api/tour-orders/00001",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "GET",
+    "pathname": "/api/tour-orders",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "GET",
+    "pathname": "/api/tour-orders/00001",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "PUT",
+    "pathname": "/api/tour-orders/00001",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "GET",
+    "pathname": "/api/tour-orders",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "GET",
+    "pathname": "/api/tour-orders/00001",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "PUT",
+    "pathname": "/api/tour-orders/00001",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "GET",
+    "pathname": "/api/tour-orders",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "GET",
+    "pathname": "/api/tour-orders/00001",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "PUT",
+    "pathname": "/api/tour-orders/00001",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "GET",
+    "pathname": "/api/tour-orders",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "GET",
+    "pathname": "/api/tour-orders/00001",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "PUT",
+    "pathname": "/api/tour-orders/00001",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "GET",
+    "pathname": "/api/tour-orders/00001",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "DELETE",
+    "pathname": "/api/tour-orders/00001",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   },
+   {
+    "method": "GET",
+    "pathname": "/api/tour-orders",
+    "scope": {
+     "coCode": "01",
+     "lcCode": "01",
+     "coYear": "2024-2025",
+     "coBook": "Z09"
+    }
+   }
+  ],
+  "exactValues": {
+   "scope": {
+    "coCode": "01",
+    "lcCode": "01",
+    "coYear": "2024-2025",
+    "coBook": "E13"
+   },
+   "voucherNo": "00001",
+   "parentSerials": [
+    7,
+    19
+   ],
+   "childSerials": [
+    3,
+    13
+   ],
+   "protectedBeforeSha256": "418a7870057171c3534c0a370ca577f24f327bfef4b35fa8cb9e755f2987ccda",
+   "protectedAfterSha256": "418a7870057171c3534c0a370ca577f24f327bfef4b35fa8cb9e755f2987ccda",
+   "versions": [
+    "adca213f5eee908c6e036b049031a0ba36a7acdb60b00a93c9018b4e0f3275aa",
+    "e73b80a225bf367639ea31da9900958b2eb88f1b022f2b18563603b896cef091",
+    "528a48bfa034977c765b45cc245133d057a6b49f73085dddc2cf802bb2109d40"
+   ],
+   "beforeSha256": "79280d5adb9664ffa1c8ef77fba3d2732c6f7458aaa1008790e7644ebcdd810e",
+   "afterUnchangedSha256": "79280d5adb9664ffa1c8ef77fba3d2732c6f7458aaa1008790e7644ebcdd810e",
+   "beforeParentChildrenSha256": "baced987876cd0bf5018eb2d6e517d6ae326b4ef834a07d545a8cf3a99f02d60",
+   "afterAdvanceParentChildrenSha256": "baced987876cd0bf5018eb2d6e517d6ae326b4ef834a07d545a8cf3a99f02d60",
+   "changedAdvance": [
+    "25",
+    "40"
+   ]
+  },
+  "checks": [
+   "configured book",
+   "real offline configuration failure blocks editing and save",
+   "real delayed configuration retry blocks editing and save until ready",
+   "POST preserves rate-before-ghat journal and amount117",
+   "browser create/reopen",
+   "two component rows",
+   "legacy flattened update400 preserves children",
+   "unchanged edit",
+   "changed child",
+   "whole-rupee pieces and percentage labour",
+   "manual paise unchanged edit",
+   "rate-before-ghat ordered commits",
+   "voucher time preservation",
+   "stale edit409 retains form",
+   "scoped print",
+   "browser deletion",
+   "exact saved Tour scalars survive API JSON, browser unchanged/advance-only saves and SQL readback"
+  ]
+ },
+ "creditNote": {
+  "checks": [
+   "scoped browse",
+   "persisted item and two components",
+   "saved registration state",
+   "same number in another credit book",
+   "scope change and failed lookup clear prior document"
+  ],
+  "boundary": "Read/browse imported fixture only; no create/edit/delete or live provider acceptance"
+ },
+ "creditNoteEntry": {
+  "checks": [
+   "create through the entry form without fixture SL_DATA",
+   "live totals match the posted voucher",
+   "balanced AC_DATA, stock-in MAIN_STOCK and negative TAX_DATA",
+   "print original copy caption",
+   "edit recalculates and reposts",
+   "fresh-page browse reopen hydrates the entry form",
+   "delete removes the write set and writes DELETE_DATA"
+  ],
+  "boundary": "Engineering evidence on a synthetic fixture; not an independent desktop comparison, live GSP or physical print acceptance"
+ },
+ "eInvoiceEntry": {
+  "checks": [
+   "create an outward e-invoice through the entry form",
+   "live TDS and Bill OS match the posted voucher",
+   "balanced AC_DATA with the TDS pair and stock-out MAIN_STOCK",
+   "IRN generation locks edit and delete",
+   "IRN cancel unlocks the voucher",
+   "fresh-page browse reopen hydrates TDS",
+   "delete removes the write set"
+  ],
+  "boundary": "Engineering evidence on a synthetic fixture with the fake-development IRN transport; not a live GSP, independent desktop or physical print acceptance"
+ },
+ "cashReceiptPayment": {
+  "checks": [
+   "cash receipt saved in the only CASH REC book, on the operator date, with a slot-2 kasar write-off",
+   "four balanced receipt legs 01-04 read back from AC_DATA",
+   "receipt voucher print opens for the saved book",
+   "bank mode and ?mode=BANK offer only the BANK REC book",
+   "cash payment saved in the CASH PAY book",
+   "contra saved in the CONTRA book"
+  ],
+  "boundary": "Engineering evidence on a synthetic fixture; not an independent desktop comparison or business acceptance"
+ },
+ "saleAmountBasis": {
+  "checks": [
+   "blank SL_AMT_TYPE prices a line on net + ghat (60,000) in the preview and the saved SL_DETL",
+   "a line RtWith of F prices fine (54,960) in the preview and the saved SL_DETL",
+   "SL_DETL.RATE_WITH stores the effective N / F",
+   "only SALES books are offered, and the only one is selected",
+   "balanced AC_DATA with 114,960 of sales income"
+  ],
+  "boundary": "Engineering evidence on a synthetic fixture; not an independent desktop comparison or business acceptance"
+ },
+ "wholesaleRateCut": {
+  "checks": [
+   "wholesale page offers only the WH SALES book and the rate-cut page only the RATE CUT book",
+   "party pick fills name and mobile; picked and typed tags fill weights, stored fine and labour",
+   "preview figures (fine, labour, derived Ac Amt Dr, band net/Os, tot fine, diff) equal the stored header",
+   "RATE_CUT_ISU, MAIN_STOCK SR_NO 1/2 and the ten Wh_Sales_Ledr legs read back from the database",
+   "edit dropping a tag returns it to stock and keeps DR_AMT and MAIN_USER",
+   "reopen by voucher number restores the form from the stored rows",
+   "delete removes every row, writes DELETE_DATA with the signed-in user and releases both tags",
+   "header-only rate cut derives Ac Amt Cr and posts legs 08/09, 45/46, 51/52 in the Payment column"
+  ],
+  "boundary": "Engineering evidence on a synthetic fixture; not an independent desktop comparison or business acceptance"
+ },
+ "tagCancelTransfer": {
+  "checks": [
+   "each page offers only its own in-use book (TAG CANCEL / TAG TRFR) and the next voucher number",
+   "a picked tag fills its row, stone and photograph; ItCode, Counter, Pcs and KrCode are read-only on it",
+   "a typed tag resolves on leaving the cell; Duplicate Tag No, a sold tag and an ambiguous number are refused",
+   "the live instance picked by its serial is the one saved; the other instance stays in stock",
+   "a loose line recomputes net and fine on leaving each cell; the totals row equals the stored lines",
+   "register header, lines, stones, TEMP_BOOK_DATA, MAIN_STOCK and DM_DATA read back with the desktop values",
+   "an edit with Ctrl+D, a stone change and a touch change keeps the hidden number, clock, user and OLD_SRNO",
+   "reopen by number and the voucher list restore the saved voucher",
+   "delete writes DELETE_DATA per line, removes the write set and gives every tag back",
+   "a transfer recomputes the hidden labour, copies the transfer item to the next row, moves the metal to the loose item and conserves the fine",
+   "the source tags, their stones and their photograph never change"
+  ],
+  "boundary": "Engineering evidence on a synthetic fixture; not an independent desktop comparison or business acceptance"
+ },
+ "error": "The input did not match the regular expression /^RH0*9\\d{3}$/. Input:\n\n'RH000001'\n",
+ "failedFixtureImages": [
+  {
+   "ENTITY_TYPE": "TAG",
+   "ENTITY_KEY": "RH000001",
+   "INSTANCE": 1,
+   "IMAGE_TYPE": "T",
+   "MIME_TYPE": "image/jpeg",
+   "IMAGE_SIZE": 2974,
+   "storedSize": 2974,
+   "fixtureBytes": "<omitted: 4020 base64 characters of a synthetic fixture image>"
+  },
+  {
+   "ENTITY_TYPE": "TAG",
+   "ENTITY_KEY": "RH000002",
+   "INSTANCE": 2,
+   "IMAGE_TYPE": "T",
+   "MIME_TYPE": "image/jpeg",
+   "IMAGE_SIZE": 2974,
+   "storedSize": 2974,
+   "fixtureBytes": "<omitted: 4020 base64 characters of a synthetic fixture image>"
+  }
+ ],
+ "finishedAt": "2026-10-01T06:49:27.935Z"
+}

@@ -1,0 +1,82 @@
+Release gate set (19 gates)
+Requirement set SHA-256: 76c356fa060b7b35964ff171af1d488bef51a5b9330340e807899119b956fbd9
+
+  lint
+      Workspace lint and typecheck
+      because: a release cannot ship code that does not typecheck
+      command: pnpm lint
+  test
+      Full test suite
+      because: the posting, RLS and authorization behaviour is asserted here
+      command: pnpm test
+  build
+      Production build
+      because: the artefacts being certified must be the ones that build
+      command: pnpm build
+  real-browser
+      Real production-stack browser journeys
+      because: X33/X34 require every registered real browser journey against production Next, Fastify and PostgreSQL with no mocked requests
+      command: API_ORIGIN=http://127.0.0.1:4410 pnpm --filter @datacare/web build && pnpm test:parity:browser
+      evidence: web/test-results/parity-real-stack/result.json
+  format
+      Formatting
+      because: keeps the certified tree identical to the reviewed tree
+      command: pnpm format:check
+  completion-register
+      Completion register, strict and release-grade
+      because: P0-07 names `register:check --strict`; on its own that only proves every entry is CLASSIFIED, and plan §14 says implemented-unverified is not done, so a release also needs --release
+      command: node scripts/check-completion-register.mjs --strict --release
+  contract-integrity
+      Behaviour contracts are checkable and honestly cited
+      because: contracts are the source of truth above the code (plan §2), and P1-07 records 8 drafts with 30 unenforced validations; nothing previously stopped a draft being flipped to approved with every cell blank
+      command: node scripts/check-contracts.mjs
+  kernel-conformance
+      Posting families use the shared compatibility kernel
+      because: WP-06 requires no module-local posting fallback; 108 local rounding helpers and 5 inline BOOK_DETL reads bypass primitives that already exist, and the local helpers round negative midpoints the wrong way
+      command: node scripts/check-kernel-conformance.mjs
+  schema-readiness
+      Desktop-declared schema present, against a live database
+      because: P0-07 requires this with a live DB, and the script exits 0 with SCHEMA_READINESS_SKIP without one
+      command: pnpm schema:readiness
+  type-parity
+      Complete numeric/text column-domain parity from a real SQL Server dump
+      because: P0-07 requires all 5,231 desktop-declared columns from real input, plus zero unsupported numeric and text domains; the ordinary script mode may skip missing input or compare an empty baseline
+      command: node scripts/check-type-parity.mjs --release
+  fresh-provision
+      Fresh provision is tenant-isolated
+      because: a late-added table without forced RLS has shipped before (message_attempt_log)
+      command: pnpm fresh:provision
+  settings-parity
+      Configuration coverage
+      because: settings reachability is a release claim
+      command: pnpm settings:parity
+  report-baselines
+      Report layouts unchanged
+      because: proves the web did not change relative to itself; never invoked with --write
+      command: node scripts/report-baselines.mjs
+  g5-desktop-comparison
+      Desktop-versus-web voucher comparison
+      because: the controlling parity evidence must include every retained baseline case exactly once; today its 70-case result is matched:false
+      command: pnpm g5:parity
+      evidence: project-memory/parity/g5/parity-diff-latest.json
+  report-comparison
+      Desktop-versus-web report data comparison
+      because: P0-07/X34 require every frozen report/mode id exactly once; a non-empty all-pass subset cannot certify the product
+      evidence: project-memory/parity/reports/report-comparison-latest.json
+  restore-drill
+      Backup/restore drill
+      because: P0-07 requires it; it is not invoked by CI today
+      command: pnpm restore-drill
+      evidence: project-memory/parity/restore-drill-result.json
+  parity-ratchet
+      Measured parity numbers did not worsen
+      because: parity is closed incrementally, and a gate that only reports "not yet" cannot detect either progress or regression
+      command: pnpm parity:measure --reuse
+      evidence: project-memory/parity/PARITY-RATCHET.json
+  operator-depth
+      Operator-reachable field depth did not worsen
+      because: DB column coverage and settings exposure can both read complete while two thirds of the desktop fields are unreachable from any screen
+      command: node scripts/check-depth.mjs
+  candidate-identity-postflight
+      Candidate identity unchanged after all release gates
+      because: X34 requires the reviewed commit, lockfile, schema and tracked web-template bundles to remain exact after every potentially mutating build and verification command

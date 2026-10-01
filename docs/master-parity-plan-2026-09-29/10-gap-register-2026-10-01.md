@@ -1,5 +1,7 @@
 # Gap register and plan amendment — 1 October 2026
 
+> **Continued in [document 11](11-audit-implementation-plan-2026-10-01.md):** the full-stack audit of the same day adds gaps G20–G66 and slices N47–N82, and corrects the status of N32, N34, N36, N38–N43 and N45. Current slice status lives in `execution-backlog.json`; the rows below are kept as the historical register.
+
 This amendment records the defects and missing behaviour found by the static desktop-versus-web audit of
 1 October 2026 and folds them into the master plan as ordered slices **N31–N46**. It supplements documents
 01–09; it does not close, narrow or replace any original package (P00–P14), continuation card (X01–X34) or

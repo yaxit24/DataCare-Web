@@ -1,0 +1,1365 @@
+ Network datacare-parity-test_default Creating 
+ Network datacare-parity-test_default Created 
+ Container datacare-parity-test-postgres-1 Creating 
+ Container datacare-parity-test-postgres-1 Created 
+ Container datacare-parity-test-postgres-1 Starting 
+ Container datacare-parity-test-postgres-1 Started 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+30 migrations found in prisma/migrations
+
+Applying migration `20260929010000_tag_transfer_book`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260929010000_tag_transfer_book/
+    └─ migration.sql
+      
+All migrations have been successfully applied.
+BEGIN
+DO
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+> datacare-web-saas@0.0.0 test <repo>/web
+> turbo run test
+
+• turbo 2.10.0
+
+   • Packages in scope: @datacare/api, @datacare/core, @datacare/db, @datacare/parity, @datacare/reports, @datacare/types, @datacare/web
+   • Running test in 7 packages
+   • Remote caching disabled
+
+@datacare/core:test: cache miss, executing 74be06c26338fd37
+@datacare/db:test: cache miss, executing 02ff5cb8c959eae9
+@datacare/types:test: cache hit, replaying logs 80b145e842d1ec9f
+@datacare/parity:test: cache hit, replaying logs fecb675e2789aadf
+@datacare/reports:test: cache hit, replaying logs 92caceb17426357f
+@datacare/reports:test: 
+@datacare/reports:test: > @datacare/reports@0.0.0 test <repo>/web/packages/reports
+@datacare/reports:test: > vitest run --passWithNoTests
+@datacare/parity:test: 
+@datacare/parity:test: > @datacare/parity@0.0.0 test <repo>/web/packages/parity
+@datacare/parity:test: > vitest run
+@datacare/parity:test: 
+@datacare/parity:test: 
+@datacare/parity:test:  RUN  v2.1.9 <repo>/web/packages/parity
+@datacare/parity:test: 
+@datacare/parity:test:  ✓ test/diff.test.ts (6 tests) 302ms
+@datacare/parity:test: 
+@datacare/types:test: 
+@datacare/reports:test: 
+@datacare/types:test: > @datacare/types@0.0.0 test <repo>/web/packages/types
+@datacare/types:test: > vitest run
+@datacare/types:test: 
+@datacare/types:test: 
+@datacare/types:test:  RUN  v2.1.9 <repo>/web/packages/types
+@datacare/types:test: 
+@datacare/types:test:  ✓ test/scope.test.ts (3 tests) 79ms
+@datacare/types:test: 
+@datacare/types:test:  Test Files  1 passed (1)
+@datacare/types:test:       Tests  3 passed (3)
+@datacare/types:test:    Start at  19:21:20
+@datacare/types:test:    Duration  20.67s (transform 2.60s, setup 0ms, collect 6.16s, tests 79ms, environment 37ms, prepare 2.61s)
+@datacare/types:test: 
+@datacare/parity:test:  Test Files  1 passed (1)
+@datacare/parity:test:       Tests  6 passed (6)
+@datacare/parity:test:    Start at  19:21:20
+@datacare/parity:test:    Duration  19.59s (transform 4.73s, setup 0ms, collect 5.71s, tests 302ms, environment 0ms, prepare 1.64s)
+@datacare/parity:test: 
+@datacare/reports:test: 
+@datacare/reports:test:  RUN  v2.1.9 <repo>/web/packages/reports
+@datacare/reports:test: 
+@datacare/reports:test: No test files found, exiting with code 0
+@datacare/reports:test: 
+@datacare/reports:test: include: **/*.{test,spec}.?(c|m)[jt]s?(x)
+@datacare/reports:test: exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,output,temp}/**, **/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*
+@datacare/db:build: cache hit, replaying logs 23a0c5255ce47c08
+@datacare/types:build: cache hit, replaying logs e4fdc400d95edad1
+@datacare/db:build: 
+@datacare/db:build: > @datacare/db@0.0.0 build <repo>/web/packages/db
+@datacare/db:build: > tsc -p tsconfig.json
+@datacare/db:build: 
+@datacare/types:build: 
+@datacare/types:build: > @datacare/types@0.0.0 build <repo>/web/packages/types
+@datacare/types:build: > tsc -p tsconfig.json
+@datacare/types:build: 
+@datacare/core:build: cache hit, replaying logs a556f8c34f6660e2
+@datacare/core:build: 
+@datacare/core:build: > @datacare/core@0.0.0 build <repo>/web/packages/core
+@datacare/core:build: > tsc -p tsconfig.json
+@datacare/core:build: 
+@datacare/web:test: cache miss, executing c8b28f47145d5c27
+@datacare/api:test: cache miss, executing c310c6962af2e8a5
+@datacare/db:test: 
+@datacare/db:test: > @datacare/db@0.0.0 test <repo>/web/packages/db
+@datacare/db:test: > vitest run --passWithNoTests
+@datacare/db:test: 
+@datacare/core:test: 
+@datacare/core:test: > @datacare/core@0.0.0 test <repo>/web/packages/core
+@datacare/core:test: > vitest run
+@datacare/core:test: 
+@datacare/web:test: 
+@datacare/web:test: > @datacare/web@0.0.0 test <repo>/web/apps/web
+@datacare/web:test: > node test/run-unit-tests.mjs
+@datacare/web:test: 
+@datacare/api:test: 
+@datacare/api:test: > @datacare/api@0.0.0 test <repo>/web/apps/api
+@datacare/api:test: > vitest run
+@datacare/api:test: 
+@datacare/web:test: 
+@datacare/web:test:  RUN  v2.1.8 <repo>/web/apps/web
+@datacare/web:test: 
+@datacare/api:test: 
+@datacare/api:test:  RUN  v2.1.9 <repo>/web/apps/api
+@datacare/api:test: 
+@datacare/core:test: 
+@datacare/core:test:  RUN  v2.1.9 <repo>/web/packages/core
+@datacare/core:test: 
+@datacare/db:test: 
+@datacare/db:test:  RUN  v2.1.9 <repo>/web/packages/db
+@datacare/db:test: 
+@datacare/api:test: [vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+@datacare/db:test:  ✓ test/scope.test.ts (3 tests) 16ms
+@datacare/db:test: 
+@datacare/db:test:  Test Files  1 passed (1)
+@datacare/db:test:       Tests  3 passed (3)
+@datacare/db:test:    Start at  04:36:14
+@datacare/db:test:    Duration  4.45s (transform 226ms, setup 0ms, collect 240ms, tests 16ms, environment 1ms, prepare 600ms)
+@datacare/db:test: 
+@datacare/web:test:  ✓ test/salesReturnForm.test.ts (31 tests) 56ms
+@datacare/web:test:  ✓ test/salesReturnReplay.test.ts (32 tests) 75ms
+@datacare/core:test:  ✓ test/saleReturnIncoming.review.test.ts (33 tests) 93ms
+@datacare/core:test:  ✓ test/saleReturnIncoming.test.ts (72 tests) 480ms
+@datacare/web:test:  ✓ test/salesReturnBillReplay.test.ts (67 tests) 756ms
+@datacare/core:test:  ✓ test/saleReturnIncomingLabour.test.ts (73 tests) 715ms
+@datacare/web:test:  ✓ test/apiContext.test.ts (20 tests) 1976ms
+@datacare/web:test:    ✓ page-pinned API transport (controlled fetch; no real HTTP/browser acceptance) > A19 bootstrap retries only once if context changes again during its retry 312ms
+@datacare/web:test:    ✓ page-pinned API transport (controlled fetch; no real HTTP/browser acceptance) > pins the additive bootstrap-only qualification without changing original vectors 408ms
+@datacare/core:test:  ✓ test/saleReturnIncomingAggregate.test.ts (62 tests) 1959ms
+@datacare/core:test:    ✓ recoverable profile and structural containment > rejects a valid36-digit integer plus cents result that no later consumer can represent 424ms
+@datacare/core:test:  ✓ test/saleReturnIncomingLabourCompose.test.ts (53 tests) 5094ms
+@datacare/core:test:    ✓ atomic incoming Return resolved labour composition > L03: Tag20% gives rate2 and tag labour20, but incoming total stays110. 363ms
+@datacare/core:test:    ✓ atomic incoming Return resolved labour composition > L05: Copied fixed labour5 is overwritten to0 because cleared rate0 differs retained cache1. 401ms
+@datacare/core:test:    ✓ atomic incoming Return resolved labour composition > L08: Category05 sets ghat10%; loss1 precedes default net+loss metal110; unchanged fine caches leave fine10. 317ms
+@datacare/core:test:    ✓ atomic incoming Return resolved labour composition > L10: Explicit synthetic outgoing200 gives received80; inactive payment cells clear after calculations. 300ms
+@datacare/core:test:    ✓ atomic incoming Return resolved labour composition > L12: Select opaque SR42 row despite ordinal2; row17 unchanged. Labour14 total134 bill13.40 total147. 319ms
+@datacare/core:test:    ✓ atomic incoming Return resolved labour composition > custom command prototype retains the complete valid original state 445ms
+@datacare/web:test:  ✓ test/salesReturnLabourReplay.test.ts (65 tests) 5956ms
+@datacare/web:test:    ✓ separate labour preview protocol, without client arithmetic > contains mismatched GET epoch 320ms
+@datacare/web:test:    ✓ separate labour preview protocol, without client arithmetic > rejects non-JSON cycle before reading embedded fields 763ms
+@datacare/web:test:    ✓ separate labour preview protocol, without client arithmetic > refuses unsupported exact code "BB " while retaining input 388ms
+@datacare/web:test:    ✓ separate labour preview protocol, without client arithmetic > rejects lookup company mismatch without candidate acceptance 368ms
+@datacare/web:test:    ✓ separate labour preview protocol, without client arithmetic > refuses append mutate-history with the accepted prefix unchanged 517ms
+@datacare/web:test:    ✓ separate labour preview protocol, without client arithmetic > 100 accepted events forbid further observation/append and overlong money never truncates 324ms
+@datacare/web:test:  ✓ test/imageEditorSession.test.ts (20 tests) 559ms
+@datacare/core:test:  ✓ test/saleReturnBillProjection.test.ts (84 tests) 869ms
+@datacare/core:test:  ✓ test/saleReturnIncomingProjection.test.ts (53 tests) 1121ms
+@datacare/core:test:  ✓ test/tagCancelLine.test.ts (23 tests) 75ms
+@datacare/core:test:  ✓ test/wholesaleLine.test.ts (19 tests) 625ms
+@datacare/core:test:  ✓ test/saleReturnIncomingSaveProjection.test.ts (63 tests) 4044ms
+@datacare/core:test:    ✓ incoming save map independent full-field fixtures > S16: Unowned numeric side effect requires expanded ownership 402ms
+@datacare/core:test:    ✓ mapping ownership and preserved observations > retains the complete original raw on a later unowned-value refusal; publishes no earlier owned patch 308ms
+@datacare/web:test:  ✓ test/contextSelection.test.ts (53 tests) 17253ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > refuses epoch CR without coercing or normalizing the pending request 396ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > refuses UUID version1 without coercing or normalizing the pending request 492ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > refuses NULL year without coercing or normalizing the pending request 492ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > refuses padded company without coercing or normalizing the pending request 435ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > contains non-data envelopes without invoking getters or accepting inherited/symbol keys 377ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > creates one stable UUID/body and persists it before any selection fetch 597ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > a storage write failure prevents dispatch in the required save-then-submit sequence 503ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > a successful selection invalidates pending ordinary responses and retains the old descriptor until navigation 580ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > confirmed receipt recovery leaves the freshly bootstrapped current page ready 410ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > late success after route departure guards the document but preserves the original recovery operation 458ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > submit refuses absent persisted recovery before any dispatch 657ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > submit refuses different-body persisted recovery before any dispatch 655ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > save refuses to replace another pending operation until an explicit matching clear 913ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > full reload preserves the original UUID/body/epoch and recovery uses fresh page headers, not a refresh bypass 672ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > refuses replaced epoch E+2 locally while retaining pending recovery bytes 635ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > unconfirmed response unexpected replay on E cannot clear or rewrite the pending operation 396ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > unconfirmed response wrong SID cannot clear or rewrite the pending operation 568ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > unconfirmed response replaced epoch cannot clear or rewrite the pending operation 347ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > unconfirmed response NULL year cannot clear or rewrite the pending operation 301ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > current E+1 recovery refuses a non-replayed response even if all context fields match 484ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > an obsolete response cannot clear pending storage or poison a newer page 875ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > completion clears only its own operation ID and preserves a newer stored request 555ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > a failed storage clear after confirmed response retains the operation for explicit recovery 1496ms
+@datacare/web:test:    ✓ pending company selection recovery (controlled storage/fetch; no real browser or server proof) > read removes malformed or foreign-SID recovery records while completion leaves unrelated invalid data untouched 472ms
+@datacare/web:test:  ✓ test/wholesaleVoucher.test.ts (18 tests) 772ms
+@datacare/web:test:    ✓ payload: what the screen sends is what it shows > drops the stored fine once weight or purity is edited, so the formula decides 445ms
+@datacare/web:test:  ✓ test/tagCancelVoucher.test.ts (20 tests) 975ms
+@datacare/web:test:    ✓ cell events (MSG_LeaveCell → CommPassTotal) > upper-cases typed text and drops the apostrophe 421ms
+@datacare/web:test:  ✓ test/scaleCaptureContext.test.ts (9 tests) 9740ms
+@datacare/web:test:    ✓ actual ScaleCapture async code with controlled hooks and WebSerial doubles > loads settings through guarded API and preserves exact primary/frame behavior 1320ms
+@datacare/web:test:    ✓ actual ScaleCapture async code with controlled hooks and WebSerial doubles > keeps the configured fallback options after a primary open failure 611ms
+@datacare/web:test:    ✓ actual ScaleCapture async code with controlled hooks and WebSerial doubles > page mismatch during open closes that port without acquiring a reader 1095ms
+@datacare/web:test:    ✓ actual ScaleCapture async code with controlled hooks and WebSerial doubles > page mismatch during a pending read cancels and rejects a late frame 958ms
+@datacare/web:test:    ✓ actual ScaleCapture async code with controlled hooks and WebSerial doubles > unmount invalidates a pending chooser even when the page context itself is unchanged 1430ms
+@datacare/web:test:    ✓ actual ScaleCapture async code with controlled hooks and WebSerial doubles > disconnect invalidates a pending frame and closes its own reader/port 1039ms
+@datacare/web:test:    ✓ actual ScaleCapture async code with controlled hooks and WebSerial doubles > current callback ownership preserves the newly focused row, not the Connect-time callback 1846ms
+@datacare/web:test:    ✓ actual ScaleCapture async code with controlled hooks and WebSerial doubles > obsolete settings refuse reconnect before another chooser is shown 1252ms
+@datacare/web:test:  ✓ test/salesOrderForm.test.ts (15 tests) 2090ms
+@datacare/web:test:    ✓ Sales Order complete editor lifecycle values > keeps saved zero/null/text precision, wall clock and noncontiguous children unchanged 392ms
+@datacare/web:test:    ✓ Sales Order labour and Design selection chronology > retains calculated totals across F1 until the next actual numeric blur 415ms
+@datacare/web:test:  ✓ test/designBookRepeat.test.ts (12 tests) 2427ms
+@datacare/web:test:    ✓ Design repeat draft and identity contract > creates a separate parent with configured raw values, new IDs and no copied child/image/saved snapshot 1044ms
+@datacare/web:test:    ✓ Design repeat draft and identity contract > retains imported snapshots on focus/unchanged blur but treats explicit Enter as a source calculation trigger 504ms
+@datacare/core:test:  ✓ test/designCalc.test.ts (36 tests) 1339ms
+@datacare/core:test:    ✓ Design Book source-defined ordered calculation vectors > retains manual amount/labour/net and parent amounts when zero guards fail, while conversion clears 627ms
+@datacare/core:test:  ✓ test/saleReturnBillTaxPolicy.test.ts (89 tests) 1523ms
+@datacare/core:test:    ✓ source company-open Sales Return bill tax precision > contains unresolved negative -1 after the valid N flag path 555ms
+@datacare/core:test:  ✓ test/sessionLedgerMode.test.ts (104 tests) 37126ms
+@datacare/core:test:    ✓ ledger-mode plain-data envelope containment > refuses an accepted-input boundary whose appended proof would exceed reread limits 36243ms
+@datacare/core:test:  ✓ test/saleReturnNBarCompanions.test.ts (61 tests) 5548ms
+@datacare/core:test:    ✓ complete independent BAR companion source literals > B01: Full82-target unchanged Option A N companion 1035ms
+@datacare/core:test:    ✓ complete independent BAR companion source literals > B04: Other-121 drops only parent:1+10-11=0 345ms
+@datacare/core:test:    ✓ complete independent BAR companion source literals > B14: Header uses rounded aggregatePCS1 not rowPCS1.4 465ms
+@datacare/core:test:    ✓ complete independent BAR companion source literals > B15: Nonzero aggregate MRP independently keeps header included 353ms
+@datacare/core:test:    ✓ independent phase inspectability and strict input boundary > refuses unsupported Val text "12x" 708ms
+@datacare/core:test:  ✓ test/savedSaleReturnClock.test.ts (159 tests) 4083ms
+@datacare/core:test:    ✓ saved Return clock independent canonical JSONB profile > 'R13': 'One fractional digit discarded' 401ms
+@datacare/core:test:    ✓ saved Return clock independent canonical JSONB profile > 'T22': 'Lowercase separator refused' 797ms
+@datacare/core:test:    ✓ saved Return clock independent canonical JSONB profile > 'T40': 'Infinite timestamp refused' 312ms
+@datacare/core:test:  ✓ test/saleReturnSaveGuards.test.ts (123 tests) 4186ms
+@datacare/core:test:    ✓ source-derived immutable guard outcomes > 'G02' 'Opening boundary inclusive.' 535ms
+@datacare/core:test:    ✓ source-derived immutable guard outcomes > 'G28' 'Opposite cheque amounts cancel source…' 914ms
+@datacare/web:test:  ✓ test/tourOrderExactValues.test.ts (19 tests) 932ms
+@datacare/web:test:    ✓ saved Tour exact input-shaped values > shows exact huge scalars, blank NULL cells, true zeros and leading-zero codes without load events 452ms
+@datacare/web:test:  ✓ test/formKeys.test.ts (7 tests) 139ms
+@datacare/web:test:  ✓ test/lineRecalc.test.ts (14 tests) 121ms
+@datacare/web:test:  ✓ test/tourOrderForm.test.ts (8 tests) 2029ms
+@datacare/web:test:    ✓ Tour Order editor values and scope > preserves textual identifiers, full precision, explicit zeroes, dates, images, advance and all children 1816ms
+@datacare/web:test:  ✓ test/columnSettings.test.ts (27 tests) 1348ms
+@datacare/web:test:    ✓ column settings client observation and identity > accepts exact saved NULLs and creates a minimal patch bound to original family/name/version 675ms
+@datacare/web:test:  ✓ test/tagSplitVoucher.test.ts (10 tests) 2686ms
+@datacare/web:test:    ✓ parent fill > fills a parent verbatim from the tag and carries its stones 409ms
+@datacare/web:test:    ✓ child rows (CommPassTotal_Pr) > recomputes net and fine on leaving the gross weight 554ms
+@datacare/web:test:    ✓ child rows (CommPassTotal_Pr) > totals the children and reports conservation against the parent 1109ms
+@datacare/web:test:  ✓ test/directFetchContext.test.ts (8 tests) 6014ms
+@datacare/web:test:    ✓ guarded direct server reads (fetch doubles only) > keeps exact backup bytes and sends both captured context headers 1624ms
+@datacare/web:test:    ✓ guarded direct server reads (fetch doubles only) > rejects a late blob before the caller can download it 888ms
+@datacare/web:test:    ✓ guarded direct server reads (fetch doubles only) > does not turn a401 error body into a backup or automatically retry 796ms
+@datacare/web:test:    ✓ guarded direct server reads (fetch doubles only) > 409 context-stale blocks later binary requests without a second dispatch 1825ms
+@datacare/web:test:    ✓ guarded direct server reads (fetch doubles only) > exports exact tickets that remain invalid through an explicit A→A page reset 454ms
+@datacare/web:test:    ✓ guarded direct server reads (fetch doubles only) > data refresh uses the same guarded post and cannot publish a late old-company result 318ms
+@datacare/core:test:  ✓ test/designRepeat.test.ts (11 tests) 3383ms
+@datacare/core:test:    ✓ MS_DESIGN_BOOK repeat and keyboard source contract > matches COL_NEW_NAME after renaming and refuses conflicting alias flags 1211ms
+@datacare/core:test:    ✓ MS_DESIGN_BOOK repeat and keyboard source contract > copies only the preceding component within its parent, preserving noncontiguous child identities 900ms
+@datacare/core:test:    ✓ MS_DESIGN_BOOK repeat and keyboard source contract > discards only untouched temporary empty child rows, without recalculating the retained parent 391ms
+@datacare/core:test:  ✓ test/settlement.test.ts (20 tests) 3029ms
+@datacare/core:test:    ✓ settlement rate basis > GV-SETTLE-BASIS-001: maps MsRatePar to its factor 623ms
+@datacare/core:test:    ✓ settlement rate derivation > GV-SETTLE-RATE-001: explicit conversion rate and percentage 1721ms
+@datacare/web:test:  ✓ test/pageContextSelectionPause.test.ts (7 tests) 1218ms
+@datacare/web:test:    ✓ explicit uncertain-selection page pause > is idempotent and cannot be cleared by a descriptor or an exact receipt without navigation 410ms
+@datacare/web:test:    ✓ selection pause across actual API control flow (fetch doubles) > rejects a pending JSON response and refuses the next business dispatch 427ms
+@datacare/core:test:  ✓ test/saleReturnEffectContext.test.ts (89 tests) 9927ms
+@datacare/core:test:    ✓ source-authored finite effect context > pins the literal fixture frozen before implementation 739ms
+@datacare/core:test:    ✓ source-authored finite effect context > 'C01' 'Finite source SR1: SQL STR defaults t…' 522ms
+@datacare/core:test:    ✓ source-authored finite effect context > 'C05' 'Last whole second; no next-day roundi…' 416ms
+@datacare/core:test:    ✓ source-authored finite effect context > 'S01' 'Finite SR1 profile refuses without Nu…' 603ms
+@datacare/core:test:    ✓ source-authored finite effect context > 'S11' 'Finite SR1 profile refuses without Nu…' 2306ms
+@datacare/core:test:    ✓ source-authored finite effect context > 'S12' 'Finite SR1 profile refuses without Nu…' 307ms
+@datacare/core:test:    ✓ source-authored finite effect context > 'S15' 'Finite SR1 profile refuses without Nu…' 689ms
+@datacare/core:test:    ✓ source-authored finite effect context > 'S16' 'Absent serial remains absent; no defa…' 316ms
+@datacare/core:test:    ✓ source-authored finite effect context > 'D01' 'Exact canonical PG clock and source s…' 329ms
+@datacare/web:test:  ✓ test/pageContext.test.ts (37 tests) 1339ms
+@datacare/core:test:  ✓ test/tagSplitLine.test.ts (13 tests) 815ms
+@datacare/core:test:    ✓ tagSplitBalance (BILL_TOTAL) and conservation > conserves within tolerance 373ms
+@datacare/core:test:  ✓ test/saleReturnSaveComposition.test.ts (7 tests) 9452ms
+@datacare/core:test:    ✓ one supplied saved Return fixture across the separate pure Save prerequisites > hydrates and replays Other1, matches N companions and all221 financial fields, and satisfies the supplied fine10 guard facts 2386ms
+@datacare/web:test:  ✓ test/parityContainment.test.ts (7 tests) 1385ms
+@datacare/core:test:    ✓ one supplied saved Return fixture across the separate pure Save prerequisites > keeps row110.49 separate from whole-unit header110 across accounting, stock, Rojmel and tax 1602ms
+@datacare/web:test:    ✓ WP-01 operator containment > renders an accessible notice with reason, safe alternative, and exit gate 908ms
+@datacare/web:test:    ✓ WP-01 operator containment > labels logical JSON backup as non-DR and restore as contained 304ms
+@datacare/core:test:    ✓ one supplied saved Return fixture across the separate pure Save prerequisites > retains every event while empty, same-value and round-trip journals leave all nine numeric target rows unchanged 2844ms
+@datacare/core:test:    ✓ one supplied saved Return fixture across the separate pure Save prerequisites > preserves the exact ordered c27 journal kind/row/column/text sequence across a multi-event replay 696ms
+@datacare/core:test:    ✓ one supplied saved Return fixture across the separate pure Save prerequisites > does not treat ready financial projections as proof of a mismatched BAR companion 1101ms
+@datacare/core:test:    ✓ one supplied saved Return fixture across the separate pure Save prerequisites > keeps unresolved edition authority visible even when calculations and effect projections qualify 515ms
+@datacare/web:test:  ✓ test/salesReturnLabourReplay.wire.test.ts (10 tests) 2344ms
+@datacare/web:test:    ✓ real saved metadata and labour-state wire scope compatibility > accepts the four-field response against saved metadata carrying tenantId without mutation 1028ms
+@datacare/web:test:    ✓ real saved metadata and labour-state wire scope compatibility > retains compatibility with the already supported four-field saved scope 350ms
+@datacare/core:test:  ✓ test/saleReturnOtherAmountReplay.test.ts (45 tests) 14995ms
+@datacare/core:test:    ✓ saved c27 complete hydration, ordered replay and Save fold > pins 16 full literal phase expectations authored before implementation 1239ms
+@datacare/core:test:    ✓ saved c27 complete hydration, ordered replay and Save fold > C01 1623ms
+@datacare/core:test:    ✓ saved c27 complete hydration, ordered replay and Save fold > C02 440ms
+@datacare/core:test:    ✓ saved c27 complete hydration, ordered replay and Save fold > C04 1182ms
+@datacare/core:test:    ✓ saved c27 complete hydration, ordered replay and Save fold > C05 604ms
+@datacare/core:test:    ✓ saved c27 complete hydration, ordered replay and Save fold > C07 1592ms
+@datacare/core:test:    ✓ saved c27 complete hydration, ordered replay and Save fold > C08 653ms
+@datacare/core:test:    ✓ saved c27 complete hydration, ordered replay and Save fold > C09 886ms
+@datacare/core:test:    ✓ saved c27 complete hydration, ordered replay and Save fold > C10 549ms
+@datacare/core:test:    ✓ saved c27 complete hydration, ordered replay and Save fold > C12 364ms
+@datacare/core:test:    ✓ saved c27 complete hydration, ordered replay and Save fold > C14 471ms
+@datacare/core:test:    ✓ saved c27 complete hydration, ordered replay and Save fold > C15 763ms
+@datacare/core:test:    ✓ saved c27 complete hydration, ordered replay and Save fold > stops at the first unsupported prefix even if a later value could restore the final amount 888ms
+@datacare/web:test:  ✓ test/designBookPage.test.ts (5 tests) 343ms
+@datacare/web:test:  ✓ test/designBookCalculation.test.ts (5 tests) 1046ms
+@datacare/web:test:    ✓ Design Book calculation editor > hydrates with no mutation or replay history, including legacy nulls, blanks and child piece weight 518ms
+@datacare/web:test:    ✓ Design Book calculation editor > updates visible cells on ordered commits and sends only item code for server-side master resolution 309ms
+@datacare/core:test:  ✓ test/saleReturnFinancialEffects.test.ts (291 tests) 85908ms
+@datacare/core:test:    ✓ independent source literals > F01 Complete 221-field Other0→1. Distinct book B/detail C/row A and SR/RT names; physical/rawNULL retained. 844ms
+@datacare/core:test:    ✓ independent source literals > F03 Fractional row110.49 while whole-unit header110: only AC and stock amounts change. 964ms
+@datacare/core:test:    ✓ independent source literals > F05 Observed order is not authority: exact source roles selected by key/identity. 1034ms
+@datacare/core:test:    ✓ independent source literals > F08 Old source-owned customer amount mismatch 817ms
+@datacare/core:test:    ✓ independent source literals > F15 Incoming N changed to tagged stock 337ms
+@datacare/core:test:    ✓ independent source literals > F16 Tax NULL GST does not satisfy ordinary branch 370ms
+@datacare/core:test:    ✓ independent source literals > F23 Missing current-schema unowned raw field 920ms
+@datacare/core:test:    ✓ independent source literals > F25 Changed stock source tag valuation is outside owned patch 1108ms
+@datacare/core:test:    ✓ independent source literals > F27 Duplicate physical rows with distinct role values 326ms
+@datacare/core:test:    ✓ independent source literals > F30 Unknown raw extension key cannot disappear 357ms
+@datacare/core:test:    ✓ independent source literals > freezes separately qualified joint reader baseline without altering old30 341ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-customer-ledger LEDR_KEY mismatch refuses without any partial candidate 1006ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-customer-ledger BILL_NO mismatch refuses without any partial candidate 1085ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-customer-ledger CHQ_NO mismatch refuses without any partial candidate 417ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-customer-ledger AC_CODE mismatch refuses without any partial candidate 545ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-customer-ledger LD_CODE mismatch refuses without any partial candidate 697ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-customer-ledger DR_AMT mismatch refuses without any partial candidate 772ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-customer-ledger SIGN mismatch refuses without any partial candidate 949ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-customer-ledger FINE_WT mismatch refuses without any partial candidate 394ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-customer-ledger ENTRY_TIME mismatch refuses without any partial candidate 327ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-customer-ledger DATA_TRFR mismatch refuses without any partial candidate 327ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-customer-ledger LDR_NAME mismatch refuses without any partial candidate 407ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-sale-account-ledger LC_CODE mismatch refuses without any partial candidate 448ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-sale-account-ledger BOOK_NAME mismatch refuses without any partial candidate 306ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-sale-account-ledger BILL_NO mismatch refuses without any partial candidate 502ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-sale-account-ledger LD_CODE mismatch refuses without any partial candidate 417ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-sale-account-ledger IT_DESC mismatch refuses without any partial candidate 531ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-outstanding-rojmel BOOK_NAME mismatch refuses without any partial candidate 941ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-outstanding-rojmel LD_CODE mismatch refuses without any partial candidate 663ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-taxbook-summary-rojmel VCH_TYPE mismatch refuses without any partial candidate 336ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-taxbook-summary-rojmel IT_TYPE mismatch refuses without any partial candidate 539ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-taxbook-summary-rojmel ITM_WEST mismatch refuses without any partial candidate 475ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-taxbook-summary-rojmel ITM_FINE mismatch refuses without any partial candidate 371ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-taxbook-summary-rojmel ITM_RATE mismatch refuses without any partial candidate 300ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-taxbook-summary-rojmel ITM_AMT mismatch refuses without any partial candidate 551ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-taxbook-summary-rojmel LBR_RATE mismatch refuses without any partial candidate 586ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-taxbook-summary-rojmel LBR_AMT mismatch refuses without any partial candidate 549ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-taxbook-summary-rojmel OTH_AMT mismatch refuses without any partial candidate 1474ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-taxbook-summary-rojmel IT_DESC mismatch refuses without any partial candidate 312ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-taxbook-summary-rojmel MEMB_CODE mismatch refuses without any partial candidate 350ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-taxbook-summary-rojmel REF_NO mismatch refuses without any partial candidate 1367ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-taxbook-summary-rojmel DATA_TYPE mismatch refuses without any partial candidate 354ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock ISR_NO mismatch refuses without any partial candidate 504ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock VCH_DATE mismatch refuses without any partial candidate 663ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock VCH_TYPE mismatch refuses without any partial candidate 660ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock BOOK_NAME mismatch refuses without any partial candidate 1107ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock TAG_NO mismatch refuses without any partial candidate 535ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock ITM_SIGN mismatch refuses without any partial candidate 594ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock ITM_GWT mismatch refuses without any partial candidate 354ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock ITM_NWT mismatch refuses without any partial candidate 999ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock ITM_TOUCH mismatch refuses without any partial candidate 511ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock ITM_FINE mismatch refuses without any partial candidate 671ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock ITM_RATE mismatch refuses without any partial candidate 584ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock LBR_RATE mismatch refuses without any partial candidate 753ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock LBR_AMT mismatch refuses without any partial candidate 829ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock OTH_AMT mismatch refuses without any partial candidate 696ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock NET_AMT mismatch refuses without any partial candidate 696ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock KR_NWT mismatch refuses without any partial candidate 1999ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock KR_TOUCH mismatch refuses without any partial candidate 478ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock KR_WEST mismatch refuses without any partial candidate 386ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock KR_LBR_AMT mismatch refuses without any partial candidate 1265ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock KR_OTH_AMT mismatch refuses without any partial candidate 941ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock KR_COST mismatch refuses without any partial candidate 345ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock EMP_CODE mismatch refuses without any partial candidate 321ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock ENTRY_TIME mismatch refuses without any partial candidate 627ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock MAIN_USER mismatch refuses without any partial candidate 346ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock DESIGN_NO mismatch refuses without any partial candidate 874ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock ITM_SIZE mismatch refuses without any partial candidate 645ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock GHT_PRC mismatch refuses without any partial candidate 502ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > incoming-stock ITM_DISC mismatch refuses without any partial candidate 693ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-tax-sr1 CO_CODE mismatch refuses without any partial candidate 504ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-tax-sr1 CO_YEAR mismatch refuses without any partial candidate 935ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-tax-sr1 VCH_NO mismatch refuses without any partial candidate 1057ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-tax-sr1 SR_NO mismatch refuses without any partial candidate 1358ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-tax-sr1 BOOK_NAME mismatch refuses without any partial candidate 1203ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-tax-sr1 TRAN_TYPE mismatch refuses without any partial candidate 1480ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-tax-sr1 VCH_DATE mismatch refuses without any partial candidate 379ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-tax-sr1 AC_CODE mismatch refuses without any partial candidate 456ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-tax-sr1 NET_AMT mismatch refuses without any partial candidate 669ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-tax-sr1 ISR_NO mismatch refuses without any partial candidate 910ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-tax-sr1 TAX_FREE_AMT mismatch refuses without any partial candidate 979ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-tax-sr2 VCH_NO mismatch refuses without any partial candidate 693ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-tax-sr2 SR_NO mismatch refuses without any partial candidate 708ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-tax-sr2 BOOK_NAME mismatch refuses without any partial candidate 923ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-tax-sr2 TRAN_TYPE mismatch refuses without any partial candidate 429ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-tax-sr2 VCH_DATE mismatch refuses without any partial candidate 757ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-tax-sr2 NET_AMT mismatch refuses without any partial candidate 408ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-tax-sr2 TOT_AMT mismatch refuses without any partial candidate 652ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-tax-sr2 TAX_SIGN mismatch refuses without any partial candidate 482ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-tax-sr2 PARTY_NAME mismatch refuses without any partial candidate 327ms
+@datacare/core:test:    ✓ all221 old source-owned values are actually admitted > return-tax-sr2 ISR_NO mismatch refuses without any partial candidate 395ms
+@datacare/core:test:    ✓ boundary, preservation and atomic candidate semantics > a bad final tax row cannot publish the six earlier patches 652ms
+@datacare/core:test:    ✓ boundary, preservation and atomic candidate semantics > retains valid sibling projection when the other phase is invalid 445ms
+@datacare/core:test:    ✓ boundary, preservation and atomic candidate semantics > keeps mapped stableFloat observations without a newly synthesizedFloat patch 324ms
+@datacare/core:test:    ✓ boundary, preservation and atomic candidate semantics > refuses numeric transport "1\n" 429ms
+@datacare/core:test:    ✓ boundary, preservation and atomic candidate semantics > refuses numeric transport "1\t" 365ms
+@datacare/core:test:    ✓ boundary, preservation and atomic candidate semantics > refuses numeric transport "1 " 306ms
+@datacare/core:test:    ✓ boundary, preservation and atomic candidate semantics > refuses numeric transport "Infinity" 656ms
+@datacare/core:test:    ✓ boundary, preservation and atomic candidate semantics > refuses cycles through raw values 384ms
+@datacare/core:test:    ✓ boundary, preservation and atomic candidate semantics > refuses symbol and nonenumerable outer keys 557ms
+@datacare/core:test:    ✓ canonical metadata refuses terminal newlines without normalization > rejects terminal newline in canonical context companyShortName 813ms
+@datacare/web:test:  ✓ test/eBillEntry.test.ts (6 tests) 207ms
+@datacare/web:test:  ✓ test/subDetailGrid.test.ts (7 tests) 695ms
+@datacare/core:test:  ✓ test/salesOrderDesign.test.ts (8 tests) 691ms
+@datacare/core:test:  ✓ test/orderLabour.test.ts (23 tests) 1801ms
+@datacare/core:test:    ✓ order-specific labour source branches > applies configured rate precision before the two-decimal cell format 745ms
+@datacare/core:test:  ✓ test/eBillCalc.test.ts (25 tests) 3271ms
+@datacare/core:test:    ✓ E-bill line arithmetic (TR_SL_EBILL CommPassTotal) > L01-gram-gross-labour-half-even-net 969ms
+@datacare/core:test:    ✓ E-bill line arithmetic (TR_SL_EBILL CommPassTotal) > L02-pieces-no-gross-excludes-labour 410ms
+@datacare/core:test:    ✓ E-bill line arithmetic (TR_SL_EBILL CommPassTotal) > rounds the whole-rupee line net half-to-even, not half-up 300ms
+@datacare/web:test:  ✓ test/financeBooks.test.ts (12 tests) 396ms
+@datacare/web:test:    ✓ finance book families (D1) > the API enforces the same families on save 325ms
+@datacare/web:test:  ✓ test/mfgLotView.test.ts (4 tests) 72ms
+@datacare/core:test:  ✓ test/orderLabourWithCache.test.ts (11 tests) 47ms
+@datacare/web:test:  ✓ test/derivedValueSources.test.ts (4 tests) 4936ms
+@datacare/web:test:    ✓ no page computes fine weight with its own arithmetic > finds transaction pages to check 2899ms
+@datacare/web:test:    ✓ no page computes fine weight with its own arithmetic > never rounds fine weight to 2dp, which would disagree with PRECISION.fine = 3 1406ms
+@datacare/web:test:    ✓ no page computes fine weight with its own arithmetic > never computes per-gram labour from net weight alone on a page that carries ghat 343ms
+@datacare/core:test:  ✓ test/saleAmount.test.ts (22 tests) 454ms
+@datacare/core:test:  ✓ test/saleReturnHeaderFloat.test.ts (47 tests) 767ms
+@datacare/web:test:  ✓ test/gridKeyboard.test.ts (5 tests) 38ms
+@datacare/web:test:  ✓ test/masterSearch.test.ts (7 tests) 40ms
+@datacare/core:test:  ✓ test/containment.test.ts (5 tests) 190ms
+@datacare/web:test:  ✓ test/textIdentifiers.test.ts (10 tests) 2504ms
+@datacare/web:test:    ✓ alphanumeric identifiers are never coerced to numbers > finds pages to check 1018ms
+@datacare/web:test:    ✓ alphanumeric identifiers are never coerced to numbers > never wraps designNo in Number() 344ms
+@datacare/core:test:  ✓ test/money.test.ts (3 tests) 113ms
+@datacare/core:test:  ✓ test/calc.test.ts (10 tests) 71ms
+@datacare/web:test:  ✓ test/reportSurfaceLinks.test.ts (1 test) 59ms
+@datacare/core:test: 
+@datacare/core:test:  Test Files  32 passed (32)
+@datacare/core:test:       Tests  1737 passed (1737)
+@datacare/core:test:    Start at  04:36:14
+@datacare/core:test:    Duration  127.74s (transform 49.51s, setup 0ms, collect 152.24s, tests 203.79s, environment 865ms, prepare 138.29s)
+@datacare/core:test: 
+@datacare/web:test:  ✓ test/chequePrintPage.test.ts (2 tests) 82ms
+@datacare/web:test:  ✓ test/cameraRequestGuard.test.ts (3 tests) 225ms
+@datacare/web:test:  ✓ test/stockLimitPages.test.ts (1 test) 196ms
+@datacare/web:test:  ✓ test/schemeInstallmentUpi.test.ts (1 test) 52ms
+@datacare/web:test:  ✓ test/reportSlug.test.ts (3 tests) 57ms
+@datacare/web:test:  ✓ test/eInvoiceExcelPage.test.ts (2 tests) 20ms
+@datacare/web:test: 
+@datacare/web:test:  Test Files  40 passed (40)
+@datacare/web:test:       Tests  594 passed (594)
+@datacare/web:test:    Start at  04:36:13
+@datacare/web:test:    Duration  135.56s (transform 57.00s, setup 0ms, collect 213.14s, tests 73.16s, environment 370ms, prepare 172.39s)
+@datacare/web:test: 
+@datacare/web:test: ✔ accepts an assertion-backed journey and derives zero provenance counters (20.202833ms)
+@datacare/web:test: ✔ uses an explicit journey status and fails closed on missing checks or result objects (3.088792ms)
+@datacare/web:test: ✔ detects nested mock, response, and interception indicators (2.847167ms)
+@datacare/web:test: ✔ detects mock indicators nested inside arrays (1.478792ms)
+@datacare/web:test: ✔ rejects malformed provenance instead of coercing it to zero (3.735583ms)
+@datacare/web:test: ✔ runner-observed route registration fails the aggregate evidence (0.715417ms)
+@datacare/web:test: ℹ tests 6
+@datacare/web:test: ℹ suites 0
+@datacare/web:test: ℹ pass 6
+@datacare/web:test: ℹ fail 0
+@datacare/web:test: ℹ cancelled 0
+@datacare/web:test: ℹ skipped 0
+@datacare/web:test: ℹ todo 0
+@datacare/web:test: ℹ duration_ms 926.869458
+@datacare/api:test:  ❯ test/salesFamilyLifecycle.db.test.ts (31 tests | 2 failed) 69242ms
+@datacare/api:test:    × database-backed sales-family voucher lifecycles > imports a return source from the chosen SALES book and refuses a non-SALES book 15109ms
+@datacare/api:test:      → 
+@datacare/api:test: Invalid `prisma.$executeRawUnsafe()` invocation:
+@datacare/api:test: 
+@datacare/api:test: 
+@datacare/api:test: Can't reach database server at `127.0.0.1:55433`
+@datacare/api:test: 
+@datacare/api:test: Please make sure your database server is running at `127.0.0.1:55433`.
+@datacare/api:test:    × database-backed sales-family voucher lifecycles > creates, gets and replaces a sales return while preserving identity and balance 17132ms
+@datacare/api:test:      → 
+@datacare/api:test: Invalid `prisma.$queryRawUnsafe()` invocation:
+@datacare/api:test: 
+@datacare/api:test: 
+@datacare/api:test: Transaction API error: Transaction not found. Transaction ID is invalid, refers to an old closed transaction Prisma doesn't have information about anymore, or was obtained before disconnecting.
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > persists every return-grid column the form offers instead of discarding it 1612ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > rejects a persisted-date-locked sales-return edit without changing its write set 960ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > rejects atomically when editing a return whose admitted tag was resold 658ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > creates, gets and replaces a sales order and its adjustment with balanced ledgers 1836ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > rejects a persisted-date-locked sales-order edit without changing it 606ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > a cash instalment writes ONE Rojmel row per line; a banked one writes TWO 401ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > an opening entry writes no Rojmel row at all (no money moves) 1100ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > AD_DATA matches the desktop instalment shape (TOT_AMT is 0 on all 8160 real rows) 331ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > writes desktop UPI_DATA split rows and UPI-specific ledger/day-book rows 1326ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > rejects UPI split totals that do not match the member installment amount 2740ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > posts a whole collection round as ONE voucher with a ledger pair per line 1255ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > rejects a bad grid line naming its index, and writes nothing 2640ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > creates, gets and replaces a scheme installment while preserving identity and balance 614ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > deletes with exactly the desktop-shaped sales return, order and member-entry audit rows 324ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > round-trips labour-invoice and scheme-maturity edits with preserved identity 307ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > persists every desktop sales-order header and line column 977ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > persists the full desktop scheme member record on enrolment 844ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > stages the scheme passbook report rows from the member installments 646ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > a sale return writes exactly its declared set of tables 1443ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > a return’s Rojmel reverses direction: metal comes back IN 1060ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > an order with an advance writes a type-01 Rojmel CREDIT; one without writes none 519ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > the order footprint is an exact SET, so an extra write cannot pass unnoticed 1106ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > re-posting an order does not collide on LEDR_KEY 1041ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > a sales order posts the ledger only when it carries an advance 10226ms
+@datacare/api:test:    ✓ database-backed sales-family voucher lifecycles > persists the desktop TR_SALE_LBR grid on a labour invoice line 1028ms
+@datacare/api:test:  ✓ test/repairReceipt.db.test.ts (9 tests) 15432ms
+@datacare/api:test:    ✓ database-backed customer repair receipt integrity > persists, edits, and reverses the source write-set using configured accounts and persisted lock date 2047ms
+@datacare/api:test:    ✓ database-backed customer repair receipt integrity > links open customer repairs, posts issue-side tender, edits atomically, and releases the source on reversal 1142ms
+@datacare/api:test:    ✓ database-backed customer repair receipt integrity > serializes concurrent KRREP ISSUE claims so one open customer row cannot be issued twice 1479ms
+@datacare/api:test:    ✓ database-backed customer repair receipt integrity > receives an open karigar issue with configured accounts, balanced ledger, and desktop Rojmel asymmetries 8062ms
+@datacare/api:test:    ✓ database-backed customer repair receipt integrity > rejects another karigar and serializes concurrent KRREP RECEIPT claims 649ms
+@datacare/api:test:    ✓ database-backed customer repair receipt integrity > delivers a karigar-completed repair with mirrored ledger directions and reopens both sources on reversal 866ms
+@datacare/api:test:    ✓ database-backed customer repair receipt integrity > delivers open customer repairs without a karigar leg, posts zero-money metal legs, and rejects re-delivery 386ms
+@datacare/api:test:    ✓ database-backed customer repair receipt integrity > serializes REP_DATA and TEMP_BOOK_DATA MAX+1 numbering under concurrent restricted writers 435ms
+@datacare/api:test:  ✓ test/releaseCertification.test.ts (80 tests) 1145ms
+@datacare/api:test:  ✓ test/tagCancelLifecycle.db.test.ts (22 tests) 65954ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > V1: writes exactly the desktop rows, and nothing else in the database changes 17195ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > V2: edit keeps the hidden number, clock, user and kept lines; releases a dropped tag, reserves an added one 10578ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > V3: delete writes the desktop DELETE_DATA rows and returns every other table to its prior state 1652ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > V4: refuses an ambiguous tag number without a serial, writing nothing and using no number 3908ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > V5: refuses the same tag number twice with the desktop message 2280ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > V6: another location's tag and a sold instance are not available 5043ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > V7: a cancel waits for a sale holding the same tag, then loses cleanly 2924ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > V7: two writers racing for one tag — exactly one voucher holds it 1849ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > K2.6: locks every tag in sorted order before resolving any, whatever the line order 3688ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > K9.2: an edit keeps its hidden number while later vouchers hold higher ones 2285ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > V8: a failure part-way through leaves nothing — the consumed web tag is back and no number is used 2921ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > V9: the lock date refuses a save, an edit and a delete 3607ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > V10: a web TAG_STOCK tag is consumed by the cancel and restored by the delete 719ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > V11: copies the stones of the instance’s first BAR_DETL row only 704ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > V12: each menu accepts only its own in-use book 1150ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > T1: a transfer moves the tag to the loose item with the same pieces, weights and fine 1528ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > T2: a transfer line needs a transfer item that exists 562ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > T3/T4: an edited transfer moves the + row to the new item; delete writes the TAGTR audit 793ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > replays an API caller’s edits through the desktop grid arithmetic (K4) 405ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > applies edited stones to the row and posts only OTH_DETL_POSTING items to DM_DATA 317ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > refuses what the desktop grid would not accept 623ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer (TR_TAG_CAN) — contract vectors > reads a voucher back as DISPLAY_DATA shows it, lists the book, and previews a tag without taking it 720ms
+@datacare/api:test:  ✓ test/purchase.lifecycle.db.test.ts (19 tests) 5514ms
+@datacare/api:test:    ✓ database-backed purchase voucher lifecycle > posts a TAG PURCHASE book exactly like a PURCHASE book, and supports reopen and delete 786ms
+@datacare/api:test:    ✓ database-backed purchase voucher lifecycle > creates, opens and edits with independent numbering and preserved identity without delete audit 416ms
+@datacare/api:test:    ✓ database-backed purchase voucher lifecycle > rejects and fully rolls back edit after a created tag was sold 409ms
+@datacare/api:test:    ✓ database-backed purchase voucher lifecycle > writes exactly the declared set of tables, so a dropped write cannot pass unnoticed 957ms
+@datacare/api:test:    ✓ database-backed purchase voucher lifecycle > preserves every persisted purchase column across reopen and save unchanged 478ms
+@datacare/api:test:  ✓ test/sales.lifecycle.db.test.ts (21 tests) 5368ms
+@datacare/api:test:    ✓ database-backed sales voucher lifecycle > persists the complete desktop Sales-family column sets under the restricted role 931ms
+@datacare/api:test:    ✓ database-backed sales voucher lifecycle > creates, opens, edits and re-consumes its own tag while preserving desktop identity without delete audit 439ms
+@datacare/api:test:    ✓ database-backed sales voucher lifecycle > rejects an edit locked by the persisted date and leaves the voucher unchanged 675ms
+@datacare/api:test:    ✓ database-backed sales voucher lifecycle > rolls back a mid-edit tax-policy failure after release so the voucher and tag stay consumed 346ms
+@datacare/api:test:    ✓ database-backed sales voucher lifecycle > persists configured whole-rupee sale totals in both the header and party ledger 339ms
+@datacare/api:test:    ✓ database-backed sales voucher lifecycle > writes exactly the declared set of tables, so a dropped write cannot pass unnoticed 550ms
+@datacare/api:test:    ✓ database-backed sales voucher lifecycle > SL_AMT_TYPE=F prices the line off the declared weight basis 362ms
+@datacare/api:test:  ✓ test/mfgLifecycle.db.test.ts (9 tests) 1197ms
+@datacare/api:test:    ✓ database-backed karigar/manufacturing edit lifecycle > covers karigar issue create/get/edit/persisted-date lock/delete against PostgreSQL 577ms
+@datacare/api:test:  ✓ test/wholesaleRateCutStock.db.test.ts (16 tests) 4266ms
+@datacare/api:test:    ✓ wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > V1 034/4 — tags sold by number move out of stock with their identity, and post leg 23 alone 1027ms
+@datacare/api:test:    ✓ wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > a tag brings its labour, other charges, MRP, cost and stored fine; a priced line is settled in rupees 411ms
+@datacare/api:test:    ✓ wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > a new row computes labour on the company basis, and a typed ghat weight survives reopen and edit 510ms
+@datacare/api:test:    ✓ wholesale sale / rate cut: stock movement and desktop ledger legs (X16) > tender keeps its paise: cash 1000.50 and kasar 0.25 post exactly, and the outstanding follows 423ms
+@datacare/api:test:  ✓ test/rojmel.test.ts (66 tests) 13ms
+@datacare/api:test:  ✓ test/routePolicy.test.ts (56 tests) 36ms
+@datacare/api:test:  ✓ test/rateCutSettlement.db.test.ts (20 tests) 4705ms
+@datacare/api:test:    ✓ rate-cut settlement persistence > writes RATE_PAR = G from the company setting, not a constant 622ms
+@datacare/api:test:    ✓ rate-cut settlement persistence > writes exactly the declared set of tables, so a dropped write cannot pass unnoticed 394ms
+@datacare/api:test:    ✓ rate-cut settlement persistence > keeps FINE_RATE the header rate only: a priced line without one leaves it 0 on the header and every leg 326ms
+@datacare/api:test:    ✓ rate-cut settlement persistence > serializes concurrent booking draw-down and rejects the over-allocation 839ms
+@datacare/api:test:    ✓ rate-cut settlement persistence > reopens rich issue and receive line fields without dropping desktop grid columns 544ms
+@datacare/api:test:  ✓ test/salesOrderSessionCommand.db.test.ts (15 tests) 8781ms
+@datacare/api:test:    ✓ Sales Order financial edit joins the admitted HTTP session transaction > the real session entry changes only advance100→125 and preserves children, raw precision, clock and accounting ownership 1051ms
+@datacare/api:test:    ✓ Sales Order financial edit joins the admitted HTTP session transaction > mounted authenticated PUT uses the retained context and one balanced125 posting; an old document retry conflicts without another write 633ms
+@datacare/api:test:    ✓ Sales Order financial edit joins the admitted HTTP session transaction > missing authority, malformed epoch and mismatched captured scope cannot reach the financial writer 343ms
+@datacare/api:test:    ✓ Sales Order financial edit joins the admitted HTTP session transaction > the actual command refuses a later committed epoch even if the company/location/year strings returned to A 345ms
+@datacare/api:test:    ✓ Sales Order financial edit joins the admitted HTTP session transaction > an actual row-lock wait cannot rebase captured input scope, amount, parent or child values 1251ms
+@datacare/api:test:    ✓ Sales Order financial edit joins the admitted HTTP session transaction > fresh FRM_EDIT denial after the real central HTTP authorization is enforced inside the command 657ms
+@datacare/api:test:    ✓ Sales Order financial edit joins the admitted HTTP session transaction > fresh forced-reset refusal after central HTTP authorization rolls back before order replacement 957ms
+@datacare/api:test:    ✓ Sales Order financial edit joins the admitted HTTP session transaction > mounted PUT refuses absent cookies and correctly signed legacy claims with no epoch 403ms
+@datacare/api:test:    ✓ Sales Order financial edit joins the admitted HTTP session transaction > real A→B→A selection invalidates the old bearer and same-scope page epoch before any PUT dispatch 499ms
+@datacare/api:test:    ✓ Sales Order financial edit joins the admitted HTTP session transaction > missing/noncanonical versions and incomplete children are rejected by mounted PUT without data replacement 352ms
+@datacare/api:test:    ✓ Sales Order financial edit joins the admitted HTTP session transaction > the participating edit preserves saved-date period lock refusal without changing session/config or finance 383ms
+@datacare/api:test:    ✓ Sales Order financial edit joins the admitted HTTP session transaction > exact stored-year validation cannot fall back to another configured year inside a financial command 353ms
+@datacare/api:test:    ✓ Sales Order financial edit joins the admitted HTTP session transaction > two real same-session edits with one document version commit one125 advance and one domain conflict 663ms
+@datacare/api:test:  ✓ test/orderSessionCommands.db.test.ts (34 tests) 16617ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > sales create writes literal260 total and25 advance with all parent/child identities 691ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > tour create writes literal260 total and25 advance with all parent/child identities 420ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > Tour exact loaded decimal replaces25 with40 while retaining NULL, clock and children 336ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > sales cancel removes all saved rows and records the original40 advance; highest number is reusable 501ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > tour cancel removes all saved rows and records the original40 advance; highest number is reusable 354ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > tour-cancel rejects missing and malformed versions without changing saved rows 311ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > tour-edit rejects missing and malformed versions without changing saved rows 752ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > sales cancellation rejects a supplied stale version and retains all current rows 1050ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > tour cancellation rejects a supplied stale version and retains all current rows 853ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > sales create rolls back real TEMP insertion and allocation on a subsequent injected failure 323ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > tour create rolls back real TEMP insertion and allocation on a subsequent injected failure 371ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > sales DELETE_DATA failure after real deletes restores the whole saved financial footprint 557ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > tour DELETE_DATA failure after real deletes restores the whole saved financial footprint 560ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > sales-create final expiry refusal rolls back all real financial statements and the injected local clock change 333ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > sales-cancel final expiry refusal rolls back all real financial statements and the injected local clock change 369ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > tour-cancel final expiry refusal rolls back all real financial statements and the injected local clock change 559ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > tour-edit final expiry refusal rolls back all real financial statements and the injected local clock change 584ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > sales concurrent creates retain number allocation locks and commit two distinct25 postings 956ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > concurrent Tour edits with one document version commit one40 replacement and one conflict 543ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > tour View-only remains allowed to create but fresh missing Delete refuses cancellation 335ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > all five required entries refuse absent identity without any financial change 389ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > all five refuse a committed later epoch even when company/location/year remain identical 536ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > sales cancel preserves the existing issued-state refusal 372ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > tour cancel preserves the existing issued-state refusal 585ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > sales cancel validates the persisted date against the existing period gate 1174ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > tour cancel validates the persisted date against the existing period gate 493ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > selection winning the real session lock refuses an already-started create before allocation 365ms
+@datacare/api:test:    ✓ remaining five order session commands on isolated PostgreSQL > selection waits behind a real create before its final check and cannot undo the committed posting 354ms
+@datacare/api:test:  ✓ test/operatorDepth.roundtrip.db.test.ts (3 tests) 2676ms
+@datacare/api:test:    ✓ operator depth — lossless round trips > purchase preserves every supplied field across an unchanged save 1472ms
+@datacare/api:test:    ✓ operator depth — lossless round trips > karigar receive preserves every supplied field across an unchanged save 383ms
+@datacare/api:test:    ✓ operator depth — lossless round trips > manufacturing preserves every supplied component field across an unchanged save 453ms
+@datacare/api:test:  ✓ test/savedSaleReturn.db.test.ts (26 tests) 6487ms
+@datacare/api:test:    ✓ saved incoming Sales Return metadata preservation > hydrates complete exact decimals, nulls, timestamps, source refs and stable saved identities 388ms
+@datacare/api:test:    ✓ saved incoming Sales Return metadata preservation > stamps one validated header employee across only proven existing employee-bearing rows 385ms
+@datacare/api:test:    ✓ saved incoming Sales Return metadata preservation > uses CAS so exactly one concurrent editor succeeds and stale retry cannot lose the winner 1000ms
+@datacare/api:test:    ✓ saved incoming Sales Return metadata preservation > invalidates a token after component ABA and parent recreation with the same values and physical ID 1157ms
+@datacare/api:test:    ✓ saved incoming Sales Return metadata preservation > preserves both child datasets during allowed metadata edits and invalidates on outgoing changes 472ms
+@datacare/api:test:  ✓ test/columnSettings.db.test.ts (21 tests) 2617ms
+@datacare/api:test:  ✓ test/tourOrderHydration.db.test.ts (14 tests) 4419ms
+@datacare/api:test:    ✓ Tour Order configured-book and complete editor round trip > preserves an imported tag and exact instance through reopen and unchanged edit, and refuses unsupported identity transitions 1213ms
+@datacare/api:test:    ✓ Tour Order configured-book and complete editor round trip > hydrates all persisted input fields and multiple independent children; unchanged edit keeps business rows 512ms
+@datacare/api:test:    ✓ Tour Order configured-book and complete editor round trip > isolates identical voucher numbers across configured books, locations and fiscal years 603ms
+@datacare/api:test:    ✓ Tour Order configured-book and complete editor round trip > blocks the allocated source order while allowing the same number in another book, branch or year 479ms
+@datacare/api:test:  ✓ test/sessionContextRefresh.db.test.ts (34 tests) 6722ms
+@datacare/api:test:    ✓ internal atomic refresh: qualified independent literals and real PostgreSQL schedules > 'R01' 'Only hash/last-used rotate; immutable…' 340ms
+@datacare/api:test:    ✓ internal atomic refresh: qualified independent literals and real PostgreSQL schedules > default PostgreSQL clock expires during signer; no rotation or revocation survives 2071ms
+@datacare/api:test:    ✓ internal atomic refresh: qualified independent literals and real PostgreSQL schedules > default PostgreSQL clock expires during after-final-sample; no rotation or revocation survives 2188ms
+@datacare/api:test:  ✓ test/entityImageConcurrency.routes.db.test.ts (17 tests) 4254ms
+@datacare/api:test:    ✓ generic entity image HTTP compare-and-swap > accepts a complete large generic image within the advertised 4 MB binary limit 690ms
+@datacare/api:test:    ✓ generic entity image HTTP compare-and-swap > accepts a complete large design image within the advertised 4 MB binary limit 567ms
+@datacare/api:test:  ✓ test/sessionContextHttp.db.test.ts (24 tests) 2344ms
+@datacare/api:test:  ✓ test/dataRepair.db.test.ts (15 tests) 1613ms
+@datacare/api:test:    ✓ data repair console > rebuilds opening balances with the desktop sign convention 313ms
+@datacare/api:test:    ✓ data repair console > refuses a destructive apply without reason, re-authentication and a fresh verified backup 358ms
+@datacare/api:test:  ✓ test/backupRestore.db.test.ts (13 tests) 34903ms
+@datacare/api:test:    ✓ WP-02A company logical backup/restore > classifies the complete live schema and seals a lossless v2 document 1056ms
+@datacare/api:test:    ✓ WP-02A company logical backup/restore > exports every row beyond the former 100000-row ceiling 4005ms
+@datacare/api:test:    ✓ WP-02A company logical backup/restore > round-trips exact rows while preserving the other company, tenant, shared data, and sequences 8041ms
+@datacare/api:test:    ✓ WP-02A company logical backup/restore > rejects a tampered checksum before deleting any target row 1342ms
+@datacare/api:test:    ✓ WP-02A company logical backup/restore > rolls back every delete when a validly sealed row overflows its database type 1554ms
+@datacare/api:test:    ✓ WP-02A company logical backup/restore > rolls back when persisted values do not match the sealed SHA-256 checksum 4144ms
+@datacare/api:test:    ✓ WP-02A company logical backup/restore > rolls back the whole replace transaction on a primary-key conflict 5595ms
+@datacare/api:test:    ✓ WP-02A company logical backup/restore > rejects malformed document shape without a TypeError or database mutation 1748ms
+@datacare/api:test:    ✓ WP-02A company logical backup/restore > rejects wrong authenticated tenant or company scope before mutation 2658ms
+@datacare/api:test:    ✓ WP-02A company logical backup/restore > rejects a self-consistent but non-live schema manifest before deletion 1178ms
+@datacare/api:test:    ✓ WP-02A company logical backup/restore > preflights internal company and external tenant-shared foreign keys before live replacement 3420ms
+@datacare/api:test:  ✓ test/saleReturnNumericUpdate.db.test.ts (15 tests) 3693ms
+@datacare/api:test:    ✓ sale return numeric write coordinator > applies the ordinary Other 0->1 edit changing exactly the nine expected rows 651ms
+@datacare/api:test:    ✓ sale return numeric write coordinator > report reconciliation (step 9) > sales-return register reflects the updated SL_DETL_RTN net/total (110 -> 111) 342ms
+@datacare/api:test:  ✓ test/sessionContextSerializableCommand.db.test.ts (17 tests) 2290ms
+@datacare/api:test:    ✓ Serializable Return command schedules on isolated PostgreSQL > D04 clock is sampled after a real lock wait even when the MVCC row itself never changed 567ms
+@datacare/api:test:    ✓ Serializable Return command schedules on isolated PostgreSQL > D09 final SQL clock refuses a naturally expired session after callback reads 563ms
+@datacare/api:test:  ✓ test/tagSplit.routes.db.test.ts (6 tests) 5056ms
+@datacare/api:test:    ✓ N19 tag split through HTTP > runs the whole Tag Split lifecycle on the provisioned TSP book 1547ms
+@datacare/api:test:    ✓ N19 tag split through HTTP > reports a deadlock with another writer as 409 Conflict, writes nothing and uses no number 1272ms
+@datacare/api:test:  ✓ test/eCreditNoteLifecycle.db.test.ts (9 tests) 3640ms
+@datacare/api:test:    ✓ X15 E CRNT lifecycle (TR_SL_EBILL E CRNT mode) > creates a credit note entirely through the writer with the desktop write set 644ms
+@datacare/api:test:    ✓ X15 E CRNT lifecycle (TR_SL_EBILL E CRNT mode) > keeps the same voucher number in two E CRNT books independent 327ms
+@datacare/api:test:    ✓ X15 E CRNT lifecycle (TR_SL_EBILL E CRNT mode) > deletes with the desktop audit row and blocks edit/delete once an IRN exists 590ms
+@datacare/api:test:    ✓ X15 E CRNT lifecycle (TR_SL_EBILL E CRNT mode) > applies the desktop save validations and writes nothing on refusal 377ms
+@datacare/api:test:    ✓ X15 E CRNT lifecycle (TR_SL_EBILL E CRNT mode) > refuses a new voucher for company type B and a missing mandatory employee 507ms
+@datacare/api:test:  ✓ test/settingsBehavior.db.test.ts (12 tests) 913ms
+@datacare/api:test:  ✓ test/transaction.integrity.db.test.ts (5 tests) 1722ms
+@datacare/api:test:    ✓ database-backed transaction integrity > allocates padded MAX+1 independently by company/location/year/book under concurrency 618ms
+@datacare/api:test:    ✓ database-backed transaction integrity > posts tagged and loose stock atomically and derives locked reversals from persisted state 477ms
+@datacare/api:test:    ✓ database-backed transaction integrity > round-trips sale and purchase returns with exact tag identity and configured return books 386ms
+@datacare/api:test:  ✓ test/dataRepairBatch2.db.test.ts (12 tests) 665ms
+@datacare/api:test:  ✓ test/tagSplitLifecycle.db.test.ts (11 tests) 5900ms
+@datacare/api:test:    ✓ N19 tag split (TR_TAG_SPLIT) — contract vectors > V1: splits a parent into two children, conserving the fine; nothing else changes unexpectedly 1628ms
+@datacare/api:test:    ✓ N19 tag split (TR_TAG_SPLIT) — contract vectors > K1: the writer refuses a TAG SPLIT book that is not in use 304ms
+@datacare/api:test:    ✓ N19 tag split (TR_TAG_SPLIT) — contract vectors > V5: delete writes DELETE_DATA, removes the write set and returns the database to its prior state 868ms
+@datacare/api:test:    ✓ N19 tag split (TR_TAG_SPLIT) — contract vectors > V7: a delete is refused once a child has been sold 338ms
+@datacare/api:test:    ✓ N19 tag split (TR_TAG_SPLIT) — contract vectors > V8: a failure part-way leaves nothing and no number is used 721ms
+@datacare/api:test:    ✓ N19 tag split (TR_TAG_SPLIT) — contract vectors > V9: the lock date refuses a save, and a delete of a voucher on or before the lock 390ms
+@datacare/api:test:    ✓ N19 tag split (TR_TAG_SPLIT) — contract vectors > reads a voucher back, lists the book, and previews a parent without consuming it 447ms
+@datacare/api:test:  ✓ test/saleReturnIncomingReplay.db.test.ts (43 tests) 5673ms
+@datacare/api:test:    ✓ saved incoming Return trusted replay in a real read-only observation > hydrates exact raw identities, rawNULL/blank/decimals/microseconds, eight caches and an empty journal without recalculation or business writes 425ms
+@datacare/api:test:    ✓ saved incoming Return trusted replay in a real read-only observation > contains hidden, known unsupported and malformed events without widening the twelve-field profile 414ms
+@datacare/api:test:  ✓ test/saleReturnBillReplay.db.test.ts (34 tests) 4986ms
+@datacare/api:test:  ✓ test/sessionContextSerializableCommand.test.ts (78 tests) 31ms
+@datacare/api:test:  ✓ test/saleReturnSource.db.test.ts (41 tests) 3921ms
+@datacare/api:test:    ✓ original sale source observation without Return admission > rejects malformed browse query {"extra":"ignored"} 356ms
+@datacare/api:test:    ✓ original sale source observation without Return admission > marks only matching tags returned across Return years/books, without admitting the source instance 426ms
+@datacare/api:test:  ✓ test/wholesaleSaleReturn.db.test.ts (4 tests) 1208ms
+@datacare/api:test:    ✓ database-backed wholesale sale return lifecycle > creates every desktop family, reads, safely replaces, locks, rejects resold tags and audits delete 932ms
+@datacare/api:test:  ✓ test/vpParcel.db.test.ts (1 test) 478ms
+@datacare/api:test:    ✓ database-backed VP parcel lifecycle > creates, reads, replaces, guards, locks and desktop-deletes a VP parcel atomically 461ms
+@datacare/api:test:  ✓ test/stockLifecycle.db.test.ts (5 tests) 1072ms
+@datacare/api:test:    ✓ database-backed tag/stock voucher lifecycle > persists item-opening desktop fine without ghat weight in detail and stock 309ms
+@datacare/api:test:  ✓ test/sessionContextSelection.test.ts (74 tests) 46ms
+@datacare/api:test:  ✓ test/goldBookLoctAmt.db.test.ts (2 tests) 800ms
+@datacare/api:test:    ✓ database-backed digital-gold and location-amount vouchers > creates, reads, edits, locks and desktop-deletes digital gold atomically 586ms
+@datacare/api:test:  ✓ test/sessionContextReadSnapshot.db.test.ts (14 tests) 2603ms
+@datacare/api:test:    ✓ session read snapshot schedules on isolated PostgreSQL > D01 reads with View-only authority and preserves all scoped raw rows/xmin/ctid 879ms
+@datacare/api:test:    ✓ session read snapshot schedules on isolated PostgreSQL > D04 clock is sampled after a real lock wait even when the MVCC row itself never changed 530ms
+@datacare/api:test:    ✓ session read snapshot schedules on isolated PostgreSQL > D09 final SQL clock refuses a naturally expired session after callback reads 532ms
+@datacare/api:test:  ✓ test/documents.test.ts (17 tests) 56ms
+@datacare/api:test:  ✓ test/mfgLotRead.db.test.ts (8 tests) 660ms
+@datacare/api:test:  ✓ test/sessionContextLogin.db.test.ts (13 tests) 1225ms
+@datacare/api:test:  ✓ test/saleReturnIncomingReplay.routes.db.test.ts (12 tests) 5203ms
+@datacare/api:test:    ✓ saved Incoming Return journal HTTP authority > allows owning View to load and simulate while preserving raw, caches and every business row 389ms
+@datacare/api:test:    ✓ saved Incoming Return journal HTTP authority > returns the unchanged loaded baseline for an empty journal and retains repeated committed events 839ms
+@datacare/api:test:    ✓ saved Incoming Return journal HTTP authority > requires explicit scope and rejects query overrides or another active business scope 1203ms
+@datacare/api:test:    ✓ saved Incoming Return journal HTTP authority > rejects caller policy, raw cells, comparison caches, source actions and malformed journals 350ms
+@datacare/api:test:  ✓ test/repairImageConcurrency.routes.db.test.ts (9 tests) 3413ms
+@datacare/api:test:    ✓ repair image HTTP compare-and-swap and source identity > keeps deleted revisions so identical recreation cannot revive a prior token 318ms
+@datacare/api:test:    ✓ repair image HTTP compare-and-swap and source identity > keeps source book/year separate from the current stage and binds tokens to the exact saved row 346ms
+@datacare/api:test:    ✓ repair image HTTP compare-and-swap and source identity > accepts a complete large Repair image above the default JSON limit and preserves source bytes 736ms
+@datacare/api:test:  ✓ test/saleReturnIncomingConfiguration.review.test.ts (69 tests) 155ms
+@datacare/api:test:  ✓ test/orderReport.db.test.ts (9 tests) 1082ms
+@datacare/api:test:    ✓ full order document datasets, subreport and ledger cutoff > binds 'OrderBill' scoped parents, components and received-metal without fanout 403ms
+@datacare/api:test:  ✓ test/sessionContextCommand.db.test.ts (13 tests) 1706ms
+@datacare/api:test:    ✓ session command lock schedules on isolated PostgreSQL > successful command changes its sentinel only, preserving both sessions/raw revision and foreign tenant 350ms
+@datacare/api:test:    ✓ session command lock schedules on isolated PostgreSQL > samples expiry after an actual session-row lock wait, before invoking work 614ms
+@datacare/api:test: stdout | test/reportContract.test.ts > Crystal report data-source contracts > classifies every token and resolves every non-allowlisted database field to Prisma
+@datacare/api:test: REPORT_CONTRACT_TOTALS {"specs":254,"distinctTokens":2407,"database":1223,"formula":408,"special":776,"unresolvable":0,"resolvedDatabase":1133,"allowlistedDatabaseGaps":90}
+@datacare/api:test: 
+@datacare/api:test:  ✓ test/reportContract.test.ts (1 test) 191ms
+@datacare/api:test:  ✓ test/desktopAccountBalance.db.test.ts (54 tests) 3443ms
+@datacare/api:test:  ✓ test/salesOrderRound4.db.test.ts (10 tests) 1365ms
+@datacare/api:test:    ✓ Sales ordinary saved state and ordered design source replay > preserves complete imported business rows, six-digit clock, nullable values and exact large decimals on unchanged edit 328ms
+@datacare/api:test:  ✓ test/sessionContextSelection.db.test.ts (15 tests) 5138ms
+@datacare/api:test:    ✓ atomic session company selection on real PostgreSQL > rolls back tentative last-lock changes when signing crosses absolute expiry 2259ms
+@datacare/api:test:    ✓ atomic session company selection on real PostgreSQL > checks fresh expiry after a real session-row lock wait 2243ms
+@datacare/api:test:  ✓ test/sessionContextReadSnapshot.test.ts (57 tests) 25ms
+@datacare/api:test:  ✓ test/otherIncome.db.test.ts (4 tests) 1544ms
+@datacare/api:test:    ✓ database-backed TR_OTH_PURC Other Income mode > creates, reads, edits and desktop-deletes an OTH INC PAY voucher 705ms
+@datacare/api:test:  ✓ test/saleReturnBillReplay.routes.db.test.ts (10 tests) 3603ms
+@datacare/api:test:    ✓ authenticated read-only saved incoming bill replay > preserves all twelve owned field capabilities and original same-value event text 1039ms
+@datacare/api:test:  ✓ test/tagCancel.routes.db.test.ts (5 tests) 3040ms
+@datacare/api:test:    ✓ N18 tag cancel and tag transfer through HTTP > reports a deadlock with another writer as 409 Conflict, writes nothing and uses no number 1304ms
+@datacare/api:test:  ✓ test/stockInout.db.test.ts (3 tests) 388ms
+@datacare/api:test:  ✓ test/eInvoiceLifecycle.db.test.ts (6 tests) 2616ms
+@datacare/api:test:    ✓ X15 E INVOICE lifecycle (TR_SL_EBILL E INVOICE mode) > posts EI-1: outward orientation, TDS pair, stock out, output GST and both rojmel round-off rows 635ms
+@datacare/api:test:    ✓ X15 E INVOICE lifecycle (TR_SL_EBILL E INVOICE mode) > applies the 50 lakh TCS threshold on a new voucher and the full base on a saved one (EI-2) 351ms
+@datacare/api:test:  ✓ test/sessionContextCommand.test.ts (54 tests) 22ms
+@datacare/api:test:  ✓ test/financeLifecycle.db.test.ts (4 tests) 619ms
+@datacare/api:test:    ✓ database-backed finance voucher lifecycles > employee JV: creates, gets, edits, locks, balances and deletes with desktop audit parity 305ms
+@datacare/api:test:  ✓ test/physicalStock.db.test.ts (5 tests) 660ms
+@datacare/api:test:    ✓ database-backed physical-stock vouchers > creates, reads, replaces and deletes an exact desktop physical-count snapshot without moving stock 315ms
+@datacare/api:test:  ✓ test/goldenVectors.test.ts (27 tests) 8ms
+@datacare/api:test:  ✓ test/saleReturnLabourReplay.routes.db.test.ts (10 tests) 5199ms
+@datacare/api:test:    ✓ real authenticated labour observation and append routes > loads complete literal phases with View-only rights and no business/session edits 640ms
+@datacare/api:test:    ✓ real authenticated labour observation and append routes > runs lookup and two source code prefixes without numeric writes, and audits exact POST outcomes 628ms
+@datacare/api:test:    ✓ real authenticated labour observation and append routes > requires both retained page headers and never borrows another session descriptor 357ms
+@datacare/api:test:    ✓ real authenticated labour observation and append routes > rejects a foreign base and malformed authority/policy fields while preserving business state 783ms
+@datacare/api:test:    ✓ real authenticated labour observation and append routes > fails an old bearer after actual same-scope selection and old page pair after fresh bearer adoption 551ms
+@datacare/api:test:    ✓ real authenticated labour observation and append routes > maps changed historical master to409 without returning or accepting a replacement prefix 814ms
+@datacare/api:test:    ✓ real authenticated labour observation and append routes > returns the exact accepted prefix after a real post-copy bill rejection 383ms
+@datacare/api:test:    ✓ real authenticated labour observation and append routes > keeps legacy preview responses/allowlists unchanged and never exposes labour in v1 302ms
+@datacare/api:test:  ✓ test/saleReturnIncomingConfiguration.db.test.ts (26 tests) 14094ms
+@datacare/api:test:    ✓ incoming Return configuration from exact scoped database observations > returns configured source policy and stable fields without changing raw saved data or provisioning columns 1169ms
+@datacare/api:test:    ✓ incoming Return configuration from exact scoped database observations > reads exact stored precision 4 with Y override as 2 1593ms
+@datacare/api:test:    ✓ incoming Return configuration from exact scoped database observations > reads exact stored precision -1 with N override as null 379ms
+@datacare/api:test:    ✓ incoming Return configuration from exact scoped database observations > reads exact stored precision null with Y override as null 499ms
+@datacare/api:test:    ✓ incoming Return configuration from exact scoped database observations > resolves explicit Fine hiding, a blank caption, and restores source visibility when the row is removed 573ms
+@datacare/api:test:    ✓ incoming Return configuration from exact scoped database observations > ignores company00 templates, unrelated companies, other tenants and other column families without fallback 469ms
+@datacare/api:test:    ✓ incoming Return configuration from exact scoped database observations > contains missing and duplicate company settings instead of using another company or an arbitrary first row 318ms
+@datacare/api:test:    ✓ incoming Return configuration from exact scoped database observations > versions every relevant physical setting update and A→B→A without exposing unrelated settings 307ms
+@datacare/api:test:    ✓ incoming Return configuration from exact scoped database observations > versions column update/recreation and relevant book/year physical observations 5659ms
+@datacare/api:test:    ✓ incoming Return configuration from exact scoped database observations > preserves blank book direction/table compatibility but rejects explicit contradictions and missing/duplicate target year 603ms
+@datacare/api:test:    ✓ incoming Return configuration from exact scoped database observations > shares the company Return column family across separately configured books but binds observations to full selected scope 460ms
+@datacare/api:test:  ✓ test/otherCommission.db.test.ts (1 test) 1074ms
+@datacare/api:test:    ✓ database-backed TR_OTH_COMM voucher > creates, reads, rewrites, persisted-date locks and desktop-deletes atomically 1043ms
+@datacare/api:test:  ✓ test/releaseCertificationRecord.test.mjs (8 tests) 187ms
+@datacare/api:test:  ✓ test/dhrnReceipt.db.test.ts (5 tests) 2159ms
+@datacare/api:test:    ✓ database-backed dhiran receipt > persists the desktop receipt header and released-item detail, and reverses both 1600ms
+@datacare/api:test:  ✓ test/salesOrderLifecycle.routes.db.test.ts (13 tests) 22520ms
+@datacare/api:test:    ✓ ordinary Sales Order configured HTTP lifecycle > reads configuration with Sales rights and the selected historical financial year 472ms
+@datacare/api:test:    ✓ ordinary Sales Order configured HTTP lifecycle > isolates identical voucher numbers in two explicitly configured non-SOR books 676ms
+@datacare/api:test:    ✓ ordinary Sales Order configured HTTP lifecycle > requires owning Sales update/delete rights and preserves data after denied requests 1520ms
+@datacare/api:test:    ✓ ordinary Sales Order configured HTTP lifecycle > refuses missing or malformed expected versions before editing or deleting 1044ms
+@datacare/api:test:    ✓ ordinary Sales Order configured HTTP lifecycle > rejects incomplete parent/component arrays without dropping saved data 1818ms
+@datacare/api:test:    ✓ ordinary Sales Order configured HTTP lifecycle > rejects stale versions without changing any order, ledger or numbering row 11214ms
+@datacare/api:test:    ✓ ordinary Sales Order configured HTTP lifecycle > rejects missing, malformed and impossible dates without allocating or posting anything 613ms
+@datacare/api:test:    ✓ ordinary Sales Order configured HTTP lifecycle > rejects a different book family and an unknown book instead of falling back to SOR 674ms
+@datacare/api:test:    ✓ ordinary Sales Order configured HTTP lifecycle > deletes only the selected saved order with Sales delete rights and its current version 587ms
+@datacare/api:test:  ✓ test/sessionContextAccess.db.test.ts (27 tests) 6264ms
+@datacare/api:test:    ✓ read-only epoch-bearing access admission on real PostgreSQL > returns detached immutable exact context while leaving both full session rows and physical identities unchanged 633ms
+@datacare/api:test:    ✓ read-only epoch-bearing access admission on real PostgreSQL > matches canonical stored epoch 9007199254740993 without Number conversion 445ms
+@datacare/api:test:    ✓ read-only epoch-bearing access admission on real PostgreSQL > matches canonical stored epoch 9223372036854775807 without Number conversion 786ms
+@datacare/api:test:    ✓ read-only epoch-bearing access admission on real PostgreSQL > GET /me allows absent page headers for bootstrap, returns exact context plus unknown diagnostics and fresh rights, and is no-store 388ms
+@datacare/api:test:    ✓ read-only epoch-bearing access admission on real PostgreSQL > fresh principal reset state restricts context operations while /me remains available 336ms
+@datacare/api:test:    ✓ read-only epoch-bearing access admission on real PostgreSQL > selected-company principal does not replace immutable stored login company 365ms
+@datacare/api:test:  ❯ test/saleReturnLabourReplay.db.test.ts (17 tests | 1 failed) 40714ms
+@datacare/api:test:    ✓ session-bound saved labour preview in PostgreSQL > preserves old DTO/hash and complete literal loaded/opened states with no writes 7966ms
+@datacare/api:test:    ✓ session-bound saved labour preview in PostgreSQL > lookup neither copies nor appends; BB then AA preserves exact bill tax history 3064ms
+@datacare/api:test:    ✓ session-bound saved labour preview in PostgreSQL > interleaves money and labour at every bill prefix 2791ms
+@datacare/api:test:    ✓ session-bound saved labour preview in PostgreSQL > qualifies AA c13 and matches every independently expected cell 2728ms
+@datacare/api:test:    ✓ session-bound saved labour preview in PostgreSQL > qualifies TA c29 and matches every independently expected cell 1554ms
+@datacare/api:test:    × session-bound saved labour preview in PostgreSQL > qualifies C3 c13 and matches every independently expected cell 9117ms
+@datacare/api:test:      → Transaction API error: Transaction already closed: A commit cannot be executed on an expired transaction. The timeout for this transaction was 5000 ms, however 5736 ms passed since the start of the transaction. Consider increasing the interactive transaction timeout or doing less work in the transaction.
+@datacare/api:test:    ✓ session-bound saved labour preview in PostgreSQL > qualifies ZZ c13 and matches every independently expected cell 3223ms
+@datacare/api:test:    ✓ session-bound saved labour preview in PostgreSQL > retains repeated same-code events and deterministic retry without persistence 1068ms
+@datacare/api:test:    ✓ session-bound saved labour preview in PostgreSQL > refuses missing, case alias, unsupported category and NULL value without falling back 422ms
+@datacare/api:test:    ✓ session-bound saved labour preview in PostgreSQL > refuses checked candidate change and historical master change before new lookup 445ms
+@datacare/api:test:    ✓ session-bound saved labour preview in PostgreSQL > detects present-row ABA and delete/recreate while ignoring unrelated master changes 904ms
+@datacare/api:test:    ✓ session-bound saved labour preview in PostgreSQL > checks the base token before now-malformed saved numeric projection 1587ms
+@datacare/api:test:    ✓ session-bound saved labour preview in PostgreSQL > refuses forged prefix, unknown identity and hidden configured labour field 1528ms
+@datacare/api:test:    ✓ session-bound saved labour preview in PostgreSQL > reads an empty saved header but offers no candidate capability 316ms
+@datacare/api:test:    ✓ session-bound saved labour preview in PostgreSQL > checks fresh read rights and context rather than reusing old request permission 680ms
+@datacare/api:test:    ✓ session-bound saved labour preview in PostgreSQL > preserves the exact accepted prefix after copy succeeds but the bill rejects 2445ms
+@datacare/api:test:    ✓ session-bound saved labour preview in PostgreSQL > keeps scope detached and all reads in one RR snapshot during a concurrent master change 769ms
+@datacare/api:test:  ✓ test/rateCut.test.ts (21 tests) 18ms
+@datacare/api:test:  ✓ test/tourOrderPrint.routes.db.test.ts (5 tests) 2483ms
+@datacare/api:test:    ✓ X14 Tour Order confirmation HTTP permissions > retains approved copy labels and prints the source-selected image template with its saved parent image 510ms
+@datacare/api:test:    ✓ X14 Tour Order confirmation HTTP permissions > requires separate Tour Order view, update and delete rights for saved images 630ms
+@datacare/api:test:  ✓ test/cashReceiptLegs.db.test.ts (7 tests) 15457ms
+@datacare/api:test:    ✓ cash receipt ledger legs > writes a pair per movement, so a receipt with a discount has FOUR legs 836ms
+@datacare/api:test:    ✓ cash receipt ledger legs > writes only the amount pair when there is no discount 332ms
+@datacare/api:test:    ✓ cash payment ledger legs > uses legs 05-08, which a receipt never uses, and pairs each movement 2382ms
+@datacare/api:test:    ✓ cash payment ledger legs > pairs EVERY line, so three lines give six legs keyed 105 through 306 1973ms
+@datacare/api:test:    ✓ multi-line cash paths write a Rojmel row per line > a multi-line RECEIPT pairs each line and writes its Rojmel rows 4860ms
+@datacare/api:test:    ✓ multi-line cash paths write a Rojmel row per line > a multi-line PAYMENT writes nine type-04 rows for nine lines 3579ms
+@datacare/api:test:    ✓ bank leg codes are not a mirror of cash > a BANK payment uses 07/08, where a CASH payment uses 05/06 329ms
+@datacare/api:test:  ✓ test/saleReturnIncomingConfiguration.routes.db.test.ts (9 tests) 4192ms
+@datacare/api:test:  ✓ test/reopenVoucher.db.test.ts (8 tests) 1207ms
+@datacare/api:test:  ✓ test/app.security.db.test.ts (5 tests) 2974ms
+@datacare/api:test:    ✓ database-backed HTTP authorization and session boundary > denies missing rights, honors View-only create, and isolates rights by current location 1688ms
+@datacare/api:test:  ✓ test/orderImageWrite.db.test.ts (11 tests) 779ms
+@datacare/api:test:  ✓ test/releaseTemplateBundleIdentity.test.mjs (13 tests) 40ms
+@datacare/api:test:  ✓ test/reportChildren.db.test.ts (12 tests) 5009ms
+@datacare/api:test:    ✓ actual report children and parent band cardinality > binds and renders distinct 'KR' children with one occurrence of each parent total 416ms
+@datacare/api:test:    ✓ actual report children and parent band cardinality > selects matching header, parent, children, party and book for 'BASE' scope 825ms
+@datacare/api:test:    ✓ actual report children and parent band cardinality > selects matching header, parent, children, party and book for 'BRANCH' scope 776ms
+@datacare/api:test:    ✓ actual report children and parent band cardinality > selects matching header, parent, children, party and book for 'YEAR' scope 372ms
+@datacare/api:test:    ✓ actual report children and parent band cardinality > selects matching header, parent, children, party and book for 'COMPANY' scope 329ms
+@datacare/api:test:    ✓ actual report children and parent band cardinality > selects matching header, parent, children, party and book for 'TENANT' scope 779ms
+@datacare/api:test:  ✓ test/savedSaleReturn.routes.db.test.ts (9 tests) 3523ms
+@datacare/api:test:    ✓ saved incoming Sale Return HTTP lifecycle > patches only explicitly dirty metadata and leaves every other business scalar intact 370ms
+@datacare/api:test:    ✓ saved incoming Sale Return HTTP lifecycle > rejects stale and cross-book or cross-tenant versions without losing the winning edit 323ms
+@datacare/api:test:    ✓ saved incoming Sale Return HTTP lifecycle > rejects missing tokens, unknown/financial/hidden patches, explicit null and forged identity 664ms
+@datacare/api:test:  ✓ test/settingsEffect.db.test.ts (7 tests) 3970ms
+@datacare/api:test:    ✓ settings that must change an outcome > NEGATIVE_STK_SALE refuses an oversell when N and permits it when Y 609ms
+@datacare/api:test:    ✓ settings that must change an outcome > SALES_WITH_HMTAX gates the hallmark tax but not the hallmark charge 312ms
+@datacare/api:test:    ✓ settings that must change an outcome > LBR_WITH_GHT includes ghat in the per-gram labour base, and excludes it when N 594ms
+@datacare/api:test:  ✓ test/orderImageReport.db.test.ts (5 tests) 2398ms
+@datacare/api:test:    ✓ image report binding from saved scoped order identities > binds 'OrdVchImg' images by actual saved scope and source precedence without fanout 370ms
+@datacare/api:test:    ✓ image report binding from saved scoped order identities > binds 'TourOrdImg' images by actual saved scope and source precedence without fanout 307ms
+@datacare/api:test:    ✓ image report binding from saved scoped order identities > keeps custom images separate across complete saved year/book/branch/company/tenant identities 1197ms
+@datacare/api:test:  ✓ test/saleReturnSource.routes.db.test.ts (7 tests) 7164ms
+@datacare/api:test:    ✓ original Sales source read HTTP boundary > keeps same-number sources separate by configured original book and authenticated tenant 848ms
+@datacare/api:test:    ✓ original Sales source read HTTP boundary > browses scoped original invoices with bounded search and pagination 1271ms
+@datacare/api:test:    ✓ original Sales source read HTTP boundary > rejects incomplete identities, ambiguous query values and hidden source scope overrides 1119ms
+@datacare/api:test:    ✓ original Sales source read HTTP boundary > refuses the wrong source family, inactive book, unknown year and missing original voucher 338ms
+@datacare/api:test:    ✓ original Sales source read HTTP boundary > observes changed source generations without mutating any voucher or business companion 1187ms
+@datacare/api:test:  ✓ test/settingsBehavior.test.ts (93 tests) 22ms
+@datacare/api:test:  ✓ test/savedSaleReturnEmpty.db.test.ts (6 tests) 3736ms
+@datacare/api:test:    ✓ empty saved Return header inspection preserves metadata and replay refusal > reads an exact empty header with no domain edit authority and unchanged nonempty sibling version 631ms
+@datacare/api:test:    ✓ empty saved Return header inspection preserves metadata and replay refusal > retains locked metadata refusal for a fresh valid employee patch and refuses a fabricated replay row 325ms
+@datacare/api:test:    ✓ empty saved Return header inspection preserves metadata and replay refusal > serves both actual authenticated GETs with empty rows, no-store and no numeric or metadata domain authority 500ms
+@datacare/api:test:  ✓ test/tagCancelIdentity.db.test.ts (10 tests) 15342ms
+@datacare/api:test:    ✓ tag cancel resolves one live serial identity > cancels a live tag and records the out-movement against the resolved instance 859ms
+@datacare/api:test:    ✓ tag cancel resolves one live serial identity > refuses a tag that belongs to another location 5190ms
+@datacare/api:test:    ✓ tag cancel resolves one live serial identity > cancels a tag that was sold and then returned, which the old guard refused forever 1319ms
+@datacare/api:test:    ✓ tag cancel resolves one live serial identity > refuses a tag whose net stock is already zero 763ms
+@datacare/api:test:    ✓ tag cancel resolves one live serial identity > writes the register from the tag itself, with the resolved instance stamped 708ms
+@datacare/api:test:    ✓ tag cancel resolves one live serial identity > restores a TAG_STOCK-only tag when the cancel is deleted, instead of losing it 1367ms
+@datacare/api:test:    ✓ tag cancel resolves one live serial identity > does NOT duplicate a BAR_DETL-backed tag into TAG_STOCK on reversal 1645ms
+@datacare/api:test:    ✓ tag cancel resolves one live serial identity > refuses a weight change on a tag that does not exist 548ms
+@datacare/api:test:    ✓ tag cancel resolves one live serial identity > stamps the resolved instance on a weight-change movement 1345ms
+@datacare/api:test:    ✓ tag cancel resolves one live serial identity > refuses a weight change on a tag whose stock is already gone 963ms
+@datacare/api:test:  ✓ test/releaseCandidateIdentity.test.mjs (16 tests) 240ms
+@datacare/api:test:  ✓ test/tagCancelRows.test.ts (17 tests) 49ms
+@datacare/api:test:  ✓ test/reportAuthorization.test.ts (12 tests) 2887ms
+@datacare/api:test:    ✓ authenticated generic report routes > enforces the requested form view/print matrix for every report slug and both export formats 1750ms
+@datacare/api:test:  ✓ test/vpLifecycle.db.test.ts (1 test) 1294ms
+@datacare/api:test:    ✓ database-backed VP adjustment lifecycle > creates, reads, replaces, locks and desktop-deletes VP adjustment atomically 1196ms
+@datacare/api:test:  ✓ test/karigarDayBook.db.test.ts (5 tests) 2482ms
+@datacare/api:test:    ✓ karigar day book (plan F3.1) > a receipt writes one metal row per detail line, type 11, metal IN 676ms
+@datacare/api:test:  ✓ test/estimateReset.db.test.ts (1 test) 2301ms
+@datacare/api:test:    ✓ UT_IMPORT Estimate Reset utility > previews and applies reset-book estimate, tag-cancel and wholesale cleanup 1935ms
+@datacare/api:test:  ✓ test/meltingPro.db.test.ts (3 tests) 2483ms
+@datacare/api:test:    ✓ database-backed TR_MLT_PRO lifecycle > atomically creates all desktop write families, reads them, replaces from source, and audits deletion 1999ms
+@datacare/api:test:  ✓ test/lineComponentRounding.db.test.ts (4 tests) 8555ms
+@datacare/api:test:    ✓ per-line tax allocation > rounds the line tax ONCE, and the lines sum to the header tax 3344ms
+@datacare/api:test:    ✓ a tagged line copies the karigar figures from the tag > takes KR_TOUCH and KR_FINE from BAR_DETL, and leaves them zero when untagged 1711ms
+@datacare/api:test:    ✓ persisted line component rounding > rounds each component to whole rupees when TOT_AMT_ROF is 0 2034ms
+@datacare/api:test:    ✓ persisted line component rounding > keeps paise when the same setting is 2, so this is configured and not hardcoded 807ms
+@datacare/api:test:  ✓ test/kernelConformance.test.ts (13 tests) 167ms
+@datacare/api:test:  ✓ test/parityBundleDiff.test.ts (24 tests) 20ms
+@datacare/api:test:  ✓ test/conditionalRules.test.ts (25 tests) 39ms
+@datacare/api:test:  ✓ test/oldItemSales.db.test.ts (2 tests) 910ms
+@datacare/api:test:    ✓ old item sales workflow over KR_DATA/KR_DETL > creates, reads, edits, and deletes OLD ITEM SALES as KR-family rows with old-gold fine 733ms
+@datacare/api:test:  ✓ test/integrationWireContract.test.ts (14 tests) 53ms
+@datacare/api:test:  ✓ test/sessionContext.extraction.test.ts (72 tests) 79ms
+@datacare/api:test:  ✓ test/provisioning.db.test.ts (14 tests) 2917ms
+@datacare/api:test:  ✓ test/yearEndCarry.db.test.ts (11 tests) 861ms
+@datacare/api:test:    ✓ year-end carry-forward > carries each account forward as ΣDR − ΣCR, one leg per account 345ms
+@datacare/api:test:  ✓ test/orderDesignSelection.db.test.ts (12 tests) 3535ms
+@datacare/api:test:    ✓ Sales F1 saved Design source resolution > uses registration-specific Remark help without changing source-copy values 509ms
+@datacare/api:test:    ✓ Sales F1 saved Design source resolution > requires a real item and a complete, configured Sales book scope 315ms
+@datacare/api:test:    ✓ Sales F1 saved Design source resolution > holds source and item non-key writes until the selecting transaction completes 609ms
+@datacare/api:test:    ✓ Sales F1 saved Design source resolution > treats blank and N design-image cells as absent without tag/custom fallback 446ms
+@datacare/api:test:  ✓ test/tagInvariants.db.test.ts (14 tests) 859ms
+@datacare/api:test:    ✓ tag invariants > passes on a coherent tag: admitted once, held, then issued 402ms
+@datacare/api:test:  ✓ test/correctionWorkflow.db.test.ts (4 tests) 2279ms
+@datacare/api:test:  ✓ test/p9Reports.db.test.ts (8 tests) 11317ms
+@datacare/api:test:    ✓ P9 report workflows > lists hallmarked tags with their HUIDs, keeping ids as text 736ms
+@datacare/api:test:    ✓ P9 report workflows > returns every tag when hallmark filtering is turned off 642ms
+@datacare/api:test:    ✓ P9 report workflows > reports item labour bands, which is what ItStk Level actually holds 2635ms
+@datacare/api:test:    ✓ P9 report workflows > prices bill profit against the TAG karigar basis 1277ms
+@datacare/api:test:    ✓ P9 report workflows > excludes non-sale movements and untagged lines, as the desktop WHERE does 2898ms
+@datacare/api:test:    ✓ P9 report workflows > computes physical-stock variance per TAG INSTANCE, not per tag number 947ms
+@datacare/api:test:    ✓ P9 report workflows > reports approval and employee issue, so an off-shelf tag is not a phantom shortage 732ms
+@datacare/api:test:    ✓ P9 report workflows > nets stock movement by SIZE, which no other report groups by 1059ms
+@datacare/api:test:  ✓ test/utilities.db.test.ts (4 tests) 1337ms
+@datacare/api:test:    ✓ database-backed desktop utilities > creates, updates, lists, gets and deletes only tenant-scoped HDD REF_NO 649ms
+@datacare/api:test:    ✓ database-backed desktop utilities > persists all desktop USER_REQUEST columns from AC_DATA and supports scoped lifecycle 486ms
+@datacare/api:test:  ✓ test/tagOpeningRoundTrip.db.test.ts (4 tests) 7317ms
+@datacare/api:test:    ✓ tag opening survives a reopen-and-save unchanged > returns every field it accepts, so a reopen loses nothing 867ms
+@datacare/api:test:    ✓ tag opening survives a reopen-and-save unchanged > keeps hallmark ids as text, because a HUID contains letters 2864ms
+@datacare/api:test:    ✓ tag opening survives a reopen-and-save unchanged > preserves the ENTIRE persisted row across reopen and save unchanged 2381ms
+@datacare/api:test:    ✓ tag opening survives a reopen-and-save unchanged > keeps the tag identity and its stock movement across the round trip 691ms
+@datacare/api:test:  ✓ test/saleReturnIncomingLabour.db.test.ts (15 tests) 871ms
+@datacare/api:test:  ✓ test/consignmentPurchase.db.test.ts (1 test) 846ms
+@datacare/api:test:    ✓ database-backed TR_PR_SL_UAE consignment purchase mode > imports open CON REC lines, posts CON PUR, preserves references on edit, and reverses source flags on delete 810ms
+@datacare/api:test:  ✓ test/designBook.routes.db.test.ts (5 tests) 1808ms
+@datacare/api:test:  ✓ test/tourOrderExactValues.db.test.ts (8 tests) 3349ms
+@datacare/api:test:    ✓ Tour exact mapped saved values retain existing writer guards > GET retains mapped exact strings, NULL and true zeros without changing its physical observation 868ms
+@datacare/api:test:    ✓ Tour exact mapped saved values retain existing writer guards > unchanged exact GET input preserves the complete business rows and changes only physical replacement/version 1087ms
+@datacare/api:test:    ✓ Tour exact mapped saved values retain existing writer guards > advance-only exact input changes25 to40 and keeps every parent/child raw scalar, hidden identity and clock 353ms
+@datacare/api:test:  ✓ test/ledgerStaging.db.test.ts (6 tests) 7384ms
+@datacare/api:test:    ✓ typed ledger report staging > stages every FINE_DATA column the desktop writes 357ms
+@datacare/api:test:    ✓ typed ledger report staging > stages every DM_KR_DATA column for the karigar diamond layouts 1412ms
+@datacare/api:test:    ✓ typed ledger report staging > stages every TEMP_ADD column, keeping the desktop AC_PARSON spelling 1326ms
+@datacare/api:test:  ✓ test/designComponents.db.test.ts (9 tests) 12097ms
+@datacare/api:test:    ✓ X11 design parent/component lifecycle > persists every component business field on its full parent key 699ms
+@datacare/api:test:    ✓ X11 design parent/component lifecycle > preserves every stored business column on unchanged save including nullable hidden values 1084ms
+@datacare/api:test:    ✓ X11 design parent/component lifecycle > keeps component identities and images when parents reorder and one child is removed 480ms
+@datacare/api:test:    ✓ X11 design parent/component lifecycle > retains omitted children for existing API clients and removes an explicit empty child set 429ms
+@datacare/api:test:    ✓ X11 design parent/component lifecycle > removes children of a removed parent and deletes both sets for the complete book key 755ms
+@datacare/api:test:    ✓ X11 design parent/component lifecycle > separates repeated design numbers by tenant, company, book and product 1986ms
+@datacare/api:test:    ✓ X11 design parent/component lifecycle > rejects duplicate or invalid child identities and values without changing the saved book 5010ms
+@datacare/api:test:    ✓ X11 design parent/component lifecycle > rolls back the whole replacement on a database child numeric overflow 783ms
+@datacare/api:test:    ✓ X11 design parent/component lifecycle > allows one concurrent edit and refuses stale save/delete and create-over-existing 844ms
+@datacare/api:test:  ✓ test/bullionSale.db.test.ts (2 tests) 962ms
+@datacare/api:test:    ✓ bullion sale workflow over RATE_CUT_DATA > posts, reopens, edits and deletes a source-linked bullion sale with issue and receive grids 844ms
+@datacare/api:test:  ✓ test/entityImage.db.test.ts (18 tests) 1465ms
+@datacare/api:test:  ✓ test/savedSaleReturnClock.db.test.ts (8 tests) 2831ms
+@datacare/api:test:    ✓ saved Return clock projection from real PostgreSQL JSONB observations > preserves actual JSONB date/time under 'ISO, MDY' and 'UTC' 451ms
+@datacare/api:test:    ✓ saved Return clock projection from real PostgreSQL JSONB observations > qualifies zero and one-to-six actual JSONB fraction digits without inventing padded raw text 586ms
+@datacare/api:test:    ✓ saved Return clock projection from real PostgreSQL JSONB observations > keeps SQL NULL distinct and yields no derived cutoff for either absent saved value 383ms
+@datacare/api:test:    ✓ saved Return clock projection from real PostgreSQL JSONB observations > contains a deliberately incomplete adapter projection without claiming the SQL reader omitted a column 632ms
+@datacare/api:test:    ✓ saved Return clock projection from real PostgreSQL JSONB observations > does not invent a clock or call the adapter when the saved document itself is absent 386ms
+@datacare/api:test:  ✓ test/wholesaleRateCut.routes.db.test.ts (4 tests) 10414ms
+@datacare/api:test:    ✓ X16 wholesale sale and rate cut through HTTP > posts a wholesale sale that moves the tag out, cuts the balance fine into money, and reopens it 2408ms
+@datacare/api:test:    ✓ X16 wholesale sale and rate cut through HTTP > refuses the sold tag, the other workflow’s book and the other workflow’s user with 400/403 2009ms
+@datacare/api:test:    ✓ X16 wholesale sale and rate cut through HTTP > an edit that drops the tag returns it to stock; the delete audits the signed-in user 430ms
+@datacare/api:test:  ✓ test/reportDateFilter.db.test.ts (10 tests) 293ms
+@datacare/api:test:  ✓ test/contraDelete.db.test.ts (4 tests) 1071ms
+@datacare/api:test:  ✓ test/stoneDmCf.db.test.ts (2 tests) 465ms
+@datacare/api:test:    ✓ TR_PHYSTK Stone/Dm-Cf SF PRINT mode > saves, reads, edits and deletes SF PRINT certificate rows without moving stock 387ms
+@datacare/api:test:  ✓ test/contractIntegrity.test.ts (17 tests) 10ms
+@datacare/api:test:  ✓ test/voucherDocumentScope.db.test.ts (14 tests) 16747ms
+@datacare/api:test:    ✓ printable vouchers read by the complete desktop key > sale: returns only the requested header, lines, company and location party 387ms
+@datacare/api:test:    ✓ print routes refuse a missing book instead of defaulting > a print request without a book is a 400 that names the missing field 768ms
+@datacare/api:test:    ✓ print routes refuse a missing book instead of defaulting > prints the session location voucher, never another location with the same number 1402ms
+@datacare/api:test:  ✓ test/manufacturingReports.db.test.ts (5 tests) 2022ms
+@datacare/api:test:    ✓ RP_MFG_ZOOM manufacturing report parity builders > matches DGV_MFG_INOUT process totals with date and karigar filters 607ms
+@datacare/api:test:    ✓ RP_MFG_ZOOM manufacturing report parity builders > matches DGV_DESIGN_FILL lot/process pivot and signed diff balances 408ms
+@datacare/api:test:    ✓ RP_MFG_ZOOM manufacturing report parity builders > supports the desktop lot-mode variant that keys the report on ITM_LOT 371ms
+@datacare/api:test:    ✓ RP_MFG_ZOOM manufacturing report parity builders > matches RP_MFG_LEDR account summary balances and filters zero rows by default 333ms
+@datacare/api:test:  ✓ test/labourDesktop.test.ts (22 tests) 19ms
+@datacare/api:test:  ✓ test/financeBookFamily.db.test.ts (7 tests) 37501ms
+@datacare/api:test:    ✓ D1 receipt/payment book family and slot-2 kasar > D1-3: a receipt write-off with no explicit account posts legs 03/04 to slot 2 (00057) 7510ms
+@datacare/api:test:    ✓ D1 receipt/payment book family and slot-2 kasar > D1-4: a payment write-off with no explicit account posts legs 07/08 to slot 2 (00042) 2834ms
+@datacare/api:test:    ✓ D1 receipt/payment book family and slot-2 kasar > multi-line receipts and payments resolve the same slot-2 account 10163ms
+@datacare/api:test:    ✓ D1 receipt/payment book family and slot-2 kasar > D1-5: a receipt or payment into a SALES book is refused and writes nothing 3013ms
+@datacare/api:test:    ✓ D1 receipt/payment book family and slot-2 kasar > D1-6: a cash receipt into a BANK REC book is refused, and a bank receipt is accepted 4518ms
+@datacare/api:test:    ✓ D1 receipt/payment book family and slot-2 kasar > D1-7: a web book with CASH in slots 1 and 2 refuses a write-off instead of posting it to cash 2353ms
+@datacare/api:test:    ✓ D1 receipt/payment book family and slot-2 kasar > an explicit kasar account still wins over slot 2 5386ms
+@datacare/api:test:  ✓ test/mfgLotRoutes.db.test.ts (5 tests) 15748ms
+@datacare/api:test:    ✓ lot Setting read HTTP integration > serves all eight GET paths with their exact Setting view permission and canonical HTTP pagination 4817ms
+@datacare/api:test:    ✓ lot Setting read HTTP integration > does not grant Setting access through generic MFG permissions or the other Setting operation 2852ms
+@datacare/api:test:    ✓ lot Setting read HTTP integration > rejects wrong families, missing books, foreign scope and malformed pagination; missing exact voucher is404 1728ms
+@datacare/api:test:    ✓ lot Setting read HTTP integration > opens exact imported references and maps malformed read identifiers to400 921ms
+@datacare/api:test:  ✓ test/dataRepairAuthority.test.ts (7 tests) 3046ms
+@datacare/api:test:  ✓ test/designCalculations.db.test.ts (7 tests) 1068ms
+@datacare/api:test:    ✓ X11 ordered calculation replay and company policy > replays parent/component edits from DB baseline and ignores submitted derived values and master defaults 578ms
+@datacare/api:test:  ✓ test/tourIdtl.db.test.ts (3 tests) 1579ms
+@datacare/api:test:    ✓ database-backed approval sub-detail > writes every desktop APR_IDTL column and reverses it on delete 1187ms
+@datacare/api:test:  ✓ test/companySettings.db.test.ts (7 tests) 1701ms
+@datacare/api:test:    ✓ database-backed company settings provisioning > clones every desktop configuration column from the template company 882ms
+@datacare/api:test:  ✓ test/designRepeat.db.test.ts (6 tests) 1773ms
+@datacare/api:test:    ✓ X11 repeat and keyboard replay against stored snapshots > persists copied parent amounts without recalculation and leaves the source full snapshot and identity intact 880ms
+@datacare/api:test:    ✓ X11 repeat and keyboard replay against stored snapshots > rejects disabled/reserved repeat fields and repeat on an existing row without changing any saved business data 315ms
+@datacare/api:test:  ✓ test/reportFiltersApplied.db.test.ts (6 tests) 1356ms
+@datacare/api:test:    ✓ report filters end to end > sales return register filters by party AND by party geography through the real join 568ms
+@datacare/api:test:  ✓ test/billToBillDelete.db.test.ts (4 tests) 10612ms
+@datacare/api:test:    ✓ bill-to-bill reversal (plan F1.4) > removes the settlement voucher and audits the deletion 2553ms
+@datacare/api:test:  ✓ test/orderReport.test.ts (14 tests) 167ms
+@datacare/api:test:  ✓ test/orderTagReports.db.test.ts (7 tests) 753ms
+@datacare/api:test:  ✓ test/tagAdjust.db.test.ts (2 tests) 5709ms
+@datacare/api:test:    ✓ TR_TAG_CAN Tag Adjust mode > records a BAR_CAN voucher and updates live tag data type on save, edit and delete 2570ms
+@datacare/api:test:    ✓ TR_TAG_CAN Tag Adjust mode > rejects non-TAG ADJ books that share the TR_TAG_CAN form 1953ms
+@datacare/api:test:  ✓ test/orderDocumentScope.db.test.ts (6 tests) 1391ms
+@datacare/api:test:    ✓ order confirmation full desktop document identity > returns only the requested header, lines, company and branch-specific party for repeated numbers 373ms
+@datacare/api:test:  ✓ test/tagSplitRows.test.ts (11 tests) 19ms
+@datacare/api:test:  ✓ test/orderSessionCommands.test.ts (24 tests) 67ms
+@datacare/api:test:  ✓ test/reportDiff.test.ts (19 tests) 30ms
+@datacare/api:test:  ✓ test/eCreditNoteLifecycle.routes.db.test.ts (2 tests) 6419ms
+@datacare/api:test:    ✓ X15 E CRNT HTTP lifecycle > creates, reopens, refuses a stale update, updates, prints and deletes over HTTP 1614ms
+@datacare/api:test:    ✓ X15 E CRNT HTTP lifecycle > enforces Transaction/E CrntNote rights for update, delete and print 514ms
+@datacare/api:test:  ✓ test/fineInoutGrid.db.test.ts (3 tests) 4413ms
+@datacare/api:test:    ✓ fine in/out persists the desktop detail grid > stores every desktop grid column the contract accepts 1408ms
+@datacare/api:test:    ✓ fine in/out persists the desktop detail grid > keeps 'N' as the no-tag sentinel when a line carries no tag 820ms
+@datacare/api:test:    ✓ fine in/out persists the desktop detail grid > records the acting user and a hidden voucher identity on both header and detail 1042ms
+@datacare/api:test:  ✓ test/parityRatchet.test.ts (17 tests) 12ms
+@datacare/api:test:  ✓ test/salesQuotation.db.test.ts (1 test) 6144ms
+@datacare/api:test:    ✓ database-backed TR_SALE sales quotation mode > persists SL QUOT rows without posting stock, ledger, tax, rojmel, bill-OS, or order rows 6057ms
+@datacare/api:test:  ✓ test/tagSplitIdentity.db.test.ts (6 tests) 60324ms
+@datacare/api:test:    ✓ tag split resolves one live serial identity > splits a live tag and records the parent out-movement against the resolved instance 20682ms
+@datacare/api:test:    ✓ tag split resolves one live serial identity > refuses a parent that belongs to another location 9901ms
+@datacare/api:test:    ✓ tag split resolves one live serial identity > splits a parent sold and then returned (net live), which an "a minus exists" guard would refuse forever 14084ms
+@datacare/api:test:    ✓ tag split resolves one live serial identity > refuses a parent whose net stock is already zero 1813ms
+@datacare/api:test:    ✓ tag split resolves one live serial identity > refuses an ambiguous tag number with two live instances instead of picking the first 4580ms
+@datacare/api:test:    ✓ tag split resolves one live serial identity > mints each child as a distinct live serial identity, resolvable on its own 1402ms
+@datacare/api:test:  ✓ test/reportFamilyReports.db.test.ts (5 tests) 12569ms
+@datacare/api:test:    ✓ RP_ALL report family parity builders > runs the Approval Rpt pending mode with party, product, and geography filters 4409ms
+@datacare/api:test:    ✓ RP_ALL report family parity builders > runs Kr Report issue/receipt modes from KR_DETL book names 3731ms
+@datacare/api:test:    ✓ RP_ALL report family parity builders > runs Reparing Rpt pending branches using desktop ISU_ADJ predicates 1295ms
+@datacare/api:test:    ✓ RP_ALL report family parity builders > runs VP Report pending/adjusted modes from RATE_CUT_DATA book 215 910ms
+@datacare/api:test:    ✓ RP_ALL report family parity builders > runs Bul Report sales/purchase pending modes from BUL_DATA 894ms
+@datacare/api:test:  ✓ test/closingStock.db.test.ts (6 tests) 4446ms
+@datacare/api:test:    ✓ closing stock valuation (Ac_Final parity) > values metal from BAL_GR fine at rate/10 plus AVG_AMT in 'F' mode 386ms
+@datacare/api:test:    ✓ closing stock valuation (Ac_Final parity) > applies the ledger-fine adjustment only to the GO group 375ms
+@datacare/api:test:    ✓ closing stock valuation (Ac_Final parity) > skips the computed pass when operator values exist in book 888 415ms
+@datacare/api:test:    ✓ closing stock valuation (Ac_Final parity) > returns a balanced double-entry pair per group without writing it 2419ms
+@datacare/api:test:    ✓ closing stock valuation (Ac_Final parity) > exposes a REAL difference instead of a balancing figure 347ms
+@datacare/api:test:  ✓ test/settings.db.test.ts (14 tests) 3362ms
+@datacare/api:test:    ✓ settings dual-table persistence > creates the missing row in each table and round-trips both sides 585ms
+@datacare/api:test:    ✓ settings dual-table persistence > persists a real date into the date columns 413ms
+@datacare/api:test:    ✓ settings dual-table persistence > rejects the whole request when any key is unknown or invalid 359ms
+@datacare/api:test:    ✓ settings dual-table persistence > isolates tenants 756ms
+@datacare/api:test:  ✓ test/desktopMessages.db.test.ts (10 tests) 8008ms
+@datacare/api:test:    ✓ desktop validation wording > blocks a cheque amount with no bank account, in desktop wording 1497ms
+@datacare/api:test:    ✓ desktop validation wording > allows a cheque amount once the bank account is supplied 658ms
+@datacare/api:test:    ✓ desktop validation wording > allows the sale once a salesperson is named, with EMP_CODE_MANDATORY=Y 652ms
+@datacare/api:test:    ✓ desktop validation wording > blocks credit to a party flagged in the defaulter list, in desktop wording 524ms
+@datacare/api:test:    ✓ desktop validation wording > permits a flagged party when nothing is left outstanding 2871ms
+@datacare/api:test:    ✓ desktop validation wording > rejects the same order line picked twice, in desktop wording 790ms
+@datacare/api:test:    ✓ desktop validation wording > allows two lines against different order serials 427ms
+@datacare/api:test:  ✓ test/releaseCandidateExpectedIdentity.test.mjs (10 tests) 17ms
+@datacare/api:test:  ✓ test/purchase.test.ts (16 tests) 55ms
+@datacare/api:test:  ✓ test/financeBookSelection.routes.db.test.ts (5 tests) 7534ms
+@datacare/api:test:    ✓ D1 receipts, payments and contra through HTTP > D1-1: a cash receipt with the book the form now sends is saved, posted and printable 688ms
+@datacare/api:test:    ✓ D1 receipts, payments and contra through HTTP > D1-2: a cash payment is saved in the PAY book 673ms
+@datacare/api:test:    ✓ D1 receipts, payments and contra through HTTP > D1-5 over HTTP: a receipt into the SALES book is refused and writes nothing 424ms
+@datacare/api:test:    ✓ D1 receipts, payments and contra through HTTP > contra is saved in the provisioned CONTRA book 556ms
+@datacare/api:test:  ✓ test/eInvoiceLifecycle.routes.db.test.ts (2 tests) 10090ms
+@datacare/api:test:    ✓ X15 E INVOICE HTTP lifecycle > creates, registers an IRN, locks edit/delete, refuses a second IRN and unlocks after cancel 3574ms
+@datacare/api:test:    ✓ X15 E INVOICE HTTP lifecycle > enforces Transaction/E Invoice rights and refuses credit-note routes on an invoice book 1213ms
+@datacare/api:test:  ✓ test/saleReturnIncomingConfiguration.test.ts (37 tests) 113ms
+@datacare/api:test:  ✓ test/sessionContextValue.test.ts (84 tests) 32ms
+@datacare/api:test:  ✓ test/purchaseQuotation.db.test.ts (1 test) 1067ms
+@datacare/api:test:    ✓ database-backed TR_PURC purchase quotation mode > persists PR QUOT rows without posting stock, ledger, tax, rojmel, bill-OS, or lot rows 975ms
+@datacare/api:test:  ✓ test/completionRegister.test.ts (11 tests) 57ms
+@datacare/api:test:  ✓ test/tourOrder.db.test.ts (2 tests) 2810ms
+@datacare/api:test:    ✓ TR_SALE_ORD Tour Order lifecycle parity > creates, reads, edits, lists, and deletes TOUR ORDER rows with desktop order stamps 2594ms
+@datacare/api:test:  ✓ test/reportRender.db.test.ts (5 tests) 4850ms
+@datacare/api:test:    ✓ database-backed critical Crystal report rendering > renders seeded 'sales bill' values through 'SalesBillHz' 582ms
+@datacare/api:test:  ✓ test/saleReturnLabourReplay.test.ts (30 tests) 40ms
+@datacare/api:test:  ✓ test/dhrnLoanLifecycle.db.test.ts (2 tests) 1494ms
+@datacare/api:test:    ✓ database-backed loan received / loan issue > receives an amount loan into DHRN_ISU_DATA with ENTRY_TYPE L and reversed principal ledger 1273ms
+@datacare/api:test:  ✓ test/schemeGoldAdjust.db.test.ts (1 test) 3750ms
+@datacare/api:test:    ✓ scheme gold adjustment desktop lifecycle > writes AD_ADJ, AD_OS amount/gold rows, ledger, rojmel, readback and reversal 2763ms
+@datacare/api:test:  ✓ test/orderImageReport.test.ts (7 tests) 137ms
+@datacare/api:test:  ✓ test/tourReports.db.test.ts (3 tests) 1039ms
+@datacare/api:test:    ✓ RP_TOUR_ZOOM Tour Report and Tour Tag parity builders > matches DGV_TOUR_FILL voucher-wise issue/sale/return/pending totals and filters 406ms
+@datacare/api:test:  ✓ test/postingAccountLiterals.test.ts (5 tests) 1766ms
+@datacare/api:test:    ✓ P0-04 posting account literals > introduces no account literal in a file that does not already carry recorded debt 1053ms
+@datacare/api:test:  ✓ test/configTables.db.test.ts (6 tests) 1373ms
+@datacare/api:test:  ✓ test/postingAccountFailClosed.db.test.ts (3 tests) 15625ms
+@datacare/api:test:    ✓ posting accounts fail closed > refuses a receipt when the book has no configured settlement account, consuming no serial 3843ms
+@datacare/api:test:    ✓ posting accounts fail closed > refuses a write-off without a write-off account and still writes nothing 3403ms
+@datacare/api:test:    ✓ posting accounts fail closed > posts to the CONFIGURED account, never to a literal, once configuration exists 4401ms
+@datacare/api:test:  ✓ test/reportXlsx.test.ts (10 tests) 263ms
+@datacare/api:test:  ✓ test/reportFilterGuard.test.ts (9 tests) 6022ms
+@datacare/api:test:    ✓ global report filter guard > refuses a shared filter on a report that does not apply it 1907ms
+@datacare/api:test:    ✓ global report filter guard > refuses a dimension a BOUND report cannot honour 651ms
+@datacare/api:test:    ✓ global report filter guard > guards the export and csv variants too 1400ms
+@datacare/api:test:    ✓ global report filter guard > does not interfere when no shared filter is supplied 400ms
+@datacare/api:test:    ✓ global report filter guard > treats a blank filter value as absent 465ms
+@datacare/api:test:    ✓ global report filter guard > returns 404 for an unknown path, not a 500 688ms
+@datacare/api:test:  ✓ test/schemeLedgerLegs.db.test.ts (2 tests) 8864ms
+@datacare/api:test:    ✓ scheme instalment ledger legs > writes a 33-character key per member line, liability first, with the contra 4855ms
+@datacare/api:test:    ✓ scheme instalment ledger legs > numbers each member line, so three members give six legs numbered 1..3 2218ms
+@datacare/api:test:  ✓ test/tagPrintStaging.db.test.ts (3 tests) 1260ms
+@datacare/api:test:    ✓ database-backed tag print staging > copies every desktop-staged column from BAR_DETL 689ms
+@datacare/api:test:    ✓ database-backed tag print staging > never clears or copies another tenant staging rows 411ms
+@datacare/api:test:  ✓ test/workflows.test.ts (19 tests) 14ms
+@datacare/api:test:  ✓ test/saleAmountBasis.routes.db.test.ts (3 tests) 20829ms
+@datacare/api:test:    ✓ D6 sale amount basis and 400-not-500 over HTTP > D6-1: the evaluated sale bills 60,000 on net and stores RtWith N 5013ms
+@datacare/api:test:    ✓ D6 sale amount basis and 400-not-500 over HTTP > an unknown labour type is a 400 validation error, not a 500 TypeError 621ms
+@datacare/api:test:    ✓ D6 sale amount basis and 400-not-500 over HTTP > a sale return without a tax rate is a 400 validation error, not a 500 DecimalError 337ms
+@datacare/api:test:  ✓ test/graphReport.db.test.ts (5 tests) 2805ms
+@datacare/api:test:    ✓ RP_GRAPH report parity builder > matches Last 30 Day SL desktop defaults from CO_MAST 1626ms
+@datacare/api:test:    ✓ RP_GRAPH report parity builder > matches Karigar SL for sold tagged stock 410ms
+@datacare/api:test:  ✓ test/orderTrackReport.db.test.ts (2 tests) 886ms
+@datacare/api:test:    ✓ RP_ORD_TRACK order tracking report parity builder > matches the desktop sales-pending order tracking grid and joined columns 534ms
+@datacare/api:test:  ✓ test/creditNoteRead.db.test.ts (3 tests) 969ms
+@datacare/api:test:  ✓ test/reportScreens.routes.db.test.ts (10 tests) 5694ms
+@datacare/api:test:    ✓ D3/D4 report screens and slug exports > D4: balance-sheet filters resolve to their form (benign 404, not 403) and its exports work 392ms
+@datacare/api:test:    ✓ D3/D4 report screens and slug exports > D4: gstr1 filters resolve to their form (benign 404, not 403) and its exports work 367ms
+@datacare/api:test:  ✓ test/taxMasterGst.db.test.ts (5 tests) 281ms
+@datacare/api:test:  ✓ test/integrationReadiness.test.ts (13 tests) 6ms
+@datacare/api:test:  ✓ test/messageLogIsolation.db.test.ts (4 tests) 263ms
+@datacare/api:test:  ✓ test/cutover.test.ts (4 tests) 14ms
+@datacare/api:test:  ✓ test/tagTransferBookMigration.db.test.ts (2 tests) 753ms
+@datacare/api:test:  ✓ test/sessionContextJwt.test.ts (63 tests) 61ms
+@datacare/api:test:  ✓ test/einvoiceProductionGuard.test.ts (10 tests) 65ms
+@datacare/api:test:  ✓ test/stockLimitMaster.db.test.ts (5 tests) 758ms
+@datacare/api:test:    ✓ MS_STK_LIMIT master parity writers > replaces Dm Size rows for one item and leaves other items untouched 447ms
+@datacare/api:test:  ✓ test/ecreditNoteIrn.db.test.ts (2 tests) 620ms
+@datacare/api:test:    ✓ TR_SL_EBILL E CrntNote IRN parity > generates a credit-note IRN and persists it only on the E CRNT voucher scope 366ms
+@datacare/api:test:  ✓ test/masterFormFields.test.ts (5 tests) 30ms
+@datacare/api:test:  ✓ test/bundleDiffPairing.test.ts (5 tests) 13ms
+@datacare/api:test:  ✓ test/routeInputForwarding.test.ts (5 tests) 8ms
+@datacare/api:test:  ✓ test/designBook.db.test.ts (5 tests) 1045ms
+@datacare/api:test:    ✓ design book master > writes every desktop column of DESIGN_DETL 326ms
+@datacare/api:test:  ✓ test/otherExpensesPrint.routes.db.test.ts (1 test) 3783ms
+@datacare/api:test:    ✓ Other Expenses save, read and print over HTTP > saves an Other Expenses voucher, reads it back and prints it from the path voucher number 921ms
+@datacare/api:test:  ✓ test/saleReturnIncomingLabour.test.ts (16 tests) 16ms
+@datacare/api:test:  ✓ test/reportGridStaging.db.test.ts (4 tests) 1009ms
+@datacare/api:test:    ✓ database-backed report grid staging > writes the desktop header row plus one row per grid row 742ms
+@datacare/api:test:  ✓ test/billProfit.test.ts (13 tests) 10ms
+@datacare/api:test:  ✓ test/tradingReport.db.test.ts (2 tests) 884ms
+@datacare/api:test:    ✓ RP_TRADING Trading Report parity builder > runs All mode with sale and purchase account rows and stock-fine fallback 616ms
+@datacare/api:test:  ✓ test/storedScope.test.ts (18 tests) 38ms
+@datacare/api:test:  ✓ test/reportFilters.test.ts (11 tests) 11ms
+@datacare/api:test:  ✓ test/registerClassify.db.test.ts (4 tests) 584ms
+@datacare/api:test:    ✓ registers classify by MAIN_BOOK, not literal book codes > sales register counts only SALES-book vouchers, excluding a RETX return and a quotation 421ms
+@datacare/api:test:  ✓ test/ledgerKeyFormat.db.test.ts (1 test) 223ms
+@datacare/api:test:  ✓ test/entryCheckReport.db.test.ts (3 tests) 7545ms
+@datacare/api:test:    ✓ RP_USER Entry Check parity > lists only pending grouped vouchers by default and honours desktop filters 1180ms
+@datacare/api:test:    ✓ RP_USER Entry Check parity > returns the desktop double-click field-change detail rows 2132ms
+@datacare/api:test:    ✓ RP_USER Entry Check parity > marks matching voucher/date/book rows checked like BtnSave 3098ms
+@datacare/api:test:  ✓ test/orderReports.db.test.ts (2 tests) 1242ms
+@datacare/api:test:    ✓ RP_ORDER report parity builders > runs Delete Data by delete-date range with desktop columns 654ms
+@datacare/api:test:    ✓ RP_ORDER report parity builders > runs Point Report summary and member detail with desktop point arithmetic 552ms
+@datacare/api:test:  ✓ test/billProfitInputs.db.test.ts (7 tests) 2143ms
+@datacare/api:test:    ✓ bill profit inputs > strips the 3% loading and converts per-kg to per-gram 376ms
+@datacare/api:test:    ✓ bill profit inputs > takes the newest rate NOT AFTER the voucher date 395ms
+@datacare/api:test:    ✓ bill profit inputs > defaults the margin to hidden until the company turns it on 884ms
+@datacare/api:test:  ✓ test/repairKarigarReceipt.test.ts (10 tests) 11ms
+@datacare/api:test:  ✓ test/einvoice_gsp.test.ts (5 tests) 13ms
+@datacare/api:test:  ✓ test/einvoiceExport.db.test.ts (2 tests) 4072ms
+@datacare/api:test:    ✓ desktop e-invoice Excel export > maps the UT_E_INVOICE header/detail grids into the einvoice and Items workbook sheets 1747ms
+@datacare/api:test:    ✓ desktop e-invoice Excel export > fails closed like the desktop when an item HSN is missing 1320ms
+@datacare/api:test:  ✓ test/auth.session.test.ts (3 tests) 26ms
+@datacare/api:test:  ✓ test/userWorkReport.db.test.ts (2 tests) 5767ms
+@datacare/api:test:    ✓ RP_USER User Report parity > builds the desktop user transaction grid from voucher, stock, ledger and payment sources 3368ms
+@datacare/api:test:    ✓ RP_USER User Report parity > uses the desktop item checklist semantics when item codes are supplied 1044ms
+@datacare/api:test:  ✓ test/seedCompleteness.db.test.ts (4 tests) 4334ms
+@datacare/api:test:  ✓ test/provenance.test.ts (9 tests) 6ms
+@datacare/api:test:  ✓ test/dhrnLoanReports.db.test.ts (2 tests) 5602ms
+@datacare/api:test:    ✓ RP_DHRN_LOAN report family > reports Dhiran register rows with computed receipt and outstanding values 1742ms
+@datacare/api:test:    ✓ RP_DHRN_LOAN report family > filters pending mode to only rows with remaining principal 1699ms
+@datacare/api:test:  ✓ test/parityStrictSettings.test.ts (7 tests) 14ms
+@datacare/api:test:  ✓ test/designMoveReport.db.test.ts (2 tests) 685ms
+@datacare/api:test:    ✓ RP_STK_MOVE Design Move parity builder > runs Design / Size mode with positive signed tag counts and filters 471ms
+@datacare/api:test:  ✓ test/creditNoteIrnAmounts.test.ts (8 tests) 24ms
+@datacare/api:test:  ✓ test/sales.test.ts (12 tests) 32ms
+@datacare/api:test:  ✓ test/parityContainmentRoutes.test.ts (4 tests) 2065ms
+@datacare/api:test:    ✓ WP-01 contained transaction routes > returns the shared 503 problem for every unsafe mutation before database access 882ms
+@datacare/api:test:    ✓ WP-01 contained transaction routes > no longer contains Tag Cancel or Tag Transfer: every lifecycle route reaches its writer 402ms
+@datacare/api:test:    ✓ WP-01 contained transaction routes > keeps authentication ahead of RBAC and containment 446ms
+@datacare/api:test:    ✓ WP-01 contained transaction routes > keeps authorization ahead of containment so unauthorized users receive 403 334ms
+@datacare/api:test:  ✓ test/oldStockReport.db.test.ts (2 tests) 649ms
+@datacare/api:test:    ✓ RP_SLPR_ZOOM Old Stock parity builder > pivots positive old gold stock by item and stock month like the desktop grid 534ms
+@datacare/api:test:  ✓ test/consiReport.db.test.ts (2 tests) 861ms
+@datacare/api:test:    ✓ RP_CONSI_APR consignment report parity builder > runs the consignment receipt balance summary from APR_DETL 642ms
+@datacare/api:test:  ✓ test/meltingParity.test.ts (5 tests) 25ms
+@datacare/api:test:  ✓ test/tagLabelSkip.db.test.ts (6 tests) 234ms
+@datacare/api:test:  ✓ test/messaging.db.test.ts (4 tests) 734ms
+@datacare/api:test:    ✓ restricted-role message attempt log > logs one successful outbound attempt 581ms
+@datacare/api:test:  ✓ test/otherItemReport.db.test.ts (2 tests) 449ms
+@datacare/api:test:    ✓ RP_OTH_DETL other item report parity builder > runs stud in/out modes from DM_DATA ENTRY_TYPE=S and DM_SIGN 380ms
+@datacare/api:test:  ✓ test/dataExport.db.test.ts (1 test) 4094ms
+@datacare/api:test:    ✓ UT_EXPORT data export utility > previews scoped DATA_TRFR rows, packages them, marks exported, and resets flags 3217ms
+@datacare/api:test:  ✓ test/pageEndpointFamily.test.ts (7 tests) 15ms
+@datacare/api:test:  ✓ test/health.test.ts (7 tests) 241ms
+@datacare/api:test:  ✓ test/footprintLoud.db.test.ts (4 tests) 312ms
+@datacare/api:test:  ✓ test/purchaseRojmel.test.ts (4 tests) 6ms
+@datacare/api:test:  ✓ test/customerAccountReports.db.test.ts (2 tests) 1961ms
+@datacare/api:test:    ✓ customer/account desktop report ports > reports Last Visit from stored AC_MAST fields with latest AC_DATA fallback 1423ms
+@datacare/api:test:    ✓ customer/account desktop report ports > reports address labels from AC_MAST with city/area filters honoured 318ms
+@datacare/api:test:  ✓ test/columnSettings.test.ts (37 tests) 21ms
+@datacare/api:test:  ✓ test/schemeMonthlyReport.db.test.ts (2 tests) 433ms
+@datacare/api:test:    ✓ RP_STK_LEVEL scheme monthly report parity builder > builds dynamic month columns and excludes closed adjusted members by default 340ms
+@datacare/api:test:  ✓ test/windowTiles.db.test.ts (5 tests) 563ms
+@datacare/api:test:  ✓ test/reportBind.test.ts (34 tests) 156ms
+@datacare/api:test:  ✓ test/opsInvariants.db.test.ts (2 tests) 731ms
+@datacare/api:test:    ✓ operational invariants against the restricted database role > reports the real forced-RLS count, append-only audit rights, and migration state 403ms
+@datacare/api:test:  ✓ test/settingsRealValues.test.ts (5 tests) 38ms
+@datacare/api:test:  ✓ test/finalReports.db.test.ts (1 test) 4791ms
+@datacare/api:test:    ✓ RP_BALANCE final reports > uses AC_MAIN_GR >= 3 for Profit and Loss and returns the launcher rows 3937ms
+@datacare/api:test:  ✓ test/saleReturnHeaderFloat.db.test.ts (12 tests) 1294ms
+@datacare/api:test:  ✓ test/branchInoutReport.db.test.ts (2 tests) 328ms
+@datacare/api:test:  ✓ test/finePolicy.test.ts (13 tests) 4ms
+@datacare/api:test:  ✓ test/clearanceDateBooks.test.ts (26 tests) 12ms
+@datacare/api:test:  ✓ test/ledgerTimestamp.db.test.ts (1 test) 573ms
+@datacare/api:test:  ✓ test/rbac.authorization.test.ts (5 tests) 10ms
+@datacare/api:test:  ✓ test/scheme.test.ts (8 tests) 5ms
+@datacare/api:test:  ✓ test/metrics.test.ts (3 tests) 68ms
+@datacare/api:test:  ✓ test/repairImage.test.ts (5 tests) 26ms
+@datacare/api:test:  ✓ test/roundingPolicy.test.ts (14 tests) 19ms
+@datacare/api:test:  ✓ test/saleReturnIncomingReplay.test.ts (31 tests) 33ms
+@datacare/api:test:  ✓ test/scaleProtocol.test.ts (10 tests) 15ms
+@datacare/api:test:  ✓ test/repairReceipt.test.ts (6 tests) 6ms
+@datacare/api:test:  ✓ test/typeParityInput.test.mjs (8 tests) 6ms
+@datacare/api:test:  ✓ test/security.test.ts (8 tests) 852ms
+@datacare/api:test:    ✓ workspace secret literal policy > finds plausible assigned credentials and ignores placeholders or environment reads 830ms
+@datacare/api:test:  ✓ test/runtimeConfig.test.ts (9 tests) 9ms
+@datacare/api:test:  ✓ test/barcode.test.ts (3 tests) 68ms
+@datacare/api:test:  ✓ test/app.runtime.test.ts (1 test) 434ms
+@datacare/api:test:    ✓ production application security options > sets Secure on access and refresh cookies in production mode 433ms
+@datacare/api:test:  ✓ test/gst.test.ts (6 tests) 33ms
+@datacare/api:test:  ✓ test/posting.test.ts (5 tests) 10ms
+@datacare/api:test:  ✓ test/bookPolicy.test.ts (9 tests) 11ms
+@datacare/api:test:  ✓ test/whatsapp.test.ts (3 tests) 7ms
+@datacare/api:test:  ✓ test/finance.test.ts (4 tests) 8ms
+@datacare/api:test:  ✓ test/masters.test.ts (6 tests) 11ms
+@datacare/api:test:  ✓ test/integrationReadiness.db.test.ts (2 tests) 455ms
+@datacare/api:test:  ✓ test/businessScope.test.ts (5 tests) 7ms
+@datacare/api:test:  ✓ test/auth.jwt.test.ts (5 tests) 50ms
+@datacare/api:test:  ✓ test/einvoice.test.ts (6 tests) 8ms
+@datacare/api:test:  ✓ test/dhrn.test.ts (6 tests) 4ms
+@datacare/api:test:  ✓ test/integrations.test.ts (8 tests) 4ms
+@datacare/api:test:  ✓ test/auth.service.test.ts (5 tests) 118ms
+@datacare/api:test:  ✓ test/financeWriters.test.ts (7 tests) 9ms
+@datacare/api:test:  ✓ test/requestContext.test.ts (6 tests) 31ms
+@datacare/api:test:  ✓ test/signAlphabet.test.ts (3 tests) 44ms
+@datacare/api:test:  ✓ test/render.test.ts (5 tests) 85ms
+@datacare/api:test:  ✓ test/rbac.policy.test.ts (5 tests) 12ms
+@datacare/api:test:  ✓ test/rates.test.ts (4 tests) 14ms
+@datacare/api:test:  ✓ test/registry.test.ts (3 tests) 11ms
+@datacare/api:test:  ✓ test/audit.test.ts (2 tests) 32ms
+@datacare/api:test:  ✓ test/taxPolicy.test.ts (2 tests) 10ms
+@datacare/api:test:  ✓ test/voucherLifecycle.test.ts (4 tests) 27ms
+@datacare/api:test:  ✓ test/deviceBridge.test.ts (5 tests) 7ms
+@datacare/api:test:  ✓ test/salesReturn.test.ts (2 tests) 3ms
+@datacare/api:test:  ✓ test/crystalFormula.test.ts (6 tests) 10ms
+@datacare/api:test:  ✓ test/reportEngine.test.ts (4 tests) 36ms
+@datacare/api:test:  ✓ test/chequePrint.test.ts (3 tests) 53ms
+@datacare/api:test:  ✓ test/auth.password.test.ts (4 tests) 419ms
+@datacare/api:test:  ✓ test/purchaseReturn.test.ts (1 test) 3ms
+@datacare/api:test:  ✓ test/accounting.test.ts (3 tests) 6ms
+@datacare/api:test:  ✓ test/numbering.test.ts (3 tests) 6ms
+@datacare/api:test:  ✓ test/formLayoutEngine.test.ts (3 tests) 531ms
+@datacare/api:test:    ✓ form layout engine (desktop WinForms → pixel-positioned HTML) > lists the extracted form layouts 527ms
+@datacare/api:test:  ✓ test/karigar.test.ts (4 tests) 4ms
+@datacare/api:test:  ✓ test/reports.test.ts (2 tests) 3ms
+@datacare/api:test:  ✓ test/migrationManifest.test.ts (1 test) 87ms
+@datacare/api:test:  ✓ test/stock.test.ts (3 tests) 6ms
+@datacare/api:test:  ✓ test/melting.test.ts (3 tests) 5ms
+@datacare/api:test:  ✓ test/parity.test.ts (1 test) 20ms
+@datacare/api:test: 
+@datacare/api:test: ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+@datacare/api:test: 
+@datacare/api:test:  FAIL  test/saleReturnLabourReplay.db.test.ts > session-bound saved labour preview in PostgreSQL > qualifies C3 c13 and matches every independently expected cell
+@datacare/api:test: PrismaClientKnownRequestError: Transaction API error: Transaction already closed: A commit cannot be executed on an expired transaction. The timeout for this transaction was 5000 ms, however 5736 ms passed since the start of the transaction. Consider increasing the interactive transaction timeout or doing less work in the transaction.
+@datacare/api:test:  ❯ Qr.transaction ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/core/engines/library/LibraryEngine.ts:217:13
+@datacare/api:test:  ❯ Proxy._transactionWithCallback ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:725:9
+@datacare/api:test:  ❯ Module.withSessionContextReadSnapshot src/modules/auth/sessionContextReadSnapshot.ts:285:12
+@datacare/api:test:     283|   }
+@datacare/api:test:     284|   try {
+@datacare/api:test:     285|     return await withTenant(
+@datacare/api:test:        |            ^
+@datacare/api:test:     286|       prisma,
+@datacare/api:test:     287|       identity.tenantId,
+@datacare/api:test:  ❯ boundary src/modules/sales/saleReturnLabourReplay.ts:729:12
+@datacare/api:test:  ❯ test/saleReturnLabourReplay.db.test.ts:147:29
+@datacare/api:test: 
+@datacare/api:test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+@datacare/api:test: 
+@datacare/api:test:  FAIL  test/salesFamilyLifecycle.db.test.ts > database-backed sales-family voucher lifecycles > imports a return source from the chosen SALES book and refuses a non-SALES book
+@datacare/api:test: PrismaClientInitializationError: 
+@datacare/api:test: Invalid `prisma.$executeRawUnsafe()` invocation:
+@datacare/api:test: 
+@datacare/api:test: 
+@datacare/api:test: Can't reach database server at `127.0.0.1:55433`
+@datacare/api:test: 
+@datacare/api:test: Please make sure your database server is running at `127.0.0.1:55433`.
+@datacare/api:test:  ❯ ei.handleRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:242:13
+@datacare/api:test:  ❯ ei.handleAndLogRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12
+@datacare/api:test:  ❯ ei.request ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12
+@datacare/api:test:  ❯ a ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24
+@datacare/api:test:  ❯ cleanup test/salesFamilyLifecycle.db.test.ts:185:7
+@datacare/api:test:     183|       'CO_SET',
+@datacare/api:test:     184|     ]) {
+@datacare/api:test:     185|       await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tena…
+@datacare/api:test:        |       ^
+@datacare/api:test:     186|     }
+@datacare/api:test:     187|   };
+@datacare/api:test:  ❯ test/salesFamilyLifecycle.db.test.ts:414:5
+@datacare/api:test: 
+@datacare/api:test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+@datacare/api:test: 
+@datacare/api:test:  FAIL  test/salesFamilyLifecycle.db.test.ts > database-backed sales-family voucher lifecycles > creates, gets and replaces a sales return while preserving identity and balance
+@datacare/api:test: PrismaClientKnownRequestError: 
+@datacare/api:test: Invalid `prisma.$queryRawUnsafe()` invocation:
+@datacare/api:test: 
+@datacare/api:test: 
+@datacare/api:test: Transaction API error: Transaction not found. Transaction ID is invalid, refers to an old closed transaction Prisma doesn't have information about anymore, or was obtained before disconnecting.
+@datacare/api:test:  ❯ ei.handleRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13
+@datacare/api:test:  ❯ ei.handleAndLogRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12
+@datacare/api:test:  ❯ ei.request ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12
+@datacare/api:test:  ❯ a ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24
+@datacare/api:test:  ❯ columnsOf src/modules/posting/posting.ts:432:48
+@datacare/api:test:     430|   const cached = _tableColumns.get(table);
+@datacare/api:test:     431|   if (cached) return cached;
+@datacare/api:test:     432|   const rows: Array<{ column_name: string }> = await tx.$queryRawUnsaf…
+@datacare/api:test:        |                                                ^
+@datacare/api:test:     433|     `SELECT column_name FROM information_schema.columns WHERE table_na…
+@datacare/api:test:     434|     table,
+@datacare/api:test:  ❯ Module.postVoucherTx src/modules/posting/posting.ts:515:26
+@datacare/api:test:  ❯ run src/modules/sales/salesReturn.ts:595:5
+@datacare/api:test:  ❯ Proxy._transactionWithCallback ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:722:18
+@datacare/api:test:  ❯ test/salesFamilyLifecycle.db.test.ts:446:21
+@datacare/api:test: 
+@datacare/api:test: ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+@datacare/api:test: 
+@datacare/api:test:  Test Files  2 failed | 290 passed (292)
+@datacare/api:test:       Tests  3 failed | 3346 passed (3349)
+@datacare/api:test:    Start at  04:36:13
+@datacare/api:test:    Duration  1611.22s (transform 86.10s, setup 0ms, collect 323.11s, tests 974.33s, environment 141ms, prepare 62.08s)
+@datacare/api:test: 
+@datacare/api:test:  ELIFECYCLE  Test failed. See above for more details.
+ ERROR  @datacare/api#test: command (<repo>/web/apps/api) /opt/homebrew/bin/pnpm run test exited (1)
+
+ Tasks:    9 successful, 10 total
+Cached:    6 cached, 10 total
+  Time:    26m57.941s 
+Failed:    @datacare/api#test
+
+ WARNING  no output files found for task @datacare/core#test. Please check your `outputs` key in `turbo.json`
+ WARNING  no output files found for task @datacare/db#test. Please check your `outputs` key in `turbo.json`
+ WARNING  no output files found for task @datacare/web#test. Please check your `outputs` key in `turbo.json`
+ ERROR  run failed: command  exited (1)
+ ELIFECYCLE  Test failed. See above for more details.
+PARITY_TEST_FAILED pnpm exited 1

@@ -1,0 +1,14 @@
+{
+ "saleLineNull": "500 {\"statusCode\":500,\"error\":\"Internal Server Error\",\"message\":\"Cannot read properties of null (reading 'itCode')\"}",
+ "saleRateText": "400 {\"error\":\"CounterStockValidationError\",\"message\":\"Please Insert Tag Entry Counter Code and Try Because It is Mandatory...\"}",
+ "saleNetText": "400 {\"error\":\"CounterStockValidationError\",\"message\":\"Please Insert Tag Entry Counter Code and Try Because It is Mandatory...\"}",
+ "saleDiscountText": "400 {\"error\":\"CounterStockValidationError\",\"message\":\"Please Insert Tag Entry Counter Code and Try Because It is Mandatory...\"}",
+ "salesReturnIncomplete": "201 {\"vchNo\":1,\"totals\":{\"net\":0,\"discount\":0,\"taxable\":0,\"tax\":0,\"cgst\":0,\"sgst\":0,\"igst\":0,\"roundOff\":0,\"total\":0}}",
+ "purchaseIntoJournalBook": "400 {\"error\":\"BookPolicyValidationError\",\"message\":\"book JV is JOURNAL, expected PURCHASE\"}",
+ "receiptIntoSalesBook": "400 {\"error\":\"FinanceValidationError\",\"message\":\"book SL is a SALES book; a receipt needs a CASH REC, BANK REC, RECEIPT book\"}",
+ "duplicateReceipt": [
+  "201 {\"vchNo\":2}",
+  "201 {\"vchNo\":3}"
+ ],
+ "deleteSaleNoVersion": "200 {\"reversed\":true}"
+}

@@ -1,0 +1,15 @@
+SET NOCOUNT ON;
+DECLARE @db sysname, @sql nvarchar(max);
+DECLARE c CURSOR FOR SELECT name FROM sys.databases WHERE name IN ('Live24','Next23','Next24','Next25') ORDER BY name;
+OPEN c; FETCH NEXT FROM c INTO @db;
+WHILE @@FETCH_STATUS=0 BEGIN
+ SET @sql = N'USE '+QUOTENAME(@db)+N';
+ SELECT '''+@db+N''' db, COUNT(*) total,
+   SUM(CASE WHEN CO_BOOK LIKE ''[0-9][0-9][0-9]'' THEN 1 ELSE 0 END) numeric3,
+   SUM(CASE WHEN LEN(CO_BOOK)=3 THEN 1 ELSE 0 END) len3,
+   SUM(CASE WHEN LC_CODE=''00'' THEN 1 ELSE 0 END) lc00,
+   SUM(CASE WHEN CUR_USE=''Y'' THEN 1 ELSE 0 END) inUse
+ FROM BOOK_DATA;';
+ EXEC sp_executesql @sql;
+ FETCH NEXT FROM c INTO @db; END
+CLOSE c; DEALLOCATE c;

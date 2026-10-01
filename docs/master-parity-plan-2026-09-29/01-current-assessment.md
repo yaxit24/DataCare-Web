@@ -72,3 +72,24 @@ Re-assessed against `main` at `c7d02c7`. The detailed register is [document 10](
 - Containment is reduced from six operations to three (`logical-restore`, `production-cutover-load`, `tag-weight-difference`).
 - The Sales/Purchase audit found concrete defects that block daily work or print the wrong document: unscoped document readers (G01), hallmark and other-expense purchase screens that cannot save because they send no book (G02, G03), a purchase-return screen that cannot record a tagged return and omits Rojmel/diamond rows (G04), registers keyed on literal book codes (G06) and a hard-coded company name on the estimate print (G09). They are scheduled first, as slices N31–N36 and N39.
 - `main` CI is red on the depth gate; the fix is the first delivery (G18).
+
+## 8. Status update — full-stack audit, 1 October 2026
+
+Measured at `0da250a`, re-checked at `dcba5a4`. Details, evidence and the resulting work are in
+[document 11](11-audit-implementation-plan-2026-10-01.md).
+
+- **Works:** on a freshly provisioned company the daily rate, sale (create, reopen, edit, print), cash receipt and
+  purchase all post balanced ledgers with day book, stock, tax and outstanding rows. The trial balance, Rojmel,
+  cash book, GSTR-1/2/3B and HSN reports agree with the ledger. All 239 routes render against the real API.
+- **Engineering:** lint, typecheck and build pass; core 1,737/1,737, web 594/594, API 3,346/3,349 on an isolated
+  database with forced RLS. Kernel conformance (124 > 108) and `docs:refs` are red; the zero-mock browser suite fails
+  at tag split because of a non-hermetic seed. CI does not run test type compilation, kernel conformance,
+  `docs:refs`, the plan validator or the browser suites.
+- **New S1 gaps:** malformed input returns 500; no request schemas, version tokens or idempotency on most financial
+  paths; printed dates lose the year; P&L and balance sheet are empty on a fresh company; web provisioning differs
+  from the desktop (location `01`, mnemonic books and accounts, no account groups); arbitrary-HTML PDF rendering;
+  no migration path; no production hardening.
+- **Desktop conventions confirmed:** all 1,096 desktop book rows are 3-digit numeric codes at location `00`; all
+  postings use location `00`; the 35 account groups are identical in every company.
+
+Acceptance counts are unchanged: 0/198 menus, 0/83 packages, 0/34 cards.

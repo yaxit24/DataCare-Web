@@ -96,6 +96,21 @@ or print a wrong document. N16, N17, N18 and the split half of N19 are `implemen
 | N45 | Wholesale remaining branches listed in the X16 progress record | P05-02, P06-05, X16 | Each branch has a write-set test and journey |
 | N46 | Quotation → invoice conversion with lineage | P05-06, X14 | Source identity kept; repeated conversion refused |
 
+### 3b. Audit implementation slices added on 1 October 2026
+
+The full-stack audit ([document 11](11-audit-implementation-plan-2026-10-01.md)) adds gaps G20–G66 and slices
+N47–N82, each with steps, tests and acceptance in document 11 §6. They run in six phases; earlier slices still in
+progress continue inside them.
+
+| Phase | Purpose | Slices |
+|---|---|---|
+| A | Trustworthy build: gates, harness and CI | N47, N48, N49 (N81 in parallel) |
+| B | Stop wrong documents and data loss | N56, N53, N40, first milestones of N51, N50 and N54, the N34 remainder |
+| C | Multi-user and data foundations | N50, N51, N52, N55, N58–N63 |
+| D | Workflow completeness | N64–N72 with N20–N23, N32, N37, N38, N44–N46 |
+| E | Documents and operator experience | N57, N73, N43, N74–N77 with N24 |
+| F | Migration, operations and release | N78, N79 (with N27), N80, N81, N82 with N25, N28–N30 |
+
 ## 4. Ready-to-implement definition for a feature
 
 Before coding a feature, its card must contain:

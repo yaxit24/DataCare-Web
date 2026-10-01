@@ -1,0 +1,9 @@
+
+> datacare-web-saas@0.0.0 typecheck:tests <repo>/web
+> cd apps/api && NODE_OPTIONS=--max-old-space-size=6144 tsc -p tsconfig.test.json --noEmit
+
+test/registerClassify.db.test.ts(115,12): error TS18048: 'byParty.totals' is possibly 'undefined'.
+test/registerClassify.db.test.ts(120,12): error TS18048: 'daily.totals' is possibly 'undefined'.
+test/registerClassify.db.test.ts(120,34): error TS18048: 'daily.totals' is possibly 'undefined'.
+test/registerClassify.db.test.ts(120,56): error TS18048: 'daily.totals' is possibly 'undefined'.
+ ELIFECYCLE  Command failed with exit code 2.

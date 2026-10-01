@@ -1,0 +1,2 @@
+TYPE_PARITY_SKIP no MSSQL_TYPES dump supplied
+  this is a SKIP, not a pass: the comparison was not performed

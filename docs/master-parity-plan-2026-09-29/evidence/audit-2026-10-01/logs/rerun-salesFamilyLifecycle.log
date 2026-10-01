@@ -1,0 +1,109 @@
+ Container datacare-parity-test-postgres-1 Running 
+ Container datacare-parity-test-postgres-1 Waiting 
+ Container datacare-parity-test-postgres-1 Healthy 
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "datacare", schema "public" at "127.0.0.1:55433"
+
+30 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+BEGIN
+DO
+NOTICE:  rls.sql: protected 174 tenant table(s)
+DO
+DO
+COMMIT
+ password_length_ok 
+--------------------
+                  1
+(1 row)
+
+DO
+ALTER ROLE
+GRANT
+GRANT
+GRANT
+REVOKE
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+PARITY_TEST_READY localhost:55433 / isolated compose project / migrations / non-owner role / forced RLS
+
+ RUN  v2.1.9 <repo>/web/apps/api
+
+[vitest] database reachable — database-backed tests ENABLED, TZ=UTC
+ ❯ test/salesFamilyLifecycle.db.test.ts (31 tests | 1 failed) 62868ms
+   ✓ database-backed sales-family voucher lifecycles > imports a return source from the chosen SALES book and refuses a non-SALES book 5762ms
+   × database-backed sales-family voucher lifecycles > creates, gets and replaces a sales return while preserving identity and balance 8899ms
+     → 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Transaction API error: Transaction already closed: A query cannot be executed on an expired transaction. The timeout for this transaction was 5000 ms, however 5143 ms passed since the start of the transaction. Consider increasing the interactive transaction timeout or doing less work in the transaction.
+   ✓ database-backed sales-family voucher lifecycles > persists every return-grid column the form offers instead of discarding it 3921ms
+   ✓ database-backed sales-family voucher lifecycles > rejects a persisted-date-locked sales-return edit without changing its write set 3065ms
+   ✓ database-backed sales-family voucher lifecycles > rejects atomically when editing a return whose admitted tag was resold 1659ms
+   ✓ database-backed sales-family voucher lifecycles > creates, gets and replaces a sales order and its adjustment with balanced ledgers 6507ms
+   ✓ database-backed sales-family voucher lifecycles > rejects a persisted-date-locked sales-order edit without changing it 2039ms
+   ✓ database-backed sales-family voucher lifecycles > a cash instalment writes ONE Rojmel row per line; a banked one writes TWO 673ms
+   ✓ database-backed sales-family voucher lifecycles > an opening entry writes no Rojmel row at all (no money moves) 3417ms
+   ✓ database-backed sales-family voucher lifecycles > AD_DATA matches the desktop instalment shape (TOT_AMT is 0 on all 8160 real rows) 594ms
+   ✓ database-backed sales-family voucher lifecycles > forwards the desktop grid inputs the route used to drop (BANK_NAME/EMP_CODE/MONTH_CODE/WITH_UPI) 400ms
+   ✓ database-backed sales-family voucher lifecycles > writes desktop UPI_DATA split rows and UPI-specific ledger/day-book rows 1060ms
+   ✓ database-backed sales-family voucher lifecycles > rejects UPI split totals that do not match the member installment amount 1654ms
+   ✓ database-backed sales-family voucher lifecycles > posts a whole collection round as ONE voucher with a ledger pair per line 3376ms
+   ✓ database-backed sales-family voucher lifecycles > rejects a bad grid line naming its index, and writes nothing 996ms
+   ✓ database-backed sales-family voucher lifecycles > creates, gets and replaces a scheme installment while preserving identity and balance 1564ms
+   ✓ database-backed sales-family voucher lifecycles > rejects a persisted-date-locked scheme-installment edit without changing it 1126ms
+   ✓ database-backed sales-family voucher lifecycles > deletes with exactly the desktop-shaped sales return, order and member-entry audit rows 2485ms
+   ✓ database-backed sales-family voucher lifecycles > round-trips labour-invoice and scheme-maturity edits with preserved identity 1463ms
+   ✓ database-backed sales-family voucher lifecycles > persists the full desktop scheme member record on enrolment 309ms
+   ✓ database-backed sales-family voucher lifecycles > stages the scheme passbook report rows from the member installments 549ms
+   ✓ database-backed sales-family voucher lifecycles > a sale return writes exactly its declared set of tables 3287ms
+   ✓ database-backed sales-family voucher lifecycles > a return’s Rojmel reverses direction: metal comes back IN 1696ms
+   ✓ database-backed sales-family voucher lifecycles > an order with an advance writes a type-01 Rojmel CREDIT; one without writes none 851ms
+   ✓ database-backed sales-family voucher lifecycles > the order footprint is an exact SET, so an extra write cannot pass unnoticed 1150ms
+   ✓ database-backed sales-family voucher lifecycles > re-posting an order does not collide on LEDR_KEY 600ms
+   ✓ database-backed sales-family voucher lifecycles > a sales order posts the ledger only when it carries an advance 1738ms
+   ✓ database-backed sales-family voucher lifecycles > persists the desktop TR_SALE_LBR grid on a labour invoice line 618ms
+   ✓ database-backed sales-family voucher lifecycles > writes the labour-invoice RECEIVE side, which had no writer at all 629ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/salesFamilyLifecycle.db.test.ts > database-backed sales-family voucher lifecycles > creates, gets and replaces a sales return while preserving identity and balance
+PrismaClientKnownRequestError: 
+Invalid `prisma.$queryRawUnsafe()` invocation:
+
+
+Transaction API error: Transaction already closed: A query cannot be executed on an expired transaction. The timeout for this transaction was 5000 ms, however 5143 ms passed since the start of the transaction. Consider increasing the interactive transaction timeout or doing less work in the transaction.
+ ❯ ei.handleRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13
+ ❯ ei.handleAndLogRequestError ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12
+ ❯ ei.request ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12
+ ❯ a ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24
+ ❯ columnsOf src/modules/posting/posting.ts:432:48
+    430|   const cached = _tableColumns.get(table);
+    431|   if (cached) return cached;
+    432|   const rows: Array<{ column_name: string }> = await tx.$queryRawUnsaf…
+       |                                                ^
+    433|     `SELECT column_name FROM information_schema.columns WHERE table_na…
+    434|     table,
+ ❯ Module.postVoucherTx src/modules/posting/posting.ts:515:26
+ ❯ run src/modules/sales/salesReturn.ts:595:5
+ ❯ Proxy._transactionWithCallback ../../node_modules/.pnpm/@prisma+client@6.19.3_prisma@6.19.3_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:722:18
+ ❯ test/salesFamilyLifecycle.db.test.ts:446:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 30 passed (31)
+   Start at  05:05:16
+   Duration  74.75s (transform 5.55s, setup 0ms, collect 9.52s, tests 62.87s, environment 0ms, prepare 349ms)
+
+undefined
+<repo>/web/apps/api:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run test/salesFamilyLifecycle.db.test.ts
+PARITY_TEST_FAILED pnpm exited 1
