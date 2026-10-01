@@ -38,7 +38,8 @@ export const NAV: NavGroup[] = [
       { label: 'Designs', href: '/masters/designs', ready: true },
       { label: 'Design Book', href: '/masters/design-book', ready: true },
       { label: 'Diamonds', href: '/masters/diamonds', ready: true },
-      { label: 'Models', href: '/masters/models', ready: true },
+      // The desktop Style menu (MS_STYLE) writes MODEL_MAST: this screen. Column settings are 'Styles / Columns'.
+      { label: 'Style', href: '/masters/models', ready: true, form: 'Masters/Models' },
       { label: 'States', href: '/masters/states', ready: true },
       { label: 'Loyalty Points', href: '/masters/points', ready: true },
       { label: 'Labour Types', href: '/masters/labour', ready: true },
@@ -212,7 +213,13 @@ export const NAV: NavGroup[] = [
   {
     label: 'Membership',
     items: [
-      { label: 'Members & Loyalty', href: '/txn/membership', ready: true },
+      // Loyalty points members (POINT_MEMB). The desktop scheme Member Mast (AD_MEMB) is Saving Schemes.
+      {
+        label: 'Loyalty Points',
+        href: '/txn/membership',
+        ready: true,
+        form: 'Membership/Members & Loyalty',
+      },
       { label: 'Saving Schemes', href: '/txn/scheme', ready: true },
       { label: 'Gold Adjust', href: '/txn/scheme-gold-adjust', ready: true },
     ],

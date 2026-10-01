@@ -67,6 +67,11 @@ jobs:
         working-directory: web
         run: pnpm advisories
 
+      - name: 'Gate: completion register agrees with the dispatch-verified menu catalog'
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        working-directory: web
+        run: pnpm register:check
+
       - name: 'Gate: master parity plan is internally consistent'
         if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
         run: python3 docs/master-parity-plan-2026-09-29/validate_plan.py

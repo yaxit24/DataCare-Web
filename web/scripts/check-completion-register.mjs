@@ -67,7 +67,23 @@ import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..');
-const REGISTER = path.resolve(repo, 'docs', 'COMPLETION-REGISTER.json');
+const argValue = (flag) => {
+  const i = process.argv.indexOf(flag);
+  return i >= 0 ? process.argv[i + 1] : undefined;
+};
+const REGISTER = path.resolve(
+  argValue('--register') ?? path.resolve(repo, 'docs', 'COMPLETION-REGISTER.json'),
+);
+/**
+ * N85 (G71): the menu catalog is the per-menu join of the desktop dispatch and the web surfaces, and
+ * `docs/tools/docs_check.py` verifies each catalog row's forms against its `MDI_FORM.cs` dispatch lines and
+ * each page and route against the code. Requiring the register to agree with it applies those same rules here
+ * without a second, divergent parser: a register row naming a form the dispatch does not open, or a surface
+ * the menu does not use, fails.
+ */
+const CATALOG = path.resolve(
+  argValue('--catalog') ?? path.resolve(repo, '..', 'docs', 'handbook', 'menu-catalog.jsonl'),
+);
 
 const STATES = new Set([
   'unclassified',
@@ -168,6 +184,60 @@ async function main() {
     }
     if (FORBIDS_SURFACE.has(state) && it.webSurface) {
       problems.push(`${label}: state '${state}' must not carry a webSurface`);
+    }
+  }
+
+  // N85: agreement with the dispatch-verified menu catalog.
+  let catalogRows;
+  try {
+    catalogRows = (await readFile(CATALOG, 'utf8'))
+      .split('\n')
+      .filter((line) => line.trim())
+      .map((line) => JSON.parse(line));
+  } catch (e) {
+    problems.push(`cannot read the menu catalog ${path.relative(repo, CATALOG)}: ${e.message}`);
+    catalogRows = [];
+  }
+  const catalog = new Map(catalogRows.map((row) => [row.id, row]));
+  for (const it of items) {
+    const label = `${it.tab ?? '?'}/${it.menu ?? '?'}`;
+    const row = catalog.get(label);
+    if (!row) {
+      problems.push(`${label}: no menu catalog row`);
+      continue;
+    }
+    const registerForms = [...(it.desktopForms ?? [])].sort();
+    const catalogForms = [...(row.forms ?? [])].sort();
+    if (JSON.stringify(registerForms) !== JSON.stringify(catalogForms)) {
+      problems.push(
+        `${label}: desktop forms [${registerForms.join(', ')}] differ from the dispatch [${catalogForms.join(', ')}]`,
+      );
+    }
+    const surface = it.webSurface;
+    if (surface && typeof surface === 'object') {
+      const value = String(surface.surface ?? '');
+      const pages = (row.ui ?? []).map((ui) => `web/apps/web/app/(app)${ui}/page.tsx`);
+      const masters = (row.ui ?? [])
+        .filter((ui) => ui.startsWith('/masters/'))
+        .map((ui) => ui.slice('/masters/'.length));
+      const known =
+        (row.api ?? []).includes(value) ||
+        pages.includes(value) ||
+        (surface.kind === 'master' && masters.includes(value)) ||
+        (surface.kind === 'report' && (row.ui ?? []).includes(`/reports/${value}`)) ||
+        (row.ui ?? []).includes(value);
+      if (!known) {
+        problems.push(
+          `${label}: web surface ${surface.kind} '${value}' is not one the menu uses (catalog ui ${JSON.stringify(row.ui ?? [])})`,
+        );
+      }
+    }
+    if (
+      it.state === 'absent' &&
+      ((row.ui ?? []).length || (row.api ?? []).length) &&
+      row.status !== 'MISSING'
+    ) {
+      problems.push(`${label}: absent in the register but the catalog lists a web surface`);
     }
   }
 
