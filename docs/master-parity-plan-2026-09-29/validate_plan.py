@@ -33,10 +33,11 @@ required = ['README.md'] + [
     '04-verification-playbook.md','05-desktop-reference.md','06-module-detail.md',
     '07-previous-plan-reconciliation.md','08-decisions-and-delivery.md','09-surface-register.md',
     '10-gap-register-2026-10-01.md','11-audit-implementation-plan-2026-10-01.md',
+    '12-lineage-verification-2026-10-01.md','13-phase1-delivery-plan.md','14-phase2-saas-plan.md',
     'desktop-form-reference.json','previous-package-reconciliation.json','execution-backlog.json',
     'requirement-index.json','evidence/verification-observations.json',
     'evidence/previous-plan-validation.json','evidence/source-comparison.json',
-    'evidence/audit-2026-10-01/observations.json',
+    'evidence/audit-2026-10-01/observations.json','lineage-register.json','phase2-backlog.json',
 ]
 for name in required:
     check((here/name).is_file() and (here/name).stat().st_size>0, 'Missing/empty deliverable: '+name)
@@ -95,21 +96,88 @@ for p in slices.values():
         for item in evidence:
             check((repo/item).exists(), 'Missing slice evidence path: '+p['id']+' '+item)
 # Gap identities continue across the registers: document 10 holds G01-G19, document 11 (the 1 October audit
-# implementation plan) continues from G20. Together they must form one contiguous sequence.
+# implementation plan) continues from G20 and document 12 (lineage verification) from G69. Together they must form
+# one contiguous sequence.
 gap_ids=[]
-for register_doc in ('10-gap-register-2026-10-01.md','11-audit-implementation-plan-2026-10-01.md'):
+for register_doc in ('10-gap-register-2026-10-01.md','11-audit-implementation-plan-2026-10-01.md',
+                     '12-lineage-verification-2026-10-01.md'):
     gap_ids+=re.findall(r'^\| (G\d{2}) \|',(here/register_doc).read_text(),re.M)
-check(gap_ids==[f'G{i:02}' for i in range(1,len(gap_ids)+1)] and len(gap_ids)>=66, 'Gap register identities incomplete')
+check(gap_ids==[f'G{i:02}' for i in range(1,len(gap_ids)+1)] and len(gap_ids)>=81, 'Gap register identities incomplete')
+# Decisions D01-D14 (document 08), D15-D22 (document 11) and D23 onward (document 12) form one sequence.
+decision_ids=[]
+for decision_doc in ('08-decisions-and-delivery.md','11-audit-implementation-plan-2026-10-01.md',
+                     '12-lineage-verification-2026-10-01.md'):
+    decision_ids+=re.findall(r'^\| (D\d{2}) \|',(here/decision_doc).read_text(),re.M)
+check(decision_ids==[f'D{i:02}' for i in range(1,len(decision_ids)+1)] and len(decision_ids)>=27,
+      'Decision identities incomplete')
 cited=set()
 for p in slices.values():
     for gap in re.findall(r'G\d{2}',p.get('gapIds','')):
         cited.add(gap)
         check(gap in gap_ids, 'Slice cites an unknown gap: '+p['id']+' '+gap)
-check(len(slices)>=82, 'Expected at least 82 ordered slices (document 11 adds N47-N82)')
+check(len(slices)>=88, 'Expected at least 88 ordered slices (document 12 adds N83-N88)')
+# Phase 2 (document 14) owns the SaaS gaps through SP slices in phase2-backlog.json.
+phase2=load(here/'phase2-backlog.json')
+sp={s['id']:s for s in phase2['slices']}
+check(sorted(sp)==[f'SP{i:02}' for i in range(1,len(sp)+1)] and len(sp)>=24, 'Phase 2 slice identities incomplete')
+milestones={m['id'] for m in phase2['milestones']}
+check(milestones=={f'M{i}' for i in range(8)}, 'Phase 2 milestones must be M0-M7')
+for s in sp.values():
+    check(s['status'] in allowed_status, 'Invented Phase 2 acceptance or unknown status: '+s['id'])
+    check(s['milestone'] in milestones, 'Phase 2 slice with unknown milestone: '+s['id'])
+    check(bool(s.get('steps')) and bool(s.get('doneWhen')), 'Phase 2 slice without steps or done-when: '+s['id'])
+    if s['status']!='planned':
+        check(bool(s.get('evidence')) and all((repo/e).exists() for e in s['evidence']),
+              'Phase 2 slice status without existing evidence: '+s['id'])
+    for gap in re.findall(r'G\d{2}',s.get('gapIds','')):
+        cited.add(gap)
+        check(gap in gap_ids, 'Phase 2 slice cites an unknown gap: '+s['id']+' '+gap)
+    for dep in s['startAfter']:
+        check(dep in sp or dep in slices, 'Phase 2 slice depends on an unknown slice: '+s['id']+' '+dep)
+def visit_sp(identity, trail):
+    if identity in trail:
+        errors.append('Phase 2 dependency cycle: '+' -> '.join(trail+[identity])); return
+    for dep in sp[identity]['startAfter']:
+        if dep in sp: visit_sp(dep,trail+[identity])
+for identity in sp: visit_sp(identity,[])
 for gap in gap_ids:
     if int(gap[1:])>=20:
         check(gap in cited, 'Audit gap is not assigned to any slice: '+gap)
 check(all(int(p['id'][1:])<=30 or p.get('gapIds') for p in slices.values()), 'Amendment slice without a gap reference')
+# Lineage register (document 12): every earlier item has a disposition and owners that exist in this plan.
+known_ids=set(slices)|set(sp)|set(gap_ids)|set(decision_ids)|set(backlog['releaseGates'])
+known_ids|={p['id'] for p in backlog['priorPackages']}|{p['id'] for p in backlog['priorCards']}
+known_ids|=set(re.findall(r'^### (J\d{2}) — ',(here/'04-verification-playbook.md').read_text(),re.M))
+lineage=load(here/'lineage-register.json')
+dispositions=set(lineage['dispositions'])
+check(dispositions=={'closed','carried','new-gap','superseded','decision'}, 'Unexpected lineage dispositions')
+lineage_counts=Counter()
+for source in lineage['sources']:
+    check((repo/source['path']).exists(), 'Lineage source does not exist: '+source['path'])
+    seen=set()
+    for item in source['items']:
+        label=source['path']+' '+item['id']
+        check(item['id'] not in seen, 'Duplicate lineage item: '+label); seen.add(item['id'])
+        check(item['disposition'] in dispositions, 'Unknown lineage disposition: '+label)
+        lineage_counts[item['disposition']]+=1
+        for owner in item.get('owners',[]):
+            check(owner in known_ids, 'Lineage owner does not exist in the plan: '+label+' '+owner)
+        for path in item.get('evidence',[]):
+            check((repo/path).exists(), 'Lineage evidence path missing: '+label+' '+path)
+        if item['disposition']=='closed':
+            check(bool(item.get('evidence')), 'Closed lineage item without evidence: '+label)
+        elif item['disposition']=='new-gap':
+            check(any(re.fullmatch(r'G\d{2}',o) and int(o[1:])>=69 for o in item.get('owners',[])),
+                  'New-gap lineage item without a document 12 gap: '+label)
+        else:
+            check(bool(item.get('owners')), 'Open lineage item without an owner: '+label)
+summary=re.search(r'<!-- lineage-counts: (.+?) -->',(here/'12-lineage-verification-2026-10-01.md').read_text())
+check(bool(summary), 'Document 12 lacks the lineage-counts summary')
+if summary:
+    stated=dict(pair.split('=') for pair in summary.group(1).split())
+    actual={'sources':len(lineage['sources']),'items':sum(lineage_counts.values()),**lineage_counts}
+    check(all(int(stated.get(k,-1))==v for k,v in actual.items()) and set(stated)==set(actual),
+          'Document 12 lineage counts differ from lineage-register.json: stated '+str(stated)+' actual '+str(dict(actual)))
 def visit(identity, trail):
     if identity in trail:
         errors.append('Slice start dependency cycle: '+' -> '.join(trail+[identity])); return
@@ -153,6 +221,7 @@ print(json.dumps({'status':'pass' if not errors else 'fail',
  'counts':{'indexedRawRecords':len(records),'sourceRegisters':len(register['sourceRegisters']),
  'primarySources':len(desktop['sourceUnits']),'priorPackages':len(backlog['priorPackages']),
  'priorCards':len(backlog['priorCards']),'newSlices':len(slices),'gapIds':len(gap_ids),
+ 'decisionIds':len(decision_ids),'phase2Slices':len(sp),'lineageItems':sum(lineage_counts.values()),
  'auditEvidenceArtefacts':len(audit['artefacts']),'apiModules':len(module_names),
  'businessJourneys':len(journeys),'checkedLocalMarkdownLinks':link_count},'errors':errors},indent=2))
 sys.exit(1 if errors else 0)

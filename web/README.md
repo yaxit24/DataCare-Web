@@ -1,3 +1,7 @@
+> **Superseded (1 October 2026).** This June scaffold description names NestJS, Redis and Kysely. The API is built
+> directly on Fastify ([ADR-0003](../project-memory/decisions/ADR-0003-http-fastify.md)) and nothing uses a queue yet.
+> The current description is the [Web handbook](../docs/handbook/web/README.md).
+
 # DataCareNext — Web SaaS (monorepo)
 
 Multi-tenant cloud rebuild of the DataCareNext jewelry/gold ERP. See `../project-memory/` for the
