@@ -3611,7 +3611,7 @@
     },
     {
       "id": "N53",
-      "status": "planned",
+      "status": "in-progress",
       "action": "Explicit transaction budgets, startup schema-metadata warm-up, timeout mapping and loyalty redemption locking",
       "parentLabels": "P01-05, P09-04, X05/X24",
       "startAfter": [
@@ -3619,10 +3619,18 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "No posting transaction queries information_schema; timeouts are retryable 503 with full rollback; concurrent redemption cannot overspend",
-      "gapIds": "G30, G31",
+      "gapIds": "G30, G31, G68",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-01",
+      "evidence": [
+        "web/apps/api/src/modules/shared/txBudget.ts",
+        "web/apps/api/src/modules/shared/schemaCatalog.ts",
+        "web/apps/api/test/transactionBudget.routes.db.test.ts",
+        "web/apps/api/test/txBudget.test.ts"
+      ],
+      "statusNote": "Column catalog loaded in one query at start-up; posting and numbering no longer query information_schema inside a transaction (numbering did on every allocation). COMMAND_TX_BUDGETS and withTxBudget cover sales, sales return, purchase, purchase return, receipts/payments/contra and loyalty points, each with a transaction-local statement_timeout (G68). Budget failures are a retryable 503 with Retry-After: 1. The member row is locked before the balance read, and the duration histogram is on /ops/metrics. The sales-return lifecycle case passed 10/10. Remaining: budget the other mutation coordinators."
     },
     {
       "id": "N54",

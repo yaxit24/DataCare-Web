@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import { nextHiddenVoucherNoTx } from '../vouchers/lifecycle.js';
 import { issueTagTx, restoreTagTx } from '../stock/stock.js';
@@ -228,7 +228,7 @@ export async function createPurchaseReturn(
   const fallbackTaxAc = input.taxAc ?? 'GSTINPUT';
   const tenantId = input.scope.tenantId;
 
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const vchNo = await nextVoucherNoTx(tx, input.scope);
     // HD_VCH_NO is the hidden voucher identity that TEMP_BOOK_DATA and the day book join on. Purchase
     // allocates one (purchase.ts:1648); the return did not, so its rows could not be joined back.
@@ -673,7 +673,7 @@ export async function getPurchaseReturn(
 ): Promise<Record<string, unknown>> {
   if (!scope.coYear || !scope.coBook)
     throw new PurchaseValidationError('company year and book are required');
-  await withTenant(prisma, scope.tenantId, (tx: any) =>
+  await withTxBudget(prisma, scope.tenantId, 'read', (tx: any) =>
     resolveBookPolicyTx(tx, scope, 'PURCHASE RETURN'),
   );
   const view = await getPurchase(prisma, scope, requestedVoucherNo);
@@ -700,7 +700,7 @@ export async function deletePurchaseReturn(
     throw new PurchaseValidationError('company year and book are required');
   const key = keyOf(input.scope, Number(input.vchNo));
   const params = [tenantId, key.CO_CODE, key.LC_CODE, key.CO_YEAR, key.CO_BOOK, key.VCH_NO];
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const bookPolicy = await resolveBookPolicyTx(tx, input.scope, 'PURCHASE RETURN');
     const headers: Array<{ HD_VCH_NO: unknown }> = await tx.$queryRawUnsafe(
       `SELECT "HD_VCH_NO" FROM "PR_DATA"

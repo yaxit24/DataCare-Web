@@ -10,7 +10,7 @@ import {
   billProfitEnabledTx,
   todaySaleRateTx,
 } from './billProfit.js';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
 import { recordFieldChangesTx } from '../vouchers/fieldAudit.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
@@ -2054,7 +2054,7 @@ export async function createSale(
 ): Promise<SaleResult> {
   completeSaleScope(input.scope);
   const scope = input.scope;
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     // TR_SALE.cs:15139 allocates the main number from SL_DATA with year in scope.
     const vchNo = await nextVoucherNoTx(tx, scope);
     // TR_SALE.cs:14209,15151 allocates a five-digit hidden number from TEMP_BOOK_DATA without year.
@@ -2077,7 +2077,7 @@ export async function createSalesQuotation(
 ): Promise<SaleResult> {
   completeSaleScope(input.scope);
   const scope = input.scope;
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await assertSalesMainBookTx(tx, scope, 'SL QUOT', 'sales quotation');
     const vchNo = await nextVoucherNoTx(tx, scope);
     const hdVchNo = await nextHiddenVoucherNoTx(tx, scope);
@@ -2098,7 +2098,7 @@ export async function getSalesQuotation(
   requestedVoucherNo: number | string,
 ): Promise<Record<string, unknown>> {
   completeSaleScope(scope);
-  await withTenant(prisma, scope.tenantId, async (tx: any) => {
+  await withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await assertSalesMainBookTx(tx, scope, 'SL QUOT', 'sales quotation');
   });
   return getSale(prisma, scope, requestedVoucherNo);
@@ -2308,7 +2308,7 @@ export async function getSale(
 ): Promise<Record<string, unknown>> {
   completeSaleScope(scope);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const params = saleParams(scope, voucherNo);
     const headers: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"VCH_TIME","BILL_NO","HD_VCH_NO","MAIN_USER",
@@ -2528,7 +2528,7 @@ export async function editSalesQuotation(
   const scope = input.scope;
   const voucherNo = formatVoucherNo(requestedVoucherNo);
   const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await assertSalesMainBookTx(tx, scope, 'SL QUOT', 'sales quotation');
     const persisted = await persistedSaleHeaderTx(tx, scope, voucherNo);
     const priorHeaderRow: Record<string, unknown> | undefined = (
@@ -2576,7 +2576,7 @@ export async function editSale(
   const scope = input.scope;
   const voucherNo = formatVoucherNo(requestedVoucherNo);
   const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const persisted = await persistedSaleHeaderTx(tx, scope, voucherNo);
     // Full prior header for the USER_DATA edit audit, read BEFORE the write set is replaced.
     const priorHeaderRow: Record<string, unknown> | undefined = (
@@ -2636,7 +2636,7 @@ export async function deleteSale(prisma: any, input: DeleteSaleInput): Promise<{
   const tenantId = scope.tenantId;
   const voucherNo = formatVoucherNo(input.vchNo);
   const key = keyOf(scope, voucherNo);
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const bookPolicy = await resolveBookPolicyTx(tx, scope, 'SALES');
     const configuredBookName = await configuredSaleBookNameTx(tx, scope);
     const header = await persistedSaleHeaderTx(tx, scope, voucherNo, [
@@ -2738,7 +2738,7 @@ export async function deleteSalesQuotation(
   const tenantId = scope.tenantId;
   const voucherNo = formatVoucherNo(input.vchNo);
   const key = keyOf(scope, voucherNo);
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     await assertSalesMainBookTx(tx, scope, 'SL QUOT', 'sales quotation');
     const bookPolicy = await resolveBookPolicyTx(tx, scope, 'SALES QUOTATION');
     const configuredBookName = await configuredSaleBookNameTx(tx, scope);

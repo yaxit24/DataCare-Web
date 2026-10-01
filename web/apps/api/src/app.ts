@@ -73,6 +73,7 @@ import { backupCompany, recordCompanyBackup } from './modules/ops/backup.js';
 import { healthPayload, readiness, type PdfRendererProbe } from './modules/ops/health.js';
 import { correlationId, requestCompletedFields } from './modules/ops/requestContext.js';
 import { collectDatabaseMetrics, MetricsRegistry, type RouteClass } from './modules/ops/metrics.js';
+import { isTransactionTimeout } from './modules/shared/txBudget.js';
 import { operationalInvariants } from './modules/ops/invariants.js';
 import {
   REPORT_FILTER_BINDINGS,
@@ -171,6 +172,20 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     reply.header('Referrer-Policy', 'no-referrer');
     reply.header('X-XSS-Protection', '0');
     return payload;
+  });
+
+  // A transaction that ran past its budget, or could not start in time, has already rolled back completely.
+  // Say so with a retryable 503 instead of an opaque 500 (N53). Nothing retries automatically: a manual retry
+  // becomes safe once N52 adds idempotency keys. Every other error goes on to Fastify's default handler.
+  app.setErrorHandler((error, req, reply) => {
+    if (isTransactionTimeout(error)) {
+      req.log.warn({ err: error }, 'transaction budget exceeded; rolled back');
+      return reply
+        .code(503)
+        .header('Retry-After', '1')
+        .send({ error: 'transaction-timeout', retryable: true });
+    }
+    return reply.send(error);
   });
 
   app.addHook('onResponse', async (req: FastifyRequest, reply: FastifyReply) => {

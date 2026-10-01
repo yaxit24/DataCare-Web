@@ -1,5 +1,6 @@
 import { withTenant } from '@datacare/db';
 import { DESKTOP_COLUMN_DEFAULTS } from './desktopColumnDefaults.js';
+import { tableColumnsTx, warmSchemaCatalog } from '../shared/schemaCatalog.js';
 
 /** A double-entry ledger row (AC_DATA): one of CR_AMT/DR_AMT set per line. */
 export interface LedgerLine {
@@ -388,17 +389,9 @@ export async function assertPeriodOpen(tx: any, tenantId: string, input: PostInp
   }
 }
 
-/** Cache of which tables have a DATA_TYPE column (desktop stamps DATA_TYPE='A' on all data rows). */
-const _hasDataType = new Map<string, boolean>();
+/** Whether a table has a DATA_TYPE column (desktop stamps DATA_TYPE='A' on all data rows). */
 async function tableHasDataType(tx: any, table: string): Promise<boolean> {
-  if (_hasDataType.has(table)) return _hasDataType.get(table)!;
-  const rows: unknown[] = await tx.$queryRawUnsafe(
-    `SELECT 1 FROM information_schema.columns WHERE table_name=$1 AND column_name='DATA_TYPE' LIMIT 1`,
-    table,
-  );
-  const has = (rows as unknown[]).length > 0;
-  _hasDataType.set(table, has);
-  return has;
+  return (await tableColumnsTx(tx, table)).has('DATA_TYPE');
 }
 
 /**
@@ -424,18 +417,16 @@ const PROVENANCE_COLUMNS = [
   'NEW_VCH_NO',
 ] as const;
 
-const _tableColumns = new Map<string, Set<string>>();
+/**
+ * Load the column metadata posting and numbering need, in one query, before any request is served (N53).
+ * After this no posting or numbering transaction queries `information_schema`.
+ */
+export async function warmPostingMetadata(prisma: any): Promise<number> {
+  return warmSchemaCatalog(prisma);
+}
 
-async function columnsOf(tx: any, table: string): Promise<Set<string>> {
-  const cached = _tableColumns.get(table);
-  if (cached) return cached;
-  const rows: Array<{ column_name: string }> = await tx.$queryRawUnsafe(
-    `SELECT column_name FROM information_schema.columns WHERE table_name=$1`,
-    table,
-  );
-  const set = new Set(rows.map((r) => r.column_name));
-  _tableColumns.set(table, set);
-  return set;
+async function columnsOf(tx: any, table: string): Promise<ReadonlySet<string>> {
+  return tableColumnsTx(tx, table);
 }
 
 /**
@@ -479,7 +470,7 @@ const ADD_USER_TABLES = new Set(['BAR_DETL', 'SL_ORD_DETL']);
  */
 export function applyProvenance(
   row: Record<string, unknown>,
-  tableColumns: Set<string>,
+  tableColumns: ReadonlySet<string>,
   table?: string,
 ): Record<string, unknown> {
   const out = { ...row };
@@ -664,14 +655,7 @@ async function persistedVoucherForReversal(
   const where = keys.map((k, i) => `${q(k)}::text=$${i + 2}::text`).join(' AND ');
   const params = keys.map((k) => key[k]);
   for (const table of tables) {
-    const columns: Array<{ column_name: string }> = await tx.$queryRawUnsafe(
-      `SELECT column_name FROM information_schema.columns
-        WHERE table_schema=current_schema() AND table_name=$1
-          AND column_name = ANY($2::text[])`,
-      table,
-      [...keys, 'tenant_id', 'CO_CODE', 'VCH_DATE'],
-    );
-    const available = new Set(columns.map((c) => c.column_name));
+    const available = await tableColumnsTx(tx, table);
     if (
       !available.has('tenant_id') ||
       !available.has('CO_CODE') ||

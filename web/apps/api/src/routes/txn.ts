@@ -1,4 +1,5 @@
 import { SessionReadSnapshotError } from '../modules/auth/sessionContextReadSnapshot.js';
+import { isTransactionTimeout } from '../modules/shared/txBudget.js';
 import {
   getSaleReturnLabourReplayState,
   observeSaleReturnLabourReplayCode,
@@ -799,6 +800,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       const out = await fn();
       return reply.code(okCode).send(out as any);
     } catch (e: any) {
+      // A rolled-back budget failure is a retryable 503 (app.ts), never a 400 "invalid-data" below.
+      if (isTransactionTimeout(e)) throw e;
       const n: string = e?.name ?? '';
       if (e instanceof SessionCommandError || e instanceof SessionReadSnapshotError)
         return reply.code(e.statusCode).send({
