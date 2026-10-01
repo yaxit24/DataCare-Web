@@ -5,75 +5,26 @@ import { useBusinessScope } from '../../../../components/BusinessScope';
 import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
 import { BookSelect } from '../../../../components/BookSelect';
 import { VoucherList } from '../../../../components/VoucherList';
+import {
+  blankHallmarkLine as blank,
+  fineFor,
+  labourCharge,
+  extendedLineFields,
+  hallmarkHeaderFromView,
+  hallmarkLineFromView,
+  hallmarkOldGoldFromView,
+  hallmarkSaleCommand,
+  type HallmarkLine as Line,
+  type LoadedHallmarkSale,
+} from '@datacare/core';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
-import { fineFor, labourCharge } from '@datacare/core';
 import {
   ExtendedBodyCells,
   ExtendedHeaderCells,
   GridModeToggle,
 } from '../../../../components/ExtendedGrid';
 
-interface Line {
-  itCode: string;
-  tagNo: string;
-  huid: string;
-  pcs: string;
-  grossWt: string;
-  netWt: string;
-  touch: string;
-  rate: string;
-  making: string;
-  lessWt: string;
-  ghtPct: string;
-  ghtWt: string;
-  westPct: string;
-  fineWt: string;
-  rateWith: string;
-  rateType: string;
-  metalAmount: string;
-  labourType: string;
-  labourPct: string;
-  labourFixed: string;
-  otherAmount: string;
-  discountPct: string;
-  ghatAmount: string;
-  mrp: string;
-  designNo: string;
-  itmSize: string;
-  style: string;
-  itemLot: string;
-  bagWt: string;
-  remark: string;
-  tblCode: string;
-  tagGrossWt: string;
-  tagNetWt: string;
-  tagCost: string;
-  karigarName: string;
-  karigarNetWt: string;
-  karigarTouch: string;
-  karigarWestPct: string;
-  karigarFine: string;
-  employeeCode: string;
-  prCode: string;
-  ordNo: string;
-  ordYrcd: string;
-  ordDbcd: string;
-  ordSrno: string;
-  isuNo: string;
-  isuYrcd: string;
-  isuDbcd: string;
-  isuSrno: string;
-  designImageId: string;
-  orderTagStockAdd: string;
-  hallmarkId2: string;
-  hallmarkId3: string;
-  hallmarkId4: string;
-  hallmarkIdWt: string;
-  hallmarkId2Wt: string;
-  hallmarkId3Wt: string;
-  hallmarkId4Wt: string;
-}
 interface Totals {
   net: number;
   discount: number;
@@ -85,163 +36,24 @@ interface Totals {
   roundOff: number;
   total: number;
 }
-/**
- * P7: fields deliberately NOT exposed on this grid, having been checked against the writer.
- *
- * Five have NO COLUMN IN SL_DETL at all despite the interface carrying a column comment
- * (ITM_MARGIN, TAG_LBR_PRC, TAG_LBR_RATE, TAG_LBR_AMT, TAG_OTH_AMT) — verified against
- * information_schema. Four more are declared on the contract but never read by the writer
- * (otherWt, itType, tagType, dataTransfer). Three are internal serials the server assigns
- * (tagSrNo, oldSrNo, vchSrno). `margin` is additionally server-derived on purpose: sales.ts:1866
- * notes a client-supplied cost would let the margin be manipulated.
- *
- * Exposing any of them would give the operator a cell that silently discards what they type, which is
- * worse than not showing the column — and it would inflate the depth metric with dead surface.
- * fineWt, metalAmount and labourFixed ARE exposed, because the writer honours each as an override.
- */
-const NUMERIC_EXTENDED = new Set<string>([
-  'lessWt',
-  'ghtPct',
-  'ghtWt',
-  'westPct',
-  'fineWt',
-  'metalAmount',
-  'labourPct',
-  'labourFixed',
-  'otherAmount',
-  'discountPct',
-  'ghatAmount',
-  'mrp',
-  'bagWt',
-  'tagGrossWt',
-  'tagNetWt',
-  'tagCost',
-  'karigarNetWt',
-  'karigarTouch',
-  'karigarWestPct',
-  'karigarFine',
-  'hallmarkIdWt',
-  'hallmarkId2Wt',
-  'hallmarkId3Wt',
-  'hallmarkId4Wt',
-  'ordSrno',
-  'isuSrno',
-]);
-
-const extendedLineFields: Array<[keyof Line, string]> = [
-  ['lessWt', 'Ls Wt'],
-  ['ghtPct', 'Ght%'],
-  ['ghtWt', 'GhtWt'],
-  ['westPct', 'West%'],
-  ['fineWt', 'Fine'],
-  ['rateWith', 'RtWith'],
-  ['rateType', 'RateType'],
-  ['metalAmount', 'ItAmt'],
-  ['labourType', 'LType'],
-  ['labourPct', 'Lbr%'],
-  ['labourFixed', 'LbrFix'],
-  ['otherAmount', 'OthAmt'],
-  ['discountPct', 'LDisc%'],
-  ['ghatAmount', 'GhtAmt'],
-  ['mrp', 'Mrp'],
-  ['designNo', 'Design'],
-  ['itmSize', 'Size'],
-  ['style', 'Style'],
-  ['itemLot', 'ItmLot'],
-  ['bagWt', 'BagWt'],
-  ['remark', 'Remark'],
-  ['tblCode', 'TblCode'],
-  ['tagGrossWt', 'TagGwt'],
-  ['tagNetWt', 'TagNwt'],
-  ['tagCost', 'TagCost'],
-  ['karigarName', 'KrCode'],
-  ['karigarNetWt', 'KrNwt'],
-  ['karigarTouch', 'KrTouch'],
-  ['karigarWestPct', 'KrWst%'],
-  ['karigarFine', 'KrFine'],
-  ['employeeCode', 'EmpCod'],
-  ['prCode', 'PrCost'],
-  ['ordNo', 'OrdNo'],
-  ['ordYrcd', 'OrdYr'],
-  ['ordDbcd', 'OrdBk'],
-  ['ordSrno', 'OrdSr'],
-  ['isuNo', 'IsuNo'],
-  ['isuYrcd', 'IsuYr'],
-  ['isuDbcd', 'IsuBk'],
-  ['isuSrno', 'IsuSr'],
-  ['designImageId', 'Image'],
-  ['orderTagStockAdd', 'OrdStk'],
-  ['hallmarkId2', 'HmId2'],
-  ['hallmarkId3', 'HmId3'],
-  ['hallmarkId4', 'HmId4'],
-  ['hallmarkIdWt', 'HmIdWt'],
-  ['hallmarkId2Wt', 'HmId2Wt'],
-  ['hallmarkId3Wt', 'HmId3Wt'],
-  ['hallmarkId4Wt', 'HmId4Wt'],
-];
 
 const str = (v: unknown) => (v == null || Number(v) === 0 ? '' : String(v));
-const blank = (): Line => ({
-  itCode: 'GOLD',
-  tagNo: '',
-  huid: '',
-  pcs: '1',
-  grossWt: '',
-  netWt: '',
-  touch: '',
-  rate: '',
-  making: '',
-  lessWt: '',
-  ghtPct: '',
-  ghtWt: '',
-  westPct: '',
-  fineWt: '',
-  rateWith: '',
-  rateType: '',
-  metalAmount: '',
-  labourType: '',
-  labourPct: '',
-  labourFixed: '',
-  otherAmount: '',
-  discountPct: '',
-  ghatAmount: '',
-  mrp: '',
-  designNo: '',
-  itmSize: '',
-  style: '',
-  itemLot: '',
-  bagWt: '',
-  remark: '',
-  tblCode: '',
-  tagGrossWt: '',
-  tagNetWt: '',
-  tagCost: '',
-  karigarName: '',
-  karigarNetWt: '',
-  karigarTouch: '',
-  karigarWestPct: '',
-  karigarFine: '',
-  employeeCode: '',
-  prCode: '',
-  ordNo: '',
-  ordYrcd: '',
-  ordDbcd: '',
-  ordSrno: '',
-  isuNo: '',
-  isuYrcd: '',
-  isuDbcd: '',
-  isuSrno: '',
-  designImageId: '',
-  orderTagStockAdd: '',
-  hallmarkId2: '',
-  hallmarkId3: '',
-  hallmarkId4: '',
-  hallmarkIdWt: '',
-  hallmarkId2Wt: '',
-  hallmarkId3Wt: '',
-  hallmarkId4Wt: '',
-});
 const n = (v: string) => Number(v || 0);
+/** Editing one of these on a loaded line invalidates its loaded fine and metal amount. */
+const DERIVATION_INPUT_KEYS = new Set<keyof Line>([
+  'itCode',
+  'pcs',
+  'grossWt',
+  'netWt',
+  'lessWt',
+  'touch',
+  'ghtWt',
+  'ghtPct',
+  'westPct',
+  'rate',
+  'rateWith',
+  'rateType',
+]);
 const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
 
 export default function HallmarkSalePage() {
@@ -267,6 +79,8 @@ export default function HallmarkSalePage() {
   // /sales/:vchNo read, update and delete routes just like the ordinary sales screen.
   const [voucherLookup, setVoucherLookup] = useState('');
   const [loadedVchNo, setLoadedVchNo] = useState('');
+  // Everything GET /sales/:vchNo returned, so an edit sends back what it does not display (G45).
+  const [loaded, setLoaded] = useState<LoadedHallmarkSale | undefined>(undefined);
   const [lines, setLines] = useState<Line[]>([blank()]);
   const [fullGrid, setFullGrid] = useState(false);
   // Desktop grids are keyboard-driven: arrows move between cells, Enter advances and
@@ -287,7 +101,19 @@ export default function HallmarkSalePage() {
   const [busy, setBusy] = useState(false);
 
   const setLine = (i: number, k: keyof Line, v: string) =>
-    setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
+    setLines((ls) =>
+      ls.map((l, j) => {
+        if (j !== i) return l;
+        const next = { ...l, [k]: v };
+        // A loaded fine or metal amount is the server's derivation from the loaded inputs. Once an input
+        // changes, show it blank (the server derives it again) unless the operator overrides it.
+        if (l.loaded && DERIVATION_INPUT_KEYS.has(k)) {
+          for (const derived of ['fineWt', 'metalAmount'] as const)
+            if (next[derived] === l.loaded.editor[derived]) next[derived] = '';
+        }
+        return next;
+      }),
+    );
 
   // live line preview: fine = net×touch/100, metal = fine×rate, making = net×making/g, net = metal+making
   const calc = (l: Line) => {
@@ -322,6 +148,7 @@ export default function HallmarkSalePage() {
 
   function resetForm() {
     setLoadedVchNo('');
+    setLoaded(undefined);
     setVoucherLookup('');
     setResult(null);
     setErr('');
@@ -355,37 +182,24 @@ export default function HallmarkSalePage() {
       setLoadedVchNo(String(view.voucherNo));
       setVoucherLookup(String(view.voucherNo));
       setResult(null);
-      setAcCode(String(view.acCode ?? ''));
-      setAcName(String(view.acName ?? ''));
-      setTaxRatePct(str(view.taxRatePct) || '0');
-      setDiscountAmount(str(view.discountAmount));
-      setInterState(!!view.interState);
-      setHmCharge(str(view.hallmarkAmount));
-      setCashAmt(str(view.cashAmt));
-      setCardAmt(str(view.cardAmt));
-      setUpiAmt(str(view.upiAmt));
-      setChequeAmt(str(view.chequeAmt));
-      const og = (view.oldGold ?? [])[0];
-      setOldGoldNet(str(og?.netWt));
-      setOldGoldTouch(str(og?.touch));
-      setOldGoldRate(str(og?.rate));
-      const loaded: Line[] = (view.lines ?? []).map((line: any) => ({
-        ...blank(),
-        itCode: String(line.itCode ?? ''),
-        tagNo: String(line.tagNo ?? ''),
-        huid: String(line.huid ?? ''),
-        pcs: str(line.pcs) || '1',
-        grossWt: str(line.grossWt),
-        netWt: str(line.netWt),
-        touch: str(line.touch),
-        rate: str(line.rate),
-        making: line.labourType === 'per_gram' ? str(line.labourRate) : '',
-        ghtWt: str(line.ghtWt),
-        westPct: str(line.westPct),
-        designNo: String(line.designNo ?? ''),
-        mrp: str(line.mrp),
-      }));
-      setLines(loaded.length ? loaded : [blank()]);
+      const header = hallmarkHeaderFromView(view);
+      const oldGold = hallmarkOldGoldFromView(view);
+      setAcCode(header.acCode);
+      setAcName(header.acName);
+      setTaxRatePct(header.taxRatePct);
+      setDiscountAmount(header.discountAmount);
+      setInterState(header.interState);
+      setHmCharge(header.hallmarkAmount);
+      setCashAmt(header.cashAmt);
+      setCardAmt(header.cardAmt);
+      setUpiAmt(header.upiAmt);
+      setChequeAmt(header.chequeAmt);
+      setOldGoldNet(oldGold.netWt);
+      setOldGoldTouch(oldGold.touch);
+      setOldGoldRate(oldGold.rate);
+      setLoaded({ view, header, oldGold });
+      const loadedLines: Line[] = (view.lines ?? []).map(hallmarkLineFromView);
+      setLines(loadedLines.length ? loadedLines : [blank()]);
     } catch (e) {
       setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'load failed');
     } finally {
@@ -417,58 +231,24 @@ export default function HallmarkSalePage() {
     setResult(null);
     setBusy(true);
     try {
-      const oldGoldAmt = r2(((n(oldGoldNet) * n(oldGoldTouch)) / 100) * n(oldGoldRate));
-      const body = {
-        coBook,
-        coYear,
-        lcCode,
-        acCode,
-        acName: acName || undefined,
-        taxRatePct: Number(taxRatePct),
-        interState,
-        discountAmount: discountAmount ? Number(discountAmount) : undefined,
-        hallmarkAmount: hmCharge ? n(hmCharge) : undefined,
-        cashAmt: cashAmt ? n(cashAmt) : undefined,
-        cardAmt: cardAmt ? n(cardAmt) : undefined,
-        upiAmt: upiAmt ? n(upiAmt) : undefined,
-        chequeAmt: chequeAmt ? n(chequeAmt) : undefined,
-        oldGold:
-          oldGoldAmt > 0
-            ? [
-                {
-                  itCode: 'OG',
-                  netWt: n(oldGoldNet),
-                  touch: n(oldGoldTouch),
-                  rate: n(oldGoldRate),
-                  amount: oldGoldAmt,
-                },
-              ]
-            : undefined,
-        lines: lines
-          .filter((l) => l.itCode && (l.netWt || l.rate))
-          .map((l) => ({
-            itCode: l.itCode,
-            tagNo: l.tagNo || undefined,
-            pcs: n(l.pcs),
-            grossWt: n(l.grossWt),
-            netWt: n(l.netWt),
-            touch: n(l.touch),
-            rate: n(l.rate),
-            huid: l.huid || undefined,
-            ...(l.making ? { labourType: 'per_gram', labourRate: n(l.making) } : {}),
-            // P7: extended columns. A blank cell is OMITTED, never sent as 0 — an explicit zero is
-            // an override at the writer and would defeat the server's own derivation.
-            ...Object.fromEntries(
-              extendedLineFields
-                .map(([key]) => [
-                  key,
-                  String((l as unknown as Record<string, unknown>)[key] ?? '').trim(),
-                ])
-                .filter(([, v]) => v !== '')
-                .map(([key, v]) => [key, NUMERIC_EXTENDED.has(key as string) ? Number(v) : v]),
-            ),
-          })),
-      };
+      const body = hallmarkSaleCommand({
+        scope: { coBook, coYear, lcCode },
+        header: {
+          acCode,
+          acName,
+          taxRatePct,
+          discountAmount,
+          interState,
+          hallmarkAmount: hmCharge,
+          cashAmt,
+          cardAmt,
+          upiAmt,
+          chequeAmt,
+        },
+        oldGold: { netWt: oldGoldNet, touch: oldGoldTouch, rate: oldGoldRate },
+        lines,
+        loaded: loadedVchNo ? loaded : undefined,
+      });
       if (loadedVchNo) {
         const updated = await put<any>(`/sales/${encodeURIComponent(loadedVchNo)}`, body);
         setLoadedVchNo(String(updated.vchNo));
