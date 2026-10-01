@@ -1,3 +1,4 @@
+import { round } from '@datacare/core';
 import { withTenant } from '@datacare/db';
 import { assertPeriodOpen, insertRowTx, postVoucherTx } from '../posting/posting.js';
 import { fineFor, round3 } from '../shared/finePolicy.js';
@@ -186,7 +187,10 @@ type ComputedLine = {
 
 const n = (value: unknown): number => (value == null || value === '' ? 0 : Number(value) || 0);
 const text = (value: unknown): string => String(value ?? '').trim();
-const r2 = (value: number): number => Math.round((value + Number.EPSILON) * 100) / 100;
+// TR_INOUT stores IT_NET_AMT / LBR_AMT / OTH_AMT / TOT_NET_AMT through Strings.Format(x, "0.00")
+// (TR_INOUT.cs:4540-4601, 5514-5613), i.e. half-up away from zero, so the kernel `round` is correct
+// (N48, G22).
+const r2 = (value: number): number => round(value, 2);
 const today = (): string => new Date().toISOString().slice(0, 10);
 const short = (value: unknown, len: number): string => text(value).slice(0, len);
 const nullable = (value: unknown, len?: number): string | null => {

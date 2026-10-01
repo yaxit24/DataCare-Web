@@ -57,6 +57,17 @@ jobs:
         working-directory: web
         run: pnpm typecheck:tests
 
+      # N48 (gap G22): kernel conformance by site identity. The script and apps/api/test/kernelConformance.test.ts
+      # load the same parity/kernel-conformance-baseline.json and run compareToBaseline, so a new rounding or
+      # BOOK_DETL bypass fails here and a burned-down site must have its ID deleted. The detector is compiled
+      # TypeScript, so the API package itself is built first (setup only built its dependencies).
+      - name: 'Gate: kernel conformance (no rounding or BOOK_DETL bypass added)'
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        working-directory: web
+        run: |
+          pnpm --filter @datacare/api build
+          node scripts/check-kernel-conformance.mjs
+
       - name: 'Gate: documentation citations resolve and pinned claims hold'
         if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
         working-directory: web
