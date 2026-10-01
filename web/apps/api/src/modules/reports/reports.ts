@@ -460,7 +460,7 @@ export async function billOutstanding(prisma: any, s: ReportScope): Promise<List
   });
 }
 
-/** GSTR-3B outward-supply summary (SL_DATA, excludes returns book 'SRT'). ITC/inward is a follow-up. */
+/** GSTR-3B outward-supply summary (SL_DATA, SALES books only (returns/quotations/credit-notes are other MAIN_BOOKs)). ITC/inward is a follow-up. */
 export async function gstr3b(prisma: any, s: ReportScope): Promise<Record<string, number>> {
   return withTenant(prisma, s.tenantId, async (tx: any) => {
     const { yr, params } = coParams(s);
@@ -468,7 +468,7 @@ export async function gstr3b(prisma: any, s: ReportScope): Promise<Record<string
     const r: any[] = await tx.$queryRawUnsafe(
       `SELECT coalesce(sum(${NN('"NET_AMT"')}-${NN('"DISC_AMT"')}),0) AS taxable, coalesce(sum(${NN('"TAX_AMT"')}),0) AS tax,
               coalesce(sum(${NN('"CGST_TAX"')}),0) AS cgst, coalesce(sum(${NN('"SGST_TAX"')}),0) AS sgst, coalesce(sum(${NN('"IGST_TAX"')}),0) AS igst
-       FROM "SL_DATA" WHERE "CO_CODE"=$1${yr}${dt} AND "CO_BOOK"<>'SRT'`,
+       FROM "SL_DATA" WHERE "CO_CODE"=$1${yr}${dt} AND "CO_BOOK" IN (SELECT b."CO_BOOK" FROM "BOOK_DATA" b WHERE b."CO_CODE"=$1 AND b."MAIN_BOOK"='SALES')`,
       ...params,
     );
     const x = r[0];
@@ -489,7 +489,7 @@ export async function salesByParty(prisma: any, s: ReportScope): Promise<ListRep
     const dt = dateWhere(s, '"VCH_DATE"', params);
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "AC_CODE" AS "acCode", max("AC_NAME") AS party, count(*)::int AS bills, sum(${NN('"TOT_AMT"')}) AS total
-       FROM "SL_DATA" WHERE "CO_CODE"=$1${yr}${dt} AND "CO_BOOK"<>'SRT' GROUP BY "AC_CODE" ORDER BY total DESC NULLS LAST`,
+       FROM "SL_DATA" WHERE "CO_CODE"=$1${yr}${dt} AND "CO_BOOK" IN (SELECT b."CO_BOOK" FROM "BOOK_DATA" b WHERE b."CO_CODE"=$1 AND b."MAIN_BOOK"='SALES') GROUP BY "AC_CODE" ORDER BY total DESC NULLS LAST`,
       ...params,
     );
     const out = rows.map((r) => ({
@@ -759,7 +759,7 @@ export async function monthlySales(prisma: any, s: ReportScope): Promise<ListRep
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT to_char("VCH_DATE"::timestamp,'YYYY-MM') AS month, count(*)::int AS invoices,
               sum(${NN('"NET_AMT"')}) AS net, sum(${NN('"TAX_AMT"')}) AS tax, sum(${NN('"TOT_AMT"')}) AS total
-       FROM "SL_DATA" WHERE "CO_CODE"=$1${yr}${dt} AND "CO_BOOK"<>'SRT' AND "VCH_DATE" IS NOT NULL
+       FROM "SL_DATA" WHERE "CO_CODE"=$1${yr}${dt} AND "CO_BOOK" IN (SELECT b."CO_BOOK" FROM "BOOK_DATA" b WHERE b."CO_CODE"=$1 AND b."MAIN_BOOK"='SALES') AND "VCH_DATE" IS NOT NULL
        GROUP BY 1 ORDER BY 1`,
       ...params,
     );

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { get, post, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
+import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { VoucherList } from '../../../../components/VoucherList';
@@ -201,6 +202,9 @@ export default function SaleReturnPage() {
 
 function LegacySaleReturnForm() {
   const { coYear } = useBusinessScope();
+  // G11: per-gram labour is on (net + ghat) unless the company sets LBR_WITH_GHT='N' (blank default Y).
+  const companySettings = useCompanySettings();
+  const labourWithGhat = companyFlag(companySettings, 'LBR_WITH_GHT', 'Y');
   const [coBook, setCoBook] = useState('');
   const [acCode, setAcCode] = useState('');
   const [acName, setAcName] = useState('');
@@ -282,7 +286,7 @@ function LegacySaleReturnForm() {
     const mk = labourCharge('per_gram', {
       netWt: n(l.netWt),
       ghatWt: n(l.ghtWt),
-      withGhat: true,
+      withGhat: labourWithGhat,
       rate: n(l.making),
     });
     return { fine, metal, mk, net: r2(metal + mk) };

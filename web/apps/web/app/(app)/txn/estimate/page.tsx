@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { get, post, downloadPdf, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
+import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import { fineFor, labourCharge } from '@datacare/core';
@@ -216,6 +217,9 @@ const n = (v: string) => Number(v || 0);
 const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
 
 export default function EstimatePage() {
+  // G11: per-gram labour is on (net + ghat) unless the company sets LBR_WITH_GHT='N' (blank default Y).
+  const companySettings = useCompanySettings();
+  const labourWithGhat = companyFlag(companySettings, 'LBR_WITH_GHT', 'Y');
   // G09: the estimate header used to hard-code one shop's name ("DHAKAN JEWELLERS"), so every company
   // printed the wrong letterhead. Take it from the company master of the active scope instead.
   const { coCode } = useBusinessScope();
@@ -268,7 +272,7 @@ export default function EstimatePage() {
     const mk = labourCharge('per_gram', {
       netWt: n(l.netWt),
       ghatWt: n(l.ghtWt),
-      withGhat: true,
+      withGhat: labourWithGhat,
       rate: n(l.making),
     });
     return { fine, metal, mk, net: r2(metal + mk) };

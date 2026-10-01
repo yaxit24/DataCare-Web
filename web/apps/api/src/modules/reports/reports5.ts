@@ -24,7 +24,7 @@ const coParams = (s: ReportScope): { yr: string; params: unknown[] } =>
     : { yr: '', params: [s.coCode] };
 
 /**
- * Daily sales summary (SL_DATA grouped by VCH_DATE, excludes returns book 'SRT'): one row per
+ * Daily sales summary (SL_DATA grouped by VCH_DATE, SALES books only (returns/quotations/credit-notes are other MAIN_BOOKs)): one row per
  * sale-day with bill count, taxable (Σ NET_AMT), tax (Σ TAX_AMT) and gross (Σ TOT_AMT), ordered by
  * date. NULL voucher dates are excluded so the day buckets stay clean (matching monthlySales in
  * reports.ts). totals reports the day count and the grand gross total.
@@ -36,7 +36,7 @@ export async function dailySalesSummary(prisma: any, s: ReportScope): Promise<Li
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "VCH_DATE" AS date, count(*)::int AS bills,
               sum(${NN('"NET_AMT"')}) AS taxable, sum(${NN('"TAX_AMT"')}) AS tax, sum(${NN('"TOT_AMT"')}) AS total
-       FROM "SL_DATA" WHERE "CO_CODE"=$1${yr}${dt} AND "CO_BOOK"<>'SRT' AND "VCH_DATE" IS NOT NULL
+       FROM "SL_DATA" WHERE "CO_CODE"=$1${yr}${dt} AND "CO_BOOK" IN (SELECT b."CO_BOOK" FROM "BOOK_DATA" b WHERE b."CO_CODE"=$1 AND b."MAIN_BOOK"='SALES') AND "VCH_DATE" IS NOT NULL
        GROUP BY "VCH_DATE" ORDER BY "VCH_DATE"`,
       ...params,
     );
@@ -83,7 +83,7 @@ export async function topItems(prisma: any, s: ReportScope): Promise<ListReport>
 }
 
 /**
- * Employee sales (SL_DATA grouped by EMP_CODE, excludes returns book 'SRT'): bill count and gross
+ * Employee sales (SL_DATA grouped by EMP_CODE, SALES books only (returns/quotations/credit-notes are other MAIN_BOOKs)): bill count and gross
  * (Σ TOT_AMT) per salesperson, ordered by gross descending. EMP_CODE was verified to exist on
  * SL_DATA (text type), so it is used directly as the grouping key — no AC_CODE salesman fallback is
  * needed. totals reports the employee count and the grand gross total.
@@ -94,7 +94,7 @@ export async function employeeSales(prisma: any, s: ReportScope): Promise<ListRe
     const dt = dateWhere(s, '"VCH_DATE"', params);
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "EMP_CODE" AS employee, count(*)::int AS bills, sum(${NN('"TOT_AMT"')}) AS total
-       FROM "SL_DATA" WHERE "CO_CODE"=$1${yr}${dt} AND "CO_BOOK"<>'SRT'
+       FROM "SL_DATA" WHERE "CO_CODE"=$1${yr}${dt} AND "CO_BOOK" IN (SELECT b."CO_BOOK" FROM "BOOK_DATA" b WHERE b."CO_CODE"=$1 AND b."MAIN_BOOK"='SALES')
        GROUP BY "EMP_CODE" ORDER BY total DESC NULLS LAST`,
       ...params,
     );
