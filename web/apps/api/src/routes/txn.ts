@@ -6529,7 +6529,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const qy = (req.query as any) || {};
     return recentVouchers(
       prisma,
-      { tenantId: s.tenantId, coCode: s.coCode },
+      // A session without a year lists nothing (fail closed) rather than every year's vouchers.
+      { tenantId: s.tenantId, coCode: s.coCode, lcCode: s.lcCode, coYear: s.coYear ?? '' },
       String(qy.table ?? ''),
       String(qy.book ?? ''),
       qy.limit ? Number(qy.limit) : 50,

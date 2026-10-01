@@ -3,10 +3,18 @@ import { useCallback, useEffect, useState } from 'react';
 import { get, del, ApiError } from '../lib/api';
 
 /** Reusable recent-voucher list for transaction screens: navigate / print / delete / load-to-edit.
- *  `table`+`book` feed GET /vouchers/recent; `deleteBase` is the module's reversible DELETE base
- *  (e.g. '/sales' → DELETE /sales/:vchNo). `printHref(vchNo)` and `onLoad(vchNo)` are optional. */
-interface VRow {
+ *  `table`+`book` feed GET /vouchers/recent, which lists only the session's company, location and year
+ *  in that book and returns each row's complete identity (N51 / G28). `deleteBase` is the module's
+ *  reversible DELETE base (e.g. '/sales' → DELETE /sales/:vchNo). `printHref(vchNo)` and
+ *  `onLoad(vchNo, identity)` are optional; callers act on the identity of the row clicked. */
+export interface VoucherIdentity {
+  coCode: string;
+  lcCode: string;
+  coYear: string;
+  coBook: string;
   vchNo: string;
+}
+interface VRow extends VoucherIdentity {
   vchDate: string | null;
   vchType: string | null;
   acCode: string;
@@ -25,7 +33,7 @@ export function VoucherList({
   book: string;
   deleteBase?: string;
   printHref?: (vchNo: string) => string;
-  onLoad?: (vchNo: string) => void;
+  onLoad?: (vchNo: string, identity: VoucherIdentity) => void;
   reloadKey?: unknown;
 }) {
   const [rows, setRows] = useState<VRow[]>([]);
@@ -46,15 +54,18 @@ export function VoucherList({
     if (open) void load();
   }, [open, load, reloadKey]);
 
-  async function remove(vchNo: string) {
+  async function remove(row: VoucherIdentity) {
     if (!deleteBase) return;
+    const vchNo = row.vchNo;
     if (!confirm(`Delete voucher #${vchNo}? This reverses its ledger + stock.`)) return;
     setMsg('');
     try {
       // The recent list is scoped to this configured book; deletion must carry the same identity. Omitting
       // it made writers fall back to mnemonic literals (for example Purchase Return -> PRT) and could not
       // delete a real desktop-shaped book such as 348.
-      await del(`${deleteBase}/${encodeURIComponent(vchNo)}?coBook=${encodeURIComponent(book)}`);
+      await del(
+        `${deleteBase}/${encodeURIComponent(vchNo)}?coBook=${encodeURIComponent(row.coBook || book)}`,
+      );
       setMsg(`Deleted #${vchNo}`);
       await load();
     } catch (e) {
@@ -95,14 +106,14 @@ export function VoucherList({
             </thead>
             <tbody>
               {rows.map((r, i) => (
-                <tr key={`${r.vchNo}-${i}`}>
+                <tr key={`${r.coYear}|${r.lcCode}|${r.coBook}|${r.vchNo}|${i}`}>
                   <td>{r.vchNo}</td>
                   <td>{r.vchDate ?? ''}</td>
                   <td>{r.acName || r.acCode}</td>
                   <td className="num">{money(r.total)}</td>
                   <td style={{ whiteSpace: 'nowrap' }}>
                     {onLoad && (
-                      <button type="button" className="ghost" onClick={() => onLoad(r.vchNo)}>
+                      <button type="button" className="ghost" onClick={() => onLoad(r.vchNo, r)}>
                         Load
                       </button>
                     )}
@@ -122,7 +133,7 @@ export function VoucherList({
                         type="button"
                         className="danger"
                         style={{ marginLeft: 4 }}
-                        onClick={() => remove(r.vchNo)}
+                        onClick={() => remove(r)}
                       >
                         Delete
                       </button>
