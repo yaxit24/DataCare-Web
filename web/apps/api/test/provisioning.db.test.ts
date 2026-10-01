@@ -80,7 +80,7 @@ d('company provisioning produces a postable company', () => {
         CO,
       ),
     );
-    expect(rows.length).toBe(23);
+    expect(rows.length).toBe(25);
     // Three legs per book (1 = control/sales, 2 = cash/bank, 3 = round-off), except the cash books.
     // RCT and PAY carry the desktop cash-book layout, 1 = cash and 2 = kasar: Ac_Ledr.cs:567-581 joins
     // BOOK_DETL SR_NO 1 and SR_NO 2 for legs 01-08. Their slot 2 used to be CASH, which would have posted
@@ -103,15 +103,17 @@ d('company provisioning produces a postable company', () => {
       );
   });
 
-  it('provisions the karigar issue and receipt books so a fresh company can use them (G19)', async () => {
+  it('provisions karigar and Jadtar issue/receipt books so a fresh company can use them (G19)', async () => {
     const rows: any[] = await withTenant(prisma, tenantId, (tx: any) =>
       tx.$queryRawUnsafe(
         `SELECT "CO_BOOK","MAIN_BOOK","BOOK_INOUT","BOOK_TBL_NAME" FROM "BOOK_DATA"
-          WHERE "CO_CODE"=$1 AND "CO_BOOK" IN ('KRI','KRR') ORDER BY "CO_BOOK"`,
+          WHERE "CO_CODE"=$1 AND "CO_BOOK" IN ('KRI','KRR','JDI','JDR') ORDER BY "CO_BOOK"`,
         CO,
       ),
     );
     expect(rows).toEqual([
+      { CO_BOOK: 'JDI', MAIN_BOOK: 'JDTR ISU', BOOK_INOUT: 'O', BOOK_TBL_NAME: 'MFG_DATA' },
+      { CO_BOOK: 'JDR', MAIN_BOOK: 'JDTR REC', BOOK_INOUT: 'I', BOOK_TBL_NAME: 'MFG_DATA' },
       { CO_BOOK: 'KRI', MAIN_BOOK: 'KARIGAR ISSUE', BOOK_INOUT: 'O', BOOK_TBL_NAME: 'KR_DATA' },
       { CO_BOOK: 'KRR', MAIN_BOOK: 'KARIGAR RECEIPT', BOOK_INOUT: 'I', BOOK_TBL_NAME: 'KR_DATA' },
     ]);
@@ -291,8 +293,8 @@ d('company provisioning produces a postable company', () => {
   it('is idempotent', async () => {
     const again = await seedCompany(prisma, tenantId, CO, { coName: 'Provision Test', lcCode: LC });
     expect(again.created.books).toBe(0);
-    // 17 three-leg books (incl. TAG PURCHASE + KARIGAR ISSUE/RECEIPT) + RCT/PAY x 2 + WHS/RTC x 12
-    // + TSP x 5 + OIN/OEX x 1, not doubled.
-    expect(await count('BOOK_DETL')).toBe(83);
+    // 19 three-leg books (incl. TAG PURCHASE, KARIGAR and JDTR issue/receipt) + RCT/PAY x 2
+    // + WHS/RTC x 12 + TSP x 5 + OIN/OEX x 1, not doubled.
+    expect(await count('BOOK_DETL')).toBe(89);
   });
 });

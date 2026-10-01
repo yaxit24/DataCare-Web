@@ -337,7 +337,14 @@ import {
   editOldItemSale,
   deleteOldItemSale,
 } from '../modules/manufacturing/karigar.js';
-import { issueMfg, receiveMfg, getMfg, editMfg, deleteMfg } from '../modules/manufacturing/mfg.js';
+import {
+  issueMfg,
+  receiveMfg,
+  getMfg,
+  editMfg,
+  deleteMfg,
+  requireMfgMainBook,
+} from '../modules/manufacturing/mfg.js';
 import {
   deleteMeltingPro,
   getMeltingPro,
@@ -3902,15 +3909,21 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
 
+  const checkedJobworkScope = async (req: FastifyRequest, mainBook: 'JDTR ISU' | 'JDTR REC') => {
+    const scope = scopeOf(req);
+    await requireMfgMainBook(prisma, scope, mainBook);
+    return scope;
+  };
+
   // Desktop jobwork issue (TR_JDT_REC). Routes are declared explicitly: the RBAC route
   // inventory and apps/api/test/routePolicy.test.ts are static analyses of these literals.
   app.post('/mfg/jobwork-issue', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
-    return run(reply, 201, () =>
+    return run(reply, 201, async () =>
       issueMfg(prisma, {
         ...b,
-        scope: scopeOf(req),
+        scope: await checkedJobworkScope(req, 'JDTR ISU'),
         mainUser: sess(req).sub,
         lines: b.lines ?? [],
       }),
@@ -3918,15 +3931,17 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   app.get('/mfg/jobwork-issue/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
-    return run(reply, 200, () => getMfg(prisma, readScope(req), (req.params as any).vchNo));
+    return run(reply, 200, async () =>
+      getMfg(prisma, await checkedJobworkScope(req, 'JDTR ISU'), (req.params as any).vchNo),
+    );
   });
   app.put('/mfg/jobwork-issue/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'update')) return;
     const b = body(req);
-    return run(reply, 200, () =>
+    return run(reply, 200, async () =>
       editMfg(prisma, {
         ...b,
-        scope: scopeOf(req),
+        scope: await checkedJobworkScope(req, 'JDTR ISU'),
         vchNo: (req.params as any).vchNo,
         mode: 'issue',
         mainUser: sess(req).sub,
@@ -3936,9 +3951,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   app.delete('/mfg/jobwork-issue/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
+    return run(reply, 200, async () =>
       deleteMfg(prisma, {
-        scope: scopeOf(req),
+        scope: await checkedJobworkScope(req, 'JDTR ISU'),
         vchNo: (req.params as any).vchNo,
         deleteUser: sess(req).sub,
       }),
@@ -3950,10 +3965,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.post('/mfg/jobwork-receive', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
-    return run(reply, 201, () =>
+    return run(reply, 201, async () =>
       receiveMfg(prisma, {
         ...b,
-        scope: scopeOf(req),
+        scope: await checkedJobworkScope(req, 'JDTR REC'),
         mainUser: sess(req).sub,
         lines: b.lines ?? [],
       }),
@@ -3961,15 +3976,17 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   app.get('/mfg/jobwork-receive/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
-    return run(reply, 200, () => getMfg(prisma, readScope(req), (req.params as any).vchNo));
+    return run(reply, 200, async () =>
+      getMfg(prisma, await checkedJobworkScope(req, 'JDTR REC'), (req.params as any).vchNo),
+    );
   });
   app.put('/mfg/jobwork-receive/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'update')) return;
     const b = body(req);
-    return run(reply, 200, () =>
+    return run(reply, 200, async () =>
       editMfg(prisma, {
         ...b,
-        scope: scopeOf(req),
+        scope: await checkedJobworkScope(req, 'JDTR REC'),
         vchNo: (req.params as any).vchNo,
         mode: 'receive',
         mainUser: sess(req).sub,
@@ -3979,9 +3996,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   app.delete('/mfg/jobwork-receive/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
+    return run(reply, 200, async () =>
       deleteMfg(prisma, {
-        scope: scopeOf(req),
+        scope: await checkedJobworkScope(req, 'JDTR REC'),
         vchNo: (req.params as any).vchNo,
         deleteUser: sess(req).sub,
       }),

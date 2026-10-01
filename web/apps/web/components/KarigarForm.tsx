@@ -177,8 +177,8 @@ export default function KarigarForm({
   const bookFamilies =
     family === 'jobwork'
       ? mode === 'issue'
-        ? ['JOBWORK ISSUE']
-        : ['JOBWORK RECEIPT']
+        ? ['JDTR ISU']
+        : ['JDTR REC']
       : oldItemSales
         ? ['OLD ITEM SALES']
         : mode === 'issue'
@@ -735,7 +735,7 @@ export default function KarigarForm({
               ? ` · labour ₹${res.labourAmt}` + (res.labourGst ? ` + GST ₹${res.labourGst}` : '')
               : ''}
           </div>
-          {!rcv && (
+          {!rcv && family === 'karigar' && (
             <div className="toolbar" style={{ marginTop: 6 }}>
               <button
                 type="button"
