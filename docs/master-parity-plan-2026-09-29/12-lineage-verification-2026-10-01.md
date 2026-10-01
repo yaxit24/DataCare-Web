@@ -225,6 +225,7 @@ the screens moved to the shared editor pass unchanged-save tests.
 | X15 `currentFinding` (CR-02) | Credit-note IRN assumes the document exists | E CRNT and E INVOICE create/edit/delete/print lifecycle exists (N16); provider and desktop acceptance remain. Recorded as `currentFindingCorrection` |
 | Completion register | 198 rows mapped | 20 rows mapped to the wrong form or surface (G71); the catalog carries the corrected view until N85 |
 | N87 | — | implemented-unverified, evidence in this change |
+| N86 | planned | in-progress: Next.js 15.5.27, React 19.0.8, Node 24 in CI and images, advisory gate; critical and high advisories 7/35 → 0/0. Prisma 7 and the Next.js 16 rehearsal remain |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

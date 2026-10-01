@@ -40,7 +40,7 @@ jobs:
         with: { version: 9.15.4 }
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: pnpm
           cache-dependency-path: web/pnpm-lock.yaml
 
@@ -61,6 +61,11 @@ jobs:
         if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
         working-directory: web
         run: pnpm docs:refs
+
+      - name: 'Gate: no unreviewed critical or high dependency advisory'
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        working-directory: web
+        run: pnpm advisories
 
       - name: 'Gate: master parity plan is internally consistent'
         if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
@@ -94,7 +99,7 @@ jobs:
         with: { version: 9.15.4 }
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: pnpm
           cache-dependency-path: web/pnpm-lock.yaml
 
@@ -276,7 +281,7 @@ jobs:
         with: { version: 9.15.4 }
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: pnpm
           cache-dependency-path: web/pnpm-lock.yaml
 
