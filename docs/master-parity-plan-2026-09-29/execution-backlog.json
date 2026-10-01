@@ -3544,7 +3544,7 @@
     },
     {
       "id": "N49",
-      "status": "planned",
+      "status": "in-progress",
       "action": "Hermetic, per-worktree isolated database and browser harness; zero-mock suites blocking in CI",
       "parentLabels": "P00-04, X03",
       "startAfter": [
@@ -3555,7 +3555,14 @@
       "gapIds": "G23, G24",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-01",
+      "evidence": [
+        "web/apps/web/test/tag-split.journey.mjs",
+        "web/apps/web/test/journeySql.mjs",
+        "web/apps/web/test/journeySeedUpdates.test.ts"
+      ],
+      "statusNote": "Steps 1-2: the tag-split SRNO_MAST seed is an exact upsert (cleanup deletes that row); every journey seed UPDATE is an upsert or goes through expectRows, cleanups are marked idempotent, and a static test fails on any other UPDATE. All 24 journeys passed twice in a row from a clean database with zero mocked requests; the original seed failed on the same clean database with RH000001 at :514. Steps 3-6 (per-worktree ports and project, database identity checks, CI job) remain."
     },
     {
       "id": "N50",

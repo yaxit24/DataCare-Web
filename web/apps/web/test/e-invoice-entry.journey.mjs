@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { expectRows } from './journeySql.mjs';
 
 /**
  * X15 real-browser journey for the E INVOICE mode of TR_SL_EBILL: an operator creates an outward
@@ -58,9 +59,14 @@ export async function seedEInvoiceEntry(sql) {
   );
   await sql(`INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","GR_CODE","RATE_TYPE","HSN_CODE","UNIT_NAME")
     VALUES($1,'01','EIGLD','Invoice gold ring','G','EIG','G','711319','GMS')`);
-  // IRN payload identities: the seller GSTIN lives on CO_MAST (restored in cleanup).
-  await sql(
-    `UPDATE "CO_MAST" SET "CO_GST_NO"='24ABCDE1234F1Z5',"CO_STATE_CODE"='24',"CO_ADD1"='Ring Road',"CO_CITY"='Surat',"CO_PIN"='395003' WHERE tenant_id=$1`,
+  // IRN payload identities: the seller GSTIN lives on CO_MAST (restored in cleanup). Only the session company is
+  // the seller; an unscoped update would also stamp every other company the harness has created.
+  await expectRows(
+    1,
+    sql(
+      `UPDATE "CO_MAST" SET "CO_GST_NO"='24ABCDE1234F1Z5',"CO_STATE_CODE"='24',"CO_ADD1"='Ring Road',"CO_CITY"='Surat',"CO_PIN"='395003' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+    ),
+    'company 01 CO_MAST row',
   );
 }
 
@@ -86,8 +92,9 @@ export async function cleanupEInvoiceEntry(sql) {
   await sql(`DELETE FROM "TAX_MAST" WHERE tenant_id=$1 AND "TAX_CODE" IN ('10','25')`);
   await sql(`DELETE FROM "GROUP_MAST" WHERE tenant_id=$1 AND "GR_CODE"='EIG'`);
   await sql(`DELETE FROM "ITEM_MAST" WHERE tenant_id=$1 AND "IT_CODE"='EIGLD'`);
+  // Idempotent cleanup: restores the seeded seller columns; matches no row once the harness drops CO_MAST.
   await sql(
-    `UPDATE "CO_MAST" SET "CO_GST_NO"=NULL,"CO_STATE_CODE"=NULL,"CO_ADD1"=NULL,"CO_CITY"=NULL,"CO_PIN"=NULL WHERE tenant_id=$1`,
+    `UPDATE "CO_MAST" SET "CO_GST_NO"=NULL,"CO_STATE_CODE"=NULL,"CO_ADD1"=NULL,"CO_CITY"=NULL,"CO_PIN"=NULL WHERE tenant_id=$1 AND "CO_CODE"='01'`,
   );
 }
 

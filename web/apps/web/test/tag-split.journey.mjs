@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { expectRows } from './journeySql.mjs';
 
 /**
  * N19 (X20) real-browser journey: desktop TR_TAG_SPLIT on a TAG SPLIT book, driven through the screen alone, with
@@ -118,7 +119,11 @@ async function insert(sql, table, row) {
 export async function seedTagSplit(sql) {
   await cleanupTagSplit(sql);
   // Trade fine on: any absorbing ledger's mirror legs need it (not exercised here, but the fixture is faithful).
-  await sql(`UPDATE "CO_SET" SET "TRAD_FINE"='Y' WHERE tenant_id=$1 AND "CO_CODE"='01'`);
+  await expectRows(
+    1,
+    sql(`UPDATE "CO_SET" SET "TRAD_FINE"='Y' WHERE tenant_id=$1 AND "CO_CODE"='01'`),
+    'company 01 CO_SET row',
+  );
   await insert(sql, 'BOOK_DATA', {
     CO_CODE: '01',
     LC_CODE: '01',
@@ -248,9 +253,17 @@ export async function seedTagSplit(sql) {
     IMAGE_SIZE: photo.length,
     IMAGE_BYTES: photo,
   });
-  // Nudge the tag serial counter high so children get recognisable numbers.
-  await sql(
-    `UPDATE "SRNO_MAST" SET "TAG_SRNO"=9000 WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01'`,
+  // Nudge the tag serial counter high so children get recognisable numbers (RH9001, RH9002). The first tag
+  // allocation creates SRNO_MAST lazily (vouchers/numbering.ts nextTagNoTx), so a clean database has no row to
+  // update: upsert the exact (tenant, company, location) counter row, shaped like the lazily created one.
+  await expectRows(
+    1,
+    sql(
+      `INSERT INTO "SRNO_MAST"(tenant_id,"CO_CODE","LC_CODE","TAG_SRNO","VCH_SRNO","TAG_NO","IT_CODE")
+       VALUES($1,'01','01','9000','0','','')
+       ON CONFLICT (tenant_id,"CO_CODE","LC_CODE") DO UPDATE SET "TAG_SRNO"=EXCLUDED."TAG_SRNO"`,
+    ),
+    'company 01 location 01 tag serial counter',
   );
 }
 
@@ -281,9 +294,8 @@ export async function cleanupTagSplit(sql) {
   await sql(`DELETE FROM "ENTITY_IMAGE" WHERE tenant_id=$1 AND "ENTITY_KEY" LIKE 'STAG%'`);
   await sql(`DELETE FROM "ITEM_MAST" WHERE tenant_id=$1 AND "IT_CODE" = ANY($2::text[])`, ITEMS);
   await sql(`DELETE FROM "EMP_MAST" WHERE tenant_id=$1 AND "EMP_CODE"='930'`);
-  await sql(
-    `UPDATE "SRNO_MAST" SET "TAG_SRNO"=0 WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01'`,
-  );
+  // Idempotent cleanup: removes the exact counter row the seed upserts; matches no row on a clean database.
+  await sql(`DELETE FROM "SRNO_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01'`);
 }
 
 // ---- screen helpers ----------------------------------------------------------------------------------
