@@ -58,8 +58,8 @@ const DAY = `${startYear}-06-15`;
       tenantId,
     );
     await exec(
-      `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","GR_CODE")
-       VALUES ($1,'01','GOLD','Gold Ornament','G','G01')`,
+      `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","GR_CODE","OTH_DETL_POSTING")
+       VALUES ($1,'01','GOLD','Gold Ornament','G','G01','Y')`,
       tenantId,
     );
     await exec(
@@ -147,12 +147,45 @@ const DAY = `${startYear}-06-15`;
     );
     expect(before?.temp).toBe(1);
     expect(before?.rojmel).toBeGreaterThan(0);
+    const dmRows = await query<Array<Record<string, unknown>>>(
+      `SELECT "MAIN_SRNO"::int,"SR_NO"::int,"ISR_NO"::int,"ENTRY_TYPE","BOOK_NAME","AC_CODE",
+              "IT_CODE","DM_CODE","DM_PCS"::float8,"DM_WT"::float8,"DM_SIGN","DM_RATE"::float8,
+              "DM_AMT"::float8,"TAG_NO","VCH_SRNO"::int,"MAIN_IT_CODE","INOUT_TYPE","TBL_CODE"
+         FROM "DM_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='348' AND "VCH_NO"=$2`,
+      tenantId,
+      vchNo,
+    );
+    expect(dmRows).toEqual([
+      {
+        MAIN_SRNO: 1,
+        SR_NO: 1,
+        ISR_NO: 1,
+        ENTRY_TYPE: 'L',
+        BOOK_NAME: 'P348',
+        AC_CODE: 'SUPP01',
+        IT_CODE: 'GOLD',
+        DM_CODE: 'GOLD',
+        DM_PCS: 1,
+        DM_WT: 5,
+        DM_SIGN: '-',
+        DM_RATE: 0,
+        DM_AMT: 450,
+        TAG_NO: 'N',
+        VCH_SRNO: 0,
+        MAIN_IT_CODE: 'GOLD',
+        INOUT_TYPE: 'O',
+        TBL_CODE: null,
+      },
+    ]);
 
     const removed = await request('DELETE', `/purchase-returns/${vchNo}?${q}`);
     expect(removed.statusCode, removed.body).toBe(200);
-    const [after] = await query<Array<{ pr: number; rojmel: number; temp: number; audit: number }>>(
+    const [after] = await query<
+      Array<{ pr: number; dm: number; rojmel: number; temp: number; audit: number }>
+    >(
       `SELECT
          (SELECT count(*)::int FROM "PR_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='348') pr,
+         (SELECT count(*)::int FROM "DM_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='348') dm,
          (SELECT count(*)::int FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='348') rojmel,
          (SELECT count(*)::int FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='348' AND "VCH_NO"=$2) temp,
          (SELECT count(*)::int FROM "DELETE_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='348'
@@ -161,6 +194,6 @@ const DAY = `${startYear}-06-15`;
       before?.hd,
       LOGIN,
     );
-    expect(after).toEqual({ pr: 0, rojmel: 0, temp: 0, audit: 1 });
+    expect(after).toEqual({ pr: 0, dm: 0, rojmel: 0, temp: 0, audit: 1 });
   });
 });

@@ -139,4 +139,9 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20260929010000_tag_transfer_book',
     checksum: '2d2b1093737686d734ed7ae6117cba3cfefc3b48b5a55ea4d7cf8d3e3395c344',
   },
+  {
+    // Ac_Stock.Dm_PrRtn_Detl persists the counter code on each Purchase Return diamond/detail row.
+    name: '20261001090000_dm_data_tbl_code',
+    checksum: 'c09e3409f0c7cbd7cb6f6cc590ca829802280ba92f5eb26ca2fc2ec028eb5f19',
+  },
 ];

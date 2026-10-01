@@ -3269,16 +3269,17 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "Tagged and partial returns accepted, over-return refused, Rojmel/DM rows present, reversal exact",
-      "gapIds": "G04, G47",
+      "gapIds": "G04, G47, G67",
       "sourceAndModuleDetail": "10-gap-register-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
       "statusAsOf": "2026-10-01",
       "evidence": [
         "web/apps/api/src/modules/purchase/purchaseReturn.ts",
-        "web/apps/api/test/purchaseReturnLifecycle.routes.db.test.ts"
+        "web/apps/api/test/purchaseReturnLifecycle.routes.db.test.ts",
+        "web/packages/db/prisma/migrations/20261001090000_dm_data_tbl_code/migration.sql"
       ],
-      "statusNote": "Day book (PR #17), full-scope GET and print, complete reversal and source-year lineage (PR #18). Edit lifecycle, PR_IDTL/DM_DATA writes and residual-limited selection remain (G47)."
+      "statusNote": "Day book (PR #17), full-scope GET and print, complete reversal and source-year lineage (PR #18); DM_DATA rows written per Dm_PrRtn_Detl with the restored TBL_CODE column (G67). Edit lifecycle, PR_IDTL stone writes and residual-limited selection remain (G47)."
     },
     {
       "id": "N35",
