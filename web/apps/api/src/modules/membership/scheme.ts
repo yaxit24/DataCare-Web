@@ -1,3 +1,4 @@
+import { round } from '@datacare/core';
 import { withTenant } from '@datacare/db';
 import {
   buildMoneyRojmel,
@@ -1379,8 +1380,10 @@ type NormalizedGoldAdjustLine = Required<
   memberName: string;
 };
 
+// Gold weight to 3dp. The desktop presents metal weights through Strings.Format(x, "0.000"), i.e. half-up
+// away from zero, so the kernel `round` is the correct primitive, not a float helper (N48, G22).
 function round3(n: number): number {
-  return Math.round((n + Number.EPSILON) * 1000) / 1000;
+  return round(n, 3);
 }
 
 async function memberSchemeInfoTx(

@@ -1,3 +1,4 @@
+import { round } from '@datacare/core';
 import { withTenant } from '@datacare/db';
 import type { ListReport, ReportScope } from './reports.js';
 
@@ -5,8 +6,9 @@ const num = (v: unknown): number => {
   const n = Number(v ?? 0);
   return Number.isFinite(n) ? n : 0;
 };
-const round3 = (n: number): number => Math.round(n * 1000) / 1000;
-const round2 = (n: number): number => Math.round(n * 100) / 100;
+// Report display rounding (N57 exact until output); desktop presents half-up, kernel `round` (N48, G22).
+const round3 = (n: number): number => round(n, 3);
+const round2 = (n: number): number => round(n, 2);
 const txt = (v: unknown): string | null => {
   const s = String(v ?? '').trim();
   return s ? s : null;

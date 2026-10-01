@@ -3543,7 +3543,7 @@
     },
     {
       "id": "N48",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Kernel conformance by site identity: one shared baseline, additions refused, restore to 108, burn down to zero",
       "parentLabels": "P01-02, P00-05, X04/X06",
       "startAfter": [
@@ -3554,7 +3554,16 @@
       "gapIds": "G22",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-01",
+      "evidence": [
+        "web/parity/kernel-conformance-baseline.json",
+        "web/scripts/check-kernel-conformance.mjs",
+        "web/apps/api/src/modules/ops/kernelConformance.ts",
+        "web/apps/api/test/kernelConformance.test.ts",
+        ".github/workflows/ci.yml"
+      ],
+      "statusNote": "The total-count ratchet is replaced by a checked-in baseline of site IDENTITIES (parity/kernel-conformance-baseline.json, 109 sites: 104 rounding, 5 book-account). The script and the mirror test load the same baseline and run the same compareToBaseline across apps/api/src + packages/core/src, so the old scope/ceiling disagreement (script 108 over API only, test 125 over API+core) is gone; a site not in the baseline fails and a burned-down site must have its ID deleted. The 21 helpers added since the reviewed tree (41a7ba4) are migrated to @datacare/core: 9 report builders, einvoiceExport, scheme, stockInout and tagSplitRows to half-up round (desktop Strings.Format); otherIncome to roundHalfEven for the Math.Round figures (discount TR_OTH_PURC.cs:2872, TDS :5001, reverse-charge back-calc :2876) and round for the Strings.Format line taxes (:2889-2900). integerMoney changed from half-up Math.round to half-to-even per the desktop. Signed midpoint vectors and the touched writers’ write-set DB tests pass (otherIncome, stockInout, scheme, tagSplitLifecycle). The script is a blocking static-gates gate. Burn-down of the remaining 104 grandfathered rounding sites and 5 BOOK_DETL reads is owned by whichever slice next touches each file (N59 for the five BOOK_DETL reads)."
     },
     {
       "id": "N49",

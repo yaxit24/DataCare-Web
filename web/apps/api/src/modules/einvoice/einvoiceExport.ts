@@ -1,3 +1,4 @@
+import { round } from '@datacare/core';
 import { withTenant } from '@datacare/db';
 import type { XlsxColumn, XlsxSheet } from '../reports/xlsx.js';
 import { EInvoiceValidationError } from './einvoice.js';
@@ -114,8 +115,11 @@ const n = (v: unknown): number => {
   const x = Number(v ?? 0);
   return Number.isFinite(x) ? x : 0;
 };
-const round2 = (v: number): number => Math.round((v + Number.EPSILON) * 100) / 100;
-const round3 = (v: number): number => Math.round((v + Number.EPSILON) * 1000) / 1000;
+// GSP export amounts/weights are re-presented from already-persisted sale rows for the IRN JSON. The desktop
+// e-invoice builder (TR_SL_EBILL) formats through Strings.Format — half-up away from zero — so the kernel
+// `round` is correct; a float helper rounds negative midpoints the wrong way (N48, G22).
+const round2 = (v: number): number => round(v, 2);
+const round3 = (v: number): number => round(v, 3);
 
 function isoOrBlank(value: unknown, name: string): string | undefined {
   const s = t(value);

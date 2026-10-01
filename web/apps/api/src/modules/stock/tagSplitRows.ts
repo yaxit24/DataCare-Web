@@ -8,6 +8,7 @@
  * Contract: parity-plan-2026-09-10/evidence/implementation-2026-09-30-n19/contract.md (K3-K9, K11).
  */
 import {
+  round,
   tagSplitChild,
   tagSplitStone,
   tagSplitStoneEffect,
@@ -37,13 +38,12 @@ export const num = (value: unknown): number => {
   const x = Number(String(value ?? '').trim() || 0);
   return Number.isFinite(x) ? x : 0;
 };
-const round = (value: number, dp: number): number => {
-  const f = 10 ** dp;
-  return Math.round((value + (value >= 0 ? 1 : -1) * 1e-9) * f) / f;
-};
+// Weights (3dp) and amounts (2dp) are presented half-up on the desktop (Strings.Format), and piece counts
+// (0dp) likewise; the kernel `round` is half-up away from zero, so f3/f2/f0 all go through it rather than a
+// float helper that rounds negative midpoints the wrong way (N48, G22).
 export const f3 = (value: unknown): number => round(num(value), 3);
 export const f2 = (value: unknown): number => round(num(value), 2);
-const f0 = (value: unknown): number => Math.round(num(value));
+const f0 = (value: unknown): number => round(num(value), 0);
 export const dbText = (value: unknown): string => (value == null ? '' : String(value));
 /** The form upper-cases keys and swallows the apostrophe (KeyPreview), as N18. */
 export const typedText = (value: unknown, max = 255): string =>
