@@ -35,6 +35,13 @@
       "purpose": "Desktop handbook: what DataCareNext does, how it looks and is operated, its business rules and data conventions."
     },
     {
+      "match": "docs/handbook/dev/*.md",
+      "area": "Documentation hub",
+      "kind": "developer guide",
+      "status": "current",
+      "purpose": "Developer setup and the supported-devices guide for the web project."
+    },
+    {
       "match": "docs/handbook/web/*.md",
       "area": "Documentation hub",
       "kind": "handbook",

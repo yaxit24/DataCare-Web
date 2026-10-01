@@ -108,14 +108,14 @@ decision_ids=[]
 for decision_doc in ('08-decisions-and-delivery.md','11-audit-implementation-plan-2026-10-01.md',
                      '12-lineage-verification-2026-10-01.md'):
     decision_ids+=re.findall(r'^\| (D\d{2}) \|',(here/decision_doc).read_text(),re.M)
-check(decision_ids==[f'D{i:02}' for i in range(1,len(decision_ids)+1)] and len(decision_ids)>=28,
+check(decision_ids==[f'D{i:02}' for i in range(1,len(decision_ids)+1)] and len(decision_ids)>=29,
       'Decision identities incomplete')
 cited=set()
 for p in slices.values():
     for gap in re.findall(r'G\d{2}',p.get('gapIds','')):
         cited.add(gap)
         check(gap in gap_ids, 'Slice cites an unknown gap: '+p['id']+' '+gap)
-check(len(slices)>=88, 'Expected at least 88 ordered slices (document 12 adds N83-N88)')
+check(len(slices)>=89, 'Expected at least 89 ordered slices (document 12 adds N83-N89)')
 # Phase 2 (document 14) owns the SaaS gaps through SP slices in phase2-backlog.json.
 phase2=load(here/'phase2-backlog.json')
 sp={s['id']:s for s in phase2['slices']}

@@ -110,8 +110,9 @@ D28 as the owner's instructions, D23, D24, D26 and D27 as recommended.
 | D26 | Runtime and framework target. Upgrade now to the latest Next.js 15.5 security release with the React 19 patch release it requires, and move CI, images and `engines` to Node 24 LTS; rehearse Next.js 16 and Prisma 7 on a branch with the full parity suite; finish Prisma 7 before 19 November 2026 or record a dated risk acceptance | Product owner — accepted as recommended, 1 October 2026; platform lead implements it now (N86) | G72 |
 | D27 | Route split timing. Strangler extraction: each N50 milestone moves its route family out of `web/apps/api/src/routes/txn.ts` into a Fastify plugin in its module, together with that family's schemas; no single large move; the exact route-universe test stays green throughout | Product owner — accepted as recommended, 1 October 2026; API lead, with N50 milestone 1 | G79 |
 | D28 | Phase 2 timing. Nothing in Phase 2 starts, including the M0 decisions of document 14 §15, until Phase 1 is complete as defined in document 13 §1 and certified (N30). N86 and N88 are Phase 1 slices and continue. The plan enforces it: every Phase 2 slice depends on SP01, SP01 on N30, and `validate_plan.py` refuses a Phase 2 status other than `planned` while a Phase 1 slice it depends on is not `implemented-unverified` | Product owner — accepted (instruction), 1 October 2026 | [ADR-0004](../../project-memory/decisions/ADR-0004-two-phase-delivery.md) amendment |
+| D29 | Device and provider testing during Phase 1. Phase 1 is built and tested against device **fakes** with recorded real-world sample inputs (scale frame, barcode scan, label output, GSP sandbox response) and against the desktop source, screenshots and transcripts as the oracle. Odoo's IoT documentation is a cited reference for device **protocols** only; what the ERP does with a reading comes from the desktop source. Real hardware and live providers are deferred to acceptance (N25); a fake must fail honestly in production (G33). | Product owner — accepted (instruction), 1 October 2026 | `web/apps/api/src/modules/integrations/deviceBridge.ts`, `scaleProtocol.ts`, `messaging.ts`; `einvoice.ts` `FakeIrnTransport` |
 
-## 5. Slices N83–N88
+## 5. Slices N83–N89
 
 Each slice follows document 02 §4–§5 and the definition of done in document 11 §7.
 
@@ -217,6 +218,29 @@ Steps:
 Done when: `web/apps/api/src/routes/txn.ts` shrinks with each moved family, the budgets and lint rules fail on planted violations, and
 the screens moved to the shared editor pass unchanged-save tests.
 
+#### N89 — Device-fake test harness and journeys
+
+Gap G33 · Parents P02-03, P11-02, P11-03; X28 · S2 · Size M · Start after N49 · Decision D29
+
+The fakes exist (`web/apps/api/src/modules/integrations/deviceBridge.ts`, `scaleProtocol.ts`, `messaging.ts`;
+`web/apps/api/src/modules/einvoice/einvoice.ts` `FakeIrnTransport`). This slice makes them a documented, reusable
+test harness so device-dependent screens are fully tested without hardware.
+
+Steps:
+1. Record real-world sample inputs as fixtures: a weighing-scale frame (9600 baud 8-N-1, and the 2400 baud 7-N-1
+   fallback), a barcode scan string, a QR payload, a Code39/label render, and a GSP sandbox IRN response. Cite the
+   device protocol (Odoo IoT documentation) and the desktop behaviour (`TR_TAG_OPBL.cs:7499-7590`,
+   `UT_TAG_PRINT.cs`) in each fixture.
+2. A browser `FakeSerialPort` and `FakeCamera` that feed those fixtures to `ScaleCapture.tsx` and `CameraCapture.tsx`
+   in a Playwright journey, with no real device.
+3. Zero-mock journeys that drive tag opening, tag print and labour billing through the fakes end to end, asserting
+   the stored weights, labels and ledger match the desktop-derived expected values.
+4. The production guard stays: an unconfigured provider or a disabled port fails, it never fakes a success (G33).
+
+Done when: tag opening, tag print and a labour sale pass real-stack journeys using only the device fakes, and the
+fixtures cite both the device protocol and the desktop source. Real-hardware acceptance remains N25.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -243,8 +267,8 @@ the screens moved to the shared editor pass unchanged-save tests.
 
 ## 8. Keeping this record current
 
-- New gaps continue at **G84** (here or in document 11, keeping numbers unique); new slices continue at **N89**, Phase 2
-  slices at **SP25**, decisions at **D29**.
+- New gaps continue at **G84** (here or in document 11, keeping numbers unique); new slices continue at **N90**, Phase 2
+  slices at **SP25**, decisions at **D30**.
   Update the thresholds in `validate_plan.py` in the same pull request.
 - When an item in `lineage-register.json` closes, change its disposition to `closed` with evidence; keep the row.
 - Run `python3 docs/master-parity-plan-2026-09-29/validate_plan.py`, `python3 docs/tools/docs_check.py` and
