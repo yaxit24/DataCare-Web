@@ -28,6 +28,44 @@ env:
   SEED_DEMO: '0'
 
 jobs:
+  # Repository gates that need no database. Before this job, CI could be green while the repository's own gates
+  # were red (gaps G20, G21). Each gate runs even when an earlier one fails, so one red cannot hide another.
+  static-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with: { version: 9.15.4 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Install, generate the database client and build the API's workspace dependencies
+        id: setup
+        working-directory: web
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @datacare/db db:generate
+          pnpm --filter "@datacare/api^..." run build
+
+      - name: 'Gate: API and core test sources type-check strictly'
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        working-directory: web
+        run: pnpm typecheck:tests
+
+      - name: 'Gate: documentation citations resolve and pinned claims hold'
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        working-directory: web
+        run: pnpm docs:refs
+
+      - name: 'Gate: master parity plan is internally consistent'
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: python3 docs/master-parity-plan-2026-09-29/validate_plan.py
+
   quality:
     runs-on: ubuntu-latest
     services:

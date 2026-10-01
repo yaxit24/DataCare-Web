@@ -15,28 +15,38 @@ the stack changes, the behaviour must not.
 ```
 web/
   apps/api/          Fastify + Prisma. 31 module directories, 248 source TS files
-  apps/web/          Next.js app router. 126 page.tsx files
+  apps/web/          Next.js app router. 128 page.tsx files
   packages/core/     pure calculation (billTotals, rounding, labour) — BUILT separately
   packages/db/       Prisma client + withTenant
   scripts/           static checks, parity measurement and verification helpers
   docs/              this and its siblings
 ```
 
-| Inventory measure                      | Value on 2026-09-12 | Evidence                                                       |
-| -------------------------------------- | ------------------- | -------------------------------------------------------------- |
-| API top-level TypeScript test files    | 266                 | `apps/api/test/*.test.ts`                                      |
-| DB test files                          | 151                 | `apps/api/test/*.db.test.ts`                                   |
-| Declared API routes                    | 556                 | `apps/api/test/routePolicy.test.ts`                            |
-| Route policy bindings                  | 196                 | `route()` calls in `routePolicy.ts`                            |
-| Prisma models                          | 170                 | `packages/db/prisma/schema.prisma`; not a database table count |
-| Migrated tenant tables with forced RLS | 174                 | Isolated DB wrapper, 29 migrations                             |
-| Web / core TypeScript test files       | 36 / 26             | `apps/web/test/*.test.ts`, `packages/core/test/*.test.ts`      |
-| Web native Node test files             | 1                   | `apps/web/test/*.test.mjs`;6 cases, separate from Vitest       |
-| Build targets                          | 7                   | `pnpm build`                                                   |
-| Desktop menu identities                | 198                 | Completion register                                            |
-| Verified menu acceptance               | 0                   | All 198 remain implemented-unverified                          |
+| Inventory measure                      | Minimum on 2026-10-01 | Evidence                                                       |
+| -------------------------------------- | --------------------- | -------------------------------------------------------------- |
+| API top-level TypeScript test files    | 290                   | `apps/api/test/*.test.ts`                                      |
+| DB test files                          | 174                   | `apps/api/test/*.db.test.ts`                                   |
+| Declared API routes                    | 608                   | `apps/api/test/routePolicy.test.ts` pins the exact count       |
+| Route policy bindings                  | 199                   | `route()` calls in `routePolicy.ts`                            |
+| Prisma models                          | 174                   | `packages/db/prisma/schema.prisma`; not a database table count |
+| Migrated tenant tables with forced RLS | 174                   | `pnpm fresh:provision`; 30 migrations                          |
+| Web / core TypeScript test files       | 40 / 32               | `apps/web/test/*.test.ts`, `packages/core/test/*.test.ts`      |
+| Web native Node test files             | 1                     | `apps/web/test/*.test.mjs`;6 cases, separate from Vitest       |
+| Build targets                          | 7                     | `pnpm build`                                                   |
+| Desktop menu identities                | 198                   | Completion register                                            |
+| Verified menu acceptance               | 0                     | All 198 remain implemented-unverified                          |
 
-<!-- verify: ls apps/api/test/*.test.ts | wc -l | tr -d ' ' == 266 -->
+Each count above is a floor checked by `pnpm docs:refs`. Floors rather than exact pins, because exact counts
+broke whenever two independently green pull requests each added a test file; a floor still fails if files or
+models disappear, and the exact route universe is already pinned by `routePolicy.test.ts`.
+
+<!-- verify: test $(ls apps/api/test/*.test.ts | wc -l) -ge 290 && echo ok == ok -->
+<!-- verify: test $(ls apps/api/test/*.db.test.ts | wc -l) -ge 174 && echo ok == ok -->
+<!-- verify: test $(grep -c '^route(' apps/api/src/modules/rbac/routePolicy.ts) -ge 199 && echo ok == ok -->
+<!-- verify: test $(grep -c '^model ' packages/db/prisma/schema.prisma) -ge 174 && echo ok == ok -->
+<!-- verify: test $(ls -d packages/db/prisma/migrations/*/ | wc -l) -ge 30 && echo ok == ok -->
+<!-- verify: test $(ls apps/web/test/*.test.ts | wc -l) -ge 40 && echo ok == ok -->
+<!-- verify: test $(ls packages/core/test/*.test.ts | wc -l) -ge 32 && echo ok == ok -->
 
 These are inventory counts, not functionality completion percentages. Test outcomes belong to the dated implementation evidence; historical test totals are not current verification.
 

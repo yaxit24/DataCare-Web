@@ -28,7 +28,7 @@
  *   node scripts/check-doc-references.mjs
  *   node scripts/check-doc-references.mjs --verbose
  */
-import { execSync } from 'node:child_process';
+import { execFileSync, execSync } from 'node:child_process';
 import { readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
@@ -58,6 +58,29 @@ const VERIFY_RE = /<!--\s*verify:\s*(.+?)\s*==\s*(.+?)\s*-->/g;
  * document that cites it.
  */
 const PLANNED_RE = /<!--\s*planned:\s*(\S+)\s*-->/g;
+/**
+ * A document may cite a run output that was produced locally and deliberately never committed - real-stack and
+ * Playwright results under the gitignored `test-results/`. Declare it with `<!-- not-retained: path -->` so the
+ * citation is a stated fact instead of a broken link. The declaration is checked: the path must be gitignored
+ * output, so it cannot hide a source or evidence file that belongs in the tree.
+ */
+const NOT_RETAINED_RE = /<!--\s*not-retained:\s*(\S+)\s*-->/g;
+
+/** True when git ignores `cited` relative to the web workspace or the repository root. */
+function isIgnoredOutput(cited) {
+  for (const base of [web, repo]) {
+    try {
+      execFileSync('git', ['check-ignore', '-q', path.resolve(base, cited)], {
+        cwd: repo,
+        stdio: 'ignore',
+      });
+      return true;
+    } catch {
+      /* not ignored from this base; try the next */
+    }
+  }
+  return false;
+}
 
 /**
  * Prefixes the docs legitimately omit.
@@ -124,10 +147,19 @@ async function main() {
     const text = await readFile(docPath, 'utf8');
 
     const planned = new Set([...text.matchAll(PLANNED_RE)].map((m) => m[1]));
+    const notRetained = new Set([...text.matchAll(NOT_RETAINED_RE)].map((m) => m[1]));
+    for (const cited of notRetained) {
+      if (!isIgnoredOutput(cited)) {
+        problems.push(
+          `${name}: not-retained declaration for a path git does not ignore -> ${cited}`,
+        );
+      }
+    }
 
     for (const m of text.matchAll(FILE_RE)) {
       const [, cited, lineNo] = m;
       if (NOT_FILES.has(cited) || !cited.includes('/') || planned.has(cited)) continue;
+      if (notRetained.has(cited)) continue;
       checkedFiles += 1;
       const resolved = await resolveCitation(cited);
       if (!resolved) {

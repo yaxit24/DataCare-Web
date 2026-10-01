@@ -3507,7 +3507,7 @@
     },
     {
       "id": "N47",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Restore red engineering gates (test types, documentation claims, plan validator) and run them in CI",
       "parentLabels": "P00-04, P00-05, X03/X34",
       "startAfter": [],
@@ -3516,7 +3516,15 @@
       "gapIds": "G20, G21",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-01",
+      "evidence": [
+        ".github/workflows/ci.yml",
+        "web/packages/core/tsconfig.test.json",
+        "web/scripts/check-doc-references.mjs",
+        "web/docs/TECHNICAL-REFERENCE.md"
+      ],
+      "statusNote": "Blocking static-gates CI job runs typecheck:tests (API plus a new strict core test config covering all 32 core tests), docs:refs and validate_plan.py, each independently. Inventory counts are pinned as verified floors; unretained test-results run outputs are declared not-retained and the checker refuses the declaration for any path git does not ignore. Each gate was broken on a scratch branch to prove CI fails."
     },
     {
       "id": "N48",

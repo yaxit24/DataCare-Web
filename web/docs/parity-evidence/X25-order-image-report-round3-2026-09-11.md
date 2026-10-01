@@ -75,3 +75,7 @@ Open work remains:
 5. **Carry-forward gaps.** Historical ledger timestamps already truncated to dates require reimport; full copy/data-type dialogs, remaining report families and all earlier business acceptance tasks remain open.
 
 The new inventory has **28 registered dataset/document contracts and the same79 contained former inferred reports**. The two image variants were outside the old102-name inferred inventory. The inventory contains107 records including the5 source-recovered order reports; these counts are not an overall parity percentage.
+
+<!-- not-retained: test-results/parity-real-stack-round3-delete-confirmation/result.json -->
+
+The run output `test-results/parity-real-stack-round3-delete-confirmation/result.json` was written to the gitignored `test-results/` directory and is not retained in the repository.

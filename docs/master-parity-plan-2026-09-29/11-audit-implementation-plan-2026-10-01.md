@@ -214,6 +214,12 @@ fail CI.
 
 Done when: the three commands exit 0 locally and in CI on `main`, and each one fails CI when broken.
 
+Implementation note: the inventory counts are pinned as floors (`-ge`) rather than exact values. An exact pin
+turned `main` red whenever two independently green pull requests each added a test file; a floor still fails
+when files or models disappear, and `routePolicy.test.ts` keeps the exact route universe. Run outputs under the
+gitignored `test-results/` are declared with `<!-- not-retained: path -->`, which the checker refuses for any
+path git does not ignore.
+
 #### N48 — Kernel conformance by site identity; restore and burn down
 
 Gap G22 · Parents P01-02, P00-05; X04, X06 · S2 · Size L · Start after N47
