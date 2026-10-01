@@ -57,7 +57,10 @@ The boundary is recorded in [ADR-0004](../project-memory/decisions/ADR-0004-two-
 - Decisions: [ADRs](../project-memory/decisions/) 0001–0004 and plan decisions D01–D28 (documents 08, 11 and 12).
 - Continuity: [`project-memory/HANDOFF.md`](../project-memory/HANDOFF.md), `project-memory/JOURNAL.md` and
   `project-memory/state.json`.
-- Agents: [`AGENTS.md`](../AGENTS.md), `.kiro/skills/` and `.kiro/steering/`.
+- Agents: [`AGENTS.md`](../AGENTS.md), the project agent `.kiro/agents/datacare.json`
+  (`kiro-cli chat --agent datacare`), ten skills in `.kiro/skills/` (three adapted from
+  [Superpowers](https://github.com/obra/superpowers), MIT) and `.kiro/steering/`. `docs/tools/session_status.py`
+  shows what other sessions are doing.
 
 **Reference — still-valid method and knowledge**
 

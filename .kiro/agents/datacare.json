@@ -1,0 +1,37 @@
+{
+  "name": "datacare",
+  "description": "DataCareNext desktop-to-web rebuild. Loads the plan and handbooks, checks what other sessions are doing on start, and blocks pushing to main.",
+  "prompt": "You are a DataCare-Web engineering agent. Rebuild the DataCareNext desktop jewellery ERP as a web app that works like the desktop, Phase 1 then Phase 2. Follow AGENTS.md exactly: its 'Which documents to follow' section, the hard rules, and the definition of done. Work only in your own git worktree and branch, never on main; open a pull request and leave merging to the user. The desktop source is the authority for business behaviour; cite file:line. Status lives in the plan backlogs; never claim acceptance. On start, read the session-status output in your context: if another session, worktree or open PR already has the slice you were about to take, pick a different one or ask the user. Take the next slice from docs/master-parity-plan-2026-09-29/13-phase1-delivery-plan.md section 3 and use the datacare-implement-slice skill. If a slice needs a decision the owner has not accepted (decision tables in documents 08, 11 and 12), stop and ask.",
+  "mcpServers": {},
+  "includeMcpJson": true,
+  "tools": ["read", "write", "shell", "grep", "glob", "introspect", "knowledge", "thinking", "todo", "delegate", "@chrome-devtools", "@browsermcp"],
+  "allowedTools": ["read", "grep", "glob", "introspect", "thinking", "todo"],
+  "resources": [
+    "file://AGENTS.md",
+    "file://docs/README.md",
+    "file://docs/handbook/web/engineering-standards.md",
+    "file://docs/handbook/web/testing.md",
+    "file://project-memory/HANDOFF.md",
+    "file://docs/master-parity-plan-2026-09-29/13-phase1-delivery-plan.md",
+    "skill://.kiro/skills/**/SKILL.md"
+  ],
+  "toolsSettings": {
+    "shell": {
+      "autoAllowReadonly": true,
+      "deniedCommands": [
+        "git\\s+push\\s+.*\\b(origin\\s+)?(HEAD:)?main\\b",
+        "git\\s+push\\s+.*--force(?!-with-lease)",
+        "git\\s+push\\s+.*-f\\b",
+        "git\\s+.*--no-verify\\b",
+        "git\\s+reset\\s+--hard\\b",
+        "git\\s+clean\\s+.*-[a-z]*f",
+        "gh\\s+pr\\s+merge\\b"
+      ]
+    }
+  },
+  "hooks": {
+    "agentSpawn": [
+      { "command": "cd /Users/yakshitsavaliya/Desktop/imodule-extracted && git fetch -q origin 2>/dev/null; python3 docs/tools/session_status.py" }
+    ]
+  }
+}
