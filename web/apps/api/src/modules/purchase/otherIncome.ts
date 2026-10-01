@@ -1,3 +1,4 @@
+import { round, roundHalfEven } from '@datacare/core';
 import { withTenant } from '@datacare/db';
 import { assertBalanced, assertPeriodOpen, insertRowTx } from '../posting/posting.js';
 import { resolveTaxPolicyTx, type ResolvedTaxPolicy } from '../shared/taxPolicy.js';
@@ -159,8 +160,13 @@ type ResolvedInput = {
   lines: ResolvedLine[];
 };
 
-const money = (value: unknown): number => Math.round((Number(value ?? 0) + 1e-9) * 100) / 100;
-const integerMoney = (value: unknown): number => Math.round(Number(value ?? 0));
+// TR_OTH_PURC rounds through two desktop mechanisms (TR_OTH_PURC.cs). Line taxes, totals and settlement
+// amounts are produced by Strings.Format(x, "0.00") (e.g. :2889-2900) — half-up away from zero — so `money`
+// is the kernel `round` at 2dp. Discount and TDS are produced by Math.Round(x, 0) (:2872, :5001) — half to
+// even — so `integerMoney` is the kernel `roundHalfEven` at 0dp. (N48, G22; the reverse-charge taxable
+// back-calc at :2876 is Math.Round(x, 2) and rounds through roundHalfEven at its call site.)
+const money = (value: unknown): number => round(Number(value ?? 0), 2);
+const integerMoney = (value: unknown): number => roundHalfEven(Number(value ?? 0), 0);
 const number = (value: unknown): number => Number(value ?? 0);
 const positiveOrZero = (value: unknown, label: string): number => {
   const resolved = money(value);
@@ -401,7 +407,8 @@ async function resolveInputTx(
     }
     const taxableAmount =
       taxType === 'R' && tax.totalPercent !== 0
-        ? money((afterDiscount / (tax.totalPercent + 100)) * 100)
+        ? // Reverse charge back-calc: desktop Math.Round(x, 2) (TR_OTH_PURC.cs:2876), half to even.
+          roundHalfEven((afterDiscount / (tax.totalPercent + 100)) * 100, 2)
         : afterDiscount;
     const igstAmount = money((taxableAmount * tax.igst.percent) / 100);
     const cgstAmount = money((taxableAmount * tax.cgst.percent) / 100);

@@ -56,6 +56,16 @@ export interface KernelBypass {
   path: string;
   line: number;
   snippet: string;
+  /**
+   * A line-independent identity for the site, `<concern>:<path>#<fingerprint>`.
+   *
+   * For a rounding helper the fingerprint is the binding name (`round2`, `r3`, `money`, `f0`), so moving the
+   * declaration up or down a file does not change the identity. For an inline `BOOK_DETL` read, which has no
+   * name, the fingerprint is a short hash of the normalised matched line. Either kind gets a `~<ordinal>`
+   * suffix when the same fingerprint occurs more than once in one file, so two `r2` helpers in the same module
+   * stay distinct and stable in declaration order.
+   */
+  siteId: string;
 }
 
 export interface KernelConformanceReport {
@@ -106,10 +116,48 @@ const BOOK_DETL = /FROM\s+"BOOK_DETL"/;
 
 const isExempt = (concern: KernelConcern, path: string): boolean =>
   concern.exempt.some((e) => path === e || path.endsWith(`/${e}`));
+/** The binding name of a helper declaration, so its identity survives moving within a file. */
+const BINDING_NAME =
+  /^\s*(?:export\s+)?(?:const|let|var)\s+(\w+)\s*(?::|=)|^\s*(?:export\s+)?function\s+(\w+)\s*\(/;
 
-/** Find every bypass of a kernel primitive. */
+/** A short, stable hash of a string. Used to fingerprint an unnamed `BOOK_DETL` read line. */
+function fingerprintOf(text: string): string {
+  // Normalise whitespace so reformatting (Prettier line wraps) does not change the identity.
+  const normalised = text.replace(/\s+/g, ' ').trim();
+  let hash = 2166136261 >>> 0; // FNV-1a 32-bit
+  for (let i = 0; i < normalised.length; i += 1) {
+    hash ^= normalised.charCodeAt(i);
+    hash = Math.imul(hash, 16777619) >>> 0;
+  }
+  return hash.toString(16).padStart(8, '0');
+}
+
+/** The name a rounding helper is bound to, or `anon` for an arrow with no binding on its own line. */
+function helperName(declarationLine: string): string {
+  const m = BINDING_NAME.exec(declarationLine);
+  return m ? (m[1] ?? m[2] ?? 'anon') : 'anon';
+}
+
+/**
+ * Assign a `<concern>:<path>#<fingerprint>` identity to each bypass, with a `~<ordinal>` suffix when the same
+ * fingerprint repeats in one file. Ordinals follow declaration order (the scan order), so two `r2` helpers in
+ * one module keep a fixed, line-independent identity.
+ */
+function assignSiteIds(
+  bypasses: Array<KernelBypass & { fingerprint: string }>,
+): Array<KernelBypass & { fingerprint: string }> {
+  const seen = new Map<string, number>();
+  return bypasses.map((b) => {
+    const base = `${b.concern}:${b.path}#${b.fingerprint}`;
+    const n = (seen.get(base) ?? 0) + 1;
+    seen.set(base, n);
+    return { ...b, siteId: n > 1 ? `${base}~${n}` : base };
+  });
+}
+
+/** Find every bypass of a kernel primitive, each carrying a stable, line-independent site identity. */
 export function findBypasses(files: readonly KernelSourceFile[]): KernelBypass[] {
-  const out: KernelBypass[] = [];
+  const raw: Array<KernelBypass & { fingerprint: string }> = [];
   const rounding = KERNEL_CONCERNS.find((c) => c.id === 'rounding')!;
   const bookAccount = KERNEL_CONCERNS.find((c) => c.id === 'book-account')!;
 
@@ -127,13 +175,16 @@ export function findBypasses(files: readonly KernelSourceFile[]): KernelBypass[]
         const declaresAbove =
           HELPER_DECLARATION.test(previous) && /(?:=>|\(|\{)\s*$/.test(previous.trimEnd());
         if (declaresHere || declaresAbove) {
-          out.push({
+          const declarationLine = declaresHere ? line : previous;
+          raw.push({
             concern: rounding.id,
             path: file.path,
             line: i + 1,
             snippet: (declaresHere ? line : `${previous.trim()} … ${line.trim()}`)
               .trim()
               .slice(0, 110),
+            fingerprint: helperName(declarationLine),
+            siteId: '',
           });
         }
       }
@@ -141,18 +192,22 @@ export function findBypasses(files: readonly KernelSourceFile[]): KernelBypass[]
 
     if (!isExempt(bookAccount, file.path)) {
       for (let i = 0; i < lines.length; i += 1) {
-        if (BOOK_DETL.test(lines[i] ?? '')) {
-          out.push({
+        const line = lines[i] ?? '';
+        if (BOOK_DETL.test(line)) {
+          raw.push({
             concern: bookAccount.id,
             path: file.path,
             line: i + 1,
-            snippet: (lines[i] ?? '').trim().slice(0, 110),
+            snippet: line.trim().slice(0, 110),
+            fingerprint: fingerprintOf(line),
+            siteId: '',
           });
         }
       }
     }
   }
-  return out;
+  // Strip the transient `fingerprint` field after it has done its job in the identity.
+  return assignSiteIds(raw).map(({ fingerprint: _f, ...rest }) => rest as KernelBypass);
 }
 
 export function auditKernelConformance(
@@ -167,8 +222,9 @@ export function auditKernelConformance(
     return { concern, bypasses: mine.length, files: new Set(mine.map((b) => b.path)).size };
   });
 
-  // Adoption may improve and may not regress. A new local helper in a voucher module is how the kernel
-  // quietly stopped being the kernel the first time.
+  // Retained for the characterisation unit tests only. The CI gate no longer uses a count ceiling: it
+  // compares site identities against the checked-in baseline through `compareToBaseline`, which is what
+  // `scripts/check-kernel-conformance.mjs` and `kernelConformance.test.ts` both run (N48, G22).
   const regressions: string[] = [];
   for (const [id, ceiling] of Object.entries(ceilings)) {
     const actual = totals[id] ?? 0;
@@ -185,5 +241,74 @@ export function auditKernelConformance(
     bypasses,
     totals,
     regressions,
+  };
+}
+
+/**
+ * The checked-in baseline, `parity/kernel-conformance-baseline.json`. It records the scanned roots, the
+ * exemptions, the concern rule set and — the point of N48 — the exact grandfathered site IDs. A site not in
+ * the baseline fails (an addition can no longer hide behind an unrelated removal); a baseline site that no
+ * longer exists also fails, with an instruction to delete its ID in the same change.
+ */
+export interface KernelBaseline {
+  /** How the baseline was built; prose, not machine-read. */
+  description: string;
+  /** `apps/api/src` and `packages/core/src`, so moving a file between them does not change the answer. */
+  scannedRoots: readonly string[];
+  /** The kernel files that legitimately contain the pattern, by concern. */
+  exemptions: Record<string, readonly string[]>;
+  /** The grandfathered site IDs that are allowed to remain until burned down. */
+  sites: readonly string[];
+}
+
+export interface KernelBaselineComparison {
+  verdict: 'ok' | 'red';
+  /** Live site IDs that are not in the baseline — a new bypass. */
+  added: string[];
+  /** Baseline site IDs that no longer exist — must be deleted from the baseline. */
+  removed: string[];
+  /** Human-readable failure lines, ready to print. */
+  problems: string[];
+  /** Every live site ID, sorted, so a reviewer can diff. */
+  liveSites: string[];
+}
+
+/**
+ * Compare the live bypass set against the checked-in baseline by site identity.
+ *
+ * This replaces the total-count ratchet. A count-based gate let an addition hide behind an unrelated removal:
+ * delete one `round2`, add one `r3` elsewhere, and the total was unchanged. Identity makes both moves visible.
+ */
+export function compareToBaseline(
+  files: readonly KernelSourceFile[],
+  baseline: KernelBaseline,
+): KernelBaselineComparison {
+  const liveSet = new Set(findBypasses(files).map((b) => b.siteId));
+  const baselineSet = new Set(baseline.sites);
+
+  const added = [...liveSet].filter((id) => !baselineSet.has(id)).sort();
+  const removed = [...baselineSet].filter((id) => !liveSet.has(id)).sort();
+
+  const problems: string[] = [];
+  for (const id of added) {
+    problems.push(
+      `NEW bypass not in the baseline: ${id} — use the kernel primitive (@datacare/core round / ` +
+        `roundHalfEven, or shared/roundingPolicy), or, if a reviewed grandfathered exception, add the ` +
+        `exact site ID to parity/kernel-conformance-baseline.json with a note`,
+    );
+  }
+  for (const id of removed) {
+    problems.push(
+      `baseline site no longer exists: ${id} — delete this ID from ` +
+        `parity/kernel-conformance-baseline.json in the same change (the burn-down is working)`,
+    );
+  }
+
+  return {
+    verdict: problems.length ? 'red' : 'ok',
+    added,
+    removed,
+    problems,
+    liveSites: [...liveSet].sort(),
   };
 }

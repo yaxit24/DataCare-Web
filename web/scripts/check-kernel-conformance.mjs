@@ -1,16 +1,20 @@
 #!/usr/bin/env node
 /**
- * Compatibility kernel conformance gate (WP-06).
+ * Kernel conformance by site identity (N48, gap G22).
  *
- * WP-06 asks that every posting family use the shared kernel and that no module keep a local fallback. The
- * kernel largely exists — exact-decimal rounding in `@datacare/core`, the flag-driven `roundingPolicy`, and
- * two fail-closed `BOOK_DETL` resolvers — so this measures ADOPTION and refuses to let it slip.
+ * The kernel exists — exact-decimal `round`/`roundHalfEven` in `@datacare/core`, the flag-driven
+ * `roundingPolicy`, and two fail-closed `BOOK_DETL` resolvers. This gate measures ADOPTION and refuses to let
+ * it slip. It no longer counts bypasses: it compares the live set of bypass SITES, by identity, against a
+ * checked-in baseline (`parity/kernel-conformance-baseline.json`). A site not in the baseline fails — an
+ * addition can no longer hide behind an unrelated removal, which a total-count ratchet allowed. A baseline
+ * site that no longer exists also fails, so a burn-down deletes its ID in the same change.
  *
- * Decisions live in `apps/api/src/modules/ops/kernelConformance.ts` and are unit tested there, including a
- * characterisation of why the local rounding helpers are NOT interchangeable with the kernel.
+ * The detector lives in `apps/api/src/modules/ops/kernelConformance.ts` and is unit tested there and in
+ * `apps/api/test/kernelConformance.test.ts`, which loads the SAME baseline, so the script and the test can
+ * never disagree about scope, rules or the grandfathered set.
  *
- *   node scripts/check-kernel-conformance.mjs           # audit; exit 1 if adoption regressed
- *   node scripts/check-kernel-conformance.mjs --list    # list every bypass with file:line
+ *   node scripts/check-kernel-conformance.mjs           # audit; exit 1 if a site was added or removed
+ *   node scripts/check-kernel-conformance.mjs --list    # list every live site ID
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -18,9 +22,11 @@ import { dirname, join, relative, resolve } from 'node:path';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const webRoot = resolve(here, '..');
-const srcRoot = resolve(webRoot, 'apps/api/src');
+const apiSrc = resolve(webRoot, 'apps/api/src');
+const coreSrc = resolve(webRoot, 'packages/core/src');
+const baselinePath = resolve(webRoot, 'parity/kernel-conformance-baseline.json');
 
-const { auditKernelConformance, KERNEL_CONCERNS } = await import(
+const { compareToBaseline } = await import(
   resolve(webRoot, 'apps/api/dist/modules/ops/kernelConformance.js')
 ).catch((error) => {
   console.error(
@@ -31,54 +37,47 @@ const { auditKernelConformance, KERNEL_CONCERNS } = await import(
 });
 
 /**
- * Adoption ceilings measured on 2026-08-30. Mirrored in apps/api/test/kernelConformance.test.ts so a drift
- * breaks a test as well as this script. They may fall; they may never rise.
+ * Collect `.ts` sources under a root. `apps/api/src` keeps its paths relative to itself; `packages/core/src`
+ * is prefixed with `packages/core/` so a file moving between the two roots keeps the same identity (the
+ * reason the mirror test widened scope to core, and the reason both scan the same two roots here).
  */
-const CEILINGS = { rounding: 108, 'book-account': 5 };
-
-function sourceFiles(dir) {
+function sourceFiles(dir, base, prefix = '') {
   const out = [];
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry);
-    if (statSync(full).isDirectory()) out.push(...sourceFiles(full));
+    if (statSync(full).isDirectory()) out.push(...sourceFiles(full, base, prefix));
     else if (entry.endsWith('.ts')) {
-      out.push({ path: relative(srcRoot, full), text: readFileSync(full, 'utf8') });
+      out.push({ path: prefix + relative(base, full), text: readFileSync(full, 'utf8') });
     }
   }
   return out;
 }
 
-const files = sourceFiles(srcRoot);
-const report = auditKernelConformance(files, CEILINGS);
+const files = [...sourceFiles(apiSrc, apiSrc), ...sourceFiles(coreSrc, coreSrc, 'packages/core/')];
 
-console.log(`kernel conformance across ${files.length} source files\n`);
-for (const { concern, bypasses, files: fileCount } of report.concerns) {
-  const ceiling = CEILINGS[concern.id];
-  console.log(`  ${concern.id}`);
-  console.log(
-    `      ${concern.title}: ${bypasses} bypass(es) in ${fileCount} file(s), ceiling ${ceiling}`,
-  );
-  console.log(`      use instead: ${concern.kernel}`);
-  console.log(`      why it matters: ${concern.why}`);
-}
+const baseline = JSON.parse(readFileSync(baselinePath, 'utf8'));
+const result = compareToBaseline(files, baseline);
+
+const rounding = result.liveSites.filter((s) => s.startsWith('rounding:')).length;
+const bookAccount = result.liveSites.filter((s) => s.startsWith('book-account:')).length;
+
+console.log(
+  `kernel conformance across ${files.length} source files (apps/api/src + packages/core/src)\n` +
+    `  ${result.liveSites.length} live bypass site(s): ${rounding} rounding, ${bookAccount} book-account\n` +
+    `  ${baseline.sites.length} site(s) in the baseline`,
+);
 
 if (process.argv.includes('--list')) {
-  for (const { concern } of report.concerns) {
-    const mine = report.bypasses.filter((b) => b.concern === concern.id);
-    if (!mine.length) continue;
-    console.log(`\n  ${concern.id} bypasses:`);
-    for (const b of mine) console.log(`    ${b.path}:${b.line}  ${b.snippet}`);
-  }
+  console.log('\n  live site IDs:');
+  for (const id of result.liveSites) console.log(`    ${id}`);
 }
 
-if (report.verdict !== 'ok') {
-  console.log('\nKERNEL_CONFORMANCE_RED adoption regressed');
-  for (const r of report.regressions) console.log(`    ${r}`);
+if (result.verdict !== 'ok') {
+  console.log('\nKERNEL_CONFORMANCE_RED the live site set does not match the baseline:');
+  for (const problem of result.problems) console.log(`    ${problem}`);
   process.exit(1);
 }
+
 console.log(
-  `\nKERNEL_CONFORMANCE_OK adoption has not regressed.` +
-    ` ${report.totals.rounding} local rounding helpers and ${report.totals['book-account']} inline BOOK_DETL` +
-    ` reads remain — each needs its desktop mechanism identified in a contract before it can be migrated,` +
-    ` because swapping them changes posted values at midpoints.`,
+  '\nKERNEL_CONFORMANCE_OK every live bypass is a grandfathered site in the baseline; no site was added or removed.',
 );
