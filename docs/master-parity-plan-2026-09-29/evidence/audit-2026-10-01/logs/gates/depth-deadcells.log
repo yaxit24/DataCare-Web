@@ -1,0 +1,2 @@
+dead-cell audit: 665 extended columns checked across 19 pages (25 mapped pages)
+  all checked extended grid columns have static writer-consumption evidence (not runtime parity).

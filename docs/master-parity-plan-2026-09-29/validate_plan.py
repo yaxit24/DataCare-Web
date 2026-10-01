@@ -32,10 +32,11 @@ required = ['README.md'] + [
     '01-current-assessment.md','02-execution-plan.md','03-shared-contracts.md',
     '04-verification-playbook.md','05-desktop-reference.md','06-module-detail.md',
     '07-previous-plan-reconciliation.md','08-decisions-and-delivery.md','09-surface-register.md',
-    '10-gap-register-2026-10-01.md',
+    '10-gap-register-2026-10-01.md','11-audit-implementation-plan-2026-10-01.md',
     'desktop-form-reference.json','previous-package-reconciliation.json','execution-backlog.json',
     'requirement-index.json','evidence/verification-observations.json',
     'evidence/previous-plan-validation.json','evidence/source-comparison.json',
+    'evidence/audit-2026-10-01/observations.json',
 ]
 for name in required:
     check((here/name).is_file() and (here/name).stat().st_size>0, 'Missing/empty deliverable: '+name)
@@ -93,12 +94,21 @@ for p in slices.values():
         check(bool(evidence), 'Slice status without evidence: '+p['id'])
         for item in evidence:
             check((repo/item).exists(), 'Missing slice evidence path: '+p['id']+' '+item)
-gap_text=(here/'10-gap-register-2026-10-01.md').read_text()
-gap_ids=re.findall(r'^\| (G\d{2}) \|',gap_text,re.M)
-check(gap_ids==[f'G{i:02}' for i in range(1,len(gap_ids)+1)] and len(gap_ids)>=18, 'Gap register identities incomplete')
+# Gap identities continue across the registers: document 10 holds G01-G19, document 11 (the 1 October audit
+# implementation plan) continues from G20. Together they must form one contiguous sequence.
+gap_ids=[]
+for register_doc in ('10-gap-register-2026-10-01.md','11-audit-implementation-plan-2026-10-01.md'):
+    gap_ids+=re.findall(r'^\| (G\d{2}) \|',(here/register_doc).read_text(),re.M)
+check(gap_ids==[f'G{i:02}' for i in range(1,len(gap_ids)+1)] and len(gap_ids)>=66, 'Gap register identities incomplete')
+cited=set()
 for p in slices.values():
     for gap in re.findall(r'G\d{2}',p.get('gapIds','')):
+        cited.add(gap)
         check(gap in gap_ids, 'Slice cites an unknown gap: '+p['id']+' '+gap)
+check(len(slices)>=82, 'Expected at least 82 ordered slices (document 11 adds N47-N82)')
+for gap in gap_ids:
+    if int(gap[1:])>=20:
+        check(gap in cited, 'Audit gap is not assigned to any slice: '+gap)
 check(all(int(p['id'][1:])<=30 or p.get('gapIds') for p in slices.values()), 'Amendment slice without a gap reference')
 def visit(identity, trail):
     if identity in trail:
@@ -132,11 +142,17 @@ for observation in observations['checks']:
     if observation.get('log'):
         path=here/'evidence'/observation['log']
         check(path.is_file() and digest(path)==observation['logSha256'], 'Test log hash mismatch: '+observation['log'])
+audit_dir=here/'evidence/audit-2026-10-01'
+audit=load(audit_dir/'observations.json')
+for artefact in audit['artefacts']:
+    path=audit_dir/artefact['path']
+    check(path.is_file() and digest(path)==artefact['sha256'], 'Audit evidence hash mismatch: '+artefact['path'])
 
 print(json.dumps({'status':'pass' if not errors else 'fail',
  'meaning':'Planning structure, retained-record coverage, source identities and log integrity only; no runtime/full-product certification.',
  'counts':{'indexedRawRecords':len(records),'sourceRegisters':len(register['sourceRegisters']),
  'primarySources':len(desktop['sourceUnits']),'priorPackages':len(backlog['priorPackages']),
- 'priorCards':len(backlog['priorCards']),'newSlices':len(slices),'apiModules':len(module_names),
+ 'priorCards':len(backlog['priorCards']),'newSlices':len(slices),'gapIds':len(gap_ids),
+ 'auditEvidenceArtefacts':len(audit['artefacts']),'apiModules':len(module_names),
  'businessJourneys':len(journeys),'checkedLocalMarkdownLinks':link_count},'errors':errors},indent=2))
 sys.exit(1 if errors else 0)

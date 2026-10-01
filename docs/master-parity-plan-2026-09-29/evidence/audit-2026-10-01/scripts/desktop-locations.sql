@@ -1,0 +1,16 @@
+SET NOCOUNT ON;
+DECLARE @db sysname, @sql nvarchar(max);
+DECLARE c CURSOR FOR SELECT name FROM sys.databases WHERE name IN ('Live24','Next23','Next24','Next25') ORDER BY name;
+OPEN c; FETCH NEXT FROM c INTO @db;
+WHILE @@FETCH_STATUS=0 BEGIN
+ SET @sql = N'USE '+QUOTENAME(@db)+N';
+ SELECT '''+@db+N''' db, ''LOCT_MAST'' t, CO_CODE+''/''+LC_CODE k, COUNT(*) n FROM LOCT_MAST GROUP BY CO_CODE, LC_CODE;
+ SELECT '''+@db+N''' db, ''AC_DATA'' t, CO_CODE+''/''+LC_CODE k, COUNT(*) n FROM AC_DATA GROUP BY CO_CODE, LC_CODE;
+ SELECT '''+@db+N''' db, ''SL_DATA'' t, CO_CODE+''/''+LC_CODE k, COUNT(*) n FROM SL_DATA GROUP BY CO_CODE, LC_CODE;
+ SELECT '''+@db+N''' db, ''BOOK_DETL'' t, CO_CODE+''/''+LC_CODE k, COUNT(*) n FROM BOOK_DETL GROUP BY CO_CODE, LC_CODE;
+ SELECT '''+@db+N''' db, ''LEDR_KEY sample shape'' t, LEFT(LEDR_KEY,4) k, COUNT(*) n FROM AC_DATA GROUP BY LEFT(LEDR_KEY,4);';
+ BEGIN TRY EXEC sp_executesql @sql; END TRY BEGIN CATCH SELECT @db, 'ERROR', ERROR_MESSAGE(), 0; END CATCH;
+ FETCH NEXT FROM c INTO @db; END
+CLOSE c; DEALLOCATE c;
+USE Next24;
+SELECT 'Next24 CO_SET' t, CO_CODE k, ISNULL(SL_AMT_TYPE,'-') sl_amt_type FROM CO_SET;

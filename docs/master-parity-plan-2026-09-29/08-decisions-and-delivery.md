@@ -21,6 +21,8 @@ These are named design/capture tasks. They do not block this planning deliverabl
 | D13 | Treatment of source ambiguities or inferred tables without runnable evidence | Desktop specialist + QA, continuously | IL/decompiler/caller analysis, another preserved build or original-runtime capture; unresolved required behavior remains open |
 | D14 | Full rollout and stabilization duration, support ownership, retained desktop access | Owner + operations, before W15 | Candidate certification, staff training, daily reconciliation and rollback rehearsal |
 
+Decisions D15–D22 (identity convention, request validation, concurrency token, idempotency, date and number formats, layout parity, screens outside the menu table, language) were added on 1 October 2026 in [document 11 §4](11-audit-implementation-plan-2026-10-01.md), with the same owner and evidence rules.
+
 ## 2. Explicitly acceptable adaptation categories
 
 The web may use PostgreSQL and different physical storage, API/service boundaries, transactions, technical IDs, optimistic version tokens, server-side roles, browser dialogs, web printing and responsive layouts. These choices must preserve the business data and outcomes. Any changed visible behavior is documented and operator-tested.

@@ -1,0 +1,231 @@
+{
+  "kind": "datacare.audit-observations/1",
+  "observedDate": "2026-10-01",
+  "auditBaseline": "0da250a150d0f0a43c6326e8b6925910df41c2c7",
+  "recheckBaseline": "dcba5a4a2e022c0fb81e61aa9b09d56db6cd116e",
+  "runtime": {
+    "host": "macOS (Apple Silicon), Docker 29.4.0",
+    "node": "v25.8.0",
+    "pnpm": "9.15.4",
+    "python": "3.11.9",
+    "database": "postgres:16-alpine, isolated and disposable, migrations + rls.sql + setup_roles.sql, non-owner app_user, forced RLS on 174 of 175 tables",
+    "browser": "Chrome 154 via Chrome DevTools MCP; Playwright Chromium for scripted runs",
+    "desktopData": "SQL Server 2022 container with Live24, Next23, Next24, Next25, NextMain; read-only aggregate queries"
+  },
+  "scope": "Engineering gates, real-database test suites, zero-mock browser journeys on a freshly provisioned company, a 239-route crawl, API probes and aggregate desktop conventions. No original Windows desktop run; no hardware, live providers, load or offline tests.",
+  "browserJourney": [
+    "Login, open company 01 / location 01 / 2026-2027, dashboard (38 API calls, all 200)",
+    "Daily rate 60000 per 10 g gold, 70000 per kg silver",
+    "Sale SL/00001: 10 g, touch 91.6, 6000 per g, 500 per g making, cash 20000: taxable 65000, tax 1950, total 66950; AC_DATA balanced at 86950; ROJ_MEL_DATA 3, MAIN_STOCK 1, TAX_DATA 2, BILL_OS_DATA 1",
+    "Reopen and edit to 9 g: total 60255, ledger 80255 each side, no duplicate rows",
+    "Print: correct totals and CGST/SGST split; date printed as \"Thu Oct 01\" (no year)",
+    "Cash receipt RCT/00001 of 10000 saved through the form",
+    "Purchase PR/00001: 20 g at 99.5 touch, 6000 per g: 119400 + 3582 GST = 122982 on a freshly provisioned company",
+    "Trial balance, Rojmel, cash book, GSTR-1/2/3B, HSN and item stock ledger agree with the ledger; Profit and Loss empty; balance sheet closing stock 0"
+  ],
+  "artefacts": [
+    {
+      "path": "browser-probes-1.json",
+      "sha256": "a3a538b3e44c5d934dbc77c386a0cc87e5beae807ba33c06d85d9688213f45b4",
+      "meaning": "Report screens after the browser journey, containment, first validation probes and UI delete attempt"
+    },
+    {
+      "path": "browser-probes-2.json",
+      "sha256": "12d512f06341ace44d568ec3d416dd2ccfae62d87a41649acaad91fa26f5d541",
+      "meaning": "Validation probes with UI payload shapes, wrong-family books, duplicate receipts, delete without version"
+    },
+    {
+      "path": "crawl-239-routes.json",
+      "sha256": "7bd6006c824f54cd37ce4762553a53168ed5574a92dbcbc0d528fefc18f0906f",
+      "meaning": "Playwright crawl of 239 routes on the real stack (no mocks): 239 clean, 1410 API calls, 62 expected report-filter 404s"
+    },
+    {
+      "path": "desktop-conventions.json",
+      "sha256": "49218d6bc6b5fb3edb96a7a419d4dd99a6de84936c313df0c4d6c441db8d7cd9",
+      "meaning": "Aggregate desktop database conventions (books, locations, account groups, seed company)"
+    },
+    {
+      "path": "logs/full-db-tests.log",
+      "sha256": "9f35d2ac575bf594c4af28cc2b7f19c9278805fd581ffafe00c8f825405693ab",
+      "meaning": "pnpm test through scripts/parity-test-env.mjs (isolated PostgreSQL, migrations, forced RLS, app_user): core 1737/1737, web 594+6, API 3346/3349"
+    },
+    {
+      "path": "logs/gates/contracts.log",
+      "sha256": "ca8bc386990b287bbc3e9a513178f857b696864811b6ee59b73a646074456a44",
+      "meaning": "Repository gate contracts at 0da250a: exit 0 (17 draft debt lines recorded)"
+    },
+    {
+      "path": "logs/gates/depth-deadcells.log",
+      "sha256": "86ebd31ec008a0c477af7968ff02812bb391a158e17c2b2e12c4ff8883a36beb",
+      "meaning": "Repository gate depth-deadcells at 0da250a: exit 0"
+    },
+    {
+      "path": "logs/gates/depth-parity.log",
+      "sha256": "4485a14bd6e46122822fd1d4e8be45a7ca175e71311f1ebe22f6934c63c2f774",
+      "meaning": "Repository gate depth-parity at 0da250a: exit 0"
+    },
+    {
+      "path": "logs/gates/docs-refs.log",
+      "sha256": "0896d3ebc6d094bdfff95a0d01b754e04cea83cdbbb39ce602da33f3f0249237",
+      "meaning": "Repository gate docs-refs at 0da250a: exit 1 (stale test count)"
+    },
+    {
+      "path": "logs/gates/format-check.log",
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "meaning": "Repository gate format-check at 0da250a: exit 0"
+    },
+    {
+      "path": "logs/gates/fresh-provision.log",
+      "sha256": "76958d4c268116f0bbd283b40b771eacf9dfdea63b440828eba16c7a9dd9c41b",
+      "meaning": "Repository gate fresh-provision at 0da250a: exit 0"
+    },
+    {
+      "path": "logs/gates/g5-parity.log",
+      "sha256": "ddd20ccee97f4af0de0306df7feb6561710350aeb53fb0cae3bb208e11ac0ad4",
+      "meaning": "Repository gate g5-parity at 0da250a: exit 1 (retained 1 September capture, 510 field differences)"
+    },
+    {
+      "path": "logs/gates/kernel-conformance.log",
+      "sha256": "6000dbb307a91036ba09e2a2f82d7a366ed7864a48a9a1aeb6d9bea6998c10af",
+      "meaning": "Repository gate kernel-conformance at 0da250a: exit 1 (124 > 108)"
+    },
+    {
+      "path": "logs/gates/parity-measure.log",
+      "sha256": "566f627819e0314499a89cb2e5aacc5dacabdc7df072278a531b0e8e28eeb637",
+      "meaning": "Repository gate parity-measure at 0da250a: exit 0"
+    },
+    {
+      "path": "logs/gates/register-release.log",
+      "sha256": "884e36e0310c664143da6a397a76e2128ddca020c2be7d192be875ce6a61293d",
+      "meaning": "Repository gate register-release at 0da250a: exit 1 (198 implemented-unverified)"
+    },
+    {
+      "path": "logs/gates/register-strict.log",
+      "sha256": "750edf3a249abadc5699b69fb037f9504ef4f1d4d777828942babeef7538c29e",
+      "meaning": "Repository gate register-strict at 0da250a: exit 0"
+    },
+    {
+      "path": "logs/gates/release-plan.log",
+      "sha256": "41a732947f4d0a7a41c1ea880ea056492f3ccf36dcb84f6d62f5101a77c6ca75",
+      "meaning": "Repository gate release-plan at 0da250a: exit 0 (plan mode prints the requirement set)"
+    },
+    {
+      "path": "logs/gates/report-baselines.log",
+      "sha256": "ec58e007f489b81f1e096b2c49de8730cd0a72fb6d30a5a65bf60f1da31062eb",
+      "meaning": "Repository gate report-baselines at 0da250a: exit 0 (254 layouts unchanged)"
+    },
+    {
+      "path": "logs/gates/schema-readiness.log",
+      "sha256": "fabcb866d4c1c1e8f6e72e27447af84ad981b9ad4838439395b0d5c36978d198",
+      "meaning": "Repository gate schema-readiness at 0da250a: exit 0 (145/145 tables, 5231/5231 columns)"
+    },
+    {
+      "path": "logs/gates/settings-parity.log",
+      "sha256": "3d8ab680a057133c4cf78ac9937b349726f107d4b95e9d99febf243295c17290",
+      "meaning": "Repository gate settings-parity at 0da250a: exit 0 (128/128)"
+    },
+    {
+      "path": "logs/gates/type-parity-release.log",
+      "sha256": "c6977530aec35a496f3a5b100a19e883cf5527602774da8a76adf08bec544808",
+      "meaning": "Repository gate type-parity-release at 0da250a: exit 0 but SKIP: comparison not performed"
+    },
+    {
+      "path": "logs/production-build.log",
+      "sha256": "4e3cd9d493c29826e53a72266b762a15b83db0f63a0c8be15c3e4454a4a1fcf9",
+      "meaning": "pnpm build with API_ORIGIN=http://127.0.0.1:4100: 7/7 tasks, exit 0"
+    },
+    {
+      "path": "logs/real-stack-result.json",
+      "sha256": "7db94b721202143e03b59c58903a549e2c28d8cf6ed8b8e7c28f6573979fa966",
+      "meaning": "Runner result.json: 14 journey sections recorded before the failure; synthetic fixture image bytes omitted"
+    },
+    {
+      "path": "logs/real-stack-run.log",
+      "sha256": "ecd8e688f9f978d50356fdf2373a64fd618b877fb24beec551381f35a7e64122",
+      "meaning": "node apps/web/test/parity.real-stack.mjs through the parity wrapper: exit 1 at tag-split.journey.mjs:514 (RH000001)"
+    },
+    {
+      "path": "logs/recheck-dcba5a4/docs-refs.log",
+      "sha256": "bec8170d1348e396cec817944faa0be499b1f72798a56a202fbf0e24aa88b163",
+      "meaning": "pnpm docs:refs at dcba5a4: exit 1, TECHNICAL-REFERENCE.md expected 266, got 289"
+    },
+    {
+      "path": "logs/recheck-dcba5a4/kernel-conformance.log",
+      "sha256": "6000dbb307a91036ba09e2a2f82d7a366ed7864a48a9a1aeb6d9bea6998c10af",
+      "meaning": "check-kernel-conformance.mjs at dcba5a4: exit 1, 124 rounding bypasses in 80 files, ceiling 108"
+    },
+    {
+      "path": "logs/recheck-dcba5a4/plan-validator.log",
+      "sha256": "28f53f243004aad876dbcfcf4114b6fe9ac94a1619c4b948069047504435c367",
+      "meaning": "validate_plan.py at dcba5a4 before this amendment: pass"
+    },
+    {
+      "path": "logs/recheck-dcba5a4/typecheck-tests.log",
+      "sha256": "3c0481f666e0f0814f23f6530fcbccc53a6b98b5472224884a419e6bf5fe2c20",
+      "meaning": "pnpm typecheck:tests at dcba5a4: exit 0"
+    },
+    {
+      "path": "logs/rerun-saleReturnLabourReplay.log",
+      "sha256": "bfb11fa4598669140ce631281a1050f93ea10ccc87460118e98db446393e021d",
+      "meaning": "saleReturnLabourReplay.db.test.ts alone: 17/17 pass (failure in the full run was environmental)"
+    },
+    {
+      "path": "logs/rerun-salesFamilyLifecycle.log",
+      "sha256": "f3554288850f494ee3ed22acd9362b037ce6f620184cc6584d78057cb1410693",
+      "meaning": "salesFamilyLifecycle.db.test.ts alone: 30/31, sales-return create exceeded the 5000 ms interactive transaction (5143 ms)"
+    },
+    {
+      "path": "logs/static-lint.log",
+      "sha256": "fbdfcbe4204e75cc82f14daa92486b8b34e1324a8fe57157790b544b0efc65d7",
+      "meaning": "db:validate, db:generate and pnpm lint (workspace lint 982 files, ESLint, turbo typecheck 10/10): exit 0"
+    },
+    {
+      "path": "logs/typecheck-tests.log",
+      "sha256": "0c6a36b2dc3ca27b80f67b4ca5598315aaa75b630acf1f959ae89350309891d4",
+      "meaning": "pnpm typecheck:tests at 0da250a: exit 2, 4 x TS18048 in registerClassify.db.test.ts:115,120"
+    },
+    {
+      "path": "scripts/crawl.mjs",
+      "sha256": "6fe00d2e73804736148a0e5124fbe993b2c3facd3eb5564c779674762298fb42",
+      "meaning": "Crawl script used for crawl-239-routes.json"
+    },
+    {
+      "path": "scripts/desktop-book-codes.sql",
+      "sha256": "c413826dcbdc4eb7a54a35711c94d4b80b5d1c8bb30958a38fe627f7db73e296",
+      "meaning": "BOOK_DATA code shape and location counts across databases"
+    },
+    {
+      "path": "scripts/desktop-conventions.sql",
+      "sha256": "4303eaf730fc8ca5a35994457bc491fe55ef6ddaf17051a091ba5f042f60d7e2",
+      "meaning": "Aggregate SQL Server probe (settings, account groups, book codes, ledger keys, party name, table counts)"
+    },
+    {
+      "path": "scripts/desktop-locations.sql",
+      "sha256": "460dfa638f427c9d105cc3d6dd80b6dc2b233f7fe07a2a2e45e8bf4f28ea44c7",
+      "meaning": "Location usage across LOCT_MAST, AC_DATA, SL_DATA and BOOK_DETL"
+    },
+    {
+      "path": "scripts/desktop-template-compare.sql",
+      "sha256": "291f3c57d96dff073fa2cc7aaa707d0b56b20ecb33ffba61a87de10663fa97e6",
+      "meaning": "AC_GROUP and TAX_MAST checksums, book location and default-chart counts across databases"
+    },
+    {
+      "path": "scripts/probes-1.mjs",
+      "sha256": "e5c7b6c233a8bb5e7474945bb8993e5a40adb6cf1d0bf299c8dcaf65b6db3ce1",
+      "meaning": "Probe script used for browser-probes-1.json"
+    },
+    {
+      "path": "scripts/probes-2.mjs",
+      "sha256": "3de0cad56261c51bf06a0f760070753ae2256342235758c4fffd8d345223e25b",
+      "meaning": "Probe script used for browser-probes-2.json"
+    }
+  ],
+  "notExecuted": [
+    "Original Windows desktop application",
+    "Printers, scanners, scales and cameras",
+    "Live GST/IRN, WhatsApp, SMS or payment providers",
+    "Multi-user load, long-running stability and offline behaviour",
+    "Desktop-versus-web differential replay of new vouchers"
+  ],
+  "applicationSourceModified": false
+}

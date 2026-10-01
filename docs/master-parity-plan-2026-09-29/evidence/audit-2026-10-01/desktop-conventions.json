@@ -1,0 +1,65 @@
+{
+  "kind": "datacare.audit-desktop-conventions/1",
+  "observedDate": "2026-10-01",
+  "source": "Original desktop SQL Server databases restored locally, queried read-only with the scripts in scripts/desktop-*.sql. Aggregates and configuration codes only; no customer names, contact details or transaction values.",
+  "databases": ["Live24", "Next23", "Next24 (seed, no vouchers)", "Next25 (two companies)", "NextMain"],
+  "bookData": {
+    "Live24": {"rows": 210, "threeDigitNumericCodes": 210, "locationCode00": 210, "inUse": 131},
+    "Next23": {"rows": 205, "threeDigitNumericCodes": 205, "locationCode00": 205, "inUse": 108},
+    "Next24": {"rows": 226, "threeDigitNumericCodes": 226, "locationCode00": 226, "inUse": 134},
+    "Next25": {"rows": 455, "threeDigitNumericCodes": 455, "locationCode00": 455, "inUse": 268},
+    "total": {"rows": 1096, "threeDigitNumericCodes": 1096, "locationCode00": 1096}
+  },
+  "locations": {
+    "rule": "Every LOCT_MAST row, every BOOK_DETL row and every posted AC_DATA and SL_DATA row uses LC_CODE '00'; every AC_DATA LEDR_KEY starts with '0100' (company 01, location 00).",
+    "LOCT_MAST": {"Live24": ["01/00"], "Next23": ["01/00"], "Next24": ["01/00"], "Next25": ["01/00", "02/00"]},
+    "AC_DATA rows": {"Live24": 5150, "Next23": 28, "Next25": 11},
+    "ledgerKeyLengthSalesBooks": {"Live24": {"23": 861, "33": 159}, "Next23": {"23": 11, "33": 1}}
+  },
+  "accountGroups": {
+    "rule": "AC_GROUP holds the same 35 rows in every company of every database (CHECKSUM_AGG 551216197).",
+    "rowsPerCompany": 35,
+    "checksum": 551216197,
+    "mainGroups": {"1": "liabilities", "2": "assets", "3": "trading income", "4": "trading expense", "5": "income", "6": "expenses"}
+  },
+  "seedCompany": {
+    "database": "Next24",
+    "rowCounts": {
+      "CO_MAST": 1, "LOCT_MAST": 1, "YEAR_MAST": 3, "CO_SET": 2, "CO_SET_NEW": 2, "BOOK_DATA": 226, "BOOK_DETL": 494,
+      "AC_GROUP": 35, "AC_MAST": 89, "GROUP_MAST": 24, "ITEM_MAST": 24, "PRODUCT_MAST": 22, "TAX_MAST": 25,
+      "STATE_MAST": 37, "COL_MAST": 699, "EMP_MAST": 1, "LOGIN_MAST": 1, "BAL_GR": 5, "PRINT_MAST": 9,
+      "TABLE_MAST": 1, "CONV_MAST": 1, "AC_DATA": 0, "SL_DATA": 0, "PR_DATA": 0, "MAIN_STOCK": 0
+    },
+    "defaultChart": "89 accounts with 5-digit codes, for example 00001 cash on hand, 00003 sales gold, 00004 sales silver, 00008 purchase gold, 00009 purchase silver, 00014 VAT, 00042 kasar avak (incoming), 00057 kasar javak (outgoing), 00085 GST tax, 00086 CGST tax, 00087 IGST tax, 00099 sales.",
+    "itemGroups": ["916", "DM", "EM", "FGL", "FSL", "GO", "OG", "ORD", "OS", "OT", "SL", "SN"],
+    "items": ["999", "DM", "EM", "FSL", "HM", "OG", "ORG", "ORS", "OS", "OT", "RD", "SN"],
+    "closingStockGroups": [
+      {"TRAD_TYPE": "GO", "name": "Gold", "SALE_AC": "00003", "PURC_AC": "00008", "CLOSING_AC": "00026", "OP_AC": "00031", "CLG_AC": "00021"},
+      {"TRAD_TYPE": "OG", "name": "Old Gold", "SALE_AC": "00005", "PURC_AC": "00010", "CLOSING_AC": "00028", "OP_AC": "00033", "CLG_AC": "00023"},
+      {"TRAD_TYPE": "OS", "name": "Old Silver", "SALE_AC": "00006", "PURC_AC": "00011", "CLOSING_AC": "00029", "OP_AC": "00034", "CLG_AC": "00024"},
+      {"TRAD_TYPE": "OT", "name": "Other", "SALE_AC": "00007", "PURC_AC": "00012", "CLOSING_AC": "00030", "OP_AC": "00031", "CLG_AC": "00025"},
+      {"TRAD_TYPE": "SL", "name": "Silver", "SALE_AC": "00004", "PURC_AC": "00009", "CLOSING_AC": "00027", "OP_AC": "00032", "CLG_AC": "00022"}
+    ],
+    "printFormats": [
+      {"PRINT_TYPE": "QR", "PRINT_FILE": "QrPrint10", "BOOK_TYPE": "T", "PRINT_SET_A": "Y"},
+      {"PRINT_TYPE": "RATE CUT", "PRINT_FILE": "RateCutItmBill", "BOOK_TYPE": "F", "PRINT_SET_A": "Y"},
+      {"PRINT_TYPE": "SALES", "PRINT_FILE": "SalesBillA4", "BOOK_TYPE": "M", "PRINT_SET_A": "Y"},
+      {"PRINT_TYPE": "SALES", "PRINT_FILE": "SalesBillHz", "BOOK_TYPE": "M", "PRINT_SET_A": "N"},
+      {"PRINT_TYPE": "SALES", "PRINT_FILE": "SalesBillVr", "BOOK_TYPE": "M", "PRINT_SET_A": "N"},
+      {"PRINT_TYPE": "SALES", "PRINT_FILE": "SalesBillA4Gst", "BOOK_TYPE": "T", "PRINT_SET_A": "Y"},
+      {"PRINT_TYPE": "TAG", "PRINT_FILE": "BarPrint10", "BOOK_TYPE": "F", "PRINT_SET_A": "Y"},
+      {"PRINT_TYPE": "TAG", "PRINT_FILE": "BarSatoPrint", "BOOK_TYPE": "F", "PRINT_SET_A": "N"},
+      {"PRINT_TYPE": "WH SALES", "PRINT_FILE": "WhSalesBill", "BOOK_TYPE": "F", "PRINT_SET_A": "Y"}
+    ],
+    "taxCodes": "25 TAX_MAST rows: 00 tax free; 01 VAT 1%; 02 CST 1%; 10 GST 3% (SGST 1.5, CGST 1.5, IGST 3); 11 GST 5%; 12 GST 12%; 13 GST 18%, each with its CGST/SGST/IGST rows on accounts 00085-00087.",
+    "settings": {"CO_SET.SL_AMT_TYPE": {"company 00 (template)": "N", "company 01": "N"}}
+  },
+  "otherCompanies": {
+    "CO_SET.SL_AMT_TYPE": {"Live24": {"N": 2}, "Next23": {"N": 2}, "Next25": {"N": 3}},
+    "SL_DATA.AC_NAME filled": {"Live24": "190 of 190", "Next23": "4 of 4"},
+    "SL_DATA.EMP_CODE filled": {"Live24": "189 of 190", "Next23": "4 of 4"},
+    "userTables": {"Live24": 145, "Next23": 138, "Next25": 151},
+    "MENU_DATA rows (NextMain)": 209
+  },
+  "desktopProvisioningAuthority": "unified/src/csharp/DataCareNext/MS_YEAR.cs:1357-1363 calls NewCompParmCreat (1504-1600) only for a new company; it copies 17 master and configuration tables from a chosen company or from company 01. MS_LOCT.cs:3612-3614 copies books for a new location from location 00."
+}
