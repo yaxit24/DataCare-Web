@@ -353,6 +353,23 @@ d('company provisioning produces a postable company', () => {
     }
   });
 
+  it('resolves a GST rate BY PERCENTAGE (no code) without a parent/component collision (G82)', async () => {
+    // A sale created by rate resolves tax by PERCENTAGE, no code. Provisioning now writes a parent (SR_NO 0)
+    // and an IGST component (SR_NO 3) that share the full rate, so a 3% lookup matches both rows. They are
+    // one configuration (the same code), so the resolver must return the parent, not report
+    // "tax rate maps to multiple configurations: 3" — the regression the pinned route suites caught.
+    const scope = { tenantId, coCode: CO, lcCode: LC, coBook: 'SL', coYear: '2024-2025' } as any;
+    for (const total of [3, 5, 12, 18, 28]) {
+      const policy = await withTenant(prisma, tenantId, (tx: any) =>
+        resolveTaxPolicyTx(tx, scope, { acCode: 'CASH', taxPct: total }),
+      );
+      // The parent row, not the IGST component that shares the percentage.
+      expect(policy.taxGroup).toBe('N');
+      expect(policy.taxPct).toBe(total);
+      expect(policy.taxAc).toBe('GST');
+    }
+  });
+
   it('resolves every GST tax code BY NAME without the G82 failure, with the right component split', async () => {
     const scope = { tenantId, coCode: CO, lcCode: LC, coBook: 'SL', coYear: '2024-2025' } as any;
     for (const [code, total] of [

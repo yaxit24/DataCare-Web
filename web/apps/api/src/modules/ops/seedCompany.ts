@@ -1,3 +1,4 @@
+import { round } from '@datacare/core';
 import { withTenant } from '@datacare/db';
 import { type BookWorkflow, workflowPolicy } from '../shared/bookPolicy.js';
 
@@ -93,7 +94,7 @@ const GST_ACCOUNT = 'GST';
 
 /** The desktop component layout for a GST code: SR_NO 1 SGST (half), 2 CGST (half), 3 IGST (full). */
 function gstComponents(prc: number): Array<{ srNo: number; group: string; prc: number }> {
-  const half = Math.round((prc / 2) * 10000) / 10000;
+  const half = round(prc / 2, 4);
   return [
     { srNo: 1, group: 'SGST', prc: half },
     { srNo: 2, group: 'CGST', prc: half },

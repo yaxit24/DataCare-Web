@@ -119,7 +119,7 @@ export async function resolveTaxPolicyTx(
             coalesce("TAX_PRC",0) AS tax_pct
        FROM "TAX_MAST"
       WHERE tenant_id=$1 AND "CO_CODE"=$2 AND ${selector} ${rowSelector}
-      ORDER BY coalesce("SR_NO",0),row_id LIMIT 2`,
+      ORDER BY coalesce("SR_NO",0),row_id LIMIT 8`,
     ...params,
   );
   if (taxes.length === 0) {
@@ -131,13 +131,12 @@ export async function resolveTaxPolicyTx(
   }
   // The conflict check still matters on the percentage-only path: two different tax CODES sharing a rate
   // with different accounts is a genuine ambiguity the caller must resolve. What it must not do is treat a
-  // code's own component rows as rivals.
-  const identities = new Set(
-    taxes.map((row) =>
-      [row.tax_code, row.tax_group, row.tax_ac, Number(row.tax_pct)].map(String).join('|'),
-    ),
-  );
-  if (identities.size > 1) {
+  // code's own component rows as rivals: once provisioning writes the parent + SGST/CGST/IGST rows (G82),
+  // a rate like 3% is carried by BOTH the code-10 parent and its IGST component, which share the tax code
+  // and are one configuration, not two. So the ambiguity is measured by DISTINCT tax code, and the parent
+  // (ordered first by SR_NO) is the row returned.
+  const codes = new Set(taxes.map((row) => String(row.tax_code)));
+  if (codes.size > 1) {
     throw new TransactionTaxValidationError(
       args.taxCode?.trim()
         ? `tax code has conflicting configuration: ${args.taxCode.trim()}`
