@@ -40,7 +40,7 @@ evidence exists and named work remains. No slice is accepted.
 | Slice | Recorded | Corrected | Engineering evidence on `main` | Remaining work |
 |---|---|---|---|---|
 | N32 | implemented-unverified | in-progress | TAG PURCHASE book lifecycle (PR #11), jobwork books (PR #16, PR #19) | 95-column `TR_PURC_HM` receive band; lossless reopen (G46) |
-| N34 | planned | in-progress | Day book written (PR #17); full-scope GET and print, complete reversal including `ROJ_MEL_DATA`, `PR_IDTL`, `DM_DATA`, source year and hidden identity (PR #18) | G47: edit lifecycle, `PR_IDTL`/`DM_DATA` writes, residual-limited source selection |
+| N34 | planned | in-progress | Day book written (PR #17); full-scope GET and print, complete reversal including `ROJ_MEL_DATA`, `PR_IDTL`, `DM_DATA`, source year and hidden identity (PR #18); `DM_DATA` rows written per `Dm_PrRtn_Detl` with the restored `TBL_CODE` column (G67) | G47: edit lifecycle, `PR_IDTL` stone writes, residual-limited source selection |
 | N36 | planned | in-progress | Sales/purchase registers, GSTR-3B, by-party, daily and employee summaries classify by `MAIN_BOOK` (PRs #13, #14) | G48 |
 | N38 | planned | in-progress | Document-only Wholesale Quotation lifecycle: own WH QUOT book, rights, create, read, edit, delete and print, with no ledger, Rojmel or stock rows (PR #22) | Conversion lineage into wholesale sale (with N46) |
 | N39 | planned | in-progress | Estimate prints the active company name (PR #12) | G49: persisted estimate and full company header |
@@ -104,6 +104,7 @@ or is a security exposure; **S2** wrong or incomplete in a supported branch; **S
 | G64 | S1 | Deployment and recovery | — | `web/docker-compose.yml` publishes database 5433, API 4000 and web 4001 on all interfaces; no `.dockerignore`; stale `web/deploy/docker-compose.prod.yml`; `web/deploy/backup.sh` keeps a local unencrypted dump with no off-host copy; no scheduled restore drill; no upgrade or rollback runbook | TLS edge only; private services; sanitized build context; encrypted off-host backups; timed restore drill; rehearsed upgrade and rollback | N80 |
 | G65 | S1 | Secrets and delivery source | — | `SECURITY-NOTICE.md` records intentionally tracked credentials; tracked `web/.env`, `web/.env.parity-test`, `web/packages/db/.env`; no secret scanning in CI | Sanitized history-free deployment source; rotated credentials; CI scanning and push protection | N81 |
 | G66 | S2 | Release-certification coverage | Document 04 gates R02, R03, R08, R09, R12 | `ops/releaseCertification.ts` declares 19 gates; none covers test type compilation, documentation/plan integrity, the two additional real-browser suites, hardware/providers, migration continuation or business UAT | Exact-set, candidate-bound gates for each missing family | N82 |
+| G67 | S2 | `DM_DATA` counter column | `Ac_Stock.Dm_PrRtn_Detl` and `Dm_Purc_Detl` (`Ac_Stock.cs:774-790`) insert `TBL_CODE` on every diamond/detail row | Found while implementing N34: the PostgreSQL `DM_DATA` table had no `TBL_CODE`, so the first faithful insert failed with "column does not exist" and every writer silently omitted the counter | Additive nullable `TBL_CODE varchar(3)` (migration `20261001090000_dm_data_tbl_code`) written by every `DM_DATA` writer | N34 |
 
 ## 4. Decisions D15–D22
 

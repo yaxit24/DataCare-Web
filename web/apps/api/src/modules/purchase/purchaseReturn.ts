@@ -269,7 +269,8 @@ export async function createPurchaseReturn(
 
     const itCodes = [...new Set(lines.map((line) => String(line.itCode).trim()))];
     const rows: any[] = await tx.$queryRawUnsafe(
-      `SELECT i."IT_CODE" ic,i."IT_NAME" iname,i."IT_TYPE" itype,g."PURC_AC" pac FROM "ITEM_MAST" i
+      `SELECT i."IT_CODE" ic,i."IT_NAME" iname,i."IT_TYPE" itype,
+              i."OTH_DETL_POSTING" oth,g."PURC_AC" pac FROM "ITEM_MAST" i
        LEFT JOIN "GROUP_MAST" g ON g.tenant_id=i.tenant_id
         AND g."CO_CODE"=i."CO_CODE" AND g."GR_CODE"=i."GR_CODE"
        WHERE i.tenant_id=$1 AND i."CO_CODE"=$2 AND i."IT_CODE"::text=ANY($3::text[])`,
@@ -280,6 +281,7 @@ export async function createPurchaseReturn(
     const purcAcByItem: Record<string, string> = {};
     const itemNameByItem: Record<string, string> = {};
     const itemTypeByItem: Record<string, string> = {};
+    const otherDetailItems = new Set<string>();
     for (const row of rows) {
       const item = String(row.ic ?? '').trim();
       const account = String(row.pac ?? '').trim();
@@ -287,6 +289,12 @@ export async function createPurchaseReturn(
       if (item) {
         itemNameByItem[item] = String(row.iname ?? '').trim();
         itemTypeByItem[item] = String(row.itype ?? '').trim();
+        if (
+          String(row.oth ?? '')
+            .trim()
+            .toUpperCase() === 'Y'
+        )
+          otherDetailItems.add(item);
       }
     }
     const missing = itCodes.filter((item) => !purcAcByItem[item]);
@@ -532,6 +540,44 @@ export async function createPurchaseReturn(
       NET_AMT: line.calc.net,
     }));
 
+    const dmRows = computed.flatMap((line, index) => {
+      const item = String(line.in.itCode ?? '').trim();
+      if (!otherDetailItems.has(item)) return [];
+      // Ac_Stock.Dm_PrRtn_Detl (Ac_Stock.cs:774-776): one loose-detail diamond movement per
+      // eligible PR_DETL line. This is not the PR_IDTL stone grid; the item itself is DM_CODE.
+      return [
+        {
+          ...key,
+          MAIN_SRNO: 1,
+          SR_NO: index + 1,
+          ISR_NO: 1,
+          VCH_DATE: vchDate,
+          ENTRY_TYPE: 'L',
+          BOOK_NAME: bookPolicy.vchType,
+          AC_CODE: input.acCode,
+          IT_CODE: item,
+          DM_CODE: item,
+          DM_ORIGIN: '',
+          DM_REMARK: '',
+          DM_SIZE: '',
+          DM_COLOR: '',
+          DM_LOT_NO: '',
+          DM_PCS: num(line.in.pcs),
+          DM_WT: num(line.in.grossWt),
+          DM_SIGN: '-',
+          DM_RATE: num(line.in.rate),
+          DM_AMT: line.calc.metal,
+          EMP_CODE: '',
+          TAG_NO: 'N',
+          VCH_SRNO: 0,
+          MAIN_IT_CODE: item,
+          INOUT_TYPE: 'O',
+          // The desktop copies A.TBL_CODE from PR_DETL, so mirror that stored value exactly.
+          TBL_CODE: text(line.in.tblCode).slice(0, 3) || null,
+        },
+      ];
+    });
+
     // G04: the purchase-return day book (Ac_Rojmel.Purc_Rtn_Rojmel). A return credits the purchase
     // account and sends metal back out to the supplier; the web wrote no ROJ_MEL_DATA at all, so a
     // jeweller's day book was missing every return's money and metal movement.
@@ -607,6 +653,7 @@ export async function createPurchaseReturn(
         { table: 'PR_DATA', rows: [header] },
         { table: 'PR_DETL', rows: detl },
         { table: 'MAIN_STOCK', rows: mainStock },
+        ...(dmRows.length ? [{ table: 'DM_DATA', rows: dmRows }] : []),
         ...(taxRows.length ? [{ table: 'TAX_DATA', rows: taxRows }] : []),
         ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
       ],
