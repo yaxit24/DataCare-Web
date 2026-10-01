@@ -8,6 +8,10 @@
 ## Active plan
 **Full-parity rebuild (52 tasks / 15 phases A–O)** — replicate the ENTIRE desktop (204 forms, 255 reports, full frontend+backend+DB) at 100% functional parity. The earlier 34-task plan delivered the verified backend CORE; this plan builds out the rest. Task graph = the session todo list (IDs 1–20 group the phases). Run continuously; checkpoint every task.
 
+## Latest planning update (2026-10-01, fourth) — device fakes, dev setup and device guides
+- **Decision D29:** Phase 1 is built and tested against device **fakes** with recorded sample inputs and against the desktop source, screenshots and transcripts as the oracle; Odoo IoT is a device-protocol reference only; real hardware and live providers are deferred to acceptance (N25); a fake must fail honestly in production (G33). Slice **N89** adds the device-fake test harness and journeys.
+- **New developer docs:** `docs/handbook/dev/setup.md` (prerequisites, install, run, test, and where the desktop reference code lives) and `docs/handbook/dev/devices.md` (scale, scanner, label printer, camera: how each is triggered and connected to a laptop). Linked from the hub.
+
 ## Latest planning update (2026-10-01, third) — owner decisions and the agent reading order
 - The owner accepted D23, D24, D26 and D27 as recommended and added **D28: nothing in Phase 2 starts, including its M0 decisions, until Phase 1 is complete and certified (N30)**. N86 now also lands Prisma 7 before 19 November 2026. Recorded in document 12 §4 and the ADR-0004 amendment; `validate_plan.py` enforces the Phase 2 gate.
 - Building agents follow "Which documents to follow" in `AGENTS.md`: the next slice from document 13 §3, its specification in document 02/06, 10, 11 or 12, status in the backlog. Older plans are history.

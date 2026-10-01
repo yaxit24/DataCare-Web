@@ -4,6 +4,13 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-01 — Device-fake testing decision, developer setup and device guides
+- Recorded owner decision D29 (test with device fakes + desktop oracle; Odoo IoT as protocol reference; real hardware at acceptance, N25) and added slice N89 (device-fake harness and journeys, owner of G33 alongside N54).
+- Wrote docs/handbook/dev/setup.md and docs/handbook/dev/devices.md, grounded in the real device code (scaleProtocol.ts 9600/2400 fallback, deviceBridge.ts, barcode.ts, ScaleCapture/CameraCapture, FakeIrnTransport/FakeMessageSender) and the desktop source; classified them in the register and linked them from the hub.
+- Checks: validate_plan and docs_check pass (89 slices, 85 gaps, 29 decisions).
+
+---
+
 ## 2026-10-01 — Owner decisions D23–D28 recorded; agent reading order
 - **Asked:** accept the recommended positions for D23, D24, D26 and D27; defer all of Phase 2 until Phase 1 is complete and its validation passes; say which plans a building agent should follow.
 - **Did:** recorded the four decisions as accepted (document 12 §4) and added D28 (Phase 2, including M0, waits for Phase 1 certification, N30) with an ADR-0004 amendment; gated every Phase 2 slice on SP01 and SP01 on N30, and added the check to `validate_plan.py`; moved Prisma 7 into N86 (D26); moved requirements 19.2 and 21.1 from decision to carried; added "Which documents to follow" to `AGENTS.md`, the steering file, the hub and the implement-slice skill; fixed the next-gap pointers to G84 after PR #33 took G82 and G83.

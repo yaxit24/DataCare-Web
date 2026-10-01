@@ -4214,6 +4214,21 @@
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N89",
+      "status": "planned",
+      "action": "Device-fake test harness and journeys: recorded scale/barcode/QR/label/GSP-sandbox fixtures and FakeSerialPort/FakeCamera driving the device screens, with no hardware",
+      "parentLabels": "P02-03, P11-02, P11-03; X28",
+      "startAfter": [
+        "N49"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Tag opening, tag print and a labour sale pass real-stack journeys using only the device fakes; an unconfigured provider or disabled port fails, never faking success",
+      "gapIds": "G33",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
     }
   ],
   "amendments": [
@@ -4249,6 +4264,12 @@
       "document": "12-lineage-verification-2026-10-01.md §4",
       "mainBaseline": "93986ef",
       "meaning": "Owner decisions: D23, D24, D26 and D27 accepted as recommended; D28 added: nothing in Phase 2, including its M0 decisions, starts until Phase 1 is complete and certified (N30), enforced by SP dependencies and validate_plan.py. N86 now lands Prisma 7 before 19 November 2026. Requirements 19.2 and 21.1 move from decision to carried in lineage-register.json. Builds on PR #33 (G82, G83). No acceptance is closed."
+    },
+    {
+      "date": "2026-10-01",
+      "document": "12-lineage-verification-2026-10-01.md §4",
+      "mainBaseline": "5f8439c",
+      "meaning": "Owner decision D29: Phase 1 is built and tested with device fakes (recorded sample inputs) and the desktop source, screenshots and transcripts as oracle; Odoo IoT is a device-protocol reference only; real hardware and live providers deferred to acceptance (N25). Adds slice N89 (device-fake test harness). Also adds the developer setup and supported-devices handbook pages. No acceptance closed."
     }
   ],
   "releaseGates": [

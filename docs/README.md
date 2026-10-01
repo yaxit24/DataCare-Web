@@ -36,6 +36,8 @@ The boundary is recorded in [ADR-0004](../project-memory/decisions/ADR-0004-two-
 | Understand what the desktop product does and how operators use it | [Desktop handbook](handbook/desktop/README.md), then [business rules](handbook/desktop/business-rules.md) and the [module guide](handbook/desktop/modules.md) |
 | Look up one desktop menu: its form, tables, web screen, status and owners | [Menu catalog](handbook/menu-catalog.md) |
 | Understand the web code, its stack and how a request flows | [Web handbook](handbook/web/README.md) and the [module map](handbook/web/modules.md) |
+| Set up the project on my laptop | [Developer setup](handbook/dev/setup.md) |
+| Connect a scale, scanner, printer or camera | [Supported devices](handbook/dev/devices.md) |
 | Pick up the next piece of work | [`project-memory/HANDOFF.md`](../project-memory/HANDOFF.md), then the queue in [document 13 §3](master-parity-plan-2026-09-29/13-phase1-delivery-plan.md#3-delivery-order) |
 | Implement a slice to the expected quality | [Engineering standards](handbook/web/engineering-standards.md), [testing](handbook/web/testing.md) and the agent skills in [`AGENTS.md`](../AGENTS.md) |
 | Test in a real browser, including visual checks with Chrome DevTools | [Testing §5](handbook/web/testing.md#5-visual-and-interactive-verification-with-chrome-devtools-mcp) |
