@@ -1,3 +1,5 @@
+import { transactionDurations, type TransactionDurations } from '../shared/txBudget.js';
+
 export type RouteClass = 'public' | 'system' | 'form' | 'unknown';
 export type VoucherOutcome = 'success' | 'rejected' | 'server_error';
 
@@ -6,6 +8,9 @@ const metricKey = (...labels: string[]): string => labels.join('\u0000');
 const labelValue = (value: string): string => value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
 export class MetricsRegistry {
+  /** Budgeted transaction durations are process-wide: coordinators record them outside any app instance. */
+  constructor(private readonly transactions: TransactionDurations = transactionDurations) {}
+
   private readonly requests = new Map<string, number>();
   private readonly voucherWrites = new Map<VoucherOutcome, number>();
   private auditFailures = 0;
@@ -98,6 +103,7 @@ export class MetricsRegistry {
       '# HELP datacare_db_pool_active_connections Current active database connections.',
       '# TYPE datacare_db_pool_active_connections gauge',
       `datacare_db_pool_active_connections ${this.dbPoolActiveConnections}`,
+      ...this.transactions.prometheus(),
     );
     return `${lines.join('\n')}\n`;
   }

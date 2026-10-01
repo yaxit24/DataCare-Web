@@ -1,6 +1,7 @@
 import { type StoneSubDetailInput } from '../shared/stoneSubDetail.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
 import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { recordFieldChangesTx } from '../vouchers/fieldAudit.js';
 import { stagePurchaseLotDetailTx } from '../stock/lotRegister.js';
 import {
@@ -1715,7 +1716,7 @@ export async function createPurchase(
   // Fail with the field name rather than a DecimalError 500 (see requirePurchaseNumber).
   input.taxRatePct = requirePurchaseNumber(input.taxRatePct, 'taxRatePct');
   const scope = input.scope;
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const isConsignmentPurchase = (await purchaseMainBookTx(tx, scope)) === 'CON PUR';
     let writeInput = input;
     let writeLines = lines;
@@ -1752,7 +1753,7 @@ export async function createPurchaseQuotation(
   completePurchaseScope(input.scope);
   input.taxRatePct = requirePurchaseNumber(input.taxRatePct, 'taxRatePct');
   const scope = input.scope;
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await assertPurchaseMainBookTx(tx, scope, 'PR QUOT', 'purchase quotation');
     const vchNo = await nextVoucherNoTx(tx, scope);
     const hdVchNo = await nextHiddenVoucherNoTx(tx, scope);
@@ -1773,7 +1774,7 @@ export async function getPurchaseQuotation(
   requestedVoucherNo: number | string,
 ): Promise<Record<string, unknown>> {
   completePurchaseScope(scope);
-  await withTenant(prisma, scope.tenantId, async (tx: any) => {
+  await withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await assertPurchaseMainBookTx(tx, scope, 'PR QUOT', 'purchase quotation');
   });
   return getPurchase(prisma, scope, requestedVoucherNo);
@@ -1791,7 +1792,7 @@ export async function editPurchaseQuotation(
   const scope = input.scope;
   const voucherNo = formatVoucherNo(requestedVoucherNo);
   const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await assertPurchaseMainBookTx(tx, scope, 'PR QUOT', 'purchase quotation');
     const persisted = await persistedPurchaseHeaderTx(tx, scope, voucherNo);
     const priorHeaderRow: Record<string, unknown> | undefined = (
@@ -2168,7 +2169,7 @@ export async function getPurchase(
 ): Promise<Record<string, unknown>> {
   completePurchaseScope(scope);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const params = purchaseParams(scope, voucherNo);
     const headers: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"VCH_TIME","BILL_NO","HD_VCH_NO","MAIN_USER",
@@ -2595,7 +2596,7 @@ export async function editPurchase(
   const scope = input.scope;
   const voucherNo = formatVoucherNo(requestedVoucherNo);
   const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const isConsignmentPurchase = (await purchaseMainBookTx(tx, scope)) === 'CON PUR';
     const persisted = await persistedPurchaseHeaderTx(tx, scope, voucherNo, ['SL_BILL_NO']);
     // Full prior header for the USER_DATA edit audit, read BEFORE the write set is replaced.
@@ -2700,7 +2701,7 @@ export async function deletePurchase(
   const tenantId = scope.tenantId;
   const voucherNo = formatVoucherNo(input.vchNo);
   const key = keyOf(scope, voucherNo);
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const deleteMainBook = await purchaseMainBookTx(tx, scope);
     const isConsignmentPurchase = deleteMainBook === 'CON PUR';
     const bookPolicy = await resolveBookPolicyTx(tx, scope, purchaseWorkflowFor(deleteMainBook));
@@ -2798,7 +2799,7 @@ export async function deletePurchaseQuotation(
   const tenantId = scope.tenantId;
   const voucherNo = formatVoucherNo(input.vchNo);
   const key = keyOf(scope, voucherNo);
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     await assertPurchaseMainBookTx(tx, scope, 'PR QUOT', 'purchase quotation');
     const bookPolicy = await resolveBookPolicyTx(tx, scope, 'PURCHASE QUOTATION');
     const configuredBookName = await configuredPurchaseBookNameTx(tx, scope);

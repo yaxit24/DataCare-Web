@@ -7,6 +7,7 @@ import { buildApp } from './app.js';
 import { hashPassword } from './modules/auth/password.js';
 import { resolveRuntimeConfig, type RuntimeConfig } from './modules/ops/runtimeConfig.js';
 import { seedCompany } from './modules/ops/seedCompany.js';
+import { warmPostingMetadata } from './modules/posting/posting.js';
 
 /** Dev-only convenience: ensure a demo company + admin login exist so you can log in immediately. */
 async function seedDemo(prisma: PrismaClient, config: RuntimeConfig) {
@@ -92,6 +93,12 @@ async function main() {
     defaultTenantId: config.tenantId,
     allowTenantHeader: !config.isProduction,
   });
+  // One catalog query now, so no posting or numbering transaction queries information_schema (N53). If the
+  // database is not reachable yet, start anyway as before: the first posting then loads the catalog once.
+  await warmPostingMetadata(prisma).then(
+    (tables) => console.log(`[datacare-api] schema catalog warmed: ${tables} tables`),
+    (error) => console.warn('[datacare-api] schema catalog not warmed:', error.message),
+  );
   if (!config.isProduction) {
     const harness = resolve(dirname(fileURLToPath(import.meta.url)), '../../web/test-harness.html');
     app.get('/', async (_req, reply) =>

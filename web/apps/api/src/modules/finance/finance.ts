@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { DEFAULT_CASH_LIMIT, resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
 import { buildCashRojmel, buildJournalRojmel } from '../shared/rojmel.js';
 import { requirePostingAccount, resolveBookSlotAccountTx } from '../shared/postingAccounts.js';
@@ -579,7 +579,7 @@ export async function postReceipt(
     return { vchNo };
   };
   if (lifecycle) return write(lifecycle.tx, lifecycle.identity);
-  return withTenant(prisma, tenantId, async (tx: any) =>
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) =>
     write(tx, await createIdentityTx(tx, input.scope, vchDate, input.mainUser)),
   );
 }
@@ -611,7 +611,7 @@ export async function postPayment(prisma: any, input: PaymentInput): Promise<Fin
   const mode = String(input.mode || 'cash').toLowerCase() as PayMode;
 
   const tenantId = input.scope.tenantId;
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     // The book first, before numbering: a payment must land in a payment book matching the mode.
     await financeBookTx(tx, input.scope, 'payment', mode);
     const vchNo = await nextVoucherNoTx(tx, input.scope);
@@ -812,7 +812,7 @@ export async function postReceiptLines(
   const tenantId = input.scope.tenantId;
   const totalAmt = round2(lines.reduce((s, l) => s + Number(l.amount), 0));
   const totalKasar = round2(lines.reduce((s, l) => s + Number(l.kasar ?? 0), 0));
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     await financeBookTx(tx, input.scope, 'receipt', mode);
     // Resolved before the ceiling check and before numbering: the ceiling counts prior cash against THIS
     // account, so a placeholder would have measured the wrong ledger as well as posting to it.
@@ -982,7 +982,7 @@ export async function postPaymentLines(
   const tenantId = input.scope.tenantId;
   const totalAmt = round2(lines.reduce((s, l) => s + Number(l.amount), 0));
   const totalKasar = round2(lines.reduce((s, l) => s + Number(l.kasar ?? 0), 0));
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     await financeBookTx(tx, input.scope, 'payment', mode);
     const vchNo = await nextVoucherNoTx(tx, input.scope);
     const key = keyOf(input.scope, vchNo, 'PAY');
@@ -1134,7 +1134,7 @@ export async function deleteReceiptLines(
 ): Promise<{ reversed: true }> {
   const tenantId = input.scope.tenantId;
   const key = keyOf(input.scope, Number(input.vchNo), 'RCT');
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     await reverseVoucherTx(tx, tenantId, {
       tables: ['CASH_DATA', 'PAY_DETL', 'AC_DATA'],
       key,
@@ -1152,7 +1152,7 @@ export async function deletePaymentLines(
 ): Promise<{ reversed: true }> {
   const tenantId = input.scope.tenantId;
   const key = keyOf(input.scope, Number(input.vchNo), 'PAY');
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     await reverseVoucherTx(tx, tenantId, {
       tables: ['PAY_DATA', 'PAY_DETL', 'AC_DATA'],
       key,
@@ -1292,7 +1292,7 @@ export async function postContra(
     return { vchNo };
   };
   if (lifecycle) return write(lifecycle.tx, lifecycle.identity);
-  return withTenant(prisma, tenantId, async (tx: any) =>
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) =>
     write(tx, await createIdentityTx(tx, input.scope, vchDate, input.mainUser)),
   );
 }
@@ -1313,7 +1313,7 @@ export async function deleteFinance(
 ): Promise<{ reversed: true }> {
   const tenantId = input.scope.tenantId;
   const key = keyOf(input.scope, Number(input.vchNo), input.book);
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     await reverseVoucherTx(tx, tenantId, {
       tables: [input.headerTable, 'AC_DATA'],
       key,
@@ -1335,7 +1335,7 @@ export async function getReceipt(
 ): Promise<Record<string, unknown>> {
   completeFinanceScope(scope);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"VCH_TIME","HD_VCH_NO","MAIN_USER","AC_CODE","AC_NAME",
               "REC_AMT","KASAR_AMT","REC_AC_CODE","CHQ_NO","IT_DESC","BOOK_NAME"
@@ -1408,7 +1408,7 @@ export async function editReceipt(
 ): Promise<FinanceResult> {
   completeFinanceScope(input.scope);
   const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
-  return withTenant(prisma, input.scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', async (tx: any) => {
     const { identity } = await editIdentityTx(tx, {
       table: 'CASH_DATA',
       scope: input.scope,
@@ -1433,7 +1433,7 @@ export async function deleteReceipt(
   completeFinanceScope(input.scope);
   const scope = input.scope;
   const voucherNo = formatVoucherNo(input.vchNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const { persisted: header, identity } = await editIdentityTx(tx, {
       table: 'CASH_DATA',
       scope,
@@ -1527,7 +1527,7 @@ export async function getPayment(
 ): Promise<Record<string, unknown>> {
   completeFinanceScope(scope);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"VCH_TIME","HD_VCH_NO","MAIN_USER","AC_CODE","AC_NAME",
               "NET_AMT","TOT_AMT","KASAR_AMT","BANK_AC","CASH_AMT","CHQ_AMT","CARD_AMT","CHQ_NO",
@@ -1578,7 +1578,7 @@ export async function getContra(
 ) {
   completeFinanceScope(scope);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"HD_VCH_NO","MAIN_USER","AC_CODE","LD_CODE","DR_AMT","CR_AMT","IT_DESC"
        FROM "CONTRA_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
@@ -1612,7 +1612,7 @@ export async function editContra(
 ) {
   completeFinanceScope(input.scope);
   const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
-  return withTenant(prisma, input.scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', async (tx: any) => {
     const { identity } = await editIdentityTx(tx, {
       table: 'CONTRA_DATA',
       scope: input.scope,
@@ -1637,7 +1637,7 @@ export async function deleteContra(
   completeFinanceScope(input.scope);
   const scope = input.scope;
   const voucherNo = formatVoucherNo(input.vchNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const { persisted: header, identity } = await editIdentityTx(tx, {
       table: 'CONTRA_DATA',
       scope,

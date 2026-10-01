@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import {
   postVoucherTx,
@@ -605,7 +605,7 @@ export async function createSaleReturn(
     });
     return { vchNo, totals };
   };
-  return lifecycle ? run(lifecycle.tx) : withTenant(prisma, tenantId, run);
+  return lifecycle ? run(lifecycle.tx) : withTxBudget(prisma, tenantId, 'voucher', run);
 }
 
 export async function saleForReturn(
@@ -621,7 +621,7 @@ export async function saleForReturn(
 }> {
   const tenantId = input.scope.tenantId;
   const book = input.origBook ?? 'SAL';
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     // A return reverses a SALE. A quotation, order or credit-note book shares SL_DATA but is not a source.
     await resolveBookPolicyTx(tx, { ...input.scope, coBook: book }, 'SALES');
     const hdr: any[] = await tx.$queryRawUnsafe(
@@ -700,7 +700,7 @@ export async function getSaleReturn(
 ): Promise<Record<string, unknown>> {
   completeReturnScope(scope);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const params = returnParams(scope, voucherNo);
     const headers: any[] = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"VCH_TIME","BILL_NO","HD_VCH_NO","MAIN_USER",
@@ -778,7 +778,7 @@ export async function editSaleReturn(
   const scope = input.scope;
   const voucherNo = formatVoucherNo(requestedVoucherNo);
   const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const persisted = await persistedVoucherHeaderTx(tx, {
       table: 'SL_DATA',
       scope,
@@ -835,7 +835,7 @@ export async function deleteSaleReturn(
   const tenantId = scope.tenantId;
   const voucherNo = formatVoucherNo(input.vchNo);
   const key = keyOf(scope, Number(voucherNo));
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const header = await persistedVoucherHeaderTx(tx, {
       table: 'SL_DATA',
       scope,

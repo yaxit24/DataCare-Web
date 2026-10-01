@@ -1,4 +1,5 @@
 import { withTenant } from '@datacare/db';
+import { tableColumnsTx, tablesWithColumnsTx } from '../shared/schemaCatalog.js';
 
 /** Desktop voucher identity: tenant + company + location + fiscal year + book. */
 export interface VoucherScope {
@@ -18,6 +19,15 @@ export class NumberingConfigurationError extends Error {
 
 const q = (id: string): string => `"${id.replace(/"/g, '""')}"`;
 const IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*$/;
+/** The six columns that make a row a voucher row: the complete voucher identity. */
+const VOUCHER_IDENTITY_COLUMNS = [
+  'tenant_id',
+  'CO_CODE',
+  'LC_CODE',
+  'CO_YEAR',
+  'CO_BOOK',
+  'VCH_NO',
+];
 const VOUCHER_WIDTH = 5;
 const MAX_VOUCHER_NO = 10 ** VOUCHER_WIDTH - 1;
 
@@ -74,15 +84,8 @@ async function numberingTables(tx: any, s: VoucherScope): Promise<string[]> {
     if (!IDENTIFIER.test(table)) {
       throw new NumberingConfigurationError(`unsafe BOOK_TBL_NAME for book ${s.coBook}: ${table}`);
     }
-    const columns: Array<{ n: unknown }> = await tx.$queryRawUnsafe(
-      `SELECT count(DISTINCT column_name)::int AS n
-         FROM information_schema.columns
-        WHERE table_schema=current_schema() AND table_name=$1
-          AND column_name = ANY($2::text[])`,
-      table,
-      ['tenant_id', 'CO_CODE', 'LC_CODE', 'CO_YEAR', 'CO_BOOK', 'VCH_NO'],
-    );
-    if (Number(columns[0]?.n ?? 0) !== 6) {
+    const identity = await tableColumnsTx(tx, table);
+    if (!VOUCHER_IDENTITY_COLUMNS.every((column) => identity.has(column))) {
       throw new NumberingConfigurationError(
         `BOOK_TBL_NAME ${table} does not carry the complete voucher identity`,
       );
@@ -90,18 +93,13 @@ async function numberingTables(tx: any, s: VoucherScope): Promise<string[]> {
     return [table];
   }
 
-  const rows: Array<{ table_name: unknown }> = await tx.$queryRawUnsafe(
-    `SELECT table_name
-       FROM information_schema.columns
-      WHERE table_schema=current_schema()
-        AND column_name = ANY($1::text[])
-        AND table_name NOT IN ('DELETE_DATA','TEMP_BOOK_DATA','TAG_STOCK_PRINT')
-      GROUP BY table_name
-     HAVING count(DISTINCT column_name)=6
-      ORDER BY table_name`,
-    ['tenant_id', 'CO_CODE', 'LC_CODE', 'CO_YEAR', 'CO_BOOK', 'VCH_NO'],
-  );
-  const tables = rows.map((r) => String(r.table_name)).filter((t) => IDENTIFIER.test(t));
+  const tables = (
+    await tablesWithColumnsTx(tx, VOUCHER_IDENTITY_COLUMNS, [
+      'DELETE_DATA',
+      'TEMP_BOOK_DATA',
+      'TAG_STOCK_PRINT',
+    ])
+  ).filter((t) => IDENTIFIER.test(t));
   if (!tables.length) {
     throw new NumberingConfigurationError(
       'no migrated voucher table carries the complete identity',
