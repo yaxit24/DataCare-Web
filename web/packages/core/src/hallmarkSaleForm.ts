@@ -1,3 +1,5 @@
+import { round } from './money.js';
+
 /**
  * Hallmark Sale editor ↔ voucher mapping (N40 / G45).
  *
@@ -458,8 +460,9 @@ export function hallmarkOldGoldFromView(view: Record<string, unknown>): Hallmark
   return { netWt: cell(first?.netWt), touch: cell(first?.touch), rate: cell(first?.rate) };
 }
 
-const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
-const oldGoldAmount = (og: HallmarkOldGold) => r2(((n(og.netWt) * n(og.touch)) / 100) * n(og.rate));
+/** The screen's old-metal amount: net × touch% × rate, to the paisa (half-up, as the screen shows it). */
+const oldGoldAmount = (og: HallmarkOldGold) =>
+  round(((n(og.netWt) * n(og.touch)) / 100) * n(og.rate), 2);
 
 /** The new-voucher header, exactly as the screen always built it. */
 function freshHeader(header: HallmarkHeader): Record<string, unknown> {
