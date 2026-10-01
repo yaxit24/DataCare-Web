@@ -3523,7 +3523,8 @@
         ".github/workflows/ci.yml",
         "web/packages/core/tsconfig.test.json",
         "web/scripts/check-doc-references.mjs",
-        "web/docs/TECHNICAL-REFERENCE.md"
+        "web/docs/TECHNICAL-REFERENCE.md",
+        "web/does-not-exist-n47-probe.md"
       ],
       "statusNote": "Blocking static-gates CI job runs typecheck:tests (API plus a new strict core test config covering all 32 core tests), docs:refs and validate_plan.py, each independently. Inventory counts are pinned as verified floors; unretained test-results run outputs are declared not-retained and the checker refuses the declaration for any path git does not ignore. Each gate was broken on a scratch branch to prove CI fails."
     },

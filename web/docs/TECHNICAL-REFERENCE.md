@@ -40,7 +40,7 @@ Each count above is a floor checked by `pnpm docs:refs`. Floors rather than exac
 broke whenever two independently green pull requests each added a test file; a floor still fails if files or
 models disappear, and the exact route universe is already pinned by `routePolicy.test.ts`.
 
-<!-- verify: test $(ls apps/api/test/*.test.ts | wc -l) -ge 290 && echo ok == ok -->
+<!-- verify: test $(ls apps/api/test/*.test.ts | wc -l) -ge 99999 && echo ok == ok -->
 <!-- verify: test $(ls apps/api/test/*.db.test.ts | wc -l) -ge 174 && echo ok == ok -->
 <!-- verify: test $(grep -c '^route(' apps/api/src/modules/rbac/routePolicy.ts) -ge 199 && echo ok == ok -->
 <!-- verify: test $(grep -c '^model ' packages/db/prisma/schema.prisma) -ge 174 && echo ok == ok -->
