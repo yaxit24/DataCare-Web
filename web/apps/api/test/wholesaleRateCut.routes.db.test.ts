@@ -146,6 +146,8 @@ const DAY = `${startYear}-06-15`;
     fineRate: 6400,
     settleCrFine: 1.931,
     pay: { cash: 12000 },
+    // Must be ignored at the HTTP boundary; hidden identity is allocated from TEMP_BOOK_DATA.
+    hdVchNo: '99999',
   };
 
   it('posts a wholesale sale that moves the tag out, cuts the balance fine into money, and reopens it', async () => {
@@ -173,13 +175,24 @@ const DAY = `${startYear}-06-15`;
       { leg: '44', ac: 'CASH', dr: 12000, cr: 0 },
     ]);
     const [header] = await query<Array<Record<string, unknown>>>(
-      `SELECT "MAIN_USER","SL_BILL_OS"::float8 AS os,"TOT_FINE_DR"::float8 AS fine_dr,
+      `SELECT "MAIN_USER","HD_VCH_NO","SL_BILL_OS"::float8 AS os,"TOT_FINE_DR"::float8 AS fine_dr,
               "TOT_FINE_CR"::float8 AS fine_cr FROM "RATE_CUT_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='WHS'`,
       tenantId,
     );
     // The signed-in user, not a body field; the outstanding is the net less the cash (12358 − 12000); the
     // party's fine closes: 11.931 issued against 10.000 received plus 1.931 cut.
-    expect(header).toEqual({ MAIN_USER: 'wholesaler', os: 358, fine_dr: 11.931, fine_cr: 11.931 });
+    expect(header).toEqual({
+      MAIN_USER: 'wholesaler',
+      HD_VCH_NO: '00001',
+      os: 358,
+      fine_dr: 11.931,
+      fine_cr: 11.931,
+    });
+    const hiddenRows = await query<Array<{ n: number }>>(
+      `SELECT count(*)::int n FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='WHS' AND "VCH_NO"='00001'`,
+      tenantId,
+    );
+    expect(hiddenRows[0]?.n).toBe(1);
 
     const reopened = await request('wholesaler', 'GET', '/wholesale-sales/1?coBook=WHS');
     expect(reopened.statusCode, reopened.body).toBe(200);
@@ -251,9 +264,23 @@ const DAY = `${startYear}-06-15`;
     });
     expect(edited.statusCode, edited.body).toBe(200);
     expect(await available('LRG00001')).toBe(1);
+    const hiddenBeforeDelete = await query<Array<{ hd: string; temp: number }>>(
+      `SELECT h."HD_VCH_NO" hd,
+              (SELECT count(*)::int FROM "TEMP_BOOK_DATA" t WHERE t.tenant_id=h.tenant_id
+                AND t."CO_CODE"=h."CO_CODE" AND t."LC_CODE"=h."LC_CODE" AND t."CO_BOOK"=h."CO_BOOK"
+                AND t."VCH_NO"=h."HD_VCH_NO") temp
+         FROM "RATE_CUT_DATA" h WHERE h.tenant_id=$1 AND h."CO_BOOK"='WHS' AND h."VCH_NO"='00001'`,
+      tenantId,
+    );
+    expect(hiddenBeforeDelete[0]).toEqual({ hd: '00001', temp: 1 });
 
     const removed = await request('wholesaler', 'DELETE', '/wholesale-sales/1', { book: 'WHS' });
     expect(removed.statusCode, removed.body).toBe(200);
+    const tempAfterDelete = await query<Array<{ n: number }>>(
+      `SELECT count(*)::int n FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='WHS'`,
+      tenantId,
+    );
+    expect(tempAfterDelete[0]?.n).toBe(0);
     const audit = await query<Array<Record<string, unknown>>>(
       `SELECT "VCH_TYPE","BOOK_NAME","DELETE_USER","MAIN_USER" FROM "DELETE_DATA" WHERE tenant_id=$1`,
       tenantId,

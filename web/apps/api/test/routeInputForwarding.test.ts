@@ -24,6 +24,7 @@ const read = (rel: string): string => readFileSync(join(here, '..', 'src', rel),
 const SERVER_OWNED: Record<string, string> = {
   scope: 'derived from the authenticated session, never the body',
   mainUser: 'the acting user comes from the session, not the payload',
+  hdVchNo: 'hidden voucher identity is allocated from TEMP_BOOK_DATA and preserved by the server',
 };
 
 /** Extract the field names declared on an exported interface. */

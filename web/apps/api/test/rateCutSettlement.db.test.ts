@@ -1,7 +1,12 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { PrismaClient } from '@prisma/client';
 import { withTenant } from '@datacare/db';
-import { deleteRateCut, getRateCut, postRateCut } from '../src/modules/sales/rateCut.js';
+import {
+  deleteRateCut,
+  editRateCut,
+  getRateCut,
+  postRateCut,
+} from '../src/modules/sales/rateCut.js';
 import { lookup } from '../src/modules/masters/lookup.js';
 import { rojmel } from '../src/modules/reports/rojmelReport.js';
 import { footprintOf, voucherTables } from './support/footprint.js';
@@ -175,7 +180,46 @@ d('rate-cut settlement persistence', () => {
       'RATE_CUT_ISU',
       // The day book. Added when the sale-side projection was implemented from the real book-064 rows.
       'ROJ_MEL_DATA',
+      // Hidden identity used by document/day-book joins.
+      'TEMP_BOOK_DATA',
     ]);
+  });
+
+  it('allocates one hidden identity, preserves it on edit and removes it on delete', async () => {
+    await setBasis('T');
+    const input = {
+      scope,
+      acCode: 'CASH',
+      lines: [line],
+      convRate: 7000,
+      settleCrFine: 100,
+    };
+    const created = await postRateCut(prisma, input);
+    const opened = await getRateCut(prisma, scope, created.vchNo);
+    const hidden = String(opened.hiddenVoucherNo ?? '');
+    expect(hidden).toMatch(/^\d{5}$/);
+    const countTemp = async () =>
+      withTenant(prisma, tenantId, async (tx: any) => {
+        const rows: Array<{ n: number }> = await tx.$queryRawUnsafe(
+          `SELECT count(*)::int n FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2
+            AND "LC_CODE"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5`,
+          tenantId,
+          scope.coCode,
+          scope.lcCode,
+          scope.coBook,
+          hidden,
+        );
+        return rows[0]?.n ?? 0;
+      });
+    await expect(countTemp()).resolves.toBe(1);
+
+    await editRateCut(prisma, { ...input, convRate: 7100 }, created.vchNo);
+    const reopened = await getRateCut(prisma, scope, created.vchNo);
+    expect(reopened.hiddenVoucherNo).toBe(hidden);
+    await expect(countTemp()).resolves.toBe(1);
+
+    await deleteRateCut(prisma, { scope, vchNo: created.vchNo });
+    await expect(countTemp()).resolves.toBe(0);
   });
 
   it('writes the sale-side Rojmel rows: type 03 fine and type 04 amount', async () => {
