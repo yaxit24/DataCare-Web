@@ -110,6 +110,7 @@ import { financeVoucherData, financeVoucherHtml } from '../modules/finance/finan
 import { dhrnIssueData, dhrnIssueHtml } from '../modules/dhrn/dhrnReceipt.js';
 import {
   DocumentScopeError,
+  documentCompanyTx,
   requireVoucherDocumentScope,
 } from '../modules/documents/voucherDocument.js';
 import { schemePassbookData, schemePassbookHtml } from '../modules/scheme/passbook.js';
@@ -517,7 +518,17 @@ import {
   resolveSettingsBehaviorTx,
 } from '../modules/shared/settingsBehavior.js';
 import { senderFromEnv, notifyWithAttemptLog } from '../modules/integrations/messaging.js';
-import { renderToPdf, PlaywrightPdfRenderer } from '../modules/reports/render.js';
+import {
+  renderToPdf,
+  PlaywrightPdfRenderer,
+  pdfRenderFailure,
+  type PdfRenderer,
+} from '../modules/reports/render.js';
+import {
+  estimatePdfHtml,
+  reportPdfHtml,
+  ReportTooLargeForPdfError,
+} from '../modules/reports/reportPdf.js';
 import { code39Svg, qrSvg } from '../modules/integrations/barcode.js';
 import {
   salesRegister,
@@ -622,7 +633,11 @@ import {
   REPORT_FILTER_BINDINGS,
   supportedFilters,
 } from '../modules/reports/reportFilters.js';
-import { isReportSlug, type ReportSlug } from '../modules/reports/reportAuthorization.js';
+import {
+  isReportSlug,
+  REPORT_FORM_BY_SLUG,
+  type ReportSlug,
+} from '../modules/reports/reportAuthorization.js';
 import { huidReport } from '../modules/reports/huid.js';
 import { schemeMonthlyReport, stockLevelReport } from '../modules/reports/stockLevel.js';
 import { billProfitReport } from '../modules/reports/billProfitReport.js';
@@ -665,6 +680,8 @@ import {
  */
 export interface TxnDeps {
   prisma: any;
+  /** Renderer for server-built PDFs (reports, estimate). Tests inject a capturing renderer. */
+  pdfRenderer?: PdfRenderer;
   requireAuth: (req: FastifyRequest, reply: FastifyReply) => Promise<void>;
   sess: (req: FastifyRequest) => {
     tenantId: string;
@@ -688,6 +705,105 @@ export interface TxnDeps {
   };
   routeAuthorized: (req: FastifyRequest) => boolean;
   metrics: MetricsRegistry;
+}
+
+/** Fields the estimate screen sends (txn/estimate/page.tsx). Anything else is refused, not ignored. */
+const ESTIMATE_FIELDS = new Set([
+  'acCode',
+  'acName',
+  'taxRatePct',
+  'discountAmount',
+  'interState',
+  'lines',
+]);
+/** Line fields the estimate screen sends: text cells, and numeric cells (including its extended grid). */
+const ESTIMATE_LINE_TEXT = new Set([
+  'designImageId',
+  'hallmarkId2',
+  'hallmarkId3',
+  'hallmarkId4',
+  'itCode',
+  'labourType',
+  'tagNo',
+  'ordNo',
+  'ordYrcd',
+  'ordDbcd',
+  'isuNo',
+  'isuYrcd',
+  'isuDbcd',
+  'huid',
+  'designNo',
+  'itmSize',
+  'tblCode',
+  'itemLot',
+  'remark',
+  'rateWith',
+  'rateType',
+  'karigarName',
+  'employeeCode',
+  'prCode',
+]);
+const ESTIMATE_LINE_NUMBERS = new Set([
+  'hallmarkIdWt',
+  'hallmarkId2Wt',
+  'hallmarkId3Wt',
+  'hallmarkId4Wt',
+  'pcs',
+  'grossWt',
+  'netWt',
+  'touch',
+  'rate',
+  'labourRate',
+  'labourFixed',
+  'mrp',
+  'ordSrno',
+  'isuSrno',
+  'ghtWt',
+  'westPct',
+  'fineWt',
+  'metalAmount',
+  'labourPct',
+  'otherAmount',
+  'lessWt',
+  'bagWt',
+  'tagGrossWt',
+  'tagNetWt',
+  'ghtPct',
+  'discountPct',
+  'ghatAmount',
+  'tagCost',
+  'karigarNetWt',
+  'karigarTouch',
+  'karigarWestPct',
+  'karigarFine',
+]);
+const ESTIMATE_NUMBERS = new Set(['taxRatePct', 'discountAmount']);
+
+/** Field paths of an estimate PDF request that are unknown or mistyped; empty when the request is valid. */
+export function estimatePdfInputErrors(b: Record<string, unknown>): string[] {
+  const errors: string[] = [];
+  const finite = (v: unknown) => v === undefined || v === null || Number.isFinite(Number(v));
+  for (const key of Object.keys(b)) {
+    if (!ESTIMATE_FIELDS.has(key)) errors.push(key);
+    else if (ESTIMATE_NUMBERS.has(key) && !finite(b[key])) errors.push(key);
+    else if ((key === 'acCode' || key === 'acName') && b[key] != null && typeof b[key] !== 'string')
+      errors.push(key);
+  }
+  if (!Array.isArray(b.lines) || b.lines.length > 200) return [...errors, 'lines'];
+  b.lines.forEach((line, i) => {
+    if (!line || typeof line !== 'object' || Array.isArray(line)) {
+      errors.push(`lines[${i}]`);
+      return;
+    }
+    for (const [key, value] of Object.entries(line as Record<string, unknown>)) {
+      if (ESTIMATE_LINE_NUMBERS.has(key)) {
+        if (!finite(value)) errors.push(`lines[${i}].${key}`);
+      } else if (ESTIMATE_LINE_TEXT.has(key)) {
+        if (value != null && typeof value !== 'string') errors.push(`lines[${i}].${key}`);
+      } else errors.push(`lines[${i}].${key}`);
+    }
+  });
+  return errors;
 }
 
 export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
@@ -897,6 +1013,32 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     return { canUpdate, canDelete };
   };
   const body = (req: FastifyRequest) => (req.body ?? {}) as Record<string, any>;
+  /** The renderer for server-built documents; injectable for tests. */
+  const pdfRenderer = (): PdfRenderer => deps.pdfRenderer ?? new PlaywrightPdfRenderer();
+  /** Render server-built HTML, mapping limits to 413/422 and a busy or slow renderer to a retryable 503. */
+  const sendPdf = async (reply: FastifyReply, html: string, filename: string) => {
+    let pdf: Buffer;
+    try {
+      pdf = await renderToPdf(html, pdfRenderer());
+    } catch (error) {
+      const failure = pdfRenderFailure(error);
+      if (failure.retryAfter) reply.header('Retry-After', String(failure.retryAfter));
+      return reply.code(failure.status).send(failure.body);
+    }
+    const name = filename.replace(/[^\w.-]/g, '') || 'document';
+    return reply
+      .header('content-type', 'application/pdf')
+      .header('content-disposition', `inline; filename="${name}.pdf"`)
+      .send(pdf);
+  };
+  /** The session company's name for a letterhead (CO_MAST.CO_NAME), blank when the master has none. */
+  const sessionCompanyName = async (req: FastifyRequest): Promise<string> => {
+    const s = readScope(req);
+    const company = await withTenant(prisma, s.tenantId, (tx: any) =>
+      documentCompanyTx(tx, { tenantId: s.tenantId, coCode: s.coCode } as any),
+    );
+    return String(company?.CO_NAME ?? '').trim();
+  };
   const salesOrderInput = (req: FastifyRequest, b = body(req)) => ({
     scope: scopeOf(req),
     requireDesignSelection: true,
@@ -1228,8 +1370,25 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
 
   // ---- Estimate / quotation (compute only — no ledger, no voucher) ----
-  app.post('/estimate', auth, async (req) => {
+  app.post('/estimate', auth, async (req) => estimateOf(body(req)));
+  // N54: the estimate PDF is built here from typed estimate input; no client HTML. Unknown fields are
+  // refused (an \`html\` field included), and the body is capped at 64 KB.
+  app.post('/estimate/pdf', { ...auth, bodyLimit: 64 * 1024 }, async (req, reply) => {
+    if (!guard(req, reply, 'print')) return;
     const b = body(req);
+    const invalid = estimatePdfInputErrors(b);
+    if (invalid.length) return reply.code(400).send({ error: 'invalid-request', fields: invalid });
+    const estimate = estimateOf(b);
+    const html = estimatePdfHtml({
+      company: await sessionCompanyName(req),
+      customer: String(b.acName || b.acCode || ''),
+      printedAt: new Date(),
+      lines: estimate.lines,
+      totals: estimate.totals,
+    });
+    return sendPdf(reply, html, 'estimate');
+  });
+  function estimateOf(b: Record<string, any>) {
     const computed = ((b.lines ?? []) as any[]).map((l) => ({ in: l, calc: computeSaleLine(l) }));
     const lineNetTotal = computed.reduce((s, c) => s + c.calc.net, 0);
     const totals = billTotals({
@@ -1249,7 +1408,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       })),
       totals,
     };
-  });
+  }
 
   // ---- Sales return ----
   // Saved incoming metadata is a bounded patch, separate from the legacy numerical writer.
@@ -4312,7 +4471,12 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   const resolveReport = async (
     slug: ReportSlug,
     req: FastifyRequest,
-  ): Promise<{ rows: Record<string, unknown>[]; totals?: Record<string, unknown> }> => {
+  ): Promise<{
+    rows: Record<string, unknown>[];
+    totals?: Record<string, unknown>;
+    /** The builder's own result, as the report screen receives it. */
+    result: unknown;
+  }> => {
     const build = REPORT_BUILDERS[slug]!;
     const scope = readScope(req);
     const q = (req.query ?? {}) as Record<string, string | undefined>;
@@ -4445,7 +4609,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       !Array.isArray(result) && result?.totals && typeof result.totals === 'object'
         ? (result.totals as Record<string, unknown>)
         : undefined;
-    return { rows, totals };
+    return { rows, totals, result };
   };
 
   /**
@@ -4481,6 +4645,52 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       .header('content-disposition', `attachment; filename="${out.fileName}"`)
       .send(out.buffer);
   });
+
+  /**
+   * N54: report PDF built on the server from the report builder's own result, with the screen's former layout
+   * (reports/reportPdf.ts). Print right on the report's own form. Replaces the client-HTML POST /render/pdf.
+   */
+  app.get('/reports/:report/export.pdf', auth, async (req, reply) => {
+    if (!guard(req, reply, 'print')) return;
+    const slug = String((req.params as any).report ?? '');
+    if (!isReportSlug(slug)) {
+      return reply.code(404).send({ error: 'unknown-report', report: slug });
+    }
+    const { result } = await resolveReport(slug, req);
+    return sendReportPdf(req, reply, slug, REPORT_FORM_BY_SLUG[slug], result);
+  });
+  // The account ledger's screen carries the account in the path, so its PDF does too.
+  app.get('/reports/account-ledger/:acCode/export.pdf', auth, async (req, reply) => {
+    if (!guard(req, reply, 'print')) return;
+    const acCode = String((req.params as any).acCode ?? '');
+    const result = await accountLedger(prisma, readScope(req), acCode, range(req));
+    return sendReportPdf(req, reply, 'account-ledger', 'Reports/Account Ledger', result);
+  });
+  const sendReportPdf = async (
+    req: FastifyRequest,
+    reply: FastifyReply,
+    slug: string,
+    form: string,
+    result: unknown,
+  ) => {
+    let html: string;
+    try {
+      html = reportPdfHtml({
+        company: await sessionCompanyName(req),
+        title: form.replace(/^Reports\//, ''),
+        coYear: readScope(req).coYear ?? '',
+        result,
+        printedAt: new Date(),
+      });
+    } catch (error) {
+      if (error instanceof ReportTooLargeForPdfError)
+        return reply
+          .code(422)
+          .send({ error: 'report-too-large-for-pdf', rows: error.rows, limit: error.limit });
+      throw error;
+    }
+    return sendPdf(reply, html, slug);
+  };
 
   // Screens for five reports that were registered only in REPORT_BUILDERS. Their exports worked and the
   // screens answered 404 (PARITY-EVALUATION-2026-09-28 D3).
@@ -6263,22 +6473,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     };
   });
 
-  // Server-side PDF (Crystal Reports replacement) — renders posted HTML to a real PDF via Chromium.
-  app.post('/render/pdf', auth, async (req, reply) => {
-    const b = body(req);
-    const html = String(b.html ?? '<p>(empty)</p>');
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    const fn = String(b.filename ?? 'document').replace(/[^\w.-]/g, '') || 'document';
-    return reply
-      .header('content-type', 'application/pdf')
-      .header('content-disposition', `inline; filename="${fn}.pdf"`)
-      .send(pdf);
-  });
   // Barcode (Code39) + QR as SVG — tag printing / UPI / IRN QR.
   app.get('/integrations/barcode', auth, async (req, reply) =>
     reply

@@ -218,16 +218,25 @@ export function downloadCsv(rows: Record<string, any>[], filename: string): void
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-/** POST HTML and download only while the captured page context remains current. */
-export async function downloadPdf(html: string, filename: string): Promise<void> {
+/**
+ * Download a PDF the server builds, only while the captured page context remains current.
+ *
+ * `path` is an API path (`/reports/sales-register/export.pdf?…`, `/estimate/pdf`). The browser never sends
+ * HTML: the server builds every document from its own data (N54). A POST sends typed input as JSON.
+ */
+export async function downloadPdf(
+  path: string,
+  filename: string,
+  init?: { method: 'POST'; body: unknown },
+): Promise<void> {
   const ticket = page.capture();
   let res: Response;
   try {
-    res = await fetch('/api/render/pdf', {
-      method: 'POST',
+    res = await fetch(`/api${path}`, {
+      method: init?.method ?? 'GET',
       credentials: 'include',
       headers: headersFor({}, ticket),
-      body: JSON.stringify({ html, filename }),
+      ...(init ? { body: JSON.stringify(init.body) } : {}),
     });
     page.assertCurrent(ticket);
     if (!res.ok) {

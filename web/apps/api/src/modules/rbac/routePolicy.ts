@@ -41,7 +41,6 @@ const SYSTEM = new Set([
   'GET /rate-groups',
   'GET /party/:acCode/balance',
   'GET /vouchers/recent',
-  'POST /render/pdf',
   'GET /integrations/barcode',
   'GET /integrations/qr',
 ]);
@@ -201,7 +200,7 @@ route('Sales/Sales Quotation', [
   'DELETE /sales-quotations/:vchNo',
   'GET /sales-quotations/quotation',
 ]);
-route('Sales/Estimate', ['POST /estimate', 'GET /sales/quotation']);
+route('Sales/Estimate', ['POST /estimate', 'POST /estimate/pdf', 'GET /sales/quotation']);
 route('Sales/Sales Return', [
   'GET /sales-returns/incoming-recent',
   'GET /sales-returns/source-vouchers',
@@ -728,7 +727,10 @@ route('Reports/Final Reports', ['GET /reports/final-reports', 'GET /reports/prof
 route('Reports/Trial Balance', ['GET /reports/trial-balance', 'GET /reports/trial-balance-doc']);
 route('Reports/Trial Balance (Full)', ['GET /reports/trial-balance-full']);
 route('Reports/Balance Sheet', ['GET /reports/balance-sheet', 'GET /reports/balance-sheet-doc']);
-route('Reports/Account Ledger', ['GET /reports/account-ledger/:acCode']);
+route('Reports/Account Ledger', [
+  'GET /reports/account-ledger/:acCode',
+  'GET /reports/account-ledger/:acCode/export.pdf',
+]);
 route('Reports/Account Balances', ['GET /reports/account-balances']);
 route('Reports/Outstanding (Debtors/Creditors)', ['GET /reports/outstanding']);
 route('Reports/Bill-wise Outstanding', ['GET /reports/bill-outstanding']);
@@ -823,6 +825,8 @@ route('Reports/Mfg Ledger', ['GET /reports/mfg-ledger', 'GET /reports/mfg-ledger
 route('Reports/Scheme Monthly Report', ['GET /reports/scheme-monthly']);
 
 const PRINT_ROUTES = new Set([
+  'POST /estimate/pdf',
+  'GET /reports/account-ledger/:acCode/export.pdf',
   'GET /tour-orders/confirmation',
   'GET /sales/invoice',
   'GET /sales-quotations/quotation',
@@ -1014,7 +1018,9 @@ export function routePolicyFor(methodInput: string, path: string): RoutePolicy |
     method === 'GET' &&
     (path === '/reports/:report/filters' ||
       path === '/reports/:report/export.csv' ||
-      path === '/reports/:report/export.xlsx')
+      path === '/reports/:report/export.xlsx' ||
+      // N54: server-built report PDF, print on the report's own form like the other exports.
+      path === '/reports/:report/export.pdf')
   ) {
     return {
       kind: 'form',

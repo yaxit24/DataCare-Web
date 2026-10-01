@@ -71,6 +71,7 @@ import { registerTxnRoutes } from './routes/txn.js';
 import { logAudit, listAudit } from './modules/ops/audit.js';
 import { backupCompany, recordCompanyBackup } from './modules/ops/backup.js';
 import { healthPayload, readiness, type PdfRendererProbe } from './modules/ops/health.js';
+import type { PdfRenderer } from './modules/reports/render.js';
 import { correlationId, requestCompletedFields } from './modules/ops/requestContext.js';
 import { collectDatabaseMetrics, MetricsRegistry, type RouteClass } from './modules/ops/metrics.js';
 import { isTransactionTimeout } from './modules/shared/txBudget.js';
@@ -88,6 +89,8 @@ export interface BuildOpts {
   logger?: boolean;
   secureCookies?: boolean;
   rendererProbe?: PdfRendererProbe;
+  /** Renderer for server-built PDFs; defaults to Playwright Chromium. Tests inject a capturing one. */
+  pdfRenderer?: PdfRenderer;
   /** Tenant bound to this deployment when no trusted gateway selects one. */
   defaultTenantId?: string;
   /** Enable only when x-tenant-id is supplied by a trusted gateway (enabled by default in tests). */
@@ -938,6 +941,7 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
 
   registerTxnRoutes(app, {
     prisma,
+    pdfRenderer: opts.pdfRenderer,
     requireAuth,
     sess,
     scopeOfRequest,

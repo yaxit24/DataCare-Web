@@ -126,8 +126,65 @@ export interface PdfRendererReadiness {
   error?: 'playwright-unavailable' | 'chromium-unavailable';
 }
 
+/**
+ * Rendering limits and isolation (N54 / G32).
+ *
+ * Every document reaching Chromium is built by the server from its own data; no route accepts HTML from a
+ * client any more. The renderer still treats that HTML as untrusted, because it carries stored business text
+ * (party names, remarks, descriptions):
+ *  - JavaScript is disabled and the context is offline. Every network request is aborted before the
+ *    content is set, so a stored `<img src="http://…">` or `<link>` cannot reach the network or the
+ *    instance metadata service. Embedded `data:` images (order photographs) still render.
+ *  - HTML, output size and time are bounded, and at most `maxConcurrent` renders run at once; beyond
+ *    `maxQueued` waiting renders the server answers 503 instead of queueing without limit.
+ *  - Chromium's OS sandbox is opt-in with PDF_RENDERER_SANDBOX=1. It needs kernel support (user namespaces,
+ *    or a seccomp profile inside containers) that has not been verified for the deployment image. Without it
+ *    Playwright starts Chromium with --no-sandbox, as before.
+ */
+export interface PdfRenderLimits {
+  maxHtmlBytes: number;
+  maxPdfBytes: number;
+  timeoutMs: number;
+  maxConcurrent: number;
+  maxQueued: number;
+}
+export const PDF_RENDER_LIMITS: Readonly<PdfRenderLimits> = Object.freeze({
+  maxHtmlBytes: 2 * 1024 * 1024,
+  maxPdfBytes: 20 * 1024 * 1024,
+  timeoutMs: 15_000,
+  maxConcurrent: 2,
+  maxQueued: 8,
+});
+
+/** The document is outside a size limit: 413 for oversized input, 422 for an oversized result. */
+export class PdfRenderLimitError extends Error {
+  constructor(
+    readonly code: 'html-too-large' | 'pdf-too-large',
+    readonly limitBytes: number,
+  ) {
+    super(`${code}: limit ${limitBytes} bytes`);
+    this.name = 'PdfRenderLimitError';
+  }
+}
+
+/** Too many renders are already running or waiting: retryable 503. */
+export class PdfRendererBusyError extends Error {
+  constructor() {
+    super('pdf renderer busy');
+    this.name = 'PdfRendererBusyError';
+  }
+}
+
+/** The render did not finish within the time limit: retryable 503. */
+export class PdfRenderTimeoutError extends Error {
+  constructor(readonly timeoutMs: number) {
+    super(`pdf render exceeded ${timeoutMs} ms`);
+    this.name = 'PdfRenderTimeoutError';
+  }
+}
+
 const chromiumLaunchOptions = (): Record<string, unknown> => ({
-  args: ['--no-sandbox'],
+  ...(process.env.PDF_RENDERER_SANDBOX === '1' ? { chromiumSandbox: true } : {}),
   ...(process.env.CHROMIUM_EXECUTABLE_PATH
     ? { executablePath: process.env.CHROMIUM_EXECUTABLE_PATH }
     : {}),
@@ -181,15 +238,84 @@ export class FakePdfRenderer implements PdfRenderer {
   }
 }
 
+/** A counting gate: at most `max` holders at once and at most `queue` waiters; beyond that, refuse. */
+class RenderGate {
+  private active = 0;
+  private readonly waiting: Array<() => void> = [];
+  constructor(
+    private readonly limits: () => Pick<PdfRenderLimits, 'maxConcurrent' | 'maxQueued'>,
+  ) {}
+
+  async acquire(): Promise<() => void> {
+    const { maxConcurrent, maxQueued } = this.limits();
+    if (this.active >= maxConcurrent) {
+      if (this.waiting.length >= maxQueued) throw new PdfRendererBusyError();
+      await new Promise<void>((resolve) => this.waiting.push(resolve));
+    }
+    this.active += 1;
+    let released = false;
+    return () => {
+      if (released) return;
+      released = true;
+      this.active -= 1;
+      this.waiting.shift()?.();
+    };
+  }
+}
+
+/** Observations of one render, for tests that prove the isolation. */
+export interface PdfRenderInspection {
+  /** Requests the page attempted; every one was aborted. */
+  blockedRequests: string[];
+  /** Read the rendered page before printing (JavaScript-off checks). */
+  probe?: unknown;
+}
+
 /**
- * Real renderer: Playwright headless-Chromium. Uses a guarded dynamic import + launch so the codebase
- * compiles/runs without the dependency; if Playwright or Chromium is unavailable it throws
- * PdfRendererUnavailableError (the Chromium binary download is heavy and may be blocked in CI/sandbox).
+ * Real renderer: Playwright headless Chromium, isolated as described above. Uses a guarded dynamic import and
+ * launch, so the codebase compiles and runs without the dependency; if Playwright or Chromium is unavailable
+ * it throws PdfRendererUnavailableError.
  */
 export class PlaywrightPdfRenderer implements PdfRenderer {
-  constructor(private readonly options: { preferCSSPageSize?: boolean } = {}) {}
+  /** The process-wide bound on concurrent renders. */
+  private static readonly sharedGate = new RenderGate(() => PDF_RENDER_LIMITS);
+  /** A renderer with its own limits (tests) has its own gate; every other renderer shares one. */
+  private readonly gate: RenderGate;
+
+  constructor(
+    private readonly options: {
+      preferCSSPageSize?: boolean;
+      /** Tighter limits for one renderer (tests); defaults to PDF_RENDER_LIMITS. */
+      limits?: Partial<PdfRenderLimits>;
+      /** Test seam: read the page after content is set, before printing. */
+      inspect?: (page: any, inspection: PdfRenderInspection) => Promise<void>;
+      /** Test seam: receives what the page tried to load. */
+      onInspection?: (inspection: PdfRenderInspection) => void;
+    } = {},
+  ) {
+    this.gate = options.limits
+      ? new RenderGate(() => this.limits)
+      : PlaywrightPdfRenderer.sharedGate;
+  }
+
+  private get limits(): PdfRenderLimits {
+    return { ...PDF_RENDER_LIMITS, ...this.options.limits };
+  }
 
   async render(html: string): Promise<Buffer> {
+    const limits = this.limits;
+    if (Buffer.byteLength(html, 'utf8') > limits.maxHtmlBytes) {
+      throw new PdfRenderLimitError('html-too-large', limits.maxHtmlBytes);
+    }
+    const release = await this.gate.acquire();
+    try {
+      return await this.renderIsolated(html, limits);
+    } finally {
+      release();
+    }
+  }
+
+  private async renderIsolated(html: string, limits: PdfRenderLimits): Promise<Buffer> {
     const playwright = await loadPlaywright();
     let browser: any;
     try {
@@ -197,15 +323,72 @@ export class PlaywrightPdfRenderer implements PdfRenderer {
     } catch (error: any) {
       throw new PdfRendererUnavailableError(`chromium launch failed: ${error?.message ?? error}`);
     }
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timedOut = new Promise<never>((_, reject) => {
+      timer = setTimeout(
+        () => reject(new PdfRenderTimeoutError(limits.timeoutMs)),
+        limits.timeoutMs,
+      );
+    });
+    const inspection: PdfRenderInspection = { blockedRequests: [] };
     try {
-      const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'load' });
-      const buffer = await page.pdf({ format: 'A4', printBackground: true, ...this.options });
-      return Buffer.from(buffer);
+      const work = (async () => {
+        const context = await browser.newContext({
+          javaScriptEnabled: false,
+          offline: true,
+          acceptDownloads: false,
+          serviceWorkers: 'block',
+        });
+        const page = await context.newPage();
+        await page.route('**/*', (route: any) => {
+          inspection.blockedRequests.push(String(route.request().url()));
+          return route.abort();
+        });
+        await page.setContent(html, { waitUntil: 'load', timeout: limits.timeoutMs });
+        if (this.options.inspect) await this.options.inspect(page, inspection);
+        const buffer = Buffer.from(
+          await page.pdf({ format: 'A4', printBackground: true, ...this.optionsForPdf() }),
+        );
+        if (buffer.length > limits.maxPdfBytes) {
+          throw new PdfRenderLimitError('pdf-too-large', limits.maxPdfBytes);
+        }
+        return buffer;
+      })();
+      return await Promise.race([work, timedOut]);
     } finally {
-      await browser.close();
+      if (timer) clearTimeout(timer);
+      this.options.onInspection?.(inspection);
+      await browser.close().catch(() => {});
     }
   }
+
+  private optionsForPdf(): Record<string, unknown> {
+    return this.options.preferCSSPageSize === undefined
+      ? {}
+      : { preferCSSPageSize: this.options.preferCSSPageSize };
+  }
+}
+
+/**
+ * The HTTP answer for a render failure: limits are client-visible (413/422), a busy or slow renderer is a
+ * retryable 503, and anything else is the renderer being unavailable.
+ */
+export function pdfRenderFailure(error: unknown): {
+  status: number;
+  body: Record<string, unknown>;
+  retryAfter?: number;
+} {
+  if (error instanceof PdfRenderLimitError) {
+    return {
+      status: error.code === 'html-too-large' ? 413 : 422,
+      body: { error: error.code, limitBytes: error.limitBytes },
+    };
+  }
+  if (error instanceof PdfRendererBusyError)
+    return { status: 503, body: { error: 'pdf-renderer-busy', retryable: true }, retryAfter: 2 };
+  if (error instanceof PdfRenderTimeoutError)
+    return { status: 503, body: { error: 'pdf-render-timeout', retryable: true }, retryAfter: 2 };
+  return { status: 503, body: { error: 'pdf-renderer-unavailable' } };
 }
 
 /** Render HTML through an explicitly selected renderer; production must choose Playwright. */
