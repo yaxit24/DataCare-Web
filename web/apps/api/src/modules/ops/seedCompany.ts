@@ -62,16 +62,44 @@ const WHOLESALE_SLOTS: Array<{ srNo: number; acCode: string }> = [
   { srNo: 12, acCode: 'FINEKSR' },
 ];
 
-/** Standard GST/TCS taxes (TAX_PRC is the total rate; the CGST/SGST↔IGST split is computed at posting). */
-const TAXES: { code: string; name: string; prc: number }[] = [
+/**
+ * Standard GST/TCS taxes. `prc` is the TOTAL rate.
+ *
+ * TAX_MAST is a parent + component shape, exactly as the desktop writes it and as the resolver reads it
+ * (G82). The resolver pins the code by its PARENT row `SR_NO = 0` (`shared/taxPolicy.ts`, matching the desktop
+ * `AND D.SR_NO = 0`), and the per-component split is read from `SR_NO = 1` SGST, `SR_NO = 2` CGST, `SR_NO = 3`
+ * IGST (`Ac_Tax.cs`: `C.SR_NO = 1/2/3`, `TAX_AMT/2`, `TAX_AMT/2`, full). A GST code therefore needs four rows;
+ * TAX FREE and TCS are a single parent row. Provisioning a code at `SR_NO = 1` only — as this seed did before
+ * G82 — leaves it with no parent, so every save that NAMES the code failed with
+ * "tax code is not configured" on every web-provisioned company.
+ *
+ * `isGst` marks the codes that get the three component rows. The web chart has a single GST output account
+ * ('GST'); the desktop's 00085/00086/00087 split is a desktop-chart detail, so all three components point at
+ * the one web GST account (a reviewed web-provisioning adaptation; the parent's `TAX_AC` is what the sale
+ * ledger posts to, `sales.ts:787`).
+ */
+const TAXES: { code: string; name: string; prc: number; isGst?: boolean }[] = [
   { code: '00', name: 'TAX FREE', prc: 0 },
-  { code: '10', name: 'GST 3%', prc: 3 },
-  { code: '11', name: 'GST 5%', prc: 5 },
-  { code: '12', name: 'GST 12%', prc: 12 },
-  { code: '13', name: 'GST 18%', prc: 18 },
-  { code: '14', name: 'GST 28%', prc: 28 },
+  { code: '10', name: 'GST 3%', prc: 3, isGst: true },
+  { code: '11', name: 'GST 5%', prc: 5, isGst: true },
+  { code: '12', name: 'GST 12%', prc: 12, isGst: true },
+  { code: '13', name: 'GST 18%', prc: 18, isGst: true },
+  { code: '14', name: 'GST 28%', prc: 28, isGst: true },
   { code: '20', name: 'TCS 0.1%', prc: 0.1 },
 ];
+
+/** The GST account the components reference; the parent carries it too so the sale ledger posts there. */
+const GST_ACCOUNT = 'GST';
+
+/** The desktop component layout for a GST code: SR_NO 1 SGST (half), 2 CGST (half), 3 IGST (full). */
+function gstComponents(prc: number): Array<{ srNo: number; group: string; prc: number }> {
+  const half = Math.round((prc / 2) * 10000) / 10000;
+  return [
+    { srNo: 1, group: 'SGST', prc: half },
+    { srNo: 2, group: 'CGST', prc: half },
+    { srNo: 3, group: 'IGST', prc },
+  ];
+}
 
 /** Voucher books the web writes (CO_BOOK literals) → friendly names. */
 /**
@@ -361,16 +389,52 @@ export async function seedCompany(
       }
     }
     for (const t of TAXES) {
-      if (await absent('TAX_MAST', '"CO_CODE"=$2 AND "TAX_CODE"=$3', coCode, t.code)) {
+      // Parent row at SR_NO 0 — the row the resolver pins a named code to (G82).
+      if (
+        await absent(
+          'TAX_MAST',
+          '"CO_CODE"=$2 AND "TAX_CODE"=$3 AND coalesce("SR_NO",0)=0',
+          coCode,
+          t.code,
+        )
+      ) {
         await tx.$executeRawUnsafe(
-          `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_PRC","TAX_GROUP") VALUES ($1,$2,$3,1,$4,$5,'N')`,
+          `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_PRC","TAX_GROUP","TAX_AC") VALUES ($1,$2,$3,0,$4,$5,'N',$6)`,
           tenantId,
           coCode,
           t.code,
           t.name,
           t.prc,
+          t.isGst ? GST_ACCOUNT : null,
         );
         taxes += 1;
+      }
+      // SGST / CGST / IGST component rows at SR_NO 1..3 for a GST code.
+      if (t.isGst) {
+        for (const c of gstComponents(t.prc)) {
+          if (
+            await absent(
+              'TAX_MAST',
+              '"CO_CODE"=$2 AND "TAX_CODE"=$3 AND coalesce("SR_NO",0)=$4',
+              coCode,
+              t.code,
+              c.srNo,
+            )
+          ) {
+            await tx.$executeRawUnsafe(
+              `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_PRC","TAX_GROUP","TAX_AC") VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+              tenantId,
+              coCode,
+              t.code,
+              c.srNo,
+              `${t.name} ${c.group}`,
+              c.prc,
+              c.group,
+              GST_ACCOUNT,
+            );
+            taxes += 1;
+          }
+        }
       }
     }
     for (const b of BOOKS) {

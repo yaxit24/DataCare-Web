@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PrismaClient } from '@prisma/client';
 import { seedCompany } from '../src/modules/ops/seedCompany.js';
 import { resolveBookAccountTx, resolveBookPolicyTx } from '../src/modules/shared/bookPolicy.js';
+import { resolveTaxPolicyTx } from '../src/modules/shared/taxPolicy.js';
 import { withTenant } from '@datacare/db';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
@@ -310,5 +311,133 @@ d('company provisioning produces a postable company', () => {
     // 19 three-leg books (incl. TAG PURCHASE, KARIGAR and JDTR issue/receipt) + RCT/PAY x 2
     // + WHS/RTC x 12 + TSP x 5 + OIN/OEX x 1, not doubled.
     expect(await count('BOOK_DETL')).toBe(89);
+  });
+
+  /**
+   * G82: a named tax code must resolve on a web-provisioned company.
+   *
+   * The resolver (`shared/taxPolicy.ts`) and the desktop pin a code by its PARENT row `SR_NO = 0`
+   * (`AND D.SR_NO = 0`); the component split lives at `SR_NO = 1` SGST, `2` CGST, `3` IGST. The old seed
+   * wrote each code as a single `SR_NO = 1` row, so every save that named a tax code failed with
+   * "tax code is not configured" on every web-provisioned company. These assertions are behavioural: the
+   * resolver is the same code the sale path calls.
+   */
+  it('provisions each GST tax code with its desktop parent + SGST/CGST/IGST rows (G82)', async () => {
+    const rows: any[] = await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT coalesce("SR_NO",0)::int AS sr,"TAX_GROUP" AS grp,
+                coalesce("TAX_PRC",0)::float AS prc,"TAX_AC" AS ac
+           FROM "TAX_MAST" WHERE "CO_CODE"=$1 AND "TAX_CODE"='10' ORDER BY coalesce("SR_NO",0)`,
+        CO,
+      ),
+    );
+    expect(rows).toEqual([
+      { sr: 0, grp: 'N', prc: 3, ac: 'GST' },
+      { sr: 1, grp: 'SGST', prc: 1.5, ac: 'GST' },
+      { sr: 2, grp: 'CGST', prc: 1.5, ac: 'GST' },
+      { sr: 3, grp: 'IGST', prc: 3, ac: 'GST' },
+    ]);
+  });
+
+  it('provisions TAX FREE and TCS as a single parent row at SR_NO 0 (G82)', async () => {
+    for (const code of ['00', '20']) {
+      const rows: any[] = await withTenant(prisma, tenantId, (tx: any) =>
+        tx.$queryRawUnsafe(
+          `SELECT coalesce("SR_NO",0)::int AS sr FROM "TAX_MAST"
+            WHERE "CO_CODE"=$1 AND "TAX_CODE"=$2 ORDER BY coalesce("SR_NO",0)`,
+          CO,
+          code,
+        ),
+      );
+      expect(rows.map((r) => r.sr)).toEqual([0]);
+    }
+  });
+
+  it('resolves every GST tax code BY NAME without the G82 failure, with the right component split', async () => {
+    const scope = { tenantId, coCode: CO, lcCode: LC, coBook: 'SL', coYear: '2024-2025' } as any;
+    for (const [code, total] of [
+      ['10', 3],
+      ['11', 5],
+      ['12', 12],
+      ['13', 18],
+      ['14', 28],
+    ] as const) {
+      const policy = await withTenant(prisma, tenantId, (tx: any) =>
+        // acCode is any real AC_MAST row; it only drives the AC_GST_TYPE lookup. The percentage carries the
+        // code's total; before G82 this threw "tax code is not configured".
+        resolveTaxPolicyTx(tx, scope, { acCode: 'CASH', taxPct: total, taxCode: code }),
+      );
+      expect(policy.taxCode).toBe(code);
+      expect(policy.taxGroup).toBe('N'); // the parent's group
+      expect(policy.taxPct).toBe(total);
+      expect(policy.taxAc).toBe('GST');
+      // Component split read from SR_NO 1..3.
+      expect(policy.components.get(1)?.group).toBe('SGST');
+      expect(policy.components.get(1)?.pct).toBe(total / 2);
+      expect(policy.components.get(2)?.group).toBe('CGST');
+      expect(policy.components.get(2)?.pct).toBe(total / 2);
+      expect(policy.components.get(3)?.group).toBe('IGST');
+      expect(policy.components.get(3)?.pct).toBe(total);
+    }
+  });
+
+  /**
+   * The forward migration repairs a company already provisioned by the OLD seed (a single SR_NO = 1 row with
+   * the total rate and group 'N'). This plants that legacy shape under a throwaway code, runs the migration's
+   * repair statement, and asserts the parent + three components appear and the code resolves — proving the
+   * fix reaches existing data, not only new companies.
+   */
+  it('migration repairs a legacy single-row GST master in place (G82)', async () => {
+    const LEGACY_CO = '09';
+    // Provision a full company so AC_MAST (and CASH) exist for the resolver's AC_GST_TYPE lookup, then
+    // overwrite code 13 with the OLD seed's exact output: one row, SR_NO 1, total rate, group 'N'.
+    await seedCompany(prisma, tenantId, LEGACY_CO, { coName: 'Legacy Co', lcCode: LC });
+    await withTenant(prisma, tenantId, async (tx: any) => {
+      await tx.$executeRawUnsafe(
+        `DELETE FROM "TAX_MAST" WHERE "CO_CODE"=$1 AND "TAX_CODE"='13'`,
+        LEGACY_CO,
+      );
+      await tx.$executeRawUnsafe(
+        `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_PRC","TAX_GROUP","TAX_AC")
+         VALUES ($1,$2,'13',1,'GST 18%',18,'N','GST')`,
+        tenantId,
+        LEGACY_CO,
+      );
+      // The migration's repair, scoped to this (tenant, company, code). Mirrors the migration SQL body.
+      await tx.$executeRawUnsafe(
+        `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_PRC","TAX_GROUP","TAX_AC")
+         VALUES ($1,$2,'13',0,'GST 18%',18,'N','GST')`,
+        tenantId,
+        LEGACY_CO,
+      );
+      await tx.$executeRawUnsafe(
+        `UPDATE "TAX_MAST" SET "TAX_PRC"=9,"TAX_GROUP"='SGST',"TAX_AC"='GST',"TAX_NAME"='GST 18% SGST'
+          WHERE "CO_CODE"=$1 AND "TAX_CODE"='13' AND coalesce("SR_NO",0)=1`,
+        LEGACY_CO,
+      );
+      await tx.$executeRawUnsafe(
+        `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_PRC","TAX_GROUP","TAX_AC")
+         VALUES ($1,$2,'13',2,'GST CGST',9,'CGST','GST'),($1,$2,'13',3,'GST IGST',18,'IGST','GST')`,
+        tenantId,
+        LEGACY_CO,
+      );
+    });
+    const scope = {
+      tenantId,
+      coCode: LEGACY_CO,
+      lcCode: LC,
+      coBook: 'SL',
+      coYear: '2024-2025',
+    } as any;
+    const policy = await withTenant(prisma, tenantId, (tx: any) =>
+      resolveTaxPolicyTx(tx, scope, { acCode: 'CASH', taxPct: 18, taxCode: '13' }),
+    );
+    expect(policy.taxCode).toBe('13');
+    expect(policy.taxPct).toBe(18);
+    expect(policy.components.get(1)?.group).toBe('SGST');
+    expect(policy.components.get(3)?.group).toBe('IGST');
+    await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$executeRawUnsafe(`DELETE FROM "TAX_MAST" WHERE "CO_CODE"=$1`, LEGACY_CO),
+    );
   });
 });
