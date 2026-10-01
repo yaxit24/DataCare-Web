@@ -186,6 +186,44 @@ databaseDescribe('desktop validation wording', () => {
     expect(created.vchNo).toBeGreaterThan(0);
   }, 30_000);
 
+  it('refuses a sale without a salesperson when EMP_CODE_MANDATORY=Y, in desktop wording', async () => {
+    await seed('N');
+    await owner.$executeRawUnsafe(
+      `UPDATE "CO_SET" SET "EMP_CODE_MANDATORY"='Y' WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+      TENANT,
+      CO,
+    );
+    await expect(
+      createSale(
+        runtime,
+        { scope, acCode: 'CUST', vchDate: DAY, taxRatePct: 3, interState: false } as never,
+        [line],
+      ),
+    ).rejects.toThrow('Please Select Employee Code and Try......');
+  }, 30_000);
+
+  it('allows the sale once a salesperson is named, with EMP_CODE_MANDATORY=Y', async () => {
+    await seed('N');
+    await owner.$executeRawUnsafe(
+      `UPDATE "CO_SET" SET "EMP_CODE_MANDATORY"='Y' WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+      TENANT,
+      CO,
+    );
+    const created = await createSale(
+      runtime,
+      {
+        scope,
+        acCode: 'CUST',
+        vchDate: DAY,
+        taxRatePct: 3,
+        interState: false,
+        empCode: 'E01',
+      } as never,
+      [line],
+    );
+    expect(created.vchNo).toBeGreaterThan(0);
+  }, 30_000);
+
   it('blocks credit to a party flagged in the defaulter list, in desktop wording', async () => {
     await seed('Y');
     // No tender supplied ⇒ the whole bill is outstanding ⇒ the desktop guard fires.
