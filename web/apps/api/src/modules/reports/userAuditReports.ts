@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { applyFilters } from './reportFilters.js';
 import type { ReportScope } from './reports.js';
 
@@ -96,7 +96,7 @@ export async function entryCheckReport(
   s: ReportScope,
   options: EntryCheckOptions = {},
 ): Promise<{ rows: EntryCheckRow[] }> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const { fromDate, toDate } = entryDateRange(s);
     const params: unknown[] = [s.tenantId, s.coCode, s.lcCode, fromDate, toDate];
     const where = [
@@ -165,7 +165,7 @@ export async function entryCheckDetailReport(
 ): Promise<{ rows: EntryCheckDetailRow[] }> {
   const coBook = requireCode(options.coBook, 'coBook', 8);
   const vchNo = requireCode(options.vchNo, 'vchNo', 12);
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const { fromDate, toDate } = entryDateRange(s);
     const params: unknown[] = [s.tenantId, s.coCode, s.lcCode, coBook, vchNo, fromDate, toDate];
     const where = [
@@ -247,7 +247,7 @@ export async function markEntryChecked(
     throw err;
   }
 
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'voucher', async (tx: any) => {
     let updated = 0;
     for (const row of normalized) {
       const count = await tx.$executeRawUnsafe(
@@ -342,7 +342,7 @@ export async function userWorkReport(
   s: ReportScope,
   options: UserWorkReportOptions = {},
 ): Promise<{ rows: UserWorkReportRow[] }> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const { fromDate, toDate } = entryDateRange(s);
     const itemCodes = parseItemCodes(options.itemCodes);
     const params: unknown[] = [s.tenantId, s.coCode, s.lcCode, fromDate, toDate];

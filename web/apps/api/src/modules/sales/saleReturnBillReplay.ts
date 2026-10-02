@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { withTenant } from '@datacare/db';
+import { withTxBudget, SNAPSHOT_READ } from '../shared/txBudget.js';
 import {
   aggregateSaleReturnIncoming,
   calculateSaleReturnBill,
@@ -481,11 +481,11 @@ export async function getSaleReturnBillReplayState(
 ): Promise<SaleReturnBillReplayState> {
   validateScope(scope, voucherNo);
   try {
-    return await withTenant(
+    return await withTxBudget(
       prisma,
       scope.tenantId,
+      SNAPSHOT_READ,
       async (tx) => (await observeSaleReturnBillReplayTx(tx, scope, voucherNo)).dto,
-      { isolationLevel: 'RepeatableRead' },
     );
   } catch (error) {
     return errorBoundary(error);
@@ -500,128 +500,121 @@ export async function previewSaleReturnBillReplay(
   validateScope(scope, voucherNo);
   try {
     const input = saleReturnBillReplayInput(value);
-    return await withTenant(
-      prisma,
-      scope.tenantId,
-      async (tx) => {
-        const observed = await observeSaleReturnBillReplayTx(
-          tx,
-          scope,
-          voucherNo,
-          input.replayVersion,
+    return await withTxBudget(prisma, scope.tenantId, SNAPSHOT_READ, async (tx) => {
+      const observed = await observeSaleReturnBillReplayTx(
+        tx,
+        scope,
+        voucherNo,
+        input.replayVersion,
+      );
+      const { dto, context } = observed;
+      const row = dto.rowReplay.rows.find((r) => r.rowIdentity === input.rowIdentity);
+      if (!row)
+        throw new SaleReturnBillReplayError(
+          409,
+          'identity-conflict',
+          'The saved row identity is missing. Reload the Return.',
         );
-        const { dto, context } = observed;
-        const row = dto.rowReplay.rows.find((r) => r.rowIdentity === input.rowIdentity);
-        if (!row)
-          throw new SaleReturnBillReplayError(
-            409,
-            'identity-conflict',
-            'The saved row identity is missing. Reload the Return.',
-          );
-        if (
-          !observed.state ||
-          !context ||
-          !dto.phases.loaded ||
-          !dto.phases.opened ||
-          !dto.rowReplay.configuration.policy ||
-          !dto.capabilities.canPreviewBill ||
-          !row.fieldCapabilities.some((c) => c.allowed)
-        )
+      if (
+        !observed.state ||
+        !context ||
+        !dto.phases.loaded ||
+        !dto.phases.opened ||
+        !dto.rowReplay.configuration.policy ||
+        !dto.capabilities.canPreviewBill ||
+        !row.fieldCapabilities.some((c) => c.allowed)
+      )
+        throw new SaleReturnBillReplayError(
+          422,
+          'unsupported-state',
+          'This saved Return is outside the supported bill preview.',
+          { diagnostics: dto.diagnostics },
+        );
+      let state = observed.state;
+      const index = state.rows.findIndex((r) => r.state.rowIdentity === row.rowIdentity);
+      const baseline = rowCells(state.rows[index]!.state);
+      const events: SaleReturnBillReplayResult['events'] = [];
+      const phases = (): SaleReturnBillReplayResult['phases'] => ({
+        loaded: dto.phases.loaded!,
+        opened: dto.phases.opened!,
+        preview: phase(state.totals, state.bill),
+      });
+      const recovery = (
+        eventIndex: number,
+        event: SaleReturnIncomingReplayEvent,
+        diagnostics: SaleReturnIncomingReplayDiagnostic[],
+      ): SaleReturnBillReplayRecovery => ({
+        eventIndex,
+        ...event,
+        baseline,
+        preview: rowCells(state.rows[index]!.state),
+        phases: phases(),
+        diagnostics,
+      });
+      for (const [eventIndex, event] of input.events.entries()) {
+        const column = allowedFields.get(event.fieldId);
+        const capability = row.fieldCapabilities.find((c) => c.fieldId === event.fieldId);
+        if (column === undefined || !capability?.allowed)
           throw new SaleReturnBillReplayError(
             422,
-            'unsupported-state',
-            'This saved Return is outside the supported bill preview.',
-            { diagnostics: dto.diagnostics },
+            'unsupported-field',
+            capability?.reason ?? 'This field has no supported bill-preview event.',
+            recovery(eventIndex, event, [
+              diag('unsupported-field', capability?.reason ?? 'Unsupported field.'),
+            ]),
           );
-        let state = observed.state;
-        const index = state.rows.findIndex((r) => r.state.rowIdentity === row.rowIdentity);
-        const baseline = rowCells(state.rows[index]!.state);
-        const events: SaleReturnBillReplayResult['events'] = [];
-        const phases = (): SaleReturnBillReplayResult['phases'] => ({
-          loaded: dto.phases.loaded!,
-          opened: dto.phases.opened!,
-          preview: phase(state.totals, state.bill),
-        });
-        const recovery = (
-          eventIndex: number,
-          event: SaleReturnIncomingReplayEvent,
-          diagnostics: SaleReturnIncomingReplayDiagnostic[],
-        ): SaleReturnBillReplayRecovery => ({
-          eventIndex,
-          ...event,
-          baseline,
-          preview: rowCells(state.rows[index]!.state),
-          phases: phases(),
-          diagnostics,
-        });
-        for (const [eventIndex, event] of input.events.entries()) {
-          const column = allowedFields.get(event.fieldId);
-          const capability = row.fieldCapabilities.find((c) => c.fieldId === event.fieldId);
-          if (column === undefined || !capability?.allowed)
-            throw new SaleReturnBillReplayError(
-              422,
-              'unsupported-field',
-              capability?.reason ?? 'This field has no supported bill-preview event.',
-              recovery(eventIndex, event, [
-                diag('unsupported-field', capability?.reason ?? 'Unsupported field.'),
-              ]),
-            );
-          const configured = dto.rowReplay.configuration.columns.find(
-            (c) => c.id === event.fieldId,
-          )!;
-          const result = reduceSaleReturnIncomingAggregate(
-            state,
-            {
-              kind: 'leaveCell',
-              rowIdentity: row.rowIdentity,
-              column,
-              text: event.editorText,
-              context: {
-                currentRow: index + 1,
-                clearing: false,
-                editorVisible: true,
-                committedColumnWidth: configured.nominalWidth,
-              },
+        const configured = dto.rowReplay.configuration.columns.find((c) => c.id === event.fieldId)!;
+        const result = reduceSaleReturnIncomingAggregate(
+          state,
+          {
+            kind: 'leaveCell',
+            rowIdentity: row.rowIdentity,
+            column,
+            text: event.editorText,
+            context: {
+              currentRow: index + 1,
+              clearing: false,
+              editorVisible: true,
+              committedColumnWidth: configured.nominalWidth,
             },
-            dto.rowReplay.configuration.policy,
-            context,
+          },
+          dto.rowReplay.configuration.policy,
+          context,
+        );
+        if (result.status === 'rejected')
+          throw new SaleReturnBillReplayError(
+            422,
+            'calculation-rejected',
+            result.diagnostic.message,
+            recovery(eventIndex, event, [result.diagnostic]),
           );
-          if (result.status === 'rejected')
+        // Editor projection is part of an accepted transient step. Verify it
+        // before publishing this prefix so recovery never contains a partial row.
+        try {
+          rowCells(result.state.rows[index]!.state);
+        } catch (error) {
+          if (error instanceof SaleReturnBillReplayError)
             throw new SaleReturnBillReplayError(
               422,
-              'calculation-rejected',
-              result.diagnostic.message,
-              recovery(eventIndex, event, [result.diagnostic]),
+              error.code,
+              error.message,
+              recovery(eventIndex, event, error.details?.diagnostics ?? []),
             );
-          // Editor projection is part of an accepted transient step. Verify it
-          // before publishing this prefix so recovery never contains a partial row.
-          try {
-            rowCells(result.state.rows[index]!.state);
-          } catch (error) {
-            if (error instanceof SaleReturnBillReplayError)
-              throw new SaleReturnBillReplayError(
-                422,
-                error.code,
-                error.message,
-                recovery(eventIndex, event, error.details?.diagnostics ?? []),
-              );
-            throw error;
-          }
-          state = result.state;
-          events.push({ ...event, status: result.status });
+          throw error;
         }
-        return {
-          ...publicIdentity(dto),
-          rowIdentity: row.rowIdentity,
-          baseline,
-          preview: rowCells(state.rows[index]!.state),
-          phases: phases(),
-          events,
-          capabilities: { canPreviewClosing: false, canSaveNumeric: false },
-        };
-      },
-      { isolationLevel: 'RepeatableRead' },
-    );
+        state = result.state;
+        events.push({ ...event, status: result.status });
+      }
+      return {
+        ...publicIdentity(dto),
+        rowIdentity: row.rowIdentity,
+        baseline,
+        preview: rowCells(state.rows[index]!.state),
+        phases: phases(),
+        events,
+        capabilities: { canPreviewClosing: false, canSaveNumeric: false },
+      };
+    });
   } catch (error) {
     return errorBoundary(error);
   }

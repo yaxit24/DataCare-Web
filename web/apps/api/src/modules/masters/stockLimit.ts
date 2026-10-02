@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 const n = (v: unknown): number => {
   if (v == null || v === '') return 0;
@@ -85,7 +85,7 @@ export async function listDiamondSizeSummary(
   prisma: any,
   scope: StockLimitScope,
 ): Promise<Array<{ itCode: string; itName: string; dmSize: string; rowCount: number }>> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows = (await tx.$queryRawUnsafe(
       `SELECT d."IT_CODE" AS "itCode",coalesce(i."IT_NAME",'') AS "itName",d."DM_SIZE" AS "dmSize",count(*)::int AS "rowCount"
          FROM "DM_SIZE" d
@@ -112,7 +112,7 @@ export async function getDiamondSizes(
   itCodeInput: string,
 ): Promise<DiamondSizeRow[]> {
   const itCode = requireItemCode(itCodeInput);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows = (await tx.$queryRawUnsafe(
       `SELECT row_number() OVER (ORDER BY d."DM_SIZE")::int AS "srNo",
               d."IT_CODE" AS "itCode",coalesce(i."IT_NAME",'') AS "itName",d."DM_SIZE" AS "dmSize",
@@ -151,7 +151,7 @@ export async function saveDiamondSizes(
 ): Promise<{ saved: number }> {
   const itCode = requireItemCode(itCodeInput);
   const clean = (lines ?? []).filter((line) => t(line?.dmSize, 15));
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await assertItemExists(tx, scope, itCode);
     await tx.$executeRawUnsafe(
       `DELETE FROM "DM_SIZE" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "IT_CODE"=$3`,
@@ -187,7 +187,7 @@ export async function deleteDiamondSizes(
   itCodeInput: string,
 ): Promise<{ deleted: number }> {
   const itCode = requireItemCode(itCodeInput);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const deleted = await tx.$executeRawUnsafe(
       `DELETE FROM "DM_SIZE" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "IT_CODE"=$3`,
       scope.tenantId,
@@ -202,7 +202,7 @@ export async function listItemStockLimitSummary(
   prisma: any,
   scope: StockLimitScope,
 ): Promise<Array<{ itCode: string; itName: string; itDesign: string; rowCount: number }>> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows = (await tx.$queryRawUnsafe(
       `SELECT w."IT_CODE" AS "itCode",coalesce(i."IT_NAME",'') AS "itName",coalesce(w."IT_DESIGN",'N') AS "itDesign",count(*)::int AS "rowCount"
          FROM "ITM_WT_MAST" w
@@ -231,7 +231,7 @@ export async function getItemStockLimits(
 ): Promise<StockLimitRow[]> {
   const itCode = requireItemCode(itCodeInput);
   const itDesign = designKey(itDesignInput);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows = (await tx.$queryRawUnsafe(
       `SELECT w."SR_NO"::float8 AS "srNo",w."IT_CODE" AS "itCode",coalesce(i."IT_NAME",'') AS "itName",
               coalesce(w."IT_DESIGN",'N') AS "itDesign",
@@ -300,7 +300,7 @@ export async function saveItemStockLimits(
   const itCode = requireItemCode(itCodeInput);
   const itDesign = designKey(itDesignInput);
   const clean = cleanStockLimitLines(lines);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await assertItemExists(tx, scope, itCode);
     await tx.$executeRawUnsafe(
       `DELETE FROM "ITM_WT_MAST"
@@ -354,7 +354,7 @@ export async function deleteItemStockLimits(
 ): Promise<{ deleted: number }> {
   const itCode = requireItemCode(itCodeInput);
   const itDesign = designKey(itDesignInput);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const deleted = await tx.$executeRawUnsafe(
       `DELETE FROM "ITM_WT_MAST"
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "IT_CODE"=$3 AND coalesce("IT_DESIGN",'N')=$4`,

@@ -1,5 +1,5 @@
 import { round } from '@datacare/core';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import type { ListReport, ReportScope } from './reports.js';
 
 const num = (v: unknown): number => {
@@ -65,7 +65,7 @@ export async function mfgInoutReport(
 ): Promise<ListReport> {
   const fromDate = s.fromDate ?? todayIso();
   const toDate = s.toDate ?? todayIso();
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [s.coCode, s.lcCode ?? '', s.coYear ?? '', fromDate, toDate];
     const where = [
       'a."CO_CODE"=$1',
@@ -156,7 +156,7 @@ export async function mfgLotIsuRecReport(
   const useItemLot = flagFrom(options.useItemLot, false);
   const lotExpr = useItemLot ? 'a."ITM_LOT"' : 'a."LOT_NO"';
   const lotColumn = useItemLot ? '"ITM_LOT"' : '"LOT_NO"';
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const processRows: Array<{ bookSname: unknown; smCode: unknown }> = await tx.$queryRawUnsafe(
       `SELECT "BOOK_SNAME" AS "bookSname", "SM_CODE" AS "smCode"
          FROM "MFG_MAST"
@@ -294,7 +294,7 @@ export async function mfgLedgerReport(
 ): Promise<ListReport> {
   const toDate = s.toDate ?? todayIso();
   const includeZero = flagFrom(options.includeZero, false);
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [s.coCode, toDate];
     const where = [
       "a.tenant_id=current_setting('app.tenant_id', true)",
@@ -392,7 +392,7 @@ export async function mfgLedgerDetailReport(
   const lcCode = txt(options.lcCode) ?? s.lcCode ?? '';
   const fromDate = s.fromDate ?? '1900-01-01';
   const toDate = s.toDate ?? todayIso();
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [s.coCode, lcCode, acCode];
     const baseWhere = [
       "a.tenant_id=current_setting('app.tenant_id', true)",

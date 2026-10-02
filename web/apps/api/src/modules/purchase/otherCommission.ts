@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { assertBalanced, assertPeriodOpen, insertRowTx } from '../posting/posting.js';
 import { resolveBookAccountTx, type BookPolicy } from '../shared/bookPolicy.js';
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
@@ -835,7 +835,7 @@ export async function saveOtherCommission(
   input: OtherCommissionInput,
   requestedVoucherNo?: string,
 ) {
-  return withTenant(prisma, input.scope.tenantId, (tx: any) =>
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', (tx: any) =>
     saveTx(tx, input, requestedVoucherNo),
   );
 }
@@ -847,7 +847,7 @@ export async function getOtherCommission(
 ) {
   const scope = completeFinanceScope(scopeInput);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await resolveBookTx(tx, scope);
     // TR_OTH_COMM.cs:3157-3237 loads PAY_DATA and preserves VCH_TIME wall-clock, HD_VCH_NO and
     // MAIN_USER; lines 3346-3372 restore PAY_DETL. Display names remain server/master-derived.
@@ -947,7 +947,7 @@ export async function deleteOtherCommission(
 ): Promise<{ reversed: true; auditedLines: number }> {
   const scope = completeFinanceScope(scopeInput);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const book = await resolveBookTx(tx, scope);
     const edited = await editIdentityTx(tx, {
       table: 'PAY_DATA',

@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { assertPeriodOpen, insertRowTx } from '../posting/posting.js';
 import {
   assertFiscalDateTx as assertVoucherFiscalDateTx,
@@ -709,7 +709,7 @@ export async function saveMeltingPro(
   resultLines: number;
   stockRows: number;
 }> {
-  return withTenant(prisma, input.scope.tenantId, (tx: any) =>
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', (tx: any) =>
     saveTx(tx, input, requestedVoucherNo),
   );
 }
@@ -721,7 +721,7 @@ export async function getMeltingPro(
 ): Promise<Record<string, unknown>> {
   completeScope(scope);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await resolveBookTx(tx, scope);
     const headers: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT *,"VCH_DATE"::text AS "VCH_DATE_TEXT" FROM "MLT_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
@@ -810,7 +810,7 @@ export async function deleteMeltingPro(
 ): Promise<{ reversed: true; auditedDetails: number }> {
   completeScope(scope);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const policy = await resolveBookTx(tx, scope);
     const persisted = await headerForUpdateTx(tx, scope, voucherNo);
     await assertOpenTx(tx, scope.tenantId, scope.coCode, persisted.VCH_DATE);

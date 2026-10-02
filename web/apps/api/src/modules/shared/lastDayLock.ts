@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from './txBudget.js';
 
 /**
  * Desktop previous-day auto lock (CO_SET.LAST_DAY_LOCK).
@@ -81,5 +81,7 @@ export async function applyLastDayLock(
   tenantId: string,
   coCode: string,
 ): Promise<LastDayLockResult> {
-  return withTenant(prisma, tenantId, async (tx: any) => applyLastDayLockTx(tx, tenantId, coCode));
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) =>
+    applyLastDayLockTx(tx, tenantId, coCode),
+  );
 }

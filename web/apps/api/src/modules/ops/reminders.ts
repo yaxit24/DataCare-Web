@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import {
   MessagingUnconfiguredError,
   senderFromEnv,
@@ -45,7 +45,7 @@ export interface ReminderList extends ListReport {
  * reminder must reflect the party's whole open position, not a single CO_YEAR). Ordered by balance.
  */
 export async function overdueReminders(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT b."AC_CODE" AS "acCode",
               (SELECT m."AC_NAME" FROM "AC_MAST" m
@@ -110,7 +110,7 @@ export async function birthdayReminders(
   const { month, day, iso } = monthDay(onDate);
   const mmdd = `${pad2(month)}-${pad2(day)}`;
   try {
-    return await withTenant(prisma, s.tenantId, async (tx: any) => {
+    return await withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
       const rows: any[] = await tx.$queryRawUnsafe(
         `WITH src AS (
            SELECT "AC_CODE" AS "acCode", "AC_NAME" AS party,

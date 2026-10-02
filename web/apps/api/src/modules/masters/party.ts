@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 /**
  * Party extras (desktop party form tabs): PHOTO (AC_IMAGE bytea, keyed by CO_CODE+AC_CODE) and FAMILY
@@ -14,7 +14,7 @@ export async function setPartyPhoto(
   if (!acCode) throw new Error('acCode is required');
   const b64 = String(dataUrl || '').replace(/^data:[^;]+;base64,/, '');
   const buf = Buffer.from(b64, 'base64');
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await tx.$executeRawUnsafe(
       `DELETE FROM "AC_IMAGE" WHERE "CO_CODE"=$1 AND "AC_CODE"=$2`,
       scope.coCode,
@@ -37,7 +37,7 @@ export async function getPartyPhoto(
   scope: { tenantId: string; coCode: string },
   acCode: string,
 ): Promise<{ dataUrl: string | null }> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "AC_IMAGE" img FROM "AC_IMAGE" WHERE "CO_CODE"=$1 AND "AC_CODE"=$2 LIMIT 1`,
       scope.coCode,
@@ -61,7 +61,7 @@ export async function familyMembers(
   scope: { tenantId: string; coCode: string },
   acCode: string,
 ): Promise<{ khataNo: string; members: FamilyMember[] }> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const kr: any[] = await tx.$queryRawUnsafe(
       `SELECT coalesce("AC_KHATA_NO",'') k FROM "AC_MAST" WHERE "CO_CODE"=$1 AND "AC_CODE"=$2 LIMIT 1`,
       scope.coCode,

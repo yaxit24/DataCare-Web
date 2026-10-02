@@ -5,7 +5,7 @@ import {
   readImageRevisionTx,
   advanceImageRevisionTx,
 } from './imageRevision.js';
-import { withTenant } from '@datacare/db';
+import { withTxBudget, SNAPSHOT_READ } from '../shared/txBudget.js';
 import { resolveBookPolicyTx } from '../shared/bookPolicy.js';
 import { formatVoucherNo } from '../vouchers/numbering.js';
 import { decodeEntityImage, ENTITY_IMAGE_MAX_BYTES } from './entityImage.js';
@@ -290,49 +290,44 @@ export async function getOrderImage(
   vchNo: string,
   srNo: number,
 ) {
-  return withTenant(
-    prisma,
-    scope.tenantId,
-    async (tx: any) => {
-      const { header, parent } = await savedParentTx(tx, scope, family, vchNo, srNo, false);
-      const keys = candidates(scope, family, header, parent);
-      const target = keys[0];
-      let image: ResolvedOrderImage | { state: 'unavailable'; code: string; message: string } = {
-        state: 'absent',
-      };
-      let targetHasImage = false;
-      for (const [index, key] of keys.entries()) {
-        try {
-          image = await readImageTx(tx, scope, key);
-          if (index === 0) targetHasImage = image.state === 'present';
-        } catch (error) {
-          // Repair is permitted under a valid saved identity. Reports still refuse these bytes.
-          if (
-            !(error instanceof OrderImageError) ||
-            !['unavailable-image', 'invalid-image'].includes(error.code)
-          )
-            throw error;
-          image = { state: 'unavailable', code: error.code, message: error.message };
-          if (index === 0) targetHasImage = true;
-        }
-        if (image.state !== 'absent') break;
+  return withTxBudget(prisma, scope.tenantId, SNAPSHOT_READ, async (tx: any) => {
+    const { header, parent } = await savedParentTx(tx, scope, family, vchNo, srNo, false);
+    const keys = candidates(scope, family, header, parent);
+    const target = keys[0];
+    let image: ResolvedOrderImage | { state: 'unavailable'; code: string; message: string } = {
+      state: 'absent',
+    };
+    let targetHasImage = false;
+    for (const [index, key] of keys.entries()) {
+      try {
+        image = await readImageTx(tx, scope, key);
+        if (index === 0) targetHasImage = image.state === 'present';
+      } catch (error) {
+        // Repair is permitted under a valid saved identity. Reports still refuse these bytes.
+        if (
+          !(error instanceof OrderImageError) ||
+          !['unavailable-image', 'invalid-image'].includes(error.code)
+        )
+          throw error;
+        image = { state: 'unavailable', code: error.code, message: error.message };
+        if (index === 0) targetHasImage = true;
       }
-      const editable = Boolean(target && target.entityType !== 'DESIGN');
-      return {
-        image,
-        version: await tokenTx(tx, scope, family, header, parent),
-        editable,
-        targetHasImage,
-        source: image.state === 'present' ? image.source : (target?.entityType ?? null),
-        reason: editable
-          ? null
-          : target?.entityType === 'DESIGN'
-            ? 'This order uses a shared Design Book image. Change that image in Design Book.'
-            : 'Save a design number and a complete image identity before adding an image.',
-      };
-    },
-    { isolationLevel: 'RepeatableRead' },
-  );
+      if (image.state !== 'absent') break;
+    }
+    const editable = Boolean(target && target.entityType !== 'DESIGN');
+    return {
+      image,
+      version: await tokenTx(tx, scope, family, header, parent),
+      editable,
+      targetHasImage,
+      source: image.state === 'present' ? image.source : (target?.entityType ?? null),
+      reason: editable
+        ? null
+        : target?.entityType === 'DESIGN'
+          ? 'This order uses a shared Design Book image. Change that image in Design Book.'
+          : 'Save a design number and a complete image identity before adding an image.',
+    };
+  });
 }
 
 /** Identity comes only from the locked, saved parent. Client keys and filenames are never accepted. */
@@ -353,7 +348,7 @@ export async function changeOrderImage(
     }
     await validateOrderImageBytes(decoded.bytes, decoded.mimeType);
   }
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const { header, parent } = await savedParentTx(tx, scope, family, vchNo, srNo, true);
     const keys = candidates(scope, family, header, parent);
     const key = keys[0];

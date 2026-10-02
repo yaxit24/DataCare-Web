@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { docShell, esc, num, money, type DocMeta } from '../documents/docChrome.js';
 import { gstr3b, balanceSheet } from './reports.js';
 import { trialBalanceFull } from './reports8.js';
@@ -10,7 +10,7 @@ import { gstr2Purchase } from './reports3.js';
  *  - Balance Sheet summary (Liabilities | Assets two-side) — BalanceHz.rpt (derived summary) */
 
 async function companyOf(prisma: any, tenantId: string, coCode: string): Promise<any> {
-  const c: any[] = await withTenant(prisma, tenantId, (tx: any) =>
+  const c: any[] = await withTxBudget(prisma, tenantId, 'read', (tx: any) =>
     tx.$queryRawUnsafe(`SELECT * FROM "CO_MAST" WHERE "CO_CODE"=$1 LIMIT 1`, coCode),
   );
   return c[0] ?? null;

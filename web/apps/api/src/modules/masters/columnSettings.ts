@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { withTenant } from '@datacare/db';
+import { withTxBudget, SNAPSHOT_READ } from '../shared/txBudget.js';
 import type { MasterScope } from './master.service.js';
 
 /** UT_SETTING.cs:4887 identifies a column by company, family and ORIGINAL name.
@@ -143,63 +143,58 @@ export async function listColumnSettings(
   input: Parameters<typeof columnSettingListOptions>[0] = {},
 ) {
   const options = columnSettingListOptions(input);
-  return withTenant(
-    prisma,
-    scope.tenantId,
-    async (tx) => {
-      // Present-row revisions detect observed insertion/deletion and present-row ABA.
-      // An absent -> insert -> delete history is not retained by this collection token.
-      // Avoid fetching every caption/value to paginate a large company's settings.
-      const revisions = await tx.$queryRawUnsafe<
-        { row_id: string; revision: string; physical: string }[]
-      >(
-        'SELECT row_id::text AS row_id,xmin::text AS revision,ctid::text AS physical FROM "COL_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 ORDER BY row_id',
-        scope.tenantId,
-        scope.coCode,
-      );
-      const collectionVersion = createHash('sha256')
-        .update(
-          JSON.stringify([
-            'column-collection-v1',
-            scope.tenantId,
-            scope.coCode,
-            options.family,
-            options.search,
-            revisions,
-          ]),
-        )
-        .digest('hex');
-      const pattern = `%${options.search.replace(/[\\%_]/g, '\\$&')}%`;
-      const rows = await tx.$queryRawUnsafe<Row[]>(
-        `WITH scoped AS (SELECT ${projection},count(*) OVER (PARTITION BY "CO_CODE","BOOK_NAME","COL_NAME")::int AS "_columnIdentityCount"
+  return withTxBudget(prisma, scope.tenantId, SNAPSHOT_READ, async (tx) => {
+    // Present-row revisions detect observed insertion/deletion and present-row ABA.
+    // An absent -> insert -> delete history is not retained by this collection token.
+    // Avoid fetching every caption/value to paginate a large company's settings.
+    const revisions = await tx.$queryRawUnsafe<
+      { row_id: string; revision: string; physical: string }[]
+    >(
+      'SELECT row_id::text AS row_id,xmin::text AS revision,ctid::text AS physical FROM "COL_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 ORDER BY row_id',
+      scope.tenantId,
+      scope.coCode,
+    );
+    const collectionVersion = createHash('sha256')
+      .update(
+        JSON.stringify([
+          'column-collection-v1',
+          scope.tenantId,
+          scope.coCode,
+          options.family,
+          options.search,
+          revisions,
+        ]),
+      )
+      .digest('hex');
+    const pattern = `%${options.search.replace(/[\\%_]/g, '\\$&')}%`;
+    const rows = await tx.$queryRawUnsafe<Row[]>(
+      `WITH scoped AS (SELECT ${projection},count(*) OVER (PARTITION BY "CO_CODE","BOOK_NAME","COL_NAME")::int AS "_columnIdentityCount"
        FROM "COL_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2)
        SELECT *,count(*) OVER ()::int AS "_columnTotal" FROM scoped
        WHERE ($3='' OR "BOOK_NAME"=$3) AND ($4='' OR COALESCE("BOOK_NAME",'') ILIKE $5 OR COALESCE("COL_NAME",'') ILIKE $5 OR COALESCE("COL_NEW_NAME",'') ILIKE $5)
        ORDER BY "BOOK_NAME" NULLS FIRST,"COL_NAME" NULLS FIRST,row_id::bigint LIMIT $6 OFFSET $7`,
-        scope.tenantId,
-        scope.coCode,
-        options.family,
-        options.search,
-        pattern,
-        options.limit,
-        options.offset,
-      );
-      return rows.map((row) => {
-        const { _revision, _physical, ...raw } = row;
-        return {
-          ...raw,
-          _columnVersion: version(scope, row),
-          _columnCollectionVersion: collectionVersion,
-        };
-      });
-    },
-    { isolationLevel: 'RepeatableRead' },
-  );
+      scope.tenantId,
+      scope.coCode,
+      options.family,
+      options.search,
+      pattern,
+      options.limit,
+      options.offset,
+    );
+    return rows.map((row) => {
+      const { _revision, _physical, ...raw } = row;
+      return {
+        ...raw,
+        _columnVersion: version(scope, row),
+        _columnCollectionVersion: collectionVersion,
+      };
+    });
+  });
 }
 
 async function mutate(prisma: any, scope: MasterScope, source: unknown, operation: Operation) {
   const input = columnSettingInput(scope, source, operation);
-  return withTenant(prisma, scope.tenantId, async (tx) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx) => {
     // Generic COL_MAST create/CSV import/update/delete uses this lock. Company
     // cloning, restore and administrator SQL are separate writers, not covered.
     // No unique constraint is added over unreconciled imported duplicate rows.

@@ -1,5 +1,5 @@
 import { dateWhere } from './reports.js';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import type { ReportScope, ListReport } from './reports.js';
 
 /**
@@ -34,7 +34,7 @@ const NN = (c: string): string => `coalesce(NULLIF(${c}::text,'')::numeric,0)`;
  * "MAHESHBHAI BABUBHAI GOHIL" (AMBALA, 9574066196) — 2 bills, lastVisit 2024-07-18, 467887.00.
  */
 export async function customerCrm(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const yr = s.coYear ? ' AND sd."CO_YEAR"=$2' : '';
     const params: unknown[] = s.coYear ? [s.coCode, s.coYear] : [s.coCode];
     const dt = dateWhere(s, 'sd."VCH_DATE"', params);
@@ -77,7 +77,7 @@ export async function customerCrm(prisma: any, s: ReportScope): Promise<ListRepo
  * netValue 5334847.00, taxValue 143348.82, totalValue 5478196.00.
  */
 export async function areaWiseSales(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const yr = s.coYear ? ' AND sd."CO_YEAR"=$2' : '';
     const params: unknown[] = s.coYear ? [s.coCode, s.coYear] : [s.coCode];
     const dt = dateWhere(s, 'sd."VCH_DATE"', params);
@@ -114,7 +114,7 @@ export async function areaWiseSales(prisma: any, s: ReportScope): Promise<ListRe
  * totalValue 5478196.00.
  */
 export async function locationWiseSales(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const yr = s.coYear ? ' AND "CO_YEAR"=$2' : '';
     const params: unknown[] = s.coYear ? [s.coCode, s.coYear] : [s.coCode];
     const dt = dateWhere(s, '"VCH_DATE"', params);

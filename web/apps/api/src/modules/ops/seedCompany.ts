@@ -1,5 +1,5 @@
 import { round } from '@datacare/core';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { type BookWorkflow, workflowPolicy } from '../shared/bookPolicy.js';
 
 /**
@@ -339,7 +339,7 @@ export async function seedCompany(
   const lcCode = opts?.lcCode ?? '01';
   // The fiscal year the desktop would open: April-to-March around today.
   const y = new Date().getFullYear();
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'heavy', async (tx: any) => {
     /**
      * Does this company lack the row we are about to create?
      *

@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import {
   assertPeriodOpen,
@@ -787,7 +787,7 @@ export async function saveCustomerRepairReceipt(
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
   if (Number.isNaN(vchDate.getTime())) throw new RepairValidationError('voucher date is invalid');
 
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const policy = await resolveRepairBookTx(tx, scope);
     const bookAccount = await resolveBookAccountTx(tx, scope, policy);
     const party = await resolvePartyTx(tx, scope, input.acCode, input.acName);
@@ -1063,7 +1063,7 @@ export async function getCustomerRepairReceipt(
   completeScope(scopeInput);
   const scope = scopeInput;
   const voucherNo = formatVoucherNo(vchNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await resolveRepairBookTx(tx, scope);
     const header = await existingHeaderTx(tx, scope, voucherNo);
     if (!header) return null;
@@ -1092,7 +1092,7 @@ export async function listCustomerRepairReceipts(
   completeScope(scopeInput);
   const scope = scopeInput;
   const limit = Math.min(200, Math.max(1, Math.trunc(Number(limitInput) || 50)));
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await resolveRepairBookTx(tx, scope);
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE","AC_CODE","AC_NAME","VCH_DESC" FROM "REP_DATA"
@@ -1122,7 +1122,7 @@ export async function deleteCustomerRepairReceipt(
   completeScope(input.scope);
   const scope = input.scope;
   const voucherNo = formatVoucherNo(input.vchNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const policy = await resolveRepairBookTx(tx, scope);
     const existing = await existingHeaderTx(tx, scope, voucherNo);
     if (!existing) throw new RepairValidationError(`repair receipt not found: ${voucherNo}`);

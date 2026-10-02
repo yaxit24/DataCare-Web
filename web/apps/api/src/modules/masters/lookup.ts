@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { barTagAvailableSql } from '../shared/stockSql.js';
 
 /** Lookup sources: master table + code/name columns for type-ahead pickers (LookupPicker UI). */
@@ -91,7 +91,7 @@ export async function lookupBullionBookings(
   const coYear = text(options.coYear);
   const acCode = text(options.acCode);
   const itType = text(options.itType);
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const rows: Record<string, unknown>[] = await tx.$queryRawUnsafe(
       `SELECT "CO_YEAR","CO_BOOK","VCH_NO",coalesce("OLD_SRNO","SR_NO")::float8 AS "SOURCE_SRNO",
               "LC_CODE","AC_CODE","IT_CODE","IT_TYPE","IT_DESC","VCH_DATE"::text AS "VCH_DATE",
@@ -188,7 +188,7 @@ export async function lookupAvailableTags(
   const n = Math.min(Number(limit) || 20, 50);
   const find = `%${text(term)}%`;
   const lcCode = text(options.lcCode);
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const rows: Record<string, unknown>[] = await tx.$queryRawUnsafe(
       `WITH bar AS (
          SELECT DISTINCT ON (b."TAG_NO",coalesce(b."VCH_SRNO",0),coalesce(b."IT_CODE"::text,''))
@@ -284,7 +284,7 @@ export async function lookup(
   const cols = [s.code, s.name, ...(s.extra ?? [])].filter((c, i, a) => a.indexOf(c) === i);
   const sel = cols.map((c) => `${q(c)}`).join(',');
   // company filter only if the table has CO_CODE
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const hasCo =
       (
         await tx.$queryRawUnsafe(

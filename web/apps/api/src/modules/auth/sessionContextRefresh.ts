@@ -1,5 +1,10 @@
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
-import { withTenant, type Tx } from '@datacare/db';
+import {
+  withTxBudget,
+  READ_COMMITTED_VOUCHER,
+  type TxBudgetPrisma,
+  type Tx,
+} from '../shared/txBudget.js';
 import { loadPrincipalTx, type Principal } from '../rbac/authorization.js';
 import { validateStoredScopeTx } from './businessScope.js';
 import type { RefreshClaims } from './jwt.js';
@@ -140,7 +145,7 @@ async function sampleTimeTx(tx: Tx, expiresAt: string, clock?: () => Date) {
  * old-JTI request observe the winner and commit the established strict reuse revocation.
  */
 export async function refreshSessionContext(
-  prisma: Parameters<typeof withTenant>[0],
+  prisma: TxBudgetPrisma,
   claims: RefreshClaims,
   dependencies: RefreshContextDependencies,
 ): Promise<{
@@ -154,9 +159,10 @@ export async function refreshSessionContext(
   if (Object.values(identity).some((value) => typeof value !== 'string' || value.length === 0)) {
     throw new SessionRejectedError('session-invalid');
   }
-  const outcome = await withTenant(
+  const outcome = await withTxBudget(
     prisma,
     identity.tenantId,
+    READ_COMMITTED_VOUCHER,
     async (tx) => {
       const rows = await tx.$queryRawUnsafe<RefreshSessionRow[]>(
         `SELECT "tenant_id" AS "tenantId","session_id" AS "sessionId",
@@ -263,7 +269,6 @@ export async function refreshSessionContext(
       }
       return { status: 'ready' as const, session, principal, ...issued };
     },
-    { isolationLevel: 'ReadCommitted' },
   );
   if (outcome.status === 'rejected') throw new SessionRejectedError(outcome.code);
   return {

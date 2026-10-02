@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import { insertRowTx } from '../posting/posting.js';
 import { resolveLiveTagIdentityTx } from './stock.js';
@@ -389,7 +389,7 @@ export async function saveTagAdjust(
   if (!input.lines?.length) throw new TagAdjustError('tagAdjust requires at least one line');
   const scope = normalizeScope(input);
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const meta = await assertTagAdjustBookTx(tx, scope);
     const vchNo =
       input.vchNo == null
@@ -421,7 +421,7 @@ export async function getTagAdjust(
     lines: [{ tagNo: 'x', dataType: 'x' }],
   });
   const vchNo = formatVoucherNo(vchNoInput);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const headers = (await tx.$queryRawUnsafe(
       `SELECT * FROM "BAR_CAN_DATA"
         WHERE tenant_id=$1 AND "CO_CODE"::text=$2::text AND "LC_CODE"::text=$3::text
@@ -474,7 +474,7 @@ export async function deleteTagAdjust(
     lines: [{ tagNo: 'x', dataType: 'x' }],
   });
   const vchNo = formatVoucherNo(vchNoInput);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await deleteRegisterTx(tx, scope, vchNo);
     return { deleted: true };
   });

@@ -1,5 +1,5 @@
 import { round } from '@datacare/core';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import {
   buildMoneyRojmel,
   buildSchemeAdjRojmel,
@@ -156,7 +156,7 @@ export async function enrollScheme(
   const monthlyAmt = numv(input.monthlyAmt);
   if (!(monthlyAmt > 0)) throw new SchemeError('monthly amount must be positive');
 
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     // Scheme master must exist (AD_MAST is keyed by CO_CODE + SCHM_CODE — no LC_CODE).
     const sch: any[] = await tx.$queryRawUnsafe(
       `SELECT "SCHM_NAME" FROM "AD_MAST" WHERE "CO_CODE"=$1 AND "SCHM_CODE"=$2 LIMIT 1`,
@@ -842,7 +842,7 @@ async function postMemberEntry(
     return { vchNo };
   };
 
-  return lifecycle ? run(lifecycle.tx) : withTenant(prisma, tenantId, run);
+  return lifecycle ? run(lifecycle.tx) : withTxBudget(prisma, tenantId, 'voucher', run);
 }
 
 /**
@@ -908,7 +908,7 @@ export async function getSchemeInstallment(
 ): Promise<Record<string, unknown>> {
   const sc = schemeScope(scope, book),
     v = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, sc.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, sc.tenantId, 'read', async (tx: any) => {
     const r: any[] = await tx.$queryRawUnsafe(
       `SELECT d."SR_NO",d."VCH_NO",d."VCH_DATE"::text,d."VCH_TIME",d."HD_VCH_NO",d."MAIN_USER",d."SCHM_CODE",d."MEMB_CODE",d."MEMB_AMT",d."REC_AC",d."CHQ_NO",d."IT_DESC",d."ENT_TYPE",d."BANK_NAME",d."EMP_CODE",d."MONTH_CODE",d."WITH_UPI",d."UPI_NAME" FROM "AD_DATA" d WHERE d.tenant_id=$1 AND d."CO_CODE"=$2 AND d."LC_CODE"=$3 AND d."CO_YEAR"=$4 AND d."CO_BOOK"=$5 AND d."VCH_NO"=$6 ORDER BY d."SR_NO"`,
       ...sp(sc, v),
@@ -986,7 +986,7 @@ export async function editSchemeInstallment(
       book === MEMB_OPENING.book
         ? { ...MEMB_OPENING, entType: 'O' as const }
         : { ...MEMB_ENTRY, entType: 'E' as const };
-  return withTenant(prisma, sc.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, sc.tenantId, 'voucher', async (tx: any) => {
     const h = await persistedVoucherHeaderTx(tx, {
       table: 'AD_DATA',
       scope: sc,
@@ -1020,7 +1020,7 @@ export async function deleteSchemeInstallment(
     sc = schemeScope(input.scope, book),
     v = formatVoucherNo(input.vchNo),
     key = keyOf(sc, Number(v), book);
-  return withTenant(prisma, sc.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, sc.tenantId, 'voucher', async (tx: any) => {
     const h = await persistedVoucherHeaderTx(tx, {
       table: 'AD_DATA',
       scope: sc,
@@ -1083,7 +1083,7 @@ export async function deleteEnrollment(
 ): Promise<{ reversed: true }> {
   const { scope, schmCode, membCode } = input;
   if (!schmCode || !membCode) throw new SchemeError('scheme and member code are required');
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await tx.$executeRawUnsafe(
       `DELETE FROM "AD_MEMB" WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "SCHM_CODE"=$3 AND "MEMB_CODE"=$4`,
       scope.coCode,
@@ -1309,7 +1309,7 @@ export async function schemeMaturity(
     });
     return { vchNo, payout };
   };
-  return lifecycle ? run(lifecycle.tx) : withTenant(prisma, tenantId, run);
+  return lifecycle ? run(lifecycle.tx) : withTxBudget(prisma, tenantId, 'voucher', run);
 }
 
 export interface SchemeGoldAdjustLineInput {
@@ -1940,7 +1940,7 @@ export async function schemeGoldAdjust(
       adjustedAmount: round2(lines.reduce((sum, l) => sum + l.adjustAmount, 0)),
     };
   };
-  return lifecycle ? run(lifecycle.tx) : withTenant(prisma, tenantId, run);
+  return lifecycle ? run(lifecycle.tx) : withTxBudget(prisma, tenantId, 'voucher', run);
 }
 
 export async function getSchemeGoldAdjust(
@@ -1951,7 +1951,7 @@ export async function getSchemeGoldAdjust(
 ): Promise<Record<string, unknown>> {
   const sc = schemeScope(scope, book);
   const v = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, sc.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, sc.tenantId, 'read', async (tx: any) => {
     const r: any[] = await tx.$queryRawUnsafe(
       `SELECT a.*,a."VCH_DATE"::text AS "VCH_DATE_TEXT" FROM "AD_ADJ" a
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6
@@ -2004,7 +2004,7 @@ export async function deleteSchemeGoldAdjust(
   const sc = schemeScope(input.scope, book);
   const v = formatVoucherNo(input.vchNo);
   const key = keyOf(sc, Number(v), book);
-  return withTenant(prisma, sc.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, sc.tenantId, 'voucher', async (tx: any) => {
     const h = await persistedVoucherHeaderTx(tx, {
       table: 'AD_ADJ',
       scope: sc,
@@ -2072,7 +2072,7 @@ export async function getSchemeMaturity(
 ): Promise<Record<string, unknown>> {
   const sc = schemeScope(scope, book),
     v = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, sc.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, sc.tenantId, 'read', async (tx: any) => {
     const r: any[] = await tx.$queryRawUnsafe(
       `SELECT a.*,a."VCH_DATE"::text AS "VCH_DATE_TEXT" FROM "AD_ADJ" a WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO"`,
       ...sp(sc, v),
@@ -2107,7 +2107,7 @@ export async function editSchemeMaturity(
     sc = schemeScope(input.scope, book),
     v = formatVoucherNo(requestedVoucherNo),
     requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
-  return withTenant(prisma, sc.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, sc.tenantId, 'voucher', async (tx: any) => {
     const h = await persistedVoucherHeaderTx(tx, {
       table: 'AD_ADJ',
       scope: sc,
@@ -2149,7 +2149,7 @@ export async function deleteSchemeMaturity(
     sc = schemeScope(input.scope, book),
     v = formatVoucherNo(input.vchNo),
     key = keyOf(sc, Number(v), book);
-  return withTenant(prisma, sc.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, sc.tenantId, 'voucher', async (tx: any) => {
     const h = await persistedVoucherHeaderTx(tx, {
       table: 'AD_ADJ',
       scope: sc,

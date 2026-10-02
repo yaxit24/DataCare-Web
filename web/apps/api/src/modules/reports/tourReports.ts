@@ -1,5 +1,5 @@
 import { round } from '@datacare/core';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { applyFilters } from './reportFilters.js';
 import type { ListReport, ReportScope } from './reports.js';
 
@@ -100,7 +100,7 @@ async function tourVoucherReport(
   const status = statusFrom(options.status);
   const onlyTagged = flagFrom(options.onlyTagged, true);
 
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [s.coCode, s.lcCode ?? '', fromDate, toDate];
     const where = [
       'a."CO_CODE"=$1',
@@ -194,7 +194,7 @@ async function tourItemWiseReport(
   const fromDate = s.fromDate ?? '2020-01-01';
   const toDate = s.toDate ?? todayIso();
 
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [s.coCode, s.lcCode ?? '', s.coYear ?? '', fromDate, toDate];
     const where = [
       'a."CO_CODE"=$1',
@@ -294,7 +294,7 @@ export async function tourTagReport(
   const status = statusFrom(options.status);
   const onlyTagged = flagFrom(options.onlyTagged, true);
 
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [s.coCode, s.lcCode ?? '', toDate];
     const where = [
       'a."CO_CODE"=$1',

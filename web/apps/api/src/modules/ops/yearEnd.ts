@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { insertRowTx } from '../posting/posting.js';
 import { barTagAvailableSql } from '../shared/stockSql.js';
 import type { VoucherScope } from '../vouchers/numbering.js';
@@ -217,7 +217,7 @@ export async function yearEndPreview(
 ): Promise<YearEndPreviewResult> {
   const fromYear = String(input.fromYear ?? '').trim();
   if (!fromYear) throw new YearEndValidationError('fromYear is required');
-  return withTenant(prisma, input.scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, input.scope.tenantId, 'heavy', async (tx: any) => {
     const closings = await computeClosingsTx(tx, input.scope, fromYear);
     const closingStockFine = await closingStockFineTx(tx, input.scope, fromYear);
     const totals = closings.reduce(
@@ -247,7 +247,7 @@ export async function yearEndClose(prisma: any, input: YearEndInput): Promise<Ye
 
   const { scope } = input;
   const tenantId = scope.tenantId;
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'heavy', async (tx: any) => {
     const closings = await computeClosingsTx(tx, scope, fromYear);
     const closingStockFine = await closingStockFineTx(tx, scope, fromYear);
 

@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import {
   postVoucherTx,
@@ -121,7 +121,7 @@ export async function postBatchReceipt(
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
   const tenantId = input.scope.tenantId;
 
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const vchNo = await nextVoucherNoTx(tx, input.scope);
     const key = keyOf(input.scope, vchNo, RCT_BOOK);
     const base = { ...key, VCH_TYPE: RCT_TYPE, VCH_DATE: vchDate };
@@ -221,7 +221,7 @@ export async function deleteBatchReceipt(
 ): Promise<{ reversed: true }> {
   const tenantId = input.scope.tenantId;
   const key = keyOf(input.scope, Number(input.vchNo), input.book ?? RCT_BOOK);
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     await reverseVoucherTx(tx, tenantId, {
       tables: ['CASH_DATA', 'AC_DATA'],
       key,

@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 export const DATA_EXPORT_KIND = 'datacare.ut-export/1.0' as const;
 
@@ -286,7 +286,7 @@ export async function dataExportPreview(
   inputScope: DataExportScope,
 ): Promise<DataExportPreview> {
   const scope = normalizeScope(inputScope);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'heavy', async (tx: any) => {
     const metadata = await exportMetadataTx(tx);
     const tables: DataExportTablePreview[] = [];
     for (const table of metadata) {
@@ -325,7 +325,7 @@ export async function dataExportPackage(
 ): Promise<DataExportPackage> {
   const scope = normalizeScope(inputScope);
   const pendingOnly = options.pendingOnly ?? true;
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'heavy', async (tx: any) => {
     const metadata = await exportMetadataTx(tx);
     const tables: Record<string, DataExportPackageTable> = {};
     for (const table of metadata) {
@@ -362,7 +362,7 @@ export async function markDataTransferFlags(
   if (state !== 'Y' && state !== 'N')
     throw new DataExportValidationError('DATA_TRFR state must be Y or N');
   const pendingOnly = options.pendingOnly ?? false;
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'heavy', async (tx: any) => {
     const metadata = (await exportMetadataTx(tx)).filter((table) => table.names.has('DATA_TRFR'));
     const updated: Record<string, number> = {};
     for (const table of metadata) {

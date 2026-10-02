@@ -1,5 +1,5 @@
 import { round } from '@datacare/core';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { applyFilters } from './reportFilters.js';
 import type { ListReport, ReportScope } from './reports.js';
 
@@ -47,7 +47,7 @@ export async function oldStockReport(
   const barStockDate = varcharDateExpr('b', 'STK_DATE');
   const mainStockDate = varcharDateExpr('a', 'STK_DATE');
 
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [s.coCode];
     const where = [
       `a."CO_CODE"=$1`,

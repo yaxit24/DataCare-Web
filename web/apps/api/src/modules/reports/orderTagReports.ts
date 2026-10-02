@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { dateWhere, type ListReport, type ReportScope } from './reports.js';
 import { applyFilters, type ReportFilters } from './reportFilters.js';
 
@@ -76,7 +76,7 @@ export async function tagEstimate(
   s: ReportScope,
   f: TagEstimateFilters = {},
 ): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [s.coCode];
     let where = 'a."CO_CODE"=$1';
     if (s.lcCode) {
@@ -201,7 +201,7 @@ export async function orderLotZoom(
 ): Promise<ListReport> {
   const lot = String(lotNo ?? '').trim();
   if (!lot) return { rows: [], totals: { rows: 0 } };
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [s.coCode, s.lcCode ?? '', lot];
     // `$2 = ''` disables the location predicate rather than dropping it, so both legs keep identical
     // parameter positions and cannot drift apart.
@@ -300,7 +300,7 @@ function pointAsOf(s: ReportScope): string {
 
 /** Delete Record Report — `RP_ORDER.cs` with `CurRpt = "Delete Data"`. */
 export async function deleteDataReport(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const { fromDate, toDate } = deleteDataRange(s);
     const params: unknown[] = [s.tenantId, s.coCode, s.lcCode ?? '', fromDate, toDate];
     const rows: any[] = await tx.$queryRawUnsafe(
@@ -361,7 +361,7 @@ async function onePointValueTx(tx: any, s: ReportScope): Promise<number> {
 
 /** Member Point Report summary — `RP_ORDER.cs` with `CurRpt = "Point Report"`. */
 export async function pointReport(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const toDate = pointAsOf(s);
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT row_number() OVER (ORDER BY b."CARD_NO",b."MEMB_NAME")::int AS "srNo",
@@ -418,7 +418,7 @@ export async function pointReportDetail(
     err.name = 'ReportValidationError';
     throw err;
   }
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const toDate = pointAsOf(s);
     const onePointValue = await onePointValueTx(tx, s);
     const rows: any[] = await tx.$queryRawUnsafe(
@@ -501,7 +501,7 @@ export async function orderTrackReport(
     .trim()
     .toLowerCase() as OrderTrackStatus;
   const lcCode = txt(options.lcCode) ?? s.lcCode ?? '';
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [s.coCode, fromDate, toDate];
     const where = [
       "a.tenant_id=current_setting('app.tenant_id', true)",

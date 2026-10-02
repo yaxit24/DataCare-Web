@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { withTenant } from '@datacare/db';
+import { withTxBudget, SNAPSHOT_READ } from '../shared/txBudget.js';
 import type { SavedSaleReturnRaw, SavedSaleReturnScope } from './savedSaleReturn.js';
 
 type Raw = SavedSaleReturnRaw;
@@ -317,92 +317,80 @@ export async function listSaleReturnSourceVouchers(
   const search = query.search ?? '';
   const offset = pagination(query.offset, 0, 0, 100000, 'offset');
   const limit = pagination(query.limit, 25, 1, 100, 'limit');
-  return withTenant(
-    prisma,
-    target.tenantId,
-    async (tx: any) => {
-      const configured = await config(tx, target, sourceYear, sourceBook);
-      const allowedBooks = [
-        ...new Set(
-          configured.books
-            .filter(
-              (row) =>
-                text(row.raw.MAIN_BOOK).toUpperCase() === 'SALES' &&
-                text(row.raw.CUR_USE).toUpperCase() !== 'N',
-            )
-            .map((row) => row.raw.CO_BOOK)
-            .filter((value): value is string => !!value),
-        ),
-      ];
-      const allowedYears = [
-        ...new Set(
-          configured.years
-            .map((row) => row.raw.CO_YEAR)
-            .filter((value): value is string => !!value),
-        ),
-      ];
-      const headers: Observed[] = await tx.$queryRawUnsafe(
-        `SELECT ${projection} FROM "SL_DATA" t WHERE ${branchWhere}
+  return withTxBudget(prisma, target.tenantId, SNAPSHOT_READ, async (tx: any) => {
+    const configured = await config(tx, target, sourceYear, sourceBook);
+    const allowedBooks = [
+      ...new Set(
+        configured.books
+          .filter(
+            (row) =>
+              text(row.raw.MAIN_BOOK).toUpperCase() === 'SALES' &&
+              text(row.raw.CUR_USE).toUpperCase() !== 'N',
+          )
+          .map((row) => row.raw.CO_BOOK)
+          .filter((value): value is string => !!value),
+      ),
+    ];
+    const allowedYears = [
+      ...new Set(
+        configured.years.map((row) => row.raw.CO_YEAR).filter((value): value is string => !!value),
+      ),
+    ];
+    const headers: Observed[] = await tx.$queryRawUnsafe(
+      `SELECT ${projection} FROM "SL_DATA" t WHERE ${branchWhere}
       AND t."CO_BOOK"=ANY($4::text[]) AND t."CO_YEAR"=ANY($5::text[]) AND ($6::text IS NULL OR t."CO_YEAR"=$6) AND ($7::text IS NULL OR t."CO_BOOK"=$7)
       AND (strpos(lower(coalesce(t."VCH_NO",'')||' '||coalesce(t."BILL_NO",'')||' '||coalesce(t."AC_NAME",'')),lower($8))>0
         OR EXISTS(SELECT 1 FROM "BOOK_DATA" b WHERE b.tenant_id=t.tenant_id AND b."CO_CODE"=t."CO_CODE" AND b."LC_CODE"=t."LC_CODE" AND b."CO_BOOK"=t."CO_BOOK" AND strpos(lower(coalesce(b."BOOK_NAME",'')),lower($8))>0))
       ORDER BY t."VCH_DATE" DESC NULLS LAST,t."VCH_NO" DESC,t."CO_YEAR",t."CO_BOOK",t.row_id LIMIT $9 OFFSET $10`,
-        ...branchValues(target),
-        allowedBooks,
-        allowedYears,
-        sourceYear ?? null,
-        sourceBook ?? null,
-        search,
-        limit + 1,
-        offset,
-      );
-      const rows: SaleReturnSourceList['rows'] = [];
-      for (const header of headers.slice(0, limit)) {
-        const source = sourceScope(header.raw);
-        const books = configured.books.filter((row) => row.raw.CO_BOOK === source.coBook);
-        const duplicates = await observe(tx, 'SL_DATA', sourceWhere, sourceValues(target, source));
-        const sourceParents = await observe(
-          tx,
-          'SL_DETL',
-          sourceWhere,
-          sourceValues(target, source),
-        );
-        const links = await linkedReturns(tx, target, source);
-        const reason =
-          bookReason(books, 'SALES', 'O') ||
-          (configured.years.filter((row) => row.raw.CO_YEAR === source.coYear).length !== 1
-            ? 'The original sale year configuration is ambiguous.'
-            : null) ||
-          (duplicates.length !== 1 ? 'Original sale header identity is ambiguous.' : null) ||
-          linkedAmbiguity(links);
-        const unsupportedReason =
-          Object.values(source).some((value) => !value || value !== value.trim()) ||
-          !/^\d{1,8}$/.test(source.voucherNo) ||
-          !/[1-9]/.test(source.voucherNo)
-            ? 'The original sale has an unsupported saved source key.'
-            : !sourceParents.length
-              ? 'The original sale has no saved source items.'
-              : null;
-        rows.push({
-          source,
-          raw: header.raw,
-          display: display(header.raw, books),
-          availability: reason
-            ? availability('ambiguous', reason)
-            : unsupportedReason
-              ? availability('unsupported', unsupportedReason)
-              : links.length
-                ? availability(
-                    'returned',
-                    'This original sale already has linked Returns; whole-voucher import is unavailable.',
-                  )
-                : availability('available'),
-        });
-      }
-      return { scope: { ...target }, rows, offset, limit, hasMore: headers.length > limit };
-    },
-    { isolationLevel: 'RepeatableRead' },
-  );
+      ...branchValues(target),
+      allowedBooks,
+      allowedYears,
+      sourceYear ?? null,
+      sourceBook ?? null,
+      search,
+      limit + 1,
+      offset,
+    );
+    const rows: SaleReturnSourceList['rows'] = [];
+    for (const header of headers.slice(0, limit)) {
+      const source = sourceScope(header.raw);
+      const books = configured.books.filter((row) => row.raw.CO_BOOK === source.coBook);
+      const duplicates = await observe(tx, 'SL_DATA', sourceWhere, sourceValues(target, source));
+      const sourceParents = await observe(tx, 'SL_DETL', sourceWhere, sourceValues(target, source));
+      const links = await linkedReturns(tx, target, source);
+      const reason =
+        bookReason(books, 'SALES', 'O') ||
+        (configured.years.filter((row) => row.raw.CO_YEAR === source.coYear).length !== 1
+          ? 'The original sale year configuration is ambiguous.'
+          : null) ||
+        (duplicates.length !== 1 ? 'Original sale header identity is ambiguous.' : null) ||
+        linkedAmbiguity(links);
+      const unsupportedReason =
+        Object.values(source).some((value) => !value || value !== value.trim()) ||
+        !/^\d{1,8}$/.test(source.voucherNo) ||
+        !/[1-9]/.test(source.voucherNo)
+          ? 'The original sale has an unsupported saved source key.'
+          : !sourceParents.length
+            ? 'The original sale has no saved source items.'
+            : null;
+      rows.push({
+        source,
+        raw: header.raw,
+        display: display(header.raw, books),
+        availability: reason
+          ? availability('ambiguous', reason)
+          : unsupportedReason
+            ? availability('unsupported', unsupportedReason)
+            : links.length
+              ? availability(
+                  'returned',
+                  'This original sale already has linked Returns; whole-voucher import is unavailable.',
+                )
+              : availability('available'),
+      });
+    }
+    return { scope: { ...target }, rows, offset, limit, hasMore: headers.length > limit };
+  });
 }
 const finitePositive = (value: string | null | undefined) =>
   !!value && Number.isFinite(Number(value)) && Number(value) > 0;
@@ -451,178 +439,172 @@ export async function getSaleReturnSourceItems(
   const requested = string(query.sourceVchNo, 'sourceVchNo', 8)!;
   if (!/^\d{1,8}$/.test(requested) || !/[1-9]/.test(requested))
     invalid('sourceVchNo must be a nonzero numeric saved key of1–8 digits.');
-  return withTenant(
-    prisma,
-    target.tenantId,
-    async (tx: any) => {
-      const configured = await config(tx, target, sourceYear, sourceBook);
-      const source: SaleReturnSourceScope = {
-        coCode: target.coCode,
-        lcCode: target.lcCode,
-        coYear: sourceYear,
-        coBook: sourceBook,
-        voucherNo: requested,
-      };
-      let headers = await observe(tx, 'SL_DATA', sourceWhere, sourceValues(target, source));
-      if (!headers.length && requested.length < 5) {
-        source.voucherNo = requested.padStart(5, '0');
-        headers = await observe(tx, 'SL_DATA', sourceWhere, sourceValues(target, source));
+  return withTxBudget(prisma, target.tenantId, SNAPSHOT_READ, async (tx: any) => {
+    const configured = await config(tx, target, sourceYear, sourceBook);
+    const source: SaleReturnSourceScope = {
+      coCode: target.coCode,
+      lcCode: target.lcCode,
+      coYear: sourceYear,
+      coBook: sourceBook,
+      voucherNo: requested,
+    };
+    let headers = await observe(tx, 'SL_DATA', sourceWhere, sourceValues(target, source));
+    if (!headers.length && requested.length < 5) {
+      source.voucherNo = requested.padStart(5, '0');
+      headers = await observe(tx, 'SL_DATA', sourceWhere, sourceValues(target, source));
+    }
+    if (headers.length !== 1)
+      fail(
+        headers.length ? 422 : 404,
+        headers.length ? 'unsupported-state' : 'not-found',
+        headers.length
+          ? 'The original sale header identity is ambiguous.'
+          : 'Original sale not found in the requested scope.',
+      );
+    const parents = await observe(tx, 'SL_DETL', sourceWhere, sourceValues(target, source));
+    const children = await observe(tx, 'SL_IDTL', sourceWhere, sourceValues(target, source));
+    const codes = [...new Set(parents.map((row) => text(row.raw.IT_CODE)).filter(Boolean))];
+    const masters = await observe(
+      tx,
+      'ITEM_MAST',
+      `${companyWhere} AND btrim(t."IT_CODE"::text)=ANY($3::text[])`,
+      [target.tenantId, target.coCode, codes],
+    );
+    const links = await linkedReturns(tx, target, source);
+    const relevantBooks = configured.books.filter(
+      (row) => row.raw.CO_BOOK === target.coBook || row.raw.CO_BOOK === sourceBook,
+    );
+    const relevantYears = configured.years.filter(
+      (row) => row.raw.CO_YEAR === sourceYear || row.raw.CO_YEAR === target.coYear,
+    );
+    const version = hash({
+      format: 'sale-return-original-source-v1',
+      target,
+      source,
+      headers,
+      parents,
+      children,
+      links,
+      masters,
+      books: relevantBooks,
+      years: relevantYears,
+    });
+    const attached = new Map<string, SaleReturnSourceComponent[]>();
+    const unresolvedComponents: SaleReturnSourceItems['unresolvedComponents'] = [];
+    for (const child of children) {
+      const owners = parents.filter(
+        (parent) => finitePositive(parent.raw.OLD_SRNO) && parent.raw.OLD_SRNO === child.raw.SR_NO,
+      );
+      const duplicates = children.filter(
+        (row) => row.raw.SR_NO === child.raw.SR_NO && row.raw.ISR_NO === child.raw.ISR_NO,
+      );
+      const reason =
+        owners.length !== 1
+          ? 'The component has no unique source parent OLD_SRNO owner.'
+          : duplicates.length !== 1
+            ? 'The component SR_NO/ISR_NO identity is duplicated.'
+            : identityMismatch(owners[0]!.raw, child.raw);
+      const dto = component(target, child);
+      if (reason) unresolvedComponents.push({ ...dto, reason });
+      else {
+        const id = recordId(target, 'SL_DETL', owners[0]!);
+        attached.set(id, [...(attached.get(id) ?? []), dto]);
       }
-      if (headers.length !== 1)
-        fail(
-          headers.length ? 422 : 404,
-          headers.length ? 'unsupported-state' : 'not-found',
-          headers.length
-            ? 'The original sale header identity is ambiguous.'
-            : 'Original sale not found in the requested scope.',
+    }
+    const priorReason = linkedAmbiguity(links);
+    const lines: SaleReturnSourceItems['lines'] = parents.map((row) => {
+      const raw = row.raw;
+      const id = recordId(target, 'SL_DETL', row);
+      const matching = text(raw.IT_CODE)
+        ? masters.filter((master) => text(master.raw.IT_CODE) === text(raw.IT_CODE))
+        : [];
+      const itemNameReason = !text(raw.IT_CODE)
+        ? 'The saved source item code is blank.'
+        : matching.length === 1
+          ? null
+          : matching.length
+            ? 'The saved item code matches multiple company item masters.'
+            : 'The saved item was not found in the company item master.';
+      let status: SaleReturnSourceAvailability;
+      if (priorReason) status = availability('ambiguous', priorReason);
+      else if (unresolvedComponents.length)
+        status = availability(
+          'ambiguous',
+          'Original sale component ownership is unresolved; inspect all saved components.',
         );
-      const parents = await observe(tx, 'SL_DETL', sourceWhere, sourceValues(target, source));
-      const children = await observe(tx, 'SL_IDTL', sourceWhere, sourceValues(target, source));
-      const codes = [...new Set(parents.map((row) => text(row.raw.IT_CODE)).filter(Boolean))];
-      const masters = await observe(
-        tx,
-        'ITEM_MAST',
-        `${companyWhere} AND btrim(t."IT_CODE"::text)=ANY($3::text[])`,
-        [target.tenantId, target.coCode, codes],
-      );
-      const links = await linkedReturns(tx, target, source);
-      const relevantBooks = configured.books.filter(
-        (row) => row.raw.CO_BOOK === target.coBook || row.raw.CO_BOOK === sourceBook,
-      );
-      const relevantYears = configured.years.filter(
-        (row) => row.raw.CO_YEAR === sourceYear || row.raw.CO_YEAR === target.coYear,
-      );
-      const version = hash({
-        format: 'sale-return-original-source-v1',
-        target,
-        source,
-        headers,
-        parents,
-        children,
-        links,
-        masters,
-        books: relevantBooks,
-        years: relevantYears,
-      });
-      const attached = new Map<string, SaleReturnSourceComponent[]>();
-      const unresolvedComponents: SaleReturnSourceItems['unresolvedComponents'] = [];
-      for (const child of children) {
-        const owners = parents.filter(
-          (parent) =>
-            finitePositive(parent.raw.OLD_SRNO) && parent.raw.OLD_SRNO === child.raw.SR_NO,
+      else if (
+        parents.filter((parent) => parent.raw.SR_NO === raw.SR_NO).length !== 1 ||
+        parents.filter((parent) => parent.raw.OLD_SRNO === raw.OLD_SRNO).length !== 1 ||
+        parents.filter((parent) => parent.raw.TAG_NO === raw.TAG_NO).length !== 1
+      )
+        status = availability(
+          'ambiguous',
+          'The source parent row, OLD_SRNO or tag does not resolve uniquely.',
         );
-        const duplicates = children.filter(
-          (row) => row.raw.SR_NO === child.raw.SR_NO && row.raw.ISR_NO === child.raw.ISR_NO,
+      else if (
+        !finitePositive(raw.SR_NO) ||
+        !finitePositive(raw.OLD_SRNO) ||
+        (raw.VCH_SRNO != null && !Number.isFinite(Number(raw.VCH_SRNO)))
+      )
+        status = availability(
+          'unsupported',
+          'The saved source parent identity is missing or nonfinite.',
         );
-        const reason =
-          owners.length !== 1
-            ? 'The component has no unique source parent OLD_SRNO owner.'
-            : duplicates.length !== 1
-              ? 'The component SR_NO/ISR_NO identity is duplicated.'
-              : identityMismatch(owners[0]!.raw, child.raw);
-        const dto = component(target, child);
-        if (reason) unresolvedComponents.push({ ...dto, reason });
-        else {
-          const id = recordId(target, 'SL_DETL', owners[0]!);
-          attached.set(id, [...(attached.get(id) ?? []), dto]);
-        }
-      }
-      const priorReason = linkedAmbiguity(links);
-      const lines: SaleReturnSourceItems['lines'] = parents.map((row) => {
-        const raw = row.raw;
-        const id = recordId(target, 'SL_DETL', row);
-        const matching = text(raw.IT_CODE)
-          ? masters.filter((master) => text(master.raw.IT_CODE) === text(raw.IT_CODE))
-          : [];
-        const itemNameReason = !text(raw.IT_CODE)
-          ? 'The saved source item code is blank.'
-          : matching.length === 1
-            ? null
-            : matching.length
-              ? 'The saved item code matches multiple company item masters.'
-              : 'The saved item was not found in the company item master.';
-        let status: SaleReturnSourceAvailability;
-        if (priorReason) status = availability('ambiguous', priorReason);
-        else if (unresolvedComponents.length)
-          status = availability(
-            'ambiguous',
-            'Original sale component ownership is unresolved; inspect all saved components.',
-          );
-        else if (
-          parents.filter((parent) => parent.raw.SR_NO === raw.SR_NO).length !== 1 ||
-          parents.filter((parent) => parent.raw.OLD_SRNO === raw.OLD_SRNO).length !== 1 ||
-          parents.filter((parent) => parent.raw.TAG_NO === raw.TAG_NO).length !== 1
-        )
-          status = availability(
-            'ambiguous',
-            'The source parent row, OLD_SRNO or tag does not resolve uniquely.',
-          );
-        else if (
-          !finitePositive(raw.SR_NO) ||
-          !finitePositive(raw.OLD_SRNO) ||
-          (raw.VCH_SRNO != null && !Number.isFinite(Number(raw.VCH_SRNO)))
-        )
-          status = availability(
-            'unsupported',
-            'The saved source parent identity is missing or nonfinite.',
-          );
-        else if (!text(raw.TAG_NO))
-          status = availability(
-            'unsupported',
-            'Desktop single-item selection requires a nonblank source tag.',
-          );
-        else if (itemNameReason)
-          status = availability(matching.length ? 'ambiguous' : 'unsupported', itemNameReason);
-        else if (links.some((link) => link.lines.some((line) => line.raw.TAG_NO === raw.TAG_NO)))
-          status = availability('returned', 'This source tag already appears in a linked Return.');
-        else status = availability('available');
-        return {
-          sourceRef: {
-            ...source,
-            recordId: id,
-            version,
-            srNo: raw.SR_NO ?? null,
-            oldSrNo: raw.OLD_SRNO ?? null,
-            vchSrno: raw.VCH_SRNO ?? null,
-            tagSrNo: raw.TAG_SRNO ?? null,
-            itCode: raw.IT_CODE ?? null,
-            tagNo: raw.TAG_NO ?? null,
-          },
-          raw,
-          display: {
-            itemName: matching.length === 1 ? (matching[0]!.raw.IT_NAME ?? null) : null,
-            itemNameReason,
-          },
-          components: attached.get(id) ?? [],
-          availability: status,
-          canSelect: status.status === 'available',
-        };
-      });
+      else if (!text(raw.TAG_NO))
+        status = availability(
+          'unsupported',
+          'Desktop single-item selection requires a nonblank source tag.',
+        );
+      else if (itemNameReason)
+        status = availability(matching.length ? 'ambiguous' : 'unsupported', itemNameReason);
+      else if (links.some((link) => link.lines.some((line) => line.raw.TAG_NO === raw.TAG_NO)))
+        status = availability('returned', 'This source tag already appears in a linked Return.');
+      else status = availability('available');
       return {
-        scope: { ...target },
-        source,
-        version,
-        header: {
-          raw: headers[0]!.raw,
-          display: display(
-            headers[0]!.raw,
-            configured.books.filter((row) => row.raw.CO_BOOK === sourceBook),
-          ),
+        sourceRef: {
+          ...source,
+          recordId: id,
+          version,
+          srNo: raw.SR_NO ?? null,
+          oldSrNo: raw.OLD_SRNO ?? null,
+          vchSrno: raw.VCH_SRNO ?? null,
+          tagSrNo: raw.TAG_SRNO ?? null,
+          itCode: raw.IT_CODE ?? null,
+          tagNo: raw.TAG_NO ?? null,
         },
-        lines,
-        unresolvedComponents,
-        linkedReturns: links.map((link) => ({
-          source: sourceScope(link.header.raw),
-          headerRaw: link.header.raw,
-          linesRaw: link.lines.map((row) => row.raw),
-        })),
-        capabilities: {
-          canApplyIncoming: false,
-          reason:
-            'You can inspect the original sale here. Applying it to a return is not available yet.',
+        raw,
+        display: {
+          itemName: matching.length === 1 ? (matching[0]!.raw.IT_NAME ?? null) : null,
+          itemNameReason,
         },
+        components: attached.get(id) ?? [],
+        availability: status,
+        canSelect: status.status === 'available',
       };
-    },
-    { isolationLevel: 'RepeatableRead' },
-  );
+    });
+    return {
+      scope: { ...target },
+      source,
+      version,
+      header: {
+        raw: headers[0]!.raw,
+        display: display(
+          headers[0]!.raw,
+          configured.books.filter((row) => row.raw.CO_BOOK === sourceBook),
+        ),
+      },
+      lines,
+      unresolvedComponents,
+      linkedReturns: links.map((link) => ({
+        source: sourceScope(link.header.raw),
+        headerRaw: link.header.raw,
+        linesRaw: link.lines.map((row) => row.raw),
+      })),
+      capabilities: {
+        canApplyIncoming: false,
+        reason:
+          'You can inspect the original sale here. Applying it to a return is not available yet.',
+      },
+    };
+  });
 }

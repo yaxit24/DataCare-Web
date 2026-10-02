@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import {
   createDesignCalculationState,
   applyDesignCalculationEvent,
@@ -212,7 +212,7 @@ export async function getDesignCalculationConfig(
   scope: DesignScope,
 ): Promise<DesignCalculationConfig> {
   if (!scope.coCode) throw new DesignBookError('company scope is required');
-  return withTenant(prisma, scope.tenantId, (tx: any) => calculationConfig(tx, scope));
+  return withTxBudget(prisma, scope.tenantId, 'read', (tx: any) => calculationConfig(tx, scope));
 }
 async function componentDefaults(
   tx: any,
@@ -241,7 +241,9 @@ export async function getDesignComponentDefaults(
   scope: DesignScope,
   itCode: string,
 ): Promise<DesignComponentDefaults> {
-  return withTenant(prisma, scope.tenantId, (tx: any) => componentDefaults(tx, scope, itCode));
+  return withTxBudget(prisma, scope.tenantId, 'read', (tx: any) =>
+    componentDefaults(tx, scope, itCode),
+  );
 }
 function calculationValues(
   row: Row | undefined,
@@ -469,7 +471,7 @@ export async function saveDesignBook(prisma: any, input: DesignBookInput): Promi
   const args = key(input.scope, input.bookName, input.prCode);
   if (!Array.isArray(input.lines) || !input.lines.length)
     throw new DesignBookError('at least one design line is required');
-  return withTenant(prisma, input.scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', async (tx: any) => {
     await lock(tx, args);
     const before = await snapshot(tx, args);
     checkVersion(input.expectedVersion, before.version);
@@ -591,7 +593,7 @@ export async function listDesignBook(
   prCode: string,
 ): Promise<Record<string, unknown>[]> {
   const args = key(scope, bookName, prCode);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await lock(tx, args);
     const { parents, children, version } = await snapshot(tx, args);
     return parents.map((parent) => ({
@@ -611,7 +613,7 @@ export async function deleteDesignBook(
   expectedVersion?: string,
 ): Promise<number> {
   const args = key(scope, bookName, prCode);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await lock(tx, args);
     const before = await snapshot(tx, args);
     checkVersion(expectedVersion, before.version);

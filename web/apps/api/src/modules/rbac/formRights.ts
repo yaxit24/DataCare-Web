@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import {
   canonicalFormsForRight,
   formKey,
@@ -23,7 +23,7 @@ export async function getUserFormRights(
   scope: { tenantId: string; lcCode: string },
   userName: string,
 ): Promise<FormRight[]> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "MAIN_MENU" mm, "SUB_MENU" sm, "FRM_VIEW" v, "FRM_EDIT" e,
               "FRM_DELETE" d, "FRM_PRINT" p
@@ -82,7 +82,7 @@ export async function setUserFormRights(
     .map((row) => formKey(String(row.mainMenu ?? ''), String(row.subMenu ?? '')));
   if (invalid.length) throw new FormRightsValidationError(invalid);
 
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const users: unknown[] = await tx.$queryRawUnsafe(
       `SELECT 1 FROM "LOGIN_MAST" WHERE "CO_CODE"=$1 AND "LOGIN_NAME"=$2 LIMIT 1`,
       scope.coCode,

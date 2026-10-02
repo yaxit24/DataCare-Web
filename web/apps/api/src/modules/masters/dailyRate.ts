@@ -1,5 +1,5 @@
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 /**
  * Daily Rate entry (desktop "Daily Rate Master"): the operator enters today's Gold fine rate (per 10g)
@@ -60,7 +60,7 @@ export async function postDailyRate(
   const { tenantId, coCode, coYear, lcCode } = input.scope;
   const taxPct = Number(input.taxPct || 0);
   const ovr = new Map((input.overrides ?? []).map((o) => [String(o.grCode), Number(o.rate)]));
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const grs: any[] = await tx.$queryRawUnsafe(
       `SELECT "GR_CODE" gr, coalesce("GR_NAME",'') nm, coalesce("GR_TYPE",'G') t, coalesce(NULLIF("GR_TOUCH"::text,'')::numeric,0)::float touch, coalesce(NULLIF("GR_PURC_TOUCH"::text,'')::numeric,0)::float prtouch FROM "GROUP_MAST" WHERE "CO_CODE"=$1 AND coalesce("GR_CODE",'')<>'' ORDER BY "GR_CODE"`,
       coCode,
@@ -137,7 +137,7 @@ export async function getDailyRate(
   }[];
 }> {
   const d = String(date || '').slice(0, 10);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "GR_CODE" gr, coalesce("GR_NAME",'') nm, coalesce(NULLIF("GR_TOUCH"::text,'')::numeric,0)::float touch, coalesce(NULLIF("GR_RATE"::text,'')::numeric,0)::float rate, coalesce(NULLIF("GR_PR_TOUCH"::text,'')::numeric,0)::float prt, coalesce(NULLIF("GR_PR_RATE"::text,'')::numeric,0)::float prr, coalesce(NULLIF("GR_TAX_PRC"::text,'')::numeric,0)::float tax, coalesce(NULLIF("FINE_GL_RATE"::text,'')::numeric,0)::float gl, coalesce(NULLIF("FINE_SL_RATE"::text,'')::numeric,0)::float sl, "EMP_CODE" emp FROM "RATE_MAST" WHERE "CO_CODE"=$1 AND "VCH_DATE"::date=$2::date ORDER BY "SR_NO"`,
       scope.coCode,
@@ -168,7 +168,7 @@ export async function dailyRateDates(
   scope: { tenantId: string; coCode: string },
   limit = 30,
 ): Promise<string[]> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT DISTINCT to_char("VCH_DATE"::date,'YYYY-MM-DD') d FROM "RATE_MAST" WHERE "CO_CODE"=$1 ORDER BY d DESC LIMIT ${Math.min(Number(limit) || 30, 100)}`,
       scope.coCode,

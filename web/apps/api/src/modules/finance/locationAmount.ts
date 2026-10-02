@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { assertBalanced, assertPeriodOpen, insertRowTx } from '../posting/posting.js';
 import { assertFiscalDateTx } from '../vouchers/lifecycle.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
@@ -691,7 +691,7 @@ export async function saveLocationAmount(
   input: LocationAmountInput,
   requestedVoucherNo?: string,
 ) {
-  return withTenant(prisma, input.scope.tenantId, (tx: any) =>
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', (tx: any) =>
     saveTx(tx, input, requestedVoucherNo),
   );
 }
@@ -703,7 +703,7 @@ export async function getLocationAmount(
 ) {
   const scope = completeFinanceScope(scopeInput);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await resolveBookAtTx(tx, scope);
     // TR_LOCT_AMT.cs:2887-2935 loads all detail and preserves HD_VCH_NO, MAIN_USER,
     // VCH_TIME and both sides of the transfer identity.
@@ -774,7 +774,7 @@ export async function deleteLocationAmount(
 ): Promise<{ reversed: true }> {
   const scope = completeFinanceScope(scopeInput);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const policy = await resolveBookAtTx(tx, scope);
     const edited = await editIdentityTx(tx, {
       table: 'LOCT_AMT',

@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import { nextHiddenVoucherNoTx } from '../vouchers/lifecycle.js';
 import { postVoucherTx } from '../posting/posting.js';
@@ -87,7 +87,7 @@ export async function meltProcess(
   const totalNwt = round3(computed.reduce((s, c) => s + num(c.in.netWt), 0));
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
 
-  const vchNo = await withTenant(prisma, tenantId, async (tx: any) => {
+  const vchNo = await withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const no = await nextVoucherNoTx(tx, { ...input.scope, coBook: 'MLT' });
     // The hidden series is per book; a melt always books to 'MLT'.
     const hdVchNo = await nextHiddenVoucherNoTx(tx, { ...input.scope, coBook: 'MLT' } as never);

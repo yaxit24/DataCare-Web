@@ -1,5 +1,5 @@
 import { formatVoucherNo } from '../vouchers/numbering.js';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 /**
  * E-Invoice (IRN) generation + cancellation — NIC e-invoice schema v1.1, ported from the desktop
@@ -287,7 +287,7 @@ export async function submitIrn(
 
   const res = await args.transport.generateIRN(args.payload);
 
-  await withTenant(prisma, scope.tenantId, async (tx: any) => {
+  await withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const coBook = scope.coBook ?? 'SAL';
     const vchNo = formatVoucherNo(args.vchNo);
     const ackDate = new Date();
@@ -698,7 +698,7 @@ export async function cancelIrnForSale(
   },
 ): Promise<{ irn: string; cancelDate: string; mode: string }> {
   const coBook = args.coBook || scope.coBook || 'SAL';
-  const irn = await withTenant(prisma, scope.tenantId, async (tx: any) => {
+  const irn = await withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     if (args.expectedMainBook) await resolveIrnBookTx(tx, scope, coBook, args.expectedMainBook);
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "IRN_NO" FROM "SL_DATA"
@@ -713,7 +713,7 @@ export async function cancelIrnForSale(
   const res = transport.cancelIRN
     ? await transport.cancelIRN(irn, args.reason ?? '2', args.remark)
     : { Irn: irn, CancelDate: new Date().toISOString().slice(0, 10), Status: 'CNL' };
-  await withTenant(prisma, scope.tenantId, async (tx: any) => {
+  await withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await tx.$executeRawUnsafe(
       `UPDATE "SL_DATA" SET "IRN_NO"=NULL,"ACK_NO"=NULL,"ACK_DATE"=NULL
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
@@ -740,7 +740,7 @@ export async function submitIrnForSale(
   },
 ): Promise<IrnResult & { mode: string }> {
   const coBook = args.coBook || scope.coBook || 'SAL';
-  const data = await withTenant(prisma, scope.tenantId, async (tx: any) => {
+  const data = await withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const book = await resolveIrnBookTx(tx, scope, coBook, args.expectedMainBook);
     const hdrRows: any[] = await tx.$queryRawUnsafe(
       `SELECT * FROM "SL_DATA"

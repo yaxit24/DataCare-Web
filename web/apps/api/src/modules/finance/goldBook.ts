@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { assertBalanced, assertPeriodOpen, insertRowTx } from '../posting/posting.js';
 import { assertFiscalDateTx } from '../vouchers/lifecycle.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
@@ -527,7 +527,7 @@ async function saveTx(
 }
 
 export async function saveGoldBook(prisma: any, input: GoldBookInput, requestedVoucherNo?: string) {
-  return withTenant(prisma, input.scope.tenantId, (tx: any) =>
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', (tx: any) =>
     saveTx(tx, input, requestedVoucherNo),
   );
 }
@@ -539,7 +539,7 @@ export async function getGoldBook(
 ) {
   const scope = completeFinanceScope(scopeInput);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await resolveBookTx(tx, scope);
     // TR_GOLD_BOOK.cs:2419-2460 loads the complete voucher and preserves HD_VCH_NO,
     // MAIN_USER and VCH_TIME while resolving display names from AC_MAST.
@@ -610,7 +610,7 @@ export async function deleteGoldBook(
 ): Promise<{ reversed: true }> {
   const scope = completeFinanceScope(scopeInput);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const policy = await resolveBookTx(tx, scope);
     const edited = await editIdentityTx(tx, {
       table: 'DG_GOLD_DATA',

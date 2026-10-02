@@ -45,9 +45,13 @@ is named; rules marked *N88* become CI ratchets with that slice.
   (`web/apps/api/src/modules/auth/businessScope.ts`). Validate a requested book against active `BOOK_DATA`.
 - **Edits and deletes** require the voucher's `version` (D17); **financial creates** require an `Idempotency-Key`
   (D18).
-- **Transactions.** One `withTenant` transaction per command with an explicit timeout for heavy families; no external
-  call (provider, renderer) inside a business transaction — use the outbox (Phase 2) or call after commit and record
-  the outcome.
+- **Transactions.** One transaction per command, opened with
+  `withTxBudget(prisma, tenantId, 'read' | 'voucher' | 'heavy' | profile, fn)`
+  (`web/apps/api/src/modules/shared/txBudget.ts`): the class sets the time limits and a transaction-local
+  `statement_timeout`, a named profile adds an isolation level, and an expired budget is a retryable 503. A direct
+  `withTenant` or `$transaction` call fails `web/apps/api/test/txBudgetCoverage.test.ts` unless it is listed there
+  with its own longer limit (N53). No external call (provider, renderer) inside a business transaction — use the
+  outbox (Phase 2) or call after commit and record the outcome.
 - **Lists** return the full identity of each voucher (company, location, year, book, number) and are paginated.
 
 ## 4. Domain logic and calculations

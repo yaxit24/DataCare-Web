@@ -1,5 +1,5 @@
 import { dateWhere } from './reports.js';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import type { ReportScope, ListReport } from './reports.js';
 
 /**
@@ -30,7 +30,7 @@ const coParams = (s: ReportScope): { yr: string; params: unknown[] } =>
  * reports.ts). totals reports the day count and the grand gross total.
  */
 export async function dailySalesSummary(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const { yr, params } = coParams(s);
     const dt = dateWhere(s, '"VCH_DATE"', params);
     const rows: any[] = await tx.$queryRawUnsafe(
@@ -61,7 +61,7 @@ export async function dailySalesSummary(prisma: any, s: ReportScope): Promise<Li
  * count (capped) and the summed amount of the returned rows.
  */
 export async function topItems(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "IT_CODE" AS item, count(*)::int AS lines, sum(${NN('"ITM_NWT"')}) AS "netWt",
               sum(${NN('"ITM_FINE"')}) AS fine, sum(${NN('"NET_AMT"')}) AS amount
@@ -89,7 +89,7 @@ export async function topItems(prisma: any, s: ReportScope): Promise<ListReport>
  * needed. totals reports the employee count and the grand gross total.
  */
 export async function employeeSales(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const { yr, params } = coParams(s);
     const dt = dateWhere(s, '"VCH_DATE"', params);
     const rows: any[] = await tx.$queryRawUnsafe(

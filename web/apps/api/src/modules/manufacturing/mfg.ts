@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import {
   assertPeriodOpen,
@@ -200,7 +200,7 @@ export async function requireMfgMainBook(
   expectedMainBook: string,
 ): Promise<void> {
   const scope = completeScope(scopeInput);
-  await withTenant(prisma, scope.tenantId, async (tx: any) => {
+  await withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows: Array<{ MAIN_BOOK: unknown; BOOK_TBL_NAME: unknown }> = await tx.$queryRawUnsafe(
       `SELECT "MAIN_BOOK","BOOK_TBL_NAME" FROM "BOOK_DATA"
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
@@ -851,7 +851,7 @@ export async function issueMfg(
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
   const t = totalsOf(input.lines, {});
 
-  const vchNo = await withTenant(prisma, tenantId, async (tx: any) => {
+  const vchNo = await withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const stage = await getStageTx(tx, scope);
     const policy = await mfgBookPolicyTx(tx, scope);
     const hiddenVoucherNo = await nextHiddenVoucherNoTx(tx, scope);
@@ -937,7 +937,7 @@ export async function receiveMfg(
   });
   const recWtTotal = round3(input.lines.reduce((s, l) => s + lineRecWt(l), 0));
 
-  const vchNo = await withTenant(prisma, tenantId, async (tx: any) => {
+  const vchNo = await withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const stage = await getStageTx(tx, scope);
     const policy = await mfgBookPolicyTx(tx, scope);
     const hiddenVoucherNo = await nextHiddenVoucherNoTx(tx, scope);
@@ -1016,7 +1016,7 @@ export async function mfgLotBalance(
   lotNo: string,
   itCode?: string,
 ): Promise<number> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [scope.coCode, lotNo];
     let sql = `SELECT
         coalesce(SUM(CASE WHEN "ITM_SIGN"=$3 THEN "IR_WT" ELSE 0 END),0) AS issued,
@@ -1119,7 +1119,7 @@ async function assertMfgReplacementSafeTx(
 export async function getMfg(prisma: any, scopeInput: VoucherScope, vchNoInput: number | string) {
   const scope = completeScope(scopeInput);
   const vchNo = formatVoucherNo(vchNoInput);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const headerRows: Record<string, unknown>[] = await tx.$queryRawUnsafe(
       `SELECT *,to_char("VCH_TIME",'HH24:MI:SS.MS') AS "VCH_CLOCK" FROM "MFG_DATA"
        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
@@ -1278,7 +1278,7 @@ export async function editMfg(prisma: any, input: MfgLifecycleInput) {
   const scope = completeScope(input.scope);
   const vchNo = formatVoucherNo(input.vchNo);
   const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const prior = await persistedVoucherHeaderTx(tx, {
       table: 'MFG_DATA',
       scope,
@@ -1388,7 +1388,7 @@ export async function editMfg(prisma: any, input: MfgLifecycleInput) {
 export async function deleteMfg(prisma: any, input: DeleteMfgInput): Promise<{ reversed: true }> {
   const scope = completeScope({ ...input.scope, coBook: input.scope.coBook ?? input.book });
   const vchNo = formatVoucherNo(input.vchNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const h = await persistedVoucherHeaderTx(tx, {
       table: 'MFG_DATA',
       scope,

@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
 import {
@@ -137,7 +137,7 @@ export async function createFineSalePurchase(
   const sgst = inter ? 0 : r2(totTax - cgst);
   const igst = inter ? totTax : 0;
 
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     // RATE_PAR mirrors the company's configured metal-rate basis. The desktop sets CurRatePar from MsRatePar
     // for a new voucher (TR_FINE_SL_PR.cs:3955-3963) and reads it back on reopen (:4288), so a hardcoded 'G'
     // mislabels every voucher at a shop quoting per-10-gram or per-kilogram rates.
@@ -364,7 +364,7 @@ export async function deleteFineSalePurchase(
   const tenantId = input.scope.tenantId;
   const book = input.scope.coBook ?? (input.side === 'PURC' ? 'FPR' : 'FSL');
   const key = keyOf({ ...input.scope, coBook: book }, Number(input.vchNo), book);
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     // restore the open fine balance on each cut source line before removing the link rows.
     const cuts: any[] = await tx.$queryRawUnsafe(
       `SELECT "SL_DBCD" db, "SL_NO" no, "SL_SRNO" sr, coalesce("STK_FINE",0)::float f, coalesce("STK_NWT",0)::float nw, coalesce("STK_GWT",0)::float gw, coalesce("STK_PCS",0)::float pc

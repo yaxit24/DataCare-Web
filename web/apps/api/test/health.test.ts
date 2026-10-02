@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { BUDGETED_BIND_SQL, READ_BUDGET, budgetedBindParams } from './support/txBudgetBinding.js';
 import { buildApp } from '../src/app.js';
 import { healthPayload, readiness } from '../src/modules/ops/health.js';
 
@@ -53,8 +54,8 @@ describe('ops health', () => {
       renderer: { available: true, engine: 'playwright-chromium' },
     });
     expect(tx.$executeRawUnsafe).toHaveBeenCalledWith(
-      "SELECT set_config('app.tenant_id', $1, true)",
-      'tenant-a',
+      BUDGETED_BIND_SQL,
+      ...budgetedBindParams('tenant-a', READ_BUDGET),
     );
   });
 

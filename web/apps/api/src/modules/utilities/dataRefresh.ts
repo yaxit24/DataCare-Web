@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 /**
  * Data Refresh — the web analog of the desktop "Data Refresh" maintenance utility.
@@ -28,7 +28,7 @@ export async function dataRefresh(
   analyzed: boolean;
   checks: { label: string; ok: boolean; detail: string }[];
 }> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'heavy', async (tx: any) => {
     const q = (sql: string, ...p: unknown[]) => tx.$queryRawUnsafe(sql, ...p);
 
     // ledger totals (informational only)

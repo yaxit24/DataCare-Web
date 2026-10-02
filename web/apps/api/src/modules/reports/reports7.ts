@@ -1,5 +1,5 @@
 import { dateWhere } from './reports.js';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import type { ReportScope, ListReport } from './reports.js';
 import { barTagAvailableSql } from '../shared/stockSql.js';
 
@@ -24,7 +24,7 @@ const NN = (c: string): string => `coalesce(NULLIF(${c}::text,'')::numeric,0)`;
  * Optional fiscal-year scope ("CO_YEAR").
  */
 export async function salesGstMonthly(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const yr = s.coYear ? ' AND "CO_YEAR"=$2' : '';
     const params: unknown[] = s.coYear ? [s.coCode, s.coYear] : [s.coCode];
     const dt = dateWhere(s, '"VCH_DATE"', params);
@@ -58,7 +58,7 @@ export async function salesGstMonthly(prisma: any, s: ReportScope): Promise<List
  * fiscal-year scope ("CO_YEAR").
  */
 export async function billAging(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const yr = s.coYear ? ' AND "CO_YEAR"=$2' : '';
     const params: unknown[] = s.coYear ? [s.coCode, s.coYear] : [s.coCode];
     const rows: any[] = await tx.$queryRawUnsafe(
@@ -87,7 +87,7 @@ export async function billAging(prisma: any, s: ReportScope): Promise<ListReport
  * ITM_SIGN='-' exists for the same TAG_NO (same NOT EXISTS rule as stockValuation in reports.ts).
  */
 export async function stockByLocation(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT coalesce(b."LC_CODE",'(none)') AS location, count(*)::int AS tags,
               coalesce(sum(${NN('b."ITM_NWT"')}),0) AS "netWt", coalesce(sum(${NN('b."ITM_FINE"')}),0) AS fine
@@ -113,7 +113,7 @@ export async function stockByLocation(prisma: any, s: ReportScope): Promise<List
  * per item, ordered by amount (top 50).
  */
 export async function purchaseByItem(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "IT_CODE" AS item, count(*)::int AS lines, sum(${NN('"ITM_NWT"')}) AS "netWt",
               sum(${NN('"ITM_FINE"')}) AS fine, sum(${NN('"NET_AMT"')}) AS amount

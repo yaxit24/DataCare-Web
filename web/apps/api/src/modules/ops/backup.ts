@@ -1,5 +1,6 @@
 import { Prisma, type PrismaClient } from '@prisma/client';
 import { withTenant, type Tx } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
 import {
   COMPANY_BACKUP_KIND,
@@ -170,7 +171,7 @@ export async function recordCompanyBackup(
   document: CompanyBackupDocument,
   operator?: string,
 ): Promise<void> {
-  await withTenant(prisma, document.tenant, async (tx) => {
+  await withTxBudget(prisma, document.tenant, 'voucher', async (tx) => {
     await tx.$executeRawUnsafe(
       `INSERT INTO "company_backup_run"
          (tenant_id,co_code,checksum,document_version,generated_at,table_count,row_count,operator)

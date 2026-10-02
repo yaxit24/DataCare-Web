@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
 import {
   assertBalanced,
@@ -130,7 +130,7 @@ export async function postLedgerAdjust(prisma: any, input: LedgerAdjustInput) {
   assertLedgerAdjustInput(input);
   completeFinanceScope(input.scope);
   const date = input.vchDate ? new Date(input.vchDate) : new Date();
-  return withTenant(prisma, input.scope.tenantId, async (tx) =>
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', async (tx) =>
     write(tx, input, await createIdentityTx(tx, input.scope, date, input.mainUser)),
   );
 }
@@ -141,7 +141,7 @@ export async function getLedgerAdjust(
 ) {
   completeFinanceScope(scope);
   const no = formatVoucherNo(requested);
-  return withTenant(prisma, scope.tenantId, async (tx) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx) => {
     const r: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"HD_VCH_NO","MAIN_USER","AC_CODE","DR_AMT","CR_AMT","DIFF_AMT","IT_REMARK" FROM "LDR_ADJ_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
       scope.tenantId,
@@ -174,7 +174,7 @@ export async function editLedgerAdjust(
   assertLedgerAdjustInput(input);
   completeFinanceScope(input.scope);
   const date = input.vchDate ? new Date(input.vchDate) : new Date();
-  return withTenant(prisma, input.scope.tenantId, async (tx) => {
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', async (tx) => {
     const { identity } = await editIdentityTx(tx, {
       table: 'LDR_ADJ_DATA',
       scope: input.scope,
@@ -193,7 +193,7 @@ export async function deleteLedgerAdjust(
   completeFinanceScope(input.scope);
   const scope = input.scope,
     no = formatVoucherNo(input.vchNo);
-  return withTenant(prisma, scope.tenantId, async (tx) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx) => {
     const { identity } = await editIdentityTx(tx, {
       table: 'LDR_ADJ_DATA',
       scope,

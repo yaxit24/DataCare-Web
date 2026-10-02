@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 export interface UtilityScope {
   tenantId: string;
@@ -27,7 +27,7 @@ function refNoOf(value: unknown): string {
 }
 
 export async function listHddRegistry(prisma: any, scope: UtilityScope): Promise<HddRegistryRow[]> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     // HDD_MAST has no CO_CODE/LC_CODE columns. The web port therefore applies the strongest
     // available server-derived scope: tenant RLS plus an explicit tenant predicate.
     const rows: Array<{ id: bigint; refNo: string | null }> = await tx.$queryRawUnsafe(
@@ -54,7 +54,7 @@ export async function saveHddRegistry(
   refNoInput: unknown,
 ): Promise<{ refNo: string; message: string }> {
   const refNo = refNoOf(refNoInput);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     // Exact desktop write set/value source: DELETE all then INSERT HDD_MAST(REF_NO)=tHddNo.Text;
     // success text is "Hdd Is Update..." (UT_HDD.cs:762-765). Tenant predicates adapt the legacy
     // global table safely; the transaction makes the replacement atomic.
@@ -73,7 +73,7 @@ export async function deleteHddRegistry(
   scope: UtilityScope,
   refNo: string,
 ): Promise<{ deleted: number }> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const deleted = await tx.$executeRawUnsafe(
       `DELETE FROM "HDD_MAST" WHERE tenant_id=$1 AND COALESCE("REF_NO",'')=$2`,
       scope.tenantId,

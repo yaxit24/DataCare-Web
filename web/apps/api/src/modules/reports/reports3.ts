@@ -1,5 +1,5 @@
 import { dateWhere } from './reports.js';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import type { ReportScope, ListReport } from './reports.js';
 import { applyFilters } from './reportFilters.js';
 
@@ -28,7 +28,7 @@ const coParams = (s: ReportScope): { yr: string; params: unknown[] } =>
  * buckets stay clean (matching monthlySales in reports.ts).
  */
 export async function monthlyPurchase(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const { yr, params } = coParams(s);
     const dt = dateWhere(s, '"VCH_DATE"', params);
     const rows: any[] = await tx.$queryRawUnsafe(
@@ -57,7 +57,7 @@ export async function monthlyPurchase(prisma: any, s: ReportScope): Promise<List
  * (Σ TOT_AMT) per supplier, ordered by spend descending.
  */
 export async function purchaseByParty(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const { yr, params } = coParams(s);
     const dt = dateWhere(s, '"VCH_DATE"', params);
     // PR_DATA is UNALIASED in this builder, so the table name qualifies the filter columns. (A second
@@ -91,7 +91,7 @@ export async function purchaseByParty(prisma: any, s: ReportScope): Promise<List
  * NOT used here. The group label falls back to the raw AC_GR code when AC_GROUP has no matching row.
  */
 export async function groupSummary(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const yr = s.coYear ? ' AND d."CO_YEAR"=$2' : '';
     const params: unknown[] = s.coYear ? [s.coCode, s.coYear] : [s.coCode];
     const dt = dateWhere(s, 'd."VCH_DATE"', params);
@@ -128,7 +128,7 @@ export async function groupSummary(prisma: any, s: ReportScope): Promise<ListRep
  * keep the uniform return type for this reporting surface.
  */
 export async function gstr2Purchase(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const { yr, params } = coParams(s);
     const dt = dateWhere(s, '"VCH_DATE"', params);
     const r: any[] = await tx.$queryRawUnsafe(

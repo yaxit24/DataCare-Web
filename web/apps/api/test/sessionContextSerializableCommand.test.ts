@@ -1,6 +1,11 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
+import {
+  BUDGETED_BIND_SQL,
+  VOUCHER_BUDGET,
+  budgetedBindParams,
+} from './support/txBudgetBinding.js';
 import type { PrismaClient } from '@prisma/client';
 import type { Tx } from '@datacare/db';
 import {
@@ -60,8 +65,8 @@ function scripted(steps: Step[], commitError?: unknown) {
     return structuredClone(next.rows ?? []);
   });
   const execute = vi.fn(async (sql: string, ...params: unknown[]) => {
-    expect(sql).toBe("SELECT set_config('app.tenant_id', $1, true)");
-    expect(params).toEqual([identity.tenantId]);
+    expect(sql).toBe(BUDGETED_BIND_SQL);
+    expect(params).toEqual(budgetedBindParams(identity.tenantId, VOUCHER_BUDGET));
     trace.push('bind');
     return 1;
   });
@@ -355,6 +360,7 @@ describe('separate Serializable fixed Return update contract', () => {
     );
     expect(db.transaction).toHaveBeenCalledTimes(1);
     expect(db.transaction.mock.calls[0]?.[1]).toEqual({
+      ...VOUCHER_BUDGET,
       isolationLevel: 'Serializable',
     });
     expect(db.trace).toEqual([

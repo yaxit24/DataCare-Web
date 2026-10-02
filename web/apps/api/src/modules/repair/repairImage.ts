@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget, SNAPSHOT_READ } from '../shared/txBudget.js';
 import {
   lockImageRevisionTx,
   readImageRevisionTx,
@@ -228,31 +228,26 @@ export async function getRepairImageState(
 ) {
   assertCompleteRepairScope(scope);
   const key = resolveRepairImageKey(scope, input);
-  return withTenant(
-    prisma,
-    scope.tenantId,
-    async (tx: any) => {
-      const snapshot = await repairImageSnapshotTx(tx, scope, key);
-      const row = snapshot.rows[0];
-      return {
-        version: snapshot.version,
-        image: await imagePreview(
-          row
-            ? {
-                bytes: Buffer.from(row.REP_IMAGE ?? []),
-                mimeType: String(row.MIME_TYPE ?? ''),
-                size: Number(row.IMAGE_SIZE),
-                validType:
-                  snapshot.rows.length === 1 &&
-                  row.IMAGE_TYPE === REPAIR_IMAGE_TYPE &&
-                  row.IMAGE_NO === key.imageNo,
-              }
-            : null,
-        ),
-      };
-    },
-    { isolationLevel: 'RepeatableRead' },
-  );
+  return withTxBudget(prisma, scope.tenantId, SNAPSHOT_READ, async (tx: any) => {
+    const snapshot = await repairImageSnapshotTx(tx, scope, key);
+    const row = snapshot.rows[0];
+    return {
+      version: snapshot.version,
+      image: await imagePreview(
+        row
+          ? {
+              bytes: Buffer.from(row.REP_IMAGE ?? []),
+              mimeType: String(row.MIME_TYPE ?? ''),
+              size: Number(row.IMAGE_SIZE),
+              validType:
+                snapshot.rows.length === 1 &&
+                row.IMAGE_TYPE === REPAIR_IMAGE_TYPE &&
+                row.IMAGE_NO === key.imageNo,
+            }
+          : null,
+      ),
+    };
+  });
 }
 
 /** Replace-on-save, exactly like the desktop button which deletes the old JPEG first. */
@@ -272,7 +267,7 @@ export async function saveRepairImage(
   const key = resolveRepairImageKey(scope, input.key);
   const image = decodeRepairImage(input);
   if (input.version !== undefined) await validateImagePixels(image.data, image.mimeType);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await assertRepairLineExistsTx(tx, scope, key);
     const revisionKey = repairRevisionKey(scope, key);
     await lockImageRevisionTx(tx, revisionKey);
@@ -327,7 +322,7 @@ export async function getRepairImage(
   assertCompleteRepairScope(scopeInput);
   const scope = scopeInput;
   const key = resolveRepairImageKey(scope, keyInput);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT * FROM "REP_IMAGE"
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
@@ -363,7 +358,7 @@ export async function deleteRepairImage(
   assertCompleteRepairScope(input.scope);
   const scope = input.scope;
   const key = resolveRepairImageKey(scope, input.key);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     if (input.version !== undefined) await assertRepairLineExistsTx(tx, scope, key);
     const revisionKey = repairRevisionKey(scope, key);
     await lockImageRevisionTx(tx, revisionKey);
@@ -403,7 +398,7 @@ export async function listRepairImageKeys(
   } catch {
     throw new RepairWorkflowValidationError(`invalid repair image voucher: ${input.vchNo}`);
   }
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "SR_NO","IMAGE_NO","MIME_TYPE","IMAGE_SIZE" FROM "REP_IMAGE"
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3

@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { applyFilters, type ReportFilters } from './reportFilters.js';
 import { closingStockValuationTx } from './closingStock.js';
 import { quoteIdent } from '../security/sql.js';
@@ -158,7 +158,7 @@ async function registerFrom(
   r: DateRange,
   mainBook?: string,
 ): Promise<Register> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const w = whereScopeDate(s, r, 'v');
     // G06: classify by the book's MAIN_BOOK, not a literal CO_BOOK. The sales register is every voucher
     // whose book is a SALES book; returns (MAIN_BOOK 'SALES RETURNE'), quotations and credit notes share
@@ -228,7 +228,7 @@ const coParams = (s: ReportScope): { yr: string; params: unknown[] } =>
  * REPORT_DATA.COL_n rather than a typed table — renders the same grid (RP_DHRN_OS.cs:3462).
  */
 export async function dhrnOutstandingList(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const { yr, params } = coParams(s);
     const dt = dateWhere(s, 'i."VCH_DATE"', params);
     const rows: any[] = await tx.$queryRawUnsafe(
@@ -271,7 +271,7 @@ export async function dhrnOutstandingList(prisma: any, s: ReportScope): Promise<
 
 /** Karigar metal balances = Σ fine issued − Σ fine received, per karigar. */
 export async function karigarBalances(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "AC_CODE" AS "acCode",
               sum(CASE WHEN "INOUT_TYPE"='O' THEN ${NN('"ITM_FINE"')} ELSE 0 END) AS issued,
@@ -294,7 +294,7 @@ export async function karigarBalances(prisma: any, s: ReportScope): Promise<List
 
 /** Account balances = Σ Dr − Σ Cr per account (AC_DATA). */
 export async function accountBalances(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const { yr, params } = coParams(s);
     const dt = dateWhere(s, '"VCH_DATE"', params);
     const rows: any[] = await tx.$queryRawUnsafe(
@@ -320,7 +320,7 @@ export async function accountBalances(prisma: any, s: ReportScope): Promise<List
 
 /** Stock valuation from the tag inventory (BAR_DETL), grouped by item (desktop stock source). */
 export async function stockValuation(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const behavior = await resolveSettingsBehaviorTx(tx, {
       tenantId: s.tenantId,
       coCode: s.coCode,
@@ -382,7 +382,7 @@ export async function stockValuation(prisma: any, s: ReportScope): Promise<ListR
 
 /** Old-gold / exchange register (SL_PR_DETL): metal received from parties against sales/orders, valued at touch. */
 export async function oldGoldRegister(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const { yr, params } = coParams(s);
     const dt = dateWhere(s, '"VCH_DATE"', params);
     const rows: any[] = await tx.$queryRawUnsafe(
@@ -419,7 +419,7 @@ export async function oldGoldRegister(prisma: any, s: ReportScope): Promise<List
 /** Bill-wise outstanding (BILL_OS_DATA): per party/direction, balance = Σ BILL_AMT − Σ REC_AMT.
  *  INOUT 'I' = receivable (customer owes us), 'O' = payable (we owe supplier). */
 export async function billOutstanding(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const { yr, params } = coParams(s);
     const dt = dateWhere(s, 'b."VCH_DATE"', params);
     const rows: any[] = await tx.$queryRawUnsafe(
@@ -462,7 +462,7 @@ export async function billOutstanding(prisma: any, s: ReportScope): Promise<List
 
 /** GSTR-3B outward-supply summary (SL_DATA, SALES books only (returns/quotations/credit-notes are other MAIN_BOOKs)). ITC/inward is a follow-up. */
 export async function gstr3b(prisma: any, s: ReportScope): Promise<Record<string, number>> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const { yr, params } = coParams(s);
     const dt = dateWhere(s, '"VCH_DATE"', params);
     const r: any[] = await tx.$queryRawUnsafe(
@@ -484,7 +484,7 @@ export async function gstr3b(prisma: any, s: ReportScope): Promise<Record<string
 
 /** Sales by party (SL_DATA grouped by customer, excl returns). */
 export async function salesByParty(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const { yr, params } = coParams(s);
     const dt = dateWhere(s, '"VCH_DATE"', params);
     const rows: any[] = await tx.$queryRawUnsafe(
@@ -507,7 +507,7 @@ export async function salesByParty(prisma: any, s: ReportScope): Promise<ListRep
 
 /** Sales by item (SL_DETL grouped by item code). */
 export async function salesByItem(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "IT_CODE" AS item, count(*)::int AS lines, sum(${NN('"ITM_NWT"')}) AS "netWt", sum(${NN('"NET_AMT"')}) AS amount
        FROM "SL_DETL" WHERE "CO_CODE"=$1 GROUP BY "IT_CODE" ORDER BY amount DESC NULLS LAST`,
@@ -553,7 +553,7 @@ export async function balanceSheet(
     ledgerFineSilver?: number;
   } = {},
 ): Promise<Record<string, unknown>> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const { yr, params } = coParams(s);
     const r: any[] = await tx.$queryRawUnsafe(
       `SELECT coalesce(sum(${NN('"DR_AMT"')}),0) AS dr, coalesce(sum(${NN('"CR_AMT"')}),0) AS cr FROM "AC_DATA" WHERE "CO_CODE"=$1${yr}`,
@@ -599,7 +599,7 @@ export async function balanceSheet(
  * balance is income and a negative balance is expense.
  */
 export async function profitAndLoss(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const conditions = ['d."CO_CODE"=$1', "coalesce(m.\"AC_MAIN_GR\",'') >= '3'"];
     const params: unknown[] = [s.coCode];
     if (s.lcCode) {
@@ -724,7 +724,7 @@ export async function finalReports(
 
 /** Outstanding balances per account (AC_DATA ΣDr−ΣCr) with names; classified receivable/payable. */
 export async function outstandingReport(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const yr = s.coYear ? ' AND d."CO_YEAR"=$2' : '';
     const params: unknown[] = s.coYear ? [s.coCode, s.coYear] : [s.coCode];
     const dt = dateWhere(s, 'd."VCH_DATE"', params);
@@ -753,7 +753,7 @@ export async function outstandingReport(prisma: any, s: ReportScope): Promise<Li
 
 /** Monthly sales MIS (SL_DATA grouped by YYYY-MM, excl returns). */
 export async function monthlySales(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const { yr, params } = coParams(s);
     const dt = dateWhere(s, '"VCH_DATE"', params);
     const rows: any[] = await tx.$queryRawUnsafe(
@@ -792,7 +792,7 @@ export interface DayBook {
 
 /** Day-book / Rojmel (AC_DATA for a date range): every ledger movement + Dr/Cr totals. */
 export async function dayBook(prisma: any, s: ReportScope, r: DateRange = {}): Promise<DayBook> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const w = whereScopeDate(s, r);
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO" AS "vchNo", "VCH_TYPE" AS "vchType", "AC_CODE" AS "acCode",

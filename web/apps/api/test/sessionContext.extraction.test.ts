@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
+import { BUDGETED_BIND_SQL, READ_BUDGET, budgetedBindParams } from './support/txBudgetBinding.js';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { withTenant, type Tx } from '@datacare/db';
+import type { Tx } from '@datacare/db';
 import type { PrismaClient } from '@prisma/client';
 import {
   resolveLoginScope,
@@ -11,6 +12,7 @@ import {
   ScopeError,
 } from '../src/modules/auth/businessScope.js';
 import { loadPrincipal, loadPrincipalTx } from '../src/modules/rbac/authorization.js';
+import { withTxBudget } from '../src/modules/shared/txBudget.js';
 import independent from './fixtures/sessionContext.extraction.independent.json';
 
 interface ReadStep {
@@ -22,7 +24,7 @@ interface ReadStep {
 
 /**
  * A transaction-boundary double, not a SQL/database emulator. Each read receives a literal,
- * preordered database result. The real withTenant helper supplies the tenant binding.
+ * preordered database result. The real withTxBudget/withTenant helpers supply the tenant binding.
  */
 function scriptedDb(steps: ReadStep[], bindingError?: Error, tenantId = 'tenant-scope-extraction') {
   const pending = [...steps];
@@ -38,16 +40,17 @@ function scriptedDb(steps: ReadStep[], bindingError?: Error, tenantId = 'tenant-
     return structuredClone(next.rows ?? []);
   });
   const execute = vi.fn(async (sql: string, ...params: unknown[]) => {
-    expect(sql).toBe("SELECT set_config('app.tenant_id', $1, true)");
+    expect(sql).toBe(BUDGETED_BIND_SQL);
     trace.push('bind');
     if (bindingError) throw bindingError;
-    expect(params).toEqual([tenantId]);
+    expect(params).toEqual(budgetedBindParams(tenantId, READ_BUDGET));
     return 1;
   });
   // Only these raw methods are exercised. This explicit double does not claim to be a live Tx.
   const tx = { $queryRawUnsafe: query, $executeRawUnsafe: execute } as unknown as Tx;
   const transaction = vi.fn(async (fn: (value: Tx) => Promise<unknown>, options?: unknown) => {
-    expect(options).toBeUndefined();
+    // Scope resolution is a read under the read budget (N53), at PostgreSQL's default isolation.
+    expect(options).toEqual(READ_BUDGET);
     trace.push('begin');
     try {
       const result = await fn(tx);
@@ -246,7 +249,7 @@ describe('session-context transaction extraction boundaries', () => {
 
   it('composes selection and principal reads in one caller-owned tenant transaction', async () => {
     const db = scriptedDb([companyStep(), locationStep(), yearStep(), principalStep()]);
-    const result = await withTenant(db.prisma, login.tenantId, async (tx) => ({
+    const result = await withTxBudget(db.prisma, login.tenantId, 'read', async (tx) => ({
       scope: await resolveSelectedScopeTx(tx, selected),
       principal: await loadPrincipalTx(tx, principalInput),
     }));
@@ -315,7 +318,7 @@ describe('session-context transaction extraction boundaries', () => {
     const failure = new Error('query failure sentinel');
     const db = scriptedDb([companyStep(), { ...locationStep(), error: failure }]);
     await expect(
-      withTenant(db.prisma, login.tenantId, async (tx) => {
+      withTxBudget(db.prisma, login.tenantId, 'read', async (tx) => {
         await resolveSelectedScopeTx(tx, selected);
         return loadPrincipalTx(tx, principalInput);
       }),

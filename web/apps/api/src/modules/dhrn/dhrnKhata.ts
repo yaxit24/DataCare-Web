@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import {
   docShell,
   esc,
@@ -24,7 +24,7 @@ export async function dhrnKhataData(
   prisma: any,
   s: DhrnKhataScope,
 ): Promise<{ rows: any[]; party: any; company: any }> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const yr = s.coYear ? ' AND "CO_YEAR"=$3' : '';
     const params = s.coYear ? [s.coCode, s.acCode, s.coYear] : [s.coCode, s.acCode];
     const rows: any[] = await tx.$queryRawUnsafe(

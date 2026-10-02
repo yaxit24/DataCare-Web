@@ -1,5 +1,5 @@
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import type { RefreshClaims, SessionClaims } from './jwt.js';
 
 export const REFRESH_SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -88,7 +88,7 @@ export async function createAuthSession(
   const sessionId = randomUUID();
   const refreshJti = newJti();
   const expiresAt = new Date(now.getTime() + REFRESH_SESSION_TTL_MS);
-  await withTenant(prisma, input.tenantId, (tx: any) =>
+  await withTxBudget(prisma, input.tenantId, 'voucher', (tx: any) =>
     tx.$executeRawUnsafe(
       `INSERT INTO "auth_session"(
          "tenant_id","session_id","login_name","login_co_code","co_code","lc_code","co_year",
@@ -126,7 +126,7 @@ export async function validateAccessSession(
   claims: SessionClaims,
   now: Date = new Date(),
 ): Promise<AuthSessionRecord> {
-  const rows: SessionRow[] = await withTenant(prisma, claims.tenantId, (tx: any) =>
+  const rows: SessionRow[] = await withTxBudget(prisma, claims.tenantId, 'read', (tx: any) =>
     tx.$queryRawUnsafe(selectSessionSql, claims.sid),
   );
   const row = rows[0];
@@ -146,7 +146,7 @@ export async function rotateRefreshSession(
   now: Date = new Date(),
 ): Promise<{ session: AuthSessionRecord; refreshJti: string }> {
   const nextJti = newJti();
-  const outcome = await withTenant(prisma, claims.tenantId, async (tx: any) => {
+  const outcome = await withTxBudget(prisma, claims.tenantId, 'voucher', async (tx: any) => {
     const rows: SessionRow[] = await tx.$queryRawUnsafe(
       `${selectSessionSql} FOR UPDATE`,
       claims.sid,
@@ -212,7 +212,7 @@ export async function updateSessionScope(
   scope: { coCode: string; lcCode: string; coYear?: string },
 ): Promise<void> {
   const changed = Number(
-    await withTenant(prisma, tenantId, (tx: any) =>
+    await withTxBudget(prisma, tenantId, 'voucher', (tx: any) =>
       tx.$executeRawUnsafe(
         `UPDATE "auth_session" SET "co_code"=$1,"lc_code"=$2,"co_year"=$3
           WHERE "session_id"=$4 AND "revoked_at" IS NULL`,
@@ -233,7 +233,7 @@ export async function revokeSession(
   reason: string,
   now: Date = new Date(),
 ): Promise<void> {
-  await withTenant(prisma, tenantId, (tx: any) =>
+  await withTxBudget(prisma, tenantId, 'voucher', (tx: any) =>
     tx.$executeRawUnsafe(
       `UPDATE "auth_session" SET "revoked_at"=COALESCE("revoked_at",$1),
               "revoke_reason"=COALESCE("revoke_reason",$2)
@@ -258,7 +258,7 @@ export async function revokeUserSessions(
 ): Promise<number> {
   const now = input.now ?? new Date();
   return Number(
-    await withTenant(prisma, input.tenantId, (tx: any) =>
+    await withTxBudget(prisma, input.tenantId, 'voucher', (tx: any) =>
       tx.$executeRawUnsafe(
         `UPDATE "auth_session" SET "revoked_at"=$1,"revoke_reason"=$2
           WHERE "login_name"=$3 AND "login_co_code"=$4 AND "revoked_at" IS NULL

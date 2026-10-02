@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { barTagAvailableSql } from '../shared/stockSql.js';
 
 /**
@@ -41,7 +41,7 @@ export async function tagStockReport(
   tab: TagStockTab,
   filters?: { tblCode?: string; itCode?: string },
 ): Promise<TagStockReport> {
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [scope.CO_CODE, scope.LC_CODE];
     const flt: string[] = [];
     if (filters?.tblCode) {

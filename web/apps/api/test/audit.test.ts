@@ -1,4 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
+import {
+  BUDGETED_BIND_SQL,
+  VOUCHER_BUDGET,
+  budgetedBindParams,
+} from './support/txBudgetBinding.js';
 import { logAudit } from '../src/modules/ops/audit.js';
 
 const prismaWith = (execute: () => Promise<unknown>) => {
@@ -27,8 +32,8 @@ describe('audit persistence', () => {
     expect(result).toEqual({ logged: true });
     expect(tx.$executeRawUnsafe).toHaveBeenNthCalledWith(
       1,
-      "SELECT set_config('app.tenant_id', $1, true)",
-      'tenant-a',
+      BUDGETED_BIND_SQL,
+      ...budgetedBindParams('tenant-a', VOUCHER_BUDGET),
     );
     // The mock's call tuple is typed `[]`, so indexing it is a type error even though the call really does
     // carry six arguments. Cast at the boundary rather than at each index.

@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import { nextHiddenVoucherNoTx } from '../vouchers/lifecycle.js';
 import { postVoucherTx, reverseVoucherTx } from '../posting/posting.js';
@@ -172,7 +172,7 @@ export async function fineInout(
   const totNwt = round3(computed.reduce((s, c) => s + num(c.in.netWt), 0));
   const totFine = round3(computed.reduce((s, c) => s + c.fine, 0));
 
-  const vchNo = await withTenant(prisma, tenantId, async (tx: any) => {
+  const vchNo = await withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const no = await nextVoucherNoTx(tx, { ...input.scope, coBook: book });
     // The hidden series is per book, so this is allocated once the book is known.
     const hdVchNo = await nextHiddenVoucherNoTx(tx, { ...input.scope, coBook: book } as never);
@@ -323,7 +323,7 @@ export async function deleteFineInout(
     CO_BOOK: scope.coBook ?? book,
     VCH_NO: formatVoucherNo(vchNo),
   };
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await reverseVoucherTx(tx, scope.tenantId, {
       tables: ['INOUT_DATA', 'INOUT_DETL', 'MAIN_STOCK'],
       key,

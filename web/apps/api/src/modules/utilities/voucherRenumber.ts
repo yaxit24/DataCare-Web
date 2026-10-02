@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 /**
  * Voucher Renumber (Phase 12 / UT) — web port of the desktop UT_VCH_RENO utility.
@@ -195,7 +195,7 @@ export async function previewRenumber(
 ): Promise<{ rows: RenumberPreviewRow[]; gaps: number }> {
   const book = String(p?.book ?? '').trim();
   if (!book) throw new RenumberValidationError('book is required');
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'heavy', async (tx: any) => {
     const { rows } = await buildMapTx(tx, scope, book);
     const gaps = rows.reduce((n, r) => n + (r.vchNo !== r.newNo ? 1 : 0), 0);
     return { rows, gaps };
@@ -222,7 +222,7 @@ export async function applyRenumber(
     );
   }
 
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'heavy', async (tx: any) => {
     const { where, params } = scopeWhere(scope, book);
     const base = params.length; // next positional placeholder is $base+1
 

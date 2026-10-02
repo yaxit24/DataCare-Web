@@ -1,4 +1,4 @@
-import { withTenant, type Tx } from '@datacare/db';
+import { withTxBudget, type Tx } from '../shared/txBudget.js';
 import type { FastifyRequest } from 'fastify';
 
 export interface BusinessScope {
@@ -165,7 +165,7 @@ export async function resolveLoginScope(
   prisma: any,
   input: LoginScopeInput,
 ): Promise<BusinessScope> {
-  return withTenant(prisma, input.tenantId, (tx) => resolveLoginScopeTx(tx, input));
+  return withTxBudget(prisma, input.tenantId, 'read', (tx) => resolveLoginScopeTx(tx, input));
 }
 
 /** The caller owns the transaction and must already bind input.tenantId through withTenant. */
@@ -187,14 +187,14 @@ export async function resolveSelectedScope(
   prisma: any,
   input: SelectedScopeInput,
 ): Promise<BusinessScope> {
-  return withTenant(prisma, input.tenantId, (tx) => resolveSelectedScopeTx(tx, input));
+  return withTxBudget(prisma, input.tenantId, 'read', (tx) => resolveSelectedScopeTx(tx, input));
 }
 
 export async function listScopeCompanies(
   prisma: any,
   input: { tenantId: string; loginName: string; isAdmin: boolean },
 ): Promise<Array<{ CO_CODE: string; CO_NAME: string | null }>> {
-  return withTenant(prisma, input.tenantId, (tx: any) =>
+  return withTxBudget(prisma, input.tenantId, 'read', (tx: any) =>
     tx.$queryRawUnsafe(
       `SELECT c."CO_CODE",c."CO_NAME" FROM "CO_MAST" c
         WHERE $2::boolean OR EXISTS(
@@ -212,7 +212,7 @@ export async function listScopeLocations(
   prisma: any,
   input: { tenantId: string; coCode: string },
 ): Promise<Array<{ LC_CODE: string; LC_NAME: string | null }>> {
-  return withTenant(prisma, input.tenantId, (tx: any) =>
+  return withTxBudget(prisma, input.tenantId, 'read', (tx: any) =>
     tx.$queryRawUnsafe(
       `SELECT "LC_CODE","LC_NAME" FROM "LOCT_MAST"
         WHERE "CO_CODE"=$1 AND "LC_CODE" IS NOT NULL ORDER BY "LC_CODE"`,
@@ -225,7 +225,7 @@ export async function listScopeYears(
   prisma: any,
   input: { tenantId: string; coCode: string },
 ): Promise<Array<{ year: string }>> {
-  return withTenant(prisma, input.tenantId, (tx: any) =>
+  return withTxBudget(prisma, input.tenantId, 'read', (tx: any) =>
     tx.$queryRawUnsafe(
       `SELECT DISTINCT COALESCE(NULLIF(TRIM("CO_YEAR"),''),LEFT("OP_DATE",4)) AS year
          FROM "YEAR_MAST" WHERE "CO_CODE"=$1
@@ -247,7 +247,7 @@ export async function listScopeBooks(
     MAIN_BOOK: string | null;
   }>
 > {
-  return withTenant(prisma, input.tenantId, (tx: any) =>
+  return withTxBudget(prisma, input.tenantId, 'read', (tx: any) =>
     tx.$queryRawUnsafe(
       `SELECT "CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK" FROM "BOOK_DATA"
         WHERE "CO_CODE"=$1 AND ("LC_CODE"=$2 OR "LC_CODE"='00' OR "LC_CODE" IS NULL)
@@ -260,7 +260,7 @@ export async function listScopeBooks(
 }
 
 async function validateBook(prisma: any, scope: BusinessScope, coBook: string): Promise<void> {
-  const rows: unknown[] = await withTenant(prisma, scope.tenantId, (tx: any) =>
+  const rows: unknown[] = await withTxBudget(prisma, scope.tenantId, 'read', (tx: any) =>
     tx.$queryRawUnsafe(
       `SELECT 1 FROM "BOOK_DATA"
         WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2

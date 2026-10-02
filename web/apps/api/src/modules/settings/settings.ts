@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { CONFIGURABLE_SETTINGS, type SettingTable } from './settingsInventory.js';
 import {
   SETTING_CATALOG,
@@ -55,7 +55,7 @@ export async function getSettings(
   prisma: any,
   scope: { tenantId: string; coCode: string },
 ): Promise<Record<string, unknown>> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const out: Record<string, unknown> = {};
     for (const table of TABLES) {
       const desc = columnsFor(table);
@@ -161,7 +161,7 @@ export async function saveSettings(
     throw new SettingsError('invalid settings', errors);
   }
 
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     let changed = 0;
     for (const table of TABLES) {
       const mine = [...values.keys()].filter((k) => SETTING_CATALOG_BY_ID[k]?.table === table);

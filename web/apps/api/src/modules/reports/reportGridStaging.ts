@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 /**
  * `REPORT_DATA` — the desktop's "print this grid" bridge.
@@ -130,7 +130,7 @@ export async function stageReportGrid(
   scope: ReportGridScope,
   snapshot: ReportGridSnapshot,
 ): Promise<number> {
-  return withTenant(prisma, tenantId, (tx: any) =>
+  return withTxBudget(prisma, tenantId, 'read', (tx: any) =>
     stageReportGridTx(tx, tenantId, scope, snapshot),
   );
 }

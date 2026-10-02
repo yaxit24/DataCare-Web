@@ -1,5 +1,5 @@
 import { insertRowTx } from '../posting/posting.js';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import type { UtilityScope } from './hddRegistry.js';
 
 export interface WindowTile {
@@ -33,7 +33,7 @@ export async function listWindowTiles(
   scope: UtilityScope,
   loginName: string,
 ): Promise<WindowTile[]> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     // UT_WINDOW selects TILE_DATA * (UT_WINDOW.cs:1253-1254) and consumes TILE_NAME,
     // DISPLAY_NAME and SM_MAIN_NAME for tile1..tile12 (UT_WINDOW.cs:1255-1326). The remaining
     // selected columns SR_NO, SHORT_NAME and ITM_SHOW are returned too. TILE_DATA has no company or
@@ -129,7 +129,7 @@ export async function saveWindowTile(
 ): Promise<{ saved: true }> {
   const tileName = String(input.tileName ?? '').trim();
   if (!tileName) throw new Error('saveWindowTile: tileName is required');
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const existing: Array<{ n: number }> = await tx.$queryRawUnsafe(
       `SELECT count(*)::int n FROM "TILE_DATA" WHERE "TILE_NAME"=$1`,
       tileName.slice(0, 10),

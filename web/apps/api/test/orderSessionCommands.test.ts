@@ -3,6 +3,11 @@ import { readFileSync } from 'node:fs';
 import type { PrismaClient } from '@prisma/client';
 import type { Tx } from '@datacare/db';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  BUDGETED_BIND_SQL,
+  VOUCHER_BUDGET,
+  budgetedBindParams,
+} from './support/txBudgetBinding.js';
 const admission = vi.hoisted(() => ({ call: vi.fn() }));
 vi.mock('../src/modules/auth/sessionContextCommand.js', () => ({
   withSessionContextCommand: admission.call,
@@ -217,8 +222,8 @@ describe('five remaining order command entries: transaction-double checks only',
       expect(transaction).toHaveBeenCalledTimes(1);
       expect(execute).toHaveBeenNthCalledWith(
         1,
-        "SELECT set_config('app.tenant_id', $1, true)",
-        'next-order-unit',
+        BUDGETED_BIND_SQL,
+        ...budgetedBindParams('next-order-unit', VOUCHER_BUDGET),
       );
       const first = query.mock.calls[0];
       query.mockClear();

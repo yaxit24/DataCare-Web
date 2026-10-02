@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import { postVoucherTx, reverseVoucherTx, type LedgerLine } from '../posting/posting.js';
 import { resolveLiveTagIdentityTx } from './stock.js';
@@ -112,7 +112,7 @@ export async function tagWeightDiff(
   const stockAdjAc = input.stockAdjAc ?? DEFAULT_STOCK_ADJ_AC;
   const diffAc = input.diffAc ?? DEFAULT_DIFF_AC;
 
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const no = await nextVoucherNoTx(tx, input.scope);
     const key = keyOf(input.scope, no, input.book ?? WTDIFF_BOOK);
     const useParty = !!input.partyAc;
@@ -292,7 +292,7 @@ export async function deleteTagWeightDiff(
   book = WTDIFF_BOOK,
 ): Promise<{ reversed: true }> {
   const key = keyOf(scope, Number(vchNo), book);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await reverseVoucherTx(tx, scope.tenantId, { tables: ['MAIN_STOCK', 'AC_DATA'], key });
     return { reversed: true };
   });

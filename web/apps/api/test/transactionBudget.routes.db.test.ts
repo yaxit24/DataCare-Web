@@ -8,13 +8,20 @@ import { enrollMember, listMembers, postPoints } from '../src/modules/membership
 import { seedCompany } from '../src/modules/ops/seedCompany.js';
 import { warmPostingMetadata } from '../src/modules/posting/posting.js';
 import { resetSchemaCatalog } from '../src/modules/shared/schemaCatalog.js';
+import {
+  isTransactionTimeout,
+  SNAPSHOT_READ,
+  withTxBudget,
+} from '../src/modules/shared/txBudget.js';
 import { scopeKey } from '../src/modules/vouchers/numbering.js';
 
 /**
  * N53 (G30, G31) over HTTP and the real database:
  *  - once the catalog is warm, a voucher save issues no information_schema query, and a cold process
  *    loads the catalog in exactly one query rather than once per table;
- *  - a voucher whose transaction waits past its budget fails as a retryable 503 and writes nothing;
+ *  - a voucher whose transaction waits past its budget fails as a retryable 503 and writes nothing, for
+ *    the first families (receipts) and for a family converted later (journal);
+ *  - the budget's statement_timeout is bound with the tenant, enforced by PostgreSQL, and transaction-local;
  *  - two sessions redeeming 80 of 100 points at once produce one redemption and a balance of 20.
  */
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
@@ -79,7 +86,8 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     );
     await owner.$executeRawUnsafe(
       `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
-       VALUES($1,'01','01',$2,'Transaction','Cash Received','Y','Y','Y','Y')`,
+       VALUES($1,'01','01',$2,'Transaction','Cash Received','Y','Y','Y','Y'),
+             ($1,'01','01',$2,'Transaction','Journal','Y','Y','Y','Y')`,
       tenantId,
       LOGIN,
     );
@@ -165,6 +173,101 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     const retried = await receipt(130);
     expect(retried.statusCode, retried.body).toBe(201);
   }, 30_000);
+
+  it('a journal voucher (converted after the first N53 slice) held past its budget is a 503 and writes nothing', async () => {
+    vi.stubEnv('DATACARE_TX_BUDGET_VOUCHER_MS', '1500');
+    const journal = () =>
+      app.inject({
+        method: 'POST',
+        url: '/journal',
+        headers: { cookie },
+        payload: {
+          coBook: 'JV',
+          narration: 'budget check',
+          lines: [
+            { acCode: 'CASH', drAmt: 50 },
+            { acCode: 'CUST01', crAmt: 50 },
+          ],
+        },
+      });
+    const journalRows = async () =>
+      query<Array<{ legs: number; days: number }>>(
+        `SELECT (SELECT count(*)::int FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='JV') legs,
+                (SELECT count(*)::int FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='JV') days`,
+        tenantId,
+      ).then((rows) => rows[0]);
+    const before = await journalRows();
+    const key = `voucher|${scopeKey({ tenantId, coCode: '01', lcCode: '01', coYear: YEAR, coBook: 'JV' })}`;
+    let release!: () => void;
+    const released = new Promise<void>((resolve) => (release = resolve));
+    const holder = owner.$transaction(
+      async (tx) => {
+        await tx.$executeRawUnsafe('SELECT pg_advisory_xact_lock(hashtext($1))', key);
+        await released;
+      },
+      { timeout: 20_000 },
+    );
+    // Before this change the journal ran under Prisma's implicit default with no statement_timeout: it
+    // waited for as long as the lock was held (measured 9.9 s here) before failing (G68). Release
+    // eventually so a regression fails on the timing below instead of hanging the suite.
+    const safety = setTimeout(() => release(), 10_000);
+    try {
+      await sleep(200);
+      const started = Date.now();
+      const blocked = await journal();
+      expect(blocked.statusCode, blocked.body).toBe(503);
+      expect(blocked.headers['retry-after']).toBe('1');
+      expect(blocked.json()).toEqual({ error: 'transaction-timeout', retryable: true });
+      expect(Date.now() - started).toBeLessThan(5_000);
+    } finally {
+      clearTimeout(safety);
+      release();
+      await holder;
+    }
+    expect(await journalRows()).toEqual(before);
+    const retried = await journal();
+    expect(retried.statusCode, retried.body).toBe(201);
+    expect((await journalRows())?.legs).toBe((before?.legs ?? 0) + 2);
+  }, 30_000);
+
+  it('binds the tenant and a transaction-local statement_timeout in one statement on real PostgreSQL', async () => {
+    // One pooled connection, so "transaction-local" is observable: the setting must not survive commit.
+    const url = new URL(process.env.DATABASE_URL ?? '');
+    url.searchParams.set('connection_limit', '1');
+    const single = new PrismaClient({ datasources: { db: { url: url.toString() } } });
+    const setting = async () =>
+      single
+        .$queryRawUnsafe<Array<{ st: string }>>(`SELECT current_setting('statement_timeout') st`)
+        .then((rows) => rows[0]?.st);
+    try {
+      const outside = await setting();
+      const inside = await withTxBudget(single, tenantId, SNAPSHOT_READ, (tx) =>
+        tx.$queryRawUnsafe<Array<{ st: string; tenant: string; iso: string }>>(
+          `SELECT current_setting('statement_timeout') st, current_setting('app.tenant_id') tenant,
+                  current_setting('transaction_isolation') iso`,
+        ),
+      );
+      // The read budget is 5 s (document 11, N53 step 2).
+      expect(inside).toEqual([{ st: '5s', tenant: tenantId, iso: 'repeatable read' }]);
+      expect(await setting()).toBe(outside);
+
+      // The limit is the budget's, and PostgreSQL enforces it: a 2 s statement under a 300 ms read
+      // budget is cancelled, reported as a budget failure, and the connection is clean afterwards.
+      vi.stubEnv('DATACARE_TX_BUDGET_READ_MS', '300');
+      const started = Date.now();
+      const cancelled = await withTxBudget(single, tenantId, 'read', (tx) =>
+        tx.$queryRawUnsafe('SELECT pg_sleep(2)'),
+      ).then(
+        () => null,
+        (error: unknown) => error,
+      );
+      expect(isTransactionTimeout(cancelled), String(cancelled)).toBe(true);
+      expect(Date.now() - started).toBeLessThan(1_500);
+      expect(await setting()).toBe(outside);
+    } finally {
+      await single.$disconnect();
+    }
+  });
 
   it('two sessions redeeming 80 of 100 points at once leave one redemption and a balance of 20', async () => {
     const scope = { tenantId, coCode: '01', lcCode: '01', coYear: YEAR };

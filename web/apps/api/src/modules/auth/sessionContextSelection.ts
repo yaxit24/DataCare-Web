@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { withTenant, type Tx } from '@datacare/db';
+import { withTxBudget, SERIALIZABLE_VOUCHER, type Tx } from '../shared/txBudget.js';
 import type { PrismaClient } from '@prisma/client';
 import { loadPrincipalTx, type Principal } from '../rbac/authorization.js';
 import { applyLastDayLockTx, type LastDayLockResult } from '../shared/lastDayLock.js';
@@ -379,125 +379,120 @@ export async function selectSessionContext(
   const identity = copyIdentity(input.identity);
   const requestSha256 = contextSelectionRequestSha256(request);
   try {
-    return await withTenant(
-      prisma,
-      identity.tenantId,
-      async (tx) => {
-        const rows = await tx.$queryRawUnsafe<SessionRow[]>(
-          `SELECT "tenant_id" AS "tenantId", "session_id" AS "sessionId", "login_name" AS "loginName",
+    return await withTxBudget(prisma, identity.tenantId, SERIALIZABLE_VOUCHER, async (tx) => {
+      const rows = await tx.$queryRawUnsafe<SessionRow[]>(
+        `SELECT "tenant_id" AS "tenantId", "session_id" AS "sessionId", "login_name" AS "loginName",
                 "login_co_code" AS "loginCoCode", "co_code" AS "coCode", "lc_code" AS "lcCode", "co_year" AS "coYear",
                 "context_epoch"::text AS "contextEpoch", "ledger_context" AS "ledgerContext",
                 "last_context_selection_id" AS "selectionId", "last_context_request_sha256" AS "requestSha256",
                 "last_context_from_epoch"::text AS "fromEpoch"
            FROM "auth_session" WHERE "tenant_id"=$1 AND "session_id"=$2 FOR UPDATE`,
-          identity.tenantId,
-          identity.sessionId,
-        );
-        if (rows.length !== 1) return fail('session-invalid');
-        const current = parsedSession(rows[0]!);
-        assertIdentity(current, identity);
-        await assertLiveAfterLock(tx, identity);
-        // Plain transactional reads only: password reset already locks LOGIN_MAST before auth_session.
-        const principal = await loadPrincipalTx(tx, {
-          tenantId: identity.tenantId,
-          loginName: identity.loginName,
-          coCode: current.row.coCode,
-          loginCoCode: current.row.loginCoCode,
-        });
-        if (principal.passwordResetRequired) return fail('password-reset-required');
+        identity.tenantId,
+        identity.sessionId,
+      );
+      if (rows.length !== 1) return fail('session-invalid');
+      const current = parsedSession(rows[0]!);
+      assertIdentity(current, identity);
+      await assertLiveAfterLock(tx, identity);
+      // Plain transactional reads only: password reset already locks LOGIN_MAST before auth_session.
+      const principal = await loadPrincipalTx(tx, {
+        tenantId: identity.tenantId,
+        loginName: identity.loginName,
+        coCode: current.row.coCode,
+        loginCoCode: current.row.loginCoCode,
+      });
+      if (principal.passwordResetRequired) return fail('password-reset-required');
 
-        if (current.receipt?.selectionId === request.selectionId) {
-          if (
-            current.receipt.requestSha256 !== requestSha256 ||
-            current.receipt.fromEpoch !== request.expectedContextEpoch
-          ) {
-            return fail('context-operation-conflict');
-          }
-          // Recovery validates the exact committed scope; it never resolves new defaults or applies last-lock.
-          await validateStoredScopeTx(tx, {
-            tenantId: identity.tenantId,
-            loginName: identity.loginName,
-            isAdmin: principal.isAdmin,
-            coCode: current.row.coCode,
-            lcCode: current.row.lcCode,
-            ...(current.row.coYear === null ? {} : { coYear: current.row.coYear }),
-          });
-          const session = projectSelected(
-            identity,
-            {
-              coCode: current.row.coCode,
-              lcCode: current.row.lcCode,
-              ...(current.row.coYear === null ? {} : { coYear: current.row.coYear }),
-            },
-            current.epoch,
-            current.ledgerContext,
-            principal,
-          );
-          const accessToken = await signSelected(session, dependencies.signAccess);
-          await assertLiveAfterLock(tx, identity);
-          return Object.freeze({ session, accessToken, replayed: true, lastDayLock: null });
+      if (current.receipt?.selectionId === request.selectionId) {
+        if (
+          current.receipt.requestSha256 !== requestSha256 ||
+          current.receipt.fromEpoch !== request.expectedContextEpoch
+        ) {
+          return fail('context-operation-conflict');
         }
-        if (request.expectedContextEpoch !== current.epoch) return fail('context-stale');
-        const next = nextContextEpoch(current.epoch);
-        if (next.status !== 'ready') return fail('context-epoch-exhausted');
-        const scope = await resolveSelectedScopeTx(tx, {
+        // Recovery validates the exact committed scope; it never resolves new defaults or applies last-lock.
+        await validateStoredScopeTx(tx, {
           tenantId: identity.tenantId,
           loginName: identity.loginName,
           isAdmin: principal.isAdmin,
-          coCode: request.coCode,
-          ...(Object.hasOwn(request, 'lcCode') ? { lcCode: request.lcCode } : {}),
-          ...(Object.hasOwn(request, 'coYear') ? { coYear: request.coYear } : {}),
+          coCode: current.row.coCode,
+          lcCode: current.row.lcCode,
+          ...(current.row.coYear === null ? {} : { coYear: current.row.coYear }),
         });
-        const target = await loadPrincipalTx(tx, {
-          tenantId: identity.tenantId,
-          loginName: identity.loginName,
-          coCode: scope.coCode,
-          loginCoCode: current.row.loginCoCode,
-        });
-        // Explicit new web policy: another company's required credential reset cannot safely use this login identity.
-        if (target.passwordResetRequired) return fail('target-password-reset-required');
-        const ledgerContext: UnknownSessionLedgerContext = Object.freeze({
-          version: SESSION_LEDGER_CONTEXT_VERSION,
-          status: 'unknown',
-          mode: null,
-          reason: 'vendor-authority-unresolved',
-        });
-        const session = projectSelected(identity, scope, next.value, ledgerContext, target);
-        // Integration requires the accompanying lastDayLock.ts FOR UPDATE change; no wrapper/nested transaction.
-        const lock = await applyLastDayLockTx(tx, identity.tenantId, scope.coCode);
+        const session = projectSelected(
+          identity,
+          {
+            coCode: current.row.coCode,
+            lcCode: current.row.lcCode,
+            ...(current.row.coYear === null ? {} : { coYear: current.row.coYear }),
+          },
+          current.epoch,
+          current.ledgerContext,
+          principal,
+        );
         const accessToken = await signSelected(session, dependencies.signAccess);
-        const updated = await tx.$queryRawUnsafe<Array<{ contextEpoch: string }>>(
-          `UPDATE "auth_session"
+        await assertLiveAfterLock(tx, identity);
+        return Object.freeze({ session, accessToken, replayed: true, lastDayLock: null });
+      }
+      if (request.expectedContextEpoch !== current.epoch) return fail('context-stale');
+      const next = nextContextEpoch(current.epoch);
+      if (next.status !== 'ready') return fail('context-epoch-exhausted');
+      const scope = await resolveSelectedScopeTx(tx, {
+        tenantId: identity.tenantId,
+        loginName: identity.loginName,
+        isAdmin: principal.isAdmin,
+        coCode: request.coCode,
+        ...(Object.hasOwn(request, 'lcCode') ? { lcCode: request.lcCode } : {}),
+        ...(Object.hasOwn(request, 'coYear') ? { coYear: request.coYear } : {}),
+      });
+      const target = await loadPrincipalTx(tx, {
+        tenantId: identity.tenantId,
+        loginName: identity.loginName,
+        coCode: scope.coCode,
+        loginCoCode: current.row.loginCoCode,
+      });
+      // Explicit new web policy: another company's required credential reset cannot safely use this login identity.
+      if (target.passwordResetRequired) return fail('target-password-reset-required');
+      const ledgerContext: UnknownSessionLedgerContext = Object.freeze({
+        version: SESSION_LEDGER_CONTEXT_VERSION,
+        status: 'unknown',
+        mode: null,
+        reason: 'vendor-authority-unresolved',
+      });
+      const session = projectSelected(identity, scope, next.value, ledgerContext, target);
+      // Integration requires the accompanying lastDayLock.ts FOR UPDATE change; no wrapper/nested transaction.
+      const lock = await applyLastDayLockTx(tx, identity.tenantId, scope.coCode);
+      const accessToken = await signSelected(session, dependencies.signAccess);
+      const updated = await tx.$queryRawUnsafe<Array<{ contextEpoch: string }>>(
+        `UPDATE "auth_session"
             SET "co_code"=$3, "lc_code"=$4, "co_year"=$5, "context_epoch"=$6::bigint,
                 "ledger_context"=$7::jsonb, "last_context_selection_id"=$8,
                 "last_context_request_sha256"=$9, "last_context_from_epoch"=$10::bigint
           WHERE "tenant_id"=$1 AND "session_id"=$2 AND "context_epoch"=$10::bigint
             AND "revoked_at" IS NULL AND "expires_at" > clock_timestamp()
           RETURNING "context_epoch"::text AS "contextEpoch"`,
-          identity.tenantId,
-          identity.sessionId,
-          session.coCode,
-          session.lcCode,
-          session.coYear,
-          session.contextEpoch,
-          JSON.stringify(ledgerContext),
-          request.selectionId,
-          requestSha256,
-          current.epoch,
-        );
-        if (updated.length !== 1 || updated[0]?.contextEpoch !== session.contextEpoch) {
-          await assertLiveAfterLock(tx, identity);
-          return fail('context-update-conflict');
-        }
-        return Object.freeze({
-          session,
-          accessToken,
-          replayed: false,
-          lastDayLock: Object.freeze({ ...lock }),
-        });
-      },
-      { isolationLevel: 'Serializable' },
-    );
+        identity.tenantId,
+        identity.sessionId,
+        session.coCode,
+        session.lcCode,
+        session.coYear,
+        session.contextEpoch,
+        JSON.stringify(ledgerContext),
+        request.selectionId,
+        requestSha256,
+        current.epoch,
+      );
+      if (updated.length !== 1 || updated[0]?.contextEpoch !== session.contextEpoch) {
+        await assertLiveAfterLock(tx, identity);
+        return fail('context-update-conflict');
+      }
+      return Object.freeze({
+        session,
+        accessToken,
+        replayed: false,
+        lastDayLock: Object.freeze({ ...lock }),
+      });
+    });
   } catch (error) {
     if (isTransactionConflict(error)) return fail('context-transaction-conflict');
     throw error;

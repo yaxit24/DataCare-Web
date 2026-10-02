@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import {
   round,
   roundHalfEven,
@@ -1619,7 +1619,7 @@ async function readRateCut(
   const key = keyOf(scope, Number(voucherNo), scope.coBook ?? RCT_BOOK);
   const t = (v: unknown) => String(v ?? '').trim();
   const n = (v: unknown) => Number(v ?? 0);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const classification = await resolveBookClassification(
       tx,
       scope.tenantId,
@@ -1918,7 +1918,7 @@ async function writeRateCut(
   const p = input.pay ?? {};
   const rp = input.receivedPay ?? {};
 
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     // The metal-rate basis is a company setting, never a request field: it changes every derived figure.
     const behavior = await resolveSettingsBehaviorTx(tx, {
       tenantId,
@@ -2889,7 +2889,7 @@ async function reverseRateCut(
   const tenantId = input.scope.tenantId;
   const key = keyOf(input.scope, Number(input.vchNo), input.book ?? RCT_BOOK);
   const quotation = options.bookGuard === 'wholesale-quotation';
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     // The audit row must record the voucher's OWN classification: this path serves both wholesale (034
     // WSALE) and rate-cut (064 RCUT), so a module constant would misfile every wholesale deletion.
     const classification = await resolveBookClassification(

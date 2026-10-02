@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import {
   ColumnSettingsError,
   createColumnSetting,
@@ -350,7 +350,7 @@ export async function createMaster(
   const missing = findMissingRequired(config, data);
   if (missing.length) throw new ValidationError(missing, desktopMessageFor(config, missing));
   assertColumnRules(config, data);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await assertSaveGuardsTx(tx, scope, config);
     if (config.table === 'AC_MAST') {
       const behavior = await resolveSettingsBehaviorTx(tx, scope);
@@ -393,7 +393,7 @@ export async function updateMaster(
   if (blanked.length) throw new ValidationError(blanked, desktopMessageFor(config, blanked));
   const built = buildUpdate(config, data, data);
   if (!built.setCols.length) throw new ValidationError(['(no updatable columns supplied)']);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     if (config.table === 'AC_MAST' && data.AC_CODE != null) {
       const behavior = await resolveSettingsBehaviorTx(tx, scope);
       if (!accountCodeHasConfiguredLength(data.AC_CODE, behavior.accountCodeLength))
@@ -426,7 +426,7 @@ export async function deleteMaster(
     if (unselected.length) throw new DeleteSelectionError(config.deleteSelectionMessage);
   }
   const key = bindMasterScope(config, scope, source);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     for (const g of buildDeleteGuards(config, key)) {
       const r: unknown[] = await tx.$queryRawUnsafe(g.sql, ...g.params);
       if (r.length) throw new ReferencedError(g.ref);
@@ -453,8 +453,15 @@ export async function listMaster(
   if (config.table === 'COL_MAST') return listColumnSettings(prisma, scope, { limit });
   const n = Math.min(Number(limit) || 100, 500);
   const where = masterScopeWhere(config, scope);
-  const rows: Record<string, unknown>[] = await withTenant(prisma, scope.tenantId, (tx: any) =>
-    tx.$queryRawUnsafe(`SELECT * FROM ${q(config.table)}${where.sql} LIMIT ${n}`, ...where.params),
+  const rows: Record<string, unknown>[] = await withTxBudget(
+    prisma,
+    scope.tenantId,
+    'read',
+    (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT * FROM ${q(config.table)}${where.sql} LIMIT ${n}`,
+        ...where.params,
+      ),
   );
   return jsonSafe(rows);
 }

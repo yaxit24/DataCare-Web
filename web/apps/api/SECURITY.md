@@ -37,6 +37,13 @@ interactive transaction and binds the tenant **transaction-locally**:
 SELECT set_config('app.tenant_id', $1, true)
 ```
 
+API modules call it through `withTxBudget()` (`apps/api/src/modules/shared/txBudget.ts`), which also
+binds the command's budget as a transaction-local `statement_timeout` in the same statement:
+
+```sql
+SELECT set_config('app.tenant_id', $1, true), set_config('statement_timeout', $2, true)
+```
+
 PostgreSQL Row-Level Security then scopes **every** statement in that transaction to the tenant.
 The `tenantId` originates from the verified JWT session (not from raw client input on data paths).
 The API connects as a dedicated **non-superuser** `app_user`; `/ready` returns 503 unless the role is

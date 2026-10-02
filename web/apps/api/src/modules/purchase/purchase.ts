@@ -1,6 +1,5 @@
 import { type StoneSubDetailInput } from '../shared/stoneSubDetail.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
-import { withTenant } from '@datacare/db';
 import { withTxBudget } from '../shared/txBudget.js';
 import { recordFieldChangesTx } from '../vouchers/fieldAudit.js';
 import { stagePurchaseLotDetailTx } from '../stock/lotRegister.js';
@@ -2401,7 +2400,7 @@ export async function listOpenConsignmentPurchaseReceipts(
   filter: ConsignmentReceiptFilter = {},
 ): Promise<Record<string, unknown>> {
   completePurchaseScope(scope);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await assertPurchaseMainBookTx(tx, scope, 'CON PUR', 'consignment purchase');
     const sourceYear = text(filter.sourceCoYear || scope.coYear);
     const sourceBook = text(filter.sourceCoBook);

@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import type { ReportScope, ListReport } from './reports.js';
 
 /**
@@ -24,7 +24,7 @@ export async function voucherRegister(
   prisma: any,
   s: ReportScope & { book?: string; fromDate?: string; toDate?: string },
 ): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     // Build the scope filter positionally: CO_CODE is always $1; the rest are appended only when set.
     const parts = ['"CO_CODE"=$1'];
     const params: unknown[] = [s.coCode];

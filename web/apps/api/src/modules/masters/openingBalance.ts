@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 /**
  * Account opening balance (desktop "Opening Balance"): stored per account in OP_DATA — money
@@ -63,7 +63,7 @@ export async function getOpeningBalance(
   scope: { tenantId: string; coCode: string },
   acCode: string,
 ): Promise<OpeningBalance> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT coalesce(NULLIF("OP_AMT"::text,'')::numeric,0)::float amt, upper(coalesce("OP_SIGN",'D')) osg,
               coalesce(NULLIF("FINE_BAL"::text,'')::numeric,0)::float g, coalesce("FINE_SIGN",'+') gsg,
@@ -96,7 +96,7 @@ export async function setOpeningBalance(prisma: any, input: OpeningInput): Promi
   const goldSign: PlusMinus = input.goldSign === '-' ? '-' : '+';
   const silver = Math.abs(Number(input.silver || 0));
   const silverSign: PlusMinus = input.silverSign === '-' ? '-' : '+';
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     await tx.$executeRawUnsafe(
       `DELETE FROM "OP_DATA" WHERE "CO_CODE"=$1 AND "AC_CODE"=$2`,
       coCode,

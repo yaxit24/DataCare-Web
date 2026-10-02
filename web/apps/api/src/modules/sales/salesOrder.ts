@@ -1,4 +1,4 @@
-import { withTenant, type Tx } from '@datacare/db';
+import { withTxBudget, SNAPSHOT_READ, type TxBudgetPrisma, type Tx } from '../shared/txBudget.js';
 import { withSessionContextCommand } from '../auth/sessionContextCommand.js';
 import { createHash } from 'node:crypto';
 import {
@@ -371,22 +371,17 @@ async function orderLabourConfigurationTx(tx: any, scope: VoucherScope) {
 
 export async function getSalesOrderConfiguration(prisma: any, scope: VoucherScope) {
   completeOrderScope(scope);
-  return withTenant(
-    prisma,
-    scope.tenantId,
-    async (tx: any) => {
-      await resolveOrderBookTx(tx, scope, requestedMode('SALES ORDER'));
-      return {
-        ...(await orderLabourConfigurationTx(tx, scope)),
-        ...(await salesOrderFiscalConfigurationTx(tx, scope)),
-      };
-    },
-    { isolationLevel: 'RepeatableRead' },
-  );
+  return withTxBudget(prisma, scope.tenantId, SNAPSHOT_READ, async (tx: any) => {
+    await resolveOrderBookTx(tx, scope, requestedMode('SALES ORDER'));
+    return {
+      ...(await orderLabourConfigurationTx(tx, scope)),
+      ...(await salesOrderFiscalConfigurationTx(tx, scope)),
+    };
+  });
 }
 
 export async function getTourOrderConfiguration(prisma: any, scope: VoucherScope) {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await resolveOrderBookTx(tx, scope, requestedMode('TOUR ORDER'));
     return orderLabourConfigurationTx(tx, scope);
   });
@@ -761,7 +756,7 @@ export async function createSalesOrder(
   const prepared = prepareSalesOrderCreate(input, lifecycle);
   return lifecycle
     ? prepared.run(lifecycle.tx)
-    : withTenant(prisma, prepared.tenantId, prepared.run);
+    : withTxBudget(prisma, prepared.tenantId, 'voucher', prepared.run);
 }
 
 /** New allocation and complete order write set in the caller's existing transaction. */
@@ -1422,165 +1417,160 @@ export async function getSalesOrder(
 ): Promise<Record<string, unknown>> {
   completeOrderScope(scope);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(
-    prisma,
-    scope.tenantId,
-    async (tx: any) => {
-      await resolveOrderBookTx(tx, scope, requestedMode(options.orderMainBook));
-      const state = await orderStateTx(tx, scope, voucherNo);
-      const h = state.SL_ORD_DATA;
-      if (h.length !== 1)
-        throw new SaleValidationError(
-          h.length
-            ? `sales order voucher is ambiguous: ${voucherNo}`
-            : `sales order voucher not found: ${voucherNo}`,
-        );
-      const d = [...state.SL_ORD_DETL].sort((a, b) => n(a.SR_NO) - n(b.SR_NO));
-      const x = h[0];
-      const advanceDebit = state.AC_DATA.find((row) => n(row.DR_AMT) > 0);
-      const dto = {
-        voucherNo: text(x.VCH_NO),
-        hiddenVoucherNo: text(x.HD_VCH_NO),
-        mainUser: text(x.MAIN_USER),
-        vchTime: text(x.VCH_CLOCK).replace(/(\.\d{3})000$/, '$1'),
-        version: orderVersion(state),
-        labourIncludesGhat: state.COMPANY_POLICY[0].labourIncludesGhat,
-        labourRateDecimals: state.COMPANY_POLICY[0].labourRateDecimals,
-        editBlockedReason: unsupportedOrderEdit(state),
-        coCode: scope.coCode,
-        lcCode: scope.lcCode,
-        coYear: scope.coYear,
-        coBook: scope.coBook,
-        vchDate: dateText(x.VCH_DATE),
-        billNo: text(x.BILL_NO),
-        vchDesc: text(x.VCH_DESC),
-        acCode: text(x.AC_CODE),
-        acName: text(x.AC_NAME),
-        netAmount: n(x.NET_AMT),
-        taxRatePct: n(x.TAX_PRC),
-        total: n(x.TOT_AMT),
-        advanceAmount: n(x.ADV_AMT),
-        cashAc: text(advanceDebit?.AC_CODE) || undefined,
-        empCode: text(x.EMP_CODE) || text(d[0]?.EMP_CODE),
-        taxCode: text(x.TAX_CODE),
-        upiAmount: n(x.UPI_AMT),
-        bankAc: text(x.BANK_AC),
-        chequeNo: text(x.CHQ_NO),
-        bankName: text(x.BANK_NAME),
-        cardAc: text(x.CARD_AC),
-        cardAdj: text(x.CARD_ADJ),
-        oldGoldFine: n(x.OLD_GL),
-        oldGoldAmount: n(x.OLD_GL_AMT),
-        oldSilverFine: n(x.OLD_SL),
-        oldSilverAmount: n(x.OLD_SL_AMT),
-        schemeAmount: n(x.SCHM_AMT),
-        rateCutRate: n(x.RCUT_RATE),
-        rateCutFine: n(x.RCUT_FINE),
-        rateCutAmount: n(x.RCUT_AMT),
-        adjustGold: n(x.ADJ_GOLD),
-        adjustSilver: n(x.ADJ_SILVER),
-        orderAdjustAmount: n(x.ORD_ADJ_AMT),
-        deliveryDate: dateText(x.DEL_DATE),
-        functionDate: dateText(x.FUN_DATE),
-        address1: text(x.ADD1),
-        address2: text(x.ADD2),
-        address3: text(x.ADD3),
-        city: text(x.CITY),
-        mobile: text(x.MOBILE),
-        lines: d.map((r) => ({
-          srNo: n(r.SR_NO),
-          tagNo: text(r.TAG_NO) === 'N' ? '' : text(r.TAG_NO),
-          itCode: text(r.IT_CODE),
-          designNo: text(r.DESIGN_NO),
-          pcs: n(r.ITM_PCS),
-          grossWt: n(r.ITM_GWT),
-          netWt: n(r.ITM_NWT),
-          touch: n(r.ITM_TOUCH),
-          rate: n(r.ITM_RATE),
-          // Inverse of the shared per-gram labour base. Keep the inferred rate unrounded so an
-          // unchanged edit retains the persisted amount even for fractional net/ghat weights.
-          making:
-            n(r.ITM_NWT) + (state.COMPANY_POLICY[0].labourIncludesGhat ? n(r.ITM_GHT_WT) : 0)
-              ? n(r.LBR_AMT) /
-                (n(r.ITM_NWT) + (state.COMPANY_POLICY[0].labourIncludesGhat ? n(r.ITM_GHT_WT) : 0))
-              : 0,
-          remark: text(r.ITM_REMARK),
-          tblCode: text(r.TBL_CODE),
-          itmColor: text(r.ITM_COLOR),
-          itmSize: text(r.ITM_SIZE),
-          bagWt: n(r.BAG_WT),
-          lessWt: n(r.ITM_OTH_WT),
-          ghtPct: n(r.ITM_GHT_PRC),
-          ghtWt: n(r.ITM_GHT_WT),
-          westPct: n(r.ITM_WEST_PRC),
-          rateFix: text(r.RATE_FIX),
-          labourPct: n(r.LBR_PRC),
-          labourType: text(r.LBR_TYPE),
-          labourRate: n(r.LBR_RATE),
-          labourAmount: n(r.LBR_AMT),
-          fineWeight: n(r.ITM_FINE),
-          itemAmount: n(r.ITM_AMT),
-          lineNetAmount: n(r.NET_AMT),
-          lineTotalAmount: n(r.TOT_AMT),
-          otherAmount: n(r.OTH_AMT),
-          mrp: n(r.ITM_MRP),
-          orderDeliveryDate: dateText(r.ORD_DEL_DATE),
-          karigarNetWt: n(r.KR_NET_WT),
-          karigarTouch: n(r.KR_TOUCH),
-          karigarWestPct: n(r.KR_WEST_PRC),
-          karigarFine: n(r.KR_FINE),
-          karigarName: text(r.KR_NAME),
-          tagCost: n(r.TAG_COST),
-          vchSrno: n(r.VCH_SRNO),
-          oldSrNo: n(r.OLD_SRNO),
-          rateType: text(r.RATE_TYPE),
-          itType: text(r.IT_TYPE),
-          prCode: text(r.PR_CODE),
-          oldTblCode: text(r.OLD_TBL_CODE),
-          tagStockLess: text(r.TAG_STK_LESS),
-          designImageId: text(r.DESIGN_IMG_ID),
-          huid: text(r.HM_ID),
-          hallmarkId2: text(r.HM_ID2),
-          hallmarkId3: text(r.HM_ID3),
-          hallmarkId4: text(r.HM_ID4),
-          hallmarkIdWt: n(r.HM_ID_WT),
-          hallmarkId2Wt: n(r.HM_ID2_WT),
-          hallmarkId3Wt: n(r.HM_ID3_WT),
-          hallmarkId4Wt: n(r.HM_ID4_WT),
-          consumed: [r.TAG_SALE, r.TAG_GEN, r.DESIGN_ISU].some((v) => text(v) === 'Y'),
-          components: state.SL_ORD_IDTL.filter((child) => n(child.SR_NO) === n(r.SR_NO))
-            .sort((a, b) => n(a.ISR_NO) - n(b.ISR_NO))
-            .map(readStoneSubDetail),
-        })),
-      };
-      // Both saved order forms retain exact mapped scalar values; calculations remain server-owned.
-      exactOrderValues(dto, x, ORDER_HEADER_FIELDS);
-      dto.lines.forEach((line, index) => {
-        const parent = d[index];
-        exactOrderValues(
-          line,
-          parent,
-          Object.fromEntries(
-            Object.entries(ORDER_PARENT_FIELDS).filter(([field]) => field !== 'making'),
-          ),
-        );
-        exactOrderValues(line, parent, {
-          fineWeight: 'ITM_FINE',
-          itemAmount: 'ITM_AMT',
-          lineNetAmount: 'NET_AMT',
-          lineTotalAmount: 'TOT_AMT',
-        });
-        for (const child of line.components) {
-          const saved = state.SL_ORD_IDTL.find(
-            (row) => n(row.SR_NO) === n(parent.SR_NO) && n(row.ISR_NO) === n(child.isrNo),
-          );
-          if (saved) exactOrderValues(child, saved, ORDER_COMPONENT_FIELDS);
-        }
+  return withTxBudget(prisma, scope.tenantId, SNAPSHOT_READ, async (tx: any) => {
+    await resolveOrderBookTx(tx, scope, requestedMode(options.orderMainBook));
+    const state = await orderStateTx(tx, scope, voucherNo);
+    const h = state.SL_ORD_DATA;
+    if (h.length !== 1)
+      throw new SaleValidationError(
+        h.length
+          ? `sales order voucher is ambiguous: ${voucherNo}`
+          : `sales order voucher not found: ${voucherNo}`,
+      );
+    const d = [...state.SL_ORD_DETL].sort((a, b) => n(a.SR_NO) - n(b.SR_NO));
+    const x = h[0];
+    const advanceDebit = state.AC_DATA.find((row) => n(row.DR_AMT) > 0);
+    const dto = {
+      voucherNo: text(x.VCH_NO),
+      hiddenVoucherNo: text(x.HD_VCH_NO),
+      mainUser: text(x.MAIN_USER),
+      vchTime: text(x.VCH_CLOCK).replace(/(\.\d{3})000$/, '$1'),
+      version: orderVersion(state),
+      labourIncludesGhat: state.COMPANY_POLICY[0].labourIncludesGhat,
+      labourRateDecimals: state.COMPANY_POLICY[0].labourRateDecimals,
+      editBlockedReason: unsupportedOrderEdit(state),
+      coCode: scope.coCode,
+      lcCode: scope.lcCode,
+      coYear: scope.coYear,
+      coBook: scope.coBook,
+      vchDate: dateText(x.VCH_DATE),
+      billNo: text(x.BILL_NO),
+      vchDesc: text(x.VCH_DESC),
+      acCode: text(x.AC_CODE),
+      acName: text(x.AC_NAME),
+      netAmount: n(x.NET_AMT),
+      taxRatePct: n(x.TAX_PRC),
+      total: n(x.TOT_AMT),
+      advanceAmount: n(x.ADV_AMT),
+      cashAc: text(advanceDebit?.AC_CODE) || undefined,
+      empCode: text(x.EMP_CODE) || text(d[0]?.EMP_CODE),
+      taxCode: text(x.TAX_CODE),
+      upiAmount: n(x.UPI_AMT),
+      bankAc: text(x.BANK_AC),
+      chequeNo: text(x.CHQ_NO),
+      bankName: text(x.BANK_NAME),
+      cardAc: text(x.CARD_AC),
+      cardAdj: text(x.CARD_ADJ),
+      oldGoldFine: n(x.OLD_GL),
+      oldGoldAmount: n(x.OLD_GL_AMT),
+      oldSilverFine: n(x.OLD_SL),
+      oldSilverAmount: n(x.OLD_SL_AMT),
+      schemeAmount: n(x.SCHM_AMT),
+      rateCutRate: n(x.RCUT_RATE),
+      rateCutFine: n(x.RCUT_FINE),
+      rateCutAmount: n(x.RCUT_AMT),
+      adjustGold: n(x.ADJ_GOLD),
+      adjustSilver: n(x.ADJ_SILVER),
+      orderAdjustAmount: n(x.ORD_ADJ_AMT),
+      deliveryDate: dateText(x.DEL_DATE),
+      functionDate: dateText(x.FUN_DATE),
+      address1: text(x.ADD1),
+      address2: text(x.ADD2),
+      address3: text(x.ADD3),
+      city: text(x.CITY),
+      mobile: text(x.MOBILE),
+      lines: d.map((r) => ({
+        srNo: n(r.SR_NO),
+        tagNo: text(r.TAG_NO) === 'N' ? '' : text(r.TAG_NO),
+        itCode: text(r.IT_CODE),
+        designNo: text(r.DESIGN_NO),
+        pcs: n(r.ITM_PCS),
+        grossWt: n(r.ITM_GWT),
+        netWt: n(r.ITM_NWT),
+        touch: n(r.ITM_TOUCH),
+        rate: n(r.ITM_RATE),
+        // Inverse of the shared per-gram labour base. Keep the inferred rate unrounded so an
+        // unchanged edit retains the persisted amount even for fractional net/ghat weights.
+        making:
+          n(r.ITM_NWT) + (state.COMPANY_POLICY[0].labourIncludesGhat ? n(r.ITM_GHT_WT) : 0)
+            ? n(r.LBR_AMT) /
+              (n(r.ITM_NWT) + (state.COMPANY_POLICY[0].labourIncludesGhat ? n(r.ITM_GHT_WT) : 0))
+            : 0,
+        remark: text(r.ITM_REMARK),
+        tblCode: text(r.TBL_CODE),
+        itmColor: text(r.ITM_COLOR),
+        itmSize: text(r.ITM_SIZE),
+        bagWt: n(r.BAG_WT),
+        lessWt: n(r.ITM_OTH_WT),
+        ghtPct: n(r.ITM_GHT_PRC),
+        ghtWt: n(r.ITM_GHT_WT),
+        westPct: n(r.ITM_WEST_PRC),
+        rateFix: text(r.RATE_FIX),
+        labourPct: n(r.LBR_PRC),
+        labourType: text(r.LBR_TYPE),
+        labourRate: n(r.LBR_RATE),
+        labourAmount: n(r.LBR_AMT),
+        fineWeight: n(r.ITM_FINE),
+        itemAmount: n(r.ITM_AMT),
+        lineNetAmount: n(r.NET_AMT),
+        lineTotalAmount: n(r.TOT_AMT),
+        otherAmount: n(r.OTH_AMT),
+        mrp: n(r.ITM_MRP),
+        orderDeliveryDate: dateText(r.ORD_DEL_DATE),
+        karigarNetWt: n(r.KR_NET_WT),
+        karigarTouch: n(r.KR_TOUCH),
+        karigarWestPct: n(r.KR_WEST_PRC),
+        karigarFine: n(r.KR_FINE),
+        karigarName: text(r.KR_NAME),
+        tagCost: n(r.TAG_COST),
+        vchSrno: n(r.VCH_SRNO),
+        oldSrNo: n(r.OLD_SRNO),
+        rateType: text(r.RATE_TYPE),
+        itType: text(r.IT_TYPE),
+        prCode: text(r.PR_CODE),
+        oldTblCode: text(r.OLD_TBL_CODE),
+        tagStockLess: text(r.TAG_STK_LESS),
+        designImageId: text(r.DESIGN_IMG_ID),
+        huid: text(r.HM_ID),
+        hallmarkId2: text(r.HM_ID2),
+        hallmarkId3: text(r.HM_ID3),
+        hallmarkId4: text(r.HM_ID4),
+        hallmarkIdWt: n(r.HM_ID_WT),
+        hallmarkId2Wt: n(r.HM_ID2_WT),
+        hallmarkId3Wt: n(r.HM_ID3_WT),
+        hallmarkId4Wt: n(r.HM_ID4_WT),
+        consumed: [r.TAG_SALE, r.TAG_GEN, r.DESIGN_ISU].some((v) => text(v) === 'Y'),
+        components: state.SL_ORD_IDTL.filter((child) => n(child.SR_NO) === n(r.SR_NO))
+          .sort((a, b) => n(a.ISR_NO) - n(b.ISR_NO))
+          .map(readStoneSubDetail),
+      })),
+    };
+    // Both saved order forms retain exact mapped scalar values; calculations remain server-owned.
+    exactOrderValues(dto, x, ORDER_HEADER_FIELDS);
+    dto.lines.forEach((line, index) => {
+      const parent = d[index];
+      exactOrderValues(
+        line,
+        parent,
+        Object.fromEntries(
+          Object.entries(ORDER_PARENT_FIELDS).filter(([field]) => field !== 'making'),
+        ),
+      );
+      exactOrderValues(line, parent, {
+        fineWeight: 'ITM_FINE',
+        itemAmount: 'ITM_AMT',
+        lineNetAmount: 'NET_AMT',
+        lineTotalAmount: 'TOT_AMT',
       });
-      return dto;
-    },
-    { isolationLevel: 'RepeatableRead' },
-  );
+      for (const child of line.components) {
+        const saved = state.SL_ORD_IDTL.find(
+          (row) => n(row.SR_NO) === n(parent.SR_NO) && n(row.ISR_NO) === n(child.isrNo),
+        );
+        if (saved) exactOrderValues(child, saved, ORDER_COMPONENT_FIELDS);
+      }
+    });
+    return dto;
+  });
 }
 
 async function assertOrderUnconsumedTx(
@@ -1632,7 +1622,7 @@ export async function editSalesOrder(
   requestedVoucherNo: number | string,
 ): Promise<{ vchNo: number; total: number; advance: number }> {
   const prepared = prepareSalesOrderEdit(input, requestedVoucherNo);
-  return withTenant(prisma, prepared.scope.tenantId, (tx) =>
+  return withTxBudget(prisma, prepared.scope.tenantId, 'voucher', (tx) =>
     runSalesOrderEditTx(tx, input, prepared),
   );
 }
@@ -1707,7 +1697,7 @@ async function runSalesOrderEditTx(
 
 /** Required-authority entry for the single participating Sales Order HTTP edit route. */
 export async function editSalesOrderInSession(
-  prisma: Parameters<typeof withTenant>[0],
+  prisma: TxBudgetPrisma,
   request: { identity: unknown; input: SalesOrderInput; voucherNo: number | string },
 ): Promise<{ vchNo: number; total: number; advance: number }> {
   // This HTTP entry requires a saved version even though internal/Tour compatibility allows omission.
@@ -1743,7 +1733,7 @@ export async function listSalesOrders(
   options: { orderMainBook?: OrderMainBook } = {},
 ): Promise<Record<string, any>[]> {
   completeOrderScope(scope);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const mode = requestedMode(options.orderMainBook);
     const book = await resolveOrderBookTx(tx, scope, mode);
     const rows: any[] = await tx.$queryRawUnsafe(
@@ -1817,7 +1807,9 @@ export async function cancelSalesOrder(
   input: SalesOrderCancelInput,
 ): Promise<{ cancelled: true }> {
   const prepared = prepareSalesOrderCancel(input);
-  return withTenant(prisma, prepared.tenantId, (tx) => runSalesOrderCancelTx(tx, input, prepared));
+  return withTxBudget(prisma, prepared.tenantId, 'voucher', (tx) =>
+    runSalesOrderCancelTx(tx, input, prepared),
+  );
 }
 
 /** Existing reversal, temporary row deletion and cancellation evidence in the caller's transaction. */
@@ -1933,7 +1925,7 @@ function requireSessionOrderVersion(value: unknown) {
 type SessionOrderCreateRequest = { identity: unknown; input: SalesOrderInput };
 type SessionOrderCancelRequest = { identity: unknown; input: SalesOrderCancelInput };
 type SessionOrderEditRequest = SessionOrderCreateRequest & { voucherNo: number | string };
-type OrderCommandPrisma = Parameters<typeof withTenant>[0];
+type OrderCommandPrisma = TxBudgetPrisma;
 
 function createOrderInSession(
   prisma: OrderCommandPrisma,
@@ -2231,7 +2223,7 @@ export async function cancelSalesOrderAdjust(
     });
     return { vchNo: no, refunded: paidAmt, kasar };
   };
-  return lifecycle ? run(lifecycle.tx) : withTenant(prisma, tenantId, run);
+  return lifecycle ? run(lifecycle.tx) : withTxBudget(prisma, tenantId, 'voucher', run);
 }
 
 const ADJUST_WRITE_TABLES = [
@@ -2254,7 +2246,7 @@ export async function getSalesOrderAdjustment(
 ): Promise<Record<string, unknown>> {
   const sc = adjustScope(scope),
     voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, sc.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, sc.tenantId, 'read', async (tx: any) => {
     const p = orderParams(sc, voucherNo);
     const r: any[] = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"VCH_TIME","HD_VCH_NO","MAIN_USER","AC_CODE","AC_NAME","ORD_NO","PAID_AMT","PAID_AC","KASAR_AMT","IT_DESC" FROM "SL_ORD_ADJ" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO"`,
@@ -2297,7 +2289,7 @@ export async function editSalesOrderAdjustment(
   const sc = adjustScope(input.scope),
     voucherNo = formatVoucherNo(requestedVoucherNo),
     requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
-  return withTenant(prisma, sc.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, sc.tenantId, 'voucher', async (tx: any) => {
     const persisted = await persistedVoucherHeaderTx(tx, {
       table: 'SL_ORD_ADJ',
       scope: sc,
@@ -2330,7 +2322,7 @@ export async function deleteSalesOrderAdjustment(
   const sc = adjustScope(input.scope),
     voucherNo = formatVoucherNo(input.vchNo),
     key = keyOf(sc, Number(voucherNo));
-  return withTenant(prisma, sc.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, sc.tenantId, 'voucher', async (tx: any) => {
     const persisted = await persistedVoucherHeaderTx(tx, {
       table: 'SL_ORD_ADJ',
       scope: sc,

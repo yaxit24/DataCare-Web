@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import {
   docShell,
   esc,
@@ -82,7 +82,7 @@ export async function schemePassbookData(
   prisma: any,
   s: PassbookScope,
 ): Promise<{ member: any; scheme: any; installments: any[]; company: any } | null> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const m: any[] = await tx.$queryRawUnsafe(
       `SELECT * FROM "AD_MEMB" WHERE "CO_CODE"=$1 AND "SCHM_CODE"=$2 AND "MEMB_CODE"=$3 LIMIT 1`,
       s.coCode,

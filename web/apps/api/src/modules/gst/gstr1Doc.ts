@@ -1,5 +1,5 @@
 import { docShell, esc, num, money, type DocMeta } from '../documents/docChrome.js';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { gstr1, type Gstr1, type GstScope } from './gst.js';
 
 /** GSTR-1 statutory return document — renders the outward-supply sections from the existing gstr1()
@@ -118,7 +118,7 @@ export async function renderGstr1Doc(
   opts: { threshold?: number; period?: string } = {},
 ): Promise<string> {
   const data = await gstr1(prisma, scope, { threshold: opts.threshold });
-  const co: any[] = await withTenant(prisma, scope.tenantId, (tx: any) =>
+  const co: any[] = await withTxBudget(prisma, scope.tenantId, 'read', (tx: any) =>
     tx.$queryRawUnsafe(`SELECT * FROM "CO_MAST" WHERE "CO_CODE"=$1 LIMIT 1`, scope.coCode),
   );
   return gstr1DocHtml(data, { company: co[0] ?? null, period: opts.period });

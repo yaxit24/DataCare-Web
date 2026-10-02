@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { insertRowTx } from '../posting/posting.js';
 
 /**
@@ -45,7 +45,7 @@ export async function setWeightSlabs(
   tenantId: string,
   slabs: WeightSlab[],
 ): Promise<number> {
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     await tx.$executeRawUnsafe(`DELETE FROM "WEIGHT_MAST" WHERE tenant_id=$1`, tenantId);
     let written = 0;
     for (const [index, slab] of slabs.entries()) {
@@ -86,7 +86,7 @@ export async function setColumnLabels(
   tenantId: string,
   labels: ColumnLabel[],
 ): Promise<number> {
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     await tx.$executeRawUnsafe(`DELETE FROM "USER_MAST" WHERE tenant_id=$1`, tenantId);
     let written = 0;
     for (const label of labels) {
@@ -135,7 +135,7 @@ export async function setBookAccountDetails(
   tenantId: string,
   rows: BookAccountDetail[],
 ): Promise<number> {
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     await tx.$executeRawUnsafe(`DELETE FROM "BOOK_IDTL" WHERE tenant_id=$1`, tenantId);
     let written = 0;
     for (const [index, row] of rows.entries()) {
@@ -176,7 +176,7 @@ export async function setRojmelClosingCash(
   closingCash: number,
   mainUser?: string,
 ): Promise<{ saved: true }> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await tx.$executeRawUnsafe(
       `DELETE FROM "ROJMEL_BAL"
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "VCH_DATE"=$4::date`,
@@ -349,7 +349,7 @@ export async function setOpeningLedger(
   scope: { tenantId: string; coCode: string; lcCode: string; coYear?: string; coBook?: string },
   rows: OpeningLedgerRow[],
 ): Promise<number> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'heavy', async (tx: any) => {
     await tx.$executeRawUnsafe(
       `DELETE FROM "OP_LDR" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "CO_YEAR"=$3`,
       scope.tenantId,

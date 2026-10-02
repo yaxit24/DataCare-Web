@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { PRECISION, round } from '@datacare/core';
 import type { ListReport, ReportScope } from './reports.js';
 
@@ -71,7 +71,7 @@ export async function stockLevelReport(
   scope: { CO_CODE: string },
   options: { itCode?: string; itType?: string } = {},
 ): Promise<StockLevelReport> {
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [scope.CO_CODE];
     const filters = ['a."CO_CODE"::text=$1'];
     if (options.itCode) {
@@ -148,7 +148,7 @@ export async function schemeMonthlyReport(
   const lcCode = txt(options.lcCode) ?? s.lcCode ?? '';
   const toDate = s.toDate ?? todayIso();
   const withAdjScheme = flagFrom(options.withAdjScheme, false);
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT a."MEMB_CODE" AS "membCode",
               b."MEMB_NAME" AS "membName",

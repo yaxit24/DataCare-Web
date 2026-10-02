@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
 import {
   formatVoucherNo,
@@ -205,7 +205,7 @@ async function insertTagTx(
 }
 
 export async function tagAvailable(prisma: any, tenantId: string, key: TagKey): Promise<boolean> {
-  return withTenant(prisma, tenantId, (tx: any) => existsTx(tx, key));
+  return withTxBudget(prisma, tenantId, 'read', (tx: any) => existsTx(tx, key));
 }
 
 export async function createTag(
@@ -213,7 +213,7 @@ export async function createTag(
   tenantId: string,
   data: Record<string, unknown> & TagKey,
 ): Promise<{ created: true }> {
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     await insertTagTx(tx, tenantId, data);
     return { created: true };
   });
@@ -306,7 +306,7 @@ export async function issueTag(
   tenantId: string,
   key: TagKey,
 ): Promise<{ issued: true }> {
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     await issueTagTx(tx, key);
     return { issued: true };
   });
@@ -318,7 +318,7 @@ export async function restoreTag(
   tenantId: string,
   data: Record<string, unknown> & TagKey,
 ): Promise<{ restored: true }> {
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     await restoreTagTx(tx, tenantId, data);
     return { restored: true };
   });
@@ -331,7 +331,7 @@ export async function onHand(
   scope: { CO_CODE: string; LC_CODE?: string },
 ): Promise<{ pcs: number; gwt: number; nwt: number; fine: number }> {
   const NN = (c: string): string => `coalesce(NULLIF(${c}::text,'')::numeric,0)`;
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const lc = scope.LC_CODE ? ' AND b."LC_CODE"::text=$2' : '';
     const params = scope.LC_CODE ? [scope.CO_CODE, scope.LC_CODE] : [scope.CO_CODE];
     const r = await tx.$queryRawUnsafe(
@@ -362,7 +362,7 @@ export async function onHandNet(
 ): Promise<{ pcs: number; gwt: number; nwt: number; fine: number }> {
   const S = (c: string): string =>
     `sum(CASE WHEN "ITM_SIGN"::text='+' THEN coalesce(NULLIF(${c}::text,'')::numeric,0) ELSE -coalesce(NULLIF(${c}::text,'')::numeric,0) END)`;
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const behavior = await resolveSettingsBehaviorTx(tx, { tenantId, coCode: scope.CO_CODE });
     // RP_STOCK.cs/RP_TAG.cs MsCoStockMerge branches widen company scope; tenant RLS remains active.
     const company = behavior.companyStockMerge ? '' : ' AND "CO_CODE"::text=$1';
@@ -396,7 +396,7 @@ export async function listTags(
   limit = 200,
 ): Promise<Record<string, unknown>[]> {
   const n = Math.min(Number(limit) || 200, 500);
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const lc = scope.LC_CODE ? ' AND b."LC_CODE"::text=$2' : '';
     const params = scope.LC_CODE ? [scope.CO_CODE, scope.LC_CODE] : [scope.CO_CODE];
     const rows: Record<string, unknown>[] = await tx.$queryRawUnsafe(
@@ -441,7 +441,7 @@ export async function physicalReconcileLegacy(
   missingCount: number;
   extraCount: number;
 }> {
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     // Book = REAL desktop tag inventory (BAR_DETL) still in stock (no MAIN_STOCK '-' out-movement).
     const rows: { TAG_NO: unknown; VCH_SRNO: unknown; nwt: unknown }[] = await tx.$queryRawUnsafe(
       `SELECT b."TAG_NO",b."VCH_SRNO",coalesce(NULLIF(b."ITM_NWT"::text,'')::numeric,0)::float AS nwt
@@ -533,7 +533,7 @@ export async function physicalReconcile(
   missingCount: number;
   extraCount: number;
 }> {
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const rows: { TAG_NO: unknown; VCH_SRNO: unknown; nwt: unknown }[] = await tx.$queryRawUnsafe(
       `SELECT b."TAG_NO",b."VCH_SRNO",coalesce(NULLIF(b."ITM_NWT"::text,'')::numeric,0)::float AS nwt
            FROM "BAR_DETL" b
@@ -662,7 +662,7 @@ export async function physicalStockList(
     karigarName: string | null;
   }>
 > {
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [scope.CO_CODE, scope.LC_CODE];
     const cl: string[] = [];
     if (filters?.tblCode) {
@@ -790,7 +790,7 @@ export async function stockAdjust(
   const r3 = (n: number): number => Math.round((n + 1e-9) * 1000) / 1000;
   const r2 = (n: number): number => Math.round((n + 1e-9) * 100) / 100;
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const no = await nextVoucherNoTx(tx, input.scope);
     const key = {
       CO_CODE: input.scope.coCode,
@@ -850,7 +850,7 @@ export async function deleteStockAdjust(
     CO_BOOK: input.scope.coBook ?? input.book ?? 'SAJ',
     VCH_NO: formatVoucherNo(input.vchNo),
   };
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     await reverseVoucherTx(tx, tenantId, {
       tables: ['MAIN_STOCK'],
       key,
@@ -906,7 +906,7 @@ export async function counterTransfer(
   const r3 = (n: number): number => Math.round((n + 1e-9) * 1000) / 1000;
   const r2 = (n: number): number => Math.round((n + 1e-9) * 100) / 100;
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const no = await nextVoucherNoTx(tx, { ...input.scope, coBook: 'CTR' });
     const key = {
       CO_CODE: input.scope.coCode,
@@ -966,7 +966,7 @@ export async function deleteCounterTransfer(
     CO_BOOK: input.scope.coBook ?? input.book ?? 'CTR',
     VCH_NO: formatVoucherNo(input.vchNo),
   };
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     await reverseVoucherTx(tx, tenantId, {
       tables: ['MAIN_STOCK'],
       key,

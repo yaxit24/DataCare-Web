@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { assertBalanced, assertPeriodOpen, insertRowTx } from '../posting/posting.js';
 import {
   resolveBookAccountTx,
@@ -1212,7 +1212,7 @@ async function saveTx(tx: any, input: VpParcelInput, requestedVoucherNo?: string
 }
 
 export async function saveVpParcel(prisma: any, input: VpParcelInput, requestedVoucherNo?: string) {
-  return withTenant(prisma, input.scope.tenantId, (tx: any) =>
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', (tx: any) =>
     saveTx(tx, input, requestedVoucherNo),
   );
 }
@@ -1224,7 +1224,7 @@ export async function getVpParcel(
 ) {
   const scope = completeFinanceScope(scopeInput);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await resolveBookTx(tx, scope);
     const headers: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT h.*,h."VCH_DATE"::text AS "VCH_DAY",to_char(h."VCH_TIME",'HH24:MI:SS.MS') AS "VCH_CLOCK"
@@ -1308,7 +1308,7 @@ export async function deleteVpParcel(
 ): Promise<{ reversed: true; auditedRows: 1 }> {
   const scope = completeFinanceScope(scopeInput);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const policy = await resolveBookTx(tx, scope);
     const edited = await editIdentityTx(tx, {
       table: 'RATE_CUT_DATA',

@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { dateWhere, type ReportScope } from './reports.js';
 
 /** `Conversion.Val`-equivalent numeric read; the desktop tolerates junk in these columns. */
@@ -107,7 +107,7 @@ const EMPTY = (): RojmelMetalTotals => ({
  * voucher's rows and orders them the way the desktop wrote them.
  */
 export async function rojmel(prisma: any, s: ReportScope): Promise<Rojmel> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [s.tenantId, s.coCode, s.lcCode, s.coYear];
     const where =
       `tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4` +

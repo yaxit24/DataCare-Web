@@ -1,5 +1,5 @@
 import { dateWhere } from './reports.js';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import type { ReportScope, ListReport } from './reports.js';
 
 /**
@@ -41,7 +41,7 @@ const NN = (c: string): string => `coalesce(NULLIF(${c}::text,'')::numeric,0)`;
  * — 2 bills, netValue 1063887.00, taxValue 31916.61, totalValue 1096900.00.
  */
 export async function purchaseByParty(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const yr = s.coYear ? ' AND pd."CO_YEAR"=$2' : '';
     const params: unknown[] = s.coYear ? [s.coCode, s.coYear] : [s.coCode];
     const dt = dateWhere(s, 'pd."VCH_DATE"', params);
@@ -83,7 +83,7 @@ export async function purchaseByParty(prisma: any, s: ReportScope): Promise<List
  * 15 bills, netValue 1460243.00, taxValue 34022.58, totalValue 1495362.00).
  */
 export async function monthlyPurchase(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const yr = s.coYear ? ' AND "CO_YEAR"=$2' : '';
     const params: unknown[] = s.coYear ? [s.coCode, s.coYear] : [s.coCode];
     const dt = dateWhere(s, '"VCH_DATE"', params);
@@ -123,7 +123,7 @@ export async function monthlyPurchase(prisma: any, s: ReportScope): Promise<List
  * inputGst ties to monthlyPurchase 2024-07 taxValue 34022.58).
  */
 export async function gstInputRegister(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const yr = s.coYear ? ' AND "CO_YEAR"=$2' : '';
     const params: unknown[] = s.coYear ? [s.coCode, s.coYear] : [s.coCode];
     const dt = dateWhere(s, '"VCH_DATE"', params);

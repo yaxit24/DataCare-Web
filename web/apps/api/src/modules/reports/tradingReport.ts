@@ -1,5 +1,5 @@
 import { round } from '@datacare/core';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import type { ListReport, ReportScope } from './reports.js';
 
 export type TradingMode = 'all' | 'only-ratecut' | 'without-ratecut';
@@ -75,7 +75,7 @@ export async function tradingReport(
   const bookCodes = cleanCodes(options.bookCodes ?? s.filters?.bookCode);
   const { fromDate, toDate } = dateBounds(s);
 
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const stockParams: unknown[] = [
       s.coCode,
       s.lcCode ?? '',

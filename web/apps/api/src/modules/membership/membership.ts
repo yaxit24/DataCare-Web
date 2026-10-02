@@ -1,4 +1,3 @@
-import { withTenant } from '@datacare/db';
 import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 
@@ -45,7 +44,7 @@ export async function enrollMember(
 ): Promise<{ enrolled: true }> {
   if (!m.membCode || !m.membName) throw new MembershipError('member code and name are required');
   const pointCode = m.pointCode || DEFAULT_POINT;
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const ex: unknown[] = await tx.$queryRawUnsafe(
       `SELECT 1 FROM "POINT_MEMB" WHERE "CO_CODE"=$1 AND "POINT_CODE"=$2 AND "MEMB_CODE"=$3 LIMIT 1`,
       scope.coCode,
@@ -167,7 +166,7 @@ export async function postPoints(
 }
 
 export async function listMembers(prisma: any, scope: MemberScope): Promise<Record<string, any>[]> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT m."MEMB_CODE" AS "membCode", m."MEMB_NAME" AS "membName", m."MOBILE_NO" AS mobile, m."POINT_CODE" AS "pointCode",
               coalesce((SELECT sum(CASE WHEN d."INOUT_TYPE"='I' THEN ${NN('d."TOT_POINT"')} ELSE -${NN('d."TOT_POINT"')} END)
