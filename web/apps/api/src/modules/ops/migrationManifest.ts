@@ -144,4 +144,9 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261001090000_dm_data_tbl_code',
     checksum: 'c09e3409f0c7cbd7cb6f6cc590ca829802280ba92f5eb26ca2fc2ec028eb5f19',
   },
+  {
+    // G82: repair web-provisioned GST tax masters to the desktop parent (SR_NO 0) + SGST/CGST/IGST shape.
+    name: '20261002010000_tax_mast_parent_row',
+    checksum: '444662274047749756cb5538c58167945a996169bdec550c65f37e00ba914b68',
+  },
 ];

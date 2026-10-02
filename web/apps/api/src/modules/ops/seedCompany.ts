@@ -1,3 +1,4 @@
+import { round } from '@datacare/core';
 import { withTenant } from '@datacare/db';
 import { type BookWorkflow, workflowPolicy } from '../shared/bookPolicy.js';
 
@@ -62,16 +63,46 @@ const WHOLESALE_SLOTS: Array<{ srNo: number; acCode: string }> = [
   { srNo: 12, acCode: 'FINEKSR' },
 ];
 
-/** Standard GST/TCS taxes (TAX_PRC is the total rate; the CGST/SGST↔IGST split is computed at posting). */
-const TAXES: { code: string; name: string; prc: number }[] = [
+/**
+ * Standard GST/TCS taxes. `prc` is the TOTAL rate.
+ *
+ * TAX_MAST is a parent + component shape, exactly as the desktop writes it and as the resolver reads it
+ * (G82). The resolver pins the code by its PARENT row `SR_NO = 0` (`shared/taxPolicy.ts`, matching the desktop
+ * `AND D.SR_NO = 0`), and the per-component split is read from `SR_NO = 1` SGST, `SR_NO = 2` CGST, `SR_NO = 3`
+ * IGST (`Ac_Tax.cs`: `C.SR_NO = 1/2/3`, `TAX_AMT/2`, `TAX_AMT/2`, full). A GST code therefore needs four rows;
+ * TAX FREE and TCS are a single parent row. Provisioning a code at `SR_NO = 1` only — as this seed did before
+ * G82 — leaves it with no parent, so every save that NAMES the code failed with
+ * "tax code is not configured" on every web-provisioned company.
+ *
+ * `isGst` marks the codes that get the three component rows.
+ *
+ * `TAX_AC` is deliberately left unset, exactly as this seed always left it. Choosing the tax ledger account is a
+ * provisioning-convention question (gaps G38 and G40, decision D15, slices N58 and N59), not part of G82: the
+ * desktop posts sale AND purchase tax to the one `TAX_MAST.TAX_AC` of the parent row (`Ac_Ledr.cs` Sales_Ledr and
+ * Purc_Ledr join `D.SR_NO = 0` and post `D.TAX_AC`), while the web writers fall back to `'GST'` for sales and
+ * `'GSTINPUT'` for purchases when `TAX_AC` is empty (`sales.ts:787`, `purchase.ts:718`). Writing `'GST'` here
+ * would silently move every web-provisioned company's purchase input tax onto the output account, so G82 adds
+ * the parent and component rows and changes no posted account.
+ */
+const TAXES: { code: string; name: string; prc: number; isGst?: boolean }[] = [
   { code: '00', name: 'TAX FREE', prc: 0 },
-  { code: '10', name: 'GST 3%', prc: 3 },
-  { code: '11', name: 'GST 5%', prc: 5 },
-  { code: '12', name: 'GST 12%', prc: 12 },
-  { code: '13', name: 'GST 18%', prc: 18 },
-  { code: '14', name: 'GST 28%', prc: 28 },
+  { code: '10', name: 'GST 3%', prc: 3, isGst: true },
+  { code: '11', name: 'GST 5%', prc: 5, isGst: true },
+  { code: '12', name: 'GST 12%', prc: 12, isGst: true },
+  { code: '13', name: 'GST 18%', prc: 18, isGst: true },
+  { code: '14', name: 'GST 28%', prc: 28, isGst: true },
   { code: '20', name: 'TCS 0.1%', prc: 0.1 },
 ];
+
+/** The desktop component layout for a GST code: SR_NO 1 SGST (half), 2 CGST (half), 3 IGST (full). */
+function gstComponents(prc: number): Array<{ srNo: number; group: string; prc: number }> {
+  const half = round(prc / 2, 4);
+  return [
+    { srNo: 1, group: 'SGST', prc: half },
+    { srNo: 2, group: 'CGST', prc: half },
+    { srNo: 3, group: 'IGST', prc },
+  ];
+}
 
 /** Voucher books the web writes (CO_BOOK literals) → friendly names. */
 /**
@@ -361,9 +392,17 @@ export async function seedCompany(
       }
     }
     for (const t of TAXES) {
-      if (await absent('TAX_MAST', '"CO_CODE"=$2 AND "TAX_CODE"=$3', coCode, t.code)) {
+      // Parent row at SR_NO 0 — the row the resolver pins a named code to (G82).
+      if (
+        await absent(
+          'TAX_MAST',
+          '"CO_CODE"=$2 AND "TAX_CODE"=$3 AND coalesce("SR_NO",0)=0',
+          coCode,
+          t.code,
+        )
+      ) {
         await tx.$executeRawUnsafe(
-          `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_PRC","TAX_GROUP") VALUES ($1,$2,$3,1,$4,$5,'N')`,
+          `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_PRC","TAX_GROUP") VALUES ($1,$2,$3,0,$4,$5,'N')`,
           tenantId,
           coCode,
           t.code,
@@ -371,6 +410,32 @@ export async function seedCompany(
           t.prc,
         );
         taxes += 1;
+      }
+      // SGST / CGST / IGST component rows at SR_NO 1..3 for a GST code.
+      if (t.isGst) {
+        for (const c of gstComponents(t.prc)) {
+          if (
+            await absent(
+              'TAX_MAST',
+              '"CO_CODE"=$2 AND "TAX_CODE"=$3 AND coalesce("SR_NO",0)=$4',
+              coCode,
+              t.code,
+              c.srNo,
+            )
+          ) {
+            await tx.$executeRawUnsafe(
+              `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_PRC","TAX_GROUP") VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+              tenantId,
+              coCode,
+              t.code,
+              c.srNo,
+              `${t.name} ${c.group}`,
+              c.prc,
+              c.group,
+            );
+            taxes += 1;
+          }
+        }
       }
     }
     for (const b of BOOKS) {
