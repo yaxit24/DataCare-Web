@@ -79,4 +79,17 @@ test('requestDocumentPath is null when no usable document URL was reported', () 
   assert.equal(requestDocumentPath({ documentURL: () => undefined }), null);
   assert.equal(requestDocumentPath({ documentURL: () => 'not a url' }), null);
   assert.equal(requestDocumentPath({ documentURL: () => `${origin}/select?x=1` }), '/select');
+  // A plain Playwright request has no documentURL; Chromium's Referer names the issuing page.
+  assert.equal(
+    requestDocumentPath({ headers: () => ({ referer: `${origin}/select` }) }),
+    '/select',
+  );
+  assert.equal(
+    requestDocumentPath({
+      documentURL: () => `${origin}/dashboard`,
+      headers: () => ({ referer: `${origin}/select` }),
+    }),
+    '/dashboard',
+  );
+  assert.equal(requestDocumentPath({ headers: () => ({}) }), null);
 });

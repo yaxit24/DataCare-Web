@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { sessionContextFixtureTables, observeSessionContext } from './session-context.journey.mjs';
+import { requestDocumentPath } from './session-context-response-observation.mjs';
 
 const requiredBytes = readFileSync(
   new URL('./fixtures/labour-preview-lifecycle.required.json', import.meta.url),
@@ -266,8 +267,13 @@ export async function exerciseLabourPreviewLifecycle(
     );
   };
   const readMe = async (target) => {
+    // Only the /me of the /select document: the page being left may still be fetching its own /me,
+    // which the navigation cancels (see requestDocumentPath).
     const waiting = target.waitForResponse(
-      (r) => pathname(r.request()) === '/api/me' && r.status() === 200,
+      (r) =>
+        pathname(r.request()) === '/api/me' &&
+        requestDocumentPath(r.request()) === '/select' &&
+        r.status() === 200,
     );
     await target.goto('/select');
     const body = await (await waiting).json();

@@ -127,15 +127,19 @@ export async function prepareJsonResponseObservation(page) {
 }
 
 /**
- * The path of the document that issued an observed request, or null when Chromium did not report one.
+ * The path of the document that issued an observed request, or null when it cannot be told.
+ *
+ * Reads the CDP `documentURL` this observer records, or, for a plain Playwright request, the Referer header
+ * Chromium sends with a same-origin fetch (the web app sets no Referrer-Policy, so it names the full page).
  *
  * A waiter for a request that a navigation will issue must not match the same endpoint fetched by the page
  * being left: that request is cancelled by the navigation (net::ERR_ABORTED), and if its response headers
- * arrived first the waiter has already matched it and fails with "failed before its body completed". On a
- * slow CI runner the dashboard's own `/me` reached that state while the journey navigated to `/select`.
+ * arrived first the waiter has already matched it and fails ("failed before its body completed", or
+ * "No resource with given identifier" from `response.json()`). On a slow CI runner the dashboard's own `/me`
+ * reached that state while a journey navigated to `/select`.
  */
 export function requestDocumentPath(request) {
-  const url = request.documentURL?.();
+  const url = request.documentURL?.() || request.headers?.()?.referer;
   if (!url) return null;
   try {
     return new URL(url).pathname;
