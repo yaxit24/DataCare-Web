@@ -9,7 +9,10 @@
         "DATABASE_URL",
         "MIGRATE_DATABASE_URL",
         "RUN_DB_INTEGRITY_TESTS",
-        "RUN_DB_SECURITY_TESTS"
+        "RUN_DB_SECURITY_TESTS",
+        "PARITY_TEST_PORT",
+        "PARITY_TEST_DATABASE",
+        "PARITY_TEST_SYSTEM_IDENTIFIER"
       ],
       "outputs": ["coverage/**"]
     },

@@ -8,6 +8,7 @@ import {
   getOrderImage,
   customOrderImageKey,
 } from '../src/modules/images/orderImage.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const db = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 db('saved order image changes', () => {
@@ -32,8 +33,7 @@ db('saved order image changes', () => {
       await sql(`DELETE FROM "${table}" WHERE tenant_id=$1`);
   }
   beforeAll(async () => {
-    if (!process.env.MIGRATE_DATABASE_URL?.includes(':55433/'))
-      throw new Error('Disposable database required.');
+    assertIsolatedTestDatabase();
     await clean();
     await sql(`INSERT INTO "BOOK_DATA" (tenant_id,"CO_CODE","LC_CODE","CO_BOOK","MAIN_BOOK","BOOK_TBL_NAME","BOOK_INOUT","CUR_USE")
       VALUES ($1,'01','01','SI1','SALES ORDER','SL_ORD_DATA','O','Y'),($1,'01','01','SI2','SALES ORDER','SL_ORD_DATA','O','Y'),($1,'01','01','TI1','TOUR ORDER','SL_ORD_DATA','I','Y')`);

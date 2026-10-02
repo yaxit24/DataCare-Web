@@ -10,6 +10,7 @@ import {
   updateColumnSetting,
 } from '../src/modules/masters/columnSettings.js';
 import { getSaleReturnIncomingConfiguration } from '../src/modules/sales/saleReturnIncomingConfiguration.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const run = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 type Listed = {
@@ -137,9 +138,7 @@ run('column settings exact family lifecycle through PostgreSQL and authenticated
       await sql(`DELETE FROM "${table}" WHERE tenant_id IN($1,$2)`, tenantId, otherTenant);
   };
   beforeAll(async () => {
-    for (const value of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL])
-      if (!value || new URL(value).port !== '55433')
-        throw new Error('Disposable column settings database 55433 required.');
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient();
     await clean();

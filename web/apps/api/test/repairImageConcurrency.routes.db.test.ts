@@ -6,6 +6,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { hashPassword } from '../src/modules/auth/password.js';
 import { repairImageNo } from '../src/modules/repair/repairImage.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const db = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 const tenantId = 'repair-image-cas-r5';
@@ -94,9 +95,7 @@ db('repair image HTTP compare-and-swap and source identity', () => {
       await sql(`DELETE FROM "${table}" WHERE tenant_id=$1`);
   }
   beforeAll(async () => {
-    for (const value of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL])
-      if (!value || new URL(value).port !== '55433')
-        throw new Error('Isolated repair image database required.');
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient();
     await cleanup();

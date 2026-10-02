@@ -185,7 +185,7 @@ pnpm install --frozen-lockfile
 pnpm --filter @datacare/db db:generate
 pnpm build
 
-# Isolated database (port 55433, migrations, non-owner role, forced RLS) for the API database tests:
+# Isolated database (fresh per run on PARITY_TEST_PORT, default 55433; migrations, non-owner role, forced RLS):
 node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test
 
 # Zero-mock browser suite (API_ORIGIN is fixed when the web app is built):
@@ -196,9 +196,9 @@ node scripts/parity-test-env.mjs -- node apps/web/test/parity.real-stack.mjs
 For a manual stack: start PostgreSQL (`docker compose up -d postgres`), apply migrations, `rls.sql` and
 `setup_roles.sql` as described in `web/DEPLOY.md`, start the API with `PORT`, `DATABASE_URL`, `JWT_SECRET`,
 `APP_TENANT_ID` and, for demo data, `SEED_DEMO` and `DEMO_PASSWORD`, then start the web app with `API_ORIGIN`
-pointing at the API. The isolated wrapper uses fixed ports (55433, 4410, 4411), so parallel worktrees collide
-(G24, N49). Environment variable names are listed in `web/.env.example`; never copy values from tracked `.env`
-files.
+pointing at the API. Parallel worktrees run the isolated wrapper on different ports (`PARITY_TEST_PORT`,
+`PARITY_API_PORT`, `PARITY_WEB_PORT`; [testing](testing.md#2-commands)). Environment variable names are listed in
+`web/.env.example`; never copy values from tracked `.env` files.
 
 ## 14. Deployment
 

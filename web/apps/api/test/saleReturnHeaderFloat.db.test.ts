@@ -4,6 +4,7 @@ import { withTenant } from '@datacare/db';
 import { qualifySaleReturnHeaderFloat } from '@datacare/core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import fixture from './fixtures/saleReturnHeaderFloat.storage.json' with { type: 'json' };
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const run = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 const fields = ['RTN_BILL_OS', 'RTN_NET_AMT', 'RTN_TOT_AMT'];
@@ -12,13 +13,7 @@ const values = (text: string) => ({ RTN_NET_AMT: text, RTN_TOT_AMT: text, RTN_BI
 run('saved Return exact header Float profile against actual PostgreSQL', () => {
   let prisma: PrismaClient;
   beforeAll(async () => {
-    const url = new URL(process.env.DATABASE_URL ?? 'http://invalid');
-    if (
-      url.port !== '55433' ||
-      url.username !== 'app_user' ||
-      !['localhost', '127.0.0.1'].includes(url.hostname)
-    )
-      throw new Error('Only disposable local PostgreSQL55433 app_user is allowed.');
+    assertIsolatedTestDatabase();
     prisma = new PrismaClient();
     const roles = await prisma.$queryRawUnsafe<Array<{ rolsuper: boolean; rolbypassrls: boolean }>>(
       'SELECT rolsuper,rolbypassrls FROM pg_roles WHERE rolname=current_user',

@@ -12,6 +12,7 @@ import { revokeSession } from '../src/modules/auth/session.js';
 import type { Principal } from '../src/modules/rbac/authorization.js';
 import independent from './fixtures/sessionContextRefresh.independent.json';
 import qualifications from './fixtures/sessionContextRefresh.qualifications.json';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 // These are real PostgreSQL tests. Only local signer/clock dependencies and statement scheduling
 // are controlled. Every authority SELECT and mutation executes against the installed schema/RLS.
@@ -310,14 +311,7 @@ run('internal atomic refresh: qualified independent literals and real PostgreSQL
     protectedBusiness = await business();
   };
   beforeAll(async () => {
-    for (const value of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL]) {
-      if (
-        !value ||
-        new URL(value).port !== '55433' ||
-        !['localhost', '127.0.0.1'].includes(new URL(value).hostname)
-      )
-        throw new Error('Only local disposable parity database55433 is allowed.');
-    }
+    assertIsolatedTestDatabase();
     if (new URL(process.env.DATABASE_URL!).username !== 'app_user')
       throw new Error('Runtime must use app_user.');
     owner = new PrismaClient({

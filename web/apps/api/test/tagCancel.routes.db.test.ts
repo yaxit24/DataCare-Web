@@ -4,6 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { hashPassword } from '../src/modules/auth/password.js';
 import { seedCompany } from '../src/modules/ops/seedCompany.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 /**
  * N18 over HTTP, on a company created by web provisioning — which now carries the desktop's TR_TAG_CAN books
@@ -80,9 +81,7 @@ const SRNO = 100312000009;
   };
 
   beforeAll(async () => {
-    for (const url of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL])
-      if (!url || new URL(url).port !== '55433')
-        throw new Error('tag cancel route fixtures require isolated database 55433');
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient();
     await wipe();

@@ -3,6 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { hashPassword } from '../src/modules/auth/password.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const db = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 db('ordinary Sales Order configured HTTP lifecycle', () => {
@@ -118,9 +119,7 @@ db('ordinary Sales Order configured HTTP lifecycle', () => {
     return response.json();
   };
   beforeAll(async () => {
-    for (const value of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL])
-      if (!value || new URL(value).port !== '55433')
-        throw new Error('Isolated parity database required.');
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient();
     await clean();

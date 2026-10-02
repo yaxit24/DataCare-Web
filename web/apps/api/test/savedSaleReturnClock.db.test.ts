@@ -6,6 +6,7 @@ import { withTenant } from '@datacare/db';
 import { projectSavedSaleReturnClock } from '@datacare/core';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { readSavedSaleReturnIncomingTx } from '../src/modules/sales/savedSaleReturn.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const run = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 const tenantId = 'r13-return-clock';
@@ -122,9 +123,7 @@ run('saved Return clock projection from real PostgreSQL JSONB observations', () 
   };
 
   beforeAll(() => {
-    for (const value of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL])
-      if (!value || new URL(value).port !== '55433')
-        throw new Error('Only disposable parity database55433 is allowed.');
+    assertIsolatedTestDatabase();
     if (new URL(process.env.DATABASE_URL!).username !== 'app_user')
       throw new Error('Restricted app_user runtime required.');
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });

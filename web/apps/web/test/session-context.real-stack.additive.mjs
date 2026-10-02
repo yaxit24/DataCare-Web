@@ -2,9 +2,10 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { randomBytes } from 'node:crypto';
 import { spawn } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { realStackTarget } from './real-stack-target.mjs';
 import {
   sessionContextFixture,
   sessionContextRequiredChecks,
@@ -27,31 +28,14 @@ const apiRequire = createRequire(resolve(root, 'apps/api/package.json'));
 const webRequire = createRequire(resolve(root, 'apps/web/package.json'));
 const { PrismaClient } = apiRequire('@prisma/client');
 const { chromium } = webRequire('playwright');
-for (const name of ['DATABASE_URL', 'MIGRATE_DATABASE_URL']) {
-  const parsed = new URL(process.env[name] || 'invalid:');
-  assert.equal(
-    parsed.hostname,
-    '127.0.0.1',
-    'Only the disposable local parity database is allowed',
-  );
-  assert.equal(parsed.port, '55433');
-  assert.equal(parsed.pathname, '/datacare');
-}
-assert.equal(new URL(process.env.DATABASE_URL).username, 'app_user');
 assert.equal(
   process.env.RUN_DB_INTEGRITY_TESTS,
   '1',
   'Use the parity environment wrapper and acquire the serial browser/DB lease',
 );
-const apiOrigin = 'http://127.0.0.1:4410',
-  webOrigin = 'http://127.0.0.1:4411';
-const routes = JSON.parse(
-  readFileSync(resolve(root, 'apps/web/.next/routes-manifest.json'), 'utf8'),
-);
-assert(
-  JSON.stringify(routes.rewrites).includes(`${apiOrigin}/:path*`),
-  'Build the integrated UI/API with API_ORIGIN=http://127.0.0.1:4410 before running',
-);
+// Database, ports and build origin (N49 step 4): see real-stack-target.mjs.
+const target = realStackTarget(root);
+const { apiOrigin, webOrigin } = target;
 const artifacts = resolve(
   process.env.SESSION_CONTEXT_ARTIFACT_DIR ||
     resolve(root, 'test-results/session-context-real-stack-lifecycle'),
@@ -73,7 +57,7 @@ const result = {
   provenance:
     'Real Chromium -> production Next -> Fastify -> PostgreSQL app_user/RLS; explicitly injected upstream response transport faults',
   releaseSha: process.env.RELEASE_SHA || null,
-  database: 'disposable localhost:55433 / app_user',
+  database: target.databaseLabel,
 };
 try {
   await seedSessionContext(sql, { passwordHash: await hashPassword(password) });
@@ -84,10 +68,20 @@ try {
     defaultTenantId: tenantId,
     allowTenantHeader: false,
   });
-  await app.listen({ host: '127.0.0.1', port: 4410 });
+  await app.listen({ host: '127.0.0.1', port: target.apiPort });
   server = spawn(
     'pnpm',
-    ['--filter', '@datacare/web', 'exec', 'next', 'start', '-p', '4411', '-H', '127.0.0.1'],
+    [
+      '--filter',
+      '@datacare/web',
+      'exec',
+      'next',
+      'start',
+      '-p',
+      String(target.webPort),
+      '-H',
+      '127.0.0.1',
+    ],
     {
       cwd: root,
       env: { ...process.env, API_ORIGIN: apiOrigin },

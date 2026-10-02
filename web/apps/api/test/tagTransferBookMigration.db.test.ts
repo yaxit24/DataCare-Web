@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { PrismaClient } from '@prisma/client';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 /**
  * N18 data migration 20260929010000_tag_transfer_book, run against real rows.
@@ -51,9 +52,7 @@ const statements: string[] = [];
     );
 
   beforeAll(async () => {
-    for (const url of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL])
-      if (!url || new URL(url).port !== '55433')
-        throw new Error('the migration fixture requires isolated database 55433');
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient();
     await wipe();

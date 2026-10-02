@@ -2,9 +2,10 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { randomBytes } from 'node:crypto';
 import { spawn } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { realStackTarget } from './real-stack-target.mjs';
 import { chromium } from 'playwright';
 import {
   aggregateRealStackEvidence,
@@ -119,26 +120,13 @@ const { PrismaClient } = apiRequire('@prisma/client');
 const { buildApp } = await import('../../api/dist/app.js');
 const { hashPassword } = await import('../../api/dist/modules/auth/password.js');
 const tenantId = 'browser-parity';
-const apiOrigin = 'http://127.0.0.1:4410';
-const webOrigin = 'http://127.0.0.1:4411';
 const artifacts = resolve(
   process.env.PARITY_ARTIFACT_DIR || resolve(root, 'test-results/parity-real-stack'),
 );
 mkdirSync(artifacts, { recursive: true });
-for (const name of ['DATABASE_URL', 'MIGRATE_DATABASE_URL']) {
-  const url = new URL(process.env[name] || 'invalid:');
-  assert.equal(url.hostname, '127.0.0.1', `${name} must use the disposable local DB`);
-  assert.equal(url.port, '55433', `${name} must use the disposable test port`);
-  assert.equal(url.pathname, '/datacare');
-}
-assert.equal(new URL(process.env.DATABASE_URL).username, 'app_user');
-const manifest = JSON.parse(
-  readFileSync(resolve(root, 'apps/web/.next/routes-manifest.json'), 'utf8'),
-);
-assert(
-  JSON.stringify(manifest.rewrites).includes(`${apiOrigin}/:path*`),
-  'Build with API_ORIGIN=http://127.0.0.1:4410 pnpm build before running the real-stack journey',
-);
+// Database, ports and build origin (N49 step 4): see real-stack-target.mjs.
+const target = realStackTarget(root);
+const { apiOrigin, webOrigin } = target;
 const owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
 const runtime = new PrismaClient();
 const password = `Test-${randomBytes(18).toString('hex')}!`;
@@ -268,7 +256,7 @@ let serverLog = '';
 const result = {
   startedAt: new Date().toISOString(),
   releaseSha: process.env.RELEASE_SHA?.trim().toLowerCase() || null,
-  database: 'disposable localhost:55433 / app_user',
+  database: target.databaseLabel,
   imageObservations: [],
   cameraDevice: 'Chromium synthetic video; no physical camera acceptance',
   status: 'running',
@@ -428,10 +416,20 @@ try {
     defaultTenantId: tenantId,
     allowTenantHeader: false,
   });
-  await app.listen({ port: 4410, host: '127.0.0.1' });
+  await app.listen({ port: target.apiPort, host: '127.0.0.1' });
   server = spawn(
     'pnpm',
-    ['--filter', '@datacare/web', 'exec', 'next', 'start', '-p', '4411', '-H', '127.0.0.1'],
+    [
+      '--filter',
+      '@datacare/web',
+      'exec',
+      'next',
+      'start',
+      '-p',
+      String(target.webPort),
+      '-H',
+      '127.0.0.1',
+    ],
     {
       cwd: root,
       env: { ...process.env, API_ORIGIN: apiOrigin },

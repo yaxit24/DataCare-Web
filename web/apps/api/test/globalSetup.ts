@@ -28,8 +28,61 @@
  *     ALLOW_SKIP_DB_TESTS=1 pnpm test
  */
 import { PrismaClient } from '@prisma/client';
+import { isolatedDatabaseProblems } from './support/isolatedDatabase.js';
 
 const FLAGS = ['RUN_DB_INTEGRITY_TESTS', 'RUN_DB_SECURITY_TESTS'] as const;
+
+/**
+ * N49 step 5: prove the reachable database is the disposable test database before any test writes to it.
+ * The URLs must pass `isolatedDatabaseProblems`; the runtime login must really be `app_user` without
+ * superuser or BYPASSRLS; both logins must reach the same database on the same server; and under
+ * `scripts/parity-test-env.mjs` the server must be the one it started (`PARITY_TEST_SYSTEM_IDENTIFIER`,
+ * from `pg_control_system()`), so a container replaced or a port reassigned mid-run is refused.
+ */
+async function identityProblems(): Promise<string[]> {
+  const problems = isolatedDatabaseProblems();
+  if (problems.length) return problems;
+  const runtime = new PrismaClient({ datasources: { db: { url: process.env.DATABASE_URL } } });
+  const owner = new PrismaClient({
+    datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } },
+  });
+  const identity = `SELECT current_user::text AS name, current_database()::text AS database,
+                           (SELECT system_identifier::text FROM pg_control_system()) AS system,
+                           r.rolsuper AS superuser, r.rolbypassrls AS bypass
+                      FROM pg_roles r WHERE r.rolname = current_user`;
+  type Identity = {
+    name: string;
+    database: string;
+    system: string;
+    superuser: boolean;
+    bypass: boolean;
+  };
+  try {
+    const [login] = await runtime.$queryRawUnsafe<Identity[]>(identity);
+    const [server] = await owner.$queryRawUnsafe<Identity[]>(identity);
+    if (!login || !server) return ['the database did not report its identity'];
+    if (login.name !== 'app_user')
+      problems.push(`the runtime login is ${login.name}, not app_user`);
+    if (login.superuser || login.bypass)
+      problems.push('the runtime role is a superuser or bypasses row-level security');
+    if (login.database !== server.database || login.system !== server.system)
+      problems.push('DATABASE_URL and MIGRATE_DATABASE_URL reach different databases or servers');
+    const expected = process.env.PARITY_TEST_SYSTEM_IDENTIFIER?.trim();
+    if (expected && server.system !== expected)
+      problems.push(
+        `the server's system identifier ${server.system} is not ${expected}, the one ` +
+          'scripts/parity-test-env.mjs started',
+      );
+  } catch (e) {
+    problems.push(
+      `could not read the database identity: ${String((e as Error)?.message ?? e).split('\n')[0]}`,
+    );
+  } finally {
+    await runtime.$disconnect().catch(() => {});
+    await owner.$disconnect().catch(() => {});
+  }
+  return problems;
+}
 
 function dsn(): string | undefined {
   const v = process.env.DATABASE_URL?.trim() || process.env.MIGRATE_DATABASE_URL?.trim();
@@ -101,6 +154,26 @@ export default async function setup() {
       `DATABASE_URL is set but the database is unreachable: ${detail}\n\n` +
         'Left alone, the 53 database-backed test files would skip and the suite would still exit 0.\n' +
         'Start the database, or run with ALLOW_SKIP_DB_TESTS=1 to accept an incomplete run.',
+    );
+  }
+
+  // Reachable is not enough: the tests delete rows, so the database must be the disposable one.
+  const problems = await identityProblems();
+  if (problems.length) {
+    if (allowSkip) {
+      for (const f of FLAGS) process.env[f] = '0';
+      console.warn(
+        `[vitest] the reachable database is not the isolated test database (${problems.join('; ')}) — ` +
+          'database-backed tests SKIPPED because ALLOW_SKIP_DB_TESTS=1.',
+      );
+      return;
+    }
+    throw new Error(
+      'The reachable database is not the isolated test database, so the database tests will not run:\n  - ' +
+        problems.join('\n  - ') +
+        '\n\nRun them through scripts/parity-test-env.mjs, or point DATABASE_URL (app_user) and ' +
+        'MIGRATE_DATABASE_URL at the same disposable database on 127.0.0.1 and PARITY_TEST_PORT ' +
+        '(default 55433).',
     );
   }
 

@@ -3,6 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { hashPassword } from '../src/modules/auth/password.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const tenantId = 'r8-return-config-http';
@@ -110,9 +111,7 @@ const query = (values: Record<string, unknown>) =>
       }
     }
     beforeAll(async () => {
-      for (const url of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL])
-        if (!url || new URL(url).port !== '55433')
-          throw new Error('Isolated configuration database required.');
+      assertIsolatedTestDatabase();
       owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
       runtime = new PrismaClient();
       await clean(true);

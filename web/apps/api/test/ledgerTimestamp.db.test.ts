@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { postVoucherTx } from '../src/modules/posting/posting.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const tenantId = 'ledger-clock-parity';
@@ -15,9 +16,7 @@ const key = { CO_CODE: '01', LC_CODE: '01', CO_YEAR: '2024-2025', CO_BOOK: 'ORD'
       await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, tenantId);
   };
   beforeAll(async () => {
-    for (const name of ['DATABASE_URL', 'MIGRATE_DATABASE_URL'])
-      if (new URL(process.env[name] ?? 'invalid:').port !== '55433')
-        throw new Error('Use isolated DB55433.');
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient();
     await clean();

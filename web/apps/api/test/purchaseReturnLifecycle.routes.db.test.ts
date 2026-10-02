@@ -4,6 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { hashPassword } from '../src/modules/auth/password.js';
 import { seedCompany } from '../src/modules/ops/seedCompany.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 /** N34/G04 lifecycle over HTTP with a desktop-shaped non-mnemonic return book. */
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
@@ -40,9 +41,7 @@ const DAY = `${startYear}-06-15`;
     });
 
   beforeAll(async () => {
-    for (const url of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL])
-      if (!url || new URL(url).port !== '55433')
-        throw new Error('purchase-return route fixtures require isolated database 55433');
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient();
     await wipe();

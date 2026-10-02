@@ -31,8 +31,8 @@ Run from `web/` unless noted.
 | `pnpm build`, `pnpm typecheck`, `pnpm lint`, `pnpm format:check` | Build, type check, lint (policy, ESLint, types) and formatting |
 | `pnpm test` | All unit tests through Turbo; fails if no database is reachable, unless `ALLOW_SKIP_DB_TESTS=1` is set explicitly |
 | `pnpm typecheck:tests` | Strict compile of API and kernel test sources |
-| `pnpm test:parity:api` | The isolated database wrapper (`web/scripts/parity-test-env.mjs`: port 55433, migrations, non-owner role, forced RLS) around the full API suite |
-| `pnpm test:parity:browser` | The same wrapper around the zero-mock browser suite; the web app must have been built with `API_ORIGIN=http://127.0.0.1:4410` |
+| `pnpm test:parity:api` | The isolated database wrapper (`web/scripts/parity-test-env.mjs`: a fresh database on `PARITY_TEST_PORT`, default 55433, with migrations, non-owner role and forced RLS, removed afterwards) around the full API suite |
+| `pnpm test:parity:browser` | The same wrapper around the zero-mock browser suite; the web app must have been built with `API_ORIGIN=http://127.0.0.1:4410` (or the `PARITY_API_PORT` in use) |
 | `pnpm test:browser`, `pnpm test:routes` | Mocked browser smoke; route reachability |
 | `pnpm docs:refs` | Citations and pinned claims in `web/docs` |
 | `pnpm depth:parity`, `pnpm depth:deadcells` | Reachable operator depth ratchet; grid cells that no writer consumes |
@@ -40,15 +40,25 @@ Run from `web/` unless noted.
 | `pnpm report-baselines`, `pnpm g5:parity`, `pnpm register:check` | Report layout drift, desktop evidence gate, completion register |
 | `python3 docs/tools/docs_check.py`, `python3 docs/master-parity-plan-2026-09-29/validate_plan.py` (repository root) | Documentation hub and plan integrity |
 
-The wrapper's fixed ports (55433, 4410, 4411) mean two worktrees cannot run it at the same time; stop the other run
-or adapt the ports explicitly (G24, N49).
+**Isolation (N49).** Each checkout gets its own Compose project (a hash of its path; override `PARITY_TEST_PROJECT`)
+and its own random credentials in `~/.cache/datacare-parity-test/` (override `PARITY_TEST_STATE_DIR`), outside the
+repository. Every run starts from an empty volume and ends with `down --volumes`, also on failure; `PARITY_TEST_KEEP=1`
+keeps the database for inspection, and `node scripts/parity-test-env.mjs --down` removes one left running. Two
+worktrees run at once on different ports: set `PARITY_TEST_PORT` (database, default 55433) and, for the browser
+suites, `PARITY_API_PORT` and `PARITY_WEB_PORT` (defaults 4410 and 4411) and build the web app with the matching
+`API_ORIGIN`, which Next fixes at build time. The wrapper hands the command the container ID and the server's
+`pg_control_system()` system identifier and fails the run if either changed by the end;
+`web/apps/api/test/globalSetup.ts` refuses any database that is not loopback, on the isolated port, the same for both
+URLs, logged in as `app_user` without superuser or BYPASSRLS, and (under the wrapper) the server it started. The CI
+job `real-stack-browser` runs the three zero-mock suites this way on every pull request.
 
 ## 3. Write-set database tests
 
 Every writer change needs a database test that compares the **complete** write set, not selected columns.
 
-1. Use a tenant ID unique to the test file, refuse to run unless `DATABASE_URL` and `MIGRATE_DATABASE_URL` point at
-   the isolated port 55433, wipe that tenant's rows before and after, and seed with `seedCompany`
+1. Use a tenant ID unique to the test file, call `assertIsolatedTestDatabase()`
+   (`web/apps/api/test/support/isolatedDatabase.ts`) before touching the database, wipe that tenant's rows before and
+   after, and seed with `seedCompany`
    (`web/apps/api/src/modules/ops/seedCompany.ts`). Master rows the scenario needs may be inserted through the owner
    connection with bind parameters; **the voucher under test is always created through its route** with
    `app.inject()`. `web/apps/api/test/purchaseReturnLifecycle.routes.db.test.ts` is a complete example.
@@ -86,8 +96,8 @@ fails instead of skipping when none is, unless `ALLOW_SKIP_DB_TESTS=1` is set ex
   sales-return-labour-replay, sales-return-replay, sales-return-saved, tag-cancel-transfer, tag-split, tour-order,
   wholesale-rate-cut. Optional runners: `session-context.real-stack.additive.mjs` and
   `labour-preview-lifecycle.real-stack.mjs`.
-- **Known blocker:** the suite stopped at tag split in the last audit because a seed was not hermetic (G23, N49); fix
-  that before relying on the suite as a gate.
+- **Hermetic seeds:** every journey seed `UPDATE` is an upsert or an asserted row count, and a static test fails on
+  any other (G23, N49 steps 1–2). The suite runs from an empty volume in the CI job `real-stack-browser`.
 
 ## 5. Visual and interactive verification with Chrome DevTools MCP
 

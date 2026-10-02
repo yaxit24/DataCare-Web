@@ -7,6 +7,7 @@ import {
 } from '@datacare/core';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { readSaleReturnIncomingLabourTx } from '../src/modules/sales/saleReturnIncomingLabour.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const run = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 const tenantId = 'labour-admission-db';
@@ -84,14 +85,7 @@ run(
       });
     };
     beforeAll(async () => {
-      for (const value of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL]) {
-        if (
-          !value ||
-          new URL(value).port !== '55433' ||
-          !['localhost', '127.0.0.1'].includes(new URL(value).hostname)
-        )
-          throw new Error('Only isolated local55433 is allowed.');
-      }
+      assertIsolatedTestDatabase();
       if (new URL(process.env.DATABASE_URL!).username !== 'app_user')
         throw new Error('app_user runtime required.');
       owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });

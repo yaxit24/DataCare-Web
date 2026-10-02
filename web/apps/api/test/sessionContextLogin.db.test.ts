@@ -4,6 +4,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import { loginSessionContext } from '../src/modules/auth/sessionContextLogin.js';
 import { hashPassword, verifyPassword } from '../src/modules/auth/password.js';
 import { resetUserPassword } from '../src/modules/auth/passwordAccount.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const databaseDescribe = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 const tenant = 'context-login-db';
@@ -127,10 +128,7 @@ databaseDescribe('atomic login context on real PostgreSQL', () => {
       throw new Error('isolated database wrapper required');
     const ownerUrl = new URL(process.env.MIGRATE_DATABASE_URL);
     const runtimeUrl = new URL(process.env.DATABASE_URL);
-    for (const url of [ownerUrl, runtimeUrl]) {
-      if (!['localhost', '127.0.0.1'].includes(url.hostname) || url.port !== '55433')
-        throw new Error('only isolated local55433 is admitted');
-    }
+    assertIsolatedTestDatabase();
     if (ownerUrl.username !== 'datacare' || runtimeUrl.username !== 'app_user')
       throw new Error('isolated owner/runtime roles required');
     owner = new PrismaClient({ datasources: { db: { url: ownerUrl.toString() } } });

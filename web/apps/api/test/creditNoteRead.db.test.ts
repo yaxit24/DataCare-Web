@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { getCreditNote, listCreditNotes } from '../src/modules/einvoice/creditNote.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const tenantId = 'credit-note-read-a';
@@ -28,9 +29,7 @@ const marker = (s: typeof scope) => Object.values(s).join('/');
       );
   };
   beforeAll(async () => {
-    for (const key of ['DATABASE_URL', 'MIGRATE_DATABASE_URL'])
-      if (new URL(process.env[key] ?? 'invalid:').port !== '55433')
-        throw new Error('Use the isolated database on55433.');
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient();
     await clean();

@@ -8,6 +8,7 @@ import {
 } from '../src/modules/sales/saleReturnIncomingReplay.js';
 import { getSavedSaleReturnIncoming } from '../src/modules/sales/savedSaleReturn.js';
 import independent from './fixtures/saleReturnIncomingReplay.independent.json';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const run = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 run('saved incoming Return trusted replay in a real read-only observation', () => {
@@ -157,9 +158,7 @@ run('saved incoming Return trusted replay in a real read-only observation', () =
     editorText,
   });
   beforeAll(() => {
-    for (const url of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL])
-      if (!url || new URL(url).port !== '55433')
-        throw new Error('Disposable parity DB55433 required.');
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient();
   });

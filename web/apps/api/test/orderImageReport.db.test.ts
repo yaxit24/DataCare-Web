@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { bindReport } from '../src/modules/reports/reportBind.js';
 import { loadReportSpec, renderReportLayout } from '../src/modules/reports/reportEngine.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const databaseDescribe = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 const tenants = ['order-img-report-a', 'order-img-report-b'];
@@ -83,9 +84,7 @@ databaseDescribe('image report binding from saved scoped order identities', () =
       );
   };
   beforeAll(async () => {
-    for (const url of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL])
-      if (!url || new URL(url).port !== '55433')
-        throw new Error('Image report fixtures require isolated database 55433');
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient();
     await cleanup();

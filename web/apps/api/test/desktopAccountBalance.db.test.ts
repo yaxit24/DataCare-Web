@@ -5,6 +5,7 @@ import { withTenant } from '@datacare/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { observeDesktopAccountBalanceTx } from '../src/modules/shared/desktopAccountBalance.js';
 import independent from './fixtures/desktopAccountBalance.independent.json';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const run = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 type Raw = Record<string, string | null>;
@@ -86,10 +87,7 @@ run('internal source-qualified MsAcBal observation without mode or closing autho
     return all;
   };
   beforeAll(() => {
-    for (const value of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL]) {
-      if (!value || new URL(value).port !== '55433')
-        throw new Error('Only disposable parity database55433 is allowed.');
-    }
+    assertIsolatedTestDatabase();
     if (new URL(process.env.DATABASE_URL!).username !== 'app_user')
       throw new Error('Non-owner app_user runtime required.');
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });

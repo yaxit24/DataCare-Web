@@ -15,8 +15,9 @@ The method is in `docs/handbook/web/testing.md` §3. A complete existing example
 - Name: `web/apps/api/test/<family><Aspect>.routes.db.test.ts` (HTTP) or `<family><Aspect>.db.test.ts` (service).
 - Gate on `process.env.RUN_DB_INTEGRITY_TESTS === '1'` like the other database tests; the global setup
   (`web/apps/api/test/globalSetup.ts`) turns it on whenever a database is reachable.
-- In `beforeAll`, refuse to run unless `DATABASE_URL` and `MIGRATE_DATABASE_URL` use port 55433 (the isolated
-  database from `web/scripts/parity-test-env.mjs`).
+- In `beforeAll`, call `assertIsolatedTestDatabase()` from `web/apps/api/test/support/isolatedDatabase.ts`, which
+  refuses anything but the isolated database from `web/scripts/parity-test-env.mjs` (never compare the port literally;
+  `web/apps/api/test/isolatedDatabase.test.ts` fails on that).
 - Use a tenant ID unique to this file; wipe its rows in `beforeAll` and `afterAll` through the owner client.
 - Fixture credentials are test-only constants generated for the file; never reuse a real or tracked credential.
 

@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { bindReport } from '../src/modules/reports/reportBind.js';
 import { loadReportSpec, renderReportLayout } from '../src/modules/reports/reportEngine.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const databaseDescribe = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 const TENANTS = ['rpt-child-contract-a', 'rpt-child-contract-b'];
@@ -38,8 +39,7 @@ databaseDescribe('actual report children and parent band cardinality', () => {
     const runtimeUrl = process.env.DATABASE_URL;
     if (!ownerUrl || !runtimeUrl)
       throw new Error('Report child fixtures require both database URLs');
-    if ([ownerUrl, runtimeUrl].some((url) => new URL(url).port !== '55433'))
-      throw new Error('Report child fixtures require the isolated test database on port 55433');
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: ownerUrl } } });
     runtime = new PrismaClient({ datasources: { db: { url: runtimeUrl } } });
     await cleanup();

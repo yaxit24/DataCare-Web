@@ -14,6 +14,7 @@ import {
   withTxBudget,
 } from '../src/modules/shared/txBudget.js';
 import { scopeKey } from '../src/modules/vouchers/numbering.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 /**
  * N53 (G30, G31) over HTTP and the real database:
@@ -65,9 +66,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   const catalogQueries = () => statements.filter((sql) => /information_schema/i.test(sql));
 
   beforeAll(async () => {
-    for (const url of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL])
-      if (!url || new URL(url).port !== '55433')
-        throw new Error('transaction budget fixtures require isolated database 55433');
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient({ log: [{ emit: 'event', level: 'query' }] });
     (runtime as any).$on('query', (event: { query: string }) => statements.push(event.query));

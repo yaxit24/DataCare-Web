@@ -4,6 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { hashPassword } from '../src/modules/auth/password.js';
 import { seedCompany } from '../src/modules/ops/seedCompany.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 /**
  * D3 and D4 (PARITY-EVALUATION-2026-09-28), over HTTP with a non-administrator holding the report rights.
@@ -54,9 +55,7 @@ const D3_SCREENS = [
   const get = (url: string) => app.inject({ method: 'GET', url, headers: { cookie } });
 
   beforeAll(async () => {
-    for (const url of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL])
-      if (!url || new URL(url).port !== '55433')
-        throw new Error('report route fixtures require isolated database 55433');
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient();
     await wipe();

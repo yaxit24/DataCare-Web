@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { getSaleReturnIncomingConfiguration } from '../src/modules/sales/saleReturnIncomingConfiguration.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const run = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 run('incoming Return configuration from exact scoped database observations', () => {
@@ -70,9 +71,7 @@ run('incoming Return configuration from exact scoped database observations', () 
     return result;
   };
   beforeAll(() => {
-    for (const value of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL])
-      if (!value || new URL(value).port !== '55433')
-        throw new Error('Disposable parity database 55433 required.');
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient();
   });

@@ -11,6 +11,7 @@ import {
   getSaleReturnIncomingReplayState,
   previewSaleReturnIncomingReplay,
 } from '../src/modules/sales/saleReturnIncomingReplay.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const run = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 run('empty saved Return header inspection preserves metadata and replay refusal', () => {
@@ -112,9 +113,7 @@ run('empty saved Return header inspection preserves metadata and replay refusal'
     events: [],
   });
   beforeAll(async () => {
-    for (const value of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL])
-      if (!value || new URL(value).port !== '55433')
-        throw new Error('Disposable parity database55433 required.');
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient();
     await cleanup(true);

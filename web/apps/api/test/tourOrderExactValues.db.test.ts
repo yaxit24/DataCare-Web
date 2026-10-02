@@ -8,6 +8,7 @@ import {
   getTourOrder,
   type SalesOrderInput,
 } from '../src/modules/sales/salesOrder.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 const db = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 const tenantId = 'tour-exact-values',
   foreignTenant = 'tour-exact-foreign';
@@ -120,14 +121,7 @@ db('Tour exact mapped saved values retain existing writer guards', () => {
     expect(createHash('sha256').update(bytes).digest('hex')).toBe(
       '4531bd17b90cd2c7700db743bb36b1981486d08fcc1c37511ac41efb4ea8917a',
     );
-    for (const key of ['DATABASE_URL', 'MIGRATE_DATABASE_URL'] as const) {
-      const url = new URL(process.env[key] ?? '');
-      if (
-        url.port !== '55433' ||
-        (key === 'DATABASE_URL' && decodeURIComponent(url.username) !== 'app_user')
-      )
-        throw new Error('isolated55433/app_user wrapper required');
-    }
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient({ datasources: { db: { url: process.env.DATABASE_URL } } });
   });

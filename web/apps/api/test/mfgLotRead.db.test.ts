@@ -6,6 +6,7 @@ import {
   listMfgLots,
   listMfgLotSources,
 } from '../src/modules/manufacturing/mfgLot.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const tenantId = 'lot-read-round3-a',
   secondTenant = 'lot-read-round3-b';
@@ -41,9 +42,7 @@ const key = (s: typeof scope) => Object.values(s).join('/');
         );
     };
     beforeAll(async () => {
-      for (const name of ['DATABASE_URL', 'MIGRATE_DATABASE_URL'])
-        if (new URL(process.env[name] ?? 'invalid:').port !== '55433')
-          throw new Error('Use disposable55433 only.');
+      assertIsolatedTestDatabase();
       owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
       runtime = new PrismaClient();
       await clean();

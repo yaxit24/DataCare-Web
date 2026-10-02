@@ -5,6 +5,7 @@ import type {
   SaleReturnBillReplayPhase,
   SaleReturnBillReplayState,
 } from '../../src/modules/sales/saleReturnBillReplay.js';
+import { assertIsolatedTestDatabase } from '../support/isolatedDatabase.js';
 
 export { independent };
 // The source-authored vector uses a logical SILVER label; ITEM_MAST stores five characters.
@@ -44,9 +45,7 @@ export const billTables = [
 type Owner = Pick<PrismaClient, '$executeRawUnsafe' | '$queryRawUnsafe'>;
 
 export function assertBillTestDatabase() {
-  for (const value of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL])
-    if (!value || new URL(value).port !== '55433')
-      throw new Error('Disposable parity database55433 is required.');
+  assertIsolatedTestDatabase();
   if (new URL(process.env.DATABASE_URL!).username !== 'app_user')
     throw new Error('Bill preview must run through app_user tenant isolation.');
 }
