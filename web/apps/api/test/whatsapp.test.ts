@@ -25,7 +25,7 @@ describe('WhatsApp Cloud API adapter (Meta Graph v22)', () => {
       token: 'T',
       fetchImpl: r.fetchImpl,
     }).send({ to: '9199', channel: 'whatsapp', body: 'hi' });
-    expect(res.status).toBe('sent');
+    expect(res.status).toBe('accepted');
     expect(r.calls[0].url).toBe('https://graph.facebook.com/v22.0/PID/messages');
     expect(JSON.parse(r.calls[0].body)).toMatchObject({
       messaging_product: 'whatsapp',
@@ -47,7 +47,7 @@ describe('WhatsApp Cloud API adapter (Meta Graph v22)', () => {
       body: 'Your invoice',
       document: { pdf: Buffer.from('%PDF-1.4 test'), filename: 'INV-1.pdf' },
     });
-    expect(res.status).toBe('sent');
+    expect(res.status).toBe('accepted');
     expect(r.calls[0].url).toBe('https://graph.facebook.com/v22.0/PID/media');
     expect(r.calls[0].isForm).toBe(true);
     expect(r.calls[1].url).toBe('https://graph.facebook.com/v22.0/PID/messages');
@@ -72,7 +72,7 @@ describe('WhatsApp Cloud API adapter (Meta Graph v22)', () => {
       body: '',
       template: { name: 'invoice_ready', lang: 'en', params: ['INV-1', '51500'] },
     });
-    expect(res.status).toBe('sent');
+    expect(res.status).toBe('accepted');
     const b = JSON.parse(r.calls[0].body);
     expect(b.type).toBe('template');
     expect(b.template.name).toBe('invoice_ready');

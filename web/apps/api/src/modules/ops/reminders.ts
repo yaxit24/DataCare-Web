@@ -1,6 +1,10 @@
 import { withTenant } from '@datacare/db';
-import { senderFromEnv, notifyWithAttemptLog } from '../integrations/messaging.js';
-import type { Channel } from '../integrations/messaging.js';
+import {
+  MessagingUnconfiguredError,
+  senderFromEnv,
+  notifyWithAttemptLog,
+} from '../integrations/messaging.js';
+import type { Channel, MessagingMode, NotifyResult } from '../integrations/messaging.js';
 import type { ReportScope, ListReport } from '../reports/reports.js';
 
 /**
@@ -165,9 +169,12 @@ export interface SendReminderInput {
 }
 
 export interface SendReminderResult {
+  /** True only when a real provider accepted the reminder (not proof of delivery). */
   ok: boolean;
-  /** Provider mode: 'whatsapp-cloud' | 'http-sms' | 'fake' (fake = wired, awaiting credentials). */
-  mode: string;
+  /** `accepted` by a provider, `simulated` in explicit test mode, or `failed` (G33). */
+  status: NotifyResult['status'];
+  /** Provider mode: 'whatsapp-cloud' | 'http-sms' | 'simulated' (MESSAGING_FAKE_MODE outside production). */
+  mode: MessagingMode;
   channel: Channel;
   to: string;
   id?: string;
@@ -175,7 +182,12 @@ export interface SendReminderResult {
   deduplicated: boolean;
 }
 
-/** Send one reminder through the persistent tenant-scoped at-most-once messaging workflow. */
+/**
+ * Send one reminder through the persistent tenant-scoped at-most-once messaging workflow.
+ *
+ * With no provider configured this throws `MessagingUnconfiguredError` (HTTP 503) BEFORE an attempt is
+ * recorded, rather than "sending" through a fake (N54 step 4, G33).
+ */
 export async function sendReminder(
   prisma: any,
   scope: Pick<ReportScope, 'tenantId' | 'coCode' | 'lcCode'>,
@@ -184,6 +196,7 @@ export async function sendReminder(
   const to = String(input?.mobile ?? '').trim();
   const body = String(input?.message ?? '');
   const { sender, mode } = senderFromEnv();
+  if (!sender) throw new MessagingUnconfiguredError();
   const channel: Channel = input?.channel ?? (mode === 'http-sms' ? 'sms' : 'whatsapp');
   const result = await notifyWithAttemptLog(
     prisma,

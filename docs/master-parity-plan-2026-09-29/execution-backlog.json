@@ -3676,15 +3676,18 @@
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
-      "statusAsOf": "2026-10-01",
+      "statusAsOf": "2026-10-02",
       "evidence": [
         "web/apps/api/src/modules/reports/render.ts",
         "web/apps/api/src/modules/reports/reportPdf.ts",
         "web/apps/api/test/reportPdf.routes.db.test.ts",
         "web/apps/api/test/pdfRenderer.chromium.test.ts",
-        "web/apps/api/test/reportPdf.test.ts"
+        "web/apps/api/test/reportPdf.test.ts",
+        "web/apps/api/src/modules/integrations/messaging.ts",
+        "web/apps/api/test/messaging.routes.db.test.ts",
+        "web/apps/web/lib/messagingOutcome.ts"
       ],
-      "statusNote": "Milestone 1: POST /render/pdf removed; report PDFs (GET /reports/:report/export.pdf and the account ledger's /reports/account-ledger/:acCode/export.pdf) and the estimate PDF (POST /estimate/pdf, typed input, 64 KB) are built on the server and need the form's print right. Renderer: JavaScript off, offline, every request aborted, size/time/concurrency limits with 413/422/503. Remaining: OS sandbox (opt-in PDF_RENDERER_SANDBOX=1 until the deployment image is verified), step 4 messaging fail-closed, schema validation through N50."
+      "statusNote": "Milestone 1: POST /render/pdf removed; report PDFs (GET /reports/:report/export.pdf and the account ledger's /reports/account-ledger/:acCode/export.pdf) and the estimate PDF (POST /estimate/pdf, typed input, 64 KB) are built on the server and need the form's print right. Renderer: JavaScript off, offline, every request aborted, size/time/concurrency limits with 413/422/503. Step 4 (G33): with no WhatsApp/SMS provider configured, /integrations/notify and /reminders/send answer 503 messaging-unconfigured before an attempt is recorded; the fake sender exists only with MESSAGING_FAKE_MODE=1 outside production (start-up refuses it in production) and reports simulated; a provider acceptance is accepted, never delivered (no callback yet); legacy sent rows replay as accepted; the integrations and reminders screens show accepted/simulated/not sent instead of \"Sent\"; deploy/.env.example and docker-compose.prod.yml now document and forward the variables the code reads. Remaining: OS sandbox (opt-in PDF_RENDERER_SANDBOX=1 until the deployment image is verified), a provider delivery callback, schema validation through N50."
     },
     {
       "id": "N55",

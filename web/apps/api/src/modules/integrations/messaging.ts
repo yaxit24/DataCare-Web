@@ -5,8 +5,17 @@ import { withTenant } from '@datacare/db';
  * Messaging integrations — web replacement for the desktop UT_WHATSAPP / UT_WAPP_WITH_API / UT_SMS.
  * The desktop built a message from a template (CO_SET.CUST_SMS/ADMIN_SMS) + sale data and sent it
  * over WhatsApp/SMS. Here, message bodies are rendered from templates (pure) and sent through an
- * injected MessageSender. A FakeMessageSender records sends for tests; the REAL WhatsApp Cloud API /
- * SMS gateway are external blockers (tokens + outbound network) behind the same interface.
+ * injected MessageSender: the WhatsApp Cloud API or an HTTP SMS gateway, configured by environment.
+ *
+ * TRUTHFULNESS (N54 step 4, gap G33). A send result says exactly what happened and nothing more:
+ *   • `accepted`  — a real provider accepted the message. That is not delivery; only a provider callback
+ *                   could say "delivered", and none is wired yet, so nothing is ever reported delivered.
+ *   • `simulated` — the in-memory fake took it. Nothing left the server. The fake exists only when
+ *                   `MESSAGING_FAKE_MODE=1` is set outside production.
+ *   • `failed`    — the provider refused it, or the call failed.
+ * With no provider configured there is NO sender: send routes answer 503 `messaging-unconfigured` before an
+ * attempt is recorded. Previously an unconfigured server fell back to the fake in every environment and
+ * answered `{ok:true}`, logging the attempt as `sent`.
  *
  * notify() is BEST-EFFORT and NEVER throws — a delivery failure must not roll back the business
  * transaction that triggered it (matches the desktop, where a failed send didn't void the sale).
@@ -24,9 +33,12 @@ export interface OutboundMessage {
   template?: { name: string; lang?: string; params?: string[] };
 }
 
+/** What a sender can truthfully report; see the module comment. */
+export type SendStatus = 'accepted' | 'simulated' | 'failed';
+
 export interface SendResult {
   id: string;
-  status: 'sent' | 'failed';
+  status: SendStatus;
 }
 
 export interface MessageSender {
@@ -41,20 +53,38 @@ export function renderTemplate(template: string, vars: Record<string, string | n
   });
 }
 
-/** Records every message in-memory; used for tests and dry-runs (no network). */
+/**
+ * Records every message in-memory and reports it as SIMULATED; used for tests and explicit test mode. It never
+ * reports a success, because nothing was delivered.
+ */
 export class FakeMessageSender implements MessageSender {
   public outbox: OutboundMessage[] = [];
   private n = 0;
   async send(msg: OutboundMessage): Promise<SendResult> {
     this.outbox.push(msg);
-    return { id: `fake-${++this.n}`, status: 'sent' };
+    return { id: `fake-${++this.n}`, status: 'simulated' };
   }
 }
 
 export interface NotifyResult {
+  /** True only when a real provider ACCEPTED the message; never for a simulation, and never proof of delivery. */
   ok: boolean;
+  /** `pending` only when replaying an attempt that another request is still sending. */
+  status: SendStatus | 'pending';
   id?: string;
   error?: string;
+}
+
+/** No provider is configured, so the message cannot be sent; the route answers 503 and records nothing. */
+export class MessagingUnconfiguredError extends Error {
+  readonly statusCode = 503;
+  readonly code = 'messaging-unconfigured';
+  constructor() {
+    super(
+      'Messaging is not configured on this server: set WA_PHONE_ID/WA_TOKEN or SMS_URL_TEMPLATE/SMS_KEY',
+    );
+    this.name = 'MessagingUnconfiguredError';
+  }
 }
 
 /**
@@ -74,7 +104,7 @@ export class HttpSmsSender implements MessageSender {
       .replace('{text}', encodeURIComponent(msg.body));
     const f = this.cfg.fetchImpl ?? fetch;
     const res = await f(url, { signal: AbortSignal.timeout(12000) } as any);
-    return { id: `sms-${Date.now()}`, status: res.ok ? 'sent' : 'failed' };
+    return { id: `sms-${Date.now()}`, status: res.ok ? 'accepted' : 'failed' };
   }
 }
 
@@ -138,7 +168,7 @@ export class WhatsAppCloudSender implements MessageSender {
               : {}),
           },
         });
-        return { id: `wa-tpl-${Date.now()}`, status: res.ok ? 'sent' : 'failed' };
+        return { id: `wa-tpl-${Date.now()}`, status: res.ok ? 'accepted' : 'failed' };
       }
       if (msg.document) {
         const id = await this.uploadPdf(msg.document.pdf, msg.document.filename);
@@ -153,7 +183,7 @@ export class WhatsAppCloudSender implements MessageSender {
             caption: msg.document.caption ?? msg.body,
           },
         });
-        return { id: `wa-doc-${Date.now()}`, status: res.ok ? 'sent' : 'failed' };
+        return { id: `wa-doc-${Date.now()}`, status: res.ok ? 'accepted' : 'failed' };
       }
       const res = await this.post({
         messaging_product: 'whatsapp',
@@ -161,7 +191,7 @@ export class WhatsAppCloudSender implements MessageSender {
         type: 'text',
         text: { body: msg.body },
       });
-      return { id: `wa-${Date.now()}`, status: res.ok ? 'sent' : 'failed' };
+      return { id: `wa-${Date.now()}`, status: res.ok ? 'accepted' : 'failed' };
     } catch {
       return { id: 'wa-error', status: 'failed' };
     }
@@ -169,9 +199,12 @@ export class WhatsAppCloudSender implements MessageSender {
 }
 
 /**
- * Pick a sender from environment config: real WhatsApp Cloud (WA_PHONE_ID+WA_TOKEN) or HTTP SMS
- * (SMS_URL_TEMPLATE+SMS_KEY) when configured, else the in-memory Fake (so the feature is wired and
- * works the moment the shop supplies credentials — no code change).
+ * Pick a sender from environment config: the WhatsApp Cloud API (WA_PHONE_ID+WA_TOKEN) or an HTTP SMS gateway
+ * (SMS_URL_TEMPLATE+SMS_KEY) when configured, so the feature goes live the moment the shop supplies credentials.
+ *
+ * Without credentials there is NO sender (`unconfigured`): the send routes answer 503 and record nothing. The
+ * in-memory fake is used only when `MESSAGING_FAKE_MODE=1` is set and the process is not in production
+ * (`NODE_ENV=production`), and it reports every send as `simulated` (N54 step 4, G33).
  */
 /**
  * The environment variables `senderFromEnv` actually reads, declared HERE so the readiness report cannot
@@ -183,10 +216,19 @@ export const WHATSAPP_ENV = ['WA_PHONE_ID', 'WA_TOKEN'] as const;
 export const SMS_ENV = ['SMS_URL_TEMPLATE', 'SMS_KEY'] as const;
 /** Optional, with a documented default rather than a hard requirement. */
 export const MESSAGING_OPTIONAL_ENV = ['WA_API_VERSION', 'SMS_SENDER'] as const;
+/** Test-only switch for the simulating fake sender; ignored (and refused at start-up) in production. */
+export const MESSAGING_FAKE_MODE_ENV = 'MESSAGING_FAKE_MODE';
+
+export type MessagingMode = 'whatsapp-cloud' | 'http-sms' | 'simulated' | 'unconfigured';
+
+/** True when the explicit fake mode is on and allowed (never in production). */
+export function messagingFakeModeAllowed(env: NodeJS.ProcessEnv = process.env): boolean {
+  return env[MESSAGING_FAKE_MODE_ENV] === '1' && env.NODE_ENV !== 'production';
+}
 
 export function senderFromEnv(env: NodeJS.ProcessEnv = process.env): {
-  sender: MessageSender;
-  mode: string;
+  sender: MessageSender | null;
+  mode: MessagingMode;
 } {
   if (env.WA_PHONE_ID && env.WA_TOKEN)
     return {
@@ -206,22 +248,40 @@ export function senderFromEnv(env: NodeJS.ProcessEnv = process.env): {
       }),
       mode: 'http-sms',
     };
-  return { sender: new FakeMessageSender(), mode: 'fake' };
+  if (messagingFakeModeAllowed(env)) return { sender: new FakeMessageSender(), mode: 'simulated' };
+  return { sender: null, mode: 'unconfigured' };
+}
+
+/** The `/integrations/status` messaging entry, in words an operator can act on (never "wired" for a fake). */
+export function messagingStatus(env: NodeJS.ProcessEnv = process.env): {
+  provider: MessagingMode;
+  status: string;
+} {
+  const { mode } = senderFromEnv(env);
+  return {
+    provider: mode,
+    status:
+      mode === 'unconfigured'
+        ? 'sends are refused — set WA_PHONE_ID/WA_TOKEN or SMS_URL_TEMPLATE/SMS_KEY to enable'
+        : mode === 'simulated'
+          ? 'test mode (MESSAGING_FAKE_MODE=1, not production) — nothing is delivered'
+          : 'provider acceptance is reported; delivery is not confirmed',
+  };
 }
 
 /**
- * Best-effort send: never throws. Returns {ok:true,id} on success or {ok:false,error} on failure,
- * so callers can fire-and-forget after committing their transaction.
+ * Best-effort send: never throws. `ok` is true only when a real provider accepted the message; a simulation is
+ * `{ok:false, status:'simulated'}` and a failure `{ok:false, status:'failed', error}`.
  */
 export async function notify(sender: MessageSender, msg: OutboundMessage): Promise<NotifyResult> {
   try {
-    if (!msg.to) return { ok: false, error: 'no recipient' };
+    if (!msg.to) return { ok: false, status: 'failed', error: 'no recipient' };
     const r = await sender.send(msg);
-    return r.status === 'sent'
-      ? { ok: true, id: r.id }
-      : { ok: false, error: 'send failed', id: r.id };
+    if (r.status === 'accepted') return { ok: true, status: 'accepted', id: r.id };
+    if (r.status === 'simulated') return { ok: false, status: 'simulated', id: r.id };
+    return { ok: false, status: 'failed', error: 'send failed', id: r.id };
   } catch (e: any) {
-    return { ok: false, error: e?.message ?? 'send error' };
+    return { ok: false, status: 'failed', error: e?.message ?? 'send error' };
   }
 }
 
@@ -262,8 +322,14 @@ export async function notifyWithAttemptLog(
   const idempotencyKey = String(options.idempotencyKey ?? '').trim();
   const templateKind = String(options.templateKind ?? '').trim();
   if (!idempotencyKey)
-    return { ok: false, error: 'idempotency key is required', deduplicated: false };
-  if (!templateKind) return { ok: false, error: 'template kind is required', deduplicated: false };
+    return {
+      ok: false,
+      status: 'failed',
+      error: 'idempotency key is required',
+      deduplicated: false,
+    };
+  if (!templateKind)
+    return { ok: false, status: 'failed', error: 'template kind is required', deduplicated: false };
 
   const claimed = await withTenant(prisma, scope.tenantId, async (tx: any) => {
     const inserted = (await tx.$queryRawUnsafe(
@@ -297,13 +363,25 @@ export async function notifyWithAttemptLog(
   });
 
   if (claimed) {
+    // Replay the stored outcome. `sent` is how attempts were recorded before N54 step 4, when it meant "the
+    // provider accepted it"; `delivered` is reserved for a future provider callback. Both read as accepted.
+    const stored = String(claimed.status ?? '');
+    const status: NotifyResult['status'] =
+      stored === 'accepted' || stored === 'sent' || stored === 'delivered'
+        ? 'accepted'
+        : stored === 'simulated'
+          ? 'simulated'
+          : stored === 'pending'
+            ? 'pending'
+            : 'failed';
     return {
-      ok: claimed.status === 'sent',
+      ok: status === 'accepted',
+      status,
       id: claimed.provider_reference ?? undefined,
       error:
-        claimed.status === 'sent'
+        status === 'accepted' || status === 'simulated'
           ? undefined
-          : (claimed.failure_reason ?? 'attempt already accepted'),
+          : (claimed.failure_reason ?? 'attempt already in progress'),
       deduplicated: true,
     };
   }
@@ -316,9 +394,9 @@ export async function notifyWithAttemptLog(
       `UPDATE "message_attempt_log"
           SET "status"=$1,"provider_reference"=$2,"failure_reason"=$3
         WHERE "tenant_id"=$4 AND "idempotency_key"=$5`,
-      result.ok ? 'sent' : 'failed',
+      result.status,
       result.id ?? null,
-      result.ok ? null : (result.error ?? 'send failed'),
+      result.status === 'failed' ? (result.error ?? 'send failed') : null,
       scope.tenantId,
       idempotencyKey,
     );

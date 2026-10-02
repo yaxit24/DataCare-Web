@@ -1,6 +1,11 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
 import { get, post, ApiError } from '../../../../lib/api';
+import {
+  messagingFailure,
+  messagingOutcome,
+  type MessagingOutcome,
+} from '../../../../lib/messagingOutcome';
 
 /**
  * Reminders — Phase 12 / UT_REMINDER.
@@ -13,8 +18,9 @@ import { get, post, ApiError } from '../../../../lib/api';
  *    (GET /reminders/birthdays?onDate=…), each individually sendable.
  *
  * The message body is rendered client-side from an editable template (mirrors the desktop CUST_SMS
- * behaviour). Provider status comes from GET /integrations/status (.messaging) — until WhatsApp/SMS
- * credentials are set the backend runs a Fake sender (mode 'fake'), reported here as "wired".
+ * behaviour). Provider status comes from GET /integrations/status (.messaging). Until WhatsApp/SMS
+ * credentials are set the server refuses sends (503 messaging-unconfigured); a test-mode send is reported as
+ * simulated and a provider acceptance as not yet confirmed delivered (N54, G33).
  *
  * NOTE: /reminders/* may not be wired into the API yet — a 404 is handled gracefully so the
  * coordinator can attach the routes without changing this page.
@@ -40,10 +46,7 @@ type BirthdayRow = {
 
 type ListReport<T> = { rows: T[]; totals?: Record<string, number>; note?: string };
 
-type SendState =
-  | { state: 'pending' }
-  | { state: 'ok'; mode: string; channel: string; id?: string }
-  | { state: 'err'; error: string };
+type SendState = { state: 'pending' } | { state: 'done'; outcome: MessagingOutcome };
 
 const inr = (n: number): string =>
   (Number(n) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -146,7 +149,10 @@ export default function RemindersPage() {
     if (!mobile) {
       setSends((m) => ({
         ...m,
-        [rowKey]: { state: 'err', error: 'No mobile number on this party.' },
+        [rowKey]: {
+          state: 'done',
+          outcome: { tone: 'err', text: 'No mobile number on this party.' },
+        },
       }));
       return;
     }
@@ -160,33 +166,16 @@ export default function RemindersPage() {
         idempotencyKey,
         templateKind,
       });
-      if (res?.ok) {
-        setSends((m) => ({
-          ...m,
-          [rowKey]: {
-            state: 'ok',
-            mode: String(res?.mode ?? ''),
-            channel: String(res?.channel ?? ''),
-            id: res?.id,
-          },
-        }));
-      } else {
-        setSends((m) => ({
-          ...m,
-          [rowKey]: {
-            state: 'err',
-            error: String(res?.error ?? 'Send failed') + (res?.mode ? ` (${res.mode})` : ''),
-          },
-        }));
-      }
+      setSends((m) => ({ ...m, [rowKey]: { state: 'done', outcome: messagingOutcome(res) } }));
     } catch (e) {
-      const msg =
-        e instanceof ApiError
-          ? e.status === 404
-            ? 'Endpoint /reminders/send is not wired yet (pending coordinator).'
-            : e.body?.error || e.message || `Request failed (${e.status})`
-          : 'Request failed';
-      setSends((m) => ({ ...m, [rowKey]: { state: 'err', error: msg } }));
+      const outcome: MessagingOutcome =
+        e instanceof ApiError && e.status === 404
+          ? {
+              tone: 'err',
+              text: 'Endpoint /reminders/send is not wired yet (pending coordinator).',
+            }
+          : messagingOutcome(messagingFailure(e));
+      setSends((m) => ({ ...m, [rowKey]: { state: 'done', outcome } }));
     }
   }
 
@@ -194,17 +183,9 @@ export default function RemindersPage() {
     const r = sends[rowKey];
     if (!r) return <span className="muted">—</span>;
     if (r.state === 'pending') return <span className="muted">Sending…</span>;
-    if (r.state === 'err') return <span style={{ color: 'var(--err)' }}>{r.error}</span>;
-    const fake = r.mode === 'fake';
     return (
-      <span style={{ color: 'var(--ok)' }}>
-        Sent{r.channel ? ` via ${r.channel}` : ''}
-        {r.mode && (
-          <span className="muted">
-            {' '}
-            · {fake ? 'fake (set creds to go live)' : `live (${r.mode})`}
-          </span>
-        )}
+      <span role="status" style={{ color: r.outcome.tone === 'ok' ? 'var(--ok)' : 'var(--err)' }}>
+        {r.outcome.text}
       </span>
     );
   }

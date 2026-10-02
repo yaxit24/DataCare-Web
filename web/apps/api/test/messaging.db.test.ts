@@ -51,35 +51,99 @@ databaseDescribe('restricted-role message attempt log', () => {
     if (owner) await owner.$disconnect();
   });
 
-  it('logs one successful outbound attempt', async () => {
-    const sender = new FakeMessageSender();
+  /** A sender that a real gateway would be: it ACCEPTS the message; delivery is never claimed. */
+  const accepting = (): MessageSender & { calls: number } => {
+    const sender = {
+      calls: 0,
+      async send() {
+        sender.calls += 1;
+        return { id: `gw-${sender.calls}`, status: 'accepted' as const };
+      },
+    };
+    return sender;
+  };
+
+  it('logs a provider acceptance as accepted, never as delivered (G33)', async () => {
+    const sender = accepting();
     const result = await notifyWithAttemptLog(runtime, sender, scope(), message, {
-      idempotencyKey: 'success-1',
+      idempotencyKey: 'accepted-1',
       templateKind: 'invoice',
     });
 
-    expect(result).toMatchObject({ ok: true, deduplicated: false, id: 'fake-1' });
-    expect(sender.outbox).toHaveLength(1);
+    expect(result).toMatchObject({ ok: true, status: 'accepted', deduplicated: false, id: 'gw-1' });
+    expect(sender.calls).toBe(1);
     expect(await rows()).toEqual([
       expect.objectContaining({
         tenant_id: TENANT_A,
-        status: 'sent',
-        provider_reference: 'fake-1',
+        status: 'accepted',
+        provider_reference: 'gw-1',
         failure_reason: null,
-        idempotency_key: 'success-1',
+        idempotency_key: 'accepted-1',
       }),
     ]);
   });
 
-  it('does not insert or call the provider twice for the same tenant key', async () => {
+  it('logs a simulated send as simulated and reports it as not delivered (G33)', async () => {
     const sender = new FakeMessageSender();
+    const result = await notifyWithAttemptLog(runtime, sender, scope(), message, {
+      idempotencyKey: 'simulated-1',
+      templateKind: 'invoice',
+    });
+
+    expect(result).toMatchObject({
+      ok: false,
+      status: 'simulated',
+      deduplicated: false,
+      id: 'fake-1',
+    });
+    expect(sender.outbox).toHaveLength(1);
+    expect(await rows()).toEqual([
+      expect.objectContaining({
+        status: 'simulated',
+        provider_reference: 'fake-1',
+        failure_reason: null,
+      }),
+    ]);
+    // A retry with the same key replays the stored simulation; it never turns into a success.
+    const retry = await notifyWithAttemptLog(runtime, sender, scope(), message, {
+      idempotencyKey: 'simulated-1',
+      templateKind: 'invoice',
+    });
+    expect(retry).toMatchObject({ ok: false, status: 'simulated', deduplicated: true });
+    expect(sender.outbox).toHaveLength(1);
+  });
+
+  it('does not insert or call the provider twice for the same tenant key', async () => {
+    const sender = accepting();
     const options = { idempotencyKey: 'retry-1', templateKind: 'invoice' };
     await notifyWithAttemptLog(runtime, sender, scope(), message, options);
     const retry = await notifyWithAttemptLog(runtime, sender, scope(), message, options);
 
-    expect(retry).toMatchObject({ ok: true, deduplicated: true, id: 'fake-1' });
-    expect(sender.outbox).toHaveLength(1);
+    expect(retry).toMatchObject({ ok: true, status: 'accepted', deduplicated: true, id: 'gw-1' });
+    expect(sender.calls).toBe(1);
     expect(await rows()).toHaveLength(1);
+  });
+
+  it('still reads a pre-N54 attempt stored as sent as a provider acceptance', async () => {
+    await withTenant(runtime, TENANT_A, (tx: any) =>
+      tx.$executeRawUnsafe(
+        `INSERT INTO "message_attempt_log"("tenant_id","co_code","channel","recipient","template_kind","idempotency_key","status","provider_reference")
+         VALUES ($1,'01','whatsapp','919812345670','invoice','legacy-1','sent','OLD-REF')`,
+        TENANT_A,
+      ),
+    );
+    const sender = accepting();
+    const replay = await notifyWithAttemptLog(runtime, sender, scope(), message, {
+      idempotencyKey: 'legacy-1',
+      templateKind: 'invoice',
+    });
+    expect(replay).toMatchObject({
+      ok: true,
+      status: 'accepted',
+      deduplicated: true,
+      id: 'OLD-REF',
+    });
+    expect(sender.calls).toBe(0);
   });
 
   it('logs a provider failure and its reason', async () => {
@@ -95,7 +159,7 @@ databaseDescribe('restricted-role message attempt log', () => {
       templateKind: 'invoice',
     });
 
-    expect(result).toMatchObject({ ok: false, error: 'gateway unavailable' });
+    expect(result).toMatchObject({ ok: false, status: 'failed', error: 'gateway unavailable' });
     expect(calls).toBe(1);
     expect(await rows()).toEqual([
       expect.objectContaining({ status: 'failed', failure_reason: 'gateway unavailable' }),

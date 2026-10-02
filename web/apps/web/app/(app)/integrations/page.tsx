@@ -1,6 +1,7 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
 import { get, post } from '../../../lib/api';
+import { messagingFailure, messagingOutcome } from '../../../lib/messagingOutcome';
 import DeviceCapabilityProbe from '../../../components/DeviceCapabilityProbe';
 
 export default function IntegrationsPage() {
@@ -9,7 +10,7 @@ export default function IntegrationsPage() {
   const [n, setN] = useState({
     to: '',
     channel: 'whatsapp',
-    body: 'Thank you for shopping with DHAKAN JEWELLERS.',
+    body: 'Thank you for shopping with us.',
     templateKind: 'manual-test',
     idempotencyKey: '',
   });
@@ -30,9 +31,7 @@ export default function IntegrationsPage() {
     const idempotencyKey = n.idempotencyKey || crypto.randomUUID();
     const payload = { ...n, idempotencyKey };
     setN(payload);
-    setSent(
-      await post('/integrations/notify', payload).catch((x) => ({ ok: false, error: String(x) })),
-    );
+    setSent(await post('/integrations/notify', payload).catch(messagingFailure));
   }
 
   return (
@@ -153,10 +152,8 @@ export default function IntegrationsPage() {
         </div>
         <button className="primary">Send / retry</button>
         {sent && (
-          <div className={`msg ${sent.ok ? 'ok' : 'err'}`}>
-            {sent.ok
-              ? `Sent via ${sent.mode} (id ${sent.id})`
-              : `mode ${sent.mode ?? '?'} — ${sent.error}`}
+          <div className={`msg ${messagingOutcome(sent).tone}`} role="status">
+            {messagingOutcome(sent).text}
           </div>
         )}
       </form>

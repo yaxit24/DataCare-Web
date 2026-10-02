@@ -51,6 +51,13 @@ services:
       GSP_USER: ${GSP_USER:-}
       GSP_EINV_PWD: ${GSP_EINV_PWD:-}
       GSP_SANDBOX: ${GSP_SANDBOX:-}
+      # Messaging. Unset by default: with no provider the API refuses sends (503) instead of faking them (G33).
+      WA_PHONE_ID: ${WA_PHONE_ID:-}
+      WA_TOKEN: ${WA_TOKEN:-}
+      WA_API_VERSION: ${WA_API_VERSION:-}
+      SMS_URL_TEMPLATE: ${SMS_URL_TEMPLATE:-}
+      SMS_KEY: ${SMS_KEY:-}
+      SMS_SENDER: ${SMS_SENDER:-}
     depends_on:
       postgres:
         condition: service_healthy

@@ -517,7 +517,7 @@ import {
   messageDeliveryEnabled,
   resolveSettingsBehaviorTx,
 } from '../modules/shared/settingsBehavior.js';
-import { senderFromEnv, notifyWithAttemptLog } from '../modules/integrations/messaging.js';
+import * as messaging from '../modules/integrations/messaging.js';
 import {
   renderToPdf,
   PlaywrightPdfRenderer,
@@ -943,6 +943,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         });
       if (e instanceof ImageVersionConflictError)
         return reply.code(409).send({ error: 'image-version-conflict', message: e.message });
+      // N54 step 4 / G33: no messaging provider, so nothing was sent or recorded.
+      if (e instanceof messaging.MessagingUnconfiguredError)
+        return reply.code(e.statusCode).send({ error: e.code, message: e.message });
       if (e instanceof SalesOrderDesignError)
         return reply.code(e.statusCode).send({ error: e.name, message: e.message });
       if (e instanceof SalesOrderWorkflowUnavailableError)
@@ -6409,9 +6412,12 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       return reply.code(400).send({ error: 'invalid-idempotency-key' });
     if (!templateKind || templateKind.length > 64)
       return reply.code(400).send({ error: 'invalid-template-kind' });
-    const { sender, mode } = senderFromEnv();
+    const { sender, mode } = messaging.senderFromEnv();
+    // N54 step 4 / G33: no provider means no send. Refuse BEFORE recording an attempt, so the log never shows
+    // a message that was not handed to a provider. The fake is only used in explicit test mode (MESSAGING_FAKE_MODE).
+    if (!sender) return reply.code(503).send({ error: 'messaging-unconfigured', mode });
     // MS_OPNCOMP.cs:687,694-695,714-715: flags and gateway are loaded, never body-supplied.
-    const r = await notifyWithAttemptLog(
+    const r = await messaging.notifyWithAttemptLog(
       prisma,
       sender,
       scope,
@@ -6432,13 +6438,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
     return {
       liveRates: { provider: 'gold-api.com + frankfurter.app', status: 'live (no key required)' },
-      messaging: {
-        provider: senderFromEnv().mode,
-        status:
-          senderFromEnv().mode === 'fake'
-            ? 'wired — set WA_PHONE_ID/WA_TOKEN or SMS_URL_TEMPLATE/SMS_KEY to go live'
-            : 'live',
-      },
+      messaging: messaging.messagingStatus(),
       einvoice: {
         provider: 'Chartered Info GSP (charteredinfo.com)',
         // gspStatus() computes the mode from the environment WITHOUT constructing a transport. Calling

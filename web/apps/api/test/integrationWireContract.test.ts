@@ -224,7 +224,7 @@ describe('WhatsApp Cloud API wire contract', () => {
       template: { name: 'bill_ready', lang: 'en', params: ['INV-1', '76,225'] },
     } as never);
 
-    expect(result.status).toBe('sent');
+    expect(result.status).toBe('accepted');
     const call = calls[0]!;
     expect(call.url).toBe('https://graph.facebook.com/v22.0/1234/messages');
     expect(call.init.headers.authorization).toBe('Bearer TKN');
@@ -255,7 +255,7 @@ describe('SMS gateway wire contract', () => {
       fetchImpl,
     });
     const result = await sender.send({ to: '919812345670', body: 'Rate today 6200' } as never);
-    expect(result.status).toBe('sent');
+    expect(result.status).toBe('accepted');
     const url = new URL(calls[0]!.url);
     expect(url.origin + url.pathname).toBe('https://sms.example.com/send');
     expect(url.searchParams.get('key')).toBe('KEY-1');
@@ -280,12 +280,46 @@ describe('credential name drift', () => {
   });
 
   it('selects the real sender the moment the advertised variables are present', () => {
-    expect(senderFromEnv({}).mode).toBe('fake');
+    // N54 step 4 / G33: with no provider configured there is NO sender — sends are refused, never faked.
+    expect(senderFromEnv({}).mode).toBe('unconfigured');
+    expect(senderFromEnv({}).sender).toBeNull();
+    // The fake exists only when explicitly asked for, outside production, and it reports 'simulated'.
+    expect(senderFromEnv({ MESSAGING_FAKE_MODE: '1' }).mode).toBe('simulated');
+    expect(senderFromEnv({ MESSAGING_FAKE_MODE: '1', NODE_ENV: 'production' }).mode).toBe(
+      'unconfigured',
+    );
     const whatsappEnv: NodeJS.ProcessEnv = {};
     for (const name of WHATSAPP_ENV) whatsappEnv[name] = 'x';
     expect(senderFromEnv(whatsappEnv).mode).toBe('whatsapp-cloud');
     const smsEnv: NodeJS.ProcessEnv = {};
     for (const name of SMS_ENV) smsEnv[name] = 'x';
     expect(senderFromEnv(smsEnv).mode).toBe('http-sms');
+    // A configured provider works in production too; only the fake is refused there.
+    expect(senderFromEnv({ ...whatsappEnv, NODE_ENV: 'production' }).mode).toBe('whatsapp-cloud');
+  });
+
+  /**
+   * The deployment files must carry the same names, or production messaging cannot be configured at all: the
+   * deploy example documented WHATSAPP_TOKEN / WHATSAPP_PHONE_ID / SMS_API_KEY (read by nothing) and the compose
+   * file forwarded no messaging variable to the API container (N54, G33).
+   */
+  it('documents and forwards exactly the variables the factory reads', async () => {
+    const { readFile } = await import('node:fs/promises');
+    const example = await readFile(
+      new URL('../../../deploy/.env.example', import.meta.url),
+      'utf8',
+    );
+    const compose = await readFile(
+      new URL('../../../deploy/docker-compose.prod.yml', import.meta.url),
+      'utf8',
+    );
+    for (const name of [...WHATSAPP_ENV, ...SMS_ENV, 'WA_API_VERSION', 'SMS_SENDER']) {
+      expect(example, `${name} must be documented`).toContain(`${name}=`);
+      expect(compose, `${name} must reach the API container`).toContain(`${name}: \${${name}:-}`);
+    }
+    for (const dead of ['WHATSAPP_TOKEN=', 'WHATSAPP_PHONE_ID=', 'SMS_API_KEY=']) {
+      expect(example).not.toContain(dead);
+    }
+    expect(compose).not.toContain('MESSAGING_FAKE_MODE');
   });
 });

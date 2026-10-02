@@ -63,6 +63,15 @@ describe('runtime configuration', () => {
       },
       'SEED_DEMO',
     ],
+    [
+      {
+        NODE_ENV: 'production',
+        DATABASE_URL: 'postgresql://db',
+        JWT_SECRET: 'a-random-production-key-with-more-than-32-characters',
+        MESSAGING_FAKE_MODE: '1',
+      },
+      'MESSAGING_FAKE_MODE',
+    ],
   ])('rejects unsafe production input %#', (env, expected) => {
     expect(() => resolveRuntimeConfig(env)).toThrow(RuntimeConfigError);
     expect(() => resolveRuntimeConfig(env)).toThrow(expected);

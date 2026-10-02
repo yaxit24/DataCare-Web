@@ -50,7 +50,7 @@ evidence exists and named work remains. No slice is accepted.
 | N49 | planned | in-progress | Hermetic journey seeds, all 24 journeys twice from a clean database (PR #28) | Steps 3–6: per-worktree ports and project, database identity checks, CI job |
 | N51 | planned | in-progress | Recent list scoped to the full voucher identity; Load and Delete by row identity (PR #30) | Version tokens (D17) |
 | N53 | planned | in-progress | Warm schema catalog, explicit budgets with `statement_timeout`, retryable 503, loyalty lock, metrics (PR #29) | Budgets for the remaining mutation coordinators |
-| N54 | planned | in-progress | Client-HTML `POST /render/pdf` removed; server-built report, account-ledger and estimate PDFs behind print rights; renderer with JavaScript off, network blocked and limits | OS sandbox verification, messaging fail-closed (step 4) |
+| N54 | planned | in-progress | Client-HTML `POST /render/pdf` removed; server-built report, account-ledger and estimate PDFs behind print rights; renderer with JavaScript off, network blocked and limits; messaging fails closed (step 4): unconfigured sends refused with 503 before any attempt is logged, the fake only in explicit non-production test mode and reported as simulated | OS sandbox verification, provider delivery callback |
 | N41 | planned | implemented-unverified | Labour previews read `LBR_WITH_GHT` (PR #14) | Desktop comparison |
 | N42 | planned | implemented-unverified | `EMP_CODE_MANDATORY` enforced with the desktop message (PR #14) | Desktop comparison |
 | N43 | planned | in-progress | Canonical O/D/T copy labels for sales, purchase, purchase return and karigar documents (PR #20) | Template registry and resolver (needs N73), HUID print, variants |
