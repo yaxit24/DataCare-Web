@@ -36,7 +36,7 @@
  * because an empty master set produces "web wrote nothing", which reads as a catastrophic defect.
  */
 import { writeFile } from 'node:fs/promises';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 
 /** Optional: where to write the desktop/web extractor case lists produced by this run. */
 const MAP_OUT = String(process.env.PARITY_CASE_MAP_OUT ?? '').trim() || null;

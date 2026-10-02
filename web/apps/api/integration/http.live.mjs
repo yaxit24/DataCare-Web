@@ -1,7 +1,7 @@
 // Tier-2 live HTTP e2e (Task 12) via Fastify .inject() against Postgres as app_user.
 // Run: DATABASE_URL=postgresql://app_user:app@127.0.0.1:5433/datacare \
 //      node apps/api/integration/http.live.mjs   (after `pnpm --filter @datacare/api build`)
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { buildApp } from '../dist/app.js';
 import { hashPassword } from '../dist/modules/auth/password.js';

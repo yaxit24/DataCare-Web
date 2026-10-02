@@ -13,7 +13,7 @@
  *
  * These tests use the RLS-bound application role deliberately, because that is the real failure mode.
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { footprintOf } from './support/footprint.js';

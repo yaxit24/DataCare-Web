@@ -748,6 +748,11 @@ registerRepair({
     // The return rows are refreshed FIRST: they are derived from the tag's pre-repair state, and updating
     // BAR_DETL first would empty the candidate set (its predicate requires fine <= 0) and silently skip them.
     const s2 = scoped('b', scope);
+    // The scope predicate appears twice in this statement (subquery and EXISTS). Each occurrence needs its
+    // own placeholder numbers: Prisma 7's driver adapter binds strictly by the highest $n in the SQL text,
+    // so reusing $1..$n and passing the params twice is rejected (08P01). The second fragment continues the
+    // numbering from where the first ends; the values are identical, so the behaviour is unchanged.
+    const s2b = scoped('b', scope, 1 + s2.params.length);
     const rn: number = await tx.$executeRawUnsafe(
       `UPDATE "SL_DETL_RTN" r SET "ITM_FINE" = (
           SELECT ${ITM_FINE_SQL} FROM "BAR_DETL" b
@@ -759,13 +764,13 @@ registerRepair({
         WHERE r.tenant_id=current_setting('app.tenant_id', true)
           AND EXISTS (
             SELECT 1 FROM "BAR_DETL" b
-             WHERE b.tenant_id=r.tenant_id${s2.sql}
+             WHERE b.tenant_id=r.tenant_id${s2b.sql}
                AND b."TAG_NO"=r."TAG_NO" AND b."VCH_SRNO"=r."VCH_SRNO"
                AND (coalesce(b."ITM_TOUCH",0) + coalesce(b."ITM_WEST_PRC",0)) <> 0
                AND coalesce(b."ITM_FINE",0) <= 0
                AND coalesce(r."ITM_FINE",0) <> ${ITM_FINE_SQL})`,
       ...s2.params,
-      ...s2.params,
+      ...s2b.params,
     );
     if (rn) applied.push(diff('SL_DETL_RTN', { update: rn }));
 

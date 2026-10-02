@@ -1,6 +1,6 @@
 // Tier-2 live report datasets (Task 27) as app_user.
 // Run: DATABASE_URL=postgresql://app_user:app@127.0.0.1:5433/datacare node apps/api/integration/reports.live.mjs
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { createSale } from '../dist/modules/sales/sales.js';
 import { createPurchase } from '../dist/modules/purchase/purchase.js';

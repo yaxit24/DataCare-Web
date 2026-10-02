@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';

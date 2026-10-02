@@ -25,7 +25,7 @@
  * **doubled member balances**, so the scheme test asserts the member's outstanding returns to its prior
  * value — not merely that rows disappeared.
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { schemeInstallment, deleteSchemeInstallment } from '../src/modules/membership/scheme.js';

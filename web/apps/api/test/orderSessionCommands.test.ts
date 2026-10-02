@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@datacare/db';
 import type { Tx } from '@datacare/db';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {

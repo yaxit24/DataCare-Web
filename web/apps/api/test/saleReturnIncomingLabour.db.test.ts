@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import {
   copySaleReturnIncomingLabour,

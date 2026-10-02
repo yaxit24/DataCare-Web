@@ -21,7 +21,7 @@
  * The fixtures below reproduce code 10 exactly as `Live24` holds it, so this test fails if the parent-row
  * preference is ever removed.
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {

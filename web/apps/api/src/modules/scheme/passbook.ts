@@ -66,7 +66,7 @@ export async function stageSchemePassbookRowsTx(
     `INSERT INTO "TEMP_AD_DATA"(
        tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","SCHM_DATE",
        "SCHM_CODE","MEMB_CODE","REC_AC","ITM_GWT","ITM_RATE","REC_AMT","BAL_AMT","CHQ_NO")
-     SELECT $1,a."CO_CODE",a."LC_CODE",a."CO_YEAR",a."CO_BOOK",a."VCH_NO",a."SR_NO",a."VCH_DATE",
+     SELECT $1::text,a."CO_CODE",a."LC_CODE",a."CO_YEAR",a."CO_BOOK",a."VCH_NO",a."SR_NO",a."VCH_DATE",
             a."VCH_DATE",a."SCHM_CODE",a."MEMB_CODE",a."REC_AC",a."ITM_GWT",a."ITM_RATE",
             a."MEMB_AMT",a."TOT_AMT",a."CHQ_NO"
        FROM "AD_DATA" a

@@ -235,10 +235,9 @@ async function main() {
     console.log('TYPE_PARITY_SKIP no DATABASE_URL');
     process.exit(0);
   }
-  // Resolve from packages/db, the way the sibling gates do - a bare import fails from scripts/.
-  const { createRequire } = await import('node:module');
-  const req = createRequire(path.join(repo, 'packages', 'db', 'package.json'));
-  const { PrismaClient } = req('@prisma/client');
+  // The adapter-backed client (Prisma 7, N86) is exported from the built @datacare/db dist; import it by
+  // relative path rather than resolving the package by name.
+  const { PrismaClient } = await import(path.join(repo, 'packages', 'db', 'dist', 'index.js'));
   const prisma = new PrismaClient({ datasources: { db: { url: url.split('?')[0] } } });
   const rows = await prisma.$queryRawUnsafe(
     `SELECT upper(table_name) t, upper(column_name) c, data_type d

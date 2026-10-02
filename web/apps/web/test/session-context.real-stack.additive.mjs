@@ -26,7 +26,7 @@ const root = resolve(
 );
 const apiRequire = createRequire(resolve(root, 'apps/api/package.json'));
 const webRequire = createRequire(resolve(root, 'apps/web/package.json'));
-const { PrismaClient } = apiRequire('@prisma/client');
+const { PrismaClient } = apiRequire('@datacare/db');
 const { chromium } = webRequire('playwright');
 assert.equal(
   process.env.RUN_DB_INTEGRITY_TESTS,

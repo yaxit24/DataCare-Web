@@ -26,12 +26,12 @@ export async function seedColumnSettings(sql) {
     ($1,'01','R8 DUPLICATE','Fine','Duplicate two',NULL,'N'),
     ($1,'01',' R8 MALFORMED','Fine','Preserved malformed identity',NULL,NULL)`);
   await sql(`INSERT INTO "COL_MAST"(tenant_id,"CO_CODE","BOOK_NAME","COL_NAME","COL_NEW_NAME","YES_NO")
-    SELECT $1,'01','R8 PAGES','Column ' || lpad(n::text,3,'0'),'Caption ' || n::text,'Y' FROM generate_series(1,60) n`);
+    SELECT $1::text,'01','R8 PAGES','Column ' || lpad(n::text,3,'0'),'Caption ' || n::text,'Y' FROM generate_series(1,60) n`);
   await sql(
     `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE") VALUES($1,'01','2025-2026','2025-04-01','2026-03-31')`,
   );
   await sql(`INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED")
-    SELECT $1,'01','r8-column-view',"LOGIN_PWD",'USER','N','N','N','N' FROM "LOGIN_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LOGIN_NAME"='browser'`);
+    SELECT $1::text,'01','r8-column-view',"LOGIN_PWD",'USER','N','N','N','N' FROM "LOGIN_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LOGIN_NAME"='browser'`);
   await sql(`INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
     VALUES($1,'01','01','r8-column-view','Masters','Styles / Columns','Y','N','N','N')`);
 }

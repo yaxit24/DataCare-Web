@@ -259,7 +259,7 @@ export async function runLoadProfile() {
     },
   };
 
-  const { PrismaClient } = apiRequire('@prisma/client');
+  const { PrismaClient } = apiRequire('@datacare/db');
   const owner = new PrismaClient({ datasources: { db: { url: ownerUrl } } });
   const runtime = new PrismaClient({ datasources: { db: { url: runtimeUrl } } });
   const [{ buildApp }, { hashPassword }] = await Promise.all([

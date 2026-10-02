@@ -1,5 +1,5 @@
 import { withTenant } from '@datacare/db';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { stageTagPrintRowsTx, TAG_PRINT_STAGING_COLUMNS } from '../src/modules/stock/tagPrint.js';
 

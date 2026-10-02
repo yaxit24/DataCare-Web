@@ -7,6 +7,9 @@ import { findPlausibleSecretLiterals } from './secret-scanner.mjs';
 const root = process.cwd();
 const sourceRoots = ['apps', 'packages', 'scripts'];
 const ignoredDirectories = new Set(['.git', '.next', '.turbo', 'coverage', 'dist', 'node_modules']);
+// Reproducible, git-ignored generator output (Prisma 7 `prisma-client`): not authored source, so it is not
+// linted. Its model field names (e.g. LOGIN_PWD) are desktop column identifiers, not secret literals.
+const ignoredRelativeDirectories = new Set(['packages/db/src/generated']);
 const sourceExtensions = new Set(['.ts', '.tsx', '.js', '.mjs']);
 const errors = [];
 let sourceCount = 0;
@@ -16,8 +19,10 @@ async function walk(directory, visit) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     if (ignoredDirectories.has(entry.name)) continue;
     const path = join(directory, entry.name);
-    if (entry.isDirectory()) await walk(path, visit);
-    else await visit(path);
+    if (entry.isDirectory()) {
+      if (ignoredRelativeDirectories.has(relative(root, path))) continue;
+      await walk(path, visit);
+    } else await visit(path);
   }
 }
 

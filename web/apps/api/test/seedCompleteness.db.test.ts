@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { seedCompany } from '../src/modules/ops/seedCompany.js';
 
 /**

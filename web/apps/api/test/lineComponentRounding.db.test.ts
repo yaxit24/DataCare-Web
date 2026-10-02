@@ -20,7 +20,7 @@
  * prove the behaviour is configured rather than hardcoded — a whole-rupee assertion alone could be satisfied by
  * a hardcoded `Math.round`.
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { createSale } from '../src/modules/sales/sales.js';

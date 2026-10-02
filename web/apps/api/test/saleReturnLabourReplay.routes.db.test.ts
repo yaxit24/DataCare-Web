@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { SignJWT } from 'jose';
 import type { FastifyInstance, LightMyRequestResponse } from 'fastify';
 import { afterAll, beforeAll, beforeEach, describe, it, expect } from 'vitest';

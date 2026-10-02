@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { withTenant, type Tx } from '@datacare/db';
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@datacare/db';
 import { describe, expect, it, vi } from 'vitest';
 import { validateStoredScopeTx } from '../src/modules/auth/businessScope.js';
 import independent from './fixtures/storedScope.independent.json';

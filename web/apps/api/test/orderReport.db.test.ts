@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { bindReport } from '../src/modules/reports/reportBind.js';
 import { loadReportSpec, renderReportLayout } from '../src/modules/reports/reportEngine.js';
@@ -93,7 +93,7 @@ databaseDescribe('full order document datasets, subreport and ledger cutoff', ()
         for (const family of families)
           await owner.$executeRawUnsafe(
             `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","MAIN_BOOK","BOOK_INOUT","BOOK_TBL_NAME","CUR_USE")
-            VALUES ($1,$2,$3,$4,$5,$5,$6,'SL_ORD_DATA','Y')`,
+            VALUES ($1,$2,$3,$4,$5,$5::text,$6,'SL_ORD_DATA','Y')`,
             s.tenantId,
             s.coCode,
             s.lcCode,
@@ -151,12 +151,13 @@ databaseDescribe('full order document datasets, subreport and ledger cutoff', ()
           ] as const)
             await owner.$executeRawUnsafe(
               `INSERT INTO "SL_PR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO",
-              "SR_NO","IT_CODE","IT_DESC","ITM_PCS","ITM_NWT","NET_AMT") VALUES($1,$2,$3,$4,$5,$6,$7,'C0001',$8,$7,$9::numeric,0)`,
+              "SR_NO","IT_CODE","IT_DESC","ITM_PCS","ITM_NWT","NET_AMT") VALUES($1,$2,$3,$4,$5,$6,$7,'C0001',$8,$10::numeric,$9::numeric,0)`,
               ...key,
               voucher,
               sr,
               `Received ${sr} ${identity(s)}`,
               weight,
+              sr,
             );
       }
       for (const [time, amount, type] of [

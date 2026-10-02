@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { deleteDhrn, issueDhrn, receiveDhrn } from '../src/modules/dhrn/dhrn.js';
 import type { VoucherScope } from '../src/modules/vouchers/numbering.js';

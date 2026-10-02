@@ -4,7 +4,7 @@
 // that each form's full multi-table footprint is present + consistent in the unified DB.
 //
 // Run: DATABASE_URL=postgresql://app_user:app@127.0.0.1:5433/datacare node apps/api/integration/parity_sweep.mjs
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 
 const prisma = new PrismaClient();

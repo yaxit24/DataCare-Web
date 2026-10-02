@@ -1,5 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { orderTrackReport } from '../src/modules/reports/orderTagReports.js';
 
@@ -72,10 +72,10 @@ databaseDescribe('RP_ORD_TRACK order tracking report parity builder', () => {
     );
     await exec(
       `INSERT INTO "SL_ORD_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","AC_CODE","EMP_CODE","ADV_AMT","OLD_GL","OLD_SL","FUN_DATE")
-       VALUES ($1,$2,$3,$4,'ORD','ORD001','2024-06-10','C001','E01',100,1.25,0.50,'2024-07-01'),
-              ($1,$2,$3,$4,'ORD','ORD002','2024-06-11','C001','E02',50,0,0,'2024-07-02'),
-              ($1,$2,$3,$4,'ORD','ORD003','2024-06-12','C001','E01',25,0,0,'2024-07-03'),
-              ($1,$2,'02',$4,'ORD','ORD004','2024-06-13','C001','E01',10,0,0,'2024-07-04')`,
+       VALUES ($1,$2,$3,$4::text,'ORD','ORD001','2024-06-10','C001','E01',100,1.25,0.50,'2024-07-01'),
+              ($1,$2,$3,$4::text,'ORD','ORD002','2024-06-11','C001','E02',50,0,0,'2024-07-02'),
+              ($1,$2,$3,$4::text,'ORD','ORD003','2024-06-12','C001','E01',25,0,0,'2024-07-03'),
+              ($1,$2,'02',$4::text,'ORD','ORD004','2024-06-13','C001','E01',10,0,0,'2024-07-04')`,
       TENANT,
       CO,
       LC,
@@ -83,10 +83,10 @@ databaseDescribe('RP_ORD_TRACK order tracking report parity builder', () => {
     );
     await exec(
       `INSERT INTO "SL_ORD_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","OLD_SRNO","VCH_DATE","AC_CODE","IT_CODE","TAG_NO","DESIGN_NO","ITM_SIZE","ITM_REMARK","ITM_GWT","ITM_PCS","DESIGN_ISU","TAG_GEN","TAG_SALE","NET_AMT","ORD_REC_AMT","ITM_TOUCH","ITM_FINE","ITM_COLOR","EMP_CODE","ORD_DEL_DATE","TAG_STK_LESS")
-       VALUES ($1,$2,$3,$4,'ORD','ORD001',1,11,'2024-06-10','C001','RING','ORDTAG1','D1','18','Make round',10.5,1,'Y','Y','N',1000,200,92,9.66,'RED','E01','2024-06-20','Y'),
-              ($1,$2,$3,$4,'ORD','ORD002',1,21,'2024-06-11','C001','RING','','D2','20','Issue pending',20,2,'N','N','N',2000,0,91,18.2,'BLUE','E02','2024-06-21','N'),
-              ($1,$2,$3,$4,'ORD','ORD003',1,31,'2024-06-12','C001','RING','','D3','22','Receive pending',30,3,'Y','N','N',3000,150,90,27,'GREEN','E01','2024-06-22','N'),
-              ($1,$2,'02',$4,'ORD','ORD004',1,41,'2024-06-13','C001','RING','ORDTAG4','D4','24','Other location',40,4,'Y','Y','N',4000,0,90,36,'BLACK','E01','2024-06-23','Y')`,
+       VALUES ($1,$2,$3,$4::text,'ORD','ORD001',1,11,'2024-06-10','C001','RING','ORDTAG1','D1','18','Make round',10.5,1,'Y','Y','N',1000,200,92,9.66,'RED','E01','2024-06-20','Y'),
+              ($1,$2,$3,$4::text,'ORD','ORD002',1,21,'2024-06-11','C001','RING','','D2','20','Issue pending',20,2,'N','N','N',2000,0,91,18.2,'BLUE','E02','2024-06-21','N'),
+              ($1,$2,$3,$4::text,'ORD','ORD003',1,31,'2024-06-12','C001','RING','','D3','22','Receive pending',30,3,'Y','N','N',3000,150,90,27,'GREEN','E01','2024-06-22','N'),
+              ($1,$2,'02',$4::text,'ORD','ORD004',1,41,'2024-06-13','C001','RING','ORDTAG4','D4','24','Other location',40,4,'Y','Y','N',4000,0,90,36,'BLACK','E01','2024-06-23','Y')`,
       TENANT,
       CO,
       LC,
@@ -94,7 +94,7 @@ databaseDescribe('RP_ORD_TRACK order tracking report parity builder', () => {
     );
     await exec(
       `INSERT INTO "APR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","AC_CODE","ISU_YRCD","ISU_DBCD","ISU_NO","ISU_SRNO","ORNA_REC_DATE")
-       VALUES ($1,$2,$3,$4,'APR','APR001',1,'2024-06-14','K001',$4,'ORD','ORD001',1,'2024-06-16')`,
+       VALUES ($1,$2,$3,$4::text,'APR','APR001',1,'2024-06-14','K001',$4::text,'ORD','ORD001',1,'2024-06-16')`,
       TENANT,
       CO,
       LC,
@@ -102,7 +102,7 @@ databaseDescribe('RP_ORD_TRACK order tracking report parity builder', () => {
     );
     await exec(
       `INSERT INTO "BAR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","TAG_NO","ITM_GWT","ITM_NWT","ORD_YRCD","ORD_DBCD","ORD_NO","ORD_SRNO")
-       VALUES ($1,$2,$3,$4,'TAG','TAG001',1,'2024-06-17','TAG001',9.75,9.20,$4,'ORD','ORD001',11)`,
+       VALUES ($1,$2,$3,$4::text,'TAG','TAG001',1,'2024-06-17','TAG001',9.75,9.20,$4::text,'ORD','ORD001',11)`,
       TENANT,
       CO,
       LC,

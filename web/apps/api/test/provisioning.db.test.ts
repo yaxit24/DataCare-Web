@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { seedCompany } from '../src/modules/ops/seedCompany.js';
 import { createPurchase } from '../src/modules/purchase/purchase.js';
 import { createSale } from '../src/modules/sales/sales.js';

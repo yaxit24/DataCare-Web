@@ -1,6 +1,6 @@
 // Tier-2 live voucher-numbering concurrency (Task 16) as app_user.
 // Run: DATABASE_URL=postgresql://app_user:app@127.0.0.1:5433/datacare node apps/api/integration/numbering.live.mjs
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { nextVoucherNo } from '../dist/modules/vouchers/numbering.js';
 

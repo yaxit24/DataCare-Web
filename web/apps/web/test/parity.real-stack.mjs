@@ -116,7 +116,7 @@ import {
 // Run through scripts/parity-test-env.mjs. This harness refuses the running application's database.
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const apiRequire = createRequire(new URL('../../api/package.json', import.meta.url));
-const { PrismaClient } = apiRequire('@prisma/client');
+const { PrismaClient } = apiRequire('@datacare/db');
 const { buildApp } = await import('../../api/dist/app.js');
 const { hashPassword } = await import('../../api/dist/modules/auth/password.js');
 const tenantId = 'browser-parity';

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createSale } from '../src/modules/sales/sales.js';
 import { DESKTOP_MESSAGES } from '../src/modules/shared/desktopMessages.js';

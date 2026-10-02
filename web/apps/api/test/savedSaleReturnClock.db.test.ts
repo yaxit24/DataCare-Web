@@ -1,7 +1,7 @@
 /** These cases exercise the actual saved JSONB reader, rather than
  * Prisma Date or SQL timestamp::text output.
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { projectSavedSaleReturnClock } from '@datacare/core';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';

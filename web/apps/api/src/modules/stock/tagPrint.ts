@@ -195,7 +195,7 @@ export async function stageTagStockPrintRowsTx(
 
   return (await tx.$executeRawUnsafe(
     `INSERT INTO "TAG_STOCK_PRINT"(tenant_id,${copied},"ITM_SIGN","ITM_QTY","DATA_TYPE")
-       SELECT $1,${copied},'+',1,'A' FROM "BAR_DETL" WHERE ${filters.join(' AND ')}`,
+       SELECT $1::text,${copied},'+',1,'A' FROM "BAR_DETL" WHERE ${filters.join(' AND ')}`,
     ...params,
   )) as number;
 }
@@ -264,7 +264,7 @@ export async function stageTagPrintRowsTx(
 
   return (await tx.$executeRawUnsafe(
     `INSERT INTO "TAG_PRINT_DATA"(tenant_id,${cols})
-       SELECT $1,${cols}
+       SELECT $1::text,${cols}
          FROM "BAR_DETL"
         WHERE tenant_id=$1
           AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6${filter}`,

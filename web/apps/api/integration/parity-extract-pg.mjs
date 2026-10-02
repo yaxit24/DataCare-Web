@@ -95,7 +95,7 @@ async function main() {
 
   // pnpm hoists nothing to the workspace root, so the client is resolved from the package that depends on it.
   const req = createRequire(resolve(REPO, 'packages', 'db', 'package.json'));
-  const { PrismaClient } = req('@prisma/client');
+  const { PrismaClient } = req('@datacare/db');
   const prisma = new PrismaClient({ datasources: { db: { url } } });
 
   // Every read below must carry the tenant context. DATABASE_URL is the RLS-BOUND application role, and

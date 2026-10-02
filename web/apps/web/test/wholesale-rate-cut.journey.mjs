@@ -93,8 +93,8 @@ export async function seedWholesaleRateCut(sql) {
       `INSERT INTO "BAR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","BOOK_NAME",
          "INOUT_TYPE","TAG_NO","VCH_SRNO","IT_CODE","ITM_PCS","ITM_GWT","ITM_OTH_WT","ITM_NWT","ITM_TOUCH","ITM_WEST_PRC",
          "ITM_FINE","TBL_CODE","KR_NAME","PR_CODE","LBR_TYPE","LBR_RATE","RATE_TYPE","EMP_ISU")
-       VALUES($1,'01','01','2024-2025','WPB','00001',1,'2024-05-01','PURCHASE','I',$2,$3,'WR916',1,$4,0,$4,92,5,
-              $5,'001',$6,'LR',$7,$8,'G','N')`,
+       VALUES($1,'01','01','2024-2025','WPB','00001',1,'2024-05-01','PURCHASE','I',$2::text,$3::int,'WR916',1,$4::numeric,0,$4::numeric,92,5,
+              $5::numeric,'001',$6,'LR',$7,$8,'G','N')`,
       t.tag,
       t.id,
       t.gwt,
@@ -106,7 +106,7 @@ export async function seedWholesaleRateCut(sql) {
     await sql(
       `INSERT INTO "MAIN_STOCK"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","ISR_NO","VCH_DATE",
          "IT_CODE","TAG_NO","VCH_SRNO","TR_TYPE","ITM_SIGN","ITM_QTY","ITM_PCS","ITM_GWT","ITM_NWT")
-       VALUES($1,'01','01','2024-2025','WPB','00001',2,1,'2024-05-01','WR916',$2,$3,'P','+',1,1,$4,$4)`,
+       VALUES($1,'01','01','2024-2025','WPB','00001',2,1,'2024-05-01','WR916',$2::text,$3::int,'P','+',1,1,$4::numeric,$4::numeric)`,
       t.tag,
       t.id,
       t.gwt,

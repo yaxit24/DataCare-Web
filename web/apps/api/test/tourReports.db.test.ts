@@ -1,5 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { tourReport, tourTagReport } from '../src/modules/reports/tourReports.js';
 
@@ -73,19 +73,19 @@ databaseDescribe('RP_TOUR_ZOOM Tour Report and Tour Tag parity builders', () => 
     await exec(
       `INSERT INTO "APR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","VCH_TYPE","BOOK_NAME","AC_CODE","EMP_CODE","IT_CODE","TAG_NO","ITM_PCS","ITM_GWT","ITM_NWT","ISU_YRCD","ISU_DBCD","ISU_NO","ISU_SRNO","OLD_SRNO","EMP_SALE","ISU_REC")
        VALUES
-       ($1,$2,$3,$4,'ISU','I001',1,'2024-06-10','EIS','EMP ISU','E01','E01','RING','T001',10,100,95,$4,'SL1','S001',1,NULL,'N','N'),
-       ($1,$2,$3,$4,'SL1','S001',1,'2024-06-12','ERC','EMP REC','E01','E01','RING','R001',2,20,19,NULL,NULL,NULL,NULL,1,'N','N'),
-       ($1,$2,$3,$4,'ISU','I002',1,'2024-06-13','EIS','EMP ISU','E01','E01','RING','T002',4,40,38,$4,'SL1','S002',1,NULL,'Y','N'),
-       ($1,$2,$3,$4,'ISU','I003',1,'2024-06-14','EIS','EMP ISU','E01','E01','RING','T003',3,30,29,$4,'505','R003',1,NULL,'N','Y'),
-       ($1,$2,$3,$4,'505','R003',1,'2024-06-15','ERC','EMP REC','E01','E01','RING','RT003',1,10,9,NULL,NULL,NULL,NULL,1,'N','N'),
-       ($1,$2,$3,$4,'ISU','I004',1,'2024-06-16','EIS','EMP ISU','E02','E02','BANG','T004',9,90,88,$4,'SL1','S004',1,NULL,'N','N'),
-       ($1,$2,$3,$4,'ISU','I005',1,'2024-07-02','EIS','EMP ISU','E01','E01','RING','T005',99,990,980,$4,'SL1','S005',1,NULL,'N','N'),
-       ($1,$2,$3,$4,'ISU','N001',1,'2024-05-20','EIS','EMP ISU','E01','E01','RING','N',10,100,95,NULL,NULL,NULL,NULL,NULL,'N','N'),
-       ($1,$2,$3,$4,'SL1','N002',1,'2024-05-22','TSL','TOUR SALES','E01','E01','RING','N',2,20,19,NULL,NULL,NULL,NULL,NULL,'N','N'),
-       ($1,$2,$3,$4,'505','N003',1,'2024-05-23','ERC','EMP REC','E01','E01','RING','N',1,10,9,NULL,NULL,NULL,NULL,NULL,'N','N'),
-       ($1,$2,$3,$4,'ISU','N004',1,'2024-06-04','EIS','EMP ISU','E01','E01','RING','N',5,50,48,NULL,NULL,NULL,NULL,NULL,'N','N'),
-       ($1,$2,$3,$4,'SL1','N005',1,'2024-06-05','TSL','TOUR SALES','E01','E01','RING','N',3,30,28,NULL,NULL,NULL,NULL,NULL,'N','N'),
-       ($1,$2,$3,$4,'505','N006',1,'2024-06-06','ERC','EMP REC','E01','E01','RING','N',2,20,18,NULL,NULL,NULL,NULL,NULL,'N','N')`,
+       ($1,$2,$3,$4::text,'ISU','I001',1,'2024-06-10','EIS','EMP ISU','E01','E01','RING','T001',10,100,95,$4::text,'SL1','S001',1,NULL,'N','N'),
+       ($1,$2,$3,$4::text,'SL1','S001',1,'2024-06-12','ERC','EMP REC','E01','E01','RING','R001',2,20,19,NULL,NULL,NULL,NULL,1,'N','N'),
+       ($1,$2,$3,$4::text,'ISU','I002',1,'2024-06-13','EIS','EMP ISU','E01','E01','RING','T002',4,40,38,$4::text,'SL1','S002',1,NULL,'Y','N'),
+       ($1,$2,$3,$4::text,'ISU','I003',1,'2024-06-14','EIS','EMP ISU','E01','E01','RING','T003',3,30,29,$4::text,'505','R003',1,NULL,'N','Y'),
+       ($1,$2,$3,$4::text,'505','R003',1,'2024-06-15','ERC','EMP REC','E01','E01','RING','RT003',1,10,9,NULL,NULL,NULL,NULL,1,'N','N'),
+       ($1,$2,$3,$4::text,'ISU','I004',1,'2024-06-16','EIS','EMP ISU','E02','E02','BANG','T004',9,90,88,$4::text,'SL1','S004',1,NULL,'N','N'),
+       ($1,$2,$3,$4::text,'ISU','I005',1,'2024-07-02','EIS','EMP ISU','E01','E01','RING','T005',99,990,980,$4::text,'SL1','S005',1,NULL,'N','N'),
+       ($1,$2,$3,$4::text,'ISU','N001',1,'2024-05-20','EIS','EMP ISU','E01','E01','RING','N',10,100,95,NULL,NULL,NULL,NULL,NULL,'N','N'),
+       ($1,$2,$3,$4::text,'SL1','N002',1,'2024-05-22','TSL','TOUR SALES','E01','E01','RING','N',2,20,19,NULL,NULL,NULL,NULL,NULL,'N','N'),
+       ($1,$2,$3,$4::text,'505','N003',1,'2024-05-23','ERC','EMP REC','E01','E01','RING','N',1,10,9,NULL,NULL,NULL,NULL,NULL,'N','N'),
+       ($1,$2,$3,$4::text,'ISU','N004',1,'2024-06-04','EIS','EMP ISU','E01','E01','RING','N',5,50,48,NULL,NULL,NULL,NULL,NULL,'N','N'),
+       ($1,$2,$3,$4::text,'SL1','N005',1,'2024-06-05','TSL','TOUR SALES','E01','E01','RING','N',3,30,28,NULL,NULL,NULL,NULL,NULL,'N','N'),
+       ($1,$2,$3,$4::text,'505','N006',1,'2024-06-06','ERC','EMP REC','E01','E01','RING','N',2,20,18,NULL,NULL,NULL,NULL,NULL,'N','N')`,
       TENANT,
       CO,
       LC,
@@ -93,9 +93,9 @@ databaseDescribe('RP_TOUR_ZOOM Tour Report and Tour Tag parity builders', () => 
     );
     await exec(
       `INSERT INTO "RATE_CUT_ISU"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","OLD_SRNO","VCH_DATE","VCH_TYPE","BOOK_NAME","AC_CODE","IT_CODE","TAG_NO","ITM_PCS","ITM_GWT","ITM_NWT")
-       VALUES ($1,$2,$3,$4,'SL1','S001',1,1,'2024-06-11','TSL','TOUR SALES','C001','RING','T001',3,30,28),
-              ($1,$2,$3,$4,'SL1','S002',1,1,'2024-06-13','TSL','TOUR SALES','C001','RING','T002',4,40,38),
-              ($1,$2,$3,$4,'SL1','S004',1,1,'2024-06-16','TSL','TOUR SALES','C001','BANG','T004',1,10,9)`,
+       VALUES ($1,$2,$3,$4::text,'SL1','S001',1,1,'2024-06-11','TSL','TOUR SALES','C001','RING','T001',3,30,28),
+              ($1,$2,$3,$4::text,'SL1','S002',1,1,'2024-06-13','TSL','TOUR SALES','C001','RING','T002',4,40,38),
+              ($1,$2,$3,$4::text,'SL1','S004',1,1,'2024-06-16','TSL','TOUR SALES','C001','BANG','T004',1,10,9)`,
       TENANT,
       CO,
       LC,

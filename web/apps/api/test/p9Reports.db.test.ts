@@ -1,5 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { huidReport } from '../src/modules/reports/huid.js';
 import { stockLevelReport } from '../src/modules/reports/stockLevel.js';

@@ -1,5 +1,6 @@
 # Dependencies and reproducible generated output only. Environment snapshots are intentionally
 # versioned in this private owner-authorized baseline; see ../SECURITY-NOTICE.md.
+packages/db/src/generated/prisma/
 node_modules/
 dist/
 .next/

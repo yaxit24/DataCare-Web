@@ -1,4 +1,5 @@
 import { withTxBudget, SNAPSHOT_READ, type TxBudgetPrisma, type Tx } from '../shared/txBudget.js';
+import { hasPostgresErrorCode } from '../shared/prismaError.js';
 import { ScopeError, validateStoredScopeTx } from './businessScope.js';
 import {
   loadPrincipalTx,
@@ -236,13 +237,9 @@ async function assertFinalContextTx(
 
 function transactionConflict(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false;
-  const detail = error as { code?: unknown; meta?: { code?: unknown } };
-  return (
-    detail.code === 'P2034' ||
-    detail.code === '40001' ||
-    detail.code === '40P01' ||
-    (detail.code === 'P2010' && (detail.meta?.code === '40001' || detail.meta?.code === '40P01'))
-  );
+  // P2034 (Prisma retryable), and the PostgreSQL serialisation/deadlock SQLSTATEs 40001/40P01 in either
+  // the Prisma 6 (meta.code) or Prisma 7 (meta.driverAdapterError.cause.originalCode) error shape (N86).
+  return hasPostgresErrorCode(error, 'P2034', '40001', '40P01');
 }
 
 export type SessionReadSnapshotAdmission = Readonly<{
