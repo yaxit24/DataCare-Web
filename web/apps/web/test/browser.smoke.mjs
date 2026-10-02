@@ -92,6 +92,8 @@ const json = (route, status, body) =>
 
 let browser;
 let page;
+/** G94: milliseconds the mocked /lookup/items reply is held (0 = immediate). */
+let lookupItemsDelayMs = 0;
 const pageErrors = [];
 const consoleErrors = [];
 const requestFailures = [];
@@ -316,8 +318,11 @@ try {
         gold: 0,
         silver: 0,
       });
-    if (path.startsWith('/lookup/items'))
+    if (path.startsWith('/lookup/items')) {
+      // G94: a test can hold the item lookup to reproduce a reply that lands after the field lost focus.
+      if (lookupItemsDelayMs) await new Promise((done) => setTimeout(done, lookupItemsDelayMs));
       return json(route, 200, [{ code: 'GOLD', name: 'Gold Ornament' }]);
+    }
     if (path.startsWith('/lookup/accounts'))
       return json(route, 200, [
         { code: 'CUST', name: 'Repair Customer' },
@@ -791,6 +796,31 @@ try {
 
   await item.focus();
   await page.keyboard.press('F1');
+  await page.getByText('Gold Ornament').waitFor();
+  await page.keyboard.press('Escape');
+  await page.getByText('Gold Ornament').waitFor({ state: 'hidden' });
+  await expectFocused(item, 'item');
+
+  // G94: an open list closes when focus moves to another control, so it cannot cover later controls or keep
+  // F-keys inert (FormKeys treats an open list as an overlay).
+  await page.keyboard.press('F1');
+  await page.getByText('Gold Ornament').waitFor();
+  await tag.focus();
+  await page.getByText('Gold Ornament').waitFor({ state: 'hidden' });
+  // A reply that arrives after the operator has left the field opens nothing.
+  lookupItemsDelayMs = 700;
+  await item.focus();
+  await page.keyboard.press('F1');
+  await tag.focus();
+  await page.waitForTimeout(1200);
+  assert.equal(
+    await page.getByText('Gold Ornament').count(),
+    0,
+    'late lookup reply must not open a list',
+  );
+  assert.equal(await page.locator('[data-lookup-open="true"]').count(), 0);
+  lookupItemsDelayMs = 0;
+  await item.focus();
   await page.getByText('Gold Ornament').waitFor();
   await page.keyboard.press('Escape');
   await page.getByText('Gold Ornament').waitFor({ state: 'hidden' });
