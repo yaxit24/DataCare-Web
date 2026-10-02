@@ -342,6 +342,73 @@ databaseDescribe('database-backed TR_OTH_PURC Other Income mode', () => {
     });
   });
 
+  /**
+   * G88: TR_OTH_PURC.cs:5007-5026 (BILL_TOTAL) rounds the total after TDS with Math.Round(x, 2) when
+   * CO_SET.ALL_ROF_REMOVE = 'Y' and Math.Round(x, 0) otherwise.
+   *
+   * Expected values from the source: one line of 1,000.60 at T1 18% forward gives SGST and CGST of
+   * 1,000.60 × 9 / 100 = 90.054 → 90.05 each (Strings.Format "0.00"), a line total of 1,180.70, and TDS 5% of
+   * 1,000.60 = 50.03 → Math.Round(…, 0) = 50 (:5001). So the total after TDS is 1,130.70: 1,131 with round-off,
+   * 1,130.70 without. The party leg is the total plus TDS.
+   */
+  it.each([
+    ['N', 1131],
+    ['Y', 1130.7],
+  ] as const)('ALL_ROF_REMOVE=%s rounds the total after TDS to %s (G88)', async (flag, total) => {
+    await exec(
+      `UPDATE "CO_SET" SET "ALL_ROF_REMOVE"=$3 WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+      TENANT,
+      CO,
+      flag,
+    );
+    const created = await saveOtherIncome(
+      runtime,
+      input({
+        chequeAmount: 0,
+        cardAmount: 0,
+        cashAmount: 0,
+        kasarAmount: 0,
+        lines: [{ itemName: 'Rent income', netAmount: 1000.6, taxCode: 'T1', taxType: 'F' }],
+      }),
+    );
+    const [row] = await query<{
+      gross: number;
+      tds: number;
+      total: number;
+      os: number;
+      party: number;
+    }>(
+      `SELECT (SELECT sum("TOT_AMT")::float FROM "PAY_DETL" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3) gross,
+              (SELECT min("TDS_AMT")::float FROM "PAY_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3) tds,
+              (SELECT min("TOT_AMT")::float FROM "PAY_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3) total,
+              (SELECT min("BILL_OS")::float FROM "PAY_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3) os,
+              (SELECT sum("DR_AMT")::float FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3
+                  AND "AC_CODE"='CUST01' AND "LD_CODE"='INC001') party`,
+      TENANT,
+      BOOK,
+      created.voucherNo,
+    );
+    expect(row).toEqual({
+      gross: 1180.7,
+      tds: 50,
+      total,
+      os: total,
+      party: Number((total + 50).toFixed(2)),
+    });
+    const [balance] = await query<{ dr: number; cr: number }>(
+      `SELECT coalesce(sum("DR_AMT"),0)::float dr, coalesce(sum("CR_AMT"),0)::float cr
+         FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+      TENANT,
+      BOOK,
+      created.voucherNo,
+    );
+    expect(balance?.dr).toBeCloseTo(balance?.cr ?? Number.NaN, 6);
+    await expect(getOtherIncome(runtime, scope, created.voucherNo)).resolves.toMatchObject({
+      totalAmount: total,
+      outstandingAmount: total,
+    });
+  });
+
   it('rejects non-OTH INC books and incomplete settlement accounts before writing', async () => {
     await seedBook('BAD', 'OTH EXP', 'O');
     await expect(

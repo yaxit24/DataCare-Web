@@ -2947,7 +2947,7 @@
       "sourceAndModuleDetail": "06-module-detail.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
-      "gapIds": "G83, G89, G90"
+      "gapIds": "G83, G89, G90, G91, G92"
     },
     {
       "id": "N16",
@@ -2990,7 +2990,8 @@
         "parity-plan-2026-09-10/46-implementation-progress-x16-2026-09-29.md",
         "web/apps/api/src/modules/sales/rateCut.ts",
         "web/apps/api/test/wholesaleRateCutStock.db.test.ts"
-      ]
+      ],
+      "gapIds": "G92"
     },
     {
       "id": "N18",
