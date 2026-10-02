@@ -114,9 +114,10 @@ export async function resolveTaxPolicyTx(
     tax_group: unknown;
     tax_ac: unknown;
     tax_pct: unknown;
+    sr_no: unknown;
   }> = await tx.$queryRawUnsafe(
     `SELECT "TAX_CODE" AS tax_code,"TAX_GROUP" AS tax_group,"TAX_AC" AS tax_ac,
-            coalesce("TAX_PRC",0) AS tax_pct
+            coalesce("TAX_PRC",0) AS tax_pct, coalesce("SR_NO",0) AS sr_no
        FROM "TAX_MAST"
       WHERE tenant_id=$1 AND "CO_CODE"=$2 AND ${selector} ${rowSelector}
       ORDER BY coalesce("SR_NO",0),row_id LIMIT 8`,
@@ -156,7 +157,14 @@ export async function resolveTaxPolicyTx(
   //
   // Confirmed by data for the intra-state case: all 184 real TAX_DATA rows are two per voucher, SGST then CGST,
   // and TAX_TYPE never holds anything else - so 'N' was never a value the desktop wrote.
-  const code = args.taxCode?.trim() ?? '';
+  //
+  // The components belong to the RESOLVED code, whether the caller named it or gave only a rate: a sale entered
+  // by rate that matches a code's parent row (SR_NO 0) is that code, the header stores it, and Ac_Tax.cs writes
+  // its SGST/CGST rows from the same master. Only a legacy single-row master (one row at SR_NO 1 carrying the
+  // total rate) has no component breakdown, so a by-rate match on a non-parent row keeps the parent-group
+  // fallback the writers already apply.
+  const matchedParent = args.srNo == null && Number(tax?.sr_no ?? -1) === 0;
+  const code = args.taxCode?.trim() || (matchedParent ? String(tax?.tax_code ?? '').trim() : '');
   const componentRows: Array<{
     sr_no: unknown;
     tax_group: unknown;

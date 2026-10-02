@@ -187,9 +187,10 @@ type ComputedLine = {
 
 const n = (value: unknown): number => (value == null || value === '' ? 0 : Number(value) || 0);
 const text = (value: unknown): string => String(value ?? '').trim();
-// TR_INOUT stores IT_NET_AMT / LBR_AMT / OTH_AMT / TOT_NET_AMT through Strings.Format(x, "0.00")
-// (TR_INOUT.cs:4540-4601, 5514-5613), i.e. half-up away from zero, so the kernel `round` is correct
-// (N48, G22).
+// Kernel half-up 2dp for posted money (N48). TR_INOUT re-displays stored amounts through Strings.Format "0.00"
+// (TR_INOUT.cs:4540-4601, 5514-5613), but computes a line amount on entry as Math.Round(fine x rate, 0) with the
+// rate per gram, per 10 g (RATE_TYPE '1'), per kg ('K') or per piece ('P') (TR_INOUT.cs:4105-4117). This writer
+// still values a rated line as fine x rate at 2dp with no unit branch — gap G87.
 const r2 = (value: number): number => round(value, 2);
 const today = (): string => new Date().toISOString().slice(0, 10);
 const short = (value: unknown, len: number): string => text(value).slice(0, len);

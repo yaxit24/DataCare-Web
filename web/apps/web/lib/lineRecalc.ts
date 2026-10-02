@@ -11,6 +11,9 @@ import {
 } from '@datacare/core';
 import type { FineWorkflow } from '@datacare/core';
 
+/** The exchange-row valuation the sale screens preview (G83); re-exported so a page needs one import. */
+export { oldGoldRowAmount, type OldGoldCells } from './oldGoldRow';
+
 /**
  * P5 — the per-cell recalculation kernel.
  *

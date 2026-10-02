@@ -167,6 +167,8 @@ type ResolvedInput = {
 // back-calc at :2876 is Math.Round(x, 2) and rounds through roundHalfEven at its call site.)
 const money = (value: unknown): number => round(Number(value ?? 0), 2);
 const integerMoney = (value: unknown): number => roundHalfEven(Number(value ?? 0), 0);
+// Gap G88: the voucher total after TDS rounds to 2dp, not 0dp, when CO_SET.ALL_ROF_REMOVE = 'Y'
+// (TR_OTH_PURC.cs:5007-5026); this writer always rounds it to whole rupees.
 const number = (value: unknown): number => Number(value ?? 0);
 const positiveOrZero = (value: unknown, label: string): number => {
   const resolved = money(value);

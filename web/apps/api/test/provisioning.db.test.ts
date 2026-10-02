@@ -538,4 +538,40 @@ d('company provisioning produces a postable company', () => {
     expect(await taxAccounts('PR', purchase.vchNo)).toEqual(['GSTINPUT']);
     expect(await taxAccounts('SL', sale.vchNo)).toEqual(['GST']);
   });
+
+  /**
+   * A sale entered BY RATE (no tax code) on a provisioned company resolves the code's PARENT row, so it is that
+   * code and its component rows apply: Ac_Tax.cs writes TAX_DATA from `C.TAX_GROUP` / `C.TAX_PRC` at
+   * `C.SR_NO = 1` (SGST, TAX_AMT/2) and `C.SR_NO = 2` (CGST, TAX_AMT/2) for every sale, and the sale header
+   * already stores the resolved code. Found in the G83 browser check: the rows carried the parent group 'N'.
+   */
+  it('writes SGST/CGST tax rows for a sale entered by rate on a provisioned company (G82)', async () => {
+    const scope = { tenantId, coCode: CO, lcCode: LC, coBook: 'SL', coYear: '2024-2025' } as any;
+    const sale = await createSale(
+      prisma,
+      {
+        scope,
+        acCode: 'G82CUS',
+        acName: 'G82 Customer',
+        vchDate: '2024-04-11',
+        taxRatePct: 3,
+        interState: false,
+      } as any,
+      [{ itCode: 'G82IT', pcs: 1, grossWt: 1, netWt: 1, touch: 90, metalAmount: 1000 }] as any,
+    );
+    const rows = (await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT "SR_NO"::int AS sr, "TAX_CODE" AS code, "TAX_TYPE" AS type,
+                coalesce("TAX_PRC",0)::float AS prc, coalesce("TAX_AMT",0)::float AS amt
+           FROM "TAX_DATA" WHERE "CO_CODE"=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+        CO,
+        String(sale.vchNo).padStart(5, '0'),
+      ),
+    )) as Array<Record<string, unknown>>;
+    // 1000 taxable at 3%: 30 tax, 15 + 15.
+    expect(rows).toEqual([
+      { sr: 1, code: '10', type: 'SGST', prc: 1.5, amt: 15 },
+      { sr: 2, code: '10', type: 'CGST', prc: 1.5, amt: 15 },
+    ]);
+  });
 });

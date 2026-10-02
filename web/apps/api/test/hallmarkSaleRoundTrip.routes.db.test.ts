@@ -252,6 +252,19 @@ function differences(
         expect.arrayContaining(['SL_DATA', 'SL_DETL', 'AC_DATA']),
       );
 
+      // G83, on the fixture where it was found: 5.3 g at 84 touch is 4.452 g fine (three decimals,
+      // TR_SALE.cs:7905) and Math.Round(4.452 x 5800, 0) = 25822. The posted 25821.60 is ignored because a rate
+      // was given, and the detail, the header and the old-gold ledger leg all carry the one valued figure.
+      const exchange = before.SL_PR_DETL ?? [];
+      expect(exchange.map((row) => [Number(row.ITM_FINE), Number(row.NET_AMT)])).toEqual([
+        [4.452, 25822],
+      ]);
+      expect(Number(before.SL_DATA?.[0]?.OLD_GL_AMT)).toBe(25822);
+      const oldGoldLeg = (before.AC_DATA ?? []).filter(
+        (row) => row.AC_CODE === 'OLDGOLD' && Number(row.DR_AMT) !== 0,
+      );
+      expect(oldGoldLeg.map((row) => Number(row.DR_AMT))).toEqual([25822]);
+
       // Reopen as the screen does, then save without touching anything.
       const loadedResponse = await request(
         'GET',

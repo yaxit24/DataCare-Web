@@ -1,4 +1,4 @@
-import { round } from './money.js';
+import { valueOldGoldLine } from './oldGold.js';
 
 /**
  * Hallmark Sale editor ↔ voucher mapping (N40 / G45).
@@ -460,9 +460,20 @@ export function hallmarkOldGoldFromView(view: Record<string, unknown>): Hallmark
   return { netWt: cell(first?.netWt), touch: cell(first?.touch), rate: cell(first?.rate) };
 }
 
-/** The screen's old-metal amount: net × touch% × rate, to the paisa (half-up, as the screen shows it). */
+/**
+ * The screen's old-metal amount, exactly as the writer stores it (G83): `valueOldGoldLine`, i.e. fine at three
+ * decimals and `Math.Round(fine x rate, 0)` (`TR_SALE.cs` `CommPassTotal_Old`). Computing net x touch x rate to the
+ * paisa showed 25,821.60 for a row the server stores at 25,822.
+ */
 const oldGoldAmount = (og: HallmarkOldGold) =>
-  round(((n(og.netWt) * n(og.touch)) / 100) * n(og.rate), 2);
+  valueOldGoldLine({ netWt: n(og.netWt), touch: n(og.touch), rate: n(og.rate) }).amount;
+
+/** The hallmark screen's old-metal helpers: read a loaded voucher's row, and preview the stored amount. */
+export const hallmarkOldGold = Object.freeze({
+  fromView: hallmarkOldGoldFromView,
+  value: (netWt: string, touch: string, rate: string): number =>
+    oldGoldAmount({ netWt, touch, rate }),
+});
 
 /** The new-voucher header, exactly as the screen always built it. */
 function freshHeader(header: HallmarkHeader): Record<string, unknown> {
@@ -525,9 +536,9 @@ export function hallmarkSaleCommand(input: {
   let oldGold: Array<Record<string, unknown>> | undefined = loadedOldGold.length
     ? loadedOldGold.map((row) => ({ ...row }))
     : undefined;
-  // The writer posts the header and ledger from each row's posted `amount`, but stores the detail row at its
-  // own valuation (G83), and the view returns the detail. With one gold row, the stored header total is that
-  // row's posted amount, so send it back and an unchanged save posts what it posted before.
+  // Since G83 the writer values every exchange row on the server and posts the detail, header, ledger and
+  // BILL_OS from that one valuation, so the posted `amount` only matters when no rate is supplied (the desktop's
+  // typed-amount flow). Sending the stored header total back keeps an unchanged save identical either way.
   const goldRows = (oldGold ?? []).filter((row) => (row.metal ?? 'G') === 'G');
   if (goldRows.length === 1 && typeof view.oldGoldAmount === 'number')
     goldRows[0]!.amount = view.oldGoldAmount;
