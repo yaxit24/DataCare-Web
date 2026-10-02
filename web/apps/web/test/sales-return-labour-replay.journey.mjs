@@ -71,7 +71,7 @@ async function insert(sql, table, values) {
       table +
       '"(tenant_id,' +
       names +
-      ') SELECT $1,' +
+      ') SELECT $1::text,' +
       names +
       ' FROM jsonb_populate_record(NULL::"' +
       table +
@@ -113,7 +113,7 @@ export async function seedSalesReturnLabourReplay(sql) {
   await expectRows(
     1,
     sql(
-      'UPDATE "CO_SET" SET "SL_AMT_TYPE"=$2,"LBR_ROF"=2,"LBR_RATE_GEN"=$2,"ALL_ROF_REMOVE"=$2,"LBR_TYPE"=$2,"TAX_ROF"=2,"EMP_CODE_MANDATORY"=$2,"LOCK_DATE"=NULL WHERE tenant_id=$1 AND "CO_CODE"=$3',
+      'UPDATE "CO_SET" SET "SL_AMT_TYPE"=$2::text,"LBR_ROF"=2,"LBR_RATE_GEN"=$2::text,"ALL_ROF_REMOVE"=$2::text,"LBR_TYPE"=$2::text,"TAX_ROF"=2,"EMP_CODE_MANDATORY"=$2::text,"LOCK_DATE"=NULL WHERE tenant_id=$1 AND "CO_CODE"=$3',
       'N',
       '01',
     ),
@@ -179,7 +179,7 @@ export async function seedSalesReturnLabourReplay(sql) {
   await insert(sql, 'SL_DATA', { ...fixture.header, ...key });
   for (const row of fixture.rows) await insert(sql, 'SL_DETL_RTN', { ...row, ...key });
   await sql(
-    'INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED") SELECT $1,$2,$3,"LOGIN_PWD",$4,$5,$5,$5,$5 FROM "LOGIN_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LOGIN_NAME"=$6',
+    'INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED") SELECT $1::text,$2::text,$3::text,"LOGIN_PWD",$4::text,$5::text,$5::text,$5::text,$5::text FROM "LOGIN_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LOGIN_NAME"=$6',
     '01',
     loginName,
     'USER',

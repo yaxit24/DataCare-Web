@@ -167,27 +167,27 @@ export async function seedSalesReturnReplay(sql) {
         .map((key) => `"${key}"`)
         .join(',');
       await sql(
-        `INSERT INTO "SL_DETL_RTN"(tenant_id,${names}) SELECT $1,${names} FROM jsonb_populate_record(NULL::"SL_DETL_RTN",$2::jsonb)`,
+        `INSERT INTO "SL_DETL_RTN"(tenant_id,${names}) SELECT $1::text,${names} FROM jsonb_populate_record(NULL::"SL_DETL_RTN",$2::jsonb)`,
         JSON.stringify(values),
       );
       if (book === 'R91' && srNo === 17) {
         values.VCH_NO = '00002';
         values.TAG_NO = 'R9-TAG';
         await sql(
-          `INSERT INTO "SL_DETL_RTN"(tenant_id,${names}) SELECT $1,${names} FROM jsonb_populate_record(NULL::"SL_DETL_RTN",$2::jsonb)`,
+          `INSERT INTO "SL_DETL_RTN"(tenant_id,${names}) SELECT $1::text,${names} FROM jsonb_populate_record(NULL::"SL_DETL_RTN",$2::jsonb)`,
           JSON.stringify(values),
         );
         values.VCH_NO = '00003';
         values.TAG_NO = 'N';
         values.ITM_AMT = '9999999999999999.99';
         await sql(
-          `INSERT INTO "SL_DETL_RTN"(tenant_id,${names}) SELECT $1,${names} FROM jsonb_populate_record(NULL::"SL_DETL_RTN",$2::jsonb)`,
+          `INSERT INTO "SL_DETL_RTN"(tenant_id,${names}) SELECT $1::text,${names} FROM jsonb_populate_record(NULL::"SL_DETL_RTN",$2::jsonb)`,
           JSON.stringify(values),
         );
       }
     }
   await sql(`INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED")
-    SELECT $1,'01','r9-replay-view',"LOGIN_PWD",'USER','N','N','N','N' FROM "LOGIN_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LOGIN_NAME"='browser'`);
+    SELECT $1::text,'01','r9-replay-view',"LOGIN_PWD",'USER','N','N','N','N' FROM "LOGIN_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LOGIN_NAME"='browser'`);
   await sql(
     `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT") VALUES($1,'01','01','r9-replay-view','Sales','Sales Return','Y','N','N','N')`,
   );

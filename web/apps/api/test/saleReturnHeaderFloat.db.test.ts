@@ -1,5 +1,5 @@
 /** Read-only PostgreSQL storage checks; no saved Return writer is exercised. */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { qualifySaleReturnHeaderFloat } from '@datacare/core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';

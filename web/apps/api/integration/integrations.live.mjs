@@ -1,7 +1,7 @@
 // Tier-2 live integrations (Task 29) as app_user — sale -> templated WhatsApp notify (fake sender)
 // + Code39 tag barcode + UPI link, all from live data.
 // Run: DATABASE_URL=postgresql://app_user:app@127.0.0.1:5433/datacare node apps/api/integration/integrations.live.mjs
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { createSale } from '../dist/modules/sales/sales.js';
 import {

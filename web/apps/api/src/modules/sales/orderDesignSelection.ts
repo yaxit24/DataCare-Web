@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@datacare/db';
 import { withTxBudget, SNAPSHOT_READ, type Tx } from '../shared/txBudget.js';
 import type {
   SalesOrderDesignList,

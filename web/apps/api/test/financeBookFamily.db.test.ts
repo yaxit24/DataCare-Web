@@ -12,7 +12,7 @@
  * - The accounts are the measured ones: book 001 slot 2 is 00057 KASAR JAVK, and book 002 slot 2 is
  *   00042 KASAR AVAK.
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import {

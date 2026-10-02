@@ -1,6 +1,6 @@
 // Tier-2 live e-invoice IRN (Task 26) as app_user — uses a FAKE GSP transport (no network).
 // Run: DATABASE_URL=postgresql://app_user:app@127.0.0.1:5433/datacare node apps/api/integration/einvoice.live.mjs
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { createSale } from '../dist/modules/sales/sales.js';
 import { buildIrnPayload, submitIrn, FakeIrnTransport } from '../dist/modules/einvoice/einvoice.js';

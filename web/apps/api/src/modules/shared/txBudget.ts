@@ -1,5 +1,6 @@
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from '@datacare/db';
 import { withTenant, type Tx } from '@datacare/db';
+import { hasPostgresErrorCode } from './prismaError.js';
 
 /**
  * Explicit interactive-transaction budgets (N53 / G30).
@@ -74,6 +75,8 @@ const TIMEOUT_MESSAGES = [
  * Also matches a wrapped cause.
  */
 export function isTransactionTimeout(error: unknown): boolean {
+  // Prisma 7 nests the SQLSTATE under meta.driverAdapterError.cause; postgresErrorCodes reads both shapes.
+  if (hasPostgresErrorCode(error, '57014', '55P03')) return true;
   for (let e: unknown = error, depth = 0; e && depth < 4; depth++) {
     const candidate = e as { code?: unknown; message?: unknown; cause?: unknown; meta?: unknown };
     if (candidate.code === 'P2028') return true;

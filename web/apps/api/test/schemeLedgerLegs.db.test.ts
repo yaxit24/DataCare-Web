@@ -19,7 +19,7 @@
  * The multi-line case is the one that matters most: with one member line, a missing line number is invisible
  * because there is nothing to distinguish. Two lines is the smallest fixture that can fail.
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { schemeInstallment } from '../src/modules/membership/scheme.js';
@@ -94,7 +94,7 @@ async function seed() {
   for (const memb of ['0019', '0144', '0183']) {
     await exec(
       `INSERT INTO "AD_MEMB"(tenant_id,"CO_CODE","LC_CODE","SCHM_CODE","MEMB_CODE","MEMB_NAME")
-       VALUES ($1,$2,$3,'04',$4,'MEMBER ' || $4)`,
+       VALUES ($1,$2,$3,'04',$4::text,'MEMBER ' || $4::text)`,
       TENANT,
       CO,
       LC,

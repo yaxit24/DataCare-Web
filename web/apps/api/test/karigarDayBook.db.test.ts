@@ -30,7 +30,7 @@
  * two readings that were wrong when taken from a handful of sampled rows. The last test below pins that the
  * money rows are absent, so the day the evidence exists the assertion fails and asks to be updated.
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { issueKarigar, receiveKarigar } from '../src/modules/manufacturing/karigar.js';

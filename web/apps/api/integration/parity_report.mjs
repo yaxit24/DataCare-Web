@@ -2,7 +2,7 @@
 // Validates each web report's headline totals against a direct SQL aggregation of the SAME
 // imported desktop data (tenant 'default'). Diff must be ~0 to pass the phase gate.
 // Run: node apps/api/integration/parity_report.mjs   (API must be up on :3000)
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 
 const prisma = new PrismaClient();

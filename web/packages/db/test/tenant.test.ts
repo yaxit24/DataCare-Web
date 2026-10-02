@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '../src/generated/prisma/client.js';
 import { withTenant } from '../src/tenant.js';
 
 /** A Prisma double that records what withTenant asks of the transaction and of the client. */

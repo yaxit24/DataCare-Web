@@ -1,7 +1,7 @@
 // Tier-2 live integration (Task 10): authenticate against LOGIN_MAST in Postgres as app_user.
 // Run: DATABASE_URL=postgresql://app_user:app@127.0.0.1:5433/datacare \
 //      node apps/api/integration/auth.live.mjs   (after `pnpm --filter @datacare/api build`)
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { authenticate } from '../dist/modules/auth/auth.service.js';
 import { hashPassword } from '../dist/modules/auth/password.js';

@@ -21,7 +21,7 @@
  * Book 075 (MEMB OPENING) has NO AC_DATA rows at all, which the web already reproduces: an opening writes
  * the AD_OS carry-forward and no money ledger.
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { schemeInstallment } from '../dist/modules/membership/scheme.js';
 

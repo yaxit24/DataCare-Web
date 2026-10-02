@@ -23,7 +23,7 @@
  * need a function written, not a route, and the last test pins that they are still missing so the gap cannot
  * be mistaken for coverage.
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {

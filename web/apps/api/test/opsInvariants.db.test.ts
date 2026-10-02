@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { operationalInvariants } from '../src/modules/ops/invariants.js';
 import { EXPECTED_MIGRATIONS } from '../src/modules/ops/migrationManifest.js';

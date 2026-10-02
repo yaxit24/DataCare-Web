@@ -23,7 +23,7 @@
  * `SUBSTRING(LEDR_KEY,22,2)` there returns spaces — the signal that led to decoding it. Three families now use
  * three different layouts and no two agree.
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import {

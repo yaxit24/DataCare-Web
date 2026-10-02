@@ -27,7 +27,7 @@
  * Escape hatch, deliberately awkward to type:
  *     ALLOW_SKIP_DB_TESTS=1 pnpm test
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { isolatedDatabaseProblems } from './support/isolatedDatabase.js';
 
 const FLAGS = ['RUN_DB_INTEGRITY_TESTS', 'RUN_DB_SECURITY_TESTS'] as const;

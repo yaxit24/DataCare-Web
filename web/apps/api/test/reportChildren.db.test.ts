@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { bindReport } from '../src/modules/reports/reportBind.js';
 import { loadReportSpec, renderReportLayout } from '../src/modules/reports/reportEngine.js';

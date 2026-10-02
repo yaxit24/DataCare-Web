@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { getSaleReturnIncomingConfiguration } from '../src/modules/sales/saleReturnIncomingConfiguration.js';
 import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';

@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { saveEntityImage, deleteEntityImage } from '../src/modules/images/entityImage.js';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';

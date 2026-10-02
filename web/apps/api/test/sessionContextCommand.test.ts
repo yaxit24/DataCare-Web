@@ -7,7 +7,7 @@ import {
   VOUCHER_BUDGET,
   budgetedBindParams,
 } from './support/txBudgetBinding.js';
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@datacare/db';
 import type { Tx } from '@datacare/db';
 import {
   withSessionContextCommand,

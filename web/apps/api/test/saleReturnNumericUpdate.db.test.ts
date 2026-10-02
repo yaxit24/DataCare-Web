@@ -23,7 +23,7 @@
  * provides postgres:16-alpine with RUN_DB_INTEGRITY_TESTS=1.
  */
 import { readFileSync } from 'node:fs';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { withTenant } from '@datacare/db';
 import {

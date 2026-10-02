@@ -1,7 +1,7 @@
 // Tier-2 live master-data CRUD (Task 13) as app_user against Postgres.
 // Run: DATABASE_URL=postgresql://app_user:app@127.0.0.1:5433/datacare \
 //      node apps/api/integration/masters.live.mjs   (after build)
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import {
   createMaster,

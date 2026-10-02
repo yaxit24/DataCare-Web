@@ -21,7 +21,7 @@
  * because both halves individually look consistent. So this test asserts the day book specifically, not just
  * that the voucher "went away".
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 // deleteContra is what DELETE /contra/:vchNo calls, so the test exercises the route's real path.

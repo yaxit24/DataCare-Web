@@ -7,8 +7,8 @@ COPY pnpm-workspace.yaml package.json pnpm-lock.yaml turbo.json tsconfig.base.js
 COPY packages ./packages
 COPY apps ./apps
 RUN pnpm install --frozen-lockfile
-# generate prisma client + build all workspace packages and the api
-RUN pnpm --filter @datacare/db run prisma:generate || true
+# Generate the Prisma client before compiling packages that import it; generation failures stop the image.
+RUN pnpm --filter @datacare/db db:generate
 RUN pnpm build
 
 # Stage 2: slim runtime — only what the API needs.

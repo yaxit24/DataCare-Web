@@ -25,7 +25,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { postReceipt, postPaymentLines } from '../dist/modules/finance/finance.js';
 import { schemeInstallment } from '../dist/modules/membership/scheme.js';

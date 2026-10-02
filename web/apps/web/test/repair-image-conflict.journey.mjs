@@ -62,7 +62,7 @@ export async function seedRepairImageConflict(sql) {
   ])
     await sql(
       `INSERT INTO "REP_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","HD_VCH_NO","SR_NO","OLD_SRNO","VCH_DATE","BOOK_NAME","AC_CODE","IT_CODE","IT_NAME","IT_DESC","ITM_PCS","ITM_GWT","ITM_OTH_WT","ITM_NWT","ITM_TOUCH","ITM_FINE","ISU_ADJ")
-      VALUES($1,'01','01',$2,'R52','00011',CASE WHEN $2='2023-2024' THEN '00071' ELSE '00072' END,$3,$3,($4)::date,'CUSTREP RECEIPT','R5CUS','GOLD',$5,'Preserve saved repair description',1,$6,1,$7,91.6,3.141,$8)`,
+      VALUES($1,'01','01',$2::text,'R52','00011',CASE WHEN $2::text='2023-2024' THEN '00071' ELSE '00072' END,$3::int,$3::int,($4)::date,'CUSTREP RECEIPT','R5CUS','GOLD',$5,'Preserve saved repair description',1,$6::numeric,1,$7::numeric,91.6,3.141,$8)`,
       year,
       sr,
       year === '2023-2024' ? '2023-07-01' : '2024-07-01',
@@ -85,7 +85,7 @@ export async function seedRepairImageConflict(sql) {
   ])
     await sql(
       `INSERT INTO "REP_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","HD_VCH_NO","SR_NO","OLD_SRNO","VCH_DATE","BOOK_NAME","AC_CODE","IT_CODE","IT_NAME","IT_DESC","ITM_PCS","ITM_GWT","ITM_OTH_WT","ITM_NWT","ITM_TOUCH","ITM_FINE","REP_LC","REP_YRCD","REP_DBCD","REP_NO","REP_SRNO","REP_HD_VCH_NO","REP_AC_CODE","REP_AC_NAME")
-      VALUES($1,'01','01','2024-2025','R51','00021','00081',$2,$2,'2024-07-02','KRREP ISSUE','R5KAR','GOLD',$3,'Preserve saved repair description',1,$4,1,$5,91.6,3.141,'01','2023-2024','R52','00011',$6,'00071','R5CUS','Repair image customer')`,
+      VALUES($1,'01','01','2024-2025','R51','00021','00081',$2::int,$2::int,'2024-07-02','KRREP ISSUE','R5KAR','GOLD',$3,'Preserve saved repair description',1,$4::numeric,1,$5::numeric,91.6,3.141,'01','2023-2024','R52','00011',$6,'00071','R5CUS','Repair image customer')`,
       issueSr,
       name,
       gwt,

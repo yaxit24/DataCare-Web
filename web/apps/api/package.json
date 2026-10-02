@@ -16,7 +16,6 @@
     "@fastify/cookie": "11.0.2",
     "@fastify/rate-limit": "10.3.0",
     "@node-rs/argon2": "2.0.2",
-    "@prisma/client": "6.19.3",
     "fastify": "5.12.5",
     "jose": "5.10.0",
     "playwright": "1.61.1",
@@ -28,6 +27,6 @@
     "@types/node": "24.19.0",
     "fflate": "0.8.2",
     "typescript": "5.9.3",
-    "vitest": "3.2.7"
+    "vitest": "4.1.11"
   }
 }

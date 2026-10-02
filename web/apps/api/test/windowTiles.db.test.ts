@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { listWindowTiles, saveWindowTile } from '../src/modules/utilities/windowTiles.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';

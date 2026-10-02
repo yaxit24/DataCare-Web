@@ -59,7 +59,7 @@ async function insert(sql, table, values) {
     .map((key) => `"${key}"`)
     .join(',');
   await sql(
-    `INSERT INTO "${table}"(tenant_id,${names}) SELECT $1,${names} FROM jsonb_populate_record(NULL::"${table}",$2::jsonb)`,
+    `INSERT INTO "${table}"(tenant_id,${names}) SELECT $1::text,${names} FROM jsonb_populate_record(NULL::"${table}",$2::jsonb)`,
     JSON.stringify(values),
   );
 }
@@ -154,7 +154,7 @@ export async function seedSalesReturnBillReplay(sql) {
     }
   }
   await sql(
-    `INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED") SELECT $1,'01','r11-bill-view',"LOGIN_PWD",'USER','N','N','N','N' FROM "LOGIN_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LOGIN_NAME"='browser'`,
+    `INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED") SELECT $1::text,'01','r11-bill-view',"LOGIN_PWD",'USER','N','N','N','N' FROM "LOGIN_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LOGIN_NAME"='browser'`,
   );
   await sql(
     `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT") VALUES($1,'01','01','r11-bill-view','Sales','Sales Return','Y','N','N','N')`,
