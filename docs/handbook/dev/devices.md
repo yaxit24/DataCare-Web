@@ -87,3 +87,7 @@ You do not need a scale, scanner, printer or camera to build and test a slice. T
 by fakes with recorded sample inputs: `FakeMessageSender`, `FakeIrnTransport`, and the scale/camera fakes added by
 slice N89. Build and prove a slice against the fakes and the desktop source; real-hardware runs are gathered once, at
 acceptance (N25). See [testing](../web/testing.md).
+
+Messaging fails closed: with no WhatsApp or SMS provider configured the send routes answer 503 and record nothing.
+To exercise them locally, set `MESSAGING_FAKE_MODE=1` (refused when `NODE_ENV=production`); every send is then
+reported and logged as `simulated`, never as sent (N54, G33).

@@ -35,11 +35,21 @@ describe('messaging', () => {
       }),
     ).toBe('Dear Asha, bill INV/1 total Rs.1030');
   });
-  it('notify records via fake sender (ok)', async () => {
+  it('notify through the fake sender is a simulation, never a success (G33)', async () => {
     const s = new FakeMessageSender();
     const r = await notify(s, { to: '+919999999999', channel: 'whatsapp', body: 'hi' });
-    expect(r.ok).toBe(true);
+    expect(r).toMatchObject({ ok: false, status: 'simulated', id: 'fake-1' });
+    expect(r.error).toBeUndefined();
     expect(s.outbox.length).toBe(1);
+  });
+  it('notify reports a provider acceptance as accepted (not delivered)', async () => {
+    const accepting: MessageSender = {
+      async send() {
+        return { id: 'gw-1', status: 'accepted' };
+      },
+    };
+    const r = await notify(accepting, { to: '+919999999999', channel: 'sms', body: 'x' });
+    expect(r).toEqual({ ok: true, status: 'accepted', id: 'gw-1' });
   });
   it('notify NEVER throws on sender failure', async () => {
     const throwing: MessageSender = {
@@ -49,6 +59,7 @@ describe('messaging', () => {
     };
     const r = await notify(throwing, { to: '+91', channel: 'sms', body: 'x' });
     expect(r.ok).toBe(false);
+    expect(r.status).toBe('failed');
     expect(r.error).toContain('gateway down');
   });
   it('notify rejects empty recipient without throwing', async () => {

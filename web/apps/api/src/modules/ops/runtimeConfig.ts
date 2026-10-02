@@ -62,6 +62,10 @@ export function resolveRuntimeConfig(env: NodeJS.ProcessEnv = process.env): Runt
       problems.push('JWT_SECRET uses a known weak/default value');
     }
     if (seedDemo) problems.push('SEED_DEMO cannot be enabled in production');
+    // N54 step 4 / G33: the simulating message sender is test-only. senderFromEnv already ignores the flag in
+    // production; refusing to start makes the misconfiguration visible instead of silently refusing sends.
+    if (env.MESSAGING_FAKE_MODE === '1')
+      problems.push('MESSAGING_FAKE_MODE cannot be enabled in production');
   }
 
   if (problems.length) throw new RuntimeConfigError(problems);
