@@ -61,6 +61,9 @@ export function LookupPicker({
         const r = (await get(
           `${base}${separator}q=${encodeURIComponent(q)}&limit=20`,
         )) as LookupRow[];
+        // G94: the search still runs, but a reply that arrives after the operator has left the field opens
+        // nothing — otherwise its list floats under another field, covering the controls below it.
+        if (document.activeElement !== inputRef.current) return;
         setRows(r || []);
         setHi(0);
         setOpen(true);
@@ -93,6 +96,14 @@ export function LookupPicker({
         }}
         onFocus={() => {
           if (value !== undefined) search(value);
+        }}
+        onBlur={(e) => {
+          // G94: the list closes when focus moves to another control (Tab, Enter-advance, a programmatic
+          // focus); a click on a non-focusable area is handled by the document listener above. An open list
+          // is an overlay to FormKeys, so a list left behind kept every F-key inert. A null relatedTarget
+          // (the list's own scrollbar, another window) leaves it open.
+          const next = e.relatedTarget;
+          if (next instanceof Node && !boxRef.current?.contains(next)) setOpen(false);
         }}
         onKeyDown={(e) => {
           if (e.key === 'F1') {

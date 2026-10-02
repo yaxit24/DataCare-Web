@@ -102,7 +102,7 @@ gap_ids=[]
 for register_doc in ('10-gap-register-2026-10-01.md','11-audit-implementation-plan-2026-10-01.md',
                      '12-lineage-verification-2026-10-01.md'):
     gap_ids+=re.findall(r'^\| (G\d{2}) \|',(here/register_doc).read_text(),re.M)
-check(gap_ids==[f'G{i:02}' for i in range(1,len(gap_ids)+1)] and len(gap_ids)>=93, 'Gap register identities incomplete')
+check(gap_ids==[f'G{i:02}' for i in range(1,len(gap_ids)+1)] and len(gap_ids)>=94, 'Gap register identities incomplete')
 # Decisions D01-D14 (document 08), D15-D22 (document 11) and D23 onward (document 12) form one sequence.
 decision_ids=[]
 for decision_doc in ('08-decisions-and-delivery.md','11-audit-implementation-plan-2026-10-01.md',
