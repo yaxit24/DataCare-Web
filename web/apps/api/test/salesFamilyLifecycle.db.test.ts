@@ -207,7 +207,9 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
     );
     await owner.$executeRawUnsafe(
       `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_GROUP","TAX_NAME","TAX_PRC","TAX_AC")
-       VALUES ($1,$2,'10',1,'GST','GST 3%',3,'GSTLED')`,
+       VALUES ($1,$2,'10',1,'GST','GST 3%',3,'GSTLED'),
+              -- The labour invoice's labour part defaults to 5%, which needs a configured code (G92).
+              ($1,$2,'11',1,'GST','GST 5%',5,'GSTLED')`,
       TENANT,
       CO,
     );

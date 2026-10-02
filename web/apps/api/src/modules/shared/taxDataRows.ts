@@ -30,23 +30,32 @@ export interface VoucherGst {
  * tax is not lost from the registers - the behaviour before G90.
  *
  * `base` carries the columns the family sets itself (key, TRAN_TYPE, TAX_SIGN, NET_AMT, DISC_AMT, TOT_AMT…).
- * Hallmark-charge rows (SR_NO 10/20/30, from HM_TAX_CODE) are not built here (G91).
+ * `srNos` numbers the rows when a voucher carries a second tax code: the labour invoice writes its labour code at
+ * SR_NO 10/20/30 from the same component rows 1/2/3 (`LbrWork_GST` :170-174). Hallmark-charge rows (also
+ * 10/20/30, from HM_TAX_CODE) are G91.
  */
 export function gstTaxRows<T extends Record<string, unknown>>(
   base: T,
   policy: Pick<ResolvedTaxPolicy, 'components' | 'taxGroup'>,
   gst: VoucherGst,
+  srNos: readonly [sgst: number, cgst: number, igst: number] = [1, 2, 3],
 ): Array<T & { SR_NO: number; TAX_TYPE: string; TAX_PRC: number; TAX_AMT: number }> {
   const type = (srNo: number): string => policy.components.get(srNo)?.group || policy.taxGroup;
   const pct = (srNo: number, fallback: number): number =>
     policy.components.get(srNo)?.pct ?? fallback;
   if (gst.interState)
     return [
-      { ...base, SR_NO: 3, TAX_TYPE: type(3), TAX_PRC: pct(3, gst.ratePct), TAX_AMT: gst.igst },
+      {
+        ...base,
+        SR_NO: srNos[2],
+        TAX_TYPE: type(3),
+        TAX_PRC: pct(3, gst.ratePct),
+        TAX_AMT: gst.igst,
+      },
     ];
   const half = round(gst.ratePct / 2, 2);
   return [
-    { ...base, SR_NO: 1, TAX_TYPE: type(1), TAX_PRC: pct(1, half), TAX_AMT: gst.sgst },
-    { ...base, SR_NO: 2, TAX_TYPE: type(2), TAX_PRC: pct(2, half), TAX_AMT: gst.cgst },
+    { ...base, SR_NO: srNos[0], TAX_TYPE: type(1), TAX_PRC: pct(1, half), TAX_AMT: gst.sgst },
+    { ...base, SR_NO: srNos[1], TAX_TYPE: type(2), TAX_PRC: pct(2, half), TAX_AMT: gst.cgst },
   ];
 }

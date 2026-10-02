@@ -67,6 +67,29 @@ describe('gstTaxRows', () => {
     ).toEqual([{ ...base, SR_NO: 3, TAX_TYPE: 'GST', TAX_PRC: 7, TAX_AMT: 70 }]);
   });
 
+  it('numbers a second code (the labour part) at SR_NO 10/20/30 from the same components 1/2/3', () => {
+    // LbrWork_GST :170-174: SR_NO 10 from C.SR_NO = 1, 20 from 2, 30 from 3.
+    expect(
+      gstTaxRows(
+        base,
+        provisioned,
+        { interState: false, ratePct: 3, igst: 0, sgst: 5, cgst: 5 },
+        [10, 20, 30],
+      ),
+    ).toEqual([
+      { ...base, SR_NO: 10, TAX_TYPE: 'SGST', TAX_PRC: 1.5, TAX_AMT: 5 },
+      { ...base, SR_NO: 20, TAX_TYPE: 'CGST', TAX_PRC: 1.5, TAX_AMT: 5 },
+    ]);
+    expect(
+      gstTaxRows(
+        base,
+        provisioned,
+        { interState: true, ratePct: 3, igst: 10, sgst: 0, cgst: 0 },
+        [10, 20, 30],
+      ),
+    ).toEqual([{ ...base, SR_NO: 30, TAX_TYPE: 'IGST', TAX_PRC: 3, TAX_AMT: 10 }]);
+  });
+
   it('a component with a blank group falls back to the master group, not an empty type', () => {
     const blank = {
       taxGroup: 'GST',
