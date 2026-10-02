@@ -39,6 +39,15 @@ export type {
 } from './tagSplitLine.js';
 export { fineFor, round3, DEFAULT_FINE_WORKFLOW } from './finePolicy.js';
 export type { FineWorkflow, FineLine } from './finePolicy.js';
+export {
+  oldGoldAmountFromRate,
+  oldGoldBasisWeight,
+  oldGoldFine,
+  oldGoldRateFromAmount,
+  resolveOldGoldValuation,
+  valueOldGoldLine,
+} from './oldGold.js';
+export type { OldGoldLineInput, OldGoldRateType, OldGoldValuationInput } from './oldGold.js';
 export { orderLabourAmount, orderLabourTransition, orderLabourReplay } from './orderLabour.js';
 export type {
   OrderLabourState,

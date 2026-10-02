@@ -2947,7 +2947,7 @@
       "sourceAndModuleDetail": "06-module-detail.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
-      "gapIds": "G83"
+      "gapIds": "G83, G89, G90"
     },
     {
       "id": "N16",
@@ -3260,7 +3260,7 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "Forward/reverse tax, discount and inter/intra split reproduce desktop arithmetic; edit replaces the exact write set",
-      "gapIds": "G03, G17",
+      "gapIds": "G03, G17, G88",
       "sourceAndModuleDetail": "10-gap-register-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
@@ -3895,7 +3895,7 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "Each listed screen can reopen, edit and print",
-      "gapIds": "G54",
+      "gapIds": "G54, G87",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"

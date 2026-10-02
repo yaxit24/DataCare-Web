@@ -1,4 +1,4 @@
-import { resolveOldGoldValuation } from './oldGoldValuation.js';
+import { valueOldGoldLine } from './oldGoldValuation.js';
 import {
   desktopLabourTypeFor,
   effectiveLabourRate,
@@ -1339,21 +1339,20 @@ async function writeSaleTx(
   // G83: value each old-metal (exchange) row ONCE, the way TR_SALE.cs's mSG_OLD grid does, and use that one
   // figure everywhere. The desktop stores the grid's recomputed amount (column 13) in BOTH SL_PR_DETL.NET_AMT
   // and SL_DATA.OLD_GL_AMT, so the detail, the header, the settlement, the ledger and BILL_OS must all carry
-  // the SAME value. Previously the detail used this server valuation while the header/ledger/BILL_OS summed
-  // the raw client-posted `amount`, so a voucher entered BY RATE carried two different old-gold figures.
-  const valuedOldMetal = oldMetalRows.map((g) => {
-    const fine =
-      g.netWt != null && g.touch != null ? round2s((num(g.netWt) * num(g.touch)) / 100) : 0;
-    const valued = resolveOldGoldValuation({
+  // the SAME value. `valueOldGoldLine` (@datacare/core) is also what the sale, quotation and hallmark screens
+  // preview, so the screen shows the figure the writer saves. It derives the fine the desktop way: three
+  // decimals, half-up, and the net weight when there is no touch (TR_SALE.cs:7903-7910).
+  const valuedOldMetal = oldMetalRows.map((g) => ({
+    metal: (g.metal ?? 'G') as string,
+    ...valueOldGoldLine({
       netWt: num(g.netWt),
-      fineWt: fine,
+      touch: num(g.touch),
       conversionWt: num(g.conversionWt),
       rate: num(g.rate),
       amount: num(g.amount),
       rateType: g.rateType,
-    });
-    return { metal: (g.metal ?? 'G') as string, fine, rate: valued.rate, amount: valued.amount };
-  });
+    }),
+  }));
   const oldGoldAmount = round2s(
     valuedOldMetal.filter((g) => g.metal === 'G').reduce((sum, g) => sum + g.amount, 0),
   );

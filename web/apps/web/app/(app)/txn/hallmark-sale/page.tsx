@@ -12,7 +12,7 @@ import {
   extendedLineFields,
   hallmarkHeaderFromView,
   hallmarkLineFromView,
-  hallmarkOldGoldFromView,
+  hallmarkOldGold,
   hallmarkSaleCommand,
   type HallmarkLine as Line,
   type LoadedHallmarkSale,
@@ -142,7 +142,7 @@ export default function HallmarkSalePage() {
   const hmAmt = n(hmCharge);
   const hmTax = r2((hmAmt * n(taxRatePct)) / 100);
   const grandTotalPrev = r2(totalPrev + hmAmt + hmTax);
-  const oldGoldVal = r2(((n(oldGoldNet) * n(oldGoldTouch)) / 100) * n(oldGoldRate));
+  const oldGoldVal = hallmarkOldGold.value(oldGoldNet, oldGoldTouch, oldGoldRate); // G83
   const paid = r2(n(cashAmt) + n(cardAmt) + n(upiAmt) + n(chequeAmt) + oldGoldVal);
   const balanceDue = r2(grandTotalPrev - paid);
 
@@ -183,7 +183,7 @@ export default function HallmarkSalePage() {
       setVoucherLookup(String(view.voucherNo));
       setResult(null);
       const header = hallmarkHeaderFromView(view);
-      const oldGold = hallmarkOldGoldFromView(view);
+      const oldGold = hallmarkOldGold.fromView(view);
       setAcCode(header.acCode);
       setAcName(header.acName);
       setTaxRatePct(header.taxRatePct);

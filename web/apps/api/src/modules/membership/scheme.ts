@@ -1380,8 +1380,9 @@ type NormalizedGoldAdjustLine = Required<
   memberName: string;
 };
 
-// Gold weight to 3dp. The desktop presents metal weights through Strings.Format(x, "0.000"), i.e. half-up
-// away from zero, so the kernel `round` is the correct primitive, not a float helper (N48, G22).
+// Gold weight to 3dp. The scheme gold-adjust grid formats the metal weight cell with
+// Strings.Format(x, "0.000") (TR_MEMB_ADJ.cs:1684), i.e. half-up away from zero, so the kernel `round` is the
+// correct primitive, not a float helper (N48, G22).
 function round3(n: number): number {
   return round(n, 3);
 }

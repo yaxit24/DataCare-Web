@@ -5,6 +5,7 @@ import {
   hallmarkHeaderFromView,
   hallmarkLineCommand,
   hallmarkLineFromView,
+  hallmarkOldGold,
   hallmarkOldGoldFromView,
   hallmarkSaleCommand,
   type HallmarkLine,
@@ -262,6 +263,16 @@ describe('hallmark sale lossless reopen (G45)', () => {
     });
     const unchanged = hallmarkSaleCommand({ scope, header, oldGold, lines, loaded });
     expect(command).toEqual({ ...unchanged, cashAmt: 25000 });
+  });
+
+  it('previews the old-metal amount the writer stores, not net x touch x rate to the paisa (G83)', () => {
+    // 5.3 g at 84 touch: fine 4.452 (three decimals, TR_SALE.cs:7905), Math.Round(4.452 x 5800, 0) = 25822.
+    // The screen used to show 25821.60.
+    expect(hallmarkOldGold.value('5.3', '84', '5800')).toBe(25822);
+    expect(hallmarkOldGold.value('6', '84', '5800')).toBe(29232);
+    expect(hallmarkOldGold.value('', '', '')).toBe(0);
+    // The same helper object reads a loaded row.
+    expect(hallmarkOldGold.fromView(view())).toEqual(hallmarkOldGoldFromView(view()));
   });
 
   it('an edited old-metal row keeps its other loaded fields and recomputes its amount', () => {

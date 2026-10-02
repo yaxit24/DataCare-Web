@@ -115,9 +115,10 @@ const n = (v: unknown): number => {
   const x = Number(v ?? 0);
   return Number.isFinite(x) ? x : 0;
 };
-// GSP export amounts/weights are re-presented from already-persisted sale rows for the IRN JSON. The desktop
-// e-invoice builder (TR_SL_EBILL) formats through Strings.Format — half-up away from zero — so the kernel
-// `round` is correct; a float helper rounds negative midpoints the wrong way (N48, G22).
+// GSP export amounts/weights are re-presented from already-persisted sale rows. The desktop e-invoice builder
+// passes the stored figures through unchanged (`Convert.ToDecimal(...)`, TR_SL_EBILL.cs:9443-9462), so this
+// rounding only trims binary-float noise on values already stored at 2 or 3 decimals; the kernel `round` does
+// that without the float helper's wrong-way negative midpoints (N48, G22).
 const round2 = (v: number): number => round(v, 2);
 const round3 = (v: number): number => round(v, 3);
 

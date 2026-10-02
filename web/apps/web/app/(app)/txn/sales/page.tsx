@@ -19,7 +19,7 @@ import { VoucherChrome } from '../../../../components/VoucherChrome';
 import { VoucherList, type VoucherIdentity } from '../../../../components/VoucherList';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { companyFlag, useCompanySettings, companySetting } from '../../../../lib/companySettings';
-import { recalcLine } from '../../../../lib/lineRecalc';
+import { oldGoldRowAmount, recalcLine } from '../../../../lib/lineRecalc';
 
 /** BOOK_DATA.MAIN_BOOK values the retail sale writer accepts (sales.ts, workflowPolicy.SALES). */
 const SALE_MAIN_BOOKS = ['SALES'];
@@ -391,7 +391,7 @@ export default function SalesEntryPage() {
   const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
   const taxable = r2(lineNet - n(discountAmount));
   const taxPrev = r2((taxable * n(taxRatePct)) / 100);
-  const ogAmt = (o: OgRow) => r2(((n(o.netWt) * n(o.touch)) / 100) * n(o.rate));
+  const ogAmt = (o: OgRow) => oldGoldRowAmount(o); // the writer's own valuation (G83)
   const setOg = (i: number, k: keyof OgRow, v: string) =>
     setOgRows((rs) => rs.map((r, j) => (j === i ? { ...r, [k]: v } : r)));
   const oldGoldVal = r2(ogRows.reduce((s, o) => s + ogAmt(o), 0));
