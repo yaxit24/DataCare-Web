@@ -2,6 +2,7 @@ import { round, roundHalfEven } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { assertBalanced, assertPeriodOpen, insertRowTx } from '../posting/posting.js';
 import { resolveTaxPolicyTx, type ResolvedTaxPolicy } from '../shared/taxPolicy.js';
+import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
 import { assertFiscalDateTx } from '../vouchers/lifecycle.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
 import {
@@ -162,13 +163,11 @@ type ResolvedInput = {
 
 // TR_OTH_PURC rounds through two desktop mechanisms (TR_OTH_PURC.cs). Line taxes, totals and settlement
 // amounts are produced by Strings.Format(x, "0.00") (e.g. :2889-2900) — half-up away from zero — so `money`
-// is the kernel `round` at 2dp. Discount and TDS are produced by Math.Round(x, 0) (:2872, :5001) — half to
-// even — so `integerMoney` is the kernel `roundHalfEven` at 0dp. (N48, G22; the reverse-charge taxable
-// back-calc at :2876 is Math.Round(x, 2) and rounds through roundHalfEven at its call site.)
+// is the kernel `round` at 2dp. Discount, TDS and the total after TDS use Math.Round(x, 0) (:2872,
+// :5001, :5007-5026) — half to even — so `integerMoney` is `roundHalfEven` at 0dp; the total keeps
+// 2dp when ALL_ROF_REMOVE = 'Y' (G88). The reverse-charge back-calc (:2876) is Math.Round(x, 2). (N48)
 const money = (value: unknown): number => round(Number(value ?? 0), 2);
 const integerMoney = (value: unknown): number => roundHalfEven(Number(value ?? 0), 0);
-// Gap G88: the voucher total after TDS rounds to 2dp, not 0dp, when CO_SET.ALL_ROF_REMOVE = 'Y'
-// (TR_OTH_PURC.cs:5007-5026); this writer always rounds it to whole rupees.
 const number = (value: unknown): number => Number(value ?? 0);
 const positiveOrZero = (value: unknown, label: string): number => {
   const resolved = money(value);
@@ -470,7 +469,8 @@ async function resolveInputTx(
   const sgstAmount = money(lines.reduce((sum, line) => sum + line.sgstAmount, 0));
   const grossAmount = money(lines.reduce((sum, line) => sum + line.totalAmount, 0));
   const tds = await tdsTx(tx, input.scope, input.tdsCode, money(netAmount - discountAmount));
-  const totalAmount = integerMoney(grossAmount - tds.amount);
+  const { allRoundingRemoved } = await resolveSettingsBehaviorTx(tx, input.scope);
+  const totalAmount = roundHalfEven(grossAmount - tds.amount, allRoundingRemoved ? 2 : 0);
   const outstandingAmount = money(
     totalAmount - chequeAmount - cardAmount - cashAmount - kasarAmount,
   );
