@@ -3,6 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { hashPassword } from '../src/modules/auth/password.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const tenantId = 'r9-return-replay-http';
@@ -135,9 +136,7 @@ const numericalFields = [
       await sql(`DELETE FROM "${table}" WHERE tenant_id IN ($1,$2)`, tenantId, otherTenant);
   }
   beforeAll(async () => {
-    for (const value of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL])
-      if (!value || new URL(value).port !== '55433')
-        throw new Error('Isolated parity database 55433 is required.');
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient();
     await clean(true);

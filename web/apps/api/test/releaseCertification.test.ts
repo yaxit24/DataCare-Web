@@ -1310,10 +1310,10 @@ describe('the release workflow is separate and tolerates nothing', () => {
     const ci = workflow('ci.yml');
     const release = workflow('release-certification.yml');
     expect(ci).toMatch(/permissions:\s*\n\s*contents:\s*read/);
-    // One checkout per job (static-gates, quality, the main-only desktop comparison), and every one of them
-    // drops the token, so no later step of candidate-controlled code can reuse it.
+    // One checkout per job (static-gates, quality, real-stack-browser, the main-only desktop comparison), and
+    // every one of them drops the token, so no later step of candidate-controlled code can reuse it.
     const checkouts = ci.match(/uses: actions\/checkout@/g) ?? [];
-    expect(checkouts).toHaveLength(3);
+    expect(checkouts).toHaveLength(4);
     expect(ci.match(/persist-credentials: false/g)).toHaveLength(checkouts.length);
     expect(release.match(/persist-credentials: false/g)).toHaveLength(1);
     expect(release).not.toContain('secrets.RELEASE_APP_DB_PASSWORD');

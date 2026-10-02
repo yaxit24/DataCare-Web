@@ -14,6 +14,7 @@ import {
   getSalesOrder,
   type SalesOrderInput,
 } from '../src/modules/sales/salesOrder.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const run = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 const tenantId = 'order-session-command';
@@ -416,13 +417,7 @@ run('Sales Order financial edit joins the admitted HTTP session transaction', ()
   };
 
   beforeAll(async () => {
-    for (const value of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL])
-      if (
-        !value ||
-        new URL(value).port !== '55433' ||
-        !['127.0.0.1', 'localhost'].includes(new URL(value).hostname)
-      )
-        throw new Error('Only the isolated local55433 fixture database is allowed');
+    assertIsolatedTestDatabase();
     if (new URL(process.env.DATABASE_URL!).username !== 'app_user')
       throw new Error('app_user runtime required');
     owner = new PrismaClient({

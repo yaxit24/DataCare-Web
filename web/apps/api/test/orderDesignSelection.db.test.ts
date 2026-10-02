@@ -9,6 +9,7 @@ import {
 } from '../src/modules/sales/orderDesignSelection.js';
 import { saveEntityImage } from '../src/modules/images/entityImage.js';
 import { applySalesOrderDesignSelection, type SalesOrderDesignSourceRef } from '@datacare/core';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const db = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 function first<T>(rows: T[]): T {
@@ -48,8 +49,7 @@ db('Sales F1 saved Design source resolution', () => {
       resolveSalesOrderDesignTx(tx, { ...scope, coCode: company }, { itCode, source }),
     );
   beforeEach(async () => {
-    if (!process.env.DATABASE_URL?.includes(':55433/'))
-      throw new Error('Disposable database required.');
+    assertIsolatedTestDatabase();
     await clean();
     await sql(`INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","MAIN_BOOK","BOOK_TBL_NAME","BOOK_INOUT","CUR_USE")
       VALUES ($1,'01','01','SO1','SALES ORDER','SL_ORD_DATA','O','Y'),($1,'01','02','SO1','SALES ORDER','SL_ORD_DATA','O','Y'),($1,'01','01','TO1','TOUR ORDER','SL_ORD_DATA','I','Y')`);

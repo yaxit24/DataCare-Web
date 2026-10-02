@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { orderData, orderHtml } from '../src/modules/sales/orderDoc.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const databaseDescribe = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 
@@ -37,10 +38,7 @@ databaseDescribe('order confirmation full desktop document identity', () => {
     }
   }
   beforeAll(async () => {
-    for (const url of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL]) {
-      if (!url || new URL(url).port !== '55433')
-        throw new Error('Order document fixtures require the isolated test database on port 55433');
-    }
+    assertIsolatedTestDatabase();
     await cleanup();
     const seenBooks = new Set<string>();
     for (const [index, s] of dimensions.entries()) {

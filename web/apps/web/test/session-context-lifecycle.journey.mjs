@@ -1,6 +1,7 @@
 import {
   observeJsonResponse,
   prepareJsonResponseObservation,
+  requestDocumentPath,
 } from './session-context-response-observation.mjs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
@@ -175,7 +176,10 @@ export async function exerciseSessionContextLifecycle(
       // New document and deliberate normal open restore company01; this is not recovery replay.
       const mePromise = observeJsonResponse(
         page,
-        (response) => pathOf(response.request()) === '/api/me' && response.status() === 200,
+        (response) =>
+          pathOf(response.request()) === '/api/me' &&
+          requestDocumentPath(response.request()) === '/select' &&
+          response.status() === 200,
       );
       await page.goto('/select');
       const me = await (await mePromise).json();
@@ -311,7 +315,10 @@ export async function exerciseSessionContextLifecycle(
       // Deliberate recovery remains usable despite origin lease loss; exact current receipt only.
       const latestMe = observeJsonResponse(
         page,
-        (response) => pathOf(response.request()) === '/api/me' && response.status() === 200,
+        (response) =>
+          pathOf(response.request()) === '/api/me' &&
+          requestDocumentPath(response.request()) === '/select' &&
+          response.status() === 200,
       );
       const leave = confirmNext();
       await page.getByRole('button', { name: 'Check company change', exact: true }).click();

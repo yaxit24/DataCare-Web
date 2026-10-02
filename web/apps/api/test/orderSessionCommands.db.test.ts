@@ -16,6 +16,7 @@ import {
 } from '../src/modules/sales/salesOrder.js';
 import { selectSessionContext } from '../src/modules/auth/sessionContextSelection.js';
 import type { SessionCommandIdentity } from '../src/modules/auth/sessionContextCommand.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const db = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 const tenantId = 'next-order-command',
@@ -316,14 +317,7 @@ db('remaining five order session commands on isolated PostgreSQL', () => {
     expect(createHash('sha256').update(bytes).digest('hex')).toBe(
       'c6f86ef10f4f948c570e417f4f1a0336df196fb1085b2028c1f79a1e432c979e',
     );
-    for (const key of ['DATABASE_URL', 'MIGRATE_DATABASE_URL'] as const) {
-      const url = new URL(process.env[key] ?? '');
-      if (
-        url.port !== '55433' ||
-        (key === 'DATABASE_URL' && decodeURIComponent(url.username) !== 'app_user')
-      )
-        throw new Error('isolated55433/app_user wrapper required');
-    }
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({
       datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } },
     });

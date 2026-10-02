@@ -1,6 +1,7 @@
 import {
   observeJsonResponse,
   prepareJsonResponseObservation,
+  requestDocumentPath,
 } from './session-context-response-observation.mjs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
@@ -295,9 +296,15 @@ export async function exerciseSessionContext(
     });
   };
   const meOnNavigation = async (target, path) => {
+    // Only the /me of the document this navigation creates: the page being left may still be fetching
+    // its own /me, which the navigation cancels (see requestDocumentPath).
+    const documentPath = new URL(path, 'http://journey.invalid').pathname;
     const result = observeJsonResponse(
       target,
-      (response) => pathOf(response.request()) === '/api/me' && response.status() === 200,
+      (response) =>
+        pathOf(response.request()) === '/api/me' &&
+        requestDocumentPath(response.request()) === documentPath &&
+        response.status() === 200,
     );
     await target.goto(path);
     const response = await result;
@@ -613,7 +620,10 @@ export async function exerciseSessionContext(
     const countBeforeRecovery = selectPosts(page).length;
     const freshMePromise = observeJsonResponse(
       page,
-      (response) => pathOf(response.request()) === '/api/me' && response.status() === 200,
+      (response) =>
+        pathOf(response.request()) === '/api/me' &&
+        requestDocumentPath(response.request()) === '/select' &&
+        response.status() === 200,
     );
     const leave = confirmNext(page, true);
     await page.getByRole('button', { name: 'Check company change', exact: true }).click();

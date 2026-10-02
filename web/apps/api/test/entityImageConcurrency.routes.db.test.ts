@@ -5,6 +5,7 @@ import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { hashPassword } from '../src/modules/auth/password.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const tenantId = 'image-cas-r5';
@@ -117,9 +118,7 @@ type Role = 'all' | 'view' | 'update' | 'delete' | 'print' | 'design' | 'tour' |
       .join('; ');
   }
   beforeAll(async () => {
-    for (const value of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL])
-      if (!value || new URL(value).port !== '55433')
-        throw new Error('Isolated image CAS database required.');
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient();
     await cleanup();

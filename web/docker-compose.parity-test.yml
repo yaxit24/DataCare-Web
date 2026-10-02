@@ -1,3 +1,5 @@
+# Disposable test database for scripts/parity-test-env.mjs, which sets the project name (one per
+# checkout), the credentials and PARITY_TEST_PORT. Do not start it directly.
 services:
   postgres:
     image: postgres:16-alpine
@@ -6,7 +8,7 @@ services:
       POSTGRES_DB: datacare
       POSTGRES_PASSWORD: ${PARITY_OWNER_PASSWORD:?Run scripts/parity-test-env.mjs}
     ports:
-      - '127.0.0.1:55433:5432'
+      - '127.0.0.1:${PARITY_TEST_PORT:-55433}:5432'
     volumes:
       - parity-test-data:/var/lib/postgresql/data
     healthcheck:

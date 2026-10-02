@@ -272,6 +272,82 @@ jobs:
         working-directory: web
         run: pnpm format:check
 
+  # N49 step 6 (gaps G23, G24): the zero-mock browser suites on every pull request. Each suite runs through
+  # scripts/parity-test-env.mjs, which starts a disposable PostgreSQL from an empty volume (migrations, forced
+  # RLS, non-owner runtime role), checks it is the same server before and after, and removes it. The web app
+  # is built with the API origin the suites listen on, because Next fixes it at build time.
+  real-stack-browser:
+    name: Real-stack browser journeys (zero mocks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PARITY_TEST_PORT: '55433'
+      PARITY_API_PORT: '4410'
+      PARITY_WEB_PORT: '4411'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with: { version: 9.15.4 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Install exact dependency graph
+        working-directory: web
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium and its system dependencies
+        working-directory: web
+        run: pnpm --filter @datacare/web exec playwright install --with-deps chromium
+
+      - name: Build the API
+        working-directory: web
+        run: |
+          pnpm --filter @datacare/db db:generate
+          pnpm --filter "@datacare/api..." run build
+
+      - name: Build the web app against the suites' API origin
+        working-directory: web
+        env:
+          API_ORIGIN: http://127.0.0.1:4410
+        run: pnpm --filter "@datacare/web..." run build
+
+      - name: Zero-mock journeys
+        id: journeys
+        working-directory: web
+        run: node scripts/parity-test-env.mjs -- node apps/web/test/parity.real-stack.mjs
+
+      - name: Session-context lifecycle
+        if: ${{ !cancelled() && steps.journeys.conclusion != 'skipped' }}
+        working-directory: web
+        run: node scripts/parity-test-env.mjs -- node apps/web/test/session-context.real-stack.additive.mjs
+
+      - name: Return labour preview lifecycle
+        if: ${{ !cancelled() && steps.journeys.conclusion != 'skipped' }}
+        working-directory: web
+        run: node scripts/parity-test-env.mjs -- node apps/web/test/labour-preview-lifecycle.real-stack.mjs
+
+      - name: Upload results and screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-stack-browser-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            web/test-results/parity-real-stack/
+            web/test-results/session-context-real-stack-lifecycle/
+            web/test-results/return-labour-preview-lifecycle/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Tear down the disposable database
+        if: always()
+        working-directory: web
+        run: node scripts/parity-test-env.mjs --down
+
   g5-desktop-comparison:
     name: G5 desktop comparison harness
     # Desktop credentials must never reach candidate-controlled pull-request code. Main is the only push ref

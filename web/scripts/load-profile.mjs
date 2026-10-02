@@ -369,7 +369,7 @@ export async function runLoadProfile() {
     };
     const output = {
       measuredAt: new Date().toISOString(),
-      target: 'compiled Fastify API over loopback HTTP and PostgreSQL 127.0.0.1:55433',
+      target: `compiled Fastify API over loopback HTTP and PostgreSQL 127.0.0.1:${process.env.PARITY_TEST_PORT?.trim() || '55433'}`,
       profile,
       requests: results.length,
       concurrency: Object.fromEntries(

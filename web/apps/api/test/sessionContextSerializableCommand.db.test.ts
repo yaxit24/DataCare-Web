@@ -11,6 +11,7 @@ import { selectSessionContext } from '../src/modules/auth/sessionContextSelectio
 import { refreshSessionContext } from '../src/modules/auth/sessionContextRefresh.js';
 import { revokeSession } from '../src/modules/auth/session.js';
 import { resetUserPassword } from '../src/modules/auth/passwordAccount.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const db = process.env.RUN_DB_INTEGRITY_TESTS === '1' ? describe : describe.skip;
 const tenantId = 'serial-command-db';
@@ -182,13 +183,7 @@ db('Serializable Return command schedules on isolated PostgreSQL', () => {
       },
     );
   beforeAll(async () => {
-    for (const key of ['DATABASE_URL', 'MIGRATE_DATABASE_URL'] as const) {
-      const value = process.env[key];
-      if (!value || new URL(value).port !== '55433')
-        throw new Error('isolated55433 wrapper is required');
-      if (key === 'DATABASE_URL' && decodeURIComponent(new URL(value).username) !== 'app_user')
-        throw new Error('runtime must use app_user');
-    }
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({
       datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } },
     });

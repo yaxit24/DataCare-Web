@@ -38,6 +38,7 @@ import {
   trialBalance,
 } from '../src/modules/reports/reports.js';
 import { salesReturnRegister } from '../src/modules/reports/reports4.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 type RawRow = Record<string, string | null>;
 /**
@@ -354,10 +355,7 @@ run('sale return numeric write coordinator', () => {
   }
 
   beforeAll(async () => {
-    for (const value of [process.env.MIGRATE_DATABASE_URL, process.env.DATABASE_URL]) {
-      if (!value || new URL(value).port !== '55433')
-        throw new Error('Isolated parity database 55433 required.');
-    }
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient();
   });

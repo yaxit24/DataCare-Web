@@ -3,6 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { hashPassword } from '../src/modules/auth/password.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const tenantId = 'lot-route-round3';
 const password = 'Lot-read-fixture!2026';
@@ -40,9 +41,7 @@ const password = 'Lot-read-fixture!2026';
         `/mfg/lot/${kind}/${path}${path.includes('?') ? '&' : '?'}coBook=${kind === 'issue' ? 'LSI' : 'LSR'}`,
     );
   beforeAll(async () => {
-    for (const name of ['DATABASE_URL', 'MIGRATE_DATABASE_URL'])
-      if (new URL(process.env[name] ?? 'invalid:').port !== '55433')
-        throw new Error('Use isolated55433 for lot route fixtures.');
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient();
     await clean();

@@ -76,8 +76,9 @@ python3 docs/tools/docs_check.py
 ```
 
 Add or extend a zero-mock journey for every changed screen (`docs/handbook/web/testing.md` §4) and run the visual
-protocol with the `datacare-e2e-visual` skill. If the isolated database port 55433 is busy (another session), wait
-or ask; never point tests at a database that holds real data.
+protocol with the `datacare-e2e-visual` skill. If the isolated database port 55433 is busy (another session), run the
+wrapper on another port (`PARITY_TEST_PORT`, and `PARITY_API_PORT`/`PARITY_WEB_PORT` for browser suites; testing §2);
+never point tests at a database that holds real data.
 
 ## 6. Record
 

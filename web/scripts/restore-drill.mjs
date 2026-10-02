@@ -17,8 +17,10 @@ const root = resolve(here, '..');
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) throw new Error('restore drill requires DATABASE_URL');
 const parsedUrl = new URL(databaseUrl);
-if (parsedUrl.hostname !== '127.0.0.1' || parsedUrl.port !== '55433') {
-  throw new Error('restore drill is restricted to PostgreSQL 127.0.0.1:55433');
+// The isolated database from scripts/parity-test-env.mjs (PARITY_TEST_PORT, default 55433; N49).
+const isolatedPort = process.env.PARITY_TEST_PORT?.trim() || '55433';
+if (parsedUrl.hostname !== '127.0.0.1' || parsedUrl.port !== isolatedPort) {
+  throw new Error(`restore drill is restricted to PostgreSQL 127.0.0.1:${isolatedPort}`);
 }
 
 const source = {

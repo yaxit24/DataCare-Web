@@ -10,6 +10,7 @@ import { financeVoucherData } from '../src/modules/finance/financeVoucher.js';
 import { dhrnIssueData } from '../src/modules/dhrn/dhrnReceipt.js';
 import { karigarIssueData } from '../src/modules/manufacturing/karigarVoucher.js';
 import type { VoucherDocumentScope } from '../src/modules/documents/voucherDocument.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 /**
  * N31 / G01: every printable voucher reads by the COMPLETE desktop key.
@@ -104,9 +105,7 @@ const families: Array<{
   };
 
   beforeAll(async () => {
-    for (const url of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL])
-      if (!url || new URL(url).port !== '55433')
-        throw new Error('document scope fixtures require the isolated test database on port 55433');
+    assertIsolatedTestDatabase();
     await cleanup();
     for (const [index, s] of dimensions.entries()) {
       const key = [s.tenantId, s.coCode, s.lcCode, s.coYear, s.coBook, s.vchNo];

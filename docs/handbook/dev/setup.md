@@ -70,7 +70,7 @@ From `web/`:
 
 ```bash
 pnpm lint && pnpm typecheck && pnpm typecheck:tests && pnpm format:check && pnpm build
-node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test     # API + write-set DB tests (isolated DB on 55433)
+node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test     # API + write-set DB tests (fresh isolated DB)
 API_ORIGIN=http://127.0.0.1:4410 pnpm build && node scripts/parity-test-env.mjs -- node apps/web/test/parity.real-stack.mjs
 pnpm docs:refs
 ```
@@ -83,8 +83,10 @@ python3 docs/tools/docs_check.py
 python3 docs/tools/session_status.py       # what other sessions, worktrees and PRs are in flight
 ```
 
-The isolated test wrapper uses fixed ports (55433, 4410, 4411), so two checkouts cannot run it at once — the status
-check reports when port 55433 is busy. Full test guide, including the Chrome DevTools visual protocol:
+The isolated test wrapper gives each checkout its own database project and credentials outside the repository. A
+second checkout runs at the same time on other ports: `PARITY_TEST_PORT=55533` for the database and, for the browser
+suites, `PARITY_API_PORT=4510 PARITY_WEB_PORT=4511` with the web app built using `API_ORIGIN=http://127.0.0.1:4510`.
+The status check reports when port 55433 is busy. Full test guide, including the Chrome DevTools visual protocol:
 [testing](../web/testing.md).
 
 ## 6. Keep the desktop reference code open while you build

@@ -75,7 +75,7 @@ When documents disagree:
   refer to environment variables by key name only.
 - **Desktop databases: aggregate queries only.** One of them holds real customer data; never select or store names,
   phone numbers, addresses or row dumps.
-- **Tests run on the isolated database** (`web/scripts/parity-test-env.mjs`, port 55433), never on a database with
+- **Tests run on the isolated database** (`web/scripts/parity-test-env.mjs`, port 55433 by default), never on a database with
   real data.
 - **Never move, rename or rewrite historical documents**; they are cited by path. Add new documents and classify them
   in `docs/handbook/doc-register.json`.

@@ -7,6 +7,7 @@ import {
   saveMeltingPro,
 } from '../src/modules/manufacturing/meltingPro.js';
 import type { VoucherScope } from '../src/modules/vouchers/numbering.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const databaseDescribe = RUN ? describe : describe.skip;
@@ -146,9 +147,7 @@ databaseDescribe('database-backed TR_MLT_PRO lifecycle', () => {
     if (!ownerUrl || !runtimeUrl) {
       throw new Error('RUN_DB_INTEGRITY_TESTS requires MIGRATE_DATABASE_URL and DATABASE_URL');
     }
-    if (new URL(ownerUrl).port !== '55433' || new URL(runtimeUrl).port !== '55433') {
-      throw new Error('melting DB tests may only use PostgreSQL port 55433');
-    }
+    assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: ownerUrl } } });
     runtime = new PrismaClient({ datasources: { db: { url: runtimeUrl } } });
   });

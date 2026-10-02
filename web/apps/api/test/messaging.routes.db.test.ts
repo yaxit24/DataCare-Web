@@ -4,6 +4,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { hashPassword } from '../src/modules/auth/password.js';
 import { seedCompany } from '../src/modules/ops/seedCompany.js';
+import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 /**
  * N54 step 4 / G33 over HTTP and the real database: messaging never reports a delivery that did not happen.
@@ -80,9 +81,7 @@ const PROVIDER_ENV = [
     });
 
   beforeAll(async () => {
-    for (const url of [process.env.DATABASE_URL, process.env.MIGRATE_DATABASE_URL])
-      if (!url || new URL(url).port !== '55433')
-        throw new Error('messaging route fixtures require isolated database 55433');
+    assertIsolatedTestDatabase();
     for (const name of PROVIDER_ENV) saved[name] = process.env[name];
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient();
