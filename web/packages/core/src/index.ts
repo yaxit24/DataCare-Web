@@ -38,6 +38,8 @@ export type {
   TagSplitBalance,
 } from './tagSplitLine.js';
 export { fineFor, round3, DEFAULT_FINE_WORKFLOW } from './finePolicy.js';
+export { stockInoutItemAmount } from './stockInoutAmount.js';
+export type { StockInoutAmountInput } from './stockInoutAmount.js';
 export type { FineWorkflow, FineLine } from './finePolicy.js';
 export {
   oldGoldAmountFromRate,
