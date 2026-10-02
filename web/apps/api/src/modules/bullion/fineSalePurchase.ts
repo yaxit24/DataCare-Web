@@ -1,4 +1,7 @@
+import { gstSplit } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
+import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
+import { gstTaxRows } from '../shared/taxDataRows.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
 import {
@@ -138,6 +141,14 @@ export async function createFineSalePurchase(
   const igst = inter ? totTax : 0;
 
   return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
+    // G92: the tax code resolved like every other family (Ac_Tax.cs Fine_Cut_GST :289-293 joins TAX_MAST on
+    // CUT_DATA.TAX_CODE); geography comes from the party's AC_GST_TYPE.
+    const policy =
+      totMetal !== 0
+        ? await resolveTaxPolicyTx(tx, input.scope, { acCode: input.partyAc, taxPct })
+        : null;
+    if (policy && policy.interState !== inter)
+      throw new FineSaleValidationError('interState does not match the persisted party GST type');
     // RATE_PAR mirrors the company's configured metal-rate basis. The desktop sets CurRatePar from MsRatePar
     // for a new voucher (TR_FINE_SL_PR.cs:3955-3963) and reads it back on reopen (:4288), so a hardcoded 'G'
     // mislabels every voucher at a shop quoting per-10-gram or per-kilogram rates.
@@ -207,6 +218,7 @@ export async function createFineSalePurchase(
       IT_TYPE: itType,
       FINE_TYPE: itType,
       NET_AMT: totMetal,
+      TAX_CODE: policy?.taxCode || null,
       TAX_PRC: taxPct,
       TAX_AMT: totTax,
       TOT_AMT: totNet,
@@ -253,27 +265,16 @@ export async function createFineSalePurchase(
       TOT_AMT: totNet,
       TAX_SIGN: isSale ? '+' : '-',
     };
-    const taxRows: Record<string, unknown>[] = [];
-    if (totTax !== 0) {
-      if (inter)
-        taxRows.push({ ...taxBase, SR_NO: 1, TAX_TYPE: 'IGST', TAX_PRC: taxPct, TAX_AMT: igst });
-      else {
-        taxRows.push({
-          ...taxBase,
-          SR_NO: 1,
-          TAX_TYPE: 'CGST',
-          TAX_PRC: r2(taxPct / 2),
-          TAX_AMT: cgst,
-        });
-        taxRows.push({
-          ...taxBase,
-          SR_NO: 2,
-          TAX_TYPE: 'SGST',
-          TAX_PRC: r2(taxPct / 2),
-          TAX_AMT: sgst,
-        });
-      }
-    }
+    // TAX_DATA from the code's component rows (Fine_Cut_GST :289-293): SR_NO 1/2 (3 inter-state), each half
+    // TAX_AMT/2 unrounded; nothing for a code without component rows.
+    const taxRows: Record<string, unknown>[] =
+      policy?.taxCode && (policy.components.size > 0 || totTax !== 0)
+        ? gstTaxRows({ ...taxBase, TAX_CODE: policy.taxCode, DISC_AMT: 0 }, policy, {
+            interState: inter,
+            ratePct: taxPct,
+            ...gstSplit(totTax, inter),
+          })
+        : [];
     // loose-fine MAIN_STOCK movement (no tag): IN on purchase ('+'), OUT on sale ('-').
     const mainStock = computed.map((c, i) => ({
       ...key,

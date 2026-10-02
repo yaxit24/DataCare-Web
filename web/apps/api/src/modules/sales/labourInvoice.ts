@@ -11,6 +11,8 @@ import {
 import { billTotals, fineFor } from '@datacare/core';
 import { receiptLegs } from '../finance/tender.js';
 import { SaleValidationError } from './sales.js';
+import { resolveTaxPolicyTx, type ResolvedTaxPolicy } from '../shared/taxPolicy.js';
+import { gstTaxRows } from '../shared/taxDataRows.js';
 
 /** Numeric coercion for a persisted column: a blank or absent cell is 0, never NaN. */
 const num = (v: unknown): number => {
@@ -230,6 +232,20 @@ export async function createLabourInvoice(
       lifecycle?.hdVchNo ??
       (await nextHiddenVoucherNoTx(tx, { ...input.scope, coBook: input.scope.coBook ?? 'LBR' }));
     const mainUser = lifecycle?.mainUser ?? String(input.mainUser ?? '').trim();
+    // G92: the metal and labour tax codes, resolved like every other family (Ac_Tax.cs LbrWork_GST :164-174 joins
+    // TAX_MAST on LBR_DATA.TAX_CODE and LBR_TAX_CODE). Geography comes from the party's AC_GST_TYPE.
+    const policyFor = async (base: number, pct: number): Promise<ResolvedTaxPolicy | null> => {
+      if (base <= 0) return null;
+      const policy = await resolveTaxPolicyTx(tx, input.scope, {
+        acCode: input.acCode,
+        taxPct: pct,
+      });
+      if (policy.interState !== inter)
+        throw new SaleValidationError('interState does not match the persisted customer GST type');
+      return policy;
+    };
+    const metalPolicy = await policyFor(metalBase, metalPct);
+    const labourPolicy = await policyFor(labourBase, labourPct);
     const key = {
       CO_CODE: input.scope.coCode,
       LC_CODE: input.scope.lcCode,
@@ -294,9 +310,11 @@ export async function createLabourInvoice(
       VCH_DATE: vchDate,
       AC_CODE: input.acCode,
       SL_NET_AMT: metalT.taxable,
+      TAX_CODE: metalPolicy?.taxCode || null,
       TAX_AMT: metalT.tax,
       TAX_PRC: metalPct,
       LBR_DR_AMT: labourT.taxable,
+      LBR_TAX_CODE: labourPolicy?.taxCode || null,
       LBR_TAX_AMT: labourT.tax,
       LBR_TAX_PRC: labourPct,
       TOT_DR_AMT: grand,
@@ -435,7 +453,9 @@ export async function createLabourInvoice(
         MAIN_USER: mainUser,
       }));
 
-    // TAX_DATA: two rows — metal GST (SALES) + labour GST (LABOUR).
+    // TAX_DATA from each code's component rows (LbrWork_GST :164-174): metal at SR_NO 1/2 (3 inter-state) on
+    // SL_NET_AMT, labour at 10/20 (30) on DR_LBR; each half TAX_AMT/2; TOT_AMT = net + tax (no round-off). The
+    // desktop join writes nothing for a code without component rows, so a code-less 0% part writes no row.
     const taxBase = {
       ...key,
       TRAN_TYPE: 'S',
@@ -445,42 +465,29 @@ export async function createLabourInvoice(
       PARTY_NAME: input.acName ?? null,
       TAX_SIGN: '+',
     };
-    const split = (t: typeof metalT, pct: number, net: number, sr0: number) =>
-      inter
-        ? [
+    const rowsFor = (
+      policy: ResolvedTaxPolicy | null,
+      t: typeof metalT,
+      pct: number,
+      srNos?: readonly [number, number, number],
+    ) =>
+      policy?.taxCode && (policy.components.size > 0 || t.tax !== 0)
+        ? gstTaxRows(
             {
               ...taxBase,
-              SR_NO: sr0,
-              TAX_TYPE: 'IGST',
-              NET_AMT: net,
-              TAX_PRC: pct,
-              TAX_AMT: t.igst,
-              TOT_AMT: t.total,
+              TAX_CODE: policy.taxCode,
+              NET_AMT: t.taxable,
+              DISC_AMT: 0,
+              TOT_AMT: r2(t.taxable + t.tax),
             },
-          ]
-        : [
-            {
-              ...taxBase,
-              SR_NO: sr0,
-              TAX_TYPE: 'CGST',
-              NET_AMT: net,
-              TAX_PRC: r2(pct / 2),
-              TAX_AMT: t.cgst,
-              TOT_AMT: t.total,
-            },
-            {
-              ...taxBase,
-              SR_NO: sr0 + 1,
-              TAX_TYPE: 'SGST',
-              NET_AMT: net,
-              TAX_PRC: r2(pct / 2),
-              TAX_AMT: t.sgst,
-              TOT_AMT: t.total,
-            },
-          ];
+            policy,
+            { interState: inter, ratePct: pct, igst: t.igst, sgst: t.sgst, cgst: t.cgst },
+            srNos,
+          )
+        : [];
     const taxRows = [
-      ...(metalBase > 0 ? split(metalT, metalPct, metalT.taxable, 1) : []),
-      ...(labourBase > 0 ? split(labourT, labourPct, labourT.taxable, 5) : []),
+      ...rowsFor(metalPolicy, metalT, metalPct),
+      ...rowsFor(labourPolicy, labourT, labourPct, [10, 20, 30]),
     ];
     const osRow = {
       ...key,
