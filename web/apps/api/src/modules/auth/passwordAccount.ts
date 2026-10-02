@@ -1,5 +1,5 @@
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { assertStrongPassword, hashPassword, verifyPassword } from './password.js';
 
 export class PasswordChangeError extends Error {
@@ -27,7 +27,7 @@ export async function upgradeLegacyPassword(
 ): Promise<void> {
   const passwordHash = await hashPassword(input.legacyPassword);
   const changed = Number(
-    await withTenant(prisma, input.tenantId, (tx: any) =>
+    await withTxBudget(prisma, input.tenantId, 'voucher', (tx: any) =>
       tx.$executeRawUnsafe(
         `UPDATE "LOGIN_MAST"
             SET "LOGIN_PWD"=$1,"PASSWORD_RESET_REQUIRED"='Y',"PASSWORD_CHANGED_AT"=NOW()
@@ -63,7 +63,7 @@ export async function changeOwnPassword(
   }
   assertStrongPassword(input.newPassword);
   const nextHash = await hashPassword(input.newPassword);
-  const outcome = await withTenant(prisma, input.tenantId, async (tx: any) => {
+  const outcome = await withTxBudget(prisma, input.tenantId, 'voucher', async (tx: any) => {
     const rows: Array<{ LOGIN_PWD?: string | null }> = await tx.$queryRawUnsafe(
       `SELECT "LOGIN_PWD" FROM "LOGIN_MAST"
         WHERE "CO_CODE"=$1 AND "LOGIN_NAME"=$2 LIMIT 1 FOR UPDATE`,
@@ -108,7 +108,7 @@ export async function resetUserPassword(
   assertStrongPassword(input.newPassword);
   const nextHash = await hashPassword(input.newPassword);
   const changed = Number(
-    await withTenant(prisma, input.tenantId, async (tx: any) => {
+    await withTxBudget(prisma, input.tenantId, 'voucher', async (tx: any) => {
       const updated = Number(
         await tx.$executeRawUnsafe(
           `UPDATE "LOGIN_MAST"

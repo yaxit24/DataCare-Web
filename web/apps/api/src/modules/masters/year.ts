@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { cloneCompanyTx } from './companyClone.js';
 
 /**
@@ -21,7 +21,7 @@ export async function listYears(
   prisma: any,
   scope: { tenantId: string; coCode: string },
 ): Promise<YearRow[]> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "CO_YEAR" y, "OP_DATE"::text od, "CL_DATE"::text cd, coalesce("YEAR_MONTH",'') ym FROM "YEAR_MAST" WHERE "CO_CODE"=$1 ORDER BY "CO_YEAR"`,
       scope.coCode,
@@ -49,7 +49,7 @@ export async function createYear(
 ): Promise<{ coYear: string }> {
   const coYear = String(input.coYear ?? '').trim();
   if (!coYear) throw new Error('coYear is required');
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'heavy', async (tx: any) => {
     const ex: any[] = await tx.$queryRawUnsafe(
       `SELECT count(*)::int n FROM "YEAR_MAST" WHERE "CO_CODE"=$1 AND "CO_YEAR"=$2`,
       scope.coCode,
@@ -80,7 +80,7 @@ export async function closeYear(
   coYear: string,
   clDate?: string,
 ): Promise<{ closed: true }> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await tx.$executeRawUnsafe(
       `UPDATE "YEAR_MAST" SET "CL_DATE"=$3 WHERE "CO_CODE"=$1 AND "CO_YEAR"=$2`,
       scope.coCode,
@@ -96,7 +96,7 @@ export async function reopenYear(
   scope: { tenantId: string; coCode: string },
   coYear: string,
 ): Promise<{ reopened: true }> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await tx.$executeRawUnsafe(
       `UPDATE "YEAR_MAST" SET "CL_DATE"=NULL WHERE "CO_CODE"=$1 AND "CO_YEAR"=$2`,
       scope.coCode,
@@ -117,7 +117,7 @@ export async function carryForwardOpenings(
   fromYear: string,
   toYear: string,
 ): Promise<{ parties: number }> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'heavy', async (tx: any) => {
     await tx.$executeRawUnsafe(
       `DELETE FROM "OP_DATA" WHERE "CO_CODE"=$1 AND "CO_YEAR"=$2`,
       scope.coCode,

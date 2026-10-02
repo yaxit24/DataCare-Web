@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import type { ReportScope, ListReport } from './reports.js';
 
 /**
@@ -21,7 +21,7 @@ const NN = (c: string): string => `coalesce(NULLIF(${c}::text,'')::numeric,0)`;
  * is the account name resolved from AC_MAST. Dr/Cr footed in JS.
  */
 export async function cashBook(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT d."VCH_DATE" AS date, d."CO_BOOK"||'/'||d."VCH_NO" AS voucher,
               (SELECT m."AC_NAME" FROM "AC_MAST" m
@@ -60,7 +60,7 @@ export async function cashBook(prisma: any, s: ReportScope): Promise<ListReport>
  * account found for the company. closing = final running balance.
  */
 export async function partyStatement(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     let acCode = (s as { acCode?: string }).acCode;
     if (!acCode) {
       const first: any[] = await tx.$queryRawUnsafe(
@@ -108,7 +108,7 @@ export async function partyStatement(prisma: any, s: ReportScope): Promise<ListR
  * tax = Σ (ITM_CGST_AMT + ITM_SGST_AMT + ITM_IGST_AMT) per slab.
  */
 export async function hsnSummary(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT ${NN('"TAX_PRC"')} AS slab, count(*)::int AS lines,
               sum(${NN('"NET_AMT"')}) AS taxable,
@@ -135,7 +135,7 @@ export async function hsnSummary(prisma: any, s: ReportScope): Promise<ListRepor
 
 /** Membership / scheme adjustments register (AD_ADJ): member & scheme credits/adjustments. */
 export async function schemeAdjustments(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "VCH_DATE" AS date, "CO_BOOK"||'/'||"VCH_NO" AS voucher, "VCH_TYPE" AS type, "SCHM_CODE" AS scheme,
               "MEMB_CODE" AS member, "AC_NAME" AS party, ${NN('"MEMB_AMT"')} AS "membAmt",
@@ -168,7 +168,7 @@ export async function schemeAdjustments(prisma: any, s: ReportScope): Promise<Li
 
 /** Item stock ledger (MAIN_STOCK): per item, total IN vs OUT movements (pcs + fine) and net. */
 export async function itemStockLedger(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "IT_CODE" AS item,
               sum(CASE WHEN "ITM_SIGN"='+' THEN ${NN('"ITM_FINE"')} ELSE 0 END) AS "inFine",

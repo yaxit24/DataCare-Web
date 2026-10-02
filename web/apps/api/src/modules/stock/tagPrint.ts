@@ -1,6 +1,6 @@
 import { roundHalfEven } from '@datacare/core';
 import { insertRowTx } from '../posting/posting.js';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { barTagAvailableSql } from '../shared/stockSql.js';
 
 /**
@@ -292,7 +292,7 @@ export async function listPrintableTags(
   scope: { CO_CODE: string; LC_CODE: string },
   filters?: { tblCode?: string; itCode?: string; tagFrom?: string; tagTo?: string },
 ): Promise<PrintableTag[]> {
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [scope.CO_CODE, scope.LC_CODE];
     const cl: string[] = [];
     if (filters?.tblCode) {

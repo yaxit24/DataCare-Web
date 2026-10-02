@@ -1,5 +1,5 @@
 import { round, roundHalfEven } from '@datacare/core';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { assertBalanced, assertPeriodOpen, insertRowTx } from '../posting/posting.js';
 import { resolveTaxPolicyTx, type ResolvedTaxPolicy } from '../shared/taxPolicy.js';
 import { assertFiscalDateTx } from '../vouchers/lifecycle.js';
@@ -951,7 +951,7 @@ export async function saveOtherPurc(
   input: OtherIncomeInput,
   requestedVoucherNo?: string,
 ) {
-  return withTenant(prisma, input.scope.tenantId, (tx: any) =>
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', (tx: any) =>
     saveTx(tx, mode, input, requestedVoucherNo),
   );
 }
@@ -976,7 +976,7 @@ export async function getOtherPurc(
   const scope = completeFinanceScope(scopeInput);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
   const words = MODE_TEXT[mode];
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await resolveBookTx(tx, scope, mode);
     const headers: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT p.*,p."VCH_DATE"::text AS "VCH_DAY",p."BILL_DATE"::text AS "BILL_DAY",
@@ -1085,7 +1085,7 @@ export async function deleteOtherPurc(
 ): Promise<{ reversed: true; auditedLines: number }> {
   const scope = completeFinanceScope(scopeInput);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const book = await resolveBookTx(tx, scope, mode);
     const edited = await editIdentityTx(tx, {
       table: 'PAY_DATA',

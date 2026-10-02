@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { playwrightRendererReadiness, type PdfRendererReadiness } from '../reports/render.js';
 
 /** Operational liveness and dependency/security readiness. */
@@ -70,7 +70,7 @@ export async function readiness(
   }
 
   try {
-    const result = await withTenant(prisma, tenantId, async (tx: any) => {
+    const result = await withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
       const ping: any[] = await tx.$queryRawUnsafe('SELECT 1 AS ok');
       const roles: any[] = await tx.$queryRawUnsafe(
         `SELECT current_user AS name, r.rolsuper, r.rolbypassrls

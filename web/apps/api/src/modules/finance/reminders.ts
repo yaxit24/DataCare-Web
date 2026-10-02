@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 /**
  * Reminder dashboard (desktop "Reminder"): a read-only aggregation of things needing attention —
@@ -48,7 +48,7 @@ export async function reminders(
   opts?: { dueWindowDays?: number },
 ): Promise<Reminders> {
   const win = Number(opts?.dueWindowDays ?? 7);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const recRows: any[] = await tx.$queryRawUnsafe(
       `SELECT b."AC_CODE" ac, coalesce(a."AC_NAME", b."AC_CODE") nm, coalesce(a."AC_MOBILE",'') mob, coalesce(NULLIF(a."AC_CR_DAYS"::text,'')::numeric,0)::int crdays,
               SUM(coalesce(NULLIF(b."BILL_AMT"::text,'')::numeric,0) - coalesce(NULLIF(b."REC_AMT"::text,'')::numeric,0) - coalesce(NULLIF(b."KASAR_AMT"::text,'')::numeric,0))::float os,

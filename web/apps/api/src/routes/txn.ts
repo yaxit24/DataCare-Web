@@ -1,5 +1,5 @@
 import { SessionReadSnapshotError } from '../modules/auth/sessionContextReadSnapshot.js';
-import { isTransactionTimeout } from '../modules/shared/txBudget.js';
+import { isTransactionTimeout, withTxBudget } from '../modules/shared/txBudget.js';
 import {
   getSaleReturnLabourReplayState,
   observeSaleReturnLabourReplayCode,
@@ -8,7 +8,6 @@ import {
 } from '../modules/sales/saleReturnLabourReplay.js';
 import { SessionCommandError } from '../modules/auth/sessionContextCommand.js';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { withTenant } from '@datacare/db';
 import { loadPrincipal, authorizeForm, FormForbiddenError } from '../modules/rbac/authorization.js';
 import { requireImageVersion, ImageVersionConflictError } from '../modules/images/imageState.js';
 import {
@@ -1037,7 +1036,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   /** The session company's name for a letterhead (CO_MAST.CO_NAME), blank when the master has none. */
   const sessionCompanyName = async (req: FastifyRequest): Promise<string> => {
     const s = readScope(req);
-    const company = await withTenant(prisma, s.tenantId, (tx: any) =>
+    const company = await withTxBudget(prisma, s.tenantId, 'read', (tx: any) =>
       documentCompanyTx(tx, { tenantId: s.tenantId, coCode: s.coCode } as any),
     );
     return String(company?.CO_NAME ?? '').trim();
@@ -6216,7 +6215,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     if (!coYear || !coBook) {
       throw new StockVoucherValidationError('scope-incomplete: company year and book are required');
     }
-    const staged = await withTenant(prisma, s.tenantId, (tx: any) =>
+    const staged = await withTxBudget(prisma, s.tenantId, 'voucher', (tx: any) =>
       stageTagPrintRowsTx(
         tx,
         s.tenantId,
@@ -6293,7 +6292,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   app.get('/integrations/device-settings', auth, async (req) => {
     const scope = scopeOf(req);
-    const behavior = await withTenant(prisma, scope.tenantId, (tx: any) =>
+    const behavior = await withTxBudget(prisma, scope.tenantId, 'read', (tx: any) =>
       resolveSettingsBehaviorTx(tx, scope),
     );
     // The browser must open the port with the desktop's own parameters, so they are published here
@@ -6331,10 +6330,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
    */
   app.get('/integrations/readiness', auth, async (req) => {
     const scope = scopeOf(req);
-    const behavior = await withTenant(prisma, scope.tenantId, (tx: any) =>
+    const behavior = await withTxBudget(prisma, scope.tenantId, 'read', (tx: any) =>
       resolveSettingsBehaviorTx(tx, scope),
     );
-    const companyMail = await withTenant(prisma, scope.tenantId, async (tx: any) => {
+    const companyMail = await withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
       const rows: Array<{ n: number }> = await tx.$queryRawUnsafe(
         // Module_Save.cs reads CO_MAIL and MAIL_API for the SMTP credentials. Note MAIL_API is absent
         // from the extracted desktop schema snapshot while present here, so the desktop references a
@@ -6379,7 +6378,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // Live gold/silver/forex rates (free APIs, no creds) — desktop MDI_FORM live-rate feed.
   app.get('/integrations/live-rates', auth, async (req) => {
     const scope = scopeOf(req);
-    const behavior = await withTenant(prisma, scope.tenantId, (tx: any) =>
+    const behavior = await withTxBudget(prisma, scope.tenantId, 'read', (tx: any) =>
       resolveSettingsBehaviorTx(tx, scope),
     );
     // MS_OPNCOMP.cs:718,933-935 and TR_PR_SL_UAE.cs:10846: OZ_CON_VAL is company-owned and is
@@ -6393,7 +6392,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     if (!guard(req, reply, 'print')) return;
     const b = body(req);
     const scope = scopeOf(req);
-    const behavior = await withTenant(prisma, scope.tenantId, (tx: any) =>
+    const behavior = await withTxBudget(prisma, scope.tenantId, 'read', (tx: any) =>
       resolveSettingsBehaviorTx(tx, scope),
     );
     const gate =
@@ -6433,7 +6432,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // What's configured/live vs pending-credentials.
   app.get('/integrations/status', auth, async (req) => {
     const scope = scopeOf(req);
-    const behavior = await withTenant(prisma, scope.tenantId, (tx: any) =>
+    const behavior = await withTxBudget(prisma, scope.tenantId, 'read', (tx: any) =>
       resolveSettingsBehaviorTx(tx, scope),
     );
     return {
@@ -7112,7 +7111,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const rep = await karigarLedger(prisma, s as any, ac);
     // G09: the letterhead is the active company's own name, not a hard-coded shop. Fall back to the
     // renderer's default only when the company master carries no name.
-    const companyRows = (await withTenant(prisma, s.tenantId, (tx: any) =>
+    const companyRows = (await withTxBudget(prisma, s.tenantId, 'read', (tx: any) =>
       tx.$queryRawUnsafe(
         `SELECT "CO_NAME" FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 LIMIT 1`,
         s.tenantId,
@@ -7681,7 +7680,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     if (copy === null) return reply;
     const scope = scopeOf(req);
     const voucher = await getWholesaleQuotation(prisma, scope, (req.params as any).vchNo);
-    const context = await withTenant(prisma, scope.tenantId, async (tx: any) => {
+    const context = await withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
       const companies: any[] = await tx.$queryRawUnsafe(
         `SELECT * FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 LIMIT 1`,
         scope.tenantId,

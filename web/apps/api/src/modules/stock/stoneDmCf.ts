@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { assertPeriodOpen, insertRowTx } from '../posting/posting.js';
 import { barTagAvailableSql } from '../shared/stockSql.js';
 import {
@@ -582,7 +582,7 @@ export async function saveStoneDmCf(
   input: StoneDmCfInput,
   requestedVoucherNo?: string,
 ): Promise<{ voucherNo: string; hiddenVoucherNo: string; created: boolean; lines: number }> {
-  return withTenant(prisma, input.scope.tenantId, (tx: any) =>
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', (tx: any) =>
     saveTx(tx, input, requestedVoucherNo),
   );
 }
@@ -594,7 +594,7 @@ export async function getStoneDmCf(
 ): Promise<Record<string, unknown>> {
   completeScope(scope);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await resolveBookTx(tx, scope);
     const headers: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"VCH_TIME","EMP_CODE","VCH_DESC","HD_VCH_NO","MAIN_USER"
@@ -680,7 +680,7 @@ export async function deleteStoneDmCf(
 ): Promise<{ reversed: true }> {
   completeScope(scope);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await resolveBookTx(tx, scope);
     const persisted = await headerForUpdateTx(tx, scope, voucherNo);
     await assertPeriodOpen(tx, scope.tenantId, {
@@ -734,7 +734,7 @@ export async function listStoneDmCfSources(
     designImageId: string;
   }>
 > {
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [scope.CO_CODE, scope.LC_CODE];
     const clauses: string[] = [];
     if (filters?.tblCode) {

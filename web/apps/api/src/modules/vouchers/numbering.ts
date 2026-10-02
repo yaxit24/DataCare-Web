@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { tableColumnsTx, tablesWithColumnsTx } from '../shared/schemaCatalog.js';
 
 /** Desktop voucher identity: tenant + company + location + fiscal year + book. */
@@ -152,7 +152,7 @@ export async function nextVoucherNoTx(tx: any, s: VoucherScope): Promise<number>
 }
 
 export async function nextVoucherNo(prisma: any, s: VoucherScope): Promise<number> {
-  return withTenant(prisma, s.tenantId, (tx: any) => nextVoucherNoTx(tx, s));
+  return withTxBudget(prisma, s.tenantId, 'voucher', (tx: any) => nextVoucherNoTx(tx, s));
 }
 
 /**

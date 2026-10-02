@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 /**
  * GSTR-1 return datasets (read-only) over the sales tables. Classification follows GST rules using
@@ -168,7 +168,7 @@ export async function gstr1(
   s: GstScope,
   opts: { threshold?: number; hsnMap?: Record<string, string> } = {},
 ): Promise<Gstr1> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const h = scopeSql(s, 'S', 1);
     const n = (c: string): string => `coalesce(NULLIF(${c}::text,'')::numeric,0)`;
     // invoices: SL_DATA joined to AC_MAST for buyer GSTIN/state

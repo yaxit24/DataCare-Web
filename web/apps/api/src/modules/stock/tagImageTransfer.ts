@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { insertRowTx } from '../posting/posting.js';
 
 /**
@@ -68,7 +68,7 @@ export async function queueTagImageTransfer(
   scope: TagImageTransferScope,
   rows: TagImageTransferRow[],
 ): Promise<number> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await tx.$executeRawUnsafe(
       `DELETE FROM "TAG_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2`,
       scope.tenantId,

@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 /**
  * Size-wise stock movement (desktop `RP_STK_MOVE`, menu caption "Movement").
@@ -57,7 +57,7 @@ export async function movementReport(
   options: { mode?: MovementMode; itCode?: string; inStockOnly?: boolean } = {},
 ): Promise<MovementReport> {
   const mode: MovementMode = options.mode ?? 'item';
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [scope.CO_CODE, scope.LC_CODE];
     const filters = ['a."CO_CODE"::text=$1', 'a."LC_CODE"::text=$2'];
     if (options.itCode) {

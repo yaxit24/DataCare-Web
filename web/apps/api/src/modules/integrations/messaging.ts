@@ -1,5 +1,5 @@
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 /**
  * Messaging integrations — web replacement for the desktop UT_WHATSAPP / UT_WAPP_WITH_API / UT_SMS.
@@ -331,7 +331,7 @@ export async function notifyWithAttemptLog(
   if (!templateKind)
     return { ok: false, status: 'failed', error: 'template kind is required', deduplicated: false };
 
-  const claimed = await withTenant(prisma, scope.tenantId, async (tx: any) => {
+  const claimed = await withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const inserted = (await tx.$queryRawUnsafe(
       `INSERT INTO "message_attempt_log"
          ("tenant_id","co_code","lc_code","channel","recipient","template_kind",
@@ -387,7 +387,7 @@ export async function notifyWithAttemptLog(
   }
 
   const result = await notify(sender, msg);
-  await withTenant(prisma, scope.tenantId, async (tx: any) => {
+  await withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await tx.$executeRawUnsafe(
       // Explicit tenant predicate: without it this UPDATE could overwrite another tenant's delivery record
       // when idempotency keys collide, which keys derived from voucher identifiers do routinely.

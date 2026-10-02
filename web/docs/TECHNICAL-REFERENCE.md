@@ -63,7 +63,9 @@ forced** in the isolated migrated database, checked by `scripts/parity-test-env.
 Fresh-install/release certification remains a separate requirement (`pnpm fresh:provision`).
 
 ```ts
-await withTenant(prisma, tenantId, async (tx) => {
+// Modules open transactions through withTxBudget (modules/shared/txBudget.ts), a budgeted withTenant:
+// 'read' | 'voucher' | 'heavy' or a named profile such as SNAPSHOT_READ (test/txBudgetCoverage.test.ts).
+await withTxBudget(prisma, tenantId, 'voucher', async (tx) => {
   /* all statements here */
 });
 insertRowTx(tx, 'TABLE', tenantId, row); // tenant is a SEPARATE argument, not a row field

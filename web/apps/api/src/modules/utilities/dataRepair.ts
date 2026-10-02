@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { verifyWithMigration } from '../auth/password.js';
 
 /**
@@ -216,7 +216,7 @@ export async function previewRepair(
   operator: string,
 ): Promise<RepairPreview> {
   const op = getRepair(operationId);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'heavy', async (tx: any) => {
     const { diffs, samples } = await op.preview(tx, scope);
     const previewHash = hashPreview(op, scope, diffs, samples);
     const clean = totalChanges(diffs) === 0;
@@ -367,7 +367,7 @@ export async function applyRepair(
       `record why this repair is being applied (at least ${REPAIR_REASON_MIN_LENGTH} characters)`,
     );
   }
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'heavy', async (tx: any) => {
     // Authority first: an unauthorised caller must not even hold the operation lock.
     if (authority.reauthentication) await requireReauthentication(tx, scope, input);
     if (authority.backupReference) await requireBackupReference(tx, scope, input);
@@ -437,7 +437,7 @@ export async function repairHistory(
   scope: { tenantId: string; coCode?: string },
   limit = 50,
 ): Promise<Record<string, unknown>[]> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const co = scope.coCode ? ' AND co_code=$2' : '';
     const params: unknown[] = [scope.tenantId];
     if (scope.coCode) params.push(scope.coCode);

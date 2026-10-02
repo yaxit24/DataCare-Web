@@ -1,5 +1,5 @@
 import { formatVoucherNo } from '../vouchers/numbering.js';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 /**
  * Bank Reconciliation (desktop "Bank Reconciliation"): the bank's authoritative ledger is its AC_DATA
@@ -37,7 +37,7 @@ export async function bankReconList(
   bankAc: string,
   range?: { from?: string; to?: string },
 ): Promise<BankReconList> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const cond: string[] = [`a."CO_CODE"=$1`, `a."AC_CODE"=$2`];
     const params: unknown[] = [scope.coCode, bankAc];
     if (range?.from) {
@@ -124,7 +124,7 @@ export async function bankReconClear(
   items: BankClearItem[],
 ): Promise<{ updated: number }> {
   const clean = (items ?? []).filter((i) => i && i.coBook && i.vchNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     let updated = 0;
     for (const it of clean) {
       const clr = it.clrDate && String(it.clrDate).trim() ? String(it.clrDate).slice(0, 10) : null;

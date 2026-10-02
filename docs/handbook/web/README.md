@@ -77,9 +77,10 @@ Fastify is used directly rather than NestJS (`project-memory/decisions/ADR-0003-
    (`web/apps/api/src/modules/rbac/routePolicy.ts`).
 6. **Body handling.** Today handlers cast the raw body; no mutation route has a JSON Schema yet, so malformed input
    can reach a writer and return 500 (G25, slice N50).
-7. **Writer.** The module opens `withTenant`, resolves settings, book and accounts on the server, allocates visible and
-   hidden numbers, checks the fiscal period and lock date, and writes the complete ledger, stock, tax and outstanding
-   effects in one transaction (`web/packages/db/src/tenant.ts`, `web/apps/api/src/modules/posting/posting.ts`).
+7. **Writer.** The module opens `withTxBudget` (a budgeted `withTenant`), resolves settings, book and accounts on the
+   server, allocates visible and hidden numbers, checks the fiscal period and lock date, and writes the complete
+   ledger, stock, tax and outstanding effects in one transaction (`web/packages/db/src/tenant.ts`,
+   `web/apps/api/src/modules/shared/txBudget.ts`, `web/apps/api/src/modules/posting/posting.ts`).
 8. **Errors.** Route wrappers map known errors to 4xx by name pattern (`web/apps/api/src/routes/txn.ts:755-864`);
    unknown errors become 500. A typed taxonomy replaces this (N88).
 9. **Audit.** Mutations are logged after the response in a separate transaction; a logging failure does not fail
@@ -229,7 +230,7 @@ replaces this with managed services ([document 14](../../master-parity-plan-2026
 |---|---|---|
 | Route monolith | `web/apps/api/src/routes/txn.ts`: 8,400 lines, 586 of the 608 routes (the rest are in `web/apps/api/src/app.ts`), no body schemas | G25/N50, G79/N88, SP03 |
 | Local rounding | 124 local rounding helpers against a ceiling of 108 | G22, N48 |
-| Transaction budgets | About 525 `withTenant` calls, 6 with explicit timeouts; one sales-return create exceeded 5 s | G30, N53 |
+| Transaction budgets | Every transaction in `web/apps/api/src` declares a budget class through `withTxBudget` (2 October; backup and restore keep their own longer limits); the per-class limits are not yet tuned from production timings | G30, N53 |
 | Large writers | `rateCut.ts` 2,981, `purchase.ts` 2,875, `sales.ts` 2,825, `salesOrder.ts` 2,357 lines | X05, X06, N59, N63 |
 | Large pages | `web/apps/web/app/(app)/reports/[report]/page.tsx` 1,867 and `web/apps/web/app/(app)/txn/sales/page.tsx` 1,485 lines | G37/N57, N88 |
 | Report bindings | 28 of 254 Crystal layouts bound | G59, G60, N73–N75 |

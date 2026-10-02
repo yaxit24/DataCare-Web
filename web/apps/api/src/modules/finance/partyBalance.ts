@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { openingFor } from '../masters/openingBalance.js';
 
 /**
@@ -23,7 +23,7 @@ export async function partyBalance(
   scope: { tenantId: string; coCode: string },
   acCode: string,
 ): Promise<PartyBalance> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT coalesce(sum(coalesce(NULLIF("DR_AMT"::text,'')::numeric,0)),0)::float dr,
               coalesce(sum(coalesce(NULLIF("CR_AMT"::text,'')::numeric,0)),0)::float cr,

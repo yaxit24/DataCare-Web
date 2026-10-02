@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
 import {
   assertBalanced,
@@ -143,14 +143,14 @@ export async function postEmployeeJv(p: any, i: EmployeeJvInput) {
   assertEmployeeJvInput(i);
   completeFinanceScope(i.scope);
   const d = i.vchDate ? new Date(i.vchDate) : new Date();
-  return withTenant(p, i.scope.tenantId, async (tx) =>
+  return withTxBudget(p, i.scope.tenantId, 'voucher', async (tx) =>
     write(tx, i, await createIdentityTx(tx, i.scope, d, i.mainUser)),
   );
 }
 export async function getEmployeeJv(p: any, s: VoucherScope, x: number | string) {
   completeFinanceScope(s);
   const no = formatVoucherNo(x);
-  return withTenant(p, s.tenantId, async (tx) => {
+  return withTxBudget(p, s.tenantId, 'read', async (tx) => {
     const a: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"HD_VCH_NO","MAIN_USER","AC_CODE","AC_NAME","PAID_AC_CODE","SALARY_AMT","TDS_AMT","PF_AMT","CHQ_NO","IT_DESC","EMP_CODE" FROM "EMP_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
       s.tenantId,
@@ -183,7 +183,7 @@ export async function editEmployeeJv(p: any, i: EmployeeJvInput, x: number | str
   assertEmployeeJvInput(i);
   completeFinanceScope(i.scope);
   const d = i.vchDate ? new Date(i.vchDate) : new Date();
-  return withTenant(p, i.scope.tenantId, async (tx) => {
+  return withTxBudget(p, i.scope.tenantId, 'voucher', async (tx) => {
     const { identity } = await editIdentityTx(tx, {
       table: 'EMP_DATA',
       scope: i.scope,
@@ -201,7 +201,7 @@ export async function editEmployeeJv(p: any, i: EmployeeJvInput, x: number | str
   completeFinanceScope(i.scope);
   const s = i.scope,
     no = formatVoucherNo(i.vchNo);
-  return withTenant(p, s.tenantId, async (tx) => {
+  return withTxBudget(p, s.tenantId, 'voucher', async (tx) => {
     const { identity } = await editIdentityTx(tx, {
       table: 'EMP_DATA',
       scope: s,

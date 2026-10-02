@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { withTenant } from '@datacare/db';
+import { withTxBudget, SNAPSHOT_READ } from '../shared/txBudget.js';
 import {
   projectSavedSaleReturnIncoming,
   projectSaleReturnIncomingEditorText,
@@ -425,11 +425,11 @@ export async function getSaleReturnIncomingReplayState(
 ): Promise<SaleReturnIncomingReplayState> {
   validateScope(scope, voucherNo);
   try {
-    return await withTenant(
+    return await withTxBudget(
       prisma,
       scope.tenantId,
+      SNAPSHOT_READ,
       async (tx) => (await observeSaleReturnIncomingReplayTx(tx, scope, voucherNo)).dto,
-      { isolationLevel: 'RepeatableRead' },
     );
   } catch (error) {
     return errorBoundary(error);
@@ -444,117 +444,112 @@ export async function previewSaleReturnIncomingReplay(
   validateScope(scope, voucherNo);
   const input = saleReturnIncomingReplayInput(value);
   try {
-    return await withTenant(
-      prisma,
-      scope.tenantId,
-      async (tx) => {
-        const { dto, states } = await observeSaleReturnIncomingReplayTx(
-          tx,
-          scope,
-          voucherNo,
-          input.replayVersion,
+    return await withTxBudget(prisma, scope.tenantId, SNAPSHOT_READ, async (tx) => {
+      const { dto, states } = await observeSaleReturnIncomingReplayTx(
+        tx,
+        scope,
+        voucherNo,
+        input.replayVersion,
+      );
+      const matching = dto.rows.filter((row) => row.rowIdentity === input.rowIdentity);
+      if (matching.length !== 1)
+        throw new SaleReturnIncomingReplayError(
+          409,
+          'identity-conflict',
+          'This saved row identity is missing or ambiguous. Reload the Return.',
         );
-        const matching = dto.rows.filter((row) => row.rowIdentity === input.rowIdentity);
-        if (matching.length !== 1)
-          throw new SaleReturnIncomingReplayError(
-            409,
-            'identity-conflict',
-            'This saved row identity is missing or ambiguous. Reload the Return.',
-          );
-        const row = matching[0]!;
-        const initial = states.get(row.rowIdentity);
-        if (
-          !initial ||
-          !dto.configuration.policy ||
-          !row.fieldCapabilities.some((field) => field.allowed)
-        )
-          throw new SaleReturnIncomingReplayError(
-            422,
-            'unsupported-state',
-            row.diagnostics[0]?.message ??
-              'This saved row is outside the supported calculation preview.',
-            { diagnostics: row.diagnostics },
-          );
-        const baseline = cells(initial);
-        let state = initial;
-        let aggregateRequired = false;
-        const events: SaleReturnIncomingReplayResult['events'] = [];
-        for (const [eventIndex, event] of input.events.entries()) {
-          const column = allowedIds.get(event.fieldId);
-          const capability = row.fieldCapabilities.find((field) => field.fieldId === event.fieldId);
-          const recovery = (
-            diagnostics: SaleReturnIncomingReplayDiagnostic[],
-          ): SaleReturnIncomingReplayRecovery => ({
-            eventIndex,
-            ...event,
-            baseline,
-            preview: cells(state),
-            diagnostics,
-          });
-          if (column === undefined || !capability?.allowed)
-            throw new SaleReturnIncomingReplayError(
-              422,
-              'unsupported-field',
-              capability?.reason ?? 'This field is not available in the saved calculation preview.',
-              recovery([
-                diagnostic(
-                  'unsupported-field',
-                  capability?.reason ?? 'The requested field has no supported preview action.',
-                ),
-              ]),
-            );
-          const configured = dto.configuration.columns.find((c) => c.id === event.fieldId)!;
-          const result = reduceSaleReturnIncoming(
-            state,
-            {
-              kind: 'leaveCell',
-              rowIdentity: row.rowIdentity,
-              column,
-              text: event.editorText,
-              context: {
-                currentRow:
-                  dto.rows.findIndex((candidate) => candidate.rowIdentity === row.rowIdentity) + 1,
-                clearing: false,
-                editorVisible: true,
-                committedColumnWidth: configured.nominalWidth,
-              },
-            },
-            dto.configuration.policy,
-          );
-          if (result.status === 'rejected')
-            throw new SaleReturnIncomingReplayError(
-              422,
-              'calculation-refused',
-              result.diagnostic.message,
-              recovery([
-                {
-                  code: result.diagnostic.code,
-                  fieldId: event.fieldId,
-                  message: result.diagnostic.message,
-                },
-              ]),
-            );
-          state = result.state;
-          aggregateRequired ||= result.aggregateRequired;
-          events.push({ ...event, status: result.status });
-        }
-        return {
-          contractVersion: dto.contractVersion,
-          scope: dto.scope,
-          voucherNo: dto.voucherNo,
-          replayVersion: dto.replayVersion,
-          documentVersion: dto.documentVersion,
-          configurationVersion: dto.configurationVersion,
-          rowIdentity: row.rowIdentity,
+      const row = matching[0]!;
+      const initial = states.get(row.rowIdentity);
+      if (
+        !initial ||
+        !dto.configuration.policy ||
+        !row.fieldCapabilities.some((field) => field.allowed)
+      )
+        throw new SaleReturnIncomingReplayError(
+          422,
+          'unsupported-state',
+          row.diagnostics[0]?.message ??
+            'This saved row is outside the supported calculation preview.',
+          { diagnostics: row.diagnostics },
+        );
+      const baseline = cells(initial);
+      let state = initial;
+      let aggregateRequired = false;
+      const events: SaleReturnIncomingReplayResult['events'] = [];
+      for (const [eventIndex, event] of input.events.entries()) {
+        const column = allowedIds.get(event.fieldId);
+        const capability = row.fieldCapabilities.find((field) => field.fieldId === event.fieldId);
+        const recovery = (
+          diagnostics: SaleReturnIncomingReplayDiagnostic[],
+        ): SaleReturnIncomingReplayRecovery => ({
+          eventIndex,
+          ...event,
           baseline,
           preview: cells(state),
-          events,
-          aggregateRequired,
-          capabilities: { canSaveNumeric: false as const },
-        };
-      },
-      { isolationLevel: 'RepeatableRead' },
-    );
+          diagnostics,
+        });
+        if (column === undefined || !capability?.allowed)
+          throw new SaleReturnIncomingReplayError(
+            422,
+            'unsupported-field',
+            capability?.reason ?? 'This field is not available in the saved calculation preview.',
+            recovery([
+              diagnostic(
+                'unsupported-field',
+                capability?.reason ?? 'The requested field has no supported preview action.',
+              ),
+            ]),
+          );
+        const configured = dto.configuration.columns.find((c) => c.id === event.fieldId)!;
+        const result = reduceSaleReturnIncoming(
+          state,
+          {
+            kind: 'leaveCell',
+            rowIdentity: row.rowIdentity,
+            column,
+            text: event.editorText,
+            context: {
+              currentRow:
+                dto.rows.findIndex((candidate) => candidate.rowIdentity === row.rowIdentity) + 1,
+              clearing: false,
+              editorVisible: true,
+              committedColumnWidth: configured.nominalWidth,
+            },
+          },
+          dto.configuration.policy,
+        );
+        if (result.status === 'rejected')
+          throw new SaleReturnIncomingReplayError(
+            422,
+            'calculation-refused',
+            result.diagnostic.message,
+            recovery([
+              {
+                code: result.diagnostic.code,
+                fieldId: event.fieldId,
+                message: result.diagnostic.message,
+              },
+            ]),
+          );
+        state = result.state;
+        aggregateRequired ||= result.aggregateRequired;
+        events.push({ ...event, status: result.status });
+      }
+      return {
+        contractVersion: dto.contractVersion,
+        scope: dto.scope,
+        voucherNo: dto.voucherNo,
+        replayVersion: dto.replayVersion,
+        documentVersion: dto.documentVersion,
+        configurationVersion: dto.configurationVersion,
+        rowIdentity: row.rowIdentity,
+        baseline,
+        preview: cells(state),
+        events,
+        aggregateRequired,
+        capabilities: { canSaveNumeric: false as const },
+      };
+    });
   } catch (error) {
     return errorBoundary(error);
   }

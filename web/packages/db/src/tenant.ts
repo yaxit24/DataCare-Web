@@ -12,6 +12,12 @@ export interface TenantTransactionOptions {
   maxWait?: number;
   timeout?: number;
   isolationLevel?: Prisma.TransactionIsolationLevel;
+  /**
+   * Transaction-local `statement_timeout` in milliseconds. Prisma checks `timeout` only between
+   * statements, so a statement waiting on a lock is not interrupted by it; PostgreSQL cancels such a
+   * statement at this limit. Bound in the same statement as the tenant, so it costs no extra round trip.
+   */
+  statementTimeoutMs?: number;
 }
 
 export async function withTenant<T>(
@@ -20,10 +26,26 @@ export async function withTenant<T>(
   fn: (tx: Tx) => Promise<T>,
   options?: TenantTransactionOptions,
 ): Promise<T> {
-  return prisma.$transaction(async (tx) => {
-    await tx.$executeRawUnsafe("SELECT set_config('app.tenant_id', $1, true)", tenantId);
-    return fn(tx);
-  }, options);
+  const { statementTimeoutMs, ...transactionOptions } = options ?? {};
+  if (
+    statementTimeoutMs !== undefined &&
+    (!Number.isInteger(statementTimeoutMs) || statementTimeoutMs <= 0)
+  )
+    throw new RangeError('statementTimeoutMs must be a positive whole number of milliseconds');
+  return prisma.$transaction(
+    async (tx) => {
+      if (statementTimeoutMs === undefined)
+        await tx.$executeRawUnsafe("SELECT set_config('app.tenant_id', $1, true)", tenantId);
+      else
+        await tx.$executeRawUnsafe(
+          "SELECT set_config('app.tenant_id', $1, true), set_config('statement_timeout', $2, true)",
+          tenantId,
+          String(statementTimeoutMs),
+        );
+      return fn(tx);
+    },
+    options === undefined ? undefined : transactionOptions,
+  );
 }
 
 /**

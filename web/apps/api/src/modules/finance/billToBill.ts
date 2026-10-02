@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx } from '../vouchers/numbering.js';
 import { postVoucherTx, assertBalanced, type LedgerLine } from '../posting/posting.js';
 
@@ -121,7 +121,7 @@ export async function listOpenBills(
   const party = String(acCode ?? '').trim();
   if (!party) throw new BillToBillValidationError('party account (acCode) is required');
   const tenantId = scope.tenantId;
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "CO_BOOK" AS "coBook", "VCH_NO" AS "vchNo",
               COALESCE(NULLIF("BILL_AMT"::text,'')::numeric,0)::float8   AS "billAmt",
@@ -171,7 +171,7 @@ export async function settleBills(prisma: any, input: BillSettleInput): Promise<
   const tenantId = scope.tenantId;
   const coCode = String(scope.coCode ?? '');
 
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     let settled = 0;
     let totalRec = 0;
     let totalKasar = 0;
@@ -374,7 +374,7 @@ export async function deleteBillSettlement(
   const coYear = String(scope.coYear ?? '').trim();
   const lcCode = scope.lcCode ?? '01';
 
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const header: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "AC_CODE","AC_NAME",COALESCE("REC_AMT",0)::float8 AS rec,
               COALESCE("KASAR_AMT",0)::float8 AS kasar,"HD_VCH_NO","MAIN_USER","VCH_DATE","VCH_TYPE"

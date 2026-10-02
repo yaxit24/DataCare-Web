@@ -1,3 +1,4 @@
+import type { Prisma } from '@prisma/client';
 import { withTenant, type Tx } from '@datacare/db';
 
 /**
@@ -159,36 +160,59 @@ export class TransactionDurations {
 
 export const transactionDurations = new TransactionDurations();
 
+/** The Prisma client a budgeted transaction runs on. */
+export type TxBudgetPrisma = Parameters<typeof withTenant>[0];
+/** The transaction client handed to a budgeted command. */
+export type { Tx };
+
+/** A budget class with an isolation level stricter or more explicit than PostgreSQL's default. */
+export interface TxProfile {
+  readonly budget: TxBudgetClass;
+  readonly isolationLevel: Prisma.TransactionIsolationLevel;
+}
+
+/** A read whose statements must all see one snapshot (PostgreSQL REPEATABLE READ). */
+export const SNAPSHOT_READ: TxProfile = Object.freeze({
+  budget: 'read',
+  isolationLevel: 'RepeatableRead',
+});
+/** One unit of work that must behave as if it ran alone (PostgreSQL SERIALIZABLE). */
+export const SERIALIZABLE_VOUCHER: TxProfile = Object.freeze({
+  budget: 'voucher',
+  isolationLevel: 'Serializable',
+});
+/** One unit of work that pins READ COMMITTED explicitly (the session-context commands). */
+export const READ_COMMITTED_VOUCHER: TxProfile = Object.freeze({
+  budget: 'voucher',
+  isolationLevel: 'ReadCommitted',
+});
+
 /**
  * Run `fn` in a tenant-scoped transaction under the declared budget, and record its duration and outcome.
- * A drop-in replacement for `withTenant(prisma, tenantId, fn)` in command coordinators.
+ * Every transaction in `apps/api/src` goes through here (`test/txBudgetCoverage.test.ts`), so none relies
+ * on Prisma's implicit 5-second default.
  */
 export async function withTxBudget<T>(
-  prisma: any,
+  prisma: TxBudgetPrisma,
   tenantId: string,
-  budgetClass: TxBudgetClass,
+  profile: TxBudgetClass | TxProfile,
   fn: (tx: Tx) => Promise<T>,
 ): Promise<T> {
+  const budgetClass = typeof profile === 'string' ? profile : profile.budget;
   const budget = txBudget(budgetClass);
   const started = performance.now();
   let outcome: TxOutcome = 'committed';
   try {
-    return await withTenant(
-      prisma,
-      tenantId,
-      async (tx) => {
-        // Prisma's timeout is only checked between statements. It cannot interrupt a statement already
-        // waiting on a lock: measured, a save queued behind another session's numbering lock waited for
-        // as long as that lock was held. statement_timeout makes PostgreSQL cancel such a statement
-        // within the budget. Transaction-local, so the pooled connection is unaffected afterwards.
-        await tx.$executeRawUnsafe(
-          "SELECT set_config('statement_timeout', $1, true)",
-          String(budget.timeout),
-        );
-        return fn(tx);
-      },
-      budget,
-    );
+    // Prisma's timeout is only checked between statements. It cannot interrupt a statement already
+    // waiting on a lock: measured, a save queued behind another session's numbering lock waited for as
+    // long as that lock was held. statement_timeout makes PostgreSQL cancel such a statement within the
+    // budget. Transaction-local, so the pooled connection is unaffected afterwards.
+    return await withTenant(prisma, tenantId, fn, {
+      timeout: budget.timeout,
+      maxWait: budget.maxWait,
+      statementTimeoutMs: budget.timeout,
+      ...(typeof profile === 'string' ? {} : { isolationLevel: profile.isolationLevel }),
+    });
   } catch (error) {
     outcome = isTransactionTimeout(error) ? 'timeout' : 'rolled_back';
     throw error;

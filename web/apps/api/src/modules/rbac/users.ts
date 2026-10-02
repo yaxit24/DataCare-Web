@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { assertStrongPassword, hashPassword } from '../auth/password.js';
 import { FORM_CATALOG } from './formCatalog.js';
 
@@ -140,7 +140,7 @@ export async function resolveRole(
   coCode: string,
   loginName: string,
 ): Promise<string | null> {
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const rows: { LOGIN_CATG: string | null }[] = await tx.$queryRawUnsafe(
       'SELECT "LOGIN_CATG" FROM "LOGIN_MAST" WHERE "CO_CODE"=$1 AND "LOGIN_NAME"=$2 LIMIT 1',
       coCode,
@@ -167,7 +167,7 @@ export async function listUsers(
   tenantId: string,
   coCode?: string,
 ): Promise<UserRow[]> {
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     // The rights matrix is stored in LOGIN_MAST.USER_UPDATE/USER_DELETE/USER_PRINT (Y/N) — the same
     // columns auth.service.rightsOf reads. They are part of the desktop schema but a deployment may
     // predate them, so probe information_schema first: selecting a missing column raises Postgres
@@ -230,7 +230,7 @@ export async function createUser(
 
   const pwdHash = await hashPassword(password);
 
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const dup: unknown[] = await tx.$queryRawUnsafe(
       'SELECT 1 FROM "LOGIN_MAST" WHERE "CO_CODE"=$1 AND "LOGIN_NAME"=$2 LIMIT 1',
       coCode,
@@ -290,7 +290,7 @@ export async function setUserRole(
   if (!role) invalid.push('role');
   if (invalid.length) throw new UserValidationError(invalid);
 
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const affected: number = coCode
       ? await tx.$executeRawUnsafe(
           'UPDATE "LOGIN_MAST" SET "LOGIN_CATG"=$1 WHERE "LOGIN_NAME"=$2 AND "CO_CODE"=$3',
@@ -340,7 +340,7 @@ export async function setUserRights(
   const coCode = (scope.coCode ?? '').trim();
   const setCatg = p.catg !== undefined && p.catg !== null && String(p.catg).trim() !== '';
 
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     if (setCatg) {
       await tx.$executeRawUnsafe(
         'UPDATE "LOGIN_MAST" SET "USER_UPDATE"=$1,"USER_DELETE"=$2,"USER_PRINT"=$3,"LOGIN_CATG"=$4 WHERE "CO_CODE"=$5 AND "LOGIN_NAME"=$6',

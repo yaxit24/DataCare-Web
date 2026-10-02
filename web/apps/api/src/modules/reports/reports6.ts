@@ -1,5 +1,5 @@
 import { dateWhere } from './reports.js';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import type { ReportScope, ListReport } from './reports.js';
 import { barTagAvailableSql } from '../shared/stockSql.js';
 import { applyFilters } from './reportFilters.js';
@@ -36,7 +36,7 @@ const NN = (c: string): string => `coalesce(NULLIF(${c}::text,'')::numeric,0)`;
  * filter correctly returns an empty register (totals { count: 0, total: 0 }).
  */
 export async function purchaseReturnRegister(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const yr = s.coYear ? ' AND p."CO_YEAR"=$2' : '';
     const params: unknown[] = s.coYear ? [s.coCode, s.coYear] : [s.coCode];
     // Voucher-date window; appended after params so the positional indices are right.
@@ -86,7 +86,7 @@ export async function purchaseReturnRegister(prisma: any, s: ReportScope): Promi
  * "JASHRAJ PG…" → toAc "JASHRAJ DHAKAN", amount 11957.00.
  */
 export async function contraRegister(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const yr = s.coYear ? ' AND d."CO_YEAR"=$2' : '';
     const params: unknown[] = s.coYear ? [s.coCode, s.coYear] : [s.coCode];
     // Voucher-date window; appended after params so the positional indices are right.
@@ -134,7 +134,7 @@ export async function contraRegister(prisma: any, s: ReportScope): Promise<ListR
  * Live sanity (CO_CODE='01'): top area VISAVADAR ≈ 4542951.00 across 154 bills.
  */
 export async function areaOutstanding(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const yr = s.coYear ? ' AND b."CO_YEAR"=$2' : '';
     const params: unknown[] = s.coYear ? [s.coCode, s.coYear] : [s.coCode];
     const dt = dateWhere(s, 'b."VCH_DATE"', params);
@@ -175,7 +175,7 @@ export async function areaOutstanding(prisma: any, s: ReportScope): Promise<List
  * Live sanity (CO_CODE='01'): group 925 ≈ 471 tags / netWt 7381.890 / fine 7280.320 (top group).
  */
 export async function itemGroupStock(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     // BAR_DETL d and ITEM_MAST i are real outer LEFT JOINs; BAR_DETL carries no EMP_CODE.
     const params: unknown[] = [s.coCode];
     const fl = applyFilters('item-group-stock', s.filters, params);

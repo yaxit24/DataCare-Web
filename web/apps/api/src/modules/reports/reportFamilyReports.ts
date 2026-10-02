@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { applyFilters } from './reportFilters.js';
 import type { ReportScope } from './reports.js';
 
@@ -163,7 +163,7 @@ export async function approvalReport(
   s: ReportScope,
   options: ReportFamilyOptions<ApprovalReportMode> = {},
 ): Promise<{ rows: LineReportRow[] }> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const mode = approvalMode(options.mode);
     const spec = approvalModes[mode];
     const params: unknown[] = [];
@@ -222,7 +222,7 @@ export async function karigarReport(
   s: ReportScope,
   options: ReportFamilyOptions<KarigarReportMode> = {},
 ): Promise<{ rows: LineReportRow[] }> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const mode = karigarMode(options.mode);
     const spec = karigarModes[mode];
     const params: unknown[] = [];
@@ -320,7 +320,7 @@ export async function repairReport(
   s: ReportScope,
   options: ReportFamilyOptions<RepairReportMode> = {},
 ): Promise<{ rows: LineReportRow[] }> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const mode = repairMode(options.mode);
     const spec = repairModes[mode];
     const params: unknown[] = [];
@@ -411,7 +411,7 @@ export async function vpReport(
   s: ReportScope,
   options: ReportFamilyOptions<VpReportMode> = {},
 ): Promise<{ rows: VpReportRow[] }> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const mode = vpMode(options.mode);
     const spec = vpModes[mode];
     const params: unknown[] = [];
@@ -546,7 +546,7 @@ export async function bullionReport(
   s: ReportScope,
   options: ReportFamilyOptions<BullionReportMode> = {},
 ): Promise<{ rows: BullionReportRow[] }> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const mode = bullionMode(options.mode);
     const spec = bullionModes[mode];
     const params: unknown[] = [];

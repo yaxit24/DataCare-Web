@@ -5,7 +5,7 @@ import {
   type KarigarRojmelLine,
   type RojmelRow,
 } from '../shared/rojmel.js';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { resolveLiveTagIdentityTx } from '../stock/stock.js';
 import {
   formatVoucherNo,
@@ -642,7 +642,7 @@ export async function issueKarigar(
   const fineIssued = round3(input.lines.reduce((sum, line) => sum + issueFine(line), 0));
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
 
-  const vchNo = await withTenant(prisma, tenantId, async (tx: any) => {
+  const vchNo = await withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const policy = await karigarBookPolicyTx(tx, scope);
     assertKarigarBookGuard(scope, policy, 'karigar');
     const hiddenVoucherNo = await nextHiddenVoucherNoTx(tx, scope);
@@ -801,7 +801,7 @@ export async function receiveKarigar(
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
   const inter = !!input.interState;
 
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const policy = await karigarBookPolicyTx(tx, scope);
     assertKarigarBookGuard(scope, policy, workflow.guard);
     const inoutType = workflow.inoutType(policy) || INOUT_RECEIPT;
@@ -1026,7 +1026,7 @@ export async function karigarMetalBalance(
   scope: VoucherScope,
   karigarAc: string,
 ): Promise<number> {
-  return withTenant(prisma, scope.tenantId, (tx: any) => balanceTx(tx, scope, karigarAc));
+  return withTxBudget(prisma, scope.tenantId, 'read', (tx: any) => balanceTx(tx, scope, karigarAc));
 }
 
 export interface KarigarLifecycleInput extends ReceiveInput {
@@ -1466,7 +1466,7 @@ export async function getKarigar(
 ) {
   const scope = completeScope(scopeInput);
   const vchNo = formatVoucherNo(vchNoInput);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const headers: Record<string, unknown>[] = await tx.$queryRawUnsafe(
       `SELECT *,to_char("VCH_TIME",'HH24:MI:SS.MS') AS "VCH_CLOCK" FROM "KR_DATA"
        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
@@ -1593,7 +1593,7 @@ export async function editKarigar(
   const scope = completeScope(input.scope);
   const vchNo = formatVoucherNo(input.vchNo);
   const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const prior = await persistedVoucherHeaderTx(tx, {
       table: 'KR_DATA',
       scope,
@@ -1855,7 +1855,7 @@ export async function deleteKarigar(
 ): Promise<{ reversed: true }> {
   const scope = completeScope({ ...input.scope, coBook: input.scope.coBook ?? input.book });
   const vchNo = formatVoucherNo(input.vchNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const h = await persistedVoucherHeaderTx(tx, {
       table: 'KR_DATA',
       scope,

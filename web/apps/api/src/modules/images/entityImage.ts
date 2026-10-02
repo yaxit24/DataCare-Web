@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget, SNAPSHOT_READ } from '../shared/txBudget.js';
 import {
   lockImageRevisionTx,
   readImageRevisionTx,
@@ -230,29 +230,24 @@ async function entityImageSnapshotTx(tx: any, k: NormalKey, requireParent?: bool
 /** A single snapshot includes absent/unavailable bytes and a version suitable for explicit replacement. */
 export async function getEntityImageState(prisma: any, key: EntityImageKey) {
   const k = normalise(key);
-  return withTenant(
-    prisma,
-    k.tenantId,
-    async (tx: any) => {
-      const snapshot = await entityImageSnapshotTx(tx, k, key.requireDesignParent);
-      const row = snapshot.rows[0];
-      return {
-        version: snapshot.version,
-        image: await imagePreview(
-          row
-            ? {
-                bytes: Buffer.from(row.IMAGE_BYTES ?? []),
-                mimeType: String(row.MIME_TYPE ?? ''),
-                size: Number(row.IMAGE_SIZE),
-                validType: snapshot.rows.length === 1 && row.IMAGE_TYPE === k.imageType,
-              }
-            : null,
-          snapshot.index.length > 0,
-        ),
-      };
-    },
-    { isolationLevel: 'RepeatableRead' },
-  );
+  return withTxBudget(prisma, k.tenantId, SNAPSHOT_READ, async (tx: any) => {
+    const snapshot = await entityImageSnapshotTx(tx, k, key.requireDesignParent);
+    const row = snapshot.rows[0];
+    return {
+      version: snapshot.version,
+      image: await imagePreview(
+        row
+          ? {
+              bytes: Buffer.from(row.IMAGE_BYTES ?? []),
+              mimeType: String(row.MIME_TYPE ?? ''),
+              size: Number(row.IMAGE_SIZE),
+              validType: snapshot.rows.length === 1 && row.IMAGE_TYPE === k.imageType,
+            }
+          : null,
+        snapshot.index.length > 0,
+      ),
+    };
+  });
 }
 
 /** Store or replace an entity's image. TAG entities also keep the desktop `TAG_IMAGE_DATA` index in step. */
@@ -264,7 +259,7 @@ export async function saveEntityImage(
   const k = normalise(key);
   const { bytes, mimeType } = decodeEntityImage(input);
   if (input.version !== undefined) await validateImagePixels(bytes, mimeType);
-  await withTenant(prisma, k.tenantId, async (tx: any) => {
+  await withTxBudget(prisma, k.tenantId, 'voucher', async (tx: any) => {
     if (!(await designParentExists(tx, k, key.requireDesignParent))) {
       throw new EntityImageError('save the design in this company before uploading its image');
     }
@@ -319,7 +314,7 @@ export async function getEntityImage(
   key: EntityImageKey,
 ): Promise<EntityImageRecord | null> {
   const k = normalise(key);
-  return withTenant(prisma, k.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, k.tenantId, 'read', async (tx: any) => {
     if (!(await designParentExists(tx, k, key.requireDesignParent))) return null;
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "ENTITY_TYPE","ENTITY_KEY","INSTANCE","IMAGE_TYPE","MIME_TYPE","IMAGE_SIZE","IMAGE_BYTES",
@@ -355,7 +350,7 @@ export async function deleteEntityImage(
   version?: string,
 ): Promise<{ deleted: boolean }> {
   const k = normalise(key);
-  return withTenant(prisma, k.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, k.tenantId, 'voucher', async (tx: any) => {
     if (!(await designParentExists(tx, k, key.requireDesignParent))) {
       if (version !== undefined)
         throw new EntityImageError('save the design in this company before editing its image');
@@ -400,7 +395,7 @@ export async function listEntityImageKeys(
   scope: { tenantId: string; coCode: string; lcCode?: string; entityType?: string },
   entityKeys?: readonly string[],
 ): Promise<{ entityType: string; entityKey: string; instance: number; size: number }[]> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [scope.tenantId, scope.coCode];
     let filter = '';
     if (scope.lcCode != null) {

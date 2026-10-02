@@ -1,5 +1,5 @@
 import { dateWhere } from './reports.js';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import type { ReportScope, ListReport } from './reports.js';
 
 /**
@@ -35,7 +35,7 @@ const NN = (c: string): string => `coalesce(NULLIF(${c}::text,'')::numeric,0)`;
  * balance −8781900.00.
  */
 export async function trialBalanceFull(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const yr = s.coYear ? ' AND d."CO_YEAR"=$2' : '';
     const params: unknown[] = s.coYear ? [s.coCode, s.coYear] : [s.coCode];
     const dt = dateWhere(s, 'd."VCH_DATE"', params);
@@ -76,7 +76,7 @@ export async function trialBalanceFull(prisma: any, s: ReportScope): Promise<Lis
  * 519.923, fine 535.382, amount 4007292.00.
  */
 export async function salesByGroup(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT coalesce(NULLIF(i."GR_CODE",''), left(d."IT_CODE", 2), '(none)') AS "group",
               count(*)::int AS lines,
@@ -114,7 +114,7 @@ export async function salesByGroup(prisma: any, s: ReportScope): Promise<ListRep
  * 2024-03-31 — inAmt 9669228.10, outAmt 3109303.88, net 6559924.22.
  */
 export async function cashDaySummary(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT d."VCH_DATE" AS date,
               sum(${NN('d."DR_AMT"')}) AS "inAmt",

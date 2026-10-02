@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { applyFilters } from './reportFilters.js';
 import type { ReportScope } from './reports.js';
 
@@ -82,7 +82,7 @@ export async function dhrnLoanReport(
   s: ReportScope,
   options: DhrnLoanReportOptions,
 ): Promise<{ rows: DhrnLoanReportRow[] }> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const { fromDate, toDate } = range(s);
     const mode = options.mode === 'pending' ? 'pending' : 'register';
     const params: unknown[] = [

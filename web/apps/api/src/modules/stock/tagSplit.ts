@@ -9,7 +9,7 @@
  *
  * Contract: parity-plan-2026-09-10/evidence/implementation-2026-09-30-n19/contract.md.
  */
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import {
   tagSplitBalance,
   tagSplitConserves,
@@ -495,7 +495,7 @@ async function inTransaction<T>(
   fn: (tx: any) => Promise<T>,
 ): Promise<T> {
   try {
-    return await withTenant(prisma, tenantId, fn, { maxWait: 10_000, timeout: 30_000 });
+    return await withTxBudget(prisma, tenantId, 'heavy', fn);
   } catch (error) {
     if (isConflict(error)) {
       throw new TagSplitConflictError(
@@ -936,7 +936,7 @@ export async function getTagSplit(
 ): Promise<Record<string, unknown>> {
   const scope = completeScope(scopeInput);
   const voucherNo = formatVoucherNo(vchNoInput);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const book = await resolveBookTx(tx, scope);
     const header: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       // LBR_DATA's primary key is the full voucher key, so at most one row matches — no row_id ordering (the
@@ -996,7 +996,7 @@ export async function listTagSplit(
   vouchers: Array<Record<string, unknown>>;
 }> {
   const scope = completeScope(scopeInput);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const book = await resolveBookTx(tx, scope);
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT a."VCH_NO", a."VCH_DATE"::text AS "VCH_DAY", b."AC_NAME", a."VCH_DESC", a."MAIN_USER",
@@ -1041,7 +1041,7 @@ export async function tagSplitSource(
   const scope = completeScope(scopeInput);
   const tagNo = typedText(request.tagNo, 15);
   if (!tagNo || tagNo === 'N') throw new TagSplitValidationError('enter a tag number');
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const key: TagKey = {
       CO_CODE: scope.coCode,
       LC_CODE: scope.lcCode,

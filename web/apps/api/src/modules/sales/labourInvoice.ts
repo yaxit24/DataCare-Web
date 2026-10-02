@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import {
   postVoucherTx,
@@ -523,7 +523,7 @@ export async function createLabourInvoice(
       total: grand,
     };
   };
-  return lifecycle ? run(lifecycle.tx) : withTenant(prisma, tenantId, run);
+  return lifecycle ? run(lifecycle.tx) : withTxBudget(prisma, tenantId, 'voucher', run);
 }
 
 type CompleteLabourScope = VoucherScope & { coYear: string; coBook: string };
@@ -563,7 +563,7 @@ export async function getLabourInvoice(
 ): Promise<Record<string, unknown>> {
   completeLabourScope(scope);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const p = labourParams(scope, voucherNo);
     const h: any[] = await tx.$queryRawUnsafe(
       `SELECT a."VCH_NO",a."VCH_DATE"::text,a."VCH_TIME",a."BILL_NO",a."HD_VCH_NO",a."MAIN_USER",a."AC_CODE",m."AC_NAME",a."SL_NET_AMT",a."TAX_PRC",a."LBR_DR_AMT",a."LBR_TAX_PRC",a."TOT_DR_AMT",a."CR_FINE",a."SL_CASH_AMT",a."SL_CHQ_AMT",a."SL_CARD_AMT",a."UPI_AMT",a."SL_KASAR_AMT",a."VCH_DESC" FROM "LBR_DATA" a LEFT JOIN "AC_MAST" m ON m.tenant_id=a.tenant_id AND m."CO_CODE"=a."CO_CODE" AND m."AC_CODE"=a."AC_CODE" WHERE a.tenant_id=$1 AND a."CO_CODE"=$2 AND a."LC_CODE"=$3 AND a."CO_YEAR"=$4 AND a."CO_BOOK"=$5 AND a."VCH_NO"=$6`,
@@ -619,7 +619,7 @@ export async function editLabourInvoice(
   const scope = input.scope,
     voucherNo = formatVoucherNo(requestedVoucherNo),
     requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const persisted = await persistedVoucherHeaderTx(tx, {
       table: 'LBR_DATA',
       scope,
@@ -660,7 +660,7 @@ export async function deleteLabourInvoice(
       CO_BOOK: scope.coBook,
       VCH_NO: voucherNo,
     };
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const h = await persistedVoucherHeaderTx(tx, {
       table: 'LBR_DATA',
       scope,

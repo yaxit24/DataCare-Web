@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import type { PrismaClient } from '@prisma/client';
-import { withTenant, type Tx } from '@datacare/db';
+import { withTxBudget, SNAPSHOT_READ, type Tx } from '../shared/txBudget.js';
 import type {
   SalesOrderDesignList,
   SalesOrderDesignOption,
@@ -148,34 +148,29 @@ export async function listSalesOrderDesigns(
   if (input.search != null && (typeof input.search !== 'string' || input.search.length > 100))
     throw new SalesOrderDesignError('Design search must contain at most 100 characters.');
   scopeValues(scope, input.itCode);
-  return withTenant(
-    prisma,
-    scope.tenantId,
-    async (tx) => {
-      await salesScopeTx(tx, scope);
-      const product = await productTx(tx, scope, input.itCode, false);
-      const thirdColumnLabel = await thirdColumnTx(tx, scope);
-      const rows = await tx.$queryRawUnsafe<SourceRow[]>(
-        `SELECT ${columns} ${from} WHERE d.tenant_id=$1 AND d."CO_CODE"=$2 AND d."PR_CODE"=$3
+  return withTxBudget(prisma, scope.tenantId, SNAPSHOT_READ, async (tx) => {
+    await salesScopeTx(tx, scope);
+    const product = await productTx(tx, scope, input.itCode, false);
+    const thirdColumnLabel = await thirdColumnTx(tx, scope);
+    const rows = await tx.$queryRawUnsafe<SourceRow[]>(
+      `SELECT ${columns} ${from} WHERE d.tenant_id=$1 AND d."CO_CODE"=$2 AND d."PR_CODE"=$3
        AND ($4='' OR strpos(lower(concat_ws(' ', d."BOOK_NAME",d."DESIGN_NO",${thirdColumnLabel === 'Remark' ? 'd."DIE_NO"' : 'p."PR_NAME"'},d."ITM_SIZE",d."KR_NAME")),lower($4))>0)
        ORDER BY d."BOOK_NAME",d."DESIGN_NO",d."SR_NO" LIMIT $5 OFFSET $6`,
-        scope.tenantId,
-        scope.coCode,
-        product,
-        (input.search ?? '').trim(),
-        limit + 1,
-        offset,
-      );
-      return {
-        rows: rows.slice(0, limit).map((row) => option(scope, input.itCode, row)),
-        offset,
-        limit,
-        hasMore: rows.length > limit,
-        thirdColumnLabel,
-      };
-    },
-    { isolationLevel: 'RepeatableRead' },
-  );
+      scope.tenantId,
+      scope.coCode,
+      product,
+      (input.search ?? '').trim(),
+      limit + 1,
+      offset,
+    );
+    return {
+      rows: rows.slice(0, limit).map((row) => option(scope, input.itCode, row)),
+      offset,
+      limit,
+      hasMore: rows.length > limit,
+      thirdColumnLabel,
+    };
+  });
 }
 function validateRef(ref: SalesOrderDesignSourceRef) {
   if (
@@ -242,22 +237,17 @@ export async function getSalesOrderDesignImage(
   scope: OrderImageScope,
   input: { itCode: string; source: SalesOrderDesignSourceRef },
 ): Promise<ResolvedOrderImage> {
-  return withTenant(
-    prisma,
-    scope.tenantId,
-    async (tx) => {
-      await salesScopeTx(tx, scope);
-      const selected = await resolveSalesOrderDesignTx(tx, scope, input);
-      if (!selected.designImageId?.trim() || selected.designImageId.trim() === 'N')
-        return { state: 'absent' };
-      return resolveOrderImageTx(
-        tx,
-        scope,
-        'SALES ORDER',
-        {},
-        { DESIGN_IMG_ID: selected.designImageId },
-      );
-    },
-    { isolationLevel: 'RepeatableRead' },
-  );
+  return withTxBudget(prisma, scope.tenantId, SNAPSHOT_READ, async (tx) => {
+    await salesScopeTx(tx, scope);
+    const selected = await resolveSalesOrderDesignTx(tx, scope, input);
+    if (!selected.designImageId?.trim() || selected.designImageId.trim() === 'N')
+      return { state: 'absent' };
+    return resolveOrderImageTx(
+      tx,
+      scope,
+      'SALES ORDER',
+      {},
+      { DESIGN_IMG_ID: selected.designImageId },
+    );
+  });
 }

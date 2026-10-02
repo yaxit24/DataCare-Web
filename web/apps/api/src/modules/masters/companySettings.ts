@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 /**
  * Company settings provisioning — `CO_SET_NEW`, the second company-configuration surface.
@@ -144,7 +144,7 @@ export async function provisionCompanySettings(
   coCode: string,
   options: ProvisionCompanySettingsOptions = {},
 ): Promise<number> {
-  return withTenant(prisma, tenantId, (tx: any) =>
+  return withTxBudget(prisma, tenantId, 'heavy', (tx: any) =>
     provisionCompanySettingsTx(tx, tenantId, coCode, options),
   );
 }

@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { withTenant } from '@datacare/db';
+import { withTxBudget, SERIALIZABLE_VOUCHER, SNAPSHOT_READ } from '../shared/txBudget.js';
 import { resolveBookPolicyTx } from '../shared/bookPolicy.js';
 import { assertPeriodOpen } from '../posting/posting.js';
 import { formatVoucherNo } from '../vouchers/numbering.js';
@@ -439,11 +439,11 @@ export async function getSavedSaleReturnIncoming(
   requestedVoucherNo: string | number,
 ): Promise<SavedSaleReturnIncoming> {
   const voucherNo = scopeKey(scope, requestedVoucherNo)!;
-  return withTenant(
+  return withTxBudget(
     prisma,
     scope.tenantId,
+    SNAPSHOT_READ,
     async (tx: any) => (await snapshot(tx, scope, voucherNo, false)).dto,
-    { isolationLevel: 'RepeatableRead' },
   );
 }
 export async function listSavedSaleReturnIncoming(
@@ -451,35 +451,30 @@ export async function listSavedSaleReturnIncoming(
   scope: SavedSaleReturnScope,
 ): Promise<{ rows: SavedSaleReturnListRow[] }> {
   scopeKey(scope);
-  return withTenant(
-    prisma,
-    scope.tenantId,
-    async (tx: any) => {
-      await configured(tx, scope);
-      const rows: ObservedRow[] = await tx.$queryRawUnsafe(
-        `SELECT ${projection} FROM "SL_DATA" t WHERE t.tenant_id=$1 AND t."CO_CODE"=$2 AND t."LC_CODE"=$3 AND t."CO_YEAR"=$4 AND t."CO_BOOK"=$5
+  return withTxBudget(prisma, scope.tenantId, SNAPSHOT_READ, async (tx: any) => {
+    await configured(tx, scope);
+    const rows: ObservedRow[] = await tx.$queryRawUnsafe(
+      `SELECT ${projection} FROM "SL_DATA" t WHERE t.tenant_id=$1 AND t."CO_CODE"=$2 AND t."LC_CODE"=$3 AND t."CO_YEAR"=$4 AND t."CO_BOOK"=$5
        AND EXISTS (SELECT 1 FROM "SL_DETL_RTN" r WHERE r.tenant_id=t.tenant_id AND r."CO_CODE"=t."CO_CODE" AND r."LC_CODE"=t."LC_CODE" AND r."CO_YEAR"=t."CO_YEAR" AND r."CO_BOOK"=t."CO_BOOK" AND r."VCH_NO"=t."VCH_NO")
        ORDER BY t."VCH_DATE" DESC NULLS LAST,t."VCH_NO" DESC,t.row_id DESC LIMIT 100`,
-        scope.tenantId,
-        scope.coCode,
-        scope.lcCode,
-        scope.coYear,
-        scope.coBook,
-      );
-      return {
-        rows: rows.map(({ raw }) => ({
-          voucherNo: raw.VCH_NO ?? '',
-          raw,
-          display: {
-            customer: raw.AC_NAME ?? raw.AC_CODE ?? '',
-            date: raw.VCH_DATE ?? '',
-            billNo: raw.BILL_NO ?? '',
-          },
-        })),
-      };
-    },
-    { isolationLevel: 'RepeatableRead' },
-  );
+      scope.tenantId,
+      scope.coCode,
+      scope.lcCode,
+      scope.coYear,
+      scope.coBook,
+    );
+    return {
+      rows: rows.map(({ raw }) => ({
+        voucherNo: raw.VCH_NO ?? '',
+        raw,
+        display: {
+          customer: raw.AC_NAME ?? raw.AC_CODE ?? '',
+          date: raw.VCH_DATE ?? '',
+          billNo: raw.BILL_NO ?? '',
+        },
+      })),
+    };
+  });
 }
 
 function object(value: unknown, label: string): Record<string, unknown> {
@@ -556,96 +551,90 @@ export async function updateSavedSaleReturnMetadata(
   const voucherNo = scopeKey(scope, requestedVoucherNo)!;
   const patch = validatePatch(input);
   try {
-    return await withTenant(
-      prisma,
-      scope.tenantId,
-      async (tx: any) => {
-        const saved = await snapshot(tx, scope, voucherNo, true);
-        if (saved.dto.version !== patch.version)
+    return await withTxBudget(prisma, scope.tenantId, SERIALIZABLE_VOUCHER, async (tx: any) => {
+      const saved = await snapshot(tx, scope, voucherNo, true);
+      if (saved.dto.version !== patch.version)
+        throw new SavedSaleReturnError(
+          409,
+          'version-conflict',
+          'The saved Return changed. Reload before retrying.',
+        );
+      const updates: Array<{ srNo: string; column: 'HM_ID' | 'ITM_REMARK'; value: string }> = [];
+      for (const row of patch.lines ?? []) {
+        const prior = saved.dto.lines.find((line) => line.identity.srNo === row.identity.srNo);
+        if (!prior || canonical(prior.identity) !== canonical(row.identity))
           throw new SavedSaleReturnError(
             409,
-            'version-conflict',
-            'The saved Return changed. Reload before retrying.',
+            'identity-conflict',
+            'The saved incoming row identity changed. Reload before retrying.',
           );
-        const updates: Array<{ srNo: string; column: 'HM_ID' | 'ITM_REMARK'; value: string }> = [];
-        for (const row of patch.lines ?? []) {
-          const prior = saved.dto.lines.find((line) => line.identity.srNo === row.identity.srNo);
-          if (!prior || canonical(prior.identity) !== canonical(row.identity))
-            throw new SavedSaleReturnError(
-              409,
-              'identity-conflict',
-              'The saved incoming row identity changed. Reload before retrying.',
-            );
-          for (const [field, column] of [
-            ['huid', 'HM_ID'],
-            ['description', 'ITM_REMARK'],
-          ] as const) {
-            if (!Object.hasOwn(row.changes, field)) continue;
-            const capability = prior.capabilities[field];
-            if (!capability.allowed)
-              throw new SavedSaleReturnError(
-                422,
-                'unsupported-state',
-                capability.reason ?? 'This metadata change is not supported.',
-              );
-            const value = row.changes[field]!;
-            if (prior.raw[column] !== value)
-              updates.push({ srNo: row.identity.srNo, column, value });
-          }
-        }
-        let employee: string | undefined;
-        if (patch.header) {
-          const capability = saved.dto.header.capabilities.employeeCode;
+        for (const [field, column] of [
+          ['huid', 'HM_ID'],
+          ['description', 'ITM_REMARK'],
+        ] as const) {
+          if (!Object.hasOwn(row.changes, field)) continue;
+          const capability = prior.capabilities[field];
           if (!capability.allowed)
             throw new SavedSaleReturnError(
               422,
               'unsupported-state',
-              capability.reason ?? 'Employee changes are not supported.',
+              capability.reason ?? 'This metadata change is not supported.',
             );
-          employee = patch.header.employeeCode;
-          if (employee !== employee.trim())
-            deny('Employee code must not contain surrounding spaces.');
-          if (!employee) {
-            if (trimmed(saved.settings[0]?.EMP_CODE_MANDATORY) === 'Y')
-              deny('An employee is required by company configuration.');
-          } else {
-            const employees: unknown[] = await tx.$queryRawUnsafe(
-              `SELECT 1 FROM "EMP_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "EMP_CODE"::text=$3 FOR SHARE`,
-              scope.tenantId,
-              scope.coCode,
-              employee,
-            );
-            if (employees.length !== 1)
-              deny('Select one unambiguous employee belonging to this company.');
-          }
+          const value = row.changes[field]!;
+          if (prior.raw[column] !== value) updates.push({ srNo: row.identity.srNo, column, value });
         }
-        for (const update of updates) {
-          const changed = await tx.$executeRawUnsafe(
-            `UPDATE "SL_DETL_RTN" t SET "${update.column}"=$7 WHERE ${where} AND t."SR_NO"::text=$8`,
-            ...params(scope, voucherNo),
-            update.value,
-            update.srNo,
+      }
+      let employee: string | undefined;
+      if (patch.header) {
+        const capability = saved.dto.header.capabilities.employeeCode;
+        if (!capability.allowed)
+          throw new SavedSaleReturnError(
+            422,
+            'unsupported-state',
+            capability.reason ?? 'Employee changes are not supported.',
           );
-          if (changed !== 1)
-            throw new SavedSaleReturnError(
-              409,
-              'identity-conflict',
-              'The saved incoming row changed. Reload before retrying.',
-            );
+        employee = patch.header.employeeCode;
+        if (employee !== employee.trim())
+          deny('Employee code must not contain surrounding spaces.');
+        if (!employee) {
+          if (trimmed(saved.settings[0]?.EMP_CODE_MANDATORY) === 'Y')
+            deny('An employee is required by company configuration.');
+        } else {
+          const employees: unknown[] = await tx.$queryRawUnsafe(
+            `SELECT 1 FROM "EMP_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "EMP_CODE"::text=$3 FOR SHARE`,
+            scope.tenantId,
+            scope.coCode,
+            employee,
+          );
+          if (employees.length !== 1)
+            deny('Select one unambiguous employee belonging to this company.');
         }
-        if (employee !== undefined) {
-          for (const table of ['SL_DATA', 'SL_DETL_RTN', 'BAR_DATA'] as const) {
-            await tx.$executeRawUnsafe(
-              `UPDATE "${table}" t SET "EMP_CODE"=$7 WHERE ${where} AND t."EMP_CODE" IS DISTINCT FROM $7`,
-              ...params(scope, voucherNo),
-              employee,
-            );
-          }
+      }
+      for (const update of updates) {
+        const changed = await tx.$executeRawUnsafe(
+          `UPDATE "SL_DETL_RTN" t SET "${update.column}"=$7 WHERE ${where} AND t."SR_NO"::text=$8`,
+          ...params(scope, voucherNo),
+          update.value,
+          update.srNo,
+        );
+        if (changed !== 1)
+          throw new SavedSaleReturnError(
+            409,
+            'identity-conflict',
+            'The saved incoming row changed. Reload before retrying.',
+          );
+      }
+      if (employee !== undefined) {
+        for (const table of ['SL_DATA', 'SL_DETL_RTN', 'BAR_DATA'] as const) {
+          await tx.$executeRawUnsafe(
+            `UPDATE "${table}" t SET "EMP_CODE"=$7 WHERE ${where} AND t."EMP_CODE" IS DISTINCT FROM $7`,
+            ...params(scope, voucherNo),
+            employee,
+          );
         }
-        return (await snapshot(tx, scope, voucherNo, true)).dto;
-      },
-      { isolationLevel: 'Serializable', timeout: 20000 },
-    );
+      }
+      return (await snapshot(tx, scope, voucherNo, true)).dto;
+    });
   } catch (error: any) {
     if (error instanceof SavedSaleReturnError) throw error;
     if (

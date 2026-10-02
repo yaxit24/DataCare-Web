@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { billFooter, docShell, esc, money, num, wt, type DocMeta } from '../documents/docChrome.js';
 import { getKarigarRepairIssue, type KarigarRepairIssueView } from './repairKarigarIssue.js';
 import type { VoucherScope } from '../vouchers/numbering.js';
@@ -10,7 +10,7 @@ export async function karigarRepairIssueDocumentData(
 ): Promise<{ issue: KarigarRepairIssueView; company: any; party: any } | null> {
   const issue = await getKarigarRepairIssue(prisma, scope, vchNo);
   if (!issue) return null;
-  const context = await withTenant(prisma, scope.tenantId, async (tx: any) => {
+  const context = await withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const companies: any[] = await tx.$queryRawUnsafe(
       `SELECT * FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 LIMIT 1`,
       scope.tenantId,

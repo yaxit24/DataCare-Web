@@ -1,5 +1,5 @@
 import { round } from '@datacare/core';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { applyFilters } from './reportFilters.js';
 import type { ListReport, ReportScope } from './reports.js';
 
@@ -55,7 +55,7 @@ export async function designMoveReport(
   const mode = modeFrom(options.mode);
   const tagNo = String(options.tagNo ?? '').trim();
   const designNo = String(options.designNo ?? '').trim();
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [s.coCode, s.lcCode ?? '', s.coYear ?? ''];
     const where = scopeWhere(s, params);
     if (tagNo) {
@@ -119,7 +119,7 @@ export async function designMoveDetailReport(
   const designNo = String(options.designNo ?? '').trim();
   if (!key || !size) return { rows: [], totals: { rows: 0 } };
 
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [s.coCode, s.lcCode ?? '', s.coYear ?? ''];
     const where = scopeWhere(s, params);
     params.push(key);

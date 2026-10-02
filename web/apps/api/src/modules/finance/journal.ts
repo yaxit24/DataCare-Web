@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { buildJournalRojmel } from '../shared/rojmel.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
 import {
@@ -155,14 +155,14 @@ export async function postJournal(
   const date = input.vchDate ? new Date(input.vchDate) : new Date();
   input = { ...input, vchDate: date };
   if (ctx) return writeJournalTx(ctx.tx, input, ctx.identity);
-  return withTenant(prisma, input.scope.tenantId, async (tx) =>
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', async (tx) =>
     writeJournalTx(tx, input, await createIdentityTx(tx, input.scope, date, input.mainUser)),
   );
 }
 export async function getJournal(prisma: any, scope: VoucherScope, requested: number | string) {
   completeFinanceScope(scope);
   const voucherNo = formatVoucherNo(requested);
-  return withTenant(prisma, scope.tenantId, async (tx) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx) => {
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"HD_VCH_NO","MAIN_USER","AC_CODE","DR_AMT","CR_AMT","IT_DESC" FROM "CONTRA_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO"`,
       scope.tenantId,
@@ -191,7 +191,7 @@ export async function getJournal(prisma: any, scope: VoucherScope, requested: nu
 export async function editJournal(prisma: any, input: JournalInput, requested: number | string) {
   completeFinanceScope(input.scope);
   const date = input.vchDate ? new Date(input.vchDate) : new Date();
-  return withTenant(prisma, input.scope.tenantId, async (tx) => {
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', async (tx) => {
     const { identity } = await editIdentityTx(tx, {
       table: 'CONTRA_DATA',
       scope: input.scope,
@@ -220,7 +220,7 @@ export async function deleteJournal(
   completeFinanceScope(input.scope);
   const scope = input.scope,
     voucherNo = formatVoucherNo(input.vchNo);
-  return withTenant(prisma, scope.tenantId, async (tx) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx) => {
     const { persisted: header, identity } = await editIdentityTx(tx, {
       table: 'CONTRA_DATA',
       scope,

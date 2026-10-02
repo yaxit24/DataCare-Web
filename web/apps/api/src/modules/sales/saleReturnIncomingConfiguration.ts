@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { withTenant } from '@datacare/db';
+import { withTxBudget, SNAPSHOT_READ } from '../shared/txBudget.js';
 import type { SavedSaleReturnRaw, SavedSaleReturnScope } from './savedSaleReturn.js';
 
 type Raw = SavedSaleReturnRaw;
@@ -556,14 +556,9 @@ export async function getSaleReturnIncomingConfiguration(
   scope: SavedSaleReturnScope,
 ): Promise<SaleReturnIncomingConfiguration> {
   validateScope(scope);
-  return withTenant(
-    prisma,
-    scope.tenantId,
-    async (tx: any) => {
-      // One RepeatableRead observation includes absence and all duplicate physical rows. No row locks
-      // or token from this read confer future write authority or durable validity across restore.
-      return readSaleReturnIncomingConfigurationTx(tx, scope);
-    },
-    { isolationLevel: 'RepeatableRead' },
-  );
+  return withTxBudget(prisma, scope.tenantId, SNAPSHOT_READ, async (tx: any) => {
+    // One RepeatableRead observation includes absence and all duplicate physical rows. No row locks
+    // or token from this read confer future write authority or durable validity across restore.
+    return readSaleReturnIncomingConfigurationTx(tx, scope);
+  });
 }

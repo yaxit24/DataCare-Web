@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
 
 /**
@@ -95,7 +95,7 @@ function scopeSql(s: ScopeFilter, startIdx: number): { sql: string; params: unkn
 
 /** Trial balance: per-AC_CODE Σ DR / Σ CR with a grand Dr=Cr check (live, RLS-scoped). */
 export async function trialBalance(prisma: any, s: ScopeFilter): Promise<TrialBalance> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const w = scopeSql(s, 1);
     const rows: { AC_CODE: string; dr: unknown; cr: unknown }[] = await tx.$queryRawUnsafe(
       `SELECT "AC_CODE", coalesce(sum("DR_AMT"),0) AS dr, coalesce(sum("CR_AMT"),0) AS cr
@@ -126,7 +126,7 @@ export async function accountLedger(
   rows: LedgerRow[];
   closing: number;
 }> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const behavior = await resolveSettingsBehaviorTx(tx, {
       tenantId: s.tenantId,
       coCode: s.coCode,

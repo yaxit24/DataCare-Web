@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 /**
  * Auto Item (desktop MS_AUTO_ITEM): bulk-create ITEM_MAST rows for a group × a set of products.
@@ -38,7 +38,7 @@ export async function bulkAutoItem(
   );
   if (!products.length) throw new AutoItemError('select at least one product');
   const { tenantId, coCode } = input.scope;
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'heavy', async (tx: any) => {
     let created = 0;
     let skipped = 0;
     const codes: string[] = [];

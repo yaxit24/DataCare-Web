@@ -1,4 +1,4 @@
-import { withTenant, type Tx } from '@datacare/db';
+import { withTxBudget, type Tx } from '../shared/txBudget.js';
 import type { UserRights } from '@datacare/types';
 import { rightsOf, type LoginMastRow } from '../auth/auth.service.js';
 import { rightNamesForForm, canonicalFormsForRight } from './formCatalog.js';
@@ -58,7 +58,7 @@ interface PrincipalInput {
  * company context.
  */
 export async function loadPrincipal(prisma: any, input: PrincipalInput): Promise<Principal> {
-  return withTenant(prisma, input.tenantId, (tx) => loadPrincipalTx(tx, input));
+  return withTxBudget(prisma, input.tenantId, 'read', (tx) => loadPrincipalTx(tx, input));
 }
 
 /** The caller owns the transaction and must already bind input.tenantId through withTenant. */
@@ -113,7 +113,7 @@ export async function authorizeForm(
   if (input.principal.isAdmin) {
     return { form: input.form, action: input.action, principal: input.principal };
   }
-  return withTenant(prisma, input.tenantId, (tx) => authorizeFormTx(tx, input));
+  return withTxBudget(prisma, input.tenantId, 'read', (tx) => authorizeFormTx(tx, input));
 }
 
 /** The caller owns the tenant-bound transaction; keep the existing authorization decisions. */

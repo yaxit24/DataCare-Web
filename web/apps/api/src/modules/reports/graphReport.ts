@@ -1,5 +1,5 @@
 import { round } from '@datacare/core';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import type { ListReport, ReportScope } from './reports.js';
 
 export type GraphMode =
@@ -250,7 +250,7 @@ export async function graphReport(
   s: ReportScope,
   options: GraphReportOptions = {},
 ): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const defaults = await companyDefaults(tx, s);
     const mode = normalizeMode(options.mode);
     const metric = normalizeMetric(options.metric, defaults.workType);

@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 /**
  * Labour Update bulk (desktop "Labour and Mrp Update"): pick an item group, see every item's current
@@ -29,7 +29,7 @@ export async function listLabourItems(
   scope: { tenantId: string; coCode: string },
   grCode: string,
 ): Promise<LabourItem[]> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "IT_CODE" it, coalesce("IT_NAME",'') nm,
               coalesce(NULLIF("IT_LBR_RATE"::text,'')::numeric,0)::float lbr, coalesce(NULLIF("LBR_PRC"::text,'')::numeric,0)::float lpc,
@@ -61,7 +61,7 @@ export async function applyLabourUpdate(
     ['mrp', 'ITEM_RATE'],
     ['west', 'IT_WEST'],
   ];
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'heavy', async (tx: any) => {
     let updated = 0;
     for (const r of clean) {
       const sets: string[] = [];
@@ -104,7 +104,7 @@ export async function getLabourSlabs(
   scope: { tenantId: string; coCode: string },
   itCode: string,
 ): Promise<LabourSlab[]> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "SR_NO" sr, coalesce(NULLIF("FROM_WT"::text,'')::numeric,0)::float fw, coalesce(NULLIF("TO_WT"::text,'')::numeric,0)::float tw, coalesce(NULLIF("MIN_PCS"::text,'')::numeric,0)::float mp,
               coalesce(NULLIF("LBR_RATE"::text,'')::numeric,0)::float lr, coalesce(NULLIF("LBR_PRC"::text,'')::numeric,0)::float lp, coalesce("LBR_TYPE",'') lt, coalesce(NULLIF("LBR_AMT"::text,'')::numeric,0)::float la
@@ -135,7 +135,7 @@ export async function setLabourSlabs(
   const clean = (slabs ?? []).filter(
     (s) => s && (num(s.fromWt) > 0 || num(s.toWt) > 0 || num(s.lbrRate) > 0 || num(s.lbrAmt) > 0),
   );
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await tx.$executeRawUnsafe(
       `DELETE FROM "ITM_WT_MAST" WHERE "CO_CODE"=$1 AND "IT_CODE"=$2`,
       scope.coCode,

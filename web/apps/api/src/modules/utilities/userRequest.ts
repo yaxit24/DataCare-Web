@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import type { UtilityScope } from './hddRegistry.js';
 
 export interface UserRequestInput {
@@ -88,7 +88,7 @@ export async function listUserRequests(
   prisma: any,
   scope: UtilityScope,
 ): Promise<UserRequestRow[]> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows = await tx.$queryRawUnsafe(
       `SELECT ${SELECT_COLUMNS} FROM "USER_REQUEST" r
         WHERE r.tenant_id=$1 AND r."CO_CODE"=$2 AND r."LC_CODE"=$3 AND r."CO_YEAR"=$4
@@ -108,7 +108,7 @@ export async function getUserRequest(
   coBook: string,
   vchNo: string,
 ): Promise<UserRequestRow | null> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows = await tx.$queryRawUnsafe(
       `SELECT ${SELECT_COLUMNS} FROM "USER_REQUEST" r
         WHERE r.tenant_id=$1 AND r."CO_CODE"=$2 AND r."LC_CODE"=$3 AND r."CO_YEAR"=$4
@@ -133,7 +133,7 @@ export async function saveUserRequest(
   const coBook = text(input.coBook);
   const vchNo = text(input.vchNo);
   const acCode = text(input.acCode);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     // Desktop first removes the same company/year/location/book/voucher request
     // (UT_USER_REQUEST.cs:392). Explicit tenant scope is added and the replacement is atomic.
     await tx.$executeRawUnsafe(
@@ -212,7 +212,7 @@ export async function deleteUserRequest(
   coBook: string,
   vchNo: string,
 ): Promise<{ deleted: number }> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const deleted = await tx.$executeRawUnsafe(
       `DELETE FROM "USER_REQUEST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
          AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,

@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { tagCancelLineQualifies, tagCancelTotals, type TagCancelTotals } from '@datacare/core';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import {
@@ -951,7 +951,7 @@ async function inTransaction<T>(
   fn: (tx: any) => Promise<T>,
 ): Promise<T> {
   try {
-    return await withTenant(prisma, tenantId, fn, { maxWait: 10_000, timeout: 30_000 });
+    return await withTxBudget(prisma, tenantId, 'heavy', fn);
   } catch (error) {
     if (isConflict(error)) {
       throw new TagCancelConflictError(
@@ -1001,7 +1001,7 @@ export async function getTagCancel(
 ): Promise<TagCancelVoucherView> {
   const scope = completeScope(scopeInput);
   const voucherNo = formatVoucherNo(vchNoInput);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const book = await resolveBookTx(tx, scope, mode);
     const headers: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT h.*, h."VCH_DATE"::text AS "VCH_DAY", to_char(h."VCH_TIME",'HH24:MI:SS') AS "VCH_CLOCK",
@@ -1062,7 +1062,7 @@ export async function listTagCancel(
   }>;
 }> {
   const scope = completeScope(scopeInput);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const book = await resolveBookTx(tx, scope, mode);
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT a."VCH_NO", a."VCH_DATE"::text AS "VCH_DAY", b."AC_NAME", a."VCH_DESC", a."MAIN_USER",
@@ -1127,7 +1127,7 @@ export async function tagCancelSource(
   if (!tagNo || tagNo === 'N') throw new TagCancelValidationError('enter a tag number');
   const vchSrno =
     query.vchSrno != null && String(query.vchSrno).trim() !== '' ? num(query.vchSrno) : undefined;
-  return withTenant(prisma, scopeInput.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scopeInput.tenantId, 'read', async (tx: any) => {
     const source = await tagSourceTx(
       tx,
       scopeInput,

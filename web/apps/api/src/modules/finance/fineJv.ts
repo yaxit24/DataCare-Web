@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { buildFineJvRojmel, rojmelMetalFor } from '../shared/rojmel.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
 import { postVoucherTx, reverseVoucherTx, type LedgerLine } from '../posting/posting.js';
@@ -157,14 +157,14 @@ async function write(tx: any, i: FineJvInput, id: VoucherIdentity) {
 export async function postFineJv(p: any, i: FineJvInput) {
   completeFinanceScope(i.scope);
   const d = i.vchDate ? new Date(i.vchDate) : new Date();
-  return withTenant(p, i.scope.tenantId, async (tx) =>
+  return withTxBudget(p, i.scope.tenantId, 'voucher', async (tx) =>
     write(tx, i, await createIdentityTx(tx, i.scope, d, i.mainUser)),
   );
 }
 export async function getFineJv(p: any, s: VoucherScope, x: number | string) {
   completeFinanceScope(s);
   const no = formatVoucherNo(x);
-  return withTenant(p, s.tenantId, async (tx) => {
+  return withTxBudget(p, s.tenantId, 'read', async (tx) => {
     const a: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"HD_VCH_NO","MAIN_USER","AC_CODE","LD_CODE","DR_FINE","CR_FINE","IT_TYPE" FROM "CONTRA_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO"`,
       s.tenantId,
@@ -192,7 +192,7 @@ export async function getFineJv(p: any, s: VoucherScope, x: number | string) {
 export async function editFineJv(p: any, i: FineJvInput, x: number | string) {
   completeFinanceScope(i.scope);
   const d = i.vchDate ? new Date(i.vchDate) : new Date();
-  return withTenant(p, i.scope.tenantId, async (tx) => {
+  return withTxBudget(p, i.scope.tenantId, 'voucher', async (tx) => {
     const { identity } = await editIdentityTx(tx, {
       table: 'CONTRA_DATA',
       scope: i.scope,
@@ -215,7 +215,7 @@ export async function deleteFineJv(
   completeFinanceScope(i.scope);
   const s = i.scope,
     no = formatVoucherNo(i.vchNo);
-  return withTenant(p, s.tenantId, async (tx) => {
+  return withTxBudget(p, s.tenantId, 'voucher', async (tx) => {
     const { persisted: header, identity } = await editIdentityTx(tx, {
       table: 'CONTRA_DATA',
       scope: s,

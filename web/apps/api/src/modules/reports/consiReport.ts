@@ -1,5 +1,5 @@
 import { round } from '@datacare/core';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import type { ListReport, ReportScope } from './reports.js';
 
 const num = (v: unknown): number => {
@@ -32,7 +32,7 @@ const isoDate = (v: unknown): string | null => {
  */
 export async function consiReport(prisma: any, s: ReportScope): Promise<ListReport> {
   const toDate = s.toDate ?? new Date().toISOString().slice(0, 10);
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT a."AC_CODE" AS "acCode", b."AC_NAME" AS "party", b."AC_ADD1" AS "address",
               b."AC_MOBILE" AS "mobile", b."AC_CITY" AS "city", c."IT_TYPE" AS "itemType",
@@ -102,7 +102,7 @@ export async function consiDetailReport(
   const fromDate = s.fromDate ?? '0001-01-01';
   const toDate = s.toDate ?? new Date().toISOString().slice(0, 10);
 
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const openingRows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT SUM(a."CR_AMT"-a."DR_AMT") AS "amountBal",
               ${fineExpr('G')} AS "goldBal",

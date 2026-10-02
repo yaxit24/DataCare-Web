@@ -1,5 +1,5 @@
 import { round } from '@datacare/core';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { assertPeriodOpen, insertRowTx, postVoucherTx } from '../posting/posting.js';
 import { fineFor, round3 } from '../shared/finePolicy.js';
 import {
@@ -951,7 +951,7 @@ async function saveStockInout(
   completeScope(input.scope);
   const policy = POLICIES[direction];
   const requested = businessDate(input.vchDate);
-  return withTenant(prisma, input.scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', async (tx: any) => {
     const book = await resolveBookTx(tx, input.scope as CompleteScope, policy);
     await assertDatesOpenTx(tx, input.scope as CompleteScope, requested);
     return writeStockInoutTx(
@@ -976,7 +976,7 @@ async function editStockInout(
   const policy = POLICIES[direction];
   const voucherNo = formatVoucherNo(requestedVoucherNo);
   const requested = businessDate(input.vchDate);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const book = await resolveBookTx(tx, scope, policy);
     const ctx = await editContextTx(tx, scope, voucherNo, policy, requested, input.mainUser);
     // TR_INOUT save-on-edit deletes and rewrites INOUT_DATA/INOUT_DETL/INOUT_IDTL/MAIN_STOCK/AC/ROJMEL
@@ -1008,7 +1008,7 @@ async function getStockInout(
   const scope = scopeInput as CompleteScope;
   const policy = POLICIES[direction];
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await resolveBookTx(tx, scope, policy);
     const headers: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"VCH_TIME","HD_VCH_NO","MAIN_USER","EMP_CODE","VCH_DESC",
@@ -1131,7 +1131,7 @@ async function deleteStockInout(
   const scope = input.scope as CompleteScope;
   const policy = POLICIES[direction];
   const voucherNo = formatVoucherNo(input.vchNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const book = await resolveBookTx(tx, scope, policy);
     const persisted = await headerTx(tx, scope, voucherNo, policy);
     const persistedBusinessDate = businessDate(

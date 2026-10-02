@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { PRECISION, round } from '@datacare/core';
 import { lineProfit, todaySaleRateTx, type ProfitBasis } from '../sales/billProfit.js';
 
@@ -90,7 +90,7 @@ export async function billProfitReport(
   scope: { CO_CODE: string; LC_CODE: string },
   options: { from?: string; to?: string; book?: string } = {},
 ): Promise<BillProfitReport> {
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [scope.CO_CODE, scope.LC_CODE];
     /**
      * The desktop's filter is THREE conditions, not one:

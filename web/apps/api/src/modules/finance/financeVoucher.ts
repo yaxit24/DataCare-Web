@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import {
   docShell,
   esc,
@@ -31,7 +31,7 @@ export async function financeVoucherData(
 ): Promise<{ header: any; lines: any[]; company: any; party: any } | null> {
   const headTable = kind === 'receipt' ? 'CASH_DATA' : 'PAY_DATA';
   const s = requireVoucherDocumentScope(scope);
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params = voucherKeyParams(s);
     const h: any[] = await tx.$queryRawUnsafe(
       `SELECT * FROM "${headTable}" WHERE ${voucherKeyWhere()} LIMIT 1`,

@@ -11,7 +11,7 @@
  * off) and skips any table that already has rows for the company, so provisioning can never wipe a
  * live company's masters. Pass `replace: true` for the desktop copy-company behaviour.
  */
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 export interface CompanyCloneTable {
   table: string;
@@ -525,5 +525,7 @@ export async function cloneCompany(
   coCode: string,
   options: CloneCompanyOptions = {},
 ): Promise<CloneCompanyResult> {
-  return withTenant(prisma, tenantId, (tx: any) => cloneCompanyTx(tx, tenantId, coCode, options));
+  return withTxBudget(prisma, tenantId, 'heavy', (tx: any) =>
+    cloneCompanyTx(tx, tenantId, coCode, options),
+  );
 }

@@ -1,5 +1,5 @@
 import { round } from '@datacare/core';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { applyFilters } from './reportFilters.js';
 import type { ListReport, ReportScope } from './reports.js';
 
@@ -58,7 +58,7 @@ export async function otherItemReport(
   const sign = mode.endsWith('-in') ? '+' : mode.endsWith('-out') ? '-' : '';
   const itemCode = String(options.itemCode ?? '').trim();
 
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [s.coCode, entryType];
     const where = ['d."CO_CODE"=$1', 'd."ENTRY_TYPE"=$2'];
     if (s.coYear) {

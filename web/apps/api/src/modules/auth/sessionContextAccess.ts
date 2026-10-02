@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget, type TxBudgetPrisma } from '../shared/txBudget.js';
 import type { SessionClaims } from './jwt.js';
 import { SessionRejectedError } from './session.js';
 import {
@@ -22,10 +22,10 @@ export interface AuthenticatedSessionContext {
 
 /** Request admission only. Financial work still needs its own check inside its write transaction. */
 export async function validateAccessSessionContext(
-  prisma: Parameters<typeof withTenant>[0],
+  prisma: TxBudgetPrisma,
   claims: SessionClaims,
 ): Promise<AuthenticatedSessionContext> {
-  const rows = await withTenant(prisma, claims.tenantId, (tx) =>
+  const rows = await withTxBudget(prisma, claims.tenantId, 'read', (tx) =>
     tx.$queryRawUnsafe<
       Array<{
         tenantId: string;

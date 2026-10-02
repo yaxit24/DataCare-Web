@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from './modules/shared/txBudget.js';
 import { buildApp } from './app.js';
 import { hashPassword } from './modules/auth/password.js';
 import { resolveRuntimeConfig, type RuntimeConfig } from './modules/ops/runtimeConfig.js';
@@ -30,7 +30,7 @@ async function seedDemo(prisma: PrismaClient, config: RuntimeConfig) {
    */
   await seedCompany(prisma, config.demoTenant, '01', { coName: 'Demo Jeweller', lcCode: '01' });
 
-  await withTenant(prisma, config.demoTenant, async (tx) => {
+  await withTxBudget(prisma, config.demoTenant, 'heavy', async (tx) => {
     await tx.$executeRawUnsafe(
       `INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG")
        SELECT $1,'01','admin',$2,'ADMIN' WHERE NOT EXISTS (SELECT 1 FROM "LOGIN_MAST" WHERE "CO_CODE"='01' AND "LOGIN_NAME"='admin')`,

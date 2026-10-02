@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import {
   assertPeriodOpen,
@@ -1104,7 +1104,7 @@ export async function saveKarigarRepairReceipt(
     throw new RepairWorkflowValidationError('voucher date is invalid');
   }
 
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const policy = await resolveRepairWorkflowBookTx(tx, scope, KARIGAR_REPAIR_RECEIPT);
     const party = await resolveRepairWorkflowPartyTx(tx, scope, input.acCode, input.acName);
     const settings = await resolveCompanySettingsTx(tx, scope);
@@ -1368,7 +1368,7 @@ export async function listOpenKarigarRepairIssueLines(
   if (!acCode) throw new RepairWorkflowValidationError('karigar account is required');
   const query = String(queryInput ?? '').trim();
   const limit = Math.min(200, Math.max(1, Math.trunc(Number(limitInput) || 50)));
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await resolveRepairWorkflowBookTx(tx, scope, KARIGAR_REPAIR_RECEIPT);
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT A.*, H."AC_NAME" AS "SOURCE_AC_NAME"
@@ -1468,7 +1468,7 @@ export async function getKarigarRepairReceipt(
   } catch {
     throw new RepairWorkflowValidationError(`invalid repair receipt voucher: ${vchNo}`);
   }
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await resolveRepairWorkflowBookTx(tx, scope, KARIGAR_REPAIR_RECEIPT);
     const header = await existingRepairHeaderTx(tx, scope, voucherNo);
     if (!header) return null;
@@ -1504,7 +1504,7 @@ export async function listKarigarRepairReceipts(
   assertCompleteRepairScope(scopeInput);
   const scope = scopeInput;
   const limit = Math.min(200, Math.max(1, Math.trunc(Number(limitInput) || 50)));
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await resolveRepairWorkflowBookTx(tx, scope, KARIGAR_REPAIR_RECEIPT);
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE","AC_CODE","AC_NAME","VCH_DESC" FROM "REP_DATA"
@@ -1539,7 +1539,7 @@ export async function deleteKarigarRepairReceipt(
   } catch {
     throw new RepairWorkflowValidationError(`invalid repair receipt voucher: ${input.vchNo}`);
   }
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const policy = await resolveRepairWorkflowBookTx(tx, scope, KARIGAR_REPAIR_RECEIPT);
     const existing = await existingRepairHeaderTx(tx, scope, voucherNo);
     if (!existing) {

@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 /**
  * Generic "recent vouchers" list for a header table + book — powers the reusable <VoucherList> that
@@ -57,7 +57,7 @@ export async function recentVouchers(
   // Fail closed: without a complete scope the list cannot tell this session's vouchers from another's.
   if (!scope.coCode || !scope.lcCode || !scope.coYear || !book) return [];
   const n = Math.min(Number(limit) || 50, 200);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const colRows: { column_name: string }[] = await tx.$queryRawUnsafe(
       `SELECT column_name FROM information_schema.columns
         WHERE table_schema=current_schema() AND table_name=$1`,

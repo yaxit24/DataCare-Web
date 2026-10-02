@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { DESKTOP_COLUMN_DEFAULTS } from './desktopColumnDefaults.js';
 import { tableColumnsTx, warmSchemaCatalog } from '../shared/schemaCatalog.js';
 
@@ -619,7 +619,7 @@ export async function postVoucher(
   tenantId: string,
   input: PostInput,
 ): Promise<{ posted: true }> {
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     await postVoucherTx(tx, tenantId, input);
     return { posted: true };
   });
@@ -715,7 +715,7 @@ export async function reverseVoucher(
   tenantId: string,
   input: ReverseInput,
 ): Promise<{ reversed: true }> {
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     await reverseVoucherTx(tx, tenantId, input);
     return { reversed: true };
   });

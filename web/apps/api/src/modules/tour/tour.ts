@@ -1,6 +1,6 @@
 import { type StoneSubDetailInput } from '../shared/stoneSubDetail.js';
 import { assertWestPct } from '../shared/counterStockPolicy.js';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import { postVoucherTx, reverseVoucherTx } from '../posting/posting.js';
 
@@ -179,7 +179,7 @@ export async function tourIssue(prisma: any, input: TourIssueInput): Promise<Tou
   const tenantId = input.scope.tenantId;
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
 
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const vchNo = await nextVoucherNoTx(tx, input.scope);
     const key = keyOf(input.scope, vchNo);
 
@@ -387,7 +387,7 @@ export interface DeleteTourInput {
 export async function deleteTour(prisma: any, input: DeleteTourInput): Promise<{ reversed: true }> {
   const tenantId = input.scope.tenantId;
   const key = keyOf(input.scope, Number(input.vchNo));
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     await reverseVoucherTx(tx, tenantId, {
       tables: ['APR_DATA', 'APR_DETL', 'APR_IDTL', 'MAIN_STOCK'],
       key,
@@ -455,7 +455,7 @@ export async function tourReturn(prisma: any, input: TourReturnInput): Promise<T
   const tenantId = input.scope.tenantId;
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
   const empCode = (input.empCode ?? '').slice(0, 3) || null;
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const vchNo = await nextVoucherNoTx(tx, { ...input.scope, coBook: 'TRR' });
     const key = returnKeyOf(input.scope, vchNo);
     const computed = input.lines.map((l) => ({ in: l, fine: tourLineFine(l) }));
@@ -569,7 +569,7 @@ export async function deleteTourReturn(
 ): Promise<{ reversed: true }> {
   const tenantId = input.scope.tenantId;
   const key = returnKeyOf(input.scope, Number(input.vchNo));
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     const links: any[] = await tx.$queryRawUnsafe(
       `SELECT "ISU_NO" ov, "ISU_SRNO" os, "IT_CODE" it, coalesce("TAG_NO",'N') tg FROM "APR_DETL" WHERE "CO_CODE"=$1 AND "CO_BOOK"='TRR' AND "VCH_NO"=$2`,
       key.CO_CODE,
@@ -626,7 +626,7 @@ export async function tourLines(
   }>
 > {
   const book = scope.coBook ?? 'TUR';
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "SR_NO" sr,"IT_CODE" it,"TAG_NO" tag, coalesce(NULLIF("ITM_PCS"::text,'')::numeric,0)::float pcs, coalesce(NULLIF("ITM_GWT"::text,'')::numeric,0)::float gwt, coalesce(NULLIF("ITM_NWT"::text,'')::numeric,0)::float nwt, coalesce(NULLIF("ITM_TOUCH"::text,'')::numeric,0)::float touch, coalesce(NULLIF("ITM_RATE"::text,'')::numeric,0)::float rate, "DESIGN_NO" dn, coalesce("ISU_REC",'N') ir
          FROM "APR_DETL" WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 ORDER BY "SR_NO"`,
@@ -658,7 +658,7 @@ export async function markApprovalBilled(
   saleRef?: string,
 ): Promise<{ marked: number }> {
   const book = scope.coBook ?? 'TUR';
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const n: number = await tx.$executeRawUnsafe(
       `UPDATE "APR_DETL" SET "EMP_SALE"='Y', "ISU_REC"='Y', "ITM_REMARK"=$4 WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 AND coalesce("ISU_REC",'N')<>'Y'`,
       scope.coCode,

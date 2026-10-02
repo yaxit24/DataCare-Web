@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { withTenant } from '@datacare/db';
+import { withTxBudget, SNAPSHOT_READ } from '../shared/txBudget.js';
 import {
   calculateEBillLine,
   calculateEBillTotals,
@@ -1582,7 +1582,7 @@ export async function saveEBill(
   input: EBillEntryInput,
   requestedVoucherNo?: string,
 ): Promise<EBillSaveResult> {
-  return withTenant(prisma, input.scope.tenantId, (tx: any) =>
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', (tx: any) =>
     saveTx(tx, family, input, requestedVoucherNo),
   );
 }
@@ -1596,7 +1596,7 @@ export async function deleteEBill(
 ): Promise<{ deleted: true; voucherNo: string }> {
   const scope = completeFinanceScope(scopeInput);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const book = await resolveBookTx(tx, family, scope);
     const edited = await editIdentityTx(tx, {
       table: 'SL_DATA',
@@ -1650,121 +1650,116 @@ export async function getEBillEntry(
 ) {
   const scope = completeFinanceScope(scopeInput);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(
-    prisma,
-    scope.tenantId,
-    async (tx: any) => {
-      await resolveBookTx(tx, family, scope);
-      const args = keyArgs(scope, voucherNo);
-      const headers: Row[] = await tx.$queryRawUnsafe(
-        `SELECT *, "VCH_DATE"::text AS "VCH_DAY", to_char("VCH_TIME",'HH24:MI:SS') AS "VCH_CLOCK"
+  return withTxBudget(prisma, scope.tenantId, SNAPSHOT_READ, async (tx: any) => {
+    await resolveBookTx(tx, family, scope);
+    const args = keyArgs(scope, voucherNo);
+    const headers: Row[] = await tx.$queryRawUnsafe(
+      `SELECT *, "VCH_DATE"::text AS "VCH_DAY", to_char("VCH_TIME",'HH24:MI:SS') AS "VCH_CLOCK"
            FROM "SL_DATA" WHERE ${keyWhere}`,
-        ...args,
-      );
-      if (!headers.length) return null;
-      if (headers.length !== 1)
-        throw new EBillWriteValidationError(`${FAMILY[family].label} is ambiguous: ${voucherNo}`);
-      const h = headers[0]!;
-      const lines: Row[] = await tx.$queryRawUnsafe(
-        `SELECT d.*, coalesce(i."IT_NAME",'') AS "IT_NAME" FROM "SL_DETL" d
+      ...args,
+    );
+    if (!headers.length) return null;
+    if (headers.length !== 1)
+      throw new EBillWriteValidationError(`${FAMILY[family].label} is ambiguous: ${voucherNo}`);
+    const h = headers[0]!;
+    const lines: Row[] = await tx.$queryRawUnsafe(
+      `SELECT d.*, coalesce(i."IT_NAME",'') AS "IT_NAME" FROM "SL_DETL" d
            LEFT JOIN "ITEM_MAST" i ON i.tenant_id=d.tenant_id AND i."CO_CODE"=d."CO_CODE" AND i."IT_CODE"=d."IT_CODE"
           WHERE d.tenant_id=$1 AND d."CO_CODE"=$2 AND d."LC_CODE"=$3 AND d."CO_YEAR"=$4 AND d."CO_BOOK"=$5 AND d."VCH_NO"=$6
           ORDER BY d."SR_NO", d.row_id`,
-        ...args,
-      );
-      const components: Row[] = await tx.$queryRawUnsafe(
-        `SELECT count(*)::int AS n FROM "SL_IDTL" WHERE ${keyWhere}`,
-        ...args,
-      );
-      const irnLocked = await registrationTx(tx, scope, voucherNo);
-      const registration: Row[] = await tx.$queryRawUnsafe(
-        `SELECT "IRN_NO","ACK_NO","ACK_DATE"::text AS "ACK_DATE" FROM "E_DATA" WHERE ${keyWhere}`,
-        ...args,
-      );
-      return {
-        family,
-        voucherNo,
-        hiddenVoucherNo: text(h.HD_VCH_NO),
-        vchDate: text(h.VCH_DAY).slice(0, 10),
-        voucherTime: text(h.VCH_CLOCK),
-        mainUser: text(h.MAIN_USER),
-        partyCode: text(h.AC_CODE),
-        partyName: text(h.AC_NAME),
-        gstType: text(h.AC_GST_TYPE),
-        billNo: text(h.BILL_NO),
-        ledgerCode: text(h.LDR_CODE),
-        employeeCode: text(h.EMP_CODE),
-        description: text(h.VCH_DESC),
-        cashAmount: Number(h.CASH_AMT ?? 0),
-        chequeAmount: Number(h.CHQ_AMT ?? 0),
-        chequeAccount: text(h.BANK_AC),
-        chequeNo: text(h.CHQ_NO),
-        cardAmount: Number(h.CARD_AMT ?? 0),
-        cardAccount: text(h.CARD_AC),
-        cardCommission: Number(h.CARD_COM_AMT ?? 0),
-        kasarAmount: Number(h.KASAR_AMT ?? 0),
-        tcsCode: text(h.TCS_CODE),
-        tcsPercent: Number(h.TCS_PRC ?? 0),
+      ...args,
+    );
+    const components: Row[] = await tx.$queryRawUnsafe(
+      `SELECT count(*)::int AS n FROM "SL_IDTL" WHERE ${keyWhere}`,
+      ...args,
+    );
+    const irnLocked = await registrationTx(tx, scope, voucherNo);
+    const registration: Row[] = await tx.$queryRawUnsafe(
+      `SELECT "IRN_NO","ACK_NO","ACK_DATE"::text AS "ACK_DATE" FROM "E_DATA" WHERE ${keyWhere}`,
+      ...args,
+    );
+    return {
+      family,
+      voucherNo,
+      hiddenVoucherNo: text(h.HD_VCH_NO),
+      vchDate: text(h.VCH_DAY).slice(0, 10),
+      voucherTime: text(h.VCH_CLOCK),
+      mainUser: text(h.MAIN_USER),
+      partyCode: text(h.AC_CODE),
+      partyName: text(h.AC_NAME),
+      gstType: text(h.AC_GST_TYPE),
+      billNo: text(h.BILL_NO),
+      ledgerCode: text(h.LDR_CODE),
+      employeeCode: text(h.EMP_CODE),
+      description: text(h.VCH_DESC),
+      cashAmount: Number(h.CASH_AMT ?? 0),
+      chequeAmount: Number(h.CHQ_AMT ?? 0),
+      chequeAccount: text(h.BANK_AC),
+      chequeNo: text(h.CHQ_NO),
+      cardAmount: Number(h.CARD_AMT ?? 0),
+      cardAccount: text(h.CARD_AC),
+      cardCommission: Number(h.CARD_COM_AMT ?? 0),
+      kasarAmount: Number(h.KASAR_AMT ?? 0),
+      tcsCode: text(h.TCS_CODE),
+      tcsPercent: Number(h.TCS_PRC ?? 0),
+      tcsAmount: Number(h.TCS_AMT ?? 0),
+      tdsCode: text(h.TDS_CODE),
+      tdsPercent: Number(h.TDS_PRC ?? 0),
+      totals: {
+        netAmount: Number(h.NET_AMT ?? 0),
+        igst: Number(h.IGST_TAX ?? 0),
+        cgst: Number(h.CGST_TAX ?? 0),
+        sgst: Number(h.SGST_TAX ?? 0),
+        taxAmount: Number(h.TAX_AMT ?? 0),
         tcsAmount: Number(h.TCS_AMT ?? 0),
-        tdsCode: text(h.TDS_CODE),
-        tdsPercent: Number(h.TDS_PRC ?? 0),
-        totals: {
-          netAmount: Number(h.NET_AMT ?? 0),
-          igst: Number(h.IGST_TAX ?? 0),
-          cgst: Number(h.CGST_TAX ?? 0),
-          sgst: Number(h.SGST_TAX ?? 0),
-          taxAmount: Number(h.TAX_AMT ?? 0),
-          tcsAmount: Number(h.TCS_AMT ?? 0),
-          tdsAmount: Number(h.TDS_AMT ?? 0),
-          roundOff: Number(h.ROF_AMT ?? 0),
-          totalAmount: Number(h.TOT_AMT ?? 0),
-          outstanding: Number(h.BILL_OS ?? 0),
-        },
-        componentCount: Number(components[0]?.n ?? 0),
-        irnLocked,
-        registration: registration[0]
-          ? {
-              irn: text(registration[0].IRN_NO),
-              ackNo: text(registration[0].ACK_NO),
-              ackDate: text(registration[0].ACK_DATE),
-            }
-          : null,
-        revision: await revisionTx(tx, scope, voucherNo),
-        lines: lines.map((l) => {
-          const net = Number(l.ITM_NWT ?? 0);
-          const ghat = Number(l.ITM_GHT_WT ?? 0);
-          return {
-            srNo: Number(l.SR_NO),
-            oldSrNo: Number(l.OLD_SRNO ?? l.SR_NO),
-            itemCode: text(l.IT_CODE),
-            itemName: text(l.IT_NAME),
-            remark: text(l.ITM_REMARK),
-            designNo: text(l.DESIGN_NO),
-            size: text(l.ITM_SIZE),
-            tagNo: text(l.TAG_NO) === 'N' ? '' : text(l.TAG_NO),
-            hmId: text(l.HM_ID),
-            pcs: Number(l.ITM_PCS ?? 0),
-            bagWt: Number(l.BAG_WT ?? 0),
-            grossWt: Number(l.ITM_GWT ?? 0),
-            lessWt: Number(l.ITM_OTH_WT ?? 0),
-            // ITM_GHT_PRC is not saved by TR_SL_EBILL; the percentage is recovered from the weights.
-            ghatPercent: net !== 0 && ghat !== 0 ? round((ghat / net) * 100, 3) : 0,
-            touch: Number(l.ITM_TOUCH ?? 0),
-            westPercent: Number(l.ITM_WEST_PRC ?? 0),
-            rate: Number(l.ITM_RATE ?? 0),
-            rateType: text(l.RATE_TYPE),
-            labourType: text(l.LBR_TYPE),
-            labourRate: Number(l.LBR_RATE ?? 0),
-            labourPercent: Number(l.LBR_PRC ?? 0),
-            otherAmount: Number(l.OTH_AMT ?? 0),
-            mrp: Number(l.ITM_MRP ?? 0),
-            taxCode: text(l.TAX_CODE),
-          };
-        }),
-      };
-    },
-    { isolationLevel: 'RepeatableRead' },
-  );
+        tdsAmount: Number(h.TDS_AMT ?? 0),
+        roundOff: Number(h.ROF_AMT ?? 0),
+        totalAmount: Number(h.TOT_AMT ?? 0),
+        outstanding: Number(h.BILL_OS ?? 0),
+      },
+      componentCount: Number(components[0]?.n ?? 0),
+      irnLocked,
+      registration: registration[0]
+        ? {
+            irn: text(registration[0].IRN_NO),
+            ackNo: text(registration[0].ACK_NO),
+            ackDate: text(registration[0].ACK_DATE),
+          }
+        : null,
+      revision: await revisionTx(tx, scope, voucherNo),
+      lines: lines.map((l) => {
+        const net = Number(l.ITM_NWT ?? 0);
+        const ghat = Number(l.ITM_GHT_WT ?? 0);
+        return {
+          srNo: Number(l.SR_NO),
+          oldSrNo: Number(l.OLD_SRNO ?? l.SR_NO),
+          itemCode: text(l.IT_CODE),
+          itemName: text(l.IT_NAME),
+          remark: text(l.ITM_REMARK),
+          designNo: text(l.DESIGN_NO),
+          size: text(l.ITM_SIZE),
+          tagNo: text(l.TAG_NO) === 'N' ? '' : text(l.TAG_NO),
+          hmId: text(l.HM_ID),
+          pcs: Number(l.ITM_PCS ?? 0),
+          bagWt: Number(l.BAG_WT ?? 0),
+          grossWt: Number(l.ITM_GWT ?? 0),
+          lessWt: Number(l.ITM_OTH_WT ?? 0),
+          // ITM_GHT_PRC is not saved by TR_SL_EBILL; the percentage is recovered from the weights.
+          ghatPercent: net !== 0 && ghat !== 0 ? round((ghat / net) * 100, 3) : 0,
+          touch: Number(l.ITM_TOUCH ?? 0),
+          westPercent: Number(l.ITM_WEST_PRC ?? 0),
+          rate: Number(l.ITM_RATE ?? 0),
+          rateType: text(l.RATE_TYPE),
+          labourType: text(l.LBR_TYPE),
+          labourRate: Number(l.LBR_RATE ?? 0),
+          labourPercent: Number(l.LBR_PRC ?? 0),
+          otherAmount: Number(l.OTH_AMT ?? 0),
+          mrp: Number(l.ITM_MRP ?? 0),
+          taxCode: text(l.TAX_CODE),
+        };
+      }),
+    };
+  });
 }
 
 /** Everything the entry screen needs to calculate like the server: settings, slots and tax codes. */
@@ -1774,7 +1769,7 @@ export async function getEBillEntryConfig(
   scopeInput: VoucherScope,
 ) {
   const scope = completeFinanceScope(scopeInput);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const book = await resolveBookTx(tx, family, scope);
     const settings = await companySettingsTx(tx, scope);
     const heads: Row[] = await tx.$queryRawUnsafe(
@@ -1823,7 +1818,7 @@ export async function getEBillEntryConfig(
 /** AcTcsAmt for the entry screen's live TCS preview; the server recomputes on save. */
 export async function eInvoiceTcsBasis(prisma: any, scopeInput: VoucherScope, partyCode: string) {
   const scope = completeFinanceScope(scopeInput);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await resolveBookTx(tx, 'E INVOICE', scope);
     const party = await accountTx(tx, scope, partyCode, 'party account');
     return { partyCode: party.code, priorDebits: await priorPartyDebitsTx(tx, scope, party.code) };
@@ -1839,7 +1834,7 @@ export async function assertEBillNotRegistered(
 ) {
   const scope = completeFinanceScope(scopeInput);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  await withTenant(prisma, scope.tenantId, async (tx: any) => {
+  await withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await resolveBookTx(tx, family, scope);
     if (await registrationTx(tx, scope, voucherNo)) {
       throw new EBillWriteValidationError('No Need to Generate eInvoice its Alrady Exciest ....');
@@ -1856,7 +1851,7 @@ export async function eBillPrintData(
 ) {
   const scope = completeFinanceScope(scopeInput);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await resolveBookTx(tx, family, scope);
     const args = keyArgs(scope, voucherNo);
     const headers: Row[] = await tx.$queryRawUnsafe(

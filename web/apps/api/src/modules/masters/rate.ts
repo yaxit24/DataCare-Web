@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 const NN = (c: string): string => `coalesce(NULLIF(${c}::text,'')::numeric,0)`;
 
@@ -19,7 +19,7 @@ export async function fetchRate(
   date: string;
 } | null> {
   const d = date && /^\d{4}-\d{2}-\d{2}/.test(date) ? date.slice(0, 10) : '9999-12-31';
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "GR_CODE", "VCH_DATE", ${NN('"GR_RATE"')} AS rate, ${NN('"GR_TOUCH"')} AS touch,
               ${NN('"FINE_GL_RATE"')} AS finegl, ${NN('"FINE_SL_RATE"')} AS finesl
@@ -54,7 +54,7 @@ export async function fetchRate(
 
 /** List rate groups (for a rate-group dropdown). */
 export async function rateGroups(prisma: any, tenantId: string, coCode: string): Promise<string[]> {
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT DISTINCT "GR_CODE" g FROM "RATE_MAST" WHERE "CO_CODE"=$1 AND coalesce("GR_CODE",'')<>'' ORDER BY 1`,
       coCode,

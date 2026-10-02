@@ -1,4 +1,9 @@
-import { withTenant, type Tx } from '@datacare/db';
+import {
+  withTxBudget,
+  SERIALIZABLE_VOUCHER,
+  type TxBudgetPrisma,
+  type Tx,
+} from '../shared/txBudget.js';
 import { ScopeError, validateStoredScopeTx } from './businessScope.js';
 import {
   loadPrincipalTx,
@@ -296,7 +301,7 @@ export type SessionSerializableCommandAdmission = Readonly<{
  * time. Expected conflicts refuse once without retry. No route or financial adopter is enabled.
  */
 export async function withSessionContextSerializableCommand<T>(
-  prisma: Parameters<typeof withTenant>[0],
+  prisma: TxBudgetPrisma,
   suppliedIdentity: unknown,
   suppliedPolicy: SessionSerializableCommandPolicy,
   work: (tx: Tx, admitted: SessionSerializableCommandAdmission) => Promise<T>,
@@ -316,77 +321,70 @@ export async function withSessionContextSerializableCommand<T>(
     return fail('scope-mismatch', 409);
   }
   try {
-    return await withTenant(
-      prisma,
-      identity.tenantId,
-      async (tx) => {
-        const binding = await tx.$queryRawUnsafe<
-          Array<{ tenant: string | null; isolation: string }>
-        >(
-          `SELECT current_setting('app.tenant_id',true) AS tenant,current_setting('transaction_isolation') AS isolation`,
-        );
-        if (
-          binding.length !== 1 ||
-          binding[0]!.tenant !== identity.tenantId ||
-          binding[0]!.isolation !== 'serializable'
-        ) {
-          return fail('invalid-transaction-context', 500);
-        }
-        const rows = await tx.$queryRawUnsafe<StoredSerializableCommandSession[]>(
-          `SELECT "tenant_id" AS "tenantId","session_id" AS "sessionId","login_name" AS "loginName",
+    return await withTxBudget(prisma, identity.tenantId, SERIALIZABLE_VOUCHER, async (tx) => {
+      const binding = await tx.$queryRawUnsafe<Array<{ tenant: string | null; isolation: string }>>(
+        `SELECT current_setting('app.tenant_id',true) AS tenant,current_setting('transaction_isolation') AS isolation`,
+      );
+      if (
+        binding.length !== 1 ||
+        binding[0]!.tenant !== identity.tenantId ||
+        binding[0]!.isolation !== 'serializable'
+      ) {
+        return fail('invalid-transaction-context', 500);
+      }
+      const rows = await tx.$queryRawUnsafe<StoredSerializableCommandSession[]>(
+        `SELECT "tenant_id" AS "tenantId","session_id" AS "sessionId","login_name" AS "loginName",
                 "login_co_code" AS "loginCoCode","co_code" AS "coCode","lc_code" AS "lcCode","co_year" AS "coYear",
                 "context_epoch"::text AS "contextEpoch","ledger_context" AS "ledgerContext"
            FROM "auth_session" WHERE "tenant_id"=$1 AND "session_id"=$2 FOR SHARE`,
-          identity.tenantId,
-          identity.sessionId,
-        );
-        if (rows.length !== 1) return fail('session-invalid', 401);
-        const row = rows[0]!;
-        // Subject identity first, then live state, then changing business context.
-        if (
-          row.tenantId !== identity.tenantId ||
-          row.sessionId !== identity.sessionId ||
-          row.loginName !== identity.loginName ||
-          row.loginCoCode !== identity.loginCoCode
-        )
-          return fail('session-invalid', 401);
-        await assertLiveTx(tx, identity);
-        const context = contextFrom(row, identity);
-        // Never lock LOGIN_MAST here: password reset already locks it before auth_session.
-        const current = await loadPrincipalTx(tx, {
+        identity.tenantId,
+        identity.sessionId,
+      );
+      if (rows.length !== 1) return fail('session-invalid', 401);
+      const row = rows[0]!;
+      // Subject identity first, then live state, then changing business context.
+      if (
+        row.tenantId !== identity.tenantId ||
+        row.sessionId !== identity.sessionId ||
+        row.loginName !== identity.loginName ||
+        row.loginCoCode !== identity.loginCoCode
+      )
+        return fail('session-invalid', 401);
+      await assertLiveTx(tx, identity);
+      const context = contextFrom(row, identity);
+      // Never lock LOGIN_MAST here: password reset already locks it before auth_session.
+      const current = await loadPrincipalTx(tx, {
+        tenantId: context.tenantId,
+        loginName: context.loginName,
+        coCode: context.coCode,
+        loginCoCode: context.loginCoCode,
+      });
+      const principal = Object.freeze({
+        ...current,
+        rights: Object.freeze({ ...current.rights }),
+      });
+      if (principal.passwordResetRequired) return fail('password-reset-required', 403);
+      await validateStoredScopeTx(tx, {
+        tenantId: context.tenantId,
+        loginName: context.loginName,
+        isAdmin: principal.isAdmin,
+        coCode: context.coCode,
+        lcCode: context.lcCode,
+        coYear: context.coYear,
+      });
+      const authorization = Object.freeze(
+        await authorizeFormTx(tx, {
           tenantId: context.tenantId,
-          loginName: context.loginName,
-          coCode: context.coCode,
-          loginCoCode: context.loginCoCode,
-        });
-        const principal = Object.freeze({
-          ...current,
-          rights: Object.freeze({ ...current.rights }),
-        });
-        if (principal.passwordResetRequired) return fail('password-reset-required', 403);
-        await validateStoredScopeTx(tx, {
-          tenantId: context.tenantId,
-          loginName: context.loginName,
-          isAdmin: principal.isAdmin,
-          coCode: context.coCode,
           lcCode: context.lcCode,
-          coYear: context.coYear,
-        });
-        const authorization = Object.freeze(
-          await authorizeFormTx(tx, {
-            tenantId: context.tenantId,
-            lcCode: context.lcCode,
-            principal,
-            form: 'Sales/Sales Return',
-            action: 'update',
-          }),
-        );
-        const result = await work(tx, Object.freeze({ context, principal, authorization }));
-        await assertFinalContextTx(tx, identity, context);
-        return result;
-      },
-      { isolationLevel: 'Serializable' },
-    );
+          principal,
+          form: 'Sales/Sales Return',
+          action: 'update',
+        }),
+      );
+      const result = await work(tx, Object.freeze({ context, principal, authorization }));
+      await assertFinalContextTx(tx, identity, context);
+      return result;
+    });
   } catch (error) {
     if (error instanceof PrincipalUnavailableError) return fail('session-invalid', 401);
     if (error instanceof ScopeError)

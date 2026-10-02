@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { VOUCHER_BUDGET } from './support/txBudgetBinding.js';
 import type { Principal } from '../src/modules/rbac/authorization.js';
 
 const h = vi.hoisted(() => ({
@@ -378,7 +379,11 @@ describe('coordinator policy and transaction sequencing (mocked, not DB atomicit
       'session-update',
       'callback-resolved',
     ]);
-    expect(h.options).toEqual({ isolationLevel: 'Serializable' });
+    expect(h.options).toEqual({
+      ...VOUCHER_BUDGET,
+      statementTimeoutMs: VOUCHER_BUDGET.timeout,
+      isolationLevel: 'Serializable',
+    });
     expect(h.tenant).toBe('T1');
   });
   it('C02 a fresh same-scope open increments once', async () => {

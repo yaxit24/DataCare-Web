@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { applyFilters } from './reportFilters.js';
 import type { ReportScope } from './reports.js';
 
@@ -69,7 +69,7 @@ export async function lastVisitReport(
   prisma: any,
   s: ReportScope,
 ): Promise<{ rows: LastVisitRow[] }> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [s.tenantId, s.coCode];
     const scopeWhere = ['a.tenant_id=$1', 'a."CO_CODE"::text=$2'];
     if (s.lcCode) {
@@ -134,7 +134,7 @@ export async function addressPrintReport(
   prisma: any,
   s: ReportScope,
 ): Promise<{ rows: AddressPrintRow[] }> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [s.tenantId, s.coCode];
     const where = ['a.tenant_id=$1', 'a."CO_CODE"::text=$2'];
     if (s.lcCode) {

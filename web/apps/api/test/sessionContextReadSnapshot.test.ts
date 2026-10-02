@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
+import { BUDGETED_BIND_SQL, READ_BUDGET, budgetedBindParams } from './support/txBudgetBinding.js';
 import type { PrismaClient } from '@prisma/client';
 import type { Tx } from '@datacare/db';
 import {
@@ -51,8 +52,8 @@ function scripted(steps: Step[], commitError?: unknown) {
     return structuredClone(next.rows ?? []);
   });
   const execute = vi.fn(async (sql: string, ...params: unknown[]) => {
-    expect(sql).toBe("SELECT set_config('app.tenant_id', $1, true)");
-    expect(params).toEqual([identity.tenantId]);
+    expect(sql).toBe(BUDGETED_BIND_SQL);
+    expect(params).toEqual(budgetedBindParams(identity.tenantId, READ_BUDGET));
     trace.push('bind');
     return 1;
   });
@@ -279,7 +280,10 @@ describe('separate session read snapshot contract', () => {
       db.trace.push('work');
     });
     expect(db.transaction).toHaveBeenCalledTimes(1);
-    expect(db.transaction.mock.calls[0]?.[1]).toEqual({ isolationLevel: 'RepeatableRead' });
+    expect(db.transaction.mock.calls[0]?.[1]).toEqual({
+      ...READ_BUDGET,
+      isolationLevel: 'RepeatableRead',
+    });
     expect(db.trace).toEqual([
       'begin',
       'bind',

@@ -1,6 +1,12 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
+import {
+  BUDGETED_BIND_SQL,
+  READ_BUDGET,
+  VOUCHER_BUDGET,
+  budgetedBindParams,
+} from './support/txBudgetBinding.js';
 import type { PrismaClient } from '@prisma/client';
 import type { Tx } from '@datacare/db';
 import {
@@ -49,7 +55,7 @@ interface Step {
   error?: Error;
 }
 /** SQL observation/transaction double. Real withTenant binds tenant; no database or lock emulation. */
-function scripted(steps: Step[]) {
+function scripted(steps: Step[], budget: { timeout: number } = VOUCHER_BUDGET) {
   const pending = [...steps];
   const trace: string[] = [];
   const query = vi.fn(async (sql: string, ..._params: unknown[]) => {
@@ -61,8 +67,8 @@ function scripted(steps: Step[]) {
     return structuredClone(step.rows ?? []);
   });
   const execute = vi.fn(async (sql: string, ...params: unknown[]) => {
-    expect(sql).toBe("SELECT set_config('app.tenant_id', $1, true)");
-    expect(params).toEqual([identity.tenantId]);
+    expect(sql).toBe(BUDGETED_BIND_SQL);
+    expect(params).toEqual(budgetedBindParams(identity.tenantId, budget));
     trace.push('bind');
     return 1;
   });
@@ -142,7 +148,10 @@ describe('transaction-bound session command source contracts', () => {
       'committed-value',
     );
     expect(db.transaction).toHaveBeenCalledTimes(1);
-    expect(db.transaction.mock.calls[0]?.[1]).toEqual({ isolationLevel: 'ReadCommitted' });
+    expect(db.transaction.mock.calls[0]?.[1]).toEqual({
+      ...VOUCHER_BUDGET,
+      isolationLevel: 'ReadCommitted',
+    });
     expect(db.execute).toHaveBeenCalledTimes(1);
     expect(db.pending).toHaveLength(0);
     expect(db.trace).toEqual([
@@ -393,7 +402,8 @@ const formCases = [
 ] as const;
 describe.each([false, true])('form Tx extraction wrapper=%s', (wrapped) => {
   it.each(formCases)('$action $row', async (fixture) => {
-    const db = scripted([{ match: 'FROM "USER_SET"', rows: [fixture.row] }]);
+    // The public wrapper reads rights under the read budget; the Tx entry opens no transaction.
+    const db = scripted([{ match: 'FROM "USER_SET"', rows: [fixture.row] }], READ_BUDGET);
     const input = {
       tenantId: identity.tenantId,
       lcCode: '01',

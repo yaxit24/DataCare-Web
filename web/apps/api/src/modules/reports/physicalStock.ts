@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { PRECISION, round } from '@datacare/core';
 
 /**
@@ -90,7 +90,7 @@ export async function physicalStockReport(
   scope: { CO_CODE: string; LC_CODE: string },
   options: { itCode?: string; tblCode?: string; onlyVariance?: boolean } = {},
 ): Promise<PhysicalStockReport> {
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [scope.CO_CODE, scope.LC_CODE];
     const filters = ['a."CO_CODE"::text=$1', 'a."LC_CODE"::text=$2'];
     if (options.itCode) {

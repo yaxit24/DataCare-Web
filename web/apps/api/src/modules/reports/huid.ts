@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { PRECISION, round } from '@datacare/core';
 
 /**
@@ -114,7 +114,7 @@ export async function huidReport(
     .toLowerCase();
   if (rawHallmark && !['all', 'with', 'without'].includes(rawHallmark))
     throw new HuidReportValidationError('hallmark must be all, with, or without');
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [scope.CO_CODE, scope.LC_CODE];
     const filters = ['c."CO_CODE"::text=$1', 'c."LC_CODE"::text=$2'];
     if (options.itCode) {

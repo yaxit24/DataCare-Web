@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { assertPeriodOpen, insertRowTx, postVoucherTx } from '../posting/posting.js';
 import { fineFor, type FineWorkflow } from '../shared/finePolicy.js';
 import {
@@ -954,7 +954,7 @@ export async function tagOpening(prisma: any, input: TagOpeningInput) {
   completeScope(input.scope);
   const scope = input.scope;
   const requested = businessDate(input.vchDate);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const policy = await resolveBookTx(tx, scope, 'tag-opening');
     await assertDatesOpenTx(tx, scope, requested);
     return writeTagOpeningTx(
@@ -971,7 +971,7 @@ export async function itemOpening(prisma: any, input: ItemOpeningInput) {
   completeScope(input.scope);
   const scope = input.scope;
   const requested = businessDate(input.vchDate);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const policy = await resolveBookTx(tx, scope, 'item-opening');
     await assertDatesOpenTx(tx, scope, requested);
     return writeItemOpeningTx(
@@ -988,7 +988,7 @@ export async function itemLot(prisma: any, input: ItemLotInput) {
   completeScope(input.scope);
   const scope = input.scope;
   const requested = businessDate(input.vchDate);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const policy = await resolveBookTx(tx, scope, 'item-lot');
     await assertDatesOpenTx(tx, scope, requested);
     return writeItemLotTx(
@@ -1016,7 +1016,7 @@ async function getHeaderAndRows(
   completeScope(scopeInput);
   const scope = scopeInput;
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await resolveBookTx(tx, scope, kind);
     const headers: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"VCH_TIME","HD_VCH_NO","MAIN_USER","STK_IT_CODE","AC_CODE"
@@ -1253,7 +1253,7 @@ export async function editTagOpening(
   const scope = input.scope;
   const voucherNo = formatVoucherNo(requestedVoucherNo);
   const requested = businessDate(input.vchDate);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const policy = await resolveBookTx(tx, scope, 'tag-opening');
     const ctx = await editContextTx(tx, scope, voucherNo, 'tag-opening', requested);
     // Desktop blocks edits/deletes after a generated tag is consumed: TR_TAG_OPBL.cs:11373-11381.
@@ -1278,7 +1278,7 @@ export async function editItemOpening(
   const scope = input.scope;
   const voucherNo = formatVoucherNo(requestedVoucherNo);
   const requested = businessDate(input.vchDate);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const policy = await resolveBookTx(tx, scope, 'item-opening');
     const ctx = await editContextTx(tx, scope, voucherNo, 'item-opening', requested);
     const proposed = itemBalanceLines(input.lines, 'itemOpening');
@@ -1304,7 +1304,7 @@ export async function editItemLot(
   const scope = input.scope;
   const voucherNo = formatVoucherNo(requestedVoucherNo);
   const requested = businessDate(input.vchDate);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const policy = await resolveBookTx(tx, scope, 'item-lot');
     const ctx = await editContextTx(tx, scope, voucherNo, 'item-lot', requested);
     const proposed = itemLotBalanceLines(input.lines, voucherNo);
@@ -1329,7 +1329,7 @@ export async function deleteTagOpening(
   completeScope(input.scope);
   const scope = input.scope;
   const voucherNo = formatVoucherNo(input.vchNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const policy = await resolveBookTx(tx, scope, 'tag-opening');
     const persisted = await headerTx(tx, scope, voucherNo, 'tag-opening');
     const persistedBusinessDate = businessDate(
@@ -1388,7 +1388,7 @@ async function deleteLoose(
   completeScope(input.scope);
   const scope = input.scope;
   const voucherNo = formatVoucherNo(input.vchNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await resolveBookTx(tx, scope, kind);
     const persisted = await headerTx(tx, scope, voucherNo, kind);
     const persistedBusinessDate = businessDate(

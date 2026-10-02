@@ -1,5 +1,5 @@
 import { dateWhere } from './reports.js';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import type { ReportScope, ListReport } from './reports.js';
 import { applyFilters } from './reportFilters.js';
 
@@ -35,7 +35,7 @@ const NN = (c: string): string => `coalesce(NULLIF(${c}::text,'')::numeric,0)`;
  * voucher is therefore also included when its exact-key SL_DATA header has a non-zero RTN_NET_AMT.
  */
 export async function salesReturnRegister(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const yr = s.coYear ? ' AND r."CO_YEAR"=$2' : '';
     const params: unknown[] = s.coYear ? [s.coCode, s.coYear] : [s.coCode];
     // Voucher-date window; appended after params so the positional indices are right.
@@ -82,7 +82,7 @@ export async function salesReturnRegister(prisma: any, s: ReportScope): Promise<
  * is the company-wide sum of per-karigar balances.
  */
 export async function karigarStatement(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "AC_CODE" AS "acCode",
               sum(CASE WHEN "INOUT_TYPE"='O' THEN ${NN('"ITM_FINE"')} ELSE 0 END) AS issued,
@@ -113,7 +113,7 @@ export async function karigarStatement(prisma: any, s: ReportScope): Promise<Lis
  * date. Scoped by CO_CODE; totals reports the group count.
  */
 export async function rateList(prisma: any, s: ReportScope): Promise<ListReport> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT DISTINCT ON (r."GR_CODE") r."GR_CODE" AS "group", r."GR_TOUCH" AS touch,
               r."GR_RATE" AS rate, r."FINE_GL_RATE" AS "fineGold", r."VCH_DATE" AS date
@@ -142,7 +142,7 @@ export async function karigarLedger(
   s: ReportScope,
   karigarAc: string,
 ): Promise<ListReport & { karigarAc: string }> {
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO" vch, "VCH_DATE"::text vd, coalesce("VCH_TYPE",'') vt, coalesce("INOUT_TYPE",'') io, coalesce("IT_CODE",'') it, ${NN('"ITM_NWT"')} nwt, ${NN('"ITM_FINE"')} fine
          FROM "KR_DETL" WHERE "CO_CODE"=$1 AND "AC_CODE"=$2 ORDER BY "VCH_DATE" NULLS LAST, "VCH_NO"`,

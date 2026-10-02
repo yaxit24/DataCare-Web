@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import {
   DEFAULT_INT_YEAR_DAYS,
   desktopDhrnInterest,
@@ -555,7 +555,7 @@ export async function issueDhrn(
     return { vchNo: identity.vchNo, monthInt, intAmt };
   };
   if (context) return run(context.tx, context.identity);
-  return withTenant(prisma, input.scope.tenantId, async (tx) =>
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', async (tx) =>
     run(tx, await createIdentityTx(tx, input.scope, date, input.mainUser)),
   );
 }
@@ -849,7 +849,7 @@ export async function receiveDhrn(
     return { vchNo: identity.vchNo, outstanding: newOs };
   };
   if (context) return run(context.tx, context.identity);
-  return withTenant(prisma, input.scope.tenantId, async (tx) =>
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', async (tx) =>
     run(tx, await createIdentityTx(tx, input.scope, date, input.mainUser)),
   );
 }
@@ -925,7 +925,7 @@ export async function receiveDhrnInterest(
   const tenantId = input.scope.tenantId;
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
 
-  const vchNo = await withTenant(prisma, tenantId, async (tx: any) => {
+  const vchNo = await withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     // Interest: operator override if supplied, else computed from issue rate × elapsed × CO_SET (R3).
     const interest =
       input.interest != null && Number.isFinite(input.interest)
@@ -1043,7 +1043,7 @@ export async function outstanding(
   scope: VoucherScope,
   isuNo: number | string,
 ): Promise<number> {
-  return withTenant(prisma, scope.tenantId, (tx: any) => outstandingTx(tx, scope, isuNo));
+  return withTxBudget(prisma, scope.tenantId, 'read', (tx: any) => outstandingTx(tx, scope, isuNo));
 }
 
 export interface DeleteDhrnInput {
@@ -1058,7 +1058,7 @@ export interface DeleteDhrnInput {
 export async function deleteDhrn(prisma: any, input: DeleteDhrnInput): Promise<{ reversed: true }> {
   const tenantId = input.scope.tenantId;
   const key = keyOf(input.scope, Number(input.vchNo), input.book);
-  return withTenant(prisma, tenantId, async (tx: any) => {
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     // A receipt owns its released-item detail as well as the DHRN_DATA movement.
     const extra =
       input.headerTable === 'DHRN_ISU_DATA'

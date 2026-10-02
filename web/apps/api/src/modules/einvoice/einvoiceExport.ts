@@ -1,5 +1,5 @@
 import { round } from '@datacare/core';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import type { XlsxColumn, XlsxSheet } from '../reports/xlsx.js';
 import { EInvoiceValidationError } from './einvoice.js';
 
@@ -367,7 +367,7 @@ export async function eInvoiceExportData(
   options: EInvoiceExportOptions = {},
 ): Promise<EInvoiceExportData> {
   const filters = checkedFilters(scope, options);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const where = scopedWhere(scope, filters, 'a');
     const fromJoin = `
       FROM "SL_DATA" a

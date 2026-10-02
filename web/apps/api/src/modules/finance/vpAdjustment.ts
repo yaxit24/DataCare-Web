@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { assertBalanced, assertPeriodOpen, insertRowTx } from '../posting/posting.js';
 import {
   resolveBookAccountTx,
@@ -597,7 +597,7 @@ export async function saveVpAdjustment(
   input: VpAdjustmentInput,
   requestedVoucherNo?: string,
 ) {
-  return withTenant(prisma, input.scope.tenantId, (tx: any) =>
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', (tx: any) =>
     saveTx(tx, input, requestedVoucherNo),
   );
 }
@@ -609,7 +609,7 @@ export async function getVpAdjustment(
 ) {
   const scope = completeFinanceScope(scopeInput);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     await resolveBookTx(tx, scope);
     // TR_VP_ADJ.cs:2431-2451 loads the persisted header and explicitly preserves HD_VCH_NO,
     // MAIN_USER and the VCH_TIME wall clock; lines 2469-2503 restore every grid/source field.
@@ -662,7 +662,7 @@ export async function deleteVpAdjustment(
 ): Promise<{ reversed: true; auditedLines: number }> {
   const scope = completeFinanceScope(scopeInput);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const policy = await resolveBookTx(tx, scope);
     const edited = await editIdentityTx(tx, {
       table: 'VP_ADJ_DATA',

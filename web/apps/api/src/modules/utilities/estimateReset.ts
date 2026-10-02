@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 export const ESTIMATE_RESET_KIND = 'datacare.ut-import-estimate-reset/1.0' as const;
 export const ESTIMATE_RESET_CONFIRMATION = 'RESET ESTIMATE' as const;
@@ -881,7 +881,7 @@ export async function estimateResetPreview(
 ): Promise<EstimateResetPreview> {
   const scope = requiredScope(inputScope);
   const asOfDate = dateOnly(inputAsOfDate);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'heavy', async (tx: any) => {
     const companyType = await ensureCompanyAllowsResetTx(tx, scope);
     await prepareCandidateTablesTx(tx, scope, asOfDate);
     const diffs = await estimateDiffsTx(tx, scope);
@@ -1296,7 +1296,7 @@ export async function applyEstimateReset(
   assertConfirmation(options as Record<string, unknown>);
   const scope = requiredScope(inputScope);
   const asOfDate = dateOnly(options.asOfDate);
-  return withTenant(prisma, scope.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, scope.tenantId, 'heavy', async (tx: any) => {
     const companyType = await ensureCompanyAllowsResetTx(tx, scope);
     await tx.$executeRawUnsafe(
       'SELECT pg_advisory_xact_lock(hashtext($1))',

@@ -1,5 +1,5 @@
 import { round } from '@datacare/core';
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 import { applyFilters } from './reportFilters.js';
 import type { ListReport, ReportScope } from './reports.js';
 
@@ -41,7 +41,7 @@ export async function branchInoutReport(
   const transferColumn = mode === 'in' ? 'a."FROM_LC_CODE"' : 'a."TO_LC_CODE"';
   const bookName = mode === 'in' ? 'INWORD' : 'OUTWORD';
 
-  return withTenant(prisma, s.tenantId, async (tx: any) => {
+  return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params: unknown[] = [s.coCode, s.lcCode ?? ''];
     const where = ['a."CO_CODE"=$1', 'a."LC_CODE"=$2', `a."BOOK_NAME" IN ('${bookName}')`];
     if (s.coYear) {

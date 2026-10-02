@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { withTenant } from '@datacare/db';
+import { withTxBudget, SERIALIZABLE_VOUCHER } from '../shared/txBudget.js';
 import {
   replaySaleReturnOtherAmount,
   projectSavedSaleReturnEffectContext,
@@ -244,11 +244,8 @@ export async function updateSaleReturnNumeric(
   const voucherNo = scopeKey(scope, requestedVoucherNo);
   const request = validateRequest(input);
   try {
-    return await withTenant(
-      prisma,
-      scope.tenantId,
-      async (tx: any) => runNumericUpdate(tx, scope, voucherNo, request),
-      { isolationLevel: 'Serializable', timeout: 20000 },
+    return await withTxBudget(prisma, scope.tenantId, SERIALIZABLE_VOUCHER, async (tx: any) =>
+      runNumericUpdate(tx, scope, voucherNo, request),
     );
   } catch (error: any) {
     if (error instanceof SavedSaleReturnError) throw error;

@@ -1,4 +1,4 @@
-import { withTenant } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 /**
  * Closing-stock valuation — the desktop's `Ac_Final.Trading_Stock` (`Ac_Final.cs:18-138`).
@@ -109,7 +109,7 @@ export async function closingStockValuation(
   scope: ClosingStockScope,
   input: ClosingStockInput,
 ): Promise<ClosingStockResult> {
-  return withTenant(prisma, scope.tenantId, async (tx: any) =>
+  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) =>
     closingStockValuationTx(tx, scope, input),
   );
 }

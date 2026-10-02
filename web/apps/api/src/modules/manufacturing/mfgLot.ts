@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { withTenant } from '@datacare/db';
+import { withTxBudget, SNAPSHOT_READ } from '../shared/txBudget.js';
 import type { VoucherScope } from '../vouchers/numbering.js';
 
 export type MfgLotKind = 'issue' | 'receive';
@@ -220,9 +220,7 @@ async function settingsTx(tx: any, s: Scope, kind: MfgLotKind) {
 }
 export async function getMfgLotSettings(prisma: any, rawScope: VoucherScope, kind: MfgLotKind) {
   const s = scopeOf(rawScope);
-  return withTenant(prisma, s.tenantId, (tx: any) => settingsTx(tx, s, kind), {
-    isolationLevel: 'RepeatableRead',
-  });
+  return withTxBudget(prisma, s.tenantId, SNAPSHOT_READ, (tx: any) => settingsTx(tx, s, kind));
 }
 export async function listMfgLots(
   prisma: any,
@@ -232,32 +230,27 @@ export async function listMfgLots(
 ) {
   const s = scopeOf(rawScope),
     p = pageOf(query);
-  return withTenant(
-    prisma,
-    s.tenantId,
-    async (tx: any) => {
-      const book = await bookTx(tx, s, kind);
-      const rows: { data: Row }[] = await tx.$queryRawUnsafe(
-        `SELECT ${recordSql('a')} AS data FROM "MFG_DATA" a WHERE ${where}
+  return withTxBudget(prisma, s.tenantId, SNAPSHOT_READ, async (tx: any) => {
+    const book = await bookTx(tx, s, kind);
+    const rows: { data: Row }[] = await tx.$queryRawUnsafe(
+      `SELECT ${recordSql('a')} AS data FROM "MFG_DATA" a WHERE ${where}
       AND ($6='%%' OR "VCH_NO" ILIKE $6 OR "BILL_NO" ILIKE $6 OR "AC_CODE" ILIKE $6 OR "VCH_DESC" ILIKE $6)
       ORDER BY "VCH_DATE" DESC NULLS LAST,"VCH_NO" DESC LIMIT $7 OFFSET $8`,
-        ...args(s),
-        p.pattern,
-        p.limit + 1,
-        p.offset,
-      );
-      const pageRows = rows.slice(0, p.limit).map((r) => r.data);
-      return {
-        book,
-        rows: pageRows,
-        displayLabels: await displayLabelsTx(tx, s, pageRows),
-        hasMore: rows.length > p.limit,
-        limit: p.limit,
-        offset: p.offset,
-      };
-    },
-    { isolationLevel: 'RepeatableRead' },
-  );
+      ...args(s),
+      p.pattern,
+      p.limit + 1,
+      p.offset,
+    );
+    const pageRows = rows.slice(0, p.limit).map((r) => r.data);
+    return {
+      book,
+      rows: pageRows,
+      displayLabels: await displayLabelsTx(tx, s, pageRows),
+      hasMore: rows.length > p.limit,
+      limit: p.limit,
+      offset: p.offset,
+    };
+  });
 }
 export async function getMfgLot(
   prisma: any,
@@ -272,71 +265,66 @@ export async function getMfgLot(
     throw new MfgLotValidationError(
       'Enter a saved voucher reference of at most 8 characters without control characters.',
     );
-  return withTenant(
-    prisma,
-    s.tenantId,
-    async (tx: any) => {
-      const settings = await settingsTx(tx, s, kind);
-      let vchNo = suppliedNo;
-      const read = async (
-        table: 'MFG_DATA' | 'MFG_DETL' | 'MFG_IDTL' | 'MFG_ISU_REC' | 'MAIN_STOCK',
-        order: string,
-      ): Promise<Row[]> => {
-        const rows: { data: Row }[] = await tx.$queryRawUnsafe(
-          `SELECT ${recordSql('a', table === 'MAIN_STOCK')} AS data FROM "${table}" a WHERE ${where} AND "VCH_NO"=$6 ORDER BY ${order}${table === 'MAIN_STOCK' ? ',row_id' : ''}`,
-          ...args(s),
-          vchNo,
+  return withTxBudget(prisma, s.tenantId, SNAPSHOT_READ, async (tx: any) => {
+    const settings = await settingsTx(tx, s, kind);
+    let vchNo = suppliedNo;
+    const read = async (
+      table: 'MFG_DATA' | 'MFG_DETL' | 'MFG_IDTL' | 'MFG_ISU_REC' | 'MAIN_STOCK',
+      order: string,
+    ): Promise<Row[]> => {
+      const rows: { data: Row }[] = await tx.$queryRawUnsafe(
+        `SELECT ${recordSql('a', table === 'MAIN_STOCK')} AS data FROM "${table}" a WHERE ${where} AND "VCH_NO"=$6 ORDER BY ${order}${table === 'MAIN_STOCK' ? ',row_id' : ''}`,
+        ...args(s),
+        vchNo,
+      );
+      return rows.map((r) => r.data);
+    };
+    let headers = await read('MFG_DATA', '"VCH_NO"');
+    // MFG_DATA stores up to eight characters; desktop Format00000 is a minimum display
+    // width, not a five-digit maximum. Exact imported keys win over numeric convenience.
+    if (!headers.length && /^\d{1,4}$/.test(suppliedNo)) {
+      vchNo = suppliedNo.padStart(5, '0');
+      headers = await read('MFG_DATA', '"VCH_NO"');
+    }
+    if (!headers.length) return null;
+    if (headers.length !== 1)
+      throw new MfgLotValidationError('The saved lot voucher identity is ambiguous.');
+    const lines = await read('MFG_DETL', '"SR_NO"'),
+      components = await read('MFG_IDTL', '"SR_NO","ISR_NO"');
+    const ids = new Set<string>();
+    for (const line of lines) {
+      const id = value(line.SR_NO);
+      if (!id || ids.has(id))
+        throw new MfgLotValidationError('A saved lot parent identity is missing or duplicated.');
+      ids.add(id);
+    }
+    const childIds = new Set<string>();
+    for (const child of components) {
+      const id = JSON.stringify([child.SR_NO, child.ISR_NO]);
+      if (child.ISR_NO == null || !ids.has(value(child.SR_NO)) || childIds.has(id))
+        throw new MfgLotValidationError(
+          'A saved lot component is duplicated or has no exact parent row.',
         );
-        return rows.map((r) => r.data);
-      };
-      let headers = await read('MFG_DATA', '"VCH_NO"');
-      // MFG_DATA stores up to eight characters; desktop Format00000 is a minimum display
-      // width, not a five-digit maximum. Exact imported keys win over numeric convenience.
-      if (!headers.length && /^\d{1,4}$/.test(suppliedNo)) {
-        vchNo = suppliedNo.padStart(5, '0');
-        headers = await read('MFG_DATA', '"VCH_NO"');
-      }
-      if (!headers.length) return null;
-      if (headers.length !== 1)
-        throw new MfgLotValidationError('The saved lot voucher identity is ambiguous.');
-      const lines = await read('MFG_DETL', '"SR_NO"'),
-        components = await read('MFG_IDTL', '"SR_NO","ISR_NO"');
-      const ids = new Set<string>();
-      for (const line of lines) {
-        const id = value(line.SR_NO);
-        if (!id || ids.has(id))
-          throw new MfgLotValidationError('A saved lot parent identity is missing or duplicated.');
-        ids.add(id);
-      }
-      const childIds = new Set<string>();
-      for (const child of components) {
-        const id = JSON.stringify([child.SR_NO, child.ISR_NO]);
-        if (child.ISR_NO == null || !ids.has(value(child.SR_NO)) || childIds.has(id))
-          throw new MfgLotValidationError(
-            'A saved lot component is duplicated or has no exact parent row.',
-          );
-        childIds.add(id);
-      }
-      const movements = await read('MFG_ISU_REC', '"SR_NO","ISR_NO"'),
-        stock = await read('MAIN_STOCK', '"SR_NO","ISR_NO"');
-      const snapshot = { header: headers[0]!, lines, components, movements, stock };
-      const version = createHash('sha256').update(JSON.stringify(snapshot)).digest('hex');
-      return {
-        scope: { coCode: s.coCode, lcCode: s.lcCode, coYear: s.coYear, coBook: s.coBook, vchNo },
-        settings,
-        ...snapshot,
-        version,
-        displayLabels: await displayLabelsTx(tx, s, [
-          headers[0]!,
-          ...lines,
-          ...components,
-          ...movements,
-          ...stock,
-        ]),
-      };
-    },
-    { isolationLevel: 'RepeatableRead' },
-  );
+      childIds.add(id);
+    }
+    const movements = await read('MFG_ISU_REC', '"SR_NO","ISR_NO"'),
+      stock = await read('MAIN_STOCK', '"SR_NO","ISR_NO"');
+    const snapshot = { header: headers[0]!, lines, components, movements, stock };
+    const version = createHash('sha256').update(JSON.stringify(snapshot)).digest('hex');
+    return {
+      scope: { coCode: s.coCode, lcCode: s.lcCode, coYear: s.coYear, coBook: s.coBook, vchNo },
+      settings,
+      ...snapshot,
+      version,
+      displayLabels: await displayLabelsTx(tx, s, [
+        headers[0]!,
+        ...lines,
+        ...components,
+        ...movements,
+        ...stock,
+      ]),
+    };
+  });
 }
 
 /** Read-only source inspection. No balance from this endpoint grants a write/allocation. */
@@ -355,23 +343,20 @@ export async function listMfgLotSources(
 ) {
   const s = scopeOf(rawScope),
     p = pageOf(query);
-  return withTenant(
-    prisma,
-    s.tenantId,
-    async (tx: any) => {
-      const settings = await settingsTx(tx, s, kind);
-      if (!settings.sourceSelection)
-        throw new MfgLotValidationError(settings.sourceUnavailableReason!);
-      if (query.sourceKind && query.sourceKind !== settings.sourceKind)
-        throw new MfgLotValidationError(
-          'The source kind does not belong to the selected Setting workflow.',
-        );
-      let rows: Row[];
-      if (kind === 'issue') {
-        // TR_MFG_WITH_LOT.ItemLotIsu:5141 canonical typed-lot balance. Do not split a negative
-        // movement away from its material lot merely because its purchase metadata is different.
-        rows = await tx.$queryRawUnsafe(
-          `SELECT a."ITM_LOT" AS "materialLot",a."IT_CODE" AS "itemCode",MIN(a."VCH_DATE")::text AS "sourceDate",
+  return withTxBudget(prisma, s.tenantId, SNAPSHOT_READ, async (tx: any) => {
+    const settings = await settingsTx(tx, s, kind);
+    if (!settings.sourceSelection)
+      throw new MfgLotValidationError(settings.sourceUnavailableReason!);
+    if (query.sourceKind && query.sourceKind !== settings.sourceKind)
+      throw new MfgLotValidationError(
+        'The source kind does not belong to the selected Setting workflow.',
+      );
+    let rows: Row[];
+    if (kind === 'issue') {
+      // TR_MFG_WITH_LOT.ItemLotIsu:5141 canonical typed-lot balance. Do not split a negative
+      // movement away from its material lot merely because its purchase metadata is different.
+      rows = await tx.$queryRawUnsafe(
+        `SELECT a."ITM_LOT" AS "materialLot",a."IT_CODE" AS "itemCode",MIN(a."VCH_DATE")::text AS "sourceDate",
         SUM(CASE WHEN a."ITM_SIGN"='+' THEN a."ITM_GWT" ELSE 0 END)::text AS "originalWeight",
         SUM(CASE WHEN a."ITM_SIGN"='+' THEN 0 ELSE a."ITM_GWT" END)::text AS "accountedWeight",
         SUM(CASE WHEN a."ITM_SIGN"='+' THEN a."ITM_GWT" ELSE -a."ITM_GWT" END)::text AS "remainingWeight",
@@ -384,33 +369,31 @@ export async function listMfgLotSources(
         GROUP BY a."ITM_LOT",a."IT_CODE"
         HAVING SUM(CASE WHEN a."ITM_SIGN"='+' THEN a."ITM_GWT" ELSE -a."ITM_GWT" END)>0
         ORDER BY a."ITM_LOT",a."IT_CODE" LIMIT $5 OFFSET $6`,
-          s.tenantId,
-          s.coCode,
-          s.lcCode,
-          p.pattern,
-          p.limit + 1,
-          p.offset,
+        s.tenantId,
+        s.coCode,
+        s.lcCode,
+        p.pattern,
+        p.limit + 1,
+        p.offset,
+      );
+    } else {
+      const account = value(query.acCode),
+        sourceBook = value(query.sourceBook);
+      if (!account || account.length > 8)
+        throw new MfgLotValidationError(
+          'Select a karigar account to inspect Setting receipt sources.',
         );
-      } else {
-        const account = value(query.acCode),
-          sourceBook = value(query.sourceBook);
-        if (!account || account.length > 8)
-          throw new MfgLotValidationError(
-            'Select a karigar account to inspect Setting receipt sources.',
-          );
-        if (!settings.sourceBooks.some((b) => value(b.CO_BOOK) === sourceBook))
-          throw new MfgLotValidationError(
-            'Select an eligible configured Setting issue source book.',
-          );
-        const sourceSettings = await settingsTx(tx, { ...s, coBook: sourceBook }, 'issue');
-        if (!sourceSettings.sourceSelection)
-          throw new MfgLotValidationError(
-            'The selected issue source book has an unresolved manufacturing stage.',
-          );
-        // TR_MFG_WITH_LOT.Setting_Rec_ItmLot:5047. Availability is pieces, unlike the separate
-        // tag/work-lot accountable-weight selector. Every source dimension is explicit here.
-        rows = await tx.$queryRawUnsafe(
-          `SELECT a."ITM_LOT" AS "materialLot",a."IT_CODE" AS "itemCode",c."ISU_IT_CODE" AS "receivedItemCode",
+      if (!settings.sourceBooks.some((b) => value(b.CO_BOOK) === sourceBook))
+        throw new MfgLotValidationError('Select an eligible configured Setting issue source book.');
+      const sourceSettings = await settingsTx(tx, { ...s, coBook: sourceBook }, 'issue');
+      if (!sourceSettings.sourceSelection)
+        throw new MfgLotValidationError(
+          'The selected issue source book has an unresolved manufacturing stage.',
+        );
+      // TR_MFG_WITH_LOT.Setting_Rec_ItmLot:5047. Availability is pieces, unlike the separate
+      // tag/work-lot accountable-weight selector. Every source dimension is explicit here.
+      rows = await tx.$queryRawUnsafe(
+        `SELECT a."ITM_LOT" AS "materialLot",a."IT_CODE" AS "itemCode",c."ISU_IT_CODE" AS "receivedItemCode",
         a."IR_LC" AS "sourceBranch",a."IR_YRCD" AS "sourceYear",a."IR_DBCD" AS "sourceBook",a."IR_NO" AS "sourceVoucher",
         a."IR_SRNO"::text AS "sourceOldSrNo",a."IR_AC" AS "sourceAccount",a."IR_TYPE" AS process,a."AC_CODE" AS account,a."KR_AC_CODE" AS karigar,
         (MIN(a."VCH_DATE") FILTER (WHERE a."ITM_SIGN"='-'))::text AS "sourceDate",
@@ -432,71 +415,69 @@ export async function listMfgLotSources(
         HAVING SUM(CASE WHEN a."ITM_SIGN"='-' THEN a."IR_PCS" ELSE 0 END)-SUM(CASE WHEN a."ITM_SIGN"='+' THEN a."IR_PCS" ELSE 0 END)>0
         ORDER BY a."ITM_LOT",a."IR_YRCD",a."IR_DBCD",a."IR_NO",a."IR_SRNO",a."IT_CODE",c."ISU_IT_CODE",a."IR_AC"
         LIMIT $8 OFFSET $9`,
-          s.tenantId,
-          s.coCode,
-          s.lcCode,
-          account,
-          value(settings.stage?.LAST_TRAN),
-          sourceBook,
-          p.pattern,
-          p.limit + 1,
-          p.offset,
-        );
-      }
-      const sources = rows.slice(0, p.limit).map((row) => {
-        const identity =
-          kind === 'issue'
-            ? {
-                kind: settings.sourceKind,
-                coCode: s.coCode,
-                lcCode: s.lcCode,
-                materialLot: row.materialLot,
-                itemCode: row.itemCode,
-              }
-            : {
-                kind: settings.sourceKind,
-                coCode: s.coCode,
-                lcCode: s.lcCode,
-                sourceBranch: row.sourceBranch,
-                sourceYear: row.sourceYear,
-                sourceBook: row.sourceBook,
-                sourceVoucher: row.sourceVoucher,
-                sourceOldSrNo: row.sourceOldSrNo,
-                sourceAccount: row.sourceAccount,
-                materialLot: row.materialLot,
-                itemCode: row.itemCode,
-                receivedItemCode: row.receivedItemCode,
-                process: row.process,
-                account: row.account,
-                karigar: row.karigar,
-              };
-        return {
-          ...row,
-          kind: settings.sourceKind,
-          identity,
-          key: createHash('sha256').update(JSON.stringify(identity)).digest('hex'),
-          availabilityBasis: kind === 'issue' ? 'gross-weight' : 'pieces',
-          advisory: true,
-        };
-      });
+        s.tenantId,
+        s.coCode,
+        s.lcCode,
+        account,
+        value(settings.stage?.LAST_TRAN),
+        sourceBook,
+        p.pattern,
+        p.limit + 1,
+        p.offset,
+      );
+    }
+    const sources = rows.slice(0, p.limit).map((row) => {
+      const identity =
+        kind === 'issue'
+          ? {
+              kind: settings.sourceKind,
+              coCode: s.coCode,
+              lcCode: s.lcCode,
+              materialLot: row.materialLot,
+              itemCode: row.itemCode,
+            }
+          : {
+              kind: settings.sourceKind,
+              coCode: s.coCode,
+              lcCode: s.lcCode,
+              sourceBranch: row.sourceBranch,
+              sourceYear: row.sourceYear,
+              sourceBook: row.sourceBook,
+              sourceVoucher: row.sourceVoucher,
+              sourceOldSrNo: row.sourceOldSrNo,
+              sourceAccount: row.sourceAccount,
+              materialLot: row.materialLot,
+              itemCode: row.itemCode,
+              receivedItemCode: row.receivedItemCode,
+              process: row.process,
+              account: row.account,
+              karigar: row.karigar,
+            };
       return {
-        settings,
-        rows: sources,
-        displayLabels: await displayLabelsTx(
-          tx,
-          s,
-          rows
-            .slice(0, p.limit)
-            .flatMap((row) => [
-              row,
-              ...(Array.isArray(row.contributors) ? (row.contributors as Row[]) : []),
-            ]),
-        ),
-        hasMore: rows.length > p.limit,
-        offset: p.offset,
-        limit: p.limit,
+        ...row,
+        kind: settings.sourceKind,
+        identity,
+        key: createHash('sha256').update(JSON.stringify(identity)).digest('hex'),
+        availabilityBasis: kind === 'issue' ? 'gross-weight' : 'pieces',
+        advisory: true,
       };
-    },
-    { isolationLevel: 'RepeatableRead' },
-  );
+    });
+    return {
+      settings,
+      rows: sources,
+      displayLabels: await displayLabelsTx(
+        tx,
+        s,
+        rows
+          .slice(0, p.limit)
+          .flatMap((row) => [
+            row,
+            ...(Array.isArray(row.contributors) ? (row.contributors as Row[]) : []),
+          ]),
+      ),
+      hasMore: rows.length > p.limit,
+      offset: p.offset,
+      limit: p.limit,
+    };
+  });
 }
