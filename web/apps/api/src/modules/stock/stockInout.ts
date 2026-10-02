@@ -1,4 +1,4 @@
-import { round } from '@datacare/core';
+import { round, stockInoutItemAmount } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { assertPeriodOpen, insertRowTx, postVoucherTx } from '../posting/posting.js';
 import { fineFor, round3 } from '../shared/finePolicy.js';
@@ -179,6 +179,7 @@ type ComputedLine = {
   westPct: number;
   fineWt: number;
   rate: number;
+  rateType: string;
   amount: number;
   labourAmount: number;
   otherAmount: number;
@@ -187,10 +188,7 @@ type ComputedLine = {
 
 const n = (value: unknown): number => (value == null || value === '' ? 0 : Number(value) || 0);
 const text = (value: unknown): string => String(value ?? '').trim();
-// Kernel half-up 2dp for posted money (N48). TR_INOUT re-displays stored amounts through Strings.Format "0.00"
-// (TR_INOUT.cs:4540-4601, 5514-5613), but computes a line amount on entry as Math.Round(fine x rate, 0) with the
-// rate per gram, per 10 g (RATE_TYPE '1'), per kg ('K') or per piece ('P') (TR_INOUT.cs:4105-4117). This writer
-// still values a rated line as fine x rate at 2dp with no unit branch — gap G87.
+// Kernel half-up 2dp for posted money (N48): TR_INOUT re-displays stored amounts through Strings.Format "0.00".
 const r2 = (value: number): number => round(value, 2);
 const today = (): string => new Date().toISOString().slice(0, 10);
 const short = (value: unknown, len: number): string => text(value).slice(0, len);
@@ -322,17 +320,17 @@ async function itemTypesTx(
   tx: any,
   scope: CompleteScope,
   itemCodes: string[],
-): Promise<Map<string, string>> {
+): Promise<Map<string, Record<string, unknown>>> {
   const codes = Array.from(new Set(itemCodes.map(text).filter(Boolean)));
   if (!codes.length) return new Map();
   const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-    `SELECT "IT_CODE","IT_TYPE" FROM "ITEM_MAST"
+    `SELECT "IT_CODE","IT_TYPE","RATE_TYPE" FROM "ITEM_MAST"
       WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "IT_CODE"::text=ANY($3::text[])`,
     scope.tenantId,
     scope.coCode,
     codes,
   );
-  return new Map(rows.map((row) => [text(row.IT_CODE), text(row.IT_TYPE) || 'G']));
+  return new Map(rows.map((row) => [text(row.IT_CODE), row]));
 }
 
 async function locationAccountsTx(
@@ -378,10 +376,6 @@ function locationForLine(
 function lineTag(value: unknown): string {
   const tag = text(value);
   return tag && tag !== 'Y' ? tag.slice(0, 15) : 'N';
-}
-
-function amountOf(line: StockInoutLine, fineWt: number): number {
-  return line.amount != null ? r2(n(line.amount)) : r2(fineWt * n(line.rate));
 }
 
 async function computedLinesTx(
@@ -456,19 +450,24 @@ async function computedLinesTx(
       line.fineWt != null
         ? round3(n(line.fineWt))
         : fineFor('sale', { netWt, ghtWt: n(line.ghtWt), touch, westPct: n(line.westPct) });
-    const amount = amountOf(line, fineWt);
+    const pcs = line.pcs != null ? n(line.pcs) : n(stock?.ITM_PCS);
+    // G87: saved/entered type, else the tag's or the item's (TR_INOUT.cs:4558, :4739); kernel :4085-4117.
+    const rateType = short(text(line.rateType) || text((stock ?? types.get(itCode))?.RATE_TYPE), 1);
+    const amount =
+      stockInoutItemAmount({ rateType, pcs, fine: fineWt, rate: n(line.rate) }) ??
+      r2(n(line.amount));
     const labourAmount = n(line.labourAmount);
     const otherAmount = n(line.otherAmount);
     return {
       input: line,
       srNo,
       itCode,
-      itType: text(line.itType) || types.get(itCode) || 'G',
+      itType: text(line.itType) || text(types.get(itCode)?.IT_TYPE) || 'G',
       transferLcCode,
       locationAccount: locations.get(transferLcCode),
       tagNo,
       vchSrno,
-      pcs: line.pcs != null ? n(line.pcs) : n(stock?.ITM_PCS),
+      pcs,
       grossWt,
       otherWt: n(line.otherWt),
       netWt,
@@ -477,6 +476,7 @@ async function computedLinesTx(
       westPct: n(line.westPct),
       fineWt,
       rate: n(line.rate),
+      rateType,
       amount,
       labourAmount,
       otherAmount,
@@ -602,7 +602,7 @@ function detailRows(
     KR_LBR_RATE: n(line.input.karigarLbrRate),
     KR_LBR_AMT: n(line.input.karigarLbrAmt),
     KR_OTH_AMT: n(line.input.karigarOthAmt),
-    RATE_TYPE: nullable(line.input.rateType, 1),
+    RATE_TYPE: nullable(line.rateType, 1),
     IT_TYPE: line.itType,
     PR_CODE: nullable(line.input.prCode, 2),
     LBR_CODE: nullable(line.input.lbrCode, 4),
@@ -677,7 +677,7 @@ function barRowsForStockIn(
       KR_LBR_RATE: n(line.input.karigarLbrRate),
       KR_LBR_AMT: n(line.input.karigarLbrAmt),
       KR_OTH_AMT: n(line.input.karigarOthAmt),
-      RATE_TYPE: nullable(line.input.rateType, 1),
+      RATE_TYPE: nullable(line.rateType, 1),
       IT_TYPE: line.itType,
       PR_CODE: nullable(line.input.prCode, 2),
       LBR_CODE: nullable(line.input.lbrCode, 4),

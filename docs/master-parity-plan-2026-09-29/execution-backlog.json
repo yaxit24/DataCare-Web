@@ -3909,7 +3909,7 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "Each listed screen can reopen, edit and print",
-      "gapIds": "G54, G87",
+      "gapIds": "G54, G87, G93",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
