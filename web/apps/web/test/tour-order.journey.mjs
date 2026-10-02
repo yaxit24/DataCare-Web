@@ -266,7 +266,12 @@ export async function exerciseTourOrder(page, options = {}) {
         await specs().getByPlaceholder('search diamonds… (F1)', { exact: true }).nth(0).fill(value);
       else await specs().getByLabel(`${label} row 1`, { exact: true }).fill(value);
     }
-    await specs().getByRole('button', { name: 'Add stone row', exact: true }).click();
+    // Scroll the button into view before clicking: the grid above it can overlap the button while a cell
+    // value is still committing, which Playwright reports as "<span> from <table class='grid'> intercepts
+    // pointer events" and times out. This is a test-robustness fix only; the operator UI is unchanged.
+    const addStoneRow = specs().getByRole('button', { name: 'Add stone row', exact: true });
+    await addStoneRow.scrollIntoViewIfNeeded();
+    await addStoneRow.click();
     await specs()
       .getByPlaceholder('search items… (F1)', { exact: true })
       .nth(1)
