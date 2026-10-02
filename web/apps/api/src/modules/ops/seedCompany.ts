@@ -74,10 +74,15 @@ const WHOLESALE_SLOTS: Array<{ srNo: number; acCode: string }> = [
  * G82 — leaves it with no parent, so every save that NAMES the code failed with
  * "tax code is not configured" on every web-provisioned company.
  *
- * `isGst` marks the codes that get the three component rows. The web chart has a single GST output account
- * ('GST'); the desktop's 00085/00086/00087 split is a desktop-chart detail, so all three components point at
- * the one web GST account (a reviewed web-provisioning adaptation; the parent's `TAX_AC` is what the sale
- * ledger posts to, `sales.ts:787`).
+ * `isGst` marks the codes that get the three component rows.
+ *
+ * `TAX_AC` is deliberately left unset, exactly as this seed always left it. Choosing the tax ledger account is a
+ * provisioning-convention question (gaps G38 and G40, decision D15, slices N58 and N59), not part of G82: the
+ * desktop posts sale AND purchase tax to the one `TAX_MAST.TAX_AC` of the parent row (`Ac_Ledr.cs` Sales_Ledr and
+ * Purc_Ledr join `D.SR_NO = 0` and post `D.TAX_AC`), while the web writers fall back to `'GST'` for sales and
+ * `'GSTINPUT'` for purchases when `TAX_AC` is empty (`sales.ts:787`, `purchase.ts:718`). Writing `'GST'` here
+ * would silently move every web-provisioned company's purchase input tax onto the output account, so G82 adds
+ * the parent and component rows and changes no posted account.
  */
 const TAXES: { code: string; name: string; prc: number; isGst?: boolean }[] = [
   { code: '00', name: 'TAX FREE', prc: 0 },
@@ -88,9 +93,6 @@ const TAXES: { code: string; name: string; prc: number; isGst?: boolean }[] = [
   { code: '14', name: 'GST 28%', prc: 28, isGst: true },
   { code: '20', name: 'TCS 0.1%', prc: 0.1 },
 ];
-
-/** The GST account the components reference; the parent carries it too so the sale ledger posts there. */
-const GST_ACCOUNT = 'GST';
 
 /** The desktop component layout for a GST code: SR_NO 1 SGST (half), 2 CGST (half), 3 IGST (full). */
 function gstComponents(prc: number): Array<{ srNo: number; group: string; prc: number }> {
@@ -400,13 +402,12 @@ export async function seedCompany(
         )
       ) {
         await tx.$executeRawUnsafe(
-          `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_PRC","TAX_GROUP","TAX_AC") VALUES ($1,$2,$3,0,$4,$5,'N',$6)`,
+          `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_PRC","TAX_GROUP") VALUES ($1,$2,$3,0,$4,$5,'N')`,
           tenantId,
           coCode,
           t.code,
           t.name,
           t.prc,
-          t.isGst ? GST_ACCOUNT : null,
         );
         taxes += 1;
       }
@@ -423,7 +424,7 @@ export async function seedCompany(
             )
           ) {
             await tx.$executeRawUnsafe(
-              `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_PRC","TAX_GROUP","TAX_AC") VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+              `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_PRC","TAX_GROUP") VALUES ($1,$2,$3,$4,$5,$6,$7)`,
               tenantId,
               coCode,
               t.code,
@@ -431,7 +432,6 @@ export async function seedCompany(
               `${t.name} ${c.group}`,
               c.prc,
               c.group,
-              GST_ACCOUNT,
             );
             taxes += 1;
           }

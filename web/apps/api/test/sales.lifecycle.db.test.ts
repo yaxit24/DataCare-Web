@@ -388,6 +388,14 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
       CO,
       LC,
     );
+    // Old-gold exchange accounts, so an exchange settlement posts (G83 test).
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GST_TYPE")
+       VALUES ($1,$2,$3,'OLDGOLD','Old Gold Exchange','L')`,
+      TENANT,
+      CO,
+      LC,
+    );
     await owner.$executeRawUnsafe(
       `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_GROUP","TAX_NAME","TAX_PRC","TAX_AC")
        VALUES ($1,$2,'10',1,'GST','GST 3%',3,'GSTLED')`,
@@ -1437,5 +1445,63 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
       TENANT,
       CO,
     );
+  });
+
+  it('G83: an old-metal exchange carries ONE valuation across detail, header and ledger', async () => {
+    // The exchange row is entered BY RATE, with a raw posted amount (44000) that deliberately differs from
+    // the desktop grid's recomputed value: fine = round2(netWt*touch/100) = 9.000 and, fine-wise,
+    // valued = Math.Round(fine * rate, 0) = Math.Round(9 * 5000, 0) = 45000. Before G83 the detail stored
+    // 45000 while the header (OLD_GL_AMT), settlement, old-gold ledger leg and BILL_OS summed the raw 44000,
+    // so one voucher carried two old-gold figures. All must now be the single valued amount.
+    const EXPECTED = 45000;
+    const created = await createSale(
+      runtime,
+      saleInput({
+        oldGoldAc: 'OLDGOLD',
+        oldGold: [
+          {
+            metal: 'G',
+            pcs: 1,
+            grossWt: 10,
+            netWt: 10,
+            touch: 90,
+            rate: 5000,
+            amount: 44000, // raw posted amount the writer must ignore in favour of the valued figure
+            description: 'OLD GOLD',
+          },
+        ],
+      }),
+      [{ itCode: 'LOOSE', pcs: 1, grossWt: 5, netWt: 5, touch: 90, metalAmount: 100000 }],
+    );
+    const vch = String(created.vchNo).padStart(5, '0');
+
+    const detl = (await owner.$queryRawUnsafe(
+      `SELECT coalesce("NET_AMT",0)::float AS net, coalesce("ITM_RATE",0)::float AS rate
+         FROM "SL_PR_DETL" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
+      TENANT,
+      vch,
+    )) as Array<{ net: number; rate: number }>;
+    expect(detl.length).toBe(1);
+    expect(detl[0]!.net).toBe(EXPECTED);
+    expect(detl[0]!.rate).toBe(5000);
+
+    const hdr = (await owner.$queryRawUnsafe(
+      `SELECT coalesce("OLD_GL_AMT",0)::float AS og FROM "SL_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
+      TENANT,
+      vch,
+    )) as Array<{ og: number }>;
+    expect(hdr[0]!.og, 'header OLD_GL_AMT equals the detail valuation').toBe(EXPECTED);
+
+    const ledg = (await owner.$queryRawUnsafe(
+      `SELECT coalesce(sum("DR_AMT"),0)::float AS dr FROM "AC_DATA"
+        WHERE tenant_id=$1 AND "VCH_NO"=$2 AND "AC_CODE"='OLDGOLD'`,
+      TENANT,
+      vch,
+    )) as Array<{ dr: number }>;
+    expect(ledg[0]!.dr, 'the old-gold ledger leg equals the detail valuation').toBe(EXPECTED);
+
+    // And the ledger still balances overall.
+    const legs = await ledgerLegs(owner, TENANT, vch);
+    expect(legs.dr).toBeCloseTo(legs.cr, 6);
   });
 });

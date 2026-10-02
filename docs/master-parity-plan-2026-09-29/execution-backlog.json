@@ -3741,7 +3741,7 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "For the 17 desktop copy tables a fresh web company equals a desktop-created company; J01 without manual SQL",
-      "gapIds": "G38, G39, G82",
+      "gapIds": "G38, G39, G82, G86",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
@@ -3756,7 +3756,7 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "Literal-identity static test green; desktop-shaped and migrated companies post, edit and delete in every family",
-      "gapIds": "G40, G41",
+      "gapIds": "G40, G41, G86",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
