@@ -1,7 +1,7 @@
 // Tier-2 live HTTP e2e for the mobile-facing transaction/report API (Follow-up F3).
 // login -> POST /sales -> GET /reports -> GET /gst -> DELETE /sales + RBAC 403. Fastify .inject().
 // Run: DATABASE_URL=postgresql://app_user:app@127.0.0.1:5433/datacare node apps/api/integration/http_txn.live.mjs
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { buildApp } from '../dist/app.js';
 import { hashPassword } from '../dist/modules/auth/password.js';

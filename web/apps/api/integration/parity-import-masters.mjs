@@ -41,7 +41,7 @@
  *   PARITY_TENANT=parity-generic \
  *   node apps/api/integration/parity-import-masters.mjs
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 
 /**
  * Master / configuration tables to copy, in dependency order.

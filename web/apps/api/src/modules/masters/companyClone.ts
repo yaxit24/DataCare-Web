@@ -510,7 +510,7 @@ export async function cloneCompanyTx(
 
     written[spec.table] = (await tx.$executeRawUnsafe(
       `INSERT INTO "${spec.table}"(tenant_id,"CO_CODE",${cols})
-         SELECT $1,$2,${cols} FROM "${spec.table}" WHERE tenant_id=$1 AND "CO_CODE"=$3`,
+         SELECT $1::text,$2::text,${cols} FROM "${spec.table}" WHERE tenant_id=$1 AND "CO_CODE"=$3`,
       tenantId,
       coCode,
       source,

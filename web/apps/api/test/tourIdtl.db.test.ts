@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { deleteTour, tourIssue } from '../src/modules/tour/tour.js';
 import type { VoucherScope } from '../src/modules/vouchers/numbering.js';

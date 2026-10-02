@@ -39,7 +39,7 @@ assert(
 mkdirSync(artifacts, { recursive: true });
 const apiRequire = createRequire(resolve(root, 'apps/api/package.json'));
 const webRequire = createRequire(resolve(root, 'apps/web/package.json'));
-const { PrismaClient } = apiRequire('@prisma/client');
+const { PrismaClient } = apiRequire('@datacare/db');
 const { chromium } = webRequire('playwright');
 const { buildApp } = await import(resolve(root, 'apps/api/dist/app.js'));
 const { hashPassword } = await import(resolve(root, 'apps/api/dist/modules/auth/password.js'));

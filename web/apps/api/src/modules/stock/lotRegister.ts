@@ -62,7 +62,7 @@ export async function stagePurchaseLotDetailTx(
        "INOUT_TYPE","ENTRY_TYPE","BOOK_NAME","AC_CODE","IT_CODE","IT_TYPE","LOT_NO","IT_PCS",
        "IT_GWT","IT_NWT","IT_SIGN","HD_VCH_NO","MAIN_USER","DATA_TYPE","DATA_TRFR","TAG_NO",
        "VCH_SRNO","TAG_IT_CODE","EMP_CODE","PR_CODE","KR_CODE","ITM_LOT")
-     SELECT $1,a."CO_CODE",a."LC_CODE",a."CO_YEAR",a."CO_BOOK",a."VCH_NO",a."SR_NO",a."VCH_DATE",
+     SELECT $1::text,a."CO_CODE",a."LC_CODE",a."CO_YEAR",a."CO_BOOK",a."VCH_NO",a."SR_NO",a."VCH_DATE",
             b."BOOK_SNAME",b."BOOK_INOUT",'L',b."MAIN_BOOK",a."AC_CODE",a."IT_CODE",a."IT_TYPE",
             a."LOT_NO",a."ITM_PCS",a."ITM_GWT",a."ITM_NWT",'+',a."VCH_NO",a."MAIN_USER",
             b."DATA_TYPE",'N','',0,'',c."EMP_CODE",a."PR_CODE",d."AC_SHORT",

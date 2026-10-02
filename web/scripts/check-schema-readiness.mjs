@@ -68,10 +68,9 @@ const contract = JSON.parse(readFileSync(CONTRACT, 'utf8'));
 const initContract = JSON.parse(readFileSync(INIT_CONTRACT, 'utf8'));
 const baseline = JSON.parse(readFileSync(BASELINE, 'utf8'));
 
-// pnpm hoists nothing to the workspace root, so the client is resolved from the package that depends on it.
-const { createRequire } = await import('node:module');
-const req = createRequire(path.join(repo, 'packages', 'db', 'package.json'));
-const { PrismaClient } = req('@prisma/client');
+// The adapter-backed client (Prisma 7, N86) is exported from the built @datacare/db dist. Import it by
+// relative path: a package cannot resolve itself by name from its own directory.
+const { PrismaClient } = await import(path.join(repo, 'packages', 'db', 'dist', 'index.js'));
 const prisma = new PrismaClient({ datasources: { db: { url } } });
 const rows = await prisma.$queryRawUnsafe(
   `SELECT table_name, column_name FROM information_schema.columns WHERE table_schema='public'`,

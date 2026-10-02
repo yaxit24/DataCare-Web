@@ -43,7 +43,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 // The BUILT output: this is a plain .mjs with no TypeScript transform, so `pnpm --filter @datacare/api build`
 // must have run. Same reason the sibling integration scripts import from dist.

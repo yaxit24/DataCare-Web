@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const d = RUN ? describe : describe.skip;

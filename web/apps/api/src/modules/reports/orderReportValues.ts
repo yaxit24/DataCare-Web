@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@datacare/db';
 import type { RptSpec } from './reportEngine.js';
 import { evalCrystal } from './crystalFormula.js';
 import { UnsupportedReportBindingError, type ReportRow } from './reportBindingContract.js';

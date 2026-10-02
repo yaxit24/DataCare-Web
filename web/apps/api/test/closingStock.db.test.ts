@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { closingStockValuation } from '../src/modules/reports/closingStock.js';
 import { balanceSheet } from '../src/modules/reports/reports.js';

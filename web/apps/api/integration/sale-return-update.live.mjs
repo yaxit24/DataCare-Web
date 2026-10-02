@@ -19,7 +19,7 @@
 // container; the host port is unreachable), so this file is verified in-sandbox ONLY by
 // `node --check` (valid ESM) and the API typecheck. It runs for real in GitHub Actions CI,
 // which provides postgres:16-alpine.
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { updateSaleReturnNumeric } from '../dist/modules/sales/saleReturnNumericUpdate.js';
 import { getSavedSaleReturnIncoming } from '../dist/modules/sales/savedSaleReturn.js';

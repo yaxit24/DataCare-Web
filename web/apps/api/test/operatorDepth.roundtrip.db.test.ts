@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { withTenant } from '@datacare/db';
 import { createPurchase, editPurchase, getPurchase } from '../src/modules/purchase/purchase.js';

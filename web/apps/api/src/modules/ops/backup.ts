@@ -1,4 +1,4 @@
-import { Prisma, type PrismaClient } from '@prisma/client';
+import { Prisma, type PrismaClient } from '@datacare/db';
 import { withTenant, type Tx } from '@datacare/db';
 import { withTxBudget } from '../shared/txBudget.js';
 import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';

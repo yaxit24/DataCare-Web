@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@datacare/db";
 import { expect } from "vitest";
 import golden from "./saleReturnLabourReplay.independent.json";
 import {

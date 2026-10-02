@@ -1,7 +1,7 @@
 // Line-level computation parity: for every REAL SL_DETL line, check the desktop's stored values
 // satisfy the web engine's formulas — fine = NWT×TOUCH/100, metal = fine×rate, net = metal+labour+other.
 // Run: DATABASE_URL=<app_user> node apps/api/integration/line_parity.live.mjs
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 
 const prisma = new PrismaClient();

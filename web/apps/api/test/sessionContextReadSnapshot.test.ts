@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 import { BUDGETED_BIND_SQL, READ_BUDGET, budgetedBindParams } from './support/txBudgetBinding.js';
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@datacare/db';
 import type { Tx } from '@datacare/db';
 import {
   withSessionContextReadSnapshot,

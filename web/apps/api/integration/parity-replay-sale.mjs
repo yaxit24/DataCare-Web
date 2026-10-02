@@ -29,7 +29,7 @@
  * rounded the total without recording the round-off. That is a real behaviour and a likely source of the
  * first genuine difference.
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 // The BUILT output, not src: this is a plain .mjs script with no TypeScript transform, so it needs
 // `pnpm --filter @datacare/api build` to have run. Same reason the other integration scripts use dist.

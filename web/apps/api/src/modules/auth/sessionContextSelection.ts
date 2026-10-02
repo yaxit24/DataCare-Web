@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { withTxBudget, SERIALIZABLE_VOUCHER, type Tx } from '../shared/txBudget.js';
-import type { PrismaClient } from '@prisma/client';
+import { hasPostgresErrorCode } from '../shared/prismaError.js';
+import type { PrismaClient } from '@datacare/db';
 import { loadPrincipalTx, type Principal } from '../rbac/authorization.js';
 import { applyLastDayLockTx, type LastDayLockResult } from '../shared/lastDayLock.js';
 import { resolveSelectedScopeTx, validateStoredScopeTx, ScopeError } from './businessScope.js';
@@ -355,13 +356,7 @@ async function signSelected(
 
 function isTransactionConflict(error: unknown): boolean {
   if (!error || typeof error !== 'object') return false;
-  const record = error as { code?: unknown; meta?: { code?: unknown } };
-  return (
-    record.code === 'P2034' ||
-    record.code === '40001' ||
-    record.code === '40P01' ||
-    (record.code === 'P2010' && (record.meta?.code === '40001' || record.meta?.code === '40P01'))
-  );
+  return hasPostgresErrorCode(error, 'P2034', '40001', '40P01');
 }
 
 /**

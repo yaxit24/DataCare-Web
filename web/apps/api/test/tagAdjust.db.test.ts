@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import {
   deleteTagAdjust,
@@ -98,7 +98,7 @@ async function seed(): Promise<void> {
        $1,$2,$3,$4,$5,$6,1,'2024-04-01','OPN','I','T','TAG OPEN','AC001','ORN',$7,$8,
        'LOT-1','DES-1','T01','18',1,0.125,12.5,0.5,12,0,91.6,1.5,11.172,
        0,'G',25,25,50,5000,60000,65000,58000,12,90,1,10.92,'KR01','F','G','P1','O',
-       'source remark',$6,'seed-user','IMG-1','CLASSIC','YELLOW')`,
+       'source remark',$9,'seed-user','IMG-1','CLASSIC','YELLOW')`,
     TENANT,
     CO,
     LC,
@@ -107,6 +107,7 @@ async function seed(): Promise<void> {
     SOURCE_VCH,
     TAG,
     VCH_SRNO,
+    SOURCE_VCH,
   );
 
   await exec(

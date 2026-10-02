@@ -1,5 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { tagWeightDiff } from '../src/modules/stock/tagOps.js';
 import { deleteTagCancel, saveTagCancel } from '../src/modules/stock/tagCancel.js';

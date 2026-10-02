@@ -3,7 +3,7 @@
 // ETL into PG (tenant 'parity') + per-numeric-column Σ diff. Writes project-memory/parity/xdb-matrix.md.
 // Run: DATABASE_URL=postgresql://app_user:app@127.0.0.1:5433/datacare node apps/api/integration/xdb_diff.mjs
 import sql from 'mssql';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { writeFileSync } from 'node:fs';
 

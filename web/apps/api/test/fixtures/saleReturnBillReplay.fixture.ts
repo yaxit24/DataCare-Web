@@ -1,4 +1,4 @@
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@datacare/db';
 import { expect } from 'vitest';
 import independent from './saleReturnBillReplay.independent.json';
 import type {

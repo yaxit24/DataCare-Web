@@ -1,7 +1,7 @@
 // Tier-2 live parity runner (Task 30): deterministic golden vectors + a live tie-in proving the
 // posted ledger matches the billTotals golden vector. Run:
 // DATABASE_URL=postgresql://app_user:app@127.0.0.1:5433/datacare node apps/api/integration/parity.live.mjs
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { runParity } from '../dist/modules/parity/golden.js';
 import { createSale } from '../dist/modules/sales/sales.js';

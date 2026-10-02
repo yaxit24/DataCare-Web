@@ -24,7 +24,7 @@
  * balances differ from the desktop's — worse than sharing the flaw. Changing it means changing both systems
  * and persisting the per-bill allocation first.
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {

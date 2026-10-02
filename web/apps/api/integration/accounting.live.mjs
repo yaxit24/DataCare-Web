@@ -1,6 +1,6 @@
 // Tier-2 live accounting datasets (Task 22) as app_user.
 // Run: DATABASE_URL=postgresql://app_user:app@127.0.0.1:5433/datacare node apps/api/integration/accounting.live.mjs
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { postReceipt, postPayment } from '../dist/modules/finance/finance.js';
 import { trialBalance, accountLedger } from '../dist/modules/accounting/accounting.js';

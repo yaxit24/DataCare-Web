@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createPurchase } from '../src/modules/purchase/purchase.js';
 import { createSale, SaleValidationError } from '../src/modules/sales/sales.js';

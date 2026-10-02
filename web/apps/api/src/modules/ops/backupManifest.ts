@@ -361,7 +361,7 @@ export async function loadBackupSchemaManifest(tx: Queryable): Promise<BackupSch
             policyname AS policy_name,
             cmd AS command,
             permissive,
-            roles,
+            roles::text[] AS roles,
             qual AS using_expression,
             with_check AS check_expression
        FROM pg_catalog.pg_policies

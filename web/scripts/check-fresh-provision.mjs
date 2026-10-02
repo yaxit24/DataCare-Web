@@ -130,7 +130,7 @@ try {
   created = true;
 
   // Apply the chain exactly as a deployment would.
-  await exec('npx', ['prisma', 'migrate', 'deploy', '--schema', 'prisma/schema.prisma'], {
+  await exec('pnpm', ['exec', 'prisma', 'migrate', 'deploy'], {
     cwd: 'packages/db',
     env: { ...process.env, DATABASE_URL: scratchUrl, MIGRATE_DATABASE_URL: scratchUrl },
   });

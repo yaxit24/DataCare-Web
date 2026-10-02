@@ -1,6 +1,6 @@
 // Tier-2 live sales end-to-end (Task 19) as app_user.
 // Run: DATABASE_URL=postgresql://app_user:app@127.0.0.1:5433/datacare node apps/api/integration/sales.live.mjs
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { createSale, deleteSale, SaleValidationError } from '../dist/modules/sales/sales.js';
 import { createTag, tagAvailable } from '../dist/modules/stock/stock.js';

@@ -1,6 +1,6 @@
 import type { VoucherScope } from '../vouchers/numbering.js';
 import { SaleValidationError } from './sales.js';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@datacare/db';
 const Decimal = Prisma.Decimal;
 
 export const ORDER_HEADER_FIELDS: Record<string, string> = {

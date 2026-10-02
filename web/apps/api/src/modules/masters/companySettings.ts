@@ -130,7 +130,7 @@ export async function provisionCompanySettingsTx(
   // row the INSERT..SELECT writes nothing, exactly as the desktop statement does.
   return (await tx.$executeRawUnsafe(
     `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE",${cols})
-       SELECT $1,$2,${cols} FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"=$3`,
+       SELECT $1::text,$2::text,${cols} FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"=$3`,
     tenantId,
     coCode,
     source,

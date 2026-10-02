@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { orderData, orderHtml } from '../src/modules/sales/orderDoc.js';
 import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';

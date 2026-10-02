@@ -8,7 +8,7 @@
 //
 // Run: DATABASE_URL=postgresql://app_user:app@127.0.0.1:5433/datacare \
 //      node apps/api/integration/parity_form.mjs compare 026 00044 SAL 19
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 
 const prisma = new PrismaClient();

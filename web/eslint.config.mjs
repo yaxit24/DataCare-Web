@@ -37,6 +37,7 @@ export default tseslint.config(
       '**/.next/**',
       '**/.turbo/**',
       '**/coverage/**',
+      'packages/db/src/generated/**',
       '**/*.d.ts',
       '**/*.d.mts',
     ],

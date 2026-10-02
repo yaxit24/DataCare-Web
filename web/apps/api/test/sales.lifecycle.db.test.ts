@@ -1,5 +1,5 @@
 import { lineTotalDesktop } from '@datacare/core';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { PeriodLockValidationError } from '../src/modules/posting/posting.js';
 import { createSale, deleteSale, editSale, getSale } from '../src/modules/sales/sales.js';

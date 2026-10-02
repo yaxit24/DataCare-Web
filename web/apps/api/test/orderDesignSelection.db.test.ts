@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import {
@@ -200,7 +200,9 @@ db('Sales F1 saved Design source resolution', () => {
             await other.$executeRawUnsafe("SET LOCAL lock_timeout = '100ms'");
             await other.$executeRawUnsafe(update, scope.tenantId);
           }),
-        ).rejects.toMatchObject({ meta: { code: '55P03' } });
+          // Prisma 7's driver adapter carries the PostgreSQL SQLSTATE under
+          // meta.driverAdapterError.cause (was meta.code under Prisma 6's Rust engine). N86.
+        ).rejects.toMatchObject({ meta: { driverAdapterError: { cause: { code: '55P03' } } } });
     });
     expect((await resolve(ref)).source).toEqual(ref);
   });

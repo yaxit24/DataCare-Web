@@ -26,7 +26,7 @@
  * (book 027 alone uses 01/03/04, 09/10, 19/20 and 25/26), so they need measuring per family before any
  * mapping is written. Guessing one here would pin a wrong answer.
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { postVoucherTx } from '../src/modules/posting/posting.js';

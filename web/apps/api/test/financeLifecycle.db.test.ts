@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import {
   deleteEmployeeJv,
@@ -241,7 +241,7 @@ databaseDescribe('database-backed finance voucher lifecycles', () => {
       await owner.$executeRawUnsafe(
         `INSERT INTO "BOOK_DATA"(
            tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK",
-           "CUR_USE","BOOK_TBL_NAME") VALUES ($1,$2,$3,$4,$5,$6,$5,'Y',$7)`,
+           "CUR_USE","BOOK_TBL_NAME") VALUES ($1,$2,$3,$4,$5,$6,$5::text,'Y',$7)`,
         TENANT,
         CO,
         LC,

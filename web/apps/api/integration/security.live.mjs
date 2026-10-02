@@ -1,6 +1,6 @@
 // Tier-2 live security re-assertion (Task 31) as app_user — RLS tenant isolation must hold.
 // Run: DATABASE_URL=postgresql://app_user:app@127.0.0.1:5433/datacare node apps/api/integration/security.live.mjs
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 
 const prisma = new PrismaClient();
