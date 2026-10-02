@@ -42,6 +42,7 @@ import {
   saleItemAmount,
 } from '@datacare/core';
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
+import { gstTaxRows } from '../shared/taxDataRows.js';
 import { orderAdvanceAvailableTx, adjustOrderIntoSaleTx } from './salesOrder.js';
 import { fineWt } from '../shared/fine.js';
 import { resolveBookAccountTx, resolveBookPolicyTx } from '../shared/bookPolicy.js';
@@ -1711,45 +1712,17 @@ async function writeSaleTx(
     TAX_SIGN: '+',
     TAX_CODE: taxPolicy.taxCode,
   };
-  // TAX_TYPE and SR_NO come from the tax code's COMPONENT rows, exactly as Ac_Tax.cs does in all ~20 of its
-  // book families: `C.TAX_GROUP` joined at C.SR_NO = 1 (SGST) and 2 (CGST) for intra-state, or 3 (IGST) for
-  // inter-state. Both rows previously carried `taxPolicy.taxGroup`, which is the PARENT's group - 'N' for a GST
-  // code - so a tax report grouping by TAX_TYPE could not split the halves at all.
-  //
-  // Confirmed by data: all 184 real TAX_DATA rows are two per voucher, SGST at SR_NO 1 then CGST at SR_NO 2,
-  // and TAX_TYPE never holds anything but those two names. Inter-state has no rows in this dataset, so its
-  // SR_NO 3 and full amount rest on the source alone - recorded as such rather than presented as measured.
-  //
-  // A component absent from TAX_MAST falls back to the parent group rather than writing an empty string, so a
-  // half-configured tax code degrades to the previous behaviour instead of writing a row no report can read.
-  const component = (srNo: number): string =>
-    taxPolicy.components.get(srNo)?.group || taxPolicy.taxGroup;
-  const taxRows = interState
-    ? [
-        {
-          ...taxBase,
-          SR_NO: 3,
-          TAX_TYPE: component(3),
-          TAX_PRC: input.taxRatePct,
-          TAX_AMT: totals.igst,
-        },
-      ]
-    : [
-        {
-          ...taxBase,
-          SR_NO: 1,
-          TAX_TYPE: component(1),
-          TAX_PRC: taxPolicy.components.get(1)?.pct ?? round2s(input.taxRatePct / 2),
-          TAX_AMT: totals.sgst,
-        },
-        {
-          ...taxBase,
-          SR_NO: 2,
-          TAX_TYPE: component(2),
-          TAX_PRC: taxPolicy.components.get(2)?.pct ?? round2s(input.taxRatePct / 2),
-          TAX_AMT: totals.cgst,
-        },
-      ];
+  // TAX_TYPE, TAX_PRC and SR_NO come from the tax code's COMPONENT rows (Ac_Tax.Sales_GST :92-96; G90 for
+  // the other families). Confirmed by data: all 184 real TAX_DATA rows are two per voucher, SGST at SR_NO 1
+  // then CGST at SR_NO 2. Inter-state has no rows in that dataset, so its SR_NO 3 and full amount rest on the
+  // source alone.
+  const taxRows = gstTaxRows(taxBase, taxPolicy, {
+    interState,
+    ratePct: input.taxRatePct,
+    igst: totals.igst,
+    sgst: totals.sgst,
+    cgst: totals.cgst,
+  });
   if (hmAmt > 0 && hmTax > 0) {
     const hmBase = { ...taxBase, NET_AMT: hmAmt };
     if (interState)

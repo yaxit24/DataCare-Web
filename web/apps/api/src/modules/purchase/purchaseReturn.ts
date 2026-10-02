@@ -19,6 +19,7 @@ import {
   PurchaseValidationError,
 } from './purchase.js';
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
+import { gstTaxRows } from '../shared/taxDataRows.js';
 import { buildPurchaseReturnRojmel, rojmelMetalFor } from '../shared/rojmel.js';
 import { resolveBookAccountTx, resolveBookPolicyTx } from '../shared/bookPolicy.js';
 import { resolveRoundingPolicyTx } from '../shared/roundingPolicyLoader.js';
@@ -487,33 +488,16 @@ export async function createPurchaseReturn(
       TAX_SIGN: '+',
       TAX_CODE: taxPolicy.taxCode,
     };
-    const taxRows: Record<string, unknown>[] = [];
-    if (totals.tax !== 0) {
-      if (taxPolicy.interState)
-        taxRows.push({
-          ...taxBase,
-          SR_NO: 1,
-          TAX_TYPE: taxPolicy.taxGroup,
-          TAX_PRC: input.taxRatePct,
-          TAX_AMT: totals.igst,
-        });
-      else {
-        taxRows.push({
-          ...taxBase,
-          SR_NO: 1,
-          TAX_TYPE: taxPolicy.taxGroup,
-          TAX_PRC: round2(input.taxRatePct / 2),
-          TAX_AMT: totals.cgst,
-        });
-        taxRows.push({
-          ...taxBase,
-          SR_NO: 2,
-          TAX_TYPE: taxPolicy.taxGroup,
-          TAX_PRC: round2(input.taxRatePct / 2),
-          TAX_AMT: totals.sgst,
-        });
-      }
-    }
+    const taxRows: Record<string, unknown>[] =
+      totals.tax !== 0
+        ? gstTaxRows(taxBase, taxPolicy, {
+            interState: taxPolicy.interState,
+            ratePct: input.taxRatePct,
+            igst: totals.igst,
+            sgst: totals.sgst,
+            cgst: totals.cgst,
+          })
+        : [];
     const mainStock = computed.map((line, index) => ({
       ...key,
       SR_NO: index + 1,

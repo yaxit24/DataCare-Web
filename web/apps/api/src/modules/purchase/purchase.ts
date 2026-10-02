@@ -26,6 +26,7 @@ import {
 import { payoutLegs, receiptLegs } from '../finance/tender.js';
 import { fineFor } from '../shared/finePolicy.js';
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
+import { gstTaxRows } from '../shared/taxDataRows.js';
 import { resolveBookAccountTx, resolveBookPolicyTx } from '../shared/bookPolicy.js';
 import { assertCounterCodes, resolveCounterStockPolicyTx } from '../shared/counterStockPolicy.js';
 import { resolveRoundingPolicyTx } from '../shared/roundingPolicyLoader.js';
@@ -1357,33 +1358,16 @@ async function writePurchaseTx(
     TAX_SIGN: '-',
     TAX_CODE: taxPolicy.taxCode,
   };
-  const taxRows: Record<string, unknown>[] = [];
-  if (totals.tax !== 0) {
-    if (interState)
-      taxRows.push({
-        ...taxBase,
-        SR_NO: 1,
-        TAX_TYPE: taxPolicy.taxGroup,
-        TAX_PRC: taxPct,
-        TAX_AMT: totals.igst,
-      });
-    else {
-      taxRows.push({
-        ...taxBase,
-        SR_NO: 1,
-        TAX_TYPE: taxPolicy.taxGroup,
-        TAX_PRC: r2(taxPct / 2),
-        TAX_AMT: totals.cgst,
-      });
-      taxRows.push({
-        ...taxBase,
-        SR_NO: 2,
-        TAX_TYPE: taxPolicy.taxGroup,
-        TAX_PRC: r2(taxPct / 2),
-        TAX_AMT: totals.sgst,
-      });
-    }
-  }
+  const taxRows: Record<string, unknown>[] =
+    totals.tax !== 0
+      ? gstTaxRows(taxBase, taxPolicy, {
+          interState,
+          ratePct: taxPct,
+          igst: totals.igst,
+          sgst: totals.sgst,
+          cgst: totals.cgst,
+        })
+      : [];
   if (hmAmt > 0 && hmTax > 0) {
     const hmB = { ...taxBase, NET_AMT: hmAmt };
     if (interState)
