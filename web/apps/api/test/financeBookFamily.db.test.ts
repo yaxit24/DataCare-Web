@@ -334,4 +334,90 @@ describe.runIf(RUN)('D1 receipt/payment book family and slot-2 kasar', () => {
       KASAR_AVAK,
     ]);
   });
+
+  // Found in the browser (E2E 2026-10-26): Payment, mode BANK, Bank A/c left blank, in the provisioned generic
+  // PAYMENT book — the voucher was saved as BPAY with its money leg on CASH.
+  it('a bank payment in the generic PAYMENT book needs a bank account and never settles to cash', async () => {
+    await book('PAY', 'Payment', 'PAY', 'PAYMENT', 'O', 'PAY_DATA', [
+      [1, 'CASH'],
+      [2, 'KASAR'],
+    ]);
+    for (const bankAc of [undefined, '', 'CASH']) {
+      await expect(
+        postPayment(runtime, {
+          scope: scopeFor('PAY'),
+          partyAc: PARTY,
+          amount: 50000,
+          mode: 'bank',
+          bankAc,
+          vchDate: '2024-04-01',
+        } as never),
+      ).rejects.toThrow(
+        bankAc === 'CASH' ? /cannot settle to the cash account CASH/ : /needs the bank account/,
+      );
+    }
+    await expect(
+      postPaymentLines(runtime, {
+        scope: scopeFor('PAY'),
+        mode: 'upi',
+        vchDate: '2024-04-01',
+        lines: [{ partyAc: PARTY, amount: 10 }],
+      } as never),
+    ).rejects.toThrow(/needs the bank account/);
+    expect(await rowCount()).toBe(0);
+
+    await postPayment(runtime, {
+      scope: scopeFor('PAY'),
+      partyAc: PARTY,
+      amount: 50000,
+      mode: 'bank',
+      bankAc: BANK,
+      vchDate: '2024-04-01',
+    } as never);
+    expect((await legs()).map((r) => [r.ac, r.dr, r.cr])).toEqual([
+      [PARTY, 50000, 0],
+      [BANK, 0, 50000],
+    ]);
+  });
+
+  it('a card receipt in the generic RECEIPT book needs a bank account; a cash receipt still uses slot 1', async () => {
+    await expect(
+      postReceipt(runtime, {
+        scope: scopeFor('RCT'),
+        partyAc: PARTY,
+        amount: 100,
+        mode: 'card',
+        vchDate: '2024-04-01',
+      } as never),
+    ).rejects.toThrow(/needs the bank account it is paid into/);
+    await expect(
+      postReceiptLines(runtime, {
+        scope: scopeFor('RCT'),
+        mode: 'cheque',
+        bankAc: 'CASH',
+        vchDate: '2024-04-01',
+        lines: [{ partyAc: PARTY, amount: 10 }],
+      } as never),
+    ).rejects.toThrow(/cannot settle to the cash account CASH/);
+    expect(await rowCount()).toBe(0);
+    await postReceipt(runtime, {
+      scope: scopeFor('RCT'),
+      partyAc: PARTY,
+      amount: 100,
+      mode: 'cash',
+      vchDate: '2024-04-01',
+    } as never);
+    expect((await legs()).map((r) => r.ac)).toEqual([PARTY, 'CASH']);
+  });
+
+  it('a bank receipt in a BANK REC book still defaults to the book slot-1 bank account', async () => {
+    await postReceipt(runtime, {
+      scope: scopeFor('011'),
+      partyAc: PARTY,
+      amount: 100,
+      mode: 'bank',
+      vchDate: '2024-04-01',
+    } as never);
+    expect((await legs()).map((r) => r.ac)).toEqual([PARTY, BANK]);
+  });
 });
