@@ -20,6 +20,7 @@ import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import SubDetailGrid, { stoneRowFromApi, useSubDetail } from '../../../../components/SubDetailGrid';
 import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
 import { fineFor, labourCharge } from '@datacare/core';
+import { todayLocal } from '../../../../lib/localDate';
 
 interface Line {
   itCode: string;
@@ -73,7 +74,7 @@ interface Line {
   urdRateType: string;
 }
 const blank = (): Line => ({
-  itCode: 'GOLD',
+  itCode: '', // desktop grids start empty; a demo default posts to the wrong item
   tagNo: '',
   metal: 'G',
   pcs: '1',
@@ -154,7 +155,7 @@ export default function PurchaseQuotationPage() {
   const router = useRouter();
   const formKeys = desktopGlobalFormKeyActions((href) => router.push(href));
   const [coBook, setCoBook] = useState('');
-  const [vchDate, setVchDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [vchDate, setVchDate] = useState(() => todayLocal());
   const [acCode, setAcCode] = useState('');
   const [acName, setAcName] = useState('');
   const [billNo, setBillNo] = useState('');
@@ -266,7 +267,7 @@ export default function PurchaseQuotationPage() {
     setVoucherLookup('');
     setResult(null);
     setErr('');
-    setVchDate(new Date().toISOString().slice(0, 10));
+    setVchDate(todayLocal());
     setAcCode('');
     setAcName('');
     setBillNo('');

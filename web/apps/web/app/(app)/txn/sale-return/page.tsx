@@ -121,7 +121,7 @@ const NUMERIC_EXTENDED = new Set<string>([
 ]);
 
 const blank = (): Line => ({
-  itCode: 'GOLD',
+  itCode: '', // desktop grids start empty; a demo default posts to the wrong item
   tagNo: '',
   pcs: '1',
   grossWt: '',
@@ -359,7 +359,13 @@ function LegacySaleReturnForm() {
           <div className="row">
             <div className="field">
               <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} preferred="SRT" />
+              {/* CurBookHelp("SALES RETURNE") (MDI_FORM.cs:7969); the writer accepts only that MAIN_BOOK. */}
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                preferred="SRT"
+                mainBooks={['SALES RETURNE']}
+              />
             </div>
             <div className="field">
               <label>Year</label>

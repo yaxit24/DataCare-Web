@@ -10,6 +10,7 @@ import { LookupPicker } from '../../../../components/LookupPicker';
 import { PartyBalance } from '../../../../components/PartyBalance';
 import { RepairImagePanel } from '../../../../components/RepairImagePanel';
 import { VoucherChrome } from '../../../../components/VoucherChrome';
+import { todayLocal } from '../../../../lib/localDate';
 
 interface RepairLine {
   /** Saved database serial; draft row positions are never photograph identities. */
@@ -147,7 +148,7 @@ export default function RepairReceiptPage() {
     const epoch = ++context.epoch;
     return () => requestContext.current === context && context.epoch === epoch;
   };
-  const [vchDate, setVchDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [vchDate, setVchDate] = useState(() => todayLocal());
   const [billNo, setBillNo] = useState('');
   const [employeeCode, setEmployeeCode] = useState('');
   const [bankName, setBankName] = useState('');

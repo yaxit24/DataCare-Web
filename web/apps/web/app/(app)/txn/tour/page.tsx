@@ -144,7 +144,7 @@ const blank = (): Line => ({
   isuAcCode: '',
   isuAcName: '',
   isuLcCode: '',
-  itCode: 'GOLD',
+  itCode: '', // desktop grids start empty; a demo default posts to the wrong item
   tagNo: '',
   pcs: '1',
   grossWt: '',

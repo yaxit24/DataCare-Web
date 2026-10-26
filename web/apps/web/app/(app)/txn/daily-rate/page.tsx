@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { get, post, ApiError } from '../../../../lib/api';
 import { RateTicker } from '../../../../components/RateTicker';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { todayLocal } from '../../../../lib/localDate';
 
 /** Daily Rate (TR_DAILY_RATE): enter Gold (/10g) + Silver (/kg) fine rate; server derives each group's
  *  rate (fine × touch / 100) → RATE_MAST. Editable per-group grid (manual override) + Tax% + Employee
@@ -16,7 +17,7 @@ interface Grp {
 }
 
 export default function DailyRatePage() {
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(todayLocal());
   const [goldRate, setGoldRate] = useState('');
   const [silverRate, setSilverRate] = useState('');
   const [taxPct, setTaxPct] = useState('3');

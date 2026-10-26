@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { post, ApiError } from '../../../../lib/api';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { todayLocal } from '../../../../lib/localDate';
 
 /** Desktop "Contra Entry" opens with `CurBookHelp("CONTRA")` (MDI_FORM.cs:8100-8111). */
 const CONTRA_MAIN_BOOKS = ['CONTRA'];
@@ -19,7 +20,7 @@ export default function ContraPage() {
   const [drAmt, setDrAmt] = useState('');
   const [crAmt, setCrAmt] = useState('');
   const [itDesc, setItDesc] = useState('');
-  const [vchDate, setVchDate] = useState(new Date().toISOString().slice(0, 10));
+  const [vchDate, setVchDate] = useState(todayLocal());
   const [res, setRes] = useState<{ vchNo: number } | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);

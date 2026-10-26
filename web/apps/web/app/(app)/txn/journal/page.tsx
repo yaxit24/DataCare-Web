@@ -5,6 +5,7 @@ import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
+import { todayLocal } from '../../../../lib/localDate';
 
 interface Line {
   acCode: string;
@@ -19,7 +20,7 @@ const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
 export default function JournalEntryPage() {
   const { lcCode, coYear } = useBusinessScope();
   const [coBook, setCoBook] = useState('');
-  const [vchDate, setVchDate] = useState('');
+  const [vchDate, setVchDate] = useState(() => todayLocal());
   const [narration, setNarration] = useState('');
   const [lines, setLines] = useState<Line[]>([blank(), blank()]);
   // Desktop grids are keyboard-driven: arrows move between cells, Enter advances and

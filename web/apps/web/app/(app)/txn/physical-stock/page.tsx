@@ -9,6 +9,7 @@ import { VoucherChrome } from '../../../../components/VoucherChrome';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { ApiError, del, get, post, put } from '../../../../lib/api';
 import { EntityImagePanel } from '../../../../components/EntityImagePanel';
+import { todayLocal } from '../../../../lib/localDate';
 
 interface StockRow {
   tagNo: string;
@@ -69,7 +70,7 @@ export default function PhysicalStockPage() {
   const formKeys = desktopGlobalFormKeyActions((href) => router.push(href));
   const { coYear, lcCode } = useBusinessScope();
   const [coBook, setCoBook] = useState('');
-  const [vchDate, setVchDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [vchDate, setVchDate] = useState(() => todayLocal());
   const [employeeCode, setEmployeeCode] = useState('');
   const [description, setDescription] = useState('');
   const [loadVoucherNo, setLoadVoucherNo] = useState('');
@@ -108,7 +109,7 @@ export default function PhysicalStockPage() {
       : fallback;
 
   function reset() {
-    setVchDate(new Date().toISOString().slice(0, 10));
+    setVchDate(todayLocal());
     setEmployeeCode('');
     setDescription('');
     setLoadVoucherNo('');

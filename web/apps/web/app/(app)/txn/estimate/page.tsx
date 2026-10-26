@@ -156,7 +156,7 @@ const NUMERIC_EXTENDED = new Set<string>([
 ]);
 
 const blank = (): Line => ({
-  itCode: 'GOLD',
+  itCode: '', // desktop grids start empty; a demo default posts to the wrong item
   pcs: '1',
   grossWt: '',
   netWt: '',
