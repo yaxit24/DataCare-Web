@@ -8,6 +8,12 @@
 ## Active plan
 **Full-parity rebuild (52 tasks / 15 phases A–O)** — replicate the ENTIRE desktop (204 forms, 255 reports, full frontend+backend+DB) at 100% functional parity. The earlier 34-task plan delivered the verified backend CORE; this plan builds out the rest. Task graph = the session todo list (IDs 1–20 group the phases). Run continuously; checkpoint every task.
 
+## Latest slice (2026-10-26, night) — N90 browser-run defects; N86 advisories (PR #55)
+- PR #55 (N86): advisory gate back to 0/0/0/0 with next 15.5.28; Next.js 16.4.3 rehearsal passes. Merge it before the N90 PR so CI's advisory job is green on N90.
+- N90 (`implemented-unverified`): defects found by operating the production build as a shop user — Year Create (G97), generic master save (G98), bank-mode settlement (G99), purchase print HSN tax (G95), grid Enter (G96), GOLD line default (G100 part), purchase/sales-return book families (G101 part), local-day defaults (G103). Open: G100 WALKIN (N58), G101 remaining screens (N62), G102 preview vs posted totals (N63).
+- Ask the owner: confirm "Canto" meant Contra (the run tested Contra); decisions D15–D19 and D30 are still pending and block N50/N51/N52/N56/N58 and G47 items.
+- Next gap G104, slice N91, decision D31.
+
 ## Latest slice (2026-10-26) — N34 Purchase Return edit lifecycle
 - Edit (`PUT /purchase-returns/:vchNo`), lossless reopen and the screen's reopen/edit/delete are implemented and tested (write-set test `web/apps/api/test/purchaseReturnEdit.routes.db.test.ts`, journey `purchase-return`). N34 stays `in-progress`: decision **D30** (document 12 §4, not accepted) asks the owner whether to follow the desktop — no residual limit, no `PR_IDTL` stone rows — instead of G47 as written. New gaps G95 (print HSN tax, N74), G96 (grid Enter, N77). Next in the document 13 queue after this: N56 waits for D19; N50/N51/N52/N58 wait for D15–D18.
 
