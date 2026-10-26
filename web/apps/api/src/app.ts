@@ -856,6 +856,7 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
           masterScope(req),
           cfg,
           (req.body ?? {}) as Record<string, unknown>,
+          { user: sess(req).sub },
         );
         return reply.code(201).send({ created: true });
       } catch (e) {
@@ -935,7 +936,7 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         unknown
       >[];
       if (!Array.isArray(rows)) return reply.code(400).send({ error: 'rows-array-required' });
-      return importMaster(prisma, masterScope(req), cfg, rows);
+      return importMaster(prisma, masterScope(req), cfg, rows, { user: sess(req).sub });
     },
   );
 

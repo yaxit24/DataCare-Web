@@ -10,6 +10,7 @@ import {
   accountCodeHasConfiguredLength,
   resolveSettingsBehaviorTx,
 } from '../shared/settingsBehavior.js';
+import { tableColumnTypesTx } from '../shared/schemaCatalog.js';
 
 /** Declarative config for a master table (Req 8). Column names are consistent across the
  * denormalized schema, so referential guards match referencing tables by the same key columns. */
@@ -32,6 +33,13 @@ export interface MasterConfig {
   table: string;
   keyColumns: string[]; // business key (excludes tenant_id), e.g. ["CO_CODE","AC_CODE"]
   requiredColumns: string[];
+  /**
+   * Write the session location into LC_CODE on save, without scoping list reads by it. The desktop party
+   * master stamps `LC_CODE = MLc_code` (`MS_ACCT.cs:7767`) and print/document readers select the party by
+   * company + location + code (`reports/reportBind.ts`, `sales/orderDoc.ts`), so an account saved without it
+   * disappears from its own bills.
+   */
+  writeLocation?: boolean;
   references?: string[]; // tables that reference this master via the same key columns
   formFields?: FormField[]; // rich ordered field set (label+type) the New/Edit form renders; keyColumns stay required
   /**
@@ -246,7 +254,7 @@ export function bindMasterScope(
   const data = { ...source };
   const columns = configuredColumns(config);
   if (columns.has('CO_CODE')) data.CO_CODE = scope.coCode;
-  if (columns.has('LC_CODE')) {
+  if (columns.has('LC_CODE') || config.writeLocation) {
     if (!scope.lcCode) throw new ValidationError(['LC_CODE']);
     data.LC_CODE = scope.lcCode;
   }
@@ -338,12 +346,64 @@ export async function assertSaveGuardsTx(
   }
 }
 
+const NUMERIC_COLUMN_TYPES = new Set([
+  'smallint',
+  'integer',
+  'bigint',
+  'numeric',
+  'decimal',
+  'real',
+  'double precision',
+]);
+const DATE_COLUMN_TYPE = /^(date|timestamp|time)\b/;
+
+/**
+ * Bind a blank form value the way the desktop master forms do. Every web master form posts its columns as
+ * text, so a field the operator left empty arrives as '' — which PostgreSQL rejects for a numeric or date
+ * column. The desktop converts a blank numeric box with `Conversion.Val` (→ 0) and a blank date mask with
+ * `IIf(!IsDate(x), DBNull.Value, x)` (→ NULL): `MS_GROUP.cs:1873-1883`, `MS_ITEM.cs:3245-3262`,
+ * `MS_ACCT.cs:7810-7851`. Only blank (or whitespace) strings are changed; a non-blank value is bound as
+ * entered, so malformed input still fails instead of silently becoming 0.
+ */
+export function normalizeBlankMasterValues(
+  data: Record<string, unknown>,
+  columnTypes: ReadonlyMap<string, string>,
+): Record<string, unknown> {
+  const out: Record<string, unknown> = { ...data };
+  for (const [column, value] of Object.entries(out)) {
+    if (typeof value !== 'string' || value.trim() !== '') continue;
+    const type = columnTypes.get(column);
+    if (type === undefined) continue;
+    if (NUMERIC_COLUMN_TYPES.has(type)) out[column] = 0;
+    else if (DATE_COLUMN_TYPE.test(type)) out[column] = null;
+  }
+  return out;
+}
+
 // ---- live ops (Tier-2) ----
+/**
+ * Who created a master row. The desktop forms set `MainUser = DC_Main.MCo_User` for a new record and reload the
+ * stored `MAIN_USER` when an existing one is opened, so an edit keeps the creator (`MS_GROUP.cs:1725,1802,1882`,
+ * `MS_ITEM.cs:2857,2990,3252`, `MS_ACCT.cs:6156,6466,7826`). The value is the server session's, never the body's.
+ */
+function stampCreator(
+  data: Record<string, unknown>,
+  columns: ReadonlySet<string>,
+  user: string | undefined,
+): Record<string, unknown> {
+  if (!columns.has('MAIN_USER')) return data;
+  const out = { ...data };
+  if (user) out.MAIN_USER = String(user).slice(0, 15);
+  else delete out.MAIN_USER;
+  return out;
+}
+
 export async function createMaster(
   prisma: any,
   scope: MasterScope,
   config: MasterConfig,
   source: Record<string, unknown>,
+  actor: { user?: string } = {},
 ): Promise<{ created: true }> {
   if (config.table === 'COL_MAST') return createColumnSetting(prisma, scope, source);
   const data = bindMasterScope(config, scope, source);
@@ -360,7 +420,13 @@ export async function createMaster(
     const dup = buildDuplicateCheck(config, data);
     const exists: unknown[] = await tx.$queryRawUnsafe(dup.sql, ...dup.params);
     if (exists.length) throw new DuplicateKeyError(config.duplicateMessage);
-    const ins = buildInsert(config, scope.tenantId, data);
+    const columnTypes = await tableColumnTypesTx(tx, config.table);
+    const row = stampCreator(
+      normalizeBlankMasterValues(data, columnTypes),
+      new Set(columnTypes.keys()),
+      actor.user,
+    );
+    const ins = buildInsert(config, scope.tenantId, row);
     try {
       await tx.$executeRawUnsafe(ins.sql, ...ins.params);
     } catch (e) {
@@ -391,8 +457,8 @@ export async function updateMaster(
     (c) => c in data && (data[c] === null || data[c] === ''),
   );
   if (blanked.length) throw new ValidationError(blanked, desktopMessageFor(config, blanked));
-  const built = buildUpdate(config, data, data);
-  if (!built.setCols.length) throw new ValidationError(['(no updatable columns supplied)']);
+  if (!buildUpdate(config, data, data).setCols.length)
+    throw new ValidationError(['(no updatable columns supplied)']);
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     if (config.table === 'AC_MAST' && data.AC_CODE != null) {
       const behavior = await resolveSettingsBehaviorTx(tx, scope);
@@ -402,8 +468,13 @@ export async function updateMaster(
     const chk = buildDuplicateCheck(config, data);
     const exists: unknown[] = await tx.$queryRawUnsafe(chk.sql, ...chk.params);
     if (!exists.length) throw new NotFoundError();
+    const row = normalizeBlankMasterValues(data, await tableColumnTypesTx(tx, config.table));
+    // An edit keeps the stored creator (the desktop reloads MAIN_USER into the form before saving).
+    delete row.MAIN_USER;
+    const update = buildUpdate(config, row, row);
+    if (!update.setCols.length) throw new ValidationError(['(no updatable columns supplied)']);
     try {
-      await tx.$executeRawUnsafe(built.sql, ...built.params);
+      await tx.$executeRawUnsafe(update.sql, ...update.params);
     } catch (e) {
       throw new DataError(dbErrorDetail(e));
     }
@@ -476,6 +547,7 @@ export const AC_MAST_CONFIG: MasterConfig = {
   table: 'AC_MAST',
   keyColumns: ['CO_CODE', 'AC_CODE'],
   requiredColumns: ['CO_CODE', 'AC_CODE', 'AC_NAME'],
+  writeLocation: true, // MS_ACCT.cs:7767 `dataRow["LC_CODE"] = DC_Main.MLc_code`
   deleteSelectionMessage: DESKTOP_MESSAGES.ACCOUNT_SELECT_FOR_DELETE,
   // MS_ACCT.cs reports the blank name in these exact words.
   columnMessages: { AC_NAME: DESKTOP_MESSAGES.PARTY_NAME_REQUIRED },
@@ -607,13 +679,14 @@ export async function importMaster(
   scope: MasterScope,
   config: MasterConfig,
   rows: Record<string, unknown>[],
+  actor: { user?: string } = {},
 ): Promise<{ created: number; failed: number; errors: { row: number; error: string }[] }> {
   let created = 0;
   let failed = 0;
   const errors: { row: number; error: string }[] = [];
   for (let i = 0; i < rows.length; i++) {
     try {
-      await createMaster(prisma, scope, config, rows[i] ?? {});
+      await createMaster(prisma, scope, config, rows[i] ?? {}, actor);
       created++;
     } catch (e) {
       failed++;
