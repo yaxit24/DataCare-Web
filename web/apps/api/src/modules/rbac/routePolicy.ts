@@ -369,6 +369,7 @@ route('Purchase/Other Commission / Expense Voucher', [
 route('Purchase/Purchase Return', [
   'POST /purchase-returns',
   'GET /purchase-returns/:vchNo',
+  'PUT /purchase-returns/:vchNo',
   'DELETE /purchase-returns/:vchNo',
   'GET /purchase-returns/:vchNo/print',
 ]);

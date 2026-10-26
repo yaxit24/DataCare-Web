@@ -800,6 +800,7 @@ export const REQUIRED_REAL_BROWSER_JOURNEY_IDS: readonly string[] = Object.freez
   'image-conflict',
   'manufacturing-lot',
   'order-images',
+  'purchase-return',
   'repair-image-conflict',
   'sale-amount-basis',
   'sales-order',

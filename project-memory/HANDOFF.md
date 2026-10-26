@@ -8,6 +8,9 @@
 ## Active plan
 **Full-parity rebuild (52 tasks / 15 phases A–O)** — replicate the ENTIRE desktop (204 forms, 255 reports, full frontend+backend+DB) at 100% functional parity. The earlier 34-task plan delivered the verified backend CORE; this plan builds out the rest. Task graph = the session todo list (IDs 1–20 group the phases). Run continuously; checkpoint every task.
 
+## Latest slice (2026-10-26) — N34 Purchase Return edit lifecycle
+- Edit (`PUT /purchase-returns/:vchNo`), lossless reopen and the screen's reopen/edit/delete are implemented and tested (write-set test `web/apps/api/test/purchaseReturnEdit.routes.db.test.ts`, journey `purchase-return`). N34 stays `in-progress`: decision **D30** (document 12 §4, not accepted) asks the owner whether to follow the desktop — no residual limit, no `PR_IDTL` stone rows — instead of G47 as written. New gaps G95 (print HSN tax, N74), G96 (grid Enter, N77). Next in the document 13 queue after this: N56 waits for D19; N50/N51/N52/N58 wait for D15–D18.
+
 ## Latest planning update (2026-10-01, fourth) — device fakes, dev setup and device guides
 - **Decision D29:** Phase 1 is built and tested against device **fakes** with recorded sample inputs and against the desktop source, screenshots and transcripts as the oracle; Odoo IoT is a device-protocol reference only; real hardware and live providers are deferred to acceptance (N25); a fake must fail honestly in production (G33). Slice **N89** adds the device-fake test harness and journeys.
 - **New developer docs:** `docs/handbook/dev/setup.md` (prerequisites, install, run, test, and where the desktop reference code lives) and `docs/handbook/dev/devices.md` (scale, scanner, label printer, camera: how each is triggered and connected to a laptop). Linked from the hub.

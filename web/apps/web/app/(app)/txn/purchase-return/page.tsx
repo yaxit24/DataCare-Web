@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { get, post, ApiError } from '../../../../lib/api';
+import { del, get, post, put, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
 import { BookSelect } from '../../../../components/BookSelect';
@@ -9,153 +9,32 @@ import { TenderPanel, type Tender } from '../../../../components/TenderPanel';
 import { VoucherList } from '../../../../components/VoucherList';
 import { EntityImagePanel } from '../../../../components/EntityImagePanel';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
-import { fineFor, labourCharge } from '@datacare/core';
 import {
   ExtendedBodyCells,
   ExtendedHeaderCells,
   GridModeToggle,
 } from '../../../../components/ExtendedGrid';
+import {
+  blank,
+  cell,
+  extendedLineFields,
+  lineCommand,
+  lineFromPurchase,
+  lineFromView,
+  linePreview,
+  setLineCell,
+  updateLine,
+  type Line,
+} from '../../../../lib/purchaseReturnForm';
 
-interface Line {
-  itCode: string;
-  tagNo: string;
-  /** The tag instance on the original purchase line. Server-owned identity; never typed by the operator. */
-  vchSrno?: number;
-  pcs: string;
-  grossWt: string;
-  netWt: string;
-  touch: string;
-  rate: string;
-  making: string;
-  tblCode: string;
-  designNo: string;
-  itDesc: string;
-  lotNo: string;
-  itmLot: string;
-  withStock: string;
-  bagWt: string;
-  lessWt: string;
-  lossWt: string;
-  ghtPct: string;
-  ghtWt: string;
-  westPct: string;
-  fineWt: string;
-  labourPct: string;
-  lessTouch: string;
-  lesTouch: string;
-  kunFine: string;
-  convRate: string;
-  convPct: string;
-  otherRate: string;
-  mrp: string;
-  metalAmount: string;
-  commissionPct: string;
-  commissionAmount: string;
-  fineCutPcs: string;
-  fineCutGrossWt: string;
-  fineCutNetWt: string;
-  fineCutFine: string;
-  prCode: string;
-  urdRateType: string;
-}
-const extendedLineFields: Array<[keyof Line, string]> = [
-  ['tblCode', 'Counter'],
-  ['designNo', 'Design'],
-  ['itDesc', 'Item Desc'],
-  ['lotNo', 'Lot No'],
-  ['itmLot', 'Item Lot'],
-  ['withStock', 'With Stock'],
-  ['bagWt', 'Bag Wt'],
-  ['lessWt', 'Less Wt'],
-  ['lossWt', 'Loss Wt'],
-  ['ghtPct', 'Ghat %'],
-  ['ghtWt', 'Ghat Wt'],
-  ['westPct', 'Wastage %'],
-  ['fineWt', 'Fine Wt'],
-  ['labourPct', 'Labour %'],
-  ['lessTouch', 'Less Touch'],
-  ['lesTouch', 'Old-gold Less Touch'],
-  ['kunFine', 'Kun Fine'],
-  ['convRate', 'Conv Rate'],
-  ['convPct', 'Conv %'],
-  ['otherRate', 'Other Rate'],
-  ['mrp', 'MRP'],
-  ['metalAmount', 'Metal Amt'],
-  ['commissionPct', 'Comm %'],
-  ['commissionAmount', 'Comm Amt'],
-  ['fineCutPcs', 'Fine-cut Pcs'],
-  ['fineCutGrossWt', 'Fine-cut Gross'],
-  ['fineCutNetWt', 'Fine-cut Net'],
-  ['fineCutFine', 'Fine-cut Fine'],
-  ['prCode', 'PR Code'],
-  ['urdRateType', 'URD Rate Type'],
-];
-
-const NUMERIC_EXTENDED = new Set<string>([
-  'bagWt',
-  'lessWt',
-  'lossWt',
-  'ghtPct',
-  'ghtWt',
-  'westPct',
-  'fineWt',
-  'labourPct',
-  'lessTouch',
-  'lesTouch',
-  'kunFine',
-  'convRate',
-  'convPct',
-  'otherRate',
-  'mrp',
-  'metalAmount',
-]);
-
-const blank = (): Line => ({
-  itCode: 'GOLD',
-  tagNo: '',
-  pcs: '1',
-  grossWt: '',
-  netWt: '',
-  touch: '',
-  rate: '',
-  making: '',
-  tblCode: '',
-  designNo: '',
-  itDesc: '',
-  lotNo: '',
-  itmLot: '',
-  withStock: '',
-  bagWt: '',
-  lessWt: '',
-  lossWt: '',
-  ghtPct: '',
-  ghtWt: '',
-  westPct: '',
-  fineWt: '',
-  labourPct: '',
-  lessTouch: '',
-  lesTouch: '',
-  kunFine: '',
-  convRate: '',
-  convPct: '',
-  otherRate: '',
-  mrp: '',
-  metalAmount: '',
-  commissionPct: '',
-  commissionAmount: '',
-  fineCutPcs: '',
-  fineCutGrossWt: '',
-  fineCutNetWt: '',
-  fineCutFine: '',
-  prCode: '',
-  urdRateType: '',
-});
 const n = (v: string) => Number(v || 0);
 const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
+const today = () => new Date().toISOString().slice(0, 10);
+const failure = (e: unknown, fallback: string) =>
+  e instanceof ApiError ? e.body?.message || e.body?.error || e.message : fallback;
 
 /** Books a purchase return can come from: TR_PURC and TR_PURC_HM purchase books. */
 const ORIGINAL_PURCHASE_BOOKS = ['PURCHASE', 'TAG PURCHASE'];
-const str = (v: unknown) => (v == null || Number(v) === 0 ? '' : String(v));
 
 export default function PurchaseReturnPage() {
   // G11: per-gram labour is on (net + ghat) unless the company sets LBR_WITH_GHT='N' (blank default Y).
@@ -163,6 +42,13 @@ export default function PurchaseReturnPage() {
   const labourWithGhat = companyFlag(companySettings, 'LBR_WITH_GHT', 'Y');
   const { coYear, lcCode } = useBusinessScope();
   const [coBook, setCoBook] = useState('');
+  // TR_KR_ISU reopens a saved voucher by number (tVchNo_KeyDown -> DISPLAY_DATA, :5709, :4612) and saves it
+  // through the same handler as a new one; loadedVchNo is the voucher being edited ('' for a new one).
+  const [voucherLookup, setVoucherLookup] = useState('');
+  const [loadedVchNo, setLoadedVchNo] = useState('');
+  const [vchDate, setVchDate] = useState(today);
+  // Header fields the screen does not show but must send back unchanged on an edit.
+  const [taxCode, setTaxCode] = useState('');
   // The original purchase this return reverses. A tagged return must name it: the writer resolves each
   // returned tag against that voucher's own lines (purchaseReturn.ts resolvePurchaseReturnTags).
   const [origBook, setOrigBook] = useState('');
@@ -197,35 +83,99 @@ export default function PurchaseReturnPage() {
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
 
-  const setLine = (i: number, k: keyof Line, v: string) =>
-    setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
+  const setLine = (i: number, k: Parameters<typeof setLineCell>[1], v: string) =>
+    setLines((ls) => ls.map((l, j) => (j === i ? setLineCell(l, k, v) : l)));
+  const scopeQuery = () =>
+    `coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}`;
 
-  // live line preview: fine = net×touch/100, metal = fine×rate, making = net×making/g, net = metal+making
-  const calc = (l: Line) => {
-    const fine = fineFor('purchaseItem', {
-      netWt: n(l.netWt),
-      touch: n(l.touch),
-      ghtWt: n(l.ghtWt),
-      westPct: n(l.westPct),
-    });
-    const metal = r2(fine * n(l.rate));
-    // P5/P7: the grid now carries ghat, so per-gram labour is (net + ghat) x rate unless the
-    // company switches ghat off (LBR_WITH_GHT, blank default 'Y').
-    const mk = labourCharge('per_gram', {
-      netWt: n(l.netWt),
-      ghatWt: n(l.ghtWt),
-      withGhat: labourWithGhat,
-      rate: n(l.making),
-    });
-    return { fine, metal, mk, net: r2(metal + mk) };
-  };
-  const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
+  const previews = lines.map((l) => linePreview(l, labourWithGhat));
+  const lineNet = previews.reduce((s, p) => s + p.net, 0);
   const taxable = r2(lineNet - n(discountAmount));
   const taxPrev = r2((taxable * n(taxRatePct)) / 100);
   const totalPrev = Math.round(taxable + taxPrev);
 
+  function newReturn() {
+    setVoucherLookup('');
+    setLoadedVchNo('');
+    setVchDate(today());
+    setTaxCode('');
+    setOrigBook('');
+    setOrigYear(coYear);
+    setOrigVchNo('');
+    setAcCode('');
+    setAcName('');
+    setBillNo('');
+    setTaxRatePct('3');
+    setDiscountAmount('');
+    setInterState(false);
+    setLines([blank()]);
+    setImageRow(0);
+    setTender({});
+    setResult(null);
+    setErr('');
+  }
+
+  /** Hydrate every field the API returns, so an unchanged save writes the same rows. */
+  async function loadReturn(requested = voucherLookup) {
+    if (!coBook || !requested.trim()) {
+      setErr('select the return book and enter a voucher number first');
+      return;
+    }
+    setErr('');
+    setBusy(true);
+    try {
+      const view = await get<any>(
+        `/purchase-returns/${encodeURIComponent(requested.trim())}?${scopeQuery()}`,
+      );
+      setLoadedVchNo(String(view.voucherNo));
+      setVoucherLookup(String(view.voucherNo));
+      setResult(null);
+      setVchDate(String(view.vchDate));
+      setTaxCode(String(view.taxCode ?? ''));
+      setOrigBook(String(view.origBook ?? ''));
+      setOrigYear(String(view.origYear ?? '') || coYear);
+      setOrigVchNo(String(view.origVchNo ?? ''));
+      setAcCode(String(view.acCode ?? ''));
+      setAcName(String(view.acName ?? ''));
+      setBillNo(String(view.billNo ?? ''));
+      setTaxRatePct(cell(view.taxRatePct) || '0');
+      setDiscountAmount(cell(view.discountAmount));
+      setInterState(!!view.interState);
+      setTender({
+        cashAmt: cell(view.cashAmt),
+        chequeAmt: cell(view.chequeAmt),
+        cardAmt: cell(view.cardAmt),
+        kasar: cell(view.kasar),
+        bankAc: String(view.bankAc ?? ''),
+      });
+      const loaded: Line[] = (view.lines ?? []).map((line: Record<string, unknown>) =>
+        lineFromView(line),
+      );
+      setLines(loaded.length ? loaded : [blank()]);
+      setImageRow(0);
+    } catch (e) {
+      setErr(failure(e, 'load failed'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function removeLoadedReturn() {
+    if (!loadedVchNo || !window.confirm(`Delete purchase return ${loadedVchNo}?`)) return;
+    setBusy(true);
+    setErr('');
+    try {
+      await del(`/purchase-returns/${encodeURIComponent(loadedVchNo)}?${scopeQuery()}`);
+      newReturn();
+    } catch (e) {
+      setErr(failure(e, 'delete failed'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   // Import the original purchase: supplier, tax and every line with its tag instance, so the operator
-  // returns what was bought instead of retyping it (desktop TR_KR_ISU source picker, :6850-6895).
+  // returns what was bought instead of retyping it (desktop TR_KR_ISU source picker, :6845-6975).
   async function importPurchase() {
     if (!origBook || !origVchNo.trim()) {
       setErr('select the original purchase book and voucher first');
@@ -241,31 +191,14 @@ export default function PurchaseReturnPage() {
       setAcCode(String(view.acCode ?? ''));
       setAcName(String(view.acName ?? ''));
       setBillNo(String(view.billNo ?? ''));
-      setTaxRatePct(str(view.taxRatePct) || '0');
+      setTaxRatePct(cell(view.taxRatePct) || '0');
       setInterState(!!view.interState);
-      const imported: Line[] = (view.lines ?? []).map((line: any) => ({
-        ...blank(),
-        itCode: String(line.itCode ?? ''),
-        tagNo: String(line.tagNo ?? ''),
-        vchSrno: Number(line.vchSrno ?? 0) || undefined,
-        pcs: str(line.pcs) || '1',
-        grossWt: str(line.grossWt),
-        netWt: str(line.netWt),
-        touch: str(line.touch),
-        rate: str(line.rate),
-        making: line.labourType === 'per_gram' ? str(line.labourRate) : '',
-        ghtWt: str(line.ghtWt),
-        westPct: str(line.westPct),
-        designNo: String(line.designNo ?? ''),
-        tblCode: String(line.tblCode ?? ''),
-        itDesc: String(line.itDesc ?? ''),
-        mrp: str(line.mrp),
-      }));
+      const imported: Line[] = (view.lines ?? []).map((line: Record<string, unknown>) =>
+        lineFromPurchase(line),
+      );
       setLines(imported.length ? imported : [blank()]);
     } catch (e) {
-      setErr(
-        e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'import failed',
-      );
+      setErr(failure(e, 'import failed'));
     } finally {
       setBusy(false);
     }
@@ -280,6 +213,7 @@ export default function PurchaseReturnPage() {
       const body = {
         coBook,
         coYear,
+        vchDate,
         origBook: origVchNo.trim() ? origBook || undefined : undefined,
         origYear: origVchNo.trim() ? origYear || undefined : undefined,
         origVchNo: origVchNo.trim() || undefined,
@@ -287,32 +221,11 @@ export default function PurchaseReturnPage() {
         acName: acName || undefined,
         billNo: billNo || undefined,
         taxRatePct: Number(taxRatePct),
+        taxCode: loadedVchNo ? taxCode || undefined : undefined,
         interState,
         discountAmount: discountAmount ? Number(discountAmount) : undefined,
-        lines: lines
-          .filter((l) => l.itCode && (l.netWt || l.rate))
-          .map((l) => ({
-            itCode: l.itCode,
-            tagNo: l.tagNo || undefined,
-            vchSrno: l.tagNo ? l.vchSrno : undefined,
-            pcs: n(l.pcs),
-            grossWt: n(l.grossWt),
-            netWt: n(l.netWt),
-            touch: n(l.touch),
-            rate: n(l.rate),
-            ...(l.making ? { labourType: 'per_gram', labourRate: n(l.making) } : {}),
-            // P7: extended columns; a blank cell is OMITTED, never sent as 0 (an explicit zero is an
-            // override at the writer and would defeat the server's derivation).
-            ...Object.fromEntries(
-              extendedLineFields
-                .map(([key]) => [
-                  key,
-                  String((l as unknown as Record<string, unknown>)[key] ?? '').trim(),
-                ])
-                .filter(([, v]) => v !== '')
-                .map(([key, v]) => [key, NUMERIC_EXTENDED.has(key as string) ? Number(v) : v]),
-            ),
-          })),
+        // A loaded line is sent back as loaded; a new line only with the cells the operator filled.
+        lines: lines.filter((l) => l.loaded || (l.itCode && (l.netWt || l.rate))).map(lineCommand),
         cashAmt: n(String(tender.cashAmt ?? '')),
         chequeAmt: n(String(tender.chequeAmt ?? '')),
         cardAmt: n(String(tender.cardAmt ?? '')),
@@ -322,9 +235,14 @@ export default function PurchaseReturnPage() {
         bankAc: tender.bankAc || undefined,
         kasarAc: tender.kasarAc || undefined,
       };
-      setResult(await post('/purchase-returns', body));
+      const saved = loadedVchNo
+        ? await put<any>(`/purchase-returns/${encodeURIComponent(loadedVchNo)}`, body)
+        : await post<any>('/purchase-returns', body);
+      // Reload what was saved, so the screen holds the persisted voucher and a further save is an edit.
+      await loadReturn(String(saved.vchNo).padStart(5, '0'));
+      setResult(saved);
     } catch (e) {
-      setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
+      setErr(failure(e, 'failed'));
     } finally {
       setBusy(false);
     }
@@ -346,6 +264,40 @@ export default function PurchaseReturnPage() {
               />
             </div>
             <div className="field">
+              <label>Voucher No</label>
+              <input
+                aria-label="Voucher No"
+                value={voucherLookup}
+                onChange={(e) => setVoucherLookup(e.target.value)}
+                placeholder="00001"
+              />
+            </div>
+            <button type="button" className="ghost" disabled={busy} onClick={() => loadReturn()}>
+              Load
+            </button>
+            {loadedVchNo && (
+              <span className="msg ok" data-testid="purchase-return-loaded">
+                Loaded #{loadedVchNo}
+              </span>
+            )}
+            {loadedVchNo && (
+              <button type="button" className="danger" disabled={busy} onClick={removeLoadedReturn}>
+                Delete
+              </button>
+            )}
+            <button type="button" className="ghost" disabled={busy} onClick={newReturn}>
+              New
+            </button>
+            <div className="field">
+              <label>Date</label>
+              <input
+                type="date"
+                aria-label="Voucher date"
+                value={vchDate}
+                onChange={(e) => setVchDate(e.target.value)}
+              />
+            </div>
+            <div className="field">
               <label>Year</label>
               <input value={coYear} readOnly />
             </div>
@@ -353,6 +305,7 @@ export default function PurchaseReturnPage() {
               <label>Supplier (AC_CODE)</label>
               <LookupPicker
                 entity="accounts"
+                ariaLabel="Supplier account"
                 value={acCode}
                 onChange={setAcCode}
                 onPick={(r) => {
@@ -448,9 +401,9 @@ export default function PurchaseReturnPage() {
             </thead>
             <tbody>
               {lines.map((l, i) => {
-                const c = calc(l);
+                const c = previews[i] ?? linePreview(l, labourWithGhat);
                 return (
-                  <tr key={i}>
+                  <tr key={i} onFocus={() => setImageRow(i)}>
                     <td>
                       <LookupPicker
                         entity="items"
@@ -463,28 +416,21 @@ export default function PurchaseReturnPage() {
                       <LookupPicker
                         entity="tags"
                         value={l.tagNo}
-                        // A typed tag is a different instance: drop the serial imported with the old one.
-                        onChange={(v) =>
-                          setLines((ls) =>
-                            ls.map((l, j) =>
-                              j === i ? { ...l, tagNo: v, vchSrno: undefined } : l,
-                            ),
-                          )
-                        }
+                        // A typed tag is a different instance: updateLine drops the old serial.
+                        onChange={(v) => setLine(i, 'tagNo', v)}
                         style={{ width: 110 }}
                         onPick={(r) =>
                           setLines((ls) =>
                             ls.map((x, j) =>
                               j === i
-                                ? {
-                                    ...x,
+                                ? updateLine(x, {
                                     tagNo: String(r.code),
                                     itCode: String(r.name || x.itCode),
                                     netWt: String(r.ITM_NWT ?? x.netWt),
                                     grossWt: String(r.ITM_GWT ?? x.grossWt),
                                     touch: String(r.ITM_TOUCH ?? x.touch),
                                     rate: String(r.ITM_RATE ?? x.rate),
-                                  }
+                                  })
                                 : x,
                             ),
                           )
@@ -571,7 +517,7 @@ export default function PurchaseReturnPage() {
               <b>Total ₹{totalPrev.toLocaleString('en-IN')}</b>
             </span>
             <button className="primary" disabled={busy}>
-              {busy ? 'Saving…' : 'Save Return'}
+              {busy ? 'Saving…' : loadedVchNo ? `Save Return #${loadedVchNo}` : 'Save Return'}
             </button>
           </div>
         </div>
@@ -597,8 +543,12 @@ export default function PurchaseReturnPage() {
         book={coBook}
         deleteBase="/purchase-returns"
         printHref={(v) =>
-          `/api/purchase-returns/${encodeURIComponent(v)}/print?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}&format=html`
+          `/api/purchase-returns/${encodeURIComponent(v)}/print?${scopeQuery()}&format=html`
         }
+        onLoad={(v) => {
+          setVoucherLookup(v);
+          void loadReturn(v);
+        }}
         reloadKey={result?.vchNo}
       />
       {/* Desktop BtnImgS / BtnImgC / BtnImgD photograph the tag on the current grid row. */}
