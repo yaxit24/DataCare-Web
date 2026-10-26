@@ -92,6 +92,96 @@ describe('faithful A4 documents', () => {
     expect(cn).not.toContain('Tax Invoice');
   });
 
+  // G95 (found in the N34 visual check and again in the 2026-10-26 E2E): purchase rows carry no per-line tax, so
+  // the HSN summary printed 0.00 tax while the totals showed IGST 5,580. PrRtnBillGst.RPT prints header tax.
+  it('purchase bill without line tax: the HSN summary carries the header IGST, split by taxable', () => {
+    const html = purchaseBillHtml(
+      {
+        BILL_NO: 'MB/1123',
+        VCH_NO: '00001',
+        CO_BOOK: 'PR',
+        NET_AMT: 186198,
+        DISC_AMT: 198,
+        IGST_TAX: 5580,
+        TOT_AMT: 191580,
+      },
+      [
+        {
+          IT_CODE: 'CHN22',
+          ITM_PCS: 2,
+          ITM_GWT: 20,
+          ITM_NWT: 19.5,
+          ITM_AMT: 116103,
+          LBR_AMT: 8775,
+          HSN_CODE: '7113',
+        },
+        {
+          IT_CODE: 'RNG18',
+          ITM_PCS: 3,
+          ITM_GWT: 12,
+          ITM_NWT: 11.2,
+          ITM_AMT: 54600,
+          LBR_AMT: 6720,
+          HSN_CODE: '7114',
+        },
+      ],
+      { company: CO, party: { AC_NAME: 'MAHALAXMI BULLION SUPPLIERS', AC_STATE: 'MAHARASHTRA' } },
+    );
+    const hsn = html.slice(html.indexOf('class="hsn"'), html.indexOf('class="tot"'));
+    // 5580 × 124878 / 186198 = 3742.36 to 7113, the remainder 1837.64 to 7114 — together exactly the header 5,580.
+    expect(hsn).toContain('<td>7113</td><td>1,24,878.00</td><td>3,742.36</td><td>3,742.36</td>');
+    expect(hsn).toContain('<td>7114</td><td>61,320.00</td><td>1,837.64</td><td>1,837.64</td>');
+    expect(hsn).not.toContain('<td>0.00</td>');
+  });
+
+  it('intra-state purchase return without line tax: the HSN summary carries header CGST and SGST', () => {
+    const html = purchaseBillHtml(
+      {
+        BILL_NO: 'R1',
+        VCH_NO: '00002',
+        CO_BOOK: 'PRT',
+        NET_AMT: 12400,
+        CGST_TAX: 186,
+        SGST_TAX: 186,
+        TOT_AMT: 12772,
+      },
+      [
+        {
+          IT_CODE: 'RNG18',
+          ITM_PCS: 1,
+          ITM_NWT: 2,
+          ITM_AMT: 11200,
+          LBR_AMT: 1200,
+          HSN_CODE: '7113',
+        },
+      ],
+      { company: CO, title: 'Purchase Return' },
+    );
+    const hsn = html.slice(html.indexOf('class="hsn"'), html.indexOf('class="tot"'));
+    expect(hsn).toContain(
+      '<td>7113</td><td>12,400.00</td><td>186.00</td><td>186.00</td><td>372.00</td>',
+    );
+  });
+
+  it('a sale that carries line tax keeps its own per-line HSN amounts', () => {
+    const html = invoiceHtml(
+      {
+        BILL_NO: 'S1',
+        VCH_NO: '1',
+        CO_BOOK: 'SAL',
+        NET_AMT: 1000,
+        CGST_TAX: 15,
+        SGST_TAX: 15,
+        TOT_AMT: 1030,
+      },
+      [{ IT_CODE: 'RING', ITM_AMT: 1000, ITM_CGST_AMT: 14, ITM_SGST_AMT: 16, HSN_CODE: '7113' }],
+      { company: CO },
+    );
+    expect(html).toContain(
+      '<td>7113</td><td>1,000.00</td><td>14.00</td><td>16.00</td><td>30.00</td>',
+    );
+  });
+
   it('purchase bill: supplier + inter-state IGST', () => {
     const html = purchaseBillHtml(
       {
