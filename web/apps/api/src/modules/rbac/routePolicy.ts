@@ -707,13 +707,7 @@ route('Masters/Item Stock Limits', [
   'POST /masters/item-stock-limits',
   'DELETE /masters/item-stock-limits',
 ]);
-route('Masters/Year Create', [
-  'GET /years',
-  'POST /years',
-  'POST /years/:coYear/close',
-  'POST /years/:coYear/reopen',
-  'POST /years/carry-forward',
-]);
+route('Masters/Year Create', ['GET /years', 'POST /years', 'POST /years/carry-forward']);
 route('Masters/Accounts', [
   'GET /party/:acCode/photo',
   'POST /party/:acCode/photo',
@@ -887,8 +881,6 @@ const UPDATE_POST_ROUTES = new Set([
   'POST /labour-slabs',
   'POST /masters/diamond-sizes',
   'POST /masters/item-stock-limits',
-  'POST /years/:coYear/close',
-  'POST /years/:coYear/reopen',
   'POST /years/carry-forward',
   'POST /party/:acCode/photo',
   'POST /stock/physical-reconcile',

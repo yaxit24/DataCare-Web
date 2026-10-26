@@ -70,8 +70,10 @@ describe('route policy registry', () => {
     // N38 gives WH QUOT its own create/read/update/delete/print resource: 603 + 5 = 608.
     // N54 removes POST /render/pdf (client HTML into Chromium) and adds three server-built PDFs: the generic
     // report export, the account ledger's export and the estimate: 608 - 1 + 3 = 610.
-    expect(routes).toHaveLength(611);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(611);
+    // Year Create loses the web-only POST /years/:coYear/close and /reopen, which rewrote YEAR_MAST.CL_DATE
+    // (the year's closing date, MS_YEAR.cs:1035-1040) and left a reopened year unable to post: 611 - 2 = 609.
+    expect(routes).toHaveLength(609);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(609);
 
     const policies = routes.map((route) => ({
       ...route,
