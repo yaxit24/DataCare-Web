@@ -1,26 +1,41 @@
 {
   "schemaVersion": 1,
-  "date": "2026-10-02",
-  "basedOn": "16b574e",
-  "node": "v25.8.0 (CI target Node 24 LTS)",
+  "date": "2026-10-26",
+  "basedOn": "96f1b74",
+  "node": "v25.8.0 locally (CI target Node 24 LTS)",
   "productionBaseline": {
-    "next": "15.5.27",
+    "next": "15.5.28",
     "react": "19.0.8",
     "react-dom": "19.0.8"
   },
   "candidate": {
-    "next": "16.3.8",
+    "next": "16.4.3",
     "react": "19.0.8",
     "react-dom": "19.0.8"
   },
   "checks": [
-    { "id": "typecheck", "status": "passed" },
-    { "id": "build", "status": "passed" },
-    { "id": "web-tests", "status": "passed" },
-    { "id": "mocked-browser", "status": "failed" },
-    { "id": "route-reachability", "status": "passed" }
+    {
+      "id": "typecheck",
+      "status": "passed"
+    },
+    {
+      "id": "build",
+      "status": "passed"
+    },
+    {
+      "id": "web-tests",
+      "status": "passed"
+    },
+    {
+      "id": "mocked-browser",
+      "status": "passed"
+    },
+    {
+      "id": "route-reachability",
+      "status": "passed"
+    }
   ],
-  "status": "regressions-found",
-  "disposition": "Next.js 16.3.8 with React fixed at 19.0.8: typecheck, production build, web unit/protocol tests (631+9) and route reachability (126/126) pass. The mocked browser smoke times out at /txn/tag-opening waiting for its heading, reproducibly across two runs, indicating a Next.js 16 client-navigation/rendering difference on that route. Per decision D26 the supported production baseline stays on the patched Next.js 15.5 line (15.5.27) while 15.5 still receives security fixes; migrating to Next.js 16 is deferred to a dedicated slice that resolves the tag-opening smoke regression. This rehearsal is run and recorded, which is what D26 requires at this stage.",
-  "notes": "Rehearsal performed on the isolated N86 branch feat/n86-prisma7-next16; package.json restored to Next 15.5.27 afterward so the committed baseline is unchanged."
+  "status": "passed",
+  "disposition": "Next.js 16.4.3 with React fixed at 19.0.8: typecheck, production build, web unit tests (643), the mocked browser smoke and route reachability (126/126) pass. The tag-opening smoke timeout recorded against 16.3.8 on 2026-10-02 does not reproduce on 16.4.3. Per decision D26 production stays on the patched Next.js 15.5 line (15.5.28, which fixes GHSA-2464-fhr4-w9xw) while 15.5 still receives security fixes; the migration to Next.js 16 remains a separate slice, which must also run the real-stack browser suite and the visual protocol on 16.",
+  "notes": "Rehearsal performed in a scratch worktree of fix/n86-advisories-2026-10-26 at 96f1b74 with only apps/web next changed to 16.4.3; nothing from it is committed except this record."
 }
