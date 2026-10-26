@@ -2,11 +2,11 @@ import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createPurchase, deletePurchase } from '../src/modules/purchase/purchase.js';
+import { createPurchaseReturn } from '../src/modules/purchase/purchaseReturn.js';
 import {
-  createPurchaseReturn,
   deletePurchaseReturn,
   getPurchaseReturn,
-} from '../src/modules/purchase/purchaseReturn.js';
+} from '../src/modules/purchase/purchaseReturnLifecycle.js';
 import { createSale, deleteSale } from '../src/modules/sales/sales.js';
 import { createSaleReturn, deleteSaleReturn } from '../src/modules/sales/salesReturn.js';
 import { PeriodLockValidationError } from '../src/modules/posting/posting.js';

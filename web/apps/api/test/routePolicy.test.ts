@@ -70,8 +70,8 @@ describe('route policy registry', () => {
     // N38 gives WH QUOT its own create/read/update/delete/print resource: 603 + 5 = 608.
     // N54 removes POST /render/pdf (client HTML into Chromium) and adds three server-built PDFs: the generic
     // report export, the account ledger's export and the estimate: 608 - 1 + 3 = 610.
-    expect(routes).toHaveLength(610);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(610);
+    expect(routes).toHaveLength(611);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(611);
 
     const policies = routes.map((route) => ({
       ...route,

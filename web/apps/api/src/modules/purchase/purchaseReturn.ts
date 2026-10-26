@@ -1,28 +1,26 @@
 import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
-import { nextHiddenVoucherNoTx } from '../vouchers/lifecycle.js';
-import { issueTagTx, restoreTagTx } from '../stock/stock.js';
-import {
-  postVoucherTx,
-  reverseVoucherTx,
-  assertBalanced,
-  insertRowTx,
-  type LedgerLine,
-} from '../posting/posting.js';
+import { nextHiddenVoucherNoTx, voucherTimestamp } from '../vouchers/lifecycle.js';
+import { issueTagTx } from '../stock/stock.js';
+import { postVoucherTx, assertBalanced, insertRowTx, type LedgerLine } from '../posting/posting.js';
 import { receiptLegs } from '../finance/tender.js';
 import { billTotals, type BillTotals } from '@datacare/core';
 import {
   buildExpenseLegs,
   computeLine,
-  getPurchase,
   type PurchaseLineInput,
   PurchaseValidationError,
 } from './purchase.js';
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
 import { gstTaxRows } from '../shared/taxDataRows.js';
 import { buildPurchaseReturnRojmel, rojmelMetalFor } from '../shared/rojmel.js';
-import { resolveBookAccountTx, resolveBookPolicyTx } from '../shared/bookPolicy.js';
+import {
+  resolveBookAccountTx,
+  resolveBookPolicyTx,
+  type BookPolicy,
+} from '../shared/bookPolicy.js';
 import { resolveRoundingPolicyTx } from '../shared/roundingPolicyLoader.js';
+import { desktopLabourTypeFor } from '../shared/labourDesktop.js';
 
 export interface PurchaseReturnInput {
   scope: VoucherScope;
@@ -218,562 +216,526 @@ async function resolvePurchaseReturnTags(
   return resolved;
 }
 
+/** Every table a purchase-return save writes or reverses, all keyed by the complete voucher key. */
+export const PURCHASE_RETURN_WRITE_TABLES = [
+  'PR_DATA',
+  'PR_DETL',
+  'PR_IDTL',
+  'DM_DATA',
+  'AC_DATA',
+  'TAX_DATA',
+  'MAIN_STOCK',
+  'ROJ_MEL_DATA',
+] as const;
+
+/** What one save carries besides the request: the voucher identity and, on edit, what the desktop keeps. */
+export interface PurchaseReturnWriteContext {
+  vchNo: number;
+  /** Hidden number joining TEMP_BOOK_DATA and the day book; an edit keeps it (TR_KR_ISU.cs:4623). */
+  hdVchNo: string;
+  bookPolicy: BookPolicy;
+  /** The voucher's creator; an edit keeps it (loaded at TR_KR_ISU.cs:4689, written at :5126). */
+  mainUser: string | null;
+  /** Persisted VCH_TIME clock; an edit keeps the time of day (TR_KR_ISU.cs:4622, written at :5123). */
+  persistedClock?: unknown;
+}
+
+function assertReturnRequest(input: PurchaseReturnInput, lines: PurchaseLineInput[]): void {
+  if (!input.acCode) throw new PurchaseValidationError('supplier account (acCode) is required');
+  if (!lines?.length) throw new PurchaseValidationError('at least one return line is required');
+  // TR_KR_ISU settles a return by cheque, card, cash and kasar only (header :5066-5072), and PR_DATA has no
+  // UPI column. A UPI amount was posted to the ledger but could not be stored, so a reopened return showed
+  // none and its next save silently dropped the bank leg.
+  if (round2(num(input.upiAmt)) !== 0)
+    throw new PurchaseValidationError(
+      'a purchase return has no UPI tender; record the refund as cheque or card',
+    );
+}
+
 export async function createPurchaseReturn(
   prisma: any,
   input: PurchaseReturnInput,
   lines: PurchaseLineInput[],
 ): Promise<PurchaseReturnResult> {
-  if (!input.acCode) throw new PurchaseValidationError('supplier account (acCode) is required');
-  if (!lines?.length) throw new PurchaseValidationError('at least one return line is required');
-  const purchaseAc = input.purchaseAc ?? 'PURCHASE';
-  const fallbackTaxAc = input.taxAc ?? 'GSTINPUT';
-  const tenantId = input.scope.tenantId;
-
-  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
+  assertReturnRequest(input, lines);
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', async (tx: any) => {
     const vchNo = await nextVoucherNoTx(tx, input.scope);
-    // HD_VCH_NO is the hidden voucher identity that TEMP_BOOK_DATA and the day book join on. Purchase
-    // allocates one (purchase.ts:1648); the return did not, so its rows could not be joined back.
-    const key = keyOf(input.scope, vchNo);
     const bookPolicy = await resolveBookPolicyTx(tx, input.scope, 'PURCHASE RETURN');
-    // Allocated after the book is resolved, because the hidden series is per book.
+    // HD_VCH_NO is the hidden voucher identity that TEMP_BOOK_DATA and the day book join on; Purchase
+    // allocates one too (purchase.ts:1648). Allocated after the book is resolved: the series is per book.
     const hdVchNo = await nextHiddenVoucherNoTx(tx, {
       ...input.scope,
-      coBook: String(key.CO_BOOK),
+      coBook: keyOf(input.scope, vchNo).CO_BOOK,
     } as never);
-    const roundingPolicy = await resolveRoundingPolicyTx(tx, input.scope);
-    const taxPolicy = await resolveTaxPolicyTx(tx, input.scope, {
-      acCode: input.acCode,
-      taxPct: input.taxRatePct,
-      taxCode: input.taxCode,
+    return writePurchaseReturnTx(tx, input, lines, {
+      vchNo,
+      hdVchNo,
+      bookPolicy,
+      mainUser: input.mainUser ?? null,
     });
-    if (input.interState !== taxPolicy.interState)
-      throw new PurchaseValidationError(
-        'interState does not match the persisted supplier GST type',
-      );
-    const taxAc = taxPolicy.taxAc ?? fallbackTaxAc;
-    const computed = lines.map((line) => {
-      const rounded =
-        line.rate == null ? line : { ...line, rate: roundingPolicy.roundPurchaseRate(line.rate) };
-      return { in: rounded, calc: computeLine(rounded, roundingPolicy) };
-    });
-    const lineNetTotal = computed.reduce((sum, line) => sum + line.calc.net, 0);
-    const totals = billTotals(
-      {
-        lineNetTotal,
-        discountAmount: input.discountAmount,
-        taxRatePct: input.taxRatePct,
-        interState: taxPolicy.interState,
-      },
-      roundingPolicy,
-    );
-    const issued = await resolvePurchaseReturnTags(tx, input, lines);
-
-    const itCodes = [...new Set(lines.map((line) => String(line.itCode).trim()))];
-    const rows: any[] = await tx.$queryRawUnsafe(
-      `SELECT i."IT_CODE" ic,i."IT_NAME" iname,i."IT_TYPE" itype,
-              i."OTH_DETL_POSTING" oth,g."PURC_AC" pac FROM "ITEM_MAST" i
-       LEFT JOIN "GROUP_MAST" g ON g.tenant_id=i.tenant_id
-        AND g."CO_CODE"=i."CO_CODE" AND g."GR_CODE"=i."GR_CODE"
-       WHERE i.tenant_id=$1 AND i."CO_CODE"=$2 AND i."IT_CODE"::text=ANY($3::text[])`,
-      tenantId,
-      input.scope.coCode,
-      itCodes,
-    );
-    const purcAcByItem: Record<string, string> = {};
-    const itemNameByItem: Record<string, string> = {};
-    const itemTypeByItem: Record<string, string> = {};
-    const otherDetailItems = new Set<string>();
-    for (const row of rows) {
-      const item = String(row.ic ?? '').trim();
-      const account = String(row.pac ?? '').trim();
-      if (item && account) purcAcByItem[item] = account;
-      if (item) {
-        itemNameByItem[item] = String(row.iname ?? '').trim();
-        itemTypeByItem[item] = String(row.itype ?? '').trim();
-        if (
-          String(row.oth ?? '')
-            .trim()
-            .toUpperCase() === 'Y'
-        )
-          otherDetailItems.add(item);
-      }
-    }
-    const missing = itCodes.filter((item) => !purcAcByItem[item]);
-    if (missing.length)
-      throw new PurchaseValidationError(
-        `item/group posting configuration missing: ${missing.join(', ')}`,
-      );
-    const expenseLegs = buildExpenseLegs(
-      computed.map((line) => ({
-        net: line.calc.net,
-        ac: purcAcByItem[String(line.in.itCode).trim()] ?? purchaseAc,
-      })),
-      totals.taxable,
-      lineNetTotal,
-    );
-
-    const controlAc =
-      totals.total === 0 ? purchaseAc : await resolveBookAccountTx(tx, input.scope, bookPolicy, 1);
-    let cashAc = input.cashAc ?? 'CASH';
-    if (round2(num(input.cashAmt)) !== 0) {
-      const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 2);
-      if (input.cashAc && input.cashAc.trim() !== configured)
-        throw new PurchaseValidationError('cash account does not match BOOK_DETL configuration');
-      cashAc = configured;
-    }
-    let roundAc = input.roundAc ?? 'ROUNDOFF';
-    let kasarAc = input.kasarAc ?? 'KASAR';
-    if (totals.roundOff !== 0 || round2(num(input.kasar)) !== 0) {
-      const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 3);
-      if (
-        (input.roundAc && input.roundAc.trim() !== configured) ||
-        (input.kasarAc && input.kasarAc.trim() !== configured)
-      )
-        throw new PurchaseValidationError(
-          'round/kasar account does not match BOOK_DETL configuration',
-        );
-      roundAc = configured;
-      kasarAc = configured;
-    }
-
-    const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
-    const originalBook = input.origVchNo == null ? null : String(input.origBook ?? 'PUR').trim();
-    const originalYear =
-      input.origVchNo == null ? null : String(input.origYear ?? input.scope.coYear ?? '').trim();
-    const originalNo = input.origVchNo == null ? null : formatVoucherNo(input.origVchNo);
-    const detl = computed.map((line, index) => ({
-      ...key,
-      VCH_DATE: vchDate,
-      VCH_TYPE: bookPolicy.vchType,
-      INOUT_TYPE: 'O',
-      ENTRY_TYPE: 'R',
-      BOOK_NAME: bookPolicy.bookName,
-      AC_CODE: input.acCode,
-      SR_NO: index + 1,
-      IT_CODE: line.in.itCode,
-      TAG_NO: line.in.tagNo ?? 'N',
-      VCH_SRNO: issued.get(index)?.VCH_SRNO ?? 0,
-      ITM_PCS: num(line.in.pcs),
-      ITM_GWT: num(line.in.grossWt),
-      ITM_NWT: num(line.in.netWt),
-      ITM_TOUCH: num(line.in.touch),
-      ITM_WEST_PRC: num(line.in.westPct),
-      ITM_FINE: line.calc.fine,
-      ITM_OTH_FINE: num(line.in.otherFineWt),
-      SILVER_FINE: num(line.in.silverFineWt),
-      ITM_RATE: num(line.in.rate),
-      ITM_AMT: line.calc.metal,
-      LBR_AMT: line.calc.labour,
-      OTH_AMT: num(line.in.otherAmount),
-      NET_AMT: line.calc.net,
-      TAX_PRC: input.taxRatePct,
-      HM_ID: line.in.huid ?? null,
-      MAIN_USER: input.mainUser ?? null,
-      HD_VCH_NO: hdVchNo,
-      VCH_TIME: vchDate,
-      // P8: the rest of the desktop purchase-return line. `purchase.ts` writes 80 columns of PR_DETL
-      // and this writer wrote 25, so a return recorded far less than the purchase it reverses even
-      // though both accept the same `PurchaseLineInput`. Every field below was already on the contract
-      // and already on the screen — it simply had nowhere to go, which made those grid cells silently
-      // discard what the operator typed.
-      //
-      // SEPARATE FINDING, deliberately NOT patched here: this writer sets no MAIN_USER, HD_VCH_NO or
-      // VCH_TIME on either header or detail, and PurchaseReturnInput has no `mainUser` at all — so a
-      // purchase return carries no user attribution and no hidden-voucher link, unlike a purchase.
-      // Fixing it needs a contract change plus hidden-voucher allocation, so it is recorded rather
-      // than half-done.
-      OLD_SRNO: index + 1,
-      IT_DESC: text(line.in.itDesc).slice(0, 50) || null,
-      IT_TYPE: text(line.in.metal).slice(0, 1) || null,
-      TBL_CODE: text(line.in.tblCode).slice(0, 3) || null,
-      DESIGN_NO: text(line.in.designNo) || null,
-      LOT_NO: text(line.in.lotNo) || null,
-      ITM_LOT: text(line.in.itmLot) || null,
-      WITH_STOCK: text(line.in.withStock).slice(0, 1) || null,
-      BAG_WT: num(line.in.bagWt),
-      ITM_OTH_WT: num(line.in.lessWt),
-      ITM_LOSS_WT: num(line.in.lossWt),
-      ITM_GHT_PRC: num(line.in.ghtPct),
-      ITM_GHT_WT: num(line.in.ghtWt),
-      ITM_LESS_TCH: num(line.in.lessTouch ?? line.in.lesTouch),
-      ITM_MRP: num(line.in.mrp),
-      ITM_OTH_RATE: num(line.in.otherRate),
-      LBR_PRC: num(line.in.labourPct),
-      LBR_TYPE: text(line.in.labourType).slice(0, 1) || null,
-      LBR_RATE: num(line.in.labourRate),
-      CONV_RATE: num(line.in.convRate),
-      CONV_PRC: num(line.in.convPct),
-      COMM_PRC: num(line.in.commissionPct),
-      COMM_AMT: num(line.in.commissionAmount),
-      FINE_CUT_PCS: num(line.in.fineCutPcs),
-      FINE_CUT_GWT: num(line.in.fineCutGrossWt),
-      FINE_CUT_NWT: num(line.in.fineCutNetWt),
-      FINE_CUT_FINE: num(line.in.fineCutFine),
-      RATE_TYPE: text(line.in.rateType).slice(0, 1) || null,
-      URD_RATE_TYPE: text(line.in.urdRateType).slice(0, 1) || null,
-      PR_CODE: text(line.in.prCode).slice(0, 2) || null,
-      TOT_AMT: line.calc.net,
-    }));
-    const header = {
-      ...key,
-      BILL_NO: input.billNo ?? formatVoucherNo(vchNo),
-      SL_BILL_NO: originalNo,
-      SL_BILL_DBCD: originalBook,
-      SL_BILL_LC: originalNo ? input.scope.lcCode : null,
-      SL_BILL_YRCD: originalNo ? originalYear : null,
-      AC_CODE: input.acCode,
-      AC_NAME: input.acName ?? null,
-      VCH_DATE: vchDate,
-      NET_AMT: totals.net,
-      DISC_AMT: totals.discount,
-      TAX_CODE: taxPolicy.taxCode,
-      AC_GST_TYPE: taxPolicy.accountGstType,
-      TAX_PRC: input.taxRatePct,
-      TAX_AMT: totals.tax,
-      CGST_TAX: totals.cgst,
-      SGST_TAX: totals.sgst,
-      IGST_TAX: totals.igst,
-      ROF_AMT: totals.roundOff,
-      TOT_AMT: totals.total,
-      MAIN_USER: input.mainUser ?? null,
-      HD_VCH_NO: hdVchNo,
-      VCH_TIME: vchDate,
-    };
-    const ledger = buildPurchaseReturnLedger({
-      key,
-      acCode: input.acCode,
-      purchaseAc,
-      taxAc,
-      roundAc,
-      controlAc,
-      vchType: bookPolicy.vchType,
-      totals,
-      expenseLegs,
-    });
-    const tender = receiptLegs(
-      { ...key, VCH_TYPE: bookPolicy.vchType },
-      {
-        partyAc: input.acCode,
-        cashAmt: input.cashAmt,
-        chequeAmt: input.chequeAmt,
-        cardAmt: input.cardAmt,
-        upiAmt: input.upiAmt,
-        kasar: input.kasar,
-        cashAc,
-        bankAc: input.bankAc,
-        kasarAc,
-      },
-    );
-    ledger.push(...tender.legs);
-    assertBalanced(ledger);
-    Object.assign(header, {
-      CASH_AMT: tender.cashAmt,
-      CHQ_AMT: round2(num(input.chequeAmt)),
-      CARD_AMT: round2(num(input.cardAmt)),
-      KASAR_AMT: tender.kasar,
-      BILL_OS: round2(totals.total - tender.paidNow - tender.kasar),
-      BANK_AC: input.bankAc ?? null,
-    });
-
-    const taxBase = {
-      ...key,
-      TRAN_TYPE: 'P',
-      BOOK_NAME: bookPolicy.bookName,
-      VCH_DATE: vchDate,
-      AC_CODE: input.acCode,
-      PARTY_NAME: input.acName ?? null,
-      NET_AMT: totals.taxable,
-      DISC_AMT: totals.discount,
-      TOT_AMT: totals.total,
-      TAX_SIGN: '+',
-      TAX_CODE: taxPolicy.taxCode,
-    };
-    const taxRows: Record<string, unknown>[] =
-      totals.tax !== 0
-        ? gstTaxRows(taxBase, taxPolicy, {
-            interState: taxPolicy.interState,
-            ratePct: input.taxRatePct,
-            igst: totals.igst,
-            sgst: totals.sgst,
-            cgst: totals.cgst,
-          })
-        : [];
-    const mainStock = computed.map((line, index) => ({
-      ...key,
-      SR_NO: index + 1,
-      VCH_DATE: vchDate,
-      VCH_TYPE: bookPolicy.vchType,
-      BOOK_NAME: bookPolicy.bookName,
-      AC_CODE: input.acCode,
-      IT_CODE: line.in.itCode,
-      TAG_NO: line.in.tagNo ?? 'N',
-      VCH_SRNO: issued.get(index)?.VCH_SRNO ?? 0,
-      TR_TYPE: 'O',
-      ITM_SIGN: '-',
-      ITM_QTY: 1,
-      ITM_PCS: num(line.in.pcs) || 1,
-      ITM_GWT: num(line.in.grossWt),
-      ITM_NWT: num(line.in.netWt),
-      ITM_TOUCH: num(line.in.touch),
-      ITM_WEST: num(line.in.westPct),
-      ITM_FINE: line.calc.fine,
-      ITM_RATE: num(line.in.rate),
-      ITM_AMT: line.calc.metal,
-      LBR_AMT: line.calc.labour,
-      OTH_AMT: num(line.in.otherAmount),
-      NET_AMT: line.calc.net,
-    }));
-
-    const dmRows = computed.flatMap((line, index) => {
-      const item = String(line.in.itCode ?? '').trim();
-      if (!otherDetailItems.has(item)) return [];
-      // Ac_Stock.Dm_PrRtn_Detl (Ac_Stock.cs:774-776): one loose-detail diamond movement per
-      // eligible PR_DETL line. This is not the PR_IDTL stone grid; the item itself is DM_CODE.
-      return [
-        {
-          ...key,
-          MAIN_SRNO: 1,
-          SR_NO: index + 1,
-          ISR_NO: 1,
-          VCH_DATE: vchDate,
-          ENTRY_TYPE: 'L',
-          BOOK_NAME: bookPolicy.vchType,
-          AC_CODE: input.acCode,
-          IT_CODE: item,
-          DM_CODE: item,
-          DM_ORIGIN: '',
-          DM_REMARK: '',
-          DM_SIZE: '',
-          DM_COLOR: '',
-          DM_LOT_NO: '',
-          DM_PCS: num(line.in.pcs),
-          DM_WT: num(line.in.grossWt),
-          DM_SIGN: '-',
-          DM_RATE: num(line.in.rate),
-          DM_AMT: line.calc.metal,
-          EMP_CODE: '',
-          TAG_NO: 'N',
-          VCH_SRNO: 0,
-          MAIN_IT_CODE: item,
-          INOUT_TYPE: 'O',
-          // The desktop copies A.TBL_CODE from PR_DETL, so mirror that stored value exactly.
-          TBL_CODE: text(line.in.tblCode).slice(0, 3) || null,
-        },
-      ];
-    });
-
-    // G04: the purchase-return day book (Ac_Rojmel.Purc_Rtn_Rojmel). A return credits the purchase
-    // account and sends metal back out to the supplier; the web wrote no ROJ_MEL_DATA at all, so a
-    // jeweller's day book was missing every return's money and metal movement.
-    const rojmelRows = buildPurchaseReturnRojmel(
-      {
-        scope: { coCode: input.scope.coCode, lcCode: input.scope.lcCode, coYear: key.CO_YEAR },
-        key,
-        coBook: key.CO_BOOK,
-        vchNo: key.VCH_NO,
-        vchDate,
-        vchType: bookPolicy.vchType,
-        bookName: bookPolicy.bookName,
-        partyName: input.acName ?? '',
-        partyCode: input.acCode,
-      },
-      computed.map((c, idx) => {
-        const item = String(c.in.itCode ?? '').trim();
-        return {
-          lineNo: idx + 1,
-          purcAc: purcAcByItem[item] ?? purchaseAc,
-          metal: rojmelMetalFor(itemTypeByItem[item]),
-          amount: round2(c.calc.metal + c.calc.labour + num(c.in.otherAmount)),
-          itemAmount: c.calc.metal,
-          labourRate: num(c.in.labourRate),
-          labourAmount: c.calc.labour,
-          otherAmount: num(c.in.otherAmount),
-          netAmount: c.calc.net,
-          pcs: num(c.in.pcs),
-          grossWt: num(c.in.grossWt),
-          netWt: num(c.in.netWt),
-          touch: num(c.in.touch),
-          wastage: num(c.in.westPct),
-          fine: c.calc.fine,
-          rate: num(c.in.rate),
-          itemCode: item,
-          itemName: itemNameByItem[item] ?? '',
-        };
-      }),
-      {
-        slot1Ac: controlAc,
-        slot3Ac: kasarAc,
-        slot5Ac: roundAc,
-        taxAc,
-        taxAmount: totals.tax,
-        // BILL_OS: what the return still leaves outstanding on the party.
-        billOutstanding: round2(totals.total - tender.paidNow - tender.kasar),
-        chequeAc: input.bankAc,
-        chequeAmount: round2(num(input.chequeAmt)),
-        // The purchase-return input carries no dedicated card account, so the card day-book row is only
-        // emitted when a bank account stands in; otherwise it is omitted rather than posted to a guess.
-        cardAc: input.bankAc,
-        cardAmount: round2(num(input.cardAmt)),
-        kasarAmount: tender.kasar,
-        discountAmount: round2(num(input.discountAmount)),
-        roundOff: totals.roundOff,
-      },
-    );
-
-    // TR_KR_ISU uses a hidden voucher series and TEMP_BOOK_DATA exactly like Purchase. The return writer
-    // allocated HD_VCH_NO but never persisted its identity, so document/day-book joins could not resolve it.
-    await insertRowTx(tx, 'TEMP_BOOK_DATA', tenantId, {
-      CO_CODE: input.scope.coCode,
-      LC_CODE: input.scope.lcCode,
-      CO_BOOK: key.CO_BOOK,
-      VCH_NO: hdVchNo,
-      BOOK_NAME: bookPolicy.bookName,
-    });
-
-    await postVoucherTx(tx, tenantId, {
-      ledger: { table: 'AC_DATA', lines: ledger },
-      bookName: bookPolicy.bookName,
-      writes: [
-        { table: 'PR_DATA', rows: [header] },
-        { table: 'PR_DETL', rows: detl },
-        { table: 'MAIN_STOCK', rows: mainStock },
-        ...(dmRows.length ? [{ table: 'DM_DATA', rows: dmRows }] : []),
-        ...(taxRows.length ? [{ table: 'TAX_DATA', rows: taxRows }] : []),
-        ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
-      ],
-    });
-    return { vchNo, totals };
   });
 }
 
 /**
- * Reopen a Purchase Return using the same lossless PR_DATA/PR_DETL/PR_IDTL projection as Purchase,
- * after validating that the selected configured book is actually a PURCHASE RETURN book.
+ * One TR_KR_ISU save. The desktop has a single save path for a new and a reopened voucher (BtnSave_Click,
+ * TR_KR_ISU.cs:4928-5355), so create and edit share this writer; the caller supplies the identity.
  */
-export async function getPurchaseReturn(
-  prisma: any,
-  scope: VoucherScope,
-  requestedVoucherNo: number | string,
-): Promise<Record<string, unknown>> {
-  if (!scope.coYear || !scope.coBook)
-    throw new PurchaseValidationError('company year and book are required');
-  await withTxBudget(prisma, scope.tenantId, 'read', (tx: any) =>
-    resolveBookPolicyTx(tx, scope, 'PURCHASE RETURN'),
-  );
-  const view = await getPurchase(prisma, scope, requestedVoucherNo);
-  return {
-    ...view,
-    origVchNo: view.saleBillNo,
-    origBook: view.saleBillBook,
-    origYear: view.saleBillYear,
-  };
-}
-
-export interface DeletePurchaseReturnInput {
-  scope: VoucherScope;
-  vchNo: number | string;
-  deleteUser?: string;
-}
-
-export async function deletePurchaseReturn(
-  prisma: any,
-  input: DeletePurchaseReturnInput,
-): Promise<{ reversed: true }> {
+export async function writePurchaseReturnTx(
+  tx: any,
+  input: PurchaseReturnInput,
+  lines: PurchaseLineInput[],
+  ctx: PurchaseReturnWriteContext,
+): Promise<PurchaseReturnResult> {
+  assertReturnRequest(input, lines);
+  const purchaseAc = input.purchaseAc ?? 'PURCHASE';
+  const fallbackTaxAc = input.taxAc ?? 'GSTINPUT';
   const tenantId = input.scope.tenantId;
-  if (!input.scope.coYear || !input.scope.coBook)
-    throw new PurchaseValidationError('company year and book are required');
-  const key = keyOf(input.scope, Number(input.vchNo));
-  const params = [tenantId, key.CO_CODE, key.LC_CODE, key.CO_YEAR, key.CO_BOOK, key.VCH_NO];
-  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
-    const bookPolicy = await resolveBookPolicyTx(tx, input.scope, 'PURCHASE RETURN');
-    const headers: Array<{ HD_VCH_NO: unknown }> = await tx.$queryRawUnsafe(
-      `SELECT "HD_VCH_NO" FROM "PR_DATA"
-        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
-          AND "CO_BOOK"=$5 AND "VCH_NO"=$6 FOR UPDATE`,
-      ...params,
-    );
-    if (headers.length !== 1)
-      throw new PurchaseValidationError(
-        headers.length
-          ? `purchase return is ambiguous: ${key.VCH_NO}`
-          : `purchase return not found: ${key.VCH_NO}`,
-      );
-    const tags: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-      `SELECT "TAG_NO","VCH_SRNO","IT_CODE","ITM_PCS","ITM_GWT","ITM_NWT"
-         FROM "PR_DETL"
-        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
-          AND "CO_BOOK"=$5 AND "VCH_NO"=$6 AND "TAG_NO"::text<>'N'
-          AND nullif(btrim(coalesce("TAG_NO"::text,'')),'') IS NOT NULL`,
-      ...params,
-    );
-    const legacy: Array<
-      Record<string, unknown> & { CO_CODE: string; LC_CODE: string; TAG_NO: string }
-    > = [];
-    for (const tag of tags) {
-      const provenance: Array<{ n: unknown }> = await tx.$queryRawUnsafe(
-        `SELECT count(*)::int n FROM "BAR_DETL"
-          WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "TAG_NO"::text=$4
-            AND coalesce("VCH_SRNO",0)=coalesce($5::numeric,0)
-            AND coalesce("IT_CODE"::text,'')=coalesce($6::text,'')`,
-        tenantId,
-        key.CO_CODE,
-        key.LC_CODE,
-        String(tag.TAG_NO),
-        tag.VCH_SRNO ?? 0,
-        tag.IT_CODE ?? '',
-      );
-      if (Number(provenance[0]?.n ?? 0) === 0)
-        legacy.push({
-          CO_CODE: key.CO_CODE,
-          LC_CODE: key.LC_CODE,
-          TAG_NO: String(tag.TAG_NO),
-          VCH_SRNO: Number(tag.VCH_SRNO ?? 0),
-          // NO IT_CODE: TAG_STOCK has IT_TYPE instead, and insertTagTx THROWS on an undeclared column
-          // rather than ignoring it — so this aborted the whole reversal for any tag that lived only in
-          // TAG_STOCK, which is exactly the imported/legacy stock this restore path exists for.
-          ITM_PCS: tag.ITM_PCS,
-          ITM_GWT: tag.ITM_GWT,
-          ITM_NWT: tag.ITM_NWT,
-          STK_TYPE: 'R',
-        });
-    }
-    await reverseVoucherTx(tx, tenantId, {
-      // Current writer owns Rojmel; PR_IDTL/DM_DATA are included now so the next child-detail slice cannot
-      // create undeletable satellites. Every table uses the complete voucher key.
-      tables: [
-        'PR_DATA',
-        'PR_DETL',
-        'PR_IDTL',
-        'DM_DATA',
-        'AC_DATA',
-        'TAX_DATA',
-        'MAIN_STOCK',
-        'ROJ_MEL_DATA',
-      ],
-      key,
-      deleteLog: {
-        table: 'DELETE_DATA',
-        row: {
-          ...key,
-          VCH_TYPE: bookPolicy.vchType,
-          BOOK_NAME: bookPolicy.bookName,
-          DELETE_USER: input.deleteUser ?? 'system',
-        },
-      },
-    });
-    const hiddenVoucherNo = String(headers[0]?.HD_VCH_NO ?? '').trim();
-    if (hiddenVoucherNo) {
-      await tx.$executeRawUnsafe(
-        `DELETE FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
-          AND "CO_BOOK"=$4 AND "VCH_NO"=$5`,
-        tenantId,
-        key.CO_CODE,
-        key.LC_CODE,
-        key.CO_BOOK,
-        hiddenVoucherNo,
-      );
-    }
-    for (const tag of legacy) await restoreTagTx(tx, tenantId, tag);
-    return { reversed: true };
+  const { vchNo, hdVchNo, bookPolicy } = ctx;
+  const key = keyOf(input.scope, vchNo);
+  const roundingPolicy = await resolveRoundingPolicyTx(tx, input.scope);
+  const taxPolicy = await resolveTaxPolicyTx(tx, input.scope, {
+    acCode: input.acCode,
+    taxPct: input.taxRatePct,
+    taxCode: input.taxCode,
   });
+  if (input.interState !== taxPolicy.interState)
+    throw new PurchaseValidationError('interState does not match the persisted supplier GST type');
+  const taxAc = taxPolicy.taxAc ?? fallbackTaxAc;
+  const computed = lines.map((line) => {
+    const rounded =
+      line.rate == null ? line : { ...line, rate: roundingPolicy.roundPurchaseRate(line.rate) };
+    return { in: rounded, calc: computeLine(rounded, roundingPolicy) };
+  });
+  const lineNetTotal = computed.reduce((sum, line) => sum + line.calc.net, 0);
+  const totals = billTotals(
+    {
+      lineNetTotal,
+      discountAmount: input.discountAmount,
+      taxRatePct: input.taxRatePct,
+      interState: taxPolicy.interState,
+    },
+    roundingPolicy,
+  );
+  const issued = await resolvePurchaseReturnTags(tx, input, lines);
+
+  const itCodes = [...new Set(lines.map((line) => String(line.itCode).trim()))];
+  const rows: any[] = await tx.$queryRawUnsafe(
+    `SELECT i."IT_CODE" ic,i."IT_NAME" iname,i."IT_TYPE" itype,
+              i."OTH_DETL_POSTING" oth,g."PURC_AC" pac FROM "ITEM_MAST" i
+       LEFT JOIN "GROUP_MAST" g ON g.tenant_id=i.tenant_id
+        AND g."CO_CODE"=i."CO_CODE" AND g."GR_CODE"=i."GR_CODE"
+       WHERE i.tenant_id=$1 AND i."CO_CODE"=$2 AND i."IT_CODE"::text=ANY($3::text[])`,
+    tenantId,
+    input.scope.coCode,
+    itCodes,
+  );
+  const purcAcByItem: Record<string, string> = {};
+  const itemNameByItem: Record<string, string> = {};
+  const itemTypeByItem: Record<string, string> = {};
+  const otherDetailItems = new Set<string>();
+  for (const row of rows) {
+    const item = String(row.ic ?? '').trim();
+    const account = String(row.pac ?? '').trim();
+    if (item && account) purcAcByItem[item] = account;
+    if (item) {
+      itemNameByItem[item] = String(row.iname ?? '').trim();
+      itemTypeByItem[item] = String(row.itype ?? '').trim();
+      if (
+        String(row.oth ?? '')
+          .trim()
+          .toUpperCase() === 'Y'
+      )
+        otherDetailItems.add(item);
+    }
+  }
+  const missing = itCodes.filter((item) => !purcAcByItem[item]);
+  if (missing.length)
+    throw new PurchaseValidationError(
+      `item/group posting configuration missing: ${missing.join(', ')}`,
+    );
+  const expenseLegs = buildExpenseLegs(
+    computed.map((line) => ({
+      net: line.calc.net,
+      ac: purcAcByItem[String(line.in.itCode).trim()] ?? purchaseAc,
+    })),
+    totals.taxable,
+    lineNetTotal,
+  );
+
+  const controlAc =
+    totals.total === 0 ? purchaseAc : await resolveBookAccountTx(tx, input.scope, bookPolicy, 1);
+  let cashAc = input.cashAc ?? 'CASH';
+  if (round2(num(input.cashAmt)) !== 0) {
+    const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 2);
+    if (input.cashAc && input.cashAc.trim() !== configured)
+      throw new PurchaseValidationError('cash account does not match BOOK_DETL configuration');
+    cashAc = configured;
+  }
+  let roundAc = input.roundAc ?? 'ROUNDOFF';
+  let kasarAc = input.kasarAc ?? 'KASAR';
+  if (totals.roundOff !== 0 || round2(num(input.kasar)) !== 0) {
+    const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 3);
+    if (
+      (input.roundAc && input.roundAc.trim() !== configured) ||
+      (input.kasarAc && input.kasarAc.trim() !== configured)
+    )
+      throw new PurchaseValidationError(
+        'round/kasar account does not match BOOK_DETL configuration',
+      );
+    roundAc = configured;
+    kasarAc = configured;
+  }
+
+  const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
+  // TR_KR_ISU stamps `mVchDate + " " + mTime` (:5123, :5205): the voucher date with the current clock on a
+  // new voucher, and with the loaded clock (:4622) on an edit.
+  const voucherTime = voucherTimestamp(vchDate, ctx.persistedClock);
+  const originalBook = input.origVchNo == null ? null : String(input.origBook ?? 'PUR').trim();
+  const originalYear =
+    input.origVchNo == null ? null : String(input.origYear ?? input.scope.coYear ?? '').trim();
+  const originalNo = input.origVchNo == null ? null : formatVoucherNo(input.origVchNo);
+  const detl = computed.map((line, index) => ({
+    ...key,
+    VCH_DATE: vchDate,
+    VCH_TYPE: bookPolicy.vchType,
+    INOUT_TYPE: 'O',
+    ENTRY_TYPE: 'R',
+    BOOK_NAME: bookPolicy.bookName,
+    AC_CODE: input.acCode,
+    SR_NO: index + 1,
+    IT_CODE: line.in.itCode,
+    // A blank tag cell is an untagged line: TR_KR_ISU writes "N" for it (:5165-5172), never ''. A
+    // reopened untagged line arrives with tagNo '' and must save back as 'N'.
+    TAG_NO: line.in.tagNo || 'N',
+    VCH_SRNO: issued.get(index)?.VCH_SRNO ?? 0,
+    ITM_PCS: num(line.in.pcs),
+    ITM_GWT: num(line.in.grossWt),
+    ITM_NWT: num(line.in.netWt),
+    ITM_TOUCH: num(line.in.touch),
+    ITM_WEST_PRC: num(line.in.westPct),
+    ITM_FINE: line.calc.fine,
+    ITM_OTH_FINE: num(line.in.otherFineWt),
+    SILVER_FINE: num(line.in.silverFineWt),
+    ITM_RATE: num(line.in.rate),
+    ITM_AMT: line.calc.metal,
+    LBR_AMT: line.calc.labour,
+    OTH_AMT: num(line.in.otherAmount),
+    NET_AMT: line.calc.net,
+    TAX_PRC: input.taxRatePct,
+    HM_ID: text(line.in.huid) || null,
+    MAIN_USER: ctx.mainUser,
+    HD_VCH_NO: hdVchNo,
+    VCH_TIME: voucherTime,
+    // P8: the rest of the desktop purchase-return line. `purchase.ts` writes 80 columns of PR_DETL
+    // and this writer wrote 25, so a return recorded far less than the purchase it reverses even
+    // though both accept the same `PurchaseLineInput`. Every field below was already on the contract
+    // and already on the screen — it simply had nowhere to go, which made those grid cells silently
+    // discard what the operator typed.
+    OLD_SRNO: index + 1,
+    IT_DESC: text(line.in.itDesc).slice(0, 50) || null,
+    IT_TYPE: text(line.in.metal).slice(0, 1) || null,
+    TBL_CODE: text(line.in.tblCode).slice(0, 3) || null,
+    DESIGN_NO: text(line.in.designNo) || null,
+    LOT_NO: text(line.in.lotNo) || null,
+    ITM_LOT: text(line.in.itmLot) || null,
+    WITH_STOCK: text(line.in.withStock).slice(0, 1) || null,
+    BAG_WT: num(line.in.bagWt),
+    ITM_OTH_WT: num(line.in.lessWt),
+    ITM_LOSS_WT: num(line.in.lossWt),
+    ITM_GHT_PRC: num(line.in.ghtPct),
+    ITM_GHT_WT: num(line.in.ghtWt),
+    ITM_LESS_TCH: num(line.in.lessTouch ?? line.in.lesTouch),
+    ITM_MRP: num(line.in.mrp),
+    ITM_OTH_RATE: num(line.in.otherRate),
+    LBR_PRC: num(line.in.labourPct),
+    // The desktop basis code (TR_KR_ISU.cs:5197 copies grid column 26: N net, G gross, P pieces, K kg).
+    // This wrote the first letter of the web mode, so `per_gram` became 'p' and reopened as per-piece.
+    LBR_TYPE: desktopLabourTypeFor(line.in.labourType, undefined) || null,
+    LBR_RATE: num(line.in.labourRate),
+    CONV_RATE: num(line.in.convRate),
+    CONV_PRC: num(line.in.convPct),
+    COMM_PRC: num(line.in.commissionPct),
+    COMM_AMT: num(line.in.commissionAmount),
+    FINE_CUT_PCS: num(line.in.fineCutPcs),
+    FINE_CUT_GWT: num(line.in.fineCutGrossWt),
+    FINE_CUT_NWT: num(line.in.fineCutNetWt),
+    FINE_CUT_FINE: num(line.in.fineCutFine),
+    RATE_TYPE: text(line.in.rateType).slice(0, 1) || null,
+    URD_RATE_TYPE: text(line.in.urdRateType).slice(0, 1) || null,
+    PR_CODE: text(line.in.prCode).slice(0, 2) || null,
+    TOT_AMT: line.calc.net,
+  }));
+  const header = {
+    ...key,
+    BILL_NO: input.billNo ?? formatVoucherNo(vchNo),
+    SL_BILL_NO: originalNo,
+    SL_BILL_DBCD: originalBook,
+    SL_BILL_LC: originalNo ? input.scope.lcCode : null,
+    SL_BILL_YRCD: originalNo ? originalYear : null,
+    AC_CODE: input.acCode,
+    AC_NAME: input.acName ?? null,
+    VCH_DATE: vchDate,
+    NET_AMT: totals.net,
+    DISC_AMT: totals.discount,
+    TAX_CODE: taxPolicy.taxCode,
+    AC_GST_TYPE: taxPolicy.accountGstType,
+    TAX_PRC: input.taxRatePct,
+    TAX_AMT: totals.tax,
+    CGST_TAX: totals.cgst,
+    SGST_TAX: totals.sgst,
+    IGST_TAX: totals.igst,
+    ROF_AMT: totals.roundOff,
+    TOT_AMT: totals.total,
+    MAIN_USER: ctx.mainUser,
+    HD_VCH_NO: hdVchNo,
+    VCH_TIME: voucherTime,
+  };
+  const ledger = buildPurchaseReturnLedger({
+    key,
+    acCode: input.acCode,
+    purchaseAc,
+    taxAc,
+    roundAc,
+    controlAc,
+    vchType: bookPolicy.vchType,
+    totals,
+    expenseLegs,
+  });
+  const tender = receiptLegs(
+    { ...key, VCH_TYPE: bookPolicy.vchType },
+    {
+      partyAc: input.acCode,
+      cashAmt: input.cashAmt,
+      chequeAmt: input.chequeAmt,
+      cardAmt: input.cardAmt,
+      upiAmt: input.upiAmt,
+      kasar: input.kasar,
+      cashAc,
+      bankAc: input.bankAc,
+      kasarAc,
+    },
+  );
+  ledger.push(...tender.legs);
+  assertBalanced(ledger);
+  Object.assign(header, {
+    CASH_AMT: tender.cashAmt,
+    CHQ_AMT: round2(num(input.chequeAmt)),
+    CARD_AMT: round2(num(input.cardAmt)),
+    KASAR_AMT: tender.kasar,
+    BILL_OS: round2(totals.total - tender.paidNow - tender.kasar),
+    BANK_AC: input.bankAc ?? null,
+  });
+
+  const taxBase = {
+    ...key,
+    TRAN_TYPE: 'P',
+    BOOK_NAME: bookPolicy.bookName,
+    VCH_DATE: vchDate,
+    AC_CODE: input.acCode,
+    PARTY_NAME: input.acName ?? null,
+    NET_AMT: totals.taxable,
+    DISC_AMT: totals.discount,
+    TOT_AMT: totals.total,
+    TAX_SIGN: '+',
+    TAX_CODE: taxPolicy.taxCode,
+  };
+  const taxRows: Record<string, unknown>[] =
+    totals.tax !== 0
+      ? gstTaxRows(taxBase, taxPolicy, {
+          interState: taxPolicy.interState,
+          ratePct: input.taxRatePct,
+          igst: totals.igst,
+          sgst: totals.sgst,
+          cgst: totals.cgst,
+        })
+      : [];
+  const mainStock = computed.map((line, index) => ({
+    ...key,
+    SR_NO: index + 1,
+    VCH_DATE: vchDate,
+    VCH_TYPE: bookPolicy.vchType,
+    BOOK_NAME: bookPolicy.bookName,
+    AC_CODE: input.acCode,
+    IT_CODE: line.in.itCode,
+    TAG_NO: line.in.tagNo || 'N',
+    VCH_SRNO: issued.get(index)?.VCH_SRNO ?? 0,
+    TR_TYPE: 'O',
+    ITM_SIGN: '-',
+    ITM_QTY: 1,
+    ITM_PCS: num(line.in.pcs) || 1,
+    ITM_GWT: num(line.in.grossWt),
+    ITM_NWT: num(line.in.netWt),
+    ITM_TOUCH: num(line.in.touch),
+    ITM_WEST: num(line.in.westPct),
+    ITM_FINE: line.calc.fine,
+    ITM_RATE: num(line.in.rate),
+    ITM_AMT: line.calc.metal,
+    LBR_AMT: line.calc.labour,
+    OTH_AMT: num(line.in.otherAmount),
+    NET_AMT: line.calc.net,
+  }));
+
+  const dmRows = computed.flatMap((line, index) => {
+    const item = String(line.in.itCode ?? '').trim();
+    if (!otherDetailItems.has(item)) return [];
+    // Ac_Stock.Dm_PrRtn_Detl (Ac_Stock.cs:774-776): one loose-detail diamond movement per
+    // eligible PR_DETL line. This is not the PR_IDTL stone grid; the item itself is DM_CODE.
+    return [
+      {
+        ...key,
+        MAIN_SRNO: 1,
+        SR_NO: index + 1,
+        ISR_NO: 1,
+        VCH_DATE: vchDate,
+        ENTRY_TYPE: 'L',
+        BOOK_NAME: bookPolicy.vchType,
+        AC_CODE: input.acCode,
+        IT_CODE: item,
+        DM_CODE: item,
+        DM_ORIGIN: '',
+        DM_REMARK: '',
+        DM_SIZE: '',
+        DM_COLOR: '',
+        DM_LOT_NO: '',
+        DM_PCS: num(line.in.pcs),
+        DM_WT: num(line.in.grossWt),
+        DM_SIGN: '-',
+        DM_RATE: num(line.in.rate),
+        DM_AMT: line.calc.metal,
+        EMP_CODE: '',
+        TAG_NO: 'N',
+        VCH_SRNO: 0,
+        MAIN_IT_CODE: item,
+        INOUT_TYPE: 'O',
+        // The desktop copies A.TBL_CODE from PR_DETL, so mirror that stored value exactly.
+        TBL_CODE: text(line.in.tblCode).slice(0, 3) || null,
+      },
+    ];
+  });
+
+  // G04: the purchase-return day book (Ac_Rojmel.Purc_Rtn_Rojmel). A return credits the purchase
+  // account and sends metal back out to the supplier; the web wrote no ROJ_MEL_DATA at all, so a
+  // jeweller's day book was missing every return's money and metal movement.
+  const rojmelRows = buildPurchaseReturnRojmel(
+    {
+      scope: { coCode: input.scope.coCode, lcCode: input.scope.lcCode, coYear: key.CO_YEAR },
+      key,
+      coBook: key.CO_BOOK,
+      vchNo: key.VCH_NO,
+      vchDate,
+      vchType: bookPolicy.vchType,
+      bookName: bookPolicy.bookName,
+      partyName: input.acName ?? '',
+      partyCode: input.acCode,
+    },
+    computed.map((c, idx) => {
+      const item = String(c.in.itCode ?? '').trim();
+      return {
+        lineNo: idx + 1,
+        purcAc: purcAcByItem[item] ?? purchaseAc,
+        metal: rojmelMetalFor(itemTypeByItem[item]),
+        amount: round2(c.calc.metal + c.calc.labour + num(c.in.otherAmount)),
+        itemAmount: c.calc.metal,
+        labourRate: num(c.in.labourRate),
+        labourAmount: c.calc.labour,
+        otherAmount: num(c.in.otherAmount),
+        netAmount: c.calc.net,
+        pcs: num(c.in.pcs),
+        grossWt: num(c.in.grossWt),
+        netWt: num(c.in.netWt),
+        touch: num(c.in.touch),
+        wastage: num(c.in.westPct),
+        fine: c.calc.fine,
+        rate: num(c.in.rate),
+        itemCode: item,
+        itemName: itemNameByItem[item] ?? '',
+      };
+    }),
+    {
+      slot1Ac: controlAc,
+      slot3Ac: kasarAc,
+      slot5Ac: roundAc,
+      taxAc,
+      taxAmount: totals.tax,
+      // BILL_OS: what the return still leaves outstanding on the party.
+      billOutstanding: round2(totals.total - tender.paidNow - tender.kasar),
+      chequeAc: input.bankAc,
+      chequeAmount: round2(num(input.chequeAmt)),
+      // The purchase-return input carries no dedicated card account, so the card day-book row is only
+      // emitted when a bank account stands in; otherwise it is omitted rather than posted to a guess.
+      cardAc: input.bankAc,
+      cardAmount: round2(num(input.cardAmt)),
+      kasarAmount: tender.kasar,
+      discountAmount: round2(num(input.discountAmount)),
+      roundOff: totals.roundOff,
+    },
+  );
+
+  // TR_KR_ISU uses a hidden voucher series and TEMP_BOOK_DATA exactly like Purchase. The return writer
+  // allocated HD_VCH_NO but never persisted its identity, so document/day-book joins could not resolve it.
+  await insertRowTx(tx, 'TEMP_BOOK_DATA', tenantId, {
+    CO_CODE: input.scope.coCode,
+    LC_CODE: input.scope.lcCode,
+    CO_BOOK: key.CO_BOOK,
+    VCH_NO: hdVchNo,
+    BOOK_NAME: bookPolicy.bookName,
+  });
+
+  await postVoucherTx(tx, tenantId, {
+    ledger: { table: 'AC_DATA', lines: ledger },
+    bookName: bookPolicy.bookName,
+    writes: [
+      { table: 'PR_DATA', rows: [header] },
+      { table: 'PR_DETL', rows: detl },
+      { table: 'MAIN_STOCK', rows: mainStock },
+      ...(dmRows.length ? [{ table: 'DM_DATA', rows: dmRows }] : []),
+      ...(taxRows.length ? [{ table: 'TAX_DATA', rows: taxRows }] : []),
+      ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
+    ],
+  });
+  return { vchNo, totals };
+}
+
+/** The complete voucher key of a purchase return in its session scope. */
+export function purchaseReturnKey(scope: VoucherScope, vchNo: number): VoucherKey {
+  return keyOf(scope, vchNo);
+}
+
+/**
+ * The body of POST and PUT /purchase-returns as writer input. Company, location, year, book and the acting
+ * user come from the session, never from the body.
+ */
+export function purchaseReturnInputFromBody(
+  scope: VoucherScope,
+  mainUser: string,
+  body: unknown,
+): PurchaseReturnInput {
+  const b = (body ?? {}) as Record<string, unknown>;
+  const amount = (value: unknown): number | undefined =>
+    value != null ? Number(value) : undefined;
+  const textOf = (value: unknown): string | undefined =>
+    value == null ? undefined : String(value);
+  return {
+    scope,
+    acCode: String(b.acCode ?? ''),
+    acName: textOf(b.acName),
+    billNo: textOf(b.billNo),
+    origVchNo: b.origVchNo as string | number | undefined,
+    origBook: textOf(b.origBook),
+    origYear: textOf(b.origYear),
+    vchDate: textOf(b.vchDate),
+    mainUser,
+    discountAmount: amount(b.discountAmount),
+    taxRatePct: b.taxRatePct as number,
+    taxCode: textOf(b.taxCode),
+    interState: !!b.interState,
+    cashAmt: amount(b.cashAmt),
+    chequeAmt: amount(b.chequeAmt),
+    cardAmt: amount(b.cardAmt),
+    upiAmt: amount(b.upiAmt),
+    kasar: amount(b.kasar),
+    cashAc: textOf(b.cashAc),
+    bankAc: textOf(b.bankAc),
+    kasarAc: textOf(b.kasarAc),
+  };
 }

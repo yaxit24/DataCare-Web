@@ -146,9 +146,13 @@ import {
 } from '../modules/purchase/purchase.js';
 import {
   createPurchaseReturn,
-  deletePurchaseReturn,
-  getPurchaseReturn,
+  purchaseReturnInputFromBody,
 } from '../modules/purchase/purchaseReturn.js';
+import {
+  deletePurchaseReturn,
+  editPurchaseReturn,
+  getPurchaseReturn,
+} from '../modules/purchase/purchaseReturnLifecycle.js';
 import {
   postReceipt,
   postPayment,
@@ -2774,37 +2778,19 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.get('/other-income/:vchNo/print', auth, otherIncome.print);
 
   // ---- Purchase return ----
+  // No JSON Schema yet: no route in this file has one until decision D16 is accepted (N50).
   app.post('/purchase-returns', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
-    return run(reply, 201, () =>
-      createPurchaseReturn(
-        prisma,
-        {
-          scope: scopeOf(req),
-          acCode: b.acCode,
-          acName: b.acName,
-          billNo: b.billNo,
-          origVchNo: b.origVchNo,
-          origBook: b.origBook,
-          origYear: b.origYear,
-          vchDate: b.vchDate,
-          mainUser: sess(req).sub,
-          discountAmount: b.discountAmount,
-          taxRatePct: b.taxRatePct,
-          taxCode: b.taxCode,
-          interState: !!b.interState,
-          cashAmt: b.cashAmt != null ? Number(b.cashAmt) : undefined,
-          chequeAmt: b.chequeAmt != null ? Number(b.chequeAmt) : undefined,
-          cardAmt: b.cardAmt != null ? Number(b.cardAmt) : undefined,
-          upiAmt: b.upiAmt != null ? Number(b.upiAmt) : undefined,
-          kasar: b.kasar != null ? Number(b.kasar) : undefined,
-          cashAc: b.cashAc,
-          bankAc: b.bankAc,
-          kasarAc: b.kasarAc,
-        },
-        b.lines ?? [],
-      ),
+    const input = purchaseReturnInputFromBody(scopeOf(req), sess(req).sub, b);
+    return run(reply, 201, () => createPurchaseReturn(prisma, input, b.lines ?? []));
+  });
+  app.put('/purchase-returns/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    const input = purchaseReturnInputFromBody(scopeOf(req), sess(req).sub, b);
+    return run(reply, 200, () =>
+      editPurchaseReturn(prisma, input, b.lines ?? [], (req.params as any).vchNo),
     );
   });
   app.get('/purchase-returns/:vchNo', auth, async (req, reply) => {
