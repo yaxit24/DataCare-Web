@@ -530,7 +530,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Pr Quotation | `TR_PURC` | `/txn/purchase-quotation` | `C R E D P L` | PARTIAL | P1-edition |
 | Purc Booking | `TR_BUL_BOOKING` | `/txn/bullion` | `C - - - - -` | PARTIAL | P1-edition |
 | Purchase | `TR_PURC`, `TR_PURC_HM` | `/txn/purchase` | `C R E D P L` | PARTIAL | P1-core |
-| Purchase Rtn | `TR_KR_ISU`, `TR_SALE_RTN_UAE` | `/txn/purchase-return` | `C - - D P L` | PARTIAL | P1-core |
+| Purchase Rtn | `TR_KR_ISU`, `TR_SALE_RTN_UAE` | `/txn/purchase-return` | `C R E D P L` | PARTIAL | P1-core |
 | Rate Cut | `TR_WH_SALE` | `/txn/rate-cut` | `C R E D - -` | PARTIAL | P1-edition |
 | Sale Booking | `TR_BUL_BOOKING` | `/txn/bullion` | `C - - - - -` | PARTIAL | P1-edition |
 | Sales | `TR_SALE`, `TR_SALE_HM` | `/txn/sales`, `/txn/hallmark-sale` | `C R E D P L` | PARTIAL | P1-core |
@@ -681,9 +681,9 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Returns purchased goods to the supplier, reversing input tax and payables and removing stock.
 - **Looks:** Debit-note header, source/party and tagged-or-loose item grid, totals/refund tender and document.
 - **Writes:** PR_DATA, PR_DETL, PR_IDTL, DM_DATA, MAIN_STOCK, BAR_DETL, AC_DATA, ROJ_MEL_DATA, TAX_DATA.
-- **Web:** `/txn/purchase-return`; `POST /purchase-returns`, `GET /purchase-returns/:vchNo`, `DELETE /purchase-returns/:vchNo`, `GET /purchase-returns/:vchNo/print`. Can: create, delete, print, list.
-- **Remaining:** No edit lifecycle; the DM_DATA projection landed in PR #25, but child/stone writes, residual-limited source selection, the UAE variant and layout remain.
-- **Owners:** G04, G47, N34, G67, X12, N51, N74.
+- **Web:** `/txn/purchase-return`; `POST /purchase-returns`, `GET /purchase-returns/:vchNo`, `PUT /purchase-returns/:vchNo`, `DELETE /purchase-returns/:vchNo`, `GET /purchase-returns/:vchNo/print`. Can: create, reopen, edit, delete, print, list.
+- **Remaining:** Create, reopen, edit, delete, print and list work (N34). Remaining: residual-limited selection and PR_IDTL stone rows, which the desktop does not do (D30, not accepted); the UAE variant; the print template binding and its HSN tax (G95); grid Enter flow (G96) and layout.
+- **Owners:** G04, G47, N34, G67, X12, N51, N74, G95, G96, N77, D30.
 - **Evidence:** [KB_transaction.md:270-294](../../project-memory/video-research/_kb/KB_transaction.md#L270-L294).
 
 ### Rate Cut

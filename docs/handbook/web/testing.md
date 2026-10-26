@@ -15,7 +15,7 @@ this page is the engineering side that every slice must satisfy first.
 | Web unit and protocol | `web/apps/web/test/*.test.ts` | 40 files, 594 tests + 6 protocol tests | Helpers, adapters, keyboard and context protocols | Integrated business behaviour |
 | Mocked browser smoke | `web/apps/web/test/browser.smoke.mjs` | — | UI interaction depth against stubbed routes | Anything about the API or data |
 | Route reachability | `pnpm test:routes` | 239 routes in the last crawl | Every page renders for a signed-in user | Correct content |
-| Zero-mock journeys | `web/apps/web/test/parity.real-stack.mjs` + 26 `*.journey.mjs` | 24 journeys, plus two optional runners | Production Next build → real Fastify → migrated PostgreSQL, driven only through the screen, no request interception | Desktop equality |
+| Zero-mock journeys | `web/apps/web/test/parity.real-stack.mjs` + 27 `*.journey.mjs` | 25 journeys, plus two optional runners | Production Next build → real Fastify → migrated PostgreSQL, driven only through the screen, no request interception | Desktop equality |
 | Desktop differential (G5) | `web/scripts/check-g5-parity.mjs`, `web/apps/api/integration/` | 0 of 70 cases match today | Web write sets equal desktop write sets for replayed desktop vouchers | Screen behaviour |
 | Visual and interactive (Chrome DevTools MCP) | §5 below | Manual or agent-driven, per changed screen | Layout regions, field order, focus, console and network health, print preview, compared with tutorial keyframes | Business data correctness on its own |
 
@@ -90,11 +90,11 @@ fails instead of skipping when none is, unless `ALLOW_SKIP_DB_TESTS=1` is set ex
   `parity.real-stack.mjs` (lines 655–678 on 1 October).
 - **What a journey must cover** for a voucher screen: create, print, reopen, edit, save unchanged, delete, and one
   refusal (invalid input or stale version), plus the effect on at least one related report.
-- **Current journeys (24):** cash-receipt-payment, column-settings, credit-note, credit-note-entry, e-invoice-entry,
+- **Current journeys (25):** cash-receipt-payment, column-settings, credit-note, credit-note-entry, e-invoice-entry,
   design-book, design-calculations, design-repeat, generic-image-conflict, image-conflict, manufacturing-lot,
-  order-images, repair-image-conflict, sale-amount-basis, sales-order, sales-order-design, sales-return-bill-replay,
-  sales-return-labour-replay, sales-return-replay, sales-return-saved, tag-cancel-transfer, tag-split, tour-order,
-  wholesale-rate-cut. Optional runners: `session-context.real-stack.additive.mjs` and
+  order-images, purchase-return, repair-image-conflict, sale-amount-basis, sales-order, sales-order-design,
+  sales-return-bill-replay, sales-return-labour-replay, sales-return-replay, sales-return-saved, tag-cancel-transfer,
+  tag-split, tour-order, wholesale-rate-cut. Optional runners: `session-context.real-stack.additive.mjs` and
   `labour-preview-lifecycle.real-stack.mjs`.
 - **Hermetic seeds:** every journey seed `UPDATE` is an upsert or an asserted row count, and a static test fails on
   any other (G23, N49 steps 1–2). The suite runs from an empty volume in the CI job `real-stack-browser`.

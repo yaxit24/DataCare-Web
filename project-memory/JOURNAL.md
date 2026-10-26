@@ -4,6 +4,13 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-26 — N34 remainder: Purchase Return edit lifecycle (G47 part)
+- **Did:** `PUT /purchase-returns/:vchNo` through one writer shared with create, as `TR_KR_ISU` saves new and reopened vouchers through one handler (`TR_KR_ISU.cs:4928-5355`): same voucher and hidden numbers, creator and time of day kept, fiscal-year and lock checks (old and new date), no `DELETE_DATA` on edit, a dropped returned tag goes back to stock. Reopen reads the return-only `PR_DETL` columns. Fixed: per-gram labour was stored as `LBR_TYPE 'p'` and reopened as per piece (now the desktop code `N`); a UPI refund is now refused (no desktop tender, no `PR_DATA` column — a reopened return silently lost it). Screen: reopen, edit, delete, voucher date, load from the recent list; helpers moved to `web/apps/web/lib/purchaseReturnForm.ts` (page 614 → 563 lines).
+- **Verified:** API+DB suite 312 files / 3459 tests; new write-set test (7 cases, negative control fails 3); web unit 643; route coverage 126/126; real-stack browser suite 25/25 journeys with zero mocked requests (new `purchase-return` journey); Chrome DevTools visual protocol at 1366x768; lint, typecheck, test types, format, build, kernel conformance, depth, dead cells, doc refs, `validate_plan.py`, `docs_check.py`.
+- **Found:** G95 (purchase prints show 0.00 HSN tax; owner N74), G96 (grid Enter stops at a read-only cell; owner N77). G47's residual-limited selection and `PR_IDTL` stone writes are not desktop behaviour (`TR_KR_ISU.cs:6845-6975`, `:5035`) — proposed decision D30, **not accepted**; N34 stays in progress until the owner decides.
+
+---
+
 ## 2026-10-01 — Device-fake testing decision, developer setup and device guides
 - Recorded owner decision D29 (test with device fakes + desktop oracle; Odoo IoT as protocol reference; real hardware at acceptance, N25) and added slice N89 (device-fake harness and journeys, owner of G33 alongside N54).
 - Wrote docs/handbook/dev/setup.md and docs/handbook/dev/devices.md, grounded in the real device code (scaleProtocol.ts 9600/2400 fallback, deviceBridge.ts, barcode.ts, ScaleCapture/CameraCapture, FakeIrnTransport/FakeMessageSender) and the desktop source; classified them in the register and linked them from the hub.

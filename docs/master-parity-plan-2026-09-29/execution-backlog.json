@@ -3285,13 +3285,19 @@
       "sourceAndModuleDetail": "10-gap-register-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
-      "statusAsOf": "2026-10-01",
+      "statusAsOf": "2026-10-26",
       "evidence": [
         "web/apps/api/src/modules/purchase/purchaseReturn.ts",
         "web/apps/api/test/purchaseReturnLifecycle.routes.db.test.ts",
-        "web/packages/db/prisma/migrations/20261001090000_dm_data_tbl_code/migration.sql"
+        "web/packages/db/prisma/migrations/20261001090000_dm_data_tbl_code/migration.sql",
+        "web/apps/api/src/modules/purchase/purchaseReturnLifecycle.ts",
+        "web/apps/api/test/purchaseReturnEdit.routes.db.test.ts",
+        "web/apps/web/lib/purchaseReturnForm.ts",
+        "web/apps/web/test/purchaseReturnForm.test.ts",
+        "web/apps/web/test/purchase-return.journey.mjs",
+        "web/apps/web/app/(app)/txn/purchase-return/page.tsx"
       ],
-      "statusNote": "Day book (PR #17), full-scope GET and print, complete reversal and source-year lineage (PR #18); DM_DATA rows written per Dm_PrRtn_Detl with the restored TBL_CODE column (G67). Edit lifecycle, PR_IDTL stone writes and residual-limited selection remain (G47)."
+      "statusNote": "Day book (PR #17), full-scope GET and print, complete reversal and source-year lineage (PR #18); DM_DATA rows written per Dm_PrRtn_Detl with the restored TBL_CODE column (G67). Edit lifecycle, PR_IDTL stone writes and residual-limited selection remain (G47). Edit lifecycle (2026-10-26): PUT /purchase-returns/:vchNo saves a reopened return through the create writer, as TR_KR_ISU's single save handler does (:4928-5355), keeping the voucher and hidden numbers, the creator and the time of day, refusing a date outside the year or locked (old or new date), writing no DELETE_DATA, and putting back a returned tag the edit drops; reopen reads the return-only PR_DETL columns; per-gram labour is stored as the desktop code N (was 'p', read back as per piece); a UPI refund is refused (no desktop tender, no PR_DATA column). The screen reopens, edits (lossless: a loaded line is sent back as loaded) and deletes. Residual-limited selection and PR_IDTL stone writes are not desktop behaviour and wait for decision D30; G95 (print HSN tax, N74) and G96 (grid Enter, N77) were found in the visual check; the UAE variant, print template binding and layout remain."
     },
     {
       "id": "N35",
@@ -4000,7 +4006,7 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "Wave A bound with zero unexplained dataset differences, approved layout and wired print actions",
-      "gapIds": "G60",
+      "gapIds": "G60, G95",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
@@ -4045,7 +4051,7 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "No unexplained missing or reordered control or column on the 20 forms; operators sign off",
-      "gapIds": "G62, G94",
+      "gapIds": "G62, G94, G96",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
