@@ -13,6 +13,7 @@ import {
   ExtendedHeaderCells,
   GridModeToggle,
 } from '../../../../components/ExtendedGrid';
+import { todayLocal } from '../../../../lib/localDate';
 
 /** Item Lot Intake (TR_ITM_LOT) — load loose/lot stock as identifiable lots → ITM_LOT_DETL +
  *  MAIN_STOCK (VCH_TYPE 'ITLOT' / TR_TYPE 'I' / '+'). No money ledger. */
@@ -74,7 +75,7 @@ const blank = (): Row => ({
 const n = (v: string) => Number(v || 0);
 const str = (v: unknown) => (v == null || Number(v) === 0 ? '' : String(v));
 const r3 = (x: number) => Math.round((x + 1e-9) * 1000) / 1000;
-const currentDate = () => new Date().toISOString().slice(0, 10);
+const currentDate = () => todayLocal();
 const gridCell = (row: number, column: number) => ({
   'data-grid-row': row,
   'data-grid-column': column,

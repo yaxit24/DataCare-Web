@@ -20,6 +20,7 @@ import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import SubDetailGrid, { stoneRowFromApi, useSubDetail } from '../../../../components/SubDetailGrid';
 import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
 import { fineFor, labourCharge } from '@datacare/core';
+import { todayLocal } from '../../../../lib/localDate';
 
 interface Line {
   itCode: string;
@@ -73,7 +74,7 @@ interface Line {
   urdRateType: string;
 }
 const blank = (): Line => ({
-  itCode: 'GOLD',
+  itCode: '', // desktop grids start empty; a demo default posts to the wrong item
   tagNo: '',
   metal: 'G',
   pcs: '1',
@@ -154,7 +155,7 @@ export default function PurchaseEntryPage() {
   const router = useRouter();
   const formKeys = desktopGlobalFormKeyActions((href) => router.push(href));
   const [coBook, setCoBook] = useState('');
-  const [vchDate, setVchDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [vchDate, setVchDate] = useState(() => todayLocal());
   const [acCode, setAcCode] = useState('');
   const [acName, setAcName] = useState('');
   const [billNo, setBillNo] = useState('');
@@ -266,7 +267,7 @@ export default function PurchaseEntryPage() {
     setVoucherLookup('');
     setResult(null);
     setErr('');
-    setVchDate(new Date().toISOString().slice(0, 10));
+    setVchDate(todayLocal());
     setAcCode('');
     setAcName('');
     setBillNo('');
@@ -534,7 +535,14 @@ export default function PurchaseEntryPage() {
             </button>
             <div className="field">
               <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} preferred="PUR" />
+              {/* TR_PURC opens on CurBookHelp("PURCHASE") (MDI_FORM.cs:7868); the writer refuses any other
+                  MAIN_BOOK, so only purchase books are offered. */}
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                preferred="PUR"
+                mainBooks={['PURCHASE']}
+              />
             </div>
             <div className="field">
               <label>Year</label>

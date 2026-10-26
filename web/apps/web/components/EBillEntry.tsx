@@ -18,6 +18,7 @@ import {
   type EBillFamily,
   type EBillLineDraft,
 } from '../lib/eBillEntry';
+import { todayLocal } from '../lib/localDate';
 
 type SaveResult = {
   voucherNo: string;
@@ -25,7 +26,7 @@ type SaveResult = {
   created: boolean;
   revision: string;
 };
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => todayLocal();
 const fmt = (value: number, dp = 2) =>
   Number(value || 0).toLocaleString('en-IN', {
     minimumFractionDigits: dp,
