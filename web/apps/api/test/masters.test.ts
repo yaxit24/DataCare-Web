@@ -5,6 +5,7 @@ import {
   buildDuplicateCheck,
   buildDeleteGuards,
   bindMasterScope,
+  normalizeBlankMasterValues,
   AC_MAST_CONFIG,
   ITEM_MAST_CONFIG,
 } from '../src/modules/masters/master.service.js';
@@ -30,6 +31,47 @@ describe('master builders', () => {
       'INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","AC_CODE","AC_NAME") VALUES ($1,$2,$3,$4)',
     );
     expect(params).toEqual(['t1', '01', 'A1', 'Cash']);
+  });
+
+  it('binds blank form values the desktop way: numeric -> 0, date -> NULL, text kept', () => {
+    // MS_GROUP.cs:1873-1883 (Conversion.Val) and MS_ACCT.cs:7810-7820 (IIf(!IsDate, DBNull)).
+    const types = new Map([
+      ['GR_TOUCH', 'double precision'],
+      ['AC_CR_DAYS', 'integer'],
+      ['DPC_PRC', 'numeric'],
+      ['BR_DATE', 'timestamp without time zone'],
+      ['AN_DATE', 'date'],
+      ['GR_NAME', 'character varying'],
+    ]);
+    expect(
+      normalizeBlankMasterValues(
+        {
+          GR_TOUCH: '',
+          AC_CR_DAYS: '  ',
+          DPC_PRC: '12.5',
+          BR_DATE: '',
+          AN_DATE: '2026-05-01',
+          GR_NAME: '',
+          UNKNOWN_COL: '',
+          GR_PURC_TOUCH: null,
+        },
+        types,
+      ),
+    ).toEqual({
+      GR_TOUCH: 0,
+      AC_CR_DAYS: 0,
+      DPC_PRC: '12.5',
+      BR_DATE: null,
+      AN_DATE: '2026-05-01',
+      GR_NAME: '',
+      UNKNOWN_COL: '',
+      GR_PURC_TOUCH: null,
+    });
+  });
+
+  it('leaves a malformed non-blank number for the database to reject', () => {
+    const types = new Map([['GR_TOUCH', 'double precision']]);
+    expect(normalizeBlankMasterValues({ GR_TOUCH: 'abc' }, types)).toEqual({ GR_TOUCH: 'abc' });
   });
 
   it('buildDuplicateCheck matches the business key', () => {
