@@ -243,13 +243,7 @@ import {
 } from '../modules/stock/tagPrint.js';
 import { tagStockReport, tagStockCsv } from '../modules/reports/tagStock.js';
 import { recentVouchers } from '../modules/vouchers/list.js';
-import {
-  listYears,
-  createYear,
-  closeYear,
-  reopenYear,
-  carryForwardOpenings,
-} from '../modules/masters/year.js';
+import { listYears, createYear, carryForwardOpenings } from '../modules/masters/year.js';
 import { reminders } from '../modules/finance/reminders.js';
 import { getOpeningBalance, setOpeningBalance } from '../modules/masters/openingBalance.js';
 import { getPartyPhoto, setPartyPhoto, familyMembers } from '../modules/masters/party.js';
@@ -6736,33 +6730,14 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
           clDate: b.clDate,
           yearMonth: b.yearMonth,
           oldMethod: b.oldMethod,
+          mainUser: sess(req).sub,
         },
       ),
     );
   });
-  app.post('/years/:coYear/close', auth, async (req, reply) => {
-    if (!guard(req, reply, 'update')) return;
-    const s = readScope(req);
-    return run(reply, 200, () =>
-      closeYear(
-        prisma,
-        { tenantId: s.tenantId, coCode: s.coCode },
-        String((req.params as any).coYear),
-        body(req).clDate,
-      ),
-    );
-  });
-  app.post('/years/:coYear/reopen', auth, async (req, reply) => {
-    if (!guard(req, reply, 'update')) return;
-    const s = readScope(req);
-    return run(reply, 200, () =>
-      reopenYear(
-        prisma,
-        { tenantId: s.tenantId, coCode: s.coCode },
-        String((req.params as any).coYear),
-      ),
-    );
-  });
+  // There is deliberately no year close/reopen here: CL_DATE is the year's closing date, not a flag
+  // (MS_YEAR.cs:1035-1040, 1196). Period locking is CO_SET.LOCK_DATE / LAST_DAY_LOCK; carry-forward is
+  // /years/carry-forward and Utilities → Year-End Close.
   app.post('/years/carry-forward', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const s = readScope(req);

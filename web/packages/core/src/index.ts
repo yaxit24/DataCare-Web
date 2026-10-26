@@ -271,3 +271,5 @@ export type {
   TagCancelTotalsRow,
 } from './tagCancelLine.js';
 export * from './hallmarkSaleForm.js';
+export { fiscalYearDates, isIsoDay } from './fiscalYear.js';
+export type { FiscalYearDates, FiscalYearInput } from './fiscalYear.js';
