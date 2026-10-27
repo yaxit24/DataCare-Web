@@ -315,7 +315,12 @@ export default function TourIssuePage() {
           <div className="row">
             <div className="field">
               <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} preferred="TUR" />
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                preferred="TUR"
+                mainBooks={['APPROVAL ISSUE']}
+              />
             </div>
             <div className="field">
               <label>Year</label>

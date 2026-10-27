@@ -86,7 +86,12 @@ export default function JournalEntryPage() {
           <div className="row">
             <div className="field">
               <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} preferred="JV" />
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                preferred="JV"
+                mainBooks={['JOURNAL']}
+              />
             </div>
             <div className="field">
               <label>Year</label>
