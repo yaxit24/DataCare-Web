@@ -8,6 +8,11 @@
 ## Active plan
 **Full-parity rebuild (52 tasks / 15 phases A–O)** — replicate the ENTIRE desktop (204 forms, 255 reports, full frontend+backend+DB) at 100% functional parity. The earlier 34-task plan delivered the verified backend CORE; this plan builds out the rest. Task graph = the session todo list (IDs 1–20 group the phases). Run continuously; checkpoint every task.
 
+## Latest slice (2026-10-27) — N97: Dhiran (pledge loan) books on a provisioned company (G109)
+- Found via browser E2E: the Pledge Loan Issue screen had no Dhiran book to select (seedCompany provisioned no DHIRAN book). Added `DHI` (DHIRAN ISSUE → DHRN_ISU_DATA) and `DHR` (DHIRAN RECEIPT → DHRN_REC_DATA) against DHRN. **PR #63 → main.** Resolves G109. Same class as N91 (Stock In). provisioning counts: 27→29 book groups, 95→101 legs.
+- Noted for N62: the `/txn/dhrn-issue` BookSelect is unfiltered (shows all 28 books, G101-class).
+- Next gap **G110**, slice **N98**, decision **D31**.
+
 ## Latest slice (2026-10-27) — N96: old-metal conversion weight derived server-side (G89)
 - `@datacare/core` `oldGoldConversionWeight` derives an exchange row's `CON_WT` from Con% + fine (desktop TR_SALE.cs:7911-7942) instead of trusting the client; the sale writer and the sale/sales-quotation previews now use it. **PR #62 → main.** Resolves G89 (was parked under N15). DB assertion: Con% 92 + tampered conversionWt 0.1 → stored CON_WT 4.207.
 - The N95 size budget caught the +2 lines in sales.ts; ceiling raised 2807→2809 (reviewed). `--write` only tightens, so a justified raise is a manual baseline edit.

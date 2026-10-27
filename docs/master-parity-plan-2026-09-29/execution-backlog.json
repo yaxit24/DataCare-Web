@@ -4456,6 +4456,28 @@
         "web/apps/api/test/sales.lifecycle.db.test.ts"
       ],
       "statusNote": "The desktop derives cUrConWt from Con% and the fine (TR_SALE.cs:7911-7942); the web valued the exchange row on the client-posted conversionWt, so the stored CON_WT and amount depended on client arithmetic. Added @datacare/core oldGoldConversionWeight (Con%>100 -> round(fine*Con%/100,3); 0<Con%<=100 -> round(fine/Con%*100-fine,3)+fine; Con%=0 -> supplied weight), used by valueOldGoldLine/oldGoldBasisWeight so the sale writer stores the derived CON_WT and the sale/sales-quotation previews (oldGoldRowAmount) show it; the KJ001NEKJ per-install branch stays waived. Verified: core vectors per branch (oldGold.test.ts), web preview test (oldGoldRow.test.ts), and a DB assertion in sales.lifecycle.db.test.ts (Con% 92, tampered conversionWt 0.1 -> stored CON_WT 4.207 derived); full API+DB 313 files/3477, web unit 646, core 1772. The N95 size budget caught the +2 lines in sales.ts; its ceiling was raised to 2809 as a reviewed baseline diff."
+    },
+    {
+      "id": "N97",
+      "status": "implemented-unverified",
+      "action": "Dhiran (pledge loan) unusable on a provisioned company: provisioning created no DHIRAN book, so Pledge Loan Issue/Receipt had no book to select",
+      "parentLabels": "P03-04; X16",
+      "startAfter": [
+        "N91"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "seedCompleteness proves the DHIRAN ISSUE and DHIRAN RECEIPT books exist with their routing tables; provisioning counts updated; full suite green",
+      "gapIds": "G109",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-27",
+      "evidence": [
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/apps/api/test/seedCompleteness.db.test.ts",
+        "web/apps/api/test/provisioning.db.test.ts"
+      ],
+      "statusNote": "Found operating the production build in Chrome (2026-10-27): the Pledge Loan Issue screen /txn/dhrn-issue rendered but its book select offered no Dhiran book. seedCompany provisioned 24 book families with no DHIRAN book, so a pledge loan could not be posted (same class as G105). The desktop opens Pledge Loan Issue on MAIN_BOOK DHIRAN ISSUE and Pledge Receipt on DHIRAN RECEIPT (MDI_FORM.cs:9527/9539); the issue writes DHRN_ISU_DATA and the receipt DHRN_REC_DATA. Fix: seedCompany now creates DHI (DHIRAN ISSUE, out, DHRN_ISU_DATA) and DHR (DHIRAN RECEIPT, in, DHRN_REC_DATA) against the DHRN receivable with the standard three legs. Verified: seedCompleteness asserts both books + routing tables; provisioning.db.test counts updated (27->29 book groups, 95->101 legs); dhiran DB tests unaffected; full API+DB 313 files/3478, web unit 646, all gates. Not verified: a fresh-browser pledge save (the running demo stack was seeded before this change; the DB test provisions fresh and is authoritative). The dhiran writer resolves loanAc/cashAc from the payload, so the books need no bespoke slots."
     }
   ],
   "amendments": [

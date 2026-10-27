@@ -300,6 +300,28 @@ const BOOKS: {
   },
   { book: 'JV', name: 'Journal', mainBook: 'JOURNAL', inout: 'I', acCode: 'KASAR' },
   { book: 'CON', name: 'Contra', mainBook: 'CONTRA', inout: 'I', acCode: 'CASH' },
+  // Desktop Dhiran (pledge loan): the Pledge Loan Issue menu opens on MAIN_BOOK 'DHIRAN ISSUE' and Pledge
+  // Receipt on 'DHIRAN RECEIPT' (MDI_FORM.cs:9527/9539, Dhiran_Form). The issue writes DHRN_ISU_DATA and the
+  // receipt DHRN_REC_DATA; both post against the DHRN receivable. Without them the Pledge Loan screens have
+  // no book to select and Save is refused on a provisioned company (N97, same class as the Stock In/Out gap).
+  {
+    book: 'DHI',
+    name: 'Dhiran Issue',
+    mainBook: 'DHIRAN ISSUE',
+    inout: 'O',
+    acCode: 'DHRN',
+    shortName: 'DHIS',
+    table: 'DHRN_ISU_DATA',
+  },
+  {
+    book: 'DHR',
+    name: 'Dhiran Receipt',
+    mainBook: 'DHIRAN RECEIPT',
+    inout: 'I',
+    acCode: 'DHRN',
+    shortName: 'DHRC',
+    table: 'DHRN_REC_DATA',
+  },
   // Desktop TR_WH_SALE serves both: book 034 `WSALE` / `WH SALES` and book 064 `RCUT` / `RATE CUT`, each an OUT
   // book over RATE_CUT_DATA. Without them a new company had no book either screen could post to, and the Rate
   // Cut screen fell back to the cash Receipt book.
