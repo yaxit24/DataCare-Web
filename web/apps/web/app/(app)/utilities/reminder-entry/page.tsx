@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { get, post, del, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { todayLocal } from '../../../../lib/localDate';
 
 interface Entry {
   vchNo: string;
@@ -17,7 +18,7 @@ export default function ReminderEntryPage() {
   const [acCode, setAcCode] = useState('');
   const [acName, setAcName] = useState('');
   const [remark, setRemark] = useState('');
-  const [remindDate, setRemindDate] = useState(new Date().toISOString().slice(0, 10));
+  const [remindDate, setRemindDate] = useState(todayLocal());
   const [entries, setEntries] = useState<Entry[]>([]);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);

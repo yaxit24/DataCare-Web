@@ -9,7 +9,7 @@ import {
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { del, get, post, put, ApiError } from '../../../../lib/api';
-import { useBusinessScope } from '../../../../components/BusinessScope';
+import { useBusinessScope, useRoundingPolicy } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
@@ -20,6 +20,8 @@ import { VoucherList, type VoucherIdentity } from '../../../../components/Vouche
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { companyFlag, useCompanySettings, companySetting } from '../../../../lib/companySettings';
 import { oldGoldRowAmount, recalcLine } from '../../../../lib/lineRecalc';
+import { billTotals } from '@datacare/core';
+import { todayLocal } from '../../../../lib/localDate';
 
 /** BOOK_DATA.MAIN_BOOK values the retail sale writer accepts (sales.ts, workflowPolicy.SALES). */
 const SALE_MAIN_BOOKS = ['SALES'];
@@ -123,7 +125,7 @@ interface Totals {
 }
 const blank = (): Line => ({
   otherWt: '',
-  itCode: 'GOLD',
+  itCode: '', // desktop grids start empty; a demo default posts to the wrong item
   tagNo: '',
   pcs: '1',
   grossWt: '',
@@ -274,12 +276,13 @@ const gridCell = (row: number, column: number) => ({
 
 export default function SalesEntryPage() {
   const { lcCode, coYear } = useBusinessScope();
+  const roundingPolicy = useRoundingPolicy();
   // Desktop posting-account overrides and hallmark/rate-unfix flags the API accepts.
   const [headerExtra, setHeaderExtra] = useState<Record<string, string>>({});
   const router = useRouter();
   const formKeys = desktopGlobalFormKeyActions((href) => router.push(href));
   const [coBook, setCoBook] = useState('');
-  const [vchDate, setVchDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [vchDate, setVchDate] = useState(() => todayLocal());
   const [refNo, setRefNo] = useState('');
   const [acCode, setAcCode] = useState('WALKIN');
   const [acName, setAcName] = useState('');
@@ -389,15 +392,25 @@ export default function SalesEntryPage() {
     return { fine: r.fineWt, metal: r.metalAmount, mk: r.netLabourAmount, net: r.totalAmount };
   };
   const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
-  const taxable = r2(lineNet - n(discountAmount));
-  const taxPrev = r2((taxable * n(taxRatePct)) / 100);
+  // G102: the item portion previews with the same arithmetic and company rounding policy the server posts.
+  const itemTotals = billTotals(
+    {
+      lineNetTotal: lineNet,
+      discountAmount: n(discountAmount),
+      taxRatePct: n(taxRatePct),
+      interState,
+    },
+    roundingPolicy,
+  );
+  const taxable = itemTotals.taxable;
+  const taxPrev = itemTotals.tax;
   const ogAmt = (o: OgRow) => oldGoldRowAmount(o); // the writer's own valuation (G83)
   const setOg = (i: number, k: keyof OgRow, v: string) =>
     setOgRows((rs) => rs.map((r, j) => (j === i ? { ...r, [k]: v } : r)));
   const oldGoldVal = r2(ogRows.reduce((s, o) => s + ogAmt(o), 0));
   const hmAmt = n(hmCharge);
   const hmTax = r2((hmAmt * n(taxRatePct)) / 100);
-  const itemTotal = Math.round(taxable + taxPrev);
+  const itemTotal = itemTotals.total;
   const tcsAmt = r2((itemTotal * n(tcsPct)) / 100);
   const totalPrev = r2(itemTotal + hmAmt + hmTax + tcsAmt);
   const kasarAmt = n(kasar);
@@ -409,7 +422,7 @@ export default function SalesEntryPage() {
     setVoucherLookup('');
     setResult(null);
     setErr('');
-    setVchDate(new Date().toISOString().slice(0, 10));
+    setVchDate(todayLocal());
     setRefNo('');
     setAcCode('WALKIN');
     setAcName('');
@@ -873,6 +886,7 @@ export default function SalesEntryPage() {
                 entity="accounts"
                 value={acCode}
                 onChange={setAcCode}
+                resolveTypedCode
                 onPick={(r) => {
                   setAcName(String(r.name || ''));
                   setAddress1(String(r.AC_ADD1 ?? ''));

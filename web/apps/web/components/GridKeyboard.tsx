@@ -142,6 +142,63 @@ function focusGridCell(container: HTMLElement, row: number, column: number): boo
   return focusPositionalCell(container, row, column);
 }
 
+/** A control the operator can type into or choose from — never a button, a read-only or a disabled field. */
+const EDITABLE_CONTROL =
+  'input:not([type="hidden"]):not([type="button"]):not([type="submit"]):not([disabled]):not([readonly]),' +
+  'select:not([disabled]),textarea:not([disabled]):not([readonly])';
+
+function gridCellElement(container: HTMLElement, row: number, column: number): HTMLElement | null {
+  const tagged = container.querySelector<HTMLElement>(
+    `[data-grid-row="${row}"][data-grid-column="${column}"]`,
+  );
+  if (tagged) return tagged;
+  const body = container.querySelector<HTMLElement>('tbody') ?? container;
+  const tr = Array.from(body.querySelectorAll<HTMLTableRowElement>(':scope > tr'))[row];
+  return tr ? ((tr.children[column] as HTMLElement | undefined) ?? null) : null;
+}
+
+/** Focus the first editable control of a cell; false when the cell holds only text or buttons. */
+function focusEditableCell(container: HTMLElement, row: number, column: number): boolean {
+  const control = gridCellElement(container, row, column)?.querySelector<HTMLElement>(
+    EDITABLE_CONTROL,
+  );
+  if (!control) return false;
+  control.focus();
+  if (control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement)
+    control.select();
+  return true;
+}
+
+/**
+ * G96: Enter walks to the next EDITABLE cell, as the desktop grid does (`TR_KR_ISU.cs:3220`
+ * `TEXT_ENTRY_KeyDown`, the pattern of `TR_SALE.cs:12250-12320`): computed cells (Fine, Amount) and the row's
+ * delete button are skipped, and Enter after the last editable cell of the last row adds a row. Before this,
+ * Enter stopped in front of the first read-only cell, or landed on the delete button where a second Enter
+ * removed the line.
+ */
+function walkEnter(
+  container: HTMLElement,
+  from: { row: number; column: number },
+  rowCount: number,
+  columnCount: number,
+  onAppendRow: () => void,
+): void {
+  let { row, column } = from;
+  for (let guard = 0; guard < rowCount * Math.max(columnCount, 1) + 1; guard++) {
+    if (column >= columnCount) {
+      row += 1;
+      column = 0;
+    }
+    if (row >= rowCount) {
+      onAppendRow();
+      focusAfterRender(container, row, 0);
+      return;
+    }
+    if (focusEditableCell(container, row, column)) return;
+    column += 1;
+  }
+}
+
 function focusAfterRender(container: HTMLElement, row: number, column: number): void {
   // Row removal shrinks an existing grid, so the target cell is usually already mounted: focus it
   // synchronously and leave no pending retry that could later fight a deliberate focus move.
@@ -203,7 +260,19 @@ export function useGridKeyboard(options: GridKeyboardOptions) {
     if (action.type === 'none') return;
     event.preventDefault();
     const container = event.currentTarget;
-    if (action.type === 'move') {
+    const columns =
+      (options.columnCount ?? 0) > 0
+        ? (options.columnCount as number)
+        : (target.closest('tr')?.children.length ?? 0);
+    if (event.key === 'Enter' && (action.type === 'move' || action.type === 'append')) {
+      walkEnter(
+        container,
+        { row, column: column + 1 },
+        options.rowCount,
+        columns,
+        options.onAppendRow,
+      );
+    } else if (action.type === 'move') {
       focusGridCell(container, action.row, action.column);
     } else if (action.type === 'append') {
       options.onAppendRow();

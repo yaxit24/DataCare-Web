@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { get, post, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
+import { todayLocal } from '../../../../lib/localDate';
 
 /**
  * e-Invoice (IRN) — Phase 10 statutory.
@@ -50,7 +51,7 @@ function fmtDate(d: string | null): string {
 
 const bookOf = (row: Row): string => String(row.coBook ?? '').trim();
 const keyOf = (row: Row): string => `${bookOf(row) || 'missing-book'}/${row.vchNo}`;
-const todayIso = (): string => new Date().toISOString().slice(0, 10);
+const todayIso = (): string => todayLocal();
 
 export default function EInvoicePage() {
   const { coYear } = useBusinessScope();

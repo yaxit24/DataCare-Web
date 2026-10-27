@@ -94,7 +94,7 @@ def plan_ids() -> set[str]:
                  '12-lineage-verification-2026-10-01.md'):
         path = PLAN / name
         if path.is_file():
-            ids |= set(re.findall(r'^\| (G\d{2}) \|', read(path), re.M))
+            ids |= set(re.findall(r'^\| (G\d{2,3}) \|', read(path), re.M))
             ids |= set(re.findall(r'^\| (D\d{2}) \|', read(path), re.M))
     ids |= set(re.findall(r'^\| (D\d{2}) \|', read(PLAN / '08-decisions-and-delivery.md'), re.M))
     ids |= set(re.findall(r'^### (J\d{2}) — ', read(PLAN / '04-verification-playbook.md'), re.M))

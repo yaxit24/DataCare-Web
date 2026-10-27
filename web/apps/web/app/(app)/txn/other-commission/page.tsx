@@ -6,6 +6,7 @@ import { BookSelect } from '../../../../components/BookSelect';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import { ApiError, del, get, post, put } from '../../../../lib/api';
+import { todayLocal } from '../../../../lib/localDate';
 
 type CommissionLine = {
   itemCode: string;
@@ -53,7 +54,7 @@ type SaveResult = {
   lines: number;
 };
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => todayLocal();
 const blankLine = (): CommissionLine => ({
   itemCode: '',
   remark: '',

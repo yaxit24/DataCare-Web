@@ -73,8 +73,8 @@ d('company provisioning produces a postable company', () => {
 
   it('creates the accounts the posting engine references by literal code', async () => {
     // 19 literal codes plus the six wholesale / rate-cut slot accounts (labour income and expense, silver
-    // sale and purchase, other charges, fine kasar).
-    expect(await count('AC_MAST')).toBe(25);
+    // sale and purchase, other charges, fine kasar), plus BRANCH (the stock in/out branch account, N91).
+    expect(await count('AC_MAST')).toBe(26);
   });
 
   it('creates every book with its posting legs', async () => {
@@ -84,7 +84,7 @@ d('company provisioning produces a postable company', () => {
         CO,
       ),
     );
-    expect(rows.length).toBe(25);
+    expect(rows.length).toBe(27);
     // Three legs per book (1 = control/sales, 2 = cash/bank, 3 = round-off), except the cash books.
     // RCT and PAY carry the desktop cash-book layout, 1 = cash and 2 = kasar: Ac_Ledr.cs:567-581 joins
     // BOOK_DETL SR_NO 1 and SR_NO 2 for legs 01-08. Their slot 2 used to be CASH, which would have posted
@@ -312,8 +312,8 @@ d('company provisioning produces a postable company', () => {
     const again = await seedCompany(prisma, tenantId, CO, { coName: 'Provision Test', lcCode: LC });
     expect(again.created.books).toBe(0);
     // 19 three-leg books (incl. TAG PURCHASE, KARIGAR and JDTR issue/receipt) + RCT/PAY x 2
-    // + WHS/RTC x 12 + TSP x 5 + OIN/OEX x 1, not doubled.
-    expect(await count('BOOK_DETL')).toBe(89);
+    // + WHS/RTC x 12 + TSP x 5 + OIN/OEX x 1 + SIN/SOT x 3 (stock in/out, N91), not doubled.
+    expect(await count('BOOK_DETL')).toBe(95);
   });
 
   /**

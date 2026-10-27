@@ -8,6 +8,23 @@
 ## Active plan
 **Full-parity rebuild (52 tasks / 15 phases A–O)** — replicate the ENTIRE desktop (204 forms, 255 reports, full frontend+backend+DB) at 100% functional parity. The earlier 34-task plan delivered the verified backend CORE; this plan builds out the rest. Task graph = the session todo list (IDs 1–20 group the phases). Run continuously; checkpoint every task.
 
+## Latest slice (2026-10-27, cont.) — N92: document previews use the company rounding policy (G102)
+- The nine document screens previewed `Math.round(taxable + tax)` while the server posts with the company rounding policy; the operator saw a total the ledger didn't store. Moved `resolveRoundingPolicy`/`roundNearest` into `@datacare/core` (one source of truth), surfaced the flags on `/me` (`loadRoundingFlags`), added a web `useRoundingPolicy()` hook (separate from `BusinessScope`), and converted purchase, sales, hallmark sale, sale return, purchase return, consignment purchase, estimate and both quotations to `billTotals(input, policy)`.
+- Verified: 4 core vectors + `/me` assertion; core 1771, API+DB 313, web unit 645, real-stack 25/0-mocks, all gates. On the PR #57 branch (stacks on N90+N91). **G84** (hallmark preview omits west %/ghat/other charges/line discounts — line arithmetic) stays with N63.
+- **Disk hazard:** the machine disk hit 100%; reclaimed ~27 GB of Docker cache/images/volumes. Watch free space before long test runs.
+- Next gap **G106**, slice **N93**, decision **D31**.
+
+## Latest slice (2026-10-27) — land N90 on main (PR #57), fix the G104 regression, add N91 Stock In/Out provisioning
+- **Merge-gap corrected:** N90's PR #56 had merged into the advisories branch (`fix/n86-advisories-2026-10-26`), NOT main, when #55 merged — its 7 commits never reached main. Opened **PR #57** from `fix/e2e-defects-2026-10-26` (rebased onto current main) → **base main**. Do NOT stack a PR on a not-yet-merged branch (that is what stranded #56).
+- **G104 regression (found + fixed):** the first G104 cut resolved a typed code on every programmatic blur for any LookupPicker with onPick, which fired an extra async onPick during Design Book grid navigation and broke the `design-repeat` real-stack journey. It was a REAL regression (not a flake — I initially misdiagnosed it as machine load; the moving failure line was the async onPick racing). Fix: typed-code resolution is opt-in via `resolveTypedCode`, enabled only on party/supplier header fields (purchase, sales, purchase return, sale return, payment). Grids untouched. Real-stack 25/25 locally and on CI.
+- **N91 (`implemented-unverified`, G105):** Stock In/Out was unusable on a provisioned company (empty book list, Save disabled). `seedCompany` now seeds the INWORD (`SIN`) / OUTWORD (`SOT`) books and a `BRANCH` stock-in-hand account wired to `LOCT_MAST.AC_CODE` (MS_LOCT.cs:3458). Verified: `seedCompleteness` + a real-route Stock In/Out posting that reconciles; full API+DB suite 313/3475. Open: the exact desktop `AC_GR` for the branch account was chosen as current-asset `01` without a desktop-DB confirmation.
+- **Ask the owner:** confirm "Canto" meant Contra; decisions D15–D19 and D30 still pending (block N50/N51/N52/N56/N58, G47). Next gap **G106**, slice **N92**, decision **D31**.
+
+## Latest slice (2026-10-26, night) — N90 browser-run defects; N86 advisories (PR #55)
+- PR #55 (N86): advisory gate back to 0/0/0/0 with next 15.5.28; Next.js 16.4.3 rehearsal passes. Merge it before the N90 PR so CI's advisory job is green on N90.
+- N90 (`implemented-unverified`): defects found by operating the production build as a shop user — Year Create (G97), generic master save (G98), bank-mode settlement (G99), purchase print HSN tax (G95), grid Enter (G96), GOLD line default (G100 part), purchase/sales-return book families (G101 part), local-day defaults (G103), typed lookup codes resolved on leave (G104). Open: G100 WALKIN (N58), G101 remaining screens (N62), G102 preview vs posted totals (N63).
+- Ask the owner: confirm "Canto" meant Contra (the run tested Contra); decisions D15–D19 and D30 are still pending and block N50/N51/N52/N56/N58 and G47 items.
+
 ## Latest slice (2026-10-26) — N34 Purchase Return edit lifecycle
 - Edit (`PUT /purchase-returns/:vchNo`), lossless reopen and the screen's reopen/edit/delete are implemented and tested (write-set test `web/apps/api/test/purchaseReturnEdit.routes.db.test.ts`, journey `purchase-return`). N34 stays `in-progress`: decision **D30** (document 12 §4, not accepted) asks the owner whether to follow the desktop — no residual limit, no `PR_IDTL` stone rows — instead of G47 as written. New gaps G95 (print HSN tax, N74), G96 (grid Enter, N77). Next in the document 13 queue after this: N56 waits for D19; N50/N51/N52/N58 wait for D15–D18.
 

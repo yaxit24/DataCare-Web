@@ -8,6 +8,7 @@ import { LookupPicker } from './LookupPicker';
 import { useGridKeyboard } from './GridKeyboard';
 import { ExtendedBodyCells, ExtendedHeaderCells, GridModeToggle } from './ExtendedGrid';
 import { fineFor } from '@datacare/core';
+import { todayLocal } from '../lib/localDate';
 
 type Direction = 'in' | 'out';
 
@@ -186,7 +187,7 @@ const blank = (): Line => ({
 
 const n = (value: string) => Number(value || 0);
 const str = (value: unknown) => (value == null || Number(value) === 0 ? '' : String(value));
-const currentDate = () => new Date().toISOString().slice(0, 10);
+const currentDate = () => todayLocal();
 const errorText = (error: unknown) =>
   error instanceof ApiError
     ? error.body?.detail || error.body?.message || error.body?.error || error.message

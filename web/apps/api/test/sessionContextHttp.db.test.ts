@@ -354,6 +354,12 @@ run('mounted HTTP session context lifecycle with signed cookies and PostgreSQL a
     expect(me.statusCode, me.body).toBe(200);
     expect(me.json()).toMatchObject({ context: signed.context, ledgerContext: unknownLedger });
     expect(me.headers['cache-control']).toMatch(/no-store/);
+    // /me carries the company money-rounding flags so a screen previews a document's totals with the same
+    // policy the server posts (G102/G84). A company with default settings yields an empty flag set (never
+    // undefined), so the web's useRoundingPolicy resolves the 2dp default.
+    expect(me.json()).toHaveProperty('roundingFlags');
+    const roundingFlags = me.json().roundingFlags;
+    expect(roundingFlags === null || typeof roundingFlags === 'object').toBe(true);
   });
 
   it('a no-year login and refresh preserve SQL NULL, JSON null and unknown scope-incomplete without choosing defaults', async () => {

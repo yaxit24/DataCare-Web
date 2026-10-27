@@ -24,6 +24,7 @@ export function LookupPicker({
   ariaLabel,
   style,
   advanceOnPick = true,
+  resolveTypedCode = false,
 }: {
   entity: string;
   value: string;
@@ -36,6 +37,13 @@ export function LookupPicker({
   style?: React.CSSProperties;
   /** Workflows with asynchronous validation move focus after their own successful commit. */
   advanceOnPick?: boolean;
+  /**
+   * Resolve an exactly-typed code on Enter and on leave (desktop `tAcCode_KeyDown`), firing onPick. Opt-in:
+   * only the voucher party/supplier fields want it. Grids that drive their own cell navigation and allocate
+   * child rows from onPick (e.g. Design Book components) must not have an extra async resolve fire on a
+   * programmatic blur, so they leave this off (G104, found 2026-10-26).
+   */
+  resolveTypedCode?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<LookupRow[]>([]);
@@ -43,6 +51,8 @@ export function LookupPicker({
   const boxRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const tmr = useRef<any>(null);
+  /** The code last chosen from the list or resolved from typing, so a resolve never fires twice for it. */
+  const picked = useRef<string | null>(null);
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
@@ -73,11 +83,40 @@ export function LookupPicker({
     }, 180);
   }
   const pick = (r: LookupRow) => {
+    picked.current = String(r.code);
     onChange(String(r.code));
     onPick?.(r);
     setOpen(false);
     if (advanceOnPick && inputRef.current) focusNext(inputRef.current);
   };
+  /**
+   * The desktop resolves a typed code on Enter: `tAcCode_KeyDown` looks the exact code up in AC_MAST and fills
+   * the party's details, opening F1 help only when nothing matches (`TR_PURC.cs:14619-14628`; `TR_SALE.cs:17340`
+   * is the same). With `resolveTypedCode`, a typed value that matches one lookup code exactly is picked on Enter
+   * before the list has opened and when the field is left for another control (Tab/click), so the screen's
+   * `onPick` effects (name, inter-state, rates) run. Found in the 2026-10-26 browser run: a supplier typed and
+   * tabbed past left the name blank and inter-state "No", and the purchase was refused.
+   */
+  async function resolveTyped(): Promise<void> {
+    const typed = String(value ?? '').trim();
+    if (!resolveTypedCode || !typed || !onPick || picked.current === typed) return;
+    try {
+      const base = searchPath || `/lookup/${entity}`;
+      const separator = base.includes('?') ? '&' : '?';
+      const r = (await get(
+        `${base}${separator}q=${encodeURIComponent(typed)}&limit=20`,
+      )) as LookupRow[];
+      const exact = (r || []).find(
+        (row) => String(row.code).trim().toUpperCase() === typed.toUpperCase(),
+      );
+      if (!exact) return;
+      picked.current = String(exact.code);
+      if (String(exact.code) !== value) onChange(String(exact.code));
+      onPick(exact);
+    } catch {
+      // An unreachable lookup leaves the typed value as it is; the save validates it.
+    }
+  }
 
   return (
     <div
@@ -91,6 +130,7 @@ export function LookupPicker({
         aria-label={ariaLabel}
         placeholder={placeholder || `search ${entity}… (F1)`}
         onChange={(e) => {
+          picked.current = null;
           onChange(e.target.value);
           search(e.target.value);
         }}
@@ -103,7 +143,10 @@ export function LookupPicker({
           // is an overlay to FormKeys, so a list left behind kept every F-key inert. A null relatedTarget
           // (the list's own scrollbar, another window) leaves it open.
           const next = e.relatedTarget;
-          if (next instanceof Node && !boxRef.current?.contains(next)) setOpen(false);
+          if (next instanceof Node && !boxRef.current?.contains(next)) {
+            setOpen(false);
+            void resolveTyped();
+          }
         }}
         onKeyDown={(e) => {
           if (e.key === 'F1') {
@@ -111,7 +154,10 @@ export function LookupPicker({
             search(value ?? '');
             return;
           } // desktop F1-LOV: open lookup
-          if (!open) return;
+          if (!open) {
+            if (e.key === 'Enter') void resolveTyped();
+            return;
+          }
           if (e.key === 'ArrowDown') {
             e.preventDefault();
             setHi((h) => Math.min(h + 1, rows.length - 1));

@@ -8,6 +8,7 @@ import { useBusinessScope } from '../../../../components/BusinessScope';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { ApiError, del, get, post, put } from '../../../../lib/api';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
+import { todayLocal } from '../../../../lib/localDate';
 
 type OutLine = {
   itCode: string;
@@ -106,7 +107,7 @@ export default function MeltingPage() {
   const formKeys = desktopGlobalFormKeyActions((href) => router.push(href));
   const { coYear, lcCode } = useBusinessScope();
   const [coBook, setCoBook] = useState('');
-  const [vchDate, setVchDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [vchDate, setVchDate] = useState(() => todayLocal());
   const [voucherSearch, setVoucherSearch] = useState('');
   const [loadedVoucherNo, setLoadedVoucherNo] = useState('');
   const [acCode, setAcCode] = useState('');
@@ -230,7 +231,7 @@ export default function MeltingPage() {
     setResultLines((rows) => rows.map((row, i) => (i === index ? { ...row, [key]: value } : row)));
 
   function reset() {
-    setVchDate(new Date().toISOString().slice(0, 10));
+    setVchDate(todayLocal());
     setVoucherSearch('');
     setLoadedVoucherNo('');
     setAcCode('');

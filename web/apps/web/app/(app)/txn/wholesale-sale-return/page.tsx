@@ -15,6 +15,7 @@ import SubDetailGrid, {
   SUB_DETAIL_COMPONENT,
   useSubDetail,
 } from '../../../../components/SubDetailGrid';
+import { todayLocal } from '../../../../lib/localDate';
 
 type ReturnLine = {
   tagNo: string;
@@ -133,7 +134,7 @@ export default function WholesaleSaleReturnPage() {
   const router = useRouter();
   const formKeys = desktopGlobalFormKeyActions((href) => router.push(href));
   const [coBook, setCoBook] = useState('');
-  const [vchDate, setVchDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [vchDate, setVchDate] = useState(() => todayLocal());
   const [voucherNo, setVoucherNo] = useState('');
   const [loadedVoucherNo, setLoadedVoucherNo] = useState('');
   const [partyCode, setPartyCode] = useState('');
@@ -176,7 +177,7 @@ export default function WholesaleSaleReturnPage() {
   });
 
   function reset() {
-    setVchDate(new Date().toISOString().slice(0, 10));
+    setVchDate(todayLocal());
     setVoucherNo('');
     setLoadedVoucherNo('');
     setPartyCode('');

@@ -75,6 +75,7 @@ import type { PdfRenderer } from './modules/reports/render.js';
 import { correlationId, requestCompletedFields } from './modules/ops/requestContext.js';
 import { collectDatabaseMetrics, MetricsRegistry, type RouteClass } from './modules/ops/metrics.js';
 import { isTransactionTimeout } from './modules/shared/txBudget.js';
+import { loadRoundingFlags } from './modules/shared/roundingPolicyLoader.js';
 import { operationalInvariants } from './modules/ops/invariants.js';
 import {
   REPORT_FILTER_BINDINGS,
@@ -628,6 +629,9 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
       s.sub,
       principal.isAdmin,
     );
+    // The company rounding flags let a screen preview a document's totals with the exact arithmetic the
+    // server posts (G102/G84). Null when no company is selected yet or settings are ambiguous.
+    const roundingFlags = s.coCode ? await loadRoundingFlags(prisma, s.tenantId, s.coCode) : null;
     return {
       user: s.sub,
       context: contextDescriptor({
@@ -641,6 +645,7 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
       coCode: s.coCode,
       lcCode: s.lcCode,
       coYear: s.coYear ?? null,
+      roundingFlags,
       rights: principal.rights,
       role: principal.role,
       isAdmin: principal.isAdmin,
@@ -856,6 +861,7 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
           masterScope(req),
           cfg,
           (req.body ?? {}) as Record<string, unknown>,
+          { user: sess(req).sub },
         );
         return reply.code(201).send({ created: true });
       } catch (e) {
@@ -935,7 +941,7 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         unknown
       >[];
       if (!Array.isArray(rows)) return reply.code(400).send({ error: 'rows-array-required' });
-      return importMaster(prisma, masterScope(req), cfg, rows);
+      return importMaster(prisma, masterScope(req), cfg, rows, { user: sess(req).sub });
     },
   );
 

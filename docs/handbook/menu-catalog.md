@@ -57,7 +57,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Setting Main | `UT_SETTING_MAIN` | `/settings` | `- R E - - L` | PARTIAL | P1-core |
 | Trade Master | `MS_TRADE` | `/masters/trade` | `C R E D - L` | PARTIAL | P1-core |
 | User Create | `MS_USER` | `/admin/users` | `C R E - - L` | PARTIAL | P1-core |
-| Year Create | `MS_YEAR` | `/masters/year-create` | `C R E - - L` | PARTIAL | P1-core |
+| Year Create | `MS_YEAR` | `/masters/year-create` | `C - - - - L` | PARTIAL | P1-core |
 | Year Select | `MS_OPNCOMP` | `/select` | `- R E - - L` | PARTIAL | P1-core |
 
 ### Account Group
@@ -216,11 +216,11 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `MS_YEAR` — direct constructor ([MDI_FORM.cs:7421-7430](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7421-L7430)).
 - **Does:** Creates financial years, clones baseline masters and carries opening balances.
-- **Looks:** Year and opening-date fields; the web adds a year list, close/reopen and carry-forward panels.
+- **Looks:** Year code, start month, opening and closing dates (derived from the code as the desktop does); the web adds a year list and a carry-forward panel.
 - **Writes:** YEAR_MAST, AC_GROUP, AC_MAST, BAL_GR, BOOK_DATA, BOOK_DETL, CO_SET, TAX_MAST.
-- **Web:** `/masters/year-create`; `GET /years`, `POST /years`, `POST /years/:coYear/close`, `POST /years/:coYear/reopen`, `POST /years/carry-forward`. Can: create, reopen, edit, list.
-- **Remaining:** The desktop 17-table copy and identity convention are not reproduced; delete, Print and branch-safe carry-forward remain.
-- **Owners:** G38, G39, N58, X10, X27.
+- **Web:** `/masters/year-create`; `GET /years`, `POST /years`, `POST /years/carry-forward`. Can: create, list.
+- **Remaining:** The desktop 17-table copy and identity convention are not reproduced; delete, Print and branch-safe carry-forward remain. Year close/reopen (web-only, rewrote CL_DATE) was removed by N90.
+- **Owners:** G38, G39, G97, N58, N90, X10, X27.
 - **Evidence:** [MS_YEAR.cs:1504-1595](../../unified/src/csharp/DataCareNext/MS_YEAR.cs#L1504-L1595).
 
 ### Year Select

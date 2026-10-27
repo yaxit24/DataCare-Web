@@ -188,6 +188,41 @@ export function docShell(opts: {
   </body></html>`;
 }
 
+/**
+ * G95: purchase and purchase-return rows carry no per-line tax — `TR_PURC` and `TR_KR_ISU` write the tax only on
+ * the header, and the desktop's `PrRtnBillGst.RPT` prints the header's `CGST_TAX`, `SGST_TAX` and `IGST_TAX`
+ * (`TR_KR_ISU.cs:5516-5520`, `extraction_output/rpt_xml/PrRtnBillGst.xml`). When no line carries a tax amount, the
+ * HSN summary therefore takes the header tax, split across HSN groups by taxable value with the last group taking
+ * the remainder, so the summary always adds up to the tax the voucher posted. A sale's lines carry their own
+ * `ITM_*GST_AMT` and are left as they are.
+ */
+function allocateHeaderTaxToHsn(
+  hsn: Record<string, { taxable: number; cgst: number; sgst: number; igst: number }>,
+  header: any,
+  lines: any[],
+): void {
+  const lineTaxCarried = lines.some(
+    (l) => num(l.ITM_CGST_AMT) !== 0 || num(l.ITM_SGST_AMT) !== 0 || num(l.ITM_IGST_AMT) !== 0,
+  );
+  const groups = Object.values(hsn);
+  if (lineTaxCarried || groups.length === 0) return;
+  const totalTaxable = groups.reduce((sum, g) => sum + g.taxable, 0);
+  for (const component of ['cgst', 'sgst', 'igst'] as const) {
+    const headerTax = num(header[`${component.toUpperCase()}_TAX`]);
+    let allocated = 0;
+    groups.forEach((group, index) => {
+      const share =
+        index === groups.length - 1
+          ? headerTax - allocated
+          : totalTaxable === 0
+            ? 0
+            : Math.round(((headerTax * group.taxable) / totalTaxable) * 100) / 100;
+      group[component] = share;
+      allocated += share;
+    });
+  }
+}
+
 /** Shared GST metal-bill body (line table w/ HSN + weights + making + taxable, HSN-wise tax summary,
  *  intra CGST+SGST vs inter IGST, hallmark/TCS/round-off, grand total, amount in words). Header-driven
  *  so sales (SL_DATA) and purchase (PR_DATA) render identically. Lines must carry HSN_CODE. */
@@ -239,6 +274,7 @@ export function gstBillBody(header: any, lines: any[]): string {
       <th>#</th><th style="width:34%">Description</th><th>HSN</th><th>Pcs</th><th>Gross Wt</th><th>Net Wt</th><th>Rate</th><th>Making</th><th>Taxable</th>
     </tr></thead><tbody>${rows || '<tr><td colspan="9" class="c">No line items</td></tr>'}</tbody>
     <tfoot><tr><td class="c" colspan="3">Total</td><td class="r">${sPcs || ''}</td><td class="r">${wt(sGwt)}</td><td class="r">${wt(sNwt)}</td><td></td><td class="r">${money(sMaking)}</td><td class="r">${money(sTaxable)}</td></tr></tfoot></table>`;
+  allocateHeaderTaxToHsn(hsn, h, lines);
   const hsnRows = Object.entries(hsn)
     .map(
       ([code, e]) =>

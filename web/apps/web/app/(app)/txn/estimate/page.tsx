@@ -4,7 +4,8 @@ import { post, downloadPdf, ApiError } from '../../../../lib/api';
 import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
-import { fineFor, labourCharge } from '@datacare/core';
+import { useRoundingPolicy } from '../../../../components/BusinessScope';
+import { fineFor, labourCharge, billTotals } from '@datacare/core';
 import {
   ExtendedBodyCells,
   ExtendedHeaderCells,
@@ -156,7 +157,7 @@ const NUMERIC_EXTENDED = new Set<string>([
 ]);
 
 const blank = (): Line => ({
-  itCode: 'GOLD',
+  itCode: '', // desktop grids start empty; a demo default posts to the wrong item
   pcs: '1',
   grossWt: '',
   netWt: '',
@@ -218,6 +219,7 @@ const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
 export default function EstimatePage() {
   // G11: per-gram labour is on (net + ghat) unless the company sets LBR_WITH_GHT='N' (blank default Y).
   const companySettings = useCompanySettings();
+  const roundingPolicy = useRoundingPolicy();
   const labourWithGhat = companyFlag(companySettings, 'LBR_WITH_GHT', 'Y');
   // G09: the letterhead is the active company's own CO_NAME; the server reads it when it builds the PDF.
   const [acCode, setAcCode] = useState('');
@@ -261,9 +263,18 @@ export default function EstimatePage() {
     return { fine, metal, mk, net: r2(metal + mk) };
   };
   const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
-  const taxable = r2(lineNet - n(discountAmount));
-  const taxPrev = r2((taxable * n(taxRatePct)) / 100);
-  const totalPrev = Math.round(taxable + taxPrev);
+  const previewTotals = billTotals(
+    {
+      lineNetTotal: lineNet,
+      discountAmount: n(discountAmount),
+      taxRatePct: n(taxRatePct),
+      interState,
+    },
+    roundingPolicy,
+  );
+  const taxable = previewTotals.taxable;
+  const taxPrev = previewTotals.tax;
+  const totalPrev = previewTotals.total;
 
   /** The typed estimate request: the compute preview and the PDF use the same one. */
   function estimateRequest() {

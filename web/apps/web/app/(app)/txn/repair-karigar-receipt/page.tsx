@@ -9,6 +9,7 @@ import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import { LookupPicker, type LookupRow } from '../../../../components/LookupPicker';
 import { PartyBalance } from '../../../../components/PartyBalance';
 import { VoucherChrome } from '../../../../components/VoucherChrome';
+import { todayLocal } from '../../../../lib/localDate';
 
 interface ReceiptLine {
   code: string;
@@ -199,7 +200,7 @@ export default function RepairKarigarReceiptPage() {
   const router = useRouter();
   const { lcCode, coYear } = useBusinessScope();
   const [coBook, setCoBook] = useState('');
-  const [vchDate, setVchDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [vchDate, setVchDate] = useState(() => todayLocal());
   const [billNo, setBillNo] = useState('');
   const [employeeCode, setEmployeeCode] = useState('');
   const [bankName, setBankName] = useState('');

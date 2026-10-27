@@ -6,6 +6,7 @@ import { BookSelect } from '../../../../components/BookSelect';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import { ApiError, del, get, post, put } from '../../../../lib/api';
+import { todayLocal } from '../../../../lib/localDate';
 
 type GoldLine = {
   acCode: string;
@@ -53,7 +54,7 @@ export default function GoldBookPage() {
   const router = useRouter();
   const formKeys = desktopGlobalFormKeyActions((href) => router.push(href));
   const [coBook, setCoBook] = useState('');
-  const [vchDate, setVchDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [vchDate, setVchDate] = useState(() => todayLocal());
   const [voucherNo, setVoucherNo] = useState('');
   const [loadedVoucherNo, setLoadedVoucherNo] = useState('');
   const [employeeCode, setEmployeeCode] = useState('');
@@ -84,7 +85,7 @@ export default function GoldBookPage() {
   });
 
   function reset() {
-    setVchDate(new Date().toISOString().slice(0, 10));
+    setVchDate(todayLocal());
     setVoucherNo('');
     setLoadedVoucherNo('');
     setEmployeeCode('');

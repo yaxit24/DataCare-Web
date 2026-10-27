@@ -271,3 +271,16 @@ export type {
   TagCancelTotalsRow,
 } from './tagCancelLine.js';
 export * from './hallmarkSaleForm.js';
+export { fiscalYearDates, isIsoDay } from './fiscalYear.js';
+export type { FiscalYearDates, FiscalYearInput } from './fiscalYear.js';
+export {
+  resolveRoundingPolicy,
+  roundNearest,
+  RoundingPolicyValidationError,
+} from './roundingPolicy.js';
+export type {
+  RoundingPolicy,
+  RoundingFlagValues,
+  TaxRoundingDecimals,
+  StandardRoundingDecimals,
+} from './roundingPolicy.js';

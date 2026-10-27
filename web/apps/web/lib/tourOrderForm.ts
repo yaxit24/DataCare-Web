@@ -14,6 +14,7 @@ import {
   type SubDetailField,
 } from '../components/SubDetailGrid';
 import type { BusinessScope } from '../components/BusinessScope';
+import { todayLocal } from './localDate';
 
 export interface Row {
   components: Array<SubDetailRow & { isrNo?: string }>;
@@ -325,7 +326,7 @@ export const blankOrderHeader = () => ({
   acName: '',
   taxRatePct: '3',
   advanceAmount: '',
-  vchDate: new Date().toISOString().slice(0, 10),
+  vchDate: todayLocal(),
 });
 
 function numberCell(value: unknown, label: string): number | undefined {

@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { getBlob } from '../../../lib/api';
 import { ParityContainmentNotice } from '../../../components/ParityContainmentNotice';
+import { todayLocal } from '../../../lib/localDate';
 
 export default function BackupPage() {
   const [busy, setBusy] = useState(false);
@@ -14,7 +15,7 @@ export default function BackupPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `backup-${todayLocal()}.json`;
       document.body.appendChild(a);
       a.click();
       a.remove();

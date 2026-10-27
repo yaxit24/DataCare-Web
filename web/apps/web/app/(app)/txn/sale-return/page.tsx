@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { get, post, ApiError } from '../../../../lib/api';
-import { useBusinessScope } from '../../../../components/BusinessScope';
+import { useBusinessScope, useRoundingPolicy } from '../../../../components/BusinessScope';
 import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
@@ -9,7 +9,7 @@ import { VoucherList } from '../../../../components/VoucherList';
 import { TenderPanel, type Tender } from '../../../../components/TenderPanel';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import { SaleReturnSavedPanel } from '../../../../components/SaleReturnSavedPanel';
-import { fineFor, labourCharge } from '@datacare/core';
+import { fineFor, labourCharge, billTotals } from '@datacare/core';
 import {
   ExtendedBodyCells,
   ExtendedHeaderCells,
@@ -121,7 +121,7 @@ const NUMERIC_EXTENDED = new Set<string>([
 ]);
 
 const blank = (): Line => ({
-  itCode: 'GOLD',
+  itCode: '', // desktop grids start empty; a demo default posts to the wrong item
   tagNo: '',
   pcs: '1',
   grossWt: '',
@@ -202,6 +202,7 @@ export default function SaleReturnPage() {
 
 function LegacySaleReturnForm() {
   const { coYear } = useBusinessScope();
+  const roundingPolicy = useRoundingPolicy();
   // G11: per-gram labour is on (net + ghat) unless the company sets LBR_WITH_GHT='N' (blank default Y).
   const companySettings = useCompanySettings();
   const labourWithGhat = companyFlag(companySettings, 'LBR_WITH_GHT', 'Y');
@@ -292,9 +293,18 @@ function LegacySaleReturnForm() {
     return { fine, metal, mk, net: r2(metal + mk) };
   };
   const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
-  const taxable = r2(lineNet - n(discountAmount));
-  const taxPrev = r2((taxable * n(taxRatePct)) / 100);
-  const totalPrev = Math.round(taxable + taxPrev);
+  const previewTotals = billTotals(
+    {
+      lineNetTotal: lineNet,
+      discountAmount: n(discountAmount),
+      taxRatePct: n(taxRatePct),
+      interState,
+    },
+    roundingPolicy,
+  );
+  const taxable = previewTotals.taxable;
+  const taxPrev = previewTotals.tax;
+  const totalPrev = previewTotals.total;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -359,7 +369,13 @@ function LegacySaleReturnForm() {
           <div className="row">
             <div className="field">
               <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} preferred="SRT" />
+              {/* CurBookHelp("SALES RETURNE") (MDI_FORM.cs:7969); the writer accepts only that MAIN_BOOK. */}
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                preferred="SRT"
+                mainBooks={['SALES RETURNE']}
+              />
             </div>
             <div className="field">
               <label>Year</label>
@@ -371,6 +387,7 @@ function LegacySaleReturnForm() {
                 entity="accounts"
                 value={acCode}
                 onChange={setAcCode}
+                resolveTypedCode
                 onPick={(r) => {
                   setAcName(String(r.name || ''));
                   if (r.AC_GST_TYPE) setInterState(String(r.AC_GST_TYPE) !== 'L');
