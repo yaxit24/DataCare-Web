@@ -221,7 +221,12 @@ export default function ItemOpeningPage() {
             </div>
             <div className="field">
               <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} preferred="IOP" />
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                preferred="IOP"
+                mainBooks={['OPSTK']}
+              />
             </div>
             <div className="field muted" style={{ alignSelf: 'end' }}>
               IT_CODE ≤ 5 chars · fine = net × touch / 100

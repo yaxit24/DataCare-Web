@@ -124,6 +124,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G111 | S2 | Tag Opening unusable on a provisioned company | Tag Opening (TR_TAG_OPEN) opens tag stock: it writes `BAR_DATA` and a positive `MAIN_STOCK` with no ledger leg (`web/apps/api/src/modules/stock/stockVoucherLifecycle.ts:258-276` empty `AC_DATA` lines) on a book routed to `BAR_DATA` | Found continuing the G110 provisioning review: `web/apps/api/src/modules/ops/seedCompany.ts` provisioned no Tag Opening book, so the Tag Opening screen had no book to select on a provisioned company (the Stock In/Out, Dhiran, Labour/Fine class — G105/G109/G110) | Provisioning creates the `TOP` (TAG OPENING → `BAR_DATA`) book as a ledger-less stock book (empty slots, like WH QUOT); a seed-completeness DB assertion, and the Tag Opening book list filtered to `TAG OPENING` — done (N101) | N101 |
 | G112 | S2 | Fine In/Out unusable on a provisioned company | Fine In/Out (TR_FINE_INOUT) is a pure metal movement: it writes `INOUT_DATA` + signed `MAIN_STOCK` with no money ledger (`web/apps/api/src/modules/inout/fineInout.ts:299` empty `AC_DATA` lines), stamped `BOOK_NAME 'FINE INOUT'` | Found continuing the G111 provisioning review: `web/apps/api/src/modules/ops/seedCompany.ts` provisioned no Fine In/Out book, so the Fine In/Out screen had no book to select on a provisioned company (the Stock In/Out, Dhiran, Labour/Fine, Tag Opening class — G105/G109/G110/G111) | Provisioning creates the `FIO` (FINE INOUT → `INOUT_DATA`) book as a ledger-less metal-movement book (empty slots); a seed-completeness DB assertion, and the Fine In/Out book list filtered to `FINE INOUT` — done (N102) | N102 |
 | G113 | S2 | Bullion Booking unusable on a provisioned company | Bullion Booking (TR_BUL_BOOKING, `MDI_FORM.cs:8171` BUL SALE / `:8183` BUL PURC) books bulk fine metal at a locked rate: the header lands in `BUL_DATA` and a balanced Dr cash / Cr bullion-payable entry in `AC_DATA` (`web/apps/api/src/modules/bullion/bullion.ts`) | Found continuing the G112 provisioning review: `web/apps/api/src/modules/ops/seedCompany.ts` provisioned no Bullion Booking book, so the Bullion Booking screen had no book to select on a provisioned company (the Stock In/Out, Dhiran, Labour/Fine, Tag Opening, Fine In/Out class — G105/G109/G110/G111/G112) | Provisioning creates the `BUL` (BUL SALE → `BUL_DATA`) book; the writer resolves its ledger accounts (`BULLION`/`CASH`) from the payload, so the standard slots are nominal; a seed-completeness DB assertion, and the Bullion Booking book list filtered to `BUL SALE` — done (N103) | N103 |
+| G114 | S2 | Item Opening unusable on a provisioned company | Item Opening (TR_ITM_OPBL, `MDI_FORM.cs:7701` CurBookHelp("OPSTK")) opens non-tag item stock: it writes `ITM_OPBL` + positive `MAIN_STOCK` with no money ledger (empty `AC_DATA`) on a book routed to `BAR_DATA` | Found continuing the G113 provisioning review: `web/apps/api/src/modules/ops/seedCompany.ts` provisioned no Item Opening book, so the Item Opening screen had no book to select on a provisioned company (the Stock In/Out, Dhiran, Labour/Fine, Tag Opening, Fine In/Out, Bullion class) | Provisioning creates the `IOP` (OPSTK → `BAR_DATA`) book as a ledger-less stock book (empty slots); a seed-completeness DB assertion, and the Item Opening book list filtered to `OPSTK` — done (N104) | N104 |
 
 ## 4. Decisions D23–D28
 
@@ -544,6 +545,21 @@ Done when: a provisioned company's Bullion Booking screen offers its book; a see
 proves the `BUL` book and its `BUL_DATA` routing; the list is filtered.
 
 
+### N104 — Item Opening book on a provisioned company (G114)
+
+The provision-then-filter sweep continued to Item Opening (TR_ITM_OPBL, `CurBookHelp("OPSTK")`): it opens
+non-tag (loose/lot) item stock, writing `ITM_OPBL` + positive `MAIN_STOCK` with no money ledger (empty
+`AC_DATA`). `seedCompany` provisioned no Item Opening book, so the screen had no book to select.
+
+`seedCompany` now provisions `IOP` (OPSTK → `BAR_DATA`) as a **ledger-less** stock book with empty slots. It
+joins `TAG OPENING`, `FINE INOUT` and `WH QUOT` in the seed-completeness orphans allowance (the ledger-less
+set is now `['FIO','IOP','TOP','WHQ']`). With the book present, the Item Opening screen's list is filtered to
+`OPSTK` (G101); the mocked-browser smoke's IOP book mock was aligned to the real `OPSTK` MAIN_BOOK.
+
+Done when: a provisioned company's Item Opening screen offers its book; a seed-completeness DB assertion proves
+the ledger-less `IOP` book and its `BAR_DATA` routing; the list is filtered and the smoke passes.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -568,6 +584,7 @@ proves the `BUL` book and its `BUL_DATA` routing; the list is filtered.
 | N101 | — | implemented-unverified, evidence in this change (G111: provisioning creates the ledger-less TAG OPENING book so Tag Opening opens; list filtered) |
 | N102 | — | implemented-unverified, evidence in this change (G112: provisioning creates the ledger-less FINE INOUT book so Fine In/Out opens; list filtered) |
 | N103 | — | implemented-unverified, evidence in this change (G113: provisioning creates the BUL SALE / BUL_DATA book so Bullion Booking opens; list filtered) |
+| N104 | — | implemented-unverified, evidence in this change (G114: provisioning creates the ledger-less OPSTK / BAR_DATA book so Item Opening opens; list filtered) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

@@ -209,6 +209,20 @@ const BOOKS: {
     table: 'BAR_DATA',
     slots: [],
   },
+  // Desktop Item Opening (TR_ITM_OPBL, MDI_FORM.cs:7701 CurBookHelp("OPSTK")): opens non-tag (loose/lot) item
+  // stock — writes ITM_OPBL + positive MAIN_STOCK with no money ledger (empty AC_DATA), on a book routed to
+  // BAR_DATA. Without this book the Item Opening screen has no book to select on a provisioned company
+  // (N104, same class as Tag Opening). Empty slots: a stock opening implies no ledger accounts.
+  {
+    book: 'IOP',
+    name: 'Item Opening',
+    mainBook: 'OPSTK',
+    inout: 'I',
+    acCode: 'PURCHASE',
+    shortName: 'IOPN',
+    table: 'BAR_DATA',
+    slots: [],
+  },
   // Desktop Fine In/Out (TR_FINE_INOUT): a pure metal movement writing INOUT_DATA + signed MAIN_STOCK with
   // no money ledger (AC_DATA empty), stamped BOOK_NAME 'FINE INOUT'. Without this book the Fine In/Out screen
   // has no book to select on a provisioned company (N102, same class as Tag Opening). Empty slots: a metal

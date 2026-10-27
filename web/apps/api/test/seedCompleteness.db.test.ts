@@ -76,10 +76,10 @@ databaseDescribe('provisioning leaves a company able to trade', () => {
     expect(await count('BOOK_DETL')).toBeGreaterThan(0);
 
     // Every book that can post must have at least one account row. WH QUOT (a quotation) and TAG OPENING
-    // (a pure stock-opening voucher, empty AC_DATA) and FINE INOUT (a pure metal movement, empty AC_DATA)
-    // are deliberately ledger-less: their writers post no ledger leg, so they carry no BOOK_DETL. Each has
-    // a zero-economic-footprint DB test.
-    const LEDGERLESS = `('WH QUOT','TAG OPENING','FINE INOUT')`;
+    // (a pure stock-opening voucher, empty AC_DATA), FINE INOUT (a pure metal movement, empty AC_DATA) and
+    // OPSTK (item opening, empty AC_DATA) are deliberately ledger-less: their writers post no ledger leg, so
+    // they carry no BOOK_DETL. Each has a zero-economic-footprint DB test.
+    const LEDGERLESS = `('WH QUOT','TAG OPENING','FINE INOUT','OPSTK')`;
     const orphans = (await owner.$queryRawUnsafe(
       `SELECT d."CO_BOOK" FROM "BOOK_DATA" d
         WHERE d.tenant_id=$1 AND coalesce(d."MAIN_BOOK",'') NOT IN ${LEDGERLESS}
@@ -96,7 +96,7 @@ databaseDescribe('provisioning leaves a company able to trade', () => {
         ORDER BY d."CO_BOOK"`,
       TENANT,
     )) as Array<{ CO_BOOK: string }>;
-    expect(documentOnly.map((o) => o.CO_BOOK)).toEqual(['FIO', 'TOP', 'WHQ']);
+    expect(documentOnly.map((o) => o.CO_BOOK)).toEqual(['FIO', 'IOP', 'TOP', 'WHQ']);
   });
 
   it('provisions the accounts a sale posts to', async () => {
@@ -210,5 +210,19 @@ databaseDescribe('provisioning leaves a company able to trade', () => {
     expect(rows).toHaveLength(1);
     expect(rows[0]!.MAIN_BOOK).toBe('BUL SALE');
     expect(rows[0]!.BOOK_TBL_NAME).toBe('BUL_DATA');
+  });
+
+  it('provisions the Item Opening book (N104/G114)', async () => {
+    // Item Opening (TR_ITM_OPBL, CurBookHelp OPSTK) opens non-tag item stock: ITM_OPBL + positive
+    // MAIN_STOCK, empty AC_DATA. Without this book the Item Opening screen has no book to select.
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT "MAIN_BOOK","BOOK_TBL_NAME" FROM "BOOK_DATA"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "CO_BOOK"='IOP'`,
+      TENANT,
+      CO,
+    )) as Array<{ MAIN_BOOK: string; BOOK_TBL_NAME: string }>;
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.MAIN_BOOK).toBe('OPSTK');
+    expect(rows[0]!.BOOK_TBL_NAME).toBe('BAR_DATA');
   });
 });
