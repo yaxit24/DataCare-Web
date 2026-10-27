@@ -4,6 +4,14 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-27 (cont.) — N98: dhiran book lists filtered to their workflow family (G101 part)
+- **Did:** following N97, the Pledge Loan Issue book select showed all 28 books. Filtered the three Dhiran screens via `mainBooks` on `BookSelect` (as N90 did for purchase/sales-return): Pledge Issue → DHIRAN ISSUE, Pledge Receipt → DHIRAN RECEIPT, Interest Receipt → DHIRAN RECEIPT (interest is on the receipt book; corrected its `preferred` from the non-existent DIN to DRC).
+- **Verified live:** browser-confirmed on the seedCompany demo — the Pledge Loan Issue book select now shows only `DHI — Dhiran Issue` (auto-selected), down from 28, no console errors. typecheck/lint(incl size budget)/web unit 646/full gate battery green. **PR #64 → main.**
+- **G101 progress:** purchase/sales-return (N90) + dhiran x3 (N98) done; ~13 screens remain under N62 (journal, tag/item opening, item lot, mfg, fine JV, tour, hallmark sale, labour sale, batch receipt, bullion, fine in/out, tag weight diff, account opening) — each needs its writer's exact MAIN_BOOK confirmed before filtering (some writers accept any book).
+- Next gap **G110**, slice **N99**, decision **D31**.
+
+---
+
 ## 2026-10-27 (cont.) — N97: Dhiran (pledge loan) books on a provisioned company (G109)
 - **Did:** found by operating the production build as a shop user — the Pledge Loan Issue screen (`/txn/dhrn-issue`) rendered but its book select offered NO Dhiran book, so a pledge loan couldn't be posted (same class as N91's Stock In). `seedCompany` provisioned 24 book families with no DHIRAN book. Added `DHI` (DHIRAN ISSUE → DHRN_ISU_DATA) and `DHR` (DHIRAN RECEIPT → DHRN_REC_DATA) against the DHRN receivable (desktop MDI_FORM.cs:9527/9539). The dhiran writer resolves loanAc/cashAc from the payload, so no bespoke slots; gave them the standard 3 legs to keep the provisioning invariant.
 - **Verified:** seedCompleteness asserts both books + routing tables; provisioning counts updated (27→29 book groups, 95→101 legs); dhiran DB tests unaffected; full API+DB 313/3478, web unit 646, all gates. **PR #63 → main.** Resolves G109.
