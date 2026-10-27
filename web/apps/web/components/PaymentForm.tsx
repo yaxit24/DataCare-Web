@@ -219,6 +219,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
                   value={partyAc}
                   onChange={setPartyAc}
                   ariaLabel="Party account"
+                  resolveTypedCode
                   onPick={(r) => {
                     const name = String(r.name || '');
                     setPartyName(name);

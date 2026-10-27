@@ -874,6 +874,7 @@ export default function SalesEntryPage() {
                 entity="accounts"
                 value={acCode}
                 onChange={setAcCode}
+                resolveTypedCode
                 onPick={(r) => {
                   setAcName(String(r.name || ''));
                   setAddress1(String(r.AC_ADD1 ?? ''));

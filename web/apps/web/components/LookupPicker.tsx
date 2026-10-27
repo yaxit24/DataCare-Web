@@ -24,6 +24,7 @@ export function LookupPicker({
   ariaLabel,
   style,
   advanceOnPick = true,
+  resolveTypedCode = false,
 }: {
   entity: string;
   value: string;
@@ -36,6 +37,13 @@ export function LookupPicker({
   style?: React.CSSProperties;
   /** Workflows with asynchronous validation move focus after their own successful commit. */
   advanceOnPick?: boolean;
+  /**
+   * Resolve an exactly-typed code on Enter and on leave (desktop `tAcCode_KeyDown`), firing onPick. Opt-in:
+   * only the voucher party/supplier fields want it. Grids that drive their own cell navigation and allocate
+   * child rows from onPick (e.g. Design Book components) must not have an extra async resolve fire on a
+   * programmatic blur, so they leave this off (G104, found 2026-10-26).
+   */
+  resolveTypedCode?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<LookupRow[]>([]);
@@ -84,14 +92,14 @@ export function LookupPicker({
   /**
    * The desktop resolves a typed code on Enter: `tAcCode_KeyDown` looks the exact code up in AC_MAST and fills
    * the party's details, opening F1 help only when nothing matches (`TR_PURC.cs:14619-14628`; `TR_SALE.cs:17340`
-   * is the same). Here a typed value that matches one lookup code exactly is picked on Enter before the list has
-   * opened, and also when the field is left (Tab or a click elsewhere), so the screen's `onPick` effects (name,
-   * inter-state, rates) always run. Found in the 2026-10-26 browser run: a supplier typed and tabbed past left the
-   * name blank and inter-state "No", and the purchase was refused.
+   * is the same). With `resolveTypedCode`, a typed value that matches one lookup code exactly is picked on Enter
+   * before the list has opened and when the field is left for another control (Tab/click), so the screen's
+   * `onPick` effects (name, inter-state, rates) run. Found in the 2026-10-26 browser run: a supplier typed and
+   * tabbed past left the name blank and inter-state "No", and the purchase was refused.
    */
   async function resolveTyped(): Promise<void> {
     const typed = String(value ?? '').trim();
-    if (!typed || !onPick || picked.current === typed) return;
+    if (!resolveTypedCode || !typed || !onPick || picked.current === typed) return;
     try {
       const base = searchPath || `/lookup/${entity}`;
       const separator = base.includes('?') ? '&' : '?';
@@ -138,7 +146,7 @@ export function LookupPicker({
           if (next instanceof Node && !boxRef.current?.contains(next)) {
             setOpen(false);
             void resolveTyped();
-          } else if (next == null) void resolveTyped();
+          }
         }}
         onKeyDown={(e) => {
           if (e.key === 'F1') {

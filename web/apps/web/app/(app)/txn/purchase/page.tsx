@@ -558,6 +558,7 @@ export default function PurchaseEntryPage() {
                 entity="accounts"
                 value={acCode}
                 onChange={setAcCode}
+                resolveTypedCode
                 onPick={(r) => {
                   setAcName(String(r.name || ''));
                   if (r.AC_GST_TYPE) setInterState(String(r.AC_GST_TYPE) !== 'L');
