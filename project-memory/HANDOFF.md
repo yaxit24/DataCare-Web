@@ -8,6 +8,12 @@
 ## Active plan
 **Full-parity rebuild (52 tasks / 15 phases A–O)** — replicate the ENTIRE desktop (204 forms, 255 reports, full frontend+backend+DB) at 100% functional parity. The earlier 34-task plan delivered the verified backend CORE; this plan builds out the rest. Task graph = the session todo list (IDs 1–20 group the phases). Run continuously; checkpoint every task.
 
+## Latest slice (2026-10-27) — N100: Labour Sale & Fine Settlement books (G110)
+- Seeded LBR (LABOUR WORK), FSL (FINE SALE), FPR (FINE PURC) books so those screens are usable; filtered Labour Sale to LABOUR WORK. **PR #66 → main.** Provisioning: 29→32 book groups, 101→104 legs.
+- Crossed slice N100: `validate_plan.py` contiguity check now numeric (was string-sorting N100 after N10). Watch for other 2-digit ID assumptions.
+- G101/G110 provisioning pattern: to filter a screen's book list, its MAIN_BOOK book must be SEEDED first. Remaining unseeded families for the still-unfiltered screens: BULLION/BUL SALE, TAG GEN (tag-opening), TAG WT CHANGE (tag-weight-diff), item-opening, ac-opbl, fine-inout, mfg-issue/receive, batch-receipt (RCT is seeded). Each is a provision-then-filter follow-up.
+- Next gap **G111**, slice **N101**, decision **D31**.
+
 ## Latest slice (2026-10-27) — N99: Journal/Item Lot/Tour book filters (G101 part)
 - Journal→JOURNAL, Item Lot→ITEM LOT, Tour→APPROVAL ISSUE book filters. Browser-confirmed (Item Lot shows only ILT). **PR #65 → main.**
 - G101 next step: the remaining screens' families (LABOUR WORK, FINE JV/SALE, BULLION, TAG OPENING) are NOT seeded — must provision those books before filtering, else the list empties. That's a provisioning slice (N91/N97 pattern), then a filter slice.
