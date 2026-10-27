@@ -38,6 +38,8 @@
     "depth:audit": "node scripts/check-depth.mjs --audit",
     "test:routes": "pnpm --filter @datacare/web test:routes",
     "depth:deadcells": "node scripts/check-dead-cells.mjs",
+    "size:budget": "node --test scripts/check-size-budget.test.mjs && node scripts/check-size-budget.mjs",
+    "size:audit": "node scripts/check-size-budget.mjs --audit",
     "advisories": "node scripts/check-advisories.mjs"
   },
   "devDependencies": {
