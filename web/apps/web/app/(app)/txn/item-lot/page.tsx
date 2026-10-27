@@ -292,7 +292,12 @@ export default function ItemLotPage() {
             </div>
             <div className="field">
               <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} preferred="ILT" />
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                preferred="ILT"
+                mainBooks={['ITEM LOT']}
+              />
             </div>
             <div className="field">
               <label>Account (optional)</label>

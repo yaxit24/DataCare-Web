@@ -4500,6 +4500,28 @@
         "web/apps/web/app/(app)/txn/dhrn-interest/page.tsx"
       ],
       "statusNote": "After N97 added the Dhiran books, the Pledge Loan Issue book select showed all 28 books (G101 class). The desktop opens each dhiran menu on CurBookHelp(MAIN_BOOK) (MDI_FORM.cs:9527/9539). Filtered the three screens via mainBooks on BookSelect: Pledge Issue -> DHIRAN ISSUE, Pledge Receipt -> DHIRAN RECEIPT, Interest Receipt -> DHIRAN RECEIPT (interest is entered on the receipt book; its preferred code corrected from the non-existent DIN to DRC). BookSelect already filters the fetched rows case-insensitively by MAIN_BOOK. Verified: browser-confirmed on the seedCompany demo (Pledge Loan Issue now shows only DHI, auto-selected, no console errors); typecheck, lint (incl size budget), web unit 646, full gate battery. The rest of G101 (journal, tag/item opening, item lot, manufacturing, fine JV, tour, hallmark sale, labour sale, batch receipt, bullion, fine in/out, tag weight difference, account opening) remains under N62 pending per-writer MAIN_BOOK confirmation."
+    },
+    {
+      "id": "N99",
+      "status": "implemented-unverified",
+      "action": "Three more screens (Journal, Item Lot, Tour/Approval Issue) offered an unfiltered book list; filter each to its MAIN_BOOK family (G101 part)",
+      "parentLabels": "P06-01; X07",
+      "startAfter": [
+        "N98"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Each screen passes mainBooks matching its provisioned book MAIN_BOOK; browser shows only that book; typecheck/lint/web-unit/gates green",
+      "gapIds": "G101",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-27",
+      "evidence": [
+        "web/apps/web/app/(app)/txn/journal/page.tsx",
+        "web/apps/web/app/(app)/txn/item-lot/page.tsx",
+        "web/apps/web/app/(app)/txn/tour/page.tsx"
+      ],
+      "statusNote": "Filtered three more G101 screens whose provisioned book MAIN_BOOK matches the desktop CurBookHelp family: Journal -> JOURNAL (seeded JV), Item Lot -> ITEM LOT (seeded ILT), Tour/Approval Issue -> APPROVAL ISSUE (seeded TUR). Each passes mainBooks to BookSelect; the preferred book is present so the list cannot empty. Verified: browser-confirmed on the seedCompany demo (Item Lot shows only ILT, auto-selected, no console errors); typecheck, lint (incl size budget), web unit 646, full gate battery. Deliberately left to N62: tag/item opening, manufacturing, fine JV, hallmark sale, labour sale, batch receipt, bullion, fine in/out, tag weight diff, account opening -- their MAIN_BOOK families (LABOUR WORK, FINE JV/SALE, BULLION, TAG OPENING, ...) are not seeded, so filtering would empty the list until those books are provisioned."
     }
   ],
   "amendments": [
