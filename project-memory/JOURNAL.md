@@ -4,6 +4,12 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-28 (cont.) — N104: Item Opening book provisioned (G114)
+- Provision-then-filter sweep continued to Item Opening (TR_ITM_OPBL, CurBookHelp OPSTK). Added IOP (OPSTK → BAR_DATA) ledger-less book (empty slots); orphans allowance now [FIO,IOP,TOP,WHQ]. Filtered list to OPSTK; aligned the smoke IOP mock to OPSTK. **PR #70 → main.**
+- Next gap **G115**, slice **N105**, decision **D31**.
+
+---
+
 ## 2026-10-28 — N103: Bullion Booking book provisioned (G113)
 - Provision-then-filter sweep continued to Bullion Booking (TR_BUL_BOOKING, BUL SALE). Added BUL (BUL SALE → BUL_DATA) with standard slots (accounts resolve from payload). Filtered its list to BUL SALE. provisioning 32→33 groups, 104→107 legs. **PR #69 → main.**
 - Running autonomously per user: implement → PR → merge when green → next, no pausing. Merging my own green PRs now (permission granted).

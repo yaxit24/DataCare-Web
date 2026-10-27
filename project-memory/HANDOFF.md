@@ -8,6 +8,11 @@
 ## Active plan
 **Full-parity rebuild (52 tasks / 15 phases A–O)** — replicate the ENTIRE desktop (204 forms, 255 reports, full frontend+backend+DB) at 100% functional parity. The earlier 34-task plan delivered the verified backend CORE; this plan builds out the rest. Task graph = the session todo list (IDs 1–20 group the phases). Run continuously; checkpoint every task.
 
+## Latest slice (2026-10-28) — N104: Item Opening book (G114)
+- Seeded IOP (OPSTK → BAR_DATA) ledger-less book so Item Opening is usable; filtered its list; aligned smoke mock. **PR #70 → main.** Orphans allowance now [FIO,IOP,TOP,WHQ].
+- Provision-then-filter sweep: Stock In/Out (N91), Dhiran (N97/N98), Labour+Fine (N100), Tag Opening (N101), Fine In/Out (N102), Bullion (N103), Item Opening (N104). Remaining: ac-opbl, tag-weight-diff (TAG WT CHANGE), mfg-issue/receive, batch-receipt (RCT seeded → filter only), bullion-sale (BUL WH SALE/RATE_CUT_DATA).
+- Next gap **G115**, slice **N105**, decision **D31**.
+
 ## Latest slice (2026-10-28) — N103: Bullion Booking book (G113)
 - Seeded BUL (BUL SALE → BUL_DATA) ledger-bearing book (accounts from payload); filtered its list. **PR #69 → main.** provisioning 32→33 groups, 104→107 legs.
 - Provision-then-filter sweep: Stock In/Out (N91), Dhiran (N97/N98), Labour+Fine (N100), Tag Opening (N101), Fine In/Out (N102), Bullion Booking (N103). Remaining unusable-screen candidates: item-opening (BAR_DATA; MAIN_BOOK needs confirm), ac-opbl, tag-weight-diff (TAG WT CHANGE), mfg-issue/receive, batch-receipt (RCT seeded → filter only), bullion-sale (BUL WH SALE/RATE_CUT_DATA).
