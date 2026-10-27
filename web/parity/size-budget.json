@@ -6,7 +6,7 @@
     "apps/api/src/routes/txn.ts": 8559,
     "apps/api/src/modules/sales/rateCut.ts": 2982,
     "apps/api/src/modules/purchase/purchase.ts": 2860,
-    "apps/api/src/modules/sales/sales.ts": 2807,
+    "apps/api/src/modules/sales/sales.ts": 2809,
     "apps/api/src/modules/sales/salesOrder.ts": 2350,
     "apps/api/src/modules/membership/scheme.ts": 2205,
     "apps/api/src/modules/posting/desktopColumnDefaults.ts": 2010,

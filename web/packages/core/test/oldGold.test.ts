@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   oldGoldAmountFromRate,
   oldGoldBasisWeight,
+  oldGoldConversionWeight,
   oldGoldFine,
   oldGoldRateFromAmount,
   resolveOldGoldValuation,
@@ -49,6 +50,7 @@ describe('old-gold amount from rate (TR_SALE.cs:7921-7963)', () => {
       fine: 4.452,
       rate: 5800,
       amount: 25822,
+      conversionWt: 0,
     });
   });
 
@@ -85,10 +87,38 @@ describe('old-gold rate from a typed amount (TR_SALE.cs:7930, :7983-7988)', () =
       fine: 3.87,
       rate: 103.36,
       amount: 400,
+      conversionWt: 0,
     });
   });
 
   it('values nothing when neither rate nor amount is given', () => {
-    expect(valueOldGoldLine({ netWt: 4.3, touch: 90 })).toEqual({ fine: 3.87, rate: 0, amount: 0 });
+    expect(valueOldGoldLine({ netWt: 4.3, touch: 90 })).toEqual({
+      fine: 3.87,
+      rate: 0,
+      amount: 0,
+      conversionWt: 0,
+    });
+  });
+
+  it('G89: derives the conversion weight from Con% and the fine, ignoring a posted conversionWt', () => {
+    // fine = 10 x 90 / 100 = 9.000. Con% 92 (<=100): round(9/92*100 - 9, 3) + 9 = 9.783.
+    expect(oldGoldConversionWeight({ fineWt: 9, conversionPct: 92, conversionWt: 50 })).toBeCloseTo(
+      9.783,
+      3,
+    );
+    // Con% 105 (>100, an uplift): round(9 x 105 / 100, 3) = 9.45.
+    expect(oldGoldConversionWeight({ fineWt: 9, conversionPct: 105 })).toBe(9.45);
+    // Con% 0: no conversion, falls back to the posted conversionWt (a legacy row).
+    expect(oldGoldConversionWeight({ fineWt: 9, conversionPct: 0, conversionWt: 0.1 })).toBe(0.1);
+    // valueOldGoldLine returns the DERIVED conversion weight, and values the row on it (G89).
+    const v = valueOldGoldLine({
+      netWt: 10,
+      touch: 90,
+      conversionPct: 92,
+      conversionWt: 50,
+      rate: 100,
+    });
+    expect(v.conversionWt).toBeCloseTo(9.783, 3);
+    expect(v.amount).toBe(978); // round(9.783 x 100, 0)
   });
 });

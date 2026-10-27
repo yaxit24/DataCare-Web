@@ -4431,6 +4431,31 @@
         ".github/workflows/ci.yml"
       ],
       "statusNote": "G79 records routes/txn.ts at 8558 lines and nine modules over 1500; N88 shrinks them by extracting route plugins and a shared voucher editor, but nothing prevented growth meanwhile. check-size-budget.mjs (baseline web/parity/size-budget.json, wired into CI next to the depth gate) records every over-cap file line count as a ceiling that may only fall and caps new files at 1500; --audit re-derives counts, --write only tightens, so a raised ceiling is a reviewed baseline diff. 20 ceilings today, led by txn.ts. Verified: gate passes the current tree; a planted +5-line growth on finance.ts and a new 1600-line file both fail and pass after revert; check-size-budget.test.mjs (run first by size:budget) covers grown-ceiling, over-cap-new, at-ceiling and shrunk cases; full gate battery green. Scope: the file-size-budget part of N88/SP03 only."
+    },
+    {
+      "id": "N96",
+      "status": "implemented-unverified",
+      "action": "Old-metal exchange rows valued on the client-posted conversionWt instead of deriving CON_WT from Con% and the fine weight as the desktop does (G89)",
+      "parentLabels": "P06-01, P10-05; X07",
+      "startAfter": [
+        "N93"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Core vectors for each Con% branch; the web preview derives the same; a DB write-set assertion shows the stored CON_WT is derived (not the posted value); full suite green",
+      "gapIds": "G89",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-27",
+      "evidence": [
+        "web/packages/core/src/oldGold.ts",
+        "web/packages/core/test/oldGold.test.ts",
+        "web/apps/api/src/modules/sales/sales.ts",
+        "web/apps/web/lib/oldGoldRow.ts",
+        "web/apps/web/test/oldGoldRow.test.ts",
+        "web/apps/api/test/sales.lifecycle.db.test.ts"
+      ],
+      "statusNote": "The desktop derives cUrConWt from Con% and the fine (TR_SALE.cs:7911-7942); the web valued the exchange row on the client-posted conversionWt, so the stored CON_WT and amount depended on client arithmetic. Added @datacare/core oldGoldConversionWeight (Con%>100 -> round(fine*Con%/100,3); 0<Con%<=100 -> round(fine/Con%*100-fine,3)+fine; Con%=0 -> supplied weight), used by valueOldGoldLine/oldGoldBasisWeight so the sale writer stores the derived CON_WT and the sale/sales-quotation previews (oldGoldRowAmount) show it; the KJ001NEKJ per-install branch stays waived. Verified: core vectors per branch (oldGold.test.ts), web preview test (oldGoldRow.test.ts), and a DB assertion in sales.lifecycle.db.test.ts (Con% 92, tampered conversionWt 0.1 -> stored CON_WT 4.207 derived); full API+DB 313 files/3477, web unit 646, core 1772. The N95 size budget caught the +2 lines in sales.ts; its ceiling was raised to 2809 as a reviewed baseline diff."
     }
   ],
   "amendments": [

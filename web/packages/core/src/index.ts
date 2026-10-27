@@ -44,6 +44,7 @@ export type { FineWorkflow, FineLine } from './finePolicy.js';
 export {
   oldGoldAmountFromRate,
   oldGoldBasisWeight,
+  oldGoldConversionWeight,
   oldGoldFine,
   oldGoldRateFromAmount,
   resolveOldGoldValuation,

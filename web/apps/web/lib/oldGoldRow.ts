@@ -5,6 +5,7 @@ export interface OldGoldCells {
   netWt: string;
   touch: string;
   rate: string;
+  conversionPct: string;
   conversionWt: string;
   rateType: string;
 }
@@ -23,6 +24,7 @@ export function oldGoldRowAmount(row: OldGoldCells): number {
     netWt: Number(row.netWt || 0),
     touch: Number(row.touch || 0),
     rate: Number(row.rate || 0),
+    conversionPct: Number(row.conversionPct || 0),
     conversionWt: Number(row.conversionWt || 0),
     rateType: row.rateType || undefined,
   }).amount;

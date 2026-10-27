@@ -1348,6 +1348,7 @@ async function writeSaleTx(
     ...valueOldGoldLine({
       netWt: num(g.netWt),
       touch: num(g.touch),
+      conversionPct: num(g.conversionPct),
       conversionWt: num(g.conversionWt),
       rate: num(g.rate),
       amount: num(g.amount),
@@ -1656,7 +1657,8 @@ async function writeSaleTx(
       ITM_TOUCH: num(g.touch),
       ITM_FINE: fine,
       CON_PRC: num(g.conversionPct),
-      CON_WT: num(g.conversionWt),
+      // CON_WT is DERIVED from Con% and the fine weight server-side (G89), not trusted from the client.
+      CON_WT: valuedOldMetal[i]!.conversionWt,
       // TR_SALE.cs values the exchange line server-side rather than trusting the posted amount:
       // rate type 'N' applies the rate to net weight, otherwise to fine (or to the conversion weight
       // when one is present), and `Math.Round(basis * rate, 0)` makes it whole rupees. When the
