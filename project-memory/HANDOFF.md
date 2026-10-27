@@ -8,6 +8,11 @@
 ## Active plan
 **Full-parity rebuild (52 tasks / 15 phases A–O)** — replicate the ENTIRE desktop (204 forms, 255 reports, full frontend+backend+DB) at 100% functional parity. The earlier 34-task plan delivered the verified backend CORE; this plan builds out the rest. Task graph = the session todo list (IDs 1–20 group the phases). Run continuously; checkpoint every task.
 
+## Latest slice (2026-10-27) — N99: Journal/Item Lot/Tour book filters (G101 part)
+- Journal→JOURNAL, Item Lot→ITEM LOT, Tour→APPROVAL ISSUE book filters. Browser-confirmed (Item Lot shows only ILT). **PR #65 → main.**
+- G101 next step: the remaining screens' families (LABOUR WORK, FINE JV/SALE, BULLION, TAG OPENING) are NOT seeded — must provision those books before filtering, else the list empties. That's a provisioning slice (N91/N97 pattern), then a filter slice.
+- Next gap **G110**, slice **N100**, decision **D31**.
+
 ## Latest slice (2026-10-27) — N98: dhiran book lists filtered to their workflow family (G101 part)
 - The three Dhiran screens now filter their `BookSelect` to DHIRAN ISSUE / DHIRAN RECEIPT (as N90 did for purchase/sales-return). Browser-confirmed: Pledge Loan Issue shows only `DHI`. **PR #64 → main.**
 - G101 remaining (~13 screens) under N62; each needs its writer's exact MAIN_BOOK confirmed (some writers accept any book, so a wrong filter would hide valid books).

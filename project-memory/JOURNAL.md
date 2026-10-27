@@ -4,6 +4,13 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-27 (cont.) — N99: Journal/Item Lot/Tour book filters (G101 part)
+- Filtered three more screens to their MAIN_BOOK family (provisioned book matches the desktop CurBookHelp, so the list can't empty): Journal → JOURNAL (JV), Item Lot → ITEM LOT (ILT), Tour/Approval Issue → APPROVAL ISSUE (TUR). Browser-confirmed: Item Lot shows only ILT. **PR #65 → main.**
+- Method for picking safe G101 screens: only filter where `seedCompany` provisions a book whose MAIN_BOOK equals the filter AND the screen's `preferred` is that book. The unfiltered remainder (tag/item opening, mfg, fine JV, hallmark/labour sale, batch receipt, bullion, fine in/out, tag weight diff, ac-opbl) need their families SEEDED first (LABOUR WORK, FINE JV/SALE, BULLION, TAG OPENING not in seedCompany) — a provisioning follow-up before they can be filtered. Left to N62.
+- Next gap **G110**, slice **N100**, decision **D31**.
+
+---
+
 ## 2026-10-27 (cont.) — N98: dhiran book lists filtered to their workflow family (G101 part)
 - **Did:** following N97, the Pledge Loan Issue book select showed all 28 books. Filtered the three Dhiran screens via `mainBooks` on `BookSelect` (as N90 did for purchase/sales-return): Pledge Issue → DHIRAN ISSUE, Pledge Receipt → DHIRAN RECEIPT, Interest Receipt → DHIRAN RECEIPT (interest is on the receipt book; corrected its `preferred` from the non-existent DIN to DRC).
 - **Verified live:** browser-confirmed on the seedCompany demo — the Pledge Loan Issue book select now shows only `DHI — Dhiran Issue` (auto-selected), down from 28, no console errors. typecheck/lint(incl size budget)/web unit 646/full gate battery green. **PR #64 → main.**
