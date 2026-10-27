@@ -130,7 +130,7 @@ databaseDescribe('provisioning leaves a company able to trade', () => {
       CO,
     )) as Array<{ AC_CODE: string | null }>;
     expect(loc.length).toBeGreaterThan(0);
-    expect(loc[0].AC_CODE).toBe('BRANCH');
+    expect(loc[0]?.AC_CODE).toBe('BRANCH');
     expect(await count('AC_MAST', `AND "AC_CODE"='BRANCH'`)).toBe(1);
   });
 });
