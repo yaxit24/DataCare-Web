@@ -4327,6 +4327,35 @@
         "web/apps/api/test/stockInoutAmount.routes.db.test.ts"
       ],
       "statusNote": "Found by operating the production build in Chrome (2026-10-26): on provisioned company 07 the Stock In Book select was empty and Save was disabled. Root cause: StockInoutForm filters BookSelect to MAIN_BOOK INWORD/OUTWORD (StockInoutForm.tsx:230,422) but seedCompany created 22 book families without either, and seeded LOCT_MAST with no AC_CODE, so the signed metal/ledger rows (stockInout.ts:760,807 filter on the location account) would also be dropped. Fix: seedCompany now adds a BRANCH stock-in-hand account, wires it to LOCT_MAST.AC_CODE (MS_LOCT.cs:3458), and creates the SIN (INWORD) and SOT (OUTWORD) books. Verified: seedCompleteness asserts both books and the branch account; stockInoutAmount posts a Stock In and Stock Out through the real routes against the seeded books and reconciles (line amounts by rate type, reopen, tag rate type); full API+DB suite 313 files / 3475 tests. Not verified: a fresh browser Stock In save re-run (the server route is covered by the DB test); the exact desktop AC_GR for the branch account was chosen as current-asset 01 without a desktop-DB confirmation."
+    },
+    {
+      "id": "N92",
+      "status": "implemented-unverified",
+      "action": "Document screens previewed Math.round(taxable+tax) instead of the company rounding policy, so the shown total differed from the posted total on nine screens",
+      "parentLabels": "P06-01, P10-05; X07",
+      "startAfter": [
+        "N90"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Core vectors prove billTotals with the policy yields the posted total (whole-rupee and paise cases); /me exposes the company flags; the nine screens build the policy and preview with billTotals; full suite and real-stack with zero mocks",
+      "gapIds": "G102",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-27",
+      "evidence": [
+        "web/packages/core/src/roundingPolicy.ts",
+        "web/packages/core/test/roundingPolicyBill.test.ts",
+        "web/apps/api/src/modules/shared/roundingPolicy.ts",
+        "web/apps/api/src/modules/shared/roundingPolicyLoader.ts",
+        "web/apps/api/src/app.ts",
+        "web/apps/api/test/sessionContextHttp.db.test.ts",
+        "web/apps/web/components/BusinessScope.tsx",
+        "web/apps/web/app/(app)/txn/purchase/page.tsx",
+        "web/apps/web/app/(app)/txn/sales/page.tsx",
+        "web/apps/web/app/(app)/txn/hallmark-sale/page.tsx"
+      ],
+      "statusNote": "Found by operating the production build (2026-10-26): purchase return previewed Rs.20,865 vs posted Rs.20,865.23; a sale previewed Rs.75,319 vs posted Rs.75,318.75. The nine document screens previewed Math.round(taxable+tax) while the server posts with the company rounding policy (TOT_AMT_ROF/TAX_ROF) through billTotals. Fix: resolveRoundingPolicy + roundNearest moved into @datacare/core (one source of truth); the API shared/roundingPolicy.ts re-exports it and keeps the PARITY_STRICT gate; /me carries the company flags via loadRoundingFlags; a web useRoundingPolicy() hook builds the policy; purchase, sales, hallmark sale, sale return, purchase return, consignment purchase, estimate and both quotations preview with billTotals(input, policy). Verified: core 1771 (incl. 4 new G102 vectors), API+DB 313 files, web unit 645, build, route coverage 126/126, kernel conformance, real-stack 25 journeys/0 mocks, /me roundingFlags assertion. Not verified: a fresh browser re-check of a company with a non-default TOT_AMT_ROF (the core vectors and the server parity cover the arithmetic). G84 (hallmark preview also omits west %/ghat/other charges/line discounts) is a separate line-arithmetic gap, still N63."
     }
   ],
   "amendments": [

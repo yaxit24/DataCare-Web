@@ -8,7 +8,7 @@ import {
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { del, get, post, put, ApiError } from '../../../../lib/api';
-import { useBusinessScope } from '../../../../components/BusinessScope';
+import { useBusinessScope, useRoundingPolicy } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { TenderPanel, type Tender } from '../../../../components/TenderPanel';
@@ -19,7 +19,7 @@ import { EntityImagePanel } from '../../../../components/EntityImagePanel';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import SubDetailGrid, { stoneRowFromApi, useSubDetail } from '../../../../components/SubDetailGrid';
 import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
-import { fineFor, labourCharge } from '@datacare/core';
+import { fineFor, labourCharge, billTotals } from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
 
 interface Line {
@@ -236,6 +236,7 @@ const lineFromApi = (
 
 export default function ConsiPurchaseEntryPage() {
   const { lcCode, coYear } = useBusinessScope();
+  const roundingPolicy = useRoundingPolicy();
   const router = useRouter();
   const formKeys = desktopGlobalFormKeyActions((href) => router.push(href));
   const [coBook, setCoBook] = useState('');
@@ -346,9 +347,18 @@ export default function ConsiPurchaseEntryPage() {
     return { fine, metal, mk, net: r2(metal + mk) };
   };
   const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
-  const taxable = r2(lineNet - n(discountAmount));
-  const taxPrev = r2((taxable * n(taxRatePct)) / 100);
-  const totalPrev = Math.round(taxable + taxPrev);
+  const previewTotals = billTotals(
+    {
+      lineNetTotal: lineNet,
+      discountAmount: n(discountAmount),
+      taxRatePct: n(taxRatePct),
+      interState,
+    },
+    roundingPolicy,
+  );
+  const taxable = previewTotals.taxable;
+  const taxPrev = previewTotals.tax;
+  const totalPrev = previewTotals.total;
 
   function newPurchase() {
     setLoadedVchNo('');

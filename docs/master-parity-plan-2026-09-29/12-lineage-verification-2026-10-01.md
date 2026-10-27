@@ -112,7 +112,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G99 | S1 | Bank-mode receipt/payment settlement account | A desktop BANK REC / BANK PAY book's `BOOK_DETL` slot 1 is the bank account (`TR_CASH.cs:2629-2650`), so slot 1 is right for the book's own mode | Found in the 2026-10-26 E2E run: Payment, mode Bank, Bank A/c blank, in the provisioned generic PAYMENT book (slot 1 CASH) was saved as `BPAY` with its money leg on CASH; `finance.ts` fell back to slot 1 for every mode | A non-cash movement in a generic RECEIPT/PAYMENT book must name its bank account and may not name the cash account; DB tests in `financeBookFamily.db.test.ts` | N90 |
 | G100 | S3 | Demo defaults on transaction screens | The desktop grids start empty and `TR_SALE.cs:14139-14142` defaults the cash party to `00045`, an account the company template carries | Found in the 2026-10-26 E2E run: nine screens started every new line with item `GOLD` (a demo item; company 07 had none) — fixed by N90; sales, hallmark sale and sales quotation still default the party to `WALKIN`, which web provisioning does not create | New lines start empty (done); the cash-party default follows the provisioned template once provisioning carries it | N58 |
 | G101 | S3 | Book lists not limited to the workflow's book family | Each desktop menu opens its form on `CurBookHelp(<MAIN_BOOK>)` (`MDI_FORM.cs:7868` purchase, `:7969` sales return) | Found in the 2026-10-26 E2E run: Purchase Invoice and Tag Opening listed every book (Contra, Journal, Sales…); N90 limits Purchase and Sales Return; journal, tag/item opening, item lot, manufacturing, dhiran, fine JV, tour, hallmark sale, labour sale, batch receipt, bullion, fine in/out, tag weight difference and account opening still use an unfiltered `BookSelect` | Every screen offers only the MAIN_BOOK values its writer accepts | N62 |
-| G102 | S2 | Screen totals rounded differently from the posted totals | The desktop grid shows the amounts it saves (`TR_PURC.cs:15474-15502` `BILL_TOTAL` rounds with `MsTotAmtRof`/`MsTaxRof`) | Found in the 2026-10-26 E2E run: purchase return previewed ₹20,865 and posted ₹20,865.23; a sale previewed ₹75,319 (balance due 319) and posted ₹75,318.75. Purchase, purchase return, sales, sale return, quotations, consignment, hallmark purchase/sale and estimate preview `Math.round(taxable + tax)` instead of the company rounding policy (`TOT_AMT_ROF`, `TAX_ROF`) | Previews use the writer's own totals arithmetic and rounding policy from `@datacare/core`, or show the server's computed totals | N63 |
+| G102 | S2 | Screen totals rounded differently from the posted totals | The desktop grid shows the amounts it saves (`TR_PURC.cs:15474-15502` `BILL_TOTAL` rounds with `MsTotAmtRof`/`MsTaxRof`) | Found in the 2026-10-26 E2E run: purchase return previewed ₹20,865 and posted ₹20,865.23; a sale previewed ₹75,319 (balance due 319) and posted ₹75,318.75. The nine document screens previewed `Math.round(taxable + tax)` instead of the company rounding policy (`TOT_AMT_ROF`, `TAX_ROF`). N92 moved `resolveRoundingPolicy` into `@datacare/core`, surfaced the company flags on `/me`, and made purchase, sales, hallmark sale, sale return, purchase return, consignment purchase, estimate and both quotations preview with `billTotals(input, policy)` — the same arithmetic and rounding the server posts | Previews use the writer's totals arithmetic and the company rounding policy from `@datacare/core` — done (N92) | N92 |
 | G103 | S3 | "Today" defaults use the UTC day | The desktop fills its date masks from the workstation's local `DateAndTime.Today` (`MS_YEAR.cs:1012`) | Found in the 2026-10-26 E2E run at 02:07 IST: new vouchers defaulted to 26 October (48 `new Date().toISOString().slice(0, 10)` defaults in 36 web files), Bank Reconciliation's month start became the previous month's last day, and Journal Voucher started with no date | One local-calendar helper (`web/apps/web/lib/localDate.ts`) for every default; unit test `localDate.test.ts` | N90 |
 | G104 | S2 | Typed lookup codes not resolved | `unified/src/csharp/DataCareNext/TR_PURC.cs:14619-14628` `tAcCode_KeyDown` looks the typed code up in AC_MAST on Enter and fills the party (F1 help opens only when nothing matches); `TR_SALE.cs:17340` is the same | Found in the 2026-10-26 E2E run: `web/apps/web/components/LookupPicker.tsx` ran its `onPick` effects only when a row was chosen from the open list, so a supplier typed and tabbed past (or Enter pressed before the list opened) left the name blank and Inter-state "No", and the purchase was refused (`interState does not match the persisted supplier GST type`) | A typed value that matches one lookup code exactly is picked on Enter and when the field is left, running the screen's pick effects; browser re-check on Purchase | N90 |
 | G105 | S2 | Stock In / Out unusable on a provisioned company | The desktop ships `INWORD` / `OUTWORD` books and every location carries a branch account (`MS_LOCT.cs:3458` binds `LOCT_MAST.AC_CODE`); `TR_INOUT.cs:5268-5282` posts the signed metal rows against that branch account and `web/apps/api/src/modules/stock/stockInout.ts:19-23,344-355` reads `LOCT_MAST.AC_CODE` for the location account | Found in the 2026-10-26 E2E run: on provisioned company 07 the Stock In Book select was empty and Save stayed disabled — `web/apps/web/components/StockInoutForm.tsx:230,422` filters `BookSelect` to `mainBook` `INWORD`/`OUTWORD`, but `web/apps/api/src/modules/ops/seedCompany.ts` creates 22 book families without either and seeds `LOCT_MAST` with no `AC_CODE`, so even with a book the metal/ledger rows (`stockInout.ts:760,807` filter on `locationAccount.acCode`) would be dropped | Provisioning creates the `INWORD` and `OUTWORD` books and a branch stock-in-hand account wired to `LOCT_MAST.AC_CODE`, so Stock In/Out opens, saves, and posts a reconciling metal + ledger entry; DB test on the isolated database | N91 |
@@ -308,6 +308,29 @@ Stock Out through the real `/stock/in` and `/stock/out` routes against the seede
 Done when: a provisioned company's Stock In/Out screens list a book and save, and the stock in/out routes post a
 reconciling metal and ledger entry on the isolated database.
 
+### N92 — Document previews use the company rounding policy (G102)
+
+Found in the 2026-10-26 browser run: the nine document screens previewed `Math.round(taxable + tax)`, so the
+operator saw a different total from the one the server posts — a purchase return previewed ₹20,865 but posted
+₹20,865.23, and a sale previewed ₹75,319 but posted ₹75,318.75. The server already posts with the company
+rounding policy (`TOT_AMT_ROF`/`TAX_ROF`, `TR_PURC.cs:15474-15502`), through `billTotals(input, policy)`; the
+screens did not have the policy.
+
+The rule `resolveRoundingPolicy` (and `roundNearest`) moved into `@datacare/core` so the server and the web
+build the identical policy from the same flags — there is now exactly one source of truth. The API's
+`web/apps/api/src/modules/shared/roundingPolicy.ts` re-exports it and keeps the server-only `PARITY_STRICT`
+gate; `/me` carries the
+company flags (`loadRoundingFlags`); and a web `useRoundingPolicy()` hook (session-scoped, kept separate from
+`BusinessScope` so the scope object stays a clean query-parameter bag) builds the policy for the screens.
+Purchase, sales, hallmark sale, sale return, purchase return, consignment purchase, estimate and both
+quotations now preview with `billTotals(input, policy)`. A company with no configured flags keeps the 2dp
+default, so nothing changes for it.
+
+Done when: each document screen previews the total the server posts (verified by core vectors for the 1515
+whole-rupee and the 75318.75 paise cases, the `/me` flag exposure, the full suite and the real-stack browser
+suite with zero mocks). G84 (the hallmark preview also omits west %, ghat, other charges and line discounts —
+a line-arithmetic gap, not rounding) remains with N63.
+
 
 ## 6. Status corrections
 
@@ -321,6 +344,7 @@ reconciling metal and ledger entry on the isolated database.
 | N86 (2026-10-26) | implemented-unverified | Still implemented-unverified: the advisory gate turned red on unchanged dependencies and PR #55 patched it (next 15.5.28, vitest 4.1.12/vite 6.4.5, zod 4.6.7, msal-node 7.1.1 override) to 0/0/0/0; Next.js 16.4.3 rehearsal re-run and passing |
 | N90 | — | implemented-unverified, evidence in this change (browser-run defects G95–G99, G103, parts of G100/G101) |
 | N91 | — | implemented-unverified, evidence in this change (G105: provisioning creates the INWORD/OUTWORD books and the branch account so Stock In/Out opens, saves and posts) |
+| N92 | — | implemented-unverified, evidence in this change (G102: the nine document screens preview the total the server posts, via the shared `@datacare/core` rounding policy on `/me`) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

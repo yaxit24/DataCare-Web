@@ -2,6 +2,7 @@ import type { VoucherScope } from '../vouchers/numbering.js';
 import {
   resolveRoundingPolicy,
   RoundingPolicyValidationError,
+  type RoundingFlagValues,
   type RoundingPolicy,
 } from './roundingPolicy.js';
 
@@ -64,4 +65,36 @@ export async function resolveRoundingPolicyTx(
     PR_RATE_ROF: row.pr_rate_rof,
     ALL_ROF_REMOVE: row.all_rof_remove,
   });
+}
+
+/**
+ * The raw rounding flags, normalised to JSON-safe strings, so the web can rebuild the identical
+ * `resolveRoundingPolicy` client-side and preview a document's totals exactly as the server posts them
+ * (G102/G84). Returns `null` when the company has no (or an ambiguous) settings row — the web then keeps its
+ * 2dp default, as the rule does for absent flags.
+ */
+export async function loadRoundingFlags(
+  prisma: any,
+  tenantId: string,
+  coCode: string,
+): Promise<RoundingFlagValues | null> {
+  try {
+    const policy = await resolveRoundingPolicyTx(prisma, {
+      tenantId,
+      coCode,
+    } as VoucherScope);
+    // Return the resolved decimals as flags: the web passes them back through resolveRoundingPolicy and gets
+    // the same policy. A configured flag keeps its decimal count; an unconfigured one is omitted so the web's
+    // rule applies its own 2dp default (and banker's-vs-half-up matches, since `configured` is re-derived).
+    const flags: RoundingFlagValues = {};
+    if (policy.configured.tax) flags.TAX_ROF = String(policy.taxDecimals);
+    if (policy.configured.labour) flags.LBR_ROF = String(policy.labourDecimals);
+    if (policy.configured.itemRate) flags.ITM_RATE_ROF = String(policy.itemRateDecimals);
+    if (policy.configured.billTotal) flags.TOT_AMT_ROF = String(policy.billTotalDecimals);
+    if (policy.configured.purchaseRate) flags.PR_RATE_ROF = String(policy.purchaseRateDecimals);
+    return flags;
+  } catch (err) {
+    if (err instanceof RoundingPolicyValidationError) return null;
+    throw err;
+  }
 }

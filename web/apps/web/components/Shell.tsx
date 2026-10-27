@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { NAV } from '../lib/nav';
 import { get, post } from '../lib/api';
 import type { BrowserSessionContext } from '../lib/pageContext';
+import type { RoundingFlagValues } from '@datacare/core';
 import { useOperationLease } from './useOperationLease';
 import {
   createPendingContextSelection,
@@ -21,6 +22,8 @@ export interface Session {
   lcCode: string;
   coYear: string | null;
   passwordResetRequired?: boolean;
+  /** Company money-rounding flags for previewing document totals (G102/G84). */
+  roundingFlags?: RoundingFlagValues | null;
   rights: Record<string, boolean>;
   /** Per-form RBAC: null means explicit admin bypass; [] means no forms. */
   allowedForms: string[] | null;

@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { del, get, post, put, ApiError } from '../../../../lib/api';
-import { useBusinessScope } from '../../../../components/BusinessScope';
+import { useBusinessScope, useRoundingPolicy } from '../../../../components/BusinessScope';
 import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
@@ -27,6 +27,7 @@ import {
   type Line,
 } from '../../../../lib/purchaseReturnForm';
 import { todayLocal } from '../../../../lib/localDate';
+import { billTotals } from '@datacare/core';
 
 const n = (v: string) => Number(v || 0);
 const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
@@ -42,6 +43,7 @@ export default function PurchaseReturnPage() {
   const companySettings = useCompanySettings();
   const labourWithGhat = companyFlag(companySettings, 'LBR_WITH_GHT', 'Y');
   const { coYear, lcCode } = useBusinessScope();
+  const roundingPolicy = useRoundingPolicy();
   const [coBook, setCoBook] = useState('');
   // TR_KR_ISU reopens a saved voucher by number (tVchNo_KeyDown -> DISPLAY_DATA, :5709, :4612) and saves it
   // through the same handler as a new one; loadedVchNo is the voucher being edited ('' for a new one).
@@ -91,9 +93,18 @@ export default function PurchaseReturnPage() {
 
   const previews = lines.map((l) => linePreview(l, labourWithGhat));
   const lineNet = previews.reduce((s, p) => s + p.net, 0);
-  const taxable = r2(lineNet - n(discountAmount));
-  const taxPrev = r2((taxable * n(taxRatePct)) / 100);
-  const totalPrev = Math.round(taxable + taxPrev);
+  const previewTotals = billTotals(
+    {
+      lineNetTotal: lineNet,
+      discountAmount: n(discountAmount),
+      taxRatePct: n(taxRatePct),
+      interState,
+    },
+    roundingPolicy,
+  );
+  const taxable = previewTotals.taxable;
+  const taxPrev = previewTotals.tax;
+  const totalPrev = previewTotals.total;
 
   function newReturn() {
     setVoucherLookup('');
