@@ -300,6 +300,40 @@ const BOOKS: {
   },
   { book: 'JV', name: 'Journal', mainBook: 'JOURNAL', inout: 'I', acCode: 'KASAR' },
   { book: 'CON', name: 'Contra', mainBook: 'CONTRA', inout: 'I', acCode: 'CASH' },
+  // Desktop Labour Sale (TR_LBR, MDI_FORM.cs:8325 CurBookHelp("LABOUR WORK")) and Fine Settlement
+  // (TR_FINE_SL_PR, :8505 FINE SALE / :8493 FINE PURC). Without these books the Labour Sale and Fine
+  // Settlement screens have no book to select on a provisioned company (N100, G110 — same class as N91/N97).
+  // Book definitions mirror the authoritative DB test `labourFineTaxRows.routes.db.test.ts`.
+  {
+    book: 'LBR',
+    name: 'Labour',
+    mainBook: 'LABOUR WORK',
+    inout: 'O',
+    acCode: 'LBRINC',
+    shortName: 'LBRI',
+    table: 'LBR_DATA',
+    slots: [{ srNo: 1, acCode: 'LBRINC' }],
+  },
+  {
+    book: 'FSL',
+    name: 'Fine Sale',
+    mainBook: 'FINE SALE',
+    inout: 'O',
+    acCode: 'FINESALE',
+    shortName: 'FNSL',
+    table: 'CUT_DATA',
+    slots: [{ srNo: 1, acCode: 'FINESALE' }],
+  },
+  {
+    book: 'FPR',
+    name: 'Fine Purchase',
+    mainBook: 'FINE PURC',
+    inout: 'I',
+    acCode: 'FINEPURC',
+    shortName: 'FNPR',
+    table: 'CUT_DATA',
+    slots: [{ srNo: 1, acCode: 'FINEPURC' }],
+  },
   // Desktop Dhiran (pledge loan): the Pledge Loan Issue menu opens on MAIN_BOOK 'DHIRAN ISSUE' and Pledge
   // Receipt on 'DHIRAN RECEIPT' (MDI_FORM.cs:9527/9539, Dhiran_Form). The issue writes DHRN_ISU_DATA and the
   // receipt DHRN_REC_DATA; both post against the DHRN receivable. Without them the Pledge Loan screens have

@@ -85,7 +85,9 @@ check(all(p['acceptance']=='open' for p in backlog['priorPackages']), 'Invented 
 check(all(p['status']=='open' for p in backlog['priorCards']), 'Invented prior card closure')
 slices={p['id']:p for p in backlog['newSlices']}
 # N01-N30 are the original ordered slices; the 1 October 2026 amendment (document 10) adds N31-N46.
-check(sorted(slices)==[f'N{i:02}' for i in range(1,len(slices)+1)], 'Slice identities are not a contiguous N01.. sequence')
+# Compare the NUMERIC set (not string-sorted padding) so N100+ is contiguous with N99, not sorted after N10.
+_slice_nums = sorted(int(sid[1:]) for sid in slices)
+check(_slice_nums == list(range(1, len(slices) + 1)), 'Slice identities are not a contiguous N01.. sequence')
 check(len(slices)>=46, 'Expected at least 46 ordered slices (N01-N30 plus amendment N31-N46)')
 allowed_status={'planned','in-progress','implemented-unverified'}
 check(all(p['status'] in allowed_status for p in slices.values()), 'Invented slice acceptance or unknown slice status')

@@ -273,7 +273,12 @@ export default function LabourInvoicePage() {
           <div className="row">
             <div className="field">
               <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} preferred="LBR" />
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                preferred="LBR"
+                mainBooks={['LABOUR WORK']}
+              />
             </div>
             <div className="field">
               <label>Customer</label>

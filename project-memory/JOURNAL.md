@@ -4,6 +4,14 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-27 (cont.) — N100: Labour Sale & Fine Settlement books provisioned (G110)
+- The G101 review's next step was provisioning, not filtering: several screens' MAIN_BOOK families were never seeded, so filtering would empty the list. Seeded LBR (LABOUR WORK → LBR_DATA), FSL (FINE SALE → CUT_DATA), FPR (FINE PURC → CUT_DATA) — the Labour Sale and Fine Settlement books — mirroring the authoritative labourFineTaxRows DB test. Filtered Labour Sale to LABOUR WORK. **PR #66 → main.**
+- Hit the 100th slice: validate_plan's contiguity check string-sorted `N100` after `N10`; fixed it to compare numerically (same spirit as the earlier G\d{2,3} widening). Watch for other 2-digit-ID assumptions as IDs cross 100.
+- Provisioning counts: 29→32 book groups, 101→104 legs (LBR/FSL/FPR single-slot). Fine Settlement's own book filter deferred (its BookSelect is in a rate-cut sub-grid). Noted: labour writer defaults labourAc to a non-seeded `LABOUR` literal — worth revisiting.
+- Next gap **G111**, slice **N101**, decision **D31**.
+
+---
+
 ## 2026-10-27 (cont.) — N99: Journal/Item Lot/Tour book filters (G101 part)
 - Filtered three more screens to their MAIN_BOOK family (provisioned book matches the desktop CurBookHelp, so the list can't empty): Journal → JOURNAL (JV), Item Lot → ITEM LOT (ILT), Tour/Approval Issue → APPROVAL ISSUE (TUR). Browser-confirmed: Item Lot shows only ILT. **PR #65 → main.**
 - Method for picking safe G101 screens: only filter where `seedCompany` provisions a book whose MAIN_BOOK equals the filter AND the screen's `preferred` is that book. The unfiltered remainder (tag/item opening, mfg, fine JV, hallmark/labour sale, batch receipt, bullion, fine in/out, tag weight diff, ac-opbl) need their families SEEDED first (LABOUR WORK, FINE JV/SALE, BULLION, TAG OPENING not in seedCompany) — a provisioning follow-up before they can be filtered. Left to N62.
