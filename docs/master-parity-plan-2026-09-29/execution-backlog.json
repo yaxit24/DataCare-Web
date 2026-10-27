@@ -4407,6 +4407,30 @@
         "web/package.json"
       ],
       "statusNote": "SECURITY-REVIEW.md s6 recorded that values reach raw SQL only as $n parameters and only identifiers/fragments are interpolated, but there was no static rule enforcing it. Added an AST checker (TypeScript compiler API) wired into lint-workspace: for every $queryRawUnsafe/$executeRawUnsafe call it inspects ONLY the first argument (the SQL template) and flags any interpolation reading a value out of the HTTP request/input (req/request/reply/body/query/params/input as a value, incl. nested fragment templates and string concat). Vetted forms pass: $n-bind placeholder index ($-prefixed), identifier sanitizers (quoteIdent), column/SQL-builder calls (n/NN/VAL/fineExpr/.join), SQL-fragment vars. Framed around the injection vector, not a name allow-list, because fragments are named freely; the builder allow-list is explicit so additions are reviewed. Verified: zero findings on 192 raw-SQL files; a planted req.body interpolation fails lint-workspace and passes after revert; sql-interpolation.test.mjs (run first in the lint script) covers 8 dangerous + 9 safe shapes; full lint (test+eslint+typecheck) and format green. Scope: this is the SQL-lint part of N88/SP03 only; route plugins, typed error taxonomy, the shared voucher editor and file-size budgets remain in N88."
+    },
+    {
+      "id": "N95",
+      "status": "implemented-unverified",
+      "action": "No budget stopped large source files (routes/txn.ts 8558 lines; nine modules over 1500) from growing while N88 extraction is pending; the second SP03 ratchet of N88",
+      "parentLabels": "SP03; X-maintainability",
+      "startAfter": [
+        "N94"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "A per-file line-count ceiling that may only fall, capping new files at 1500; passes the current tree; fails a tracked file that grows and a new over-cap file; a test proves both and runs in CI",
+      "gapIds": "G108",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-27",
+      "evidence": [
+        "web/scripts/check-size-budget.mjs",
+        "web/scripts/check-size-budget.test.mjs",
+        "web/parity/size-budget.json",
+        "web/package.json",
+        ".github/workflows/ci.yml"
+      ],
+      "statusNote": "G79 records routes/txn.ts at 8558 lines and nine modules over 1500; N88 shrinks them by extracting route plugins and a shared voucher editor, but nothing prevented growth meanwhile. check-size-budget.mjs (baseline web/parity/size-budget.json, wired into CI next to the depth gate) records every over-cap file line count as a ceiling that may only fall and caps new files at 1500; --audit re-derives counts, --write only tightens, so a raised ceiling is a reviewed baseline diff. 20 ceilings today, led by txn.ts. Verified: gate passes the current tree; a planted +5-line growth on finance.ts and a new 1600-line file both fail and pass after revert; check-size-budget.test.mjs (run first by size:budget) covers grown-ceiling, over-cap-new, at-ceiling and shrunk cases; full gate battery green. Scope: the file-size-budget part of N88/SP03 only."
     }
   ],
   "amendments": [
