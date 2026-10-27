@@ -4,6 +4,13 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-27 (cont.) — N101: Tag Opening book provisioned (G111)
+- Next in the provision-then-filter sweep. TR_TAG_OPEN opens tag stock (BAR_DATA + positive MAIN_STOCK, no ledger leg) but seedCompany seeded no Tag Opening book. Added TOP (TAG OPENING → BAR_DATA) as a ledger-less book (empty slots, like WH QUOT); seedCompleteness orphans check now allows ['TOP','WHQ']. Filtered the Tag Opening list to TAG OPENING; aligned the browser-smoke mock to the real MAIN_BOOK (space, not the hyphen placeholder) as item-lot needed in N99. **PR #67 → main.**
+- Pattern reminder: a UI book filter on a smoke-exercised screen needs the smoke mock's MAIN_BOOK set to the REAL value (space-separated), not the old hyphen placeholder, or the filter hides the book in the mock.
+- Next gap **G112**, slice **N102**, decision **D31**.
+
+---
+
 ## 2026-10-27 (cont.) — N100: Labour Sale & Fine Settlement books provisioned (G110)
 - The G101 review's next step was provisioning, not filtering: several screens' MAIN_BOOK families were never seeded, so filtering would empty the list. Seeded LBR (LABOUR WORK → LBR_DATA), FSL (FINE SALE → CUT_DATA), FPR (FINE PURC → CUT_DATA) — the Labour Sale and Fine Settlement books — mirroring the authoritative labourFineTaxRows DB test. Filtered Labour Sale to LABOUR WORK. **PR #66 → main.**
 - Hit the 100th slice: validate_plan's contiguity check string-sorted `N100` after `N10`; fixed it to compare numerically (same spirit as the earlier G\d{2,3} widening). Watch for other 2-digit-ID assumptions as IDs cross 100.

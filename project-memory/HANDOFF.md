@@ -8,6 +8,12 @@
 ## Active plan
 **Full-parity rebuild (52 tasks / 15 phases A–O)** — replicate the ENTIRE desktop (204 forms, 255 reports, full frontend+backend+DB) at 100% functional parity. The earlier 34-task plan delivered the verified backend CORE; this plan builds out the rest. Task graph = the session todo list (IDs 1–20 group the phases). Run continuously; checkpoint every task.
 
+## Latest slice (2026-10-27) — N101: Tag Opening book (G111)
+- Seeded TOP (TAG OPENING → BAR_DATA) as a ledger-less stock book so Tag Opening is usable; filtered its list to TAG OPENING; aligned the smoke mock. **PR #67 → main.** orphans check now allows ['TOP','WHQ'].
+- Provision-then-filter sweep so far: Stock In/Out (N91), Dhiran (N97/N98), Labour+Fine (N100), Tag Opening (N101). Still unseeded book families for unusable screens: BULLION booking (BUL_DATA), item-opening, ac-opbl, fine-inout, tag-weight-diff (TAG WT CHANGE), mfg-issue/receive, batch-receipt (RCT is seeded so just needs a filter). Each is the same pattern.
+- Smoke-mock rule: a filtered, smoke-exercised screen needs its smoke book mock MAIN_BOOK = the REAL seeded value (space), not a hyphen placeholder.
+- Next gap **G112**, slice **N102**, decision **D31**.
+
 ## Latest slice (2026-10-27) — N100: Labour Sale & Fine Settlement books (G110)
 - Seeded LBR (LABOUR WORK), FSL (FINE SALE), FPR (FINE PURC) books so those screens are usable; filtered Labour Sale to LABOUR WORK. **PR #66 → main.** Provisioning: 29→32 book groups, 101→104 legs.
 - Crossed slice N100: `validate_plan.py` contiguity check now numeric (was string-sorting N100 after N10). Watch for other 2-digit ID assumptions.
