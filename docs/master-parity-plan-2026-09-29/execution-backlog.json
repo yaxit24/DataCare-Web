@@ -3764,7 +3764,7 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "For the 17 desktop copy tables a fresh web company equals a desktop-created company; J01 without manual SQL",
-      "gapIds": "G38, G39, G82, G86",
+      "gapIds": "G38, G39, G82, G86, G100",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
@@ -3824,7 +3824,7 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "Each screen lists exactly its eligible books; wrong family refused before numbering",
-      "gapIds": "G43",
+      "gapIds": "G43, G101",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
@@ -3839,7 +3839,7 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "An unchanged browser save is a no-op on every listed page",
-      "gapIds": "G46, G84",
+      "gapIds": "G46, G84, G102",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
@@ -4009,7 +4009,8 @@
       "gapIds": "G60, G95",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusNote": "G95 delivered by N90 (2026-10-26); the slice's other gaps remain."
     },
     {
       "id": "N75",
@@ -4054,7 +4055,8 @@
       "gapIds": "G62, G94, G96",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusNote": "G96 delivered by N90 (2026-10-26); the slice's other gaps remain."
     },
     {
       "id": "N78",
@@ -4212,7 +4214,7 @@
         "web/security/next16-rehearsal.json",
         ".github/workflows/ci.yml"
       ],
-      "statusNote": "Steps 1-3 (prior): next 15.5.27, react/react-dom 19.0.8, Node 24 in both CI workflows, Dockerfile.web, apps/api/Dockerfile and engines; blocking advisory gate. Step 4 (Prisma 7, D26): upgraded to Prisma 7.10.0 with the PostgreSQL driver adapter — new prisma-client generator with ESM output and a custom generated path, datasource URL moved to packages/db/prisma.config.ts, one adapter-backed PrismaClient boundary in @datacare/db consumed by all 232 API files (no @prisma/client in @datacare/api). Adapted three Prisma 7 raw-query behaviour changes without changing business results: parameter-type casts (::text/::numeric/::text[]) at untyped INSERT..SELECT and reused-placeholder positions in production (backupManifest, tagPrint, companyClone, companySettings, lotRegister, passbook) and in db-test fixtures; distinct placeholders for the dataRepairOps SL_DETL_RTN update; a shared prismaError.ts (postgresErrorCodes/hasPostgresErrorCode) reading the Prisma 7 driverAdapterError SQLSTATE path, used by the four sessionContext conflict detectors and txBudget timeout detection. Vitest 4.1.11 clears the last moderate advisory GHSA-82fw-gwwq-j7x9. New blocking runtime:check gate (pure validator + node:test controls) in static-gates. Step 5: Next.js 16.3.8 rehearsal recorded in web/security/next16-rehearsal.json (React fixed) — typecheck, build, web unit 631+9 and route reachability 126/126 pass; mocked-browser smoke regresses on /txn/tag-opening under Next 16, so the supported baseline stays on patched 15.5.27 and the Next 16 migration is deferred (status regressions-found with a disposition, which D26 permits). Verified on the isolated branch: typecheck, typecheck:tests, lint, format, build, advisories 0/0, the full isolated DB suite 309 files/3446 tests 0 failures on a per-worktree port, both self-contained real-stack browser runners, and a Chrome DevTools visual pass against the live Prisma 7 stack (login, dashboard KPIs balanced, Sales Invoice, a posted sale 201 with the trial balance still balanced). The 24-journey harness still stops at the pre-existing non-hermetic tag-split cross-seed (G23/N49), unrelated to this slice."
+      "statusNote": "Steps 1-3 (prior): next 15.5.27, react/react-dom 19.0.8, Node 24 in both CI workflows, Dockerfile.web, apps/api/Dockerfile and engines; blocking advisory gate. Step 4 (Prisma 7, D26): upgraded to Prisma 7.10.0 with the PostgreSQL driver adapter — new prisma-client generator with ESM output and a custom generated path, datasource URL moved to packages/db/prisma.config.ts, one adapter-backed PrismaClient boundary in @datacare/db consumed by all 232 API files (no @prisma/client in @datacare/api). Adapted three Prisma 7 raw-query behaviour changes without changing business results: parameter-type casts (::text/::numeric/::text[]) at untyped INSERT..SELECT and reused-placeholder positions in production (backupManifest, tagPrint, companyClone, companySettings, lotRegister, passbook) and in db-test fixtures; distinct placeholders for the dataRepairOps SL_DETL_RTN update; a shared prismaError.ts (postgresErrorCodes/hasPostgresErrorCode) reading the Prisma 7 driverAdapterError SQLSTATE path, used by the four sessionContext conflict detectors and txBudget timeout detection. Vitest 4.1.11 clears the last moderate advisory GHSA-82fw-gwwq-j7x9. New blocking runtime:check gate (pure validator + node:test controls) in static-gates. Step 5: Next.js 16.3.8 rehearsal recorded in web/security/next16-rehearsal.json (React fixed) — typecheck, build, web unit 631+9 and route reachability 126/126 pass; mocked-browser smoke regresses on /txn/tag-opening under Next 16, so the supported baseline stays on patched 15.5.27 and the Next 16 migration is deferred (status regressions-found with a disposition, which D26 permits). Verified on the isolated branch: typecheck, typecheck:tests, lint, format, build, advisories 0/0, the full isolated DB suite 309 files/3446 tests 0 failures on a per-worktree port, both self-contained real-stack browser runners, and a Chrome DevTools visual pass against the live Prisma 7 stack (login, dashboard KPIs balanced, Sales Invoice, a posted sale 201 with the trial balance still balanced). The 24-journey harness still stops at the pre-existing non-hermetic tag-split cross-seed (G23/N49), unrelated to this slice. 2026-10-26 (PR #55): new critical/high advisories against the unchanged lockfile turned the gate red; next 15.5.28 (GHSA-2464-fhr4-w9xw), vitest 4.1.12 with vite 6.4.5, source-map-js 1.2.2, zod 4.6.7, @azure/msal-node 7.1.1 by override, fastify 5.12.7 and fast-uri 3.1.9 bring it back to 0/0/0/0; the Next.js 16 rehearsal was re-run on 16.4.3 against the 15.5.28 baseline and passes."
     },
     {
       "id": "N87",
@@ -4268,6 +4270,40 @@
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N90",
+      "status": "implemented-unverified",
+      "action": "Operator-journey defects found in the 2026-10-26 browser run: Year Create dates and close/reopen, generic master blank values/creator/location, bank-mode settlement account, purchase print HSN tax, grid Enter, demo line defaults, purchase/sales-return book families, local-date defaults",
+      "parentLabels": "P03-04, P06-01, P10-05, P02-01; X07, X10, X16, X25",
+      "startAfter": [
+        "N49"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "The gap-row tests pass; the real-stack suite passes with zero mocks; the J01/J02/J04/J12 browser journeys repeated on the production build show the fixed behaviour",
+      "gapIds": "G95, G96, G97, G98, G99, G100, G101, G103, G104",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-26",
+      "evidence": [
+        "web/packages/core/src/fiscalYear.ts",
+        "web/packages/core/test/fiscalYear.test.ts",
+        "web/apps/api/src/modules/masters/year.ts",
+        "web/apps/api/src/modules/masters/master.service.ts",
+        "web/apps/api/test/masterSaveFidelity.db.test.ts",
+        "web/apps/api/test/masters.test.ts",
+        "web/apps/api/src/modules/finance/finance.ts",
+        "web/apps/api/test/financeBookFamily.db.test.ts",
+        "web/apps/api/src/modules/documents/docChrome.ts",
+        "web/apps/api/test/documents.test.ts",
+        "web/apps/web/components/GridKeyboard.tsx",
+        "web/apps/web/lib/localDate.ts",
+        "web/apps/web/test/localDate.test.ts",
+        "web/apps/web/test/purchase-return.journey.mjs",
+        "web/apps/web/components/LookupPicker.tsx"
+      ],
+      "statusNote": "Found by operating the production build in Chrome on an isolated database (company 07 provisioned through the UI, masters through the screens, then J01/J02/J04/J12). Delivered: G97 (Year Create: shared fiscalYearDates rule, no close/reopen, first-year clone only), G98 (blank numeric 0 / date NULL, server MAIN_USER, party LC_CODE), G99 (non-cash receipt/payment in a generic book needs a bank account, never cash), G95 (purchase print HSN tax from the header), G96 (grid Enter walks editable cells), G100 part (no GOLD default; WALKIN remains with N58), G101 part (purchase and sales return book families; others remain with N62), G103 (local-day defaults, journal date), G104 (a typed lookup code is resolved on Enter and on leave, so a typed supplier fills its name and GST type). Verified: API+DB suite 312 files on the branch, web unit 645, route coverage 126/126, mocked browser smoke, real-stack 25 journeys with 0 mocks; browser re-checks of Year Create, master saves and the bank payment refusal. Not verified: G102 (preview totals vs posted totals) is open under N63; no desktop side-by-side for these screens."
     }
   ],
   "amendments": [

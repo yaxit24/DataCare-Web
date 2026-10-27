@@ -134,7 +134,7 @@ const FINE_INPUTS: TextKey[] = [
 const LABOUR_INPUTS: TextKey[] = ['pcs', 'netWt', 'ghtWt', 'making', 'labourPct'];
 
 export const blank = (): Line => ({
-  itCode: 'GOLD',
+  itCode: '', // desktop grids start empty; a demo default posts to the wrong item
   tagNo: '',
   pcs: '1',
   grossWt: '',

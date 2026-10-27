@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ApiError, post } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
+import { todayLocal } from '../../../../lib/localDate';
 
 interface EstimateResetDiff {
   table: string;
@@ -33,7 +34,7 @@ interface EstimateResetPreview {
   applied?: boolean;
 }
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => todayLocal();
 const num = (value: number) => Number(value || 0).toLocaleString('en-IN');
 const errText = (e: unknown, fallback: string): string =>
   e instanceof ApiError ? e.body?.message || e.body?.error || e.message : fallback;

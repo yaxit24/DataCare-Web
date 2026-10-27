@@ -101,7 +101,7 @@ for p in slices.values():
 gap_ids=[]
 for register_doc in ('10-gap-register-2026-10-01.md','11-audit-implementation-plan-2026-10-01.md',
                      '12-lineage-verification-2026-10-01.md'):
-    gap_ids+=re.findall(r'^\| (G\d{2}) \|',(here/register_doc).read_text(),re.M)
+    gap_ids+=re.findall(r'^\| (G\d{2,3}) \|',(here/register_doc).read_text(),re.M)
 check(gap_ids==[f'G{i:02}' for i in range(1,len(gap_ids)+1)] and len(gap_ids)>=94, 'Gap register identities incomplete')
 # Decisions D01-D14 (document 08), D15-D22 (document 11) and D23 onward (document 12) form one sequence.
 decision_ids=[]
@@ -112,7 +112,7 @@ check(decision_ids==[f'D{i:02}' for i in range(1,len(decision_ids)+1)] and len(d
       'Decision identities incomplete')
 cited=set()
 for p in slices.values():
-    for gap in re.findall(r'G\d{2}',p.get('gapIds','')):
+    for gap in re.findall(r'G\d{2,3}',p.get('gapIds','')):
         cited.add(gap)
         check(gap in gap_ids, 'Slice cites an unknown gap: '+p['id']+' '+gap)
 check(len(slices)>=89, 'Expected at least 89 ordered slices (document 12 adds N83-N89)')
@@ -129,7 +129,7 @@ for s in sp.values():
     if s['status']!='planned':
         check(bool(s.get('evidence')) and all((repo/e).exists() for e in s['evidence']),
               'Phase 2 slice status without existing evidence: '+s['id'])
-    for gap in re.findall(r'G\d{2}',s.get('gapIds','')):
+    for gap in re.findall(r'G\d{2,3}',s.get('gapIds','')):
         cited.add(gap)
         check(gap in gap_ids, 'Phase 2 slice cites an unknown gap: '+s['id']+' '+gap)
     for dep in s['startAfter']:
@@ -186,7 +186,7 @@ for source in lineage['sources']:
         if item['disposition']=='closed':
             check(bool(item.get('evidence')), 'Closed lineage item without evidence: '+label)
         elif item['disposition']=='new-gap':
-            check(any(re.fullmatch(r'G\d{2}',o) and int(o[1:])>=69 for o in item.get('owners',[])),
+            check(any(re.fullmatch(r'G\d{2,3}',o) and int(o[1:])>=69 for o in item.get('owners',[])),
                   'New-gap lineage item without a document 12 gap: '+label)
         else:
             check(bool(item.get('owners')), 'Open lineage item without an owner: '+label)

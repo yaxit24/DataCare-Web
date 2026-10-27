@@ -8,6 +8,7 @@ import { LookupPicker } from './LookupPicker';
 import { PartyBalance } from './PartyBalance';
 import { RateTicker } from './RateTicker';
 import { useGridKeyboard } from './GridKeyboard';
+import { todayLocal } from '../lib/localDate';
 
 interface MLine {
   partyAc: string;
@@ -32,7 +33,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
   const [coBook, setCoBook] = useState('');
   // TR_CASH saves the operator's voucher date (mVchDate, TR_CASH.cs:3021). The form had no date field,
   // so every receipt and payment was dated the moment it was saved.
-  const [vchDate, setVchDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [vchDate, setVchDate] = useState(() => todayLocal());
   const mainBooks = financeMainBooks(kind, mode);
   useEffect(() => {
     setMode(initialFinanceMode(window.location.search));

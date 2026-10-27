@@ -85,7 +85,7 @@ async function financeBookTx(
   scope: VoucherScope,
   direction: FinanceDirection,
   mode: PayMode,
-): Promise<Awaited<ReturnType<typeof configuredBookTx>>> {
+): Promise<Awaited<ReturnType<typeof configuredBookTx>> & { layout: 'cash' | 'bank' | 'any' }> {
   const book = await configuredBookTx(tx, scope);
   const mainBook = book.mainBook.toUpperCase();
   const family = FINANCE_BOOK_FAMILIES[direction] as Record<string, 'cash' | 'bank' | 'any'>;
@@ -101,7 +101,41 @@ async function financeBookTx(
       `book ${scope.coBook} is a ${mainBook} book and cannot take a ${mode} ${direction}`,
     );
   }
-  return book;
+  return { ...book, layout: allowed };
+}
+
+/**
+ * The cash or bank account a receipt/payment settles to: the caller's account, else the book's BOOK_DETL slot 1.
+ *
+ * A desktop CASH REC/PAY book's slot 1 is the cash account and a BANK REC/PAY book's slot 1 is the bank account
+ * (TR_CASH.cs:2629-2650 lays the form out from the book), so slot 1 is always the right default for the book's own
+ * mode. The generic web RECEIPT/PAYMENT books take every mode with CASH in slot 1, so a bank, card, UPI or cheque
+ * movement in them has no configured account: it must name one, and it may not name the cash account. Before
+ * this, a "bank" payment left without a bank account was posted to cash on hand (found in the browser, E2E
+ * 2026-10-26).
+ */
+async function financeSettlementAccountTx(
+  tx: any,
+  scope: VoucherScope,
+  book: { layout: 'cash' | 'bank' | 'any' },
+  direction: FinanceDirection,
+  mode: PayMode,
+  explicit: unknown,
+): Promise<string> {
+  const role = mode === 'cash' ? 'cash-settlement' : 'bank-settlement';
+  if (mode === 'cash' || book.layout !== 'any')
+    return resolveBookSlotAccountTx(tx, scope, role, 1, explicit);
+  const chosen = String(explicit ?? '').trim();
+  if (!chosen)
+    throw new FinanceValidationError(
+      `a ${mode} ${direction} in book ${scope.coBook} needs the bank account it ${direction === 'receipt' ? 'is paid into' : 'is paid from'}`,
+    );
+  const cashAc = await resolveBookSlotAccountTx(tx, scope, 'cash-settlement', 1).catch(() => '');
+  if (cashAc && chosen === cashAc)
+    throw new FinanceValidationError(
+      `a ${mode} ${direction} cannot settle to the cash account ${cashAc}; choose the bank account`,
+    );
+  return chosen;
 }
 
 /**
@@ -368,11 +402,12 @@ export async function postReceipt(
     // placeholder is now gone in both directions: an explicit account still wins, a configured slot answers
     // otherwise, and a book with neither refuses the receipt before numbering instead of posting to a code
     // that only exists in the demo seed.
-    const recAcResolved = await resolveBookSlotAccountTx(
+    const recAcResolved = await financeSettlementAccountTx(
       tx,
       input.scope,
-      mode === 'cash' ? 'cash-settlement' : 'bank-settlement',
-      1,
+      configuredBook,
+      'receipt',
+      mode,
       input.bankAc,
     );
     // Cash-receipt ceiling (desktop TR_CASH): block when this + the party's prior cash exceeds the
@@ -613,7 +648,7 @@ export async function postPayment(prisma: any, input: PaymentInput): Promise<Fin
   const tenantId = input.scope.tenantId;
   return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     // The book first, before numbering: a payment must land in a payment book matching the mode.
-    await financeBookTx(tx, input.scope, 'payment', mode);
+    const configuredBook = await financeBookTx(tx, input.scope, 'payment', mode);
     const vchNo = await nextVoucherNoTx(tx, input.scope);
     const key = keyOf(input.scope, vchNo, 'PAY');
     const vchType = mode === 'cash' ? 'CPAY' : 'BPAY';
@@ -635,11 +670,12 @@ export async function postPayment(prisma: any, input: PaymentInput): Promise<Fin
     // Slot 1 of BOOK_DETL, for the same reason as the receipt: book 002's leg-06 rows all name 00001. P0-04
     // removed the `'CASH'` placeholder that used to sit behind this, so an unconfigured book now refuses the
     // payment instead of posting to a code that only exists in the demo seed.
-    const payAcResolved = await resolveBookSlotAccountTx(
+    const payAcResolved = await financeSettlementAccountTx(
       tx,
       input.scope,
-      mode === 'cash' ? 'cash-settlement' : 'bank-settlement',
-      1,
+      configuredBook,
+      'payment',
+      mode,
       input.bankAc,
     );
 
@@ -813,14 +849,15 @@ export async function postReceiptLines(
   const totalAmt = round2(lines.reduce((s, l) => s + Number(l.amount), 0));
   const totalKasar = round2(lines.reduce((s, l) => s + Number(l.kasar ?? 0), 0));
   return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
-    await financeBookTx(tx, input.scope, 'receipt', mode);
+    const receiptBook = await financeBookTx(tx, input.scope, 'receipt', mode);
     // Resolved before the ceiling check and before numbering: the ceiling counts prior cash against THIS
     // account, so a placeholder would have measured the wrong ledger as well as posting to it.
-    const recAcLines = await resolveBookSlotAccountTx(
+    const recAcLines = await financeSettlementAccountTx(
       tx,
       input.scope,
-      mode === 'cash' ? 'cash-settlement' : 'bank-settlement',
-      1,
+      receiptBook,
+      'receipt',
+      mode,
       input.bankAc,
     );
     if (mode === 'cash') {
@@ -983,7 +1020,7 @@ export async function postPaymentLines(
   const totalAmt = round2(lines.reduce((s, l) => s + Number(l.amount), 0));
   const totalKasar = round2(lines.reduce((s, l) => s + Number(l.kasar ?? 0), 0));
   return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
-    await financeBookTx(tx, input.scope, 'payment', mode);
+    const paymentBook = await financeBookTx(tx, input.scope, 'payment', mode);
     const vchNo = await nextVoucherNoTx(tx, input.scope);
     const key = keyOf(input.scope, vchNo, 'PAY');
     const vchType = mode === 'cash' ? 'CPAY' : 'BPAY';
@@ -997,11 +1034,12 @@ export async function postPaymentLines(
     //
     // It balanced, which is why it survived. What it cannot do is reproduce a per-account ledger: the desktop
     // shows nine cash movements and the aggregate form shows one.
-    const payAcLinesResolved = await resolveBookSlotAccountTx(
+    const payAcLinesResolved = await financeSettlementAccountTx(
       tx,
       input.scope,
-      mode === 'cash' ? 'cash-settlement' : 'bank-settlement',
-      1,
+      paymentBook,
+      'payment',
+      mode,
       input.bankAc,
     );
 

@@ -7,6 +7,7 @@ import { LookupPicker } from './LookupPicker';
 import { desktopGlobalFormKeyActions, FormKeyHints } from './FormKeys';
 import { useGridKeyboard } from './GridKeyboard';
 import { ApiError, del, get, post, put } from '../lib/api';
+import { todayLocal } from '../lib/localDate';
 
 /**
  * Desktop TR_OTH_PURC. "Other Income" opens it on an OTH INC book and "Other Expenses" on an OTH EXP book
@@ -80,7 +81,7 @@ type IncomeView = {
 
 type SaveResult = { voucherNo: string; hiddenVoucherNo: string; created: boolean; lines: number };
 
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => todayLocal();
 const money = (value: number) => Math.round((Number(value || 0) + 1e-9) * 100) / 100;
 const blankLine = (): IncomeLine => ({
   hsnCode: '',

@@ -2,6 +2,7 @@
 import { useCallback, useState } from 'react';
 import { get, post, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { monthStartLocal, todayLocal } from '../../../../lib/localDate';
 
 interface Txn {
   coBook: string;
@@ -24,11 +25,8 @@ interface Data {
   cleared: number;
   uncleared: number;
 }
-const today = () => new Date().toISOString().slice(0, 10);
-const monthStart = () => {
-  const d = new Date();
-  return new Date(d.getFullYear(), d.getMonth(), 1).toISOString().slice(0, 10);
-};
+const today = () => todayLocal();
+const monthStart = () => monthStartLocal();
 
 export default function BankReconPage() {
   const [bankAc, setBankAc] = useState('');

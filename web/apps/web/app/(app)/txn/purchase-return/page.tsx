@@ -26,10 +26,11 @@ import {
   updateLine,
   type Line,
 } from '../../../../lib/purchaseReturnForm';
+import { todayLocal } from '../../../../lib/localDate';
 
 const n = (v: string) => Number(v || 0);
 const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => todayLocal();
 const failure = (e: unknown, fallback: string) =>
   e instanceof ApiError ? e.body?.message || e.body?.error || e.message : fallback;
 

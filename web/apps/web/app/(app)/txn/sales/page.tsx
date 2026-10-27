@@ -20,6 +20,7 @@ import { VoucherList, type VoucherIdentity } from '../../../../components/Vouche
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { companyFlag, useCompanySettings, companySetting } from '../../../../lib/companySettings';
 import { oldGoldRowAmount, recalcLine } from '../../../../lib/lineRecalc';
+import { todayLocal } from '../../../../lib/localDate';
 
 /** BOOK_DATA.MAIN_BOOK values the retail sale writer accepts (sales.ts, workflowPolicy.SALES). */
 const SALE_MAIN_BOOKS = ['SALES'];
@@ -123,7 +124,7 @@ interface Totals {
 }
 const blank = (): Line => ({
   otherWt: '',
-  itCode: 'GOLD',
+  itCode: '', // desktop grids start empty; a demo default posts to the wrong item
   tagNo: '',
   pcs: '1',
   grossWt: '',
@@ -279,7 +280,7 @@ export default function SalesEntryPage() {
   const router = useRouter();
   const formKeys = desktopGlobalFormKeyActions((href) => router.push(href));
   const [coBook, setCoBook] = useState('');
-  const [vchDate, setVchDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [vchDate, setVchDate] = useState(() => todayLocal());
   const [refNo, setRefNo] = useState('');
   const [acCode, setAcCode] = useState('WALKIN');
   const [acName, setAcName] = useState('');
@@ -409,7 +410,7 @@ export default function SalesEntryPage() {
     setVoucherLookup('');
     setResult(null);
     setErr('');
-    setVchDate(new Date().toISOString().slice(0, 10));
+    setVchDate(todayLocal());
     setRefNo('');
     setAcCode('WALKIN');
     setAcName('');

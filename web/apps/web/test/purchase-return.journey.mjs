@@ -162,12 +162,28 @@ export async function exercisePurchaseReturn(page, { checkpoint, owner, tenantId
 
   await page.getByLabel('Voucher date', { exact: true }).fill('2024-06-15');
   await pickAccount(page, 'Supplier account', 'PRSUPP');
-  // Grid columns: 0 item (GOLD by default), 2 pcs, 3 gross, 4 net, 5 touch, 6 rate, 7 making, 8 fine, 9 amount.
+  // Grid columns: 0 item, 2 pcs, 3 gross, 4 net, 5 touch, 6 rate, 7 making, 8 fine, 9 amount, 10 remove.
+  // A new line starts with no item, as the desktop grid does (the old 'GOLD' demo default is gone).
+  assert.equal(await gridInput(page, 0, 0).inputValue(), '', 'a new return line starts empty');
+  await gridInput(page, 0, 0).fill('GOLD');
   await gridInput(page, 0, 3).fill('5');
   await gridInput(page, 0, 4).fill('5');
   await gridInput(page, 0, 5).fill('80');
   await gridInput(page, 0, 6).fill('1500');
   await gridInput(page, 0, 7).fill('40');
+  // G96: Enter from the last editable cell skips the computed Fine and Amount cells and the remove button,
+  // and adds a line with the cursor in its item cell. Ctrl+D removes it again.
+  const returnedRows = () => {
+    const panel = [...document.querySelectorAll('.panel')].find((p) =>
+      [...p.querySelectorAll('h1,h2,h3')].some((h) => h.textContent?.trim() === 'Returned Items'),
+    );
+    return panel ? [...panel.querySelectorAll('table.grid tbody tr')] : [];
+  };
+  await gridInput(page, 0, 7).press('Enter');
+  await page.waitForFunction(`(${returnedRows})().length === 2 &&
+    (${returnedRows})()[1].querySelector('td').contains(document.activeElement)`);
+  await page.keyboard.press('Control+d');
+  await page.waitForFunction(`(${returnedRows})().length === 1`);
   // fine 5 x 80 / 100 = 4, metal 4 x 1500 = 6000, labour 5 x 40 = 200 -> 6200; 3% GST 186 -> 6386.
   await waitForText(gridCell(page, 0, 8), '4');
   await waitForText(gridCell(page, 0, 9), '6,200');

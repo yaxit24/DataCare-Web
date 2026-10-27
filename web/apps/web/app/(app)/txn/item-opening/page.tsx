@@ -6,6 +6,7 @@ import { del, get, post, put, ApiError } from '../../../../lib/api';
 import { BookSelect } from '../../../../components/BookSelect';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
+import { todayLocal } from '../../../../lib/localDate';
 
 /** Item (non-tag) Opening Balance — TR_ITM_OPBL → ITM_OPBL + MAIN_STOCK 'ITOBL'. Bulk/loose opening stock. */
 interface Row {
@@ -32,7 +33,7 @@ const blank = (): Row => ({
 });
 const n = (v: string) => Number(v || 0);
 const str = (v: unknown) => (v == null || Number(v) === 0 ? '' : String(v));
-const currentDate = () => new Date().toISOString().slice(0, 10);
+const currentDate = () => todayLocal();
 const gridCell = (row: number, column: number) => ({
   'data-grid-row': row,
   'data-grid-column': column,

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ApiError, del, get, post, put } from '../../../../lib/api';
 import { BookSelect } from '../../../../components/BookSelect';
 import { useBusinessScope } from '../../../../components/BusinessScope';
+import { todayLocal } from '../../../../lib/localDate';
 
 interface Line {
   tagNo: string;
@@ -28,7 +29,7 @@ interface LoadedVoucher {
 }
 
 const blank = (): Line => ({ tagNo: '', itCode: '', vchSrno: '', dataType: '', remark: '' });
-const today = () => new Date().toISOString().slice(0, 10);
+const today = () => todayLocal();
 const msg = (e: unknown, fallback: string): string =>
   e instanceof ApiError
     ? e.body?.message || e.body?.error || e.body?.detail || e.message

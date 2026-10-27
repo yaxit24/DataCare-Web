@@ -20,6 +20,7 @@ import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import { ParityContainmentFieldset } from '../../../../components/ParityContainmentNotice';
 import { parityContainmentMessage, parityContainmentRule } from '@datacare/core/containment';
 import { fineFor } from '@datacare/core';
+import { todayLocal } from '../../../../lib/localDate';
 
 /** Tag Opening (TR_TAG_OPBL): load opening barcoded stock. Tag No auto-generates (SRNO_MAST.TAG_SRNO)
  *  when left blank. Rich per-tag fields → BAR_DETL (Counter/Design/Size/LsWt/Lbr%/LbrRate/OthAmt). */
@@ -212,7 +213,7 @@ const blank = (): Line => ({
 const n = (v: string) => Number(v || 0);
 const str = (v: unknown) => (v == null || Number(v) === 0 ? '' : String(v));
 const r3 = (x: number) => Math.round((x + 1e-9) * 1000) / 1000;
-const currentDate = () => new Date().toISOString().slice(0, 10);
+const currentDate = () => todayLocal();
 const gridCell = (row: number, column: number) => ({
   'data-grid-row': row,
   'data-grid-column': column,
