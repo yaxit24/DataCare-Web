@@ -4304,6 +4304,29 @@
         "web/apps/web/components/LookupPicker.tsx"
       ],
       "statusNote": "Found by operating the production build in Chrome on an isolated database (company 07 provisioned through the UI, masters through the screens, then J01/J02/J04/J12). Delivered: G97 (Year Create: shared fiscalYearDates rule, no close/reopen, first-year clone only), G98 (blank numeric 0 / date NULL, server MAIN_USER, party LC_CODE), G99 (non-cash receipt/payment in a generic book needs a bank account, never cash), G95 (purchase print HSN tax from the header), G96 (grid Enter walks editable cells), G100 part (no GOLD default; WALKIN remains with N58), G101 part (purchase and sales return book families; others remain with N62), G103 (local-day defaults, journal date), G104 (a typed lookup code is resolved on Enter and on leave, so a typed supplier fills its name and GST type). Verified: API+DB suite 312 files on the branch, web unit 645, route coverage 126/126, mocked browser smoke, real-stack 25 journeys with 0 mocks; browser re-checks of Year Create, master saves and the bank payment refusal. Not verified: G102 (preview totals vs posted totals) is open under N63; no desktop side-by-side for these screens."
+    },
+    {
+      "id": "N91",
+      "status": "implemented-unverified",
+      "action": "Stock In/Out unusable on a provisioned company: provisioning did not create the INWORD/OUTWORD books or a branch account on the location, so the Stock In/Out book list was empty and Save stayed disabled",
+      "parentLabels": "P03-04; X16",
+      "startAfter": [
+        "N90"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "seedCompleteness proves the INWORD and OUTWORD books and the branch account on LOCT_MAST exist; the /stock/in and /stock/out routes post and reconcile against the seeded books on the isolated database",
+      "gapIds": "G105",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-27",
+      "evidence": [
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/apps/api/test/seedCompleteness.db.test.ts",
+        "web/apps/api/test/provisioning.db.test.ts",
+        "web/apps/api/test/stockInoutAmount.routes.db.test.ts"
+      ],
+      "statusNote": "Found by operating the production build in Chrome (2026-10-26): on provisioned company 07 the Stock In Book select was empty and Save was disabled. Root cause: StockInoutForm filters BookSelect to MAIN_BOOK INWORD/OUTWORD (StockInoutForm.tsx:230,422) but seedCompany created 22 book families without either, and seeded LOCT_MAST with no AC_CODE, so the signed metal/ledger rows (stockInout.ts:760,807 filter on the location account) would also be dropped. Fix: seedCompany now adds a BRANCH stock-in-hand account, wires it to LOCT_MAST.AC_CODE (MS_LOCT.cs:3458), and creates the SIN (INWORD) and SOT (OUTWORD) books. Verified: seedCompleteness asserts both books and the branch account; stockInoutAmount posts a Stock In and Stock Out through the real routes against the seeded books and reconciles (line amounts by rate type, reopen, tag rate type); full API+DB suite 313 files / 3475 tests. Not verified: a fresh browser Stock In save re-run (the server route is covered by the DB test); the exact desktop AC_GR for the branch account was chosen as current-asset 01 without a desktop-DB confirmation."
     }
   ],
   "amendments": [

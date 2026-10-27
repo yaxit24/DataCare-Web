@@ -84,13 +84,8 @@ type DetailRow = {
     runtime = new PrismaClient();
     await wipe();
     await seedCompany(runtime, tenantId, '01');
-    await exec(
-      `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME",
-                               "MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","BOOK_TBL_DETL")
-       VALUES ($1,'01','01','SOU','Stock Out','OUT','OUTWORD','O','Y','INOUT_DATA','INOUT_DETL'),
-              ($1,'01','01','SIN','Stock In','SIN','INWORD','I','Y','INOUT_DATA','INOUT_DETL')`,
-      tenantId,
-    );
+    // seedCompany now provisions the INWORD book 'SIN' and the OUTWORD book 'SOT' (N91), so the test uses
+    // those canonical books instead of inserting its own (a second 'SIN' made the book lookup ambiguous).
     await exec(
       `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","RATE_TYPE")
        VALUES ($1,'01','GOLD','Gold by gram','G',NULL),
@@ -229,13 +224,13 @@ type DetailRow = {
     );
     const tagOut = created(
       await send('POST', '/stock/out', {
-        coBook: 'SOU',
+        coBook: 'SOT',
         vchDate: DAY,
         toLcCode: '03',
         lines: [{ itCode: 'PCSIT', tagNo: 'G87-TAG', fineWt: 0.25, rate: 1000 }],
       }),
     );
-    expect(await details('SOU', tagOut)).toEqual([
+    expect(await details('SOT', tagOut)).toEqual([
       { sr: 1, it: 'PCSIT', rt: 'P', rate: 1000, amt: 2000 },
     ]);
   });

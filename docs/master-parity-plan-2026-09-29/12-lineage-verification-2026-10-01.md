@@ -115,6 +115,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G102 | S2 | Screen totals rounded differently from the posted totals | The desktop grid shows the amounts it saves (`TR_PURC.cs:15474-15502` `BILL_TOTAL` rounds with `MsTotAmtRof`/`MsTaxRof`) | Found in the 2026-10-26 E2E run: purchase return previewed ₹20,865 and posted ₹20,865.23; a sale previewed ₹75,319 (balance due 319) and posted ₹75,318.75. Purchase, purchase return, sales, sale return, quotations, consignment, hallmark purchase/sale and estimate preview `Math.round(taxable + tax)` instead of the company rounding policy (`TOT_AMT_ROF`, `TAX_ROF`) | Previews use the writer's own totals arithmetic and rounding policy from `@datacare/core`, or show the server's computed totals | N63 |
 | G103 | S3 | "Today" defaults use the UTC day | The desktop fills its date masks from the workstation's local `DateAndTime.Today` (`MS_YEAR.cs:1012`) | Found in the 2026-10-26 E2E run at 02:07 IST: new vouchers defaulted to 26 October (48 `new Date().toISOString().slice(0, 10)` defaults in 36 web files), Bank Reconciliation's month start became the previous month's last day, and Journal Voucher started with no date | One local-calendar helper (`web/apps/web/lib/localDate.ts`) for every default; unit test `localDate.test.ts` | N90 |
 | G104 | S2 | Typed lookup codes not resolved | `unified/src/csharp/DataCareNext/TR_PURC.cs:14619-14628` `tAcCode_KeyDown` looks the typed code up in AC_MAST on Enter and fills the party (F1 help opens only when nothing matches); `TR_SALE.cs:17340` is the same | Found in the 2026-10-26 E2E run: `web/apps/web/components/LookupPicker.tsx` ran its `onPick` effects only when a row was chosen from the open list, so a supplier typed and tabbed past (or Enter pressed before the list opened) left the name blank and Inter-state "No", and the purchase was refused (`interState does not match the persisted supplier GST type`) | A typed value that matches one lookup code exactly is picked on Enter and when the field is left, running the screen's pick effects; browser re-check on Purchase | N90 |
+| G105 | S2 | Stock In / Out unusable on a provisioned company | The desktop ships `INWORD` / `OUTWORD` books and every location carries a branch account (`MS_LOCT.cs:3458` binds `LOCT_MAST.AC_CODE`); `TR_INOUT.cs:5268-5282` posts the signed metal rows against that branch account and `web/apps/api/src/modules/stock/stockInout.ts:19-23,344-355` reads `LOCT_MAST.AC_CODE` for the location account | Found in the 2026-10-26 E2E run: on provisioned company 07 the Stock In Book select was empty and Save stayed disabled — `web/apps/web/components/StockInoutForm.tsx:230,422` filters `BookSelect` to `mainBook` `INWORD`/`OUTWORD`, but `web/apps/api/src/modules/ops/seedCompany.ts` creates 22 book families without either and seeds `LOCT_MAST` with no `AC_CODE`, so even with a book the metal/ledger rows (`stockInout.ts:760,807` filter on `locationAccount.acCode`) would be dropped | Provisioning creates the `INWORD` and `OUTWORD` books and a branch stock-in-hand account wired to `LOCT_MAST.AC_CODE`, so Stock In/Out opens, saves, and posts a reconciling metal + ledger entry; DB test on the isolated database | N91 |
 
 ## 4. Decisions D23–D28
 
@@ -289,6 +290,24 @@ Done when: the tests named in the gap rows pass, the real-stack suite (including
 empty-line and Enter checks) passes with zero mocks, and the same journeys repeated in the browser show the fixed
 behaviour.
 
+### N91 — Stock In/Out on a provisioned company (G105)
+
+Found while continuing the 2026-10-26 browser run: on the freshly provisioned company the Stock In screen showed
+an empty Book select and kept Save disabled. `web/apps/web/components/StockInoutForm.tsx:230,422` filters the book
+list to the `INWORD` (Stock In) / `OUTWORD` (Stock Out) MAIN_BOOK, but `web/apps/api/src/modules/ops/seedCompany.ts`
+provisioned 22 book families with neither, and seeded `LOCT_MAST` with no `AC_CODE`. The desktop ships both books
+(`MDI_FORM.cs:8159`/`:8136`) and every location carries a branch account (`MS_LOCT.cs:3458`); the writer posts the
+signed metal against that account (`web/apps/api/src/modules/stock/stockInout.ts:19-23,344-355`) and drops the
+metal/ledger rows (`:760,807`) when it is blank, so even a hand-added book would have posted nothing.
+
+Provisioning now adds a `BRANCH` stock-in-hand account (current-asset group), wires it to `LOCT_MAST.AC_CODE`, and
+creates the `SIN` (`INWORD`) and `SOT` (`OUTWORD`) books. `web/apps/api/test/seedCompleteness.db.test.ts` asserts
+both books and the branch account; `web/apps/api/test/stockInoutAmount.routes.db.test.ts` posts a Stock In and a
+Stock Out through the real `/stock/in` and `/stock/out` routes against the seeded books and reconciles.
+
+Done when: a provisioned company's Stock In/Out screens list a book and save, and the stock in/out routes post a
+reconciling metal and ledger entry on the isolated database.
+
 
 ## 6. Status corrections
 
@@ -301,6 +320,7 @@ behaviour.
 | N86 | planned | in-progress: Next.js 15.5.27, React 19.0.8, Node 24 in CI and images, advisory gate; critical and high advisories 7/35 → 0/0. Prisma 7 and the Next.js 16 rehearsal remain → **implemented-unverified**: Prisma 7.10.0 with the PostgreSQL driver adapter (one @datacare/db boundary, ESM prisma-client generator, prisma.config.ts), three Prisma 7 raw-query behaviour changes adapted without changing business results, Vitest 4.1.11 clears the last moderate advisory, a blocking `runtime:check` gate, and a recorded Next.js 16 rehearsal (`web/security/next16-rehearsal.json`, status regressions-found: mocked-browser smoke regresses on /txn/tag-opening, so production stays on patched 15.5). Full isolated DB suite 309 files/3446 tests green; Chrome DevTools visual pass against the Prisma 7 stack |
 | N86 (2026-10-26) | implemented-unverified | Still implemented-unverified: the advisory gate turned red on unchanged dependencies and PR #55 patched it (next 15.5.28, vitest 4.1.12/vite 6.4.5, zod 4.6.7, msal-node 7.1.1 override) to 0/0/0/0; Next.js 16.4.3 rehearsal re-run and passing |
 | N90 | — | implemented-unverified, evidence in this change (browser-run defects G95–G99, G103, parts of G100/G101) |
+| N91 | — | implemented-unverified, evidence in this change (G105: provisioning creates the INWORD/OUTWORD books and the branch account so Stock In/Out opens, saves and posts) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

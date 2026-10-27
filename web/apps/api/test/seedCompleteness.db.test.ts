@@ -110,4 +110,27 @@ databaseDescribe('provisioning leaves a company able to trade', () => {
     expect(await count('AC_MAST')).toBe(before);
     expect(await count('CO_SET')).toBe(1); // still exactly one, or settings fail closed
   });
+
+  it('provisions Stock In/Out: INWORD/OUTWORD books and the branch account on the location (N91/G105)', async () => {
+    // StockInoutForm filters the book list to MAIN_BOOK INWORD (Stock In) / OUTWORD (Stock Out); without
+    // these books the select is empty and Save stays disabled.
+    const stockBooks = (await owner.$queryRawUnsafe(
+      `SELECT "MAIN_BOOK" FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2
+        AND "MAIN_BOOK" IN ('INWORD','OUTWORD') ORDER BY "MAIN_BOOK"`,
+      TENANT,
+      CO,
+    )) as Array<{ MAIN_BOOK: string }>;
+    expect(stockBooks.map((b) => b.MAIN_BOOK)).toEqual(['INWORD', 'OUTWORD']);
+
+    // TR_INOUT posts the signed metal against the branch account the location carries (MS_LOCT.cs:3458);
+    // stockInout.ts drops the metal/ledger rows when LOCT_MAST.AC_CODE is blank.
+    const loc = (await owner.$queryRawUnsafe(
+      `SELECT "AC_CODE" FROM "LOCT_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+      TENANT,
+      CO,
+    )) as Array<{ AC_CODE: string | null }>;
+    expect(loc.length).toBeGreaterThan(0);
+    expect(loc[0].AC_CODE).toBe('BRANCH');
+    expect(await count('AC_MAST', `AND "AC_CODE"='BRANCH'`)).toBe(1);
+  });
 });

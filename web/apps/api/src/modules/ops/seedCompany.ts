@@ -41,6 +41,10 @@ const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string }[] = [
   { code: 'SLVPURC', name: 'PURCHASE SILVER A/C', gr: '21' },
   { code: 'OTHCHRG', name: 'OTHER CHARGES A/C', gr: '23' },
   { code: 'FINEKSR', name: 'FINE KASAR A/C', gr: '31' },
+  // Stock In/Out (TR_INOUT) posts the signed metal rows against the branch account the location carries
+  // (`MS_LOCT.cs:3458` binds `LOCT_MAST.AC_CODE`; `stockInout.ts:344-355` reads it). A current-asset
+  // stock-in-hand control holds the branch's inter-location metal (N91/G105).
+  { code: 'BRANCH', name: 'BRANCH STOCK IN HAND', gr: '01' },
 ];
 
 /**
@@ -191,6 +195,25 @@ const BOOKS: {
   { book: 'TUR', name: 'Approval Issue', mainBook: 'APPROVAL ISSUE', inout: 'O', acCode: 'OS' },
   { book: 'TRR', name: 'Approval Return', mainBook: 'APPROVAL RETURN', inout: 'I', acCode: 'OS' },
   { book: 'SAJ', name: 'Stock Adjust', mainBook: 'STOCK ADJUST', inout: 'I', acCode: 'KASAR' },
+  // Desktop TR_INOUT branch transfer: Stock In opens on MAIN_BOOK 'INWORD' and Stock Out on 'OUTWORD'
+  // (MDI_FORM.cs:8159/8136; the signed metal posts against the branch account on LOCT_MAST, not a book slot).
+  // Without them `StockInoutForm`'s book list is empty and Save stays disabled (N91/G105).
+  {
+    book: 'SIN',
+    name: 'Stock In',
+    mainBook: 'INWORD',
+    inout: 'I',
+    acCode: 'BRANCH',
+    shortName: 'STKIN',
+  },
+  {
+    book: 'SOT',
+    name: 'Stock Out',
+    mainBook: 'OUTWORD',
+    inout: 'O',
+    acCode: 'BRANCH',
+    shortName: 'STKOT',
+  },
   // Desktop TR_TAG_CAN serves both menus on its own MAIN_BOOK (MDI_FORM.cs:8586 "TAG CANCEL", :8664 "TAG TRFR"),
   // numbered from BAR_CAN_DATA (MS_UPDATE.cs:7825). The desktop's own short names are TGCAN and TAGTR
   // (`project-memory/parity/verify-stock-tags.md` §0). 'TAG TRANSFER', provisioned before, is no desktop MAIN_BOOK.
@@ -511,11 +534,13 @@ export async function seedCompany(
     // and accounts but not the location, so a provisioned company was unreachable through the UI.
     if (await absent('LOCT_MAST', '"CO_CODE"=$2 AND "LC_CODE"=$3', coCode, lcCode)) {
       await tx.$executeRawUnsafe(
-        `INSERT INTO "LOCT_MAST"(tenant_id,"CO_CODE","LC_CODE","LC_NAME") VALUES ($1,$2,$3,$4)`,
+        `INSERT INTO "LOCT_MAST"(tenant_id,"CO_CODE","LC_CODE","LC_NAME","AC_CODE") VALUES ($1,$2,$3,$4,$5)`,
         tenantId,
         coCode,
         lcCode,
         'Main Counter',
+        // The branch account TR_INOUT posts stock in/out against (MS_LOCT.cs:3458; N91/G105).
+        'BRANCH',
       );
       locality = true;
     }
