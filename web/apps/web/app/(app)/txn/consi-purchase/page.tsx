@@ -19,7 +19,7 @@ import { EntityImagePanel } from '../../../../components/EntityImagePanel';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import SubDetailGrid, { stoneRowFromApi, useSubDetail } from '../../../../components/SubDetailGrid';
 import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
-import { fineFor, labourCharge, billTotals } from '@datacare/core';
+import { fineFor, labourCharge, billTotals, lineNet as lineNetAmount } from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
 
 interface Line {
@@ -344,7 +344,8 @@ export default function ConsiPurchaseEntryPage() {
       withGhat: labourWithGhat,
       rate: n(l.making),
     });
-    return { fine, metal, mk, net: r2(metal + mk) };
+    const other = Number(l.otherAmount ?? 0) || 0;
+    return { fine, metal, mk, net: lineNetAmount({ metal, labour: mk, other }) };
   };
   const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
   const previewTotals = billTotals(

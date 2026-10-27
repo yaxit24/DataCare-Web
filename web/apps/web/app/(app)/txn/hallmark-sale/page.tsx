@@ -9,6 +9,7 @@ import {
   blankHallmarkLine as blank,
   fineFor,
   labourCharge,
+  lineNet as lineNetAmount,
   billTotals,
   extendedLineFields,
   hallmarkHeaderFromView,
@@ -118,6 +119,12 @@ export default function HallmarkSalePage() {
     );
 
   // live line preview: fine = net×touch/100, metal = fine×rate, making = net×making/g, net = metal+making
+  // G84: the line net the bill totals from is metal + labour + OTHER charges, exactly as the server's
+  // computeLine composes it (`sales.ts` `calcLineNet({ metal, labour, other })`, core `lineNet`). The
+  // bespoke preview did metal + per-gram making only, dropping other charges, so a voucher previewed
+  // ₹63,056.35 and saved ₹67,414.53. The per-line discount and ghat amount are stored as their own
+  // columns and do NOT change this line net (the server keeps LBR_AMT gross and adds neither), so the
+  // preview must not subtract or add them either.
   const calc = (l: Line) => {
     const fine = fineFor('sale', {
       netWt: n(l.netWt),
@@ -126,16 +133,14 @@ export default function HallmarkSalePage() {
       westPct: n(l.westPct),
     });
     const metal = r2(fine * n(l.rate));
-    // P5/P7: this page now carries ghat, and per-gram labour is (net + ghat) x rate unless the
-    // company switches ghat off (LBR_WITH_GHT, blank default 'Y'). The structural guard in
-    // derivedValueSources.test.ts caught this the moment ghtWt was added to the grid.
     const mk = labourCharge('per_gram', {
       netWt: n(l.netWt),
       ghatWt: n(l.ghtWt),
       withGhat: labourWithGhat,
       rate: n(l.making),
     });
-    return { fine, metal, mk, net: r2(metal + mk) };
+    const other = n(l.otherAmount);
+    return { fine, metal, mk, net: lineNetAmount({ metal, labour: mk, other }) };
   };
   const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
   const previewTotals = billTotals(

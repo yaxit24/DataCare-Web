@@ -1504,4 +1504,53 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
     const legs = await ledgerLegs(owner, TENANT, vch);
     expect(legs.dr).toBeCloseTo(legs.cr, 6);
   });
+
+  it('G84: a line NET_AMT is metal + labour + other — the line discount and ghat amount do not change it', async () => {
+    // TR_SALE.cs CommPassTotal totals each line as item(23) + labour(27) + other(29) into column 35; the
+    // per-line discount and ghat are stored (DISC_AMT/GHT_AMT) but never fold into that line total. A
+    // screen preview must compose the same way, or it shows a total the server does not post (G84: a
+    // hallmark voucher previewed ₹63,056.35 and saved ₹67,414.53 because the preview dropped other
+    // charges). This pins the server's rule so a preview can be checked against it.
+    const created = await createSale(runtime, saleInput(), [
+      {
+        itCode: 'GOLD',
+        vchSrno: 1,
+        tagNo: 'TAG001',
+        pcs: 1,
+        grossWt: 10,
+        netWt: 10,
+        touch: 91.6,
+        metalAmount: 50000, // explicit, so ITM_AMT is exactly this
+        labourType: 'fixed',
+        labourFixed: 2000,
+        otherAmount: 1500,
+        discountPct: 10, // must NOT reduce NET_AMT
+        ghatAmount: 250, // must NOT increase NET_AMT
+      },
+    ] as never);
+    const row = (await owner.$queryRawUnsafe(
+      `SELECT "ITM_AMT"::float itm, "LBR_AMT"::float lbr, "OTH_AMT"::float oth,
+              "DISC_AMT"::float disc, "GHT_AMT"::float ght,
+              "NET_AMT"::float net, "TOT_AMT"::float tot
+         FROM "SL_DETL" WHERE tenant_id=$1 AND "VCH_NO"=$2 ORDER BY "SR_NO" LIMIT 1`,
+      TENANT,
+      String(created.vchNo).padStart(5, '0'),
+    )) as Array<{
+      itm: number;
+      lbr: number;
+      oth: number;
+      disc: number;
+      ght: number;
+      net: number;
+      tot: number;
+    }>;
+    const r = row[0]!;
+    expect(r.itm).toBe(50000);
+    expect(r.lbr).toBe(2000);
+    expect(r.oth).toBe(1500);
+    // The discount and ghat are stored on their own columns, not folded into the line total.
+    expect(r.ght).toBe(250);
+    expect(r.net).toBe(53500); // 50000 + 2000 + 1500, NOT minus discount, NOT plus ghat
+    expect(r.tot).toBe(53500);
+  });
 });

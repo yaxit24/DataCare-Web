@@ -4356,6 +4356,34 @@
         "web/apps/web/app/(app)/txn/hallmark-sale/page.tsx"
       ],
       "statusNote": "Found by operating the production build (2026-10-26): purchase return previewed Rs.20,865 vs posted Rs.20,865.23; a sale previewed Rs.75,319 vs posted Rs.75,318.75. The nine document screens previewed Math.round(taxable+tax) while the server posts with the company rounding policy (TOT_AMT_ROF/TAX_ROF) through billTotals. Fix: resolveRoundingPolicy + roundNearest moved into @datacare/core (one source of truth); the API shared/roundingPolicy.ts re-exports it and keeps the PARITY_STRICT gate; /me carries the company flags via loadRoundingFlags; a web useRoundingPolicy() hook builds the policy; purchase, sales, hallmark sale, sale return, purchase return, consignment purchase, estimate and both quotations preview with billTotals(input, policy). Verified: core 1771 (incl. 4 new G102 vectors), API+DB 313 files, web unit 645, build, route coverage 126/126, kernel conformance, real-stack 25 journeys/0 mocks, /me roundingFlags assertion. Not verified: a fresh browser re-check of a company with a non-default TOT_AMT_ROF (the core vectors and the server parity cover the arithmetic). G84 (hallmark preview also omits west %/ghat/other charges/line discounts) is a separate line-arithmetic gap, still N63."
+    },
+    {
+      "id": "N93",
+      "status": "implemented-unverified",
+      "action": "Document previews built the line net inconsistently and none matched the server: six omitted other charges (G84), two netted the line discount and added the ghat amount (G106)",
+      "parentLabels": "P06-01, P10-05; X07",
+      "startAfter": [
+        "N92"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "A DB test pins the server line-net rule (NET_AMT = metal + gross labour + other; discount/ghat on their own columns); every document preview composes the same via core lineNet; web unit and real-stack with zero mocks",
+      "gapIds": "G84, G106",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-27",
+      "evidence": [
+        "web/apps/api/test/sales.lifecycle.db.test.ts",
+        "web/apps/web/app/(app)/txn/hallmark-sale/page.tsx",
+        "web/apps/web/app/(app)/txn/sales/page.tsx",
+        "web/apps/web/app/(app)/txn/sales-quotation/page.tsx",
+        "web/apps/web/app/(app)/txn/purchase/page.tsx",
+        "web/apps/web/app/(app)/txn/consi-purchase/page.tsx",
+        "web/apps/web/app/(app)/txn/purchase-quotation/page.tsx",
+        "web/apps/web/app/(app)/txn/sale-return/page.tsx",
+        "web/apps/web/app/(app)/txn/estimate/page.tsx"
+      ],
+      "statusNote": "Found resolving G84. The desktop line total (TR_SALE.cs CommPassTotal col 35) is item + labour + other; the per-line discount and ghat amount are stored on SL_DETL.DISC_AMT/GHT_AMT and never fold into the line net, which the server matches (calcLineNet). The previews did not: hallmark sale, purchase, consignment purchase, purchase quotation, sale return and estimate previewed metal + making only (omitting other charges, G84); sales and sales quotation previewed recalcLine.totalAmount, which nets the line discount off labour and adds the ghat amount (G106). All eight now compose lineNet({metal, labour, other}) like the server; purchase-return already did. Verified: a DB test posts a line with a 10% discount and a Rs.250 ghat and pins SL_DETL.NET_AMT to metal + gross labour + other (53500 for a 50000/2000/1500 line); API+DB suite, web unit 645, real-stack 25 journeys/0 mocks. Not verified: a fresh browser re-check per screen (the server rule is pinned by the DB test and the previews share one core helper)."
     }
   ],
   "amendments": [

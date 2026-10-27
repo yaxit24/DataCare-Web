@@ -5,7 +5,7 @@ import { companyFlag, useCompanySettings } from '../../../../lib/companySettings
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import { useRoundingPolicy } from '../../../../components/BusinessScope';
-import { fineFor, labourCharge, billTotals } from '@datacare/core';
+import { fineFor, labourCharge, billTotals, lineNet as lineNetAmount } from '@datacare/core';
 import {
   ExtendedBodyCells,
   ExtendedHeaderCells,
@@ -260,7 +260,8 @@ export default function EstimatePage() {
       withGhat: labourWithGhat,
       rate: n(l.making),
     });
-    return { fine, metal, mk, net: r2(metal + mk) };
+    const other = n(l.otherAmount);
+    return { fine, metal, mk, net: lineNetAmount({ metal, labour: mk, other }) };
   };
   const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
   const previewTotals = billTotals(

@@ -20,7 +20,7 @@ import { VoucherList } from '../../../../components/VoucherList';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { companyFlag, useCompanySettings, companySetting } from '../../../../lib/companySettings';
 import { oldGoldRowAmount, recalcLine } from '../../../../lib/lineRecalc';
-import { billTotals } from '@datacare/core';
+import { billTotals, lineNet as lineNetAmount } from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
 
 interface Line {
@@ -386,7 +386,14 @@ export default function SalesQuotationPage() {
       // CO_SET.SL_AMT_TYPE: the basis a line without its own RtWith is priced on (blank = N).
       saleAmountType: String(companySetting(companySettings, 'SL_AMT_TYPE') ?? ''),
     });
-    return { fine: r.fineWt, metal: r.metalAmount, mk: r.netLabourAmount, net: r.totalAmount };
+    // G84: metal + GROSS labour + other, as the server composes the line net — not recalcLine.totalAmount,
+    // which nets the line discount and adds the ghat amount the server keeps on separate columns.
+    const net = lineNetAmount({
+      metal: r.metalAmount,
+      labour: r.labourAmount,
+      other: r.otherAmount,
+    });
+    return { fine: r.fineWt, metal: r.metalAmount, mk: r.netLabourAmount, net };
   };
   const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
   const itemTotals = billTotals(

@@ -20,7 +20,7 @@ import { VoucherList, type VoucherIdentity } from '../../../../components/Vouche
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { companyFlag, useCompanySettings, companySetting } from '../../../../lib/companySettings';
 import { oldGoldRowAmount, recalcLine } from '../../../../lib/lineRecalc';
-import { billTotals } from '@datacare/core';
+import { billTotals, lineNet as lineNetAmount } from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
 
 /** BOOK_DATA.MAIN_BOOK values the retail sale writer accepts (sales.ts, workflowPolicy.SALES). */
@@ -389,7 +389,16 @@ export default function SalesEntryPage() {
       // CO_SET.SL_AMT_TYPE: the basis a line without its own RtWith is priced on (blank = N).
       saleAmountType: String(companySetting(companySettings, 'SL_AMT_TYPE') ?? ''),
     });
-    return { fine: r.fineWt, metal: r.metalAmount, mk: r.netLabourAmount, net: r.totalAmount };
+    // G84: the line net the bill totals from is metal + GROSS labour + other, as the server composes it
+    // (sales.ts calcLineNet, core lineNet). recalcLine.totalAmount instead nets the line discount and adds
+    // the ghat amount, which the server stores on their own columns but never folds into the line total —
+    // so a line with a discount or ghat amount would preview a total the server does not post.
+    const net = lineNetAmount({
+      metal: r.metalAmount,
+      labour: r.labourAmount,
+      other: r.otherAmount,
+    });
+    return { fine: r.fineWt, metal: r.metalAmount, mk: r.netLabourAmount, net };
   };
   const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
   // G102: the item portion previews with the same arithmetic and company rounding policy the server posts.
