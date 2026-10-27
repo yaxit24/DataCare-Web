@@ -1,3 +1,38 @@
+## ⛔ BLOCKER (2026-10-28): GitHub Actions disabled — ACCOUNT BILLING
+CI cannot run. Every workflow since ~19:40 fails in ~3s with the GitHub annotation:
+"The job was not started because recent account payments have failed or your spending limit
+needs to be increased. Please check the 'Billing & plans' section in your settings."
+
+Evidence (gh run list): N105 PR #71's branch checks ran GREEN at 19:32 and merged; the next
+run at 19:53 (#71 on main) and #72 at 19:58 both FAILED instantly with the billing message.
+
+Impact: the "merge only green PRs" contract CANNOT be satisfied for any new PR until the
+account owner (yaxit24) restores GitHub billing (GitHub → Settings → Billing & plans →
+clear the failed payment / raise the Actions spending limit). This is NOT a code problem.
+
+Local certification instead (authoritative while CI is down), run on branch
+docs/book-sweep-e2e-verify-2026-10-28 (and main 91da1fa):
+  - typecheck / lint (incl SQL + size gates) / format:check / docs:refs / register:check / kernel-conformance: all PASS
+  - test:routes: 126 routes OK
+  - web unit (@datacare/web): PASS
+  - full API+DB (isolated, PARITY_TEST_PORT): 313 files / 3483 tests PASS
+N105 (batch-receipt→RECEIPT filter) is safely on main (merged while CI was green).
+Open PR #72 is doc-only, locally verified; it will go green once billing is restored — do not
+merge until CI passes.
+
+Also researched but NOT implemented (needs an owner design decision, recorded as the next gap):
+LABOUR literal account (P0-04). labourInvoice.ts defaults labourAc to the literal 'LABOUR',
+which is NOT a seeded account, so a Labour bill with a labour amount Crs a nonexistent account
+on a provisioned/migrated company. Desktop (Ac_Ledr.cs:1203) resolves it from BOOK_DETL:
+B.SR_NO=6 (labour income), B.SR_NO=1 (metal), B.SR_NO=8 (silver), all under
+MAIN_BOOK='LABOUR WORK' AND B.BOOK_INOUT='I'. BUT the web models the labour book as BOOK_INOUT
+'O' consistently across seed, the labour DB test, and the writer's own INOUT_TYPE 'O' rows —
+so adopting the desktop's slot resolution needs a decision on the labour book direction and a
+seed carrying SR_NO 1/6/8 slots. Tracked by postingAccountLiterals.test.ts P0-04 ratchet
+(labourInvoice.ts REMAINING=4 of total 68). This is the recommended next substantive slice
+once CI is back.
+
+
 # HANDOFF — START HERE every new session
 
 > Read this first, then the todo list (authoritative task graph) + `state.json`. Verify against reality before trusting it.
