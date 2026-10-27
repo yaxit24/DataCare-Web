@@ -560,6 +560,15 @@ Done when: a provisioned company's Item Opening screen offers its book; a seed-c
 the ledger-less `IOP` book and its `BAR_DATA` routing; the list is filtered and the smoke passes.
 
 
+### N105 — Multi-Party Receipt book list filtered (G101 part)
+
+A clean filter-only G101 step: Multi-Party Receipt (batch receipt) posts to the RECEIPT family (`batchReceipt.ts`
+stamps `BOOK_NAME 'RECEIPT'`) and the seeded `RCT` book already carries MAIN_BOOK `RECEIPT`, so filtering is
+safe (the preferred book is present). The screen now passes `mainBooks={['RECEIPT']}` to `BookSelect`.
+
+Done when: Multi-Party Receipt offers only the RECEIPT family.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -585,6 +594,7 @@ the ledger-less `IOP` book and its `BAR_DATA` routing; the list is filtered and 
 | N102 | — | implemented-unverified, evidence in this change (G112: provisioning creates the ledger-less FINE INOUT book so Fine In/Out opens; list filtered) |
 | N103 | — | implemented-unverified, evidence in this change (G113: provisioning creates the BUL SALE / BUL_DATA book so Bullion Booking opens; list filtered) |
 | N104 | — | implemented-unverified, evidence in this change (G114: provisioning creates the ledger-less OPSTK / BAR_DATA book so Item Opening opens; list filtered) |
+| N105 | — | implemented-unverified, evidence in this change (G101 part: Multi-Party Receipt book list filtered to RECEIPT) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
