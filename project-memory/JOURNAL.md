@@ -4,6 +4,12 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-27 (cont.) — N102: Fine In/Out book provisioned (G112)
+- Next in the provision-then-filter sweep. TR_FINE_INOUT is a pure metal movement (INOUT_DATA + signed MAIN_STOCK, empty AC_DATA, BOOK_NAME FINE INOUT) but seedCompany seeded no Fine In/Out book. Added FIO (FINE INOUT → INOUT_DATA) as a ledger-less book (empty slots); seedCompleteness orphans allowance now ['FIO','TOP','WHQ']. Filtered the Fine In/Out list to FINE INOUT. Not in the smoke, so no mock alignment. **PR #68 → main.**
+- Next gap **G113**, slice **N103**, decision **D31**.
+
+---
+
 ## 2026-10-27 (cont.) — N101: Tag Opening book provisioned (G111)
 - Next in the provision-then-filter sweep. TR_TAG_OPEN opens tag stock (BAR_DATA + positive MAIN_STOCK, no ledger leg) but seedCompany seeded no Tag Opening book. Added TOP (TAG OPENING → BAR_DATA) as a ledger-less book (empty slots, like WH QUOT); seedCompleteness orphans check now allows ['TOP','WHQ']. Filtered the Tag Opening list to TAG OPENING; aligned the browser-smoke mock to the real MAIN_BOOK (space, not the hyphen placeholder) as item-lot needed in N99. **PR #67 → main.**
 - Pattern reminder: a UI book filter on a smoke-exercised screen needs the smoke mock's MAIN_BOOK set to the REAL value (space-separated), not the old hyphen placeholder, or the filter hides the book in the mock.
