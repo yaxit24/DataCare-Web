@@ -133,4 +133,21 @@ databaseDescribe('provisioning leaves a company able to trade', () => {
     expect(loc[0]?.AC_CODE).toBe('BRANCH');
     expect(await count('AC_MAST', `AND "AC_CODE"='BRANCH'`)).toBe(1);
   });
+
+  it('provisions the Dhiran (pledge) books so Pledge Loan Issue/Receipt can post (N97/G109)', async () => {
+    // The Pledge Loan Issue/Receipt screens need a DHIRAN ISSUE / DHIRAN RECEIPT book; without them the book
+    // select offers no pledge book and Save is refused (MDI_FORM.cs:9527/9539).
+    const dhrnBooks = (await owner.$queryRawUnsafe(
+      `SELECT "CO_BOOK","MAIN_BOOK","BOOK_TBL_NAME" FROM "BOOK_DATA"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "MAIN_BOOK" IN ('DHIRAN ISSUE','DHIRAN RECEIPT')
+        ORDER BY "MAIN_BOOK"`,
+      TENANT,
+      CO,
+    )) as Array<{ CO_BOOK: string; MAIN_BOOK: string; BOOK_TBL_NAME: string }>;
+    expect(dhrnBooks.map((b) => b.MAIN_BOOK)).toEqual(['DHIRAN ISSUE', 'DHIRAN RECEIPT']);
+    // The issue writes DHRN_ISU_DATA and the receipt DHRN_REC_DATA (the writer routes by BOOK_TBL_NAME).
+    const byMain = Object.fromEntries(dhrnBooks.map((b) => [b.MAIN_BOOK, b.BOOK_TBL_NAME]));
+    expect(byMain['DHIRAN ISSUE']).toBe('DHRN_ISU_DATA');
+    expect(byMain['DHIRAN RECEIPT']).toBe('DHRN_REC_DATA');
+  });
 });

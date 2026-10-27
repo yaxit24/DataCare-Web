@@ -119,6 +119,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G106 | S2 | Sales previews netted the line discount and added the ghat amount into the line total | The desktop line total (`TR_SALE.cs` CommPassTotal, column 35) is item + labour + other; the per-line discount and ghat amount are stored on their own columns (`SL_DETL.DISC_AMT`/`GHT_AMT`) and never fold into the line net — the server matches it (`web/apps/api/src/modules/sales/sales.ts` `calcLineNet({ metal, labour, other })`, confirmed by a DB test posting a line with a 10% discount and a ₹250 ghat that stores `NET_AMT` = metal + gross labour + other) | Found resolving G84: `web/apps/web/app/(app)/txn/sales/page.tsx` and `web/apps/web/app/(app)/txn/sales-quotation/page.tsx` previewed `recalcLine(...).totalAmount`, which nets the line discount off labour and adds the ghat amount — so a line carrying a `Line Disc %` or `Ghat Amt` (both editable grid columns) previewed a total the server does not post | The sales and sales-quotation previews compose the line net as the server does (`lineNet({ metal, labour, other })`), leaving the discount and ghat on their own columns; a DB test pins the server rule (`web/apps/api/test/sales.lifecycle.db.test.ts`) — done (N93) | N93 |
 | G107 | S2 | No static rule rejected a request value interpolated into raw SQL | `project-memory/parity/SECURITY-REVIEW.md` §6: values reach `$queryRawUnsafe`/`$executeRawUnsafe` only as `$n` parameters and only identifiers/fragments are interpolated — but "there is no general static rule that parses all SQL templates and rejects unbound value interpolation", so a future call could reopen SQL injection | A new AST gate (`web/scripts/sql-interpolation.mjs`, wired into `web/scripts/lint-workspace.mjs`) inspects the first argument of every raw-unsafe call and flags any `${…}` that reads a value out of the HTTP request/input (`req`/`request`/`body`/`query`/`params`/`input` as a value), including nested fragment templates; `$n`-bind indices, identifier sanitizers and SQL fragments pass. Zero findings on the current tree; a planted `req.body` interpolation fails the gate | A static lint gate rejects a request/input value interpolated into a raw-SQL template; a test proves it flags a planted violation and passes the vetted forms — done (N94) | N94 |
 | G108 | S2 | No budget stopped large source files from growing | G79 records `web/apps/api/src/routes/txn.ts` at 8,558 lines and nine modules over 1,500; N88 reduces them by extracting per-module route plugins and a shared voucher editor, but nothing prevented them from growing further meanwhile | A size-budget ratchet (`web/scripts/check-size-budget.mjs`, baseline `web/parity/size-budget.json`, wired into CI next to the depth gate) freezes each over-cap file's line count as a ceiling that may only fall and caps every new source file at 1,500 lines; `--audit` re-derives counts and `--write` only tightens, so a raised ceiling is a reviewed baseline diff. Passes the current tree (20 ceilings); a planted +5-line growth and a new 1,600-line file both fail the gate | A per-file line-count ceiling that may only fall, with a default cap on new files, enforced in CI; a test proves it flags growth and a new over-cap file — done (N95) | N95 |
+| G109 | S2 | Dhiran (pledge loan) unusable on a provisioned company | The desktop opens Pledge Loan Issue on MAIN_BOOK `DHIRAN ISSUE` and Pledge Receipt on `DHIRAN RECEIPT` (`unified/src/csharp/DataCareNext/MDI_FORM.cs:9527,9539` `Dhiran_Form`); the issue writes `DHRN_ISU_DATA`, the receipt `DHRN_REC_DATA` | Found operating the production build (2026-10-27): the Pledge Loan Issue screen's book select offered no Dhiran book (`web/apps/api/src/modules/ops/seedCompany.ts` provisioned 24 book families with no DHIRAN book), so the operator could not post a pledge loan — the same class as the Stock In/Out gap (G105) | Provisioning creates the `DHI` (DHIRAN ISSUE) and `DHR` (DHIRAN RECEIPT) books routed to `DHRN_ISU_DATA`/`DHRN_REC_DATA`, so Pledge Loan Issue/Receipt open and post; a seed-completeness DB assertion — done (N97) | N97 |
 
 ## 4. Decisions D23–D28
 
@@ -420,6 +421,23 @@ DB write-set assertion in `sales.lifecycle.db.test.ts` where a row with Con% 92 
 Done when: the writer and the previews derive `CON_WT` from `CON_PRC` and the fine; a posted weight is ignored
 when a percentage is given; proven by kernel vectors and a DB assertion.
 
+### N97 — Dhiran (pledge loan) books on a provisioned company (G109)
+
+Found operating the production build as a shop user: the Pledge Loan Issue screen (`/txn/dhrn-issue`) rendered,
+but its book select offered no Dhiran book — `seedCompany` provisioned 24 book families with no DHIRAN book, so
+the operator could not post a pledge loan. The same class as the Stock In/Out gap (G105): the desktop opens
+Pledge Loan Issue on MAIN_BOOK `DHIRAN ISSUE` and Pledge Receipt on `DHIRAN RECEIPT` (`MDI_FORM.cs:9527,9539`),
+the issue writing `DHRN_ISU_DATA` and the receipt `DHRN_REC_DATA`.
+
+`seedCompany` now provisions the `DHI` (DHIRAN ISSUE, out, `DHRN_ISU_DATA`) and `DHR` (DHIRAN RECEIPT, in,
+`DHRN_REC_DATA`) books against the `DHRN` receivable, with the standard three posting legs. `seedCompleteness`
+asserts both books exist with their routing tables; `provisioning.db.test.ts` book-group and leg counts were
+updated (27 → 29 groups, 95 → 101 legs). The dhiran writer resolves its ledger accounts from the payload
+(`loanAc`/`cashAc`), so the books need no bespoke slots.
+
+Done when: a provisioned company's Pledge Loan Issue/Receipt screens offer a Dhiran book and post; a
+seed-completeness DB assertion proves the books and their routing tables exist.
+
 
 ## 6. Status corrections
 
@@ -438,6 +456,7 @@ when a percentage is given; proven by kernel vectors and a DB assertion.
 | N94 | — | implemented-unverified, evidence in this change (G107/SP03: an AST lint gate rejects a request/input value interpolated into raw `$queryRawUnsafe`/`$executeRawUnsafe` SQL; proven by a planted-violation test) |
 | N95 | — | implemented-unverified, evidence in this change (G108/SP03: a per-file line-count ceiling that may only fall, capping new files at 1,500 lines, enforced in CI; proven by a growth test) |
 | N96 | — | implemented-unverified, evidence in this change (G89: the writer and previews derive the old-metal conversion weight `CON_WT` from `CON_PRC` and the fine, matching the desktop; a posted weight is ignored) |
+| N97 | — | implemented-unverified, evidence in this change (G109: provisioning creates the DHIRAN ISSUE/RECEIPT books so Pledge Loan Issue/Receipt open and post) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
