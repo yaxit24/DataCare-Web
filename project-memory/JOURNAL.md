@@ -4,6 +4,14 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-27 (cont.) — N97: Dhiran (pledge loan) books on a provisioned company (G109)
+- **Did:** found by operating the production build as a shop user — the Pledge Loan Issue screen (`/txn/dhrn-issue`) rendered but its book select offered NO Dhiran book, so a pledge loan couldn't be posted (same class as N91's Stock In). `seedCompany` provisioned 24 book families with no DHIRAN book. Added `DHI` (DHIRAN ISSUE → DHRN_ISU_DATA) and `DHR` (DHIRAN RECEIPT → DHRN_REC_DATA) against the DHRN receivable (desktop MDI_FORM.cs:9527/9539). The dhiran writer resolves loanAc/cashAc from the payload, so no bespoke slots; gave them the standard 3 legs to keep the provisioning invariant.
+- **Verified:** seedCompleteness asserts both books + routing tables; provisioning counts updated (27→29 book groups, 95→101 legs); dhiran DB tests unaffected; full API+DB 313/3478, web unit 646, all gates. **PR #63 → main.** Resolves G109.
+- **Method note:** the browser E2E run surfaced this (the book dropdown had no DHRN option). The running demo stack was seeded before the fix, so the live re-check needs a fresh DB; the DB tests provision fresh and are authoritative. Also noticed the dhrn-issue BookSelect is unfiltered (shows all 28 books, G101-class) — recorded for N62.
+- Next gap **G110**, slice **N98**, decision **D31**.
+
+---
+
 ## 2026-10-27 (cont.) — N96: old-metal conversion weight derived server-side (G89)
 - **Did:** found via desktop-vs-web audit of the old-gold valuation. The desktop derives `cUrConWt` from Con% and the fine (TR_SALE.cs:7911-7942); the web trusted the client-posted `conversionWt`, so a screen/tampered client decided the stored `CON_WT` and amount. Added `@datacare/core` `oldGoldConversionWeight` (Con%>100 uplift; 0<Con%<=100 usual; Con%=0 legacy fallback); `valueOldGoldLine` returns the derived weight and `oldGoldBasisWeight` values on it, so the sale writer stores the derived CON_WT and the sale/sales-quotation previews show it. KJ001NEKJ per-install branch stays waived.
 - **Verified:** core vectors per branch, web preview test, and a DB write-set assertion (Con% 92 + tampered conversionWt 0.1 → stored CON_WT 4.207, derived, not 0.1). Full API+DB 313/3477, web unit 646, core 1772, all gates. **PR #62 → main.** Resolves G89 (was parked under N15).
