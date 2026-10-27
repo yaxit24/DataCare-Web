@@ -268,7 +268,9 @@ try {
           CO_BOOK: 'ILT',
           BOOK_NAME: 'Item Lot',
           BOOK_SNAME: 'ILOT',
-          MAIN_BOOK: 'ITEM-LOT',
+          // Must be the real seeded MAIN_BOOK ('ITEM LOT', a space) so the item-lot screen's N99 book
+          // filter (mainBooks={['ITEM LOT']}) keeps this book; a hyphenated placeholder would hide it.
+          MAIN_BOOK: 'ITEM LOT',
         },
         {
           CO_BOOK: 'PHS',
