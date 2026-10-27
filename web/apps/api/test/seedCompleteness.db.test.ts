@@ -150,4 +150,21 @@ databaseDescribe('provisioning leaves a company able to trade', () => {
     expect(byMain['DHIRAN ISSUE']).toBe('DHRN_ISU_DATA');
     expect(byMain['DHIRAN RECEIPT']).toBe('DHRN_REC_DATA');
   });
+
+  it('provisions the Labour Sale and Fine Settlement books (N100/G110)', async () => {
+    // Labour Sale (TR_LBR) opens on LABOUR WORK; Fine Settlement (TR_FINE_SL_PR) on FINE SALE / FINE PURC
+    // (MDI_FORM.cs:8325/8505/8493). Without them those screens have no book to select on a provisioned
+    // company. The writer routes by BOOK_TBL_NAME: labour → LBR_DATA, fine sale/purc → CUT_DATA.
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT "MAIN_BOOK","BOOK_TBL_NAME" FROM "BOOK_DATA"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "MAIN_BOOK" IN ('LABOUR WORK','FINE SALE','FINE PURC')
+        ORDER BY "MAIN_BOOK"`,
+      TENANT,
+      CO,
+    )) as Array<{ MAIN_BOOK: string; BOOK_TBL_NAME: string }>;
+    const byMainBook = Object.fromEntries(rows.map((r) => [r.MAIN_BOOK, r.BOOK_TBL_NAME]));
+    expect(byMainBook['LABOUR WORK']).toBe('LBR_DATA');
+    expect(byMainBook['FINE SALE']).toBe('CUT_DATA');
+    expect(byMainBook['FINE PURC']).toBe('CUT_DATA');
+  });
 });

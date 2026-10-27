@@ -84,7 +84,7 @@ d('company provisioning produces a postable company', () => {
         CO,
       ),
     );
-    expect(rows.length).toBe(29);
+    expect(rows.length).toBe(32);
     // Three legs per book (1 = control/sales, 2 = cash/bank, 3 = round-off), except the cash books.
     // RCT and PAY carry the desktop cash-book layout, 1 = cash and 2 = kasar: Ac_Ledr.cs:567-581 joins
     // BOOK_DETL SR_NO 1 and SR_NO 2 for legs 01-08. Their slot 2 used to be CASH, which would have posted
@@ -100,8 +100,13 @@ d('company provisioning produces a postable company', () => {
             : book === 'TSP'
               ? 5
               : // OTH INC / OTH EXP each carry a single configured expense/income slot (TR_OTH_PURC reads
-                // slot 1); TAG PURCHASE takes the standard three purchase legs like PURCHASE.
-                book === 'OIN' || book === 'OEX'
+                // slot 1); LBR (labour), FSL/FPR (fine settlement) each carry their single configured
+                // control slot; TAG PURCHASE takes the standard three purchase legs like PURCHASE.
+                book === 'OIN' ||
+                  book === 'OEX' ||
+                  book === 'LBR' ||
+                  book === 'FSL' ||
+                  book === 'FPR'
                 ? 1
                 : 3,
       );
@@ -312,9 +317,9 @@ d('company provisioning produces a postable company', () => {
     const again = await seedCompany(prisma, tenantId, CO, { coName: 'Provision Test', lcCode: LC });
     expect(again.created.books).toBe(0);
     // 19 three-leg books (incl. TAG PURCHASE, KARIGAR and JDTR issue/receipt) + RCT/PAY x 2
-    // + WHS/RTC x 12 + TSP x 5 + OIN/OEX x 1 + SIN/SOT x 3 (stock in/out, N91) + DHI/DHR x 3 (dhiran, N97),
-    // not doubled.
-    expect(await count('BOOK_DETL')).toBe(101);
+    // + WHS/RTC x 12 + TSP x 5 + OIN/OEX x 1 + SIN/SOT x 3 (stock in/out, N91) + DHI/DHR x 3 (dhiran, N97)
+    // + LBR/FSL/FPR x 1 (labour + fine settlement, N100), not doubled.
+    expect(await count('BOOK_DETL')).toBe(104);
   });
 
   /**
