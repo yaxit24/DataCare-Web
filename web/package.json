@@ -16,7 +16,7 @@
     "test:parity:api": "node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api test",
     "test:parity:browser": "node scripts/parity-test-env.mjs -- node apps/web/test/parity.real-stack.mjs",
     "typecheck": "turbo run typecheck",
-    "lint": "node scripts/lint-workspace.mjs && eslint . && turbo run typecheck",
+    "lint": "node --test scripts/sql-interpolation.test.mjs && node scripts/lint-workspace.mjs && eslint . && turbo run typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "restore-drill": "pnpm --filter @datacare/db build && pnpm --filter @datacare/api build && node scripts/restore-drill.mjs",
@@ -38,6 +38,8 @@
     "depth:audit": "node scripts/check-depth.mjs --audit",
     "test:routes": "pnpm --filter @datacare/web test:routes",
     "depth:deadcells": "node scripts/check-dead-cells.mjs",
+    "size:budget": "node --test scripts/check-size-budget.test.mjs && node scripts/check-size-budget.mjs",
+    "size:audit": "node scripts/check-size-budget.mjs --audit",
     "advisories": "node scripts/check-advisories.mjs"
   },
   "devDependencies": {

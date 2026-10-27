@@ -8,6 +8,16 @@
 ## Active plan
 **Full-parity rebuild (52 tasks / 15 phases A–O)** — replicate the ENTIRE desktop (204 forms, 255 reports, full frontend+backend+DB) at 100% functional parity. The earlier 34-task plan delivered the verified backend CORE; this plan builds out the rest. Task graph = the session todo list (IDs 1–20 group the phases). Run continuously; checkpoint every task.
 
+## Latest slice (2026-10-27, cont.4) — N95: source file-size budget ratchet (G108/SP03)
+- `web/scripts/check-size-budget.mjs` (baseline `web/parity/size-budget.json`, CI gate next to the depth gate) freezes each over-cap file's line count as a ceiling that may only fall and caps new source files at 1,500; `--audit` re-derives, `--write` only tightens. Test (`check-size-budget.test.mjs`, run first by `size:budget`) proves growth fails. 20 ceilings today, led by `txn.ts` (8,558). **PR #60 stacked on #59 (base = N94 branch).** Second SP03 ratchet of N88; route plugins, error taxonomy, shared voucher editor still open.
+- Worktree note: `main` is checked out in `~/Desktop/imodule-extracted`, so `git checkout main` fails in the `~/dc-wt/e2e-fixes` worktree — branch from `origin/main` or the stacking base instead.
+- Next gap **G109**, slice **N96**, decision **D31**.
+
+## Latest slice (2026-10-27, cont.3) — N94: static SQL-injection gate (G107/SP03)
+- `web/scripts/sql-interpolation.mjs` (AST, wired into `lint-workspace.mjs`) rejects a request/input value interpolated into a raw `$queryRawUnsafe`/`$executeRawUnsafe` template; `$n`-bind indices, identifier sanitizers and SQL fragments pass. Zero findings today; a planted `req.body` interpolation fails lint. Test runs first in the `lint` script. **PR #59 → main.** First SP03 ratchet of N88 (route plugins, error taxonomy, shared editor, size budgets still open).
+- Lesson: don't allow-list fragment NAMES (160 false positives) — flag the injection vector (request-rooted values) instead. Prisma methods are `$queryRawUnsafe` with the `$`.
+- Next gap **G108**, slice **N95**, decision **D31**.
+
 ## Latest slice (2026-10-27, cont.2) — N93: document previews compose the line net the server posts (G84, G106)
 - Every document preview now totals each line as metal + GROSS labour + other (`@datacare/core` `lineNet`), exactly as the server posts (`calcLineNet`). Six screens had omitted other charges (G84: hallmark preview ₹63,056.35 vs saved ₹67,414.53); sales + sales-quotation had used `recalcLine.totalAmount`, which wrongly nets the line discount and adds the ghat amount (G106, found while fixing G84). The per-line discount and ghat stay on SL_DETL.DISC_AMT/GHT_AMT and never enter the line net — pinned by a DB test (10% discount + ₹250 ghat → NET_AMT unchanged).
 - **PR #58 → main.** Verified: DB composition test, API+DB 313/3477, web unit 645, real-stack 25/0-mocks, all gates. Lesson: `recalcLine.totalAmount` is NOT the bill-net composition (it nets discount + adds ghat) — use `lineNet({metal,labour,other})`.

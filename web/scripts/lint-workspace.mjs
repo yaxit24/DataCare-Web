@@ -3,6 +3,7 @@ import { extname, join, relative } from 'node:path';
 import process from 'node:process';
 import ts from 'typescript';
 import { findPlausibleSecretLiterals } from './secret-scanner.mjs';
+import { findUnsafeSqlInterpolations } from './sql-interpolation.mjs';
 
 const root = process.cwd();
 const sourceRoots = ['apps', 'packages', 'scripts'];
@@ -66,6 +67,20 @@ async function lintSource(path) {
   if (!testFixture) {
     for (const finding of findPlausibleSecretLiterals(text, projectPath)) {
       report(path, `${finding.message} at line ${finding.line}`);
+    }
+    // SQL raw-interpolation safety (N94/G79): a value read from the HTTP request/input must travel as a
+    // `$n` parameter, never be interpolated into a $queryRawUnsafe/$executeRawUnsafe template.
+    if (
+      (projectPath.startsWith('apps/api/src/') || projectPath.startsWith('packages/')) &&
+      (extension === '.ts' || extension === '.tsx')
+    ) {
+      for (const finding of findUnsafeSqlInterpolations(source)) {
+        report(
+          path,
+          `request/input value interpolated into ${finding.method} SQL at line ${finding.line} ` +
+            `(\`${finding.expr}\`) — bind it as a $n parameter instead`,
+        );
+      }
     }
   }
   if (

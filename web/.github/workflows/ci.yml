@@ -254,6 +254,13 @@ jobs:
         working-directory: web
         run: pnpm depth:deadcells
 
+      # routes/txn.ts is 8,558 lines and nine modules exceed 1,500 (G79). This freezes each large file's
+      # line count as a ceiling that may only fall and caps new files, so N88's extraction can only shrink
+      # the tree; a raised ceiling is a reviewed baseline diff (web/parity/size-budget.json).
+      - name: 'Gate: source file sizes did not worsen'
+        working-directory: web
+        run: pnpm size:budget
+
       - name: Smoke production readiness
         working-directory: web
         env:
