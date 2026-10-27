@@ -135,7 +135,12 @@ export default function BatchReceiptPage() {
           <div className="row">
             <div className="field">
               <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} preferred="RCT" />
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                preferred="RCT"
+                mainBooks={['RECEIPT']}
+              />
             </div>
             <div className="field">
               <label>Year</label>

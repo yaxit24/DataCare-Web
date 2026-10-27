@@ -4,6 +4,12 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-28 (cont.) — N105: Multi-Party Receipt book filter (G101)
+- Filter-only: batch receipt posts to RECEIPT (seeded RCT), so filtered its book list to RECEIPT. **PR #71 → main.**
+- Next gap **G115**, slice **N106**, decision **D31**. Remaining provision-then-filter candidates are lower-confidence (ac-opbl special book 000; tag-weight-diff is contained X21; mfg-issue/receive; fine-jv family FINE JV not seeded). Consider switching the sweep target or pivoting to another parity area next.
+
+---
+
 ## 2026-10-28 (cont.) — N104: Item Opening book provisioned (G114)
 - Provision-then-filter sweep continued to Item Opening (TR_ITM_OPBL, CurBookHelp OPSTK). Added IOP (OPSTK → BAR_DATA) ledger-less book (empty slots); orphans allowance now [FIO,IOP,TOP,WHQ]. Filtered list to OPSTK; aligned the smoke IOP mock to OPSTK. **PR #70 → main.**
 - Next gap **G115**, slice **N105**, decision **D31**.
