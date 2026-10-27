@@ -4478,6 +4478,28 @@
         "web/apps/api/test/provisioning.db.test.ts"
       ],
       "statusNote": "Found operating the production build in Chrome (2026-10-27): the Pledge Loan Issue screen /txn/dhrn-issue rendered but its book select offered no Dhiran book. seedCompany provisioned 24 book families with no DHIRAN book, so a pledge loan could not be posted (same class as G105). The desktop opens Pledge Loan Issue on MAIN_BOOK DHIRAN ISSUE and Pledge Receipt on DHIRAN RECEIPT (MDI_FORM.cs:9527/9539); the issue writes DHRN_ISU_DATA and the receipt DHRN_REC_DATA. Fix: seedCompany now creates DHI (DHIRAN ISSUE, out, DHRN_ISU_DATA) and DHR (DHIRAN RECEIPT, in, DHRN_REC_DATA) against the DHRN receivable with the standard three legs. Verified: seedCompleteness asserts both books + routing tables; provisioning.db.test counts updated (27->29 book groups, 95->101 legs); dhiran DB tests unaffected; full API+DB 313 files/3478, web unit 646, all gates. Not verified: a fresh-browser pledge save (the running demo stack was seeded before this change; the DB test provisions fresh and is authoritative). The dhiran writer resolves loanAc/cashAc from the payload, so the books need no bespoke slots."
+    },
+    {
+      "id": "N98",
+      "status": "implemented-unverified",
+      "action": "Dhiran screens offered an unfiltered book list (all 28 books); each should offer only its MAIN_BOOK family (G101 part)",
+      "parentLabels": "P06-01; X07",
+      "startAfter": [
+        "N97"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "The three dhiran screens pass mainBooks to BookSelect; browser shows only the Dhiran book; typecheck/lint/web-unit/gates green",
+      "gapIds": "G101",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-27",
+      "evidence": [
+        "web/apps/web/app/(app)/txn/dhrn-issue/page.tsx",
+        "web/apps/web/app/(app)/txn/dhrn-receipt/page.tsx",
+        "web/apps/web/app/(app)/txn/dhrn-interest/page.tsx"
+      ],
+      "statusNote": "After N97 added the Dhiran books, the Pledge Loan Issue book select showed all 28 books (G101 class). The desktop opens each dhiran menu on CurBookHelp(MAIN_BOOK) (MDI_FORM.cs:9527/9539). Filtered the three screens via mainBooks on BookSelect: Pledge Issue -> DHIRAN ISSUE, Pledge Receipt -> DHIRAN RECEIPT, Interest Receipt -> DHIRAN RECEIPT (interest is entered on the receipt book; its preferred code corrected from the non-existent DIN to DRC). BookSelect already filters the fetched rows case-insensitively by MAIN_BOOK. Verified: browser-confirmed on the seedCompany demo (Pledge Loan Issue now shows only DHI, auto-selected, no console errors); typecheck, lint (incl size budget), web unit 646, full gate battery. The rest of G101 (journal, tag/item opening, item lot, manufacturing, fine JV, tour, hallmark sale, labour sale, batch receipt, bullion, fine in/out, tag weight difference, account opening) remains under N62 pending per-writer MAIN_BOOK confirmation."
     }
   ],
   "amendments": [

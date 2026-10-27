@@ -171,7 +171,12 @@ export default function DhrnIssuePage() {
           <div className="row">
             <div className="field">
               <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} preferred="DIS" />
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                preferred="DIS"
+                mainBooks={['DHIRAN ISSUE']}
+              />
             </div>
             <div className="field">
               <label>Year</label>

@@ -8,6 +8,11 @@
 ## Active plan
 **Full-parity rebuild (52 tasks / 15 phases A–O)** — replicate the ENTIRE desktop (204 forms, 255 reports, full frontend+backend+DB) at 100% functional parity. The earlier 34-task plan delivered the verified backend CORE; this plan builds out the rest. Task graph = the session todo list (IDs 1–20 group the phases). Run continuously; checkpoint every task.
 
+## Latest slice (2026-10-27) — N98: dhiran book lists filtered to their workflow family (G101 part)
+- The three Dhiran screens now filter their `BookSelect` to DHIRAN ISSUE / DHIRAN RECEIPT (as N90 did for purchase/sales-return). Browser-confirmed: Pledge Loan Issue shows only `DHI`. **PR #64 → main.**
+- G101 remaining (~13 screens) under N62; each needs its writer's exact MAIN_BOOK confirmed (some writers accept any book, so a wrong filter would hide valid books).
+- Next gap **G110**, slice **N99**, decision **D31**.
+
 ## Latest slice (2026-10-27) — N97: Dhiran (pledge loan) books on a provisioned company (G109)
 - Found via browser E2E: the Pledge Loan Issue screen had no Dhiran book to select (seedCompany provisioned no DHIRAN book). Added `DHI` (DHIRAN ISSUE → DHRN_ISU_DATA) and `DHR` (DHIRAN RECEIPT → DHRN_REC_DATA) against DHRN. **PR #63 → main.** Resolves G109. Same class as N91 (Stock In). provisioning counts: 27→29 book groups, 95→101 legs.
 - Noted for N62: the `/txn/dhrn-issue` BookSelect is unfiltered (shows all 28 books, G101-class).
