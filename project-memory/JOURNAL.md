@@ -4,6 +4,14 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-27 (cont.) — Browser verification of N91 on the production build; browsermcp→chrome-devtools switch
+- **Did:** stood up the E2E stack (isolated parity DB + real demo-seed API on 4410 + `next start` on 4411, web rebuilt with `API_ORIGIN=4410`), logged in as admin/CO 01/FY 2026-2027, and drove it with **chrome-devtools MCP** (the `browsermcp` transport had closed — switched all browser interaction to chrome-devtools). Confirmed **N91 live**: the Stock In screen (`/txn/stock-in`) opens with the `SIN — Stock In` (INWORD) book selected and the `Save Stock In` button enabled, zero console errors. The demo company is provisioned by `seedCompany`, so this exercises the exact N91 book/branch-account seeding. Stock Out shares the same `StockInoutForm`; its SOT/OUTWORD posting is covered by the route DB test.
+- **Updated** the N91 backlog statusNote from "Not verified: a fresh browser Stock In save re-run" to browser-confirmed.
+- **Gotcha reconfirmed:** SPA navigations race `evaluate_script` (a read can land on a transitioning document, showing a stray route like `/masters/design-book`); `wait_for` on the target heading is the reliable settle. The web `.next` build bakes `API_ORIGIN` at build time — `next start` with a different env does NOT override it (got ECONNREFUSED to the old 4420 until rebuilt).
+- Stack torn down (0 containers, 0 stray procs). No code change this entry; N90–N95 status unchanged (N94 #59 / N95 #60 still open & green, stacked).
+
+---
+
 ## 2026-10-27 (cont.) — N95: source file-size budget ratchet (G108/SP03)
 - **Did:** second SP03 ratchet of N88. `routes/txn.ts` is 8,558 lines and nine modules exceed 1,500 (G79); nothing stopped them growing while N88 extraction is pending. `web/scripts/check-size-budget.mjs` (baseline `web/parity/size-budget.json`, CI gate next to the depth gate) freezes each over-cap file as a ceiling that may only fall and caps new files at 1,500; `--audit` re-derives, `--write` only tightens. `check-size-budget.test.mjs` (run first by `size:budget`) proves grown-ceiling, over-cap-new, at-ceiling and shrunk cases. Extracted a pure `evaluateBudget()` and guarded the CLI behind an entry-point check so the test can import it.
 - **Verified:** passes the current tree (509 files, 20 ceilings); a planted +5-line growth on finance.ts and a new 1,600-line file both fail and pass after revert; full gate battery green. **PR #60, stacked on #59 (base = the N94 branch).**
