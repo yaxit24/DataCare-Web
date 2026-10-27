@@ -80,7 +80,12 @@ export default function DhrnInterestPage() {
           <div className="row">
             <div className="field">
               <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} preferred="DIN" />
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                preferred="DRC"
+                mainBooks={['DHIRAN RECEIPT']}
+              />
             </div>
             <div className="field">
               <label>Year</label>
