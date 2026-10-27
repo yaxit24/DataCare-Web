@@ -16,6 +16,8 @@ import {
   type SettingsBehavior,
 } from '../src/modules/shared/settingsBehavior.js';
 import { resolveRoundingPolicyTx } from '../src/modules/shared/roundingPolicyLoader.js';
+import { loadRoundingFlags } from '../src/modules/shared/roundingPolicyLoader.js';
+import { resolveRoundingPolicy } from '@datacare/core';
 import type { VoucherScope } from '../src/modules/vouchers/numbering.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
@@ -647,5 +649,43 @@ databaseDescribe('restricted-role CO_SET behavior integration', () => {
     expect((await read()).rateBasis).toBe('G');
     await set({ rateBasis: null });
     expect((await read()).rateBasis).toBe('G');
+  });
+
+  it('loadRoundingFlags round-trips a non-default TOT_AMT_ROF so the web rebuilds the posted policy (G102)', async () => {
+    // The server posts with CO_SET_NEW.TOT_AMT_ROF; the web must preview with the same policy. Seed a
+    // whole-rupee company and prove the flags /me ships rebuild a policy that rounds a bill total to a whole
+    // rupee, exactly as resolveRoundingPolicyTx (the posting path) does.
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","TOT_AMT_ROF") VALUES ($1,$2,'0')
+       ON CONFLICT DO NOTHING`,
+      TENANT,
+      CO,
+    );
+    await owner.$executeRawUnsafe(
+      `UPDATE "CO_SET_NEW" SET "TOT_AMT_ROF"='0' WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+      TENANT,
+      CO,
+    );
+
+    const serverPolicy = await withTenant(runtime, TENANT, (tx: any) =>
+      resolveRoundingPolicyTx(tx, { tenantId: TENANT, coCode: CO, lcCode: LC }),
+    );
+    expect(serverPolicy.billTotalDecimals).toBe(0);
+    expect(serverPolicy.roundBillTotal(1515.21)).toBe(1515);
+
+    // /me ships these flags; the web calls resolveRoundingPolicy on them.
+    const flags = await loadRoundingFlags(runtime, TENANT, CO);
+    expect(flags).not.toBeNull();
+    expect(flags?.TOT_AMT_ROF).toBe('0');
+    const webPolicy = resolveRoundingPolicy(flags ?? {});
+    expect(webPolicy.billTotalDecimals).toBe(serverPolicy.billTotalDecimals);
+    expect(webPolicy.roundBillTotal(1515.21)).toBe(serverPolicy.roundBillTotal(1515.21));
+    expect(webPolicy.roundBillTotal(75318.75)).toBe(serverPolicy.roundBillTotal(75318.75));
+
+    await owner.$executeRawUnsafe(
+      `DELETE FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+      TENANT,
+      CO,
+    );
   });
 });

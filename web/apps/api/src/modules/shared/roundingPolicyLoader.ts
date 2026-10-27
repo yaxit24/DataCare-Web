@@ -5,6 +5,7 @@ import {
   type RoundingFlagValues,
   type RoundingPolicy,
 } from './roundingPolicy.js';
+import { withTxBudget } from './txBudget.js';
 
 interface RoundingSettingsRow {
   co_set_count: unknown;
@@ -79,10 +80,11 @@ export async function loadRoundingFlags(
   coCode: string,
 ): Promise<RoundingFlagValues | null> {
   try {
-    const policy = await resolveRoundingPolicyTx(prisma, {
-      tenantId,
-      coCode,
-    } as VoucherScope);
+    // Establish the tenant RLS context exactly as the posting path does, or the CO_SET_NEW subquery the
+    // policy reads returns nothing under RLS and every company would look like the 2dp default.
+    const policy = await withTxBudget(prisma, tenantId, 'read', (tx: any) =>
+      resolveRoundingPolicyTx(tx, { tenantId, coCode } as VoucherScope),
+    );
     // Return the resolved decimals as flags: the web passes them back through resolveRoundingPolicy and gets
     // the same policy. A configured flag keeps its decimal count; an unconfigured one is omitted so the web's
     // rule applies its own 2dp default (and banker's-vs-half-up matches, since `configured` is re-derived).
