@@ -8,6 +8,11 @@
 ## Active plan
 **Full-parity rebuild (52 tasks / 15 phases A–O)** — replicate the ENTIRE desktop (204 forms, 255 reports, full frontend+backend+DB) at 100% functional parity. The earlier 34-task plan delivered the verified backend CORE; this plan builds out the rest. Task graph = the session todo list (IDs 1–20 group the phases). Run continuously; checkpoint every task.
 
+## Latest slice (2026-10-27) — N96: old-metal conversion weight derived server-side (G89)
+- `@datacare/core` `oldGoldConversionWeight` derives an exchange row's `CON_WT` from Con% + fine (desktop TR_SALE.cs:7911-7942) instead of trusting the client; the sale writer and the sale/sales-quotation previews now use it. **PR #62 → main.** Resolves G89 (was parked under N15). DB assertion: Con% 92 + tampered conversionWt 0.1 → stored CON_WT 4.207.
+- The N95 size budget caught the +2 lines in sales.ts; ceiling raised 2807→2809 (reviewed). `--write` only tightens, so a justified raise is a manual baseline edit.
+- Next gap **G109**, slice **N97**, decision **D31**.
+
 ## Merge status (2026-10-27) — N90–N95 all on main
 - PRs #55/#57/#58/#59/#60 merged: **N86, N90, N91, N92, N93, N94, N95 are on main** (main at `a129ee6`+). N94 (SQL-injection static gate) and N95 (file-size budget ratchet) are the two SP03 ratchets of N88; the rest of N88 (per-module route plugins, typed error taxonomy, shared voucher editor) remains open.
 - **N91 browser-confirmed** (2026-10-27): Stock In opens with the SIN/INWORD book and Save enabled on the seedCompany demo (chrome-devtools, production build, zero console errors).

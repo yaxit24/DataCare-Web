@@ -35,7 +35,11 @@ export interface OldGoldValuationInput {
   netWt?: number;
   /** cUrFine — fine weight, `oldGoldFine` of the net weight and touch. */
   fineWt?: number;
-  /** cUrConWt — conversion weight, used in preference to fine when a Con% conversion applies. */
+  /** cUrConTouch (`[9]`, "Con%") — the conversion purity. When non-zero the writer DERIVES the conversion
+   * weight from it and the fine weight (G89); the client's `conversionWt` is not trusted. */
+  conversionPct?: number;
+  /** cUrConWt — conversion weight. Used only as a fallback when no `conversionPct` is given (a legacy row
+   * that carried the weight but not the percentage). */
   conversionWt?: number;
   /** cUrRate — rate per gram of whichever basis the rate type selects. */
   rate?: number;
@@ -64,9 +68,31 @@ export function oldGoldFine(input: { netWt?: number; touch?: number }): number {
   return fine !== 0 ? fine : round(net, 3);
 }
 
+/**
+ * cUrConWt (`[10]`): the conversion weight the rate applies to, DERIVED from the fine weight and Con% exactly
+ * as the desktop does (`TR_SALE.cs:7919-7942`, the normal non-`KJ001NEKJ` paths), so the server never trusts a
+ * client-posted weight (G89):
+ *   • Con% > 100 (an uplift): `round(fine * Con% / 100, 3)`.
+ *   • 0 < Con% ≤ 100 (the usual lower purity): `round(fine / Con% * 100 − fine, 3) + fine`.
+ *   • Con% == 0: no conversion; fall back to the supplied `conversionWt` (a legacy row), else 0.
+ * The `KJ001NEKJ` per-installation branch (:7923-7933) is deliberately not implemented (WAIVERS.md).
+ */
+export function oldGoldConversionWeight(input: {
+  fineWt?: number;
+  conversionPct?: number;
+  conversionWt?: number;
+}): number {
+  const fine = n(input.fineWt);
+  const conPct = n(input.conversionPct);
+  if (conPct === 0) return n(input.conversionWt);
+  if (fine === 0) return 0;
+  if (conPct > 100) return round((fine * conPct) / 100, 3);
+  return round((fine / conPct) * 100 - fine, 3) + fine;
+}
+
 /** The weight the rate applies to, following the desktop's branch order. */
 export function oldGoldBasisWeight(input: OldGoldValuationInput): number {
-  const conversion = n(input.conversionWt);
+  const conversion = oldGoldConversionWeight(input);
   if (conversion !== 0) return conversion;
   if (String(input.rateType ?? '').toUpperCase() === 'N') return n(input.netWt);
   return n(input.fineWt);
@@ -111,13 +137,16 @@ export function resolveOldGoldValuation(input: OldGoldValuationInput): {
   return { rate: 0, amount: 0 };
 }
 
-/** Value one exchange line exactly as the writer stores it: its fine weight, rate and whole-rupee amount. */
+/** Value one exchange line exactly as the writer stores it: its fine weight, rate, whole-rupee amount, and the
+ * conversion weight DERIVED from Con% (G89) — the server stores this derived `CON_WT`, never the client's. */
 export function valueOldGoldLine(input: OldGoldLineInput): {
   fine: number;
   rate: number;
   amount: number;
+  conversionWt: number;
 } {
   const fine = oldGoldFine(input);
-  const valued = resolveOldGoldValuation({ ...input, fineWt: fine });
-  return { fine, rate: valued.rate, amount: valued.amount };
+  const conversionWt = oldGoldConversionWeight({ ...input, fineWt: fine });
+  const valued = resolveOldGoldValuation({ ...input, fineWt: fine, conversionWt });
+  return { fine, rate: valued.rate, amount: valued.amount, conversionWt };
 }

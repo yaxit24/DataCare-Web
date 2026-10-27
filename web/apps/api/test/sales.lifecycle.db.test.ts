@@ -557,7 +557,7 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
             otherWt: 0.2,
             netWt: 4.3,
             touch: 90,
-            conversionPct: 2,
+            conversionPct: 92,
             conversionWt: 0.1,
             rate: 100,
             rateType: 'F',
@@ -717,8 +717,10 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
     });
     expect(oldMetal).toMatchObject({
       ITM_OTH_WT: 0.2,
-      CON_PRC: 2,
-      CON_WT: 0.1,
+      CON_PRC: 92,
+      // G89: CON_WT is DERIVED from Con% 92 and the fine 3.87 (round(3.87/92*100 - 3.87, 3) + 3.87),
+      // NOT the posted conversionWt of 0.1 which is ignored.
+      CON_WT: 4.207,
       ITM_RATE_TYPE: 'F',
       HM_ID_WT: 0,
       HM_ID2_WT: 0,
