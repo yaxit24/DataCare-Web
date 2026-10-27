@@ -264,7 +264,9 @@ try {
           CO_BOOK: 'IOP',
           BOOK_NAME: 'Item Opening',
           BOOK_SNAME: 'IOPN',
-          MAIN_BOOK: 'ITEM-OPENING',
+          // Real seeded MAIN_BOOK ('OPSTK') so the item-opening screen's N104 book filter
+          // (mainBooks={['OPSTK']}) keeps this book; a hyphenated placeholder would hide it.
+          MAIN_BOOK: 'OPSTK',
         },
         {
           CO_BOOK: 'ILT',
