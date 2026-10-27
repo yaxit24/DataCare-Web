@@ -8,6 +8,12 @@
 ## Active plan
 **Full-parity rebuild (52 tasks / 15 phases A–O)** — replicate the ENTIRE desktop (204 forms, 255 reports, full frontend+backend+DB) at 100% functional parity. The earlier 34-task plan delivered the verified backend CORE; this plan builds out the rest. Task graph = the session todo list (IDs 1–20 group the phases). Run continuously; checkpoint every task.
 
+## Merge status (2026-10-27) — N90–N95 all on main
+- PRs #55/#57/#58/#59/#60 merged: **N86, N90, N91, N92, N93, N94, N95 are on main** (main at `a129ee6`+). N94 (SQL-injection static gate) and N95 (file-size budget ratchet) are the two SP03 ratchets of N88; the rest of N88 (per-module route plugins, typed error taxonomy, shared voucher editor) remains open.
+- **N91 browser-confirmed** (2026-10-27): Stock In opens with the SIN/INWORD book and Save enabled on the seedCompany demo (chrome-devtools, production build, zero console errors).
+- Stacked-PR hazard struck twice more: a doc note pushed to #60's branch *after* #60 merged was stranded off main → re-landed via PR #61. Lesson: do not push to a branch after its PR is merged; open a fresh branch off `origin/main`.
+- Next gap **G109**, slice **N96**, decision **D31**. Decisions D15–D19, D30 still pending (block N50/N51/N52/N56/N58, G47).
+
 ## Latest slice (2026-10-27, cont.4) — N95: source file-size budget ratchet (G108/SP03)
 - `web/scripts/check-size-budget.mjs` (baseline `web/parity/size-budget.json`, CI gate next to the depth gate) freezes each over-cap file's line count as a ceiling that may only fall and caps new source files at 1,500; `--audit` re-derives, `--write` only tightens. Test (`check-size-budget.test.mjs`, run first by `size:budget`) proves growth fails. 20 ceilings today, led by `txn.ts` (8,558). **PR #60 stacked on #59 (base = N94 branch).** Second SP03 ratchet of N88; route plugins, error taxonomy, shared voucher editor still open.
 - Worktree note: `main` is checked out in `~/Desktop/imodule-extracted`, so `git checkout main` fails in the `~/dc-wt/e2e-fixes` worktree — branch from `origin/main` or the stacking base instead.
