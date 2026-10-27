@@ -8,6 +8,11 @@
 ## Active plan
 **Full-parity rebuild (52 tasks / 15 phases A–O)** — replicate the ENTIRE desktop (204 forms, 255 reports, full frontend+backend+DB) at 100% functional parity. The earlier 34-task plan delivered the verified backend CORE; this plan builds out the rest. Task graph = the session todo list (IDs 1–20 group the phases). Run continuously; checkpoint every task.
 
+## Latest slice (2026-10-27, cont.2) — N93: document previews compose the line net the server posts (G84, G106)
+- Every document preview now totals each line as metal + GROSS labour + other (`@datacare/core` `lineNet`), exactly as the server posts (`calcLineNet`). Six screens had omitted other charges (G84: hallmark preview ₹63,056.35 vs saved ₹67,414.53); sales + sales-quotation had used `recalcLine.totalAmount`, which wrongly nets the line discount and adds the ghat amount (G106, found while fixing G84). The per-line discount and ghat stay on SL_DETL.DISC_AMT/GHT_AMT and never enter the line net — pinned by a DB test (10% discount + ₹250 ghat → NET_AMT unchanged).
+- **PR #58 → main.** Verified: DB composition test, API+DB 313/3477, web unit 645, real-stack 25/0-mocks, all gates. Lesson: `recalcLine.totalAmount` is NOT the bill-net composition (it nets discount + adds ghat) — use `lineNet({metal,labour,other})`.
+- Next gap **G107**, slice **N94**, decision **D31**.
+
 ## Latest slice (2026-10-27, cont.) — N92: document previews use the company rounding policy (G102)
 - The nine document screens previewed `Math.round(taxable + tax)` while the server posts with the company rounding policy; the operator saw a total the ledger didn't store. Moved `resolveRoundingPolicy`/`roundNearest` into `@datacare/core` (one source of truth), surfaced the flags on `/me` (`loadRoundingFlags`), added a web `useRoundingPolicy()` hook (separate from `BusinessScope`), and converted purchase, sales, hallmark sale, sale return, purchase return, consignment purchase, estimate and both quotations to `billTotals(input, policy)`.
 - Verified: 4 core vectors + `/me` assertion; core 1771, API+DB 313, web unit 645, real-stack 25/0-mocks, all gates. On the PR #57 branch (stacks on N90+N91). **G84** (hallmark preview omits west %/ghat/other charges/line discounts — line arithmetic) stays with N63.

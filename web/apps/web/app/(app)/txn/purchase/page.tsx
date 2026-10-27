@@ -19,7 +19,7 @@ import { EntityImagePanel } from '../../../../components/EntityImagePanel';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import SubDetailGrid, { stoneRowFromApi, useSubDetail } from '../../../../components/SubDetailGrid';
 import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
-import { fineFor, labourCharge, billTotals } from '@datacare/core';
+import { fineFor, labourCharge, billTotals, lineNet as lineNetAmount } from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
 
 interface Line {
@@ -256,7 +256,10 @@ export default function PurchaseEntryPage() {
       withGhat: labourWithGhat,
       rate: n(l.making),
     });
-    return { fine, metal, mk, net: r2(metal + mk) };
+    // G84: the server's line net is metal + labour + OTHER charges (purchase.ts calcLineNet); previewing
+    // metal + making alone understated any line carrying an other-charge amount.
+    const other = Number(l.otherAmount ?? 0) || 0;
+    return { fine, metal, mk, net: lineNetAmount({ metal, labour: mk, other }) };
   };
   const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
   // G102: preview with the same arithmetic and company rounding policy the server posts, so the shown

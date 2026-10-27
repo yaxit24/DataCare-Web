@@ -9,7 +9,7 @@ import { VoucherList } from '../../../../components/VoucherList';
 import { TenderPanel, type Tender } from '../../../../components/TenderPanel';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import { SaleReturnSavedPanel } from '../../../../components/SaleReturnSavedPanel';
-import { fineFor, labourCharge, billTotals } from '@datacare/core';
+import { fineFor, labourCharge, billTotals, lineNet as lineNetAmount } from '@datacare/core';
 import {
   ExtendedBodyCells,
   ExtendedHeaderCells,
@@ -290,7 +290,8 @@ function LegacySaleReturnForm() {
       withGhat: labourWithGhat,
       rate: n(l.making),
     });
-    return { fine, metal, mk, net: r2(metal + mk) };
+    const other = n(l.otherAmount);
+    return { fine, metal, mk, net: lineNetAmount({ metal, labour: mk, other }) };
   };
   const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
   const previewTotals = billTotals(
