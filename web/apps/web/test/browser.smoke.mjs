@@ -256,7 +256,9 @@ try {
           CO_BOOK: 'TOP',
           BOOK_NAME: 'Tag Opening',
           BOOK_SNAME: 'TGOP',
-          MAIN_BOOK: 'TAG-OPENING',
+          // Real seeded MAIN_BOOK ('TAG OPENING', a space) so the tag-opening screen's N101 book filter
+          // (mainBooks={['TAG OPENING']}) keeps this book; a hyphenated placeholder would hide it.
+          MAIN_BOOK: 'TAG OPENING',
         },
         {
           CO_BOOK: 'IOP',

@@ -195,6 +195,20 @@ const BOOKS: {
   { book: 'TUR', name: 'Approval Issue', mainBook: 'APPROVAL ISSUE', inout: 'O', acCode: 'OS' },
   { book: 'TRR', name: 'Approval Return', mainBook: 'APPROVAL RETURN', inout: 'I', acCode: 'OS' },
   { book: 'SAJ', name: 'Stock Adjust', mainBook: 'STOCK ADJUST', inout: 'I', acCode: 'KASAR' },
+  // Desktop Tag Opening (TR_TAG_OPEN): a pure stock-opening voucher writing BAR_DATA and positive MAIN_STOCK,
+  // with no ledger entry (AC_DATA lines are empty). Without this book the Tag Opening screen has no book to
+  // select on a provisioned company (N101, same class as Stock In/Out and Dhiran). Empty slots: a stock
+  // opening implies no ledger accounts. Book definition mirrors `tagOpeningRoundTrip.db.test.ts`.
+  {
+    book: 'TOP',
+    name: 'Tag Opening',
+    mainBook: 'TAG OPENING',
+    inout: 'I',
+    acCode: 'PURCHASE',
+    shortName: 'TAGOP',
+    table: 'BAR_DATA',
+    slots: [],
+  },
   // Desktop TR_INOUT branch transfer: Stock In opens on MAIN_BOOK 'INWORD' and Stock Out on 'OUTWORD'
   // (MDI_FORM.cs:8159/8136; the signed metal posts against the branch account on LOCT_MAST, not a book slot).
   // Without them `StockInoutForm`'s book list is empty and Save stays disabled (N91/G105).

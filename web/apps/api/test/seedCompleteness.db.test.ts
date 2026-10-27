@@ -75,11 +75,13 @@ databaseDescribe('provisioning leaves a company able to trade', () => {
     // The original bug in one line: books existed, their account rows did not.
     expect(await count('BOOK_DETL')).toBeGreaterThan(0);
 
-    // Every book that can post must have at least one account row. WH QUOT is deliberately document-only:
-    // Ac_Ledr/Ac_Rojmel/Ac_Stock exclude it, and its writer has a zero-economic-footprint DB test.
+    // Every book that can post must have at least one account row. WH QUOT (a quotation) and TAG OPENING
+    // (a pure stock-opening voucher, empty AC_DATA) are deliberately ledger-less: their writers post no
+    // ledger leg, so they carry no BOOK_DETL. Both have zero-economic-footprint DB tests.
+    const LEDGERLESS = `('WH QUOT','TAG OPENING')`;
     const orphans = (await owner.$queryRawUnsafe(
       `SELECT d."CO_BOOK" FROM "BOOK_DATA" d
-        WHERE d.tenant_id=$1 AND coalesce(d."MAIN_BOOK",'')<>'WH QUOT'
+        WHERE d.tenant_id=$1 AND coalesce(d."MAIN_BOOK",'') NOT IN ${LEDGERLESS}
           AND NOT EXISTS (SELECT 1 FROM "BOOK_DETL" t
                            WHERE t.tenant_id=d.tenant_id AND t."CO_CODE"=d."CO_CODE"
                              AND t."CO_BOOK"=d."CO_BOOK")`,
@@ -87,12 +89,13 @@ databaseDescribe('provisioning leaves a company able to trade', () => {
     )) as Array<{ CO_BOOK: string }>;
     expect(orphans.map((o) => o.CO_BOOK)).toEqual([]);
     const documentOnly = (await owner.$queryRawUnsafe(
-      `SELECT d."CO_BOOK" FROM "BOOK_DATA" d WHERE d.tenant_id=$1 AND d."MAIN_BOOK"='WH QUOT'
+      `SELECT d."CO_BOOK" FROM "BOOK_DATA" d WHERE d.tenant_id=$1 AND d."MAIN_BOOK" IN ${LEDGERLESS}
         AND NOT EXISTS (SELECT 1 FROM "BOOK_DETL" t WHERE t.tenant_id=d.tenant_id
-          AND t."CO_CODE"=d."CO_CODE" AND t."CO_BOOK"=d."CO_BOOK")`,
+          AND t."CO_CODE"=d."CO_CODE" AND t."CO_BOOK"=d."CO_BOOK")
+        ORDER BY d."CO_BOOK"`,
       TENANT,
     )) as Array<{ CO_BOOK: string }>;
-    expect(documentOnly.map((o) => o.CO_BOOK)).toEqual(['WHQ']);
+    expect(documentOnly.map((o) => o.CO_BOOK)).toEqual(['TOP', 'WHQ']);
   });
 
   it('provisions the accounts a sale posts to', async () => {
@@ -166,5 +169,18 @@ databaseDescribe('provisioning leaves a company able to trade', () => {
     expect(byMainBook['LABOUR WORK']).toBe('LBR_DATA');
     expect(byMainBook['FINE SALE']).toBe('CUT_DATA');
     expect(byMainBook['FINE PURC']).toBe('CUT_DATA');
+  });
+
+  it('provisions the Tag Opening book (N101/G111)', async () => {
+    // Tag Opening (TR_TAG_OPEN) opens tag stock: it writes BAR_DATA + positive MAIN_STOCK and no ledger
+    // leg. Without this book the Tag Opening screen has no book to select on a provisioned company.
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT "MAIN_BOOK","BOOK_TBL_NAME" FROM "BOOK_DATA"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "MAIN_BOOK"='TAG OPENING'`,
+      TENANT,
+      CO,
+    )) as Array<{ MAIN_BOOK: string; BOOK_TBL_NAME: string }>;
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.BOOK_TBL_NAME).toBe('BAR_DATA');
   });
 });

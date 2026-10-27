@@ -497,7 +497,12 @@ export default function TagOpeningPage() {
             </div>
             <div className="field">
               <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} preferred="TOP" />
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                preferred="TOP"
+                mainBooks={['TAG OPENING']}
+              />
             </div>
           </div>
         </div>
