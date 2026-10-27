@@ -121,6 +121,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G108 | S2 | No budget stopped large source files from growing | G79 records `web/apps/api/src/routes/txn.ts` at 8,558 lines and nine modules over 1,500; N88 reduces them by extracting per-module route plugins and a shared voucher editor, but nothing prevented them from growing further meanwhile | A size-budget ratchet (`web/scripts/check-size-budget.mjs`, baseline `web/parity/size-budget.json`, wired into CI next to the depth gate) freezes each over-cap file's line count as a ceiling that may only fall and caps every new source file at 1,500 lines; `--audit` re-derives counts and `--write` only tightens, so a raised ceiling is a reviewed baseline diff. Passes the current tree (20 ceilings); a planted +5-line growth and a new 1,600-line file both fail the gate | A per-file line-count ceiling that may only fall, with a default cap on new files, enforced in CI; a test proves it flags growth and a new over-cap file — done (N95) | N95 |
 | G109 | S2 | Dhiran (pledge loan) unusable on a provisioned company | The desktop opens Pledge Loan Issue on MAIN_BOOK `DHIRAN ISSUE` and Pledge Receipt on `DHIRAN RECEIPT` (`unified/src/csharp/DataCareNext/MDI_FORM.cs:9527,9539` `Dhiran_Form`); the issue writes `DHRN_ISU_DATA`, the receipt `DHRN_REC_DATA` | Found operating the production build (2026-10-27): the Pledge Loan Issue screen's book select offered no Dhiran book (`web/apps/api/src/modules/ops/seedCompany.ts` provisioned 24 book families with no DHIRAN book), so the operator could not post a pledge loan — the same class as the Stock In/Out gap (G105) | Provisioning creates the `DHI` (DHIRAN ISSUE) and `DHR` (DHIRAN RECEIPT) books routed to `DHRN_ISU_DATA`/`DHRN_REC_DATA`, so Pledge Loan Issue/Receipt open and post; a seed-completeness DB assertion — done (N97) | N97 |
 | G110 | S2 | Labour Sale and Fine Settlement unusable on a provisioned company | The desktop opens Labour Sale on MAIN_BOOK `LABOUR WORK` (`unified/src/csharp/DataCareNext/MDI_FORM.cs:8325`) and Fine Settlement on `FINE SALE`/`FINE PURC` (`:8505`/`:8493`); the labour writer routes to `LBR_DATA`, fine settlement to `CUT_DATA` | Found continuing the G101 book-filter review: `web/apps/api/src/modules/ops/seedCompany.ts` provisioned no `LABOUR WORK`, `FINE SALE` or `FINE PURC` book, so those screens had no book to select (the same class as the Stock In/Out and Dhiran gaps, G105/G109), and the screens could not be book-filtered either | Provisioning creates the `LBR` (LABOUR WORK → LBR_DATA), `FSL` (FINE SALE → CUT_DATA) and `FPR` (FINE PURC → CUT_DATA) books with their control slots; a seed-completeness DB assertion, and the Labour Sale book list filtered to `LABOUR WORK` — done (N100) | N100 |
+| G111 | S2 | Tag Opening unusable on a provisioned company | Tag Opening (TR_TAG_OPEN) opens tag stock: it writes `BAR_DATA` and a positive `MAIN_STOCK` with no ledger leg (`web/apps/api/src/modules/stock/stockVoucherLifecycle.ts:258-276` empty `AC_DATA` lines) on a book routed to `BAR_DATA` | Found continuing the G110 provisioning review: `web/apps/api/src/modules/ops/seedCompany.ts` provisioned no Tag Opening book, so the Tag Opening screen had no book to select on a provisioned company (the Stock In/Out, Dhiran, Labour/Fine class — G105/G109/G110) | Provisioning creates the `TOP` (TAG OPENING → `BAR_DATA`) book as a ledger-less stock book (empty slots, like WH QUOT); a seed-completeness DB assertion, and the Tag Opening book list filtered to `TAG OPENING` — done (N101) | N101 |
 
 ## 4. Decisions D23–D28
 
@@ -489,6 +490,23 @@ rate-cut sub-grid that needs separate analysis).
 Done when: a provisioned company's Labour Sale and Fine Settlement screens offer their book; a seed-completeness
 DB assertion proves the books and routing tables; the Labour Sale list is filtered.
 
+### N101 — Tag Opening book on a provisioned company (G111)
+
+The next screen in the provision-then-filter sweep. Tag Opening (TR_TAG_OPEN) opens tag stock — it writes
+`BAR_DATA` and a positive `MAIN_STOCK` with no ledger leg (`stockVoucherLifecycle.ts` posts empty `AC_DATA`
+lines) — but `seedCompany` provisioned no Tag Opening book, so the screen had no book to select (the Stock
+In/Out, Dhiran and Labour/Fine class, G105/G109/G110).
+
+`seedCompany` now provisions `TOP` (TAG OPENING → `BAR_DATA`) as a **ledger-less** stock book with empty slots,
+mirroring `tagOpeningRoundTrip.db.test.ts`. Because it carries no ledger leg, it joins `WH QUOT` as a
+legitimately BOOK_DETL-less book: the seed-completeness orphans check now allows both, and asserts the
+ledger-less set is exactly `['TOP','WHQ']`. With the book present, the Tag Opening screen's list is filtered to
+`TAG OPENING` (G101); the mocked-browser smoke's book mock was aligned to the real `TAG OPENING` MAIN_BOOK so
+the filter keeps it (the same alignment the item-lot filter needed in N99).
+
+Done when: a provisioned company's Tag Opening screen offers its book; a seed-completeness DB assertion proves
+the ledger-less `TOP` book and its `BAR_DATA` routing; the list is filtered and the smoke passes.
+
 
 ## 6. Status corrections
 
@@ -511,6 +529,7 @@ DB assertion proves the books and routing tables; the Labour Sale list is filter
 | N98 | — | implemented-unverified, evidence in this change (G101 part: the three Dhiran screens filter their book list to DHIRAN ISSUE / DHIRAN RECEIPT; browser-confirmed) |
 | N99 | — | implemented-unverified, evidence in this change (G101 part: Journal → JOURNAL, Item Lot → ITEM LOT, Tour → APPROVAL ISSUE book filters; Item Lot browser-confirmed) |
 | N100 | — | implemented-unverified, evidence in this change (G110: provisioning creates the LABOUR WORK / FINE SALE / FINE PURC books so Labour Sale and Fine Settlement open; Labour Sale list filtered) |
+| N101 | — | implemented-unverified, evidence in this change (G111: provisioning creates the ledger-less TAG OPENING book so Tag Opening opens; list filtered) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

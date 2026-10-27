@@ -4545,6 +4545,29 @@
         "web/apps/web/app/(app)/txn/labour-sale/page.tsx"
       ],
       "statusNote": "Continuing the G101 book-filter review showed the next step was provisioning: several screens MAIN_BOOK families were never seeded, so filtering them would empty the list. Labour Sale (LABOUR WORK, MDI_FORM.cs:8325) and Fine Settlement (FINE SALE/FINE PURC, :8505/:8493) had no book at all. seedCompany now provisions LBR (LABOUR WORK -> LBR_DATA), FSL (FINE SALE -> CUT_DATA), FPR (FINE PURC -> CUT_DATA) with single control slots, mirroring labourFineTaxRows.routes.db.test.ts. With the labour book present, the Labour Sale screen is filtered to LABOUR WORK. Verified: seedCompleteness asserts the three books + routing tables; provisioning counts updated (29->32 book groups, 101->104 legs, LBR/FSL/FPR added to the single-slot leg list); full API+DB 313/3479, web unit 646, browser smoke, all gates. Fine Settlement filtering deferred (its BookSelect is in a rate-cut sub-grid). Note: the labour writer defaults labourAc to a literal LABOUR that is not a seeded account; the screen passes the real account, but that default is worth revisiting."
+    },
+    {
+      "id": "N101",
+      "status": "implemented-unverified",
+      "action": "Tag Opening unusable on a provisioned company: no Tag Opening book was seeded, so the screen had no book to select",
+      "parentLabels": "P03-04; X16",
+      "startAfter": [
+        "N100"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "seedCompleteness proves the ledger-less TAG OPENING book exists routed to BAR_DATA; the orphans check allows it alongside WH QUOT; the Tag Opening list is filtered and the browser smoke passes; full suite green",
+      "gapIds": "G111",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-27",
+      "evidence": [
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/apps/api/test/seedCompleteness.db.test.ts",
+        "web/apps/web/app/(app)/txn/tag-opening/page.tsx",
+        "web/apps/web/test/browser.smoke.mjs"
+      ],
+      "statusNote": "The provision-then-filter sweep continued to Tag Opening. TR_TAG_OPEN opens tag stock (writes BAR_DATA + positive MAIN_STOCK, empty AC_DATA), but seedCompany provisioned no Tag Opening book, so the screen had no book to select. seedCompany now provisions TOP (TAG OPENING -> BAR_DATA) as a ledger-less stock book (empty slots, like WH QUOT); the seedCompleteness orphans check allows both and asserts the ledger-less set is [TOP, WHQ]. The Tag Opening list is filtered to TAG OPENING; the browser-smoke book mock was aligned to the real TAG OPENING MAIN_BOOK (space) so the filter keeps it (same alignment item-lot needed in N99). Verified: seedCompleteness asserts the TOP book + BAR_DATA routing; provisioning counts unchanged (TOP carries no BOOK_DETL legs); full API+DB 313/3480, web unit 646, browser smoke, all gates."
     }
   ],
   "amendments": [
