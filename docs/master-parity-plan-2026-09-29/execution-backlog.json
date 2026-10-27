@@ -4590,6 +4590,29 @@
         "web/apps/web/app/(app)/txn/fine-inout/page.tsx"
       ],
       "statusNote": "The provision-then-filter sweep continued to Fine In/Out. TR_FINE_INOUT is a pure metal movement (INOUT_DATA + signed MAIN_STOCK, empty AC_DATA, BOOK_NAME FINE INOUT), but seedCompany provisioned no Fine In/Out book, so the screen had no book to select. seedCompany now provisions FIO (FINE INOUT -> INOUT_DATA) as a ledger-less book (empty slots, like TAG OPENING and WH QUOT); the seedCompleteness orphans check allows all three and asserts the ledger-less set is [FIO, TOP, WHQ]. The Fine In/Out list is filtered to FINE INOUT. Verified: seedCompleteness asserts the FIO book + INOUT_DATA routing; provisioning counts unchanged (no BOOK_DETL legs); full API+DB 313/3481, web unit 646, browser smoke, all gates. Not exercised by the mocked smoke, so no mock alignment was needed."
+    },
+    {
+      "id": "N103",
+      "status": "implemented-unverified",
+      "action": "Bullion Booking unusable on a provisioned company: no Bullion Booking book was seeded, so the screen had no book to select",
+      "parentLabels": "P03-04; X16",
+      "startAfter": [
+        "N102"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "seedCompleteness proves the BUL SALE / BUL_DATA book exists; provisioning counts updated; the Bullion Booking list is filtered; full suite green",
+      "gapIds": "G113",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-28",
+      "evidence": [
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/apps/api/test/seedCompleteness.db.test.ts",
+        "web/apps/api/test/provisioning.db.test.ts",
+        "web/apps/web/app/(app)/txn/bullion/page.tsx"
+      ],
+      "statusNote": "The provision-then-filter sweep continued to Bullion Booking (TR_BUL_BOOKING, MDI_FORM.cs:8171 BUL SALE). It books bulk fine metal (BUL_DATA header + balanced Dr cash / Cr bullion-payable AC_DATA), but seedCompany provisioned no Bullion Booking book. seedCompany now provisions BUL (BUL SALE -> BUL_DATA) with the standard three slots; the writer resolves BULLION/CASH from the payload so the slots are nominal. The Bullion Booking list is filtered to BUL SALE. Verified: seedCompleteness asserts the BUL book + BUL_DATA routing; provisioning counts updated (32->33 book groups, 104->107 legs); full API+DB 313/3482, web unit 646, browser smoke, all gates. Bullion sale (TR_BUL_SALE) uses a separate BUL WH SALE/RATE_CUT_DATA book not covered here."
     }
   ],
   "amendments": [

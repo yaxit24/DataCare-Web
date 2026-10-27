@@ -84,7 +84,7 @@ d('company provisioning produces a postable company', () => {
         CO,
       ),
     );
-    expect(rows.length).toBe(32);
+    expect(rows.length).toBe(33);
     // Three legs per book (1 = control/sales, 2 = cash/bank, 3 = round-off), except the cash books.
     // RCT and PAY carry the desktop cash-book layout, 1 = cash and 2 = kasar: Ac_Ledr.cs:567-581 joins
     // BOOK_DETL SR_NO 1 and SR_NO 2 for legs 01-08. Their slot 2 used to be CASH, which would have posted
@@ -318,8 +318,8 @@ d('company provisioning produces a postable company', () => {
     expect(again.created.books).toBe(0);
     // 19 three-leg books (incl. TAG PURCHASE, KARIGAR and JDTR issue/receipt) + RCT/PAY x 2
     // + WHS/RTC x 12 + TSP x 5 + OIN/OEX x 1 + SIN/SOT x 3 (stock in/out, N91) + DHI/DHR x 3 (dhiran, N97)
-    // + LBR/FSL/FPR x 1 (labour + fine settlement, N100), not doubled.
-    expect(await count('BOOK_DETL')).toBe(104);
+    // + LBR/FSL/FPR x 1 (labour + fine settlement, N100) + BUL x 3 (bullion booking, N103), not doubled.
+    expect(await count('BOOK_DETL')).toBe(107);
   });
 
   /**

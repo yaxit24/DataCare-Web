@@ -223,6 +223,20 @@ const BOOKS: {
     table: 'INOUT_DATA',
     slots: [],
   },
+  // Desktop Bullion Booking (TR_BUL_BOOKING, MDI_FORM.cs:8171 BUL SALE / :8183 BUL PURC): a party books bulk
+  // fine metal at a locked rate. The header lands in BUL_DATA and a balanced Dr cash / Cr bullion-payable
+  // entry in AC_DATA. Without this book the Bullion Booking screen has no book to select on a provisioned
+  // company (N103, same class as Dhiran/Stock In). The writer resolves its accounts from the payload
+  // (payableAc 'BULLION', cashAc 'CASH'), so the standard three slots are nominal.
+  {
+    book: 'BUL',
+    name: 'Bullion Booking',
+    mainBook: 'BUL SALE',
+    inout: 'I',
+    acCode: 'BULLION',
+    shortName: 'BULBK',
+    table: 'BUL_DATA',
+  },
   // Desktop TR_INOUT branch transfer: Stock In opens on MAIN_BOOK 'INWORD' and Stock Out on 'OUTWORD'
   // (MDI_FORM.cs:8159/8136; the signed metal posts against the branch account on LOCT_MAST, not a book slot).
   // Without them `StockInoutForm`'s book list is empty and Save stays disabled (N91/G105).

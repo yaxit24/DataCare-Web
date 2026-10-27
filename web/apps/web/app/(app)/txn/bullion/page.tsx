@@ -74,7 +74,12 @@ export default function BullionBookingPage() {
           <div className="row">
             <div className="field">
               <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} preferred="BUL" />
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                preferred="BUL"
+                mainBooks={['BUL SALE']}
+              />
             </div>
             <div className="field">
               <label>Year</label>
