@@ -123,6 +123,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G110 | S2 | Labour Sale and Fine Settlement unusable on a provisioned company | The desktop opens Labour Sale on MAIN_BOOK `LABOUR WORK` (`unified/src/csharp/DataCareNext/MDI_FORM.cs:8325`) and Fine Settlement on `FINE SALE`/`FINE PURC` (`:8505`/`:8493`); the labour writer routes to `LBR_DATA`, fine settlement to `CUT_DATA` | Found continuing the G101 book-filter review: `web/apps/api/src/modules/ops/seedCompany.ts` provisioned no `LABOUR WORK`, `FINE SALE` or `FINE PURC` book, so those screens had no book to select (the same class as the Stock In/Out and Dhiran gaps, G105/G109), and the screens could not be book-filtered either | Provisioning creates the `LBR` (LABOUR WORK → LBR_DATA), `FSL` (FINE SALE → CUT_DATA) and `FPR` (FINE PURC → CUT_DATA) books with their control slots; a seed-completeness DB assertion, and the Labour Sale book list filtered to `LABOUR WORK` — done (N100) | N100 |
 | G111 | S2 | Tag Opening unusable on a provisioned company | Tag Opening (TR_TAG_OPEN) opens tag stock: it writes `BAR_DATA` and a positive `MAIN_STOCK` with no ledger leg (`web/apps/api/src/modules/stock/stockVoucherLifecycle.ts:258-276` empty `AC_DATA` lines) on a book routed to `BAR_DATA` | Found continuing the G110 provisioning review: `web/apps/api/src/modules/ops/seedCompany.ts` provisioned no Tag Opening book, so the Tag Opening screen had no book to select on a provisioned company (the Stock In/Out, Dhiran, Labour/Fine class — G105/G109/G110) | Provisioning creates the `TOP` (TAG OPENING → `BAR_DATA`) book as a ledger-less stock book (empty slots, like WH QUOT); a seed-completeness DB assertion, and the Tag Opening book list filtered to `TAG OPENING` — done (N101) | N101 |
 | G112 | S2 | Fine In/Out unusable on a provisioned company | Fine In/Out (TR_FINE_INOUT) is a pure metal movement: it writes `INOUT_DATA` + signed `MAIN_STOCK` with no money ledger (`web/apps/api/src/modules/inout/fineInout.ts:299` empty `AC_DATA` lines), stamped `BOOK_NAME 'FINE INOUT'` | Found continuing the G111 provisioning review: `web/apps/api/src/modules/ops/seedCompany.ts` provisioned no Fine In/Out book, so the Fine In/Out screen had no book to select on a provisioned company (the Stock In/Out, Dhiran, Labour/Fine, Tag Opening class — G105/G109/G110/G111) | Provisioning creates the `FIO` (FINE INOUT → `INOUT_DATA`) book as a ledger-less metal-movement book (empty slots); a seed-completeness DB assertion, and the Fine In/Out book list filtered to `FINE INOUT` — done (N102) | N102 |
+| G113 | S2 | Bullion Booking unusable on a provisioned company | Bullion Booking (TR_BUL_BOOKING, `MDI_FORM.cs:8171` BUL SALE / `:8183` BUL PURC) books bulk fine metal at a locked rate: the header lands in `BUL_DATA` and a balanced Dr cash / Cr bullion-payable entry in `AC_DATA` (`web/apps/api/src/modules/bullion/bullion.ts`) | Found continuing the G112 provisioning review: `web/apps/api/src/modules/ops/seedCompany.ts` provisioned no Bullion Booking book, so the Bullion Booking screen had no book to select on a provisioned company (the Stock In/Out, Dhiran, Labour/Fine, Tag Opening, Fine In/Out class — G105/G109/G110/G111/G112) | Provisioning creates the `BUL` (BUL SALE → `BUL_DATA`) book; the writer resolves its ledger accounts (`BULLION`/`CASH`) from the payload, so the standard slots are nominal; a seed-completeness DB assertion, and the Bullion Booking book list filtered to `BUL SALE` — done (N103) | N103 |
 
 ## 4. Decisions D23–D28
 
@@ -526,6 +527,23 @@ Done when: a provisioned company's Fine In/Out screen offers its book; a seed-co
 the ledger-less `FIO` book and its `INOUT_DATA` routing; the list is filtered.
 
 
+### N103 — Bullion Booking book on a provisioned company (G113)
+
+The provision-then-filter sweep continued to Bullion Booking (TR_BUL_BOOKING): a party books bulk fine metal at
+a locked rate, writing `BUL_DATA` and a balanced Dr cash / Cr bullion-payable entry in `AC_DATA`. `seedCompany`
+provisioned no Bullion Booking book, so the screen had no book to select (the Stock In/Out, Dhiran, Labour/Fine,
+Tag Opening and Fine In/Out class — G105/G109/G110/G111/G112).
+
+`seedCompany` now provisions `BUL` (BUL SALE → `BUL_DATA`) with the standard three slots. Unlike the ledger-less
+stock books, this one is ledger-bearing, but the writer resolves its accounts (`BULLION`/`CASH`) from the
+payload rather than BOOK_DETL, so the slots are nominal. With the book present, the Bullion Booking screen's
+list is filtered to `BUL SALE` (G101). `seedCompleteness` asserts the book and its `BUL_DATA` routing;
+`provisioning.db.test.ts` counts were updated (32 → 33 book groups, 104 → 107 legs).
+
+Done when: a provisioned company's Bullion Booking screen offers its book; a seed-completeness DB assertion
+proves the `BUL` book and its `BUL_DATA` routing; the list is filtered.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -549,6 +567,7 @@ the ledger-less `FIO` book and its `INOUT_DATA` routing; the list is filtered.
 | N100 | — | implemented-unverified, evidence in this change (G110: provisioning creates the LABOUR WORK / FINE SALE / FINE PURC books so Labour Sale and Fine Settlement open; Labour Sale list filtered) |
 | N101 | — | implemented-unverified, evidence in this change (G111: provisioning creates the ledger-less TAG OPENING book so Tag Opening opens; list filtered) |
 | N102 | — | implemented-unverified, evidence in this change (G112: provisioning creates the ledger-less FINE INOUT book so Fine In/Out opens; list filtered) |
+| N103 | — | implemented-unverified, evidence in this change (G113: provisioning creates the BUL SALE / BUL_DATA book so Bullion Booking opens; list filtered) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

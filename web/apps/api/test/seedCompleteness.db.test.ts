@@ -197,4 +197,18 @@ databaseDescribe('provisioning leaves a company able to trade', () => {
     expect(rows).toHaveLength(1);
     expect(rows[0]!.BOOK_TBL_NAME).toBe('INOUT_DATA');
   });
+
+  it('provisions the Bullion Booking book (N103/G113)', async () => {
+    // Bullion Booking (TR_BUL_BOOKING) books bulk fine metal: BUL_DATA header + balanced AC_DATA ledger.
+    // Without this book the Bullion Booking screen has no book to select on a provisioned company.
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT "MAIN_BOOK","BOOK_TBL_NAME" FROM "BOOK_DATA"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "CO_BOOK"='BUL'`,
+      TENANT,
+      CO,
+    )) as Array<{ MAIN_BOOK: string; BOOK_TBL_NAME: string }>;
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.MAIN_BOOK).toBe('BUL SALE');
+    expect(rows[0]!.BOOK_TBL_NAME).toBe('BUL_DATA');
+  });
 });

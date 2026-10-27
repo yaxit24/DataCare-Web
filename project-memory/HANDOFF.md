@@ -8,6 +8,12 @@
 ## Active plan
 **Full-parity rebuild (52 tasks / 15 phases A–O)** — replicate the ENTIRE desktop (204 forms, 255 reports, full frontend+backend+DB) at 100% functional parity. The earlier 34-task plan delivered the verified backend CORE; this plan builds out the rest. Task graph = the session todo list (IDs 1–20 group the phases). Run continuously; checkpoint every task.
 
+## Latest slice (2026-10-28) — N103: Bullion Booking book (G113)
+- Seeded BUL (BUL SALE → BUL_DATA) ledger-bearing book (accounts from payload); filtered its list. **PR #69 → main.** provisioning 32→33 groups, 104→107 legs.
+- Provision-then-filter sweep: Stock In/Out (N91), Dhiran (N97/N98), Labour+Fine (N100), Tag Opening (N101), Fine In/Out (N102), Bullion Booking (N103). Remaining unusable-screen candidates: item-opening (BAR_DATA; MAIN_BOOK needs confirm), ac-opbl, tag-weight-diff (TAG WT CHANGE), mfg-issue/receive, batch-receipt (RCT seeded → filter only), bullion-sale (BUL WH SALE/RATE_CUT_DATA).
+- MODE: running continuously, merging own green PRs, no pausing between slices (user directive 2026-10-28).
+- Next gap **G114**, slice **N104**, decision **D31**.
+
 ## Latest slice (2026-10-27) — N102: Fine In/Out book (G112)
 - Seeded FIO (FINE INOUT → INOUT_DATA) ledger-less book so Fine In/Out is usable; filtered its list. **PR #68 → main.** Ledger-less orphans set now ['FIO','TOP','WHQ'].
 - Provision-then-filter sweep: Stock In/Out (N91), Dhiran (N97/N98), Labour+Fine (N100), Tag Opening (N101), Fine In/Out (N102). Still unseeded for unusable screens: BULLION booking (BUL_DATA), item-opening (BAR_DATA, MAIN_BOOK needs confirming), ac-opbl, tag-weight-diff (TAG WT CHANGE), mfg-issue/receive, batch-receipt (RCT seeded → filter only).

@@ -4,6 +4,13 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-28 — N103: Bullion Booking book provisioned (G113)
+- Provision-then-filter sweep continued to Bullion Booking (TR_BUL_BOOKING, BUL SALE). Added BUL (BUL SALE → BUL_DATA) with standard slots (accounts resolve from payload). Filtered its list to BUL SALE. provisioning 32→33 groups, 104→107 legs. **PR #69 → main.**
+- Running autonomously per user: implement → PR → merge when green → next, no pausing. Merging my own green PRs now (permission granted).
+- Next gap **G114**, slice **N104**, decision **D31**.
+
+---
+
 ## 2026-10-27 (cont.) — N102: Fine In/Out book provisioned (G112)
 - Next in the provision-then-filter sweep. TR_FINE_INOUT is a pure metal movement (INOUT_DATA + signed MAIN_STOCK, empty AC_DATA, BOOK_NAME FINE INOUT) but seedCompany seeded no Fine In/Out book. Added FIO (FINE INOUT → INOUT_DATA) as a ledger-less book (empty slots); seedCompleteness orphans allowance now ['FIO','TOP','WHQ']. Filtered the Fine In/Out list to FINE INOUT. Not in the smoke, so no mock alignment. **PR #68 → main.**
 - Next gap **G113**, slice **N103**, decision **D31**.
