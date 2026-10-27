@@ -4568,6 +4568,28 @@
         "web/apps/web/test/browser.smoke.mjs"
       ],
       "statusNote": "The provision-then-filter sweep continued to Tag Opening. TR_TAG_OPEN opens tag stock (writes BAR_DATA + positive MAIN_STOCK, empty AC_DATA), but seedCompany provisioned no Tag Opening book, so the screen had no book to select. seedCompany now provisions TOP (TAG OPENING -> BAR_DATA) as a ledger-less stock book (empty slots, like WH QUOT); the seedCompleteness orphans check allows both and asserts the ledger-less set is [TOP, WHQ]. The Tag Opening list is filtered to TAG OPENING; the browser-smoke book mock was aligned to the real TAG OPENING MAIN_BOOK (space) so the filter keeps it (same alignment item-lot needed in N99). Verified: seedCompleteness asserts the TOP book + BAR_DATA routing; provisioning counts unchanged (TOP carries no BOOK_DETL legs); full API+DB 313/3480, web unit 646, browser smoke, all gates."
+    },
+    {
+      "id": "N102",
+      "status": "implemented-unverified",
+      "action": "Fine In/Out unusable on a provisioned company: no Fine In/Out book was seeded, so the screen had no book to select",
+      "parentLabels": "P03-04; X16",
+      "startAfter": [
+        "N101"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "seedCompleteness proves the ledger-less FINE INOUT book exists routed to INOUT_DATA; the orphans check allows it alongside TAG OPENING and WH QUOT; the Fine In/Out list is filtered; full suite green",
+      "gapIds": "G112",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-27",
+      "evidence": [
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/apps/api/test/seedCompleteness.db.test.ts",
+        "web/apps/web/app/(app)/txn/fine-inout/page.tsx"
+      ],
+      "statusNote": "The provision-then-filter sweep continued to Fine In/Out. TR_FINE_INOUT is a pure metal movement (INOUT_DATA + signed MAIN_STOCK, empty AC_DATA, BOOK_NAME FINE INOUT), but seedCompany provisioned no Fine In/Out book, so the screen had no book to select. seedCompany now provisions FIO (FINE INOUT -> INOUT_DATA) as a ledger-less book (empty slots, like TAG OPENING and WH QUOT); the seedCompleteness orphans check allows all three and asserts the ledger-less set is [FIO, TOP, WHQ]. The Fine In/Out list is filtered to FINE INOUT. Verified: seedCompleteness asserts the FIO book + INOUT_DATA routing; provisioning counts unchanged (no BOOK_DETL legs); full API+DB 313/3481, web unit 646, browser smoke, all gates. Not exercised by the mocked smoke, so no mock alignment was needed."
     }
   ],
   "amendments": [

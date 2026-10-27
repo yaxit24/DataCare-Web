@@ -290,7 +290,12 @@ export default function FineInoutPage() {
             </div>
             <div className="field">
               <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} preferred="FIO" />
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                preferred="FIO"
+                mainBooks={['FINE INOUT']}
+              />
             </div>
             <div className="field">
               <label>Year</label>

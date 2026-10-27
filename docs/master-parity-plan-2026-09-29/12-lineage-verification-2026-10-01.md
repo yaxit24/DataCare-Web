@@ -122,6 +122,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G109 | S2 | Dhiran (pledge loan) unusable on a provisioned company | The desktop opens Pledge Loan Issue on MAIN_BOOK `DHIRAN ISSUE` and Pledge Receipt on `DHIRAN RECEIPT` (`unified/src/csharp/DataCareNext/MDI_FORM.cs:9527,9539` `Dhiran_Form`); the issue writes `DHRN_ISU_DATA`, the receipt `DHRN_REC_DATA` | Found operating the production build (2026-10-27): the Pledge Loan Issue screen's book select offered no Dhiran book (`web/apps/api/src/modules/ops/seedCompany.ts` provisioned 24 book families with no DHIRAN book), so the operator could not post a pledge loan — the same class as the Stock In/Out gap (G105) | Provisioning creates the `DHI` (DHIRAN ISSUE) and `DHR` (DHIRAN RECEIPT) books routed to `DHRN_ISU_DATA`/`DHRN_REC_DATA`, so Pledge Loan Issue/Receipt open and post; a seed-completeness DB assertion — done (N97) | N97 |
 | G110 | S2 | Labour Sale and Fine Settlement unusable on a provisioned company | The desktop opens Labour Sale on MAIN_BOOK `LABOUR WORK` (`unified/src/csharp/DataCareNext/MDI_FORM.cs:8325`) and Fine Settlement on `FINE SALE`/`FINE PURC` (`:8505`/`:8493`); the labour writer routes to `LBR_DATA`, fine settlement to `CUT_DATA` | Found continuing the G101 book-filter review: `web/apps/api/src/modules/ops/seedCompany.ts` provisioned no `LABOUR WORK`, `FINE SALE` or `FINE PURC` book, so those screens had no book to select (the same class as the Stock In/Out and Dhiran gaps, G105/G109), and the screens could not be book-filtered either | Provisioning creates the `LBR` (LABOUR WORK → LBR_DATA), `FSL` (FINE SALE → CUT_DATA) and `FPR` (FINE PURC → CUT_DATA) books with their control slots; a seed-completeness DB assertion, and the Labour Sale book list filtered to `LABOUR WORK` — done (N100) | N100 |
 | G111 | S2 | Tag Opening unusable on a provisioned company | Tag Opening (TR_TAG_OPEN) opens tag stock: it writes `BAR_DATA` and a positive `MAIN_STOCK` with no ledger leg (`web/apps/api/src/modules/stock/stockVoucherLifecycle.ts:258-276` empty `AC_DATA` lines) on a book routed to `BAR_DATA` | Found continuing the G110 provisioning review: `web/apps/api/src/modules/ops/seedCompany.ts` provisioned no Tag Opening book, so the Tag Opening screen had no book to select on a provisioned company (the Stock In/Out, Dhiran, Labour/Fine class — G105/G109/G110) | Provisioning creates the `TOP` (TAG OPENING → `BAR_DATA`) book as a ledger-less stock book (empty slots, like WH QUOT); a seed-completeness DB assertion, and the Tag Opening book list filtered to `TAG OPENING` — done (N101) | N101 |
+| G112 | S2 | Fine In/Out unusable on a provisioned company | Fine In/Out (TR_FINE_INOUT) is a pure metal movement: it writes `INOUT_DATA` + signed `MAIN_STOCK` with no money ledger (`web/apps/api/src/modules/inout/fineInout.ts:299` empty `AC_DATA` lines), stamped `BOOK_NAME 'FINE INOUT'` | Found continuing the G111 provisioning review: `web/apps/api/src/modules/ops/seedCompany.ts` provisioned no Fine In/Out book, so the Fine In/Out screen had no book to select on a provisioned company (the Stock In/Out, Dhiran, Labour/Fine, Tag Opening class — G105/G109/G110/G111) | Provisioning creates the `FIO` (FINE INOUT → `INOUT_DATA`) book as a ledger-less metal-movement book (empty slots); a seed-completeness DB assertion, and the Fine In/Out book list filtered to `FINE INOUT` — done (N102) | N102 |
 
 ## 4. Decisions D23–D28
 
@@ -508,6 +509,23 @@ Done when: a provisioned company's Tag Opening screen offers its book; a seed-co
 the ledger-less `TOP` book and its `BAR_DATA` routing; the list is filtered and the smoke passes.
 
 
+### N102 — Fine In/Out book on a provisioned company (G112)
+
+The provision-then-filter sweep continued to Fine In/Out (TR_FINE_INOUT), a pure metal movement writing
+`INOUT_DATA` + signed `MAIN_STOCK` with no money ledger (`fineInout.ts` posts empty `AC_DATA`). `seedCompany`
+provisioned no Fine In/Out book, so the screen had no book to select (the Stock In/Out, Dhiran, Labour/Fine and
+Tag Opening class — G105/G109/G110/G111).
+
+`seedCompany` now provisions `FIO` (FINE INOUT → `INOUT_DATA`) as a **ledger-less** metal-movement book with
+empty slots, mirroring `fineInoutGrid.db.test.ts`. It joins `TAG OPENING` and `WH QUOT` in the
+seed-completeness orphans allowance (the ledger-less set is now `['FIO','TOP','WHQ']`). With the book present,
+the Fine In/Out screen's list is filtered to `FINE INOUT` (G101). The book is not exercised by the mocked
+smoke, so no mock alignment was needed.
+
+Done when: a provisioned company's Fine In/Out screen offers its book; a seed-completeness DB assertion proves
+the ledger-less `FIO` book and its `INOUT_DATA` routing; the list is filtered.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -530,6 +548,7 @@ the ledger-less `TOP` book and its `BAR_DATA` routing; the list is filtered and 
 | N99 | — | implemented-unverified, evidence in this change (G101 part: Journal → JOURNAL, Item Lot → ITEM LOT, Tour → APPROVAL ISSUE book filters; Item Lot browser-confirmed) |
 | N100 | — | implemented-unverified, evidence in this change (G110: provisioning creates the LABOUR WORK / FINE SALE / FINE PURC books so Labour Sale and Fine Settlement open; Labour Sale list filtered) |
 | N101 | — | implemented-unverified, evidence in this change (G111: provisioning creates the ledger-less TAG OPENING book so Tag Opening opens; list filtered) |
+| N102 | — | implemented-unverified, evidence in this change (G112: provisioning creates the ledger-less FINE INOUT book so Fine In/Out opens; list filtered) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

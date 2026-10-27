@@ -76,9 +76,10 @@ databaseDescribe('provisioning leaves a company able to trade', () => {
     expect(await count('BOOK_DETL')).toBeGreaterThan(0);
 
     // Every book that can post must have at least one account row. WH QUOT (a quotation) and TAG OPENING
-    // (a pure stock-opening voucher, empty AC_DATA) are deliberately ledger-less: their writers post no
-    // ledger leg, so they carry no BOOK_DETL. Both have zero-economic-footprint DB tests.
-    const LEDGERLESS = `('WH QUOT','TAG OPENING')`;
+    // (a pure stock-opening voucher, empty AC_DATA) and FINE INOUT (a pure metal movement, empty AC_DATA)
+    // are deliberately ledger-less: their writers post no ledger leg, so they carry no BOOK_DETL. Each has
+    // a zero-economic-footprint DB test.
+    const LEDGERLESS = `('WH QUOT','TAG OPENING','FINE INOUT')`;
     const orphans = (await owner.$queryRawUnsafe(
       `SELECT d."CO_BOOK" FROM "BOOK_DATA" d
         WHERE d.tenant_id=$1 AND coalesce(d."MAIN_BOOK",'') NOT IN ${LEDGERLESS}
@@ -95,7 +96,7 @@ databaseDescribe('provisioning leaves a company able to trade', () => {
         ORDER BY d."CO_BOOK"`,
       TENANT,
     )) as Array<{ CO_BOOK: string }>;
-    expect(documentOnly.map((o) => o.CO_BOOK)).toEqual(['TOP', 'WHQ']);
+    expect(documentOnly.map((o) => o.CO_BOOK)).toEqual(['FIO', 'TOP', 'WHQ']);
   });
 
   it('provisions the accounts a sale posts to', async () => {
@@ -182,5 +183,18 @@ databaseDescribe('provisioning leaves a company able to trade', () => {
     )) as Array<{ MAIN_BOOK: string; BOOK_TBL_NAME: string }>;
     expect(rows).toHaveLength(1);
     expect(rows[0]!.BOOK_TBL_NAME).toBe('BAR_DATA');
+  });
+
+  it('provisions the Fine In/Out book (N102/G112)', async () => {
+    // Fine In/Out (TR_FINE_INOUT) is a pure metal movement: INOUT_DATA + signed MAIN_STOCK, empty AC_DATA.
+    // Without this book the Fine In/Out screen has no book to select on a provisioned company.
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT "MAIN_BOOK","BOOK_TBL_NAME" FROM "BOOK_DATA"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "MAIN_BOOK"='FINE INOUT'`,
+      TENANT,
+      CO,
+    )) as Array<{ MAIN_BOOK: string; BOOK_TBL_NAME: string }>;
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.BOOK_TBL_NAME).toBe('INOUT_DATA');
   });
 });
