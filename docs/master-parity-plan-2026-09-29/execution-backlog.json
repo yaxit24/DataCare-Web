@@ -4384,6 +4384,29 @@
         "web/apps/web/app/(app)/txn/estimate/page.tsx"
       ],
       "statusNote": "Found resolving G84. The desktop line total (TR_SALE.cs CommPassTotal col 35) is item + labour + other; the per-line discount and ghat amount are stored on SL_DETL.DISC_AMT/GHT_AMT and never fold into the line net, which the server matches (calcLineNet). The previews did not: hallmark sale, purchase, consignment purchase, purchase quotation, sale return and estimate previewed metal + making only (omitting other charges, G84); sales and sales quotation previewed recalcLine.totalAmount, which nets the line discount off labour and adds the ghat amount (G106). All eight now compose lineNet({metal, labour, other}) like the server; purchase-return already did. Verified: a DB test posts a line with a 10% discount and a Rs.250 ghat and pins SL_DETL.NET_AMT to metal + gross labour + other (53500 for a 50000/2000/1500 line); API+DB suite, web unit 645, real-stack 25 journeys/0 mocks. Not verified: a fresh browser re-check per screen (the server rule is pinned by the DB test and the previews share one core helper)."
+    },
+    {
+      "id": "N94",
+      "status": "implemented-unverified",
+      "action": "No static rule rejected a request/input value interpolated into raw $queryRawUnsafe/$executeRawUnsafe SQL (SECURITY-REVIEW residual); the first SP03 safety-boundary ratchet of N88",
+      "parentLabels": "SP03; X-security",
+      "startAfter": [
+        "N47"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "An AST lint gate flags a request/input value interpolated into a raw-SQL template and passes the vetted /sanitizer/fragment forms; zero findings on the current tree; a planted violation fails lint; a test proves both directions and runs in CI",
+      "gapIds": "G107",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-27",
+      "evidence": [
+        "web/scripts/sql-interpolation.mjs",
+        "web/scripts/sql-interpolation.test.mjs",
+        "web/scripts/lint-workspace.mjs",
+        "web/package.json"
+      ],
+      "statusNote": "SECURITY-REVIEW.md s6 recorded that values reach raw SQL only as $n parameters and only identifiers/fragments are interpolated, but there was no static rule enforcing it. Added an AST checker (TypeScript compiler API) wired into lint-workspace: for every $queryRawUnsafe/$executeRawUnsafe call it inspects ONLY the first argument (the SQL template) and flags any interpolation reading a value out of the HTTP request/input (req/request/reply/body/query/params/input as a value, incl. nested fragment templates and string concat). Vetted forms pass: $n-bind placeholder index ($-prefixed), identifier sanitizers (quoteIdent), column/SQL-builder calls (n/NN/VAL/fineExpr/.join), SQL-fragment vars. Framed around the injection vector, not a name allow-list, because fragments are named freely; the builder allow-list is explicit so additions are reviewed. Verified: zero findings on 192 raw-SQL files; a planted req.body interpolation fails lint-workspace and passes after revert; sql-interpolation.test.mjs (run first in the lint script) covers 8 dangerous + 9 safe shapes; full lint (test+eslint+typecheck) and format green. Scope: this is the SQL-lint part of N88/SP03 only; route plugins, typed error taxonomy, the shared voucher editor and file-size budgets remain in N88."
     }
   ],
   "amendments": [

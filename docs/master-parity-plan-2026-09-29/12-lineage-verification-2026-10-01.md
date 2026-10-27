@@ -117,6 +117,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G104 | S2 | Typed lookup codes not resolved | `unified/src/csharp/DataCareNext/TR_PURC.cs:14619-14628` `tAcCode_KeyDown` looks the typed code up in AC_MAST on Enter and fills the party (F1 help opens only when nothing matches); `TR_SALE.cs:17340` is the same | Found in the 2026-10-26 E2E run: `web/apps/web/components/LookupPicker.tsx` ran its `onPick` effects only when a row was chosen from the open list, so a supplier typed and tabbed past (or Enter pressed before the list opened) left the name blank and Inter-state "No", and the purchase was refused (`interState does not match the persisted supplier GST type`) | A typed value that matches one lookup code exactly is picked on Enter and when the field is left, running the screen's pick effects; browser re-check on Purchase | N90 |
 | G105 | S2 | Stock In / Out unusable on a provisioned company | The desktop ships `INWORD` / `OUTWORD` books and every location carries a branch account (`MS_LOCT.cs:3458` binds `LOCT_MAST.AC_CODE`); `TR_INOUT.cs:5268-5282` posts the signed metal rows against that branch account and `web/apps/api/src/modules/stock/stockInout.ts:19-23,344-355` reads `LOCT_MAST.AC_CODE` for the location account | Found in the 2026-10-26 E2E run: on provisioned company 07 the Stock In Book select was empty and Save stayed disabled — `web/apps/web/components/StockInoutForm.tsx:230,422` filters `BookSelect` to `mainBook` `INWORD`/`OUTWORD`, but `web/apps/api/src/modules/ops/seedCompany.ts` creates 22 book families without either and seeds `LOCT_MAST` with no `AC_CODE`, so even with a book the metal/ledger rows (`stockInout.ts:760,807` filter on `locationAccount.acCode`) would be dropped | Provisioning creates the `INWORD` and `OUTWORD` books and a branch stock-in-hand account wired to `LOCT_MAST.AC_CODE`, so Stock In/Out opens, saves, and posts a reconciling metal + ledger entry; DB test on the isolated database | N91 |
 | G106 | S2 | Sales previews netted the line discount and added the ghat amount into the line total | The desktop line total (`TR_SALE.cs` CommPassTotal, column 35) is item + labour + other; the per-line discount and ghat amount are stored on their own columns (`SL_DETL.DISC_AMT`/`GHT_AMT`) and never fold into the line net — the server matches it (`web/apps/api/src/modules/sales/sales.ts` `calcLineNet({ metal, labour, other })`, confirmed by a DB test posting a line with a 10% discount and a ₹250 ghat that stores `NET_AMT` = metal + gross labour + other) | Found resolving G84: `web/apps/web/app/(app)/txn/sales/page.tsx` and `web/apps/web/app/(app)/txn/sales-quotation/page.tsx` previewed `recalcLine(...).totalAmount`, which nets the line discount off labour and adds the ghat amount — so a line carrying a `Line Disc %` or `Ghat Amt` (both editable grid columns) previewed a total the server does not post | The sales and sales-quotation previews compose the line net as the server does (`lineNet({ metal, labour, other })`), leaving the discount and ghat on their own columns; a DB test pins the server rule (`web/apps/api/test/sales.lifecycle.db.test.ts`) — done (N93) | N93 |
+| G107 | S2 | No static rule rejected a request value interpolated into raw SQL | `project-memory/parity/SECURITY-REVIEW.md` §6: values reach `$queryRawUnsafe`/`$executeRawUnsafe` only as `$n` parameters and only identifiers/fragments are interpolated — but "there is no general static rule that parses all SQL templates and rejects unbound value interpolation", so a future call could reopen SQL injection | A new AST gate (`web/scripts/sql-interpolation.mjs`, wired into `web/scripts/lint-workspace.mjs`) inspects the first argument of every raw-unsafe call and flags any `${…}` that reads a value out of the HTTP request/input (`req`/`request`/`body`/`query`/`params`/`input` as a value), including nested fragment templates; `$n`-bind indices, identifier sanitizers and SQL fragments pass. Zero findings on the current tree; a planted `req.body` interpolation fails the gate | A static lint gate rejects a request/input value interpolated into a raw-SQL template; a test proves it flags a planted violation and passes the vetted forms — done (N94) | N94 |
 
 ## 4. Decisions D23–D28
 
@@ -355,6 +356,31 @@ exactly as the server does, keeping the discount and ghat on their own columns. 
 Done when: each document preview totals the line net the server posts (metal + gross labour + other), proven by
 the DB composition test, the web unit suite and the real-stack browser suite with zero mocks.
 
+### N94 — Static gate: a request value may not be interpolated into raw SQL (G107, SP03)
+
+The SECURITY-REVIEW recorded that the codebase always binds values as `$n` parameters and only interpolates
+identifiers and SQL fragments into `$queryRawUnsafe`/`$executeRawUnsafe`, but that there was **no static rule**
+enforcing it — so a future call could interpolate a request value and reopen SQL injection. This slice adds
+that rule, the first SP03 (maintainability/safety boundary) ratchet of N88.
+
+`web/scripts/sql-interpolation.mjs` is an AST checker (TypeScript compiler API, the same foundation
+as the secret scanner) wired into `web/scripts/lint-workspace.mjs`. For every raw-unsafe call it
+inspects **only the first argument** (the SQL template) and flags any `${…}` that reads a value out of the HTTP
+request/input — `req`/`request`/`reply`/`body`/`query`/`params`/`input` used as a value, including a value
+smuggled through a nested fragment template or a string concatenation. The vetted forms all pass: a `$n`-bind
+placeholder index (`$${params.length + 1}`), an identifier sanitizer (`quoteIdent`), a column/SQL-builder call
+(`n(...)`, `NN(...)`, `fineExpr(...)`, `*.join(...)`), and a SQL-fragment variable. The classifier is framed
+around the injection vector rather than a name allow-list, because the codebase names fragments freely; the
+builder allow-list is kept explicit so adding one is a reviewed change.
+
+The gate reports zero findings on the current tree (192 raw-SQL files), and a planted `req.body` interpolation
+fails `lint-workspace`. `web/scripts/sql-interpolation.test.mjs` (run first in the `lint` script)
+proves both directions: eight dangerous shapes flagged, nine vetted shapes allowed.
+
+Done when: the gate passes the clean tree, fails a planted request-value interpolation, and its test runs in
+CI; recorded as the SQL-lint part of N88/SP03 (route plugins, error taxonomy, shared editor and size budgets
+remain).
+
 
 ## 6. Status corrections
 
@@ -370,6 +396,7 @@ the DB composition test, the web unit suite and the real-stack browser suite wit
 | N91 | — | implemented-unverified, evidence in this change (G105: provisioning creates the INWORD/OUTWORD books and the branch account so Stock In/Out opens, saves and posts) |
 | N92 | — | implemented-unverified, evidence in this change (G102: the nine document screens preview the total the server posts, via the shared `@datacare/core` rounding policy on `/me`) |
 | N93 | — | implemented-unverified, evidence in this change (G84, G106: every document preview composes the line net the server posts — metal + gross labour + other — with discount/ghat on their own columns) |
+| N94 | — | implemented-unverified, evidence in this change (G107/SP03: an AST lint gate rejects a request/input value interpolated into raw `$queryRawUnsafe`/`$executeRawUnsafe` SQL; proven by a planted-violation test) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
