@@ -209,6 +209,20 @@ const BOOKS: {
     table: 'BAR_DATA',
     slots: [],
   },
+  // Desktop Fine In/Out (TR_FINE_INOUT): a pure metal movement writing INOUT_DATA + signed MAIN_STOCK with
+  // no money ledger (AC_DATA empty), stamped BOOK_NAME 'FINE INOUT'. Without this book the Fine In/Out screen
+  // has no book to select on a provisioned company (N102, same class as Tag Opening). Empty slots: a metal
+  // movement implies no ledger accounts. Mirrors `fineInoutGrid.db.test.ts`.
+  {
+    book: 'FIO',
+    name: 'Fine In Out',
+    mainBook: 'FINE INOUT',
+    inout: 'I',
+    acCode: 'PURCHASE',
+    shortName: 'FINO',
+    table: 'INOUT_DATA',
+    slots: [],
+  },
   // Desktop TR_INOUT branch transfer: Stock In opens on MAIN_BOOK 'INWORD' and Stock Out on 'OUTWORD'
   // (MDI_FORM.cs:8159/8136; the signed metal posts against the branch account on LOCT_MAST, not a book slot).
   // Without them `StockInoutForm`'s book list is empty and Save stays disabled (N91/G105).
