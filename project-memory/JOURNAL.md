@@ -4,6 +4,13 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-28 (cont.) — N108: purchase-return posting accounts from the book (G117, P0-04)
+- Mirror of N107 for purchase: control=BOOK_DETL slot 1 (unconditional) + per-item expense fallback; cash=slot 2; round/kasar=slot 3; removed PURCHASE/CASH/ROUNDOFF/KASAR literals. Only GSTINPUT literal remains. P0-04 register 5->1, total 63->59. **PR #75 → main** (merge on local verification; CI billing-blocked).
+- Full local battery green: API+DB 313/3483, web 646, routes 126, gates + kernel.
+- Next gap **G118**, slice **N109**, decision **D31**. P0-04 continuations: dhrn.ts (5), billToBill.ts (5), salesOrder.ts (3), sales.ts (14), purchase.ts (10). The two GST/GSTINPUT literals left in sales/purchase-return are a tax-account-config concern (resolver pins TAX_MAST SR_NO 0 TAX_AC); a dedicated slice could seed TAX_AC + fail-closed, but that touches several minimal test fixtures.
+
+---
+
 ## 2026-10-28 (cont.) — N107: sales-return posting accounts from the book (G116, P0-04)
 - salesReturn.ts resolved cash/round from the book already but kept literal initializers (SALES/CASH/ROUNDOFF/KASAR). Now control=BOOK_DETL slot 1 (unconditional, desktop LD_CODE=B.AC_CODE) + per-item revenue fallback; cash=slot 2; round/kasar=slot 3; no literals. Only GST literal remains (tax-config concern). P0-04 register 5->1, total 67->63. **PR #74 → main** (merge on local verification; CI billing-blocked).
 - Full local battery green: API+DB 313/3483, web 646, routes 126, all gates + kernel.
