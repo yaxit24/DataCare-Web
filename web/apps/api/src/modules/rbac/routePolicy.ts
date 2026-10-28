@@ -470,6 +470,12 @@ route('Cash / Bank/Card / UPI Receipt', [
   'PUT /card-receipts/:vchNo',
   'DELETE /card-receipts/:vchNo',
 ]);
+route('Utilities/Customer Entry', [
+  'POST /crm/customer-entries',
+  'GET /crm/customer-entries/:employeeCode/:vchNo',
+  'PUT /crm/customer-entries/:employeeCode/:vchNo',
+  'DELETE /crm/customer-entries/:employeeCode/:vchNo',
+]);
 
 route('Inventory/Stock / Tags', ['POST /stock/tags', 'GET /stock/tags', 'GET /stock/on-hand']);
 route('Inventory/Tag Opening', [
