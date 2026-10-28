@@ -132,6 +132,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G119 | Med | Sales | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (SALES book legs) | `web/apps/api/src/modules/sales/sales.ts` | The sale cash and round/kasar accounts must come from the book's BOOK_DETL slots (2/3), not literal `CASH`/`ROUNDOFF`/`KASAR` initializers. | N110 |
 | G120 | Med | Purchase | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (PURCHASE book legs) | `web/apps/api/src/modules/purchase/purchase.ts` | The purchase cash and round/kasar accounts must come from the book's BOOK_DETL slots (2/3), not literal `CASH`/`ROUNDOFF`/`KASAR` initializers. | N111 |
 | G121 | Med | Bullion | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (BUL SALE book legs) | `web/apps/api/src/modules/bullion/bullion.ts` | The bullion payable and funding accounts must come from the booking book's BOOK_DETL slots (1/2), not literal `BULLION`/`CASH`. | N112 |
+| G122 | Med | Order cancel | `unified/src/csharp/DataCareNext/MDI_FORM.cs:8629` | `web/apps/api/src/modules/ops/seedCompany.ts` | Provisioning must create the ORDER CANCEL book (CO_BOOK ORC, SL_ORD_ADJ) so a fresh company can cancel/refund a sales order; the cancel writer targets book ORC. | N113 |
 
 ## 4. Decisions D23–D28
 
@@ -663,6 +664,18 @@ and leaves the P0-04 register (total 48 → 46).
 Done when: a bullion booking posts to the book's configured payable and cash accounts on a provisioned company.
 
 
+### N113 — Order Cancel book provisioned (G122)
+
+The Order Cancel screen refunds a sales order's advance through SL_ORD_ADJ + a balanced AC_DATA refund,
+and its writer targets book `ORC` (desktop MDI_FORM.cs:8629 CurBookHelp("ORDER CANCEL")). `seedCompany`
+provisioned no ORDER CANCEL book, so a fresh company could not cancel/refund an order. Provisioned the
+`ORC` book (MAIN_BOOK 'ORDER CANCEL', table SL_ORD_ADJ, standard 3 legs). This also lays the groundwork
+for resolving the order-cancel refund accounts from the book in a later P0-04 sub-pass. Provisioning
+book-groups 33 → 34, BOOK_DETL legs 108 → 111.
+
+Done when: a provisioned company can cancel and refund a sales order.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -696,6 +709,7 @@ Done when: a bullion booking posts to the book's configured payable and cash acc
 | N110 | — | implemented-unverified, evidence in this change (G119: sale cash/round/kasar accounts default to the resolved control account, not literals; P0-04 56→53) |
 | N111 | — | implemented-unverified, evidence in this change (G120: purchase cash/round/kasar default to the resolved control account; purchase.ts pinned to true count 5; P0-04 53→48) |
 | N112 | — | implemented-unverified, evidence in this change (G121: bullion payable/cash resolved from BOOK_DETL slots 1/2; bullion.ts cleared; P0-04 48→46) |
+| N113 | — | implemented-unverified, evidence in this change (G122: provisioning creates the ORDER CANCEL book so Order Cancel is usable) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

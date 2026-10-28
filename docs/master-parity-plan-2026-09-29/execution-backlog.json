@@ -4809,6 +4809,27 @@
         "web/apps/api/test/postingAccountLiterals.test.ts"
       ],
       "statusNote": "Bullion booking had no book-account resolution; payableAc/cashAc fell back to literals BULLION/CASH. Added resolveBullionAccountTx -> resolveBookAccountTx(slot 1 payable, slot 2 cash) fail-closed, override honoured. Seeded BUL book (N103) carries slot 1=BULLION, slot 2=CASH. bullion.ts cleared from the P0-04 register, total 48->46. Verified locally: typecheck/typecheck:tests/lint/format/size/kernel; routes 126; web 646; full API+DB 313/3483."
+    },
+    {
+      "id": "N113",
+      "status": "implemented-unverified",
+      "action": "Provisioning created no ORDER CANCEL book, so Order Cancel (refund an order advance) was unusable on a fresh company; provision the ORC book",
+      "parentLabels": "P06-01; X07",
+      "startAfter": [
+        "N112"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "seedCompany provisions ORC (MAIN_BOOK ORDER CANCEL, SL_ORD_ADJ); provisioning counts 33->34 groups, 108->111 legs; full API+DB 313/3483, web 646, routes 126, gates green",
+      "gapIds": "G122",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-28",
+      "evidence": [
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/apps/api/test/provisioning.db.test.ts"
+      ],
+      "statusNote": "Order Cancel refunds an order advance via SL_ORD_ADJ + a balanced AC_DATA refund; its writer targets book ORC (desktop MDI_FORM.cs:8629 ORDER CANCEL). seedCompany provisioned no such book, so a fresh company could not cancel/refund an order. Added the ORC book (MAIN_BOOK ORDER CANCEL, table SL_ORD_ADJ, standard 3 legs). Provisioning 33->34 groups, 108->111 legs. Sets up a later P0-04 pass to resolve the refund accounts from the ORC slots. Verified locally: typecheck/typecheck:tests/lint/format/size/kernel; routes 126; web 646; full API+DB 313/3483."
     }
   ],
   "amendments": [
