@@ -4,6 +4,13 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-28 (cont.) — N112: bullion payable/cash from the book (G121, P0-04)
+- Bullion booking had no book resolution; payable/cash were literals BULLION/CASH. Added resolveBullionAccountTx -> resolveBookAccountTx(1 payable, 2 cash), fail-closed, override honoured. Seeded BUL book (N103) carries those slots. bullion.ts cleared from register. P0-04 total 48->46. **PR #80 → main**.
+- Session P0-04 arc: 68 -> 46 (22 literals removed). Remaining: sales.ts 11, purchase.ts 5, billToBill 5, karigar 4, salesOrder 3, employeeJv 3, fineSalePurchase 2 (wait: fineSalePurchase 2 still listed), ledgerAdjust 2, mfg 2, tagOps 2. The tax/income/config cluster (GST/GSTINPUT/INTINC/HMCHRG/TCS/TDS/PF/FINESALE/FINEPURC/BULLION-payable) is the bulk of the rest.
+- Next gap G122, slice N113, decision D31.
+
+---
+
 ## 2026-10-28 (cont.) — N111: purchase.ts P0-04 (cash/round/kasar from book, G120)
 - Purchase mirror of N110. cash/round/kasar default to resolved control account; posting path resolves slots 2/3. purchase.ts pinned to true count 5 (register had slack at 10). P0-04 total 53->48. **PR #79 → main**.
 - Session P0-04 arc: 68 -> 48 (20 literals removed across labour, sales/purchase return, dhrn, sales, purchase). Remaining: sales.ts 11, purchase.ts 5, billToBill 5, karigar 4, salesOrder 3, employeeJv 3, bullion x2, ledgerAdjust 2, mfg 2, tagOps 2. Tax/income literals (GST/GSTINPUT/INTINC/HMCHRG/TCS) need a tax/company-config slice.
