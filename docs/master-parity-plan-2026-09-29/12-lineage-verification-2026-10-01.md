@@ -131,6 +131,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G118 | Med | Dhiran | `unified/src/csharp/DataCareNext/Ac_Ledr.cs:1066` | `web/apps/api/src/modules/dhrn/dhrn.ts` | The dhrn funding (cash) account must come from the book's BOOK_DETL slot 2 (desktop joins `B.SR_NO = 2` under MAIN_BOOK `DHIRAN ISSUE`/`DHIRAN RECEIPT`), not a literal `CASH` that only the seed carries. | N109 |
 | G119 | Med | Sales | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (SALES book legs) | `web/apps/api/src/modules/sales/sales.ts` | The sale cash and round/kasar accounts must come from the book's BOOK_DETL slots (2/3), not literal `CASH`/`ROUNDOFF`/`KASAR` initializers. | N110 |
 | G120 | Med | Purchase | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (PURCHASE book legs) | `web/apps/api/src/modules/purchase/purchase.ts` | The purchase cash and round/kasar accounts must come from the book's BOOK_DETL slots (2/3), not literal `CASH`/`ROUNDOFF`/`KASAR` initializers. | N111 |
+| G121 | Med | Bullion | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (BUL SALE book legs) | `web/apps/api/src/modules/bullion/bullion.ts` | The bullion payable and funding accounts must come from the booking book's BOOK_DETL slots (1/2), not literal `BULLION`/`CASH`. | N112 |
 
 ## 4. Decisions D23–D28
 
@@ -651,6 +652,17 @@ slack at 10); P0-04 total 53 → 48.
 Done when: a purchase funds cash and settles round/kasar from the book's configured accounts.
 
 
+### N112 — Bullion booking accounts resolved from the book (G121, P0-04)
+
+Bullion booking had no book-account resolution: `payableAc`/`cashAc` fell back to literal
+`BULLION`/`CASH`. They now resolve from the booking book's BOOK_DETL slots (1 = payable/control,
+2 = cash) via the kernel primitive (fail-closed), honouring an explicit override. The seeded BUL
+book (N103) already carries slot 1 = BULLION and slot 2 = CASH. bullion.ts drops to zero literals
+and leaves the P0-04 register (total 48 → 46).
+
+Done when: a bullion booking posts to the book's configured payable and cash accounts on a provisioned company.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -683,6 +695,7 @@ Done when: a purchase funds cash and settles round/kasar from the book's configu
 | N109 | — | implemented-unverified, evidence in this change (G118: dhrn funding account resolved from BOOK_DETL slot 2, not a literal; P0-04 59→56) |
 | N110 | — | implemented-unverified, evidence in this change (G119: sale cash/round/kasar accounts default to the resolved control account, not literals; P0-04 56→53) |
 | N111 | — | implemented-unverified, evidence in this change (G120: purchase cash/round/kasar default to the resolved control account; purchase.ts pinned to true count 5; P0-04 53→48) |
+| N112 | — | implemented-unverified, evidence in this change (G121: bullion payable/cash resolved from BOOK_DETL slots 1/2; bullion.ts cleared; P0-04 48→46) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

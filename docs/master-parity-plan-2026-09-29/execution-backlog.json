@@ -4788,6 +4788,27 @@
         "web/apps/api/test/postingAccountLiterals.test.ts"
       ],
       "statusNote": "Purchase mirror of N110. cash/round/kasar literal initializers default to the resolved control account (book slot 1); posting path still resolves slots 2/3 under !isPurchaseQuotation. True literal count after removal is 5 (PURCHASE x2, GSTINPUT, HMCHRG x2); the register had carried slack at 10, now pinned to 5. Remaining deferred (PURCHASE quotation fallback, GSTINPUT tax-config, HMCHRG company-config). total 53->48. Verified locally: typecheck/typecheck:tests/lint/format/size/kernel; routes 126; web 646; full API+DB 313/3483."
+    },
+    {
+      "id": "N112",
+      "status": "implemented-unverified",
+      "action": "Bullion booking payable/cash fell back to literals BULLION/CASH; resolve from the booking book BOOK_DETL slots 1/2",
+      "parentLabels": "P0-04; X07",
+      "startAfter": [
+        "N111"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "bullion.ts resolves payable(1)/cash(2) via resolveBookAccountTx; file cleared from register / total 48->46; full API+DB 313/3483, web 646, routes 126, gates green",
+      "gapIds": "G121",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-28",
+      "evidence": [
+        "web/apps/api/src/modules/bullion/bullion.ts",
+        "web/apps/api/test/postingAccountLiterals.test.ts"
+      ],
+      "statusNote": "Bullion booking had no book-account resolution; payableAc/cashAc fell back to literals BULLION/CASH. Added resolveBullionAccountTx -> resolveBookAccountTx(slot 1 payable, slot 2 cash) fail-closed, override honoured. Seeded BUL book (N103) carries slot 1=BULLION, slot 2=CASH. bullion.ts cleared from the P0-04 register, total 48->46. Verified locally: typecheck/typecheck:tests/lint/format/size/kernel; routes 126; web 646; full API+DB 313/3483."
     }
   ],
   "amendments": [
