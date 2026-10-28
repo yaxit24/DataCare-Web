@@ -44,6 +44,7 @@ databaseDescribe('database-backed dhiran receipt', () => {
       'TEMP_BOOK_DATA',
       'SRNO_MAST',
       'BOOK_DATA',
+      'BOOK_DETL',
       'AC_MAST',
       'CO_SET',
     ]) {
@@ -69,7 +70,17 @@ databaseDescribe('database-backed dhiran receipt', () => {
     );
     await owner.$executeRawUnsafe(
       `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME")
-       VALUES ($1,$2,$3,'BORR','Pledge Borrower')`,
+       VALUES ($1,$2,$3,'BORR','Pledge Borrower'),($1,$2,$3,'CASH','Cash Account')`,
+      TENANT,
+      CO,
+      LC,
+    );
+    // G118 / P0-04: the dhrn writers resolve the funding account from BOOK_DETL slot 2 (desktop
+    // Ac_Ledr.cs:1066 joins B.SR_NO = 2), so both dhiran books must carry that slot.
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","MAIN_BOOK","BOOK_INOUT")
+       VALUES ($1,$2,$3,'DHI',2,'CASH','DHIRAN ISSUE','O'),
+              ($1,$2,$3,'DHR',2,'CASH','DHIRAN RECEIPT','I')`,
       TENANT,
       CO,
       LC,

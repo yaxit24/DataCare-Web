@@ -4,6 +4,13 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-28 (cont.) — N109: dhrn funding account from the book (G118, P0-04)
+- The 3 dhrn writers (issue/receipt/interest) defaulted cash to literal CASH. Desktop Ac_Ledr.cs:1066 funds from BOOK_DETL slot 2. Added dhrnCashAcTx -> resolveBookAccountTx(...,2) fail-closed; override honoured; interest writer now resolves the book too. Seeded DHI/DHR carry slot 2=CASH. INTINC literal left (web models interest income separately vs desktop book slots 1/2; deferred). P0-04 dhrn.ts 5->2, total 59->56. Test fixtures: added SR_NO 2 slots to dhrnReceipt + settingsBehavior; added BOOK_DETL to dhrnReceipt wipe list. **PR #77 → main** (merge on local verification; CI billing-blocked).
+- Full local battery green: API+DB 313/3483, web 646, routes 126, gates + kernel.
+- Next gap **G119**, slice **N110**, decision **D31**. P0-04 remaining: sales.ts (14), purchase.ts (10), billToBill.ts (5 tender), karigar.ts (4), salesOrder.ts (3, needs ORC book), employeeJv.ts (3), bullion x2, ledgerAdjust (2), mfg (2), tagOps (2 contained). Plus the GST/GSTINPUT/INTINC tax/income literals (tax-config/modeling slice).
+
+---
+
 ## 2026-10-28 (cont.) — N108: purchase-return posting accounts from the book (G117, P0-04)
 - Mirror of N107 for purchase: control=BOOK_DETL slot 1 (unconditional) + per-item expense fallback; cash=slot 2; round/kasar=slot 3; removed PURCHASE/CASH/ROUNDOFF/KASAR literals. Only GSTINPUT literal remains. P0-04 register 5->1, total 63->59. **PR #75 → main** (merge on local verification; CI billing-blocked).
 - Full local battery green: API+DB 313/3483, web 646, routes 126, gates + kernel.
