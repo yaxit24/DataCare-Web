@@ -506,8 +506,18 @@ import {
 } from '../modules/stock/tagSplit.js';
 import { lookup } from '../modules/masters/lookup.js';
 import { postJournal, deleteJournal } from '../modules/finance/journal.js';
-import { postLedgerAdjust, deleteLedgerAdjust } from '../modules/finance/ledgerAdjust.js';
-import { postEmployeeJv, deleteEmployeeJv } from '../modules/finance/employeeJv.js';
+import {
+  postLedgerAdjust,
+  deleteLedgerAdjust,
+  getLedgerAdjust,
+  editLedgerAdjust,
+} from '../modules/finance/ledgerAdjust.js';
+import {
+  postEmployeeJv,
+  deleteEmployeeJv,
+  getEmployeeJv,
+  editEmployeeJv,
+} from '../modules/finance/employeeJv.js';
 import {
   cashBook,
   partyStatement,
@@ -2997,20 +3007,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const html = schemePassbookHtml(data.member, data.scheme, data.installments, {
       company: data.company,
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="passbook-${String(q.membCode ?? '').replace(/[^\w.-]/g, '')}.pdf"`,
-      )
-      .send(pdf);
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `passbook-${q.membCode ?? ''}`,
+    });
   });
 
   app.get('/dhrn/khata', auth, async (req, reply) => {
@@ -3026,20 +3026,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       company: data.company,
       period: [q.fromDate, q.toDate].filter(Boolean).join(' — '),
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="khata-${String(q.acCode ?? '').replace(/[^\w.-]/g, '')}.pdf"`,
-      )
-      .send(pdf);
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `khata-${q.acCode ?? ''}`,
+    });
   });
 
   const dhrnIssuePayload = (req: any, b: any) => ({
@@ -3213,20 +3203,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       party: data.party,
       copy: q.copy ? String(q.copy) : undefined,
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="repair-receipt-${String((req.params as any).vchNo).replace(/[^\w.-]/g, '')}.pdf"`,
-      )
-      .send(pdf);
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `repair-receipt-${(req.params as any).vchNo}`,
+    });
   });
   app.get('/repair-receipts/:vchNo', auth, async (req, reply) => {
     const data = await getCustomerRepairReceipt(prisma, readScope(req), (req.params as any).vchNo);
@@ -3320,20 +3300,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       party: data.party,
       copy: q.copy ? String(q.copy) : undefined,
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="repair-karigar-issue-${String((req.params as any).vchNo).replace(/[^\w.-]/g, '')}.pdf"`,
-      )
-      .send(pdf);
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `repair-karigar-issue-${(req.params as any).vchNo}`,
+    });
   });
   app.get('/repair-karigar-issues/:vchNo', auth, async (req, reply) => {
     const data = await getKarigarRepairIssue(prisma, readScope(req), (req.params as any).vchNo);
@@ -3436,20 +3406,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       party: data.party,
       copy: q.copy ? String(q.copy) : undefined,
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="repair-karigar-receipt-${String((req.params as any).vchNo).replace(/[^\w.-]/g, '')}.pdf"`,
-      )
-      .send(pdf);
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `repair-karigar-receipt-${(req.params as any).vchNo}`,
+    });
   });
   app.get('/repair-karigar-receipts/:vchNo', auth, async (req, reply) => {
     const data = await getKarigarRepairReceipt(prisma, readScope(req), (req.params as any).vchNo);
@@ -3555,20 +3515,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       party: data.party,
       copy: q.copy ? String(q.copy) : undefined,
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="repair-customer-issue-${String((req.params as any).vchNo).replace(/[^\w.-]/g, '')}.pdf"`,
-      )
-      .send(pdf);
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `repair-customer-issue-${(req.params as any).vchNo}`,
+    });
   });
   app.get('/repair-customer-issues/:vchNo', auth, async (req, reply) => {
     const data = await getCustomerRepairIssue(prisma, readScope(req), (req.params as any).vchNo);
@@ -6969,17 +6919,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const html = await renderGstr2Doc(prisma, s as any, {
       period: s.coYear ? `FY ${s.coYear}` : '',
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header('content-disposition', 'inline; filename="gstr2.pdf"')
-      .send(pdf);
+    return sendVoucherDocument(reply, html, { format: q.format, filename: 'gstr2' });
   });
   app.get('/reports/sales-return-register', auth, async (req) =>
     salesReturnRegister(prisma, readScope(req)),
@@ -7937,6 +7877,30 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
+  // N122 (Stage D): reopen + edit a ledger adjustment (reader/editor already in the module).
+  app.get('/ledger-adjust/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getLedgerAdjust(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.put('/ledger-adjust/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      editLedgerAdjust(
+        prisma,
+        {
+          scope: scopeOf(req),
+          acCode: b.acCode,
+          adjAc: b.adjAc,
+          amount: Number(b.amount),
+          direction: b.direction === 'credit' ? 'credit' : 'debit',
+          remark: b.remark,
+          vchDate: b.vchDate,
+        },
+        (req.params as any).vchNo,
+      ),
+    );
+  });
   // Employee salary JV (desktop TR_EMP_JV → EMP_DATA + balanced AC_DATA with TDS/PF deductions).
   app.post('/employee-jv', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
@@ -7967,6 +7931,36 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         vchNo: (req.params as any).vchNo,
         book: body(req).book,
       }),
+    );
+  });
+  // N122 (Stage D): reopen + edit an employee salary JV (reader/editor already in the module).
+  app.get('/employee-jv/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getEmployeeJv(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.put('/employee-jv/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      editEmployeeJv(
+        prisma,
+        {
+          scope: scopeOf(req),
+          empAc: b.empAc,
+          empName: b.empName,
+          empCode: b.empCode,
+          paidAc: b.paidAc,
+          salaryAmt: Number(b.salaryAmt),
+          tdsAmt: b.tdsAmt != null ? Number(b.tdsAmt) : undefined,
+          pfAmt: b.pfAmt != null ? Number(b.pfAmt) : undefined,
+          tdsAc: b.tdsAc,
+          pfAc: b.pfAc,
+          chqNo: b.chqNo,
+          desc: b.desc,
+          vchDate: b.vchDate,
+        },
+        (req.params as any).vchNo,
+      ),
     );
   });
   app.get('/reports/monthly-sales', auth, async (req) => monthlySales(prisma, readScope(req)));

@@ -4,6 +4,15 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-28 (cont.2) — Journal print (N120) + Fine-sale reopen (N121)
+- **N120 (G129): Journal voucher print** — GET /journal/:vchNo/print. Journal lines live in CONTRA_DATA+AC_DATA, so added journalVoucherHtml next to the contra renderer, reusing contraVoucherData. Classic Particulars|Debit|Credit table. VERIFIED LIVE HTTP 200 (Dr HMCHRG / Cr CASH 5000). **PR #88.**
+- **N121 (G130, Stage D): Fine sale/purchase reopen** — GET /fine-sale/:vchNo. New getFineSalePurchase reads CUT_DATA+CUT_DETL back into the create shape (side from INOUT_TYPE, fine from CR_FINE/DR_FINE, ISO date). VERIFIED LIVE HTTP 200 (10-fine @6000 -> totals 60000/1800/61800, vchDate 2026-10-28). **PR #89.** main 5ceb50a.
+- NOTE: the plan's validate_plan requires newSlices ids to be a contiguous N-sequence, so the fine-sale reopen slice is id **N121** (not "D31"); D-numbering is only informal. Next slice id **N122**, next gap **G131**.
+- Converted many legacy inline-PDF print tails to the shared sendVoucherDocument (receipt/payment/sales/purchase invoices, karigar-issue, purchase/sales quotation, dhrn, and the 4 report docs gstr1/trial-balance/gstr3b/balance-sheet) to keep txn.ts under its tightening ceiling (now ~8507). Route universe 615.
+- Remaining Stage-D reopen gaps among genuine persisted vouchers: employee-jv, ledger-adjust, reminder-entries (estimate is a stateless calculator by design, not persisted; daily-rate/labour-slabs/labour-update/settings/years/members/repair-images/ac-opbl are masters/config). Continue there, then the 5 MISSING workflows (Card Rec, Tour Sales, Dhrn Os Letter, Loan Intrest, Cust Entry).
+
+---
+
 ## 2026-10-28 (cont.) — Stage E prints continued (N118 sales-return credit note, N119 contra)
 - **N118 (G127): Sales-return Credit Note** — GET /sales-returns/:vchNo/print. The return header is SL_DATA but lines are SL_DETL_RTN (NOT SL_DETL), so a dedicated saleReturnBill.ts reader was needed. VERIFIED LIVE: HTTP 200, taxable 27480, half-tax 412. **PR #86.**
 - **N119 (G128): Contra voucher** — GET /contra/:vchNo/print. New contraVoucher.ts reads the 2 CONTRA_DATA rows (Cr from / Dr to), renders From->To transfer. VERIFIED LIVE: CASH->BANK 15000, HTTP 200. **PR #87.** main 0542f32.
