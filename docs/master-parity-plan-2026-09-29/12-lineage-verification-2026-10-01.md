@@ -130,6 +130,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G117 | Med | Purchase return | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (PURC RETURN book legs) | `web/apps/api/src/modules/purchase/purchaseReturn.ts` | The control/expense, cash and round/kasar accounts must come from the book's BOOK_DETL slots (SR_NO 1/2/3), not literal `PURCHASE`/`CASH`/`ROUNDOFF`/`KASAR` placeholders. | N108 |
 | G118 | Med | Dhiran | `unified/src/csharp/DataCareNext/Ac_Ledr.cs:1066` | `web/apps/api/src/modules/dhrn/dhrn.ts` | The dhrn funding (cash) account must come from the book's BOOK_DETL slot 2 (desktop joins `B.SR_NO = 2` under MAIN_BOOK `DHIRAN ISSUE`/`DHIRAN RECEIPT`), not a literal `CASH` that only the seed carries. | N109 |
 | G119 | Med | Sales | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (SALES book legs) | `web/apps/api/src/modules/sales/sales.ts` | The sale cash and round/kasar accounts must come from the book's BOOK_DETL slots (2/3), not literal `CASH`/`ROUNDOFF`/`KASAR` initializers. | N110 |
+| G120 | Med | Purchase | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (PURCHASE book legs) | `web/apps/api/src/modules/purchase/purchase.ts` | The purchase cash and round/kasar accounts must come from the book's BOOK_DETL slots (2/3), not literal `CASH`/`ROUNDOFF`/`KASAR` initializers. | N111 |
 
 ## 4. Decisions D23–D28
 
@@ -639,6 +640,17 @@ total 56 → 53).
 Done when: a retail sale funds cash and settles round/kasar from the book's configured accounts.
 
 
+### N111 — Purchase cash/round/kasar accounts resolved from the book (G120, P0-04)
+
+The purchase mirror of N110. The cash/round/kasar literal initializers (`CASH`/`ROUNDOFF`/`KASAR`) now
+default to the resolved control account (book slot 1); the posting path still resolves slots 2/3 under
+`!isPurchaseQuotation`. The remaining purchase.ts literals (PURCHASE control fallback, GSTINPUT, HMCHRG)
+are left for later sub-passes. purchase.ts is now pinned at its true count 5 (the ratchet had carried
+slack at 10); P0-04 total 53 → 48.
+
+Done when: a purchase funds cash and settles round/kasar from the book's configured accounts.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -670,6 +682,7 @@ Done when: a retail sale funds cash and settles round/kasar from the book's conf
 | N108 | — | implemented-unverified, evidence in this change (G117: purchase-return control/cash/round accounts resolved from BOOK_DETL slots; P0-04 63→59) |
 | N109 | — | implemented-unverified, evidence in this change (G118: dhrn funding account resolved from BOOK_DETL slot 2, not a literal; P0-04 59→56) |
 | N110 | — | implemented-unverified, evidence in this change (G119: sale cash/round/kasar accounts default to the resolved control account, not literals; P0-04 56→53) |
+| N111 | — | implemented-unverified, evidence in this change (G120: purchase cash/round/kasar default to the resolved control account; purchase.ts pinned to true count 5; P0-04 53→48) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
