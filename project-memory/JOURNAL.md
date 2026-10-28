@@ -4,6 +4,16 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-28 (cont.) — Stage E prints continued (N118 sales-return credit note, N119 contra)
+- **N118 (G127): Sales-return Credit Note** — GET /sales-returns/:vchNo/print. The return header is SL_DATA but lines are SL_DETL_RTN (NOT SL_DETL), so a dedicated saleReturnBill.ts reader was needed. VERIFIED LIVE: HTTP 200, taxable 27480, half-tax 412. **PR #86.**
+- **N119 (G128): Contra voucher** — GET /contra/:vchNo/print. New contraVoucher.ts reads the 2 CONTRA_DATA rows (Cr from / Dr to), renders From->To transfer. VERIFIED LIVE: CASH->BANK 15000, HTTP 200. **PR #87.** main 0542f32.
+- Each slice converted several legacy inline-PDF print tails to the shared sendVoucherDocument to stay under the (tightening) txn.ts size ceiling. Route universe now 613.
+- **Transaction document coverage now:** sales Tax Invoice (N116, covers hallmark too — same /sales pipeline), purchase bill (N117), sales-return credit note (N118), contra voucher (N119), receipt voucher + payment voucher (pre-existing /finance/*-voucher, verified live). Sale lifecycle verified: create/reopen/EDIT(PUT, rate 6000->7000 persisted)/delete/print all work.
+- Verified via LIVE E2E (running stack) that ALL core daily workflows POST correctly on a provisioned company — the web core cycle (login->open->create->reopen->edit->post->print GST invoice) is working end to end.
+- Next Stage-E candidates: journal voucher print, then the ExtraTran/Karigar/Dhiran/Scheme workflow prints, then report prints/modes, the reopen/edit gaps on remaining screens, and the 5 MISSING workflows. Next gap G129, slice N120, decision D31. Print pattern: documents/voucherPrint.ts (resolvePrintScope + sendVoucherDocument); register in routePolicy.ts + bump universe count in routePolicy.test.ts + keep txn.ts under size (convert an inline print tail, then check-size-budget.mjs --write).
+
+---
+
 ## 2026-10-28 (cont.) — Stage E document prints begin (N116 sales invoice, N117 purchase bill)
 - Live E2E review (API-level, running stack) confirmed ALL core daily workflows POST correctly on a provisioned company (sale/purchase/returns/receipt/payment/contra/journal all 201 with correct GST). Earlier 'failures' were my wrong book codes/field names. The real gap is Stage E PRINTS: NONE of the core txn screens had a print endpoint.
 - **N116 (G125): Sales Tax Invoice print** — GET /sales/:vchNo/print. New salesBill.ts (SL_DATA/SL_DETL + shared docChrome gstBillBody/billFooter). VERIFIED LIVE: HTTP 200 HTML, company/WALKIN/item/HSN/CGST+SGST, amounts 60000/900+900/61800. **PR #84.**
