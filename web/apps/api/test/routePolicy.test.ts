@@ -79,8 +79,9 @@ describe('route policy registry', () => {
     // G129 (Stage E) adds the journal voucher print GET /journal/:vchNo/print: 613 + 1 = 614.
     // D31 (Stage D) adds the fine sale/purchase reopen GET /fine-sale/:vchNo: 614 + 1 = 615.
     // N122 (Stage D) adds reopen+edit for ledger-adjust and employee-jv (4 routes): 615 + 4 = 619.
-    expect(routes).toHaveLength(619);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(619);
+    // N123 (G132) adds the Card Receipt / CARD ADJUST lifecycle (4 routes): 619 + 4 = 623.
+    expect(routes).toHaveLength(623);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(623);
 
     const policies = routes.map((route) => ({
       ...route,

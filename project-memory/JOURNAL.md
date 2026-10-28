@@ -4,6 +4,20 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-28 (cont.4) — Card Receipt / CARD ADJUST (N123) — first MISSING workflow built
+- **N123 (G132):** built the Card Rec workflow (desktop TR_CARD_REC) end to end — the only P1-core one of the 5 MISSING workflows. New cardReceipt.ts: exact 8-leg ledger (Ac_Ledr.cs:1790-1804: 01 Cr party R, 02 Dr party C, 03 Cr slot1 C, 04 Dr bank R, 05 Cr bank B, 06 Dr slot1 B, 07 Dr party H, 08 Cr slot2 H), CARD_DATA header (38 cols), 4-row ROJ_MEL_DATA (Ac_Rojmel.cs:843-849). Commission acct = BOOK_DETL slot 1, cash = slot 2 of a NEW provisioned CRD (CARD ADJUST) book + new CARDCOMM account. Whole-unit card-commission rounding (one-arg Math.Round, TR_CARD_REC.cs:3796). post/get/edit/delete (DELETE_DATA audit VCH_VAL_CR=CARD_AMT + hidden-identity cleanup). POST/GET/PUT/DELETE /card-receipts. Route universe 619->623. Grandfathered r0/r2 in the kernel baseline (same as employeeJv/ledgerAdjust). New DB test (8 legs, 07/08 cash variant, header, roj, reopen, edit, delete) passes; full API+DB now **314 files / 3485 tests**. **VERIFIED LIVE**: 10000@2%/1% -> gross 10200 / bank net 10098 / party net 10000; reopen; edit to 20000 (comm 400, net 20196); delete. **PR #<pending>.**
+- Spec was produced by a research sub-agent reading the 4063-line TR_CARD_REC.cs (precise write-set, legs, calcs, numbering, reopen, delete, account resolution) — see the sub-agent transcript. The CARD_DATA Prisma model already existed (all 38 cols), so no migration was needed.
+- REMAINING 4 MISSING workflows: Tour Sales, Dhrn Os Letter, Loan Intrest, Cust Entry. Next slice id **N124**, next gap **G133**. The card-receipt build is the template for the remaining net-new workflows (research sub-agent -> writer mirroring employeeJv -> book provisioning -> routes -> DB test -> live verify).
+
+---
+
+## 2026-10-28 (cont.3) — Ledger-adjust + Employee-JV reopen/edit (N122)
+- **N122 (G131, Stage D):** both ledger-adjust and employee-jv already had reopen readers (getLedgerAdjust/getEmployeeJv) + editors (editLedgerAdjust/editEmployeeJv) in their modules; only POST+DELETE were routed. Exposed GET/PUT for both. VERIFIED LIVE: ledger-adjust post->reopen(500)->edit(750)->reload; employee-jv post(20000)->reopen->edit(25000)->reload. **PR #90.** main f9ef2df. NOTE: neither LA nor EJV has a dedicated seeded book — they post against an existing book via ?coBook=JV (the UI passes coBook); provisioning a dedicated book is a separate gap if desired.
+- Route universe now 619. Converted 6 more inline prints to sendVoucherDocument (gstr2, 4 repair docs, passbook, khata); txn.ts ~8501.
+- **STAGE-D/E CORE IS NOW STRONG.** Core daily vouchers all have: create, reopen, edit, delete, print. Remaining big gaps = the **5 MISSING workflows**: Card Rec (P1-core), Tour Sales, Dhrn Os Letter, Loan Intrest, Cust Entry — all confirmed ABSENT in web code. These are net-new builds (model + writer + routes + UI), larger than the thin slices so far. Next: research each desktop form (unified/src/csharp/DataCareNext) and build the highest-value one (Card Rec) first. Next slice id **N123**, next gap **G132**.
+
+---
+
 ## 2026-10-28 (cont.2) — Journal print (N120) + Fine-sale reopen (N121)
 - **N120 (G129): Journal voucher print** — GET /journal/:vchNo/print. Journal lines live in CONTRA_DATA+AC_DATA, so added journalVoucherHtml next to the contra renderer, reusing contraVoucherData. Classic Particulars|Debit|Credit table. VERIFIED LIVE HTTP 200 (Dr HMCHRG / Cr CASH 5000). **PR #88.**
 - **N121 (G130, Stage D): Fine sale/purchase reopen** — GET /fine-sale/:vchNo. New getFineSalePurchase reads CUT_DATA+CUT_DETL back into the create shape (side from INOUT_TYPE, fine from CR_FINE/DR_FINE, ISO date). VERIFIED LIVE HTTP 200 (10-fine @6000 -> totals 60000/1800/61800, vchDate 2026-10-28). **PR #89.** main 5ceb50a.

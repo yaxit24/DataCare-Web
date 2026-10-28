@@ -49,12 +49,15 @@ export function resolvePrintScope(
 export async function sendVoucherDocument(
   reply: FastifyReply,
   html: string,
-  opts: { format?: unknown; filename: string },
+  opts: { format?: unknown; filename: string; preferCSSPageSize?: boolean },
 ): Promise<FastifyReply> {
   if (opts.format === 'html') return reply.type('text/html').send(html);
   let pdf: Buffer;
   try {
-    pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
+    pdf = await renderToPdf(
+      html,
+      new PlaywrightPdfRenderer(opts.preferCSSPageSize ? { preferCSSPageSize: true } : undefined),
+    );
   } catch {
     return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
   }

@@ -519,6 +519,12 @@ import {
   editEmployeeJv,
 } from '../modules/finance/employeeJv.js';
 import {
+  postCardReceipt,
+  getCardReceipt,
+  editCardReceipt,
+  deleteCardReceipt,
+} from '../modules/finance/cardReceipt.js';
+import {
   cashBook,
   partyStatement,
   hsnSummary,
@@ -2240,20 +2246,11 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         }
         throw error;
       }
-      if (q.format === 'html') return reply.type('text/html').send(html);
-      let pdf: Buffer;
-      try {
-        pdf = await renderToPdf(html, new PlaywrightPdfRenderer({ preferCSSPageSize: true }));
-      } catch {
-        return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-      }
-      return reply
-        .header('content-type', 'application/pdf')
-        .header(
-          'content-disposition',
-          `inline; filename="order-${String(q.vchNo ?? '').replace(/[^\w.-]/g, '')}.pdf"`,
-        )
-        .send(pdf);
+      return sendVoucherDocument(reply, html, {
+        format: q.format,
+        filename: `order-${q.vchNo ?? ''}`,
+        preferCSSPageSize: true,
+      });
     };
   app.get('/sales/order-confirmation', auth, orderConfirmation('SALES ORDER'));
   app.get('/tour-orders/confirmation', auth, orderConfirmation('TOUR ORDER'));
@@ -2712,20 +2709,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         company: data.company,
         party: data.party,
       });
-      if (q.format === 'html') return reply.type('text/html').send(html);
-      let pdf: Buffer;
-      try {
-        pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-      } catch {
-        return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-      }
-      return reply
-        .header('content-type', 'application/pdf')
-        .header(
-          'content-disposition',
-          `inline; filename="voucher-${vchNo.replace(/[^\w.-]/g, '')}.pdf"`,
-        )
-        .send(pdf);
+      return sendVoucherDocument(reply, html, { format: q.format, filename: `voucher-${vchNo}` });
     },
   });
   const otherExpense = otherPurcHandlers('OTH EXP');
@@ -6813,20 +6797,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const spec = loadReportSpec(String(q.name ?? ''));
     if (!spec) return reply.code(404).send({ error: 'report-spec-not-found' });
     const html = renderReportLayout(spec, {});
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="${String(q.name ?? 'report').replace(/[^\w.-]/g, '')}.pdf"`,
-      )
-      .send(pdf);
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `${q.name ?? 'report'}`,
+    });
   });
   app.get('/reports/render', auth, async (req, reply) => {
     const q = req.query as any;
@@ -6887,31 +6861,17 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }
       throw error;
     }
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(
-        html,
-        new PlaywrightPdfRenderer({
-          preferCSSPageSize: [
-            'OrderVch',
-            'OrderBill',
-            'TourOrdVch',
-            'OrdVchImg',
-            'TourOrdImg',
-          ].includes(spec.report),
-        }),
-      );
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="${String(q.name ?? 'report').replace(/[^\w.-]/g, '')}.pdf"`,
-      )
-      .send(pdf);
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `${q.name ?? 'report'}`,
+      preferCSSPageSize: [
+        'OrderVch',
+        'OrderBill',
+        'TourOrdVch',
+        'OrdVchImg',
+        'TourOrdImg',
+      ].includes(spec.report),
+    });
   });
   app.get('/reports/gstr2-doc', auth, async (req, reply) => {
     const q = req.query as any;
@@ -7963,6 +7923,56 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       ),
     );
   });
+  const cardReceiptInput = (req: FastifyRequest, b: Record<string, any>) => ({
+    scope: scopeOf(req),
+    partyAc: b.partyAc,
+    partyName: b.partyName,
+    bankAc: b.bankAc,
+    bankName: b.bankName,
+    cardAmt: Number(b.cardAmt),
+    cardComPrc: b.cardComPrc != null ? Number(b.cardComPrc) : undefined,
+    cardComAmt: b.cardComAmt != null ? Number(b.cardComAmt) : undefined,
+    bankComPrc: b.bankComPrc != null ? Number(b.bankComPrc) : undefined,
+    bankSchPrc: b.bankSchPrc != null ? Number(b.bankSchPrc) : undefined,
+    bankComm1: b.bankComm1 != null ? Number(b.bankComm1) : undefined,
+    bankComm2: b.bankComm2 != null ? Number(b.bankComm2) : undefined,
+    cashPaid: b.cashPaid != null ? Number(b.cashPaid) : undefined,
+    empCode: b.empCode,
+    desc: b.desc,
+    billNo: b.billNo,
+    billYrCd: b.billYrCd,
+    billDbCd: b.billDbCd,
+    billAmt: b.billAmt != null ? Number(b.billAmt) : undefined,
+    vchDate: b.vchDate,
+  });
+  app.post('/card-receipts', auth, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    const b = body(req);
+    return run(reply, 201, () =>
+      postCardReceipt(prisma, { ...cardReceiptInput(req, b), mainUser: sess(req).sub }),
+    );
+  });
+  app.get('/card-receipts/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getCardReceipt(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.put('/card-receipts/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      editCardReceipt(prisma, cardReceiptInput(req, b), (req.params as any).vchNo),
+    );
+  });
+  app.delete('/card-receipts/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      deleteCardReceipt(prisma, {
+        scope: scopeOf(req),
+        vchNo: (req.params as any).vchNo,
+        deleteUser: sess(req).sub,
+      }),
+    );
+  });
   app.get('/reports/monthly-sales', auth, async (req) => monthlySales(prisma, readScope(req)));
   app.get('/gst/gstr1', auth, async (req) =>
     gstr1(prisma, readScope(req), gstr1Options(req.query)),
@@ -8157,20 +8167,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         title,
         copy: q.copy ? EBILL_COPIES[String(q.copy)] : undefined,
       });
-      if (q.format === 'html') return reply.type('text/html').send(html);
-      let pdf: Buffer;
-      try {
-        pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-      } catch {
-        return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-      }
-      return reply
-        .header('content-type', 'application/pdf')
-        .header(
-          'content-disposition',
-          `inline; filename="${file}-${String((req.params as any).vchNo).replace(/[^\w.-]/g, '')}.pdf"`,
-        )
-        .send(pdf);
+      return sendVoucherDocument(reply, html, {
+        format: q.format,
+        filename: `${file}-${(req.params as any).vchNo}`,
+      });
     },
     cancelIrn: async (req: FastifyRequest, reply: FastifyReply) => {
       if (!guard(req, reply, 'print')) return;

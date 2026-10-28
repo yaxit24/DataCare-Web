@@ -45,6 +45,7 @@ const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string; gstType?: strin
   { code: 'SLVSALE', name: 'SALES SILVER A/C', gr: '20' },
   { code: 'SLVPURC', name: 'PURCHASE SILVER A/C', gr: '21' },
   { code: 'OTHCHRG', name: 'OTHER CHARGES A/C', gr: '23' },
+  { code: 'CARDCOMM', name: 'CARD / BANK COMMISSION A/C', gr: '22' },
   { code: 'FINEKSR', name: 'FINE KASAR A/C', gr: '31' },
   // Stock In/Out (TR_INOUT) posts the signed metal rows against the branch account the location carries
   // (`MS_LOCT.cs:3458` binds `LOCT_MAST.AC_CODE`; `stockInout.ts:344-355` reads it). A current-asset
@@ -373,6 +374,23 @@ const BOOKS: {
   },
   { book: 'JV', name: 'Journal', mainBook: 'JOURNAL', inout: 'I', acCode: 'KASAR' },
   { book: 'CON', name: 'Contra', mainBook: 'CONTRA', inout: 'I', acCode: 'CASH' },
+  // Card Receipt / CARD ADJUST (desktop TR_CARD_REC, MDI_FORM.cs:8457 CurBookHelp("CARD ADJUST")).
+  // The 8-leg card ledger resolves the commission/charges account from BOOK_DETL slot 1 and the
+  // cash/control account (for CASH_PAID cashback) from slot 2 (Ac_Ledr.cs:1792-1804); without this
+  // book and its slots the Card Rec screen has no book to select on a provisioned company (N123, G132).
+  {
+    book: 'CRD',
+    name: 'Card Receipt',
+    mainBook: 'CARD ADJUST',
+    inout: 'I',
+    acCode: 'CARDCOMM',
+    shortName: 'CARD',
+    table: 'CARD_DATA',
+    slots: [
+      { srNo: 1, acCode: 'CARDCOMM' },
+      { srNo: 2, acCode: 'CASH' },
+    ],
+  },
   // Desktop Labour Sale (TR_LBR, MDI_FORM.cs:8325 CurBookHelp("LABOUR WORK")) and Fine Settlement
   // (TR_FINE_SL_PR, :8505 FINE SALE / :8493 FINE PURC). Without these books the Labour Sale and Fine
   // Settlement screens have no book to select on a provisioned company (N100, G110 — same class as N91/N97).

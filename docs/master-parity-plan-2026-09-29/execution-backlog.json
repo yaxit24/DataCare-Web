@@ -5033,6 +5033,30 @@
         "web/apps/api/src/modules/finance/employeeJv.ts"
       ],
       "statusNote": "Both ledger-adjust and employee-jv already had reopen readers + editors in their modules; only POST+DELETE were routed. Exposed GET/PUT for both. Converted 6 inline-PDF prints (gstr2, 4 repair docs, passbook, khata) to sendVoucherDocument for the size ceiling. Routes registered; universe 615->619. VERIFIED LIVE: ledger-adjust post->reopen(500 debit)->edit(750)->reload 750; employee-jv post(20000)->reopen->edit(25000)->reload 25000. Verified: typecheck/typecheck:tests/lint/format/size/kernel/register; routes 126; web 646; full API+DB 313/3483."
+    },
+    {
+      "id": "N123",
+      "status": "implemented-unverified",
+      "action": "Build the Card Receipt / CARD ADJUST workflow (one of the 5 MISSING): writer + full lifecycle + book provisioning",
+      "parentLabels": "P05; missing-workflows",
+      "startAfter": [
+        "N122"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "POST/GET/PUT/DELETE /card-receipts; 8-leg balanced ledger + CARD_DATA + ROJ_MEL_DATA; CRD book provisioned; route universe 623; full API+DB 314/3485, web 646, routes 126, gates; verified live",
+      "gapIds": "G132",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-28",
+      "evidence": [
+        "web/apps/api/src/modules/finance/cardReceipt.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/apps/api/test/cardReceipt.routes.db.test.ts"
+      ],
+      "statusNote": "Card Rec (TR_CARD_REC) was entirely absent (MISSING workflow, P1-core). Built cardReceipt.ts: exact 8-leg ledger (Ac_Ledr.cs:1790-1804), CARD_DATA header (38 cols), 4-row ROJ_MEL_DATA (Ac_Rojmel.cs:843-849), commission=BOOK_DETL slot 1 / cash=slot 2 of a new CRD (CARD ADJUST) book + CARDCOMM account; whole-unit card-commission rounding (TR_CARD_REC.cs:3796). post/get/edit/delete with DELETE_DATA audit (VCH_VAL_CR=CARD_AMT) + hidden-identity cleanup. POST/GET/PUT/DELETE /card-receipts; universe 619->623; grandfathered the two rounding helpers in the kernel baseline like employeeJv/ledgerAdjust. New DB test asserts 8 legs, 07/08 cash variant, header, roj (4), reopen, edit (10000->20000), delete. VERIFIED LIVE: 10000@2%/1% -> gross 10200, bank net 10098, party net 10000; reopen; edit to 20000 (comm 400, net 20196); delete. Verified: typecheck/typecheck:tests/lint/format/size/kernel/register; routes 126; web 646; full API+DB 314/3485."
     }
   ],
   "amendments": [
