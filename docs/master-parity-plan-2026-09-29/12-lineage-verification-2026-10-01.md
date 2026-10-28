@@ -133,6 +133,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G120 | Med | Purchase | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (PURCHASE book legs) | `web/apps/api/src/modules/purchase/purchase.ts` | The purchase cash and round/kasar accounts must come from the book's BOOK_DETL slots (2/3), not literal `CASH`/`ROUNDOFF`/`KASAR` initializers. | N111 |
 | G121 | Med | Bullion | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (BUL SALE book legs) | `web/apps/api/src/modules/bullion/bullion.ts` | The bullion payable and funding accounts must come from the booking book's BOOK_DETL slots (1/2), not literal `BULLION`/`CASH`. | N112 |
 | G122 | Med | Order cancel | `unified/src/csharp/DataCareNext/MDI_FORM.cs:8629` | `web/apps/api/src/modules/ops/seedCompany.ts` | Provisioning must create the ORDER CANCEL book (CO_BOOK ORC, SL_ORD_ADJ) so a fresh company can cancel/refund a sales order; the cancel writer targets book ORC. | N113 |
+| G123 | Med | Fine settlement | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (CUT_DATA FSL/FPR legs) | `web/apps/api/src/modules/bullion/fineSalePurchase.ts` | The fine-sale/fine-purchase metal account must come from the FSL/FPR book's BOOK_DETL slot 1, not literal `FINESALE`/`FINEPURC`. | N114 |
 
 ## 4. Decisions D23–D28
 
@@ -676,6 +677,17 @@ book-groups 33 → 34, BOOK_DETL legs 108 → 111.
 Done when: a provisioned company can cancel and refund a sales order.
 
 
+### N114 — Fine settlement metal account resolved from the book (G123, P0-04)
+
+Fine Settlement (FINE SALE / FINE PURC) credited/debited its metal leg to a literal
+`FINESALE`/`FINEPURC`. The account is the FSL/FPR book's BOOK_DETL slot 1 (the seed already names
+FINESALE/FINEPURC there, N100), so the writer now resolves it via the kernel primitive (fail-closed),
+honouring an explicit override. fineSalePurchase.ts drops to zero account literals (the GST/GSTINPUT
+tax account is a separate tax-config concern and is not matched by the P0-04 scan). P0-04 total 46 → 44.
+
+Done when: a fine sale/purchase posts its metal leg to the book's configured account on a provisioned company.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -710,6 +722,7 @@ Done when: a provisioned company can cancel and refund a sales order.
 | N111 | — | implemented-unverified, evidence in this change (G120: purchase cash/round/kasar default to the resolved control account; purchase.ts pinned to true count 5; P0-04 53→48) |
 | N112 | — | implemented-unverified, evidence in this change (G121: bullion payable/cash resolved from BOOK_DETL slots 1/2; bullion.ts cleared; P0-04 48→46) |
 | N113 | — | implemented-unverified, evidence in this change (G122: provisioning creates the ORDER CANCEL book so Order Cancel is usable) |
+| N114 | — | implemented-unverified, evidence in this change (G123: fine-settlement metal account resolved from FSL/FPR BOOK_DETL slot 1; fineSalePurchase.ts cleared; P0-04 46→44) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
