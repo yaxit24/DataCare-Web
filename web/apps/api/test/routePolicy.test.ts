@@ -72,8 +72,9 @@ describe('route policy registry', () => {
     // report export, the account ledger's export and the estimate: 608 - 1 + 3 = 610.
     // Year Create loses the web-only POST /years/:coYear/close and /reopen, which rewrote YEAR_MAST.CL_DATE
     // (the year's closing date, MS_YEAR.cs:1035-1040) and left a reopened year unable to post: 611 - 2 = 609.
-    expect(routes).toHaveLength(609);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(609);
+    // G125 (Stage E) adds the retail Tax Invoice print GET /sales/:vchNo/print: 609 + 1 = 610.
+    expect(routes).toHaveLength(610);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(610);
 
     const policies = routes.map((route) => ({
       ...route,
