@@ -4,6 +4,16 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-28 (cont.) — Stage E document prints begin (N116 sales invoice, N117 purchase bill)
+- Live E2E review (API-level, running stack) confirmed ALL core daily workflows POST correctly on a provisioned company (sale/purchase/returns/receipt/payment/contra/journal all 201 with correct GST). Earlier 'failures' were my wrong book codes/field names. The real gap is Stage E PRINTS: NONE of the core txn screens had a print endpoint.
+- **N116 (G125): Sales Tax Invoice print** — GET /sales/:vchNo/print. New salesBill.ts (SL_DATA/SL_DETL + shared docChrome gstBillBody/billFooter). VERIFIED LIVE: HTTP 200 HTML, company/WALKIN/item/HSN/CGST+SGST, amounts 60000/900+900/61800. **PR #84.**
+- **N117 (G126): Purchase bill print** — GET /purchases/:vchNo/print reusing purchaseBill.ts. VERIFIED LIVE: HTTP 200 'Purchase Bill'/Supplier. **PR #85.** main 72b6a2f.
+- **Reusable print pattern (use for all remaining prints):** extracted `web/apps/api/src/modules/documents/voucherPrint.ts` with `resolvePrintScope(reply, readScope(req), vchNo)` (fail-closed 400) and `sendVoucherDocument(reply, html, {format, filename})` (HTML or PDF). A print endpoint is now ~10 lines: guard→copy(standardDocumentCopy, O/D/T)→resolvePrintScope→get<Voucher>→<bill>Data→<bill>Html→sendVoucherDocument. MUST also: (1) register 'GET /x/:vchNo/print' in routePolicy.ts under the menu group, (2) bump the route-universe count in routePolicy.test.ts (now 611), (3) keep txn.ts under its size ceiling — convert an existing inline-PDF print tail to sendVoucherDocument to reclaim lines, then `node scripts/check-size-budget.mjs --write` to tighten.
+- Live stack creds live in /tmp/dc-stack.login; stop with `touch /tmp/dc-stack.stop`. Login via API: POST /auth/login {loginName:admin, password, coCode:01, lcCode:01, coYear:2026-2027}. Seeded books: SL(sales) PR(purchase) SRT(sales ret) PRT(purc ret) RCT(receipt) PAY(payment) CON(contra) JV(journal). Party default WALKIN (debtor, GST L).
+- Next Stage-E prints: receipt/payment (daily), then sales-return, then report prints. Next gap G127, slice N118, decision D31.
+
+---
+
 ## 2026-10-28 (cont.) — Full Phase 1 review + N115 (WALKIN core-blocker fix, G124/G100)
 - Did a complete Phase 1 review (plan + programmatic + LIVE browser via chrome-devtools MCP on a seeded demo company). Updated doc 12 with the review summary and elevated G100 to a confirmed core-cycle blocker (G124). Plan validated (validate_plan + docs_check pass).
 - Programmatic: 5 MISSING workflows still absent (Card Rec, Tour Sales, Dhrn Os Letter, Loan Intrest, Cust Entry). Capability tally over 133 workflow screens: C113 R72 E74 D68 P28 L58. P1-core (85): 37 no-reopen, 34 no-edit, 64 no-print, only 7 full CREDPL. Remaining work = recorded Stage D (reopen/edit) + Stage E (prints/reports) + 5 MISSING.
