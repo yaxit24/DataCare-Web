@@ -74,8 +74,9 @@ describe('route policy registry', () => {
     // (the year's closing date, MS_YEAR.cs:1035-1040) and left a reopened year unable to post: 611 - 2 = 609.
     // G125 (Stage E) adds the retail Tax Invoice print GET /sales/:vchNo/print: 609 + 1 = 610.
     // G126 (Stage E) adds the purchase bill print GET /purchases/:vchNo/print: 610 + 1 = 611.
-    expect(routes).toHaveLength(611);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(611);
+    // G127 (Stage E) adds the sales-return credit-note print GET /sales-returns/:vchNo/print: 611 + 1 = 612.
+    expect(routes).toHaveLength(612);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(612);
 
     const policies = routes.map((route) => ({
       ...route,

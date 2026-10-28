@@ -220,6 +220,7 @@ route('Sales/Sales Return', [
   'POST /sales-returns',
   'GET /sales-returns/import',
   'GET /sales-returns/:vchNo',
+  'GET /sales-returns/:vchNo/print',
   'DELETE /sales-returns/:vchNo',
   'GET /sales/credit-note',
 ]);

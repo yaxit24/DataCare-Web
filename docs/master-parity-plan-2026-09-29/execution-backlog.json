@@ -4917,6 +4917,29 @@
         "web/apps/api/test/routePolicy.test.ts"
       ],
       "statusNote": "Supplier-side counterpart of N116, reusing purchaseBill.ts + the shared print helpers. Converted wholesale-quotation, estimate/quotation and sales-return credit-note print tails to sendVoucherDocument to keep txn.ts under its (now tighter) size ceiling. Route policy registered; universe 610->611. VERIFIED LIVE: a posted purchase print returned HTTP 200 HTML with company/Supplier/item/HSN/CGST/SGST (5484 bytes). Verified: typecheck/typecheck:tests/lint/format/size/kernel/register; routes 126; web 646; full API+DB 313/3483."
+    },
+    {
+      "id": "N118",
+      "status": "implemented-unverified",
+      "action": "Add the sales-return Credit Note print (GET /sales-returns/:vchNo/print), reading SL_DATA + SL_DETL_RTN",
+      "parentLabels": "P03-05; E-documents",
+      "startAfter": [
+        "N117"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "GET /sales-returns/:vchNo/print returns the credit note; route registered + universe 612; full API+DB 313/3483, web 646, routes 126, gates; verified live",
+      "gapIds": "G127",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-28",
+      "evidence": [
+        "web/apps/api/src/modules/sales/saleReturnBill.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/test/routePolicy.test.ts"
+      ],
+      "statusNote": "The sales-return lines live in SL_DETL_RTN (not SL_DETL), so the sales bill cannot render it. Added saleReturnBill.ts (SL_DATA + SL_DETL_RTN + shared GST chrome, Credit Note copy) and GET /sales-returns/:vchNo/print. Converted 5 legacy inline-PDF prints (sales/purchases invoice, receipt/payment voucher) to sendVoucherDocument to stay under the tightening txn.ts ceiling. Route policy registered; universe 611->612. VERIFIED LIVE: a 5g return credit note returned HTTP 200 with customer/HSN/CGST/SGST, taxable 27480, half-tax 412. Verified: typecheck/typecheck:tests/lint/format/size/kernel/register; routes 126; web 646; full API+DB 313/3483."
     }
   ],
   "amendments": [
