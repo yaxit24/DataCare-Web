@@ -125,6 +125,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G112 | S2 | Fine In/Out unusable on a provisioned company | Fine In/Out (TR_FINE_INOUT) is a pure metal movement: it writes `INOUT_DATA` + signed `MAIN_STOCK` with no money ledger (`web/apps/api/src/modules/inout/fineInout.ts:299` empty `AC_DATA` lines), stamped `BOOK_NAME 'FINE INOUT'` | Found continuing the G111 provisioning review: `web/apps/api/src/modules/ops/seedCompany.ts` provisioned no Fine In/Out book, so the Fine In/Out screen had no book to select on a provisioned company (the Stock In/Out, Dhiran, Labour/Fine, Tag Opening class — G105/G109/G110/G111) | Provisioning creates the `FIO` (FINE INOUT → `INOUT_DATA`) book as a ledger-less metal-movement book (empty slots); a seed-completeness DB assertion, and the Fine In/Out book list filtered to `FINE INOUT` — done (N102) | N102 |
 | G113 | S2 | Bullion Booking unusable on a provisioned company | Bullion Booking (TR_BUL_BOOKING, `MDI_FORM.cs:8171` BUL SALE / `:8183` BUL PURC) books bulk fine metal at a locked rate: the header lands in `BUL_DATA` and a balanced Dr cash / Cr bullion-payable entry in `AC_DATA` (`web/apps/api/src/modules/bullion/bullion.ts`) | Found continuing the G112 provisioning review: `web/apps/api/src/modules/ops/seedCompany.ts` provisioned no Bullion Booking book, so the Bullion Booking screen had no book to select on a provisioned company (the Stock In/Out, Dhiran, Labour/Fine, Tag Opening, Fine In/Out class — G105/G109/G110/G111/G112) | Provisioning creates the `BUL` (BUL SALE → `BUL_DATA`) book; the writer resolves its ledger accounts (`BULLION`/`CASH`) from the payload, so the standard slots are nominal; a seed-completeness DB assertion, and the Bullion Booking book list filtered to `BUL SALE` — done (N103) | N103 |
 | G114 | S2 | Item Opening unusable on a provisioned company | Item Opening (TR_ITM_OPBL, `MDI_FORM.cs:7701` CurBookHelp("OPSTK")) opens non-tag item stock: it writes `ITM_OPBL` + positive `MAIN_STOCK` with no money ledger (empty `AC_DATA`) on a book routed to `BAR_DATA` | Found continuing the G113 provisioning review: `web/apps/api/src/modules/ops/seedCompany.ts` provisioned no Item Opening book, so the Item Opening screen had no book to select on a provisioned company (the Stock In/Out, Dhiran, Labour/Fine, Tag Opening, Fine In/Out, Bullion class) | Provisioning creates the `IOP` (OPSTK → `BAR_DATA`) book as a ledger-less stock book (empty slots); a seed-completeness DB assertion, and the Item Opening book list filtered to `OPSTK` — done (N104) | N104 |
+| G115 | High | Labour | `unified/src/csharp/DataCareNext/Ac_Ledr.cs:1203` | `web/apps/api/src/modules/sales/labourInvoice.ts` | The labour-income leg must credit the book's BOOK_DETL slot SR_NO 6 (desktop joins `B.SR_NO = 6` under MAIN_BOOK `LABOUR WORK`), not a literal `LABOUR` account that exists only in the provisioning seed and is absent on a migrated company. | N106 |
 
 ## 4. Decisions D23–D28
 
@@ -569,6 +570,22 @@ safe (the preferred book is present). The screen now passes `mainBooks={['RECEIP
 Done when: Multi-Party Receipt offers only the RECEIPT family.
 
 
+### N106 — Labour-income account resolved from the book, not a literal (G115, P0-04)
+
+The labour invoice credited its labour part to a literal `LABOUR` account (`labourInvoice.ts`
+`input.labourAc ?? 'LABOUR'`). `LABOUR` is not a seeded account on a provisioned company (the seed
+names the labour-income account `LBRINC`) and is absent on a migrated one, so a labour bill with a
+labour amount posted a Cr to a non-existent account. The desktop (`Ac_Ledr.cs:1203`, leg `01`) credits
+`A.DR_LBR` to `B.AC_CODE` where `B.SR_NO = 6` under `MAIN_BOOK IN ('LABOUR WORK')` — i.e. the book's
+configured labour-income slot. The writer now resolves that account through the kernel primitive
+`resolveBookAccountTx(tx, scope, policy, 6)` (fail-closed on a missing/ambiguous slot); an explicit
+caller override still wins. `seedCompany` provisions the labour book's SR_NO 6 slot (`LBRINC`) alongside
+SR_NO 1, so a fresh company resolves it. This closes one of the P0-04 posting-account literals
+(`labourInvoice.ts` 4 → 3; total 68 → 67).
+
+Done when: a labour bill on a provisioned company credits the book's configured labour-income account.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -595,6 +612,7 @@ Done when: Multi-Party Receipt offers only the RECEIPT family.
 | N103 | — | implemented-unverified, evidence in this change (G113: provisioning creates the BUL SALE / BUL_DATA book so Bullion Booking opens; list filtered) |
 | N104 | — | implemented-unverified, evidence in this change (G114: provisioning creates the ledger-less OPSTK / BAR_DATA book so Item Opening opens; list filtered) |
 | N105 | — | implemented-unverified, evidence in this change (G101 part: Multi-Party Receipt book list filtered to RECEIPT) |
+| N106 | — | implemented-unverified, evidence in this change (G115: labour-income account resolved from BOOK_DETL SR_NO 6, not a literal; P0-04 68→67) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

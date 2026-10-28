@@ -4,6 +4,13 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-28 (cont.) — N106: labour-income account from the book (G115, P0-04)
+- labourInvoice.ts credited a literal 'LABOUR' account (not seeded — seed uses LBRINC; absent on migrated companies), so a labour bill Cr-ed a non-existent account. Desktop Ac_Ledr.cs:1203 credits A.DR_LBR to BOOK_DETL B.AC_CODE where B.SR_NO=6 (MAIN_BOOK LABOUR WORK). Now resolved via kernel primitive resolveBookAccountTx(...,6), fail-closed; explicit override honoured. seedCompany gives LBR SR_NO 1+6 slots (LBRINC); provisioning BOOK_DETL 107->108. P0-04 register 4->3, total 68->67. **PR #73 → main** (merged on local verification; GitHub Actions still billing-blocked).
+- Full local battery green: typecheck/typecheck:tests/lint/format/docs/register/size/kernel; routes 126; web 646; API+DB 313/3483.
+- Next gap **G116**, slice **N107**, decision **D31**. Candidate P0-04 continuations: salesReturn.ts (5), purchaseReturn.ts (5), dhrn.ts (5), billToBill.ts (5), salesOrder.ts (3) — each resolve a literal from BOOK_DETL/company config like the desktop.
+
+---
+
 ## 2026-10-28 (cont.) — E2E posting verification of the book-provisioning sweep
 - Beyond "the book appears", proved a newly-provisioned workflow actually POSTS: on the seedCompany demo, API login → POST /stock/item-opening (coBook IOP) → 201 {vchNo:1,items:1} → GET the voucher back → 200 with its line + header. Confirms N104 (and the whole N91/N97/N100-N104 sweep) lets a fresh company create+persist+reload these vouchers. Upgraded N104's statusNote. No code change; doc/verification only.
 - mfg-issue/receive deliberately NOT provisioned: the generic MFG screens cover many desktop process stages (MFG STNG/POLISH/CAST/…); which stage(s) a fresh company should carry is a product decision, and `requireMfgMainBook` exists but isn't called by the mfg issue/receive routes — so it's not a clean single-book provision. ac-opbl (special book 000) and tag-weight-diff (contained X21) are also out of the clean sweep. Sweep of clean cases is complete.

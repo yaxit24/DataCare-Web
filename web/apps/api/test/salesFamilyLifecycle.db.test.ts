@@ -235,7 +235,7 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
          ($1,$2,$3,'SRT','Sales Return','SRTN','SALES RETURNE','I','Y','SL_DATA'),
          ($1,$2,$3,'SOR','Sales Order','SORD','SALES ORDER','O','Y','SL_ORD_DATA'),
          ($1,$2,$3,'ORC','Order Cancel','SADJ','ORDER CANCEL','O','Y','SL_ORD_ADJ'),
-         ($1,$2,$3,'LBR','Labour','LBRI','LABOUR','O','Y','LBR_DATA'),
+         ($1,$2,$3,'LBR','Labour','LBRI','LABOUR WORK','O','Y','LBR_DATA'),
          ($1,$2,$3,'074','Member Entry','MBENT','MEMB ENTRY','I','Y','AD_DATA'),
          ($1,$2,$3,'076','Member Adjust','MBADJ','MEMB ADJUST','O','Y','AD_ADJ')`,
       TENANT,
@@ -247,6 +247,9 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
        VALUES ($1,$2,$3,'SRT',1,'CTRL','SALES RETURNE','I'),
               ($1,$2,$3,'SRT',2,'CASH','SALES RETURNE','I'),
               ($1,$2,$3,'SRT',3,'ROUND','SALES RETURNE','I'),
+              -- G115 / P0-04: the labour writer resolves its income account from BOOK_DETL SR_NO 6
+              -- (desktop Ac_Ledr.cs:1203), so the LBR book must carry that slot.
+              ($1,$2,$3,'LBR',6,'CTRL','LABOUR WORK','O'),
               -- P0-04: the scheme/member books settle to their configured slot 1. Real book 074's leg-02 rows
               -- name 00001, so the slot has to exist here too — the module no longer falls back to a literal.
               ($1,$2,$3,'074',1,'CASHAC','MEMB ENTRY','I'),
