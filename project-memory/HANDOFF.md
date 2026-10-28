@@ -1,3 +1,46 @@
+## 2026-10-28 (cont.) — P0-04 posting-literal sweep (N106-N108 merged) + CI billing blocker
+
+CI (GitHub Actions) is DISABLED by an account billing failure (see the earlier blocker note);
+the repo has NO required-status-check protection, so PRs merge on authoritative LOCAL verification
+(full battery: typecheck/typecheck:tests/lint/format/docs:refs/register/size/kernel-conformance;
+routes 126; web unit 646; full API+DB 313 files / 3483 tests on an isolated PARITY_TEST_PORT DB).
+
+Merged to main (now ba0bef7):
+- N105 (#71) filter Multi-Party Receipt -> RECEIPT.
+- #72 docs: end-to-end posting verification of the book sweep.
+- N106 (#73, G115): labour-income account resolved from BOOK_DETL SR_NO 6 (desktop Ac_Ledr.cs:1203),
+  not the literal 'LABOUR' (absent on provisioned/migrated companies). seedCompany gives LBR SR_NO 1+6
+  slots (LBRINC); provisioning BOOK_DETL 107->108. P0-04 labourInvoice.ts 4->3.
+- N107 (#74, G116): sales-return control/cash/round resolved from BOOK_DETL slots 1/2/3 (was literal
+  SALES/CASH/ROUNDOFF/KASAR initializers). salesReturn.ts 5->1 (GST literal remains).
+- N108 (#75, G117): purchase-return mirror. purchaseReturn.ts 5->1 (GSTINPUT literal remains).
+P0-04 REMAINING_TOTAL 68 -> 59 (postingAccountLiterals.test.ts ratchet).
+
+PATTERN that worked (return mirrors): the writer already called resolveBookPolicyTx + resolveBookAccountTx
+for non-zero amounts but kept literal INITIALIZERS. Fix = resolve the control account from slot 1
+UNCONDITIONALLY, reuse it as the per-item revenue/expense fallback (the `missing` guard already makes the
+`?? literal` dead), and resolve cash(2)/round-kasar(3) with no literal initializer. Use the kernel
+primitive resolveBookAccountTx (raw BOOK_DETL reads trip check-kernel-conformance — a NEW book-account
+bypass; the primitive is pre-baselined). Lower the per-file REMAINING and REMAINING_TOTAL.
+
+Next P0-04 targets and the plumbing each needs (none are as clean as the returns):
+- sales.ts (14), purchase.ts (10): highest value; same book-slot pattern but many sites + tag/old-gold/
+  tender legs — do in careful sub-passes.
+- dhrn.ts (5: CASH x3, INTINC x2): THREE writers (issue/receipt/interest), NO resolveBookPolicy plumbing
+  yet, BOOK_NAME literal 'DHIRAN'. DHI/DHR books seeded (default 3 legs: control=DHRN, cash=CASH,
+  roundoff=ROUNDOFF). Need to add book-policy resolution per writer; interest income likely a book slot.
+- billToBill.ts (5: BANK, CASH x2, KASAR): tender accounts for bill-to-bill; no book-policy plumbing;
+  book is RCT/PAY (RECEIPT/PAYMENT).
+- salesOrder.ts (3: CASH x2 adv/refund, KASAR): advance uses the seeded SALES ORDER book (resolvable via
+  resolveOrderBookTx slot 2); BUT order-cancel uses book 'ORC' which is NOT seeded -> provision ORC first
+  (confirm desktop ORDER CANCEL MAIN_BOOK) or the refund path can't resolve. Mixed-readiness file.
+- Remaining single GST/GSTINPUT literals in sales/purchase-return: the tax account. resolveTaxPolicyTx
+  pins TAX_MAST parent row SR_NO 0 TAX_AC; several minimal test fixtures seed a tax code with no TAX_AC
+  and relied on the literal. A dedicated slice would seed TAX_AC in those fixtures + fail-closed.
+
+Plan IDs now: next gap G118, slice N109, decision D31. All plan docs (validate_plan + docs_check) pass.
+
+
 ## ⛔ BLOCKER (2026-10-28): GitHub Actions disabled — ACCOUNT BILLING
 CI cannot run. Every workflow since ~19:40 fails in ~3s with the GitHub annotation:
 "The job was not started because recent account payments have failed or your spending limit
