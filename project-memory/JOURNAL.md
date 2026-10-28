@@ -4,6 +4,13 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-28 (cont.) — N113: provision the Order Cancel book (G122)
+- Order Cancel (refund an order advance, writer targets book ORC, desktop MDI_FORM.cs:8629 ORDER CANCEL) had no seeded book -> unusable on a fresh company. Provisioned ORC (MAIN_BOOK ORDER CANCEL, SL_ORD_ADJ, 3 legs). Provisioning 33->34 groups, 108->111 legs. Sets up a later P0-04 pass to resolve the salesOrder cancel refund accounts (paidAc/kasarAc) from the ORC slots. **PR #81 → main**.
+- Full local battery green: API+DB 313/3483, web 646, routes 126, gates + kernel.
+- Next gap G123, slice N114, decision D31. P0-04 remaining total 46 (sales.ts 11, purchase.ts 5, billToBill 5, karigar 4, salesOrder 3 [now ORC-resolvable], employeeJv 3, fineSalePurchase 2, ledgerAdjust 2, mfg 2, tagOps 2).
+
+---
+
 ## 2026-10-28 (cont.) — N112: bullion payable/cash from the book (G121, P0-04)
 - Bullion booking had no book resolution; payable/cash were literals BULLION/CASH. Added resolveBullionAccountTx -> resolveBookAccountTx(1 payable, 2 cash), fail-closed, override honoured. Seeded BUL book (N103) carries those slots. bullion.ts cleared from register. P0-04 total 48->46. **PR #80 → main**.
 - Session P0-04 arc: 68 -> 46 (22 literals removed). Remaining: sales.ts 11, purchase.ts 5, billToBill 5, karigar 4, salesOrder 3, employeeJv 3, fineSalePurchase 2 (wait: fineSalePurchase 2 still listed), ledgerAdjust 2, mfg 2, tagOps 2. The tax/income/config cluster (GST/GSTINPUT/INTINC/HMCHRG/TCS/TDS/PF/FINESALE/FINEPURC/BULLION-payable) is the bulk of the rest.

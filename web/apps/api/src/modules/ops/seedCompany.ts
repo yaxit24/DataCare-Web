@@ -192,6 +192,18 @@ const BOOKS: {
     ],
   },
   { book: 'SOR', name: 'Sales Order', mainBook: 'SALES ORDER', inout: 'O', acCode: 'SALES' },
+  // Desktop MDI_FORM.cs:8629 CurBookHelp("ORDER CANCEL"); the Order Cancel screen refunds an order's
+  // advance through SL_ORD_ADJ + a balanced AC_DATA refund (accounts from the payload). Without this
+  // book a provisioned company could not cancel/refund an order (N113).
+  {
+    book: 'ORC',
+    name: 'Order Cancel',
+    mainBook: 'ORDER CANCEL',
+    inout: 'O',
+    acCode: 'SALES',
+    shortName: 'SADJ',
+    table: 'SL_ORD_ADJ',
+  },
   { book: 'TUR', name: 'Approval Issue', mainBook: 'APPROVAL ISSUE', inout: 'O', acCode: 'OS' },
   { book: 'TRR', name: 'Approval Return', mainBook: 'APPROVAL RETURN', inout: 'I', acCode: 'OS' },
   { book: 'SAJ', name: 'Stock Adjust', mainBook: 'STOCK ADJUST', inout: 'I', acCode: 'KASAR' },
