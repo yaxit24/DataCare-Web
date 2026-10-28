@@ -12,7 +12,12 @@ import { type BookWorkflow, workflowPolicy } from '../shared/bookPolicy.js';
  */
 
 /** System accounts keyed by the literal AC_CODE the posting falls back to. */
-const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string }[] = [
+const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string; gstType?: string }[] = [
+  // G124 / G100: the sales/hallmark-sale/sales-quotation screens default the party to WALKIN. The
+  // desktop's ready-to-trade template carries a cash/walk-in party (00045); without one, the default
+  // retail sale fails tax-policy resolution. Seed WALKIN as a local (intra-state) Sundry Debtor (AC_GR
+  // '10', the group the customer masters use) so a fresh company can post the default sale.
+  { code: 'WALKIN', name: 'WALK-IN CUSTOMER', gr: '10', gstType: 'L' },
   { code: 'CASH', name: 'CASH ON HAND', gr: '01' },
   { code: 'BANK', name: 'BANK A/C', gr: '02' },
   { code: 'SALES', name: 'SALES A/C', gr: '20' },
@@ -533,13 +538,14 @@ export async function seedCompany(
     for (const a of SYSTEM_ACCOUNTS) {
       if (await absent('AC_MAST', '"CO_CODE"=$2 AND "AC_CODE"=$3', coCode, a.code)) {
         await tx.$executeRawUnsafe(
-          `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GR") VALUES ($1,$2,$3,$4,$5,$6)`,
+          `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GR","AC_GST_TYPE") VALUES ($1,$2,$3,$4,$5,$6,$7)`,
           tenantId,
           coCode,
           lcCode,
           a.code,
           a.name,
           a.gr,
+          a.gstType ?? null,
         );
         accounts += 1;
       }
