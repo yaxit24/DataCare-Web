@@ -464,6 +464,12 @@ route('Cash / Bank/Employee Salary JV', [
   'PUT /employee-jv/:vchNo',
   'DELETE /employee-jv/:vchNo',
 ]);
+route('Cash / Bank/Card / UPI Receipt', [
+  'POST /card-receipts',
+  'GET /card-receipts/:vchNo',
+  'PUT /card-receipts/:vchNo',
+  'DELETE /card-receipts/:vchNo',
+]);
 
 route('Inventory/Stock / Tags', ['POST /stock/tags', 'GET /stock/tags', 'GET /stock/on-hand']);
 route('Inventory/Tag Opening', [

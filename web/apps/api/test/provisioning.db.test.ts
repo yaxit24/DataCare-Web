@@ -75,7 +75,7 @@ d('company provisioning produces a postable company', () => {
     // 19 literal codes plus the six wholesale / rate-cut slot accounts (labour income and expense, silver
     // sale and purchase, other charges, fine kasar), plus BRANCH (the stock in/out branch account, N91),
     // plus WALKIN (the walk-in customer the sales screens default to, G124).
-    expect(await count('AC_MAST')).toBe(27);
+    expect(await count('AC_MAST')).toBe(28);
   });
 
   it('creates every book with its posting legs', async () => {
@@ -85,7 +85,7 @@ d('company provisioning produces a postable company', () => {
         CO,
       ),
     );
-    expect(rows.length).toBe(34);
+    expect(rows.length).toBe(35);
     // Three legs per book (1 = control/sales, 2 = cash/bank, 3 = round-off), except the cash books.
     // RCT and PAY carry the desktop cash-book layout, 1 = cash and 2 = kasar: Ac_Ledr.cs:567-581 joins
     // BOOK_DETL SR_NO 1 and SR_NO 2 for legs 01-08. Their slot 2 used to be CASH, which would have posted
@@ -102,7 +102,7 @@ d('company provisioning produces a postable company', () => {
               ? 5
               : // LBR (labour) carries its two configured slots: SR_NO 1 (metal) and SR_NO 6
                 // (labour income), so the labour writer resolves the income account from the book (G115).
-                book === 'LBR'
+                book === 'LBR' || book === 'CRD'
                 ? 2
                 : // OTH INC / OTH EXP each carry a single configured expense/income slot (TR_OTH_PURC reads
                   // slot 1); FSL/FPR (fine settlement) each carry their single configured
@@ -321,7 +321,7 @@ d('company provisioning produces a postable company', () => {
     // + WHS/RTC x 12 + TSP x 5 + OIN/OEX x 1 + SIN/SOT x 3 (stock in/out, N91) + DHI/DHR x 3 (dhiran, N97)
     // + LBR x 2 (labour: metal SR_NO 1 + income SR_NO 6, G115) + FSL/FPR x 1 (fine settlement, N100)
     // + BUL x 3 (bullion booking, N103) + ORC x 3 (order cancel, N113), not doubled.
-    expect(await count('BOOK_DETL')).toBe(111);
+    expect(await count('BOOK_DETL')).toBe(113);
   });
 
   /**

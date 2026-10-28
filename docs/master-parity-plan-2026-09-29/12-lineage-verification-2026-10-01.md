@@ -142,6 +142,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G129 | Med | Journal / documents | `unified/src/csharp/DataCareNext/JournalVch.rpt` | `web/apps/api/src/routes/txn.ts` `GET /journal/:vchNo/print`, `web/apps/api/src/modules/finance/contraVoucher.ts` `journalVoucherHtml` | The journal voucher must produce a printable multi-line Dr/Cr entry (Particulars, Debit, Credit, totals, narration). | N120 |
 | G130 | Med | Fine sale/purchase / lifecycle | `unified/src/csharp/DataCareNext/TR_FINE_SL_PR.cs:4288` | `web/apps/api/src/routes/txn.ts` `GET /fine-sale/:vchNo`, `web/apps/api/src/modules/bullion/fineSalePurchase.ts` `getFineSalePurchase` | The fine sale/purchase must be reopenable (read CUT_DATA + CUT_DETL back into the form) so the operator can reload a posted voucher. | N121 |
 | G131 | Med | Ledger adjust & employee JV / lifecycle | `unified/src/csharp/DataCareNext/TR_EMP_JV.cs`, ledger-adjust form | `web/apps/api/src/routes/txn.ts` `GET/PUT /ledger-adjust/:vchNo`, `GET/PUT /employee-jv/:vchNo` | Both vouchers must be reopenable and editable (the reader/editor already existed in the modules; only the routes were missing). | N122 |
+| G132 | High | Card Rec (MISSING workflow) | `unified/src/csharp/DataCareNext/TR_CARD_REC.cs`, `Ac_Ledr.cs:1790-1804` | `web/apps/api/src/modules/finance/cardReceipt.ts`, `web/apps/api/src/routes/txn.ts` `POST/GET/PUT/DELETE /card-receipts` | The Card Receipt (CARD ADJUST) workflow must exist: a customer card settlement posting the exact 8-leg ledger (party/bank/commission/cash), writing CARD_DATA + ROJ_MEL_DATA, reopenable, editable and deletable with the desktop DELETE_DATA audit. | N123 |
 
 ## 4. Decisions D23–D28
 
@@ -825,6 +826,26 @@ by reload.
 Done when: both vouchers reopen and edit through the API.
 
 
+### N123 — Card Receipt / CARD ADJUST workflow (G132, one of the 5 MISSING workflows)
+
+Card Rec (desktop TR_CARD_REC) was entirely absent from the web — one of the five MISSING workflows and the
+only P1-core one. N123 builds it end to end. A new `cardReceipt.ts` writer posts the exact desktop 8-leg
+ledger (Ac_Ledr.cs:1790-1804): 01 Cr party R, 02 Dr party C, 03 Cr slot1 C, 04 Dr bank R, 05 Cr bank B,
+06 Dr slot1 B, 07 Dr party H, 08 Cr slot2 H — where R = CARD_AMT + card commission, C = card commission,
+B = bank commission, H = cash paid; the commission/charges account is BOOK_DETL slot 1 and the cash account
+slot 2 of a newly provisioned CRD (CARD ADJUST) book (with a new CARDCOMM account). It writes the full
+CARD_DATA header and the 4-row ROJ_MEL_DATA projection (Ac_Rojmel.cs:843-849). `getCardReceipt`,
+`editCardReceipt` (replace-and-repost) and `deleteCardReceipt` (reverse the write set + the desktop
+DELETE_DATA audit carrying VCH_VAL_CR = CARD_AMT + hidden-identity cleanup) complete the lifecycle, exposed
+at POST/GET/PUT/DELETE /card-receipts. Card commission uses the desktop whole-unit rounding
+(TR_CARD_REC.cs:3796); the two local rounding helpers are grandfathered in the kernel baseline like the
+sibling finance writers. Route universe 619 -> 623; a dedicated routes DB test asserts the 8 legs, the
+cash-leg variant (07/08), CARD_DATA/ROJ_MEL_DATA, reopen, edit and delete. Verified live: a 10,000 card
+receipt at 2% card / 1% bank posted (gross 10,200, bank net 10,098), reopened, edited to 20,000 and deleted.
+
+Done when: the Card Receipt workflow creates, reopens, edits and deletes with the desktop write-set.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -868,6 +889,7 @@ Done when: both vouchers reopen and edit through the API.
 | N120 | — | implemented-unverified, evidence in this change (G129: journal voucher print GET /journal/:vchNo/print; verified live HTML 200) |
 | N121 | — | implemented-unverified, evidence in this change (G130: fine sale/purchase reopen GET /fine-sale/:vchNo; verified live HTTP 200) |
 | N122 | — | implemented-unverified, evidence in this change (G131: ledger-adjust & employee-jv reopen+edit; verified live round-trip) |
+| N123 | — | implemented-unverified, evidence in this change (G132: Card Receipt / CARD ADJUST workflow; verified live full lifecycle) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
