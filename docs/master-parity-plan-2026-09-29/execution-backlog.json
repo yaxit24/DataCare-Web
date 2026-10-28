@@ -4681,6 +4681,27 @@
         "web/apps/api/test/labourFineTaxRows.routes.db.test.ts"
       ],
       "statusNote": "Desktop Ac_Ledr.cs:1203 credits A.DR_LBR to BOOK_DETL B.AC_CODE where B.SR_NO=6 (MAIN_BOOK LABOUR WORK). The web writer defaulted labourAc to the literal LABOUR, not a seeded account (seed uses LBRINC), so a labour bill Cr-ed a non-existent account on a provisioned/migrated company. Now resolved via the kernel primitive resolveBookAccountTx(...,6) fail-closed; explicit override still honoured. seedCompany gives the LBR book SR_NO 1 + 6 slots (LBRINC); provisioning BOOK_DETL 107->108, LBR leg-count 1->2. P0-04 register labourInvoice.ts 4->3, total 68->67. Verified locally: typecheck/typecheck:tests/lint/format/docs:refs/register/size/kernel-conformance; routes 126; web 646; full API+DB 313 files/3483 tests."
+    },
+    {
+      "id": "N107",
+      "status": "implemented-unverified",
+      "action": "Sales-return writer kept literal SALES/CASH/ROUNDOFF/KASAR initializers; resolve control/cash/round from BOOK_DETL slots 1/2/3 like the desktop",
+      "parentLabels": "P0-04; X07",
+      "startAfter": [
+        "N106"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "salesReturn.ts resolves control(1)/cash(2)/round(3) from the book; only GST literal remains; P0-04 register 5->1 / total 67->63; full API+DB 313/3483, web 646, routes 126, gates green",
+      "gapIds": "G116",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-28",
+      "evidence": [
+        "web/apps/api/src/modules/sales/salesReturn.ts",
+        "web/apps/api/test/postingAccountLiterals.test.ts"
+      ],
+      "statusNote": "The sales-return writer already resolved cash/round from the book when the amount was non-zero but kept literal initializers (SALES/CASH/ROUNDOFF/KASAR). Now the control account is resolved unconditionally from BOOK_DETL slot 1 (desktop LD_CODE=B.AC_CODE) and reused as the per-item revenue fallback; cash from slot 2, round/kasar from slot 3; no literal initializers. Only the GST account literal remains (separate tax-config concern), so labour register entry falls 5->1, total 67->63. Verified locally: typecheck/typecheck:tests/lint/format/size/kernel-conformance; routes 126; web 646; full API+DB 313/3483."
     }
   ],
   "amendments": [

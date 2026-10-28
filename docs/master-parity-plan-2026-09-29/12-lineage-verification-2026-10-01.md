@@ -126,6 +126,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G113 | S2 | Bullion Booking unusable on a provisioned company | Bullion Booking (TR_BUL_BOOKING, `MDI_FORM.cs:8171` BUL SALE / `:8183` BUL PURC) books bulk fine metal at a locked rate: the header lands in `BUL_DATA` and a balanced Dr cash / Cr bullion-payable entry in `AC_DATA` (`web/apps/api/src/modules/bullion/bullion.ts`) | Found continuing the G112 provisioning review: `web/apps/api/src/modules/ops/seedCompany.ts` provisioned no Bullion Booking book, so the Bullion Booking screen had no book to select on a provisioned company (the Stock In/Out, Dhiran, Labour/Fine, Tag Opening, Fine In/Out class — G105/G109/G110/G111/G112) | Provisioning creates the `BUL` (BUL SALE → `BUL_DATA`) book; the writer resolves its ledger accounts (`BULLION`/`CASH`) from the payload, so the standard slots are nominal; a seed-completeness DB assertion, and the Bullion Booking book list filtered to `BUL SALE` — done (N103) | N103 |
 | G114 | S2 | Item Opening unusable on a provisioned company | Item Opening (TR_ITM_OPBL, `MDI_FORM.cs:7701` CurBookHelp("OPSTK")) opens non-tag item stock: it writes `ITM_OPBL` + positive `MAIN_STOCK` with no money ledger (empty `AC_DATA`) on a book routed to `BAR_DATA` | Found continuing the G113 provisioning review: `web/apps/api/src/modules/ops/seedCompany.ts` provisioned no Item Opening book, so the Item Opening screen had no book to select on a provisioned company (the Stock In/Out, Dhiran, Labour/Fine, Tag Opening, Fine In/Out, Bullion class) | Provisioning creates the `IOP` (OPSTK → `BAR_DATA`) book as a ledger-less stock book (empty slots); a seed-completeness DB assertion, and the Item Opening book list filtered to `OPSTK` — done (N104) | N104 |
 | G115 | High | Labour | `unified/src/csharp/DataCareNext/Ac_Ledr.cs:1203` | `web/apps/api/src/modules/sales/labourInvoice.ts` | The labour-income leg must credit the book's BOOK_DETL slot SR_NO 6 (desktop joins `B.SR_NO = 6` under MAIN_BOOK `LABOUR WORK`), not a literal `LABOUR` account that exists only in the provisioning seed and is absent on a migrated company. | N106 |
+| G116 | Med | Sales return | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (SALES RETURNE book legs) | `web/apps/api/src/modules/sales/salesReturn.ts` | The control/revenue, cash and round/kasar accounts must come from the book's BOOK_DETL slots (SR_NO 1/2/3), not literal `SALES`/`CASH`/`ROUNDOFF`/`KASAR` placeholders that only the provisioning seed carries. | N107 |
 
 ## 4. Decisions D23–D28
 
@@ -586,6 +587,19 @@ SR_NO 1, so a fresh company resolves it. This closes one of the P0-04 posting-ac
 Done when: a labour bill on a provisioned company credits the book's configured labour-income account.
 
 
+### N107 — Sales-return posting accounts resolved from the book (G116, P0-04)
+
+The sales-return writer already resolved its cash/round accounts from the book when the amount was
+non-zero, but kept literal initializers (`SALES`, `CASH`, `ROUNDOFF`, `KASAR`) that the P0-04 scan
+counts and that could post to a seed-only account in a degenerate path. The control account is now
+resolved unconditionally from the book's BOOK_DETL slot 1 (desktop `LD_CODE = B.AC_CODE`) and used as
+the per-item revenue fallback; cash resolves from slot 2 and round/kasar from slot 3, with no literal
+initializer. The only remaining literal is the GST account (a separate tax-config concern), so the
+file falls from 5 to 1 (P0-04 total 67 → 63).
+
+Done when: a sales return credits the book's configured control/cash/round accounts on a provisioned company.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -613,6 +627,7 @@ Done when: a labour bill on a provisioned company credits the book's configured 
 | N104 | — | implemented-unverified, evidence in this change (G114: provisioning creates the ledger-less OPSTK / BAR_DATA book so Item Opening opens; list filtered) |
 | N105 | — | implemented-unverified, evidence in this change (G101 part: Multi-Party Receipt book list filtered to RECEIPT) |
 | N106 | — | implemented-unverified, evidence in this change (G115: labour-income account resolved from BOOK_DETL SR_NO 6, not a literal; P0-04 68→67) |
+| N107 | — | implemented-unverified, evidence in this change (G116: sales-return control/cash/round accounts resolved from BOOK_DETL slots; P0-04 67→63) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
