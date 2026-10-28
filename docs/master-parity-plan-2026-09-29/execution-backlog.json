@@ -4895,6 +4895,28 @@
         "web/apps/api/test/routePolicy.test.ts"
       ],
       "statusNote": "Live review found NO core txn screen had a print; the retail bill is the top Stage E gap. Added GET /sales/:vchNo/print backed by salesBill.ts (SL_DATA/SL_DETL + shared GST-bill chrome). Extracted resolvePrintScope + sendVoucherDocument into documents/voucherPrint.ts and reused them for the purchase-return print to stay within the txn.ts size ceiling (which tightened). Route policy registered; route universe 609->610. VERIFIED LIVE: a posted sale print returned HTTP 200 HTML with company/WALKIN/item/HSN/CGST/SGST and correct amounts (60000 taxable, 900+900 tax, 61800 total). Verified: typecheck/typecheck:tests/lint/format/size/kernel/register; routes 126; web 646; full API+DB 313/3483."
+    },
+    {
+      "id": "N117",
+      "status": "implemented-unverified",
+      "action": "Add the purchase bill print (GET /purchases/:vchNo/print), the supplier-side counterpart of the Tax Invoice",
+      "parentLabels": "P04-01; E-documents",
+      "startAfter": [
+        "N116"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "GET /purchases/:vchNo/print returns the supplier bill; route registered + universe 611; full API+DB 313/3483, web 646, routes 126, gates; verified live",
+      "gapIds": "G126",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-28",
+      "evidence": [
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/test/routePolicy.test.ts"
+      ],
+      "statusNote": "Supplier-side counterpart of N116, reusing purchaseBill.ts + the shared print helpers. Converted wholesale-quotation, estimate/quotation and sales-return credit-note print tails to sendVoucherDocument to keep txn.ts under its (now tighter) size ceiling. Route policy registered; universe 610->611. VERIFIED LIVE: a posted purchase print returned HTTP 200 HTML with company/Supplier/item/HSN/CGST/SGST (5484 bytes). Verified: typecheck/typecheck:tests/lint/format/size/kernel/register; routes 126; web 646; full API+DB 313/3483."
     }
   ],
   "amendments": [

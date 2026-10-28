@@ -329,6 +329,7 @@ route('Sales/VP Parcel', [
 route('Purchase/Purchase Invoice', [
   'POST /purchases',
   'GET /purchases/:vchNo',
+  'GET /purchases/:vchNo/print',
   'PUT /purchases/:vchNo',
   'DELETE /purchases/:vchNo',
   'GET /purchases/invoice',

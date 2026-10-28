@@ -136,6 +136,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G123 | Med | Fine settlement | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (CUT_DATA FSL/FPR legs) | `web/apps/api/src/modules/bullion/fineSalePurchase.ts` | The fine-sale/fine-purchase metal account must come from the FSL/FPR book's BOOK_DETL slot 1, not literal `FINESALE`/`FINEPURC`. | N114 |
 | G124 | High | Sales | `unified/src/csharp/DataCareNext/TR_SALE.cs:14141` (cash party `00045` from the company template) | `web/apps/api/src/modules/ops/seedCompany.ts` | A fresh/provisioned company must carry the walk-in party the sales/hallmark-sale/sales-quotation screens default to, so the core retail sale posts without the operator first creating an account (the live review hit HTTP 400 on the default sale). | N115 |
 | G125 | High | Sales / documents | `unified/src/csharp/DataCareNext/SaleBillA4Gst.rpt` | `web/apps/api/src/routes/txn.ts` `GET /sales/:vchNo/print`, `web/apps/api/src/modules/sales/salesBill.ts` | The retail sale must produce a printable Tax Invoice (the single highest-value desktop document); every sale needs a bill. | N116 |
+| G126 | Med | Purchase / documents | `unified/src/csharp/DataCareNext/PurcBillA4Gst.rpt` | `web/apps/api/src/routes/txn.ts` `GET /purchases/:vchNo/print` | The purchase must produce a printable supplier bill (the purchase counterpart of the Tax Invoice). | N117 |
 
 ## 4. Decisions D23–D28
 
@@ -737,6 +738,19 @@ item, HSN, CGST/SGST and the correct amounts (60,000 taxable / 900+900 tax / 61,
 Done when: a posted retail sale produces a Tax Invoice (HTML and PDF) with the desktop copies.
 
 
+### N117 — Purchase bill print (G126, Stage E)
+
+The supplier-side counterpart of N116. Adds `GET /purchases/:vchNo/print`, reusing the existing
+`purchaseBill.ts` data/HTML and the shared print helpers (`resolvePrintScope`, `sendVoucherDocument`).
+Four more existing inline-PDF print endpoints (purchase-return already done, plus wholesale-quotation,
+estimate/quotation and the sales-return credit note) were converted to the shared helper while adding this,
+so `txn.ts` stayed under its size ceiling (which tightened further). Route registered under the Purchase
+Invoice RBAC policy; route universe 610 → 611. Verified live: a posted purchase's print returned HTTP 200
+with the company, Supplier caption, item, HSN and CGST/SGST.
+
+Done when: a posted purchase produces a supplier bill (HTML and PDF).
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -774,6 +788,7 @@ Done when: a posted retail sale produces a Tax Invoice (HTML and PDF) with the d
 | N114 | — | implemented-unverified, evidence in this change (G123: fine-settlement metal account resolved from FSL/FPR BOOK_DETL slot 1; fineSalePurchase.ts cleared; P0-04 46→44) |
 | N115 | — | implemented-unverified, evidence in this change (G124/G100: seed the WALKIN walk-in customer so the default retail sale posts) |
 | N116 | — | implemented-unverified, evidence in this change (G125: sales Tax Invoice print GET /sales/:vchNo/print; verified live HTML 200 with correct bill) |
+| N117 | — | implemented-unverified, evidence in this change (G126: purchase bill print GET /purchases/:vchNo/print; verified live HTML 200) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

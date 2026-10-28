@@ -2169,20 +2169,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       title: 'Credit Note — Sales Return',
       copy: q.copy,
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="creditnote-${String(q.vchNo ?? '').replace(/[^\w.-]/g, '')}.pdf"`,
-      )
-      .send(pdf);
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `creditnote-${q.vchNo ?? ''}`,
+    });
   });
 
   const orderConfirmation =
@@ -2420,20 +2410,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       title: 'Estimate / Quotation',
       copy: 'PROFORMA — NOT A TAX INVOICE',
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="quotation-${String(q.vchNo ?? '').replace(/[^\w.-]/g, '')}.pdf"`,
-      )
-      .send(pdf);
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `quotation-${q.vchNo ?? ''}`,
+    });
   });
 
   app.get('/sales-quotations/quotation', auth, async (req, reply) => {
@@ -2577,6 +2557,28 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.get('/purchases/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, () => getPurchase(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  // G126 (Stage E): the purchase bill print (desktop PurcBillA4Gst.rpt), the supplier-side counterpart
+  // of the sales Tax Invoice. Reuses the shared print helpers and purchaseBill chrome.
+  app.get('/purchases/:vchNo/print', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const q = req.query as any;
+    const copyLabel = standardDocumentCopy(q.copy, reply);
+    if (copyLabel === null) return reply;
+    const scope = resolvePrintScope(reply, readScope(req), (req.params as any).vchNo);
+    if (!scope) return reply;
+    await getPurchase(prisma, scope, scope.vchNo);
+    const data = await purchaseBillData(prisma, scope);
+    if (!data) return reply.code(404).send({ error: 'purchase-not-found' });
+    const html = purchaseBillHtml(data.header, data.lines, {
+      company: data.company,
+      party: data.party,
+      copy: copyLabel,
+    });
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `purchase-${scope.vchNo}`,
+    });
   });
   app.put('/purchases/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'update')) return;
@@ -7655,20 +7657,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       return { company: companies[0], party: parties[0] };
     });
     const html = wholesaleQuotationHtml(voucher, { ...context, copy });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="wholesale-quotation-${String((req.params as any).vchNo).replace(/[^\w.-]/g, '')}.pdf"`,
-      )
-      .send(pdf);
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `wholesale-quotation-${(req.params as any).vchNo}`,
+    });
   });
   app.put('/wholesale-quotations/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'update')) return;
