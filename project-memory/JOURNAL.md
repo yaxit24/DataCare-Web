@@ -4,6 +4,14 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-28 (cont.) — Full Phase 1 review + N115 (WALKIN core-blocker fix, G124/G100)
+- Did a complete Phase 1 review (plan + programmatic + LIVE browser via chrome-devtools MCP on a seeded demo company). Updated doc 12 with the review summary and elevated G100 to a confirmed core-cycle blocker (G124). Plan validated (validate_plan + docs_check pass).
+- Programmatic: 5 MISSING workflows still absent (Card Rec, Tour Sales, Dhrn Os Letter, Loan Intrest, Cust Entry). Capability tally over 133 workflow screens: C113 R72 E74 D68 P28 L58. P1-core (85): 37 no-reopen, 34 no-edit, 64 no-print, only 7 full CREDPL. Remaining work = recorded Stage D (reopen/edit) + Stage E (prints/reports) + 5 MISSING.
+- LIVE defect (core blocker): default Sales Invoice (party WALKIN) returned HTTP 400 "account not found for tax policy: WALKIN" — seedCompany provisioned no walk-in party (desktop uses 00045). **N115** seeds WALKIN (AC_GR 10 Sundry Debtors, AC_GST_TYPE L) + writes AC_GST_TYPE in the account insert. VERIFIED LIVE: default-party sale now posts 201 (CGST 900 + SGST 900 from the L type). AC_MAST 26->27. **PR #83 → main (2dfc909).**
+- Next: continue Stage D/E and the MISSING workflows per the plan. Next gap G125, slice N116, decision D31.
+
+---
+
 ## 2026-10-28 (cont.) — N114: fine-settlement metal account from the book (G123, P0-04)
 - Fine Settlement metal leg used literal FINESALE/FINEPURC; now resolved from FSL/FPR book BOOK_DETL slot 1 (seed names them there, N100) via resolveBookAccountTx fail-closed. fineSalePurchase.ts cleared. P0-04 total 46->44. **PR #82 → main**.
 - NOTE: salesOrder P0-04 attempted + REVERTED — salesOrder.ts is at its size ceiling (2350) and the advance/cancel fix overflowed to 2356-2372; deferred (needs a size-neutral refactor or a ceiling-safe approach). ORC book (N113) already delivered the usability win.
