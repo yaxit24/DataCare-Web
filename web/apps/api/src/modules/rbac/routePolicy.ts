@@ -452,8 +452,18 @@ route('Cash / Bank/Rate Cut (price fixing)', [
   'PUT /rate-cut/:vchNo',
   'DELETE /rate-cut/:vchNo',
 ]);
-route('Cash / Bank/Ledger Adjustment', ['POST /ledger-adjust', 'DELETE /ledger-adjust/:vchNo']);
-route('Cash / Bank/Employee Salary JV', ['POST /employee-jv', 'DELETE /employee-jv/:vchNo']);
+route('Cash / Bank/Ledger Adjustment', [
+  'POST /ledger-adjust',
+  'GET /ledger-adjust/:vchNo',
+  'PUT /ledger-adjust/:vchNo',
+  'DELETE /ledger-adjust/:vchNo',
+]);
+route('Cash / Bank/Employee Salary JV', [
+  'POST /employee-jv',
+  'GET /employee-jv/:vchNo',
+  'PUT /employee-jv/:vchNo',
+  'DELETE /employee-jv/:vchNo',
+]);
 
 route('Inventory/Stock / Tags', ['POST /stock/tags', 'GET /stock/tags', 'GET /stock/on-hand']);
 route('Inventory/Tag Opening', [

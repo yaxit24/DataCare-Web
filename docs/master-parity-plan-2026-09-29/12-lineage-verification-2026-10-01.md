@@ -141,6 +141,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G128 | Med | Contra / documents | `unified/src/csharp/DataCareNext/ContraVch.rpt` | `web/apps/api/src/routes/txn.ts` `GET /contra/:vchNo/print`, `web/apps/api/src/modules/finance/contraVoucher.ts` | The contra (bank<->cash transfer) must produce a printable voucher showing the from/to accounts and amount. | N119 |
 | G129 | Med | Journal / documents | `unified/src/csharp/DataCareNext/JournalVch.rpt` | `web/apps/api/src/routes/txn.ts` `GET /journal/:vchNo/print`, `web/apps/api/src/modules/finance/contraVoucher.ts` `journalVoucherHtml` | The journal voucher must produce a printable multi-line Dr/Cr entry (Particulars, Debit, Credit, totals, narration). | N120 |
 | G130 | Med | Fine sale/purchase / lifecycle | `unified/src/csharp/DataCareNext/TR_FINE_SL_PR.cs:4288` | `web/apps/api/src/routes/txn.ts` `GET /fine-sale/:vchNo`, `web/apps/api/src/modules/bullion/fineSalePurchase.ts` `getFineSalePurchase` | The fine sale/purchase must be reopenable (read CUT_DATA + CUT_DETL back into the form) so the operator can reload a posted voucher. | N121 |
+| G131 | Med | Ledger adjust & employee JV / lifecycle | `unified/src/csharp/DataCareNext/TR_EMP_JV.cs`, ledger-adjust form | `web/apps/api/src/routes/txn.ts` `GET/PUT /ledger-adjust/:vchNo`, `GET/PUT /employee-jv/:vchNo` | Both vouchers must be reopenable and editable (the reader/editor already existed in the modules; only the routes were missing). | N122 |
 
 ## 4. Decisions D23–D28
 
@@ -809,6 +810,21 @@ party, totals (60000/1800/61800), the line and the ISO voucher date.
 Done when: a posted fine sale/purchase can be reloaded through the reopen endpoint.
 
 
+### N122 — Ledger-adjust & employee-JV reopen + edit (G131, Stage D)
+
+Both the ledger adjustment and the employee salary JV already had their reopen readers (getLedgerAdjust,
+getEmployeeJv) and editors (editLedgerAdjust, editEmployeeJv) implemented in their modules, but the HTTP
+layer only wired POST + DELETE. N122 exposes `GET`/`PUT /ledger-adjust/:vchNo` and
+`GET`/`PUT /employee-jv/:vchNo`, completing both lifecycles. Six legacy inline-PDF prints (gstr2 report doc,
+the four repair-document prints, the passbook and khata docs) were converted to the shared
+sendVoucherDocument helper to keep txn.ts under its ceiling. Routes registered under the Ledger Adjustment
+and Employee Salary JV policies; route universe 615 -> 619. Verified live: a ledger adjustment reopened
+(500, debit) and edited to 750; an employee JV reopened (salary 20000) and edited to 25000, each confirmed
+by reload.
+
+Done when: both vouchers reopen and edit through the API.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -851,6 +867,7 @@ Done when: a posted fine sale/purchase can be reloaded through the reopen endpoi
 | N119 | — | implemented-unverified, evidence in this change (G128: contra voucher print GET /contra/:vchNo/print; verified live HTML 200) |
 | N120 | — | implemented-unverified, evidence in this change (G129: journal voucher print GET /journal/:vchNo/print; verified live HTML 200) |
 | N121 | — | implemented-unverified, evidence in this change (G130: fine sale/purchase reopen GET /fine-sale/:vchNo; verified live HTTP 200) |
+| N122 | — | implemented-unverified, evidence in this change (G131: ledger-adjust & employee-jv reopen+edit; verified live round-trip) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
