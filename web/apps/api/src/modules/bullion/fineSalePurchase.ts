@@ -42,6 +42,12 @@ type VoucherKey = {
 const num = (v: unknown): number => (v == null ? 0 : Number(v));
 const r2 = (n: number): number => Math.round((n + 1e-9) * 100) / 100;
 const r3 = (n: number): number => Math.round((n + 1e-9) * 1000) / 1000;
+/** An ISO yyyy-mm-dd regardless of whether the column comes back as a Date or a text string. */
+const isoDate = (v: unknown): string => {
+  if (v == null) return '';
+  if (v instanceof Date) return v.toISOString().slice(0, 10);
+  return String(v).slice(0, 10);
+};
 
 export interface FineLine {
   itCode?: string;
@@ -419,5 +425,88 @@ export async function deleteFineSalePurchase(
       );
     }
     return { reversed: true };
+  });
+}
+
+/**
+ * Reopen a Fine Sale / Fine Purchase (N121): read the CUT_DATA header + CUT_DETL lines back into the
+ * same shape the create endpoint accepts, so a trained operator can reload the voucher (mirrors
+ * TR_FINE_SL_PR.cs:4288 reading RATE_PAR and the stored lines back into the form).
+ */
+export async function getFineSalePurchase(
+  prisma: any,
+  scope: VoucherScope,
+  vchNo: number | string,
+): Promise<{
+  vchNo: string;
+  side: 'SALE' | 'PURC';
+  vchDate: string;
+  partyAc: string;
+  partyName: string | null;
+  itType: 'G' | 'S';
+  taxPct: number;
+  interState: boolean;
+  totals: { metal: number; tax: number; net: number };
+  lines: Array<{
+    srNo: number;
+    itType: 'G' | 'S';
+    fineWt: number;
+    fineRate: number;
+    taxPct: number;
+    metal: number;
+    net: number;
+  }>;
+} | null> {
+  const tenantId = scope.tenantId;
+  const book = scope.coBook ?? 'FSL';
+  const key = keyOf({ ...scope, coBook: book }, Number(vchNo), book);
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
+    const h: any[] = await tx.$queryRawUnsafe(
+      `SELECT * FROM "CUT_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 LIMIT 1`,
+      tenantId,
+      key.CO_CODE,
+      key.LC_CODE,
+      key.CO_YEAR,
+      key.CO_BOOK,
+      key.VCH_NO,
+    );
+    if (!h.length) return null;
+    const header = h[0];
+    const d: any[] = await tx.$queryRawUnsafe(
+      `SELECT * FROM "CUT_DETL" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO"`,
+      tenantId,
+      key.CO_CODE,
+      key.LC_CODE,
+      key.CO_YEAR,
+      key.CO_BOOK,
+      key.VCH_NO,
+    );
+    const isSale = String(header.INOUT_TYPE ?? '').toUpperCase() === 'O';
+    const lines = d.map((row) => ({
+      srNo: num(row.SR_NO),
+      itType: (String(row.IT_TYPE ?? 'G').toUpperCase() === 'S' ? 'S' : 'G') as 'G' | 'S',
+      // on a sale the fine is stored as CR_FINE, on a purchase as DR_FINE
+      fineWt: r3(num(row.CR_FINE) || num(row.DR_FINE)),
+      fineRate: num(row.FINE_RATE),
+      taxPct: num(row.TAX_PRC),
+      metal: r2(num(row.TOT_AMT)),
+      net: r2(num(row.NET_AMT)),
+    }));
+    return {
+      vchNo: key.VCH_NO,
+      side: isSale ? 'SALE' : 'PURC',
+      vchDate: isoDate(header.VCH_DATE),
+      partyAc: String(header.AC_CODE ?? ''),
+      partyName: header.AC_NAME ?? null,
+      itType: String(header.IT_TYPE ?? 'G').toUpperCase() === 'S' ? 'S' : 'G',
+      taxPct: num(header.TAX_PRC),
+      interState: num(header.IGST_TAX) > 0,
+      totals: {
+        metal: r2(num(header.NET_AMT)),
+        tax: r2(num(header.TAX_AMT)),
+        net: r2(num(header.TOT_AMT)),
+      },
+      lines,
+    };
   });
 }

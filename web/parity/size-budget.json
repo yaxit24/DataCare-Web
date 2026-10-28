@@ -3,7 +3,7 @@
   "note": "Per-file line ceilings (may only fall). Files at or below defaultCap need no entry. A raised ceiling or a new over-cap file is a reviewed baseline diff. Counts are re-derived by --audit.",
   "defaultCap": 1500,
   "ceilings": {
-    "apps/api/src/routes/txn.ts": 8529,
+    "apps/api/src/routes/txn.ts": 8508,
     "apps/api/src/modules/sales/rateCut.ts": 2982,
     "apps/api/src/modules/purchase/purchase.ts": 2860,
     "apps/api/src/modules/sales/sales.ts": 2809,

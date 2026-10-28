@@ -77,8 +77,9 @@ describe('route policy registry', () => {
     // G127 (Stage E) adds the sales-return credit-note print GET /sales-returns/:vchNo/print: 611 + 1 = 612.
     // G128 (Stage E) adds the contra voucher print GET /contra/:vchNo/print: 612 + 1 = 613.
     // G129 (Stage E) adds the journal voucher print GET /journal/:vchNo/print: 613 + 1 = 614.
-    expect(routes).toHaveLength(614);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(614);
+    // D31 (Stage D) adds the fine sale/purchase reopen GET /fine-sale/:vchNo: 614 + 1 = 615.
+    expect(routes).toHaveLength(615);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(615);
 
     const policies = routes.map((route) => ({
       ...route,

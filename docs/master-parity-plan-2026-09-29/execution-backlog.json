@@ -4986,6 +4986,29 @@
         "web/apps/api/test/routePolicy.test.ts"
       ],
       "statusNote": "Journal had no print. The journal writer stores lines in CONTRA_DATA + AC_DATA, so added journalVoucherHtml next to the contra renderer and reused contraVoucherData. GET /journal/:vchNo/print renders the classic Particulars|Debit|Credit table (credit indented under To), totals, narration, amount in words. Converted sales-quotation + dhrn inline prints to sendVoucherDocument for the size ceiling. Route policy registered; universe 613->614. VERIFIED LIVE: a 5000 Dr HMCHRG / Cr CASH journal printed HTTP 200 with both legs + totals + narration. Verified: typecheck/typecheck:tests/lint/format/size/kernel/register; routes 126; web 646; full API+DB 313/3483."
+    },
+    {
+      "id": "N121",
+      "status": "implemented-unverified",
+      "action": "Add the fine sale/purchase reopen reader (GET /fine-sale/:vchNo) reading CUT_DATA + CUT_DETL",
+      "parentLabels": "P05; D-lifecycle",
+      "startAfter": [
+        "N120"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "GET /fine-sale/:vchNo returns the posted voucher; route registered + universe 615; full API+DB 313/3483, web 646, routes 126, gates; verified live",
+      "gapIds": "G130",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-28",
+      "evidence": [
+        "web/apps/api/src/modules/bullion/fineSalePurchase.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/test/routePolicy.test.ts"
+      ],
+      "statusNote": "Fine sale/purchase had create+delete but no reopen. Added getFineSalePurchase (CUT_DATA header + CUT_DETL lines back into the create shape; side from INOUT_TYPE, fine from CR_FINE/DR_FINE, ISO date) and GET /fine-sale/:vchNo. Converted 4 report-doc PDF tails (gstr1/trial-balance/gstr3b/balance-sheet) to sendVoucherDocument for the size ceiling. Route policy registered; universe 614->615. VERIFIED LIVE: a 10-fine sale at 6000 reopened HTTP 200 with party WALKIN, totals 60000/1800/61800, the line, and vchDate 2026-10-28. Verified: typecheck/typecheck:tests/lint/format/size/kernel/register; routes 126; web 646; full API+DB 313/3483."
     }
   ],
   "amendments": [

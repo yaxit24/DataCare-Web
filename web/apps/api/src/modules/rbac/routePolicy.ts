@@ -376,7 +376,11 @@ route('Purchase/Purchase Return', [
   'DELETE /purchase-returns/:vchNo',
   'GET /purchase-returns/:vchNo/print',
 ]);
-route('Purchase/Fine Settlement', ['POST /fine-sale', 'DELETE /fine-sale/:vchNo']);
+route('Purchase/Fine Settlement', [
+  'POST /fine-sale',
+  'GET /fine-sale/:vchNo',
+  'DELETE /fine-sale/:vchNo',
+]);
 route('ExtraTran/Old Item Sales', [
   'POST /old-item-sales',
   'GET /old-item-sales/:vchNo',
