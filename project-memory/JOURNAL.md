@@ -4,6 +4,13 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-28 (cont.) — N111: purchase.ts P0-04 (cash/round/kasar from book, G120)
+- Purchase mirror of N110. cash/round/kasar default to resolved control account; posting path resolves slots 2/3. purchase.ts pinned to true count 5 (register had slack at 10). P0-04 total 53->48. **PR #79 → main**.
+- Session P0-04 arc: 68 -> 48 (20 literals removed across labour, sales/purchase return, dhrn, sales, purchase). Remaining: sales.ts 11, purchase.ts 5, billToBill 5, karigar 4, salesOrder 3, employeeJv 3, bullion x2, ledgerAdjust 2, mfg 2, tagOps 2. Tax/income literals (GST/GSTINPUT/INTINC/HMCHRG/TCS) need a tax/company-config slice.
+- Next gap G121, slice N112, decision D31.
+
+---
+
 ## 2026-10-28 (cont.) — N110: sales.ts P0-04 pass 1 (cash/round/kasar from book, G119)
 - sales.ts already resolved cash/round from the book under !isSalesQuotation but kept literal CASH/ROUNDOFF/KASAR initializers; now default to the resolved control account (slot 1). Posting path still resolves slots 2/3. P0-04 sales.ts 14->11, total 56->53. **PR #78 → main** (merge on local verification; CI billing-blocked).
 - Full local battery green: API+DB 313/3483, web 646, routes 126, gates + kernel.
