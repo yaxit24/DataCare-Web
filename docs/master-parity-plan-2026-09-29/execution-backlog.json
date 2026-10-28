@@ -4940,6 +4940,29 @@
         "web/apps/api/test/routePolicy.test.ts"
       ],
       "statusNote": "The sales-return lines live in SL_DETL_RTN (not SL_DETL), so the sales bill cannot render it. Added saleReturnBill.ts (SL_DATA + SL_DETL_RTN + shared GST chrome, Credit Note copy) and GET /sales-returns/:vchNo/print. Converted 5 legacy inline-PDF prints (sales/purchases invoice, receipt/payment voucher) to sendVoucherDocument to stay under the tightening txn.ts ceiling. Route policy registered; universe 611->612. VERIFIED LIVE: a 5g return credit note returned HTTP 200 with customer/HSN/CGST/SGST, taxable 27480, half-tax 412. Verified: typecheck/typecheck:tests/lint/format/size/kernel/register; routes 126; web 646; full API+DB 313/3483."
+    },
+    {
+      "id": "N119",
+      "status": "implemented-unverified",
+      "action": "Add the contra voucher print (GET /contra/:vchNo/print) showing the bank<->cash transfer",
+      "parentLabels": "P05; E-documents",
+      "startAfter": [
+        "N118"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "GET /contra/:vchNo/print returns the transfer voucher; route registered + universe 613; full API+DB 313/3483, web 646, routes 126, gates; verified live",
+      "gapIds": "G128",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-28",
+      "evidence": [
+        "web/apps/api/src/modules/finance/contraVoucher.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/test/routePolicy.test.ts"
+      ],
+      "statusNote": "Contra had no print. Added contraVoucher.ts (reads the 2 CONTRA_DATA rows, Cr from-ac / Dr to-ac, renders a From->To transfer voucher on docShell) and GET /contra/:vchNo/print. Converted karigar-issue + purchase-quotation inline prints to sendVoucherDocument for the size ceiling. Route policy registered; universe 612->613. VERIFIED LIVE: a CASH->BANK contra of 15000 printed HTTP 200 with accounts, amount, narration. Verified: typecheck/typecheck:tests/lint/format/size/kernel/register; routes 126; web 646; full API+DB 313/3483."
     }
   ],
   "amendments": [

@@ -106,6 +106,7 @@ import { ORDER_REPORT_COPIES, type OrderReportCopy } from '../modules/reports/or
 import { purchaseBillData, purchaseBillHtml } from '../modules/purchase/purchaseBill.js';
 import { salesBillData, salesBillHtml } from '../modules/sales/salesBill.js';
 import { saleReturnBillData, saleReturnBillHtml } from '../modules/sales/saleReturnBill.js';
+import { contraVoucherData, contraVoucherHtml } from '../modules/finance/contraVoucher.js';
 import { sendVoucherDocument, resolvePrintScope } from '../modules/documents/voucherPrint.js';
 import { karigarIssueData, karigarIssueHtml } from '../modules/manufacturing/karigarVoucher.js';
 import { financeVoucherData, financeVoucherHtml } from '../modules/finance/financeVoucher.js';
@@ -2093,20 +2094,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       footerText:
         'Purchase quotation — subject to confirmation, rate finalisation, and stock receipt.',
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="purchase-quotation-${String(q.vchNo ?? '').replace(/[^\w.-]/g, '')}.pdf"`,
-      )
-      .send(pdf);
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `purchase-quotation-${q.vchNo ?? ''}`,
+    });
   });
 
   app.get('/karigar/issue-voucher', auth, async (req, reply) => {
@@ -2122,20 +2113,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       party: data.party,
       copy: copyLabel,
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="karigar-issue-${String(q.vchNo ?? '').replace(/[^\w.-]/g, '')}.pdf"`,
-      )
-      .send(pdf);
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `karigar-issue-${q.vchNo ?? ''}`,
+    });
   });
 
   app.get('/sales/credit-note', auth, async (req, reply) => {
@@ -7770,6 +7751,23 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.get('/contra/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, () => getContra(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  // G128 (Stage E): the contra voucher print (bank<->cash transfer, desktop ContraVch.rpt).
+  app.get('/contra/:vchNo/print', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const q = req.query as any;
+    const copyLabel = standardDocumentCopy(q.copy, reply);
+    if (copyLabel === null) return reply;
+    const scope = resolvePrintScope(reply, readScope(req), (req.params as any).vchNo);
+    if (!scope) return reply;
+    await getContra(prisma, scope, scope.vchNo);
+    const data = await contraVoucherData(prisma, scope);
+    if (!data) return reply.code(404).send({ error: 'contra-not-found' });
+    const html = contraVoucherHtml(data.rows, { company: data.company, copy: copyLabel });
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `contra-${scope.vchNo}`,
+    });
   });
   app.put('/contra/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'update')) return;
