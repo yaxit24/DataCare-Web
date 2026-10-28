@@ -523,7 +523,9 @@ import {
   getCardReceipt,
   editCardReceipt,
   deleteCardReceipt,
+  cardReceiptInputFromBody,
 } from '../modules/finance/cardReceipt.js';
+import { registerCrmRoutes } from './crm.js';
 import {
   cashBook,
   partyStatement,
@@ -1038,6 +1040,15 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     return { canUpdate, canDelete };
   };
   const body = (req: FastifyRequest) => (req.body ?? {}) as Record<string, any>;
+  registerCrmRoutes(app, {
+    prisma,
+    auth,
+    guard,
+    scopeOf,
+    run,
+    body,
+    mainUserOf: (req) => sess(req).sub,
+  });
   /** The renderer for server-built documents; injectable for tests. */
   const pdfRenderer = (): PdfRenderer => deps.pdfRenderer ?? new PlaywrightPdfRenderer();
   /** Render server-built HTML, mapping limits to 413/422 and a busy or slow renderer to a retryable 503. */
@@ -7923,33 +7934,14 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       ),
     );
   });
-  const cardReceiptInput = (req: FastifyRequest, b: Record<string, any>) => ({
-    scope: scopeOf(req),
-    partyAc: b.partyAc,
-    partyName: b.partyName,
-    bankAc: b.bankAc,
-    bankName: b.bankName,
-    cardAmt: Number(b.cardAmt),
-    cardComPrc: b.cardComPrc != null ? Number(b.cardComPrc) : undefined,
-    cardComAmt: b.cardComAmt != null ? Number(b.cardComAmt) : undefined,
-    bankComPrc: b.bankComPrc != null ? Number(b.bankComPrc) : undefined,
-    bankSchPrc: b.bankSchPrc != null ? Number(b.bankSchPrc) : undefined,
-    bankComm1: b.bankComm1 != null ? Number(b.bankComm1) : undefined,
-    bankComm2: b.bankComm2 != null ? Number(b.bankComm2) : undefined,
-    cashPaid: b.cashPaid != null ? Number(b.cashPaid) : undefined,
-    empCode: b.empCode,
-    desc: b.desc,
-    billNo: b.billNo,
-    billYrCd: b.billYrCd,
-    billDbCd: b.billDbCd,
-    billAmt: b.billAmt != null ? Number(b.billAmt) : undefined,
-    vchDate: b.vchDate,
-  });
   app.post('/card-receipts', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
     return run(reply, 201, () =>
-      postCardReceipt(prisma, { ...cardReceiptInput(req, b), mainUser: sess(req).sub }),
+      postCardReceipt(
+        prisma,
+        cardReceiptInputFromBody(scopeOf(req), { ...b, mainUser: sess(req).sub }),
+      ),
     );
   });
   app.get('/card-receipts/:vchNo', auth, async (req, reply) => {
@@ -7960,7 +7952,11 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     if (!guard(req, reply, 'update')) return;
     const b = body(req);
     return run(reply, 200, () =>
-      editCardReceipt(prisma, cardReceiptInput(req, b), (req.params as any).vchNo),
+      editCardReceipt(
+        prisma,
+        cardReceiptInputFromBody(scopeOf(req), { ...b, mainUser: sess(req).sub }),
+        (req.params as any).vchNo,
+      ),
     );
   });
   app.delete('/card-receipts/:vchNo', auth, async (req, reply) => {

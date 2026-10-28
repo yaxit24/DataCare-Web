@@ -12,6 +12,7 @@ table below.
 | `accounting` | Trial balance, account ledger, balances | `RP_LEDR`, `RP_BALANCE` |
 | `auth` | JWT and passwords, persisted sessions, business scope, context epoch | `MS_LOGIN`, `MS_OPNCOMP`, password update |
 | `bullion` | Bullion booking, bullion sale, fine sale and purchase posting | `TR_BUL_BOOKING`, `TR_BUL_SALE`, `TR_FINE_SL_PR` |
+| `crm` | Customer entry — employee-scoped customer enquiry, item-interest and follow-up-reminder log (non-financial) | `UT_CUST_ENTRY` |
 | `dhrn` | Pledge and loan issue, receipt and interest; outstanding; receipt and khata documents | `TR_DHRN_ISU`, `TR_DHRN_REC`, `TR_DHRN_INTREC` |
 | `documents` | Scoped A4 document chrome and the voucher document key | Sales, purchase, finance, karigar and loan prints |
 | `einvoice` | E-invoice and e-credit-note lifecycle, IRN payload, transport, cancel, export | `TR_SL_EBILL`, `UT_E_INVOICE` |

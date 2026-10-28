@@ -15,7 +15,11 @@ const routePattern = /\b(?:app|server)\.(get|post|put|patch|delete)\(\s*(['"`])(
 
 function declaredRoutes(): Array<{ method: string; path: string }> {
   const rows: Array<{ method: string; path: string }> = [];
-  for (const file of [resolve(here, '../src/app.ts'), resolve(here, '../src/routes/txn.ts')]) {
+  for (const file of [
+    resolve(here, '../src/app.ts'),
+    resolve(here, '../src/routes/txn.ts'),
+    resolve(here, '../src/routes/crm.ts'),
+  ]) {
     const source = readFileSync(file, 'utf8');
     for (const match of source.matchAll(routePattern)) {
       rows.push({ method: match[1]!.toUpperCase(), path: match[3]! });
@@ -80,8 +84,9 @@ describe('route policy registry', () => {
     // D31 (Stage D) adds the fine sale/purchase reopen GET /fine-sale/:vchNo: 614 + 1 = 615.
     // N122 (Stage D) adds reopen+edit for ledger-adjust and employee-jv (4 routes): 615 + 4 = 619.
     // N123 (G132) adds the Card Receipt / CARD ADJUST lifecycle (4 routes): 619 + 4 = 623.
-    expect(routes).toHaveLength(623);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(623);
+    // N124 (G133) adds the Customer Entry CRM lifecycle (4 routes): 623 + 4 = 627.
+    expect(routes).toHaveLength(627);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(627);
 
     const policies = routes.map((route) => ({
       ...route,

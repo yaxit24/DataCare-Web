@@ -128,6 +128,31 @@ Prior obligations: P06-04/P06-05; X16. Operator surfaces: `txn/bullion, txn/fine
 3. Race two allocations against the same remaining fine weight; at most the allowed quantity commits and the losing request retains its draft with a conflict.
 4. Attempt booking deletion after an adjustment; expect a linked-document rejection. Reverse dependent sales in permitted order, then delete; all booking effects unwind and audit remains.
 
+### crm
+
+Prior obligations: P05 (missing-workflow build). Operator surface: `utility/customer-entry (Cust Entry)`.
+
+**Observed:** `customerEntry.ts` implements the desktop UT_CUST_ENTRY Customer Entry workflow — an employee-scoped, NON-FINANCIAL customer enquiry / item-interest / follow-up-reminder log. It writes only CUST_DATA (one row per customer/interest line, keyed by CO_BOOK = employeeCode with an employee-scoped VCH_NO) and a seed CUST_DETL follow-up row (ISR_NO=1) per line; it posts no AC_DATA/ROJ_MEL_DATA/DELETE_DATA and uses no configured accounting book. A row is persisted only when it carries a name+remark, a tag, or an item+reminder date (UT_CUST_ENTRY.cs:2503-2509). The four CRUD routes live in a dedicated `routes/crm.ts` plugin wired from registerTxnRoutes.
+
+**Current implementation anchors:**
+- `web/apps/api/src/modules/crm/customerEntry.ts` — `assertCustomerEntryInput`; `postCustomerEntry`; `getCustomerEntry`; `editCustomerEntry`; `deleteCustomerEntry` (one aggregate per employee-scoped voucher).
+- `web/apps/api/src/routes/crm.ts` — `registerCrmRoutes` (POST/GET/PUT/DELETE /crm/customer-entries).
+
+**Existing test files to retain and extend:**
+- `web/apps/api/test/customerEntry.routes.db.test.ts`
+
+**Implementation sequence:**
+
+1. Persist the employee-scoped CUST_DATA aggregate and the seed CUST_DETL (ISR_NO=1) per qualifying row, honouring the desktop write predicate.
+2. Reopen by employee code + voucher number, ordered by SR_NO, returning every stored customer/item-interest field.
+3. Replace-and-reseed on edit; delete removes both tables (no ledger, no audit) — matching the desktop.
+
+**Step-by-step verification cases and expected outcomes:**
+
+1. Post a multi-row entry with one non-qualifying row; expected only the qualifying rows persist and a seed CUST_DETL exists per persisted row, with no AC_DATA.
+2. Reopen, edit to fewer rows, reload; expected the aggregate is replaced exactly and the row count matches.
+3. Delete; expected both CUST_DATA and CUST_DETL rows are removed for the employee-scoped voucher.
+
 ### dhrn
 
 Prior obligations: P09-01/P09-02/P09-05; X24. Operator surfaces: `txn/dhrn-issue, dhrn-receipt, dhrn-interest, loan-issue and loan-received`.

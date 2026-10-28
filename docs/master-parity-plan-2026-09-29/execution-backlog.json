@@ -5057,6 +5057,30 @@
         "web/apps/api/test/cardReceipt.routes.db.test.ts"
       ],
       "statusNote": "Card Rec (TR_CARD_REC) was entirely absent (MISSING workflow, P1-core). Built cardReceipt.ts: exact 8-leg ledger (Ac_Ledr.cs:1790-1804), CARD_DATA header (38 cols), 4-row ROJ_MEL_DATA (Ac_Rojmel.cs:843-849), commission=BOOK_DETL slot 1 / cash=slot 2 of a new CRD (CARD ADJUST) book + CARDCOMM account; whole-unit card-commission rounding (TR_CARD_REC.cs:3796). post/get/edit/delete with DELETE_DATA audit (VCH_VAL_CR=CARD_AMT) + hidden-identity cleanup. POST/GET/PUT/DELETE /card-receipts; universe 619->623; grandfathered the two rounding helpers in the kernel baseline like employeeJv/ledgerAdjust. New DB test asserts 8 legs, 07/08 cash variant, header, roj (4), reopen, edit (10000->20000), delete. VERIFIED LIVE: 10000@2%/1% -> gross 10200, bank net 10098, party net 10000; reopen; edit to 20000 (comm 400, net 20196); delete. Verified: typecheck/typecheck:tests/lint/format/size/kernel/register; routes 126; web 646; full API+DB 314/3485."
+    },
+    {
+      "id": "N124",
+      "status": "implemented-unverified",
+      "action": "Build the Customer Entry / CRM workflow (2nd of the 5 MISSING): non-financial CUST_DATA+CUST_DETL aggregate + lifecycle",
+      "parentLabels": "P05; missing-workflows",
+      "startAfter": [
+        "N123"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "POST/GET/PUT/DELETE /crm/customer-entries; CUST_DATA+CUST_DETL, no ledger; route universe 627; full API+DB 315/3487, web 646, routes 126, gates; verified live",
+      "gapIds": "G133",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-28",
+      "evidence": [
+        "web/apps/api/src/modules/crm/customerEntry.ts",
+        "web/apps/api/src/routes/crm.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/modules/rbac/formCatalog.ts",
+        "web/apps/api/test/customerEntry.routes.db.test.ts"
+      ],
+      "statusNote": "Cust Entry (UT_CUST_ENTRY) was absent (MISSING workflow). Built customerEntry.ts: NON-FINANCIAL employee-scoped CUST_DATA (one row per line, CO_BOOK=employeeCode, employee-scoped VCH_NO) + seed CUST_DETL ISR_NO=1 per line; no AC_DATA/ROJ_MEL_DATA/DELETE_DATA/book. Row predicate = name+remark OR tag OR item+remDate (UT_CUST_ENTRY.cs:2503-2509). post/get/edit/delete. Routes extracted to a new routes/crm.ts plugin (size-budget split) wired from registerTxnRoutes. Added Utilities/Customer Entry form to the catalog. Universe 623->627. New DB test (predicate, reopen, edit, delete, no-ledger). VERIFIED LIVE: 2-row entry -> reopen -> edit to 1 row -> delete. Verified: typecheck/typecheck:tests/lint/format/size/kernel/register/docs:refs; routes 126; web 646; full API+DB 315/3487."
     }
   ],
   "amendments": [

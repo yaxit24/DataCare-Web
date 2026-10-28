@@ -143,6 +143,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G130 | Med | Fine sale/purchase / lifecycle | `unified/src/csharp/DataCareNext/TR_FINE_SL_PR.cs:4288` | `web/apps/api/src/routes/txn.ts` `GET /fine-sale/:vchNo`, `web/apps/api/src/modules/bullion/fineSalePurchase.ts` `getFineSalePurchase` | The fine sale/purchase must be reopenable (read CUT_DATA + CUT_DETL back into the form) so the operator can reload a posted voucher. | N121 |
 | G131 | Med | Ledger adjust & employee JV / lifecycle | `unified/src/csharp/DataCareNext/TR_EMP_JV.cs`, ledger-adjust form | `web/apps/api/src/routes/txn.ts` `GET/PUT /ledger-adjust/:vchNo`, `GET/PUT /employee-jv/:vchNo` | Both vouchers must be reopenable and editable (the reader/editor already existed in the modules; only the routes were missing). | N122 |
 | G132 | High | Card Rec (MISSING workflow) | `unified/src/csharp/DataCareNext/TR_CARD_REC.cs`, `Ac_Ledr.cs:1790-1804` | `web/apps/api/src/modules/finance/cardReceipt.ts`, `web/apps/api/src/routes/txn.ts` `POST/GET/PUT/DELETE /card-receipts` | The Card Receipt (CARD ADJUST) workflow must exist: a customer card settlement posting the exact 8-leg ledger (party/bank/commission/cash), writing CARD_DATA + ROJ_MEL_DATA, reopenable, editable and deletable with the desktop DELETE_DATA audit. | N123 |
+| G133 | High | Cust Entry (MISSING workflow) | `unified/src/csharp/DataCareNext/UT_CUST_ENTRY.cs` | `web/apps/api/src/modules/crm/customerEntry.ts`, `web/apps/api/src/routes/crm.ts` `POST/GET/PUT/DELETE /crm/customer-entries` | The Customer Entry (CRM enquiry / item-interest / follow-up reminder) workflow must exist: an employee-scoped, non-financial CUST_DATA + CUST_DETL aggregate, reopenable, editable and deletable. | N124 |
 
 ## 4. Decisions D23–D28
 
@@ -846,6 +847,24 @@ receipt at 2% card / 1% bank posted (gross 10,200, bank net 10,098), reopened, e
 Done when: the Card Receipt workflow creates, reopens, edits and deletes with the desktop write-set.
 
 
+### N124 — Customer Entry / CRM workflow (G133, one of the 5 MISSING workflows)
+
+Cust Entry (desktop UT_CUST_ENTRY) was absent — the second of the five MISSING workflows to be built. It
+is a NON-FINANCIAL employee-scoped customer CRM enquiry / item-interest / follow-up-reminder log: a new
+`web/apps/api/src/modules/crm/customerEntry.ts` writes only CUST_DATA (one row per customer/interest line, keyed by
+CO_BOOK = employeeCode with an employee-scoped VCH_NO) plus a seed CUST_DETL follow-up row (ISR_NO=1) per
+line — no AC_DATA/ROJ_MEL_DATA/DELETE_DATA, no configured book. A row persists only when it carries a
+name+remark, a tag, or an item+reminder date (UT_CUST_ENTRY.cs:2503-2509). post/get/edit/delete complete
+the lifecycle (edit replaces the aggregate; delete removes both tables). The 4 routes live in a new
+`web/apps/api/src/routes/crm.ts` plugin (wired from registerTxnRoutes with the shared helpers, per the size-budget split
+guidance) so the monolithic route file stayed under its ceiling. A new `Utilities/Customer Entry` form was
+added to the catalog. Route universe 623 -> 627; a new DB test asserts the row predicate, reopen, edit and
+delete, and that no ledger is written. Verified live: a 2-row entry posted, reopened, edited to 1 row and
+deleted.
+
+Done when: the Customer Entry workflow creates, reopens, edits and deletes its CUST_DATA + CUST_DETL aggregate.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -890,6 +909,7 @@ Done when: the Card Receipt workflow creates, reopens, edits and deletes with th
 | N121 | — | implemented-unverified, evidence in this change (G130: fine sale/purchase reopen GET /fine-sale/:vchNo; verified live HTTP 200) |
 | N122 | — | implemented-unverified, evidence in this change (G131: ledger-adjust & employee-jv reopen+edit; verified live round-trip) |
 | N123 | — | implemented-unverified, evidence in this change (G132: Card Receipt / CARD ADJUST workflow; verified live full lifecycle) |
+| N124 | — | implemented-unverified, evidence in this change (G133: Customer Entry CRM workflow; verified live full lifecycle) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
