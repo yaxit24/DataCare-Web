@@ -423,7 +423,11 @@ route('Cash / Bank/Contra', [
   'PUT /contra/:vchNo',
   'DELETE /contra/:vchNo',
 ]);
-route('Cash / Bank/Journal Voucher', ['POST /journal', 'DELETE /journal/:vchNo']);
+route('Cash / Bank/Journal Voucher', [
+  'POST /journal',
+  'DELETE /journal/:vchNo',
+  'GET /journal/:vchNo/print',
+]);
 route('Cash / Bank/Account Opening Bal', ['POST /ac-opbl', 'DELETE /ac-opbl/:vchNo']);
 route('Cash / Bank/Fine JV (metal transfer)', [
   'POST /fine-jv',

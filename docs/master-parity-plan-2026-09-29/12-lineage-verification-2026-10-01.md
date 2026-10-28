@@ -139,6 +139,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G126 | Med | Purchase / documents | `unified/src/csharp/DataCareNext/PurcBillA4Gst.rpt` | `web/apps/api/src/routes/txn.ts` `GET /purchases/:vchNo/print` | The purchase must produce a printable supplier bill (the purchase counterpart of the Tax Invoice). | N117 |
 | G127 | Med | Sales return / documents | `unified/src/csharp/DataCareNext/SaleRtnBillA4Gst.rpt` | `web/apps/api/src/routes/txn.ts` `GET /sales-returns/:vchNo/print`, `web/apps/api/src/modules/sales/saleReturnBill.ts` | The sales return must produce a printable credit note (returned goods + value credited to the customer). | N118 |
 | G128 | Med | Contra / documents | `unified/src/csharp/DataCareNext/ContraVch.rpt` | `web/apps/api/src/routes/txn.ts` `GET /contra/:vchNo/print`, `web/apps/api/src/modules/finance/contraVoucher.ts` | The contra (bank<->cash transfer) must produce a printable voucher showing the from/to accounts and amount. | N119 |
+| G129 | Med | Journal / documents | `unified/src/csharp/DataCareNext/JournalVch.rpt` | `web/apps/api/src/routes/txn.ts` `GET /journal/:vchNo/print`, `web/apps/api/src/modules/finance/contraVoucher.ts` `journalVoucherHtml` | The journal voucher must produce a printable multi-line Dr/Cr entry (Particulars, Debit, Credit, totals, narration). | N120 |
 
 ## 4. Decisions D23–D28
 
@@ -780,6 +781,20 @@ accounts, the amount and the narration.
 Done when: a posted contra produces a transfer voucher (HTML and PDF).
 
 
+### N120 — Journal voucher print (G129, Stage E)
+
+The journal voucher (multi-line Dr/Cr) had create/delete but no print. The journal writer stores its lines
+in CONTRA_DATA (shared with contra) + AC_DATA, so N120 adds `journalVoucherHtml` alongside the contra
+renderer and reuses `contraVoucherData` to read the rows. `GET /journal/:vchNo/print` renders the classic
+accounting journal table (Particulars | Debit | Credit with the credited account indented under "To",
+totals, narration and amount in words). Two more legacy inline-PDF prints (sales-quotation and dhrn) were
+converted to the shared helper to keep txn.ts under its ceiling. Route registered under the Journal policy;
+route universe 613 -> 614. Verified live: a 5,000 Dr HMCHRG / Cr CASH journal printed HTTP 200 with both
+legs, the totals and the narration.
+
+Done when: a posted journal produces a Dr/Cr voucher (HTML and PDF).
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -820,6 +835,7 @@ Done when: a posted contra produces a transfer voucher (HTML and PDF).
 | N117 | — | implemented-unverified, evidence in this change (G126: purchase bill print GET /purchases/:vchNo/print; verified live HTML 200) |
 | N118 | — | implemented-unverified, evidence in this change (G127: sales-return credit-note print GET /sales-returns/:vchNo/print; verified live HTML 200) |
 | N119 | — | implemented-unverified, evidence in this change (G128: contra voucher print GET /contra/:vchNo/print; verified live HTML 200) |
+| N120 | — | implemented-unverified, evidence in this change (G129: journal voucher print GET /journal/:vchNo/print; verified live HTML 200) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

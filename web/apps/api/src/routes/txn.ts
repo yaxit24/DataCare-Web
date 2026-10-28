@@ -106,7 +106,11 @@ import { ORDER_REPORT_COPIES, type OrderReportCopy } from '../modules/reports/or
 import { purchaseBillData, purchaseBillHtml } from '../modules/purchase/purchaseBill.js';
 import { salesBillData, salesBillHtml } from '../modules/sales/salesBill.js';
 import { saleReturnBillData, saleReturnBillHtml } from '../modules/sales/saleReturnBill.js';
-import { contraVoucherData, contraVoucherHtml } from '../modules/finance/contraVoucher.js';
+import {
+  contraVoucherData,
+  contraVoucherHtml,
+  journalVoucherHtml,
+} from '../modules/finance/contraVoucher.js';
 import { sendVoucherDocument, resolvePrintScope } from '../modules/documents/voucherPrint.js';
 import { karigarIssueData, karigarIssueHtml } from '../modules/manufacturing/karigarVoucher.js';
 import { financeVoucherData, financeVoucherHtml } from '../modules/finance/financeVoucher.js';
@@ -2391,20 +2395,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       title: 'Sales Quotation',
       copy: 'PROFORMA — NOT A TAX INVOICE',
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="sales-quotation-${String(q.vchNo ?? '').replace(/[^\w.-]/g, '')}.pdf"`,
-      )
-      .send(pdf);
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `sales-quotation-${q.vchNo ?? ''}`,
+    });
   });
 
   app.get('/finance/receipt-voucher', auth, async (req, reply) => {
@@ -2983,20 +2977,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       company: data.company,
       party: data.party,
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="dhrn-${String(q.vchNo ?? '').replace(/[^\w.-]/g, '')}.pdf"`,
-      )
-      .send(pdf);
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `dhrn-${q.vchNo ?? ''}`,
+    });
   });
 
   app.get('/scheme/passbook', auth, async (req, reply) => {
@@ -7708,6 +7692,22 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         book: body(req).book,
       }),
     );
+  });
+  // G129 (Stage E): the journal voucher print (multi-line Dr/Cr, desktop JournalVch.rpt).
+  app.get('/journal/:vchNo/print', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const q = req.query as any;
+    const copyLabel = standardDocumentCopy(q.copy, reply);
+    if (copyLabel === null) return reply;
+    const scope = resolvePrintScope(reply, readScope(req), (req.params as any).vchNo);
+    if (!scope) return reply;
+    const data = await contraVoucherData(prisma, scope);
+    if (!data) return reply.code(404).send({ error: 'journal-not-found' });
+    const html = journalVoucherHtml(data.rows, { company: data.company, copy: copyLabel });
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `journal-${scope.vchNo}`,
+    });
   });
   /**
    * Contra deletion (desktop TR_CONTRA).
