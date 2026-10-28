@@ -129,6 +129,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G116 | Med | Sales return | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (SALES RETURNE book legs) | `web/apps/api/src/modules/sales/salesReturn.ts` | The control/revenue, cash and round/kasar accounts must come from the book's BOOK_DETL slots (SR_NO 1/2/3), not literal `SALES`/`CASH`/`ROUNDOFF`/`KASAR` placeholders that only the provisioning seed carries. | N107 |
 | G117 | Med | Purchase return | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (PURC RETURN book legs) | `web/apps/api/src/modules/purchase/purchaseReturn.ts` | The control/expense, cash and round/kasar accounts must come from the book's BOOK_DETL slots (SR_NO 1/2/3), not literal `PURCHASE`/`CASH`/`ROUNDOFF`/`KASAR` placeholders. | N108 |
 | G118 | Med | Dhiran | `unified/src/csharp/DataCareNext/Ac_Ledr.cs:1066` | `web/apps/api/src/modules/dhrn/dhrn.ts` | The dhrn funding (cash) account must come from the book's BOOK_DETL slot 2 (desktop joins `B.SR_NO = 2` under MAIN_BOOK `DHIRAN ISSUE`/`DHIRAN RECEIPT`), not a literal `CASH` that only the seed carries. | N109 |
+| G119 | Med | Sales | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (SALES book legs) | `web/apps/api/src/modules/sales/sales.ts` | The sale cash and round/kasar accounts must come from the book's BOOK_DETL slots (2/3), not literal `CASH`/`ROUNDOFF`/`KASAR` initializers. | N110 |
 
 ## 4. Decisions D23–D28
 
@@ -625,6 +626,19 @@ slots 1/2 — a modelling decision for a later slice. dhrn.ts falls from 5 to 2 
 Done when: a dhrn issue/receipt/interest voucher funds from the book's configured cash account on a provisioned company.
 
 
+### N110 — Sale cash/round/kasar accounts resolved from the book (G119, P0-04, first sales.ts pass)
+
+First sub-pass on sales.ts (the largest P0-04 file). The sale writer already resolved its cash/round
+accounts from the book under `!isSalesQuotation` but kept literal initializers `CASH`/`ROUNDOFF`/`KASAR`.
+Those initializers now default to the resolved control account (the book's slot 1), so a degenerate or
+non-posting path never names a seed-only literal; the posting path still resolves slots 2/3 exactly as
+before. The remaining sales.ts literals (SALES control fallback for quotations/rate-unfix, GST, tender
+cash/bank/old-gold, HMCHRG, TCS) are left for later sub-passes. sales.ts falls from 14 to 11 (P0-04
+total 56 → 53).
+
+Done when: a retail sale funds cash and settles round/kasar from the book's configured accounts.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -655,6 +669,7 @@ Done when: a dhrn issue/receipt/interest voucher funds from the book's configure
 | N107 | — | implemented-unverified, evidence in this change (G116: sales-return control/cash/round accounts resolved from BOOK_DETL slots; P0-04 67→63) |
 | N108 | — | implemented-unverified, evidence in this change (G117: purchase-return control/cash/round accounts resolved from BOOK_DETL slots; P0-04 63→59) |
 | N109 | — | implemented-unverified, evidence in this change (G118: dhrn funding account resolved from BOOK_DETL slot 2, not a literal; P0-04 59→56) |
+| N110 | — | implemented-unverified, evidence in this change (G119: sale cash/round/kasar accounts default to the resolved control account, not literals; P0-04 56→53) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

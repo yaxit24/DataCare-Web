@@ -4,6 +4,13 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-28 (cont.) — N110: sales.ts P0-04 pass 1 (cash/round/kasar from book, G119)
+- sales.ts already resolved cash/round from the book under !isSalesQuotation but kept literal CASH/ROUNDOFF/KASAR initializers; now default to the resolved control account (slot 1). Posting path still resolves slots 2/3. P0-04 sales.ts 14->11, total 56->53. **PR #78 → main** (merge on local verification; CI billing-blocked).
+- Full local battery green: API+DB 313/3483, web 646, routes 126, gates + kernel.
+- sales.ts remaining 11: SALES quotation/rateUnfix control fallback (570/705), GST (706), tender cash/bank/oldGold (519/523/530/1909), HMCHRG (1493/1511), TCS (1522/1531). Next sub-pass could do tender (resolve from book slots) or HMCHRG/TCS (company-config accounts). Next gap G120, slice N111, decision D31.
+
+---
+
 ## 2026-10-28 (cont.) — N109: dhrn funding account from the book (G118, P0-04)
 - The 3 dhrn writers (issue/receipt/interest) defaulted cash to literal CASH. Desktop Ac_Ledr.cs:1066 funds from BOOK_DETL slot 2. Added dhrnCashAcTx -> resolveBookAccountTx(...,2) fail-closed; override honoured; interest writer now resolves the book too. Seeded DHI/DHR carry slot 2=CASH. INTINC literal left (web models interest income separately vs desktop book slots 1/2; deferred). P0-04 dhrn.ts 5->2, total 59->56. Test fixtures: added SR_NO 2 slots to dhrnReceipt + settingsBehavior; added BOOK_DETL to dhrnReceipt wipe list. **PR #77 → main** (merge on local verification; CI billing-blocked).
 - Full local battery green: API+DB 313/3483, web 646, routes 126, gates + kernel.
