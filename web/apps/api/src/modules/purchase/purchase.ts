@@ -778,7 +778,7 @@ async function writePurchaseTx(
     isPurchaseQuotation || totals.total === 0
       ? purchaseAc
       : await resolveBookAccountTx(tx, input.scope, bookPolicy, 1);
-  let cashAc = input.cashAc ?? 'CASH';
+  let cashAc = controlAc;
   if (!isPurchaseQuotation && round2(num(input.cashAmt)) !== 0) {
     cashAc = validateConfiguredAccount(
       'cash account',
@@ -786,8 +786,8 @@ async function writePurchaseTx(
       await resolveBookAccountTx(tx, input.scope, bookPolicy, 2),
     );
   }
-  let roundAc = requestedRoundAc ?? 'ROUNDOFF';
-  let kasarAc = input.kasarAc ?? 'KASAR';
+  let roundAc = requestedRoundAc ?? controlAc;
+  let kasarAc = input.kasarAc ?? controlAc;
   if (!isPurchaseQuotation && (totals.roundOff !== 0 || round2(num(input.kasar)) !== 0)) {
     const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 3);
     roundAc = validateConfiguredAccount('round account', requestedRoundAc, configured);
