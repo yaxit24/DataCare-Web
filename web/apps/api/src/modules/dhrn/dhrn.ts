@@ -7,6 +7,7 @@ import {
   type SettingsBehavior,
 } from '../shared/settingsBehavior.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
+import { resolveBookAccountTx, type BookPolicy } from '../shared/bookPolicy.js';
 import {
   postVoucherTx,
   reverseVoucherTx,
@@ -117,6 +118,30 @@ function assertDhrnBook(
 
 function desktopDhrnBookName(book: DhrnBook, entryType: DhrnEntryType): string {
   return entryType === 'L' ? book.mainBook || book.name : book.name;
+}
+
+/**
+ * G118 / P0-04: the dhrn funding (cash) account is the book's BOOK_DETL slot 2, exactly as the desktop
+ * joins `B.AC_CODE` where `B.SR_NO = 2` under MAIN_BOOK 'DHIRAN ISSUE'/'DHIRAN RECEIPT' (Ac_Ledr.cs:1066).
+ * We resolve it through the kernel primitive (fail-closed) rather than a literal 'CASH' that only the
+ * provisioning seed carries; an explicit caller override still wins.
+ */
+async function dhrnCashAcTx(
+  tx: any,
+  scope: VoucherScope,
+  book: DhrnBook,
+  override?: string,
+): Promise<string> {
+  const trimmed = (override ?? '').trim();
+  if (trimmed) return trimmed;
+  const policy: BookPolicy = {
+    coBook: scope.coBook ?? '',
+    vchType: book.shortName || (scope.coBook ?? ''),
+    bookName: book.mainBook || book.name,
+    mainBook: book.mainBook || book.name,
+    inout: (book.inout as string) || 'O',
+  };
+  return resolveBookAccountTx(tx, scope, policy, 2);
 }
 
 /** Interest dispatcher honouring the desktop CO_SET interest type. */
@@ -396,9 +421,9 @@ export async function issueDhrn(
       : new Date();
   const run = async (tx: any, identity: VoucherIdentity) => {
     const loanAc = (input.loanAc ?? '').trim() || input.borrowerAc;
-    const cashAc = input.cashAc ?? 'CASH';
     const book = await configuredBookTx(tx, input.scope);
     assertDhrnBook(book, input.expectedMainBook, input.expectedBookInout);
+    const cashAc = await dhrnCashAcTx(tx, input.scope, book, input.cashAc);
     const entryType = input.entryType ?? 'D';
     const inoutType = input.expectedBookInout ?? ((book.inout as 'I' | 'O' | '') || 'O');
     const bookName = desktopDhrnBookName(book, entryType);
@@ -667,7 +692,6 @@ export async function receiveDhrn(
   const date = input.vchDate ? new Date(input.vchDate) : new Date();
   const run = async (tx: any, identity: VoucherIdentity) => {
     const loanAc = (input.loanAc ?? '').trim() || input.borrowerAc;
-    const cashAc = input.cashAc ?? 'CASH';
     const intIncAc = input.intIncAc ?? 'INTINC';
     const entryType = input.entryType ?? 'D';
     const before = await outstandingTx(tx, input.scope, input.isuNo, {
@@ -688,6 +712,7 @@ export async function receiveDhrn(
     const newOs = round2(before - input.principalRepaid);
     const book = await configuredBookTx(tx, input.scope);
     assertDhrnBook(book, input.expectedMainBook, input.expectedBookInout);
+    const cashAc = await dhrnCashAcTx(tx, input.scope, book, input.cashAc);
     const inoutType = input.expectedBookInout ?? ((book.inout as 'I' | 'O' | '') || 'I');
     const bookName = desktopDhrnBookName(book, entryType);
     const key = voucherKey(input.scope, identity.voucherNo);
@@ -920,12 +945,13 @@ export async function receiveDhrnInterest(
 ): Promise<{ vchNo: number }> {
   if (!input.borrowerAc) throw new DhrnValidationError('borrower account is required');
 
-  const cashAc = input.cashAc ?? 'CASH';
   const intIncAc = input.intIncAc ?? 'INTINC';
   const tenantId = input.scope.tenantId;
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
 
   const vchNo = await withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
+    const book = await configuredBookTx(tx, input.scope);
+    const cashAc = await dhrnCashAcTx(tx, input.scope, book, input.cashAc);
     // Interest: operator override if supplied, else computed from issue rate × elapsed × CO_SET (R3).
     const interest =
       input.interest != null && Number.isFinite(input.interest)

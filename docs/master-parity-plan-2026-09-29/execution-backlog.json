@@ -4723,6 +4723,29 @@
         "web/apps/api/test/postingAccountLiterals.test.ts"
       ],
       "statusNote": "Mirror of N107 for the purchase side. Control account resolved unconditionally from BOOK_DETL slot 1 and reused as the per-item expense fallback; cash from slot 2, round/kasar from slot 3; literal PURCHASE/CASH/ROUNDOFF/KASAR initializers removed. Only GSTINPUT literal remains (tax-config concern): register 5->1, total 63->59. Verified locally: typecheck/typecheck:tests/lint/format/size/kernel; routes 126; web 646; full API+DB 313/3483."
+    },
+    {
+      "id": "N109",
+      "status": "implemented-unverified",
+      "action": "The three dhrn writers defaulted the funding account to a literal CASH; resolve it from the book BOOK_DETL slot 2 like the desktop",
+      "parentLabels": "P0-04; X07",
+      "startAfter": [
+        "N108"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "dhrn.ts resolves cash from BOOK_DETL slot 2 via resolveBookAccountTx in issue/receipt/interest; P0-04 register 5->2 (INTINC remains) / total 59->56; full API+DB 313/3483, web 646, routes 126, gates green",
+      "gapIds": "G118",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-28",
+      "evidence": [
+        "web/apps/api/src/modules/dhrn/dhrn.ts",
+        "web/apps/api/test/dhrnReceipt.db.test.ts",
+        "web/apps/api/test/settingsBehavior.db.test.ts",
+        "web/apps/api/test/postingAccountLiterals.test.ts"
+      ],
+      "statusNote": "Desktop Ac_Ledr.cs:1066 joins B.SR_NO=2 for the dhrn funding account. The three web writers (issue/receipt/interest) defaulted to a literal CASH; now resolved via resolveBookAccountTx(...,2) fail-closed, explicit override honoured. Seeded DHI/DHR books carry slot 2=CASH. Interest-income INTINC literal left (web models it as a separate account vs desktop book slots 1/2; deferred). dhrn.ts 5->2, total 59->56. Added SR_NO 2 slots to dhrnReceipt + settingsBehavior fixtures (+ BOOK_DETL to dhrnReceipt wipe list). Verified locally: typecheck/typecheck:tests/lint/format/size/kernel; routes 126; web 646; full API+DB 313/3483."
     }
   ],
   "amendments": [

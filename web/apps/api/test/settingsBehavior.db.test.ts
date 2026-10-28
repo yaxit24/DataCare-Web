@@ -96,6 +96,16 @@ databaseDescribe('restricted-role CO_SET behavior integration', () => {
       LC,
       RCT,
     );
+    // G118 / P0-04: the dhrn writers resolve the funding account from BOOK_DETL slot 2 (desktop
+    // Ac_Ledr.cs:1066); configure it on the pledge book so interest/receipt posts resolve it.
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","MAIN_BOOK","BOOK_INOUT")
+         VALUES ($1,$2,$3,$4,2,'CASHAC','DHRN ISSUE','O')`,
+      TENANT,
+      CO,
+      LC,
+      DHR,
+    );
   };
 
   const set = async (patch: Partial<Record<keyof SettingsBehavior, string | null>>) => {

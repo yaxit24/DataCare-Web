@@ -128,6 +128,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G115 | High | Labour | `unified/src/csharp/DataCareNext/Ac_Ledr.cs:1203` | `web/apps/api/src/modules/sales/labourInvoice.ts` | The labour-income leg must credit the book's BOOK_DETL slot SR_NO 6 (desktop joins `B.SR_NO = 6` under MAIN_BOOK `LABOUR WORK`), not a literal `LABOUR` account that exists only in the provisioning seed and is absent on a migrated company. | N106 |
 | G116 | Med | Sales return | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (SALES RETURNE book legs) | `web/apps/api/src/modules/sales/salesReturn.ts` | The control/revenue, cash and round/kasar accounts must come from the book's BOOK_DETL slots (SR_NO 1/2/3), not literal `SALES`/`CASH`/`ROUNDOFF`/`KASAR` placeholders that only the provisioning seed carries. | N107 |
 | G117 | Med | Purchase return | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (PURC RETURN book legs) | `web/apps/api/src/modules/purchase/purchaseReturn.ts` | The control/expense, cash and round/kasar accounts must come from the book's BOOK_DETL slots (SR_NO 1/2/3), not literal `PURCHASE`/`CASH`/`ROUNDOFF`/`KASAR` placeholders. | N108 |
+| G118 | Med | Dhiran | `unified/src/csharp/DataCareNext/Ac_Ledr.cs:1066` | `web/apps/api/src/modules/dhrn/dhrn.ts` | The dhrn funding (cash) account must come from the book's BOOK_DETL slot 2 (desktop joins `B.SR_NO = 2` under MAIN_BOOK `DHIRAN ISSUE`/`DHIRAN RECEIPT`), not a literal `CASH` that only the seed carries. | N109 |
 
 ## 4. Decisions D23–D28
 
@@ -611,6 +612,19 @@ literal remains (a tax-config concern), so the file falls from 5 to 1 (P0-04 tot
 Done when: a purchase return debits the book's configured control/cash/round accounts on a provisioned company.
 
 
+### N109 — Dhrn funding account resolved from the book (G118, P0-04)
+
+The three dhrn writers (issue, receipt, interest-only) defaulted the funding account to a literal
+`CASH`. The desktop credits/debits the book's BOOK_DETL slot 2 (`Ac_Ledr.cs:1066`, `B.SR_NO = 2`), so the
+writers now resolve the cash account via the kernel primitive `resolveBookAccountTx(..., 2)` (fail-closed),
+honouring an explicit caller override. The seeded DHI/DHR books already carry slot 2 = `CASH` (the default
+leg layout). The dedicated interest-income account (`INTINC`) is left as a documented remaining literal
+because the web models interest income as a separate account while the desktop routes it through book
+slots 1/2 — a modelling decision for a later slice. dhrn.ts falls from 5 to 2 (P0-04 total 59 → 56).
+
+Done when: a dhrn issue/receipt/interest voucher funds from the book's configured cash account on a provisioned company.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -640,6 +654,7 @@ Done when: a purchase return debits the book's configured control/cash/round acc
 | N106 | — | implemented-unverified, evidence in this change (G115: labour-income account resolved from BOOK_DETL SR_NO 6, not a literal; P0-04 68→67) |
 | N107 | — | implemented-unverified, evidence in this change (G116: sales-return control/cash/round accounts resolved from BOOK_DETL slots; P0-04 67→63) |
 | N108 | — | implemented-unverified, evidence in this change (G117: purchase-return control/cash/round accounts resolved from BOOK_DETL slots; P0-04 63→59) |
+| N109 | — | implemented-unverified, evidence in this change (G118: dhrn funding account resolved from BOOK_DETL slot 2, not a literal; P0-04 59→56) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
