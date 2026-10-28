@@ -4746,6 +4746,27 @@
         "web/apps/api/test/postingAccountLiterals.test.ts"
       ],
       "statusNote": "Desktop Ac_Ledr.cs:1066 joins B.SR_NO=2 for the dhrn funding account. The three web writers (issue/receipt/interest) defaulted to a literal CASH; now resolved via resolveBookAccountTx(...,2) fail-closed, explicit override honoured. Seeded DHI/DHR books carry slot 2=CASH. Interest-income INTINC literal left (web models it as a separate account vs desktop book slots 1/2; deferred). dhrn.ts 5->2, total 59->56. Added SR_NO 2 slots to dhrnReceipt + settingsBehavior fixtures (+ BOOK_DETL to dhrnReceipt wipe list). Verified locally: typecheck/typecheck:tests/lint/format/size/kernel; routes 126; web 646; full API+DB 313/3483."
+    },
+    {
+      "id": "N110",
+      "status": "implemented-unverified",
+      "action": "First sales.ts P0-04 sub-pass: cash/round/kasar literal initializers default to the resolved control account; posting path still resolves BOOK_DETL slots 2/3",
+      "parentLabels": "P0-04; X07",
+      "startAfter": [
+        "N109"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "sales.ts cash/round/kasar no longer use CASH/ROUNDOFF/KASAR literals; register 14->11 / total 56->53; full API+DB 313/3483, web 646, routes 126, gates green",
+      "gapIds": "G119",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-28",
+      "evidence": [
+        "web/apps/api/src/modules/sales/sales.ts",
+        "web/apps/api/test/postingAccountLiterals.test.ts"
+      ],
+      "statusNote": "First sub-pass on the largest P0-04 file. The sale writer already resolved cash/round from the book under !isSalesQuotation but kept literal initializers CASH/ROUNDOFF/KASAR; they now default to the resolved control account (book slot 1) so degenerate/quotation paths never name a seed-only literal, while the posting path still resolves slots 2/3. Remaining sales.ts literals (SALES quotation fallback, GST, tender cash/bank/old-gold, HMCHRG, TCS) deferred. sales.ts 14->11, total 56->53. Verified locally: typecheck/typecheck:tests/lint/format/size/kernel; routes 126; web 646; full API+DB 313/3483."
     }
   ],
   "amendments": [

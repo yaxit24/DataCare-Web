@@ -956,7 +956,7 @@ async function writeSaleTx(
     isSalesQuotation || input.rateUnfix || totals.total === 0
       ? salesAc
       : await resolveBookAccountTx(tx, input.scope, bookPolicy, 1);
-  let cashAc = input.cashAc ?? 'CASH';
+  let cashAc = controlAc;
   if (!isSalesQuotation && round2s(num(input.cashAmt)) !== 0) {
     cashAc = validateConfiguredAccount(
       'cash account',
@@ -1008,11 +1008,11 @@ async function writeSaleTx(
   ) {
     throw new SaleValidationError(DESKTOP_MESSAGES.CARD_WITHOUT_BANK);
   }
-  let roundAc = requestedRoundAc ?? 'ROUNDOFF';
+  let roundAc = requestedRoundAc ?? controlAc;
   // BOOK_DETL is a per-book account SLOT table: SR_NO 1 sale, 2 cash, 3 kasar, 4 advance, 5 discount,
   // 6 labour income, 7 cash purchase, 8 scheme bonus. The Rojmel's advance row names slot 4.
   let advanceAc = '';
-  let kasarAc = input.kasarAc ?? 'KASAR';
+  let kasarAc = input.kasarAc ?? controlAc;
   if (!isSalesQuotation && (totals.roundOff !== 0 || kasar !== 0)) {
     const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 3);
     roundAc = validateConfiguredAccount('round account', requestedRoundAc, configured);
