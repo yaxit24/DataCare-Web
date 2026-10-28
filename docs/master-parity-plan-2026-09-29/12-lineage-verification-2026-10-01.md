@@ -138,6 +138,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G125 | High | Sales / documents | `unified/src/csharp/DataCareNext/SaleBillA4Gst.rpt` | `web/apps/api/src/routes/txn.ts` `GET /sales/:vchNo/print`, `web/apps/api/src/modules/sales/salesBill.ts` | The retail sale must produce a printable Tax Invoice (the single highest-value desktop document); every sale needs a bill. | N116 |
 | G126 | Med | Purchase / documents | `unified/src/csharp/DataCareNext/PurcBillA4Gst.rpt` | `web/apps/api/src/routes/txn.ts` `GET /purchases/:vchNo/print` | The purchase must produce a printable supplier bill (the purchase counterpart of the Tax Invoice). | N117 |
 | G127 | Med | Sales return / documents | `unified/src/csharp/DataCareNext/SaleRtnBillA4Gst.rpt` | `web/apps/api/src/routes/txn.ts` `GET /sales-returns/:vchNo/print`, `web/apps/api/src/modules/sales/saleReturnBill.ts` | The sales return must produce a printable credit note (returned goods + value credited to the customer). | N118 |
+| G128 | Med | Contra / documents | `unified/src/csharp/DataCareNext/ContraVch.rpt` | `web/apps/api/src/routes/txn.ts` `GET /contra/:vchNo/print`, `web/apps/api/src/modules/finance/contraVoucher.ts` | The contra (bank<->cash transfer) must produce a printable voucher showing the from/to accounts and amount. | N119 |
 
 ## 4. Decisions D23–D28
 
@@ -766,6 +767,19 @@ the customer, HSN, CGST/SGST and the correct taxable (27,480) and half-tax (412)
 Done when: a posted sales return produces a credit-note document (HTML and PDF).
 
 
+### N119 — Contra voucher print (G128, Stage E)
+
+The contra (bank<->cash transfer) had create/reopen/edit/delete but no print. N119 adds
+`GET /contra/:vchNo/print` backed by a new `contraVoucher.ts` that reads the two CONTRA_DATA rows
+(Cr the from-account, Dr the to-account) and renders a From -> To transfer voucher on the shared docShell
+chrome. Two more legacy inline-PDF prints (karigar-issue and purchase-quotation) were converted to the
+shared helper to keep txn.ts under its tightening size ceiling. Route registered under the Contra policy;
+route universe 612 -> 613. Verified live: a CASH -> BANK contra of 15,000 printed HTTP 200 showing the
+accounts, the amount and the narration.
+
+Done when: a posted contra produces a transfer voucher (HTML and PDF).
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -805,6 +819,7 @@ Done when: a posted sales return produces a credit-note document (HTML and PDF).
 | N116 | — | implemented-unverified, evidence in this change (G125: sales Tax Invoice print GET /sales/:vchNo/print; verified live HTML 200 with correct bill) |
 | N117 | — | implemented-unverified, evidence in this change (G126: purchase bill print GET /purchases/:vchNo/print; verified live HTML 200) |
 | N118 | — | implemented-unverified, evidence in this change (G127: sales-return credit-note print GET /sales-returns/:vchNo/print; verified live HTML 200) |
+| N119 | — | implemented-unverified, evidence in this change (G128: contra voucher print GET /contra/:vchNo/print; verified live HTML 200) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
