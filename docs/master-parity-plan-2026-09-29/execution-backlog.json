@@ -4851,6 +4851,26 @@
         "web/apps/api/test/postingAccountLiterals.test.ts"
       ],
       "statusNote": "Fine Settlement metal leg used literal FINESALE/FINEPURC; now resolved from the FSL/FPR book BOOK_DETL slot 1 (seed already names FINESALE/FINEPURC, N100) via resolveBookAccountTx fail-closed, override honoured. fineSalePurchase.ts cleared from the register; GST/GSTINPUT tax account is a separate tax-config concern (not matched by the scan). total 46->44. NOTE: salesOrder P0-04 (advance/cancel) was attempted but reverted — the file is at its size ceiling (2350) and the fix overflowed; deferred. Verified locally: typecheck/typecheck:tests/lint/format/size/kernel; routes 126; web 646; full API+DB 313/3483."
+    },
+    {
+      "id": "N115",
+      "status": "implemented-unverified",
+      "action": "Seed the walk-in customer (WALKIN) so the default retail sale posts on a fresh company (G124; G100 remainder confirmed live)",
+      "parentLabels": "P03-04; P06-01; X07",
+      "startAfter": [
+        "N114"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "seedCompany provisions a WALKIN debtor account; POST /sales with the default party resolves its tax policy and posts; a DB test asserts the account exists and a default-party sale posts; full API+DB, web, routes, gates green",
+      "gapIds": "G124,G100",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-28",
+      "evidence": [
+        "web/apps/api/src/modules/ops/seedCompany.ts"
+      ],
+      "statusNote": "Live 2026-10-28 browser review: the default Sales Invoice (party WALKIN) returned HTTP 400 account not found for tax policy: WALKIN because seedCompany provisions no walk-in party (desktop uses 00045 from the template). Seed a WALKIN debtor (group 03, GST type L) so the screen default resolves and the sale posts. Confirms/closes the G100 remainder."
     }
   ],
   "amendments": [

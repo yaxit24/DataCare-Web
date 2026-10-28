@@ -100,9 +100,14 @@ databaseDescribe('provisioning leaves a company able to trade', () => {
   });
 
   it('provisions the accounts a sale posts to', async () => {
-    for (const ac of ['CASH', 'SALES']) {
+    for (const ac of ['CASH', 'SALES', 'WALKIN']) {
       expect(await count('AC_MAST', `AND "AC_CODE"='${ac}'`)).toBe(1);
     }
+    // G124 / G100: the sales screens default the party to WALKIN; it must exist as a local (intra-state)
+    // debtor so the default retail sale resolves its tax policy and posts on a fresh company.
+    expect(
+      await count('AC_MAST', `AND "AC_CODE"='WALKIN' AND upper(btrim("AC_GST_TYPE"::text))='L'`),
+    ).toBe(1);
     expect(await count('TAX_MAST')).toBeGreaterThan(0);
     // Voucher numbering reads SRNO_MAST; without it the first voucher cannot be numbered.
     expect(await count('SRNO_MAST')).toBeGreaterThan(0);

@@ -73,8 +73,9 @@ d('company provisioning produces a postable company', () => {
 
   it('creates the accounts the posting engine references by literal code', async () => {
     // 19 literal codes plus the six wholesale / rate-cut slot accounts (labour income and expense, silver
-    // sale and purchase, other charges, fine kasar), plus BRANCH (the stock in/out branch account, N91).
-    expect(await count('AC_MAST')).toBe(26);
+    // sale and purchase, other charges, fine kasar), plus BRANCH (the stock in/out branch account, N91),
+    // plus WALKIN (the walk-in customer the sales screens default to, G124).
+    expect(await count('AC_MAST')).toBe(27);
   });
 
   it('creates every book with its posting legs', async () => {

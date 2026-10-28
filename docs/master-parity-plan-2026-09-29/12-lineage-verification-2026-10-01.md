@@ -110,7 +110,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G97 | S1 | Year Create dates and close/reopen | `unified/src/csharp/DataCareNext/MS_YEAR.cs:1035-1043` fills 01/04/yyyy – 31/03/yyyy+1 from the year code and `:1196`/`:1224` save `CL_DATE` as the year's closing date; the form has no close or reopen; `:1357-1363` copies masters only when a new company gets its first year (`NewCompCode`, `MS_COMPANY.cs:6196`) | Found in the 2026-10-26 E2E run: `web/apps/api/src/modules/masters/year.ts` read `closed: !!CL_DATE`, so every year showed "Closed"; Reopen set `CL_DATE` NULL and the year could post nothing (`assertFiscalDateTx`); Close wrote today's date; Create Year stored no closing date; Year Create in company 01 failed ("company clone source and target must differ") | Opening and closing dates derived by one shared rule (`@datacare/core` `fiscalYearDates`), no web close/reopen, masters copied only for a company's first year; DB test `masterSaveFidelity.db.test.ts` | N90 |
 | G98 | S1 | Generic master save | `MS_GROUP.cs:1873-1883`, `MS_ITEM.cs:3245-3262`, `MS_ACCT.cs:7810-7851` store a blank numeric box as `Conversion.Val` (0) and a blank date mask as DBNull; `MS_GROUP.cs:1725,1802,1882` (same in `MS_ITEM`, `MS_ACCT`) stamp `MAIN_USER` on a new record and keep it on edit; `MS_ACCT.cs:7767` writes `LC_CODE = MLc_code` | Found in the 2026-10-26 E2E run: saving an item group, item or party with any numeric or date field blank failed (`invalid input syntax for type double precision: ""`); masters were saved without `MAIN_USER`; parties were saved with `LC_CODE` NULL, which print and document readers that select by location (`web/apps/api/src/modules/reports/reportBind.ts:159`, `web/apps/api/src/modules/sales/orderDoc.ts:69`) cannot find | Blank values bound by column type, server-side creator stamp, account location written on save; tests `masters.test.ts`, `masterSaveFidelity.db.test.ts` | N90 |
 | G99 | S1 | Bank-mode receipt/payment settlement account | A desktop BANK REC / BANK PAY book's `BOOK_DETL` slot 1 is the bank account (`TR_CASH.cs:2629-2650`), so slot 1 is right for the book's own mode | Found in the 2026-10-26 E2E run: Payment, mode Bank, Bank A/c blank, in the provisioned generic PAYMENT book (slot 1 CASH) was saved as `BPAY` with its money leg on CASH; `finance.ts` fell back to slot 1 for every mode | A non-cash movement in a generic RECEIPT/PAYMENT book must name its bank account and may not name the cash account; DB tests in `financeBookFamily.db.test.ts` | N90 |
-| G100 | S3 | Demo defaults on transaction screens | The desktop grids start empty and `TR_SALE.cs:14139-14142` defaults the cash party to `00045`, an account the company template carries | Found in the 2026-10-26 E2E run: nine screens started every new line with item `GOLD` (a demo item; company 07 had none) — fixed by N90; sales, hallmark sale and sales quotation still default the party to `WALKIN`, which web provisioning does not create | New lines start empty (done); the cash-party default follows the provisioned template once provisioning carries it | N58 |
+| G100 | S3 | Demo defaults on transaction screens | The desktop grids start empty and `TR_SALE.cs:14139-14142` defaults the cash party to `00045`, an account the company template carries | Found in the 2026-10-26 E2E run: nine screens started every new line with item `GOLD` (a demo item; company 07 had none) — fixed by N90; sales, hallmark sale and sales quotation still default the party to `WALKIN`, which web provisioning does not create | New lines start empty (done); **CORE-CYCLE BLOCKER confirmed in the 2026-10-28 full browser review**: a logged-in operator on the seeded demo company entered a 10 g gold line (live totals correct: Net 60,916, Tax 3% 1,827.48, Total 62,743.48) and Save returned HTTP 400 `account not found for tax policy: WALKIN` — `seedCompany` provisions no walk-in party (`WALKIN`/`00045`), so the default retail sale cannot post on a fresh company. Fixed by N115: seed the `WALKIN` walk-in customer (debtor group `03`, GST type `L`) so the screen default resolves and the tax policy succeeds | N58, N115 |
 | G101 | S3 | Book lists not limited to the workflow's book family | Each desktop menu opens its form on `CurBookHelp(<MAIN_BOOK>)` (`MDI_FORM.cs:7868` purchase, `:7969` sales return, `:9527`/`:9539` dhiran) | Found in the 2026-10-26 E2E run: Purchase Invoice and Tag Opening listed every book (Contra, Journal, Sales…). N90 limited Purchase and Sales Return; N98 the three Dhiran screens; N99 the Journal (JOURNAL), Item Lot (ITEM LOT) and Tour/Approval Issue (APPROVAL ISSUE) screens — each browser- or match-confirmed against the provisioned book. Still unfiltered: tag/item opening, manufacturing, fine JV, hallmark sale, labour sale, batch receipt, bullion, fine in/out, tag weight difference and account opening — most need their MAIN_BOOK book provisioned first (LABOUR WORK, FINE JV/SALE, BULLION, TAG OPENING are not seeded) or a per-writer confirmation | Every screen offers only the MAIN_BOOK values its writer accepts; purchase/sales-return (N90), the three dhiran screens (N98) and journal/item-lot/tour (N99) done, the rest under N62 | N62 |
 | G102 | S2 | Screen totals rounded differently from the posted totals | The desktop grid shows the amounts it saves (`TR_PURC.cs:15474-15502` `BILL_TOTAL` rounds with `MsTotAmtRof`/`MsTaxRof`) | Found in the 2026-10-26 E2E run: purchase return previewed ₹20,865 and posted ₹20,865.23; a sale previewed ₹75,319 (balance due 319) and posted ₹75,318.75. The nine document screens previewed `Math.round(taxable + tax)` instead of the company rounding policy (`TOT_AMT_ROF`, `TAX_ROF`). N92 moved `resolveRoundingPolicy` into `@datacare/core`, surfaced the company flags on `/me`, and made purchase, sales, hallmark sale, sale return, purchase return, consignment purchase, estimate and both quotations preview with `billTotals(input, policy)` — the same arithmetic and rounding the server posts | Previews use the writer's totals arithmetic and the company rounding policy from `@datacare/core` — done (N92) | N92 |
 | G103 | S3 | "Today" defaults use the UTC day | The desktop fills its date masks from the workstation's local `DateAndTime.Today` (`MS_YEAR.cs:1012`) | Found in the 2026-10-26 E2E run at 02:07 IST: new vouchers defaulted to 26 October (48 `new Date().toISOString().slice(0, 10)` defaults in 36 web files), Bank Reconciliation's month start became the previous month's last day, and Journal Voucher started with no date | One local-calendar helper (`web/apps/web/lib/localDate.ts`) for every default; unit test `localDate.test.ts` | N90 |
@@ -134,6 +134,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G121 | Med | Bullion | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (BUL SALE book legs) | `web/apps/api/src/modules/bullion/bullion.ts` | The bullion payable and funding accounts must come from the booking book's BOOK_DETL slots (1/2), not literal `BULLION`/`CASH`. | N112 |
 | G122 | Med | Order cancel | `unified/src/csharp/DataCareNext/MDI_FORM.cs:8629` | `web/apps/api/src/modules/ops/seedCompany.ts` | Provisioning must create the ORDER CANCEL book (CO_BOOK ORC, SL_ORD_ADJ) so a fresh company can cancel/refund a sales order; the cancel writer targets book ORC. | N113 |
 | G123 | Med | Fine settlement | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (CUT_DATA FSL/FPR legs) | `web/apps/api/src/modules/bullion/fineSalePurchase.ts` | The fine-sale/fine-purchase metal account must come from the FSL/FPR book's BOOK_DETL slot 1, not literal `FINESALE`/`FINEPURC`. | N114 |
+| G124 | High | Sales | `unified/src/csharp/DataCareNext/TR_SALE.cs:14141` (cash party `00045` from the company template) | `web/apps/api/src/modules/ops/seedCompany.ts` | A fresh/provisioned company must carry the walk-in party the sales/hallmark-sale/sales-quotation screens default to, so the core retail sale posts without the operator first creating an account (the live review hit HTTP 400 on the default sale). | N115 |
 
 ## 4. Decisions D23–D28
 
@@ -688,6 +689,36 @@ tax account is a separate tax-config concern and is not matched by the P0-04 sca
 Done when: a fine sale/purchase posts its metal leg to the book's configured account on a provisioned company.
 
 
+### N115 — Seed the walk-in customer so the default retail sale posts (G124, G100 remainder)
+
+The 2026-10-28 full browser review (below) reproduced G100 as a live core-cycle blocker: the Sales Invoice, Hallmark
+Sale and Sales Quotation screens default the party to `WALKIN`, but `seedCompany` provisions no such account, so the
+tax-policy resolver throws `account not found for tax policy: WALKIN` and the default sale returns HTTP 400. The desktop
+defaults the cash party to `00045`, an account its company template carries (`TR_SALE.cs:14141`). N115 provisions a
+`WALKIN` walk-in customer account (debtor group `03`, local GST type `L`) in the seed so the screen default resolves and
+the sale posts, matching the desktop behaviour of a ready-to-trade company.
+
+Done when: a freshly provisioned company can post the default retail sale (cash party `WALKIN`) end to end.
+
+### 2026-10-28 — full Phase 1 review (plan + programmatic + live browser)
+
+A complete review re-measured Phase 1 against the definition of done. The implementation plan remains the authoritative
+gap list; this review confirms its structure and adds one elevated blocker (G124/G100).
+
+- **Programmatic.** The five MISSING workflows (Card Rec, Tour Sales, Dhrn Os Letter, Loan Intrest, Cust Entry) are still
+  absent in code. 60 reopen (GET-by-voucher) endpoints exist. The engineering-grade capability tally across the 133
+  workflow screens: create 113, reopen 72, edit 74, delete 68, **print 28**, list 58. Of the 85 P1-core workflow screens,
+  37 can create but not reopen, 34 lack edit, **64 lack print**, and only 7 have the full create/reopen/edit/delete/print/list
+  lifecycle. This matches stages D (lifecycle) and E (documents) as the dominant remaining work.
+- **Live browser (seeded demo company, real API+DB).** Login, company/year selection and the dashboard work; the navigation
+  exposes the full menu surface; the Sales Invoice screen is faithful (auto voucher number, date with weekday, configured-book
+  selector, old-gold exchange grid, 40-column full grid, desktop F-key shortcuts, Load/New reopen, recent-voucher list) and
+  its live calculation is correct. The one hard defect found is G124/G100 (the `WALKIN` default sale 400), fixed by N115.
+- **Conclusion.** No new module-level gap was discovered; the remaining work is the recorded Stage D (reopen/edit lifecycle
+  on ~37 P1-core screens), Stage E (prints on 64 P1-core screens, report modes/filters/layouts) and the 5 MISSING workflows,
+  plus the in-flight P0-04 posting-account sweep (N106–N114). N115 is executed first because it unblocks the core cycle.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -723,6 +754,7 @@ Done when: a fine sale/purchase posts its metal leg to the book's configured acc
 | N112 | — | implemented-unverified, evidence in this change (G121: bullion payable/cash resolved from BOOK_DETL slots 1/2; bullion.ts cleared; P0-04 48→46) |
 | N113 | — | implemented-unverified, evidence in this change (G122: provisioning creates the ORDER CANCEL book so Order Cancel is usable) |
 | N114 | — | implemented-unverified, evidence in this change (G123: fine-settlement metal account resolved from FSL/FPR BOOK_DETL slot 1; fineSalePurchase.ts cleared; P0-04 46→44) |
+| N115 | — | implemented-unverified, evidence in this change (G124/G100: seed the WALKIN walk-in customer so the default retail sale posts) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
