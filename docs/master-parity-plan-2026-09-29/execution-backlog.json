@@ -4871,6 +4871,30 @@
         "web/apps/api/src/modules/ops/seedCompany.ts"
       ],
       "statusNote": "Live 2026-10-28 browser review: the default Sales Invoice (party WALKIN) returned HTTP 400 account not found for tax policy: WALKIN because seedCompany provisions no walk-in party (desktop uses 00045 from the template). Seed a WALKIN debtor (group 03, GST type L) so the screen default resolves and the sale posts. Confirms/closes the G100 remainder."
+    },
+    {
+      "id": "N116",
+      "status": "implemented-unverified",
+      "action": "Add the retail sales Tax Invoice print (GET /sales/:vchNo/print) — the highest-value missing Stage E document",
+      "parentLabels": "P03-04; E-documents",
+      "startAfter": [
+        "N115"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "GET /sales/:vchNo/print returns the Tax Invoice HTML/PDF; route registered + in the route universe (610); full API+DB 313/3483, web 646, routes 126, gates; verified live on the running stack",
+      "gapIds": "G125",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-28",
+      "evidence": [
+        "web/apps/api/src/modules/sales/salesBill.ts",
+        "web/apps/api/src/modules/documents/voucherPrint.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/test/routePolicy.test.ts"
+      ],
+      "statusNote": "Live review found NO core txn screen had a print; the retail bill is the top Stage E gap. Added GET /sales/:vchNo/print backed by salesBill.ts (SL_DATA/SL_DETL + shared GST-bill chrome). Extracted resolvePrintScope + sendVoucherDocument into documents/voucherPrint.ts and reused them for the purchase-return print to stay within the txn.ts size ceiling (which tightened). Route policy registered; route universe 609->610. VERIFIED LIVE: a posted sale print returned HTTP 200 HTML with company/WALKIN/item/HSN/CGST/SGST and correct amounts (60000 taxable, 900+900 tax, 61800 total). Verified: typecheck/typecheck:tests/lint/format/size/kernel/register; routes 126; web 646; full API+DB 313/3483."
     }
   ],
   "amendments": [

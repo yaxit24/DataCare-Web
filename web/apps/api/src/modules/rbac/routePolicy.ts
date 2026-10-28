@@ -189,6 +189,7 @@ route('Utilities/Window Tiles', [
 route('Sales/Sales Invoice', [
   'POST /sales',
   'GET /sales/:vchNo',
+  'GET /sales/:vchNo/print',
   'PUT /sales/:vchNo',
   'DELETE /sales/:vchNo',
   'GET /sales/invoice',

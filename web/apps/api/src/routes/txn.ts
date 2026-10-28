@@ -104,6 +104,8 @@ import {
 } from '../modules/sales/orderDesignSelection.js';
 import { ORDER_REPORT_COPIES, type OrderReportCopy } from '../modules/reports/orderReportValues.js';
 import { purchaseBillData, purchaseBillHtml } from '../modules/purchase/purchaseBill.js';
+import { salesBillData, salesBillHtml } from '../modules/sales/salesBill.js';
+import { sendVoucherDocument, resolvePrintScope } from '../modules/documents/voucherPrint.js';
 import { karigarIssueData, karigarIssueHtml } from '../modules/manufacturing/karigarVoucher.js';
 import { financeVoucherData, financeVoucherHtml } from '../modules/finance/financeVoucher.js';
 import { dhrnIssueData, dhrnIssueHtml } from '../modules/dhrn/dhrnReceipt.js';
@@ -1321,6 +1323,25 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.get('/sales/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, () => getSale(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  // G125 (Stage E): the retail Tax Invoice print (desktop SaleBillA4Gst.rpt). Every sale needs a
+  // printable bill; builds the shared GST-bill HTML and renders it to PDF (or returns raw HTML).
+  app.get('/sales/:vchNo/print', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const q = req.query as any;
+    const copyLabel = standardDocumentCopy(q.copy, reply);
+    if (copyLabel === null) return reply;
+    const scope = resolvePrintScope(reply, readScope(req), (req.params as any).vchNo);
+    if (!scope) return reply;
+    await getSale(prisma, scope, scope.vchNo);
+    const data = await salesBillData(prisma, scope);
+    if (!data) return reply.code(404).send({ error: 'sale-not-found' });
+    const html = salesBillHtml(data.header, data.lines, {
+      company: data.company,
+      party: data.party,
+      copy: copyLabel,
+    });
+    return sendVoucherDocument(reply, html, { format: q.format, filename: `sale-${scope.vchNo}` });
   });
   app.put('/sales/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'update')) return;
@@ -2798,22 +2819,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const q = req.query as any;
     const copyLabel = standardDocumentCopy(q.copy, reply);
     if (copyLabel === null) return reply;
-    const s = readScope(req);
-    let scope;
-    try {
-      scope = requireVoucherDocumentScope({
-        tenantId: s.tenantId,
-        coCode: s.coCode,
-        lcCode: s.lcCode,
-        coYear: s.coYear,
-        coBook: s.coBook,
-        vchNo: String((req.params as any).vchNo ?? ''),
-      });
-    } catch (e: any) {
-      if (e instanceof DocumentScopeError)
-        return reply.code(400).send({ error: e.name, field: e.field, message: e.message });
-      throw e;
-    }
+    const scope = resolvePrintScope(reply, readScope(req), (req.params as any).vchNo);
+    if (!scope) return reply;
     await getPurchaseReturn(prisma, scope, scope.vchNo);
     const data = await purchaseBillData(prisma, scope);
     if (!data) return reply.code(404).send({ error: 'purchase-return-not-found' });
@@ -2825,20 +2832,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       partyCaption: 'Supplier',
       footerText: 'Purchase return — goods and value returned to supplier.',
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="purchase-return-${String(scope.vchNo).replace(/[^\w.-]/g, '')}.pdf"`,
-      )
-      .send(pdf);
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `purchase-return-${scope.vchNo}`,
+    });
   });
   app.delete('/purchase-returns/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;

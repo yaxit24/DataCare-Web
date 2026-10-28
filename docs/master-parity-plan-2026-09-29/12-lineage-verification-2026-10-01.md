@@ -135,6 +135,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G122 | Med | Order cancel | `unified/src/csharp/DataCareNext/MDI_FORM.cs:8629` | `web/apps/api/src/modules/ops/seedCompany.ts` | Provisioning must create the ORDER CANCEL book (CO_BOOK ORC, SL_ORD_ADJ) so a fresh company can cancel/refund a sales order; the cancel writer targets book ORC. | N113 |
 | G123 | Med | Fine settlement | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (CUT_DATA FSL/FPR legs) | `web/apps/api/src/modules/bullion/fineSalePurchase.ts` | The fine-sale/fine-purchase metal account must come from the FSL/FPR book's BOOK_DETL slot 1, not literal `FINESALE`/`FINEPURC`. | N114 |
 | G124 | High | Sales | `unified/src/csharp/DataCareNext/TR_SALE.cs:14141` (cash party `00045` from the company template) | `web/apps/api/src/modules/ops/seedCompany.ts` | A fresh/provisioned company must carry the walk-in party the sales/hallmark-sale/sales-quotation screens default to, so the core retail sale posts without the operator first creating an account (the live review hit HTTP 400 on the default sale). | N115 |
+| G125 | High | Sales / documents | `unified/src/csharp/DataCareNext/SaleBillA4Gst.rpt` | `web/apps/api/src/routes/txn.ts` `GET /sales/:vchNo/print`, `web/apps/api/src/modules/sales/salesBill.ts` | The retail sale must produce a printable Tax Invoice (the single highest-value desktop document); every sale needs a bill. | N116 |
 
 ## 4. Decisions D23–D28
 
@@ -719,6 +720,23 @@ gap list; this review confirms its structure and adds one elevated blocker (G124
   plus the in-flight P0-04 posting-account sweep (N106–N114). N115 is executed first because it unblocks the core cycle.
 
 
+### N116 — Sales Tax Invoice print (G125, Stage E)
+
+The live 2026-10-28 review confirmed the plan's largest gap end to end: NONE of the core daily transaction
+screens (sales, purchases, sales/purchase returns, receipt, payment, contra, journal) had a print endpoint
+(only 28 of 133 workflow screens do). The retail Tax Invoice is the single highest-value missing document —
+every sale needs a printable bill. N116 adds `GET /sales/:vchNo/print`: a new `salesBill.ts` reads SL_DATA +
+SL_DETL (joined seller/customer/HSN) and renders the shared A4 GST-bill chrome (docShell + gstBillBody +
+billFooter, the same one the purchase bill uses), returning HTML (`?format=html`) or a PDF. Two reusable
+helpers were extracted to `web/apps/api/src/modules/documents/voucherPrint.ts` (`resolvePrintScope`, `sendVoucherDocument`) so this
+and the existing purchase-return print share the scope/copy/PDF scaffold; the route is registered under the
+Sales Invoice RBAC policy and pinned in the route universe (609 → 610). Verified end to end on the running
+stack: a posted sale's `.../print?format=html&copy=O` returns HTTP 200 with the company, WALK-IN CUSTOMER,
+item, HSN, CGST/SGST and the correct amounts (60,000 taxable / 900+900 tax / 61,800 total).
+
+Done when: a posted retail sale produces a Tax Invoice (HTML and PDF) with the desktop copies.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -755,6 +773,7 @@ gap list; this review confirms its structure and adds one elevated blocker (G124
 | N113 | — | implemented-unverified, evidence in this change (G122: provisioning creates the ORDER CANCEL book so Order Cancel is usable) |
 | N114 | — | implemented-unverified, evidence in this change (G123: fine-settlement metal account resolved from FSL/FPR BOOK_DETL slot 1; fineSalePurchase.ts cleared; P0-04 46→44) |
 | N115 | — | implemented-unverified, evidence in this change (G124/G100: seed the WALKIN walk-in customer so the default retail sale posts) |
+| N116 | — | implemented-unverified, evidence in this change (G125: sales Tax Invoice print GET /sales/:vchNo/print; verified live HTML 200 with correct bill) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
