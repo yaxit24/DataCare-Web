@@ -572,6 +572,7 @@ import { bullionBooking, deleteBullionBooking } from '../modules/bullion/bullion
 import {
   createFineSalePurchase,
   deleteFineSalePurchase,
+  getFineSalePurchase,
 } from '../modules/bullion/fineSalePurchase.js';
 import {
   tourIssue,
@@ -7986,17 +7987,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       threshold: Number(q.threshold) || undefined,
       period,
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header('content-disposition', 'inline; filename="gstr1.pdf"')
-      .send(pdf);
+    return sendVoucherDocument(reply, html, { format: q.format, filename: 'gstr1' });
   });
   app.get('/reports/gstr3b', auth, async (req) => gstr3b(prisma, readScope(req)));
   app.get('/reports/trial-balance-doc', auth, async (req, reply) => {
@@ -8005,17 +7996,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const html = await renderTrialBalanceDoc(prisma, s as any, {
       period: s.coYear ? `FY ${s.coYear}` : '',
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header('content-disposition', 'inline; filename="trial-balance.pdf"')
-      .send(pdf);
+    return sendVoucherDocument(reply, html, { format: q.format, filename: 'trial-balance' });
   });
   app.get('/reports/gstr3b-doc', auth, async (req, reply) => {
     const q = req.query as any;
@@ -8023,17 +8004,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const html = await renderGstr3bDoc(prisma, s as any, {
       period: s.coYear ? `FY ${s.coYear}` : '',
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header('content-disposition', 'inline; filename="gstr3b.pdf"')
-      .send(pdf);
+    return sendVoucherDocument(reply, html, { format: q.format, filename: 'gstr3b' });
   });
   app.get('/reports/balance-sheet-doc', auth, async (req, reply) => {
     const q = req.query as any;
@@ -8041,17 +8012,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const html = await renderBalanceSheetDoc(prisma, s as any, {
       period: s.coYear ? `FY ${s.coYear}` : '',
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header('content-disposition', 'inline; filename="balance-sheet.pdf"')
-      .send(pdf);
+    return sendVoucherDocument(reply, html, { format: q.format, filename: 'balance-sheet' });
   });
 
   // ---- E-invoice (IRN via Fake transport until GSP creds provided) ----
@@ -8386,6 +8347,24 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         cashAc: b.cashAc,
       }),
     );
+  });
+  // N121 (Stage D): reopen a fine sale/purchase so the operator can reload it.
+  app.get('/fine-sale/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const side =
+      String((req.query as any).side || 'SALE').toUpperCase() === 'PURC' ? 'PURC' : 'SALE';
+    return run(reply, 200, async () => {
+      const doc = await getFineSalePurchase(
+        prisma,
+        { ...scopeOf(req), coBook: side === 'PURC' ? 'FPR' : 'FSL' },
+        (req.params as any).vchNo,
+      );
+      if (!doc) {
+        reply.code(404);
+        return { error: 'fine-sale-not-found' };
+      }
+      return doc;
+    });
   });
   app.delete('/fine-sale/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
