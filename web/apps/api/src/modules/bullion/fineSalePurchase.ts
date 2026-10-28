@@ -3,6 +3,7 @@ import { withTxBudget } from '../shared/txBudget.js';
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
 import { gstTaxRows } from '../shared/taxDataRows.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
+import { resolveBookAccountTx, type BookPolicy } from '../shared/bookPolicy.js';
 import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
 import {
   postVoucherTx,
@@ -125,7 +126,7 @@ export async function createFineSalePurchase(
   const vchType = isSale ? 'FNSL' : 'FNPR';
   const bookName = isSale ? 'FINE SALE' : 'FINE PURC';
   const taxAc = input.taxAc ?? (isSale ? 'GST' : 'GSTINPUT');
-  const metalAc = isSale ? (input.fineSalesAc ?? 'FINESALE') : (input.finePurchaseAc ?? 'FINEPURC');
+  const metalAcOverride = (isSale ? input.fineSalesAc : input.finePurchaseAc)?.trim() || '';
   const partyAc = input.cashAc ?? input.partyAc;
 
   const computed = lines.map((l) => ({
@@ -149,6 +150,22 @@ export async function createFineSalePurchase(
         : null;
     if (policy && policy.interState !== inter)
       throw new FineSaleValidationError('interState does not match the persisted party GST type');
+    // G121 / P0-04: the fine metal account is the FSL/FPR book's BOOK_DETL slot 1 (seed FINESALE/FINEPURC),
+    // not a literal; an explicit caller override wins.
+    const metalAc =
+      metalAcOverride ||
+      (await resolveBookAccountTx(
+        tx,
+        { ...input.scope, coBook: input.scope.coBook ?? book },
+        {
+          coBook: input.scope.coBook ?? book,
+          vchType,
+          bookName,
+          mainBook: bookName,
+          inout: isSale ? 'O' : 'I',
+        } as BookPolicy,
+        1,
+      ));
     // RATE_PAR mirrors the company's configured metal-rate basis. The desktop sets CurRatePar from MsRatePar
     // for a new voucher (TR_FINE_SL_PR.cs:3955-3963) and reads it back on reopen (:4288), so a hardcoded 'G'
     // mislabels every voucher at a shop quoting per-10-gram or per-kilogram rates.

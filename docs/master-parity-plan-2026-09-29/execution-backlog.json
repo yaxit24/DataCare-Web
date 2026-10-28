@@ -4830,6 +4830,27 @@
         "web/apps/api/test/provisioning.db.test.ts"
       ],
       "statusNote": "Order Cancel refunds an order advance via SL_ORD_ADJ + a balanced AC_DATA refund; its writer targets book ORC (desktop MDI_FORM.cs:8629 ORDER CANCEL). seedCompany provisioned no such book, so a fresh company could not cancel/refund an order. Added the ORC book (MAIN_BOOK ORDER CANCEL, table SL_ORD_ADJ, standard 3 legs). Provisioning 33->34 groups, 108->111 legs. Sets up a later P0-04 pass to resolve the refund accounts from the ORC slots. Verified locally: typecheck/typecheck:tests/lint/format/size/kernel; routes 126; web 646; full API+DB 313/3483."
+    },
+    {
+      "id": "N114",
+      "status": "implemented-unverified",
+      "action": "Fine settlement credited/debited the metal leg to a literal FINESALE/FINEPURC; resolve from the FSL/FPR book BOOK_DETL slot 1",
+      "parentLabels": "P0-04; X07",
+      "startAfter": [
+        "N113"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "fineSalePurchase.ts resolves metalAc from book slot 1 via resolveBookAccountTx; file cleared from register / total 46->44; full API+DB 313/3483, web 646, routes 126, gates green",
+      "gapIds": "G123",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-28",
+      "evidence": [
+        "web/apps/api/src/modules/bullion/fineSalePurchase.ts",
+        "web/apps/api/test/postingAccountLiterals.test.ts"
+      ],
+      "statusNote": "Fine Settlement metal leg used literal FINESALE/FINEPURC; now resolved from the FSL/FPR book BOOK_DETL slot 1 (seed already names FINESALE/FINEPURC, N100) via resolveBookAccountTx fail-closed, override honoured. fineSalePurchase.ts cleared from the register; GST/GSTINPUT tax account is a separate tax-config concern (not matched by the scan). total 46->44. NOTE: salesOrder P0-04 (advance/cancel) was attempted but reverted — the file is at its size ceiling (2350) and the fix overflowed; deferred. Verified locally: typecheck/typecheck:tests/lint/format/size/kernel; routes 126; web 646; full API+DB 313/3483."
     }
   ],
   "amendments": [

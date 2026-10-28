@@ -4,6 +4,15 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-28 (cont.) — N114: fine-settlement metal account from the book (G123, P0-04)
+- Fine Settlement metal leg used literal FINESALE/FINEPURC; now resolved from FSL/FPR book BOOK_DETL slot 1 (seed names them there, N100) via resolveBookAccountTx fail-closed. fineSalePurchase.ts cleared. P0-04 total 46->44. **PR #82 → main**.
+- NOTE: salesOrder P0-04 attempted + REVERTED — salesOrder.ts is at its size ceiling (2350) and the advance/cancel fix overflowed to 2356-2372; deferred (needs a size-neutral refactor or a ceiling-safe approach). ORC book (N113) already delivered the usability win.
+- Docker daemon went down mid-session (DB tests failed with 'docker exited 1'); restarted via `open -a Docker`, cleaned stale parity containers, re-ran green.
+- Session P0-04 arc: 68 -> 44 (24 literals removed across labour, sales/purchase return, dhrn, sales, purchase, bullion, fine-settlement). Remaining: sales.ts 11, purchase.ts 5, billToBill 5, karigar 4, salesOrder 3 (deferred, size), employeeJv 3, ledgerAdjust 2, mfg 2, tagOps 2. Bulk of remainder is the tax/income/config cluster (GST/GSTINPUT/INTINC/HMCHRG/TCS/TDS/PF) needing a tax/company-config slice.
+- Next gap G124, slice N115, decision D31.
+
+---
+
 ## 2026-10-28 (cont.) — N113: provision the Order Cancel book (G122)
 - Order Cancel (refund an order advance, writer targets book ORC, desktop MDI_FORM.cs:8629 ORDER CANCEL) had no seeded book -> unusable on a fresh company. Provisioned ORC (MAIN_BOOK ORDER CANCEL, SL_ORD_ADJ, 3 legs). Provisioning 33->34 groups, 108->111 legs. Sets up a later P0-04 pass to resolve the salesOrder cancel refund accounts (paidAc/kasarAc) from the ORC slots. **PR #81 → main**.
 - Full local battery green: API+DB 313/3483, web 646, routes 126, gates + kernel.
