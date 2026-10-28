@@ -87,3 +87,57 @@ export function contraVoucherHtml(rows: any[], ctx: ContraVoucherCtx = {}): stri
     ),
   });
 }
+
+/**
+ * Journal voucher document (G129): a multi-line Dr/Cr entry. The journal writer stores its lines in
+ * CONTRA_DATA (shared with contra) + AC_DATA, so this reuses `contraVoucherData`. Rendered as the
+ * classic accounting journal table (Particulars | Debit | Credit) with narration, per JournalVch.rpt.
+ */
+export function journalVoucherHtml(rows: any[], ctx: ContraVoucherCtx = {}): string {
+  const h = rows[0] ?? {};
+  const acName = (r: any) => esc(r?.RESOLVED_NAME ?? r?.AC_NAME ?? r?.AC_CODE ?? '');
+  let totDr = 0;
+  let totCr = 0;
+  const lineRows = rows
+    .map((r, i) => {
+      const dr = num(r.DR_AMT);
+      const cr = num(r.CR_AMT);
+      totDr += dr;
+      totCr += cr;
+      // Classic journal indents the credited account under "To".
+      const particulars = cr > 0 ? `&nbsp;&nbsp;&nbsp;&nbsp;To ${acName(r)}` : acName(r);
+      return (
+        `<tr><td class="c">${i + 1}</td><td>${particulars}</td>` +
+        `<td class="r">${dr > 0 ? money(dr) : ''}</td><td class="r">${cr > 0 ? money(cr) : ''}</td></tr>`
+      );
+    })
+    .join('');
+  const narration = rows.map((r) => r.IT_DESC).find((d) => d && String(d).trim()) ?? '';
+  const vchDate = h.VCH_DATE ? String(h.VCH_DATE).slice(0, 10) : '';
+
+  const body =
+    `<table class="items"><thead><tr><th>#</th><th style="width:56%">Particulars</th><th class="r">Debit</th><th class="r">Credit</th></tr></thead>` +
+    `<tbody>${lineRows}</tbody>` +
+    `<tfoot><tr><td class="c" colspan="2">Total</td><td class="r">${money(totDr)}</td><td class="r">${money(totCr)}</td></tr></tfoot></table>` +
+    (narration ? `<div class="words"><b>Narration:</b> ${esc(narration)}</div>` : '') +
+    `<div class="words"><b>Amount in words:</b> ${esc(rupeesInWords(totDr))} only.</div>`;
+
+  const meta: DocMeta[] = [
+    { k: 'Voucher No', v: String(h.BILL_NO ?? h.VCH_NO ?? '') },
+    { k: 'Date', v: vchDate },
+    { k: 'Book / Vch', v: `${h.CO_BOOK ?? ''} / ${h.VCH_NO ?? ''}` },
+  ];
+  return docShell({
+    title: 'Journal Voucher',
+    copy: ctx.copy,
+    company: ctx.company,
+    fallbackName: ctx.fallbackName,
+    meta,
+    body,
+    footer: billFooter(
+      ctx.company,
+      ctx.fallbackName,
+      'Journal entry — as per particulars above. E.&O.E.',
+    ),
+  });
+}
