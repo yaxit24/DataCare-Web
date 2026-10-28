@@ -12,6 +12,11 @@ import { billTotals, fineFor } from '@datacare/core';
 import { receiptLegs } from '../finance/tender.js';
 import { SaleValidationError } from './sales.js';
 import { resolveTaxPolicyTx, type ResolvedTaxPolicy } from '../shared/taxPolicy.js';
+import {
+  resolveBookAccountTx,
+  BookPolicyValidationError,
+  type BookPolicy,
+} from '../shared/bookPolicy.js';
 import { gstTaxRows } from '../shared/taxDataRows.js';
 
 /** Numeric coercion for a persisted column: a blank or absent cell is 0, never NaN. */
@@ -193,6 +198,33 @@ type LabourWriteContext = {
   persistedClock?: unknown;
 };
 
+/**
+ * G115 / P0-04: the labour-income account comes from the book's BOOK_DETL slot SR_NO 6, exactly
+ * as the desktop credits A.DR_LBR to B.AC_CODE where B.SR_NO = 6 (Ac_Ledr.cs:1203). We resolve it
+ * through the kernel primitive (resolveBookAccountTx) — fail-closed on a missing/ambiguous row —
+ * rather than inventing a literal 'LABOUR' account that only the provisioning seed carries. The
+ * labour book is modelled MAIN_BOOK 'LABOUR WORK', direction 'O' (seedCompany), matching the slot.
+ */
+async function resolveLabourIncomeAc(tx: any, scope: VoucherScope): Promise<string> {
+  const coBook = scope.coBook ?? 'LBR';
+  const policy: BookPolicy = {
+    coBook,
+    vchType: 'LBRI',
+    bookName: 'LABOUR WORK',
+    mainBook: 'LABOUR WORK',
+    inout: 'O',
+  };
+  try {
+    return await resolveBookAccountTx(tx, { ...scope, coBook }, policy, 6);
+  } catch (e) {
+    if (e instanceof BookPolicyValidationError)
+      throw new SaleValidationError(
+        `labour book ${coBook} income account (BOOK_DETL SR_NO 6) is not configured: ${e.message}`,
+      );
+    throw e;
+  }
+}
+
 export async function createLabourInvoice(
   prisma: any,
   input: LabourInvoiceInput,
@@ -205,7 +237,11 @@ export async function createLabourInvoice(
   const metalPct = input.metalTaxPct ?? 3;
   const labourPct = input.labourTaxPct ?? 5;
   const salesAc = input.salesAc ?? 'SALES';
-  const labourAc = input.labourAc ?? 'LABOUR';
+  // G115 / P0-04: the labour-income account is NOT a literal. The desktop (Ac_Ledr.cs:1203,
+  // leg '01') credits A.DR_LBR to the book's BOOK_DETL slot SR_NO 6 (MAIN_BOOK 'LABOUR WORK'),
+  // never a hard-coded 'LABOUR' account — which exists only in the provisioning seed and is
+  // absent on a migrated company. We resolve it from the book inside the tx; an explicit
+  // caller override still wins.
   const taxAc = input.taxAc ?? 'GST';
   const roundAc = input.roundAc ?? 'ROUNDOFF';
   const tenantId = input.scope.tenantId;
@@ -232,6 +268,9 @@ export async function createLabourInvoice(
       lifecycle?.hdVchNo ??
       (await nextHiddenVoucherNoTx(tx, { ...input.scope, coBook: input.scope.coBook ?? 'LBR' }));
     const mainUser = lifecycle?.mainUser ?? String(input.mainUser ?? '').trim();
+    // G115 / P0-04: resolve the labour-income account from the book's BOOK_DETL slot SR_NO 6
+    // (desktop Ac_Ledr.cs:1203 join on B.SR_NO = 6), honouring an explicit caller override.
+    const labourAc = input.labourAc ?? (await resolveLabourIncomeAc(tx, input.scope));
     // G92: the metal and labour tax codes, resolved like every other family (Ac_Tax.cs LbrWork_GST :164-174 joins
     // TAX_MAST on LBR_DATA.TAX_CODE and LBR_TAX_CODE). Geography comes from the party's AC_GST_TYPE.
     const policyFor = async (base: number, pct: number): Promise<ResolvedTaxPolicy | null> => {

@@ -4656,6 +4656,31 @@
         "web/apps/web/app/(app)/txn/batch-receipt/page.tsx"
       ],
       "statusNote": "Clean filter-only G101 step. Multi-Party Receipt (batch receipt) posts to the RECEIPT family (batchReceipt.ts stamps BOOK_NAME RECEIPT); the seeded RCT book carries MAIN_BOOK RECEIPT, so filtering keeps it (preferred=RCT present). Added mainBooks=[RECEIPT] to BookSelect. Not smoke-exercised. Verified: typecheck, lint (incl size budget), web unit 646, format."
+    },
+    {
+      "id": "N106",
+      "status": "implemented-unverified",
+      "action": "Labour invoice credited a literal LABOUR account (absent on provisioned/migrated companies); resolve the labour-income account from the book BOOK_DETL slot SR_NO 6 like the desktop",
+      "parentLabels": "P0-04; X07",
+      "startAfter": [
+        "N105"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "labourInvoice.ts resolves SR_NO 6 via resolveBookAccountTx; seedCompany seeds the slot; P0-04 register 4->3 / total 68->67; full API+DB 313/3483, web 646, routes 126, all gates green",
+      "gapIds": "G115",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-28",
+      "evidence": [
+        "web/apps/api/src/modules/sales/labourInvoice.ts",
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/apps/api/test/postingAccountLiterals.test.ts",
+        "web/apps/api/test/provisioning.db.test.ts",
+        "web/apps/api/test/salesFamilyLifecycle.db.test.ts",
+        "web/apps/api/test/labourFineTaxRows.routes.db.test.ts"
+      ],
+      "statusNote": "Desktop Ac_Ledr.cs:1203 credits A.DR_LBR to BOOK_DETL B.AC_CODE where B.SR_NO=6 (MAIN_BOOK LABOUR WORK). The web writer defaulted labourAc to the literal LABOUR, not a seeded account (seed uses LBRINC), so a labour bill Cr-ed a non-existent account on a provisioned/migrated company. Now resolved via the kernel primitive resolveBookAccountTx(...,6) fail-closed; explicit override still honoured. seedCompany gives the LBR book SR_NO 1 + 6 slots (LBRINC); provisioning BOOK_DETL 107->108, LBR leg-count 1->2. P0-04 register labourInvoice.ts 4->3, total 68->67. Verified locally: typecheck/typecheck:tests/lint/format/docs:refs/register/size/kernel-conformance; routes 126; web 646; full API+DB 313 files/3483 tests."
     }
   ],
   "amendments": [

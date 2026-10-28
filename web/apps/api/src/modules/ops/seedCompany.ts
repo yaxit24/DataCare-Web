@@ -368,7 +368,13 @@ const BOOKS: {
     acCode: 'LBRINC',
     shortName: 'LBRI',
     table: 'LBR_DATA',
-    slots: [{ srNo: 1, acCode: 'LBRINC' }],
+    // Desktop Ac_Ledr.cs:1203 credits the labour amount to BOOK_DETL SR_NO 6 and the metal to
+    // SR_NO 1. We provision both so the labour writer resolves the income account from the book
+    // (G115 / P0-04) instead of a literal.
+    slots: [
+      { srNo: 1, acCode: 'LBRINC' },
+      { srNo: 6, acCode: 'LBRINC' },
+    ],
   },
   {
     book: 'FSL',
