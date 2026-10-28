@@ -4,6 +4,13 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-28 (cont.) — N107: sales-return posting accounts from the book (G116, P0-04)
+- salesReturn.ts resolved cash/round from the book already but kept literal initializers (SALES/CASH/ROUNDOFF/KASAR). Now control=BOOK_DETL slot 1 (unconditional, desktop LD_CODE=B.AC_CODE) + per-item revenue fallback; cash=slot 2; round/kasar=slot 3; no literals. Only GST literal remains (tax-config concern). P0-04 register 5->1, total 67->63. **PR #74 → main** (merge on local verification; CI billing-blocked).
+- Full local battery green: API+DB 313/3483, web 646, routes 126, all gates + kernel.
+- Next gap **G117**, slice **N108**, decision **D31**. P0-04 continuations: purchaseReturn.ts (5, mirror of salesReturn), dhrn.ts (5), billToBill.ts (5), sales.ts (14), purchase.ts (10). purchaseReturn is the natural next (same shape as salesReturn).
+
+---
+
 ## 2026-10-28 (cont.) — N106: labour-income account from the book (G115, P0-04)
 - labourInvoice.ts credited a literal 'LABOUR' account (not seeded — seed uses LBRINC; absent on migrated companies), so a labour bill Cr-ed a non-existent account. Desktop Ac_Ledr.cs:1203 credits A.DR_LBR to BOOK_DETL B.AC_CODE where B.SR_NO=6 (MAIN_BOOK LABOUR WORK). Now resolved via kernel primitive resolveBookAccountTx(...,6), fail-closed; explicit override honoured. seedCompany gives LBR SR_NO 1+6 slots (LBRINC); provisioning BOOK_DETL 107->108. P0-04 register 4->3, total 68->67. **PR #73 → main** (merged on local verification; GitHub Actions still billing-blocked).
 - Full local battery green: typecheck/typecheck:tests/lint/format/docs/register/size/kernel; routes 126; web 646; API+DB 313/3483.
