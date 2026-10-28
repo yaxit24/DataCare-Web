@@ -105,6 +105,7 @@ import {
 import { ORDER_REPORT_COPIES, type OrderReportCopy } from '../modules/reports/orderReportValues.js';
 import { purchaseBillData, purchaseBillHtml } from '../modules/purchase/purchaseBill.js';
 import { salesBillData, salesBillHtml } from '../modules/sales/salesBill.js';
+import { saleReturnBillData, saleReturnBillHtml } from '../modules/sales/saleReturnBill.js';
 import { sendVoucherDocument, resolvePrintScope } from '../modules/documents/voucherPrint.js';
 import { karigarIssueData, karigarIssueHtml } from '../modules/manufacturing/karigarVoucher.js';
 import { financeVoucherData, financeVoucherHtml } from '../modules/finance/financeVoucher.js';
@@ -2051,20 +2052,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       party: data.party,
       copy: copyLabel,
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="invoice-${String(q.vchNo ?? '').replace(/[^\w.-]/g, '')}.pdf"`,
-      )
-      .send(pdf);
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `invoice-${q.vchNo ?? ''}`,
+    });
   });
 
   // ---- Purchase ----
@@ -2081,20 +2072,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       party: data.party,
       copy: copyLabel,
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="purchase-${String(q.vchNo ?? '').replace(/[^\w.-]/g, '')}.pdf"`,
-      )
-      .send(pdf);
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `purchase-${q.vchNo ?? ''}`,
+    });
   });
 
   app.get('/purchase-quotations/quotation', auth, async (req, reply) => {
@@ -2455,20 +2436,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       company: data.company,
       party: data.party,
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="receipt-${String(q.vchNo ?? '').replace(/[^\w.-]/g, '')}.pdf"`,
-      )
-      .send(pdf);
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `receipt-${q.vchNo ?? ''}`,
+    });
   });
 
   app.get('/finance/payment-voucher', auth, async (req, reply) => {
@@ -2481,20 +2452,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       company: data.company,
       party: data.party,
     });
-    if (q.format === 'html') return reply.type('text/html').send(html);
-    let pdf: Buffer;
-    try {
-      pdf = await renderToPdf(html, new PlaywrightPdfRenderer());
-    } catch {
-      return reply.code(503).send({ error: 'pdf-renderer-unavailable' });
-    }
-    return reply
-      .header('content-type', 'application/pdf')
-      .header(
-        'content-disposition',
-        `inline; filename="payment-${String(q.vchNo ?? '').replace(/[^\w.-]/g, '')}.pdf"`,
-      )
-      .send(pdf);
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `payment-${q.vchNo ?? ''}`,
+    });
   });
 
   const purchaseInput = (req: FastifyRequest, b: Record<string, any>) => ({
@@ -7867,6 +7828,28 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.get('/sales-returns/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, () => getSaleReturn(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  // G127 (Stage E): the sales-return Credit Note print (desktop SaleRtnBillA4Gst.rpt). Reads SL_DATA +
+  // SL_DETL_RTN via saleReturnBill and renders the shared GST-bill chrome, marked as a credit note.
+  app.get('/sales-returns/:vchNo/print', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const q = req.query as any;
+    const copyLabel = standardDocumentCopy(q.copy, reply);
+    if (copyLabel === null) return reply;
+    const scope = resolvePrintScope(reply, readScope(req), (req.params as any).vchNo);
+    if (!scope) return reply;
+    await getSaleReturn(prisma, scope, scope.vchNo);
+    const data = await saleReturnBillData(prisma, scope);
+    if (!data) return reply.code(404).send({ error: 'sales-return-not-found' });
+    const html = saleReturnBillHtml(data.header, data.lines, {
+      company: data.company,
+      party: data.party,
+      copy: copyLabel,
+    });
+    return sendVoucherDocument(reply, html, {
+      format: q.format,
+      filename: `sales-return-${scope.vchNo}`,
+    });
   });
   app.get('/sales-orders/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;

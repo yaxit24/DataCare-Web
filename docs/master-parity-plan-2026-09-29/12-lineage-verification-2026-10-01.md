@@ -137,6 +137,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G124 | High | Sales | `unified/src/csharp/DataCareNext/TR_SALE.cs:14141` (cash party `00045` from the company template) | `web/apps/api/src/modules/ops/seedCompany.ts` | A fresh/provisioned company must carry the walk-in party the sales/hallmark-sale/sales-quotation screens default to, so the core retail sale posts without the operator first creating an account (the live review hit HTTP 400 on the default sale). | N115 |
 | G125 | High | Sales / documents | `unified/src/csharp/DataCareNext/SaleBillA4Gst.rpt` | `web/apps/api/src/routes/txn.ts` `GET /sales/:vchNo/print`, `web/apps/api/src/modules/sales/salesBill.ts` | The retail sale must produce a printable Tax Invoice (the single highest-value desktop document); every sale needs a bill. | N116 |
 | G126 | Med | Purchase / documents | `unified/src/csharp/DataCareNext/PurcBillA4Gst.rpt` | `web/apps/api/src/routes/txn.ts` `GET /purchases/:vchNo/print` | The purchase must produce a printable supplier bill (the purchase counterpart of the Tax Invoice). | N117 |
+| G127 | Med | Sales return / documents | `unified/src/csharp/DataCareNext/SaleRtnBillA4Gst.rpt` | `web/apps/api/src/routes/txn.ts` `GET /sales-returns/:vchNo/print`, `web/apps/api/src/modules/sales/saleReturnBill.ts` | The sales return must produce a printable credit note (returned goods + value credited to the customer). | N118 |
 
 ## 4. Decisions D23–D28
 
@@ -751,6 +752,20 @@ with the company, Supplier caption, item, HSN and CGST/SGST.
 Done when: a posted purchase produces a supplier bill (HTML and PDF).
 
 
+### N118 — Sales-return Credit Note print (G127, Stage E)
+
+The sales-return keeps its header in SL_DATA but its returned items in SL_DETL_RTN (not SL_DETL), so the
+plain sales bill cannot print it. N118 adds `GET /sales-returns/:vchNo/print` backed by a new
+`saleReturnBill.ts` that reads SL_DATA + SL_DETL_RTN and renders the shared GST-bill chrome marked as a
+Credit Note. Five more legacy inline-PDF print endpoints (the /sales, /purchases, /finance/receipt-voucher
+and /finance/payment-voucher invoice prints) were converted to the shared `sendVoucherDocument` helper while
+adding this, keeping txn.ts under its (tightening) size ceiling. Route registered under the Sales Return
+policy; route universe 611 → 612. Verified live: a posted 5 g return's credit note returned HTTP 200 with
+the customer, HSN, CGST/SGST and the correct taxable (27,480) and half-tax (412).
+
+Done when: a posted sales return produces a credit-note document (HTML and PDF).
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -789,6 +804,7 @@ Done when: a posted purchase produces a supplier bill (HTML and PDF).
 | N115 | — | implemented-unverified, evidence in this change (G124/G100: seed the WALKIN walk-in customer so the default retail sale posts) |
 | N116 | — | implemented-unverified, evidence in this change (G125: sales Tax Invoice print GET /sales/:vchNo/print; verified live HTML 200 with correct bill) |
 | N117 | — | implemented-unverified, evidence in this change (G126: purchase bill print GET /purchases/:vchNo/print; verified live HTML 200) |
+| N118 | — | implemented-unverified, evidence in this change (G127: sales-return credit-note print GET /sales-returns/:vchNo/print; verified live HTML 200) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
