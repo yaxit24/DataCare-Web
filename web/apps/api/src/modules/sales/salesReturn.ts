@@ -255,8 +255,6 @@ export async function createSaleReturn(
   if (!input.acCode) throw new SaleValidationError('customer account (acCode) is required');
   if (!lines?.length) throw new SaleValidationError('at least one return line is required');
   assertSaleTaxRate(input.taxRatePct);
-  const salesAc = input.salesAc ?? 'SALES';
-  const fallbackTaxAc = input.taxAc ?? 'GST';
   const tenantId = input.scope.tenantId;
 
   const run = async (tx: any): Promise<SaleReturnResult> => {
@@ -275,7 +273,9 @@ export async function createSaleReturn(
     });
     if (input.interState !== taxPolicy.interState)
       throw new SaleValidationError('interState does not match the persisted customer GST type');
-    const taxAc = taxPolicy.taxAc ?? fallbackTaxAc;
+    // The GST account comes from the resolved tax policy (desktop joins TAX_MAST.TAX_AC) or an
+    // explicit override; a literal 'GST' remains only as a last-resort fallback (tracked by P0-04).
+    const taxAc = taxPolicy.taxAc ?? input.taxAc ?? 'GST';
     const computed = lines.map((line) => {
       const rounded =
         line.rate == null ? line : { ...line, rate: roundingPolicy.roundItemRate(line.rate) };
@@ -314,6 +314,11 @@ export async function createSaleReturn(
       throw new SaleValidationError(
         `item/group posting configuration missing: ${missing.join(', ')}`,
       );
+    // P0-04: the control account is the book's BOOK_DETL slot 1 (desktop LD_CODE = B.AC_CODE).
+    // It also stands in for a per-item revenue account when the item's group has no SALE_AC,
+    // and as the caller's explicit override — never a literal 'SALES'.
+    const controlAc = await resolveBookAccountTx(tx, input.scope, bookPolicy, 1);
+    const salesAc = input.salesAc ?? controlAc;
     const incomeLegs = buildIncomeLegs(
       computed.map((line) => ({
         net: line.calc.net,
@@ -323,17 +328,15 @@ export async function createSaleReturn(
       lineNetTotal,
     );
 
-    const controlAc =
-      totals.total === 0 ? salesAc : await resolveBookAccountTx(tx, input.scope, bookPolicy, 1);
-    let cashAc = input.cashAc ?? 'CASH';
+    let cashAc = controlAc;
     if (round2(num(input.cashAmt)) !== 0) {
       const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 2);
       if (input.cashAc && input.cashAc.trim() !== configured)
         throw new SaleValidationError('cash account does not match BOOK_DETL configuration');
       cashAc = configured;
     }
-    let roundAc = input.roundAc ?? 'ROUNDOFF';
-    let kasarAc = input.kasarAc ?? 'KASAR';
+    let roundAc = controlAc;
+    let kasarAc = controlAc;
     if (totals.roundOff !== 0 || round2(num(input.kasar)) !== 0) {
       const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 3);
       if (

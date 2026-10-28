@@ -84,7 +84,7 @@ const REMAINING: Readonly<Record<string, number>> = {
   'modules/dhrn/dhrn.ts': 5,
   'modules/finance/billToBill.ts': 5,
   'modules/purchase/purchaseReturn.ts': 5,
-  'modules/sales/salesReturn.ts': 5,
+  'modules/sales/salesReturn.ts': 1,
   'modules/manufacturing/karigar.ts': 4,
   'modules/sales/labourInvoice.ts': 3,
   'modules/finance/employeeJv.ts': 3,
@@ -97,7 +97,7 @@ const REMAINING: Readonly<Record<string, number>> = {
 };
 
 /** The total at the time P0-04's first slice landed. It may fall; it may not rise. */
-const REMAINING_TOTAL = 67;
+const REMAINING_TOTAL = 63;
 
 /**
  * Files this slice cleaned. Listing them explicitly means a regression names itself instead of hiding inside
