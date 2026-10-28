@@ -1,6 +1,11 @@
 import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import {
+  resolveBookAccountTx,
+  BookPolicyValidationError,
+  type BookPolicy,
+} from '../shared/bookPolicy.js';
+import {
   postVoucherTx,
   reverseVoucherTx,
   assertBalanced,
@@ -41,6 +46,38 @@ function keyOf(s: VoucherScope, vchNo: number | string): VoucherKey {
     CO_BOOK: s.coBook ?? 'BUL',
     VCH_NO: formatVoucherNo(vchNo),
   };
+}
+
+/**
+ * G121 / P0-04: resolve a bullion booking account from the book's BOOK_DETL slot (1 = payable/control,
+ * 2 = cash), honouring an explicit caller override. The seeded BUL book carries slot 1 = BULLION and
+ * slot 2 = CASH; fail closed on a missing/ambiguous slot rather than a literal.
+ */
+async function resolveBullionAccountTx(
+  tx: any,
+  scope: VoucherScope,
+  srNo: number,
+  override?: string,
+): Promise<string> {
+  const trimmed = (override ?? '').trim();
+  if (trimmed) return trimmed;
+  const coBook = scope.coBook ?? 'BUL';
+  const policy: BookPolicy = {
+    coBook,
+    vchType: 'BULBK',
+    bookName: 'BUL SALE',
+    mainBook: 'BUL SALE',
+    inout: 'I',
+  };
+  try {
+    return await resolveBookAccountTx(tx, { ...scope, coBook }, policy, srNo);
+  } catch (e) {
+    if (e instanceof BookPolicyValidationError)
+      throw new BullionValidationError(
+        `bullion book ${coBook} account slot ${srNo} is not configured: ${e.message}`,
+      );
+    throw e;
+  }
 }
 
 export interface BullionBookingInput {
@@ -112,11 +149,13 @@ export async function bullionBooking(
   if (!(amount > 0)) throw new BullionValidationError('amount must be positive');
   const advanceAmt = round2(num(input.advanceAmt));
 
-  const payableAc = input.payableAc ?? 'BULLION';
-  const cashAc = input.cashAc ?? 'CASH';
   const tenantId = input.scope.tenantId;
 
   return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
+    // G121 / P0-04: the payable and funding accounts come from the booking book's BOOK_DETL slots
+    // (slot 1 = bullion payable/control, slot 2 = cash), not literals; explicit overrides still win.
+    const payableAc = await resolveBullionAccountTx(tx, input.scope, 1, input.payableAc);
+    const cashAc = await resolveBullionAccountTx(tx, input.scope, 2, input.cashAc);
     const vchNo = await nextVoucherNoTx(tx, input.scope);
     const key = keyOf(input.scope, vchNo);
     const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
