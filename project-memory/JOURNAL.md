@@ -4,6 +4,13 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-28 (cont.) — E2E posting verification of the book-provisioning sweep
+- Beyond "the book appears", proved a newly-provisioned workflow actually POSTS: on the seedCompany demo, API login → POST /stock/item-opening (coBook IOP) → 201 {vchNo:1,items:1} → GET the voucher back → 200 with its line + header. Confirms N104 (and the whole N91/N97/N100-N104 sweep) lets a fresh company create+persist+reload these vouchers. Upgraded N104's statusNote. No code change; doc/verification only.
+- mfg-issue/receive deliberately NOT provisioned: the generic MFG screens cover many desktop process stages (MFG STNG/POLISH/CAST/…); which stage(s) a fresh company should carry is a product decision, and `requireMfgMainBook` exists but isn't called by the mfg issue/receive routes — so it's not a clean single-book provision. ac-opbl (special book 000) and tag-weight-diff (contained X21) are also out of the clean sweep. Sweep of clean cases is complete.
+- Next: pick a new parity area (not more marginal book provisioning). Next gap **G115**, slice **N106**, decision **D31**.
+
+---
+
 ## 2026-10-28 (cont.) — N105: Multi-Party Receipt book filter (G101)
 - Filter-only: batch receipt posts to RECEIPT (seeded RCT), so filtered its book list to RECEIPT. **PR #71 → main.**
 - Next gap **G115**, slice **N106**, decision **D31**. Remaining provision-then-filter candidates are lower-confidence (ac-opbl special book 000; tag-weight-diff is contained X21; mfg-issue/receive; fine-jv family FINE JV not seeded). Consider switching the sweep target or pivoting to another parity area next.
