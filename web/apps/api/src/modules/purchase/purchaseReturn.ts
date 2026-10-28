@@ -287,7 +287,6 @@ export async function writePurchaseReturnTx(
   ctx: PurchaseReturnWriteContext,
 ): Promise<PurchaseReturnResult> {
   assertReturnRequest(input, lines);
-  const purchaseAc = input.purchaseAc ?? 'PURCHASE';
   const fallbackTaxAc = input.taxAc ?? 'GSTINPUT';
   const tenantId = input.scope.tenantId;
   const { vchNo, hdVchNo, bookPolicy } = ctx;
@@ -353,6 +352,11 @@ export async function writePurchaseReturnTx(
     throw new PurchaseValidationError(
       `item/group posting configuration missing: ${missing.join(', ')}`,
     );
+  // P0-04: the control account is the book's BOOK_DETL slot 1 (desktop LD_CODE = B.AC_CODE). It also
+  // stands in for a per-item expense account when the item's group has no PURC_AC, and as the caller's
+  // explicit override — never a literal 'PURCHASE'.
+  const controlAc = await resolveBookAccountTx(tx, input.scope, bookPolicy, 1);
+  const purchaseAc = input.purchaseAc ?? controlAc;
   const expenseLegs = buildExpenseLegs(
     computed.map((line) => ({
       net: line.calc.net,
@@ -362,17 +366,15 @@ export async function writePurchaseReturnTx(
     lineNetTotal,
   );
 
-  const controlAc =
-    totals.total === 0 ? purchaseAc : await resolveBookAccountTx(tx, input.scope, bookPolicy, 1);
-  let cashAc = input.cashAc ?? 'CASH';
+  let cashAc = controlAc;
   if (round2(num(input.cashAmt)) !== 0) {
     const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 2);
     if (input.cashAc && input.cashAc.trim() !== configured)
       throw new PurchaseValidationError('cash account does not match BOOK_DETL configuration');
     cashAc = configured;
   }
-  let roundAc = input.roundAc ?? 'ROUNDOFF';
-  let kasarAc = input.kasarAc ?? 'KASAR';
+  let roundAc = controlAc;
+  let kasarAc = controlAc;
   if (totals.roundOff !== 0 || round2(num(input.kasar)) !== 0) {
     const configured = await resolveBookAccountTx(tx, input.scope, bookPolicy, 3);
     if (

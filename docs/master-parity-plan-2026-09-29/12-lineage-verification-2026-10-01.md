@@ -127,6 +127,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G114 | S2 | Item Opening unusable on a provisioned company | Item Opening (TR_ITM_OPBL, `MDI_FORM.cs:7701` CurBookHelp("OPSTK")) opens non-tag item stock: it writes `ITM_OPBL` + positive `MAIN_STOCK` with no money ledger (empty `AC_DATA`) on a book routed to `BAR_DATA` | Found continuing the G113 provisioning review: `web/apps/api/src/modules/ops/seedCompany.ts` provisioned no Item Opening book, so the Item Opening screen had no book to select on a provisioned company (the Stock In/Out, Dhiran, Labour/Fine, Tag Opening, Fine In/Out, Bullion class) | Provisioning creates the `IOP` (OPSTK → `BAR_DATA`) book as a ledger-less stock book (empty slots); a seed-completeness DB assertion, and the Item Opening book list filtered to `OPSTK` — done (N104) | N104 |
 | G115 | High | Labour | `unified/src/csharp/DataCareNext/Ac_Ledr.cs:1203` | `web/apps/api/src/modules/sales/labourInvoice.ts` | The labour-income leg must credit the book's BOOK_DETL slot SR_NO 6 (desktop joins `B.SR_NO = 6` under MAIN_BOOK `LABOUR WORK`), not a literal `LABOUR` account that exists only in the provisioning seed and is absent on a migrated company. | N106 |
 | G116 | Med | Sales return | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (SALES RETURNE book legs) | `web/apps/api/src/modules/sales/salesReturn.ts` | The control/revenue, cash and round/kasar accounts must come from the book's BOOK_DETL slots (SR_NO 1/2/3), not literal `SALES`/`CASH`/`ROUNDOFF`/`KASAR` placeholders that only the provisioning seed carries. | N107 |
+| G117 | Med | Purchase return | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` (PURC RETURN book legs) | `web/apps/api/src/modules/purchase/purchaseReturn.ts` | The control/expense, cash and round/kasar accounts must come from the book's BOOK_DETL slots (SR_NO 1/2/3), not literal `PURCHASE`/`CASH`/`ROUNDOFF`/`KASAR` placeholders. | N108 |
 
 ## 4. Decisions D23–D28
 
@@ -600,6 +601,16 @@ file falls from 5 to 1 (P0-04 total 67 → 63).
 Done when: a sales return credits the book's configured control/cash/round accounts on a provisioned company.
 
 
+### N108 — Purchase-return posting accounts resolved from the book (G117, P0-04)
+
+The mirror of N107 for the purchase side. The control account is now resolved unconditionally from the
+book's BOOK_DETL slot 1 and reused as the per-item expense fallback; cash from slot 2, round/kasar from
+slot 3; the literal `PURCHASE`/`CASH`/`ROUNDOFF`/`KASAR` initializers are gone. Only the GSTINPUT account
+literal remains (a tax-config concern), so the file falls from 5 to 1 (P0-04 total 63 → 59).
+
+Done when: a purchase return debits the book's configured control/cash/round accounts on a provisioned company.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -628,6 +639,7 @@ Done when: a sales return credits the book's configured control/cash/round accou
 | N105 | — | implemented-unverified, evidence in this change (G101 part: Multi-Party Receipt book list filtered to RECEIPT) |
 | N106 | — | implemented-unverified, evidence in this change (G115: labour-income account resolved from BOOK_DETL SR_NO 6, not a literal; P0-04 68→67) |
 | N107 | — | implemented-unverified, evidence in this change (G116: sales-return control/cash/round accounts resolved from BOOK_DETL slots; P0-04 67→63) |
+| N108 | — | implemented-unverified, evidence in this change (G117: purchase-return control/cash/round accounts resolved from BOOK_DETL slots; P0-04 63→59) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

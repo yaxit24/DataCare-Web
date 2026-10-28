@@ -4702,6 +4702,27 @@
         "web/apps/api/test/postingAccountLiterals.test.ts"
       ],
       "statusNote": "The sales-return writer already resolved cash/round from the book when the amount was non-zero but kept literal initializers (SALES/CASH/ROUNDOFF/KASAR). Now the control account is resolved unconditionally from BOOK_DETL slot 1 (desktop LD_CODE=B.AC_CODE) and reused as the per-item revenue fallback; cash from slot 2, round/kasar from slot 3; no literal initializers. Only the GST account literal remains (separate tax-config concern), so labour register entry falls 5->1, total 67->63. Verified locally: typecheck/typecheck:tests/lint/format/size/kernel-conformance; routes 126; web 646; full API+DB 313/3483."
+    },
+    {
+      "id": "N108",
+      "status": "implemented-unverified",
+      "action": "Purchase-return writer kept literal PURCHASE/CASH/ROUNDOFF/KASAR initializers; resolve control/cash/round from BOOK_DETL slots 1/2/3 like the desktop (mirror of N107)",
+      "parentLabels": "P0-04; X07",
+      "startAfter": [
+        "N107"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "purchaseReturn.ts resolves control(1)/cash(2)/round(3) from the book; only GSTINPUT literal remains; P0-04 register 5->1 / total 63->59; full API+DB 313/3483, web 646, routes 126, gates green",
+      "gapIds": "G117",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-28",
+      "evidence": [
+        "web/apps/api/src/modules/purchase/purchaseReturn.ts",
+        "web/apps/api/test/postingAccountLiterals.test.ts"
+      ],
+      "statusNote": "Mirror of N107 for the purchase side. Control account resolved unconditionally from BOOK_DETL slot 1 and reused as the per-item expense fallback; cash from slot 2, round/kasar from slot 3; literal PURCHASE/CASH/ROUNDOFF/KASAR initializers removed. Only GSTINPUT literal remains (tax-config concern): register 5->1, total 63->59. Verified locally: typecheck/typecheck:tests/lint/format/size/kernel; routes 126; web 646; full API+DB 313/3483."
     }
   ],
   "amendments": [
