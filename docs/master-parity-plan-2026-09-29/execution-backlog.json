@@ -5152,6 +5152,29 @@
         "web/apps/api/test/tourSale.routes.db.test.ts"
       ],
       "statusNote": "Tour Sales (TR_TOUR_SALE) posts the SAME TR_WH_SALE engine (Wh_Sales_Ledr, TR_TOUR_SALE.cs:11252) on a TOUR SALES book. Added a tour-sale workflow to the wholesale-sale pipeline (WORKFLOW_MAIN_BOOK + book guard) and 4 thin wrappers in a new sales/tourSale.ts over the exported rateCut internals (writeRateCut/readRateCut/reverseRateCut). Provisioned the TSL (TOUR SALES) book with the 12 wholesale slots. Routes POST/GET/PUT/DELETE /tour-sales in the shared plugin under the Tour/Approval Sale right; universe 631->635. New routes DB test (post+tag-out+fine-cut+reopen+wrong-book guard). VERIFIED LIVE: 10g fine tour sale @6000 -> net 60000 on TSL, reopened. Verified: typecheck/typecheck:tests/lint/format/size/kernel/register/docs; routes 126; web 646; full API+DB 318/3492. ALL 5 MISSING workflows now complete (Card Rec, Cust Entry, Loan Intrest, Dhrn Os Letter, Tour Sales)."
+    },
+    {
+      "id": "N128",
+      "status": "implemented-unverified",
+      "action": "Expose journal reopen+edit routes (GET/PUT /journal/:vchNo); reader/editor already existed",
+      "parentLabels": "P05; D-lifecycle",
+      "startAfter": [
+        "N127"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "GET/PUT /journal/:vchNo; route universe 637; full API+DB 318/3492, web 646, routes 126, gates; verified live round-trip",
+      "gapIds": "G137",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/api/src/routes/crm.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/test/routePolicy.test.ts"
+      ],
+      "statusNote": "Journal had create/delete/print but no reopen/edit routes though getJournal/editJournal existed (like N122). Exposed GET/PUT /journal/:vchNo via the shared routes plugin. Universe 635->637. VERIFIED LIVE: 5000 Dr/Cr journal -> reopen (2 lines) -> edit to 6000 (amounts round-trip). Verified: typecheck/typecheck:tests/lint/format/size/kernel/register/docs; routes 126; web 646; full API+DB 318/3492."
     }
   ],
   "amendments": [
