@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
-import { get, post, ApiError } from '../lib/api';
+import { get, post, put, ApiError } from '../lib/api';
 import { LookupPicker } from './LookupPicker';
 import { BookSelect } from './BookSelect';
+import { VoucherList } from './VoucherList';
 import { EntityImagePanel } from './EntityImagePanel';
 import { useGridKeyboard } from './GridKeyboard';
 import SubDetailGrid, { SUB_DETAIL_COMPONENT, useSubDetail } from './SubDetailGrid';
@@ -220,6 +221,12 @@ export default function KarigarForm({
   const [bal, setBal] = useState<number | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const [loadedVch, setLoadedVch] = useState('');
+  // Reopen/edit is backed for karigar/issue, karigar/receive and old-item-sales (GET/PUT/DELETE
+  // routes exist); jobwork has no lifecycle routes yet, so it stays create-only.
+  const lifecycle = family === 'karigar' || oldItemSales;
+  // VoucherList lists by the family's header table: KR_DATA for karigar/old-item-sales.
+  const lifecycleTable = 'KR_DATA';
   // P3: the karigar's outstanding bill amount carried on the voucher (IssueInput.billOutstanding).
   const [billOutstanding, setBillOutstanding] = useState('');
   const [partyFine, setPartyFine] = useState('');
@@ -263,6 +270,105 @@ export default function KarigarForm({
       setBal(r.balance);
     } catch {
       setBal(null);
+    }
+  }
+
+  function resetForm() {
+    setLoadedVch('');
+    setKarigarAc('');
+    setKarigarName('');
+    setLines([blank()]);
+    sub.reset();
+    setBillOutstanding('');
+    setPartyFine('');
+    setRes(null);
+    setErr('');
+  }
+
+  // Reopen a saved karigar / old-item-sales voucher for edit (GET ${ep}/:vchNo). The reader returns
+  // numbers; the form holds strings, so every field is stringified. Sub-detail stones are replaced
+  // in one shot via sub.load(perLine), the primitive SubDetailGrid exposes for exactly this.
+  async function loadVoucher(vchNo: string) {
+    if (!lifecycle) return;
+    setErr('');
+    setRes(null);
+    setBusy(true);
+    try {
+      const d = await get<any>(
+        `${ep}/${encodeURIComponent(vchNo)}?coBook=${encodeURIComponent(coBook)}`,
+      );
+      setLoadedVch(String(d.voucherNo ?? vchNo));
+      setKarigarAc(String(d.karigarAc ?? ''));
+      setKarigarName(String(d.karigarName ?? ''));
+      if (d.labourGstPct != null) setLabourGstPct(String(d.labourGstPct));
+      setBillOutstanding(d.billOutstanding ? String(d.billOutstanding) : '');
+      setPartyFine(d.partyFine ? String(d.partyFine) : '');
+      const str = (v: unknown) => (v == null || v === 0 ? '' : String(v));
+      const srcLines: any[] = Array.isArray(d.lines) && d.lines.length ? d.lines : [];
+      setLines(
+        srcLines.length
+          ? srcLines.map((l) => ({
+              ...blank(),
+              itCode: String(l.itCode ?? ''),
+              designNo: String(l.designNo ?? ''),
+              tblCode: String(l.tblCode ?? '001'),
+              itmSize: String(l.itmSize ?? ''),
+              tagNo: String(l.tagNo ?? ''),
+              pcs: str(l.pcs) || '1',
+              grossWt: str(l.grossWt),
+              othWt: str(l.othWt),
+              netWt: str(l.netWt),
+              ghtWt: str(l.ghtWt),
+              touch: str(l.touch),
+              westPct: str(l.westPct),
+              lbrType: String(l.lbrType ?? 'G'),
+              lbrRate: str(l.lbrRate),
+              lbrPct: str(l.lbrPct),
+              lbrAmt: str(l.lbrAmt),
+              othAmt: str(l.othAmt),
+              bagWt: str(l.bagWt),
+              convPct: str(l.convPct),
+              convRate: str(l.convRate),
+              itDesc: String(l.itDesc ?? ''),
+              lessTouch: str(l.lessTouch),
+              lossWt: str(l.lossWt),
+              lotNo: String(l.lotNo ?? ''),
+              mrp: str(l.mrp),
+              oldSrNo: str(l.oldSrNo),
+              otherFine: str(l.otherFine),
+              otherRate: str(l.otherRate),
+              silverFine: str(l.silverFine),
+              ghtPct: str(l.ghtPct),
+              urdRateType: String(l.urdRateType ?? ''),
+              commissionPct: str(l.commissionPct),
+              commissionAmount: str(l.commissionAmount),
+              rate: str(l.rate),
+              rateType: String(l.rateType ?? ''),
+              amount: str(l.amount),
+              totalAmount: str(l.totalAmount),
+              withStock: String(l.withStock ?? ''),
+            }))
+          : [blank()],
+      );
+      // Replace the stone sub-detail, one entry per parent line.
+      const stoneStr = (v: unknown) => (v == null || v === 0 ? undefined : String(v));
+      sub.load(
+        (srcLines.length ? srcLines : [{}]).map((l) =>
+          (Array.isArray(l.stones) ? l.stones : []).map((s: any) => {
+            const row: Record<string, string> = {};
+            for (const [k, v] of Object.entries(s)) {
+              if (k === 'isrNo') continue;
+              const sv = typeof v === 'number' ? stoneStr(v) : v ? String(v) : undefined;
+              if (sv != null) row[k] = sv;
+            }
+            return row;
+          }),
+        ),
+      );
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -391,7 +497,10 @@ export default function KarigarForm({
         }
         if (oldItemSales && partyFine.trim()) body.partyFine = n(partyFine);
       }
-      const r = await post(ep, body);
+      const r =
+        lifecycle && loadedVch
+          ? await put(`${ep}/${encodeURIComponent(loadedVch)}`, body)
+          : await post(ep, body);
       setRes(r);
       setLines([blank()]);
       checkBalance();
@@ -721,11 +830,24 @@ export default function KarigarForm({
                   : ''}
             </span>
             <button className="primary" disabled={busy}>
-              {busy ? 'Saving…' : 'Save'}
+              {busy ? 'Saving…' : lifecycle && loadedVch ? `Update #${loadedVch}` : 'Save'}
             </button>
+            {lifecycle && loadedVch && (
+              <button type="button" className="ghost" onClick={resetForm} disabled={busy}>
+                New
+              </button>
+            )}
           </div>
         </div>
       </form>
+      {lifecycle && (
+        <VoucherList
+          table={lifecycleTable}
+          book={coBook}
+          deleteBase={ep}
+          onLoad={(vchNo) => loadVoucher(vchNo)}
+        />
+      )}
       {err && <div className="msg err">{err}</div>}
       {res && (
         <div className="panel">

@@ -5559,14 +5559,14 @@
     },
     {
       "id": "N146",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Wire reopen/edit/delete lifecycle into the shared KarigarForm (lights up karigar-issue, karigar-receive and old-item-sales at once): add loadVoucher (GET ${ep}/:vchNo -> map header + 40+ line fields + sub.load(stones)), PUT-when-loaded, New, and a family-gated VoucherList (karigar + old-item-sales have backend routes; jobwork does NOT and is excluded)",
       "parentLabels": "P10; D-lifecycle",
       "startAfter": [
         "N145"
       ],
       "entryDefinition": "02-execution-plan.md section 4",
-      "requiredProof": "DB/live test: reopen a karigar-receive and an old-item-sale into the full line grid + stones, edit, re-read; jobwork still create-only (no backend routes); gates + route universe unchanged (UI-only); full API+DB green",
+      "requiredProof": "Live: karigar-receive create 201 -> GET reopen (pcs 2) -> PUT edit 200 (pcs 2->3) -> GET reopen (pcs 3). UI-only (no new routes); gates green; web tests 9; full API+DB unchanged (editKarigar/getKarigar already tested).",
       "gapIds": "G155",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
@@ -5575,7 +5575,7 @@
       "evidence": [
         "web/apps/web/components/KarigarForm.tsx"
       ],
-      "statusNote": "READY, NOT YET IMPLEMENTED. The backend is fully built: getKarigar/editKarigar/deleteKarigar and getOldItemSale/editOldItemSale/deleteOldItemSale exist with GET/PUT/DELETE routes (karigar/issue, karigar/receive, old-item-sales each have 3 lifecycle routes). The shared KarigarForm (5 pages) is create-only: it imports only get/post, no VoucherList/loadedVch/put. useSubDetail already exposes load(perLine)/reset() purpose-built for reopen (SubDetailGrid.tsx:315) and getKarigar returns a rich header+lines+stones shape, so the wiring is tractable: map the reader lines (number) to the form Line (string) and the reader stones to SubDetailRow, call sub.load, set loadedVch, PUT when loaded, and show a VoucherList gated to families whose backend has routes (karigar + old-item-sales, NOT jobwork which has 0 lifecycle routes). This is a UI-only slice (no new routes), so no size-budget or route-universe impact. jobwork needs its own backend-routes slice first."
+      "statusNote": "IMPLEMENTED. Wired reopen/edit/delete into the shared KarigarForm: loadVoucher (GET ${ep}/:vchNo?coBook -> stringify header + 40+ line fields; sub.load(perLine) rebuilds the stone sub-detail), resetForm (New), PUT-when-loaded, and a family-gated VoucherList (table KR_DATA) shown only when lifecycle === true (family karigar or old-item-sales; jobwork excluded, it has no backend lifecycle routes). UI-only: no new routes, no size-budget/route-universe impact. Lit up karigar-issue, karigar-receive and old-item-sales at once. Verified live on the running stack: karigar-receive create 201, GET reopen returns the line grid (pcs 2), PUT edit 200, GET reopen reflects the edit (pcs 3). Gates (typecheck/lint/format/typecheck:tests/size) green; web tests 9/9. The backend getKarigar/editKarigar/getOldItemSale/editOldItemSale were already covered by existing API tests."
     }
   ],
   "amendments": [
