@@ -5436,6 +5436,29 @@
         "web/apps/api/test/routeInputForwarding.test.ts"
       ],
       "statusNote": "Scheme instalment (841 vouchers) could create/reopen/delete but not edit though editSchemeInstallment existed. Extracted the big installment input mapping into a shared schemeInstallmentInput(req,b) helper (POST now calls it, net-reducing txn.ts) + added PUT /scheme/installment/:vchNo (universe 640->641). Updated routeInputForwarding.test to verify the helper forwards every SchemeInstallmentInput field (helperKeys, like rate-cut). Full API+DB 318/3492 green. Live end-to-end edit needs a seeded scheme + book 074 (demo lacks them) - separate provisioning concern; route + forwarding verified by the suite. Verified: typecheck/lint/format/typecheck:tests/size/kernel/register; web 646."
+    },
+    {
+      "id": "N141",
+      "status": "implemented-unverified",
+      "action": "Restore CI to green: commit the missing cardReceiptInputFromBody export that broke tsc -p since N124; fix the PaymentForm save-confirmation regression that failed the real-stack cash-receipt journey; resync the depth baseline + unreachable triage after the Stage D/E writers",
+      "parentLabels": "P-release; CI-health",
+      "startAfter": [
+        "N140"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Clean-tree pnpm --filter @datacare/api build (tsc -p); all three real-stack journeys green; depth:parity + depth:deadcells green; PR #109 CI all jobs pass (static-gates, quality, Real-stack browser journeys); main CI run completed success",
+      "gapIds": "G150",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/api/src/modules/finance/cardReceipt.ts",
+        "web/apps/web/components/PaymentForm.tsx",
+        "web/parity/unreachable-triage.json",
+        "web/parity/depth-parity-baseline.json"
+      ],
+      "statusNote": "CI had been RED since N124 (febec1a): txn.ts imported cardReceiptInputFromBody from cardReceipt.ts but the export lived only in an uncommitted working-tree change a later git stash dropped, so a clean tsc -p failed TS2724 - masked locally because the dirty tree carried it across ~16 merges. Committed the 31-line body mapper. Second break: PaymentForm.submit() called resetForm() after a NEW single-party save, nulling res and wiping the Saved - Voucher #N confirmation; the real-stack cash-receipt-payment journey timed out waiting for it. Now clears only the entry inputs, keeps res (matches the multi-line branch). Third: depth:parity gate failed (API fields no screen can supply 96->102) - accumulated healthy growth: Stage D/E writers added 367 API input fields, 361 reachable, 6 net unreachable are all server-derived/internal (BOOK_DETL-resolved posting slots, book-classification flags, writer-assigned voucher numbers, day-book projection rows, read-query keys). Resynced unreachable-triage.json to the exact 102-field set (0 operator-class - every former operator-backlog gap was closed by the same slices - 71 serverDerived, 31 internal, each spot-checked against its writer) and re-recorded depth-parity-baseline.json preserving note/metricChanges/endToEnd/phases with an honest metricChanges entry. Verified: clean-tree API build; all 3 real-stack journeys; depth:parity + depth:deadcells; full battery; PR #109 all CI jobs green; main CI run 40827479158 completed success."
     }
   ],
   "amendments": [
