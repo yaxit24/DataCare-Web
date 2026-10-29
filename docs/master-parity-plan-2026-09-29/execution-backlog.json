@@ -5531,6 +5531,31 @@
         "web/apps/api/test/dhrnReceiptLifecycle.db.test.ts"
       ],
       "statusNote": "Companion to N143. The pledge RECEIPT (redemption) was create-only: receiveDhrn + deleteDhrn existed but no getDhrnReceipt/editDhrnReceipt, no GET/PUT routes, and the page imported only get/post. ALSO a correctness bug: deleteDhrn reversed the receipt rows but did NOT restore the issue ISU_REC flag, so a reversed receipt left the pledge permanently marked redeemed - diverging from desktop TR_DHRN_REC.cs:6376 (sets ISU_REC=N). Added getDhrnReceipt (DHRN_REC_DATA + DHRN_REC_DETL released items) and editDhrnReceipt (editIdentityTx + replaceWriteSetTx(DHRN_REC_TABLES) + receiveDhrn lifecycle; restores ISU_REC=N before the repost so the outstanding guard sees the pre-receipt balance). Made deleteDhrn read the receipt ISU_YRCD/ISU_DBCD/ISU_NO before reversal and restore DHRN_ISU_DATA.ISU_REC=N for the receipt case. To stay under the txn.ts size ceiling, extracted all six dhrn issue+receipt lifecycle routes into a new registerDhrnLifecycleRoutes in routes/crm.ts (the issue/receipt body mappers are passed in); txn.ts shrank and its ceiling was lowered. Route universe 644->647. Page rewired: loadReceipt/resetForm/VoucherList + PUT-when-loaded + Update/New. DB test (3 cases incl. delete-restores-ISU_REC) green; full API+DB 3502; routePolicy+routeInputForwarding green. Live: POST /dhrn/issue 201, POST /dhrn/receipt 201 (outstanding 0). The GET/DELETE follow the identical scopeOf(req) pattern as the verified contra reopen (coBook via the page-context ticket); delete+restore proven by the DB test which passes an explicit-scope delete."
+    },
+    {
+      "id": "N145",
+      "status": "implemented-unverified",
+      "action": "Loan Received + Loan Issue reopen/edit/delete: reuse the dhrn readers (same tables) + add editLoanReceived/editLoanIssue (inject loan flags) + GET/PUT/DELETE /loan/received/:isuNo and /loan/issue/:vchNo in registerDhrnLifecycleRoutes, and wire both create-only pages with load/New/Update + VoucherList",
+      "parentLabels": "P10; D-lifecycle",
+      "startAfter": [
+        "N144"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "DB test loanLifecycle.db.test.ts (loan-received reopen+edit keeps ENTRY_TYPE=L; loan-issue reopen+edit keeps ENTRY_TYPE=L); route universe 647->653; full API+DB 3504; routePolicy + routeInputForwarding green",
+      "gapIds": "G154",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/api/src/modules/dhrn/dhrn.ts",
+        "web/apps/api/src/routes/crm.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/web/app/(app)/txn/loan-issue/page.tsx",
+        "web/apps/web/app/(app)/txn/loan-received/page.tsx",
+        "web/apps/api/test/loanLifecycle.db.test.ts"
+      ],
+      "statusNote": "Loan Received (receiveLoan wraps issueDhrn -> DHRN_ISU_DATA, ENTRY_TYPE L) and Loan Issue (issueLoan wraps receiveDhrn -> DHRN_REC_DATA) were both create-only. Because the data lives in the same tables as pledges, reopen reuses getDhrnIssue (loan-received) and getDhrnReceipt (loan-issue) unchanged. Added editLoanReceived/editLoanIssue thin wrappers that inject the loan flags (entryType L, LOAN REC/LOAN ISSUE books, loan ledgerMode) then delegate to editDhrnIssue/editDhrnReceipt so the repost stays a loan. Added six routes to registerDhrnLifecycleRoutes in crm.ts (GET/PUT/DELETE on /loan/received/:isuNo and /loan/issue/:vchNo), classified in routePolicy, universe 647->653. Wired both pages (loan-issue mirrors dhrn-receipt, loan-received mirrors dhrn-issue) with load/New/Update + VoucherList. DB test (2 cases proving ENTRY_TYPE stays L across edit) green; full API+DB 3504; routePolicy + routeInputForwarding green."
     }
   ],
   "amendments": [

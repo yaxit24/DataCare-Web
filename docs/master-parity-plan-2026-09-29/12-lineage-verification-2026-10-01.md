@@ -164,6 +164,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G151 | Med | Batch receipt / kasar write-off | `unified/src/csharp/DataCareNext/Ac_Ledr.cs:571-581` | `web/apps/api/src/modules/finance/batchReceipt.ts`, `web/apps/api/src/modules/finance/finance.ts` `kasarAccountTx`, `web/apps/api/test/batchReceiptKasar.db.test.ts` | `postBatchReceipt` required the caller to name the kasar (write-off) account, but the batch grid has no kasar-account column and the route forwards only `{scope,vchDate,lines}`, so every on-screen write-off on a batch collection was refused. The single-row receipt/payment path already resolves BOOK_DETL slot 2 (desktop `Ac_Ledr.cs:571-581`); the batch path must do the same. | N142 |
 | G152 | High | Dhiran pledge issue / reopen+edit | `unified/src/csharp/DataCareNext/TR_DHRN_ISU.cs` | `web/apps/api/src/modules/dhrn/dhrn.ts` `getDhrnIssue`/`editDhrnIssue`, `web/apps/api/src/routes/txn.ts` `GET/PUT/DELETE /dhrn/issue/:isuNo`, `web/apps/web/app/(app)/txn/dhrn-issue/page.tsx` | The pledge issue (a core daily workflow) could be created and deleted but not reopened or edited: `issueDhrn`/`deleteDhrn` existed but there was no reader/editor or GET/PUT routes, and the page was create-only (no VoucherList). Add `getDhrnIssue`/`editDhrnIssue` mirroring the N125 interest pattern, the three routes, and the lifecycle UI. | N143 |
 | G153 | High | Dhiran pledge receipt / reopen+edit + ISU_REC restore | `unified/src/csharp/DataCareNext/TR_DHRN_REC.cs:6376` | `web/apps/api/src/modules/dhrn/dhrn.ts` `getDhrnReceipt`/`editDhrnReceipt`/`deleteDhrn`, `web/apps/api/src/routes/crm.ts` `registerDhrnLifecycleRoutes`, `web/apps/web/app/(app)/txn/dhrn-receipt/page.tsx` | The pledge receipt (redemption) was create-only, and worse, deleting a receipt did NOT restore the issue's `ISU_REC` flag, so a reversed receipt left the pledge permanently marked redeemed (desktop `TR_DHRN_REC.cs:6376` sets it back to `'N'`). Add reader/editor + routes, restore `ISU_REC='N'` on receipt delete/edit, and wire the lifecycle UI. | N144 |
+| G154 | Med | Loan Received / Loan Issue reopen+edit | `unified/src/csharp/DataCareNext/TR_DHRN_ISU.cs`, `unified/src/csharp/DataCareNext/TR_DHRN_REC.cs` | `web/apps/api/src/modules/dhrn/dhrn.ts` `editLoanReceived`/`editLoanIssue`, `web/apps/api/src/routes/crm.ts` `registerDhrnLifecycleRoutes`, `web/apps/web/app/(app)/txn/loan-issue/page.tsx`, `web/apps/web/app/(app)/txn/loan-received/page.tsx` | Loan Received (receiveLoan→issueDhrn, DHRN_ISU_DATA) and Loan Issue (issueLoan→receiveDhrn, DHRN_REC_DATA) were create-only. They share the pledge tables, so reopen reuses the dhrn readers; add loan-flag-injecting editors + the six routes + the lifecycle UI. | N145 |
 
 ## 4. Decisions D23–D28
 
@@ -1242,6 +1243,25 @@ reopen (coBook arrives on the page-context ticket the browser sends).
 Done when: an operator can load a saved redemption, change it and re-save, and deleting one reopens
 the pledge for a fresh redemption.
 
+### N145 — Loan Received + Loan Issue reopen/edit/delete (G154, Stage D)
+
+Loan Received (`receiveLoan` wraps `issueDhrn`, writing DHRN_ISU_DATA with ENTRY_TYPE 'L') and Loan
+Issue (`issueLoan` wraps `receiveDhrn`, writing DHRN_REC_DATA) were both create-only. Because the
+loan vouchers share the pledge tables, their reopen readers are exactly `getDhrnIssue` (loan-received)
+and `getDhrnReceipt` (loan-issue) — unchanged. N145 adds thin `editLoanReceived`/`editLoanIssue`
+wrappers that inject the loan flags (`entryType: 'L'`, LOAN REC / LOAN ISSUE books, the loan
+ledgerMode) and delegate to `editDhrnIssue`/`editDhrnReceipt`, so an edited loan reposts as a loan,
+not a pledge. Six routes were added to `registerDhrnLifecycleRoutes` in `web/apps/api/src/routes/crm.ts`
+(GET/PUT/DELETE on `/loan/received/:isuNo` and `/loan/issue/:vchNo`), classified in routePolicy
+(universe 647 → 653). Both pages were wired with load/New/Update and a VoucherList (loan-issue mirrors
+dhrn-receipt, loan-received mirrors dhrn-issue).
+
+Verified: `loanLifecycle.db.test.ts` (2 cases — loan-received and loan-issue each reopen and edit and
+keep ENTRY_TYPE 'L' across the edit, proving the repost stayed a loan) green; routePolicy +
+routeInputForwarding green; full API+DB 3504.
+
+Done when: an operator can reopen and edit a saved Loan Received or Loan Issue and it stays a loan.
+
 
 ## 6. Status corrections
 
@@ -1308,6 +1328,7 @@ the pledge for a fresh redemption.
 | N142 | — | implemented-unverified, evidence in this change (G151: batch-receipt kasar now resolves BOOK_DETL slot 2 via the shared kasarAccountTx; DB test 4/4, full API+DB 319/3496, live POST 201 was 400) |
 | N143 | — | implemented-unverified, evidence in this change (G152: dhrn pledge-issue reopen/edit/delete + lifecycle UI; route universe 641→644, DB test 3/3, full API+DB 320/3499, live POST 201 + PUT 200) |
 | N144 | — | implemented-unverified, evidence in this change (G153: dhrn pledge-receipt reopen/edit/delete + ISU_REC-restore fix; routes extracted to crm.ts, universe 644→647, DB test 3/3, full API+DB 3502, live POST 201) |
+| N145 | — | implemented-unverified, evidence in this change (G154: Loan Received + Loan Issue reopen/edit/delete reusing the dhrn readers + loan-flag editors; universe 647→653, DB test 2/2, full API+DB 3504) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

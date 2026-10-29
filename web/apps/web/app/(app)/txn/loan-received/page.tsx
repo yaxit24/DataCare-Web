@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
-import { post, ApiError } from '../../../../lib/api';
+import { post, put, get, ApiError } from '../../../../lib/api';
+import { VoucherList } from '../../../../components/VoucherList';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
@@ -73,6 +74,7 @@ export default function DhrnIssuePage() {
   const [res, setRes] = useState<{ vchNo: number; intAmt: number; monthInt: number } | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const [loadedVch, setLoadedVch] = useState('');
 
   const setLine = (i: number, k: keyof Coll, v: string) =>
     setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
@@ -99,6 +101,67 @@ export default function DhrnIssuePage() {
   const intPreviewApproximate = r2(
     ((n(principal) * n(intPrc)) / 100) * ((n(intMonths) * 30) / 360),
   );
+
+  function resetForm() {
+    setLoadedVch('');
+    setBorrowerAc('');
+    setBorrowerName('');
+    setLoanType('A');
+    setPrincipal('');
+    setIntPrc('');
+    setIntMonths('');
+    setPacketNo('');
+    setOtherCharges('');
+    setToDate('');
+    setExtra({});
+    setLines([blank()]);
+    setRes(null);
+    setErr('');
+  }
+
+  // Reopen a saved loan received (GET /loan/received/:isuNo) for edit; it lives in DHRN_ISU_DATA.
+  async function loadReceived(isuNo: string) {
+    setErr('');
+    setRes(null);
+    setBusy(true);
+    try {
+      const d = await get<any>(`/loan/received/${encodeURIComponent(isuNo)}`);
+      setLoadedVch(String(d.voucherNo ?? isuNo));
+      setBorrowerAc(String(d.borrowerAc ?? ''));
+      setBorrowerName(String(d.borrowerName ?? ''));
+      setLoanType((d.loanType as 'A' | 'G' | 'S') || 'A');
+      setPrincipal(String(d.principal ?? ''));
+      setIntPrc(d.intPrc ? String(d.intPrc) : '');
+      setIntMonths(d.intMonths ? String(d.intMonths) : '');
+      setPacketNo(String(d.packetNo ?? ''));
+      setOtherCharges(d.otherCharges ? String(d.otherCharges) : '');
+      setToDate(String(d.toDate ?? ''));
+      setExtra({
+        fromDate: String(d.fromDate ?? ''),
+        licenceNo: String(d.licenceNo ?? ''),
+        remarks: String(d.remarks ?? ''),
+      });
+      const coll = Array.isArray(d.collateral) ? d.collateral : [];
+      setLines(
+        coll.length
+          ? coll.map((c: any) => ({
+              ...blank(),
+              itCode: String(c.itCode ?? ''),
+              itDesc: String(c.itName ?? c.itDesc ?? ''),
+              pcs: c.pcs ? String(c.pcs) : '',
+              grossWt: c.grossWt ? String(c.grossWt) : '',
+              netWt: c.netWt ? String(c.netWt) : '',
+              touch: c.touch ? String(c.touch) : '',
+              rate: c.rate ? String(c.rate) : '',
+            }))
+          : [blank()],
+      );
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -155,7 +218,11 @@ export default function DhrnIssuePage() {
             };
           }),
       };
-      setRes(await post('/loan/received', body));
+      setRes(
+        loadedVch
+          ? await put(`/loan/received/${encodeURIComponent(loadedVch)}`, body)
+          : await post('/loan/received', body),
+      );
     } catch (e) {
       setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
     } finally {
@@ -354,8 +421,13 @@ export default function DhrnIssuePage() {
               Fine {inr(totalFine)} g · <b>Total ₹{inr(totalAmount)}</b>
             </span>
             <button className="primary" disabled={busy}>
-              {busy ? 'Saving…' : 'Receive Loan'}
+              {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : 'Receive Loan'}
             </button>
+            {loadedVch && (
+              <button type="button" className="ghost" onClick={resetForm} disabled={busy}>
+                New
+              </button>
+            )}
           </div>
         </div>
         <details style={{ marginTop: 8 }}>
@@ -373,6 +445,13 @@ export default function DhrnIssuePage() {
           </div>
         </details>
       </form>
+
+      <VoucherList
+        table="DHRN_ISU_DATA"
+        book={coBook}
+        deleteBase="/loan/received"
+        onLoad={(isuNo) => loadReceived(isuNo)}
+      />
 
       {err && <div className="msg err">{err}</div>}
       {res && (

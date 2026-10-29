@@ -20,6 +20,8 @@ import {
   editDhrnIssue,
   getDhrnReceipt,
   editDhrnReceipt,
+  editLoanReceived,
+  editLoanIssue,
   deleteDhrn,
   type DhrnIssueInput,
   type DhrnReceiptInput,
@@ -235,6 +237,39 @@ export function registerDhrnLifecycleRoutes(
     );
   });
   app.delete('/dhrn/receipt/:vchNo', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () => deleteDhrn(prisma, del('DHRN_REC_DATA')(req)));
+  });
+
+  // Loan Received reuses the pledge-issue tables (receiveLoan wraps issueDhrn, writes DHRN_ISU_DATA):
+  // reopen via getDhrnIssue, edit via editLoanReceived (injects the loan flags), delete the issue row.
+  app.get('/loan/received/:isuNo', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getDhrnIssue(prisma, scopeOf(req), (req.params as any).isuNo));
+  });
+  app.put('/loan/received/:isuNo', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    return run(reply, 200, () =>
+      editLoanReceived(prisma, issuePayload(req, body(req)), (req.params as any).isuNo),
+    );
+  });
+  app.delete('/loan/received/:isuNo', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () => deleteDhrn(prisma, del('DHRN_ISU_DATA')(req)));
+  });
+
+  // Loan Issue reuses the pledge-receipt tables (issueLoan wraps receiveDhrn, writes DHRN_REC_DATA).
+  app.get('/loan/issue/:vchNo', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getDhrnReceipt(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.put('/loan/issue/:vchNo', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    return run(reply, 200, () =>
+      editLoanIssue(prisma, receiptPayload(req, body(req)), (req.params as any).vchNo),
+    );
+  });
+  app.delete('/loan/issue/:vchNo', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
     return run(reply, 200, () => deleteDhrn(prisma, del('DHRN_REC_DATA')(req)));
   });
