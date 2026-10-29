@@ -159,6 +159,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G146 | High | Receipt/Payment / frontend lifecycle + edit fixes | `unified/src/csharp/DataCareNext/TR_CASH.cs` | `web/apps/web/components/PaymentForm.tsx`, `web/apps/api/src/modules/finance/finance.ts`, `web/apps/api/src/routes/txn.ts` | The receipt/payment pages were create-only; add reopen/delete (both) + edit (receipt) in the UI, fix editReceipt to reverse ROJ_MEL_DATA, and make the payment delete resolve its mode from the persisted voucher. | N137 |
 | G147 | High | Fine JV / frontend lifecycle + book | `unified/src/csharp/DataCareNext/MDI_FORM.cs:8360` (FINE JV) | `web/apps/web/app/(app)/txn/fine-jv/page.tsx`, `web/apps/api/src/routes/txn.ts`, `web/apps/api/src/modules/ops/seedCompany.ts` | The Fine JV page was create-only and no FINE JV book was provisioned (POST 409 book-unavailable). Add PUT /fine-jv/:vchNo, wire the page lifecycle, and provision the FJV book. | N138 |
 | G148 | High | Payment edit | `unified/src/csharp/DataCareNext/TR_CASH.cs` | `web/apps/api/src/modules/finance/finance.ts` `postPayment`/`editPayment`, `web/apps/api/src/routes/txn.ts` `PUT /payments/:vchNo`, `web/apps/web/components/PaymentForm.tsx` | Payment edit was unavailable (postPayment had no lifecycle-context hook). Refactor postPayment to the FinanceWriteContext pattern, write HD_VCH_NO + the hidden identity, add editPayment + PUT /payments/:vchNo, and enable payment edit in the UI. | N139 |
+| G149 | Med | Scheme instalment / edit | `unified/src/csharp/DataCareNext/TR_MEMB_ENT.cs` | `web/apps/api/src/routes/txn.ts` `PUT /scheme/installment/:vchNo`, `web/apps/api/src/modules/membership/scheme.ts` `editSchemeInstallment` | The scheme instalment (highest-volume workflow) could be created, reopened and deleted but not edited; expose editSchemeInstallment via a PUT route (extract a shared input helper). | N140 |
 
 ## 4. Decisions D23–D28
 
@@ -1109,6 +1110,20 @@ earlier "delete and re-enter" note is removed). Verified live via the web `/api`
 Done when: the operator can edit a saved payment from the screen; the payment lifecycle matches the receipt.
 
 
+### N140 — Scheme instalment edit (G149, Stage D)
+
+The scheme instalment — the highest-volume workflow (841 vouchers) — had create, reopen (getSchemeInstallment)
+and delete but no edit route, even though editSchemeInstallment already existed in the module. N140 extracts
+the large installment input mapping into a shared `schemeInstallmentInput(req, b)` helper (the POST now calls
+it, which net-reduced txn.ts) and adds `PUT /scheme/installment/:vchNo` (route universe 640 -> 641). The
+route-input-forwarding test was updated to verify the helper (via helperKeys) forwards every
+SchemeInstallmentInput field, matching the rate-cut pattern. Full API+DB 318/3492 green. (A live end-to-end
+edit additionally needs a seeded scheme master and book 074, which the demo company does not provision — a
+separate provisioning concern; the route and field forwarding are verified by the suite.)
+
+Done when: a scheme instalment can be edited through the API with every input field forwarded.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -1169,6 +1184,7 @@ Done when: the operator can edit a saved payment from the screen; the payment li
 | N137 | — | implemented-unverified, evidence in this change (G146: receipt/payment lifecycle UI + editReceipt ROJ_MEL_DATA fix + payment-delete mode resolution; verified via the web /api proxy) |
 | N138 | — | implemented-unverified, evidence in this change (G147: fine-jv lifecycle UI + FINE JV book provisioning; verified live) |
 | N139 | — | implemented-unverified, evidence in this change (G148: payment edit — postPayment lifecycle refactor + editPayment + PUT; verified live) |
+| N140 | — | implemented-unverified, evidence in this change (G149: scheme-installment edit route + input-helper extraction; verified by the suite) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

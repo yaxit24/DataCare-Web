@@ -725,6 +725,7 @@ route('Membership/Saving Schemes', [
   'DELETE /scheme/enroll',
   'POST /scheme/installment',
   'GET /scheme/installment/:vchNo',
+  'PUT /scheme/installment/:vchNo',
   'DELETE /scheme/installment/:vchNo',
   'POST /scheme/opening',
   'DELETE /scheme/opening/:vchNo',
