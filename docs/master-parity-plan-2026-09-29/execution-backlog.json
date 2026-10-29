@@ -5413,6 +5413,29 @@
         "web/apps/api/src/modules/rbac/routePolicy.ts"
       ],
       "statusNote": "Payment edit was deferred in N137 (postPayment had no FinanceWriteContext hook). Refactored postPayment to write(tx,identity)+dispatch like postReceipt, write HD_VCH_NO + insertHiddenIdentityTx to PAY_DATA (the missing HD_VCH_NO caused editIdentityTx \"invalid voucher number\"), added editPayment (PAYMENT_WRITE_TABLES replace+repost) + PUT /payments/:vchNo (universe 639->640), enabled payment Update in PaymentForm. Added mainUser to PaymentInput. Condensed finance.ts comments to stay under the cap. VERIFIED LIVE via web /api proxy: payment 4000 -> edit 9000 -> reopen 9000. Verified: typecheck/lint/format/typecheck:tests/size/kernel/register; web 646; full API+DB 318/3492."
+    },
+    {
+      "id": "N140",
+      "status": "implemented-unverified",
+      "action": "Expose scheme-installment edit via PUT /scheme/installment/:vchNo; extract a shared schemeInstallmentInput helper",
+      "parentLabels": "P10; D-lifecycle",
+      "startAfter": [
+        "N139"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "PUT /scheme/installment/:vchNo; route-input-forwarding verifies the helper forwards every field; route universe 641; full API+DB 318/3492, web 646, gates",
+      "gapIds": "G149",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/membership/scheme.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/test/routeInputForwarding.test.ts"
+      ],
+      "statusNote": "Scheme instalment (841 vouchers) could create/reopen/delete but not edit though editSchemeInstallment existed. Extracted the big installment input mapping into a shared schemeInstallmentInput(req,b) helper (POST now calls it, net-reducing txn.ts) + added PUT /scheme/installment/:vchNo (universe 640->641). Updated routeInputForwarding.test to verify the helper forwards every SchemeInstallmentInput field (helperKeys, like rate-cut). Full API+DB 318/3492 green. Live end-to-end edit needs a seeded scheme + book 074 (demo lacks them) - separate provisioning concern; route + forwarding verified by the suite. Verified: typecheck/lint/format/typecheck:tests/size/kernel/register; web 646."
     }
   ],
   "amendments": [

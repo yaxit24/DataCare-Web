@@ -610,6 +610,7 @@ import {
   schemeGoldAdjust,
   deleteSchemeInstallment,
   getSchemeInstallment,
+  editSchemeInstallment,
   getSchemeMaturity,
   getSchemeGoldAdjust,
   deleteEnrollment,
@@ -6991,74 +6992,77 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
+  const schemeInstallmentInput = (req: FastifyRequest, b: Record<string, any>) => ({
+    scope: scopeOf(req),
+    schmCode: b.schmCode,
+    membCode: b.membCode,
+    amount: Number(b.amount),
+    mode: b.mode,
+    chqNo: b.chqNo,
+    vchDate: b.vchDate,
+    liabAc: b.liabAc,
+    bankAc: b.bankAc,
+    bankName: b.bankName,
+    empCode: b.empCode,
+    monthCode: b.monthCode,
+    withUpi: b.withUpi === true || b.withUpi === 'Y',
+    upiAcCode: b.upiAcCode,
+    upiAcName: b.upiAcName,
+    upiType: b.upiType,
+    upiId: b.upiId,
+    upiAmount: b.upiAmount != null ? Number(b.upiAmount) : undefined,
+    upiLines: Array.isArray(b.upiLines)
+      ? b.upiLines.map((u: Record<string, unknown>) => ({
+          srNo: u.srNo != null ? Number(u.srNo) : undefined,
+          upiAcCode: u.upiAcCode as string | undefined,
+          upiAcName: u.upiAcName as string | undefined,
+          upiType: u.upiType as string | undefined,
+          upiId: u.upiId as string | undefined,
+          amount: Number(u.amount),
+        }))
+      : undefined,
+    // A collection round is one voucher with many member lines; the module validates each.
+    lines: Array.isArray(b.lines)
+      ? b.lines.map((l: Record<string, unknown>) => ({
+          schmCode: l.schmCode as string,
+          membCode: l.membCode as string,
+          amount: Number(l.amount),
+          liabAc: l.liabAc as string | undefined,
+          chqNo: l.chqNo as string | undefined,
+          bankName: l.bankName as string | undefined,
+          empCode: l.empCode as string | undefined,
+          monthCode: l.monthCode as string | undefined,
+          withUpi: l.withUpi === true || l.withUpi === 'Y',
+          upiAcCode: l.upiAcCode as string | undefined,
+          upiAcName: l.upiAcName as string | undefined,
+          upiType: l.upiType as string | undefined,
+          upiId: l.upiId as string | undefined,
+          upiAmount: l.upiAmount != null ? Number(l.upiAmount) : undefined,
+          upiLines: Array.isArray(l.upiLines)
+            ? l.upiLines.map((u: Record<string, unknown>) => ({
+                srNo: u.srNo != null ? Number(u.srNo) : undefined,
+                upiAcCode: u.upiAcCode as string | undefined,
+                upiAcName: u.upiAcName as string | undefined,
+                upiType: u.upiType as string | undefined,
+                upiId: u.upiId as string | undefined,
+                amount: Number(u.amount),
+              }))
+            : undefined,
+        }))
+      : undefined,
+  });
   app.post('/scheme/installment', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      schemeInstallment(prisma, {
-        scope: scopeOf(req),
-        schmCode: b.schmCode,
-        membCode: b.membCode,
-        amount: Number(b.amount),
-        mode: b.mode,
-        chqNo: b.chqNo,
-        vchDate: b.vchDate,
-        // The desktop's TR_MEMB_ENT grid also captures the settling bank, the collecting employee, the
-        // scheme month, UPI settlement and the two account overrides. Without these the AD_DATA
-        // columns BANK_NAME / EMP_CODE / MONTH_CODE / WITH_UPI could never be populated over the API.
-        liabAc: b.liabAc,
-        bankAc: b.bankAc,
-        bankName: b.bankName,
-        empCode: b.empCode,
-        monthCode: b.monthCode,
-        withUpi: b.withUpi === true || b.withUpi === 'Y',
-        upiAcCode: b.upiAcCode,
-        upiAcName: b.upiAcName,
-        upiType: b.upiType,
-        upiId: b.upiId,
-        upiAmount: b.upiAmount != null ? Number(b.upiAmount) : undefined,
-        upiLines: Array.isArray(b.upiLines)
-          ? b.upiLines.map((u: Record<string, unknown>) => ({
-              srNo: u.srNo != null ? Number(u.srNo) : undefined,
-              upiAcCode: u.upiAcCode as string | undefined,
-              upiAcName: u.upiAcName as string | undefined,
-              upiType: u.upiType as string | undefined,
-              upiId: u.upiId as string | undefined,
-              amount: Number(u.amount),
-            }))
-          : undefined,
-        // The desktop enters a whole collection round as one voucher (812 of 1428 real member-entry
-        // vouchers carry more than one member). Amounts are coerced here; the module validates each
-        // line and rejects a non-positive one naming its index.
-        lines: Array.isArray(b.lines)
-          ? b.lines.map((l: Record<string, unknown>) => ({
-              schmCode: l.schmCode as string,
-              membCode: l.membCode as string,
-              amount: Number(l.amount),
-              liabAc: l.liabAc as string | undefined,
-              chqNo: l.chqNo as string | undefined,
-              bankName: l.bankName as string | undefined,
-              empCode: l.empCode as string | undefined,
-              monthCode: l.monthCode as string | undefined,
-              withUpi: l.withUpi === true || l.withUpi === 'Y',
-              upiAcCode: l.upiAcCode as string | undefined,
-              upiAcName: l.upiAcName as string | undefined,
-              upiType: l.upiType as string | undefined,
-              upiId: l.upiId as string | undefined,
-              upiAmount: l.upiAmount != null ? Number(l.upiAmount) : undefined,
-              upiLines: Array.isArray(l.upiLines)
-                ? l.upiLines.map((u: Record<string, unknown>) => ({
-                    srNo: u.srNo != null ? Number(u.srNo) : undefined,
-                    upiAcCode: u.upiAcCode as string | undefined,
-                    upiAcName: u.upiAcName as string | undefined,
-                    upiType: u.upiType as string | undefined,
-                    upiId: u.upiId as string | undefined,
-                    amount: Number(u.amount),
-                  }))
-                : undefined,
-            }))
-          : undefined,
-      }),
+    return run(reply, 201, () => schemeInstallment(prisma, schemeInstallmentInput(req, body(req))));
+  });
+  app.put('/scheme/installment/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    return run(reply, 200, () =>
+      editSchemeInstallment(
+        prisma,
+        schemeInstallmentInput(req, body(req)),
+        (req.params as any).vchNo,
+      ),
     );
   });
   // Member opening balance (desktop 075 MEMB OPENING → AD_DATA ENT_TYPE='O' + AD_OS + balanced AC_DATA).
@@ -7074,9 +7078,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         mode: b.mode,
         chqNo: b.chqNo,
         vchDate: b.vchDate,
-        // The desktop's TR_MEMB_ENT grid also captures the settling bank, the collecting employee, the
-        // scheme month, UPI settlement and the two account overrides. Without these the AD_DATA
-        // columns BANK_NAME / EMP_CODE / MONTH_CODE / WITH_UPI could never be populated over the API.
+        // TR_MEMB_ENT also captures bank/employee/month/UPI + account overrides (AD_DATA columns).
         liabAc: b.liabAc,
         bankAc: b.bankAc,
         bankName: b.bankName,
@@ -7098,9 +7100,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
               amount: Number(u.amount),
             }))
           : undefined,
-        // The desktop enters a whole collection round as one voucher (812 of 1428 real member-entry
-        // vouchers carry more than one member). Amounts are coerced here; the module validates each
-        // line and rejects a non-positive one naming its index.
+        // A collection round is one voucher with many member lines; the module validates each.
         lines: Array.isArray(b.lines)
           ? b.lines.map((l: Record<string, unknown>) => ({
               schmCode: l.schmCode as string,

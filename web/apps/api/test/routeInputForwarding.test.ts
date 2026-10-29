@@ -104,13 +104,14 @@ describe('routes forward every documented module input', () => {
     const fields = interfaceFields(scheme, 'SchemeInstallmentInput');
     expect(fields.length).toBeGreaterThan(8);
     expect(fields).toContain('monthCode');
-    const keys = forwardedKeys(txn, 'schemeInstallment');
+    const keys = helperKeys(txn, 'schemeInstallmentInput');
     expect(keys.length).toBeGreaterThan(6);
   });
 
   it('/scheme/installment forwards all client-supplied SchemeInstallmentInput fields', () => {
+    expect(txn).toContain('schemeInstallment(prisma, schemeInstallmentInput(req, body(req)))');
     const declared = interfaceFields(scheme, 'SchemeInstallmentInput');
-    const forwarded = new Set(forwardedKeys(txn, 'schemeInstallment'));
+    const forwarded = new Set(helperKeys(txn, 'schemeInstallmentInput'));
     const missing = declared.filter((f) => !forwarded.has(f) && !(f in SERVER_OWNED));
     expect(missing).toEqual([]);
   });
