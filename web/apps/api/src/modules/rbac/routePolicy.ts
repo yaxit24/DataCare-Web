@@ -443,6 +443,7 @@ route('Cash / Bank/Account Opening Bal', ['POST /ac-opbl', 'DELETE /ac-opbl/:vch
 route('Cash / Bank/Fine JV (metal transfer)', [
   'POST /fine-jv',
   'GET /fine-jv/:vchNo',
+  'PUT /fine-jv/:vchNo',
   'DELETE /fine-jv/:vchNo',
 ]);
 route('Cash / Bank/Bill-to-Bill Settle', [
