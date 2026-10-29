@@ -5344,6 +5344,29 @@
         "web/apps/web/lib/nav.ts"
       ],
       "statusNote": "Dhrn Os Letter (backend N126) had no UI. Added /txn/dhrn-os-letter: borrower picker + as-of date + Preview(HTML)/Open Letter(PDF) buttons opening GET /dhrn/os-letter. Nav under LOANS (DHRN). VERIFIED: page 200 + letter 200 (Pledge Outstanding Letter, WALK-IN, 30000, Total Amount Due) for a pledged party. ALL 5 MISSING workflows now reachable in the UI (Tour Sales N133, Card Receipt N134, Customer Entry N135, Dhrn Os Letter N136, Loan Interest N132). Verified: typecheck/lint/format/typecheck:tests; web 646."
+    },
+    {
+      "id": "N137",
+      "status": "implemented-unverified",
+      "action": "Wire receipt/payment lifecycle UI (reopen/delete both, edit receipt); fix editReceipt ROJ_MEL_DATA reversal + payment-delete mode resolution",
+      "parentLabels": "P03; D-lifecycle-frontend",
+      "startAfter": [
+        "N136"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "PaymentForm reopen/edit/delete; PUT /receipts/:vchNo; editReceipt reverses ROJ_MEL_DATA; payment delete resolves mode; route universe 638; full API+DB 318/3492, web 646, gates; verified live",
+      "gapIds": "G146",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/web/components/PaymentForm.tsx",
+        "web/apps/api/src/modules/finance/finance.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts"
+      ],
+      "statusNote": "PaymentForm (receipt+payment) was create-only. Wired single-party reopen/edit/delete + VoucherList(CASH_DATA/PAY_DATA). Fixed 2 backend defects: editReceipt RECEIPT_WRITE_TABLES now includes ROJ_MEL_DATA (receipt edit was colliding on ROJ_MEL_DATA_pkey); payment DELETE resolves mode from persisted PAY_DATA VCH_TYPE (RLS-scoped) when the body omits it. Added PUT /receipts/:vchNo (editReceipt); payment edit deferred (postPayment lacks the lifecycle hook). Universe 637->638. VERIFIED LIVE via web /api proxy: receipt 5000 -> edit 7500 -> reopen 7500; payment post -> delete(no mode) 200. Verified: typecheck both/lint/format/typecheck:tests/size/kernel/register; web 646; full API+DB 318/3492."
     }
   ],
   "amendments": [

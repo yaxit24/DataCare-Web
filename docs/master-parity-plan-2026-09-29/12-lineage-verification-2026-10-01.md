@@ -156,6 +156,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G143 | High | Card Receipt / frontend page | `unified/src/csharp/DataCareNext/TR_CARD_REC.cs` | `web/apps/web/app/(app)/txn/card-receipt/page.tsx`, `web/apps/web/lib/nav.ts`, `web/apps/api/src/modules/vouchers/list.ts` | Card Rec (backend N123) had no frontend page and the Card/UPI menu opened the generic receipt; build a bespoke card-receipt page on the CRD book with the card/bank commission fields and the full lifecycle. | N134 |
 | G144 | High | Customer Entry / frontend page | `unified/src/csharp/DataCareNext/UT_CUST_ENTRY.cs` | `web/apps/web/app/(app)/txn/customer-entry/page.tsx`, `web/apps/web/lib/nav.ts` | Customer Entry (backend N124) had no frontend page; build an employee-scoped multi-row CRM grid with load/edit/delete by employeeCode+vchNo. | N135 |
 | G145 | Med | Dhrn Os Letter / frontend page | `unified/src/csharp/DataCareNext/RP_DHRN_OS.cs` | `web/apps/web/app/(app)/txn/dhrn-os-letter/page.tsx`, `web/apps/web/lib/nav.ts` | The Dhrn Os Letter (backend N126) had no UI; add a party + as-of page that opens the HTML/PDF letter from GET /dhrn/os-letter. | N136 |
+| G146 | High | Receipt/Payment / frontend lifecycle + edit fixes | `unified/src/csharp/DataCareNext/TR_CASH.cs` | `web/apps/web/components/PaymentForm.tsx`, `web/apps/api/src/modules/finance/finance.ts`, `web/apps/api/src/routes/txn.ts` | The receipt/payment pages were create-only; add reopen/delete (both) + edit (receipt) in the UI, fix editReceipt to reverse ROJ_MEL_DATA, and make the payment delete resolve its mode from the persisted voucher. | N137 |
 
 ## 4. Decisions D23–D28
 
@@ -1060,6 +1061,23 @@ Os Letter (N136) and Loan Interest (wired N132).
 Done when: the operator can generate a pledge outstanding letter for a party from the screen.
 
 
+### N137 — Receipt/Payment lifecycle UI + two edit/delete fixes (G146, Stage D frontend)
+
+The shared PaymentForm (receipt + payment) was create-only in the single-party mode. N137 wires reopen
+(`getReceipt`/`getPayment`), edit and delete into it, and surfaces the recent-voucher list
+(`<VoucherList table="CASH_DATA"|"PAY_DATA">`). Two real backend defects surfaced and were fixed: (1)
+`editReceipt` replaced RECEIPT_WRITE_TABLES but that set omitted ROJ_MEL_DATA, so a receipt edit collided on
+the ROJ_MEL_DATA primary key — ROJ_MEL_DATA was added to the set; (2) the payment DELETE route required the
+`mode` in the body, which a generic recent-voucher delete does not send — it now resolves the mode from the
+persisted PAY_DATA VCH_TYPE (CPAY/BPAY) inside an RLS-scoped read. A new `PUT /receipts/:vchNo` route exposes
+`editReceipt` (route universe 637 -> 638); payment edit is deferred (postPayment lacks the lifecycle-context
+hook, so the UI shows a delete-and-re-enter note). Verified live via the web `/api` proxy: a receipt posted
+(5,000), edited to 7,500 and reopened at 7,500; a payment posted and deleted with no mode in the body (the
+path the VoucherList uses).
+
+Done when: the operator can reopen/delete receipts and payments and edit a receipt from the screen.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -1117,6 +1135,7 @@ Done when: the operator can generate a pledge outstanding letter for a party fro
 | N134 | — | implemented-unverified, evidence in this change (G143: Card Receipt frontend page on the CRD book; verified via the web /api proxy) |
 | N135 | — | implemented-unverified, evidence in this change (G144: Customer Entry frontend page; verified via the web /api proxy) |
 | N136 | — | implemented-unverified, evidence in this change (G145: Dhrn Os Letter frontend page; verified page 200 + letter 200) |
+| N137 | — | implemented-unverified, evidence in this change (G146: receipt/payment lifecycle UI + editReceipt ROJ_MEL_DATA fix + payment-delete mode resolution; verified via the web /api proxy) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

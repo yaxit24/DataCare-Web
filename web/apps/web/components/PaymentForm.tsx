@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { post, ApiError } from '../lib/api';
+import { post, put, get, del, ApiError } from '../lib/api';
 import { financeMainBooks, initialFinanceMode } from '../lib/financeBooks';
 import { BookSelect } from './BookSelect';
+import { VoucherList } from './VoucherList';
 import { LookupPicker } from './LookupPicker';
 import { PartyBalance } from './PartyBalance';
 import { RateTicker } from './RateTicker';
@@ -65,9 +66,58 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
   const [res, setRes] = useState<{ vchNo: number; total?: number; coBook: string } | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const [loadedVch, setLoadedVch] = useState('');
   const setM = (i: number, k: keyof MLine, v: string) =>
     setMlines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
   const mTotal = mlines.reduce((s, l) => s + nn(l.amount), 0);
+
+  function resetForm() {
+    setLoadedVch('');
+    setPartyAc('');
+    setPartyName('');
+    setAmount('');
+    setKasar('');
+    setChqNo('');
+    setRes(null);
+    setErr('');
+  }
+
+  async function loadVoucher(vchNo: string) {
+    setErr('');
+    setRes(null);
+    try {
+      const d = await get<any>(
+        `${ep}/${encodeURIComponent(vchNo)}?coBook=${encodeURIComponent(coBook)}`,
+      );
+      setLoadedVch(vchNo);
+      setMulti(false);
+      setPartyAc(String(d.partyAc ?? d.acCode ?? ''));
+      setPartyName(String(d.partyName ?? d.acName ?? ''));
+      setAmount(String(d.amount ?? d.recAmt ?? d.totAmt ?? ''));
+      setMode(String(d.mode ?? 'cash'));
+      setBankAc(String(d.bankAc ?? ''));
+      setChqNo(String(d.chqNo ?? ''));
+      setKasar(Number(d.kasar ?? 0) ? String(d.kasar) : '');
+      setVchDate(String(d.vchDate ?? todayLocal()).slice(0, 10));
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.body?.error || e.message : 'failed to load');
+    }
+  }
+
+  async function removeVoucher() {
+    if (!loadedVch || !window.confirm(`Delete ${title} #${loadedVch}?`)) return;
+    setBusy(true);
+    setErr('');
+    try {
+      await del(`${ep}/${encodeURIComponent(loadedVch)}`, { coBook });
+      resetForm();
+      setRes(null);
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.body?.error || e.message : 'delete failed');
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -105,7 +155,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
         setRes({ ...r, coBook });
         setMlines([mblank()]);
       } else {
-        const r = await post<{ vchNo: number; total?: number }>(ep, {
+        const singleBody = {
           coBook,
           vchDate,
           partyAc,
@@ -125,8 +175,17 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
           ...(kind === 'receipt' && mode === 'upi'
             ? { upiId: upiId || undefined, bankName: bankName || undefined }
             : {}),
-        });
+        };
+        const r =
+          loadedVch && kind === 'receipt'
+            ? await put<{ vchNo: number; total?: number }>(
+                `${ep}/${encodeURIComponent(loadedVch)}`,
+                singleBody,
+              )
+            : await post<{ vchNo: number; total?: number }>(ep, singleBody);
         setRes({ ...r, coBook });
+        if (!loadedVch) resetForm();
+        else setLoadedVch(String(r.vchNo).padStart(5, '0'));
       }
     } catch (e) {
       // `detail` carries the database reason behind an `invalid-data` refusal (txn.ts run()).
@@ -374,9 +433,34 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
             </button>
           </div>
         )}
-        <div style={{ marginTop: 10 }}>
-          <button className="primary" disabled={busy || !coBook}>
-            {busy ? 'Saving…' : `Save ${title}`}
+        <div className="toolbar" style={{ marginTop: 10 }}>
+          {loadedVch && kind === 'payment' && (
+            <span className="muted">
+              Payment edit is not available — delete and re-enter to correct.
+            </span>
+          )}
+          <span className="spacer" />
+          {loadedVch && (
+            <>
+              <button type="button" onClick={resetForm} disabled={busy}>
+                New
+              </button>
+              <button
+                type="button"
+                className="danger"
+                onClick={() => void removeVoucher()}
+                disabled={busy}
+              >
+                Delete
+              </button>
+            </>
+          )}
+          <button className="primary" disabled={busy || !coBook || (multi && !!loadedVch)}>
+            {busy
+              ? 'Saving…'
+              : loadedVch && kind === 'receipt'
+                ? `Update #${loadedVch}`
+                : `Save ${title}`}
           </button>
         </div>
       </form>
@@ -410,6 +494,18 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
             )}
           </div>
         </div>
+      )}
+      {coBook && !multi && (
+        <VoucherList
+          table={kind === 'receipt' ? 'CASH_DATA' : 'PAY_DATA'}
+          book={coBook}
+          deleteBase={ep}
+          onLoad={(vchNo) => void loadVoucher(vchNo)}
+          printHref={(v) =>
+            `/api/finance/${kind}-voucher?coBook=${encodeURIComponent(coBook)}&vchNo=${encodeURIComponent(v)}&format=html`
+          }
+          reloadKey={res?.vchNo}
+        />
       )}
     </div>
   );
