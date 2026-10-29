@@ -245,21 +245,10 @@ export function assertCashReceiptCeiling(
 
 /** A balanced two-line transfer ledger: Dr `drAc` / Cr `crAc` for `amount` (Req 13.1). */
 /**
- * Desktop leg codes for the cash books, measured across all 522 legs of books 001 and 002.
- *
- * DIRECTION-SPECIFIC: a receipt and a payment share NO codes, and the same role takes a different number
- * depending on which way the money moves.
- *
- *   book 001 CASH REC   01 party Cr / 02 cash  Dr        03 party Cr / 04 kasar Dr   (kasar 00057 JAVK)
- *   book 002 CASH PAY   05 party Dr / 06 cash  Cr        07 party Dr / 08 kasar Cr   (kasar 00042 AVAK)
- *
- * The kasar ACCOUNT differs too - 00057 KASAR JAVK on a receipt, 00042 KASAR AVAK on a payment. Gujarati
- * javak is outgoing and avak incoming, so it mirrors the money rather than the voucher. One account for both
- * would post half the discounts to the wrong ledger.
- *
- * Bank books are NOT covered here. They have the same MAIN_BOOK shape but their codes must be measured, not
- * assumed - the cash codes already differ by direction, so assuming they carry across would be the same error
- * one level up.
+ * Desktop cash-book leg codes (direction-specific; receipt/payment share none):
+ *   CASH REC 01 party Cr / 02 cash Dr · 03 party Cr / 04 kasar Dr (kasar 00057 JAVK)
+ *   CASH PAY 05 party Dr / 06 cash Cr · 07 party Dr / 08 kasar Cr (kasar 00042 AVAK)
+ * The kasar account mirrors the money (JAVK out / AVAK in). Bank codes are measured separately.
  */
 const CASH_LEG = {
   recParty: 1,
@@ -272,25 +261,7 @@ const CASH_LEG = {
   payKasar: 8,
 } as const;
 
-/**
- * BANK leg codes, measured across all 228 legs of the 11 active bank books. NOT a mirror of cash.
- *
- *   BANK REC   01 party Cr / 02 bank Dr   (42)      same as CASH REC
- *              03 party Cr / 04 kasar Dr  (6)       same as CASH REC
- *              05 bank  Cr / 06 charges Dr (1)      cash has NO equivalent
- *   BANK PAY   07 party Dr / 08 bank Cr   (61)      CASH PAY uses 05/06 - DIFFERENT
- *              11 bank  Cr / 12 charges Dr (4)      cash has NO equivalent
- *
- * A bank RECEIPT shares the cash receipt's codes; a bank PAYMENT does not. Assuming the mirror would have
- * written 05/06 on all 61 bank-payment legs.
- *
- * And the code space is PER MAIN_BOOK, not per direction: `BANK REC` 05/06 is a bank-charges pair while
- * `CASH PAY` 05/06 is a party/cash pair. The same numbers mean different things in different books, so these
- * are kept as separate maps rather than one lookup keyed on the code.
- *
- * The bank-charges pairs are recorded but NOT yet emitted - the web has no bank-charge input on these paths,
- * which is a gap of its own rather than a wrong value.
- */
+/** BANK leg codes, measured across all 228 legs of the 11 active bank books. NOT a mirror of cash. (detail condensed; see git history / plan doc 06.) */
 const BANK_LEG = {
   recParty: 1,
   recBank: 2,
@@ -621,6 +592,7 @@ export async function postReceipt(
 
 export interface PaymentInput {
   scope: VoucherScope;
+  mainUser?: string;
   partyAc: string; // who we pay
   partyName?: string;
   amount: number;
@@ -640,16 +612,22 @@ export interface PaymentInput {
 }
 
 /** Payment (money OUT): Dr party, Cr cash/bank. Header → PAY_DATA. */
-export async function postPayment(prisma: any, input: PaymentInput): Promise<FinanceResult> {
+export async function postPayment(
+  prisma: any,
+  input: PaymentInput,
+  lifecycle?: FinanceWriteContext,
+): Promise<FinanceResult> {
   if (!input.partyAc) throw new FinanceValidationError('party account is required');
   if (!(input.amount > 0)) throw new FinanceValidationError('amount must be positive');
   const mode = String(input.mode || 'cash').toLowerCase() as PayMode;
 
+  completeFinanceScope(input.scope);
   const tenantId = input.scope.tenantId;
-  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
+  const payVchDate = input.vchDate ? new Date(input.vchDate) : new Date();
+  const write = async (tx: any, identity: VoucherIdentity): Promise<FinanceResult> => {
     // The book first, before numbering: a payment must land in a payment book matching the mode.
     const configuredBook = await financeBookTx(tx, input.scope, 'payment', mode);
-    const vchNo = await nextVoucherNoTx(tx, input.scope);
+    const vchNo = identity.vchNo;
     const key = keyOf(input.scope, vchNo, 'PAY');
     const vchType = mode === 'cash' ? 'CPAY' : 'BPAY';
     const kasar = round2(Number(input.kasar ?? 0));
@@ -784,13 +762,47 @@ export async function postPayment(prisma: any, input: PaymentInput): Promise<Fin
               CARD_AMT: mode === 'card' ? input.amount : 0,
               CHQ_NO: input.chqNo ?? null,
               VCH_DATE: input.vchDate ? new Date(input.vchDate) : new Date(),
+              HD_VCH_NO: identity.hiddenVoucherNo,
             },
           ],
         },
         ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
       ],
     });
+    await insertHiddenIdentityTx(tx, input.scope, identity, configuredBook.name);
     return { vchNo };
+  };
+  if (lifecycle) return write(lifecycle.tx, lifecycle.identity);
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) =>
+    write(tx, await createIdentityTx(tx, input.scope, payVchDate, input.mainUser)),
+  );
+}
+
+const PAYMENT_WRITE_TABLES = ['PAY_DATA', 'AC_DATA', 'ROJ_MEL_DATA'] as const;
+
+/** Edit a single-party payment: replace the write set and repost in one transaction (mirror editReceipt). */
+export async function editPayment(
+  prisma: any,
+  input: PaymentInput,
+  requestedVoucherNo: number | string,
+): Promise<FinanceResult> {
+  completeFinanceScope(input.scope);
+  const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
+  return withTxBudget(prisma, input.scope.tenantId, 'voucher', async (tx: any) => {
+    const { identity } = await editIdentityTx(tx, {
+      table: 'PAY_DATA',
+      scope: input.scope,
+      requestedVoucherNo,
+      requestedDate,
+    });
+    await replaceWriteSetTx(
+      tx,
+      input.scope,
+      identity.voucherNo,
+      identity.hiddenVoucherNo,
+      PAYMENT_WRITE_TABLES,
+    );
+    return postPayment(prisma, input, { tx, identity });
   });
 }
 
@@ -1239,28 +1251,7 @@ export async function postContra(
     const ledger = buildTransferLedger(key, book.shortName, input.toAc, input.fromAc, input.amount);
     for (const line of ledger) line.VCH_DATE = vchDate;
     assertBalanced(ledger);
-    /**
-     * THE DAY BOOK — plan item F3.3.
-     *
-     * A contra wrote NO `ROJ_MEL_DATA` rows, so a bank↔cash transfer was invisible in the Rojmel: the
-     * combined metal-and-money day book bound to F11, and the report the shop opens every morning. The
-     * desktop writes **74 rows across its 37 contra vouchers — exactly two per voucher**.
-     *
-     * Measured shape (book 017, all 74 rows):
-     *     type `01`  IT_TYPE 'A'  SIGN blank   Cr leg   37 of 37 rows carry only CR_AMT
-     *     type `02`  IT_TYPE 'A'  SIGN blank   Dr leg   37 of 37 rows carry only DR_AMT
-     *     LEDR_KEY 33 chars — head(21) + type(2) + SR_NO right-aligned in 10
-     *     AC_CODE / LD_CODE mirror the AC_DATA legs, each row naming the other side in LD_CODE
-     * Example key pair: `01002024-20250170000101         1` / `…0000102         2`.
-     *
-     * `buildJournalRojmel` already encodes exactly this rule and was already verified against these same
-     * 74 rows (100% DR/CR agreement with each row's own ledger leg) — it was simply never called from here,
-     * only from `postJournal`. The lines are derived from `ledger` rather than rebuilt, so the day book and
-     * the general ledger cannot drift apart.
-     *
-     * This gap was found by adding a vacuity guard to the F1.1 contra-delete test: its assertion that no
-     * day-book rows survive a deletion was passing because there had never been any.
-     */
+    /** THE DAY BOOK — plan item F3.3. (detail condensed; see git history / plan doc 06.) */
     const rojmelRows = buildJournalRojmel(
       {
         scope: {
@@ -1536,28 +1527,7 @@ export async function deleteReceipt(
  *  day-book row is unreachable and its unique LEDR_KEY blocks the next voucher reusing that number. */
 const CONTRA_WRITE_TABLES = ['CONTRA_DATA', 'AC_DATA', 'ROJ_MEL_DATA'] as const;
 
-/**
- * Read a saved payment — plan item F2.1.
- *
- * WHY THIS COULD NOT REUSE `getReceipt`
- * ====================================
- * A payment's header is **`PAY_DATA`**, not the `CASH_DATA` a receipt writes (`postPayment` at the
- * `table: 'PAY_DATA'` write; `postReceipt` writes `CASH_DATA`). Pointing the receipt reader at a payment
- * would find nothing and report the voucher missing, so the two are genuinely separate readers rather than
- * one parameterised by table. The column names differ as well: a receipt carries `REC_AMT` and `REC_AC_CODE`,
- * a payment carries `NET_AMT`/`TOT_AMT` and `BANK_AC`.
- *
- * This mattered because payments are the SECOND most-used family in the business — 133 vouchers in the
- * reference year, behind only the 841 scheme instalments — and a saved payment could not be reopened or
- * reprinted at all.
- *
- * The returned shape is keyed the way `PaymentInput` is keyed (`partyAc`, `amount`, `mode`, `kasar`, …) so
- * that post-then-get is symmetric and a round-trip test can assert on the caller's own field names.
- *
- * `mode` is RECONSTRUCTED rather than stored: `postPayment` records the tender in which amount column carries
- * the value — `CASH_AMT`, `CHQ_AMT` or `CARD_AMT` — so the reader reads it back the same way. `BANK_AC` is
- * null on a cash payment, which is the tie-breaker when every amount column is zero.
- */
+/** Read a saved payment — plan item F2.1. (detail condensed; see git history / plan doc 06.) */
 export async function getPayment(
   prisma: any,
   scope: VoucherScope,

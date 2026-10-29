@@ -5390,6 +5390,29 @@
         "web/apps/api/test/provisioning.db.test.ts"
       ],
       "statusNote": "Fine JV page was create-only and no FINE JV book was provisioned (POST 409 book-unavailable). Added PUT /fine-jv/:vchNo (editFineJv), wired the page (loadFineJv + PUT-on-edit + New + VoucherList CONTRA_DATA), provisioned the FJV (FINE JV, inward) book in seedCompany (no slots -> 3 default legs; book 37->38, BOOK_DETL 127->130). Universe 638->639. VERIFIED LIVE via web /api proxy: 10-fine gold WALKIN->CASH post 201 -> edit 15 -> reopen 15. Verified: typecheck/lint/format/typecheck:tests/size/register; web 646; full API+DB 318/3492; provisioning.db 21 tests."
+    },
+    {
+      "id": "N139",
+      "status": "implemented-unverified",
+      "action": "Refactor postPayment to the lifecycle-context pattern (+HD_VCH_NO +hidden identity); add editPayment + PUT /payments/:vchNo; enable payment edit in the UI",
+      "parentLabels": "P03; D-lifecycle",
+      "startAfter": [
+        "N138"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "payment post/edit/reopen; PUT /payments/:vchNo; route universe 640; full API+DB 318/3492, web 646, gates; verified live",
+      "gapIds": "G148",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/api/src/modules/finance/finance.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/web/components/PaymentForm.tsx",
+        "web/apps/api/src/modules/rbac/routePolicy.ts"
+      ],
+      "statusNote": "Payment edit was deferred in N137 (postPayment had no FinanceWriteContext hook). Refactored postPayment to write(tx,identity)+dispatch like postReceipt, write HD_VCH_NO + insertHiddenIdentityTx to PAY_DATA (the missing HD_VCH_NO caused editIdentityTx \"invalid voucher number\"), added editPayment (PAYMENT_WRITE_TABLES replace+repost) + PUT /payments/:vchNo (universe 639->640), enabled payment Update in PaymentForm. Added mainUser to PaymentInput. Condensed finance.ts comments to stay under the cap. VERIFIED LIVE via web /api proxy: payment 4000 -> edit 9000 -> reopen 9000. Verified: typecheck/lint/format/typecheck:tests/size/kernel/register; web 646; full API+DB 318/3492."
     }
   ],
   "amendments": [

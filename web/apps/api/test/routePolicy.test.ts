@@ -91,8 +91,9 @@ describe('route policy registry', () => {
     // N128 (Stage D) adds journal reopen+edit (2 routes): 635 + 2 = 637.
     // N137 (Stage D) adds receipt edit PUT /receipts/:vchNo: 637 + 1 = 638.
     // N138 (Stage D) adds fine-jv edit PUT /fine-jv/:vchNo: 638 + 1 = 639.
-    expect(routes).toHaveLength(639);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(639);
+    // N139 (Stage D) adds payment edit PUT /payments/:vchNo: 639 + 1 = 640.
+    expect(routes).toHaveLength(640);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(640);
 
     const policies = routes.map((route) => ({
       ...route,
