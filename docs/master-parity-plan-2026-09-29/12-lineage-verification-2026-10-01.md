@@ -153,6 +153,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G140 | High | Ledger-adjust & Employee-JV / frontend lifecycle | `unified/src/csharp/DataCareNext/TR_LEDR_ADJ.cs`, `TR_EMP_JV.cs` | `web/apps/web/app/(app)/txn/ledger-adjust/page.tsx`, `web/apps/web/app/(app)/txn/employee-jv/page.tsx`, `web/apps/api/src/modules/vouchers/list.ts` | Both pages were create-only; add a book selector + full reopen/edit/delete lifecycle, and allow-list LDR_ADJ_DATA + EMP_DATA (with DIFF_AMT/SALARY_AMT amount detection) in the recent-voucher list. | N131 |
 | G141 | High | Loan Interest / frontend lifecycle | `unified/src/csharp/DataCareNext/TR_DHRN_INTREC.cs` | `web/apps/web/app/(app)/txn/dhrn-interest/page.tsx`, `web/apps/api/src/modules/vouchers/list.ts` | The dhrn-interest page was create-only and still used the old DHIRAN RECEIPT book; point it at the INTREST RECIVED (DIR) book and add the full reopen/edit/delete lifecycle (backend ready from N125), allow-listing DHRN_REC_DATA. | N132 |
 | G142 | High | Tour Sales / frontend page | `unified/src/csharp/DataCareNext/TR_TOUR_SALE.cs` | `web/apps/web/app/(app)/txn/tour-sales/page.tsx`, `web/apps/web/lib/wholesaleVoucher.ts`, `web/apps/web/lib/nav.ts` | Tour Sales (backend N127) had no frontend page; the operator could not reach it from the menu. Reuse the shared wholesale-sale form on the TOUR SALES book. | N133 |
+| G143 | High | Card Receipt / frontend page | `unified/src/csharp/DataCareNext/TR_CARD_REC.cs` | `web/apps/web/app/(app)/txn/card-receipt/page.tsx`, `web/apps/web/lib/nav.ts`, `web/apps/api/src/modules/vouchers/list.ts` | Card Rec (backend N123) had no frontend page and the Card/UPI menu opened the generic receipt; build a bespoke card-receipt page on the CRD book with the card/bank commission fields and the full lifecycle. | N134 |
 
 ## 4. Decisions D23–D28
 
@@ -1014,6 +1015,22 @@ and the Load / Save / Delete / New buttons, with no console errors.
 Done when: the operator can create, load, edit and delete a tour sale from the Tour Sales screen.
 
 
+### N134 — Card Receipt frontend page (G143)
+
+Card Rec (backend N123) had no UI entry point and the "Card / UPI Receipt" menu opened the generic receipt
+screen, which cannot enter the dedicated CARD ADJUST fields. N134 adds a bespoke `/txn/card-receipt` page on
+the CRD (CARD ADJUST) book with the customer, card bank account, card amount, card/bank commission %,
+schedule-charge %, cash paid and narration, a live preview of the computed card commission / gross / bank
+commission / bank net (the server remains authoritative), and the full lifecycle (load/edit/delete via
+`<VoucherList table="CARD_DATA" deleteBase="/card-receipts">`). The nav "Card / UPI Receipt" entry was
+repointed to it, and CARD_DATA was allow-listed in the recent-voucher list (with CARD_AMT amount detection).
+Verified: the page serves 200 and the full lifecycle via the web `/api` proxy — a 10,000 card receipt at 2%
+card / 1% bank posted (gross 10,200, bank net 10,098, party net 10,000), appeared in the recent list, and
+reopened with the amounts intact.
+
+Done when: the operator can create, reopen, edit and delete a card receipt from the Card Receipt screen.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -1068,6 +1085,7 @@ Done when: the operator can create, load, edit and delete a tour sale from the T
 | N131 | — | implemented-unverified, evidence in this change (G140: ledger-adjust & employee-jv lifecycle UI + voucher-list allow-list; verified via the web /api proxy) |
 | N132 | — | implemented-unverified, evidence in this change (G141: loan-interest page lifecycle UI on the DIR book; verified via the web /api proxy) |
 | N133 | — | implemented-unverified, evidence in this change (G142: Tour Sales frontend page via the shared wholesale form; verified live in browser) |
+| N134 | — | implemented-unverified, evidence in this change (G143: Card Receipt frontend page on the CRD book; verified via the web /api proxy) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

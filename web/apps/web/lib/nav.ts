@@ -155,7 +155,7 @@ export const NAV: NavGroup[] = [
       { label: 'Rate Cut (price fixing)', href: '/txn/rate-cut', ready: true },
       { label: 'Ledger Adjustment', href: '/txn/ledger-adjust', ready: true },
       { label: 'Employee Salary JV', href: '/txn/employee-jv', ready: true },
-      { label: 'Card / UPI Receipt', href: '/txn/receipt', ready: true },
+      { label: 'Card / UPI Receipt', href: '/txn/card-receipt', ready: true },
       { label: 'Digital Gold Book', href: '/txn/gold-book', ready: true },
       { label: 'VP Adjustment', href: '/txn/vp-adjustment', ready: true },
       { label: 'Location Amount Transfer', href: '/txn/location-amount', ready: true },
