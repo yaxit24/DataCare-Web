@@ -38,7 +38,7 @@ REGISTER_MD = HANDBOOK / 'doc-register.md'
 DESKTOP_SRC = REPO / 'unified' / 'src' / 'csharp' / 'DataCareNext'
 MDI = DESKTOP_SRC / 'MDI_FORM.cs'
 WEB_APP = REPO / 'web' / 'apps' / 'web' / 'app'
-API_ROUTE_FILES = [REPO / 'web/apps/api/src/app.ts', REPO / 'web/apps/api/src/routes/txn.ts']
+API_ROUTE_FILES = [REPO / 'web/apps/api/src/app.ts', REPO / 'web/apps/api/src/routes/txn.ts', REPO / 'web/apps/api/src/routes/crm.ts']
 MASTER_CONFIGS = REPO / 'web/apps/api/src/modules/masters/configs.ts'
 
 STATUSES = ['FULL', 'PARTIAL', 'REPORT', 'CONTAINED', 'MISSING']

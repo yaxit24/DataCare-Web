@@ -52,7 +52,7 @@ type VoucherKey = {
   CO_BOOK: string;
   VCH_NO: string;
 };
-const round2 = (n: number): number => Math.round((n + Number.EPSILON) * 100) / 100;
+export const round2 = (n: number): number => Math.round((n + Number.EPSILON) * 100) / 100;
 
 /** Accrued simple interest on outstanding principal (RP_DHRN_OS.cs parity). */
 export function accruedInterest(
@@ -211,7 +211,7 @@ async function dhrnConfigTx(tx: any, tenantId: string, coCode: unknown): Promise
  * CO_SET interest type + year-days and the per-loan-type rounding — desktop TR_DHRN_REC/INTREC
  * BILL_TOTAL parity. Used by the endpoints when the operator does not override the interest amount.
  */
-async function computeDhrnInterestTx(
+export async function computeDhrnInterestTx(
   tx: any,
   scope: VoucherScope,
   isuNo: number | string,
@@ -919,101 +919,6 @@ export function issueLoan(
     },
     context,
   );
-}
-
-export interface DhrnInterestInput {
-  scope: VoucherScope;
-  isuNo: number | string; // the issue VCH_NO this interest collection is booked against
-  borrowerAc: string;
-  borrowerName?: string;
-  interest?: number; // interest collected; omit to auto-compute (principal is left untouched)
-  intPrc?: number;
-  cashAc?: string; // funding ledger (default 'CASH')
-  intIncAc?: string; // interest-income ledger (default 'INTINC')
-  mainUser?: string;
-  vchDate?: Date | string;
-}
-
-/**
- * Interest-only collection (TR_DHRN_INTREC): collect accrued interest on a Dhrn issue WITHOUT
- * repaying principal — the outstanding is unchanged. Ledger is Dr cash (interest) /
- * Cr interest-income (interest); no loan-receivable leg, no DHRN_REC_AMT.
- */
-export async function receiveDhrnInterest(
-  prisma: any,
-  input: DhrnInterestInput,
-): Promise<{ vchNo: number }> {
-  if (!input.borrowerAc) throw new DhrnValidationError('borrower account is required');
-
-  const intIncAc = input.intIncAc ?? 'INTINC';
-  const tenantId = input.scope.tenantId;
-  const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
-
-  const vchNo = await withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
-    const book = await configuredBookTx(tx, input.scope);
-    const cashAc = await dhrnCashAcTx(tx, input.scope, book, input.cashAc);
-    // Interest: operator override if supplied, else computed from issue rate × elapsed × CO_SET (R3).
-    const interest =
-      input.interest != null && Number.isFinite(input.interest)
-        ? round2(input.interest)
-        : await computeDhrnInterestTx(tx, input.scope, input.isuNo, vchDate);
-    if (!(interest > 0))
-      throw new DhrnValidationError('interest must be positive (none accrued or supplied)');
-    const no = await nextVoucherNoTx(tx, input.scope);
-    const key = keyOf(input.scope, no, 'DIN');
-    // Interest-only ledger: Dr cash (interest) / Cr interest-income (interest).
-    const base = { ...key, VCH_TYPE: 'DINT' };
-    const ledger: LedgerLine[] = [
-      { ...base, AC_CODE: cashAc, DR_AMT: interest, CR_AMT: 0, SIGN: 'D' },
-      { ...base, AC_CODE: intIncAc, DR_AMT: 0, CR_AMT: interest, SIGN: 'C' },
-    ];
-    assertBalanced(ledger);
-    // DHRN_DATA movement row: interest in (INOUT 'I'), principal untouched (DHRN_AMT/DHRN_REC_AMT 0).
-    const movement = {
-      ...key,
-      SR_NO: 1,
-      VCH_TYPE: 'DINT',
-      INOUT_TYPE: 'I',
-      ENTRY_TYPE: 'D',
-      BOOK_NAME: 'DHIRAN',
-      VCH_DATE: vchDate,
-      AC_CODE: input.borrowerAc,
-      DHRN_AMT: 0,
-      DHRN_REC_AMT: 0,
-      INT_PRC: input.intPrc ?? 0,
-      INT_AMT: interest,
-      INT_REC_AMT: interest,
-      ISU_NO: formatVoucherNo(input.isuNo),
-      ISU_LC: input.scope.lcCode,
-      ISU_YRCD: input.scope.coYear ?? null,
-      LOAN_TYPE: 'A',
-    };
-    // DHRN_REC_DATA header: interest receipt with no principal repayment (DHRN_REC_AMT 0).
-    const recHeader = {
-      ...key,
-      VCH_TYPE: 'DINT',
-      VCH_DATE: vchDate,
-      AC_CODE: input.borrowerAc,
-      AC_NAME: input.borrowerName ?? null,
-      ISU_NO: formatVoucherNo(input.isuNo),
-      ISU_LC: input.scope.lcCode,
-      ISU_YRCD: input.scope.coYear ?? null,
-      DHRN_REC_AMT: 0,
-      INT_AMT: interest,
-      INT_REC_AMT: interest,
-      INT_PRC: input.intPrc ?? 0,
-    };
-    await postVoucherTx(tx, tenantId, {
-      ledger: { table: 'AC_DATA', lines: ledger },
-      bookName: 'DHIRAN',
-      writes: [
-        { table: 'DHRN_REC_DATA', rows: [recHeader] },
-        { table: 'DHRN_DATA', rows: [movement] },
-      ],
-    });
-    return no;
-  });
-  return { vchNo };
 }
 
 async function outstandingTx(

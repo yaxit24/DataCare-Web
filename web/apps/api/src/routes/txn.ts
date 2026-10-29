@@ -184,7 +184,6 @@ import {
   receiveLoan,
   issueLoan,
   outstanding,
-  receiveDhrnInterest,
 } from '../modules/dhrn/dhrn.js';
 import { fineInout, deleteFineInout } from '../modules/inout/fineInout.js';
 import { listUsers, createUser, setUserRights } from '../modules/rbac/users.js';
@@ -525,7 +524,7 @@ import {
   deleteCardReceipt,
   cardReceiptInputFromBody,
 } from '../modules/finance/cardReceipt.js';
-import { registerCrmRoutes } from './crm.js';
+import { registerCrmRoutes, registerLoanInterestRoutes } from './crm.js';
 import {
   cashBook,
   partyStatement,
@@ -1040,15 +1039,17 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     return { canUpdate, canDelete };
   };
   const body = (req: FastifyRequest) => (req.body ?? {}) as Record<string, any>;
-  registerCrmRoutes(app, {
+  const extraRouteHelpers = {
     prisma,
     auth,
     guard,
     scopeOf,
     run,
     body,
-    mainUserOf: (req) => sess(req).sub,
-  });
+    mainUserOf: (req: FastifyRequest) => sess(req).sub,
+  };
+  registerCrmRoutes(app, extraRouteHelpers);
+  registerLoanInterestRoutes(app, extraRouteHelpers);
   /** The renderer for server-built documents; injectable for tests. */
   const pdfRenderer = (): PdfRenderer => deps.pdfRenderer ?? new PlaywrightPdfRenderer();
   /** Render server-built HTML, mapping limits to 413/422 and a busy or slow renderer to a retryable 503. */
@@ -3119,21 +3120,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     isuNo: (req.params as any).isuNo,
     outstanding: await outstanding(prisma, readScope(req) as any, (req.params as any).isuNo),
   }));
-  app.post('/dhrn/interest', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      receiveDhrnInterest(prisma, {
-        scope: scopeOf(req),
-        isuNo: b.isuNo,
-        borrowerAc: b.borrowerAc,
-        borrowerName: b.borrowerName,
-        interest: b.interest != null ? Number(b.interest) : undefined,
-        intPrc: b.intPrc,
-        vchDate: b.vchDate,
-      }),
-    );
-  });
   app.post('/inout/fine', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);

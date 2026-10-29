@@ -700,7 +700,12 @@ route('Loans (Dhrn)/Pledge Issue', [
   'GET /dhrn/:isuNo/outstanding',
 ]);
 route('Loans (Dhrn)/Pledge Receipt', ['POST /dhrn/receipt', 'GET /dhrn/khata']);
-route('Loans (Dhrn)/Interest Receipt', ['POST /dhrn/interest']);
+route('Loans (Dhrn)/Interest Receipt', [
+  'POST /dhrn/interest',
+  'GET /dhrn/interest/:vchNo',
+  'PUT /dhrn/interest/:vchNo',
+  'DELETE /dhrn/interest/:vchNo',
+]);
 route('Loans (Dhrn)/Loan Received', ['POST /loan/received']);
 route('Loans (Dhrn)/Loan Issue', ['POST /loan/issue', 'GET /loan/:isuNo/outstanding']);
 
