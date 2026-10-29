@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
-import { post, ApiError } from '../../../../lib/api';
+import { post, put, get, ApiError } from '../../../../lib/api';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { VoucherList } from '../../../../components/VoucherList';
 import { todayLocal } from '../../../../lib/localDate';
 
 /** Desktop "Contra Entry" opens with `CurBookHelp("CONTRA")` (MDI_FORM.cs:8100-8111). */
@@ -24,8 +25,43 @@ export default function ContraPage() {
   const [res, setRes] = useState<{ vchNo: number } | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  // Stage D: the voucher currently loaded for edit, or null for a new one.
+  const [loadedVch, setLoadedVch] = useState('');
   const n = (v: string) => Number(v || 0);
   const equal = Math.abs(n(drAmt) - n(crAmt)) < 0.005 && n(drAmt) > 0;
+
+  function resetForm() {
+    setLoadedVch('');
+    setDrAc('');
+    setCrAc('');
+    setToAcName('');
+    setDrAmt('');
+    setCrAmt('');
+    setItDesc('');
+    setVchDate(todayLocal());
+    setRes(null);
+    setErr('');
+  }
+
+  async function loadContra(vchNo: string) {
+    setErr('');
+    setRes(null);
+    try {
+      const d = await get<any>(
+        `/contra/${encodeURIComponent(vchNo)}?coBook=${encodeURIComponent(coBook)}`,
+      );
+      setLoadedVch(vchNo);
+      setDrAc(String(d.toAc ?? ''));
+      setCrAc(String(d.fromAc ?? ''));
+      setToAcName(String(d.toAcName ?? d.acName ?? ''));
+      setDrAmt(String(d.amount ?? ''));
+      setCrAmt(String(d.amount ?? ''));
+      setItDesc(String(d.itDesc ?? ''));
+      setVchDate(String(d.vchDate ?? todayLocal()).slice(0, 10));
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.body?.error || e.message : 'failed to load');
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,19 +85,24 @@ export default function ContraPage() {
     }
     setBusy(true);
     try {
-      setRes(
-        await post('/contra', {
-          coBook,
-          toAc: drAc.trim(),
-          fromAc: crAc.trim(),
-          amount: n(drAmt),
-          itDesc: itDesc || undefined,
-          vchDate,
-        }),
-      );
-      setDrAmt('');
-      setCrAmt('');
-      setItDesc('');
+      const payload = {
+        coBook,
+        toAc: drAc.trim(),
+        fromAc: crAc.trim(),
+        toAcName: toAcName || undefined,
+        amount: n(drAmt),
+        itDesc: itDesc || undefined,
+        vchDate,
+      };
+      const saved = loadedVch
+        ? await put<{ vchNo: number }>(`/contra/${encodeURIComponent(loadedVch)}`, payload)
+        : await post<{ vchNo: number }>('/contra', payload);
+      setRes(saved);
+      if (!loadedVch) {
+        setDrAmt('');
+        setCrAmt('');
+        setItDesc('');
+      }
     } catch (e) {
       setErr(
         e instanceof ApiError
@@ -184,8 +225,13 @@ export default function ContraPage() {
               {equal ? 'Balanced ✓' : 'Dr must equal Cr'}
             </span>
             <span className="spacer" />
+            {loadedVch && (
+              <button type="button" onClick={resetForm} disabled={busy}>
+                New
+              </button>
+            )}
             <button className="primary" disabled={busy || !equal || !coBook}>
-              {busy ? 'Saving…' : 'Save Contra'}
+              {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : 'Save Contra'}
             </button>
           </div>
         </div>
@@ -193,8 +239,22 @@ export default function ContraPage() {
       {err && <div className="msg err">{err}</div>}
       {res && (
         <div className="panel">
-          <div className="msg ok">Contra posted — Voucher #{res.vchNo}</div>
+          <div className="msg ok">
+            Contra {loadedVch ? 'updated' : 'posted'} — Voucher #{res.vchNo}
+          </div>
         </div>
+      )}
+      {coBook && (
+        <VoucherList
+          table="CONTRA_DATA"
+          book={coBook}
+          deleteBase="/contra"
+          onLoad={(vchNo) => void loadContra(vchNo)}
+          printHref={(v) =>
+            `/api/contra/${encodeURIComponent(v)}/print?coBook=${encodeURIComponent(coBook)}&format=html`
+          }
+          reloadKey={res?.vchNo}
+        />
       )}
     </div>
   );

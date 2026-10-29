@@ -5175,6 +5175,26 @@
         "web/apps/api/test/routePolicy.test.ts"
       ],
       "statusNote": "Journal had create/delete/print but no reopen/edit routes though getJournal/editJournal existed (like N122). Exposed GET/PUT /journal/:vchNo via the shared routes plugin. Universe 635->637. VERIFIED LIVE: 5000 Dr/Cr journal -> reopen (2 lines) -> edit to 6000 (amounts round-trip). Verified: typecheck/typecheck:tests/lint/format/size/kernel/register/docs; routes 126; web 646; full API+DB 318/3492."
+    },
+    {
+      "id": "N129",
+      "status": "implemented-unverified",
+      "action": "Wire the full reopen/edit/delete/print lifecycle into the contra page UI (template for the finance pages)",
+      "parentLabels": "P05; D-lifecycle-frontend",
+      "startAfter": [
+        "N128"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "contra page loads/edits/deletes/prints a saved voucher; web 646, gates; verified live in the browser",
+      "gapIds": "G138",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/web/app/(app)/txn/contra/page.tsx"
+      ],
+      "statusNote": "Audit found the finance-voucher PAGES were create-only in the UI though the backend supports the full lifecycle. Wired contra as the template: loadContra GETs /contra/:vchNo and repopulates; submit PUTs when editing (POSTs when new) with a New button + edit-aware label; VoucherList(table=CONTRA_DATA, deleteBase=/contra, onLoad, printHref) for reopen/delete/print. VERIFIED LIVE in the browser: contra page renders cleanly (no console errors), CON book pre-selected, filled Dr BANK/Cr CASH 3000 (Balanced), saved -> Contra posted Voucher #2. API round-trip (POST->recent->PUT 5000->7500->reopen) also verified. Verified: lint/format/typecheck:tests/size; web 646. Follow-ups replicate to journal/ledger-adjust/employee-jv/payment/receipt/fine-jv."
     }
   ],
   "amendments": [
