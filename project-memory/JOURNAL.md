@@ -4,6 +4,16 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-29 (cont.4) — FRONTEND lifecycle UI: finance voucher pages (N129 contra, N130 journal)
+- **CRITICAL AUDIT FINDING:** a fresh capability audit (sub-agent) found the real operator-blocking gap is the FRONTEND, not the backend. The backend lifecycle is comprehensive, but many finance-voucher PAGES are create-only (no reopen/edit/delete from the screen) — AND the 5 new MISSING workflows (Card Rec, Cust Entry, Loan Interest, Dhrn Os Letter, Tour Sales) have NO frontend pages at all. The goal ("operator completes every journey in the web app") needs the UI, not just the API.
+- **N129 (G138): Contra page lifecycle UI** — wired loadContra (GET /contra/:vchNo) + PUT-on-edit + New button + VoucherList(CONTRA_DATA, /contra) for reopen/delete/print. **VERIFIED LIVE IN BROWSER**: logged in, opened contra (clean render, CON book preselected), Dr BANK/Cr CASH 3000 (Balanced ✓), Save -> "Contra posted — Voucher #2". **PR #97.**
+- **N130 (G139): Journal page lifecycle UI** — same template; VoucherList(CONTRA_DATA filtered by JV, /journal). VERIFIED LIVE render (JV preselected, grid+Post present, no console errors); GET/PUT/delete/print APIs were live-verified in N128. **PR #<pending>.**
+- **TEMPLATE established** (contra/journal): page imports put/get + VoucherList; add loadX(vchNo) that GETs /x/:vchNo and repopulates; submit PUTs when loadedVch else POSTs (+ New button + "Update #N" label); render `<VoucherList table=<HEADER_TABLE> book={coBook} deleteBase="/x" onLoad={loadX} printHref=.../>`. VoucherList reads /vouchers/recent?table=&book= (allow-list in modules/vouchers/list.ts).
+- REMAINING finance pages to wire (need a book selector added first — they post against JV without one): ledger-adjust, employee-jv, payment, fine-jv, receipt, batch-receipt. THEN build frontend pages for the 5 new workflows (card-receipt, customer-entry, tour-sales, dhrn-os-letter; loan-interest page exists but is create-only). Next slice **N131**.
+- Browser verification via chrome-devtools MCP: dev web on :4411, login admin + co 01 FY 2026-2027, pages hot-reload. (browsermcp transport was flaky; chrome-devtools MCP works.)
+
+---
+
 ## 2026-10-29 (cont.3) — Journal reopen (N128) + report-print coverage confirmed; Stage D/E CLOSED
 - **N128 (G137):** exposed journal GET/PUT /journal/:vchNo (getJournal/editJournal existed). Journal lifecycle now complete (create/reopen/edit/delete/print). Universe 637. **PR #96.** main 0eade3e.
 - **REPORT-PRINT COVERAGE: already comprehensive.** The catalog said "only 5 reports printable" — STALE. There is a GENERIC `GET /reports/:report/export.pdf` (txn.ts:4492, resolveReport + sendReportPdf + REPORT_FORM_BY_SLUG) that renders a PDF for EVERY registered report slug. VERIFIED LIVE: day-book / cash-book / bill-outstanding / trial-balance export.pdf all return 200 with 117-154KB PDFs. So Stage-E report printing is done via this one route; only the 5 "-doc" statement variants (gstr/balance-sheet/trial-balance) are bespoke HTML docs.
