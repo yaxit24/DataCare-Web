@@ -802,7 +802,7 @@ route('Reports/Customer CRM', ['GET /reports/customer-crm']);
 route('Reports/Area-wise Sales', ['GET /reports/area-wise-sales']);
 route('Reports/Location-wise Sales', ['GET /reports/location-wise-sales']);
 route('Reports/GST Input Register', ['GET /reports/gst-input-register']);
-route('Reports/Pledge Outstanding', ['GET /reports/dhrn-outstanding']);
+route('Reports/Pledge Outstanding', ['GET /reports/dhrn-outstanding', 'GET /dhrn/os-letter']);
 route('Reports/Karigar Balances', ['GET /reports/karigar-balances']);
 route('Reports/Stock Valuation', ['GET /reports/stock-valuation']);
 route('Reports/Tag-Stock Report', ['GET /reports/tag-stock', 'GET /reports/tag-stock.csv']);

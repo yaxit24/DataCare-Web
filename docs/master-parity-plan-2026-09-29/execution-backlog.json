@@ -5105,6 +5105,29 @@
         "web/apps/api/test/dhrnInterestLifecycle.db.test.ts"
       ],
       "statusNote": "The web /dhrn/interest was a 2-leg stub. Rebuilt to TR_DHRN_INTREC in a new dhrnInterest.ts (extracted from dhrn.ts for the size cap): amount-loan 8-leg ledger (Ac_Ledr.cs:1152-1166) with distinct I/R/K + optional P+U principal, full DHRN_REC_DATA header, DHRN_DATA movement (INT_REC_AMT=R+K), ROJ_MEL_DATA, REMARK_DATA; own INTREST RECIVED book (DIR) with interest income from slot 2; createIdentityTx/hidden identity; get/edit/delete with DELETE_DATA audit (VCH_VAL_CR=INT_REC_AMT). Settlement defaults literal-free to the issue cash slot; kasar is the one registered P0-04 literal (moved from dhrn.ts, total 44). Routes in the shared plugin; universe 627->630. New lifecycle DB test. VERIFIED LIVE: 50000 pledge -> 1800 interest -> reopen -> edit (1700+100 kasar) -> delete. Verified: typecheck/typecheck:tests/lint/format/size/kernel/register/docs; routes 126; web 646; full API+DB 316/3488."
+    },
+    {
+      "id": "N126",
+      "status": "implemented-unverified",
+      "action": "Build the Dhrn Os Letter per-party pledge outstanding statement document (GET /dhrn/os-letter)",
+      "parentLabels": "P09; missing-workflows",
+      "startAfter": [
+        "N125"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "GET /dhrn/os-letter returns the outstanding letter; reuses desktopDhrnInterest; route universe 631; full API+DB 317/3490, web 646, routes 126, gates; verified live",
+      "gapIds": "G135",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/api/src/modules/dhrn/dhrnOsLetter.ts",
+        "web/apps/api/src/routes/crm.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/test/dhrnOsLetter.db.test.ts"
+      ],
+      "statusNote": "Dhrn Os Letter (RP_DHRN_OS) was absent. Added dhrnOsLetter.ts: stateless per-party pledge outstanding letter reading open DHRN_ISU_DATA + DHRN_DATA receipts through an as-of cut-off, outstanding principal + accrued interest via desktopDhrnInterest (roll-forward from latest TO_DATE + prior assessed - prior received), pledged items from DHRN_ISU_DETL, rendered on the shared doc chrome with reminder wording and total due. GET /dhrn/os-letter?acCode=&asOf= via sendVoucherDocument; posts nothing. Uses the kernel round primitive (no grandfathering). Route in the shared plugin under Reports/Pledge Outstanding; universe 630->631. New DB test (open-pledge row + null case). VERIFIED LIVE: 80000 pledge letter HTTP 200 with borrower/amounts/wording. Verified: typecheck/typecheck:tests/lint/format/size/kernel/register/docs; routes 126; web 646; full API+DB 317/3490."
     }
   ],
   "amendments": [

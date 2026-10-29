@@ -14,6 +14,8 @@ import {
   deleteDhrnInterest,
   dhrnInterestInputFromBody,
 } from '../modules/dhrn/dhrnInterest.js';
+import { dhrnOsLetterData, dhrnOsLetterHtml } from '../modules/dhrn/dhrnOsLetter.js';
+import { sendVoucherDocument } from '../modules/documents/voucherPrint.js';
 
 /**
  * CRM routes (N124): the Customer Entry workflow (desktop UT_CUST_ENTRY) — an employee-scoped,
@@ -96,5 +98,26 @@ export function registerLoanInterestRoutes(app: FastifyInstance, h: CrmRouteHelp
         deleteUser: mainUserOf(req),
       }),
     );
+  });
+  // N126 (G135): Dhrn Os Letter — per-party pledge outstanding statement (desktop RP_DHRN_OS).
+  app.get('/dhrn/os-letter', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const q = req.query as any;
+    const scope = scopeOf(req);
+    const acCode = String(q.acCode ?? '').trim();
+    if (!acCode) return reply.code(400).send({ error: 'acCode-required' });
+    const data = await dhrnOsLetterData(prisma, {
+      tenantId: scope.tenantId,
+      coCode: scope.coCode,
+      lcCode: scope.lcCode,
+      coYear: scope.coYear,
+      acCode,
+      asOf: q.asOf ? String(q.asOf) : undefined,
+    });
+    if (!data) return reply.code(404).send({ error: 'party-or-pledge-not-found' });
+    return sendVoucherDocument(reply, dhrnOsLetterHtml(data, {}), {
+      format: q.format,
+      filename: `dhrn-os-letter-${acCode}-${data.asOf}`,
+    });
   });
 }

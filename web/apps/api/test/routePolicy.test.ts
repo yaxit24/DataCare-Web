@@ -86,8 +86,9 @@ describe('route policy registry', () => {
     // N123 (G132) adds the Card Receipt / CARD ADJUST lifecycle (4 routes): 619 + 4 = 623.
     // N124 (G133) adds the Customer Entry CRM lifecycle (4 routes): 623 + 4 = 627.
     // N125 (G134) adds the Dhrn Interest reopen/edit/delete (3 routes): 627 + 3 = 630.
-    expect(routes).toHaveLength(630);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(630);
+    // N126 (G135) adds the Dhrn Os Letter document GET /dhrn/os-letter: 630 + 1 = 631.
+    expect(routes).toHaveLength(631);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(631);
 
     const policies = routes.map((route) => ({
       ...route,
