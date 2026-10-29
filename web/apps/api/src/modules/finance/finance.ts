@@ -151,7 +151,7 @@ async function financeSettlementAccountTx(
  * Web provisioning used to give cash books CASH in both slots, and a write-off posted to the cash
  * account would overstate cash on hand.
  */
-async function kasarAccountTx(
+export async function kasarAccountTx(
   tx: any,
   scope: VoucherScope,
   explicit: unknown,

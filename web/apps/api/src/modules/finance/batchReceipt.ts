@@ -6,7 +6,7 @@ import {
   assertBalanced,
   type LedgerLine,
 } from '../posting/posting.js';
-import { type PayMode } from './finance.js';
+import { type PayMode, kasarAccountTx } from './finance.js';
 import { requirePostingAccount, resolveBookSlotAccountTx } from '../shared/postingAccounts.js';
 
 export class BatchReceiptValidationError extends Error {
@@ -135,7 +135,8 @@ export async function postBatchReceipt(
     const cashRows: Record<string, unknown>[] = [];
     let total = 0;
 
-    rawLines.forEach((l, idx) => {
+    for (let idx = 0; idx < rawLines.length; idx++) {
+      const l = rawLines[idx]!;
       const mode = String(l.mode || 'cash').toLowerCase() as PayMode;
       const amount = round2(num(l.amount));
       const kasar = round2(num(l.kasarAmt));
@@ -155,10 +156,18 @@ export async function postBatchReceipt(
       ledger.push({ ...base, AC_CODE: recAc, DR_AMT: amount, CR_AMT: 0, SIGN: 'D' });
       // Dr the write-off account for the give-up — only when there is one.
       if (kasar > 0) {
-        const kasarAc = requirePostingAccount(
-          'kasar',
+        // Desktop Ac_Ledr.cs:571-581 posts the kasar leg to BOOK_DETL slot 2, not a caller-named
+        // account. Mirror the single-row receipt path (finance.ts kasarAccountTx): an explicit line
+        // or voucher account wins, else the book's slot-2 kasar account answers, guarded against
+        // naming the slot-1 settlement account. The batch grid has no kasar-account column, so
+        // without this fallback every on-screen write-off was refused (same defect fixed for the
+        // single-row form).
+        const kasarAc = await kasarAccountTx(
+          tx,
+          input.scope,
           l.kasarAc ?? input.kasarAc,
-          `batch receipt line ${idx + 1} writes off ${kasar}`,
+          recAc,
+          kasar,
         );
         ledger.push({ ...base, AC_CODE: kasarAc, DR_AMT: kasar, CR_AMT: 0, SIGN: 'D' });
       }
@@ -190,7 +199,7 @@ export async function postBatchReceipt(
         IT_DESC: num(l.itemDescriptionCode),
         MOB_ENTRY_SAVE: 'N',
       });
-    });
+    }
 
     // Σ Dr must equal Σ Cr (Req 13.1). postVoucherTx re-asserts this, but we fail fast here too.
     assertBalanced(ledger);
