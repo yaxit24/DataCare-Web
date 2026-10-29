@@ -113,6 +113,7 @@ function keyOf(s: VoucherScope, vchNo: number, book: string): VoucherKey {
 export async function createFineSalePurchase(
   prisma: any,
   input: FineSalePurchaseInput,
+  context?: { tx: any; forceVchNo: number },
 ): Promise<{ vchNo: number; totals: { fine: number; metal: number; tax: number; net: number } }> {
   if (!input.partyAc) throw new FineSaleValidationError('party account (partyAc) is required');
   const lines = (input.lines ?? []).filter(
@@ -147,7 +148,7 @@ export async function createFineSalePurchase(
   const sgst = inter ? 0 : r2(totTax - cgst);
   const igst = inter ? totTax : 0;
 
-  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
+  const run = async (tx: any) => {
     // G92: the tax code resolved like every other family (Ac_Tax.cs Fine_Cut_GST :289-293 joins TAX_MAST on
     // CUT_DATA.TAX_CODE); geography comes from the party's AC_GST_TYPE.
     const policy =
@@ -197,7 +198,7 @@ export async function createFineSalePurchase(
         );
     }
 
-    const no = await nextVoucherNoTx(tx, input.scope);
+    const no = context?.forceVchNo ?? (await nextVoucherNoTx(tx, input.scope));
     const key = keyOf(input.scope, no, book);
     const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
 
@@ -373,7 +374,53 @@ export async function createFineSalePurchase(
       );
     }
     return { vchNo: no, totals: { fine: totFine, metal: totMetal, tax: totTax, net: totNet } };
+  };
+  if (context) return run(context.tx);
+  return withTxBudget(prisma, tenantId, 'voucher', (tx: any) => run(tx));
+}
+
+/**
+ * Reverse a Fine Sale / Fine Purchase inside an open transaction: restore the open-fine balance on
+ * every cut source line (CUT_STK_DETL -> PR_DETL), then reverse the voucher's own write set and log
+ * the delete. Shared by delete (its own tx) and edit (the repost tx), so both agree.
+ */
+async function reverseFineSaleTx(
+  tx: any,
+  tenantId: string,
+  key: VoucherKey,
+  side: 'SALE' | 'PURC' | undefined,
+  deleteUser: string,
+): Promise<void> {
+  const cuts: any[] = await tx.$queryRawUnsafe(
+    `SELECT "SL_DBCD" db, "SL_NO" no, "SL_SRNO" sr, coalesce("STK_FINE",0)::float f, coalesce("STK_NWT",0)::float nw, coalesce("STK_GWT",0)::float gw, coalesce("STK_PCS",0)::float pc
+       FROM "CUT_STK_DETL" WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 AND coalesce("SL_NO",'')<>''`,
+    key.CO_CODE,
+    key.CO_BOOK,
+    key.VCH_NO,
+  );
+  await reverseVoucherTx(tx, tenantId, {
+    tables: ['CUT_DATA', 'CUT_DETL', 'CUT_STK_DETL', 'AC_DATA', 'TAX_DATA', 'MAIN_STOCK'],
+    key,
+    deleteLog: {
+      table: 'DELETE_DATA',
+      row: { ...key, VCH_TYPE: side === 'PURC' ? 'FNPR' : 'FNSL', DELETE_USER: deleteUser },
+    },
   });
+  for (const c of cuts) {
+    await tx.$executeRawUnsafe(
+      `UPDATE "PR_DETL" SET "FINE_CUT_FINE"=greatest(coalesce("FINE_CUT_FINE",0)-$5,0)::text, "FINE_CUT_NWT"=greatest(coalesce("FINE_CUT_NWT",0)-$6,0)::text,
+           "FINE_CUT_GWT"=greatest(coalesce("FINE_CUT_GWT",0)-$7,0)::text, "FINE_CUT_PCS"=greatest(coalesce("FINE_CUT_PCS",0)-$8,0)::text
+         WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 AND "SR_NO"=$4`,
+      key.CO_CODE,
+      String(c.db ?? ''),
+      String(c.no ?? ''),
+      Number(c.sr ?? 0),
+      Number(c.f ?? 0),
+      Number(c.nw ?? 0),
+      Number(c.gw ?? 0),
+      Number(c.pc ?? 0),
+    );
+  }
 }
 
 export async function deleteFineSalePurchase(
@@ -389,42 +436,30 @@ export async function deleteFineSalePurchase(
   const book = input.scope.coBook ?? (input.side === 'PURC' ? 'FPR' : 'FSL');
   const key = keyOf({ ...input.scope, coBook: book }, Number(input.vchNo), book);
   return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
-    // restore the open fine balance on each cut source line before removing the link rows.
-    const cuts: any[] = await tx.$queryRawUnsafe(
-      `SELECT "SL_DBCD" db, "SL_NO" no, "SL_SRNO" sr, coalesce("STK_FINE",0)::float f, coalesce("STK_NWT",0)::float nw, coalesce("STK_GWT",0)::float gw, coalesce("STK_PCS",0)::float pc
-       FROM "CUT_STK_DETL" WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 AND coalesce("SL_NO",'')<>''`,
-      key.CO_CODE,
-      key.CO_BOOK,
-      key.VCH_NO,
-    );
-    await reverseVoucherTx(tx, tenantId, {
-      tables: ['CUT_DATA', 'CUT_DETL', 'CUT_STK_DETL', 'AC_DATA', 'TAX_DATA', 'MAIN_STOCK'],
-      key,
-      deleteLog: {
-        table: 'DELETE_DATA',
-        row: {
-          ...key,
-          VCH_TYPE: input.side === 'PURC' ? 'FNPR' : 'FNSL',
-          DELETE_USER: input.deleteUser ?? 'system',
-        },
-      },
-    });
-    for (const c of cuts) {
-      await tx.$executeRawUnsafe(
-        `UPDATE "PR_DETL" SET "FINE_CUT_FINE"=greatest(coalesce("FINE_CUT_FINE",0)-$5,0)::text, "FINE_CUT_NWT"=greatest(coalesce("FINE_CUT_NWT",0)-$6,0)::text,
-           "FINE_CUT_GWT"=greatest(coalesce("FINE_CUT_GWT",0)-$7,0)::text, "FINE_CUT_PCS"=greatest(coalesce("FINE_CUT_PCS",0)-$8,0)::text
-         WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 AND "SR_NO"=$4`,
-        key.CO_CODE,
-        String(c.db ?? ''),
-        String(c.no ?? ''),
-        Number(c.sr ?? 0),
-        Number(c.f ?? 0),
-        Number(c.nw ?? 0),
-        Number(c.gw ?? 0),
-        Number(c.pc ?? 0),
-      );
-    }
+    await reverseFineSaleTx(tx, tenantId, key, input.side, input.deleteUser ?? 'system');
     return { reversed: true };
+  });
+}
+
+/**
+ * Edit a Fine Sale / Fine Purchase (desktop save-on-edit): in one transaction reverse the old
+ * voucher (restoring cut drawdowns and stock) and repost the new input under the SAME voucher
+ * number via createFineSalePurchase's forceVchNo context. Reversing first means the repost's own
+ * rate-cut validation sees the restored open balances.
+ */
+export async function editFineSalePurchase(
+  prisma: any,
+  input: FineSalePurchaseInput,
+  vchNo: number | string,
+): Promise<{ vchNo: number; totals: { fine: number; metal: number; tax: number; net: number } }> {
+  const tenantId = input.scope.tenantId;
+  const isSale = input.side === 'SALE';
+  const book = input.scope.coBook ?? (isSale ? 'FSL' : 'FPR');
+  const no = Number(vchNo);
+  const key = keyOf({ ...input.scope, coBook: book }, no, book);
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
+    await reverseFineSaleTx(tx, tenantId, key, input.side, 'system');
+    return createFineSalePurchase(prisma, input, { tx, forceVchNo: no });
   });
 }
 

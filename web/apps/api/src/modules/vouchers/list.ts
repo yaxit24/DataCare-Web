@@ -27,6 +27,7 @@ const ALLOWED = new Set([
   'DHRN_REC_DATA',
   'DHRN_ISU_DATA',
   'CARD_DATA',
+  'CUT_DATA',
 ]);
 const IDENTITY_COLUMNS = ['CO_CODE', 'LC_CODE', 'CO_YEAR', 'CO_BOOK', 'VCH_NO'];
 const qid = (c: string): string => '"' + c.replace(/[^A-Za-z0-9_]/g, '') + '"';

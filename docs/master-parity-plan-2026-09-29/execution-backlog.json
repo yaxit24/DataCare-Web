@@ -5579,14 +5579,14 @@
     },
     {
       "id": "N147",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Fine Sale / Fine Purchase edit: refactor createFineSalePurchase to accept a {tx,identity} lifecycle context and persist HD_VCH_NO (insertHiddenIdentityTx), add editFineSalePurchase (editIdentityTx + replaceWriteSetTx over CUT_DATA/CUT_DETL/CUT_STK_DETL/TAX_DATA/MAIN_STOCK/AC_DATA) + PUT /fine-sale/:vchNo, and wire the create-only fine-sale page with load/New/Update + VoucherList",
       "parentLabels": "P10; D-lifecycle",
       "startAfter": [
         "N146"
       ],
       "entryDefinition": "02-execution-plan.md section 4",
-      "requiredProof": "DB test: create->reopen->edit (change a line, stock + tax + ledger re-derived, no orphan CUT_DETL/MAIN_STOCK)->delete; route universe +1; full API+DB green; live create/reopen/edit",
+      "requiredProof": "DB test fineSaleEdit.db.test.ts (create 2 lines fine 15 -> reopen -> edit 1 line fine 8 same vchNo, CUT_DETL 2->1 no orphans, MAIN_STOCK re-derived -> delete reverses to 0); route universe 653->654; full API+DB 3505; live create 201 -> GET reopen -> PUT edit 200.",
       "gapIds": "G156",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
@@ -5596,7 +5596,7 @@
         "web/apps/api/src/modules/bullion/fineSalePurchase.ts",
         "web/apps/web/app/(app)/txn/fine-sale/page.tsx"
       ],
-      "statusNote": "READY, NOT IMPLEMENTED. fine-sale has createFineSalePurchase + getFineSalePurchase (N121 reopen reader) + deleteFineSalePurchase + POST/GET/DELETE routes, but NO editFineSalePurchase and NO PUT, and the page is create-only (imports only post). Unlike the dhrn writers, createFineSalePurchase uses nextVoucherNoTx (not createIdentityTx/insertHiddenIdentityTx), so the editIdentityTx pattern cannot resolve yet - the writer must first be refactored to the identity+context pattern. It also writes MAIN_STOCK, so the edit must reverse+rewrite the stock movement via replaceWriteSetTx (FINE_SALE_WRITE_TABLES already defined in deleteFineSalePurchase: CUT_DATA/CUT_DETL/CUT_STK_DETL/AC_DATA/TAX_DATA/MAIN_STOCK). Careful stock-path change - own slice."
+      "statusNote": "IMPLEMENTED. Refactored createFineSalePurchase to accept an optional {tx,forceVchNo} context (the withTxBudget closure became a run(tx) fn; no = context.forceVchNo ?? nextVoucherNoTx). Extracted the delete restore+reverse into reverseFineSaleTx (restores the CUT_STK_DETL->PR_DETL open-fine drawdown, then reverseVoucherTx over CUT_DATA/CUT_DETL/CUT_STK_DETL/AC_DATA/TAX_DATA/MAIN_STOCK). editFineSalePurchase = reverseFineSaleTx(old) + createFineSalePurchase(new, {tx, forceVchNo}) in one tx, so the repost reuses the same number and its rate-cut validation sees restored balances. Added PUT /fine-sale/:vchNo + a fineSaleInput helper (also shrank POST) + fineSide/fineBook helpers (removed inline dup in GET/DELETE, kept txn.ts under its lowered ceiling). Wired the create-only page with loadVoucher (netWt=fineWt, touch=100 since CUT_DETL stores only fine), resetForm, PUT-when-loaded, New, VoucherList (CUT_DATA added to the recent allow-list). Route universe 653->654. DB test (create->reopen->edit->delete, stock/detl re-derived) green; full API+DB 3505; live create 201 -> reopen -> PUT 200."
     },
     {
       "id": "N148",
