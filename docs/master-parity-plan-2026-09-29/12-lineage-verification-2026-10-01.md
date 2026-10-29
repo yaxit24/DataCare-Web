@@ -146,6 +146,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G133 | High | Cust Entry (MISSING workflow) | `unified/src/csharp/DataCareNext/UT_CUST_ENTRY.cs` | `web/apps/api/src/modules/crm/customerEntry.ts`, `web/apps/api/src/routes/crm.ts` `POST/GET/PUT/DELETE /crm/customer-entries` | The Customer Entry (CRM enquiry / item-interest / follow-up reminder) workflow must exist: an employee-scoped, non-financial CUST_DATA + CUST_DETL aggregate, reopenable, editable and deletable. | N124 |
 | G134 | High | Loan Intrest (MISSING workflow) | `unified/src/csharp/DataCareNext/TR_DHRN_INTREC.cs`, `Ac_Ledr.cs:1152-1166` | `web/apps/api/src/modules/dhrn/dhrnInterest.ts`, `web/apps/api/src/routes/crm.ts` `POST/GET/PUT/DELETE /dhrn/interest` | The Loan/Dhrn Interest Receipt must be desktop-faithful: the amount-loan 8-leg ledger (principal/interest-assess/interest-collect/kasar pairs), full DHRN_REC_DATA header, DHRN_DATA movement (INT_REC_AMT = R+K), ROJ_MEL_DATA and REMARK_DATA, on its own INTREST RECIVED book, with reopen/edit/delete. | N125 |
 | G135 | Med | Dhrn Os Letter (MISSING workflow) | `unified/src/csharp/DataCareNext/RP_DHRN_OS.cs`, `DhrnOsLetter.RPT` | `web/apps/api/src/modules/dhrn/dhrnOsLetter.ts`, `web/apps/api/src/routes/crm.ts` `GET /dhrn/os-letter` | The Dhrn Os Letter must produce a per-party pledge outstanding statement/letter: each open pledge with principal, repaid, outstanding, accrued interest to a cut-off and total due, with the reminder wording. | N126 |
+| G136 | High | Tour Sales (MISSING workflow) | `unified/src/csharp/DataCareNext/TR_TOUR_SALE.cs:11252` (Ac_Ledr.Wh_Sales_Ledr) | `web/apps/api/src/modules/sales/tourSale.ts`, `web/apps/api/src/routes/crm.ts` `POST/GET/PUT/DELETE /tour-sales` | Tour Sales must post the same TR_WH_SALE engine (Wh_Sales_Ledr/Rojmel/Stk over RATE_CUT_DATA) on a TOUR SALES book, with create/reopen/edit/delete. | N127 |
 
 ## 4. Decisions D23–D28
 
@@ -905,6 +906,24 @@ interest/total) and the null-when-no-pledge case. Verified live: an 80,000 pledg
 Done when: the letter lists a party's open pledges with outstanding and total due.
 
 
+### N127 — Tour Sales (G136, the 5th and final MISSING workflow)
+
+Tour Sales (desktop TR_TOUR_SALE) is NOT a bespoke 14k-line reimplementation: the desktop form posts the
+SAME TR_WH_SALE engine (Ac_Ledr.Wh_Sales_Ledr / Wh_Sales_Rojmel / Wh_Sale_Stk over RATE_CUT_DATA,
+TR_TOUR_SALE.cs:11252), the only difference being the book — the "Tour Sales" menu opens it on a TOUR SALES
+book (MDI_FORM.cs:9321). N127 adds `tour-sale` as a workflow to the wholesale-sale pipeline: a `tour-sale`
+entry in WORKFLOW_MAIN_BOOK + book guard (accepts only a TOUR SALES book), and four thin wrappers in a new
+`web/apps/api/src/modules/sales/tourSale.ts` over the exported wholesale-sale internals (writeRateCut/readRateCut/
+reverseRateCut). A TSL (TOUR SALES) book is provisioned with the same twelve BOOK_DETL slots as WH SALES;
+rateCut.ts already lists TOUR SALES in STOCK_MAIN_BOOKS. Routes POST/GET/PUT/DELETE /tour-sales live in the
+shared routes plugin under the Tour/Approval Sale right; route universe 631 -> 635. A routes DB test posts a
+tour sale that moves a tag out, cuts the balance fine into money, reopens it, and asserts the book guard
+rejects a non-TOUR-SALES book. Verified live: a 10 g fine tour sale at 6000 posted (net 60,000) on the TSL
+book and reopened.
+
+Done when: Tour Sales posts the wholesale engine on a TOUR SALES book and reopens/edits/deletes.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -952,6 +971,7 @@ Done when: the letter lists a party's open pledges with outstanding and total du
 | N124 | — | implemented-unverified, evidence in this change (G133: Customer Entry CRM workflow; verified live full lifecycle) |
 | N125 | — | implemented-unverified, evidence in this change (G134: desktop-faithful Loan/Dhrn Interest Receipt; verified live full lifecycle) |
 | N126 | — | implemented-unverified, evidence in this change (G135: Dhrn Os Letter pledge-outstanding document; verified live HTML 200) |
+| N127 | — | implemented-unverified, evidence in this change (G136: Tour Sales via the wholesale engine on a TOUR SALES book; verified live full lifecycle) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

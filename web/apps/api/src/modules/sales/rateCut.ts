@@ -81,16 +81,12 @@ const RCT_BOOK = 'RTC'; // distinct from cash-receipt book 'RCT' (avoid voucher-
 const RCT_BOOK_NAME = 'RATE CUT';
 const RCT_TYPE = 'RCUT';
 const BULLION_SALE_MAIN_BOOKS = new Set(['BUL WH SALE', 'BUL SALE']);
-/**
- * Desktop TR_WH_SALE serves two books, and the MENU decides which: "Wh Sales" opens it on `WH SALES` (book 034)
- * and "Rate Cut" on `RATE CUT` (book 064), each through `CurBookHelp` (MDI_FORM.cs:8038-8046, 8110-8118) and each
- * under its own user right. Before, `/rate-cut` accepted any book — including the cash Receipt book `RCT`, which
- * the Rate Cut screen preselected, so its cash/kasar slots received the metal value.
- */
+/** Each workflow's book guard accepts only its MAIN_BOOK; Tour Sales (TR_TOUR_SALE) reuses the engine on TOUR SALES. */
 const WORKFLOW_MAIN_BOOK = {
   'rate-cut': 'RATE CUT',
   'wholesale-sale': 'WH SALES',
   'wholesale-quotation': 'WH QUOT',
+  'tour-sale': 'TOUR SALES',
 } as const;
 /** `Wh_Sale_Stk` moves stock for these books only, and only when `BOOK_INOUT` is 'O' (Ac_Stock.cs:151,153). */
 const STOCK_MAIN_BOOKS = new Set([
@@ -148,7 +144,8 @@ export async function resolveBookClassification(
   };
 }
 
-type RateCutBookGuard = 'rate-cut' | 'wholesale-sale' | 'wholesale-quotation' | 'bullion-sale';
+export type RateCutBookGuard =
+  'rate-cut' | 'wholesale-sale' | 'wholesale-quotation' | 'tour-sale' | 'bullion-sale';
 /**
  * Which desktop form writes the rows. Both post through the same three routines (`Wh_Sales_Ledr`,
  * `Wh_Sales_Rojmel`, `Wh_Sale_Stk`), but their line rows and tax handling differ: TR_WH_SALE writes
@@ -200,11 +197,12 @@ function assertRateCutBookGuard(
       (workflow) => WORKFLOW_MAIN_BOOK[workflow] === mainBook,
     );
     const label = (value: keyof typeof WORKFLOW_MAIN_BOOK): string =>
-      value === 'rate-cut'
-        ? 'rate cut'
-        : value === 'wholesale-quotation'
-          ? 'wholesale quotation'
-          : 'wholesale sale';
+      ({
+        'rate-cut': 'rate cut',
+        'wholesale-quotation': 'wholesale quotation',
+        'tour-sale': 'tour sale',
+        'wholesale-sale': 'wholesale sale',
+      })[value];
     throw new RateCutValidationError(
       other
         ? `book ${coBook} is ${classification.bookName}; use the ${label(other)} workflow`
@@ -1609,7 +1607,7 @@ function buildStockRows(
  * the values a header-only rate-cut carries, which is why they are surfaced explicitly rather than left inside
  * a totals blob. (A header-only voucher is exactly what 25 of 25 real rate-cuts are — see decision D-1.)
  */
-async function readRateCut(
+export async function readRateCut(
   prisma: any,
   scope: VoucherScope,
   requestedVoucherNo: number | string,
@@ -1882,7 +1880,7 @@ export async function getBullionSale(
   return readRateCut(prisma, scope, requestedVoucherNo, { bookGuard: 'bullion-sale' });
 }
 
-async function writeRateCut(
+export async function writeRateCut(
   prisma: any,
   input: RateCutInput,
   options: { vchNo?: number | string; bookGuard?: RateCutBookGuard } = {},
@@ -2881,7 +2879,7 @@ export interface DeleteRateCutInput {
  * booking draw-down, remove its rows from every table it can touch by voucher key and write the desktop's
  * DELETE_DATA audit row — all in one transaction.
  */
-async function reverseRateCut(
+export async function reverseRateCut(
   prisma: any,
   input: DeleteRateCutInput,
   options: { bookGuard?: RateCutBookGuard } = {},

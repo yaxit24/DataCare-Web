@@ -4,7 +4,7 @@
   "defaultCap": 1500,
   "ceilings": {
     "apps/api/src/routes/txn.ts": 8484,
-    "apps/api/src/modules/sales/rateCut.ts": 2982,
+    "apps/api/src/modules/sales/rateCut.ts": 2980,
     "apps/api/src/modules/purchase/purchase.ts": 2860,
     "apps/api/src/modules/sales/sales.ts": 2809,
     "apps/api/src/modules/sales/salesOrder.ts": 2350,

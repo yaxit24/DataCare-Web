@@ -15,6 +15,12 @@ import {
   dhrnInterestInputFromBody,
 } from '../modules/dhrn/dhrnInterest.js';
 import { dhrnOsLetterData, dhrnOsLetterHtml } from '../modules/dhrn/dhrnOsLetter.js';
+import {
+  postTourSale,
+  getTourSale,
+  editTourSale,
+  deleteTourSale,
+} from '../modules/sales/tourSale.js';
 import { sendVoucherDocument } from '../modules/documents/voucherPrint.js';
 
 /**
@@ -35,6 +41,7 @@ export interface CrmRouteHelpers {
   run: (reply: FastifyReply, okCode: number, fn: () => Promise<unknown>) => Promise<unknown>;
   body: (req: FastifyRequest) => Record<string, any>;
   mainUserOf: (req: FastifyRequest) => string;
+  rateCutInput?: (req: FastifyRequest, b: Record<string, any>) => any;
 }
 
 export function registerCrmRoutes(app: FastifyInstance, h: CrmRouteHelpers): void {
@@ -119,5 +126,34 @@ export function registerLoanInterestRoutes(app: FastifyInstance, h: CrmRouteHelp
       format: q.format,
       filename: `dhrn-os-letter-${acCode}-${data.asOf}`,
     });
+  });
+}
+
+/** Tour Sales routes (N127, desktop TR_TOUR_SALE): the TR_WH_SALE engine on a TOUR SALES book. */
+export function registerTourSaleRoutes(app: FastifyInstance, h: CrmRouteHelpers): void {
+  const { prisma, auth, guard, scopeOf, run, body, mainUserOf } = h;
+  const input = (req: FastifyRequest) => h.rateCutInput!(req, body(req));
+  app.post('/tour-sales', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'create')) return;
+    return run(reply, 201, () => postTourSale(prisma, input(req)));
+  });
+  app.get('/tour-sales/:vchNo', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getTourSale(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.put('/tour-sales/:vchNo', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    return run(reply, 200, () => editTourSale(prisma, input(req), (req.params as any).vchNo));
+  });
+  app.delete('/tour-sales/:vchNo', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      deleteTourSale(prisma, {
+        scope: scopeOf(req),
+        vchNo: (req.params as any).vchNo,
+        book: (body(req) as any).book,
+        deleteUser: mainUserOf(req),
+      }),
+    );
   });
 }
