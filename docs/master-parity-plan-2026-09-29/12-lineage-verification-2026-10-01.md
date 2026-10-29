@@ -1418,6 +1418,33 @@ followed by the page reopen wiring. Recorded planned-only; no page was shipped.
 Done when: `getMfg` round-trips the Order Issue payload and the page offers reopen/edit/delete.
 
 
+### N153 — getMfg reader round-trips the last nine MFG_DETL columns (G161 prerequisite, Stage D)
+
+The backend half of N152, shipped on its own because it is a correctness fix independent of any UI:
+`getMfg` (`web/apps/api/src/modules/manufacturing/mfg.ts`) now maps the nine MFG_DETL columns it
+previously dropped — `TOT_NWT→totalNetWt`, `OLD_NWT→oldNetWt`, `NET_AMT→netAmt`, `ITM_LOSS→itmLoss`,
+`RATE_TYPE→rateType`, `PR_CODE→prCode`, `KR_NAME→krName`, `ORD_AC_CODE→ordAcCode`,
+`ORD_DESIGN→ordDesign`. All are already fetched by the reader's `SELECT *`; the writer persists them
+(`detlRows`, `:606-676`) and `editMfg` deletes-then-rebuilds the write set from the request, so
+before this fix a reopen→unchanged-save blanked them. `itmLoss` is receive-only at the writer (`:771`
+gates it on `ctx.isReceipt`), read unconditionally (an issue voucher stored 0); `netAmt` is the line
+`NET_AMT` (`lineNetAmt`, `:641`), distinct from the component `IT_NET_AMT`.
+
+Proof: the manufacturing case in `operatorDepth.roundtrip.db.test.ts` (the "preserves every supplied
+field across an unchanged save" harness: create → read → edit with the read-back values → assert the
+inputs survived) now supplies and asserts the eight issue-valid fields; `itmLoss` stays on the
+receive path like `itmGhat`. This is the fourth time this module's WRITE side was complete while the
+READ side was not (P3-1 extended it once before).
+
+Verified: gates (typecheck/typecheck:tests/lint/format/size/register/kernel/docs:refs) + clean-tree
+`@datacare/api` build; `operatorDepth.roundtrip.db.test.ts` 3/3 and `mfgLifecycle.db.test.ts` 9/9;
+`depth:parity` passed (unreachable API fields unchanged at 102 — the fields are reachable through the
+existing editMfg write path). The `mfg.ts` size ceiling rose 1504→1516 (a visible baseline diff).
+N152's UI reopen wiring is now unblocked.
+
+Done when: `getMfg` returns every persisted MFG_DETL payload field and a round-trip test proves it.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -1489,6 +1516,7 @@ Done when: `getMfg` round-trips the Order Issue payload and the page offers reop
 | N149 | — | implemented-unverified, evidence in this change (G158: mfg-issue reopen/edit lifecycle UI wired to the DB-tested getMfg/editMfg routes; UI-only, gates + web 9/9 green, live deferred — demo has no MFG book) |
 | N150 | — | implemented-unverified, evidence in this change (G159: mfg-receive reopen/edit lifecycle UI, companion to N149; UI-only, gates + web 9/9 green, live deferred — demo has no MFG book) |
 | N151 | — | implemented-unverified, evidence in this change (G160: bullion-sale reopen/edit/delete lifecycle UI; UI-only, sub-agent implement+audit AUDIT_PASS, gates + clean API build + web 646+9 + bullionSale.db.test.ts 2/2 + depth:parity green, live deferred — demo has no bullion book) |
+| N153 | — | implemented-unverified, evidence in this change (G161 prerequisite: getMfg reader now maps the nine MFG_DETL columns it dropped — totalNetWt/oldNetWt/netAmt/itmLoss/rateType/prCode/krName/ordAcCode/ordDesign; backend correctness fix proven by operatorDepth.roundtrip.db.test.ts 3/3 + mfgLifecycle.db.test.ts 9/9; gates + clean API build + depth:parity green; size ceiling 1504→1516; unblocks N152 UI) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

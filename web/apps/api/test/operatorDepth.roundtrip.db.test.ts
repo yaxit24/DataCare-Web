@@ -683,6 +683,17 @@ databaseDescribe('operator depth — lossless round trips', () => {
         oldOther: 22.75,
         addOtherWt: 0.44,
         lessOtherWt: 0.33,
+        // P3-2: the nine line columns exposed by the Order Issue reopen audit (G161). Eight are
+        // issue-valid and asserted here; `itmLoss` is receive-only at the writer (mfg.ts:771 gates it
+        // on ctx.isReceipt) so, like itmGhat, it is covered by the receive path, not this issue voucher.
+        totalNetWt: 13.75,
+        oldNetWt: 2.9,
+        netAmt: 81234.5,
+        rateType: 'W',
+        prCode: 'PR',
+        krName: 'KARI',
+        ordAcCode: 'ORDCUST',
+        ordDesign: 'DSN-ORD-1',
         // rtnChol / rtnGhis / mtrlWt / mtrlItCode are receive-only at the writer
         // (mfg.ts:589,592 gate them on ctx.isReceipt), matching the desktop: filings and polishing
         // dust come back on RECEIPT, not when metal is issued. Supplying them on an issue voucher
@@ -746,6 +757,14 @@ databaseDescribe('operator depth — lossless round trips', () => {
             oldOther: line.oldOther,
             addOtherWt: line.addOtherWt,
             lessOtherWt: line.lessOtherWt,
+            totalNetWt: line.totalNetWt,
+            oldNetWt: line.oldNetWt,
+            netAmt: line.netAmt,
+            rateType: line.rateType,
+            prCode: line.prCode,
+            krName: line.krName,
+            ordAcCode: line.ordAcCode,
+            ordDesign: line.ordDesign,
             rtnChol: line.rtnChol,
             rtnGhis: line.rtnGhis,
             itmGhat: line.itmGhat,
@@ -786,6 +805,15 @@ databaseDescribe('operator depth — lossless round trips', () => {
         'lines[0].lessOtherWt': 0.33,
         'lines[0].dmPcs': 7,
         'lines[0].dmWt': 0.91,
+        // P3-2 assertions (G161): the eight issue-valid line columns the reader now maps.
+        'lines[0].totalNetWt': 13.75,
+        'lines[0].oldNetWt': 2.9,
+        'lines[0].netAmt': 81234.5,
+        'lines[0].rateType': 'W',
+        'lines[0].prCode': 'PR',
+        'lines[0].krName': 'KARI',
+        'lines[0].ordAcCode': 'ORDCUST',
+        'lines[0].ordDesign': 'DSN-ORD-1',
       },
       identity: [],
     });
