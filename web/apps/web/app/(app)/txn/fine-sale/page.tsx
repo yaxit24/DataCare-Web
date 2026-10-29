@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
-import { post, ApiError } from '../../../../lib/api';
+import { post, put, get, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { BookSelect } from '../../../../components/BookSelect';
+import { VoucherList } from '../../../../components/VoucherList';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 
 /** Fine Sale / Fine Purchase (TR_FINE_SL_PR) — pure-metal trade priced on fine weight. SALE sells
@@ -55,6 +56,7 @@ export default function FineSalePurchasePage() {
   const [res, setRes] = useState<any>(null);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [loadedVch, setLoadedVch] = useState('');
   const set = (k: keyof typeof f, v: string | boolean) => setF((x) => ({ ...x, [k]: v }));
   const setRow = (i: number, k: keyof Row, v: string) =>
     setRows((rs) => rs.map((r, j) => (j === i ? { ...r, [k]: v } : r)));
@@ -65,6 +67,57 @@ export default function FineSalePurchasePage() {
   const totMetal = r2(rows.reduce((s, r) => s + (r.itCode.trim() ? metal(r) : 0), 0));
   const totTax = r2((totMetal * n(f.taxPct)) / 100);
   const totNet = r2(totMetal + totTax);
+
+  function resetForm() {
+    setLoadedVch('');
+    setF({ partyAc: '', partyName: '', itType: 'G', taxPct: '3', interState: false });
+    setRows([blank()]);
+    setCuts([]);
+    setRes(null);
+    setMsg(null);
+  }
+
+  // Reopen a saved fine sale/purchase (GET /fine-sale/:vchNo?side=) for edit. CUT_DETL stores the
+  // fine weight + rate (not the net-weight/touch split), so a reopened line sets netWt = fineWt and
+  // touch = 100 — which reproduces the same fine (netWt*touch/100) and the same priced metal.
+  async function loadVoucher(vchNo: string) {
+    setMsg(null);
+    setRes(null);
+    setBusy(true);
+    try {
+      const d = await get<any>(
+        `/fine-sale/${encodeURIComponent(vchNo)}?side=${side === 'PURC' ? 'PURC' : 'SALE'}`,
+      );
+      setLoadedVch(String(d.vchNo ?? vchNo));
+      setSide(d.side === 'PURC' ? 'PURC' : 'SALE');
+      setF({
+        partyAc: String(d.partyAc ?? ''),
+        partyName: String(d.partyName ?? ''),
+        itType: d.itType === 'S' ? 'S' : 'G',
+        taxPct: d.taxPct != null ? String(d.taxPct) : '0',
+        interState: !!d.interState,
+      });
+      const src: any[] = Array.isArray(d.lines) && d.lines.length ? d.lines : [];
+      setRows(
+        src.length
+          ? src.map((l) => ({
+              ...blank(),
+              netWt: l.fineWt ? String(l.fineWt) : '',
+              touch: '100',
+              fineRate: l.fineRate ? String(l.fineRate) : '',
+            }))
+          : [blank()],
+      );
+      setCuts([]); // rate-cut links are not re-editable on reopen; a fresh cut set may be re-entered
+    } catch (e) {
+      setMsg({
+        kind: 'err',
+        text: e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed',
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -101,7 +154,7 @@ export default function FineSalePurchasePage() {
         : [];
     setBusy(true);
     try {
-      const r = await post('/fine-sale', {
+      const payload = {
         side,
         partyAc: f.partyAc.trim(),
         partyName: f.partyName || undefined,
@@ -110,14 +163,20 @@ export default function FineSalePurchasePage() {
         interState: f.interState,
         lines,
         cuts: cutList,
-      });
+      };
+      const r = loadedVch
+        ? await put(`/fine-sale/${encodeURIComponent(loadedVch)}`, payload)
+        : await post('/fine-sale', payload);
       setRes(r);
       setMsg({
         kind: 'ok',
         text: `${side === 'SALE' ? 'Fine sale' : 'Fine purchase'} #${r.vchNo} — fine ${Number(r.totals?.fine).toLocaleString('en-IN')} g, net ₹${Number(r.totals?.net).toLocaleString('en-IN')}${cutList.length ? `, ${cutList.length} line(s) fixed` : ''}`,
       });
-      setRows([blank()]);
-      setCuts([]);
+      if (loadedVch) setLoadedVch(String(r.vchNo).padStart(5, '0'));
+      else {
+        setRows([blank()]);
+        setCuts([]);
+      }
     } catch (err) {
       setMsg({
         kind: 'err',
@@ -369,8 +428,17 @@ export default function FineSalePurchasePage() {
             <span className="muted">POST /fine-sale ({side})</span>
             <span className="spacer" />
             <button className="primary" disabled={busy}>
-              {busy ? 'Saving…' : `Save Fine ${side === 'SALE' ? 'Sale' : 'Purchase'}`}
+              {busy
+                ? 'Saving…'
+                : loadedVch
+                  ? `Update #${loadedVch}`
+                  : `Save Fine ${side === 'SALE' ? 'Sale' : 'Purchase'}`}
             </button>
+            {loadedVch && (
+              <button type="button" className="ghost" onClick={resetForm} disabled={busy}>
+                New
+              </button>
+            )}
           </div>
           {res && (
             <div className="tiles" style={{ marginTop: 10 }}>
@@ -382,6 +450,12 @@ export default function FineSalePurchasePage() {
           )}
         </div>
       </form>
+      <VoucherList
+        table="CUT_DATA"
+        book={side === 'PURC' ? 'FPR' : 'FSL'}
+        deleteBase="/fine-sale"
+        onLoad={(vchNo) => loadVoucher(vchNo)}
+      />
     </div>
   );
 }

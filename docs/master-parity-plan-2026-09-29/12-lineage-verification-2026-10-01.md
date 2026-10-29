@@ -1291,6 +1291,36 @@ existing API suite.
 Done when: an operator can load a saved karigar or old-item-sales voucher, edit its lines (and stones)
 and re-save.
 
+### N147 — Fine Sale / Fine Purchase edit (G156, Stage D)
+
+Fine Sale/Purchase could create (`createFineSalePurchase`), reopen (`getFineSalePurchase`, N121) and
+delete, but there was no `editFineSalePurchase` and no PUT route, and the page was create-only. The
+writer allocated its number with `nextVoucherNoTx` (not the identity/context pattern), and it writes
+MAIN_STOCK and draws down the rate-cut source lines' open fine on PR_DETL — side effects an edit must
+unwind before reposting.
+
+N147 refactors `createFineSalePurchase` to accept an optional `{ tx, forceVchNo }` context (the
+`withTxBudget` closure became a `run(tx)` function; `no = context.forceVchNo ?? nextVoucherNoTx`). The
+delete's restore-and-reverse body was extracted into `reverseFineSaleTx` (restore the
+CUT_STK_DETL→PR_DETL open-fine drawdown, then `reverseVoucherTx` over
+CUT_DATA/CUT_DETL/CUT_STK_DETL/AC_DATA/TAX_DATA/MAIN_STOCK). `editFineSalePurchase` runs
+`reverseFineSaleTx(old)` then `createFineSalePurchase(new, { tx, forceVchNo })` in one transaction, so
+the repost reuses the same voucher number and its own rate-cut validation sees the restored open
+balances. A `PUT /fine-sale/:vchNo` route (universe 653 → 654), a shared `fineSaleInput` helper and
+`fineSide`/`fineBook` helpers (which removed the inline side duplication in GET/DELETE and kept
+`txn.ts` under its lowered ceiling) complete the backend. The page was wired with `loadVoucher`
+(CUT_DETL stores only the fine weight + rate, so a reopened line sets `netWt = fineWt`, `touch = 100`
+— reproducing the same fine and priced metal), `resetForm`, PUT-when-loaded, New, and a VoucherList on
+`CUT_DATA` (added to the recent-voucher allow-list).
+
+Verified: `fineSaleEdit.db.test.ts` (create 2 lines fine 15 → reopen → edit to 1 line fine 8 at the
+same vchNo with CUT_DETL 2→1 and no orphan rows, MAIN_STOCK re-derived → delete reverses everything)
+green; routePolicy + routeInputForwarding green; full API+DB 3505. Live: `POST /fine-sale` → 201
+(fine 13.74), `GET` reopen (2 lines), `PUT` → 200 (re-derived to fine 8).
+
+Done when: an operator can load a saved fine sale/purchase, change its lines and re-save at the same
+voucher number with stock and ledger re-derived.
+
 
 ## 6. Status corrections
 
@@ -1359,6 +1389,7 @@ and re-save.
 | N144 | — | implemented-unverified, evidence in this change (G153: dhrn pledge-receipt reopen/edit/delete + ISU_REC-restore fix; routes extracted to crm.ts, universe 644→647, DB test 3/3, full API+DB 3502, live POST 201) |
 | N145 | — | implemented-unverified, evidence in this change (G154: Loan Received + Loan Issue reopen/edit/delete reusing the dhrn readers + loan-flag editors; universe 647→653, DB test 2/2, full API+DB 3504) |
 | N146 | — | implemented-unverified, evidence in this change (G155: KarigarForm reopen/edit lifecycle lighting up karigar-issue/receive + old-item-sales; UI-only, live create 201→GET→PUT 200→GET verified) |
+| N147 | — | implemented-unverified, evidence in this change (G156: Fine Sale/Purchase edit — writer refactored to a forceVchNo context + reverseFineSaleTx + editFineSalePurchase + PUT; universe 653→654, DB test 1/1, full API+DB 3505, live create 201→reopen→PUT 200) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

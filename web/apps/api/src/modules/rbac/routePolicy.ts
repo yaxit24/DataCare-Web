@@ -383,6 +383,7 @@ route('Purchase/Purchase Return', [
 route('Purchase/Fine Settlement', [
   'POST /fine-sale',
   'GET /fine-sale/:vchNo',
+  'PUT /fine-sale/:vchNo',
   'DELETE /fine-sale/:vchNo',
 ]);
 route('ExtraTran/Old Item Sales', [

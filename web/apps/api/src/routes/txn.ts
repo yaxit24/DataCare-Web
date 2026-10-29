@@ -597,6 +597,7 @@ import {
   createFineSalePurchase,
   deleteFineSalePurchase,
   getFineSalePurchase,
+  editFineSalePurchase,
 } from '../modules/bullion/fineSalePurchase.js';
 import {
   tourIssue,
@@ -705,9 +706,9 @@ import {
 } from '../modules/reports/userAuditReports.js';
 
 /**
- * HTTP/REST exposure of the verified backend modules for the mobile app to consume. Every route is
- * auth-guarded (requireAuth preHandler) and RBAC-guarded (assertRight) for mutations; domain errors map
- * to HTTP status. The service functions are unchanged — this is a thin JSON adapter.
+ * HTTP/REST exposure of the verified backend modules. Every route is auth-guarded (requireAuth) and
+ * RBAC-guarded (assertRight) for mutations; domain errors map to HTTP status. A thin JSON adapter —
+ * the service functions are unchanged.
  */
 export interface TxnDeps {
   prisma: any;
@@ -1737,12 +1738,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       canUpdate: (await formMutationCapabilities(req, 'Sales/Sales Return')).canUpdate,
     }));
   });
-  // Strict numeric Sale Return update (card X13, steps 8-9) via the separately versioned
-  // updateSaleReturnNumeric coordinator (NOT generic editSaleReturn, NOT metadata-only). RBAC via
-  // guard(...,'update'); the coordinator re-observes every trusted dependency inside its Serializable
-  // transaction, so caller fields grant no authority. Operator identity and audit time come from the
-  // session. Stale version / SSI conflict / ambiguous key / cross-year/alias/phantom row map to 4xx via
-  // SavedSaleReturnError; success returns a fresh saved version for the UI to adopt.
+  // Strict numeric Sale Return update (card X13, steps 8-9) via the versioned updateSaleReturnNumeric
+  // coordinator, which re-observes every trusted dependency inside a Serializable transaction (caller
+  // fields grant no authority); conflicts/stale-version/ambiguous-key map to 4xx via SavedSaleReturnError.
   app.put('/sales-returns/:vchNo/incoming-numeric', auth, async (req, reply) => {
     if (!guard(req, reply, 'update')) return;
     reply.header('cache-control', 'no-store');
@@ -2652,9 +2650,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     lines: b.lines ?? [],
     mainUser: sess(req).sub,
   });
-  // Desktop TR_OTH_PURC in both modes (MDI_FORM.cs:8372-8394): "Other Expenses" on an OTH EXP book and
-  // "Other Income" on an OTH INC book. One writer posts both through the desktop's mirrored
-  // Oth_Purc_Ledr / Oth_Purc_Rojmel / Oth_Purc_GST routines; each menu keeps its own route and right.
+  // Desktop TR_OTH_PURC in both modes (MDI_FORM.cs:8372-8394): "Other Expenses" (OTH EXP book) and
+  // "Other Income" (OTH INC book). One writer posts both via the mirrored Oth_Purc_Ledr/Rojmel/GST
+  // routines; each menu keeps its own route and right.
   const otherPurcHandlers = (mode: OtherPurcMode) => ({
     create: async (req: FastifyRequest, reply: FastifyReply) => {
       if (!guard(req, reply, 'create')) return;
@@ -4163,9 +4161,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
 
-  // ---- One XLSX export for every report (desktop BtnExel, present on 38 forms, absent from the web) ----
-  // The registry reuses the SAME builder each report route calls, so an export can never disagree with what
-  // the report shows on screen. Rows are re-derived server-side; the client cannot supply them.
+  // ---- One XLSX export for every report (desktop BtnExel, on 38 forms, absent from the web) ----
+  // The registry reuses the SAME builder each report route calls, so an export cannot disagree with the
+  // on-screen report; rows are re-derived server-side (the client cannot supply them).
   type ReportBuilder = (prisma: unknown, scope: unknown, range?: unknown) => Promise<unknown>;
 
   const REPORT_BUILDERS = {
@@ -4538,9 +4536,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   };
 
   // Screens for five reports registered only in REPORT_BUILDERS (exports worked, screens 404'd —
-  // PARITY-EVALUATION-2026-09-28 D3). Each screen calls the export's own builder with the export's own
-  // inputs so the two cannot disagree; policies already exist (routePolicy.ts 'Reports/HuId Report' +
-  // four after it); literal paths, because routePolicy.test.ts reads them.
+  // PARITY-EVALUATION-2026-09-28 D3). Each calls the export's own builder with its own inputs (so the
+  // two agree); policies exist (routePolicy.ts 'Reports/HuId Report' + four); literal paths for the test.
   app.get('/reports/huid', auth, async (req) =>
     REPORT_BUILDERS.huid(prisma, readScope(req), range(req)),
   );
@@ -4663,10 +4660,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
 
-  // ---- Data repair console (desktop MS_UPDATE) ----
-  // Admin-only in routePolicy.ts (ADMIN_ONLY + SCOPED_ADMIN_ONLY), so the central hook already refused a
-  // non-administrator; `guard` re-asserts it. A destructive apply additionally requires a reason,
-  // re-authentication and a verified recent backup, all enforced inside applyRepair.
+  // Data repair console (desktop MS_UPDATE). Admin-only (routePolicy ADMIN_ONLY + SCOPED_ADMIN_ONLY); a
+  // destructive apply also requires a reason, re-authentication and a verified recent backup (applyRepair).
   app.get('/utilities/data-repair/operations', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return {
@@ -8263,35 +8258,35 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
   // ---- Fine sale / purchase (TR_FINE_SL_PR): pure-metal trade on fine weight + rate-cut ----
+  const fineSide = (v: unknown) => (String(v || 'SALE').toUpperCase() === 'PURC' ? 'PURC' : 'SALE');
+  const fineBook = (v: unknown) => (fineSide(v) === 'PURC' ? 'FPR' : 'FSL');
+  const fineSaleInput = (req: FastifyRequest, b: any) => {
+    const side = fineSide(b.side);
+    return {
+      scope: { ...scopeOf(req), coBook: side === 'PURC' ? 'FPR' : 'FSL' },
+      side: side as 'SALE' | 'PURC',
+      partyAc: b.partyAc,
+      partyName: b.partyName,
+      itType: b.itType,
+      taxPct: b.taxPct != null ? Number(b.taxPct) : undefined,
+      interState: !!b.interState,
+      vchDate: b.vchDate,
+      lines: b.lines ?? [],
+      cuts: b.cuts ?? [],
+      cashAc: b.cashAc,
+    };
+  };
   app.post('/fine-sale', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    const side = String(b.side || 'SALE').toUpperCase() === 'PURC' ? 'PURC' : 'SALE';
-    return run(reply, 201, () =>
-      createFineSalePurchase(prisma, {
-        scope: { ...scopeOf(req), coBook: side === 'PURC' ? 'FPR' : 'FSL' },
-        side,
-        partyAc: b.partyAc,
-        partyName: b.partyName,
-        itType: b.itType,
-        taxPct: b.taxPct != null ? Number(b.taxPct) : undefined,
-        interState: !!b.interState,
-        vchDate: b.vchDate,
-        lines: b.lines ?? [],
-        cuts: b.cuts ?? [],
-        cashAc: b.cashAc,
-      }),
-    );
+    return run(reply, 201, () => createFineSalePurchase(prisma, fineSaleInput(req, body(req))));
   });
   // N121 (Stage D): reopen a fine sale/purchase so the operator can reload it.
   app.get('/fine-sale/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
-    const side =
-      String((req.query as any).side || 'SALE').toUpperCase() === 'PURC' ? 'PURC' : 'SALE';
     return run(reply, 200, async () => {
       const doc = await getFineSalePurchase(
         prisma,
-        { ...scopeOf(req), coBook: side === 'PURC' ? 'FPR' : 'FSL' },
+        { ...scopeOf(req), coBook: fineBook((req.query as any).side) },
         (req.params as any).vchNo,
       );
       if (!doc) {
@@ -8301,14 +8296,19 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       return doc;
     });
   });
+  app.put('/fine-sale/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    return run(reply, 200, () =>
+      editFineSalePurchase(prisma, fineSaleInput(req, body(req)), (req.params as any).vchNo),
+    );
+  });
   app.delete('/fine-sale/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
-    const side = String(body(req).side || 'SALE').toUpperCase() === 'PURC' ? 'PURC' : 'SALE';
     return run(reply, 200, () =>
       deleteFineSalePurchase(prisma, {
-        scope: { ...scopeOf(req), coBook: side === 'PURC' ? 'FPR' : 'FSL' },
+        scope: { ...scopeOf(req), coBook: fineBook(body(req).side) },
         vchNo: (req.params as any).vchNo,
-        side,
+        side: fineSide(body(req).side) as 'SALE' | 'PURC',
         deleteUser: sess(req).tenantId,
       }),
     );
