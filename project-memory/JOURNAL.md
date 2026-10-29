@@ -4,6 +4,18 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-29 (cont.5) — Net-new MISSING-workflow frontend PAGES (N133 Tour Sales, N134 Card Receipt, N135 Customer Entry)
+- The 5 MISSING workflows had backends but several had NO frontend page (operator couldn't reach them). Building the pages:
+- **N133 (G142) Tour Sales** — reused the shared WholesaleVoucherForm by adding a `tour-sale` workflow (endpoint /tour-sales, mainBook TOUR SALES) + /txn/tour-sales page + nav. Full lifecycle free from the shared form. **VERIFIED LIVE in browser**: book filtered to TSL, grids, Load/Save/Delete/New, no console errors. **PR #101.**
+- **N134 (G143) Card Receipt** — bespoke /txn/card-receipt page on the CRD book (card/bank comm %, sch %, cash paid, live preview), VoucherList(CARD_DATA); repointed the Card/UPI nav. Allow-listed CARD_DATA. **VERIFIED via web /api proxy**: 10000@2%/1% -> gross 10200/net 10098 -> recent -> reopen. **PR #102.**
+- **N135 (G144) Customer Entry** — /txn/customer-entry employee-scoped multi-row CRM grid; keyed by employeeCode+vchNo (no book), reopen via employee+Load-no input. Nav under ExtraTran. **VERIFIED via web /api proxy**: 2-row post -> reopen -> edit to 1 -> delete. **PR #<pending>.** main after merge.
+- Earlier this session N129-N132 wired finance-page lifecycle UI (contra live, journal, ledger-adjust, employee-jv, loan-interest). So ALL 5 MISSING workflows now have working UI (Tour Sales, Card Receipt, Customer Entry net-new; Loan Interest wired N132; Dhrn Os Letter is a report/letter — reachable via a print/report link, pending a dedicated page button).
+- Allow-list growth in modules/vouchers/list.ts: +LDR_ADJ_DATA, EMP_DATA, DHRN_REC_DATA, CARD_DATA (and amount cols DIFF_AMT/SALARY_AMT/CARD_AMT). voucher-list scope test stays green.
+- REMAINING frontend: Dhrn Os Letter needs a page/print button (GET /dhrn/os-letter); payment/receipt/fine-jv lifecycle UI; then migration/release gates R00-R14 + operator journeys J01-J28. Next slice N136.
+- GOTCHA reminder (HANDOFF): the dev web is `next start` on a PROD build baking API_ORIGIN — rebuild web with API_ORIGIN=http://127.0.0.1:4410 + restart to see page changes; verify via the web /api proxy (127.0.0.1:4411/api/...).
+
+---
+
 ## 2026-10-29 (cont.4) — FRONTEND lifecycle UI: finance voucher pages (N129 contra, N130 journal)
 - **CRITICAL AUDIT FINDING:** a fresh capability audit (sub-agent) found the real operator-blocking gap is the FRONTEND, not the backend. The backend lifecycle is comprehensive, but many finance-voucher PAGES are create-only (no reopen/edit/delete from the screen) — AND the 5 new MISSING workflows (Card Rec, Cust Entry, Loan Interest, Dhrn Os Letter, Tour Sales) have NO frontend pages at all. The goal ("operator completes every journey in the web app") needs the UI, not just the API.
 - **N129 (G138): Contra page lifecycle UI** — wired loadContra (GET /contra/:vchNo) + PUT-on-edit + New button + VoucherList(CONTRA_DATA, /contra) for reopen/delete/print. **VERIFIED LIVE IN BROWSER**: logged in, opened contra (clean render, CON book preselected), Dr BANK/Cr CASH 3000 (Balanced ✓), Save -> "Contra posted — Voucher #2". **PR #97.**

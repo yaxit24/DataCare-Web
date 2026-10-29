@@ -130,7 +130,10 @@ export const NAV: NavGroup[] = [
   },
   {
     label: 'ExtraTran',
-    items: [{ label: 'Old Item Sales', href: '/txn/old-item-sales', ready: true }],
+    items: [
+      { label: 'Old Item Sales', href: '/txn/old-item-sales', ready: true },
+      { label: 'Customer Entry', href: '/txn/customer-entry', ready: true },
+    ],
   },
   {
     label: 'Cash / Bank',

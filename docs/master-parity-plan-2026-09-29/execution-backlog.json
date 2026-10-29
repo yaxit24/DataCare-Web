@@ -5302,6 +5302,27 @@
         "web/apps/api/src/modules/vouchers/list.ts"
       ],
       "statusNote": "Card Rec (backend N123) had no page; the Card/UPI menu opened the generic receipt. Built /txn/card-receipt on the CRD book with customer/card-bank/card amount/card+bank comm %/sch %/cash paid/narration, a live preview of card comm/gross/bank comm/bank net (server authoritative), and full lifecycle (VoucherList CARD_DATA). Repointed the Card/UPI nav entry. Allow-listed CARD_DATA + CARD_AMT amount detection. VERIFIED: page 200 + web /api proxy lifecycle: 10000 @2%/1% -> gross 10200/bank net 10098/party net 10000 -> recent -> reopen. Verified: typecheck both/lint/format/typecheck:tests; web 646; voucher-list scope test green."
+    },
+    {
+      "id": "N135",
+      "status": "implemented-unverified",
+      "action": "Build the Customer Entry frontend page (employee-scoped multi-row CRM grid) + nav entry",
+      "parentLabels": "P05; missing-workflows-frontend",
+      "startAfter": [
+        "N134"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "customer-entry page serves + full lifecycle via the web /api proxy; web 646, gates; verified",
+      "gapIds": "G144",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/web/app/(app)/txn/customer-entry/page.tsx",
+        "web/apps/web/lib/nav.ts"
+      ],
+      "statusNote": "Customer Entry (backend N124) had no page. Added /txn/customer-entry: employee code/name/date + a multi-row grid (party/name/mobile/remark/remDate/item/like/pcs/weights); non-qualifying rows dimmed per the desktop predicate. Keyed by employeeCode+vchNo (no book), so reopen uses employee + Load-entry-no input; edit PUTs, Delete removes. Nav entry under ExtraTran. VERIFIED via the web /api proxy: 2-row post (201) -> reopen (2 rows) -> edit to 1 -> delete; page serves 200. Verified: typecheck/lint/format/typecheck:tests; web 646."
     }
   ],
   "amendments": [
