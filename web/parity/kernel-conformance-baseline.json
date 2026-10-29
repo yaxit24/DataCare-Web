@@ -1,18 +1,9 @@
 {
   "description": "Kernel-conformance baseline by site identity (N48, gap G22). Each entry is a site that reimplements a kernel primitive and is grandfathered until the slice that next touches its file migrates it. A site NOT listed here fails the gate (an addition can no longer hide behind an unrelated removal); a listed site that no longer exists also fails, and must be deleted here in the same change. Built from the last reviewed tree (commit 41a7ba4, parent of b533d6a: 108 rounding sites) scanned across apps/api/src AND packages/core/src with the current detector, intersected with the current tree, so relocations between the two roots (for example finePolicy.ts moving into core) do not change the answer. The 21 helpers added since that tree are deliberately absent: they are burned down by N48 itself.",
-  "scannedRoots": [
-    "apps/api/src",
-    "packages/core/src"
-  ],
+  "scannedRoots": ["apps/api/src", "packages/core/src"],
   "exemptions": {
-    "rounding": [
-      "modules/shared/roundingPolicy.ts",
-      "modules/parity/golden.ts"
-    ],
-    "book-account": [
-      "modules/shared/bookPolicy.ts",
-      "modules/shared/postingAccounts.ts"
-    ]
+    "rounding": ["modules/shared/roundingPolicy.ts", "modules/parity/golden.ts"],
+    "book-account": ["modules/shared/bookPolicy.ts", "modules/shared/postingAccounts.ts"]
   },
   "sites": [
     "book-account:modules/repair/repairCustomerIssue.ts#098226d2",

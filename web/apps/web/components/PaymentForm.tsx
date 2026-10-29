@@ -183,8 +183,15 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
             )
           : await post<{ vchNo: number; total?: number }>(ep, singleBody);
         setRes({ ...r, coBook });
-        if (!loadedVch) resetForm();
-        else setLoadedVch(String(r.vchNo).padStart(5, '0'));
+        if (!loadedVch) {
+          // Clear the entry inputs for the next voucher but KEEP `res` so the
+          // "Saved — Voucher #N" confirmation stays visible (resetForm() nulls res).
+          setPartyAc('');
+          setPartyName('');
+          setAmount('');
+          setKasar('');
+          setChqNo('');
+        } else setLoadedVch(String(r.vchNo).padStart(5, '0'));
       }
     } catch (e) {
       // `detail` carries the database reason behind an `invalid-data` refusal (txn.ts run()).

@@ -384,6 +384,37 @@ async function write(
   };
 }
 
+const n = (v: unknown) => (v != null ? Number(v) : undefined);
+/** Map a raw request body + scope into a CardReceiptInput (keeps the route file thin). */
+export function cardReceiptInputFromBody(
+  scope: VoucherScope,
+  b: Record<string, any>,
+): CardReceiptInput {
+  return {
+    scope,
+    partyAc: b.partyAc,
+    partyName: b.partyName,
+    bankAc: b.bankAc,
+    bankName: b.bankName,
+    cardAmt: Number(b.cardAmt),
+    cardComPrc: n(b.cardComPrc),
+    cardComAmt: n(b.cardComAmt),
+    bankComPrc: n(b.bankComPrc),
+    bankSchPrc: n(b.bankSchPrc),
+    bankComm1: n(b.bankComm1),
+    bankComm2: n(b.bankComm2),
+    cashPaid: n(b.cashPaid),
+    empCode: b.empCode,
+    desc: b.desc,
+    billNo: b.billNo,
+    billYrCd: b.billYrCd,
+    billDbCd: b.billDbCd,
+    billAmt: n(b.billAmt),
+    vchDate: b.vchDate,
+    mainUser: b.mainUser,
+  };
+}
+
 export async function postCardReceipt(p: any, i: CardReceiptInput) {
   assertCardReceiptInput(i);
   completeFinanceScope(i.scope);
