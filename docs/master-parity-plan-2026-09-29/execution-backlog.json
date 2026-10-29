@@ -5128,6 +5128,30 @@
         "web/apps/api/test/dhrnOsLetter.db.test.ts"
       ],
       "statusNote": "Dhrn Os Letter (RP_DHRN_OS) was absent. Added dhrnOsLetter.ts: stateless per-party pledge outstanding letter reading open DHRN_ISU_DATA + DHRN_DATA receipts through an as-of cut-off, outstanding principal + accrued interest via desktopDhrnInterest (roll-forward from latest TO_DATE + prior assessed - prior received), pledged items from DHRN_ISU_DETL, rendered on the shared doc chrome with reminder wording and total due. GET /dhrn/os-letter?acCode=&asOf= via sendVoucherDocument; posts nothing. Uses the kernel round primitive (no grandfathering). Route in the shared plugin under Reports/Pledge Outstanding; universe 630->631. New DB test (open-pledge row + null case). VERIFIED LIVE: 80000 pledge letter HTTP 200 with borrower/amounts/wording. Verified: typecheck/typecheck:tests/lint/format/size/kernel/register/docs; routes 126; web 646; full API+DB 317/3490."
+    },
+    {
+      "id": "N127",
+      "status": "implemented-unverified",
+      "action": "Build Tour Sales (5th MISSING) as the wholesale-sale engine on a provisioned TOUR SALES book",
+      "parentLabels": "P05; missing-workflows",
+      "startAfter": [
+        "N126"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "POST/GET/PUT/DELETE /tour-sales on a TOUR SALES book; TSL provisioned; book guard; route universe 635; full API+DB 318/3492, web 646, routes 126, gates; verified live",
+      "gapIds": "G136",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/api/src/modules/sales/tourSale.ts",
+        "web/apps/api/src/modules/sales/rateCut.ts",
+        "web/apps/api/src/routes/crm.ts",
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/apps/api/test/tourSale.routes.db.test.ts"
+      ],
+      "statusNote": "Tour Sales (TR_TOUR_SALE) posts the SAME TR_WH_SALE engine (Wh_Sales_Ledr, TR_TOUR_SALE.cs:11252) on a TOUR SALES book. Added a tour-sale workflow to the wholesale-sale pipeline (WORKFLOW_MAIN_BOOK + book guard) and 4 thin wrappers in a new sales/tourSale.ts over the exported rateCut internals (writeRateCut/readRateCut/reverseRateCut). Provisioned the TSL (TOUR SALES) book with the 12 wholesale slots. Routes POST/GET/PUT/DELETE /tour-sales in the shared plugin under the Tour/Approval Sale right; universe 631->635. New routes DB test (post+tag-out+fine-cut+reopen+wrong-book guard). VERIFIED LIVE: 10g fine tour sale @6000 -> net 60000 on TSL, reopened. Verified: typecheck/typecheck:tests/lint/format/size/kernel/register/docs; routes 126; web 646; full API+DB 318/3492. ALL 5 MISSING workflows now complete (Card Rec, Cust Entry, Loan Intrest, Dhrn Os Letter, Tour Sales)."
     }
   ],
   "amendments": [

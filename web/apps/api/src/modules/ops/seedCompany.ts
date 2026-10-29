@@ -483,6 +483,19 @@ const BOOKS: {
     shortName: 'WSALE',
     table: 'RATE_CUT_DATA',
   },
+  // Desktop Tour Sales (TR_TOUR_SALE, MDI_FORM.cs:9321 CurBookHelp('TOUR SALES')) posts the same
+  // TR_WH_SALE engine (Wh_Sales_Ledr/Rojmel/Stk) on a TOUR SALES book over RATE_CUT_DATA. Without it
+  // the Tour Sales screen has no book to select on a provisioned company (N127, G136).
+  {
+    book: 'TSL',
+    name: 'Tour Sales',
+    mainBook: 'TOUR SALES',
+    inout: 'O',
+    acCode: 'SALES',
+    slots: WHOLESALE_SLOTS,
+    shortName: 'TSALE',
+    table: 'RATE_CUT_DATA',
+  },
   // Desktop book 434 WHQUT / WH QUOT uses TR_WH_SALE's document grids, while its posting routines
   // exclude WH QUOT. Empty slots are deliberate: a quotation must not need or imply ledger accounts.
   {

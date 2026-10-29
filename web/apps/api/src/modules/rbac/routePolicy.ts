@@ -297,6 +297,10 @@ route('Sales/Tour / Approval Sale', [
   'DELETE /tour/:vchNo',
   'GET /tour/:vchNo/lines',
   'POST /tour/:vchNo/bill',
+  'POST /tour-sales',
+  'GET /tour-sales/:vchNo',
+  'PUT /tour-sales/:vchNo',
+  'DELETE /tour-sales/:vchNo',
 ]);
 route('Sales/Approval Return', ['POST /tour/return', 'DELETE /tour/return/:vchNo']);
 // Desktop menu "Wh Sales" opens TR_WH_SALE scoped to MAIN_BOOK 'WH SALES' (MDI_FORM.cs:8038-8046), under its

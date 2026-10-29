@@ -524,7 +524,7 @@ import {
   deleteCardReceipt,
   cardReceiptInputFromBody,
 } from '../modules/finance/cardReceipt.js';
-import { registerCrmRoutes, registerLoanInterestRoutes } from './crm.js';
+import { registerCrmRoutes, registerLoanInterestRoutes, registerTourSaleRoutes } from './crm.js';
 import {
   cashBook,
   partyStatement,
@@ -1050,7 +1050,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   };
   registerCrmRoutes(app, extraRouteHelpers);
   registerLoanInterestRoutes(app, extraRouteHelpers);
-  /** The renderer for server-built documents; injectable for tests. */
   const pdfRenderer = (): PdfRenderer => deps.pdfRenderer ?? new PlaywrightPdfRenderer();
   /** Render server-built HTML, mapping limits to 413/422 and a busy or slow renderer to a retryable 503. */
   const sendPdf = async (reply: FastifyReply, html: string, filename: string) => {
@@ -1154,6 +1153,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     mobile: b.mobile,
     bankName: b.bankName,
   });
+  registerTourSaleRoutes(app, { ...extraRouteHelpers, rateCutInput });
 
   // ---- Desktop utilities (server-derived tenant/company/location/year only) ----
   app.get('/utilities/data-export/preview', auth, async (req, reply) => {
