@@ -145,6 +145,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G132 | High | Card Rec (MISSING workflow) | `unified/src/csharp/DataCareNext/TR_CARD_REC.cs`, `Ac_Ledr.cs:1790-1804` | `web/apps/api/src/modules/finance/cardReceipt.ts`, `web/apps/api/src/routes/txn.ts` `POST/GET/PUT/DELETE /card-receipts` | The Card Receipt (CARD ADJUST) workflow must exist: a customer card settlement posting the exact 8-leg ledger (party/bank/commission/cash), writing CARD_DATA + ROJ_MEL_DATA, reopenable, editable and deletable with the desktop DELETE_DATA audit. | N123 |
 | G133 | High | Cust Entry (MISSING workflow) | `unified/src/csharp/DataCareNext/UT_CUST_ENTRY.cs` | `web/apps/api/src/modules/crm/customerEntry.ts`, `web/apps/api/src/routes/crm.ts` `POST/GET/PUT/DELETE /crm/customer-entries` | The Customer Entry (CRM enquiry / item-interest / follow-up reminder) workflow must exist: an employee-scoped, non-financial CUST_DATA + CUST_DETL aggregate, reopenable, editable and deletable. | N124 |
 | G134 | High | Loan Intrest (MISSING workflow) | `unified/src/csharp/DataCareNext/TR_DHRN_INTREC.cs`, `Ac_Ledr.cs:1152-1166` | `web/apps/api/src/modules/dhrn/dhrnInterest.ts`, `web/apps/api/src/routes/crm.ts` `POST/GET/PUT/DELETE /dhrn/interest` | The Loan/Dhrn Interest Receipt must be desktop-faithful: the amount-loan 8-leg ledger (principal/interest-assess/interest-collect/kasar pairs), full DHRN_REC_DATA header, DHRN_DATA movement (INT_REC_AMT = R+K), ROJ_MEL_DATA and REMARK_DATA, on its own INTREST RECIVED book, with reopen/edit/delete. | N125 |
+| G135 | Med | Dhrn Os Letter (MISSING workflow) | `unified/src/csharp/DataCareNext/RP_DHRN_OS.cs`, `DhrnOsLetter.RPT` | `web/apps/api/src/modules/dhrn/dhrnOsLetter.ts`, `web/apps/api/src/routes/crm.ts` `GET /dhrn/os-letter` | The Dhrn Os Letter must produce a per-party pledge outstanding statement/letter: each open pledge with principal, repaid, outstanding, accrued interest to a cut-off and total due, with the reminder wording. | N126 |
 
 ## 4. Decisions D23–D28
 
@@ -887,6 +888,23 @@ kasar -> 8 legs) and delete. Verified live: a 50,000 pledge's 1,800 interest pos
 Done when: the interest receipt posts the desktop write-set and reopens/edits/deletes.
 
 
+### N126 — Dhrn Os Letter document (G135, 4th of the 5 MISSING workflows)
+
+The Dhrn Os Letter (desktop RP_DHRN_OS "Dhrn Due" + DhrnOsLetter.RPT) was absent. N126 adds a stateless
+per-party pledge outstanding statement/letter: a new `web/apps/api/src/modules/dhrn/dhrnOsLetter.ts` reads every still-open
+DHRN_ISU_DATA pledge of the borrower (issued on/before an as-of date), aggregates receipts from DHRN_DATA
+through the cut-off, computes the outstanding principal and the accrued (unpaid) interest via the shared
+`desktopDhrnInterest` (rolled forward from the latest TO_DATE + prior assessed − prior received), lists the
+pledged items from DHRN_ISU_DETL, and renders a letter on the shared doc chrome with the reminder wording
+and the total due. `GET /dhrn/os-letter?acCode=&asOf=` returns HTML or a PDF via sendVoucherDocument; it
+posts nothing and writes no REPORT_DATA. Route registered under Reports/Pledge Outstanding (universe 630 ->
+631) and lives in the shared routes plugin. A DB test asserts the open-pledge row (principal/outstanding/
+interest/total) and the null-when-no-pledge case. Verified live: an 80,000 pledge's letter returned HTTP
+200 with the borrower, amounts and wording.
+
+Done when: the letter lists a party's open pledges with outstanding and total due.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -933,6 +951,7 @@ Done when: the interest receipt posts the desktop write-set and reopens/edits/de
 | N123 | — | implemented-unverified, evidence in this change (G132: Card Receipt / CARD ADJUST workflow; verified live full lifecycle) |
 | N124 | — | implemented-unverified, evidence in this change (G133: Customer Entry CRM workflow; verified live full lifecycle) |
 | N125 | — | implemented-unverified, evidence in this change (G134: desktop-faithful Loan/Dhrn Interest Receipt; verified live full lifecycle) |
+| N126 | — | implemented-unverified, evidence in this change (G135: Dhrn Os Letter pledge-outstanding document; verified live HTML 200) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
