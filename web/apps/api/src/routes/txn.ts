@@ -186,6 +186,9 @@ import {
   receiveLoan,
   issueLoan,
   outstanding,
+  getDhrnIssue,
+  editDhrnIssue,
+  deleteDhrn,
 } from '../modules/dhrn/dhrn.js';
 import { fineInout, deleteFineInout } from '../modules/inout/fineInout.js';
 import { listUsers, createUser, setUserRights } from '../modules/rbac/users.js';
@@ -701,8 +704,8 @@ import {
 
 /**
  * HTTP/REST exposure of the verified backend modules for the mobile app to consume. Every route is
- * auth-guarded (requireAuth preHandler) and RBAC-guarded (assertRight) for mutations; domain errors
- * map to HTTP status. The service functions are unchanged — this is a thin JSON adapter.
+ * auth-guarded (requireAuth preHandler) and RBAC-guarded (assertRight) for mutations; domain errors map
+ * to HTTP status. The service functions are unchanged — this is a thin JSON adapter.
  */
 export interface TxnDeps {
   prisma: any;
@@ -866,8 +869,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     };
   };
   // Printable documents read by the complete desktop voucher key (modules/documents/voucherDocument.ts):
-  // company, location and year from the authenticated scope, book and voucher from the request. There is
-  // deliberately no default book. A missing one is a 400, never another book's voucher with the same number.
+  // scope's company/location/year + request's book/voucher. No default book — a miss is a 400, not a clash.
   const documentScope = (req: FastifyRequest, reply: FastifyReply) => {
     const s = readScope(req);
     const q = (req.query ?? {}) as Record<string, unknown>;
@@ -1733,28 +1735,22 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       canUpdate: (await formMutationCapabilities(req, 'Sales/Sales Return')).canUpdate,
     }));
   });
-  // Strict numeric Sale Return update (card X13, steps 8-9). This routes through the
-  // separately versioned updateSaleReturnNumeric coordinator (NOT the generic editSaleReturn
-  // and NOT the metadata-only path). RBAC is enforced by guard(...,'update') and the coordinator
-  // re-observes every trusted dependency inside its Serializable transaction; the caller's
-  // supplied fields grant no authority by themselves. The authenticated operator identity is
-  // taken from the session (never trusted from the body), and an explicit whole-second audit
-  // time is derived server-side. A stale document/context/master/guard version, a real
-  // Serializable (SSI) conflict, an ambiguous ledger key or a cross-year/alias/phantom row all
-  // map to a 4xx via SavedSaleReturnError; a fresh saved version is returned on success so the
-  // UI can adopt it and preserve draft/conflict state.
+  // Strict numeric Sale Return update (card X13, steps 8-9) via the separately versioned
+  // updateSaleReturnNumeric coordinator (NOT generic editSaleReturn, NOT metadata-only). RBAC via
+  // guard(...,'update'); the coordinator re-observes every trusted dependency inside its Serializable
+  // transaction, so caller fields grant no authority. Operator identity and audit time come from the
+  // session. Stale version / SSI conflict / ambiguous key / cross-year/alias/phantom row map to 4xx via
+  // SavedSaleReturnError; success returns a fresh saved version for the UI to adopt.
   app.put('/sales-returns/:vchNo/incoming-numeric', auth, async (req, reply) => {
     if (!guard(req, reply, 'update')) return;
     reply.header('cache-control', 'no-store');
     return run(reply, 200, async () => {
       const s = sess(req);
       const b = body(req);
-      // Endpoint-side gate is a SUPERSET-safe convenience only: it checks the two body fields
-      // are present strings and rejects unknown keys so an obviously malformed request fails
-      // fast with a clear message. It intentionally does NOT re-implement the hex/length/charset
-      // BOUNDS — those live once in the coordinator's validateRequest, which is the single
-      // authoritative validator and denies fail-closed. Because the endpoint's checks are a
-      // strict subset of the coordinator's, they cannot drift into ACCEPTING anything the
+      // Endpoint-side gate is a SUPERSET-safe convenience only: it checks the two body fields are
+      // present strings and rejects unknown keys for a fast clear error. It does NOT re-implement the
+      // hex/length/charset BOUNDS — those live once in the coordinator's validateRequest (the single
+      // authoritative, fail-closed validator). Being a strict subset, it cannot accept anything the
       // coordinator would reject (at worst the error message differs), so the split is safe.
       if (typeof b.version !== 'string')
         throw new SavedSaleReturnError(
@@ -3102,6 +3098,29 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const b = body(req);
     return run(reply, 201, () => issueDhrn(prisma, dhrnIssuePayload(req, b)));
   });
+  app.get('/dhrn/issue/:isuNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getDhrnIssue(prisma, scopeOf(req), (req.params as any).isuNo));
+  });
+  app.put('/dhrn/issue/:isuNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    return run(reply, 200, () =>
+      editDhrnIssue(prisma, dhrnIssuePayload(req, body(req)), (req.params as any).isuNo),
+    );
+  });
+  app.delete('/dhrn/issue/:isuNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    const s = scopeOf(req);
+    const d = {
+      scope: s,
+      vchNo: (req.params as any).isuNo,
+      headerTable: 'DHRN_ISU_DATA' as const,
+      book: s.coBook ?? '',
+      vchType: 'DHRN',
+      deleteUser: sess(req).sub,
+    };
+    return run(reply, 200, () => deleteDhrn(prisma, d));
+  });
   app.post('/dhrn/receipt', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
@@ -4306,11 +4325,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   const isReportFamilySlug = (slug: ReportSlug): slug is keyof typeof REPORT_FAMILY_BUILDERS =>
     Object.prototype.hasOwnProperty.call(REPORT_FAMILY_BUILDERS, slug);
   /**
-   * Resolve a report to its rows and totals.
-   *
-   * Shared by the XLSX and CSV exports so the two cannot disagree about what a report contains. Keeping the
-   * resolution in one place also means the filter handling below — which the shared builder signature cannot
-   * express — is applied identically to both formats.
+   * Resolve a report to its rows and totals. Shared by the XLSX and CSV exports so the two cannot
+   * disagree about what a report contains, and so the filter handling below (which the shared builder
+   * signature cannot express) is applied identically to both formats.
    */
   const resolveReport = async (
     slug: ReportSlug,
@@ -4457,11 +4474,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   };
 
   /**
-   * CSV export for every report.
-   *
-   * The desktop exports CSV from every report and the web previously had exactly one such route, so this is a
-   * real capability gap as well as the input the parity comparison needs: Crystal exports CSV, the web exports
-   * CSV, and the two files can then be compared on rows and totals rather than on layout.
+   * CSV export for every report (desktop exports CSV from every report; the web previously had one). Closes
+   * a capability gap and feeds the parity comparison: Crystal and the web both export CSV, comparable on
+   * rows and totals rather than layout.
    */
   app.get('/reports/:report/export.csv', auth, async (req, reply) => {
     if (!guard(req, reply, 'print')) return;
@@ -4536,12 +4551,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     return sendPdf(reply, html, slug);
   };
 
-  // Screens for five reports that were registered only in REPORT_BUILDERS. Their exports worked and the
-  // screens answered 404 (PARITY-EVALUATION-2026-09-28 D3).
-  // - Each screen calls the export's own builder with the export's own inputs, so the two cannot
-  //   disagree.
-  // - Their policies already existed (routePolicy.ts, 'Reports/HuId Report' and the four after it).
-  // - Literal paths, because routePolicy.test.ts reads them.
+  // Screens for five reports registered only in REPORT_BUILDERS (exports worked, screens 404'd —
+  // PARITY-EVALUATION-2026-09-28 D3). Each screen calls the export's own builder with the export's own
+  // inputs so the two cannot disagree; policies already exist (routePolicy.ts 'Reports/HuId Report' +
+  // four after it); literal paths, because routePolicy.test.ts reads them.
   app.get('/reports/huid', auth, async (req) =>
     REPORT_BUILDERS.huid(prisma, readScope(req), range(req)),
   );
@@ -6159,16 +6172,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
 
   /**
-   * Parse a raw scale frame server-side using the desktop's own extractor.
-   *
-   * Offered so a device client never has to reimplement the filter: it forwards the bytes it read and
-   * receives the exact text the desktop would have placed in the cell. The endpoint is pure — it touches
-   * no tenant data — but stays behind `auth` because it is part of the authenticated device surface.
-   */
-  /**
-   * Integration readiness: what works now, and exactly what each remaining integration is waiting for.
-   * Returns variable PRESENCE only, never values, and never reports an integration ready on the strength
-   * of code alone — a missing credential is always `awaiting-credentials`.
+   * Integration readiness: what works now and what each remaining integration awaits. Returns variable
+   * PRESENCE only (never values), and never reports ready on code alone — a missing credential is always
+   * `awaiting-credentials`. (The scale-frame parser above reuses the desktop extractor server-side.)
    */
   app.get('/integrations/readiness', auth, async (req) => {
     const scope = scopeOf(req);
@@ -7160,14 +7166,11 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
   /**
-   * Scheme enrolment removal — plan item F1.2.
-   *
-   * Enrolment is keyed by scheme + member, not by a voucher number: `enrollScheme` creates the AD_MEMB
-   * membership record, and the instalments that follow are the vouchers. So this takes the member identity
-   * rather than a `:vchNo`, and `deleteEnrollment` (scheme.ts:738) removes the AD_MEMB row.
-   *
-   * The desktop shows 3 MEMB ENTRY deletions in DELETE_DATA. Removing an enrolment that still has instalments
-   * would orphan them, so the module guards that; the route surfaces the guard rather than working around it.
+   * Scheme enrolment removal (plan item F1.2). Enrolment is keyed by scheme + member, not a voucher
+   * number: `enrollScheme` creates the AD_MEMB record and the instalments that follow are the vouchers,
+   * so this takes the member identity and `deleteEnrollment` (scheme.ts:738) removes the AD_MEMB row.
+   * Desktop shows 3 MEMB ENTRY deletions in DELETE_DATA. Removing an enrolment that still has instalments
+   * would orphan them, so the module guards that and the route surfaces the guard.
    */
   app.delete('/scheme/enroll', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
@@ -7299,12 +7302,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
   /**
-   * Reverse a bill-to-bill settlement — plan item F1.4, previously blocked as decision D-4.
-   *
-   * Matches the desktop exactly: it removes the voucher's own rows across BILL_OS_DATA, AC_DATA,
-   * ROJ_MEL_DATA, REMARK_DATA, CASH_DATA and TEMP_BOOK_DATA and writes a DELETE_DATA audit row, and it does
-   * NOT restore the REC_AMT it applied to the bills it paid — `UPDATE BILL_OS_DATA` appears zero times in
-   * TR_BILL_TO.cs's delete path. See deleteBillSettlement for why replicating that is deliberate.
+   * Reverse a bill-to-bill settlement (plan F1.4, previously blocked as D-4). Matches the desktop: removes
+   * the voucher's rows across BILL_OS_DATA, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, CASH_DATA, TEMP_BOOK_DATA
+   * and writes a DELETE_DATA audit, and does NOT restore the REC_AMT applied to the bills it paid (UPDATE
+   * BILL_OS_DATA appears zero times in TR_BILL_TO.cs's delete path). See deleteBillSettlement.
    */
   app.delete('/bill-to-bill/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
@@ -7598,13 +7599,12 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     });
   });
   /**
-   * Contra deletion. `deleteContra` (finance.ts) is the purpose-built reversal: it reads the full CONTRA_DATA
-   * detail via editIdentityTx extraColumns so the DELETE_DATA audit carries the voucher's own amounts (not
-   * zeros, as a generic deleteJournal would). */
-  /**
-   * REOPENING A SAVED VOUCHER (F2.1). These GET /:vchNo routes expose get* lifecycle functions that already
-   * existed in their modules but were never routed (a saved voucher was unreachable to view/reprint). Every
-   * one shares the `(prisma, scope, voucherNo)` signature, following GET /purchases/:vchNo.
+   * Contra deletion. `deleteContra` (finance.ts) is the purpose-built reversal: it reads the full
+   * CONTRA_DATA detail via editIdentityTx extraColumns so the DELETE_DATA audit carries the voucher's own
+   * amounts (not zeros, as a generic deleteJournal would).
+   *
+   * REOPENING A SAVED VOUCHER (F2.1): these GET /:vchNo routes expose get* lifecycle functions that existed
+   * in their modules but were never routed. Every one shares the `(prisma, scope, voucherNo)` signature.
    */
   app.get('/contra/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;

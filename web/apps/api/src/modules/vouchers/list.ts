@@ -25,6 +25,7 @@ const ALLOWED = new Set([
   'LDR_ADJ_DATA',
   'EMP_DATA',
   'DHRN_REC_DATA',
+  'DHRN_ISU_DATA',
   'CARD_DATA',
 ]);
 const IDENTITY_COLUMNS = ['CO_CODE', 'LC_CODE', 'CO_YEAR', 'CO_BOOK', 'VCH_NO'];
@@ -78,6 +79,7 @@ export async function recentVouchers(
       'DIFF_AMT',
       'SALARY_AMT',
       'CARD_AMT',
+      'DHRN_AMT',
     ].find((c) => cols.has(c));
     const nameSel = cols.has('AC_NAME') ? '"AC_NAME"' : `''`;
     const typeSel = cols.has('VCH_TYPE') ? `coalesce("VCH_TYPE",'')` : `''`;

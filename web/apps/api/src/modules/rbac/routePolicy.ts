@@ -705,6 +705,9 @@ route('Manufacturing/MFG Issue', ['DELETE /mfg/:vchNo']);
 
 route('Loans (Dhrn)/Pledge Issue', [
   'POST /dhrn/issue',
+  'GET /dhrn/issue/:isuNo',
+  'PUT /dhrn/issue/:isuNo',
+  'DELETE /dhrn/issue/:isuNo',
   'GET /dhrn/issue-receipt',
   'GET /dhrn/:isuNo/outstanding',
 ]);

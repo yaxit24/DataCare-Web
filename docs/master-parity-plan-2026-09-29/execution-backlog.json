@@ -5481,6 +5481,31 @@
         "web/apps/api/test/batchReceiptKasar.db.test.ts"
       ],
       "statusNote": "postBatchReceipt was the one receipt path that still REQUIRED the caller to name the kasar write-off account (requirePostingAccount threw when neither line.kasarAc nor input.kasarAc was supplied). The batch grid has no kasar-account column and POST /receipts/batch forwards only {scope,vchDate,lines}, so EVERY on-screen write-off on a batch collection was refused - the exact defect the single-row form had already fixed by resolving BOOK_DETL slot 2 (Ac_Ledr.cs:571-581). Exported kasarAccountTx from finance.ts and reused it in batchReceipt (converting the forEach to an async for-loop): an explicit line/voucher account still wins, else slot 2 answers, guarded against colliding with the slot-1 settlement. New DB test proves all four branches. Live: POST /receipts/batch {RCT, WALKIN, amount 1000, kasarAmt 15} returned 201 {vchNo:1,total:1000} on the rebuilt stack (previously HTTP 400 kasar account not configured). Verified: typecheck/lint/format/typecheck:tests/size/kernel/register; clean-tree API build; full API+DB 319/3496."
+    },
+    {
+      "id": "N143",
+      "status": "implemented-unverified",
+      "action": "Dhiran pledge ISSUE reopen/edit/delete: add getDhrnIssue reader + editDhrnIssue editor + GET/PUT/DELETE /dhrn/issue/:isuNo routes, and wire the create-only issue page with load/New/Update + VoucherList",
+      "parentLabels": "P10; D-lifecycle",
+      "startAfter": [
+        "N142"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "DB test dhrnIssueLifecycle.db.test.ts (reopen into input shape, edit+shrink collateral with no orphan detail, delete reverses header/detail/ledger); route universe 641->644; routePolicy + routeInputForwarding green; full API+DB 320/3499; live POST 201 + PUT 200 with recent-list confirming the edited principal",
+      "gapIds": "G152",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/api/src/modules/dhrn/dhrn.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/modules/vouchers/list.ts",
+        "web/apps/web/app/(app)/txn/dhrn-issue/page.tsx",
+        "web/apps/api/test/dhrnIssueLifecycle.db.test.ts"
+      ],
+      "statusNote": "The pledge issue (a core daily jewellery-shop workflow) could be created and deleted but not reopened or edited: issueDhrn + deleteDhrn existed but there was no getDhrnIssue/editDhrnIssue and no GET/PUT routes, and the page imported only post (create-only, no VoucherList). Mirrored the N125 dhrn-interest pattern: getDhrnIssue reads DHRN_ISU_DATA + DHRN_ISU_DETL (and FROM_DATE/licence/remarks/adjusted/unchecked from the DHRN_DATA movement, which the header does not carry) into a DhrnIssueInput-shaped object; editDhrnIssue does editIdentityTx + replaceWriteSetTx(DHRN_ISU_TABLES) + issueDhrn(lifecycle) - issueDhrn already accepted a {tx,identity} context and persists HD_VCH_NO via insertHiddenIdentityTx, so the edit identity resolves. Added GET/PUT/DELETE /dhrn/issue/:isuNo (universe 641->644), classified in routePolicy, and added DHRN_ISU_DATA + DHRN_AMT to the recent-voucher allow-list. Page rewired with loadIssue/resetForm/VoucherList + PUT-when-loaded + Update/New. Reclaimed ~30 comment lines in txn.ts to stay under the size ceiling. DB test (3 cases incl. a collateral SHRINK proving no orphan DHRN_ISU_DETL rows) green; full API+DB 320/3499. Live: POST /dhrn/issue 201, PUT 200, recent-list shows the edited principal 30000. GET reopen follows the identical scopeOf(req) pattern as the verified contra reopen (coBook via the page-context ticket)."
     }
   ],
   "amendments": [
