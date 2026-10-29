@@ -176,13 +176,12 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
             ? { upiId: upiId || undefined, bankName: bankName || undefined }
             : {}),
         };
-        const r =
-          loadedVch && kind === 'receipt'
-            ? await put<{ vchNo: number; total?: number }>(
-                `${ep}/${encodeURIComponent(loadedVch)}`,
-                singleBody,
-              )
-            : await post<{ vchNo: number; total?: number }>(ep, singleBody);
+        const r = loadedVch
+          ? await put<{ vchNo: number; total?: number }>(
+              `${ep}/${encodeURIComponent(loadedVch)}`,
+              singleBody,
+            )
+          : await post<{ vchNo: number; total?: number }>(ep, singleBody);
         setRes({ ...r, coBook });
         if (!loadedVch) resetForm();
         else setLoadedVch(String(r.vchNo).padStart(5, '0'));
@@ -456,11 +455,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
             </>
           )}
           <button className="primary" disabled={busy || !coBook || (multi && !!loadedVch)}>
-            {busy
-              ? 'Saving…'
-              : loadedVch && kind === 'receipt'
-                ? `Update #${loadedVch}`
-                : `Save ${title}`}
+            {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : `Save ${title}`}
           </button>
         </div>
       </form>

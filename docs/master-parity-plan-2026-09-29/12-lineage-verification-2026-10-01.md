@@ -158,6 +158,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G145 | Med | Dhrn Os Letter / frontend page | `unified/src/csharp/DataCareNext/RP_DHRN_OS.cs` | `web/apps/web/app/(app)/txn/dhrn-os-letter/page.tsx`, `web/apps/web/lib/nav.ts` | The Dhrn Os Letter (backend N126) had no UI; add a party + as-of page that opens the HTML/PDF letter from GET /dhrn/os-letter. | N136 |
 | G146 | High | Receipt/Payment / frontend lifecycle + edit fixes | `unified/src/csharp/DataCareNext/TR_CASH.cs` | `web/apps/web/components/PaymentForm.tsx`, `web/apps/api/src/modules/finance/finance.ts`, `web/apps/api/src/routes/txn.ts` | The receipt/payment pages were create-only; add reopen/delete (both) + edit (receipt) in the UI, fix editReceipt to reverse ROJ_MEL_DATA, and make the payment delete resolve its mode from the persisted voucher. | N137 |
 | G147 | High | Fine JV / frontend lifecycle + book | `unified/src/csharp/DataCareNext/MDI_FORM.cs:8360` (FINE JV) | `web/apps/web/app/(app)/txn/fine-jv/page.tsx`, `web/apps/api/src/routes/txn.ts`, `web/apps/api/src/modules/ops/seedCompany.ts` | The Fine JV page was create-only and no FINE JV book was provisioned (POST 409 book-unavailable). Add PUT /fine-jv/:vchNo, wire the page lifecycle, and provision the FJV book. | N138 |
+| G148 | High | Payment edit | `unified/src/csharp/DataCareNext/TR_CASH.cs` | `web/apps/api/src/modules/finance/finance.ts` `postPayment`/`editPayment`, `web/apps/api/src/routes/txn.ts` `PUT /payments/:vchNo`, `web/apps/web/components/PaymentForm.tsx` | Payment edit was unavailable (postPayment had no lifecycle-context hook). Refactor postPayment to the FinanceWriteContext pattern, write HD_VCH_NO + the hidden identity, add editPayment + PUT /payments/:vchNo, and enable payment edit in the UI. | N139 |
 
 ## 4. Decisions D23–D28
 
@@ -1093,6 +1094,21 @@ posted (201), edited to 15 (200) and reopened at 15.
 Done when: the operator can create, reopen, edit and delete a fine JV from the screen on a provisioned company.
 
 
+### N139 — Payment edit (G148, completes the receipt/payment lifecycle)
+
+N137 deferred payment edit because `postPayment` inlined `withTxBudget`/`nextVoucherNoTx` and so could not be
+re-driven inside an edit transaction the way `postReceipt` (with its `FinanceWriteContext`) can. N139
+refactors `postPayment` to the same `write(tx, identity)` + lifecycle-dispatch shape, writes
+`HD_VCH_NO = identity.hiddenVoucherNo` to the PAY_DATA row and calls `insertHiddenIdentityTx` (so
+`editIdentityTx` can later read the hidden number — the missing HD_VCH_NO was why the first attempt returned
+"invalid voucher number"), and adds `editPayment` (replace PAYMENT_WRITE_TABLES + repost) and
+`PUT /payments/:vchNo` (route universe 639 -> 640). The PaymentForm now offers Update for payments too (the
+earlier "delete and re-enter" note is removed). Verified live via the web `/api` proxy: a payment posted
+(4,000), edited to 9,000 and reopened at 9,000.
+
+Done when: the operator can edit a saved payment from the screen; the payment lifecycle matches the receipt.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -1152,6 +1168,7 @@ Done when: the operator can create, reopen, edit and delete a fine JV from the s
 | N136 | — | implemented-unverified, evidence in this change (G145: Dhrn Os Letter frontend page; verified page 200 + letter 200) |
 | N137 | — | implemented-unverified, evidence in this change (G146: receipt/payment lifecycle UI + editReceipt ROJ_MEL_DATA fix + payment-delete mode resolution; verified via the web /api proxy) |
 | N138 | — | implemented-unverified, evidence in this change (G147: fine-jv lifecycle UI + FINE JV book provisioning; verified live) |
+| N139 | — | implemented-unverified, evidence in this change (G148: payment edit — postPayment lifecycle refactor + editPayment + PUT; verified live) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

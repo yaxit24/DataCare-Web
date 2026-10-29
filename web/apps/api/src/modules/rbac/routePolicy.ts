@@ -419,6 +419,7 @@ route('Cash / Bank/Multi-Party Receipt', [
 route('Cash / Bank/Payment', [
   'POST /payments',
   'GET /payments/:vchNo',
+  'PUT /payments/:vchNo',
   'DELETE /payments/:vchNo',
   'POST /payments/multi',
   'DELETE /payments/multi/:vchNo',

@@ -13,7 +13,7 @@
     "apps/api/src/modules/manufacturing/karigar.ts": 1947,
     "apps/api/src/modules/einvoice/eBillWriter.ts": 1896,
     "apps/web/app/(app)/reports/[report]/page.tsx": 1743,
-    "apps/api/src/modules/finance/finance.ts": 1737,
+    "apps/api/src/modules/finance/finance.ts": 1707,
     "apps/api/src/modules/ops/releaseCertification.ts": 1656,
     "apps/api/src/modules/repair/repairCustomerIssue.ts": 1653,
     "apps/api/src/modules/shared/rojmel.ts": 1636,

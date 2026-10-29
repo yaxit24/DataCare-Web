@@ -164,6 +164,7 @@ import {
 import {
   postReceipt,
   postPayment,
+  editPayment,
   postContra,
   deleteContra,
   getContra,
@@ -2820,22 +2821,27 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       editReceipt(prisma, receiptInput(req, body(req)), (req.params as any).vchNo),
     );
   });
+  const paymentInput = (req: FastifyRequest, b: Record<string, any>) => ({
+    scope: scopeOf(req),
+    partyAc: b.partyAc,
+    partyName: b.partyName,
+    amount: b.amount,
+    mode: b.mode,
+    bankAc: b.bankAc,
+    chqNo: b.chqNo,
+    vchDate: b.vchDate,
+    kasar: b.kasar != null ? Number(b.kasar) : undefined,
+    kasarAc: b.kasarAc,
+    mainUser: sess(req).sub,
+  });
   app.post('/payments', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      postPayment(prisma, {
-        scope: scopeOf(req),
-        partyAc: b.partyAc,
-        partyName: b.partyName,
-        amount: b.amount,
-        mode: b.mode,
-        bankAc: b.bankAc,
-        chqNo: b.chqNo,
-        vchDate: b.vchDate,
-        kasar: b.kasar != null ? Number(b.kasar) : undefined,
-        kasarAc: b.kasarAc,
-      }),
+    return run(reply, 201, () => postPayment(prisma, paymentInput(req, body(req))));
+  });
+  app.put('/payments/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    return run(reply, 200, () =>
+      editPayment(prisma, paymentInput(req, body(req)), (req.params as any).vchNo),
     );
   });
   app.post('/contra', auth, async (req, reply) => {
@@ -2892,8 +2898,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
   /**
-   * Single receipt/payment deletion (F1.3). Receipt=CASH_DATA (deleteReceipt), payment=PAY_DATA (generic
-   * deleteFinance) — different header tables; a receipt-shaped delete of a payment would reverse nothing. */
+   * Single receipt/payment deletion (F1.3). Receipt=CASH_DATA (deleteReceipt), payment=PAY_DATA (deleteFinance). */
   app.delete('/receipts/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
     return run(reply, 200, () =>
@@ -2932,13 +2937,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
   /**
-   * Single payment deletion — plan item F1.3. See the receipt delete above for why the two differ.
-   *
-   * `headerTable: 'PAY_DATA'` is not interchangeable with the receipt's CASH_DATA: `postPayment` writes
-   * PAY_DATA (finance.ts:512). `mode` is required rather than defaulted because the audit's VCH_TYPE is how
-   * the desktop classifies the deletion — CPAY for cash, BPAY for bank (finance.ts:523) — and BANK PAY has
-   * MORE real deletions than CASH PAY (5 against 3), so there is no safe majority to assume.
-   */
+   * Single payment deletion (F1.3). headerTable=PAY_DATA; the audit VCH_TYPE (CPAY cash / BPAY bank) is
+   * resolved from the mode or the persisted voucher. */
   app.delete('/payments/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
     const b = body(req);
