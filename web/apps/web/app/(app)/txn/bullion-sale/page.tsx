@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { post, ApiError } from '../../../../lib/api';
+import { ApiError, del, get, post, put } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker, type LookupRow } from '../../../../components/LookupPicker';
@@ -67,6 +67,41 @@ interface Line {
   issueSrno: string;
 }
 
+type ViewRow = Record<string, unknown>;
+
+interface BullionSaleView {
+  voucherNo: string | number;
+  vchDate?: unknown;
+  acCode?: unknown;
+  acName?: unknown;
+  itType?: unknown;
+  fineRate?: unknown;
+  convRate?: unknown;
+  convPct?: unknown;
+  add1?: unknown;
+  add2?: unknown;
+  add3?: unknown;
+  city?: unknown;
+  mobile?: unknown;
+  bankName?: unknown;
+  settleDrAmt?: unknown;
+  settleCrAmt?: unknown;
+  settleDrFine?: unknown;
+  settleCrFine?: unknown;
+  pay?: ViewRow;
+  receivedPay?: ViewRow;
+  lines?: ViewRow[];
+  receivedLines?: ViewRow[];
+}
+
+interface BullionSaleResult {
+  vchNo: number;
+  fine: number;
+  netAmt: number;
+}
+
+type DisplayResult = BullionSaleResult & { updated: boolean };
+
 const blankLine = (): Line => ({
   itCode: '',
   itemName: '',
@@ -115,6 +150,61 @@ const n = (v: string) => Number(v || 0);
 const round3 = (x: number) => Math.round((x + 1e-9) * 1000) / 1000;
 const round0 = (x: number) => Math.round(x + 1e-9);
 const inr = (x: number) => round0(x).toLocaleString('en-IN');
+const inputValue = (value: unknown): string => (value == null ? '' : String(value));
+const viewRow = (value: unknown): ViewRow =>
+  value != null && typeof value === 'object' ? (value as ViewRow) : {};
+
+function lineFromView(row: ViewRow): Line {
+  const ref = viewRow(row.isuRef);
+  const rateType = inputValue(row.rateType);
+  const netWt = Number(row.netWt ?? 0);
+  const tagNo = inputValue(row.tagNo);
+  return {
+    ...blankLine(),
+    itCode: inputValue(row.itCode),
+    itemName: inputValue(row.itemName),
+    tagNo: tagNo.toUpperCase() === 'N' ? '' : tagNo,
+    designNo: inputValue(row.designNo),
+    lotNo: inputValue(row.lotNo),
+    itemLot: inputValue(row.itemLot),
+    pcs: inputValue(row.pcs),
+    grossWt: inputValue(row.grossWt),
+    othWt: inputValue(row.othWt),
+    netWt: inputValue(row.netWt),
+    // The reader returns persisted ghat weight; this bullion grid edits and sends its percentage.
+    ghtPct: row.ghtWt == null || netWt === 0 ? '' : inputValue((Number(row.ghtWt) * 100) / netWt),
+    lessWt: inputValue(row.lessWt),
+    touch: inputValue(row.touch),
+    west: inputValue(row.westPct),
+    lessTouch: inputValue(row.lessTouch),
+    rate: inputValue(row.rate),
+    rateType: ['G', '1', 'K', 'P'].includes(rateType) ? (rateType as RateType) : 'G',
+    lbrType: inputValue(row.lbrType),
+    lbrRate: inputValue(row.lbrRate),
+    lbrAmt: inputValue(row.lbrAmt),
+    othAmt: inputValue(row.othAmt),
+    otherRate: inputValue(row.otherRate),
+    otherFine: inputValue(row.otherFine),
+    mrp: inputValue(row.mrp),
+    taxPct: inputValue(row.taxPct),
+    tagCost: inputValue(row.tagCost),
+    tagGrossWt: inputValue(row.tagGrossWt),
+    tagNetWt: inputValue(row.tagNetWt),
+    lineConvRate: inputValue(row.convRate),
+    lineConvPct: inputValue(row.convPct),
+    prCode: inputValue(row.prCode),
+    bookingLookup: inputValue(ref.no),
+    mcxRate: inputValue(row.mcxRate),
+    hallmarkFine: inputValue(row.hallmarkFine),
+    adjustWt: inputValue(row.adjustWt),
+    silverFine: inputValue(row.silverFine),
+    issueLcCode: inputValue(row.issueLcCode),
+    issueYear: inputValue(ref.yrcd),
+    issueBook: inputValue(ref.dbcd),
+    issueNo: inputValue(ref.no),
+    issueSrno: inputValue(ref.srno),
+  };
+}
 
 function lineNetWt(l: Line): number {
   return l.netWt.trim() ? round3(n(l.netWt)) : round3(n(l.grossWt) - n(l.othWt));
@@ -200,6 +290,8 @@ export default function BullionSalePage() {
   const { lcCode, coYear } = useBusinessScope();
   const [coBook, setCoBook] = useState('');
   const [vchDate, setVchDate] = useState('');
+  const [voucherSearch, setVoucherSearch] = useState('');
+  const [loadedVoucherNo, setLoadedVoucherNo] = useState('');
   const [fineRate, setFineRate] = useState('');
   const [convRate, setConvRate] = useState('');
   const [convPct, setConvPct] = useState('');
@@ -263,9 +355,7 @@ export default function BullionSalePage() {
   const [settleCrAmt, setSettleCrAmt] = useState('');
   const [settleDrFine, setSettleDrFine] = useState('');
   const [settleCrFine, setSettleCrFine] = useState('');
-  const [result, setResult] = useState<{ vchNo: number; fine: number; netAmt: number } | null>(
-    null,
-  );
+  const [result, setResult] = useState<DisplayResult | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -377,61 +467,205 @@ export default function BullionSalePage() {
     (hasLine || hasReceivedLine) &&
     (totalFine > 0 || totalAmt > 0 || receivedTotalFine > 0 || receivedTotalAmt > 0);
 
+  function reset() {
+    setVchDate('');
+    setVoucherSearch('');
+    setLoadedVoucherNo('');
+    setFineRate('');
+    setConvRate('');
+    setConvPct('');
+    setAcCode('');
+    setAcName('');
+    setItType('G');
+    setLines([blankLine()]);
+    setReceivedLines([blankLine()]);
+    setCash('');
+    setChq('');
+    setCard('');
+    setKasar('');
+    setBillOs('');
+    setBankAc('');
+    setChqNo('');
+    setCardAc('');
+    setReceivedCash('');
+    setReceivedChq('');
+    setReceivedCard('');
+    setReceivedKasar('');
+    setReceivedBillOs('');
+    setReceivedBankAc('');
+    setReceivedChqNo('');
+    setReceivedCardAc('');
+    setAdd1('');
+    setAdd2('');
+    setAdd3('');
+    setCity('');
+    setMobile('');
+    setBankName('');
+    setSettleDrAmt('');
+    setSettleCrAmt('');
+    setSettleDrFine('');
+    setSettleCrFine('');
+    setResult(null);
+    setErr('');
+  }
+
+  function payload() {
+    return {
+      coBook,
+      coYear,
+      lcCode,
+      vchDate: vchDate || undefined,
+      acCode,
+      acName,
+      itType,
+      fineRate: fineRate.trim() ? n(fineRate) : undefined,
+      convRate: convRate.trim() ? n(convRate) : undefined,
+      convPct: convPct.trim() ? n(convPct) : undefined,
+      lines: activeRows(lines).map(linePayload),
+      receivedLines: activeRows(receivedLines).map(linePayload),
+      pay: {
+        cash: n(cash) || undefined,
+        chq: n(chq) || undefined,
+        card: n(card) || undefined,
+        kasar: n(kasar) || undefined,
+        billOs: n(billOs) || undefined,
+        bankAc: bankAc.trim() || undefined,
+        chqNo: chqNo.trim() || undefined,
+        cardAc: cardAc.trim() || undefined,
+      },
+      receivedPay: {
+        cash: n(receivedCash) || undefined,
+        chq: n(receivedChq) || undefined,
+        card: n(receivedCard) || undefined,
+        kasar: n(receivedKasar) || undefined,
+        billOs: n(receivedBillOs) || undefined,
+        bankAc: receivedBankAc.trim() || undefined,
+        chqNo: receivedChqNo.trim() || undefined,
+        cardAc: receivedCardAc.trim() || undefined,
+      },
+      add1: add1.trim() || undefined,
+      add2: add2.trim() || undefined,
+      add3: add3.trim() || undefined,
+      city: city.trim() || undefined,
+      mobile: mobile.trim() || undefined,
+      bankName: bankName.trim() || undefined,
+      settleDrAmt: settleDrAmt.trim() ? n(settleDrAmt) : undefined,
+      settleCrAmt: settleCrAmt.trim() ? n(settleCrAmt) : undefined,
+      settleDrFine: settleDrFine.trim() ? n(settleDrFine) : undefined,
+      settleCrFine: settleCrFine.trim() ? n(settleCrFine) : undefined,
+    };
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setErr('');
     setResult(null);
     setBusy(true);
     try {
-      const body = {
+      const updated = Boolean(loadedVoucherNo);
+      const saved = updated
+        ? await put<BullionSaleResult>(
+            `/bullion-sales/${encodeURIComponent(loadedVoucherNo)}`,
+            payload(),
+          )
+        : await post<BullionSaleResult>('/bullion-sales', payload());
+      const voucherNo = String(saved.vchNo);
+      setResult({ ...saved, updated });
+      setLoadedVoucherNo(voucherNo);
+      setVoucherSearch(voucherNo);
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function loadVoucher() {
+    const requested = voucherSearch.trim();
+    if (!coBook || !requested) {
+      setErr('Select a book and enter a voucher.');
+      return;
+    }
+    setBusy(true);
+    setErr('');
+    setResult(null);
+    try {
+      const view = await get<BullionSaleView>(
+        `/bullion-sales/${encodeURIComponent(requested)}?coBook=${encodeURIComponent(coBook)}`,
+      );
+      const pay = view.pay ?? {};
+      const receivedPay = view.receivedPay ?? {};
+      const issueLines = (view.lines ?? []).map(lineFromView);
+      const receiptLines = (view.receivedLines ?? []).map(lineFromView);
+      const voucherNo = inputValue(view.voucherNo);
+      setVchDate(inputValue(view.vchDate).slice(0, 10));
+      setAcCode(inputValue(view.acCode));
+      setAcName(inputValue(view.acName));
+      setItType(view.itType === 'S' ? 'S' : 'G');
+      setFineRate(inputValue(view.fineRate));
+      setConvRate(inputValue(view.convRate));
+      setConvPct(inputValue(view.convPct));
+      setAdd1(inputValue(view.add1));
+      setAdd2(inputValue(view.add2));
+      setAdd3(inputValue(view.add3));
+      setCity(inputValue(view.city));
+      setMobile(inputValue(view.mobile));
+      setBankName(inputValue(view.bankName));
+      setSettleDrAmt(inputValue(view.settleDrAmt));
+      setSettleCrAmt(inputValue(view.settleCrAmt));
+      setSettleDrFine(inputValue(view.settleDrFine));
+      setSettleCrFine(inputValue(view.settleCrFine));
+      setCash(inputValue(pay.cash));
+      setChq(inputValue(pay.chq));
+      setCard(inputValue(pay.card));
+      setKasar(inputValue(pay.kasar));
+      setBillOs(inputValue(pay.billOs));
+      setBankAc(inputValue(pay.bankAc));
+      setChqNo(inputValue(pay.chqNo));
+      setCardAc(inputValue(pay.cardAc));
+      setReceivedCash(inputValue(receivedPay.cash));
+      setReceivedChq(inputValue(receivedPay.chq));
+      setReceivedCard(inputValue(receivedPay.card));
+      setReceivedKasar(inputValue(receivedPay.kasar));
+      setReceivedBillOs(inputValue(receivedPay.billOs));
+      setReceivedBankAc(inputValue(receivedPay.bankAc));
+      setReceivedChqNo(inputValue(receivedPay.chqNo));
+      setReceivedCardAc(inputValue(receivedPay.cardAc));
+      setLines(issueLines.length ? issueLines : [blankLine()]);
+      setReceivedLines(receiptLines.length ? receiptLines : [blankLine()]);
+      setLoadedVoucherNo(voucherNo);
+      setVoucherSearch(voucherNo);
+    } catch (e) {
+      setErr(
+        e instanceof ApiError
+          ? e.body?.message || e.body?.error || e.message
+          : 'bullion sale load failed',
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function remove() {
+    if (!loadedVoucherNo || !window.confirm(`Delete bullion sale voucher ${loadedVoucherNo}?`)) {
+      return;
+    }
+    setBusy(true);
+    setErr('');
+    try {
+      await del(`/bullion-sales/${encodeURIComponent(loadedVoucherNo)}`, {
         coBook,
         coYear,
         lcCode,
-        vchDate: vchDate || undefined,
-        acCode,
-        acName,
-        itType,
-        fineRate: fineRate.trim() ? n(fineRate) : undefined,
-        convRate: convRate.trim() ? n(convRate) : undefined,
-        convPct: convPct.trim() ? n(convPct) : undefined,
-        lines: activeRows(lines).map(linePayload),
-        receivedLines: activeRows(receivedLines).map(linePayload),
-        pay: {
-          cash: n(cash) || undefined,
-          chq: n(chq) || undefined,
-          card: n(card) || undefined,
-          kasar: n(kasar) || undefined,
-          billOs: n(billOs) || undefined,
-          bankAc: bankAc.trim() || undefined,
-          chqNo: chqNo.trim() || undefined,
-          cardAc: cardAc.trim() || undefined,
-        },
-        receivedPay: {
-          cash: n(receivedCash) || undefined,
-          chq: n(receivedChq) || undefined,
-          card: n(receivedCard) || undefined,
-          kasar: n(receivedKasar) || undefined,
-          billOs: n(receivedBillOs) || undefined,
-          bankAc: receivedBankAc.trim() || undefined,
-          chqNo: receivedChqNo.trim() || undefined,
-          cardAc: receivedCardAc.trim() || undefined,
-        },
-        add1: add1.trim() || undefined,
-        add2: add2.trim() || undefined,
-        add3: add3.trim() || undefined,
-        city: city.trim() || undefined,
-        mobile: mobile.trim() || undefined,
-        bankName: bankName.trim() || undefined,
-        settleDrAmt: settleDrAmt.trim() ? n(settleDrAmt) : undefined,
-        settleCrAmt: settleCrAmt.trim() ? n(settleCrAmt) : undefined,
-        settleDrFine: settleDrFine.trim() ? n(settleDrFine) : undefined,
-        settleCrFine: settleCrFine.trim() ? n(settleCrFine) : undefined,
-      };
-      setResult(
-        (await post('/bullion-sales', body)) as { vchNo: number; fine: number; netAmt: number },
-      );
+        book: coBook,
+      });
+      reset();
     } catch (e) {
-      setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
+      setErr(
+        e instanceof ApiError
+          ? e.body?.message || e.body?.error || e.message
+          : 'bullion sale delete failed',
+      );
     } finally {
       setBusy(false);
     }
@@ -462,6 +696,19 @@ export default function BullionSalePage() {
             <div className="field">
               <label>Date</label>
               <input type="date" value={vchDate} onChange={(e) => setVchDate(e.target.value)} />
+            </div>
+            <div className="field">
+              <label>Voucher no.</label>
+              <div className="row" style={{ gap: 6 }}>
+                <input
+                  aria-label="Voucher no."
+                  value={voucherSearch}
+                  onChange={(e) => setVoucherSearch(e.target.value)}
+                />
+                <button type="button" onClick={loadVoucher} disabled={busy}>
+                  Load
+                </button>
+              </div>
             </div>
             <div className="field">
               <label>Fine Rate</label>
@@ -1030,8 +1277,16 @@ export default function BullionSalePage() {
               )}
             </span>
             <span className="spacer" />
+            <button type="button" className="ghost" onClick={reset} disabled={busy}>
+              New
+            </button>
+            {loadedVoucherNo && (
+              <button type="button" className="danger" onClick={remove} disabled={busy}>
+                Delete
+              </button>
+            )}
             <button className="primary" disabled={busy || !canSubmit}>
-              {busy ? 'Saving…' : 'Save Bullion Sale'}
+              {busy ? 'Saving…' : loadedVoucherNo ? 'Update Bullion Sale' : 'Save Bullion Sale'}
             </button>
           </div>
         </div>
@@ -1041,7 +1296,7 @@ export default function BullionSalePage() {
       {result && (
         <div className="panel">
           <div className="msg ok">
-            Posted — Bullion Sale #{result.vchNo} · fine{' '}
+            {result.updated ? 'Updated' : 'Posted'} — Bullion Sale #{result.vchNo} · fine{' '}
             {Number(result.fine ?? 0).toLocaleString('en-IN')} · net ₹
             {inr(Number(result.netAmt ?? 0))}
           </div>
