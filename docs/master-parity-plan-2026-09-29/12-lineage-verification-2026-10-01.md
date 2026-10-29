@@ -152,6 +152,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G139 | High | Journal / frontend lifecycle | `unified/src/csharp/DataCareNext/TR_JOURNAL` | `web/apps/web/app/(app)/txn/journal/page.tsx` | The journal page was create-only; the operator must load/edit/delete/print a saved journal from the screen (backend ready via N128). | N130 |
 | G140 | High | Ledger-adjust & Employee-JV / frontend lifecycle | `unified/src/csharp/DataCareNext/TR_LEDR_ADJ.cs`, `TR_EMP_JV.cs` | `web/apps/web/app/(app)/txn/ledger-adjust/page.tsx`, `web/apps/web/app/(app)/txn/employee-jv/page.tsx`, `web/apps/api/src/modules/vouchers/list.ts` | Both pages were create-only; add a book selector + full reopen/edit/delete lifecycle, and allow-list LDR_ADJ_DATA + EMP_DATA (with DIFF_AMT/SALARY_AMT amount detection) in the recent-voucher list. | N131 |
 | G141 | High | Loan Interest / frontend lifecycle | `unified/src/csharp/DataCareNext/TR_DHRN_INTREC.cs` | `web/apps/web/app/(app)/txn/dhrn-interest/page.tsx`, `web/apps/api/src/modules/vouchers/list.ts` | The dhrn-interest page was create-only and still used the old DHIRAN RECEIPT book; point it at the INTREST RECIVED (DIR) book and add the full reopen/edit/delete lifecycle (backend ready from N125), allow-listing DHRN_REC_DATA. | N132 |
+| G142 | High | Tour Sales / frontend page | `unified/src/csharp/DataCareNext/TR_TOUR_SALE.cs` | `web/apps/web/app/(app)/txn/tour-sales/page.tsx`, `web/apps/web/lib/wholesaleVoucher.ts`, `web/apps/web/lib/nav.ts` | Tour Sales (backend N127) had no frontend page; the operator could not reach it from the menu. Reuse the shared wholesale-sale form on the TOUR SALES book. | N133 |
 
 ## 4. Decisions D23–D28
 
@@ -999,6 +1000,20 @@ received/issue intact.
 Done when: the operator can create, reopen, edit and delete a pledge interest receipt from the screen.
 
 
+### N133 — Tour Sales frontend page (G142)
+
+Tour Sales had its backend built in N127 but no UI entry point, so a trained operator could not reach it
+from the menu. Because the desktop TR_TOUR_SALE posts the same TR_WH_SALE engine on a TOUR SALES book, the
+web reuses the shared `WholesaleVoucherForm`: a new `tour-sale` workflow was added to WHOLESALE_WORKFLOWS
+(title "Tour Sales", endpoint `/tour-sales`, mainBook `TOUR SALES`), a thin `/txn/tour-sales` page renders
+`<WholesaleVoucherForm workflow="tour-sale">`, and a Sales-menu nav entry was added. The shared form already
+implements the full create/load/edit/delete lifecycle keyed off the workflow endpoint. Verified live in the
+browser: the page renders with the book selector filtered to "TSL — Tour Sales", the issue/receive grids,
+and the Load / Save / Delete / New buttons, with no console errors.
+
+Done when: the operator can create, load, edit and delete a tour sale from the Tour Sales screen.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -1052,6 +1067,7 @@ Done when: the operator can create, reopen, edit and delete a pledge interest re
 | N130 | — | implemented-unverified, evidence in this change (G139: journal page lifecycle UI; verified live render) |
 | N131 | — | implemented-unverified, evidence in this change (G140: ledger-adjust & employee-jv lifecycle UI + voucher-list allow-list; verified via the web /api proxy) |
 | N132 | — | implemented-unverified, evidence in this change (G141: loan-interest page lifecycle UI on the DIR book; verified via the web /api proxy) |
+| N133 | — | implemented-unverified, evidence in this change (G142: Tour Sales frontend page via the shared wholesale form; verified live in browser) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

@@ -86,6 +86,7 @@ export const NAV: NavGroup[] = [
       { label: 'Bullion Booking', href: '/txn/bullion', ready: true },
       { label: 'Bul Sales', href: '/txn/bullion-sale', ready: true },
       { label: 'Tour / Approval Sale', href: '/txn/tour', ready: true },
+      { label: 'Tour Sales', href: '/txn/tour-sales', ready: true },
       { label: 'Approval Return', href: '/txn/tour-return', ready: true },
       { label: 'VP Parcel', href: '/txn/vp-parcel', ready: true },
     ],

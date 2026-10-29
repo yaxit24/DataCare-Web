@@ -5258,6 +5258,28 @@
         "web/apps/api/src/modules/vouchers/list.ts"
       ],
       "statusNote": "The dhrn-interest page was create-only on the old DHIRAN RECEIPT book. Repointed to the INTREST RECIVED (DIR) book (N125), added richer fields (assessed/received/kasar/issue-book) + loadInterest GET + PUT-on-edit + New button + VoucherList(DHRN_REC_DATA, /dhrn/interest). Allow-listed DHRN_REC_DATA. VERIFIED via the web /api proxy: pledge issue -> interest POST on DIR (201) -> recent list -> reopen {borrowerAc WALKIN, interest 1200, intReceived 1200, isuNo 00001}. Verified: typecheck both/lint/format; web 646; voucher-list scope test green."
+    },
+    {
+      "id": "N133",
+      "status": "implemented-unverified",
+      "action": "Build the Tour Sales frontend page (reuse the shared wholesale-sale form on the TOUR SALES book) + nav entry",
+      "parentLabels": "P05; missing-workflows-frontend",
+      "startAfter": [
+        "N132"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "tour-sales page renders with the TSL book filter + full lifecycle buttons; web 646, gates; verified live in the browser",
+      "gapIds": "G142",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/web/app/(app)/txn/tour-sales/page.tsx",
+        "web/apps/web/lib/wholesaleVoucher.ts",
+        "web/apps/web/lib/nav.ts"
+      ],
+      "statusNote": "Tour Sales (backend N127) had no UI entry point. Added a tour-sale workflow to WHOLESALE_WORKFLOWS (endpoint /tour-sales, mainBook TOUR SALES), a thin /txn/tour-sales page using the shared WholesaleVoucherForm, and a Sales nav entry. The shared form already does create/load/edit/delete keyed off the endpoint. VERIFIED LIVE in the browser: page renders with book filtered to TSL - Tour Sales, issue/receive grids, Load/Save/Delete/New buttons, no console errors. Verified: typecheck/lint/format/typecheck:tests; web 646."
     }
   ],
   "amendments": [
