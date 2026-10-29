@@ -15,6 +15,15 @@ import {
   dhrnInterestInputFromBody,
 } from '../modules/dhrn/dhrnInterest.js';
 import { dhrnOsLetterData, dhrnOsLetterHtml } from '../modules/dhrn/dhrnOsLetter.js';
+import {
+  getDhrnIssue,
+  editDhrnIssue,
+  getDhrnReceipt,
+  editDhrnReceipt,
+  deleteDhrn,
+  type DhrnIssueInput,
+  type DhrnReceiptInput,
+} from '../modules/dhrn/dhrn.js';
 import { getJournal, editJournal } from '../modules/finance/journal.js';
 import {
   postTourSale,
@@ -172,5 +181,61 @@ export function registerTourSaleRoutes(app: FastifyInstance, h: CrmRouteHelpers)
         deleteUser: mainUserOf(req),
       }),
     );
+  });
+}
+
+/**
+ * Dhiran pledge issue + receipt reopen/edit/delete (N143/N144). Extracted here to keep routes/txn.ts
+ * under its size ceiling. The issue/receipt body mappers live in registerTxnRoutes (they feed the
+ * POST handlers too), so they are passed in rather than duplicated.
+ */
+export function registerDhrnLifecycleRoutes(
+  app: FastifyInstance,
+  h: CrmRouteHelpers & {
+    issuePayload: (req: FastifyRequest, b: Record<string, any>) => DhrnIssueInput;
+    receiptPayload: (req: FastifyRequest, b: Record<string, any>) => DhrnReceiptInput;
+  },
+): void {
+  const { prisma, auth, guard, scopeOf, run, body, mainUserOf, issuePayload, receiptPayload } = h;
+  const del = (headerTable: 'DHRN_ISU_DATA' | 'DHRN_REC_DATA') => (req: FastifyRequest) => {
+    const s = scopeOf(req);
+    return {
+      scope: s,
+      vchNo: (req.params as any).vchNo ?? (req.params as any).isuNo,
+      headerTable,
+      book: s.coBook ?? '',
+      vchType: 'DHRN',
+      deleteUser: mainUserOf(req),
+    };
+  };
+
+  app.get('/dhrn/issue/:isuNo', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getDhrnIssue(prisma, scopeOf(req), (req.params as any).isuNo));
+  });
+  app.put('/dhrn/issue/:isuNo', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    return run(reply, 200, () =>
+      editDhrnIssue(prisma, issuePayload(req, body(req)), (req.params as any).isuNo),
+    );
+  });
+  app.delete('/dhrn/issue/:isuNo', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () => deleteDhrn(prisma, del('DHRN_ISU_DATA')(req)));
+  });
+
+  app.get('/dhrn/receipt/:vchNo', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getDhrnReceipt(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.put('/dhrn/receipt/:vchNo', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    return run(reply, 200, () =>
+      editDhrnReceipt(prisma, receiptPayload(req, body(req)), (req.params as any).vchNo),
+    );
+  });
+  app.delete('/dhrn/receipt/:vchNo', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () => deleteDhrn(prisma, del('DHRN_REC_DATA')(req)));
   });
 }

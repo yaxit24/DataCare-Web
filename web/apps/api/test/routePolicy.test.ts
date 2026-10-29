@@ -92,9 +92,10 @@ describe('route policy registry', () => {
     // N137 (Stage D) adds receipt edit PUT /receipts/:vchNo: 637 + 1 = 638.
     // N138 (Stage D) adds fine-jv edit PUT /fine-jv/:vchNo: 638 + 1 = 639.
     // N139 (Stage D) adds payment edit PUT /payments/:vchNo: 639 + 1 = 640.
-    // N142/N143 (Stage D) add dhrn-issue reopen/edit/delete: GET/PUT/DELETE /dhrn/issue/:isuNo, 641 + 3 = 644.
-    expect(routes).toHaveLength(644);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(644);
+    // N142/N143/N144 (Stage D) add dhrn issue + receipt reopen/edit/delete: GET/PUT/DELETE on
+    // /dhrn/issue/:isuNo and /dhrn/receipt/:vchNo, 641 + 3 + 3 = 647.
+    expect(routes).toHaveLength(647);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(647);
 
     const policies = routes.map((route) => ({
       ...route,

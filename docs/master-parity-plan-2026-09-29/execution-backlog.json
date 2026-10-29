@@ -5506,6 +5506,31 @@
         "web/apps/api/test/dhrnIssueLifecycle.db.test.ts"
       ],
       "statusNote": "The pledge issue (a core daily jewellery-shop workflow) could be created and deleted but not reopened or edited: issueDhrn + deleteDhrn existed but there was no getDhrnIssue/editDhrnIssue and no GET/PUT routes, and the page imported only post (create-only, no VoucherList). Mirrored the N125 dhrn-interest pattern: getDhrnIssue reads DHRN_ISU_DATA + DHRN_ISU_DETL (and FROM_DATE/licence/remarks/adjusted/unchecked from the DHRN_DATA movement, which the header does not carry) into a DhrnIssueInput-shaped object; editDhrnIssue does editIdentityTx + replaceWriteSetTx(DHRN_ISU_TABLES) + issueDhrn(lifecycle) - issueDhrn already accepted a {tx,identity} context and persists HD_VCH_NO via insertHiddenIdentityTx, so the edit identity resolves. Added GET/PUT/DELETE /dhrn/issue/:isuNo (universe 641->644), classified in routePolicy, and added DHRN_ISU_DATA + DHRN_AMT to the recent-voucher allow-list. Page rewired with loadIssue/resetForm/VoucherList + PUT-when-loaded + Update/New. Reclaimed ~30 comment lines in txn.ts to stay under the size ceiling. DB test (3 cases incl. a collateral SHRINK proving no orphan DHRN_ISU_DETL rows) green; full API+DB 320/3499. Live: POST /dhrn/issue 201, PUT 200, recent-list shows the edited principal 30000. GET reopen follows the identical scopeOf(req) pattern as the verified contra reopen (coBook via the page-context ticket)."
+    },
+    {
+      "id": "N144",
+      "status": "implemented-unverified",
+      "action": "Dhiran pledge RECEIPT reopen/edit/delete: add getDhrnReceipt + editDhrnReceipt + GET/PUT/DELETE /dhrn/receipt/:vchNo (extracted to routes/crm.ts), make the receipt delete restore the issue ISU_REC=N (desktop TR_DHRN_REC.cs:6376), and wire the create-only receipt page with load/New/Update + VoucherList",
+      "parentLabels": "P10; D-lifecycle",
+      "startAfter": [
+        "N143"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "DB test dhrnReceiptLifecycle.db.test.ts (receipt marks issue redeemed then delete restores ISU_REC=N; reopen into input shape; edit partial->full repay redeems); route universe 644->647; full API+DB 3502; routes extracted to crm.ts to keep txn.ts under its (now lowered) size ceiling; live POST issue 201 + receipt 201",
+      "gapIds": "G153",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/api/src/modules/dhrn/dhrn.ts",
+        "web/apps/api/src/routes/crm.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/web/app/(app)/txn/dhrn-receipt/page.tsx",
+        "web/apps/api/test/dhrnReceiptLifecycle.db.test.ts"
+      ],
+      "statusNote": "Companion to N143. The pledge RECEIPT (redemption) was create-only: receiveDhrn + deleteDhrn existed but no getDhrnReceipt/editDhrnReceipt, no GET/PUT routes, and the page imported only get/post. ALSO a correctness bug: deleteDhrn reversed the receipt rows but did NOT restore the issue ISU_REC flag, so a reversed receipt left the pledge permanently marked redeemed - diverging from desktop TR_DHRN_REC.cs:6376 (sets ISU_REC=N). Added getDhrnReceipt (DHRN_REC_DATA + DHRN_REC_DETL released items) and editDhrnReceipt (editIdentityTx + replaceWriteSetTx(DHRN_REC_TABLES) + receiveDhrn lifecycle; restores ISU_REC=N before the repost so the outstanding guard sees the pre-receipt balance). Made deleteDhrn read the receipt ISU_YRCD/ISU_DBCD/ISU_NO before reversal and restore DHRN_ISU_DATA.ISU_REC=N for the receipt case. To stay under the txn.ts size ceiling, extracted all six dhrn issue+receipt lifecycle routes into a new registerDhrnLifecycleRoutes in routes/crm.ts (the issue/receipt body mappers are passed in); txn.ts shrank and its ceiling was lowered. Route universe 644->647. Page rewired: loadReceipt/resetForm/VoucherList + PUT-when-loaded + Update/New. DB test (3 cases incl. delete-restores-ISU_REC) green; full API+DB 3502; routePolicy+routeInputForwarding green. Live: POST /dhrn/issue 201, POST /dhrn/receipt 201 (outstanding 0). The GET/DELETE follow the identical scopeOf(req) pattern as the verified contra reopen (coBook via the page-context ticket); delete+restore proven by the DB test which passes an explicit-scope delete."
     }
   ],
   "amendments": [

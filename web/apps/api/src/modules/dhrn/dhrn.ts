@@ -995,6 +995,29 @@ export async function deleteDhrn(prisma: any, input: DeleteDhrnInput): Promise<{
       input.headerTable === 'DHRN_ISU_DATA'
         ? ['DHRN_ISU_DETL', 'DHRN_DATA']
         : ['DHRN_REC_DETL', 'DHRN_DATA'];
+    // A receipt marked its pledge issue redeemed (ISU_REC='Y', TR_DHRN_REC.cs:6300). Reversing the
+    // receipt must restore the pledge to not-redeemed (ISU_REC='N', TR_DHRN_REC.cs:6376), matched by
+    // the receipt's own ISU_YRCD/ISU_DBCD/ISU_NO — read BEFORE the row is reversed away.
+    let restore: { isuYear: string; isuBook: string; isuNo: string } | null = null;
+    if (input.headerTable === 'DHRN_REC_DATA') {
+      const rows: any[] = await tx.$queryRawUnsafe(
+        `SELECT "ISU_YRCD","ISU_DBCD","ISU_NO" FROM "DHRN_REC_DATA"
+          WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6
+          LIMIT 1`,
+        tenantId,
+        key.CO_CODE,
+        key.LC_CODE,
+        key.CO_YEAR,
+        key.CO_BOOK,
+        key.VCH_NO,
+      );
+      if (rows.length)
+        restore = {
+          isuYear: String(rows[0].ISU_YRCD ?? ''),
+          isuBook: String(rows[0].ISU_DBCD ?? ''),
+          isuNo: String(rows[0].ISU_NO ?? ''),
+        };
+    }
     await reverseVoucherTx(tx, tenantId, {
       tables: [input.headerTable, ...extra, 'AC_DATA'],
       key,
@@ -1003,6 +1026,18 @@ export async function deleteDhrn(prisma: any, input: DeleteDhrnInput): Promise<{
         row: { ...key, VCH_TYPE: input.vchType, DELETE_USER: input.deleteUser ?? 'system' },
       },
     });
+    if (restore && restore.isuNo) {
+      await tx.$executeRawUnsafe(
+        `UPDATE "DHRN_ISU_DATA" SET "ISU_REC"='N'
+          WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
+        tenantId,
+        key.CO_CODE,
+        key.LC_CODE,
+        restore.isuYear,
+        restore.isuBook,
+        restore.isuNo,
+      );
+    }
     return { reversed: true };
   });
 }
@@ -1142,4 +1177,146 @@ export async function editDhrnIssue(
     return issueDhrn(prisma, input, { tx, identity });
   });
   return { vchNo: res.vchNo };
+}
+
+/**
+ * The tables a pledge RECEIPT owns, reversed/replaced on edit. `receiveDhrn` writes the DHRN_REC_DATA
+ * header, the DHRN_REC_DETL released-item grid, the DHRN_DATA movement and the AC_DATA ledger.
+ */
+const DHRN_REC_TABLES = ['DHRN_REC_DATA', 'DHRN_REC_DETL', 'DHRN_DATA', 'AC_DATA'] as const;
+
+/**
+ * Reopen a pledge receipt (redemption) for edit. Reads DHRN_REC_DATA + its DHRN_REC_DETL released
+ * items into a `DhrnReceiptInput`-shaped object so the receipt form can repopulate it. Mirrors the
+ * N143 issue reader; the receipt header already carries every field this form needs.
+ */
+export async function getDhrnReceipt(prisma: any, scope: VoucherScope, vchNo: number | string) {
+  const tenantId = scope.tenantId;
+  const no = formatVoucherNo(vchNo);
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
+    const hdr: any[] = await tx.$queryRawUnsafe(
+      `SELECT "VCH_NO","HD_VCH_NO","VCH_DATE"::text vd,"FROM_DATE"::text fd,"TO_DATE"::text td,
+              "AC_CODE","AC_NAME","ISU_NO","ISU_LC","ISU_YRCD","ISU_DBCD",
+              "DHRN_REC_AMT"::float8 p,"INT_AMT"::float8 ia,"INT_PRC"::float8 prc,"DHRN_BILL",
+              "PACKET_NO","LOAN_TYPE","KASAR_AMT"::float8 k,"INT_DAY"::float8 idd,"INT_MONTH"::float8 im,
+              "EMP_CODE","GOLD_AMT"::float8 ga,"GOLD_WT"::float8 gw,"VCH_DESC","MAIN_USER"
+         FROM "DHRN_REC_DATA"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
+      tenantId,
+      scope.coCode,
+      scope.lcCode,
+      scope.coYear,
+      scope.coBook,
+      no,
+    );
+    if (!hdr.length) throw new DhrnValidationError(`dhrn-receipt voucher not found: ${no}`);
+    const h = hdr[0];
+    const detl: any[] = await tx.$queryRawUnsafe(
+      `SELECT "SR_NO"::int sr,"PACKET_NO","CUST_NAME","IT_CODE","IT_NAME","ITM_PCS"::float8 pcs,
+              "ITM_GWT"::float8 gwt,"ITM_NWT"::float8 nwt,"ITM_TOUCH"::float8 tch,"ITM_FINE"::float8 fine,
+              "ITM_RATE"::float8 rate,"ITM_AMT"::float8 amt,"IT_DESC","ISU_NO","ISU_YRCD","ISU_DBCD",
+              "ISU_SRNO"::int isr,"REC_NWT"::float8 rnwt,"REC_QTY"::float8 rqty
+         FROM "DHRN_REC_DETL"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6
+        ORDER BY "SR_NO"`,
+      tenantId,
+      scope.coCode,
+      scope.lcCode,
+      scope.coYear,
+      scope.coBook,
+      no,
+    );
+    return {
+      voucherNo: no,
+      hiddenVoucherNo: String(h.HD_VCH_NO ?? ''),
+      mainUser: String(h.MAIN_USER ?? ''),
+      vchDate: String(h.vd ?? '').slice(0, 10),
+      fromDate: String(h.fd ?? '').slice(0, 10),
+      toDate: String(h.td ?? '').slice(0, 10),
+      borrowerAc: String(h.AC_CODE ?? ''),
+      borrowerName: String(h.AC_NAME ?? ''),
+      isuNo: String(h.ISU_NO ?? ''),
+      isuBook: String(h.ISU_DBCD ?? ''),
+      isuYear: String(h.ISU_YRCD ?? ''),
+      principalRepaid: Number(h.p ?? 0),
+      interest: Number(h.ia ?? 0),
+      intPrc: Number(h.prc ?? 0),
+      billNo: String(h.DHRN_BILL ?? ''),
+      packetNo: String(h.PACKET_NO ?? ''),
+      loanType: String(h.LOAN_TYPE ?? ''),
+      interestKasar: Number(h.k ?? 0),
+      interestDays: Number(h.idd ?? 0),
+      interestMonths: Number(h.im ?? 0),
+      empCode: String(h.EMP_CODE ?? ''),
+      goldAmount: Number(h.ga ?? 0),
+      goldWeight: Number(h.gw ?? 0),
+      vchDesc: String(h.VCH_DESC ?? ''),
+      items: detl.map((c) => ({
+        srNo: Number(c.sr ?? 0),
+        packetNo: String(c.PACKET_NO ?? ''),
+        custName: String(c.CUST_NAME ?? ''),
+        itCode: String(c.IT_CODE ?? ''),
+        itName: String(c.IT_NAME ?? ''),
+        pcs: Number(c.pcs ?? 0),
+        grossWt: Number(c.gwt ?? 0),
+        netWt: Number(c.nwt ?? 0),
+        touch: Number(c.tch ?? 0),
+        fineWt: Number(c.fine ?? 0),
+        rate: Number(c.rate ?? 0),
+        amount: Number(c.amt ?? 0),
+        itDesc: String(c.IT_DESC ?? ''),
+        isuNo: String(c.ISU_NO ?? ''),
+        isuYrcd: String(c.ISU_YRCD ?? ''),
+        isuDbcd: String(c.ISU_DBCD ?? ''),
+        isuSrno: Number(c.isr ?? 0),
+        receivedNetWt: Number(c.rnwt ?? 0),
+        receivedQty: Number(c.rqty ?? 0),
+      })),
+    };
+  });
+}
+
+/**
+ * Edit a pledge receipt: reverse the issue's ISU_REC flag, clear the whole write set and repost
+ * through `receiveDhrn` (which re-sets ISU_REC='Y' and re-validates outstanding). Because the
+ * repost re-reads outstanding AFTER the old receipt's rows are cleared, the amount guard is correct.
+ */
+export async function editDhrnReceipt(
+  prisma: any,
+  input: DhrnReceiptInput,
+  vchNo: number | string,
+): Promise<{ vchNo: number; outstanding: number }> {
+  completeFinanceScope(input.scope);
+  if (!input.borrowerAc) throw new DhrnValidationError('borrower account is required');
+  const tenantId = input.scope.tenantId;
+  const d = input.vchDate ? new Date(input.vchDate) : new Date();
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
+    const { identity } = await editIdentityTx(tx, {
+      table: 'DHRN_REC_DATA',
+      scope: input.scope,
+      requestedVoucherNo: vchNo,
+      requestedDate: d,
+    });
+    // Restore the pledge to not-redeemed before clearing the old receipt, so the repost's outstanding
+    // check sees the pre-receipt balance (receiveDhrn re-sets ISU_REC='Y' on success).
+    const isuNo = formatVoucherNo(input.isuNo);
+    await tx.$executeRawUnsafe(
+      `UPDATE "DHRN_ISU_DATA" SET "ISU_REC"='N'
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
+      tenantId,
+      input.scope.coCode,
+      input.scope.lcCode,
+      input.isuYear ?? input.scope.coYear,
+      input.isuBook ?? input.scope.coBook,
+      isuNo,
+    );
+    await replaceWriteSetTx(
+      tx,
+      input.scope,
+      identity.voucherNo,
+      identity.hiddenVoucherNo,
+      DHRN_REC_TABLES,
+    );
+    return receiveDhrn(prisma, input, { tx, identity });
+  });
 }
