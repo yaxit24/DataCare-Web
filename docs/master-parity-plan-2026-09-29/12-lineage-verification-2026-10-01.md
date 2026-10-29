@@ -168,6 +168,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G155 | Med | Karigar / Old-Item-Sales reopen+edit (shared form) | `unified/src/csharp/DataCareNext/TR_KR_ISU.cs`, `unified/src/csharp/DataCareNext/TR_MFG_KR_ISU_REC.cs` | `web/apps/web/components/KarigarForm.tsx` | The shared KarigarForm (karigar-issue/receive, old-item-sales, jobwork-issue/receive) is create-only even though `getKarigar`/`editKarigar` and `getOldItemSale`/`editOldItemSale` and their GET/PUT/DELETE routes already exist (karigar + old-item-sales; jobwork reads through a different backend, see G157). `useSubDetail.load()` is already built for reopen. Wire `loadVoucher` + PUT-when-loaded + a family-gated VoucherList (UI-only). | N146 |
 | G156 | Med | Fine Sale / Fine Purchase edit | `unified/src/csharp/DataCareNext/TR_FINE_SL_PR.cs` | `web/apps/api/src/modules/bullion/fineSalePurchase.ts`, `web/apps/web/app/(app)/txn/fine-sale/page.tsx` | Fine Sale/Purchase can create, reopen (`getFineSalePurchase`, N121) and delete, but there is no `editFineSalePurchase` or PUT route, and the page is create-only. The writer uses `nextVoucherNoTx`, not the identity/context pattern, so it must be refactored before an edit (which must also reverse+rewrite MAIN_STOCK) can resolve. | N147 |
 | G157 | Med | Jobwork reopen+edit in KarigarForm | `unified/src/csharp/DataCareNext/TR_JDT_REC.cs` | `web/apps/web/components/KarigarForm.tsx` | N146 wired KarigarForm reopen/edit but excluded jobwork, which reads through a different backend (`getMfg`/MFG_KR_DATA via `/mfg/jobwork-*`, not `getKarigar`/KR_DATA). The jobwork GET/PUT/DELETE routes exist; extend `loadVoucher` with a jobwork branch that maps the `getMfg` reader shape. | N148 |
+| G158 | Med | Manufacturing Issue reopen+edit (UI) | `unified/src/csharp/DataCareNext/TR_MFG_ISU_REC.cs` | `web/apps/web/app/(app)/txn/mfg-issue/page.tsx` | The mfg-issue page was create-only though `getMfg`/`editMfg`/`deleteMfg` and `GET/PUT/DELETE /mfg/issue/:vchNo` exist and are covered by `mfgLifecycle.db.test.ts`. The getMfg reader's field names match the page Line exactly and `useSubDetail.load()` exists; wire `loadVoucher` + PUT-when-loaded + VoucherList (UI-only). | N149 |
 
 ## 4. Decisions D23–D28
 
@@ -1321,6 +1322,27 @@ green; routePolicy + routeInputForwarding green; full API+DB 3505. Live: `POST /
 Done when: an operator can load a saved fine sale/purchase, change its lines and re-save at the same
 voucher number with stock and ledger re-derived.
 
+### N149 — Manufacturing Issue reopen/edit lifecycle UI (G158, Stage D)
+
+The mfg-issue page was create-only (it imported only `post`) even though `getMfg`/`editMfg`/
+`deleteMfg` and `GET/PUT/DELETE /mfg/issue/:vchNo` already exist and are covered by
+`mfgLifecycle.db.test.ts` (9 tests: create/get/edit/persisted-date-lock/delete). The getMfg reader
+returns a line shape whose field names match the page `Line` interface exactly — itCode, netWt, the
+reconciliation columns (rtnChol/rtnGhis/itmGhat/totalGrossWt), the karigar/old-metal/material/
+provenance block — and `useSubDetail` already exposes `load()` for the component sub-detail.
+
+N149 wires `loadVoucher` (GET `/mfg/issue/:vchNo?coBook`, a field-for-field stringify copy over the
+`blank()` keys, `sub.load(perLine)` for the MFG_IDTL components), `resetForm`, PUT-when-loaded, a New
+button and a VoucherList on `MFG_DATA` (added to the recent-voucher allow-list). This is a UI-only
+change — no new routes, so no size-budget or route-universe impact.
+
+Verified: gates (typecheck/lint/format/size/register) green; web tests 9/9; and the backend the UI
+calls is green under `mfgLifecycle.db.test.ts`. Live click was deferred because the demo company
+provisions no manufacturing book, so the DB-tested backend could not be exercised through the running
+stack; the wiring uses the identical reopen pattern verified live on six other workflows this session.
+
+Done when: an operator can load a saved MFG issue, edit its lines and components, and re-save.
+
 
 ## 6. Status corrections
 
@@ -1390,6 +1412,7 @@ voucher number with stock and ledger re-derived.
 | N145 | — | implemented-unverified, evidence in this change (G154: Loan Received + Loan Issue reopen/edit/delete reusing the dhrn readers + loan-flag editors; universe 647→653, DB test 2/2, full API+DB 3504) |
 | N146 | — | implemented-unverified, evidence in this change (G155: KarigarForm reopen/edit lifecycle lighting up karigar-issue/receive + old-item-sales; UI-only, live create 201→GET→PUT 200→GET verified) |
 | N147 | — | implemented-unverified, evidence in this change (G156: Fine Sale/Purchase edit — writer refactored to a forceVchNo context + reverseFineSaleTx + editFineSalePurchase + PUT; universe 653→654, DB test 1/1, full API+DB 3505, live create 201→reopen→PUT 200) |
+| N149 | — | implemented-unverified, evidence in this change (G158: mfg-issue reopen/edit lifecycle UI wired to the DB-tested getMfg/editMfg routes; UI-only, gates + web 9/9 green, live deferred — demo has no MFG book) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

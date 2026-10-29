@@ -5617,6 +5617,27 @@
         "web/apps/web/components/KarigarForm.tsx"
       ],
       "statusNote": "READY, NOT IMPLEMENTED. N146 wired KarigarForm reopen/edit but gated it to family karigar + old-item-sales because jobwork reads through a DIFFERENT backend (getMfg/MFG_KR_DATA via /mfg/jobwork-*, not getKarigar/KR_DATA). The jobwork GET/PUT/DELETE routes DO exist (txn.ts:3970-4035). Extending needs a jobwork branch in loadVoucher that fetches /mfg/jobwork-{issue,receive}/:vchNo and maps the getMfg reader shape (different field names) to the form Line + sub-detail, plus a jobwork VoucherList on the MFG_KR_DATA table. Separate because the reader mapping differs from karigar."
+    },
+    {
+      "id": "N149",
+      "status": "implemented-unverified",
+      "action": "Wire reopen/edit/delete lifecycle into the create-only mfg-issue page: loadVoucher (GET /mfg/issue/:vchNo?coBook maps the getMfg reader field-for-field to the extended Line grid; sub.load for the component sub-detail), PUT-when-loaded, New, VoucherList on MFG_DATA",
+      "parentLabels": "P10; D-lifecycle",
+      "startAfter": [
+        "N147"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "UI-only; backend getMfg/editMfg/deleteMfg + /mfg/issue GET/PUT/DELETE already exist and are covered by mfgLifecycle.db.test.ts (9 tests). typecheck/lint/format/size green; web tests 9; MFG_DATA added to the recent-voucher allow-list. Live click deferred: the demo provisions no MFG book.",
+      "gapIds": "G158",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/web/app/(app)/txn/mfg-issue/page.tsx",
+        "web/apps/api/src/modules/vouchers/list.ts"
+      ],
+      "statusNote": "IMPLEMENTED. mfg-issue was create-only (imported only post) though getMfg/editMfg/deleteMfg and GET/PUT/DELETE /mfg/issue/:vchNo exist and are covered by mfgLifecycle.db.test.ts (9 tests: create/get/edit/persisted-date-lock/delete). The getMfg reader returns a rich line shape whose field names match the page Line interface EXACTLY (itCode, netWt, rtnChol, rtnGhis, itmGhat, totalGrossWt, the karigar/old-metal/material/provenance block). useSubDetail already exposes load() for the component sub-detail. Added loadVoucher (field-for-field stringify copy over the blank() keys; sub.load(perLine) for components), resetForm, PUT-when-loaded, New, and a VoucherList on MFG_DATA (added to the recent allow-list). UI-only: no new routes, no size/route-universe impact. Gates green; web tests 9/9. Live click deferred - the demo provisions no manufacturing book, so the backend (DB-tested) could not be clicked through the running stack; the wiring uses the identical reopen pattern verified live on six other workflows this session."
     }
   ],
   "amendments": [
