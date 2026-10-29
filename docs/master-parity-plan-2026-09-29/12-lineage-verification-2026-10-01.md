@@ -170,6 +170,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G157 | Med | Jobwork reopen+edit in KarigarForm | `unified/src/csharp/DataCareNext/TR_JDT_REC.cs` | `web/apps/web/components/KarigarForm.tsx` | N146 wired KarigarForm reopen/edit but excluded jobwork, which reads through a different backend (`getMfg`/MFG_KR_DATA via `/mfg/jobwork-*`, not `getKarigar`/KR_DATA). The jobwork GET/PUT/DELETE routes exist; extend `loadVoucher` with a jobwork branch that maps the `getMfg` reader shape. | N148 |
 | G158 | Med | Manufacturing Issue reopen+edit (UI) | `unified/src/csharp/DataCareNext/TR_MFG_ISU_REC.cs` | `web/apps/web/app/(app)/txn/mfg-issue/page.tsx` | The mfg-issue page was create-only though `getMfg`/`editMfg`/`deleteMfg` and `GET/PUT/DELETE /mfg/issue/:vchNo` exist and are covered by `mfgLifecycle.db.test.ts`. The getMfg reader's field names match the page Line exactly and `useSubDetail.load()` exists; wire `loadVoucher` + PUT-when-loaded + VoucherList (UI-only). | N149 |
 | G159 | Med | Manufacturing Receive reopen+edit (UI) | `unified/src/csharp/DataCareNext/TR_MFG_ISU_REC.cs` | `web/apps/web/app/(app)/txn/mfg-receive/page.tsx` | Companion to G158: mfg-receive was create-only though the same `getMfg`/`editMfg`/`deleteMfg` backend and `GET/PUT/DELETE /mfg/receive/:vchNo` exist (mfgLifecycle.db.test.ts). Wire the same lifecycle (plus the labourAmt header). | N150 |
+| G160 | Med | Bullion Sale reopen+edit+delete (UI) | `unified/src/csharp/DataCareNext/TR_BUL_SALE.cs` | `web/apps/web/app/(app)/txn/bullion-sale/page.tsx` | The bullion-sale page was create-only (imported only `post`) though `getBullionSale`/`editBullionSale`/`deleteBullionSale` and `GET/PUT/DELETE /bullion-sales/:vchNo` exist and are covered by `bullionSale.db.test.ts` (post → reopen → edit → delete). The reader (`readRateCut` with `bookGuard:'bullion-sale'`) returns header fields + `lines`/`receivedLines`; wire `loadVoucher` (GET + full header/tender/line restore) + PUT-when-loaded + delete + New/Update (UI-only, no new routes). | N151 |
 
 ## 4. Decisions D23–D28
 
@@ -1360,6 +1361,35 @@ manufacturing book).
 Done when: an operator can load a saved MFG receive, edit its lines and components, and re-save.
 
 
+### N151 — Bullion Sale reopen/edit/delete lifecycle UI (G160, Stage D)
+
+The bullion-sale page (`/txn/bullion-sale`, desktop `TR_BUL_SALE.cs`) was create-only: it imported
+only `post` and had no way to reopen, edit or delete a saved voucher. The backend was already
+complete and tested — `getBullionSale`/`editBullionSale`/`deleteBullionSale` (in
+`web/apps/api/src/modules/sales/rateCut.ts`, the bullion family shares `readRateCut`/`writeRateCut`
+with `bookGuard:'bullion-sale'`) and `GET/PUT/DELETE /bullion-sales/:vchNo`, exercised by
+`web/apps/api/test/bullionSale.db.test.ts` (post → reopen → edit → delete, 2 tests).
+
+N151 is UI-only. It extracts the submit body into a `payload()` helper, makes submit PUT when a
+voucher is loaded (else POST), and adds `loadVoucher` (GET `/bullion-sales/:vchNo?coBook`, restoring
+every header field the payload sends — party, `fineRate`/`convRate`/`convPct`/`itType`, address, all
+four `settle*` values, and both the issue-side and receive-side tender bands — plus rebuilding
+`lines`/`receivedLines` through a `lineFromView` mapper that converts the reader's `ghtWt`→`ghtPct`
+and `westPct`→`west`), `remove` (DELETE with confirm), `reset` (New), a voucher-no Load input, and
+New/Delete buttons with an Update label and Posted/Updated feedback. No new routes.
+
+Implemented by a sub-agent pipeline (implementer + independent auditor). The auditor confirmed the
+change is confined to the one page, every submitted header field is restored on load (the standard
+reopen-then-save-blanks defect class — none found), and re-ran the full battery.
+
+Verified: gates (typecheck/typecheck:tests/lint/format/size/register/kernel) + clean-tree
+`@datacare/api` build (empty error scan) + web tests 646+9 green; backend green under
+`bullionSale.db.test.ts` (2/2); `depth:parity` passed (+2 txn grid pages now lifecycle-complete).
+Live click deferred for the same reason as N149/N150 — the demo company provisions no bullion book.
+
+Done when: an operator can load a saved bullion sale, edit its lines/tenders, re-save, and delete.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -1430,6 +1460,7 @@ Done when: an operator can load a saved MFG receive, edit its lines and componen
 | N147 | — | implemented-unverified, evidence in this change (G156: Fine Sale/Purchase edit — writer refactored to a forceVchNo context + reverseFineSaleTx + editFineSalePurchase + PUT; universe 653→654, DB test 1/1, full API+DB 3505, live create 201→reopen→PUT 200) |
 | N149 | — | implemented-unverified, evidence in this change (G158: mfg-issue reopen/edit lifecycle UI wired to the DB-tested getMfg/editMfg routes; UI-only, gates + web 9/9 green, live deferred — demo has no MFG book) |
 | N150 | — | implemented-unverified, evidence in this change (G159: mfg-receive reopen/edit lifecycle UI, companion to N149; UI-only, gates + web 9/9 green, live deferred — demo has no MFG book) |
+| N151 | — | implemented-unverified, evidence in this change (G160: bullion-sale reopen/edit/delete lifecycle UI; UI-only, sub-agent implement+audit AUDIT_PASS, gates + clean API build + web 646+9 + bullionSale.db.test.ts 2/2 + depth:parity green, live deferred — demo has no bullion book) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

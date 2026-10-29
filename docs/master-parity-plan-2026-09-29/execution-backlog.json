@@ -5658,6 +5658,26 @@
         "web/apps/web/app/(app)/txn/mfg-receive/page.tsx"
       ],
       "statusNote": "IMPLEMENTED. Companion to N149. mfg-receive was create-only though getMfg/editMfg/deleteMfg + GET/PUT/DELETE /mfg/receive/:vchNo exist (mfgLifecycle.db.test.ts). Same wiring as mfg-issue plus the labourAmt header field: loadVoucher (GET /mfg/receive/:vchNo?coBook -> field-for-field stringify over blank() keys; sub.load(perLine) for components), resetForm, PUT-when-loaded, New, VoucherList on MFG_DATA (already in the allow-list from N149). UI-only. Gates green; web 9/9. Live click deferred - demo provisions no MFG book; identical reopen pattern verified live on six other workflows this session."
+    },
+    {
+      "id": "N151",
+      "status": "implemented-unverified",
+      "action": "Wire reopen/edit/delete lifecycle into the create-only bullion-sale page (imported only post); backend getBullionSale/editBullionSale/deleteBullionSale + /bullion-sales GET/PUT/DELETE already exist and are DB-tested",
+      "parentLabels": "P10; D-lifecycle",
+      "startAfter": [
+        "N150"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "UI-only; backend getBullionSale/editBullionSale/deleteBullionSale + /bullion-sales GET/PUT/DELETE exist and are covered by bullionSale.db.test.ts (post/reopen/edit/delete, 2 tests). typecheck/typecheck:tests/lint/format/size/register/kernel green; clean-tree api build; web tests 646+9; depth:parity green. Live click deferred: demo has no bullion book.",
+      "gapIds": "G160",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/web/app/(app)/txn/bullion-sale/page.tsx"
+      ],
+      "statusNote": "IMPLEMENTED. bullion-sale page was create-only (imported only post) though getBullionSale/editBullionSale/deleteBullionSale (rateCut.ts, bullion family shares readRateCut/writeRateCut with bookGuard bullion-sale) + GET/PUT/DELETE /bullion-sales/:vchNo exist and are tested by bullionSale.db.test.ts (post -> reopen -> edit -> delete). UI-only: extracted submit body into payload(), submit PUTs when loaded else POSTs, loadVoucher (GET /bullion-sales/:vchNo?coBook restoring every header field the payload sends - party, fineRate/convRate/convPct/itType, address, four settle* values, both issue+receive tender bands - and rebuilding lines/receivedLines via lineFromView with ghtWt->ghtPct and westPct->west), remove (DELETE with confirm), reset (New), voucher-no Load input, New/Delete buttons + Update label + Posted/Updated message. Implemented by sub-agent pipeline (implement + independent audit, AUDIT_PASS: change confined to one page, every submitted header field restored on load). Gates green incl clean-tree api build (empty error scan); web 646+9; bullionSale.db.test.ts 2/2; depth:parity +2 txn grid pages. Live click deferred - demo provisions no bullion book; identical reopen pattern verified live on multiple workflows this session."
     }
   ],
   "amendments": [
