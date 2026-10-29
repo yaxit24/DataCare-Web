@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
-import { post, ApiError } from '../../../../lib/api';
+import { post, put, get, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
+import { VoucherList } from '../../../../components/VoucherList';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import { todayLocal } from '../../../../lib/localDate';
@@ -39,6 +40,38 @@ export default function JournalEntryPage() {
   const [result, setResult] = useState<{ vchNo: number } | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const [loadedVch, setLoadedVch] = useState('');
+
+  function resetForm() {
+    setLoadedVch('');
+    setLines([blank(), blank()]);
+    setNarration('');
+    setVchDate(todayLocal());
+    setResult(null);
+    setErr('');
+  }
+
+  async function loadJournal(vchNo: string) {
+    setErr('');
+    setResult(null);
+    try {
+      const d = await get<any>(
+        `/journal/${encodeURIComponent(vchNo)}?coBook=${encodeURIComponent(coBook)}`,
+      );
+      setLoadedVch(vchNo);
+      setNarration(String(d.narration ?? ''));
+      setVchDate(String(d.vchDate ?? todayLocal()).slice(0, 10));
+      const rows: Line[] = (d.lines ?? []).map((l: any) => ({
+        acCode: String(l.acCode ?? ''),
+        desc: String(l.desc ?? ''),
+        debit: Number(l.drAmt ?? 0) ? String(l.drAmt) : '',
+        credit: Number(l.crAmt ?? 0) ? String(l.crAmt) : '',
+      }));
+      setLines(rows.length ? rows : [blank(), blank()]);
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.body?.error || e.message : 'failed to load');
+    }
+  }
 
   const setLine = (i: number, k: keyof Line, v: string) =>
     setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
@@ -70,7 +103,15 @@ export default function JournalEntryPage() {
           desc: l.desc || undefined,
         })),
       };
-      setResult(await post('/journal', body));
+      setResult(
+        loadedVch
+          ? await put<{ vchNo: number }>(`/journal/${encodeURIComponent(loadedVch)}`, body)
+          : await post<{ vchNo: number }>('/journal', body),
+      );
+      if (!loadedVch) {
+        setLines([blank(), blank()]);
+        setNarration('');
+      }
     } catch (e) {
       setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
     } finally {
@@ -217,8 +258,13 @@ export default function JournalEntryPage() {
                 <b style={{ color: 'var(--err)' }}>Difference ₹{diff.toLocaleString('en-IN')}</b>
               )}
             </span>
+            {loadedVch && (
+              <button type="button" onClick={resetForm} disabled={busy}>
+                New
+              </button>
+            )}
             <button className="primary" disabled={busy || !canSubmit}>
-              {busy ? 'Saving…' : 'Post Journal'}
+              {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : 'Post Journal'}
             </button>
           </div>
           {!balanced && totDebit + totCredit > 0 && (
@@ -237,8 +283,22 @@ export default function JournalEntryPage() {
       {err && <div className="msg err">{err}</div>}
       {result && (
         <div className="panel">
-          <div className="msg ok">Posted — Journal Voucher #{result.vchNo}</div>
+          <div className="msg ok">
+            {loadedVch ? 'Updated' : 'Posted'} — Journal Voucher #{result.vchNo}
+          </div>
         </div>
+      )}
+      {coBook && (
+        <VoucherList
+          table="CONTRA_DATA"
+          book={coBook}
+          deleteBase="/journal"
+          onLoad={(vchNo) => void loadJournal(vchNo)}
+          printHref={(v) =>
+            `/api/journal/${encodeURIComponent(v)}/print?coBook=${encodeURIComponent(coBook)}&format=html`
+          }
+          reloadKey={result?.vchNo}
+        />
       )}
     </div>
   );

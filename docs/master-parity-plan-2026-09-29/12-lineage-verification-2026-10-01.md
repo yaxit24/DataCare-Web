@@ -149,6 +149,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G136 | High | Tour Sales (MISSING workflow) | `unified/src/csharp/DataCareNext/TR_TOUR_SALE.cs:11252` (Ac_Ledr.Wh_Sales_Ledr) | `web/apps/api/src/modules/sales/tourSale.ts`, `web/apps/api/src/routes/crm.ts` `POST/GET/PUT/DELETE /tour-sales` | Tour Sales must post the same TR_WH_SALE engine (Wh_Sales_Ledr/Rojmel/Stk over RATE_CUT_DATA) on a TOUR SALES book, with create/reopen/edit/delete. | N127 |
 | G137 | Med | Journal / lifecycle | `unified/src/csharp/DataCareNext/TR_JOURNAL` (journal voucher) | `web/apps/api/src/routes/crm.ts` `GET/PUT /journal/:vchNo`, `web/apps/api/src/modules/finance/journal.ts` `getJournal`/`editJournal` | The journal voucher must be reopenable and editable through the API (the reader/editor already existed; only the routes were missing). | N128 |
 | G138 | High | Finance vouchers / frontend lifecycle | `unified/src/csharp/DataCareNext/TR_CONTRA.cs` | `web/apps/web/app/(app)/txn/contra/page.tsx` | The finance-voucher pages were create-only in the UI even though the backend supports reopen/edit/delete/print; the operator must be able to load, edit, delete and print a saved voucher from the screen. Contra is the first page wired (template for the rest). | N129 |
+| G139 | High | Journal / frontend lifecycle | `unified/src/csharp/DataCareNext/TR_JOURNAL` | `web/apps/web/app/(app)/txn/journal/page.tsx` | The journal page was create-only; the operator must load/edit/delete/print a saved journal from the screen (backend ready via N128). | N130 |
 
 ## 4. Decisions D23–D28
 
@@ -955,6 +956,18 @@ Done when: the operator can create, reopen, edit, delete and print a contra from
 slices replicate this template to journal, ledger-adjust, employee-jv, payment, receipt, fine-jv.)
 
 
+### N130 — Journal page lifecycle UI (G139, Stage D frontend)
+
+Applies the N129 contra template to the journal page: `loadJournal(vchNo)` GETs `/journal/:vchNo` and
+rebuilds the Dr/Cr grid + narration; submit PUTs when editing (POSTs when new) with a New button and an
+edit-aware label; the reusable `<VoucherList table="CONTRA_DATA" book deleteBase="/journal" onLoad
+printHref>` (journal rows live in CONTRA_DATA, filtered by the JV book) gives reopen/delete/print. Verified
+live in the browser: the journal page renders cleanly (no console errors), the JV book is pre-selected, and
+the Dr/Cr grid + Post button are present; the GET/PUT/delete/print APIs were live-verified in N128.
+
+Done when: the operator can create, reopen, edit, delete and print a journal from the screen.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -1005,6 +1018,7 @@ slices replicate this template to journal, ledger-adjust, employee-jv, payment, 
 | N127 | — | implemented-unverified, evidence in this change (G136: Tour Sales via the wholesale engine on a TOUR SALES book; verified live full lifecycle) |
 | N128 | — | implemented-unverified, evidence in this change (G137: journal reopen+edit routes; verified live round-trip) |
 | N129 | — | implemented-unverified, evidence in this change (G138: contra page full lifecycle UI; verified live in browser) |
+| N130 | — | implemented-unverified, evidence in this change (G139: journal page lifecycle UI; verified live render) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

@@ -5195,6 +5195,26 @@
         "web/apps/web/app/(app)/txn/contra/page.tsx"
       ],
       "statusNote": "Audit found the finance-voucher PAGES were create-only in the UI though the backend supports the full lifecycle. Wired contra as the template: loadContra GETs /contra/:vchNo and repopulates; submit PUTs when editing (POSTs when new) with a New button + edit-aware label; VoucherList(table=CONTRA_DATA, deleteBase=/contra, onLoad, printHref) for reopen/delete/print. VERIFIED LIVE in the browser: contra page renders cleanly (no console errors), CON book pre-selected, filled Dr BANK/Cr CASH 3000 (Balanced), saved -> Contra posted Voucher #2. API round-trip (POST->recent->PUT 5000->7500->reopen) also verified. Verified: lint/format/typecheck:tests/size; web 646. Follow-ups replicate to journal/ledger-adjust/employee-jv/payment/receipt/fine-jv."
+    },
+    {
+      "id": "N130",
+      "status": "implemented-unverified",
+      "action": "Wire the reopen/edit/delete/print lifecycle into the journal page UI (contra template)",
+      "parentLabels": "P05; D-lifecycle-frontend",
+      "startAfter": [
+        "N129"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "journal page loads/edits/deletes/prints; web 646, gates; verified live render",
+      "gapIds": "G139",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/web/app/(app)/txn/journal/page.tsx"
+      ],
+      "statusNote": "Applied the N129 contra template to the journal page: loadJournal GETs /journal/:vchNo and rebuilds the Dr/Cr grid+narration; submit PUTs when editing (POSTs when new) + New button + edit-aware label; VoucherList(table=CONTRA_DATA, deleteBase=/journal, onLoad, printHref) for reopen/delete/print (journal rows are in CONTRA_DATA filtered by JV). VERIFIED LIVE: journal page renders cleanly (no console errors), JV book pre-selected, Dr/Cr grid + Post button present; GET/PUT/delete/print APIs live-verified in N128. Verified: lint/format/typecheck:tests; web 646."
     }
   ],
   "amendments": [
