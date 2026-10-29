@@ -5678,6 +5678,24 @@
         "web/apps/web/app/(app)/txn/bullion-sale/page.tsx"
       ],
       "statusNote": "IMPLEMENTED. bullion-sale page was create-only (imported only post) though getBullionSale/editBullionSale/deleteBullionSale (rateCut.ts, bullion family shares readRateCut/writeRateCut with bookGuard bullion-sale) + GET/PUT/DELETE /bullion-sales/:vchNo exist and are tested by bullionSale.db.test.ts (post -> reopen -> edit -> delete). UI-only: extracted submit body into payload(), submit PUTs when loaded else POSTs, loadVoucher (GET /bullion-sales/:vchNo?coBook restoring every header field the payload sends - party, fineRate/convRate/convPct/itType, address, four settle* values, both issue+receive tender bands - and rebuilding lines/receivedLines via lineFromView with ghtWt->ghtPct and westPct->west), remove (DELETE with confirm), reset (New), voucher-no Load input, New/Delete buttons + Update label + Posted/Updated message. Implemented by sub-agent pipeline (implement + independent audit, AUDIT_PASS: change confined to one page, every submitted header field restored on load). Gates green incl clean-tree api build (empty error scan); web 646+9; bullionSale.db.test.ts 2/2; depth:parity +2 txn grid pages. Live click deferred - demo provisions no bullion book; identical reopen pattern verified live on multiple workflows this session."
+    },
+    {
+      "id": "N152",
+      "status": "planned",
+      "action": "Extend getMfg reader to round-trip the Order Issue payload (nine missing line columns + karigarName + issue-side itmLoss) with an all-fields GET->payload round-trip test, THEN wire mfg-order-issue reopen/edit/delete UI. Backend prerequisite first - NOT a safe UI-only slice.",
+      "parentLabels": "P10; D-lifecycle",
+      "startAfter": [
+        "N151"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Backend: getMfg returns TOT_NWT/OLD_NWT/RATE_TYPE/PR_CODE/NET_AMT/KR_NAME/ORD_AC_CODE/ORD_DESIGN + karigarName + defined issue-side itmLoss; new all-fields GET->payload unchanged round-trip test green; mfgLifecycle.db.test.ts still green. Then UI: loadVoucher/PUT-when-loaded/delete/New on mfg-order-issue page. Live click deferred - demo has no MFG book.",
+      "gapIds": "G161",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [],
+      "statusNote": "PLANNED (backend prerequisite, not yet implemented). Discovered during the post-N151 UI-lifecycle sweep: mfg-order-issue is the only remaining create-only voucher page with a full GET+PUT+DELETE backend lifecycle but no UI reopen. An implement+independent-audit attempt proved it is NOT a safe UI-only slice: the bespoke page POSTs ~51 extendedLineFields + header karigarName, but getMfg (mfg.ts:1155-1271) omits karigarName and nine persisted line columns (totalNetWt/oldNetWt/rateType/prCode/itmLoss/netAmt/krName/ordAcCode/ordDesign); editMfg deletes-and-rebuilds the write set (mfg.ts:1368-1383), so an unchanged reopen->save would blank those columns (data corruption). N149/N150 are unaffected - mfg-issue/mfg-receive do not send those extended fields. Fix requires extending getMfg (backend) + an all-fields round-trip test before the UI wiring. No page shipped; staged attempt discarded. The UI-lifecycle sweep is otherwise COMPLETE: every other reopen-capable voucher page exposes reopen/edit/delete directly or via a shared component."
     }
   ],
   "amendments": [
