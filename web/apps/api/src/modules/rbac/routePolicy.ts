@@ -407,6 +407,7 @@ route('Transaction/Stock In', [
 route('Cash / Bank/Receipt', [
   'POST /receipts',
   'GET /receipts/:vchNo',
+  'PUT /receipts/:vchNo',
   'DELETE /receipts/:vchNo',
   'GET /finance/receipt-voucher',
 ]);

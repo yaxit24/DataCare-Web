@@ -1364,7 +1364,13 @@ export async function deleteFinance(
   });
 }
 
-const RECEIPT_WRITE_TABLES = ['CASH_DATA', 'CARD_DATA', 'UPI_DATA', 'AC_DATA'] as const;
+const RECEIPT_WRITE_TABLES = [
+  'CASH_DATA',
+  'CARD_DATA',
+  'UPI_DATA',
+  'AC_DATA',
+  'ROJ_MEL_DATA',
+] as const;
 
 export async function getReceipt(
   prisma: any,
@@ -1526,14 +1532,8 @@ export async function deleteReceipt(
   });
 }
 
-/**
- * The contra write set, and therefore its reversal set.
- *
- * `ROJ_MEL_DATA` was added with the day-book projection in `postContra` (plan item F3.3). The two must move
- * together: a write without a matching reversal leaves orphan day-book rows that no delete can reach, and
- * because `LEDR_KEY` is unique the next voucher reusing that number then fails to post. The contra-delete
- * test asserts the day book is cleared, which is what caught this.
- */
+/** The contra write set = reversal set. ROJ_MEL_DATA must be reversed with the rest (F3.3): an unreversed
+ *  day-book row is unreachable and its unique LEDR_KEY blocks the next voucher reusing that number. */
 const CONTRA_WRITE_TABLES = ['CONTRA_DATA', 'AC_DATA', 'ROJ_MEL_DATA'] as const;
 
 /**

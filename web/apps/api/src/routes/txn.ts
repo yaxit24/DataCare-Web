@@ -169,6 +169,7 @@ import {
   getContra,
   editContra,
   getReceipt,
+  editReceipt,
   getPayment,
   deleteReceipt,
   deleteFinance,
@@ -2794,26 +2795,29 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
 
   // ---- Finance (receipt / payment / contra) ----
+  const receiptInput = (req: FastifyRequest, b: Record<string, any>) => ({
+    scope: scopeOf(req),
+    partyAc: b.partyAc,
+    partyName: b.partyName,
+    amount: b.amount,
+    mode: b.mode,
+    bankAc: b.bankAc,
+    chqNo: b.chqNo,
+    vchDate: b.vchDate,
+    cardCommissionPct: b.cardCommissionPct != null ? Number(b.cardCommissionPct) : undefined,
+    bankName: b.bankName,
+    upiId: b.upiId,
+    kasar: b.kasar != null ? Number(b.kasar) : undefined,
+    kasarAc: b.kasarAc,
+  });
   app.post('/receipts', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      postReceipt(prisma, {
-        scope: scopeOf(req),
-        partyAc: b.partyAc,
-        partyName: b.partyName,
-        amount: b.amount,
-        mode: b.mode,
-        bankAc: b.bankAc,
-        chqNo: b.chqNo,
-        // The operator's voucher date (TR_CASH mVchDate); the writers default to today when absent.
-        vchDate: b.vchDate,
-        cardCommissionPct: b.cardCommissionPct != null ? Number(b.cardCommissionPct) : undefined,
-        bankName: b.bankName,
-        upiId: b.upiId,
-        kasar: b.kasar != null ? Number(b.kasar) : undefined,
-        kasarAc: b.kasarAc,
-      }),
+    return run(reply, 201, () => postReceipt(prisma, receiptInput(req, body(req))));
+  });
+  app.put('/receipts/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    return run(reply, 200, () =>
+      editReceipt(prisma, receiptInput(req, body(req)), (req.params as any).vchNo),
     );
   });
   app.post('/payments', auth, async (req, reply) => {
@@ -2888,25 +2892,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
   /**
-   * Single receipt / payment deletion — plan item F1.3.
-   *
-   * WHY THESE EXIST
-   * ===============
-   * Reversal existed only for the MULTI variants above, yet the single voucher is the common case and the one
-   * the business actually deletes. From `DELETE_DATA` on the real database: **CASH REC 4, CASH PAY 3,
-   * BANK PAY 5, BANK REC 1 — 13 deletions**, against zero rows in `USER_DATA`, the edit audit. Correction here
-   * is delete-and-re-enter, and it was impossible.
-   *
-   * THE TWO SIDES USE DIFFERENT HEADER TABLES — this is easy to get wrong.
-   *   `postReceipt` writes CASH_DATA (finance.ts:249)
-   *   `postPayment` writes PAY_DATA  (finance.ts:512)
-   * A receipt-shaped delete pointed at a payment would silently reverse nothing and still report success.
-   *
-   * The receipt side has a purpose-built `deleteReceipt` (finance.ts:1286) that reads the persisted header
-   * through `editIdentityTx` and reverses RECEIPT_WRITE_TABLES, so it needs no VCH_TYPE from the caller.
-   * The payment side has no equivalent, so it goes through the generic `deleteFinance` and must state both
-   * the header table and the audit classification.
-   */
+   * Single receipt/payment deletion (F1.3). Receipt=CASH_DATA (deleteReceipt), payment=PAY_DATA (generic
+   * deleteFinance) — different header tables; a receipt-shaped delete of a payment would reverse nothing. */
   app.delete('/receipts/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
     return run(reply, 200, () =>
@@ -2955,18 +2942,35 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.delete('/payments/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
     const b = body(req);
-    const mode = String(b.mode ?? '')
+    let mode = String(b.mode ?? '')
       .trim()
       .toLowerCase();
+    // Resolve the mode from the persisted PAY_DATA VCH_TYPE when the caller omits it (generic delete).
     if (mode !== 'cash' && mode !== 'bank') {
-      return reply.code(400).send({ error: "mode must be 'cash' or 'bank'" });
+      const sc = scopeOf(req);
+      const rows: any[] = await withTxBudget(prisma, sc.tenantId, 'read', (tx: any) =>
+        tx.$queryRawUnsafe(
+          `SELECT "VCH_TYPE" t FROM "PAY_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 LIMIT 1`,
+          sc.tenantId,
+          sc.coCode,
+          sc.lcCode,
+          sc.coYear,
+          String(b.book ?? sc.coBook ?? 'PAY'),
+          String((req.params as any).vchNo).padStart(5, '0'),
+        ),
+      );
+      const t = String(rows[0]?.t ?? '').toUpperCase();
+      mode = t === 'BPAY' ? 'bank' : t === 'CPAY' ? 'cash' : '';
+      if (mode !== 'cash' && mode !== 'bank') {
+        return reply.code(400).send({ error: "mode must be 'cash' or 'bank'" });
+      }
     }
     return run(reply, 200, () =>
       deleteFinance(prisma, {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
         headerTable: 'PAY_DATA',
-        book: String(b.book ?? 'PAY'),
+        book: String(b.book ?? scopeOf(req).coBook ?? 'PAY'),
         vchType: mode === 'cash' ? 'CPAY' : 'BPAY',
         deleteUser: sess(req).sub,
       }),
@@ -7623,28 +7627,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
    * the same three tables but does not read those columns.
    */
   /**
-   * REOPENING A SAVED VOUCHER — plan item F2.1.
-   *
-   * WHY THESE EXIST
-   * ===============
-   * 13 of the 19 voucher families this business actually uses could be POSTED but never REOPENED. A voucher
-   * became unreachable the moment it was saved: it could not be viewed to check what was entered, and it could
-   * not be reprinted. In the desktop, opening a saved voucher by number is a core interaction — it is what the
-   * F-key lookup is for — so this is the difference between a data-entry screen and an ERP.
-   *
-   * Nothing new was implemented for these. Every `get*` function below already existed in its module and was
-   * simply never routed; a scan of `export async function (get|edit|delete)*` against the route file found
-   * **34 of 120 lifecycle functions unrouted**. The pattern followed is `GET /purchases/:vchNo`
-   * (`getPurchase`, line 1117 above) and every one of these shares its signature:
-   * `(prisma, scope, voucherNo)`.
-   *
-   * Ordered by how much the business uses them, from the AC_DATA/BOOK_DATA census:
-   *   scheme instalment 841 · cash receipt 56 · sales order 39 · contra 37 · scheme maturity 17 ·
-   *   fine JV 14 · labour invoice 3 · sales return 1 · order cancel 1
-   *
-   * Two live families are NOT here because they have no `get*` function to route — `payments` (133 vouchers,
-   * whose header is PAY_DATA rather than the CASH_DATA `getReceipt` reads) and `rate-cut` (40). Those need a
-   * function written, not a route, and are recorded as still-open in the plan rather than faked here.
+   * REOPENING A SAVED VOUCHER (F2.1). These GET /:vchNo routes expose get* lifecycle functions that already
+   * existed in their modules but were never routed (a saved voucher was unreachable to view/reprint). Every
+   * one shares the `(prisma, scope, voucherNo)` signature, following GET /purchases/:vchNo.
    */
   app.get('/contra/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
