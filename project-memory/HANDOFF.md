@@ -273,3 +273,17 @@ Research complete (sub-agent spec captured in this session's transcript). Decisi
 - 15 concrete gaps listed in the session transcript. Full lifecycle DB test + live verification required.
 Remaining MISSING after Loan Intrest: Dhrn Os Letter (RP_DHRN_OS, a report/letter — different pattern), Tour Sales (TR_TOUR_SALE, ~14k lines — largest).
 Session N116-N124 all merged; main at the latest. Route universe 627; full API+DB 315 files / 3487 tests. Next ids N125 / G134.
+
+## LIVE-VERIFY GOTCHA (N131): the dev stack web runs `next start` on a PRODUCTION build
+/tmp/dc-stack.mjs runs the web as `next start` (NOT next dev) — so frontend page changes are NOT hot-reloaded; you MUST rebuild the web to see them. AND Next bakes `API_ORIGIN` into the build at build time (apps/web/next.config.mjs:5 rewrites /api/* to $API_ORIGIN, default http://localhost:4000). The stack sets API_ORIGIN as a runtime env which Next ignores for the rewrite. So after changing a web page:
+  cd web; export PATH=...; API_ORIGIN=http://127.0.0.1:4410 pnpm --filter @datacare/web build
+  touch /tmp/dc-stack.stop; sleep 4; rm -f /tmp/dc-stack.stop
+  PARITY_TEST_PROJECT=datacare-run PARITY_TEST_PORT=55800 nohup node scripts/parity-test-env.mjs -- node /tmp/dc-stack.mjs >/tmp/dc-stack.env 2>&1 &
+  sleep 55
+Without the API_ORIGIN build arg the web /api proxy 500s (proxies to :4000). The password regenerates each restart (/tmp/dc-stack.login line 2). To verify a page lifecycle without the browser, hit the WEB proxy the UI uses: curl -c jar -X POST http://127.0.0.1:4411/api/auth/login {coCode,loginName,password}; then curl -b jar http://127.0.0.1:4411/api/<route>.
+
+## FRONTEND lifecycle UI progress (N129-N131) + remaining
+DONE (create/reopen/edit/delete/print in the UI via the VoucherList template): contra (N129, live browser), journal (N130), ledger-adjust + employee-jv (N131). The template: page imports put/get + VoucherList; add load<X>(vchNo) GET /x/:vchNo -> repopulate; submit PUTs when loadedVch else POSTs (+ New button + "Update #N" label); `<VoucherList table=<HEADER_TABLE> book={coBook} deleteBase="/x" onLoad printHref/>`. Header tables: SL_DATA/PR_DATA/PAY_DATA/CASH_DATA/CONTRA_DATA(contra+journal)/KR_DATA/LBR_DATA/APR_DATA/SL_ORD_DATA/LDR_ADJ_DATA/EMP_DATA are allow-listed in modules/vouchers/list.ts (add more there as needed; also add the amount column to the amtCol detector).
+REMAINING frontend lifecycle: payment (PaymentForm.tsx, POST-only; add reopen/edit/delete — needs PUT /payments/:vchNo which may not exist yet — check finance.ts editReceipt/editPayment), receipt (same), fine-jv (FINE_JV header table — add to allow-list), batch-receipt grid missing body cells.
+REMAINING new-workflow frontend PAGES (backend done, NO page yet): card-receipt (/card-receipts, CARD_DATA), customer-entry (/crm/customer-entries), tour-sales (/tour-sales, RATE_CUT_DATA book TSL — can reuse the wholesale-sale page pattern), dhrn-os-letter (a report/letter — add a page under reports or a print button). loan-interest page exists but is create-only -> wire reopen/edit/delete (GET/PUT/DELETE /dhrn/interest/:vchNo exist from N125).
+Next slice N132.

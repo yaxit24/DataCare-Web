@@ -1,7 +1,9 @@
 'use client';
 import { useState } from 'react';
-import { post, ApiError } from '../../../../lib/api';
+import { post, put, get, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { BookSelect } from '../../../../components/BookSelect';
+import { VoucherList } from '../../../../components/VoucherList';
 
 /** Employee Salary JV (desktop TR_EMP_JV → EMP_DATA + balanced AC_DATA).
  *  Dr employee salary; Cr cash/bank net; Cr TDS; Cr PF — net = salary − tds − pf. */
@@ -16,6 +18,8 @@ export default function EmployeeJvPage() {
     chqNo: '',
     desc: '',
   });
+  const [coBook, setCoBook] = useState('');
+  const [loadedVch, setLoadedVch] = useState('');
   const [res, setRes] = useState<{ vchNo: number; netPaid: number } | null>(null);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -23,10 +27,56 @@ export default function EmployeeJvPage() {
   const n = (v: string) => Number(v || 0);
   const net = Math.round((n(f.salaryAmt) - n(f.tdsAmt) - n(f.pfAmt) + 1e-9) * 100) / 100;
 
+  function resetForm() {
+    setLoadedVch('');
+    setF({
+      empAc: '',
+      empName: '',
+      paidAc: 'CASH',
+      salaryAmt: '',
+      tdsAmt: '',
+      pfAmt: '',
+      chqNo: '',
+      desc: '',
+    });
+    setRes(null);
+    setMsg(null);
+  }
+
+  async function loadEmpJv(vchNo: string) {
+    setMsg(null);
+    setRes(null);
+    try {
+      const d = await get<any>(
+        `/employee-jv/${encodeURIComponent(vchNo)}?coBook=${encodeURIComponent(coBook)}`,
+      );
+      setLoadedVch(vchNo);
+      setF({
+        empAc: String(d.empAc ?? ''),
+        empName: String(d.empName ?? ''),
+        paidAc: String(d.paidAc ?? 'CASH'),
+        salaryAmt: String(d.salaryAmt ?? ''),
+        tdsAmt: Number(d.tdsAmt ?? 0) ? String(d.tdsAmt) : '',
+        pfAmt: Number(d.pfAmt ?? 0) ? String(d.pfAmt) : '',
+        chqNo: String(d.chqNo ?? ''),
+        desc: String(d.desc ?? ''),
+      });
+    } catch (e) {
+      setMsg({
+        kind: 'err',
+        text: e instanceof ApiError ? e.body?.error || e.message : 'load failed',
+      });
+    }
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setMsg(null);
     setRes(null);
+    if (!coBook) {
+      setMsg({ kind: 'err', text: 'select the configured book first' });
+      return;
+    }
     if (!f.empAc.trim()) {
       setMsg({ kind: 'err', text: 'employee account is required' });
       return;
@@ -41,7 +91,8 @@ export default function EmployeeJvPage() {
     }
     setBusy(true);
     try {
-      const r = await post<{ vchNo: number; netPaid: number }>('/employee-jv', {
+      const body = {
+        coBook,
         empAc: f.empAc.trim(),
         empName: f.empName.trim() || undefined,
         paidAc: f.paidAc.trim() || undefined,
@@ -50,13 +101,20 @@ export default function EmployeeJvPage() {
         pfAmt: f.pfAmt.trim() ? n(f.pfAmt) : undefined,
         chqNo: f.chqNo.trim() || undefined,
         desc: f.desc.trim() || undefined,
-      });
+      };
+      const r = loadedVch
+        ? await put<{ vchNo: number; netPaid: number }>(
+            `/employee-jv/${encodeURIComponent(loadedVch)}`,
+            body,
+          )
+        : await post<{ vchNo: number; netPaid: number }>('/employee-jv', body);
       setRes(r);
       setMsg({
         kind: 'ok',
-        text: `Salary JV posted — net ₹${r.netPaid.toLocaleString('en-IN')} (voucher #${r.vchNo})`,
+        text: `Salary JV ${loadedVch ? 'updated' : 'posted'} — net ₹${r.netPaid.toLocaleString('en-IN')} (voucher #${r.vchNo})`,
       });
-      setF((s) => ({ ...s, salaryAmt: '', tdsAmt: '', pfAmt: '', chqNo: '', desc: '' }));
+      if (!loadedVch)
+        setF((s) => ({ ...s, salaryAmt: '', tdsAmt: '', pfAmt: '', chqNo: '', desc: '' }));
     } catch (err) {
       setMsg({
         kind: 'err',
@@ -74,6 +132,10 @@ export default function EmployeeJvPage() {
       </h1>
       {msg && <div className={`msg ${msg.kind}`}>{msg.text}</div>}
       <form className="panel" onSubmit={submit} style={{ maxWidth: 720 }}>
+        <div className="field">
+          <label>Book</label>
+          <BookSelect value={coBook} onChange={setCoBook} preferred="JV" mainBooks={['JOURNAL']} />
+        </div>
         <div className="row">
           <div className="field" style={{ flex: 2 }}>
             <label>Employee account</label>
@@ -136,8 +198,13 @@ export default function EmployeeJvPage() {
             POST /employee-jv · Dr employee / Cr cash {net.toLocaleString('en-IN')} + TDS + PF
           </span>
           <span className="spacer" />
-          <button className="primary" disabled={busy}>
-            {busy ? 'Posting…' : 'Post Salary JV'}
+          {loadedVch && (
+            <button type="button" onClick={resetForm} disabled={busy}>
+              New
+            </button>
+          )}
+          <button className="primary" disabled={busy || !coBook}>
+            {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : 'Post Salary JV'}
           </button>
         </div>
         {res && (
@@ -153,6 +220,15 @@ export default function EmployeeJvPage() {
           </div>
         )}
       </form>
+      {coBook && (
+        <VoucherList
+          table="EMP_DATA"
+          book={coBook}
+          deleteBase="/employee-jv"
+          onLoad={(vchNo) => void loadEmpJv(vchNo)}
+          reloadKey={res?.vchNo}
+        />
+      )}
     </div>
   );
 }

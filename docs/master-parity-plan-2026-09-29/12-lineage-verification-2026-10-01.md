@@ -150,6 +150,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G137 | Med | Journal / lifecycle | `unified/src/csharp/DataCareNext/TR_JOURNAL` (journal voucher) | `web/apps/api/src/routes/crm.ts` `GET/PUT /journal/:vchNo`, `web/apps/api/src/modules/finance/journal.ts` `getJournal`/`editJournal` | The journal voucher must be reopenable and editable through the API (the reader/editor already existed; only the routes were missing). | N128 |
 | G138 | High | Finance vouchers / frontend lifecycle | `unified/src/csharp/DataCareNext/TR_CONTRA.cs` | `web/apps/web/app/(app)/txn/contra/page.tsx` | The finance-voucher pages were create-only in the UI even though the backend supports reopen/edit/delete/print; the operator must be able to load, edit, delete and print a saved voucher from the screen. Contra is the first page wired (template for the rest). | N129 |
 | G139 | High | Journal / frontend lifecycle | `unified/src/csharp/DataCareNext/TR_JOURNAL` | `web/apps/web/app/(app)/txn/journal/page.tsx` | The journal page was create-only; the operator must load/edit/delete/print a saved journal from the screen (backend ready via N128). | N130 |
+| G140 | High | Ledger-adjust & Employee-JV / frontend lifecycle | `unified/src/csharp/DataCareNext/TR_LEDR_ADJ.cs`, `TR_EMP_JV.cs` | `web/apps/web/app/(app)/txn/ledger-adjust/page.tsx`, `web/apps/web/app/(app)/txn/employee-jv/page.tsx`, `web/apps/api/src/modules/vouchers/list.ts` | Both pages were create-only; add a book selector + full reopen/edit/delete lifecycle, and allow-list LDR_ADJ_DATA + EMP_DATA (with DIFF_AMT/SALARY_AMT amount detection) in the recent-voucher list. | N131 |
 
 ## 4. Decisions D23–D28
 
@@ -968,6 +969,21 @@ the Dr/Cr grid + Post button are present; the GET/PUT/delete/print APIs were liv
 Done when: the operator can create, reopen, edit, delete and print a journal from the screen.
 
 
+### N131 — Ledger-adjust & Employee-JV lifecycle UI (G140, Stage D frontend)
+
+Applies the N129/N130 lifecycle-UI template to the ledger-adjust and employee-jv pages, which were
+create-only. Both gained a `BookSelect` (preferred JV / JOURNAL), a `load<X>(vchNo)` that GETs
+`/<x>/:vchNo` and repopulates the form, submit that PUTs when editing (POSTs when new) with a New button and
+an edit-aware label, and the reusable `<VoucherList>` for reopen/delete. The recent-voucher list
+(modules/vouchers/list.ts) was extended to allow-list `LDR_ADJ_DATA` and `EMP_DATA` and to detect their
+amount columns (`DIFF_AMT`, `SALARY_AMT`). Verified through the web `/api` proxy (the exact path the UI
+uses): a ledger adjustment posted (201), appeared in the recent list (total 250), and reopened with the
+account/amount/direction/remark intact. Full API+DB 318/3492 (incl. the voucher-list scope test) stayed
+green with the allow-list extension.
+
+Done when: the operator can create, reopen, edit and delete a ledger adjustment and an employee JV from the screen.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -1019,6 +1035,7 @@ Done when: the operator can create, reopen, edit, delete and print a journal fro
 | N128 | — | implemented-unverified, evidence in this change (G137: journal reopen+edit routes; verified live round-trip) |
 | N129 | — | implemented-unverified, evidence in this change (G138: contra page full lifecycle UI; verified live in browser) |
 | N130 | — | implemented-unverified, evidence in this change (G139: journal page lifecycle UI; verified live render) |
+| N131 | — | implemented-unverified, evidence in this change (G140: ledger-adjust & employee-jv lifecycle UI + voucher-list allow-list; verified via the web /api proxy) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
