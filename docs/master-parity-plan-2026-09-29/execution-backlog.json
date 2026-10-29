@@ -5556,6 +5556,26 @@
         "web/apps/api/test/loanLifecycle.db.test.ts"
       ],
       "statusNote": "Loan Received (receiveLoan wraps issueDhrn -> DHRN_ISU_DATA, ENTRY_TYPE L) and Loan Issue (issueLoan wraps receiveDhrn -> DHRN_REC_DATA) were both create-only. Because the data lives in the same tables as pledges, reopen reuses getDhrnIssue (loan-received) and getDhrnReceipt (loan-issue) unchanged. Added editLoanReceived/editLoanIssue thin wrappers that inject the loan flags (entryType L, LOAN REC/LOAN ISSUE books, loan ledgerMode) then delegate to editDhrnIssue/editDhrnReceipt so the repost stays a loan. Added six routes to registerDhrnLifecycleRoutes in crm.ts (GET/PUT/DELETE on /loan/received/:isuNo and /loan/issue/:vchNo), classified in routePolicy, universe 647->653. Wired both pages (loan-issue mirrors dhrn-receipt, loan-received mirrors dhrn-issue) with load/New/Update + VoucherList. DB test (2 cases proving ENTRY_TYPE stays L across edit) green; full API+DB 3504; routePolicy + routeInputForwarding green."
+    },
+    {
+      "id": "N146",
+      "status": "implemented-unverified",
+      "action": "Wire reopen/edit/delete lifecycle into the shared KarigarForm (lights up karigar-issue, karigar-receive and old-item-sales at once): add loadVoucher (GET ${ep}/:vchNo -> map header + 40+ line fields + sub.load(stones)), PUT-when-loaded, New, and a family-gated VoucherList (karigar + old-item-sales have backend routes; jobwork does NOT and is excluded)",
+      "parentLabels": "P10; D-lifecycle",
+      "startAfter": [
+        "N145"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Live: karigar-receive create 201 -> GET reopen (pcs 2) -> PUT edit 200 (pcs 2->3) -> GET reopen (pcs 3). UI-only (no new routes); gates green; web tests 9; full API+DB unchanged (editKarigar/getKarigar already tested).",
+      "gapIds": "G155",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/web/components/KarigarForm.tsx"
+      ],
+      "statusNote": "IMPLEMENTED. Wired reopen/edit/delete into the shared KarigarForm: loadVoucher (GET ${ep}/:vchNo?coBook -> stringify header + 40+ line fields; sub.load(perLine) rebuilds the stone sub-detail), resetForm (New), PUT-when-loaded, and a family-gated VoucherList (table KR_DATA) shown only when lifecycle === true (family karigar or old-item-sales; jobwork excluded, it has no backend lifecycle routes). UI-only: no new routes, no size-budget/route-universe impact. Lit up karigar-issue, karigar-receive and old-item-sales at once. Verified live on the running stack: karigar-receive create 201, GET reopen returns the line grid (pcs 2), PUT edit 200, GET reopen reflects the edit (pcs 3). Gates (typecheck/lint/format/typecheck:tests/size) green; web tests 9/9. The backend getKarigar/editKarigar/getOldItemSale/editOldItemSale were already covered by existing API tests."
     }
   ],
   "amendments": [

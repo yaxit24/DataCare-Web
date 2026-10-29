@@ -165,6 +165,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G152 | High | Dhiran pledge issue / reopen+edit | `unified/src/csharp/DataCareNext/TR_DHRN_ISU.cs` | `web/apps/api/src/modules/dhrn/dhrn.ts` `getDhrnIssue`/`editDhrnIssue`, `web/apps/api/src/routes/txn.ts` `GET/PUT/DELETE /dhrn/issue/:isuNo`, `web/apps/web/app/(app)/txn/dhrn-issue/page.tsx` | The pledge issue (a core daily workflow) could be created and deleted but not reopened or edited: `issueDhrn`/`deleteDhrn` existed but there was no reader/editor or GET/PUT routes, and the page was create-only (no VoucherList). Add `getDhrnIssue`/`editDhrnIssue` mirroring the N125 interest pattern, the three routes, and the lifecycle UI. | N143 |
 | G153 | High | Dhiran pledge receipt / reopen+edit + ISU_REC restore | `unified/src/csharp/DataCareNext/TR_DHRN_REC.cs:6376` | `web/apps/api/src/modules/dhrn/dhrn.ts` `getDhrnReceipt`/`editDhrnReceipt`/`deleteDhrn`, `web/apps/api/src/routes/crm.ts` `registerDhrnLifecycleRoutes`, `web/apps/web/app/(app)/txn/dhrn-receipt/page.tsx` | The pledge receipt (redemption) was create-only, and worse, deleting a receipt did NOT restore the issue's `ISU_REC` flag, so a reversed receipt left the pledge permanently marked redeemed (desktop `TR_DHRN_REC.cs:6376` sets it back to `'N'`). Add reader/editor + routes, restore `ISU_REC='N'` on receipt delete/edit, and wire the lifecycle UI. | N144 |
 | G154 | Med | Loan Received / Loan Issue reopen+edit | `unified/src/csharp/DataCareNext/TR_DHRN_ISU.cs`, `unified/src/csharp/DataCareNext/TR_DHRN_REC.cs` | `web/apps/api/src/modules/dhrn/dhrn.ts` `editLoanReceived`/`editLoanIssue`, `web/apps/api/src/routes/crm.ts` `registerDhrnLifecycleRoutes`, `web/apps/web/app/(app)/txn/loan-issue/page.tsx`, `web/apps/web/app/(app)/txn/loan-received/page.tsx` | Loan Received (receiveLoan→issueDhrn, DHRN_ISU_DATA) and Loan Issue (issueLoan→receiveDhrn, DHRN_REC_DATA) were create-only. They share the pledge tables, so reopen reuses the dhrn readers; add loan-flag-injecting editors + the six routes + the lifecycle UI. | N145 |
+| G155 | Med | Karigar / Old-Item-Sales reopen+edit (shared form) | `unified/src/csharp/DataCareNext/TR_KR_ISU.cs`, `unified/src/csharp/DataCareNext/TR_MFG_KR_ISU_REC.cs` | `web/apps/web/components/KarigarForm.tsx` | The shared KarigarForm (karigar-issue/receive, old-item-sales, jobwork-issue/receive) is create-only even though `getKarigar`/`editKarigar` and `getOldItemSale`/`editOldItemSale` and their GET/PUT/DELETE routes already exist (karigar + old-item-sales; jobwork has none). `useSubDetail.load()` is already built for reopen. Wire `loadVoucher` + PUT-when-loaded + a family-gated VoucherList (UI-only). | N146 |
 
 ## 4. Decisions D23–D28
 
@@ -1262,6 +1263,32 @@ routeInputForwarding green; full API+DB 3504.
 
 Done when: an operator can reopen and edit a saved Loan Received or Loan Issue and it stays a loan.
 
+### N146 — KarigarForm reopen/edit lifecycle (G155, Stage D)
+
+The shared `KarigarForm` (backing karigar-issue, karigar-receive, old-item-sales and
+jobwork-issue/receive) was create-only even though the backend was fully built: `getKarigar`/
+`editKarigar`/`deleteKarigar` and `getOldItemSale`/`editOldItemSale`/`deleteOldItemSale` with
+GET/PUT/DELETE routes already existed for karigar and old-item-sales (jobwork has none), and
+`useSubDetail` already exposed `load(perLine)`/`reset()` built for reopen. The form just never called
+them — it imported only `get`/`post`.
+
+N146 wires the lifecycle into the shared component: `loadVoucher` fetches `GET ${ep}/:vchNo?coBook=`,
+stringifies the reader's header and 40+ line fields into the form `Line` shape, and rebuilds the
+stone sub-detail in one shot via `sub.load(perLine)`; `resetForm` clears to a New voucher; submit PUTs
+to `${ep}/${loadedVch}` when a voucher is loaded; and a VoucherList (keyed on `KR_DATA`) is shown only
+when `lifecycle` is true — `family === 'karigar' || oldItemSales`, so jobwork stays create-only until
+its own backend routes exist. This is a UI-only change: no new routes, so no size-budget or
+route-universe impact, and it lit up three workflows at once.
+
+Verified live on the running stack: a karigar-receive created (201), reopened through
+`GET /karigar/receive/00001?coBook=KRR` (returned the line grid, pcs 2), edited via `PUT` (200,
+pcs 2 → 3), and reopened again to confirm the change (pcs 3). Gates (typecheck/lint/format/
+typecheck:tests/size) green; web tests 9/9. The backend readers/editors were already covered by the
+existing API suite.
+
+Done when: an operator can load a saved karigar or old-item-sales voucher, edit its lines (and stones)
+and re-save.
+
 
 ## 6. Status corrections
 
@@ -1329,6 +1356,7 @@ Done when: an operator can reopen and edit a saved Loan Received or Loan Issue a
 | N143 | — | implemented-unverified, evidence in this change (G152: dhrn pledge-issue reopen/edit/delete + lifecycle UI; route universe 641→644, DB test 3/3, full API+DB 320/3499, live POST 201 + PUT 200) |
 | N144 | — | implemented-unverified, evidence in this change (G153: dhrn pledge-receipt reopen/edit/delete + ISU_REC-restore fix; routes extracted to crm.ts, universe 644→647, DB test 3/3, full API+DB 3502, live POST 201) |
 | N145 | — | implemented-unverified, evidence in this change (G154: Loan Received + Loan Issue reopen/edit/delete reusing the dhrn readers + loan-flag editors; universe 647→653, DB test 2/2, full API+DB 3504) |
+| N146 | — | implemented-unverified, evidence in this change (G155: KarigarForm reopen/edit lifecycle lighting up karigar-issue/receive + old-item-sales; UI-only, live create 201→GET→PUT 200→GET verified) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
