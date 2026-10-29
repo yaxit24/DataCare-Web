@@ -5323,6 +5323,27 @@
         "web/apps/web/lib/nav.ts"
       ],
       "statusNote": "Customer Entry (backend N124) had no page. Added /txn/customer-entry: employee code/name/date + a multi-row grid (party/name/mobile/remark/remDate/item/like/pcs/weights); non-qualifying rows dimmed per the desktop predicate. Keyed by employeeCode+vchNo (no book), so reopen uses employee + Load-entry-no input; edit PUTs, Delete removes. Nav entry under ExtraTran. VERIFIED via the web /api proxy: 2-row post (201) -> reopen (2 rows) -> edit to 1 -> delete; page serves 200. Verified: typecheck/lint/format/typecheck:tests; web 646."
+    },
+    {
+      "id": "N136",
+      "status": "implemented-unverified",
+      "action": "Build the Dhrn Os Letter frontend page (party + as-of, opens the HTML/PDF letter) + nav entry",
+      "parentLabels": "P09; missing-workflows-frontend",
+      "startAfter": [
+        "N135"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "dhrn-os-letter page serves + opens the letter for a pledged party; web 646, gates; verified",
+      "gapIds": "G145",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/web/app/(app)/txn/dhrn-os-letter/page.tsx",
+        "web/apps/web/lib/nav.ts"
+      ],
+      "statusNote": "Dhrn Os Letter (backend N126) had no UI. Added /txn/dhrn-os-letter: borrower picker + as-of date + Preview(HTML)/Open Letter(PDF) buttons opening GET /dhrn/os-letter. Nav under LOANS (DHRN). VERIFIED: page 200 + letter 200 (Pledge Outstanding Letter, WALK-IN, 30000, Total Amount Due) for a pledged party. ALL 5 MISSING workflows now reachable in the UI (Tour Sales N133, Card Receipt N134, Customer Entry N135, Dhrn Os Letter N136, Loan Interest N132). Verified: typecheck/lint/format/typecheck:tests; web 646."
     }
   ],
   "amendments": [

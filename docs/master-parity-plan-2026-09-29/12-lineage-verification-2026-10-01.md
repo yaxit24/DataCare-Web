@@ -155,6 +155,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G142 | High | Tour Sales / frontend page | `unified/src/csharp/DataCareNext/TR_TOUR_SALE.cs` | `web/apps/web/app/(app)/txn/tour-sales/page.tsx`, `web/apps/web/lib/wholesaleVoucher.ts`, `web/apps/web/lib/nav.ts` | Tour Sales (backend N127) had no frontend page; the operator could not reach it from the menu. Reuse the shared wholesale-sale form on the TOUR SALES book. | N133 |
 | G143 | High | Card Receipt / frontend page | `unified/src/csharp/DataCareNext/TR_CARD_REC.cs` | `web/apps/web/app/(app)/txn/card-receipt/page.tsx`, `web/apps/web/lib/nav.ts`, `web/apps/api/src/modules/vouchers/list.ts` | Card Rec (backend N123) had no frontend page and the Card/UPI menu opened the generic receipt; build a bespoke card-receipt page on the CRD book with the card/bank commission fields and the full lifecycle. | N134 |
 | G144 | High | Customer Entry / frontend page | `unified/src/csharp/DataCareNext/UT_CUST_ENTRY.cs` | `web/apps/web/app/(app)/txn/customer-entry/page.tsx`, `web/apps/web/lib/nav.ts` | Customer Entry (backend N124) had no frontend page; build an employee-scoped multi-row CRM grid with load/edit/delete by employeeCode+vchNo. | N135 |
+| G145 | Med | Dhrn Os Letter / frontend page | `unified/src/csharp/DataCareNext/RP_DHRN_OS.cs` | `web/apps/web/app/(app)/txn/dhrn-os-letter/page.tsx`, `web/apps/web/lib/nav.ts` | The Dhrn Os Letter (backend N126) had no UI; add a party + as-of page that opens the HTML/PDF letter from GET /dhrn/os-letter. | N136 |
 
 ## 4. Decisions D23–D28
 
@@ -1046,6 +1047,19 @@ the web `/api` proxy: a 2-row entry posted, reopened (2 rows), edited to 1 row a
 Done when: the operator can create, reopen, edit and delete a customer entry from the screen.
 
 
+### N136 — Dhrn Os Letter frontend page (G145); all 5 MISSING workflows now reachable in the UI
+
+The Dhrn Os Letter document endpoint (backend N126) had no UI entry point. N136 adds a focused
+`/txn/dhrn-os-letter` page: a borrower account picker + an as-of date, with Preview (HTML) and Open Letter
+(PDF) buttons that open `GET /dhrn/os-letter?acCode=&asOf=&format=` in a new tab. A nav entry was added under
+LOANS (DHRN). Verified: the page serves 200 and, for a party with an open pledge, the letter returns HTTP
+200 with the borrower, amounts and total due. With this slice all five previously-MISSING workflows are now
+reachable and usable from the web menu: Tour Sales (N133), Card Receipt (N134), Customer Entry (N135), Dhrn
+Os Letter (N136) and Loan Interest (wired N132).
+
+Done when: the operator can generate a pledge outstanding letter for a party from the screen.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -1102,6 +1116,7 @@ Done when: the operator can create, reopen, edit and delete a customer entry fro
 | N133 | — | implemented-unverified, evidence in this change (G142: Tour Sales frontend page via the shared wholesale form; verified live in browser) |
 | N134 | — | implemented-unverified, evidence in this change (G143: Card Receipt frontend page on the CRD book; verified via the web /api proxy) |
 | N135 | — | implemented-unverified, evidence in this change (G144: Customer Entry frontend page; verified via the web /api proxy) |
+| N136 | — | implemented-unverified, evidence in this change (G145: Dhrn Os Letter frontend page; verified page 200 + letter 200) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
