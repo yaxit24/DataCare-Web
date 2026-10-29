@@ -5237,6 +5237,27 @@
         "web/apps/api/src/modules/vouchers/list.ts"
       ],
       "statusNote": "Applied the N129/N130 template to ledger-adjust + employee-jv (were create-only): added BookSelect (JV/JOURNAL) + load<X>(vchNo) GET + PUT-on-edit + New button + VoucherList(LDR_ADJ_DATA / EMP_DATA). Extended modules/vouchers/list.ts ALLOWED with LDR_ADJ_DATA + EMP_DATA and the amount detector with DIFF_AMT + SALARY_AMT. VERIFIED via the web /api proxy: ledger-adjust POST 201 -> recent list (total 250) -> reopen {acCode WALKIN, amount 250, direction debit, remark}. (Also found + fixed the harness gotcha: Next bakes API_ORIGIN at build time, so the web must be built with API_ORIGIN=http://127.0.0.1:4410 for the stack proxy to reach the API.) Verified: lint/format/typecheck/typecheck:tests/size; web 646; full API+DB 318/3492."
+    },
+    {
+      "id": "N132",
+      "status": "implemented-unverified",
+      "action": "Wire the dhrn-interest page to the DIR book with full reopen/edit/delete lifecycle; allow-list DHRN_REC_DATA",
+      "parentLabels": "P09; D-lifecycle-frontend",
+      "startAfter": [
+        "N131"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "dhrn-interest page loads/edits/deletes on the DIR book; DHRN_REC_DATA allow-listed; web 646, gates; verified via the web /api proxy",
+      "gapIds": "G141",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/web/app/(app)/txn/dhrn-interest/page.tsx",
+        "web/apps/api/src/modules/vouchers/list.ts"
+      ],
+      "statusNote": "The dhrn-interest page was create-only on the old DHIRAN RECEIPT book. Repointed to the INTREST RECIVED (DIR) book (N125), added richer fields (assessed/received/kasar/issue-book) + loadInterest GET + PUT-on-edit + New button + VoucherList(DHRN_REC_DATA, /dhrn/interest). Allow-listed DHRN_REC_DATA. VERIFIED via the web /api proxy: pledge issue -> interest POST on DIR (201) -> recent list -> reopen {borrowerAc WALKIN, interest 1200, intReceived 1200, isuNo 00001}. Verified: typecheck both/lint/format; web 646; voucher-list scope test green."
     }
   ],
   "amendments": [

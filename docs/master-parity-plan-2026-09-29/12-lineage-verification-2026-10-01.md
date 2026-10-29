@@ -151,6 +151,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G138 | High | Finance vouchers / frontend lifecycle | `unified/src/csharp/DataCareNext/TR_CONTRA.cs` | `web/apps/web/app/(app)/txn/contra/page.tsx` | The finance-voucher pages were create-only in the UI even though the backend supports reopen/edit/delete/print; the operator must be able to load, edit, delete and print a saved voucher from the screen. Contra is the first page wired (template for the rest). | N129 |
 | G139 | High | Journal / frontend lifecycle | `unified/src/csharp/DataCareNext/TR_JOURNAL` | `web/apps/web/app/(app)/txn/journal/page.tsx` | The journal page was create-only; the operator must load/edit/delete/print a saved journal from the screen (backend ready via N128). | N130 |
 | G140 | High | Ledger-adjust & Employee-JV / frontend lifecycle | `unified/src/csharp/DataCareNext/TR_LEDR_ADJ.cs`, `TR_EMP_JV.cs` | `web/apps/web/app/(app)/txn/ledger-adjust/page.tsx`, `web/apps/web/app/(app)/txn/employee-jv/page.tsx`, `web/apps/api/src/modules/vouchers/list.ts` | Both pages were create-only; add a book selector + full reopen/edit/delete lifecycle, and allow-list LDR_ADJ_DATA + EMP_DATA (with DIFF_AMT/SALARY_AMT amount detection) in the recent-voucher list. | N131 |
+| G141 | High | Loan Interest / frontend lifecycle | `unified/src/csharp/DataCareNext/TR_DHRN_INTREC.cs` | `web/apps/web/app/(app)/txn/dhrn-interest/page.tsx`, `web/apps/api/src/modules/vouchers/list.ts` | The dhrn-interest page was create-only and still used the old DHIRAN RECEIPT book; point it at the INTREST RECIVED (DIR) book and add the full reopen/edit/delete lifecycle (backend ready from N125), allow-listing DHRN_REC_DATA. | N132 |
 
 ## 4. Decisions D23–D28
 
@@ -984,6 +985,20 @@ green with the allow-list extension.
 Done when: the operator can create, reopen, edit and delete a ledger adjustment and an employee JV from the screen.
 
 
+### N132 — Loan Interest page lifecycle UI (G141, Stage D frontend)
+
+The dhrn-interest page was create-only and still numbered on the old DHIRAN RECEIPT book. N132 repoints it
+to the INTREST RECIVED (DIR) book provisioned in N125, exposes the richer desktop fields (assessed interest,
+interest received, kasar, issue book), and wires the full lifecycle: `loadInterest(vchNo)` GETs
+`/dhrn/interest/:vchNo` and repopulates, submit PUTs when editing (POSTs when new) with a New button, and the
+reusable `<VoucherList table="DHRN_REC_DATA" book deleteBase="/dhrn/interest" onLoad>` for reopen/delete.
+DHRN_REC_DATA was allow-listed in the recent-voucher list. Verified through the web `/api` proxy: issue a
+pledge, post interest on DIR (201), it appears in the recent list, and reopens with the borrower/interest/
+received/issue intact.
+
+Done when: the operator can create, reopen, edit and delete a pledge interest receipt from the screen.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -1036,6 +1051,7 @@ Done when: the operator can create, reopen, edit and delete a ledger adjustment 
 | N129 | — | implemented-unverified, evidence in this change (G138: contra page full lifecycle UI; verified live in browser) |
 | N130 | — | implemented-unverified, evidence in this change (G139: journal page lifecycle UI; verified live render) |
 | N131 | — | implemented-unverified, evidence in this change (G140: ledger-adjust & employee-jv lifecycle UI + voucher-list allow-list; verified via the web /api proxy) |
+| N132 | — | implemented-unverified, evidence in this change (G141: loan-interest page lifecycle UI on the DIR book; verified via the web /api proxy) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

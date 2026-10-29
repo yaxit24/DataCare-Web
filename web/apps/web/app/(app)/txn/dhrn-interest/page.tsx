@@ -1,28 +1,66 @@
 'use client';
 import { useState } from 'react';
-import { get, post, ApiError } from '../../../../lib/api';
+import { get, post, put, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { VoucherList } from '../../../../components/VoucherList';
 
-// Dhrn (pledge loan) interest-only collection. Booked against an issue voucher (ISU_NO): it collects
-// accrued interest WITHOUT repaying principal, so the outstanding is unchanged.
+// Dhrn (pledge loan) interest receipt (desktop TR_DHRN_INTREC). Booked against an issue voucher
+// (ISU_NO) on the INTREST RECIVED book: collects assessed interest (and optionally received/kasar).
+// Full lifecycle: create / reopen / edit / delete.
 const inr = (x: number) => Number(x || 0).toLocaleString('en-IN');
 
 export default function DhrnInterestPage() {
   const { lcCode, coYear } = useBusinessScope();
   const [coBook, setCoBook] = useState('');
   const [isuNo, setIsuNo] = useState('');
+  const [isuBook, setIsuBook] = useState('DHI');
   const [borrowerAc, setBorrowerAc] = useState('');
   const [borrowerName, setBorrowerName] = useState('');
   const [interest, setInterest] = useState('');
-  const [os, setOs] = useState<number | null>(null); // last fetched/known outstanding
+  const [intReceived, setIntReceived] = useState('');
+  const [intKasar, setIntKasar] = useState('');
+  const [os, setOs] = useState<number | null>(null);
   const [res, setRes] = useState<{ vchNo: number } | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const [checking, setChecking] = useState(false);
+  const [loadedVch, setLoadedVch] = useState('');
 
-  // GET /dhrn/{isuNo}/outstanding → { isuNo, outstanding }
+  function resetForm() {
+    setLoadedVch('');
+    setIsuNo('');
+    setBorrowerAc('');
+    setBorrowerName('');
+    setInterest('');
+    setIntReceived('');
+    setIntKasar('');
+    setOs(null);
+    setRes(null);
+    setErr('');
+  }
+
+  async function loadInterest(vchNo: string) {
+    setErr('');
+    setRes(null);
+    try {
+      const d = await get<any>(
+        `/dhrn/interest/${encodeURIComponent(vchNo)}?coBook=${encodeURIComponent(coBook)}`,
+      );
+      setLoadedVch(vchNo);
+      setIsuNo(String(d.isuNo ?? '').replace(/^0+/, '') || String(d.isuNo ?? ''));
+      setIsuBook(String(d.isuBook ?? 'DHI'));
+      setBorrowerAc(String(d.borrowerAc ?? ''));
+      setBorrowerName(String(d.borrowerName ?? ''));
+      setInterest(Number(d.interest ?? 0) ? String(d.interest) : '');
+      setIntReceived(Number(d.intReceived ?? 0) ? String(d.intReceived) : '');
+      setIntKasar(Number(d.intKasar ?? 0) ? String(d.intKasar) : '');
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.body?.error || e.message : 'failed to load');
+    }
+  }
+
   async function checkOutstanding() {
     setErr('');
     setOs(null);
@@ -45,6 +83,10 @@ export default function DhrnInterestPage() {
     e.preventDefault();
     setErr('');
     setRes(null);
+    if (!coBook) {
+      setErr('select the interest-receipt book first');
+      return;
+    }
     setBusy(true);
     try {
       const body = {
@@ -52,19 +94,23 @@ export default function DhrnInterestPage() {
         coYear,
         lcCode,
         isuNo,
+        isuBook: isuBook || undefined,
+        isuYear: coYear,
         borrowerAc,
         borrowerName: borrowerName || undefined,
-        // P1-1: same suppression as dhrn-receipt, with a worse symptom here.
-        //
-        // `dhrn.ts:756-760` computes the accrued interest when the field is absent, then
-        // `:761-762` refuses a non-positive result. Sending an explicit 0 therefore did not
-        // merely charge nothing — it made a blank field FAIL with "interest must be positive"
-        // instead of computing what was owed, so the interest-only receipt was unusable
-        // without hand-calculating the figure the server already knows.
         interest: interest.trim() === '' ? undefined : Number(interest),
+        intReceived: intReceived.trim() === '' ? undefined : Number(intReceived),
+        intKasar: intKasar.trim() === '' ? undefined : Number(intKasar),
       };
-      const out = await post('/dhrn/interest', body);
+      const out = loadedVch
+        ? await put<{ vchNo: number }>(`/dhrn/interest/${encodeURIComponent(loadedVch)}`, body)
+        : await post<{ vchNo: number }>('/dhrn/interest', body);
       setRes(out);
+      if (!loadedVch) {
+        setInterest('');
+        setIntReceived('');
+        setIntKasar('');
+      }
     } catch (e) {
       setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
     } finally {
@@ -83,8 +129,8 @@ export default function DhrnInterestPage() {
               <BookSelect
                 value={coBook}
                 onChange={setCoBook}
-                preferred="DRC"
-                mainBooks={['DHIRAN RECEIPT']}
+                preferred="DIR"
+                mainBooks={['INTREST RECIVED']}
               />
             </div>
             <div className="field">
@@ -92,8 +138,8 @@ export default function DhrnInterestPage() {
               <input value={coYear} readOnly />
             </div>
             <div className="field">
-              <label>Location</label>
-              <input value={lcCode} readOnly />
+              <label>Issue Book</label>
+              <input value={isuBook} onChange={(e) => setIsuBook(e.target.value)} />
             </div>
             <div className="field">
               <label>Issue Voucher No</label>
@@ -122,21 +168,27 @@ export default function DhrnInterestPage() {
           </div>
           <div className="row">
             <div className="field">
-              <label>Interest</label>
-              {/* `required` was part of the same defect: it forced the operator to type a figure,
-                  so the configured monthly/daily/compound calculation could never run even after
-                  the payload was fixed. Desktop TR_DHRN_INTREC.cs:4265-4368 defaults the compound
-                  flag and offers a month selector rather than demanding a hand-computed amount. */}
+              <label>Interest (assessed)</label>
               <input
                 value={interest}
                 onChange={(e) => setInterest(e.target.value)}
                 placeholder="blank = compute the accrued interest"
-                aria-describedby="dhrn-interest-help"
               />
-              <small id="dhrn-interest-help" className="hint">
-                Leave blank to receive the interest accrued to this date; type a value only to
-                override it.
+              <small className="hint">
+                Leave blank to compute the interest accrued to this date.
               </small>
+            </div>
+            <div className="field">
+              <label>Interest received</label>
+              <input
+                value={intReceived}
+                onChange={(e) => setIntReceived(e.target.value)}
+                placeholder="blank = same as assessed"
+              />
+            </div>
+            <div className="field">
+              <label>Kasar (write-off)</label>
+              <input value={intKasar} onChange={(e) => setIntKasar(e.target.value)} />
             </div>
             <div className="field">
               <label>&nbsp;</label>
@@ -152,14 +204,18 @@ export default function DhrnInterestPage() {
           </div>
           {os != null && (
             <div className="muted" style={{ marginTop: 6 }}>
-              Outstanding for issue <b>#{isuNo}</b>: <b>₹{inr(os)}</b>{' '}
-              <span className="muted">(unchanged by interest receipt)</span>
+              Outstanding for issue <b>#{isuNo}</b>: <b>₹{inr(os)}</b>
             </div>
           )}
           <div className="toolbar" style={{ marginTop: 10 }}>
             <span className="spacer" />
-            <button className="primary" disabled={busy}>
-              {busy ? 'Saving…' : 'Receive Interest'}
+            {loadedVch && (
+              <button type="button" onClick={resetForm} disabled={busy}>
+                New
+              </button>
+            )}
+            <button className="primary" disabled={busy || !coBook}>
+              {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : 'Receive Interest'}
             </button>
             <button
               type="button"
@@ -181,14 +237,19 @@ export default function DhrnInterestPage() {
       {err && <div className="msg err">{err}</div>}
       {res && (
         <div className="panel">
-          <div className="msg ok">Interest received — Voucher #{res.vchNo}</div>
-          <div className="tiles">
-            <div className="tile">
-              <div className="muted">vchNo</div>
-              <div className="big kpi">{res.vchNo}</div>
-            </div>
+          <div className="msg ok">
+            Interest {loadedVch ? 'updated' : 'received'} — Voucher #{res.vchNo}
           </div>
         </div>
+      )}
+      {coBook && (
+        <VoucherList
+          table="DHRN_REC_DATA"
+          book={coBook}
+          deleteBase="/dhrn/interest"
+          onLoad={(vchNo) => void loadInterest(vchNo)}
+          reloadKey={res?.vchNo}
+        />
       )}
     </div>
   );
