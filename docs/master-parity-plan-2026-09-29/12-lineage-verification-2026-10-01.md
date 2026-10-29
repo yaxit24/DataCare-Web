@@ -154,6 +154,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G141 | High | Loan Interest / frontend lifecycle | `unified/src/csharp/DataCareNext/TR_DHRN_INTREC.cs` | `web/apps/web/app/(app)/txn/dhrn-interest/page.tsx`, `web/apps/api/src/modules/vouchers/list.ts` | The dhrn-interest page was create-only and still used the old DHIRAN RECEIPT book; point it at the INTREST RECIVED (DIR) book and add the full reopen/edit/delete lifecycle (backend ready from N125), allow-listing DHRN_REC_DATA. | N132 |
 | G142 | High | Tour Sales / frontend page | `unified/src/csharp/DataCareNext/TR_TOUR_SALE.cs` | `web/apps/web/app/(app)/txn/tour-sales/page.tsx`, `web/apps/web/lib/wholesaleVoucher.ts`, `web/apps/web/lib/nav.ts` | Tour Sales (backend N127) had no frontend page; the operator could not reach it from the menu. Reuse the shared wholesale-sale form on the TOUR SALES book. | N133 |
 | G143 | High | Card Receipt / frontend page | `unified/src/csharp/DataCareNext/TR_CARD_REC.cs` | `web/apps/web/app/(app)/txn/card-receipt/page.tsx`, `web/apps/web/lib/nav.ts`, `web/apps/api/src/modules/vouchers/list.ts` | Card Rec (backend N123) had no frontend page and the Card/UPI menu opened the generic receipt; build a bespoke card-receipt page on the CRD book with the card/bank commission fields and the full lifecycle. | N134 |
+| G144 | High | Customer Entry / frontend page | `unified/src/csharp/DataCareNext/UT_CUST_ENTRY.cs` | `web/apps/web/app/(app)/txn/customer-entry/page.tsx`, `web/apps/web/lib/nav.ts` | Customer Entry (backend N124) had no frontend page; build an employee-scoped multi-row CRM grid with load/edit/delete by employeeCode+vchNo. | N135 |
 
 ## 4. Decisions D23–D28
 
@@ -1031,6 +1032,20 @@ reopened with the amounts intact.
 Done when: the operator can create, reopen, edit and delete a card receipt from the Card Receipt screen.
 
 
+### N135 — Customer Entry frontend page (G144)
+
+Customer Entry (backend N124) had no UI entry point. N135 adds an employee-scoped, multi-row CRM grid at
+`/txn/customer-entry`: employee code/name + date, and one row per customer/item-interest line (party, name,
+mobile, remark, reminder date, item, like flag, pcs/weights). Non-qualifying rows are dimmed to mirror the
+desktop write predicate (name+remark, or a tag, or item+reminder date). Because the entry is keyed by
+employeeCode + vchNo (not an accounting book), reopen uses an employee + Load-entry-no input (not the
+VoucherList); edit PUTs and Delete removes the aggregate. A nav entry was added under ExtraTran. Verified via
+the web `/api` proxy: a 2-row entry posted, reopened (2 rows), edited to 1 row and deleted; the page serves
+200.
+
+Done when: the operator can create, reopen, edit and delete a customer entry from the screen.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -1086,6 +1101,7 @@ Done when: the operator can create, reopen, edit and delete a card receipt from 
 | N132 | — | implemented-unverified, evidence in this change (G141: loan-interest page lifecycle UI on the DIR book; verified via the web /api proxy) |
 | N133 | — | implemented-unverified, evidence in this change (G142: Tour Sales frontend page via the shared wholesale form; verified live in browser) |
 | N134 | — | implemented-unverified, evidence in this change (G143: Card Receipt frontend page on the CRD book; verified via the web /api proxy) |
+| N135 | — | implemented-unverified, evidence in this change (G144: Customer Entry frontend page; verified via the web /api proxy) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
