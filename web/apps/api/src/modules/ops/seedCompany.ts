@@ -453,6 +453,23 @@ const BOOKS: {
     shortName: 'DHRC',
     table: 'DHRN_REC_DATA',
   },
+  // Desktop Loan/Dhrn Interest Receipt (TR_DHRN_INTREC, MDI_FORM.cs:9549 CurBookHelp('INTREST RECIVED')).
+  // Its own book over DHRN_REC_DATA, inward. The interest ledger resolves the interest-income account
+  // from BOOK_DETL slot 2 (Ac_Ledr.cs:1156) and the metal fine link from slot 1; without this book the
+  // Loan Interest screen has no book to select on a provisioned company (N125, G134).
+  {
+    book: 'DIR',
+    name: 'Dhiran Interest',
+    mainBook: 'INTREST RECIVED',
+    inout: 'I',
+    acCode: 'INTINC',
+    shortName: 'DINT',
+    table: 'DHRN_REC_DATA',
+    slots: [
+      { srNo: 1, acCode: 'INTINC' },
+      { srNo: 2, acCode: 'INTINC' },
+    ],
+  },
   // Desktop TR_WH_SALE serves both: book 034 `WSALE` / `WH SALES` and book 064 `RCUT` / `RATE CUT`, each an OUT
   // book over RATE_CUT_DATA. Without them a new company had no book either screen could post to, and the Rate
   // Cut screen fell back to the cash Receipt book.

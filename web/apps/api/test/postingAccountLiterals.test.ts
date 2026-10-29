@@ -81,7 +81,8 @@ const ACCOUNT_LITERALS = [
 const REMAINING: Readonly<Record<string, number>> = {
   'modules/sales/sales.ts': 11,
   'modules/purchase/purchase.ts': 5,
-  'modules/dhrn/dhrn.ts': 2,
+  'modules/dhrn/dhrn.ts': 1,
+  'modules/dhrn/dhrnInterest.ts': 1,
   'modules/finance/billToBill.ts': 5,
   'modules/purchase/purchaseReturn.ts': 1,
   'modules/sales/salesReturn.ts': 1,

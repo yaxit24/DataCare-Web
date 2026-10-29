@@ -144,6 +144,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G131 | Med | Ledger adjust & employee JV / lifecycle | `unified/src/csharp/DataCareNext/TR_EMP_JV.cs`, ledger-adjust form | `web/apps/api/src/routes/txn.ts` `GET/PUT /ledger-adjust/:vchNo`, `GET/PUT /employee-jv/:vchNo` | Both vouchers must be reopenable and editable (the reader/editor already existed in the modules; only the routes were missing). | N122 |
 | G132 | High | Card Rec (MISSING workflow) | `unified/src/csharp/DataCareNext/TR_CARD_REC.cs`, `Ac_Ledr.cs:1790-1804` | `web/apps/api/src/modules/finance/cardReceipt.ts`, `web/apps/api/src/routes/txn.ts` `POST/GET/PUT/DELETE /card-receipts` | The Card Receipt (CARD ADJUST) workflow must exist: a customer card settlement posting the exact 8-leg ledger (party/bank/commission/cash), writing CARD_DATA + ROJ_MEL_DATA, reopenable, editable and deletable with the desktop DELETE_DATA audit. | N123 |
 | G133 | High | Cust Entry (MISSING workflow) | `unified/src/csharp/DataCareNext/UT_CUST_ENTRY.cs` | `web/apps/api/src/modules/crm/customerEntry.ts`, `web/apps/api/src/routes/crm.ts` `POST/GET/PUT/DELETE /crm/customer-entries` | The Customer Entry (CRM enquiry / item-interest / follow-up reminder) workflow must exist: an employee-scoped, non-financial CUST_DATA + CUST_DETL aggregate, reopenable, editable and deletable. | N124 |
+| G134 | High | Loan Intrest (MISSING workflow) | `unified/src/csharp/DataCareNext/TR_DHRN_INTREC.cs`, `Ac_Ledr.cs:1152-1166` | `web/apps/api/src/modules/dhrn/dhrnInterest.ts`, `web/apps/api/src/routes/crm.ts` `POST/GET/PUT/DELETE /dhrn/interest` | The Loan/Dhrn Interest Receipt must be desktop-faithful: the amount-loan 8-leg ledger (principal/interest-assess/interest-collect/kasar pairs), full DHRN_REC_DATA header, DHRN_DATA movement (INT_REC_AMT = R+K), ROJ_MEL_DATA and REMARK_DATA, on its own INTREST RECIVED book, with reopen/edit/delete. | N125 |
 
 ## 4. Decisions D23–D28
 
@@ -865,6 +866,27 @@ deleted.
 Done when: the Customer Entry workflow creates, reopens, edits and deletes its CUST_DATA + CUST_DETL aggregate.
 
 
+### N125 — Loan/Dhrn Interest Receipt made desktop-faithful (G134, 3rd of the 5 MISSING workflows)
+
+The web `/dhrn/interest` was a sparse interest-only stub (Dr cash / Cr income, two legs, hardcoded book).
+N125 rebuilds it to the desktop TR_DHRN_INTREC: a new `web/apps/api/src/modules/dhrn/dhrnInterest.ts` posts the exact
+amount-loan 8-leg ledger (Ac_Ledr.cs:1152-1166) — 01/02 principal pair, 03/04 interest assessed, 05/06
+interest collected, 07/08 kasar — each pair conditional, with assessed I, received R and kasar K kept
+distinct, plus optional principal (regular P + unchak U). It writes the full DHRN_REC_DATA header on its
+own provisioned `INTREST RECIVED` book (DIR, inward; interest income from BOOK_DETL slot 2), a DHRN_DATA
+movement (INT_REC_AMT = R + K), the ROJ_MEL_DATA projection and a REMARK_DATA row. Identity uses
+createIdentityTx/insertHiddenIdentityTx (hidden number + TEMP_BOOK_DATA); getDhrnInterest/editDhrnInterest
+(replace-and-repost) and a desktop-faithful delete (reverse the write set + DELETE_DATA audit carrying
+VCH_VAL_CR = INT_REC_AMT + hidden identity cleanup) complete the lifecycle. The settlement account defaults
+literal-free to the issue book's cash slot; only the kasar write-off remains a registered P0-04 literal
+(moved from dhrn.ts, total unchanged at 44). The 4 routes live in the shared routes plugin; route universe
+627 -> 630. A new lifecycle DB test asserts the legs, header, movement, roj, remark, reopen, edit (adds
+kasar -> 8 legs) and delete. Verified live: a 50,000 pledge's 1,800 interest posted, reopened, edited
+(received 1,700 + kasar 100) and deleted.
+
+Done when: the interest receipt posts the desktop write-set and reopens/edits/deletes.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -910,6 +932,7 @@ Done when: the Customer Entry workflow creates, reopens, edits and deletes its C
 | N122 | — | implemented-unverified, evidence in this change (G131: ledger-adjust & employee-jv reopen+edit; verified live round-trip) |
 | N123 | — | implemented-unverified, evidence in this change (G132: Card Receipt / CARD ADJUST workflow; verified live full lifecycle) |
 | N124 | — | implemented-unverified, evidence in this change (G133: Customer Entry CRM workflow; verified live full lifecycle) |
+| N125 | — | implemented-unverified, evidence in this change (G134: desktop-faithful Loan/Dhrn Interest Receipt; verified live full lifecycle) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

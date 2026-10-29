@@ -5081,6 +5081,30 @@
         "web/apps/api/test/customerEntry.routes.db.test.ts"
       ],
       "statusNote": "Cust Entry (UT_CUST_ENTRY) was absent (MISSING workflow). Built customerEntry.ts: NON-FINANCIAL employee-scoped CUST_DATA (one row per line, CO_BOOK=employeeCode, employee-scoped VCH_NO) + seed CUST_DETL ISR_NO=1 per line; no AC_DATA/ROJ_MEL_DATA/DELETE_DATA/book. Row predicate = name+remark OR tag OR item+remDate (UT_CUST_ENTRY.cs:2503-2509). post/get/edit/delete. Routes extracted to a new routes/crm.ts plugin (size-budget split) wired from registerTxnRoutes. Added Utilities/Customer Entry form to the catalog. Universe 623->627. New DB test (predicate, reopen, edit, delete, no-ledger). VERIFIED LIVE: 2-row entry -> reopen -> edit to 1 row -> delete. Verified: typecheck/typecheck:tests/lint/format/size/kernel/register/docs:refs; routes 126; web 646; full API+DB 315/3487."
+    },
+    {
+      "id": "N125",
+      "status": "implemented-unverified",
+      "action": "Make the Loan/Dhrn Interest Receipt (/dhrn/interest) desktop-faithful: 8-leg ledger, full DHRN_REC_DATA, own INTREST RECIVED book, reopen/edit/delete",
+      "parentLabels": "P09; missing-workflows",
+      "startAfter": [
+        "N124"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "POST/GET/PUT/DELETE /dhrn/interest; 8-leg ledger + DHRN_REC_DATA + DHRN_DATA + ROJ_MEL_DATA + REMARK_DATA; DIR book provisioned; route universe 630; full API+DB 316/3488, web 646, routes 126, gates; verified live",
+      "gapIds": "G134",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/api/src/modules/dhrn/dhrnInterest.ts",
+        "web/apps/api/src/routes/crm.ts",
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/test/dhrnInterestLifecycle.db.test.ts"
+      ],
+      "statusNote": "The web /dhrn/interest was a 2-leg stub. Rebuilt to TR_DHRN_INTREC in a new dhrnInterest.ts (extracted from dhrn.ts for the size cap): amount-loan 8-leg ledger (Ac_Ledr.cs:1152-1166) with distinct I/R/K + optional P+U principal, full DHRN_REC_DATA header, DHRN_DATA movement (INT_REC_AMT=R+K), ROJ_MEL_DATA, REMARK_DATA; own INTREST RECIVED book (DIR) with interest income from slot 2; createIdentityTx/hidden identity; get/edit/delete with DELETE_DATA audit (VCH_VAL_CR=INT_REC_AMT). Settlement defaults literal-free to the issue cash slot; kasar is the one registered P0-04 literal (moved from dhrn.ts, total 44). Routes in the shared plugin; universe 627->630. New lifecycle DB test. VERIFIED LIVE: 50000 pledge -> 1800 interest -> reopen -> edit (1700+100 kasar) -> delete. Verified: typecheck/typecheck:tests/lint/format/size/kernel/register/docs; routes 126; web 646; full API+DB 316/3488."
     }
   ],
   "amendments": [
