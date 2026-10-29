@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { post, ApiError } from '../../../../lib/api';
+import { get, post, put, del, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { EntityImagePanel } from '../../../../components/EntityImagePanel';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
@@ -23,6 +23,7 @@ interface Row {
   ordNo: string;
   ordSrno: string;
   ordAcCode: string;
+  ordDesign: string;
   totalGrossWt: string;
   totalLessWt: string;
   totalNetWt: string;
@@ -181,6 +182,7 @@ const blank = (): Row => ({
   ordNo: '',
   ordSrno: '',
   ordAcCode: '',
+  ordDesign: '',
   totalGrossWt: '',
   totalLessWt: '',
   totalNetWt: '',
@@ -236,6 +238,8 @@ const blank = (): Row => ({
 const n = (v: string) => Number(v || 0);
 
 export default function MfgOrderIssuePage() {
+  const [voucherSearch, setVoucherSearch] = useState('');
+  const [loadedVoucherNo, setLoadedVoucherNo] = useState('');
   const [karigarAc, setKarigarAc] = useState('');
   const [karigarName, setKarigarName] = useState('');
   const [vchDate, setVchDate] = useState('');
@@ -254,63 +258,172 @@ export default function MfgOrderIssuePage() {
   });
   // The desktop's image buttons act on the current grid row.
   const [imageRow, setImageRow] = useState(0);
-  const [res, setRes] = useState<{ vchNo: number; fineIssued: number } | null>(null);
+  const [res, setRes] = useState<{ vchNo: number; fineIssued?: number } | null>(null);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const set = (i: number, k: keyof Row, v: string) =>
     setRows((rs) => rs.map((r, j) => (j === i ? { ...r, [k]: v } : r)));
+  const setDesign = (i: number, v: string) =>
+    setRows((rs) => rs.map((r, j) => (j === i ? { ...r, designNo: v, ordDesign: v } : r)));
+
+  function payload() {
+    return {
+      karigarAc: karigarAc.trim(),
+      karigarName: karigarName || undefined,
+      vchDate: vchDate || undefined,
+      lines: rows
+        .filter((r) => r.itCode.trim())
+        .map((r) => ({
+          // P7: writer-verified extended columns. A blank cell is OMITTED, never sent as 0 — an
+          // explicit zero is an override at the writer and defeats the server's own derivation.
+          ...Object.fromEntries(
+            extendedLineFields
+              .map(([key]) => [
+                key,
+                String((r as unknown as Record<string, unknown>)[key] ?? '').trim(),
+              ])
+              .filter(([, v]) => v !== '')
+              .map(([key, v]) => [key, NUMERIC_EXTENDED.has(key as string) ? Number(v) : v]),
+          ),
+          itCode: r.itCode.trim(),
+          designNo: r.designNo.trim() || undefined,
+          pcs: n(r.pcs),
+          grossWt: n(r.grossWt),
+          netWt: n(r.netWt),
+          touch: n(r.touch),
+          ordNo: r.ordNo.trim() || undefined,
+          ordSrno: r.ordSrno ? n(r.ordSrno) : undefined,
+          ordAcCode: r.ordAcCode.trim() || undefined,
+          ordDesign: r.ordDesign.trim() || undefined,
+        })),
+    };
+  }
+
+  function reset() {
+    setVoucherSearch('');
+    setLoadedVoucherNo('');
+    setRes(null);
+    setMsg(null);
+    setKarigarAc('');
+    setKarigarName('');
+    setVchDate('');
+    setRows([blank()]);
+  }
+
+  async function loadVoucher() {
+    const requested = voucherSearch.trim();
+    if (!requested) {
+      setMsg({ kind: 'err', text: 'enter a voucher number' });
+      return;
+    }
+    setBusy(true);
+    setMsg(null);
+    setRes(null);
+    try {
+      const d = await get<{
+        voucherNo?: number | string;
+        karigarAc?: unknown;
+        vchDate?: unknown;
+        lines?: Array<Record<string, unknown>>;
+      }>(`/mfg/order-issue/${encodeURIComponent(requested)}?coBook=DIS`);
+      const str = (v: unknown) => (v == null || v === 0 || v === '' ? '' : String(v));
+      const src = Array.isArray(d.lines) && d.lines.length ? d.lines : [];
+      const template = blank();
+      const voucherNo = String(d.voucherNo ?? requested);
+      setKarigarAc(String(d.karigarAc ?? ''));
+      setKarigarName(String(d.lines?.[0]?.krName ?? ''));
+      setVchDate(String(d.vchDate ?? '').slice(0, 10));
+      setRows(
+        src.length
+          ? src.map((line) => {
+              const row = { ...template };
+              for (const key of Object.keys(template) as Array<keyof Row>) {
+                row[key] = str(line[key]);
+              }
+              return row;
+            })
+          : [blank()],
+      );
+      setLoadedVoucherNo(voucherNo);
+      setVoucherSearch(voucherNo);
+    } catch (err) {
+      setVoucherSearch(loadedVoucherNo);
+      setMsg({
+        kind: 'err',
+        text:
+          err instanceof ApiError
+            ? err.body?.detail || err.body?.message || err.body?.error || err.message
+            : 'failed to load voucher',
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function remove() {
+    if (
+      !loadedVoucherNo ||
+      voucherSearch !== loadedVoucherNo ||
+      !window.confirm(`Delete order issue voucher ${loadedVoucherNo}?`)
+    ) {
+      return;
+    }
+    setBusy(true);
+    setMsg(null);
+    setRes(null);
+    try {
+      await del(`/mfg/order-issue/${encodeURIComponent(loadedVoucherNo)}`, {});
+      reset();
+    } catch (err) {
+      setMsg({
+        kind: 'err',
+        text:
+          err instanceof ApiError
+            ? err.body?.detail || err.body?.message || err.body?.error || err.message
+            : 'failed to delete voucher',
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setMsg(null);
     setRes(null);
+    if (loadedVoucherNo && voucherSearch !== loadedVoucherNo) {
+      setMsg({ kind: 'err', text: 'load the entered voucher before updating' });
+      return;
+    }
     if (!karigarAc.trim()) {
       setMsg({ kind: 'err', text: 'karigar/process account is required' });
       return;
     }
-    const lines = rows
-      .filter((r) => r.itCode.trim())
-      .map((r) => ({
-        // P7: writer-verified extended columns. A blank cell is OMITTED, never sent as 0 — an
-        // explicit zero is an override at the writer and defeats the server's own derivation.
-        ...Object.fromEntries(
-          extendedLineFields
-            .map(([key]) => [
-              key,
-              String((r as unknown as Record<string, unknown>)[key] ?? '').trim(),
-            ])
-            .filter(([, v]) => v !== '')
-            .map(([key, v]) => [key, NUMERIC_EXTENDED.has(key as string) ? Number(v) : v]),
-        ),
-        itCode: r.itCode.trim(),
-        designNo: r.designNo.trim() || undefined,
-        pcs: n(r.pcs),
-        grossWt: n(r.grossWt),
-        netWt: n(r.netWt),
-        touch: n(r.touch),
-        ordNo: r.ordNo.trim() || undefined,
-        ordSrno: r.ordSrno ? n(r.ordSrno) : undefined,
-        ordAcCode: r.ordAcCode.trim() || undefined,
-        ordDesign: r.designNo.trim() || undefined,
-      }));
-    if (!lines.length) {
+    const body = payload();
+    if (!body.lines.length) {
       setMsg({ kind: 'err', text: 'enter at least one design line' });
       return;
     }
     setBusy(true);
     try {
-      const r = await post<{ vchNo: number; fineIssued: number }>('/mfg/order-issue', {
-        karigarAc: karigarAc.trim(),
-        karigarName: karigarName || undefined,
-        vchDate: vchDate || undefined,
-        lines,
-      });
+      const updated = Boolean(loadedVoucherNo);
+      const r = updated
+        ? await put<{ vchNo: number; fineIssued?: number }>(
+            `/mfg/order-issue/${encodeURIComponent(loadedVoucherNo)}`,
+            body,
+          )
+        : await post<{ vchNo: number; fineIssued: number }>('/mfg/order-issue', body);
+      const voucherNo = String(r.vchNo);
       setRes(r);
+      setLoadedVoucherNo(voucherNo);
+      setVoucherSearch(voucherNo);
       setMsg({
         kind: 'ok',
-        text: `Design issued — voucher #${r.vchNo}, fine ${Number(r.fineIssued).toLocaleString('en-IN')} g (orders marked issued)`,
+        text: updated
+          ? `Design updated — voucher #${r.vchNo}`
+          : `Design issued — voucher #${r.vchNo}, fine ${Number(r.fineIssued).toLocaleString('en-IN')} g (orders marked issued)`,
       });
-      setRows([blank()]);
+      if (!updated) setRows([blank()]);
     } catch (err) {
       setMsg({
         kind: 'err',
@@ -333,6 +446,19 @@ export default function MfgOrderIssuePage() {
       <form onSubmit={submit}>
         <div className="panel">
           <div className="row">
+            <div className="field">
+              <label>Voucher no.</label>
+              <div className="row" style={{ gap: 6 }}>
+                <input
+                  aria-label="Voucher no."
+                  value={voucherSearch}
+                  onChange={(e) => setVoucherSearch(e.target.value)}
+                />
+                <button type="button" onClick={loadVoucher} disabled={busy}>
+                  Load
+                </button>
+              </div>
+            </div>
             <div className="field" style={{ flex: 2 }}>
               <label>Karigar / Process</label>
               <LookupPicker
@@ -393,7 +519,7 @@ export default function MfgOrderIssuePage() {
                   <td>
                     <input
                       value={r.designNo}
-                      onChange={(e) => set(i, 'designNo', e.target.value)}
+                      onChange={(e) => setDesign(i, e.target.value)}
                       style={{ width: 80 }}
                     />
                   </td>
@@ -480,10 +606,28 @@ export default function MfgOrderIssuePage() {
             </button>
             <span className="spacer" />
             <span className="muted" style={{ marginRight: 12 }}>
-              POST /mfg/order-issue
+              {loadedVoucherNo
+                ? `PUT /mfg/order-issue/${loadedVoucherNo}`
+                : 'POST /mfg/order-issue'}
             </span>
-            <button className="primary" disabled={busy}>
-              {busy ? 'Issuing…' : 'Issue Designs'}
+            <button type="button" className="ghost" onClick={reset} disabled={busy}>
+              New
+            </button>
+            {loadedVoucherNo && (
+              <button
+                type="button"
+                className="danger"
+                onClick={remove}
+                disabled={busy || voucherSearch !== loadedVoucherNo}
+              >
+                Delete
+              </button>
+            )}
+            <button
+              className="primary"
+              disabled={busy || (!!loadedVoucherNo && voucherSearch !== loadedVoucherNo)}
+            >
+              {busy ? 'Saving…' : loadedVoucherNo ? 'Update' : 'Issue Designs'}
             </button>
           </div>
           {res && (

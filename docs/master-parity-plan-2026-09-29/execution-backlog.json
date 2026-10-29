@@ -5681,7 +5681,7 @@
     },
     {
       "id": "N152",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Extend getMfg reader to round-trip the Order Issue payload (nine missing line columns + karigarName + issue-side itmLoss) with an all-fields GET->payload round-trip test, THEN wire mfg-order-issue reopen/edit/delete UI. Backend prerequisite first - NOT a safe UI-only slice.",
       "parentLabels": "P10; D-lifecycle",
       "startAfter": [
@@ -5694,8 +5694,10 @@
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
       "statusAsOf": "2026-10-29",
-      "evidence": [],
-      "statusNote": "PLANNED (UI wiring remains; backend prerequisite CLEARED by N153). The getMfg reader now round-trips all nine MFG_DETL columns (N153), so the mfg-order-issue reopen->save no longer risks blanking them. Remaining work: wire loadVoucher/PUT-when-loaded/delete/New on the mfg-order-issue page, mapping every payload field back from the now-complete getMfg view. PLANNED (backend prerequisite, not yet implemented). Discovered during the post-N151 UI-lifecycle sweep: mfg-order-issue is the only remaining create-only voucher page with a full GET+PUT+DELETE backend lifecycle but no UI reopen. An implement+independent-audit attempt proved it is NOT a safe UI-only slice: the bespoke page POSTs ~51 extendedLineFields + header karigarName, but getMfg (mfg.ts:1155-1271) omits karigarName and nine persisted line columns (totalNetWt/oldNetWt/rateType/prCode/itmLoss/netAmt/krName/ordAcCode/ordDesign); editMfg deletes-and-rebuilds the write set (mfg.ts:1368-1383), so an unchanged reopen->save would blank those columns (data corruption). N149/N150 are unaffected - mfg-issue/mfg-receive do not send those extended fields. Fix requires extending getMfg (backend) + an all-fields round-trip test before the UI wiring. No page shipped; staged attempt discarded. The UI-lifecycle sweep is otherwise COMPLETE: every other reopen-capable voucher page exposes reopen/edit/delete directly or via a shared component."
+      "evidence": [
+        "web/apps/web/app/(app)/txn/mfg-order-issue/page.tsx"
+      ],
+      "statusNote": "IMPLEMENTED (UI). Unblocked by N153 (getMfg reader now round-trips all nine MFG_DETL columns). Wired via sub-agent implement+independent-audit pipeline (AUDIT_PASS). The mfg-order-issue page now imports get/put/del, extracts payload(), PUTs when loaded else POSTs, reopens via GET /mfg/order-issue/:vchNo?coBook=DIS (restores karigarAc/vchDate/rows field-by-field over blank() template; header karigarName from lines[0].krName since the writer stores it per-line as MFG_DETL.KR_NAME not on the header), deletes with confirm, offers New/Load/Update/Delete with a stale-target guard (Update/Delete disabled when voucherSearch != loadedVoucherNo). Auditor AST comparison: all 61 sent line keys both returned by getMfg and restored by loadVoucher (missing=[]); itmLoss=0 on issue vouchers (receive-only) accepted. Gates + clean api build + web 646+9 + depth:parity green. Live click deferred - demo has no MFG/DIS book; backend lifecycle covered by mfgLifecycle.db.test.ts + the N153 round-trip test."
     },
     {
       "id": "N153",

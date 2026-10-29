@@ -171,7 +171,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G158 | Med | Manufacturing Issue reopen+edit (UI) | `unified/src/csharp/DataCareNext/TR_MFG_ISU_REC.cs` | `web/apps/web/app/(app)/txn/mfg-issue/page.tsx` | The mfg-issue page was create-only though `getMfg`/`editMfg`/`deleteMfg` and `GET/PUT/DELETE /mfg/issue/:vchNo` exist and are covered by `mfgLifecycle.db.test.ts`. The getMfg reader's field names match the page Line exactly and `useSubDetail.load()` exists; wire `loadVoucher` + PUT-when-loaded + VoucherList (UI-only). | N149 |
 | G159 | Med | Manufacturing Receive reopen+edit (UI) | `unified/src/csharp/DataCareNext/TR_MFG_ISU_REC.cs` | `web/apps/web/app/(app)/txn/mfg-receive/page.tsx` | Companion to G158: mfg-receive was create-only though the same `getMfg`/`editMfg`/`deleteMfg` backend and `GET/PUT/DELETE /mfg/receive/:vchNo` exist (mfgLifecycle.db.test.ts). Wire the same lifecycle (plus the labourAmt header). | N150 |
 | G160 | Med | Bullion Sale reopen+edit+delete (UI) | `unified/src/csharp/DataCareNext/TR_BUL_SALE.cs` | `web/apps/web/app/(app)/txn/bullion-sale/page.tsx` | The bullion-sale page was create-only (imported only `post`) though `getBullionSale`/`editBullionSale`/`deleteBullionSale` and `GET/PUT/DELETE /bullion-sales/:vchNo` exist and are covered by `bullionSale.db.test.ts` (post → reopen → edit → delete). The reader (`readRateCut` with `bookGuard:'bullion-sale'`) returns header fields + `lines`/`receivedLines`; wire `loadVoucher` (GET + full header/tender/line restore) + PUT-when-loaded + delete + New/Update (UI-only, no new routes). | N151 |
-| G161 | Med | Manufacturing Order Issue reopen+edit (needs reader extension) | `unified/src/csharp/DataCareNext/TR_MFG_ISU_REC.cs` | `web/apps/web/app/(app)/txn/mfg-order-issue/page.tsx` | The Order Issue page is create-only; `GET/PUT/DELETE /mfg/order-issue/:vchNo` exist (getMfg/editMfg/deleteMfg, coBook DIS, irType D). **Not a safe UI-only slice** — unlike mfg-issue/mfg-receive, this bespoke page's POST payload sends ~51 writer-verified `extendedLineFields` plus header `karigarName`, but `getMfg` (`web/apps/api/src/modules/manufacturing/mfg.ts:1155-1271`) omits nine persisted line keys (`totalNetWt`,`oldNetWt`,`rateType`,`prCode`,`itmLoss`,`netAmt`,`krName`,`ordAcCode`,`ordDesign`) and `karigarName`. Because `editMfg` deletes-and-rebuilds the write set, an unchanged reopen→save would blank those columns. Requires a **backend** `getMfg` reader extension to return every persisted payload field (plus issue-side `itmLoss` and `karigarName` semantics) with an all-fields GET→payload round-trip test, THEN the UI reopen wiring. | — (planned; reader extension first) |
+| G161 | Med | Manufacturing Order Issue reopen+edit (needs reader extension) | `unified/src/csharp/DataCareNext/TR_MFG_ISU_REC.cs` | `web/apps/web/app/(app)/txn/mfg-order-issue/page.tsx` | The Order Issue page is create-only; `GET/PUT/DELETE /mfg/order-issue/:vchNo` exist (getMfg/editMfg/deleteMfg, coBook DIS, irType D). **Not a safe UI-only slice** — unlike mfg-issue/mfg-receive, this bespoke page's POST payload sends ~51 writer-verified `extendedLineFields` plus header `karigarName`, but `getMfg` (`web/apps/api/src/modules/manufacturing/mfg.ts:1155-1271`) omits nine persisted line keys (`totalNetWt`,`oldNetWt`,`rateType`,`prCode`,`itmLoss`,`netAmt`,`krName`,`ordAcCode`,`ordDesign`) and `karigarName`. Because `editMfg` deletes-and-rebuilds the write set, an unchanged reopen→save would blank those columns. Requires a **backend** `getMfg` reader extension to return every persisted payload field (plus issue-side `itmLoss` and `karigarName` semantics) with an all-fields GET→payload round-trip test, THEN the UI reopen wiring. | N153 (reader) + N152 (UI) |
 
 ## 4. Decisions D23–D28
 
@@ -1391,7 +1391,7 @@ Live click deferred for the same reason as N149/N150 — the demo company provis
 Done when: an operator can load a saved bullion sale, edit its lines/tenders, re-save, and delete.
 
 
-### N152 — Manufacturing Order Issue reopen (planned; backend reader prerequisite) (G161, Stage D)
+### N152 — Manufacturing Order Issue reopen/edit/delete lifecycle UI (G161, Stage D)
 
 An exhaustive sweep for remaining create-only voucher pages that have a full `GET+PUT+DELETE
 /route/:vchNo` backend lifecycle but no UI reopen/edit/delete found exactly one: `mfg-order-issue`
@@ -1416,6 +1416,16 @@ issue-side `itmLoss`, and `karigarName` — with an all-fields GET→payload unc
 followed by the page reopen wiring. Recorded planned-only; no page was shipped.
 
 Done when: `getMfg` round-trips the Order Issue payload and the page offers reopen/edit/delete.
+
+**Resolved (UI wiring).** With the N153 reader fix merged, this became a safe UI-only slice and was
+implemented via a sub-agent implement+independent-audit pipeline (AUDIT_PASS). The page now imports
+`get/put/del`, extracts `payload()`, PUTs when a voucher is loaded (else POSTs), reopens via GET
+`/mfg/order-issue/:vchNo?coBook=DIS` restoring `karigarAc`/`vchDate`/`rows` field-by-field over the
+`blank()` template and the header `karigarName` from `lines[0].krName`, deletes with confirm, and
+offers New/Load/Update/Delete with a stale-target guard (Update/Delete disabled when the search box
+differs from the loaded voucher). The auditor's independent AST comparison confirmed all 61 sent line
+keys are both returned by `getMfg` and restored by `loadVoucher` (`missing=[]`). Gates + clean API
+build + web 646+9 + `depth:parity` green. Live click deferred — demo provisions no MFG/DIS book.
 
 
 ### N153 — getMfg reader round-trips the last nine MFG_DETL columns (G161 prerequisite, Stage D)
@@ -1517,6 +1527,7 @@ Done when: `getMfg` returns every persisted MFG_DETL payload field and a round-t
 | N150 | — | implemented-unverified, evidence in this change (G159: mfg-receive reopen/edit lifecycle UI, companion to N149; UI-only, gates + web 9/9 green, live deferred — demo has no MFG book) |
 | N151 | — | implemented-unverified, evidence in this change (G160: bullion-sale reopen/edit/delete lifecycle UI; UI-only, sub-agent implement+audit AUDIT_PASS, gates + clean API build + web 646+9 + bullionSale.db.test.ts 2/2 + depth:parity green, live deferred — demo has no bullion book) |
 | N153 | — | implemented-unverified, evidence in this change (G161 prerequisite: getMfg reader now maps the nine MFG_DETL columns it dropped — totalNetWt/oldNetWt/netAmt/itmLoss/rateType/prCode/krName/ordAcCode/ordDesign; backend correctness fix proven by operatorDepth.roundtrip.db.test.ts 3/3 + mfgLifecycle.db.test.ts 9/9; gates + clean API build + depth:parity green; size ceiling 1504→1516; unblocks N152 UI) |
+| N152 | — | implemented-unverified, evidence in this change (G161: mfg-order-issue reopen/edit/delete lifecycle UI, unblocked by N153; UI-only, sub-agent implement+audit AUDIT_PASS with AST field-mapping proof all 61 sent keys restored, stale-target guard; gates + clean API build + web 646+9 + depth:parity green, live deferred — demo has no MFG/DIS book) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
