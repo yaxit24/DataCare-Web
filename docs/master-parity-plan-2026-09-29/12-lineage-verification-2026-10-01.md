@@ -148,6 +148,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G135 | Med | Dhrn Os Letter (MISSING workflow) | `unified/src/csharp/DataCareNext/RP_DHRN_OS.cs`, `DhrnOsLetter.RPT` | `web/apps/api/src/modules/dhrn/dhrnOsLetter.ts`, `web/apps/api/src/routes/crm.ts` `GET /dhrn/os-letter` | The Dhrn Os Letter must produce a per-party pledge outstanding statement/letter: each open pledge with principal, repaid, outstanding, accrued interest to a cut-off and total due, with the reminder wording. | N126 |
 | G136 | High | Tour Sales (MISSING workflow) | `unified/src/csharp/DataCareNext/TR_TOUR_SALE.cs:11252` (Ac_Ledr.Wh_Sales_Ledr) | `web/apps/api/src/modules/sales/tourSale.ts`, `web/apps/api/src/routes/crm.ts` `POST/GET/PUT/DELETE /tour-sales` | Tour Sales must post the same TR_WH_SALE engine (Wh_Sales_Ledr/Rojmel/Stk over RATE_CUT_DATA) on a TOUR SALES book, with create/reopen/edit/delete. | N127 |
 | G137 | Med | Journal / lifecycle | `unified/src/csharp/DataCareNext/TR_JOURNAL` (journal voucher) | `web/apps/api/src/routes/crm.ts` `GET/PUT /journal/:vchNo`, `web/apps/api/src/modules/finance/journal.ts` `getJournal`/`editJournal` | The journal voucher must be reopenable and editable through the API (the reader/editor already existed; only the routes were missing). | N128 |
+| G138 | High | Finance vouchers / frontend lifecycle | `unified/src/csharp/DataCareNext/TR_CONTRA.cs` | `web/apps/web/app/(app)/txn/contra/page.tsx` | The finance-voucher pages were create-only in the UI even though the backend supports reopen/edit/delete/print; the operator must be able to load, edit, delete and print a saved voucher from the screen. Contra is the first page wired (template for the rest). | N129 |
 
 ## 4. Decisions D23–D28
 
@@ -937,6 +938,23 @@ description as the narration, a pre-existing getJournal display detail).
 Done when: a posted journal reopens and edits through the API.
 
 
+### N129 — Contra page full lifecycle UI (G138, Stage D frontend)
+
+A fresh capability audit found the real operator-blocking gap is not the backend but the FRONTEND: the
+finance-voucher pages (contra, journal, ledger-adjust, employee-jv, payment, receipt, fine-jv) were
+create-only in the UI even though the backend has reopen/edit/delete/print. N129 wires the full lifecycle
+into the contra page as the template: a `loadContra(vchNo)` that GETs `/contra/:vchNo` and repopulates the
+form, a submit that PUTs when editing (POSTs when new, with a New button + edit-aware button label), and the
+reusable `<VoucherList table="CONTRA_DATA" book deleteBase="/contra" onLoad printHref>` for the recent list
+(reopen/delete/print). Verified LIVE in the browser: logged in, opened the contra page (renders cleanly, no
+console errors, CON book pre-selected), filled Dr BANK / Cr CASH 3000 (Balanced ✓), saved — "Contra posted
+— Voucher #2". The API-level round-trip (POST -> recent list -> PUT edit 5000->7500 -> reopen) was also
+verified.
+
+Done when: the operator can create, reopen, edit, delete and print a contra from the screen. (Follow-up
+slices replicate this template to journal, ledger-adjust, employee-jv, payment, receipt, fine-jv.)
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -986,6 +1004,7 @@ Done when: a posted journal reopens and edits through the API.
 | N126 | — | implemented-unverified, evidence in this change (G135: Dhrn Os Letter pledge-outstanding document; verified live HTML 200) |
 | N127 | — | implemented-unverified, evidence in this change (G136: Tour Sales via the wholesale engine on a TOUR SALES book; verified live full lifecycle) |
 | N128 | — | implemented-unverified, evidence in this change (G137: journal reopen+edit routes; verified live round-trip) |
+| N129 | — | implemented-unverified, evidence in this change (G138: contra page full lifecycle UI; verified live in browser) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
