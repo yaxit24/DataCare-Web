@@ -5367,6 +5367,29 @@
         "web/apps/api/src/modules/rbac/routePolicy.ts"
       ],
       "statusNote": "PaymentForm (receipt+payment) was create-only. Wired single-party reopen/edit/delete + VoucherList(CASH_DATA/PAY_DATA). Fixed 2 backend defects: editReceipt RECEIPT_WRITE_TABLES now includes ROJ_MEL_DATA (receipt edit was colliding on ROJ_MEL_DATA_pkey); payment DELETE resolves mode from persisted PAY_DATA VCH_TYPE (RLS-scoped) when the body omits it. Added PUT /receipts/:vchNo (editReceipt); payment edit deferred (postPayment lacks the lifecycle hook). Universe 637->638. VERIFIED LIVE via web /api proxy: receipt 5000 -> edit 7500 -> reopen 7500; payment post -> delete(no mode) 200. Verified: typecheck both/lint/format/typecheck:tests/size/kernel/register; web 646; full API+DB 318/3492."
+    },
+    {
+      "id": "N138",
+      "status": "implemented-unverified",
+      "action": "Wire the fine-jv page lifecycle, add PUT /fine-jv/:vchNo, and provision the FINE JV (FJV) book",
+      "parentLabels": "P05; D-lifecycle-frontend",
+      "startAfter": [
+        "N137"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "fine-jv page load/edit/delete; PUT /fine-jv/:vchNo; FJV book provisioned; route universe 639; full API+DB 318/3492, web 646, gates; verified live",
+      "gapIds": "G147",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/web/app/(app)/txn/fine-jv/page.tsx",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/apps/api/test/provisioning.db.test.ts"
+      ],
+      "statusNote": "Fine JV page was create-only and no FINE JV book was provisioned (POST 409 book-unavailable). Added PUT /fine-jv/:vchNo (editFineJv), wired the page (loadFineJv + PUT-on-edit + New + VoucherList CONTRA_DATA), provisioned the FJV (FINE JV, inward) book in seedCompany (no slots -> 3 default legs; book 37->38, BOOK_DETL 127->130). Universe 638->639. VERIFIED LIVE via web /api proxy: 10-fine gold WALKIN->CASH post 201 -> edit 15 -> reopen 15. Verified: typecheck/lint/format/typecheck:tests/size/register; web 646; full API+DB 318/3492; provisioning.db 21 tests."
     }
   ],
   "amendments": [

@@ -90,8 +90,9 @@ describe('route policy registry', () => {
     // N127 (G136) adds the Tour Sales lifecycle (4 routes): 631 + 4 = 635.
     // N128 (Stage D) adds journal reopen+edit (2 routes): 635 + 2 = 637.
     // N137 (Stage D) adds receipt edit PUT /receipts/:vchNo: 637 + 1 = 638.
-    expect(routes).toHaveLength(638);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(638);
+    // N138 (Stage D) adds fine-jv edit PUT /fine-jv/:vchNo: 638 + 1 = 639.
+    expect(routes).toHaveLength(639);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(639);
 
     const policies = routes.map((route) => ({
       ...route,

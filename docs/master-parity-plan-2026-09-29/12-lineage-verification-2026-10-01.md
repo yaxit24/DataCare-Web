@@ -157,6 +157,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G144 | High | Customer Entry / frontend page | `unified/src/csharp/DataCareNext/UT_CUST_ENTRY.cs` | `web/apps/web/app/(app)/txn/customer-entry/page.tsx`, `web/apps/web/lib/nav.ts` | Customer Entry (backend N124) had no frontend page; build an employee-scoped multi-row CRM grid with load/edit/delete by employeeCode+vchNo. | N135 |
 | G145 | Med | Dhrn Os Letter / frontend page | `unified/src/csharp/DataCareNext/RP_DHRN_OS.cs` | `web/apps/web/app/(app)/txn/dhrn-os-letter/page.tsx`, `web/apps/web/lib/nav.ts` | The Dhrn Os Letter (backend N126) had no UI; add a party + as-of page that opens the HTML/PDF letter from GET /dhrn/os-letter. | N136 |
 | G146 | High | Receipt/Payment / frontend lifecycle + edit fixes | `unified/src/csharp/DataCareNext/TR_CASH.cs` | `web/apps/web/components/PaymentForm.tsx`, `web/apps/api/src/modules/finance/finance.ts`, `web/apps/api/src/routes/txn.ts` | The receipt/payment pages were create-only; add reopen/delete (both) + edit (receipt) in the UI, fix editReceipt to reverse ROJ_MEL_DATA, and make the payment delete resolve its mode from the persisted voucher. | N137 |
+| G147 | High | Fine JV / frontend lifecycle + book | `unified/src/csharp/DataCareNext/MDI_FORM.cs:8360` (FINE JV) | `web/apps/web/app/(app)/txn/fine-jv/page.tsx`, `web/apps/api/src/routes/txn.ts`, `web/apps/api/src/modules/ops/seedCompany.ts` | The Fine JV page was create-only and no FINE JV book was provisioned (POST 409 book-unavailable). Add PUT /fine-jv/:vchNo, wire the page lifecycle, and provision the FJV book. | N138 |
 
 ## 4. Decisions D23–D28
 
@@ -1078,6 +1079,20 @@ path the VoucherList uses).
 Done when: the operator can reopen/delete receipts and payments and edit a receipt from the screen.
 
 
+### N138 — Fine JV lifecycle UI + FINE JV book provisioning (G147, Stage D)
+
+The Fine JV (metal-weight transfer) page was create-only, and a provisioned company had no FINE JV book, so
+every save returned 409 "book-unavailable". N138 adds `PUT /fine-jv/:vchNo` (editFineJv existed; route
+universe 638 -> 639), wires the page lifecycle (loadFineJv GETs /fine-jv/:vchNo + repopulates; submit PUTs
+when editing; a New button; `<VoucherList table="CONTRA_DATA" deleteBase="/fine-jv">` since fine-jv stores
+in CONTRA_DATA under its own FJV book), and provisions the FJV (FINE JV, inward) book in seedCompany (the
+transfer needs no BOOK_DETL slots, so it takes the 3 default legs). Provisioning counts updated (book 37 ->
+38, BOOK_DETL 127 -> 130). Verified live via the web `/api` proxy: a 10-fine gold transfer WALKIN -> CASH
+posted (201), edited to 15 (200) and reopened at 15.
+
+Done when: the operator can create, reopen, edit and delete a fine JV from the screen on a provisioned company.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -1136,6 +1151,7 @@ Done when: the operator can reopen/delete receipts and payments and edit a recei
 | N135 | — | implemented-unverified, evidence in this change (G144: Customer Entry frontend page; verified via the web /api proxy) |
 | N136 | — | implemented-unverified, evidence in this change (G145: Dhrn Os Letter frontend page; verified page 200 + letter 200) |
 | N137 | — | implemented-unverified, evidence in this change (G146: receipt/payment lifecycle UI + editReceipt ROJ_MEL_DATA fix + payment-delete mode resolution; verified via the web /api proxy) |
+| N138 | — | implemented-unverified, evidence in this change (G147: fine-jv lifecycle UI + FINE JV book provisioning; verified live) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

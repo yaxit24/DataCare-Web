@@ -374,6 +374,17 @@ const BOOKS: {
   },
   { book: 'JV', name: 'Journal', mainBook: 'JOURNAL', inout: 'I', acCode: 'KASAR' },
   { book: 'CON', name: 'Contra', mainBook: 'CONTRA', inout: 'I', acCode: 'CASH' },
+  // Fine JV (desktop Fine Jv Entry, MDI_FORM.cs:8360 CurBookHelp('FINE JV')): a pure metal-weight transfer
+  // between two parties (CONTRA_DATA + balanced AC_DATA fine legs; no money, no book slots). Without this
+  // book the Fine JV screen has no book to select on a provisioned company (N138).
+  {
+    book: 'FJV',
+    name: 'Fine JV',
+    mainBook: 'FINE JV',
+    inout: 'I',
+    acCode: 'CASH',
+    shortName: 'FJV',
+  },
   // Card Receipt / CARD ADJUST (desktop TR_CARD_REC, MDI_FORM.cs:8457 CurBookHelp("CARD ADJUST")).
   // The 8-leg card ledger resolves the commission/charges account from BOOK_DETL slot 1 and the
   // cash/control account (for CASH_PAID cashback) from slot 2 (Ac_Ledr.cs:1792-1804); without this

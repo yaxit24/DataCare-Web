@@ -316,7 +316,7 @@ import {
   gstr2Purchase,
 } from '../modules/reports/reports3.js';
 import { postAcOpening, deleteAcOpening } from '../modules/finance/acOpening.js';
-import { deleteFineJv, getFineJv, postFineJv } from '../modules/finance/fineJv.js';
+import { deleteFineJv, getFineJv, postFineJv, editFineJv } from '../modules/finance/fineJv.js';
 import { deleteBillSettlement, listOpenBills, settleBills } from '../modules/finance/billToBill.js';
 import {
   deleteBullionSale,
@@ -7144,23 +7144,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
   /**
-   * Scheme instalment deletion — plan item F1.2.
-   *
-   * WHY THIS IS THE MOST IMPORTANT DELETE IN PHASE F1
-   * ================================================
-   * Scheme is the **highest-volume workflow in the business**: 841 vouchers and 1635 day-book rows in the
-   * reference year — more than sales (189 vouchers, 556 day-book rows). It had no reversal at all, so an
-   * operator who took a wrong instalment could not undo it.
-   *
-   * `deleteSchemeInstallment` already existed (scheme.ts:673) and was already routed — but only for book
-   * **075** (MEMB OPENING, `MBOP`) above. The live instalment book is **074** (MEMB ENTRY, `MBENT`), which
-   * carries all 841 vouchers. Both write AD_DATA (`BOOK_TBL_NAME='AD_DATA'` on both books), so the same
-   * reversal is correct; only the book and the audit's VCH_TYPE differ.
-   *
-   * Book and short name are taken from the real BOOK_DATA rows:
-   *     074 | Member Monthly Entry | MBENT | AD_DATA | MEMB ENTRY
-   *     075 | Member Opening Entry | MBOP  | AD_DATA | MEMB OPENING
-   * VCH_TYPE equals BOOK_SNAME on 39 of 40 real books, which is why 'MBENT' is the audit classification.
+   * Scheme instalment deletion (F1.2) — the highest-volume workflow (841 vouchers). deleteSchemeInstallment
+   * (scheme.ts) reverses AD_DATA; the live book is 074 (MEMB ENTRY, MBENT) — 075 (MEMB OPENING, MBOP) above
+   * is the opening variant. VCH_TYPE = BOOK_SNAME is the audit classification.
    */
   app.delete('/scheme/installment/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
@@ -7612,20 +7598,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     });
   });
   /**
-   * Contra deletion (desktop TR_CONTRA).
-   *
-   * WHY THIS EXISTS
-   * ===============
-   * `POST /contra` had no reversal, so a contra voucher could be created and never undone. That matters
-   * because deleting and re-entering is how this business actually corrects a voucher: `USER_DATA` — the
-   * per-column edit audit — holds ZERO rows for the year, while `DELETE_DATA` holds 72 across 17 families,
-   * of which **6 are CONTRA**. It is the fourth most-deleted family in the company's real data.
-   *
-   * `deleteContra` (finance.ts:1409) is the purpose-built reversal: it reads the full CONTRA_DATA detail set
-   * through `editIdentityTx` with the header's `extraColumns`, so the delete audit carries the voucher's own
-   * amounts rather than zeros. An earlier revision of this route delegated to `deleteJournal`, which reverses
-   * the same three tables but does not read those columns.
-   */
+   * Contra deletion. `deleteContra` (finance.ts) is the purpose-built reversal: it reads the full CONTRA_DATA
+   * detail via editIdentityTx extraColumns so the DELETE_DATA audit carries the voucher's own amounts (not
+   * zeros, as a generic deleteJournal would). */
   /**
    * REOPENING A SAVED VOUCHER (F2.1). These GET /:vchNo routes expose get* lifecycle functions that already
    * existed in their modules but were never routed (a saved voucher was unreachable to view/reprint). Every
@@ -7701,6 +7676,24 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.get('/fine-jv/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, () => getFineJv(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.put('/fine-jv/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      editFineJv(
+        prisma,
+        {
+          scope: scopeOf(req),
+          fromAc: b.fromAc,
+          toAc: b.toAc,
+          fineWt: Number(b.fineWt),
+          metal: b.metal,
+          vchDate: b.vchDate,
+        },
+        (req.params as any).vchNo,
+      ),
+    );
   });
   app.get('/labour-invoice/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
