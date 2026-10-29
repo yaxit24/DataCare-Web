@@ -163,6 +163,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G150 | High | CI health / release gates | `.github/workflows/ci.yml`, `web/apps/api/src/modules/finance/cardReceipt.ts`, `web/apps/web/components/PaymentForm.tsx`, `web/parity/depth-parity-baseline.json` | `web/apps/api/src/modules/finance/cardReceipt.ts` `cardReceiptInputFromBody`, `web/apps/web/components/PaymentForm.tsx`, `web/parity/unreachable-triage.json`, `web/parity/depth-parity-baseline.json` | CI red since N124: the `cardReceiptInputFromBody` export was never committed (lived in an uncommitted working-tree change a `git stash` dropped), so a clean `tsc -p` failed TS2724 — masked locally by the dirty tree across ~16 merges. Also the PaymentForm `resetForm()`-after-save wiped the save confirmation (real-stack journey timeout), and the depth ceiling drifted 96→102 from the Stage D/E writers. Commit the export, keep `res` after a new save, resync the depth baseline + triage. | N141 |
 | G151 | Med | Batch receipt / kasar write-off | `unified/src/csharp/DataCareNext/Ac_Ledr.cs:571-581` | `web/apps/api/src/modules/finance/batchReceipt.ts`, `web/apps/api/src/modules/finance/finance.ts` `kasarAccountTx`, `web/apps/api/test/batchReceiptKasar.db.test.ts` | `postBatchReceipt` required the caller to name the kasar (write-off) account, but the batch grid has no kasar-account column and the route forwards only `{scope,vchDate,lines}`, so every on-screen write-off on a batch collection was refused. The single-row receipt/payment path already resolves BOOK_DETL slot 2 (desktop `Ac_Ledr.cs:571-581`); the batch path must do the same. | N142 |
 | G152 | High | Dhiran pledge issue / reopen+edit | `unified/src/csharp/DataCareNext/TR_DHRN_ISU.cs` | `web/apps/api/src/modules/dhrn/dhrn.ts` `getDhrnIssue`/`editDhrnIssue`, `web/apps/api/src/routes/txn.ts` `GET/PUT/DELETE /dhrn/issue/:isuNo`, `web/apps/web/app/(app)/txn/dhrn-issue/page.tsx` | The pledge issue (a core daily workflow) could be created and deleted but not reopened or edited: `issueDhrn`/`deleteDhrn` existed but there was no reader/editor or GET/PUT routes, and the page was create-only (no VoucherList). Add `getDhrnIssue`/`editDhrnIssue` mirroring the N125 interest pattern, the three routes, and the lifecycle UI. | N143 |
+| G153 | High | Dhiran pledge receipt / reopen+edit + ISU_REC restore | `unified/src/csharp/DataCareNext/TR_DHRN_REC.cs:6376` | `web/apps/api/src/modules/dhrn/dhrn.ts` `getDhrnReceipt`/`editDhrnReceipt`/`deleteDhrn`, `web/apps/api/src/routes/crm.ts` `registerDhrnLifecycleRoutes`, `web/apps/web/app/(app)/txn/dhrn-receipt/page.tsx` | The pledge receipt (redemption) was create-only, and worse, deleting a receipt did NOT restore the issue's `ISU_REC` flag, so a reversed receipt left the pledge permanently marked redeemed (desktop `TR_DHRN_REC.cs:6376` sets it back to `'N'`). Add reader/editor + routes, restore `ISU_REC='N'` on receipt delete/edit, and wire the lifecycle UI. | N144 |
 
 ## 4. Decisions D23–D28
 
@@ -1210,6 +1211,37 @@ as the verified contra reopen (coBook arrives on the page-context ticket the bro
 
 Done when: an operator can load a saved pledge, change its principal or collateral and re-save.
 
+### N144 — Dhiran pledge receipt reopen/edit/delete + ISU_REC restore (G153, Stage D)
+
+Companion to N143. The pledge **receipt** (redemption) was create-only — `receiveDhrn` and
+`deleteDhrn` existed but there was no `getDhrnReceipt`/`editDhrnReceipt`, no GET/PUT routes, and the
+page imported only `get`/`post`. There was also a correctness defect: `deleteDhrn` reversed the
+receipt's own rows but did NOT restore the issue's `ISU_REC` flag, so a reversed (or edited) receipt
+left the pledge permanently marked redeemed — diverging from desktop `TR_DHRN_REC.cs:6376`, which
+sets `DHRN_ISU_DATA.ISU_REC='N'` on delete.
+
+N144 adds `getDhrnReceipt` (DHRN_REC_DATA + its DHRN_REC_DETL released items) and `editDhrnReceipt`
+(`editIdentityTx` + `replaceWriteSetTx(DHRN_REC_TABLES)` + `receiveDhrn` lifecycle; it restores
+`ISU_REC='N'` before the repost so the repost's outstanding check sees the pre-receipt balance, and
+`receiveDhrn` re-sets `ISU_REC='Y'` on success). `deleteDhrn` now reads the receipt's
+ISU_YRCD/ISU_DBCD/ISU_NO before reversal and restores `ISU_REC='N'` for the receipt case.
+
+To keep `web/apps/api/src/routes/txn.ts` under its size ceiling (both this and N143 add three routes each), all six
+dhrn issue+receipt lifecycle routes were extracted into a new `registerDhrnLifecycleRoutes` in
+`web/apps/api/src/routes/crm.ts`; the issue/receipt body mappers are passed in (they also feed the POST handlers).
+txn.ts shrank and its ceiling was lowered. Route universe 644 → 647. The page was rewired with
+`loadReceipt`/`resetForm`/`VoucherList`, PUT-when-loaded and Update/New.
+
+Verified: `dhrnReceiptLifecycle.db.test.ts` (3 cases — a receipt marks the issue redeemed and delete
+restores `ISU_REC='N'`; reopen into input shape; edit a partial repayment to full redeems the pledge)
+green; routePolicy + routeInputForwarding green; full API+DB 3502. Live: `POST /dhrn/issue` → 201 and
+`POST /dhrn/receipt` → 201 (outstanding 0). The delete-restore is proven by the DB test (explicit
+scope); the GET/DELETE routes follow the identical `scopeOf(req)` pattern as the verified contra
+reopen (coBook arrives on the page-context ticket the browser sends).
+
+Done when: an operator can load a saved redemption, change it and re-save, and deleting one reopens
+the pledge for a fresh redemption.
+
 
 ## 6. Status corrections
 
@@ -1275,6 +1307,7 @@ Done when: an operator can load a saved pledge, change its principal or collater
 | N141 | — | implemented-unverified, evidence in this change (G150: committed the missing cardReceiptInputFromBody export, fixed the PaymentForm save-confirmation regression, resynced the depth baseline + triage; PR #109 all CI jobs green, main run 40827479158 success) |
 | N142 | — | implemented-unverified, evidence in this change (G151: batch-receipt kasar now resolves BOOK_DETL slot 2 via the shared kasarAccountTx; DB test 4/4, full API+DB 319/3496, live POST 201 was 400) |
 | N143 | — | implemented-unverified, evidence in this change (G152: dhrn pledge-issue reopen/edit/delete + lifecycle UI; route universe 641→644, DB test 3/3, full API+DB 320/3499, live POST 201 + PUT 200) |
+| N144 | — | implemented-unverified, evidence in this change (G153: dhrn pledge-receipt reopen/edit/delete + ISU_REC-restore fix; routes extracted to crm.ts, universe 644→647, DB test 3/3, full API+DB 3502, live POST 201) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

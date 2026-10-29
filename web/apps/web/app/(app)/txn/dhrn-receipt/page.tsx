@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
-import { get, post, ApiError } from '../../../../lib/api';
+import { get, post, put, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
+import { VoucherList } from '../../../../components/VoucherList';
 import { LookupPicker } from '../../../../components/LookupPicker';
 
 // Dhrn (pledge loan) repayment. A receipt is booked against an issue voucher (ISU_NO): it repays
@@ -55,6 +56,7 @@ export default function DhrnReceiptPage() {
   const [extra, setExtra] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [checking, setChecking] = useState(false);
+  const [loadedVch, setLoadedVch] = useState('');
 
   // GET /dhrn/{isuNo}/outstanding → { isuNo, outstanding }
   async function checkOutstanding() {
@@ -72,6 +74,56 @@ export default function DhrnReceiptPage() {
       setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
     } finally {
       setChecking(false);
+    }
+  }
+
+  function resetForm() {
+    setLoadedVch('');
+    setIsuNo('');
+    setBorrowerAc('');
+    setBorrowerName('');
+    setPrincipalRepaid('');
+    setInterest('');
+    setOs(null);
+    setExtra({});
+    setRes(null);
+    setErr('');
+  }
+
+  // Reopen a saved pledge receipt (GET /dhrn/receipt/:vchNo) into the form for edit.
+  async function loadReceipt(vchNo: string) {
+    setErr('');
+    setRes(null);
+    setBusy(true);
+    try {
+      const d = await get<any>(`/dhrn/receipt/${encodeURIComponent(vchNo)}`);
+      setLoadedVch(String(d.voucherNo ?? vchNo));
+      setIsuNo(String(d.isuNo ?? ''));
+      setBorrowerAc(String(d.borrowerAc ?? ''));
+      setBorrowerName(String(d.borrowerName ?? ''));
+      setPrincipalRepaid(d.principalRepaid ? String(d.principalRepaid) : '');
+      setInterest(d.interest ? String(d.interest) : '');
+      setExtra({
+        billNo: String(d.billNo ?? ''),
+        fromDate: String(d.fromDate ?? ''),
+        toDate: String(d.toDate ?? ''),
+        packetNo: String(d.packetNo ?? ''),
+        loanType: String(d.loanType ?? ''),
+        interestKasar: d.interestKasar ? String(d.interestKasar) : '',
+        interestDays: d.interestDays ? String(d.interestDays) : '',
+        interestMonths: d.interestMonths ? String(d.interestMonths) : '',
+        empCode: String(d.empCode ?? ''),
+        goldAmount: d.goldAmount ? String(d.goldAmount) : '',
+        goldWeight: d.goldWeight ? String(d.goldWeight) : '',
+        vchDesc: String(d.vchDesc ?? ''),
+        isuBook: String(d.isuBook ?? ''),
+        isuYear: String(d.isuYear ?? ''),
+        intPrc: d.intPrc ? String(d.intPrc) : '',
+      });
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -130,7 +182,12 @@ export default function DhrnReceiptPage() {
         toDate: extra.toDate || undefined,
         vchDesc: extra.vchDesc || undefined,
       };
-      const out = await post('/dhrn/receipt', body);
+      const out = loadedVch
+        ? await put<{ vchNo: number; outstanding: number }>(
+            `/dhrn/receipt/${encodeURIComponent(loadedVch)}`,
+            body,
+          )
+        : await post<{ vchNo: number; outstanding: number }>('/dhrn/receipt', body);
       setRes(out);
       setOs(Number(out.outstanding)); // reflect post-repayment outstanding
     } catch (e) {
@@ -234,8 +291,13 @@ export default function DhrnReceiptPage() {
           <div className="toolbar" style={{ marginTop: 10 }}>
             <span className="spacer" />
             <button className="primary" disabled={busy}>
-              {busy ? 'Saving…' : 'Receive Repayment'}
+              {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : 'Receive Repayment'}
             </button>
+            {loadedVch && (
+              <button type="button" className="ghost" onClick={resetForm} disabled={busy}>
+                New
+              </button>
+            )}
           </div>
         </div>
         <details style={{ marginTop: 8 }}>
@@ -254,10 +316,19 @@ export default function DhrnReceiptPage() {
         </details>
       </form>
 
+      <VoucherList
+        table="DHRN_REC_DATA"
+        book={coBook}
+        deleteBase="/dhrn/receipt"
+        onLoad={(vchNo) => loadReceipt(vchNo)}
+      />
+
       {err && <div className="msg err">{err}</div>}
       {res && (
         <div className="panel">
-          <div className="msg ok">Received — Voucher #{res.vchNo}</div>
+          <div className="msg ok">
+            {loadedVch ? 'Updated' : 'Received'} — Voucher #{res.vchNo}
+          </div>
           <div className="tiles">
             <div className="tile">
               <div className="muted">vchNo</div>

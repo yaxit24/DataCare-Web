@@ -186,9 +186,6 @@ import {
   receiveLoan,
   issueLoan,
   outstanding,
-  getDhrnIssue,
-  editDhrnIssue,
-  deleteDhrn,
 } from '../modules/dhrn/dhrn.js';
 import { fineInout, deleteFineInout } from '../modules/inout/fineInout.js';
 import { listUsers, createUser, setUserRights } from '../modules/rbac/users.js';
@@ -529,7 +526,12 @@ import {
   deleteCardReceipt,
   cardReceiptInputFromBody,
 } from '../modules/finance/cardReceipt.js';
-import { registerCrmRoutes, registerLoanInterestRoutes, registerTourSaleRoutes } from './crm.js';
+import {
+  registerCrmRoutes,
+  registerLoanInterestRoutes,
+  registerTourSaleRoutes,
+  registerDhrnLifecycleRoutes,
+} from './crm.js';
 import {
   cashBook,
   partyStatement,
@@ -3098,29 +3100,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const b = body(req);
     return run(reply, 201, () => issueDhrn(prisma, dhrnIssuePayload(req, b)));
   });
-  app.get('/dhrn/issue/:isuNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    return run(reply, 200, () => getDhrnIssue(prisma, scopeOf(req), (req.params as any).isuNo));
-  });
-  app.put('/dhrn/issue/:isuNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'update')) return;
-    return run(reply, 200, () =>
-      editDhrnIssue(prisma, dhrnIssuePayload(req, body(req)), (req.params as any).isuNo),
-    );
-  });
-  app.delete('/dhrn/issue/:isuNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    const s = scopeOf(req);
-    const d = {
-      scope: s,
-      vchNo: (req.params as any).isuNo,
-      headerTable: 'DHRN_ISU_DATA' as const,
-      book: s.coBook ?? '',
-      vchType: 'DHRN',
-      deleteUser: sess(req).sub,
-    };
-    return run(reply, 200, () => deleteDhrn(prisma, d));
-  });
   app.post('/dhrn/receipt', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
@@ -3144,6 +3123,13 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     isuNo: (req.params as any).isuNo,
     outstanding: await outstanding(prisma, readScope(req) as any, (req.params as any).isuNo),
   }));
+  // Dhiran issue + receipt reopen/edit/delete live in routes/crm.ts (size-budget split); they reuse
+  // the issue/receipt body mappers defined above.
+  registerDhrnLifecycleRoutes(app, {
+    ...extraRouteHelpers,
+    issuePayload: dhrnIssuePayload,
+    receiptPayload: dhrnReceiptPayload,
+  });
   app.post('/inout/fine', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
@@ -4678,9 +4664,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
 
   // ---- Data repair console (desktop MS_UPDATE) ----
-  // The whole console is admin-only in routePolicy.ts (ADMIN_ONLY + SCOPED_ADMIN_ONLY), so central
-  // authorization has already refused a non-administrator before any handler here runs. `guard` re-asserts
-  // that the central hook authorized this request; a destructive apply additionally requires a reason,
+  // Admin-only in routePolicy.ts (ADMIN_ONLY + SCOPED_ADMIN_ONLY), so the central hook already refused a
+  // non-administrator; `guard` re-asserts it. A destructive apply additionally requires a reason,
   // re-authentication and a verified recent backup, all enforced inside applyRepair.
   app.get('/utilities/data-repair/operations', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
@@ -6200,9 +6185,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
 
   /**
-   * Verify the configured integration credentials with a real round-trip. Admin-gated because it
-   * contacts external providers. Returns no secret values, only a per-provider verdict — and reports SMS
-   * as unverifiable rather than guessing, because those gateways have no authentication endpoint.
+   * Verify the configured integration credentials with a real round-trip. Admin-gated because it contacts
+   * external providers. Returns no secret values, only a per-provider verdict — and reports SMS as
+   * unverifiable rather than guessing, because those gateways have no authentication endpoint.
    */
   app.post('/integrations/verify-credentials', auth, async () => ({
     checks: await verifyIntegrationCredentials(),
@@ -7166,11 +7151,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
   /**
-   * Scheme enrolment removal (plan item F1.2). Enrolment is keyed by scheme + member, not a voucher
-   * number: `enrollScheme` creates the AD_MEMB record and the instalments that follow are the vouchers,
-   * so this takes the member identity and `deleteEnrollment` (scheme.ts:738) removes the AD_MEMB row.
-   * Desktop shows 3 MEMB ENTRY deletions in DELETE_DATA. Removing an enrolment that still has instalments
-   * would orphan them, so the module guards that and the route surfaces the guard.
+   * Scheme enrolment removal (plan F1.2). Keyed by scheme + member, not a voucher number: enrollScheme
+   * creates the AD_MEMB record and the instalments are the vouchers, so this takes the member identity and
+   * deleteEnrollment (scheme.ts:738) removes the AD_MEMB row. Removing an enrolment that still has
+   * instalments would orphan them, so the module guards that and the route surfaces the guard.
    */
   app.delete('/scheme/enroll', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
@@ -7599,12 +7583,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     });
   });
   /**
-   * Contra deletion. `deleteContra` (finance.ts) is the purpose-built reversal: it reads the full
-   * CONTRA_DATA detail via editIdentityTx extraColumns so the DELETE_DATA audit carries the voucher's own
-   * amounts (not zeros, as a generic deleteJournal would).
-   *
-   * REOPENING A SAVED VOUCHER (F2.1): these GET /:vchNo routes expose get* lifecycle functions that existed
-   * in their modules but were never routed. Every one shares the `(prisma, scope, voucherNo)` signature.
+   * Contra deletion. `deleteContra` (finance.ts) reads the full CONTRA_DATA detail via editIdentityTx
+   * extraColumns so the DELETE_DATA audit carries the voucher's own amounts (not zeros). REOPENING (F2.1):
+   * the GET /:vchNo routes expose get* lifecycle functions, each `(prisma, scope, voucherNo)`.
    */
   app.get('/contra/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
