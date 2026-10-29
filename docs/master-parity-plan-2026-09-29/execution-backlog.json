@@ -5215,6 +5215,28 @@
         "web/apps/web/app/(app)/txn/journal/page.tsx"
       ],
       "statusNote": "Applied the N129 contra template to the journal page: loadJournal GETs /journal/:vchNo and rebuilds the Dr/Cr grid+narration; submit PUTs when editing (POSTs when new) + New button + edit-aware label; VoucherList(table=CONTRA_DATA, deleteBase=/journal, onLoad, printHref) for reopen/delete/print (journal rows are in CONTRA_DATA filtered by JV). VERIFIED LIVE: journal page renders cleanly (no console errors), JV book pre-selected, Dr/Cr grid + Post button present; GET/PUT/delete/print APIs live-verified in N128. Verified: lint/format/typecheck:tests; web 646."
+    },
+    {
+      "id": "N131",
+      "status": "implemented-unverified",
+      "action": "Wire reopen/edit/delete lifecycle into the ledger-adjust + employee-jv pages; allow-list LDR_ADJ_DATA/EMP_DATA in the recent-voucher list",
+      "parentLabels": "P05; D-lifecycle-frontend",
+      "startAfter": [
+        "N130"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "both pages load/edit/delete; LDR_ADJ_DATA/EMP_DATA allow-listed; full API+DB 318/3492, web 646, gates; verified via the web /api proxy",
+      "gapIds": "G140",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/web/app/(app)/txn/ledger-adjust/page.tsx",
+        "web/apps/web/app/(app)/txn/employee-jv/page.tsx",
+        "web/apps/api/src/modules/vouchers/list.ts"
+      ],
+      "statusNote": "Applied the N129/N130 template to ledger-adjust + employee-jv (were create-only): added BookSelect (JV/JOURNAL) + load<X>(vchNo) GET + PUT-on-edit + New button + VoucherList(LDR_ADJ_DATA / EMP_DATA). Extended modules/vouchers/list.ts ALLOWED with LDR_ADJ_DATA + EMP_DATA and the amount detector with DIFF_AMT + SALARY_AMT. VERIFIED via the web /api proxy: ledger-adjust POST 201 -> recent list (total 250) -> reopen {acCode WALKIN, amount 250, direction debit, remark}. (Also found + fixed the harness gotcha: Next bakes API_ORIGIN at build time, so the web must be built with API_ORIGIN=http://127.0.0.1:4410 for the stack proxy to reach the API.) Verified: lint/format/typecheck/typecheck:tests/size; web 646; full API+DB 318/3492."
     }
   ],
   "amendments": [
