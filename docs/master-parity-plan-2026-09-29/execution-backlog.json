@@ -5280,6 +5280,28 @@
         "web/apps/web/lib/nav.ts"
       ],
       "statusNote": "Tour Sales (backend N127) had no UI entry point. Added a tour-sale workflow to WHOLESALE_WORKFLOWS (endpoint /tour-sales, mainBook TOUR SALES), a thin /txn/tour-sales page using the shared WholesaleVoucherForm, and a Sales nav entry. The shared form already does create/load/edit/delete keyed off the endpoint. VERIFIED LIVE in the browser: page renders with book filtered to TSL - Tour Sales, issue/receive grids, Load/Save/Delete/New buttons, no console errors. Verified: typecheck/lint/format/typecheck:tests; web 646."
+    },
+    {
+      "id": "N134",
+      "status": "implemented-unverified",
+      "action": "Build the Card Receipt frontend page on the CRD (CARD ADJUST) book with the card/bank commission fields + full lifecycle",
+      "parentLabels": "P05; missing-workflows-frontend",
+      "startAfter": [
+        "N133"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "card-receipt page serves + full lifecycle via the web /api proxy; CARD_DATA allow-listed; web 646, gates; verified",
+      "gapIds": "G143",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/web/app/(app)/txn/card-receipt/page.tsx",
+        "web/apps/web/lib/nav.ts",
+        "web/apps/api/src/modules/vouchers/list.ts"
+      ],
+      "statusNote": "Card Rec (backend N123) had no page; the Card/UPI menu opened the generic receipt. Built /txn/card-receipt on the CRD book with customer/card-bank/card amount/card+bank comm %/sch %/cash paid/narration, a live preview of card comm/gross/bank comm/bank net (server authoritative), and full lifecycle (VoucherList CARD_DATA). Repointed the Card/UPI nav entry. Allow-listed CARD_DATA + CARD_AMT amount detection. VERIFIED: page 200 + web /api proxy lifecycle: 10000 @2%/1% -> gross 10200/bank net 10098/party net 10000 -> recent -> reopen. Verified: typecheck both/lint/format/typecheck:tests; web 646; voucher-list scope test green."
     }
   ],
   "amendments": [
