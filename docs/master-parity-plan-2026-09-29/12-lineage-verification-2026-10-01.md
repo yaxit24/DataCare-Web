@@ -160,6 +160,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G147 | High | Fine JV / frontend lifecycle + book | `unified/src/csharp/DataCareNext/MDI_FORM.cs:8360` (FINE JV) | `web/apps/web/app/(app)/txn/fine-jv/page.tsx`, `web/apps/api/src/routes/txn.ts`, `web/apps/api/src/modules/ops/seedCompany.ts` | The Fine JV page was create-only and no FINE JV book was provisioned (POST 409 book-unavailable). Add PUT /fine-jv/:vchNo, wire the page lifecycle, and provision the FJV book. | N138 |
 | G148 | High | Payment edit | `unified/src/csharp/DataCareNext/TR_CASH.cs` | `web/apps/api/src/modules/finance/finance.ts` `postPayment`/`editPayment`, `web/apps/api/src/routes/txn.ts` `PUT /payments/:vchNo`, `web/apps/web/components/PaymentForm.tsx` | Payment edit was unavailable (postPayment had no lifecycle-context hook). Refactor postPayment to the FinanceWriteContext pattern, write HD_VCH_NO + the hidden identity, add editPayment + PUT /payments/:vchNo, and enable payment edit in the UI. | N139 |
 | G149 | Med | Scheme instalment / edit | `unified/src/csharp/DataCareNext/TR_MEMB_ENT.cs` | `web/apps/api/src/routes/txn.ts` `PUT /scheme/installment/:vchNo`, `web/apps/api/src/modules/membership/scheme.ts` `editSchemeInstallment` | The scheme instalment (highest-volume workflow) could be created, reopened and deleted but not edited; expose editSchemeInstallment via a PUT route (extract a shared input helper). | N140 |
+| G150 | High | CI health / release gates | `.github/workflows/ci.yml`, `web/apps/api/src/modules/finance/cardReceipt.ts`, `web/apps/web/components/PaymentForm.tsx`, `web/parity/depth-parity-baseline.json` | `web/apps/api/src/modules/finance/cardReceipt.ts` `cardReceiptInputFromBody`, `web/apps/web/components/PaymentForm.tsx`, `web/parity/unreachable-triage.json`, `web/parity/depth-parity-baseline.json` | CI red since N124: the `cardReceiptInputFromBody` export was never committed (lived in an uncommitted working-tree change a `git stash` dropped), so a clean `tsc -p` failed TS2724 — masked locally by the dirty tree across ~16 merges. Also the PaymentForm `resetForm()`-after-save wiped the save confirmation (real-stack journey timeout), and the depth ceiling drifted 96→102 from the Stage D/E writers. Commit the export, keep `res` after a new save, resync the depth baseline + triage. | N141 |
 
 ## 4. Decisions D23–D28
 
@@ -1123,6 +1124,38 @@ separate provisioning concern; the route and field forwarding are verified by th
 
 Done when: a scheme instalment can be edited through the API with every input field forwarded.
 
+### N141 — Restore CI to green (G150, Phase-release)
+
+CI had been failing on every run since N124 (`febec1a`). Root cause: `web/apps/api/src/routes/txn.ts`
+imported `cardReceiptInputFromBody` from `web/apps/api/src/modules/finance/cardReceipt.ts`, but the export was never
+committed — it lived only in an uncommitted working-tree change that a later `git stash` workflow dropped. A
+clean checkout (CI, or `pnpm --filter @datacare/api build` = `tsc -p`) failed `TS2724: has no exported member
+'cardReceiptInputFromBody'`. Local `tsc --noEmit` passed only because the dirty working tree carried the
+export, masking the break across ~16 merges. N141 commits the 31-line body mapper.
+
+A second regression surfaced once the build was fixed and the `Real-stack browser journeys (zero mocks)` job
+ran: the `cash-receipt-payment` journey timed out waiting for `Saved — Voucher #1`. `PaymentForm.submit()`
+called `resetForm()` after a successful single-party save, and `resetForm()` sets `res = null`, immediately
+wiping the confirmation it had just set. The fix clears only the entry inputs after a new save and keeps
+`res`, matching the multi-line branch (which only resets its grid).
+
+A third failure was the `operator-reachable field depth did not worsen` gate: `API fields no screen can
+supply` rose 96 → 102. This is accumulated healthy growth, not a regression — the Stage D/E slices (card
+receipt, customer entry, loan interest, tour sale, the dhrn-interest rewrite, stock in/out and
+purchase/order refinements) added 367 API input fields; 361 are reachable from a screen and the 6 net
+unreachable rise is entirely server-derived/internal (BOOK_DETL-resolved posting slots, book-classification
+flags, writer-assigned voucher numbers, day-book projection rows, read-query keys). `web/parity/unreachable-triage.json`
+was resynced to the exact current 102-field set — 0 operator-class (every former operator-backlog gap was
+closed by the same slices), 71 serverDerived, 31 internal, each spot-checked against its writer — and
+`web/parity/depth-parity-baseline.json` was re-recorded (preserving `note`/`metricChanges`/`endToEnd`/`phases`
+that `--write` drops) with an honest `metricChanges` entry documenting the ceiling rise.
+
+Verified: clean-tree `pnpm --filter @datacare/api build`; all three real-stack journeys green; `depth:parity`
++ `depth:deadcells` green; the full local battery; PR #109 all CI jobs pass (static-gates, quality,
+Real-stack browser journeys); the main post-merge CI run (`40827479158`) completed `success`.
+
+Done when: CI is green on `main` again and a clean `tsc -p` build succeeds with an empty working tree.
+
 
 ## 6. Status corrections
 
@@ -1185,6 +1218,7 @@ Done when: a scheme instalment can be edited through the API with every input fi
 | N138 | — | implemented-unverified, evidence in this change (G147: fine-jv lifecycle UI + FINE JV book provisioning; verified live) |
 | N139 | — | implemented-unverified, evidence in this change (G148: payment edit — postPayment lifecycle refactor + editPayment + PUT; verified live) |
 | N140 | — | implemented-unverified, evidence in this change (G149: scheme-installment edit route + input-helper extraction; verified by the suite) |
+| N141 | — | implemented-unverified, evidence in this change (G150: committed the missing cardReceiptInputFromBody export, fixed the PaymentForm save-confirmation regression, resynced the depth baseline + triage; PR #109 all CI jobs green, main run 40827479158 success) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
