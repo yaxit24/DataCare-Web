@@ -5576,6 +5576,47 @@
         "web/apps/web/components/KarigarForm.tsx"
       ],
       "statusNote": "IMPLEMENTED. Wired reopen/edit/delete into the shared KarigarForm: loadVoucher (GET ${ep}/:vchNo?coBook -> stringify header + 40+ line fields; sub.load(perLine) rebuilds the stone sub-detail), resetForm (New), PUT-when-loaded, and a family-gated VoucherList (table KR_DATA) shown only when lifecycle === true (family karigar or old-item-sales; jobwork excluded, it has no backend lifecycle routes). UI-only: no new routes, no size-budget/route-universe impact. Lit up karigar-issue, karigar-receive and old-item-sales at once. Verified live on the running stack: karigar-receive create 201, GET reopen returns the line grid (pcs 2), PUT edit 200, GET reopen reflects the edit (pcs 3). Gates (typecheck/lint/format/typecheck:tests/size) green; web tests 9/9. The backend getKarigar/editKarigar/getOldItemSale/editOldItemSale were already covered by existing API tests."
+    },
+    {
+      "id": "N147",
+      "status": "planned",
+      "action": "Fine Sale / Fine Purchase edit: refactor createFineSalePurchase to accept a {tx,identity} lifecycle context and persist HD_VCH_NO (insertHiddenIdentityTx), add editFineSalePurchase (editIdentityTx + replaceWriteSetTx over CUT_DATA/CUT_DETL/CUT_STK_DETL/TAX_DATA/MAIN_STOCK/AC_DATA) + PUT /fine-sale/:vchNo, and wire the create-only fine-sale page with load/New/Update + VoucherList",
+      "parentLabels": "P10; D-lifecycle",
+      "startAfter": [
+        "N146"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "DB test: create->reopen->edit (change a line, stock + tax + ledger re-derived, no orphan CUT_DETL/MAIN_STOCK)->delete; route universe +1; full API+DB green; live create/reopen/edit",
+      "gapIds": "G156",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/api/src/modules/bullion/fineSalePurchase.ts",
+        "web/apps/web/app/(app)/txn/fine-sale/page.tsx"
+      ],
+      "statusNote": "READY, NOT IMPLEMENTED. fine-sale has createFineSalePurchase + getFineSalePurchase (N121 reopen reader) + deleteFineSalePurchase + POST/GET/DELETE routes, but NO editFineSalePurchase and NO PUT, and the page is create-only (imports only post). Unlike the dhrn writers, createFineSalePurchase uses nextVoucherNoTx (not createIdentityTx/insertHiddenIdentityTx), so the editIdentityTx pattern cannot resolve yet - the writer must first be refactored to the identity+context pattern. It also writes MAIN_STOCK, so the edit must reverse+rewrite the stock movement via replaceWriteSetTx (FINE_SALE_WRITE_TABLES already defined in deleteFineSalePurchase: CUT_DATA/CUT_DETL/CUT_STK_DETL/AC_DATA/TAX_DATA/MAIN_STOCK). Careful stock-path change - own slice."
+    },
+    {
+      "id": "N148",
+      "status": "planned",
+      "action": "Extend the KarigarForm lifecycle (N146) to the jobwork family: jobwork-issue/receive have full backend lifecycle at /mfg/jobwork-issue|receive/:vchNo (getMfg/editMfg/deleteMfg via checkedJobworkScope), but KarigarForm excludes jobwork from reopen because getMfg returns a different shape than getKarigar; add a jobwork-aware branch in loadVoucher that maps the getMfg reader output to the form Line shape",
+      "parentLabels": "P10; D-lifecycle",
+      "startAfter": [
+        "N146"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "Live: jobwork-receive create->reopen->edit via /mfg/jobwork-receive/:vchNo; KarigarForm lifecycle flag extended to jobwork with the correct reader mapping; gates green",
+      "gapIds": "G157",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/web/components/KarigarForm.tsx"
+      ],
+      "statusNote": "READY, NOT IMPLEMENTED. N146 wired KarigarForm reopen/edit but gated it to family karigar + old-item-sales because jobwork reads through a DIFFERENT backend (getMfg/MFG_KR_DATA via /mfg/jobwork-*, not getKarigar/KR_DATA). The jobwork GET/PUT/DELETE routes DO exist (txn.ts:3970-4035). Extending needs a jobwork branch in loadVoucher that fetches /mfg/jobwork-{issue,receive}/:vchNo and maps the getMfg reader shape (different field names) to the form Line + sub-detail, plus a jobwork VoucherList on the MFG_KR_DATA table. Separate because the reader mapping differs from karigar."
     }
   ],
   "amendments": [
