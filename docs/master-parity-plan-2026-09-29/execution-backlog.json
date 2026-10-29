@@ -5638,6 +5638,26 @@
         "web/apps/api/src/modules/vouchers/list.ts"
       ],
       "statusNote": "IMPLEMENTED. mfg-issue was create-only (imported only post) though getMfg/editMfg/deleteMfg and GET/PUT/DELETE /mfg/issue/:vchNo exist and are covered by mfgLifecycle.db.test.ts (9 tests: create/get/edit/persisted-date-lock/delete). The getMfg reader returns a rich line shape whose field names match the page Line interface EXACTLY (itCode, netWt, rtnChol, rtnGhis, itmGhat, totalGrossWt, the karigar/old-metal/material/provenance block). useSubDetail already exposes load() for the component sub-detail. Added loadVoucher (field-for-field stringify copy over the blank() keys; sub.load(perLine) for components), resetForm, PUT-when-loaded, New, and a VoucherList on MFG_DATA (added to the recent allow-list). UI-only: no new routes, no size/route-universe impact. Gates green; web tests 9/9. Live click deferred - the demo provisions no manufacturing book, so the backend (DB-tested) could not be clicked through the running stack; the wiring uses the identical reopen pattern verified live on six other workflows this session."
+    },
+    {
+      "id": "N150",
+      "status": "implemented-unverified",
+      "action": "Wire reopen/edit/delete lifecycle into the create-only mfg-receive page (companion to N149), same getMfg/editMfg backend + sub.load component sub-detail",
+      "parentLabels": "P10; D-lifecycle",
+      "startAfter": [
+        "N149"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "UI-only; backend getMfg/editMfg/deleteMfg + /mfg/receive GET/PUT/DELETE exist and are covered by mfgLifecycle.db.test.ts. typecheck/lint/format green; web tests 9. Live click deferred: demo has no MFG book.",
+      "gapIds": "G159",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/web/app/(app)/txn/mfg-receive/page.tsx"
+      ],
+      "statusNote": "IMPLEMENTED. Companion to N149. mfg-receive was create-only though getMfg/editMfg/deleteMfg + GET/PUT/DELETE /mfg/receive/:vchNo exist (mfgLifecycle.db.test.ts). Same wiring as mfg-issue plus the labourAmt header field: loadVoucher (GET /mfg/receive/:vchNo?coBook -> field-for-field stringify over blank() keys; sub.load(perLine) for components), resetForm, PUT-when-loaded, New, VoucherList on MFG_DATA (already in the allow-list from N149). UI-only. Gates green; web 9/9. Live click deferred - demo provisions no MFG book; identical reopen pattern verified live on six other workflows this session."
     }
   ],
   "amendments": [
