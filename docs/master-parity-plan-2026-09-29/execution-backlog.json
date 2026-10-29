@@ -5685,7 +5685,7 @@
       "action": "Extend getMfg reader to round-trip the Order Issue payload (nine missing line columns + karigarName + issue-side itmLoss) with an all-fields GET->payload round-trip test, THEN wire mfg-order-issue reopen/edit/delete UI. Backend prerequisite first - NOT a safe UI-only slice.",
       "parentLabels": "P10; D-lifecycle",
       "startAfter": [
-        "N151"
+        "N153"
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "Backend: getMfg returns TOT_NWT/OLD_NWT/RATE_TYPE/PR_CODE/NET_AMT/KR_NAME/ORD_AC_CODE/ORD_DESIGN + karigarName + defined issue-side itmLoss; new all-fields GET->payload unchanged round-trip test green; mfgLifecycle.db.test.ts still green. Then UI: loadVoucher/PUT-when-loaded/delete/New on mfg-order-issue page. Live click deferred - demo has no MFG book.",
@@ -5695,7 +5695,28 @@
       "verification": "04-verification-playbook.md",
       "statusAsOf": "2026-10-29",
       "evidence": [],
-      "statusNote": "PLANNED (backend prerequisite, not yet implemented). Discovered during the post-N151 UI-lifecycle sweep: mfg-order-issue is the only remaining create-only voucher page with a full GET+PUT+DELETE backend lifecycle but no UI reopen. An implement+independent-audit attempt proved it is NOT a safe UI-only slice: the bespoke page POSTs ~51 extendedLineFields + header karigarName, but getMfg (mfg.ts:1155-1271) omits karigarName and nine persisted line columns (totalNetWt/oldNetWt/rateType/prCode/itmLoss/netAmt/krName/ordAcCode/ordDesign); editMfg deletes-and-rebuilds the write set (mfg.ts:1368-1383), so an unchanged reopen->save would blank those columns (data corruption). N149/N150 are unaffected - mfg-issue/mfg-receive do not send those extended fields. Fix requires extending getMfg (backend) + an all-fields round-trip test before the UI wiring. No page shipped; staged attempt discarded. The UI-lifecycle sweep is otherwise COMPLETE: every other reopen-capable voucher page exposes reopen/edit/delete directly or via a shared component."
+      "statusNote": "PLANNED (UI wiring remains; backend prerequisite CLEARED by N153). The getMfg reader now round-trips all nine MFG_DETL columns (N153), so the mfg-order-issue reopen->save no longer risks blanking them. Remaining work: wire loadVoucher/PUT-when-loaded/delete/New on the mfg-order-issue page, mapping every payload field back from the now-complete getMfg view. PLANNED (backend prerequisite, not yet implemented). Discovered during the post-N151 UI-lifecycle sweep: mfg-order-issue is the only remaining create-only voucher page with a full GET+PUT+DELETE backend lifecycle but no UI reopen. An implement+independent-audit attempt proved it is NOT a safe UI-only slice: the bespoke page POSTs ~51 extendedLineFields + header karigarName, but getMfg (mfg.ts:1155-1271) omits karigarName and nine persisted line columns (totalNetWt/oldNetWt/rateType/prCode/itmLoss/netAmt/krName/ordAcCode/ordDesign); editMfg deletes-and-rebuilds the write set (mfg.ts:1368-1383), so an unchanged reopen->save would blank those columns (data corruption). N149/N150 are unaffected - mfg-issue/mfg-receive do not send those extended fields. Fix requires extending getMfg (backend) + an all-fields round-trip test before the UI wiring. No page shipped; staged attempt discarded. The UI-lifecycle sweep is otherwise COMPLETE: every other reopen-capable voucher page exposes reopen/edit/delete directly or via a shared component."
+    },
+    {
+      "id": "N153",
+      "status": "implemented-unverified",
+      "action": "Extend getMfg reader to map the nine MFG_DETL columns it dropped (totalNetWt/oldNetWt/netAmt/itmLoss/rateType/prCode/krName/ordAcCode/ordDesign) + prove via the operatorDepth round-trip harness. Backend half of N152 (G161 prerequisite), shipped standalone as a reader/writer parity correctness fix.",
+      "parentLabels": "P10; D-lifecycle",
+      "startAfter": [
+        "N151"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "getMfg maps TOT_NWT/OLD_NWT/NET_AMT/ITM_LOSS/RATE_TYPE/PR_CODE/KR_NAME/ORD_AC_CODE/ORD_DESIGN; operatorDepth.roundtrip.db.test.ts manufacturing case supplies+asserts the 8 issue-valid fields (itmLoss receive-only); mfgLifecycle.db.test.ts 9/9 still green; gates + clean api build + depth:parity green; size ceiling 1504->1516.",
+      "gapIds": "G161",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/api/src/modules/manufacturing/mfg.ts",
+        "web/apps/api/test/operatorDepth.roundtrip.db.test.ts"
+      ],
+      "statusNote": "IMPLEMENTED. Backend half of N152 (G161 prerequisite), shipped standalone because it is a correctness fix independent of any UI. getMfg (mfg.ts ~1213) now maps the nine MFG_DETL columns it previously dropped: TOT_NWT->totalNetWt, OLD_NWT->oldNetWt, NET_AMT->netAmt, ITM_LOSS->itmLoss, RATE_TYPE->rateType, PR_CODE->prCode, KR_NAME->krName, ORD_AC_CODE->ordAcCode, ORD_DESIGN->ordDesign. All already fetched by SELECT *; the writer persists them (detlRows :606-676) and editMfg deletes+rebuilds from the request, so before this fix a reopen->unchanged-save blanked them (the exact data-corruption risk flagged by the N152 Order Issue audit). itmLoss receive-only at writer (:771), read unconditionally; netAmt is line NET_AMT (lineNetAmt :641) not component IT_NET_AMT. Proof: operatorDepth.roundtrip.db.test.ts manufacturing case now supplies+asserts the 8 issue-valid fields (itmLoss stays on receive path like itmGhat). Fourth time this module's WRITE was complete while READ was not (P3-1 extended it once before). Gates + clean api build + docs:refs green; operatorDepth.roundtrip 3/3 + mfgLifecycle 9/9; depth:parity passed (unreachable API fields unchanged 102). Size ceiling raised 1504->1516 (visible baseline diff). Unblocks N152 UI wiring."
     }
   ],
   "amendments": [

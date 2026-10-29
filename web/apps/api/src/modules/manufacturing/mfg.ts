@@ -1217,6 +1217,18 @@ export async function getMfg(prisma: any, scopeInput: VoucherScope, vchNoInput: 
       repNo: d.REP_NO,
       repSrno: Number(d.REP_SRNO ?? 0),
       repAcCode: d.REP_AC_CODE,
+      // P3-2 (G161): nine MFG_DETL columns the writer persists but the reader dropped — Order Issue
+      // reopen→editMfg (delete+rebuild) would blank them. itmLoss is receive-only (:771); netAmt is
+      // the line NET_AMT (lineNetAmt, :641), not the component IT_NET_AMT.
+      totalNetWt: Number(d.TOT_NWT ?? 0),
+      oldNetWt: Number(d.OLD_NWT ?? 0),
+      netAmt: Number(d.NET_AMT ?? 0),
+      itmLoss: Number(d.ITM_LOSS ?? 0),
+      rateType: d.RATE_TYPE,
+      prCode: d.PR_CODE,
+      krName: d.KR_NAME,
+      ordAcCode: d.ORD_AC_CODE,
+      ordDesign: d.ORD_DESIGN,
       /**
        * Every field `MfgComponent` accepts, not a subset.
        *

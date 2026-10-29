@@ -21,7 +21,7 @@
     "apps/api/src/modules/settings/settingsCatalog.ts": 1568,
     "apps/web/app/(app)/txn/sales/page.tsx": 1523,
     "apps/api/src/modules/sales/wholesaleSaleReturn.ts": 1510,
-    "apps/api/src/modules/manufacturing/mfg.ts": 1504,
+    "apps/api/src/modules/manufacturing/mfg.ts": 1516,
     "apps/web/app/(app)/txn/sales-quotation/page.tsx": 1503
   }
 }
