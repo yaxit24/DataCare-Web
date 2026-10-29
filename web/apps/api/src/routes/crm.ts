@@ -15,6 +15,7 @@ import {
   dhrnInterestInputFromBody,
 } from '../modules/dhrn/dhrnInterest.js';
 import { dhrnOsLetterData, dhrnOsLetterHtml } from '../modules/dhrn/dhrnOsLetter.js';
+import { getJournal, editJournal } from '../modules/finance/journal.js';
 import {
   postTourSale,
   getTourSale,
@@ -126,6 +127,22 @@ export function registerLoanInterestRoutes(app: FastifyInstance, h: CrmRouteHelp
       format: q.format,
       filename: `dhrn-os-letter-${acCode}-${data.asOf}`,
     });
+  });
+  // N128 (Stage D): reopen + edit a journal voucher (reader/editor already in the module).
+  app.get('/journal/:vchNo', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getJournal(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.put('/journal/:vchNo', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      editJournal(
+        prisma,
+        { scope: scopeOf(req), vchDate: b.vchDate, narration: b.narration, lines: b.lines ?? [] },
+        (req.params as any).vchNo,
+      ),
+    );
   });
 }
 

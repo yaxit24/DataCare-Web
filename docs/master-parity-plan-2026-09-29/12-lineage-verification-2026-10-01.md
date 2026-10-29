@@ -147,6 +147,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G134 | High | Loan Intrest (MISSING workflow) | `unified/src/csharp/DataCareNext/TR_DHRN_INTREC.cs`, `Ac_Ledr.cs:1152-1166` | `web/apps/api/src/modules/dhrn/dhrnInterest.ts`, `web/apps/api/src/routes/crm.ts` `POST/GET/PUT/DELETE /dhrn/interest` | The Loan/Dhrn Interest Receipt must be desktop-faithful: the amount-loan 8-leg ledger (principal/interest-assess/interest-collect/kasar pairs), full DHRN_REC_DATA header, DHRN_DATA movement (INT_REC_AMT = R+K), ROJ_MEL_DATA and REMARK_DATA, on its own INTREST RECIVED book, with reopen/edit/delete. | N125 |
 | G135 | Med | Dhrn Os Letter (MISSING workflow) | `unified/src/csharp/DataCareNext/RP_DHRN_OS.cs`, `DhrnOsLetter.RPT` | `web/apps/api/src/modules/dhrn/dhrnOsLetter.ts`, `web/apps/api/src/routes/crm.ts` `GET /dhrn/os-letter` | The Dhrn Os Letter must produce a per-party pledge outstanding statement/letter: each open pledge with principal, repaid, outstanding, accrued interest to a cut-off and total due, with the reminder wording. | N126 |
 | G136 | High | Tour Sales (MISSING workflow) | `unified/src/csharp/DataCareNext/TR_TOUR_SALE.cs:11252` (Ac_Ledr.Wh_Sales_Ledr) | `web/apps/api/src/modules/sales/tourSale.ts`, `web/apps/api/src/routes/crm.ts` `POST/GET/PUT/DELETE /tour-sales` | Tour Sales must post the same TR_WH_SALE engine (Wh_Sales_Ledr/Rojmel/Stk over RATE_CUT_DATA) on a TOUR SALES book, with create/reopen/edit/delete. | N127 |
+| G137 | Med | Journal / lifecycle | `unified/src/csharp/DataCareNext/TR_JOURNAL` (journal voucher) | `web/apps/api/src/routes/crm.ts` `GET/PUT /journal/:vchNo`, `web/apps/api/src/modules/finance/journal.ts` `getJournal`/`editJournal` | The journal voucher must be reopenable and editable through the API (the reader/editor already existed; only the routes were missing). | N128 |
 
 ## 4. Decisions D23–D28
 
@@ -924,6 +925,18 @@ book and reopened.
 Done when: Tour Sales posts the wholesale engine on a TOUR SALES book and reopens/edits/deletes.
 
 
+### N128 — Journal reopen + edit (G137, Stage D)
+
+The journal voucher had create, delete and print but no reopen/edit routes, even though `getJournal` and
+`editJournal` were already implemented in the module (same situation as N122's ledger-adjust/employee-jv).
+N128 exposes `GET`/`PUT /journal/:vchNo` from the shared routes plugin, completing the journal lifecycle
+(create/reopen/edit/delete/print). Route universe 635 -> 637. Verified live: a 5,000 Dr/Cr journal posted,
+reopened (2 lines), and edited to 6,000 (the amounts round-trip; the reader surfaces the first line's
+description as the narration, a pre-existing getJournal display detail).
+
+Done when: a posted journal reopens and edits through the API.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -972,6 +985,7 @@ Done when: Tour Sales posts the wholesale engine on a TOUR SALES book and reopen
 | N125 | — | implemented-unverified, evidence in this change (G134: desktop-faithful Loan/Dhrn Interest Receipt; verified live full lifecycle) |
 | N126 | — | implemented-unverified, evidence in this change (G135: Dhrn Os Letter pledge-outstanding document; verified live HTML 200) |
 | N127 | — | implemented-unverified, evidence in this change (G136: Tour Sales via the wholesale engine on a TOUR SALES book; verified live full lifecycle) |
+| N128 | — | implemented-unverified, evidence in this change (G137: journal reopen+edit routes; verified live round-trip) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

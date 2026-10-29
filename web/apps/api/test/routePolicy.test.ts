@@ -88,8 +88,9 @@ describe('route policy registry', () => {
     // N125 (G134) adds the Dhrn Interest reopen/edit/delete (3 routes): 627 + 3 = 630.
     // N126 (G135) adds the Dhrn Os Letter document GET /dhrn/os-letter: 630 + 1 = 631.
     // N127 (G136) adds the Tour Sales lifecycle (4 routes): 631 + 4 = 635.
-    expect(routes).toHaveLength(635);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(635);
+    // N128 (Stage D) adds journal reopen+edit (2 routes): 635 + 2 = 637.
+    expect(routes).toHaveLength(637);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(637);
 
     const policies = routes.map((route) => ({
       ...route,

@@ -433,6 +433,8 @@ route('Cash / Bank/Contra', [
 ]);
 route('Cash / Bank/Journal Voucher', [
   'POST /journal',
+  'GET /journal/:vchNo',
+  'PUT /journal/:vchNo',
   'DELETE /journal/:vchNo',
   'GET /journal/:vchNo/print',
 ]);
