@@ -1325,6 +1325,39 @@ green; routePolicy + routeInputForwarding green; full API+DB 3505. Live: `POST /
 Done when: an operator can load a saved fine sale/purchase, change its lines and re-save at the same
 voucher number with stock and ledger re-derived.
 
+### N148 — Jobwork reopen/edit/delete lifecycle in KarigarForm (G157, Stage D)
+
+N146 wired reopen/edit/delete into the shared `KarigarForm` but gated it to the karigar +
+old-item-sales families, because jobwork-issue/receive read through a different backend
+(`getMfg`/MFG_DATA via `/mfg/jobwork-{issue,receive}`, not `getKarigar`/KR_DATA) with a `components`
+sub-detail rather than `stones`. The jobwork GET/PUT/DELETE routes already existed
+(`web/apps/api/src/routes/txn.ts:3968-4035`, via `checkedJobworkScope`), and N153 made the last
+MFG_DETL columns (`krName`/`totalNetWt`) readable — so jobwork reopen is now lossless (the
+`jobworkLine` POST payload is a strict subset of what `getMfg` returns).
+
+N148 extends the `lifecycle` flag to jobwork, makes `lifecycleTable` family-dependent
+(`MFG_DATA` for jobwork, `KR_DATA` otherwise), and adds a jobwork branch in `loadVoucher` that maps
+the `getMfg` line shape into the form `Line` (`size→itmSize`, `itemRemark→itDesc`, `itRate→rate`,
+`itAmt→amount`, a new `totalNetWt` slot, `krName`→header `karigarName`) and replaces the sub-detail
+with `components` (translating the reader's `lbrAmt`/`netAmt` to the grid's `lbrAmount`/`netAmount`
+so the serializer re-emits them on an unchanged save). The karigar/old-item-sales `stones` + `KR_DATA`
+path is untouched.
+
+Implemented by a sub-agent implement+independent-audit pipeline (AUDIT_PASS after the auditor caught
+and the implementer fixed two real reopen-losses: `totalNetWt` had no `Line` slot, and the component
+`lbrAmt`/`netAmt` needed the UI alias). The auditor's AST proof: all 23 jobwork line fields and all
+18 component fields round-trip (`MISSING=none`, `NOT_RESTORED=none`), and the non-jobwork mapper +
+stones loader are byte-identical to `HEAD` (matching SHA-256).
+
+Verified: gates (typecheck/typecheck:tests/lint/format/size/register/kernel/docs:refs) + clean-tree
+`@datacare/api` build + web tests 646+9 + `depth:parity` green. UI-only — no new routes
+(jobwork routes already classified; `MFG_DATA` already in the recent-voucher allow-list). Live click
+deferred — the demo provisions no jobwork (JDTR) book.
+
+Done when: an operator can load a saved jobwork issue/receive, edit its lines and components, re-save,
+and delete.
+
+
 ### N149 — Manufacturing Issue reopen/edit lifecycle UI (G158, Stage D)
 
 The mfg-issue page was create-only (it imported only `post`) even though `getMfg`/`editMfg`/
@@ -1523,6 +1556,7 @@ Done when: `getMfg` returns every persisted MFG_DETL payload field and a round-t
 | N145 | — | implemented-unverified, evidence in this change (G154: Loan Received + Loan Issue reopen/edit/delete reusing the dhrn readers + loan-flag editors; universe 647→653, DB test 2/2, full API+DB 3504) |
 | N146 | — | implemented-unverified, evidence in this change (G155: KarigarForm reopen/edit lifecycle lighting up karigar-issue/receive + old-item-sales; UI-only, live create 201→GET→PUT 200→GET verified) |
 | N147 | — | implemented-unverified, evidence in this change (G156: Fine Sale/Purchase edit — writer refactored to a forceVchNo context + reverseFineSaleTx + editFineSalePurchase + PUT; universe 653→654, DB test 1/1, full API+DB 3505, live create 201→reopen→PUT 200) |
+| N148 | — | implemented-unverified, evidence in this change (G157: jobwork reopen/edit/delete extended into the shared KarigarForm — lifecycle+MFG_DATA table+getMfg-shape loadVoucher branch with components sub-detail; sub-agent implement+audit AUDIT_PASS, AST proof all 23 line + 18 component fields round-trip and the karigar/stones path byte-identical; gates + clean API build + web 646+9 + depth:parity green; live deferred — demo has no jobwork book) |
 | N149 | — | implemented-unverified, evidence in this change (G158: mfg-issue reopen/edit lifecycle UI wired to the DB-tested getMfg/editMfg routes; UI-only, gates + web 9/9 green, live deferred — demo has no MFG book) |
 | N150 | — | implemented-unverified, evidence in this change (G159: mfg-receive reopen/edit lifecycle UI, companion to N149; UI-only, gates + web 9/9 green, live deferred — demo has no MFG book) |
 | N151 | — | implemented-unverified, evidence in this change (G160: bullion-sale reopen/edit/delete lifecycle UI; UI-only, sub-agent implement+audit AUDIT_PASS, gates + clean API build + web 646+9 + bullionSale.db.test.ts 2/2 + depth:parity green, live deferred — demo has no bullion book) |

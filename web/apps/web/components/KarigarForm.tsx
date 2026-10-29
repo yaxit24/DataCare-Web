@@ -19,6 +19,7 @@ interface Line {
   grossWt: string;
   othWt: string;
   netWt: string;
+  totalNetWt: string;
   ghtWt: string;
   touch: string;
   westPct: string;
@@ -94,6 +95,7 @@ const blank = (): Line => ({
   grossWt: '',
   othWt: '',
   netWt: '',
+  totalNetWt: '',
   ghtWt: '',
   touch: '',
   westPct: '',
@@ -222,11 +224,11 @@ export default function KarigarForm({
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const [loadedVch, setLoadedVch] = useState('');
-  // Reopen/edit is backed for karigar/issue, karigar/receive and old-item-sales (GET/PUT/DELETE
-  // routes exist); jobwork has no lifecycle routes yet, so it stays create-only.
-  const lifecycle = family === 'karigar' || oldItemSales;
-  // VoucherList lists by the family's header table: KR_DATA for karigar/old-item-sales.
-  const lifecycleTable = 'KR_DATA';
+  // Reopen/edit is backed for karigar issue/receive, old-item-sales, and jobwork issue/receive.
+  // Jobwork lifecycle routes exist in txn.ts:3968-4035, and reopen reads getMfg.
+  const lifecycle = family === 'karigar' || oldItemSales || family === 'jobwork';
+  // VoucherList lists by the family's header table.
+  const lifecycleTable = family === 'jobwork' ? 'MFG_DATA' : 'KR_DATA';
   // P3: the karigar's outstanding bill amount carried on the voucher (IssueInput.billOutstanding).
   const [billOutstanding, setBillOutstanding] = useState('');
   const [partyFine, setPartyFine] = useState('');
@@ -285,9 +287,10 @@ export default function KarigarForm({
     setErr('');
   }
 
-  // Reopen a saved karigar / old-item-sales voucher for edit (GET ${ep}/:vchNo). The reader returns
-  // numbers; the form holds strings, so every field is stringified. Sub-detail stones are replaced
-  // in one shot via sub.load(perLine), the primitive SubDetailGrid exposes for exactly this.
+  // Reopen a saved karigar, old-item-sales, or jobwork voucher for edit (GET ${ep}/:vchNo).
+  // The readers return numbers; the form holds strings, so every numeric field is stringified.
+  // Sub-details are replaced in one shot via sub.load(perLine), using stones for KR and components
+  // for MFG jobwork vouchers.
   async function loadVoucher(vchNo: string) {
     if (!lifecycle) return;
     setErr('');
@@ -299,72 +302,120 @@ export default function KarigarForm({
       );
       setLoadedVch(String(d.voucherNo ?? vchNo));
       setKarigarAc(String(d.karigarAc ?? ''));
-      setKarigarName(String(d.karigarName ?? ''));
       if (d.labourGstPct != null) setLabourGstPct(String(d.labourGstPct));
       setBillOutstanding(d.billOutstanding ? String(d.billOutstanding) : '');
       setPartyFine(d.partyFine ? String(d.partyFine) : '');
       const str = (v: unknown) => (v == null || v === 0 ? '' : String(v));
       const srcLines: any[] = Array.isArray(d.lines) && d.lines.length ? d.lines : [];
+      setKarigarName(String(d.karigarName ?? srcLines[0]?.krName ?? ''));
       setLines(
         srcLines.length
-          ? srcLines.map((l) => ({
-              ...blank(),
-              itCode: String(l.itCode ?? ''),
-              designNo: String(l.designNo ?? ''),
-              tblCode: String(l.tblCode ?? '001'),
-              itmSize: String(l.itmSize ?? ''),
-              tagNo: String(l.tagNo ?? ''),
-              pcs: str(l.pcs) || '1',
-              grossWt: str(l.grossWt),
-              othWt: str(l.othWt),
-              netWt: str(l.netWt),
-              ghtWt: str(l.ghtWt),
-              touch: str(l.touch),
-              westPct: str(l.westPct),
-              lbrType: String(l.lbrType ?? 'G'),
-              lbrRate: str(l.lbrRate),
-              lbrPct: str(l.lbrPct),
-              lbrAmt: str(l.lbrAmt),
-              othAmt: str(l.othAmt),
-              bagWt: str(l.bagWt),
-              convPct: str(l.convPct),
-              convRate: str(l.convRate),
-              itDesc: String(l.itDesc ?? ''),
-              lessTouch: str(l.lessTouch),
-              lossWt: str(l.lossWt),
-              lotNo: String(l.lotNo ?? ''),
-              mrp: str(l.mrp),
-              oldSrNo: str(l.oldSrNo),
-              otherFine: str(l.otherFine),
-              otherRate: str(l.otherRate),
-              silverFine: str(l.silverFine),
-              ghtPct: str(l.ghtPct),
-              urdRateType: String(l.urdRateType ?? ''),
-              commissionPct: str(l.commissionPct),
-              commissionAmount: str(l.commissionAmount),
-              rate: str(l.rate),
-              rateType: String(l.rateType ?? ''),
-              amount: str(l.amount),
-              totalAmount: str(l.totalAmount),
-              withStock: String(l.withStock ?? ''),
-            }))
+          ? srcLines.map((l) =>
+              family === 'jobwork'
+                ? {
+                    ...blank(),
+                    itCode: String(l.itCode ?? ''),
+                    designNo: String(l.designNo ?? ''),
+                    lotNo: String(l.lotNo ?? ''),
+                    tagNo: String(l.tagNo ?? ''),
+                    itmSize: String(l.size ?? ''),
+                    itDesc: String(l.itemRemark ?? ''),
+                    rateType: String(l.rateType ?? ''),
+                    pcs: str(l.pcs) || '1',
+                    grossWt: str(l.grossWt),
+                    othWt: str(l.othWt),
+                    netWt: str(l.netWt),
+                    totalNetWt: l.totalNetWt == null ? '' : String(l.totalNetWt),
+                    ghtWt: str(l.ghtWt),
+                    touch: str(l.touch),
+                    westPct: str(l.westPct),
+                    lbrType: String(l.lbrType ?? 'G'),
+                    lbrRate: str(l.lbrRate),
+                    lbrAmt: str(l.lbrAmt),
+                    rate: str(l.itRate),
+                    amount: str(l.itAmt),
+                    othAmt: str(l.othAmt),
+                  }
+                : {
+                    ...blank(),
+                    itCode: String(l.itCode ?? ''),
+                    designNo: String(l.designNo ?? ''),
+                    tblCode: String(l.tblCode ?? '001'),
+                    itmSize: String(l.itmSize ?? ''),
+                    tagNo: String(l.tagNo ?? ''),
+                    pcs: str(l.pcs) || '1',
+                    grossWt: str(l.grossWt),
+                    othWt: str(l.othWt),
+                    netWt: str(l.netWt),
+                    ghtWt: str(l.ghtWt),
+                    touch: str(l.touch),
+                    westPct: str(l.westPct),
+                    lbrType: String(l.lbrType ?? 'G'),
+                    lbrRate: str(l.lbrRate),
+                    lbrPct: str(l.lbrPct),
+                    lbrAmt: str(l.lbrAmt),
+                    othAmt: str(l.othAmt),
+                    bagWt: str(l.bagWt),
+                    convPct: str(l.convPct),
+                    convRate: str(l.convRate),
+                    itDesc: String(l.itDesc ?? ''),
+                    lessTouch: str(l.lessTouch),
+                    lossWt: str(l.lossWt),
+                    lotNo: String(l.lotNo ?? ''),
+                    mrp: str(l.mrp),
+                    oldSrNo: str(l.oldSrNo),
+                    otherFine: str(l.otherFine),
+                    otherRate: str(l.otherRate),
+                    silverFine: str(l.silverFine),
+                    ghtPct: str(l.ghtPct),
+                    urdRateType: String(l.urdRateType ?? ''),
+                    commissionPct: str(l.commissionPct),
+                    commissionAmount: str(l.commissionAmount),
+                    rate: str(l.rate),
+                    rateType: String(l.rateType ?? ''),
+                    amount: str(l.amount),
+                    totalAmount: str(l.totalAmount),
+                    withStock: String(l.withStock ?? ''),
+                  },
+            )
           : [blank()],
       );
-      // Replace the stone sub-detail, one entry per parent line.
-      const stoneStr = (v: unknown) => (v == null || v === 0 ? undefined : String(v));
-      sub.load(
-        (srcLines.length ? srcLines : [{}]).map((l) =>
-          (Array.isArray(l.stones) ? l.stones : []).map((s: any) => {
-            const row: Record<string, string> = {};
-            for (const [k, v] of Object.entries(s)) {
-              if (k === 'isrNo') continue;
-              const sv = typeof v === 'number' ? stoneStr(v) : v ? String(v) : undefined;
-              if (sv != null) row[k] = sv;
-            }
-            return row;
-          }),
-        ),
-      );
+      if (family === 'jobwork') {
+        // Rebuild the component sub-detail, one entry per parent line.
+        const cstr = (v: unknown) => (v == null || v === 0 ? undefined : String(v));
+        sub.load(
+          (srcLines.length ? srcLines : [{}]).map((l) =>
+            (Array.isArray(l.components) ? l.components : []).map((c: any) => {
+              const r: Record<string, string> = {};
+              for (const [k, v] of Object.entries(c)) {
+                if (k === 'isrNo') continue;
+                const sv = typeof v === 'number' ? cstr(v) : v ? String(v) : undefined;
+                if (sv != null) {
+                  const field = k === 'lbrAmt' ? 'lbrAmount' : k === 'netAmt' ? 'netAmount' : k;
+                  r[field] = sv;
+                }
+              }
+              return r;
+            }),
+          ),
+        );
+      } else {
+        // Replace the stone sub-detail, one entry per parent line.
+        const stoneStr = (v: unknown) => (v == null || v === 0 ? undefined : String(v));
+        sub.load(
+          (srcLines.length ? srcLines : [{}]).map((l) =>
+            (Array.isArray(l.stones) ? l.stones : []).map((s: any) => {
+              const row: Record<string, string> = {};
+              for (const [k, v] of Object.entries(s)) {
+                if (k === 'isrNo') continue;
+                const sv = typeof v === 'number' ? stoneStr(v) : v ? String(v) : undefined;
+                if (sv != null) row[k] = sv;
+              }
+              return row;
+            }),
+          ),
+        );
+      }
     } catch (e) {
       setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
     } finally {
@@ -473,7 +524,11 @@ export default function KarigarForm({
         // MfgLine.lbrType/lbrRate unreachable.
         westPct: n(l.westPct),
         ...(l.lbrAmt.trim() === '' ? {} : { lbrAmt: n(l.lbrAmt) }),
-        ...(rcv ? { othAmt: n(l.othAmt) } : { totalNetWt: n(l.netWt) || undefined }),
+        ...(rcv
+          ? { othAmt: n(l.othAmt) }
+          : {
+              totalNetWt: l.totalNetWt.trim() === '' ? n(l.netWt) || undefined : n(l.totalNetWt),
+            }),
       });
 
       const body: any = {

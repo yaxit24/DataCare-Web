@@ -5600,11 +5600,11 @@
     },
     {
       "id": "N148",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Extend the KarigarForm lifecycle (N146) to the jobwork family: jobwork-issue/receive have full backend lifecycle at /mfg/jobwork-issue|receive/:vchNo (getMfg/editMfg/deleteMfg via checkedJobworkScope), but KarigarForm excludes jobwork from reopen because getMfg returns a different shape than getKarigar; add a jobwork-aware branch in loadVoucher that maps the getMfg reader output to the form Line shape",
       "parentLabels": "P10; D-lifecycle",
       "startAfter": [
-        "N146"
+        "N153"
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "Live: jobwork-receive create->reopen->edit via /mfg/jobwork-receive/:vchNo; KarigarForm lifecycle flag extended to jobwork with the correct reader mapping; gates green",
@@ -5612,11 +5612,11 @@
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
-      "statusAsOf": "2026-10-29",
+      "statusAsOf": "2026-10-30",
       "evidence": [
         "web/apps/web/components/KarigarForm.tsx"
       ],
-      "statusNote": "READY, NOT IMPLEMENTED. N146 wired KarigarForm reopen/edit but gated it to family karigar + old-item-sales because jobwork reads through a DIFFERENT backend (getMfg/MFG_KR_DATA via /mfg/jobwork-*, not getKarigar/KR_DATA). The jobwork GET/PUT/DELETE routes DO exist (txn.ts:3970-4035). Extending needs a jobwork branch in loadVoucher that fetches /mfg/jobwork-{issue,receive}/:vchNo and maps the getMfg reader shape (different field names) to the form Line + sub-detail, plus a jobwork VoucherList on the MFG_KR_DATA table. Separate because the reader mapping differs from karigar."
+      "statusNote": "IMPLEMENTED. Extended KarigarForm reopen/edit/delete lifecycle to the jobwork family (jobwork-issue/receive). Unblocked once N153 made getMfg return krName/totalNetWt. lifecycle flag now includes jobwork; lifecycleTable = jobwork?MFG_DATA:KR_DATA (MFG_DATA already in allow-list); loadVoucher jobwork branch maps the getMfg line shape (size->itmSize, itemRemark->itDesc, itRate->rate, itAmt->amount, new Line.totalNetWt slot, krName->header karigarName) and loads the components sub-detail (translating reader lbrAmt/netAmt to the grid lbrAmount/netAmount so componentInputs re-emits them). Karigar/old-item-sales stones+KR_DATA path AST-proven byte-identical. Implemented by sub-agent implement+independent-audit (AUDIT_PASS after 2 caught defects: totalNetWt no Line slot, component alias mismatch). Auditor AST proof: all 23 jobwork line fields + 18 component fields round-trip (MISSING=none, NOT_RESTORED=none). UI-only, no new routes (jobwork routes already exist+classified). Gates + clean api build + web 646+9 + depth:parity + docs:refs green. Live click deferred - demo has no jobwork (JDTR) book; lifecycle covered by the getMfg/editMfg DB tests."
     },
     {
       "id": "N149",
