@@ -1006,3 +1006,140 @@ export async function deleteDhrn(prisma: any, input: DeleteDhrnInput): Promise<{
     return { reversed: true };
   });
 }
+
+/**
+ * The tables a pledge issue owns, reversed/replaced on edit and delete. `issueDhrn` writes the
+ * DHRN_ISU_DATA header, the DHRN_ISU_DETL collateral grid, the DHRN_DATA movement and the AC_DATA
+ * ledger; an edit must clear all of them before reposting so a shrunk collateral grid cannot leave
+ * orphan rows (the write-without-read defect class).
+ */
+const DHRN_ISU_TABLES = ['DHRN_ISU_DATA', 'DHRN_ISU_DETL', 'DHRN_DATA', 'AC_DATA'] as const;
+
+/**
+ * Reopen a pledge issue for edit. Reads the DHRN_ISU_DATA header and its DHRN_ISU_DETL collateral
+ * rows back into a `DhrnIssueInput`-shaped object the issue form can repopulate, so an operator can
+ * load a saved pledge, change it and save (desktop TR_DHRN_ISU edit-on-reopen).
+ */
+export async function getDhrnIssue(prisma: any, scope: VoucherScope, isuNo: number | string) {
+  const tenantId = scope.tenantId;
+  const no = formatVoucherNo(isuNo);
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
+    const hdr: any[] = await tx.$queryRawUnsafe(
+      `SELECT "VCH_NO","HD_VCH_NO","VCH_DATE"::text vd,"TO_DATE"::text td,
+              "AC_CODE","AC_NAME","DHRN_AMT"::float8 amt,"INT_PRC"::float8 prc,"INT_MONTH"::float8 im,
+              "LOAN_TYPE","PACKET_NO","OTH_AMT"::float8 oth,"GOLD_WT"::float8 gw,"GOLD_AMT"::float8 ga,"MAIN_USER"
+         FROM "DHRN_ISU_DATA"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
+      tenantId,
+      scope.coCode,
+      scope.lcCode,
+      scope.coYear,
+      scope.coBook,
+      no,
+    );
+    if (!hdr.length) throw new DhrnValidationError(`dhrn-issue voucher not found: ${no}`);
+    const h = hdr[0];
+    // The pledge movement row (DHRN_DATA) carries FROM_DATE and the licence/remarks/adjusted/unchecked
+    // fields that the DHRN_ISU_DATA header does not; read it by the issue voucher number.
+    const mv: any[] = await tx.$queryRawUnsafe(
+      `SELECT "FROM_DATE"::text fd,"DHRN_LIC_NO","REMARKS","ADJ_DHRN"::float8 adj,"UNCHAK_DHRN_REC"::float8 unc
+         FROM "DHRN_DATA"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "ISU_NO"=$5
+        ORDER BY "SR_NO" LIMIT 1`,
+      tenantId,
+      scope.coCode,
+      scope.lcCode,
+      scope.coYear,
+      no,
+    );
+    const m = mv[0] ?? {};
+    const detl: any[] = await tx.$queryRawUnsafe(
+      `SELECT "IT_CODE","IT_NAME","IT_DESC","ITM_PCS"::float8 pcs,"ITM_GWT"::float8 gwt,
+              "ITM_OTH_WT"::float8 owt,"ITM_NWT"::float8 nwt,"ITM_TOUCH"::float8 tch,
+              "ITM_WEST_PRC"::float8 wst,"ITM_FINE"::float8 fine,"ITM_RATE"::float8 rate,
+              "ITM_AMT"::float8 amt,"PACKET_NO","HM_ID","IT_TYPE","RATE_TYPE"
+         FROM "DHRN_ISU_DETL"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6
+        ORDER BY "SR_NO"`,
+      tenantId,
+      scope.coCode,
+      scope.lcCode,
+      scope.coYear,
+      scope.coBook,
+      no,
+    );
+    return {
+      voucherNo: no,
+      hiddenVoucherNo: String(h.HD_VCH_NO ?? ''),
+      mainUser: String(h.MAIN_USER ?? ''),
+      vchDate: String(h.vd ?? '').slice(0, 10),
+      fromDate: String(m.fd ?? '').slice(0, 10),
+      toDate: String(h.td ?? '').slice(0, 10),
+      borrowerAc: String(h.AC_CODE ?? ''),
+      borrowerName: String(h.AC_NAME ?? ''),
+      principal: Number(h.amt ?? 0),
+      intPrc: Number(h.prc ?? 0),
+      intMonths: Number(h.im ?? 0),
+      loanType: String(h.LOAN_TYPE ?? 'A'),
+      packetNo: String(h.PACKET_NO ?? ''),
+      otherCharges: Number(h.oth ?? 0),
+      goldWt: Number(h.gw ?? 0),
+      goldAmt: Number(h.ga ?? 0),
+      licenceNo: String(m.DHRN_LIC_NO ?? ''),
+      remarks: String(m.REMARKS ?? ''),
+      adjustedDhrn: Number(m.adj ?? 0),
+      uncheckedReceipts: Number(m.unc ?? 0),
+      collateral: detl.map((c) => ({
+        itCode: String(c.IT_CODE ?? ''),
+        itName: String(c.IT_NAME ?? ''),
+        itDesc: String(c.IT_DESC ?? ''),
+        pcs: Number(c.pcs ?? 0),
+        grossWt: Number(c.gwt ?? 0),
+        otherWt: Number(c.owt ?? 0),
+        netWt: Number(c.nwt ?? 0),
+        touch: Number(c.tch ?? 0),
+        westPct: Number(c.wst ?? 0),
+        fineWt: Number(c.fine ?? 0),
+        rate: Number(c.rate ?? 0),
+        amount: Number(c.amt ?? 0),
+        packet: String(c.PACKET_NO ?? ''),
+        huid: String(c.HM_ID ?? ''),
+        itType: String(c.IT_TYPE ?? ''),
+        rateType: String(c.RATE_TYPE ?? ''),
+      })),
+    };
+  });
+}
+
+/**
+ * Edit a pledge issue: take the edit identity, clear the whole write set and repost through the
+ * same `issueDhrn` writer (desktop save-on-edit). `issueDhrn` already persists HD_VCH_NO via
+ * insertHiddenIdentityTx at create time, so the edit identity resolves.
+ */
+export async function editDhrnIssue(
+  prisma: any,
+  input: DhrnIssueInput,
+  isuNo: number | string,
+): Promise<{ vchNo: number }> {
+  completeFinanceScope(input.scope);
+  if (!input.borrowerAc) throw new DhrnValidationError('borrower account is required');
+  const tenantId = input.scope.tenantId;
+  const d = input.vchDate ? new Date(input.vchDate) : new Date();
+  const res = await withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
+    const { identity } = await editIdentityTx(tx, {
+      table: 'DHRN_ISU_DATA',
+      scope: input.scope,
+      requestedVoucherNo: isuNo,
+      requestedDate: d,
+    });
+    await replaceWriteSetTx(
+      tx,
+      input.scope,
+      identity.voucherNo,
+      identity.hiddenVoucherNo,
+      DHRN_ISU_TABLES,
+    );
+    return issueDhrn(prisma, input, { tx, identity });
+  });
+  return { vchNo: res.vchNo };
+}

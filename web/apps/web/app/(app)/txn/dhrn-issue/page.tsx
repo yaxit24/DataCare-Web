@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
-import { post, ApiError } from '../../../../lib/api';
+import { post, put, get, del, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
+import { VoucherList } from '../../../../components/VoucherList';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { EntityImagePanel } from '../../../../components/EntityImagePanel';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
@@ -73,6 +74,7 @@ export default function DhrnIssuePage() {
   const [res, setRes] = useState<{ vchNo: number; intAmt: number; monthInt: number } | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const [loadedVch, setLoadedVch] = useState('');
 
   const setLine = (i: number, k: keyof Coll, v: string) =>
     setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
@@ -99,6 +101,71 @@ export default function DhrnIssuePage() {
   const intPreviewApproximate = r2(
     ((n(principal) * n(intPrc)) / 100) * ((n(intMonths) * 30) / 360),
   );
+
+  function resetForm() {
+    setLoadedVch('');
+    setBorrowerAc('');
+    setBorrowerName('');
+    setLoanType('A');
+    setPrincipal('');
+    setIntPrc('');
+    setIntMonths('');
+    setPacketNo('');
+    setOtherCharges('');
+    setToDate('');
+    setExtra({});
+    setLines([blank()]);
+    setRes(null);
+    setErr('');
+  }
+
+  // Reopen a saved pledge (GET /dhrn/issue/:isuNo) into the form so it can be edited and re-saved.
+  async function loadIssue(isuNo: string) {
+    setErr('');
+    setRes(null);
+    setBusy(true);
+    try {
+      const d = await get<any>(`/dhrn/issue/${encodeURIComponent(isuNo)}`);
+      setLoadedVch(String(d.voucherNo ?? isuNo));
+      setBorrowerAc(String(d.borrowerAc ?? ''));
+      setBorrowerName(String(d.borrowerName ?? ''));
+      setLoanType((d.loanType as 'A' | 'G' | 'S') || 'A');
+      setPrincipal(String(d.principal ?? ''));
+      setIntPrc(d.intPrc ? String(d.intPrc) : '');
+      setIntMonths(d.intMonths ? String(d.intMonths) : '');
+      setPacketNo(String(d.packetNo ?? ''));
+      setOtherCharges(d.otherCharges ? String(d.otherCharges) : '');
+      setToDate(String(d.toDate ?? ''));
+      setExtra({
+        fromDate: String(d.fromDate ?? ''),
+        goldWt: d.goldWt ? String(d.goldWt) : '',
+        goldAmt: d.goldAmt ? String(d.goldAmt) : '',
+        licenceNo: String(d.licenceNo ?? ''),
+        remarks: String(d.remarks ?? ''),
+        adjustedDhrn: d.adjustedDhrn ? String(d.adjustedDhrn) : '',
+        uncheckedReceipts: d.uncheckedReceipts ? String(d.uncheckedReceipts) : '',
+      });
+      const coll = Array.isArray(d.collateral) ? d.collateral : [];
+      setLines(
+        coll.length
+          ? coll.map((c: any) => ({
+              ...blank(),
+              itCode: String(c.itCode ?? ''),
+              itDesc: String(c.itName ?? c.itDesc ?? ''),
+              pcs: c.pcs ? String(c.pcs) : '',
+              grossWt: c.grossWt ? String(c.grossWt) : '',
+              netWt: c.netWt ? String(c.netWt) : '',
+              touch: c.touch ? String(c.touch) : '',
+              rate: c.rate ? String(c.rate) : '',
+            }))
+          : [blank()],
+      );
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -155,7 +222,11 @@ export default function DhrnIssuePage() {
             };
           }),
       };
-      setRes(await post('/dhrn/issue', body));
+      setRes(
+        loadedVch
+          ? await put(`/dhrn/issue/${encodeURIComponent(loadedVch)}`, body)
+          : await post('/dhrn/issue', body),
+      );
     } catch (e) {
       setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
     } finally {
@@ -359,8 +430,13 @@ export default function DhrnIssuePage() {
               Fine {inr(totalFine)} g · <b>Total ₹{inr(totalAmount)}</b>
             </span>
             <button className="primary" disabled={busy}>
-              {busy ? 'Saving…' : 'Issue Loan'}
+              {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : 'Issue Loan'}
             </button>
+            {loadedVch && (
+              <button type="button" className="ghost" onClick={resetForm} disabled={busy}>
+                New
+              </button>
+            )}
           </div>
         </div>
         <details style={{ marginTop: 8 }}>
@@ -379,10 +455,22 @@ export default function DhrnIssuePage() {
         </details>
       </form>
 
+      <VoucherList
+        table="DHRN_ISU_DATA"
+        book={coBook}
+        deleteBase="/dhrn/issue"
+        onLoad={(vchNo) => loadIssue(vchNo)}
+        printHref={(vchNo) =>
+          `/api/dhrn/issue-receipt?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(vchNo)}&format=html`
+        }
+      />
+
       {err && <div className="msg err">{err}</div>}
       {res && (
         <div className="panel">
-          <div className="msg ok">Issued — Voucher #{res.vchNo}</div>
+          <div className="msg ok">
+            {loadedVch ? 'Updated' : 'Issued'} — Voucher #{res.vchNo}
+          </div>
           <div className="toolbar" style={{ marginTop: 6 }}>
             <button
               type="button"
