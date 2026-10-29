@@ -921,6 +921,56 @@ export function issueLoan(
   );
 }
 
+/**
+ * Edit a Loan Received voucher. It lives in DHRN_ISU_DATA (receiveLoan wraps issueDhrn), so the edit
+ * reuses editDhrnIssue with the loan flags injected — the repost goes through issueDhrn as a loan.
+ */
+export function editLoanReceived(
+  prisma: any,
+  input: Omit<
+    DhrnIssueInput,
+    'entryType' | 'expectedMainBook' | 'expectedBookInout' | 'ledgerMode'
+  >,
+  isuNo: number | string,
+): Promise<{ vchNo: number }> {
+  return editDhrnIssue(
+    prisma,
+    {
+      ...input,
+      entryType: 'L',
+      expectedMainBook: 'LOAN REC',
+      expectedBookInout: 'I',
+      ledgerMode: 'loan-received',
+    },
+    isuNo,
+  );
+}
+
+/**
+ * Edit a Loan Issue voucher. It lives in DHRN_REC_DATA (issueLoan wraps receiveDhrn), so the edit
+ * reuses editDhrnReceipt with the loan flags injected — the repost goes through receiveDhrn as a loan.
+ */
+export function editLoanIssue(
+  prisma: any,
+  input: Omit<
+    DhrnReceiptInput,
+    'entryType' | 'expectedMainBook' | 'expectedBookInout' | 'ledgerMode'
+  >,
+  vchNo: number | string,
+): Promise<{ vchNo: number; outstanding: number }> {
+  return editDhrnReceipt(
+    prisma,
+    {
+      ...input,
+      entryType: 'L',
+      expectedMainBook: 'LOAN ISSUE',
+      expectedBookInout: 'O',
+      ledgerMode: 'loan-issue',
+    },
+    vchNo,
+  );
+}
+
 async function outstandingTx(
   tx: any,
   s: VoucherScope,

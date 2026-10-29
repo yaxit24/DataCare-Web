@@ -724,8 +724,19 @@ route('Loans (Dhrn)/Interest Receipt', [
   'PUT /dhrn/interest/:vchNo',
   'DELETE /dhrn/interest/:vchNo',
 ]);
-route('Loans (Dhrn)/Loan Received', ['POST /loan/received']);
-route('Loans (Dhrn)/Loan Issue', ['POST /loan/issue', 'GET /loan/:isuNo/outstanding']);
+route('Loans (Dhrn)/Loan Received', [
+  'POST /loan/received',
+  'GET /loan/received/:isuNo',
+  'PUT /loan/received/:isuNo',
+  'DELETE /loan/received/:isuNo',
+]);
+route('Loans (Dhrn)/Loan Issue', [
+  'POST /loan/issue',
+  'GET /loan/issue/:vchNo',
+  'PUT /loan/issue/:vchNo',
+  'DELETE /loan/issue/:vchNo',
+  'GET /loan/:isuNo/outstanding',
+]);
 
 route('Membership/Members & Loyalty', ['POST /members', 'POST /members/points', 'GET /members']);
 route('Membership/Saving Schemes', [
