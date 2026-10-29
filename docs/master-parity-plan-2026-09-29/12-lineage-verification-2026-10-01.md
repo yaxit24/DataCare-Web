@@ -169,6 +169,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G156 | Med | Fine Sale / Fine Purchase edit | `unified/src/csharp/DataCareNext/TR_FINE_SL_PR.cs` | `web/apps/api/src/modules/bullion/fineSalePurchase.ts`, `web/apps/web/app/(app)/txn/fine-sale/page.tsx` | Fine Sale/Purchase can create, reopen (`getFineSalePurchase`, N121) and delete, but there is no `editFineSalePurchase` or PUT route, and the page is create-only. The writer uses `nextVoucherNoTx`, not the identity/context pattern, so it must be refactored before an edit (which must also reverse+rewrite MAIN_STOCK) can resolve. | N147 |
 | G157 | Med | Jobwork reopen+edit in KarigarForm | `unified/src/csharp/DataCareNext/TR_JDT_REC.cs` | `web/apps/web/components/KarigarForm.tsx` | N146 wired KarigarForm reopen/edit but excluded jobwork, which reads through a different backend (`getMfg`/MFG_KR_DATA via `/mfg/jobwork-*`, not `getKarigar`/KR_DATA). The jobwork GET/PUT/DELETE routes exist; extend `loadVoucher` with a jobwork branch that maps the `getMfg` reader shape. | N148 |
 | G158 | Med | Manufacturing Issue reopen+edit (UI) | `unified/src/csharp/DataCareNext/TR_MFG_ISU_REC.cs` | `web/apps/web/app/(app)/txn/mfg-issue/page.tsx` | The mfg-issue page was create-only though `getMfg`/`editMfg`/`deleteMfg` and `GET/PUT/DELETE /mfg/issue/:vchNo` exist and are covered by `mfgLifecycle.db.test.ts`. The getMfg reader's field names match the page Line exactly and `useSubDetail.load()` exists; wire `loadVoucher` + PUT-when-loaded + VoucherList (UI-only). | N149 |
+| G159 | Med | Manufacturing Receive reopen+edit (UI) | `unified/src/csharp/DataCareNext/TR_MFG_ISU_REC.cs` | `web/apps/web/app/(app)/txn/mfg-receive/page.tsx` | Companion to G158: mfg-receive was create-only though the same `getMfg`/`editMfg`/`deleteMfg` backend and `GET/PUT/DELETE /mfg/receive/:vchNo` exist (mfgLifecycle.db.test.ts). Wire the same lifecycle (plus the labourAmt header). | N150 |
 
 ## 4. Decisions D23–D28
 
@@ -1343,6 +1344,21 @@ stack; the wiring uses the identical reopen pattern verified live on six other w
 
 Done when: an operator can load a saved MFG issue, edit its lines and components, and re-save.
 
+### N150 — Manufacturing Receive reopen/edit lifecycle UI (G159, Stage D)
+
+Companion to N149. The mfg-receive page was create-only though the same `getMfg`/`editMfg`/`deleteMfg`
+backend and `GET/PUT/DELETE /mfg/receive/:vchNo` exist and are covered by `mfgLifecycle.db.test.ts`.
+N150 applies the identical wiring (plus the `labourAmt` header field): `loadVoucher`
+(GET `/mfg/receive/:vchNo?coBook`, field-for-field stringify over the `blank()` keys, `sub.load`
+for the component sub-detail), `resetForm`, PUT-when-loaded, New, and a VoucherList on `MFG_DATA`.
+UI-only — no new routes.
+
+Verified: gates (typecheck/lint/format) + web tests 9/9 green; backend green under
+`mfgLifecycle.db.test.ts`. Live click deferred for the same reason as N149 (the demo provisions no
+manufacturing book).
+
+Done when: an operator can load a saved MFG receive, edit its lines and components, and re-save.
+
 
 ## 6. Status corrections
 
@@ -1413,6 +1429,7 @@ Done when: an operator can load a saved MFG issue, edit its lines and components
 | N146 | — | implemented-unverified, evidence in this change (G155: KarigarForm reopen/edit lifecycle lighting up karigar-issue/receive + old-item-sales; UI-only, live create 201→GET→PUT 200→GET verified) |
 | N147 | — | implemented-unverified, evidence in this change (G156: Fine Sale/Purchase edit — writer refactored to a forceVchNo context + reverseFineSaleTx + editFineSalePurchase + PUT; universe 653→654, DB test 1/1, full API+DB 3505, live create 201→reopen→PUT 200) |
 | N149 | — | implemented-unverified, evidence in this change (G158: mfg-issue reopen/edit lifecycle UI wired to the DB-tested getMfg/editMfg routes; UI-only, gates + web 9/9 green, live deferred — demo has no MFG book) |
+| N150 | — | implemented-unverified, evidence in this change (G159: mfg-receive reopen/edit lifecycle UI, companion to N149; UI-only, gates + web 9/9 green, live deferred — demo has no MFG book) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

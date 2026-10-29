@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
-import { post, ApiError } from '../../../../lib/api';
+import { post, put, get, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
+import { VoucherList } from '../../../../components/VoucherList';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { EntityImagePanel } from '../../../../components/EntityImagePanel';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
@@ -289,6 +290,7 @@ export default function MfgReceivePage() {
   } | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const [loadedVch, setLoadedVch] = useState('');
 
   const setLine = (i: number, k: keyof Line, v: string) =>
     setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
@@ -300,6 +302,68 @@ export default function MfgReceivePage() {
   const netTotal = r3(lines.reduce((s, l) => s + n(l.netWt), 0));
   const fineTotal = r3(lines.reduce((s, l) => s + fineOf(l), 0));
   const recTotal = r3(lines.reduce((s, l) => s + recOf(l), 0));
+
+  function resetForm() {
+    setLoadedVch('');
+    setKarigarAc('');
+    setKarigarName('');
+    setPartyAc('');
+    setPartyName('');
+    setLabourAmt('');
+    setLines([blank()]);
+    sub.reset();
+    setResult(null);
+    setErr('');
+  }
+
+  // Reopen a saved MFG receive (GET /mfg/receive/:vchNo?coBook) for edit; the getMfg reader field
+  // names match the form Line exactly, so each line is copied field-for-field (number->string); the
+  // component sub-detail is replaced via sub.load(perLine).
+  async function loadVoucher(vchNo: string) {
+    setErr('');
+    setResult(null);
+    setBusy(true);
+    try {
+      const d = await get<any>(
+        `/mfg/receive/${encodeURIComponent(vchNo)}?coBook=${encodeURIComponent(coBook)}`,
+      );
+      setLoadedVch(String(d.voucherNo ?? vchNo));
+      setKarigarAc(String(d.karigarAc ?? ''));
+      setPartyAc(String(d.partyAc ?? ''));
+      if (d.labourAmt != null) setLabourAmt(d.labourAmt ? String(d.labourAmt) : '');
+      const str = (v: unknown) => (v == null || v === 0 || v === '' ? '' : String(v));
+      const src: any[] = Array.isArray(d.lines) && d.lines.length ? d.lines : [];
+      const template = blank();
+      setLines(
+        src.length
+          ? src.map((l) => {
+              const row: any = { ...template };
+              for (const k of Object.keys(template)) row[k] = str(l[k]);
+              if (!row.pcs) row.pcs = '1';
+              return row as Line;
+            })
+          : [blank()],
+      );
+      const cstr = (v: unknown) => (v == null || v === 0 ? undefined : String(v));
+      sub.load(
+        (src.length ? src : [{}]).map((l) =>
+          (Array.isArray(l.components) ? l.components : []).map((c: any) => {
+            const r: Record<string, string> = {};
+            for (const [k, v] of Object.entries(c)) {
+              if (k === 'isrNo') continue;
+              const sv = typeof v === 'number' ? cstr(v) : v ? String(v) : undefined;
+              if (sv != null) r[k] = sv;
+            }
+            return r;
+          }),
+        ),
+      );
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -373,7 +437,11 @@ export default function MfgReceivePage() {
             itmLoss: n(l.lossWt), // lossWt column → MfgLine.itmLoss
           })),
       };
-      setResult(await post('/mfg/receive', body));
+      setResult(
+        loadedVch
+          ? await put(`/mfg/receive/${encodeURIComponent(loadedVch)}`, body)
+          : await post('/mfg/receive', body),
+      );
     } catch (e) {
       setErr(
         e instanceof ApiError
@@ -583,11 +651,23 @@ export default function MfgReceivePage() {
               <b>RecWt {recTotal.toLocaleString('en-IN')}</b>
             </span>
             <button className="primary" disabled={busy}>
-              {busy ? 'Saving…' : 'Save Receive'}
+              {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : 'Save Receive'}
             </button>
+            {loadedVch && (
+              <button type="button" className="ghost" onClick={resetForm} disabled={busy}>
+                New
+              </button>
+            )}
           </div>
         </div>
       </form>
+
+      <VoucherList
+        table="MFG_DATA"
+        book={coBook}
+        deleteBase="/mfg/receive"
+        onLoad={(vchNo) => loadVoucher(vchNo)}
+      />
 
       {err && <div className="msg err">{err}</div>}
       {result && (
