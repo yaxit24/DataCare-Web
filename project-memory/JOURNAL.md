@@ -4,6 +4,15 @@ Newest entries at the top. One block per session/task.
 
 ---
 
+## 2026-10-29 (cont.6) — Receipt/Payment lifecycle UI + 2 backend fixes (N137); frontend frontier advancing
+- **N137 (G146):** wired the shared PaymentForm (receipt+payment) single-party reopen/edit/delete + VoucherList(CASH_DATA/PAY_DATA). Added PUT /receipts/:vchNo (editReceipt). FOUND+FIXED 2 real backend defects by exercising the paths: (1) editReceipt's RECEIPT_WRITE_TABLES omitted ROJ_MEL_DATA -> receipt edit collided on ROJ_MEL_DATA_pkey (added it); (2) the payment DELETE required `mode` in the body which a generic recent-voucher delete doesn't send -> now resolves mode from the persisted PAY_DATA VCH_TYPE in an RLS-scoped read. Payment edit DEFERRED (postPayment has no lifecycle-context hook like postReceipt; refactor it later to enable editPayment). Universe 638. **VERIFIED LIVE via web /api proxy**: receipt 5000->edit 7500->reopen 7500; payment post->delete(no mode) 200. **PR #105.** main 02b6194.
+- **FRONTEND FRONTIER STATE:** All 5 MISSING workflows now reachable+usable in the UI (Tour Sales N133, Card Receipt N134, Customer Entry N135, Dhrn Os Letter N136, Loan Interest N132). Finance-voucher pages with full lifecycle UI: contra (N129, live browser), journal (N130), ledger-adjust+employee-jv (N131), loan-interest (N132), receipt+payment (N137, edit=receipt only).
+- voucher-list ALLOWED now: SL/PR/PAY/CASH/CONTRA/KR/LBR/APR/SL_ORD + LDR_ADJ/EMP/DHRN_REC/CARD_DATA (amount cols +DIFF_AMT/SALARY_AMT/CARD_AMT).
+- REMAINING frontend lifecycle: fine-jv page (FINE_JV header — add to allow-list + wire), batch-receipt grid missing body cells, MFG Setting Isu/Rec (backend writes:false — needs a real writer), MFG Issue/Receive extended body cells (rtnChol/rtnGhis zeroed), Franchise Fan Sales/Purc (TR_FN_INOUT — no web equiv), scheme member reopen/edit, Tag Wt Change (containment-blocked), Backup restore UI, bulk SMS/WhatsApp. THEN payment-edit (editPayment), then release gates R00-R14 + operator journeys J01-J28. Next slice N138.
+- Reminder: dev web = next start on a PROD build baking API_ORIGIN — rebuild web with API_ORIGIN=http://127.0.0.1:4410 + restart to see page changes; verify via web /api proxy (127.0.0.1:4411/api/...). Password regenerates per restart.
+
+---
+
 ## 2026-10-29 (cont.5) — Net-new MISSING-workflow frontend PAGES (N133 Tour Sales, N134 Card Receipt, N135 Customer Entry)
 - The 5 MISSING workflows had backends but several had NO frontend page (operator couldn't reach them). Building the pages:
 - **N133 (G142) Tour Sales** — reused the shared WholesaleVoucherForm by adding a `tour-sale` workflow (endpoint /tour-sales, mainBook TOUR SALES) + /txn/tour-sales page + nav. Full lifecycle free from the shared form. **VERIFIED LIVE in browser**: book filtered to TSL, grids, Load/Save/Delete/New, no console errors. **PR #101.**
