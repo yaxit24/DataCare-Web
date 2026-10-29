@@ -161,6 +161,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G148 | High | Payment edit | `unified/src/csharp/DataCareNext/TR_CASH.cs` | `web/apps/api/src/modules/finance/finance.ts` `postPayment`/`editPayment`, `web/apps/api/src/routes/txn.ts` `PUT /payments/:vchNo`, `web/apps/web/components/PaymentForm.tsx` | Payment edit was unavailable (postPayment had no lifecycle-context hook). Refactor postPayment to the FinanceWriteContext pattern, write HD_VCH_NO + the hidden identity, add editPayment + PUT /payments/:vchNo, and enable payment edit in the UI. | N139 |
 | G149 | Med | Scheme instalment / edit | `unified/src/csharp/DataCareNext/TR_MEMB_ENT.cs` | `web/apps/api/src/routes/txn.ts` `PUT /scheme/installment/:vchNo`, `web/apps/api/src/modules/membership/scheme.ts` `editSchemeInstallment` | The scheme instalment (highest-volume workflow) could be created, reopened and deleted but not edited; expose editSchemeInstallment via a PUT route (extract a shared input helper). | N140 |
 | G150 | High | CI health / release gates | `.github/workflows/ci.yml`, `web/apps/api/src/modules/finance/cardReceipt.ts`, `web/apps/web/components/PaymentForm.tsx`, `web/parity/depth-parity-baseline.json` | `web/apps/api/src/modules/finance/cardReceipt.ts` `cardReceiptInputFromBody`, `web/apps/web/components/PaymentForm.tsx`, `web/parity/unreachable-triage.json`, `web/parity/depth-parity-baseline.json` | CI red since N124: the `cardReceiptInputFromBody` export was never committed (lived in an uncommitted working-tree change a `git stash` dropped), so a clean `tsc -p` failed TS2724 — masked locally by the dirty tree across ~16 merges. Also the PaymentForm `resetForm()`-after-save wiped the save confirmation (real-stack journey timeout), and the depth ceiling drifted 96→102 from the Stage D/E writers. Commit the export, keep `res` after a new save, resync the depth baseline + triage. | N141 |
+| G151 | Med | Batch receipt / kasar write-off | `unified/src/csharp/DataCareNext/Ac_Ledr.cs:571-581` | `web/apps/api/src/modules/finance/batchReceipt.ts`, `web/apps/api/src/modules/finance/finance.ts` `kasarAccountTx`, `web/apps/api/test/batchReceiptKasar.db.test.ts` | `postBatchReceipt` required the caller to name the kasar (write-off) account, but the batch grid has no kasar-account column and the route forwards only `{scope,vchDate,lines}`, so every on-screen write-off on a batch collection was refused. The single-row receipt/payment path already resolves BOOK_DETL slot 2 (desktop `Ac_Ledr.cs:571-581`); the batch path must do the same. | N142 |
 
 ## 4. Decisions D23–D28
 
@@ -1156,6 +1157,30 @@ Real-stack browser journeys); the main post-merge CI run (`40827479158`) complet
 
 Done when: CI is green on `main` again and a clean `tsc -p` build succeeds with an empty working tree.
 
+### N142 — Batch receipt kasar write-off account (G151, Stage D)
+
+`postBatchReceipt` was the last receipt path that still *required* the caller to name the kasar
+(write-off) account: `requirePostingAccount('kasar', l.kasarAc ?? input.kasarAc, …)` threw when
+neither was supplied. The batch grid has no kasar-account column and `POST /receipts/batch` forwards
+only `{ scope, vchDate, lines }`, so every on-screen write-off entered on a batch collection was
+refused — the exact defect the single-row form had already fixed by resolving `BOOK_DETL` slot 2
+(desktop `Ac_Ledr.cs:571-581`, which joins `BOOK_DETL … SR_NO = 2 AND KASAR_AMT <> 0`).
+
+N142 exports `kasarAccountTx` from `finance.ts` and reuses it in `batchReceipt.ts` (converting the
+per-line `forEach` to an async `for` loop so the slot resolution can be awaited): an explicit line or
+voucher account still wins, else the book's slot-2 kasar account answers, guarded against naming the
+slot-1 settlement account (posting a write-off to the cash account would overstate cash on hand). A
+new DB test proves all four branches — slot-2 fallback, explicit override wins, slot-1/2 collision
+refused with rollback, and a no-kasar line posting cleanly without any slot 2.
+
+Verified: `batchReceiptKasar.db.test.ts` (4 cases) green; full API+DB 319/3496; the full local gate
+battery; and live on the running stack — `POST /receipts/batch` with `{ RCT, WALKIN, amount 1000,
+kasarAmt 15 }` returned `201 { vchNo: 1, total: 1000 }`, where before the fix it returned `400 kasar
+account is not configured`.
+
+Done when: an operator can enter a kasar on a batch-receipt line and the voucher posts, writing the
+give-up to the book's configured slot-2 account.
+
 
 ## 6. Status corrections
 
@@ -1219,6 +1244,7 @@ Done when: CI is green on `main` again and a clean `tsc -p` build succeeds with 
 | N139 | — | implemented-unverified, evidence in this change (G148: payment edit — postPayment lifecycle refactor + editPayment + PUT; verified live) |
 | N140 | — | implemented-unverified, evidence in this change (G149: scheme-installment edit route + input-helper extraction; verified by the suite) |
 | N141 | — | implemented-unverified, evidence in this change (G150: committed the missing cardReceiptInputFromBody export, fixed the PaymentForm save-confirmation regression, resynced the depth baseline + triage; PR #109 all CI jobs green, main run 40827479158 success) |
+| N142 | — | implemented-unverified, evidence in this change (G151: batch-receipt kasar now resolves BOOK_DETL slot 2 via the shared kasarAccountTx; DB test 4/4, full API+DB 319/3496, live POST 201 was 400) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

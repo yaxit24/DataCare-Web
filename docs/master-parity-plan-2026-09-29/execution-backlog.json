@@ -5459,6 +5459,28 @@
         "web/parity/depth-parity-baseline.json"
       ],
       "statusNote": "CI had been RED since N124 (febec1a): txn.ts imported cardReceiptInputFromBody from cardReceipt.ts but the export lived only in an uncommitted working-tree change a later git stash dropped, so a clean tsc -p failed TS2724 - masked locally because the dirty tree carried it across ~16 merges. Committed the 31-line body mapper. Second break: PaymentForm.submit() called resetForm() after a NEW single-party save, nulling res and wiping the Saved - Voucher #N confirmation; the real-stack cash-receipt-payment journey timed out waiting for it. Now clears only the entry inputs, keeps res (matches the multi-line branch). Third: depth:parity gate failed (API fields no screen can supply 96->102) - accumulated healthy growth: Stage D/E writers added 367 API input fields, 361 reachable, 6 net unreachable are all server-derived/internal (BOOK_DETL-resolved posting slots, book-classification flags, writer-assigned voucher numbers, day-book projection rows, read-query keys). Resynced unreachable-triage.json to the exact 102-field set (0 operator-class - every former operator-backlog gap was closed by the same slices - 71 serverDerived, 31 internal, each spot-checked against its writer) and re-recorded depth-parity-baseline.json preserving note/metricChanges/endToEnd/phases with an honest metricChanges entry. Verified: clean-tree API build; all 3 real-stack journeys; depth:parity + depth:deadcells; full battery; PR #109 all CI jobs green; main CI run 40827479158 completed success."
+    },
+    {
+      "id": "N142",
+      "status": "implemented-unverified",
+      "action": "Batch receipt: resolve the kasar (write-off) account from BOOK_DETL slot 2 when no explicit account is supplied, mirroring the single-row receipt/payment path (desktop Ac_Ledr.cs:571-581)",
+      "parentLabels": "P10; D-lifecycle",
+      "startAfter": [
+        "N141"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "DB test batchReceiptKasar.db.test.ts (4 cases: slot-2 fallback, explicit override wins, slot-1/2 collision refused, no-kasar clean); full API+DB 319/3496; live POST /receipts/batch with a kasar line returns 201 on the running stack (was 400)",
+      "gapIds": "G151",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-29",
+      "evidence": [
+        "web/apps/api/src/modules/finance/batchReceipt.ts",
+        "web/apps/api/src/modules/finance/finance.ts",
+        "web/apps/api/test/batchReceiptKasar.db.test.ts"
+      ],
+      "statusNote": "postBatchReceipt was the one receipt path that still REQUIRED the caller to name the kasar write-off account (requirePostingAccount threw when neither line.kasarAc nor input.kasarAc was supplied). The batch grid has no kasar-account column and POST /receipts/batch forwards only {scope,vchDate,lines}, so EVERY on-screen write-off on a batch collection was refused - the exact defect the single-row form had already fixed by resolving BOOK_DETL slot 2 (Ac_Ledr.cs:571-581). Exported kasarAccountTx from finance.ts and reused it in batchReceipt (converting the forEach to an async for-loop): an explicit line/voucher account still wins, else slot 2 answers, guarded against colliding with the slot-1 settlement. New DB test proves all four branches. Live: POST /receipts/batch {RCT, WALKIN, amount 1000, kasarAmt 15} returned 201 {vchNo:1,total:1000} on the rebuilt stack (previously HTTP 400 kasar account not configured). Verified: typecheck/lint/format/typecheck:tests/size/kernel/register; clean-tree API build; full API+DB 319/3496."
     }
   ],
   "amendments": [
