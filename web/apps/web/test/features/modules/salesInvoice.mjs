@@ -363,6 +363,17 @@ export const salesInvoice = {
         assert.equal(h.tax, TWO_LINES.tax);
         const g = await ledger(ctx, vchNo);
         assert(balanced(g));
+        // G169: each group's income account is credited with its own line (Ac_Ledr.cs:90 line path).
+        assert.deepEqual(
+          g
+            .filter((x) => x.ac === 'SALES' || x.ac === 'SLVSALE')
+            .map((x) => [x.ac, x.cr])
+            .sort(),
+          [
+            ['SALES', EXPECT_A.net],
+            ['SLVSALE', EXPECT_B.net],
+          ],
+        );
         const s = await stock(ctx, vchNo);
         assert.deepEqual(
           s.map((x) => [x.it, x.nwt]),
@@ -383,7 +394,8 @@ export const salesInvoice = {
           a: EXPECT_A,
           b: EXPECT_B,
           totals: TWO_LINES,
-          ledger: 'one revenue leg per detail line, keyed VCH_NO+STR(SR_NO)+05 (Ac_Ledr.cs:74)',
+          ledger:
+            'one revenue leg per detail line on its group SALE_AC, keyed VCH_NO+STR(SR_NO)+03 (Ac_Ledr.cs:90 line path, measured revenue code 03)',
         },
         observe: async (ctx) => ({
           countsAfterFailedSave: await counts(ctx),

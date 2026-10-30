@@ -3719,7 +3719,7 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "Controls active and tested; every committed mutation has one immutable audit event",
-      "gapIds": "G34, G35, G187",
+      "gapIds": "G34, G35, G189",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
@@ -5897,18 +5897,31 @@
     },
     {
       "id": "N162",
-      "status": "planned",
-      "action": "Post one revenue/expense leg per detail line (desktop key VCH_NO+STR(SR_NO)+'05', Ac_Ledr.cs:74) so a sale or a purchase with items from two groups saves; remove sales-invoice.create.two-lines-dissimilar and purchase-invoice.create.two-groups from features/baseline.json.",
+      "status": "implemented-unverified",
+      "action": "Post one revenue/expense leg per detail line when a sale or a purchase posts to more than one item account, so a bill with items from two groups saves: the desktop line path keys each line VCH_NO+STR(SR_NO)+code (sale Ac_Ledr.cs:90, purchase Ac_Ledr.cs:410), with the family's measured role code 03; single-account bills keep the measured single 03 leg. Remove sales-invoice.create.two-lines-dissimilar and purchase-invoice.create.two-groups from features/baseline.json.",
       "parentLabels": "P9; J04",
       "startAfter": [
         "N161"
       ],
       "requiredProof": "feature E2E sales-invoice.create.two-lines-dissimilar and purchase-invoice.create.two-groups pass (Σ income/expense legs = taxable, balanced ledger); sales and purchase DB suites green; both baseline entries are removed in the same PR.",
       "gapIds": "G169, G176",
-      "entryDefinition": "02-execution-plan.md section 4",
+      "entryDefinition": "12-lineage-verification-2026-10-01.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/api/src/modules/posting/lineLegs.ts",
+        "web/apps/api/src/modules/sales/sales.ts",
+        "web/apps/api/src/modules/purchase/purchase.ts",
+        "web/apps/api/test/lineLegs.test.ts",
+        "web/apps/api/test/saleTwoGroupRevenue.routes.db.test.ts",
+        "web/apps/api/test/purchaseTwoGroupLegs.routes.db.test.ts",
+        "web/apps/web/test/features/modules/salesInvoice.mjs",
+        "web/apps/web/test/features/modules/purchaseInvoice.mjs",
+        "web/apps/web/test/features/baseline.json"
+      ],
+      "statusNote": "IMPLEMENTED. Desktop authority: Sales_Ledr and Purc_Ledr each have a header path (BOOK_DATA.ITM_TYPE <> 'A': one leg to the book's slot-1 account, sale Ac_Ledr.cs:92, purchase :414-421) and a line path (ITM_TYPE = 'A': one leg per detail line to GROUP_MAST.SALE_AC / PURC_AC for A.NET_AMT keyed VCH_NO+STR(A.SR_NO)+code, sale :90, purchase :410). The G169 row cited :74 code 05, which is the UAE RATE_UNFIX='Y' branch. Posting to several item accounts is the line path's behaviour, so a multi-account bill now posts one leg per line with STR(SR_NO) right-aligned in 10 before the role code; the role code stays the MEASURED 03 of each family (the decompiled code map disagrees with the measured one on every role). Inferred, not measured: the captured data holds no bill posting to two item accounts. Single-account bills are unchanged. Shared helper posting/lineLegs.ts (buildLineLegs, lineLegKey). Also fixed: with PURC_WITH_LBR='N' the labour/other leg to book slot 4 used the purchase code 03 too and collided with the item leg; it now keeps the unmapped band (50+) because its desktop code is not measured. Verified: unit/function vectors 60 passed (lineLegs, sales, purchase, workflows); HTTP write-set suites 13 passed (sale 7, purchase 6: create, reopen + unchanged save, edit, discount, single-account control, cash tender, delete with DELETE_DATA, labour split); negative control with main's purchase writer fails 5 of 6 with the exact duplicate-key 400; feature E2E Sales Invoice 18 passed / 2 failed (G170, G171, baselined) / 3 blocked and Purchase Invoice 17 / 2 (G170, G171) / 2, FEATURE_E2E_PASSED with both G169 and G176 entries removed; Chrome DevTools browser runs of both screens on an isolated stack: sale (masters, two-group sale, ledger report, reopen, edit, print, delete) and purchase (gold + silver typed in the grid, POST saved voucher 00001 with PURCHASE 113,836 and SLVPURC 7,400 on per-line keys, reopen by Load, edit silver rate to 85 -> 125,349.46, printed bill shows both lines, delete reverses all legs and stock with DELETE_DATA). purchase.ts size ceiling 2883 -> 2894 (reviewed growth for the fix). Not verified: desktop match; a web-provisioned purchase book has no slot 4, so PURC_WITH_LBR='N' still refuses a labour purchase on a fresh company (the test adds slot 4 in its fixture) - recorded as G184. The purchase run also found G185: typing a code and pressing Enter at once picks a row of the previous lookup list (supplier SUPL became BANK)."
     },
     {
       "id": "N163",
@@ -6006,7 +6019,7 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "settings.field.pan-limit-any-amount passes (50000 stored and honoured by the PAN rule); a non-number is refused; TAX_ROF shows a decimals label with 0-5; the baseline entry is removed.",
-      "gapIds": "G177, G185",
+      "gapIds": "G177, G187",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
@@ -6129,14 +6142,14 @@
     {
       "id": "N176",
       "status": "planned",
-      "action": "Negative-stock and period-lock refusals use the desktop wording (TR_SALE.cs:10398, :15066/:16308) through desktopMessages.ts, keeping the item/stock/date details; the settings cases assert the desktop text.",
-      "parentLabels": "P9; T06",
+      "action": "Provision BOOK_DETL slot 4 (labour and other charges, Ac_Ledr.cs:419-421) on the purchase-family books with the desktop template's account, so a purchase with labour saves on a web-provisioned company when PURC_WITH_LBR = 'N'.",
+      "parentLabels": "P9; J02",
       "startAfter": [
-        "N170"
+        "N162"
       ],
-      "requiredProof": "settings.effect.negative-stock-refused and settings.effect.lock-date-refuses assert the desktop message text and pass.",
+      "requiredProof": "seedCompany test shows slot 4 on the purchase books; an HTTP write-set test posts a labour purchase with PURC_WITH_LBR = 'N' on a freshly provisioned company without fixture changes; a feature E2E case through the screen.",
       "gapIds": "G184",
-      "entryDefinition": "02-execution-plan.md section 4",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
@@ -6144,13 +6157,43 @@
     {
       "id": "N177",
       "status": "planned",
+      "action": "Lookups resolve the typed text on Enter: when the open list was fetched for different text, Enter looks the typed code up exactly (as the desktop tAcCode_KeyDown does, TR_PURC.cs:14619-14628) instead of picking the highlighted row; applies to every LookupPicker (party, item, tag, employee).",
+      "parentLabels": "P9; J04",
+      "startAfter": [
+        "N171"
+      ],
+      "requiredProof": "A web unit test of the race (Enter before the search returns picks the typed code); feature E2E cases on the sale and purchase party boxes that type a code and press Enter at once; a browser run.",
+      "gapIds": "G185",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N178",
+      "status": "planned",
+      "action": "Negative-stock and period-lock refusals use the desktop wording (TR_SALE.cs:10398, :15066/:16308) through desktopMessages.ts, keeping the item/stock/date details; the settings cases assert the desktop text.",
+      "parentLabels": "P9; T06",
+      "startAfter": [
+        "N170"
+      ],
+      "requiredProof": "settings.effect.negative-stock-refused and settings.effect.lock-date-refuses assert the desktop message text and pass.",
+      "gapIds": "G186",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N179",
+      "status": "planned",
       "action": "Classify every no-visible-effect button from the with-data sweep: record each expected one in surface-baseline.json byDesign with its source, and open a gap for each real defect (starting with report CSV on an empty section).",
       "parentLabels": "P9; R03",
       "startAfter": [
         "N170"
       ],
       "requiredProof": "the with-data sweep reports no unclassified no-visible-effect button; each by-design entry cites its source; each defect has a gap row.",
-      "gapIds": "G186",
+      "gapIds": "G188",
       "entryDefinition": "02-execution-plan.md section 4",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",

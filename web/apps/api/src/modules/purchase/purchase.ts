@@ -17,6 +17,7 @@ import {
   insertRowTx,
   type LedgerLine,
 } from '../posting/posting.js';
+import { buildLineLegs, lineLegKey, type LineLeg } from '../posting/lineLegs.js';
 import {
   deleteVoucherWriteSetTx,
   nextHiddenVoucherNoTx,
@@ -321,7 +322,9 @@ export function buildPurchaseLedger(p: {
   controlAc?: string;
   vchType?: string;
   totals: Pick<BillTotals, 'total' | 'taxable' | 'tax' | 'roundOff'>;
-  expenseLegs?: { ac: string; amount: number }[];
+  expenseLegs?: LineLeg[];
+  /** PURC_WITH_LBR='N' labour/other to slot 4 (Ac_Ledr.cs:419-421); unmeasured code, so the unmapped band (G176). */
+  labourLeg?: { ac: string; amount: number };
 }): LedgerLine[] {
   const base = { ...p.key, VCH_TYPE: p.vchType ?? 'PURC' };
   const lines: LedgerLine[] = [];
@@ -343,13 +346,22 @@ export function buildPurchaseLedger(p: {
     if (leg.amount !== 0)
       lines.push({
         ...base,
-        legType: PURC_LEG.purchase,
+        ...lineLegKey(leg, PURC_LEG.purchase), // G176: per-line key on a multi-account bill
         AC_CODE: leg.ac,
         LD_CODE: p.acCode,
         DR_AMT: leg.amount,
         CR_AMT: 0,
         SIGN: 'D',
       });
+  if (p.labourLeg && p.labourLeg.amount !== 0)
+    lines.push({
+      ...base,
+      AC_CODE: p.labourLeg.ac,
+      LD_CODE: p.acCode,
+      DR_AMT: p.labourLeg.amount,
+      CR_AMT: 0,
+      SIGN: 'D',
+    });
   if (p.totals.tax !== 0)
     lines.push({
       ...base,
@@ -875,7 +887,7 @@ async function writePurchaseTx(
   );
   const labourOtherTotal = round2(splits.reduce((sum, split) => sum + split.labourOther, 0));
   const primaryTotal = splits.reduce((sum, split) => sum + split.primary, 0);
-  const expenseLegs = buildExpenseLegs(
+  const expenseLegs = buildLineLegs(
     computed.map((c, index) => ({
       net: splits[index]?.primary ?? 0,
       ac: purcAcByItem[String(c.in.itCode ?? '').trim()] ?? purchaseAc,
@@ -883,12 +895,10 @@ async function writePurchaseTx(
     round2(totals.taxable - labourOtherTotal),
     primaryTotal,
   );
-  if (!isPurchaseQuotation && labourOtherTotal !== 0) {
-    expenseLegs.push({
-      ac: await resolveBookAccountTx(tx, input.scope, bookPolicy, 4),
-      amount: labourOtherTotal,
-    });
-  }
+  const labourLeg =
+    !isPurchaseQuotation && labourOtherTotal !== 0
+      ? { ac: await resolveBookAccountTx(tx, input.scope, bookPolicy, 4), amount: labourOtherTotal }
+      : undefined;
 
   // Each purchased tag receives the desktop VCH_SRNO identity even when TAG_NO is manual.
   //
@@ -1283,6 +1293,7 @@ async function writePurchaseTx(
     vchType: bookPolicy.vchType,
     totals,
     expenseLegs,
+    labourLeg,
   });
   if (hmAmt > 0) {
     const hb = { ...key, VCH_TYPE: bookPolicy.vchType };
