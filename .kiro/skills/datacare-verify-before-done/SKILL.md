@@ -53,6 +53,10 @@ For a changed screen, the `datacare-e2e-visual` protocol must also have been run
 | Write set matches | The write-set database test passes with desktop-derived expected values | The web returns something |
 | Plan is consistent | `validate_plan.py` and `docs_check.py` print `pass` this turn | Edited carefully |
 
+## Feature behavior claims
+
+Before reporting that a feature works, apply the [feature browser validation skill](../datacare-feature-browser-validation/SKILL.md). Retain the required-case matrix and real browser/business evidence, run its exact-set validator, and report failed, blocked and untested cases. A green code gate or successful page render is not feature verification; desktop execution and product acceptance are separate claims.
+
 ## Red flags — stop and run the command
 
 - "should", "probably", "seems to"; "Great!", "Perfect!", "Done!" before any command ran.

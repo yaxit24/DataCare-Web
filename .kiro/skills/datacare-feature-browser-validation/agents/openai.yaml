@@ -1,0 +1,4 @@
+interface:
+  display_name: "DataCare Feature Validation"
+  short_description: "Validate real browser workflows and business effects"
+  default_prompt: "Use $datacare-feature-browser-validation to verify a DataCare feature through the browser against its desktop behavior."

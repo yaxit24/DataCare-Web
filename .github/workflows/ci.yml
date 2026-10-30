@@ -99,6 +99,10 @@ jobs:
         if: ${{ !cancelled() }}
         run: python3 docs/tools/docs_check.py
 
+      - name: 'Gate: feature evidence validator contract tests (not browser execution)'
+        if: ${{ !cancelled() }}
+        run: python3 -m unittest discover -s .kiro/skills/datacare-feature-browser-validation/scripts -p 'test_*.py'
+
   quality:
     runs-on: ubuntu-latest
     services:

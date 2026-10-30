@@ -8,6 +8,12 @@ For every run retain: requirement/case IDs, candidate Git commit and dirty-input
 
 Use **exact required-set** validation. Missing, skipped, duplicate or unknown case IDs fail closure. A result count of 100 does not prove the required 100 cases ran. Evidence for another commit/setting/template does not pass merely because it is recent. Capture expected values independently before modifying the web implementation.
 
+### Operational skill and measured feature coverage
+
+Feature verification uses the [feature browser validation skill](../../.kiro/skills/datacare-feature-browser-validation/SKILL.md). Before execution, expand every applicable T01–T18 group below into source-backed cases for the feature’s books, settings, roles, boundaries and downstream states; preserve justified N/A dispositions. Operate the actual screen, check persisted effects and resulting reports, and retain the exact-set evidence bundle. Two sessions, retries and write failures are required where applicable, not optional replacements for the happy path.
+
+The skill’s checker rejects missing/duplicate/unknown cases, changed input identities and missing/tampered required artifacts. It does not execute the browser or certify artifact meaning. Report executed coverage, browser/business pass coverage and independent Windows desktop-match coverage separately; blocked/untested cases remain in the denominator. No source-derived result, skipped desktop comparison or API-only pass becomes a browser/desktop pass. Feature-scope coverage does not close parent acceptance or imply an edition/product percentage.
+
 ## 2. Test environments and initial procedure
 
 1. Freeze a clean candidate checkout and exact dependency lock. Hydrate required LFS binaries/templates and verify against `ARTIFACT-MANIFEST.sha256`; classify unavailable artifacts before replay.

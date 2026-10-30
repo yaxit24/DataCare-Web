@@ -89,6 +89,7 @@ When documents disagree:
 | `datacare-desktop-authority` | Find exactly what the desktop does, with citations |
 | `datacare-write-set-test` | Write a complete write-set database test |
 | `datacare-e2e-visual` | Verify screens in Chrome through the Chrome DevTools MCP |
+| `datacare-feature-browser-validation` | Operate the complete feature in the browser, validate business effects, and measure exact required-case coverage separately from desktop match |
 | `datacare-code-review` | Review a change against the engineering standards |
 | `datacare-plan-update` | Record status, gaps, slices and decisions in the plan |
 | `datacare-docs-update` | Keep the menu catalog, register and handbooks current |
@@ -132,10 +133,11 @@ python3 docs/tools/session_status.py        # what other sessions, worktrees and
 2. Tests: kernel vectors for calculations, a write-set database test for writers, schema and policy tests for
    routes, a zero-mock journey and the visual protocol for screens
    ([`docs/handbook/web/testing.md`](docs/handbook/web/testing.md)).
-3. Code follows [`docs/handbook/web/engineering-standards.md`](docs/handbook/web/engineering-standards.md).
-4. All commands above pass.
-5. Backlog, document 11 §2 (or document 12 §6) and the affected menu-catalog rows are updated.
-6. The pull request states what was verified and what was not.
+3. For a feature or workflow claim, use the [feature browser validation skill](.kiro/skills/datacare-feature-browser-validation/SKILL.md): freeze the applicable T01–T18 cases, execute through the real UI, check complete persisted and downstream effects, and retain the validated evidence bundle. Blocked/untested cases remain in coverage; browser success never implies desktop acceptance.
+4. Code follows [`docs/handbook/web/engineering-standards.md`](docs/handbook/web/engineering-standards.md).
+5. All commands above pass.
+6. Backlog, document 11 §2 (or document 12 §6) and the affected menu-catalog rows are updated.
+7. The pull request states what was verified and what was not.
 
 ## Where to look
 
