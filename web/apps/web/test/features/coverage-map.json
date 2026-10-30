@@ -20,6 +20,12 @@
         "web/apps/web/components/LookupPicker.tsx",
         "web/apps/web/lib/lookupEnter.ts"
       ]
+    },
+    "usersRights": {
+      "covers": [
+        "web/apps/web/app/(app)/admin/users/page.tsx",
+        "web/apps/api/src/modules/rbac/users.ts"
+      ]
     }
   }
 }

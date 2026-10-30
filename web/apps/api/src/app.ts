@@ -1,3 +1,9 @@
+import type { EditionPolicy } from '@datacare/core';
+import {
+  assertFormClassified,
+  editionDescriptor,
+  editionRefusal,
+} from './modules/rbac/editionGate.js';
 import { LastDayLockConfigurationError } from './modules/shared/lastDayLock.js';
 import { loginSessionContext } from './modules/auth/sessionContextLogin.js';
 import {
@@ -86,6 +92,8 @@ import { reportFormForSlug } from './modules/reports/reportAuthorization.js';
 
 export interface BuildOpts {
   prisma: any;
+  /** The running desktop edition (N171). Absent = no edition gate (tests run every edition's routes). */
+  edition?: EditionPolicy | null;
   secret: string;
   logger?: boolean;
   secureCookies?: boolean;
@@ -132,6 +140,7 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         `orphaned=${orphanedMasterPolicies.join(',') || 'none'}`,
     );
   }
+  app.decorate('editionPolicy', opts.edition ?? null);
   const cookieBase = {
     httpOnly: true as const,
     sameSite: 'strict' as const,
@@ -164,6 +173,7 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         `unmapped-or-ambiguous-route-policy: ${methods.join(',')} ${routeOptions.url}`,
       );
     }
+    if (opts.edition && policy.kind === 'form' && policy.form) assertFormClassified(policy.form);
     routeOptions.config = {
       ...(routeOptions.config ?? {}),
       authorizationPolicy: policy,
@@ -436,6 +446,12 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     ) {
       return reply.code(403).send({ error: 'password-reset-required' });
     }
+    // N171: a route of a higher desktop edition is refused before any rights or scope check.
+    if (opts.edition && policy.kind === 'form') {
+      const form = resolvePolicyForm(policy, req.params as Record<string, unknown>);
+      const refusal = form ? editionRefusal(form, opts.edition) : null;
+      if (refusal) return reply.code(403).send(refusal);
+    }
 
     try {
       if (policy.businessScope) {
@@ -651,6 +667,7 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
       isAdmin: principal.isAdmin,
       passwordResetRequired: principal.passwordResetRequired,
       allowedForms,
+      edition: editionDescriptor(opts.edition),
     };
   });
 

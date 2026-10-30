@@ -92,6 +92,7 @@ async function main() {
     secureCookies: config.secureCookies,
     defaultTenantId: config.tenantId,
     allowTenantHeader: !config.isProduction,
+    edition: config.edition,
   });
   // One catalog query now, so no posting or numbering transaction queries information_schema (N53). If the
   // database is not reachable yet, start anyway as before: the first posting then loads the catalog once.
