@@ -6231,6 +6231,104 @@
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N180",
+      "status": "implemented-unverified",
+      "action": "Sales Return feature module on shared real data: 24 cases (T01-T18) through the real screen with desktop-derived expectations (SL_AMT_TYPE basis, whole-rupee return amounts), every failure baselined to a gap.",
+      "parentLabels": "P9; R03; J07",
+      "startAfter": [
+        "N170"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "requiredProof": "run-features.mjs sales-return 14 passed / 7 failed (all baselined) / 3 blocked, bundleValid true, FEATURE_E2E_PASSED in the Real-stack job.",
+      "gapIds": "G190, G191, G192, G193, G194, G195, G196",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/web/test/features/modules/salesReturn.mjs",
+        "web/apps/web/test/features/run-features.mjs",
+        "web/apps/web/test/features/baseline.json",
+        "web/apps/web/test/features/coverage-map.json"
+      ],
+      "statusNote": "IMPLEMENTED. Sales Return module executed through the real screen; defects G190-G194 baselined, G195-G196 found while checking the desktop rounding, all planned (N181-N185)."
+    },
+    {
+      "id": "N181",
+      "status": "planned",
+      "action": "Sales Return prices like the desktop: resolve CO_SET.SL_AMT_TYPE for the returned line (net + ghat, gross or fine), round the item and labour amounts and the bill total to whole rupees as TR_SALE_RTN does, in the screen preview and the writer; remove sales-return.formula.net-basis and sales-return.create.amount-net-basis from features/baseline.json.",
+      "parentLabels": "P05-03, X13; J07",
+      "startAfter": [
+        "N180"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "requiredProof": "both cases pass (preview and stored 61,234 + 2,375, tax 1,908.27, total 65,517); a fine-basis company still prices on fine; the baseline entries are removed.",
+      "gapIds": "G190"
+    },
+    {
+      "id": "N182",
+      "status": "planned",
+      "action": "Sales Return import and layout: a loose sale line imported with TAG_NO 'N' saves as an untagged return line (the writer treats 'N' as no tag, as TR_SALE_RTN does), and the Import button is not covered by the Tax % box at desktop widths; remove sales-return.create.from-bill-import and sales-return.ui.import-button-clickable from features/baseline.json.",
+      "parentLabels": "P05-03, X13; J07",
+      "startAfter": [
+        "N180"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "requiredProof": "both cases pass; a tagged line still needs its provenance; the baseline entries are removed.",
+      "gapIds": "G191, G192"
+    },
+    {
+      "id": "N183",
+      "status": "planned",
+      "action": "Voucher lifecycle answers and audit users: map PersistedVoucherNotFoundError (and the ambiguous twin) to a stable 4xx conflict in run(); pass the logged-in user as mainUser on POST /sales-returns; pass sess(req).sub, not the tenant id, as deleteUser on the seven delete routes; remove sales-return.concurrency.double-delete, sales-return.create.records-user and sales-return.delete.audit-user from features/baseline.json.",
+      "parentLabels": "P01-04/05, X05",
+      "startAfter": [
+        "N180"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "requiredProof": "the three cases pass; a route test proves a second delete answers 4xx with no write; DELETE_DATA.DELETE_USER is the login name on all seven deletes.",
+      "gapIds": "G193, G194"
+    },
+    {
+      "id": "N184",
+      "status": "planned",
+      "action": "Sale line amounts round like the desktop: item and labour amounts to whole rupees, or 2 decimals when CO_SET.ALL_ROF_REMOVE = 'Y' (TR_SALE.cs CommPassTotal digits), with TOT_AMT_ROF kept for the bill total only; move the merged sales-invoice and settings.effect.sale-amount-fine expectations to the desktop values in the same change.",
+      "parentLabels": "P06-01, P10-05; X07",
+      "startAfter": [
+        "N180"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "requiredProof": "core vectors for 61,234.5 -> 61,234 (banker's) and ALL_ROF_REMOVE=Y -> 61,234.50; the sales-invoice and settings feature modules pass with desktop expectations; preview equals posted.",
+      "gapIds": "G195"
+    },
+    {
+      "id": "N185",
+      "status": "planned",
+      "action": "Rounding defaults for new companies: decide under D05 whether web provisioning writes the desktop schema defaults (LBR_ROF 0, ITM_RATE_ROF 0, PR_RATE_ROF 2, TOT_AMT_ROF 0, ALL_ROF_REMOVE N, a TAX_ROF value) or keeps the 2-decimal reading of blank settings, and record the decision; implement the chosen defaults for new companies only.",
+      "parentLabels": "P06-01, P10-05; X07",
+      "startAfter": [
+        "N184"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "requiredProof": "the decision is recorded with its source; a newly provisioned company shows the chosen settings on the Settings screen and a sale rounds accordingly in the browser.",
+      "gapIds": "G196"
     }
   ],
   "amendments": [
