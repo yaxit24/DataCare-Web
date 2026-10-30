@@ -283,7 +283,11 @@ function differences(
         lines,
         loaded: { view, header, oldGold },
       });
-      const saved = await request('PUT', `/sales/${vchNo}`, command);
+      // N51: the update carries the version the voucher was read with.
+      const saved = await request('PUT', `/sales/${vchNo}`, {
+        ...command,
+        expectedVersion: view.version,
+      });
       expect(saved.statusCode, saved.body).toBe(200);
 
       const after = await writeSet(vchNo);

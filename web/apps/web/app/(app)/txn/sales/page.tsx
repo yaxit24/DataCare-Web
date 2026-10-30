@@ -346,6 +346,7 @@ export default function SalesEntryPage() {
   } | null>(null);
   const [voucherLookup, setVoucherLookup] = useState('');
   const [loadedVchNo, setLoadedVchNo] = useState('');
+  const [loadedVersion, setLoadedVersion] = useState(''); // N51 (D17): sent on update and delete
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const cashRef = useRef<HTMLInputElement>(null);
@@ -429,6 +430,7 @@ export default function SalesEntryPage() {
 
   function newSale() {
     setLoadedVchNo('');
+    setLoadedVersion('');
     setVoucherLookup('');
     setResult(null);
     setErr('');
@@ -501,6 +503,7 @@ export default function SalesEntryPage() {
         `/sales/${encodeURIComponent(vchNo)}?coBook=${encodeURIComponent(identity.coBook)}&coYear=${encodeURIComponent(identity.coYear || coYear)}&lcCode=${encodeURIComponent(identity.lcCode || lcCode)}`,
       );
       setLoadedVchNo(String(view.voucherNo));
+      setLoadedVersion(String(view.version ?? ''));
       setVoucherLookup(String(view.voucherNo));
       setResult(null);
       setVchDate(String(view.vchDate));
@@ -643,7 +646,7 @@ export default function SalesEntryPage() {
     setErr('');
     try {
       await del(
-        `/sales/${encodeURIComponent(loadedVchNo)}?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}`,
+        `/sales/${encodeURIComponent(loadedVchNo)}?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}&expectedVersion=${encodeURIComponent(loadedVersion)}`,
       );
       newSale();
     } catch (e) {
@@ -816,11 +819,12 @@ export default function SalesEntryPage() {
       const saved = loadedVchNo
         ? await put<{ vchNo: number; totals: Totals; billProfit?: SaleProfit }>(
             `/sales/${encodeURIComponent(loadedVchNo)}`,
-            body,
+            { ...body, expectedVersion: loadedVersion },
           )
         : await post<{ vchNo: number; totals: Totals; billProfit?: SaleProfit }>('/sales', body);
       setResult(saved);
       const savedNo = String(saved.vchNo).padStart(5, '0');
+      setLoadedVersion((saved as { version?: string }).version ?? ''); // N51: create and update return it
       setLoadedVchNo(savedNo);
       setVoucherLookup(savedNo);
     } catch (e) {

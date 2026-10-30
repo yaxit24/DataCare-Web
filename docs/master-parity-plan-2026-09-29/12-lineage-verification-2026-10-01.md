@@ -1891,6 +1891,17 @@ cache a previous server wrote. Proven by `web/apps/web/test/clearRouteCache.test
 Done when: no local browser run can be answered with a previous build's page.
 
 
+### N51 milestone 2 — Sale version tokens (G170, D17)
+
+`web/apps/api/src/modules/vouchers/version.ts` hashes a voucher's complete write set. `GET /sales/:vchNo` returns it
+as `version`; `PUT` and `DELETE` require it as `expectedVersion` (`web/apps/api/src/routes/saleVoucher.ts`), and
+`web/apps/api/src/modules/sales/sales.ts` refuses a stale one with `409 voucher-version-conflict` after locking the
+header and before any write. Proven by `web/apps/api/test/saleVersion.routes.db.test.ts` and the
+`concurrency.stale-second-save` case of `web/apps/web/test/features/modules/salesInvoice.mjs`.
+
+Done when: every Standard voucher family refuses a stale update or delete.
+
+
 ### N164 — UI surface map: every page and every button, plus a browser test with every behaviour change (G172)
 
 `web/apps/web/test/features/run-surface.mjs` crawls every route an operator can reach — the 235 sidebar links
