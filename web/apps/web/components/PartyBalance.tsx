@@ -12,6 +12,9 @@ interface Bal {
   gold: number;
   silver: number;
 }
+/** How long the party code must stay unchanged before its balance is fetched. */
+export const BALANCE_DELAY_MS = 300;
+
 export function PartyBalance({ acCode }: { acCode: string }) {
   const [b, setB] = useState<Bal | null>(null);
   useEffect(() => {
@@ -21,15 +24,19 @@ export function PartyBalance({ acCode }: { acCode: string }) {
       return;
     }
     let on = true;
-    get<Bal>(`/party/${encodeURIComponent(ac)}/balance`)
-      .then((d) => {
-        if (on) setB(d);
-      })
-      .catch(() => {
-        if (on) setB(null);
-      });
+    // G182: the party box changes on every keystroke; ask once the operator has stopped typing.
+    const timer = setTimeout(() => {
+      get<Bal>(`/party/${encodeURIComponent(ac)}/balance`)
+        .then((d) => {
+          if (on) setB(d);
+        })
+        .catch(() => {
+          if (on) setB(null);
+        });
+    }, BALANCE_DELAY_MS);
     return () => {
       on = false;
+      clearTimeout(timer);
     };
   }, [acCode]);
   if (!b) return null;
