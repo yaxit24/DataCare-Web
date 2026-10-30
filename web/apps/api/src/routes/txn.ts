@@ -251,7 +251,7 @@ import {
   stageTagPrintRowsTx,
 } from '../modules/stock/tagPrint.js';
 import { tagStockReport, tagStockCsv } from '../modules/reports/tagStock.js';
-import { recentVouchers } from '../modules/vouchers/list.js';
+import { registerVoucherNavigationRoutes } from './voucherNavigation.js';
 import { listYears, createYear, carryForwardOpenings } from '../modules/masters/year.js';
 import { reminders } from '../modules/finance/reminders.js';
 import { getOpeningBalance, setOpeningBalance } from '../modules/masters/openingBalance.js';
@@ -1072,6 +1072,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   };
   registerCrmRoutes(app, extraRouteHelpers);
   registerLoanInterestRoutes(app, extraRouteHelpers);
+  registerVoucherNavigationRoutes(app, extraRouteHelpers);
   const pdfRenderer = (): PdfRenderer => deps.pdfRenderer ?? new PlaywrightPdfRenderer();
   /** Render server-built HTML, mapping limits to 413/422 and a busy or slow renderer to a retryable 503. */
   const sendPdf = async (reply: FastifyReply, html: string, filename: string) => {
@@ -6561,18 +6562,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.get('/reports/consi-report/detail', auth, async (req, reply) => {
     const q = (req.query ?? {}) as Record<string, string | undefined>;
     return run(reply, 200, () => consiDetailReport(prisma, readScope(req), q.acCode));
-  });
-  app.get('/vouchers/recent', auth, async (req) => {
-    const s = scopeOf(req);
-    const qy = (req.query as any) || {};
-    return recentVouchers(
-      prisma,
-      // A session without a year lists nothing (fail closed) rather than every year's vouchers.
-      { tenantId: s.tenantId, coCode: s.coCode, lcCode: s.lcCode, coYear: s.coYear ?? '' },
-      String(qy.table ?? ''),
-      String(qy.book ?? ''),
-      qy.limit ? Number(qy.limit) : 50,
-    );
   });
   app.get('/years', auth, async (req) => {
     const s = readScope(req);
