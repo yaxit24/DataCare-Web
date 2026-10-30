@@ -2082,7 +2082,7 @@ leaves the baseline in the change that fixes it.
 | N172 | — | planned (G179: voucher number box — Enter opens the voucher, Up the last, Down the first, F1 the list, on every Standard voucher screen) |
 | N173 | — | planned (G180: the print window works after the access cookie expires) |
 | N174 | — | implemented-unverified, evidence in this change (G181: the HSN summary prints the header tax heads; unit 23 incl. 300 generated bills, feature case through Print, both fail against the old code) |
-| N175 | — | planned (G182: no bulk route prefetch; party balance fetched once per chosen party) |
+| N175 | — | implemented-unverified, evidence in this change (G182: no navigation prefetch; one balance request per typed party; feature case fails against the old code) |
 | N176 | — | planned (G184: provision BOOK_DETL slot 4 on purchase-family books so PURC_WITH_LBR = 'N' works on a fresh company) |
 | N177 | — | implemented-unverified, evidence in this change (G185: Enter resolves the typed code when the list is for older text; web unit 7 passed; two new feature cases pass and fail against the old component) |
 | N178 | — | planned (G186: negative-stock and period-lock refusals use the desktop wording) |

@@ -6166,7 +6166,7 @@
     },
     {
       "id": "N175",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Stop the request storms: navigation links do not prefetch every route on page load, and the party box fetches the balance once for the chosen party, not on every keystroke.",
       "parentLabels": "P9; X05",
       "startAfter": [
@@ -6177,7 +6177,14 @@
       "entryDefinition": "15-standard-edition-plan.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/web/components/Shell.tsx",
+        "web/apps/web/components/PartyBalance.tsx",
+        "web/apps/web/test/features/modules/salesInvoice.mjs"
+      ],
+      "statusNote": "IMPLEMENTED. The Shell navigation links (and the Beta links) no longer prefetch: each page drew one route prefetch per navigation link (about 240 in a tall window, 30 in the headless test viewport). PartyBalance waits 300 ms after the party code stops changing before it asks for the balance, so typing a code asks once (it is on 8 screens). Verified: feature case sales-invoice.entry.no-request-storm sees 0 prefetches on opening Sales Invoice and 1 balance request (for E2ELOC) while typing it; against main's Shell and PartyBalance it fails with 30 prefetches."
     },
     {
       "id": "N176",

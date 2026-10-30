@@ -897,6 +897,37 @@ export const salesInvoice = {
     ),
 
     C(
+      'entry.no-request-storm',
+      'T01',
+      'read-only',
+      'G182: opening the screen draws no route prefetches, and typing a party code asks for its balance once',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const seen = [];
+        page.on('request', (r) => seen.push(r.url()));
+        await openSales(page);
+        await page.waitForTimeout(1500);
+        const prefetches = seen.filter((u) => u.includes('_rsc=')).length;
+        const party = page.getByPlaceholder('search accounts… (F1)').first();
+        await party.fill('');
+        await page.waitForTimeout(500);
+        const typingFrom = seen.length;
+        await party.pressSequentially(PARTIES.local.code, { delay: 60 });
+        await page.waitForTimeout(1200);
+        const balances = seen
+          .slice(typingFrom)
+          .filter((u) => /\/api\/party\/[^/]*\/balance/.test(u));
+        assert.ok(prefetches <= 2, `${prefetches} route prefetches on opening the screen`);
+        assert.equal(balances.length, 1, `balance requests while typing: ${balances.join(', ')}`);
+        assert.ok(balances[0].includes(`/party/${PARTIES.local.code}/balance`), balances[0]);
+        return {
+          observation: `${prefetches} route prefetches on opening; ${balances.length} balance request while typing ${PARTIES.local.code}`,
+          expected: 'at most 2 prefetches; 1 balance request, for the typed code',
+        };
+      },
+    ),
+
+    C(
       'keyboard.alt-s-saves',
       'T17',
       'mutation',
