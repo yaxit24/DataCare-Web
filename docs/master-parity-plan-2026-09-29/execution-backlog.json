@@ -6035,18 +6035,26 @@
     },
     {
       "id": "N169",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Users & Rights: refuse a change that would leave the company without an administrator (demoting or deleting the last ADMIN, including the caller's own account), with a readable message; add a feature E2E case for it.",
       "parentLabels": "P9; X05",
       "startAfter": [
         "N164"
       ],
-      "entryDefinition": "02-execution-plan.md section 4",
+      "entryDefinition": "12-lineage-verification-2026-10-01.md section 5",
       "requiredProof": "browser case: the only admin tries to set their own role to USER and is refused with a message, LOGIN_MAST unchanged; with a second admin present the change is allowed.",
       "gapIds": "G178",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/api/src/modules/rbac/users.ts",
+        "web/apps/api/test/lastAdministrator.routes.db.test.ts",
+        "web/apps/web/app/(app)/admin/users/page.tsx",
+        "web/apps/web/test/features/modules/usersRights.mjs"
+      ],
+      "statusNote": "IMPLEMENTED. setUserRights refuses a category change that would leave the company without an administrator (LastAdministratorValidationError, 400 with the reason), locking the company's admin LOGIN_MAST rows FOR UPDATE so two admins demoting each other at once cannot both succeed. The Users & Rights screen now shows the server's reason instead of a generic failure. The desktop does not need this (it keeps a built-in main user); the web has no other way back. Verified: HTTP DB test 3 passed (only admin refused and unchanged and can still reach /admin/users; with a second admin the change succeeds and the remaining one is protected; ordinary changes unaffected); negative control against main's users.ts fails all 3; new feature module users (Users & Rights): entry.lists-users, rights.clerk-refused and rights.last-admin-refused pass through the real screen (the reason is shown and LOGIN_CATG stays ADMIN), 15 groups blocked as not yet written (step E11)."
     },
     {
       "id": "N170",

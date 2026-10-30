@@ -16,6 +16,12 @@
         "web/apps/api/src/modules/purchase/purchase.ts",
         "web/apps/api/src/modules/posting/lineLegs.ts"
       ]
+    },
+    "usersRights": {
+      "covers": [
+        "web/apps/web/app/(app)/admin/users/page.tsx",
+        "web/apps/api/src/modules/rbac/users.ts"
+      ]
     }
   }
 }
