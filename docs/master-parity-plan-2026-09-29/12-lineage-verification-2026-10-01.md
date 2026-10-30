@@ -1846,6 +1846,18 @@ not yet written (document 15 step E11).
 
 Done when: no sequence of rights changes leaves a company without an administrator.
 
+### N177 — Enter in a lookup picks the typed code, never a row of an older list (G185)
+
+The desktop looks the typed code up exactly on Enter (`unified/src/csharp/DataCareNext/TR_PURC.cs:14619-14628`). The web
+lookup searched 180 ms after the last keystroke, so Enter pressed straight after typing picked the first row of the
+previous list. `web/apps/web/components/LookupPicker.tsx` now remembers the text each list was fetched for, ignores an
+answer for older text, and on Enter with a list for other text looks the typed code up exactly before picking
+(`web/apps/web/lib/lookupEnter.ts`). Proven by `web/apps/web/test/lookupEnter.test.ts` and the feature cases
+`sales-invoice.lookup.code-enter-at-once` and `purchase-invoice.lookup.code-enter-at-once`, which fail against the old
+component with the 30 October symptom.
+
+Done when: typing a code and pressing Enter at once always puts that code on the voucher, on every lookup.
+
 
 ### N164 — UI surface map: every page and every button, plus a browser test with every behaviour change (G172)
 
@@ -2061,7 +2073,7 @@ leaves the baseline in the change that fixes it.
 | N174 | — | planned (G181: printed HSN table rounds the GST halves consistently and totals the bill tax) |
 | N175 | — | planned (G182: no bulk route prefetch; party balance fetched once per chosen party) |
 | N176 | — | planned (G184: provision BOOK_DETL slot 4 on purchase-family books so PURC_WITH_LBR = 'N' works on a fresh company) |
-| N177 | — | planned (G185: Enter in a lookup resolves the typed code instead of picking a row of an earlier list) |
+| N177 | — | implemented-unverified, evidence in this change (G185: Enter resolves the typed code when the list is for older text; web unit 7 passed; two new feature cases pass and fail against the old component) |
 | N178 | — | planned (G186: negative-stock and period-lock refusals use the desktop wording) |
 | N179 | — | planned (G188: classify the 141 no-effect buttons as by-design with source, or open a gap) |
 | N180 | — | implemented-unverified, evidence in this change (Sales Return module 14/7/3 on shared real data; found G190–G196; corrects the N161/N170 rounding statement) |

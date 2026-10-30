@@ -275,6 +275,39 @@ export const salesInvoice = {
     ),
 
     C(
+      'lookup.code-enter-at-once',
+      'T17',
+      'read-only',
+      'TR_SALE.cs:17340 tAcCode_KeyDown: Enter looks the typed code up exactly; a list fetched for older text is never picked (G185)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openSales(page);
+        const party = page.getByPlaceholder('search accounts… (F1)').first();
+        await party.click();
+        await party.fill('');
+        // Let the list for the empty box arrive first: that stale list is what Enter used to pick from.
+        await page.waitForTimeout(400);
+        await party.pressSequentially(PARTIES.local.code);
+        await party.press('Enter');
+        const name = field(page, 'Customer Name');
+        for (let i = 0; i < 40 && (await name.inputValue()) === ''; i++)
+          await page.waitForTimeout(100);
+        const picked = await party.inputValue();
+        const shownName = await name.inputValue();
+        assert.equal(
+          picked,
+          PARTIES.local.code,
+          `Enter at once picked ${picked}, not the typed code`,
+        );
+        assert.equal(shownName, PARTIES.local.name, 'the typed party is filled in');
+        return {
+          observation: `typed ${PARTIES.local.code} + Enter at once: party ${picked}, name ${shownName}`,
+          expected: { party: PARTIES.local.code, name: PARTIES.local.name },
+        };
+      },
+    ),
+
+    C(
       'formula.single-line',
       'T03',
       'read-only',
