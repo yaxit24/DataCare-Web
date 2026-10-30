@@ -6020,7 +6020,7 @@
     },
     {
       "id": "N168",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Settings controls match the desktop: editable amount settings (PAN_CARD_VAL, FONT_SIZE, GRID_ROW_HIGHT, VCH_DESC_HELP_LENT) offer the presets but accept any valid amount, validated server-side; TAX_ROF is labelled as the number of tax decimals and offers 0-5; remove settings.field.pan-limit-any-amount from features/baseline.json.",
       "parentLabels": "P9; J21",
       "startAfter": [
@@ -6031,7 +6031,16 @@
       "gapIds": "G177, G187",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/api/src/modules/settings/settingsCatalog.ts",
+        "web/apps/api/src/modules/settings/settings.ts",
+        "web/apps/api/test/settingsEditable.test.ts",
+        "web/apps/web/app/(app)/settings/page.tsx",
+        "web/apps/web/test/features/modules/settingsEffects.mjs"
+      ],
+      "statusNote": "IMPLEMENTED. PAN_CARD_VAL, FONT_SIZE, GRID_ROW_HIGHT and VCH_DESC_HELP_LENT are editable combos with presets, as on the desktop (no setting form sets a DropDownStyle; the four save Val(Text) at UT_SETTING.cs:5059 and UT_SETTING_MAIN.cs:9120, :9148, :9300). The catalog marks them editable ('number' or 'integer' for the Int columns); the API accepts any number (a whole number for the Int columns) and the screen shows a text box with the presets as a datalist. Verified: settingsEditable.test.ts 3 passed; settings.db.test.ts 14 passed; settings.field.pan-limit-any-amount now passes (baseline entry removed) and the new settings.field.grid-row-height-whole-number stores 31 and refuses 22.5; full Settings module 12 passed / 0 failed / 2 blocked."
     },
     {
       "id": "N169",

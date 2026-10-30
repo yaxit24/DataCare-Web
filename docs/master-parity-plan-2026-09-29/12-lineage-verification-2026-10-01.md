@@ -2129,7 +2129,7 @@ click filled `E2ELOC` and a `GLD22` line with tag `N`, Save answered 201, and th
 | N165 | — | planned (G172: readable message / single retry when two sessions open the company at once) |
 | N166 | — | planned (G173, G174: fault injection for T14 and a settings-variant company for T15 in the feature E2E harness) |
 | N167 | — | planned (G175: decide the negative-weight line rule from an original-Windows run, then implement and execute the case) |
-| N168 | — | planned (G177: editable amount settings — presets offered, any amount accepted and validated) |
+| N168 | — | implemented-unverified, evidence in this change (G177: four numeric setting combos accept typed amounts with presets; unit 3, DB 14, two feature cases; baseline entry removed) |
 | N169 | — | implemented-unverified, evidence in this change (G178: last-administrator refusal with row locks; DB test 3 passed and fails against the old code; Users & Rights feature module: 3 cases pass through the real screen) |
 | N170 | — | implemented-unverified, evidence in this change (Purchase Invoice module 16/3/2, Settings effects module 10/1/2 + 11 N/A, Sales CSV export case, one shared company per run, with-data crawl and regenerated map; found G176, G177, G178) |
 | N171 | — | planned (G183, D31: Standard edition gate — the 114 Standard menus only in navigation, rights, pages and API; deferred editions available only as labelled Beta when switched on) |

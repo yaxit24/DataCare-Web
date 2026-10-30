@@ -40,6 +40,8 @@ export interface SettingDescriptor {
   label: string;
   hint?: string;
   options?: SettingOption[];
+  /** The options are presets of an editable combo (G177); see coerceSettingValue. */
+  editable?: 'number' | 'integer';
   maxLength?: number;
   /** No authoritative desktop option list found; rendered as text pending evidence. */
   unknownOptions?: true;
@@ -394,8 +396,9 @@ export const SETTING_CATALOG: readonly SettingDescriptor[] = [
     id: 'CO_SET.PAN_CARD_VAL',
     key: 'PAN_CARD_VAL',
     table: 'CO_SET',
-    type: 'enum',
+    type: 'number',
     label: 'PAN required above (₹)',
+    editable: 'number',
     options: [
       { label: '100000', value: '100000' },
       { label: '200000', value: '200000' },
@@ -913,6 +916,7 @@ export const SETTING_CATALOG: readonly SettingDescriptor[] = [
     table: 'CO_SET_NEW',
     type: 'number',
     label: 'Font Size',
+    editable: 'number',
     options: [
       { label: '8', value: '8' },
       { label: '9', value: '9' },
@@ -951,6 +955,7 @@ export const SETTING_CATALOG: readonly SettingDescriptor[] = [
     table: 'CO_SET_NEW',
     type: 'number',
     label: 'Grid ROW Hight',
+    editable: 'integer',
     options: [
       { label: '20', value: '20' },
       { label: '21', value: '21' },
@@ -1457,6 +1462,7 @@ export const SETTING_CATALOG: readonly SettingDescriptor[] = [
     table: 'CO_SET_NEW',
     type: 'number',
     label: 'Voucher Desc Help Lent',
+    editable: 'integer',
     options: [
       { label: '10', value: '10' },
       { label: '15', value: '15' },
