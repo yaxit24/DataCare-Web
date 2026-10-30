@@ -184,6 +184,10 @@ closing crawl finds registers, ledgers and saved vouchers to act on. The committ
 A `WORKS` verdict means only that the page behaved; it does not mean desktop parity. The map shows parity separately:
 the desktop menu-catalog status of each route and whether a journey or feature module proves its lifecycle.
 
+**Earlier records.** [Hand-run live validation, 30 October 2026](live-validation-2026-10-30.md) is the first
+browser check of the running app, kept as history. [Module-wise parity estimate, 30 October 2026](parity-estimate-2026-10-30.md)
+is a judgement from code and tests, set beside the measured browser results; the measurements supersede it.
+
 ## 5. Visual and interactive verification with Chrome DevTools MCP
 
 Automated journeys prove behaviour; this protocol checks what an operator sees and touches. Run it for every screen a
