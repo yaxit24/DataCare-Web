@@ -6272,7 +6272,7 @@
     },
     {
       "id": "N182",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Sales Return import and layout: a loose sale line imported with TAG_NO 'N' saves as an untagged return line (the writer treats 'N' as no tag, as TR_SALE_RTN does), and the Import button is not covered by the Tax % box at desktop widths; remove sales-return.create.from-bill-import and sales-return.ui.import-button-clickable from features/baseline.json.",
       "parentLabels": "P05-03, X13; J07",
       "startAfter": [
@@ -6283,7 +6283,16 @@
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
       "requiredProof": "both cases pass; a tagged line still needs its provenance; the baseline entries are removed.",
-      "gapIds": "G191, G192"
+      "gapIds": "G191, G192",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/api/src/modules/sales/salesReturn.ts",
+        "web/apps/web/app/(app)/txn/sale-return/page.tsx",
+        "web/apps/api/test/salesFamilyLifecycle.db.test.ts",
+        "web/apps/web/test/features/modules/salesReturn.mjs",
+        "web/apps/web/test/features/baseline.json"
+      ],
+      "statusNote": "IMPLEMENTED. Tag N is treated as no tag on a return line; the Import button stays clickable. sales-return.create.from-bill-import and sales-return.ui.import-button-clickable pass and left the baseline; a DB test proves N saves as loose and an unknown tag is still refused."
     },
     {
       "id": "N183",

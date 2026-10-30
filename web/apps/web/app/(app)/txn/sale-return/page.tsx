@@ -405,9 +405,20 @@ function LegacySaleReturnForm() {
             </div>
             <div className="field">
               <label>Orig Bill No</label>
-              <div style={{ display: 'flex', gap: 4 }}>
-                <input value={billNo} onChange={(e) => setBillNo(e.target.value)} />
-                <button type="button" className="ghost" onClick={importBill}>
+              {/* The input shrinks so Import stays inside this field; at its default width it spilled
+                  under the next field (Tax %), which then took the click (G192). */}
+              <div style={{ display: 'flex', gap: 4, minWidth: 0 }}>
+                <input
+                  value={billNo}
+                  onChange={(e) => setBillNo(e.target.value)}
+                  style={{ flex: 1, minWidth: 0 }}
+                />
+                <button
+                  type="button"
+                  className="ghost"
+                  onClick={importBill}
+                  style={{ flex: 'none' }}
+                >
                   Import
                 </button>
               </div>

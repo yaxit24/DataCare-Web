@@ -1964,6 +1964,24 @@ settings, which the web reads as 2 decimals, while the desktop schema defaults t
 Done when: every daily voucher screen has a module like this, run on shared real data, and each fixed defect
 leaves the baseline in the change that fixes it.
 
+### N182 — Sales Return: an imported loose line saves, and Import can be clicked (G191, G192)
+
+G191: the return writer treated any non-blank tag as a tag to verify, so a loose sale line imported with
+`TAG_NO` `N` was refused on save. The desktop copies `N` into the return grid as it is (`TR_SALE_RTN.cs:3917`)
+and every tag step skips it (`:4773`, `:8585`, `:13387`, `:13395`). The writer now treats blank and `N` as no tag
+(`web/apps/api/src/modules/sales/salesReturn.ts`), so the line saves as loose stock with `TAG_NO` `N`, as the
+desktop stores it (`:14326-14334`); a real tag still has to be a line of the original sale.
+
+G192: the Orig Bill No input kept its default width, so the Import button spilled under the next field (Tax %),
+which took the click. The input now shrinks inside its field and the button keeps its size
+(`web/apps/web/app/(app)/txn/sale-return/page.tsx`).
+
+Evidence: `sales-return.create.from-bill-import` (Import clicked with the mouse, the return saves and stores tag
+`N`) and `sales-return.ui.import-button-clickable` pass, and both leave `web/apps/web/test/features/baseline.json`; the Sales
+Return module runs 16 passed, 5 failed (baselined), 3 blocked. A new database test in
+`web/apps/api/test/salesFamilyLifecycle.db.test.ts` saves a line marked `N` as loose stock and still refuses the
+unknown tag `NOSUCH`; it fails without the fix. The two return lifecycle test files pass (39 tests).
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2066,7 +2084,7 @@ leaves the baseline in the change that fixes it.
 | N179 | — | planned (G188: classify the 141 no-effect buttons as by-design with source, or open a gap) |
 | N180 | — | implemented-unverified, evidence in this change (Sales Return module 14/7/3 on shared real data; found G190–G196; corrects the N161/N170 rounding statement) |
 | N181 | — | planned (G190: the return line is priced on SL_AMT_TYPE and its amounts and total are whole rupees, as TR_SALE_RTN does) |
-| N182 | — | planned (G191, G192: an imported loose line (tag N) saves; Import is clickable) |
+| N182 | — | implemented-unverified, evidence in this change (an imported loose line with tag N saves as loose stock and an unknown tag is still refused; Import stays inside its field; both feature cases pass and leave the baseline) |
 | N183 | — | planned (G193, G194: a missing voucher answers a stable 4xx; returns and seven deletes record the logged-in user) |
 | N184 | — | planned (G195: sale line amounts round to whole rupees unless ALL_ROF_REMOVE = Y; merged feature expectations move to desktop values) |
 | N185 | — | planned (G196: decide under D05 and provision the desktop rounding defaults for new companies, or record the 2-decimal choice) |
