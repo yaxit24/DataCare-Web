@@ -5719,6 +5719,28 @@
         "web/apps/api/test/operatorDepth.roundtrip.db.test.ts"
       ],
       "statusNote": "IMPLEMENTED. Backend half of N152 (G161 prerequisite), shipped standalone because it is a correctness fix independent of any UI. getMfg (mfg.ts ~1213) now maps the nine MFG_DETL columns it previously dropped: TOT_NWT->totalNetWt, OLD_NWT->oldNetWt, NET_AMT->netAmt, ITM_LOSS->itmLoss, RATE_TYPE->rateType, PR_CODE->prCode, KR_NAME->krName, ORD_AC_CODE->ordAcCode, ORD_DESIGN->ordDesign. All already fetched by SELECT *; the writer persists them (detlRows :606-676) and editMfg deletes+rebuilds from the request, so before this fix a reopen->unchanged-save blanked them (the exact data-corruption risk flagged by the N152 Order Issue audit). itmLoss receive-only at writer (:771), read unconditionally; netAmt is line NET_AMT (lineNetAmt :641) not component IT_NET_AMT. Proof: operatorDepth.roundtrip.db.test.ts manufacturing case now supplies+asserts the 8 issue-valid fields (itmLoss stays on receive path like itmGhat). Fourth time this module's WRITE was complete while READ was not (P3-1 extended it once before). Gates + clean api build + docs:refs green; operatorDepth.roundtrip 3/3 + mfgLifecycle 9/9; depth:parity passed (unreachable API fields unchanged 102). Size ceiling raised 1504->1516 (visible baseline diff). Unblocks N152 UI wiring."
+    },
+    {
+      "id": "N154",
+      "status": "implemented-unverified",
+      "action": "Multi-Party (batch) Receipt reopen/edit/delete: add getBatchReceipt reader (reads all CASH_DATA rows as lines[], derives pay mode from REC_AC_CODE vs book slot-1 cash account) + editBatchReceipt (reverse+re-post under same vchNo via forceVchNo) + GET/PUT/DELETE /receipts/batch/:vchNo + UI reopen/edit/delete + VoucherList on CASH_DATA. Desktop TR_CASH is fully reopen/edit/delete-capable (delete-then-rebuild with DELETE_DATA audit).",
+      "parentLabels": "P6; D-lifecycle",
+      "startAfter": [
+        "N148"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "batchReceiptLifecycle.db.test.ts: post 2-party (cash+kasar, cheque+bank) -> getBatchReceipt asserts derived mode + every field -> editBatchReceipt (same vchNo, change grid) -> balanced AC_DATA + DELETE_DATA audit -> delete; unchanged reopen->re-save round-trip. routePolicy 56/56 (universe 654->657). gates + clean api build + web 646+9 + depth:parity (forceVchNo triaged internal). Live click deferred - lifecycle proven at the service layer by the DB test.",
+      "gapIds": "G162",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/api/src/modules/finance/batchReceipt.ts",
+        "web/apps/api/test/batchReceiptLifecycle.db.test.ts",
+        "web/apps/web/app/(app)/txn/batch-receipt/page.tsx"
+      ],
+      "statusNote": "IMPLEMENTED. Desktop Multi-Party Receipt (TR_CASH.cs) is fully reopen/edit/delete-capable (BtnF load, edit=delete CASH_DATA+AC_DATA by VCH_NO + rebuild + DELETE_DATA audit, TR_CASH.cs:2988-3081,3217). Web batch-receipt page was create-only; single-row getReceipt rejects multi-row vouchers. Added getBatchReceipt (reads every CASH_DATA row by SR_NO into lines[] matching BatchReceiptLineInput; derives mode: REC_AC_CODE==book slot-1 cash-settlement -> cash (no bankAc) else chqNo?cheque:bank with bankAc=REC_AC_CODE - mirrors the writer so unchanged reopen->save re-posts the identical ledger), editBatchReceipt (deleteBatchReceipt reverse + postBatchReceipt forceVchNo under the same number), BatchReceiptInput.forceVchNo (edit-only internal field, triaged in unreachable-triage.json), GET/PUT/DELETE /receipts/batch/:vchNo (classified under the existing Multi-Party Receipt form, universe 654->657), and the UI (payload() extraction, PUT-when-loaded, loadVoucher mapping the view back to the grid, remove/reset, Voucher-no Load + New/Delete + Update#N + VoucherList on CASH_DATA). Proven by batchReceiptLifecycle.db.test.ts 2/2 (balanced AC_DATA 3515->1200, DELETE_DATA audit, unchanged round-trip) + batchReceiptKasar 4/4 + routePolicy 56/56. All gates green incl clean api build, web 646+9, depth:parity (102->103 unreachable, all internal/serverDerived, operator 0). txn.ts size ceiling 8443->8482. Live click deferred - lifecycle proven end-to-end at the service layer."
     }
   ],
   "amendments": [

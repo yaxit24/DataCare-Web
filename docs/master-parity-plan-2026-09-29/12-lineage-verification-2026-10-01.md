@@ -172,6 +172,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G159 | Med | Manufacturing Receive reopen+edit (UI) | `unified/src/csharp/DataCareNext/TR_MFG_ISU_REC.cs` | `web/apps/web/app/(app)/txn/mfg-receive/page.tsx` | Companion to G158: mfg-receive was create-only though the same `getMfg`/`editMfg`/`deleteMfg` backend and `GET/PUT/DELETE /mfg/receive/:vchNo` exist (mfgLifecycle.db.test.ts). Wire the same lifecycle (plus the labourAmt header). | N150 |
 | G160 | Med | Bullion Sale reopen+edit+delete (UI) | `unified/src/csharp/DataCareNext/TR_BUL_SALE.cs` | `web/apps/web/app/(app)/txn/bullion-sale/page.tsx` | The bullion-sale page was create-only (imported only `post`) though `getBullionSale`/`editBullionSale`/`deleteBullionSale` and `GET/PUT/DELETE /bullion-sales/:vchNo` exist and are covered by `bullionSale.db.test.ts` (post → reopen → edit → delete). The reader (`readRateCut` with `bookGuard:'bullion-sale'`) returns header fields + `lines`/`receivedLines`; wire `loadVoucher` (GET + full header/tender/line restore) + PUT-when-loaded + delete + New/Update (UI-only, no new routes). | N151 |
 | G161 | Med | Manufacturing Order Issue reopen+edit (needs reader extension) | `unified/src/csharp/DataCareNext/TR_MFG_ISU_REC.cs` | `web/apps/web/app/(app)/txn/mfg-order-issue/page.tsx` | The Order Issue page is create-only; `GET/PUT/DELETE /mfg/order-issue/:vchNo` exist (getMfg/editMfg/deleteMfg, coBook DIS, irType D). **Not a safe UI-only slice** — unlike mfg-issue/mfg-receive, this bespoke page's POST payload sends ~51 writer-verified `extendedLineFields` plus header `karigarName`, but `getMfg` (`web/apps/api/src/modules/manufacturing/mfg.ts:1155-1271`) omits nine persisted line keys (`totalNetWt`,`oldNetWt`,`rateType`,`prCode`,`itmLoss`,`netAmt`,`krName`,`ordAcCode`,`ordDesign`) and `karigarName`. Because `editMfg` deletes-and-rebuilds the write set, an unchanged reopen→save would blank those columns. Requires a **backend** `getMfg` reader extension to return every persisted payload field (plus issue-side `itmLoss` and `karigarName` semantics) with an all-fields GET→payload round-trip test, THEN the UI reopen wiring. | N153 (reader) + N152 (UI) |
+| G162 | Med | Multi-Party (batch) Receipt reopen/edit/delete | `unified/src/csharp/DataCareNext/TR_CASH.cs` | `web/apps/web/app/(app)/txn/batch-receipt/page.tsx`, `web/apps/api/src/modules/finance/batchReceipt.ts` | The desktop Multi-Party Receipt (TR_CASH, a grid of party rows) is fully reopen/edit/delete-capable — `BtnF` loads by voucher no., an edit deletes `CASH_DATA`+`AC_DATA` by VCH_NO and rebuilds them, writing a `DELETE_DATA` audit (`TR_CASH.cs:2988-3081,3217`). The web batch-receipt page was create-only: the backend had `postBatchReceipt`/`deleteBatchReceipt` but no reader or editor, and the single-row `getReceipt` refuses a multi-row voucher. Add `getBatchReceipt` (reads every CASH_DATA row as `lines[]`, deriving pay mode from `REC_AC_CODE` vs the book slot-1 cash account) + `editBatchReceipt` (reverse + re-post under the same number via `forceVchNo`) + `GET/PUT/DELETE /receipts/batch/:vchNo` + the UI reopen/edit/delete + VoucherList on CASH_DATA. | N154 |
 
 ## 4. Decisions D23–D28
 
@@ -1488,6 +1489,49 @@ N152's UI reopen wiring is now unblocked.
 Done when: `getMfg` returns every persisted MFG_DETL payload field and a round-trip test proves it.
 
 
+### N154 — Multi-Party (batch) Receipt reopen/edit/delete lifecycle (G162, Stage D)
+
+The desktop Multi-Party Receipt (`TR_CASH.cs`, a grid of party rows written to `CASH_DATA`) is
+fully reopen/edit/delete-capable: `BtnF` loads an existing voucher, `BtnSave` re-saves, and an edit
+deletes `CASH_DATA`+`AC_DATA` by `VCH_NO` and rebuilds them while writing a `DELETE_DATA` audit row
+(`TR_CASH.cs:2988-3081,3217`). The web batch-receipt page could only POST — the backend had
+`postBatchReceipt`/`deleteBatchReceipt` but no reader or editor, and the single-row `getReceipt`
+rejects a voucher with more than one `CASH_DATA` row.
+
+N154 adds, in `web/apps/api/src/modules/finance/batchReceipt.ts`:
+- **`getBatchReceipt`** — reads every `CASH_DATA` row of the voucher, in `SR_NO` order, into a
+  `lines[]` shaped to feed straight back into `BatchReceiptLineInput`. The pay **mode is derived**,
+  not stored: `postBatchReceipt` settles a cash line to the book's slot-1 cash-settlement account and
+  a non-cash line to its own bank ledger (`REC_AC_CODE`), so a row whose `REC_AC_CODE` equals that
+  slot-1 account reads back as `cash` (no `bankAc`), otherwise a bank-side mode (`cheque` when it
+  carries a cheque number, else `bank`) with `bankAc = REC_AC_CODE` — mirroring the writer so an
+  unchanged reopen→save re-posts the identical ledger.
+- **`editBatchReceipt`** — reverses the old `CASH_DATA`+`AC_DATA` write set (with the `DELETE_DATA`
+  audit, via `deleteBatchReceipt`) and re-posts the new grid under the **same** voucher number
+  (`postBatchReceipt` + the new edit-only `forceVchNo`), matching the desktop delete-then-rebuild.
+
+Plus `GET/PUT/DELETE /receipts/batch/:vchNo` (classified under the existing Multi-Party Receipt
+form), and the UI reopen/edit/delete on the batch-receipt page (Voucher-no Load input, New/Delete,
+`Update #N` label, and a `VoucherList` on `CASH_DATA` — already in the recent-voucher allow-list).
+
+Proof: `batchReceiptLifecycle.db.test.ts` (2 tests) posts a two-party batch (a cash line with a kasar
+write-off and a cheque line into the bank), reopens it asserting the **derived mode** and every field,
+edits it in place (same `VCH_NO`, dropping a party and changing an amount) asserting the balanced
+`AC_DATA` (3515 → 1200) and the `DELETE_DATA` audit, then deletes it; a second test proves an
+unchanged reopen→re-save re-posts the identical lines and ledger sums. `batchReceiptKasar.db.test.ts`
+(4) still passes.
+
+Verified: gates (typecheck/typecheck:tests/lint/format/size/register/kernel/docs:refs) + clean-tree
+`@datacare/api` build + web tests 646+9 + `routePolicy` 56/56 (universe 654→657). The new
+edit-only `BatchReceiptInput.forceVchNo` is triaged `internal` in `unreachable-triage.json`
+(unreachable 102→103, operator still 0) and the depth baseline resynced; `depth:parity` passes.
+`txn.ts` size ceiling rose 8443→8482 (visible baseline diff). Live click deferred — exercised by the
+DB lifecycle test rather than the demo (which provisions a receipt book but the batch reopen path is
+proven end-to-end at the service layer).
+
+Done when: an operator can load a saved multi-party receipt, edit its party rows, re-save, and delete.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -1562,6 +1606,7 @@ Done when: `getMfg` returns every persisted MFG_DETL payload field and a round-t
 | N151 | — | implemented-unverified, evidence in this change (G160: bullion-sale reopen/edit/delete lifecycle UI; UI-only, sub-agent implement+audit AUDIT_PASS, gates + clean API build + web 646+9 + bullionSale.db.test.ts 2/2 + depth:parity green, live deferred — demo has no bullion book) |
 | N153 | — | implemented-unverified, evidence in this change (G161 prerequisite: getMfg reader now maps the nine MFG_DETL columns it dropped — totalNetWt/oldNetWt/netAmt/itmLoss/rateType/prCode/krName/ordAcCode/ordDesign; backend correctness fix proven by operatorDepth.roundtrip.db.test.ts 3/3 + mfgLifecycle.db.test.ts 9/9; gates + clean API build + depth:parity green; size ceiling 1504→1516; unblocks N152 UI) |
 | N152 | — | implemented-unverified, evidence in this change (G161: mfg-order-issue reopen/edit/delete lifecycle UI, unblocked by N153; UI-only, sub-agent implement+audit AUDIT_PASS with AST field-mapping proof all 61 sent keys restored, stale-target guard; gates + clean API build + web 646+9 + depth:parity green, live deferred — demo has no MFG/DIS book) |
+| N154 | — | implemented-unverified, evidence in this change (G162: multi-party batch-receipt reopen/edit/delete — getBatchReceipt reader with derived pay mode + editBatchReceipt reverse+re-post + GET/PUT/DELETE routes + UI + VoucherList; proven by batchReceiptLifecycle.db.test.ts 2/2 (balanced AC_DATA + DELETE_DATA audit + unchanged round-trip) and batchReceiptKasar 4/4; routePolicy 56/56 universe 654→657; forceVchNo triaged internal (unreachable 102→103, operator 0); gates + clean API build + web 646+9 + depth:parity green; txn.ts ceiling 8443→8482) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

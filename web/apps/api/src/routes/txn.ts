@@ -632,7 +632,12 @@ import {
 } from '../modules/reports/reports4.js';
 import { dailySalesSummary, topItems, employeeSales } from '../modules/reports/reports5.js';
 import { overdueReminders, birthdayReminders, sendReminder } from '../modules/ops/reminders.js';
-import { postBatchReceipt } from '../modules/finance/batchReceipt.js';
+import {
+  postBatchReceipt,
+  getBatchReceipt,
+  editBatchReceipt,
+  deleteBatchReceipt,
+} from '../modules/finance/batchReceipt.js';
 import {
   purchaseReturnRegister,
   contraRegister,
@@ -6945,7 +6950,41 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
     return run(reply, 201, () =>
-      postBatchReceipt(prisma, { scope: scopeOf(req), vchDate: b.vchDate, lines: b.lines ?? [] }),
+      postBatchReceipt(prisma, {
+        scope: scopeOf(req),
+        vchDate: b.vchDate,
+        lines: b.lines ?? [],
+        kasarAc: b.kasarAc,
+      }),
+    );
+  });
+  app.get('/receipts/batch/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => getBatchReceipt(prisma, scopeOf(req), (req.params as any).vchNo));
+  });
+  app.put('/receipts/batch/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    const b = body(req);
+    return run(reply, 200, () =>
+      editBatchReceipt(prisma, {
+        scope: scopeOf(req),
+        vchNo: (req.params as any).vchNo,
+        vchDate: b.vchDate,
+        lines: b.lines ?? [],
+        kasarAc: b.kasarAc,
+        deleteUser: sess(req).sub,
+      }),
+    );
+  });
+  app.delete('/receipts/batch/:vchNo', auth, async (req, reply) => {
+    if (!guard(req, reply, 'delete')) return;
+    return run(reply, 200, () =>
+      deleteBatchReceipt(prisma, {
+        scope: scopeOf(req),
+        vchNo: (req.params as any).vchNo,
+        book: body(req).book,
+        deleteUser: sess(req).sub,
+      }),
     );
   });
   app.get('/reminders/overdue', auth, async (req) => overdueReminders(prisma, readScope(req)));

@@ -1,9 +1,10 @@
 'use client';
 import { useState } from 'react';
-import { post, ApiError } from '../../../../lib/api';
+import { post, get, put, del, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { VoucherList } from '../../../../components/VoucherList';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import {
   ExtendedBodyCells,
@@ -82,6 +83,8 @@ export default function BatchReceiptPage() {
   const [result, setResult] = useState<{ vchNo: number; total: number } | null>(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const [voucherSearch, setVoucherSearch] = useState('');
+  const [loadedVch, setLoadedVch] = useState('');
 
   const setLine = (i: number, k: keyof Line, v: string) =>
     setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
@@ -94,32 +97,113 @@ export default function BatchReceiptPage() {
   const validLines = lines.filter((l) => l.partyAc.trim() && n(l.amount) > 0);
   const canSubmit = validLines.length >= 1 && totRecv > 0;
 
+  function payload() {
+    return {
+      coBook,
+      coYear,
+      lcCode,
+      vchDate: vchDate || undefined,
+      lines: validLines.map((l) => ({
+        bankCharges: n(l.bankCharges),
+        chqPrintName: l.chqPrintName || undefined,
+        clearDate: l.clearDate || undefined,
+        itemDescriptionCode: l.itemDescriptionCode || undefined,
+        partyAc: l.partyAc,
+        partyName: l.partyName || undefined,
+        amount: Number(l.amount || 0),
+        mode: l.mode,
+        bankAc: l.mode === 'cash' ? undefined : l.bankAc || undefined,
+        chqNo: l.mode === 'cheque' ? l.chqNo || undefined : undefined,
+        kasarAmt: Number(l.kasar || 0),
+      })),
+    };
+  }
+
+  function reset() {
+    setVchDate('');
+    setLines([blank(), blank()]);
+    setVoucherSearch('');
+    setLoadedVch('');
+    setResult(null);
+    setErr('');
+  }
+
+  async function loadVoucher(vchNo: string) {
+    if (!coBook || !vchNo.trim()) {
+      setErr('select the book and enter a voucher number first');
+      return;
+    }
+    setBusy(true);
+    setErr('');
+    setResult(null);
+    try {
+      const d = await get<{
+        voucherNo: string;
+        vchDate: string;
+        lines: Array<Record<string, unknown>>;
+      }>(
+        `/receipts/batch/${encodeURIComponent(vchNo.trim())}?coBook=${encodeURIComponent(coBook)}`,
+      );
+      const str = (v: unknown) => (v == null || v === 0 || v === '' ? '' : String(v));
+      setLoadedVch(String(d.voucherNo ?? vchNo));
+      setVoucherSearch(String(d.voucherNo ?? vchNo));
+      setVchDate(String(d.vchDate ?? ''));
+      const src = Array.isArray(d.lines) ? d.lines : [];
+      setLines(
+        src.length
+          ? src.map((l) => ({
+              bankCharges: str(l.bankCharges),
+              chqPrintName: l.chqPrintName == null ? '' : String(l.chqPrintName),
+              clearDate: l.clearDate == null ? '' : String(l.clearDate),
+              itemDescriptionCode: str(l.itemDescriptionCode),
+              partyAc: String(l.partyAc ?? ''),
+              partyName: l.partyName == null ? '' : String(l.partyName),
+              amount: str(l.amount),
+              mode: String(l.mode ?? 'cash'),
+              bankAc: l.bankAc == null ? '' : String(l.bankAc),
+              chqNo: l.chqNo == null ? '' : String(l.chqNo),
+              kasar: str(l.kasarAmt),
+            }))
+          : [blank(), blank()],
+      );
+    } catch (e) {
+      setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'load failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function remove() {
+    if (!loadedVch || !window.confirm(`Delete multi-party receipt #${loadedVch}?`)) return;
+    setBusy(true);
+    setErr('');
+    try {
+      await del(`/receipts/batch/${encodeURIComponent(loadedVch)}`, { coBook, coYear, lcCode });
+      reset();
+    } catch (e) {
+      setErr(
+        e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'delete failed',
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setErr('');
     setResult(null);
     setBusy(true);
     try {
-      const body = {
-        coBook,
-        coYear,
-        lcCode,
-        vchDate: vchDate || undefined,
-        lines: validLines.map((l) => ({
-          bankCharges: n(l.bankCharges),
-          chqPrintName: l.chqPrintName || undefined,
-          clearDate: l.clearDate || undefined,
-          itemDescriptionCode: l.itemDescriptionCode || undefined,
-          partyAc: l.partyAc,
-          partyName: l.partyName || undefined,
-          amount: Number(l.amount || 0),
-          mode: l.mode,
-          bankAc: l.mode === 'cash' ? undefined : l.bankAc || undefined,
-          chqNo: l.mode === 'cheque' ? l.chqNo || undefined : undefined,
-          kasarAmt: Number(l.kasar || 0),
-        })),
-      };
-      setResult(await post('/receipts/batch', body));
+      const r = loadedVch
+        ? await put<{ vchNo: number; total: number }>(
+            `/receipts/batch/${encodeURIComponent(loadedVch)}`,
+            payload(),
+          )
+        : await post<{ vchNo: number; total: number }>('/receipts/batch', payload());
+      setResult(r);
+      setLoadedVch(String(r.vchNo));
+      setVoucherSearch(String(r.vchNo));
     } catch (e) {
       setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
     } finally {
@@ -153,6 +237,29 @@ export default function BatchReceiptPage() {
             <div className="field">
               <label>Date</label>
               <input type="date" value={vchDate} onChange={(e) => setVchDate(e.target.value)} />
+            </div>
+            <div className="field">
+              <label>Voucher no.</label>
+              <div className="row" style={{ gap: 6 }}>
+                <input
+                  aria-label="Voucher no."
+                  value={voucherSearch}
+                  onChange={(e) => setVoucherSearch(e.target.value)}
+                  placeholder="load existing"
+                  style={{ width: 110 }}
+                />
+                <button type="button" onClick={() => loadVoucher(voucherSearch)} disabled={busy}>
+                  Load
+                </button>
+                <button type="button" className="ghost" onClick={reset} disabled={busy}>
+                  New
+                </button>
+                {loadedVch && (
+                  <button type="button" className="danger" onClick={remove} disabled={busy}>
+                    Delete
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -295,7 +402,7 @@ export default function BatchReceiptPage() {
               <b>{validLines.length}</b> {validLines.length === 1 ? 'party' : 'parties'}
             </span>
             <button className="primary" disabled={busy || !canSubmit}>
-              {busy ? 'Saving…' : 'Post Receipt'}
+              {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : 'Post Receipt'}
             </button>
           </div>
           {!canSubmit && totRecv === 0 && (
@@ -310,11 +417,18 @@ export default function BatchReceiptPage() {
       {result && (
         <div className="panel">
           <div className="msg ok">
-            Posted — Receipt Voucher #{result.vchNo} · Total received ₹
+            {loadedVch ? 'Updated' : 'Posted'} — Receipt Voucher #{result.vchNo} · Total received ₹
             {inr(r2(Number(result.total ?? 0)))}
           </div>
         </div>
       )}
+
+      <VoucherList
+        table="CASH_DATA"
+        book={coBook}
+        deleteBase="/receipts/batch"
+        onLoad={(vchNo) => loadVoucher(vchNo)}
+      />
     </div>
   );
 }
