@@ -107,7 +107,9 @@ export function coerceSettingValue(
     case 'number': {
       const n = Number(s);
       if (!Number.isFinite(n)) return { ok: false, reason: 'must be a number' };
-      if (d.options?.length) {
+      if (d.editable === 'integer' && !Number.isInteger(n))
+        return { ok: false, reason: 'must be a whole number' };
+      if (d.options?.length && !d.editable) {
         const allowed = d.options.map((o) => Number(o.value));
         if (!allowed.includes(n)) {
           return { ok: false, reason: `must be one of ${allowed.join(', ')}` };
