@@ -15,7 +15,10 @@ import {
   wipeTenants,
 } from './harness.mjs';
 import { seedCatalogue } from './fixtures/catalogue.mjs';
+import { purchaseInvoice } from './modules/purchaseInvoice.mjs';
 import { salesInvoice } from './modules/salesInvoice.mjs';
+import { settingsEffects } from './modules/settingsEffects.mjs';
+import { runSurface } from './surface/runner.mjs';
 
 /**
  * Feature E2E runner (docs/handbook/web/testing.md §4a).
@@ -30,7 +33,7 @@ import { salesInvoice } from './modules/salesInvoice.mjs';
  * Gate: every applicable case must pass, except cases listed in baseline.json (known defects, each with a gap
  * id). A new failure fails the run; a baseline case that now passes also fails the run until it is removed.
  */
-const MODULES = [salesInvoice];
+const MODULES = [salesInvoice, purchaseInvoice, settingsEffects];
 
 const artifacts = resolve(webRoot, 'test-results/feature-e2e');
 const baselinePath = resolve(webRoot, 'apps/web/test/features/baseline.json');
@@ -55,11 +58,13 @@ const report = { startedAt: new Date().toISOString(), modules: [] };
 let gateProblems = [];
 try {
   stack = await startStack({ artifacts });
+  // One company for the whole run: every module adds its vouchers to it, as a shop's day would, so later modules
+  // and the closing surface crawl see real business data rather than an empty company.
+  await wipeTenants(stack.owner, [TENANT, SECOND_TENANT]);
+  await seedCatalogue(stack, { password });
+  resetSavedLogins();
   for (const module of modules) {
     console.log(`\n=== ${module.feature}: ${module.title} (${module.cases.length} cases) ===`);
-    await wipeTenants(stack.owner, [TENANT, SECOND_TENANT]);
-    await seedCatalogue(stack, { password });
-    resetSavedLogins();
     const { run, moduleDir } = await runModule(stack, module, { onlyCases });
     const { summary } = validateBundle(moduleDir);
     const gate = compareBaseline(module.feature, run, baseline);
@@ -78,6 +83,16 @@ try {
     gateProblems.push(
       ...gate.missing.map((id) => `${module.feature}: baseline names unknown case ${id}`),
     );
+  }
+  // FEATURE_E2E_THEN_SURFACE=1: crawl every page on the data the modules just created (report-only).
+  if (process.env.FEATURE_E2E_THEN_SURFACE === '1') {
+    const { map } = await runSurface(stack, {
+      out: resolve(webRoot, 'test-results/ui-surface-with-data'),
+      sweep: process.env.SURFACE_SWEEP === '1',
+      workers: Math.max(1, Number(process.env.SURFACE_WORKERS || 4)),
+      label: 'with-data',
+    });
+    report.surfaceWithData = map.summary;
   }
 } finally {
   report.finishedAt = new Date().toISOString();

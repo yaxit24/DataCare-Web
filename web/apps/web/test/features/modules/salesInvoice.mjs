@@ -827,6 +827,33 @@ export const salesInvoice = {
     ),
 
     C(
+      'output.register-csv',
+      'T16',
+      'output',
+      'Report export (desktop BtnExel / CSV): the sales register exports the rows on screen, including the saved voucher',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const vchNo = await createOneLine(ctx, page);
+        await page.goto('/reports/sales-register');
+        await page.getByRole('button', { name: 'Run', exact: true }).click();
+        await page.locator('table.grid tbody tr').filter({ hasText: vchNo }).first().waitFor();
+        const [download] = await Promise.all([
+          page.waitForEvent('download', { timeout: 10_000 }),
+          page.getByRole('button', { name: 'CSV', exact: true }).first().click(),
+        ]);
+        const { readFileSync } = await import('node:fs');
+        const text = readFileSync(await download.path(), 'utf8');
+        assert.match(text, new RegExp(vchNo));
+        return {
+          observation: `${download.suggestedFilename()}: ${text.split('\n').length} lines, contains ${vchNo}`,
+          expected: 'CSV with the saved voucher',
+          output: Buffer.from(text),
+        };
+      },
+      { expected: { download: 'csv containing the voucher' } },
+    ),
+
+    C(
       'journey.sale-to-register-and-ledger',
       'T18',
       'mutation',
@@ -871,4 +898,19 @@ export const salesInvoice = {
       run: async () => ({}),
     },
   ],
+};
+
+/** The Sales Invoice screen helpers, for modules that observe a sale (settings effects, journeys). */
+export const salesScreen = {
+  openSales,
+  pickParty,
+  fillLine,
+  save,
+  field,
+  cell,
+  header,
+  lines,
+  ledger,
+  counts,
+  LINE_A,
 };

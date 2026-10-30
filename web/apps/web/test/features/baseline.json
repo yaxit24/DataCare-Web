@@ -16,5 +16,29 @@
       "gap": "G171",
       "reason": "Desktop saves with the &Save mnemonic, Alt+S (TR_SALE.cs:4896 BtnSave.Text = \"&Save\"). No web Save button sets accessKey, so the keyboard save path does not exist."
     }
+  ],
+  "purchase-invoice": [
+    {
+      "case": "purchase-invoice.create.two-groups",
+      "gap": "G176",
+      "reason": "A purchase with a gold (PURC_AC PURCHASE) and a silver (SLVPURC) line fails with duplicate AC_DATA.LEDR_KEY: every per-group expense leg gets the same leg type. Same defect class as G169 on sales."
+    },
+    {
+      "case": "purchase-invoice.concurrency.stale-second-save",
+      "gap": "G170",
+      "reason": "Lost update on purchase too: the stale second save answers 200 and overwrites the first (no version token; N51)."
+    },
+    {
+      "case": "purchase-invoice.keyboard.alt-s-saves",
+      "gap": "G171",
+      "reason": "No Alt+S keyboard save on the purchase screen (desktop &Save mnemonic)."
+    }
+  ],
+  "settings": [
+    {
+      "case": "settings.field.pan-limit-any-amount",
+      "gap": "G177",
+      "reason": "The web shows PAN_CARD_VAL as a fixed list (100000/200000); the desktop combo is editable (UT_SETTING.cs:4300-4301 presets, :5059 saves Val(Text)), so a shop's own limit such as 50000 cannot be entered. FONT_SIZE, GRID_ROW_HIGHT and VCH_DESC_HELP_LENT have the same shape."
+    }
   ]
 }

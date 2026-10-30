@@ -176,6 +176,11 @@ committed map is `docs/handbook/web/ui-surface-map.md`, regenerated from a full 
 SURFACE_SWEEP=1 SURFACE_WRITE_DOC=1 node scripts/parity-test-env.mjs -- node apps/web/test/features/run-surface.mjs
 ```
 
+To crawl on real data, run the feature suites first and keep their company: `FEATURE_E2E_THEN_SURFACE=1
+SURFACE_SWEEP=1 SURFACE_WRITE_DOC=1 node scripts/parity-test-env.mjs -- node apps/web/test/features/run-features.mjs`.
+The feature runner provisions one company for the whole run, so every module adds its vouchers to it and the
+closing crawl finds registers, ledgers and saved vouchers to act on. The committed map comes from this mode.
+
 A `WORKS` verdict means only that the page behaved; it does not mean desktop parity. The map shows parity separately:
 the desktop menu-catalog status of each route and whether a journey or feature module proves its lifecycle.
 

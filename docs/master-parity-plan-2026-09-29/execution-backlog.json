@@ -5898,13 +5898,13 @@
     {
       "id": "N162",
       "status": "planned",
-      "action": "Post one sale revenue leg per detail line (desktop key VCH_NO+STR(SR_NO)+'05', Ac_Ledr.cs:74) so a bill with items from two groups saves; remove sales-invoice.create.two-lines-dissimilar from features/baseline.json.",
+      "action": "Post one revenue/expense leg per detail line (desktop key VCH_NO+STR(SR_NO)+'05', Ac_Ledr.cs:74) so a sale or a purchase with items from two groups saves; remove sales-invoice.create.two-lines-dissimilar and purchase-invoice.create.two-groups from features/baseline.json.",
       "parentLabels": "P9; J04",
       "startAfter": [
         "N161"
       ],
-      "requiredProof": "feature E2E sales-invoice.create.two-lines-dissimilar passes (gold + silver bill saves, Σ revenue legs = taxable, balanced ledger); sales DB suite green; the baseline entry is removed in the same PR.",
-      "gapIds": "G169",
+      "requiredProof": "feature E2E sales-invoice.create.two-lines-dissimilar and purchase-invoice.create.two-groups pass (Σ income/expense legs = taxable, balanced ledger); sales and purchase DB suites green; both baseline entries are removed in the same PR.",
+      "gapIds": "G169, G176",
       "entryDefinition": "02-execution-plan.md section 4",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
@@ -5995,6 +5995,61 @@
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N168",
+      "status": "planned",
+      "action": "Settings whose desktop control is an editable combo (PAN_CARD_VAL, FONT_SIZE, GRID_ROW_HIGHT, VCH_DESC_HELP_LENT): offer the presets but accept any valid amount, validated server-side; remove settings.field.pan-limit-any-amount from features/baseline.json.",
+      "parentLabels": "P9; J21",
+      "startAfter": [
+        "N164"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "settings.field.pan-limit-any-amount passes (50000 stored and honoured by the PAN rule); a non-number is refused; the baseline entry is removed.",
+      "gapIds": "G177",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N169",
+      "status": "planned",
+      "action": "Users & Rights: refuse a change that would leave the company without an administrator (demoting or deleting the last ADMIN, including the caller's own account), with a readable message; add a feature E2E case for it.",
+      "parentLabels": "P9; X05",
+      "startAfter": [
+        "N164"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "browser case: the only admin tries to set their own role to USER and is refused with a message, LOGIN_MAST unchanged; with a second admin present the change is allowed.",
+      "gapIds": "G178",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N170",
+      "status": "implemented-unverified",
+      "action": "Deep feature modules on real data: Purchase Invoice (21 cases) and Company Settings effects (24 cases), a Sales CSV export case, one shared company per run so modules build real data, and the with-data surface crawl that regenerates the committed map.",
+      "parentLabels": "P9; R03; J02; J21",
+      "startAfter": [
+        "N164"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "run-features.mjs: sales 17/3/3, purchase 16/3/2, settings 10/1/2 + 11 N/A, FEATURE_E2E_PASSED; with-data sweep over 241 routes regenerates docs/handbook/web/ui-surface-map.md.",
+      "gapIds": "G176, G177, G178",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/web/test/features/modules/purchaseInvoice.mjs",
+        "web/apps/web/test/features/modules/settingsEffects.mjs",
+        "web/apps/web/test/features/modules/salesInvoice.mjs",
+        "web/apps/web/test/features/run-features.mjs",
+        "web/apps/web/test/features/surface/runner.mjs",
+        "docs/handbook/web/ui-surface-map.md"
+      ],
+      "statusNote": "IMPLEMENTED. Purchase and settings modules executed through the real screens on a shared company; defects G176 (two-group purchase), G177 (fixed-list PAN limit) and G178 (last admin can demote themselves) recorded and planned (N162, N168, N169)."
     }
   ],
   "amendments": [

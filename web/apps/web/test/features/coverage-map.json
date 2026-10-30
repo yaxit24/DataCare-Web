@@ -8,6 +8,12 @@
         "web/packages/core/src/saleAmount.ts",
         "web/packages/core/src/calc.ts"
       ]
+    },
+    "purchaseInvoice": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/purchase/page.tsx",
+        "web/apps/api/src/modules/purchase/purchase.ts"
+      ]
     }
   }
 }

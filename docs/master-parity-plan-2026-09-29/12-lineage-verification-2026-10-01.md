@@ -186,6 +186,9 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G173 | Med | Feature E2E cannot run rollback (T14) cases | `docs/master-parity-plan-2026-09-29/04-verification-playbook.md` | `web/apps/web/test/features/harness.mjs` | T14 needs a declared fault at each write boundary before commit; the harness has no fault injector, so `sales-invoice.rollback.mid-write` is blocked. | N166 |
 | G174 | Med | Feature E2E has no settings-variant company (T15) | `docs/master-parity-plan-2026-09-29/04-verification-playbook.md` | `web/apps/web/test/features/fixtures/catalogue.mjs` | T15 needs a company with other settings (fine-basis pricing, whole-rupee rounding, negative stock refused); the catalogue provisions one configuration only, so `sales-invoice.config.setting-change` is blocked. | N166 |
 | G175 | Low | Negative-weight sale line: rule undecided | `unified/src/csharp/DataCareNext/TR_SALE.cs` | `web/apps/api/src/modules/sales/sales.ts` | No desktop source refuses a negative weight (`TR_SALE_KeyPress` 14870-14883 only uppercases) and the web saves one. Needs an original-Windows run to decide; `sales-invoice.refusal.negative-weight` is blocked until then. | N167 |
+| G176 | High | A purchase with items from two groups cannot be saved | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/api/src/modules/purchase/purchase.ts` | Found by the feature E2E suite (`purchase-invoice.create.two-groups`): a gold line (GROUP_MAST.PURC_AC `PURCHASE`) and a silver line (`SLVPURC`) on one purchase fail with `duplicate key … AC_DATA_tenant_ledr_key_key`; every per-group expense leg is posted with the same leg type. Same class as G169 on sales. | N162 |
+| G177 | Med | Settings with an amount limited to fixed presets | `unified/src/csharp/DataCareNext/UT_SETTING.cs` | `web/apps/api/src/modules/settings/settingsCatalog.ts` | Found by `settings.field.pan-limit-any-amount`: the web renders PAN_CARD_VAL as a select of 100000/200000, but the desktop `cboPanCardVal` is an editable combo (presets at :4300-4301, saved as `Val(Text)` at :5059; no DropDownList style anywhere in the setting forms), so a shop cannot enter its own PAN limit such as 50000. FONT_SIZE, GRID_ROW_HIGHT and VCH_DESC_HELP_LENT are limited the same way. | N168 |
+| G178 | High | The only administrator can remove their own admin role and lock the company out | `unified/src/csharp/DataCareNext/MS_USER.cs` | `web/apps/api/src/modules/rbac/users.ts` | Observed on the live demo database: `POST /admin/users/:loginName/rights` (200 at 10:20:16 UTC) set `admin` to LOGIN_CATG `USER` with every right `N`; every later admin request answered 403 and the sales register says `forbidden`. `setUserRights` updates LOGIN_CATG with no check for the last administrator or the caller's own account. The desktop has no such check either, but always keeps the built-in `ABC` user with full rights (`MS_USER.cs:1330`), so it cannot lock itself out; the web has no recovery short of editing the database. | N169 |
 
 ## 4. Decisions D23–D28
 
@@ -1784,6 +1787,48 @@ Done when: the map is regenerated from a full sweep whenever screens change, the
 request, and no behaviour change merges without a browser test or a stated exemption.
 
 
+### N170 — Deep feature modules on real data: Purchase Invoice and Company Settings (G176–G178)
+
+The surface map of N164 was crawled on a company with masters only. N170 makes the suite run on real business data
+and goes deeper. The feature runner now provisions one company for the whole run, and each module adds its
+vouchers to it through the screens, as a shop's day would. With `FEATURE_E2E_THEN_SURFACE=1` the runner then crawls
+every page and presses every button on that data; the committed `docs/handbook/web/ui-surface-map.md` now comes
+from this run (241 routes, 848 presses, 43 of 88 reports returned rows after Run; all routes behave at smoke level).
+
+**Purchase Invoice (TR_PURC), 21 cases** — expectations hand-computed from the desktop fine-weight rule
+(`PR_AMT_TYPE='F'`, TR_PURC.cs:7396): 16 passed, 3 failed (baselined), 2 blocked. Passed: book filter and defaults,
+preview, create (header, lines, MAIN_STOCK +20, balanced ledger, supplier credited with the bill total, sentinel
+untouched, purchase register), inter-state supplier gets IGST without a manual toggle, URD with no GST, discount,
+reopen, unchanged save, edit re-prices on fine, delete reverses with DELETE_DATA, bill print, refusals, a clerk
+without the purchase right writes nothing, double-click makes one purchase, the purchase raises item stock and
+reaches the register and day book. Failed: G176 (gold + silver purchase cannot save, the purchase twin of G169),
+G170 (lost update, now shown on purchases too) and G171 (no Alt+S save).
+
+**Company Settings and their effect on a sale, 24 cases (13 applicable)** — each consumer case changes one setting
+through the Settings screen, makes a sale through the Sales screen, compares the stored result with the desktop
+rule and restores the setting: 10 passed, 1 failed, 2 blocked, 11 not applicable with reasons. Passed: every
+setting on a tab (all CO_SET and CO_SET_NEW settings), a change is stored and shown again after reload, a
+non-numeric cash limit is refused, `SL_AMT_TYPE=F` prices a new line on fine (56,090.80, RATE_WITH F),
+`NEGATIVE_STK_SALE=N` refuses an oversell and still allows an in-stock sale, `TOT_AMT_ROF=0` rounds the line
+banker's-style to 61,234 and the bill to 65,517, `LOCK_DATE` refuses a sale on the lock date, `CASH_LIMIT`
+refuses cash above the limit with the desktop message, `PAN_CARD_VAL` refuses a no-PAN party above the limit and
+allows a party with a PAN, and a clerk cannot change a setting. Failed: G177 — the PAN limit can only be 100000 or
+200000 on the web, while the desktop combo is editable (FONT_SIZE, GRID_ROW_HIGHT and VCH_DESC_HELP_LENT have
+the same shape). Message differences recorded as observations: the negative-stock and period-lock refusals use web
+wording, not the desktop's "Negative Stock is Not Allow …" and "You Cant Save and Delete This Voucher …".
+
+**Sales Invoice** gains `output.register-csv`: the sales register's CSV export contains the saved voucher
+(passed). This settles the N164 review item: the CSV buttons that "did nothing" on an empty company had no rows
+to export, which is the intended behaviour.
+
+**G178 (High)**, found on the live demo database while checking a report: `admin` had been changed to an ordinary
+user with every right `N` (`POST /admin/users/:loginName/rights` answered 200), and from then on every admin
+request answered 403. Nothing stops the only administrator from removing their own role. Planned as N169.
+
+Done when: every daily voucher screen has a module like these, run on shared real data, and the map is
+regenerated from that run.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -1872,6 +1917,9 @@ request, and no behaviour change merges without a browser test or a stated exemp
 | N165 | — | planned (G172: readable message / single retry when two sessions open the company at once) |
 | N166 | — | planned (G173, G174: fault injection for T14 and a settings-variant company for T15 in the feature E2E harness) |
 | N167 | — | planned (G175: decide the negative-weight line rule from an original-Windows run, then implement and execute the case) |
+| N168 | — | planned (G177: editable amount settings — presets offered, any amount accepted and validated) |
+| N169 | — | planned (G178: refuse removing the admin role from the last administrator, including oneself) |
+| N170 | — | implemented-unverified, evidence in this change (Purchase Invoice module 16/3/2, Settings effects module 10/1/2 + 11 N/A, Sales CSV export case, one shared company per run, with-data crawl and regenerated map; found G176, G177, G178) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
