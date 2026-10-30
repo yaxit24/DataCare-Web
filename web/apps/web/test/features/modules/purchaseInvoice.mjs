@@ -851,6 +851,45 @@ export const purchaseInvoice = {
     ),
 
     C(
+      'print.date-with-year',
+      'T16',
+      'output',
+      'G36 (D19): the printed purchase bill and the recent list show the voucher date as dd/MM/yyyy, with its year',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const vchNo = await createOne(ctx, page);
+        const [bill] = await ctx.rows(
+          `SELECT to_char("VCH_DATE",'DD/MM/YYYY') shown FROM "PR_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        const documentRequest = page
+          .context()
+          .waitForEvent('request', (r) => /\/api\/purchases\/invoice\?/.test(r.url()), {
+            timeout: 15_000,
+          });
+        const [popup] = await Promise.all([
+          page.waitForEvent('popup'),
+          page.getByRole('button', { name: 'View Purchase Bill', exact: true }).click(),
+        ]);
+        const url = new URL((await documentRequest).url());
+        url.searchParams.set('format', 'html');
+        const html = await (await page.request.get(url.toString())).text();
+        await popup.close();
+        assert.ok(html.includes(bill.shown), `the purchase bill shows ${bill.shown}`);
+        await page.getByRole('button', { name: '▸ Recent vouchers', exact: true }).click();
+        const row = page.locator('table.grid tr', { hasText: vchNo }).last();
+        await row.waitFor();
+        const listed = (await row.locator('td').nth(1).innerText()).trim();
+        assert.equal(listed, bill.shown, 'the recent list shows dd/MM/yyyy');
+        return {
+          observation: `purchase bill and recent list show ${listed}`,
+          expected: bill.shown,
+          output: Buffer.from(html),
+        };
+      },
+    ),
+
+    C(
       'keyboard.alt-s-saves',
       'T17',
       'mutation',
