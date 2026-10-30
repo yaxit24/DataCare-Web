@@ -4,6 +4,10 @@ The owner's instruction of 30 October 2026: build one edition of DataCareNext co
 other. Standard comes first; it contains Lite and Basic. Ultra, Pro, Advance and Enterprise wait until Standard runs
 in production. This is decision D31 ([document 12 §4](12-lineage-verification-2026-10-01.md#4-decisions-d23d28)).
 
+**Confirmed by the owner on 30 October 2026 (evening):** Standard first, and Standard complete: every one of its
+114 menus working end to end like the desktop, each verified through the browser with every case a user can meet,
+edge cases included. Pilot users wait until Standard is complete. §5 and §6 set out how that is done and measured.
+
 This document changes the **order and scope** of Phase 1 work. It does not replace the slice specifications of
 documents 02, 06, 10, 11 and 12, the contracts of document 03, the acceptance rules of document 04 or the definition
 of done of [document 13 §1](13-phase1-delivery-plan.md#1-definition-of-done). Status stays in
@@ -74,7 +78,7 @@ Per menu, with its edition, catalog grade and web routes:
 - **Transaction:** Purchase (L; PARTIAL; `/txn/purchase`); Purchase Rtn (L; PARTIAL; `/txn/purchase-return`); Sales Order (L; PARTIAL; `/txn/sales-order`); Sales (L; PARTIAL; `/txn/sales`, `/txn/hallmark-sale`); Sales Return (L; PARTIAL; `/txn/sale-return`); Wh Sales (L; PARTIAL; `/txn/wholesale-sale`); Cash Received (L; PARTIAL; `/txn/receipt`); Cash Payment (L; PARTIAL; `/txn/payment`); Bank Received (L; PARTIAL; `/txn/receipt?mode=BANK`); Bank Payment (L; PARTIAL; `/txn/payment?mode=BANK`); Contra Entry (L; PARTIAL; `/txn/contra`); Rate Cut (B; PARTIAL; `/txn/rate-cut`); Sale Booking (S; PARTIAL; `/txn/bullion`); Purc Booking (S; PARTIAL; `/txn/bullion`); Bul Sales (S; PARTIAL; `/txn/bullion-sale`); Bul LcBook (S; PARTIAL; `/txn/bullion`); E Invoice (B; PARTIAL; `/txn/e-invoice`); E CrntNote (B; PARTIAL; `/txn/e-crnt-note`); Sl Quotation (B; PARTIAL; `/txn/sales-quotation`); Pr Quotation (S; PARTIAL; `/txn/purchase-quotation`); Wh Quotation (S; PARTIAL; `/txn/wholesale-quotation`); Wh Sl Return (S; PARTIAL; `/txn/wholesale-sale-return`).
 
 The catalog grades are those of 1 October. Slices N89–N162 added reopen, edit and delete to many of these screens
-since then, so step E1 refreshes the grade of every Standard row from the code and the browser.
+since then; each row is re-graded when its menu is done (§5).
 
 **Deferred: 78 menus of Pro, Advance and Enterprise.** They stay in the code, hidden and refused (§3), until
 Standard runs in production.
@@ -101,105 +105,125 @@ are all outside Standard.
 **Web routes.** Of the 240 routes in the web navigation (`web/apps/web/lib/nav.ts`), 105 serve a Standard menu and
 54 serve only deferred menus. The other 81 match no desktop menu in the catalog: most are report variants and
 utilities that belong to a Standard menu's modes (for example the sales reports by party, item and month), and some
-belong to deferred areas (Dhiran outstanding letter, membership, tour sales, card receipt, customer entry). Step E2
-classifies each of the 81 against the desktop before the gate hides anything.
+belong to deferred areas (Dhiran outstanding letter, membership, tour sales, card receipt, customer entry). Slice
+N171 classifies each of the 81 against the desktop before the gate hides anything.
 
-## 3. Setting the deferred code aside without deleting it
+## 3. Standard only; the other editions as Beta
 
-The deferred code is working, tested and merged, and the browser lane's suites exercise parts of it. Commenting it out
-or deleting it would break the build and the test suites and throw away verified work. It is set aside the way the
-desktop itself does it, by edition:
+The Pro, Advance and Enterprise code stays in the repository, compiled and tested, and is taken out of the
+Standard product the way the desktop does it, by edition (slice N171, gap G183):
 
 1. **Snapshot branch.** `archive/all-editions-2026-10-30` points at `main` before the gate (`54256eb`), so the full
    multi-edition state can always be recovered as it was.
-2. **Edition gate.** One table, generated from `menu-editions.json`, gives each desktop menu and each web route its
-   edition. The running edition comes from configuration (`APP_EDITION`, default `S`); per-company licences come
-   later with the other editions.
-   - Navigation lists only the menus of the running edition (as `MDI_FORM` filters `MENU_DATA`).
-   - Opening a deferred route by URL shows "not available in this edition" instead of the screen.
-   - The API refuses deferred route families with `403 {error:'edition-unavailable'}`, so a hidden screen cannot be
-     reached by calling its API.
-   - `/me` reports the edition, and Users & Rights lists only the edition's menus (`MS_USER` has 13 edition tests).
-   - Edition branches inside shared screens follow the desktop's `MsSoftType` tests (§1).
-3. **Tests stay.** The suites of deferred features keep running in CI with the edition switched on in their fixture,
-   so nothing regresses while it waits.
+2. **Edition gate.** One generated table gives every desktop menu, web route, rights form and API route family its
+   edition, from `menu-editions.json`. The running edition comes from configuration (`APP_EDITION`, default `S`).
+   - Navigation and Users & Rights list only the menus of the running edition, as `MDI_FORM` filters `MENU_DATA`.
+   - A deferred page opened by URL says it is not part of the Standard edition instead of showing the screen.
+   - Its API answers `403 {error:'edition-unavailable'}`, so a hidden screen cannot be used by calling its API.
+   - `/me` reports the edition. Edition branches inside shared screens follow the desktop's `MsSoftType` tests (§1).
+3. **Beta.** For internal use the deferred editions can be switched on (`APP_EDITION_BETA=1`): their menus appear in
+   a separate Beta group, each labelled Beta, and their APIs answer. A Standard deployment has Beta off.
+4. **Not commented out.** Commenting the code out would break the build and the test suites that import it, and
+   code that no longer compiles decays while the shared posting, tax and numbering code changes for Standard. Hiding
+   it gives users the same Standard product.
+5. **Tests stay.** The test harnesses build the application without the gate, so the deferred suites keep running
+   and nothing regresses while it waits. The gate has its own tests.
 
 Raising the edition later (Ultra, then Pro, Advance, Enterprise) is a configuration change plus that edition's
 verification, not a re-implementation.
 
-## 4. State of Standard on 30 October 2026
+## 4. State of Standard on 30 October 2026 (evening)
 
-- Every web route renders for a signed-in user (UI surface crawl, 241 routes, slice N164 in the browser lane).
-- Feature-level E2E coverage exists for one menu: Sales Invoice, 22 cases. On `main` 16 pass, 3 fail with recorded
-  gaps and 3 are blocked with reasons; with N162 (the G169 fix, in review) 17 pass and the remaining failures are
-  G170 (lost update) and G171 (no Alt+S save).
-- Found in the 30 October browser run of Sales Invoice, to be registered as gaps once the browser lane's G172–G175
-  are on `main` (gap numbers must stay contiguous):
-  - Enter in the voucher-number box does not load the voucher; the desktop loads on Enter and steps to the last and
-    first voucher on Up and Down (`unified/src/csharp/DataCareNext/TR_SALE.cs:17068-17096`).
-  - The print popup shows `{"error":"unauthenticated"}` once the 15-minute access cookie has expired, because it is
-    a plain navigation and cannot refresh the session the way API calls do.
-  - The printed invoice's HSN summary rounds each half of the tax separately (1,021.64 + 1,021.64 = 2,043.28) while
-    the bill's tax is 2,043.29 and the summary panel shows 1,021.65 twice.
-  - The printed date has no year ("Fri Oct 30"); that is N56, waiting for decision D19.
-  - Each page load prefetches the roughly 240 navigation routes, and the party lookup sends one balance request per
-    keystroke.
-- Owner decisions that block production quality on Standard screens, all recommended and not yet accepted (document
-  11 §4): **D16** request schemas (N50), **D17** version tokens against lost updates (N51, G170), **D18**
-  idempotency keys on financial creates (N52), **D19** date and number formats (N56).
-- Desktop-match evidence needs an original-Windows run, which does not exist yet. It stays a separate measure and
-  does not block "working in production".
+Measured across the 114 Standard menus:
+
+| Measure | Result | Source |
+|---|---|---|
+| Screen opens and its buttons respond | 113 of 114 (one report page was not in the crawl) | Browser crawl of 241 pages, N164/N170 |
+| Voucher menus with create, reopen, edit and delete wired | about 35 of 50 | Scan of the current screen code |
+| Menus with a full browser case list | 3: Sales Invoice (23 cases: 17 pass, 3 fail, 3 blocked), Purchase Invoice (21: 16, 3, 2), Company Settings (24, of which 13 apply: 10, 1, 2) | Feature E2E run on `main` (`8146111`), CI job "Real-stack browser journeys" |
+| Menus where every case passes | 0 | Same run |
+| Menus compared with the running desktop | 0 | No original-Windows run exists |
+
+Open defects on Standard menus, all in document 12:
+- **Found by the feature suites:** G169 and G176 (a sale or purchase with items from two groups cannot be saved),
+  G170 (a stale second save overwrites the first), G171 (no Alt+S save), G177 (a settings amount limited to presets),
+  G178 (the last administrator can remove their own admin role).
+- **Found in the 30 October browser run:** G179 (Enter, Up and Down in the voucher number box), G180 (the print
+  window after the access cookie expires), G181 (the printed HSN table differs from the bill tax by a paisa), G182
+  (request storms).
+- **Blocking test cases:** G173 and G174 (no fault injection or settings-variant company in the harness) and G175
+  (the negative-weight rule needs the desktop).
+
+Owner decisions still open that Standard needs (document 11 §4): **D16** request schemas (N50), **D17** version
+tokens against lost updates (N51, G170), **D18** idempotency keys on financial creates (N52), **D19** date and number
+formats (N56). Until they are accepted, the slices that depend on them wait and everything else continues.
 
 ## 5. Delivery plan
 
-The time box the owner set is one to two days. Two lanes run in parallel: **lane A**, implementation, and **lane B**,
-the browser and feature E2E lane. Every step follows document 13 §6 and the testing handbook: desktop authority
-cited, unit and function tests, a write-set database test for each writer, the feature E2E module for each changed
-screen, a browser run through the Chrome DevTools MCP, a pull request with green CI, then merge.
+**One menu at a time, to 100%.** Two lanes work in parallel: lane A implements, lane B builds the browser case lists.
+For each Standard menu:
 
-| Step | Lane | Work | Estimate |
-|---|---|---|---|
-| E0 | A | This plan, decision D31, `menu-editions.json` | 1 h |
-| E1 | A | Land N162 (G169) and the Alt+S save (G171); refresh the catalog grade of the 114 Standard rows | 2 h |
-| E2 | A | Snapshot branch; edition gate (§3) with its tests; classify the 81 unmapped routes | 3–4 h |
-| E3 | A | Voucher-shell defects of §4: Enter/Up/Down on the voucher number, print after session expiry, printed HSN tax, prefetch and lookup request storms | 3 h |
-| E4 | B, then A | Feature modules and fixes, sales and purchase family: Purchase, Purchase Rtn, Pr Quotation, Sales Return, Sl Quotation, Sales Order, Order Cancel | 6 h |
-| E5 | B, then A | Cash and bank: Cash/Bank Received and Payment, Contra, Bill Wise Rec, Other Income, Other Expenses | 4 h |
-| E6 | B, then A | Masters and openings: Party, Item, Group, Tax, Product, Counter, Employee, Item Touch, Labour, Address, AutoItem; Party, Item and Tag Opening | 4 h |
-| E7 | B, then A | Tags and stock: Only Tag Entry, Tag Print, Tag Cancel, Tag Transfer, Counter Trfr, Stock Adjust, Physical Stock, Daily Rate | 4 h |
-| E8 | B, then A | The 24 Standard reports: modes, filters and totals checked against the vouchers of E4–E7; prints | 6 h |
-| E9 | B, then A | Company and admin: Company, Year Create, Year Select, Books, User Create, Account Group, Trade Master, Settings, Data Backup and Refresh, Import and Export, Vch ReNumber, Estimate Reset, Reminder Entry | 5 h |
-| E10 | B, then A | The rest of Standard: Karigar and repair (9), Approval Isu and Rtn, Labour Work, Fine Jv, Old Item Sales, VP Parcel and Adjust, Mfg (4), wholesale and bullion (Wh Sales, Wh Quotation, Wh Sl Return, Rate Cut, Sale/Purc Booking, Bul Sales, Bul LcBook), E Invoice, E CrntNote, SMS and WhatsApp, Bank Reconcile, Labour Update | 10–12 h |
-| E11 | A | Standard release candidate: full CI and feature E2E on one commit, release certifier dry run, Docker deployment, backup and restore drill, operator walkthrough script | 3 h |
+1. **Desktop study.** Read the form's source: every control and key, every mode and book family, every validation
+   and its message, every calculation with its rounding stage, every table written, every print and report it feeds.
+   Cite the lines.
+2. **Case list.** Freeze the feature module's cases (playbook T01–T18): every button and key, every mode, the whole
+   lifecycle (create, reopen, unchanged save, edit, delete, print, list), every refusal with proof that nothing was
+   written, and the edge cases a user can reach: zero, negative and maximum values, items from two groups,
+   inter-state tax, every tender mix, stale edits, double submit, user rights, and the effect on downstream reports.
+   Expected values are worked out from the desktop rules, never copied from the web.
+3. **Browser run.** Run the module through the real screen on the zero-mock stack. Each failure becomes a gap in
+   document 12 and a baseline entry.
+4. **Fix.** Fix each defect with unit, function and write-set database tests until every case passes, and remove its
+   baseline entry in the same change.
+5. **Visual and keyboard check.** Walk the screen with the Chrome DevTools MCP: field order, Enter and F-key flow,
+   lookups, print preview, console and network health.
+6. **Done.** The menu's catalog row becomes FULL; pull request with green CI; merge.
 
-**What fits in the time box.** E0–E3 and E4–E5 fit in the first day; with both lanes running, the second day covers
-E6–E8. That gives **Standard RC-1**: the edition gate and the daily shop cycle (sales and purchase family, cash and
-bank, masters, tags, the core reports), about 70 of the 114 menus, verified end to end. E9–E11, the remaining
-menus and the fixes their suites will find need about three more working days at the measured pace (one full
-feature module took about half a day to build with its framework; later modules reuse it). The estimate rests on
-that one module and will be revised after E4.
+**Order.** Shared defects first, because each one fixes many screens; then the menus in the order a shop uses them.
 
-**Order inside each step.** Fix what blocks a business result first (refused saves, wrong postings, lost data), then
-lifecycle gaps (reopen, edit, delete, print), then keyboard and layout. A defect the suites find becomes a gap in
-document 12 and a baseline entry, and is fixed in its own change.
+| Step | Work | Slices | Lane-hours |
+|---|---|---|---:|
+| E0 | This plan, D31, `menu-editions.json` | — | done |
+| E1 | Sale and purchase with two item groups (G169, G176); Alt+S save (G171) | N162, N163 | 6 |
+| E2 | Edition gate with Beta (G183) | N171 | 8 |
+| E3 | Voucher number keys, print window, printed HSN table, request storms (G179–G182); last-administrator lockout (G178); editable settings amounts (G177); open-company conflict (G172) | N172–N175, N169, N168, N165 | 12 |
+| E4 | Rollback and settings-variant cases in the harness (G173, G174) | N166 | 6 |
+| E5 | D16–D19 on Standard routes: request schemas, version tokens (G170), idempotency, dates | N50, N51, N52, N56 | 30 |
+| E6 | Sales and purchase family: Sales (with the hallmark mode), Purchase, Sales Return, Purchase Rtn, Sales Order, Order Cancel, Sl, Pr and Wh Quotation | — | 50 |
+| E7 | Cash and bank: Cash and Bank Received and Payment, Contra, Bill Wise Rec, Other Income, Other Expenses, Bank Reconcile | — | 30 |
+| E8 | Masters and openings: the 14 Master tab menus | — | 20 |
+| E9 | Tags and stock: Only Tag Entry, Tag Print, Tag Cancel, Tag Transfer, Counter Trfr, Stock Adjust, Physical Stock, Daily Rate, Tag Wt Change | — | 35 |
+| E10 | Reports: the 24 Report tab menus, Kr Report, Reparing Rpt and the three Mfg reports, checked against the vouchers of E6–E9 | — | 45 |
+| E11 | Company and admin (12 menus) and utilities: Data Import and Export, Vch ReNumber, Estimate Reset, Reminder Entry, Labour Update, SMS, WhatsApp | — | 40 |
+| E12 | The rest: Karigar and repair, Approval Isu and Rtn, Labour Work, Fine Jv, Old Item Sales, VP Parcel and Adjust, Mfg Mast, Wh Sales, Wh Sl Return, Rate Cut, Sale and Purc Booking, Bul Sales, Bul LcBook, E Invoice, E CrntNote | — | 90 |
+| E13 | Release candidate: full CI and feature run on one commit, release certifier dry run, deployment from empty, backup and restore drill | N80, N82 (parts) | 10 |
+
+**Estimate.** About 380 lane-hours. The basis is the pace measured on 30 October: lane B wrote three case lists
+(68 cases) in about six hours, and fixing one defect class with all its tests and a browser run (G169) took about
+two hours. Per menu that is about 5 hours for a voucher screen (case list and fixes), 1 for a master, 1.5 for a
+report and 2 for a utility, plus about 70 hours of shared work (E1–E5, E13). With both lanes that is roughly 8 days
+of round-the-clock work, or 2 to 3 weeks at a normal working pace. It is re-estimated every week from the number of
+menus done; the 30 October estimate of a few days for Standard was too optimistic.
+
+**Progress** is one number: Standard menus done, out of 114. A menu is done when its feature module has no failing
+or blocked case and no baseline entry, its writers have write-set tests, and its catalog row is FULL. Every pull
+request and the handoff report it.
 
 ## 6. Done for Standard
 
-Standard is ready for production when:
+Standard is complete when:
 
-1. Navigation, rights and the API expose exactly the 114 Standard menus; deferred routes are refused in the screen
-   and in the API (§3).
-2. Each Standard menu meets document 13 §1 items 1–4: every desktop mode opens the right screen; the lifecycle the
-   desktop allows works; a write-set database test; a feature E2E module whose applicable T01–T18 cases pass or are
-   baselined with a recorded gap and a reason; a browser run with evidence.
-3. No open gap of severity High on a Standard menu; Medium gaps have an owner decision or a dated plan.
-4. Decisions D16–D19 are accepted and their slices (N50 for Standard routes, N51, N52, N56) are done for the
-   Standard screens.
-5. One candidate commit passes CI, the full feature E2E run and the release certifier dry run; the Docker deployment
-   starts from empty; a backup restores (N80 restore milestone); the runbook is written.
+1. Navigation, rights, pages and the API expose exactly the 114 Standard menus; the other editions appear only as
+   Beta when switched on (§3).
+2. All 114 menus are done (§5): every case passes in the browser, with no failing or blocked case. A case that can
+   only be decided by the desktop (for example G175) gets an owner decision on the rule first.
+3. No gap is open on a Standard menu.
+4. D16–D19 are implemented on the Standard routes.
+5. One candidate commit passes CI and the full feature run; the release certifier dry run passes; the deployment
+   starts from empty; a backup restores.
 
-Not claimed by this: desktop match (document 04 side-by-side) and parent acceptance, which need the original-Windows
-run. They are measured and reported separately, as document 13 §1 already requires.
+Desktop match (the side-by-side comparison of document 04) is measured separately once an original-Windows run
+exists; until then the desktop source is the authority for every expected value.
 
 ## 7. Effect on the other plan documents
 
@@ -211,5 +235,4 @@ run. They are measured and reported separately, as document 13 §1 already requi
   menus are not in the edition is deferred even when its books are seeded.
 - **Phase 2** is unchanged: it starts after Phase 1 is complete and certified (D28). "Phase 1 complete" now means
   complete for the editions released so far, starting with Standard.
-- **The browser lane** builds its feature modules in the order of §5 and runs its surface crawl with the Standard
-  edition, so findings land on in-scope menus first.
+- **The browser lane** builds its feature modules in the order of §5, so findings land on Standard menus first.
