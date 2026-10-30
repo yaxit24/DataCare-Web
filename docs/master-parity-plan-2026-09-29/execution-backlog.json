@@ -6144,7 +6144,7 @@
     },
     {
       "id": "N174",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Printed GST bills round the CGST and SGST halves one way everywhere on the page, and the HSN table totals the bill tax exactly (TR_SALE.cs stores SGST_TAX = CGST_TAX = tax / 2 unrounded).",
       "parentLabels": "P9; J22",
       "startAfter": [
@@ -6155,7 +6155,14 @@
       "entryDefinition": "15-standard-edition-plan.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/api/src/modules/documents/docChrome.ts",
+        "web/apps/api/test/documents.test.ts",
+        "web/apps/web/test/features/modules/salesInvoice.mjs"
+      ],
+      "statusNote": "IMPLEMENTED. The printed HSN summary takes the voucher's header tax heads for every GST bill, as every desktop sales bill does (SalesBillA4Gst, B2BSaleBillA4Tax, SalesBillHzGst and SalesBillOrgDup print SL_DATA.CGST_TAX/SGST_TAX; SL_DETL.ITM_CGST_AMT/ITM_SGST_AMT have UseCount 0). Each HSN group takes its taxable share of a head rounded half-up to the paisa and the last group the exact remainder, so each column adds up to the summary head and the Tax column to the bill tax; the halves stay equal as the desktop stores them. Verified: documents.test.ts 23 passed (header heads, the G181 bill 954.15/954.15/1,908.29, two groups 954.14+67.51, and 300 generated bills whose printed columns add up), the 4 new tests fail against main's docChrome.ts; feature case sales-invoice.print.hsn-agrees-with-summary passes through the screen's Print and fails against main; Chrome check of the printed invoice on the demo data (HSN 954.15/954.15/1,908.29 beside summary 954.15/954.15)."
     },
     {
       "id": "N175",
