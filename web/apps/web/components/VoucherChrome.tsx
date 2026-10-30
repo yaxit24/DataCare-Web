@@ -1,5 +1,5 @@
 'use client';
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, type Ref, useEffect, useState } from 'react';
 
 /**
  * Shared voucher chrome (mirrors the desktop voucher form): a header strip with Vch No / Date
@@ -13,6 +13,8 @@ export interface VoucherChromeProps {
   vchNo?: string | number | null;
   date?: string; // yyyy-mm-dd
   onDateChange?: (d: string) => void;
+  /** The voucher date input, so a screen can move to it (the desktop focuses mVchDate after DISPLAY_DATA). */
+  dateInputRef?: Ref<HTMLInputElement>;
   showTime?: boolean;
   refNo?: string;
   onRefNoChange?: (r: string) => void;
@@ -88,6 +90,7 @@ export function VoucherChrome(props: VoucherChromeProps) {
           </>,
           <input
             type="date"
+            ref={props.dateInputRef}
             value={props.date ?? ''}
             onChange={(e) => props.onDateChange?.(e.target.value)}
             readOnly={!props.onDateChange}

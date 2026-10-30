@@ -14,6 +14,7 @@ import { LookupPicker } from '../../../../components/LookupPicker';
 import { TenderPanel, type Tender } from '../../../../components/TenderPanel';
 import { VoucherChrome } from '../../../../components/VoucherChrome';
 import { VoucherList } from '../../../../components/VoucherList';
+import { useVoucherNumberKeys, VoucherNumberNote } from '../../../../components/VoucherNumberKeys';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { EntityImagePanel } from '../../../../components/EntityImagePanel';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
@@ -296,12 +297,19 @@ export default function PurchaseEntryPage() {
   }
 
   async function loadPurchase() {
-    if (!voucherLookup.trim()) return;
+    await openPurchase(voucherLookup);
+  }
+
+  /** Open a saved purchase of the selected book; resolves whether it loaded. */
+  async function openPurchase(requested: string, book = coBook): Promise<boolean> {
+    const vchNo = requested.trim();
+    if (!vchNo || !book) return false;
+    if (book !== coBook) setCoBook(book);
     setBusy(true);
     setErr('');
     try {
       const view = await get<any>(
-        `/purchases/${encodeURIComponent(voucherLookup.trim())}?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}`,
+        `/purchases/${encodeURIComponent(vchNo)}?coBook=${encodeURIComponent(book)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}`,
       );
       setLoadedVchNo(String(view.voucherNo));
       setVoucherLookup(String(view.voucherNo));
@@ -350,12 +358,23 @@ export default function PurchaseEntryPage() {
           (line.stones ?? []).map((stone: any) => stoneRowFromApi(stone)),
         ),
       );
+      return true;
     } catch (e) {
       setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
+      return false;
     } finally {
       setBusy(false);
     }
   }
+
+  // N172 (G179): the voucher number box's F1, Up, Down and Enter (tVchNo_KeyDown, TR_PURC.cs:14407-14432).
+  const numberKeys = useVoucherNumberKeys({
+    table: 'PR_DATA',
+    book: coBook,
+    value: voucherLookup,
+    open: (vchNo) => openPurchase(vchNo),
+    fresh: newPurchase,
+  });
 
   async function removeLoadedPurchase() {
     if (!loadedVchNo || !window.confirm(`Delete voucher ${loadedVchNo}?`)) return;
@@ -512,6 +531,7 @@ export default function PurchaseEntryPage() {
           vchNo={loadedVchNo ? Number(loadedVchNo) : (result?.vchNo ?? null)}
           date={vchDate}
           onDateChange={setVchDate}
+          dateInputRef={numberKeys.dateRef}
           refNo={billNo}
           onRefNoChange={setBillNo}
           saving={busy}
@@ -525,12 +545,14 @@ export default function PurchaseEntryPage() {
                 aria-label="Voucher No"
                 value={voucherLookup}
                 onChange={(e) => setVoucherLookup(e.target.value)}
+                onKeyDown={numberKeys.onKeyDown}
                 placeholder="00001"
               />
             </div>
             <button type="button" className="ghost" disabled={busy} onClick={loadPurchase}>
               Load
             </button>
+            <VoucherNumberNote note={numberKeys.note} />
             {loadedVchNo && (
               <span className="msg ok" data-testid="purchase-loaded">
                 Loaded #{loadedVchNo}
@@ -971,6 +993,8 @@ export default function PurchaseEntryPage() {
         table="PR_DATA"
         book={coBook}
         deleteBase="/purchases"
+        onLoad={(_vchNo, identity) => void openPurchase(identity.vchNo, identity.coBook)}
+        openKey={numberKeys.listKey}
         printHref={(v) =>
           `/api/purchases/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(v)}&format=html`
         }

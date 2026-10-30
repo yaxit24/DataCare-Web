@@ -17,6 +17,7 @@ import { RateTicker } from '../../../../components/RateTicker';
 import { PartyBalance } from '../../../../components/PartyBalance';
 import { VoucherChrome } from '../../../../components/VoucherChrome';
 import { VoucherList, type VoucherIdentity } from '../../../../components/VoucherList';
+import { useVoucherNumberKeys, VoucherNumberNote } from '../../../../components/VoucherNumberKeys';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { companyFlag, useCompanySettings, companySetting } from '../../../../lib/companySettings';
 import { oldGoldRowAmount, recalcLine } from '../../../../lib/lineRecalc';
@@ -490,9 +491,9 @@ export default function SalesEntryPage() {
    */
   async function openSale(
     identity: Pick<VoucherIdentity, 'coBook' | 'coYear' | 'lcCode' | 'vchNo'>,
-  ) {
+  ): Promise<boolean> {
     const vchNo = identity.vchNo.trim();
-    if (!vchNo || !identity.coBook) return;
+    if (!vchNo || !identity.coBook) return false;
     if (identity.coBook !== coBook) setCoBook(identity.coBook);
     setBusy(true);
     setErr('');
@@ -619,12 +620,23 @@ export default function SalesEntryPage() {
         isuSrno: Number(line.isuSrno ?? 0) || undefined,
       }));
       setLines(loadedLines.length ? loadedLines : [blank()]);
+      return true;
     } catch (e) {
       setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
+      return false;
     } finally {
       setBusy(false);
     }
   }
+
+  // N172 (G179): the voucher number box's F1, Up, Down and Enter (tVchNo_KeyDown, TR_SALE.cs:17068-17096).
+  const numberKeys = useVoucherNumberKeys({
+    table: 'SL_DATA',
+    book: coBook,
+    value: voucherLookup,
+    open: (vchNo) => openSale({ coBook, coYear, lcCode, vchNo }),
+    fresh: newSale,
+  });
 
   async function removeLoadedSale() {
     if (!loadedVchNo || !window.confirm(`Delete voucher ${loadedVchNo}?`)) return;
@@ -830,6 +842,7 @@ export default function SalesEntryPage() {
           vchNo={loadedVchNo ? Number(loadedVchNo) : (result?.vchNo ?? null)}
           date={vchDate}
           onDateChange={setVchDate}
+          dateInputRef={numberKeys.dateRef}
           refNo={refNo}
           onRefNoChange={setRefNo}
           saving={busy}
@@ -851,12 +864,14 @@ export default function SalesEntryPage() {
                 aria-label="Voucher No"
                 value={voucherLookup}
                 onChange={(e) => setVoucherLookup(e.target.value)}
+                onKeyDown={numberKeys.onKeyDown}
                 placeholder="00001"
               />
             </div>
             <button type="button" className="ghost" disabled={busy} onClick={loadSale}>
               Load
             </button>
+            <VoucherNumberNote note={numberKeys.note} />
             {loadedVchNo && (
               <span className="msg ok" data-testid="sales-loaded">
                 Loaded #{loadedVchNo}
@@ -1510,6 +1525,7 @@ export default function SalesEntryPage() {
         book={coBook}
         deleteBase="/sales"
         onLoad={(_vchNo, identity) => void openSale(identity)}
+        openKey={numberKeys.listKey}
         printHref={(v) =>
           `/api/sales/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(v)}&format=html&copy=O`
         }
