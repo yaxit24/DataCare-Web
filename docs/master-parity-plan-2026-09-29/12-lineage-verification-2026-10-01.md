@@ -208,6 +208,10 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G195 | High | Sale line amounts are rounded by TOT_AMT_ROF instead of to whole rupees | `unified/src/csharp/DataCareNext/TR_SALE.cs` | `web/apps/api/src/modules/sales/sales.ts`; `web/packages/core/src/calc.ts` | Found while checking the return's rounding. The desktop's `CommPassTotal` starts with `digits = 0` and uses 2 only when `CO_SET.ALL_ROF_REMOVE = 'Y'` (`TR_SALE.cs:10343-10362`), then rounds the item amount (`:10905`) and the labour amount (`:11100-11108`) with it; `TOT_AMT_ROF` rounds only the bill total (`:19192`, `:19274`). The web rounds each line component with `TOT_AMT_ROF` (`sales.ts:337-349`), a rule taken from a customer database where `TOT_AMT_ROF` is 0, so the two agree only at 0. With `TOT_AMT_ROF` 2, or blank (read as 2), a 10 g line at 6,123.45 is 61,234.50 on the web and 61,234 on the desktop. The web's E-Bill calculation already follows the desktop rule (`web/packages/core/src/eBillCalc.ts:30`). The merged cases of `sales-invoice` (EXPECT_A 61,234.50) and `settings.effect.sale-amount-fine` (56,090.80) assert the web value; the desktop values are 61,234 and 56,091. | N184 |
 | G196 | Med | A new web company leaves the rounding settings blank, and the web reads blank as 2 decimals | `unified/src/csharp/DataCareNext/Ac_Image.cs` | `web/packages/core/src/roundingPolicy.ts` | The desktop schema makes the rounding settings NOT NULL with defaults: `LBR_ROF` 0 and `ITM_RATE_ROF` 0 (`Ac_Image.cs:6320`, `:6358`), `PR_RATE_ROF` 2 (`:7010`), `TOT_AMT_ROF` 0 (`:7357`) and `ALL_ROF_REMOVE` `N` (`:7565`). A new desktop company copies them from an existing one (`MS_YEAR.cs:1529-1531`), and a blank `TAX_ROF` reads as 0 decimals (`MS_OPNCOMP.cs:668-671`, `DC_Main.cs:2088-2101`). On the live demo company `TAX_ROF` and `ALL_ROF_REMOVE` are NULL and there is no `CO_SET_NEW` row, and `resolveRoundingPolicy` reads blank as 2 decimals on purpose (`roundingPolicy.ts:103`). So a new web company keeps paise on the bill total, tax, labour rate and item rate where a new desktop company rounds to whole rupees. To decide under D05: provision the desktop defaults, or keep 2 decimals for web-created companies and record why. | N185 |
 | G197 | Med | A rebuilt checkout served the previous build's pages to the browser tests | `docs/master-parity-plan-2026-09-29/04-verification-playbook.md` | `web/apps/web/package.json` | Found while checking N172 in Chrome: after `pnpm build`, `next start` (Next.js 15.5.28) answered `/txn/sales` with `x-nextjs-cache: HIT` and the previous build's page chunk, because pages served by the previous server stay in `apps/web/.next/server/route-cache` and the build does not remove that directory. Deleting it made the same server serve the new chunk. A local feature or real-stack run after a rebuild could therefore pass or fail on old code; CI builds from a clean checkout and was not affected. | N186 |
+| G198 | High | Purchase-family line amounts keep paise where the desktop rounds to whole rupees | `unified/src/csharp/DataCareNext/TR_KR_ISU.cs` | `web/apps/api/src/modules/purchase/purchaseReturn.ts`; `web/apps/web/lib/purchaseReturnForm.ts` | Found by `purchase-return.formula.whole-rupees` and `purchase-return.create.amounts`: a 10 g GLD22 return line (touch 91.6, rate 6,123.45, making 237.5/g) previews and stores 56,090.80 + 2,375 = 58,465.80, tax 1,753.97 and total 60,219.77. TR_KR_ISU rounds the item amount (`TR_KR_ISU.cs:4015`) and the labour amount (`:4028`) with `Math.Round(x, 0)`, sums the bill to whole rupees (`:6522`) and rounds the total to whole rupees (`:6528`): 56,091 + 2,375 = 58,466, tax 1,753.98, total 60,220. TR_PURC rounds its line amounts the same way (`TR_PURC.cs:9946-9958`, `:9983-9987`); the Purchase Invoice module's lines happen to give whole rupees, so its cases do not show it. Same mechanism as G195 (sales) and G190 (sales return). | N188 |
+| G199 | Med | A purchase return cannot be saved without choosing an original purchase book | `unified/src/csharp/DataCareNext/TR_KR_ISU.cs` | `web/apps/web/app/(app)/txn/purchase-return/page.tsx`; `web/apps/web/components/BookSelect.tsx` | Found by `purchase-return.create.without-original`: Orig Purchase Book is a `BookSelect`, which is always `required` (`BookSelect.tsx:83`), and with two purchase books (PR and the TAG PURCHASE book) nothing is preselected, so the browser blocks Save ("Please select an item in the list") on a return that is not against a purchase. A saved free-standing return reopens with the field blank again, so every edit needs a book chosen first. The desktop save checks a party and a voucher number, not an original purchase (`TR_KR_ISU.cs:4986-4999`). | N189 |
+| G200 | Med | Alt+S does not save on the Purchase Return screen and 19 other voucher screens | `unified/src/csharp/DataCareNext/TR_KR_ISU.cs` | `web/apps/web/app/(app)/txn/purchase-return/page.tsx`; `web/apps/web/lib/saveMnemonic.ts` | Found by `purchase-return.keyboard.alt-s-saves`: N163 (G171) made Alt+S press the button marked `data-save-mnemonic`, and the Purchase Return save button is not marked, so the key does nothing. The desktop button is `&Save` (`TR_KR_ISU.cs:2330`). A scan of `web/apps/web/app/(app)/txn/*/page.tsx` finds 20 screens whose primary Save button is unmarked: batch-receipt, card-receipt, customer-entry, dhrn-interest, dhrn-issue, dhrn-receipt, employee-jv, fine-inout, fine-sale, ledger-adjust, loan-issue, loan-received, melting, mfg-issue, mfg-receive, purchase-hm, purchase-return, scheme-gold-adjust, tag-adjust and tour-order. | N190 |
+| G201 | Med | The Purchase Return Register lists no return on a web-provisioned company | `unified/src/csharp/DataCareNext/MS_UPDATE.cs` | `web/apps/api/src/modules/reports/reports6.ts`; `web/apps/api/src/modules/ops/seedCompany.ts` | Found by `purchase-return.report.register-lists-return`: after saving PRT returns the register shows "No rows". The register keeps books with `BOOK_TBL_NAME = 'PR_DATA'` and a name containing "return" (`reports6.ts:50-55`), and `seedCompany` provisions PRT (and PR, SL, SRT) with `BOOK_TBL_NAME` NULL (`seedCompany.ts:174`, no `table`). The desktop sets `BOOK_TBL_NAME = 'PR_DATA'`, `BOOK_TBL_DETL = 'PR_DETL'` for every PURCHASE, PURC RETURN, CON PUR, TAG PURCHASE and PR QUOT book (`MS_UPDATE.cs:7849`, `:16402`). | N191 |
 
 ## 4. Decisions D23–D28
 
@@ -2032,6 +2036,35 @@ click filled `E2ELOC` and a `GLD22` line with tag `N`, Save answered 201, and th
 `N` with `VCH_SRNO` 0 and a `MAIN_STOCK` + 10 g row with tag `N`. The same screen still prices the line on fine weight
 (58,465.80), which is G190 (N181).
 
+### N187 — Purchase Return feature module on real data (G198–G201)
+
+**Purchase Return (TR_KR_ISU in PURC RETURN mode), 22 cases**, run through the real screen on the shared company.
+Expectations come from the desktop form: metal = fine × rate and per-gram labour = (net + ghat) × rate, each
+rounded to whole rupees (`TR_KR_ISU.cs:4015`, `:4028`); the bill summed and its total rounded to whole rupees
+(`:6522`, `:6528`), tax with `TAX_ROF` (`:6527`); metal goes out of stock and the supplier is debited; the tender
+has no UPI (`:5066-5072`). Lifecycle cases use a line whose amounts are whole rupees (5 g at 1,500, 40/g), so only
+the rounding cases depend on rounding. Result: 15 passed, 5 failed (baselined), 2 blocked.
+
+Passed: book and defaults; create effects (stock −5, supplier debited with the total, balanced ledger, creator
+recorded); a return against a purchase imported from the Purchase screen; gold and silver lines on one return;
+an inter-state supplier on IGST; the no-lines and UPI refusals write nothing; reopen by voucher number; an
+unchanged save changes nothing and a new weight re-derives the line keeping number, hidden number and creator;
+delete reverses everything and writes DELETE_DATA with the user; the debit-note print; a clerk without the right
+writes nothing; two operators deleting the same return (the second answers 400 and stock is restored once); a
+double-click makes one return; and the J07-style journey (a purchase and its full return put the stock back and
+move the supplier by the return total less the purchase total).
+
+Failed: G198 twice (amounts keep paise: 58,465.80 where the desktop has 58,466), G199 (a free-standing return
+cannot be saved until an original purchase book is chosen), G200 (Alt+S does nothing on this screen) and G201
+(the Purchase Return Register lists nothing). Blocked: T14 rollback (G173) and T15 settings variant (G174).
+
+**Scope note for G193.** The purchase-return delete answers 400 for a voucher that is already gone, so G193 is
+narrower than recorded: it is the sale-return delete (and any writer whose route does not map
+`PersistedVoucherNotFoundError`) that answers 500.
+
+Done when: every daily voucher screen has a module like this, run on shared real data, and each fixed defect
+leaves the baseline in the change that fixes it.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2142,6 +2175,11 @@ click filled `E2ELOC` and a `GLD22` line with tag `N`, Save answered 201, and th
 | N184 | — | planned (G195: sale line amounts round to whole rupees unless ALL_ROF_REMOVE = Y; merged feature expectations move to desktop values) |
 | N185 | — | planned (G196: decide under D05 and provision the desktop rounding defaults for new companies, or record the 2-decimal choice) |
 | N186 | — | implemented-unverified, evidence in this change (G197: the web build clears the route cache; unit 2, a real build removed 13 entries) |
+| N187 | — | implemented-unverified, evidence in this change (Purchase Return module 15/5/2 on shared real data; found G198–G201; narrows G193) |
+| N188 | — | planned (G198: purchase return and purchase line amounts and bill total in whole rupees, as TR_KR_ISU and TR_PURC) |
+| N189 | — | planned (G199: the original purchase book is optional on a purchase return and survives reopen) |
+| N190 | — | planned (G200: mark the save button on the 20 remaining voucher screens so Alt+S saves) |
+| N191 | — | planned (G201: provision BOOK_TBL_NAME for purchase-family books and backfill existing companies) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 
