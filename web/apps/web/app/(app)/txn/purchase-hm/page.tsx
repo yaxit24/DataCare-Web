@@ -14,6 +14,7 @@ import {
   ExtendedHeaderCells,
   GridModeToggle,
 } from '../../../../components/ExtendedGrid';
+import { openDocument } from '../../../../lib/openDocument';
 
 /** Hallmark Purchase (TR_PURC_HM) — buy items capturing HUID + a hallmarking charge & its input GST.
  *
@@ -479,9 +480,8 @@ export default function HallmarkPurchasePage() {
                   type="button"
                   className="ghost"
                   onClick={() =>
-                    window.open(
+                    openDocument(
                       `/api/purchases/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(loadedVchNo)}&format=html`,
-                      '_blank',
                     )
                   }
                 >

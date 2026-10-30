@@ -717,6 +717,52 @@ export const salesInvoice = {
     ),
 
     C(
+      'print.after-access-expiry',
+      'T16',
+      'output',
+      'G180: Print still opens the invoice after the 15-minute access cookie has expired (the session refreshes first)',
+      async (ctx) => {
+        // Its own login slot: the refresh rotates this slot's refresh token, which no other case may reuse.
+        const { page } = await ctx.session(as(USERS.admin.user, 'access-expiry-sales'));
+        const vchNo = await createOneLine(ctx, page);
+        await loadVoucher(page, vchNo);
+        // As if the access cookie had expired: the browser drops it and keeps the refresh cookie.
+        await page.context().clearCookies({ name: 'access' });
+        const refreshed = page.waitForRequest(
+          (r) => r.url().endsWith('/api/auth/refresh') && r.method() === 'POST',
+          { timeout: 15_000 },
+        );
+        const [popup] = await Promise.all([
+          page.waitForEvent('popup'),
+          page.getByRole('button', { name: 'Print', exact: true }).click(),
+        ]);
+        await refreshed;
+        const document = await popup.waitForResponse(
+          (r) => /\/api\/sales\/invoice\?/.test(r.url()),
+          {
+            timeout: 15_000,
+          },
+        );
+        const html = await document.text();
+        await popup.close();
+        assert.equal(document.status(), 200, html.slice(0, 200));
+        assert.ok(
+          !html.includes('unauthenticated'),
+          'the window shows the invoice, not unauthenticated',
+        );
+        assert.ok(
+          html.includes(String(Number(vchNo))) || html.includes(vchNo),
+          'the invoice of the voucher',
+        );
+        return {
+          observation: `after the access cookie was dropped, Print refreshed the session and the window got ${document.status()} (${html.length} bytes)`,
+          expected: 'the invoice opens (200), not {"error":"unauthenticated"}',
+          output: Buffer.from(html),
+        };
+      },
+    ),
+
+    C(
       'refusal.cheque-without-bank',
       'T06',
       'refusal',
@@ -963,6 +1009,37 @@ export const salesInvoice = {
         };
       },
     ),
+    C(
+      'entry.no-request-storm',
+      'T01',
+      'read-only',
+      'G182: opening the screen draws no route prefetches, and typing a party code asks for its balance once',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const seen = [];
+        page.on('request', (r) => seen.push(r.url()));
+        await openSales(page);
+        await page.waitForTimeout(1500);
+        const prefetches = seen.filter((u) => u.includes('_rsc=')).length;
+        const party = page.getByPlaceholder('search accounts… (F1)').first();
+        await party.fill('');
+        await page.waitForTimeout(500);
+        const typingFrom = seen.length;
+        await party.pressSequentially(PARTIES.local.code, { delay: 60 });
+        await page.waitForTimeout(1200);
+        const balances = seen
+          .slice(typingFrom)
+          .filter((u) => /\/api\/party\/[^/]*\/balance/.test(u));
+        assert.ok(prefetches <= 2, `${prefetches} route prefetches on opening the screen`);
+        assert.equal(balances.length, 1, `balance requests while typing: ${balances.join(', ')}`);
+        assert.ok(balances[0].includes(`/party/${PARTIES.local.code}/balance`), balances[0]);
+        return {
+          observation: `${prefetches} route prefetches on opening; ${balances.length} balance request while typing ${PARTIES.local.code}`,
+          expected: 'at most 2 prefetches; 1 balance request, for the typed code',
+        };
+      },
+    ),
+
     C(
       'keyboard.alt-s-saves',
       'T17',

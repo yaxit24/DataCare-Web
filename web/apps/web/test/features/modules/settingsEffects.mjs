@@ -423,6 +423,45 @@ export const settingsEffects = {
     ),
 
     C(
+      'field.grid-row-height-whole-number',
+      'T02',
+      'mutation',
+      'UT_SETTING_MAIN.cs:9148 saves GRID_ROW_HIGHT as Val(cboGridRowHeight.Text) into an integer column: any whole number may be typed, a fraction is refused',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await page.goto('/settings');
+        await page.getByRole('heading', { name: 'Company Settings', exact: true }).waitFor();
+        const id = 'CO_SET_NEW.GRID_ROW_HIGHT';
+        const control = page.locator(`[id="${id}"]`);
+        const tabs = page.getByRole('tab');
+        for (let i = 0; i < (await tabs.count()) && !(await control.count()); i++)
+          await tabs.nth(i).click();
+        assert.equal(
+          await control.evaluate((el) => el.tagName),
+          'INPUT',
+          'an editable box with presets',
+        );
+        const presets = await page.locator(`datalist[id="${id}-presets"] option`).count();
+        const before = await stored(ctx, 'CO_SET_NEW', 'GRID_ROW_HIGHT');
+        await mustSet(page, id, '31');
+        const typed = await stored(ctx, 'CO_SET_NEW', 'GRID_ROW_HIGHT');
+        assert.equal(Number(typed), 31);
+        const refused = await setSetting(page, id, '22.5');
+        assert.equal(refused.status(), 400, await refused.text());
+        await page.getByText('must be a whole number', { exact: false }).first().waitFor();
+        const afterFraction = await stored(ctx, 'CO_SET_NEW', 'GRID_ROW_HIGHT');
+        assert.equal(Number(afterFraction), 31, 'the fraction is not stored');
+        await mustSet(page, id, before == null ? '' : String(before));
+        return {
+          observation: `${presets} presets; typed 31 stored ${typed}; 22.5 refused, stored ${afterFraction}`,
+          expected: { typed: 31, fraction: 'refused' },
+          database: { GRID_ROW_HIGHT: typed, afterFraction },
+          downstream: { stored: typed },
+        };
+      },
+    ),
+
+    C(
       'rights.clerk-cannot-change',
       'T11',
       'refusal',

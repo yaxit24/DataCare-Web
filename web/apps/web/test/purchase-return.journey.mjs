@@ -235,6 +235,8 @@ export async function exercisePurchaseReturn(page, { checkpoint, owner, tenantId
     page.waitForEvent('popup'),
     recent.getByRole('link', { name: 'Print', exact: true }).click(),
   ]);
+  // The window opens blank and loads the print once the session is fresh (openDocument, G180).
+  await printed.waitForURL(new RegExp(`coBook=${BOOK}`));
   await printed.waitForLoadState();
   assert.match(printed.url(), new RegExp(`coBook=${BOOK}`));
   const printedHtml = await printed.content();

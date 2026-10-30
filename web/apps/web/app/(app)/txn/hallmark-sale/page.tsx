@@ -26,6 +26,7 @@ import {
   ExtendedHeaderCells,
   GridModeToggle,
 } from '../../../../components/ExtendedGrid';
+import { openDocument } from '../../../../lib/openDocument';
 
 interface Totals {
   net: number;
@@ -590,9 +591,8 @@ export default function HallmarkSalePage() {
               type="button"
               className="ghost"
               onClick={() =>
-                window.open(
+                openDocument(
                   `/api/sales/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(String(result.vchNo))}`,
-                  '_blank',
                 )
               }
             >

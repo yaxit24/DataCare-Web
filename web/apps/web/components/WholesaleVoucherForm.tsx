@@ -33,6 +33,7 @@ import { useBusinessScope } from './BusinessScope';
 import { GridModeToggle } from './ExtendedGrid';
 import { useGridKeyboard } from './GridKeyboard';
 import { LookupPicker, type LookupRow } from './LookupPicker';
+import { openDocument } from '../lib/openDocument';
 
 /**
  * TR_WH_SALE on the web: one form for "Wh Sales" and "Rate Cut" (lib/wholesaleVoucher.ts explains the split).
@@ -1028,9 +1029,8 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
             type="button"
             className="ghost"
             onClick={() =>
-              window.open(
+              openDocument(
                 `/api/wholesale-quotations/${encodeURIComponent(loadedVoucherNo)}/print?coBook=${encodeURIComponent(coBook)}&format=html`,
-                '_blank',
               )
             }
             disabled={busy}

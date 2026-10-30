@@ -2,13 +2,7 @@
   "_comment": "Known feature-E2E failures. Each entry: { case, gap, reason }. Shrink-only: a new failure fails CI, and an entry whose case now passes must be removed in the same change.",
   "sales-invoice": [],
   "purchase-invoice": [],
-  "settings": [
-    {
-      "case": "settings.field.pan-limit-any-amount",
-      "gap": "G177",
-      "reason": "The web shows PAN_CARD_VAL as a fixed list (100000/200000); the desktop combo is editable (UT_SETTING.cs:4300-4301 presets, :5059 saves Val(Text)), so a shop's own limit such as 50000 cannot be entered. FONT_SIZE, GRID_ROW_HIGHT and VCH_DESC_HELP_LENT have the same shape."
-    }
-  ],
+  "settings": [],
   "sales-return": [
     {
       "case": "sales-return.formula.net-basis",
@@ -19,16 +13,6 @@
       "case": "sales-return.create.amount-net-basis",
       "gap": "G190",
       "reason": "Stored ITM_AMT/NET_AMT/TOT_AMT follow the fine basis with paise; the desktop stores 61,234 + 2,375 and a whole-rupee total of 65,517 (TR_SALE_RTN.cs:16405)."
-    },
-    {
-      "case": "sales-return.create.from-bill-import",
-      "gap": "G191",
-      "reason": "Import copies the sold loose line's TAG_NO 'N' and Save refuses it as a tag ('tag provenance is missing or ambiguous: N'); the desktop treats 'N' as no tag."
-    },
-    {
-      "case": "sales-return.ui.import-button-clickable",
-      "gap": "G192",
-      "reason": "The Tax % input covers the Import button at 1600 px, so the mouse cannot press Import."
     },
     {
       "case": "sales-return.concurrency.double-delete",

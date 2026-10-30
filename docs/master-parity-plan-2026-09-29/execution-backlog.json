@@ -5980,7 +5980,7 @@
     },
     {
       "id": "N165",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Open Company for the same user from two sessions at once: retry the serializable context selection once and, if it still conflicts, show a readable message instead of the raw code context-transaction-conflict.",
       "parentLabels": "P9; X05",
       "startAfter": [
@@ -5991,7 +5991,15 @@
       "entryDefinition": "02-execution-plan.md section 4",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/web/lib/contextSelection.ts",
+        "web/apps/web/test/contextSelectionRetry.test.ts",
+        "web/apps/web/app/select/page.tsx",
+        "web/apps/web/test/features/modules/companyOpen.mjs"
+      ],
+      "statusNote": "IMPLEMENTED. A selection that loses a serializable transaction conflict (409 context-transaction-conflict, rolled back) is sent again with the same request up to four times with a jittered backoff (150/400/900/1600 ms); the server replays a selection that already committed. If it still loses, the Open Company screen says another session was opening a company at the same moment instead of the raw code. Verified: contextSelectionRetry.test.ts 3 passed; new feature module company-open: entry.lists-choices and concurrency.sessions-open-at-once (four sessions of one user press Open together and all reach the dashboard) pass, the latter three runs in a row; against main's screen it fails twice out of two with the raw 'context-transaction-conflict'. 16 groups are recorded as not yet written (document 15 step E11)."
     },
     {
       "id": "N166",
@@ -6025,7 +6033,7 @@
     },
     {
       "id": "N168",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Settings controls match the desktop: editable amount settings (PAN_CARD_VAL, FONT_SIZE, GRID_ROW_HIGHT, VCH_DESC_HELP_LENT) offer the presets but accept any valid amount, validated server-side; TAX_ROF is labelled as the number of tax decimals and offers 0-5; remove settings.field.pan-limit-any-amount from features/baseline.json.",
       "parentLabels": "P9; J21",
       "startAfter": [
@@ -6036,7 +6044,16 @@
       "gapIds": "G177, G187",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/api/src/modules/settings/settingsCatalog.ts",
+        "web/apps/api/src/modules/settings/settings.ts",
+        "web/apps/api/test/settingsEditable.test.ts",
+        "web/apps/web/app/(app)/settings/page.tsx",
+        "web/apps/web/test/features/modules/settingsEffects.mjs"
+      ],
+      "statusNote": "IMPLEMENTED. PAN_CARD_VAL, FONT_SIZE, GRID_ROW_HIGHT and VCH_DESC_HELP_LENT are editable combos with presets, as on the desktop (no setting form sets a DropDownStyle; the four save Val(Text) at UT_SETTING.cs:5059 and UT_SETTING_MAIN.cs:9120, :9148, :9300). The catalog marks them editable ('number' or 'integer' for the Int columns); the API accepts any number (a whole number for the Int columns) and the screen shows a text box with the presets as a datalist. Verified: settingsEditable.test.ts 3 passed; settings.db.test.ts 14 passed; settings.field.pan-limit-any-amount now passes (baseline entry removed) and the new settings.field.grid-row-height-whole-number stores 31 and refuses 22.5; full Settings module 12 passed / 0 failed / 2 blocked."
     },
     {
       "id": "N169",
@@ -6147,7 +6164,7 @@
     },
     {
       "id": "N173",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Print and document windows keep working after the 15-minute access cookie expires: the window refreshes the session before it loads the document instead of showing {\"error\":\"unauthenticated\"}.",
       "parentLabels": "P9; J22",
       "startAfter": [
@@ -6158,7 +6175,15 @@
       "entryDefinition": "15-standard-edition-plan.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/web/lib/openDocument.ts",
+        "web/apps/web/test/openDocument.test.ts",
+        "web/apps/web/components/GlobalFormKeys.tsx",
+        "web/apps/web/test/features/modules/salesInvoice.mjs"
+      ],
+      "statusNote": "IMPLEMENTED. Every print, PDF and export window now opens through openDocument: the window opens inside the click (popup blockers allow it) and is pointed at the document only after GET /me, whose 401 path refreshes the access cookie (lib/api.ts). 31 window.open(url,'_blank') calls on 26 screens use it; a delegated click handler in GlobalFormKeys sends plain left clicks on new-tab /api links (recent-list Print, report CSV/print, order prints) the same way. The blob download in EBillEntry is unchanged. Verified: web unit openDocument.test.ts 5 passed; feature case sales-invoice.print.after-access-expiry drops the access cookie, presses Print and gets the invoice (200) after a POST /auth/refresh; it fails against main's screen (no refresh happens); print.pdf still passes."
     },
     {
       "id": "N174",
@@ -6184,7 +6209,7 @@
     },
     {
       "id": "N175",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Stop the request storms: navigation links do not prefetch every route on page load, and the party box fetches the balance once for the chosen party, not on every keystroke.",
       "parentLabels": "P9; X05",
       "startAfter": [
@@ -6195,7 +6220,14 @@
       "entryDefinition": "15-standard-edition-plan.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/web/components/Shell.tsx",
+        "web/apps/web/components/PartyBalance.tsx",
+        "web/apps/web/test/features/modules/salesInvoice.mjs"
+      ],
+      "statusNote": "IMPLEMENTED. The Shell navigation links (and the Beta links) no longer prefetch: each page drew one route prefetch per navigation link (about 240 in a tall window, 30 in the headless test viewport). PartyBalance waits 300 ms after the party code stops changing before it asks for the balance, so typing a code asks once (it is on 8 screens). Verified: feature case sales-invoice.entry.no-request-storm sees 0 prefetches on opening Sales Invoice and 1 balance request (for E2ELOC) while typing it; against main's Shell and PartyBalance it fails with 30 prefetches."
     },
     {
       "id": "N176",
@@ -6306,7 +6338,7 @@
     },
     {
       "id": "N182",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Sales Return import and layout: a loose sale line imported with TAG_NO 'N' saves as an untagged return line (the writer treats 'N' as no tag, as TR_SALE_RTN does), and the Import button is not covered by the Tax % box at desktop widths; remove sales-return.create.from-bill-import and sales-return.ui.import-button-clickable from features/baseline.json.",
       "parentLabels": "P05-03, X13; J07",
       "startAfter": [
@@ -6317,7 +6349,16 @@
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
       "requiredProof": "both cases pass; a tagged line still needs its provenance; the baseline entries are removed.",
-      "gapIds": "G191, G192"
+      "gapIds": "G191, G192",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/api/src/modules/sales/salesReturn.ts",
+        "web/apps/web/app/(app)/txn/sale-return/page.tsx",
+        "web/apps/api/test/salesFamilyLifecycle.db.test.ts",
+        "web/apps/web/test/features/modules/salesReturn.mjs",
+        "web/apps/web/test/features/baseline.json"
+      ],
+      "statusNote": "IMPLEMENTED. Tag N is treated as no tag on a return line; the Import button stays clickable. sales-return.create.from-bill-import and sales-return.ui.import-button-clickable pass and left the baseline; a DB test proves N saves as loose and an unknown tag is still refused."
     },
     {
       "id": "N183",

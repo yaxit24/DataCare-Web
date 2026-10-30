@@ -10,6 +10,7 @@ import { PartyBalance } from './PartyBalance';
 import { RateTicker } from './RateTicker';
 import { useGridKeyboard } from './GridKeyboard';
 import { todayLocal } from '../lib/localDate';
+import { openDocument } from '../lib/openDocument';
 
 interface MLine {
   partyAc: string;
@@ -482,9 +483,8 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
               type="button"
               className="ghost"
               onClick={() =>
-                window.open(
+                openDocument(
                   `/api/finance/${kind}-voucher?coBook=${encodeURIComponent(res.coBook)}&vchNo=${encodeURIComponent(String(res.vchNo))}&format=html`,
-                  '_blank',
                 )
               }
             >

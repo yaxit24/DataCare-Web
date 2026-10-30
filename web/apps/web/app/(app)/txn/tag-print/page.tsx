@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { get, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { openDocument } from '../../../../lib/openDocument';
 
 /** Tag Print — list in-stock tags (BAR_DETL) and open a print-ready label sheet for the selected tags. */
 interface Tag {
@@ -49,7 +50,7 @@ export default function TagPrintPage() {
     const q = qs();
     if (selected.length && selected.length !== tags.length) q.set('tags', selected.join(','));
     if (Number(labelSkip) > 0) q.set('labelSkip', String(Number(labelSkip)));
-    window.open(`/api/stock/tag-print/label?${q.toString()}`, '_blank');
+    openDocument(`/api/stock/tag-print/label?${q.toString()}`);
   }
 
   return (
