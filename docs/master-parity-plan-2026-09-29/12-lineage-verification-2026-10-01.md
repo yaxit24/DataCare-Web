@@ -207,6 +207,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G194 | Med | Sales Return does not record who created or deleted it | `unified/src/csharp/DataCareNext/TR_SALE_RTN.cs` | `web/apps/api/src/routes/txn.ts` | Found by `sales-return.create.records-user` and `sales-return.delete.audit-user`. A return saved by `e2eadmin` stores `SL_DATA.MAIN_USER` blank, because `POST /sales-returns` (`txn.ts:1804-1833`) does not pass the user; the desktop stores `DC_Main.MCo_User` (`TR_SALE_RTN.cs:9966`, `:12908`). Its delete writes `DELETE_DATA.DELETE_USER` = `feature-e2e`, the tenant id, because the route passes `sess(req).tenantId` (`txn.ts:1856`); the desktop writes `MCo_User` (`:15076`). Six more deletes pass the tenant id: labour invoice (`txn.ts:2083`), multi receipt (`:2907`), multi payment (`:2946`), MFG order issue (`:3810`), MFG (`:3823`) and fine sale (`:8360`). | N183 |
 | G195 | High | Sale line amounts are rounded by TOT_AMT_ROF instead of to whole rupees | `unified/src/csharp/DataCareNext/TR_SALE.cs` | `web/apps/api/src/modules/sales/sales.ts`; `web/packages/core/src/calc.ts` | Found while checking the return's rounding. The desktop's `CommPassTotal` starts with `digits = 0` and uses 2 only when `CO_SET.ALL_ROF_REMOVE = 'Y'` (`TR_SALE.cs:10343-10362`), then rounds the item amount (`:10905`) and the labour amount (`:11100-11108`) with it; `TOT_AMT_ROF` rounds only the bill total (`:19192`, `:19274`). The web rounds each line component with `TOT_AMT_ROF` (`sales.ts:337-349`), a rule taken from a customer database where `TOT_AMT_ROF` is 0, so the two agree only at 0. With `TOT_AMT_ROF` 2, or blank (read as 2), a 10 g line at 6,123.45 is 61,234.50 on the web and 61,234 on the desktop. The web's E-Bill calculation already follows the desktop rule (`web/packages/core/src/eBillCalc.ts:30`). The merged cases of `sales-invoice` (EXPECT_A 61,234.50) and `settings.effect.sale-amount-fine` (56,090.80) assert the web value; the desktop values are 61,234 and 56,091. | N184 |
 | G196 | Med | A new web company leaves the rounding settings blank, and the web reads blank as 2 decimals | `unified/src/csharp/DataCareNext/Ac_Image.cs` | `web/packages/core/src/roundingPolicy.ts` | The desktop schema makes the rounding settings NOT NULL with defaults: `LBR_ROF` 0 and `ITM_RATE_ROF` 0 (`Ac_Image.cs:6320`, `:6358`), `PR_RATE_ROF` 2 (`:7010`), `TOT_AMT_ROF` 0 (`:7357`) and `ALL_ROF_REMOVE` `N` (`:7565`). A new desktop company copies them from an existing one (`MS_YEAR.cs:1529-1531`), and a blank `TAX_ROF` reads as 0 decimals (`MS_OPNCOMP.cs:668-671`, `DC_Main.cs:2088-2101`). On the live demo company `TAX_ROF` and `ALL_ROF_REMOVE` are NULL and there is no `CO_SET_NEW` row, and `resolveRoundingPolicy` reads blank as 2 decimals on purpose (`roundingPolicy.ts:103`). So a new web company keeps paise on the bill total, tax, labour rate and item rate where a new desktop company rounds to whole rupees. To decide under D05: provision the desktop defaults, or keep 2 decimals for web-created companies and record why. | N185 |
+| G197 | Med | A rebuilt checkout served the previous build's pages to the browser tests | `docs/master-parity-plan-2026-09-29/04-verification-playbook.md` | `web/apps/web/package.json` | Found while checking N172 in Chrome: after `pnpm build`, `next start` (Next.js 15.5.28) answered `/txn/sales` with `x-nextjs-cache: HIT` and the previous build's page chunk, because pages served by the previous server stay in `apps/web/.next/server/route-cache` and the build does not remove that directory. Deleting it made the same server serve the new chunk. A local feature or real-stack run after a rebuild could therefore pass or fail on old code; CI builds from a clean checkout and was not affected. | N186 |
 
 ## 4. Decisions D23–D28
 
@@ -1870,6 +1871,14 @@ the `print.hsn-agrees-with-summary` case of `web/apps/web/test/features/modules/
 Done when: on every printed GST bill the HSN columns add up to the printed heads and the Tax column to the bill tax.
 
 
+### N186 — Every server started after a build serves that build (G197)
+
+`web/apps/web/package.json` runs `web/apps/web/scripts/clearRouteCache.mjs` after `next build`, which removes the route
+cache a previous server wrote. Proven by `web/apps/web/test/clearRouteCache.test.ts` and a real build.
+
+Done when: no local browser run can be answered with a previous build's page.
+
+
 ### N164 — UI surface map: every page and every button, plus a browser test with every behaviour change (G172)
 
 `web/apps/web/test/features/run-surface.mjs` crawls every route an operator can reach — the 235 sidebar links
@@ -2093,6 +2102,7 @@ leaves the baseline in the change that fixes it.
 | N183 | — | planned (G193, G194: a missing voucher answers a stable 4xx; returns and seven deletes record the logged-in user) |
 | N184 | — | planned (G195: sale line amounts round to whole rupees unless ALL_ROF_REMOVE = Y; merged feature expectations move to desktop values) |
 | N185 | — | planned (G196: decide under D05 and provision the desktop rounding defaults for new companies, or record the 2-decimal choice) |
+| N186 | — | implemented-unverified, evidence in this change (G197: the web build clears the route cache; unit 2, a real build removed 13 entries) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 
