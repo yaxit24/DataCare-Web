@@ -6358,6 +6358,28 @@
       "verification": "04-verification-playbook.md",
       "requiredProof": "the decision is recorded with its source; a newly provisioned company shows the chosen settings on the Settings screen and a sale rounds accordingly in the browser.",
       "gapIds": "G196"
+    },
+    {
+      "id": "N186",
+      "status": "implemented-unverified",
+      "statusAsOf": "2026-10-30",
+      "action": "The web build clears Next.js's runtime route cache (apps/web/.next/server/route-cache), so every server started after a build serves that build's pages.",
+      "parentLabels": "P9; X10",
+      "startAfter": [
+        "N164"
+      ],
+      "requiredProof": "after a build the route cache is gone (unit test of the cleanup and a real build); a server started after the build serves the new page chunk.",
+      "gapIds": "G197",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "evidence": [
+        "web/apps/web/scripts/clearRouteCache.mjs",
+        "web/apps/web/test/clearRouteCache.test.ts",
+        "web/apps/web/package.json"
+      ],
+      "statusNote": "IMPLEMENTED. `pnpm build` in apps/web now runs `next build && node scripts/clearRouteCache.mjs`. Found while checking N172 in Chrome: after a rebuild, next start answered /txn/sales with x-nextjs-cache: HIT and the previous build's page chunk (page-257b5… instead of page-7a879…) because the previous server's pages stayed in .next/server/route-cache; deleting it made the same server serve the new chunk. Verified: clearRouteCache.test.ts 2 passed; a real `pnpm --filter @datacare/web build` removed 13 cached route entries. CI builds from a clean checkout and was not affected; local feature and real-stack runs were."
     }
   ],
   "amendments": [
