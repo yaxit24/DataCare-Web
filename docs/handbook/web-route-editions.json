@@ -1,0 +1,483 @@
+{
+ "kind": "datacare.web-route-editions/1.0",
+ "_comment": "Edition of each web navigation route, and each API rights form without a navigation item, that matches no desktop MENU_DATA row through the menu catalog. edition: L/B/S/U/P/A/E or platform (always available). Consumed by web/scripts/generate-edition-table.mjs (slice N171).",
+ "routes": {
+  "/audit": {
+   "edition": "platform",
+   "menu": "—",
+   "reason": "Web audit log for administrators."
+  },
+  "/dashboard": {
+   "edition": "platform",
+   "menu": "—",
+   "reason": "Home page after Open Company (the desktop MDI start screen)."
+  },
+  "/forms/form-layouts": {
+   "edition": "platform",
+   "menu": "—",
+   "reason": "Web catalogue of the desktop form layouts, not a desktop menu."
+  },
+  "/masters/conversions": {
+   "edition": "E",
+   "menu": "—",
+   "reason": "CONV_MAST has no desktop maintenance screen; only company create and refresh copy it (MS_COMPANY, MS_YEAR, MS_UPDATE)."
+  },
+  "/masters/customers": {
+   "edition": "L",
+   "menu": "Master/Party",
+   "reason": "Customer view of AC_MAST, the Party master (MS_ACCT modes)."
+  },
+  "/masters/designs": {
+   "edition": "A",
+   "menu": "Master/Style",
+   "reason": "DESIGN_MAST is maintained by MS_STYLE, the Style menu (Advance); formCatalog notes the shared Designs rights row."
+  },
+  "/masters/diamond-sizes": {
+   "edition": "E",
+   "menu": "Master/Dm Size",
+   "reason": "MS_STK_LIMIT Dm Size mode; the Dm Size menu is hidden (SM_VIEW N) and ItStk Limit is Enterprise."
+  },
+  "/masters/einvoice-gsp": {
+   "edition": "B",
+   "menu": "Transaction/E Invoice",
+   "reason": "GSP credentials used by the E Invoice menu."
+  },
+  "/masters/franchise-accounts": {
+   "edition": "E",
+   "menu": "—",
+   "reason": "FAN_AC_MAST has no desktop maintenance screen; only company create and refresh copy it."
+  },
+  "/masters/gold-rate": {
+   "edition": "L",
+   "menu": "Other/Daily Rate",
+   "reason": "Live rate source configuration feeding the daily rate."
+  },
+  "/masters/item-weights": {
+   "edition": "E",
+   "menu": "More/ItStk Level",
+   "reason": "ITM_WT_MAST is maintained by MS_STK_LIMIT (ItStk Limit, Enterprise)."
+  },
+  "/masters/messages": {
+   "edition": "B",
+   "menu": "Other/Whatsapp",
+   "reason": "Message templates of the WhatsApp and SMS menus (Basic and Standard)."
+  },
+  "/masters/opening-balance": {
+   "edition": "L",
+   "menu": "Master/Party Opening",
+   "reason": "Party opening balances (TR_AC_OPBL data)."
+  },
+  "/masters/print-formats": {
+   "edition": "B",
+   "menu": "Company/Setting",
+   "reason": "Print format settings of the Setting menu."
+  },
+  "/masters/rates": {
+   "edition": "L",
+   "menu": "Other/Daily Rate",
+   "reason": "RATE master behind the Daily Rate menu (MS_RATE)."
+  },
+  "/masters/states": {
+   "edition": "L",
+   "menu": "Master/Party",
+   "reason": "State list used by the Party master for GST state codes."
+  },
+  "/masters/styles": {
+   "edition": "S",
+   "menu": "Company/Setting Main",
+   "reason": "COL_MAST column captions and visibility, part of the Setting screens."
+  },
+  "/masters/years": {
+   "edition": "L",
+   "menu": "Company/Year Create",
+   "reason": "Financial years list behind Year Create and Year Select."
+  },
+  "/reports/account-balances": {
+   "edition": "L",
+   "menu": "Report/Ledger Report",
+   "reason": "A mode of the Ledger Report report menu."
+  },
+  "/reports/area-outstanding": {
+   "edition": "B",
+   "menu": "Report/Party Os",
+   "reason": "A mode of the Party Os report menu."
+  },
+  "/reports/area-wise-sales": {
+   "edition": "L",
+   "menu": "Report/Sales Report",
+   "reason": "A mode of the Sales Report report menu."
+  },
+  "/reports/bill-aging": {
+   "edition": "A",
+   "menu": "Analysis/Bill Os Day",
+   "reason": "Outstanding by days, the Bill Os Day menu (Advance); formCatalog lists Bill Os Day as an alias of Outstanding."
+  },
+  "/reports/bill-outstanding": {
+   "edition": "B",
+   "menu": "Report/Party Os",
+   "reason": "A mode of the Party Os report menu."
+  },
+  "/reports/cash-day-summary": {
+   "edition": "L",
+   "menu": "Report/Cash Bank",
+   "reason": "A mode of the Cash Bank report menu."
+  },
+  "/reports/contra-register": {
+   "edition": "L",
+   "menu": "Report/Cash Bank",
+   "reason": "A mode of the Cash Bank report menu."
+  },
+  "/reports/day-book": {
+   "edition": "B",
+   "menu": "Report/Rojmel",
+   "reason": "A mode of the Rojmel report menu."
+  },
+  "/reports/group-summary": {
+   "edition": "S",
+   "menu": "Report/Final Reports",
+   "reason": "A mode of the Final Reports report menu."
+  },
+  "/reports/gst-input-register": {
+   "edition": "L",
+   "menu": "Report/Gst Report",
+   "reason": "A mode of the Gst Report report menu."
+  },
+  "/reports/gstr1": {
+   "edition": "L",
+   "menu": "Report/Gst Report",
+   "reason": "A mode of the Gst Report report menu."
+  },
+  "/reports/gstr2": {
+   "edition": "L",
+   "menu": "Report/Gst Report",
+   "reason": "A mode of the Gst Report report menu."
+  },
+  "/reports/gstr3b": {
+   "edition": "L",
+   "menu": "Report/Gst Report",
+   "reason": "A mode of the Gst Report report menu."
+  },
+  "/reports/hsn-summary": {
+   "edition": "L",
+   "menu": "Report/Gst Report",
+   "reason": "A mode of the Gst Report report menu."
+  },
+  "/reports/item-group-stock": {
+   "edition": "L",
+   "menu": "Report/Stock Report",
+   "reason": "A mode of the Stock Report report menu."
+  },
+  "/reports/karigar-balances": {
+   "edition": "B",
+   "menu": "Karigar/Kr Report",
+   "reason": "A mode of the Kr Report report menu."
+  },
+  "/reports/karigar-ledger": {
+   "edition": "B",
+   "menu": "Karigar/Kr Report",
+   "reason": "A mode of the Kr Report report menu."
+  },
+  "/reports/karigar-statement": {
+   "edition": "B",
+   "menu": "Karigar/Kr Report",
+   "reason": "A mode of the Kr Report report menu."
+  },
+  "/reports/location-wise-sales": {
+   "edition": "E",
+   "menu": "Company/Location",
+   "reason": "Per-location sales need several locations; the Location master is Enterprise."
+  },
+  "/reports/monthly-purchase": {
+   "edition": "L",
+   "menu": "Report/Purchase Rpt",
+   "reason": "A mode of the Purchase Rpt report menu."
+  },
+  "/reports/monthly-sales": {
+   "edition": "L",
+   "menu": "Report/Sales Report",
+   "reason": "A mode of the Sales Report report menu."
+  },
+  "/reports/old-gold-register": {
+   "edition": "S",
+   "menu": "Report/Old Stock",
+   "reason": "A mode of the Old Stock report menu."
+  },
+  "/reports/physical-stock-verify": {
+   "edition": "B",
+   "menu": "Other/Physical Stock",
+   "reason": "A mode of the Physical Stock report menu."
+  },
+  "/reports/purchase-by-item": {
+   "edition": "L",
+   "menu": "Report/Purchase Rpt",
+   "reason": "A mode of the Purchase Rpt report menu."
+  },
+  "/reports/purchase-by-party": {
+   "edition": "L",
+   "menu": "Report/Purchase Rpt",
+   "reason": "A mode of the Purchase Rpt report menu."
+  },
+  "/reports/purchase-return-register": {
+   "edition": "L",
+   "menu": "Report/Purchase Rpt",
+   "reason": "A mode of the Purchase Rpt report menu."
+  },
+  "/reports/rate-list": {
+   "edition": "L",
+   "menu": "Other/Daily Rate",
+   "reason": "A mode of the Daily Rate report menu."
+  },
+  "/reports/report-layouts": {
+   "edition": "platform",
+   "menu": "—",
+   "reason": "Web catalogue of the bound Crystal layouts, not a desktop menu."
+  },
+  "/reports/sales-by-group": {
+   "edition": "L",
+   "menu": "Report/Sales Report",
+   "reason": "A mode of the Sales Report report menu."
+  },
+  "/reports/sales-by-item": {
+   "edition": "L",
+   "menu": "Report/Sales Report",
+   "reason": "A mode of the Sales Report report menu."
+  },
+  "/reports/sales-by-party": {
+   "edition": "L",
+   "menu": "Report/Sales Report",
+   "reason": "A mode of the Sales Report report menu."
+  },
+  "/reports/sales-gst-monthly": {
+   "edition": "L",
+   "menu": "Report/Gst Report",
+   "reason": "A mode of the Gst Report report menu."
+  },
+  "/reports/sales-return-register": {
+   "edition": "L",
+   "menu": "Report/Sales Report",
+   "reason": "A mode of the Sales Report report menu."
+  },
+  "/reports/stock-by-location": {
+   "edition": "E",
+   "menu": "Company/Location",
+   "reason": "Per-location stock needs several locations; the Location master is Enterprise."
+  },
+  "/reports/top-items": {
+   "edition": "L",
+   "menu": "Report/Sales Report",
+   "reason": "A mode of the Sales Report report menu."
+  },
+  "/reports/trial-balance-full": {
+   "edition": "S",
+   "menu": "Report/Final Reports",
+   "reason": "A mode of the Final Reports report menu."
+  },
+  "/reports/voucher-register": {
+   "edition": "L",
+   "menu": "Report/Sales Report",
+   "reason": "A mode of the Sales Report report menu."
+  },
+  "/soon": {
+   "edition": "platform",
+   "menu": "—",
+   "reason": "Placeholder page for navigation items not yet built."
+  },
+  "/txn/batch-receipt": {
+   "edition": "L",
+   "menu": "Transaction/Cash Received",
+   "reason": "Multi-party receipt mode of TR_CASH (Cash and Bank Received)."
+  },
+  "/txn/card-receipt": {
+   "edition": "P",
+   "menu": "ExtraTran/Card Rec",
+   "reason": "TR_CARD_REC, the Card Rec menu (Pro)."
+  },
+  "/txn/cheque-print": {
+   "edition": "L",
+   "menu": "Transaction/Bank Payment",
+   "reason": "Cheque printing (MS_PRINT) for bank payments."
+  },
+  "/txn/customer-entry": {
+   "edition": "A",
+   "menu": "Crm/Cust Entry",
+   "reason": "UT_CUST_ENTRY, the Cust Entry menu (Advance)."
+  },
+  "/txn/dhrn-os-letter": {
+   "edition": "P",
+   "menu": "Dhiran/Dhrn Os Letter",
+   "reason": "RP_DHRN_OS, a Dhiran menu (Pro)."
+  },
+  "/txn/estimate": {
+   "edition": "L",
+   "menu": "Transaction/Sales",
+   "reason": "Estimate mode of TR_SALE (the page cites TR_SALE)."
+  },
+  "/txn/fine-inout": {
+   "edition": "E",
+   "menu": "ExtraTran/Amt In",
+   "reason": "TR_FN_INOUT (FINE INOUT book); the metal and amount in/out menus are Enterprise."
+  },
+  "/txn/gold-book": {
+   "edition": "E",
+   "menu": "—",
+   "reason": "TR_GOLD_BOOK (digital gold) is opened from no MENU_DATA row (MDI_FORM.cs:9486); not in any edition menu."
+  },
+  "/txn/item-lot": {
+   "edition": "A",
+   "menu": "Master/Lot Opening",
+   "reason": "TR_ITM_LOT is dispatched from Lot Opening (MDI_FORM.cs:7700-7715), an Advance menu hidden in MENU_DATA."
+  },
+  "/txn/jobwork-issue": {
+   "edition": "S",
+   "menu": "Mfg/Mfg Mast",
+   "reason": "Job-work (Jadtar) issue, TR_JDT_REC; MDI_FORM.cs:11230-11237 ties MsMfgType J/M to the Standard Mfg button."
+  },
+  "/txn/jobwork-receive": {
+   "edition": "S",
+   "menu": "Mfg/Mfg Mast",
+   "reason": "Job-work (Jadtar) receipt; see Job-work Issue."
+  },
+  "/txn/journal": {
+   "edition": "L",
+   "menu": "Transaction/Contra Entry",
+   "reason": "Journal mode of TR_CONTRA, the form behind Contra Entry and Fine Jv Entry."
+  },
+  "/txn/melting": {
+   "edition": "S",
+   "menu": "Mfg/Mfg Mast",
+   "reason": "Melting voucher of the manufacturing family."
+  },
+  "/txn/membership": {
+   "edition": "E",
+   "menu": "Master/Point Mast",
+   "reason": "Loyalty points (POINT data); Point Mast and Point Report are Enterprise."
+  },
+  "/txn/mfg-issue": {
+   "edition": "S",
+   "menu": "Mfg/Mfg Mast",
+   "reason": "TR_MFG_ISU_REC issue; the Standard Mfg tab reports on these vouchers (Mfg InOut, Mfg Ledger)."
+  },
+  "/txn/mfg-lot-issue": {
+   "edition": "S",
+   "menu": "Mfg/Lot IsuRec",
+   "reason": "Setting issue (MFG STNG ISU); reported by Lot IsuRec (Standard)."
+  },
+  "/txn/mfg-lot-receive": {
+   "edition": "S",
+   "menu": "Mfg/Lot IsuRec",
+   "reason": "Setting receipt (MFG STNG REC); reported by Lot IsuRec (Standard)."
+  },
+  "/txn/mfg-receive": {
+   "edition": "S",
+   "menu": "Mfg/Mfg Mast",
+   "reason": "TR_MFG_ORD_REC receipt; reported by the Standard Mfg InOut and Mfg Ledger."
+  },
+  "/txn/reminders": {
+   "edition": "B",
+   "menu": "Other/Reminder Entry",
+   "reason": "Reminder list of UT_REMINDER (Reminder Entry, Basic)."
+  },
+  "/txn/stock": {
+   "edition": "L",
+   "menu": "Report/Tag Stock",
+   "reason": "Stock and tag browser over the Tag Stock report data."
+  },
+  "/txn/tour-sales": {
+   "edition": "E",
+   "menu": "Karigar/Tour Sales",
+   "reason": "TR_TOUR_SALE, the Tour Sales menu (Enterprise)."
+  },
+  "/utilities": {
+   "edition": "platform",
+   "menu": "—",
+   "reason": "Utilities hub page linking the utility screens."
+  },
+  "/utilities/e-invoice": {
+   "edition": "B",
+   "menu": "Transaction/E Invoice",
+   "reason": "IRN generation and cancellation for the E Invoice menu."
+  },
+  "/utilities/hdd-registry": {
+   "edition": "platform",
+   "menu": "—",
+   "reason": "UT_HDD registration, opened by the desktop before the company when no registration exists (MS_OPNCOMP.cs:616-620)."
+  },
+  "/utilities/reminders": {
+   "edition": "B",
+   "menu": "Other/Reminder Entry",
+   "reason": "UT_REMINDER, the Reminder Entry menu (Basic)."
+  },
+  "/utilities/user-request": {
+   "edition": "E",
+   "menu": "—",
+   "reason": "UT_USER_REQUEST; MDI_FORM.cs:11249-11254 shows it only in Enterprise, for administrators."
+  },
+  "/utilities/year-end": {
+   "edition": "L",
+   "menu": "Company/Balance TrFr",
+   "reason": "Year-end close of Balance TrFr."
+  }
+ },
+ "forms": {
+  "Masters/Diamond Sizes": {
+   "edition": "E",
+   "menu": "Master/Dm Size",
+   "reason": "MS_STK_LIMIT Dm Size mode; hidden on the desktop, ItStk Limit is Enterprise."
+  },
+  "Masters/Item Cities": {
+   "edition": "A",
+   "menu": "Master/Style",
+   "reason": "MS_STYLE Item City mode of the Style menu (Advance)."
+  },
+  "Masters/Item Stock Limits": {
+   "edition": "E",
+   "menu": "Master/ItStk Limit",
+   "reason": "MS_STK_LIMIT, the ItStk Limit menu (Enterprise)."
+  },
+  "Purchase/Other Purchase": {
+   "edition": "B",
+   "menu": "ExtraTran/Other Expenses",
+   "reason": "Earlier name of the Other Expenses rights form (TR_OTH_PURC, Basic)."
+  },
+  "Reports/HuId Report": {
+   "edition": "L",
+   "menu": "Report/HuId Report",
+   "reason": "RP_HUID, the HuId Report menu (Lite)."
+  },
+  "Reports/ItStk Level": {
+   "edition": "E",
+   "menu": "More/ItStk Level",
+   "reason": "The ItStk Level menu (Enterprise)."
+  },
+  "Reports/Movement": {
+   "edition": "E",
+   "menu": "More/Movement",
+   "reason": "The Movement menu (Enterprise)."
+  },
+  "Reports/Order Zoom": {
+   "edition": "P",
+   "menu": "Analysis/Order Zoom",
+   "reason": "The Order Zoom menu (Pro)."
+  },
+  "Reports/Physical Stock": {
+   "edition": "B",
+   "menu": "Other/Physical Stock",
+   "reason": "Physical stock report of the Physical Stock menu (Basic)."
+  },
+  "Reports/Rojmel": {
+   "edition": "B",
+   "menu": "Report/Rojmel",
+   "reason": "RP_ROJMEL, the Rojmel menu (Basic)."
+  },
+  "Reports/Tag Estimate": {
+   "edition": "B",
+   "menu": "Report/Tag Estmate",
+   "reason": "The Tag Estmate menu (Basic)."
+  },
+  "Utilities/Customer Entry": {
+   "edition": "A",
+   "menu": "Crm/Cust Entry",
+   "reason": "UT_CUST_ENTRY, the Cust Entry menu (Advance)."
+  }
+ }
+}

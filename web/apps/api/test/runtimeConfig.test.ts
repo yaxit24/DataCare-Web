@@ -105,3 +105,23 @@ describe('runtime configuration', () => {
     ).toBe(true);
   });
 });
+
+describe('desktop edition (N171)', () => {
+  it('defaults to Standard with Beta off', () => {
+    expect(resolveRuntimeConfig({ NODE_ENV: 'development' }).edition).toEqual({
+      code: 'S',
+      beta: false,
+    });
+  });
+  it('reads APP_EDITION (any case) and APP_EDITION_BETA', () => {
+    expect(
+      resolveRuntimeConfig({ NODE_ENV: 'development', APP_EDITION: 'e', APP_EDITION_BETA: '1' })
+        .edition,
+    ).toEqual({ code: 'E', beta: true });
+  });
+  it('refuses an unknown edition', () => {
+    expect(() => resolveRuntimeConfig({ NODE_ENV: 'development', APP_EDITION: 'X' })).toThrow(
+      /APP_EDITION must be one of L, B, S, U, P, A, E/,
+    );
+  });
+});

@@ -1,3 +1,5 @@
+import { isEditionCode, type EditionPolicy } from '@datacare/core';
+
 export interface RuntimeConfig {
   isProduction: boolean;
   port: number;
@@ -9,6 +11,8 @@ export interface RuntimeConfig {
   seedDemo: boolean;
   secureCookies: boolean;
   logger: boolean;
+  /** The desktop edition this deployment runs (APP_EDITION, default Standard) and whether Beta is on (N171). */
+  edition: EditionPolicy;
 }
 
 const DEFAULT_DEV_SECRET = 'dev-secret-change-me';
@@ -53,6 +57,9 @@ export function resolveRuntimeConfig(env: NodeJS.ProcessEnv = process.env): Runt
   if (seedDemo && !demoPassword)
     problems.push('DEMO_PASSWORD is required when SEED_DEMO is enabled');
 
+  const editionCode = env.APP_EDITION?.trim().toUpperCase() || 'S';
+  if (!isEditionCode(editionCode)) problems.push('APP_EDITION must be one of L, B, S, U, P, A, E');
+
   if (isProduction) {
     if (!env.DATABASE_URL?.trim()) problems.push('DATABASE_URL is required');
     if (!suppliedSecret) problems.push('JWT_SECRET is required');
@@ -81,6 +88,10 @@ export function resolveRuntimeConfig(env: NodeJS.ProcessEnv = process.env): Runt
     seedDemo,
     secureCookies: isProduction,
     logger: isProduction,
+    edition: {
+      code: isEditionCode(editionCode) ? editionCode : 'S',
+      beta: isEnabled(env.APP_EDITION_BETA),
+    },
   };
 }
 

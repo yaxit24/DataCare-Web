@@ -3,9 +3,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { NAV } from '../lib/nav';
+import { editionNav, navItemForm } from '../lib/editionNav';
 import { get, post } from '../lib/api';
 import type { BrowserSessionContext } from '../lib/pageContext';
-import type { RoundingFlagValues } from '@datacare/core';
+import { routeAvailability, type EditionCode, type RoundingFlagValues } from '@datacare/core';
 import { useOperationLease } from './useOperationLease';
 import {
   createPendingContextSelection,
@@ -27,6 +28,8 @@ export interface Session {
   rights: Record<string, boolean>;
   /** Per-form RBAC: null means explicit admin bypass; [] means no forms. */
   allowedForms: string[] | null;
+  /** The running desktop edition (N171); null when the deployment has no edition gate. */
+  edition?: { code: EditionCode; name: string; beta: boolean } | null;
 }
 
 export default function Shell({
@@ -39,6 +42,12 @@ export default function Shell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  // N171: only the running edition's menus, as MDI_FORM loads MENU_DATA by SM_TYPE; Beta collects the rest.
+  const edition = session.edition
+    ? { code: session.edition.code, beta: session.edition.beta }
+    : null;
+  const editionMenus = editionNav(NAV, edition);
+  const pageAvailability = edition ? routeAvailability(pathname, edition) : 'available';
 
   // --- Phase 13: Company / Year switcher ---------------------------------
   // Current coCode/coYear come from the `session` prop (the /me payload the
@@ -168,6 +177,12 @@ export default function Shell({
     <div className="app">
       <header className="topbar">
         <span className="brand">DataCareNext</span>
+        {session.edition && (
+          <span className="chip" data-testid="edition">
+            {session.edition.name}
+            {session.edition.beta ? ' + Beta' : ''}
+          </span>
+        )}
         {ready ? (
           <>
             <select
@@ -235,7 +250,7 @@ export default function Shell({
           }
         }}
       >
-        {NAV.map((g) => {
+        {editionMenus.groups.map((g) => {
           // Only explicit null (server-verified admin) means show all; [] hides every form.
           const allowed = session.allowedForms;
           const items =
@@ -258,6 +273,27 @@ export default function Shell({
             </div>
           );
         })}
+        {(() => {
+          const allowed = session.allowedForms;
+          const betaItems = editionMenus.beta.filter(
+            (it) => allowed === null || allowed.includes(navItemForm(it.group, it)),
+          );
+          if (!betaItems.length) return null;
+          return (
+            <div key="beta" data-testid="beta-menus">
+              <div className="group">Beta</div>
+              {betaItems.map((it) => (
+                <Link
+                  key={`beta-${it.label}-${it.href}`}
+                  href={it.href}
+                  className={pathname === it.href.split('?')[0] ? 'active' : ''}
+                >
+                  {it.label} <span className="soon">beta</span>
+                </Link>
+              ))}
+            </div>
+          );
+        })()}
       </nav>
       <main className="content">
         {(pending || selectionError) && (
@@ -288,7 +324,23 @@ export default function Shell({
           style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
           aria-busy={switching}
         >
-          {children}
+          {pageAvailability === 'unavailable' ? (
+            <div className="msg err" role="alert" data-testid="edition-unavailable">
+              <p>This screen is not part of the {session.edition?.name} edition.</p>
+            </div>
+          ) : (
+            <>
+              {pageAvailability === 'beta' && (
+                <div className="msg" role="status" data-testid="edition-beta">
+                  <p>
+                    Beta: this screen belongs to a higher edition than {session.edition?.name} and
+                    is not part of its release.
+                  </p>
+                </div>
+              )}
+              {children}
+            </>
+          )}
         </fieldset>
       </main>
     </div>
