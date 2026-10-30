@@ -3629,7 +3629,7 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "Stale update or delete is a 409 with no write; recent lists act only on the complete key",
-      "gapIds": "G27, G28",
+      "gapIds": "G27, G28, G170",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
@@ -5894,6 +5894,107 @@
         "docs/handbook/web/testing.md"
       ],
       "statusNote": "IMPLEMENTED (framework + first module). Sales Invoice matrix: executed 86.36%, browser/business pass 72.73%, desktop match 0% (no original-Windows run). Defects found and baselined: G169 two-group sale fails on duplicate AC_DATA.LEDR_KEY (desktop keys revenue per detail line, Ac_Ledr.cs:74); G170 lost update on concurrent edit (N51/D17); G171 no Alt+S keyboard save (TR_SALE.cs:4896). Blocked: T14 rollback (no fault injector), T15 settings-variant company, negative-weight rule undecided. Next modules one PR each: Purchase, Receipt/Payment/Contra/Journal, Sales Return, Sales Order, inventory tags, Karigar/MFG, Dhiran/Loan, Scheme, Reports."
+    },
+    {
+      "id": "N162",
+      "status": "planned",
+      "action": "Post one sale revenue leg per detail line (desktop key VCH_NO+STR(SR_NO)+'05', Ac_Ledr.cs:74) so a bill with items from two groups saves; remove sales-invoice.create.two-lines-dissimilar from features/baseline.json.",
+      "parentLabels": "P9; J04",
+      "startAfter": [
+        "N161"
+      ],
+      "requiredProof": "feature E2E sales-invoice.create.two-lines-dissimilar passes (gold + silver bill saves, Σ revenue legs = taxable, balanced ledger); sales DB suite green; the baseline entry is removed in the same PR.",
+      "gapIds": "G169",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N163",
+      "status": "planned",
+      "action": "Keyboard save on voucher screens: the Save button answers Alt+S like the desktop &Save mnemonic (TR_SALE.cs:4896); remove sales-invoice.keyboard.alt-s-saves from features/baseline.json.",
+      "parentLabels": "P9; T17",
+      "startAfter": [
+        "N161"
+      ],
+      "requiredProof": "feature E2E sales-invoice.keyboard.alt-s-saves passes; the surface crawl shows no new finding; the baseline entry is removed.",
+      "gapIds": "G171",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N164",
+      "status": "implemented-unverified",
+      "action": "UI surface crawl and map: visit every menu route and unlinked page as a logged-in operator, record every control and API call, probe the main action and missing-voucher load, press every distinct button (sweep mode), classify findings, gate them with a shrink-only baseline; and the PR gate requiring a browser test with every behaviour change.",
+      "parentLabels": "P9; R03",
+      "startAfter": [
+        "N161"
+      ],
+      "requiredProof": "run-surface.mjs full sweep over 241 routes with verdicts and findings written to docs/handbook/web/ui-surface-map.md; probe-mode gate passes in CI; check-browser-test-coverage.mjs fails a behaviour-only diff (N157 commit), passes with Browser-Test-Exempt and passes a tests-only diff.",
+      "gapIds": "G172",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/web/test/features/run-surface.mjs",
+        "web/apps/web/test/features/surface/crawl.mjs",
+        "web/apps/web/test/features/surface/map.mjs",
+        "web/apps/web/test/features/surface-baseline.json",
+        "web/scripts/check-browser-test-coverage.mjs",
+        "web/apps/web/test/features/coverage-map.json",
+        "docs/handbook/web/ui-surface-map.md"
+      ],
+      "statusNote": "IMPLEMENTED. The map is a smoke-level surface map: WORKS means the page behaved, not desktop parity; parity is shown by the catalog status and deep-test columns.",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N165",
+      "status": "planned",
+      "action": "Open Company for the same user from two sessions at once: retry the serializable context selection once and, if it still conflicts, show a readable message instead of the raw code context-transaction-conflict.",
+      "parentLabels": "P9; X05",
+      "startAfter": [
+        "N164"
+      ],
+      "requiredProof": "a two-session browser case opening the company at the same moment ends with both sessions on the dashboard or a readable retry message; no raw error code on screen.",
+      "gapIds": "G172",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N166",
+      "status": "planned",
+      "action": "Feature E2E infrastructure: declared fault injection at each write boundary for T14 rollback cases, and a settings-variant fixture company (SL_AMT_TYPE=F, TOT_AMT_ROF=0, NEGATIVE_STK_SALE=N, ALL_ROF_REMOVE=Y) for T15 cases; unblock sales-invoice.rollback.mid-write and sales-invoice.config.setting-change.",
+      "parentLabels": "P9; R03; T14; T15",
+      "startAfter": [
+        "N161"
+      ],
+      "requiredProof": "the two blocked Sales Invoice cases run and are recorded passed or failed (never blocked) with fault and database evidence.",
+      "gapIds": "G173, G174",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N167",
+      "status": "planned",
+      "action": "Decide the negative-weight sale line rule from an original-Windows TR_SALE run (refuse vs accept), implement it, and turn sales-invoice.refusal.negative-weight from blocked into an executed case.",
+      "parentLabels": "P9; T06",
+      "startAfter": [
+        "N161"
+      ],
+      "requiredProof": "desktop execution evidence for a negative-weight line; the web matches it; the feature case is executed.",
+      "gapIds": "G175",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
     }
   ],
   "amendments": [

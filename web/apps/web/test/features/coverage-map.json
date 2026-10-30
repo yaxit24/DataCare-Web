@@ -1,0 +1,13 @@
+{
+  "_comment": "Which feature module covers which source files (web/scripts/check-browser-test-coverage.mjs). A change to a covered file must update that module or features/baseline.json in the same PR. A pattern ending in / covers the directory. Add an entry with every new feature module.",
+  "modules": {
+    "salesInvoice": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/sales/page.tsx",
+        "web/apps/api/src/modules/sales/sales.ts",
+        "web/packages/core/src/saleAmount.ts",
+        "web/packages/core/src/calc.ts"
+      ]
+    }
+  }
+}

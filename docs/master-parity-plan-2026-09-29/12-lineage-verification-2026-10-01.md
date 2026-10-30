@@ -182,6 +182,10 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G169 | High | A sale with items from two groups cannot be saved | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/api/src/modules/sales/sales.ts` | Found by the feature E2E suite (`sales-invoice.create.two-lines-dissimilar`): a bill with a gold line (group SALE_AC `SALES`) and a silver line (`SLVSALE`) fails with `duplicate key … AC_DATA_tenant_ledr_key_key`, because every per-group income leg is posted with the same leg type 03. The desktop posts one revenue row per detail line keyed `VCH_NO+STR(SR_NO)+'05'` (`Ac_Ledr.cs:74`). Any shop selling gold and silver on one bill is blocked. | N161 |
 | G170 | High | Lost update: a stale second save overwrites the first | `unified/src/csharp/DataCareNext/TR_SALE.cs` | `web/apps/api/src/modules/sales/sales.ts` | Found by `sales-invoice.concurrency.stale-second-save`: two operators load voucher 1, the first saves rate 6500, the second (stale) saves rate 7000 and is answered 200; the line ends at 70,000 and the first save is gone. `editSale` reads no version token. Tracked by N51 (version tokens on every update/delete, waiting on decision D17). | N161 |
 | G171 | Low | No keyboard save on voucher screens | `unified/src/csharp/DataCareNext/TR_SALE.cs` | `web/apps/web/components/VoucherChrome.tsx` | Found by `sales-invoice.keyboard.alt-s-saves`: the desktop saves with the `&Save` mnemonic, Alt+S (`TR_SALE.cs:4896`). No web Save button sets `accessKey`, so an operator who saves from the keyboard cannot. (The desktop has no Ctrl+S binding; the case was corrected to Alt+S.) | N161 |
+| G172 | Low | Opening the company from two sessions at once shows a raw error code | — | `web/apps/api/src/modules/auth/sessionContextSelection.ts` | Found while building the surface crawl: four sessions of the same user pressing Open at the same moment got `409` from `POST /context/select` and the Open Company screen showed the raw code `context-transaction-conflict` (`sessionContextSelection.ts:492`). Rare in a shop, but the operator sees a code instead of a message and no retry is offered. | N165 |
+| G173 | Med | Feature E2E cannot run rollback (T14) cases | `docs/master-parity-plan-2026-09-29/04-verification-playbook.md` | `web/apps/web/test/features/harness.mjs` | T14 needs a declared fault at each write boundary before commit; the harness has no fault injector, so `sales-invoice.rollback.mid-write` is blocked. | N166 |
+| G174 | Med | Feature E2E has no settings-variant company (T15) | `docs/master-parity-plan-2026-09-29/04-verification-playbook.md` | `web/apps/web/test/features/fixtures/catalogue.mjs` | T15 needs a company with other settings (fine-basis pricing, whole-rupee rounding, negative stock refused); the catalogue provisions one configuration only, so `sales-invoice.config.setting-change` is blocked. | N166 |
+| G175 | Low | Negative-weight sale line: rule undecided | `unified/src/csharp/DataCareNext/TR_SALE.cs` | `web/apps/api/src/modules/sales/sales.ts` | No desktop source refuses a negative weight (`TR_SALE_KeyPress` 14870-14883 only uppercases) and the web saves one. Needs an original-Windows run to decide; `sales-invoice.refusal.negative-weight` is blocked until then. | N167 |
 
 ## 4. Decisions D23–D28
 
@@ -1739,6 +1743,47 @@ Done when: each feature's matrix runs in CI on every pull request, every failure
 baseline, and each fixed defect leaves the baseline in the change that fixed it.
 
 
+### N164 — UI surface map: every page and every button, plus a browser test with every behaviour change (G172)
+
+`web/apps/web/test/features/run-surface.mjs` crawls every route an operator can reach — the 235 sidebar links
+(234 distinct routes; Accounts is linked twice) and 7 pages the menu does not link (`/txn/cheque-print`,
+`/txn/e-crnt-note`, `/txn/e-invoice`, `/txn/membership`, `/txn/other-commission`, `/txn/wholesale-sale-return`,
+`/password-change`) — as a logged-in operator on the disposable stack. It records every control and API call,
+probes the main action on the empty form and a missing-voucher load, runs reports and their PDF, and in sweep
+mode presses every distinct button (844 presses). The result is committed as
+`docs/handbook/web/ui-surface-map.md`, joined with the desktop menu-catalog status and the journeys or feature
+modules that already prove each route's lifecycle.
+
+Result of the full sweep: all 241 routes render and behave at smoke level — no crash, no server error, no lost
+session, no refusal hidden from the operator. 22 empty-form saves are blocked by required fields; the rest refuse
+with a visible message. Three medium findings are the desktop's own behaviour and are recorded as `byDesign` with
+their source (HDD Registry saves an empty entry, `UT_HDD.cs:765`; two reminder tabs with a count of 0). 22 routes
+have deep lifecycle tests; the other 219 are proven only at this smoke level, which is the coverage still to build.
+
+Open review items (low, not gated): 172 buttons showed no visible effect on an empty company. Most are expected
+(`New` on a blank form, removing the only row, `Load` with no number), but `CSV` on 75 report pages did nothing on
+an empty report while `Excel` downloaded, and `Post Installment` / `Post Maturity` / `Post Points` gave no message
+on an empty form. These need a rerun with data before they are called defects.
+
+Building the crawl found G172 (two sessions opening the company at the same moment show the raw code
+`context-transaction-conflict`).
+
+The same change makes the browser-test rule binding: `web/scripts/check-browser-test-coverage.mjs` runs in
+static-gates on every pull request and fails one that changes a page, component, web library, API module, route
+or core calculation without changing a browser test; files listed in
+`web/apps/web/test/features/coverage-map.json` must change their own feature module. A PR with no browser-visible
+effect says why in its body (`Browser-Test-Exempt: <reason>`). Checked against history: the N157 commit (a
+`sales.ts` change without a browser test) fails, the same diff with an exemption passes, the N161 commit (tests
+only) passes.
+
+Every defect found so far is now a planned slice: N162 (G169 two-group sale), N163 (G171 Alt+S save), N51 now
+carries G170 (lost update), N165 (G172), N166 (G173/G174 rollback and settings-variant infrastructure), N167
+(G175 negative-weight rule).
+
+Done when: the map is regenerated from a full sweep whenever screens change, the probe gate runs on every pull
+request, and no behaviour change merges without a browser test or a stated exemption.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -1821,6 +1866,12 @@ baseline, and each fixed defect leaves the baseline in the change that fixed it.
 | N159 | — | implemented-unverified, evidence in this change (G167: labour invoice resolves metal-sale from BOOK_DETL slot 1 and round-off from slot 3 via a generalized resolveLabourBookSlot, gated on their legs posting, explicit wins/fail-closed; the 'GST' tax default left documented; REMAINING labourInvoice.ts 3→1, TOTAL 34→32; salesFamilyLifecycle gained LBR slots 1/3 and passes 31; labour DB suite 118/8 + gates + clean API build + web 646+9 + depth green) |
 | N160 | — | implemented-unverified, evidence in this change (G168/N50-increment: a synchronous input-shape TypeError/RangeError from a mutation handler body now maps to a 400 invalid-request in run(), so a non-array 'lines' is 400 not 500 'lines.map is not a function'; typed server-fault 500s preserved — serializable-command 78 pass; two new probes in saleAmountBasis.routes.db.test.ts + broad routes.db 53/14 + gates + clean API build + web 646+9 + depth green; txn.ts ceiling 8482→8491) |
 | N161 | — | implemented-unverified, evidence in this change (feature E2E suite framework + Sales Invoice matrix of 22 cases through the real screen: 16 passed, 3 failed and baselined as G169/G170/G171, 3 blocked with reasons; evidence bundle valid under the evidence-contract validator; negative control fails the gate; CI step added to the real-stack job) |
+| N162 | — | planned (G169: one revenue leg per detail line so a two-group sale saves; proof = feature case passes and its baseline entry is removed) |
+| N163 | — | planned (G171: Alt+S keyboard save on voucher screens) |
+| N164 | — | implemented-unverified, evidence in this change (UI surface crawl + committed map `docs/handbook/web/ui-surface-map.md` + PR browser-test gate; found G172) |
+| N165 | — | planned (G172: readable message / single retry when two sessions open the company at once) |
+| N166 | — | planned (G173, G174: fault injection for T14 and a settings-variant company for T15 in the feature E2E harness) |
+| N167 | — | planned (G175: decide the negative-weight line rule from an original-Windows run, then implement and execute the case) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

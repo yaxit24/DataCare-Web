@@ -1,0 +1,21 @@
+{
+  "_comment": "Known UI-surface findings from web/apps/web/test/features/run-surface.mjs. findings = known defects { key, mode, gap, reason } (shrink-only: a new finding fails the run, a fixed one must be removed). byDesign = findings proven to be the desktop's own behaviour or not a defect { key, mode, source }.",
+  "findings": [],
+  "byDesign": [
+    {
+      "key": "/utilities/hdd-registry | empty-form-accepted | submit-empty-form | Create HDD | ",
+      "mode": "probe",
+      "source": "unified/src/csharp/DataCareNext/UT_HDD.cs:765 — the desktop saves with no field validation and answers \"Hdd Is Update...\"; the web does the same"
+    },
+    {
+      "key": "/txn/reminders | no-feedback | submit-empty-form | Receivables (0) | ",
+      "mode": "probe",
+      "source": "The highlighted button is the Receivables tab with a count of 0 (web/apps/web/app/(app)/txn/reminders/page.tsx); there is nothing to list"
+    },
+    {
+      "key": "/utilities/reminders | no-feedback | submit-empty-form | Outstanding (0) | ",
+      "mode": "probe",
+      "source": "The highlighted button is the Outstanding tab with a count of 0 (web/apps/web/app/(app)/utilities/reminders/page.tsx); there is nothing to list"
+    }
+  ]
+}

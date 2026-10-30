@@ -143,6 +143,42 @@ was misread, and the baseline entry removed when a defect is fixed. A defect the
 (doc 12) and enters the baseline; it is fixed in its own slice, never by weakening the case. A case may only become
 blocked or N/A with a recorded source-backed reason.
 
+The rule is enforced. The static-gates job runs `web/scripts/check-browser-test-coverage.mjs` on every pull request:
+a PR that changes a page, component, web library, API module, route or core calculation must change a browser test
+(a feature module or baseline, a journey, or the surface baseline). A file listed in
+`web/apps/web/test/features/coverage-map.json` must change the feature module that covers it. A change with no
+browser-visible effect states why in the PR body with a line `Browser-Test-Exempt: <reason>`; the reason is printed
+in the CI log. Run it locally with `node scripts/check-browser-test-coverage.mjs --base origin/main`.
+
+## 4b. UI surface crawl (every page, every button)
+
+`web/apps/web/test/features/run-surface.mjs` logs in and visits every route an operator can reach: every sidebar link
+in `web/apps/web/lib/nav.ts` and every page under `web/apps/web/app` that the menu does not link. On each page it
+records the heading, every control in the content area and the API calls made on load, then runs three probes:
+load voucher 99999 where the page has a voucher-number Load, press the main action on the empty form, and for a
+report press Run and Download PDF. With `SURFACE_SWEEP=1` it also presses every distinct button and records what
+happened: navigation, popup, download, dialog, a read or write request and its status, a screen change, or nothing.
+Buttons that would change data other pages depend on (delete, renumber, year end, provision, reset) run in a last
+pass of their own, and pages that change company-wide state run last.
+
+| Finding                                                                                                | Severity | Meaning                                                                                                                                     |
+| ------------------------------------------------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `page-crash`, `server-error`, `session-lost`, `load-failed`                                            | high     | The page or an action crashed, answered 5xx, or ended the session                                                                           |
+| `load-refused`, `silent-refusal`, `no-feedback`, `empty-form-accepted`, `console-error`, `placeholder` | medium   | A refusal the operator cannot see, an action with no response, a create from an empty form, a script error, or a planned-screen placeholder |
+| `no-visible-effect`, `no-heading`, `load-refused-by-design`                                            | low      | Recorded in the map for review; not gated                                                                                                   |
+
+`web/apps/web/test/features/surface-baseline.json` lists known defects (`findings`, each with a gap id) and findings
+proved to be the desktop's own behaviour (`byDesign`, each with its source). The gate is shrink-only, like the
+feature baseline. CI runs the probes on every pull request (the button sweep takes longer and runs locally). The
+committed map is `docs/handbook/web/ui-surface-map.md`, regenerated from a full sweep:
+
+```bash
+SURFACE_SWEEP=1 SURFACE_WRITE_DOC=1 node scripts/parity-test-env.mjs -- node apps/web/test/features/run-surface.mjs
+```
+
+A `WORKS` verdict means only that the page behaved; it does not mean desktop parity. The map shows parity separately:
+the desktop menu-catalog status of each route and whether a journey or feature module proves its lifecycle.
+
 ## 5. Visual and interactive verification with Chrome DevTools MCP
 
 Automated journeys prove behaviour; this protocol checks what an operator sees and touches. Run it for every screen a
