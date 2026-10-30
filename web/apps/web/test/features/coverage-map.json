@@ -7,14 +7,18 @@
         "web/apps/api/src/modules/sales/sales.ts",
         "web/packages/core/src/saleAmount.ts",
         "web/packages/core/src/calc.ts",
-        "web/apps/api/src/modules/posting/lineLegs.ts"
+        "web/apps/api/src/modules/posting/lineLegs.ts",
+        "web/apps/web/components/LookupPicker.tsx",
+        "web/apps/web/lib/lookupEnter.ts"
       ]
     },
     "purchaseInvoice": {
       "covers": [
         "web/apps/web/app/(app)/txn/purchase/page.tsx",
         "web/apps/api/src/modules/purchase/purchase.ts",
-        "web/apps/api/src/modules/posting/lineLegs.ts"
+        "web/apps/api/src/modules/posting/lineLegs.ts",
+        "web/apps/web/components/LookupPicker.tsx",
+        "web/apps/web/lib/lookupEnter.ts"
       ]
     },
     "usersRights": {

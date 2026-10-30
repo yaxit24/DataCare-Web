@@ -275,6 +275,39 @@ export const salesInvoice = {
     ),
 
     C(
+      'lookup.code-enter-at-once',
+      'T17',
+      'read-only',
+      'TR_SALE.cs:17340 tAcCode_KeyDown: Enter looks the typed code up exactly; a list fetched for older text is never picked (G185)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openSales(page);
+        const party = page.getByPlaceholder('search accounts… (F1)').first();
+        await party.click();
+        await party.fill('');
+        // Let the list for the empty box arrive first: that stale list is what Enter used to pick from.
+        await page.waitForTimeout(400);
+        await party.pressSequentially(PARTIES.local.code);
+        await party.press('Enter');
+        const name = field(page, 'Customer Name');
+        for (let i = 0; i < 40 && (await name.inputValue()) === ''; i++)
+          await page.waitForTimeout(100);
+        const picked = await party.inputValue();
+        const shownName = await name.inputValue();
+        assert.equal(
+          picked,
+          PARTIES.local.code,
+          `Enter at once picked ${picked}, not the typed code`,
+        );
+        assert.equal(shownName, PARTIES.local.name, 'the typed party is filled in');
+        return {
+          observation: `typed ${PARTIES.local.code} + Enter at once: party ${picked}, name ${shownName}`,
+          expected: { party: PARTIES.local.code, name: PARTIES.local.name },
+        };
+      },
+    ),
+
+    C(
       'formula.single-line',
       'T03',
       'read-only',
@@ -626,6 +659,59 @@ export const salesInvoice = {
           observation: `voucher ${vchNo}: ${type} document, ${bytes.length} bytes`,
           expected: 'a printable invoice',
           output: bytes,
+        };
+      },
+    ),
+
+    C(
+      'print.hsn-agrees-with-summary',
+      'T16',
+      'output',
+      'SalesBillA4Gst.rpt prints SL_DATA.CGST_TAX/SGST_TAX (line halves unused); G181: the HSN table must show the same heads as the summary and total the bill tax',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const vchNo = await createOneLine(ctx, page); // 1,908.29 tax: two halves of 954.145
+        await loadVoucher(page, vchNo);
+        const documentRequest = page
+          .context()
+          .waitForEvent('request', (r) => /\/api\/sales\/invoice\?.*format=html/.test(r.url()), {
+            timeout: 15_000,
+          });
+        const [popup] = await Promise.all([
+          page.waitForEvent('popup'),
+          page.getByRole('button', { name: 'Print', exact: true }).click(),
+        ]);
+        const response = await page.request.get((await documentRequest).url());
+        assert.equal(response.status(), 200, await response.text());
+        const html = await response.text();
+        await popup.close();
+        const amount = (text) => Number(String(text).replace(/,/g, ''));
+        const table = html.slice(html.indexOf('class="hsn"'), html.indexOf('class="tot"'));
+        const rows = [
+          ...table.matchAll(
+            /<tr><td>[^<]*<\/td><td>[^<]*<\/td><td>([^<]*)<\/td><td>([^<]*)<\/td><td>([^<]*)<\/td><\/tr>/g,
+          ),
+        ];
+        const paise = (values) => Math.round(values.reduce((sum, v) => sum + v, 0) * 100);
+        const printed = {
+          hsnCgst: paise(rows.map((r) => amount(r[1]))) / 100,
+          hsnSgst: paise(rows.map((r) => amount(r[2]))) / 100,
+          hsnTax: paise(rows.map((r) => amount(r[3]))) / 100,
+          summaryCgst: amount(/<td>CGST<\/td><td class="r">([^<]*)<\/td>/.exec(html)?.[1]),
+          summarySgst: amount(/<td>SGST<\/td><td class="r">([^<]*)<\/td>/.exec(html)?.[1]),
+        };
+        const [bill] = await ctx.rows(
+          `SELECT "TAX_AMT"::float tax,"CGST_TAX"::float cgst,"SGST_TAX"::float sgst FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        assert.equal(printed.hsnCgst, printed.summaryCgst, 'HSN CGST column = summary CGST');
+        assert.equal(printed.hsnSgst, printed.summarySgst, 'HSN SGST column = summary SGST');
+        assert.equal(printed.hsnTax, bill.tax, 'HSN Tax column = bill tax');
+        return {
+          observation: `HSN CGST ${printed.hsnCgst} / SGST ${printed.hsnSgst} / Tax ${printed.hsnTax}; summary CGST ${printed.summaryCgst} / SGST ${printed.summarySgst}; bill tax ${bill.tax}`,
+          expected:
+            'the HSN columns equal the summary heads and the Tax column equals the bill tax',
+          output: Buffer.from(html),
         };
       },
     ),
