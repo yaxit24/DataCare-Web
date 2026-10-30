@@ -254,6 +254,10 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
               -- G115 / P0-04: the labour writer resolves its income account from BOOK_DETL SR_NO 6
               -- (desktop Ac_Ledr.cs:1203), so the LBR book must carry that slot.
               ($1,$2,$3,'LBR',6,'CTRL','LABOUR WORK','O'),
+              -- N59/G167: the labour invoice resolves its metal-sale (slot 1) and round-off (slot 3)
+              -- accounts from the same book, so the LBR book must carry those slots too.
+              ($1,$2,$3,'LBR',1,'CTRL','LABOUR WORK','O'),
+              ($1,$2,$3,'LBR',3,'ROUND','LABOUR WORK','O'),
               -- P0-04: the scheme/member books settle to their configured slot 1. Real book 074's leg-02 rows
               -- name 00001, so the slot has to exist here too — the module no longer falls back to a literal.
               ($1,$2,$3,'074',1,'CASHAC','MEMB ENTRY','I'),

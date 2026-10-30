@@ -5826,6 +5826,28 @@
         "web/apps/api/test/postingAccountLiterals.test.ts"
       ],
       "statusNote": "IMPLEMENTED (partial-by-design, mirrors N157). purchase.ts had 5 literal account fallbacks. Cleaned 2 with a real configured source: the purchase expense account now resolves from BOOK_DETL slot 1 (resolveBookAccountTx(..,1), explicit wins, fail-closed for a posting purchase; 'PURCHASE' placeholder for a no-ledger quotation), and the single-expense income branch throws an invariant instead of 'PURCHASE'. Left 3 as verified-legitimate (same reasoning as N157's sales counterpart): 'GSTINPUT' tax-input account (depends on the documented TAX_MAST SR_NO provisioning gap) and 'HMCHRG' x2 (no BOOK_DETL slot, no persisted header column). REMAINING purchase.ts 5->3, TOTAL 36->34. Full purchase DB suite 55/9 green + all gates + clean api build + web 646+9 + depth. purchase.ts ceiling 2860->2883."
+    },
+    {
+      "id": "N159",
+      "status": "implemented-unverified",
+      "action": "Resolve the labour invoice's metal-sale (BOOK_DETL slot 1) and round-off (slot 3) accounts from the labour book, like the existing slot-6 income resolution, instead of the 'SALES'/'ROUNDOFF' literals; leave the 'GST' tax default documented.",
+      "parentLabels": "P9; N59; G115",
+      "startAfter": [
+        "N158"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "postingAccountLiterals.test.ts REMAINING labourInvoice.ts 3->1, TOTAL 34->32, guard green. salesFamilyLifecycle LBR slots 1/3 added, 31 pass. Labour DB suite 118/8 green. gates + clean api build + web 646+9 + depth.",
+      "gapIds": "G167",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/api/src/modules/sales/labourInvoice.ts",
+        "web/apps/api/test/postingAccountLiterals.test.ts",
+        "web/apps/api/test/salesFamilyLifecycle.db.test.ts"
+      ],
+      "statusNote": "IMPLEMENTED (partial-by-design). labourInvoice.ts had 3 literals; the labour-income account already resolved from BOOK_DETL slot 6 (G115). Cleaned 2 more: generalized the slot-6 resolver into resolveLabourBookSlot(tx,scope,srNo,label) and resolved the metal-sale account from slot 1 and the round-off from slot 3, inside the tx and gated on their legs posting (metalT.taxable!==0 / roundOff!==0); explicit caller account wins, fail-closed otherwise. Left 'GST' (tax account, documented TAX_MAST provisioning gap). salesFamilyLifecycle gained LBR slots 1 and 3 (it seeded only slot 6). REMAINING labourInvoice.ts 3->1, TOTAL 34->32. Guard + labour DB suite 118/8 + salesFamilyLifecycle 31 + all gates + clean api build + web 646+9 + depth green. No size ceiling change needed."
     }
   ],
   "amendments": [

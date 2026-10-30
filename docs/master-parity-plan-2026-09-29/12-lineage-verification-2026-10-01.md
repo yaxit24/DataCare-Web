@@ -177,6 +177,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G164 | Med | Sales-order advance cash account is a literal | `unified/src/csharp/DataCareNext/TR_SALE_ORD.cs` | `web/apps/api/src/modules/sales/salesOrder.ts` | The order-advance debit leg used `input.cashAc ?? 'CASH'` — when an advance was taken without a named account it posted the Dr leg to the non-existent `'CASH'` ledger (N59 anti-pattern). The desktop debits the order book's BOOK_DETL slot-1 account (noted at `salesOrder.ts:1197`). Resolve slot 1 on the posting transaction (explicit wins) and FAIL-CLOSED when unconfigured. | N156 |
 | G165 | Med | Core sale posting used literal account fallbacks | `unified/src/csharp/DataCareNext/TR_SALE.cs`; `unified/src/csharp/DataCareNext/Ac_Tax.cs` | `web/apps/api/src/modules/sales/sales.ts` | The sale writer carried 11 literal account fallbacks. Five were genuine N59 defects with a configured/persisted source: the cash leg and the electronic-tender (card/upi/cheque) bank leg (incl. the cheque Rojmel row) posted to `'CASH'`/`'BANK'`, and the sale-income account defaulted to `'SALES'`. These now resolve from BOOK_DETL slot 1 (income) / slot 2 (cash) or the persisted `BANK_AC`, FAIL-CLOSED when an electronic tender posts with no bank account. The remaining six (`'OLDGOLD'`, `'HMCHRG'`x2, `'TCS'`x2, `'GST'`) are legitimate fixed defaults with NO BOOK_DETL slot, NO persisted header column, and no tax-code resolution (a documented web provisioning gap), so fail-closing them would break legitimate reopen — left intact and tracked in the posting-literals REMAINING ledger. | N157 |
 | G166 | Med | Purchase posting used literal account fallbacks | `unified/src/csharp/DataCareNext/TR_PURC.cs` | `web/apps/api/src/modules/purchase/purchase.ts` | The purchase writer mirrored the sale one: 5 literal fallbacks. Two were genuine N59 defects — the purchase expense account defaulted to `'PURCHASE'` (both the writer base and the single-expense income branch). These now resolve from BOOK_DETL slot 1 (explicit wins, fail-closed for a posting purchase; placeholder for a no-ledger quotation). The remaining three (`'GSTINPUT'`, `'HMCHRG'`x2) are legitimate fixed defaults — the tax-input account depends on the documented TAX_MAST provisioning gap and hallmark has no slot/persisted column — left intact and tracked in REMAINING. | N158 |
+| G167 | Med | Labour invoice metal-sale/round-off accounts were literals | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/api/src/modules/sales/labourInvoice.ts` | The labour invoice already resolved its labour-income leg from BOOK_DETL slot 6 (G115) but still defaulted the metal-sale income to `'SALES'` and the round-off to `'ROUNDOFF'`. Both now resolve from the labour book (slot 1 and slot 3) through a generalized `resolveLabourBookSlot`, inside the tx and gated on their legs posting (explicit wins, fail-closed). The `'GST'` tax account stays a documented default (TAX_MAST provisioning gap). | N159 |
 
 ## 4. Decisions D23–D28
 
@@ -1649,6 +1650,29 @@ Done when: the purchase expense account comes from configuration (fail-closed), 
 non-configurable defaults are documented rather than silently literal.
 
 
+### N159 — Labour invoice resolves its metal-sale/round-off accounts from the labour book, not literals (G167, Stage D)
+
+The labour invoice (`labourInvoice.ts`) already resolved its labour-income leg from BOOK_DETL slot 6
+(the G115 fix), but the metal-sale income still defaulted to `'SALES'` and the round-off to
+`'ROUNDOFF'`. The G115 resolver was generalized into `resolveLabourBookSlot(tx, scope, srNo, label)`,
+and the metal-sale account now resolves from slot 1 and the round-off from slot 3 — inside the
+transaction and gated on their legs actually posting (`metalT.taxable !== 0` / `roundOff !== 0`), with
+an explicit caller account winning and fail-closed otherwise.
+
+Left intact: the `'GST'` tax account, which depends on the documented TAX_MAST SR_NO provisioning gap
+(same as every other family's tax leg).
+
+Proof: `postingAccountLiterals.test.ts` REMAINING for `labourInvoice.ts` drops 3 to 1, REMAINING_TOTAL
+34 to 32, guard green. `salesFamilyLifecycle.db.test.ts` gained LBR slots 1 and 3 (it had seeded only
+slot 6) and its labour-invoice create/edit/receive cases pass (31), proving the slot resolution works
+end-to-end. The labour DB suite (desktop grid, fine-tax rows, sale-return labour replay = 118 across
+8 files) is unchanged and green. Verified: full gates + clean `@datacare/api` build + web 646+9 +
+`depth:parity`.
+
+Done when: the labour metal-sale and round-off accounts come from the book slots (fail-closed), and
+the tax default is documented rather than silently literal.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -1728,6 +1752,7 @@ non-configurable defaults are documented rather than silently literal.
 | N156 | — | implemented-unverified, evidence in this change (G164: sales-order advance debits the order book BOOK_DETL slot-1 account instead of the 'CASH' literal — explicit wins, fail-closed; proven by salesOrderRound4 fail-closed+explicit case (11/11) and salesFamilyLifecycle SOR slot-1 (32); gates + clean API build + web 646+9 + sales-order DB green; salesOrder.ts ceiling 2361→2374) |
 | N157 | — | implemented-unverified, evidence in this change (G165: core sale posting resolves cash=BOOK_DETL slot-2, income=slot-1, electronic-tender bank=persisted BANK_AC fail-closed, and a single-income invariant instead of literals; the 6 non-configurable defaults oldgold/hmcharge×2/tcs×2/gst are verified legitimate and left, tracked in REMAINING 11→6, TOTAL 41→36; full sales DB suite 69/9 + gates + clean API build + web 646+9 + depth green; sales.ts ceiling 2809→2845) |
 | N158 | — | implemented-unverified, evidence in this change (G166: purchase expense account resolves from BOOK_DETL slot-1 instead of the 'PURCHASE' literal, explicit wins/fail-closed, plus a single-expense invariant; the 3 non-configurable defaults gstinput/hmcharge×2 verified legitimate and left, tracked in REMAINING 5→3, TOTAL 36→34; full purchase DB suite 55/9 + gates + clean API build + web 646+9 + depth green; purchase.ts ceiling 2860→2883) |
+| N159 | — | implemented-unverified, evidence in this change (G167: labour invoice resolves metal-sale from BOOK_DETL slot 1 and round-off from slot 3 via a generalized resolveLabourBookSlot, gated on their legs posting, explicit wins/fail-closed; the 'GST' tax default left documented; REMAINING labourInvoice.ts 3→1, TOTAL 34→32; salesFamilyLifecycle gained LBR slots 1/3 and passes 31; labour DB suite 118/8 + gates + clean API build + web 646+9 + depth green) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

@@ -205,7 +205,12 @@ type LabourWriteContext = {
  * rather than inventing a literal 'LABOUR' account that only the provisioning seed carries. The
  * labour book is modelled MAIN_BOOK 'LABOUR WORK', direction 'O' (seedCompany), matching the slot.
  */
-async function resolveLabourIncomeAc(tx: any, scope: VoucherScope): Promise<string> {
+async function resolveLabourBookSlot(
+  tx: any,
+  scope: VoucherScope,
+  srNo: number,
+  label: string,
+): Promise<string> {
   const coBook = scope.coBook ?? 'LBR';
   const policy: BookPolicy = {
     coBook,
@@ -215,14 +220,18 @@ async function resolveLabourIncomeAc(tx: any, scope: VoucherScope): Promise<stri
     inout: 'O',
   };
   try {
-    return await resolveBookAccountTx(tx, { ...scope, coBook }, policy, 6);
+    return await resolveBookAccountTx(tx, { ...scope, coBook }, policy, srNo);
   } catch (e) {
     if (e instanceof BookPolicyValidationError)
       throw new SaleValidationError(
-        `labour book ${coBook} income account (BOOK_DETL SR_NO 6) is not configured: ${e.message}`,
+        `labour book ${coBook} ${label} (BOOK_DETL SR_NO ${srNo}) is not configured: ${e.message}`,
       );
     throw e;
   }
+}
+
+async function resolveLabourIncomeAc(tx: any, scope: VoucherScope): Promise<string> {
+  return resolveLabourBookSlot(tx, scope, 6, 'income account');
 }
 
 export async function createLabourInvoice(
@@ -236,14 +245,13 @@ export async function createLabourInvoice(
   const inter = !!input.interState;
   const metalPct = input.metalTaxPct ?? 3;
   const labourPct = input.labourTaxPct ?? 5;
-  const salesAc = input.salesAc ?? 'SALES';
-  // G115 / P0-04: the labour-income account is NOT a literal. The desktop (Ac_Ledr.cs:1203,
-  // leg '01') credits A.DR_LBR to the book's BOOK_DETL slot SR_NO 6 (MAIN_BOOK 'LABOUR WORK'),
-  // never a hard-coded 'LABOUR' account — which exists only in the provisioning seed and is
-  // absent on a migrated company. We resolve it from the book inside the tx; an explicit
-  // caller override still wins.
+  // N59/G167: the metal-sale income account (slot 1) and the round-off account (slot 3) come from the
+  // labour book's BOOK_DETL, exactly like the labour-income slot 6 above — not the literals 'SALES'
+  // /'ROUNDOFF'. Resolved inside the tx only when their legs actually post (explicit caller wins,
+  // fail-closed otherwise). The tax account stays a literal fallback (documented TAX_MAST gap).
+  const requestedSalesAc = input.salesAc;
   const taxAc = input.taxAc ?? 'GST';
-  const roundAc = input.roundAc ?? 'ROUNDOFF';
+  const requestedRoundAc = input.roundAc;
   const tenantId = input.scope.tenantId;
 
   const metalBase = r2(lines.reduce((s, l) => s + Number(l.metalAmount ?? 0), 0));
@@ -271,6 +279,18 @@ export async function createLabourInvoice(
     // G115 / P0-04: resolve the labour-income account from the book's BOOK_DETL slot SR_NO 6
     // (desktop Ac_Ledr.cs:1203 join on B.SR_NO = 6), honouring an explicit caller override.
     const labourAc = input.labourAc ?? (await resolveLabourIncomeAc(tx, input.scope));
+    // N59/G167: resolve the metal-sale (slot 1) and round-off (slot 3) accounts from the labour book,
+    // only when their legs post. Explicit caller account wins; otherwise fail-closed on a missing slot.
+    const salesAc =
+      metalT.taxable !== 0
+        ? (requestedSalesAc ??
+          (await resolveLabourBookSlot(tx, input.scope, 1, 'metal-sale account')))
+        : (requestedSalesAc ?? '');
+    const roundAc =
+      roundOff !== 0
+        ? (requestedRoundAc ??
+          (await resolveLabourBookSlot(tx, input.scope, 3, 'round-off account')))
+        : (requestedRoundAc ?? '');
     // G92: the metal and labour tax codes, resolved like every other family (Ac_Tax.cs LbrWork_GST :164-174 joins
     // TAX_MAST on LBR_DATA.TAX_CODE and LBR_TAX_CODE). Geography comes from the party's AC_GST_TYPE.
     const policyFor = async (base: number, pct: number): Promise<ResolvedTaxPolicy | null> => {
