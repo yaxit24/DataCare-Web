@@ -5925,18 +5925,27 @@
     },
     {
       "id": "N163",
-      "status": "planned",
-      "action": "Keyboard save on voucher screens: the Save button answers Alt+S like the desktop &Save mnemonic (TR_SALE.cs:4896); remove sales-invoice.keyboard.alt-s-saves from features/baseline.json.",
+      "status": "implemented-unverified",
+      "action": "Keyboard save on voucher screens: Alt+S presses the screen's Save button, like the desktop &Save mnemonic (TR_SALE.cs:4896; 106 desktop forms caption their save button &Save; no Ctrl+S binding exists). Remove sales-invoice.keyboard.alt-s-saves and purchase-invoice.keyboard.alt-s-saves from features/baseline.json.",
       "parentLabels": "P9; T17",
       "startAfter": [
         "N161"
       ],
       "requiredProof": "feature E2E sales-invoice.keyboard.alt-s-saves passes; the surface crawl shows no new finding; the baseline entry is removed.",
       "gapIds": "G171",
-      "entryDefinition": "02-execution-plan.md section 4",
+      "entryDefinition": "12-lineage-verification-2026-10-01.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/web/lib/saveMnemonic.ts",
+        "web/apps/web/components/GlobalFormKeys.tsx",
+        "web/apps/web/components/VoucherChrome.tsx",
+        "web/apps/web/test/saveMnemonic.test.ts",
+        "web/apps/web/test/features/baseline.json"
+      ],
+      "statusNote": "IMPLEMENTED. The shell's global key handler (GlobalFormKeys) presses the first enabled, on-screen button marked data-save-mnemonic when Alt+S is pressed (physical key KeyS, so Option+S on a Mac works; Ctrl, Meta and Shift chords and auto-repeat are refused, so a held key cannot submit twice). Marked: the VoucherChrome Save button (Sales Invoice, Purchase Invoice, Sales and Purchase Quotation, Physical Stock, the four repair screens, and two deferred screens), the shared forms (PaymentForm for cash and bank receipt and payment, KarigarForm, WholesaleVoucherForm, StockInoutForm, TagCancelForm, TagSplitForm, EBillEntry) and the single Save button of Sales Return, Sales Order, Approval Issue and Return, Fine JV, Contra, Journal, Tag and Item Opening, Counter Transfer, Stock Adjust, Daily Rate, Party Opening, Bill-wise Receipt, Labour Sale, Bullion Booking and Sale, Order Issue and Hallmark Sale. Their desktop forms (TR_SALE_RTN, TR_SALE_ORD, TR_APR_ISU, TR_CONTRA, TR_TAG_OPBL, TR_ITM_OPBL, TR_PHYSTK, TR_TAG_CAN, MS_RATE, TR_AC_OPBL, TR_BILL_TO, TR_SALE_LBR, TR_BUL_BOOKING, TR_BUL_SALE, TR_SALE_HM) all caption &Save. Not marked: Order Cancel (its primary button is the per-order Refund & Cancel confirmation) and Tag Print (Load / Print labels). Verified: web unit 12 passed (saveMnemonic + formKeys); feature E2E sales-invoice.keyboard.alt-s-saves and purchase-invoice.keyboard.alt-s-saves pass through the real screen (Sales 18 passed, Purchase 17 passed, FEATURE_E2E_PASSED) and leave the baseline; Chrome DevTools run on Contra (a screen without a feature module yet): Alt+S from the Cr amount box saved voucher CON 00001 (BANK Dr 5,000, CASH Cr 5,000). Each remaining screen's Alt+S case is added with its feature module (document 15 §5)."
     },
     {
       "id": "N164",

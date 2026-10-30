@@ -892,6 +892,7 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
         <button
           type="button"
           className="primary"
+          data-save-mnemonic
           data-testid={id('save')}
           disabled={!canSave}
           onClick={() => void save()}

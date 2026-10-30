@@ -1788,6 +1788,23 @@ Done when: a sale and a purchase with lines from two item groups save, post each
 reopen, edit, print and delete like any other bill.
 
 
+### N163 — Alt+S saves the voucher, as the desktop &Save mnemonic (G171)
+
+`unified/src/csharp/DataCareNext/TR_SALE.cs:4896` captions the save button `&Save`, and 106 desktop forms do the
+same, so Alt+S saves on every one of them; the desktop has no Ctrl+S binding. The shell's global key handler
+(`web/apps/web/components/GlobalFormKeys.tsx`, logic in `web/apps/web/lib/saveMnemonic.ts`) presses the first enabled,
+on-screen button marked `data-save-mnemonic`. It matches the physical key, so Option+S works on a Mac, and it ignores
+auto-repeat, so a held key cannot submit twice. The Save buttons of `web/apps/web/components/VoucherChrome.tsx`, the
+shared voucher forms and the single-Save Standard voucher pages are marked; Order Cancel and Tag Print are not, because
+their primary buttons are not a save.
+
+Verified: unit tests `web/apps/web/test/saveMnemonic.test.ts`; the feature cases `sales-invoice.keyboard.alt-s-saves`
+and `purchase-invoice.keyboard.alt-s-saves` pass through the real screen and left the baseline; a Chrome DevTools run
+saved a Contra voucher with Alt+S from its amount box. Each remaining screen's Alt+S case comes with its feature module.
+
+Done when: Alt+S saves on every Standard voucher screen, proven by each screen's feature module.
+
+
 ### N164 — UI surface map: every page and every button, plus a browser test with every behaviour change (G172)
 
 `web/apps/web/test/features/run-surface.mjs` crawls every route an operator can reach — the 235 sidebar links
@@ -1954,7 +1971,7 @@ regenerated from that run.
 | N160 | — | implemented-unverified, evidence in this change (G168/N50-increment: a synchronous input-shape TypeError/RangeError from a mutation handler body now maps to a 400 invalid-request in run(), so a non-array 'lines' is 400 not 500 'lines.map is not a function'; typed server-fault 500s preserved — serializable-command 78 pass; two new probes in saleAmountBasis.routes.db.test.ts + broad routes.db 53/14 + gates + clean API build + web 646+9 + depth green; txn.ts ceiling 8482→8491) |
 | N161 | — | implemented-unverified, evidence in this change (feature E2E suite framework + Sales Invoice matrix of 22 cases through the real screen: 16 passed, 3 failed and baselined as G169/G170/G171, 3 blocked with reasons; evidence bundle valid under the evidence-contract validator; negative control fails the gate; CI step added to the real-stack job) |
 | N162 | — | implemented-unverified, evidence in this change (G169, G176: one item leg per detail line keyed STR(SR_NO)+03 when a sale or purchase posts to two item accounts; labour-split leg off code 03; vectors 60 passed, HTTP write-set suites 13 passed, negative control reproduces the duplicate-key 400; feature E2E Sales 18/2/3 and Purchase 17/2/2 with both baseline entries removed; browser runs of both screens) |
-| N163 | — | planned (G171: Alt+S keyboard save on voucher screens) |
+| N163 | — | implemented-unverified, evidence in this change (G171: Alt+S presses the marked Save button from any field; web unit 12 passed; sales and purchase Alt+S feature cases pass and left the baseline; Contra saved with Alt+S in a Chrome DevTools run) |
 | N164 | — | implemented-unverified, evidence in this change (UI surface crawl + committed map `docs/handbook/web/ui-surface-map.md` + PR browser-test gate; found G172) |
 | N165 | — | planned (G172: readable message / single retry when two sessions open the company at once) |
 | N166 | — | planned (G173, G174: fault injection for T14 and a settings-variant company for T15 in the feature E2E harness) |

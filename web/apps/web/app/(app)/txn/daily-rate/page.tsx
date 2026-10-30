@@ -194,7 +194,7 @@ export default function DailyRatePage() {
             </table>
           </div>
         )}
-        <button className="primary" disabled={busy} style={{ marginTop: 10 }}>
+        <button className="primary" data-save-mnemonic disabled={busy} style={{ marginTop: 10 }}>
           {busy ? 'Saving…' : 'Set Daily Rate'}
         </button>
       </form>

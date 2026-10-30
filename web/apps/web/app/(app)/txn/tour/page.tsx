@@ -502,7 +502,7 @@ export default function TourIssuePage() {
               Pcs {totalPcs} · Net {totalNet.toLocaleString('en-IN')} g ·{' '}
               <b>Fine {totalFine.toLocaleString('en-IN')} g</b>
             </span>
-            <button className="primary" disabled={busy || !salesmanAc}>
+            <button className="primary" data-save-mnemonic disabled={busy || !salesmanAc}>
               {busy ? 'Saving…' : 'Issue on Tour'}
             </button>
           </div>

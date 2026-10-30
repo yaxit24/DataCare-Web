@@ -436,7 +436,7 @@ export default function LabourInvoicePage() {
               + Add line
             </button>
             <span className="spacer" />
-            <button className="primary" disabled={busy}>
+            <button className="primary" data-save-mnemonic disabled={busy}>
               {busy ? 'Saving…' : 'Save Labour Bill'}
             </button>
           </div>

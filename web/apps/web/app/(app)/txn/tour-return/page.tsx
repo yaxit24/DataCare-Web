@@ -473,7 +473,7 @@ export default function TourReturnPage() {
             <span className="muted" style={{ marginRight: 12 }}>
               POST /tour/return
             </span>
-            <button className="primary" disabled={busy}>
+            <button className="primary" data-save-mnemonic disabled={busy}>
               {busy ? 'Posting…' : 'Post Return'}
             </button>
           </div>

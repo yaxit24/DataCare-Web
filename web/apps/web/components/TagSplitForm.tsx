@@ -840,6 +840,7 @@ export function TagSplitForm() {
         <button
           type="button"
           className="primary"
+          data-save-mnemonic
           data-testid={id('save')}
           disabled={!canSave}
           onClick={() => void save()}

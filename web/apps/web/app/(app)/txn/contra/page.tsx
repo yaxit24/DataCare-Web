@@ -230,7 +230,7 @@ export default function ContraPage() {
                 New
               </button>
             )}
-            <button className="primary" disabled={busy || !equal || !coBook}>
+            <button className="primary" data-save-mnemonic disabled={busy || !equal || !coBook}>
               {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : 'Save Contra'}
             </button>
           </div>

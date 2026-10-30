@@ -314,7 +314,7 @@ export default function StockAdjustPage() {
             <span className="muted" style={{ marginRight: 12 }}>
               POST /stock/adjust
             </span>
-            <button className="primary" disabled={busy}>
+            <button className="primary" data-save-mnemonic disabled={busy}>
               {busy ? 'Posting…' : 'Post Adjustment'}
             </button>
           </div>

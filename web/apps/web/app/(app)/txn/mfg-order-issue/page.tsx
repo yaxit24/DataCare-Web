@@ -625,6 +625,7 @@ export default function MfgOrderIssuePage() {
             )}
             <button
               className="primary"
+              data-save-mnemonic
               disabled={busy || (!!loadedVoucherNo && voucherSearch !== loadedVoucherNo)}
             >
               {busy ? 'Saving…' : loadedVoucherNo ? 'Update' : 'Issue Designs'}

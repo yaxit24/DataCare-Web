@@ -372,7 +372,7 @@ export default function BillToBillPage() {
               Receiving ₹{inr(totRec)} · Kasar ₹{inr(totKasar)} · <b>{allocCount}</b>{' '}
               {allocCount === 1 ? 'bill' : 'bills'}
             </span>
-            <button className="primary" disabled={busy || !canSubmit}>
+            <button className="primary" data-save-mnemonic disabled={busy || !canSubmit}>
               {busy ? 'Settling…' : 'Settle'}
             </button>
           </div>

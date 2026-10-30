@@ -263,7 +263,7 @@ export default function JournalEntryPage() {
                 New
               </button>
             )}
-            <button className="primary" disabled={busy || !canSubmit}>
+            <button className="primary" data-save-mnemonic disabled={busy || !canSubmit}>
               {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : 'Post Journal'}
             </button>
           </div>
