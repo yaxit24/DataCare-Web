@@ -6050,6 +6050,81 @@
         "docs/handbook/web/ui-surface-map.md"
       ],
       "statusNote": "IMPLEMENTED. Purchase and settings modules executed through the real screens on a shared company; defects G176 (two-group purchase), G177 (fixed-list PAN limit) and G178 (last admin can demote themselves) recorded and planned (N162, N168, N169)."
+    },
+    {
+      "id": "N171",
+      "status": "planned",
+      "action": "Standard edition gate (D31): one generated table gives every desktop menu, web route, rights form and API route family its edition; the running edition (APP_EDITION, default S) shows only the 114 Standard menus in navigation and Users & Rights, a deferred page opened by URL shows 'not in the Standard edition', and its API answers 403 edition-unavailable. Deferred editions can be switched on as Beta (APP_EDITION_BETA): listed in a separate Beta navigation group with a Beta label and allowed by the API. /me reports the edition. Every one of the 240 navigation routes is classified, including the 81 that match no desktop menu row.",
+      "parentLabels": "P9; X05",
+      "startAfter": [
+        "N170"
+      ],
+      "requiredProof": "Unit tests of the edition table (Lite 49, Basic 78, Standard 114 menus; every navigation route classified); API tests (a deferred route is 403 edition-unavailable with the gate on, allowed with Beta on, untouched when the gate is not configured; a Standard route is unchanged); web unit tests of navigation filtering; existing suites unchanged; a browser run showing the Standard navigation, a deferred URL refused, and Beta switched on.",
+      "gapIds": "G183",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N172",
+      "status": "planned",
+      "action": "Voucher number box on every Standard voucher screen behaves like the desktop tVchNo_KeyDown (TR_SALE.cs:17068-17096): Enter opens the typed voucher, Up opens the last, Down the first, F1 the voucher list.",
+      "parentLabels": "P9; J04",
+      "startAfter": [
+        "N171"
+      ],
+      "requiredProof": "A feature E2E case per voucher module (Enter opens, Up last, Down first, F1 list) passes in the browser; a web unit test of the key handler.",
+      "gapIds": "G179",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N173",
+      "status": "planned",
+      "action": "Print and document windows keep working after the 15-minute access cookie expires: the window refreshes the session before it loads the document instead of showing {\"error\":\"unauthenticated\"}.",
+      "parentLabels": "P9; J22",
+      "startAfter": [
+        "N171"
+      ],
+      "requiredProof": "A browser case that lets the access cookie expire, presses Print and gets the document; an API or web unit test of the refresh-then-open path.",
+      "gapIds": "G180",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N174",
+      "status": "planned",
+      "action": "Printed GST bills round the CGST and SGST halves one way everywhere on the page, and the HSN table totals the bill tax exactly (TR_SALE.cs stores SGST_TAX = CGST_TAX = tax / 2 unrounded).",
+      "parentLabels": "P9; J22",
+      "startAfter": [
+        "N171"
+      ],
+      "requiredProof": "A unit vector for the gold + silver bill of 30 October (tax 2,043.29: HSN table and summary agree and total 2,043.29) and the feature print case asserting both.",
+      "gapIds": "G181",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N175",
+      "status": "planned",
+      "action": "Stop the request storms: navigation links do not prefetch every route on page load, and the party box fetches the balance once for the chosen party, not on every keystroke.",
+      "parentLabels": "P9; X05",
+      "startAfter": [
+        "N171"
+      ],
+      "requiredProof": "A browser check that a page load issues no bulk ?_rsc= prefetch and that typing a six-character party code sends at most one balance request; route reachability unchanged.",
+      "gapIds": "G182",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
     }
   ],
   "amendments": [

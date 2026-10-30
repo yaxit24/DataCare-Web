@@ -1,3 +1,13 @@
+## 2026-10-30 (evening) — Standard at 100% confirmed; plan revised (document 15)
+
+Owner confirmed Standard first and complete: all 114 menus end to end like the desktop, each verified in the browser
+with every case and edge case; pilots wait. Document 15 §5 now has the per-menu method (desktop study -> frozen case
+list -> browser run -> fix -> visual check -> FULL), steps E0-E13 with lane-hours (~380 in all, 2-3 weeks at a normal
+pace; the earlier few-days estimate was too optimistic), and the progress number "Standard menus done / 114".
+Deferred editions are hidden by the edition gate and available only as labelled Beta (`APP_EDITION_BETA=1`).
+New gaps G179-G183 and planned slices N171-N175 (N171 = edition gate). E1 next: N162 (G169 + G176) and N163 (G171).
+Decisions D16-D19 still need the owner.
+
 ## 2026-10-30 — Standard edition first (D31, document 15)
 
 Owner instruction: build one desktop edition to production before the others, Standard first (it contains Lite and
