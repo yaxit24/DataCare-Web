@@ -75,6 +75,8 @@ python3 docs/master-parity-plan-2026-09-29/validate_plan.py
 python3 docs/tools/docs_check.py
 ```
 
+Use the [feature browser validation skill](../datacare-feature-browser-validation/SKILL.md) for every changed feature/workflow: execute its frozen applicable case matrix through the real browser, verify persisted and downstream business effects, and retain exact-set coverage and desktop-match evidence separately. A selected happy path or green API suite cannot satisfy this requirement.
+
 Add or extend a zero-mock journey for every changed screen (`docs/handbook/web/testing.md` §4) and run the visual
 protocol with the `datacare-e2e-visual` skill. If the isolated database port 55433 is busy (another session), run the
 wrapper on another port (`PARITY_TEST_PORT`, and `PARITY_API_PORT`/`PARITY_WEB_PORT` for browser suites; testing §2);

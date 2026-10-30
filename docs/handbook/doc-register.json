@@ -65,7 +65,8 @@
     {
       "match": [
         ".kiro/skills/*/SKILL.md",
-        ".kiro/steering/*.md"
+        ".kiro/steering/*.md",
+        ".kiro/skills/*/references/*.md"
       ],
       "area": "Documentation hub",
       "kind": "agent skill",
