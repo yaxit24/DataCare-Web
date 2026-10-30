@@ -1982,6 +1982,12 @@ Return module runs 16 passed, 5 failed (baselined), 3 blocked. A new database te
 `web/apps/api/test/salesFamilyLifecycle.db.test.ts` saves a line marked `N` as loose stock and still refuses the
 unknown tag `NOSUCH`; it fails without the fix. The two return lifecycle test files pass (39 tests).
 
+Also checked by hand in the local Chrome on the seeded stack (`web/apps/web/test/features/serve.mjs`): at 1600 px
+Import is the top element at its own centre and ends 12 px before the Tax % box; importing sale 00002 with a mouse
+click filled `E2ELOC` and a `GLD22` line with tag `N`, Save answered 201, and the database holds `SL_DETL_RTN.TAG_NO`
+`N` with `VCH_SRNO` 0 and a `MAIN_STOCK` + 10 g row with tag `N`. The same screen still prices the line on fine weight
+(58,465.80), which is G190 (N181).
+
 ## 6. Status corrections
 
 | Item | Before | Now |
