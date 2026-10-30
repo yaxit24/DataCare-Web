@@ -1,6 +1,8 @@
 'use client';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { desktopGlobalFormKeyActions, useFormKeys } from './FormKeys';
+import { findSaveButton, isSaveMnemonic } from '../lib/saveMnemonic';
 
 /**
  * Installs the desktop MDI shell's global accelerators on every authenticated page.
@@ -17,5 +19,18 @@ import { desktopGlobalFormKeyActions, useFormKeys } from './FormKeys';
 export function GlobalFormKeys() {
   const router = useRouter();
   useFormKeys(desktopGlobalFormKeyActions((href) => router.push(href)));
+  // The &Save mnemonic (G171): Alt+S presses the screen's marked save button, from any field.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!isSaveMnemonic(event)) return;
+      const button = findSaveButton(document);
+      if (!button) return;
+      event.preventDefault();
+      event.stopPropagation();
+      button.click();
+    };
+    document.addEventListener('keydown', onKeyDown, true);
+    return () => document.removeEventListener('keydown', onKeyDown, true);
+  }, []);
   return null;
 }

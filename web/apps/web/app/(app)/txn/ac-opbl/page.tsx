@@ -216,7 +216,7 @@ export default function AcOpeningPage() {
                 <b style={{ color: 'var(--err)' }}>Difference ₹{diff.toLocaleString('en-IN')}</b>
               )}
             </span>
-            <button className="primary" disabled={busy || !canSubmit}>
+            <button className="primary" data-save-mnemonic disabled={busy || !canSubmit}>
               {busy ? 'Saving…' : 'Post Opening'}
             </button>
           </div>

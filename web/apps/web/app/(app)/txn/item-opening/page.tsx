@@ -310,7 +310,7 @@ export default function ItemOpeningPage() {
               + Add item
             </button>
             <span className="spacer" />
-            <button ref={submitRef} className="primary" disabled={busy}>
+            <button ref={submitRef} className="primary" data-save-mnemonic disabled={busy}>
               {busy ? 'Posting…' : loadedVchNo ? 'Update Opening' : 'Post Opening'}
             </button>
           </div>

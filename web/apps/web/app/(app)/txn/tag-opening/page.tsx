@@ -707,7 +707,7 @@ export default function TagOpeningPage() {
               + Add tag
             </button>
             <span className="spacer" />
-            <button ref={submitRef} className="primary" disabled={busy}>
+            <button ref={submitRef} className="primary" data-save-mnemonic disabled={busy}>
               {busy ? 'Saving…' : loadedVchNo ? 'Update Opening' : 'Load Opening Stock'}
             </button>
           </div>

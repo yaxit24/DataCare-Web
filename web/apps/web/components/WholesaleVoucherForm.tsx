@@ -1006,7 +1006,13 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
         </p>
       ) : null}
       <div className="toolbar">
-        <button type="button" className="primary" onClick={() => void save()} disabled={!canSave}>
+        <button
+          type="button"
+          className="primary"
+          data-save-mnemonic
+          onClick={() => void save()}
+          disabled={!canSave}
+        >
           {busy ? 'Saving…' : loadedVoucherNo ? 'Update' : 'Save'}
         </button>
         <button

@@ -218,7 +218,7 @@ export default function CounterTransferPage() {
             <span className="muted" style={{ marginRight: 12 }}>
               POST /stock/counter-transfer
             </span>
-            <button className="primary" disabled={busy}>
+            <button className="primary" data-save-mnemonic disabled={busy}>
               {busy ? 'Posting…' : 'Post Transfer'}
             </button>
           </div>

@@ -175,6 +175,7 @@ export function VoucherChrome(props: VoucherChromeProps) {
         <button
           type={props.onSave ? 'button' : 'submit'}
           className="primary"
+          data-save-mnemonic
           onClick={props.onSave}
           disabled={props.saving}
         >

@@ -681,6 +681,7 @@ export function EBillEntry({
         <button
           type="button"
           className="primary"
+          data-save-mnemonic
           disabled={busy || !coBook || locked}
           onClick={() => void save()}
         >

@@ -461,7 +461,11 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
               </button>
             </>
           )}
-          <button className="primary" disabled={busy || !coBook || (multi && !!loadedVch)}>
+          <button
+            className="primary"
+            data-save-mnemonic
+            disabled={busy || !coBook || (multi && !!loadedVch)}
+          >
             {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : `Save ${title}`}
           </button>
         </div>

@@ -1285,7 +1285,7 @@ export default function BullionSalePage() {
                 Delete
               </button>
             )}
-            <button className="primary" disabled={busy || !canSubmit}>
+            <button className="primary" data-save-mnemonic disabled={busy || !canSubmit}>
               {busy ? 'Saving…' : loadedVoucherNo ? 'Update Bullion Sale' : 'Save Bullion Sale'}
             </button>
           </div>

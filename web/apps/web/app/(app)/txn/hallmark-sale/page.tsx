@@ -565,7 +565,7 @@ export default function HallmarkSalePage() {
                 : ''}{' '}
               · <b>Total ₹{grandTotalPrev.toLocaleString('en-IN')}</b>
             </span>
-            <button className="primary" disabled={busy}>
+            <button className="primary" data-save-mnemonic disabled={busy}>
               {busy ? 'Saving…' : loadedVchNo ? 'Update Hallmark Sale' : 'Save Hallmark Sale'}
             </button>
           </div>

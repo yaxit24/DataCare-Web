@@ -884,7 +884,7 @@ export default function KarigarForm({
                   ? ` · Party fine ${partyFine || totFine}`
                   : ''}
             </span>
-            <button className="primary" disabled={busy}>
+            <button className="primary" data-save-mnemonic disabled={busy}>
               {busy ? 'Saving…' : lifecycle && loadedVch ? `Update #${loadedVch}` : 'Save'}
             </button>
             {lifecycle && loadedVch && (

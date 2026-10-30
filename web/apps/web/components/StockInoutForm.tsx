@@ -607,7 +607,12 @@ export function StockInoutForm({ direction }: { direction: Direction }) {
               Net {netTotal.toLocaleString('en-IN')} g ·{' '}
               <b>Fine {fineTotal.toLocaleString('en-IN')}</b>
             </span>
-            <button ref={submitRef} className="primary" disabled={busy || !coBook}>
+            <button
+              ref={submitRef}
+              className="primary"
+              data-save-mnemonic
+              disabled={busy || !coBook}
+            >
               {busy ? 'Saving…' : loadedVchNo ? `Update ${label}` : `Save ${label}`}
             </button>
           </div>

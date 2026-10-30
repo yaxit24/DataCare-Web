@@ -193,7 +193,7 @@ export default function FineJvPage() {
                 New
               </button>
             )}
-            <button className="primary" disabled={busy || !canSubmit}>
+            <button className="primary" data-save-mnemonic disabled={busy || !canSubmit}>
               {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : 'Save Fine JV'}
             </button>
           </div>

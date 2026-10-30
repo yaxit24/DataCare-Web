@@ -885,7 +885,11 @@ export default function SalesOrderPage() {
                 + Add line
               </button>
               <span className="spacer" />
-              <button className="primary" disabled={busy || !coBook || !previewReady}>
+              <button
+                className="primary"
+                data-save-mnemonic
+                disabled={busy || !coBook || !previewReady}
+              >
                 {busy ? 'Saving…' : selected ? 'Update Sales Order' : 'Save Sales Order'}
               </button>
             </div>
