@@ -7,6 +7,8 @@ description: Verify a DataCare web screen in a real Chrome browser through the C
 
 Screens: `$ARGUMENTS` (for example `/txn/receipt` or `Transaction/Cash Received`).
 
+For a feature-level working/completion claim, also apply the [feature browser validation skill](../datacare-feature-browser-validation/SKILL.md). This visual checklist alone does not establish complete business behavior or exact required-case coverage.
+
 The full protocol is `docs/handbook/web/testing.md` §5. This skill is the operating checklist.
 
 ## 1. Stack

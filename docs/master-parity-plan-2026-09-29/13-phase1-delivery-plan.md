@@ -23,7 +23,7 @@ books is in use or its edition setting is on (D21). It is done when:
 3. A database test compares the complete write set with independently derived expected rows (testing §3), and the
    desktop differential matches when a desktop capture exists (N83).
 4. A zero-mock journey drives the screen (testing §4), and the Chrome DevTools visual protocol is recorded for it
-   (testing §5).
+   (testing §5). The [feature browser validation skill](../../.kiro/skills/datacare-feature-browser-validation/SKILL.md) freezes and executes all applicable feature cases, checks persisted/downstream business effects and validates the exact-set evidence bundle. Report browser pass and desktop-match coverage separately; failed, blocked or untested required cases prevent a complete-feature claim.
 5. Its print uses a bound template with the desktop copies (N73–N75); its reports show the desktop modes and filters.
 6. An operator accepts it in the side-by-side comparison of document 04.
 

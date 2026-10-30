@@ -24,7 +24,7 @@ Every Markdown file in the repository, classified by the first matching rule in 
 | `docs/handbook/web/*.md` | 4 | handbook | current | — | Web handbook: stack, architecture, modules, engineering standards and testing. |
 | [`AGENTS.md`](../../AGENTS.md) | 1 | agent instructions | current | — | Rules and entry points for AI coding agents working in this repository. |
 | [`.kiro/skills/third-party/README.md`](../../.kiro/skills/third-party/README.md) | 1 | attribution | reference | — | Source and MIT licence of the three skills adapted from Superpowers. |
-| `.kiro/skills/*/SKILL.md`<br>`.kiro/steering/*.md` | 11 | agent skill | current | — | Kiro skills and steering that encode the repository's working procedures. |
+| `.kiro/skills/*/SKILL.md`<br>`.kiro/steering/*.md`<br>`.kiro/skills/*/references/*.md` | 13 | agent skill | current | — | Kiro skills and steering that encode the repository's working procedures. |
 
 ## Master plan
 

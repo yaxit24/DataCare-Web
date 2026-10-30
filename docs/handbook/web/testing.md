@@ -22,6 +22,12 @@ this page is the engineering side that every slice must satisfy first.
 A slice is engineering-complete only when the tiers that apply to it are all green (document 11 §7 and
 [engineering standards](engineering-standards.md)).
 
+## Feature-level validation requirement
+
+Before claiming a feature works, use the [feature browser validation skill](../../../.kiro/skills/datacare-feature-browser-validation/SKILL.md). It turns the applicable T01–T18 groups into a frozen, feature-specific matrix, drives the real UI, checks intermediate values, complete persisted effects and downstream reports, and exercises stale edits, retries, refusals and rollback. Missing implementation is a failure or blocker, never N/A.
+
+Retain exact case identities and candidate/input hashes with screenshots/traces and independent expectations; run the skill’s evidence validator. Report executed coverage, browser/business pass coverage and independent desktop-match coverage separately. Blocked and untested applicable cases stay in the denominator. The validator checks bundle integrity, not artifact truth; it cannot replace browser execution or evidence review. Existing journey titles and suite totals are not proof that every branch ran. Physical device/provider acceptance and parent release acceptance remain separate.
+
 ## 2. Commands
 
 Run from `web/` unless noted.
