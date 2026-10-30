@@ -664,6 +664,59 @@ export const salesInvoice = {
     ),
 
     C(
+      'print.hsn-agrees-with-summary',
+      'T16',
+      'output',
+      'SalesBillA4Gst.rpt prints SL_DATA.CGST_TAX/SGST_TAX (line halves unused); G181: the HSN table must show the same heads as the summary and total the bill tax',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const vchNo = await createOneLine(ctx, page); // 1,908.29 tax: two halves of 954.145
+        await loadVoucher(page, vchNo);
+        const documentRequest = page
+          .context()
+          .waitForEvent('request', (r) => /\/api\/sales\/invoice\?.*format=html/.test(r.url()), {
+            timeout: 15_000,
+          });
+        const [popup] = await Promise.all([
+          page.waitForEvent('popup'),
+          page.getByRole('button', { name: 'Print', exact: true }).click(),
+        ]);
+        const response = await page.request.get((await documentRequest).url());
+        assert.equal(response.status(), 200, await response.text());
+        const html = await response.text();
+        await popup.close();
+        const amount = (text) => Number(String(text).replace(/,/g, ''));
+        const table = html.slice(html.indexOf('class="hsn"'), html.indexOf('class="tot"'));
+        const rows = [
+          ...table.matchAll(
+            /<tr><td>[^<]*<\/td><td>[^<]*<\/td><td>([^<]*)<\/td><td>([^<]*)<\/td><td>([^<]*)<\/td><\/tr>/g,
+          ),
+        ];
+        const paise = (values) => Math.round(values.reduce((sum, v) => sum + v, 0) * 100);
+        const printed = {
+          hsnCgst: paise(rows.map((r) => amount(r[1]))) / 100,
+          hsnSgst: paise(rows.map((r) => amount(r[2]))) / 100,
+          hsnTax: paise(rows.map((r) => amount(r[3]))) / 100,
+          summaryCgst: amount(/<td>CGST<\/td><td class="r">([^<]*)<\/td>/.exec(html)?.[1]),
+          summarySgst: amount(/<td>SGST<\/td><td class="r">([^<]*)<\/td>/.exec(html)?.[1]),
+        };
+        const [bill] = await ctx.rows(
+          `SELECT "TAX_AMT"::float tax,"CGST_TAX"::float cgst,"SGST_TAX"::float sgst FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        assert.equal(printed.hsnCgst, printed.summaryCgst, 'HSN CGST column = summary CGST');
+        assert.equal(printed.hsnSgst, printed.summarySgst, 'HSN SGST column = summary SGST');
+        assert.equal(printed.hsnTax, bill.tax, 'HSN Tax column = bill tax');
+        return {
+          observation: `HSN CGST ${printed.hsnCgst} / SGST ${printed.hsnSgst} / Tax ${printed.hsnTax}; summary CGST ${printed.summaryCgst} / SGST ${printed.summarySgst}; bill tax ${bill.tax}`,
+          expected:
+            'the HSN columns equal the summary heads and the Tax column equals the bill tax',
+          output: Buffer.from(html),
+        };
+      },
+    ),
+
+    C(
       'refusal.cheque-without-bank',
       'T06',
       'refusal',

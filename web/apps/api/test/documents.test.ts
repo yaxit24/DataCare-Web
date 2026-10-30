@@ -163,7 +163,9 @@ describe('faithful A4 documents', () => {
     );
   });
 
-  it('a sale that carries line tax keeps its own per-line HSN amounts', () => {
+  // G181: every desktop sales bill prints SL_DATA.CGST_TAX/SGST_TAX and never the line halves (UseCount 0 in
+  // SalesBillA4Gst, B2BSaleBillA4Tax, SalesBillHzGst, SalesBillOrgDup), so the HSN summary takes the header heads.
+  it('a sale prints its header tax heads in the HSN summary, not the per-line halves', () => {
     const html = invoiceHtml(
       {
         BILL_NO: 'S1',
@@ -178,8 +180,124 @@ describe('faithful A4 documents', () => {
       { company: CO },
     );
     expect(html).toContain(
-      '<td>7113</td><td>1,000.00</td><td>14.00</td><td>16.00</td><td>30.00</td>',
+      '<td>7113</td><td>1,000.00</td><td>15.00</td><td>15.00</td><td>30.00</td>',
     );
+  });
+
+  it('G181: an odd-paise tax prints the same halves in the HSN table and the summary, and the table totals the tax', () => {
+    // Line A of the feature data: 63,609.50 x 3% = 1,908.285 -> 1,908.29; halves stored unrounded, 954.145 each.
+    // The line halves were rounded on their own (954.1425 -> 954.14), which printed 954.14 beside a 954.15 summary.
+    const html = invoiceHtml(
+      {
+        BILL_NO: 'S2',
+        VCH_NO: '2',
+        CO_BOOK: 'SAL',
+        NET_AMT: 63609.5,
+        TAX_AMT: 1908.29,
+        CGST_TAX: 954.145,
+        SGST_TAX: 954.145,
+        TOT_AMT: 65517.79,
+      },
+      [
+        {
+          IT_CODE: 'GLD22',
+          ITM_AMT: 61234.5,
+          LBR_AMT: 2375,
+          ITM_CGST_AMT: 954.14,
+          ITM_SGST_AMT: 954.14,
+          HSN_CODE: '7113',
+        },
+      ],
+      { company: CO },
+    );
+    expect(html).toContain(
+      '<td>7113</td><td>63,609.50</td><td>954.15</td><td>954.15</td><td>1,908.29</td>',
+    );
+    expect(html).toContain('<td>CGST</td><td class="r">954.15</td>');
+    expect(html).toContain('<td>SGST</td><td class="r">954.15</td>');
+  });
+
+  it('two HSN groups: each column adds up to the summary head, the last group takes the remainder', () => {
+    const html = invoiceHtml(
+      {
+        BILL_NO: 'S3',
+        VCH_NO: '3',
+        CO_BOOK: 'SAL',
+        NET_AMT: 68109.67,
+        TAX_AMT: 2043.29,
+        CGST_TAX: 1021.645,
+        SGST_TAX: 1021.645,
+        TOT_AMT: 70152.96,
+      },
+      [
+        {
+          IT_CODE: 'GLD22',
+          ITM_AMT: 63609.5,
+          ITM_CGST_AMT: 954.14,
+          ITM_SGST_AMT: 954.14,
+          HSN_CODE: '7113',
+        },
+        {
+          IT_CODE: 'SLV92',
+          ITM_AMT: 4500.17,
+          ITM_CGST_AMT: 67.5,
+          ITM_SGST_AMT: 67.5,
+          HSN_CODE: '7114',
+        },
+      ],
+      { company: CO },
+    );
+    expect(html).toContain(
+      '<td>7113</td><td>63,609.50</td><td>954.14</td><td>954.14</td><td>1,908.28</td>',
+    );
+    expect(html).toContain(
+      '<td>7114</td><td>4,500.17</td><td>67.51</td><td>67.51</td><td>135.01</td>',
+    );
+    expect(html).toContain('<td>CGST</td><td class="r">1,021.65</td>');
+  });
+
+  it('for any bill, the printed HSN columns add up to the printed heads and the Tax column to the bill tax', () => {
+    const amount = (text: string) => Number(text.replace(/,/g, ''));
+    let seed = 20261030;
+    const next = () => (seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648;
+    for (let bill = 0; bill < 300; bill++) {
+      const groups = 1 + Math.floor(next() * 4);
+      const lines = Array.from({ length: groups }, (_, i) => ({
+        IT_CODE: `IT${i}`,
+        ITM_AMT: Math.floor(next() * 10_000_000) / 100,
+        HSN_CODE: String(7110 + i),
+      }));
+      const taxable = lines.reduce((sum, line) => sum + line.ITM_AMT, 0);
+      const tax = Math.round(taxable * 3) / 100; // 3% to the paisa
+      const half = tax / 2; // TR_SALE.cs:15288-15289: unrounded halves
+      const html = invoiceHtml(
+        {
+          VCH_NO: String(bill),
+          CO_BOOK: 'SAL',
+          NET_AMT: taxable,
+          TAX_AMT: tax,
+          CGST_TAX: half,
+          SGST_TAX: half,
+          TOT_AMT: taxable + tax,
+        },
+        lines,
+        { company: CO },
+      );
+      const table = html.slice(html.indexOf('class="hsn"'), html.indexOf('class="tot"'));
+      const rows = [
+        ...table.matchAll(
+          /<tr><td>[^<]*<\/td><td>[^<]*<\/td><td>([^<]*)<\/td><td>([^<]*)<\/td><td>([^<]*)<\/td><\/tr>/g,
+        ),
+      ];
+      expect(rows).toHaveLength(groups);
+      const cents = (values: number[]) =>
+        Math.round(values.reduce((sum, value) => sum + value, 0) * 100);
+      const summaryCgst = amount(/<td>CGST<\/td><td class="r">([^<]*)<\/td>/.exec(html)![1]!);
+      const summarySgst = amount(/<td>SGST<\/td><td class="r">([^<]*)<\/td>/.exec(html)![1]!);
+      expect(cents(rows.map((row) => amount(row[1]!)))).toBe(Math.round(summaryCgst * 100));
+      expect(cents(rows.map((row) => amount(row[2]!)))).toBe(Math.round(summarySgst * 100));
+      expect(cents(rows.map((row) => amount(row[3]!)))).toBe(Math.round(tax * 100));
+    }
   });
 
   it('purchase bill: supplier + inter-state IGST', () => {
