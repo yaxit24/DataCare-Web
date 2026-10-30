@@ -1,3 +1,4 @@
+import { round } from '@datacare/core';
 /** Shared A4 print-document chrome for faithful customer/vendor/karigar-facing
  *  documents (GST tax invoice, purchase bill, karigar issue voucher…), mirroring
  *  the desktop Crystal bills (company GSTIN header, bill-to w/ GSTIN + state,
@@ -189,36 +190,40 @@ export function docShell(opts: {
 }
 
 /**
- * G95: purchase and purchase-return rows carry no per-line tax — `TR_PURC` and `TR_KR_ISU` write the tax only on
- * the header, and the desktop's `PrRtnBillGst.RPT` prints the header's `CGST_TAX`, `SGST_TAX` and `IGST_TAX`
- * (`TR_KR_ISU.cs:5516-5520`, `extraction_output/rpt_xml/PrRtnBillGst.xml`). When no line carries a tax amount, the
- * HSN summary therefore takes the header tax, split across HSN groups by taxable value with the last group taking
- * the remainder, so the summary always adds up to the tax the voucher posted. A sale's lines carry their own
- * `ITM_*GST_AMT` and are left as they are.
+ * The HSN summary prints the voucher's header tax heads, split across the HSN groups (G95, G181).
+ *
+ * Every desktop GST bill prints the header heads and never the line halves: the sales bills `SalesBillA4Gst`,
+ * `B2BSaleBillA4Tax`, `SalesBillHzGst` and `SalesBillOrgDup` use `SL_DATA.CGST_TAX` and `SGST_TAX`, with
+ * `SL_DETL.ITM_CGST_AMT` and `ITM_SGST_AMT` unused (`extraction_output/rpt_xml/*.xml`, UseCount 0), and purchase rows
+ * carry no line tax at all (`TR_KR_ISU.cs:5516-5520`, `PrRtnBillGst.xml`). The web also stores per-line halves, each
+ * rounded on its own for the GST return and the e-invoice; printing them made the HSN table disagree with the summary
+ * beside it by a paisa (G181: 954.14 in the table against 954.15 in the summary on a 1,908.29 tax).
+ *
+ * Each group takes its taxable share of a head, rounded half-up to the paisa, and the last group takes the exact
+ * remainder. Every column therefore adds up to the head printed in the summary, and the Tax column to the bill tax.
+ * The halves stay equal, as the desktop stores and prints them (`TR_SALE.cs:15288-15289` writes tax / 2 unrounded),
+ * so an odd-paise tax prints as two equal halves each rounded the same way.
  */
 function allocateHeaderTaxToHsn(
   hsn: Record<string, { taxable: number; cgst: number; sgst: number; igst: number }>,
   header: any,
-  lines: any[],
 ): void {
-  const lineTaxCarried = lines.some(
-    (l) => num(l.ITM_CGST_AMT) !== 0 || num(l.ITM_SGST_AMT) !== 0 || num(l.ITM_IGST_AMT) !== 0,
-  );
   const groups = Object.values(hsn);
-  if (lineTaxCarried || groups.length === 0) return;
+  if (groups.length === 0) return;
   const totalTaxable = groups.reduce((sum, g) => sum + g.taxable, 0);
   for (const component of ['cgst', 'sgst', 'igst'] as const) {
     const headerTax = num(header[`${component.toUpperCase()}_TAX`]);
     let allocated = 0;
     groups.forEach((group, index) => {
+      // A head is a paisa amount or half of one (tax / 2), so three places hold the remainder exactly.
       const share =
         index === groups.length - 1
-          ? headerTax - allocated
+          ? round(headerTax - allocated, 3)
           : totalTaxable === 0
             ? 0
-            : Math.round(((headerTax * group.taxable) / totalTaxable) * 100) / 100;
+            : round((headerTax * group.taxable) / totalTaxable, 2);
       group[component] = share;
-      allocated += share;
+      allocated = round(allocated + share, 3);
     });
   }
 }
@@ -251,9 +256,6 @@ export function gstBillBody(header: any, lines: any[]): string {
       const key = String(l.HSN_CODE ?? '').trim() || '—';
       const e = (hsn[key] ??= { taxable: 0, cgst: 0, sgst: 0, igst: 0 });
       e.taxable += taxable;
-      e.cgst += num(l.ITM_CGST_AMT);
-      e.sgst += num(l.ITM_SGST_AMT);
-      e.igst += num(l.ITM_IGST_AMT);
       const desc =
         esc(l.IT_CODE) +
         (l.DESIGN_NO
@@ -274,7 +276,7 @@ export function gstBillBody(header: any, lines: any[]): string {
       <th>#</th><th style="width:34%">Description</th><th>HSN</th><th>Pcs</th><th>Gross Wt</th><th>Net Wt</th><th>Rate</th><th>Making</th><th>Taxable</th>
     </tr></thead><tbody>${rows || '<tr><td colspan="9" class="c">No line items</td></tr>'}</tbody>
     <tfoot><tr><td class="c" colspan="3">Total</td><td class="r">${sPcs || ''}</td><td class="r">${wt(sGwt)}</td><td class="r">${wt(sNwt)}</td><td></td><td class="r">${money(sMaking)}</td><td class="r">${money(sTaxable)}</td></tr></tfoot></table>`;
-  allocateHeaderTaxToHsn(hsn, h, lines);
+  allocateHeaderTaxToHsn(hsn, h);
   const hsnRows = Object.entries(hsn)
     .map(
       ([code, e]) =>
