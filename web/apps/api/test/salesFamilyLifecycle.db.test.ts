@@ -247,6 +247,10 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
        VALUES ($1,$2,$3,'SRT',1,'CTRL','SALES RETURNE','I'),
               ($1,$2,$3,'SRT',2,'CASH','SALES RETURNE','I'),
               ($1,$2,$3,'SRT',3,'ROUND','SALES RETURNE','I'),
+              -- N59/G164: the order advance debits the order book's slot-1 account (desktop
+              -- salesOrder.ts:1197), so the SOR book must carry that slot — the writer no longer
+              -- falls back to the literal 'CASH'.
+              ($1,$2,$3,'SOR',1,'CTRL','SALES ORDER','O'),
               -- G115 / P0-04: the labour writer resolves its income account from BOOK_DETL SR_NO 6
               -- (desktop Ac_Ledr.cs:1203), so the LBR book must carry that slot.
               ($1,$2,$3,'LBR',6,'CTRL','LABOUR WORK','O'),

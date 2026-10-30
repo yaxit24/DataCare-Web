@@ -490,4 +490,26 @@ run('Sales ordinary saved state and ordered design source replay', () => {
     );
     expect(await snapshot()).toEqual(before);
   });
+
+  // N59/G164: the order advance debits the book's slot-1 account, never the literal 'CASH'.
+  it('refuses an order advance when the book has no configured settlement account, and still honours an explicit one', async () => {
+    // Book S91 carries no BOOK_DETL slot 1. An advance with NO cashAc must be refused (fail-closed),
+    // not posted to a non-existent 'CASH' ledger — and nothing is left behind.
+    await expect(
+      createSalesOrder(runtime, { ...input(), cashAc: undefined, advanceAmount: 100 }),
+    ).rejects.toThrow();
+    const orphan = (await owner.$queryRawUnsafe(
+      `SELECT count(*)::int n FROM "SL_ORD_DATA" WHERE tenant_id=$1`,
+      tenantId,
+    )) as { n: number }[];
+    expect(orphan[0]!.n).toBe(0);
+
+    // An explicit account still wins (posts the advance Dr leg to that account).
+    await createSalesOrder(runtime, { ...input(), cashAc: 'CASH', advanceAmount: 100 });
+    const legs = (await owner.$queryRawUnsafe(
+      `SELECT "AC_CODE" ac, "DR_AMT"::float dr FROM "AC_DATA" WHERE tenant_id=$1 AND "DR_AMT"::float=100`,
+      tenantId,
+    )) as { ac: string; dr: number }[];
+    expect(legs.find((l) => l.ac === 'CASH')).toBeTruthy();
+  });
 });

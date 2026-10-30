@@ -89,14 +89,13 @@ const REMAINING: Readonly<Record<string, number>> = {
   'modules/manufacturing/karigar.ts': 4,
   'modules/sales/labourInvoice.ts': 3,
   'modules/finance/employeeJv.ts': 3,
-  'modules/sales/salesOrder.ts': 3,
   'modules/finance/ledgerAdjust.ts': 2,
   'modules/manufacturing/mfg.ts': 2,
   'modules/stock/tagOps.ts': 2,
 };
 
 /** The total at the time P0-04's first slice landed. It may fall; it may not rise. */
-const REMAINING_TOTAL = 44;
+const REMAINING_TOTAL = 41;
 
 /**
  * Files this slice cleaned. Listing them explicitly means a regression names itself instead of hiding inside
@@ -108,6 +107,7 @@ const MUST_STAY_CLEAN = [
   'modules/finance/batchReceipt.ts',
   'modules/membership/scheme.ts',
   'modules/shared/postingAccounts.ts',
+  'modules/sales/salesOrder.ts',
 ];
 
 const FALLBACK = new RegExp(String.raw`(?:\?\?|\|\|)\s*'(${ACCOUNT_LITERALS.join('|')})'`, 'g');

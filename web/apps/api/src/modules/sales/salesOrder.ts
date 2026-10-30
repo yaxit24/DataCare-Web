@@ -812,11 +812,24 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
   const parentNumbers = orderRowNumbers(orderLines, 'srNo');
   const tenantId = input.scope.tenantId;
   const adv = round2(Number(input.advanceAmount || 0));
-  const cashAc = input.cashAc ?? 'CASH';
 
   const run = async (tx: any) => {
     const mode = requestedMode(input.orderMainBook);
     const book = await resolveOrderBookTx(tx, input.scope, mode);
+    // N59/G164: the advance debit account is NOT the literal 'CASH'. The desktop debits the order
+    // book's BOOK_DETL slot-1 account for the advance (verified at :1197 below); only when an advance
+    // is actually taken does the account matter. Explicit request account wins, else resolve slot 1
+    // on this transaction and FAIL-CLOSED when unconfigured.
+    const cashAc =
+      adv > 0
+        ? await resolveBookSlotAccountTx(
+            tx,
+            { ...input.scope, coBook: book.coBook },
+            'cash-settlement',
+            1,
+            input.cashAc,
+          )
+        : (input.cashAc ?? '');
     if (mode.mainBook === 'SALES ORDER')
       await assertSalesOrderDateTx(tx, input.scope, requestedDate);
     const configuration = await orderLabourConfigurationTx(tx, input.scope);

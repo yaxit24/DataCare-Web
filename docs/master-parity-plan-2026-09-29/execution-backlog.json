@@ -5762,6 +5762,28 @@
         "web/apps/api/test/salesOrderCancelAccounts.db.test.ts"
       ],
       "statusNote": "IMPLEMENTED. cancelSalesOrderAdjust fell back to literal 'CASH'/'KASAR' account codes (N59 anti-pattern) which do not exist in a real AC_MAST, so a cancel without an explicit account posted refund/kasar legs to a non-existent ledger. Desktop posts via Ac_Ledr.Order_Adj_Ledr (TR_SL_ORD_ADJ.cs:3665) resolving from BOOK_DETL slots. Fix: on the posting tx, paidAc = resolveBookSlotAccountTx(tx, {scope,coBook:'ORC'}, 'cash-settlement', 1, input.paidAc) when paidAmt>0 (explicit wins else ORC slot-1, fail-closed); kasarAc = kasarAccountTx(tx, ORCscope, input.kasarAc, paidAc, kasar) when kasar>0 (explicit/slot-2, guarded vs settlement). Imports resolveBookSlotAccountTx + kasarAccountTx. Proven by salesOrderCancelAccounts.db.test.ts 4/4 (slot-1 refund resolution, slot-2 kasar, explicit wins, fail-closed when unconfigured). salesFamilyLifecycle 31/31 unaffected (passes paidAc explicitly). All gates green incl clean api build, web 646+9, sales-order DB 58/58, depth:parity (removes a literal, no new unreachable field). salesOrder.ts size ceiling 2350->2361."
+    },
+    {
+      "id": "N156",
+      "status": "implemented-unverified",
+      "action": "Resolve the sales-order advance debit account from the order book's BOOK_DETL slot 1 instead of the 'CASH' literal - explicit request account wins, else slot 1, fail-closed when unconfigured and only when an advance is taken.",
+      "parentLabels": "P9; N59",
+      "startAfter": [
+        "N155"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "salesOrderRound4.db.test.ts: advance with no cashAc refused (fail-closed, nothing left); explicit account still posts the Dr leg. salesFamilyLifecycle (orderInput advance 100, no cashAc) now configures SOR slot-1 and passes. gates + clean api build + web 646+9 + sales-order DB green.",
+      "gapIds": "G164",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/api/src/modules/sales/salesOrder.ts",
+        "web/apps/api/test/salesOrderRound4.db.test.ts",
+        "web/apps/api/test/salesFamilyLifecycle.db.test.ts"
+      ],
+      "statusNote": "IMPLEMENTED. salesOrder writer debited the advance to input.cashAc ?? 'CASH' (N59 literal - 'CASH' is not a real AC_MAST code). Desktop debits the order book BOOK_DETL slot-1 (salesOrder.ts:1197 comment). Fix: moved cashAc resolution inside run(tx) after resolveOrderBookTx; when adv>0, cashAc = resolveBookSlotAccountTx(tx, {scope,coBook:book.coBook}, 'cash-settlement', 1, input.cashAc) (explicit wins, else slot-1, fail-closed); when adv==0, input.cashAc ?? ''. Proven by a new salesOrderRound4 case (advance+no cashAc refused with nothing left behind; explicit cashAc posts the Dr leg) + salesFamilyLifecycle seed gained SOR slot-1 (its orderInput takes a 100 advance with no cashAc) still green. All gates + clean api build + web 646+9 + sales-order DB (round4 11/11, family 32, cancel-accounts 4/4, lifecycle) + depth:parity green. salesOrder.ts size ceiling 2361->2374."
     }
   ],
   "amendments": [
