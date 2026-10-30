@@ -228,6 +228,20 @@ export function resetSavedLogins() {
 }
 
 /**
+ * A long-lived authenticated context for one crawler worker. Each worker uses its own login slot, so its refresh
+ * token is never shared with another context (refresh tokens are single-use).
+ */
+export async function authenticatedContext(stack, credentials) {
+  const storageState = await savedLogin(stack, credentials);
+  return stack.browser.newContext({
+    baseURL: stack.target.webOrigin,
+    viewport: { width: 1600, height: 1000 },
+    storageState,
+    acceptDownloads: true,
+  });
+}
+
+/**
  * A new, isolated browser context for one case, authenticated as `user` (see savedLogin). Every request the
  * page makes to /api is recorded; console errors and page errors are collected.
  */

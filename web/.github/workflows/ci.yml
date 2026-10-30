@@ -36,6 +36,17 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          # The PR merge commit and its base parent, for the browser-test gate's diff.
+          fetch-depth: 2
+
+      # A behaviour change ships with its browser test (testing handbook §4a). Needs only git and Node. The PR body
+      # is passed through the environment, never interpolated into the command.
+      - name: 'Gate: behaviour changes ship with a browser test'
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+        working-directory: web
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: node scripts/check-browser-test-coverage.mjs --base HEAD^1 --head HEAD
       - uses: pnpm/action-setup@v4
         with: { version: 9.15.4 }
       - uses: actions/setup-node@v4
@@ -352,6 +363,11 @@ jobs:
         working-directory: web
         run: node scripts/parity-test-env.mjs -- node apps/web/test/features/run-features.mjs
 
+      - name: UI surface crawl (every page; main-action and missing-voucher probes; shrink-only baseline)
+        if: ${{ !cancelled() && steps.journeys.conclusion != 'skipped' }}
+        working-directory: web
+        run: node scripts/parity-test-env.mjs -- node apps/web/test/features/run-surface.mjs
+
       - name: Upload results and screenshots
         if: failure()
         uses: actions/upload-artifact@v4
@@ -362,6 +378,7 @@ jobs:
             web/test-results/session-context-real-stack-lifecycle/
             web/test-results/return-labour-preview-lifecycle/
             web/test-results/feature-e2e/
+            web/test-results/ui-surface/
           if-no-files-found: ignore
           retention-days: 14
 
