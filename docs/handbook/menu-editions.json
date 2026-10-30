@@ -1,0 +1,2091 @@
+{
+ "kind": "datacare.menu-editions/1.0",
+ "source": {
+  "database": "NextMain (desktop menu database, MENU_DATA)",
+  "file": "unified/database/backups/NextMain.BAK",
+  "sha256": "e714fb411f06ee087112e4ba0afd910c661c558b9d703cd2c559976054c421a1",
+  "query": "SELECT SM_MAIN_CODE,SM_MAIN_NAME,SM_CODE,SM_NAME,BTN_NAME,SM_TYPE,SM_VIEW,MAIN_SRNO,TILE_ITEM FROM MENU_DATA ORDER BY BTN_NAME,SM_CODE",
+  "note": "Configuration rows only (menu captions and codes); no customer data. Editions are cumulative: MDI_FORM.cs:11236-11330 loads MENU_DATA rows WHERE SM_VIEW='Y' AND SM_TYPE IN (...) for the running edition DC_Main.MsSoftType."
+ },
+ "editions": [
+  {
+   "code": "L",
+   "name": "Lite",
+   "includes": [
+    "L"
+   ],
+   "visibleMenus": 49
+  },
+  {
+   "code": "B",
+   "name": "Basic",
+   "includes": [
+    "L",
+    "B"
+   ],
+   "visibleMenus": 78
+  },
+  {
+   "code": "S",
+   "name": "Standard",
+   "includes": [
+    "L",
+    "B",
+    "S"
+   ],
+   "visibleMenus": 114
+  },
+  {
+   "code": "U",
+   "name": "Ultra",
+   "includes": [
+    "L",
+    "B",
+    "S",
+    "U"
+   ],
+   "visibleMenus": 114
+  },
+  {
+   "code": "P",
+   "name": "Pro",
+   "includes": [
+    "L",
+    "B",
+    "S",
+    "U",
+    "P"
+   ],
+   "visibleMenus": 148
+  },
+  {
+   "code": "A",
+   "name": "Advance",
+   "includes": [
+    "L",
+    "B",
+    "S",
+    "U",
+    "P",
+    "A"
+   ],
+   "visibleMenus": 158
+  },
+  {
+   "code": "E",
+   "name": "Enterprise",
+   "includes": [
+    "L",
+    "B",
+    "S",
+    "U",
+    "P",
+    "A",
+    "E"
+   ],
+   "visibleMenus": 192
+  }
+ ],
+ "menus": [
+  {
+   "tab": "Analysis",
+   "smCode": "51",
+   "menu": "Last Visit",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Analysis/Last Visit"
+  },
+  {
+   "tab": "Analysis",
+   "smCode": "52",
+   "menu": "Stock Ledger",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Analysis/Stock Ledger"
+  },
+  {
+   "tab": "Analysis",
+   "smCode": "53",
+   "menu": "Order Zoom",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Analysis/Order Zoom"
+  },
+  {
+   "tab": "Analysis",
+   "smCode": "54",
+   "menu": "Tag Detail",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Analysis/Tag Detail"
+  },
+  {
+   "tab": "Analysis",
+   "smCode": "55",
+   "menu": "Stock Move",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Analysis/Stock Move"
+  },
+  {
+   "tab": "Analysis",
+   "smCode": "56",
+   "menu": "Delete Data",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Analysis/Delete Data"
+  },
+  {
+   "tab": "Analysis",
+   "smCode": "57",
+   "menu": "Party InOut",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Analysis/Party InOut"
+  },
+  {
+   "tab": "Analysis",
+   "smCode": "61",
+   "menu": "Bill Os Day",
+   "edition": "A",
+   "editionName": "Advance",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Analysis/Bill Os Day"
+  },
+  {
+   "tab": "Company",
+   "smCode": "01",
+   "menu": "Company",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Company/Company"
+  },
+  {
+   "tab": "Company",
+   "smCode": "02",
+   "menu": "Year Create",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Company/Year Create"
+  },
+  {
+   "tab": "Company",
+   "smCode": "03",
+   "menu": "Balance TrFr",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Company/Balance TrFr"
+  },
+  {
+   "tab": "Company",
+   "smCode": "04",
+   "menu": "Books",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Company/Books"
+  },
+  {
+   "tab": "Company",
+   "smCode": "05",
+   "menu": "User Create",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Company/User Create"
+  },
+  {
+   "tab": "Company",
+   "smCode": "06",
+   "menu": "Account Group",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Company/Account Group"
+  },
+  {
+   "tab": "Company",
+   "smCode": "07",
+   "menu": "Trade Master",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Company/Trade Master"
+  },
+  {
+   "tab": "Company",
+   "smCode": "08",
+   "menu": "Setting",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Company/Setting"
+  },
+  {
+   "tab": "Company",
+   "smCode": "09",
+   "menu": "Setting Main",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Company/Setting Main"
+  },
+  {
+   "tab": "Company",
+   "smCode": "10",
+   "menu": "Location",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Company/Location"
+  },
+  {
+   "tab": "Company",
+   "smCode": "11",
+   "menu": "Data Refresh",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Company/Data Refresh"
+  },
+  {
+   "tab": "Company",
+   "smCode": "12",
+   "menu": "Data Backup",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Company/Data Backup"
+  },
+  {
+   "tab": "Company",
+   "smCode": "13",
+   "menu": "Main Menu",
+   "edition": "A",
+   "editionName": "Advance",
+   "visible": false,
+   "separator": false,
+   "catalogId": "Company/Main Menu"
+  },
+  {
+   "tab": "Company",
+   "smCode": "14",
+   "menu": "Admin Setting",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Company/Admin Setting"
+  },
+  {
+   "tab": "Company",
+   "smCode": "15",
+   "menu": "Year Select",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Company/Year Select"
+  },
+  {
+   "tab": "Company",
+   "smCode": "16",
+   "menu": "Menu Set",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Company/Menu Set"
+  },
+  {
+   "tab": "Crm",
+   "smCode": "01",
+   "menu": "Cust Entry",
+   "edition": "A",
+   "editionName": "Advance",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Crm/Cust Entry"
+  },
+  {
+   "tab": "Crm",
+   "smCode": "02",
+   "menu": "Cust Report",
+   "edition": "A",
+   "editionName": "Advance",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Crm/Cust Report"
+  },
+  {
+   "tab": "Dhiran",
+   "smCode": "01",
+   "menu": "Dhrn Issue",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Dhiran/Dhrn Issue"
+  },
+  {
+   "tab": "Dhiran",
+   "smCode": "02",
+   "menu": "Intrest Rec",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Dhiran/Intrest Rec"
+  },
+  {
+   "tab": "Dhiran",
+   "smCode": "03",
+   "menu": "Dhrn Rec",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Dhiran/Dhrn Rec"
+  },
+  {
+   "tab": "Dhiran",
+   "smCode": "04",
+   "menu": "Intrest All",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Dhiran/Intrest All"
+  },
+  {
+   "tab": "Dhiran",
+   "smCode": "05",
+   "menu": "Dhiran Report",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Dhiran/Dhiran Report"
+  },
+  {
+   "tab": "Dhiran",
+   "smCode": "06",
+   "menu": "Dhrn Os Letter",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Dhiran/Dhrn Os Letter"
+  },
+  {
+   "tab": "Dhiran",
+   "smCode": "07",
+   "menu": "Dhrn Due",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Dhiran/Dhrn Due"
+  },
+  {
+   "tab": "Dhiran",
+   "smCode": "21",
+   "menu": "Loan Received",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Dhiran/Loan Received"
+  },
+  {
+   "tab": "Dhiran",
+   "smCode": "22",
+   "menu": "Loan Intrest",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Dhiran/Loan Intrest"
+  },
+  {
+   "tab": "Dhiran",
+   "smCode": "23",
+   "menu": "Loan Issue",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Dhiran/Loan Issue"
+  },
+  {
+   "tab": "Dhiran",
+   "smCode": "24",
+   "menu": "Intrest Isu All",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Dhiran/Intrest Isu All"
+  },
+  {
+   "tab": "Dhiran",
+   "smCode": "25",
+   "menu": "Loan Report",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Dhiran/Loan Report"
+  },
+  {
+   "tab": "ExtraTran",
+   "smCode": "01",
+   "menu": "Approval Isu",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "ExtraTran/Approval Isu"
+  },
+  {
+   "tab": "ExtraTran",
+   "smCode": "02",
+   "menu": "Approval Rtn",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "ExtraTran/Approval Rtn"
+  },
+  {
+   "tab": "ExtraTran",
+   "smCode": "03",
+   "menu": "Labour Work",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "ExtraTran/Labour Work"
+  },
+  {
+   "tab": "ExtraTran",
+   "smCode": "04",
+   "menu": "Fine Jv Entry",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "ExtraTran/Fine Jv Entry"
+  },
+  {
+   "tab": "ExtraTran",
+   "smCode": "05",
+   "menu": "Old Item Sales",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "ExtraTran/Old Item Sales"
+  },
+  {
+   "tab": "ExtraTran",
+   "smCode": "06",
+   "menu": "Bill Wise Rec",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "ExtraTran/Bill Wise Rec"
+  },
+  {
+   "tab": "ExtraTran",
+   "smCode": "07",
+   "menu": "Other Expenses",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "ExtraTran/Other Expenses"
+  },
+  {
+   "tab": "ExtraTran",
+   "smCode": "08",
+   "menu": "Other Income",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "ExtraTran/Other Income"
+  },
+  {
+   "tab": "ExtraTran",
+   "smCode": "09",
+   "menu": "Consi Rec",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "ExtraTran/Consi Rec"
+  },
+  {
+   "tab": "ExtraTran",
+   "smCode": "10",
+   "menu": "Consi Purc",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "ExtraTran/Consi Purc"
+  },
+  {
+   "tab": "ExtraTran",
+   "smCode": "11",
+   "menu": "Consi Isu",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "ExtraTran/Consi Isu"
+  },
+  {
+   "tab": "ExtraTran",
+   "smCode": "12",
+   "menu": "Vp Parcel",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "ExtraTran/Vp Parcel"
+  },
+  {
+   "tab": "ExtraTran",
+   "smCode": "13",
+   "menu": "Vp Adjust",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "ExtraTran/Vp Adjust"
+  },
+  {
+   "tab": "ExtraTran",
+   "smCode": "14",
+   "menu": "Card Rec",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "ExtraTran/Card Rec"
+  },
+  {
+   "tab": "ExtraTran",
+   "smCode": "15",
+   "menu": "Amt Out",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "ExtraTran/Amt Out"
+  },
+  {
+   "tab": "ExtraTran",
+   "smCode": "16",
+   "menu": "Amt In",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "ExtraTran/Amt In"
+  },
+  {
+   "tab": "ExtraTran",
+   "smCode": "17",
+   "menu": "Fine Purc",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "ExtraTran/Fine Purc"
+  },
+  {
+   "tab": "ExtraTran",
+   "smCode": "18",
+   "menu": "Fine Sales",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": false,
+   "separator": false,
+   "catalogId": "ExtraTran/Fine Sales"
+  },
+  {
+   "tab": "ExtraTran",
+   "smCode": "21",
+   "menu": "Employee Jv",
+   "edition": "A",
+   "editionName": "Advance",
+   "visible": true,
+   "separator": false,
+   "catalogId": "ExtraTran/Employee Jv"
+  },
+  {
+   "tab": "ExtraTran",
+   "smCode": "22",
+   "menu": "Service Comm",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "ExtraTran/Service Comm"
+  },
+  {
+   "tab": "ExtraTran",
+   "smCode": "23",
+   "menu": "Tag Wise Purc",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "ExtraTran/Tag Wise Purc"
+  },
+  {
+   "tab": "Karigar",
+   "smCode": "01",
+   "menu": "Kr Issue",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Karigar/Kr Issue"
+  },
+  {
+   "tab": "Karigar",
+   "smCode": "02",
+   "menu": "Kr Received",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Karigar/Kr Received"
+  },
+  {
+   "tab": "Karigar",
+   "smCode": "03",
+   "menu": "Kr Design Isu",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Karigar/Kr Design Isu"
+  },
+  {
+   "tab": "Karigar",
+   "smCode": "04",
+   "menu": "",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": true,
+   "catalogId": null
+  },
+  {
+   "tab": "Karigar",
+   "smCode": "05",
+   "menu": "Cust Repar Rec",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Karigar/Cust Repar Rec"
+  },
+  {
+   "tab": "Karigar",
+   "smCode": "06",
+   "menu": "Kr Repar Isu",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Karigar/Kr Repar Isu"
+  },
+  {
+   "tab": "Karigar",
+   "smCode": "07",
+   "menu": "Kr Repar Rec",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Karigar/Kr Repar Rec"
+  },
+  {
+   "tab": "Karigar",
+   "smCode": "08",
+   "menu": "Cust Repar Isu",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Karigar/Cust Repar Isu"
+  },
+  {
+   "tab": "Karigar",
+   "smCode": "09",
+   "menu": "",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": true,
+   "catalogId": null
+  },
+  {
+   "tab": "Karigar",
+   "smCode": "10",
+   "menu": "Kr Report",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Karigar/Kr Report"
+  },
+  {
+   "tab": "Karigar",
+   "smCode": "11",
+   "menu": "Reparing Rpt",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Karigar/Reparing Rpt"
+  },
+  {
+   "tab": "Karigar",
+   "smCode": "23",
+   "menu": "Stock Isu",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Karigar/Stock Isu"
+  },
+  {
+   "tab": "Karigar",
+   "smCode": "24",
+   "menu": "Tour Order",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Karigar/Tour Order"
+  },
+  {
+   "tab": "Karigar",
+   "smCode": "25",
+   "menu": "Tour Sales",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Karigar/Tour Sales"
+  },
+  {
+   "tab": "Karigar",
+   "smCode": "26",
+   "menu": "Stock Rec",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Karigar/Stock Rec"
+  },
+  {
+   "tab": "Karigar",
+   "smCode": "27",
+   "menu": "Tour Report",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Karigar/Tour Report"
+  },
+  {
+   "tab": "Karigar",
+   "smCode": "28",
+   "menu": "Tour Tag",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Karigar/Tour Tag"
+  },
+  {
+   "tab": "Master",
+   "smCode": "01",
+   "menu": "Party",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Master/Party"
+  },
+  {
+   "tab": "Master",
+   "smCode": "02",
+   "menu": "Address",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Master/Address"
+  },
+  {
+   "tab": "Master",
+   "smCode": "03",
+   "menu": "Product",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Master/Product"
+  },
+  {
+   "tab": "Master",
+   "smCode": "04",
+   "menu": "Group",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Master/Group"
+  },
+  {
+   "tab": "Master",
+   "smCode": "05",
+   "menu": "Item",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Master/Item"
+  },
+  {
+   "tab": "Master",
+   "smCode": "06",
+   "menu": "AutoItem",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Master/AutoItem"
+  },
+  {
+   "tab": "Master",
+   "smCode": "07",
+   "menu": "Employee",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Master/Employee"
+  },
+  {
+   "tab": "Master",
+   "smCode": "08",
+   "menu": "Tax",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Master/Tax"
+  },
+  {
+   "tab": "Master",
+   "smCode": "09",
+   "menu": "Party Opening",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Master/Party Opening"
+  },
+  {
+   "tab": "Master",
+   "smCode": "10",
+   "menu": "Item Opening",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Master/Item Opening"
+  },
+  {
+   "tab": "Master",
+   "smCode": "11",
+   "menu": "Tag Opening",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Master/Tag Opening"
+  },
+  {
+   "tab": "Master",
+   "smCode": "12",
+   "menu": "Lot Opening",
+   "edition": "A",
+   "editionName": "Advance",
+   "visible": false,
+   "separator": false,
+   "catalogId": "Master/Lot Opening"
+  },
+  {
+   "tab": "Master",
+   "smCode": "13",
+   "menu": "Counter",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Master/Counter"
+  },
+  {
+   "tab": "Master",
+   "smCode": "15",
+   "menu": "Style",
+   "edition": "A",
+   "editionName": "Advance",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Master/Style"
+  },
+  {
+   "tab": "Master",
+   "smCode": "16",
+   "menu": "Labour",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Master/Labour"
+  },
+  {
+   "tab": "Master",
+   "smCode": "17",
+   "menu": "Item Touch",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Master/Item Touch"
+  },
+  {
+   "tab": "Master",
+   "smCode": "18",
+   "menu": "ItStk Limit",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Master/ItStk Limit"
+  },
+  {
+   "tab": "Master",
+   "smCode": "19",
+   "menu": "Point Mast",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Master/Point Mast"
+  },
+  {
+   "tab": "Master",
+   "smCode": "20",
+   "menu": "Labour Disc",
+   "edition": "A",
+   "editionName": "Advance",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Master/Labour Disc"
+  },
+  {
+   "tab": "Master",
+   "smCode": "21",
+   "menu": "Labour Type",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Master/Labour Type"
+  },
+  {
+   "tab": "Master",
+   "smCode": "22",
+   "menu": "Design Book",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Master/Design Book"
+  },
+  {
+   "tab": "Master",
+   "smCode": "23",
+   "menu": "Diamond",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Master/Diamond"
+  },
+  {
+   "tab": "Master",
+   "smCode": "24",
+   "menu": "Dm Size",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": false,
+   "separator": false,
+   "catalogId": "Master/Dm Size"
+  },
+  {
+   "tab": "Mfg",
+   "smCode": "21",
+   "menu": "Mfg Mast",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Mfg/Mfg Mast"
+  },
+  {
+   "tab": "Mfg",
+   "smCode": "25",
+   "menu": "Lot IsuRec",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Mfg/Lot IsuRec"
+  },
+  {
+   "tab": "Mfg",
+   "smCode": "26",
+   "menu": "Mfg Ledger",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Mfg/Mfg Ledger"
+  },
+  {
+   "tab": "Mfg",
+   "smCode": "28",
+   "menu": "Mfg InOut",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Mfg/Mfg InOut"
+  },
+  {
+   "tab": "More",
+   "smCode": "75",
+   "menu": "Order Track",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "More/Order Track"
+  },
+  {
+   "tab": "More",
+   "smCode": "76",
+   "menu": "Graph Report",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "More/Graph Report"
+  },
+  {
+   "tab": "More",
+   "smCode": "77",
+   "menu": "ItStk Level",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "More/ItStk Level"
+  },
+  {
+   "tab": "More",
+   "smCode": "78",
+   "menu": "Bill Wise Profit",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "More/Bill Wise Profit"
+  },
+  {
+   "tab": "More",
+   "smCode": "79",
+   "menu": "User Report",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "More/User Report"
+  },
+  {
+   "tab": "More",
+   "smCode": "80",
+   "menu": "Point Report",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "More/Point Report"
+  },
+  {
+   "tab": "More",
+   "smCode": "81",
+   "menu": "Deisgn Move",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "More/Deisgn Move"
+  },
+  {
+   "tab": "More",
+   "smCode": "82",
+   "menu": "Movement",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "More/Movement"
+  },
+  {
+   "tab": "More",
+   "smCode": "83",
+   "menu": "Entry Check",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "More/Entry Check"
+  },
+  {
+   "tab": "More",
+   "smCode": "84",
+   "menu": "Lot Report",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "More/Lot Report"
+  },
+  {
+   "tab": "More",
+   "smCode": "85",
+   "menu": "Emp Sale",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "More/Emp Sale"
+  },
+  {
+   "tab": "More",
+   "smCode": "86",
+   "menu": "Oth Itm Rpt",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "More/Oth Itm Rpt"
+  },
+  {
+   "tab": "Other",
+   "smCode": "01",
+   "menu": "Daily Rate",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Daily Rate"
+  },
+  {
+   "tab": "Other",
+   "smCode": "02",
+   "menu": "Only Tag Entry",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Only Tag Entry"
+  },
+  {
+   "tab": "Other",
+   "smCode": "03",
+   "menu": "Tag Cancel",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Tag Cancel"
+  },
+  {
+   "tab": "Other",
+   "smCode": "04",
+   "menu": "Tag Print",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Tag Print"
+  },
+  {
+   "tab": "Other",
+   "smCode": "05",
+   "menu": "Stock Adjust",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Stock Adjust"
+  },
+  {
+   "tab": "Other",
+   "smCode": "06",
+   "menu": "Order Cancel",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Order Cancel"
+  },
+  {
+   "tab": "Other",
+   "smCode": "07",
+   "menu": "Reminder Entry",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Reminder Entry"
+  },
+  {
+   "tab": "Other",
+   "smCode": "08",
+   "menu": "Physical Stock",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Physical Stock"
+  },
+  {
+   "tab": "Other",
+   "smCode": "09",
+   "menu": "Tag Transfer",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Tag Transfer"
+  },
+  {
+   "tab": "Other",
+   "smCode": "10",
+   "menu": "Tag Adjust",
+   "edition": "A",
+   "editionName": "Advance",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Tag Adjust"
+  },
+  {
+   "tab": "Other",
+   "smCode": "11",
+   "menu": "Tag Split",
+   "edition": "A",
+   "editionName": "Advance",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Tag Split"
+  },
+  {
+   "tab": "Other",
+   "smCode": "12",
+   "menu": "Ledger Adjust",
+   "edition": "A",
+   "editionName": "Advance",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Ledger Adjust"
+  },
+  {
+   "tab": "Other",
+   "smCode": "15",
+   "menu": "Data Import",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Data Import"
+  },
+  {
+   "tab": "Other",
+   "smCode": "16",
+   "menu": "Tag Wt Change",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Tag Wt Change"
+  },
+  {
+   "tab": "Other",
+   "smCode": "17",
+   "menu": "E-Excel",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": false,
+   "separator": false,
+   "catalogId": "Other/E-Excel"
+  },
+  {
+   "tab": "Other",
+   "smCode": "18",
+   "menu": "Stone/Dm-Cf",
+   "edition": "A",
+   "editionName": "Advance",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Stone/Dm-Cf"
+  },
+  {
+   "tab": "Other",
+   "smCode": "20",
+   "menu": "Whatsapp",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Whatsapp"
+  },
+  {
+   "tab": "Other",
+   "smCode": "21",
+   "menu": "Sms",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Sms"
+  },
+  {
+   "tab": "Other",
+   "smCode": "22",
+   "menu": "Labour Update",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Labour Update"
+  },
+  {
+   "tab": "Other",
+   "smCode": "23",
+   "menu": "Counter Trfr",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Counter Trfr"
+  },
+  {
+   "tab": "Other",
+   "smCode": "24",
+   "menu": "Bank Reconcile",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Bank Reconcile"
+  },
+  {
+   "tab": "Other",
+   "smCode": "25",
+   "menu": "Vch ReNumber",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Vch ReNumber"
+  },
+  {
+   "tab": "Other",
+   "smCode": "34",
+   "menu": "Data Export",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Data Export"
+  },
+  {
+   "tab": "Other",
+   "smCode": "35",
+   "menu": "Estimate Reset",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Other/Estimate Reset"
+  },
+  {
+   "tab": "Report",
+   "smCode": "01",
+   "menu": "Ledger Report",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Ledger Report"
+  },
+  {
+   "tab": "Report",
+   "smCode": "02",
+   "menu": "Stock Report",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Stock Report"
+  },
+  {
+   "tab": "Report",
+   "smCode": "03",
+   "menu": "Tag Stock",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Tag Stock"
+  },
+  {
+   "tab": "Report",
+   "smCode": "04",
+   "menu": "Sales Report",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Sales Report"
+  },
+  {
+   "tab": "Report",
+   "smCode": "05",
+   "menu": "Purchase Rpt",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Purchase Rpt"
+  },
+  {
+   "tab": "Report",
+   "smCode": "06",
+   "menu": "Approval Rpt",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Approval Rpt"
+  },
+  {
+   "tab": "Report",
+   "smCode": "07",
+   "menu": "Order Report",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Order Report"
+  },
+  {
+   "tab": "Report",
+   "smCode": "08",
+   "menu": "Cash Bank",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Cash Bank"
+  },
+  {
+   "tab": "Report",
+   "smCode": "09",
+   "menu": "Gst Report",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Gst Report"
+  },
+  {
+   "tab": "Report",
+   "smCode": "10",
+   "menu": "Party Os",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Party Os"
+  },
+  {
+   "tab": "Report",
+   "smCode": "11",
+   "menu": "Final Reports",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Final Reports"
+  },
+  {
+   "tab": "Report",
+   "smCode": "12",
+   "menu": "Tag Estmate",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Tag Estmate"
+  },
+  {
+   "tab": "Report",
+   "smCode": "13",
+   "menu": "Tag Image",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Tag Image"
+  },
+  {
+   "tab": "Report",
+   "smCode": "14",
+   "menu": "Consi Report",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Consi Report"
+  },
+  {
+   "tab": "Report",
+   "smCode": "15",
+   "menu": "Trading Report",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Trading Report"
+  },
+  {
+   "tab": "Report",
+   "smCode": "16",
+   "menu": "HuId Report",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/HuId Report"
+  },
+  {
+   "tab": "Report",
+   "smCode": "17",
+   "menu": "Bul Report",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Bul Report"
+  },
+  {
+   "tab": "Report",
+   "smCode": "21",
+   "menu": "Rojmel",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Rojmel"
+  },
+  {
+   "tab": "Report",
+   "smCode": "22",
+   "menu": "Sale Zoom",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Sale Zoom"
+  },
+  {
+   "tab": "Report",
+   "smCode": "23",
+   "menu": "Purc Zoom",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Purc Zoom"
+  },
+  {
+   "tab": "Report",
+   "smCode": "24",
+   "menu": "Old Stock",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Old Stock"
+  },
+  {
+   "tab": "Report",
+   "smCode": "25",
+   "menu": "Stock With Fine",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Stock With Fine"
+  },
+  {
+   "tab": "Report",
+   "smCode": "26",
+   "menu": "Item InOut",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Item InOut"
+  },
+  {
+   "tab": "Report",
+   "smCode": "27",
+   "menu": "Reminder Rpt",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": false,
+   "separator": false,
+   "catalogId": "Report/Reminder Rpt"
+  },
+  {
+   "tab": "Report",
+   "smCode": "28",
+   "menu": "Address Print",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Address Print"
+  },
+  {
+   "tab": "Report",
+   "smCode": "29",
+   "menu": "Vp Report",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Report/Vp Report"
+  },
+  {
+   "tab": "Scheme",
+   "smCode": "01",
+   "menu": "Scheme Mast",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Scheme/Scheme Mast"
+  },
+  {
+   "tab": "Scheme",
+   "smCode": "02",
+   "menu": "Member Mast",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Scheme/Member Mast"
+  },
+  {
+   "tab": "Scheme",
+   "smCode": "03",
+   "menu": "Memb Opening",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Scheme/Memb Opening"
+  },
+  {
+   "tab": "Scheme",
+   "smCode": "04",
+   "menu": "Memb Entry",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Scheme/Memb Entry"
+  },
+  {
+   "tab": "Scheme",
+   "smCode": "05",
+   "menu": "Memb Adjust",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Scheme/Memb Adjust"
+  },
+  {
+   "tab": "Scheme",
+   "smCode": "06",
+   "menu": "Gold Adjust",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Scheme/Gold Adjust"
+  },
+  {
+   "tab": "Scheme",
+   "smCode": "07",
+   "menu": "Scheme Report",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Scheme/Scheme Report"
+  },
+  {
+   "tab": "Scheme",
+   "smCode": "08",
+   "menu": "Scheme Ledger",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Scheme/Scheme Ledger"
+  },
+  {
+   "tab": "Scheme",
+   "smCode": "09",
+   "menu": "Monthly Report",
+   "edition": "P",
+   "editionName": "Pro",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Scheme/Monthly Report"
+  },
+  {
+   "tab": "Scheme",
+   "smCode": "25",
+   "menu": "Day Sales",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Scheme/Day Sales"
+  },
+  {
+   "tab": "Scheme",
+   "smCode": "26",
+   "menu": "Branch InOut",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Scheme/Branch InOut"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "01",
+   "menu": "Purchase",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Purchase"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "02",
+   "menu": "Purchase Rtn",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Purchase Rtn"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "03",
+   "menu": "Sales Order",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Sales Order"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "04",
+   "menu": "Sales",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Sales"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "05",
+   "menu": "Sales Return",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Sales Return"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "08",
+   "menu": "Wh Sales",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Wh Sales"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "09",
+   "menu": "Cash Received",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Cash Received"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "10",
+   "menu": "Cash Payment",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Cash Payment"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "11",
+   "menu": "Bank Received",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Bank Received"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "12",
+   "menu": "Bank Payment",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Bank Payment"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "13",
+   "menu": "Contra Entry",
+   "edition": "L",
+   "editionName": "Lite",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Contra Entry"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "14",
+   "menu": "Rate Cut",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Rate Cut"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "15",
+   "menu": "Stock Out",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Stock Out"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "16",
+   "menu": "Stock In",
+   "edition": "E",
+   "editionName": "Enterprise",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Stock In"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "17",
+   "menu": "Sale Booking",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Sale Booking"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "18",
+   "menu": "Purc Booking",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Purc Booking"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "19",
+   "menu": "Bul Sales",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Bul Sales"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "20",
+   "menu": "Bul LcBook",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Bul LcBook"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "21",
+   "menu": "E Invoice",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/E Invoice"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "22",
+   "menu": "E CrntNote",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/E CrntNote"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "24",
+   "menu": "Sl Quotation",
+   "edition": "B",
+   "editionName": "Basic",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Sl Quotation"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "25",
+   "menu": "Pr Quotation",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Pr Quotation"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "26",
+   "menu": "Wh Quotation",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Wh Quotation"
+  },
+  {
+   "tab": "Transaction",
+   "smCode": "27",
+   "menu": "Wh Sl Return",
+   "edition": "S",
+   "editionName": "Standard",
+   "visible": true,
+   "separator": false,
+   "catalogId": "Transaction/Wh Sl Return"
+  }
+ ]
+}

@@ -28,6 +28,9 @@ The boundary is recorded in [ADR-0004](../project-memory/decisions/ADR-0004-two-
 - Open work is ordered in [document 13](master-parity-plan-2026-09-29/13-phase1-delivery-plan.md) and tracked in
   [`execution-backlog.json`](master-parity-plan-2026-09-29/execution-backlog.json) (slices N01–N88) and
   [`phase2-backlog.json`](master-parity-plan-2026-09-29/phase2-backlog.json) (SP01–SP24).
+- **From 30 October 2026 the Standard edition comes first** ([document 15](master-parity-plan-2026-09-29/15-standard-edition-plan.md),
+  decision D31): the 114 menus of the desktop's Lite, Basic and Standard editions are built to production before the
+  78 Pro, Advance and Enterprise menus. Each menu's edition is in [`menu-editions.json`](handbook/menu-editions.json).
 
 ## Start here
 
@@ -38,7 +41,7 @@ The boundary is recorded in [ADR-0004](../project-memory/decisions/ADR-0004-two-
 | Understand the web code, its stack and how a request flows | [Web handbook](handbook/web/README.md) and the [module map](handbook/web/modules.md) |
 | Set up the project on my laptop | [Developer setup](handbook/dev/setup.md) |
 | Connect a scale, scanner, printer or camera | [Supported devices](handbook/dev/devices.md) |
-| Pick up the next piece of work | [`project-memory/HANDOFF.md`](../project-memory/HANDOFF.md), then the queue in [document 13 §3](master-parity-plan-2026-09-29/13-phase1-delivery-plan.md#3-delivery-order) |
+| Pick up the next piece of work | [`project-memory/HANDOFF.md`](../project-memory/HANDOFF.md), then [document 15 §5](master-parity-plan-2026-09-29/15-standard-edition-plan.md#5-delivery-plan) (Standard edition first) and the queue in [document 13 §3](master-parity-plan-2026-09-29/13-phase1-delivery-plan.md#3-delivery-order) |
 | Implement a slice to the expected quality | [Engineering standards](handbook/web/engineering-standards.md), [testing](handbook/web/testing.md) and the agent skills in [`AGENTS.md`](../AGENTS.md) |
 | Test in a real browser, including visual checks with Chrome DevTools | [Testing §5](handbook/web/testing.md#5-visual-and-interactive-verification-with-chrome-devtools-mcp) |
 | Research a desktop behaviour safely | [Desktop handbook §9](handbook/desktop/README.md#9-sources-and-how-to-research-desktop-behaviour) |
