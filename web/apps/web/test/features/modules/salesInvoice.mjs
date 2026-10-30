@@ -636,7 +636,8 @@ export const salesInvoice = {
       'output',
       'G180: Print still opens the invoice after the 15-minute access cookie has expired (the session refreshes first)',
       async (ctx) => {
-        const { page } = await ctx.session();
+        // Its own login slot: the refresh rotates this slot's refresh token, which no other case may reuse.
+        const { page } = await ctx.session(as(USERS.admin.user, 'access-expiry-sales'));
         const vchNo = await createOneLine(ctx, page);
         await loadVoucher(page, vchNo);
         // As if the access cookie had expired: the browser drops it and keeps the refresh cookie.

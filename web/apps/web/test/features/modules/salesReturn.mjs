@@ -662,6 +662,45 @@ export const salesReturn = {
     ),
 
     C(
+      'print.after-access-expiry',
+      'T16',
+      'output',
+      'G180: View Credit Note still opens after the 15-minute access cookie has expired (the session refreshes first)',
+      async (ctx) => {
+        // Its own login slot: the refresh rotates this slot's refresh token, which no other case may reuse.
+        const { page } = await ctx.session(as(USERS.admin.user, 'access-expiry-return'));
+        const vchNo = await createReturn(ctx, page);
+        // As if the access cookie had expired: the browser drops it and keeps the refresh cookie.
+        await page.context().clearCookies({ name: 'access' });
+        const refreshed = page.waitForRequest(
+          (r) => r.url().endsWith('/api/auth/refresh') && r.method() === 'POST',
+          { timeout: 15_000 },
+        );
+        const [popup] = await Promise.all([
+          page.waitForEvent('popup'),
+          page.getByRole('button', { name: 'View Credit Note', exact: true }).click(),
+        ]);
+        await refreshed;
+        const document = await popup.waitForResponse(
+          (r) => /\/api\/sales\/credit-note\?/.test(r.url()),
+          { timeout: 15_000 },
+        );
+        const body = await document.body();
+        await popup.close();
+        assert.equal(document.status(), 200, body.toString('utf8').slice(0, 200));
+        assert.ok(
+          !body.toString('utf8').includes('unauthenticated'),
+          'the window shows the document',
+        );
+        return {
+          observation: `voucher ${vchNo}: after the access cookie was dropped, View Credit Note refreshed the session and the window got ${document.status()} (${body.length} bytes)`,
+          expected: 'the document opens (200), not {"error":"unauthenticated"}',
+          output: body,
+        };
+      },
+    ),
+
+    C(
       'reopen.saved-panel',
       'T08',
       'read-only',
