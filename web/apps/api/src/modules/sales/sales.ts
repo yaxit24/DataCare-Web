@@ -63,6 +63,7 @@ import {
 } from '../shared/settingsBehavior.js';
 import { partyCashReceivedTx } from '../finance/finance.js';
 import { tenderThresholdDecision } from '../finance/tender.js';
+import { buildLineLegs, lineLegKey, type LineLeg } from '../posting/lineLegs.js';
 
 export class SaleValidationError extends Error {
   constructor(msg: string) {
@@ -413,7 +414,7 @@ export function buildSaleLedger(p: {
   rateUnfix?: boolean;
   vchType?: string;
   totals: Pick<BillTotals, 'total' | 'taxable' | 'tax' | 'roundOff'>;
-  incomeLegs?: { ac: string; amount: number }[];
+  incomeLegs?: LineLeg[];
   payments?: {
     cashAc?: string;
     cashAmt?: number;
@@ -447,7 +448,7 @@ export function buildSaleLedger(p: {
       if (leg.amount !== 0)
         lines.push({
           ...base,
-          legType: SALE_LEG.revenue,
+          ...lineLegKey(leg, SALE_LEG.revenue), // G169: per-line key on a multi-account bill
           AC_CODE: leg.ac,
           LD_CODE: p.acCode,
           DR_AMT: 0,
@@ -842,8 +843,7 @@ async function writeSaleTx(
     roundingPolicy,
   );
 
-  // Per-group income accounts (desktop GROUP_MAST.SALE_AC): map each item → its group's sale account,
-  // fall back to the single salesAc when unmapped. Income is split across distinct SALE_ACs (Σ == taxable).
+  // Per-group income accounts (GROUP_MAST.SALE_AC, fallback salesAc); several → one leg per line (G169).
   const itCodes = Array.from(
     new Set(lines.map((l) => String(l.itCode ?? '').trim()).filter(Boolean)),
   );
@@ -895,7 +895,7 @@ async function writeSaleTx(
         );
     }
   }
-  const incomeLegs = buildIncomeLegs(
+  const incomeLegs = buildLineLegs(
     computed.map((c) => ({
       net: c.calc.net,
       ac: saleAcByItem[String(c.in.itCode ?? '').trim()] ?? salesAc,
