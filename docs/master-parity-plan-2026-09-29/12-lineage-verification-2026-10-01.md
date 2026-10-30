@@ -2126,7 +2126,7 @@ click filled `E2ELOC` and a `GLD22` line with tag `N`, Save answered 201, and th
 | N162 | — | implemented-unverified, evidence in this change (G169, G176: one item leg per detail line keyed STR(SR_NO)+03 when a sale or purchase posts to two item accounts; labour-split leg off code 03; vectors 60 passed, HTTP write-set suites 13 passed, negative control reproduces the duplicate-key 400; feature E2E Sales 18/2/3 and Purchase 17/2/2 with both baseline entries removed; browser runs of both screens) |
 | N163 | — | implemented-unverified, evidence in this change (G171: Alt+S presses the marked Save button from any field; web unit 12 passed; sales and purchase Alt+S feature cases pass and left the baseline; Contra saved with Alt+S in a Chrome DevTools run) |
 | N164 | — | implemented-unverified, evidence in this change (UI surface crawl + committed map `docs/handbook/web/ui-surface-map.md` + PR browser-test gate; found G172) |
-| N165 | — | planned (G172: readable message / single retry when two sessions open the company at once) |
+| N165 | — | implemented-unverified, evidence in this change (G172: the selection retries a transaction conflict and the screen explains; unit 3, new Open Company module, fails against the old screen) |
 | N166 | — | planned (G173, G174: fault injection for T14 and a settings-variant company for T15 in the feature E2E harness) |
 | N167 | — | planned (G175: decide the negative-weight line rule from an original-Windows run, then implement and execute the case) |
 | N168 | — | implemented-unverified, evidence in this change (G177: four numeric setting combos accept typed amounts with presets; unit 3, DB 14, two feature cases; baseline entry removed) |
