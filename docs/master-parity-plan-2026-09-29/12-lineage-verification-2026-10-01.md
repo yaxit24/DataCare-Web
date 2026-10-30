@@ -179,6 +179,9 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G166 | Med | Purchase posting used literal account fallbacks | `unified/src/csharp/DataCareNext/TR_PURC.cs` | `web/apps/api/src/modules/purchase/purchase.ts` | The purchase writer mirrored the sale one: 5 literal fallbacks. Two were genuine N59 defects — the purchase expense account defaulted to `'PURCHASE'` (both the writer base and the single-expense income branch). These now resolve from BOOK_DETL slot 1 (explicit wins, fail-closed for a posting purchase; placeholder for a no-ledger quotation). The remaining three (`'GSTINPUT'`, `'HMCHRG'`x2) are legitimate fixed defaults — the tax-input account depends on the documented TAX_MAST provisioning gap and hallmark has no slot/persisted column — left intact and tracked in REMAINING. | N158 |
 | G167 | Med | Labour invoice metal-sale/round-off accounts were literals | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/api/src/modules/sales/labourInvoice.ts` | The labour invoice already resolved its labour-income leg from BOOK_DETL slot 6 (G115) but still defaulted the metal-sale income to `'SALES'` and the round-off to `'ROUNDOFF'`. Both now resolve from the labour book (slot 1 and slot 3) through a generalized `resolveLabourBookSlot`, inside the tx and gated on their legs posting (explicit wins, fail-closed). The `'GST'` tax account stays a documented default (TAX_MAST provisioning gap). | N159 |
 | G168 | Med | Malformed request body returned 500, not 400 | PARITY-EVALUATION §5c 500 probes | `web/apps/api/src/routes/txn.ts` | A malformed body shape that reached a writer (e.g. a non-array `lines`) threw a synchronous `TypeError` (`lines.map is not a function`) that fell through the shared `run()` catch to Fastify's default 500. Now a `TypeError`/`RangeError` from a handler body — after auth and routing have already succeeded — is answered as a 400 `invalid-request`. Typed server-fault errors keep their own status (mapped earlier). First increment of N50; full per-route JSON Schemas remain. | N160 |
+| G169 | High | A sale with items from two groups cannot be saved | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/api/src/modules/sales/sales.ts` | Found by the feature E2E suite (`sales-invoice.create.two-lines-dissimilar`): a bill with a gold line (group SALE_AC `SALES`) and a silver line (`SLVSALE`) fails with `duplicate key … AC_DATA_tenant_ledr_key_key`, because every per-group income leg is posted with the same leg type 03. The desktop posts one revenue row per detail line keyed `VCH_NO+STR(SR_NO)+'05'` (`Ac_Ledr.cs:74`). Any shop selling gold and silver on one bill is blocked. | N161 |
+| G170 | High | Lost update: a stale second save overwrites the first | `unified/src/csharp/DataCareNext/TR_SALE.cs` | `web/apps/api/src/modules/sales/sales.ts` | Found by `sales-invoice.concurrency.stale-second-save`: two operators load voucher 1, the first saves rate 6500, the second (stale) saves rate 7000 and is answered 200; the line ends at 70,000 and the first save is gone. `editSale` reads no version token. Tracked by N51 (version tokens on every update/delete, waiting on decision D17). | N161 |
+| G171 | Low | No keyboard save on voucher screens | `unified/src/csharp/DataCareNext/TR_SALE.cs` | `web/apps/web/components/VoucherChrome.tsx` | Found by `sales-invoice.keyboard.alt-s-saves`: the desktop saves with the `&Save` mnemonic, Alt+S (`TR_SALE.cs:4896`). No web Save button sets `accessKey`, so an operator who saves from the keyboard cannot. (The desktop has no Ctrl+S binding; the case was corrected to Alt+S.) | N161 |
 
 ## 4. Decisions D23–D28
 
@@ -1699,6 +1702,43 @@ rejects before the handler runs) remain planned under N50.
 Done when: a malformed request body is rejected with a 400 rather than crashing with a 500.
 
 
+### N161 — Feature E2E suites: every T01–T18 case of a feature, through the real screen (G169–G171)
+
+The journeys prove single workflows. N161 adds a suite per **feature** that runs its whole frozen case matrix —
+every applicable T01–T18 group of the verification playbook — through the real browser on the zero-mock
+real-stack harness, with a shared sample-data catalogue, an evidence bundle checked by the evidence-contract
+validator, and a shrink-only baseline of known defects. Details and the per-slice rule are in
+`docs/handbook/web/testing.md` §4a.
+
+Framework (`web/apps/web/test/features/`): `web/apps/web/test/features/harness.mjs` boots the disposable stack once; one real login per
+user slot through the login and Open Company screens, reused through saved browser state because `/auth/login`
+is limited to 10 per minute (`web/apps/api/src/app.ts:500`) and refresh tokens are single-use (re-login after 10
+minutes, inside the 15-minute access cookie). Each case gets its own browser context, screenshots, API request
+log and console errors; no request is intercepted. `web/apps/web/test/features/fixtures/catalogue.mjs` provisions the base company with the
+real `seedCompany` and adds items, groups, local and inter-state parties, a bank account, opening stock, an
+admin, a clerk without the delete right, a historic year and a second-tenant sentinel voucher.
+
+First module, Sales Invoice (TR_SALE), 22 cases. Expected values are hand-computed from the desktop rules
+(net-weight pricing when `SL_AMT_TYPE='N'`, components rounded to `TOT_AMT_ROF`, SGST = CGST = tax / 2
+unrounded, delete writes DELETE_DATA at `TR_SALE.cs:16316-16322`). Result on the candidate: **16 passed, 3
+failed, 3 blocked** — executed 86.36%, browser/business pass 72.73%, desktop match 0% (no Windows run).
+Passed: book filtering and defaults, preview formula, create with cash, inter-state IGST, discount, reopen
+round-trip, unchanged save is a no-op, edit re-prices and rebuilds a balanced ledger, delete reverses with
+DELETE_DATA, PDF print, cheque-without-bank / no-lines / unknown-item refusals with no write, clerk delete
+refused with the voucher intact, double-click creates one voucher, and the sale reaching the sales register
+and day book. Failed (baselined): G169 two-group sale cannot save, G170 lost update, G171 no Alt+S save.
+Blocked with reasons: T14 rollback needs a fault injector; T15 needs a settings-variant company; a
+negative-weight line has no desktop rule to test against.
+
+Six first-run failures were test bugs, each fixed against the desktop source rather than the web code: the
+2-decimal default for a blank `TOT_AMT_ROF`, the unrounded GST halves, a non-existent `VCH_CLOCK` column,
+Chrome logging 4xx answers as console errors, the PDF popup request, and Ctrl+S (the desktop uses Alt+S).
+A negative control (dropping G171 from the baseline) failed the gate as a new failure, as intended.
+
+Done when: each feature's matrix runs in CI on every pull request, every failure is a recorded gap in the
+baseline, and each fixed defect leaves the baseline in the change that fixed it.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -1780,6 +1820,7 @@ Done when: a malformed request body is rejected with a 400 rather than crashing 
 | N158 | — | implemented-unverified, evidence in this change (G166: purchase expense account resolves from BOOK_DETL slot-1 instead of the 'PURCHASE' literal, explicit wins/fail-closed, plus a single-expense invariant; the 3 non-configurable defaults gstinput/hmcharge×2 verified legitimate and left, tracked in REMAINING 5→3, TOTAL 36→34; full purchase DB suite 55/9 + gates + clean API build + web 646+9 + depth green; purchase.ts ceiling 2860→2883) |
 | N159 | — | implemented-unverified, evidence in this change (G167: labour invoice resolves metal-sale from BOOK_DETL slot 1 and round-off from slot 3 via a generalized resolveLabourBookSlot, gated on their legs posting, explicit wins/fail-closed; the 'GST' tax default left documented; REMAINING labourInvoice.ts 3→1, TOTAL 34→32; salesFamilyLifecycle gained LBR slots 1/3 and passes 31; labour DB suite 118/8 + gates + clean API build + web 646+9 + depth green) |
 | N160 | — | implemented-unverified, evidence in this change (G168/N50-increment: a synchronous input-shape TypeError/RangeError from a mutation handler body now maps to a 400 invalid-request in run(), so a non-array 'lines' is 400 not 500 'lines.map is not a function'; typed server-fault 500s preserved — serializable-command 78 pass; two new probes in saleAmountBasis.routes.db.test.ts + broad routes.db 53/14 + gates + clean API build + web 646+9 + depth green; txn.ts ceiling 8482→8491) |
+| N161 | — | implemented-unverified, evidence in this change (feature E2E suite framework + Sales Invoice matrix of 22 cases through the real screen: 16 passed, 3 failed and baselined as G169/G170/G171, 3 blocked with reasons; evidence bundle valid under the evidence-contract validator; negative control fails the gate; CI step added to the real-stack job) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

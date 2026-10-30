@@ -1,0 +1,93 @@
+import assert from 'node:assert/strict';
+import { randomBytes } from 'node:crypto';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import {
+  SECOND_TENANT,
+  TENANT,
+  compareBaseline,
+  resetSavedLogins,
+  runModule,
+  startStack,
+  stopStack,
+  validateBundle,
+  webRoot,
+  wipeTenants,
+} from './harness.mjs';
+import { seedCatalogue } from './fixtures/catalogue.mjs';
+import { salesInvoice } from './modules/salesInvoice.mjs';
+
+/**
+ * Feature E2E runner (docs/handbook/web/testing.md §4a).
+ *
+ *   node scripts/parity-test-env.mjs -- node apps/web/test/features/run-features.mjs
+ *
+ * Env:
+ *   FEATURE_E2E_MODULES   comma list of module ids (default: all)
+ *   FEATURE_E2E_CASES     comma list of case ids to run (others are recorded "untested")
+ *   PARITY_API_PORT / PARITY_WEB_PORT / PARITY_TEST_PORT as for the other real-stack suites
+ *
+ * Gate: every applicable case must pass, except cases listed in baseline.json (known defects, each with a gap
+ * id). A new failure fails the run; a baseline case that now passes also fails the run until it is removed.
+ */
+const MODULES = [salesInvoice];
+
+const artifacts = resolve(webRoot, 'test-results/feature-e2e');
+const baselinePath = resolve(webRoot, 'apps/web/test/features/baseline.json');
+const baseline = JSON.parse(readFileSync(baselinePath, 'utf8'));
+const selected = new Set(
+  (process.env.FEATURE_E2E_MODULES ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
+);
+const onlyCases = process.env.FEATURE_E2E_CASES
+  ? new Set(process.env.FEATURE_E2E_CASES.split(',').map((s) => s.trim()))
+  : undefined;
+const modules = MODULES.filter((m) => selected.size === 0 || selected.has(m.feature));
+assert(modules.length, 'no feature module selected');
+
+const password = `E2e-${randomBytes(12).toString('hex')}!`;
+process.env.FEATURE_E2E_PASSWORD = password;
+
+let stack;
+const report = { startedAt: new Date().toISOString(), modules: [] };
+let gateProblems = [];
+try {
+  stack = await startStack({ artifacts });
+  for (const module of modules) {
+    console.log(`\n=== ${module.feature}: ${module.title} (${module.cases.length} cases) ===`);
+    await wipeTenants(stack.owner, [TENANT, SECOND_TENANT]);
+    await seedCatalogue(stack, { password });
+    resetSavedLogins();
+    const { run, moduleDir } = await runModule(stack, module, { onlyCases });
+    const { summary } = validateBundle(moduleDir);
+    const gate = compareBaseline(module.feature, run, baseline);
+    report.modules.push({ feature: module.feature, summary, gate });
+    console.log(
+      `  -> applicable ${summary.applicableCases}, passed ${summary.counts?.passed}, failed ${summary.counts?.failed}, blocked ${summary.counts?.blocked}, untested ${summary.counts?.untested}; browser pass ${summary.browserBusinessPassPct}%`,
+    );
+    if (summary.errors?.length)
+      gateProblems.push(...summary.errors.map((e) => `${module.feature}: bundle: ${e}`));
+    gateProblems.push(...gate.newFailures.map((id) => `${module.feature}: NEW failure ${id}`));
+    gateProblems.push(
+      ...gate.fixed.map(
+        (id) => `${module.feature}: ${id} now passes — remove it from baseline.json`,
+      ),
+    );
+    gateProblems.push(
+      ...gate.missing.map((id) => `${module.feature}: baseline names unknown case ${id}`),
+    );
+  }
+} finally {
+  report.finishedAt = new Date().toISOString();
+  report.problems = gateProblems;
+  writeFileSync(resolve(artifacts, 'report.json'), `${JSON.stringify(report, null, 2)}\n`);
+  if (stack) await wipeTenants(stack.owner, [TENANT, SECOND_TENANT]).catch(() => {});
+  await stopStack(stack);
+}
+if (gateProblems.length) {
+  console.error(`\nFEATURE_E2E_FAILED:\n- ${gateProblems.join('\n- ')}`);
+  process.exit(1);
+}
+console.log('\nFEATURE_E2E_PASSED');

@@ -347,6 +347,11 @@ jobs:
         working-directory: web
         run: node scripts/parity-test-env.mjs -- node apps/web/test/labour-preview-lifecycle.real-stack.mjs
 
+      - name: Feature E2E suites (frozen T01-T18 matrices, shrink-only defect baseline)
+        if: ${{ !cancelled() && steps.journeys.conclusion != 'skipped' }}
+        working-directory: web
+        run: node scripts/parity-test-env.mjs -- node apps/web/test/features/run-features.mjs
+
       - name: Upload results and screenshots
         if: failure()
         uses: actions/upload-artifact@v4
@@ -356,6 +361,7 @@ jobs:
             web/test-results/parity-real-stack/
             web/test-results/session-context-real-stack-lifecycle/
             web/test-results/return-labour-preview-lifecycle/
+            web/test-results/feature-e2e/
           if-no-files-found: ignore
           retention-days: 14
 
