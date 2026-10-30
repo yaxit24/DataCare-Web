@@ -33,16 +33,6 @@
       "reason": "Stored ITM_AMT/NET_AMT/TOT_AMT follow the fine basis with paise; the desktop stores 61,234 + 2,375 and a whole-rupee total of 65,517 (TR_SALE_RTN.cs:16405)."
     },
     {
-      "case": "sales-return.create.from-bill-import",
-      "gap": "G191",
-      "reason": "Import copies the sold loose line's TAG_NO 'N' and Save refuses it as a tag ('tag provenance is missing or ambiguous: N'); the desktop treats 'N' as no tag."
-    },
-    {
-      "case": "sales-return.ui.import-button-clickable",
-      "gap": "G192",
-      "reason": "The Tax % input covers the Import button at 1600 px, so the mouse cannot press Import."
-    },
-    {
       "case": "sales-return.concurrency.double-delete",
       "gap": "G193",
       "reason": "The second delete of an already deleted return answers 500 (PersistedVoucherNotFoundError is not mapped by run())."

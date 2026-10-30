@@ -1949,4 +1949,36 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
     )) as Array<{ n: number }>;
     expect(none[0]!.n).toBe(0);
   });
+
+  // G191: a loose sale line imported into a return carries TAG_NO 'N', the desktop's no-tag marker
+  // (TR_SALE_RTN.cs:3917 copies it; :4773 and :13387 skip it). It must save as loose stock, while a real
+  // tag that is not a line of the original sale is still refused.
+  it('saves a return line marked N as loose stock and still refuses an unknown tag', async () => {
+    const loose = await createSaleReturn(runtime, returnInput(), [
+      { itCode: 'LOOSE', tagNo: 'N', pcs: 1, grossWt: 1, netWt: 1, touch: 90, metalAmount: 100 },
+    ]);
+    const stored = (await owner.$queryRawUnsafe(
+      `SELECT "TAG_NO"::text tag, coalesce("VCH_SRNO",0)::int srno FROM "SL_DETL_RTN"
+        WHERE tenant_id=$1 AND "CO_BOOK"='SRT' AND "VCH_NO"=$2`,
+      TENANT,
+      String(loose.vchNo).padStart(5, '0'),
+    )) as Array<{ tag: string; srno: number }>;
+    expect(stored.map((row) => ({ tag: row.tag.trim(), srno: row.srno }))).toEqual([
+      { tag: 'N', srno: 0 },
+    ]);
+
+    await expect(
+      createSaleReturn(runtime, returnInput(), [
+        {
+          itCode: 'GOLD',
+          tagNo: 'NOSUCH',
+          pcs: 1,
+          grossWt: 3,
+          netWt: 3,
+          touch: 100,
+          metalAmount: 300,
+        },
+      ]),
+    ).rejects.toThrow(/not an unambiguous line of the original sale: NOSUCH/);
+  });
 });

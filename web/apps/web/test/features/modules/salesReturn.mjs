@@ -322,9 +322,7 @@ export const salesReturn = {
           .nth(1)
           .selectOption('SL');
         await field(page, 'Orig Bill No').fill(sale);
-        // Pressed from the keyboard: the mouse cannot reach it (ui.import-button-clickable).
-        await page.getByRole('button', { name: 'Import', exact: true }).focus();
-        await page.keyboard.press('Enter');
+        await page.getByRole('button', { name: 'Import', exact: true }).click();
         await page.waitForTimeout(1500);
         const party = await page.getByPlaceholder('search accounts… (F1)').first().inputValue();
         const item = await cell(page, 0, 1).inputValue();
@@ -334,10 +332,26 @@ export const salesReturn = {
         assert.equal(response.status(), 201, await response.text());
         const vchNo = String((await response.json()).vchNo).padStart(5, '0');
         const [h] = await header(ctx, vchNo);
+        // The sold line is loose stock, so the returned line keeps the desktop's no-tag marker 'N'
+        // (TR_SALE_RTN.cs:14326-14334 stores 'N' for a line without a tag).
+        const tags = await ctx.rows(
+          `SELECT "TAG_NO"::text tag FROM "SL_DETL_RTN" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+          vchNo,
+        );
+        assert.deepEqual(
+          tags.map((t) => t.tag.trim()),
+          ['N'],
+        );
         return {
-          observation: `sale ${sale} imported (party ${party}, item ${item}, net ${net}); return ${vchNo} saved, total ${h.tot}`,
-          expected: { party: PARTIES.local.code, item: ITEMS.gold.code, net: '10', saved: 201 },
-          database: { header: h },
+          observation: `sale ${sale} imported (party ${party}, item ${item}, net ${net}); return ${vchNo} saved, total ${h.tot}, tag ${tags[0].tag}`,
+          expected: {
+            party: PARTIES.local.code,
+            item: ITEMS.gold.code,
+            net: '10',
+            saved: 201,
+            tag: 'N',
+          },
+          database: { header: h, tags },
           downstream: { imported: true },
         };
       },
@@ -479,8 +493,7 @@ export const salesReturn = {
           .nth(1)
           .selectOption('SL');
         await field(page, 'Orig Bill No').fill('99999');
-        await page.getByRole('button', { name: 'Import', exact: true }).focus();
-        await page.keyboard.press('Enter');
+        await page.getByRole('button', { name: 'Import', exact: true }).click();
         await page.locator('.msg.err').waitFor();
         const item = await cell(page, 0, 1).inputValue();
         assert.equal(item, '');
