@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -15,10 +15,14 @@ const routePattern = /\b(?:app|server)\.(get|post|put|patch|delete)\(\s*(['"`])(
 
 function declaredRoutes(): Array<{ method: string; path: string }> {
   const rows: Array<{ method: string; path: string }> = [];
+  // app.ts and every route plugin under routes/ (txn.ts, crm.ts, voucherNavigation.ts, ...).
+  const routeDir = resolve(here, '../src/routes');
   for (const file of [
     resolve(here, '../src/app.ts'),
-    resolve(here, '../src/routes/txn.ts'),
-    resolve(here, '../src/routes/crm.ts'),
+    ...readdirSync(routeDir)
+      .filter((name) => name.endsWith('.ts'))
+      .sort()
+      .map((name) => resolve(routeDir, name)),
   ]) {
     const source = readFileSync(file, 'utf8');
     for (const match of source.matchAll(routePattern)) {
@@ -94,8 +98,9 @@ describe('route policy registry', () => {
     // N139 (Stage D) adds payment edit PUT /payments/:vchNo: 639 + 1 = 640.
     // N142/N143/N144 add dhrn issue + receipt reopen/edit/delete (641+6); N145 adds loan received +
     // loan issue reopen/edit/delete (+6); N147 adds PUT /fine-sale/:vchNo (+1), 647 + 6 + 1 = 654.
-    expect(routes).toHaveLength(657);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(657);
+    // N172 adds GET /vouchers/neighbour, the voucher number box's Up/Down walk: 657 + 1 = 658.
+    expect(routes).toHaveLength(658);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(658);
 
     const policies = routes.map((route) => ({
       ...route,

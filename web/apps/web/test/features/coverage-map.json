@@ -9,7 +9,12 @@
         "web/packages/core/src/calc.ts",
         "web/apps/api/src/modules/posting/lineLegs.ts",
         "web/apps/web/components/LookupPicker.tsx",
-        "web/apps/web/lib/lookupEnter.ts"
+        "web/apps/web/lib/lookupEnter.ts",
+        "web/apps/web/components/VoucherNumberKeys.tsx",
+        "web/apps/web/components/VoucherList.tsx",
+        "web/apps/web/lib/voucherNumberKeys.ts",
+        "web/apps/api/src/modules/vouchers/list.ts",
+        "web/apps/api/src/routes/voucherNavigation.ts"
       ]
     },
     "purchaseInvoice": {
@@ -18,7 +23,12 @@
         "web/apps/api/src/modules/purchase/purchase.ts",
         "web/apps/api/src/modules/posting/lineLegs.ts",
         "web/apps/web/components/LookupPicker.tsx",
-        "web/apps/web/lib/lookupEnter.ts"
+        "web/apps/web/lib/lookupEnter.ts",
+        "web/apps/web/components/VoucherNumberKeys.tsx",
+        "web/apps/web/components/VoucherList.tsx",
+        "web/apps/web/lib/voucherNumberKeys.ts",
+        "web/apps/api/src/modules/vouchers/list.ts",
+        "web/apps/api/src/routes/voucherNavigation.ts"
       ]
     },
     "usersRights": {

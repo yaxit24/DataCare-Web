@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { get, del, ApiError } from '../lib/api';
 
 /** Reusable recent-voucher list for transaction screens: navigate / print / delete / load-to-edit.
@@ -28,6 +28,7 @@ export function VoucherList({
   printHref,
   onLoad,
   reloadKey,
+  openKey,
 }: {
   table: string;
   book: string;
@@ -35,10 +36,17 @@ export function VoucherList({
   printHref?: (vchNo: string) => string;
   onLoad?: (vchNo: string, identity: VoucherIdentity) => void;
   reloadKey?: unknown;
+  /** Changing this opens the list and focuses its first voucher: the voucher number box's F1 (N172). */
+  openKey?: number;
 }) {
   const [rows, setRows] = useState<VRow[]>([]);
   const [open, setOpen] = useState(false);
   const [msg, setMsg] = useState('');
+  const body = useRef<HTMLTableSectionElement | null>(null);
+  const toggle = useRef<HTMLButtonElement | null>(null);
+  const focusAfterLoad = useRef(false);
+  // Counts finished loads. It changes in the same render as the rows, so the focus effect below sees them drawn.
+  const [loads, setLoads] = useState(0);
   const load = useCallback(async () => {
     try {
       setRows(
@@ -49,10 +57,40 @@ export function VoucherList({
     } catch (e) {
       setMsg(e instanceof ApiError ? e.body?.error || e.message : 'failed');
     }
+    setLoads((count) => count + 1);
   }, [table, book]);
   useEffect(() => {
     if (open) void load();
   }, [open, load, reloadKey]);
+  useEffect(() => {
+    if (!focusAfterLoad.current) return;
+    focusAfterLoad.current = false;
+    // The first voucher's Load, or the list toggle when the list is empty.
+    (
+      body.current?.querySelector<HTMLButtonElement>('button[data-voucher-load]') ?? toggle.current
+    )?.focus();
+  }, [loads]);
+  useEffect(() => {
+    if (!openKey) return;
+    focusAfterLoad.current = true;
+    if (open) void load();
+    else setOpen(true);
+    // Only a new F1 press reopens the list; `open` and `load` changing must not.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openKey]);
+
+  /** Up and Down move between the vouchers' Load buttons, like the rows of the desktop list (MS_HELP). */
+  function moveFocus(event: KeyboardEvent<HTMLButtonElement>) {
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+    const buttons = Array.from(
+      body.current?.querySelectorAll<HTMLButtonElement>('button[data-voucher-load]') ?? [],
+    );
+    const next =
+      buttons[buttons.indexOf(event.currentTarget) + (event.key === 'ArrowDown' ? 1 : -1)];
+    if (!next) return;
+    event.preventDefault();
+    next.focus();
+  }
 
   async function remove(row: VoucherIdentity) {
     if (!deleteBase) return;
@@ -81,7 +119,7 @@ export function VoucherList({
   return (
     <div className="panel">
       <div className="toolbar" style={{ margin: 0 }}>
-        <button type="button" className="ghost" onClick={() => setOpen((o) => !o)}>
+        <button type="button" className="ghost" ref={toggle} onClick={() => setOpen((o) => !o)}>
           {open ? '▾ Recent vouchers' : '▸ Recent vouchers'}
         </button>
         {open && (
@@ -104,7 +142,7 @@ export function VoucherList({
                 <th></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody ref={body}>
               {rows.map((r, i) => (
                 <tr key={`${r.coYear}|${r.lcCode}|${r.coBook}|${r.vchNo}|${i}`}>
                   <td>{r.vchNo}</td>
@@ -113,7 +151,13 @@ export function VoucherList({
                   <td className="num">{money(r.total)}</td>
                   <td style={{ whiteSpace: 'nowrap' }}>
                     {onLoad && (
-                      <button type="button" className="ghost" onClick={() => onLoad(r.vchNo, r)}>
+                      <button
+                        type="button"
+                        className="ghost"
+                        data-voucher-load
+                        onKeyDown={moveFocus}
+                        onClick={() => onLoad(r.vchNo, r)}
+                      >
                         Load
                       </button>
                     )}
