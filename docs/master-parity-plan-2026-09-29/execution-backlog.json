@@ -6098,8 +6098,8 @@
     },
     {
       "id": "N172",
-      "status": "planned",
-      "action": "Voucher number box on every Standard voucher screen behaves like the desktop tVchNo_KeyDown (TR_SALE.cs:17068-17096): Enter opens the typed voucher, Up opens the last, Down the first, F1 the voucher list.",
+      "status": "in-progress",
+      "action": "Voucher number box on every Standard voucher screen behaves like the desktop tVchNo_KeyDown (TR_SALE.cs:17068-17096): Enter opens the typed voucher, Up the next saved voucher, Down the previous one, F1 the voucher list.",
       "parentLabels": "P9; J04",
       "startAfter": [
         "N171"
@@ -6109,7 +6109,20 @@
       "entryDefinition": "15-standard-edition-plan.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/api/src/modules/vouchers/list.ts",
+        "web/apps/api/src/routes/voucherNavigation.ts",
+        "web/apps/api/test/voucherNeighbour.routes.db.test.ts",
+        "web/apps/web/components/VoucherNumberKeys.tsx",
+        "web/apps/web/lib/voucherNumberKeys.ts",
+        "web/apps/web/test/voucherNumberKeys.test.ts",
+        "web/apps/web/components/VoucherList.tsx",
+        "web/apps/web/test/features/modules/salesInvoice.mjs",
+        "web/apps/web/test/features/modules/purchaseInvoice.mjs"
+      ],
+      "statusNote": "IN PROGRESS. Done for Sales Invoice and Purchase Invoice, with the shared parts every voucher screen will use. The desktop maps Up to BtnLast_Click and Down to BtnFirst_Click, which despite their names step to the NEXT and PREVIOUS saved voucher (TR_SALE.cs:17164-17222, TR_PURC.cs:14476-14534): at most 10 numbers are tried, Up past the last saved voucher is the next new number and Up there says 'Last Record...', Down below 2 does nothing. GET /vouchers/neighbour runs that walk on the server (allow-listed table, session company/location/year, requested book); useVoucherNumberKeys wires F1, Up, Down and Enter into the box (Enter moves to the date after opening, as DISPLAY_DATA does); F1 opens the recent-voucher list on its newest voucher and Up/Down move between its rows. The /vouchers/recent route moved with it into routes/voucherNavigation.ts (txn.ts shrinks by 11 lines). Verified: HTTP DB test 8 passed (both directions, gaps, the 10-try stop, other book/year ignored, empty book, bad table/direction 400, 401 without a session); web unit 4 passed; feature cases sales-invoice.keyboard.voucher-number-keys and purchase-invoice.keyboard.voucher-number-keys pass, and fail against main's screens (negative control); full Sales 20/1/3 and Purchase 19/1/2 (the failures are the G170 baseline); Chrome check on the demo data with a deleted voucher in the middle. Remaining: the other Standard voucher screens with a number box adopt the hook (item-opening, tag-opening, purchase-return, sales-quotation, purchase-quotation, wholesale-sale-return, tour-return, vp-parcel, vp-adjustment and the four repair screens), and the screens that open vouchers only from the list gain the box in their document 15 per-menu step. Known differences: the web list shows number, date, party and total, not the desktop MS_HELP columns; a typed number with no voucher shows the not-found message instead of an add-mode form with that number."
     },
     {
       "id": "N173",
@@ -6211,6 +6224,21 @@
       ],
       "requiredProof": "the with-data sweep reports no unclassified no-visible-effect button; each by-design entry cites its source; each defect has a gap row.",
       "gapIds": "G188",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N180",
+      "status": "planned",
+      "action": "Clear Next.js's runtime route cache (apps/web/.next/server/route-cache) before every local browser run starts the web server, so a rebuilt checkout never serves the previous build's pages.",
+      "parentLabels": "P9; X10",
+      "startAfter": [
+        "N164"
+      ],
+      "requiredProof": "the feature harness, the real-stack runners and the local stack remove the route cache before next start; a rebuild followed by a run serves the new build's page chunk (asserted by the harness).",
+      "gapIds": "G190",
       "entryDefinition": "02-execution-plan.md section 4",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",

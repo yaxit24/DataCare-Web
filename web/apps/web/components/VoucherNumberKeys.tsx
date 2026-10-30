@@ -19,20 +19,19 @@ export interface VoucherNumberKeyOptions {
   open: (vchNo: string) => Promise<boolean>;
   /** Show a blank new voucher. */
   fresh: () => void;
-  /** F1: show the voucher list. */
-  list: () => void;
-  /** After Enter opens a voucher, the desktop moves to the voucher date (DISPLAY_DATA, TR_SALE.cs:14845). */
-  focusDate?: () => void;
 }
 
 /**
- * The voucher number box's keys (N172, G179). Returns the box's onKeyDown and the note to show next to it.
+ * The voucher number box's keys (N172, G179). Give the box `onKeyDown`, the screen's `VoucherList` `openKey={listKey}`
+ * (F1 opens it) and the voucher date input `dateRef` (Enter moves there after opening, as DISPLAY_DATA does,
+ * TR_SALE.cs:14845), and render `<VoucherNumberNote note={note} />` next to the box.
  * Up and Down keep the focus in the box, as the desktop does (TR_SALE.cs:17189, :17220), so the operator can keep
  * stepping. A key pressed while a step is still loading is ignored.
  */
-export function useVoucherNumberKeys(options: VoucherNumberKeyOptions) {
-  const { table, book, value, open, fresh, list, focusDate } = options;
+export function useVoucherNumberKeys({ table, book, value, open, fresh }: VoucherNumberKeyOptions) {
   const [note, setNote] = useState('');
+  const [listKey, setListKey] = useState(0);
+  const dateRef = useRef<HTMLInputElement>(null);
   const pending = useRef(false);
   const onKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
@@ -43,14 +42,14 @@ export function useVoucherNumberKeys(options: VoucherNumberKeyOptions) {
       if (pending.current) return;
       setNote('');
       if (key === 'list') {
-        list();
+        setListKey((count) => count + 1);
         return;
       }
       pending.current = true;
       const step = async () => {
         if (key === 'open') {
           // An empty box is the new-entry state: Enter just moves on to the date, as on the desktop.
-          if (!value.trim() || (await open(value.trim()))) focusDate?.();
+          if (!value.trim() || (await open(value.trim()))) dateRef.current?.focus();
           return;
         }
         const answer = await get<NeighbourVoucher>(neighbourPath(table, book, value, key));
@@ -74,7 +73,16 @@ export function useVoucherNumberKeys(options: VoucherNumberKeyOptions) {
           pending.current = false;
         });
     },
-    [table, book, value, open, fresh, list, focusDate],
+    [table, book, value, open, fresh],
   );
-  return { onKeyDown, note };
+  return { onKeyDown, note, listKey, dateRef };
+}
+
+/** The voucher number box's message ("Last Record...", or a step that found no voucher). */
+export function VoucherNumberNote({ note }: { note: string }) {
+  return note ? (
+    <span className="msg" role="status" data-testid="voucher-number-note">
+      {note}
+    </span>
+  ) : null;
 }

@@ -7,14 +7,24 @@
         "web/apps/api/src/modules/sales/sales.ts",
         "web/packages/core/src/saleAmount.ts",
         "web/packages/core/src/calc.ts",
-        "web/apps/api/src/modules/posting/lineLegs.ts"
+        "web/apps/api/src/modules/posting/lineLegs.ts",
+        "web/apps/web/components/VoucherNumberKeys.tsx",
+        "web/apps/web/components/VoucherList.tsx",
+        "web/apps/web/lib/voucherNumberKeys.ts",
+        "web/apps/api/src/modules/vouchers/list.ts",
+        "web/apps/api/src/routes/voucherNavigation.ts"
       ]
     },
     "purchaseInvoice": {
       "covers": [
         "web/apps/web/app/(app)/txn/purchase/page.tsx",
         "web/apps/api/src/modules/purchase/purchase.ts",
-        "web/apps/api/src/modules/posting/lineLegs.ts"
+        "web/apps/api/src/modules/posting/lineLegs.ts",
+        "web/apps/web/components/VoucherNumberKeys.tsx",
+        "web/apps/web/components/VoucherList.tsx",
+        "web/apps/web/lib/voucherNumberKeys.ts",
+        "web/apps/api/src/modules/vouchers/list.ts",
+        "web/apps/api/src/routes/voucherNavigation.ts"
       ]
     },
     "usersRights": {

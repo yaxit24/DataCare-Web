@@ -17,7 +17,7 @@ import { RateTicker } from '../../../../components/RateTicker';
 import { PartyBalance } from '../../../../components/PartyBalance';
 import { VoucherChrome } from '../../../../components/VoucherChrome';
 import { VoucherList, type VoucherIdentity } from '../../../../components/VoucherList';
-import { useVoucherNumberKeys } from '../../../../components/useVoucherNumberKeys';
+import { useVoucherNumberKeys, VoucherNumberNote } from '../../../../components/VoucherNumberKeys';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { companyFlag, useCompanySettings, companySetting } from '../../../../lib/companySettings';
 import { oldGoldRowAmount, recalcLine } from '../../../../lib/lineRecalc';
@@ -629,16 +629,12 @@ export default function SalesEntryPage() {
   }
 
   // N172 (G179): the voucher number box's F1, Up, Down and Enter (tVchNo_KeyDown, TR_SALE.cs:17068-17096).
-  const dateRef = useRef<HTMLInputElement>(null);
-  const [listKey, setListKey] = useState(0);
   const numberKeys = useVoucherNumberKeys({
     table: 'SL_DATA',
     book: coBook,
     value: voucherLookup,
     open: (vchNo) => openSale({ coBook, coYear, lcCode, vchNo }),
     fresh: newSale,
-    list: () => setListKey((key) => key + 1),
-    focusDate: () => dateRef.current?.focus(),
   });
 
   async function removeLoadedSale() {
@@ -845,7 +841,7 @@ export default function SalesEntryPage() {
           vchNo={loadedVchNo ? Number(loadedVchNo) : (result?.vchNo ?? null)}
           date={vchDate}
           onDateChange={setVchDate}
-          dateInputRef={dateRef}
+          dateInputRef={numberKeys.dateRef}
           refNo={refNo}
           onRefNoChange={setRefNo}
           saving={busy}
@@ -875,11 +871,7 @@ export default function SalesEntryPage() {
             <button type="button" className="ghost" disabled={busy} onClick={loadSale}>
               Load
             </button>
-            {numberKeys.note && (
-              <span className="msg" role="status" data-testid="voucher-number-note">
-                {numberKeys.note}
-              </span>
-            )}
+            <VoucherNumberNote note={numberKeys.note} />
             {loadedVchNo && (
               <span className="msg ok" data-testid="sales-loaded">
                 Loaded #{loadedVchNo}
@@ -1535,7 +1527,7 @@ export default function SalesEntryPage() {
         book={coBook}
         deleteBase="/sales"
         onLoad={(_vchNo, identity) => void openSale(identity)}
-        openKey={listKey}
+        openKey={numberKeys.listKey}
         printHref={(v) =>
           `/api/sales/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(v)}&format=html&copy=O`
         }
