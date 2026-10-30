@@ -5869,6 +5869,31 @@
         "web/apps/api/test/saleAmountBasis.routes.db.test.ts"
       ],
       "statusNote": "IMPLEMENTED (first increment of N50). Confirmed empirically that POST /sales with lines:'not-an-array' returned 500 'lines.map is not a function' - a malformed body shape reaching a writer threw a synchronous TypeError that fell through run()'s catch to Fastify's default 500. Fix: in run()'s fallthrough (after the typed-ValidationError and DB-constraint branches), a TypeError/RangeError is now a 400 invalid-request - by that point auth+routing succeeded, so a shape error is a client-input fault. Typed server-fault errors (SessionCommandError statusCode:500 etc.) are mapped BEFORE this branch and are unaffected (sessionContextSerializableCommand 78 pass). Proven by two new probes in saleAmountBasis.routes.db.test.ts (non-array lines -> 400; non-object body -> <500). Broad routes.db suite 53/14 green + all gates + clean api build + web 646+9 + depth. txn.ts ceiling 8482->8491. FOLLOW-UP: N50 full per-route Fastify JSON Schemas (typed body validation that rejects before the handler) remains planned."
+    },
+    {
+      "id": "N161",
+      "status": "implemented-unverified",
+      "action": "Feature E2E suites: per-feature frozen T01-T18 case matrices driven through the real browser on the zero-mock real-stack harness, with a shared sample-data catalogue built on seedCompany, evidence bundles checked by the evidence-contract validator, and a shrink-only known-defect baseline gated in CI. First module: Sales Invoice (22 cases).",
+      "parentLabels": "P9; R03; J04",
+      "startAfter": [
+        "N160"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "run-features.mjs on the disposable stack: Sales Invoice 16 passed / 3 failed (baselined G169-G171) / 3 blocked; validate_evidence.py bundleValid true; negative control (baseline entry removed) fails the gate; CI real-stack job runs the step.",
+      "gapIds": "G169; G170; G171",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/web/test/features/harness.mjs",
+        "web/apps/web/test/features/run-features.mjs",
+        "web/apps/web/test/features/fixtures/catalogue.mjs",
+        "web/apps/web/test/features/modules/salesInvoice.mjs",
+        "web/apps/web/test/features/baseline.json",
+        "docs/handbook/web/testing.md"
+      ],
+      "statusNote": "IMPLEMENTED (framework + first module). Sales Invoice matrix: executed 86.36%, browser/business pass 72.73%, desktop match 0% (no original-Windows run). Defects found and baselined: G169 two-group sale fails on duplicate AC_DATA.LEDR_KEY (desktop keys revenue per detail line, Ac_Ledr.cs:74); G170 lost update on concurrent edit (N51/D17); G171 no Alt+S keyboard save (TR_SALE.cs:4896). Blocked: T14 rollback (no fault injector), T15 settings-variant company, negative-weight rule undecided. Next modules one PR each: Purchase, Receipt/Payment/Contra/Journal, Sales Return, Sales Order, inventory tags, Karigar/MFG, Dhiran/Loan, Scheme, Reports."
     }
   ],
   "amendments": [
