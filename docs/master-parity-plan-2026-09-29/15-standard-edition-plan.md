@@ -154,9 +154,10 @@ Open defects on Standard menus, all in document 12:
 - **Blocking test cases:** G173 and G174 (no fault injection or settings-variant company in the harness) and G175
   (the negative-weight rule needs the desktop).
 
-Owner decisions still open that Standard needs (document 11 §4): **D16** request schemas (N50), **D17** version
-tokens against lost updates (N51, G170), **D18** idempotency keys on financial creates (N52), **D19** date and number
-formats (N56). Until they are accepted, the slices that depend on them wait and everything else continues.
+Decisions: on 30 October 2026 the owner delegated the open decisions to the implementer, who accepted D15–D22 and
+D30 as recommended and adopted the D01–D14 starting positions (documents 08, 11 and 12). So **D16** request schemas
+(N50), **D17** version tokens against lost updates (N51, G170), **D18** idempotency keys on financial creates (N52) and
+**D19** dates and numbers (N56) are no longer blocked and are scheduled in step E5.
 
 ## 5. Delivery plan
 
@@ -218,7 +219,7 @@ Standard is complete when:
 2. All 114 menus are done (§5): every case passes in the browser, with no failing or blocked case. A case that can
    only be decided by the desktop (for example G175) gets an owner decision on the rule first.
 3. No gap is open on a Standard menu.
-4. D16–D19 are implemented on the Standard routes.
+4. D16–D19 (accepted 30 October 2026) are implemented on the Standard routes.
 5. One candidate commit passes CI and the full feature run; the release certifier dry run passes; the deployment
    starts from empty; a backup restores.
 
