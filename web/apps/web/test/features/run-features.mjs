@@ -66,6 +66,13 @@ const password = `E2e-${randomBytes(12).toString('hex')}!`;
 process.env.FEATURE_E2E_PASSWORD = password;
 
 let stack;
+// A rejection outside a case (for example a page event handler that throws) would end the process before the
+// finally block below runs, leaving the Next server and the database container behind. Stop them first.
+process.on('unhandledRejection', async (reason) => {
+  console.error('\nunhandled rejection:', reason);
+  await stopStack(stack).catch(() => {});
+  process.exit(1);
+});
 const report = { startedAt: new Date().toISOString(), modules: [] };
 let gateProblems = [];
 try {

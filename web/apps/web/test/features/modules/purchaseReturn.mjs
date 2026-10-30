@@ -691,6 +691,8 @@ export const purchaseReturn = {
           page.waitForEvent('popup'),
           row.getByRole('link', { name: 'Print', exact: true }).click(),
         ]);
+        // N173: the print window refreshes the session first, then opens the document.
+        await printed.waitForURL(new RegExp(`coBook=${BOOK}`));
         await printed.waitForLoadState();
         const html = await printed.content();
         await printed.close();
