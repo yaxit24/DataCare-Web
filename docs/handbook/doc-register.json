@@ -77,7 +77,7 @@
       "match": [
         "docs/master-parity-plan-2026-09-29/README.md",
         "docs/master-parity-plan-2026-09-29/0[1-9]-*.md",
-        "docs/master-parity-plan-2026-09-29/1[1-4]-*.md"
+        "docs/master-parity-plan-2026-09-29/1[1-5]-*.md"
       ],
       "area": "Master plan",
       "kind": "plan",

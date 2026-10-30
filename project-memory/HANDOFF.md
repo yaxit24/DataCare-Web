@@ -1,3 +1,22 @@
+## 2026-10-30 — Standard edition first (D31, document 15)
+
+Owner instruction: build one desktop edition to production before the others, Standard first (it contains Lite and
+Basic). Plan: `docs/master-parity-plan-2026-09-29/15-standard-edition-plan.md`; decision D31 in document 12 §4.
+
+- Editions come from `DC_Main.MsSoftType` (7th character of the registration serial, `MS_OPNCOMP.cs:648`) and are
+  cumulative: the MDI loads `MENU_DATA` by `SM_TYPE` (`MDI_FORM.cs:11249-11322`). Standard = `L`+`B`+`S` = 114 menus;
+  Pro/Advance/Enterprise = 78 deferred. Per-menu list: `docs/handbook/menu-editions.json`, read from the shipped
+  `NextMain.BAK` (MENU_DATA configuration rows only) in a throwaway SQL Server container.
+- Deferred code is NOT deleted or commented out: snapshot branch `archive/all-editions-2026-10-30` + an edition gate
+  (nav, rights, page guard, API 403 `edition-unavailable`), step E2 of document 15.
+- Queue: document 15 §5, steps E0-E11. E1 = land N162 (G169, branch `fix/n162-g169-two-group-revenue`, verified
+  locally, gates not yet run) and the Alt+S save (G171).
+- ID coordination: the browser lane has UNCOMMITTED plan rows G172-G175 and N162-N167 (N162 = G169, N163 = G171).
+  New gaps found on 30 October (voucher-number Enter/Up/Down, print popup after session expiry, printed HSN tax
+  split, route prefetch storm, per-keystroke party balance) are listed in document 15 §4 and get gap IDs after those
+  land, because gap and slice IDs must stay contiguous.
+- Owner decisions still needed for Standard production: D16, D17, D18, D19 (document 11 §4).
+
 ## 2026-10-28 (cont.) — P0-04 posting-literal sweep (N106-N108 merged) + CI billing blocker
 
 CI (GitHub Actions) is DISABLED by an account billing failure (see the earlier blocker note);

@@ -30,7 +30,7 @@ Every Markdown file in the repository, classified by the first matching rule in 
 
 | Path | Files | Kind | Status | Superseded by / see | Purpose |
 |---|---:|---|---|---|---|
-| `docs/master-parity-plan-2026-09-29/README.md`<br>`docs/master-parity-plan-2026-09-29/0[1-9]-*.md`<br>`docs/master-parity-plan-2026-09-29/1[1-4]-*.md` | 14 | plan | current | — | Current plan: assessment, execution waves, contracts, verification, desktop reference, module detail, reconciliation, decisions, surfaces, audit plan, lineage, Phase 1 and Phase 2 plans. |
+| `docs/master-parity-plan-2026-09-29/README.md`<br>`docs/master-parity-plan-2026-09-29/0[1-9]-*.md`<br>`docs/master-parity-plan-2026-09-29/1[1-5]-*.md` | 15 | plan | current | — | Current plan: assessment, execution waves, contracts, verification, desktop reference, module detail, reconciliation, decisions, surfaces, audit plan, lineage, Phase 1 and Phase 2 plans. |
 | [`docs/master-parity-plan-2026-09-29/10-gap-register-2026-10-01.md`](../../docs/master-parity-plan-2026-09-29/10-gap-register-2026-10-01.md) | 1 | gap register | historical | [`docs/master-parity-plan-2026-09-29/execution-backlog.json`](../../docs/master-parity-plan-2026-09-29/execution-backlog.json) | Gap register G01-G19; its slice statuses are superseded by document 11 and the backlog. |
 | `docs/master-parity-plan-2026-09-29/evidence/*.md` | 1 | review | evidence | — | Independent review of the execution and verification documents (29 September). |
 

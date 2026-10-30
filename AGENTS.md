@@ -39,7 +39,8 @@ decisions, and how to build and test. Use them together:
 
 | Question | Where |
 |---|---|
-| Which slice is next? | Document 13 §3, then the slice's status in `execution-backlog.json` |
+| Which slice is next? | Document 15 §5 (Standard edition first, decision D31), then document 13 §3, then the slice's status in `execution-backlog.json` |
+| Is a menu in scope now? | Its edition in `docs/handbook/menu-editions.json`: only Lite, Basic and Standard menus (`L`, `B`, `S`) until Standard runs in production (document 15) |
 | What exactly must the slice do? | Its specification — document 02 §4 with document 06 (N01–N30), 10 (N31–N46), 11 §6 (N47–N82), 12 §5 (N83–N88) — its gap rows, and the decisions it cites |
 | What rules apply to every slice? | Document 03 (shared contracts), document 04 (tests, journeys, acceptance), `docs/handbook/web/engineering-standards.md` |
 | What does the desktop do? | The desktop source, through the `datacare-desktop-authority` skill; document 05; `docs/handbook/desktop/` |

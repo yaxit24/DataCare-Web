@@ -1,5 +1,10 @@
 # Phase 1 delivery plan — the desktop, in the web
 
+> **Order from 30 October 2026: Standard edition first** ([document 15](15-standard-edition-plan.md), decision
+> D31). Phase 1 is delivered one desktop edition at a time. The 114 Standard menus are built to production before any
+> Ultra, Pro, Advance or Enterprise menu; document 15 §5 re-orders the queue in §3 below. The definition of done (§1)
+> and the slice method (§6) are unchanged.
+
 Phase 1 makes the web application do what DataCareNext does: every in-scope menu, workflow, form, print and business
 rule, across database, API and screens, with the same write sets, calculations and report data
 ([ADR-0004](../../project-memory/decisions/ADR-0004-two-phase-delivery.md)). This document orders the existing plan
