@@ -1,4 +1,4 @@
-import { round } from '@datacare/core';
+import { round, toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import {
   resolveSettingsBehaviorTx,
@@ -38,7 +38,7 @@ export interface DhrnOsLetterScope {
   asOf?: string; // ISO yyyy-mm-dd cut-off; default today
 }
 
-const dt = (v: any): string => (v ? String(v).slice(0, 10) : '');
+const dt = (v: any): string => toIsoDate(v); // N56: a real ISO date, used in the interest arithmetic
 const r2 = (n: number): number => round(n, 2);
 
 export interface DhrnOsLetterPledge {
@@ -126,7 +126,7 @@ export async function dhrnOsLetterData(
       const repaid = r2(Number(m.rec ?? 0) + Number(m.unch ?? 0));
       const outstanding = r2(Number(i.amt) - repaid);
       if (!(outstanding > 0)) continue; // only open pledges
-      const accrualFrom = m.mxto ? String(m.mxto).slice(0, 10) : dt(i.vd);
+      const accrualFrom = m.mxto ? toIsoDate(m.mxto) : dt(i.vd);
       const current = desktopDhrnInterest({
         principal: outstanding,
         annualRatePct: Number(i.prc),

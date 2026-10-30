@@ -1,3 +1,4 @@
+import { formatDesktopDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import {
   docShell,
@@ -57,7 +58,7 @@ export function contraVoucherHtml(rows: any[], ctx: ContraVoucherCtx = {}): stri
   const h = rows[0] ?? {};
   const acName = (r: any) => esc(r?.RESOLVED_NAME ?? r?.AC_NAME ?? r?.AC_CODE ?? '');
   const narration = h.IT_DESC ?? '';
-  const vchDate = h.VCH_DATE ? String(h.VCH_DATE).slice(0, 10) : '';
+  const vchDate = formatDesktopDate(h.VCH_DATE); // N56 (D19): dd/MM/yyyy, always with the year
 
   const body =
     `<table class="items"><thead><tr><th style="width:50%">From (credited)</th><th style="width:50%">To (debited)</th></tr></thead>` +
@@ -113,7 +114,7 @@ export function journalVoucherHtml(rows: any[], ctx: ContraVoucherCtx = {}): str
     })
     .join('');
   const narration = rows.map((r) => r.IT_DESC).find((d) => d && String(d).trim()) ?? '';
-  const vchDate = h.VCH_DATE ? String(h.VCH_DATE).slice(0, 10) : '';
+  const vchDate = formatDesktopDate(h.VCH_DATE); // N56 (D19): dd/MM/yyyy, always with the year
 
   const body =
     `<table class="items"><thead><tr><th>#</th><th style="width:56%">Particulars</th><th class="r">Debit</th><th class="r">Credit</th></tr></thead>` +

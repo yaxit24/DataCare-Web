@@ -3726,7 +3726,7 @@
     },
     {
       "id": "N56",
-      "status": "planned",
+      "status": "in-progress",
       "action": "Canonical date transport and dd/MM/yyyy display on every document and list",
       "parentLabels": "P10-05, P02-05, X25",
       "startAfter": [
@@ -3737,7 +3737,18 @@
       "gapIds": "G36",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/packages/core/src/dates.ts",
+        "web/packages/core/test/dates.test.ts",
+        "web/apps/api/test/documents.test.ts",
+        "web/apps/api/src/modules/ops/kernelConformance.ts",
+        "web/parity/kernel-conformance-baseline.json",
+        "web/apps/web/components/VoucherList.tsx",
+        "web/apps/web/test/features/modules/salesInvoice.mjs"
+      ],
+      "statusNote": "IN PROGRESS. @datacare/core dates.ts: toIsoDate (a date column's UTC parts, an ISO date, or the calendar day written in an ISO or space-separated timestamp; anything else throws) and formatDesktopDate (dd/MM/yyyy). Every printed document that sliced its date now prints dd/MM/yyyy: sale invoice, sale bill, sale-return credit note, purchase bill (also purchase return), contra (2), finance, karigar, order, Dhiran receipt and khata, scheme passbook; the Dhiran OS letter's interest dates and the reports4 DTO use toIsoDate. The recent-voucher list shows dd/MM/yyyy. Kernel conformance gains the date-normalization concern (String/text(date).slice(0, 10)); its 55 live sites at introduction are grandfathered by identity, so a new one fails. Verified: core dates.test.ts 5 passed; documents.test.ts prints 01/10/2026 for a Date on the sale, purchase, finance and karigar documents; kernelConformance.test.ts 20 passed; feature case sales-invoice.print.date-with-year (the invoice and the recent list show the DB date as DD/MM/YYYY) passes and fails against main's invoice and list. Remaining: migrate the 55 grandfathered transport sites to toIsoDate (rule at zero) and the other screens' date columns."
     },
     {
       "id": "N57",

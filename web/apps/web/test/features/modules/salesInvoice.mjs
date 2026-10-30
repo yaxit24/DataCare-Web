@@ -763,6 +763,49 @@ export const salesInvoice = {
     ),
 
     C(
+      'print.date-with-year',
+      'T16',
+      'output',
+      'G36 (D19): the printed invoice and the recent list show the voucher date as dd/MM/yyyy, with its year',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const vchNo = await createOneLine(ctx, page);
+        await loadVoucher(page, vchNo);
+        const [bill] = await ctx.rows(
+          `SELECT to_char("VCH_DATE",'DD/MM/YYYY') shown FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        const documentRequest = page
+          .context()
+          .waitForEvent('request', (r) => /\/api\/sales\/invoice\?.*format=html/.test(r.url()), {
+            timeout: 15_000,
+          });
+        const [popup] = await Promise.all([
+          page.waitForEvent('popup'),
+          page.getByRole('button', { name: 'Print', exact: true }).click(),
+        ]);
+        const response = await page.request.get((await documentRequest).url());
+        const html = await response.text();
+        await popup.close();
+        assert.ok(html.includes(bill.shown), `the invoice shows ${bill.shown}`);
+        assert.ok(
+          !/(Mon|Tue|Wed|Thu|Fri|Sat|Sun) [A-Z][a-z]{2} \d{2}/.test(html),
+          'no "Thu Oct 01" date',
+        );
+        await page.getByRole('button', { name: '▸ Recent vouchers', exact: true }).click();
+        const row = page.locator('table.grid tr', { hasText: vchNo }).last();
+        await row.waitFor();
+        const listed = (await row.locator('td').nth(1).innerText()).trim();
+        assert.equal(listed, bill.shown, 'the recent list shows dd/MM/yyyy');
+        return {
+          observation: `invoice and recent list show ${listed}`,
+          expected: bill.shown,
+          output: Buffer.from(html),
+        };
+      },
+    ),
+
+    C(
       'refusal.cheque-without-bank',
       'T06',
       'refusal',

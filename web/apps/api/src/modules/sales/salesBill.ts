@@ -1,3 +1,4 @@
+import { formatDesktopDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { docShell, gstBillBody, billFooter, type DocMeta } from '../documents/docChrome.js';
 import {
@@ -57,7 +58,7 @@ export interface SalesBillCtx {
 export function salesBillHtml(header: any, lines: any[], ctx: SalesBillCtx = {}): string {
   const h = header;
   const p = ctx.party ?? {};
-  const vchDate = h.VCH_DATE ? String(h.VCH_DATE).slice(0, 10) : '';
+  const vchDate = formatDesktopDate(h.VCH_DATE); // N56 (D19): dd/MM/yyyy, always with the year
   const meta: DocMeta[] = [
     { k: 'Bill No', v: String(h.BILL_NO ?? h.VCH_NO ?? '') },
     { k: 'Date', v: vchDate },

@@ -1,5 +1,6 @@
 'use client';
 import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { formatDesktopDate } from '@datacare/core';
 import { get, del, ApiError } from '../lib/api';
 
 /** Reusable recent-voucher list for transaction screens: navigate / print / delete / load-to-edit.
@@ -146,7 +147,7 @@ export function VoucherList({
               {rows.map((r, i) => (
                 <tr key={`${r.coYear}|${r.lcCode}|${r.coBook}|${r.vchNo}|${i}`}>
                   <td>{r.vchNo}</td>
-                  <td>{r.vchDate ?? ''}</td>
+                  <td>{formatDesktopDate(r.vchDate)}</td>
                   <td>{r.acName || r.acCode}</td>
                   <td className="num">{money(r.total)}</td>
                   <td style={{ whiteSpace: 'nowrap' }}>
