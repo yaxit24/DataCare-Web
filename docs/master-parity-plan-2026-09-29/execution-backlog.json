@@ -5848,6 +5848,27 @@
         "web/apps/api/test/salesFamilyLifecycle.db.test.ts"
       ],
       "statusNote": "IMPLEMENTED (partial-by-design). labourInvoice.ts had 3 literals; the labour-income account already resolved from BOOK_DETL slot 6 (G115). Cleaned 2 more: generalized the slot-6 resolver into resolveLabourBookSlot(tx,scope,srNo,label) and resolved the metal-sale account from slot 1 and the round-off from slot 3, inside the tx and gated on their legs posting (metalT.taxable!==0 / roundOff!==0); explicit caller account wins, fail-closed otherwise. Left 'GST' (tax account, documented TAX_MAST provisioning gap). salesFamilyLifecycle gained LBR slots 1 and 3 (it seeded only slot 6). REMAINING labourInvoice.ts 3->1, TOTAL 34->32. Guard + labour DB suite 118/8 + salesFamilyLifecycle 31 + all gates + clean api build + web 646+9 + depth green. No size ceiling change needed."
+    },
+    {
+      "id": "N160",
+      "status": "implemented-unverified",
+      "action": "Map a synchronous input-shape TypeError/RangeError thrown from a mutation handler body to a 400 invalid-request in the shared run() helper, so a malformed request body (e.g. a non-array 'lines') is a 400 not a 500. First increment of N50 (full per-route JSON Schemas remain).",
+      "parentLabels": "P9; N50",
+      "startAfter": [
+        "N159"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "saleAmountBasis.routes.db.test.ts: a non-array lines field now returns 400 (was 500 'lines.map is not a function'); a non-object body stays <500. Server-fault 500s preserved (sessionContextSerializableCommand 78 pass). Broad routes.db suite 53/14 green. gates + clean api build + web 646+9 + depth.",
+      "gapIds": "G168",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/test/saleAmountBasis.routes.db.test.ts"
+      ],
+      "statusNote": "IMPLEMENTED (first increment of N50). Confirmed empirically that POST /sales with lines:'not-an-array' returned 500 'lines.map is not a function' - a malformed body shape reaching a writer threw a synchronous TypeError that fell through run()'s catch to Fastify's default 500. Fix: in run()'s fallthrough (after the typed-ValidationError and DB-constraint branches), a TypeError/RangeError is now a 400 invalid-request - by that point auth+routing succeeded, so a shape error is a client-input fault. Typed server-fault errors (SessionCommandError statusCode:500 etc.) are mapped BEFORE this branch and are unaffected (sessionContextSerializableCommand 78 pass). Proven by two new probes in saleAmountBasis.routes.db.test.ts (non-array lines -> 400; non-object body -> <500). Broad routes.db suite 53/14 green + all gates + clean api build + web 646+9 + depth. txn.ts ceiling 8482->8491. FOLLOW-UP: N50 full per-route Fastify JSON Schemas (typed body validation that rejects before the handler) remains planned."
     }
   ],
   "amendments": [

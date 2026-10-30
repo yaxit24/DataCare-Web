@@ -159,4 +159,24 @@ const DAY = `${startYear}-06-15`;
     )) as Array<{ n: number }>;
     expect(written!.n).toBe(0);
   });
+
+  // N50: a malformed body shape (not just a bad value) must be a 400, never a 500. The writer reads
+  // `lines` as an array and maps it; a non-array, or a non-object body, used to throw a raw TypeError
+  // that fell through to a 500.
+  it('a non-array lines field is a 400 invalid-request, not a 500 TypeError', async () => {
+    const refused = await post('/sales', {
+      coBook: 'SL',
+      acCode: 'CUST01',
+      vchDate: DAY,
+      taxRatePct: 0,
+      lines: 'not-an-array',
+    });
+    expect(refused.statusCode, refused.body).toBeLessThan(500);
+    expect(refused.statusCode, refused.body).toBe(400);
+  });
+
+  it('a non-object body is a 400 invalid-request, not a 500', async () => {
+    const refused = await post('/sales', 'this is not an object');
+    expect(refused.statusCode, refused.body).toBeLessThan(500);
+  });
 });
