@@ -3719,7 +3719,7 @@
       ],
       "entryDefinition": "02-execution-plan.md section 4",
       "requiredProof": "Controls active and tested; every committed mutation has one immutable audit event",
-      "gapIds": "G34, G35",
+      "gapIds": "G34, G35, G189",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
@@ -6021,14 +6021,14 @@
     {
       "id": "N168",
       "status": "planned",
-      "action": "Settings whose desktop control is an editable combo (PAN_CARD_VAL, FONT_SIZE, GRID_ROW_HIGHT, VCH_DESC_HELP_LENT): offer the presets but accept any valid amount, validated server-side; remove settings.field.pan-limit-any-amount from features/baseline.json.",
+      "action": "Settings controls match the desktop: editable amount settings (PAN_CARD_VAL, FONT_SIZE, GRID_ROW_HIGHT, VCH_DESC_HELP_LENT) offer the presets but accept any valid amount, validated server-side; TAX_ROF is labelled as the number of tax decimals and offers 0-5; remove settings.field.pan-limit-any-amount from features/baseline.json.",
       "parentLabels": "P9; J21",
       "startAfter": [
         "N164"
       ],
       "entryDefinition": "02-execution-plan.md section 4",
-      "requiredProof": "settings.field.pan-limit-any-amount passes (50000 stored and honoured by the PAN rule); a non-number is refused; the baseline entry is removed.",
-      "gapIds": "G177",
+      "requiredProof": "settings.field.pan-limit-any-amount passes (50000 stored and honoured by the PAN rule); a non-number is refused; TAX_ROF shows a decimals label with 0-5; the baseline entry is removed.",
+      "gapIds": "G177, G187",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
@@ -6174,6 +6174,36 @@
       "requiredProof": "A web unit test of the race (Enter before the search returns picks the typed code); feature E2E cases on the sale and purchase party boxes that type a code and press Enter at once; a browser run.",
       "gapIds": "G185",
       "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N178",
+      "status": "planned",
+      "action": "Negative-stock and period-lock refusals use the desktop wording (TR_SALE.cs:10398, :15066/:16308) through desktopMessages.ts, keeping the item/stock/date details; the settings cases assert the desktop text.",
+      "parentLabels": "P9; T06",
+      "startAfter": [
+        "N170"
+      ],
+      "requiredProof": "settings.effect.negative-stock-refused and settings.effect.lock-date-refuses assert the desktop message text and pass.",
+      "gapIds": "G186",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md"
+    },
+    {
+      "id": "N179",
+      "status": "planned",
+      "action": "Classify every no-visible-effect button from the with-data sweep: record each expected one in surface-baseline.json byDesign with its source, and open a gap for each real defect (starting with report CSV on an empty section).",
+      "parentLabels": "P9; R03",
+      "startAfter": [
+        "N170"
+      ],
+      "requiredProof": "the with-data sweep reports no unclassified no-visible-effect button; each by-design entry cites its source; each defect has a gap row.",
+      "gapIds": "G188",
+      "entryDefinition": "02-execution-plan.md section 4",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
