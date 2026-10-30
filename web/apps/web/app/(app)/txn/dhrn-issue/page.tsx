@@ -8,6 +8,7 @@ import { LookupPicker } from '../../../../components/LookupPicker';
 import { EntityImagePanel } from '../../../../components/EntityImagePanel';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import { fineFor } from '@datacare/core';
+import { openDocument } from '../../../../lib/openDocument';
 
 // One pledged-ornament collateral line. Fine + Amount are computed previews (see calc()).
 interface Coll {
@@ -476,9 +477,8 @@ export default function DhrnIssuePage() {
               type="button"
               className="ghost"
               onClick={() =>
-                window.open(
+                openDocument(
                   `/api/dhrn/issue-receipt?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(String(res.vchNo))}&format=html`,
-                  '_blank',
                 )
               }
             >

@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { get } from '../../../../lib/api';
+import { openDocument } from '../../../../lib/openDocument';
 
 interface Row {
   report: string;
@@ -23,7 +24,7 @@ export default function ReportLayoutsPage() {
   }, []);
   const filtered = rows.filter((r) => r.report.toLowerCase().includes(q.toLowerCase()));
   const open = (name: string) =>
-    window.open(`/api/reports/layout?name=${encodeURIComponent(name)}&format=html`, '_blank');
+    openDocument(`/api/reports/layout?name=${encodeURIComponent(name)}&format=html`);
   return (
     <div>
       <h1>

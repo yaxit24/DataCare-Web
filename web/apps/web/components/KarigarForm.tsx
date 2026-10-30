@@ -7,6 +7,7 @@ import { VoucherList } from './VoucherList';
 import { EntityImagePanel } from './EntityImagePanel';
 import { useGridKeyboard } from './GridKeyboard';
 import SubDetailGrid, { SUB_DETAIL_COMPONENT, useSubDetail } from './SubDetailGrid';
+import { openDocument } from '../lib/openDocument';
 
 /** Karigar (goldsmith) issue/receive. Issue = raw fine metal OUT; Receive = finished ornaments IN
  *  (wastage folded into fine), with per-line labour + optional GST + optional barcode tagging (F3). */
@@ -918,9 +919,8 @@ export default function KarigarForm({
                 type="button"
                 className="ghost"
                 onClick={() =>
-                  window.open(
+                  openDocument(
                     `/api/karigar/issue-voucher?coBook=${encodeURIComponent(coBook)}&vchNo=${encodeURIComponent(String(res.vchNo))}&format=html`,
-                    '_blank',
                   )
                 }
               >

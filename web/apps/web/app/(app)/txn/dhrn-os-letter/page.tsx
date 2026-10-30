@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { todayLocal } from '../../../../lib/localDate';
+import { openDocument } from '../../../../lib/openDocument';
 
 /**
  * Dhrn Os Letter (desktop RP_DHRN_OS) — a per-party pledge OUTSTANDING statement/letter. Pick the
@@ -33,7 +34,7 @@ export default function DhrnOsLetterPage() {
       setErr('pick the borrower account first');
       return;
     }
-    window.open(url(format), '_blank');
+    openDocument(url(format));
   }
 
   return (

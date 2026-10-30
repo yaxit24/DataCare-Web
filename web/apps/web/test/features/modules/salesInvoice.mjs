@@ -631,6 +631,51 @@ export const salesInvoice = {
     ),
 
     C(
+      'print.after-access-expiry',
+      'T16',
+      'output',
+      'G180: Print still opens the invoice after the 15-minute access cookie has expired (the session refreshes first)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const vchNo = await createOneLine(ctx, page);
+        await loadVoucher(page, vchNo);
+        // As if the access cookie had expired: the browser drops it and keeps the refresh cookie.
+        await page.context().clearCookies({ name: 'access' });
+        const refreshed = page.waitForRequest(
+          (r) => r.url().endsWith('/api/auth/refresh') && r.method() === 'POST',
+          { timeout: 15_000 },
+        );
+        const [popup] = await Promise.all([
+          page.waitForEvent('popup'),
+          page.getByRole('button', { name: 'Print', exact: true }).click(),
+        ]);
+        await refreshed;
+        const document = await popup.waitForResponse(
+          (r) => /\/api\/sales\/invoice\?/.test(r.url()),
+          {
+            timeout: 15_000,
+          },
+        );
+        const html = await document.text();
+        await popup.close();
+        assert.equal(document.status(), 200, html.slice(0, 200));
+        assert.ok(
+          !html.includes('unauthenticated'),
+          'the window shows the invoice, not unauthenticated',
+        );
+        assert.ok(
+          html.includes(String(Number(vchNo))) || html.includes(vchNo),
+          'the invoice of the voucher',
+        );
+        return {
+          observation: `after the access cookie was dropped, Print refreshed the session and the window got ${document.status()} (${html.length} bytes)`,
+          expected: 'the invoice opens (200), not {"error":"unauthenticated"}',
+          output: Buffer.from(html),
+        };
+      },
+    ),
+
+    C(
       'refusal.cheque-without-bank',
       'T06',
       'refusal',
