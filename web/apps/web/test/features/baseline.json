@@ -20,5 +20,42 @@
       "gap": "G177",
       "reason": "The web shows PAN_CARD_VAL as a fixed list (100000/200000); the desktop combo is editable (UT_SETTING.cs:4300-4301 presets, :5059 saves Val(Text)), so a shop's own limit such as 50000 cannot be entered. FONT_SIZE, GRID_ROW_HIGHT and VCH_DESC_HELP_LENT have the same shape."
     }
+  ],
+  "sales-return": [
+    {
+      "case": "sales-return.formula.net-basis",
+      "gap": "G190",
+      "reason": "The return prices the line on fine weight with paise (58,465.80); the desktop prices on SL_AMT_TYPE (net + ghat) in whole rupees, 63,609 (TR_SALE_RTN.cs:4914-4931, 4955, 4985)."
+    },
+    {
+      "case": "sales-return.create.amount-net-basis",
+      "gap": "G190",
+      "reason": "Stored ITM_AMT/NET_AMT/TOT_AMT follow the fine basis with paise; the desktop stores 61,234 + 2,375 and a whole-rupee total of 65,517 (TR_SALE_RTN.cs:16405)."
+    },
+    {
+      "case": "sales-return.create.from-bill-import",
+      "gap": "G191",
+      "reason": "Import copies the sold loose line's TAG_NO 'N' and Save refuses it as a tag ('tag provenance is missing or ambiguous: N'); the desktop treats 'N' as no tag."
+    },
+    {
+      "case": "sales-return.ui.import-button-clickable",
+      "gap": "G192",
+      "reason": "The Tax % input covers the Import button at 1600 px, so the mouse cannot press Import."
+    },
+    {
+      "case": "sales-return.concurrency.double-delete",
+      "gap": "G193",
+      "reason": "The second delete of an already deleted return answers 500 (PersistedVoucherNotFoundError is not mapped by run())."
+    },
+    {
+      "case": "sales-return.create.records-user",
+      "gap": "G194",
+      "reason": "POST /sales-returns does not pass the user, so SL_DATA.MAIN_USER is blank; the desktop stores DC_Main.MCo_User (TR_SALE_RTN.cs:9966, 12908)."
+    },
+    {
+      "case": "sales-return.delete.audit-user",
+      "gap": "G194",
+      "reason": "The delete writes the tenant id as DELETE_DATA.DELETE_USER; the desktop writes DC_Main.MCo_User (TR_SALE_RTN.cs:15076)."
+    }
   ]
 }

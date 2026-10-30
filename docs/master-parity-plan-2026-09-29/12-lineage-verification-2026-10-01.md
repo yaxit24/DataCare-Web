@@ -200,6 +200,13 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G187 | Low | Tax rounding setting is labelled as Y/N but is a decimal count | `unified/src/csharp/DataCareNext/MS_OPNCOMP.cs` | `web/apps/api/src/modules/settings/settingsCatalog.ts` | Found while preparing the settings cases: TAX_ROF is shown as `Round-off tax (Y/N)` with options 0/1/2, but it is the number of decimals tax is rounded to (`MS_OPNCOMP.cs:671`; values above 5 fall back to 2 at `:741-743`) and the web rounding policy accepts 0–5. An operator reading the label cannot tell what 0, 1 or 2 mean. | N168 |
 | G188 | Low | 141 buttons with no visible effect are not yet classified | — | `docs/handbook/web/ui-surface-map.md` | The with-data sweep pressed 848 buttons; 141 (27 distinct names) produced no request, navigation, dialog or screen change: CSV on 43 report pages, New on a blank form (19), removing the only row (39 across ×, Remove … row 1 and Remove), Load without a voucher number (7), Cancel (6), Check balance without a party (5), Details (1). Most are expected, but none is proven so. The sales register CSV exports correctly when it has rows (`sales-invoice.output.register-csv`); the 43 are probably CSV on an empty section, which silently exports nothing. | N179 |
 | G189 | Low | The login limit refuses a busy counter with a raw 'Too Many Requests' | `unified/src/csharp/DataCareNext/MS_LOGIN.cs` | `web/apps/api/src/app.ts` | Hit while building the suite: `/auth/login` allows 10 attempts a minute (`app.ts:500`, per client address), and the login screen then shows the raw text `Too Many Requests`. Several counters behind one shop address logging in at opening time would be refused this way; the desktop login (`MS_LOGIN.cs`) has no attempt limit. The limit itself is a security control and stays; the message and the per-address key need a decision. | N55 |
+| G190 | High | Sales Return prices the line on fine weight and keeps paise | `unified/src/csharp/DataCareNext/TR_SALE_RTN.cs` | `web/apps/api/src/modules/sales/salesReturn.ts`; `web/apps/api/src/modules/sales/sales.ts`; `web/apps/web/app/(app)/txn/sale-return/page.tsx` | Found by `sales-return.formula.net-basis` and `sales-return.create.amount-net-basis`: a 10 g GLD22 line (touch 91.6, rate 6,123.45, making 237.5/g) previews and saves 58,465.80, which is fine 9.16 × rate + making. The desktop prices on `CO_SET.SL_AMT_TYPE` (`TR_SALE_RTN.cs:4914-4931`: net + ghat for `N`, gross for `G`, fine only for `F`) and rounds the item and labour amounts to whole rupees with `Math.Round(x, 0)` (`:4955`, `:4985`), and the bill total too (`:16405`): 61,234 + 2,375 = 63,609, tax 1,908.27, total 65,517. The web return calls the sale calculation with a blank amount type on purpose, which keeps a fine basis (`sales.ts:293-300`). | N181 |
+| G191 | Med | A loose-stock sale line imported into a return cannot be saved | `unified/src/csharp/DataCareNext/TR_SALE_RTN.cs` | `web/apps/api/src/modules/sales/salesReturn.ts`; `web/apps/web/app/(app)/txn/sale-return/page.tsx` | Found by `sales-return.create.from-bill-import`: Orig Book `SL`, Orig Bill No and Import fill the customer and the sold line, then Save answers 400 `tag provenance is missing or ambiguous: N`. The sold line has no tag and is stored with `TAG_NO` `N`, the desktop's loose-stock marker. The desktop copies it into the return grid as it is (`TR_SALE_RTN.cs:3917`) and every tag step skips `N` (`:4773`, `:8585`, `:13387`, `:13395`). The web writer treats any non-blank tag as a tag (`salesReturn.ts:155`), although its reader already maps `N` to blank (`salesReturn.ts:739`). | N182 |
+| G192 | Low | The Tax % box covers the Import button on the Sales Return screen | `unified/src/csharp/DataCareNext/TR_SALE_RTN.cs` | `web/apps/web/app/(app)/txn/sale-return/page.tsx` | Found by `sales-return.ui.import-button-clickable`: at 1600 px the Tax % input lies over Import beside Orig Bill No, so a click lands on the input and Import works only from the keyboard (focus and Enter). | N182 |
+| G193 | Med | Deleting a voucher that is already gone answers 500 | `docs/master-parity-plan-2026-09-29/03-shared-contracts.md` | `web/apps/api/src/modules/vouchers/lifecycle.ts`; `web/apps/api/src/routes/txn.ts` | Found by `sales-return.concurrency.double-delete`: two operators delete the same return; the first answers 200 and reverses the stock once (580 → 570), the second answers 500. `persistedVoucherHeaderTx` throws `PersistedVoucherNotFoundError` (`lifecycle.ts:131`) and `run()` (`txn.ts:950-1040`) does not map it, so it surfaces as a server error. The shared contract asks for a stable conflict reason for a stale document (`03-shared-contracts.md`, rule 9 of the conflict list). 18 writer modules read their header through `persistedVoucherHeaderTx`. | N183 |
+| G194 | Med | Sales Return does not record who created or deleted it | `unified/src/csharp/DataCareNext/TR_SALE_RTN.cs` | `web/apps/api/src/routes/txn.ts` | Found by `sales-return.create.records-user` and `sales-return.delete.audit-user`. A return saved by `e2eadmin` stores `SL_DATA.MAIN_USER` blank, because `POST /sales-returns` (`txn.ts:1804-1833`) does not pass the user; the desktop stores `DC_Main.MCo_User` (`TR_SALE_RTN.cs:9966`, `:12908`). Its delete writes `DELETE_DATA.DELETE_USER` = `feature-e2e`, the tenant id, because the route passes `sess(req).tenantId` (`txn.ts:1856`); the desktop writes `MCo_User` (`:15076`). Six more deletes pass the tenant id: labour invoice (`txn.ts:2083`), multi receipt (`:2907`), multi payment (`:2946`), MFG order issue (`:3810`), MFG (`:3823`) and fine sale (`:8360`). | N183 |
+| G195 | High | Sale line amounts are rounded by TOT_AMT_ROF instead of to whole rupees | `unified/src/csharp/DataCareNext/TR_SALE.cs` | `web/apps/api/src/modules/sales/sales.ts`; `web/packages/core/src/calc.ts` | Found while checking the return's rounding. The desktop's `CommPassTotal` starts with `digits = 0` and uses 2 only when `CO_SET.ALL_ROF_REMOVE = 'Y'` (`TR_SALE.cs:10343-10362`), then rounds the item amount (`:10905`) and the labour amount (`:11100-11108`) with it; `TOT_AMT_ROF` rounds only the bill total (`:19192`, `:19274`). The web rounds each line component with `TOT_AMT_ROF` (`sales.ts:337-349`), a rule taken from a customer database where `TOT_AMT_ROF` is 0, so the two agree only at 0. With `TOT_AMT_ROF` 2, or blank (read as 2), a 10 g line at 6,123.45 is 61,234.50 on the web and 61,234 on the desktop. The web's E-Bill calculation already follows the desktop rule (`web/packages/core/src/eBillCalc.ts:30`). The merged cases of `sales-invoice` (EXPECT_A 61,234.50) and `settings.effect.sale-amount-fine` (56,090.80) assert the web value; the desktop values are 61,234 and 56,091. | N184 |
+| G196 | Med | A new web company leaves the rounding settings blank, and the web reads blank as 2 decimals | `unified/src/csharp/DataCareNext/Ac_Image.cs` | `web/packages/core/src/roundingPolicy.ts` | The desktop schema makes the rounding settings NOT NULL with defaults: `LBR_ROF` 0 and `ITM_RATE_ROF` 0 (`Ac_Image.cs:6320`, `:6358`), `PR_RATE_ROF` 2 (`:7010`), `TOT_AMT_ROF` 0 (`:7357`) and `ALL_ROF_REMOVE` `N` (`:7565`). A new desktop company copies them from an existing one (`MS_YEAR.cs:1529-1531`), and a blank `TAX_ROF` reads as 0 decimals (`MS_OPNCOMP.cs:668-671`, `DC_Main.cs:2088-2101`). On the live demo company `TAX_ROF` and `ALL_ROF_REMOVE` are NULL and there is no `CO_SET_NEW` row, and `resolveRoundingPolicy` reads blank as 2 decimals on purpose (`roundingPolicy.ts:103`). So a new web company keeps paise on the bill total, tax, labour rate and item rate where a new desktop company rounds to whole rupees. To decide under D05: provision the desktop defaults, or keep 2 decimals for web-created companies and record why. | N185 |
 
 ## 4. Decisions D23–D28
 
@@ -1902,6 +1909,40 @@ request answered 403. Nothing stops the only administrator from removing their o
 Done when: every daily voucher screen has a module like these, run on shared real data, and the map is
 regenerated from that run.
 
+### N180 — Sales Return feature module on real data (G190–G196)
+
+**Sales Return (TR_SALE_RTN), 24 cases**, run through the real screen on the shared company. Expectations come
+from the desktop return rules: the line is priced on `CO_SET.SL_AMT_TYPE` (net + ghat for `N`,
+`TR_SALE_RTN.cs:4914-4931`); the item amount, the labour amount and the bill total are rounded to whole rupees
+whatever the settings (`:4955`, `:4985`, `:16405`); tax is rounded with `TAX_ROF` (`:16402`). Result: 14 passed,
+7 failed (baselined), 3 blocked.
+
+Passed: book filter and defaults; create effects (stock +10, customer credited with the bill total, balanced
+ledger); gold and silver lines on one return; inter-state IGST; cash refund; the no-lines and missing-bill
+refusals write nothing; delete reverses stock and ledger and writes DELETE_DATA; the credit-note print; reopen in
+the Saved returns panel; a clerk without the return right writes nothing; a double-click makes one return; Alt+S
+saves; and the J07 journey, where a sale and its full return put the stock back, move the customer by the sale
+total less the return total, and the return reaches the sales-return register.
+
+Failed: G190 twice (fine basis with paise: 58,465.80 where the desktop has 63,609), G191 (an imported loose line
+carries tag `N` and Save refuses it), G192 (Tax % covers Import), G193 (the second of two deletes answers 500),
+G194 twice (the return stores no creator, and its delete records the tenant id as the deleting user). Blocked:
+numeric edit of a saved return (planned in N10/N11), T14 rollback (G173) and T15 settings variant (G174).
+
+Two first-run failures were test bugs: the return lines live in `SL_DETL_RTN`, and the Saved returns panel
+clears the voucher box when its book finishes loading, so the case now picks the book before typing.
+
+**Correction to N161 and N170.** Both narratives say sale line amounts are rounded with `TOT_AMT_ROF`. The
+desktop rounds them to whole rupees unless `ALL_ROF_REMOVE = 'Y'` (`TR_SALE.cs:10343-10362`, `:10905`,
+`:11100-11108`); `TOT_AMT_ROF` rounds only the bill total (`:19192`, `:19274`). The merged expectations
+`sales-invoice` EXPECT_A (61,234.50) and `settings.effect.sale-amount-fine` (56,090.80) are therefore web values;
+the desktop gives 61,234 and 56,091. This is G195; N184 moves those cases to the desktop values. The
+`settings.effect.whole-rupee-rounding` case keeps its numbers (61,234 and 65,517), but its line rounding comes
+from the whole-rupee rule, not from `TOT_AMT_ROF`. G196 records that a new web company has blank rounding
+settings, which the web reads as 2 decimals, while the desktop schema defaults them to whole rupees.
+
+Done when: every daily voucher screen has a module like this, run on shared real data, and each fixed defect
+leaves the baseline in the change that fixes it.
 
 ## 6. Status corrections
 
@@ -2003,6 +2044,12 @@ regenerated from that run.
 | N177 | — | planned (G185: Enter in a lookup resolves the typed code instead of picking a row of an earlier list) |
 | N178 | — | planned (G186: negative-stock and period-lock refusals use the desktop wording) |
 | N179 | — | planned (G188: classify the 141 no-effect buttons as by-design with source, or open a gap) |
+| N180 | — | implemented-unverified, evidence in this change (Sales Return module 14/7/3 on shared real data; found G190–G196; corrects the N161/N170 rounding statement) |
+| N181 | — | planned (G190: the return line is priced on SL_AMT_TYPE and its amounts and total are whole rupees, as TR_SALE_RTN does) |
+| N182 | — | planned (G191, G192: an imported loose line (tag N) saves; Import is clickable) |
+| N183 | — | planned (G193, G194: a missing voucher answers a stable 4xx; returns and seven deletes record the logged-in user) |
+| N184 | — | planned (G195: sale line amounts round to whole rupees unless ALL_ROF_REMOVE = Y; merged feature expectations move to desktop values) |
+| N185 | — | planned (G196: decide under D05 and provision the desktop rounding defaults for new companies, or record the 2-decimal choice) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 
