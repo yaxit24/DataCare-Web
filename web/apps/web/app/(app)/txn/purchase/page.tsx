@@ -204,6 +204,7 @@ export default function PurchaseEntryPage() {
   const [result, setResult] = useState<any>(null);
   const [voucherLookup, setVoucherLookup] = useState('');
   const [loadedVchNo, setLoadedVchNo] = useState('');
+  const [loadedVersion, setLoadedVersion] = useState(''); // N51 (D17): sent on update and delete
   const [err, setErr] = useState('');
   // Desktop purchase header fields (TR_PURC:12982-13056) — party contact, bank/cheque,
   // credit terms, discount, TDS/TCS, hallmark charge and the posting-account overrides.
@@ -280,6 +281,7 @@ export default function PurchaseEntryPage() {
 
   function newPurchase() {
     setLoadedVchNo('');
+    setLoadedVersion('');
     setVoucherLookup('');
     setResult(null);
     setErr('');
@@ -311,6 +313,7 @@ export default function PurchaseEntryPage() {
         `/purchases/${encodeURIComponent(vchNo)}?coBook=${encodeURIComponent(book)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}`,
       );
       setLoadedVchNo(String(view.voucherNo));
+      setLoadedVersion(String(view.version ?? ''));
       setVoucherLookup(String(view.voucherNo));
       setResult(null);
       setVchDate(String(view.vchDate));
@@ -381,7 +384,7 @@ export default function PurchaseEntryPage() {
     setErr('');
     try {
       await del(
-        `/purchases/${encodeURIComponent(loadedVchNo)}?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}`,
+        `/purchases/${encodeURIComponent(loadedVchNo)}?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}&expectedVersion=${encodeURIComponent(loadedVersion)}`,
       );
       newPurchase();
     } catch (e) {
@@ -508,9 +511,13 @@ export default function PurchaseEntryPage() {
         kasarAc: tender.kasarAc || undefined,
       };
       const saved = loadedVchNo
-        ? await put<any>(`/purchases/${encodeURIComponent(loadedVchNo)}`, body)
+        ? await put<any>(`/purchases/${encodeURIComponent(loadedVchNo)}`, {
+            ...body,
+            expectedVersion: loadedVersion,
+          })
         : await post<any>('/purchases', body);
       setResult(saved);
+      setLoadedVersion(String(saved.version ?? '')); // N51: create and update return it
       const savedNo = String(saved.vchNo).padStart(5, '0');
       setLoadedVchNo(savedNo);
       setVoucherLookup(savedNo);

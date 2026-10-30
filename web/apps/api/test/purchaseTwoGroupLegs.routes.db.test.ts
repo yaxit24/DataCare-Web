@@ -177,7 +177,10 @@ const SILVER = { itCode: 'SLV01', pcs: 3, grossWt: 100.4, netWt: 100, touch: 92.
     const reopened = await call('GET', `/purchases/${vchNo}?coBook=${BOOK}`);
     expect(reopened.statusCode, reopened.body).toBe(200);
     const before = await ledger(vchNo);
-    const saved = await call('PUT', `/purchases/${vchNo}`, payload);
+    const saved = await call('PUT', `/purchases/${vchNo}`, {
+      ...payload,
+      expectedVersion: reopened.json().version,
+    });
     expect(saved.statusCode, saved.body).toBe(200);
     expect(await ledger(vchNo)).toEqual(before);
   });
@@ -185,11 +188,11 @@ const SILVER = { itCode: 'SLV01', pcs: 3, grossWt: 100.4, netWt: 100, touch: 92.
   it('T09 edit: re-pricing the silver line moves only its leg, the tax and the party leg', async () => {
     const vchNo = await create(purchase([GOLD, SILVER]));
     // Silver rate 80 → 85: 92.5 × 85 = 7,862.50; taxable 121,698.50; GST 3% = 3,650.955 → 3,650.96; total 125,349.46.
-    const edited = await call(
-      'PUT',
-      `/purchases/${vchNo}`,
-      purchase([GOLD, { ...SILVER, rate: 85 }]),
-    );
+    const { version } = (await call('GET', `/purchases/${vchNo}?coBook=${BOOK}`)).json();
+    const edited = await call('PUT', `/purchases/${vchNo}`, {
+      ...purchase([GOLD, { ...SILVER, rate: 85 }]),
+      expectedVersion: version,
+    });
     expect(edited.statusCode, edited.body).toBe(200);
     expect((await ledger(vchNo)).map((r) => [r.tail, r.ac, r.dr, r.cr])).toEqual([
       ['01', 'SUPL', 0, 125349.46],
@@ -212,7 +215,11 @@ const SILVER = { itCode: 'SLV01', pcs: 3, grossWt: 100.4, netWt: 100, touch: 92.
   it('T10 delete: every leg of the two-group purchase is reversed and DELETE_DATA is written', async () => {
     const vchNo = await create(purchase([GOLD, SILVER]));
     const before = await snapshotTenant(owner, tenantId);
-    const deleted = await call('DELETE', `/purchases/${vchNo}?coBook=${BOOK}`);
+    const { version } = (await call('GET', `/purchases/${vchNo}?coBook=${BOOK}`)).json();
+    const deleted = await call(
+      'DELETE',
+      `/purchases/${vchNo}?coBook=${BOOK}&expectedVersion=${version}`,
+    );
     expect(deleted.statusCode, deleted.body).toBe(200);
     expect(await ledger(vchNo)).toEqual([]);
     const diff = diffTenant(before, await snapshotTenant(owner, tenantId));
@@ -263,5 +270,42 @@ const SILVER = { itCode: 'SLV01', pcs: 3, grossWt: 100.4, netWt: 100, touch: 92.
         tenantId,
       );
     }
+  });
+
+  // N51 (D17, G170): a purchase carries the same version token as a sale.
+  it('N51: a stale purchase save or delete is a 409 that changes nothing', async () => {
+    const vchNo = await create(purchase([GOLD]));
+    const { version } = (await call('GET', `/purchases/${vchNo}?coBook=${BOOK}`)).json();
+    expect(version).toMatch(/^[0-9a-f]{64}$/);
+    const missing = await call('PUT', `/purchases/${vchNo}`, purchase([{ ...GOLD, rate: 6100 }]));
+    expect(missing.statusCode, missing.body).toBe(400);
+    const first = await call('PUT', `/purchases/${vchNo}`, {
+      ...purchase([{ ...GOLD, rate: 6100 }]),
+      expectedVersion: version,
+    });
+    expect(first.statusCode, first.body).toBe(200);
+    const stale = await call('PUT', `/purchases/${vchNo}`, {
+      ...purchase([{ ...GOLD, rate: 6200 }]),
+      expectedVersion: version,
+    });
+    expect(stale.statusCode, stale.body).toBe(409);
+    expect(stale.json()).toMatchObject({ error: 'voucher-version-conflict' });
+    const staleDelete = await call(
+      'DELETE',
+      `/purchases/${vchNo}?coBook=${BOOK}&expectedVersion=${version}`,
+    );
+    expect(staleDelete.statusCode, staleDelete.body).toBe(409);
+    const rates = (await owner.$queryRawUnsafe(
+      `SELECT "ITM_RATE"::float rate FROM "PR_DETL" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+      tenantId,
+      BOOK,
+      vchNo,
+    )) as Array<{ rate: number }>;
+    expect(rates.map((row) => row.rate)).toEqual([6100]);
+    const deleted = await call(
+      'DELETE',
+      `/purchases/${vchNo}?coBook=${BOOK}&expectedVersion=${first.json().version}`,
+    );
+    expect(deleted.statusCode, deleted.body).toBe(200);
   });
 });

@@ -1,7 +1,7 @@
 import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { createPurchase, deletePurchase } from '../src/modules/purchase/purchase.js';
+import { createPurchase, deletePurchase, getPurchase } from '../src/modules/purchase/purchase.js';
 import { createPurchaseReturn } from '../src/modules/purchase/purchaseReturn.js';
 import {
   deletePurchaseReturn,
@@ -20,6 +20,10 @@ import {
   nextVoucherNoTx,
   type VoucherScope,
 } from '../src/modules/vouchers/numbering.js';
+
+/** N51: the purchase's current version, as the screen would have read it before saving or deleting. */
+const versionOfPurchase = async (prisma: any, scope: any, vchNo: number | string) =>
+  String((await getPurchase(prisma, scope, vchNo)).version);
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const databaseDescribe = RUN ? describe : describe.skip;
@@ -387,7 +391,11 @@ databaseDescribe('database-backed transaction integrity', () => {
       CO,
     );
     await expect(
-      deletePurchase(runtime, { scope: scope('PUR'), vchNo: purchase.vchNo }),
+      deletePurchase(runtime, {
+        scope: scope('PUR'),
+        vchNo: purchase.vchNo,
+        expectedVersion: await versionOfPurchase(runtime, scope('PUR'), purchase.vchNo),
+      }),
     ).rejects.toThrow('tag already issued');
     await deleteSale(runtime, {
       scope: scope('SAL'),
@@ -418,7 +426,11 @@ databaseDescribe('database-backed transaction integrity', () => {
     )) as Array<Record<string, bigint>>;
     expect(Number(saleReversal[0]?.upi)).toBe(0);
     expect(Number(saleReversal[0]?.order_reset)).toBe(1);
-    await deletePurchase(runtime, { scope: scope('PUR'), vchNo: purchase.vchNo });
+    await deletePurchase(runtime, {
+      scope: scope('PUR'),
+      vchNo: purchase.vchNo,
+      expectedVersion: await versionOfPurchase(runtime, scope('PUR'), purchase.vchNo),
+    });
 
     const finalRows = (await owner.$queryRawUnsafe(
       `SELECT

@@ -144,9 +144,7 @@ import {
   createPurchaseQuotation,
   getPurchase,
   getPurchaseQuotation,
-  editPurchase,
   editPurchaseQuotation,
-  deletePurchase,
   deletePurchaseQuotation,
   listOpenConsignmentPurchaseReceipts,
 } from '../modules/purchase/purchase.js';
@@ -251,6 +249,7 @@ import {
 import { tagStockReport, tagStockCsv } from '../modules/reports/tagStock.js';
 import { registerVoucherNavigationRoutes } from './voucherNavigation.js';
 import { registerSaleVoucherRoutes } from './saleVoucher.js';
+import { registerPurchaseVoucherRoutes } from './purchaseVoucher.js';
 import { VoucherVersionConflictError } from '../modules/vouchers/version.js';
 import { listYears, createYear, carryForwardOpenings } from '../modules/masters/year.js';
 import { reminders } from '../modules/finance/reminders.js';
@@ -2507,10 +2506,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const b = body(req);
     return run(reply, 201, () => createPurchase(prisma, purchaseInput(req, b), b.lines ?? []));
   });
-  app.get('/purchases/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    return run(reply, 200, () => getPurchase(prisma, scopeOf(req), (req.params as any).vchNo));
-  });
+  // GET, PUT and DELETE of /purchases/:vchNo and /consignment-purchases/:vchNo carry the version token (N51).
+  registerPurchaseVoucherRoutes(app, { ...extraRouteHelpers, purchaseInput });
   // G126 (Stage E): the purchase bill print (desktop PurcBillA4Gst.rpt), the supplier-side counterpart
   // of the sales Tax Invoice. Reuses the shared print helpers and purchaseBill chrome.
   app.get('/purchases/:vchNo/print', auth, async (req, reply) => {
@@ -2533,23 +2530,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       filename: `purchase-${scope.vchNo}`,
     });
   });
-  app.put('/purchases/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'update')) return;
-    const b = body(req);
-    return run(reply, 200, () =>
-      editPurchase(prisma, purchaseInput(req, b), b.lines ?? [], (req.params as any).vchNo),
-    );
-  });
-  app.delete('/purchases/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
-      deletePurchase(prisma, {
-        scope: scopeOf(req),
-        vchNo: (req.params as any).vchNo,
-        deleteUser: sess(req).sub,
-      }),
-    );
-  });
 
   app.get('/consignment-purchases/open-receipts', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
@@ -2566,27 +2546,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
     return run(reply, 201, () => createPurchase(prisma, purchaseInput(req, b), b.lines ?? []));
-  });
-  app.get('/consignment-purchases/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    return run(reply, 200, () => getPurchase(prisma, scopeOf(req), (req.params as any).vchNo));
-  });
-  app.put('/consignment-purchases/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'update')) return;
-    const b = body(req);
-    return run(reply, 200, () =>
-      editPurchase(prisma, purchaseInput(req, b), b.lines ?? [], (req.params as any).vchNo),
-    );
-  });
-  app.delete('/consignment-purchases/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
-      deletePurchase(prisma, {
-        scope: scopeOf(req),
-        vchNo: (req.params as any).vchNo,
-        deleteUser: sess(req).sub,
-      }),
-    );
   });
 
   app.post('/purchase-quotations', auth, async (req, reply) => {
