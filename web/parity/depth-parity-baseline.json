@@ -1,5 +1,5 @@
 {
-  "recordedAt": "2026-10-29T05:54:28.193Z",
+  "recordedAt": "2026-10-30T02:27:26.477Z",
   "note": [
     "Operator-depth ratchet baseline. `current` is the measured state at plan time, re-derived",
     "from source by scripts/check-depth.mjs. Floors may only rise, ceilings may only fall.",
@@ -39,11 +39,11 @@
     "web": {
       "pages": 132,
       "txnPages": 90,
-      "txnPagesWithLineGrid": 84,
-      "txnPagesWithEditableGrid": 69,
-      "inputControls": 1537,
+      "txnPagesWithLineGrid": 86,
+      "txnPagesWithEditableGrid": 71,
+      "inputControls": 1540,
       "gridColumns": 2029,
-      "operatorSurface": 3566,
+      "operatorSurface": 3569,
       "pagesWithGridKeyboard": 65,
       "txnPagesWithGridKeyboard": 65,
       "txnGridPagesWithKeyboard": 65,
@@ -51,13 +51,13 @@
       "pagesWithLookupPicker": 92,
       "pagesWithLineRecalc": 0,
       "pagesWithSubDetailGrid": 19,
-      "apiValidationMessages": 918
+      "apiValidationMessages": 921
     },
     "ratios": {
-      "operatorSurfacePct": 69.8,
+      "operatorSurfacePct": 69.9,
       "gridColumnPct": 57.8,
-      "inputControlPct": 96.1,
-      "operatorSurfacePerPagePct": 104.3
+      "inputControlPct": 96.3,
+      "operatorSurfacePerPagePct": 105.4
     },
     "settings": {
       "inventory": 130,
@@ -65,9 +65,9 @@
       "inert": 79
     },
     "reachability": {
-      "apiInputFields": 2505,
+      "apiInputFields": 2506,
       "reachableFromUi": 2403,
-      "apiOnlyUnreachable": 102
+      "apiOnlyUnreachable": 103
     },
     "containment": {
       "operations": 3,
@@ -278,6 +278,12 @@
         "apiInputFields": [2138, 2505]
       },
       "attribution": "A CEILING RISE THAT IS NOT A REGRESSION. parity/unreachable-triage.json was resynced to the exact current set: of the 102 unreachable fields, 0 are operator-class (every former operator-backlog gap — DesignBookLine pageNo/dieNo/ghatWt, ChequeInput payee/acPayee, RateCutLine isuRef, SchemeInstallment withUpi — was closed by the same slices), 71 are serverDerived and 31 are internal. Each new field was spot-checked against its writer. No operator-typed field became unreachable."
+    },
+    {
+      "metric": "reachability.apiOnlyUnreachable",
+      "from": 102,
+      "to": 103,
+      "reason": "N154/G162 batch-receipt reopen/edit: getBatchReceipt reader + editBatchReceipt add BatchReceiptInput.forceVchNo, an edit-only internal field (reuse the voucher number on reverse+re-post, desktop TR_CASH delete-then-rebuild). Triaged class=internal in unreachable-triage.json; operator gaps still 0."
     }
   ],
   "endToEnd": {

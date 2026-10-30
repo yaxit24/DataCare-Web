@@ -2,11 +2,11 @@
   "kind": "unreachable-field-triage",
   "note": "Classifies the fields gap_manifest.py reports as unreachable from any screen. `operator` is the only class that represents work; the other two are fields a request should not carry, and their unreachability is correct. The P3 ceiling is therefore serverDerived + internal, not zero.",
   "totals": {
-    "unreachable": 102,
+    "unreachable": 103,
     "operator": 0,
     "serverDerived": 71,
-    "internal": 31,
-    "correctlyUnreachable": 102
+    "internal": 32,
+    "correctlyUnreachable": 103
   },
   "operatorBacklog": [],
   "fields": [
@@ -825,6 +825,14 @@
       "field": "mainName",
       "class": "serverDerived",
       "reason": "window/tile chrome label, not voucher data"
+    },
+    {
+      "interface": "BatchReceiptInput",
+      "file": "web/apps/api/src/modules/finance/batchReceipt.ts",
+      "module": "finance",
+      "field": "forceVchNo",
+      "class": "internal",
+      "reason": "edit-only: editBatchReceipt reverses the old write set and re-posts under the SAME voucher number via this field (desktop TR_CASH delete-then-rebuild, TR_CASH.cs:2988-3081); no screen supplies it - a create allocates a fresh number"
     }
   ]
 }

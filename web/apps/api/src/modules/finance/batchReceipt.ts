@@ -73,6 +73,12 @@ export interface BatchReceiptInput {
   lines: BatchReceiptLineInput[];
   /** Voucher-level write-off ledger, used by any line that does not name its own. */
   kasarAc?: string;
+  /**
+   * EDIT ONLY: reuse this voucher number instead of allocating a fresh one. `editBatchReceipt`
+   * reverses the old write set (freeing the number) and re-posts under the same number, matching the
+   * desktop TR_CASH edit (delete-then-rebuild on the same VCH_NO, `TR_CASH.cs:2988-3081`).
+   */
+  forceVchNo?: number | string;
 }
 
 export interface BatchReceiptResult {
@@ -103,6 +109,7 @@ export interface BatchReceiptResult {
 export async function postBatchReceipt(
   prisma: any,
   input: BatchReceiptInput,
+  context?: { tx?: any },
 ): Promise<BatchReceiptResult> {
   const rawLines = input.lines ?? [];
   if (rawLines.length < 1)
@@ -121,8 +128,12 @@ export async function postBatchReceipt(
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
   const tenantId = input.scope.tenantId;
 
-  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
-    const vchNo = await nextVoucherNoTx(tx, input.scope);
+  // `editBatchReceipt` passes its own transaction so the reverse and the re-post commit ATOMICALLY
+  // (one rollback unit) — a re-post failure must not leave the reversal committed and the voucher
+  // destroyed. A plain create opens its own voucher transaction.
+  const run = async (tx: any): Promise<BatchReceiptResult> => {
+    const vchNo =
+      input.forceVchNo == null ? await nextVoucherNoTx(tx, input.scope) : Number(input.forceVchNo);
     const key = keyOf(input.scope, vchNo, RCT_BOOK);
     const base = { ...key, VCH_TYPE: RCT_TYPE, VCH_DATE: vchDate };
     // P0-04: the settlement and write-off accounts used to be the literals `'CASH'`/`'BANK'` and a module
@@ -209,7 +220,11 @@ export async function postBatchReceipt(
       bookName: RCT_BOOK_NAME,
     });
     return { vchNo, total: round2(total) };
-  });
+  };
+
+  return context?.tx
+    ? run(context.tx)
+    : withTxBudget(prisma, tenantId, 'voucher', (tx: any) => run(tx));
 }
 
 export interface DeleteBatchReceiptInput {
@@ -217,6 +232,32 @@ export interface DeleteBatchReceiptInput {
   vchNo: number | string;
   book?: string; // CO_BOOK used at creation (defaults to 'RCT')
   deleteUser?: string;
+}
+
+/**
+ * Reverse a multi-party receipt's write set ON A GIVEN TRANSACTION: remove its CASH_DATA header
+ * rows and AC_DATA ledger rows by voucher key and write a DELETE_DATA audit row. Factored out so the
+ * editor can reverse-and-re-post inside ONE transaction (atomic delete-then-rebuild).
+ */
+async function reverseBatchReceiptTx(
+  tx: any,
+  tenantId: string,
+  key: VoucherKey,
+  deleteUser: string,
+): Promise<void> {
+  await reverseVoucherTx(tx, tenantId, {
+    tables: ['CASH_DATA', 'AC_DATA'],
+    key,
+    deleteLog: {
+      table: 'DELETE_DATA',
+      row: {
+        ...key,
+        VCH_TYPE: RCT_TYPE,
+        BOOK_NAME: RCT_BOOK_NAME,
+        DELETE_USER: deleteUser,
+      },
+    },
+  });
 }
 
 /**
@@ -231,19 +272,121 @@ export async function deleteBatchReceipt(
   const tenantId = input.scope.tenantId;
   const key = keyOf(input.scope, Number(input.vchNo), input.book ?? RCT_BOOK);
   return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
-    await reverseVoucherTx(tx, tenantId, {
-      tables: ['CASH_DATA', 'AC_DATA'],
-      key,
-      deleteLog: {
-        table: 'DELETE_DATA',
-        row: {
-          ...key,
-          VCH_TYPE: RCT_TYPE,
-          BOOK_NAME: RCT_BOOK_NAME,
-          DELETE_USER: input.deleteUser ?? 'system',
-        },
-      },
-    });
+    await reverseBatchReceiptTx(tx, tenantId, key, input.deleteUser ?? 'system');
     return { reversed: true };
+  });
+}
+
+/** One reopened collection line, shaped to feed straight back into `BatchReceiptLineInput`. */
+export interface BatchReceiptLineView {
+  srNo: number;
+  partyAc: string;
+  partyName: string;
+  amount: number;
+  kasarAmt: number;
+  mode: PayMode;
+  bankAc: string;
+  chqNo: string;
+  bankCharges: number;
+  chqPrintName: string;
+  clearDate: string;
+  itemDescriptionCode: number;
+}
+
+export interface BatchReceiptView {
+  voucherNo: string;
+  vchDate: string;
+  lines: BatchReceiptLineView[];
+}
+
+const isoDate = (v: unknown): string => {
+  if (v == null) return '';
+  const d = v instanceof Date ? v : new Date(String(v));
+  return Number.isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
+};
+
+/**
+ * Reopen a multi-party receipt for edit (desktop TR_CASH load, `TR_CASH.cs` BtnF). Unlike the
+ * single-row `getReceipt` (which refuses a voucher with more than one CASH_DATA row), a batch
+ * receipt has ONE row per collection line, so this returns every row as a `lines[]` array shaped to
+ * feed straight back into `BatchReceiptLineInput`.
+ *
+ * `mode` is DERIVED, not stored: `postBatchReceipt` settles a cash line to the book's slot-1
+ * cash-settlement account and a non-cash line to its own bank ledger (`REC_AC_CODE`). So a row whose
+ * `REC_AC_CODE` equals that slot-1 account is 'cash' (no `bankAc`); otherwise it is a bank-side mode
+ * ('cheque' when it carries a cheque number, else 'bank') with `bankAc = REC_AC_CODE`. This mirrors
+ * exactly what the writer did, so an unchanged reopen→save re-posts the identical ledger.
+ */
+export async function getBatchReceipt(
+  prisma: any,
+  scope: VoucherScope,
+  requestedVoucherNo: number | string,
+): Promise<BatchReceiptView> {
+  const tenantId = scope.tenantId;
+  const key = keyOf(scope, Number(requestedVoucherNo), scope.coBook ?? RCT_BOOK);
+  return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
+    const cashSettlementAc = await resolveBookSlotAccountTx(tx, scope, 'cash-settlement', 1);
+    const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT "SR_NO","VCH_DATE"::text AS "VCH_DATE","AC_CODE","AC_NAME","REC_AMT","KASAR_AMT",
+              "REC_AC_CODE","CHQ_NO","BANK_CHARGES","CHQ_PRINT_NAME","CLR_DATE"::text AS "CLR_DATE",
+              "IT_DESC"
+         FROM "CASH_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+           AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6
+         ORDER BY "SR_NO"`,
+      tenantId,
+      key.CO_CODE,
+      key.LC_CODE,
+      key.CO_YEAR,
+      key.CO_BOOK,
+      key.VCH_NO,
+    );
+    if (rows.length < 1)
+      throw new BatchReceiptValidationError(`batch receipt not found: ${key.VCH_NO}`);
+    const lines: BatchReceiptLineView[] = rows.map((r) => {
+      const recAc = String(r.REC_AC_CODE ?? '').trim();
+      const isCash = recAc === String(cashSettlementAc).trim();
+      const chqNo = r.CHQ_NO == null ? '' : String(r.CHQ_NO);
+      const mode: PayMode = isCash ? 'cash' : chqNo.trim() ? 'cheque' : 'bank';
+      return {
+        srNo: Number(r.SR_NO ?? 0),
+        partyAc: String(r.AC_CODE ?? ''),
+        partyName: r.AC_NAME == null ? '' : String(r.AC_NAME),
+        amount: num(r.REC_AMT),
+        kasarAmt: num(r.KASAR_AMT),
+        mode,
+        bankAc: isCash ? '' : recAc,
+        chqNo,
+        bankCharges: num(r.BANK_CHARGES),
+        chqPrintName: r.CHQ_PRINT_NAME == null ? '' : String(r.CHQ_PRINT_NAME),
+        clearDate: isoDate(r.CLR_DATE),
+        itemDescriptionCode: num(r.IT_DESC),
+      };
+    });
+    return { voucherNo: key.VCH_NO, vchDate: isoDate(rows[0]!.VCH_DATE), lines };
+  });
+}
+
+export interface EditBatchReceiptInput extends BatchReceiptInput {
+  vchNo: number | string;
+  book?: string;
+  deleteUser?: string;
+}
+
+/**
+ * Edit a multi-party receipt in place (desktop TR_CASH edit = delete-then-rebuild on the same
+ * VCH_NO, `TR_CASH.cs:2988-3081`). The reverse of the old CASH_DATA + AC_DATA write set (with the
+ * DELETE_DATA audit) and the re-post of the new grid under the SAME voucher number run inside ONE
+ * transaction: if the re-post is rejected (e.g. a bank line with no account), the whole thing rolls
+ * back and the original voucher is left intact — the reversal is NEVER committed on its own.
+ */
+export async function editBatchReceipt(
+  prisma: any,
+  input: EditBatchReceiptInput,
+): Promise<BatchReceiptResult> {
+  const tenantId = input.scope.tenantId;
+  const key = keyOf(input.scope, Number(input.vchNo), input.book ?? RCT_BOOK);
+  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
+    await reverseBatchReceiptTx(tx, tenantId, key, input.deleteUser ?? 'system');
+    return postBatchReceipt(prisma, { ...input, forceVchNo: input.vchNo }, { tx });
   });
 }
