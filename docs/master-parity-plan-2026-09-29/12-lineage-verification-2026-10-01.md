@@ -194,6 +194,8 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G181 | Med | The printed invoice's HSN table disagrees with the bill tax by a paisa | `unified/src/csharp/DataCareNext/TR_SALE.cs` | `web/apps/api/src/modules/documents/docChrome.ts` | Found in the 30 October browser run (gold + silver bill, tax 2,043.29): the printed HSN table shows CGST 1,021.64 + SGST 1,021.64 = 2,043.28 while the summary beside it shows CGST and SGST 1,021.65 each and the grand total includes 2,043.29. The halves are stored unrounded (`TR_SALE.cs` keeps `SGST_TAX = CGST_TAX = tax / 2`), so the print must round them one way consistently and the table must total the bill tax. A legal document must not show two different tax totals. | N174 |
 | G182 | Low | Request storms: every page prefetches all navigation routes, and the party box fetches a balance per keystroke | — | `web/apps/web/components/Shell.tsx` | Found in the 30 October browser run: each page load requested about 240 `?_rsc=` route prefetches (one per navigation link), and typing `CUST01` in the party box sent six balance requests (`/party/C/balance`, `/party/CU/balance`, …). Wasted server work on every screen, worse on a slow shop connection. | N175 |
 | G183 | Med | The web has no edition: it shows the menus of every desktop edition | `unified/src/csharp/DataCareNext/MDI_FORM.cs` | `web/apps/web/lib/nav.ts` | The desktop loads only its edition's menus (`MENU_DATA` filtered by `SM_TYPE`, `MDI_FORM.cs:11249-11322`) and hides the Scheme and Dhiran buttons in Standard (`:11282-11285`). The web lists all 240 routes for every company, so a Standard shop sees Pro, Advance and Enterprise screens (Dhiran, schemes, consignment, tour, design book) that its desktop never shows, and their APIs accept requests. Needed for decision D31. | N171 |
+| G184 | Med | A provisioned purchase book has no slot 4, so a purchase with labour is refused when labour is posted separately | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/api/src/modules/ops/seedCompany.ts` | Found while fixing G176: with the setting PURC_WITH_LBR = 'N' the desktop posts a line's labour and other charges to the purchase book's BOOK_DETL slot 4 (`Ac_Ledr.cs:419-421`). `seedCompany` gives the purchase book slots 1-3 only, so the writer's fail-closed slot-4 lookup refuses every purchase with labour on a web-provisioned company once the setting is switched. The N162 test adds slot 4 in its fixture. | N176 |
+| G185 | High | Typing a code and pressing Enter at once picks the first row of the previous list | `unified/src/csharp/DataCareNext/TR_PURC.cs` | `web/apps/web/components/LookupPicker.tsx` | Found in the 30 October browser run of Purchase Invoice: in the supplier box, typing `SUPL` and pressing Enter straight away put `BANK` (the first row of the list shown before typing) on the bill; it happened twice. The lookup searches 180 ms after the last keystroke and Enter picks the highlighted row of the last list that arrived, which can belong to earlier text. The desktop looks the typed code up exactly on Enter (`TR_PURC.cs:14619-14628`; `TR_SALE.cs` does the same). A fast operator or a barcode scanner can post a voucher to the wrong account. | N177 |
 
 ## 4. Decisions D23–D28
 
@@ -1752,6 +1754,40 @@ Done when: each feature's matrix runs in CI on every pull request, every failure
 baseline, and each fixed defect leaves the baseline in the change that fixed it.
 
 
+### N162 — A sale or purchase that posts to two item accounts writes one leg per line (G169, G176)
+
+The desktop posts a bill's item side on one of two paths, chosen by `BOOK_DATA.ITM_TYPE`. The header path credits
+or debits the book's slot-1 account once (sale `unified/src/csharp/DataCareNext/Ac_Ledr.cs:92`, purchase `:414-421`).
+The line path posts each detail line to its group's `GROUP_MAST.SALE_AC` or `PURC_AC` for `A.NET_AMT`, keyed
+`VCH_NO + STR(A.SR_NO) + code` (sale `:90`, purchase `:410`). The G169 row cited `:74` with code `05`; that
+statement is the UAE `RATE_UNFIX = 'Y'` branch.
+
+The web posts to per-group accounts but gave every item leg the family's single code `03` with no line number, so a
+gold plus silver bill wrote two legs with one key and the save failed. Posting to several accounts is the line path's
+behaviour, so such a bill now posts one leg per line: the tail is `STR(SR_NO)` (right-aligned in 10) followed by the
+measured role code `03`. The decompiled code map disagrees with the measured one on every role, so its codes are not
+borrowed. The layout is inferred: the captured data has no bill that posts to two item accounts. A bill whose lines
+share one account keeps the measured single leg. With a bill discount the amount is shared by line value and the
+last funded line takes the rounding remainder. A purchase whose labour is posted separately (PURC_WITH_LBR = 'N')
+also collided, because its slot-4 labour leg used code `03` too; that leg now keeps the unmapped band (50 and up)
+because its desktop code is not measured.
+
+Code: `web/apps/api/src/modules/posting/lineLegs.ts`, used by the sale writer (`web/apps/api/src/modules/sales/sales.ts`)
+and the purchase writer (`web/apps/api/src/modules/purchase/purchase.ts`). Tests: `web/apps/api/test/lineLegs.test.ts`
+(vectors), `web/apps/api/test/saleTwoGroupRevenue.routes.db.test.ts` and
+`web/apps/api/test/purchaseTwoGroupLegs.routes.db.test.ts` (write sets over HTTP: create, reopen and unchanged save,
+edit, discount, single-account control, cash tender, labour split, delete), and the feature cases
+`sales-invoice.create.two-lines-dissimilar` and `purchase-invoice.create.two-groups`, which now assert each group
+account's amount and have left the baseline. Browser runs through the Chrome DevTools MCP covered both screens:
+two-group bill typed in the grid, ledger checked, reopened, edited, printed and deleted.
+
+Not verified: a desktop run. Found on the way: G184 (no slot 4 on a provisioned purchase book) and G185 (Enter in a
+lookup can pick a row of an earlier list).
+
+Done when: a sale and a purchase with lines from two item groups save, post each line to its group's account, and
+reopen, edit, print and delete like any other bill.
+
+
 ### N164 — UI surface map: every page and every button, plus a browser test with every behaviour change (G172)
 
 `web/apps/web/test/features/run-surface.mjs` crawls every route an operator can reach — the 235 sidebar links
@@ -1917,7 +1953,7 @@ regenerated from that run.
 | N159 | — | implemented-unverified, evidence in this change (G167: labour invoice resolves metal-sale from BOOK_DETL slot 1 and round-off from slot 3 via a generalized resolveLabourBookSlot, gated on their legs posting, explicit wins/fail-closed; the 'GST' tax default left documented; REMAINING labourInvoice.ts 3→1, TOTAL 34→32; salesFamilyLifecycle gained LBR slots 1/3 and passes 31; labour DB suite 118/8 + gates + clean API build + web 646+9 + depth green) |
 | N160 | — | implemented-unverified, evidence in this change (G168/N50-increment: a synchronous input-shape TypeError/RangeError from a mutation handler body now maps to a 400 invalid-request in run(), so a non-array 'lines' is 400 not 500 'lines.map is not a function'; typed server-fault 500s preserved — serializable-command 78 pass; two new probes in saleAmountBasis.routes.db.test.ts + broad routes.db 53/14 + gates + clean API build + web 646+9 + depth green; txn.ts ceiling 8482→8491) |
 | N161 | — | implemented-unverified, evidence in this change (feature E2E suite framework + Sales Invoice matrix of 22 cases through the real screen: 16 passed, 3 failed and baselined as G169/G170/G171, 3 blocked with reasons; evidence bundle valid under the evidence-contract validator; negative control fails the gate; CI step added to the real-stack job) |
-| N162 | — | planned (G169: one revenue leg per detail line so a two-group sale saves; proof = feature case passes and its baseline entry is removed) |
+| N162 | — | implemented-unverified, evidence in this change (G169, G176: one item leg per detail line keyed STR(SR_NO)+03 when a sale or purchase posts to two item accounts; labour-split leg off code 03; vectors 60 passed, HTTP write-set suites 13 passed, negative control reproduces the duplicate-key 400; feature E2E Sales 18/2/3 and Purchase 17/2/2 with both baseline entries removed; browser runs of both screens) |
 | N163 | — | planned (G171: Alt+S keyboard save on voucher screens) |
 | N164 | — | implemented-unverified, evidence in this change (UI surface crawl + committed map `docs/handbook/web/ui-surface-map.md` + PR browser-test gate; found G172) |
 | N165 | — | planned (G172: readable message / single retry when two sessions open the company at once) |
@@ -1931,6 +1967,8 @@ regenerated from that run.
 | N173 | — | planned (G180: the print window works after the access cookie expires) |
 | N174 | — | planned (G181: printed HSN table rounds the GST halves consistently and totals the bill tax) |
 | N175 | — | planned (G182: no bulk route prefetch; party balance fetched once per chosen party) |
+| N176 | — | planned (G184: provision BOOK_DETL slot 4 on purchase-family books so PURC_WITH_LBR = 'N' works on a fresh company) |
+| N177 | — | planned (G185: Enter in a lookup resolves the typed code instead of picking a row of an earlier list) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub

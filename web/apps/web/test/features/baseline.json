@@ -2,11 +2,6 @@
   "_comment": "Known feature-E2E failures. Each entry: { case, gap, reason }. Shrink-only: a new failure fails CI, and an entry whose case now passes must be removed in the same change.",
   "sales-invoice": [
     {
-      "case": "sales-invoice.create.two-lines-dissimilar",
-      "gap": "G169",
-      "reason": "A bill with items from two groups (gold SALES + silver SLVSALE) fails with duplicate AC_DATA.LEDR_KEY: every per-group income leg gets the same leg type 03. Desktop posts one revenue leg per detail line keyed VCH_NO+STR(SR_NO)+'05' (Ac_Ledr.cs:74)."
-    },
-    {
       "case": "sales-invoice.concurrency.stale-second-save",
       "gap": "G170",
       "reason": "Lost update: two operators load the same voucher, the first saves, the stale second save answers 200 and overwrites it (line 70,000 instead of 65,000). editSale reads no version token; tracked by N51 (version tokens on every update/delete, waiting on decision D17)."
@@ -18,11 +13,6 @@
     }
   ],
   "purchase-invoice": [
-    {
-      "case": "purchase-invoice.create.two-groups",
-      "gap": "G176",
-      "reason": "A purchase with a gold (PURC_AC PURCHASE) and a silver (SLVPURC) line fails with duplicate AC_DATA.LEDR_KEY: every per-group expense leg gets the same leg type. Same defect class as G169 on sales."
-    },
     {
       "case": "purchase-invoice.concurrency.stale-second-save",
       "gap": "G170",

@@ -313,6 +313,17 @@ export const purchaseInvoice = {
         assert.deepEqual([h.net, h.tax], [121236, 3637.08]);
         const g = await ledger(ctx, vchNo);
         assert(balanced(g));
+        // G176: each group's expense account is debited with its own line (Ac_Ledr.cs:410 line path).
+        assert.deepEqual(
+          g
+            .filter((x) => x.ac === 'PURCHASE' || x.ac === 'SLVPURC')
+            .map((x) => [x.ac, x.dr])
+            .sort(),
+          [
+            ['PURCHASE', EXPECT_G.net],
+            ['SLVPURC', EXPECT_S.net],
+          ],
+        );
         return {
           observation: `voucher ${vchNo}: gold + silver lines, net ${h.net}, tax ${h.tax}`,
           expected: { net: 121236, tax: 3637.08 },
