@@ -99,6 +99,15 @@ jobs:
         working-directory: web
         run: pnpm register:check
 
+      # N171: the edition table (packages/core/src/editionTable.ts) is generated from the desktop MENU_DATA editions,
+      # the menu catalog and the reviewed overrides; every navigation route, page and rights form must be classified.
+      - name: 'Gate: edition table is current and every route and form is classified'
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        working-directory: web
+        run: |
+          node --test scripts/generate-edition-table.test.mjs
+          node scripts/generate-edition-table.mjs --check
+
       - name: 'Gate: master parity plan is internally consistent'
         if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
         run: python3 docs/master-parity-plan-2026-09-29/validate_plan.py

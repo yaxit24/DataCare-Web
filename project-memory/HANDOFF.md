@@ -1,3 +1,10 @@
+## 2026-10-30 (night) — N171 edition gate
+
+The API and screens now run the Standard edition by default (`APP_EDITION=S`). Pro, Advance and Enterprise screens
+are hidden and their APIs answer `403 edition-unavailable`. To use them on a dev stack set `APP_EDITION_BETA=1`
+(Beta group). Test harnesses build the app without an edition, so every suite still runs. A new navigation item or
+page must be classified in `docs/handbook/web-route-editions.json` unless the menu catalog maps it; regenerate with
+`node scripts/generate-edition-table.mjs`.
 ## 2026-10-30 (night) — decisions delegated and accepted
 
 The owner delegated every open decision to the implementer. Accepted as recommended: D15–D22 (document 11 §4) and

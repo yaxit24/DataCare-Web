@@ -6075,7 +6075,7 @@
     },
     {
       "id": "N171",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Standard edition gate (D31): one generated table gives every desktop menu, web route, rights form and API route family its edition; the running edition (APP_EDITION, default S) shows only the 114 Standard menus in navigation and Users & Rights, a deferred page opened by URL shows 'not in the Standard edition', and its API answers 403 edition-unavailable. Deferred editions can be switched on as Beta (APP_EDITION_BETA): listed in a separate Beta navigation group with a Beta label and allowed by the API. /me reports the edition. Every one of the 240 navigation routes is classified, including the 81 that match no desktop menu row.",
       "parentLabels": "P9; X05",
       "startAfter": [
@@ -6083,10 +6083,25 @@
       ],
       "requiredProof": "Unit tests of the edition table (Lite 49, Basic 78, Standard 114 menus; every navigation route classified); API tests (a deferred route is 403 edition-unavailable with the gate on, allowed with Beta on, untouched when the gate is not configured; a Standard route is unchanged); web unit tests of navigation filtering; existing suites unchanged; a browser run showing the Standard navigation, a deferred URL refused, and Beta switched on.",
       "gapIds": "G183",
-      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "entryDefinition": "12-lineage-verification-2026-10-01.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/scripts/generate-edition-table.mjs",
+        "web/scripts/generate-edition-table.test.mjs",
+        "web/packages/core/src/editions.ts",
+        "web/packages/core/src/editionTable.ts",
+        "web/packages/core/test/editions.test.ts",
+        "web/apps/api/src/modules/rbac/editionGate.ts",
+        "web/apps/api/test/editionGate.test.ts",
+        "web/apps/web/lib/editionNav.ts",
+        "web/apps/web/test/editionNav.test.ts",
+        "web/apps/web/components/Shell.tsx",
+        "docs/handbook/web-route-editions.json"
+      ],
+      "statusNote": "IMPLEMENTED. Generated table (web/packages/core/src/editionTable.ts) from menu-editions.json (desktop MENU_DATA), the menu catalog's ui routes and the reviewed overrides docs/handbook/web-route-editions.json (81 routes and 12 API-only rights forms with a reason each, plus 2 platform pages): 245 routes (L 82, B 42, S 42, P 23, A 11, E 38, platform 7) and 252 forms. Standard shows 173 routes; 72 routes of Pro, Advance and Enterprise are deferred. Gate: APP_EDITION (default S) and APP_EDITION_BETA. API: a form route of a higher edition answers 403 {error:'edition-unavailable', form, edition} after authentication and before rights and scope; a gated deployment refuses to start if any route's static form is unclassified; /me reports the edition; /admin/form-catalog lists only the edition's forms (166 in Standard). Web: navigation lists only the edition's menus (the Loans and Membership groups disappear in Standard), the header names the edition, a deferred page opened by URL says it is not part of the edition, and with Beta the deferred screens sit in a separate Beta group with a Beta notice on the page. Without APP_EDITION (every test harness builds the app in-process without it) nothing changes, so the deferred suites keep running. CI static gate: the generator's tests and --check. Verified: core 8, API 7 + runtime config 13 + policy/report/runtime suites (112 in all), web 5 (editionNav) and the full web unit suite, generator test 5; Chrome DevTools runs on an isolated stack in Standard (Standard menus only, /txn/dhrn-issue blocked with the message, POST /dhrn/issue 403 edition-unavailable, GET /masters/items 200, /me edition S, rights catalog without Loans) and with Beta (Standard + Beta label, Beta group, Pledge Issue renders with the Beta notice and its API passes the gate)."
     },
     {
       "id": "N172",
