@@ -189,7 +189,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G176 | High | A purchase with items from two groups cannot be saved | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/api/src/modules/purchase/purchase.ts` | Found by the feature E2E suite (`purchase-invoice.create.two-groups`): a gold line (GROUP_MAST.PURC_AC `PURCHASE`) and a silver line (`SLVPURC`) on one purchase fail with `duplicate key … AC_DATA_tenant_ledr_key_key`; every per-group expense leg is posted with the same leg type. Same class as G169 on sales. | N162 |
 | G177 | Med | Settings with an amount limited to fixed presets | `unified/src/csharp/DataCareNext/UT_SETTING.cs` | `web/apps/api/src/modules/settings/settingsCatalog.ts` | Found by `settings.field.pan-limit-any-amount`: the web renders PAN_CARD_VAL as a select of 100000/200000, but the desktop `cboPanCardVal` is an editable combo (presets at :4300-4301, saved as `Val(Text)` at :5059; no DropDownList style anywhere in the setting forms), so a shop cannot enter its own PAN limit such as 50000. FONT_SIZE, GRID_ROW_HIGHT and VCH_DESC_HELP_LENT are limited the same way. | N168 |
 | G178 | High | The only administrator can remove their own admin role and lock the company out | `unified/src/csharp/DataCareNext/MS_USER.cs` | `web/apps/api/src/modules/rbac/users.ts` | Observed on the live demo database: `POST /admin/users/:loginName/rights` (200 at 10:20:16 UTC) set `admin` to LOGIN_CATG `USER` with every right `N`; every later admin request answered 403 and the sales register says `forbidden`. `setUserRights` updates LOGIN_CATG with no check for the last administrator or the caller's own account. The desktop has no such check either, but always keeps the built-in `ABC` user with full rights (`MS_USER.cs:1330`), so it cannot lock itself out; the web has no recovery short of editing the database. | N169 |
-| G179 | Med | Voucher number box ignores Enter, Up and Down | `unified/src/csharp/DataCareNext/TR_SALE.cs` | `web/apps/web/app/(app)/txn/sales/page.tsx` | Found in the 30 October browser run of Sales Invoice: typing a saved voucher number and pressing Enter leaves the screen empty; only the Load button opens it. The desktop `tVchNo_KeyDown` opens the voucher on Enter (`DISPLAY_DATA`), the last voucher on Up and the first on Down (`TR_SALE.cs:17068-17096`), and F1 opens the voucher list. Operators reopen vouchers by keyboard all day; the same box is on the other voucher screens. | N172 |
+| G179 | Med | Voucher number box ignores Enter, Up and Down | `unified/src/csharp/DataCareNext/TR_SALE.cs` | `web/apps/web/app/(app)/txn/sales/page.tsx` | Found in the 30 October browser run of Sales Invoice: typing a saved voucher number and pressing Enter leaves the screen empty; only the Load button opens it. The desktop `tVchNo_KeyDown` (`TR_SALE.cs:17068-17096`) opens the voucher on Enter (`DISPLAY_DATA`) and the voucher list on F1. Up and Down call `BtnLast_Click` and `BtnFirst_Click`, which step to the next and the previous saved voucher, not the last and the first (`TR_SALE.cs:17164-17222`; corrected from the source on 30 October). Operators reopen vouchers by keyboard all day; the same box is on the other voucher screens. | N172 |
 | G180 | Med | The print window shows `unauthenticated` after the session's access cookie expires | — | `web/apps/web/app/(app)/txn/sales/page.tsx` | Found in the 30 October browser run: about 40 minutes into a session, Print opened `/api/sales/invoice?…&format=html` showing `{"error":"unauthenticated"}`. The screen's own API calls refresh the 15-minute access cookie (`POST /auth/refresh`), but the print window is a plain navigation and cannot; pressing Print again after any other API call works. An operator sees an error instead of the bill. | N173 |
 | G181 | Med | The printed invoice's HSN table disagrees with the bill tax by a paisa | `unified/src/csharp/DataCareNext/TR_SALE.cs` | `web/apps/api/src/modules/documents/docChrome.ts` | Found in the 30 October browser run (gold + silver bill, tax 2,043.29): the printed HSN table shows CGST 1,021.64 + SGST 1,021.64 = 2,043.28 while the summary beside it shows CGST and SGST 1,021.65 each and the grand total includes 2,043.29. The halves are stored unrounded (`TR_SALE.cs` keeps `SGST_TAX = CGST_TAX = tax / 2`), so the print must round them one way consistently and the table must total the bill tax. A legal document must not show two different tax totals. | N174 |
 | G182 | Low | Request storms: every page prefetches all navigation routes, and the party box fetches a balance per keystroke | — | `web/apps/web/components/Shell.tsx` | Found in the 30 October browser run: each page load requested about 240 `?_rsc=` route prefetches (one per navigation link), and typing `CUST01` in the party box sent six balance requests (`/party/C/balance`, `/party/CU/balance`, …). Wasted server work on every screen, worse on a slow shop connection. | N175 |
@@ -207,6 +207,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G194 | Med | Sales Return does not record who created or deleted it | `unified/src/csharp/DataCareNext/TR_SALE_RTN.cs` | `web/apps/api/src/routes/txn.ts` | Found by `sales-return.create.records-user` and `sales-return.delete.audit-user`. A return saved by `e2eadmin` stores `SL_DATA.MAIN_USER` blank, because `POST /sales-returns` (`txn.ts:1804-1833`) does not pass the user; the desktop stores `DC_Main.MCo_User` (`TR_SALE_RTN.cs:9966`, `:12908`). Its delete writes `DELETE_DATA.DELETE_USER` = `feature-e2e`, the tenant id, because the route passes `sess(req).tenantId` (`txn.ts:1856`); the desktop writes `MCo_User` (`:15076`). Six more deletes pass the tenant id: labour invoice (`txn.ts:2083`), multi receipt (`:2907`), multi payment (`:2946`), MFG order issue (`:3810`), MFG (`:3823`) and fine sale (`:8360`). | N183 |
 | G195 | High | Sale line amounts are rounded by TOT_AMT_ROF instead of to whole rupees | `unified/src/csharp/DataCareNext/TR_SALE.cs` | `web/apps/api/src/modules/sales/sales.ts`; `web/packages/core/src/calc.ts` | Found while checking the return's rounding. The desktop's `CommPassTotal` starts with `digits = 0` and uses 2 only when `CO_SET.ALL_ROF_REMOVE = 'Y'` (`TR_SALE.cs:10343-10362`), then rounds the item amount (`:10905`) and the labour amount (`:11100-11108`) with it; `TOT_AMT_ROF` rounds only the bill total (`:19192`, `:19274`). The web rounds each line component with `TOT_AMT_ROF` (`sales.ts:337-349`), a rule taken from a customer database where `TOT_AMT_ROF` is 0, so the two agree only at 0. With `TOT_AMT_ROF` 2, or blank (read as 2), a 10 g line at 6,123.45 is 61,234.50 on the web and 61,234 on the desktop. The web's E-Bill calculation already follows the desktop rule (`web/packages/core/src/eBillCalc.ts:30`). The merged cases of `sales-invoice` (EXPECT_A 61,234.50) and `settings.effect.sale-amount-fine` (56,090.80) assert the web value; the desktop values are 61,234 and 56,091. | N184 |
 | G196 | Med | A new web company leaves the rounding settings blank, and the web reads blank as 2 decimals | `unified/src/csharp/DataCareNext/Ac_Image.cs` | `web/packages/core/src/roundingPolicy.ts` | The desktop schema makes the rounding settings NOT NULL with defaults: `LBR_ROF` 0 and `ITM_RATE_ROF` 0 (`Ac_Image.cs:6320`, `:6358`), `PR_RATE_ROF` 2 (`:7010`), `TOT_AMT_ROF` 0 (`:7357`) and `ALL_ROF_REMOVE` `N` (`:7565`). A new desktop company copies them from an existing one (`MS_YEAR.cs:1529-1531`), and a blank `TAX_ROF` reads as 0 decimals (`MS_OPNCOMP.cs:668-671`, `DC_Main.cs:2088-2101`). On the live demo company `TAX_ROF` and `ALL_ROF_REMOVE` are NULL and there is no `CO_SET_NEW` row, and `resolveRoundingPolicy` reads blank as 2 decimals on purpose (`roundingPolicy.ts:103`). So a new web company keeps paise on the bill total, tax, labour rate and item rate where a new desktop company rounds to whole rupees. To decide under D05: provision the desktop defaults, or keep 2 decimals for web-created companies and record why. | N185 |
+| G197 | Med | A rebuilt checkout served the previous build's pages to the browser tests | `docs/master-parity-plan-2026-09-29/04-verification-playbook.md` | `web/apps/web/package.json` | Found while checking N172 in Chrome: after `pnpm build`, `next start` (Next.js 15.5.28) answered `/txn/sales` with `x-nextjs-cache: HIT` and the previous build's page chunk, because pages served by the previous server stay in `apps/web/.next/server/route-cache` and the build does not remove that directory. Deleting it made the same server serve the new chunk. A local feature or real-stack run after a rebuild could therefore pass or fail on old code; CI builds from a clean checkout and was not affected. | N186 |
 
 ## 4. Decisions D23–D28
 
@@ -1846,6 +1847,18 @@ not yet written (document 15 step E11).
 
 Done when: no sequence of rights changes leaves a company without an administrator.
 
+### N172 — Voucher number box keys like the desktop (G179), Sales and Purchase first
+
+`GET /vouchers/neighbour` (`web/apps/api/src/modules/vouchers/list.ts`, `web/apps/api/src/routes/voucherNavigation.ts`) runs the
+desktop walk of `BtnLast_Click` and `BtnFirst_Click` (`unified/src/csharp/DataCareNext/TR_SALE.cs:17164-17222`): the next or
+previous saved voucher within 10 numbers, the next new number after the last saved voucher, and "Last Record..." beyond it.
+`web/apps/web/components/VoucherNumberKeys.tsx` gives the voucher number box F1, Up, Down and Enter, and
+`web/apps/web/components/VoucherList.tsx` opens on F1 with the focus on its newest voucher. Proven by
+`web/apps/api/test/voucherNeighbour.routes.db.test.ts`, `web/apps/web/test/voucherNumberKeys.test.ts` and the
+`keyboard.voucher-number-keys` cases of the Sales and Purchase feature modules.
+
+Done when: every Standard voucher screen's number box answers F1, Up, Down and Enter as the desktop does.
+
 ### N177 — Enter in a lookup picks the typed code, never a row of an older list (G185)
 
 The desktop looks the typed code up exactly on Enter (`unified/src/csharp/DataCareNext/TR_PURC.cs:14619-14628`). The web
@@ -1868,6 +1881,14 @@ taxable share rounded half-up and the last group the exact remainder. Proven by 
 the `print.hsn-agrees-with-summary` case of `web/apps/web/test/features/modules/salesInvoice.mjs`.
 
 Done when: on every printed GST bill the HSN columns add up to the printed heads and the Tax column to the bill tax.
+
+
+### N186 — Every server started after a build serves that build (G197)
+
+`web/apps/web/package.json` runs `web/apps/web/scripts/clearRouteCache.mjs` after `next build`, which removes the route
+cache a previous server wrote. Proven by `web/apps/web/test/clearRouteCache.test.ts` and a real build.
+
+Done when: no local browser run can be answered with a previous build's page.
 
 
 ### N164 — UI surface map: every page and every button, plus a browser test with every behaviour change (G172)
@@ -2078,6 +2099,9 @@ leaves the baseline in the change that fixes it.
 | N168 | — | implemented-unverified, evidence in this change (G177: four numeric setting combos accept typed amounts with presets; unit 3, DB 14, two feature cases; baseline entry removed) |
 | N169 | — | implemented-unverified, evidence in this change (G178: last-administrator refusal with row locks; DB test 3 passed and fails against the old code; Users & Rights feature module: 3 cases pass through the real screen) |
 | N170 | — | implemented-unverified, evidence in this change (Purchase Invoice module 16/3/2, Settings effects module 10/1/2 + 11 N/A, Sales CSV export case, one shared company per run, with-data crawl and regenerated map; found G176, G177, G178) |
+| N171 | — | planned (G183, D31: Standard edition gate — the 114 Standard menus only in navigation, rights, pages and API; deferred editions available only as labelled Beta when switched on) |
+| N172 | — | in-progress, evidence in this change (G179: Sales and Purchase voucher number box F1/Up/Down/Enter with the shared walk endpoint and hook; DB test 8, web unit 4, two feature cases with a negative control; the other voucher screens remain) |
+
 | N171 | — | implemented-unverified, evidence in this change (G183: generated edition table, 245 routes and 252 forms; API 403 edition-unavailable, /me edition, rights catalog filtered; Standard navigation, page guard and Beta group; core, API, web and generator tests; browser runs in Standard and with Beta) |
 | N172 | — | planned (G179: voucher number box — Enter opens the voucher, Up the last, Down the first, F1 the list, on every Standard voucher screen) |
 | N173 | — | planned (G180: the print window works after the access cookie expires) |
@@ -2093,6 +2117,7 @@ leaves the baseline in the change that fixes it.
 | N183 | — | planned (G193, G194: a missing voucher answers a stable 4xx; returns and seven deletes record the logged-in user) |
 | N184 | — | planned (G195: sale line amounts round to whole rupees unless ALL_ROF_REMOVE = Y; merged feature expectations move to desktop values) |
 | N185 | — | planned (G196: decide under D05 and provision the desktop rounding defaults for new companies, or record the 2-decimal choice) |
+| N186 | — | implemented-unverified, evidence in this change (G197: the web build clears the route cache; unit 2, a real build removed 13 entries) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

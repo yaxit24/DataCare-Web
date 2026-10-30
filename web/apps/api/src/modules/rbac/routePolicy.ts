@@ -41,6 +41,7 @@ const SYSTEM = new Set([
   'GET /rate-groups',
   'GET /party/:acCode/balance',
   'GET /vouchers/recent',
+  'GET /vouchers/neighbour',
   'GET /integrations/barcode',
   'GET /integrations/qr',
 ]);

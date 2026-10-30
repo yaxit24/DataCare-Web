@@ -745,6 +745,73 @@ export const purchaseInvoice = {
     ),
 
     C(
+      'keyboard.voucher-number-keys',
+      'T17',
+      'read-only',
+      'TR_PURC.cs:14407-14432 tVchNo_KeyDown: Down and Up step to the previous and next saved voucher (BtnFirst/BtnLast :14476-14534), Up past the last is a new voucher and then Last Record..., Enter opens the typed number and moves to the date, F1 opens the voucher list',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const first = await createOne(ctx, page);
+        const second = await createOne(ctx, page);
+        await page.getByRole('button', { name: 'New', exact: true }).click();
+        const box = page.getByLabel('Voucher No', { exact: true });
+        const loaded = page.getByTestId('purchase-loaded');
+        const note = page.getByTestId('voucher-number-note');
+        const seen = [];
+        const expectLoaded = async (vchNo, step) => {
+          await loaded.filter({ hasText: `Loaded #${vchNo}` }).waitFor();
+          seen.push(`${step}: #${vchNo}`);
+        };
+        await box.focus();
+        // Down from the new voucher opens the last saved one, then the one before it.
+        await page.keyboard.press('ArrowDown');
+        await expectLoaded(second, 'Down');
+        await page.keyboard.press('ArrowDown');
+        await expectLoaded(first, 'Down');
+        assert.equal(
+          await box.evaluate((el) => el === document.activeElement),
+          true,
+          'Up/Down keep the focus in the box',
+        );
+        // Up steps forward; past the last saved voucher it is a new voucher, then "Last Record...".
+        await page.keyboard.press('ArrowUp');
+        await expectLoaded(second, 'Up');
+        await page.keyboard.press('ArrowUp');
+        await loaded.waitFor({ state: 'detached' });
+        assert.equal(await box.inputValue(), '', 'a blank new voucher');
+        seen.push('Up: new voucher');
+        await page.keyboard.press('ArrowUp');
+        await note.filter({ hasText: 'Last Record...' }).waitFor();
+        seen.push('Up: Last Record...');
+        // Enter opens the typed number and moves to the voucher date.
+        await box.fill(first);
+        await page.keyboard.press('Enter');
+        await expectLoaded(first, 'Enter');
+        await page.waitForFunction(() => document.activeElement?.getAttribute('type') === 'date');
+        seen.push('Enter: focus on the date');
+        // F1 opens the voucher list on its newest voucher; Down moves to the next row and Enter opens it.
+        await box.focus();
+        await page.keyboard.press('F1');
+        await page.waitForFunction(() => document.activeElement?.hasAttribute('data-voucher-load'));
+        await page.keyboard.press('ArrowDown');
+        await page.keyboard.press('Enter');
+        await expectLoaded(first, 'F1 list');
+        return {
+          observation: seen.join('; '),
+          expected: [
+            `Down: #${second}`,
+            `Down: #${first}`,
+            `Up: #${second}`,
+            'Up: new voucher',
+            'Up: Last Record...',
+            `Enter: #${first}`,
+            'Enter: focus on the date',
+            `F1 list: #${first}`,
+          ].join('; '),
+        };
+      },
+    ),
+    C(
       'keyboard.alt-s-saves',
       'T17',
       'mutation',

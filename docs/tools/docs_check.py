@@ -8,8 +8,8 @@ Usage (from any directory):
 What it proves (structure and evidence pointers only, not product behaviour):
   * docs/handbook/menu-catalog.jsonl has exactly one row per desktop menu in web/docs/COMPLETION-REGISTER.json;
     every desktop form has a decompiled source file; every dispatch range is inside MDI_FORM.cs and names one of
-    the row's forms; every web screen resolves to a page.tsx; every API route is declared in app.ts or
-    routes/txn.ts; every plan owner exists in the plan; every cited evidence path exists and its line range fits.
+    the row's forms; every web screen resolves to a page.tsx; every API route is declared in app.ts or a
+    routes/ plugin; every plan owner exists in the plan; every cited evidence path exists and its line range fits.
   * docs/handbook/doc-register.json classifies every Markdown file in the repository (first matching rule wins)
     and every rule matches at least one file.
   * Relative links and backtick file citations (`path/to/file.ts:10-20`) in the hub, handbooks, plan documents
@@ -38,7 +38,8 @@ REGISTER_MD = HANDBOOK / 'doc-register.md'
 DESKTOP_SRC = REPO / 'unified' / 'src' / 'csharp' / 'DataCareNext'
 MDI = DESKTOP_SRC / 'MDI_FORM.cs'
 WEB_APP = REPO / 'web' / 'apps' / 'web' / 'app'
-API_ROUTE_FILES = [REPO / 'web/apps/api/src/app.ts', REPO / 'web/apps/api/src/routes/txn.ts', REPO / 'web/apps/api/src/routes/crm.ts']
+# app.ts and every route plugin under routes/ (txn.ts, crm.ts, voucherNavigation.ts, ...).
+API_ROUTE_FILES = [REPO / 'web/apps/api/src/app.ts', *sorted((REPO / 'web/apps/api/src/routes').glob('*.ts'))]
 MASTER_CONFIGS = REPO / 'web/apps/api/src/modules/masters/configs.ts'
 
 STATUSES = ['FULL', 'PARTIAL', 'REPORT', 'CONTAINED', 'MISSING']
