@@ -367,6 +367,11 @@ jobs:
         working-directory: web
         run: node scripts/parity-test-env.mjs -- node apps/web/test/labour-preview-lifecycle.real-stack.mjs
 
+      - name: Standard edition gate (navigation, page guard, API refusal, Beta)
+        if: ${{ !cancelled() && steps.journeys.conclusion != 'skipped' }}
+        working-directory: web
+        run: node scripts/parity-test-env.mjs -- node apps/web/test/edition.real-stack.mjs
+
       - name: Feature E2E suites (frozen T01-T18 matrices, shrink-only defect baseline)
         if: ${{ !cancelled() && steps.journeys.conclusion != 'skipped' }}
         working-directory: web
@@ -387,6 +392,7 @@ jobs:
             web/test-results/session-context-real-stack-lifecycle/
             web/test-results/return-labour-preview-lifecycle/
             web/test-results/feature-e2e/
+            web/test-results/edition-real-stack/
             web/test-results/ui-surface/
           if-no-files-found: ignore
           retention-days: 14
