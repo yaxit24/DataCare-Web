@@ -83,6 +83,8 @@ export default function HallmarkSalePage() {
   // /sales/:vchNo read, update and delete routes just like the ordinary sales screen.
   const [voucherLookup, setVoucherLookup] = useState('');
   const [loadedVchNo, setLoadedVchNo] = useState('');
+  // N51 (D17): the version the loaded voucher was read with; sent on update and delete.
+  const [loadedVersion, setLoadedVersion] = useState('');
   // Everything GET /sales/:vchNo returned, so an edit sends back what it does not display (G45).
   const [loaded, setLoaded] = useState<LoadedHallmarkSale | undefined>(undefined);
   const [lines, setLines] = useState<Line[]>([blank()]);
@@ -165,6 +167,7 @@ export default function HallmarkSalePage() {
 
   function resetForm() {
     setLoadedVchNo('');
+    setLoadedVersion('');
     setLoaded(undefined);
     setVoucherLookup('');
     setResult(null);
@@ -197,6 +200,7 @@ export default function HallmarkSalePage() {
         `/sales/${encodeURIComponent(lookup)}?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}`,
       );
       setLoadedVchNo(String(view.voucherNo));
+      setLoadedVersion(String(view.version ?? ''));
       setVoucherLookup(String(view.voucherNo));
       setResult(null);
       const header = hallmarkHeaderFromView(view);
@@ -230,7 +234,7 @@ export default function HallmarkSalePage() {
     setErr('');
     try {
       await del(
-        `/sales/${encodeURIComponent(loadedVchNo)}?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}`,
+        `/sales/${encodeURIComponent(loadedVchNo)}?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}&expectedVersion=${encodeURIComponent(loadedVersion)}`,
       );
       resetForm();
     } catch (e) {
@@ -267,12 +271,17 @@ export default function HallmarkSalePage() {
         loaded: loadedVchNo ? loaded : undefined,
       });
       if (loadedVchNo) {
-        const updated = await put<any>(`/sales/${encodeURIComponent(loadedVchNo)}`, body);
+        const updated = await put<any>(`/sales/${encodeURIComponent(loadedVchNo)}`, {
+          ...body,
+          expectedVersion: loadedVersion,
+        });
         setLoadedVchNo(String(updated.vchNo));
+        setLoadedVersion(String(updated.version ?? ''));
         setResult(updated);
       } else {
         const created = await post<any>('/sales', body);
         setLoadedVchNo(String(created.vchNo));
+        setLoadedVersion(String(created.version ?? ''));
         setResult(created);
       }
     } catch (e) {

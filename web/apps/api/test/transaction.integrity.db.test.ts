@@ -7,7 +7,7 @@ import {
   deletePurchaseReturn,
   getPurchaseReturn,
 } from '../src/modules/purchase/purchaseReturnLifecycle.js';
-import { createSale, deleteSale } from '../src/modules/sales/sales.js';
+import { createSale, deleteSale, getSale } from '../src/modules/sales/sales.js';
 import { createSaleReturn, deleteSaleReturn } from '../src/modules/sales/salesReturn.js';
 import { PeriodLockValidationError } from '../src/modules/posting/posting.js';
 import { tagAvailable, TagNotAvailableError } from '../src/modules/stock/stock.js';
@@ -369,7 +369,11 @@ databaseDescribe('database-backed transaction integrity', () => {
       CO,
     );
     await expect(
-      deleteSale(runtime, { scope: scope('SAL'), vchNo: sale.vchNo }),
+      deleteSale(runtime, {
+        scope: scope('SAL'),
+        vchNo: sale.vchNo,
+        expectedVersion: String((await getSale(runtime, scope('SAL'), sale.vchNo)).version),
+      }),
     ).rejects.toBeInstanceOf(PeriodLockValidationError);
     const stillPosted = (await owner.$queryRawUnsafe(
       `SELECT count(*)::int n FROM "SL_DATA" WHERE tenant_id=$1 AND "VCH_NO"='00001'`,
@@ -385,7 +389,11 @@ databaseDescribe('database-backed transaction integrity', () => {
     await expect(
       deletePurchase(runtime, { scope: scope('PUR'), vchNo: purchase.vchNo }),
     ).rejects.toThrow('tag already issued');
-    await deleteSale(runtime, { scope: scope('SAL'), vchNo: sale.vchNo });
+    await deleteSale(runtime, {
+      scope: scope('SAL'),
+      vchNo: sale.vchNo,
+      expectedVersion: String((await getSale(runtime, scope('SAL'), sale.vchNo)).version),
+    });
     await expect(
       tagAvailable(runtime, TENANT, {
         CO_CODE: CO,
@@ -545,7 +553,11 @@ databaseDescribe('database-backed transaction integrity', () => {
         IT_CODE: 'GOLD',
       }),
     ).resolves.toBe(false);
-    await deleteSale(runtime, { scope: scope('SAL'), vchNo: sale.vchNo });
+    await deleteSale(runtime, {
+      scope: scope('SAL'),
+      vchNo: sale.vchNo,
+      expectedVersion: String((await getSale(runtime, scope('SAL'), sale.vchNo)).version),
+    });
 
     const purchaseReturn = await createPurchaseReturn(
       runtime,

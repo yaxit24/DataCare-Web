@@ -28,9 +28,7 @@ import { PasswordPolicyError } from '../modules/auth/password.js';
 import {
   createSale,
   createSalesQuotation,
-  deleteSale,
   deleteSalesQuotation,
-  editSale,
   editSalesQuotation,
   getSale,
   getSalesQuotation,
@@ -252,6 +250,8 @@ import {
 } from '../modules/stock/tagPrint.js';
 import { tagStockReport, tagStockCsv } from '../modules/reports/tagStock.js';
 import { registerVoucherNavigationRoutes } from './voucherNavigation.js';
+import { registerSaleVoucherRoutes } from './saleVoucher.js';
+import { VoucherVersionConflictError } from '../modules/vouchers/version.js';
 import { listYears, createYear, carryForwardOpenings } from '../modules/masters/year.js';
 import { reminders } from '../modules/finance/reminders.js';
 import { getOpeningBalance, setOpeningBalance } from '../modules/masters/openingBalance.js';
@@ -961,6 +961,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
           message: e.message,
           ...(e.form === undefined ? {} : { form: e.form, action: e.action }),
         });
+      if (e instanceof VoucherVersionConflictError)
+        return reply.code(409).send({ error: e.code, message: e.message });
       if (e instanceof SavedSaleReturnError)
         return reply.code(e.statusCode).send({ error: e.code, message: e.message });
       if (e instanceof SaleReturnSourceError)
@@ -1378,10 +1380,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const b = body(req);
     return run(reply, 201, () => createSale(prisma, saleInput(req, b), b.lines ?? []));
   });
-  app.get('/sales/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    return run(reply, 200, () => getSale(prisma, scopeOf(req), (req.params as any).vchNo));
-  });
+  // GET, PUT and DELETE /sales/:vchNo carry the version token (N51) and live in routes/saleVoucher.ts.
+  registerSaleVoucherRoutes(app, { ...extraRouteHelpers, saleInput });
   // G125 (Stage E): the retail Tax Invoice print (desktop SaleBillA4Gst.rpt). Every sale needs a
   // printable bill; builds the shared GST-bill HTML and renders it to PDF (or returns raw HTML).
   app.get('/sales/:vchNo/print', auth, async (req, reply) => {
@@ -1400,23 +1400,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       copy: copyLabel,
     });
     return sendVoucherDocument(reply, html, { format: q.format, filename: `sale-${scope.vchNo}` });
-  });
-  app.put('/sales/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'update')) return;
-    const b = body(req);
-    return run(reply, 200, () =>
-      editSale(prisma, saleInput(req, b), b.lines ?? [], (req.params as any).vchNo),
-    );
-  });
-  app.delete('/sales/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
-      deleteSale(prisma, {
-        scope: scopeOf(req),
-        vchNo: (req.params as any).vchNo,
-        deleteUser: sess(req).sub,
-      }),
-    );
   });
 
   app.post('/sales-quotations', auth, async (req, reply) => {
