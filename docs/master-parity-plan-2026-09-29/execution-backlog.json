@@ -6228,21 +6228,6 @@
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md"
-    },
-    {
-      "id": "N180",
-      "status": "planned",
-      "action": "Clear Next.js's runtime route cache (apps/web/.next/server/route-cache) before every local browser run starts the web server, so a rebuilt checkout never serves the previous build's pages.",
-      "parentLabels": "P9; X10",
-      "startAfter": [
-        "N164"
-      ],
-      "requiredProof": "the feature harness, the real-stack runners and the local stack remove the route cache before next start; a rebuild followed by a run serves the new build's page chunk (asserted by the harness).",
-      "gapIds": "G190",
-      "entryDefinition": "02-execution-plan.md section 4",
-      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
-      "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
     }
   ],
   "amendments": [
