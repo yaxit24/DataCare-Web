@@ -47,5 +47,6 @@
       "gap": "G194",
       "reason": "The delete writes the tenant id as DELETE_DATA.DELETE_USER; the desktop writes DC_Main.MCo_User (TR_SALE_RTN.cs:15076)."
     }
-  ]
+  ],
+  "purchase-return": []
 }
