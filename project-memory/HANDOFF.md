@@ -1,3 +1,9 @@
+## 2026-10-30 (night) — decisions delegated and accepted
+
+The owner delegated every open decision to the implementer. Accepted as recommended: D15–D22 (document 11 §4) and
+D30 (document 12 §4); D01–D14 starting positions adopted (document 08 §1). N50, N51, N52, N56 and N58 are unblocked.
+Next IDs: gap G190, slice N180, decision D32.
+
 ## 2026-10-30 (evening) — Standard at 100% confirmed; plan revised (document 15)
 
 Owner confirmed Standard first and complete: all 114 menus end to end like the desktop, each verified in the browser
