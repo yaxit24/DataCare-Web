@@ -33,6 +33,8 @@ import {
 import { SaleValidationError } from './sales.js';
 import { fineWt } from '../shared/fine.js';
 import { resolveSalesOrderDesignTx } from './orderDesignSelection.js';
+import { resolveBookSlotAccountTx } from '../shared/postingAccounts.js';
+import { kasarAccountTx } from '../finance/finance.js';
 import {
   orderDate,
   orderClock,
@@ -2138,8 +2140,17 @@ export async function cancelSalesOrderAdjust(
     const custAc = String(ord.ac);
     const paidAmt = round2(input.paidAmt != null ? Number(input.paidAmt) : Number(ord.adv)); // default: refund full advance
     const kasar = round2(Number(input.kasarAmt || 0));
-    const paidAc = input.paidAc ?? 'CASH';
-    const kasarAc = input.kasarAc ?? 'KASAR';
+    // N59/G163: the refund/write-off ledgers are NOT literals. The desktop posts the order-cancel
+    // adjustment through Ac_Ledr.Order_Adj_Ledr (TR_SL_ORD_ADJ.cs:3665), which answers both accounts
+    // from the cancel book's BOOK_DETL slots (1=settlement, 2=kasar) — never 'CASH'/'KASAR', which do
+    // not exist in a real AC_MAST. Explicit wins; else resolve on this tx and FAIL-CLOSED if unconfigured.
+    const cancelScope: VoucherScope = { ...input.scope, coBook: 'ORC' };
+    const paidAc =
+      paidAmt > 0
+        ? await resolveBookSlotAccountTx(tx, cancelScope, 'cash-settlement', 1, input.paidAc)
+        : (input.paidAc ?? '');
+    const kasarAc =
+      kasar > 0 ? await kasarAccountTx(tx, cancelScope, input.kasarAc, paidAc, kasar) : '';
     const no = lifecycle?.vchNo ?? (await nextVoucherNoTx(tx, { ...input.scope, coBook: 'ORC' }));
     const hdVchNo =
       lifecycle?.hdVchNo ?? (await nextHiddenVoucherNoTx(tx, { ...input.scope, coBook: 'ORC' }));

@@ -5741,6 +5741,27 @@
         "web/apps/web/app/(app)/txn/batch-receipt/page.tsx"
       ],
       "statusNote": "IMPLEMENTED. Desktop Multi-Party Receipt (TR_CASH.cs) is fully reopen/edit/delete-capable (BtnF load, edit=delete CASH_DATA+AC_DATA by VCH_NO + rebuild + DELETE_DATA audit, TR_CASH.cs:2988-3081,3217). Web batch-receipt page was create-only; single-row getReceipt rejects multi-row vouchers. Added getBatchReceipt (reads every CASH_DATA row by SR_NO into lines[] matching BatchReceiptLineInput; derives mode: REC_AC_CODE==book slot-1 cash-settlement -> cash (no bankAc) else chqNo?cheque:bank with bankAc=REC_AC_CODE - mirrors the writer so unchanged reopen->save re-posts the identical ledger), editBatchReceipt (deleteBatchReceipt reverse + postBatchReceipt forceVchNo under the same number), BatchReceiptInput.forceVchNo (edit-only internal field, triaged in unreachable-triage.json), GET/PUT/DELETE /receipts/batch/:vchNo (classified under the existing Multi-Party Receipt form, universe 654->657), and the UI (payload() extraction, PUT-when-loaded, loadVoucher mapping the view back to the grid, remove/reset, Voucher-no Load + New/Delete + Update#N + VoucherList on CASH_DATA). Proven by batchReceiptLifecycle.db.test.ts 2/2 (balanced AC_DATA 3515->1200, DELETE_DATA audit, unchanged round-trip) + batchReceiptKasar 4/4 + routePolicy 56/56. All gates green incl clean api build, web 646+9, depth:parity (102->103 unreachable, all internal/serverDerived, operator 0). txn.ts size ceiling 8443->8482. Live click deferred - lifecycle proven end-to-end at the service layer."
+    },
+    {
+      "id": "N155",
+      "status": "implemented-unverified",
+      "action": "Resolve the order-cancel refund/kasar ledger accounts from the cancel book's BOOK_DETL slots (1=settlement, 2=kasar) instead of the 'CASH'/'KASAR' string literals - explicit request account wins, else the configured slot, fail-closed when unconfigured. Desktop posts via Ac_Ledr.Order_Adj_Ledr.",
+      "parentLabels": "P9; N59",
+      "startAfter": [
+        "N154"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "salesOrderCancelAccounts.db.test.ts: no-account cancel posts refund to configured slot-1 (not 'CASH'); kasar slot-2; explicit wins; fail-closed when unconfigured (refuses, rolls back). salesFamilyLifecycle 31/31 unaffected. gates + clean api build + web 646+9 + sales-order DB 58/58 + depth:parity.",
+      "gapIds": "G163",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/api/src/modules/sales/salesOrder.ts",
+        "web/apps/api/test/salesOrderCancelAccounts.db.test.ts"
+      ],
+      "statusNote": "IMPLEMENTED. cancelSalesOrderAdjust fell back to literal 'CASH'/'KASAR' account codes (N59 anti-pattern) which do not exist in a real AC_MAST, so a cancel without an explicit account posted refund/kasar legs to a non-existent ledger. Desktop posts via Ac_Ledr.Order_Adj_Ledr (TR_SL_ORD_ADJ.cs:3665) resolving from BOOK_DETL slots. Fix: on the posting tx, paidAc = resolveBookSlotAccountTx(tx, {scope,coBook:'ORC'}, 'cash-settlement', 1, input.paidAc) when paidAmt>0 (explicit wins else ORC slot-1, fail-closed); kasarAc = kasarAccountTx(tx, ORCscope, input.kasarAc, paidAc, kasar) when kasar>0 (explicit/slot-2, guarded vs settlement). Imports resolveBookSlotAccountTx + kasarAccountTx. Proven by salesOrderCancelAccounts.db.test.ts 4/4 (slot-1 refund resolution, slot-2 kasar, explicit wins, fail-closed when unconfigured). salesFamilyLifecycle 31/31 unaffected (passes paidAc explicitly). All gates green incl clean api build, web 646+9, sales-order DB 58/58, depth:parity (removes a literal, no new unreachable field). salesOrder.ts size ceiling 2350->2361."
     }
   ],
   "amendments": [

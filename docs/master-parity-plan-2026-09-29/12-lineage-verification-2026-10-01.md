@@ -173,6 +173,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G160 | Med | Bullion Sale reopen+edit+delete (UI) | `unified/src/csharp/DataCareNext/TR_BUL_SALE.cs` | `web/apps/web/app/(app)/txn/bullion-sale/page.tsx` | The bullion-sale page was create-only (imported only `post`) though `getBullionSale`/`editBullionSale`/`deleteBullionSale` and `GET/PUT/DELETE /bullion-sales/:vchNo` exist and are covered by `bullionSale.db.test.ts` (post → reopen → edit → delete). The reader (`readRateCut` with `bookGuard:'bullion-sale'`) returns header fields + `lines`/`receivedLines`; wire `loadVoucher` (GET + full header/tender/line restore) + PUT-when-loaded + delete + New/Update (UI-only, no new routes). | N151 |
 | G161 | Med | Manufacturing Order Issue reopen+edit (needs reader extension) | `unified/src/csharp/DataCareNext/TR_MFG_ISU_REC.cs` | `web/apps/web/app/(app)/txn/mfg-order-issue/page.tsx` | The Order Issue page is create-only; `GET/PUT/DELETE /mfg/order-issue/:vchNo` exist (getMfg/editMfg/deleteMfg, coBook DIS, irType D). **Not a safe UI-only slice** — unlike mfg-issue/mfg-receive, this bespoke page's POST payload sends ~51 writer-verified `extendedLineFields` plus header `karigarName`, but `getMfg` (`web/apps/api/src/modules/manufacturing/mfg.ts:1155-1271`) omits nine persisted line keys (`totalNetWt`,`oldNetWt`,`rateType`,`prCode`,`itmLoss`,`netAmt`,`krName`,`ordAcCode`,`ordDesign`) and `karigarName`. Because `editMfg` deletes-and-rebuilds the write set, an unchanged reopen→save would blank those columns. Requires a **backend** `getMfg` reader extension to return every persisted payload field (plus issue-side `itmLoss` and `karigarName` semantics) with an all-fields GET→payload round-trip test, THEN the UI reopen wiring. | N153 (reader) + N152 (UI) |
 | G162 | Med | Multi-Party (batch) Receipt reopen/edit/delete | `unified/src/csharp/DataCareNext/TR_CASH.cs` | `web/apps/web/app/(app)/txn/batch-receipt/page.tsx`, `web/apps/api/src/modules/finance/batchReceipt.ts` | The desktop Multi-Party Receipt (TR_CASH, a grid of party rows) is fully reopen/edit/delete-capable — `BtnF` loads by voucher no., an edit deletes `CASH_DATA`+`AC_DATA` by VCH_NO and rebuilds them, writing a `DELETE_DATA` audit (`TR_CASH.cs:2988-3081,3217`). The web batch-receipt page was create-only: the backend had `postBatchReceipt`/`deleteBatchReceipt` but no reader or editor, and the single-row `getReceipt` refuses a multi-row voucher. Add `getBatchReceipt` (reads every CASH_DATA row as `lines[]`, deriving pay mode from `REC_AC_CODE` vs the book slot-1 cash account) + `editBatchReceipt` (reverse + re-post under the same number via `forceVchNo`) + `GET/PUT/DELETE /receipts/batch/:vchNo` + the UI reopen/edit/delete + VoucherList on CASH_DATA. | N154 |
+| G163 | Med | Order-cancel refund/kasar accounts are literals | `unified/src/csharp/DataCareNext/TR_SL_ORD_ADJ.cs` | `web/apps/api/src/modules/sales/salesOrder.ts` `cancelSalesOrderAdjust` | `cancelSalesOrderAdjust` fell back to the string literals `'CASH'` (refund settlement) and `'KASAR'` (write-off) when the request named neither — codes that do not exist in a real company's AC_MAST, so a cancel without an explicit account posted the refund/kasar legs to a non-existent ledger (the N59 anti-pattern). The desktop posts the adjustment via `Ac_Ledr.Order_Adj_Ledr` (`TR_SL_ORD_ADJ.cs:3665`), resolving both accounts from the cancel book's BOOK_DETL slots (1=settlement, 2=kasar). Resolve the same configured accounts on the transaction (explicit wins, else slot 1/2) and FAIL-CLOSED when unconfigured. | N155 |
 
 ## 4. Decisions D23–D28
 
@@ -1532,6 +1533,34 @@ proven end-to-end at the service layer).
 Done when: an operator can load a saved multi-party receipt, edit its party rows, re-save, and delete.
 
 
+### N155 — Order-cancel refund/kasar accounts resolved from BOOK_DETL, not literals (G163, Stage D)
+
+`cancelSalesOrderAdjust` posted the order-cancel refund leg to `input.paidAc ?? 'CASH'` and the
+write-off leg to `input.kasarAc ?? 'KASAR'`. The strings `'CASH'`/`'KASAR'` are not account codes in
+a real company's `AC_MAST` (a real cash account is a code like `00001`), so a cancel entered without
+an explicit account posted a balanced-but-wrong voucher to a non-existent ledger — the N59 literal
+anti-pattern already removed from the single/batch receipt and scheme paths. The desktop posts this
+voucher through `Ac_Ledr.Order_Adj_Ledr` (`TR_SL_ORD_ADJ.cs:3665`), which answers the settlement and
+write-off accounts from the cancel book's `BOOK_DETL` slots.
+
+N155 resolves both on the posting transaction against the cancel book (`ORC`): `paidAc` =
+`resolveBookSlotAccountTx(tx, {…coBook:'ORC'}, 'cash-settlement', 1, input.paidAc)` when a refund is
+paid (an explicit request account wins, else slot 1), and `kasarAc` = `kasarAccountTx(tx, …, input.kasarAc, paidAc, kasar)`
+when a write-off is taken (explicit, else slot 2, guarded against naming the settlement account).
+Both **fail closed** — an unconfigured book is refused, not posted to an invented ledger.
+
+Proof: `salesOrderCancelAccounts.db.test.ts` (4) — a cancel with no named account posts the refund to
+the configured slot-1 account (asserting `'CASH'` never appears); a write-off resolves slot 2; an
+explicit account wins; and an unconfigured book is refused with the voucher rolled back. The existing
+`salesFamilyLifecycle.db.test.ts` (31) is unaffected (it passes `paidAc` explicitly, which still
+wins). Verified: full gates + clean `@datacare/api` build + web 646+9 + sales-order DB suite 58/58;
+`depth:parity` passes (the fix removes a literal and adds no unreachable field). `salesOrder.ts` size
+ceiling rose 2350→2361.
+
+Done when: an order cancel without a named account posts to the configured settlement/kasar accounts,
+and a book without them is refused.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -1607,6 +1636,7 @@ Done when: an operator can load a saved multi-party receipt, edit its party rows
 | N153 | — | implemented-unverified, evidence in this change (G161 prerequisite: getMfg reader now maps the nine MFG_DETL columns it dropped — totalNetWt/oldNetWt/netAmt/itmLoss/rateType/prCode/krName/ordAcCode/ordDesign; backend correctness fix proven by operatorDepth.roundtrip.db.test.ts 3/3 + mfgLifecycle.db.test.ts 9/9; gates + clean API build + depth:parity green; size ceiling 1504→1516; unblocks N152 UI) |
 | N152 | — | implemented-unverified, evidence in this change (G161: mfg-order-issue reopen/edit/delete lifecycle UI, unblocked by N153; UI-only, sub-agent implement+audit AUDIT_PASS with AST field-mapping proof all 61 sent keys restored, stale-target guard; gates + clean API build + web 646+9 + depth:parity green, live deferred — demo has no MFG/DIS book) |
 | N154 | — | implemented-unverified, evidence in this change (G162: multi-party batch-receipt reopen/edit/delete — getBatchReceipt reader with derived pay mode + editBatchReceipt reverse+re-post + GET/PUT/DELETE routes + UI + VoucherList; proven by batchReceiptLifecycle.db.test.ts 2/2 (balanced AC_DATA + DELETE_DATA audit + unchanged round-trip) and batchReceiptKasar 4/4; routePolicy 56/56 universe 654→657; forceVchNo triaged internal (unreachable 102→103, operator 0); gates + clean API build + web 646+9 + depth:parity green; txn.ts ceiling 8443→8482) |
+| N155 | — | implemented-unverified, evidence in this change (G163: order-cancel refund/kasar accounts resolved from BOOK_DETL slots instead of the 'CASH'/'KASAR' literals — explicit wins, else slot 1/2, fail-closed; proven by salesOrderCancelAccounts.db.test.ts 4/4 (slot resolution, kasar slot-2, explicit wins, fail-closed) with salesFamilyLifecycle 31/31 unaffected; gates + clean API build + web 646+9 + sales-order DB 58/58 + depth:parity green; salesOrder.ts ceiling 2350→2361) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
