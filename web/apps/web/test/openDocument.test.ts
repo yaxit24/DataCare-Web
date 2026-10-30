@@ -46,13 +46,31 @@ describe('openDocument (G180)', () => {
     expect(win.location.href).toBe('/api/purchases/invoice?vchNo=00002');
   });
 
-  it('falls back to a plain window when the first one was blocked or closed', async () => {
+  it('falls back to a plain window when the first one was blocked', async () => {
     get.mockResolvedValue({});
-    const { opener, opened, win } = fakeOpener();
-    win.closed = true;
+    const opened: Array<{ url: string; target?: string }> = [];
+    const opener = {
+      open: vi.fn((url: string, target?: string) => {
+        opened.push({ url, target });
+        return null; // blocked
+      }),
+    };
     openDocument('/api/reports/x/export.xlsx', opener);
     await flush();
-    expect(opened.at(-1)).toEqual({ url: '/api/reports/x/export.xlsx', target: '_blank' });
+    expect(opened).toEqual([
+      { url: '', target: '_blank' },
+      { url: '/api/reports/x/export.xlsx', target: '_blank' },
+    ]);
+  });
+
+  it('does not reopen a window the operator closed before the document loaded', async () => {
+    get.mockResolvedValue({});
+    const { opener, opened, win } = fakeOpener();
+    openDocument('/api/sales/invoice?vchNo=00003', opener);
+    win.closed = true;
+    await flush();
+    expect(opened).toEqual([{ url: '', target: '_blank' }]);
+    expect(win.location.href).toBe('about:blank');
   });
 });
 

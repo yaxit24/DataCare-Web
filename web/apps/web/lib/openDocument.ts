@@ -16,8 +16,9 @@ export function openDocument(url: string, opener: Pick<Window, 'open'> = window)
     } catch {
       // A failed check still opens the document: its own response then explains the problem.
     }
-    if (target && !target.closed) target.location.href = url;
-    else opener.open(url, '_blank');
+    // A blocked window falls back to a plain one; a window the operator already closed stays closed.
+    if (!target) opener.open(url, '_blank');
+    else if (!target.closed) target.location.href = url;
   })();
 }
 
