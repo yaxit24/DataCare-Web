@@ -42,6 +42,9 @@
         "web/apps/web/app/(app)/txn/sale-return/page.tsx",
         "web/apps/api/src/modules/sales/salesReturn.ts"
       ]
+    },
+    "companyOpen": {
+      "covers": ["web/apps/web/app/select/page.tsx", "web/apps/web/lib/contextSelection.ts"]
     }
   }
 }

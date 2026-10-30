@@ -5975,7 +5975,7 @@
     },
     {
       "id": "N165",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Open Company for the same user from two sessions at once: retry the serializable context selection once and, if it still conflicts, show a readable message instead of the raw code context-transaction-conflict.",
       "parentLabels": "P9; X05",
       "startAfter": [
@@ -5986,7 +5986,15 @@
       "entryDefinition": "02-execution-plan.md section 4",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/web/lib/contextSelection.ts",
+        "web/apps/web/test/contextSelectionRetry.test.ts",
+        "web/apps/web/app/select/page.tsx",
+        "web/apps/web/test/features/modules/companyOpen.mjs"
+      ],
+      "statusNote": "IMPLEMENTED. A selection that loses a serializable transaction conflict (409 context-transaction-conflict, rolled back) is sent again with the same request up to four times with a jittered backoff (150/400/900/1600 ms); the server replays a selection that already committed. If it still loses, the Open Company screen says another session was opening a company at the same moment instead of the raw code. Verified: contextSelectionRetry.test.ts 3 passed; new feature module company-open: entry.lists-choices and concurrency.sessions-open-at-once (four sessions of one user press Open together and all reach the dashboard) pass, the latter three runs in a row; against main's screen it fails twice out of two with the raw 'context-transaction-conflict'. 16 groups are recorded as not yet written (document 15 step E11)."
     },
     {
       "id": "N166",

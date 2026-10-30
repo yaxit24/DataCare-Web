@@ -160,6 +160,38 @@ export function clearPendingContextSelection(selectionId: string): void {
  * bootstraps fresh authority; the exact stored body/operation ID is reused under that new page.
  * No refresh bypass, automatic draft retry, or replacement expected epoch is introduced.
  */
+/** Pauses before each retry of a selection that lost a transaction conflict (G172). */
+export const CONFLICT_RETRY_DELAYS_MS = [150, 400, 900, 1600] as const;
+
+/**
+ * G172: several sessions opening a company at the same moment can make one serializable selection lose with
+ * 409 `context-transaction-conflict`. That transaction rolled back, and the same request is safe to send again (the
+ * server replays a selection that already committed), so it is retried before the operator ever sees it.
+ */
+export async function postSelectionRetryingConflicts(
+  pending: PendingContextSelection,
+  isCurrent: () => boolean,
+  wait: (ms: number) => Promise<void> = (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await post<{ context: unknown; scoped: boolean; replayed: boolean }>(
+        '/context/select',
+        pending.request,
+      );
+    } catch (error) {
+      const conflict =
+        error instanceof ApiError &&
+        error.status === 409 &&
+        error.body?.error === 'context-transaction-conflict';
+      const delay = CONFLICT_RETRY_DELAYS_MS[attempt];
+      if (!conflict || delay === undefined || !isCurrent()) throw error;
+      // A little jitter, so sessions that lost together do not collide again.
+      await wait(delay + Math.floor(Math.random() * 100));
+    }
+  }
+}
+
 export async function submitPendingContextSelection(
   pending: PendingContextSelection,
   options: { isCurrent?: () => boolean } = {},
@@ -191,10 +223,7 @@ export async function submitPendingContextSelection(
     );
   }
   try {
-    const response = await post<{ context: unknown; scoped: boolean; replayed: boolean }>(
-      '/context/select',
-      pending.request,
-    );
+    const response = await postSelectionRetryingConflicts(pending, isCurrent);
     const context = parseBrowserSessionContext(response.context);
     if (
       response.scoped !== true ||
