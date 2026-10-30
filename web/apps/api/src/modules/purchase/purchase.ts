@@ -394,7 +394,13 @@ export function buildExpenseLegs(
   const byAc = new Map<string, number>();
   for (const it of items) byAc.set(it.ac, R2((byAc.get(it.ac) ?? 0) + it.net));
   const acs = [...byAc.keys()];
-  if (acs.length <= 1) return [{ ac: acs[0] ?? 'PURCHASE', amount: R2(taxable) }];
+  // Every item carries a resolved expense account (writer resolves purchaseAc fail-closed, per-group
+  // PURC_AC falls back to it), so acs is never empty here; guard the invariant rather than a literal.
+  if (acs.length <= 1) {
+    const only = acs[0];
+    if (!only) throw new PurchaseValidationError('purchase expense account could not be resolved');
+    return [{ ac: only, amount: R2(taxable) }];
+  }
   const legs: { ac: string; amount: number }[] = [];
   let allocated = 0;
   for (let i = 0; i < acs.length; i++) {
@@ -643,7 +649,11 @@ async function writePurchaseTx(
   if (!lines || lines.length === 0)
     throw new PurchaseValidationError('at least one line item is required');
 
-  const purchaseAc = input.purchaseAc ?? 'PURCHASE';
+  // N59/G166: the purchase expense account is the book's slot-1 account, resolved below once the book
+  // policy is known (explicit request wins, fail-closed when a posting purchase needs it). The tax-input
+  // account stays a literal fallback for now — like the sale GST account it depends on the documented
+  // TAX_MAST SR_NO provisioning gap, so removing it is out of scope here.
+  let purchaseAc = input.purchaseAc ?? '';
   const fallbackTaxAc = input.taxAc ?? 'GSTINPUT';
   const requestedRoundAc = input.roundAc;
   const taxPct = input.urd ? 0 : input.taxRatePct;
@@ -672,6 +682,19 @@ async function writePurchaseTx(
     isPurchaseQuotation ? 'PURCHASE QUOTATION' : purchaseWorkflowFor(actualMainBook),
   );
   const roundingPolicy = await resolveRoundingPolicyTx(tx, input.scope);
+
+  // Resolve the purchase expense account now the book is known: explicit request wins, else BOOK_DETL
+  // slot 1. A posting purchase fails closed when the slot is missing; a quotation posts no ledger, so it
+  // tolerates an unconfigured book and keeps a non-empty placeholder for its expense preview.
+  if (!purchaseAc) {
+    if (isPurchaseQuotation) {
+      purchaseAc = await resolveBookAccountTx(tx, input.scope, bookPolicy, 1).catch(
+        () => 'PURCHASE',
+      );
+    } else {
+      purchaseAc = await resolveBookAccountTx(tx, input.scope, bookPolicy, 1);
+    }
+  }
 
   // TR_PURC.cs refuses a voucher whose footer totals are ALL zero — labour amount, pieces, gross weight
   // and net amount together. Summing the same four quantities across the request's lines reproduces the

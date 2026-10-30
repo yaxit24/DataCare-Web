@@ -5805,6 +5805,27 @@
         "web/apps/api/test/postingAccountLiterals.test.ts"
       ],
       "statusNote": "IMPLEMENTED (partial-by-design). sales.ts had 11 literal account fallbacks. Cleaned 5 that have a real configured/persisted source: cash leg takes the already-resolved slot-2 account; income resolves from BOOK_DETL slot 1 (explicit wins, fail-closed for a posting sale; placeholder for a no-ledger quotation); electronic-tender bank leg + cheque Rojmel row use persisted BANK_AC fail-closed; single-income branch throws an invariant not 'SALES'. Left 6 as verified legitimate fixed defaults (no BOOK_DETL slot, no persisted header column - SL_DATA only has BANK_AC/CARD_AC/SCHM_AC - so reopen can't recover them; tax account depends on a documented TAX_MAST SR_NO provisioning gap): 'OLDGOLD','HMCHRG'x2,'TCS'x2,'GST'. Fail-closing those was tried and empirically broke legitimate reopen (400s on hallmark round-trip/amount-basis/quotation), so reverted. REMAINING sales.ts 11->6, TOTAL 41->36. Full sales DB suite 69/9 green + all gates + clean api build + web 646+9 + depth. sales.ts ceiling 2809->2845."
+    },
+    {
+      "id": "N158",
+      "status": "implemented-unverified",
+      "action": "Resolve the purchase expense account from BOOK_DETL slot 1 (explicit wins, fail-closed for a posting purchase; placeholder for a no-ledger quotation) and throw a single-expense invariant instead of the 'PURCHASE' literal; leave GSTINPUT (tax provisioning gap) and HMCHRG (no configured source) documented in REMAINING.",
+      "parentLabels": "P9; N59",
+      "startAfter": [
+        "N157"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "postingAccountLiterals.test.ts REMAINING purchase.ts 5->3, TOTAL 36->34, guard green. Full purchase DB suite 55/9 files green (lifecycle, consignment, quotation, returns, rojmel). gates + clean api build + web 646+9 + depth.",
+      "gapIds": "G166",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/api/src/modules/purchase/purchase.ts",
+        "web/apps/api/test/postingAccountLiterals.test.ts"
+      ],
+      "statusNote": "IMPLEMENTED (partial-by-design, mirrors N157). purchase.ts had 5 literal account fallbacks. Cleaned 2 with a real configured source: the purchase expense account now resolves from BOOK_DETL slot 1 (resolveBookAccountTx(..,1), explicit wins, fail-closed for a posting purchase; 'PURCHASE' placeholder for a no-ledger quotation), and the single-expense income branch throws an invariant instead of 'PURCHASE'. Left 3 as verified-legitimate (same reasoning as N157's sales counterpart): 'GSTINPUT' tax-input account (depends on the documented TAX_MAST SR_NO provisioning gap) and 'HMCHRG' x2 (no BOOK_DETL slot, no persisted header column). REMAINING purchase.ts 5->3, TOTAL 36->34. Full purchase DB suite 55/9 green + all gates + clean api build + web 646+9 + depth. purchase.ts ceiling 2860->2883."
     }
   ],
   "amendments": [
