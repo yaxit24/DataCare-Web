@@ -176,6 +176,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G163 | Med | Order-cancel refund/kasar accounts are literals | `unified/src/csharp/DataCareNext/TR_SL_ORD_ADJ.cs` | `web/apps/api/src/modules/sales/salesOrder.ts` `cancelSalesOrderAdjust` | `cancelSalesOrderAdjust` fell back to the string literals `'CASH'` (refund settlement) and `'KASAR'` (write-off) when the request named neither — codes that do not exist in a real company's AC_MAST, so a cancel without an explicit account posted the refund/kasar legs to a non-existent ledger (the N59 anti-pattern). The desktop posts the adjustment via `Ac_Ledr.Order_Adj_Ledr` (`TR_SL_ORD_ADJ.cs:3665`), resolving both accounts from the cancel book's BOOK_DETL slots (1=settlement, 2=kasar). Resolve the same configured accounts on the transaction (explicit wins, else slot 1/2) and FAIL-CLOSED when unconfigured. | N155 |
 | G164 | Med | Sales-order advance cash account is a literal | `unified/src/csharp/DataCareNext/TR_SALE_ORD.cs` | `web/apps/api/src/modules/sales/salesOrder.ts` | The order-advance debit leg used `input.cashAc ?? 'CASH'` — when an advance was taken without a named account it posted the Dr leg to the non-existent `'CASH'` ledger (N59 anti-pattern). The desktop debits the order book's BOOK_DETL slot-1 account (noted at `salesOrder.ts:1197`). Resolve slot 1 on the posting transaction (explicit wins) and FAIL-CLOSED when unconfigured. | N156 |
 | G165 | Med | Core sale posting used literal account fallbacks | `unified/src/csharp/DataCareNext/TR_SALE.cs`; `unified/src/csharp/DataCareNext/Ac_Tax.cs` | `web/apps/api/src/modules/sales/sales.ts` | The sale writer carried 11 literal account fallbacks. Five were genuine N59 defects with a configured/persisted source: the cash leg and the electronic-tender (card/upi/cheque) bank leg (incl. the cheque Rojmel row) posted to `'CASH'`/`'BANK'`, and the sale-income account defaulted to `'SALES'`. These now resolve from BOOK_DETL slot 1 (income) / slot 2 (cash) or the persisted `BANK_AC`, FAIL-CLOSED when an electronic tender posts with no bank account. The remaining six (`'OLDGOLD'`, `'HMCHRG'`x2, `'TCS'`x2, `'GST'`) are legitimate fixed defaults with NO BOOK_DETL slot, NO persisted header column, and no tax-code resolution (a documented web provisioning gap), so fail-closing them would break legitimate reopen — left intact and tracked in the posting-literals REMAINING ledger. | N157 |
+| G166 | Med | Purchase posting used literal account fallbacks | `unified/src/csharp/DataCareNext/TR_PURC.cs` | `web/apps/api/src/modules/purchase/purchase.ts` | The purchase writer mirrored the sale one: 5 literal fallbacks. Two were genuine N59 defects — the purchase expense account defaulted to `'PURCHASE'` (both the writer base and the single-expense income branch). These now resolve from BOOK_DETL slot 1 (explicit wins, fail-closed for a posting purchase; placeholder for a no-ledger quotation). The remaining three (`'GSTINPUT'`, `'HMCHRG'`x2) are legitimate fixed defaults — the tax-input account depends on the documented TAX_MAST provisioning gap and hallmark has no slot/persisted column — left intact and tracked in REMAINING. | N158 |
 
 ## 4. Decisions D23–D28
 
@@ -1625,6 +1626,29 @@ Done when: the sale cash/bank/income accounts come from configuration (fail-clos
 non-configurable defaults are documented rather than silently literal.
 
 
+### N158 — Purchase posting resolves its expense account from configuration, not the 'PURCHASE' literal (G166, Stage D)
+
+The purchase writer (`purchase.ts`) mirrors the sale writer and carried the same class of literal
+fallbacks. Applying the N157 reasoning file-for-file: the purchase expense account now resolves from
+BOOK_DETL slot 1 (`resolveBookAccountTx(..,1)`, explicit request wins) for a posting purchase and
+keeps a harmless preview placeholder for a quotation (no ledger); and the single-account expense
+branch throws an invariant instead of defaulting to `'PURCHASE'` (every item carries a resolved
+account, so it is unreachable).
+
+Left intact (verified NOT the N59 class, same reasoning as the sale counterparts): the tax-input
+account (`'GSTINPUT'`, depends on the documented TAX_MAST SR_NO provisioning gap) and the hallmark
+charge (`'HMCHRG'`, no BOOK_DETL slot and no persisted header column). They remain in the
+posting-literals REMAINING ledger as honest debt.
+
+Proof: `postingAccountLiterals.test.ts` REMAINING for `purchase.ts` drops 5 to 3, REMAINING_TOTAL
+36 to 34, guard green. The full purchase DB suite is unchanged and green (lifecycle, consignment,
+quotation, returns, rojmel = 55 across 9 files). Verified: full gates + clean `@datacare/api` build +
+web 646+9 + `depth:parity`. `purchase.ts` size ceiling 2860 to 2883.
+
+Done when: the purchase expense account comes from configuration (fail-closed), and the
+non-configurable defaults are documented rather than silently literal.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -1703,6 +1727,7 @@ non-configurable defaults are documented rather than silently literal.
 | N155 | — | implemented-unverified, evidence in this change (G163: order-cancel refund/kasar accounts resolved from BOOK_DETL slots instead of the 'CASH'/'KASAR' literals — explicit wins, else slot 1/2, fail-closed; proven by salesOrderCancelAccounts.db.test.ts 4/4 (slot resolution, kasar slot-2, explicit wins, fail-closed) with salesFamilyLifecycle 31/31 unaffected; gates + clean API build + web 646+9 + sales-order DB 58/58 + depth:parity green; salesOrder.ts ceiling 2350→2361) |
 | N156 | — | implemented-unverified, evidence in this change (G164: sales-order advance debits the order book BOOK_DETL slot-1 account instead of the 'CASH' literal — explicit wins, fail-closed; proven by salesOrderRound4 fail-closed+explicit case (11/11) and salesFamilyLifecycle SOR slot-1 (32); gates + clean API build + web 646+9 + sales-order DB green; salesOrder.ts ceiling 2361→2374) |
 | N157 | — | implemented-unverified, evidence in this change (G165: core sale posting resolves cash=BOOK_DETL slot-2, income=slot-1, electronic-tender bank=persisted BANK_AC fail-closed, and a single-income invariant instead of literals; the 6 non-configurable defaults oldgold/hmcharge×2/tcs×2/gst are verified legitimate and left, tracked in REMAINING 11→6, TOTAL 41→36; full sales DB suite 69/9 + gates + clean API build + web 646+9 + depth green; sales.ts ceiling 2809→2845) |
+| N158 | — | implemented-unverified, evidence in this change (G166: purchase expense account resolves from BOOK_DETL slot-1 instead of the 'PURCHASE' literal, explicit wins/fail-closed, plus a single-expense invariant; the 3 non-configurable defaults gstinput/hmcharge×2 verified legitimate and left, tracked in REMAINING 5→3, TOTAL 36→34; full purchase DB suite 55/9 + gates + clean API build + web 646+9 + depth green; purchase.ts ceiling 2860→2883) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
