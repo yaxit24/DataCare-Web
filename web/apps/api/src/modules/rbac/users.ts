@@ -116,6 +116,18 @@ export class UsersValidationError extends Error {
   }
 }
 
+/**
+ * G178: a rights change may not leave the company without an administrator. Observed on the live demo: the only
+ * admin set their own LOGIN_CATG to USER and every admin screen answered 403 from then on, with no way back short of
+ * editing the database. The desktop has a built-in main user to recover with; the web has none, so it refuses.
+ */
+export class LastAdministratorValidationError extends Error {
+  constructor(loginName: string) {
+    super(`the company must keep at least one administrator; ${loginName} is the last one`);
+    this.name = 'LastAdministratorValidationError';
+  }
+}
+
 /** Admin iff LOGIN_CATG starts with "A" (mirrors auth.service.rightsOf). */
 export function isAdminRole(role?: string | null): boolean {
   return (role ?? '').toUpperCase().startsWith('A');
@@ -341,6 +353,18 @@ export async function setUserRights(
   const setCatg = p.catg !== undefined && p.catg !== null && String(p.catg).trim() !== '';
 
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
+    if (setCatg && !isAdminRole(String(p.catg))) {
+      // Lock the company's administrators, so two of them demoting each other at once cannot both succeed.
+      const admins: { LOGIN_NAME: string | null }[] = await tx.$queryRawUnsafe(
+        `SELECT "LOGIN_NAME" FROM "LOGIN_MAST"
+          WHERE "CO_CODE"=$1 AND upper(coalesce("LOGIN_CATG",'')) LIKE 'A%' FOR UPDATE`,
+        coCode,
+      );
+      const same = (name: string | null) =>
+        (name ?? '').trim().toUpperCase() === loginName.toUpperCase();
+      if (admins.some((row) => same(row.LOGIN_NAME)) && admins.every((row) => same(row.LOGIN_NAME)))
+        throw new LastAdministratorValidationError(loginName);
+    }
     if (setCatg) {
       await tx.$executeRawUnsafe(
         'UPDATE "LOGIN_MAST" SET "USER_UPDATE"=$1,"USER_DELETE"=$2,"USER_PRINT"=$3,"LOGIN_CATG"=$4 WHERE "CO_CODE"=$5 AND "LOGIN_NAME"=$6',
