@@ -163,10 +163,16 @@ export default function UsersAdminPage() {
       await load();
     } catch (err) {
       const status = err instanceof ApiError ? err.status : 0;
+      // G178: show the server's reason (for example the last-administrator refusal) instead of a generic failure.
+      const reason = err instanceof ApiError && status === 400 ? (err.body as any)?.message : null;
       setMsg({
         kind: 'err',
         text:
-          status === 403 ? 'Admin access required' : `Failed to save rights for "${u.loginName}"`,
+          status === 403
+            ? 'Admin access required'
+            : reason
+              ? `Rights not saved for "${u.loginName}": ${reason}`
+              : `Failed to save rights for "${u.loginName}"`,
       });
     } finally {
       setSavingKey(null);

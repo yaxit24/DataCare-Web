@@ -1829,6 +1829,16 @@ an edition, so every suite still runs.
 Done when: a Standard deployment shows, allows and lists exactly the Standard menus, proven by the unit, API and
 navigation tests and a browser run in Standard and with Beta.
 
+### N169 — Users & Rights cannot leave the company without an administrator (G178)
+
+`web/apps/api/src/modules/rbac/users.ts` refuses a category change that would demote the last administrator,
+including the caller's own account, after locking the company's administrator rows so concurrent demotions cannot
+both succeed. The Users & Rights screen shows the reason. Proven by `web/apps/api/test/lastAdministrator.routes.db.test.ts`
+and the new feature module `web/apps/web/test/features/modules/usersRights.mjs`, whose other groups are recorded as
+not yet written (document 15 step E11).
+
+Done when: no sequence of rights changes leaves a company without an administrator.
+
 
 ### N164 — UI surface map: every page and every button, plus a browser test with every behaviour change (G172)
 
@@ -2002,7 +2012,7 @@ regenerated from that run.
 | N166 | — | planned (G173, G174: fault injection for T14 and a settings-variant company for T15 in the feature E2E harness) |
 | N167 | — | planned (G175: decide the negative-weight line rule from an original-Windows run, then implement and execute the case) |
 | N168 | — | planned (G177: editable amount settings — presets offered, any amount accepted and validated) |
-| N169 | — | planned (G178: refuse removing the admin role from the last administrator, including oneself) |
+| N169 | — | implemented-unverified, evidence in this change (G178: last-administrator refusal with row locks; DB test 3 passed and fails against the old code; Users & Rights feature module: 3 cases pass through the real screen) |
 | N170 | — | implemented-unverified, evidence in this change (Purchase Invoice module 16/3/2, Settings effects module 10/1/2 + 11 N/A, Sales CSV export case, one shared company per run, with-data crawl and regenerated map; found G176, G177, G178) |
 | N171 | — | implemented-unverified, evidence in this change (G183: generated edition table, 245 routes and 252 forms; API 403 edition-unavailable, /me edition, rights catalog filtered; Standard navigation, page guard and Beta group; core, API, web and generator tests; browser runs in Standard and with Beta) |
 | N172 | — | planned (G179: voucher number box — Enter opens the voucher, Up the last, Down the first, F1 the list, on every Standard voucher screen) |
