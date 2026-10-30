@@ -113,15 +113,17 @@ export default function SelectPage() {
       setErr(
         key === 'target-password-reset-required'
           ? 'The target company requires a password reset. Sign in through that company or ask its administrator to reset the credential.'
-          : key === 'year-unavailable'
-            ? 'Selected year is not available.'
-            : key === 'location-unavailable'
-              ? 'Selected location is not available.'
-              : error instanceof PageContextError
-                ? error.message
-                : error instanceof Error
+          : key === 'context-transaction-conflict'
+            ? 'Another session was opening a company at the same moment. Reload this page and press Open again.'
+            : key === 'year-unavailable'
+              ? 'Selected year is not available.'
+              : key === 'location-unavailable'
+                ? 'Selected location is not available.'
+                : error instanceof PageContextError
                   ? error.message
-                  : 'The company change could not be confirmed.',
+                  : error instanceof Error
+                    ? error.message
+                    : 'The company change could not be confirmed.',
       );
       busyRef.current = false;
       setBusy(false);

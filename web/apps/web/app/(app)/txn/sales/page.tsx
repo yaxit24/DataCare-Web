@@ -23,6 +23,7 @@ import { companyFlag, useCompanySettings, companySetting } from '../../../../lib
 import { oldGoldRowAmount, recalcLine } from '../../../../lib/lineRecalc';
 import { billTotals, lineNet as lineNetAmount } from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
+import { openDocument } from '../../../../lib/openDocument';
 
 /** BOOK_DATA.MAIN_BOOK values the retail sale writer accepts (sales.ts, workflowPolicy.SALES). */
 const SALE_MAIN_BOOKS = ['SALES'];
@@ -853,9 +854,8 @@ export default function SalesEntryPage() {
           onPrint={
             loadedVchNo
               ? () =>
-                  window.open(
+                  openDocument(
                     `/api/sales/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(loadedVchNo)}&format=html&copy=O`,
-                    '_blank',
                   )
               : undefined
           }
@@ -1475,9 +1475,8 @@ export default function SalesEntryPage() {
               type="button"
               className="ghost"
               onClick={() =>
-                window.open(
+                openDocument(
                   `/api/sales/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(String(result.vchNo))}`,
-                  '_blank',
                 )
               }
             >
@@ -1487,9 +1486,8 @@ export default function SalesEntryPage() {
               type="button"
               className="ghost"
               onClick={() =>
-                window.open(
+                openDocument(
                   `/api/sales/quotation?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(String(result.vchNo))}&format=html`,
-                  '_blank',
                 )
               }
             >

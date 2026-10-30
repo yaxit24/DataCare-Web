@@ -152,7 +152,15 @@ async function resolveReturnedTagIdentities(
   input: SaleReturnInput,
   lines: SaleLineInput[],
 ): Promise<Map<number, { VCH_SRNO: number; IT_CODE: string }>> {
-  const tagged = lines.map((line, index) => ({ line, index })).filter(({ line }) => line.tagNo);
+  // 'N' is the desktop's loose-stock marker, not a tag: TR_SALE_RTN.cs:3917 copies a sold line's TAG_NO into
+  // the return grid as it is, and every tag step skips 'N' (:4773, :8585, :13387, :13395). So an imported
+  // untagged line has no tag provenance to check (G191).
+  const tagged = lines
+    .map((line, index) => ({ line, index }))
+    .filter(({ line }) => {
+      const tagNo = String(line.tagNo ?? '').trim();
+      return tagNo !== '' && tagNo.toUpperCase() !== 'N';
+    });
   const resolved = new Map<number, { VCH_SRNO: number; IT_CODE: string }>();
   if (!tagged.length) return resolved;
   if (input.origVchNo == null) {

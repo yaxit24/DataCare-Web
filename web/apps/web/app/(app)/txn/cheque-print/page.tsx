@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
+import { openDocument } from '../../../../lib/openDocument';
 
 function todayLocal(): string {
   const d = new Date();
@@ -72,7 +73,7 @@ export default function ChequePrintPage() {
   function openCheque(autoPrint = false) {
     if (!requireInput()) return;
     const q = chequeHref.includes('?') ? '&' : '?';
-    window.open(`${chequeHref}${autoPrint ? `${q}autoPrint=true` : ''}`, '_blank');
+    openDocument(`${chequeHref}${autoPrint ? `${q}autoPrint=true` : ''}`);
   }
 
   return (

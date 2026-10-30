@@ -150,6 +150,18 @@ a PR that changes a page, component, web library, API module, route or core calc
 browser-visible effect states why in the PR body with a line `Browser-Test-Exempt: <reason>`; the reason is printed
 in the CI log. Run it locally with `node scripts/check-browser-test-coverage.mjs --base origin/main`.
 
+**Checking a screen by hand.** `web/apps/web/test/features/serve.mjs` starts the same isolated stack, provisions
+the sample catalogue, optionally runs modules first so the company holds real vouchers, and stays up until Ctrl+C
+(which wipes the test tenants). Open the printed login URL in any browser, for example the local Chrome. Give the
+run its own `PARITY_TEST_PROJECT`, because a database named after the checkout is torn down by any other run from
+the same checkout that ends, and use the API port the web was built against:
+
+```bash
+PARITY_TEST_PROJECT=datacare-serve PARITY_TEST_PORT=55471 PARITY_API_PORT=4420 PARITY_WEB_PORT=4421 \
+FEATURE_E2E_SERVE_PASSWORD='<choose one>' FEATURE_E2E_MODULES=sales-return \
+  node scripts/parity-test-env.mjs -- node apps/web/test/features/serve.mjs
+```
+
 ## 4b. UI surface crawl (every page, every button)
 
 `web/apps/web/test/features/run-surface.mjs` logs in and visits every route an operator can reach: every sidebar link

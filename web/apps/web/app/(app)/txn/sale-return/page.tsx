@@ -15,6 +15,7 @@ import {
   ExtendedHeaderCells,
   GridModeToggle,
 } from '../../../../components/ExtendedGrid';
+import { openDocument } from '../../../../lib/openDocument';
 
 interface Line {
   itCode: string;
@@ -405,9 +406,20 @@ function LegacySaleReturnForm() {
             </div>
             <div className="field">
               <label>Orig Bill No</label>
-              <div style={{ display: 'flex', gap: 4 }}>
-                <input value={billNo} onChange={(e) => setBillNo(e.target.value)} />
-                <button type="button" className="ghost" onClick={importBill}>
+              {/* The input shrinks so Import stays inside this field; at its default width it spilled
+                  under the next field (Tax %), which then took the click (G192). */}
+              <div style={{ display: 'flex', gap: 4, minWidth: 0 }}>
+                <input
+                  value={billNo}
+                  onChange={(e) => setBillNo(e.target.value)}
+                  style={{ flex: 1, minWidth: 0 }}
+                />
+                <button
+                  type="button"
+                  className="ghost"
+                  onClick={importBill}
+                  style={{ flex: 'none' }}
+                >
                   Import
                 </button>
               </div>
@@ -601,9 +613,8 @@ function LegacySaleReturnForm() {
               type="button"
               className="ghost"
               onClick={() =>
-                window.open(
+                openDocument(
                   `/api/sales/credit-note?coBook=${encodeURIComponent(coBook)}&vchNo=${encodeURIComponent(String(result.vchNo))}&format=html`,
-                  '_blank',
                 )
               }
             >

@@ -1883,6 +1883,15 @@ the `print.hsn-agrees-with-summary` case of `web/apps/web/test/features/modules/
 Done when: on every printed GST bill the HSN columns add up to the printed heads and the Tax column to the bill tax.
 
 
+### N173 — A print window opens the document after the access cookie has expired (G180)
+
+`web/apps/web/lib/openDocument.ts` opens the window inside the click and points it at the document only after an API
+call has refreshed the session; the screens' `window.open` calls use it, and `web/apps/web/components/GlobalFormKeys.tsx`
+sends new-tab `/api` links the same way. Proven by `web/apps/web/test/openDocument.test.ts` and the
+`print.after-access-expiry` case of `web/apps/web/test/features/modules/salesInvoice.mjs`.
+
+Done when: no print, PDF or export window shows `unauthenticated` while the session can still refresh.
+
 ### N186 — Every server started after a build serves that build (G197)
 
 `web/apps/web/package.json` runs `web/apps/web/scripts/clearRouteCache.mjs` after `next build`, which removes the route
@@ -2019,6 +2028,30 @@ settings, which the web reads as 2 decimals, while the desktop schema defaults t
 Done when: every daily voucher screen has a module like this, run on shared real data, and each fixed defect
 leaves the baseline in the change that fixes it.
 
+### N182 — Sales Return: an imported loose line saves, and Import can be clicked (G191, G192)
+
+G191: the return writer treated any non-blank tag as a tag to verify, so a loose sale line imported with
+`TAG_NO` `N` was refused on save. The desktop copies `N` into the return grid as it is (`TR_SALE_RTN.cs:3917`)
+and every tag step skips it (`:4773`, `:8585`, `:13387`, `:13395`). The writer now treats blank and `N` as no tag
+(`web/apps/api/src/modules/sales/salesReturn.ts`), so the line saves as loose stock with `TAG_NO` `N`, as the
+desktop stores it (`:14326-14334`); a real tag still has to be a line of the original sale.
+
+G192: the Orig Bill No input kept its default width, so the Import button spilled under the next field (Tax %),
+which took the click. The input now shrinks inside its field and the button keeps its size
+(`web/apps/web/app/(app)/txn/sale-return/page.tsx`).
+
+Evidence: `sales-return.create.from-bill-import` (Import clicked with the mouse, the return saves and stores tag
+`N`) and `sales-return.ui.import-button-clickable` pass, and both leave `web/apps/web/test/features/baseline.json`; the Sales
+Return module runs 16 passed, 5 failed (baselined), 3 blocked. A new database test in
+`web/apps/api/test/salesFamilyLifecycle.db.test.ts` saves a line marked `N` as loose stock and still refuses the
+unknown tag `NOSUCH`; it fails without the fix. The two return lifecycle test files pass (39 tests).
+
+Also checked by hand in the local Chrome on the seeded stack (`web/apps/web/test/features/serve.mjs`): at 1600 px
+Import is the top element at its own centre and ends 12 px before the Tax % box; importing sale 00002 with a mouse
+click filled `E2ELOC` and a `GLD22` line with tag `N`, Save answered 201, and the database holds `SL_DETL_RTN.TAG_NO`
+`N` with `VCH_SRNO` 0 and a `MAIN_STOCK` + 10 g row with tag `N`. The same screen still prices the line on fine weight
+(58,465.80), which is G190 (N181).
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2104,10 +2137,10 @@ leaves the baseline in the change that fixes it.
 | N162 | — | implemented-unverified, evidence in this change (G169, G176: one item leg per detail line keyed STR(SR_NO)+03 when a sale or purchase posts to two item accounts; labour-split leg off code 03; vectors 60 passed, HTTP write-set suites 13 passed, negative control reproduces the duplicate-key 400; feature E2E Sales 18/2/3 and Purchase 17/2/2 with both baseline entries removed; browser runs of both screens) |
 | N163 | — | implemented-unverified, evidence in this change (G171: Alt+S presses the marked Save button from any field; web unit 12 passed; sales and purchase Alt+S feature cases pass and left the baseline; Contra saved with Alt+S in a Chrome DevTools run) |
 | N164 | — | implemented-unverified, evidence in this change (UI surface crawl + committed map `docs/handbook/web/ui-surface-map.md` + PR browser-test gate; found G172) |
-| N165 | — | planned (G172: readable message / single retry when two sessions open the company at once) |
+| N165 | — | implemented-unverified, evidence in this change (G172: the selection retries a transaction conflict and the screen explains; unit 3, new Open Company module, fails against the old screen) |
 | N166 | — | planned (G173, G174: fault injection for T14 and a settings-variant company for T15 in the feature E2E harness) |
 | N167 | — | planned (G175: decide the negative-weight line rule from an original-Windows run, then implement and execute the case) |
-| N168 | — | planned (G177: editable amount settings — presets offered, any amount accepted and validated) |
+| N168 | — | implemented-unverified, evidence in this change (G177: four numeric setting combos accept typed amounts with presets; unit 3, DB 14, two feature cases; baseline entry removed) |
 | N169 | — | implemented-unverified, evidence in this change (G178: last-administrator refusal with row locks; DB test 3 passed and fails against the old code; Users & Rights feature module: 3 cases pass through the real screen) |
 | N170 | — | implemented-unverified, evidence in this change (Purchase Invoice module 16/3/2, Settings effects module 10/1/2 + 11 N/A, Sales CSV export case, one shared company per run, with-data crawl and regenerated map; found G176, G177, G178) |
 | N171 | — | planned (G183, D31: Standard edition gate — the 114 Standard menus only in navigation, rights, pages and API; deferred editions available only as labelled Beta when switched on) |
@@ -2115,16 +2148,19 @@ leaves the baseline in the change that fixes it.
 
 | N171 | — | implemented-unverified, evidence in this change (G183: generated edition table, 245 routes and 252 forms; API 403 edition-unavailable, /me edition, rights catalog filtered; Standard navigation, page guard and Beta group; core, API, web and generator tests; browser runs in Standard and with Beta) |
 | N172 | — | planned (G179: voucher number box — Enter opens the voucher, Up the last, Down the first, F1 the list, on every Standard voucher screen) |
+| N173 | — | implemented-unverified, evidence in this change (G180: print windows refresh the session first; unit 5, feature case with the access cookie dropped, fails against the old screen) |
+| N174 | — | planned (G181: printed HSN table rounds the GST halves consistently and totals the bill tax) |
+
 | N173 | — | planned (G180: the print window works after the access cookie expires) |
 | N174 | — | implemented-unverified, evidence in this change (G181: the HSN summary prints the header tax heads; unit 23 incl. 300 generated bills, feature case through Print, both fail against the old code) |
-| N175 | — | planned (G182: no bulk route prefetch; party balance fetched once per chosen party) |
+| N175 | — | implemented-unverified, evidence in this change (G182: no navigation prefetch; one balance request per typed party; feature case fails against the old code) |
 | N176 | — | planned (G184: provision BOOK_DETL slot 4 on purchase-family books so PURC_WITH_LBR = 'N' works on a fresh company) |
 | N177 | — | implemented-unverified, evidence in this change (G185: Enter resolves the typed code when the list is for older text; web unit 7 passed; two new feature cases pass and fail against the old component) |
 | N178 | — | planned (G186: negative-stock and period-lock refusals use the desktop wording) |
 | N179 | — | planned (G188: classify the 141 no-effect buttons as by-design with source, or open a gap) |
 | N180 | — | implemented-unverified, evidence in this change (Sales Return module 14/7/3 on shared real data; found G190–G196; corrects the N161/N170 rounding statement) |
 | N181 | — | planned (G190: the return line is priced on SL_AMT_TYPE and its amounts and total are whole rupees, as TR_SALE_RTN does) |
-| N182 | — | planned (G191, G192: an imported loose line (tag N) saves; Import is clickable) |
+| N182 | — | implemented-unverified, evidence in this change (an imported loose line with tag N saves as loose stock and an unknown tag is still refused; Import stays inside its field; both feature cases pass and leave the baseline) |
 | N183 | — | planned (G193, G194: a missing voucher answers a stable 4xx; returns and seven deletes record the logged-in user) |
 | N184 | — | planned (G195: sale line amounts round to whole rupees unless ALL_ROF_REMOVE = Y; merged feature expectations move to desktop values) |
 | N185 | — | planned (G196: decide under D05 and provision the desktop rounding defaults for new companies, or record the 2-decimal choice) |

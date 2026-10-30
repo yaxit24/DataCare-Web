@@ -20,6 +20,7 @@ import { salesInvoice } from './modules/salesInvoice.mjs';
 import { salesReturn } from './modules/salesReturn.mjs';
 import { settingsEffects } from './modules/settingsEffects.mjs';
 import { usersRights } from './modules/usersRights.mjs';
+import { companyOpen } from './modules/companyOpen.mjs';
 import { runSurface } from './surface/runner.mjs';
 
 /**
@@ -35,7 +36,14 @@ import { runSurface } from './surface/runner.mjs';
  * Gate: every applicable case must pass, except cases listed in baseline.json (known defects, each with a gap
  * id). A new failure fails the run; a baseline case that now passes also fails the run until it is removed.
  */
-const MODULES = [salesInvoice, purchaseInvoice, settingsEffects, usersRights, salesReturn];
+const MODULES = [
+  salesInvoice,
+  purchaseInvoice,
+  settingsEffects,
+  usersRights,
+  salesReturn,
+  companyOpen,
+];
 
 const artifacts = resolve(webRoot, 'test-results/feature-e2e');
 const baselinePath = resolve(webRoot, 'apps/web/test/features/baseline.json');

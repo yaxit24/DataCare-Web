@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { post, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { openDocument } from '../../../../lib/openDocument';
 
 /**
  * Saving Schemes (Phase 9 — desktop BtmSchm / Module_Schm). Three panels:
@@ -696,9 +697,8 @@ export default function SchemePage() {
               className="ghost"
               disabled={!inst.schmCode || !inst.membCode}
               onClick={() =>
-                window.open(
+                openDocument(
                   `/api/scheme/passbook?schmCode=${encodeURIComponent(inst.schmCode.trim())}&membCode=${encodeURIComponent(inst.membCode.trim())}&format=html`,
-                  '_blank',
                 )
               }
             >
