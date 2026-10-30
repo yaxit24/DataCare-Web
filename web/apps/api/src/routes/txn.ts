@@ -1022,6 +1022,15 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
           detail: (m?.[1] ?? msg).replace(/^ERROR:\s*/, '').slice(0, 200),
         });
       }
+      // N50: a malformed request body that reaches a writer throws a synchronous shape error
+      // (e.g. `lines.map is not a function` when `lines` is not an array, or reading a property of a
+      // non-object). Auth and routing have already succeeded by here, so a TypeError/RangeError thrown
+      // from the handler body is a client-input-shape fault, not a server fault — answer 400, not 500.
+      if (e instanceof TypeError || e instanceof RangeError) {
+        return reply
+          .code(400)
+          .send({ error: 'invalid-request', message: (e?.message ?? '').slice(0, 200) });
+      }
       throw e;
     }
   };
