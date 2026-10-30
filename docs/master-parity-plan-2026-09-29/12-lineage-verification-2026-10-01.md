@@ -1809,6 +1809,26 @@ saved a Contra voucher with Alt+S from its amount box. Each remaining screen's A
 Done when: Alt+S saves on every Standard voucher screen, proven by each screen's feature module.
 
 
+### N171 — Standard edition gate: only the Standard menus in navigation, rights, pages and API (G183, D31)
+
+The desktop shows a menu only in its edition and above (`unified/src/csharp/DataCareNext/MDI_FORM.cs:11249-11322`
+loads `MENU_DATA` by `SM_TYPE`). `web/scripts/generate-edition-table.mjs` builds `web/packages/core/src/editionTable.ts`:
+each web route takes the lowest edition of the visible desktop menus it serves (from `docs/handbook/menu-editions.json`
+and the menu catalog), and the routes and rights forms that serve no desktop menu row take the reviewed edition in
+`docs/handbook/web-route-editions.json`, each with its reason. Every navigation item, page and rights form must be
+classified, or the generator, its CI gate and a gated API all refuse.
+
+`APP_EDITION` (default `S`) sets the running edition. The API refuses a higher edition's routes with
+`403 edition-unavailable` before any rights or scope check (`web/apps/api/src/modules/rbac/editionGate.ts`), `/me`
+reports the edition, and the rights editor lists only its forms. The screens list only its menus, name the edition in
+the header and refuse a deferred page opened by URL (`web/apps/web/components/Shell.tsx`,
+`web/apps/web/lib/editionNav.ts`). `APP_EDITION_BETA=1` opens the higher editions for internal use in a separate Beta
+group, each page marked Beta. The deferred code stays compiled and tested: the harnesses build the application without
+an edition, so every suite still runs.
+
+Done when: a Standard deployment shows, allows and lists exactly the Standard menus, proven by the unit, API and
+navigation tests and a browser run in Standard and with Beta.
+
 ### N169 — Users & Rights cannot leave the company without an administrator (G178)
 
 `web/apps/api/src/modules/rbac/users.ts` refuses a category change that would demote the last administrator,
@@ -1994,7 +2014,7 @@ regenerated from that run.
 | N168 | — | planned (G177: editable amount settings — presets offered, any amount accepted and validated) |
 | N169 | — | implemented-unverified, evidence in this change (G178: last-administrator refusal with row locks; DB test 3 passed and fails against the old code; Users & Rights feature module: 3 cases pass through the real screen) |
 | N170 | — | implemented-unverified, evidence in this change (Purchase Invoice module 16/3/2, Settings effects module 10/1/2 + 11 N/A, Sales CSV export case, one shared company per run, with-data crawl and regenerated map; found G176, G177, G178) |
-| N171 | — | planned (G183, D31: Standard edition gate — the 114 Standard menus only in navigation, rights, pages and API; deferred editions available only as labelled Beta when switched on) |
+| N171 | — | implemented-unverified, evidence in this change (G183: generated edition table, 245 routes and 252 forms; API 403 edition-unavailable, /me edition, rights catalog filtered; Standard navigation, page guard and Beta group; core, API, web and generator tests; browser runs in Standard and with Beta) |
 | N172 | — | planned (G179: voucher number box — Enter opens the voucher, Up the last, Down the first, F1 the list, on every Standard voucher screen) |
 | N173 | — | planned (G180: the print window works after the access cookie expires) |
 | N174 | — | planned (G181: printed HSN table rounds the GST halves consistently and totals the bill tax) |

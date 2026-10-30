@@ -54,7 +54,8 @@ docker compose up -d
 ```
 
 - **Environment values you set in `.env`** (names only; never commit real values):
-  `POSTGRES_PASSWORD`, `APP_DB_PASSWORD`, `JWT_SECRET` (`openssl rand -hex 48`), `APP_TENANT_ID`. For demo data add
+  `POSTGRES_PASSWORD`, `APP_DB_PASSWORD`, `JWT_SECRET` (`openssl rand -hex 48`), `APP_TENANT_ID`. The API runs the Standard edition by default (`APP_EDITION`, slice N171): set `APP_EDITION_BETA=1` to
+  see the higher editions' screens as Beta. For demo data add
   `SEED_DEMO=1` and `DEMO_PASSWORD`. Provider and device variables are in [devices.md](devices.md).
 - **`API_ORIGIN` is baked into the web build.** The browser calls the API through a same-origin `/api` rewrite; if
   you change the API port, rebuild the web image with `--build-arg API_ORIGIN=<url>`.

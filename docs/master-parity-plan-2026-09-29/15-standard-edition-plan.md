@@ -115,8 +115,9 @@ Standard product the way the desktop does it, by edition (slice N171, gap G183):
 
 1. **Snapshot branch.** `archive/all-editions-2026-10-30` points at `main` before the gate (`54256eb`), so the full
    multi-edition state can always be recovered as it was.
-2. **Edition gate.** One generated table gives every desktop menu, web route, rights form and API route family its
-   edition, from `menu-editions.json`. The running edition comes from configuration (`APP_EDITION`, default `S`).
+2. **Edition gate.** One generated table (`web/packages/core/src/editionTable.ts`, built by
+   `web/scripts/generate-edition-table.mjs`) gives every web route and rights form its edition, from
+   `menu-editions.json`. The running edition comes from configuration (`APP_EDITION`, default `S`).
    - Navigation and Users & Rights list only the menus of the running edition, as `MDI_FORM` filters `MENU_DATA`.
    - A deferred page opened by URL says it is not part of the Standard edition instead of showing the screen.
    - Its API answers `403 {error:'edition-unavailable'}`, so a hidden screen cannot be used by calling its API.

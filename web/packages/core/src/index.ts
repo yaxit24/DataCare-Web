@@ -285,3 +285,15 @@ export type {
   TaxRoundingDecimals,
   StandardRoundingDecimals,
 } from './roundingPolicy.js';
+export {
+  EDITION_NAMES,
+  EDITION_ORDER,
+  formAvailability,
+  formTier,
+  isEditionCode,
+  routeAvailability,
+  routeTier,
+  tierIncluded,
+} from './editions.js';
+export type { EditionAvailability, EditionCode, EditionPolicy, EditionTier } from './editions.js';
+export { FORM_EDITION, ROUTE_EDITION } from './editionTable.js';

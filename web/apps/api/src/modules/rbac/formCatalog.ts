@@ -1,3 +1,4 @@
+import { formAvailability, type EditionPolicy } from '@datacare/core';
 /**
  * Canonical form catalog for server-side USER_SET enforcement.
  *
@@ -432,8 +433,15 @@ export const FORM_CATALOG: FormCatalogEntry[] = Object.entries(groups).flatMap(
 
 const byKey = new Map(FORM_CATALOG.map((entry) => [formKey(entry.mainMenu, entry.subMenu), entry]));
 
-export function getFormCatalog(): FormCatalogEntry[] {
-  return FORM_CATALOG.map(({ mainMenu, subMenu }) => ({ mainMenu, subMenu }));
+/**
+ * The forms the rights editor lists. With an edition gate (N171) only the running edition's forms are listed, plus
+ * the higher editions' forms when Beta is on, as MS_USER lists only the MENU_DATA rows of the running edition.
+ */
+export function getFormCatalog(edition?: EditionPolicy | null): FormCatalogEntry[] {
+  return FORM_CATALOG.filter(
+    ({ mainMenu, subMenu }) =>
+      !edition || formAvailability(formKey(mainMenu, subMenu), edition) !== 'unavailable',
+  ).map(({ mainMenu, subMenu }) => ({ mainMenu, subMenu }));
 }
 
 export function getFormEntry(key: string): FormCatalogEntry | undefined {

@@ -28,6 +28,8 @@ cp .env.example .env
 #   APP_DB_PASSWORD     – app_user (runtime) password
 #   JWT_SECRET          – long random string:  openssl rand -hex 48
 #   APP_TENANT_ID       – the migrated customer's tenant_id (1–24 safe characters)
+#   APP_EDITION         – optional desktop edition, default S (Standard); APP_EDITION_BETA=1 opens the
+#                         higher editions' screens as labelled Beta for internal use (N171)
 ```
 
 `docker-compose.yml` reads `.env` automatically. The DB/JWT vars are marked required and

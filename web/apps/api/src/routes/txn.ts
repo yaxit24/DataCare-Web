@@ -4774,7 +4774,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // Per-form RBAC (USER_SET): read/replace a user's per-menu FRM_VIEW/EDIT/DELETE/PRINT rows.
   app.get('/admin/form-catalog', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return; // admin-gate
-    return run(reply, 200, async () => getFormCatalog());
+    return run(reply, 200, async () => getFormCatalog((app as any).editionPolicy));
   });
   app.post('/backup/restore', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return; // admin-gate — HIGH-RISK: replaces this tenant's company data
