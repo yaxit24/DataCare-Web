@@ -5784,6 +5784,27 @@
         "web/apps/api/test/salesFamilyLifecycle.db.test.ts"
       ],
       "statusNote": "IMPLEMENTED. salesOrder writer debited the advance to input.cashAc ?? 'CASH' (N59 literal - 'CASH' is not a real AC_MAST code). Desktop debits the order book BOOK_DETL slot-1 (salesOrder.ts:1197 comment). Fix: moved cashAc resolution inside run(tx) after resolveOrderBookTx; when adv>0, cashAc = resolveBookSlotAccountTx(tx, {scope,coBook:book.coBook}, 'cash-settlement', 1, input.cashAc) (explicit wins, else slot-1, fail-closed); when adv==0, input.cashAc ?? ''. Proven by a new salesOrderRound4 case (advance+no cashAc refused with nothing left behind; explicit cashAc posts the Dr leg) + salesFamilyLifecycle seed gained SOR slot-1 (its orderInput takes a 100 advance with no cashAc) still green. All gates + clean api build + web 646+9 + sales-order DB (round4 11/11, family 32, cancel-accounts 4/4, lifecycle) + depth:parity green. salesOrder.ts size ceiling 2361->2374."
+    },
+    {
+      "id": "N157",
+      "status": "implemented-unverified",
+      "action": "Resolve the core sale posting's cash (BOOK_DETL slot 2), income (slot 1) and electronic-tender bank (persisted BANK_AC, fail-closed) accounts from configuration instead of 'CASH'/'BANK'/'SALES' literals; leave the six non-configurable fixed defaults (oldgold/hmcharge/tcs/gst) documented and tracked.",
+      "parentLabels": "P9; N59",
+      "startAfter": [
+        "N156"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "postingAccountLiterals.test.ts REMAINING sales.ts 11->6, TOTAL 41->36, guard green. Full sales DB suite 69/9 files green (lifecycle, family, hallmark round-trip, amount-basis, quotation, bullion, old-item, fine-sale). gates + clean api build + web 646+9 + depth.",
+      "gapIds": "G165",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/api/src/modules/sales/sales.ts",
+        "web/apps/api/test/postingAccountLiterals.test.ts"
+      ],
+      "statusNote": "IMPLEMENTED (partial-by-design). sales.ts had 11 literal account fallbacks. Cleaned 5 that have a real configured/persisted source: cash leg takes the already-resolved slot-2 account; income resolves from BOOK_DETL slot 1 (explicit wins, fail-closed for a posting sale; placeholder for a no-ledger quotation); electronic-tender bank leg + cheque Rojmel row use persisted BANK_AC fail-closed; single-income branch throws an invariant not 'SALES'. Left 6 as verified legitimate fixed defaults (no BOOK_DETL slot, no persisted header column - SL_DATA only has BANK_AC/CARD_AC/SCHM_AC - so reopen can't recover them; tax account depends on a documented TAX_MAST SR_NO provisioning gap): 'OLDGOLD','HMCHRG'x2,'TCS'x2,'GST'. Fail-closing those was tried and empirically broke legitimate reopen (400s on hallmark round-trip/amount-basis/quotation), so reverted. REMAINING sales.ts 11->6, TOTAL 41->36. Full sales DB suite 69/9 green + all gates + clean api build + web 646+9 + depth. sales.ts ceiling 2809->2845."
     }
   ],
   "amendments": [
