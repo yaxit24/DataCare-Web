@@ -6229,7 +6229,7 @@
     },
     {
       "id": "N176",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Provision BOOK_DETL slot 4 (labour and other charges, Ac_Ledr.cs:419-421) on the purchase-family books with the desktop template's account, so a purchase with labour saves on a web-provisioned company when PURC_WITH_LBR = 'N'.",
       "parentLabels": "P9; J02",
       "startAfter": [
@@ -6240,7 +6240,15 @@
       "entryDefinition": "15-standard-edition-plan.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/apps/api/test/provisioning.db.test.ts",
+        "web/apps/api/test/purchaseTwoGroupLegs.routes.db.test.ts",
+        "web/apps/web/test/features/modules/purchaseInvoice.mjs"
+      ],
+      "statusNote": "IMPLEMENTED. Provisioning gives the PURCHASE (PR) and TAG PURCHASE (TPR) books BOOK_DETL slot 4 = LBREXP (labour and other charges, Ac_Ledr.cs:419-421) beside 1 purchase, 2 cash and 3 round-off. Verified: provisioning.db.test.ts expects four legs on PR and TPR and 132 BOOK_DETL rows; the PURC_WITH_LBR = N route test now uses the provisioned slot instead of a fixture insert; purchase, purchase-return, consignment, card-receipt and finance-book DB tests pass; feature case purchase-invoice.settings.labour-to-slot-4 switches the setting on the Settings screen, saves a purchase with 3,000 making and finds the LBREXP leg, and fails against main's provisioning with 'book PR account row 4 is missing'."
     },
     {
       "id": "N177",

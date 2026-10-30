@@ -226,23 +226,19 @@ const SILVER = { itCode: 'SLV01', pcs: 3, grossWt: 100.4, netWt: 100, touch: 92.
   });
 
   it('PURC_WITH_LBR = N: labour posts to the slot-4 account on its own key, beside the item leg', async () => {
-    // The desktop splits labour and other charges to BOOK_DETL slot 4 (Ac_Ledr.cs:419-421). The provisioned purchase
-    // book has slots 1-3 only, so the fixture adds slot 4 (LBREXP) and switches the setting.
+    // The desktop splits labour and other charges to BOOK_DETL slot 4 (Ac_Ledr.cs:419-421). Provisioning gives the
+    // purchase book that slot (LBREXP, G184), so only the setting is switched here.
     const updated = await exec(
       `UPDATE "CO_SET" SET "PURC_WITH_LBR"='N' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
       tenantId,
     );
     expect(updated).toBe(1);
-    const added = await exec(
-      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","BOOK_NAME","BOOK_SNAME","MAIN_BOOK",
-         "BOOK_INOUT","AC_CODE","AC_NAME","DATA_TYPE")
-       SELECT tenant_id,"CO_CODE","LC_CODE","CO_BOOK",4,"BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT",
-              'LBREXP','LABOUR EXPENSE A/C',"DATA_TYPE"
-         FROM "BOOK_DETL" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "SR_NO"=1`,
+    const [slot4] = (await owner.$queryRawUnsafe(
+      `SELECT "AC_CODE" ac FROM "BOOK_DETL" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "SR_NO"=4`,
       tenantId,
       BOOK,
-    );
-    expect(added).toBe(1);
+    )) as Array<{ ac: string }>;
+    expect(slot4?.ac).toBe('LBREXP');
     try {
       // Gold only: primary 113,836 − 3,000 = 110,836 to PURCHASE; 3,000 to LBREXP; tax on 113,836 = 3,415.08.
       const vchNo = await create(purchase([GOLD]));
