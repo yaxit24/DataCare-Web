@@ -79,7 +79,7 @@ const ACCOUNT_LITERALS = [
  * so those two cannot post at all until that containment is lifted.
  */
 const REMAINING: Readonly<Record<string, number>> = {
-  'modules/sales/sales.ts': 11,
+  'modules/sales/sales.ts': 6,
   'modules/purchase/purchase.ts': 5,
   'modules/dhrn/dhrn.ts': 1,
   'modules/dhrn/dhrnInterest.ts': 1,
@@ -95,7 +95,7 @@ const REMAINING: Readonly<Record<string, number>> = {
 };
 
 /** The total at the time P0-04's first slice landed. It may fall; it may not rise. */
-const REMAINING_TOTAL = 41;
+const REMAINING_TOTAL = 36;
 
 /**
  * Files this slice cleaned. Listing them explicitly means a regression names itself instead of hiding inside

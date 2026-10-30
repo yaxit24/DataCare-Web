@@ -516,11 +516,14 @@ export function buildSaleLedger(p: {
     });
   };
   const pay = p.payments ?? {};
-  addReceipt(pay.cashAc ?? 'CASH', Number(pay.cashAmt ?? 0), {
+  // cash = BOOK_DETL slot 2 (resolved by the writer); bank is fail-closed upstream when it posts.
+  // addReceipt ignores a zero amount, so a blank account is never used. Old gold has no configured
+  // source, so it keeps its historical default.
+  addReceipt(pay.cashAc ?? '', Number(pay.cashAmt ?? 0), {
     party: SALE_LEG.partyCash,
     account: SALE_LEG.cash,
   });
-  addReceipt(pay.bankAc ?? 'BANK', Number(pay.bankAmt ?? 0), {
+  addReceipt(pay.bankAc ?? '', Number(pay.bankAmt ?? 0), {
     party: SALE_LEG.partyBank,
     account: SALE_LEG.bank,
   });
@@ -567,7 +570,13 @@ export function buildIncomeLegs(
   const byAc = new Map<string, number>();
   for (const it of items) byAc.set(it.ac, R2((byAc.get(it.ac) ?? 0) + it.net));
   const acs = [...byAc.keys()];
-  if (acs.length <= 1) return [{ ac: acs[0] ?? 'SALES', amount: R2(taxable) }];
+  // Every item carries a resolved income account (writer resolves salesAc fail-closed, per-group
+  // SALE_AC falls back to it), so acs is never empty here; guard the invariant rather than a literal.
+  if (acs.length <= 1) {
+    const only = acs[0];
+    if (!only) throw new SaleValidationError('sale income account could not be resolved');
+    return [{ ac: only, amount: R2(taxable) }];
+  }
   const legs: { ac: string; amount: number }[] = [];
   let allocated = 0;
   for (let i = 0; i < acs.length; i++) {
@@ -702,7 +711,13 @@ async function writeSaleTx(
   assertSaleTaxRate(input.taxRatePct);
   completeSaleScope(input.scope);
 
-  const salesAc = input.salesAc ?? 'SALES';
+  // N59/G165: the income account is the book's slot-1 sale-income account (resolved below, once the
+  // book policy is known). An explicit request account always wins; it fails closed when needed.
+  let salesAc = input.salesAc ?? '';
+  // Tax account authority is the tax policy (TAX_MAST.TAX_AC). It stays a literal fallback for now
+  // because a web-only provisioning gap (TAX_MAST rows at SR_NO 1, code lookup pins SR_NO 0) can leave
+  // the policy account null while tax is still charged by rate — removing it needs that gap closed
+  // first, which is out of scope here. Tracked in the posting-account-literals REMAINING ledger.
   const fallbackTaxAc = input.taxAc ?? 'GST';
   const requestedRoundAc = input.roundAc;
 
@@ -727,6 +742,17 @@ async function writeSaleTx(
     isSalesQuotation ? 'SALES QUOTATION' : 'SALES',
   );
   const roundingPolicy = await resolveRoundingPolicyTx(tx, input.scope);
+
+  // Resolve the sale-income account now the book is known: explicit request wins, else BOOK_DETL
+  // slot 1. A posting sale fails closed when the slot is missing; a quotation never posts a ledger,
+  // so it tolerates an unconfigured book and keeps a non-empty placeholder for its income preview.
+  if (!salesAc) {
+    if (isSalesQuotation) {
+      salesAc = await resolveBookAccountTx(tx, input.scope, bookPolicy, 1).catch(() => 'SALES');
+    } else {
+      salesAc = await resolveBookAccountTx(tx, input.scope, bookPolicy, 1);
+    }
+  }
 
   // TR_PURC.cs:12868 — counter code is mandatory only when CO_SET_NEW.COUNTER_STK='Y'; the flag is read
   // server-side per transaction, never from the request.
@@ -1464,6 +1490,14 @@ async function writeSaleTx(
   };
   Object.assign(header, { ACK_DATE: null });
 
+  // N59/G165: the electronic-tender (card/upi/cheque) leg posts to the request-named bank account,
+  // never a literal 'BANK'. BANK_AC is persisted and round-trips on reopen, so fail-closed is safe:
+  // if any electronic tender posts without a bank account, refuse rather than invent one.
+  const bankTenderAmt = round2s(num(input.cardAmt) + num(input.upiAmt) + num(input.chequeAmt));
+  const bankAc = text(input.bankAc);
+  if (!isSalesQuotation && bankTenderAmt > 0 && !bankAc)
+    throw new SaleValidationError('bank account is required for card/upi/cheque tender');
+
   const ledger = isSalesQuotation
     ? []
     : buildSaleLedger({
@@ -1480,8 +1514,10 @@ async function writeSaleTx(
         payments: {
           cashAc,
           cashAmt: input.cashAmt,
-          bankAc: input.bankAc,
-          bankAmt: round2s(num(input.cardAmt) + num(input.upiAmt) + num(input.chequeAmt)),
+          bankAc,
+          bankAmt: bankTenderAmt,
+          // Old gold has no persisted account column and no sale-book slot, so it keeps the request
+          // account or the historical 'OLDGOLD' default (unchanged behaviour; cannot round-trip a slot).
           oldGoldAc: input.oldGoldAc,
           oldGoldAmt: round2s(oldGoldAmount + oldSilverAmount),
         },
@@ -1906,7 +1942,7 @@ async function writeSaleTx(
       // advance slot. Old metal comes from SL_PR_DETL and keeps its weight even though IT_TYPE is 'A',
       // so the day book shows metal taken in exchange without counting it as a metal sale.
       settlements: [
-        { kind: 'cheque' as const, account: text(input.bankAc) || 'BANK', amount: chequeAmt },
+        { kind: 'cheque' as const, account: bankAc, amount: chequeAmt },
         { kind: 'kasar' as const, account: kasarAc, amount: kasar },
         { kind: 'advance' as const, account: advanceAc, amount: orderAdjust },
         // Slot 5 is the book's round-off/discount account. SOURCE-ONLY: this company's data has ROF_AMT

@@ -175,6 +175,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G162 | Med | Multi-Party (batch) Receipt reopen/edit/delete | `unified/src/csharp/DataCareNext/TR_CASH.cs` | `web/apps/web/app/(app)/txn/batch-receipt/page.tsx`, `web/apps/api/src/modules/finance/batchReceipt.ts` | The desktop Multi-Party Receipt (TR_CASH, a grid of party rows) is fully reopen/edit/delete-capable — `BtnF` loads by voucher no., an edit deletes `CASH_DATA`+`AC_DATA` by VCH_NO and rebuilds them, writing a `DELETE_DATA` audit (`TR_CASH.cs:2988-3081,3217`). The web batch-receipt page was create-only: the backend had `postBatchReceipt`/`deleteBatchReceipt` but no reader or editor, and the single-row `getReceipt` refuses a multi-row voucher. Add `getBatchReceipt` (reads every CASH_DATA row as `lines[]`, deriving pay mode from `REC_AC_CODE` vs the book slot-1 cash account) + `editBatchReceipt` (reverse + re-post under the same number via `forceVchNo`) + `GET/PUT/DELETE /receipts/batch/:vchNo` + the UI reopen/edit/delete + VoucherList on CASH_DATA. | N154 |
 | G163 | Med | Order-cancel refund/kasar accounts are literals | `unified/src/csharp/DataCareNext/TR_SL_ORD_ADJ.cs` | `web/apps/api/src/modules/sales/salesOrder.ts` `cancelSalesOrderAdjust` | `cancelSalesOrderAdjust` fell back to the string literals `'CASH'` (refund settlement) and `'KASAR'` (write-off) when the request named neither — codes that do not exist in a real company's AC_MAST, so a cancel without an explicit account posted the refund/kasar legs to a non-existent ledger (the N59 anti-pattern). The desktop posts the adjustment via `Ac_Ledr.Order_Adj_Ledr` (`TR_SL_ORD_ADJ.cs:3665`), resolving both accounts from the cancel book's BOOK_DETL slots (1=settlement, 2=kasar). Resolve the same configured accounts on the transaction (explicit wins, else slot 1/2) and FAIL-CLOSED when unconfigured. | N155 |
 | G164 | Med | Sales-order advance cash account is a literal | `unified/src/csharp/DataCareNext/TR_SALE_ORD.cs` | `web/apps/api/src/modules/sales/salesOrder.ts` | The order-advance debit leg used `input.cashAc ?? 'CASH'` — when an advance was taken without a named account it posted the Dr leg to the non-existent `'CASH'` ledger (N59 anti-pattern). The desktop debits the order book's BOOK_DETL slot-1 account (noted at `salesOrder.ts:1197`). Resolve slot 1 on the posting transaction (explicit wins) and FAIL-CLOSED when unconfigured. | N156 |
+| G165 | Med | Core sale posting used literal account fallbacks | `unified/src/csharp/DataCareNext/TR_SALE.cs`; `unified/src/csharp/DataCareNext/Ac_Tax.cs` | `web/apps/api/src/modules/sales/sales.ts` | The sale writer carried 11 literal account fallbacks. Five were genuine N59 defects with a configured/persisted source: the cash leg and the electronic-tender (card/upi/cheque) bank leg (incl. the cheque Rojmel row) posted to `'CASH'`/`'BANK'`, and the sale-income account defaulted to `'SALES'`. These now resolve from BOOK_DETL slot 1 (income) / slot 2 (cash) or the persisted `BANK_AC`, FAIL-CLOSED when an electronic tender posts with no bank account. The remaining six (`'OLDGOLD'`, `'HMCHRG'`x2, `'TCS'`x2, `'GST'`) are legitimate fixed defaults with NO BOOK_DETL slot, NO persisted header column, and no tax-code resolution (a documented web provisioning gap), so fail-closing them would break legitimate reopen — left intact and tracked in the posting-literals REMAINING ledger. | N157 |
 
 ## 4. Decisions D23–D28
 
@@ -1588,6 +1589,42 @@ Done when: an order advance without a named account posts to the configured slot
 book without it is refused.
 
 
+### N157 — Core sale posting resolves its tender/income accounts, no longer the 'CASH'/'BANK'/'SALES' literals (G165, Stage D)
+
+The sale writer (`sales.ts`) carried eleven literal account fallbacks. Not all were defects, so each
+was checked against the desktop authority before changing — and five were cleaned, six deliberately
+left.
+
+Cleaned (genuine N59, a real configured/persisted source exists): the cash receipt leg now takes the
+already-resolved BOOK_DETL slot-2 account the writer computes (the `?? 'CASH'` was inert); the
+sale-income account resolves from BOOK_DETL slot 1 (`resolveBookAccountTx(..,1)`, explicit request
+wins) for a posting sale and keeps a harmless preview placeholder for a quotation (which posts no
+ledger); the electronic-tender (card/upi/cheque) bank leg and the cheque Rojmel settlement row now use
+the persisted `BANK_AC` (returned by the reader and round-tripped via `VIEW_HEADER_PASSTHROUGH`),
+FAIL-CLOSED when any electronic tender posts without a bank account; and the single-account income
+branch throws an invariant instead of defaulting to `'SALES'` (every item now carries a resolved
+account, so it is unreachable).
+
+Left intact (verified NOT the N59 class): old gold (`'OLDGOLD'`), hallmark charge (`'HMCHRG'`), TCS
+(`'TCS'`) and the GST tax account (`'GST'`). None has a BOOK_DETL slot; none is persisted in a header
+column (SL_DATA has only `BANK_AC`/`CARD_AC`/`SCHM_AC`), so a reopen cannot recover a resolved value;
+and the tax account depends on an already-documented provisioning gap (TAX_MAST rows at SR_NO 1 while
+the code lookup pins SR_NO 0) under which the web charges tax by rate with no resolvable TAX_AC.
+Fail-closing any of these breaks a legitimate create-then-reopen-and-save, which was confirmed
+empirically (the fail-closed experiment reproduced 400s on the hallmark round-trip and the
+amount-basis/quotation tests). They remain in the posting-literals REMAINING ledger as honest debt.
+
+Proof: `postingAccountLiterals.test.ts` REMAINING for `sales.ts` drops 11 to 6, REMAINING_TOTAL
+41 to 36, guard green. The full sales DB suite is unchanged and green (sales lifecycle, family 32,
+hallmark round-trip, amount-basis, quotation, bullion, old-item, fine-sale edit = 69 across 9 files),
+proving the resolved cash/bank/income accounts reproduce the same ledger and the six kept defaults
+still post as before. Verified: full gates + clean `@datacare/api` build + web 646+9 + `depth:parity`.
+`sales.ts` size ceiling 2809 to 2845.
+
+Done when: the sale cash/bank/income accounts come from configuration (fail-closed for bank), and the
+non-configurable defaults are documented rather than silently literal.
+
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -1665,6 +1702,7 @@ book without it is refused.
 | N154 | — | implemented-unverified, evidence in this change (G162: multi-party batch-receipt reopen/edit/delete — getBatchReceipt reader with derived pay mode + editBatchReceipt reverse+re-post + GET/PUT/DELETE routes + UI + VoucherList; proven by batchReceiptLifecycle.db.test.ts 2/2 (balanced AC_DATA + DELETE_DATA audit + unchanged round-trip) and batchReceiptKasar 4/4; routePolicy 56/56 universe 654→657; forceVchNo triaged internal (unreachable 102→103, operator 0); gates + clean API build + web 646+9 + depth:parity green; txn.ts ceiling 8443→8482) |
 | N155 | — | implemented-unverified, evidence in this change (G163: order-cancel refund/kasar accounts resolved from BOOK_DETL slots instead of the 'CASH'/'KASAR' literals — explicit wins, else slot 1/2, fail-closed; proven by salesOrderCancelAccounts.db.test.ts 4/4 (slot resolution, kasar slot-2, explicit wins, fail-closed) with salesFamilyLifecycle 31/31 unaffected; gates + clean API build + web 646+9 + sales-order DB 58/58 + depth:parity green; salesOrder.ts ceiling 2350→2361) |
 | N156 | — | implemented-unverified, evidence in this change (G164: sales-order advance debits the order book BOOK_DETL slot-1 account instead of the 'CASH' literal — explicit wins, fail-closed; proven by salesOrderRound4 fail-closed+explicit case (11/11) and salesFamilyLifecycle SOR slot-1 (32); gates + clean API build + web 646+9 + sales-order DB green; salesOrder.ts ceiling 2361→2374) |
+| N157 | — | implemented-unverified, evidence in this change (G165: core sale posting resolves cash=BOOK_DETL slot-2, income=slot-1, electronic-tender bank=persisted BANK_AC fail-closed, and a single-income invariant instead of literals; the 6 non-configurable defaults oldgold/hmcharge×2/tcs×2/gst are verified legitimate and left, tracked in REMAINING 11→6, TOTAL 41→36; full sales DB suite 69/9 + gates + clean API build + web 646+9 + depth green; sales.ts ceiling 2809→2845) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 
 ## 7. Documentation hub
