@@ -6165,7 +6165,7 @@
     },
     {
       "id": "N177",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Lookups resolve the typed text on Enter: when the open list was fetched for different text, Enter looks the typed code up exactly (as the desktop tAcCode_KeyDown does, TR_PURC.cs:14619-14628) instead of picking the highlighted row; applies to every LookupPicker (party, item, tag, employee).",
       "parentLabels": "P9; J04",
       "startAfter": [
@@ -6173,10 +6173,19 @@
       ],
       "requiredProof": "A web unit test of the race (Enter before the search returns picks the typed code); feature E2E cases on the sale and purchase party boxes that type a code and press Enter at once; a browser run.",
       "gapIds": "G185",
-      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "entryDefinition": "12-lineage-verification-2026-10-01.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/web/lib/lookupEnter.ts",
+        "web/apps/web/components/LookupPicker.tsx",
+        "web/apps/web/test/lookupEnter.test.ts",
+        "web/apps/web/test/features/modules/salesInvoice.mjs",
+        "web/apps/web/test/features/modules/purchaseInvoice.mjs"
+      ],
+      "statusNote": "IMPLEMENTED. LookupPicker remembers the text its list was fetched for and drops an answer for older text. Enter while the shown list belongs to other text (or before it arrived) looks the typed code up exactly, as the desktop tAcCode_KeyDown does (TR_PURC.cs:14619-14628): an exact code is picked, otherwise the list for the typed text opens. A fresh list keeps arrow + Enter picking. Applies to every LookupPicker (party, item, tag, employee). Verified: web unit lookupEnter 7 passed; new feature cases sales-invoice.lookup.code-enter-at-once and purchase-invoice.lookup.code-enter-at-once pass through the real screen (Sales 20 passed, Purchase 19 passed, only G170 failing, FEATURE_E2E_PASSED); negative control with main's LookupPicker fails both cases with 'Enter at once picked BANK, not the typed code', the exact 30 October defect."
     },
     {
       "id": "N178",

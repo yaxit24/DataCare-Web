@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { get } from '../lib/api';
 import { focusNext } from './focus';
+import { exactCodeRow, isCurrentAnswer, lookupEnterAction } from '../lib/lookupEnter';
 
 export interface LookupRow {
   code: string;
@@ -53,6 +54,10 @@ export function LookupPicker({
   const tmr = useRef<any>(null);
   /** The code last chosen from the list or resolved from typing, so a resolve never fires twice for it. */
   const picked = useRef<string | null>(null);
+  /** G185: the text the shown rows were fetched for, and the latest typed text (an answer for older text is dropped). */
+  const rowsFor = useRef<string | null>(null);
+  const latest = useRef<string>(value ?? '');
+  latest.current = value ?? '';
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
@@ -74,6 +79,9 @@ export function LookupPicker({
         // G94: the search still runs, but a reply that arrives after the operator has left the field opens
         // nothing — otherwise its list floats under another field, covering the controls below it.
         if (document.activeElement !== inputRef.current) return;
+        // G185: a reply for older text (the operator kept typing) must not replace the current list.
+        if (!isCurrentAnswer(q, latest.current)) return;
+        rowsFor.current = q;
         setRows(r || []);
         setHi(0);
         setOpen(true);
@@ -118,6 +126,33 @@ export function LookupPicker({
     }
   }
 
+  /**
+   * G185: Enter while the list is for other text, or before it arrived, looks the typed code up exactly, as the desktop
+   * does (TR_PURC.cs:14619-14628): an exact code is picked, otherwise the list for the typed text opens.
+   */
+  async function resolveEnter(): Promise<void> {
+    const typed = String(value ?? '');
+    clearTimeout(tmr.current);
+    try {
+      const base = searchPath || `/lookup/${entity}`;
+      const separator = base.includes('?') ? '&' : '?';
+      const r = ((await get(`${base}${separator}q=${encodeURIComponent(typed.trim())}&limit=20`)) ||
+        []) as LookupRow[];
+      if (!isCurrentAnswer(typed, latest.current)) return;
+      const exact = exactCodeRow(r, typed);
+      if (exact) {
+        pick(exact);
+        return;
+      }
+      rowsFor.current = typed;
+      setRows(r);
+      setHi(0);
+      setOpen(true);
+    } catch {
+      // An unreachable lookup leaves the typed value as it is; the save validates it.
+    }
+  }
+
   return (
     <div
       ref={boxRef}
@@ -154,6 +189,19 @@ export function LookupPicker({
             search(value ?? '');
             return;
           } // desktop F1-LOV: open lookup
+          if (e.key === 'Enter') {
+            const action = lookupEnterAction({
+              open,
+              rowCount: rows.length,
+              rowsFor: rowsFor.current,
+              value: String(value ?? ''),
+            });
+            if (action === 'resolve-typed' && (open || resolveTypedCode)) {
+              e.preventDefault();
+              void resolveEnter();
+              return;
+            }
+          }
           if (!open) {
             if (e.key === 'Enter') void resolveTyped();
             return;
