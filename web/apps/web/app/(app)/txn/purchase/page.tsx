@@ -22,6 +22,7 @@ import SubDetailGrid, { stoneRowFromApi, useSubDetail } from '../../../../compon
 import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
 import { fineFor, labourCharge, billTotals, lineNet as lineNetAmount } from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
+import { openDocument } from '../../../../lib/openDocument';
 
 interface Line {
   itCode: string;
@@ -968,9 +969,8 @@ export default function PurchaseEntryPage() {
               type="button"
               className="ghost"
               onClick={() =>
-                window.open(
+                openDocument(
                   `/api/purchases/invoice?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(String(result.vchNo))}&format=html`,
-                  '_blank',
                 )
               }
             >

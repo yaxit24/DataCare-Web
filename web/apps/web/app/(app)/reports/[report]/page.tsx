@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation';
 import { get, post, downloadPdf, downloadCsv, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { reportApiSlug } from '../../../../lib/reportSlug';
+import { openDocument } from '../../../../lib/openDocument';
 
 const TITLES: Record<string, string> = {
   'last-visit': 'Last Visit',
@@ -1530,9 +1531,8 @@ export default function ReportPage() {
           <button
             className="ghost"
             onClick={() =>
-              window.open(
+              openDocument(
                 `/api/reports/${({ gstr1: 'gstr1-doc', gstr2: 'gstr2-doc', gstr3b: 'gstr3b-doc', 'trial-balance': 'trial-balance-doc', 'trial-balance-full': 'trial-balance-doc', 'balance-sheet': 'balance-sheet-doc' } as Record<string, string>)[slug]}?coYear=${encodeURIComponent(coYear)}&format=html`,
-                '_blank',
               )
             }
           >
@@ -1683,7 +1683,7 @@ export default function ReportPage() {
                   if (refAc) q.set('refAc', refAc);
                 }
                 if (slug === 'order-lot-zoom' && lotNo) q.set('lotNo', lotNo);
-                window.open(`/api/reports/${slug}/export.xlsx?${q.toString()}`, '_blank');
+                openDocument(`/api/reports/${slug}/export.xlsx?${q.toString()}`);
               }}
             >
               Excel

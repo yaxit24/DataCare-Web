@@ -11,6 +11,7 @@ import { PartyBalance } from '../../../../components/PartyBalance';
 import { RepairImagePanel } from '../../../../components/RepairImagePanel';
 import { VoucherChrome } from '../../../../components/VoucherChrome';
 import { todayLocal } from '../../../../lib/localDate';
+import { openDocument } from '../../../../lib/openDocument';
 
 interface IssueSourceLine {
   code: string;
@@ -343,9 +344,8 @@ export default function RepairKarigarIssuePage() {
           onPrint={
             loadedVoucherNo
               ? () =>
-                  window.open(
+                  openDocument(
                     `/api/repair-karigar-issues/${encodeURIComponent(loadedVoucherNo)}/print?coBook=${encodeURIComponent(coBook)}&format=html`,
-                    '_blank',
                   )
               : undefined
           }

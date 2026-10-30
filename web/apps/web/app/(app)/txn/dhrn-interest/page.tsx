@@ -5,6 +5,7 @@ import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { VoucherList } from '../../../../components/VoucherList';
+import { openDocument } from '../../../../lib/openDocument';
 
 // Dhrn (pledge loan) interest receipt (desktop TR_DHRN_INTREC). Booked against an issue voucher
 // (ISU_NO) on the INTREST RECIVED book: collects assessed interest (and optionally received/kasar).
@@ -222,9 +223,8 @@ export default function DhrnInterestPage() {
               className="ghost"
               disabled={!borrowerAc}
               onClick={() =>
-                window.open(
+                openDocument(
                   `/api/dhrn/khata?acCode=${encodeURIComponent(borrowerAc)}&coYear=${encodeURIComponent(coYear)}&format=html`,
-                  '_blank',
                 )
               }
             >

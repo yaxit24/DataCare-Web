@@ -10,6 +10,7 @@ import { LookupPicker, type LookupRow } from '../../../../components/LookupPicke
 import { PartyBalance } from '../../../../components/PartyBalance';
 import { VoucherChrome } from '../../../../components/VoucherChrome';
 import { todayLocal } from '../../../../lib/localDate';
+import { openDocument } from '../../../../lib/openDocument';
 
 interface ReceiptLine {
   code: string;
@@ -432,9 +433,8 @@ export default function RepairKarigarReceiptPage() {
           onPrint={
             loadedVoucherNo
               ? () =>
-                  window.open(
+                  openDocument(
                     `/api/repair-karigar-receipts/${encodeURIComponent(loadedVoucherNo)}/print?coBook=${encodeURIComponent(coBook)}&format=html`,
-                    '_blank',
                   )
               : undefined
           }

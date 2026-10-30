@@ -6142,7 +6142,7 @@
     },
     {
       "id": "N173",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Print and document windows keep working after the 15-minute access cookie expires: the window refreshes the session before it loads the document instead of showing {\"error\":\"unauthenticated\"}.",
       "parentLabels": "P9; J22",
       "startAfter": [
@@ -6153,7 +6153,15 @@
       "entryDefinition": "15-standard-edition-plan.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-30",
+      "evidence": [
+        "web/apps/web/lib/openDocument.ts",
+        "web/apps/web/test/openDocument.test.ts",
+        "web/apps/web/components/GlobalFormKeys.tsx",
+        "web/apps/web/test/features/modules/salesInvoice.mjs"
+      ],
+      "statusNote": "IMPLEMENTED. Every print, PDF and export window now opens through openDocument: the window opens inside the click (popup blockers allow it) and is pointed at the document only after GET /me, whose 401 path refreshes the access cookie (lib/api.ts). 31 window.open(url,'_blank') calls on 26 screens use it; a delegated click handler in GlobalFormKeys sends plain left clicks on new-tab /api links (recent-list Print, report CSV/print, order prints) the same way. The blob download in EBillEntry is unchanged. Verified: web unit openDocument.test.ts 5 passed; feature case sales-invoice.print.after-access-expiry drops the access cookie, presses Print and gets the invoice (200) after a POST /auth/refresh; it fails against main's screen (no refresh happens); print.pdf still passes."
     },
     {
       "id": "N174",

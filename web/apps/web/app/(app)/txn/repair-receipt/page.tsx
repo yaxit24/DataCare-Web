@@ -11,6 +11,7 @@ import { PartyBalance } from '../../../../components/PartyBalance';
 import { RepairImagePanel } from '../../../../components/RepairImagePanel';
 import { VoucherChrome } from '../../../../components/VoucherChrome';
 import { todayLocal } from '../../../../lib/localDate';
+import { openDocument } from '../../../../lib/openDocument';
 
 interface RepairLine {
   /** Saved database serial; draft row positions are never photograph identities. */
@@ -445,9 +446,8 @@ export default function RepairReceiptPage() {
           onPrint={
             loadedVoucherNo && loadedImageScope === imageScope
               ? () =>
-                  window.open(
+                  openDocument(
                     `/api/repair-receipts/${encodeURIComponent(loadedVoucherNo)}/print?${new URLSearchParams({ coCode, lcCode, coYear, coBook, format: 'html' })}`,
-                    '_blank',
                   )
               : undefined
           }

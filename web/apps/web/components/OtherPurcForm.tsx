@@ -8,6 +8,7 @@ import { desktopGlobalFormKeyActions, FormKeyHints } from './FormKeys';
 import { useGridKeyboard } from './GridKeyboard';
 import { ApiError, del, get, post, put } from '../lib/api';
 import { todayLocal } from '../lib/localDate';
+import { openDocument } from '../lib/openDocument';
 
 /**
  * Desktop TR_OTH_PURC. "Other Income" opens it on an OTH INC book and "Other Expenses" on an OTH EXP book
@@ -372,9 +373,8 @@ export function OtherPurcForm({ mode }: { mode: OtherPurcMode }) {
             type="button"
             disabled={busy || !loadedVoucherNo}
             onClick={() =>
-              window.open(
+              openDocument(
                 `/api${cfg.endpoint}/${encodeURIComponent(loadedVoucherNo)}/print?coBook=${encodeURIComponent(coBook)}&format=html`,
-                '_blank',
               )
             }
           >

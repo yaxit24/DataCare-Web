@@ -1883,6 +1883,15 @@ the `print.hsn-agrees-with-summary` case of `web/apps/web/test/features/modules/
 Done when: on every printed GST bill the HSN columns add up to the printed heads and the Tax column to the bill tax.
 
 
+### N173 — A print window opens the document after the access cookie has expired (G180)
+
+`web/apps/web/lib/openDocument.ts` opens the window inside the click and points it at the document only after an API
+call has refreshed the session; the screens' `window.open` calls use it, and `web/apps/web/components/GlobalFormKeys.tsx`
+sends new-tab `/api` links the same way. Proven by `web/apps/web/test/openDocument.test.ts` and the
+`print.after-access-expiry` case of `web/apps/web/test/features/modules/salesInvoice.mjs`.
+
+Done when: no print, PDF or export window shows `unauthenticated` while the session can still refresh.
+
 ### N186 — Every server started after a build serves that build (G197)
 
 `web/apps/web/package.json` runs `web/apps/web/scripts/clearRouteCache.mjs` after `next build`, which removes the route
@@ -2128,6 +2137,9 @@ click filled `E2ELOC` and a `GLD22` line with tag `N`, Save answered 201, and th
 
 | N171 | — | implemented-unverified, evidence in this change (G183: generated edition table, 245 routes and 252 forms; API 403 edition-unavailable, /me edition, rights catalog filtered; Standard navigation, page guard and Beta group; core, API, web and generator tests; browser runs in Standard and with Beta) |
 | N172 | — | planned (G179: voucher number box — Enter opens the voucher, Up the last, Down the first, F1 the list, on every Standard voucher screen) |
+| N173 | — | implemented-unverified, evidence in this change (G180: print windows refresh the session first; unit 5, feature case with the access cookie dropped, fails against the old screen) |
+| N174 | — | planned (G181: printed HSN table rounds the GST halves consistently and totals the bill tax) |
+
 | N173 | — | planned (G180: the print window works after the access cookie expires) |
 | N174 | — | implemented-unverified, evidence in this change (G181: the HSN summary prints the header tax heads; unit 23 incl. 300 generated bills, feature case through Print, both fail against the old code) |
 | N175 | — | planned (G182: no bulk route prefetch; party balance fetched once per chosen party) |
