@@ -5,15 +5,15 @@
     {
       "key": "/utilities/hdd-registry | empty-form-accepted | submit-empty-form | Create HDD | ",
       "mode": "probe",
-      "source": "unified/src/csharp/DataCareNext/UT_HDD.cs:765 — the desktop saves with no field validation and answers \"Hdd Is Update...\"; the web does the same"
+      "source": "unified/src/csharp/DataCareNext/UT_HDD.cs:765 \u2014 the desktop saves with no field validation and answers \"Hdd Is Update...\"; the web does the same"
     },
     {
-      "key": "/txn/reminders | no-feedback | submit-empty-form | Receivables (0) | ",
+      "key": "/txn/reminders | no-feedback | submit-empty-form | Receivables (n) | ",
       "mode": "probe",
       "source": "The highlighted button is the Receivables tab with a count of 0 (web/apps/web/app/(app)/txn/reminders/page.tsx); there is nothing to list"
     },
     {
-      "key": "/utilities/reminders | no-feedback | submit-empty-form | Outstanding (0) | ",
+      "key": "/utilities/reminders | no-feedback | submit-empty-form | Outstanding (n) | ",
       "mode": "probe",
       "source": "The highlighted button is the Outstanding tab with a count of 0 (web/apps/web/app/(app)/utilities/reminders/page.tsx); there is nothing to list"
     }

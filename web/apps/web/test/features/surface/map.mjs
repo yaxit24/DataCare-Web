@@ -12,7 +12,7 @@ export const findingKey = (f) =>
     f.route,
     f.kind,
     f.probe ?? '',
-    f.button ?? '',
+    String(f.button ?? '').replace(/\s*\(\d+\)$/, ' (n)'),
     f.kind === 'server-error' || f.kind === 'load-refused'
       ? String(f.detail)
           .replace(/\?.*$/, '')
@@ -147,6 +147,12 @@ function renderMarkdown(map) {
   lines.push('');
   lines.push(
     `Candidate \`${meta.candidate}\`${meta.dirtyPatch ? ' (with local changes)' : ''}, ${meta.finishedAt}, every button pressed: ${meta.sweep ? 'yes' : 'no (probes only)'}, ${meta.durationSeconds}s.`,
+  );
+  lines.push('');
+  lines.push(
+    meta.label === 'with-data'
+      ? 'Data: crawled after the feature suites created real vouchers through the screens (sales, purchases, settings changes), so registers, ledgers and Load have data to act on.'
+      : 'Data: crawled on a company with masters only (no vouchers); reports and Load had nothing to show.',
   );
   lines.push('');
   lines.push(
