@@ -40,11 +40,7 @@ export interface SettingDescriptor {
   label: string;
   hint?: string;
   options?: SettingOption[];
-  /**
-   * The options are presets of an editable combo, not a closed list (G177). No setting form sets a DropDownStyle, so
-   * every desktop setting combo accepts typed text, and these save it as `Val(Text)` (UT_SETTING.cs:5059,
-   * UT_SETTING_MAIN.cs:9120, :9148, :9300). Any number is accepted; an integer column takes whole numbers only.
-   */
+  /** The options are presets of an editable combo (G177); see coerceSettingValue. */
   editable?: 'number' | 'integer';
   maxLength?: number;
   /** No authoritative desktop option list found; rendered as text pending evidence. */
