@@ -13,8 +13,9 @@ of done of [document 13 §1](13-phase1-delivery-plan.md#1-definition-of-done). S
 
 The desktop has seven editions, held in `DC_Main.MsSoftType`: `L` Lite, `B` Basic, `S` Standard, `U` Ultra, `P` Pro,
 `A` Advance, `E` Enterprise. The code is the seventh character of the registration serial
-(`unified/src/csharp/DataCareNext/MS_OPNCOMP.cs:648`); an unregistered copy runs as Lite
-(`unified/src/csharp/DataCareNext/MS_OPNCOMP.cs:612`).
+(`unified/src/csharp/DataCareNext/MS_OPNCOMP.cs:648`). The edition defaults to Lite, and stays Lite when the serial
+carries no known edition code (`unified/src/csharp/DataCareNext/MS_OPNCOMP.cs:612`, `:650-652`); with no registration row
+at all the desktop opens its registration screen `UT_HDD` instead (`unified/src/csharp/DataCareNext/MS_OPNCOMP.cs:616-620`).
 
 Editions are cumulative. At start-up the MDI loads the menu table `MENU_DATA` (in the desktop's `NextMain` database)
 filtered by the edition's set of `SM_TYPE` codes:
