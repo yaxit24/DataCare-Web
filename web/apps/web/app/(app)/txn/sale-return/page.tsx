@@ -15,6 +15,7 @@ import {
   ExtendedHeaderCells,
   GridModeToggle,
 } from '../../../../components/ExtendedGrid';
+import { openDocument } from '../../../../lib/openDocument';
 
 interface Line {
   itCode: string;
@@ -612,9 +613,8 @@ function LegacySaleReturnForm() {
               type="button"
               className="ghost"
               onClick={() =>
-                window.open(
+                openDocument(
                   `/api/sales/credit-note?coBook=${encodeURIComponent(coBook)}&vchNo=${encodeURIComponent(String(result.vchNo))}&format=html`,
-                  '_blank',
                 )
               }
             >

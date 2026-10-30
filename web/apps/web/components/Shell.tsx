@@ -263,8 +263,14 @@ export default function Shell({
               <div className="group">{g.label}</div>
               {items.map((it) => {
                 const active = pathname === it.href.split('?')[0];
+                // G182: no prefetch. Each page drew about 240 route prefetches, one per navigation link.
                 return (
-                  <Link key={it.label + it.href} href={it.href} className={active ? 'active' : ''}>
+                  <Link
+                    key={it.label + it.href}
+                    href={it.href}
+                    prefetch={false}
+                    className={active ? 'active' : ''}
+                  >
                     {it.label}
                     {!it.ready && <span className="soon">soon</span>}
                   </Link>
@@ -286,6 +292,7 @@ export default function Shell({
                 <Link
                   key={`beta-${it.label}-${it.href}`}
                   href={it.href}
+                  prefetch={false}
                   className={pathname === it.href.split('?')[0] ? 'active' : ''}
                 >
                   {it.label} <span className="soon">beta</span>

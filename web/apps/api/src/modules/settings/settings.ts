@@ -107,7 +107,12 @@ export function coerceSettingValue(
     case 'number': {
       const n = Number(s);
       if (!Number.isFinite(n)) return { ok: false, reason: 'must be a number' };
-      if (d.options?.length) {
+      // G177: no desktop setting form sets a DropDownStyle, so every setting combo accepts typed text, and the
+      // editable numeric ones save Val(Text) (UT_SETTING.cs:5059; UT_SETTING_MAIN.cs:9120, :9148, :9300). Their options
+      // are presets; an integer column takes whole numbers only.
+      if (d.editable === 'integer' && !Number.isInteger(n))
+        return { ok: false, reason: 'must be a whole number' };
+      if (d.options?.length && !d.editable) {
         const allowed = d.options.map((o) => Number(o.value));
         if (!allowed.includes(n)) {
           return { ok: false, reason: `must be one of ${allowed.join(', ')}` };

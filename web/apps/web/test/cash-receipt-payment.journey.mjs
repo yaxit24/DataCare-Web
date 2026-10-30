@@ -129,6 +129,8 @@ export async function exerciseCashReceiptPayment(page, { checkpoint, owner, tena
     page.waitForEvent('popup'),
     page.getByRole('button', { name: 'View Receipt Voucher', exact: true }).click(),
   ]);
+  // The window opens blank and loads the voucher once the session is fresh (openDocument, G180).
+  await voucherPage.waitForURL(/coBook=CRB/);
   await voucherPage.waitForLoadState();
   assert.match(voucherPage.url(), /coBook=CRB/);
   assert.match(await voucherPage.content(), /1,000/);

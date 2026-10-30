@@ -22,6 +22,7 @@ import { companyFlag, useCompanySettings, companySetting } from '../../../../lib
 import { oldGoldRowAmount, recalcLine } from '../../../../lib/lineRecalc';
 import { billTotals, lineNet as lineNetAmount } from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
+import { openDocument } from '../../../../lib/openDocument';
 
 interface Line {
   itCode: string;
@@ -820,9 +821,8 @@ export default function SalesQuotationPage() {
           onPrint={
             loadedVchNo
               ? () =>
-                  window.open(
+                  openDocument(
                     `/api/sales-quotations/quotation?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(loadedVchNo)}&format=html&copy=O`,
-                    '_blank',
                   )
               : undefined
           }
@@ -1437,9 +1437,8 @@ export default function SalesQuotationPage() {
               type="button"
               className="ghost"
               onClick={() =>
-                window.open(
+                openDocument(
                   `/api/sales-quotations/quotation?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(String(result.vchNo))}`,
-                  '_blank',
                 )
               }
             >
@@ -1449,9 +1448,8 @@ export default function SalesQuotationPage() {
               type="button"
               className="ghost"
               onClick={() =>
-                window.open(
+                openDocument(
                   `/api/sales-quotations/quotation?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&vchNo=${encodeURIComponent(String(result.vchNo))}&format=html`,
-                  '_blank',
                 )
               }
             >

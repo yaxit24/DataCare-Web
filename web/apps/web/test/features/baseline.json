@@ -14,13 +14,7 @@
       "reason": "Lost update on purchase too: the stale second save answers 200 and overwrites the first (no version token; N51)."
     }
   ],
-  "settings": [
-    {
-      "case": "settings.field.pan-limit-any-amount",
-      "gap": "G177",
-      "reason": "The web shows PAN_CARD_VAL as a fixed list (100000/200000); the desktop combo is editable (UT_SETTING.cs:4300-4301 presets, :5059 saves Val(Text)), so a shop's own limit such as 50000 cannot be entered. FONT_SIZE, GRID_ROW_HIGHT and VCH_DESC_HELP_LENT have the same shape."
-    }
-  ],
+  "settings": [],
   "sales-return": [
     {
       "case": "sales-return.formula.net-basis",

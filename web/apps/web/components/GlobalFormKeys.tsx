@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { desktopGlobalFormKeyActions, useFormKeys } from './FormKeys';
 import { findSaveButton, isSaveMnemonic } from '../lib/saveMnemonic';
+import { documentLinkFrom, openDocument } from '../lib/openDocument';
 
 /**
  * Installs the desktop MDI shell's global accelerators on every authenticated page.
@@ -31,6 +32,17 @@ export function GlobalFormKeys() {
     };
     document.addEventListener('keydown', onKeyDown, true);
     return () => document.removeEventListener('keydown', onKeyDown, true);
+  }, []);
+  // G180: a new-tab document link (Print, CSV, PDF) refreshes the session before the tab loads the document.
+  useEffect(() => {
+    const onClick = (event: MouseEvent) => {
+      const href = documentLinkFrom(event);
+      if (!href) return;
+      event.preventDefault();
+      openDocument(href);
+    };
+    document.addEventListener('click', onClick);
+    return () => document.removeEventListener('click', onClick);
   }, []);
   return null;
 }

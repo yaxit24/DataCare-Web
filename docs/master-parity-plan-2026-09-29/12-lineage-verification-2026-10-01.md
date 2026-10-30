@@ -1887,6 +1887,15 @@ the `print.hsn-agrees-with-summary` case of `web/apps/web/test/features/modules/
 Done when: on every printed GST bill the HSN columns add up to the printed heads and the Tax column to the bill tax.
 
 
+### N173 — A print window opens the document after the access cookie has expired (G180)
+
+`web/apps/web/lib/openDocument.ts` opens the window inside the click and points it at the document only after an API
+call has refreshed the session; the screens' `window.open` calls use it, and `web/apps/web/components/GlobalFormKeys.tsx`
+sends new-tab `/api` links the same way. Proven by `web/apps/web/test/openDocument.test.ts` and the
+`print.after-access-expiry` case of `web/apps/web/test/features/modules/salesInvoice.mjs`.
+
+Done when: no print, PDF or export window shows `unauthenticated` while the session can still refresh.
+
 ### N186 — Every server started after a build serves that build (G197)
 
 `web/apps/web/package.json` runs `web/apps/web/scripts/clearRouteCache.mjs` after `next build`, which removes the route
@@ -2150,10 +2159,10 @@ leaves the baseline in the change that fixes it.
 | N162 | — | implemented-unverified, evidence in this change (G169, G176: one item leg per detail line keyed STR(SR_NO)+03 when a sale or purchase posts to two item accounts; labour-split leg off code 03; vectors 60 passed, HTTP write-set suites 13 passed, negative control reproduces the duplicate-key 400; feature E2E Sales 18/2/3 and Purchase 17/2/2 with both baseline entries removed; browser runs of both screens) |
 | N163 | — | implemented-unverified, evidence in this change (G171: Alt+S presses the marked Save button from any field; web unit 12 passed; sales and purchase Alt+S feature cases pass and left the baseline; Contra saved with Alt+S in a Chrome DevTools run) |
 | N164 | — | implemented-unverified, evidence in this change (UI surface crawl + committed map `docs/handbook/web/ui-surface-map.md` + PR browser-test gate; found G172) |
-| N165 | — | planned (G172: readable message / single retry when two sessions open the company at once) |
+| N165 | — | implemented-unverified, evidence in this change (G172: the selection retries a transaction conflict and the screen explains; unit 3, new Open Company module, fails against the old screen) |
 | N166 | — | planned (G173, G174: fault injection for T14 and a settings-variant company for T15 in the feature E2E harness) |
 | N167 | — | planned (G175: decide the negative-weight line rule from an original-Windows run, then implement and execute the case) |
-| N168 | — | planned (G177: editable amount settings — presets offered, any amount accepted and validated) |
+| N168 | — | implemented-unverified, evidence in this change (G177: four numeric setting combos accept typed amounts with presets; unit 3, DB 14, two feature cases; baseline entry removed) |
 | N169 | — | implemented-unverified, evidence in this change (G178: last-administrator refusal with row locks; DB test 3 passed and fails against the old code; Users & Rights feature module: 3 cases pass through the real screen) |
 | N170 | — | implemented-unverified, evidence in this change (Purchase Invoice module 16/3/2, Settings effects module 10/1/2 + 11 N/A, Sales CSV export case, one shared company per run, with-data crawl and regenerated map; found G176, G177, G178) |
 | N171 | — | planned (G183, D31: Standard edition gate — the 114 Standard menus only in navigation, rights, pages and API; deferred editions available only as labelled Beta when switched on) |
@@ -2161,9 +2170,12 @@ leaves the baseline in the change that fixes it.
 
 | N171 | — | implemented-unverified, evidence in this change (G183: generated edition table, 245 routes and 252 forms; API 403 edition-unavailable, /me edition, rights catalog filtered; Standard navigation, page guard and Beta group; core, API, web and generator tests; browser runs in Standard and with Beta) |
 | N172 | — | planned (G179: voucher number box — Enter opens the voucher, Up the last, Down the first, F1 the list, on every Standard voucher screen) |
+| N173 | — | implemented-unverified, evidence in this change (G180: print windows refresh the session first; unit 5, feature case with the access cookie dropped, fails against the old screen) |
+| N174 | — | planned (G181: printed HSN table rounds the GST halves consistently and totals the bill tax) |
+
 | N173 | — | planned (G180: the print window works after the access cookie expires) |
 | N174 | — | implemented-unverified, evidence in this change (G181: the HSN summary prints the header tax heads; unit 23 incl. 300 generated bills, feature case through Print, both fail against the old code) |
-| N175 | — | planned (G182: no bulk route prefetch; party balance fetched once per chosen party) |
+| N175 | — | implemented-unverified, evidence in this change (G182: no navigation prefetch; one balance request per typed party; feature case fails against the old code) |
 | N176 | — | planned (G184: provision BOOK_DETL slot 4 on purchase-family books so PURC_WITH_LBR = 'N' works on a fresh company) |
 | N177 | — | implemented-unverified, evidence in this change (G185: Enter resolves the typed code when the list is for older text; web unit 7 passed; two new feature cases pass and fail against the old component) |
 | N178 | — | planned (G186: negative-stock and period-lock refusals use the desktop wording) |

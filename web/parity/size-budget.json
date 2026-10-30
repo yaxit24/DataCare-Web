@@ -18,7 +18,7 @@
     "apps/api/src/modules/repair/repairCustomerIssue.ts": 1653,
     "apps/api/src/modules/shared/rojmel.ts": 1636,
     "apps/api/src/modules/repair/repairKarigarReceipt.ts": 1582,
-    "apps/api/src/modules/settings/settingsCatalog.ts": 1568,
+    "apps/api/src/modules/settings/settingsCatalog.ts": 1574,
     "apps/web/app/(app)/txn/sales/page.tsx": 1539,
     "apps/api/src/modules/manufacturing/mfg.ts": 1516,
     "apps/api/src/modules/sales/wholesaleSaleReturn.ts": 1510,

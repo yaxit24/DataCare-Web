@@ -21,6 +21,7 @@ import { salesInvoice } from './modules/salesInvoice.mjs';
 import { salesReturn } from './modules/salesReturn.mjs';
 import { settingsEffects } from './modules/settingsEffects.mjs';
 import { usersRights } from './modules/usersRights.mjs';
+import { companyOpen } from './modules/companyOpen.mjs';
 import { runSurface } from './surface/runner.mjs';
 
 /**
@@ -42,6 +43,7 @@ const MODULES = [
   settingsEffects,
   usersRights,
   salesReturn,
+  companyOpen,
   purchaseReturn,
 ];
 

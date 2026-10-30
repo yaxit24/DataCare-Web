@@ -10,6 +10,7 @@ import { LookupPicker, type LookupRow } from '../../../../components/LookupPicke
 import { PartyBalance } from '../../../../components/PartyBalance';
 import { VoucherChrome } from '../../../../components/VoucherChrome';
 import { todayLocal } from '../../../../lib/localDate';
+import { openDocument } from '../../../../lib/openDocument';
 
 interface IssueLine {
   code: string;
@@ -465,9 +466,8 @@ export default function RepairCustomerIssuePage() {
           onPrint={
             loadedVoucherNo
               ? () =>
-                  window.open(
+                  openDocument(
                     `/api/repair-customer-issues/${encodeURIComponent(loadedVoucherNo)}/print?coBook=${encodeURIComponent(coBook)}&format=html`,
-                    '_blank',
                   )
               : undefined
           }

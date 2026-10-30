@@ -14,6 +14,8 @@ interface Field {
   label: string;
   hint?: string;
   options?: SettingOption[];
+  /** The options are presets of an editable combo (G177): any number may be typed. */
+  editable?: 'number' | 'integer';
   maxLength?: number;
   unknownOptions?: true;
   surface: 'UT_SETTING' | 'UT_SETTING_MAIN' | 'UT_SET_ADMIN' | 'SCHEMA_ONLY';
@@ -121,6 +123,28 @@ export default function SettingsPage() {
             <option value={v}>{`Legacy value: ${v}`}</option>
           )}
         </select>
+      );
+    }
+    if (f.editable && f.options?.length) {
+      // The desktop combo offers presets and accepts a typed amount (G177).
+      return (
+        <>
+          <input
+            {...common}
+            type="text"
+            inputMode={f.editable === 'integer' ? 'numeric' : 'decimal'}
+            list={`${f.id}-presets`}
+            value={v}
+            onChange={(e) => set(f.id, e.target.value)}
+          />
+          <datalist id={`${f.id}-presets`}>
+            {f.options.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </datalist>
+        </>
       );
     }
     if (f.type === 'number' && f.options?.length) {

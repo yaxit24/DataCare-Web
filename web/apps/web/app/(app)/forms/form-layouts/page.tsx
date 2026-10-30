@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { get } from '../../../../lib/api';
+import { openDocument } from '../../../../lib/openDocument';
 
 interface Row {
   form: string;
@@ -23,8 +24,7 @@ export default function FormLayoutsPage() {
       .catch(() => setErr('Failed to load form layouts'));
   }, []);
   const filtered = rows.filter((r) => r.form.toLowerCase().includes(q.toLowerCase()));
-  const open = (name: string) =>
-    window.open(`/api/forms/layout?name=${encodeURIComponent(name)}`, '_blank');
+  const open = (name: string) => openDocument(`/api/forms/layout?name=${encodeURIComponent(name)}`);
   return (
     <div>
       <h1>
