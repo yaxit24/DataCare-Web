@@ -81,7 +81,7 @@ const legsOf = (ac: string, year = YEAR) =>
     `SELECT right("LEDR_KEY",2) code, "LEDR_KEY" key, "VCH_TYPE" vt, "VCH_NO" vch, "VCH_DATE"::date::text dt,
             "BOOK_NAME" bn, "LD_CODE" ld, coalesce("DR_AMT",0)::float dr, coalesce("CR_AMT",0)::float cr,
             "IT_TYPE" it, "SIGN" sg, coalesce("FINE_WT",0)::float fine, "IT_DESC" descr, "PARTY_AC_CODE" pac, "MAIN_USER" mu
-       FROM "AC_DATA" WHERE "CO_CODE"=$1 AND "CO_YEAR"=$2 AND "CO_BOOK"='000' AND "AC_CODE"=$3 ORDER BY "LEDR_KEY"`,
+       FROM "AC_DATA" WHERE tenant_id='${TENANT}' AND "CO_CODE"=$1 AND "CO_YEAR"=$2 AND "CO_BOOK"='000' AND "AC_CODE"=$3 ORDER BY "LEDR_KEY"`,
     CO,
     year,
     ac,
@@ -90,7 +90,7 @@ const opData = (ac: string, year = YEAR) =>
   rows(
     `SELECT "CO_BOOK" bk, "VCH_NO" vch, coalesce("OP_AMT",0)::float amt, "OP_SIGN" osg, coalesce("FINE_BAL",0)::float g,
             "FINE_SIGN" gsg, coalesce("SL_FINE_BAL",0)::float s, "SL_FINE_SIGN" ssg, "DATA_TYPE" dt, "DATA_TRFR" tr, "MAIN_USER" mu
-       FROM "OP_DATA" WHERE "CO_CODE"=$1 AND "CO_YEAR"=$2 AND "AC_CODE"=$3`,
+       FROM "OP_DATA" WHERE tenant_id='${TENANT}' AND "CO_CODE"=$1 AND "CO_YEAR"=$2 AND "AC_CODE"=$3`,
     CO,
     year,
     ac,
@@ -256,8 +256,8 @@ describe.skipIf(!RUN)(
       await expect(deletePartyOpening(runtime, scope, '', 'ADMIN')).rejects.toThrow(
         'Please Select Account Details.',
       );
-      expect(await rows(`SELECT 1 FROM "OP_DATA"`)).toHaveLength(0);
-      expect(await rows(`SELECT 1 FROM "AC_DATA"`)).toHaveLength(0);
+      expect(await rows(`SELECT 1 FROM "OP_DATA" WHERE tenant_id=$1`, TENANT)).toHaveLength(0);
+      expect(await rows(`SELECT 1 FROM "AC_DATA" WHERE tenant_id=$1`, TENANT)).toHaveLength(0);
     });
 
     it('delete audits the opening and removes OP_DATA, OP_DETL and the legs', async () => {
@@ -283,12 +283,13 @@ describe.skipIf(!RUN)(
       expect(await deletePartyOpening(runtime, scope, PARTY, 'CLERK')).toEqual({ deleted: true });
       expect(await opData(PARTY)).toHaveLength(0);
       expect(await legsOf(PARTY)).toHaveLength(0);
-      expect(await rows(`SELECT 1 FROM "OP_DETL"`)).toHaveLength(0);
+      expect(await rows(`SELECT 1 FROM "OP_DETL" WHERE tenant_id=$1`, TENANT)).toHaveLength(0);
       const audit = await rows(
         `SELECT coalesce("SR_NO",0)::int sr, "VCH_TYPE" vt, "BOOK_NAME" bn, "AC_NAME" nm, coalesce("VCH_VAL_DR",0)::float dr,
               coalesce("VCH_VAL_CR",0)::float cr, "FINE_TYPE" ft, coalesce("VCH_FINE_DR",0)::float fdr,
               coalesce("VCH_FINE_CR",0)::float fcr, "MAIN_USER" mu, "DELETE_USER" du
-         FROM "DELETE_DATA" ORDER BY "SR_NO"`,
+         FROM "DELETE_DATA" WHERE tenant_id=$1 ORDER BY "SR_NO"`,
+        TENANT,
       );
       expect(audit).toEqual([
         {
@@ -331,7 +332,7 @@ describe.skipIf(!RUN)(
         PARTY,
       );
       await savePartyOpening(runtime, { scope, acCode: PARTY, amount: 50, sign: 'D' });
-      expect(await rows(`SELECT 1 FROM "OP_DETL"`)).toHaveLength(1);
+      expect(await rows(`SELECT 1 FROM "OP_DETL" WHERE tenant_id=$1`, TENANT)).toHaveLength(1);
     });
 
     it('the year carry-forward reads the legs once and writes the next year in the same shape', async () => {

@@ -58,22 +58,35 @@ async function pickParty(page, code) {
   const input = page.getByLabel('Party Code', { exact: true });
   await input.fill(code);
   await input.locator('xpath=..').getByText(code, { exact: true }).first().waitFor();
-  await Promise.all([
+  const [response] = await Promise.all([
     page.waitForResponse((r) => isApi(r, 'GET', `/ac-opbl/${code}`)),
     input.press('Enter'),
   ]);
+  const opening = await response.json();
+  // The form fills from this response on the next render; wait for it so later reads and clicks see the opening.
+  const amount = opening.exists && Number(opening.amount) ? Number(opening.amount).toFixed(2) : '';
+  await page.waitForFunction(
+    ([want, exists]) => {
+      const box = document.getElementById('opening-amount');
+      const del = [...document.querySelectorAll('button')].find(
+        (b) => b.textContent.trim() === 'Delete',
+      );
+      return Boolean(box && del && box.value === want && del.disabled === !exists);
+    },
+    [amount, Boolean(opening.exists)],
+  );
+  return opening;
 }
+// Sets all three heads and signs, so a save never keeps a value left from an earlier opening.
 async function fillHeads(page, heads) {
-  const box = {
-    amount: 'Opening Amount',
-    gold: 'Opening Gold Fine',
-    silver: 'Opening Silver Fine',
-  };
-  for (const [key, label] of Object.entries(box)) {
-    if (heads[key] !== undefined)
-      await page.getByLabel(label, { exact: true }).fill(String(heads[key]));
-    const sign = heads[`${key === 'amount' ? '' : key}${key === 'amount' ? 'sign' : 'Sign'}`];
-    if (sign) await page.getByLabel(`${label} Cr or Dr`, { exact: true }).selectOption(sign);
+  const fields = [
+    ['Opening Amount', 'amount', 'sign'],
+    ['Opening Gold Fine', 'gold', 'goldSign'],
+    ['Opening Silver Fine', 'silver', 'silverSign'],
+  ];
+  for (const [label, value, sign] of fields) {
+    await page.getByLabel(label, { exact: true }).fill(String(heads[value] ?? ''));
+    await page.getByLabel(`${label} Cr or Dr`, { exact: true }).selectOption(heads[sign] ?? 'C');
   }
 }
 async function save(page, trigger) {
@@ -93,9 +106,9 @@ async function enter(page, heads) {
 }
 async function removeOpening(page) {
   await openScreen(page);
-  await pickParty(page, PARTY.code);
+  const opening = await pickParty(page, PARTY.code);
+  if (!opening.exists) return;
   const button = page.getByRole('button', { name: 'Delete', exact: true });
-  if (await button.isDisabled()) return;
   await Promise.all([
     page.waitForResponse((r) => isApi(r, 'DELETE', `/ac-opbl/${PARTY.code}`)),
     button.click(),
@@ -117,6 +130,16 @@ const legs = (ctx) =>
       WHERE a.tenant_id=$1 AND a."CO_BOOK"='000' AND a."VCH_TYPE"='ACOP' AND a."AC_CODE"=$2 ORDER BY a."LEDR_KEY"`,
     PARTY.code,
   );
+// The balance bar's text: Σ(DR−CR) over the party's AC_DATA (DC_Main.MsAcBal), Dr when not negative. Other
+// modules post to the same party in a full run, so the expected text comes from the ledger, not a constant.
+async function balanceText(ctx) {
+  const [{ bal }] = await ctx.rows(
+    `SELECT coalesce(sum(coalesce("DR_AMT",0)-coalesce("CR_AMT",0)),0)::float bal FROM "AC_DATA" WHERE tenant_id=$1 AND "AC_CODE"=$2`,
+    PARTY.code,
+  );
+  const r = Math.round((Number(bal) + 1e-9) * 100) / 100;
+  return `₹${Math.abs(r).toLocaleString('en-IN')} ${r >= 0 ? 'Dr' : 'Cr'}`;
+}
 const legShape = (rows) => rows.map((l) => [l.code, l.dr, l.cr, l.it, l.sg, l.fine]);
 
 export const partyOpening = {
@@ -296,12 +319,13 @@ export const partyOpening = {
             .getByRole('region', { name: 'Opening list' })
             .locator('tr', { hasText: PARTY.code });
           await row.getByText('25,000.00', { exact: true }).waitFor();
-          await page.getByText('₹25,000 Dr', { exact: true }).waitFor();
+          const balance = await balanceText(ctx);
+          await page.getByText(balance, { exact: true }).waitFor();
           return {
-            observation: `OP_DATA ${JSON.stringify(op)}; legs ${JSON.stringify(legShape(posted))}; list and balance bar show 25,000 Dr`,
+            observation: `OP_DATA ${JSON.stringify(op)}; legs ${JSON.stringify(legShape(posted))}; list 25,000.00 Dr; balance bar ${balance}`,
             expected: 'one OP_DATA row; legs 02 and 03',
             database: { op, legs: posted },
-            downstream: { list: '25,000.00 Dr', balance: '₹25,000 Dr' },
+            downstream: { list: '25,000.00 Dr', balance },
           };
         } finally {
           await removeOpening(page);
@@ -381,12 +405,13 @@ export const partyOpening = {
             [[400, 'C', 0]],
           );
           assert.deepEqual(legShape(posted), [['01', 0, 400, 'A', '', 0]]);
-          await page.getByText('₹400 Cr', { exact: true }).waitFor();
+          const balance = await balanceText(ctx);
+          await page.getByText(balance, { exact: true }).waitFor();
           return {
             observation: `OP_DATA ${JSON.stringify(op)}; legs ${JSON.stringify(legShape(posted))}`,
             expected: '400 Cr; leg 01 only',
             database: { op, legs: posted },
-            downstream: { balance: '₹400 Cr' },
+            downstream: { balance },
           };
         } finally {
           await removeOpening(page);
@@ -573,12 +598,13 @@ export const partyOpening = {
             page.waitForResponse((r) => isApi(r, 'GET', `/party/${PARTY.code}/balance`)),
             party.press('Enter'),
           ]);
-          await page.getByText('₹25,000 Dr', { exact: true }).waitFor();
+          const balance = await balanceText(ctx);
+          await page.getByText(balance, { exact: true }).waitFor();
           return {
-            observation: 'Cash Received shows ₹25,000 Dr for the party',
-            expected: '₹25,000 Dr (not 50,000)',
+            observation: `Cash Received shows ${balance}, the party's ledger balance with the opening counted once`,
+            expected: 'the AC_DATA balance, not that balance plus the opening again',
             database: { legs: legShape(await legs(ctx)) },
-            downstream: { receiptBalance: '₹25,000 Dr' },
+            downstream: { receiptBalance: balance },
           };
         } finally {
           await removeOpening(page);
