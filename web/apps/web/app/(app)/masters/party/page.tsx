@@ -17,13 +17,14 @@ export default function PartyFormPage() {
   const [mobile, setMobile] = useState('');
   const [gr, setGr] = useState('');
   const [photo, setPhoto] = useState<string>('');
+  // MS_ACCT.cs:6197-6199: the three Cr/Dr combos start on Cr.
   const [op, setOp] = useState({
     amount: '',
-    sign: 'D',
+    sign: 'C',
     gold: '',
-    goldSign: '+',
+    goldSign: 'C',
     silver: '',
-    silverSign: '+',
+    silverSign: 'C',
   });
   const [family, setFamily] = useState<{
     khataNo: string;
@@ -48,11 +49,11 @@ export default function PartyFormPage() {
       if (o)
         setOp({
           amount: String(o.amount || ''),
-          sign: o.sign || 'D',
+          sign: o.sign === 'D' ? 'D' : 'C',
           gold: String(o.gold || ''),
-          goldSign: o.goldSign || '+',
+          goldSign: o.goldSign === 'D' ? 'D' : 'C',
           silver: String(o.silver || ''),
-          silverSign: o.silverSign || '+',
+          silverSign: o.silverSign === 'D' ? 'D' : 'C',
         });
     } catch {
       /* new party */
@@ -255,13 +256,14 @@ export default function PartyFormPage() {
               />
             </div>
             <div className="field">
-              <label>Dr/Cr</label>
+              <label>Cr/Dr</label>
               <select
+                aria-label="Opening amount Cr or Dr"
                 value={op.sign}
                 onChange={(e) => setOp((o) => ({ ...o, sign: e.target.value }))}
               >
-                <option value="D">Dr</option>
                 <option value="C">Cr</option>
+                <option value="D">Dr</option>
               </select>
             </div>
             <div className="field">
@@ -272,13 +274,14 @@ export default function PartyFormPage() {
               />
             </div>
             <div className="field">
-              <label>+/−</label>
+              <label>Cr/Dr</label>
               <select
+                aria-label="Gold Cr or Dr"
                 value={op.goldSign}
                 onChange={(e) => setOp((o) => ({ ...o, goldSign: e.target.value }))}
               >
-                <option value="+">+</option>
-                <option value="-">−</option>
+                <option value="C">Cr</option>
+                <option value="D">Dr</option>
               </select>
             </div>
             <div className="field">
@@ -289,18 +292,19 @@ export default function PartyFormPage() {
               />
             </div>
             <div className="field">
-              <label>+/−</label>
+              <label>Cr/Dr</label>
               <select
+                aria-label="Silver Cr or Dr"
                 value={op.silverSign}
                 onChange={(e) => setOp((o) => ({ ...o, silverSign: e.target.value }))}
               >
-                <option value="+">+</option>
-                <option value="-">−</option>
+                <option value="C">Cr</option>
+                <option value="D">Dr</option>
               </select>
             </div>
           </div>
           <div className="muted" style={{ marginTop: 6 }}>
-            Saved with the party (OP_DATA) — inline opening-at-create.
+            Saved with the party as its opening (TR_AC_OPBL).
           </div>
         </div>
       )}

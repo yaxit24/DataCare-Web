@@ -74,6 +74,13 @@
         "web/apps/api/src/modules/sales/salesOrder.ts",
         "web/apps/api/src/modules/sales/orderDoc.ts"
       ]
+    },
+    "partyOpening": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/ac-opbl/page.tsx",
+        "web/apps/api/src/modules/finance/partyOpening.ts",
+        "web/apps/api/src/routes/partyOpening.ts"
+      ]
     }
   }
 }

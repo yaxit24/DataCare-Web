@@ -219,6 +219,10 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G206 | Med | Sales Order takes one cash advance and stores no tender breakdown | `unified/src/csharp/DataCareNext/TR_SALE_ORD.cs`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/web/app/(app)/txn/sales-order/page.tsx`; `web/apps/api/src/modules/sales/salesOrder.ts` | Found by `sales-order.create.header-tender` and `sales-order.create.tender-modes`. The desktop advance is the sum of its tender rows: cash, UPI, cheque, card, old gold, old silver and scheme (`TR_SALE_ORD.cs:11368`); each is stored on SL_ORD_DATA (`:9126-9142`: CASH_AMT, UPI_AMT, CHQ_AMT, CARD_AMT, OLD_GL_AMT, OLD_SL_AMT, SCHM_AMT) and Order_Ledr posts each to its own account (`Ac_Ledr.cs:28-61`, legs 01-06 and 12-13). The web screen has one Advance amount, saved as ADV_AMT with CASH_AMT 0, and shows the other tender fields read-only. | N197 |
 | G207 | Med | Order advance debits the sales account on a provisioned company | `unified/src/csharp/DataCareNext/Ac_Ledr.cs`; `unified/src/csharp/DataCareNext/Ac_Rojmel.cs` | `web/apps/api/src/modules/ops/seedCompany.ts` | Found by `sales-order.create.advance-ledger`: a 5,000 cash advance posts Dr SALES / Cr customer. Order_Ledr debits the order book's BOOK_DETL slot 1 with CASH_AMT (`Ac_Ledr.cs:28-35`) and Order_Rojmel uses slot 1 as the advance contra (`Ac_Rojmel.cs:11`); on the real data slot 1 of book 020 is 00001, the cash account (recorded in `salesOrder.ts`). `seedCompany.ts:219` gives the SOR book the sale layout (1 SALES, 2 CASH, 3 ROUNDOFF). | N198 |
 | G208 | Med | A sale cannot adjust an order advance on a provisioned company | `unified/src/csharp/DataCareNext/Ac_Rojmel.cs` | `web/apps/api/src/modules/ops/seedCompany.ts`; `web/apps/api/src/modules/sales/sales.ts` | Found by `sales-order.journey.order-to-sale`: Sales Invoice with Ord No and Order Amt answers 400 "book SL account row 4 is missing". Sales_Rojmel posts the sale's ADV_AMT against BOOK_DETL slot 4 (`Ac_Rojmel.cs:96`) and `sales.ts` resolves slot 4 when an advance applies, but provisioned sale books get slots 1-3 only. | N198 |
+| G209 | High | Party Opening was a balanced multi-account voucher, not the desktop's per-party opening | `unified/src/csharp/DataCareNext/TR_AC_OPBL.cs`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/web/app/(app)/txn/ac-opbl/page.tsx`; `web/apps/api/src/modules/finance/partyOpening.ts` | Found while writing the Party Opening case list: the desktop keeps one OP_DATA row per party in book '000' with Cr/Dr signs (`TR_AC_OPBL.cs:2694-2722`) and posts it through AcOp_Ledr (`Ac_Ledr.cs:9-28`) as up to six legs dated the day before the year opens. The web numbered an 'ACO' voucher, demanded that debits equal credits, wrote no OP_DATA and had no reopen, edit, list or desktop messages, so a shop could not enter one party's opening on its own. The balanced-voucher module is removed. | N199 |
+| G210 | High | Openings were counted twice in party balances and written in a shape the desktop does not read | `unified/src/csharp/DataCareNext/DC_Main.cs`; `unified/src/csharp/DataCareNext/BtmSchm.cs` | `web/apps/api/src/modules/finance/partyBalance.ts`; `web/apps/api/src/modules/masters/year.ts`; `web/apps/api/src/modules/finance/partyOpening.ts` | The desktop balance reads AC_DATA alone (`DC_Main.MsAcBal`, `DC_Main.cs:1463`), where the opening legs already are; the web added OP_DATA on top, so a migrated desktop opening (117 legs in the migrated data, all in AcOp_Ledr's layout) counted twice. The inline opening (a separate module, now removed) and the year carry-forward wrote OP_DATA in books 'OPN' and 'OPB' with '+'/'-' metal signs and no legs, and the carry-forward dropped silver. | N199 |
+| G211 | Med | Party Opening had no bill-wise grid | `unified/src/csharp/DataCareNext/TR_AC_OPBL.cs` | `web/apps/web/app/(app)/txn/ac-opbl/page.tsx` | The desktop screen has a bill-wise grid saved to OP_DETL (`TR_AC_OPBL.cs:2724-2760`) whose signed totals set the opening heads (MSG_TOT_FILL), with the fine worked out from net weight, touch and wastage (CommPassTotal); the web kept existing OP_DETL rows but could not show or edit them. The desktop Print button only checks print rights (`:2626-2633`) and prints nothing. | N200 |
+| G212 | Med | Year End close and Balance TrFr write next-year openings in two different shapes | `unified/src/csharp/DataCareNext/BtmSchm.cs`; `unified/src/csharp/DataCareNext/Ac_Final.cs` | `web/apps/api/src/modules/ops/yearEnd.ts`; `web/apps/api/src/modules/masters/year.ts` | Found while moving the carry-forward to the Party Opening writer: year-end close writes '000' ACOP legs with its own key and no OP_DATA, while Balance TrFr now writes OP_DATA and AcOp_Ledr legs. Running one after the other can leave both sets of legs, counting the opening twice. | N201 |
 
 ## 4. Decisions D23–D28
 
@@ -2180,6 +2184,18 @@ Evidence: `sales-order.create.cheque-card-advance`, `refusal.cheque-needs-bank` 
 the browser (sales-order 19 passed, 6 baselined, 2 blocked); a DB test pins the header, legs 01-06 and day-book rows
 01-03; `salesOrderSessionCommand.db.test.ts` now expects CASH_AMT to follow an advance edit.
 
+### N199 — Party Opening is the desktop TR_AC_OPBL (G209, G210)
+
+`web/apps/api/src/modules/finance/partyOpening.ts` holds every opening write. A save replaces the party's OP_DATA row in
+book '000', voucher '00000', with the Cr/Dr signs the desktop stores (`TR_AC_OPBL.cs:2694-2722`), then replaces its
+ledger legs as AcOp_Ledr does (`Ac_Ledr.cs:9-28`): 01/02 amount Cr/Dr, 03/04 gold Cr '+' / Dr '-', 05/06 silver, dated
+the day before the year opens. A delete writes the two DELETE_DATA rows and removes OP_DATA, OP_DETL and the legs
+(`:2856-2880`). The screen `/txn/ac-opbl` follows the desktop: Party Code, the three heads with Cr/Dr (default Cr),
+Save, Delete, Cancel, the opening list by balance type, and the desktop messages. The Party master's inline opening, the
+Opening Balance page and the year carry-forward use the same writer, and the party balance no longer adds OP_DATA to
+AC_DATA. The bill-wise grid (OP_DETL) is on the screen too (G211, N200): its signed totals set the heads, as MSG_TOT_FILL
+does. The two carry-forward paths are G212 (N201).
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2305,6 +2321,9 @@ the browser (sales-order 19 passed, 6 baselined, 2 blocked); a DB test pins the 
 | N196 | — | implemented-unverified, evidence in this change (G205: order line priced on SL_AMT_TYPE in whole rupees; tax and total rounded; sales-order formula and amounts cases pass) |
 | N197 | — | implemented-unverified, evidence in this change (G206 part: cash, cheque and card tenders stored per tender and posted on legs 01-06; UPI, old metal and scheme stay open) |
 | N198 | — | planned (G207, G208: provision SOR slot 1 as the cash account and sale books with slot 4; backfill existing companies) |
+| N199 | — | implemented-unverified, evidence in this change (G209, G210: Party Opening is TR_AC_OPBL; openings counted once) |
+| N200 | — | implemented-unverified, evidence in this change (G211: the bill-wise opening grid) |
+| N201 | — | planned (G212: one carry-forward writer for Year End close and Balance TrFr) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

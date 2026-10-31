@@ -9,9 +9,9 @@ interface Opening {
   amount: number;
   sign: 'D' | 'C';
   gold: number;
-  goldSign: '+' | '-';
+  goldSign: 'C' | 'D';
   silver: number;
-  silverSign: '+' | '-';
+  silverSign: 'C' | 'D';
 }
 
 export default function OpeningBalancePage() {
@@ -71,7 +71,7 @@ export default function OpeningBalancePage() {
   return (
     <div>
       <h1>
-        Opening Balance <span className="muted">— per-account opening money + metal (OP_DATA)</span>
+        Opening Balance <span className="muted">— per-account opening money + metal</span>
       </h1>
       {msg && <div className={`msg ${msg.kind}`}>{msg.text}</div>}
       <div className="panel">
@@ -107,10 +107,10 @@ export default function OpeningBalancePage() {
               />
             </div>
             <div className="field">
-              <label>Dr / Cr</label>
+              <label>Cr / Dr</label>
               <select value={op.sign} onChange={(e) => upd('sign', e.target.value)}>
-                <option value="D">Dr</option>
                 <option value="C">Cr</option>
+                <option value="D">Dr</option>
               </select>
             </div>
           </div>
@@ -124,10 +124,10 @@ export default function OpeningBalancePage() {
               />
             </div>
             <div className="field">
-              <label>+ / −</label>
+              <label>Cr / Dr</label>
               <select value={op.goldSign} onChange={(e) => upd('goldSign', e.target.value)}>
-                <option value="+">+ (we hold)</option>
-                <option value="-">− (we owe)</option>
+                <option value="C">Cr</option>
+                <option value="D">Dr</option>
               </select>
             </div>
           </div>
@@ -141,15 +141,16 @@ export default function OpeningBalancePage() {
               />
             </div>
             <div className="field">
-              <label>+ / −</label>
+              <label>Cr / Dr</label>
               <select value={op.silverSign} onChange={(e) => upd('silverSign', e.target.value)}>
-                <option value="+">+ (we hold)</option>
-                <option value="-">− (we owe)</option>
+                <option value="C">Cr</option>
+                <option value="D">Dr</option>
               </select>
             </div>
           </div>
           <div className="muted" style={{ margin: '6px 0' }}>
-            Opening is added to ledger movements when computing the party balance.
+            Saved as the party&apos;s opening (TR_AC_OPBL): it posts to the ledger the day before
+            the year opens.
           </div>
           <button className="primary" disabled={busy}>
             {busy ? 'Saving…' : 'Save Opening'}

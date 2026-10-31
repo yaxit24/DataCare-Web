@@ -254,7 +254,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Labour Type | `MS_LBR_TYPE` | `/masters/labour` | `C R E D - L` | PARTIAL | P1-core |
 | Lot Opening | `TR_ITM_LOT` | `/txn/item-lot` | `C R E D - -` | PARTIAL | P1-edition |
 | Party | `MS_ACCT` | `/masters/party`, `/masters/accounts` | `C R E D - L` | PARTIAL | P1-core |
-| Party Opening | `TR_AC_OPBL` | `/txn/ac-opbl` | `C - - - - -` | PARTIAL | P1-core |
+| Party Opening | `TR_AC_OPBL` | `/txn/ac-opbl` | `C R E D - L` | PARTIAL | P1-core |
 | Point Mast | `MS_POINT` | `/masters/points` | `C R E D - L` | PARTIAL | P1-edition |
 | Product | `MS_PRODUCT` | `/masters/products` | `C R E D - L` | PARTIAL | P1-core |
 | Style | `MS_STYLE` | `/masters/models` | `C R E D - L` | PARTIAL | P1-edition |
@@ -451,12 +451,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 ### Party Opening
 
 - **Desktop:** `TR_AC_OPBL` — direct constructor, no book help ([MDI_FORM.cs:7680-7689](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7680-L7689)).
-- **Does:** Posts opening money, gold and silver balances as a balanced opening voucher.
-- **Looks:** Voucher/date header and account lines with amount and signed gold/silver balances.
+- **Does:** Enters each party's opening amount, gold fine and silver fine, each Cr or Dr, and posts them to the ledger the day before the year opens.
+- **Looks:** Party Code; Opening Amount, Opening Gold Fine and Opening Silver Fine with Cr/Dr; bill-wise grid; opening list by balance type.
 - **Writes:** OP_DATA, AC_DATA, CONTRA_DATA.
-- **Web:** `/txn/ac-opbl`; `POST /ac-opbl`, `DELETE /ac-opbl/:vchNo`. Can: create.
-- **Remaining:** No reopen, edit, delete, print or list in the UI; configured account roles, versions and idempotency remain.
-- **Owners:** X16, G27, N51, G29, N52, N59.
+- **Web:** `/txn/ac-opbl`; `GET /ac-opbl`, `GET /ac-opbl/:acCode`, `POST /ac-opbl`, `DELETE /ac-opbl/:acCode`. Can: create, reopen, edit, delete, list.
+- **Remaining:** Rights and two-session cases are pending; the desktop Print button only checks print rights and prints nothing.
+- **Owners:** X16, G27, N51, G29, N52, N59, G209, G210, N199, N200, G211.
 - **Evidence:** [TR_AC_OPBL.md:1-25](../../project-memory/catalogs/forms/TR_AC_OPBL.md#L1-L25).
 
 ### Point Mast

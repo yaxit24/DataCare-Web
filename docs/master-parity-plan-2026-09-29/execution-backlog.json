@@ -6687,6 +6687,71 @@
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
       "parentLabels": "P9; R03"
+    },
+    {
+      "id": "N199",
+      "status": "implemented-unverified",
+      "action": "Party Opening is the desktop TR_AC_OPBL: one OP_DATA row per party in book '000' with Cr/Dr signs, AcOp_Ledr's six ledger legs, the opening list by balance type, reopen, edit and an audited delete; the Party master's inline opening, the Opening Balance page and the year carry-forward use the same writer, and the party balance counts an opening once.",
+      "parentLabels": "P9; L2",
+      "startAfter": [
+        "N171"
+      ],
+      "requiredProof": "the party-opening feature module passes through the screen; partyOpening.db.test.ts pins the OP_DATA row, the legs, the balance, the delete audit and the carry-forward.",
+      "gapIds": "G209, G210",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/api/src/modules/finance/partyOpening.ts",
+        "web/apps/api/src/routes/partyOpening.ts",
+        "web/apps/web/app/(app)/txn/ac-opbl/page.tsx",
+        "web/apps/api/test/partyOpening.db.test.ts",
+        "web/apps/web/test/features/modules/partyOpening.mjs"
+      ],
+      "statusNote": "IMPLEMENTED. Verified: partyOpening.db.test.ts 9 passed (the balance case fails on main's partyBalance, which counted the opening twice); party-opening module 13 passed, 5 blocked; cash-bank module unchanged (9 passed)."
+    },
+    {
+      "id": "N200",
+      "status": "implemented-unverified",
+      "action": "The bill-wise opening grid of TR_AC_OPBL: OP_DETL rows (voucher, date, bill, credit days, item, weights, touch, wastage, fines, diamond and amount with Cr/Dr) whose signed totals set the opening heads (MSG_TOT_FILL), the fine from net weight × (touch + wastage) (CommPassTotal), and the row refusals with the desktop messages.",
+      "parentLabels": "P9; L2",
+      "startAfter": [
+        "N199"
+      ],
+      "requiredProof": "bill rows saved through the screen are stored in OP_DETL, set the heads and reopen; refused rows answer the desktop messages.",
+      "gapIds": "G211",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/api/src/modules/finance/partyOpening.ts",
+        "web/apps/web/app/(app)/txn/ac-opbl/page.tsx",
+        "web/apps/api/test/partyOpening.db.test.ts",
+        "web/apps/web/test/features/modules/partyOpening.mjs"
+      ],
+      "statusNote": "IMPLEMENTED with N199. Verified: partyOpening.db.test.ts bill cases (heads from totals, OP_DETL replace and removal, four refusals); party-opening.children.bill-rows through the screen. The desktop Print button only checks print rights (TR_AC_OPBL.cs:2626-2633), so no print is owed."
+    },
+    {
+      "id": "N201",
+      "status": "planned",
+      "action": "Year End close and Balance TrFr carry openings forward through one writer: year-end close writes OP_DATA with its legs, and neither path leaves legs the other cannot replace.",
+      "parentLabels": "P9; L5",
+      "startAfter": [
+        "N199"
+      ],
+      "requiredProof": "running Year End close and then Balance TrFr (and the reverse) leaves one opening per party, counted once.",
+      "gapIds": "G212",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-31",
+      "evidence": [],
+      "statusNote": "PLANNED."
     }
   ],
   "amendments": [

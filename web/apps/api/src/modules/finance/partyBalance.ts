@@ -1,10 +1,13 @@
 import { withTxBudget } from '../shared/txBudget.js';
-import { openingFor } from '../masters/openingBalance.js';
 
 /**
  * Party balance for the on-select balance bar (desktop shows Dr/Cr amount + Gold + Silver the moment a
  * party is picked). Money balance = Σ(DR_AMT − CR_AMT) over AC_DATA; metal = Σ signed FINE_WT by
  * IT_TYPE ('G'/'S', SIGN '+'/'-'). Read-only.
+ *
+ * Openings are already in AC_DATA: a party opening writes its AcOp_Ledr legs in book '000' (modules/finance/partyOpening.ts),
+ * and the desktop balance (DC_Main.MsAcBal, DC_Main.cs:1463) reads AC_DATA alone. Adding OP_DATA as well counted every
+ * opening twice.
  */
 const r2 = (n: number): number => Math.round((n + 1e-9) * 100) / 100;
 const r3 = (n: number): number => Math.round((n + 1e-9) * 1000) / 1000;
@@ -34,8 +37,7 @@ export async function partyBalance(
       acCode,
     );
     const r = rows[0] ?? {};
-    const opening = await openingFor(tx, scope.coCode, acCode);
-    const bal = r2(Number(r.dr ?? 0) - Number(r.cr ?? 0) + opening.money);
+    const bal = r2(Number(r.dr ?? 0) - Number(r.cr ?? 0));
     let name: string | null = null;
     try {
       const nm: any[] = await tx.$queryRawUnsafe(
@@ -52,8 +54,8 @@ export async function partyBalance(
       name,
       amount: Math.abs(bal),
       sign: bal >= 0 ? 'Dr' : 'Cr',
-      gold: r3(Number(r.gold ?? 0) + opening.gold),
-      silver: r3(Number(r.silver ?? 0) + opening.silver),
+      gold: r3(Number(r.gold ?? 0)),
+      silver: r3(Number(r.silver ?? 0)),
     };
   });
 }
