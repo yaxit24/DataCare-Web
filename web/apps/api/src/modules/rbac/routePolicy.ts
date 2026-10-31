@@ -464,7 +464,13 @@ route('Cash / Bank/Bill-to-Bill Settle', [
   'DELETE /bill-to-bill/:vchNo',
 ]);
 route('Cash / Bank/Bank Reconciliation', ['GET /bank-recon', 'POST /bank-recon/clear']);
-route('Cash / Bank/Daily Rate', ['POST /daily-rate', 'GET /daily-rate', 'GET /daily-rate/dates']);
+route('Cash / Bank/Daily Rate', [
+  'POST /daily-rate',
+  'GET /daily-rate',
+  'GET /daily-rate/dates',
+  'DELETE /daily-rate',
+  'GET /daily-rate/print',
+]);
 route('Cash / Bank/Reminders', ['GET /reminders']);
 route('Cash / Bank/Rate Cut (price fixing)', [
   'POST /rate-cut',
@@ -943,6 +949,8 @@ const PRINT_ROUTES = new Set([
   // TR_CONTRA.cs:3000-3004: Contra and Journal documents are printed from the same form as Fine JV.
   'GET /contra/:vchNo/print',
   'GET /journal/:vchNo/print',
+  // MS_RATE.cs:1834-1838: RateRpt needs print rights.
+  'GET /daily-rate/print',
 ]);
 
 const UPDATE_POST_ROUTES = new Set([
