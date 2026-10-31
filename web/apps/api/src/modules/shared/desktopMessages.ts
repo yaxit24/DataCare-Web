@@ -231,6 +231,9 @@ export const DESKTOP_MESSAGES = {
    */
   PARTY_ENTRY_REQUIRED: 'Please Insert Party Entry And Try.....',
 
+  /** TR_CONTRA.cs:2694 — desktop condition: the grid's Cr total differs from its Dr total. */
+  CONTRA_DR_CR_NOT_SAME: 'You Cant Save This Voucher Becouse Cr Value and Dr Value is not same....',
+
   /** TR_AC_OPBL.cs:2682 — desktop condition: Save with no party code. */
   OPENING_PARTY_REQUIRED: 'Please Enter Party First...',
 

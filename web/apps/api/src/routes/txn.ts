@@ -161,10 +161,6 @@ import {
   postReceipt,
   postPayment,
   editPayment,
-  postContra,
-  deleteContra,
-  getContra,
-  editContra,
   getReceipt,
   editReceipt,
   getPayment,
@@ -248,6 +244,7 @@ import {
 } from '../modules/stock/tagPrint.js';
 import { tagStockReport, tagStockCsv } from '../modules/reports/tagStock.js';
 import { registerVoucherNavigationRoutes } from './voucherNavigation.js';
+import { postContra, deleteContra, getContra, editContra } from '../modules/finance/contra.js';
 import { registerSaleVoucherRoutes } from './saleVoucher.js';
 import { registerPurchaseVoucherRoutes } from './purchaseVoucher.js';
 import { registerPartyOpeningRoutes } from './partyOpening.js';
@@ -2804,11 +2801,13 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     return run(reply, 201, () =>
       postContra(prisma, {
         scope: scopeOf(req),
+        lines: Array.isArray(b.lines) ? b.lines : undefined, // the desktop grid (TR_CONTRA)
         fromAc: b.fromAc,
         toAc: b.toAc,
         amount: b.amount,
         vchDate: b.vchDate,
         itDesc: b.itDesc,
+        mainUser: sess(req).sub,
       }),
     );
   });
@@ -7549,6 +7548,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         prisma,
         {
           scope: scopeOf(req),
+          lines: Array.isArray(b.lines) ? b.lines : undefined, // the desktop grid (TR_CONTRA)
           fromAc: b.fromAc,
           toAc: b.toAc,
           amount: Number(b.amount),
