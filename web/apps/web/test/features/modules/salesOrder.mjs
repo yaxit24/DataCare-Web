@@ -526,7 +526,7 @@ export const salesOrder = {
       'create.tender-modes',
       'T02',
       'mutation',
-      'TR_SALE_ORD.cs:11368 and Order_Ledr legs 01/02 and 12/13: an advance of 3,000 cash and 2,000 UPI posts each tender to its own account',
+      'TR_SALE_ORD.cs:11368 and Order_Ledr legs 12/13: an advance can include UPI (and old metal and scheme), each posted to its own account',
       async (ctx) => {
         const { page } = await ctx.session();
         await enterOrder(page, { advance: 3000 });
@@ -552,6 +552,104 @@ export const salesOrder = {
           legs: 'customer Cr 5,000; cash Dr 3,000; UPI account Dr 2,000',
         },
         observe: async (ctx) => ({ orders: await latest(ctx) }),
+      },
+    ),
+
+    C(
+      'create.cheque-card-advance',
+      'T02',
+      'mutation',
+      'TR_SALE_ORD.cs:9131-9150, :11368 and Order_Ledr (Ac_Ledr.cs:28-47): cash 3,000, cheque 2,000 and card 1,000 are stored per tender, ADV_AMT 6,000, and post legs 01-06; the day book credits 6,000 and debits the bank and card (Ac_Rojmel.cs:11-16)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await enterOrder(page, { advance: 3000 });
+        await openDetails(page);
+        for (const [label, value] of [
+          ['Cash A/c', CASH],
+          ['Cheque Amt', '2000'],
+          ['Bank A/c', PARTIES.bank.code],
+          ['Cheque No', '123456'],
+          ['Card Amt', '1000'],
+          ['Card A/c', PARTIES.bank.code],
+        ])
+          await page.getByLabel(label, { exact: true }).fill(value);
+        const response = await save(page);
+        assert.equal(response.status(), 201, await response.text());
+        const vchNo = String((await response.json()).vchNo).padStart(5, '0');
+        const [h] = await ctx.rows(
+          `SELECT "CASH_AMT"::float cash,"CHQ_AMT"::float chq,"CARD_AMT"::float card,"ADV_AMT"::float adv
+             FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        const g = await ctx.rows(
+          `SELECT right("LEDR_KEY",2) leg,btrim("AC_CODE") ac,"DR_AMT"::float dr,"CR_AMT"::float cr,btrim("CHQ_NO"::text) chq
+             FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "LEDR_KEY"`,
+          vchNo,
+        );
+        const r = await ctx.rows(
+          `SELECT right("LEDR_KEY",2) leg,btrim("AC_CODE") ac,"DR_AMT"::float dr,"CR_AMT"::float cr
+             FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "LEDR_KEY"`,
+          vchNo,
+        );
+        const party = PARTIES.local.code;
+        const bank = PARTIES.bank.code;
+        assert.deepEqual(h, { cash: 3000, chq: 2000, card: 1000, adv: 6000 });
+        assert.deepEqual(
+          g.map((x) => [x.leg, x.ac, x.dr, x.cr, x.chq || '']),
+          [
+            ['01', party, 0, 3000, ''],
+            ['02', CASH, 3000, 0, ''],
+            ['03', party, 0, 2000, '123456'],
+            ['04', bank, 2000, 0, '123456'],
+            ['05', party, 0, 1000, '123456'],
+            ['06', bank, 1000, 0, '123456'],
+          ],
+        );
+        assert.deepEqual(
+          r.map((x) => [x.leg, x.ac, x.dr, x.cr]),
+          [
+            ['01', party, 0, 6000],
+            ['02', bank, 2000, 0],
+            ['03', bank, 1000, 0],
+          ],
+        );
+        await loadOrder(page, vchNo);
+        await openDetails(page);
+        const reopened = [
+          await page.getByLabel('Advance ₹', { exact: true }).inputValue(),
+          await page.getByLabel('Cheque Amt', { exact: true }).inputValue(),
+          await page.getByLabel('Card Amt', { exact: true }).inputValue(),
+        ].map(Number);
+        assert.deepEqual(reopened, [3000, 2000, 1000]);
+        return {
+          observation: `order ${vchNo}: tenders ${JSON.stringify(h)}, ${g.length} legs, ${r.length} day-book rows; reopened ${reopened.join('/')}`,
+          expected: { cash: 3000, cheque: 2000, card: 1000, advance: 6000, legs: '01-06' },
+          database: { header: h, ledger: g, dayBook: r },
+          downstream: { reopened },
+        };
+      },
+    ),
+
+    C(
+      'refusal.cheque-needs-bank',
+      'T06',
+      'refusal',
+      'TR_SALE_ORD.cs:8988-8991: a cheque amount without a bank account is refused ("Please Select Bank Account And Try Because Chq Rec Amt <> 0") and writes nothing',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const before = await counts(ctx);
+        await enterOrder(page);
+        await openDetails(page);
+        await page.getByLabel('Cheque Amt', { exact: true }).fill('2000');
+        const { response } = await trySave(page);
+        assert.equal(response?.status(), 400, `answered ${response?.status()}`);
+        await page.getByText('Please Select Bank Account', { exact: false }).waitFor();
+        assert.deepEqual(await counts(ctx), before);
+        return {
+          observation: 'refused with the desktop message',
+          expected: 'refused, no write',
+          database: { before },
+        };
       },
     ),
 

@@ -384,7 +384,8 @@ run('Sales Order financial edit joins the admitted HTTP session transaction', ()
     for (const table of orderTables) {
       const omit =
         table === 'SL_ORD_DATA'
-          ? ['ADV_AMT']
+          ? // N197: the screen's advance is the cash tender, so CASH_AMT follows it and ADV_AMT is their sum.
+            ['ADV_AMT', 'CASH_AMT']
           : table === 'AC_DATA' || table === 'ROJ_MEL_DATA'
             ? ['DR_AMT', 'CR_AMT']
             : [];

@@ -6652,8 +6652,8 @@
     },
     {
       "id": "N197",
-      "status": "planned",
-      "action": "The order's tender rows like TR_SALE_ORD: cash, UPI, cheque (bank), card, old gold, old silver and scheme amounts editable on the screen, stored on SL_ORD_DATA and posted per Order_Ledr legs 01-06 and 12-13; ADV_AMT is their sum.",
+      "status": "implemented-unverified",
+      "action": "The Sales Order's money tenders like TR_SALE_ORD: cash, cheque (bank, cheque no) and card (card account) editable on the screen, stored on SL_ORD_DATA with ADV_AMT their sum, posted on Order_Ledr legs 01-06 and day-book types 01-03; UPI, old metal and scheme stay open.",
       "startAfter": [
         "N195"
       ],
@@ -6663,7 +6663,15 @@
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
-      "parentLabels": "P9; R03"
+      "parentLabels": "P9; R03",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/api/src/modules/sales/salesOrderTender.ts",
+        "web/apps/api/test/salesOrderRound4.db.test.ts",
+        "web/apps/web/test/features/modules/salesOrder.mjs",
+        "web/apps/web/test/features/baseline.json"
+      ],
+      "statusNote": "IMPLEMENTED (cash, cheque, card). create.header-tender, create.cheque-card-advance and refusal.cheque-needs-bank pass in the browser; UPI, old metal and scheme remain open."
     },
     {
       "id": "N198",

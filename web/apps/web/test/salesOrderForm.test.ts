@@ -408,3 +408,38 @@ describe('Sales Order preview on the company amount basis (N196)', () => {
     expect(enter().itemAmount).toBe('56090.8');
   });
 });
+
+// N197 (G206): the cheque and card tenders travel with the order and come back on reopen.
+describe('Sales Order cheque and card tenders (N197)', () => {
+  it('sends the cheque and card amounts and hydrates them', () => {
+    const row = setSalesOrderCell(setSalesOrderCell(blank(1), 'itCode', 'GLD22'), 'netWt', '5');
+    const payload = salesOrderPayload(
+      { ...blankOrderHeader(), acCode: 'TOURAC', advanceAmount: '3000' },
+      {
+        chequeAmount: '2000',
+        bankAc: 'BANKX',
+        chequeNo: '654321',
+        cardAmount: '1000',
+        cardAc: 'BANKX',
+      },
+      [row],
+    );
+    expect([payload.advanceAmount, payload.chequeAmount, payload.cardAmount]).toEqual([
+      3000, 2000, 1000,
+    ]);
+    expect([payload.bankAc, payload.chequeNo, payload.cardAc]).toEqual([
+      'BANKX',
+      '654321',
+      'BANKX',
+    ]);
+    const hydrated = hydrateSalesOrder({ ...stored, chequeAmount: 2000, cardAmount: 0 });
+    expect([hydrated.header.chequeAmount, hydrated.header.cardAmount]).toEqual(['2000', '']);
+  });
+  it('refuses a cheque amount that is not a number', () => {
+    expect(() =>
+      salesOrderPayload({ ...blankOrderHeader(), acCode: 'TOURAC' }, { chequeAmount: 'two' }, [
+        setSalesOrderCell(blank(1), 'itCode', 'GLD22'),
+      ]),
+    ).toThrow('Cheque Amt must be a valid number');
+  });
+});
