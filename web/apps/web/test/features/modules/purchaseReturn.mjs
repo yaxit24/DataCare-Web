@@ -74,14 +74,14 @@ const cell = (page, row, n) =>
 const cellText = (page, row, n) =>
   grid(page).locator('tbody tr').nth(row).locator(`td:nth-child(${n})`);
 
-async function openReturn(page, { original = true } = {}) {
+async function openReturn(page, { original = false } = {}) {
   await page.goto('/txn/purchase-return');
   await page.getByRole('heading', { name: 'Purchase Return', exact: true }).waitFor();
   const book = page.getByRole('combobox', { name: 'Configured book', exact: true }).first();
   for (let i = 0; i < 50 && (await book.inputValue()) !== BOOK; i++) await page.waitForTimeout(100);
   assert.equal(await book.inputValue(), BOOK, 'the provisioned PURC RETURN book is selected');
-  // The web makes Orig Purchase Book a required select and the company has two purchase books, so nothing is
-  // preselected and the browser blocks Save until one is chosen (G198, its own case). Lifecycle cases pick PR.
+  // The company has two purchase books, so Orig Purchase Book starts blank; a free-standing return saves without it
+  // (N189, G199). A case that returns against a purchase picks the book itself.
   if (original) await chooseOriginalBook(page);
   return book;
 }
@@ -581,24 +581,11 @@ export const purchaseReturn = {
         const vchNo = await createReturn(ctx, page);
         const [before] = await header(ctx, vchNo);
         await loadReturn(page, vchNo);
-        // A free-standing return reopens with Orig Purchase Book empty, and that select is required (G198), so
-        // an operator has to choose a book before saving. Record it, then choose PR and test the edit itself.
-        const reopenBlocked = await page.evaluate(() => {
-          const el = document.querySelector('form :invalid');
-          return el
-            ? el.closest('.field')?.querySelector('label')?.textContent?.trim() || el.tagName
-            : null;
-        });
+        // A free-standing return reopens with Orig Purchase Book blank; the desktop needs only the party and the
+        // voucher number (TR_KR_ISU.cs:4986-4999), so the reopened return saves as it is (N189, G199).
         await page.waitForLoadState('networkidle');
-        await chooseOriginalBook(page);
-        const picked = await field(page, 'Orig Purchase Book').inputValue();
-        await page.waitForTimeout(1000);
-        const later = await field(page, 'Orig Purchase Book').inputValue();
         const { response: unchanged, blocked } = await submit(page, `Save Return #${vchNo}`);
-        assert(
-          unchanged,
-          `reopened return not saved: picked ${picked}, 1 s later ${later || 'blank'}; ${blocked}`,
-        );
+        assert(unchanged, `reopened return not saved: ${blocked}`);
         assert.equal(unchanged.status(), 200, await unchanged.text());
         assert.deepEqual(
           (await header(ctx, vchNo))[0],
@@ -609,9 +596,7 @@ export const purchaseReturn = {
           .getByText(`Return saved — Voucher #${Number(vchNo)}`, { exact: false })
           .waitFor();
         await page.waitForLoadState('networkidle');
-        // After a save the screen reloads the voucher, and Orig Purchase Book comes back blank again (G198).
         const afterSave = await field(page, 'Orig Purchase Book').inputValue();
-        await chooseOriginalBook(page);
         await cell(page, 0, 4).fill('10');
         await cell(page, 0, 5).fill('10');
         const edited = await save(page, `Save Return #${vchNo}`);
@@ -626,7 +611,7 @@ export const purchaseReturn = {
         );
         assert(balanced(await ledger(ctx, vchNo)));
         return {
-          observation: `voucher ${vchNo}: reopened with required field blank: ${reopenBlocked ?? 'none'}; after the unchanged save Orig Purchase Book was '${afterSave}'; edit → total ${after.tot}`,
+          observation: `voucher ${vchNo}: unchanged save 200 with Orig Purchase Book '${afterSave}'; edit → total ${after.tot}`,
           expected: { total: 12772, identityKept: true },
           database: { before, after, line: l },
           downstream: { balanced: true },

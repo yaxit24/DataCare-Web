@@ -2258,6 +2258,18 @@ serves its own build however the build was produced, including a turbo cache rep
 feature harness call `assertPortsFree` before they start their servers and stop with the port named when something
 already answers there.
 
+### N189 — A purchase return without an original purchase saves (G199)
+
+`web/apps/web/components/BookSelect.tsx` takes `required` (default true). The voucher's own book stays required; the
+Purchase Return's Orig Purchase Book passes `required={false}`, because the desktop needs only the party and the voucher
+number to save a return (`TR_KR_ISU.cs:4986-4999`) and the writer already stores no original reference when there is no
+original voucher. The browser no longer blocks Save on a blank original book, so a free-standing return saves and a
+reopened free-standing return saves unchanged.
+
+Evidence: `purchase-return.create.without-original` passes and leaves the baseline; `edit.unchanged-and-reprice` now
+saves the reopened return without choosing a book; `create.against-purchase` still imports and saves with PR chosen;
+`web/apps/web/test/bookSelect.test.ts` pins the default and the opt-out.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2373,7 +2385,7 @@ already answers there.
 | N186 | — | implemented-unverified, evidence in this change (G197: the web build clears the route cache; unit 2, a real build removed 13 entries) |
 | N187 | — | implemented-unverified, evidence in this change (Purchase Return module 15/5/2 on shared real data; found G198–G201; narrows G193) |
 | N188 | — | planned (G198: purchase return and purchase line amounts and bill total in whole rupees, as TR_KR_ISU and TR_PURC) |
-| N189 | — | planned (G199: the original purchase book is optional on a purchase return and survives reopen) |
+| N189 | — | implemented-unverified, evidence in this change (G199: BookSelect `required` opt-out; a free-standing purchase return saves, and a reopened one saves unchanged) |
 | N190 | — | implemented-unverified, evidence in this change (G200: 22 voucher screens marked; a unit scan keeps every voucher page's primary Save marked; purchase-return Alt+S passes in the browser) |
 | N191 | — | planned (G201: provision BOOK_TBL_NAME for purchase-family books and backfill existing companies) |
 | N192 | — | implemented-unverified, evidence in this change (G202, D32 recorded; generated per-tier progress page; Lite packages in document 15 §5) |
