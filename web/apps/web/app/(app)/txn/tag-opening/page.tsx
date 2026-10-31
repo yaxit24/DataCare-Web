@@ -9,11 +9,13 @@ import {
   extendedGridColumnCount,
   GridModeToggle,
 } from '../../../../components/ExtendedGrid';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { del, get, post, put, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
+import { VoucherList } from '../../../../components/VoucherList';
+import { useVoucherNumberKeys, VoucherNumberNote } from '../../../../components/VoucherNumberKeys';
 import { BookSelect } from '../../../../components/BookSelect';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
@@ -22,8 +24,12 @@ import { parityContainmentMessage, parityContainmentRule } from '@datacare/core/
 import { fineFor } from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
 
-/** Tag Opening (TR_TAG_OPBL): load opening barcoded stock. Tag No auto-generates (SRNO_MAST.TAG_SRNO)
- *  when left blank. Rich per-tag fields → BAR_DETL (Counter/Design/Size/LsWt/Lbr%/LbrRate/OthAmt). */
+/** Tag Opening and Only Tag Entry (TR_TAG_OPBL): load opening barcoded stock. Tag No auto-generates (SRNO_MAST.TAG_SRNO)
+ *  when left blank. Rich per-tag fields → BAR_DETL (Counter/Design/Size/LsWt/Lbr%/LbrRate/OthAmt).
+ *  The two menus share the form and differ by book family (MDI_FORM.cs:7700-7710 CurBookHelp("OPSTK"), :8574-8584
+ *  CurBookHelp("TAG GEN")): Only Tag Entry (`?mode=TAG GEN`) makes the tags out of a loose stock item, which it asks for. */
+const DELETE_CONFIRM = 'Are You Sure To Delete This Voucher now?'; // TR_TAG_OPBL.cs:11387
+const DELETE_DONE = 'Delete Success.'; // :11431
 interface Line {
   tagNo: string;
   vchSrno?: number;
@@ -210,8 +216,31 @@ const blank = (): Line => ({
   tagCost: '',
   westPct: '',
 });
+/** A saved row as the grid shows it: text as stored, numbers as typed text, zero as blank (the desktop's empty cell). */
+function fromSaved(saved: Record<string, unknown>): Line {
+  const line = blank();
+  for (const key of Object.keys(line) as Array<keyof Line>) {
+    if (key === 'vchSrno') continue;
+    const value = saved[key];
+    if (value === undefined || value === null) continue;
+    (line as unknown as Record<string, string>)[key] =
+      typeof value === 'number' ? (value === 0 ? '' : String(value)) : String(value);
+  }
+  line.vchSrno = Number(saved.vchSrno ?? 0) || undefined;
+  if (!line.tblCode) line.tblCode = '001';
+  return line;
+}
 const n = (v: string) => Number(v || 0);
-const str = (v: unknown) => (v == null || Number(v) === 0 ? '' : String(v));
+/** The cells the Fine column is worked out from. TR_TAG_OPBL.cs:6527-6594 recomputes the Fine column whenever one of
+ *  them changes, so a fine reloaded with the voucher (or typed in Fine Wt) gives way to the formula once they change. */
+const FINE_INPUTS = new Set<keyof Line>([
+  'grossWt',
+  'lessWt',
+  'netWt',
+  'touch',
+  'ghtWt',
+  'westPct',
+]);
 const r3 = (x: number) => Math.round((x + 1e-9) * 1000) / 1000;
 const currentDate = () => todayLocal();
 const gridCell = (row: number, column: number) => ({
@@ -233,6 +262,12 @@ export default function TagOpeningPage() {
   const [busy, setBusy] = useState(false);
   // P3: The loose-stock item code the opened tag draws its metal from.
   const [stockItCode, setStockItCode] = useState('');
+  // The menu decides the book family: Tag Opening lists OPSTK books, Only Tag Entry (?mode=TAG GEN) TAG GEN books.
+  const [tagGen, setTagGen] = useState(false);
+  useEffect(() => {
+    setTagGen(new URLSearchParams(window.location.search).get('mode')?.toUpperCase() === 'TAG GEN');
+  }, []);
+  const [notice, setNotice] = useState('');
   const submitRef = useRef<HTMLButtonElement>(null);
   // Desktop parity: TR_TAG_OPBL reads the scale only while the NET WEIGHT cell is current
   // (`if (MSG.Col != 14) continue;`), so the row that owns focus is tracked and a reading is discarded
@@ -263,14 +298,21 @@ export default function TagOpeningPage() {
     onEscape: () => submitRef.current?.focus(),
   });
   const setLine = (i: number, k: keyof Line, v: string) =>
-    setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
+    setLines((ls) =>
+      ls.map((l, j) =>
+        j === i ? { ...l, [k]: v, ...(FINE_INPUTS.has(k) ? { fineWt: '' } : {}) } : l,
+      ),
+    );
+  // The Fine column shows what will be saved: the stored or typed fine while it stands, else the formula.
   const fine = (l: Line) =>
-    fineFor('tagOpening', {
-      netWt: n(l.netWt),
-      touch: n(l.touch),
-      ghtWt: n(l.ghtWt),
-      westPct: n(l.westPct),
-    });
+    l.fineWt.trim()
+      ? n(l.fineWt)
+      : fineFor('tagOpening', {
+          netWt: n(l.netWt),
+          touch: n(l.touch),
+          ghtWt: n(l.ghtWt),
+          westPct: n(l.westPct),
+        });
   const scopeQuery = `coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}`;
   const errorText = (error: unknown) =>
     error instanceof ApiError
@@ -282,57 +324,60 @@ export default function TagOpeningPage() {
     setVoucherLookup('');
     setVchDate(currentDate());
     setLines([blank()]);
+    setStockItCode('');
     setRes(null);
     setErr('');
+    setNotice('');
   }
 
-  async function loadVoucher() {
-    if (!voucherLookup.trim()) return;
+  async function openVoucher(requested: string): Promise<boolean> {
+    const vchNo = requested.trim();
+    if (!vchNo) return false;
     setBusy(true);
     setErr('');
+    setNotice('');
     try {
-      const view = await get<any>(
-        `/stock/tag-opening/${encodeURIComponent(voucherLookup.trim())}?${scopeQuery}`,
-      );
+      const view = await get<any>(`/stock/tag-opening/${encodeURIComponent(vchNo)}?${scopeQuery}`);
       setLoadedVchNo(String(view.voucherNo));
       setVoucherLookup(String(view.voucherNo));
       setVchDate(String(view.vchDate));
-      const loaded = (view.lines ?? []).map((line: any): Line => ({
-        // Start from blank() so every desktop field has a defined value, then overlay the loaded row.
-        ...blank(),
-        tagNo: String(line.tagNo ?? ''),
-        vchSrno: Number(line.vchSrno ?? 0) || undefined,
-        itCode: String(line.itCode ?? ''),
-        tblCode: String(line.tblCode ?? '001'),
-        designNo: String(line.designNo ?? ''),
-        itmSize: String(line.itmSize ?? ''),
-        pcs: str(line.pcs),
-        grossWt: str(line.grossWt),
-        lessWt: str(line.lessWt),
-        netWt: str(line.netWt),
-        touch: str(line.touch),
-        lbrPct: str(line.lbrPct),
-        lbrRate: str(line.lbrRate),
-        othAmt: str(line.othAmt),
-        rate: str(line.rate),
-        mrp: str(line.mrp),
-      }));
+      // TR_TAG_OPBL.cs:10398 reloads the stock item (BAR_DATA.STK_IT_CODE) with the voucher.
+      setStockItCode(String(view.stockItCode ?? ''));
+      // Every field the API returns goes back into the row (G214): copying only the 15 visible columns made an
+      // unchanged save blank the other 50 (hallmark ids, karigar costing, JDT weights, order and mfg links).
+      const loaded = (view.lines ?? []).map((line: any): Line => fromSaved(line));
       setLines(loaded.length ? loaded : [blank()]);
       setRes(null);
+      return true;
     } catch (error) {
       setErr(errorText(error));
+      return false;
     } finally {
       setBusy(false);
     }
   }
 
+  async function loadVoucher() {
+    await openVoucher(voucherLookup);
+  }
+
+  // N172 (G179): the voucher number box's F1, Up, Down and Enter (tVchNo_KeyDown, TR_TAG_OPBL.cs:11879).
+  const numberKeys = useVoucherNumberKeys({
+    table: 'BAR_DATA',
+    book: coBook,
+    value: voucherLookup,
+    open: (vchNo) => openVoucher(vchNo),
+    fresh: newVoucher,
+  });
+
   async function removeVoucher() {
-    if (!loadedVchNo || !window.confirm(`Delete voucher ${loadedVchNo}?`)) return;
+    if (!loadedVchNo || !window.confirm(DELETE_CONFIRM)) return;
     setBusy(true);
     setErr('');
     try {
       await del(`/stock/tag-opening/${encodeURIComponent(loadedVchNo)}?${scopeQuery}`);
       newVoucher();
+      setNotice(DELETE_DONE);
     } catch (error) {
       setErr(errorText(error));
     } finally {
@@ -347,7 +392,7 @@ export default function TagOpeningPage() {
     setBusy(true);
     try {
       const body = {
-        stockItCode: stockItCode.trim() || undefined,
+        stockItCode: tagGen ? stockItCode.trim() || undefined : undefined,
         coBook: coBook || undefined,
         coYear,
         lcCode,
@@ -449,17 +494,34 @@ export default function TagOpeningPage() {
     <div>
       <FormKeyHints actions={formKeys} />
       <h1>
-        Tag Opening Balance{' '}
-        <span className="muted">— barcoded opening stock (Tag No auto-generates when blank)</span>
+        {tagGen ? 'Only Tag Entry' : 'Tag Opening Balance'}{' '}
+        <span className="muted">
+          {tagGen
+            ? '— tags made from a loose stock item (Tag No auto-generates when blank)'
+            : '— barcoded opening stock (Tag No auto-generates when blank)'}
+        </span>
       </h1>
+      {notice && (
+        <div className="msg ok" role="status">
+          {notice}
+        </div>
+      )}
       <form onSubmit={submit}>
         <div className="panel">
-          <div className="row">
-            <div className="field">
-              <label>Stock Item Code</label>
-              <input value={stockItCode} onChange={(e) => setStockItCode(e.target.value)} />
+          {tagGen && (
+            <div className="row">
+              <div className="field">
+                <label>Stock Item Code</label>
+                <LookupPicker
+                  entity="items"
+                  ariaLabel="Stock Item Code"
+                  value={stockItCode}
+                  onChange={setStockItCode}
+                  style={{ width: 120 }}
+                />
+              </div>
             </div>
-          </div>
+          )}
           <div className="row">
             <div className="field">
               <label>Voucher No</label>
@@ -467,12 +529,14 @@ export default function TagOpeningPage() {
                 aria-label="Voucher No"
                 value={voucherLookup}
                 onChange={(e) => setVoucherLookup(e.target.value)}
+                onKeyDown={numberKeys.onKeyDown}
                 placeholder="00001"
               />
             </div>
             <button type="button" className="ghost" disabled={busy} onClick={loadVoucher}>
               Load
             </button>
+            <VoucherNumberNote note={numberKeys.note} />
             {loadedVchNo && (
               <span className="msg ok" data-testid="tag-opening-loaded">
                 Loaded #{loadedVchNo}
@@ -490,6 +554,7 @@ export default function TagOpeningPage() {
               <label>Date</label>
               <input
                 aria-label="Date"
+                ref={numberKeys.dateRef}
                 type="date"
                 value={vchDate}
                 onChange={(e) => setVchDate(e.target.value)}
@@ -500,8 +565,8 @@ export default function TagOpeningPage() {
               <BookSelect
                 value={coBook}
                 onChange={setCoBook}
-                preferred="TOP"
-                mainBooks={['TAG OPENING']}
+                preferred={tagGen ? 'TGN' : 'TOP'}
+                mainBooks={tagGen ? ['TAG GEN'] : ['OPSTK', 'TAG OPENING']}
               />
             </div>
           </div>
@@ -623,7 +688,9 @@ export default function TagOpeningPage() {
                       />
                     </td>
                   ))}
-                  <td className="num">{fine(line).toLocaleString('en-IN')}</td>
+                  <td className="num" data-testid={`tag-opening-fine-row-${i + 1}`}>
+                    {fine(line).toLocaleString('en-IN')}
+                  </td>
                   {(
                     [
                       ['lbrPct', 44],
@@ -690,6 +757,7 @@ export default function TagOpeningPage() {
                   <div className="field" key={String(key)}>
                     <label>{label}</label>
                     <input
+                      aria-label={`${label} row ${index + 1}`}
                       value={String(line[key] ?? '')}
                       onChange={(e) => setLine(index, key, e.target.value)}
                     />
@@ -713,7 +781,11 @@ export default function TagOpeningPage() {
           </div>
         </fieldset>
       </form>
-      {err && <div className="msg err">{err}</div>}
+      {err && (
+        <div className="msg err" role="alert">
+          {err}
+        </div>
+      )}
       {res && (
         <div className="panel">
           <div className="msg ok">
@@ -726,6 +798,13 @@ export default function TagOpeningPage() {
           ) : null}
         </div>
       )}
+      <VoucherList
+        table="BAR_DATA"
+        book={coBook}
+        onLoad={(vchNo) => void openVoucher(vchNo)}
+        openKey={numberKeys.listKey}
+        reloadKey={res?.vchNo}
+      />
     </div>
   );
 }

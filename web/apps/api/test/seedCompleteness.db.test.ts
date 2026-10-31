@@ -76,10 +76,11 @@ databaseDescribe('provisioning leaves a company able to trade', () => {
     expect(await count('BOOK_DETL')).toBeGreaterThan(0);
 
     // Every book that can post must have at least one account row. WH QUOT (a quotation) and TAG OPENING
-    // (a pure stock-opening voucher, empty AC_DATA), FINE INOUT (a pure metal movement, empty AC_DATA) and
+    // (a pure stock-opening voucher, empty AC_DATA), TAG GEN (Only Tag Entry, tags out of loose stock, empty
+    // AC_DATA), FINE INOUT (a pure metal movement, empty AC_DATA) and
     // OPSTK (item opening, empty AC_DATA) are deliberately ledger-less: their writers post no ledger leg, so
     // they carry no BOOK_DETL. Each has a zero-economic-footprint DB test.
-    const LEDGERLESS = `('WH QUOT','TAG OPENING','FINE INOUT','OPSTK')`;
+    const LEDGERLESS = `('WH QUOT','TAG OPENING','TAG GEN','FINE INOUT','OPSTK')`;
     const orphans = (await owner.$queryRawUnsafe(
       `SELECT d."CO_BOOK" FROM "BOOK_DATA" d
         WHERE d.tenant_id=$1 AND coalesce(d."MAIN_BOOK",'') NOT IN ${LEDGERLESS}
@@ -96,7 +97,7 @@ databaseDescribe('provisioning leaves a company able to trade', () => {
         ORDER BY d."CO_BOOK"`,
       TENANT,
     )) as Array<{ CO_BOOK: string }>;
-    expect(documentOnly.map((o) => o.CO_BOOK)).toEqual(['FIO', 'IOP', 'TOP', 'WHQ']);
+    expect(documentOnly.map((o) => o.CO_BOOK)).toEqual(['FIO', 'IOP', 'TGN', 'TOP', 'WHQ']);
   });
 
   it('provisions the accounts a sale posts to', async () => {
