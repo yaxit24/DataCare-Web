@@ -328,6 +328,106 @@ type Line = { crdr: 'DR' | 'CR'; acCode: string; fine: number; itDesc?: string }
     expect(await countWriteRows()).toEqual(before);
   });
 
+  it('refuses in desktop order — employee, company type B, year, lock date, then totals — with the desktop lock text', async () => {
+    const before = await countWriteRows();
+    const unequal = { lines: [twoRows(2)[0], twoRows(1.5)[1]] };
+    const message = async (payload: Record<string, unknown>) => {
+      const response = await post(body(payload));
+      expect(response.statusCode, response.body).toBe(400);
+      return String(response.json().message);
+    };
+    await exec(
+      `UPDATE "CO_SET" SET "EMP_CODE_MANDATORY"='Y',"LOCK_DATE"=$2 WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+      tenantId,
+      DAY,
+    );
+    await exec(
+      `UPDATE "CO_MAST" SET "CO_TYPE"='B' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+      tenantId,
+    );
+    try {
+      // TR_CONTRA.cs:2666 before :2673 before :2680 before :2686 before :2692.
+      expect(await message({ ...unequal, vchDate: OUT_OF_YEAR })).toBe(
+        'Please Select Employee Code and Try......',
+      );
+      expect(await message({ ...unequal, vchDate: OUT_OF_YEAR, empCode: EMP })).toBe(
+        'You Cant Save This Voucher Becouse This Company Type is B......',
+      );
+      await exec(
+        `UPDATE "CO_MAST" SET "CO_TYPE"=NULL WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        tenantId,
+      );
+      expect(await message({ ...unequal, vchDate: OUT_OF_YEAR, empCode: EMP })).toBe(
+        'You Cant Save Entry Because Voucher Date Not In Current Year... Please Change Date...',
+      );
+      const [y, m, d] = DAY.split('-');
+      expect(await message({ ...unequal, empCode: EMP })).toBe(
+        `You Cant Save and Delete This Voucher Becouse Lock Date is = ${d}/${m}/${y} ....`,
+      );
+    } finally {
+      await exec(
+        `UPDATE "CO_SET" SET "EMP_CODE_MANDATORY"=NULL,"LOCK_DATE"=NULL WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        tenantId,
+      );
+      await exec(
+        `UPDATE "CO_MAST" SET "CO_TYPE"=NULL WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        tenantId,
+      );
+    }
+    expect(await countWriteRows()).toEqual(before);
+  });
+
+  it('reopens equal counter rows as one grid row and re-saves an unchanged account whose master row is gone', async () => {
+    // TR_CONTRA.cs:2541 groups the LDR_TYPE 0 rows by AC_CODE, AC_NAME, CRDR_TYPE and IT_DESC.
+    const vchNo = await create({
+      lines: [
+        { crdr: 'DR', acCode: FROM, fine: 5, itDesc: '' },
+        { crdr: 'CR', acCode: TO2, fine: 2, itDesc: 'split' },
+        { crdr: 'CR', acCode: TO2, fine: 3, itDesc: 'split' },
+      ],
+    });
+    expect(await source(vchNo)).toHaveLength(4);
+    const reopened = await adminRequest('GET', `/fine-jv/${vchNo}?coBook=${BOOK}`);
+    expect(reopened.statusCode, reopened.body).toBe(200);
+    expect(reopened.json().lines).toEqual([
+      { crdr: 'DR', acCode: FROM, acName: FROM_NAME, itDesc: '', fine: 5 },
+      { crdr: 'CR', acCode: TO2, acName: TO2_NAME, itDesc: 'split', fine: 5 },
+    ]);
+    await exec(`DELETE FROM "AC_MAST" WHERE tenant_id=$1 AND "AC_CODE"=$2`, tenantId, TO2);
+    try {
+      // TR_CONTRA.cs:2550 reloads the saved AC_NAME; an unchanged account is re-saved with it.
+      const resaved = await adminRequest('PUT', `/fine-jv/${vchNo}?coBook=${BOOK}`, {
+        lines: reopened
+          .json()
+          .lines.map(({ acName: _name, ...line }: Record<string, unknown>) => line),
+      });
+      expect(resaved.statusCode, resaved.body).toBe(200);
+      expect((await source(vchNo)).map((r) => [r.sr, r.ac, r.name, r.cr, r.dr])).toEqual([
+        [1, TO2, TO2_NAME, 5, 0],
+        [2, FROM, FROM_NAME, 0, 5],
+      ]);
+      // Vch_Remark LEFT JOINs AC_MAST, so the orphan account's remark carries no name.
+      expect((await remarks(vchNo)).map((r) => [r.sr, r.ac, r.name, r.remark])).toEqual([
+        [1, TO2, '', 'split'],
+      ]);
+      const changed = await adminRequest('PUT', `/fine-jv/${vchNo}?coBook=${BOOK}`, {
+        lines: [
+          { crdr: 'DR', acCode: TO2, fine: 5 },
+          { crdr: 'CR', acCode: FROM, fine: 5 },
+        ],
+      });
+      expect(changed.statusCode, changed.body).toBe(400);
+      expect(changed.body).toContain(`fine-jv account not found: ${TO2}`);
+    } finally {
+      await exec(
+        `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GR") VALUES ($1,'01','01',$2,$3,'10')`,
+        tenantId,
+        TO2,
+        TO2_NAME,
+      );
+    }
+  });
+
   it('writes the desktop pair, 33-character fine legs, the book-named hidden identity, day book names and rebuilt remarks', async () => {
     const vchNo = await create({ empCode: EMP });
     expect(await source(vchNo)).toEqual([
@@ -468,6 +568,12 @@ type Line = { crdr: 'DR' | 'CR'; acCode: string; fine: number; itDesc?: string }
     expect(html.split('From detail').length - 1).toBe(2);
     expect(html).toContain('3.000');
     expect(html).toContain('2.000');
+    // {@InVoiceTipe} is 'ORIGINAL' on a preview; {@CurPag} prints the page number; CR/DR fields are not suppressed.
+    expect(html).toContain('ORIGINAL');
+    expect(html).toContain('counter(page)');
+    expect(html.split('>0.000<').length - 1).toBe(4);
+    expect(html).toContain('Vch Date');
+    expect(html).toContain('Vch No');
     expect(html).toContain('For : Fine JV Jewellers');
     expect(html).toContain('Party signature.');
     expect(html).toContain('>signature.<');
@@ -565,6 +671,14 @@ type Line = { crdr: 'DR' | 'CR'; acCode: string; fine: number; itDesc?: string }
       [DAY, 4.322],
     ]);
 
+    const longDesc = 'L'.repeat(150);
+    const described = await adminRequest('PUT', `/fine-jv/${vchNo}?coBook=${BOOK}`, {
+      lines: [
+        { crdr: 'DR', acCode: FROM, fine: 4.322, itDesc: longDesc },
+        { crdr: 'CR', acCode: TO2, fine: 4.322, itDesc: 'new to' },
+      ],
+    });
+    expect(described.statusCode, described.body).toBe(200);
     const hidden = String((await source(vchNo))[0]!.hidden);
     const deleted = await adminRequest('DELETE', `/fine-jv/${vchNo}?coBook=${BOOK}`);
     expect(deleted.statusCode, deleted.body).toBe(200);
@@ -581,6 +695,18 @@ type Line = { crdr: 'DR' | 'CR'; acCode: string; fine: number; itDesc?: string }
       ADMIN,
     );
     expect(left).toEqual([{ remarks: 0, temp: 0, source: 0, audits: 2 }]);
+    // TR_CONTRA.cs:2961 audits SUBSTRING(IT_DESC,1,149).
+    const auditDesc = await query<Array<{ sr: number; len: number }>>(
+      `SELECT "SR_NO"::int sr,length(coalesce("VCH_DESC",''))::int len FROM "DELETE_DATA"
+        WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 ORDER BY "SR_NO"`,
+      tenantId,
+      BOOK,
+      vchNo,
+    );
+    expect(auditDesc).toEqual([
+      { sr: 1, len: 6 },
+      { sr: 2, len: 149 },
+    ]);
   });
 
   it('answers forbidden, malformed and missing Fine JV requests precisely', async () => {

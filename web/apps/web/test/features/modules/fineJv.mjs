@@ -858,8 +858,13 @@ export const fineJv = {
           'For : ',
           'Party signature.',
           '>signature.<',
+          'ORIGINAL',
+          'Vch Date',
+          'Vch No',
         ])
           assert(html.includes(text), `FineJvBill shows ${text}`);
+        // The CR_FINE / DR_FINE fields are not suppressed (FineJvBill.xml:564-586): each row prints its zero side.
+        assert.equal(html.split('>0.000<').length - 1, 2, 'one zero side per printed row');
         for (const absent of ['Total', 'Authorised Signatory', 'Bank Details'])
           assert(!html.includes(absent), `FineJvBill has no ${absent}`);
         return {

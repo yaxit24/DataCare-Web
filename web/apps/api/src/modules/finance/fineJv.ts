@@ -1,11 +1,13 @@
-import { round, toIsoDate } from '@datacare/core';
+import { formatDesktopDate, round, toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { buildFineJvRojmel, rojmelMetalFor } from '../shared/rojmel.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
 import { assertFiscalDateTx } from '../vouchers/lifecycle.js';
 import {
+  assertPeriodOpen,
   insertRowTx,
+  PeriodLockValidationError,
   postVoucherTx,
   reverseVoucherTx,
   type LedgerLine,
@@ -63,7 +65,21 @@ export const FINE_JV_MESSAGES = {
   /** TR_CONTRA.cs:2680-2685, a date outside the company's open and close dates. */
   NOT_IN_CURRENT_YEAR:
     'You Cant Save Entry Because Voucher Date Not In Current Year... Please Change Date...',
+  /** TR_CONTRA.cs:2686-2691 (save) and :2951-2954 (delete), a voucher dated on or before the lock date. */
+  lockDate: (lockIso: string) =>
+    `You Cant Save and Delete This Voucher Becouse Lock Date is = ${formatDesktopDate(lockIso)} ....`,
 } as const;
+
+/** Any period-lock refusal inside a Fine JV save or delete answers with the desktop text. */
+async function withDesktopLockText<T>(work: () => Promise<T>): Promise<T> {
+  try {
+    return await work();
+  } catch (error) {
+    if (error instanceof PeriodLockValidationError)
+      error.message = FINE_JV_MESSAGES.lockDate(error.lockDate);
+    throw error;
+  }
+}
 
 export interface FineJvLine {
   crdr: 'DR' | 'CR' | string;
@@ -136,7 +152,7 @@ function metalOf(value: unknown): 'G' | 'S' {
   return metal;
 }
 
-/** The grid a request saves: TR_CONTRA.cs:2765 skips rows with no account or no value; :2692 needs equal totals. */
+/** The grid a request saves: TR_CONTRA.cs:2765 skips rows with no account or no value. */
 export function fineJvLines(raw: unknown): Line[] {
   if (!Array.isArray(raw)) throw new FineJvValidationError('fine-jv requires grid lines');
   const lines = raw
@@ -158,15 +174,19 @@ export function fineJvLines(raw: unknown): Line[] {
     .filter((line) => line.acCode && line.fine !== 0);
   if (lines.length < 2)
     throw new FineJvValidationError('a fine JV needs at least two accounts with a positive fine');
+  return lines;
+}
+
+/** TR_CONTRA.cs:2692-2697: the CrFine and DrFine totals must agree (checked after the lock, as the desktop does). */
+function assertBalancedFine(lines: Line[]): void {
   const total = (side: 'DR' | 'CR') =>
     r3(lines.filter((line) => line.crdr === side).reduce((sum, line) => sum + line.fine, 0));
   if (total('DR') !== total('CR'))
     throw new FineJvValidationError(DESKTOP_MESSAGES.CONTRA_DR_CR_NOT_SAME);
-  return lines;
 }
 
-/** The scoped account master name, preferring the voucher's own location (as the document join does). */
-async function accountNameTx(tx: any, scope: VoucherScope, code: string): Promise<string> {
+/** The scoped account master name (null when the code has no AC_MAST row), preferring the voucher's location. */
+async function accountNameTx(tx: any, scope: VoucherScope, code: string): Promise<string | null> {
   const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
     `SELECT "AC_NAME" FROM "AC_MAST"
       WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "AC_CODE"=$3
@@ -178,15 +198,17 @@ async function accountNameTx(tx: any, scope: VoucherScope, code: string): Promis
     code,
     scope.lcCode,
   );
-  if (!rows.length) throw new FineJvValidationError(`fine-jv account not found: ${code}`);
-  return text(rows[0]!.AC_NAME);
+  return rows.length ? text(rows[0]!.AC_NAME) : null;
 }
 
-/** TR_CONTRA.cs:2666-2685 in desktop order, then the employee code must name an employee. */
+/**
+ * TR_CONTRA.cs:2666-2697 in desktop order: employee when mandatory, company type B on a new voucher, the current
+ * year, the lock date, then equal totals. The employee must then name an EMP_MAST row (the desktop picks it from help).
+ */
 async function assertSaveAllowedTx(
   tx: any,
   scope: VoucherScope,
-  options: { creating: boolean; empCode: string; date: Date },
+  options: { creating: boolean; empCode: string; date: Date; lines: Line[] },
 ): Promise<void> {
   const settings: Array<{ mandatory: string }> = await tx.$queryRawUnsafe(
     `SELECT upper(btrim(coalesce("EMP_CODE_MANDATORY"::text,''))) mandatory
@@ -214,6 +236,10 @@ async function assertSaveAllowedTx(
       throw new FineJvValidationError(FINE_JV_MESSAGES.NOT_IN_CURRENT_YEAR);
     throw error;
   }
+  await assertPeriodOpen(tx, scope.tenantId, {
+    ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: options.date }] },
+  });
+  assertBalancedFine(options.lines);
   if (options.empCode) {
     const employees: unknown[] = await tx.$queryRawUnsafe(
       `SELECT 1 FROM "EMP_MAST" WHERE tenant_id=$1 AND "CO_CODE"::text=$2::text AND "EMP_CODE"=$3 LIMIT 1`,
@@ -229,16 +255,17 @@ async function assertSaveAllowedTx(
 /**
  * Names and descriptions for the grid. The desktop reloads the saved AC_NAME into the grid
  * (TR_CONTRA.cs:2502, :2550) and replaces it from AC_MAST only when another account is picked, so an
- * unchanged account keeps the saved name of the row it came from; a description the request omits keeps
- * that row's saved description.
+ * unchanged account keeps the saved name of the row it came from, even if its master row is gone; a new or
+ * changed account must exist in AC_MAST. A description the request omits keeps that row's saved description.
+ * `masterNames` holds the AC_MAST names Vch_Remark joins (null when there is no master row).
  */
 async function resolveGridTx(
   tx: any,
   scope: VoucherScope,
   lines: Line[],
   saved?: FineJvGridLine[],
-): Promise<{ grid: FineJvGridLine[]; masterNames: Map<string, string> }> {
-  const masterNames = new Map<string, string>();
+): Promise<{ grid: FineJvGridLine[]; masterNames: Map<string, string | null> }> {
+  const masterNames = new Map<string, string | null>();
   for (const code of new Set(lines.map((line) => line.acCode)))
     masterNames.set(code, await accountNameTx(tx, scope, code));
   const used = new Set<number>();
@@ -252,10 +279,13 @@ async function resolveGridTx(
         prior = saved[at];
       }
     }
+    const master = masterNames.get(line.acCode);
+    if (!prior && master == null)
+      throw new FineJvValidationError(`fine-jv account not found: ${line.acCode}`);
     return {
       crdr: line.crdr,
       acCode: line.acCode,
-      acName: prior ? prior.acName : (masterNames.get(line.acCode) ?? ''),
+      acName: prior ? prior.acName : (master ?? ''),
       itDesc: line.itDesc ?? prior?.itDesc ?? '',
       fine: line.fine,
     };
@@ -270,7 +300,7 @@ async function rebuildRemarksTx(
   voucherNo: string,
   book: Book,
   rows: SourceRow[],
-  masterNames: Map<string, string>,
+  masterNames: Map<string, string | null>,
 ): Promise<void> {
   const s = completeFinanceScope(scope);
   await tx.$executeRawUnsafe(
@@ -294,7 +324,8 @@ async function rebuildRemarksTx(
       SR_NO: row.SR_NO,
       VCH_DATE: row.VCH_DATE,
       AC_CODE: row.AC_CODE,
-      AC_NAME: masterNames.get(text(row.AC_CODE)) ?? '',
+      // Vch_Remark LEFT JOINs AC_MAST, so a code without a master row gets no name.
+      AC_NAME: masterNames.get(text(row.AC_CODE)) ?? null,
       MAIN_BOOK: book.mainBook,
       VCH_REMARK: row.IT_DESC,
     });
@@ -308,7 +339,7 @@ async function writeTx(
     book: Book;
     identity: VoucherIdentity;
     grid: FineJvGridLine[];
-    masterNames: Map<string, string>;
+    masterNames: Map<string, string | null>;
     metal: 'G' | 'S';
     empCode: string;
   },
@@ -456,13 +487,15 @@ export async function postFineJv(p: any, i: FineJvInput): Promise<FineJvResult> 
   const metal = metalOf(i.metal ?? 'G');
   const date = i.vchDate ? new Date(i.vchDate) : new Date();
   const empCode = text(i.empCode);
-  return withTxBudget(p, i.scope.tenantId, 'voucher', async (tx) => {
-    const book = await fineJvBookTx(tx, i.scope);
-    await assertSaveAllowedTx(tx, i.scope, { creating: true, empCode, date });
-    const resolved = await resolveGridTx(tx, i.scope, lines);
-    const identity = await createIdentityTx(tx, i.scope, date, i.mainUser);
-    return writeTx(tx, { scope: i.scope, book, identity, metal, empCode, ...resolved });
-  });
+  return withTxBudget(p, i.scope.tenantId, 'voucher', (tx) =>
+    withDesktopLockText(async () => {
+      const book = await fineJvBookTx(tx, i.scope);
+      await assertSaveAllowedTx(tx, i.scope, { creating: true, empCode, date, lines });
+      const resolved = await resolveGridTx(tx, i.scope, lines);
+      const identity = await createIdentityTx(tx, i.scope, date, i.mainUser);
+      return writeTx(tx, { scope: i.scope, book, identity, metal, empCode, ...resolved });
+    }),
+  );
 }
 
 async function sourceRowsTx(
@@ -486,42 +519,53 @@ async function sourceRowsTx(
 }
 
 /**
- * Reopen (TR_CONTRA.cs:2467-2565): row 1 from the LDR_TYPE '1' mirrors (its fine is the mirrors' net on
- * its own side) and one row per LDR_TYPE '0' counter row, in SR_NO order.
+ * Reopen (TR_CONTRA.cs:2467-2565). Both queries group CONTRA_DATA by AC_CODE, AC_NAME, CRDR_TYPE and IT_DESC: the
+ * LDR_TYPE '1' mirrors give row 1 and the LDR_TYPE '0' counter rows give the other rows, so two counter rows with
+ * the same account, name, side and description reopen as one grid row with their fines summed. Groups keep the
+ * order of their first SR_NO (the desktop's GROUP BY has no ORDER BY). Row 1's fine is the mirrors' net on its own
+ * side; a row-1 group that carries both Cr and Dr fine (row 1 paired with rows on both sides) shows the net only.
  */
 export function fineJvGridOfRows(rows: SourceRow[], voucherNo: string): FineJvGridLine[] {
-  const mirrors = rows.filter((row) => text(row.LDR_TYPE) === '1');
-  const counters = rows.filter((row) => text(row.LDR_TYPE) === '0');
-  const head = mirrors[0];
-  if (
-    !head ||
-    !counters.length ||
-    mirrors.length + counters.length !== rows.length ||
-    mirrors.some((row) => text(row.AC_CODE) !== text(head.AC_CODE))
-  )
-    throw new FineJvValidationError(
-      `fine-jv voucher ${voucherNo} cannot be opened as a TR_CONTRA grid: its rows are not row-1 mirrors (LDR_TYPE 1) paired with counter rows (LDR_TYPE 0)`,
-    );
   const side = (row: SourceRow): 'DR' | 'CR' =>
     text(row.CRDR_TYPE).toUpperCase() === 'CR' ? 'CR' : 'DR';
-  const crdr = side(head);
-  const dr = mirrors.reduce((sum, row) => sum + num(row.DR_FINE), 0);
-  const cr = mirrors.reduce((sum, row) => sum + num(row.CR_FINE), 0);
+  const groups = (ldrType: string) => {
+    const byKey = new Map<string, { head: SourceRow; cr: number; dr: number }>();
+    for (const row of rows.filter((r) => text(r.LDR_TYPE) === ldrType)) {
+      const key = JSON.stringify([
+        text(row.AC_CODE),
+        text(row.AC_NAME),
+        side(row),
+        text(row.IT_DESC),
+      ]);
+      const group = byKey.get(key) ?? { head: row, cr: 0, dr: 0 };
+      group.cr += num(row.CR_FINE);
+      group.dr += num(row.DR_FINE);
+      byKey.set(key, group);
+    }
+    return [...byKey.values()];
+  };
+  const mirrors = groups('1');
+  const counters = groups('0');
+  if (
+    mirrors.length !== 1 ||
+    !counters.length ||
+    rows.some((r) => !['0', '1'].includes(text(r.LDR_TYPE)))
+  )
+    throw new FineJvValidationError(
+      `fine-jv voucher ${voucherNo} cannot be opened as a TR_CONTRA grid: its rows are not one row-1 account (LDR_TYPE 1) paired with counter rows (LDR_TYPE 0)`,
+    );
+  const head = mirrors[0]!;
+  const crdr = side(head.head);
+  const line = (group: { head: SourceRow; cr: number; dr: number }, fine: number) => ({
+    crdr: side(group.head),
+    acCode: text(group.head.AC_CODE),
+    acName: text(group.head.AC_NAME),
+    itDesc: text(group.head.IT_DESC),
+    fine: r3(fine),
+  });
   return [
-    {
-      crdr,
-      acCode: text(head.AC_CODE),
-      acName: text(head.AC_NAME),
-      itDesc: text(head.IT_DESC),
-      fine: r3(crdr === 'DR' ? dr - cr : cr - dr),
-    },
-    ...counters.map((row) => ({
-      crdr: side(row),
-      acCode: text(row.AC_CODE),
-      acName: text(row.AC_NAME),
-      itDesc: text(row.IT_DESC),
-      fine: r3(num(row.CR_FINE) || num(row.DR_FINE)),
-    })),
+    line(head, crdr === 'DR' ? head.dr - head.cr : head.cr - head.dr),
+    ...counters.map((group) => line(group, group.cr || group.dr)),
   ];
 }
 
@@ -551,32 +595,35 @@ export async function editFineJv(p: any, i: FineJvInput, x: number | string) {
   completeFinanceScope(i.scope);
   const lines = fineJvLines(i.lines);
   const voucherNo = formatVoucherNo(x);
-  return withTxBudget(p, i.scope.tenantId, 'voucher', async (tx) => {
-    const book = await fineJvBookTx(tx, i.scope);
-    const saved = await sourceRowsTx(tx, i.scope, voucherNo, true);
-    if (!saved.length) throw new FineJvNotFoundError(voucherNo);
-    const savedGrid = fineJvGridOfRows(saved, voucherNo);
-    const header = saved[0]!;
-    const date = i.vchDate ? new Date(i.vchDate) : new Date(toIsoDate(header.VCH_DATE));
-    const metal = metalOf(i.metal ?? header.IT_TYPE);
-    const empCode = i.empCode === undefined ? text(header.EMP_CODE) : text(i.empCode);
-    await assertSaveAllowedTx(tx, i.scope, { creating: false, empCode, date });
-    const { identity } = await editIdentityTx(tx, {
-      table: 'CONTRA_DATA',
-      scope: i.scope,
-      requestedVoucherNo: voucherNo,
-      requestedDate: date,
-    });
-    const resolved = await resolveGridTx(tx, i.scope, lines, savedGrid);
-    await replaceWriteSetTx(
-      tx,
-      i.scope,
-      identity.voucherNo,
-      identity.hiddenVoucherNo,
-      WRITE_TABLES,
-    );
-    return writeTx(tx, { scope: i.scope, book, identity, metal, empCode, ...resolved });
-  });
+  return withTxBudget(p, i.scope.tenantId, 'voucher', (tx) =>
+    withDesktopLockText(async () => {
+      const book = await fineJvBookTx(tx, i.scope);
+      const saved = await sourceRowsTx(tx, i.scope, voucherNo, true);
+      if (!saved.length) throw new FineJvNotFoundError(voucherNo);
+      const savedGrid = fineJvGridOfRows(saved, voucherNo);
+      const header = saved[0]!;
+      const date = i.vchDate ? new Date(i.vchDate) : new Date(toIsoDate(header.VCH_DATE));
+      const metal = metalOf(i.metal ?? header.IT_TYPE);
+      const empCode = i.empCode === undefined ? text(header.EMP_CODE) : text(i.empCode);
+      await assertSaveAllowedTx(tx, i.scope, { creating: false, empCode, date, lines });
+      // Web hardening: editIdentityTx also refuses a voucher whose SAVED date is locked.
+      const { identity } = await editIdentityTx(tx, {
+        table: 'CONTRA_DATA',
+        scope: i.scope,
+        requestedVoucherNo: voucherNo,
+        requestedDate: date,
+      });
+      const resolved = await resolveGridTx(tx, i.scope, lines, savedGrid);
+      await replaceWriteSetTx(
+        tx,
+        i.scope,
+        identity.voucherNo,
+        identity.hiddenVoucherNo,
+        WRITE_TABLES,
+      );
+      return writeTx(tx, { scope: i.scope, book, identity, metal, empCode, ...resolved });
+    }),
+  );
 }
 
 export async function deleteFineJv(
@@ -591,52 +638,58 @@ export async function deleteFineJv(
   completeFinanceScope(i.scope);
   const s = i.scope,
     no = formatVoucherNo(i.vchNo);
-  return withTxBudget(p, s.tenantId, 'voucher', async (tx) => {
-    const book = await fineJvBookTx(tx, s);
-    const rows: SourceRow[] = await tx.$queryRawUnsafe(
-      `SELECT "SR_NO","AC_CODE","AC_NAME","DR_AMT","CR_AMT","DR_FINE","CR_FINE","IT_TYPE","IT_DESC" FROM "CONTRA_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO" FOR UPDATE`,
-      s.tenantId,
-      s.coCode,
-      s.lcCode,
-      s.coYear,
-      s.coBook,
-      no,
-    );
-    if (!rows.length) throw new FineJvNotFoundError(no);
-    // TR_CONTRA.cs:2951 checks the lock against the voucher's own date only.
-    const { persisted: header, identity } = await editIdentityTx(tx, {
-      table: 'CONTRA_DATA',
-      scope: s,
-      requestedVoucherNo: no,
-      requestedDate: new Date(),
-      checkRequestedDate: false,
-    });
-    await reverseVoucherTx(tx, s.tenantId, { tables: [...DELETE_TABLES], key: voucherKey(s, no) });
-    await tx.$executeRawUnsafe(
-      `DELETE FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5`,
-      s.tenantId,
-      s.coCode,
-      s.lcCode,
-      s.coBook,
-      identity.hiddenVoucherNo,
-    );
-    await insertDesktopDeleteAuditTx(tx, {
-      scope: s,
-      configuredBook: book,
-      header,
-      rows: rows.map((r) => ({
-        srNo: num(r.SR_NO),
-        valueDr: num(r.DR_AMT),
-        valueCr: num(r.CR_AMT),
-        fineType: text(r.IT_TYPE) || 'A',
-        fineDr: num(r.DR_FINE),
-        fineCr: num(r.CR_FINE),
-        description: text(r.IT_DESC),
-        acCode: r.AC_CODE,
-        acName: r.AC_NAME,
-      })),
-      deleteUser: i.deleteUser,
-    });
-    return { reversed: true as const };
-  });
+  return withTxBudget(p, s.tenantId, 'voucher', (tx) =>
+    withDesktopLockText(async () => {
+      const book = await fineJvBookTx(tx, s);
+      const rows: SourceRow[] = await tx.$queryRawUnsafe(
+        `SELECT "SR_NO","AC_CODE","AC_NAME","DR_AMT","CR_AMT","DR_FINE","CR_FINE","IT_TYPE","IT_DESC" FROM "CONTRA_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO" FOR UPDATE`,
+        s.tenantId,
+        s.coCode,
+        s.lcCode,
+        s.coYear,
+        s.coBook,
+        no,
+      );
+      if (!rows.length) throw new FineJvNotFoundError(no);
+      // TR_CONTRA.cs:2951 checks the lock against the voucher's own date only.
+      const { persisted: header, identity } = await editIdentityTx(tx, {
+        table: 'CONTRA_DATA',
+        scope: s,
+        requestedVoucherNo: no,
+        requestedDate: new Date(),
+        checkRequestedDate: false,
+      });
+      await reverseVoucherTx(tx, s.tenantId, {
+        tables: [...DELETE_TABLES],
+        key: voucherKey(s, no),
+      });
+      await tx.$executeRawUnsafe(
+        `DELETE FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5`,
+        s.tenantId,
+        s.coCode,
+        s.lcCode,
+        s.coBook,
+        identity.hiddenVoucherNo,
+      );
+      await insertDesktopDeleteAuditTx(tx, {
+        scope: s,
+        configuredBook: book,
+        header,
+        rows: rows.map((r) => ({
+          srNo: num(r.SR_NO),
+          valueDr: num(r.DR_AMT),
+          valueCr: num(r.CR_AMT),
+          fineType: text(r.IT_TYPE) || 'A',
+          fineDr: num(r.DR_FINE),
+          fineCr: num(r.CR_FINE),
+          // TR_CONTRA.cs:2961 audits SUBSTRING(IT_DESC,1,149).
+          description: String(r.IT_DESC ?? '').slice(0, 149),
+          acCode: r.AC_CODE,
+          acName: r.AC_NAME,
+        })),
+        deleteUser: i.deleteUser,
+      });
+      return { reversed: true as const };
+    }),
+  );
 }

@@ -123,8 +123,9 @@ export interface FineJvVoucherCtx extends ContraVoucherCtx {
  * :3026/:3069). From the extracted report: the title `{@RptTitle}` is 'Gold ' or 'Silver ' (IT_TYPE 'G' or
  * not) followed by BOOK_DATA.BOOK_NAME; the header carries Vch Date and Vch No; each detail record prints
  * AC_MAST.AC_NAME with CR_FINE and DR_FINE, then its IT_DESC on a second line that is suppressed when blank;
- * there is no total section. The extracted spec does not carry the numeric field formats, so fines print in
- * the app's 0.000 form and a zero side is left blank.
+ * there is no total section. `{@InVoiceTipe}` defaults to 'ORIGINAL' (TR_CONTRA sets the copy label only when it
+ * prints, :3070-3089) and `{@CurPag}` prints the page number at the top right. The CrFine and DrFine fields are not
+ * suppressed, so a zero side prints its value; the extracted spec carries no numeric format, so fines print as 0.000.
  */
 export function fineJvVoucherHtml(rows: any[], ctx: FineJvVoucherCtx = {}): string {
   const h = rows[0] ?? {};
@@ -141,8 +142,8 @@ export function fineJvVoucherHtml(rows: any[], ctx: FineJvVoucherCtx = {}): stri
       const dr = num(row.DR_FINE);
       const desc = String(row.IT_DESC ?? '').trim();
       return (
-        `<tr><td>${acName(row)}</td><td class="r">${cr ? wt(cr) : ''}</td>` +
-        `<td class="r">${dr ? wt(dr) : ''}</td></tr>` +
+        `<tr><td>${acName(row)}</td><td class="r">${wt(cr)}</td>` +
+        `<td class="r">${wt(dr)}</td></tr>` +
         (desc
           ? `<tr><td colspan="3" style="padding-left:28px;color:#595959;font-size:9.5px">${esc(desc)}</td></tr>`
           : '')
@@ -153,13 +154,16 @@ export function fineJvVoucherHtml(rows: any[], ctx: FineJvVoucherCtx = {}): stri
     { k: 'Vch Date', v: formatDesktopDate(h.VCH_DATE) },
     { k: 'Vch No', v: String(h.VCH_NO ?? '') },
   ];
+  // `{@CurPag}`: the page number in the top-right page margin of every printed page.
+  const pageNumber = `<style>@page{@top-right{content:counter(page);font-size:9px}}</style>`;
   const body =
+    pageNumber +
     `<table class="items"><thead><tr><th style="width:56%">Party Name</th>` +
     `<th class="r">Cr Fine</th><th class="r">Dr Fine</th></tr></thead>` +
     `<tbody>${lineRows}</tbody></table>`;
   return docShell({
     title: `${metal} ${ctx.bookName ?? 'Fine JV'}`,
-    copy: ctx.copy,
+    copy: ctx.copy ?? 'ORIGINAL',
     company: ctx.company,
     fallbackName: ctx.fallbackName,
     meta,
