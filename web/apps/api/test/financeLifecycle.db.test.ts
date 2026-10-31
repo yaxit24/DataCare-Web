@@ -7,6 +7,7 @@ import {
   postEmployeeJv,
 } from '../src/modules/finance/employeeJv.js';
 import { deleteFineJv, editFineJv, getFineJv, postFineJv } from '../src/modules/finance/fineJv.js';
+import { deleteContra, editContra, getContra, postContra } from '../src/modules/finance/contra.js';
 import {
   deleteJournal,
   editJournal,
@@ -46,6 +47,7 @@ type Engine = {
   editedGet: Record<string, unknown>;
   editedRows: Array<Record<string, unknown>>;
   auditRows: Array<Record<string, unknown>>;
+  verifyAfterEdit?: (owner: PrismaClient, scope: VoucherScope, voucherNo: string) => Promise<void>;
 };
 
 const scopeFor = (book: string): VoucherScope => ({
@@ -182,26 +184,95 @@ const engines: Engine[] = [
       scope,
       mainUser,
       vchDate: replacement ? EDIT_DAY : DAY,
-      fromAc: replacement ? 'GOLD2' : 'GOLD1',
-      toAc: replacement ? 'PARTY2' : 'PARTY1',
-      fineWt: replacement ? 2.75 : 1.25,
       metal: replacement ? 'S' : 'G',
+      // TR_CONTRA.cs:1530-1543: grid row 1 (the giving account) is DR and its counter row is CR.
+      lines: replacement
+        ? [
+            { crdr: 'DR', acCode: 'GOLD2', fine: 2.75 },
+            { crdr: 'CR', acCode: 'PARTY2', fine: 2.75 },
+          ]
+        : [
+            { crdr: 'DR', acCode: 'GOLD1', fine: 1.25 },
+            { crdr: 'CR', acCode: 'PARTY1', fine: 1.25 },
+          ],
     }),
     create: postFineJv,
     get: getFineJv,
     edit: editFineJv,
     remove: (prisma, scope, vchNo) =>
       deleteFineJv(prisma, { scope, vchNo, deleteUser: 'delete-user' }),
-    initialGet: { fromAc: 'GOLD1', toAc: 'PARTY1', fineWt: 1.25, metal: 'G' },
-    editedGet: { fromAc: 'GOLD2', toAc: 'PARTY2', fineWt: 2.75, metal: 'S' },
+    initialGet: {
+      metal: 'G',
+      lines: [
+        { crdr: 'DR', acCode: 'GOLD1', acName: 'Gold One', itDesc: '', fine: 1.25 },
+        { crdr: 'CR', acCode: 'PARTY1', acName: 'Party One', itDesc: '', fine: 1.25 },
+      ],
+    },
+    editedGet: {
+      metal: 'S',
+      lines: [
+        { crdr: 'DR', acCode: 'GOLD2', acName: 'Gold Two', itDesc: '', fine: 2.75 },
+        { crdr: 'CR', acCode: 'PARTY2', acName: 'Party Two', itDesc: '', fine: 2.75 },
+      ],
+    },
     editedRows: [
-      { AC_CODE: 'PARTY2', LD_CODE: 'GOLD2', DR_FINE: '2.75', CR_FINE: '0' },
-      { AC_CODE: 'GOLD2', LD_CODE: 'PARTY2', DR_FINE: '0', CR_FINE: '2.75' },
+      // Desktop TR_CONTRA.cs:2760-2847: the From account is the primary DR grid row. Its To
+      // counter-row is persisted first (LDR_TYPE 0) with CR_FINE, then the primary From row is
+      // mirrored (LDR_TYPE 1) with DR_FINE. Ac_Ledr.cs:846-848 and Ac_Rojmel.cs:342-344 use
+      // those columns to preserve the receiving + and giving - effects.
+      {
+        AC_CODE: 'PARTY2',
+        LD_CODE: 'GOLD2',
+        CR_FINE: '2.75',
+        DR_FINE: '0',
+        CRDR_TYPE: 'CR',
+        LDR_TYPE: '0',
+      },
+      {
+        AC_CODE: 'GOLD2',
+        LD_CODE: 'PARTY2',
+        CR_FINE: '0',
+        DR_FINE: '2.75',
+        CRDR_TYPE: 'DR',
+        LDR_TYPE: '1',
+      },
     ],
     auditRows: [
-      { AC_CODE: 'PARTY2', FINE_TYPE: 'S', VCH_FINE_DR: '2.75', VCH_FINE_CR: '0' },
-      { AC_CODE: 'GOLD2', FINE_TYPE: 'S', VCH_FINE_DR: '0', VCH_FINE_CR: '2.75' },
+      { AC_CODE: 'PARTY2', FINE_TYPE: 'S', VCH_FINE_DR: '0', VCH_FINE_CR: '2.75' },
+      { AC_CODE: 'GOLD2', FINE_TYPE: 'S', VCH_FINE_DR: '2.75', VCH_FINE_CR: '0' },
     ],
+    verifyAfterEdit: async (owner, scope, voucherNo) => {
+      const params = [
+        scope.tenantId,
+        scope.coCode,
+        scope.lcCode,
+        scope.coYear,
+        scope.coBook,
+        voucherNo,
+      ];
+      const ledger = (await owner.$queryRawUnsafe(
+        `SELECT "AC_CODE" ac,"LD_CODE" ld,"SIGN" sign,"IT_TYPE" metal,"FINE_WT"::float fine,
+                "DR_AMT"::float dr,"CR_AMT"::float cr
+           FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+             AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "AC_CODE"`,
+        ...params,
+      )) as Array<Record<string, unknown>>;
+      const rojmel = (await owner.$queryRawUnsafe(
+        `SELECT "AC_CODE" ac,"LD_CODE" ld,"SIGN" sign,"IT_TYPE" metal,"ITM_FINE"::float fine,
+                "DR_AMT"::float dr,"CR_AMT"::float cr,"ITM_GWT"::float gwt
+           FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+             AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "AC_CODE"`,
+        ...params,
+      )) as Array<Record<string, unknown>>;
+      expect(ledger).toEqual([
+        { ac: 'GOLD2', ld: 'PARTY2', sign: '-', metal: 'S', fine: 2.75, dr: 0, cr: 0 },
+        { ac: 'PARTY2', ld: 'GOLD2', sign: '+', metal: 'S', fine: 2.75, dr: 0, cr: 0 },
+      ]);
+      expect(rojmel).toEqual([
+        { ac: 'GOLD2', ld: 'PARTY2', sign: '-', metal: 'S', fine: 2.75, dr: 0, cr: 0, gwt: 0 },
+        { ac: 'PARTY2', ld: 'GOLD2', sign: '+', metal: 'S', fine: 2.75, dr: 0, cr: 0, gwt: 0 },
+      ]);
+    },
   },
 ];
 
@@ -219,7 +290,10 @@ databaseDescribe('database-backed finance voucher lifecycles', () => {
       // Its PK is LEDR_KEY alone, so a leftover row makes a reused voucher number collide (23505).
       'ROJ_MEL_DATA',
       'TEMP_BOOK_DATA',
+      'REMARK_DATA',
       'BOOK_DATA',
+      'AC_MAST',
+      'YEAR_MAST',
       'CO_SET',
     ]) {
       await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, TENANT);
@@ -232,16 +306,32 @@ databaseDescribe('database-backed finance voucher lifecycles', () => {
       TENANT,
       CO,
     );
-    for (const [book, name, shortName, table] of [
-      ['EJV', 'Employee JV', 'EJV', 'EMP_DATA'],
-      ['LAD', 'Ledger Adjustment', 'LAD', 'LDR_ADJ_DATA'],
-      ['JRN', 'Journal Book', 'JRN', 'CONTRA_DATA'],
-      ['FJV', 'Fine JV', 'FJV', 'CONTRA_DATA'],
+    // TR_CONTRA.cs:2680-2685 refuses a date outside the company's current year (YEAR_MAST).
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE")
+       VALUES ($1,$2,$3,'2024-04-01','2025-03-31')`,
+      TENANT,
+      CO,
+      YEAR,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME")
+       VALUES ($1,$2,$3,'GOLD1','Gold One'),($1,$2,$3,'PARTY1','Party One'),
+              ($1,$2,$3,'GOLD2','Gold Two'),($1,$2,$3,'PARTY2','Party Two')`,
+      TENANT,
+      CO,
+      LC,
+    );
+    for (const [book, name, shortName, table, mainBook] of [
+      ['EJV', 'Employee JV', 'EJV', 'EMP_DATA', 'Employee JV'],
+      ['LAD', 'Ledger Adjustment', 'LAD', 'LDR_ADJ_DATA', 'Ledger Adjustment'],
+      ['JRN', 'Journal Book', 'JRN', 'CONTRA_DATA', 'JOURNAL'],
+      ['FJV', 'Fine JV', 'FJV', 'CONTRA_DATA', 'FINE JV'],
     ]) {
       await owner.$executeRawUnsafe(
         `INSERT INTO "BOOK_DATA"(
            tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK",
-           "CUR_USE","BOOK_TBL_NAME") VALUES ($1,$2,$3,$4,$5,$6,$5::text,'Y',$7)`,
+           "CUR_USE","BOOK_TBL_NAME") VALUES ($1,$2,$3,$4,$5,$6,$8,'Y',$7)`,
         TENANT,
         CO,
         LC,
@@ -249,6 +339,7 @@ databaseDescribe('database-backed finance voucher lifecycles', () => {
         name,
         shortName,
         table,
+        mainBook,
       );
       await owner.$executeRawUnsafe(
         `INSERT INTO "TEMP_BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","VCH_NO","BOOK_NAME")
@@ -260,6 +351,14 @@ databaseDescribe('database-backed finance voucher lifecycles', () => {
         name,
       );
     }
+    // Ac_Ledr.Contra_Ledr accepts Fine JV source rows only from an inward FINE JV book (line 846).
+    await owner.$executeRawUnsafe(
+      `UPDATE "BOOK_DATA" SET "BOOK_INOUT"='I'
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"='FJV'`,
+      TENANT,
+      CO,
+      LC,
+    );
     await owner.$executeRawUnsafe(
       `INSERT INTO "EMP_DATA"(
          tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE")
@@ -408,6 +507,7 @@ databaseDescribe('database-backed finance voucher lifecycles', () => {
           expect(String(replaced[index]?.[column] ?? '')).toBe(String(expected));
         }
       });
+      await engine.verifyAfterEdit?.(owner, scope, '00008');
       expect((await state(engine)).audits).toBe(0);
 
       const balance = (
@@ -476,4 +576,92 @@ databaseDescribe('database-backed finance voucher lifecycles', () => {
       });
     }, 30_000);
   }
+
+  it('fine JV refuses another book family before allocating any business rows', async () => {
+    const scope = scopeFor('JRN');
+    const before = await state({ table: 'CONTRA_DATA', book: 'JRN' } as Engine, '00008', '00041');
+    await expect(
+      postFineJv(runtime, {
+        scope,
+        lines: [
+          { crdr: 'DR', acCode: 'GOLD1', fine: 1.25 },
+          { crdr: 'CR', acCode: 'PARTY1', fine: 1.25 },
+        ],
+        metal: 'G',
+        vchDate: DAY,
+        mainUser: 'wrong-book-user',
+      }),
+    ).rejects.toThrow('FINE JV');
+    expect(await state({ table: 'CONTRA_DATA', book: 'JRN' } as Engine, '00008', '00041')).toEqual(
+      before,
+    );
+  });
+  it('fine JV refuses an outward FINE JV book before allocating any business rows', async () => {
+    const scope = scopeFor('JRN');
+    await owner.$executeRawUnsafe(
+      `UPDATE "BOOK_DATA" SET "MAIN_BOOK"='FINE JV',"BOOK_INOUT"='O'
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"='JRN'`,
+      TENANT,
+      CO,
+      LC,
+    );
+    const before = await state({ table: 'CONTRA_DATA', book: 'JRN' } as Engine, '00008', '00041');
+    await expect(
+      postFineJv(runtime, {
+        scope,
+        lines: [
+          { crdr: 'DR', acCode: 'GOLD1', fine: 1.25 },
+          { crdr: 'CR', acCode: 'PARTY1', fine: 1.25 },
+        ],
+        metal: 'G',
+        vchDate: DAY,
+        mainUser: 'wrong-dir',
+      }),
+    ).rejects.toThrow('inward');
+    expect(await state({ table: 'CONTRA_DATA', book: 'JRN' } as Engine, '00008', '00041')).toEqual(
+      before,
+    );
+  });
+  it('contra and journal services refuse a FINE JV book before reading, rewriting or deleting it', async () => {
+    // MDI_FORM.cs:8100-8111 opens Contra on CurBookHelp('CONTRA') and :8360-8365 opens Fine JV on
+    // CurBookHelp('FINE JV'); both share CONTRA_DATA, so one family must not reach the other's vouchers.
+    const scope = scopeFor('FJV');
+    const fine = await postFineJv(runtime, {
+      scope,
+      vchDate: DAY,
+      metal: 'G',
+      mainUser: 'fine-user',
+      lines: [
+        { crdr: 'DR', acCode: 'GOLD1', fine: 1.25 },
+        { crdr: 'CR', acCode: 'PARTY1', fine: 1.25 },
+      ],
+    });
+    const engine = { table: 'CONTRA_DATA', book: 'FJV' } as Engine;
+    const before = { rows: await sourceRows(engine), state: await state(engine) };
+    const money = [
+      { crdr: 'DR' as const, acCode: 'PARTY1', amount: 10 },
+      { crdr: 'CR' as const, acCode: 'GOLD1', amount: 10 },
+    ];
+    const journalLines = [
+      { acCode: 'PARTY1', drAmt: 10 },
+      { acCode: 'GOLD1', crAmt: 10 },
+    ];
+    const contraRefusals: Array<() => Promise<unknown>> = [
+      () => getContra(runtime, scope, fine.vchNo),
+      () => editContra(runtime, { scope, vchDate: DAY, lines: money }, fine.vchNo),
+      () => deleteContra(runtime, { scope, vchNo: fine.vchNo, deleteUser: 'contra-user' }),
+      () => postContra(runtime, { scope, vchDate: DAY, lines: money }),
+    ];
+    for (const refusal of contraRefusals)
+      await expect(refusal()).rejects.toThrow("MAIN_BOOK='CONTRA'");
+    const journalRefusals: Array<() => Promise<unknown>> = [
+      () => getJournal(runtime, scope, fine.vchNo),
+      () => editJournal(runtime, { scope, vchDate: DAY, lines: journalLines }, fine.vchNo),
+      () => deleteJournal(runtime, { scope, vchNo: fine.vchNo, deleteUser: 'journal-user' }),
+      () => postJournal(runtime, { scope, vchDate: DAY, lines: journalLines }),
+    ];
+    for (const refusal of journalRefusals)
+      await expect(refusal()).rejects.toThrow("MAIN_BOOK='JOURNAL'");
+    expect({ rows: await sourceRows(engine), state: await state(engine) }).toEqual(before);
+  });
 });

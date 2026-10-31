@@ -821,7 +821,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Consi Purc | `TR_PR_SL_UAE` | `/txn/consi-purchase` | `C R E D P L` | PARTIAL | P1-edition |
 | Consi Rec | `TR_APR_ISU` | `/txn/tour-return` | `C - - - - -` | PARTIAL | P1-edition |
 | Employee Jv | `TR_EMP_JV` | `/txn/employee-jv` | `C - - - - -` | PARTIAL | P1-edition |
-| Fine Jv Entry | `TR_CONTRA` | `/txn/fine-jv` | `C - - - - -` | PARTIAL | P1-core |
+| Fine Jv Entry | `TR_CONTRA` | `/txn/fine-jv` | `C R E D P L` | PARTIAL | P1-core |
 | Fine Purc | `TR_FINE_SL_PR` | `/txn/fine-sale` | `C - - - - -` | PARTIAL | P1-edition |
 | Fine Sales | `TR_FINE_SL_PR` | `/txn/fine-sale` | `C - - - - -` | PARTIAL | P1-edition |
 | Labour Work | `TR_SALE_LBR` | `/txn/labour-sale` | `C - - D - L` | PARTIAL | P1-core |
@@ -947,12 +947,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `TR_CONTRA` — CurBookHelp('FINE JV') ([MDI_FORM.cs:8360-8365](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8360-L8365)).
 - **Does:** Transfers fine gold or silver balance between two accounts without money movement.
-- **Looks:** Voucher/book/date header and a compact from/to account, metal and fine-weight panel.
-- **Writes:** CONTRA_DATA, AC_DATA, ROJ_MEL_DATA, REMARK_DATA.
-- **Web:** `/txn/fine-jv`; `POST /fine-jv`, `GET /fine-jv/:vchNo`, `DELETE /fine-jv/:vchNo`. Can: create.
-- **Remaining:** Read and delete APIs exist but the UI only creates; edit, list, print, versions and the sign/rounding comparison remain.
-- **Owners:** G53, N67, X16, P06-02, N51, N52.
-- **Evidence:** [page.tsx:57-156](../../web/apps/web/app/%28app%29/txn/fine-jv/page.tsx#L57-L156).
+- **Looks:** TR_CONTRA grid in FINE JV mode: Vch No (Enter/F1/Up/Down), book, Vch Date, Item Type (Gold/Silver) and Employee; rows of Sr, Cr/Dr, AcCode, Ac Name, It Desc, CrFine and DrFine at 0.000 with totals; recent list with Load, Delete and Print.
+- **Writes:** CONTRA_DATA, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, TEMP_BOOK_DATA, DELETE_DATA, APR_IDTL.
+- **Web:** `/txn/fine-jv`; `POST /fine-jv`, `GET /fine-jv/:vchNo`, `GET /fine-jv/:vchNo/print`, `PUT /fine-jv/:vchNo`, `DELETE /fine-jv/:vchNo`. Can: create, reopen, edit, delete, print, list.
+- **Remaining:** The desktop grid, paired rows, 33-character fine legs, day book, remark rebuild, desktop refusals, lossless reopen/edit, delete audit and FineJvBill behind print rights pass 18 browser cases. Open: version concurrency, idempotency retry, fault rollback, the browser settings matrix, L6 report filters, RE_TRFR (no web column), the per-voucher USER_UPDATE/USER_DELETE override, the EMP_AS_USER employee default and a desktop-runtime comparison.
+- **Owners:** G219, N206, N51, N52.
+- **Evidence:** [TR_CONTRA.cs:1426-1446](../../unified/src/csharp/DataCareNext/TR_CONTRA.cs#L1426-L1446), [TR_CONTRA.cs:2666-2890](../../unified/src/csharp/DataCareNext/TR_CONTRA.cs#L2666-L2890), [TR_CONTRA.cs:2951-2968](../../unified/src/csharp/DataCareNext/TR_CONTRA.cs#L2951-L2968), [TR_CONTRA.cs:2996-3098](../../unified/src/csharp/DataCareNext/TR_CONTRA.cs#L2996-L3098), [Ac_Ledr.cs:846-848](../../unified/src/csharp/DataCareNext/Ac_Ledr.cs#L846-L848), [Ac_Tax.cs:686-694](../../unified/src/csharp/DataCareNext/Ac_Tax.cs#L686-L694), [page.tsx](../../web/apps/web/app/%28app%29/txn/fine-jv/page.tsx).
 
 ### Fine Purc
 

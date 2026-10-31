@@ -350,7 +350,95 @@ export const contraEntry = {
       'T10',
       'Delete is exercised inside reopen-edit-delete; the DELETE_DATA audit follows.',
     ),
-    pending('rights', 'T11', 'The catalogue clerk has no contra rights yet.'),
+    C(
+      'rights.print-denied',
+      'T11',
+      'refusal',
+      'TR_CONTRA.cs:3000-3004: a user who may view Contra Entry but has no UserPrint is refused the ContraBill print.',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const vchNo = await enter(page, [
+          { crdr: 'DR', account: 'BANK', amount: 31 },
+          { crdr: 'CR', account: 'CASH', amount: 31 },
+        ]);
+        const before = await contraRows(ctx, vchNo);
+        const viewer = await ctx.session(as(USERS.printViewer.user));
+        await openContra(viewer.page);
+        const response = await viewer.page.request.get(
+          `/api/contra/${vchNo}/print?coBook=${BOOK}&format=html`,
+        );
+        const body = await response.text();
+        assert.equal(response.status(), 403, body.slice(0, 200));
+        assert.match(body, /"action":"print"/);
+        const after = await contraRows(ctx, vchNo);
+        assert.deepEqual(after, before);
+        return {
+          observation: `view-allowed user refused the print of contra ${vchNo}`,
+          expected: '403 print and no change',
+          database: { before, after },
+        };
+      },
+    ),
+    C(
+      'rights.fine-jv-book-refused',
+      'T11',
+      'refusal',
+      "MDI_FORM.cs:8100-8111 opens Contra Entry only on CurBookHelp('CONTRA'); a Fine JV voucher in the shared CONTRA_DATA table may not be read, printed or deleted through the Contra routes.",
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await page.goto('/txn/fine-jv');
+        await page.getByRole('heading', { name: 'Fine Jv Entry', exact: true }).waitFor();
+        const created = await page.evaluate(async () => {
+          const response = await fetch('/api/fine-jv', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              coBook: 'FJV',
+              metal: 'G',
+              lines: [
+                { crdr: 'DR', acCode: 'E2ELOC', fine: 1.5 },
+                { crdr: 'CR', acCode: 'E2EINT', fine: 1.5 },
+              ],
+            }),
+          });
+          return { status: response.status, body: await response.text() };
+        });
+        assert.equal(created.status, 201, created.body);
+        const fineNo = String(JSON.parse(created.body).vchNo).padStart(5, '0');
+        const fineRows = () =>
+          ctx.rows(
+            `SELECT "SR_NO"::int sr,"AC_CODE" ac,coalesce("CR_FINE",0)::float cr,coalesce("DR_FINE",0)::float dr
+               FROM "CONTRA_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='FJV' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+            fineNo,
+          );
+        const before = await fineRows();
+        const answers = [];
+        for (const [method, url] of [
+          ['GET', `/api/contra/${fineNo}?coBook=FJV`],
+          ['GET', `/api/contra/${fineNo}/print?coBook=FJV&format=html`],
+          ['DELETE', `/api/contra/${fineNo}?coBook=FJV`],
+        ]) {
+          const answer = await page.evaluate(
+            async ({ m, u }) => {
+              const response = await fetch(u, { method: m, credentials: 'include' });
+              return { status: response.status, body: await response.text() };
+            },
+            { m: method, u: url },
+          );
+          assert.equal(answer.status, 400, `${method} ${url} => ${answer.body}`);
+          assert.match(answer.body, /MAIN_BOOK='CONTRA'/);
+          answers.push([method, url, answer.status]);
+        }
+        const after = await fineRows();
+        assert.deepEqual(after, before);
+        return {
+          observation: `Contra read, print and delete refused Fine JV ${fineNo}: ${JSON.stringify(answers)}`,
+          expected: "400 MAIN_BOOK='CONTRA' and the Fine JV rows unchanged",
+          database: { before, after },
+        };
+      },
+    ),
     pending(
       'concurrency',
       'T12',

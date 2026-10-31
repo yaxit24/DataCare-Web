@@ -5,6 +5,7 @@ import {
   esc,
   num,
   money,
+  wt,
   rupeesInWords,
   billFooter,
   type DocMeta,
@@ -32,9 +33,17 @@ export async function contraVoucherData(
   return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params = voucherKeyParams(s);
     const rows: any[] = await tx.$queryRawUnsafe(
-      `SELECT c.*, a."AC_NAME" AS "RESOLVED_NAME"
+      `SELECT c.*, a."RESOLVED_NAME"
          FROM "CONTRA_DATA" c
-         LEFT JOIN "AC_MAST" a ON a.tenant_id=c.tenant_id AND a."CO_CODE"=c."CO_CODE" AND a."AC_CODE"=c."AC_CODE"
+         LEFT JOIN LATERAL (
+           SELECT m."AC_NAME" AS "RESOLVED_NAME"
+             FROM "AC_MAST" m
+            WHERE m.tenant_id=c.tenant_id AND m."CO_CODE"=c."CO_CODE" AND m."AC_CODE"=c."AC_CODE"
+            ORDER BY CASE WHEN m."LC_CODE"::text=c."LC_CODE"::text THEN 0
+                          WHEN m."LC_CODE" IS NULL OR btrim(m."LC_CODE"::text)='' THEN 1 ELSE 2 END,
+                     m.row_id
+            LIMIT 1
+         ) a ON true
         WHERE ${voucherKeyWhere('c')} ORDER BY c."SR_NO"`,
       ...params,
     );
@@ -86,6 +95,76 @@ export function contraVoucherHtml(rows: any[], ctx: ContraVoucherCtx = {}): stri
       ctx.fallbackName,
       'Contra entry — funds transferred between the accounts above. E.&O.E.',
     ),
+  });
+}
+
+/**
+ * FineJvBill's page footer (report-specs/FineJvBill.spec.json, PageFooter Section2): `{@for}` =
+ * 'For : ' + CO_NAME at the right, the stamp box, then 'Party signature.' at the left and 'signature.' at the
+ * right. The report binds no bank field and prints no declaration.
+ */
+function fineJvFooter(company: any, fallbackName = 'Company'): string {
+  const c = company ?? {};
+  return (
+    `<div class="foot"><div class="bank" style="align-self:flex-end">Party signature.</div>` +
+    `<div class="sign"><div class="for">For : ${esc(c.CO_NAME ?? fallbackName)}</div>` +
+    `<div>signature.</div></div></div>`
+  );
+}
+
+export interface FineJvVoucherCtx extends ContraVoucherCtx {
+  /** BOOK_DATA.BOOK_NAME of the configured book; `{@RptTitle}` appends it to the metal. */
+  bookName?: string;
+}
+
+/**
+ * Fine JV document (desktop `FineJvBill.RPT`, selected by `TR_CONTRA.BtnPrint_Click` when
+ * `FormMainBook = 'FINE JV'`, TR_CONTRA.cs:3021, :3061-3069, for every CONTRA_DATA row of the voucher,
+ * :3026/:3069). From the extracted report: the title `{@RptTitle}` is 'Gold ' or 'Silver ' (IT_TYPE 'G' or
+ * not) followed by BOOK_DATA.BOOK_NAME; the header carries Vch Date and Vch No; each detail record prints
+ * AC_MAST.AC_NAME with CR_FINE and DR_FINE, then its IT_DESC on a second line that is suppressed when blank;
+ * there is no total section. The extracted spec does not carry the numeric field formats, so fines print in
+ * the app's 0.000 form and a zero side is left blank.
+ */
+export function fineJvVoucherHtml(rows: any[], ctx: FineJvVoucherCtx = {}): string {
+  const h = rows[0] ?? {};
+  const acName = (row: any) => esc(row?.RESOLVED_NAME ?? row?.AC_NAME ?? row?.AC_CODE ?? '');
+  const metal =
+    String(h.IT_TYPE ?? '')
+      .trim()
+      .toUpperCase() === 'G'
+      ? 'Gold'
+      : 'Silver';
+  const lineRows = rows
+    .map((row) => {
+      const cr = num(row.CR_FINE);
+      const dr = num(row.DR_FINE);
+      const desc = String(row.IT_DESC ?? '').trim();
+      return (
+        `<tr><td>${acName(row)}</td><td class="r">${cr ? wt(cr) : ''}</td>` +
+        `<td class="r">${dr ? wt(dr) : ''}</td></tr>` +
+        (desc
+          ? `<tr><td colspan="3" style="padding-left:28px;color:#595959;font-size:9.5px">${esc(desc)}</td></tr>`
+          : '')
+      );
+    })
+    .join('');
+  const meta: DocMeta[] = [
+    { k: 'Vch Date', v: formatDesktopDate(h.VCH_DATE) },
+    { k: 'Vch No', v: String(h.VCH_NO ?? '') },
+  ];
+  const body =
+    `<table class="items"><thead><tr><th style="width:56%">Party Name</th>` +
+    `<th class="r">Cr Fine</th><th class="r">Dr Fine</th></tr></thead>` +
+    `<tbody>${lineRows}</tbody></table>`;
+  return docShell({
+    title: `${metal} ${ctx.bookName ?? 'Fine JV'}`,
+    copy: ctx.copy,
+    company: ctx.company,
+    fallbackName: ctx.fallbackName,
+    meta,
+    body,
+    footer: fineJvFooter(ctx.company, ctx.fallbackName),
   });
 }
 

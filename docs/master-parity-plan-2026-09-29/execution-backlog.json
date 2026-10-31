@@ -6857,6 +6857,41 @@
         "web/apps/web/test/assertPortsFree.test.ts"
       ],
       "statusNote": "IMPLEMENTED. Verified: the two new unit tests pass (the config test fails with main's next.config.mjs); a planted stale route cache was removed by next start, which served the current tag-opening chunk; assertPortsFree refused a port held by another server."
+    },
+    {
+      "id": "N206",
+      "status": "implemented-unverified",
+      "action": "Fine Jv Entry is the desktop TR_CONTRA grid in FINE JV mode: paired LDR_TYPE 0/1 rows, CR_FINE + / DR_FINE - legs keyed STR(SR_NO)+'03'/'04', day book and REMARK_DATA rebuilt from the rows, the desktop save refusals, lossless reopen and edit, FineJvBill behind print rights; Contra and Journal refuse another family's book and need print rights for their documents.",
+      "parentLabels": "P1-core; L4; T01-T18",
+      "startAfter": [
+        "N138"
+      ],
+      "requiredProof": "Source-derived HTTP/DB tests red against the old writer prove the paired rows, 33-character keys, TEMP_BOOK_DATA name, day-book names, remark rebuild, desktop refusals, omitted-field edit, delete set, print layout and 400/403/404 answers, and the Contra/Journal family and print guards; the fine-jv and contra feature modules pass every executable case; Chrome DevTools visual and Lighthouse checks pass.",
+      "gapIds": "G219",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/api/src/modules/finance/fineJv.ts",
+        "web/apps/api/src/routes/fineJv.ts",
+        "web/apps/api/src/modules/finance/contraVoucher.ts",
+        "web/apps/api/src/modules/finance/contra.ts",
+        "web/apps/api/src/modules/finance/journal.ts",
+        "web/apps/api/src/modules/finance/lifecycle.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/web/app/(app)/txn/fine-jv/page.tsx",
+        "web/apps/api/test/fineJv.routes.db.test.ts",
+        "web/apps/api/test/financeLifecycle.db.test.ts",
+        "web/apps/api/test/reopenVoucher.db.test.ts",
+        "web/apps/api/test/routePolicy.test.ts",
+        "web/apps/web/test/fineJvPage.test.ts",
+        "web/apps/web/test/features/modules/fineJv.mjs",
+        "web/apps/web/test/features/modules/contraEntry.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: fineJv.routes.db.test.ts 7/7 (all red before), financeLifecycle 7/7 (cross-family case red before the guard), reopenVoucher, routePolicy, contraDelete, financeBookSelection and transactionBudget pass; full suite api 3612, web 693, core 1791 tests pass; fine-jv feature module 18 passed / 5 blocked / 1 N/A, contra module adds print-denied and FINE JV book refusal; Chrome DevTools three-row entry, FineJvBill print, Enter reopen, edit and delete; Lighthouse 100 on the grid. Open: version concurrency, idempotency, fault rollback, browser settings matrix, L6 report filters, RE_TRFR (no column), per-voucher USER_UPDATE/USER_DELETE override, EMP_AS_USER default, desktop-runtime comparison."
     }
   ],
   "amendments": [

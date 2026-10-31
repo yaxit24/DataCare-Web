@@ -8,7 +8,7 @@
   --accent-ink: #ffffff;
   --side: #1f2d3d;
   --side-ink: #cdd8e3;
-  --ok: #1a7f4b;
+  --ok: #187344;
   --err: #b3261e;
   --side-hover: #2a3b4f;
 }
@@ -89,7 +89,7 @@ h2 {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  color: #7f93a8;
+  color: #8297ad;
 }
 .sidebar a {
   display: block;

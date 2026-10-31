@@ -454,6 +454,7 @@ route('Cash / Bank/Account Opening Bal', [
 route('Cash / Bank/Fine JV (metal transfer)', [
   'POST /fine-jv',
   'GET /fine-jv/:vchNo',
+  'GET /fine-jv/:vchNo/print',
   'PUT /fine-jv/:vchNo',
   'DELETE /fine-jv/:vchNo',
 ]);
@@ -938,6 +939,10 @@ const PRINT_ROUTES = new Set([
   'GET /reports/trial-balance-doc',
   'GET /reports/balance-sheet-doc',
   'GET /reports/render',
+  'GET /fine-jv/:vchNo/print',
+  // TR_CONTRA.cs:3000-3004: Contra and Journal documents are printed from the same form as Fine JV.
+  'GET /contra/:vchNo/print',
+  'GET /journal/:vchNo/print',
 ]);
 
 const UPDATE_POST_ROUTES = new Set([

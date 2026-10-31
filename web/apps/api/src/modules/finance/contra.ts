@@ -17,6 +17,7 @@ import {
   insertDesktopDeleteAuditTx,
   insertHiddenIdentityTx,
   replaceWriteSetTx,
+  requireBookFamily,
   text,
   voucherKey,
   type VoucherIdentity,
@@ -173,6 +174,7 @@ export async function postContra(
       VCH_NO: formatVoucherNo(vchNo),
     };
     const book = await configuredBookTx(tx, input.scope);
+    requireBookFamily(book, 'CONTRA', 'contra');
     const rows = contraRows(lines);
     const ledger = contraLedger(key, book.shortName, rows, vchDate);
     assertBalanced(ledger);
@@ -280,6 +282,7 @@ export async function getContra(
   completeFinanceScope(scope);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
   return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
+    requireBookFamily(await configuredBookTx(tx, scope), 'CONTRA', 'contra');
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"HD_VCH_NO","MAIN_USER","SR_NO","LDR_TYPE","CRDR_TYPE","AC_CODE","AC_NAME",
               "LD_CODE","DR_AMT","CR_AMT","IT_DESC"
@@ -320,6 +323,7 @@ export async function editContra(
   completeFinanceScope(input.scope);
   const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
   return withTxBudget(prisma, input.scope.tenantId, 'voucher', async (tx: any) => {
+    requireBookFamily(await configuredBookTx(tx, input.scope), 'CONTRA', 'contra');
     const { identity } = await editIdentityTx(tx, {
       table: 'CONTRA_DATA',
       scope: input.scope,
@@ -345,6 +349,7 @@ export async function deleteContra(
   const scope = input.scope;
   const voucherNo = formatVoucherNo(input.vchNo);
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
+    requireBookFamily(await configuredBookTx(tx, scope), 'CONTRA', 'contra');
     // A contra has a row per grid row (TR_CONTRA.cs:2760-2866), so only the shared identity columns are locked as
     // the header; the audit takes the row columns from SR_NO 1.
     const { persisted, identity } = await editIdentityTx(tx, {

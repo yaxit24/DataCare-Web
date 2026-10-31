@@ -54,8 +54,9 @@ export async function configuredBookTx(tx: any, scope: VoucherScope) {
     BOOK_SNAME: unknown;
     MAIN_BOOK: unknown;
     BOOK_INOUT: unknown;
+    DATA_TYPE: unknown;
   }> = await tx.$queryRawUnsafe(
-    `SELECT "BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT" FROM "BOOK_DATA"
+    `SELECT "BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","DATA_TYPE" FROM "BOOK_DATA"
       WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
         AND coalesce(nullif(btrim("CUR_USE"::text),''),'Y') <> 'N'
       ORDER BY row_id`,
@@ -74,7 +75,25 @@ export async function configuredBookTx(tx: any, scope: VoucherScope) {
     shortName: text(rows[0]!.BOOK_SNAME),
     mainBook: text(rows[0]!.MAIN_BOOK),
     inout: text(rows[0]!.BOOK_INOUT),
+    dataType: text(rows[0]!.DATA_TYPE) || 'A',
   };
+}
+
+/**
+ * CONTRA_DATA is shared by Contra (`CurBookHelp('CONTRA')`, MDI_FORM.cs:8100-8111), Fine JV
+ * (`CurBookHelp('FINE JV')`, MDI_FORM.cs:8360-8365) and the web Journal. The desktop menu can only
+ * open a book of its own family, so a route of one family must refuse another family's book before it
+ * reads, rewrites or deletes that family's vouchers.
+ */
+export function requireBookFamily(
+  book: { mainBook: string },
+  mainBook: string,
+  label: string,
+): void {
+  if (book.mainBook.trim().toUpperCase() !== mainBook)
+    throw new FinanceLifecycleValidationError(
+      `${label} requires BOOK_DATA.MAIN_BOOK='${mainBook}' for the configured book`,
+    );
 }
 
 export async function createIdentityTx(
