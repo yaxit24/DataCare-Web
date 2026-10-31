@@ -499,8 +499,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date/print header; rich tag grid, component sub-grid, totals, image and label controls.
 - **Writes:** BAR_DETL, BAR_IDTL, MAIN_STOCK, DM_DATA, LOT_DETL, TAG_IMAGE_DATA, TAG_PRINT_DATA, SRNO_MAST.
 - **Web:** `/txn/tag-opening`; `POST /stock/tag-opening`, `GET /stock/tag-opening/:vchNo`, `PUT /stock/tag-opening/:vchNo`, `DELETE /stock/tag-opening/:vchNo`. Can: create, reopen, edit, delete.
-- **Remaining:** An unchanged save loses fields; no label print or recent list; book selector and COL_MAST layout remain.
-- **Owners:** X18, G46, N63, G54, N68, N62, N77, G71, N85.
+- **Remaining:** Rights, two-session, retry, rollback and counter-mandatory cases are pending; the karigar weight block (G217) and tag label print are missing; the COL_MAST grid layout remains.
+- **Owners:** X18, G46, N63, G54, N68, N62, N77, G71, N85, G214, G215, G216, N203, G217, N204.
 - **Evidence:** [KB_master.md:187-217](../../project-memory/video-research/_kb/KB_master.md#L187-L217).
 
 ### Tax
@@ -2282,8 +2282,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher header, rich tag grid, stone sub-grid, totals, print-template controls and image tools.
 - **Writes:** BAR_DATA, BAR_DETL, BAR_IDTL, MAIN_STOCK, TAG_IMAGE_DATA, TAG_SET, DM_DATA.
 - **Web:** `/txn/tag-opening`; `POST /stock/tag-opening`, `GET /stock/tag-opening/:vchNo`, `PUT /stock/tag-opening/:vchNo`, `DELETE /stock/tag-opening/:vchNo`. Can: create, reopen, edit, delete.
-- **Remaining:** The lifecycle exists, but an unchanged save loses fields and label print is missing.
-- **Owners:** G46, N63, G54, N68, X18, G71, N85.
+- **Remaining:** Rights, two-session, retry, rollback and counter-mandatory cases are pending; the karigar weight block (G217) and tag label print are missing.
+- **Owners:** G46, N63, G54, N68, X18, G71, N85, G214, G215, G216, N203, G217, N204.
 - **Evidence:** [TR_TAG_OPBL.md](../../project-memory/catalogs/forms/TR_TAG_OPBL.md).
 
 ### Order Cancel

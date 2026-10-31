@@ -6799,6 +6799,72 @@
         "web/apps/web/test/edition.real-stack.mjs"
       ],
       "statusNote": "IMPLEMENTED. Verified: editionGate and runtimeConfig tests (22 passed), liteEditionCalls.test.ts (fails with the settings exemption removed), EDITION_REAL_STACK_PASSED with the Lite phase (88 Lite links, Basic screen and API refused, Beta group opens Rojmel as Beta)."
+    },
+    {
+      "id": "N203",
+      "status": "implemented-unverified",
+      "action": "Tag Opening and Only Tag Entry are the desktop TR_TAG_OPBL: the two menus on their own book families with the TGN (TAG GEN) book provisioned, the stock item shown and required only for Only Tag Entry, reopen keeping every field, stock rows as Ac_Stock.Tag_Opbl_Stk writes them, the desktop refusal and delete texts, and the voucher number keys.",
+      "parentLabels": "P9; L2",
+      "startAfter": [
+        "N171",
+        "N172"
+      ],
+      "requiredProof": "the tag-opening feature module passes through the screen for both menus (reopen keeps a hallmark id; sold tag blocks delete); tagOpeningStock.db.test.ts pins the stock rows and refusals and fails on main's writer.",
+      "gapIds": "G214, G215, G216",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/web/app/(app)/txn/tag-opening/page.tsx",
+        "web/apps/api/src/modules/stock/stockVoucherLifecycle.ts",
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/apps/api/test/tagOpeningStock.db.test.ts",
+        "web/apps/web/test/features/modules/tagOpening.mjs"
+      ],
+      "statusNote": "IMPLEMENTED. Verified: tagOpeningStock.db.test.ts 4 passed (all 4 fail on main's writer); 20 related DB test files, 176 tests passed; tag-opening module 13 passed, 5 blocked (the reopen case fails with main's 15-field reopen); Chrome check on the demo stack: Only Tag Entry refused without the stock item, saved with Alt+S, the O and I rows checked in MAIN_STOCK, reopened with Enter, deleted with the desktop question and DELETE_DATA."
+    },
+    {
+      "id": "N204",
+      "status": "planned",
+      "action": "Add the karigar weight block (KrOthWt, KrNwt, KrGht%, KrGht, KrTouch, KrWst%, KrFine) to the tag grid with the desktop formulas, save it to BAR_DETL and copy it to MAIN_STOCK as Tag_Opbl_Stk does.",
+      "parentLabels": "P9; L2",
+      "startAfter": [
+        "N203"
+      ],
+      "requiredProof": "a DB test pins the BAR_DETL and MAIN_STOCK karigar values; the tag-opening module saves a tag with a karigar block through the screen.",
+      "gapIds": "G217",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-31",
+      "evidence": [],
+      "statusNote": "PLANNED."
+    },
+    {
+      "id": "N205",
+      "status": "implemented-unverified",
+      "action": "Browser suites run against the build they were given: the production server clears the route cache when it starts, and every real-stack suite and the feature harness refuse to start when their ports already answer.",
+      "parentLabels": "P9",
+      "startAfter": [
+        "N186"
+      ],
+      "requiredProof": "nextConfigRouteCache.test.ts fails with main's next.config.mjs; assertPortsFree.test.ts refuses an occupied port; a stale route cache planted before next start is gone and the current chunk is served.",
+      "gapIds": "G218",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/web/next.config.mjs",
+        "web/apps/web/test/real-stack-target.mjs",
+        "web/apps/web/test/nextConfigRouteCache.test.ts",
+        "web/apps/web/test/assertPortsFree.test.ts"
+      ],
+      "statusNote": "IMPLEMENTED. Verified: the two new unit tests pass (the config test fails with main's next.config.mjs); a planted stale route cache was removed by next start, which served the current tag-opening chunk; assertPortsFree refused a port held by another server."
     }
   ],
   "amendments": [

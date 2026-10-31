@@ -251,6 +251,15 @@ export const DESKTOP_MESSAGES = {
 
   /** TR_AC_OPBL.cs:3114 — desktop condition: a bill row's Cr/Dr is not C or D. */
   OPENING_BILL_SIGN_REQUIRED: 'Please Enter C or D and Try Again...',
+
+  /** TR_TAG_OPBL.cs:8562 — desktop condition: a tag number already in another grid row. */
+  TAG_DUPLICATE: 'Duplicate Tag No',
+
+  /** TR_TAG_OPBL.cs:10815 — desktop condition: Only Tag Entry (TAG GEN) saved without the stock item code. */
+  TAG_GEN_STOCK_ITEM_REQUIRED: 'Stock item code Insert First...',
+
+  /** TR_TAG_OPBL.cs:11383 — desktop condition: delete while a tag of the voucher is in a sale (two spaces as stored). */
+  TAG_OPENING_DELETE_SOLD: 'You Cant Delete This Voucher Because  Tag Use in Sales Transection....',
 } as const;
 
 export type DesktopMessageKey = keyof typeof DESKTOP_MESSAGES;

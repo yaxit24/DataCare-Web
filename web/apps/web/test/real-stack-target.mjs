@@ -52,3 +52,24 @@ export function realStackTarget(root, env = process.env) {
     databaseLabel: `disposable localhost:${dbPort} / app_user`,
   };
 }
+
+/**
+ * N205 (G218): refuse to start a suite's servers when something already answers on one of its ports. The new Next
+ * server cannot bind a port another server holds and exits, but the readiness probe got a 200 from the old one, so
+ * the suite ran against that server's build (seen with a demo stack left on the same ports).
+ */
+export async function assertPortsFree(target) {
+  for (const origin of [target.apiOrigin, target.webOrigin]) {
+    let answered = false;
+    try {
+      await fetch(origin, { signal: AbortSignal.timeout(2000) });
+      answered = true;
+    } catch {
+      // Nothing listening: the connection was refused or timed out.
+    }
+    assert(
+      !answered,
+      `${origin} already answers: stop the server using that port, or set PARITY_API_PORT/PARITY_WEB_PORT`,
+    );
+  }
+}

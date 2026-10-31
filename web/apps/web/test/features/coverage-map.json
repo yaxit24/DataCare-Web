@@ -81,6 +81,12 @@
         "web/apps/api/src/modules/finance/partyOpening.ts",
         "web/apps/api/src/routes/partyOpening.ts"
       ]
+    },
+    "tagOpening": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/tag-opening/page.tsx",
+        "web/apps/api/src/modules/stock/stockVoucherLifecycle.ts"
+      ]
     }
   }
 }

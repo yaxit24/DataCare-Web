@@ -169,6 +169,13 @@ export const NAV: NavGroup[] = [
     items: [
       { label: 'Stock / Tags', href: '/txn/stock', ready: true },
       { label: 'Tag Opening', href: '/txn/tag-opening', ready: true },
+      // Only Tag Entry shares TR_TAG_OPBL and its rights row with Tag Opening; the menu picks the TAG GEN books.
+      {
+        label: 'Only Tag Entry',
+        href: '/txn/tag-opening?mode=TAG%20GEN',
+        ready: true,
+        form: 'Inventory/Tag Opening',
+      },
       { label: 'Tag Print', href: '/txn/tag-print', ready: true },
       { label: 'Item Opening (non-tag)', href: '/txn/item-opening', ready: true },
       { label: 'Tag Cancel', href: '/txn/tag-cancel', ready: true },
