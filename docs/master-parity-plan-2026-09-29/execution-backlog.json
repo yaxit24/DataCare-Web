@@ -6768,6 +6768,29 @@
       "statusAsOf": "2026-10-31",
       "evidence": [],
       "statusNote": "PLANNED."
+    },
+    {
+      "id": "N202",
+      "status": "implemented-unverified",
+      "action": "Lite is the running edition (D33): APP_EDITION defaults to L, the higher editions' menus stay behind Beta, and the configuration reads every edition needs pass the edition gate.",
+      "parentLabels": "P9; L5",
+      "startAfter": [
+        "N171"
+      ],
+      "requiredProof": "edition.real-stack.mjs passes its Lite phase (navigation, refused Basic screen and API, settings read, Sales screen, Beta group); liteEditionCalls.test.ts finds no Lite screen calling a higher-edition API.",
+      "gapIds": "G213",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/api/src/modules/ops/runtimeConfig.ts",
+        "web/apps/api/src/modules/rbac/editionGate.ts",
+        "web/apps/api/test/liteEditionCalls.test.ts",
+        "web/apps/web/test/edition.real-stack.mjs"
+      ],
+      "statusNote": "IMPLEMENTED. Verified: editionGate and runtimeConfig tests (22 passed), liteEditionCalls.test.ts (fails with the settings exemption removed), EDITION_REAL_STACK_PASSED with the Lite phase (88 Lite links, Basic screen and API refused, Beta group opens Rojmel as Beta)."
     }
   ],
   "amendments": [

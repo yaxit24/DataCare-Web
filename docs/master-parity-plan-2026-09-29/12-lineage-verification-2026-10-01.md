@@ -223,6 +223,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G210 | High | Openings were counted twice in party balances and written in a shape the desktop does not read | `unified/src/csharp/DataCareNext/DC_Main.cs`; `unified/src/csharp/DataCareNext/BtmSchm.cs` | `web/apps/api/src/modules/finance/partyBalance.ts`; `web/apps/api/src/modules/masters/year.ts`; `web/apps/api/src/modules/finance/partyOpening.ts` | The desktop balance reads AC_DATA alone (`DC_Main.MsAcBal`, `DC_Main.cs:1463`), where the opening legs already are; the web added OP_DATA on top, so a migrated desktop opening (117 legs in the migrated data, all in AcOp_Ledr's layout) counted twice. The inline opening (a separate module, now removed) and the year carry-forward wrote OP_DATA in books 'OPN' and 'OPB' with '+'/'-' metal signs and no legs, and the carry-forward dropped silver. | N199 |
 | G211 | Med | Party Opening had no bill-wise grid | `unified/src/csharp/DataCareNext/TR_AC_OPBL.cs` | `web/apps/web/app/(app)/txn/ac-opbl/page.tsx` | The desktop screen has a bill-wise grid saved to OP_DETL (`TR_AC_OPBL.cs:2724-2760`) whose signed totals set the opening heads (MSG_TOT_FILL), with the fine worked out from net weight, touch and wastage (CommPassTotal); the web kept existing OP_DETL rows but could not show or edit them. The desktop Print button only checks print rights (`:2626-2633`) and prints nothing. | N200 |
 | G212 | Med | Year End close and Balance TrFr write next-year openings in two different shapes | `unified/src/csharp/DataCareNext/BtmSchm.cs`; `unified/src/csharp/DataCareNext/Ac_Final.cs` | `web/apps/api/src/modules/ops/yearEnd.ts`; `web/apps/api/src/modules/masters/year.ts` | Found while moving the carry-forward to the Party Opening writer: year-end close writes '000' ACOP legs with its own key and no OP_DATA, while Balance TrFr now writes OP_DATA and AcOp_Ledr legs. Running one after the other can leave both sets of legs, counting the opening twice. | N201 |
+| G213 | Med | Deployments ran Standard while only Lite was being completed | `unified/src/csharp/DataCareNext/MDI_FORM.cs` | `web/apps/api/src/modules/ops/runtimeConfig.ts`; `web/apps/api/src/modules/rbac/editionGate.ts` | The owner asked for the Lite edition to be completed first with the other menus held back as Beta (D33); the API defaulted to Standard, so 65 Basic and Standard menus that are not yet verified were open to users. Running Lite also showed that Lite screens read the company settings through the Basic Settings route, which the Lite gate would refuse. | N202 |
 
 ## 4. Decisions D23–D28
 
@@ -241,6 +242,7 @@ D28 as the owner's instructions, D23, D24, D26 and D27 as recommended.
 | D30 | Purchase Return source limits and stone rows. G47 asks for residual-limited source selection and `PR_IDTL` stone writes, but the desktop does neither: `TR_KR_ISU.cs:6845-6880` lists purchase vouchers with their full weights, `:6882-6975` imports full `ITM_NWT`/`ITM_GWT` for PURC RETURN (the `ADJ_NWT` residual applies only to the approval branch, `:6918`, `:6943-6950`), and `PR_IDTL` is only deleted (`:5035`, `:5385`), never inserted; `Ac_Stock.cs:774-778` posts `DM_DATA` from `PR_DETL` alone. Recommended: follow the desktop (no residual limit, no stone rows) and keep the web's existing over-return guard for tags (a returned tag must be in stock and on the named purchase); record a residual limit, if wanted, as a Phase 2 product rule. Rejected: implementing G47 as written, which changes desktop results | Product owner and desktop specialist, before N34 closes — **accepted as recommended, 30 October 2026** (the owner delegated the decision to the implementer) | `web/apps/api/test/purchaseReturnEdit.routes.db.test.ts` |
 | D31 | Edition-first delivery. Phase 1 is delivered one desktop edition at a time, Standard first: the menus the desktop shows when `DC_Main.MsSoftType` is `S`, i.e. `MENU_DATA` rows with `SM_TYPE` in `L`, `B`, `S` (`unified/src/csharp/DataCareNext/MDI_FORM.cs:11278-11286`), 114 menus listed in `docs/handbook/menu-editions.json`. Standard is built to production before any Ultra, Pro, Advance or Enterprise menu (78 deferred). Deferred features are not deleted or commented out: a snapshot branch keeps the pre-change state, and an edition gate hides them in navigation and rights and refuses their routes and APIs, as the desktop does by edition; for internal use they can be switched on as labelled Beta. Standard is complete only when all 114 menus pass their full browser case lists with no failing or blocked case (document 15 §6, confirmed by the owner on the evening of 30 October). Plan: document 15 | Owner instruction, 30 October 2026 — accepted | `docs/master-parity-plan-2026-09-29/15-standard-edition-plan.md` |
 | D32 | Edition tier order inside Standard. Within D31, the work follows the desktop's edition tiers: first every Lite menu (the 49 `MENU_DATA` rows with `SM_TYPE` `L`) is made to work end to end like the desktop, then the 29 menus Basic adds (`B`), then the 36 menus Standard adds (`S`); the higher editions (Ultra, Pro, Advance, Enterprise) follow Standard as D31 says. Shared defects found on a Lite screen are still fixed once for every screen. Progress is reported per tier by the generated `docs/handbook/web/standard-progress.md` | Product owner — instruction, 31 October 2026 | document 15 §5 (Lite packages L1–L6, PR #162); `web/scripts/generate-standard-progress.mjs` |
+| D33 | Lite is the running edition until Lite is complete. Deployments run the Lite edition by default (`APP_EDITION`, default `L`): the navigation lists only the 49 Lite menus, a higher edition's screen opened by URL is refused, and its API answers `403 edition-unavailable`. The Basic, Standard and higher menus are not deleted; with `APP_EDITION_BETA=1` they appear in the Beta group with a Beta notice for internal use. The company settings and the scale settings stay readable in every edition, because the desktop loads `CO_SET` when a company opens in every edition (`MS_OPNCOMP.cs:657-684`) | Product owner — instruction, 31 October 2026 | document 15 |
 
 ## 5. Slices N83–N89
 
@@ -1842,7 +1844,7 @@ and the menu catalog), and the routes and rights forms that serve no desktop men
 `docs/handbook/web-route-editions.json`, each with its reason. Every navigation item, page and rights form must be
 classified, or the generator, its CI gate and a gated API all refuse.
 
-`APP_EDITION` (default `S`) sets the running edition. The API refuses a higher edition's routes with
+`APP_EDITION` (default `L` since D33; `S` before) sets the running edition. The API refuses a higher edition's routes with
 `403 edition-unavailable` before any rights or scope check (`web/apps/api/src/modules/rbac/editionGate.ts`), `/me`
 reports the edition, and the rights editor lists only its forms. The screens list only its menus, name the edition in
 the header and refuse a deferred page opened by URL (`web/apps/web/components/Shell.tsx`,
@@ -2212,6 +2214,16 @@ and leave the baseline. `web/apps/api/test/voucherLifecycleAnswers.routes.db.tes
 records the login on create and delete, that a second delete answers 404 with no second DELETE_DATA row, and that no
 voucher route passes the tenant id as the delete user; both tests fail on the previous code.
 
+### N202 — Lite is the running edition (D33, G213)
+
+`APP_EDITION` now defaults to `L`. The navigation, the page guard and the API gate (N171) therefore show and allow only
+the 49 Lite menus; `APP_EDITION_BETA=1` lists the Basic and higher menus in the Beta group. `GET /settings` and
+`GET /integrations/device-settings` pass the gate in every edition (`EDITION_EXEMPT_ROUTES`), because every edition
+loads the company settings when a company opens (`MS_OPNCOMP.cs:657-684`); saving settings stays a Basic action.
+`liteEditionCalls.test.ts` scans every Lite page and shared module for its API calls and fails if one needs a higher
+edition, and `edition.real-stack.mjs` checks the Lite navigation, a refused Basic screen and API, the settings read,
+the Sales screen, and the Beta group in a real browser.
+
 ### N189 — A purchase return without an original purchase saves (G199)
 
 `web/apps/web/components/BookSelect.tsx` takes `required` (default true). The voucher's own book stays required; the
@@ -2352,6 +2364,7 @@ saves the reopened return without choosing a book; `create.against-purchase` sti
 | N199 | — | implemented-unverified, evidence in this change (G209, G210: Party Opening is TR_AC_OPBL; openings counted once) |
 | N200 | — | implemented-unverified, evidence in this change (G211: the bill-wise opening grid) |
 | N201 | — | planned (G212: one carry-forward writer for Year End close and Balance TrFr) |
+| N202 | — | implemented-unverified, evidence in this change (G213, D33: Lite is the default edition; the configuration reads pass the gate) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

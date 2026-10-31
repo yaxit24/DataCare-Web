@@ -20,6 +20,16 @@ export interface EditionRefusal {
   edition: EditionCode;
 }
 
+/**
+ * Configuration reads every edition's screens need, so the gate never refuses them (D33). The desktop loads CO_SET into
+ * its globals when a company opens, in every edition (`MS_OPNCOMP.cs:657-684`), and each voucher screen reads those
+ * globals; the Settings menu that edits them (UT_SETTING) is a Basic menu. Their rights check still applies.
+ */
+export const EDITION_EXEMPT_ROUTES: ReadonlySet<string> = new Set([
+  'GET /settings',
+  'GET /integrations/device-settings',
+]);
+
 /** The refusal for `form` under `policy`, or null when the form may be used (or no gate is configured). */
 export function editionRefusal(
   form: string,
