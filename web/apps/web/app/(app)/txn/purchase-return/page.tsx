@@ -346,6 +346,7 @@ export default function PurchaseReturnPage() {
                 value={origBook}
                 onChange={setOrigBook}
                 mainBooks={ORIGINAL_PURCHASE_BOOKS}
+                required={false}
               />
             </div>
             <div className="field">
