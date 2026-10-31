@@ -54,7 +54,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Report | Gst Report | `/reports/gst-report` | REPORT | — | no module | — |
 | Report | HuId Report | `/reports/huid` | REPORT | — | no module | — |
 | Transaction | Purchase | `/txn/purchase` | PARTIAL | purchase-invoice | module green | — |
-| Transaction | Purchase Rtn | `/txn/purchase-return` | PARTIAL | purchase-return | module, 3 open | G198, G199 |
+| Transaction | Purchase Rtn | `/txn/purchase-return` | PARTIAL | purchase-return | module, 2 open | G198 |
 | Transaction | Sales Order | `/txn/sales-order` | PARTIAL | sales-order | module, 3 open | G206, G36 |
 | Transaction | Sales | `/txn/sales`, `/txn/hallmark-sale` | PARTIAL | sales-invoice | module green | — |
 | Transaction | Sales Return | `/txn/sale-return` | PARTIAL | sales-return | module, 2 open | G190 |

@@ -16,6 +16,7 @@ export function BookSelect({
   preferred,
   mainBooks,
   disabled = false,
+  required = true,
 }: {
   value: string;
   onChange: (book: string) => void;
@@ -24,6 +25,12 @@ export function BookSelect({
   /** Optional authoritative BOOK_DATA.MAIN_BOOK values accepted by this workflow. */
   mainBooks?: string[];
   disabled?: boolean;
+  /**
+   * The voucher's own book is required; a reference to another voucher's book may be optional. N189 (G199): a
+   * purchase return needs only a party and a voucher number (TR_KR_ISU.cs:4986-4999), so its original purchase book
+   * is blank on a free-standing return.
+   */
+  required?: boolean;
 }) {
   const [books, setBooks] = useState<ScopeBook[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -80,7 +87,7 @@ export function BookSelect({
       value={value}
       onChange={(event) => onChange(event.target.value)}
       disabled={disabled || !loaded || books.length === 0}
-      required
+      required={required}
       aria-label="Configured book"
     >
       <option value="">

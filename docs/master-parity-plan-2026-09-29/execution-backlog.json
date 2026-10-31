@@ -6496,7 +6496,7 @@
     },
     {
       "id": "N189",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Original purchase book optional: a purchase return that is not against a purchase saves without choosing an original book, and a reopened return keeps its original book (or none) without blocking Save; remove purchase-return.create.without-original from features/baseline.json.",
       "parentLabels": "P9; X13",
       "startAfter": [
@@ -6507,7 +6507,15 @@
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
       "requiredProof": "the case passes; a return against a purchase still validates the original voucher; reopen then Save needs no extra choice.",
-      "gapIds": "G199"
+      "gapIds": "G199",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/web/components/BookSelect.tsx",
+        "web/apps/web/app/(app)/txn/purchase-return/page.tsx",
+        "web/apps/web/test/bookSelect.test.ts",
+        "web/apps/web/test/features/baseline.json"
+      ],
+      "statusNote": "IMPLEMENTED. BookSelect required opt-out on the original purchase book; purchase-return.create.without-original passes and left the baseline."
     },
     {
       "id": "N190",
