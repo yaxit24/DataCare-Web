@@ -1,3 +1,4 @@
+import { formatDesktopDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import {
   docShell,
@@ -107,7 +108,7 @@ export function karigarIssueHtml(header: any, lines: any[], ctx: KarigarVoucherC
       ? `<div class="words"><b>Amount in words:</b> ${esc(rupeesInWords(num(h.TOT_AMT)))} only.</div>`
       : '');
 
-  const vchDate = h.VCH_DATE ? String(h.VCH_DATE).slice(0, 10) : '';
+  const vchDate = formatDesktopDate(h.VCH_DATE); // N56 (D19): dd/MM/yyyy, always with the year
   const meta: DocMeta[] = [
     { k: 'Voucher No', v: String(h.BILL_NO ?? h.VCH_NO ?? '') },
     { k: 'Date', v: vchDate },

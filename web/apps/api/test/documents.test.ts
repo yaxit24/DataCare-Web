@@ -300,6 +300,38 @@ describe('faithful A4 documents', () => {
     }
   });
 
+  // N56 (D19, G36): String(date).slice(0, 10) printed "Thu Oct 01" with no year.
+  it('every document prints the voucher date as dd/MM/yyyy with its year', () => {
+    const day = new Date(Date.UTC(2026, 9, 1)); // a date column read by the driver
+    const docs = [
+      invoiceHtml({ VCH_NO: '1', CO_BOOK: 'SAL', VCH_DATE: day, NET_AMT: 100, TOT_AMT: 103 }, [], {
+        company: CO,
+      }),
+      purchaseBillHtml(
+        { VCH_NO: '2', CO_BOOK: 'PUR', VCH_DATE: day, NET_AMT: 100, TOT_AMT: 103 },
+        [],
+        {
+          company: CO,
+        },
+      ),
+      financeVoucherHtml(
+        'receipt',
+        { VCH_NO: '3', CO_BOOK: 'RCT', VCH_DATE: day, REC_AMT: 10 },
+        [],
+        {
+          company: CO,
+        },
+      ),
+      karigarIssueHtml({ VCH_NO: '4', CO_BOOK: 'KIS', VCH_DATE: day, TOT_AMT: 0 }, [], {
+        company: CO,
+      }),
+    ];
+    for (const html of docs) {
+      expect(html).toContain('01/10/2026');
+      expect(html).not.toMatch(/Thu Oct 01/);
+    }
+  });
+
   it('purchase bill: supplier + inter-state IGST', () => {
     const html = purchaseBillHtml(
       {

@@ -290,7 +290,7 @@ export default function DhrnReceiptPage() {
           )}
           <div className="toolbar" style={{ marginTop: 10 }}>
             <span className="spacer" />
-            <button className="primary" disabled={busy}>
+            <button className="primary" data-save-mnemonic disabled={busy}>
               {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : 'Receive Repayment'}
             </button>
             {loadedVch && (

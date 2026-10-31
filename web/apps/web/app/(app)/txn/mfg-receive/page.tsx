@@ -650,7 +650,7 @@ export default function MfgReceivePage() {
               Net {netTotal.toLocaleString('en-IN')} g · Fine {fineTotal.toLocaleString('en-IN')} ·{' '}
               <b>RecWt {recTotal.toLocaleString('en-IN')}</b>
             </span>
-            <button className="primary" disabled={busy}>
+            <button className="primary" data-save-mnemonic disabled={busy}>
               {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : 'Save Receive'}
             </button>
             {loadedVch && (

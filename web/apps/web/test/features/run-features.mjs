@@ -22,6 +22,7 @@ import { salesReturn } from './modules/salesReturn.mjs';
 import { settingsEffects } from './modules/settingsEffects.mjs';
 import { usersRights } from './modules/usersRights.mjs';
 import { companyOpen } from './modules/companyOpen.mjs';
+import { cashBank } from './modules/cashBank.mjs';
 import { contraEntry } from './modules/contraEntry.mjs';
 import { runSurface } from './surface/runner.mjs';
 
@@ -46,6 +47,7 @@ const MODULES = [
   salesReturn,
   companyOpen,
   purchaseReturn,
+  cashBank,
   contraEntry,
 ];
 

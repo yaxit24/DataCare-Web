@@ -1,3 +1,4 @@
+import { formatDesktopDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import {
   docShell,
@@ -115,7 +116,7 @@ export interface PassbookCtx {
   copy?: string;
   fallbackName?: string;
 }
-const dt = (v: any): string => (v ? String(v).slice(0, 10) : '');
+const dt = (v: any): string => formatDesktopDate(v); // N56 (D19): dd/MM/yyyy
 
 export function schemePassbookHtml(
   member: any,

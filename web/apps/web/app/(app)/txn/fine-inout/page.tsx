@@ -416,7 +416,7 @@ export default function FineInoutPage() {
               Net {netTotal.toLocaleString('en-IN')} g ·{' '}
               <b>Fine {fineTotal.toLocaleString('en-IN')}</b>
             </span>
-            <button className="primary" disabled={busy}>
+            <button className="primary" data-save-mnemonic disabled={busy}>
               {busy ? 'Saving…' : `Save ${direction}`}
             </button>
           </div>

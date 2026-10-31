@@ -1,3 +1,4 @@
+import { formatDesktopDate } from '@datacare/core';
 import { formatVoucherNo } from '../vouchers/numbering.js';
 import { withTxBudget, SNAPSHOT_READ } from '../shared/txBudget.js';
 import { resolveBookPolicyTx } from '../shared/bookPolicy.js';
@@ -110,8 +111,7 @@ export interface OrderCtx {
   fallbackName?: string;
   title?: string;
 }
-const dt = (v: any): string =>
-  v ? (v instanceof Date ? v.toISOString().slice(0, 10) : String(v).slice(0, 10)) : '';
+const dt = (v: any): string => formatDesktopDate(v); // N56 (D19): dd/MM/yyyy
 
 export function orderHtml(header: any, lines: any[], ctx: OrderCtx = {}): string {
   const h = header;

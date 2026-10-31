@@ -100,6 +100,15 @@ export const KERNEL_CONCERNS: readonly KernelConcern[] = Object.freeze([
       'silently takes the first row and often falls back to a literal',
     exempt: Object.freeze(['modules/shared/bookPolicy.ts', 'modules/shared/postingAccounts.ts']),
   }),
+  Object.freeze({
+    id: 'date-normalization',
+    title: 'Date sliced from its string form',
+    kernel: '@datacare/core toIsoDate (transport) or formatDesktopDate (display, dd/MM/yyyy)',
+    why:
+      'String() of a JavaScript Date is "Thu Oct 01 2026 …", so slicing ten characters drops the year ' +
+      '(G36: the printed tax invoice showed no year); D19 transports YYYY-MM-DD and displays dd/MM/yyyy',
+    exempt: Object.freeze(['packages/core/dates.ts']),
+  }),
 ]);
 
 /**
@@ -113,6 +122,9 @@ const HELPER_DECLARATION =
   /^\s*(?:export\s+)?(?:const\s+\w+\s*(?::[^=\n]*)?=\s*(?:\([^)]*\)|\w+)\s*(?::[^=>\n]*)?=>|function\s+\w+\s*\()/;
 const ROUNDS = /Math\.round\(/;
 const BOOK_DETL = /FROM\s+"BOOK_DETL"/;
+/** `String(x.VCH_DATE).slice(0, 10)`, `text(h.vd ?? '').slice(0, 10)` and the like: a date read by slicing its text. */
+const DATE_SLICE =
+  /\b(?:String|text|t|str)\([^()]*(?:[A-Z_]*DATE[A-Z_]*|\b[vtf]d\b|[Dd]ate)[^()]*\)\.slice\(0, ?10\)/;
 
 const isExempt = (concern: KernelConcern, path: string): boolean =>
   concern.exempt.some((e) => path === e || path.endsWith(`/${e}`));
@@ -160,6 +172,7 @@ export function findBypasses(files: readonly KernelSourceFile[]): KernelBypass[]
   const raw: Array<KernelBypass & { fingerprint: string }> = [];
   const rounding = KERNEL_CONCERNS.find((c) => c.id === 'rounding')!;
   const bookAccount = KERNEL_CONCERNS.find((c) => c.id === 'book-account')!;
+  const dateNormalization = KERNEL_CONCERNS.find((c) => c.id === 'date-normalization')!;
 
   for (const file of files) {
     const lines = file.text.split('\n');
@@ -196,6 +209,21 @@ export function findBypasses(files: readonly KernelSourceFile[]): KernelBypass[]
         if (BOOK_DETL.test(line)) {
           raw.push({
             concern: bookAccount.id,
+            path: file.path,
+            line: i + 1,
+            snippet: line.trim().slice(0, 110),
+            fingerprint: fingerprintOf(line),
+            siteId: '',
+          });
+        }
+      }
+    }
+    if (!isExempt(dateNormalization, file.path)) {
+      for (let i = 0; i < lines.length; i += 1) {
+        const line = lines[i] ?? '';
+        if (DATE_SLICE.test(line)) {
+          raw.push({
+            concern: dateNormalization.id,
             path: file.path,
             line: i + 1,
             snippet: line.trim().slice(0, 110),
@@ -291,10 +319,11 @@ export function compareToBaseline(
 
   const problems: string[] = [];
   for (const id of added) {
+    const kernel =
+      KERNEL_CONCERNS.find((c) => id.startsWith(`${c.id}:`))?.kernel ?? 'the kernel primitive';
     problems.push(
-      `NEW bypass not in the baseline: ${id} — use the kernel primitive (@datacare/core round / ` +
-        `roundHalfEven, or shared/roundingPolicy), or, if a reviewed grandfathered exception, add the ` +
-        `exact site ID to parity/kernel-conformance-baseline.json with a note`,
+      `NEW bypass not in the baseline: ${id} — use ${kernel}, or, if a reviewed grandfathered exception, ` +
+        `add the exact site ID to parity/kernel-conformance-baseline.json with a note`,
     );
   }
   for (const id of removed) {

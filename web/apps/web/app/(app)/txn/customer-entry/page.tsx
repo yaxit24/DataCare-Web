@@ -359,7 +359,7 @@ export default function CustomerEntryPage() {
                 </button>
               </>
             )}
-            <button className="primary" disabled={busy || !employeeCode.trim()}>
+            <button className="primary" data-save-mnemonic disabled={busy || !employeeCode.trim()}>
               {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : 'Save Entry'}
             </button>
           </div>

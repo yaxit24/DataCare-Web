@@ -639,7 +639,11 @@ export default function TourOrderPage() {
                 + Add line
               </button>
               <span className="spacer" />
-              <button className="primary" disabled={busy || !coBook || !previewReady}>
+              <button
+                className="primary"
+                data-save-mnemonic
+                disabled={busy || !coBook || !previewReady}
+              >
                 {busy ? 'Saving…' : selected ? 'Update Tour Order' : 'Save Tour Order'}
               </button>
             </div>

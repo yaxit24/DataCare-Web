@@ -1906,6 +1906,16 @@ cache a previous server wrote. Proven by `web/apps/web/test/clearRouteCache.test
 Done when: no local browser run can be answered with a previous build's page.
 
 
+### N56 milestone 1 — Printed dates carry the year (G36, D19)
+
+`web/packages/core/src/dates.ts` converts dates for transport (`toIsoDate`) and display (`formatDesktopDate`,
+`dd/MM/yyyy`). The printed documents and `web/apps/web/components/VoucherList.tsx` use them, and
+`web/apps/api/src/modules/ops/kernelConformance.ts` refuses a new date sliced from its string form. Proven by
+`web/packages/core/test/dates.test.ts`, `web/apps/api/test/documents.test.ts` and the `print.date-with-year` case of
+`web/apps/web/test/features/modules/salesInvoice.mjs`.
+
+Done when: no document or list prints a date without its year and the date-normalization rule is at zero.
+
 ### N51 milestone 2 — Sale version tokens (G170, D17)
 
 `web/apps/api/src/modules/vouchers/version.ts` hashes a voucher's complete write set. `GET /sales/:vchNo` returns it
@@ -2100,6 +2110,19 @@ baseline: per tier, how many menus have a browser feature module, how many have 
 done (catalog row FULL and no open defect), with every menu's routes, module, state and open gaps. On 31 October:
 Lite 49 menus, 5 with a module, 3 with no open defect, 0 done; Basic 29, 1 and 1, 0; Standard 36, none yet.
 `--check` reports a stale page.
+### N190 — Alt+S saves on every voucher screen (G200)
+
+N163 made Alt+S press the button marked `data-save-mnemonic`, the desktop's `&Save` mnemonic (for example
+`TR_KR_ISU.cs:2330`), but 20 voucher pages, Purchase Return among them, had an unmarked primary Save. Those 20 are
+now marked, and two more found by the new scan (Lot Intake on `item-lot`, Post Weight Change on `tag-weight-diff`).
+`web/apps/web/test/saveMnemonicCoverage.test.ts` reads every `app/(app)/txn/*/page.tsx` and fails when a primary
+button labelled Save, Update, Post, Issue or Receive is unmarked, unless the page renders a shared form that marks
+its own button; it also refuses two marks on one page. Two pages with several independent forms (`membership`,
+`scheme`) are listed with their reason: Alt+S there must press the focused form's Save, which `findSaveButton`
+does not do yet, and neither menu is in the Standard edition.
+
+Evidence: `purchase-return.keyboard.alt-s-saves` passes in the browser and leaves the baseline; a negative control
+(Purchase Return unmarked) fails the scan.
 
 ## 6. Status corrections
 
@@ -2217,7 +2240,7 @@ Lite 49 menus, 5 with a module, 3 with no open defect, 0 done; Basic 29, 1 and 1
 | N187 | — | implemented-unverified, evidence in this change (Purchase Return module 15/5/2 on shared real data; found G198–G201; narrows G193) |
 | N188 | — | planned (G198: purchase return and purchase line amounts and bill total in whole rupees, as TR_KR_ISU and TR_PURC) |
 | N189 | — | planned (G199: the original purchase book is optional on a purchase return and survives reopen) |
-| N190 | — | planned (G200: mark the save button on the 20 remaining voucher screens so Alt+S saves) |
+| N190 | — | implemented-unverified, evidence in this change (G200: 22 voucher screens marked; a unit scan keeps every voucher page's primary Save marked; purchase-return Alt+S passes in the browser) |
 | N191 | — | planned (G201: provision BOOK_TBL_NAME for purchase-family books and backfill existing companies) |
 | N192 | — | implemented-unverified, evidence in this change (G202, D32 recorded; generated per-tier progress page; Lite packages in document 15 §5) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |

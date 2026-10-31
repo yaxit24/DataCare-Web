@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { dateWhere } from './reports.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import type { ReportScope, ListReport } from './reports.js';
@@ -160,7 +161,7 @@ export async function karigarLedger(
       else rcv = round3(rcv + f);
       return {
         vchNo: String(r.vch ?? ''),
-        vchDate: r.vd ? String(r.vd).slice(0, 10) : null,
+        vchDate: r.vd ? toIsoDate(r.vd) : null,
         vchType: String(r.vt ?? ''),
         direction: isIssue ? 'Issue' : 'Receive',
         itCode: String(r.it ?? ''),

@@ -529,7 +529,7 @@ export default function PurchaseReturnPage() {
               Taxable ₹{taxable.toLocaleString('en-IN')} · Tax ₹{taxPrev.toLocaleString('en-IN')} ·{' '}
               <b>Total ₹{totalPrev.toLocaleString('en-IN')}</b>
             </span>
-            <button className="primary" disabled={busy}>
+            <button className="primary" data-save-mnemonic disabled={busy}>
               {busy ? 'Saving…' : loadedVchNo ? `Save Return #${loadedVchNo}` : 'Save Return'}
             </button>
           </div>

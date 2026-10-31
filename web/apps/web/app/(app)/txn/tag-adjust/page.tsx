@@ -262,7 +262,7 @@ export default function TagAdjustPage() {
         </div>
 
         <div className="toolbar">
-          <button className="primary" disabled={busy || !coBook}>
+          <button className="primary" data-save-mnemonic disabled={busy || !coBook}>
             {busy ? 'Saving…' : loadedNo ? 'Update Tag Adjust' : 'Save Tag Adjust'}
           </button>
           <input

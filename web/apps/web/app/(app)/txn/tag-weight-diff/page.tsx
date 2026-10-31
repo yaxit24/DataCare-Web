@@ -303,7 +303,7 @@ export default function TagWeightDiffPage() {
               Net diff {totDiff} g · Diff fine {totDiffFine} g · Value ₹
               {totValue.toLocaleString('en-IN')}
             </span>
-            <button className="primary" disabled={busy || containment.blocked}>
+            <button className="primary" data-save-mnemonic disabled={busy || containment.blocked}>
               {busy ? 'Posting…' : 'Post Weight Change'}
             </button>
           </div>
