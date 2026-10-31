@@ -2248,10 +2248,33 @@ weight block is G217 (N204).
 
 ### N204 — The tag grid's karigar weight block (G217)
 
-Add KrOthWt, KrNwt, KrGht%, KrGht, KrTouch, KrWst% and KrFine to the tag grid with the desktop formulas
-(`TR_TAG_OPBL.cs:6686-6826`), save them to BAR_DETL, and copy them to MAIN_STOCK KR_NWT, KR_TOUCH, KR_WEST and KR_FINE
-as Tag_Opbl_Stk does. Proof: a DB test pins the BAR_DETL and MAIN_STOCK values for a tag with a karigar block, and the
-tag-opening module saves one through the screen.
+The tag grid carries KrOthWt, KrNwt, KrGht%, KrGht, KrTouch, KrWst% and KrFine with the desktop headers
+(`TR_TAG_OPBL.cs:5146-5172`), in the full grid after the base columns and in each row's desktop fields. Leaving a cell
+runs CommPassTotal's karigar block (`:6679-6826`), ported to `@datacare/core` as `tagKarigarBlock`: KrNwt is gross −
+KrOthWt while both are non-zero, otherwise a blank KrNwt takes the net weight and a typed one stays (`:6690-6704`);
+with no karigar touch or wastage KrFine is KrNwt + KrGht (`:6793-6800`), otherwise a blank KrFine is (KrNwt + KrGht) ×
+(KrTouch + KrWst%) / 100 (`:6804-6811`) and a typed one stays until KrNwt, KrTouch, KrWst% or KrGht changes (`:6712`,
+`:6749`, `:6771`, `:6815`). The save writes the block as BtnSave_Click does (`:10975-11022`, `tagKarigarColumns`):
+KR_NET_WT is the KrNwt cell, and without a KrTouch the row takes the tag's own touch, wastage and fine (`:11010-11012`).
+Tag_Opbl_Stk copies KR_NET_WT, KR_TOUCH, KR_WEST_PRC and KR_FINE to MAIN_STOCK KR_NWT, KR_TOUCH, KR_WEST and KR_FINE
+(`Ac_Stock.cs:28`), and reopen reloads the seven cells (`:10478-10491`). The migrated data agrees: 1327 of 1330 tags
+store KR_NET_WT = ITM_NWT, 92 of the 93 with no KrOthWt and a net below the gross store the net weight, and all 1170
+opening tag stock rows carry their BAR_DETL karigar values.
+
+Not covered: the order, manufacturing and lot paths fill the block from other vouchers (`:5572-5584`, `:8330-8368`,
+`:8586-8600`, and the lot branch of the save at `:10990-11005`); the web tag screen has no lot header or order pull, so
+these stay with those features. The MsUserKrTouchHide setting that hides KrTouch, KrWst% and KrFine for non-admin users
+(`:5156-5172`) is not applied.
+
+Evidence: `tagKarigar.test.ts` (core, 9 cases) and the new case in `tagOpeningStock.db.test.ts` (BAR_DETL and
+MAIN_STOCK for a tag with a block and for one without a KrTouch; it fails with main's writer) pass with
+`tagOpeningRoundTrip.db.test.ts`, whose rich line now carries the block. The zero-mock `tag-opening` module passes 14
+cases with 5 blocked, including `formula.karigar-block` (typed through the screen: KrNwt 10.000 and KrFine 9.584 shown,
+then stored in BAR_DETL and MAIN_STOCK). Chrome DevTools on the demo stack: the block typed in the full grid showed
+KrNwt 10.000 and KrFine 9.584 after leaving the cell, saved as BAR_DETL 0.5 / 10 / 2.5 / 0.25 / 92 / 1.5 / 9.584 and
+MAIN_STOCK KR_NWT 10, KR_TOUCH 92, KR_WEST 1.5, KR_FINE 9.584, reopened with Enter in Vch No with every cell, saved
+unchanged with the same values, and deleted with the desktop prompt. Desktop-runtime comparison and parent acceptance
+remain open.
 
 ### N205 — Browser suites run against the build they were given (G218)
 
@@ -2476,7 +2499,7 @@ Desktop-runtime comparison and parent acceptance remain open.
 | N201 | — | planned (G212: one carry-forward writer for Year End close and Balance TrFr) |
 | N202 | — | implemented-unverified, evidence in this change (G213, D33: Lite is the default edition; the configuration reads pass the gate) |
 | N203 | — | implemented-unverified, evidence in this change (G214, G215, G216: Tag Opening and Only Tag Entry follow TR_TAG_OPBL; reopen keeps every field; stock rows follow Tag_Opbl_Stk) |
-| N204 | — | planned (G217: the karigar weight block on the tag grid) |
+| N204 | — | implemented-unverified, evidence in this change (G217: the karigar weight block is on the tag grid with the CommPassTotal rules, saved to BAR_DETL and copied to MAIN_STOCK) |
 | N205 | — | implemented-unverified, evidence in this change (G218: the production server starts from an empty route cache; suites refuse occupied ports) |
 | N206 | — | implemented-unverified, evidence in this change (G219: Fine Jv Entry is the TR_CONTRA FINE JV grid with paired rows, 33-character fine legs, remark rebuild and the desktop refusals; Contra and Journal refuse another family's book and need print rights; 18 browser cases pass, 5 blocked) |
 | N207 | — | planned (G220: the generic voucher list and number-box routes need the owning form's view right for the requested book) |

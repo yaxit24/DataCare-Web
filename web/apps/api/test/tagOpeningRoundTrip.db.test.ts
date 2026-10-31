@@ -133,6 +133,12 @@ const richLine = {
   hallmarkId2Wt: 2.002,
   hallmarkId3Wt: 3.003,
   hallmarkId4Wt: 4.004,
+  // The karigar weight block (N204): KrOthWt forces KrNwt to gross − KrOthWt, and a KrTouch keeps the karigar cells.
+  karigarOthWt: 1.234,
+  karigarGhtPct: 1.5,
+  karigarGhtWt: 0.125,
+  karigarTouch: 92.5,
+  karigarWestPct: 1.25,
   karigarLbrRate: 12.5,
   karigarLbrAmt: 154.25,
   karigarOthAmt: 22.75,
