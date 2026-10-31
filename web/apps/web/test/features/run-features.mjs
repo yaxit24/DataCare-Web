@@ -16,6 +16,7 @@ import {
 } from './harness.mjs';
 import { seedCatalogue } from './fixtures/catalogue.mjs';
 import { purchaseInvoice } from './modules/purchaseInvoice.mjs';
+import { purchaseReturn } from './modules/purchaseReturn.mjs';
 import { salesInvoice } from './modules/salesInvoice.mjs';
 import { salesReturn } from './modules/salesReturn.mjs';
 import { settingsEffects } from './modules/settingsEffects.mjs';
@@ -43,6 +44,7 @@ const MODULES = [
   usersRights,
   salesReturn,
   companyOpen,
+  purchaseReturn,
 ];
 
 const artifacts = resolve(webRoot, 'test-results/feature-e2e');
@@ -64,6 +66,13 @@ const password = `E2e-${randomBytes(12).toString('hex')}!`;
 process.env.FEATURE_E2E_PASSWORD = password;
 
 let stack;
+// A rejection outside a case (for example a page event handler that throws) would end the process before the
+// finally block below runs, leaving the Next server and the database container behind. Stop them first.
+process.on('unhandledRejection', async (reason) => {
+  console.error('\nunhandled rejection:', reason);
+  await stopStack(stack).catch(() => {});
+  process.exit(1);
+});
 const report = { startedAt: new Date().toISOString(), modules: [] };
 let gateProblems = [];
 try {

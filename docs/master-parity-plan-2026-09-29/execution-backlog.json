@@ -6434,6 +6434,89 @@
         "web/apps/web/package.json"
       ],
       "statusNote": "IMPLEMENTED. `pnpm build` in apps/web now runs `next build && node scripts/clearRouteCache.mjs`. Found while checking N172 in Chrome: after a rebuild, next start answered /txn/sales with x-nextjs-cache: HIT and the previous build's page chunk (page-257b5… instead of page-7a879…) because the previous server's pages stayed in .next/server/route-cache; deleting it made the same server serve the new chunk. Verified: clearRouteCache.test.ts 2 passed; a real `pnpm --filter @datacare/web build` removed 13 cached route entries. CI builds from a clean checkout and was not affected; local feature and real-stack runs were."
+    },
+    {
+      "id": "N187",
+      "status": "implemented-unverified",
+      "action": "Purchase Return feature module on shared real data: 22 cases (T01-T18) through the real screen with desktop-derived expectations (TR_KR_ISU whole-rupee amounts, stock out, supplier debit), every failure baselined to a gap.",
+      "parentLabels": "P9; R03",
+      "startAfter": [
+        "N180"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "requiredProof": "run-features.mjs purchase-return 15 passed / 5 failed (all baselined) / 2 blocked, bundleValid true, FEATURE_E2E_PASSED in the Real-stack job.",
+      "gapIds": "G198, G199, G200, G201",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/web/test/features/modules/purchaseReturn.mjs",
+        "web/apps/web/test/features/run-features.mjs",
+        "web/apps/web/test/features/baseline.json",
+        "web/apps/web/test/features/coverage-map.json"
+      ],
+      "statusNote": "IMPLEMENTED. Purchase Return module executed through the real screen; defects G198-G201 baselined and planned (N188-N191)."
+    },
+    {
+      "id": "N188",
+      "status": "planned",
+      "action": "Purchase-family amounts like the desktop: round the purchase return's (and purchase's) item and labour amounts and the bill total to whole rupees as TR_KR_ISU and TR_PURC do, in the screen preview and the writer; remove purchase-return.formula.whole-rupees and purchase-return.create.amounts from features/baseline.json. Do it together with N184 (same rounding mechanism).",
+      "parentLabels": "P06-01, P10-05; X07",
+      "startAfter": [
+        "N187"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "requiredProof": "both cases pass (58,466 net, 1,753.98 tax, 60,220 total); a purchase line with paise rounds the same; preview equals posted.",
+      "gapIds": "G198"
+    },
+    {
+      "id": "N189",
+      "status": "planned",
+      "action": "Original purchase book optional: a purchase return that is not against a purchase saves without choosing an original book, and a reopened return keeps its original book (or none) without blocking Save; remove purchase-return.create.without-original from features/baseline.json.",
+      "parentLabels": "P9; X13",
+      "startAfter": [
+        "N187"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "requiredProof": "the case passes; a return against a purchase still validates the original voucher; reopen then Save needs no extra choice.",
+      "gapIds": "G199"
+    },
+    {
+      "id": "N190",
+      "status": "planned",
+      "action": "Alt+S on every voucher screen: mark the primary save button with data-save-mnemonic on the 20 screens listed in G200; remove purchase-return.keyboard.alt-s-saves from features/baseline.json.",
+      "parentLabels": "P9; J21",
+      "startAfter": [
+        "N187"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "requiredProof": "purchase-return.keyboard.alt-s-saves passes; a scan finds no voucher screen with an unmarked primary Save button.",
+      "gapIds": "G200"
+    },
+    {
+      "id": "N191",
+      "status": "planned",
+      "action": "Book table names: provision BOOK_TBL_NAME/BOOK_TBL_DETL for PURCHASE, PURC RETURN, CON PUR, TAG PURCHASE and PR QUOT books as MS_UPDATE does, backfill existing companies, and check the other registers that route by BOOK_TBL_NAME; remove purchase-return.report.register-lists-return from features/baseline.json.",
+      "parentLabels": "P03-04; X07",
+      "startAfter": [
+        "N187"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "requiredProof": "the case passes on a newly provisioned company; a migration test backfills an existing company; the purchase-return register lists PRT returns.",
+      "gapIds": "G201"
     }
   ],
   "amendments": [
