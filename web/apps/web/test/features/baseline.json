@@ -54,16 +54,6 @@
   ],
   "sales-order": [
     {
-      "case": "sales-order.formula.whole-rupees",
-      "gap": "G205",
-      "reason": "The order line is priced on fine weight with paise: 9.16 g × 6,123.45 previews 58,465.8; the desktop (SL_AMT_TYPE N) prices net 10 × 6,123.45 = 61,234 and shows 63,609 (TR_SALE_ORD.cs:6560-6672)."
-    },
-    {
-      "case": "sales-order.create.amounts",
-      "gap": "G205",
-      "reason": "Saved ITM_AMT 56,090.80, tax 1,753.97, total 60,220; the desktop stores 61,234, tax 1,908 and total 65,517 (TR_SALE_ORD.cs:6672, :11340-11342)."
-    },
-    {
       "case": "sales-order.create.advance-ledger",
       "gap": "G207",
       "reason": "The 5,000 advance debits SALES: the provisioned SOR book's slot 1 is the sales account (seedCompany.ts:219); the desktop debits the cash account in slot 1 (Ac_Ledr.cs:28-35)."

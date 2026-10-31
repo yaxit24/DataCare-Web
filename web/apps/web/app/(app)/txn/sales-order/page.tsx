@@ -41,6 +41,8 @@ export default function SalesOrderPage() {
     scope: string;
     includesGhat: boolean;
     rateDecimals: number;
+    /** CO_SET.SL_AMT_TYPE: the weight the metal rate multiplies (N196, G205). */
+    itemAmountType?: string;
     fiscalOpeningDate?: string;
     fiscalClosingDate?: string;
   } | null>(null);
@@ -251,6 +253,7 @@ export default function SalesOrderPage() {
       void get<{
         labourIncludesGhat: boolean;
         labourRateDecimals: number;
+        itemAmountType?: string;
         fiscalOpeningDate?: string;
         fiscalClosingDate?: string;
       }>(`/sales-orders/configuration?${scopeQuery}`)
@@ -260,6 +263,7 @@ export default function SalesOrderPage() {
               scope: scopeQuery,
               includesGhat: configuration.labourIncludesGhat,
               rateDecimals: configuration.labourRateDecimals,
+              itemAmountType: configuration.itemAmountType,
               fiscalOpeningDate: configuration.fiscalOpeningDate,
               fiscalClosingDate: configuration.fiscalClosingDate,
             });
