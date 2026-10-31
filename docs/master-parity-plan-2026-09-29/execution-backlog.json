@@ -6503,7 +6503,7 @@
     },
     {
       "id": "N190",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Alt+S on every voucher screen: mark the primary save button with data-save-mnemonic on the 20 screens listed in G200; remove purchase-return.keyboard.alt-s-saves from features/baseline.json.",
       "parentLabels": "P9; J21",
       "startAfter": [
@@ -6514,7 +6514,14 @@
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
       "requiredProof": "purchase-return.keyboard.alt-s-saves passes; a scan finds no voucher screen with an unmarked primary Save button.",
-      "gapIds": "G200"
+      "gapIds": "G200",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/web/test/saveMnemonicCoverage.test.ts",
+        "web/apps/web/app/(app)/txn/purchase-return/page.tsx",
+        "web/apps/web/test/features/baseline.json"
+      ],
+      "statusNote": "IMPLEMENTED. 22 voucher screens marked for Alt+S; a unit scan keeps every voucher page marked; purchase-return.keyboard.alt-s-saves passes and left the baseline."
     },
     {
       "id": "N191",

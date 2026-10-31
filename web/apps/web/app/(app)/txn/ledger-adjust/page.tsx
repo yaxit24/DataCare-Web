@@ -146,7 +146,7 @@ export default function LedgerAdjustPage() {
               New
             </button>
           )}
-          <button className="primary" disabled={busy || !coBook}>
+          <button className="primary" data-save-mnemonic disabled={busy || !coBook}>
             {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : 'Post Adjustment'}
           </button>
         </div>
