@@ -224,6 +224,10 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G211 | Med | Party Opening had no bill-wise grid | `unified/src/csharp/DataCareNext/TR_AC_OPBL.cs` | `web/apps/web/app/(app)/txn/ac-opbl/page.tsx` | The desktop screen has a bill-wise grid saved to OP_DETL (`TR_AC_OPBL.cs:2724-2760`) whose signed totals set the opening heads (MSG_TOT_FILL), with the fine worked out from net weight, touch and wastage (CommPassTotal); the web kept existing OP_DETL rows but could not show or edit them. The desktop Print button only checks print rights (`:2626-2633`) and prints nothing. | N200 |
 | G212 | Med | Year End close and Balance TrFr write next-year openings in two different shapes | `unified/src/csharp/DataCareNext/BtmSchm.cs`; `unified/src/csharp/DataCareNext/Ac_Final.cs` | `web/apps/api/src/modules/ops/yearEnd.ts`; `web/apps/api/src/modules/masters/year.ts` | Found while moving the carry-forward to the Party Opening writer: year-end close writes '000' ACOP legs with its own key and no OP_DATA, while Balance TrFr now writes OP_DATA and AcOp_Ledr legs. Running one after the other can leave both sets of legs, counting the opening twice. | N201 |
 | G213 | Med | Deployments ran Standard while only Lite was being completed | `unified/src/csharp/DataCareNext/MDI_FORM.cs` | `web/apps/api/src/modules/ops/runtimeConfig.ts`; `web/apps/api/src/modules/rbac/editionGate.ts` | The owner asked for the Lite edition to be completed first with the other menus held back as Beta (D33); the API defaulted to Standard, so 65 Basic and Standard menus that are not yet verified were open to users. Running Lite also showed that Lite screens read the company settings through the Basic Settings route, which the Lite gate would refuse. | N202 |
+| G214 | High | Reopening a tag voucher and saving it unchanged blanked most of its fields | `unified/src/csharp/DataCareNext/TR_TAG_OPBL.cs` | `web/apps/web/app/(app)/txn/tag-opening/page.tsx` | The desktop reloads 87 BAR_DETL columns into the grid when a voucher opens (`TR_TAG_OPBL.cs:10452-10574`) and the stock item with it (`:10398`). The web reopen copied 15 of the 65 line fields, so an unchanged save rewrote the tag with blank hallmark ids and weights, karigar costing, JDT weights and order and manufacturing links; the reopened Fine column showed the formula instead of the stored fine. | N203 |
+| G215 | High | Only Tag Entry was not a working menu | `unified/src/csharp/DataCareNext/MDI_FORM.cs`; `unified/src/csharp/DataCareNext/TR_TAG_OPBL.cs`; `unified/src/csharp/DataCareNext/MS_UPDATE.cs` | `web/apps/web/lib/nav.ts`; `web/apps/web/app/(app)/txn/tag-opening/page.tsx`; `web/apps/api/src/modules/ops/seedCompany.ts` | The desktop opens TR_TAG_OPBL on the TAG GEN books for Only Tag Entry (`MDI_FORM.cs:8574-8584`), provisions them (`MS_UPDATE.cs:17020-17036`) and refuses a save without the stock item the tags are made from ("Stock item code Insert First...", `TR_TAG_OPBL.cs:10813-10818`). The web had no TAG GEN book and no menu entry, and showed the stock item on every tag opening. | N203 |
+| G216 | High | Tag opening stock rows did not follow Tag_Opbl_Stk, and its refusals used web wording | `unified/src/csharp/DataCareNext/Ac_Stock.cs`; `unified/src/csharp/DataCareNext/TR_TAG_OPBL.cs` | `web/apps/api/src/modules/stock/stockVoucherLifecycle.ts`; `web/apps/api/src/modules/shared/desktopMessages.ts` | `Ac_Stock.Tag_Opbl_Stk` (`Ac_Stock.cs:22-36`) writes an opening tag as P / 'TAGOP' / 'TAG OPBL' with ITM_QTY 1 and the tag's wastage, labour rate, karigar cost and design; an Only Tag Entry tag as I / the book's short name / 'TAG GEN'; and one 'O' row per voucher taking the stock item out by the voucher's totals. The migrated data agrees (1169 P rows, 159 I rows, 31 relief rows with TAG_NO 'N'). The web wrote 'TAGOP' and the book's own name for both menus, TR_TYPE P for TAG GEN tags and ITM_QTY = pieces, and one relief row per tag whenever a stock item was sent, so an opening voucher could take loose stock out. A tag typed twice and the delete of a sold tag were refused with web texts instead of "Duplicate Tag No" (`:8562`) and "You Cant Delete This Voucher Because  Tag Use in Sales Transection...." (`:11383`). | N203 |
+| G217 | Med | The tag grid's karigar weight block is not saved | `unified/src/csharp/DataCareNext/TR_TAG_OPBL.cs`; `unified/src/csharp/DataCareNext/Ac_Stock.cs` | `web/apps/api/src/modules/stock/stockVoucherLifecycle.ts`; `web/apps/web/app/(app)/txn/tag-opening/page.tsx` | Found in the Chrome check of N203: the desktop grid carries KrOthWt, KrNwt, KrGht%, KrGht, KrTouch, KrWst% and KrFine (columns 17-23, `TR_TAG_OPBL.cs:5146-5172`), works out KrNwt = gross − KrOthWt and KrFine = (KrNwt + KrGht) × (KrTouch + KrWst%) / 100 (`:6686-6826`), saves them to BAR_DETL (`:9325-9330`), and Tag_Opbl_Stk copies them to MAIN_STOCK KR_NWT, KR_TOUCH, KR_WEST and KR_FINE. All 1359 migrated tag stock rows carry KR_NWT. The web has no input for them, so they stay 0. | N204 |
 
 ## 4. Decisions D23–D28
 
@@ -2224,6 +2228,28 @@ loads the company settings when a company opens (`MS_OPNCOMP.cs:657-684`); savin
 edition, and `edition.real-stack.mjs` checks the Lite navigation, a refused Basic screen and API, the settings read,
 the Sales screen, and the Beta group in a real browser.
 
+### N203 — Tag Opening and Only Tag Entry are the desktop TR_TAG_OPBL (G214, G215, G216)
+
+The two menus share `/txn/tag-opening`: Tag Opening lists the opening books (OPSTK and the web's TAG OPENING), Only
+Tag Entry (`?mode=TAG GEN`, a new Inventory menu entry) lists the TAG GEN books, and provisioning adds the TGN book
+(TAG GEN, short name TGEN). Only Tag Entry shows and requires the stock item; Tag Opening hides it and draws on no loose
+stock. Reopening a voucher copies every field the API returns back into the grid and restores the stock item, and the
+Fine column shows the stored fine until weight, touch, ghat or wastage change, as the desktop recomputes it. The
+writer follows Tag_Opbl_Stk (`Ac_Stock.cs:22-36`): P / 'TAGOP' / 'TAG OPBL' rows for an opening book, I / short name /
+'TAG GEN' rows plus one 'O' relief row by the voucher's totals for Only Tag Entry, ITM_QTY 1, and the tag's wastage,
+labour rate, karigar cost and design on each row. Duplicate tags, a missing stock item and the delete of a sold tag are
+refused with the desktop texts; delete asks the desktop question and reports "Delete Success.". The voucher number box
+has the N172 keys (Enter, F1, Up, Down) and the recent list reads BAR_DATA. The relief row leaves the counter empty, as
+the decompiled insert does (`Ac_Stock.cs:28`), although 30 of the 31 migrated relief rows carry counter 001. The karigar
+weight block is G217 (N204).
+
+### N204 — The tag grid's karigar weight block (G217)
+
+Add KrOthWt, KrNwt, KrGht%, KrGht, KrTouch, KrWst% and KrFine to the tag grid with the desktop formulas
+(`TR_TAG_OPBL.cs:6686-6826`), save them to BAR_DETL, and copy them to MAIN_STOCK KR_NWT, KR_TOUCH, KR_WEST and KR_FINE
+as Tag_Opbl_Stk does. Proof: a DB test pins the BAR_DETL and MAIN_STOCK values for a tag with a karigar block, and the
+tag-opening module saves one through the screen.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2353,6 +2379,8 @@ the Sales screen, and the Beta group in a real browser.
 | N200 | — | implemented-unverified, evidence in this change (G211: the bill-wise opening grid) |
 | N201 | — | planned (G212: one carry-forward writer for Year End close and Balance TrFr) |
 | N202 | — | implemented-unverified, evidence in this change (G213, D33: Lite is the default edition; the configuration reads pass the gate) |
+| N203 | — | implemented-unverified, evidence in this change (G214, G215, G216: Tag Opening and Only Tag Entry follow TR_TAG_OPBL; reopen keeps every field; stock rows follow Tag_Opbl_Stk) |
+| N204 | — | planned (G217: the karigar weight block on the tag grid) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

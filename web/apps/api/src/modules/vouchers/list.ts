@@ -29,6 +29,8 @@ const ALLOWED = new Set([
   'CARD_DATA',
   'CUT_DATA',
   'MFG_DATA',
+  // Tag Opening and Only Tag Entry (TR_TAG_OPBL): the voucher number box and the F1 list (N172).
+  'BAR_DATA',
 ]);
 const IDENTITY_COLUMNS = ['CO_CODE', 'LC_CODE', 'CO_YEAR', 'CO_BOOK', 'VCH_NO'];
 const qid = (c: string): string => '"' + c.replace(/[^A-Za-z0-9_]/g, '') + '"';
