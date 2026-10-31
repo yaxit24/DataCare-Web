@@ -109,10 +109,6 @@ export interface TagOpeningInput {
 }
 
 export interface ItemOpeningLine {
-  /** Diamond component of an opening line (ITM_OPBL DM_WT / DM_RATE / DM_AMT). */
-  diamondWt?: number;
-  diamondRate?: number;
-  diamondAmount?: number;
   itCode: string;
   pcs?: number;
   grossWt?: number;
@@ -818,12 +814,8 @@ async function writeItemOpeningTx(
     line.amount != null ? n(line.amount) : r2(fineOf(line) * n(line.rate));
   await insertIdentityTx(tx, scope, policy, date, {}, ctx);
   const details = input.lines.map((line, index) => ({
-    // TR_ITM_OPBL.cs carries the diamond weight, rate and amount on an opening line: a mixed ornament's
-    // opening value has a stone component as well as a metal one. (BAR_DETL has no DM_* columns — an
-    // earlier attempt put these on the tag-opening writer and failed with 42703 at the database.)
-    DM_WT: n(line.diamondWt),
-    DM_RATE: n(line.diamondRate),
-    DM_AMT: n(line.diamondAmount),
+    // The desktop Save (TR_ITM_OPBL.cs:1424-1446) writes no DM_WT / DM_RATE / DM_AMT, so they keep
+    // their column defaults here too (N209).
     ...key,
     SR_NO: index + 1,
     IT_CODE: text(line.itCode),
