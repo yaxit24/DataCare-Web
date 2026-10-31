@@ -6521,7 +6521,7 @@
     {
       "id": "N192",
       "status": "implemented-unverified",
-      "action": "Lite first (D32): record the edition tier order (Lite, then Basic, then Standard), order the Lite menus in document 15 §5a, and generate a per-tier progress page from the menu editions, the catalog and the feature E2E coverage map and baseline.",
+      "action": "Lite first (D32): record the edition tier order (Lite, then Basic, then Standard) as a decision and generate a per-tier progress page from the menu editions, the catalog and the feature E2E coverage map and baseline; the Lite packages L1-L6 are in document 15 section 5.",
       "parentLabels": "P9; R03",
       "startAfter": [
         "N187"
@@ -6535,10 +6535,9 @@
       "statusAsOf": "2026-10-31",
       "evidence": [
         "web/scripts/generate-standard-progress.mjs",
-        "docs/handbook/web/standard-progress.md",
-        "docs/master-parity-plan-2026-09-29/15-standard-edition-plan.md"
+        "docs/handbook/web/standard-progress.md"
       ],
-      "statusNote": "IMPLEMENTED. D32 recorded; Lite-first order in document 15 §5a; per-tier progress page generated."
+      "statusNote": "IMPLEMENTED. D32 recorded; per-tier progress page generated; document 15 section 5 carries the Lite packages."
     }
   ],
   "amendments": [
