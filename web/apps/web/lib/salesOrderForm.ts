@@ -83,12 +83,16 @@ export const readonlyRowFields = new Set([
   'oldTblCode',
   'tagStockLess',
 ]);
+/**
+ * N197 (G206): the Sales Order's cheque and card tenders (TR_SALE_ORD MSG2_TOTAL rows 4 and 5). Their accounts and the
+ * cheque number are edited in the order details; ADV_AMT is the sum of cash, cheque and card.
+ */
+export const salesOrderTenderFields: Array<[string, string]> = [
+  ['chequeAmount', 'Cheque Amt'],
+  ['cardAmount', 'Card Amt'],
+];
 export const readonlyHeaderFields = new Set([
   'netAmount',
-  'bankAc',
-  'bankName',
-  'chequeNo',
-  'cardAc',
   'cardAdj',
   'upiAmount',
   'oldGoldFine',
@@ -391,8 +395,12 @@ export function hydrateSalesOrder(document: Record<string, any>) {
       labourPct: numeric(row.labourPct, 'Saved labour percentage'),
     },
   }));
+  const header = { ...hydrated.header };
+  for (const [field] of salesOrderTenderFields)
+    header[field] = Number(document[field] ?? 0) ? String(document[field]) : '';
   return {
     ...hydrated,
+    header,
     rows,
   };
 }
@@ -440,6 +448,11 @@ export function salesOrderPayload(
     )
       throw new Error('Restore the saved item code or remove its row explicitly');
   const calculated = tourOrderPayload(f, header, rows, expectedVersion);
+  for (const [field, label] of salesOrderTenderFields) {
+    const raw = String(header[field] ?? '').trim();
+    if (raw && !Number.isFinite(Number(raw))) throw new Error(`${label} must be a valid number`);
+    calculated[field] = raw ? Number(raw) : undefined;
+  }
   calculated.dirtyFields = [...dirtyFields];
   const keptRows = rows.filter((row) => row.itCode.trim());
   for (const [index, line] of (calculated.lines as Record<string, any>[]).entries()) {

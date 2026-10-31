@@ -362,6 +362,57 @@ run('Sales ordinary saved state and ordered design source replay', () => {
     expect(line).toEqual({ metal: expected.metal, labour: 2375, net: expected.net });
     expect(header).toEqual({ net: expected.net, tax: expected.tax, total: expected.total });
   });
+  // N197 (G206): cash, cheque and card tenders as TR_SALE_ORD stores them (:9131-9150, ADV_AMT the sum, :11368) and
+  // Order_Ledr / Order_Rojmel post them (Ac_Ledr.cs:28-47, Ac_Rojmel.cs:11-16).
+  it('stores and posts cash, cheque and card tenders, and refuses a cheque without its bank', async () => {
+    await sql(
+      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME") VALUES($1,'01','01','BANKX','Bank X')`,
+      tenantId,
+    );
+    const tendered = {
+      ...input(),
+      advanceAmount: 300,
+      chequeAmount: 200,
+      bankAc: 'BANKX',
+      chequeNo: '654321',
+      cardAmount: 100,
+      cardAc: 'BANKX',
+    };
+    await expect(createSalesOrder(runtime, { ...tendered, bankAc: '' } as any)).rejects.toThrow(
+      'Please Select Bank Account',
+    );
+    await createSalesOrder(runtime, tendered as any);
+    const [header] = await query(
+      `SELECT "CASH_AMT"::float cash,"CHQ_AMT"::float chq,"CARD_AMT"::float card,"ADV_AMT"::float adv FROM "SL_ORD_DATA" WHERE tenant_id=$1`,
+      tenantId,
+    );
+    const legs = await query(
+      `SELECT right("LEDR_KEY",2) leg,"AC_CODE" ac,"LD_CODE" ld,"DR_AMT"::float dr,"CR_AMT"::float cr,"CHQ_NO" chq,"PARTY_AC_CODE" party FROM "AC_DATA" WHERE tenant_id=$1 ORDER BY "LEDR_KEY"`,
+      tenantId,
+    );
+    const day = await query(
+      `SELECT right("LEDR_KEY",2) leg,"AC_CODE" ac,"DR_AMT"::float dr,"CR_AMT"::float cr FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 ORDER BY "LEDR_KEY"`,
+      tenantId,
+    );
+    expect(header).toEqual({ cash: 300, chq: 200, card: 100, adv: 600 });
+    expect(legs.map((l) => [l.leg, l.ac, l.ld, l.dr, l.cr, l.chq || '', l.party])).toEqual([
+      ['01', 'PARTY', 'CASH', 0, 300, '', 'PARTY'],
+      ['02', 'CASH', 'PARTY', 300, 0, '', 'PARTY'],
+      ['03', 'PARTY', 'BANKX', 0, 200, '654321', 'PARTY'],
+      ['04', 'BANKX', 'PARTY', 200, 0, '654321', 'PARTY'],
+      ['05', 'PARTY', 'BANKX', 0, 100, '654321', 'PARTY'],
+      ['06', 'BANKX', 'PARTY', 100, 0, '654321', 'PARTY'],
+    ]);
+    expect(day.map((r) => [r.leg, r.ac, r.dr, r.cr])).toEqual([
+      ['01', 'PARTY', 0, 600],
+      ['02', 'BANKX', 200, 0],
+      ['03', 'BANKX', 100, 0],
+    ]);
+    const reopened = await loaded();
+    expect(
+      [reopened.advanceAmount, reopened.chequeAmount, reopened.cardAmount].map(Number),
+    ).toEqual([300, 200, 100]);
+  });
   it('rejects stale Design sources and forged journal values without any order writes', async () => {
     const selection = (await listSalesOrderDesigns(runtime, scope(), { itCode: 'GL' })).rows[0]!;
     const raw: any = {

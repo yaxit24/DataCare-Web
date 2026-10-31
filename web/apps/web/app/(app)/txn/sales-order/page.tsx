@@ -22,6 +22,7 @@ import {
   selectSalesOrderDesign,
   readonlyRowFields,
   readonlyHeaderFields,
+  salesOrderTenderFields,
   type Row,
 } from '../../../../lib/salesOrderForm';
 import { OrderImagePanel } from '../../../../components/OrderImagePanel';
@@ -752,7 +753,7 @@ export default function SalesOrderPage() {
                 allocation workflows are not available here.
               </p>
               <div className="row">
-                {extendedHeaderFields.map(([key, label]) => (
+                {[...extendedHeaderFields, ...salesOrderTenderFields].map(([key, label]) => (
                   <div className="field" key={key}>
                     <label htmlFor={`sales-header-${key}`}>
                       {key === 'netAmount' ? 'Saved Net Amount' : label}

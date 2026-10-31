@@ -86,6 +86,7 @@ import {
   getTourOrder,
   listSalesOrders,
   listTourOrders,
+  orderTenderRequest,
 } from '../modules/sales/salesOrder.js';
 import {
   createLabourInvoice,
@@ -1115,12 +1116,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     cashAc: b.cashAc,
     mainUser: sess(req).sub,
     taxCode: b.taxCode,
-    upiAmount: b.upiAmount,
-    bankAc: b.bankAc,
-    chequeNo: b.chequeNo,
-    bankName: b.bankName,
-    cardAc: b.cardAc,
-    cardAdj: b.cardAdj,
+    ...orderTenderRequest(b), // N197: cash/cheque/card tenders and their accounts
     oldGoldFine: b.oldGoldFine,
     oldGoldAmount: b.oldGoldAmount,
     oldSilverFine: b.oldSilverFine,
