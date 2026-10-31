@@ -1,3 +1,13 @@
+## 2026-10-31 — Lite first, then Basic, then Standard
+
+- Owner instruction (31 October): finish every **Lite** menu end to end first, then the Basic additions, then the
+  Standard additions. Recorded in document 15 §5 with the Lite packages L1–L6; progress is now reported per edition
+  (Lite menus FULL / 49). On 31 October the 49 Lite menus were 38 PARTIAL, 10 REPORT and 1 CONTAINED.
+- Merged 30-31 October: N172 voucher number keys (#149), N173 print windows refresh the session (#152), N174 HSN
+  table (#150), N175 request storms (#154), N168 editable setting amounts (#155), N165 Open Company conflict (#156),
+  N186 route cache cleared after builds (#153), N51 version tokens for sales (#158) and purchases (#159), N176
+  purchase slot 4 (#161). Open: N56 dates (#160).
+
 ## 2026-10-30 (night) — N171 edition gate
 
 The API and screens now run the Standard edition by default (`APP_EDITION=S`). Pro, Advance and Enterprise screens
