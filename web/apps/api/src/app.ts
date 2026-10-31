@@ -1,6 +1,7 @@
 import type { EditionPolicy } from '@datacare/core';
 import {
   assertFormClassified,
+  EDITION_EXEMPT_ROUTES,
   editionDescriptor,
   editionRefusal,
 } from './modules/rbac/editionGate.js';
@@ -447,7 +448,11 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
       return reply.code(403).send({ error: 'password-reset-required' });
     }
     // N171: a route of a higher desktop edition is refused before any rights or scope check.
-    if (opts.edition && policy.kind === 'form') {
+    if (
+      opts.edition &&
+      policy.kind === 'form' &&
+      !EDITION_EXEMPT_ROUTES.has(`${req.method} ${req.routeOptions.url}`)
+    ) {
       const form = resolvePolicyForm(policy, req.params as Record<string, unknown>);
       const refusal = form ? editionRefusal(form, opts.edition) : null;
       if (refusal) return reply.code(403).send(refusal);
