@@ -5,7 +5,10 @@
  *
  * Real Chromium -> production Next -> in-process Fastify (app_user under forced RLS) -> disposable PostgreSQL.
  * The company comes from the real seedCompany provisioning; the operator signs in through the login and Open Company
- * screens. Phase 1 runs the API as the Standard edition: the navigation lists only Standard menus, a Pro screen
+ * screens. Phase 0 runs the API as Lite, the default edition (D33): the navigation lists only Lite menus, a Basic
+ * screen opened by URL is refused and its API answers 403, the Lite screens work, and the company settings stay
+ * readable (the configuration every edition loads); with Beta on, the Basic menus appear in the Beta group.
+ * Phase 1 runs the API as the Standard edition: the navigation lists only Standard menus, a Pro screen
  * opened by URL is refused, and its API answers 403 edition-unavailable. Phase 2 restarts the API with Beta on (same
  * signing secret, so the session survives): the Pro screen appears in the Beta group, opens with a Beta notice, and
  * its API passes the gate. Desktop authority: MDI_FORM.cs:11249-11322 loads MENU_DATA by edition.
@@ -94,8 +97,8 @@ try {
     await hashPassword(password),
   );
 
-  // Phase 1: Standard.
-  await startApi({ code: 'S', beta: false });
+  // Phase 0: Lite, the default edition (D33).
+  await startApi({ code: 'L', beta: false });
   server = spawn(
     'pnpm',
     [
@@ -138,6 +141,62 @@ try {
   await page.getByRole('textbox', { name: 'Password' }).fill(password);
   await page.getByRole('button', { name: 'Sign In' }).click();
   await page.getByRole('button', { name: 'Open', exact: true }).click();
+  await page.getByRole('heading', { name: /^Dashboard FY/ }).waitFor();
+
+  assert.equal((await page.getByTestId('edition').textContent())?.trim(), 'Lite');
+  const liteNav = await navHrefs(page);
+  for (const href of [
+    '/txn/sales',
+    '/txn/purchase',
+    '/txn/receipt',
+    '/txn/contra',
+    '/txn/ac-opbl',
+    '/admin/users',
+  ])
+    assert(liteNav.includes(href), `Lite navigation lists ${href}`);
+  for (const href of ['/reports/rojmel', '/txn/sales-quotation', '/settings', '/txn/dhrn-issue'])
+    assert(!liteNav.includes(href), `Lite navigation hides ${href}`);
+  assert.equal(await page.getByTestId('beta-menus').count(), 0, 'no Beta group in Lite');
+  await page.goto('/reports/rojmel');
+  await page.getByTestId('edition-unavailable').waitFor();
+  assert.match(
+    (await page.getByTestId('edition-unavailable').textContent()) ?? '',
+    /not part of the Lite edition/,
+  );
+  const liteRefused = await apiStatus(page, 'GET', '/reports/rojmel');
+  assert.equal(liteRefused.status, 403);
+  assert.deepEqual(JSON.parse(liteRefused.body), {
+    error: 'edition-unavailable',
+    form: 'Reports/Rojmel',
+    edition: 'L',
+  });
+  // The configuration reads every edition needs pass the gate (MS_OPNCOMP.cs:657-684 loads CO_SET in every edition).
+  assert.equal((await apiStatus(page, 'GET', '/settings')).status, 200);
+  await page.goto('/txn/sales');
+  await page.getByRole('heading', { name: 'Sales Invoice', exact: true }).waitFor();
+  assert.equal(
+    await page.getByTestId('edition-unavailable').count(),
+    0,
+    'Sales Invoice is a Lite screen',
+  );
+  checks.lite = { links: liteNav.length, basicRefused: liteRefused.status };
+
+  // Lite with Beta: the Basic menus are listed under Beta and open with the Beta notice.
+  await startApi({ code: 'L', beta: true });
+  await page.goto('/dashboard');
+  await page.getByRole('heading', { name: /^Dashboard FY/ }).waitFor();
+  assert.equal((await page.getByTestId('edition').textContent())?.trim(), 'Lite + Beta');
+  await page
+    .getByTestId('beta-menus')
+    .getByRole('link', { name: /Rojmel/ })
+    .first()
+    .click();
+  await page.getByTestId('edition-beta').waitFor();
+  checks.liteBeta = { basicMenuOpensAsBeta: true };
+
+  // Phase 1: Standard.
+  await startApi({ code: 'S', beta: false });
+  await page.goto('/dashboard');
   await page.getByRole('heading', { name: /^Dashboard FY/ }).waitFor();
 
   assert.equal((await page.getByTestId('edition').textContent())?.trim(), 'Standard');
