@@ -40,8 +40,9 @@ const scopeOf = (coBook: string) => ({
 });
 const exec = (sql: string, ...p: unknown[]) =>
   withTenant(owner, TENANT, (tx) => tx.$executeRawUnsafe(sql, ...p));
+/** Reads bind $1 to this file's tenant: the owner connection bypasses RLS, and other test files share the database. */
 const rows = <T = any>(sql: string, ...p: unknown[]) =>
-  withTenant(owner, TENANT, (tx) => tx.$queryRawUnsafe(sql, ...p)) as Promise<T[]>;
+  withTenant(owner, TENANT, (tx) => tx.$queryRawUnsafe(sql, TENANT, ...p)) as Promise<T[]>;
 
 async function wipe(): Promise<void> {
   const tables = (await owner.$queryRawUnsafe(
@@ -118,7 +119,7 @@ const stock = (book: string, vchNo: string) =>
             coalesce("ITM_GWT",0)::float gwt, coalesce("ITM_NWT",0)::float nwt, coalesce("ITM_FINE",0)::float fine,
             coalesce("ITM_WEST",0)::float west, coalesce("LBR_RATE",0)::float lrate, coalesce("KR_COST",0)::float krcost,
             coalesce("DESIGN_NO",'') design
-       FROM "MAIN_STOCK" WHERE "CO_BOOK"=$1 AND "VCH_NO"=$2 ORDER BY "SR_NO","TAG_NO"`,
+       FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 ORDER BY "SR_NO","TAG_NO"`,
     book,
     vchNo,
   );
@@ -158,7 +159,7 @@ describe.skipIf(!RUN)('Tag Opening and Only Tag Entry stock rows (Ac_Stock.Tag_O
       [4.68, 2, 450, 1200, 'D-12'],
     ]);
     const [header] = await rows(
-      `SELECT "STK_IT_CODE" stk FROM "BAR_DATA" WHERE "CO_BOOK"='000' AND "VCH_NO"=$1`,
+      `SELECT "STK_IT_CODE" stk FROM "BAR_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='000' AND "VCH_NO"=$2`,
       vchNo,
     );
     expect(header.stk).toBeNull();
@@ -168,7 +169,7 @@ describe.skipIf(!RUN)('Tag Opening and Only Tag Entry stock rows (Ac_Stock.Tag_O
     await expect(
       tagOpening(runtime, { scope: scopeOf('TGN'), vchDate: DAY, lines: [line('G-1', 10.5, 10)] }),
     ).rejects.toThrow('Stock item code Insert First...');
-    expect(await rows(`SELECT 1 FROM "BAR_DATA"`)).toHaveLength(0);
+    expect(await rows(`SELECT 1 FROM "BAR_DATA" WHERE tenant_id=$1`)).toHaveLength(0);
     const saved = await tagOpening(runtime, {
       scope: scopeOf('TGN'),
       mainUser: 'ADMIN',
@@ -199,7 +200,7 @@ describe.skipIf(!RUN)('Tag Opening and Only Tag Entry stock rows (Ac_Stock.Tag_O
       [2, 'TGEN', 'TAG GEN', 'GOLD', 'G-2', 'I', '+', 1, 1, 5.25, 5, 4.68],
     ]);
     const [header] = await rows(
-      `SELECT "STK_IT_CODE" stk FROM "BAR_DATA" WHERE "CO_BOOK"='TGN' AND "VCH_NO"=$1`,
+      `SELECT "STK_IT_CODE" stk FROM "BAR_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TGN' AND "VCH_NO"=$2`,
       vchNo,
     );
     expect(header.stk).toBe('LOOSE');
@@ -232,7 +233,9 @@ describe.skipIf(!RUN)('Tag Opening and Only Tag Entry stock rows (Ac_Stock.Tag_O
       lines: [line('SOLD-1', 10.5, 10)],
     });
     const vchNo = String(saved.vchNo).padStart(5, '0');
-    const [tag] = await rows(`SELECT "VCH_SRNO" srno FROM "BAR_DETL" WHERE "TAG_NO"='SOLD-1'`);
+    const [tag] = await rows(
+      `SELECT "VCH_SRNO" srno FROM "BAR_DETL" WHERE tenant_id=$1 AND "TAG_NO"='SOLD-1'`,
+    );
     await exec(
       `INSERT INTO "MAIN_STOCK"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","IT_CODE","TAG_NO","VCH_SRNO","TR_TYPE","ITM_SIGN","ITM_PCS","ITM_GWT","ITM_NWT")
        VALUES ($1,$2,$3,$4,'SL','00001',1,'2024-06-02'::date,'GOLD','SOLD-1',$5,'S','-',1,10.5,10)`,
