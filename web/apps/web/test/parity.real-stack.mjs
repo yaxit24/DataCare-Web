@@ -5,7 +5,7 @@ import { spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { realStackTarget } from './real-stack-target.mjs';
+import { assertPortsFree, realStackTarget } from './real-stack-target.mjs';
 import { chromium } from 'playwright';
 import {
   aggregateRealStackEvidence,
@@ -423,6 +423,7 @@ try {
     defaultTenantId: tenantId,
     allowTenantHeader: false,
   });
+  await assertPortsFree(target);
   await app.listen({ port: target.apiPort, host: '127.0.0.1' });
   server = spawn(
     'pnpm',

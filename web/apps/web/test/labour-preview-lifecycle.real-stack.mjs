@@ -5,7 +5,7 @@ import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { realStackTarget } from './real-stack-target.mjs';
+import { assertPortsFree, realStackTarget } from './real-stack-target.mjs';
 import { seedSessionContext } from './session-context.journey.mjs';
 import { seedSalesReturnLabourReplay } from './sales-return-labour-replay.journey.mjs';
 import {
@@ -85,6 +85,7 @@ try {
     defaultTenantId: tenantId,
     allowTenantHeader: false,
   });
+  await assertPortsFree(target);
   await app.listen({ host: '127.0.0.1', port: target.apiPort });
   server = spawn(
     'pnpm',

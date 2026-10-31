@@ -228,6 +228,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G215 | High | Only Tag Entry was not a working menu | `unified/src/csharp/DataCareNext/MDI_FORM.cs`; `unified/src/csharp/DataCareNext/TR_TAG_OPBL.cs`; `unified/src/csharp/DataCareNext/MS_UPDATE.cs` | `web/apps/web/lib/nav.ts`; `web/apps/web/app/(app)/txn/tag-opening/page.tsx`; `web/apps/api/src/modules/ops/seedCompany.ts` | The desktop opens TR_TAG_OPBL on the TAG GEN books for Only Tag Entry (`MDI_FORM.cs:8574-8584`), provisions them (`MS_UPDATE.cs:17020-17036`) and refuses a save without the stock item the tags are made from ("Stock item code Insert First...", `TR_TAG_OPBL.cs:10813-10818`). The web had no TAG GEN book and no menu entry, and showed the stock item on every tag opening. | N203 |
 | G216 | High | Tag opening stock rows did not follow Tag_Opbl_Stk, and its refusals used web wording | `unified/src/csharp/DataCareNext/Ac_Stock.cs`; `unified/src/csharp/DataCareNext/TR_TAG_OPBL.cs` | `web/apps/api/src/modules/stock/stockVoucherLifecycle.ts`; `web/apps/api/src/modules/shared/desktopMessages.ts` | `Ac_Stock.Tag_Opbl_Stk` (`Ac_Stock.cs:22-36`) writes an opening tag as P / 'TAGOP' / 'TAG OPBL' with ITM_QTY 1 and the tag's wastage, labour rate, karigar cost and design; an Only Tag Entry tag as I / the book's short name / 'TAG GEN'; and one 'O' row per voucher taking the stock item out by the voucher's totals. The migrated data agrees (1169 P rows, 159 I rows, 31 relief rows with TAG_NO 'N'). The web wrote 'TAGOP' and the book's own name for both menus, TR_TYPE P for TAG GEN tags and ITM_QTY = pieces, and one relief row per tag whenever a stock item was sent, so an opening voucher could take loose stock out. A tag typed twice and the delete of a sold tag were refused with web texts instead of "Duplicate Tag No" (`:8562`) and "You Cant Delete This Voucher Because  Tag Use in Sales Transection...." (`:11383`). | N203 |
 | G217 | Med | The tag grid's karigar weight block is not saved | `unified/src/csharp/DataCareNext/TR_TAG_OPBL.cs`; `unified/src/csharp/DataCareNext/Ac_Stock.cs` | `web/apps/api/src/modules/stock/stockVoucherLifecycle.ts`; `web/apps/web/app/(app)/txn/tag-opening/page.tsx` | Found in the Chrome check of N203: the desktop grid carries KrOthWt, KrNwt, KrGht%, KrGht, KrTouch, KrWst% and KrFine (columns 17-23, `TR_TAG_OPBL.cs:5146-5172`), works out KrNwt = gross − KrOthWt and KrFine = (KrNwt + KrGht) × (KrTouch + KrWst%) / 100 (`:6686-6826`), saves them to BAR_DETL (`:9325-9330`), and Tag_Opbl_Stk copies them to MAIN_STOCK KR_NWT, KR_TOUCH, KR_WEST and KR_FINE. All 1359 migrated tag stock rows carry KR_NWT. The web has no input for them, so they stay 0. | N204 |
+| G218 | Med | Browser suites could test an older build | — (test infrastructure) | `web/apps/web/next.config.mjs`; `web/apps/web/test/real-stack-target.mjs`; `web/apps/web/test/features/harness.mjs` | Found while verifying N203. The build clears the route cache (N186), but turbo replays a cached web build without running that step, so the pages a previous server cached survived and a fresh `next start` served an older chunk (`x-nextjs-cache: HIT`); a full feature run failed the reopen case on it. Separately, a suite whose ports were still held by a demo stack got a 200 from that stack's readiness probe and ran against its build: the new Next server could not bind the port. | N205 |
 
 ## 4. Decisions D23–D28
 
@@ -2250,6 +2251,13 @@ Add KrOthWt, KrNwt, KrGht%, KrGht, KrTouch, KrWst% and KrFine to the tag grid wi
 as Tag_Opbl_Stk does. Proof: a DB test pins the BAR_DETL and MAIN_STOCK values for a tag with a karigar block, and the
 tag-opening module saves one through the screen.
 
+### N205 — Browser suites run against the build they were given (G218)
+
+`next.config.mjs` clears the route cache when the production server starts (`PHASE_PRODUCTION_SERVER`), so a server
+serves its own build however the build was produced, including a turbo cache replay. Every real-stack suite and the
+feature harness call `assertPortsFree` before they start their servers and stop with the port named when something
+already answers there.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2381,6 +2389,7 @@ tag-opening module saves one through the screen.
 | N202 | — | implemented-unverified, evidence in this change (G213, D33: Lite is the default edition; the configuration reads pass the gate) |
 | N203 | — | implemented-unverified, evidence in this change (G214, G215, G216: Tag Opening and Only Tag Entry follow TR_TAG_OPBL; reopen keeps every field; stock rows follow Tag_Opbl_Stk) |
 | N204 | — | planned (G217: the karigar weight block on the tag grid) |
+| N205 | — | implemented-unverified, evidence in this change (G218: the production server starts from an empty route cache; suites refuse occupied ports) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 
