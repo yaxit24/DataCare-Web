@@ -181,7 +181,7 @@ For each Standard menu:
    lookups, print preview, console and network health.
 6. **Done.** The menu's catalog row becomes FULL; pull request with green CI; merge.
 
-**Order.** Shared defects first, because each one fixes many screens; then the menus in the order a shop uses them.
+**Order.** Shared defects first, because each one fixes many screens; then the menus in the order a shop uses them, Lite first, then the menus Basic adds, then the menus Standard adds (D32, §5a).
 
 | Step | Work | Slices | Lane-hours |
 |---|---|---|---:|
@@ -210,6 +210,29 @@ menus done; the 30 October estimate of a few days for Standard was too optimisti
 **Progress** is one number: Standard menus done, out of 114. A menu is done when its feature module has no failing
 or blocked case and no baseline entry, its writers have write-set tests, and its catalog row is FULL. Every pull
 request and the handoff report it.
+
+## 5a. Lite first, then Basic, then Standard (D32)
+
+The owner's instruction of 31 October 2026: make every Lite menu work end to end like the desktop first, then add
+the menus of the further editions. Inside Standard the order is therefore Lite (49 menus), then the menus Basic
+adds (29), then the menus Standard adds (36). The steps of §5 (desktop study, case list, browser run, fixes, visual
+and keyboard check) apply to each menu unchanged; shared defects found on a Lite screen are still fixed once for
+every screen. Progress per tier is generated in [standard-progress.md](../handbook/web/standard-progress.md).
+
+Lite, in the order it is taken:
+
+| Step | Lite menus | State on 31 October |
+|---|---|---|
+| L1 | Sales, Purchase, Sales Return, Purchase Rtn | modules exist; Sales and Purchase have no open defect; returns have G190, G193, G194, G198–G201 open |
+| L2 | Cash Received, Cash Payment, Bank Received, Bank Payment, Contra Entry | no module yet |
+| L3 | Sales Order, Order Cancel, Order Report | no module yet |
+| L4 | Wh Sales, Approval Isu, Approval Rtn, Approval Rpt, Fine Jv Entry | no module yet |
+| L5 | Party, Address, Product, Group, Item, AutoItem, Employee, Tax, Party Opening, Item Opening, Tag Opening | no module yet |
+| L6 | Daily Rate, Only Tag Entry, Tag Print, Tag Cancel, Stock Adjust | no module yet |
+| L7 | Ledger Report, Stock Report, Tag Stock, Sales Report, Purchase Rpt, Cash Bank, Gst Report, HuId Report | no module yet |
+| L8 | Company, Year Create, Balance TrFr, Books, User Create, Data Refresh, Data Backup, Data Import | User Create has a module with no open defect |
+
+Basic (29 menus) follows, then Standard's own 36, in the same way; the step table of §5 gives their grouping.
 
 ## 6. Done for Standard
 

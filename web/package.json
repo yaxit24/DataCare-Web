@@ -40,7 +40,9 @@
     "depth:deadcells": "node scripts/check-dead-cells.mjs",
     "size:budget": "node --test scripts/check-size-budget.test.mjs && node scripts/check-size-budget.mjs",
     "size:audit": "node scripts/check-size-budget.mjs --audit",
-    "advisories": "node scripts/check-advisories.mjs"
+    "advisories": "node scripts/check-advisories.mjs",
+    "progress": "node scripts/generate-standard-progress.mjs",
+    "progress:check": "node scripts/generate-standard-progress.mjs --check"
   },
   "devDependencies": {
     "@types/node": "24.19.0",
