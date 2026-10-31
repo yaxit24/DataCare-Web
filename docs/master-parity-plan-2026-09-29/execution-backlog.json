@@ -6851,6 +6851,7 @@
       "evidence": [
         "web/packages/core/src/tagKarigar.ts",
         "web/packages/core/test/tagKarigar.test.ts",
+        "web/apps/api/src/modules/stock/tagKarigarLine.ts",
         "web/apps/api/src/modules/stock/stockVoucherLifecycle.ts",
         "web/apps/web/app/(app)/txn/tag-opening/page.tsx",
         "web/apps/web/components/ExtendedGrid.tsx",

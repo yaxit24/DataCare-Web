@@ -1,4 +1,5 @@
-import { round, tagKarigarColumns, tagKarigarStock } from '@datacare/core';
+import { round } from '@datacare/core';
+import { tagKarigarLineColumns } from './tagKarigarLine.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import { assertPeriodOpen, insertRowTx, postVoucherTx } from '../posting/posting.js';
@@ -616,7 +617,7 @@ async function writeTagOpeningTx(
   const fineOf = (line: TagOpeningLine): number =>
     line.fineWt != null ? n(line.fineWt) : fineFor('tagOpening', line);
   // The karigar weight block as BtnSave_Click writes it (TR_TAG_OPBL.cs:10975-11022, N204).
-  const karigar = input.lines.map((line) => tagKarigarColumns({ ...line, fineWt: fineOf(line) }));
+  const karigar = input.lines.map((line) => tagKarigarLineColumns(line, fineOf(line)));
   const details = input.lines.map((line, index) => ({
     ...key,
     SR_NO: index + 1,
@@ -673,7 +674,7 @@ async function writeTagOpeningTx(
     HM_ID2_WT: n(line.hallmarkId2Wt), // mSG[L,86] :9380
     HM_ID3_WT: n(line.hallmarkId3Wt), // mSG[L,87] :9381
     HM_ID4_WT: n(line.hallmarkId4Wt), // mSG[L,88] :9382
-    ...karigar[index]!, // mSG 17-23 :10975-11022
+    ...karigar[index]!.detail, // mSG 17-23 :10975-11022
     KR_LBR_RATE: n(line.karigarLbrRate), // mSG[L,35] :9341
     KR_LBR_AMT: n(line.karigarLbrAmt), // mSG[L,36] :9342
     KR_OTH_AMT: n(line.karigarOthAmt), // mSG[L,37] :9343
@@ -752,7 +753,7 @@ async function writeTagOpeningTx(
     OTH_AMT: n(line.othAmt),
     ITM_MRP: n(line.mrp),
     NET_AMT: 0,
-    ...tagKarigarStock(karigar[index]!),
+    ...karigar[index]!.stock,
     KR_LBR_AMT: n(line.karigarLbrAmt),
     KR_OTH_AMT: n(line.karigarOthAmt),
     KR_COST: n(line.karigarCost),
