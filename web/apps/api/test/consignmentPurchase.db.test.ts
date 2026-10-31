@@ -11,6 +11,10 @@ import {
 } from '../src/modules/purchase/purchase.js';
 import type { VoucherScope } from '../src/modules/vouchers/numbering.js';
 
+/** N51: the purchase's current version, as the screen would have read it before saving or deleting. */
+const versionOfPurchase = async (prisma: any, scope: any, vchNo: number | string) =>
+  String((await getPurchase(prisma, scope, vchNo)).version);
+
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const databaseDescribe = RUN ? describe : describe.skip;
 const TENANT = 'consignment-purchase-db';
@@ -335,6 +339,7 @@ databaseDescribe('database-backed TR_PR_SL_UAE consignment purchase mode', () =>
       purchaseInput({ mainUser: 'editor' }),
       [line({ grossWt: 8, netWt: 7 })],
       created.vchNo,
+      await versionOfPurchase(runtime, purchaseInput({ mainUser: 'editor' }).scope, created.vchNo),
     );
     const afterEdit = await query(
       `SELECT "ADJ_GWT"::float adj_gwt,"ADJ_NWT"::float adj_nwt,"CON_ISU_REC" source_flag
@@ -346,7 +351,12 @@ databaseDescribe('database-backed TR_PR_SL_UAE consignment purchase mode', () =>
     expect(afterEdit[0]).toMatchObject({ adj_gwt: 8, adj_nwt: 7, source_flag: 'Y' });
 
     await expect(
-      deletePurchase(runtime, { scope, vchNo: created.vchNo, deleteUser: 'deleter' }),
+      deletePurchase(runtime, {
+        scope,
+        vchNo: created.vchNo,
+        deleteUser: 'deleter',
+        expectedVersion: await versionOfPurchase(runtime, scope, created.vchNo),
+      }),
     ).resolves.toEqual({
       reversed: true,
     });

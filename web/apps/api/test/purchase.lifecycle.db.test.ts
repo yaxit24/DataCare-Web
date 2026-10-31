@@ -14,6 +14,10 @@ import { createSale } from '../src/modules/sales/sales.js';
 import type { VoucherScope } from '../src/modules/vouchers/numbering.js';
 import { footprintOf, ledgerLegs, voucherTables } from './support/footprint.js';
 
+/** N51: the purchase's current version, as the screen would have read it before saving or deleting. */
+const versionOfPurchase = async (prisma: any, scope: any, vchNo: number | string) =>
+  String((await getPurchase(prisma, scope, vchNo)).version);
+
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const databaseDescribe = RUN ? describe : describe.skip;
 const TENANT = 'purchase-lifecycle-db';
@@ -320,7 +324,12 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       acCode: 'SUPP',
       lines: [{ itCode: 'LOOSE' }],
     });
-    await deletePurchase(runtime, { scope: tagScope, vchNo: tagged.vchNo, deleteUser: 'tester' });
+    await deletePurchase(runtime, {
+      scope: tagScope,
+      vchNo: tagged.vchNo,
+      deleteUser: 'tester',
+      expectedVersion: await versionOfPurchase(runtime, tagScope, tagged.vchNo),
+    });
     const remaining = (await owner.$queryRawUnsafe(
       `SELECT count(*)::int n FROM "PR_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TPR'`,
       TENANT,
@@ -373,6 +382,15 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
         }),
         replacementLines.map((line) => ({ ...line, metal: 'S' as const })),
         created.vchNo,
+        await versionOfPurchase(
+          runtime,
+          purchaseInput({
+            mainUser: 'different-user',
+            acName: 'request-controlled spoof',
+            vchDate: '2024-04-11',
+          }).scope,
+          created.vchNo,
+        ),
       ),
     ).resolves.toMatchObject({ vchNo: 8 });
 
@@ -450,7 +468,13 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
     const before = await getPurchase(runtime, scope, created.vchNo);
 
     await expect(
-      editPurchase(runtime, purchaseInput(), replacementLines, created.vchNo),
+      editPurchase(
+        runtime,
+        purchaseInput(),
+        replacementLines,
+        created.vchNo,
+        await versionOfPurchase(runtime, purchaseInput().scope, created.vchNo),
+      ),
     ).rejects.toEqual(
       expect.objectContaining<Partial<PurchaseValidationError>>({
         name: 'PurchaseValidationError',
@@ -497,6 +521,7 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
         purchaseInput(),
         [{ ...firstLines[0], itCode: 'LOOSE' }, firstLines[1]!],
         created.vchNo,
+        await versionOfPurchase(runtime, purchaseInput().scope, created.vchNo),
       ),
     ).rejects.toThrow(
       'You Cant Change ItCode In Edit Mode Please Tag Transfer And Generate New Tag',
@@ -513,6 +538,7 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
         { ...firstLines[1], itCode: 'GOLD' },
       ],
       created.vchNo,
+      await versionOfPurchase(runtime, purchaseInput().scope, created.vchNo),
     );
     expect(String(edited.vchNo).padStart(5, '0')).toBe(String(created.vchNo).padStart(5, '0'));
   }, 30_000);
@@ -533,6 +559,11 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
         purchaseInput({ vchDate: '2024-04-20' }),
         replacementLines,
         created.vchNo,
+        await versionOfPurchase(
+          runtime,
+          purchaseInput({ vchDate: '2024-04-20' }).scope,
+          created.vchNo,
+        ),
       ),
     ).rejects.toBeInstanceOf(PeriodLockValidationError);
 
@@ -564,6 +595,11 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
         purchaseInput({ vchDate: '2024-04-09' }),
         replacementLines,
         created.vchNo,
+        await versionOfPurchase(
+          runtime,
+          purchaseInput({ vchDate: '2024-04-09' }).scope,
+          created.vchNo,
+        ),
       ),
     ).rejects.toBeInstanceOf(PeriodLockValidationError);
     expect(await getPurchase(runtime, scope, created.vchNo)).toEqual(before);
@@ -578,7 +614,12 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       TENANT,
     );
     await expect(
-      deletePurchase(runtime, { scope, vchNo: created.vchNo, deleteUser: 'current-user' }),
+      deletePurchase(runtime, {
+        scope,
+        vchNo: created.vchNo,
+        deleteUser: 'current-user',
+        expectedVersion: await versionOfPurchase(runtime, scope, created.vchNo),
+      }),
     ).resolves.toEqual({ reversed: true });
 
     const audits = (await owner.$queryRawUnsafe(
@@ -787,6 +828,7 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       scope,
       vchNo: created.vchNo,
       deleteUser: 'deleter',
+      expectedVersion: await versionOfPurchase(runtime, scope, created.vchNo),
     });
     const after = (await owner.$queryRawUnsafe(
       `SELECT count(*)::int n FROM "PR_IDTL" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
@@ -844,7 +886,12 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
     // Desktop stamps HD_VCH_NO with the voucher number here, not the hidden number.
     expect(String(row.HD_VCH_NO).trim()).toBe(vchNo);
 
-    await deletePurchase(runtime, { scope, vchNo: created.vchNo, deleteUser: 'deleter' });
+    await deletePurchase(runtime, {
+      scope,
+      vchNo: created.vchNo,
+      deleteUser: 'deleter',
+      expectedVersion: await versionOfPurchase(runtime, scope, created.vchNo),
+    });
     const gone = (await owner.$queryRawUnsafe(
       `SELECT count(*)::int n FROM "LOT_DETL" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
       TENANT,
@@ -869,6 +916,11 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       purchaseInput({ mainUser: 'editing-user', city: 'Surat', creditDays: 30 }),
       firstLines,
       created.vchNo,
+      await versionOfPurchase(
+        runtime,
+        purchaseInput({ mainUser: 'editing-user', city: 'Surat', creditDays: 30 }).scope,
+        created.vchNo,
+      ),
     );
 
     const rows = (await owner.$queryRawUnsafe(
@@ -904,7 +956,12 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
     expect(String(sample.BOOK_NAME).trim()).toBe('PURCHASE');
 
     // The audit survives deletion of the voucher it describes.
-    await deletePurchase(runtime, { scope, vchNo: created.vchNo, deleteUser: 'deleter' });
+    await deletePurchase(runtime, {
+      scope,
+      vchNo: created.vchNo,
+      deleteUser: 'deleter',
+      expectedVersion: await versionOfPurchase(runtime, scope, created.vchNo),
+    });
     const after = (await owner.$queryRawUnsafe(
       `SELECT count(*)::int n FROM "USER_DATA" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
       TENANT,
@@ -1180,6 +1237,11 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
       { ...purchaseInput(), vchDate: String(reopened.vchDate) },
       reopened.lines as never,
       created.vchNo,
+      await versionOfPurchase(
+        runtime,
+        { ...purchaseInput(), vchDate: String(reopened.vchDate) }.scope,
+        created.vchNo,
+      ),
     );
 
     const after = { PR_DETL: await snapshot('PR_DETL'), BAR_DETL: await snapshot('BAR_DETL') };

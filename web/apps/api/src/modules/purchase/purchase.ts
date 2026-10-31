@@ -9,6 +9,7 @@ import {
   nextTagNoTx,
   type VoucherScope,
 } from '../vouchers/numbering.js';
+import { assertVoucherVersionTx, versionKeyOf, voucherVersionTx } from '../vouchers/version.js';
 import {
   postVoucherTx,
   reverseVoucherTx,
@@ -1757,7 +1758,10 @@ export async function createPurchase(
     if (isConsignmentPurchase) {
       await applyConsignmentPurchaseAdjustmentsTx(tx, scope, formatVoucherNo(result.vchNo), 1);
     }
-    return result;
+    return {
+      ...result,
+      version: await purchaseVersionTx(tx, scope, formatVoucherNo(result.vchNo)),
+    };
   });
 }
 
@@ -1850,6 +1854,7 @@ export interface DeletePurchaseInput {
   scope: VoucherScope;
   vchNo: number | string;
   deleteUser?: string;
+  expectedVersion?: string; // N51 (D17): the version the operator's copy was read with
 }
 
 const PURCHASE_QUOTATION_WRITE_TABLES = ['PR_DATA', 'PR_DETL', 'PR_IDTL'] as const;
@@ -1872,6 +1877,11 @@ const PURCHASE_WRITE_TABLES = [
   'LOT_DETL',
   'REMARK_DATA',
 ] as const;
+/** N51 (D17): the version covers the write set above; check it after the header lock, before any write. */
+const purchaseVersionTx = (tx: any, scope: VoucherScope, vchNo: string) =>
+  voucherVersionTx(tx, PURCHASE_WRITE_TABLES, versionKeyOf(scope, vchNo));
+const assertPurchaseVersionTx = (tx: any, scope: VoucherScope, vchNo: string, expected?: string) =>
+  assertVoucherVersionTx(tx, PURCHASE_WRITE_TABLES, versionKeyOf(scope, vchNo), expected ?? '');
 
 type CompletePurchaseScope = VoucherScope & { coYear: string; coBook: string };
 const text = (value: unknown): string => String(value ?? '').trim();
@@ -2402,6 +2412,7 @@ export async function getPurchase(
         otherAmount: num(row.OTH_AMT),
         huid: text(row.HM_ID),
       })),
+      version: await purchaseVersionTx(tx, scope, voucherNo), // N51: sent back as expectedVersion
     };
   });
 }
@@ -2606,6 +2617,7 @@ export async function editPurchase(
   input: PurchaseInput,
   lines: PurchaseLineInput[],
   requestedVoucherNo: number | string,
+  expectedVersion: string,
 ): Promise<PurchaseResult> {
   completePurchaseScope(input.scope);
   // Fail with the field name rather than a DecimalError 500 (see requirePurchaseNumber).
@@ -2616,6 +2628,7 @@ export async function editPurchase(
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const isConsignmentPurchase = (await purchaseMainBookTx(tx, scope)) === 'CON PUR';
     const persisted = await persistedPurchaseHeaderTx(tx, scope, voucherNo, ['SL_BILL_NO']);
+    await assertPurchaseVersionTx(tx, scope, voucherNo, expectedVersion); // G170: before any write
     // Full prior header for the USER_DATA edit audit, read BEFORE the write set is replaced.
     const priorHeaderRow: Record<string, unknown> | undefined = (
       await tx.$queryRawUnsafe(
@@ -2704,7 +2717,7 @@ export async function editPurchase(
     if (isConsignmentPurchase) {
       await applyConsignmentPurchaseAdjustmentsTx(tx, scope, voucherNo, 1);
     }
-    return result;
+    return { ...result, version: await purchaseVersionTx(tx, scope, voucherNo) };
   });
 }
 
@@ -2735,6 +2748,7 @@ export async function deletePurchase(
       'VCH_DESC',
       'SL_BILL_NO',
     ]);
+    await assertPurchaseVersionTx(tx, scope, voucherNo, input.expectedVersion); // G170
     await assertPeriodOpen(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: header.VCH_DATE }] },
     });

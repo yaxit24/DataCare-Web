@@ -6,6 +6,10 @@ import { editKarigar, getKarigar, receiveKarigar } from '../src/modules/manufact
 import { editMfg, getMfg, issueMfg } from '../src/modules/manufacturing/mfg.js';
 import type { VoucherScope } from '../src/modules/vouchers/numbering.js';
 
+/** N51: the purchase's current version, as the screen would have read it before saving or deleting. */
+const versionOfPurchase = async (prisma: any, scope: any, vchNo: number | string) =>
+  String((await getPurchase(prisma, scope, vchNo)).version);
+
 /**
  * Operator-depth round-trip harness (parity plan P0-2).
  *
@@ -166,7 +170,12 @@ const assertLosslessRoundTrip = async <TRead>(
   await testCase.editUnchanged(voucherNo, first);
   const second = await testCase.read(voucherNo);
 
-  const lost = differences(first, second);
+  // The version token changes on every save by design (N51, D17); it is not voucher data.
+  const withoutVersion = (view: any) => {
+    const { version: _version, ...rest } = view ?? {};
+    return rest;
+  };
+  const lost = differences(withoutVersion(first), withoutVersion(second));
   expect(
     lost,
     describeDifferences(`${testCase.label}: an unchanged save altered the voucher`, lost),
@@ -450,6 +459,7 @@ databaseDescribe('operator depth — lossless round trips', () => {
             stones: line.stones,
           })) as any,
           voucherNo,
+          await versionOfPurchase(runtime, (header as any).scope, voucherNo),
         );
       },
       supplied: {
