@@ -178,7 +178,7 @@ const SECRET = 'e-crnt-route-test-signing-secret-over-thirty-two-characters';
     // Saved taxable (item + labour + other = 62250), item name and the ISO business date are printed.
     expect(print.body).toContain('62,250.00');
     expect(print.body).toContain('Gold Ring');
-    expect(print.body).toContain('2024-06-10');
+    expect(print.body).toContain('10/06/2024'); // N56 (D19): the print shows dd/MM/yyyy
     const duplicate = await request(
       'GET',
       `/e-credit-notes/00001/print?${qs()}&format=html&copy=D`,

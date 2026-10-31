@@ -393,4 +393,24 @@ describe('kernel adoption in this repository', () => {
     }
     expect(offenders).toEqual([]);
   });
+
+  // N56 (G36, D19): String(date).slice(0, 10) printed "Thu Oct 01" with no year.
+  it('flags a date sliced from its string form, but not other ten-character slices or the core helper', () => {
+    const text = [
+      "const vchDate = h.VCH_DATE ? String(h.VCH_DATE).slice(0, 10) : '';",
+      '      vchDate: text(x.VCH_DATE).slice(0, 10),',
+      "      fromDate: String(m.fd ?? '').slice(0, 10),",
+      '      HM_ID: str(line.in.huid).slice(0, 10) || null,',
+      '      ITM_LOT: str(line.in.itemLot).slice(0, 10) || null,',
+    ].join('\n');
+    const found = findBypasses([{ path: 'modules/x/y.ts', text }]).filter(
+      (b) => b.concern === 'date-normalization',
+    );
+    expect(found.map((b) => b.line)).toEqual([1, 2, 3]);
+    expect(
+      findBypasses([{ path: 'packages/core/dates.ts', text }]).filter(
+        (b) => b.concern === 'date-normalization',
+      ),
+    ).toEqual([]);
+  });
 });

@@ -1906,6 +1906,16 @@ cache a previous server wrote. Proven by `web/apps/web/test/clearRouteCache.test
 Done when: no local browser run can be answered with a previous build's page.
 
 
+### N56 milestone 1 — Printed dates carry the year (G36, D19)
+
+`web/packages/core/src/dates.ts` converts dates for transport (`toIsoDate`) and display (`formatDesktopDate`,
+`dd/MM/yyyy`). The printed documents and `web/apps/web/components/VoucherList.tsx` use them, and
+`web/apps/api/src/modules/ops/kernelConformance.ts` refuses a new date sliced from its string form. Proven by
+`web/packages/core/test/dates.test.ts`, `web/apps/api/test/documents.test.ts` and the `print.date-with-year` case of
+`web/apps/web/test/features/modules/salesInvoice.mjs`.
+
+Done when: no document or list prints a date without its year and the date-normalization rule is at zero.
+
 ### N51 milestone 2 — Sale version tokens (G170, D17)
 
 `web/apps/api/src/modules/vouchers/version.ts` hashes a voucher's complete write set. `GET /sales/:vchNo` returns it
