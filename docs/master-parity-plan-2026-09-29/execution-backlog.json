@@ -6496,7 +6496,7 @@
     },
     {
       "id": "N189",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Original purchase book optional: a purchase return that is not against a purchase saves without choosing an original book, and a reopened return keeps its original book (or none) without blocking Save; remove purchase-return.create.without-original from features/baseline.json.",
       "parentLabels": "P9; X13",
       "startAfter": [
@@ -6507,7 +6507,15 @@
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
       "requiredProof": "the case passes; a return against a purchase still validates the original voucher; reopen then Save needs no extra choice.",
-      "gapIds": "G199"
+      "gapIds": "G199",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/web/components/BookSelect.tsx",
+        "web/apps/web/app/(app)/txn/purchase-return/page.tsx",
+        "web/apps/web/test/bookSelect.test.ts",
+        "web/apps/web/test/features/baseline.json"
+      ],
+      "statusNote": "IMPLEMENTED. BookSelect required opt-out on the original purchase book; purchase-return.create.without-original passes and left the baseline."
     },
     {
       "id": "N190",
@@ -6533,7 +6541,7 @@
     },
     {
       "id": "N191",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Book table names: provision BOOK_TBL_NAME/BOOK_TBL_DETL for PURCHASE, PURC RETURN, CON PUR, TAG PURCHASE and PR QUOT books as MS_UPDATE does, backfill existing companies, and check the other registers that route by BOOK_TBL_NAME; remove purchase-return.report.register-lists-return from features/baseline.json.",
       "parentLabels": "P03-04; X07",
       "startAfter": [
@@ -6544,7 +6552,15 @@
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
       "requiredProof": "the case passes on a newly provisioned company; a migration test backfills an existing company; the purchase-return register lists PRT returns.",
-      "gapIds": "G201"
+      "gapIds": "G201",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/packages/db/prisma/migrations/20261031090000_book_tables_and_advance_slots/migration.sql",
+        "web/apps/api/test/bookTablesMigration.db.test.ts",
+        "web/apps/api/test/provisioning.db.test.ts"
+      ],
+      "statusNote": "IMPLEMENTED. Desktop table names on ten book families, backfilled; purchase-return.report.register-lists-return passes and left the baseline."
     },
     {
       "id": "N192",
@@ -6683,7 +6699,7 @@
     },
     {
       "id": "N198",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Provisioning: the SALES ORDER book's BOOK_DETL slot 1 is the cash account, and sale books get slot 4 (the advance account Sales_Rojmel uses); backfill existing companies.",
       "startAfter": [
         "N195"
@@ -6694,7 +6710,15 @@
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
-      "parentLabels": "P9; R03"
+      "parentLabels": "P9; R03",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/packages/db/prisma/migrations/20261031090000_book_tables_and_advance_slots/migration.sql",
+        "web/apps/api/test/bookTablesMigration.db.test.ts",
+        "web/apps/web/test/features/baseline.json"
+      ],
+      "statusNote": "IMPLEMENTED. SOR slot 1 = CASH, SALES slot 4 = ORDADV, backfilled; sales-order.create.advance-ledger and journey.order-to-sale pass and left the baseline."
     },
     {
       "id": "N199",
@@ -6849,6 +6873,59 @@
         "web/apps/web/test/assertPortsFree.test.ts"
       ],
       "statusNote": "IMPLEMENTED. Verified: the two new unit tests pass (the config test fails with main's next.config.mjs); a planted stale route cache was removed by next start, which served the current tag-opening chunk; assertPortsFree refused a port held by another server."
+    },
+    {
+      "id": "N206",
+      "status": "implemented-unverified",
+      "action": "Fine Jv Entry is the desktop TR_CONTRA grid in FINE JV mode: paired LDR_TYPE 0/1 rows, CR_FINE + / DR_FINE - legs keyed STR(SR_NO)+'03'/'04', day book and REMARK_DATA rebuilt from the rows, the desktop save refusals, lossless reopen and edit, FineJvBill behind print rights; Contra and Journal refuse another family's book and need print rights for their documents.",
+      "parentLabels": "P1-core; L4; T01-T18",
+      "startAfter": [
+        "N138"
+      ],
+      "requiredProof": "Source-derived HTTP/DB tests red against the old writer prove the paired rows, 33-character keys, TEMP_BOOK_DATA name, day-book names, remark rebuild, desktop refusals, omitted-field edit, delete set, print layout and 400/403/404 answers, and the Contra/Journal family and print guards; the fine-jv and contra feature modules pass every executable case; Chrome DevTools visual and Lighthouse checks pass.",
+      "gapIds": "G219",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/api/src/modules/finance/fineJv.ts",
+        "web/apps/api/src/routes/fineJv.ts",
+        "web/apps/api/src/modules/finance/contraVoucher.ts",
+        "web/apps/api/src/modules/finance/contra.ts",
+        "web/apps/api/src/modules/finance/journal.ts",
+        "web/apps/api/src/modules/finance/lifecycle.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/web/app/(app)/txn/fine-jv/page.tsx",
+        "web/apps/api/test/fineJv.routes.db.test.ts",
+        "web/apps/api/test/financeLifecycle.db.test.ts",
+        "web/apps/api/test/reopenVoucher.db.test.ts",
+        "web/apps/api/test/routePolicy.test.ts",
+        "web/apps/web/test/fineJvPage.test.ts",
+        "web/apps/web/test/features/modules/fineJv.mjs",
+        "web/apps/web/test/features/modules/contraEntry.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: fineJv.routes.db.test.ts 9/9 (7 red against the old writer; refusal order, grouped reopen, print layout and audit length red against the first draft), financeLifecycle 7/7 (cross-family case red before the guard), reopenVoucher, routePolicy, contraDelete, financeBookSelection and transactionBudget pass; full suite api 3614, web 693, core 1791 tests pass; fine-jv feature module 18 passed / 5 blocked / 1 N/A, contra module adds print-denied and FINE JV book refusal; Chrome DevTools three-row entry, FineJvBill print, Enter reopen, edit and delete; Lighthouse 100 on the grid. Open: row 1 paired on both sides reopens with its net fine only, version concurrency, idempotency, fault rollback, browser settings matrix, L6 report filters, RE_TRFR (no column), per-voucher USER_UPDATE/USER_DELETE override, EMP_AS_USER default, desktop-runtime comparison."
+    },
+    {
+      "id": "N207",
+      "status": "planned",
+      "action": "Require the owning form's view right for the book requested from GET /vouchers/recent and GET /vouchers/neighbour, so a shared table such as CONTRA_DATA lists only the books the user may open.",
+      "parentLabels": "P1-core; L1-L6",
+      "startAfter": [
+        "N206"
+      ],
+      "requiredProof": "An HTTP/DB test shows a user with Contra view rights but no Fine JV rights cannot list or step through FINE JV vouchers, and the Contra and Fine JV feature modules still list their own vouchers.",
+      "gapIds": "G220",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-31",
+      "evidence": [],
+      "statusNote": "PLANNED."
     }
   ],
   "amendments": [

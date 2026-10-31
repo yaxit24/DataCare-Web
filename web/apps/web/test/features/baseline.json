@@ -25,24 +25,9 @@
       "case": "purchase-return.create.amounts",
       "gap": "G198",
       "reason": "Stored ITM_AMT/NET_AMT/TOT_AMT keep paise (56,090.80 / 58,465.80 / 60,219.77); the desktop stores 56,091 / 58,466 / 60,220."
-    },
-    {
-      "case": "purchase-return.create.without-original",
-      "gap": "G199",
-      "reason": "Orig Purchase Book is a required select with no preselection (two purchase books), so the browser blocks Save on a free-standing return; the desktop needs only a party and a voucher number (TR_KR_ISU.cs:4986-4999)."
-    },
-    {
-      "case": "purchase-return.report.register-lists-return",
-      "gap": "G201",
-      "reason": "The register requires BOOK_TBL_NAME 'PR_DATA' and seedCompany leaves it NULL for PRT, so it lists no return; the desktop sets it for PURC RETURN books (MS_UPDATE.cs:7849)."
     }
   ],
   "sales-order": [
-    {
-      "case": "sales-order.create.advance-ledger",
-      "gap": "G207",
-      "reason": "The 5,000 advance debits SALES: the provisioned SOR book's slot 1 is the sales account (seedCompany.ts:219); the desktop debits the cash account in slot 1 (Ac_Ledr.cs:28-35)."
-    },
     {
       "case": "sales-order.create.tender-modes",
       "gap": "G206",
@@ -57,11 +42,6 @@
       "case": "sales-order.print.order",
       "gap": "G36",
       "reason": "The printed order bill (report spec OrderBill) prints the date as 2026-10-31; D19 needs dd/MM/yyyy. N56 is in progress."
-    },
-    {
-      "case": "sales-order.journey.order-to-sale",
-      "gap": "G208",
-      "reason": "A sale that adjusts the order advance answers 400 'book SL account row 4 is missing': provisioned sale books have no slot 4, which Sales_Rojmel uses for ADV_AMT (Ac_Rojmel.cs:96)."
     }
   ]
 }

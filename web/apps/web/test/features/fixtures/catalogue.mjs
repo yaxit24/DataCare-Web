@@ -19,6 +19,7 @@ import { SECOND_TENANT, TENANT } from '../harness.mjs';
 export const USERS = Object.freeze({
   admin: { user: 'e2eadmin', category: 'ADMIN' },
   clerk: { user: 'e2eclerk', category: 'USER' }, // may view/create/edit sales, may NOT delete
+  printViewer: { user: 'e2eprint', category: 'USER' }, // may view Fine JV and Contra but may NOT print them
 });
 
 export const ITEMS = Object.freeze({
@@ -110,8 +111,11 @@ export async function seedCatalogue(stack, { password }) {
     );
   await sql(
     `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
-     VALUES ($1,'01','01',$2,'Sales','Sales Invoice','Y','Y','N','Y')`,
+     VALUES ($1,'01','01',$2,'Sales','Sales Invoice','Y','Y','N','Y'),
+            ($1,'01','01',$3,'Cash / Bank','Fine JV (metal transfer)','Y','Y','N','N'),
+            ($1,'01','01',$3,'Cash / Bank','Contra','Y','Y','N','N')`,
     USERS.clerk.user,
+    USERS.printViewer.user,
   );
 
   // F01: a sentinel tenant with the same company/book/voucher number. It must never change.

@@ -6,10 +6,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 15 | 11 | 0 |
+| Lite (first, D32) | 49 | 16 | 12 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
 | Standard (added by Standard) | 36 | 0 | 0 | 0 |
-| **Standard total** | **114** | **16** | **12** | **0** |
+| **Standard total** | **114** | **17** | **13** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
@@ -24,7 +24,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Company | Data Backup | `/backup` | CONTAINED | — | no module | — |
 | ExtraTran | Approval Isu | `/txn/tour` | PARTIAL | — | no module | — |
 | ExtraTran | Approval Rtn | `/txn/tour-return` | PARTIAL | — | no module | — |
-| ExtraTran | Fine Jv Entry | `/txn/fine-jv` | PARTIAL | — | no module | — |
+| ExtraTran | Fine Jv Entry | `/txn/fine-jv` | PARTIAL | fine-jv | module green | — |
 | Master | Party | `/masters/party`, `/masters/accounts` | PARTIAL | — | no module | — |
 | Master | Address | `/masters/addresses` | PARTIAL | — | no module | — |
 | Master | Product | `/masters/products` | PARTIAL | — | no module | — |
@@ -49,13 +49,13 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Report | Sales Report | `/reports/sales-register` | REPORT | — | no module | — |
 | Report | Purchase Rpt | `/reports/purchase-register` | REPORT | — | no module | — |
 | Report | Approval Rpt | `/reports/approval-report` | REPORT | — | no module | — |
-| Report | Order Report | `/txn/sales-order` | REPORT | sales-order | module, 5 open | G206, G207, G208, G36 |
+| Report | Order Report | `/txn/sales-order` | REPORT | sales-order | module, 3 open | G206, G36 |
 | Report | Cash Bank | `/reports/cash-book` | REPORT | — | no module | — |
 | Report | Gst Report | `/reports/gst-report` | REPORT | — | no module | — |
 | Report | HuId Report | `/reports/huid` | REPORT | — | no module | — |
 | Transaction | Purchase | `/txn/purchase` | PARTIAL | purchase-invoice | module green | — |
-| Transaction | Purchase Rtn | `/txn/purchase-return` | PARTIAL | purchase-return | module, 4 open | G198, G199, G201 |
-| Transaction | Sales Order | `/txn/sales-order` | PARTIAL | sales-order | module, 5 open | G206, G207, G208, G36 |
+| Transaction | Purchase Rtn | `/txn/purchase-return` | PARTIAL | purchase-return | module, 2 open | G198 |
+| Transaction | Sales Order | `/txn/sales-order` | PARTIAL | sales-order | module, 3 open | G206, G36 |
 | Transaction | Sales | `/txn/sales`, `/txn/hallmark-sale` | PARTIAL | sales-invoice | module green | — |
 | Transaction | Sales Return | `/txn/sale-return` | PARTIAL | sales-return | module, 2 open | G190 |
 | Transaction | Wh Sales | `/txn/wholesale-sale` | PARTIAL | — | no module | — |

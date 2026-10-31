@@ -136,10 +136,11 @@ describe.runIf(RUN)('contra deletion (plan F1.1)', () => {
     const created = await postContra(runtime, {
       scope,
       vchDate: '2024-04-10',
-      // Contra is a bank<->cash transfer: Dr toAc, Cr fromAc (finance.ts:1087).
-      fromAc: '00001',
-      toAc: '00008',
-      amount: 5000,
+      // Contra is a bank<->cash transfer: row 1 DR the receiving account, row 2 CR the giver.
+      lines: [
+        { crdr: 'DR', acCode: '00008', amount: 5000 },
+        { crdr: 'CR', acCode: '00001', amount: 5000 },
+      ],
       mainUser: 'contra-del',
     } as never);
 
@@ -177,10 +178,11 @@ describe.runIf(RUN)('contra deletion (plan F1.1)', () => {
     const created = await postContra(runtime, {
       scope,
       vchDate: '2024-04-14',
-      // Contra is a bank<->cash transfer: Dr toAc, Cr fromAc (finance.ts:1087).
-      fromAc: '00001',
-      toAc: '00008',
-      amount: 3300,
+      // Contra is a bank<->cash transfer: row 1 DR the receiving account, row 2 CR the giver.
+      lines: [
+        { crdr: 'DR', acCode: '00008', amount: 3300 },
+        { crdr: 'CR', acCode: '00001', amount: 3300 },
+      ],
       mainUser: 'contra-del',
     } as never);
     const vchNo = String(created.vchNo).padStart(5, '0');
@@ -234,10 +236,11 @@ describe.runIf(RUN)('contra deletion (plan F1.1)', () => {
     const created = await postContra(runtime, {
       scope,
       vchDate: '2024-04-11',
-      // Contra is a bank<->cash transfer: Dr toAc, Cr fromAc (finance.ts:1087).
-      fromAc: '00001',
-      toAc: '00008',
-      amount: 1200,
+      // Contra is a bank<->cash transfer: row 1 DR the receiving account, row 2 CR the giver.
+      lines: [
+        { crdr: 'DR', acCode: '00008', amount: 1200 },
+        { crdr: 'CR', acCode: '00001', amount: 1200 },
+      ],
       mainUser: 'contra-del',
     } as never);
     const vchNo = String(created.vchNo).padStart(5, '0');
@@ -259,19 +262,21 @@ describe.runIf(RUN)('contra deletion (plan F1.1)', () => {
     const keep = await postContra(runtime, {
       scope,
       vchDate: '2024-04-12',
-      // Contra is a bank<->cash transfer: Dr toAc, Cr fromAc (finance.ts:1087).
-      fromAc: '00001',
-      toAc: '00008',
-      amount: 700,
+      // Contra is a bank<->cash transfer: row 1 DR the receiving account, row 2 CR the giver.
+      lines: [
+        { crdr: 'DR', acCode: '00008', amount: 700 },
+        { crdr: 'CR', acCode: '00001', amount: 700 },
+      ],
       mainUser: 'contra-del',
     } as never);
     const drop = await postContra(runtime, {
       scope,
       vchDate: '2024-04-13',
-      // Contra is a bank<->cash transfer: Dr toAc, Cr fromAc (finance.ts:1087).
-      fromAc: '00001',
-      toAc: '00008',
-      amount: 900,
+      // Contra is a bank<->cash transfer: row 1 DR the receiving account, row 2 CR the giver.
+      lines: [
+        { crdr: 'DR', acCode: '00008', amount: 900 },
+        { crdr: 'CR', acCode: '00001', amount: 900 },
+      ],
       mainUser: 'contra-del',
     } as never);
 

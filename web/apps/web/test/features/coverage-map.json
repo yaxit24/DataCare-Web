@@ -67,6 +67,17 @@
         "web/apps/api/src/modules/finance/contra.ts"
       ]
     },
+    "fineJv": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/fine-jv/page.tsx",
+        "web/apps/api/src/modules/finance/fineJv.ts",
+        "web/apps/api/src/modules/finance/lifecycle.ts",
+        "web/apps/api/src/modules/finance/contraVoucher.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/routes/fineJv.ts",
+        "web/apps/api/src/routes/txn.ts"
+      ]
+    },
     "salesOrder": {
       "covers": [
         "web/apps/web/app/(app)/txn/sales-order/page.tsx",

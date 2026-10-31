@@ -249,6 +249,7 @@ import { postContra, deleteContra, getContra, editContra } from '../modules/fina
 import { registerSaleVoucherRoutes } from './saleVoucher.js';
 import { registerPurchaseVoucherRoutes } from './purchaseVoucher.js';
 import { registerPartyOpeningRoutes } from './partyOpening.js';
+import { registerFineJvRoutes } from './fineJv.js';
 import { registerItemOpeningRoutes } from './itemOpening.js';
 import { VoucherVersionConflictError } from '../modules/vouchers/version.js';
 import { listYears, createYear, carryForwardOpenings } from '../modules/masters/year.js';
@@ -314,7 +315,6 @@ import {
   groupSummary,
   gstr2Purchase,
 } from '../modules/reports/reports3.js';
-import { deleteFineJv, getFineJv, postFineJv, editFineJv } from '../modules/finance/fineJv.js';
 import { deleteBillSettlement, listOpenBills, settleBills } from '../modules/finance/billToBill.js';
 import {
   deleteBullionSale,
@@ -503,7 +503,7 @@ import {
   TagSplitConflictError,
 } from '../modules/stock/tagSplit.js';
 import { lookup } from '../modules/masters/lookup.js';
-import { postJournal, deleteJournal } from '../modules/finance/journal.js';
+import { postJournal, deleteJournal, getJournal } from '../modules/finance/journal.js';
 import {
   postLedgerAdjust,
   deleteLedgerAdjust,
@@ -963,6 +963,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       // N183 (G193): the voucher is already gone (another operator deleted it) or is ambiguous.
       if (n === 'PersistedVoucherNotFoundError' || n === 'PersistedVoucherAmbiguousError')
         return reply.code(e.statusCode).send({ error: e.code, message: e.message });
+      if (n === 'FineJvNotFoundError')
+        return reply.code(404).send({ error: 'fine-jv-not-found', message: e.message });
       if (e instanceof SavedSaleReturnError)
         return reply.code(e.statusCode).send({ error: e.code, message: e.message });
       if (e instanceof SaleReturnSourceError)
@@ -1036,6 +1038,17 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       throw e;
     }
   };
+  // A document route's reader refusal (wrong book family, malformed number) is a 400, as `run` answers.
+  const documentRefusal = async (reply: FastifyReply, read: () => Promise<unknown>) => {
+    try {
+      await read();
+      return false;
+    } catch (e: any) {
+      if (!/(ValidationError|NumberingConfigurationError)$/.test(e?.name ?? '')) throw e;
+      await reply.code(400).send({ error: e.name, message: e.message });
+      return true;
+    }
+  };
   const formMutationCapabilities = async (req: FastifyRequest, form: string) => {
     const { canUpdate, canDelete } = await formCapabilities(req, form);
     return { canUpdate, canDelete };
@@ -1077,14 +1090,17 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     auth,
     guard,
     scopeOf,
+    readScope,
     run,
     body,
     mainUserOf: (req: FastifyRequest) => sess(req).sub,
+    standardDocumentCopy,
   };
   registerCrmRoutes(app, extraRouteHelpers);
   registerLoanInterestRoutes(app, extraRouteHelpers);
   registerVoucherNavigationRoutes(app, extraRouteHelpers);
   registerPartyOpeningRoutes(app, extraRouteHelpers);
+  registerFineJvRoutes(app, extraRouteHelpers);
   registerItemOpeningRoutes(app, extraRouteHelpers, formCapabilities);
   const pdfRenderer = (): PdfRenderer => deps.pdfRenderer ?? new PlaywrightPdfRenderer();
   /** Render server-built HTML, mapping limits to 413/422 and a busy or slow renderer to a retryable 503. */
@@ -2812,10 +2828,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     return run(reply, 201, () =>
       postContra(prisma, {
         scope: scopeOf(req),
-        lines: Array.isArray(b.lines) ? b.lines : undefined, // the desktop grid (TR_CONTRA)
-        fromAc: b.fromAc,
-        toAc: b.toAc,
-        amount: b.amount,
+        lines: Array.isArray(b.lines) ? b.lines : [], // the desktop grid (TR_CONTRA)
         vchDate: b.vchDate,
         itDesc: b.itDesc,
         mainUser: sess(req).sub,
@@ -7206,30 +7219,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
-  app.post('/fine-jv', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      postFineJv(prisma, {
-        scope: scopeOf(req),
-        fromAc: b.fromAc,
-        toAc: b.toAc,
-        fineWt: Number(b.fineWt),
-        metal: b.metal,
-        vchDate: b.vchDate,
-      }),
-    );
-  });
-  app.delete('/fine-jv/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
-      deleteFineJv(prisma, {
-        scope: scopeOf(req),
-        vchNo: (req.params as any).vchNo,
-        book: body(req).book,
-      }),
-    );
-  });
   app.get('/bill-to-bill/open', auth, async (req) => {
     const s = readScope(req);
     return listOpenBills(
@@ -7510,13 +7499,15 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
   // G129 (Stage E): the journal voucher print (multi-line Dr/Cr, desktop JournalVch.rpt).
+  // TR_CONTRA.cs:3000-3004: printing needs UserPrint; the book must be the Journal family's.
   app.get('/journal/:vchNo/print', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
+    if (!guard(req, reply, 'print')) return;
     const q = req.query as any;
     const copyLabel = standardDocumentCopy(q.copy, reply);
     if (copyLabel === null) return reply;
     const scope = resolvePrintScope(reply, readScope(req), (req.params as any).vchNo);
     if (!scope) return reply;
+    if (await documentRefusal(reply, () => getJournal(prisma, scope, scope.vchNo))) return reply;
     const data = await contraVoucherData(prisma, scope);
     if (!data) return reply.code(404).send({ error: 'journal-not-found' });
     const html = journalVoucherHtml(data.rows, { company: data.company, copy: copyLabel });
@@ -7536,13 +7527,13 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   // G128 (Stage E): the contra voucher print (bank<->cash transfer, desktop ContraVch.rpt).
   app.get('/contra/:vchNo/print', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
+    if (!guard(req, reply, 'print')) return;
     const q = req.query as any;
     const copyLabel = standardDocumentCopy(q.copy, reply);
     if (copyLabel === null) return reply;
     const scope = resolvePrintScope(reply, readScope(req), (req.params as any).vchNo);
     if (!scope) return reply;
-    await getContra(prisma, scope, scope.vchNo);
+    if (await documentRefusal(reply, () => getContra(prisma, scope, scope.vchNo))) return reply;
     const data = await contraVoucherData(prisma, scope);
     if (!data) return reply.code(404).send({ error: 'contra-not-found' });
     const html = contraVoucherHtml(data.rows, { company: data.company, copy: copyLabel });
@@ -7559,13 +7550,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         prisma,
         {
           scope: scopeOf(req),
-          lines: Array.isArray(b.lines) ? b.lines : undefined, // the desktop grid (TR_CONTRA)
-          fromAc: b.fromAc,
-          toAc: b.toAc,
-          amount: Number(b.amount),
+          lines: Array.isArray(b.lines) ? b.lines : [], // the desktop grid (TR_CONTRA)
           vchDate: b.vchDate,
           itDesc: b.itDesc,
-          toAcName: b.toAcName,
           empCode: b.empCode,
           itemType: b.itemType,
           mainUser: sess(req).sub,
@@ -7597,28 +7584,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.get('/bullion-sales/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, () => getBullionSale(prisma, scopeOf(req), (req.params as any).vchNo));
-  });
-  app.get('/fine-jv/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    return run(reply, 200, () => getFineJv(prisma, scopeOf(req), (req.params as any).vchNo));
-  });
-  app.put('/fine-jv/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'update')) return;
-    const b = body(req);
-    return run(reply, 200, () =>
-      editFineJv(
-        prisma,
-        {
-          scope: scopeOf(req),
-          fromAc: b.fromAc,
-          toAc: b.toAc,
-          fineWt: Number(b.fineWt),
-          metal: b.metal,
-          vchDate: b.vchDate,
-        },
-        (req.params as any).vchNo,
-      ),
-    );
   });
   app.get('/labour-invoice/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;

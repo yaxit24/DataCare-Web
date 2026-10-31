@@ -25,6 +25,7 @@ import { usersRights } from './modules/usersRights.mjs';
 import { companyOpen } from './modules/companyOpen.mjs';
 import { cashBank } from './modules/cashBank.mjs';
 import { contraEntry } from './modules/contraEntry.mjs';
+import { fineJv } from './modules/fineJv.mjs';
 import { partyOpening } from './modules/partyOpening.mjs';
 import { tagOpening } from './modules/tagOpening.mjs';
 import { itemOpening } from './modules/itemOpening.mjs';
@@ -53,6 +54,7 @@ const MODULES = [
   purchaseReturn,
   cashBank,
   contraEntry,
+  fineJv,
   salesOrder,
   partyOpening,
   tagOpening,
