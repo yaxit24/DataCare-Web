@@ -18,7 +18,14 @@ class FiscalDateValidationError extends Error {
   }
 }
 
+/**
+ * N183 (G193): a voucher another operator has already deleted is a stale document, not a server fault. The stable
+ * reason `voucher-not-found` (404) lets the screen say so and offer a reload (03-shared-contracts.md, conflict rule 9).
+ * `statusCode` also gives routes outside `run()` the same answer through Fastify's default error handler.
+ */
 class PersistedVoucherNotFoundError extends Error {
+  readonly statusCode = 404;
+  readonly code = 'voucher-not-found';
   constructor(voucherNo: string) {
     super(`voucher not found: ${voucherNo}`);
     this.name = 'PersistedVoucherNotFoundError';
@@ -26,6 +33,8 @@ class PersistedVoucherNotFoundError extends Error {
 }
 
 class PersistedVoucherAmbiguousError extends Error {
+  readonly statusCode = 409;
+  readonly code = 'voucher-ambiguous';
   constructor(voucherNo: string) {
     super(`voucher is ambiguous: ${voucherNo}`);
     this.name = 'PersistedVoucherAmbiguousError';

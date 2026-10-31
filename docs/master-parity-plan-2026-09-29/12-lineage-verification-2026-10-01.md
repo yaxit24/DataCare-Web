@@ -2196,6 +2196,22 @@ Opening Balance page and the year carry-forward use the same writer, and the par
 AC_DATA. The bill-wise grid (OP_DETL) is on the screen too (G211, N200): its signed totals set the heads, as MSG_TOT_FILL
 does. The two carry-forward paths are G212 (N201).
 
+### N183 — Stale-voucher answers and the real user on create and delete (G193, G194)
+
+`web/apps/api/src/modules/vouchers/lifecycle.ts` gives `PersistedVoucherNotFoundError` a stable reason
+`voucher-not-found` with status 404, and its ambiguous twin `voucher-ambiguous` with 409; `run()` in
+`web/apps/api/src/routes/txn.ts` answers them, and `statusCode` gives routes outside `run()` the same answer. A voucher
+another operator has already deleted is a stale document (`03-shared-contracts.md`, conflict rule 9), not a server
+fault. `POST /sales-returns` now passes the login name as `mainUser` (`TR_SALE_RTN.cs:9966`, `:12908`), and the seven
+delete routes that passed the tenant id as the delete user (sales return, labour invoice, multi receipt, multi payment,
+MFG order issue, MFG, fine sale) pass the login name (`TR_SALE_RTN.cs:15076`).
+
+Evidence: `sales-return.concurrency.double-delete`, `sales-return.create.records-user`,
+`sales-return.delete.audit-user` and `sales-order.concurrency.double-delete` pass in the browser (second delete 404)
+and leave the baseline. `web/apps/api/test/voucherLifecycleAnswers.routes.db.test.ts` proves over HTTP that a return
+records the login on create and delete, that a second delete answers 404 with no second DELETE_DATA row, and that no
+voucher route passes the tenant id as the delete user; both tests fail on the previous code.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2285,7 +2301,7 @@ does. The two carry-forward paths are G212 (N201).
 | N166 | — | planned (G173, G174: fault injection for T14 and a settings-variant company for T15 in the feature E2E harness) |
 | N167 | — | planned (G175: decide the negative-weight line rule from an original-Windows run, then implement and execute the case) |
 | N168 | — | implemented-unverified, evidence in this change (G177: four numeric setting combos accept typed amounts with presets; unit 3, DB 14, two feature cases; baseline entry removed) |
-| N169 | — | implemented-unverified, evidence in this change (G178: last-administrator refusal with row locks; DB test 3 passed and fails against the old code; Users & Rights feature module: 3 cases pass through the real screen) |
+| N169 | — | implemented-unverified, evidence in this change (G178: last-administrator refusal with row locks; DB test 3 passed and fails against the old code; Users & Rights feature module: 3 cases pass through the real screen); live demo `dc-shop` `admin` restored to ADMIN with all three rights on 31 October, row backed up first |
 | N170 | — | implemented-unverified, evidence in this change (Purchase Invoice module 16/3/2, Settings effects module 10/1/2 + 11 N/A, Sales CSV export case, one shared company per run, with-data crawl and regenerated map; found G176, G177, G178) |
 | N171 | — | planned (G183, D31: Standard edition gate — the 114 Standard menus only in navigation, rights, pages and API; deferred editions available only as labelled Beta when switched on) |
 | N172 | — | in-progress, evidence in this change (G179: Sales and Purchase voucher number box F1/Up/Down/Enter with the shared walk endpoint and hook; DB test 8, web unit 4, two feature cases with a negative control; the other voucher screens remain) |
@@ -2305,7 +2321,7 @@ does. The two carry-forward paths are G212 (N201).
 | N180 | — | implemented-unverified, evidence in this change (Sales Return module 14/7/3 on shared real data; found G190–G196; corrects the N161/N170 rounding statement) |
 | N181 | — | planned (G190: the return line is priced on SL_AMT_TYPE and its amounts and total are whole rupees, as TR_SALE_RTN does) |
 | N182 | — | implemented-unverified, evidence in this change (an imported loose line with tag N saves as loose stock and an unknown tag is still refused; Import stays inside its field; both feature cases pass and leave the baseline) |
-| N183 | — | planned (G193, G194: a missing voucher answers a stable 4xx; returns and seven deletes record the logged-in user) |
+| N183 | — | implemented-unverified, evidence in this change (G193: a second delete answers 404 voucher-not-found; G194: the sales return and seven deletes record the login name; 4 baselined cases pass in the browser) |
 | N184 | — | planned (G195: sale line amounts round to whole rupees unless ALL_ROF_REMOVE = Y; merged feature expectations move to desktop values) |
 | N185 | — | planned (G196: decide under D05 and provision the desktop rounding defaults for new companies, or record the 2-decimal choice) |
 | N186 | — | implemented-unverified, evidence in this change (G197: the web build clears the route cache; unit 2, a real build removed 13 entries) |

@@ -959,6 +959,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         });
       if (e instanceof VoucherVersionConflictError)
         return reply.code(409).send({ error: e.code, message: e.message });
+      // N183 (G193): the voucher is already gone (another operator deleted it) or is ambiguous.
+      if (n === 'PersistedVoucherNotFoundError' || n === 'PersistedVoucherAmbiguousError')
+        return reply.code(e.statusCode).send({ error: e.code, message: e.message });
       if (e instanceof SavedSaleReturnError)
         return reply.code(e.statusCode).send({ error: e.code, message: e.message });
       if (e instanceof SaleReturnSourceError)
@@ -1803,6 +1806,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
           cashAc: b.cashAc,
           bankAc: b.bankAc,
           kasarAc: b.kasarAc,
+          mainUser: sess(req).sub, // N183 (G194): TR_SALE_RTN.cs:9966 stores MCo_User
         },
         b.lines ?? [],
       ),
@@ -1829,7 +1833,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       deleteSaleReturn(prisma, {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
-        deleteUser: sess(req).tenantId,
+        deleteUser: sess(req).sub,
       }),
     );
   });
@@ -2056,7 +2060,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       deleteLabourInvoice(prisma, {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
-        deleteUser: sess(req).tenantId,
+        deleteUser: sess(req).sub,
       }),
     );
   });
@@ -2842,7 +2846,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       deleteReceiptLines(prisma, {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
-        deleteUser: sess(req).tenantId,
+        deleteUser: sess(req).sub,
       }),
     );
   });
@@ -2881,7 +2885,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       deletePaymentLines(prisma, {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
-        deleteUser: sess(req).tenantId,
+        deleteUser: sess(req).sub,
       }),
     );
   });
@@ -3745,7 +3749,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         vchNo: (req.params as any).vchNo,
         book: 'DIS',
         vchType: 'DISU',
-        deleteUser: sess(req).tenantId,
+        deleteUser: sess(req).sub,
       }),
     );
   });
@@ -3758,7 +3762,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         vchNo: (req.params as any).vchNo,
         book: b.book,
         vchType: b.vchType ?? 'MISU',
-        deleteUser: sess(req).tenantId,
+        deleteUser: sess(req).sub,
       }),
     );
   });
@@ -8243,7 +8247,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         scope: { ...scopeOf(req), coBook: fineBook(body(req).side) },
         vchNo: (req.params as any).vchNo,
         side: fineSide(body(req).side) as 'SALE' | 'PURC',
-        deleteUser: sess(req).tenantId,
+        deleteUser: sess(req).sub,
       }),
     );
   });

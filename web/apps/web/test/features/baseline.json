@@ -13,21 +13,6 @@
       "case": "sales-return.create.amount-net-basis",
       "gap": "G190",
       "reason": "Stored ITM_AMT/NET_AMT/TOT_AMT follow the fine basis with paise; the desktop stores 61,234 + 2,375 and a whole-rupee total of 65,517 (TR_SALE_RTN.cs:16405)."
-    },
-    {
-      "case": "sales-return.concurrency.double-delete",
-      "gap": "G193",
-      "reason": "The second delete of an already deleted return answers 500 (PersistedVoucherNotFoundError is not mapped by run())."
-    },
-    {
-      "case": "sales-return.create.records-user",
-      "gap": "G194",
-      "reason": "POST /sales-returns does not pass the user, so SL_DATA.MAIN_USER is blank; the desktop stores DC_Main.MCo_User (TR_SALE_RTN.cs:9966, 12908)."
-    },
-    {
-      "case": "sales-return.delete.audit-user",
-      "gap": "G194",
-      "reason": "The delete writes the tenant id as DELETE_DATA.DELETE_USER; the desktop writes DC_Main.MCo_User (TR_SALE_RTN.cs:15076)."
     }
   ],
   "purchase-return": [
@@ -72,11 +57,6 @@
       "case": "sales-order.print.order",
       "gap": "G36",
       "reason": "The printed order bill (report spec OrderBill) prints the date as 2026-10-31; D19 needs dd/MM/yyyy. N56 is in progress."
-    },
-    {
-      "case": "sales-order.concurrency.double-delete",
-      "gap": "G193",
-      "reason": "The second delete of a sales order that is already gone answers 500 instead of a 4xx conflict."
     },
     {
       "case": "sales-order.journey.order-to-sale",
