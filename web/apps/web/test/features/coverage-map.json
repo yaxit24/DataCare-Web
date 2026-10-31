@@ -99,6 +99,14 @@
         "web/apps/api/src/modules/stock/stockVoucherLifecycle.ts",
         "web/packages/core/src/tagKarigar.ts"
       ]
+    },
+    "dailyRate": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/daily-rate/page.tsx",
+        "web/apps/api/src/modules/masters/dailyRate.ts",
+        "web/apps/api/src/routes/dailyRate.ts",
+        "web/packages/core/src/dailyRate.ts"
+      ]
     }
   }
 }
