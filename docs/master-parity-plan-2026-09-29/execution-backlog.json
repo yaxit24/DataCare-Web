@@ -6087,7 +6087,7 @@
         "web/apps/web/app/(app)/admin/users/page.tsx",
         "web/apps/web/test/features/modules/usersRights.mjs"
       ],
-      "statusNote": "IMPLEMENTED. setUserRights refuses a category change that would leave the company without an administrator (LastAdministratorValidationError, 400 with the reason), locking the company's admin LOGIN_MAST rows FOR UPDATE so two admins demoting each other at once cannot both succeed. The Users & Rights screen now shows the server's reason instead of a generic failure. The desktop does not need this (it keeps a built-in main user); the web has no other way back. Verified: HTTP DB test 3 passed (only admin refused and unchanged and can still reach /admin/users; with a second admin the change succeeds and the remaining one is protected; ordinary changes unaffected); negative control against main's users.ts fails all 3; new feature module users (Users & Rights): entry.lists-users, rights.clerk-refused and rights.last-admin-refused pass through the real screen (the reason is shown and LOGIN_CATG stays ADMIN), 15 groups blocked as not yet written (step E11)."
+      "statusNote": "IMPLEMENTED. setUserRights refuses a category change that would leave the company without an administrator (LastAdministratorValidationError, 400 with the reason), locking the company's admin LOGIN_MAST rows FOR UPDATE so two admins demoting each other at once cannot both succeed. The Users & Rights screen now shows the server's reason instead of a generic failure. The desktop does not need this (it keeps a built-in main user); the web has no other way back. Verified: HTTP DB test 3 passed (only admin refused and unchanged and can still reach /admin/users; with a second admin the change succeeds and the remaining one is protected; ordinary changes unaffected); negative control against main's users.ts fails all 3; new feature module users (Users & Rights): entry.lists-users, rights.clerk-refused and rights.last-admin-refused pass through the real screen (the reason is shown and LOGIN_CATG stays ADMIN), 15 groups blocked as not yet written (step E11). Live demo dc-shop admin restored to ADMIN with update, delete and print rights on 31 October 2026 (row backed up first); login returns all three rights."
     },
     {
       "id": "N170",
@@ -6383,7 +6383,7 @@
     },
     {
       "id": "N183",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Voucher lifecycle answers and audit users: map PersistedVoucherNotFoundError (and the ambiguous twin) to a stable 4xx conflict in run(); pass the logged-in user as mainUser on POST /sales-returns; pass sess(req).sub, not the tenant id, as deleteUser on the seven delete routes; remove sales-return.concurrency.double-delete, sales-return.create.records-user and sales-return.delete.audit-user from features/baseline.json.",
       "parentLabels": "P01-04/05, X05",
       "startAfter": [
@@ -6394,7 +6394,15 @@
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
       "requiredProof": "the three cases pass; a route test proves a second delete answers 4xx with no write; DELETE_DATA.DELETE_USER is the login name on all seven deletes.",
-      "gapIds": "G193, G194"
+      "gapIds": "G193, G194",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/api/src/modules/vouchers/lifecycle.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/test/voucherLifecycleAnswers.routes.db.test.ts",
+        "web/apps/web/test/features/baseline.json"
+      ],
+      "statusNote": "IMPLEMENTED. Second delete answers 404 voucher-not-found; the sales return and seven deletes record the login name; the four G193/G194 browser cases pass and left the baseline."
     },
     {
       "id": "N184",
