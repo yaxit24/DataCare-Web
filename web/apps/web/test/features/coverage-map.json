@@ -53,6 +53,13 @@
         "web/apps/api/src/modules/purchase/purchaseReturn.ts",
         "web/apps/api/src/modules/purchase/purchaseReturnLifecycle.ts"
       ]
+    },
+    "cashBank": {
+      "covers": [
+        "web/apps/web/components/PaymentForm.tsx",
+        "web/apps/web/app/(app)/txn/receipt/page.tsx",
+        "web/apps/web/app/(app)/txn/payment/page.tsx"
+      ]
     }
   }
 }

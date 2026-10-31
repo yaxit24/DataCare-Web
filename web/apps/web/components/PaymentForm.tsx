@@ -5,6 +5,7 @@ import { post, put, get, del, ApiError } from '../lib/api';
 import { financeMainBooks, initialFinanceMode } from '../lib/financeBooks';
 import { BookSelect } from './BookSelect';
 import { VoucherList } from './VoucherList';
+import { useVoucherNumberKeys, VoucherNumberNote } from './VoucherNumberKeys';
 import { LookupPicker } from './LookupPicker';
 import { PartyBalance } from './PartyBalance';
 import { RateTicker } from './RateTicker';
@@ -68,11 +69,13 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const [loadedVch, setLoadedVch] = useState('');
+  const [voucherLookup, setVoucherLookup] = useState('');
   const setM = (i: number, k: keyof MLine, v: string) =>
     setMlines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
   const mTotal = mlines.reduce((s, l) => s + nn(l.amount), 0);
 
   function resetForm() {
+    setVoucherLookup('');
     setLoadedVch('');
     setPartyAc('');
     setPartyName('');
@@ -83,7 +86,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
     setErr('');
   }
 
-  async function loadVoucher(vchNo: string) {
+  async function loadVoucher(vchNo: string): Promise<boolean> {
     setErr('');
     setRes(null);
     try {
@@ -100,10 +103,22 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
       setChqNo(String(d.chqNo ?? ''));
       setKasar(Number(d.kasar ?? 0) ? String(d.kasar) : '');
       setVchDate(String(d.vchDate ?? todayLocal()).slice(0, 10));
+      setVoucherLookup(vchNo);
+      return true;
     } catch (e) {
       setErr(e instanceof ApiError ? e.body?.error || e.message : 'failed to load');
+      return false;
     }
   }
+
+  // N172 (G179): the voucher number box's F1, Up, Down and Enter (TR_CASH tVchNo_KeyDown).
+  const numberKeys = useVoucherNumberKeys({
+    table: kind === 'receipt' ? 'CASH_DATA' : 'PAY_DATA',
+    book: coBook,
+    value: voucherLookup,
+    open: (vchNo) => loadVoucher(vchNo),
+    fresh: resetForm,
+  });
 
   async function removeVoucher() {
     if (!loadedVch || !window.confirm(`Delete ${title} #${loadedVch}?`)) return;
@@ -222,6 +237,18 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
       <form className="panel" onSubmit={submit}>
         <div className="row">
           <div className="field">
+            <label>Voucher No</label>
+            <input
+              aria-label="Voucher No"
+              value={voucherLookup}
+              onChange={(e) => setVoucherLookup(e.target.value)}
+              onKeyDown={numberKeys.onKeyDown}
+              placeholder="00001"
+              style={{ width: 90 }}
+            />
+            <VoucherNumberNote note={numberKeys.note} />
+          </div>
+          <div className="field">
             <label>Mode</label>
             <select aria-label="Mode" value={mode} onChange={(e) => setMode(e.target.value)}>
               <option value="cash">CASH</option>
@@ -240,6 +267,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
             <input
               type="date"
               aria-label="Voucher date"
+              ref={numberKeys.dateRef}
               value={vchDate}
               onChange={(e) => setVchDate(e.target.value)}
               required
@@ -507,6 +535,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
           book={coBook}
           deleteBase={ep}
           onLoad={(vchNo) => void loadVoucher(vchNo)}
+          openKey={numberKeys.listKey}
           printHref={(v) =>
             `/api/finance/${kind}-voucher?coBook=${encodeURIComponent(coBook)}&vchNo=${encodeURIComponent(v)}&format=html`
           }
