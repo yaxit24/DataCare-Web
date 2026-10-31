@@ -6,10 +6,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 16 | 12 | 0 |
+| Lite (first, D32) | 49 | 17 | 13 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
 | Standard (added by Standard) | 36 | 0 | 0 | 0 |
-| **Standard total** | **114** | **17** | **13** | **0** |
+| **Standard total** | **114** | **18** | **14** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
@@ -34,7 +34,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Master | Employee | `/masters/employees` | PARTIAL | — | no module | — |
 | Master | Tax | `/masters/taxes` | PARTIAL | — | no module | — |
 | Master | Party Opening | `/txn/ac-opbl` | PARTIAL | party-opening | module green | — |
-| Master | Item Opening | `/txn/item-opening` | PARTIAL | — | no module | — |
+| Master | Item Opening | `/txn/item-opening` | PARTIAL | item-opening | module green | — |
 | Master | Tag Opening | `/txn/tag-opening` | PARTIAL | tag-opening | module green | — |
 | Other | Daily Rate | `/txn/daily-rate` | PARTIAL | — | no module | — |
 | Other | Only Tag Entry | `/txn/tag-opening` | PARTIAL | tag-opening | module green | — |

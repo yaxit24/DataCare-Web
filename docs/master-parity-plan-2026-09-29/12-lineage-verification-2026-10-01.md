@@ -231,6 +231,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G218 | Med | Browser suites could test an older build | — (test infrastructure) | `web/apps/web/next.config.mjs`; `web/apps/web/test/real-stack-target.mjs`; `web/apps/web/test/features/harness.mjs` | Found while verifying N203. The build clears the route cache (N186), but turbo replays a cached web build without running that step, so the pages a previous server cached survived and a fresh `next start` served an older chunk (`x-nextjs-cache: HIT`); a full feature run failed the reopen case on it. Separately, a suite whose ports were still held by a demo stack got a 200 from that stack's readiness probe and ran against its build: the new Next server could not bind the port. | N205 |
 | G219 | High | Fine Jv Entry was a reduced two-account form with reversed fine signs, and the routes sharing CONTRA_DATA reached each other's books | `unified/src/csharp/DataCareNext/MDI_FORM.cs:8360-8365`; `unified/src/csharp/DataCareNext/TR_CONTRA.cs:1426-1446,2666-2890,2951-2968,3000-3069`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs:846-848`; `unified/src/csharp/DataCareNext/Ac_Rojmel.cs:342-344`; `unified/src/csharp/DataCareNext/Ac_Tax.cs:686-694` | `web/apps/api/src/modules/finance/fineJv.ts`; `web/apps/api/src/routes/fineJv.ts`; `web/apps/web/app/(app)/txn/fine-jv/page.tsx`; `web/apps/api/src/modules/finance/contra.ts`; `web/apps/api/src/modules/finance/journal.ts`; `web/apps/api/src/modules/finance/contraVoucher.ts` | The desktop screen is the TR_CONTRA grid in FINE JV mode: row 1 is paired with every later row, the row is written first as LDR_TYPE 0 with its own side and description and row 1 is mirrored as LDR_TYPE 1 (`TR_CONTRA.cs:2760-2847`); each CR_FINE row posts a `STR(SR_NO)+'03'` `+` leg and each DR_FINE row a `'04'` `-` leg (33-character keys, `Ac_Ledr.cs:846-848`); Vch_Remark rebuilds REMARK_DATA from described rows; save refuses a missing mandatory employee, a new voucher in a type-B company, a date outside the year and unequal totals with the desktop texts; FineJvBill prints 'Gold '/'Silver ' + BOOK_NAME, the IT_DESC line and the signature footer. The web stored To as DR_FINE, offered one From/To pair, keyed legs with a 2-wide line number, named TEMP_BOOK_DATA after MAIN_BOOK, skipped the fiscal-date, employee and company-type checks, kept stale desktop flags, never wrote REMARK_DATA, and its Contra and Journal routes could read, rewrite, delete or print a FINE JV voucher; their documents needed only view rights. | N206 |
 | G220 | Med | The generic voucher list and number-box routes read any book of an allow-listed table | `unified/src/csharp/DataCareNext/MDI_FORM.cs:8100-8111,8360-8365`; `unified/src/csharp/DataCareNext/TR_CONTRA.cs:3136-3146` | `web/apps/api/src/routes/voucherNavigation.ts`; `web/apps/api/src/modules/vouchers/list.ts`; `web/apps/api/src/modules/rbac/routePolicy.ts` | Found in the N206 review. `GET /vouchers/recent` and `GET /vouchers/neighbour` are SYSTEM routes that take the table and book from the request, so any signed-in user of the company can list another menu's vouchers of a shared table (for example a Fine JV book through CONTRA_DATA) with their dates, accounts and totals, within the session's tenant, company, location and year. The desktop's list (TR_CONTRA.cs:3136-3146) only lists the open form's own book. The routes should require view rights on the form that owns the requested book. | N207 |
+| G221 | High | Item Opening was not the desktop TR_ITM_OPBL metal-type grid | `unified/src/csharp/DataCareNext/TR_ITM_OPBL.cs`; `unified/src/csharp/DataCareNext/Ac_Stock.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7690-7699` | `web/apps/web/app/(app)/txn/item-opening/page.tsx`; `web/apps/api/src/modules/stock/stockVoucherLifecycle.ts`; `web/apps/api/src/routes/txn.ts` | The desktop opens TR_ITM_OPBL directly, with no book help (`MDI_FORM.cs:7690-7699`). Enter on the Item Type select lists every item of that metal type (`TR_ITM_OPBL.cs:1269-1370`) in a 17-column grid with a Total row, and Save replaces the type's rows in book '000' with VCH_NO = the type letter (`:1380-1490`); the stock rows come from `Ac_Stock.Itm_Opbl_Stk` (`Ac_Stock.cs:11-21`: AC_CODE '00000', VCH_TYPE ITOBL, BOOK_NAME 'ITM OPBL', P / +, the KR_* fields, dated the year's opening date less one day) and DM_DATA from `Dm_Itm_Opbl_Detl` for OTH_DETL_POSTING items (`:734-741`). The web wrote a numbered BAR_DATA voucher in book IOP on the voucher date; its fine ignored the wastage, its stock rows lacked those fields, it wrote no per-type ITM_OPBL rows and no DM_DATA, and its grid had no West%, labour, other amount, net amount or totals. | N208 |
 
 ## 4. Decisions D23–D28
 
@@ -2346,6 +2347,50 @@ book refusal. Chrome DevTools: a three-row voucher entered through the lookups, 
 descriptions and the signature footer, reopened with Enter in Vch No, edited, and deleted with the desktop prompt;
 Lighthouse on the reopened grid scores Accessibility, Best Practices, SEO and Agentic Browsing 100 with no failed audit.
 Desktop-runtime comparison and parent acceptance remain open.
+
+### N208 — Item Opening is the desktop TR_ITM_OPBL metal-type grid (G221, Lite L2)
+
+The screen is the desktop grid. The Item Type select lists Gold, Silver, Diamond, Real Stone, Emitation, Other and
+Platinum after a blank entry (`TR_ITM_OPBL.cs:1227-1234`); Enter on it loads every item of that type in desktop order and focuses row 1
+Rtype (`:1269-1370`). The 17 columns are Sr., ItCode, Item Name, Rtype, Pcs, GrWt, NetWt, Touch, West%, Fine, Rate,
+ItmAmt, LType, LRate, LbrAmt, OthAmt and NetAmt, with a Total row (MSG_TOT_FILL `:995-1026`). Enter moves one cell right,
+NetAmt goes to the next row's Pcs and on the last row adds a row at ItCode, and Enter on an empty ItCode goes to Save
+(`:1538-1684`). Esc leaves when the gross and net totals are unchanged and otherwise goes to Save. Leaving a cell works
+the row out as CommPassTotal does (`:942-993`), ported to `@datacare/core` as `itemOpeningRow`: a blank net takes the
+gross, fine = net × (touch + wastage) / 100, amount is pcs × rate for rate type P with no fine, otherwise fine × rate
+(a typed amount stays when either is zero), labour by LType (P pieces, K net / 1000, G gross, otherwise net) rounded as
+VB rounds (half to even), and net amount = amount + labour + other.
+
+Save refuses without the update right ("You Have No Rights.....", `:1061-1063`) or a type ("Please Select
+Metaltype....", `:1407`), replaces the type's ITM_OPBL rows in book 000 with each cell as the grid holds it and
+DATA_TRFR 'Y' (the column default, `MS_UPDATE.cs:21658`), writes the ITOBL MAIN_STOCK rows of `Itm_Opbl_Stk`
+(SR_NO = grid row, ISR_NO 1, the opening date less one day, QTY = pieces, KR_COST = net amount) and DM_DATA rows for
+items with OTH_DETL_POSTING 'Y', then clears the screen ("Data Are Saved."). Delete asks "Are You Sure To Delete All
+Item Opening From This Record now?" and removes the type's ITM_OPBL, ITOBL stock and ITOBL DM_DATA rows ("Delete
+Success.", `:1492-1517`). Print checks the print right (`:1371-1379`). The desktop Save writes no DM_WT, DM_RATE or
+DM_AMT (`:1424-1446`), so the web-only diamond fields of the older numbered-voucher writer are removed.
+
+Deliberate differences: the grid reads only this year's book 000 rows, where DISPLAY_DATA has no year or book filter
+(`:1286`) and could show and save another year's opening into this one; the stock and DM deletes are limited to ITOBL
+rows because book 000 also holds the TAGOP rows of Tag Opening; Save and Delete carry a version token (N51, D17) where
+the desktop's later save wins; the web refuses a row with weight but no item code, an item of another metal type, and a
+save or delete while the shown grid is not the chosen type; arrow keys keep a typed value, where the desktop drops it
+because MSG_LeaveCell stores nothing while UpDown is set. The older numbered-voucher routes (POST /stock/item-opening,
+GET|PUT|DELETE /stock/item-opening/:vchNo) stay for the IOP vouchers they wrote, but the screen no longer lists them.
+
+Evidence: `itemOpening.test.ts` (core, 8 cases) and `itemOpening.db.test.ts` (8 cases: desktop grid order, book 000 with
+ITOBL rows, DM_DATA only for OTH_DETL_POSTING items, an unchanged save keeps the stored cells, a cleared row is dropped
+while other types and TAGOP rows stay, stock on hand rises and the delete removes it, a stale version is refused, the
+desktop messages) pass with `stockLifecycle`, `tagOpeningStock`, `partyOpening`, `provisioning`, `seedCompleteness` and
+`routePolicy`. The zero-mock `item-opening` module passes 17 of 18 cases (T14 fault rollback blocked: no fault injector),
+including the rights refusal through a USER_SET row, two sessions, a replayed request, another year's rows and the item
+stock ledger after a loose sale. Chrome DevTools on the demo stack: Gold loaded with Enter, 10.5 g at 91.6 + 2 gives
+fine 9.828, 58968.00 at 6000, labour G 13 gives 136 and net 59204.00; Alt+S saved one ITM_OPBL row and one ITOBL row
+dated 2026-03-31; the reopen showed every stored cell; Esc left an unchanged grid and went to Save after a change; Delete
+removed both rows. The check found two keyboard defects, fixed here: Enter on the type loaded a blank grid when the
+select's value changed without a React change event, and Esc from the type select left the screen. Desktop-runtime
+comparison and parent acceptance remain open.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2480,6 +2525,7 @@ Desktop-runtime comparison and parent acceptance remain open.
 | N205 | — | implemented-unverified, evidence in this change (G218: the production server starts from an empty route cache; suites refuse occupied ports) |
 | N206 | — | implemented-unverified, evidence in this change (G219: Fine Jv Entry is the TR_CONTRA FINE JV grid with paired rows, 33-character fine legs, remark rebuild and the desktop refusals; Contra and Journal refuse another family's book and need print rights; 18 browser cases pass, 5 blocked) |
 | N207 | — | planned (G220: the generic voucher list and number-box routes need the owning form's view right for the requested book) |
+| N208 | — | implemented-unverified, evidence in this change (G221: Item Opening is the TR_ITM_OPBL metal-type grid in book 000 with ITOBL stock rows, DM_DATA for OTH_DETL_POSTING items and the desktop messages) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

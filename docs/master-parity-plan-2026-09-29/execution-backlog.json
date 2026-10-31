@@ -6926,6 +6926,38 @@
       "statusAsOf": "2026-10-31",
       "evidence": [],
       "statusNote": "PLANNED."
+    },
+    {
+      "id": "N208",
+      "status": "implemented-unverified",
+      "action": "Item Opening is the desktop TR_ITM_OPBL metal-type grid: Enter on Item Type lists the type's items in the 17-column grid with totals, CommPassTotal works each row out in @datacare/core, Save replaces the type's ITM_OPBL rows in book 000 with ITOBL stock rows from Itm_Opbl_Stk and DM_DATA for OTH_DETL_POSTING items, Delete removes them, all with the desktop messages and version tokens.",
+      "parentLabels": "P1-core; L2; T01-T18",
+      "startAfter": [
+        "N203"
+      ],
+      "requiredProof": "Core unit tests of the cell rules; an HTTP/DB test of the book 000 write set, ITOBL stock rows, DM_DATA, unchanged save, cleared row, stock on hand, stale version and desktop messages; the item-opening feature module passes every executable case; a Chrome DevTools keyboard, save, reopen and delete pass.",
+      "gapIds": "G221",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/packages/core/src/itemOpening.ts",
+        "web/packages/core/test/itemOpening.test.ts",
+        "web/apps/api/src/modules/stock/itemOpening.ts",
+        "web/apps/api/src/routes/itemOpening.ts",
+        "web/apps/api/src/modules/stock/stockVoucherLifecycle.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/modules/shared/desktopMessages.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/web/app/(app)/txn/item-opening/page.tsx",
+        "web/apps/api/test/itemOpening.db.test.ts",
+        "web/apps/api/test/routePolicy.test.ts",
+        "web/apps/web/test/features/modules/itemOpening.mjs",
+        "web/apps/web/test/browser.smoke.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: core itemOpening 8/8, itemOpening.db.test.ts 8/8, the item-opening feature module 17 passed and 1 blocked (T14 fault rollback, no fault injector), browser smoke, and a Chrome DevTools pass on the demo stack (keyboard entry, Alt+S save checked in the database, reopen, Esc both ways, Delete). Open: fault rollback, desktop-runtime comparison and parent acceptance."
     }
   ],
   "amendments": [
