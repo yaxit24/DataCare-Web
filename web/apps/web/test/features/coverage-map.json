@@ -53,6 +53,12 @@
         "web/apps/api/src/modules/purchase/purchaseReturn.ts",
         "web/apps/api/src/modules/purchase/purchaseReturnLifecycle.ts"
       ]
+    },
+    "contraEntry": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/contra/page.tsx",
+        "web/apps/api/src/modules/finance/contra.ts"
+      ]
     }
   }
 }
