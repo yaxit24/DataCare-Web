@@ -351,6 +351,37 @@ export const contraEntry = {
       'Delete is exercised inside reopen-edit-delete; the DELETE_DATA audit follows.',
     ),
     C(
+      'rights.voucher-list-needs-contra-view',
+      'T11',
+      'refusal',
+      'N207: the recent-voucher list reads a book only for a user who may open its menu (TR_CONTRA.cs:3136-3146; MDI_FORM.cs:8100-8111).',
+      async (ctx) => {
+        const clerk = await ctx.session(as(USERS.clerk.user));
+        await clerk.page.goto('/txn/sales');
+        const answer = await clerk.page.evaluate(async () => {
+          const r = await fetch('/api/vouchers/recent?table=CONTRA_DATA&book=CON', {
+            credentials: 'include',
+          });
+          return { status: r.status, body: await r.text() };
+        });
+        assert.equal(answer.status, 403, answer.body);
+        const { page } = await ctx.session();
+        await openContra(page);
+        const admin = await page.evaluate(async () => {
+          const r = await fetch('/api/vouchers/recent?table=CONTRA_DATA&book=CON', {
+            credentials: 'include',
+          });
+          return r.status;
+        });
+        assert.equal(admin, 200);
+        return {
+          observation: `Sales-only clerk ${answer.status}, admin ${admin}`,
+          expected: '403 for a user without Contra rights, 200 for the admin',
+          database: { unchanged: true },
+        };
+      },
+    ),
+    C(
       'rights.print-denied',
       'T11',
       'refusal',
