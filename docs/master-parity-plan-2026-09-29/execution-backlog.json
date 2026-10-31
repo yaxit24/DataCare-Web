@@ -6560,6 +6560,50 @@
       "statusNote": "IMPLEMENTED. D32 recorded; per-tier progress page generated; document 15 section 5 carries the Lite packages."
     },
     {
+      "id": "N193",
+      "status": "implemented-unverified",
+      "action": "Bank and cheque receipts and payments write the voucher's cheque number on every AC_DATA leg, as Bank_Ledr (Ac_Ledr.cs:585-593).",
+      "parentLabels": "P9; L1",
+      "startAfter": [
+        "N171"
+      ],
+      "requiredProof": "a cheque receipt through the screen has CHQ_NO on both legs; a DB test pins it.",
+      "gapIds": "G203",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/api/src/modules/finance/finance.ts",
+        "web/apps/api/test/financeBookFamily.db.test.ts",
+        "web/apps/web/test/features/modules/cashBank.mjs"
+      ],
+      "statusNote": "IMPLEMENTED in #165. The four leg templates of finance.ts carry CHQ_NO (cash mode keeps '', as Cash_Ledr). Verified: cash-bank.create.cheque-receipt (cheque 123456 on legs 01 and 02; it failed with empty CHQ_NO before the fix) and financeBookFamily.db.test.ts."
+    },
+    {
+      "id": "N194",
+      "status": "implemented-unverified",
+      "action": "Contra Entry is the desktop TR_CONTRA grid: any number of rows, a CONTRA_DATA pair per row against row 1, one leg per row keyed STR(SR_NO)+01/02, the desktop totals message, reopen of the grid.",
+      "parentLabels": "P9; L1",
+      "startAfter": [
+        "N171"
+      ],
+      "requiredProof": "the contra feature module passes through the screen (two and three rows to the row and leg, unequal totals refused with the desktop message, reopen-edit-delete, print, number keys); the contra DB tests pass.",
+      "gapIds": "G204",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/api/src/modules/finance/contra.ts",
+        "web/apps/web/app/(app)/txn/contra/page.tsx",
+        "web/apps/web/test/features/modules/contraEntry.mjs"
+      ],
+      "statusNote": "IMPLEMENTED. modules/finance/contra.ts writes the TR_CONTRA pairs (TR_CONTRA.cs:2760-2866), Contra_Ledr legs and day-book rows, refuses unequal totals with DESKTOP_MESSAGES.CONTRA_DR_CR_NOT_SAME (:2694), and rebuilds the grid on reopen (:2467, :2541); the two-account body is still accepted. The screen is a grid with the N172 number keys. Verified: contra module 7 passed; contraDelete, financeLifecycle, reopenVoucher and financeBookSelection DB tests 21 passed; real-stack journey cash-receipt-payment drives the grid (PARITY_REAL_STACK_PASSED)."
+    },
+    {
       "id": "N195",
       "status": "implemented-unverified",
       "action": "Sales Order feature module: 25 cases (T01-T18) through the real screen with desktop-derived expectations (TR_SALE_ORD whole-rupee pricing on the SL_AMT_TYPE basis, Order_Ledr advance legs, refusals), every failure baselined to a gap.",

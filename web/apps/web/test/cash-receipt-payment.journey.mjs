@@ -168,10 +168,13 @@ export async function exerciseCashReceiptPayment(page, { checkpoint, owner, tena
   await page.getByRole('heading', { name: /^Contra/ }).waitFor();
   await bookValue(page, 'CNB');
   await page.locator('input[type="date"]').first().fill('2024-06-17');
-  await pickAccount(page, 'Dr account', 'BANKB');
-  await pickAccount(page, 'Cr account', 'CASH');
-  await page.getByLabel('Dr amount', { exact: true }).fill('500');
-  await page.getByLabel('Cr amount', { exact: true }).fill('500');
+  // The TR_CONTRA grid: row 1 the main account (DR), row 2 the other side (CR).
+  await page.getByLabel('Dr/Cr row 1', { exact: true }).selectOption('DR');
+  await pickAccount(page, 'Account row 1', 'BANKB');
+  await page.getByLabel('Amount row 1', { exact: true }).fill('500');
+  await page.getByLabel('Dr/Cr row 2', { exact: true }).selectOption('CR');
+  await pickAccount(page, 'Account row 2', 'CASH');
+  await page.getByLabel('Amount row 2', { exact: true }).fill('500');
   await page.getByRole('button', { name: 'Save Contra', exact: true }).click();
   await page.getByText('Contra posted — Voucher #1', { exact: false }).waitFor();
   const contra = await rows(
