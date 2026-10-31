@@ -6524,6 +6524,27 @@
       "verification": "04-verification-playbook.md",
       "requiredProof": "the case passes on a newly provisioned company; a migration test backfills an existing company; the purchase-return register lists PRT returns.",
       "gapIds": "G201"
+    },
+    {
+      "id": "N192",
+      "status": "implemented-unverified",
+      "action": "Lite first (D32): record the edition tier order (Lite, then Basic, then Standard) as a decision and generate a per-tier progress page from the menu editions, the catalog and the feature E2E coverage map and baseline; the Lite packages L1-L6 are in document 15 section 5.",
+      "parentLabels": "P9; R03",
+      "startAfter": [
+        "N187"
+      ],
+      "entryDefinition": "02-execution-plan.md section 4",
+      "requiredProof": "standard-progress.md generated with 114 menus split 49/29/36; --check passes on the committed page; D32 in document 12.",
+      "gapIds": "G202",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/scripts/generate-standard-progress.mjs",
+        "docs/handbook/web/standard-progress.md"
+      ],
+      "statusNote": "IMPLEMENTED. D32 recorded; per-tier progress page generated; document 15 section 5 carries the Lite packages."
     }
   ],
   "amendments": [

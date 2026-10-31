@@ -150,6 +150,8 @@ a PR that changes a page, component, web library, API module, route or core calc
 browser-visible effect states why in the PR body with a line `Browser-Test-Exempt: <reason>`; the reason is printed
 in the CI log. Run it locally with `node scripts/check-browser-test-coverage.mjs --base origin/main`.
 
+**Progress page.** `docs/handbook/web/standard-progress.md` is generated from the menu editions, the catalog and this suite's coverage map and baseline (D32). A change that adds a module, adds or removes a baseline entry or changes a catalog status runs `pnpm progress` in `web/` and commits the page; `pnpm progress:check` reports a stale page.
+
 **Checking a screen by hand.** `web/apps/web/test/features/serve.mjs` starts the same isolated stack, provisions
 the sample catalogue, optionally runs modules first so the company holds real vouchers, and stays up until Ctrl+C
 (which wipes the test tenants). Open the printed login URL in any browser, for example the local Chrome. Give the

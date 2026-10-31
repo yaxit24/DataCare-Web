@@ -181,7 +181,25 @@ For each Standard menu:
    lookups, print preview, console and network health.
 6. **Done.** The menu's catalog row becomes FULL; pull request with green CI; merge.
 
-**Order.** Shared defects first, because each one fixes many screens; then the menus in the order a shop uses them.
+**Order.** Shared defects first, because each one fixes many screens; then the menus edition by edition (owner,
+31 October 2026): every **Lite** menu end to end first, then the **Basic** additions, then the **Standard**
+additions. A Lite deployment is the smallest complete shop, so it is finished and proven before anything is added on
+top of it. Within an edition, the menus go in the order a shop uses them.
+
+| Edition | Package | Menus |
+|---|---|---|
+| Lite (49) | L1 Transactions (11) | Sales, Purchase, Sales Return, Purchase Rtn, Sales Order, Wh Sales, Cash Received, Cash Payment, Bank Received, Bank Payment, Contra Entry |
+| | L2 Masters and openings (11) | Party, Address, Product, Group, Item, AutoItem, Employee, Tax, Party Opening, Item Opening, Tag Opening |
+| | L3 Tags and stock (7) | Daily Rate, Only Tag Entry, Tag Cancel, Tag Print, Stock Adjust, Order Cancel, Data Import |
+| | L4 Approval and fine (3) | Approval Isu, Approval Rtn, Fine Jv Entry |
+| | L5 Company (7) | Company, Year Create, Balance TrFr, Books, User Create, Data Refresh, Data Backup |
+| | L6 Reports (10), checked against the vouchers of L1–L4 | Ledger Report, Stock Report, Tag Stock, Sales Report, Purchase Rpt, Approval Rpt, Order Report, Cash Bank, Gst Report, HuId Report |
+| Basic (+29) | B1–B7 by tab | Company 4, ExtraTran 3, Karigar 4, Master 2, Other 6, Report 6, Transaction 4 |
+| Standard (+36) | S1–S8 by tab | Company 1, ExtraTran 4, Karigar 5, Master 1, Mfg 4, Other 6, Report 8, Transaction 7 |
+
+The progress number is reported per edition: Lite menus FULL out of 49, then Basic out of 78, then Standard out of
+114. On 31 October the Lite menus were 38 PARTIAL, 10 REPORT and 1 CONTAINED (`docs/handbook/menu-catalog.jsonl`).
+The E6–E12 packages below keep their content; they are taken in this edition order.
 
 | Step | Work | Slices | Lane-hours |
 |---|---|---|---:|
