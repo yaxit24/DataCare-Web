@@ -394,7 +394,7 @@ export async function postReceipt(
     const kasar = round2(Number(input.kasar ?? 0));
     const kasarAc =
       kasar > 0 ? await kasarAccountTx(tx, input.scope, input.kasarAc, recAcResolved, kasar) : '';
-    const lbase = { ...key, VCH_TYPE: vchType };
+    const lbase = { ...key, VCH_TYPE: vchType, CHQ_NO: input.chqNo ?? '' }; // Bank_Ledr, Ac_Ledr.cs:585-593
     // A SELF-BALANCED PAIR PER MOVEMENT, with the party leg repeated - not one netted party credit.
     //
     // Measured on book 001 (CASH REC), all 162 legs: the amount pair is 01 party Cr / 02 cash Dr (56 each) and
@@ -631,7 +631,7 @@ export async function postPayment(
     const key = keyOf(input.scope, vchNo, 'PAY');
     const vchType = mode === 'cash' ? 'CPAY' : 'BPAY';
     const kasar = round2(Number(input.kasar ?? 0));
-    const lbase = { ...key, VCH_TYPE: vchType };
+    const lbase = { ...key, VCH_TYPE: vchType, CHQ_NO: input.chqNo ?? '' }; // as Bank_Ledr
     // A SELF-BALANCED PAIR PER MOVEMENT, the mirror of the receipt - and with DIFFERENT leg codes.
     //
     // Measured on book 002 (CASH PAY), all 360 legs: the amount pair is 05 party Dr / 06 cash Cr (175 each) and
@@ -883,7 +883,7 @@ export async function postReceiptLines(
     const key = keyOf(input.scope, vchNo, 'RCT');
     const vchType = mode === 'cash' ? 'CREC' : 'BREC';
     const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
-    const lbase = { ...key, VCH_TYPE: vchType };
+    const lbase = { ...key, VCH_TYPE: vchType, CHQ_NO: input.chqNo ?? '' }; // as Bank_Ledr
     // A PAIR PER MOVEMENT PER LINE, matching the payment path. This wrote one AGGREGATE cash debit plus one
     // aggregate kasar debit plus one netted party credit per line.
     //
@@ -1037,7 +1037,7 @@ export async function postPaymentLines(
     const key = keyOf(input.scope, vchNo, 'PAY');
     const vchType = mode === 'cash' ? 'CPAY' : 'BPAY';
     const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
-    const lbase = { ...key, VCH_TYPE: vchType };
+    const lbase = { ...key, VCH_TYPE: vchType, CHQ_NO: input.chqNo ?? '' }; // as Bank_Ledr
     // A PAIR PER LINE, each with its own line number - not one party leg per line plus aggregate cash.
     //
     // Real voucher 002/00029 is NINE CASH_DATA lines and EIGHTEEN AC_DATA legs, keyed 105/106 through 905/906.
