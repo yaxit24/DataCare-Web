@@ -21,7 +21,7 @@ import { useBusinessScope } from '../../../../components/BusinessScope';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import { ParityContainmentFieldset } from '../../../../components/ParityContainmentNotice';
 import { parityContainmentMessage, parityContainmentRule } from '@datacare/core/containment';
-import { fineFor } from '@datacare/core';
+import { fineFor, tagKarigarBlock } from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
 
 /** Tag Opening and Only Tag Entry (TR_TAG_OPBL): load opening barcoded stock. Tag No auto-generates (SRNO_MAST.TAG_SRNO)
@@ -69,6 +69,14 @@ interface Line {
   jdtKunTouch: string;
   jdtKunWt: string;
   jdtWaxWt: string;
+  // The karigar weight block, desktop columns 17-23 (N204).
+  karigarOthWt: string;
+  karigarNetWt: string;
+  karigarGhtPct: string;
+  karigarGhtWt: string;
+  karigarTouch: string;
+  karigarWestPct: string;
+  karigarFine: string;
   karigarCost: string;
   karigarGwtTouch: string;
   karigarLbrAmt: string;
@@ -100,6 +108,14 @@ interface Line {
   westPct: string;
 }
 const extendedLineFields: Array<[keyof Line, string]> = [
+  // TR_TAG_OPBL columns 17-23 follow NetWt on the desktop grid, with these headers (TR_TAG_OPBL.cs:5146-5172).
+  ['karigarOthWt', 'KrOthWt'],
+  ['karigarNetWt', 'KrNwt'],
+  ['karigarGhtPct', 'KrGht%'],
+  ['karigarGhtWt', 'KrGht'],
+  ['karigarTouch', 'KrTouch'],
+  ['karigarWestPct', 'KrWst%'],
+  ['karigarFine', 'KrFine'],
   ['designImageId', 'Design Image Id'],
   ['empIsu', 'Emp Isu'],
   ['fineWt', 'Fine Wt'],
@@ -186,6 +202,13 @@ const blank = (): Line => ({
   jdtKunTouch: '',
   jdtKunWt: '',
   jdtWaxWt: '',
+  karigarOthWt: '',
+  karigarNetWt: '',
+  karigarGhtPct: '',
+  karigarGhtWt: '',
+  karigarTouch: '',
+  karigarWestPct: '',
+  karigarFine: '',
   karigarCost: '',
   karigarGwtTouch: '',
   karigarLbrAmt: '',
@@ -241,6 +264,15 @@ const FINE_INPUTS = new Set<keyof Line>([
   'ghtWt',
   'westPct',
 ]);
+/** CommPassTotal recomputes KrFine when KrTouch, KrWst% or KrGht changes (TR_TAG_OPBL.cs:6749, :6771, :6815), and when
+ *  KrNwt changes (:6712), which a change of gross, net or KrOthWt can cause. */
+const KARIGAR_FINE_INPUTS = new Set<keyof Line>([
+  'karigarNetWt',
+  'karigarTouch',
+  'karigarWestPct',
+  'karigarGhtWt',
+]);
+const karigarNet = (line: Line) => tagKarigarBlock(line).karigarNetWt;
 const r3 = (x: number) => Math.round((x + 1e-9) * 1000) / 1000;
 const currentDate = () => todayLocal();
 const gridCell = (row: number, column: number) => ({
@@ -299,9 +331,28 @@ export default function TagOpeningPage() {
   });
   const setLine = (i: number, k: keyof Line, v: string) =>
     setLines((ls) =>
-      ls.map((l, j) =>
-        j === i ? { ...l, [k]: v, ...(FINE_INPUTS.has(k) ? { fineWt: '' } : {}) } : l,
-      ),
+      ls.map((l, j) => {
+        if (j !== i) return l;
+        const next = { ...l, [k]: v, ...(FINE_INPUTS.has(k) ? { fineWt: '' } : {}) };
+        return KARIGAR_FINE_INPUTS.has(k) || karigarNet(next) !== karigarNet(l)
+          ? { ...next, karigarFine: '' }
+          : next;
+      }),
+    );
+  // Leaving a cell runs CommPassTotal's karigar block (TR_TAG_OPBL.cs:6679-6826): KrNwt and KrFine are filled in.
+  const leaveKarigar = (i: number) =>
+    setLines((ls) =>
+      ls.map((l, j) => {
+        if (j !== i) return l;
+        const block = tagKarigarBlock(l);
+        const cell = (current: string, worked: number) =>
+          worked === 0 && !current.trim() ? current : worked.toFixed(3);
+        const karigarNetWt = cell(l.karigarNetWt, block.karigarNetWt);
+        const karigarFine = cell(l.karigarFine, block.karigarFine);
+        return karigarNetWt === l.karigarNetWt && karigarFine === l.karigarFine
+          ? l
+          : { ...l, karigarNetWt, karigarFine };
+      }),
     );
   // The Fine column shows what will be saved: the stored or typed fine while it stands, else the formula.
   const fine = (l: Line) =>
@@ -431,6 +482,13 @@ export default function TagOpeningPage() {
             jdtKunTouch: Number(line.jdtKunTouch || 0) || undefined,
             jdtKunWt: Number(line.jdtKunWt || 0) || undefined,
             jdtWaxWt: Number(line.jdtWaxWt || 0) || undefined,
+            karigarOthWt: Number(line.karigarOthWt || 0) || undefined,
+            karigarNetWt: Number(line.karigarNetWt || 0) || undefined,
+            karigarGhtPct: Number(line.karigarGhtPct || 0) || undefined,
+            karigarGhtWt: Number(line.karigarGhtWt || 0) || undefined,
+            karigarTouch: Number(line.karigarTouch || 0) || undefined,
+            karigarWestPct: Number(line.karigarWestPct || 0) || undefined,
+            karigarFine: Number(line.karigarFine || 0) || undefined,
             karigarCost: Number(line.karigarCost || 0) || undefined,
             karigarGwtTouch: Number(line.karigarGwtTouch || 0) || undefined,
             karigarLbrAmt: Number(line.karigarLbrAmt || 0) || undefined,
@@ -680,6 +738,7 @@ export default function TagOpeningPage() {
                         onBlur={() => {
                           if (field === 'netWt')
                             setScaleRow((current) => (current === i ? null : current));
+                          leaveKarigar(i);
                         }}
                         aria-label={`Tag opening ${field} row ${i + 1}`}
                         value={line[field]}
@@ -715,6 +774,7 @@ export default function TagOpeningPage() {
                     row={i}
                     baseColumns={14}
                     setValue={(row, key, value) => setLine(row, key, value)}
+                    onLeave={(row) => leaveKarigar(row)}
                     cellProps={gridCell}
                   />
                   <td>
@@ -760,6 +820,7 @@ export default function TagOpeningPage() {
                       aria-label={`${label} row ${index + 1}`}
                       value={String(line[key] ?? '')}
                       onChange={(e) => setLine(index, key, e.target.value)}
+                      onBlur={() => leaveKarigar(index)}
                     />
                   </div>
                 ))}

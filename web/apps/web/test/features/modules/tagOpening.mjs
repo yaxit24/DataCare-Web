@@ -272,6 +272,74 @@ export const tagOpening = {
       },
     ),
     C(
+      'formula.karigar-block',
+      'T03',
+      'mutation',
+      'TR_TAG_OPBL.cs:6679-6826 and :10975-11022 (N204): KrNwt = gross − KrOthWt = 10.5 − 0.5 = 10; KrFine = (10 + 0.25) × (92 + 1.5) / 100 = 9.584; BAR_DETL keeps the block and Tag_Opbl_Stk copies it to MAIN_STOCK (Ac_Stock.cs:28)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openScreen(page);
+        await fillTag(page, 1, { gross: '10.5', less: '0.5', net: '10', touch: '91.6' });
+        await page.getByText('Tag row 1 desktop fields', { exact: true }).click();
+        const cell = (label) => page.getByLabel(`${label} row 1`, { exact: true });
+        for (const [label, value] of [
+          ['KrOthWt', '0.5'],
+          ['KrGht%', '2.5'],
+          ['KrGht', '0.25'],
+          ['KrTouch', '92'],
+          ['KrWst%', '1.5'],
+        ])
+          await cell(label).fill(value);
+        // Leaving the cell runs CommPassTotal, which fills KrNwt and KrFine.
+        await cell('KrWst%').press('Tab');
+        const shown = {
+          net: await cell('KrNwt').inputValue(),
+          fine: await cell('KrFine').inputValue(),
+        };
+        const response = await save(page);
+        const body = await response.json();
+        assert.equal(response.status(), 201, JSON.stringify(body));
+        const vchNo = pad(body.vchNo);
+        try {
+          const [bar] = await ctx.rows(
+            `SELECT coalesce("KR_OTH_WT",0)::float oth, coalesce("KR_NET_WT",0)::float net,
+                    coalesce("KR_GHT_PRC",0)::float ghtp, coalesce("KR_GHT_WT",0)::float ght,
+                    coalesce("KR_TOUCH",0)::float touch, coalesce("KR_WEST_PRC",0)::float west,
+                    coalesce("KR_FINE",0)::float fine
+               FROM "BAR_DETL" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+            OPEN_BOOK,
+            vchNo,
+          );
+          const [kr] = await ctx.rows(
+            `SELECT coalesce("KR_NWT",0)::float net, coalesce("KR_TOUCH",0)::float touch,
+                    coalesce("KR_WEST",0)::float west, coalesce("KR_FINE",0)::float fine
+               FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 AND "TAG_NO"<>'N'`,
+            OPEN_BOOK,
+            vchNo,
+          );
+          assert.deepEqual(shown, { net: '10.000', fine: '9.584' });
+          assert.deepEqual(bar, {
+            oth: 0.5,
+            net: 10,
+            ghtp: 2.5,
+            ght: 0.25,
+            touch: 92,
+            west: 1.5,
+            fine: 9.584,
+          });
+          assert.deepEqual(kr, { net: 10, touch: 92, west: 1.5, fine: 9.584 });
+          return {
+            observation: `grid KrNwt ${shown.net}, KrFine ${shown.fine}; BAR_DETL ${JSON.stringify(bar)}; MAIN_STOCK ${JSON.stringify(kr)}`,
+            expected: 'KrNwt 10.000 and KrFine 9.584 on the grid, in BAR_DETL and in MAIN_STOCK',
+            database: { detail: bar, stock: kr },
+            downstream: { karigarFine: kr.fine },
+          };
+        } finally {
+          await removeVoucher(page, vchNo);
+        }
+      },
+    ),
+    C(
       'lookup.item-enter',
       'T04',
       'mutation',

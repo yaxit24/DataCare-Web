@@ -1,4 +1,4 @@
-import { round } from '@datacare/core';
+import { round, tagKarigarColumns, tagKarigarStock } from '@datacare/core';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import { assertPeriodOpen, insertRowTx, postVoucherTx } from '../posting/posting.js';
@@ -67,6 +67,14 @@ export interface TagOpeningLine {
   hallmarkId2Wt?: number;
   hallmarkId3Wt?: number;
   hallmarkId4Wt?: number;
+  // Karigar weight block — mSG 17-23 (KrOthWt, KrNwt, KrGht%, KrGht, KrTouch, KrWst%, KrFine; N204).
+  karigarOthWt?: number;
+  karigarNetWt?: number;
+  karigarGhtPct?: number;
+  karigarGhtWt?: number;
+  karigarTouch?: number;
+  karigarWestPct?: number;
+  karigarFine?: number;
   // Karigar costing — mSG 35/36/37/39/40/41/42/45/53/60.
   karigarLbrRate?: number;
   karigarLbrAmt?: number;
@@ -607,6 +615,8 @@ async function writeTagOpeningTx(
   const stamp = voucherTimestamp(date, ctx.persistedClock);
   const fineOf = (line: TagOpeningLine): number =>
     line.fineWt != null ? n(line.fineWt) : fineFor('tagOpening', line);
+  // The karigar weight block as BtnSave_Click writes it (TR_TAG_OPBL.cs:10975-11022, N204).
+  const karigar = input.lines.map((line) => tagKarigarColumns({ ...line, fineWt: fineOf(line) }));
   const details = input.lines.map((line, index) => ({
     ...key,
     SR_NO: index + 1,
@@ -663,6 +673,7 @@ async function writeTagOpeningTx(
     HM_ID2_WT: n(line.hallmarkId2Wt), // mSG[L,86] :9380
     HM_ID3_WT: n(line.hallmarkId3Wt), // mSG[L,87] :9381
     HM_ID4_WT: n(line.hallmarkId4Wt), // mSG[L,88] :9382
+    ...karigar[index]!, // mSG 17-23 :10975-11022
     KR_LBR_RATE: n(line.karigarLbrRate), // mSG[L,35] :9341
     KR_LBR_AMT: n(line.karigarLbrAmt), // mSG[L,36] :9342
     KR_OTH_AMT: n(line.karigarOthAmt), // mSG[L,37] :9343
@@ -711,7 +722,7 @@ async function writeTagOpeningTx(
   // The stock rows of Ac_Stock.Tag_Opbl_Stk (Ac_Stock.cs:22-36): an opening book's tag is a purchase-in ('P', VCH_TYPE
   // 'TAGOP', BOOK_NAME 'TAG OPBL'); an Only Tag Entry tag is an issue-in ('I', the book's short name and family), and
   // the stock item it was made from goes out once, by the voucher's totals ('O', '-', TAG_NO 'N'). A tag row's quantity
-  // is always 1, and the row carries the tag's karigar costing and design.
+  // is always 1, and the row carries the tag's karigar weight block (Ac_Stock.cs:28), karigar costing and design.
   const sum = (pick: (line: TagOpeningLine) => number) =>
     input.lines.reduce((total, line) => total + pick(line), 0);
   const tagStock = input.lines.map((line, index) => ({
@@ -741,6 +752,7 @@ async function writeTagOpeningTx(
     OTH_AMT: n(line.othAmt),
     ITM_MRP: n(line.mrp),
     NET_AMT: 0,
+    ...tagKarigarStock(karigar[index]!),
     KR_LBR_AMT: n(line.karigarLbrAmt),
     KR_OTH_AMT: n(line.karigarOthAmt),
     KR_COST: n(line.karigarCost),
@@ -1109,6 +1121,7 @@ export async function getTagOpening(
       '"ITM_STYLE","ITM_COLOR","ITM_MARGIN","LBR_CODE","SL_TYPE","EMP_ISU","DESIGN_IMG_ID",' +
       '"MAIN_MARGIN_PRC","MAIN_MRP",' +
       '"HM_ID2","HM_ID3","HM_ID4","HM_ID_WT","HM_ID2_WT","HM_ID3_WT","HM_ID4_WT",' +
+      '"KR_OTH_WT","KR_NET_WT","KR_GHT_PRC","KR_GHT_WT","KR_TOUCH","KR_WEST_PRC","KR_FINE",' +
       '"KR_LBR_RATE","KR_LBR_AMT","KR_OTH_AMT","KR_OTH_RATE","KR_OTH_FINE","KR_TOT_FINE",' +
       '"KR_GWT_TOUCH","KR_COST","KR_NAME","KR_WAX_WT",' +
       '"JDT_JDT_WT","JDT_GHT_WT","JDT_KUN_WT","JDT_KUN_TOUCH","JDT_KUN_NET","JDT_WAX_WT",' +
@@ -1164,6 +1177,14 @@ export async function getTagOpening(
       hallmarkId2Wt: n(row.HM_ID2_WT),
       hallmarkId3Wt: n(row.HM_ID3_WT),
       hallmarkId4Wt: n(row.HM_ID4_WT),
+      // The grid reloads the karigar block into mSG 17-23 (TR_TAG_OPBL.cs:10478-10491).
+      karigarOthWt: n(row.KR_OTH_WT),
+      karigarNetWt: n(row.KR_NET_WT),
+      karigarGhtPct: n(row.KR_GHT_PRC),
+      karigarGhtWt: n(row.KR_GHT_WT),
+      karigarTouch: n(row.KR_TOUCH),
+      karigarWestPct: n(row.KR_WEST_PRC),
+      karigarFine: n(row.KR_FINE),
       karigarLbrRate: n(row.KR_LBR_RATE),
       karigarLbrAmt: n(row.KR_LBR_AMT),
       karigarOthAmt: n(row.KR_OTH_AMT),
