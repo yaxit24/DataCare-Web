@@ -100,16 +100,19 @@ d('company provisioning produces a postable company', () => {
             ? 12
             : book === 'TSP'
               ? 5
-              : // LBR (labour) carries its two configured slots: SR_NO 1 (metal) and SR_NO 6
-                // (labour income), so the labour writer resolves the income account from the book (G115).
-                book === 'LBR' || book === 'CRD' || book === 'DIR'
-                ? 2
-                : // OTH INC / OTH EXP each carry a single configured expense/income slot (TR_OTH_PURC reads
-                  // slot 1); FSL/FPR (fine settlement) each carry their single configured
-                  // control slot; TAG PURCHASE takes the standard three purchase legs like PURCHASE.
-                  book === 'OIN' || book === 'OEX' || book === 'FSL' || book === 'FPR'
-                  ? 1
-                  : 3,
+              : // PURCHASE and TAG PURCHASE add slot 4, labour and other charges (Ac_Ledr.cs:419-421, G184).
+                book === 'PR' || book === 'TPR'
+                ? 4
+                : // LBR (labour) carries its two configured slots: SR_NO 1 (metal) and SR_NO 6
+                  // (labour income), so the labour writer resolves the income account from the book (G115).
+                  book === 'LBR' || book === 'CRD' || book === 'DIR'
+                  ? 2
+                  : // OTH INC / OTH EXP each carry a single configured expense/income slot (TR_OTH_PURC reads
+                    // slot 1); FSL/FPR (fine settlement) each carry their single configured
+                    // control slot.
+                    book === 'OIN' || book === 'OEX' || book === 'FSL' || book === 'FPR'
+                    ? 1
+                    : 3,
       );
   });
 
@@ -320,8 +323,9 @@ d('company provisioning produces a postable company', () => {
     // 19 three-leg books (incl. TAG PURCHASE, KARIGAR and JDTR issue/receipt) + RCT/PAY x 2
     // + WHS/RTC x 12 + TSP x 5 + OIN/OEX x 1 + SIN/SOT x 3 (stock in/out, N91) + DHI/DHR x 3 (dhiran, N97)
     // + LBR x 2 (labour: metal SR_NO 1 + income SR_NO 6, G115) + FSL/FPR x 1 (fine settlement, N100)
-    // + BUL x 3 (bullion booking, N103) + ORC x 3 (order cancel, N113), not doubled.
-    expect(await count('BOOK_DETL')).toBe(130);
+    // + BUL x 3 (bullion booking, N103) + ORC x 3 (order cancel, N113), not doubled; PR and TPR add slot 4
+    // (labour and other charges, G184): 130 + 2.
+    expect(await count('BOOK_DETL')).toBe(132);
   });
 
   /**
