@@ -66,6 +66,14 @@
         "web/apps/web/app/(app)/txn/contra/page.tsx",
         "web/apps/api/src/modules/finance/contra.ts"
       ]
+    },
+    "salesOrder": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/sales-order/page.tsx",
+        "web/apps/web/lib/salesOrderForm.ts",
+        "web/apps/api/src/modules/sales/salesOrder.ts",
+        "web/apps/api/src/modules/sales/orderDoc.ts"
+      ]
     }
   }
 }

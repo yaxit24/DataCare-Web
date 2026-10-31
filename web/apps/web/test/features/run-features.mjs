@@ -17,6 +17,7 @@ import {
 import { seedCatalogue } from './fixtures/catalogue.mjs';
 import { purchaseInvoice } from './modules/purchaseInvoice.mjs';
 import { purchaseReturn } from './modules/purchaseReturn.mjs';
+import { salesOrder } from './modules/salesOrder.mjs';
 import { salesInvoice } from './modules/salesInvoice.mjs';
 import { salesReturn } from './modules/salesReturn.mjs';
 import { settingsEffects } from './modules/settingsEffects.mjs';
@@ -49,6 +50,7 @@ const MODULES = [
   purchaseReturn,
   cashBank,
   contraEntry,
+  salesOrder,
 ];
 
 const artifacts = resolve(webRoot, 'test-results/feature-e2e');

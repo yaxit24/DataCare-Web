@@ -51,5 +51,52 @@
       "gap": "G201",
       "reason": "The register requires BOOK_TBL_NAME 'PR_DATA' and seedCompany leaves it NULL for PRT, so it lists no return; the desktop sets it for PURC RETURN books (MS_UPDATE.cs:7849)."
     }
+  ],
+  "sales-order": [
+    {
+      "case": "sales-order.formula.whole-rupees",
+      "gap": "G205",
+      "reason": "The order line is priced on fine weight with paise: 9.16 g × 6,123.45 previews 58,465.8; the desktop (SL_AMT_TYPE N) prices net 10 × 6,123.45 = 61,234 and shows 63,609 (TR_SALE_ORD.cs:6560-6672)."
+    },
+    {
+      "case": "sales-order.create.amounts",
+      "gap": "G205",
+      "reason": "Saved ITM_AMT 56,090.80, tax 1,753.97, total 60,220; the desktop stores 61,234, tax 1,908 and total 65,517 (TR_SALE_ORD.cs:6672, :11340-11342)."
+    },
+    {
+      "case": "sales-order.create.advance-ledger",
+      "gap": "G207",
+      "reason": "The 5,000 advance debits SALES: the provisioned SOR book's slot 1 is the sales account (seedCompany.ts:219); the desktop debits the cash account in slot 1 (Ac_Ledr.cs:28-35)."
+    },
+    {
+      "case": "sales-order.create.header-tender",
+      "gap": "G206",
+      "reason": "CASH_AMT stays 0 while ADV_AMT is 5,000; the desktop stores the cash tender in CASH_AMT (TR_SALE_ORD.cs:9138)."
+    },
+    {
+      "case": "sales-order.create.tender-modes",
+      "gap": "G206",
+      "reason": "UPI, cheque, card, old metal and scheme amounts are read-only on the order, so an advance can only be one cash amount (TR_SALE_ORD.cs:11368, Ac_Ledr.cs:28-61)."
+    },
+    {
+      "case": "sales-order.reopen.recent-list",
+      "gap": "G36",
+      "reason": "The Recent Sales Orders list prints the date as 2026-10-31 (sales-order/page.tsx String(o.vchDate).slice(0, 10)); D19 needs dd/MM/yyyy. N56 is in progress."
+    },
+    {
+      "case": "sales-order.print.order",
+      "gap": "G36",
+      "reason": "The printed order bill (report spec OrderBill) prints the date as 2026-10-31; D19 needs dd/MM/yyyy. N56 is in progress."
+    },
+    {
+      "case": "sales-order.concurrency.double-delete",
+      "gap": "G193",
+      "reason": "The second delete of a sales order that is already gone answers 500 instead of a 4xx conflict."
+    },
+    {
+      "case": "sales-order.journey.order-to-sale",
+      "gap": "G208",
+      "reason": "A sale that adjusts the order advance answers 400 'book SL account row 4 is missing': provisioned sale books have no slot 4, which Sales_Rojmel uses for ADV_AMT (Ac_Rojmel.cs:96)."
+    }
   ]
 }
