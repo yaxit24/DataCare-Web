@@ -16,7 +16,6 @@ import {
   type LedgerLine,
 } from '../posting/posting.js';
 import {
-  billTotals,
   orderLabourAmount,
   orderLabourTransition,
   orderLabourReplay,
@@ -24,13 +23,13 @@ import {
   round,
   type OrderLabourEdit,
   type OrderLabourAction,
-  type OrderLabourPolicy,
   type OrderLabourState,
   applySalesOrderDesignSelection,
   clearSalesOrderDesignSelection,
   type SalesOrderDesignEvent,
 } from '@datacare/core';
 import { SaleValidationError } from './sales.js';
+import * as pricing from './salesOrderPricing.js';
 import { fineWt } from '../shared/fine.js';
 import { resolveSalesOrderDesignTx } from './orderDesignSelection.js';
 import { resolveBookSlotAccountTx } from '../shared/postingAccounts.js';
@@ -378,6 +377,7 @@ export async function getSalesOrderConfiguration(prisma: any, scope: VoucherScop
     return {
       ...(await orderLabourConfigurationTx(tx, scope)),
       ...(await salesOrderFiscalConfigurationTx(tx, scope)),
+      itemAmountType: await pricing.salesOrderAmountTypeTx(tx, scope), // N196: the preview's basis
     };
   });
 }
@@ -406,7 +406,7 @@ function persistedLabour(row?: Record<string, any>): OrderLabourState {
 function calculateOrderLine(
   line: SalesOrderLine,
   prior: Record<string, any> | undefined,
-  policy: OrderLabourPolicy,
+  policy: pricing.OrderPricingPolicy,
   exactLabour?: OrderLabourState,
 ) {
   const previous = persistedLabour(prior);
@@ -485,19 +485,13 @@ function calculateOrderLine(
       error instanceof Error ? error.message : 'invalid order labour calculation',
     );
   }
-  const sameMetal =
-    prior &&
-    [
-      ['netWt', 'ITM_NWT'],
-      ['ghtWt', 'ITM_GHT_WT'],
-      ['touch', 'ITM_TOUCH'],
-      ['westPct', 'ITM_WEST_PRC'],
-      ['rate', 'ITM_RATE'],
-    ].every(([field, column]) => n((line as any)[field!]) === n(prior[column!]));
+  const sameMetal = prior && pricing.orderMetalUnchanged(policy, line, prior);
   const fine = sameMetal
     ? n(prior.ITM_FINE)
     : fineWt(line.netWt, line.ghtWt, line.touch, line.westPct);
-  const metal = sameMetal ? n(prior.ITM_AMT) : round2(fine * n(line.rate));
+  const metal = sameMetal
+    ? n(prior.ITM_AMT)
+    : (pricing.orderMetalAmount(policy, line) ?? round2(fine * n(line.rate)));
   const sameTotal =
     prior &&
     sameMetal &&
@@ -570,7 +564,7 @@ async function replaySalesOrderLineTx(
   scope: VoucherScope,
   line: SalesOrderLine,
   prior: Record<string, any> | undefined,
-  policy: OrderLabourPolicy,
+  policy: pricing.OrderPricingPolicy,
 ) {
   const edits = line.orderEdits;
   if (!edits) return calculateOrderLine(line, prior, policy);
@@ -833,10 +827,10 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
     if (mode.mainBook === 'SALES ORDER')
       await assertSalesOrderDateTx(tx, input.scope, requestedDate);
     const configuration = await orderLabourConfigurationTx(tx, input.scope);
-    const policy = {
+    const policy = await pricing.orderPricingPolicyTx(tx, input.scope, mode.mainBook, {
       includesGhat: configuration.labourIncludesGhat,
       rateDecimals: configuration.labourRateDecimals,
-    };
+    });
     const previousLines = new Map(
       (lifecycle?.previousLines ?? []).map((row) => [n(row.SR_NO), row]),
     );
@@ -895,7 +889,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
     const baseNet = linesNet > 0 ? linesNet : Number(input.netAmount || 0);
     if (!(baseNet > 0))
       throw new SaleValidationError('order amount (or line weights/rate) is required');
-    let totals = billTotals({
+    let totals = pricing.orderTotals(policy, {
       lineNetTotal: baseNet,
       taxRatePct: input.taxRatePct,
       interState: !!input.interState,

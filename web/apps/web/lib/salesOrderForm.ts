@@ -21,6 +21,7 @@ import {
   type OrderLabourPolicy,
   type SalesOrderDesignSourceRef,
   type SalesOrderDesignOption,
+  salesOrderItemAmount,
 } from '@datacare/core';
 
 export { extendedHeaderFields, extendedRowFields };
@@ -38,7 +39,16 @@ export type Row = OrderRow & {
   labourCache: OrderLabourCache;
   calculationBasis: Pick<
     OrderRow,
-    'netWt' | 'ghtWt' | 'touch' | 'westPct' | 'rate' | 'labourAmount' | 'otherAmount'
+    | 'netWt'
+    | 'ghtWt'
+    | 'touch'
+    | 'westPct'
+    | 'rate'
+    | 'labourAmount'
+    | 'otherAmount'
+    | 'grossWt'
+    | 'pcs'
+    | 'rateType'
   >;
   draftFields: string[];
   calculationPending: boolean;
@@ -112,6 +122,9 @@ export const blank = (srNo?: number): Row => ({
     rate: '',
     labourAmount: '0',
     otherAmount: '',
+    grossWt: '',
+    pcs: '',
+    rateType: '',
   },
   draftFields: [],
   calculationPending: false,
@@ -195,7 +208,7 @@ export function commitSalesOrderLabour(
   previous: Row,
   row: Row,
   field: keyof Row,
-  policy: OrderLabourPolicy,
+  policy: OrderLabourPolicy & { itemAmountType?: string },
 ): Row {
   const actions: Partial<Record<keyof Row, 'rate' | 'percentage' | 'amount'>> = {
     labourRate: 'rate',
@@ -213,9 +226,33 @@ export function commitSalesOrderLabour(
   const result = orderLabourWithCache(visible, row.labourCache, policy);
   // F1 leaves this basis unchanged too. Imported cached metal/net values survive
   // unrelated triggers, while a later copied Touch/West trigger correctly reprices.
-  const sameMetal = (['netWt', 'ghtWt', 'touch', 'westPct', 'rate'] as const).every(
-    (key) => numeric(normalized[key], key) === numeric(row.calculationBasis[key], key),
-  );
+  // N196 (G205): on the Sales Order the metal also depends on the gross weight (SL_AMT_TYPE G), the pieces (rate
+  // type P) and the rate type itself.
+  const pricedOnGross = String(policy.itemAmountType ?? '').toUpperCase() === 'G';
+  const pricedOnPieces =
+    String(normalized.rateType ?? '')
+      .trim()
+      .toUpperCase() === 'P';
+  const metalKeys = [
+    'netWt',
+    'ghtWt',
+    'touch',
+    'westPct',
+    'rate',
+    ...(policy.itemAmountType && pricedOnGross ? (['grossWt'] as const) : []),
+    ...(policy.itemAmountType && pricedOnPieces ? (['pcs'] as const) : []),
+  ] as const;
+  const sameMetal =
+    metalKeys.every(
+      (key) => numeric(normalized[key], key) === numeric(row.calculationBasis[key], key),
+    ) &&
+    (!policy.itemAmountType ||
+      String(normalized.rateType ?? '')
+        .trim()
+        .toUpperCase() ===
+        String(row.calculationBasis.rateType ?? '')
+          .trim()
+          .toUpperCase());
   const fineWeight = sameMetal
     ? row.fineWeight
     : String(
@@ -228,7 +265,23 @@ export function commitSalesOrderLabour(
       );
   const metal = sameMetal
     ? row.itemAmount
-    : String(round(numeric(fineWeight, 'Fine weight') * visible.itemRate, 2));
+    : policy.itemAmountType
+      ? String(
+          salesOrderItemAmount(
+            {
+              pcs: visible.pcs,
+              grossWt: visible.grossWt,
+              netWt: visible.netWt,
+              ghtWt: visible.ghatWt,
+              touch: numeric(row.touch, 'touch'),
+              westPct: numeric(row.westPct, 'westPct'),
+            },
+            policy.itemAmountType,
+            visible.itemRate,
+            normalized.rateType,
+          ),
+        )
+      : String(round(numeric(fineWeight, 'Fine weight') * visible.itemRate, 2));
   const sameTotal =
     sameMetal &&
     result.state.labourAmount ===
@@ -277,6 +330,9 @@ export function commitSalesOrderLabour(
       rate: row.rate,
       labourAmount: String(result.state.labourAmount),
       otherAmount: row.otherAmount,
+      grossWt: row.grossWt,
+      pcs: row.pcs,
+      rateType: row.rateType,
     },
     calculationPending: false,
     draftFields: row.draftFields.filter((key) => key !== field),
@@ -322,6 +378,9 @@ export function hydrateSalesOrder(document: Record<string, any>) {
       rate: row.rate,
       labourAmount: row.labourAmount,
       otherAmount: row.otherAmount,
+      grossWt: row.grossWt,
+      pcs: row.pcs,
+      rateType: row.rateType,
     },
     fineWeight: String(
       document.lines?.find((line: any) => String(line.srNo) === row.srNo)?.fineWeight ?? '',

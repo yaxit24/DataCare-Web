@@ -237,6 +237,8 @@ export {
   saleItemAmount,
 } from './saleAmount.js';
 export type { SaleAmountLine, SaleAmountBasis } from './saleAmount.js';
+export { salesOrderItemWeight, salesOrderItemAmount, salesOrderBill } from './salesOrderAmount.js';
+export type { SalesOrderAmountLine, SalesOrderBill } from './salesOrderAmount.js';
 export { rateFactor, settleMoneyMetal, settlementBalance } from './settlement.js';
 export type { RateBasis, SettlementInput, SettlementResult } from './settlement.js';
 export {

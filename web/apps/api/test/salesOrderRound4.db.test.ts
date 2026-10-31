@@ -312,12 +312,55 @@ run('Sales ordinary saved state and ordered design source replay', () => {
       ],
     });
     const second = await loaded('S92');
+    // The copied touch and wastage apply at this later trigger: the fine weight is now 1.84. The company's
+    // SL_AMT_TYPE is blank, which the desktop reads as N, so the metal is priced on net + ghat, 2 × 100 = 200,
+    // not on the fine weight (TR_SALE_ORD.cs:6571-6627; N196, G205).
     expect(second.lines[0]).toMatchObject({
       fineWeight: 1.84,
-      itemAmount: 184,
+      itemAmount: 200,
       labourAmount: 40,
-      lineNetAmount: 224,
+      lineNetAmount: 240,
     });
+  });
+  // N196 (G205): TR_SALE_ORD prices the metal on SL_AMT_TYPE in whole rupees and rounds tax and total to rupees
+  // (TR_SALE_ORD.cs:6571-6672, :11340-11342). Net 10, touch 91.6, rate 6,123.45, labour 237.5 /g, tax 3%.
+  it.each([
+    ['N', { metal: 61234, net: 63609, tax: 1908, total: 65517 }],
+    ['F', { metal: 56091, net: 58466, tax: 1754, total: 60220 }],
+  ])('prices an order line on SL_AMT_TYPE %s in whole rupees', async (amountType, expected) => {
+    await sql(`UPDATE "CO_SET" SET "SL_AMT_TYPE"=$2 WHERE tenant_id=$1`, tenantId, amountType);
+    await createSalesOrder(runtime, {
+      ...input(),
+      taxRatePct: 3,
+      advanceAmount: 0,
+      lines: [
+        {
+          srNo: 1,
+          itCode: 'GL',
+          designImageId: 'N',
+          pcs: 1,
+          grossWt: 10.25,
+          netWt: 10,
+          ghtWt: 0,
+          touch: 91.6,
+          westPct: 0,
+          rate: 6123.45,
+          labourRate: 237.5,
+          labourType: '',
+          otherAmount: 0,
+        },
+      ],
+    } as any);
+    const [line] = await query(
+      `SELECT "ITM_AMT"::float metal,"LBR_AMT"::float labour,"NET_AMT"::float net FROM "SL_ORD_DETL" WHERE tenant_id=$1`,
+      tenantId,
+    );
+    const [header] = await query(
+      `SELECT "NET_AMT"::float net,"TAX_AMT"::float tax,"TOT_AMT"::float total FROM "SL_ORD_DATA" WHERE tenant_id=$1`,
+      tenantId,
+    );
+    expect(line).toEqual({ metal: expected.metal, labour: 2375, net: expected.net });
+    expect(header).toEqual({ net: expected.net, tax: expected.tax, total: expected.total });
   });
   it('rejects stale Design sources and forged journal values without any order writes', async () => {
     const selection = (await listSalesOrderDesigns(runtime, scope(), { itCode: 'GL' })).rows[0]!;
