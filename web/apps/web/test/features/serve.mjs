@@ -27,12 +27,20 @@ import {
 } from './harness.mjs';
 import { USERS, seedCatalogue } from './fixtures/catalogue.mjs';
 import { purchaseInvoice } from './modules/purchaseInvoice.mjs';
+import { purchaseReturn } from './modules/purchaseReturn.mjs';
 import { salesInvoice } from './modules/salesInvoice.mjs';
 import { salesReturn } from './modules/salesReturn.mjs';
 import { settingsEffects } from './modules/settingsEffects.mjs';
 import { usersRights } from './modules/usersRights.mjs';
 
-const ALL = [salesInvoice, purchaseInvoice, settingsEffects, usersRights, salesReturn];
+const ALL = [
+  salesInvoice,
+  purchaseInvoice,
+  settingsEffects,
+  usersRights,
+  salesReturn,
+  purchaseReturn,
+];
 const wanted = new Set(
   (process.env.FEATURE_E2E_MODULES ?? '')
     .split(',')

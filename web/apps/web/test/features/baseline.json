@@ -29,5 +29,32 @@
       "gap": "G194",
       "reason": "The delete writes the tenant id as DELETE_DATA.DELETE_USER; the desktop writes DC_Main.MCo_User (TR_SALE_RTN.cs:15076)."
     }
+  ],
+  "purchase-return": [
+    {
+      "case": "purchase-return.formula.whole-rupees",
+      "gap": "G198",
+      "reason": "The return previews 56,090.80 + 2,375 = 58,465.80 with paise; the desktop rounds the item and labour amounts and the bill to whole rupees, 58,466 and a 60,220 total (TR_KR_ISU.cs:4015, 4028, 6522-6528)."
+    },
+    {
+      "case": "purchase-return.create.amounts",
+      "gap": "G198",
+      "reason": "Stored ITM_AMT/NET_AMT/TOT_AMT keep paise (56,090.80 / 58,465.80 / 60,219.77); the desktop stores 56,091 / 58,466 / 60,220."
+    },
+    {
+      "case": "purchase-return.create.without-original",
+      "gap": "G199",
+      "reason": "Orig Purchase Book is a required select with no preselection (two purchase books), so the browser blocks Save on a free-standing return; the desktop needs only a party and a voucher number (TR_KR_ISU.cs:4986-4999)."
+    },
+    {
+      "case": "purchase-return.keyboard.alt-s-saves",
+      "gap": "G200",
+      "reason": "The Purchase Return save button carries no data-save-mnemonic, so Alt+S does nothing; the desktop button is &Save (TR_KR_ISU.cs:2330)."
+    },
+    {
+      "case": "purchase-return.report.register-lists-return",
+      "gap": "G201",
+      "reason": "The register requires BOOK_TBL_NAME 'PR_DATA' and seedCompany leaves it NULL for PRT, so it lists no return; the desktop sets it for PURC RETURN books (MS_UPDATE.cs:7849)."
+    }
   ]
 }

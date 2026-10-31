@@ -45,6 +45,14 @@
     },
     "companyOpen": {
       "covers": ["web/apps/web/app/select/page.tsx", "web/apps/web/lib/contextSelection.ts"]
+    },
+    "purchaseReturn": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/purchase-return/page.tsx",
+        "web/apps/web/lib/purchaseReturnForm.ts",
+        "web/apps/api/src/modules/purchase/purchaseReturn.ts",
+        "web/apps/api/src/modules/purchase/purchaseReturnLifecycle.ts"
+      ]
     }
   }
 }

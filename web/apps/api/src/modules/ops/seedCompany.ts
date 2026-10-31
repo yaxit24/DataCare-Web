@@ -54,6 +54,18 @@ const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string; gstType?: strin
 ];
 
 /**
+ * BOOK_DETL of a purchase-family book (PURCHASE, TAG PURCHASE): 1 purchase, 2 cash, 3 round-off and 4 labour and
+ * other charges. With CO_SET.PURC_WITH_LBR = 'N' the desktop posts a line's labour and other charges to slot 4
+ * (Ac_Ledr.cs:419-421); without it the writer's fail-closed slot lookup refused every such purchase (G184).
+ */
+const PURCHASE_BOOK_SLOTS: Array<{ srNo: number; acCode: string }> = [
+  { srNo: 1, acCode: 'PURCHASE' },
+  { srNo: 2, acCode: 'CASH' },
+  { srNo: 3, acCode: 'ROUNDOFF' },
+  { srNo: 4, acCode: 'LBREXP' },
+];
+
+/**
  * BOOK_DETL of a TR_WH_SALE book, in the desktop's slot order (Ac_Ledr.cs:613-778 joins `B.SR_NO = n`; the real
  * books 034/064 carry all twelve): 1 sale gold, 2 purchase gold, 3 cash, 4 kasar, 5 purchase kasar, 6 labour
  * income, 7 labour expense, 8 sale silver, 9 purchase silver, 10 interest, 11 other charges, 12 fine kasar.
@@ -140,7 +152,13 @@ const BOOKS: {
   table?: string;
 }[] = [
   { book: 'SL', name: 'Sales', workflow: 'SALES', acCode: 'SALES' },
-  { book: 'PR', name: 'Purchase', workflow: 'PURCHASE', acCode: 'PURCHASE' },
+  {
+    book: 'PR',
+    name: 'Purchase',
+    workflow: 'PURCHASE',
+    acCode: 'PURCHASE',
+    slots: PURCHASE_BOOK_SLOTS,
+  },
   // Desktop TR_PURC_HM 'Tag Wise Purc' book (MDI_FORM.cs:8540) — a TAG PURCHASE book posts through the
   // same Purc_* routines as PURCHASE, so a fresh company can use the hallmark-purchase screen (G02).
   {
@@ -149,6 +167,7 @@ const BOOKS: {
     mainBook: 'TAG PURCHASE',
     inout: 'I',
     acCode: 'PURCHASE',
+    slots: PURCHASE_BOOK_SLOTS,
   },
   // Desktop TR_OTH_PURC books: 375 OTINC 'OTH INC' (I) and 355 OTEXP 'OTH EXP' (O). Without them a fresh
   // company opened Other Income / Other Expenses to "No active books" (G03/G17, provisioning gap).

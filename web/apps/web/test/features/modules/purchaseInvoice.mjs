@@ -851,6 +851,58 @@ export const purchaseInvoice = {
     ),
 
     C(
+      'settings.labour-to-slot-4',
+      'T15',
+      'mutation',
+      "Ac_Ledr.cs:419-421: with PURC_WITH_LBR = N a line's labour posts to the purchase book's slot 4; a provisioned book has it (G184)",
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const setLabourSetting = async (value) => {
+          await page.goto('/settings');
+          await page.getByRole('heading', { name: 'Company Settings', exact: true }).waitFor();
+          const control = page.locator('[id="CO_SET.PURC_WITH_LBR"]');
+          const tabs = page.getByRole('tab');
+          for (let i = 0; i < (await tabs.count()) && !(await control.count()); i++)
+            await tabs.nth(i).click();
+          await control.selectOption(value);
+          const [saved] = await Promise.all([
+            page.waitForResponse(
+              (r) =>
+                new URL(r.url()).pathname === '/api/settings' && r.request().method() === 'POST',
+            ),
+            page.getByRole('button', { name: /^Save \d+ change\(s\)$/ }).click(),
+          ]);
+          assert.equal(saved.status(), 200, await saved.text());
+        };
+        const [{ before }] = await ctx.rows(
+          `SELECT coalesce("PURC_WITH_LBR",'') before FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        );
+        await setLabourSetting('N');
+        try {
+          const vchNo = await createOne(ctx, page); // 20 g x 150 making = 3,000 labour
+          const legs = await ctx.rows(
+            `SELECT "AC_CODE" ac,"DR_AMT"::float dr FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "LEDR_KEY"`,
+            vchNo,
+          );
+          const labour = legs.filter((leg) => leg.ac === 'LBREXP');
+          assert.deepEqual(
+            labour.map((leg) => leg.dr),
+            [3000],
+            JSON.stringify(legs),
+          );
+          return {
+            observation: `purchase ${vchNo} saved with labour 3,000 on LBREXP`,
+            expected: { labourLeg: { ac: 'LBREXP', dr: 3000 } },
+            database: { legs },
+            downstream: { labour },
+          };
+        } finally {
+          await setLabourSetting(before === 'N' ? 'N' : 'Y');
+        }
+      },
+    ),
+
+    C(
       'print.date-with-year',
       'T16',
       'output',
