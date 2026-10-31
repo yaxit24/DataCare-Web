@@ -1,19 +1,7 @@
 {
   "_comment": "Known feature-E2E failures. Each entry: { case, gap, reason }. Shrink-only: a new failure fails CI, and an entry whose case now passes must be removed in the same change.",
-  "sales-invoice": [
-    {
-      "case": "sales-invoice.concurrency.stale-second-save",
-      "gap": "G170",
-      "reason": "Lost update: two operators load the same voucher, the first saves, the stale second save answers 200 and overwrites it (line 70,000 instead of 65,000). editSale reads no version token; tracked by N51 (version tokens on every update/delete, waiting on decision D17)."
-    }
-  ],
-  "purchase-invoice": [
-    {
-      "case": "purchase-invoice.concurrency.stale-second-save",
-      "gap": "G170",
-      "reason": "Lost update on purchase too: the stale second save answers 200 and overwrites the first (no version token; N51)."
-    }
-  ],
+  "sales-invoice": [],
+  "purchase-invoice": [],
   "settings": [],
   "sales-return": [
     {

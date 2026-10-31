@@ -211,6 +211,7 @@ export default function HallmarkPurchasePage() {
   const [coBook, setCoBook] = useState('');
   const [voucherLookup, setVoucherLookup] = useState('');
   const [loadedVchNo, setLoadedVchNo] = useState('');
+  const [loadedVersion, setLoadedVersion] = useState(''); // N51 (D17): sent on update and delete
   const [f, setF] = useState({
     acCode: '',
     acName: '',
@@ -271,6 +272,7 @@ export default function HallmarkPurchasePage() {
 
   function newVoucher() {
     setLoadedVchNo('');
+    setLoadedVersion('');
     setVoucherLookup('');
     setRes(null);
     setMsg(null);
@@ -288,6 +290,7 @@ export default function HallmarkPurchasePage() {
         `/purchases/${encodeURIComponent(voucherLookup.trim())}?${scopeQuery()}`,
       );
       setLoadedVchNo(String(view.voucherNo));
+      setLoadedVersion(String(view.version ?? ''));
       setVoucherLookup(String(view.voucherNo));
       setF({
         acCode: String(view.acCode ?? ''),
@@ -344,7 +347,9 @@ export default function HallmarkPurchasePage() {
     setBusy(true);
     setMsg(null);
     try {
-      await del(`/purchases/${encodeURIComponent(loadedVchNo)}?${scopeQuery()}`);
+      await del(
+        `/purchases/${encodeURIComponent(loadedVchNo)}?${scopeQuery()}&expectedVersion=${encodeURIComponent(loadedVersion)}`,
+      );
       newVoucher();
       setMsg({ kind: 'ok', text: 'Voucher deleted' });
     } catch (err) {
@@ -412,9 +417,13 @@ export default function HallmarkPurchasePage() {
         lines,
       };
       const r = loadedVchNo
-        ? await put<any>(`/purchases/${encodeURIComponent(loadedVchNo)}`, payload)
+        ? await put<any>(`/purchases/${encodeURIComponent(loadedVchNo)}`, {
+            ...payload,
+            expectedVersion: loadedVersion,
+          })
         : await post<any>('/purchases', payload);
       setRes(r);
+      setLoadedVersion(String(r.version ?? '')); // N51: create and update return it
       const savedNo = String(r.vchNo).padStart(5, '0');
       setLoadedVchNo(savedNo);
       setVoucherLookup(savedNo);

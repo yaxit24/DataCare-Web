@@ -791,6 +791,7 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
         saleInput({ mainUser: 'different-user', vchDate: '2024-04-11' }),
         replacementLines,
         created.vchNo,
+        String((await getSale(runtime, scope, created.vchNo)).version),
       ),
     ).resolves.toMatchObject({ vchNo: 8 });
 
@@ -883,6 +884,7 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
         saleInput({ vchDate: '2024-04-20' }),
         [{ ...replacementLines[0]!, netWt: 8 }],
         created.vchNo,
+        String((await getSale(runtime, scope, created.vchNo)).version),
       ),
     ).rejects.toBeInstanceOf(PeriodLockValidationError);
     expect(await getSale(runtime, scope, created.vchNo)).toEqual(before);
@@ -907,6 +909,7 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
         saleInput({ hallmarkAmount: 10, hmTaxPct: 5 }),
         replacementLines,
         created.vchNo,
+        String((await getSale(runtime, scope, created.vchNo)).version),
       ),
     ).rejects.toThrow(/hallmark tax rate does not match/);
 
@@ -978,7 +981,12 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
       'D'.repeat(170),
     );
     await expect(
-      deleteSale(runtime, { scope, vchNo: created.vchNo, deleteUser: 'current-user' }),
+      deleteSale(runtime, {
+        scope,
+        vchNo: created.vchNo,
+        deleteUser: 'current-user',
+        expectedVersion: String((await getSale(runtime, scope, created.vchNo)).version),
+      }),
     ).resolves.toEqual({ reversed: true });
 
     const audits = (await owner.$queryRawUnsafe(

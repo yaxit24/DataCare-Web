@@ -61,7 +61,7 @@ interface TaxRow {
     for (const row of rows)
       await owner.$executeRawUnsafe(`DELETE FROM "${row.table_name}" WHERE tenant_id=$1`, tenantId);
   };
-  const send = (method: 'POST' | 'PUT' | 'DELETE', url: string, payload?: unknown) =>
+  const send = (method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, payload?: unknown) =>
     app.inject({
       method,
       url,
@@ -200,7 +200,9 @@ interface TaxRow {
     ]);
 
     // Edit and delete keep and then remove exactly those rows.
+    const localVersion = (await send('GET', `/purchases/${local}?coBook=PR`)).json().version;
     const edited = await send('PUT', `/purchases/${local}`, {
+      expectedVersion: localVersion,
       coBook: 'PR',
       vchDate: DAY,
       acCode: 'SUPL',
@@ -213,7 +215,11 @@ interface TaxRow {
       [1, 'SGST', 1.5],
       [2, 'CGST', 1.5],
     ]);
-    const removed = await send('DELETE', `/purchases/${inter}?coBook=PR`);
+    const interVersion = (await send('GET', `/purchases/${inter}?coBook=PR`)).json().version;
+    const removed = await send(
+      'DELETE',
+      `/purchases/${inter}?coBook=PR&expectedVersion=${interVersion}`,
+    );
     expect(removed.statusCode, removed.body).toBe(200);
     expect(await taxRows('PR', inter)).toEqual([]);
   });

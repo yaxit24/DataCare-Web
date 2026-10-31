@@ -1910,6 +1910,16 @@ Done when: no local browser run can be answered with a previous build's page.
 
 Done when: no document or list prints a date without its year and the date-normalization rule is at zero.
 
+### N51 milestone 2 — Sale version tokens (G170, D17)
+
+`web/apps/api/src/modules/vouchers/version.ts` hashes a voucher's complete write set. `GET /sales/:vchNo` returns it
+as `version`; `PUT` and `DELETE` require it as `expectedVersion` (`web/apps/api/src/routes/saleVoucher.ts`), and
+`web/apps/api/src/modules/sales/sales.ts` refuses a stale one with `409 voucher-version-conflict` after locking the
+header and before any write. Proven by `web/apps/api/test/saleVersion.routes.db.test.ts` and the
+`concurrency.stale-second-save` case of `web/apps/web/test/features/modules/salesInvoice.mjs`.
+
+Done when: every Standard voucher family refuses a stale update or delete.
+
 
 ### N164 — UI surface map: every page and every button, plus a browser test with every behaviour change (G172)
 

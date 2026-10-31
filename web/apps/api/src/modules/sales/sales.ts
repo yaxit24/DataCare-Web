@@ -13,6 +13,7 @@ import {
 import { withTxBudget } from '../shared/txBudget.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
 import { recordFieldChangesTx } from '../vouchers/fieldAudit.js';
+import { assertVoucherVersionTx, versionKeyOf, voucherVersionTx } from '../vouchers/version.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import {
   deleteVoucherWriteSetTx,
@@ -2078,13 +2079,18 @@ export async function createSale(
     const vchNo = await nextVoucherNoTx(tx, scope);
     // TR_SALE.cs:14209,15151 allocates a five-digit hidden number from TEMP_BOOK_DATA without year.
     const hdVchNo = await nextHiddenVoucherNoTx(tx, scope);
-    return writeSaleTx(tx, input, lines, {
+    const saved = await writeSaleTx(tx, input, lines, {
       vchNo,
       hdVchNo,
       mainUser: String(input.mainUser ?? '').trim(),
       persistedClock: undefined,
       isEdit: false,
     });
+    const no = formatVoucherNo(vchNo); // N51: the screen keeps the version for its first edit or delete
+    return {
+      ...saved,
+      version: await voucherVersionTx(tx, SALE_WRITE_TABLES, versionKeyOf(scope, no)),
+    };
   });
 }
 
@@ -2127,6 +2133,8 @@ export interface DeleteSaleInput {
   scope: VoucherScope;
   vchNo: number | string;
   deleteUser?: string;
+  /** The `version` the operator's copy was read with (N51, D17). */
+  expectedVersion?: string;
 }
 
 const SALES_QUOTATION_WRITE_TABLES = ['SL_DATA', 'SL_DETL', 'SL_IDTL', 'SL_PR_DETL'] as const;
@@ -2150,6 +2158,9 @@ const SALE_WRITE_TABLES = [
   'REMARK_DATA',
   'AD_ADJ',
 ] as const;
+/** N51 (D17): refuse a stale copy; call it after the header lock. A missing token never matches. */
+const assertSaleVersionTx = (tx: any, scope: VoucherScope, vchNo: string, expected?: string) =>
+  assertVoucherVersionTx(tx, SALE_WRITE_TABLES, versionKeyOf(scope, vchNo), expected ?? '');
 
 type CompleteSaleScope = VoucherScope & { coYear: string; coBook: string };
 type LegacyRestore = Record<string, unknown> & {
@@ -2532,6 +2543,7 @@ export async function getSale(
         rateType: text(row.ITM_RATE_TYPE),
         amount: num(row.NET_AMT),
       })),
+      version: await voucherVersionTx(tx, SALE_WRITE_TABLES, versionKeyOf(scope, voucherNo)),
     };
   });
 }
@@ -2590,6 +2602,7 @@ export async function editSale(
   input: SaleInput,
   lines: SaleLineInput[],
   requestedVoucherNo: number | string,
+  expectedVersion: string,
 ): Promise<SaleResult> {
   completeSaleScope(input.scope);
   const scope = input.scope;
@@ -2597,6 +2610,7 @@ export async function editSale(
   const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const persisted = await persistedSaleHeaderTx(tx, scope, voucherNo);
+    await assertSaleVersionTx(tx, scope, voucherNo, expectedVersion); // G170: before any write
     // Full prior header for the USER_DATA edit audit, read BEFORE the write set is replaced.
     const priorHeaderRow: Record<string, unknown> | undefined = (
       await tx.$queryRawUnsafe(
@@ -2635,7 +2649,7 @@ export async function editSale(
       await restoreTagTx(tx, scope.tenantId, tag);
     }
     // TR_SALE.cs:14242-14243,14386,21243,15331,15341 preserve hidden no/user/clock.
-    return writeSaleTx(tx, input, lines, {
+    const saved = await writeSaleTx(tx, input, lines, {
       vchNo: Number(voucherNo),
       hdVchNo: hiddenVoucherNo,
       mainUser: text(persisted.MAIN_USER),
@@ -2645,6 +2659,11 @@ export async function editSale(
       persistedHeader: priorHeaderRow,
       editingUser: input.mainUser ?? null,
     });
+    // N51: the screen keeps the new version for its next save or delete.
+    return {
+      ...saved,
+      version: await voucherVersionTx(tx, SALE_WRITE_TABLES, versionKeyOf(scope, voucherNo)),
+    };
   });
 }
 
@@ -2671,6 +2690,7 @@ export async function deleteSale(prisma: any, input: DeleteSaleInput): Promise<{
       'KASAR_AMT',
       'VCH_DESC',
     ]);
+    await assertSaleVersionTx(tx, scope, voucherNo, input.expectedVersion); // G170
     await assertPeriodOpen(tx, tenantId, {
       ledger: {
         table: 'AC_DATA',

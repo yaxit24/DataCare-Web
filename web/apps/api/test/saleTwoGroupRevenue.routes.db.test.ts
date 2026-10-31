@@ -194,7 +194,10 @@ const headOf = (vchNo: string) => `0101${YEAR}${BOOK}${vchNo}`;
     expect(reopened.statusCode, reopened.body).toBe(200);
     expect((reopened.json().lines as unknown[]).length).toBe(2);
     const before = await ledger(vchNo);
-    const saved = await call('PUT', `/sales/${vchNo}`, payload);
+    const saved = await call('PUT', `/sales/${vchNo}`, {
+      ...payload,
+      expectedVersion: reopened.json().version,
+    });
     expect(saved.statusCode, saved.body).toBe(200);
     expect(await ledger(vchNo)).toEqual(before);
   });
@@ -203,11 +206,11 @@ const headOf = (vchNo: string) => `0101${YEAR}${BOOK}${vchNo}`;
     const vchNo = await create(sale([GOLD_LINE, SILVER_LINE]));
     // Silver rate 85.50 → 90.00: 50 g × 90 = 4,500.00; taxable 68,109.50; GST 3% = 2,043.285 → 2,043.29;
     // total 70,152.79.
-    const edited = await call(
-      'PUT',
-      `/sales/${vchNo}`,
-      sale([GOLD_LINE, { ...SILVER_LINE, rate: 90 }]),
-    );
+    const { version } = (await call('GET', `/sales/${vchNo}?coBook=${BOOK}`)).json();
+    const edited = await call('PUT', `/sales/${vchNo}`, {
+      ...sale([GOLD_LINE, { ...SILVER_LINE, rate: 90 }]),
+      expectedVersion: version,
+    });
     expect(edited.statusCode, edited.body).toBe(200);
     const rows = await ledger(vchNo);
     expect(rows.map((r) => [r.tail, r.ac, r.dr, r.cr])).toEqual([
@@ -259,7 +262,11 @@ const headOf = (vchNo: string) => `0101${YEAR}${BOOK}${vchNo}`;
   it('T10 delete: every ledger leg of the two-group voucher is reversed and DELETE_DATA is written', async () => {
     const vchNo = await create(sale([GOLD_LINE, SILVER_LINE]));
     const before = await snapshotTenant(owner, tenantId);
-    const deleted = await call('DELETE', `/sales/${vchNo}?coBook=${BOOK}`);
+    const { version } = (await call('GET', `/sales/${vchNo}?coBook=${BOOK}`)).json();
+    const deleted = await call(
+      'DELETE',
+      `/sales/${vchNo}?coBook=${BOOK}&expectedVersion=${version}`,
+    );
     expect(deleted.statusCode, deleted.body).toBe(200);
     expect(await ledger(vchNo)).toEqual([]);
     const diff = diffTenant(before, await snapshotTenant(owner, tenantId));

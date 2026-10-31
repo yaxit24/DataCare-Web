@@ -180,8 +180,8 @@ databaseDescribe('order confirmation full desktop document identity', () => {
     const document = (await orderData(runtime, { ...base, family: 'SALES ORDER' }))!;
     expect(document.header.VCH_DATE).toBeInstanceOf(Date);
     const html = orderHtml(document.header, document.lines, document);
-    expect(html).toContain('2024-04-03');
-    expect(html).toContain('2024-04-09');
+    expect(html).toContain('03/04/2024'); // N56 (D19): the print shows dd/MM/yyyy
+    expect(html).toContain('09/04/2024');
     expect(html).not.toContain('Wed Apr');
     expect(html).not.toContain('Tue Apr');
   });

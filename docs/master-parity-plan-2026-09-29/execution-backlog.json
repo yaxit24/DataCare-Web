@@ -3633,13 +3633,18 @@
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
-      "statusAsOf": "2026-10-01",
+      "statusAsOf": "2026-10-30",
       "evidence": [
         "web/apps/api/src/modules/vouchers/list.ts",
         "web/apps/web/components/VoucherList.tsx",
-        "web/apps/api/test/voucherListScope.routes.db.test.ts"
+        "web/apps/api/test/voucherListScope.routes.db.test.ts",
+        "web/apps/api/src/modules/vouchers/version.ts",
+        "web/apps/api/src/routes/saleVoucher.ts",
+        "web/apps/api/test/saleVersion.routes.db.test.ts",
+        "web/apps/api/src/routes/purchaseVoucher.ts",
+        "web/apps/api/test/purchaseTwoGroupLegs.routes.db.test.ts"
       ],
-      "statusNote": "Milestone 1 without version tokens: /vouchers/recent filters on the session company, location, year and book and returns each row's identity. VoucherList hands the identity to onLoad and deletes by the row's book. The sales page loads a recent voucher by identity. The version field and expectedVersion (steps 1-3, 5) wait for decision D17."
+      "statusNote": "IN PROGRESS. Milestone 1 (complete identity in recent lists) as before. Milestone 2, sales (D17 accepted): modules/vouchers/version.ts hashes the complete write set (SALE_WRITE_TABLES, canonical JSON, SHA-256 as the sales-order token); GET /sales/:vchNo returns version; PUT requires expectedVersion in the body and DELETE in the query (64 hex, else 400 VoucherVersionValidationError); the writer checks it after the header lock and before any write, and a stale one is 409 voucher-version-conflict with nothing changed; an update returns its new version. The three sale routes moved to routes/saleVoucher.ts (txn.ts ceiling tightened to 8463; sales.ts reviewed 2845 -> 2860). The Sales and Hallmark Sale screens keep the version and send it; the recent list's Delete reads the version just before the confirmed delete. Verified: saleVersion.routes.db.test.ts 4 passed (400 without or with a malformed token, the G170 stale save refused while the first survives, stale delete refused, unchanged save issues a new version); the sales lifecycle, integrity, two-group and hallmark round-trip DB tests pass with tokens; sales-invoice.concurrency.stale-second-save now passes in the browser (baseline entry removed; Sales 23 passed / 0 failed / 3 blocked). Milestone 3, purchases: the same token on GET/PUT/DELETE /purchases/:vchNo and /consignment-purchases/:vchNo (routes/purchaseVoucher.ts; txn.ts ceiling tightened to 8422; purchase.ts reviewed 2894 -> 2908); the Purchase, Hallmark Purchase and Consignment Purchase screens keep and send it. Verified: the stale purchase save and delete are 409 with the first save kept (purchaseTwoGroupLegs.routes.db.test.ts), the purchase lifecycle, consignment, integrity, round-trip and tax-component DB tests pass with tokens (9 files, 84 tests; the round trip ignores the token, which changes on every save by design), purchase-invoice.concurrency.stale-second-save now passes in the browser (baseline entry removed; Purchase 21 passed / 0 failed / 2 blocked). Remaining: the other Standard voucher families."
     },
     {
       "id": "N52",

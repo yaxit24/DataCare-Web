@@ -102,9 +102,14 @@ export function VoucherList({
       // The recent list is scoped to this configured book; deletion must carry the same identity. Omitting
       // it made writers fall back to mnemonic literals (for example Purchase Return -> PRT) and could not
       // delete a real desktop-shaped book such as 348.
-      await del(
-        `${deleteBase}/${encodeURIComponent(vchNo)}?coBook=${encodeURIComponent(row.coBook || book)}`,
+      const path = `${deleteBase}/${encodeURIComponent(vchNo)}?coBook=${encodeURIComponent(row.coBook || book)}`;
+      // N51 (D17): a family whose read returns a version needs it on delete. The list shows no voucher contents, so
+      // the version is read just before the delete the operator confirmed.
+      const version = await get<{ version?: string }>(path).then(
+        (view) => view?.version ?? '',
+        () => '',
       );
+      await del(version ? `${path}&expectedVersion=${encodeURIComponent(version)}` : path);
       setMsg(`Deleted #${vchNo}`);
       await load();
     } catch (e) {
