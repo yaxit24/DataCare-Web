@@ -300,3 +300,11 @@ export {
 export type { EditionAvailability, EditionCode, EditionPolicy, EditionTier } from './editions.js';
 export { FORM_EDITION, ROUTE_EDITION } from './editionTable.js';
 export { formatDesktopDate, toIsoDate } from './dates.js';
+export {
+  ITEM_OPENING_TYPES,
+  isItemOpeningType,
+  itemOpeningRow,
+  itemOpeningRowSaved,
+  itemOpeningTotals,
+} from './itemOpening.js';
+export type { ItemOpeningRow, ItemOpeningRowInput, ItemOpeningTypeCode } from './itemOpening.js';

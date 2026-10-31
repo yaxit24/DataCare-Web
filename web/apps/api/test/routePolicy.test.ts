@@ -100,8 +100,10 @@ describe('route policy registry', () => {
     // loan issue reopen/edit/delete (+6); N147 adds PUT /fine-sale/:vchNo (+1), 647 + 6 + 1 = 654.
     // N172 adds GET /vouchers/neighbour, the voucher number box's Up/Down walk: 657 + 1 = 658.
     // N199 adds the Party Opening list and read (GET /ac-opbl, GET /ac-opbl/:acCode): 658 + 2 = 660.
-    expect(routes).toHaveLength(660);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(660);
+    // N208 adds the TR_ITM_OPBL Item Opening grid: GET /stock/item-opening/rights and
+    // GET|PUT|DELETE /stock/item-opening/type/:type: 660 + 4 = 664.
+    expect(routes).toHaveLength(664);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(664);
 
     const policies = routes.map((route) => ({
       ...route,

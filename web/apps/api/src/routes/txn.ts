@@ -249,6 +249,7 @@ import { postContra, deleteContra, getContra, editContra } from '../modules/fina
 import { registerSaleVoucherRoutes } from './saleVoucher.js';
 import { registerPurchaseVoucherRoutes } from './purchaseVoucher.js';
 import { registerPartyOpeningRoutes } from './partyOpening.js';
+import { registerItemOpeningRoutes } from './itemOpening.js';
 import { VoucherVersionConflictError } from '../modules/vouchers/version.js';
 import { listYears, createYear, carryForwardOpenings } from '../modules/masters/year.js';
 import { reminders } from '../modules/finance/reminders.js';
@@ -1036,6 +1037,11 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     }
   };
   const formMutationCapabilities = async (req: FastifyRequest, form: string) => {
+    const { canUpdate, canDelete } = await formCapabilities(req, form);
+    return { canUpdate, canDelete };
+  };
+  /** The signed-in user's update, delete and print rights on a form (the desktop's FRM_EDIT/FRM_DELETE/FRM_PRINT). */
+  const formCapabilities = async (req: FastifyRequest, form: string) => {
     const s = sess(req);
     const principal = await loadPrincipal(prisma, {
       tenantId: s.tenantId,
@@ -1043,7 +1049,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       loginCoCode: s.loginCoCode,
       loginName: s.sub,
     });
-    const may = async (action: 'update' | 'delete') => {
+    const may = async (action: 'update' | 'delete' | 'print') => {
       try {
         await authorizeForm(prisma, {
           tenantId: s.tenantId,
@@ -1058,8 +1064,12 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         throw error;
       }
     };
-    const [canUpdate, canDelete] = await Promise.all([may('update'), may('delete')]);
-    return { canUpdate, canDelete };
+    const [canUpdate, canDelete, canPrint] = await Promise.all([
+      may('update'),
+      may('delete'),
+      may('print'),
+    ]);
+    return { canUpdate, canDelete, canPrint };
   };
   const body = (req: FastifyRequest) => (req.body ?? {}) as Record<string, any>;
   const extraRouteHelpers = {
@@ -1075,6 +1085,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerLoanInterestRoutes(app, extraRouteHelpers);
   registerVoucherNavigationRoutes(app, extraRouteHelpers);
   registerPartyOpeningRoutes(app, extraRouteHelpers);
+  registerItemOpeningRoutes(app, extraRouteHelpers, formCapabilities);
   const pdfRenderer = (): PdfRenderer => deps.pdfRenderer ?? new PlaywrightPdfRenderer();
   /** Render server-built HTML, mapping limits to 413/422 and a busy or slow renderer to a retryable 503. */
   const sendPdf = async (reply: FastifyReply, html: string, filename: string) => {

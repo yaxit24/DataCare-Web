@@ -27,6 +27,7 @@ import { cashBank } from './modules/cashBank.mjs';
 import { contraEntry } from './modules/contraEntry.mjs';
 import { partyOpening } from './modules/partyOpening.mjs';
 import { tagOpening } from './modules/tagOpening.mjs';
+import { itemOpening } from './modules/itemOpening.mjs';
 import { runSurface } from './surface/runner.mjs';
 
 /**
@@ -55,6 +56,7 @@ const MODULES = [
   salesOrder,
   partyOpening,
   tagOpening,
+  itemOpening,
 ];
 
 const artifacts = resolve(webRoot, 'test-results/feature-e2e');

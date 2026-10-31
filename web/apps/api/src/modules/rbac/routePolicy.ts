@@ -531,6 +531,11 @@ route('Inventory/Item Opening (non-tag)', [
   'GET /stock/item-opening/:vchNo',
   'PUT /stock/item-opening/:vchNo',
   'DELETE /stock/item-opening/:vchNo',
+  // TR_ITM_OPBL's grid per metal type (book '000', the type letter as voucher number) and the form's rights.
+  'GET /stock/item-opening/rights',
+  'GET /stock/item-opening/type/:type',
+  'PUT /stock/item-opening/type/:type',
+  'DELETE /stock/item-opening/type/:type',
 ]);
 route('Inventory/Lot Management', [
   'POST /stock/item-lot',

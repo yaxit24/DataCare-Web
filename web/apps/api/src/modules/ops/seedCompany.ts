@@ -259,10 +259,10 @@ const BOOKS: {
     table: 'BAR_DATA',
     slots: [],
   },
-  // Desktop Item Opening (TR_ITM_OPBL, MDI_FORM.cs:7701 CurBookHelp("OPSTK")): opens non-tag (loose/lot) item
-  // stock — writes ITM_OPBL + positive MAIN_STOCK with no money ledger (empty AC_DATA), on a book routed to
-  // BAR_DATA. Without this book the Item Opening screen has no book to select on a provisioned company
-  // (N104, same class as Tag Opening). Empty slots: a stock opening implies no ledger accounts.
+  // Web-only numbered Item Opening voucher book. The desktop Item Opening (TR_ITM_OPBL) has no book help
+  // (MDI_FORM.cs:7690-7699; the CurBookHelp("OPSTK") at :7701 belongs to Tag Opening) and writes book '000', which
+  // the screen now does (N208). Kept for the vouchers the older POST /stock/item-opening route wrote on this book.
+  // Empty slots: a stock opening implies no ledger accounts.
   {
     book: 'IOP',
     name: 'Item Opening',
