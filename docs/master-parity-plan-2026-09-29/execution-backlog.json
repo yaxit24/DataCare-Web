@@ -6558,6 +6558,74 @@
         "docs/handbook/web/standard-progress.md"
       ],
       "statusNote": "IMPLEMENTED. D32 recorded; per-tier progress page generated; document 15 section 5 carries the Lite packages."
+    },
+    {
+      "id": "N195",
+      "status": "implemented-unverified",
+      "action": "Sales Order feature module: 25 cases (T01-T18) through the real screen with desktop-derived expectations (TR_SALE_ORD whole-rupee pricing on the SL_AMT_TYPE basis, Order_Ledr advance legs, refusals), every failure baselined to a gap.",
+      "startAfter": [
+        "N187"
+      ],
+      "requiredProof": "run-features.mjs sales-order 14 passed / 9 failed (all baselined) / 2 blocked, bundleValid true, FEATURE_E2E_PASSED in the Real-stack job.",
+      "gapIds": "G205, G206, G207, G208",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/web/test/features/modules/salesOrder.mjs",
+        "web/apps/web/test/features/run-features.mjs",
+        "web/apps/web/test/features/baseline.json",
+        "web/apps/web/test/features/coverage-map.json"
+      ],
+      "statusNote": "IMPLEMENTED. Sales Order module executed through the real screen; defects G205-G208 baselined and planned (N196-N198); G193 and G36 instances recorded.",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "parentLabels": "P9; R03"
+    },
+    {
+      "id": "N196",
+      "status": "planned",
+      "action": "Price a sales-order line like TR_SALE_ORD: metal = round(weight × rate, 0) with the weight from SL_AMT_TYPE (F fine, G gross, else net + ghat); tax = round(net × %, 0); total = round(net + tax, 0). Server writer and the screen preview.",
+      "startAfter": [
+        "N195"
+      ],
+      "requiredProof": "sales-order.formula.whole-rupees and sales-order.create.amounts pass and leave the baseline; a DB test pins 61,234 / 1,908 / 65,517 for the module's line O.",
+      "gapIds": "G205",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "parentLabels": "P9; R03"
+    },
+    {
+      "id": "N197",
+      "status": "planned",
+      "action": "The order's tender rows like TR_SALE_ORD: cash, UPI, cheque (bank), card, old gold, old silver and scheme amounts editable on the screen, stored on SL_ORD_DATA and posted per Order_Ledr legs 01-06 and 12-13; ADV_AMT is their sum.",
+      "startAfter": [
+        "N195"
+      ],
+      "requiredProof": "sales-order.create.header-tender and sales-order.create.tender-modes pass and leave the baseline.",
+      "gapIds": "G206",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "parentLabels": "P9; R03"
+    },
+    {
+      "id": "N198",
+      "status": "planned",
+      "action": "Provisioning: the SALES ORDER book's BOOK_DETL slot 1 is the cash account, and sale books get slot 4 (the advance account Sales_Rojmel uses); backfill existing companies.",
+      "startAfter": [
+        "N195"
+      ],
+      "requiredProof": "sales-order.create.advance-ledger and sales-order.journey.order-to-sale pass and leave the baseline; a provisioning test asserts both slots.",
+      "gapIds": "G207, G208",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "parentLabels": "P9; R03"
     }
   ],
   "amendments": [

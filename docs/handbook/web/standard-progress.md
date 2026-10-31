@@ -6,10 +6,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 5 | 3 | 0 |
+| Lite (first, D32) | 49 | 11 | 7 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
 | Standard (added by Standard) | 36 | 0 | 0 | 0 |
-| **Standard total** | **114** | **6** | **4** | **0** |
+| **Standard total** | **114** | **12** | **8** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
@@ -49,20 +49,20 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Report | Sales Report | `/reports/sales-register` | REPORT | — | no module | — |
 | Report | Purchase Rpt | `/reports/purchase-register` | REPORT | — | no module | — |
 | Report | Approval Rpt | `/reports/approval-report` | REPORT | — | no module | — |
-| Report | Order Report | `/txn/sales-order` | REPORT | — | no module | — |
+| Report | Order Report | `/txn/sales-order` | REPORT | sales-order | module, 9 open | G193, G205, G206, G207, G208, G36 |
 | Report | Cash Bank | `/reports/cash-book` | REPORT | — | no module | — |
 | Report | Gst Report | `/reports/gst-report` | REPORT | — | no module | — |
 | Report | HuId Report | `/reports/huid` | REPORT | — | no module | — |
 | Transaction | Purchase | `/txn/purchase` | PARTIAL | purchase-invoice | module green | — |
 | Transaction | Purchase Rtn | `/txn/purchase-return` | PARTIAL | purchase-return | module, 4 open | G198, G199, G201 |
-| Transaction | Sales Order | `/txn/sales-order` | PARTIAL | — | no module | — |
+| Transaction | Sales Order | `/txn/sales-order` | PARTIAL | sales-order | module, 9 open | G193, G205, G206, G207, G208, G36 |
 | Transaction | Sales | `/txn/sales`, `/txn/hallmark-sale` | PARTIAL | sales-invoice | module green | — |
 | Transaction | Sales Return | `/txn/sale-return` | PARTIAL | sales-return | module, 5 open | G190, G193, G194 |
 | Transaction | Wh Sales | `/txn/wholesale-sale` | PARTIAL | — | no module | — |
-| Transaction | Cash Received | `/txn/receipt` | PARTIAL | — | no module | — |
-| Transaction | Cash Payment | `/txn/payment` | PARTIAL | — | no module | — |
-| Transaction | Bank Received | `/txn/receipt?mode=BANK` | PARTIAL | — | no module | — |
-| Transaction | Bank Payment | `/txn/payment?mode=BANK` | PARTIAL | — | no module | — |
+| Transaction | Cash Received | `/txn/receipt` | PARTIAL | cash-bank | module green | — |
+| Transaction | Cash Payment | `/txn/payment` | PARTIAL | cash-bank | module green | — |
+| Transaction | Bank Received | `/txn/receipt?mode=BANK` | PARTIAL | cash-bank | module green | — |
+| Transaction | Bank Payment | `/txn/payment?mode=BANK` | PARTIAL | cash-bank | module green | — |
 | Transaction | Contra Entry | `/txn/contra` | PARTIAL | — | no module | — |
 
 ## Basic — 29 menus (added by Basic)

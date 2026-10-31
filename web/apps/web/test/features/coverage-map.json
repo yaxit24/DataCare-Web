@@ -60,6 +60,14 @@
         "web/apps/web/app/(app)/txn/receipt/page.tsx",
         "web/apps/web/app/(app)/txn/payment/page.tsx"
       ]
+    },
+    "salesOrder": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/sales-order/page.tsx",
+        "web/apps/web/lib/salesOrderForm.ts",
+        "web/apps/api/src/modules/sales/salesOrder.ts",
+        "web/apps/api/src/modules/sales/orderDoc.ts"
+      ]
     }
   }
 }
