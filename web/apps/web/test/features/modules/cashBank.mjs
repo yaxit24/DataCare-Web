@@ -419,6 +419,88 @@ export const cashBank = {
       'The cash-limit setting is covered by refusal.cash-limit; employee-mandatory follows.',
     ),
     pending('journey', 'T18', 'The party ledger and cash book reports are checked in package L6.'),
-    pending('branches', 'T02', 'Bank mode with a bank account and cheque number follows.'),
+    C(
+      'create.bank-receipt',
+      'T02',
+      'mutation',
+      'Bank_Ledr (Ac_Ledr.cs:585-593): BANK REC posts 01 party CR / 02 bank DR the amount; the web chooses the bank on the screen',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openForm(page, '/txn/receipt?mode=BANK');
+        assert.equal(await page.getByLabel('Mode', { exact: true }).inputValue(), 'bank');
+        const bank = page.getByLabel('Bank account', { exact: true });
+        await bank.fill(PARTIES.bank.code);
+        await bank
+          .locator('xpath=..')
+          .getByText(PARTIES.bank.code, { exact: true })
+          .first()
+          .waitFor();
+        await bank.press('Enter');
+        await pickParty(page, PARTIES.local.code);
+        await page.getByLabel('Amount', { exact: true }).fill('2500');
+        const response = await save(page, 'Save Receipt');
+        assert.equal(response.status(), 201, await response.text());
+        const vchNo = String((await response.json()).vchNo).padStart(5, '0');
+        const rows = await legs(ctx, RECEIPT_BOOK, vchNo);
+        const shape = rows.map((r) => [r.code, r.ac, r.dr, r.cr]);
+        assert.deepEqual(shape, [
+          ['01', PARTIES.local.code, 0, 2500],
+          ['02', PARTIES.bank.code, 2500, 0],
+        ]);
+        return {
+          observation: `voucher ${vchNo}: ${JSON.stringify(shape)}`,
+          expected: '01 party CR / 02 bank DR 2,500',
+          database: { legs: rows },
+          downstream: { legs: shape.length },
+        };
+      },
+    ),
+    C(
+      'create.cheque-receipt',
+      'T02',
+      'mutation',
+      'Bank_Ledr (Ac_Ledr.cs:585-593) writes A.CHQ_NO on every leg of a cheque receipt',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openForm(page, '/txn/receipt?mode=BANK');
+        await page.getByLabel('Mode', { exact: true }).selectOption('cheque');
+        const bank = page.getByLabel('Bank account', { exact: true });
+        await bank.fill(PARTIES.bank.code);
+        await bank
+          .locator('xpath=..')
+          .getByText(PARTIES.bank.code, { exact: true })
+          .first()
+          .waitFor();
+        await bank.press('Enter');
+        await page
+          .locator('.field', { has: page.locator('label', { hasText: /^Cheque No$/ }) })
+          .locator('input')
+          .fill('123456');
+        await pickParty(page, PARTIES.local.code);
+        await page.getByLabel('Amount', { exact: true }).fill('4000');
+        const response = await save(page, 'Save Receipt');
+        assert.equal(response.status(), 201, await response.text());
+        const vchNo = String((await response.json()).vchNo).padStart(5, '0');
+        const rows = await ctx.rows(
+          `SELECT right("LEDR_KEY",2) code,"AC_CODE" ac,coalesce("CHQ_NO",'') chq,"DR_AMT"::float dr,"CR_AMT"::float cr
+             FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${RECEIPT_BOOK}' AND "VCH_NO"=$2 ORDER BY "LEDR_KEY"`,
+          vchNo,
+        );
+        assert.deepEqual(
+          rows.map((r) => [r.code, r.ac, r.chq, r.dr, r.cr]),
+          [
+            ['01', PARTIES.local.code, '123456', 0, 4000],
+            ['02', PARTIES.bank.code, '123456', 4000, 0],
+          ],
+          JSON.stringify(rows),
+        );
+        return {
+          observation: `voucher ${vchNo}: cheque 123456 on both legs`,
+          expected: 'CHQ_NO 123456 on legs 01 and 02',
+          database: { legs: rows },
+          downstream: { legs: rows.length },
+        };
+      },
+    ),
   ],
 };

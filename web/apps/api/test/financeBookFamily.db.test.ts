@@ -293,6 +293,14 @@ describe.runIf(RUN)('D1 receipt/payment book family and slot-2 kasar', () => {
       vchDate: '2024-04-01',
     } as never);
     expect((await legs()).map((r) => r.ac)).toEqual([PARTY, BANK]);
+    // Bank_Ledr (Ac_Ledr.cs:585-593) writes the voucher's cheque number on every leg.
+    const cheques = (await withTenant(owner, TENANT, (tx) =>
+      tx.$queryRawUnsafe(
+        `SELECT coalesce("CHQ_NO",'') chq FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='011' ORDER BY "LEDR_KEY"`,
+        TENANT,
+      ),
+    )) as Array<{ chq: string }>;
+    expect(cheques.map((row) => row.chq)).toEqual(['000123', '000123']);
   });
 
   it('D1-7: a web book with CASH in slots 1 and 2 refuses a write-off instead of posting it to cash', async () => {
