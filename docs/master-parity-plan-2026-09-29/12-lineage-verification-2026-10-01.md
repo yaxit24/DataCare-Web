@@ -2346,6 +2346,17 @@ book refusal. Chrome DevTools: a three-row voucher entered through the lookups, 
 descriptions and the signature footer, reopened with Enter in Vch No, edited, and deleted with the desktop prompt;
 Lighthouse on the reopened grid scores Accessibility, Best Practices, SEO and Agentic Browsing 100 with no failed audit.
 Desktop-runtime comparison and parent acceptance remain open.
+### N207 — The voucher list reads only books the user may open (G220)
+
+`GET /vouchers/recent` and `GET /vouchers/neighbour` now read the requested book's BOOK_DATA.MAIN_BOOK and require read
+rights on a form that owns it; an administrator passes and a book with no owning form is refused with 403. The owners
+come from `web/apps/api/src/modules/vouchers/bookForms.ts`: the desktop's MENU_NAME per MAIN_BOOK (MS_UPDATE.cs)
+resolved through the rights catalogue, the pages' BookSelect families, and the web-only books' screens.
+
+Evidence: `web/apps/api/test/voucherListRights.db.test.ts` (red against main) shows every provisioned book family maps
+to an existing form, and a Contra-only user lists CON but is refused FJV and an unknown book while an administrator may
+list both; the whole feature suite still passes.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2479,7 +2490,7 @@ Desktop-runtime comparison and parent acceptance remain open.
 | N204 | — | planned (G217: the karigar weight block on the tag grid) |
 | N205 | — | implemented-unverified, evidence in this change (G218: the production server starts from an empty route cache; suites refuse occupied ports) |
 | N206 | — | implemented-unverified, evidence in this change (G219: Fine Jv Entry is the TR_CONTRA FINE JV grid with paired rows, 33-character fine legs, remark rebuild and the desktop refusals; Contra and Journal refuse another family's book and need print rights; 18 browser cases pass, 5 blocked) |
-| N207 | — | planned (G220: the generic voucher list and number-box routes need the owning form's view right for the requested book) |
+| N207 | — | implemented-unverified, evidence in this change (G220: the voucher list and number-box routes require read rights on a form that owns the book's MAIN_BOOK) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 
