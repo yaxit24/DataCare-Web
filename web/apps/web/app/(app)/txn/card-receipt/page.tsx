@@ -225,7 +225,7 @@ export default function CardReceiptPage() {
               New
             </button>
           )}
-          <button className="primary" disabled={busy || !coBook}>
+          <button className="primary" data-save-mnemonic disabled={busy || !coBook}>
             {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : 'Save Card Receipt'}
           </button>
         </div>

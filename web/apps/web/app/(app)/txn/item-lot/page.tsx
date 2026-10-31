@@ -430,7 +430,7 @@ export default function ItemLotPage() {
               + Add lot
             </button>
             <span className="spacer" />
-            <button ref={submitRef} className="primary" disabled={busy}>
+            <button ref={submitRef} className="primary" data-save-mnemonic disabled={busy}>
               {busy ? 'Posting…' : loadedVchNo ? 'Update Lot Intake' : 'Post Lot Intake'}
             </button>
           </div>

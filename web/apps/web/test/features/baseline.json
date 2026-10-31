@@ -47,11 +47,6 @@
       "reason": "Orig Purchase Book is a required select with no preselection (two purchase books), so the browser blocks Save on a free-standing return; the desktop needs only a party and a voucher number (TR_KR_ISU.cs:4986-4999)."
     },
     {
-      "case": "purchase-return.keyboard.alt-s-saves",
-      "gap": "G200",
-      "reason": "The Purchase Return save button carries no data-save-mnemonic, so Alt+S does nothing; the desktop button is &Save (TR_KR_ISU.cs:2330)."
-    },
-    {
       "case": "purchase-return.report.register-lists-return",
       "gap": "G201",
       "reason": "The register requires BOOK_TBL_NAME 'PR_DATA' and seedCompany leaves it NULL for PRT, so it lists no return; the desktop sets it for PURC RETURN books (MS_UPDATE.cs:7849)."

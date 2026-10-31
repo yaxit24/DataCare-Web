@@ -2085,6 +2085,20 @@ narrower than recorded: it is the sale-return delete (and any writer whose route
 Done when: every daily voucher screen has a module like this, run on shared real data, and each fixed defect
 leaves the baseline in the change that fixes it.
 
+### N190 — Alt+S saves on every voucher screen (G200)
+
+N163 made Alt+S press the button marked `data-save-mnemonic`, the desktop's `&Save` mnemonic (for example
+`TR_KR_ISU.cs:2330`), but 20 voucher pages, Purchase Return among them, had an unmarked primary Save. Those 20 are
+now marked, and two more found by the new scan (Lot Intake on `item-lot`, Post Weight Change on `tag-weight-diff`).
+`web/apps/web/test/saveMnemonicCoverage.test.ts` reads every `app/(app)/txn/*/page.tsx` and fails when a primary
+button labelled Save, Update, Post, Issue or Receive is unmarked, unless the page renders a shared form that marks
+its own button; it also refuses two marks on one page. Two pages with several independent forms (`membership`,
+`scheme`) are listed with their reason: Alt+S there must press the focused form's Save, which `findSaveButton`
+does not do yet, and neither menu is in the Standard edition.
+
+Evidence: `purchase-return.keyboard.alt-s-saves` passes in the browser and leaves the baseline; a negative control
+(Purchase Return unmarked) fails the scan.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2201,7 +2215,7 @@ leaves the baseline in the change that fixes it.
 | N187 | — | implemented-unverified, evidence in this change (Purchase Return module 15/5/2 on shared real data; found G198–G201; narrows G193) |
 | N188 | — | planned (G198: purchase return and purchase line amounts and bill total in whole rupees, as TR_KR_ISU and TR_PURC) |
 | N189 | — | planned (G199: the original purchase book is optional on a purchase return and survives reopen) |
-| N190 | — | planned (G200: mark the save button on the 20 remaining voucher screens so Alt+S saves) |
+| N190 | — | implemented-unverified, evidence in this change (G200: 22 voucher screens marked; a unit scan keeps every voucher page's primary Save marked; purchase-return Alt+S passes in the browser) |
 | N191 | — | planned (G201: provision BOOK_TBL_NAME for purchase-family books and backfill existing companies) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |

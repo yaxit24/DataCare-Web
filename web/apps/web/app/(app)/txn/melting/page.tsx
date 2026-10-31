@@ -725,7 +725,7 @@ export default function MeltingPage() {
             Delete
           </button>
         )}
-        <button type="button" className="primary" onClick={save} disabled={busy}>
+        <button type="button" className="primary" data-save-mnemonic onClick={save} disabled={busy}>
           {busy ? 'Working…' : loadedVoucherNo ? 'Update' : 'Save'}
         </button>
       </div>

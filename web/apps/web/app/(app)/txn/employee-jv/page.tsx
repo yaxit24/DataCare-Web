@@ -203,7 +203,7 @@ export default function EmployeeJvPage() {
               New
             </button>
           )}
-          <button className="primary" disabled={busy || !coBook}>
+          <button className="primary" data-save-mnemonic disabled={busy || !coBook}>
             {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : 'Post Salary JV'}
           </button>
         </div>

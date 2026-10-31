@@ -421,7 +421,7 @@ export default function DhrnIssuePage() {
             <span className="muted" style={{ marginRight: 16 }}>
               Fine {inr(totalFine)} g · <b>Total ₹{inr(totalAmount)}</b>
             </span>
-            <button className="primary" disabled={busy}>
+            <button className="primary" data-save-mnemonic disabled={busy}>
               {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : 'Receive Loan'}
             </button>
             {loadedVch && (
