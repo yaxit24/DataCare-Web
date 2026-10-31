@@ -41,7 +41,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:?set in .env}
       APP_VERSION: ${APP_VERSION:-0.0.0}
       APP_TENANT_ID: ${APP_TENANT_ID:?set in .env}
-      APP_EDITION: ${APP_EDITION:-S}
+      APP_EDITION: ${APP_EDITION:-L}
       APP_EDITION_BETA: ${APP_EDITION_BETA:-0}
       # e-Invoice / IRN. Passed through UNSET-by-default on purpose: with NODE_ENV=production the API refuses
       # to issue an IRN rather than fabricating one, so an absent value fails loudly at the point of use

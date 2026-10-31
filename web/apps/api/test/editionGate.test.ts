@@ -64,7 +64,7 @@ function fakePrisma() {
   return { $transaction: vi.fn((fn: (t: typeof tx) => unknown) => fn(tx)) };
 }
 
-async function appWith(edition: { code: 'S' | 'E'; beta: boolean } | undefined) {
+async function appWith(edition: { code: 'L' | 'S' | 'E'; beta: boolean } | undefined) {
   return buildApp({
     prisma: fakePrisma(),
     secret: SECRET,
@@ -105,6 +105,7 @@ describe('edition gate over HTTP', () => {
     );
     // Building with an edition is itself the coverage proof: every route's static rights form must be classified,
     // or buildApp throws edition-table-missing-form at boot.
+    apps.lite = await appWith({ code: 'L', beta: false });
     apps.standard = await appWith({ code: 'S', beta: false });
     apps.beta = await appWith({ code: 'S', beta: true });
     apps.ungated = await appWith(undefined);
@@ -148,6 +149,33 @@ describe('edition gate over HTTP', () => {
       const response = await post(name, '/dhrn/issue');
       expect(response.statusCode, name).toBe(403);
       expect(response.json().error, name).toBe('forbidden');
+    }
+  });
+
+  it('refuses a Basic route in Lite (the default edition, D33) and passes a Lite route on to the rights check', async () => {
+    const refused = await get('lite', '/reports/rojmel');
+    expect(refused.statusCode).toBe(403);
+    expect(refused.json()).toEqual({
+      error: 'edition-unavailable',
+      form: 'Reports/Rojmel',
+      edition: 'L',
+    });
+    const save = await post('lite', '/settings');
+    expect(save.statusCode).toBe(403);
+    expect(save.json()).toEqual({
+      error: 'edition-unavailable',
+      form: 'Utilities/Settings',
+      edition: 'L',
+    });
+    const lite = await get('lite', '/masters/items');
+    expect(lite.statusCode).toBe(403);
+    expect(lite.json().error).toBe('forbidden');
+  });
+
+  it('never refuses the configuration reads every edition needs (MS_OPNCOMP loads CO_SET in every edition)', async () => {
+    for (const url of ['/settings', '/integrations/device-settings']) {
+      const response = await get('lite', url);
+      expect(response.json().error, url).not.toBe('edition-unavailable');
     }
   });
 

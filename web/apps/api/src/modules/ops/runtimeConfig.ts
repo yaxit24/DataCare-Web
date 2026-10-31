@@ -11,7 +11,10 @@ export interface RuntimeConfig {
   seedDemo: boolean;
   secureCookies: boolean;
   logger: boolean;
-  /** The desktop edition this deployment runs (APP_EDITION, default Standard) and whether Beta is on (N171). */
+  /**
+   * The desktop edition this deployment runs (APP_EDITION) and whether Beta is on (N171). The default is Lite (D33):
+   * Lite is the edition being completed, so the menus of Basic and above stay behind Beta until their turn.
+   */
   edition: EditionPolicy;
 }
 
@@ -57,7 +60,7 @@ export function resolveRuntimeConfig(env: NodeJS.ProcessEnv = process.env): Runt
   if (seedDemo && !demoPassword)
     problems.push('DEMO_PASSWORD is required when SEED_DEMO is enabled');
 
-  const editionCode = env.APP_EDITION?.trim().toUpperCase() || 'S';
+  const editionCode = env.APP_EDITION?.trim().toUpperCase() || 'L';
   if (!isEditionCode(editionCode)) problems.push('APP_EDITION must be one of L, B, S, U, P, A, E');
 
   if (isProduction) {
@@ -89,7 +92,7 @@ export function resolveRuntimeConfig(env: NodeJS.ProcessEnv = process.env): Runt
     secureCookies: isProduction,
     logger: isProduction,
     edition: {
-      code: isEditionCode(editionCode) ? editionCode : 'S',
+      code: isEditionCode(editionCode) ? editionCode : 'L',
       beta: isEnabled(env.APP_EDITION_BETA),
     },
   };

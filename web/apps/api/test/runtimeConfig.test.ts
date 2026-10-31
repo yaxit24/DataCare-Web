@@ -107,9 +107,9 @@ describe('runtime configuration', () => {
 });
 
 describe('desktop edition (N171)', () => {
-  it('defaults to Standard with Beta off', () => {
+  it('defaults to Lite with Beta off (D33: Lite is completed first)', () => {
     expect(resolveRuntimeConfig({ NODE_ENV: 'development' }).edition).toEqual({
-      code: 'S',
+      code: 'L',
       beta: false,
     });
   });
