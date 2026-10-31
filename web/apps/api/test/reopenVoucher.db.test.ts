@@ -222,9 +222,10 @@ describe.runIf(RUN)('reopening a saved voucher (plan F2.1)', () => {
   it('a contra round-trips its accounts, amount and narration', async () => {
     const created = await postContra(runtime, {
       scope: scopeFor(CONTRA_BOOK),
-      fromAc: '00001',
-      toAc: '00008',
-      amount: 7250,
+      lines: [
+        { crdr: 'DR', acCode: '00008', amount: 7250 },
+        { crdr: 'CR', acCode: '00001', amount: 7250 },
+      ],
       vchDate: '2024-05-10',
       itDesc: 'transfer to bank',
       mainUser: 'reopen',
@@ -267,19 +268,23 @@ describe.runIf(RUN)('reopening a saved voucher (plan F2.1)', () => {
   it('a fine JV round-trips its metal WEIGHT, which is the value that matters', async () => {
     const created = await postFineJv(runtime, {
       scope: scopeFor(FJV_BOOK),
-      fromAc: '00050',
-      toAc: '00001',
-      // FineJvInput is keyed fineWt/metal — a fine JV moves metal, not money.
-      fineWt: 12.5,
+      // The TR_CONTRA grid: row 1 gives (DR) and its counter row receives (CR) the fine metal.
+      lines: [
+        { crdr: 'DR', acCode: '00050', fine: 12.5 },
+        { crdr: 'CR', acCode: '00001', fine: 12.5 },
+      ],
       metal: 'G',
       vchDate: '2024-05-12',
       mainUser: 'reopen',
-    } as never);
+    });
     const vchNo = String(created.vchNo).padStart(5, '0');
 
     const read = (await getFineJv(runtime, scopeFor(FJV_BOOK), vchNo)) as Record<string, unknown>;
     expect(read.voucherNo).toBe(vchNo);
-    expect(read.fineWt).toBeCloseTo(12.5, 3);
+    expect(read.lines).toMatchObject([
+      { crdr: 'DR', acCode: '00050', fine: 12.5 },
+      { crdr: 'CR', acCode: '00001', fine: 12.5 },
+    ]);
     expect(read.metal).toBe('G');
   });
 

@@ -199,9 +199,10 @@ const DAY = `${startYear}-06-15`;
   it('contra is saved in the provisioned CONTRA book', async () => {
     const saved = await request('POST', '/contra', {
       coBook: 'CON',
-      fromAc: 'CASH',
-      toAc: 'BANK',
-      amount: 500,
+      lines: [
+        { crdr: 'DR', acCode: 'BANK', amount: 500 },
+        { crdr: 'CR', acCode: 'CASH', amount: 500 },
+      ],
       vchDate: DAY,
     });
     expect(saved.statusCode, saved.body).toBe(201);

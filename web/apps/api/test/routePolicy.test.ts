@@ -100,8 +100,9 @@ describe('route policy registry', () => {
     // loan issue reopen/edit/delete (+6); N147 adds PUT /fine-sale/:vchNo (+1), 647 + 6 + 1 = 654.
     // N172 adds GET /vouchers/neighbour, the voucher number box's Up/Down walk: 657 + 1 = 658.
     // N199 adds the Party Opening list and read (GET /ac-opbl, GET /ac-opbl/:acCode): 658 + 2 = 660.
-    expect(routes).toHaveLength(660);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(660);
+    // FineJvBill adds GET /fine-jv/:vchNo/print: 660 + 1 = 661.
+    expect(routes).toHaveLength(661);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(661);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -119,6 +120,28 @@ describe('route policy registry', () => {
       expect(getFormEntry(policy.form!)).toBeDefined();
       expect(policy.action).toMatch(/^(read|create|update|delete|print)$/);
     }
+  });
+
+  it('binds Fine JV printing to the Fine JV form and print scope', () => {
+    expect(routePolicyFor('GET', '/fine-jv/:vchNo/print')).toMatchObject({
+      kind: 'form',
+      form: 'Cash / Bank/Fine JV (metal transfer)',
+      action: 'print',
+      businessScope: true,
+    });
+  });
+
+  it('requires print rights for the Contra and Journal documents of TR_CONTRA (TR_CONTRA.cs:3000-3004)', () => {
+    expect(routePolicyFor('GET', '/contra/:vchNo/print')).toMatchObject({
+      kind: 'form',
+      form: 'Cash / Bank/Contra',
+      action: 'print',
+    });
+    expect(routePolicyFor('GET', '/journal/:vchNo/print')).toMatchObject({
+      kind: 'form',
+      form: 'Cash / Bank/Journal Voucher',
+      action: 'print',
+    });
   });
 
   it('binds saved Return browse/read and metadata updates to the Sales Return form', () => {

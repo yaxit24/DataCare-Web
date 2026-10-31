@@ -6,10 +6,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 15 | 11 | 0 |
+| Lite (first, D32) | 49 | 16 | 12 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
 | Standard (added by Standard) | 36 | 0 | 0 | 0 |
-| **Standard total** | **114** | **16** | **12** | **0** |
+| **Standard total** | **114** | **17** | **13** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
@@ -24,7 +24,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Company | Data Backup | `/backup` | CONTAINED | — | no module | — |
 | ExtraTran | Approval Isu | `/txn/tour` | PARTIAL | — | no module | — |
 | ExtraTran | Approval Rtn | `/txn/tour-return` | PARTIAL | — | no module | — |
-| ExtraTran | Fine Jv Entry | `/txn/fine-jv` | PARTIAL | — | no module | — |
+| ExtraTran | Fine Jv Entry | `/txn/fine-jv` | PARTIAL | fine-jv | module green | — |
 | Master | Party | `/masters/party`, `/masters/accounts` | PARTIAL | — | no module | — |
 | Master | Address | `/masters/addresses` | PARTIAL | — | no module | — |
 | Master | Product | `/masters/products` | PARTIAL | — | no module | — |

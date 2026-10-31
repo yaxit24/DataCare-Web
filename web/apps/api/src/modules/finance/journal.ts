@@ -15,6 +15,7 @@ import {
   insertDesktopDeleteAuditTx,
   insertHiddenIdentityTx,
   replaceWriteSetTx,
+  requireBookFamily,
   text,
   num,
   voucherKey,
@@ -69,6 +70,7 @@ async function writeJournalTx(
   }
   completeFinanceScope(input.scope);
   const book = await configuredBookTx(tx, input.scope);
+  requireBookFamily(book, 'JOURNAL', 'journal');
   const key = voucherKey(input.scope, identity.voucherNo);
   const narration = text(input.narration);
   const ledger: LedgerLine[] = raw.map((line) => {
@@ -163,6 +165,7 @@ export async function getJournal(prisma: any, scope: VoucherScope, requested: nu
   completeFinanceScope(scope);
   const voucherNo = formatVoucherNo(requested);
   return withTxBudget(prisma, scope.tenantId, 'read', async (tx) => {
+    requireBookFamily(await configuredBookTx(tx, scope), 'JOURNAL', 'journal');
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"HD_VCH_NO","MAIN_USER","AC_CODE","DR_AMT","CR_AMT","IT_DESC" FROM "CONTRA_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO"`,
       scope.tenantId,
@@ -192,6 +195,7 @@ export async function editJournal(prisma: any, input: JournalInput, requested: n
   completeFinanceScope(input.scope);
   const date = input.vchDate ? new Date(input.vchDate) : new Date();
   return withTxBudget(prisma, input.scope.tenantId, 'voucher', async (tx) => {
+    requireBookFamily(await configuredBookTx(tx, input.scope), 'JOURNAL', 'journal');
     const { identity } = await editIdentityTx(tx, {
       table: 'CONTRA_DATA',
       scope: input.scope,
@@ -221,6 +225,7 @@ export async function deleteJournal(
   const scope = input.scope,
     voucherNo = formatVoucherNo(input.vchNo);
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx) => {
+    requireBookFamily(await configuredBookTx(tx, scope), 'JOURNAL', 'journal');
     const { persisted: header, identity } = await editIdentityTx(tx, {
       table: 'CONTRA_DATA',
       scope,

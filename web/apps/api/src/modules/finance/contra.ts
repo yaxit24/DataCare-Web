@@ -17,6 +17,7 @@ import {
   insertDesktopDeleteAuditTx,
   insertHiddenIdentityTx,
   replaceWriteSetTx,
+  requireBookFamily,
   text,
   voucherKey,
   type VoucherIdentity,
@@ -43,13 +44,8 @@ export interface ContraLine {
 
 export interface ContraInput {
   scope: VoucherScope;
-  /** The grid, row 1 first. */
-  lines?: ContraLine[];
-  /** The earlier two-account form: Dr `toAc`, Cr `fromAc` (kept for existing callers). */
-  fromAc?: string;
-  toAc?: string;
-  toAcName?: string;
-  amount?: number;
+  /** The TR_CONTRA grid, row 1 first (TR_CONTRA.cs:1530-1545, :2760-2866). */
+  lines: ContraLine[];
   /** Item type selector (TR_CONTRA.cs:2786 cboItemTyp first character); 'A' = amount. */
   itemType?: string;
   empCode?: string;
@@ -63,19 +59,9 @@ const CONTRA_WRITE_TABLES = ['CONTRA_DATA', 'AC_DATA', 'ROJ_MEL_DATA'] as const;
 
 const numv = (v: unknown): number => Number(v ?? 0);
 
-/** The grid of a request: `lines`, or the two-account form as row 1 DR `toAc` and row 2 CR `fromAc`. */
+/** The grid of a request (the desktop screen has no other form of entry). */
 export function contraLines(input: ContraInput): ContraLine[] {
-  const raw: ContraLine[] = input.lines?.length
-    ? input.lines
-    : [
-        {
-          crdr: 'DR',
-          acCode: input.toAc ?? '',
-          acName: input.toAcName,
-          amount: Number(input.amount ?? 0),
-        },
-        { crdr: 'CR', acCode: input.fromAc ?? '', amount: Number(input.amount ?? 0) },
-      ];
+  const raw: ContraLine[] = Array.isArray(input.lines) ? input.lines : [];
   // TR_CONTRA.cs:2764 skips a row with no account or no amount.
   const lines = raw
     .map((line) => ({
@@ -173,6 +159,7 @@ export async function postContra(
       VCH_NO: formatVoucherNo(vchNo),
     };
     const book = await configuredBookTx(tx, input.scope);
+    requireBookFamily(book, 'CONTRA', 'contra');
     const rows = contraRows(lines);
     const ledger = contraLedger(key, book.shortName, rows, vchDate);
     assertBalanced(ledger);
@@ -280,6 +267,7 @@ export async function getContra(
   completeFinanceScope(scope);
   const voucherNo = formatVoucherNo(requestedVoucherNo);
   return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
+    requireBookFamily(await configuredBookTx(tx, scope), 'CONTRA', 'contra');
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"HD_VCH_NO","MAIN_USER","SR_NO","LDR_TYPE","CRDR_TYPE","AC_CODE","AC_NAME",
               "LD_CODE","DR_AMT","CR_AMT","IT_DESC"
@@ -320,6 +308,7 @@ export async function editContra(
   completeFinanceScope(input.scope);
   const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
   return withTxBudget(prisma, input.scope.tenantId, 'voucher', async (tx: any) => {
+    requireBookFamily(await configuredBookTx(tx, input.scope), 'CONTRA', 'contra');
     const { identity } = await editIdentityTx(tx, {
       table: 'CONTRA_DATA',
       scope: input.scope,
@@ -345,6 +334,7 @@ export async function deleteContra(
   const scope = input.scope;
   const voucherNo = formatVoucherNo(input.vchNo);
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
+    requireBookFamily(await configuredBookTx(tx, scope), 'CONTRA', 'contra');
     // A contra has a row per grid row (TR_CONTRA.cs:2760-2866), so only the shared identity columns are locked as
     // the header; the audit takes the row columns from SR_NO 1.
     const { persisted, identity } = await editIdentityTx(tx, {

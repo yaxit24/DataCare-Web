@@ -229,6 +229,8 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G216 | High | Tag opening stock rows did not follow Tag_Opbl_Stk, and its refusals used web wording | `unified/src/csharp/DataCareNext/Ac_Stock.cs`; `unified/src/csharp/DataCareNext/TR_TAG_OPBL.cs` | `web/apps/api/src/modules/stock/stockVoucherLifecycle.ts`; `web/apps/api/src/modules/shared/desktopMessages.ts` | `Ac_Stock.Tag_Opbl_Stk` (`Ac_Stock.cs:22-36`) writes an opening tag as P / 'TAGOP' / 'TAG OPBL' with ITM_QTY 1 and the tag's wastage, labour rate, karigar cost and design; an Only Tag Entry tag as I / the book's short name / 'TAG GEN'; and one 'O' row per voucher taking the stock item out by the voucher's totals. The migrated data agrees (1169 P rows, 159 I rows, 31 relief rows with TAG_NO 'N'). The web wrote 'TAGOP' and the book's own name for both menus, TR_TYPE P for TAG GEN tags and ITM_QTY = pieces, and one relief row per tag whenever a stock item was sent, so an opening voucher could take loose stock out. A tag typed twice and the delete of a sold tag were refused with web texts instead of "Duplicate Tag No" (`:8562`) and "You Cant Delete This Voucher Because  Tag Use in Sales Transection...." (`:11383`). | N203 |
 | G217 | Med | The tag grid's karigar weight block is not saved | `unified/src/csharp/DataCareNext/TR_TAG_OPBL.cs`; `unified/src/csharp/DataCareNext/Ac_Stock.cs` | `web/apps/api/src/modules/stock/stockVoucherLifecycle.ts`; `web/apps/web/app/(app)/txn/tag-opening/page.tsx` | Found in the Chrome check of N203: the desktop grid carries KrOthWt, KrNwt, KrGht%, KrGht, KrTouch, KrWst% and KrFine (columns 17-23, `TR_TAG_OPBL.cs:5146-5172`), works out KrNwt = gross − KrOthWt and KrFine = (KrNwt + KrGht) × (KrTouch + KrWst%) / 100 (`:6686-6826`), saves them to BAR_DETL (`:9325-9330`), and Tag_Opbl_Stk copies them to MAIN_STOCK KR_NWT, KR_TOUCH, KR_WEST and KR_FINE. All 1359 migrated tag stock rows carry KR_NWT. The web has no input for them, so they stay 0. | N204 |
 | G218 | Med | Browser suites could test an older build | — (test infrastructure) | `web/apps/web/next.config.mjs`; `web/apps/web/test/real-stack-target.mjs`; `web/apps/web/test/features/harness.mjs` | Found while verifying N203. The build clears the route cache (N186), but turbo replays a cached web build without running that step, so the pages a previous server cached survived and a fresh `next start` served an older chunk (`x-nextjs-cache: HIT`); a full feature run failed the reopen case on it. Separately, a suite whose ports were still held by a demo stack got a 200 from that stack's readiness probe and ran against its build: the new Next server could not bind the port. | N205 |
+| G219 | High | Fine Jv Entry was a reduced two-account form with reversed fine signs, and the routes sharing CONTRA_DATA reached each other's books | `unified/src/csharp/DataCareNext/MDI_FORM.cs:8360-8365`; `unified/src/csharp/DataCareNext/TR_CONTRA.cs:1426-1446,2666-2890,2951-2968,3000-3069`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs:846-848`; `unified/src/csharp/DataCareNext/Ac_Rojmel.cs:342-344`; `unified/src/csharp/DataCareNext/Ac_Tax.cs:686-694` | `web/apps/api/src/modules/finance/fineJv.ts`; `web/apps/api/src/routes/fineJv.ts`; `web/apps/web/app/(app)/txn/fine-jv/page.tsx`; `web/apps/api/src/modules/finance/contra.ts`; `web/apps/api/src/modules/finance/journal.ts`; `web/apps/api/src/modules/finance/contraVoucher.ts` | The desktop screen is the TR_CONTRA grid in FINE JV mode: row 1 is paired with every later row, the row is written first as LDR_TYPE 0 with its own side and description and row 1 is mirrored as LDR_TYPE 1 (`TR_CONTRA.cs:2760-2847`); each CR_FINE row posts a `STR(SR_NO)+'03'` `+` leg and each DR_FINE row a `'04'` `-` leg (33-character keys, `Ac_Ledr.cs:846-848`); Vch_Remark rebuilds REMARK_DATA from described rows; save refuses a missing mandatory employee, a new voucher in a type-B company, a date outside the year and unequal totals with the desktop texts; FineJvBill prints 'Gold '/'Silver ' + BOOK_NAME, the IT_DESC line and the signature footer. The web stored To as DR_FINE, offered one From/To pair, keyed legs with a 2-wide line number, named TEMP_BOOK_DATA after MAIN_BOOK, skipped the fiscal-date, employee and company-type checks, kept stale desktop flags, never wrote REMARK_DATA, and its Contra and Journal routes could read, rewrite, delete or print a FINE JV voucher; their documents needed only view rights. | N206 |
+| G220 | Med | The generic voucher list and number-box routes read any book of an allow-listed table | `unified/src/csharp/DataCareNext/MDI_FORM.cs:8100-8111,8360-8365`; `unified/src/csharp/DataCareNext/TR_CONTRA.cs:3136-3146` | `web/apps/api/src/routes/voucherNavigation.ts`; `web/apps/api/src/modules/vouchers/list.ts`; `web/apps/api/src/modules/rbac/routePolicy.ts` | Found in the N206 review. `GET /vouchers/recent` and `GET /vouchers/neighbour` are SYSTEM routes that take the table and book from the request, so any signed-in user of the company can list another menu's vouchers of a shared table (for example a Fine JV book through CONTRA_DATA) with their dates, accounts and totals, within the session's tenant, company, location and year. The desktop's list (TR_CONTRA.cs:3136-3146) only lists the open form's own book. The routes should require view rights on the form that owns the requested book. | N207 |
 
 ## 4. Decisions D23–D28
 
@@ -2270,6 +2272,60 @@ Evidence: `purchase-return.create.without-original` passes and leaves the baseli
 saves the reopened return without choosing a book; `create.against-purchase` still imports and saves with PR chosen;
 `web/apps/web/test/bookSelect.test.ts` pins the default and the opt-out.
 
+### N206 — Fine Jv Entry is the desktop TR_CONTRA grid in FINE JV mode (G219, Lite L4)
+
+The menu opens only the inward FINE JV book (`MDI_FORM.cs:8360-8365`, `Ac_Ledr.cs:846`) and shows the desktop grid: Sr,
+Cr/Dr, AcCode, Ac Name, It Desc, CrFine and DrFine at 0.000 (`TR_CONTRA.cs:1426-1446`), with Vch No (Enter, F1, Up,
+Down), Vch Date, Item Type (Gold/Silver) and Employee in the header (`:1107-1372`, `:2329-2343`). Row 1 is DR and a new
+row takes the other side (`:1530-1545`). A save pairs row 1 with every later row: the row is written first (LDR_TYPE
+'0', its side, CR_FINE from the Cr column, DR_FINE from the Dr column, LD_CODE row 1, its description) and row 1 is
+mirrored against it (LDR_TYPE '1', the opposite fine, row 1's description), with INOUT_TYPE, ENTRY_TYPE 'J', the
+employee, the creator in MAIN_USER and DATA_TRFR, USER_UPDATE and USER_DELETE reset to 'N' (`:2760-2847`). Each CR_FINE
+row posts one AC_DATA leg keyed `STR(SR_NO)+'03'` with `+` and each DR_FINE row one keyed `'04'` with `-`, 33 characters
+in all (`Ac_Ledr.cs:846-848`); the day book copies each row's AC_NAME, description and the book's DATA_TYPE
+(`Ac_Rojmel.cs:342-344`); TEMP_BOOK_DATA takes BOOK_DATA.BOOK_NAME (`TR_CONTRA.cs:2742-2753`, `:2307`); and REMARK_DATA
+is deleted and rebuilt from the described rows with the AC_MAST name and MAIN_BOOK (`Ac_Tax.cs:686-694`, called at
+`TR_CONTRA.cs:2890`). Save refuses, in desktop order and with the desktop texts, a missing employee when
+`EMP_CODE_MANDATORY='Y'`, a new voucher when the company's CO_TYPE is 'B', a date outside the year, a date on or before
+the lock date ("You Cant Save and Delete This Voucher Becouse Lock Date is = dd/MM/yyyy ....") and unequal Cr/Dr totals
+(`:2666-2697`); an unknown new account or employee is refused before anything is written. Reopen groups the mirrors
+and the counter rows by account, name, side and description as the desktop queries do (`:2467`, `:2541`), so equal
+counter rows reopen as one row with their fines summed; an edit keeps the saved date, metal and employee when the
+request omits them, and an unchanged account keeps its saved name even when its master row is gone (`:2502`, `:2550`). Delete checks the lock against the voucher's
+date, audits every row with the first 149 characters of its description, then removes remarks, the hidden identity,
+ledger, day book, source rows and APR_IDTL (`:2951-2968`). Print needs UserPrint (`:3000-3004`) and renders
+FineJvBill for every saved row: 'Gold '/'Silver ' + BOOK_NAME, the copy label (ORIGINAL by default), the page number,
+Vch Date and Vch No, Party Name / Cr Fine / Dr Fine (zero sides print 0.000) with the IT_DESC line suppressed when
+blank, no total, and 'For : ' + CO_NAME, 'Party signature.' and 'signature.' (`:3021`, `:3061-3069`,
+`web/apps/api/report-specs/FineJvBill.spec.json`).
+
+Contra Entry opens only CONTRA books (`MDI_FORM.cs:8100-8111`), so `contra.ts` and `journal.ts` now refuse another
+family's book on create, read, edit and delete, and the Contra and Journal documents need print rights like FineJvBill.
+Without the guard `getContra` read the Fine JV voucher (the red run of `financeLifecycle.db.test.ts`). The Contra API now takes only the grid's
+`lines`; the older two-account `fromAc`/`toAc`/`amount` input, which no screen sends, is removed (the depth gate counts
+it as API input no screen can supply).
+
+Deliberate differences: the desktop deletes REMARK_DATA without CO_YEAR (`TR_CONTRA.cs:2963`), which would also remove
+another year's remarks for the same voucher number; the web deletes the voucher's own year only. The web has no RE_TRFR
+column, so the re-transfer flag the desktop sets on an edited, already-transferred voucher (`:2806-2813`) is not stored.
+The per-voucher USER_UPDATE / USER_DELETE override (`:2698`, `:2955`) and the employee default from EMP_AS_USER (`:2390`)
+are not implemented. The extracted FineJvBill spec carries no numeric field formats, so fines print as 0.000. A grid whose
+row 1 is paired with rows on both sides reopens row 1 with its net fine only, where the desktop shows both columns.
+The generic voucher list routes still read any book of a shared table (G220, planned as N207).
+
+Evidence: `fineJv.routes.db.test.ts` (9 cases; the first 7 red against the old writer, and the refusal-order,
+grouped-reopen, print-layout and audit-length cases red against this slice's first draft) and the cross-family case in
+`financeLifecycle.db.test.ts` (red before the guard) pass with `reopenVoucher.db.test.ts`, `routePolicy.test.ts`,
+`contraDelete.db.test.ts`, `financeBookSelection.routes.db.test.ts` and `transactionBudget.routes.db.test.ts`; the full
+workspace suite passes (api 338 files / 3614 tests, web 56 / 693, core 40 / 1791). The zero-mock `fine-jv` module passes
+18 executable cases (entry, book family, 0.000, unequal totals, unknown account, out-of-year date, two-row write set,
+three-row grid, reopen, unchanged save, edit, delete, tenant sentinel, print denied, Journal routes refusing the FINE JV
+book, FineJvBill, Alt+S, Vch No Enter) with 5 blocked (version concurrency, idempotency retry, fault rollback, browser
+settings matrix, L6 report filters) and 1 not applicable; the `contra` module adds a print-denied case and a FINE JV
+book refusal. Chrome DevTools: a three-row voucher entered through the lookups, printed as Gold Fine JV with both
+descriptions and the signature footer, reopened with Enter in Vch No, edited, and deleted with the desktop prompt;
+Lighthouse on the reopened grid scores Accessibility, Best Practices, SEO and Agentic Browsing 100 with no failed audit.
+Desktop-runtime comparison and parent acceptance remain open.
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2402,6 +2458,8 @@ saves the reopened return without choosing a book; `create.against-purchase` sti
 | N203 | — | implemented-unverified, evidence in this change (G214, G215, G216: Tag Opening and Only Tag Entry follow TR_TAG_OPBL; reopen keeps every field; stock rows follow Tag_Opbl_Stk) |
 | N204 | — | planned (G217: the karigar weight block on the tag grid) |
 | N205 | — | implemented-unverified, evidence in this change (G218: the production server starts from an empty route cache; suites refuse occupied ports) |
+| N206 | — | implemented-unverified, evidence in this change (G219: Fine Jv Entry is the TR_CONTRA FINE JV grid with paired rows, 33-character fine legs, remark rebuild and the desktop refusals; Contra and Journal refuse another family's book and need print rights; 18 browser cases pass, 5 blocked) |
+| N207 | — | planned (G220: the generic voucher list and number-box routes need the owning form's view right for the requested book) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 
