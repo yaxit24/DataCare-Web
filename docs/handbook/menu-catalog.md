@@ -368,7 +368,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Writes:** ITM_OPBL, MAIN_STOCK, DM_DATA.
 - **Web:** `/txn/item-opening`; `GET /stock/item-opening/rights`, `GET /stock/item-opening/type/:type`, `PUT /stock/item-opening/type/:type`, `DELETE /stock/item-opening/type/:type`. Can: create, reopen, edit, delete.
 - **Remaining:** The desktop grid per metal type in book 000, the CommPassTotal cell rules, ITOBL stock rows from Itm_Opbl_Stk, DM_DATA for OTH_DETL_POSTING items, the desktop messages and version tokens pass 17 browser cases. Open: fault rollback, a desktop-runtime comparison and parent acceptance. On purpose the grid reads only this year's book 000 (the desktop read has no year filter) and arrow keys keep a typed value. The older numbered IOP voucher routes (POST /stock/item-opening, GET|PUT|DELETE /stock/item-opening/:vchNo) remain for vouchers they wrote but are not on the screen.
-- **Owners:** X18, G27, N51, N77, X25, G221, N208.
+- **Owners:** X18, G27, N51, N77, X25, G222, N209.
 - **Evidence:** [KB_master.md:187-217](../../project-memory/video-research/_kb/KB_master.md#L187-L217).
 
 ### Item Touch

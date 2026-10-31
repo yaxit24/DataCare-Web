@@ -815,7 +815,7 @@ async function writeItemOpeningTx(
   await insertIdentityTx(tx, scope, policy, date, {}, ctx);
   const details = input.lines.map((line, index) => ({
     // The desktop Save (TR_ITM_OPBL.cs:1424-1446) writes no DM_WT / DM_RATE / DM_AMT, so they keep
-    // their column defaults here too (N208).
+    // their column defaults here too (N209).
     ...key,
     SR_NO: index + 1,
     IT_CODE: text(line.itCode),

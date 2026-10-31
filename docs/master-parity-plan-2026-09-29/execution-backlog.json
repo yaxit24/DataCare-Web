@@ -6928,7 +6928,7 @@
       "statusNote": "PLANNED."
     },
     {
-      "id": "N208",
+      "id": "N209",
       "status": "implemented-unverified",
       "action": "Item Opening is the desktop TR_ITM_OPBL metal-type grid: Enter on Item Type lists the type's items in the 17-column grid with totals, CommPassTotal works each row out in @datacare/core, Save replaces the type's ITM_OPBL rows in book 000 with ITOBL stock rows from Itm_Opbl_Stk and DM_DATA for OTH_DETL_POSTING items, Delete removes them, all with the desktop messages and version tokens.",
       "parentLabels": "P1-core; L2; T01-T18",
@@ -6936,7 +6936,7 @@
         "N203"
       ],
       "requiredProof": "Core unit tests of the cell rules; an HTTP/DB test of the book 000 write set, ITOBL stock rows, DM_DATA, unchanged save, cleared row, stock on hand, stale version and desktop messages; the item-opening feature module passes every executable case; a Chrome DevTools keyboard, save, reopen and delete pass.",
-      "gapIds": "G221",
+      "gapIds": "G222",
       "entryDefinition": "15-standard-edition-plan.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",

@@ -22,7 +22,7 @@ import { FIXTURE_MANIFEST, ITEMS, PARTIES, USERS } from '../fixtures/catalogue.m
  * - Keys (:1538-1684): Enter moves one cell right; Enter on NetAmt goes to the next row's Pcs, or on the last row adds
  *   a row and goes to its ItCode; Enter on an empty ItCode goes to Save; text is upper-cased; Esc leaves an unchanged
  *   screen and otherwise goes to Save.
- * Web rules that differ on purpose (gap G221): the grid reads only this year's book '000' rows, a save or delete
+ * Web rules that differ on purpose (gap G222): the grid reads only this year's book '000' rows, a save or delete
  * carries the version read with the grid (N51), and an item code that is not of the type is refused.
  */
 const GOLD = ITEMS.gold.code;
@@ -524,7 +524,7 @@ export const itemOpening = {
       'refusal.type-and-item',
       'T06',
       'refusal',
-      'BtnSave_Click :1407 "Please Select Metaltype...."; BtnDelete_Click :1505 "Please Select Item For Delete."; the web refuses an item of another metal type (gap G221)',
+      'BtnSave_Click :1407 "Please Select Metaltype...."; BtnDelete_Click :1505 "Please Select Item For Delete."; the web refuses an item of another metal type (gap G222)',
       async (ctx) => {
         const { page, requests } = await ctx.session();
         await openScreen(page);
@@ -901,7 +901,7 @@ export const itemOpening = {
       'history.other-year',
       'T15',
       'mutation',
-      "The web reads and replaces only this year's book 000 rows (gap G221); the desktop reload (:1286) has no year filter and would show another year's opening",
+      "The web reads and replaces only this year's book 000 rows (gap G222); the desktop reload (:1286) has no year filter and would show another year's opening",
       async (ctx) => {
         const { page } = await ctx.session();
         await openScreen(page);

@@ -9,7 +9,7 @@ import {
 import { onHandNet } from '../src/modules/stock/stock.js';
 
 /**
- * N208 / G221: Item Opening is the desktop TR_ITM_OPBL grid, one opening per metal type in book '000'.
+ * N209 / G222: Item Opening is the desktop TR_ITM_OPBL grid, one opening per metal type in book '000'.
  *
  * Expected values come from the desktop, not from the web:
  * - DISPLAY_DATA (TR_ITM_OPBL.cs:1269-1370) lists every item of the type, ordered IT_TYPE, GR_CODE, IT_NAME.
@@ -149,7 +149,7 @@ const count = async (table: string, where = 'true') =>
     )[0]!.n,
   );
 
-describe.skipIf(!RUN)('Item Opening = desktop TR_ITM_OPBL (N208, G221)', () => {
+describe.skipIf(!RUN)('Item Opening = desktop TR_ITM_OPBL (N209, G222)', () => {
   beforeEach(async () => {
     await wipe();
     await seed();

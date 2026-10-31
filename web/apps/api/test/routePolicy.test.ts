@@ -101,7 +101,7 @@ describe('route policy registry', () => {
     // N172 adds GET /vouchers/neighbour, the voucher number box's Up/Down walk: 657 + 1 = 658.
     // N199 adds the Party Opening list and read (GET /ac-opbl, GET /ac-opbl/:acCode): 658 + 2 = 660.
     // FineJvBill adds GET /fine-jv/:vchNo/print: 660 + 1 = 661.
-    // N208 adds the TR_ITM_OPBL Item Opening grid: GET /stock/item-opening/rights and
+    // N209 adds the TR_ITM_OPBL Item Opening grid: GET /stock/item-opening/rights and
     // GET|PUT|DELETE /stock/item-opening/type/:type: 661 + 4 = 665.
     expect(routes).toHaveLength(665);
     expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(665);

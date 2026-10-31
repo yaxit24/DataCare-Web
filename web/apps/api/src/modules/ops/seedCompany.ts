@@ -307,7 +307,7 @@ const BOOKS: {
   },
   // Web-only numbered Item Opening voucher book. The desktop Item Opening (TR_ITM_OPBL) has no book help
   // (MDI_FORM.cs:7690-7699; the CurBookHelp("OPSTK") at :7701 belongs to Tag Opening) and writes book '000', which
-  // the screen now does (N208). Kept for the vouchers the older POST /stock/item-opening route wrote on this book.
+  // the screen now does (N209). Kept for the vouchers the older POST /stock/item-opening route wrote on this book.
   // Empty slots: a stock opening implies no ledger accounts.
   {
     book: 'IOP',
