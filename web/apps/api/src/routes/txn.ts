@@ -2817,10 +2817,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     return run(reply, 201, () =>
       postContra(prisma, {
         scope: scopeOf(req),
-        lines: Array.isArray(b.lines) ? b.lines : undefined, // the desktop grid (TR_CONTRA)
-        fromAc: b.fromAc,
-        toAc: b.toAc,
-        amount: b.amount,
+        lines: Array.isArray(b.lines) ? b.lines : [], // the desktop grid (TR_CONTRA)
         vchDate: b.vchDate,
         itDesc: b.itDesc,
         mainUser: sess(req).sub,
@@ -7542,13 +7539,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         prisma,
         {
           scope: scopeOf(req),
-          lines: Array.isArray(b.lines) ? b.lines : undefined, // the desktop grid (TR_CONTRA)
-          fromAc: b.fromAc,
-          toAc: b.toAc,
-          amount: Number(b.amount),
+          lines: Array.isArray(b.lines) ? b.lines : [], // the desktop grid (TR_CONTRA)
           vchDate: b.vchDate,
           itDesc: b.itDesc,
-          toAcName: b.toAcName,
           empCode: b.empCode,
           itemType: b.itemType,
           mainUser: sess(req).sub,

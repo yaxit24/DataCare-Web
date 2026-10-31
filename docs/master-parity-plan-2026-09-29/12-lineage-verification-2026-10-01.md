@@ -2301,7 +2301,9 @@ blank, no total, and 'For : ' + CO_NAME, 'Party signature.' and 'signature.' (`:
 
 Contra Entry opens only CONTRA books (`MDI_FORM.cs:8100-8111`), so `contra.ts` and `journal.ts` now refuse another
 family's book on create, read, edit and delete, and the Contra and Journal documents need print rights like FineJvBill.
-Without the guard `getContra` read the Fine JV voucher (the red run of `financeLifecycle.db.test.ts`).
+Without the guard `getContra` read the Fine JV voucher (the red run of `financeLifecycle.db.test.ts`). The Contra API now takes only the grid's
+`lines`; the older two-account `fromAc`/`toAc`/`amount` input, which no screen sends, is removed (the depth gate counts
+it as API input no screen can supply).
 
 Deliberate differences: the desktop deletes REMARK_DATA without CO_YEAR (`TR_CONTRA.cs:2963`), which would also remove
 another year's remarks for the same voucher number; the web deletes the voucher's own year only. The web has no RE_TRFR

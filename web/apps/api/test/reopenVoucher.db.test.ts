@@ -222,9 +222,10 @@ describe.runIf(RUN)('reopening a saved voucher (plan F2.1)', () => {
   it('a contra round-trips its accounts, amount and narration', async () => {
     const created = await postContra(runtime, {
       scope: scopeFor(CONTRA_BOOK),
-      fromAc: '00001',
-      toAc: '00008',
-      amount: 7250,
+      lines: [
+        { crdr: 'DR', acCode: '00008', amount: 7250 },
+        { crdr: 'CR', acCode: '00001', amount: 7250 },
+      ],
       vchDate: '2024-05-10',
       itDesc: 'transfer to bank',
       mainUser: 'reopen',

@@ -44,13 +44,8 @@ export interface ContraLine {
 
 export interface ContraInput {
   scope: VoucherScope;
-  /** The grid, row 1 first. */
-  lines?: ContraLine[];
-  /** The earlier two-account form: Dr `toAc`, Cr `fromAc` (kept for existing callers). */
-  fromAc?: string;
-  toAc?: string;
-  toAcName?: string;
-  amount?: number;
+  /** The TR_CONTRA grid, row 1 first (TR_CONTRA.cs:1530-1545, :2760-2866). */
+  lines: ContraLine[];
   /** Item type selector (TR_CONTRA.cs:2786 cboItemTyp first character); 'A' = amount. */
   itemType?: string;
   empCode?: string;
@@ -64,19 +59,9 @@ const CONTRA_WRITE_TABLES = ['CONTRA_DATA', 'AC_DATA', 'ROJ_MEL_DATA'] as const;
 
 const numv = (v: unknown): number => Number(v ?? 0);
 
-/** The grid of a request: `lines`, or the two-account form as row 1 DR `toAc` and row 2 CR `fromAc`. */
+/** The grid of a request (the desktop screen has no other form of entry). */
 export function contraLines(input: ContraInput): ContraLine[] {
-  const raw: ContraLine[] = input.lines?.length
-    ? input.lines
-    : [
-        {
-          crdr: 'DR',
-          acCode: input.toAc ?? '',
-          acName: input.toAcName,
-          amount: Number(input.amount ?? 0),
-        },
-        { crdr: 'CR', acCode: input.fromAc ?? '', amount: Number(input.amount ?? 0) },
-      ];
+  const raw: ContraLine[] = Array.isArray(input.lines) ? input.lines : [];
   // TR_CONTRA.cs:2764 skips a row with no account or no amount.
   const lines = raw
     .map((line) => ({
