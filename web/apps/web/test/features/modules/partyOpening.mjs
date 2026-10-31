@@ -14,6 +14,8 @@ import { FIXTURE_MANIFEST, PARTIES, USERS } from '../fixtures/catalogue.mjs';
  * - Delete asks "Are You Sure To Delete This Record now?" (:2870), writes DELETE_DATA SR_NO 0 (amount, gold) and 1
  *   (silver), removes OP_DATA, OP_DETL and the legs, and says "Delete Success." (:2872-2879).
  *
+ * - The bill grid saves to OP_DETL (:2724-2760); with bill rows the heads are their signed totals (MSG_TOT_FILL).
+ *
  * Every case uses E2EINT and removes its opening at the end, so other modules see the party unchanged.
  */
 const PARTY = PARTIES.interState;
@@ -263,10 +265,70 @@ export const partyOpening = {
         }
       },
     ),
-    pending(
-      'bills',
+    C(
+      'children.bill-rows',
       'T05',
-      'The bill-wise opening grid (OP_DETL) is not on the web screen yet; a save keeps existing OP_DETL rows (DB test).',
+      'mutation',
+      'TR_AC_OPBL bill grid (MSG, :1562-1675, saved to OP_DETL :2724-2760): Enter on the last cell adds a row, and the heads are the signed row totals (MSG_TOT_FILL: 30,000 Dr + 5,000 Cr = 25,000 Dr)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        try {
+          await openScreen(page);
+          await pickParty(page, PARTY.code);
+          const cell = (label, row) => page.getByLabel(`${label} row ${row}`, { exact: true });
+          await cell('VchNo', 1).fill('00012');
+          await cell('BillNo', 1).fill('B12');
+          await cell('Amount', 1).fill('30000');
+          await cell('Cr/Dr', 1).selectOption('D');
+          await cell('Cr/Dr', 1).press('Enter');
+          await cell('VchNo', 2).waitFor();
+          await cell('VchNo', 2).fill('00015');
+          await cell('Amount', 2).fill('5000');
+          assert.equal(
+            await page.getByLabel('Opening Amount', { exact: true }).inputValue(),
+            '25000.00',
+          );
+          assert.equal(
+            await page.getByLabel('Opening Amount Cr or Dr', { exact: true }).inputValue(),
+            'D',
+          );
+          const response = await save(page);
+          assert.equal(response.status(), 200, await response.text());
+          const op = await opData(ctx);
+          const posted = await legs(ctx);
+          const bills = await ctx.rows(
+            `SELECT "SR_NO" sr, "VCH_NO" vch, "BILL_NO" bill, coalesce("ITM_AMT",0)::float amt, "ITM_SIGN" sg
+               FROM "OP_DETL" WHERE tenant_id=$1 AND "AC_CODE"=$2 ORDER BY "SR_NO"`,
+            PARTY.code,
+          );
+          assert.deepEqual(
+            op.map((r) => [r.amt, r.osg]),
+            [[25000, 'D']],
+          );
+          assert.deepEqual(legShape(posted), [['02', 25000, 0, 'A', '', 0]]);
+          assert.deepEqual(
+            bills.map((b) => [b.sr, b.vch, b.bill, b.amt, b.sg]),
+            [
+              ['1', '00012', 'B12', 30000, 'D'],
+              ['2', '00015', '', 5000, 'C'],
+            ],
+          );
+          // Reopen shows the two bills and a new blank row.
+          await openScreen(page);
+          await pickParty(page, PARTY.code);
+          assert.equal(await cell('VchNo', 1).inputValue(), '00012');
+          assert.equal(await cell('VchNo', 2).inputValue(), '00015');
+          assert.equal(await cell('VchNo', 3).inputValue(), '');
+          return {
+            observation: `OP_DATA ${JSON.stringify(op)}; OP_DETL ${JSON.stringify(bills)}`,
+            expected: 'heads 25,000 Dr from the rows; two OP_DETL rows; reopen shows them',
+            database: { op, legs: posted, bills },
+            downstream: { reopenedRows: 2 },
+          };
+        } finally {
+          await removeOpening(page);
+        }
+      },
     ),
     C(
       'refusal.no-party',

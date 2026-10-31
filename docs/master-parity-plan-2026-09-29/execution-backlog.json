@@ -6706,21 +6706,26 @@
     },
     {
       "id": "N200",
-      "status": "planned",
-      "action": "The bill-wise opening grid of TR_AC_OPBL (OP_DETL: voucher, date, bill, credit days, item, weights, fines, diamond and amount with Cr/Dr), whose totals set the opening heads (MSG_TOT_FILL), and the opening list print.",
+      "status": "implemented-unverified",
+      "action": "The bill-wise opening grid of TR_AC_OPBL: OP_DETL rows (voucher, date, bill, credit days, item, weights, touch, wastage, fines, diamond and amount with Cr/Dr) whose signed totals set the opening heads (MSG_TOT_FILL), the fine from net weight × (touch + wastage) (CommPassTotal), and the row refusals with the desktop messages.",
       "parentLabels": "P9; L2",
       "startAfter": [
         "N199"
       ],
-      "requiredProof": "bill rows saved through the screen are stored in OP_DETL, set the heads and reopen; the list prints.",
+      "requiredProof": "bill rows saved through the screen are stored in OP_DETL, set the heads and reopen; refused rows answer the desktop messages.",
       "gapIds": "G211",
       "entryDefinition": "15-standard-edition-plan.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
       "statusAsOf": "2026-10-31",
-      "evidence": [],
-      "statusNote": "PLANNED."
+      "evidence": [
+        "web/apps/api/src/modules/finance/partyOpening.ts",
+        "web/apps/web/app/(app)/txn/ac-opbl/page.tsx",
+        "web/apps/api/test/partyOpening.db.test.ts",
+        "web/apps/web/test/features/modules/partyOpening.mjs"
+      ],
+      "statusNote": "IMPLEMENTED with N199. Verified: partyOpening.db.test.ts bill cases (heads from totals, OP_DETL replace and removal, four refusals); party-opening.children.bill-rows through the screen. The desktop Print button only checks print rights (TR_AC_OPBL.cs:2626-2633), so no print is owed."
     },
     {
       "id": "N201",

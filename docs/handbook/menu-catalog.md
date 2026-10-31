@@ -455,8 +455,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Party Code; Opening Amount, Opening Gold Fine and Opening Silver Fine with Cr/Dr; bill-wise grid; opening list by balance type.
 - **Writes:** OP_DATA, AC_DATA, CONTRA_DATA.
 - **Web:** `/txn/ac-opbl`; `GET /ac-opbl`, `GET /ac-opbl/:acCode`, `POST /ac-opbl`, `DELETE /ac-opbl/:acCode`. Can: create, reopen, edit, delete, list.
-- **Remaining:** The bill-wise opening grid (OP_DETL) and Print are not on the web screen (G211, N200); rights and two-session cases are pending.
-- **Owners:** X16, G27, N51, G29, N52, N59, G209, G210, N199.
+- **Remaining:** Rights and two-session cases are pending; the desktop Print button only checks print rights and prints nothing.
+- **Owners:** X16, G27, N51, G29, N52, N59, G209, G210, N199, N200, G211.
 - **Evidence:** [TR_AC_OPBL.md:1-25](../../project-memory/catalogs/forms/TR_AC_OPBL.md#L1-L25).
 
 ### Point Mast

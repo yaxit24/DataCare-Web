@@ -335,6 +335,94 @@ describe.skipIf(!RUN)(
       expect(await rows(`SELECT 1 FROM "OP_DETL" WHERE tenant_id=$1`, TENANT)).toHaveLength(1);
     });
 
+    it('bill rows set the heads from their signed totals and replace OP_DETL (MSG_TOT_FILL, TR_AC_OPBL.cs:2724-2760)', async () => {
+      const saved = await savePartyOpening(runtime, {
+        scope,
+        acCode: PARTY,
+        mainUser: 'ADMIN',
+        amount: 999,
+        sign: 'C',
+        bills: [
+          {
+            vchNo: '00012',
+            vchDate: '2026-02-10',
+            billNo: 'B12',
+            itType: 'A',
+            amount: 30000,
+            sign: 'D',
+          },
+          { vchNo: '00015', itType: 'A', amount: 5000, sign: 'C' },
+          { vchNo: '00020', itType: 'G', netWt: 10, touch: 91.6, goldFine: 9.16, sign: 'D' },
+          { vchNo: '', itType: 'A', sign: 'C' },
+        ],
+      });
+      // Amount: -30,000 + 5,000 = 25,000 Dr; gold: 9.16 Dr. The typed 999 Cr is replaced by the grid totals.
+      expect([saved.amount, saved.sign, saved.gold, saved.goldSign]).toEqual([
+        25000,
+        'D',
+        9.16,
+        'D',
+      ]);
+      expect((await opData(PARTY))[0]).toMatchObject({ amt: 25000, osg: 'D', g: 9.16, gsg: 'D' });
+      expect((await legsOf(PARTY)).map((l) => [l.code, l.dr, l.it, l.sg, l.fine])).toEqual([
+        ['02', 25000, 'A', '', 0],
+        ['04', 0, 'G', '-', 9.16],
+      ]);
+      const detl = await rows(
+        `SELECT "SR_NO" sr, "VCH_NO" vch, "VCH_DATE"::date::text dt, "BILL_NO" bill, "ITM_TYPE" it, coalesce("ITM_AMT",0)::float amt,
+              coalesce("ITM_GL_FINE",0)::float gf, "ITM_SIGN" sg FROM "OP_DETL" WHERE tenant_id=$1 ORDER BY "SR_NO"`,
+        TENANT,
+      );
+      expect(detl).toEqual([
+        {
+          sr: '1',
+          vch: '00012',
+          dt: '2026-02-10',
+          bill: 'B12',
+          it: 'A',
+          amt: 30000,
+          gf: 0,
+          sg: 'D',
+        },
+        { sr: '2', vch: '00015', dt: null, bill: '', it: 'A', amt: 5000, gf: 0, sg: 'C' },
+        { sr: '3', vch: '00020', dt: null, bill: '', it: 'G', amt: 0, gf: 9.16, sg: 'D' },
+      ]);
+      expect(saved.bills.map((b) => b.vchNo)).toEqual(['00012', '00015', '00020']);
+      expect(saved.billDate).toBe('2026-03-31');
+      // A second save with fewer rows replaces them; an empty list removes them and the typed heads apply.
+      await savePartyOpening(runtime, {
+        scope,
+        acCode: PARTY,
+        bills: [{ vchNo: '00015', itType: 'A', amount: 700, sign: 'C' }],
+      });
+      expect(await rows(`SELECT 1 FROM "OP_DETL" WHERE tenant_id=$1`, TENANT)).toHaveLength(1);
+      expect((await opData(PARTY))[0]).toMatchObject({ amt: 700, osg: 'C', g: 0 });
+      await savePartyOpening(runtime, { scope, acCode: PARTY, amount: 50, sign: 'D', bills: [] });
+      expect(await rows(`SELECT 1 FROM "OP_DETL" WHERE tenant_id=$1`, TENANT)).toHaveLength(0);
+      expect((await opData(PARTY))[0]).toMatchObject({ amt: 50, osg: 'D' });
+    });
+
+    it('refuses bill rows the desktop refuses, with its messages', async () => {
+      const bill = { vchNo: '00012', itType: 'A', amount: 10, sign: 'C' };
+      await expect(
+        savePartyOpening(runtime, { scope, acCode: PARTY, bills: [{ ...bill, vchNo: '' }] }),
+      ).rejects.toThrow('Please Insert Vch No and Try...');
+      await expect(
+        savePartyOpening(runtime, {
+          scope,
+          acCode: PARTY,
+          bills: [{ ...bill, amount: 0, billNo: 'X' }],
+        }),
+      ).rejects.toThrow('Please Insert Gold fine or Silver fine or Net Amount and try...');
+      await expect(
+        savePartyOpening(runtime, { scope, acCode: PARTY, bills: [{ ...bill, itType: 'Q' }] }),
+      ).rejects.toThrow('Please insert ItmType  G = Gold S = Silver Or A = Amount and try');
+      await expect(
+        savePartyOpening(runtime, { scope, acCode: PARTY, bills: [{ ...bill, sign: 'X' }] }),
+      ).rejects.toThrow('Please Enter C or D and Try Again...');
+      expect(await rows(`SELECT 1 FROM "OP_DATA" WHERE tenant_id=$1`, TENANT)).toHaveLength(0);
+    });
+
     it('the year carry-forward reads the legs once and writes the next year in the same shape', async () => {
       await savePartyOpening(runtime, {
         scope,

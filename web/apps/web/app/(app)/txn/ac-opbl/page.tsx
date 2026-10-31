@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { del, get, post, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { PartyBalance } from '../../../../components/PartyBalance';
+import { useGridKeyboard } from '../../../../components/GridKeyboard';
 
 /**
  * Party Opening (desktop TR_AC_OPBL). One opening per party: the amount, gold fine and silver fine, each Cr or Dr
@@ -10,6 +11,29 @@ import { PartyBalance } from '../../../../components/PartyBalance';
  * on the right is the desktop's opening list by balance type (:2299-2311). Picking a party or a list row reloads it.
  */
 type CrDr = 'C' | 'D';
+/** One bill-wise row (TR_AC_OPBL MSG columns 1-18). Numbers are kept as typed text until save. */
+interface Bill {
+  key: number;
+  vchNo: string;
+  vchDate: string;
+  billNo: string;
+  crDays: string;
+  itemDesc: string;
+  itType: string;
+  grossWt: string;
+  netWt: string;
+  ghatWt: string;
+  touch: string;
+  wastage: string;
+  goldFine: string;
+  silverFine: string;
+  dmPcs: string;
+  dmWt: string;
+  dmAmt: string;
+  amount: string;
+  sign: string;
+}
+type BillField = Exclude<keyof Bill, 'key'>;
 interface Opening {
   acCode: string;
   acName: string | null;
@@ -20,6 +44,8 @@ interface Opening {
   goldSign: CrDr;
   silver: number;
   silverSign: CrDr;
+  bills: Record<BillField, string | number | null>[];
+  billDate: string | null;
 }
 interface Form {
   amount: string;
@@ -41,6 +67,99 @@ interface OpeningList {
   totalCr: number;
   totalDr: number;
 }
+
+/** The grid's columns in desktop order (MSG_CLEAR, TR_AC_OPBL.cs:1562-1675). */
+const BILL_COLUMNS: { field: BillField; label: string; width: number; num?: number }[] = [
+  { field: 'vchNo', label: 'VchNo', width: 70 },
+  { field: 'vchDate', label: 'VchDate', width: 130 },
+  { field: 'billNo', label: 'BillNo', width: 70 },
+  { field: 'crDays', label: 'Days', width: 50, num: 0 },
+  { field: 'itemDesc', label: 'Item Name', width: 140 },
+  { field: 'itType', label: 'ItType', width: 50 },
+  { field: 'grossWt', label: 'GrWt', width: 80, num: 3 },
+  { field: 'netWt', label: 'NetWt', width: 80, num: 3 },
+  { field: 'ghatWt', label: 'GhtWt', width: 70, num: 2 },
+  { field: 'touch', label: 'Touch', width: 60, num: 2 },
+  { field: 'wastage', label: 'West%', width: 60, num: 2 },
+  { field: 'goldFine', label: 'Gold Fine', width: 80, num: 3 },
+  { field: 'silverFine', label: 'Silver Fine', width: 80, num: 3 },
+  { field: 'dmPcs', label: 'DmPcs', width: 55, num: 0 },
+  { field: 'dmWt', label: 'DmWt', width: 65, num: 2 },
+  { field: 'dmAmt', label: 'DmAmt', width: 80, num: 2 },
+  { field: 'amount', label: 'Amount', width: 100, num: 2 },
+  { field: 'sign', label: 'Cr/Dr', width: 50 },
+];
+let billKey = 0;
+const blankBill = (vchDate = '', itType = 'A'): Bill => ({
+  key: (billKey += 1),
+  vchNo: '',
+  vchDate,
+  billNo: '',
+  crDays: '',
+  itemDesc: '',
+  itType,
+  grossWt: '',
+  netWt: '',
+  ghatWt: '',
+  touch: '',
+  wastage: '',
+  goldFine: '',
+  silverFine: '',
+  dmPcs: '',
+  dmWt: '',
+  dmAmt: '',
+  amount: '',
+  sign: 'C',
+});
+const n = (v: string) => Number(v || 0) || 0;
+const fixed = (v: number, places: number) => (v ? v.toFixed(places) : '');
+/**
+ * CommPassTotal (TR_AC_OPBL.cs:1855-1883): a G row's gold fine and an S row's silver fine are the net weight times
+ * (touch + wastage) / 100, or the net weight when touch is blank. A gross weight fills a blank net weight (case 7).
+ */
+function recalc(b: Bill, changed: BillField): Bill {
+  const next = { ...b };
+  if (changed === 'grossWt' && !n(next.netWt)) next.netWt = next.grossWt;
+  if (['grossWt', 'netWt', 'touch', 'wastage', 'itType'].includes(changed)) {
+    const fine = n(next.touch)
+      ? (n(next.netWt) * (n(next.touch) + n(next.wastage))) / 100
+      : n(next.netWt);
+    if (next.itType === 'G') next.goldFine = fixed(fine, 3);
+    if (next.itType === 'S') next.silverFine = fixed(fine, 3);
+  }
+  return next;
+}
+const isBlank = (b: Bill) =>
+  ![b.vchNo, b.billNo, b.itemDesc].some((v) => v.trim()) &&
+  ![b.grossWt, b.netWt, b.goldFine, b.silverFine, b.amount, b.dmWt].some((v) => n(v));
+/** MSG_TOT_FILL: Cr rows add and Dr rows subtract; gold only from G rows, silver only from S rows. */
+function billTotals(bills: Bill[]) {
+  const t = { grossWt: 0, netWt: 0, goldFine: 0, silverFine: 0, dmWt: 0, dmAmt: 0, amount: 0 };
+  for (const b of bills) {
+    const k = b.sign === 'D' ? -1 : 1;
+    t.grossWt += k * n(b.grossWt);
+    t.netWt += k * n(b.netWt);
+    if (b.itType === 'G') t.goldFine += k * n(b.goldFine);
+    if (b.itType === 'S') t.silverFine += k * n(b.silverFine);
+    t.dmWt += k * n(b.dmWt);
+    t.dmAmt += k * n(b.dmAmt);
+    t.amount += k * n(b.amount);
+  }
+  return t;
+}
+const asBill = (r: Record<BillField, string | number | null>): Bill => {
+  const b = blankBill();
+  for (const c of BILL_COLUMNS) {
+    const v = r[c.field];
+    b[c.field] =
+      v === null || v === undefined
+        ? ''
+        : c.num !== undefined
+          ? fixed(Number(v), c.num)
+          : String(v);
+  }
+  return b;
+};
 
 const EMPTY: Form = { amount: '', sign: 'C', gold: '', goldSign: 'C', silver: '', silverSign: 'C' };
 const DELETE_CONFIRM = 'Are You Sure To Delete This Record now?'; // TR_AC_OPBL.cs:2870
@@ -68,13 +187,20 @@ function SignSelect({
   label,
   value,
   onChange,
+  disabled,
 }: {
   label: string;
   value: CrDr;
   onChange: (v: CrDr) => void;
+  disabled?: boolean;
 }) {
   return (
-    <select aria-label={label} value={value} onChange={(e) => onChange(e.target.value as CrDr)}>
+    <select
+      aria-label={label}
+      value={value}
+      disabled={disabled}
+      onChange={(e) => onChange(e.target.value as CrDr)}
+    >
       <option value="C">Cr</option>
       <option value="D">Dr</option>
     </select>
@@ -91,6 +217,29 @@ export default function PartyOpeningPage() {
   const [busy, setBusy] = useState(false);
   // Bumped after a save or delete so the balance bar reads the party's new ledger balance.
   const [balanceKey, setBalanceKey] = useState(0);
+  const [bills, setBills] = useState<Bill[]>([blankBill()]);
+  const [billDate, setBillDate] = useState('');
+  // Desktop grids are keyboard-driven (TEXT_ENTRY_KeyDown, TR_AC_OPBL.cs:3034-3142): arrows move between cells,
+  // Enter advances and adds a row after the last cell of the last row, Ctrl/Cmd+D removes a row.
+  const handleGridKey = useGridKeyboard({
+    rowCount: bills.length,
+    columnCount: BILL_COLUMNS.length,
+    onAppendRow: () =>
+      setBills((rows) => [...rows, blankBill(billDate, rows[rows.length - 1]?.itType || 'A')]),
+    onRemoveRow: (row) => {
+      setBills((rows) =>
+        rows.length === 1 ? [blankBill(billDate)] : rows.filter((_, i) => i !== row),
+      );
+      return true;
+    },
+    onEscape: () => {},
+  });
+  const setBill = (i: number, field: BillField, value: string) =>
+    setBills((rows) => rows.map((b, j) => (j === i ? recalc({ ...b, [field]: value }, field) : b)));
+  const filledBills = bills.filter((b) => !isBlank(b));
+  const totals = billTotals(filledBills);
+  const fromBills = filledBills.length > 0;
+  const signOf = (v: number, typed: CrDr): CrDr => (fromBills ? (v < 0 ? 'D' : 'C') : typed);
 
   const loadList = useCallback(async (type: BalanceType) => {
     try {
@@ -112,6 +261,9 @@ export default function PartyOpeningPage() {
       const o = await get<Opening>(`/ac-opbl/${encodeURIComponent(ac)}`);
       setLoaded(o);
       setForm(asForm(o));
+      const date = o.billDate ?? '';
+      setBillDate(date);
+      setBills([...(o.bills ?? []).map(asBill), blankBill(date)]);
     } catch (e) {
       setMsg({ kind: 'err', text: messageOf(e) });
     } finally {
@@ -123,6 +275,7 @@ export default function PartyOpeningPage() {
     setAcCode('');
     setLoaded(null);
     setForm(EMPTY);
+    setBills([blankBill(billDate)]);
   };
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -139,9 +292,21 @@ export default function PartyOpeningPage() {
         goldSign: form.goldSign,
         silver: form.silver,
         silverSign: form.silverSign,
+        bills: filledBills.map((b) => {
+          const row: Record<string, string | number | null> = {};
+          for (const c of BILL_COLUMNS)
+            row[c.field] =
+              c.num !== undefined
+                ? n(b[c.field])
+                : c.field === 'vchDate'
+                  ? b.vchDate || null
+                  : b[c.field];
+          return row;
+        }),
       });
       setLoaded(saved);
       setForm(asForm(saved));
+      setBills([...(saved.bills ?? []).map(asBill), blankBill(saved.billDate ?? billDate)]);
       setMsg({ kind: 'ok', text: SAVED });
       setBalanceKey((k) => k + 1);
       await loadList(balanceType);
@@ -200,13 +365,19 @@ export default function PartyOpeningPage() {
             </div>
           </div>
           {acCode && <PartyBalance key={`${acCode}:${balanceKey}`} acCode={acCode} />}
+          {filledBills.length > 0 && (
+            <div className="muted" style={{ marginBottom: 6 }}>
+              The opening is the total of the bill rows below.
+            </div>
+          )}
           <div className="row">
             <div className="field">
               <label htmlFor="opening-amount">Opening Amount</label>
               <input
                 id="opening-amount"
                 inputMode="decimal"
-                value={form.amount}
+                value={filledBills.length ? fixed(Math.abs(totals.amount), 2) : form.amount}
+                readOnly={filledBills.length > 0}
                 onChange={(e) => set('amount', e.target.value)}
                 style={{ textAlign: 'right' }}
               />
@@ -215,7 +386,8 @@ export default function PartyOpeningPage() {
               <label>&nbsp;</label>
               <SignSelect
                 label="Opening Amount Cr or Dr"
-                value={form.sign}
+                value={signOf(totals.amount, form.sign)}
+                disabled={fromBills}
                 onChange={(v) => set('sign', v)}
               />
             </div>
@@ -226,7 +398,8 @@ export default function PartyOpeningPage() {
               <input
                 id="opening-gold"
                 inputMode="decimal"
-                value={form.gold}
+                value={filledBills.length ? fixed(Math.abs(totals.goldFine), 3) : form.gold}
+                readOnly={filledBills.length > 0}
                 onChange={(e) => set('gold', e.target.value)}
                 style={{ textAlign: 'right' }}
               />
@@ -235,7 +408,8 @@ export default function PartyOpeningPage() {
               <label>&nbsp;</label>
               <SignSelect
                 label="Opening Gold Fine Cr or Dr"
-                value={form.goldSign}
+                value={signOf(totals.goldFine, form.goldSign)}
+                disabled={fromBills}
                 onChange={(v) => set('goldSign', v)}
               />
             </div>
@@ -246,7 +420,8 @@ export default function PartyOpeningPage() {
               <input
                 id="opening-silver"
                 inputMode="decimal"
-                value={form.silver}
+                value={filledBills.length ? fixed(Math.abs(totals.silverFine), 3) : form.silver}
+                readOnly={filledBills.length > 0}
                 onChange={(e) => set('silver', e.target.value)}
                 style={{ textAlign: 'right' }}
               />
@@ -255,7 +430,8 @@ export default function PartyOpeningPage() {
               <label>&nbsp;</label>
               <SignSelect
                 label="Opening Silver Fine Cr or Dr"
-                value={form.silverSign}
+                value={signOf(totals.silverFine, form.silverSign)}
+                disabled={fromBills}
                 onChange={(v) => set('silverSign', v)}
               />
             </div>
@@ -335,6 +511,75 @@ export default function PartyOpeningPage() {
           </table>
         </section>
       </div>
+
+      <section className="panel" style={{ overflowX: 'auto' }} aria-label="Bill-wise opening">
+        <h2>Bills</h2>
+        <table className="grid" onKeyDown={handleGridKey}>
+          <thead>
+            <tr>
+              <th>Sr.</th>
+              {BILL_COLUMNS.map((c) => (
+                <th key={c.field} className={c.num !== undefined ? 'num' : undefined}>
+                  {c.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {bills.map((b, i) => (
+              <tr key={b.key}>
+                <td>{i + 1}</td>
+                {BILL_COLUMNS.map((c) => (
+                  <td key={c.field} className={c.num !== undefined ? 'num' : undefined}>
+                    {c.field === 'itType' || c.field === 'sign' ? (
+                      <select
+                        aria-label={`${c.label} row ${i + 1}`}
+                        value={b[c.field]}
+                        onChange={(e) => setBill(i, c.field, e.target.value)}
+                      >
+                        {(c.field === 'itType' ? ['G', 'S', 'A'] : ['C', 'D']).map((v) => (
+                          <option key={v} value={v}>
+                            {v}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        aria-label={`${c.label} row ${i + 1}`}
+                        type={c.field === 'vchDate' ? 'date' : 'text'}
+                        inputMode={c.num !== undefined ? 'decimal' : undefined}
+                        value={b[c.field]}
+                        onChange={(e) => setBill(i, c.field, e.target.value)}
+                        style={{
+                          width: c.width,
+                          textAlign: c.num !== undefined ? 'right' : undefined,
+                        }}
+                      />
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colSpan={7} style={{ textAlign: 'right', fontWeight: 600 }}>
+                Total :
+              </td>
+              <td className="num">{fixed(totals.grossWt, 3)}</td>
+              <td className="num">{fixed(totals.netWt, 3)}</td>
+              <td colSpan={3}></td>
+              <td className="num">{fixed(totals.goldFine, 3)}</td>
+              <td className="num">{fixed(totals.silverFine, 3)}</td>
+              <td></td>
+              <td className="num">{fixed(totals.dmWt, 2)}</td>
+              <td className="num">{fixed(totals.dmAmt, 2)}</td>
+              <td className="num">{fixed(totals.amount, 2)}</td>
+              <td>{totals.amount < 0 ? 'D' : totals.amount > 0 ? 'C' : ''}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </section>
     </div>
   );
 }

@@ -239,6 +239,18 @@ export const DESKTOP_MESSAGES = {
 
   /** TR_AC_OPBL.cs:2868 — desktop condition: Delete with no party code. */
   OPENING_ACCOUNT_REQUIRED: 'Please Select Account Details.',
+
+  /** TR_AC_OPBL.cs:2668 — desktop condition: a bill row without a voucher number. */
+  OPENING_BILL_VCH_REQUIRED: 'Please Insert Vch No and Try...',
+
+  /** TR_AC_OPBL.cs:2674 — desktop condition: a bill row with no gold fine, silver fine or amount. */
+  OPENING_BILL_VALUE_REQUIRED: 'Please Insert Gold fine or Silver fine or Net Amount and try...',
+
+  /** TR_AC_OPBL.cs:3106 — desktop condition: a bill row's item type is not G, S or A. */
+  OPENING_BILL_TYPE_REQUIRED: 'Please insert ItmType  G = Gold S = Silver Or A = Amount and try',
+
+  /** TR_AC_OPBL.cs:3114 — desktop condition: a bill row's Cr/Dr is not C or D. */
+  OPENING_BILL_SIGN_REQUIRED: 'Please Enter C or D and Try Again...',
 } as const;
 
 export type DesktopMessageKey = keyof typeof DESKTOP_MESSAGES;

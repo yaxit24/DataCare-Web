@@ -50,6 +50,8 @@ export function registerPartyOpeningRoutes(
         acCode: String(b.acCode ?? ''),
         mainUser: mainUserOf(req),
         ...headsOf(b),
+        // The bill-wise grid; absent keeps the party's OP_DETL rows (the Party master's inline opening).
+        bills: Array.isArray(b.bills) ? b.bills : undefined,
       }),
     );
   });
