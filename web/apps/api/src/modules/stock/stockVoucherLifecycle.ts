@@ -1,3 +1,5 @@
+import { round } from '@datacare/core';
+import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import { assertPeriodOpen, insertRowTx, postVoucherTx } from '../posting/posting.js';
 import { fineFor, type FineWorkflow } from '../shared/finePolicy.js';
@@ -161,7 +163,10 @@ export interface ItemLotInput {
 
 type CompleteScope = VoucherScope & { coYear: string; coBook: string };
 type Kind = 'tag-opening' | 'item-opening' | 'item-lot';
-type BookPolicy = { bookName: string; vchType: string };
+/** The configured book: its name, its short name (VCH_TYPE) and its desktop family (BOOK_DATA.MAIN_BOOK). */
+type BookPolicy = { bookName: string; vchType: string; mainBook: string };
+/** Only Tag Entry (MDI_FORM.cs:8574-8584 CurBookHelp("TAG GEN")): tags made out of a loose stock item. */
+const TAG_GEN = 'TAG GEN';
 type WriteContext = {
   voucherNo: string;
   hiddenVoucherNo: string;
@@ -212,7 +217,7 @@ function params(scope: CompleteScope, voucherNo: string): unknown[] {
 async function resolveBookTx(tx: any, scope: CompleteScope, kind: Kind): Promise<BookPolicy> {
   const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
     `WITH candidates AS (
-       SELECT "BOOK_NAME","BOOK_SNAME",row_id,
+       SELECT "BOOK_NAME","BOOK_SNAME","MAIN_BOOK",row_id,
               CASE WHEN "LC_CODE"=$4 THEN 0 ELSE 1 END AS priority
          FROM "BOOK_DATA"
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "CO_BOOK"=$3
@@ -236,6 +241,7 @@ async function resolveBookTx(tx: any, scope: CompleteScope, kind: Kind): Promise
   return {
     bookName: text(row.BOOK_NAME),
     vchType: text(row.BOOK_SNAME) || scope.coBook,
+    mainBook: text(row.MAIN_BOOK).toUpperCase(),
   };
 }
 
@@ -343,6 +349,7 @@ async function assertTagOpeningUnconsumedTx(
   tx: any,
   scope: CompleteScope,
   voucherNo: string,
+  consumedMessage?: string,
 ): Promise<Map<string, number>> {
   const sourceRows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
     `SELECT "TAG_NO","VCH_SRNO","IT_CODE" FROM "BAR_DETL"
@@ -386,7 +393,8 @@ async function assertTagOpeningUnconsumedTx(
     if (rows.length) {
       const row = rows[0]!;
       throw new StockVoucherValidationError(
-        `tag ${text(row.TAG_NO)} (${n(row.VCH_SRNO)}) has already been consumed by a later voucher`,
+        consumedMessage ??
+          `tag ${text(row.TAG_NO)} (${n(row.VCH_SRNO)}) has already been consumed by a later voucher`,
       );
     }
   }
@@ -566,8 +574,8 @@ async function writeTagOpeningTx(
   const duplicateTag = input.lines
     .map((line) => text(line.tagNo))
     .find((tagNo, index, values) => tagNo && values.indexOf(tagNo) !== index);
-  if (duplicateTag)
-    throw new StockVoucherValidationError(`duplicate tag identity: ${duplicateTag}`);
+  // TR_TAG_OPBL.cs:8562: a tag number typed twice in the grid is refused with the desktop's message.
+  if (duplicateTag) throw new StockVoucherValidationError(DESKTOP_MESSAGES.TAG_DUPLICATE);
   const identities: Array<{ tagNo: string; vchSrno: number }> = [];
   for (const line of input.lines) {
     if (!text(line.itCode)) throw new StockVoucherValidationError('tag opening item is required');
@@ -588,10 +596,14 @@ async function writeTagOpeningTx(
         (other) => other.tagNo === identity.tagNo && other.vchSrno === identity.vchSrno,
       ) !== index,
   );
-  if (duplicate) {
-    throw new StockVoucherValidationError(`duplicate tag identity: ${duplicate.tagNo}`);
-  }
-  await insertIdentityTx(tx, scope, policy, date, { stockItCode: input.stockItCode }, ctx);
+  if (duplicate) throw new StockVoucherValidationError(DESKTOP_MESSAGES.TAG_DUPLICATE);
+  // Only Tag Entry makes tags out of a loose stock item, so the item is required (TR_TAG_OPBL.cs:10813-10818); the
+  // opening books (OPSTK) hide the field and draw on no stock (CLEAR_DATA, :10303-10310).
+  const tagGen = policy.mainBook === TAG_GEN;
+  const stockItCode = tagGen ? text(input.stockItCode) : '';
+  if (tagGen && !stockItCode)
+    throw new StockVoucherValidationError(DESKTOP_MESSAGES.TAG_GEN_STOCK_ITEM_REQUIRED);
+  await insertIdentityTx(tx, scope, policy, date, { stockItCode }, ctx);
   const stamp = voucherTimestamp(date, ctx.persistedClock);
   const fineOf = (line: TagOpeningLine): number =>
     line.fineWt != null ? n(line.fineWt) : fineFor('tagOpening', line);
@@ -696,51 +708,82 @@ async function writeTagOpeningTx(
     IT_GWT: n(line.grossWt),
     MAIN_USER: ctx.mainUser || null,
   }));
+  // The stock rows of Ac_Stock.Tag_Opbl_Stk (Ac_Stock.cs:22-36): an opening book's tag is a purchase-in ('P', VCH_TYPE
+  // 'TAGOP', BOOK_NAME 'TAG OPBL'); an Only Tag Entry tag is an issue-in ('I', the book's short name and family), and
+  // the stock item it was made from goes out once, by the voucher's totals ('O', '-', TAG_NO 'N'). A tag row's quantity
+  // is always 1, and the row carries the tag's karigar costing and design.
+  const sum = (pick: (line: TagOpeningLine) => number) =>
+    input.lines.reduce((total, line) => total + pick(line), 0);
   const tagStock = input.lines.map((line, index) => ({
     ...key,
     SR_NO: index + 1,
     VCH_DATE: date,
-    VCH_TYPE: 'TAGOP',
-    BOOK_NAME: policy.bookName.slice(0, 20),
+    STK_DATE: date.toISOString().slice(0, 10),
+    VCH_TYPE: tagGen ? policy.vchType : 'TAGOP',
+    BOOK_NAME: tagGen ? TAG_GEN : 'TAG OPBL',
+    AC_CODE: '',
     TBL_CODE: line.tblCode ?? '001',
     IT_CODE: text(line.itCode),
     TAG_NO: identities[index]!.tagNo,
     VCH_SRNO: identities[index]!.vchSrno,
-    TR_TYPE: 'P',
+    TR_TYPE: tagGen ? 'I' : 'P',
     ITM_SIGN: '+',
-    ITM_QTY: n(line.pcs) || 1,
+    ITM_QTY: 1,
     ITM_PCS: n(line.pcs) || 1,
     ITM_GWT: n(line.grossWt),
     ITM_NWT: n(line.netWt),
     ITM_TOUCH: n(line.touch),
+    ITM_WEST: n(line.westPct),
     ITM_FINE: fineOf(line),
     ITM_RATE: n(line.rate),
-    ITM_MRP: n(line.mrp),
+    LBR_RATE: n(line.lbrRate),
     LBR_AMT: n(line.lbrAmt),
     OTH_AMT: n(line.othAmt),
+    ITM_MRP: n(line.mrp),
+    NET_AMT: 0,
+    KR_LBR_AMT: n(line.karigarLbrAmt),
+    KR_OTH_AMT: n(line.karigarOthAmt),
+    KR_COST: n(line.karigarCost),
+    ENTRY_TIME: stamp,
     MAIN_USER: ctx.mainUser || null,
+    DATA_TYPE: 'A',
+    DESIGN_NO: text(line.designNo),
+    ITM_SIZE: text(line.itmSize),
   }));
-  const relief = text(input.stockItCode)
-    ? input.lines.map((line, index) => ({
-        ...key,
-        SR_NO: input.lines.length + index + 1,
-        VCH_DATE: date,
-        VCH_TYPE: 'TAGOP',
-        BOOK_NAME: policy.bookName.slice(0, 20),
-        TBL_CODE: line.tblCode ?? '001',
-        IT_CODE: text(input.stockItCode),
-        TAG_NO: 'N',
-        VCH_SRNO: 0,
-        TR_TYPE: 'O',
-        ITM_SIGN: '-',
-        ITM_QTY: n(line.pcs) || 1,
-        ITM_PCS: n(line.pcs) || 1,
-        ITM_GWT: n(line.grossWt),
-        ITM_NWT: n(line.netWt),
-        ITM_TOUCH: n(line.touch),
-        ITM_FINE: fineOf(line),
-        MAIN_USER: ctx.mainUser || null,
-      }))
+  const relief = tagGen
+    ? [
+        {
+          ...key,
+          SR_NO: 0,
+          VCH_DATE: date,
+          STK_DATE: date.toISOString().slice(0, 10),
+          VCH_TYPE: policy.vchType,
+          BOOK_NAME: TAG_GEN,
+          AC_CODE: '',
+          IT_CODE: stockItCode,
+          TAG_NO: 'N',
+          VCH_SRNO: 0,
+          TR_TYPE: 'O',
+          ITM_SIGN: '-',
+          ITM_QTY: 1,
+          ITM_PCS: sum((line) => n(line.pcs) || 1),
+          ITM_GWT: round(
+            sum((line) => n(line.grossWt)),
+            3,
+          ),
+          ITM_NWT: round(
+            sum((line) => n(line.netWt)),
+            3,
+          ),
+          ITM_FINE: round(
+            sum((line) => fineOf(line)),
+            3,
+          ),
+          ENTRY_TIME: stamp,
+          MAIN_USER: ctx.mainUser || null,
+          DATA_TYPE: 'A',
+        },
+      ]
     : [];
   await postVoucherTx(tx, scope.tenantId, {
     ledger: { table: 'AC_DATA', lines: [] },
@@ -1338,7 +1381,13 @@ export async function deleteTagOpening(
         : text(persisted.VCH_DATE).slice(0, 10),
     );
     await assertDatesOpenTx(tx, scope, persistedBusinessDate, persisted.VCH_DATE);
-    await assertTagOpeningUnconsumedTx(tx, scope, voucherNo);
+    // TR_TAG_OPBL.cs:11376-11385: a voucher whose tag is already sold cannot be deleted.
+    await assertTagOpeningUnconsumedTx(
+      tx,
+      scope,
+      voucherNo,
+      DESKTOP_MESSAGES.TAG_OPENING_DELETE_SOLD,
+    );
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "SR_NO","VCH_DATE","VCH_TIME","AC_CODE","IT_CODE","TAG_NO","IT_TYPE","ITM_NWT","HD_VCH_NO","MAIN_USER"
          FROM "BAR_DETL" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3

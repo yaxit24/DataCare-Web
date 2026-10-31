@@ -6,7 +6,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { realStackTarget } from '../real-stack-target.mjs';
+import { assertPortsFree, realStackTarget } from '../real-stack-target.mjs';
 
 /**
  * Feature E2E harness (docs/handbook/web/testing.md §4a).
@@ -81,6 +81,7 @@ export async function startStack({ artifacts }) {
     defaultTenantId: TENANT,
     allowTenantHeader: false,
   });
+  await assertPortsFree(target);
   await app.listen({ port: target.apiPort, host: '127.0.0.1' });
 
   let serverLog = '';

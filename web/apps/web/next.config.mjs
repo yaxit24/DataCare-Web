@@ -1,5 +1,7 @@
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { PHASE_PRODUCTION_SERVER } from 'next/constants.js';
+import { clearRouteCache } from './scripts/clearRouteCache.mjs';
 
 /** @type {import('next').NextConfig} */
 const API = process.env.API_ORIGIN || 'http://localhost:4000';
@@ -13,4 +15,13 @@ const nextConfig = {
     return [{ source: '/api/:path*', destination: `${API}/:path*` }];
   },
 };
-export default nextConfig;
+
+/**
+ * N205 (G218): the production server starts from an empty route cache. The build clears it (N186), but a build that
+ * turbo restores from its cache replays the build's log without running that step, so the pages a previous server
+ * cached survived and a fresh `next start` served them (`x-nextjs-cache: HIT` with a chunk from an older build).
+ */
+export default function config(phase) {
+  if (phase === PHASE_PRODUCTION_SERVER) clearRouteCache();
+  return nextConfig;
+}

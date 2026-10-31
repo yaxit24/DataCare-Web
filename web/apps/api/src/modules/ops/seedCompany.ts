@@ -246,6 +246,19 @@ const BOOKS: {
     table: 'BAR_DATA',
     slots: [],
   },
+  // Desktop Only Tag Entry (TR_TAG_OPBL, MDI_FORM.cs:8574-8584 CurBookHelp("TAG GEN")): makes tags out of a loose
+  // stock item — the tags go in and the item goes out (Ac_Stock.Tag_Opbl_Stk, Ac_Stock.cs:22-36). No ledger entry, so
+  // the book has no account slots. The desktop's default book is "Only Tag Entry 1" (TGEN1, MS_UPDATE.cs:17020).
+  {
+    book: 'TGN',
+    name: 'Only Tag Entry',
+    mainBook: 'TAG GEN',
+    inout: 'I',
+    acCode: 'PURCHASE',
+    shortName: 'TGEN',
+    table: 'BAR_DATA',
+    slots: [],
+  },
   // Desktop Item Opening (TR_ITM_OPBL, MDI_FORM.cs:7701 CurBookHelp("OPSTK")): opens non-tag (loose/lot) item
   // stock — writes ITM_OPBL + positive MAIN_STOCK with no money ledger (empty AC_DATA), on a book routed to
   // BAR_DATA. Without this book the Item Opening screen has no book to select on a provisioned company
