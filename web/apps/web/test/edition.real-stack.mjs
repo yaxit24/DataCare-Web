@@ -20,7 +20,7 @@ import { spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { realStackTarget } from './real-stack-target.mjs';
+import { assertPortsFree, realStackTarget } from './real-stack-target.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 assert(process.env.MIGRATE_DATABASE_URL, 'Run through scripts/parity-test-env.mjs');
@@ -97,7 +97,8 @@ try {
     await hashPassword(password),
   );
 
-  // Phase 0: Lite, the default edition (D33).
+  // Phase 0: Lite, the default edition (D33). The ports are checked once: later phases restart only this suite's API.
+  await assertPortsFree(target);
   await startApi({ code: 'L', beta: false });
   server = spawn(
     'pnpm',

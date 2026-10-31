@@ -6826,6 +6826,29 @@
       "statusAsOf": "2026-10-31",
       "evidence": [],
       "statusNote": "PLANNED."
+    },
+    {
+      "id": "N205",
+      "status": "implemented-unverified",
+      "action": "Browser suites run against the build they were given: the production server clears the route cache when it starts, and every real-stack suite and the feature harness refuse to start when their ports already answer.",
+      "parentLabels": "P9",
+      "startAfter": [
+        "N186"
+      ],
+      "requiredProof": "nextConfigRouteCache.test.ts fails with main's next.config.mjs; assertPortsFree.test.ts refuses an occupied port; a stale route cache planted before next start is gone and the current chunk is served.",
+      "gapIds": "G218",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/web/next.config.mjs",
+        "web/apps/web/test/real-stack-target.mjs",
+        "web/apps/web/test/nextConfigRouteCache.test.ts",
+        "web/apps/web/test/assertPortsFree.test.ts"
+      ],
+      "statusNote": "IMPLEMENTED. Verified: the two new unit tests pass (the config test fails with main's next.config.mjs); a planted stale route cache was removed by next start, which served the current tag-opening chunk; assertPortsFree refused a port held by another server."
     }
   ],
   "amendments": [
