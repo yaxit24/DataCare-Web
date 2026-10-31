@@ -1,4 +1,4 @@
-import { round } from '@datacare/core';
+import { round, toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { buildJournalRojmel } from '../shared/rojmel.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
@@ -300,7 +300,7 @@ export async function getContra(
       voucherNo,
       hiddenVoucherNo: text(h.HD_VCH_NO),
       mainUser: text(h.MAIN_USER),
-      vchDate: text(h.VCH_DATE).slice(0, 10),
+      vchDate: toIsoDate(h.VCH_DATE), // N56 (D19)
       lines,
       // The two-account form, for a two-row contra.
       toAc: two ? (lines.find((l) => l.crdr === 'DR')?.acCode ?? '') : '',
