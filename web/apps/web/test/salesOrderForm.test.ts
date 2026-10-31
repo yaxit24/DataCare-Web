@@ -374,3 +374,37 @@ describe('Sales Order labour and Design selection chronology', () => {
     expect(original.orderEdits).toEqual([]);
   });
 });
+
+// N196 (G205): with the company's SL_AMT_TYPE in the policy, the preview prices the metal like TR_SALE_ORD
+// (TR_SALE_ORD.cs:6571-6672): net + ghat for N, fine for F, in whole rupees. Without it (the Tour Order) the
+// previous fine-weight, two-decimal preview stays.
+describe('Sales Order preview on the company amount basis (N196)', () => {
+  const enter = (amountType?: string) => {
+    const pricing = amountType ? { ...policy, itemAmountType: amountType } : policy;
+    let row = setSalesOrderCell(blank(1), 'itCode', 'GLD22');
+    for (const [field, value] of [
+      ['grossWt', '10.25'],
+      ['netWt', '10'],
+      ['pcs', '1'],
+      ['touch', '91.6'],
+      ['rate', '6123.45'],
+      ['labourRate', '237.5'],
+    ] as const)
+      row = commitSalesOrderLabour(row, setSalesOrderCell(row, field, value), field, pricing);
+    return row;
+  };
+  it('prices net 10 g at 6,123.45 as 61,234 and the line as 63,609 on SL_AMT_TYPE N', () => {
+    const row = enter('N');
+    expect([row.itemAmount, row.labourAmount, row.lineNetAmount]).toEqual([
+      '61234',
+      '2375',
+      '63609',
+    ]);
+  });
+  it('prices the fine weight 9.16 g as 56,091 on SL_AMT_TYPE F', () => {
+    expect(enter('F').itemAmount).toBe('56091');
+  });
+  it('keeps the fine-weight two-decimal preview when no amount basis is given', () => {
+    expect(enter().itemAmount).toBe('56090.8');
+  });
+});

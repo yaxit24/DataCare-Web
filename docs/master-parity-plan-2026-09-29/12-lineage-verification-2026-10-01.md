@@ -2149,6 +2149,23 @@ the confirmation page. The failures are G205 (fine-weight pricing with paise), G
 breakdown), G207 and G208 (provisioning of the order and sale book slots), G193 (a second delete answers 500) and
 G36 (the order list and the printed bill show `2026-10-31`; N56 is in progress).
 
+### N196 — Sales Order line priced on SL_AMT_TYPE in whole rupees (G205)
+
+`web/packages/core/src/salesOrderAmount.ts` holds the TR_SALE_ORD rules. The metal weight follows SL_AMT_TYPE: fine for
+F (net + ghat at touch + wastage, or net when those are blank), gross for G, net + ghat otherwise
+(`TR_SALE_ORD.cs:6571-6627`). The line's rate type then prices pieces, per 10 g or per kg (`:6646-6672`), and every
+branch rounds to whole rupees, half to even. The bill takes tax as round(net × %, 0) and the total as
+round(net + tax, 0) (`:11340-11342`). `web/apps/api/src/modules/sales/salesOrderPricing.ts` applies them to a Sales
+Order only; the Tour Order is its own desktop form (TR_TOUR_ORD) and keeps its pricing. The screen gets the basis from
+`GET /sales-orders/configuration` and previews the same amount (`web/apps/web/lib/salesOrderForm.ts`).
+
+One existing expectation changed: `salesOrderRound4.db.test.ts` priced a copied touch on the fine weight (184) on a
+company whose SL_AMT_TYPE is blank, which the desktop reads as N, so the metal is net × rate (200).
+
+Evidence: `sales-order.formula.whole-rupees` and `sales-order.create.amounts` pass in the browser and leave the
+baseline (sales-order 16 passed, 7 baselined); the new DB test pins 61,234 / 1,908 / 65,517 on N and 56,091 / 1,754 /
+60,220 on F and fails on the previous writer; core tests cover the bases, rate types and half-even rounding.
+
 ### N199 — Party Opening is the desktop TR_AC_OPBL (G209, G210)
 
 `web/apps/api/src/modules/finance/partyOpening.ts` holds every opening write. A save replaces the party's OP_DATA row in
@@ -2282,7 +2299,7 @@ AC_DATA. The bill-wise grid and the list print remain (G211, N200); the two carr
 | N193 | — | implemented-unverified (G203: cheque number on every bank leg, #165) |
 | N194 | — | implemented-unverified, evidence in this change (G204: the TR_CONTRA grid) |
 | N195 | — | implemented-unverified, evidence in this change (G205-G208: Sales Order feature module, 14 passed / 9 baselined / 2 blocked) |
-| N196 | — | planned (G205: price the order line on the SL_AMT_TYPE basis in whole rupees; tax and total rounded to rupees) |
+| N196 | — | implemented-unverified, evidence in this change (G205: order line priced on SL_AMT_TYPE in whole rupees; tax and total rounded; sales-order formula and amounts cases pass) |
 | N197 | — | planned (G206: the order's tender rows: cash, UPI, cheque, card, old metal and scheme, stored and posted per Order_Ledr) |
 | N198 | — | planned (G207, G208: provision SOR slot 1 as the cash account and sale books with slot 4; backfill existing companies) |
 | N199 | — | implemented-unverified, evidence in this change (G209, G210: Party Opening is TR_AC_OPBL; openings counted once) |
