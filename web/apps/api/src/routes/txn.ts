@@ -188,7 +188,7 @@ import type { MetricsRegistry } from '../modules/ops/metrics.js';
 import { getUserFormRights, setUserFormRights } from '../modules/rbac/formRights.js';
 import { partyBalance } from '../modules/finance/partyBalance.js';
 import { bankReconList, bankReconClear } from '../modules/finance/bankRecon.js';
-import { postDailyRate, getDailyRate, dailyRateDates } from '../modules/masters/dailyRate.js';
+import { registerDailyRateRoutes } from './dailyRate.js';
 import { bulkAutoItem } from '../modules/masters/autoItem.js';
 import {
   deleteDesignBook,
@@ -1091,6 +1091,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerVoucherNavigationRoutes(app, extraRouteHelpers);
   registerPartyOpeningRoutes(app, extraRouteHelpers);
   registerFineJvRoutes(app, extraRouteHelpers);
+  registerDailyRateRoutes(app, { ...extraRouteHelpers, formMutationCapabilities });
   const pdfRenderer = (): PdfRenderer => deps.pdfRenderer ?? new PlaywrightPdfRenderer();
   /** Render server-built HTML, mapping limits to 413/422 and a busy or slow renderer to a retryable 503. */
   const sendPdf = async (reply: FastifyReply, html: string, filename: string) => {
@@ -4842,31 +4843,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       { tenantId: s.tenantId, coCode: s.coCode },
       String((req.params as any).acCode),
     );
-  });
-  app.post('/daily-rate', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    const s = readScope(req);
-    const b = body(req);
-    return run(reply, 201, () =>
-      postDailyRate(prisma, {
-        scope: { tenantId: s.tenantId, coCode: s.coCode, coYear: s.coYear, lcCode: s.lcCode },
-        date: String(b.date ?? ''),
-        goldRate: Number(b.goldRate || 0),
-        silverRate: Number(b.silverRate || 0),
-        taxPct: b.taxPct != null ? Number(b.taxPct) : undefined,
-        empCode: b.empCode,
-        overrides: b.overrides,
-      }),
-    );
-  });
-  app.get('/daily-rate', auth, async (req) => {
-    const s = readScope(req);
-    const qy = (req.query as any) || {};
-    return getDailyRate(prisma, { tenantId: s.tenantId, coCode: s.coCode }, String(qy.date ?? ''));
-  });
-  app.get('/daily-rate/dates', auth, async (req) => {
-    const s = readScope(req);
-    return dailyRateDates(prisma, { tenantId: s.tenantId, coCode: s.coCode }, 30);
   });
   app.post('/masters/auto-item', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;

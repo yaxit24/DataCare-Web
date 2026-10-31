@@ -73,9 +73,7 @@
         "web/apps/api/src/modules/finance/fineJv.ts",
         "web/apps/api/src/modules/finance/lifecycle.ts",
         "web/apps/api/src/modules/finance/contraVoucher.ts",
-        "web/apps/api/src/modules/rbac/routePolicy.ts",
-        "web/apps/api/src/routes/fineJv.ts",
-        "web/apps/api/src/routes/txn.ts"
+        "web/apps/api/src/routes/fineJv.ts"
       ]
     },
     "salesOrder": {
@@ -97,6 +95,14 @@
       "covers": [
         "web/apps/web/app/(app)/txn/tag-opening/page.tsx",
         "web/apps/api/src/modules/stock/stockVoucherLifecycle.ts"
+      ]
+    },
+    "dailyRate": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/daily-rate/page.tsx",
+        "web/apps/api/src/modules/masters/dailyRate.ts",
+        "web/apps/api/src/routes/dailyRate.ts",
+        "web/packages/core/src/dailyRate.ts"
       ]
     }
   }

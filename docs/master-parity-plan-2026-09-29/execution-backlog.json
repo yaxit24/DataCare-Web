@@ -6926,6 +6926,32 @@
       "statusAsOf": "2026-10-31",
       "evidence": [],
       "statusNote": "PLANNED."
+    },
+    {
+      "id": "N208",
+      "status": "implemented-unverified",
+      "action": "Daily Rate is the desktop MS_RATE: GROUP_MAST grid with touch, Enter-on-silver recalculation with banker's rounding, grid saved per company/location/year/date, edit rights for a saved day, delete, F1 list and RateRpt.",
+      "parentLabels": "P1-core; L2",
+      "startAfter": [
+        "N206"
+      ],
+      "requiredProof": "Hand-worked recalculation vectors; HTTP/DB tests red against the old writer for grid source, saved rows, location scope, rights, delete, list and RateRpt; the daily-rate feature module passes every executable case.",
+      "gapIds": "G221",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/packages/core/src/dailyRate.ts",
+        "web/packages/core/test/dailyRate.test.ts",
+        "web/apps/api/src/modules/masters/dailyRate.ts",
+        "web/apps/api/src/routes/dailyRate.ts",
+        "web/apps/web/app/(app)/txn/daily-rate/page.tsx",
+        "web/apps/api/test/dailyRate.routes.db.test.ts",
+        "web/apps/web/test/features/modules/dailyRate.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Core vectors 7/7, HTTP/DB 8/8 (red before), daily-rate feature module 10 passed / 6 blocked. Open: rate lookup location scope (rate.ts), customer-specific per-location copy, external app push, MDI rate labels, desktop-runtime comparison."
     }
   ],
   "amendments": [

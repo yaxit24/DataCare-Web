@@ -231,6 +231,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G218 | Med | Browser suites could test an older build | — (test infrastructure) | `web/apps/web/next.config.mjs`; `web/apps/web/test/real-stack-target.mjs`; `web/apps/web/test/features/harness.mjs` | Found while verifying N203. The build clears the route cache (N186), but turbo replays a cached web build without running that step, so the pages a previous server cached survived and a fresh `next start` served an older chunk (`x-nextjs-cache: HIT`); a full feature run failed the reopen case on it. Separately, a suite whose ports were still held by a demo stack got a 200 from that stack's readiness probe and ran against its build: the new Next server could not bind the port. | N205 |
 | G219 | High | Fine Jv Entry was a reduced two-account form with reversed fine signs, and the routes sharing CONTRA_DATA reached each other's books | `unified/src/csharp/DataCareNext/MDI_FORM.cs:8360-8365`; `unified/src/csharp/DataCareNext/TR_CONTRA.cs:1426-1446,2666-2890,2951-2968,3000-3069`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs:846-848`; `unified/src/csharp/DataCareNext/Ac_Rojmel.cs:342-344`; `unified/src/csharp/DataCareNext/Ac_Tax.cs:686-694` | `web/apps/api/src/modules/finance/fineJv.ts`; `web/apps/api/src/routes/fineJv.ts`; `web/apps/web/app/(app)/txn/fine-jv/page.tsx`; `web/apps/api/src/modules/finance/contra.ts`; `web/apps/api/src/modules/finance/journal.ts`; `web/apps/api/src/modules/finance/contraVoucher.ts` | The desktop screen is the TR_CONTRA grid in FINE JV mode: row 1 is paired with every later row, the row is written first as LDR_TYPE 0 with its own side and description and row 1 is mirrored as LDR_TYPE 1 (`TR_CONTRA.cs:2760-2847`); each CR_FINE row posts a `STR(SR_NO)+'03'` `+` leg and each DR_FINE row a `'04'` `-` leg (33-character keys, `Ac_Ledr.cs:846-848`); Vch_Remark rebuilds REMARK_DATA from described rows; save refuses a missing mandatory employee, a new voucher in a type-B company, a date outside the year and unequal totals with the desktop texts; FineJvBill prints 'Gold '/'Silver ' + BOOK_NAME, the IT_DESC line and the signature footer. The web stored To as DR_FINE, offered one From/To pair, keyed legs with a 2-wide line number, named TEMP_BOOK_DATA after MAIN_BOOK, skipped the fiscal-date, employee and company-type checks, kept stale desktop flags, never wrote REMARK_DATA, and its Contra and Journal routes could read, rewrite, delete or print a FINE JV voucher; their documents needed only view rights. | N206 |
 | G220 | Med | The generic voucher list and number-box routes read any book of an allow-listed table | `unified/src/csharp/DataCareNext/MDI_FORM.cs:8100-8111,8360-8365`; `unified/src/csharp/DataCareNext/TR_CONTRA.cs:3136-3146` | `web/apps/api/src/routes/voucherNavigation.ts`; `web/apps/api/src/modules/vouchers/list.ts`; `web/apps/api/src/modules/rbac/routePolicy.ts` | Found in the N206 review. `GET /vouchers/recent` and `GET /vouchers/neighbour` are SYSTEM routes that take the table and book from the request, so any signed-in user of the company can list another menu's vouchers of a shared table (for example a Fine JV book through CONTRA_DATA) with their dates, accounts and totals, within the session's tenant, company, location and year. The desktop's list (TR_CONTRA.cs:3136-3146) only lists the open form's own book. The routes should require view rights on the form that owns the requested book. | N207 |
+| G221 | High | Daily Rate did not follow MS_RATE and its save deleted other locations' rates | `unified/src/csharp/DataCareNext/MS_RATE.cs:1752-2109,2314-2458` | `web/apps/api/src/modules/masters/dailyRate.ts`; `web/apps/api/src/routes/dailyRate.ts`; `web/apps/web/app/(app)/txn/daily-rate/page.tsx`; `web/packages/core/src/dailyRate.ts` | The desktop lists the groups with a touch (GR_TYPE, GR_NAME), derives TaxRate = Round(Touch × Gold / 100) (silver / 10000) with Rate10gm net of the group's Tax% and PrRate from the purchase touch, using banker's rounding, and saves the grid per company, location, year and date. The web derived silver per kg, added tax on top, rounded half up, used one Tax% for every group, deleted every location's rows for the date, read and listed without the location, wrote GR_NAME, had no delete or print, and allowed any save without edit rights. | N208 |
 
 ## 4. Decisions D23–D28
 
@@ -2346,6 +2347,31 @@ book refusal. Chrome DevTools: a three-row voucher entered through the lookups, 
 descriptions and the signature footer, reopened with Enter in Vch No, edited, and deleted with the desktop prompt;
 Lighthouse on the reopened grid scores Accessibility, Best Practices, SEO and Agentic Browsing 100 with no failed audit.
 Desktop-runtime comparison and parent acceptance remain open.
+### N208 — Daily Rate is the desktop MS_RATE (G221, Lite L2)
+
+The screen is the desktop Rate Master (`MDI_FORM.cs:8564-8573`): Vch Date with F1 (saved days with user, gold and
+silver rate, `MS_RATE.cs:2370-2396`), Gold Rate 10gm, Silver Rate 1Kg and Employee, and a grid of the GROUP_MAST
+groups with a touch in GR_TYPE then GR_NAME order (Sr., GrCode, GrName, Touch, Tax%, Rate10gm, TaxRate, PrTouch,
+PrRate; `:1364-1414`, `:1752-1832`). Enter on Silver Rate 1Kg recomputes the gold and silver rows whose metal rate
+changed (`:2314-2368`): TaxRate = Round(Touch × Gold / 100), the silver 1 kg rate / 10000, Rate10gm = Round(TaxRate /
+(Tax% + 100) × 100, 0) when the group has a Tax%, and PrRate from the purchase touch, all with .NET banker's rounding
+(`recalcDailyRateGrid` in `web/packages/core/src/dailyRate.ts`). A UAE company also shows the purchase and USD rates and
+recomputes PrRate from a changed purchase rate (`:1705-1715`, `:2397-2458`). Save stores the grid as shown: the
+company/location/year/date rows are replaced by one row per group with a touch and a Rate10gm, SR_NO the grid row,
+with the header rates, GR_TYPE, the employee and the creator; location '00' also sets GROUP_MAST.GR_RATE
+(`:1867-1947`). Changing a saved day needs edit rights (`:1882-1886`); delete needs delete rights and asks "Are You
+Sure To Delete This Day Rate?" (`:2095-2109`); RateRpt needs print rights and prints 'Daily Rate Report dd/MM/yyyy'
+with Group Name and Rate 10gm (`:1834-1866`, `web/apps/api/report-specs/RateRpt.spec.json`).
+
+Not carried over: the per-location copy for one customer's registration (`:1937-1948`), the push of rates to an
+external app database (AppSchemeTrfr, `:2048-2094`) and the MDI rate labels (the web keeps its RateTicker). The
+sale and purchase rate lookup (`rate.ts`) still reads RATE_MAST without the location (TR_SALE.cs:12547 uses it).
+
+Evidence: `web/packages/core/test/dailyRate.test.ts` (7 hand-worked vectors, banker's rounding included) and
+`web/apps/api/test/dailyRate.routes.db.test.ts` (8 cases, all red against the old writer) pass; the zero-mock
+`daily-rate` module passes 10 executable cases (grid order, Enter recalculation, negative refusal, saved rows,
+F1 reopen, unchanged save, unpriced group skipped, delete, RateRpt, Alt+S) with 6 blocked and 2 not applicable.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2480,6 +2506,7 @@ Desktop-runtime comparison and parent acceptance remain open.
 | N205 | — | implemented-unverified, evidence in this change (G218: the production server starts from an empty route cache; suites refuse occupied ports) |
 | N206 | — | implemented-unverified, evidence in this change (G219: Fine Jv Entry is the TR_CONTRA FINE JV grid with paired rows, 33-character fine legs, remark rebuild and the desktop refusals; Contra and Journal refuse another family's book and need print rights; 18 browser cases pass, 5 blocked) |
 | N207 | — | planned (G220: the generic voucher list and number-box routes need the owning form's view right for the requested book) |
+| N208 | — | implemented-unverified, evidence in this change (G221: Daily Rate is MS_RATE — grid source, recalculation, scoped save/delete, F1, RateRpt, rights) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 
