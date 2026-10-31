@@ -250,10 +250,10 @@ import { tagStockReport, tagStockCsv } from '../modules/reports/tagStock.js';
 import { registerVoucherNavigationRoutes } from './voucherNavigation.js';
 import { registerSaleVoucherRoutes } from './saleVoucher.js';
 import { registerPurchaseVoucherRoutes } from './purchaseVoucher.js';
+import { registerPartyOpeningRoutes } from './partyOpening.js';
 import { VoucherVersionConflictError } from '../modules/vouchers/version.js';
 import { listYears, createYear, carryForwardOpenings } from '../modules/masters/year.js';
 import { reminders } from '../modules/finance/reminders.js';
-import { getOpeningBalance, setOpeningBalance } from '../modules/masters/openingBalance.js';
 import { getPartyPhoto, setPartyPhoto, familyMembers } from '../modules/masters/party.js';
 import {
   listLabourItems,
@@ -315,7 +315,6 @@ import {
   groupSummary,
   gstr2Purchase,
 } from '../modules/reports/reports3.js';
-import { postAcOpening, deleteAcOpening } from '../modules/finance/acOpening.js';
 import { deleteFineJv, getFineJv, postFineJv, editFineJv } from '../modules/finance/fineJv.js';
 import { deleteBillSettlement, listOpenBills, settleBills } from '../modules/finance/billToBill.js';
 import {
@@ -1074,6 +1073,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerCrmRoutes(app, extraRouteHelpers);
   registerLoanInterestRoutes(app, extraRouteHelpers);
   registerVoucherNavigationRoutes(app, extraRouteHelpers);
+  registerPartyOpeningRoutes(app, extraRouteHelpers);
   const pdfRenderer = (): PdfRenderer => deps.pdfRenderer ?? new PlaywrightPdfRenderer();
   /** Render server-built HTML, mapping limits to 413/422 and a busy or slow renderer to a retryable 503. */
   const sendPdf = async (reply: FastifyReply, html: string, filename: string) => {
@@ -4831,31 +4831,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       String((req.params as any).acCode),
     );
   });
-  app.get('/accounts/:acCode/opening', auth, async (req) => {
-    const s = readScope(req);
-    return getOpeningBalance(
-      prisma,
-      { tenantId: s.tenantId, coCode: s.coCode },
-      String((req.params as any).acCode),
-    );
-  });
-  app.post('/accounts/:acCode/opening', auth, async (req, reply) => {
-    if (!guard(req, reply, 'update')) return;
-    const s = readScope(req);
-    const b = body(req);
-    return run(reply, 200, () =>
-      setOpeningBalance(prisma, {
-        scope: { tenantId: s.tenantId, coCode: s.coCode, coYear: s.coYear, lcCode: s.lcCode },
-        acCode: String((req.params as any).acCode),
-        amount: Number(b.amount || 0),
-        sign: b.sign === 'C' ? 'C' : 'D',
-        gold: Number(b.gold || 0),
-        goldSign: b.goldSign === '-' ? '-' : '+',
-        silver: Number(b.silver || 0),
-        silverSign: b.silverSign === '-' ? '-' : '+',
-      }),
-    );
-  });
   app.post('/daily-rate', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const s = readScope(req);
@@ -6541,6 +6516,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         { tenantId: s.tenantId, coCode: s.coCode, lcCode: s.lcCode },
         String(b.fromYear),
         String(b.toYear),
+        sess(req).sub,
       ),
     );
   });
@@ -7220,13 +7196,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
-  app.post('/ac-opbl', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      postAcOpening(prisma, { scope: scopeOf(req), vchDate: b.vchDate, lines: b.lines ?? [] }),
-    );
-  });
   app.post('/fine-jv', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
@@ -7450,16 +7419,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         vchNo: (req.params as any).vchNo,
         book: body(req).book,
         deleteUser: sess(req).sub,
-      }),
-    );
-  });
-  app.delete('/ac-opbl/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
-      deleteAcOpening(prisma, {
-        scope: scopeOf(req),
-        vchNo: (req.params as any).vchNo,
-        book: body(req).book,
       }),
     );
   });
@@ -8358,6 +8317,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         { tenantId: s.tenantId, coCode: s.coCode, lcCode: s.lcCode },
         String(b.fromYear),
         String(b.toYear),
+        sess(req).sub,
       ),
     );
   });

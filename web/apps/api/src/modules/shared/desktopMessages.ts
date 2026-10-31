@@ -230,6 +230,12 @@ export const DESKTOP_MESSAGES = {
    * voucher carries no content at all.
    */
   PARTY_ENTRY_REQUIRED: 'Please Insert Party Entry And Try.....',
+
+  /** TR_AC_OPBL.cs:2682 — desktop condition: Save with no party code. */
+  OPENING_PARTY_REQUIRED: 'Please Enter Party First...',
+
+  /** TR_AC_OPBL.cs:2868 — desktop condition: Delete with no party code. */
+  OPENING_ACCOUNT_REQUIRED: 'Please Select Account Details.',
 } as const;
 
 export type DesktopMessageKey = keyof typeof DESKTOP_MESSAGES;

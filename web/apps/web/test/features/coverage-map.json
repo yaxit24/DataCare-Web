@@ -60,6 +60,13 @@
         "web/apps/web/app/(app)/txn/receipt/page.tsx",
         "web/apps/web/app/(app)/txn/payment/page.tsx"
       ]
+    },
+    "partyOpening": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/ac-opbl/page.tsx",
+        "web/apps/api/src/modules/finance/partyOpening.ts",
+        "web/apps/api/src/routes/partyOpening.ts"
+      ]
     }
   }
 }

@@ -1,6 +1,7 @@
 import { fiscalYearDates } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { CLONE_TEMPLATE_CO_CODE, cloneCompanyTx } from './companyClone.js';
+import { OPENING_BOOK, writePartyOpeningTx } from '../finance/partyOpening.js';
 
 /**
  * Financial-year master (desktop "Year Create", `MS_YEAR`): create a company year (YEAR_MAST: OP_DATE opening,
@@ -109,15 +110,18 @@ export async function createYear(
 }
 
 /**
- * Carry-forward: compute each party's CLOSING balance in `fromYear` (its fromYear opening + the net of
- * its AC_DATA there — money net = Σ(DR−CR) on non-gold legs, gold net = Σ signed FINE_WT on IT_TYPE 'G')
- * and write it as the `toYear` OPENING (OP_DATA). Idempotent: clears toYear openings first.
+ * Carry-forward (Balance TrFr, BtmSchm.cs:2764-2801): each party's CLOSING balance in `fromYear` becomes its `toYear`
+ * opening. The closing is read from AC_DATA alone, which already holds the fromYear opening as its AcOp_Ledr legs:
+ * money = Σ(DR−CR), gold and silver = Σ signed FINE_WT on IT_TYPE 'G' and 'S' ('+' is Cr). Each opening is written
+ * through the Party Opening writer, so it lands in OP_DATA book '000' with its ledger legs, as the desktop's openings do.
+ * Idempotent: the toYear openings and their legs are cleared first, as BtmSchm clears OP_DATA.
  */
 export async function carryForwardOpenings(
   prisma: any,
   scope: { tenantId: string; coCode: string; lcCode?: string },
   fromYear: string,
   toYear: string,
+  mainUser = 'system',
 ): Promise<{ parties: number }> {
   return withTxBudget(prisma, scope.tenantId, 'heavy', async (tx: any) => {
     await tx.$executeRawUnsafe(
@@ -125,55 +129,42 @@ export async function carryForwardOpenings(
       scope.coCode,
       toYear,
     );
-    // fromYear ledger net per party
-    const acRows: any[] = await tx.$queryRawUnsafe(
+    await tx.$executeRawUnsafe(
+      `DELETE FROM "AC_DATA" WHERE "CO_CODE"=$1 AND "CO_YEAR"=$2 AND "CO_BOOK"=$3 AND "BOOK_NAME"='TR_AC_OPBL'`,
+      scope.coCode,
+      toYear,
+      OPENING_BOOK,
+    );
+    const closings: any[] = await tx.$queryRawUnsafe(
       `SELECT "AC_CODE" ac,
-              coalesce(sum(CASE WHEN coalesce("IT_TYPE",'')<>'G' THEN coalesce(NULLIF("DR_AMT"::text,'')::numeric,0)-coalesce(NULLIF("CR_AMT"::text,'')::numeric,0) ELSE 0 END),0)::float money,
-              coalesce(sum(CASE WHEN coalesce("IT_TYPE",'')='G' THEN (CASE WHEN coalesce("SIGN",'')='+' THEN 1 ELSE -1 END)*coalesce(NULLIF("FINE_WT"::text,'')::numeric,0) ELSE 0 END),0)::float gold
-         FROM "AC_DATA" WHERE "CO_CODE"=$1 AND "CO_YEAR"=$2 AND coalesce("AC_CODE",'')<>'' GROUP BY "AC_CODE"`,
+              coalesce(sum(coalesce("DR_AMT",0)-coalesce("CR_AMT",0)),0)::float money,
+              coalesce(sum(CASE WHEN "IT_TYPE"='G' THEN (CASE WHEN "SIGN"='+' THEN 1 ELSE -1 END)*coalesce("FINE_WT",0) ELSE 0 END),0)::float gold,
+              coalesce(sum(CASE WHEN "IT_TYPE"='S' THEN (CASE WHEN "SIGN"='+' THEN 1 ELSE -1 END)*coalesce("FINE_WT",0) ELSE 0 END),0)::float silver
+         FROM "AC_DATA" WHERE "CO_CODE"=$1 AND "CO_YEAR"=$2 AND coalesce("AC_CODE",'')<>''
+        GROUP BY "AC_CODE" ORDER BY "AC_CODE"`,
       scope.coCode,
       fromYear,
     );
-    // fromYear opening per party
-    const opRows: any[] = await tx.$queryRawUnsafe(
-      `SELECT "AC_CODE" ac, coalesce(NULLIF("OP_AMT"::text,'')::numeric,0)::float amt, upper(coalesce("OP_SIGN",'D')) osg, coalesce(NULLIF("FINE_BAL"::text,'')::numeric,0)::float fb, coalesce("FINE_SIGN",'+') fsg
-         FROM "OP_DATA" WHERE "CO_CODE"=$1 AND "CO_YEAR"=$2`,
-      scope.coCode,
-      fromYear,
-    );
-    const closing = new Map<string, { money: number; gold: number }>();
-    for (const r of opRows) {
-      const m = num(r.amt) * (String(r.osg) === 'C' ? -1 : 1);
-      const g = num(r.fb) * (String(r.fsg) === '-' ? -1 : 1);
-      const c = closing.get(String(r.ac)) ?? { money: 0, gold: 0 };
-      c.money += m;
-      c.gold += g;
-      closing.set(String(r.ac), c);
-    }
-    for (const r of acRows) {
-      const c = closing.get(String(r.ac)) ?? { money: 0, gold: 0 };
-      c.money += num(r.money);
-      c.gold += num(r.gold);
-      closing.set(String(r.ac), c);
-    }
     let parties = 0;
-    for (const [ac, c] of closing) {
-      const money = r2(c.money);
-      const gold = r3(c.gold);
-      if (Math.abs(money) < 0.005 && Math.abs(gold) < 0.0005) continue; // skip fully-settled parties
+    for (const c of closings) {
+      const money = r2(num(c.money));
+      const gold = r3(num(c.gold));
+      const silver = r3(num(c.silver));
+      if (money === 0 && gold === 0 && silver === 0) continue; // a settled party carries nothing
       parties += 1;
-      await tx.$executeRawUnsafe(
-        `INSERT INTO "OP_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","AC_CODE","OP_AMT","OP_SIGN","FINE_BAL","FINE_SIGN","DATA_TYPE") VALUES ($1,$2,$3,$4,'OPB',$5,$6,$7,$8,$9,$10,'O')`,
-        scope.tenantId,
-        scope.coCode,
-        scope.lcCode ?? '01',
-        toYear,
-        ac,
-        ac,
-        Math.abs(money),
-        money >= 0 ? 'D' : 'C',
-        Math.abs(gold),
-        gold >= 0 ? '+' : '-',
+      await writePartyOpeningTx(
+        tx,
+        { tenantId: scope.tenantId, coCode: scope.coCode, lcCode: scope.lcCode, coYear: toYear },
+        String(c.ac),
+        {
+          amount: Math.abs(money),
+          sign: money >= 0 ? 'D' : 'C',
+          gold: Math.abs(gold),
+          goldSign: gold >= 0 ? 'C' : 'D',
+          silver: Math.abs(silver),
+          silverSign: silver >= 0 ? 'C' : 'D',
+        },
+        mainUser,
       );
     }
     return { parties };

@@ -23,6 +23,7 @@ import { settingsEffects } from './modules/settingsEffects.mjs';
 import { usersRights } from './modules/usersRights.mjs';
 import { companyOpen } from './modules/companyOpen.mjs';
 import { cashBank } from './modules/cashBank.mjs';
+import { partyOpening } from './modules/partyOpening.mjs';
 import { runSurface } from './surface/runner.mjs';
 
 /**
@@ -47,6 +48,7 @@ const MODULES = [
   companyOpen,
   purchaseReturn,
   cashBank,
+  partyOpening,
 ];
 
 const artifacts = resolve(webRoot, 'test-results/feature-e2e');

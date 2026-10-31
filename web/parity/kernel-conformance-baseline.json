@@ -101,8 +101,6 @@
     "rounding:modules/manufacturing/mfg.ts#round2",
     "rounding:modules/manufacturing/mfg.ts#round3",
     "rounding:modules/masters/dailyRate.ts#r0",
-    "rounding:modules/masters/openingBalance.ts#r2",
-    "rounding:modules/masters/openingBalance.ts#r3",
     "rounding:modules/masters/year.ts#r2",
     "rounding:modules/masters/year.ts#r3",
     "rounding:modules/membership/membership.ts#r2",

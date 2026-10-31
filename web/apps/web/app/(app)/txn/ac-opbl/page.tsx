@@ -1,239 +1,340 @@
 'use client';
-import { useState } from 'react';
-import { post, ApiError } from '../../../../lib/api';
-import { useBusinessScope } from '../../../../components/BusinessScope';
-import { BookSelect } from '../../../../components/BookSelect';
+import { useCallback, useEffect, useState } from 'react';
+import { del, get, post, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
-import { useGridKeyboard } from '../../../../components/GridKeyboard';
+import { PartyBalance } from '../../../../components/PartyBalance';
 
-interface Line {
-  goldFine: string;
+/**
+ * Party Opening (desktop TR_AC_OPBL). One opening per party: the amount, gold fine and silver fine, each Cr or Dr
+ * (the combos default to Cr, TR_AC_OPBL.cs:2232-2239). Save rewrites the party's opening and its ledger legs; the list
+ * on the right is the desktop's opening list by balance type (:2299-2311). Picking a party or a list row reloads it.
+ */
+type CrDr = 'C' | 'D';
+interface Opening {
   acCode: string;
-  debit: string;
-  credit: string;
-  fineWt: string;
-  itType: string;
+  acName: string | null;
+  exists: boolean;
+  amount: number;
+  sign: CrDr;
+  gold: number;
+  goldSign: CrDr;
+  silver: number;
+  silverSign: CrDr;
 }
-const blank = (): Line => ({
-  acCode: '',
-  debit: '',
-  credit: '',
-  fineWt: '',
-  itType: 'A',
-  goldFine: '',
-});
-const n = (v: string) => Number(v || 0);
-const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
+interface Form {
+  amount: string;
+  sign: CrDr;
+  gold: string;
+  goldSign: CrDr;
+  silver: string;
+  silverSign: CrDr;
+}
+type BalanceType = 'amount' | 'gold' | 'silver';
+interface ListRow {
+  acCode: string;
+  acName: string | null;
+  cr: number;
+  dr: number;
+}
+interface OpeningList {
+  rows: ListRow[];
+  totalCr: number;
+  totalDr: number;
+}
 
-export default function AcOpeningPage() {
-  const { lcCode, coYear } = useBusinessScope();
-  const [coBook, setCoBook] = useState('');
-  const [vchDate, setVchDate] = useState('');
-  const [lines, setLines] = useState<Line[]>([blank(), blank()]);
-  // Desktop grids are keyboard-driven: arrows move between cells, Enter advances and
-  // appends a row at the end, Ctrl/Cmd+D removes one (TR_SALE.cs:12250-12320).
-  const handleGridKey = useGridKeyboard({
-    rowCount: lines.length,
-    onAppendRow: () => setLines((rows) => [...rows, blank()]),
-    onRemoveRow: (row) => {
-      setLines((rows) =>
-        rows.length === 1 ? [blank()] : rows.filter((_, index) => index !== row),
-      );
-      return true;
-    },
-    onEscape: () => {},
-  });
-  const [result, setResult] = useState<{ vchNo: number } | null>(null);
-  const [err, setErr] = useState('');
+const EMPTY: Form = { amount: '', sign: 'C', gold: '', goldSign: 'C', silver: '', silverSign: 'C' };
+const DELETE_CONFIRM = 'Are You Sure To Delete This Record now?'; // TR_AC_OPBL.cs:2870
+const SAVED = 'Data Are Saved.'; // :2830
+const DELETED = 'Delete Success.'; // :2879
+
+const asForm = (o: Opening): Form =>
+  o.exists
+    ? {
+        amount: o.amount ? o.amount.toFixed(2) : '',
+        sign: o.sign,
+        gold: o.gold ? o.gold.toFixed(3) : '',
+        goldSign: o.goldSign,
+        silver: o.silver ? o.silver.toFixed(3) : '',
+        silverSign: o.silverSign,
+      }
+    : EMPTY;
+const messageOf = (e: unknown) =>
+  e instanceof ApiError
+    ? e.body?.message || e.body?.detail || e.body?.error || e.message
+    : 'failed';
+const places = (t: BalanceType) => (t === 'amount' ? 2 : 3);
+
+function SignSelect({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: CrDr;
+  onChange: (v: CrDr) => void;
+}) {
+  return (
+    <select aria-label={label} value={value} onChange={(e) => onChange(e.target.value as CrDr)}>
+      <option value="C">Cr</option>
+      <option value="D">Dr</option>
+    </select>
+  );
+}
+
+export default function PartyOpeningPage() {
+  const [acCode, setAcCode] = useState('');
+  const [loaded, setLoaded] = useState<Opening | null>(null);
+  const [form, setForm] = useState<Form>(EMPTY);
+  const [balanceType, setBalanceType] = useState<BalanceType>('amount');
+  const [list, setList] = useState<OpeningList | null>(null);
+  const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  // Bumped after a save or delete so the balance bar reads the party's new ledger balance.
+  const [balanceKey, setBalanceKey] = useState(0);
 
-  const setLine = (i: number, k: keyof Line, v: string) =>
-    setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
+  const loadList = useCallback(async (type: BalanceType) => {
+    try {
+      setList(await get<OpeningList>(`/ac-opbl?balanceType=${type}`));
+    } catch (e) {
+      setMsg({ kind: 'err', text: messageOf(e) });
+    }
+  }, []);
+  useEffect(() => {
+    void loadList(balanceType);
+  }, [balanceType, loadList]);
 
-  // Live double-entry totals: an opening posts only when Σ Debit == Σ Credit (and non-zero).
-  const totDebit = r2(lines.reduce((s, l) => s + n(l.debit), 0));
-  const totCredit = r2(lines.reduce((s, l) => s + n(l.credit), 0));
-  const diff = r2(totDebit - totCredit);
-  const balanced = totDebit === totCredit && totDebit > 0;
-  const validLines = lines.filter((l) => l.acCode.trim() && (n(l.debit) > 0 || n(l.credit) > 0));
-  const canSubmit = balanced && validLines.length >= 1;
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setErr('');
-    setResult(null);
+  const open = useCallback(async (code: string) => {
+    const ac = code.trim();
+    setAcCode(ac);
+    if (!ac) return;
     setBusy(true);
     try {
-      const body = {
-        coBook,
-        coYear,
-        lcCode,
-        vchDate: vchDate || undefined,
-        lines: validLines.map((l) => ({
-          // P3: an opening balance can carry fine gold beside the money amount.
-          goldFine: n(l.goldFine) || undefined,
-          acCode: l.acCode,
-          drAmt: Number(l.debit || 0),
-          crAmt: Number(l.credit || 0),
-          fineWt: Number(l.fineWt || 0),
-          itType: l.itType || 'A',
-        })),
-      };
-      setResult(await post('/ac-opbl', body));
+      const o = await get<Opening>(`/ac-opbl/${encodeURIComponent(ac)}`);
+      setLoaded(o);
+      setForm(asForm(o));
     } catch (e) {
-      setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
+      setMsg({ kind: 'err', text: messageOf(e) });
+    } finally {
+      setBusy(false);
+    }
+  }, []);
+
+  const clear = () => {
+    setAcCode('');
+    setLoaded(null);
+    setForm(EMPTY);
+  };
+  const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
+
+  async function save(e: React.FormEvent) {
+    e.preventDefault();
+    setMsg(null);
+    setBusy(true);
+    try {
+      const saved = await post<Opening>('/ac-opbl', {
+        acCode: acCode.trim(),
+        amount: form.amount,
+        sign: form.sign,
+        gold: form.gold,
+        goldSign: form.goldSign,
+        silver: form.silver,
+        silverSign: form.silverSign,
+      });
+      setLoaded(saved);
+      setForm(asForm(saved));
+      setMsg({ kind: 'ok', text: SAVED });
+      setBalanceKey((k) => k + 1);
+      await loadList(balanceType);
+    } catch (e) {
+      setMsg({ kind: 'err', text: messageOf(e) });
     } finally {
       setBusy(false);
     }
   }
 
+  async function remove() {
+    if (!window.confirm(DELETE_CONFIRM)) return;
+    setMsg(null);
+    setBusy(true);
+    try {
+      await del(`/ac-opbl/${encodeURIComponent(acCode.trim())}`);
+      clear();
+      setMsg({ kind: 'ok', text: DELETED });
+      await loadList(balanceType);
+    } catch (e) {
+      setMsg({ kind: 'err', text: messageOf(e) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const fmt = (v: number) =>
+    v.toLocaleString('en-IN', { minimumFractionDigits: places(balanceType) });
+
   return (
     <div>
-      <h1>Account Opening Balance</h1>
-      <form onSubmit={submit}>
-        <div className="panel">
+      <h1>Party Opening</h1>
+      {msg && (
+        <div className={`msg ${msg.kind}`} role={msg.kind === 'err' ? 'alert' : 'status'}>
+          {msg.text}
+        </div>
+      )}
+      <div className="row" style={{ alignItems: 'flex-start', gap: 16 }}>
+        <form
+          className="panel"
+          style={{ flex: 1 }}
+          onSubmit={save}
+          aria-label="Party Opening editor"
+        >
           <div className="row">
-            <div className="field">
-              <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} preferred="ACO" />
-            </div>
-            <div className="field">
-              <label>Year</label>
-              <input value={coYear} readOnly />
-            </div>
-            <div className="field">
-              <label>Location</label>
-              <input value={lcCode} readOnly />
-            </div>
-            <div className="field">
-              <label>Date</label>
-              <input type="date" value={vchDate} onChange={(e) => setVchDate(e.target.value)} />
+            <div className="field" style={{ flex: 2 }}>
+              <label>Party Code</label>
+              <LookupPicker
+                entity="accounts"
+                ariaLabel="Party Code"
+                resolveTypedCode
+                value={acCode}
+                onChange={setAcCode}
+                onPick={(r) => void open(String(r.code))}
+              />
             </div>
           </div>
-        </div>
+          {acCode && <PartyBalance key={`${acCode}:${balanceKey}`} acCode={acCode} />}
+          <div className="row">
+            <div className="field">
+              <label htmlFor="opening-amount">Opening Amount</label>
+              <input
+                id="opening-amount"
+                inputMode="decimal"
+                value={form.amount}
+                onChange={(e) => set('amount', e.target.value)}
+                style={{ textAlign: 'right' }}
+              />
+            </div>
+            <div className="field">
+              <label>&nbsp;</label>
+              <SignSelect
+                label="Opening Amount Cr or Dr"
+                value={form.sign}
+                onChange={(v) => set('sign', v)}
+              />
+            </div>
+          </div>
+          <div className="row">
+            <div className="field">
+              <label htmlFor="opening-gold">Opening Gold Fine</label>
+              <input
+                id="opening-gold"
+                inputMode="decimal"
+                value={form.gold}
+                onChange={(e) => set('gold', e.target.value)}
+                style={{ textAlign: 'right' }}
+              />
+            </div>
+            <div className="field">
+              <label>&nbsp;</label>
+              <SignSelect
+                label="Opening Gold Fine Cr or Dr"
+                value={form.goldSign}
+                onChange={(v) => set('goldSign', v)}
+              />
+            </div>
+          </div>
+          <div className="row">
+            <div className="field">
+              <label htmlFor="opening-silver">Opening Silver Fine</label>
+              <input
+                id="opening-silver"
+                inputMode="decimal"
+                value={form.silver}
+                onChange={(e) => set('silver', e.target.value)}
+                style={{ textAlign: 'right' }}
+              />
+            </div>
+            <div className="field">
+              <label>&nbsp;</label>
+              <SignSelect
+                label="Opening Silver Fine Cr or Dr"
+                value={form.silverSign}
+                onChange={(v) => set('silverSign', v)}
+              />
+            </div>
+          </div>
+          <div className="toolbar" style={{ marginTop: 10 }}>
+            <button className="primary" data-save-mnemonic disabled={busy}>
+              {busy ? 'Saving…' : 'Save'}
+            </button>
+            <button
+              type="button"
+              className="danger"
+              onClick={() => void remove()}
+              disabled={busy || !loaded?.exists}
+            >
+              Delete
+            </button>
+            <button type="button" className="ghost" onClick={clear} disabled={busy}>
+              Cancel
+            </button>
+          </div>
+        </form>
 
-        <div className="panel" style={{ overflow: 'auto' }}>
-          <h2>Opening Balances</h2>
-          <table className="grid" onKeyDown={handleGridKey}>
+        <section className="panel" style={{ flex: 1 }} aria-label="Opening list">
+          <div className="row">
+            <div className="field">
+              <label htmlFor="opening-balance-type">Balance Type</label>
+              <select
+                id="opening-balance-type"
+                value={balanceType}
+                onChange={(e) => setBalanceType(e.target.value as BalanceType)}
+              >
+                <option value="amount">Amount</option>
+                <option value="gold">Gold</option>
+                <option value="silver">Silver</option>
+              </select>
+            </div>
+          </div>
+          <table className="grid">
             <thead>
               <tr>
-                <th>Account</th>
-                <th className="num">Debit</th>
-                <th className="num">Credit</th>
-                <th className="num">Fine Wt</th>
-                <th>Type</th>
-                <th className="num">Gold Fine</th>
-                <th></th>
+                <th>Sr.</th>
+                <th>Code</th>
+                <th>Name</th>
+                <th className="num">Cr</th>
+                <th className="num">Dr</th>
               </tr>
             </thead>
             <tbody>
-              {lines.map((l, i) => (
-                <tr key={i}>
-                  <td>
-                    <LookupPicker
-                      entity="accounts"
-                      value={l.acCode}
-                      onChange={(v) => setLine(i, 'acCode', v)}
-                      style={{ width: 200 }}
-                    />
-                  </td>
-                  <td className="num">
-                    <input
-                      style={{ width: 110, textAlign: 'right' }}
-                      value={l.debit}
-                      onChange={(e) => setLine(i, 'debit', e.target.value)}
-                      disabled={n(l.credit) > 0}
-                    />
-                  </td>
-                  <td className="num">
-                    <input
-                      style={{ width: 110, textAlign: 'right' }}
-                      value={l.credit}
-                      onChange={(e) => setLine(i, 'credit', e.target.value)}
-                      disabled={n(l.debit) > 0}
-                    />
-                  </td>
-                  <td className="num">
-                    <input
-                      style={{ width: 100, textAlign: 'right' }}
-                      value={l.fineWt}
-                      onChange={(e) => setLine(i, 'fineWt', e.target.value)}
-                    />
-                  </td>
-                  <td>
-                    <select value={l.itType} onChange={(e) => setLine(i, 'itType', e.target.value)}>
-                      <option value="A">A · Amount</option>
-                      <option value="G">G · Gold</option>
-                      <option value="S">S · Silver</option>
-                    </select>
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      className="danger"
-                      onClick={() =>
-                        setLines((ls) =>
-                          ls.length > 2
-                            ? ls.filter((_, j) => j !== i)
-                            : ls.map((x, j) => (j === i ? blank() : x)),
-                        )
-                      }
-                    >
-                      ×
-                    </button>
-                  </td>
+              {(list?.rows ?? []).map((r, i) => (
+                <tr
+                  key={r.acCode}
+                  onClick={() => void open(r.acCode)}
+                  style={{ cursor: 'pointer' }}
+                  aria-selected={r.acCode === acCode}
+                >
+                  <td>{i + 1}</td>
+                  <td>{r.acCode}</td>
+                  <td>{r.acName}</td>
+                  <td className="num">{r.cr ? fmt(r.cr) : ''}</td>
+                  <td className="num">{r.dr ? fmt(r.dr) : ''}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr>
-                <td style={{ textAlign: 'right', fontWeight: 600 }}>Totals</td>
-                <td className="num">
-                  <b>{totDebit.toLocaleString('en-IN')}</b>
+                <td colSpan={3} style={{ textAlign: 'right', fontWeight: 600 }}>
+                  Total
                 </td>
                 <td className="num">
-                  <b>{totCredit.toLocaleString('en-IN')}</b>
+                  <b>{fmt(list?.totalCr ?? 0)}</b>
                 </td>
-                <td colSpan={3}></td>
+                <td className="num">
+                  <b>{fmt(list?.totalDr ?? 0)}</b>
+                </td>
               </tr>
             </tfoot>
           </table>
-
-          <div className="toolbar" style={{ marginTop: 10 }}>
-            <button
-              type="button"
-              className="ghost"
-              onClick={() => setLines((ls) => [...ls, blank()])}
-            >
-              + Add line
-            </button>
-            <span className="spacer" />
-            <span className="muted" style={{ marginRight: 16 }}>
-              Dr ₹{totDebit.toLocaleString('en-IN')} · Cr ₹{totCredit.toLocaleString('en-IN')} ·{' '}
-              {balanced ? (
-                <b style={{ color: 'var(--ok)' }}>Balanced ✓</b>
-              ) : (
-                <b style={{ color: 'var(--err)' }}>Difference ₹{diff.toLocaleString('en-IN')}</b>
-              )}
-            </span>
-            <button className="primary" data-save-mnemonic disabled={busy || !canSubmit}>
-              {busy ? 'Saving…' : 'Post Opening'}
-            </button>
-          </div>
-          {!balanced && totDebit + totCredit > 0 && (
-            <div className="muted" style={{ marginTop: 6 }}>
-              Debits must equal credits to post.
-            </div>
-          )}
-        </div>
-      </form>
-
-      {err && <div className="msg err">{err}</div>}
-      {result && (
-        <div className="panel">
-          <div className="msg ok">Posted — Account Opening Voucher #{result.vchNo}</div>
-        </div>
-      )}
+        </section>
+      </div>
     </div>
   );
 }

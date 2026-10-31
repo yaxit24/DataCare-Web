@@ -445,7 +445,12 @@ route('Cash / Bank/Journal Voucher', [
   'DELETE /journal/:vchNo',
   'GET /journal/:vchNo/print',
 ]);
-route('Cash / Bank/Account Opening Bal', ['POST /ac-opbl', 'DELETE /ac-opbl/:vchNo']);
+route('Cash / Bank/Account Opening Bal', [
+  'GET /ac-opbl',
+  'GET /ac-opbl/:acCode',
+  'POST /ac-opbl',
+  'DELETE /ac-opbl/:acCode',
+]);
 route('Cash / Bank/Fine JV (metal transfer)', [
   'POST /fine-jv',
   'GET /fine-jv/:vchNo',

@@ -99,8 +99,9 @@ describe('route policy registry', () => {
     // N142/N143/N144 add dhrn issue + receipt reopen/edit/delete (641+6); N145 adds loan received +
     // loan issue reopen/edit/delete (+6); N147 adds PUT /fine-sale/:vchNo (+1), 647 + 6 + 1 = 654.
     // N172 adds GET /vouchers/neighbour, the voucher number box's Up/Down walk: 657 + 1 = 658.
-    expect(routes).toHaveLength(658);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(658);
+    // N199 adds the Party Opening list and read (GET /ac-opbl, GET /ac-opbl/:acCode): 658 + 2 = 660.
+    expect(routes).toHaveLength(660);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(660);
 
     const policies = routes.map((route) => ({
       ...route,
