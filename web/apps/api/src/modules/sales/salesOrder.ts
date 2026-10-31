@@ -30,6 +30,8 @@ import {
 } from '@datacare/core';
 import { SaleValidationError } from './sales.js';
 import * as pricing from './salesOrderPricing.js';
+import * as tenders from './salesOrderTender.js';
+export { orderTenderRequest } from './salesOrderTender.js';
 import { fineWt } from '../shared/fine.js';
 import { resolveSalesOrderDesignTx } from './orderDesignSelection.js';
 import { resolveBookSlotAccountTx } from '../shared/postingAccounts.js';
@@ -78,7 +80,9 @@ export interface SalesOrderInput {
   lines?: SalesOrderLine[];
   taxRatePct: number;
   interState?: boolean;
-  advanceAmount?: number;
+  advanceAmount?: number; // the cash tender
+  chequeAmount?: number; // N197: MSG2_TOTAL[4,3] (CHQ_AMT), with bankAc and chequeNo
+  cardAmount?: number; // N197: MSG2_TOTAL[5,3] (CARD_AMT), with cardAc
   vchDate?: Date | string;
   cashAc?: string;
   mainUser?: string;
@@ -805,7 +809,9 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
   const orderLines = input.lines ?? [];
   const parentNumbers = orderRowNumbers(orderLines, 'srNo');
   const tenantId = input.scope.tenantId;
-  const adv = round2(Number(input.advanceAmount || 0));
+  const salesOrderForm = (input.orderMainBook ?? 'SALES ORDER') === 'SALES ORDER';
+  const tender = tenders.orderTenderOf(input, salesOrderForm);
+  const adv = tenders.orderAdvanceTotal(tender);
 
   const run = async (tx: any) => {
     const mode = requestedMode(input.orderMainBook);
@@ -815,7 +821,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
     // is actually taken does the account matter. Explicit request account wins, else resolve slot 1
     // on this transaction and FAIL-CLOSED when unconfigured.
     const cashAc =
-      adv > 0
+      tender.cash > 0
         ? await resolveBookSlotAccountTx(
             tx,
             { ...input.scope, coBook: book.coBook },
@@ -930,7 +936,8 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
           ? undefined
           : orderClock(lifecycle.persistedClock)
         : orderClock(input.vchTime);
-    const headerDirty = orderDirtyColumns(input, ORDER_HEADER_FIELDS);
+    const headerFields = tenders.orderHeaderFields(ORDER_HEADER_FIELDS, salesOrderForm);
+    const headerDirty = orderDirtyColumns(input, headerFields);
     const parentDirty = orderLines.map((line, index) =>
       orderDirtyColumns(
         line,
@@ -969,7 +976,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         TAX_PRC: input.taxRatePct,
         TAX_AMT: totals.tax,
         TOT_AMT: totals.total,
-        ADV_AMT: adv,
+        ...tenders.orderTenderColumns(tender, salesOrderForm),
         VCH_TIME: vchDate,
         ENTRY_TIME:
           lifecycle?.previousHeader && !headerDirty.has('VCH_TIME') && !headerDirty.has('VCH_DATE')
@@ -1009,7 +1016,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         MOBILE: txt(input.mobile, 21), // tMobile.Text:9161
       },
       input,
-      ORDER_HEADER_FIELDS,
+      headerFields,
       headerDirty,
     );
     const detl = computed.map((c, i) =>
@@ -1183,21 +1190,14 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         );
       });
     });
-    const ledger: LedgerLine[] =
-      adv > 0
-        ? [
-            { ...key, VCH_TYPE: book.vchType, AC_CODE: cashAc, DR_AMT: adv, CR_AMT: 0, SIGN: 'D' },
-            {
-              ...key,
-              VCH_TYPE: book.vchType,
-              AC_CODE: input.acCode,
-              DR_AMT: 0,
-              CR_AMT: adv,
-              SIGN: 'C',
-            },
-          ]
-        : [];
-    if (ledger.length) assertBalanced(ledger);
+    const ledger: LedgerLine[] = tenders.orderTenderLedger(
+      key,
+      book.vchType,
+      { code: input.acCode, name: input.acName, billNo: header.BILL_NO as string },
+      cashAc,
+      tender,
+      salesOrderForm,
+    );
 
     // The Rojmel (day book). Book 020 carries 55 real rows across four types; the other four in
     // Ac_Rojmel.Order_Rojmel never fired here. Type 01 is the advance as a CREDIT with the book's slot-1
@@ -1214,32 +1214,35 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
     // The old-metal detail rows (types 04 and 06) come from SL_PR_DETL, which this function does not
     // currently write on an order - so they cannot fire yet. They are implemented in the shared builder
     // and will be exercised when an order accepts metal in part-exchange.
-    const rojmelRows = buildOrderRojmel(
-      {
-        scope: {
-          coCode: input.scope.coCode,
-          lcCode: input.scope.lcCode,
-          coYear: input.scope.coYear!,
+    const rojmelRows = tenders.withCardRojmel(
+      buildOrderRojmel(
+        {
+          scope: {
+            coCode: input.scope.coCode,
+            lcCode: input.scope.lcCode,
+            coYear: input.scope.coYear!,
+          },
+          key,
+          coBook: key.CO_BOOK,
+          vchNo: key.VCH_NO,
+          vchDate,
+          vchType: book.vchType,
+          bookName: book.mainBook,
+          partyName: input.acName ?? '',
+          partyCode: input.acCode,
         },
-        key,
-        coBook: key.CO_BOOK,
-        vchNo: key.VCH_NO,
-        vchDate,
-        vchType: book.vchType,
-        bookName: book.mainBook,
-        partyName: input.acName ?? '',
-        partyCode: input.acCode,
-      },
-      {
-        // Slot 1 is the book's advance contra. `cashAc` is what the ledger already debits for the
-        // advance, which is the same account the desktop names in LD_CODE.
-        advanceContraAc: cashAc,
-        bankAc: cashAc,
-        advanceAmount: adv,
-        // An order's cheque tender is not modelled separately from the advance here, so type 02 stays
-        // dormant rather than being fed a value it does not have.
-        chequeAmount: 0,
-      },
+        {
+          // Slot 1 is the book's advance contra. `cashAc` is what the ledger already debits for the
+          // advance, which is the same account the desktop names in LD_CODE.
+          // N197: 01 credits ADV_AMT, 02 debits the cheque's bank; withCardRojmel adds 03 (Ac_Rojmel.cs:11-16).
+          advanceContraAc: cashAc,
+          bankAc: tender.bankAc,
+          advanceAmount: adv,
+          chequeAmount: tender.cheque,
+        },
+      ),
+      input.acCode,
+      tender,
     );
     await insertRowTx(tx, 'TEMP_BOOK_DATA', tenantId, {
       CO_CODE: scoped.coCode,
@@ -1400,9 +1403,7 @@ function unsupportedOrderEdit(
     )
   )
     return 'This order has metal, settlement or stock allocations that must be resolved before editing.';
-  const header = state.SL_ORD_DATA[0];
-  if (header && ['CASH_AMT', 'CHQ_AMT', 'CARD_AMT'].some((column) => n(header[column]) !== 0))
-    return 'This order uses separate cash, cheque or card settlement. Its settlement workflow must be completed before editing.';
+  // N197: cash, cheque and card tenders are edited on the screen, so they no longer block an edit.
   return undefined;
 }
 
@@ -1438,7 +1439,8 @@ export async function getSalesOrder(
       );
     const d = [...state.SL_ORD_DETL].sort((a, b) => n(a.SR_NO) - n(b.SR_NO));
     const x = h[0];
-    const advanceDebit = state.AC_DATA.find((row) => n(row.DR_AMT) > 0);
+    const salesOrderForm = options.orderMainBook !== 'TOUR ORDER';
+    const tenderView = tenders.orderTenderView(x, state.AC_DATA, salesOrderForm);
     const dto = {
       voucherNo: text(x.VCH_NO),
       hiddenVoucherNo: text(x.HD_VCH_NO),
@@ -1460,8 +1462,8 @@ export async function getSalesOrder(
       netAmount: n(x.NET_AMT),
       taxRatePct: n(x.TAX_PRC),
       total: n(x.TOT_AMT),
-      advanceAmount: n(x.ADV_AMT),
-      cashAc: text(advanceDebit?.AC_CODE) || undefined,
+      ...tenderView.fields,
+      cashAc: tenderView.cashAc,
       empCode: text(x.EMP_CODE) || text(d[0]?.EMP_CODE),
       taxCode: text(x.TAX_CODE),
       upiAmount: n(x.UPI_AMT),
@@ -1555,7 +1557,8 @@ export async function getSalesOrder(
       })),
     };
     // Both saved order forms retain exact mapped scalar values; calculations remain server-owned.
-    exactOrderValues(dto, x, ORDER_HEADER_FIELDS);
+    exactOrderValues(dto, x, tenders.orderHeaderFields(ORDER_HEADER_FIELDS, salesOrderForm));
+    exactOrderValues(dto, x, tenderView.exactFields);
     dto.lines.forEach((line, index) => {
       const parent = d[index];
       exactOrderValues(

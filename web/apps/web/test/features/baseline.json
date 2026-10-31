@@ -59,14 +59,9 @@
       "reason": "The 5,000 advance debits SALES: the provisioned SOR book's slot 1 is the sales account (seedCompany.ts:219); the desktop debits the cash account in slot 1 (Ac_Ledr.cs:28-35)."
     },
     {
-      "case": "sales-order.create.header-tender",
-      "gap": "G206",
-      "reason": "CASH_AMT stays 0 while ADV_AMT is 5,000; the desktop stores the cash tender in CASH_AMT (TR_SALE_ORD.cs:9138)."
-    },
-    {
       "case": "sales-order.create.tender-modes",
       "gap": "G206",
-      "reason": "UPI, cheque, card, old metal and scheme amounts are read-only on the order, so an advance can only be one cash amount (TR_SALE_ORD.cs:11368, Ac_Ledr.cs:28-61)."
+      "reason": "UPI, old metal and scheme amounts are read-only on the order (cash, cheque and card are taken since N197), so an advance cannot include them (TR_SALE_ORD.cs:11368, Ac_Ledr.cs:48-61)."
     },
     {
       "case": "sales-order.reopen.recent-list",

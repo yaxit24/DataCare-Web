@@ -12,6 +12,8 @@ export const ORDER_HEADER_FIELDS: Record<string, string> = {
   netAmount: 'NET_AMT',
   taxRatePct: 'TAX_PRC',
   advanceAmount: 'ADV_AMT',
+  chequeAmount: 'CHQ_AMT', // N197, Sales Order only
+  cardAmount: 'CARD_AMT', // N197, Sales Order only
   vchDesc: 'VCH_DESC',
   empCode: 'EMP_CODE',
   taxCode: 'TAX_CODE',

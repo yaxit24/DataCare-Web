@@ -49,13 +49,13 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Report | Sales Report | `/reports/sales-register` | REPORT | — | no module | — |
 | Report | Purchase Rpt | `/reports/purchase-register` | REPORT | — | no module | — |
 | Report | Approval Rpt | `/reports/approval-report` | REPORT | — | no module | — |
-| Report | Order Report | `/txn/sales-order` | REPORT | sales-order | module, 7 open | G193, G206, G207, G208, G36 |
+| Report | Order Report | `/txn/sales-order` | REPORT | sales-order | module, 6 open | G193, G206, G207, G208, G36 |
 | Report | Cash Bank | `/reports/cash-book` | REPORT | — | no module | — |
 | Report | Gst Report | `/reports/gst-report` | REPORT | — | no module | — |
 | Report | HuId Report | `/reports/huid` | REPORT | — | no module | — |
 | Transaction | Purchase | `/txn/purchase` | PARTIAL | purchase-invoice | module green | — |
 | Transaction | Purchase Rtn | `/txn/purchase-return` | PARTIAL | purchase-return | module, 4 open | G198, G199, G201 |
-| Transaction | Sales Order | `/txn/sales-order` | PARTIAL | sales-order | module, 7 open | G193, G206, G207, G208, G36 |
+| Transaction | Sales Order | `/txn/sales-order` | PARTIAL | sales-order | module, 6 open | G193, G206, G207, G208, G36 |
 | Transaction | Sales | `/txn/sales`, `/txn/hallmark-sale` | PARTIAL | sales-invoice | module green | — |
 | Transaction | Sales Return | `/txn/sale-return` | PARTIAL | sales-return | module, 5 open | G190, G193, G194 |
 | Transaction | Wh Sales | `/txn/wholesale-sale` | PARTIAL | — | no module | — |

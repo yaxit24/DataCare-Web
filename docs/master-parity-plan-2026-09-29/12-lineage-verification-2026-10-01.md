@@ -2162,6 +2162,24 @@ Evidence: `sales-order.formula.whole-rupees` and `sales-order.create.amounts` pa
 baseline (sales-order 16 passed, 7 baselined); the new DB test pins 61,234 / 1,908 / 65,517 on N and 56,091 / 1,754 /
 60,220 on F and fails on the previous writer; core tests cover the bases, rate types and half-even rounding.
 
+### N197 — Sales Order cash, cheque and card tenders (G206, part)
+
+`web/apps/api/src/modules/sales/salesOrderTender.ts` takes the order's money tenders as TR_SALE_ORD does. The screen's
+Advance is the cash tender; Cheque Amt (with Bank A/c and Cheque No) and Card Amt (with Card A/c) are now editable in
+the order details. The header stores CASH_AMT, CHQ_AMT and CARD_AMT, and ADV_AMT is their sum
+(`TR_SALE_ORD.cs:9131-9150`, `:11368`). A cheque without its bank, or a card amount without its account, is refused
+with the desktop message (`:8988-8996`). Order_Ledr's legs are written with their desktop leg types: 01/02 cash
+(party CR, slot-1 account DR), 03/04 cheque and 05/06 card, with LD_CODE, CHQ_NO, BILL_NO, the party as PARTY_AC_CODE
+and the 'CASH - ', 'BANK - ', 'CARD - ' names (`Ac_Ledr.cs:28-47`). The day book credits the whole advance (type 01)
+and debits the cheque's bank (02) and the card account (03) (`Ac_Rojmel.cs:11-16`). A reopened order shows its cash,
+cheque and card separately; an order saved before this change keeps its cash in ADV_AMT. Tendered orders are no
+longer blocked from editing. The Tour Order (TR_TOUR_ORD) keeps its single cash advance. UPI, old metal and scheme
+remain read-only; their slice is recorded once the IDs held by #169 are merged.
+
+Evidence: `sales-order.create.cheque-card-advance`, `refusal.cheque-needs-bank` and `create.header-tender` pass in
+the browser (sales-order 19 passed, 6 baselined, 2 blocked); a DB test pins the header, legs 01-06 and day-book rows
+01-03; `salesOrderSessionCommand.db.test.ts` now expects CASH_AMT to follow an advance edit.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2285,7 +2303,7 @@ baseline (sales-order 16 passed, 7 baselined); the new DB test pins 61,234 / 1,9
 | N194 | — | implemented-unverified, evidence in this change (G204: the TR_CONTRA grid) |
 | N195 | — | implemented-unverified, evidence in this change (G205-G208: Sales Order feature module, 14 passed / 9 baselined / 2 blocked) |
 | N196 | — | implemented-unverified, evidence in this change (G205: order line priced on SL_AMT_TYPE in whole rupees; tax and total rounded; sales-order formula and amounts cases pass) |
-| N197 | — | planned (G206: the order's tender rows: cash, UPI, cheque, card, old metal and scheme, stored and posted per Order_Ledr) |
+| N197 | — | implemented-unverified, evidence in this change (G206 part: cash, cheque and card tenders stored per tender and posted on legs 01-06; UPI, old metal and scheme stay open) |
 | N198 | — | planned (G207, G208: provision SOR slot 1 as the cash account and sale books with slot 4; backfill existing companies) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
