@@ -1,3 +1,4 @@
+import { round } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { buildJournalRojmel } from '../shared/rojmel.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
@@ -61,7 +62,6 @@ export interface ContraInput {
 const CONTRA_WRITE_TABLES = ['CONTRA_DATA', 'AC_DATA', 'ROJ_MEL_DATA'] as const;
 
 const numv = (v: unknown): number => Number(v ?? 0);
-const paise = (n: number): number => Math.round(n * 100);
 
 /** The grid of a request: `lines`, or the two-account form as row 1 DR `toAc` and row 2 CR `fromAc`. */
 export function contraLines(input: ContraInput): ContraLine[] {
@@ -88,9 +88,13 @@ export function contraLines(input: ContraInput): ContraLine[] {
     .filter((line) => line.acCode && Number.isFinite(line.amount) && line.amount !== 0);
   if (lines.length < 2 || lines.some((line) => line.amount < 0))
     throw new FinanceValidationError('a contra needs at least two accounts with positive amounts');
-  const dr = lines.filter((l) => l.crdr === 'DR').reduce((sum, l) => sum + paise(l.amount), 0);
-  const cr = lines.filter((l) => l.crdr === 'CR').reduce((sum, l) => sum + paise(l.amount), 0);
-  if (dr !== cr) throw new FinanceValidationError(DESKTOP_MESSAGES.CONTRA_DR_CR_NOT_SAME);
+  const total = (side: 'DR' | 'CR') =>
+    round(
+      lines.filter((l) => l.crdr === side).reduce((sum, l) => sum + l.amount, 0),
+      2,
+    );
+  if (total('DR') !== total('CR'))
+    throw new FinanceValidationError(DESKTOP_MESSAGES.CONTRA_DR_CR_NOT_SAME);
   return lines;
 }
 
@@ -256,7 +260,7 @@ export function gridOfRows(rows: Array<Record<string, unknown>>): ContraLine[] {
       crdr,
       acCode: text(head?.AC_CODE),
       acName: text(head?.AC_NAME) || undefined,
-      amount: Math.round((crdr === 'DR' ? dr - cr : cr - dr) * 100) / 100,
+      amount: round(crdr === 'DR' ? dr - cr : cr - dr, 2),
     },
     ...counters.map((r) => ({
       crdr: (text(r.CRDR_TYPE).toUpperCase() === 'CR' ? 'CR' : 'DR') as 'DR' | 'CR',
