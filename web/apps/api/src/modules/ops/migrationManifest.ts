@@ -149,4 +149,8 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261002010000_tax_mast_parent_row',
     checksum: '444662274047749756cb5538c58167945a996169bdec550c65f37e00ba914b68',
   },
+  {
+    name: '20261031090000_book_tables_and_advance_slots',
+    checksum: '289966d3b25b66efd6f6957f6ec58fcea91edbd6df6ff8bb014dd43a09e07849',
+  },
 ];

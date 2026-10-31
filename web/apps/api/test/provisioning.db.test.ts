@@ -74,8 +74,9 @@ d('company provisioning produces a postable company', () => {
   it('creates the accounts the posting engine references by literal code', async () => {
     // 19 literal codes plus the six wholesale / rate-cut slot accounts (labour income and expense, silver
     // sale and purchase, other charges, fine kasar), plus BRANCH (the stock in/out branch account, N91),
-    // plus WALKIN (the walk-in customer the sales screens default to, G124).
-    expect(await count('AC_MAST')).toBe(28);
+    // plus WALKIN (the walk-in customer the sales screens default to, G124), plus ORDADV (the sale books'
+    // slot-4 order-advance account, N198).
+    expect(await count('AC_MAST')).toBe(29);
   });
 
   it('creates every book with its posting legs', async () => {
@@ -100,8 +101,9 @@ d('company provisioning produces a postable company', () => {
             ? 12
             : book === 'TSP'
               ? 5
-              : // PURCHASE and TAG PURCHASE add slot 4, labour and other charges (Ac_Ledr.cs:419-421, G184).
-                book === 'PR' || book === 'TPR'
+              : // PURCHASE and TAG PURCHASE add slot 4, labour and other charges (Ac_Ledr.cs:419-421, G184);
+                // SALES adds slot 4, the order advance a sale adjusts (Ac_Rojmel.cs:96, N198).
+                book === 'PR' || book === 'TPR' || book === 'SL'
                 ? 4
                 : // LBR (labour) carries its two configured slots: SR_NO 1 (metal) and SR_NO 6
                   // (labour income), so the labour writer resolves the income account from the book (G115).
@@ -114,6 +116,42 @@ d('company provisioning produces a postable company', () => {
                     ? 1
                     : 3,
       );
+  });
+
+  // N191 (G201): the desktop's table names for the sale, purchase, order, contra and other-income families
+  // (MS_UPDATE.cs:7829-7933). N198 (G207, G208): the order book's slot 1 is the cash account (Order_Ledr legs 01/02)
+  // and the sale book's slot 4 the order-advance account.
+  it('gives the voucher families the desktop table names and the order and sale books their advance slots', async () => {
+    const books: any[] = await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT "CO_BOOK" b,"BOOK_TBL_NAME" t,"BOOK_TBL_DETL" d FROM "BOOK_DATA"
+          WHERE "CO_CODE"=$1 AND "CO_BOOK" IN ('SL','SRT','PR','PRT','TPR','SOR','CON','FJV','OIN','OEX') ORDER BY 1`,
+        CO,
+      ),
+    );
+    expect(books).toEqual([
+      { b: 'CON', t: 'CONTRA_DATA', d: 'CONTRA_DATA' },
+      { b: 'FJV', t: 'CONTRA_DATA', d: 'CONTRA_DATA' },
+      { b: 'OEX', t: 'PAY_DATA', d: 'PAY_DETL' },
+      { b: 'OIN', t: 'PAY_DATA', d: 'PAY_DETL' },
+      { b: 'PR', t: 'PR_DATA', d: 'PR_DETL' },
+      { b: 'PRT', t: 'PR_DATA', d: 'PR_DETL' },
+      { b: 'SL', t: 'SL_DATA', d: 'SL_DETL' },
+      { b: 'SOR', t: 'SL_ORD_DATA', d: 'SL_ORD_DETL' },
+      { b: 'SRT', t: 'SL_DATA', d: 'SL_DETL' },
+      { b: 'TPR', t: 'PR_DATA', d: 'PR_DETL' },
+    ]);
+    const slots: any[] = await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT "CO_BOOK" b,"SR_NO"::int s,"AC_CODE" a FROM "BOOK_DETL"
+          WHERE "CO_CODE"=$1 AND (("CO_BOOK"='SOR' AND "SR_NO"=1) OR ("CO_BOOK"='SL' AND "SR_NO"=4)) ORDER BY 1`,
+        CO,
+      ),
+    );
+    expect(slots).toEqual([
+      { b: 'SL', s: 4, a: 'ORDADV' },
+      { b: 'SOR', s: 1, a: 'CASH' },
+    ]);
   });
 
   it('provisions karigar and Jadtar issue/receipt books so a fresh company can use them (G19)', async () => {
@@ -325,7 +363,8 @@ d('company provisioning produces a postable company', () => {
     // + LBR x 2 (labour: metal SR_NO 1 + income SR_NO 6, G115) + FSL/FPR x 1 (fine settlement, N100)
     // + BUL x 3 (bullion booking, N103) + ORC x 3 (order cancel, N113), not doubled; PR and TPR add slot 4
     // (labour and other charges, G184): 130 + 2.
-    expect(await count('BOOK_DETL')).toBe(132);
+    // 133: the sale book's fourth slot, the order advance (N198).
+    expect(await count('BOOK_DETL')).toBe(133);
   });
 
   /**

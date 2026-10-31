@@ -37,6 +37,9 @@ const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string; gstType?: strin
   { code: 'FINEPURC', name: 'FINE METAL PURCHASE', gr: '21' },
   { code: 'DHRN', name: 'DHIRAN / LOAN', gr: '21' },
   { code: 'CAPITAL', name: 'CAPITAL A/C', gr: '25' },
+  // N198 (G208): the sale books' slot 4 is the order-advance account the sale day book names for an adjusted
+  // advance (Sales_Rojmel, Ac_Rojmel.cs:96, `SR_NO = 4`). The real chart carries it as 00020 ORDER ADVANCE (group 04).
+  { code: 'ORDADV', name: 'ORDER ADVANCE', gr: '04' },
   // The wholesale / rate-cut slots (`Wh_Sales_Ledr`): labour income and expense, the silver twins of the sale
   // and purchase controls, other charges and fine kasar — the roles of 00041/00056/00004/00009/00077/00098 on
   // the real books 034/064.
@@ -136,6 +139,36 @@ function gstComponents(prc: number): Array<{ srNo: number; group: string; prc: n
  * provisioned company hit `book <X> account row 1 is missing` on its first voucher — found by running the
  * application, not by any test.
  */
+/**
+ * N198 (G208): a sale book's BOOK_DETL slots — 1 sale, 2 cash, 3 kasar/round-off, 4 order advance (`sales.ts`). A sale
+ * that adjusts an order advance resolves slot 4, so a book without it could not take an advance.
+ */
+const SALE_BOOK_SLOTS: Array<{ srNo: number; acCode: string }> = [
+  { srNo: 1, acCode: 'SALES' },
+  { srNo: 2, acCode: 'CASH' },
+  { srNo: 3, acCode: 'ROUNDOFF' },
+  { srNo: 4, acCode: 'ORDADV' },
+];
+
+/**
+ * N191 (G201): the desktop's BOOK_TBL_NAME / BOOK_TBL_DETL for each family, as MS_UPDATE writes them on company open
+ * (`MS_UPDATE.cs:7829` CONTRA, `:7837` SALES ORDER, `:7841` SALES and SALES RETURNE, `:7849` PURCHASE, PURC RETURN and
+ * TAG PURCHASE, `:7897` FINE JV, `:7933` OTH INC and OTH EXP). Reports and numbering route by it; the Purchase
+ * Return Register lists nothing for a book without it. Only families whose web writer uses the same header table.
+ */
+const DESKTOP_BOOK_TABLES: Record<string, { table: string; detail: string }> = {
+  SALES: { table: 'SL_DATA', detail: 'SL_DETL' },
+  'SALES RETURNE': { table: 'SL_DATA', detail: 'SL_DETL' },
+  PURCHASE: { table: 'PR_DATA', detail: 'PR_DETL' },
+  'PURC RETURN': { table: 'PR_DATA', detail: 'PR_DETL' },
+  'TAG PURCHASE': { table: 'PR_DATA', detail: 'PR_DETL' },
+  'SALES ORDER': { table: 'SL_ORD_DATA', detail: 'SL_ORD_DETL' },
+  CONTRA: { table: 'CONTRA_DATA', detail: 'CONTRA_DATA' },
+  'FINE JV': { table: 'CONTRA_DATA', detail: 'CONTRA_DATA' },
+  'OTH INC': { table: 'PAY_DATA', detail: 'PAY_DETL' },
+  'OTH EXP': { table: 'PAY_DATA', detail: 'PAY_DETL' },
+};
+
 const BOOKS: {
   book: string;
   name: string;
@@ -151,7 +184,7 @@ const BOOKS: {
   /** BOOK_TBL_NAME, for the families that route by it. */
   table?: string;
 }[] = [
-  { book: 'SL', name: 'Sales', workflow: 'SALES', acCode: 'SALES' },
+  { book: 'SL', name: 'Sales', workflow: 'SALES', acCode: 'SALES', slots: SALE_BOOK_SLOTS },
   {
     book: 'PR',
     name: 'Purchase',
@@ -216,7 +249,20 @@ const BOOKS: {
       { srNo: 2, acCode: 'KASAR' },
     ],
   },
-  { book: 'SOR', name: 'Sales Order', mainBook: 'SALES ORDER', inout: 'O', acCode: 'SALES' },
+  // N198 (G207): Order_Ledr debits slot 1 with the cash advance (Ac_Ledr.cs:28-35) and Order_Rojmel names it as the
+  // advance contra (Ac_Rojmel.cs:11). On the real data every cash leg 02 of book 020 is 00001 CASH ON HAND.
+  {
+    book: 'SOR',
+    name: 'Sales Order',
+    mainBook: 'SALES ORDER',
+    inout: 'O',
+    acCode: 'CASH',
+    slots: [
+      { srNo: 1, acCode: 'CASH' },
+      { srNo: 2, acCode: 'CASH' },
+      { srNo: 3, acCode: 'ROUNDOFF' },
+    ],
+  },
   // Desktop MDI_FORM.cs:8629 CurBookHelp("ORDER CANCEL"); the Order Cancel screen refunds an order's
   // advance through SL_ORD_ADJ + a balanced AC_DATA refund (accounts from the payload). Without this
   // book a provisioned company could not cancel/refund an order (N113).
@@ -694,6 +740,7 @@ export async function seedCompany(
       const wf = b.workflow ? workflowPolicy[b.workflow] : undefined;
       const mainBook = wf?.mainBook ?? b.mainBook ?? b.name.toUpperCase();
       const inout = wf?.inout ?? b.inout ?? 'I';
+      const desktopTables = DESKTOP_BOOK_TABLES[mainBook];
       if (
         await absent(
           'BOOK_DATA',
@@ -705,8 +752,8 @@ export async function seedCompany(
       ) {
         await tx.$executeRawUnsafe(
           `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME",
-             "MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'Y',$9)`,
+             "MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","BOOK_TBL_DETL")
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'Y',$9,$10)`,
           tenantId,
           coCode,
           lcCode,
@@ -715,7 +762,8 @@ export async function seedCompany(
           b.shortName ?? b.book,
           mainBook,
           inout,
-          b.table ?? null,
+          b.table ?? desktopTables?.table ?? null,
+          b.table ? null : (desktopTables?.detail ?? null),
         );
         // BOOK_DETL carries ONE ROW PER POSTING LEG, and `bookPolicy.resolveBookAccountTx` asks for a
         // specific SR_NO. The sale path alone resolves three: 1 = the control/sales account, 2 = the

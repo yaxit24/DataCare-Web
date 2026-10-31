@@ -2271,6 +2271,26 @@ reopened free-standing return saves unchanged.
 Evidence: `purchase-return.create.without-original` passes and leaves the baseline; `edit.unchanged-and-reprice` now
 saves the reopened return without choosing a book; `create.against-purchase` still imports and saves with PR chosen;
 `web/apps/web/test/bookSelect.test.ts` pins the default and the opt-out.
+### N191 and N198 — Book tables and the order/sale advance slots, with a backfill (G201, G207, G208)
+
+`web/apps/api/src/modules/ops/seedCompany.ts` now gives the sale, sales-return, purchase, purchase-return, tag-purchase,
+sales-order, contra, fine-JV, other-income and other-expense books the desktop's `BOOK_TBL_NAME` and `BOOK_TBL_DETL`
+(`MS_UPDATE.cs:7829`, `:7837`, `:7841`, `:7849`, `:7897`, `:7933`), only for families whose web writer uses the same
+header table. The SALES ORDER book's slot 1 is the cash account: Order_Ledr debits it with the cash advance
+(`Ac_Ledr.cs:28-35`), and on the real data every cash leg 02 of book 020 is `00001` CASH ON HAND. The SALES book gets
+slot 4, a new system account ORDADV "ORDER ADVANCE" (the real chart's `00020 ORDER ADVANCE`, group 04), which Sales_Rojmel
+names for an adjusted advance (`Ac_Rojmel.cs:96`); the desktop posts no ledger leg for it.
+
+`web/packages/db/prisma/migrations/20261031090000_book_tables_and_advance_slots/migration.sql` brings existing companies
+to the same state: it fills blank table names only, adds ORDADV and slot 4 only to sale books with the web layout
+(slot 1 SALES), and moves the order books' slot 1 from SALES to CASH only where the CASH account exists. Desktop data is
+not touched.
+
+Evidence: `purchase-return.report.register-lists-return`, `sales-order.create.advance-ledger` (Dr CASH / Cr customer)
+and `sales-order.journey.order-to-sale` (sale 7,931 with the 5,000 advance leaves 2,931 outstanding) pass in the browser
+and leave the baseline. `web/apps/api/test/bookTablesMigration.db.test.ts` runs the migration's statements on old-layout
+and desktop-shaped rows: it fills the first, leaves the second unchanged and is idempotent; the provisioning test pins
+the new table names and slots.
 
 ### N206 — Fine Jv Entry is the desktop TR_CONTRA grid in FINE JV mode (G219, Lite L4)
 
@@ -2443,14 +2463,14 @@ Desktop-runtime comparison and parent acceptance remain open.
 | N188 | — | planned (G198: purchase return and purchase line amounts and bill total in whole rupees, as TR_KR_ISU and TR_PURC) |
 | N189 | — | implemented-unverified, evidence in this change (G199: BookSelect `required` opt-out; a free-standing purchase return saves, and a reopened one saves unchanged) |
 | N190 | — | implemented-unverified, evidence in this change (G200: 22 voucher screens marked; a unit scan keeps every voucher page's primary Save marked; purchase-return Alt+S passes in the browser) |
-| N191 | — | planned (G201: provision BOOK_TBL_NAME for purchase-family books and backfill existing companies) |
+| N191 | — | implemented-unverified, evidence in this change (G201: desktop BOOK_TBL_NAME/BOOK_TBL_DETL on ten families, backfill migration; purchase-return register case passes) |
 | N192 | — | implemented-unverified, evidence in this change (G202, D32 recorded; generated per-tier progress page; Lite packages in document 15 §5) |
 | N193 | — | implemented-unverified (G203: cheque number on every bank leg, #165) |
 | N194 | — | implemented-unverified, evidence in this change (G204: the TR_CONTRA grid) |
 | N195 | — | implemented-unverified, evidence in this change (G205-G208: Sales Order feature module, 14 passed / 9 baselined / 2 blocked) |
 | N196 | — | implemented-unverified, evidence in this change (G205: order line priced on SL_AMT_TYPE in whole rupees; tax and total rounded; sales-order formula and amounts cases pass) |
 | N197 | — | implemented-unverified, evidence in this change (G206 part: cash, cheque and card tenders stored per tender and posted on legs 01-06; UPI, old metal and scheme stay open) |
-| N198 | — | planned (G207, G208: provision SOR slot 1 as the cash account and sale books with slot 4; backfill existing companies) |
+| N198 | — | implemented-unverified, evidence in this change (G207: SOR slot 1 is the cash account; G208: sale books get slot 4 ORDER ADVANCE; backfill migration; advance-ledger and order-to-sale cases pass) |
 | N199 | — | implemented-unverified, evidence in this change (G209, G210: Party Opening is TR_AC_OPBL; openings counted once) |
 | N200 | — | implemented-unverified, evidence in this change (G211: the bill-wise opening grid) |
 | N201 | — | planned (G212: one carry-forward writer for Year End close and Balance TrFr) |

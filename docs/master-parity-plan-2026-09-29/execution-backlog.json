@@ -6541,7 +6541,7 @@
     },
     {
       "id": "N191",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Book table names: provision BOOK_TBL_NAME/BOOK_TBL_DETL for PURCHASE, PURC RETURN, CON PUR, TAG PURCHASE and PR QUOT books as MS_UPDATE does, backfill existing companies, and check the other registers that route by BOOK_TBL_NAME; remove purchase-return.report.register-lists-return from features/baseline.json.",
       "parentLabels": "P03-04; X07",
       "startAfter": [
@@ -6552,7 +6552,15 @@
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
       "requiredProof": "the case passes on a newly provisioned company; a migration test backfills an existing company; the purchase-return register lists PRT returns.",
-      "gapIds": "G201"
+      "gapIds": "G201",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/packages/db/prisma/migrations/20261031090000_book_tables_and_advance_slots/migration.sql",
+        "web/apps/api/test/bookTablesMigration.db.test.ts",
+        "web/apps/api/test/provisioning.db.test.ts"
+      ],
+      "statusNote": "IMPLEMENTED. Desktop table names on ten book families, backfilled; purchase-return.report.register-lists-return passes and left the baseline."
     },
     {
       "id": "N192",
@@ -6691,7 +6699,7 @@
     },
     {
       "id": "N198",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Provisioning: the SALES ORDER book's BOOK_DETL slot 1 is the cash account, and sale books get slot 4 (the advance account Sales_Rojmel uses); backfill existing companies.",
       "startAfter": [
         "N195"
@@ -6702,7 +6710,15 @@
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
-      "parentLabels": "P9; R03"
+      "parentLabels": "P9; R03",
+      "statusAsOf": "2026-10-31",
+      "evidence": [
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/packages/db/prisma/migrations/20261031090000_book_tables_and_advance_slots/migration.sql",
+        "web/apps/api/test/bookTablesMigration.db.test.ts",
+        "web/apps/web/test/features/baseline.json"
+      ],
+      "statusNote": "IMPLEMENTED. SOR slot 1 = CASH, SALES slot 4 = ORDADV, backfilled; sales-order.create.advance-ledger and journey.order-to-sale pass and left the baseline."
     },
     {
       "id": "N199",
