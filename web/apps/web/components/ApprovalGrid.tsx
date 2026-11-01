@@ -215,6 +215,24 @@ export const approvalFine = (line: ApprovalLine) => {
   return round(purity === 0 ? weight : (weight * purity) / 100, 3);
 };
 
+export const approvalNetAmount = (line: ApprovalLine) =>
+  round(
+    number(line.amount) +
+      number(line.labourAmount) +
+      number(line.otherAmount) +
+      number(line.mrp) -
+      number(line.discountAmount),
+    2,
+  );
+
+const NET_AMOUNT_FIELDS = new Set<keyof ApprovalLine>([
+  'amount',
+  'labourAmount',
+  'otherAmount',
+  'mrp',
+  'discountAmount',
+]);
+
 export function ApprovalGrid({
   kind,
   lines,
@@ -236,7 +254,13 @@ export function ApprovalGrid({
 }) {
   const set = (row: number, field: keyof ApprovalLine, value: string) =>
     setLines((current) =>
-      current.map((line, index) => (index === row ? { ...line, [field]: value } : line)),
+      current.map((line, index) => {
+        if (index !== row) return line;
+        const next = { ...line, [field]: value };
+        return NET_AMOUNT_FIELDS.has(field)
+          ? { ...next, netAmount: String(approvalNetAmount(next)) }
+          : next;
+      }),
     );
   const add = () => {
     setLines((current) => [...current, blankApprovalLine()]);
@@ -297,7 +321,15 @@ export function ApprovalGrid({
               rate: String(value.ITM_RATE ?? line.rate),
               amount: String(value.ITM_AMT ?? line.amount),
               mrp: String(value.ITM_MRP ?? line.mrp),
-              netAmount: Number(value.ITM_MRP ?? 0) !== 0 ? String(value.ITM_MRP) : line.netAmount,
+              netAmount: String(
+                approvalNetAmount({
+                  ...line,
+                  amount: String(value.ITM_AMT ?? line.amount),
+                  labourAmount: String(value.LBR_AMT ?? line.labourAmount),
+                  otherAmount: String(value.OTH_AMT ?? line.otherAmount),
+                  mrp: String(value.ITM_MRP ?? line.mrp),
+                }),
+              ),
               karigarNetWt: String(value.KR_NET_WT ?? line.karigarNetWt),
               karigarTouch: String(value.KR_TOUCH ?? line.karigarTouch),
               karigarWestPct: String(value.KR_WEST_PRC ?? line.karigarWestPct),

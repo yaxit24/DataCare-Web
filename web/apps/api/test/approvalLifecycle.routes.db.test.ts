@@ -496,12 +496,39 @@ type Cookie = string;
   });
 
   it('rejects invalid approval fields at the HTTP write boundary without a partial write', async () => {
-    // TR_APR_ISU.cs:6155-6157 omits pcs-only zero-value rows; column widths come from APR_DETL/APR_IDTL.
+    // TR_APR_ISU.cs:6155-6157 omits pcs-only zero-value rows; :6324-6331 requires a coded,
+    // valued stone; APR_DETL DECIMAL(14,3)/(18,2) must be checked after deriving fine and NET_AMT.
     const cases = [
       issueBody({ lines: [{ itCode: ITEM, grossWt: 1, lotNo: 'X'.repeat(16) }] }),
       issueBody({ lines: [{ itCode: ITEM, grossWt: 1, amount: -1 }] }),
       issueBody({ lines: [{ itCode: ITEM, pcs: 1 }] }),
       issueBody({ lines: [{ itCode: 'MISS', grossWt: 1 }] }),
+      issueBody({ lines: [{ itCode: ITEM, grossWt: 1, stones: [{}] }] }),
+      issueBody({ lines: [{ itCode: ITEM, grossWt: 1, stones: [{ pcs: 1 }] }] }),
+      issueBody({
+        lines: [
+          {
+            itCode: ITEM,
+            grossWt: 1,
+            netWt: 99_999_999_999.999,
+            ghtWt: 99_999_999_999.999,
+            touch: 99_999.9999,
+            westPct: 99_999.9999,
+          },
+        ],
+      }),
+      issueBody({
+        lines: [
+          {
+            itCode: ITEM,
+            grossWt: 1,
+            amount: 3_000_000_000_000_000,
+            labourAmount: 3_000_000_000_000_000,
+            otherAmount: 3_000_000_000_000_000,
+            mrp: 3_000_000_000_000_000,
+          },
+        ],
+      }),
     ];
     for (const payload of cases) {
       const before = await snapshotTenant(owner, tenantId, BUSINESS_TABLES);
@@ -512,6 +539,34 @@ type Cookie = string;
         removed: {},
       });
     }
+  });
+
+  it('writes APR_IDTL only for coded stones with a nonzero desktop value basis', async () => {
+    // TR_APR_ISU.cs:6324-6331 inserts a stone only when pcs + gross + karigar weight + net amount != 0.
+    const response = await admin(
+      'POST',
+      '/tour/issue',
+      issueBody({
+        lines: [
+          {
+            itCode: ITEM,
+            grossWt: 1,
+            stones: [
+              { isrNo: 8, itCode: STONE, dmCode: 'ZERO' },
+              { isrNo: 9, itCode: STONE, dmCode: 'KEPT', netAmount: 1 },
+            ],
+          },
+        ],
+      }),
+    );
+    expect(response.statusCode, response.body).toBe(201);
+    expect(
+      await query(
+        `SELECT "ISR_NO"::int stone,"DM_CODE" diamond,"IT_NET_AMT"::float8 net
+           FROM "APR_IDTL" WHERE tenant_id=$1 AND "CO_BOOK"='TUR' ORDER BY "ISR_NO"`,
+        tenantId,
+      ),
+    ).toEqual([{ stone: 9, diamond: 'KEPT', net: 1 }]);
   });
 
   it('derives fine from net plus ghat and touch plus wastage, with the desktop fallback', async () => {
@@ -649,6 +704,7 @@ type Cookie = string;
       TAG_NO: TAG,
       ISU_REC: 'N',
       EMP_SALE: 'N',
+      CON_ISU_REC: 'N',
       ITM_PCS: 1,
       ITM_GWT: 10.5,
       ITM_NWT: 10,
@@ -691,7 +747,7 @@ type Cookie = string;
       ITM_MRP: 63734,
       DISC_PRC: 2.5,
       DISC_AMT: 1593.35,
-      NET_AMT: 62140.65,
+      NET_AMT: 125874.65,
       IT_TYPE: 'G',
       KR_NET_WT: 10,
       KR_TOUCH: 91,
@@ -822,7 +878,7 @@ type Cookie = string;
           touch: 91.6,
           discountPct: 2.5,
           discountAmount: 1593.35,
-          netAmount: 62140.65,
+          netAmount: 125874.65,
           itType: 'G',
           stones: [
             {
@@ -1128,12 +1184,12 @@ type Cookie = string;
     expect(
       await query(
         `SELECT "OLD_SRNO"::int old_sr,"ISU_REC" received,"EMP_SALE" sale,
-                coalesce("CON_ISU_REC",'') consignment
+                "CON_ISU_REC" consignment
            FROM "APR_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='TUR' AND "VCH_NO"=$2`,
         tenantId,
         issue.voucherNo,
       ),
-    ).toEqual([{ old_sr: 1, received: 'Y', sale: 'N', consignment: '' }]);
+    ).toEqual([{ old_sr: 1, received: 'Y', sale: 'N', consignment: 'N' }]);
     expect(
       await query(
         `SELECT "APR_ISU" apr,"APP_TRFR" transfer FROM "BAR_DETL"
@@ -1580,9 +1636,17 @@ type Cookie = string;
 
   it('deletes an unconsumed issue with the desktop audit and restores BAR availability', async () => {
     const created = await createIssue();
+    // TR_APR_ISU.cs:6648 selects IT_TYPE verbatim into DELETE_DATA.FINE_TYPE, including blank.
+    await exec(
+      `UPDATE "APR_DETL" SET "IT_TYPE"='' WHERE tenant_id=$1 AND "CO_BOOK"='TUR' AND "VCH_NO"=$2`,
+      tenantId,
+      created.voucherNo,
+    );
+    const refreshed = await admin('GET', `/tour/${created.voucherNo}?coBook=TUR`);
+    expect(refreshed.statusCode, refreshed.body).toBe(200);
     const deleted = await admin(
       'DELETE',
-      `/tour/${created.voucherNo}?coBook=TUR&expectedVersion=${created.version}`,
+      `/tour/${created.voucherNo}?coBook=TUR&expectedVersion=${refreshed.json().version}`,
     );
     expect(deleted.statusCode, deleted.body).toBe(200);
     expect(await stockBalance(TAG)).toBe(1);
@@ -1604,7 +1668,7 @@ type Cookie = string;
         book: 'Approval Issue',
         user: ADMIN,
         account: PARTY_NAME,
-        fine_type: 'G',
+        fine_type: '',
         fine: 10,
         description: `ItCode / ${ITEM}   TagNo / ${TAG}`,
       },

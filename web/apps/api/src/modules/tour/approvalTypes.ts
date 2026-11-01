@@ -175,9 +175,27 @@ export function tourLineFine(line: TourIssueLine): number {
 }
 
 export function tourLineNetAmount(line: TourIssueLine): number {
-  if (line.netAmount != null) return num(line.netAmount);
-  const basis = num(line.mrp) || num(line.amount) + num(line.labourAmount) + num(line.otherAmount);
-  return basis - num(line.discountAmount);
+  return (
+    num(line.amount) +
+    num(line.labourAmount) +
+    num(line.otherAmount) +
+    num(line.mrp) -
+    num(line.discountAmount)
+  );
+}
+
+function assertDerivedDecimal(
+  line: number,
+  field: 'fineWt' | 'netAmount',
+  value: number,
+  exclusiveLimit: number,
+  column: string,
+): void {
+  if (!Number.isFinite(value) || Math.abs(value) >= exclusiveLimit) {
+    throw new TourValidationError(
+      `approval line ${line} derived ${field} exceeds ${column} precision`,
+    );
+  }
 }
 
 export function completeApprovalScope(scope: VoucherScope): CompleteApprovalScope {
@@ -198,6 +216,12 @@ export function normalizeApprovalLines(raw: unknown): TourIssueLine[] {
     assertWestPct(line.westPct);
     const itCode = text(line.itCode).slice(0, 5);
     if (!itCode) throw new TourValidationError(`approval line ${index + 1} needs an item`);
+    const fineWt = tourLineFine(line);
+    const netAmount = tourLineNetAmount(line);
+    // APR_DETL.ITM_FINE is DECIMAL(14,3), NET_AMT is DECIMAL(18,2). Inputs fit their
+    // individual columns but their desktop formulas can still overflow the derived target.
+    assertDerivedDecimal(index + 1, 'fineWt', fineWt, 10 ** 11, 'APR_DETL.ITM_FINE');
+    assertDerivedDecimal(index + 1, 'netAmount', netAmount, 10 ** 16, 'APR_DETL.NET_AMT');
     const normalized = {
       ...line,
       oldSrNo: line.oldSrNo == null ? index + 1 : num(line.oldSrNo),
@@ -208,7 +232,8 @@ export function normalizeApprovalLines(raw: unknown): TourIssueLine[] {
       grossWt: approvalRound3(line.grossWt),
       netWt: approvalRound3(line.netWt),
       touch: approvalRound3(line.touch),
-      fineWt: tourLineFine(line),
+      fineWt,
+      netAmount,
       stones: Array.isArray(line.stones) ? line.stones : [],
     };
     // TR_APR_ISU.cs:6155-6157 inserts only MRP lines or rows with gross/labour/other value.

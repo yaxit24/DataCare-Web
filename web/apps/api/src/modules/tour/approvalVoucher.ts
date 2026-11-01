@@ -770,7 +770,7 @@ async function remove(
         header: persisted,
         rows: current.state.details.map((row) => ({
           srNo: num(row.SR_NO),
-          fineType: text(row.IT_TYPE) || 'A',
+          fineType: text(row.IT_TYPE),
           // TR_APR_ISU.cs:6648 puts ITM_NWT in VCH_FINE_CR despite that column's name.
           fineCr: num(row.ITM_NWT),
           acCode: row.AC_CODE,

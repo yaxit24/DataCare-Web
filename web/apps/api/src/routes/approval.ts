@@ -41,9 +41,10 @@ const text = (maxLength: number) => ({ type: 'string', maxLength }) as const;
 const STONE_SCHEMA = {
   type: 'object',
   additionalProperties: false,
+  required: ['itCode'],
   properties: {
     isrNo: SERIAL,
-    itCode: text(5),
+    itCode: { type: 'string', minLength: 1, maxLength: 5 },
     dmCode: text(8),
     dmName: text(50),
     dmSize: text(20),
