@@ -23,7 +23,12 @@ export function lookupEnterAction(state: {
   value: string;
 }): LookupEnterAction {
   const typed = state.value.trim();
-  if (state.open && state.rowCount > 0 && state.rowsFor !== null && state.rowsFor === state.value)
+  if (
+    state.open &&
+    state.rowCount > 0 &&
+    state.rowsFor !== null &&
+    sameText(state.rowsFor, state.value)
+  )
     return 'pick-highlighted';
   return typed ? 'resolve-typed' : 'none';
 }
@@ -45,5 +50,15 @@ export function exactCodeRow<T extends { code: unknown }>(
 
 /** A search answer that arrives after the operator typed more must not replace the list for the current text. */
 export function isCurrentAnswer(requestedFor: string, currentValue: string): boolean {
-  return requestedFor === currentValue;
+  return sameText(requestedFor, currentValue);
+}
+
+/**
+ * The lookups search case-insensitively (ILIKE), so a list fetched for 'rin' is the list for 'RIN'. The masters upper-case
+ * every typed key as the desktop's KeyPress does (MS_ITEM.cs:3066-3079, MS_GROUP.cs:1975-1988): the box holds 'RIN' while
+ * the search went out for the raw 'rin', and an exact comparison dropped every answer to lower-case typing (found in the
+ * 2026-11-01 Item master run).
+ */
+function sameText(a: string, b: string): boolean {
+  return a.toUpperCase() === b.toUpperCase();
 }

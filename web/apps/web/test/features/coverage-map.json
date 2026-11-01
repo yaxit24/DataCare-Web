@@ -135,6 +135,13 @@
         "web/apps/api/src/modules/masters/taxMaster.ts",
         "web/apps/api/src/routes/taxMaster.ts"
       ]
+    },
+    "itemMaster": {
+      "covers": [
+        "web/apps/web/app/(app)/masters/items/page.tsx",
+        "web/apps/api/src/modules/masters/itemMaster.ts",
+        "web/apps/api/src/routes/itemMaster.ts"
+      ]
     }
   }
 }
