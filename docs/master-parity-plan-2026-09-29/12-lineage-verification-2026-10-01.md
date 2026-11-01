@@ -234,7 +234,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G221 | High | Daily Rate did not follow MS_RATE and its save deleted other locations' rates | `unified/src/csharp/DataCareNext/MS_RATE.cs:1752-2109,2314-2458` | `web/apps/api/src/modules/masters/dailyRate.ts`; `web/apps/api/src/routes/dailyRate.ts`; `web/apps/web/app/(app)/txn/daily-rate/page.tsx`; `web/packages/core/src/dailyRate.ts` | The desktop lists the groups with a touch (GR_TYPE, GR_NAME), derives TaxRate = Round(Touch × Gold / 100) (silver / 10000) with Rate10gm net of the group's Tax% and PrRate from the purchase touch, using banker's rounding, and saves the grid per company, location, year and date. The web derived silver per kg, added tax on top, rounded half up, used one Tax% for every group, deleted every location's rows for the date, read and listed without the location, wrote GR_NAME, had no delete or print, and allowed any save without edit rights. | N208 |
 | G222 | High | Item Opening was not the desktop TR_ITM_OPBL metal-type grid | `unified/src/csharp/DataCareNext/TR_ITM_OPBL.cs`; `unified/src/csharp/DataCareNext/Ac_Stock.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7690-7699` | `web/apps/web/app/(app)/txn/item-opening/page.tsx`; `web/apps/api/src/modules/stock/stockVoucherLifecycle.ts`; `web/apps/api/src/routes/txn.ts` | The desktop opens TR_ITM_OPBL directly, with no book help (`MDI_FORM.cs:7690-7699`). Enter on the Item Type select lists every item of that metal type (`TR_ITM_OPBL.cs:1269-1370`) in a 17-column grid with a Total row, and Save replaces the type's rows in book '000' with VCH_NO = the type letter (`:1380-1490`); the stock rows come from `Ac_Stock.Itm_Opbl_Stk` (`Ac_Stock.cs:11-21`: AC_CODE '00000', VCH_TYPE ITOBL, BOOK_NAME 'ITM OPBL', P / +, the KR_* fields, dated the year's opening date less one day) and DM_DATA from `Dm_Itm_Opbl_Detl` for OTH_DETL_POSTING items (`:734-741`). The web wrote a numbered BAR_DATA voucher in book IOP on the voucher date; its fine ignored the wastage, its stock rows lacked those fields, it wrote no per-type ITM_OPBL rows and no DM_DATA, and its grid had no West%, labour, other amount, net amount or totals. | N209 |
 | G223 | Med | Tag Cancel had no print, accepted a new voucher in a type B company and answered the lock and fiscal refusals with web wording | `unified/src/csharp/DataCareNext/TR_TAG_CAN.cs:4950-4990,5330-5345,5386-5440` | `web/apps/api/src/modules/stock/tagCancel.ts`; `web/apps/api/src/modules/stock/tagCancelBill.ts`; `web/apps/web/components/TagCancelForm.tsx` | The desktop refuses a new voucher when CO_TYPE is 'B', a date outside the year and a date on or before the lock date with its own texts, in that order, and prints TagCanBill behind UserPrint. The web had no print route, never checked the company type, checked the lock after reading the lines and answered with "period is locked …" / "voucher date … is outside fiscal year …". | N210 |
-| G224 | High | Approval Isu/Approval Rtn used web-only book families and Tour row stamps and lacked the desktop lifecycle, guards, delete refusals, audit and print | `unified/src/csharp/DataCareNext/MDI_FORM.cs:8300-8317`; `unified/src/csharp/DataCareNext/TR_APR_ISU.cs:5788-6772`; `unified/src/csharp/DataCareNext/Ac_Stock.cs:60-85,887-892` | `web/apps/api/src/modules/tour/tour.ts`; `web/apps/api/src/modules/sales/approvalSaleReferences.ts`; `web/apps/web/app/(app)/txn/tour/page.tsx`; `web/apps/web/app/(app)/txn/tour-return/page.tsx`; `web/apps/api/src/modules/ops/seedCompany.ts` | Implemented-unverified in N211: exact APR ISU/APR RTN identity; legacy links require one source and one consistent BAR instance; runtime source/BAR checks and affected counts fail closed; issue edit/delete locks source details against concurrent returns; `/sales` references are complete, open, same-party, request-unique, row-locked and checked, and block approval deletion while referenced. Stable OLD_SRNO/ISU_SRNO/APR_IDTL identities, stone-bearing no-op saves, zero-piece reopen, desktop NET_AMT/CON_ISU_REC/FINE_TYPE semantics, stone admission and derived precision checks have DB/HTTP, unit and zero-mock coverage. The hidden billing bridge remains a no-write 409 because there is still no browser Approval-to-Sales import flow; tagged retail and Wh Sales continuation are not browser-proven. Licence state, AprBillImg, idempotency, fault injection, repeated Crystal page furniture/page numbers and original-Windows acceptance also remain open. | N211 |
+| G224 | High | Approval Isu/Approval Rtn used web-only book families and Tour row stamps and lacked the desktop lifecycle, guards, delete refusals, audit and print | `unified/src/csharp/DataCareNext/MDI_FORM.cs:8300-8317`; `unified/src/csharp/DataCareNext/TR_APR_ISU.cs:3414-3421,3936-3942,4741-4835,5788-6772`; `unified/src/csharp/DataCareNext/TR_SALE.cs:20130-20169,20399-20411`; `unified/src/csharp/DataCareNext/Ac_Stock.cs:60-85,887-892` | `web/apps/api/src/modules/tour/approvalVoucher.ts`; `web/apps/api/src/modules/tour/approvalRows.ts`; `web/apps/api/src/modules/sales/approvalSaleReferences.ts`; `web/apps/web/components/ApprovalGrid.tsx`; `web/apps/api/test/approvalLifecycle.routes.db.test.ts` | Implemented-unverified in N211. Tests prove exact source and item-scoped BAR validation before return creation and before an unchanged PUT no-op; OLD_SRNO-keyed, exact tag/instance/item/quantity `/sales` locking with tagged mismatch no-write, tagged consume/release and a gapped source; max-plus-one OLD_SRNO/ISR_NO allocation with duplicate/zero/fraction refusal; one-decimal NET_AMT with LDisc-derived DISC_AMT; strict company-master stone codes; and the existing lifecycle/audit/print cases. Still open: operator Apr No import (including browser-driven tagged consume/delete reversal), Wh Sales continuation, licence expiry, image panel and AprBillImg, create idempotency/lost acknowledgement, injected rollback, Crystal repeated-page furniture/numbers, original-Windows comparison, operator sign-off and parent acceptance. | N211 |
 
 ## 4. Decisions D23–D28
 
@@ -2473,47 +2473,67 @@ a tag, delete back to stock, print rights, TagCanBill, Alt+S) with 5 blocked and
 ### N211 — Approval Isu and Approval Rtn are desktop TR_APR_ISU (G224, Lite L4)
 
 The menu dispatches admit only `APR ISU` and `APR RTN` books (`MDI_FORM.cs:8300-8317`). Provisioning uses those
-families over APR_DATA/APR_DETL. The identity migration changes only the former web families and former TOUR/TOURR +
-EMP ISU/EMP REC stamps. It repairs a legacy link only when the issue detail and its BAR_DETL tag instance are each
-unique and their tag serials agree; zero or multiple BAR candidates remain unlinked. Runtime return edit/delete locks
-and verifies the exact source detail and, for a tag, the exact BAR instance, and every source/BAR reversal checks that
-one row changed. An unresolved legacy return is not guessed: issue deletion still detects it, while return edit/delete
-fails with a repair message. Existing desktop/custom book metadata and unrelated Tour Sales rows remain unchanged. A
-following schema migration adds the APR_DETL `DISC_PRC` and `DISC_AMT` columns present in the desktop writer.
+families over APR_DATA/APR_DETL. The identity migration changes only former web approval families and former
+TOUR/TOURR + EMP ISU/EMP REC stamps. It repairs a legacy link only when one source row and one matching BAR instance
+can be proved; zero or multiple candidates remain unlinked. Existing desktop/custom book metadata and unrelated Tour
+Sales rows remain unchanged. The detail migration adds the desktop `DISC_PRC` and `DISC_AMT` columns.
 
-The source-derived HTTP/DB tests verify family isolation; type-B, fiscal-year, lock-date, employee and party refusals;
-strict request widths/ranges; ITEM_MAST validation for loose rows; coded stone admission; derived DECIMAL bounds; and
-rejection of pcs-only zero-value item rows. Create/reopen/edit/delete cover APR_DATA, APR_DETL, APR_IDTL,
-TEMP_BOOK_DATA, REMARK_DATA, MAIN_STOCK, DM_DATA and BAR/source flags. Tested columns include discounts; NET_AMT =
-ITM_AMT + LBR_AMT + OTH_AMT + ITM_MRP - DISC_AMT; new CON_ISU_REC `N`; verbatim delete-audit IT_TYPE; APR_IDTL
-HD_VCH_NO; stock EMP_CODE/ITM_LOT/ITM_DISC; current ISU_LC_CODE; and fine `(net+ght)*(touch+west)/100` with the
-desktop fallback. APR_IDTL rows require nonzero pcs + gross + karigar weight + net amount. Return OLD_SRNO remains the
-return row's identity while ISU_SRNO names the selected source; issue stones stay on the stable parent OLD_SRNO after a
-line gap and retain ISR_NO. A sparse unchanged stone-bearing browser save keeps its version and physical rows, and a
-stored zero-piece line reopens as zero. Issue edit/delete locks APR_DETL in stable order, and a barrier-controlled test
-proves a concurrent return commits before deletion re-checks and refuses. A repeated return source fails with
-`Duplicate Tag No` and writes nothing. Central RBAC runs before handler validation, so these tests do not claim the
-desktop's refusal order when rights are absent.
+Return creation now locks the source by its durable OLD_SRNO and compares the submitted IT_CODE, TAG_NO and VCH_SRNO
+with that row. For a tagged line it also locks exactly one BAR_DETL row on company, location, TAG_NO, VCH_SRNO and
+IT_CODE before allocating the return identity or posting rows. Return edit/delete checks the same source and BAR
+identity. An unchanged PUT performs that check before its no-op fast path. Every BAR flag update includes IT_CODE and
+requires one affected row. The corruption tests change only BAR_DETL.IT_CODE and prove POST and unchanged PUT both
+return 400 with no business-table change (`TR_APR_ISU.cs:4741-4835,5044-5061,6412-6431,6664-6680`).
 
-`POST /sales` now treats any line-level approval reference as one four-part identity. Before writing, it locks source
-APR_DETL rows in sorted order and requires each source to be unique, open, in an APR ISU book, for the sale party and
-item, and used only once in the request; its checked update and the sale write commit together. Approval deletion also
-refuses while SL_DETL retains a reference, and sale deletion reopens the source. This secures the raw write path but
-does not claim the desktop operator workflow: the Sales Invoice page has no Apr No import control, a tagged approval
-continuation is not exercised through that page, Wh Sales continuation is separate, and the former
-`POST /tour/:vchNo/bill` bridge remains a no-write 409 behind Sales Invoice create authorization.
+Line identity follows the desktop's durable grid serial (`TR_APR_ISU.cs:3414-3421`): explicit OLD_SRNO and per-line
+stone ISR_NO values must be unique positive safe integers, and each missing value is allocated above the greatest
+retained value. The persistence layer has no positional fallback. A DB edit removes line/stone 1, retains ID 2 and
+adds ID 3; separate HTTP cases refuse duplicate, zero and fractional IDs. Browser units prove the same max-plus-one
+line and stone payload rule, and the Approval Isu feature matrix performs the line-gap edit through the screen.
 
-AprBill keeps the extracted TAG_NO marker, including the stored `N` sentinel, and renders the bound title,
-company/party block, item/component columns, totals, description and signatures behind each form's print right. Its
-HTML is a semantic flowing document; repeated Crystal page headers/footers and visible page numbers are not reproduced.
+The amount test follows `TR_APR_ISU.cs:3936-3942,6218-6225`: LDisc% derives DISC_AMT from LBR_AMT, then NET_AMT is
+rounded with `@datacare/core` to one decimal before persistence and display. The independent vector is
+20.05 × 10% = 2.01 and 100.04 + 20.05 + 0.02 − 2.01 = 118.1. The full-row fixture now expects 59.38 discount and
+127408.6 net from its own inputs rather than the request's inconsistent posted totals. The screen feature case checks
+both visible cells and the persisted row.
 
-Evidence: `approvalLifecycle.routes.db.test.ts`, `approvalBookMigration.db.test.ts`, `sales.lifecycle.db.test.ts`,
-`approvalGrid.test.ts` and `subDetailGrid.test.ts`; the zero-mock `approval-issue` and `approval-return` feature modules
-include rich tag/stone hydration, a stone-bearing physical no-op, zero-piece reopen, consumed-issue edit,
-duplicate return, delete confirmation/audit and return-only rights cases. Open: desktop licence-expiry state,
-APR_IMG_PRINT=Y/AprBillImg, create idempotency/lost acknowledgement, injected mid-write rollback, the operator-facing
-Apr No Sales Invoice import (including tagged approval), Wh Sales continuation, repeated-page Crystal pagination,
-original-Windows comparison and parent acceptance.
+Stone IT_CODE is trimmed before the route's required check. Service normalization repeats the check for non-HTTP
+callers, and the writer requires every distinct code to exist in ITEM_MAST for the session company before identity
+allocation. Whitespace-only and unknown codes each return 400 with no approval write; the browser module also enters
+an unknown code through the stone grid and observes the refusal (`TR_APR_ISU.cs:6324-6331`).
+
+`POST /sales` treats a line-level approval reference as the source's four-part voucher identity plus stable OLD_SRNO.
+It locks one open APR ISU row, verifies the sale party, IT_CODE, TAG_NO, VCH_SRNO, pieces, gross weight and net weight,
+and locks the exact BAR row. An approval-held tag reuses that locked identity instead of attempting a second live-stock
+issue. Consumption updates only the locked APR and BAR rows; sale edit/delete releases the source through OLD_SRNO and
+the exact BAR item. DB tests prove a different tag/instance/quantity returns 400 without business writes, an exact
+tagged source consumes and reverses, and OLD_SRNO 2 still binds after SR_NO compacts to 1
+(`TR_SALE.cs:20130-20169,20399-20411`). The zero-mock Sales Invoice matrix covers the mismatched-tag refusal through a
+real authenticated browser session, but the page still has no operator import control.
+
+Existing tests continue to cover family isolation; type-B, fiscal-year, lock-date, employee and party refusals;
+complete APR_DATA/APR_DETL/APR_IDTL/TEMP_BOOK_DATA/REMARK_DATA/MAIN_STOCK/DM_DATA writes; source and BAR reversals;
+zero-piece reopen; sparse stone-bearing no-op; consumed-issue edit; concurrent return versus issue delete; duplicate
+return selection; audited delete; separate rights; and AprBill's bound data. These are engineering tests, not desktop
+runtime acceptance.
+
+Evidence: `web/apps/api/test/approvalLifecycle.routes.db.test.ts`, `web/apps/api/test/approvalBookMigration.db.test.ts`,
+`web/apps/api/test/sales.lifecycle.db.test.ts`, `web/apps/web/test/approvalGrid.test.ts`,
+`web/apps/web/test/subDetailGrid.test.ts`, and the zero-mock `approval-issue`, `approval-return` and `sales-invoice`
+feature modules.
+
+Open work remains explicit:
+
+- Add the Sales Invoice Apr No selector/import control. Drive exact tagged consumption and sale-delete source reopening
+  through that screen; the API/DB path alone is not an operator workflow.
+- Implement and browser-prove the separate Wh Sales approval continuation.
+- Model the desktop licence-expiry save state.
+- Render the approval image panel and the `APR_IMG_PRINT=Y` / AprBillImg branch.
+- Add create idempotency and lost-acknowledgement recovery.
+- Add declared mid-write fault injection and prove rollback after each effect family.
+- Reproduce or explicitly disposition repeated Crystal page headers, footers and visible page numbers.
+- Execute an independent original-Windows comparison on sanitized fixtures.
+- Obtain operator sign-off and parent-package acceptance; N211 remains implemented-unverified.
 
 ## 6. Status corrections
 
@@ -2652,7 +2672,7 @@ original-Windows comparison and parent acceptance.
 | N208 | — | implemented-unverified, evidence in this change (G221: Daily Rate is MS_RATE — grid source, recalculation, scoped save/delete, F1, RateRpt, rights) |
 | N209 | — | implemented-unverified, evidence in this change (G222: Item Opening is the TR_ITM_OPBL metal-type grid in book 000 with ITOBL stock rows, DM_DATA for OTH_DETL_POSTING items and the desktop messages) |
 | N210 | — | implemented-unverified, evidence in this change (G223: Tag Cancel prints TagCanBill behind print rights and refuses type B, the year and the lock date with the desktop texts in desktop order) |
-| N211 | — | implemented-unverified, evidence in this change (G224: unique source/BAR legacy links and checked runtime reversal; issue/return serialization; guarded atomic `/sales` references and SL_DETL delete dependency; stable line/stone identities and stone-bearing no-op; NET_AMT/CON_ISU_REC/FINE_TYPE parity; stone and derived-range validation. The Apr No sales import UI, tagged/Wh Sales continuation, Crystal pagination and listed acceptance items remain open) |
+| N211 | — | implemented-unverified, evidence in this change (G224: exact source/BAR checks precede return create and unchanged PUT; `/sales` matches stable OLD_SRNO plus party/item/tag/instance/quantities and updates the locked BAR row; max-plus-one line/stone IDs reject duplicate/zero/fraction values; LDisc-derived discount and one-decimal NET_AMT; strict company stone codes; existing lifecycle/audit/print coverage. Operator Apr No import, Wh Sales continuation, licence/image/idempotency/fault-injection/Crystal pagination, Windows comparison and acceptance remain open) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 
