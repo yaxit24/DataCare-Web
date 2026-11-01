@@ -571,6 +571,7 @@ route('Inventory/Tag Cancel', [
   'POST /stock/tag-cancel',
   'PUT /stock/tag-cancel/:vchNo',
   'DELETE /stock/tag-cancel/:vchNo',
+  'GET /stock/tag-cancel/:vchNo/print',
 ]);
 route('Inventory/Tag Adjust', [
   'POST /stock/tag-adjust',
@@ -782,6 +783,16 @@ route('Membership/Gold Adjust', [
 ]);
 
 route('Masters/Auto Item', ['POST /masters/auto-item']);
+// MS_EMP (N211): the Employee master's own screen; the generic /masters/employees routes stay for imports.
+route('Masters/Employees', [
+  'GET /masters/employee-master',
+  'GET /masters/employee-master/print',
+  'GET /masters/employee-master/accounts',
+  'GET /masters/employee-master/:code',
+  'POST /masters/employee-master',
+  'PUT /masters/employee-master/:code',
+  'DELETE /masters/employee-master/:code',
+]);
 // MS_TAX (N213): the Tax master's own screen, a header row with its component rows per code.
 route('Masters/Taxes', [
   'GET /masters/tax-master',
@@ -921,6 +932,7 @@ route('Reports/Mfg Ledger', ['GET /reports/mfg-ledger', 'GET /reports/mfg-ledger
 route('Reports/Scheme Monthly Report', ['GET /reports/scheme-monthly']);
 
 const PRINT_ROUTES = new Set([
+  'GET /masters/employee-master/print',
   'GET /masters/tax-master/print',
   'POST /estimate/pdf',
   'GET /reports/account-ledger/:acCode/export.pdf',
@@ -967,6 +979,8 @@ const PRINT_ROUTES = new Set([
   'GET /journal/:vchNo/print',
   // MS_RATE.cs:1834-1838: RateRpt needs print rights.
   'GET /daily-rate/print',
+  // TR_TAG_CAN.cs:5390-5393: TagCanBill needs print rights.
+  'GET /stock/tag-cancel/:vchNo/print',
 ]);
 
 const UPDATE_POST_ROUTES = new Set([

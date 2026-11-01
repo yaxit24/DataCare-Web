@@ -189,6 +189,7 @@ import { getUserFormRights, setUserFormRights } from '../modules/rbac/formRights
 import { partyBalance } from '../modules/finance/partyBalance.js';
 import { bankReconList, bankReconClear } from '../modules/finance/bankRecon.js';
 import { registerDailyRateRoutes } from './dailyRate.js';
+import { tagCancelBillHtml, TagCancelBillNotFoundError } from '../modules/stock/tagCancelBill.js';
 import { bulkAutoItem } from '../modules/masters/autoItem.js';
 import {
   deleteDesignBook,
@@ -251,6 +252,7 @@ import { registerPurchaseVoucherRoutes } from './purchaseVoucher.js';
 import { registerPartyOpeningRoutes } from './partyOpening.js';
 import { registerFineJvRoutes } from './fineJv.js';
 import { registerItemOpeningRoutes } from './itemOpening.js';
+import { registerEmployeeMasterRoutes } from './employeeMaster.js';
 import { registerTaxMasterRoutes } from './taxMaster.js';
 import { VoucherVersionConflictError } from '../modules/vouchers/version.js';
 import { listYears, createYear, carryForwardOpenings } from '../modules/masters/year.js';
@@ -1104,6 +1106,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerFineJvRoutes(app, extraRouteHelpers);
   registerDailyRateRoutes(app, { ...extraRouteHelpers, formMutationCapabilities });
   registerItemOpeningRoutes(app, extraRouteHelpers, formCapabilities);
+  registerEmployeeMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerTaxMasterRoutes(app, extraRouteHelpers, formCapabilities);
   const pdfRenderer = (): PdfRenderer => deps.pdfRenderer ?? new PlaywrightPdfRenderer();
   /** Render server-built HTML, mapping limits to 413/422 and a busy or slow renderer to a retryable 503. */
@@ -5309,6 +5312,31 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.post('/stock/tag-cancel', auth, tagCancelRoute.create);
   app.put('/stock/tag-cancel/:vchNo', auth, tagCancelRoute.update);
   app.delete('/stock/tag-cancel/:vchNo', auth, tagCancelRoute.remove);
+  // TagCanBill (TR_TAG_CAN.cs:5386-5440): print rights are required (:5390-5393).
+  app.get('/stock/tag-cancel/:vchNo/print', auth, async (req, reply) => {
+    if (!guard(req, reply, 'print')) return;
+    const q = req.query as any;
+    const copyLabel = standardDocumentCopy(q.copy, reply);
+    if (copyLabel === null) return reply;
+    try {
+      const html = await tagCancelBillHtml(
+        prisma,
+        readScope(req),
+        (req.params as any).vchNo,
+        copyLabel,
+      );
+      return sendVoucherDocument(reply, html, {
+        format: q.format,
+        filename: `tag-cancel-${(req.params as any).vchNo}`,
+      });
+    } catch (e: any) {
+      if (e instanceof TagCancelBillNotFoundError)
+        return reply.code(404).send({ error: e.code, message: e.message });
+      if (/(ValidationError|NumberingConfigurationError)$/.test(e?.name ?? ''))
+        return reply.code(400).send({ error: e.name, message: e.message });
+      throw e;
+    }
+  });
   app.post('/stock/counter-transfer', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);

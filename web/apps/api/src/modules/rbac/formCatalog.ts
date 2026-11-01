@@ -275,6 +275,8 @@ const aliases: Record<string, readonly string[]> = {
   'Masters/Customers': ['Party', 'Party Master', 'Customer'],
   'Masters/Party (rich)': ['Party', 'Party Master'],
   'Masters/Items': ['Item', 'Item Master'],
+  // MDI_FORM.cs:7660 opens MS_EMP from the 'Employee' button, whose name is the USER_SET SUB_MENU (:7034).
+  'Masters/Employees': ['Employee', 'Employee Master'],
   'Masters/Item Groups': ['Item Group', 'Group Master'],
   'Masters/Metal Rates': ['Daily Rate', 'Rate Master'],
   'Masters/Books / Series': ['Book', 'Book Master', 'Books'],

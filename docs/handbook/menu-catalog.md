@@ -331,12 +331,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `MS_EMP` — direct constructor ([MDI_FORM.cs:7660-7669](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7660-L7669)).
 - **Does:** Maintains employees with linked ledger, user, amount and work-hour attributes.
-- **Looks:** Search grid beside code, name, account, amount, user and day-hour fields.
+- **Looks:** SEARCH RECORD box over a Code / Name list on the left; Employee Code, Employee Name, Account Code with the account name, User Name, Amount and Day Hour on the right; Print, Save, Cancel, Delete and Exit along the bottom.
 - **Writes:** EMP_MAST.
-- **Web:** `/masters/employees`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Conditional links, reference guards, Print and layout/help remain.
-- **Owners:** X10, G38, N58, N77.
-- **Evidence:** [MS_EMP.cs:1334-1725](../../unified/src/csharp/DataCareNext/MS_EMP.cs#L1334-L1725).
+- **Web:** `/masters/employees`; `GET /masters/employee-master`, `GET /masters/employee-master/print`, `GET /masters/employee-master/accounts`, `GET /masters/employee-master/:code`, `POST /masters/employee-master`, `PUT /masters/employee-master/:code`, `DELETE /masters/employee-master/:code`. Can: create, reopen, edit, delete, list.
+- **Remaining:** The EmpMast print layout is not in the repository (Print lists the employees on screen); the help cannot create an account (MsCreat); desktop-runtime comparison remains.
+- **Owners:** X10, G38, N58, N77, G224, N211.
+- **Evidence:** [MS_EMP.cs:1144-1725](../../unified/src/csharp/DataCareNext/MS_EMP.cs#L1144-L1725).
 
 ### Group
 
@@ -2168,7 +2168,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Stock Adjust | `TR_TAG_CAN` | `/txn/stock-adjust` | `C - - D - -` | PARTIAL | P1-core |
 | Stone/Dm-Cf | `TR_PHYSTK` | `/txn/stone-dm-cf` | `C R E D P -` | PARTIAL | P1-core |
 | Tag Adjust | `TR_TAG_CAN` | `/txn/tag-adjust` | `C R E D - -` | PARTIAL | P1-core |
-| Tag Cancel | `TR_TAG_CAN` | `/txn/tag-cancel` | `C R E D - L` | PARTIAL | P1-core |
+| Tag Cancel | `TR_TAG_CAN` | `/txn/tag-cancel` | `C R E D P L` | PARTIAL | P1-core |
 | Tag Print | `UT_TAG_PRINT` | `/txn/tag-print` | `- - - - P L` | PARTIAL | P1-core |
 | Tag Split | `TR_TAG_SPLIT` | `/txn/tag-split` | `C R E D - L` | PARTIAL | P1-core |
 | Tag Transfer | `TR_TAG_CAN` | `/txn/tag-transfer` | `C R E D - L` | PARTIAL | P1-core |
@@ -2369,9 +2369,9 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Writes off a missing or unusable tagged piece without a sales bill.
 - **Looks:** Voucher/date header and a scan-driven tag grid with item, counter, weights, fine and karigar detail.
 - **Writes:** BAR_CAN_DATA, BAR_CAN_DETL, BAR_CAN_IDTL, BAR_DETL, BAR_IDTL, MAIN_STOCK, DM_DATA, DELETE_DATA.
-- **Web:** `/txn/tag-cancel`; `GET /stock/tag-cancel`, `POST /stock/tag-cancel`, `GET /stock/tag-cancel/:vchNo`, `PUT /stock/tag-cancel/:vchNo`, `DELETE /stock/tag-cancel/:vchNo`, `GET /stock/tag-cancel/source`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Implemented from source (N18), but no captured desktop BAR_CAN rows or independent business acceptance exist.
-- **Owners:** N18, X19, X18, P07-03.
+- **Web:** `/txn/tag-cancel`; `GET /stock/tag-cancel`, `POST /stock/tag-cancel`, `GET /stock/tag-cancel/:vchNo`, `PUT /stock/tag-cancel/:vchNo`, `DELETE /stock/tag-cancel/:vchNo`, `GET /stock/tag-cancel/source`, `GET /stock/tag-cancel/:vchNo/print`. Can: create, reopen, edit, delete, print, list.
+- **Remaining:** Implemented from source (N18, N210): TagCanBill behind print rights and the desktop refusals pass 12 browser cases. Open: no captured desktop BAR_CAN rows, idempotency retry, fault rollback, the Tag Stock report check and a desktop-runtime comparison.
+- **Owners:** G223, N18, N210, P07-03, X18, X19.
 - **Evidence:** [KB_other.md:106-149](../../project-memory/video-research/_kb/KB_other.md#L106-L149).
 
 ### Tag Print
