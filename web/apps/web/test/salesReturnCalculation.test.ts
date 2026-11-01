@@ -28,10 +28,7 @@ describe('TR_SALE_RTN New return preview (G190/N181)', () => {
     const result = saleReturnLinePreview(line, policy, amountType, true);
     expect(result).toEqual({ fine: 9.16, metal: 61234, mk: 2375, net: 63609 });
     expect(
-      saleReturnBillTotals(
-        { lineNetTotal: result.net, taxRatePct: 3, interState: false },
-        policy,
-      ),
+      saleReturnBillTotals({ lineNetTotal: result.net, taxRatePct: 3, interState: false }, policy),
     ).toMatchObject({ net: 63609, tax: 1908.27, total: 65517 });
   });
 
@@ -41,10 +38,7 @@ describe('TR_SALE_RTN New return preview (G190/N181)', () => {
     const result = saleReturnLinePreview(line, policy, saleReturnAmountType('F'), true);
     expect(result).toEqual({ fine: 9.16, metal: 56091, mk: 2375, net: 58466 });
     expect(
-      saleReturnBillTotals(
-        { lineNetTotal: result.net, taxRatePct: 3, interState: false },
-        policy,
-      ),
+      saleReturnBillTotals({ lineNetTotal: result.net, taxRatePct: 3, interState: false }, policy),
     ).toMatchObject({ net: 58466, tax: 1753.98, total: 60220 });
   });
 });
