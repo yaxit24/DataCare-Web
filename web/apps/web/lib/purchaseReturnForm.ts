@@ -1,4 +1,12 @@
-import { fineFor, labourCharge, lineNet, metalAmount } from '@datacare/core';
+import {
+  fineFor,
+  labourCharge,
+  lineNet,
+  purchaseReturnAmountBasis,
+  purchaseReturnRoundingPolicy,
+  saleItemAmountWhole,
+  type RoundingPolicy,
+} from '@datacare/core';
 
 /**
  * Purchase Return editor <-> voucher mapping (N34 / G47).
@@ -340,9 +348,11 @@ export function lineCommand(line: Line): Record<string, unknown> {
  */
 export function linePreview(
   line: Line,
+  policy: RoundingPolicy,
   labourWithGhat: boolean,
 ): { fine: number; metal: number; labour: number; net: number } {
   const c = lineCommand(line);
+  const returnPolicy = purchaseReturnRoundingPolicy(policy);
   const oldGold = c.lesTouch != null || c.kunFine != null;
   const fine =
     c.fineWt != null
@@ -355,19 +365,30 @@ export function linePreview(
           lesTouch: num(c.lesTouch),
           kunFine: num(c.kunFine),
         });
-  const metal = c.metalAmount != null ? num(c.metalAmount) : metalAmount(fine, num(c.rate));
+  const rate = policy.roundPurchaseRate(num(c.rate));
+  const basis = purchaseReturnAmountBasis({ pieces: num(c.pcs), fineWt: fine }, c.rateType);
+  const metal =
+    c.metalAmount != null
+      ? returnPolicy.roundBillTotal(num(c.metalAmount))
+      : basis.quantity > 0 && rate
+        ? saleItemAmountWhole(basis, rate)
+        : 0;
   const labour =
     c.labourAmount != null
-      ? num(c.labourAmount)
+      ? returnPolicy.roundLabourAmount(num(c.labourAmount))
       : c.labourType === 'per_gram'
-        ? labourCharge('per_gram', {
-            netWt: num(c.netWt),
-            ghatWt: num(c.ghtWt),
-            withGhat: labourWithGhat,
-            rate: num(c.labourRate),
-          })
+        ? labourCharge(
+            'per_gram',
+            {
+              netWt: num(c.netWt),
+              ghatWt: num(c.ghtWt),
+              withGhat: labourWithGhat,
+              rate: num(c.labourRate),
+            },
+            returnPolicy,
+          )
         : c.labourType === 'per_piece'
-          ? labourCharge('per_piece', { pcs: num(c.pcs), rate: num(c.labourRate) })
+          ? labourCharge('per_piece', { pcs: num(c.pcs), rate: num(c.labourRate) }, returnPolicy)
           : 0;
   return { fine, metal, labour, net: lineNet({ metal, labour, other: num(c.otherAmount) }) };
 }

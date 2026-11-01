@@ -636,6 +636,79 @@ databaseDescribe('database-backed transaction integrity', () => {
       }),
     ).resolves.toBe(true);
   }, 30_000);
+  it('stores the desktop whole-rupee Purchase Return amounts through every downstream write', async () => {
+    await owner.$executeRawUnsafe(
+      `UPDATE "CO_SET" SET "TAX_ROF"='2' WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+      TENANT,
+      CO,
+    );
+    const created = await createPurchaseReturn(
+      runtime,
+      {
+        scope: scope('PRT'),
+        acCode: 'SUPP',
+        vchDate: DAY,
+        taxRatePct: 3,
+        interState: false,
+        mainUser: 'prt-user',
+      },
+      [
+        {
+          itCode: 'GOLD',
+          pcs: 1,
+          grossWt: 10.25,
+          netWt: 10,
+          touch: 91.6,
+          rate: 6123.45,
+          labourType: 'per_gram',
+          labourRate: 237.5,
+        },
+      ],
+    );
+    const vch = String(created.vchNo).padStart(5, '0');
+    const [amounts] = (await owner.$queryRawUnsafe(
+      `SELECT d."ITM_FINE"::float fine,d."ITM_AMT"::float item,d."LBR_AMT"::float labour,
+              d."NET_AMT"::float line_net,h."NET_AMT"::float net,h."TAX_AMT"::float tax,
+              h."ROF_AMT"::float round_off,h."TOT_AMT"::float total,
+              s."ITM_SIGN" sign,s."ITM_AMT"::float stock_item,s."NET_AMT"::float stock_net,
+              (SELECT coalesce(sum(x."TAX_AMT"),0)::float FROM "TAX_DATA" x
+                WHERE x.tenant_id=$1 AND x."CO_BOOK"='PRT' AND x."VCH_NO"=$2) tax_rows,
+              (SELECT coalesce(sum(x."DR_AMT"),0)::float FROM "AC_DATA" x
+                WHERE x.tenant_id=$1 AND x."CO_BOOK"='PRT' AND x."VCH_NO"=$2) ledger_dr,
+              (SELECT coalesce(sum(x."CR_AMT"),0)::float FROM "AC_DATA" x
+                WHERE x.tenant_id=$1 AND x."CO_BOOK"='PRT' AND x."VCH_NO"=$2) ledger_cr,
+              (SELECT count(*)::int FROM "ROJ_MEL_DATA" x
+                WHERE x.tenant_id=$1 AND x."CO_BOOK"='PRT' AND x."VCH_NO"=$2) rojmel_rows
+         FROM "PR_DATA" h
+         JOIN "PR_DETL" d ON d.tenant_id=h.tenant_id AND d."CO_CODE"=h."CO_CODE"
+          AND d."LC_CODE"=h."LC_CODE" AND d."CO_YEAR"=h."CO_YEAR"
+          AND d."CO_BOOK"=h."CO_BOOK" AND d."VCH_NO"=h."VCH_NO"
+         JOIN "MAIN_STOCK" s ON s.tenant_id=d.tenant_id AND s."CO_CODE"=d."CO_CODE"
+          AND s."LC_CODE"=d."LC_CODE" AND s."CO_YEAR"=d."CO_YEAR"
+          AND s."CO_BOOK"=d."CO_BOOK" AND s."VCH_NO"=d."VCH_NO" AND s."SR_NO"=d."SR_NO"
+        WHERE h.tenant_id=$1 AND h."CO_BOOK"='PRT' AND h."VCH_NO"=$2`,
+      TENANT,
+      vch,
+    )) as Array<Record<string, number | string>>;
+    expect(amounts).toMatchObject({
+      fine: 9.16,
+      item: 56091,
+      labour: 2375,
+      line_net: 58466,
+      net: 58466,
+      tax: 1753.98,
+      round_off: 0.02,
+      total: 60220,
+      sign: '-',
+      stock_item: 56091,
+      stock_net: 58466,
+      tax_rows: 1753.98,
+      ledger_dr: 60220,
+      ledger_cr: 60220,
+    });
+    expect(Number(amounts?.rojmel_rows)).toBeGreaterThan(0);
+  });
+
   it('records attribution and a hidden voucher identity on a purchase return', async () => {
     // A purchase return reverses stock and money, and previously recorded NO acting user, NO VCH_TIME and
     // NO HD_VCH_NO — while a purchase records all three (purchase.ts, 13 assignments). HD_VCH_NO is the

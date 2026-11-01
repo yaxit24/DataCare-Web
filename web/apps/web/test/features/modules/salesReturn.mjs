@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { FIXTURE_MANIFEST, ITEMS, PARTIES, USERS } from '../fixtures/catalogue.mjs';
 import { salesScreen as S } from './salesInvoice.mjs';
+import { mustSet } from './settingsEffects.mjs';
 
 /**
  * Feature: Sales → Sales Return, "New return" form (desktop TR_SALE_RTN, CurBookHelp("SALES RETURNE")).
@@ -10,7 +11,7 @@ import { salesScreen as S } from './salesInvoice.mjs';
  *   provisions) is (net + ghat) × rate, 'G' gross × rate, 'F' fine × rate. Making per gram is net × making.
  * - A return brings metal back IN (MAIN_STOCK '+'), credits the customer and debits sales returns; a cash refund
  *   pays the customer from the book's cash account. Delete reverses everything once.
- * - Amounts at 2 decimals (blank TOT_AMT_ROF on a web-provisioned company).
+ * - Return item, labour, line-net and final-total stages are whole-rupee half-even; TAX_ROF independently controls tax.
  */
 
 const BOOK = 'SRT';
@@ -193,7 +194,11 @@ export const salesReturn = {
     'web/apps/web/test/features/fixtures/catalogue.mjs',
   ],
   fixtureManifest: FIXTURE_MANIFEST,
-  settingsManifest: { SL_AMT_TYPE: 'N (seedCompany)', TOT_AMT_ROF: 'blank → 2dp' },
+  settingsManifest: {
+    SL_AMT_TYPE: 'N (seedCompany)',
+    TAX_ROF: 'blank → 2dp web fallback',
+    RETURN_AMOUNTS: 'whole-rupee half-even regardless of TOT_AMT_ROF',
+  },
   cases: [
     C(
       'entry.defaults',
@@ -971,15 +976,40 @@ export const salesReturn = {
       ...C('rollback.mid-write', 'T14', 'refusal', 'Playbook T14', async () => ({})),
       blocked: 'No fault injector in the harness yet (G173 / N166).',
     },
-    {
-      ...C(
-        'config.amount-type',
-        'T15',
-        'mutation',
-        'Playbook T15: SL_AMT_TYPE=F company prices a return on fine',
-        async () => ({}),
-      ),
-      blocked: 'No settings-variant company in the catalogue yet (G174 / N166).',
-    },
+    C(
+      'config.amount-type',
+      'T15',
+      'mutation',
+      'TR_SALE_RTN.cs:4928-4960: SL_AMT_TYPE=F prices a return on fine and still rounds item/labour/total to whole rupees',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await mustSet(page, 'CO_SET.SL_AMT_TYPE', 'F');
+        try {
+          await openReturn(page);
+          await pickParty(page, PARTIES.local.code);
+          await fillLine(page, 0, LINE_R);
+          const row = grid(page).locator('tbody tr').first();
+          await page.waitForTimeout(500);
+          assert.match(await row.innerText(), /58,466(\.00)?(?![.\d])/);
+          const response = await saveReturn(page);
+          assert.equal(response.status(), 201, await response.text());
+          const vchNo = String((await response.json()).vchNo).padStart(5, '0');
+          const [h] = await header(ctx, vchNo);
+          const [l] = await lines(ctx, vchNo);
+          assert.deepEqual(
+            [l.amt, l.lbr, l.net, h.net, h.tax, h.tot],
+            [56091, 2375, 58466, 58466, 1753.98, 60220],
+          );
+          return {
+            observation: `F-basis return ${vchNo}: item ${l.amt}, net ${l.net}, total ${h.tot}`,
+            expected: { item: 56091, labour: 2375, net: 58466, tax: 1753.98, total: 60220 },
+            database: { header: h, line: l },
+            downstream: { total: h.tot },
+          };
+        } finally {
+          await mustSet(page, 'CO_SET.SL_AMT_TYPE', 'N');
+        }
+      },
+    ),
   ],
 };

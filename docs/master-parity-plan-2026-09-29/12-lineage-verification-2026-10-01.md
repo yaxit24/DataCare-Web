@@ -2085,6 +2085,22 @@ settings, which the web reads as 2 decimals, while the desktop schema defaults t
 Done when: every daily voucher screen has a module like this, run on shared real data, and each fixed defect
 leaves the baseline in the change that fixes it.
 
+### N181 — Sales Return amount basis and whole-rupee stages (G190)
+
+The New return screen and writer now follow `TR_SALE_RTN.cs:4892-5030,16384-16407`. The server resolves
+`CO_SET.SL_AMT_TYPE`; N and blank use net plus ghat, G uses gross, F uses fine, and the desktop's nominal P company
+mode falls through to the N branch while item `RATE_TYPE=P` still prices pieces. Item, labour, line-net and final-total
+stages round directly to whole rupees with midpoint-to-even semantics; tax keeps `TAX_ROF`. The browser preview uses
+the same shared policy as the writer.
+
+The independent N-basis fixture stores 61,234 item plus 2,375 labour, 63,609 net, 1,908.27 tax and 65,517 total. The
+F-basis control stores 56,091 plus 2,375, 58,466 net, 1,753.98 tax and 60,220 total. Core vectors include a 1.499
+case to prove no two-decimal intermediate. The database test checks header, detail, stock, tax, ledger and Rojmel
+amounts. `sales-return.formula.net-basis`, `sales-return.create.amount-net-basis` and the formerly blocked F-basis
+T15 case pass; the two G190 entries left the shrink-only baseline. Latest browser result: 23 passed, 0 failed and 2
+blocked among 25 applicable cases. The quality, API/database, zero-mock browser and UI-surface CI jobs passed.
+Original-Windows side-by-side and operator acceptance remain open.
+
 ### N182 — Sales Return: an imported loose line saves, and Import can be clicked (G191, G192)
 
 G191: the return writer treated any non-blank tag as a tag to verify, so a loose sale line imported with
@@ -2130,6 +2146,20 @@ move the supplier by the return total less the purchase total).
 Failed: G198 twice (amounts keep paise: 58,465.80 where the desktop has 58,466), G199 (a free-standing return
 cannot be saved until an original purchase book is chosen), G200 (Alt+S does nothing on this screen) and G201
 (the Purchase Return Register lists nothing). Blocked: T14 rollback (G173) and T15 settings variant (G174).
+
+### N188 milestone 1 — Purchase Return whole-rupee stages (G198)
+
+The Purchase Return preview and writer now follow `TR_KR_ISU.cs:3938-4036,6517-6538`. The item basis is the
+three-decimal fine cell unless item `RATE_TYPE=P` selects pieces; `1` and `K` only change the divisor. Company
+`PR_AMT_TYPE` does not alter this form. Item and labour amounts round directly to whole rupees with midpoint-to-even
+semantics, fractional other charges remain in the line, header net and final total round to whole rupees, and
+purchase-rate and tax precision remain independent.
+
+The fixture now previews and stores fine 9.160, item 56,091, labour 2,375, net 58,466, tax 1,753.98, round-off 0.02
+and total 60,220. The database test checks PR_DATA, PR_DETL, MAIN_STOCK sign and amounts, TAX_DATA, balanced AC_DATA
+and Rojmel presence. Both G198 cases pass and left the baseline. Latest browser result: 20 passed, 0 failed and 2
+blocked among 22 applicable cases; full quality, database, zero-mock browser and UI-surface CI passed. N188 remains
+in progress because its ordinary Purchase half and paise-producing Purchase proof are still open.
 
 **Scope note for G193.** The purchase-return delete answers 400 for a voucher that is already gone, so G193 is
 narrower than recorded: it is the sale-return delete (and any writer whose route does not map
@@ -3114,14 +3144,14 @@ remain open.
 | N178 | — | planned (G186: negative-stock and period-lock refusals use the desktop wording) |
 | N179 | — | planned (G188: classify the 141 no-effect buttons as by-design with source, or open a gap) |
 | N180 | — | implemented-unverified, evidence in this change (Sales Return module 14/7/3 on shared real data; found G190–G196; corrects the N161/N170 rounding statement) |
-| N181 | — | planned (G190: the return line is priced on SL_AMT_TYPE and its amounts and total are whole rupees, as TR_SALE_RTN does) |
+| N181 | — | implemented-unverified, evidence in this change (G190: N/G/F Sales Return basis; whole-rupee item, labour, line-net and total; tax precision retained; 23/0/2 browser result) |
 | N182 | — | implemented-unverified, evidence in this change (an imported loose line with tag N saves as loose stock and an unknown tag is still refused; Import stays inside its field; both feature cases pass and leave the baseline) |
 | N183 | — | implemented-unverified, evidence in this change (G193: a second delete answers 404 voucher-not-found; G194: the sales return and seven deletes record the login name; 4 baselined cases pass in the browser) |
 | N184 | — | planned (G195: sale line amounts round to whole rupees unless ALL_ROF_REMOVE = Y; merged feature expectations move to desktop values) |
 | N185 | — | planned (G196: decide under D05 and provision the desktop rounding defaults for new companies, or record the 2-decimal choice) |
 | N186 | — | implemented-unverified, evidence in this change (G197: the web build clears the route cache; unit 2, a real build removed 13 entries) |
 | N187 | — | implemented-unverified, evidence in this change (Purchase Return module 15/5/2 on shared real data; found G198–G201; narrows G193) |
-| N188 | — | planned (G198: purchase return and purchase line amounts and bill total in whole rupees, as TR_KR_ISU and TR_PURC) |
+| N188 | — | in-progress, milestone 1 evidence in this change (G198 Purchase Return: 58,466 net, 1,753.98 tax, 60,220 total; 20/0/2 browser result; ordinary Purchase half remains) |
 | N189 | — | implemented-unverified, evidence in this change (G199: BookSelect `required` opt-out; a free-standing purchase return saves, and a reopened one saves unchanged) |
 | N190 | — | implemented-unverified, evidence in this change (G200: 22 voucher screens marked; a unit scan keeps every voucher page's primary Save marked; purchase-return Alt+S passes in the browser) |
 | N191 | — | implemented-unverified, evidence in this change (G201: desktop BOOK_TBL_NAME/BOOK_TBL_DETL on ten families, backfill migration; purchase-return register case passes) |
