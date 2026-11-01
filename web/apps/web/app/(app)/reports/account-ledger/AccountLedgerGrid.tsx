@@ -1,17 +1,16 @@
 'use client';
 import { formatDesktopDate } from '@datacare/core';
-import type {
-  AccountLedgerResult,
-  AgeingRow,
-  DetailRow,
-  SummaryRow,
-} from './types';
+import type { AccountLedgerResult, AgeingRow, DetailRow, SummaryRow } from './types';
 
 /** en-IN money (2dp) and weight (3dp) formatting; blank for zero so the grid reads like the desktop. */
 const money = (n: number): string =>
-  n ? Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '';
+  n
+    ? Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : '';
 const wt = (n: number): string =>
-  n ? Number(n).toLocaleString('en-IN', { minimumFractionDigits: 3, maximumFractionDigits: 3 }) : '';
+  n
+    ? Number(n).toLocaleString('en-IN', { minimumFractionDigits: 3, maximumFractionDigits: 3 })
+    : '';
 const t = (k: string, totals: Record<string, number | string>): number => Number(totals[k] ?? 0);
 
 export function AccountLedgerGrid({
@@ -21,7 +20,8 @@ export function AccountLedgerGrid({
   result: AccountLedgerResult;
   onOpenAccount: (acCode: string) => void;
 }) {
-  if (result.view === 'summary') return <SummaryGrid result={result} onOpenAccount={onOpenAccount} />;
+  if (result.view === 'summary')
+    return <SummaryGrid result={result} onOpenAccount={onOpenAccount} />;
   if (result.view === 'ageing') return <AgeingGrid result={result} />;
   return <DetailGrid result={result} />;
 }

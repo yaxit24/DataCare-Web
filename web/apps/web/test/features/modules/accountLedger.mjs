@@ -53,8 +53,16 @@ const button = (page, name) => page.getByRole('button', { name, exact: true });
 const CODES = ['Z100', 'Z200', 'Z300', 'Z400', 'Z500'];
 
 async function cleanCase(ctx) {
-  await exec(ctx, `DELETE FROM "AC_DATA" WHERE tenant_id=$1 AND "AC_CODE" = ANY($2::text[])`, CODES);
-  await exec(ctx, `DELETE FROM "AC_MAST" WHERE tenant_id=$1 AND "AC_CODE" = ANY($2::text[])`, CODES);
+  await exec(
+    ctx,
+    `DELETE FROM "AC_DATA" WHERE tenant_id=$1 AND "AC_CODE" = ANY($2::text[])`,
+    CODES,
+  );
+  await exec(
+    ctx,
+    `DELETE FROM "AC_MAST" WHERE tenant_id=$1 AND "AC_CODE" = ANY($2::text[])`,
+    CODES,
+  );
   await exec(ctx, `DELETE FROM "REMARK_DATA" WHERE tenant_id=$1 AND "VCH_NO" LIKE 'Z%'`);
 }
 
@@ -121,9 +129,27 @@ async function seedAlpha(ctx) {
   await seedAccount(ctx, 'Z100', 'ZZ ALPHA');
   await seedLeg(ctx, 'Z100', { vchNo: 'Z0001', date: '2024-04-01', cr: 100 });
   await seedLeg(ctx, 'Z100', { vchNo: 'Z0002', date: '2024-04-02', dr: 140 });
-  await seedLeg(ctx, 'Z100', { vchNo: 'Z0003', date: '2024-04-03', itType: 'G', sign: '+', fine: 2.5 });
-  await seedLeg(ctx, 'Z100', { vchNo: 'Z0004', date: '2024-04-04', itType: 'G', sign: '-', fine: 0.75 });
-  await seedLeg(ctx, 'Z100', { vchNo: 'Z0005', date: '2024-04-05', itType: 'S', sign: '-', fine: 6.25 });
+  await seedLeg(ctx, 'Z100', {
+    vchNo: 'Z0003',
+    date: '2024-04-03',
+    itType: 'G',
+    sign: '+',
+    fine: 2.5,
+  });
+  await seedLeg(ctx, 'Z100', {
+    vchNo: 'Z0004',
+    date: '2024-04-04',
+    itType: 'G',
+    sign: '-',
+    fine: 0.75,
+  });
+  await seedLeg(ctx, 'Z100', {
+    vchNo: 'Z0005',
+    date: '2024-04-05',
+    itType: 'S',
+    sign: '-',
+    fine: 6.25,
+  });
 }
 
 export const accountLedger = {
@@ -285,10 +311,7 @@ export const accountLedger = {
           await page.locator('table.grid').waitFor();
           // The export buttons appear only after a run.
           for (const name of ['Print', 'Download PDF', 'Excel', 'CSV'])
-            assert.ok(
-              await button(page, name).isVisible(),
-              `${name} is offered after a run`,
-            );
+            assert.ok(await button(page, name).isVisible(), `${name} is offered after a run`);
           // A direct fetch proves the export resolves the same rows (ALPHA present).
           const csv = await page.evaluate(async () => {
             const res = await fetch('/api/reports/account-ledger/export.csv?view=summary', {
@@ -326,9 +349,7 @@ export const accountLedger = {
           await button(page, 'Run').click();
           await page.locator('table.grid').waitFor();
           await page.locator('body').press('Escape');
-          await page.waitForFunction(
-            () => document.querySelector('#al-view')?.value === 'summary',
-          );
+          await page.waitForFunction(() => document.querySelector('#al-view')?.value === 'summary');
           return {
             observation: 'Enter runs; Esc returns a drill-down to the summary',
             expected: { afterEsc: 'summary' },
@@ -349,9 +370,7 @@ export const accountLedger = {
           const row = page.locator('table.grid tbody tr', { hasText: 'ZZ ALPHA' }).first();
           await row.waitFor();
           await row.dblclick();
-          await page.waitForFunction(
-            () => document.querySelector('#al-view')?.value === 'detail',
-          );
+          await page.waitForFunction(() => document.querySelector('#al-view')?.value === 'detail');
           await page.locator('table.grid tbody tr').first().waitFor();
           return {
             observation: 'double-click on a summary row drills into its detail',

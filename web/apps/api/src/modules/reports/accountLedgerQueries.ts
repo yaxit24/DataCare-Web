@@ -381,7 +381,10 @@ function finishDrill(
   rows: DetailRow[],
 ): AccountLedgerResult {
   const sum = (sel: (r: DetailBase) => number, dp: number) =>
-    round(base.reduce((t, r) => t + sel(r), 0), dp);
+    round(
+      base.reduce((t, r) => t + sel(r), 0),
+      dp,
+    );
   const drAmt = sum((r) => r.drAmt, AMT);
   const crAmt = sum((r) => r.crAmt, AMT);
   const drGold = sum((r) => r.drGold, WT);
@@ -529,7 +532,10 @@ export async function ageingDataset(
     );
 
   const tot = (sel: (r: AgeingRow) => number, dp: number) =>
-    round(rows.reduce((t, r) => t + sel(r), 0), dp);
+    round(
+      rows.reduce((t, r) => t + sel(r), 0),
+      dp,
+    );
   const totals = {
     amt15: tot((r) => r.amt15, AMT),
     amt30: tot((r) => r.amt30, AMT),

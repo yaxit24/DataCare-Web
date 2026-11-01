@@ -126,9 +126,9 @@ describe('account ledger — query parsing (fail closed)', () => {
     expect(() => parseAccountLedgerQuery({ fromDate: '2024-13-01' })).toThrow(
       AccountLedgerValidationError,
     );
-    expect(() =>
-      parseAccountLedgerQuery({ fromDate: '2024-05-01', toDate: '2024-04-01' }),
-    ).toThrow(AccountLedgerValidationError);
+    expect(() => parseAccountLedgerQuery({ fromDate: '2024-05-01', toDate: '2024-04-01' })).toThrow(
+      AccountLedgerValidationError,
+    );
     expect(() => parseAccountLedgerQuery({ dataType: 'Z' })).toThrow(AccountLedgerValidationError);
     expect(() => parseAccountLedgerQuery({ view: 'ageing', fineType: 'X' })).toThrow(
       AccountLedgerValidationError,

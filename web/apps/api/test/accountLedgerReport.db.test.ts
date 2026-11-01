@@ -42,7 +42,12 @@ const YEAR = `${startYear}-${startYear + 1}`;
   };
 
   // AC_MAST header rows (distinct non-default codes so a literal fallback would be caught).
-  const seedAccount = (tid: string, acCode: string, name: string, extra: Record<string, string> = {}) =>
+  const seedAccount = (
+    tid: string,
+    acCode: string,
+    name: string,
+    extra: Record<string, string> = {},
+  ) =>
     exec(
       `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GR","AC_CITY","AC_MOBILE","AC_REF_NAME","AC_AREA","AC_STATE","AC_KHATA_NO","AC_TYPE","AC_REF_CODE")
        VALUES($1,'01','01',$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
@@ -118,9 +123,27 @@ const YEAR = `${startYear}-${startYear + 1}`;
     await seedAccount(tenantId, 'A100', 'ALPHA', { refName: 'REF ONE', khata: '11' });
     await seedLeg(tenantId, 'A100', { vchNo: '00001', date: '2024-04-01', cr: 100 });
     await seedLeg(tenantId, 'A100', { vchNo: '00002', date: '2024-04-02', dr: 140 });
-    await seedLeg(tenantId, 'A100', { vchNo: '00003', date: '2024-04-03', itType: 'G', sign: '+', fine: 2.5 });
-    await seedLeg(tenantId, 'A100', { vchNo: '00004', date: '2024-04-04', itType: 'G', sign: '-', fine: 0.75 });
-    await seedLeg(tenantId, 'A100', { vchNo: '00005', date: '2024-04-05', itType: 'S', sign: '-', fine: 6.25 });
+    await seedLeg(tenantId, 'A100', {
+      vchNo: '00003',
+      date: '2024-04-03',
+      itType: 'G',
+      sign: '+',
+      fine: 2.5,
+    });
+    await seedLeg(tenantId, 'A100', {
+      vchNo: '00004',
+      date: '2024-04-04',
+      itType: 'G',
+      sign: '-',
+      fine: 0.75,
+    });
+    await seedLeg(tenantId, 'A100', {
+      vchNo: '00005',
+      date: '2024-04-05',
+      itType: 'S',
+      sign: '-',
+      fine: 6.25,
+    });
 
     // Scenario B: BETA nets to exactly zero (dropped unless withZero); GAMMA is master-only (never shows).
     await seedAccount(tenantId, 'A200', 'BETA');
@@ -236,7 +259,9 @@ const YEAR = `${startYear}-${startYear + 1}`;
   });
 
   it('voucher-summary nets a voucher gross Dr/Cr and aggregates its remarks (Scenario D)', async () => {
-    const res = await get(`/reports/account-ledger?view=voucher-summary&acCode=A400&coYear=${YEAR}`);
+    const res = await get(
+      `/reports/account-ledger?view=voucher-summary&acCode=A400&coYear=${YEAR}`,
+    );
     expect(res.statusCode, res.body).toBe(200);
     const body = res.json();
     expect(body.account.acName).toBe('DELTA');
