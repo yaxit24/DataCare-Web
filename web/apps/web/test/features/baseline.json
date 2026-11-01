@@ -4,18 +4,7 @@
   "purchase-invoice": [],
   "settings": [],
   "sales-return": [],
-  "purchase-return": [
-    {
-      "case": "purchase-return.formula.whole-rupees",
-      "gap": "G198",
-      "reason": "The return previews 56,090.80 + 2,375 = 58,465.80 with paise; the desktop rounds the item and labour amounts and the bill to whole rupees, 58,466 and a 60,220 total (TR_KR_ISU.cs:4015, 4028, 6522-6528)."
-    },
-    {
-      "case": "purchase-return.create.amounts",
-      "gap": "G198",
-      "reason": "Stored ITM_AMT/NET_AMT/TOT_AMT keep paise (56,090.80 / 58,465.80 / 60,219.77); the desktop stores 56,091 / 58,466 / 60,220."
-    }
-  ],
+  "purchase-return": [],
   "sales-order": [
     {
       "case": "sales-order.create.tender-modes",
