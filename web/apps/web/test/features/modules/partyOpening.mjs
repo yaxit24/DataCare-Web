@@ -525,7 +525,64 @@ export const partyOpening = {
         };
       },
     ),
-    pending('rights', 'T11', 'The catalogue clerk has no Party Opening rights row yet.'),
+    C(
+      'rights.desktop-row',
+      'T11',
+      'refusal',
+      'MDI_FORM.cs:7034-7046 reads USER_SET by the menu caption \'Party Opening\'; TR_AC_OPBL reads FRM_EDIT/FRM_DELETE of that row (:2020-2030): a new opening needs only the view right, a change to one says "You Have No Rights....." (:2647-2650) and so does Delete (:2862-2864)',
+      async (ctx) => {
+        await ctx.owner.$executeRawUnsafe(
+          `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
+           VALUES ($1,'01','01',$2,'Master','Party Opening','Y','N','N','N')`,
+          ctx.tenantId,
+          USERS.clerk.user,
+        );
+        const admin = (await ctx.session()).page;
+        try {
+          await removeOpening(admin);
+          const { page, requests } = await ctx.session(as(USERS.clerk.user));
+          // A new opening needs only the view right.
+          await openScreen(page);
+          await pickParty(page, PARTY.code);
+          await fillHeads(page, { amount: '1500', sign: 'D' });
+          const created = await save(page);
+          assert.equal(created.status(), 200, await created.text());
+          await page.getByText('Data Are Saved.', { exact: true }).waitFor();
+          const afterNew = await opData(ctx);
+          // A change to the saved opening needs the edit right.
+          await pickParty(page, PARTY.code);
+          await fillHeads(page, { amount: '2500', sign: 'D' });
+          const changed = await save(page);
+          assert.equal(changed.status(), 403);
+          await page.getByText('You Have No Rights.....', { exact: true }).waitFor();
+          const [deleted] = await Promise.all([
+            page.waitForResponse((r) => isApi(r, 'DELETE', `/ac-opbl/${PARTY.code}`)),
+            page.getByRole('button', { name: 'Delete', exact: true }).click(),
+          ]);
+          assert.equal(deleted.status(), 403);
+          await page.locator('.msg.err').filter({ hasText: 'You Have No Rights.....' }).waitFor();
+          const afterRefusals = await opData(ctx);
+          assert.deepEqual(afterRefusals, afterNew, 'the refused change and delete wrote nothing');
+          assert.equal(
+            requests.filter((r) => r.method === 'POST' && r.status === 200).length,
+            1,
+            'one save went through',
+          );
+          return {
+            observation: `new opening ${created.status()}; change ${changed.status()}; delete ${deleted.status()}; OP_DATA unchanged by the refusals`,
+            expected: 'view right: a new opening only; the desktop text for a change and a delete',
+            database: { afterNew, afterRefusals },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM "USER_SET" WHERE tenant_id=$1 AND "USER_NAME"=$2 AND "SUB_MENU"='Party Opening'`,
+            ctx.tenantId,
+            USERS.clerk.user,
+          );
+          await removeOpening(admin);
+        }
+      },
+    ),
     pending(
       'concurrency',
       'T12',

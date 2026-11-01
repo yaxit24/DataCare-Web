@@ -269,7 +269,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Writes:** ADD_MAST.
 - **Web:** `/masters/addresses`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
 - **Remaining:** Conditional fields, import/reference rules, Print and keyboard/help flow are unproven.
-- **Owners:** X10, G38, N58, N77.
+- **Owners:** X10, G38, N58, N77, G225, N212.
 - **Evidence:** [module-map.json:544-558](../../project-memory/catalogs/module-map.json#L544-L558).
 
 ### AutoItem
@@ -280,7 +280,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Writes:** ITEM_MAST, TOUCH_MAST.
 - **Web:** `/masters/auto-item`; `POST /masters/auto-item`. Can: create.
 - **Remaining:** Web reverses the desktop code/name order and writes a subset; minimum stock, flags, Print and propagation remain.
-- **Owners:** G55, N69, X10.
+- **Owners:** G55, N69, X10, G225, N212.
 - **Evidence:** [KB_master.md:150-181](../../project-memory/video-research/_kb/KB_master.md#L150-L181).
 
 ### Counter
@@ -346,7 +346,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Writes:** GROUP_MAST, ITEM_MAST.
 - **Web:** `/masters/groups`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
 - **Remaining:** Downstream policy effects, conditional fields, reference guards and Print remain.
-- **Owners:** X10, X08, G38, N58, N77.
+- **Owners:** X10, X08, G38, N58, N77, G225, N212.
 - **Evidence:** [KB_master.md:150-178](../../project-memory/video-research/_kb/KB_master.md#L150-L178).
 
 ### Item
@@ -445,7 +445,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Writes:** AC_MAST, OP_DATA, AC_DATA.
 - **Web:** `/masters/party`, `/masters/accounts`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`, `GET /party/:acCode/family`, `GET /party/:acCode/photo`, `POST /party/:acCode/photo`, `GET /accounts/:acCode/opening`, `POST /accounts/:acCode/opening`. Can: create, reopen, edit, delete, list.
 - **Remaining:** The rich party page ignores duplicate-detail updates and lacks delete and print; capabilities are split across two routes.
-- **Owners:** G53, N67, X10, G38, N58, N77.
+- **Owners:** G53, N67, X10, G38, N58, N77, G225, N212.
 - **Evidence:** [KB_master.md:113-145](../../project-memory/video-research/_kb/KB_master.md#L113-L145).
 
 ### Party Opening
@@ -456,7 +456,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Writes:** OP_DATA, AC_DATA, CONTRA_DATA.
 - **Web:** `/txn/ac-opbl`; `GET /ac-opbl`, `GET /ac-opbl/:acCode`, `POST /ac-opbl`, `DELETE /ac-opbl/:acCode`. Can: create, reopen, edit, delete, list.
 - **Remaining:** Rights and two-session cases are pending; the desktop Print button only checks print rights and prints nothing.
-- **Owners:** X16, G27, N51, G29, N52, N59, G209, G210, N199, N200, G211.
+- **Owners:** X16, G27, N51, G29, N52, N59, G209, G210, N199, N200, G211, G225, N212.
 - **Evidence:** [TR_AC_OPBL.md:1-25](../../project-memory/catalogs/forms/TR_AC_OPBL.md#L1-L25).
 
 ### Point Mast
@@ -478,7 +478,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Writes:** PRODUCT_MAST.
 - **Web:** `/masters/products`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
 - **Remaining:** Reference and default guards, optional image fields, Print and help remain.
-- **Owners:** X10, G38, N58, N77.
+- **Owners:** X10, G38, N58, N77, G225, N212.
 - **Evidence:** [KB_master.md:150-178](../../project-memory/video-research/_kb/KB_master.md#L150-L178).
 
 ### Style
@@ -511,7 +511,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Writes:** TAX_MAST, AC_MAST.
 - **Web:** `/masters/taxes`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
 - **Remaining:** Component and effective-date policy, statutory mappings, reference guards and Print remain.
-- **Owners:** X10, X08, G38, N58, N77.
+- **Owners:** X10, X08, G38, N58, N77, G225, N212.
 - **Evidence:** [MS_TAX.cs:1704-2065](../../unified/src/csharp/DataCareNext/MS_TAX.cs#L1704-L2065).
 
 ## Transaction
@@ -683,7 +683,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Writes:** PR_DATA, PR_DETL, PR_IDTL, DM_DATA, MAIN_STOCK, BAR_DETL, AC_DATA, ROJ_MEL_DATA, TAX_DATA.
 - **Web:** `/txn/purchase-return`; `POST /purchase-returns`, `GET /purchase-returns/:vchNo`, `PUT /purchase-returns/:vchNo`, `DELETE /purchase-returns/:vchNo`, `GET /purchase-returns/:vchNo/print`. Can: create, reopen, edit, delete, print, list.
 - **Remaining:** Create, reopen, edit, delete, print and list work (N34). Remaining: residual-limited selection and PR_IDTL stone rows, which the desktop does not do (D30, not accepted); the UAE variant; the print template binding and its HSN tax (G95); grid Enter flow (G96) and layout.
-- **Owners:** G04, G47, N34, G67, X12, N51, N74, G95, G96, N77, D30.
+- **Owners:** G04, G47, N34, G67, X12, N51, N74, G95, G96, N77, D30, G225, N212.
 - **Evidence:** [KB_transaction.md:270-294](../../project-memory/video-research/_kb/KB_transaction.md#L270-L294).
 
 ### Rate Cut
@@ -863,7 +863,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Writes:** APR_DATA, APR_DETL, APR_IDTL, MAIN_STOCK, BAR_DETL, DM_DATA.
 - **Web:** `/txn/tour`; `POST /tour/issue`, `DELETE /tour/:vchNo`. Can: create.
 - **Remaining:** Create-only shared Tour page; APR ISU book enforcement, reopen/edit/delete/print and the partial sale/return custody chain remain.
-- **Owners:** N22, X17, P05-05, N62, X07.
+- **Owners:** N22, X17, P05-05, N62, X07, G225, N212.
 - **Evidence:** [KB_transaction.md:331-357](../../project-memory/video-research/_kb/KB_transaction.md#L331-L357).
 
 ### Approval Rtn
@@ -874,7 +874,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Writes:** APR_DATA, APR_DETL, APR_IDTL, MAIN_STOCK, BAR_DETL, DM_DATA.
 - **Web:** `/txn/tour-return`; `GET /tour/:vchNo/lines`, `POST /tour/return`, `DELETE /tour/return/:vchNo`. Can: create.
 - **Remaining:** Source lines load, but the saved-return lifecycle, the APR RTN book, partial billing, print and dependency reversal remain.
-- **Owners:** N22, X17, N59, N62, X07.
+- **Owners:** N22, X17, N59, N62, X07, G225, N212.
 - **Evidence:** [KB_transaction.md:331-357](../../project-memory/video-research/_kb/KB_transaction.md#L331-L357).
 
 ### Bill Wise Rec
@@ -951,7 +951,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Writes:** CONTRA_DATA, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, TEMP_BOOK_DATA, DELETE_DATA, APR_IDTL.
 - **Web:** `/txn/fine-jv`; `POST /fine-jv`, `GET /fine-jv/:vchNo`, `GET /fine-jv/:vchNo/print`, `PUT /fine-jv/:vchNo`, `DELETE /fine-jv/:vchNo`. Can: create, reopen, edit, delete, print, list.
 - **Remaining:** The desktop grid, paired rows, 33-character fine legs, day book, remark rebuild, the desktop refusals in desktop order, grouped reopen, edit that keeps omitted fields and saved names, delete audit and FineJvBill behind print rights pass 18 browser cases. Open: a row 1 paired on both sides reopens with its net fine only, the generic voucher list reads any book of CONTRA_DATA (G220/N207), version concurrency, idempotency retry, fault rollback, the browser settings matrix, L6 report filters, RE_TRFR (no web column), the per-voucher USER_UPDATE/USER_DELETE override, the EMP_AS_USER employee default and a desktop-runtime comparison.
-- **Owners:** G219, N206, N51, N52.
+- **Owners:** G219, N206, N51, N52, G225, N212.
 - **Evidence:** [TR_CONTRA.cs:1426-1446](../../unified/src/csharp/DataCareNext/TR_CONTRA.cs#L1426-L1446), [TR_CONTRA.cs:2666-2890](../../unified/src/csharp/DataCareNext/TR_CONTRA.cs#L2666-L2890), [TR_CONTRA.cs:2951-2968](../../unified/src/csharp/DataCareNext/TR_CONTRA.cs#L2951-L2968), [TR_CONTRA.cs:2996-3098](../../unified/src/csharp/DataCareNext/TR_CONTRA.cs#L2996-L3098), [Ac_Ledr.cs:846-848](../../unified/src/csharp/DataCareNext/Ac_Ledr.cs#L846-L848), [Ac_Tax.cs:686-694](../../unified/src/csharp/DataCareNext/Ac_Tax.cs#L686-L694), [page.tsx](../../web/apps/web/app/%28app%29/txn/fine-jv/page.tsx).
 
 ### Fine Purc
@@ -1652,7 +1652,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Reads:** AC_DATA, AC_MAST, BOOK_DATA, CASH_DATA, UPI_DATA, AD_DATA, AD_MEMB.
 - **Web:** `/reports/cash-book`; `GET /reports/cash-book`. Can: print, list.
 - **Remaining:** Cash Book does not prove the RP_CASH_BANK scheme/pending/member modes, drill-down or the AcLedger/PassBook layouts.
-- **Owners:** X16, P06-01, N24, X26, N57, N75.
+- **Owners:** X16, P06-01, N24, X26, N57, N75, G225, N212.
 - **Evidence:** [RP_CASH_BANK.cs:2084-2357](../../unified/src/csharp/DataCareNext/RP_CASH_BANK.cs#L2084-L2357).
 
 ### Consi Report
@@ -1685,7 +1685,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Reads:** TAX_DATA, TAX_MAST, BOOK_DATA, AC_MAST, LOCT_MAST.
 - **Web:** `/reports/gst-report`; `GET /reports/gst-report`, `GET /reports/gstr1`, `GET /reports/gstr2`, `GET /reports/gstr3b`, `GET /reports/hsn-summary`. Can: print, list.
 - **Remaining:** The web is a launcher over reports; RP_GST/RP_TAX jurisdiction modes, exact grids and CSV and the Crystal outputs are not certified.
-- **Owners:** N24, X26, P10-03, N36, G48, N57, N75.
+- **Owners:** N24, X26, P10-03, N36, G48, N57, N75, G225, N212.
 - **Evidence:** [gst-engine.md:8-45](../../web-implementation-spec/04_Cross_Cutting_Engines/gst-engine.md#L8-L45).
 
 ### HuId Report
@@ -1773,7 +1773,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Reads:** PR_DATA, PR_DETL, PR_IDTL, AC_MAST, ITEM_MAST, BOOK_DATA.
 - **Web:** `/reports/purchase-register`; `GET /reports/purchase-register`, `GET /reports/purchase-by-party`, `GET /reports/purchase-by-item`. Can: print, list.
 - **Remaining:** A register exists; the RP_ALL purchase variants, the MAIN_BOOK classification remainder, filters and Crystal templates remain.
-- **Owners:** N36, G06, G48, N24, X26, N57, N75.
+- **Owners:** N36, G06, G48, N24, X26, N57, N75, G225, N212.
 - **Evidence:** [RP_ALL.cs:7946-8140](../../unified/src/csharp/DataCareNext/RP_ALL.cs#L7946-L8140).
 
 ### Reminder Rpt
@@ -1817,7 +1817,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Reads:** SL_DATA, SL_DETL, SL_DETL_RTN, AC_MAST, ITEM_MAST, BOOK_DATA.
 - **Web:** `/reports/sales-register`; `GET /reports/sales-register`, `GET /reports/sales-by-party`, `GET /reports/sales-by-item`, `GET /reports/sales-by-group`. Can: print, list.
 - **Remaining:** A register exists; the RP_ALL sales variants, the MAIN_BOOK classification remainder, filters and Crystal templates remain.
-- **Owners:** N36, G06, G48, N24, X26, N57, N75.
+- **Owners:** N36, G06, G48, N24, X26, N57, N75, G225, N212.
 - **Evidence:** [RP_ALL.cs:7572-7945](../../unified/src/csharp/DataCareNext/RP_ALL.cs#L7572-L7945).
 
 ### Stock Report
@@ -1872,7 +1872,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Reads:** MAIN_STOCK, BAR_DETL, BAR_IDTL, APR_DETL, TAG_IMAGE_DATA, TAG_STOCK_PRINT.
 - **Web:** `/reports/tag-stock`; `GET /reports/tag-stock`, `GET /reports/tag-stock.csv`. Can: print, list.
 - **Remaining:** Tabs and totals exist; date/tag/product/group filters, full columns and sub-details, Excel/PDF and Crystal layouts are incomplete.
-- **Owners:** N24, X26, P10-04, N57, N75.
+- **Owners:** N24, X26, P10-04, N57, N75, G225, N212.
 - **Evidence:** [RP_TAG.cs:3977-4325](../../unified/src/csharp/DataCareNext/RP_TAG.cs#L3977-L4325).
 
 ### Trading Report

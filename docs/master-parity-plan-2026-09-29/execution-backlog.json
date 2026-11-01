@@ -7054,6 +7054,31 @@
         "web/apps/web/test/features/modules/employeeMaster.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Verified: core vbVal 6/6, employeeMaster.test.ts 3/3, employeeMaster.db.test.ts 13/13, routePolicy, the employee-master feature module 17 of 17 applicable cases (T05 not applicable; T14 through an injected insert fault), and a Chrome DevTools pass on the demo stack (keyboard entry, Enter on Save, list keys, Alt+S, the '001' refusal after the question, delete, search, Esc). Open: the EmpMast print layout (not in the repository), the help's create path (MsCreat), desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N212",
+      "status": "implemented-unverified",
+      "action": "Desktop rights rows reach the Lite screens: each Lite menu caption (the USER_SET SUB_MENU the desktop writes) is an alias of the web forms its screen uses, and Party Opening's Save checks the edit right for an existing opening as TR_AC_OPBL does.",
+      "parentLabels": "P1-core; L1-L6; T11",
+      "startAfter": [
+        "N209"
+      ],
+      "requiredProof": "An HTTP/DB test that logs a view-only user in for each caption with the desktop's rights row and reads the screen's routes (200) and another menu's (403), with a negative control on main's catalog; the party-opening feature module's T11 through a desktop 'Party Opening' row.",
+      "gapIds": "G225",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/apps/api/src/modules/rbac/formCatalog.ts",
+        "web/apps/api/src/routes/partyOpening.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/web/app/(app)/txn/ac-opbl/page.tsx",
+        "web/apps/api/test/desktopRightsCaptions.db.test.ts",
+        "web/apps/web/test/features/modules/partyOpening.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: desktopRightsCaptions.db.test.ts 28/28 (27 fail on main's catalog), partyOpening.db.test.ts, the full API suite (343 files, 3665 tests), web unit tests, smoke, and the party-opening feature module 15 passed, 0 failed, 3 blocked (T11 now passes). Open: Company, Data Refresh, Data Import, Order Report, Cash/Bank Received and Approval Rtn's issue lines (shared forms), and the Basic and Standard captions."
     }
   ],
   "amendments": [

@@ -177,9 +177,12 @@ const asForm = (o: Opening): Form =>
         silverSign: o.silverSign,
       }
     : EMPTY;
+const NO_RIGHTS = 'You Have No Rights.....'; // TR_AC_OPBL.cs:2649, :2864
 const messageOf = (e: unknown) =>
   e instanceof ApiError
-    ? e.body?.message || e.body?.detail || e.body?.error || e.message
+    ? e.status === 403
+      ? NO_RIGHTS
+      : e.body?.message || e.body?.detail || e.body?.error || e.message
     : 'failed';
 const places = (t: BalanceType) => (t === 'amount' ? 2 : 3);
 

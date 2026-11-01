@@ -235,6 +235,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G222 | High | Item Opening was not the desktop TR_ITM_OPBL metal-type grid | `unified/src/csharp/DataCareNext/TR_ITM_OPBL.cs`; `unified/src/csharp/DataCareNext/Ac_Stock.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7690-7699` | `web/apps/web/app/(app)/txn/item-opening/page.tsx`; `web/apps/api/src/modules/stock/stockVoucherLifecycle.ts`; `web/apps/api/src/routes/txn.ts` | The desktop opens TR_ITM_OPBL directly, with no book help (`MDI_FORM.cs:7690-7699`). Enter on the Item Type select lists every item of that metal type (`TR_ITM_OPBL.cs:1269-1370`) in a 17-column grid with a Total row, and Save replaces the type's rows in book '000' with VCH_NO = the type letter (`:1380-1490`); the stock rows come from `Ac_Stock.Itm_Opbl_Stk` (`Ac_Stock.cs:11-21`: AC_CODE '00000', VCH_TYPE ITOBL, BOOK_NAME 'ITM OPBL', P / +, the KR_* fields, dated the year's opening date less one day) and DM_DATA from `Dm_Itm_Opbl_Detl` for OTH_DETL_POSTING items (`:734-741`). The web wrote a numbered BAR_DATA voucher in book IOP on the voucher date; its fine ignored the wastage, its stock rows lacked those fields, it wrote no per-type ITM_OPBL rows and no DM_DATA, and its grid had no West%, labour, other amount, net amount or totals. | N209 |
 | G223 | Med | Tag Cancel had no print, accepted a new voucher in a type B company and answered the lock and fiscal refusals with web wording | `unified/src/csharp/DataCareNext/TR_TAG_CAN.cs:4950-4990,5330-5345,5386-5440` | `web/apps/api/src/modules/stock/tagCancel.ts`; `web/apps/api/src/modules/stock/tagCancelBill.ts`; `web/apps/web/components/TagCancelForm.tsx` | The desktop refuses a new voucher when CO_TYPE is 'B', a date outside the year and a date on or before the lock date with its own texts, in that order, and prints TagCanBill behind UserPrint. The web had no print route, never checked the company type, checked the lock after reading the lines and answered with "period is locked …" / "voucher date … is outside fiscal year …". | N210 |
 | G224 | Medium | The Employee master was a generic field form, not the desktop MS_EMP screen | `unified/src/csharp/DataCareNext/MS_EMP.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7660-7669`; `web/apps/api/form-specs/DataCareNext.MS_EMP.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts`; `web/apps/api/src/modules/rbac/formCatalog.ts` | The desktop opens MS_EMP from the 'Employee' button, whose caption is the USER_SET SUB_MENU (`MDI_FORM.cs:7660-7669`, `:7034`). The screen has a SEARCH RECORD box over a Code / Name list ordered by name, and Employee Code, Employee Name, Account Code with the account name, User Name (the company-01 login names), Amount and Day Hour, in that tab order (form spec). A new entry takes the next code ('001', else the highest + 1 as "000", `MS_EMP.cs:1260-1268`); leaving the code or name refuses one another employee has (`:1350-1411`); Save replaces the row with Val of the numbers, 'ABC' for a blank user and the creator (`:1462-1550`); Delete refuses the default employee '001' (`:1552-1584`). The web rendered the generic master form, which showed EMP_TYPE, TDS and PF as typed boxes, had no search list, next code, duplicate checks, desktop texts or account help, and the rights alias 'Employee' was missing, so a desktop USER_SET row gave no access. Not closed here: the EmpMast report layout is not in the repository, so Print lists the employees on screen; the help list's create path (MsCreat opens MS_ACCT with group 10, `:1659-1665`) is shared MS_HELP behaviour left to the Party master slice. | N211 |
+| G225 | High | Desktop rights rows named by the menu caption did not reach fifteen Lite screens | `unified/src/csharp/DataCareNext/MDI_FORM.cs:7034-7046`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7610-8951`; `unified/src/csharp/DataCareNext/TR_AC_OPBL.cs:2020-2030` | `web/apps/api/src/modules/rbac/formCatalog.ts`; `web/apps/api/src/modules/rbac/authorization.ts`; `web/apps/api/src/routes/partyOpening.ts` | The desktop reads USER_SET by LC_CODE, USER_NAME and SUB_MENU = the menu button's caption (MsUserRightForm = MsSideBtn, `MDI_FORM.cs:7034-7046`), so a migrated or desktop-written rights row names the caption. The web matches a row against the form's name and aliases, and the captions Address, Product, Group, AutoItem, Tax, Party Opening, Purchase Rtn, Approval Isu, Approval Rtn, Fine Jv Entry, Tag Stock, Sales Report, Purchase Rpt, Cash Bank and Gst Report were not aliases of the forms their screens use: a restricted user with the desktop's rights was refused. Party Opening's Save also ignored FRM_EDIT for an existing opening (`TR_AC_OPBL.cs:2647-2650`). Not closed here: captions whose screens also use another menu's form (Company, Data Refresh, Data Import, Order Report, Cash Received, Bank Received, and Approval Rtn's issue lines), and 14 Basic and 19 Standard menus, which follow their tiers. | N212 |
 
 ## 4. Decisions D23–D28
 
@@ -2526,6 +2527,36 @@ Delete removed 002 with the list read again by code, F1 and the search filtered 
 check found a defect, fixed here: upper-casing the account box as it was typed made the picker drop every answer to a
 lower-case search, so the help never opened. Desktop-runtime comparison and parent acceptance remain open.
 
+### N212 — Desktop rights rows reach the Lite screens by their menu captions (G225, Lite)
+
+The desktop names a rights row by the menu button's caption: MDI_FORM sets MsUserRightForm = MsSideBtn and reads USER_SET
+WHERE LC_CODE, USER_NAME and SUB_MENU = the caption (`MDI_FORM.cs:7034-7046`, `:7111-7116`, `:7264-7269`), and the form
+reads FRM_EDIT, FRM_DELETE and FRM_PRINT of the same row (for example `TR_AC_OPBL.cs:2020-2030`). The web looks a row up
+by the form's name and its aliases (`authorization.ts`), and fifteen Lite captions were not aliases of the forms their
+screens use, so a migrated shop's restricted users were refused: Address, Product, Group, AutoItem, Tax, Party Opening,
+Purchase Rtn, Approval Isu, Approval Rtn, Fine Jv Entry, Tag Stock, Sales Report, Purchase Rpt, Cash Bank and Gst Report.
+The captions are now aliases of those forms (the dispatch case labels `:7610`, `:7620`, `:7630`, `:7640`, `:7670`,
+`:7680`, `:7893`, `:8300`, `:8312`, `:8360`, `:8891`, `:8901`, `:8911`, `:8941`, `:8951`; RP_GST's Gstr 1, 2 and 3 views at
+`RP_GST.cs:1340-1392`), and 'Party' also reaches the Party page's opening routes, which MS_ACCT shows itself.
+
+Party Opening's Save now checks the edit right for an opening that exists, as TR_AC_OPBL does (`:2647-2650`, EntryMode E
+set at `:2621`): a new opening needs only the view right, a change answers "You Have No Rights....." and writes nothing.
+The screen shows the desktop text for a refused change or delete (`:2649`, `:2864`).
+
+Not closed here, recorded on the gap: the captions whose screens also use another menu's form are left, because an alias
+would grant that menu (Company → Provision Company, an administrator screen; Data Refresh → Data Repair; Data Import →
+the Party master; Order Report → Sales Order; Cash Received and Bank Received → the Multi-Party Receipt routes the
+receipt screen's multi-party mode posts to; Approval Rtn → the issue lines read under Tour / Approval Sale). The Basic
+tier has 14 and the Standard tier 19 more menus whose captions do not reach their forms; they follow their tiers.
+
+Evidence: `desktopRightsCaptions.db.test.ts` (28 cases) logs a view-only user in for each caption with the rights row the
+desktop writes (SUB_MENU = the caption) and reads the screen's routes (200) and another menu's (403), checks that each
+caption reaches its forms and no other menu's, and saves a new party opening, is refused the change and the delete, and
+saves the change once FRM_EDIT is 'Y'. Against main's form catalog 27 of the 28 fail. `partyOpening.db.test.ts` passes.
+The `party-opening` feature module's T11, blocked before, passes through a desktop 'Party Opening' row (new opening saved,
+change and delete refused on screen with the desktop text, OP_DATA unchanged): 15 passed, 0 failed, 3 blocked. The full
+API suite (343 files, 3665 tests), web unit tests and the smoke pass.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2664,6 +2695,7 @@ lower-case search, so the help never opened. Desktop-runtime comparison and pare
 | N209 | — | implemented-unverified, evidence in this change (G222: Item Opening is the TR_ITM_OPBL metal-type grid in book 000 with ITOBL stock rows, DM_DATA for OTH_DETL_POSTING items and the desktop messages) |
 | N210 | — | implemented-unverified, evidence in this change (G223: Tag Cancel prints TagCanBill behind print rights and refuses type B, the year and the lock date with the desktop texts in desktop order) |
 | N211 | — | implemented-unverified, evidence in this change (G224: the Employee master is the MS_EMP screen with its list, next code, keys, desktop texts, rights alias and account help; version tokens and the web refusals recorded on the gap) |
+| N212 | — | implemented-unverified, evidence in this change (G225: the Lite menu captions reach their screens' forms as USER_SET aliases; Party Opening's Save checks the edit right for an existing opening) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 
