@@ -16,6 +16,7 @@ import {
 } from './harness.mjs';
 import { seedCatalogue } from './fixtures/catalogue.mjs';
 import { purchaseInvoice } from './modules/purchaseInvoice.mjs';
+import { purchaseReport } from './modules/purchaseReport.mjs';
 import { purchaseReturn } from './modules/purchaseReturn.mjs';
 import { salesOrder } from './modules/salesOrder.mjs';
 import { salesInvoice } from './modules/salesInvoice.mjs';
@@ -57,6 +58,7 @@ import { runSurface } from './surface/runner.mjs';
 const MODULES = [
   salesInvoice,
   purchaseInvoice,
+  purchaseReport,
   settingsEffects,
   usersRights,
   salesReturn,

@@ -245,6 +245,24 @@ const latest = (ctx) =>
     `SELECT "VCH_NO","TOT_AMT"::float tot FROM "PR_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' ORDER BY "VCH_NO" DESC LIMIT 1`,
   );
 
+/** Narrow browser/DB setup reused by report feature matrices; the return still goes through the real screen. */
+export const purchaseReturnSetup = Object.freeze({
+  BOOK,
+  LINE_W,
+  EXPECT_W,
+  openReturn,
+  pickSupplier,
+  fillLine,
+  save,
+  createReturn,
+  loadReturn,
+  header,
+  lines,
+  ledger,
+  stock,
+  counts,
+});
+
 const C = (id, group, kind, source, run, extra = {}) => ({
   id: `purchase-return.${id}`,
   group,
