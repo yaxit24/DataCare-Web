@@ -1713,13 +1713,13 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 ### Ledger Report
 
 - **Desktop:** `RP_LEDR` — constructor caption 'Ledger Report' ([MDI_FORM.cs:8871-8880](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8871-L8880)).
-- **Does:** Shows account opening, movements and closing in money, gold and silver with voucher drill-down.
-- **Looks:** Account/group/date/location/city/area filters with account, detail, voucher and month/ageing grids.
-- **Reads:** AC_DATA, AC_MAST, MAIN_STOCK, FINE_DATA, LEDR_AC_DATA, BOOK_DATA, LDR_ADJ_DATA.
-- **Web:** `/reports/account-ledger`; `GET /reports/account-ledger/:acCode`, `GET /reports/account-ledger/:acCode/export.pdf`. Can: print, list.
-- **Remaining:** A basic ledger exists; metal/time/ageing/purchase modes, zero/sign semantics, nested drill-down and many Crystal variants remain.
-- **Owners:** N24, X26, P10-02, N57, N75.
-- **Evidence:** [RP_LEDR.cs:4658-7694](../../unified/src/csharp/DataCareNext/RP_LEDR.cs#L4658-L7694).
+- **Does:** Shows account opening, movements and closing in money, gold and silver with voucher drill-down and debit ageing.
+- **Looks:** View/account/date/data-type filters and a With-Zero toggle, with account-summary, voucher, detail and debit-ageing grids and totals.
+- **Reads:** AC_DATA, AC_MAST, BOOK_DATA, REMARK_DATA.
+- **Web:** `/reports/account-ledger`; `GET /reports/account-ledger`, `GET /reports/account-ledger/export.pdf`, `GET /reports/account-ledger/export.xlsx`, `GET /reports/account-ledger/export.csv`, `GET /reports/account-ledger/:acCode`, `GET /reports/account-ledger/:acCode/export.pdf`. Can: print, list.
+- **Remaining:** N219 builds the account summary, voucher/detail drill-down, debit ageing, signed money/gold/silver balances, totals and PDF/Excel/CSV from one read-only resolver; the OP_LDR opening-ledger ageing union, the staging-table gold/silver fine prints and the Crystal layout comparison remain.
+- **Owners:** N219, N57, N75.
+- **Evidence:** [RP_LEDR.cs:4658-7694](../../unified/src/csharp/DataCareNext/RP_LEDR.cs#L4658-L7694), [accountLedgerReport.ts](../../web/apps/api/src/modules/reports/accountLedgerReport.ts), [accountLedger.ts](../../web/apps/api/src/routes/accountLedger.ts).
 
 ### Old Stock
 
