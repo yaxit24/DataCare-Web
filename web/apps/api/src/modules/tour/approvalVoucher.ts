@@ -691,6 +691,17 @@ async function assertIssueDeleteAllowedTx(
     voucherNo,
   );
   if (returns.length) throw new TourValidationError(APPROVAL_MESSAGES.DELETE_RETURNED);
+  const retailSales: unknown[] = await tx.$queryRawUnsafe(
+    `SELECT 1 FROM "SL_DETL" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+      AND "ISU_YRCD"=$4 AND "ISU_DBCD"=$5 AND "ISU_NO"=$6 LIMIT 1`,
+    scope.tenantId,
+    scope.coCode,
+    scope.lcCode,
+    scope.coYear,
+    scope.coBook,
+    voucherNo,
+  );
+  if (retailSales.length) throw new TourValidationError(APPROVAL_MESSAGES.DELETE_SALE);
   const sales: unknown[] = await tx.$queryRawUnsafe(
     `SELECT 1 FROM "RATE_CUT_ISU" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
       AND "ISU_YRCD"=$4 AND "ISU_DBCD"=$5 AND "ISU_NO"=$6 LIMIT 1`,

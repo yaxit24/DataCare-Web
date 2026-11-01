@@ -33,6 +33,7 @@ export const APPROVAL_MESSAGES = {
   LEGACY_RETURN_UNLINKED:
     'Approval Return source or tag link is missing, ambiguous, or inconsistent; repair this legacy voucher before edit or delete.',
   DELETE_RETURNED: 'You Cant Delete this Voucher Because This Voucher Is Approval Returne....',
+  DELETE_SALE: 'You Cant Delete this Voucher Because This Voucher Use In Sales....',
   DELETE_WHOLESALE: 'You Cant Delete this Voucher Because This Voucher Use In Wh Sales....',
   lockDate: (date: string) =>
     `You Cant Save and Delete This Voucher Becouse Lock Date is = ${formatDesktopDate(date)} ....`,

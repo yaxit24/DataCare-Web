@@ -738,6 +738,9 @@ async function writeSaleTx(
       `book ${input.scope.coBook} is SL QUOT; use the sales quotation workflow`,
     );
   }
+  const approvalSources = isSalesQuotation
+    ? []
+    : await lockApprovalSaleReferencesTx(tx, input.scope as CompleteSaleScope, input.acCode, lines);
   const bookPolicy = await resolveBookPolicyTx(
     tx,
     input.scope,
@@ -1983,7 +1986,7 @@ async function writeSaleTx(
     ],
   });
 
-  await consumeSaleReferencesTx(tx, input.scope, key.VCH_NO);
+  await consumeSaleReferencesTx(tx, input.scope, key.VCH_NO, approvalSources);
 
   // Consume the order advance into this sale (P0-3): record SL_ORD_ADJ linking order → this bill.
   if (orderAdjust > 0 && input.orderRef?.ordNo != null) {
@@ -2296,10 +2299,100 @@ async function releaseSaleReferencesTx(
   return legacyRestores;
 }
 
+interface LockedApprovalSaleSource {
+  rowId: bigint;
+  line: number;
+  reference: string;
+}
+
+async function lockApprovalSaleReferencesTx(
+  tx: any,
+  scope: CompleteSaleScope,
+  partyAc: string,
+  lines: SaleLineInput[],
+): Promise<LockedApprovalSaleSource[]> {
+  const references = lines
+    .map((line, index) => {
+      const year = text(line.isuYrcd);
+      const book = text(line.isuDbcd);
+      const no = text(line.isuNo);
+      const srNo = num(line.isuSrno);
+      const any = !!year || !!book || !!no || srNo !== 0;
+      if (!any) return null;
+      if (!year || !book || !no || srNo <= 0 || !Number.isFinite(srNo)) {
+        throw new SaleValidationError(
+          `approval reference on sale line ${index + 1} requires isuYrcd, isuDbcd, isuNo and isuSrno`,
+        );
+      }
+      let voucherNo: string;
+      try {
+        voucherNo = formatVoucherNo(no);
+      } catch {
+        throw new SaleValidationError(`approval reference on sale line ${index + 1} is invalid`);
+      }
+      return { line, index, year, book, voucherNo, srNo };
+    })
+    .filter((value): value is NonNullable<typeof value> => value !== null)
+    .sort(
+      (a, b) =>
+        a.year.localeCompare(b.year) ||
+        a.book.localeCompare(b.book) ||
+        a.voucherNo.localeCompare(b.voucherNo) ||
+        a.srNo - b.srNo,
+    );
+  const seen = new Set<string>();
+  const locked: LockedApprovalSaleSource[] = [];
+  for (const ref of references) {
+    const reference = `${ref.year}/${ref.book}/${ref.voucherNo}/${ref.srNo}`;
+    if (seen.has(reference)) {
+      throw new SaleValidationError(`approval reference is duplicated in this sale: ${reference}`);
+    }
+    seen.add(reference);
+    const rows: Array<{
+      row_id: bigint;
+      AC_CODE: unknown;
+      IT_CODE: unknown;
+    }> = await tx.$queryRawUnsafe(
+      `SELECT a.row_id,a."AC_CODE",a."IT_CODE" FROM "APR_DETL" a
+        JOIN "BOOK_DATA" b ON b.tenant_id=a.tenant_id AND b."CO_CODE"=a."CO_CODE"
+         AND b."LC_CODE"=a."LC_CODE" AND b."CO_BOOK"=a."CO_BOOK"
+       WHERE a.tenant_id=$1 AND a."CO_CODE"=$2 AND a."LC_CODE"=$3
+         AND a."CO_YEAR"=$4 AND a."CO_BOOK"=$5 AND a."VCH_NO"=$6
+         AND a."SR_NO"::numeric=$7::numeric AND coalesce(a."ISU_REC",'N')='N'
+         AND upper(btrim(b."MAIN_BOOK"))='APR ISU'
+       ORDER BY a.row_id FOR UPDATE OF a`,
+      scope.tenantId,
+      scope.coCode,
+      scope.lcCode,
+      ref.year,
+      ref.book,
+      ref.voucherNo,
+      ref.srNo,
+    );
+    if (rows.length !== 1) {
+      throw new SaleValidationError(`approval reference is unavailable or ambiguous: ${reference}`);
+    }
+    const source = rows[0]!;
+    if (text(source.AC_CODE) !== text(partyAc)) {
+      throw new SaleValidationError(
+        `approval reference party does not match the sale: ${reference}`,
+      );
+    }
+    if (text(source.IT_CODE) !== text(ref.line.itCode)) {
+      throw new SaleValidationError(
+        `approval reference item does not match sale line ${ref.index + 1}`,
+      );
+    }
+    locked.push({ rowId: source.row_id, line: ref.index + 1, reference });
+  }
+  return locked;
+}
+
 async function consumeSaleReferencesTx(
   tx: any,
   scope: CompleteSaleScope,
   voucherNo: string,
+  approvalSources: LockedApprovalSaleSource[],
 ): Promise<void> {
   const params = saleParams(scope, voucherNo);
   await tx.$executeRawUnsafe(
@@ -2311,15 +2404,19 @@ async function consumeSaleReferencesTx(
         AND coalesce(o."OLD_SRNO",0)=coalesce(s."ORD_SRNO",0)`,
     ...params,
   );
-  await tx.$executeRawUnsafe(
-    `UPDATE "APR_DETL" a SET "ISU_REC"='Y' FROM "SL_DETL" s
-      WHERE a.tenant_id=$1 AND s.tenant_id=$1 AND s."CO_CODE"=$2 AND s."LC_CODE"=$3
-        AND s."CO_YEAR"=$4 AND s."CO_BOOK"=$5 AND s."VCH_NO"=$6
-        AND a."CO_CODE"=s."CO_CODE" AND a."LC_CODE"=s."LC_CODE"
-        AND a."CO_YEAR"=s."ISU_YRCD" AND a."CO_BOOK"=s."ISU_DBCD"
-        AND a."VCH_NO"=s."ISU_NO" AND coalesce(a."SR_NO",0)=coalesce(s."ISU_SRNO",0)`,
-    ...params,
-  );
+  for (const source of approvalSources) {
+    const affected = await tx.$executeRawUnsafe(
+      `UPDATE "APR_DETL" SET "ISU_REC"='Y'
+        WHERE tenant_id=$1 AND row_id=$2 AND coalesce("ISU_REC",'N')='N'`,
+      scope.tenantId,
+      source.rowId,
+    );
+    if (affected !== 1) {
+      throw new SaleValidationError(
+        `approval reference changed while saving sale line ${source.line}: ${source.reference}`,
+      );
+    }
+  }
   await tx.$executeRawUnsafe(
     `UPDATE "BAR_DETL" b SET "APR_ISU"='N',"APP_TRFR"='Y' FROM "SL_DETL" s
       WHERE b.tenant_id=$1 AND s.tenant_id=$1 AND s."CO_CODE"=$2 AND s."LC_CODE"=$3

@@ -1163,6 +1163,116 @@ type Cookie = string;
     );
   });
 
+  it('validates and atomically consumes approval references supplied to POST /sales', async () => {
+    // TR_SALE.cs:20008 loads only open APR_DETL rows, :20042-20045 adopts the approval party, and
+    // :16112 closes the exact ISU_YRCD/ISU_DBCD/ISU_NO/ISU_SRNO source inside the sale save.
+    await exec(
+      `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","SALE_AC")
+       VALUES ($1,'01','AP2','Approval sale items','SALES')`,
+      tenantId,
+    );
+    await exec(
+      `UPDATE "ITEM_MAST" SET "GR_CODE"='AP2' WHERE tenant_id=$1 AND "CO_CODE"='01' AND "IT_CODE"=$2`,
+      tenantId,
+      ITEM,
+    );
+    await exec(
+      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GR")
+       VALUES ($1,'01','01','OTHERAPR','Other Approval Party','10')`,
+      tenantId,
+    );
+    const issueResponse = await admin(
+      'POST',
+      '/tour/issue',
+      issueBody({
+        lines: [{ itCode: ITEM, pcs: 1, grossWt: 1, netWt: 1, touch: 91.6, amount: 1000 }],
+      }),
+    );
+    expect(issueResponse.statusCode, issueResponse.body).toBe(201);
+    const issue = issueResponse.json();
+    const saleLine = {
+      itCode: ITEM,
+      pcs: 1,
+      grossWt: 1,
+      netWt: 1,
+      touch: 91.6,
+      rate: 1000,
+      isuNo: issue.voucherNo,
+      isuYrcd: YEAR,
+      isuDbcd: ISSUE_BOOK,
+      isuSrno: 1,
+    };
+    const saleBody = (overrides: Record<string, unknown> = {}) => ({
+      coBook: 'SL',
+      acCode: PARTY,
+      vchDate: DAY,
+      taxRatePct: 0,
+      interState: false,
+      lines: [saleLine],
+      ...overrides,
+    });
+    const footprint = () =>
+      query<Array<{ headers: number; details: number }>>(
+        `SELECT
+          (SELECT count(*)::int FROM "SL_DATA" WHERE tenant_id=$1) headers,
+          (SELECT count(*)::int FROM "SL_DETL" WHERE tenant_id=$1) details`,
+        tenantId,
+      );
+    for (const payload of [
+      saleBody({ lines: [{ ...saleLine, isuYrcd: undefined }] }),
+      saleBody({ lines: [{ ...saleLine, isuNo: '99999' }] }),
+      saleBody({ acCode: 'OTHERAPR' }),
+      saleBody({ lines: [saleLine, { ...saleLine }] }),
+    ]) {
+      const before = await footprint();
+      const refused = await admin('POST', '/sales', payload);
+      expect(refused.statusCode, refused.body).toBe(400);
+      expect(refused.json().message).toMatch(/approval reference/i);
+      expect(await footprint()).toEqual(before);
+      expect(
+        await query(
+          `SELECT "ISU_REC" received FROM "APR_DETL"
+            WHERE tenant_id=$1 AND "CO_BOOK"='TUR' AND "VCH_NO"=$2`,
+          tenantId,
+          issue.voucherNo,
+        ),
+      ).toEqual([{ received: 'N' }]);
+    }
+
+    const sold = await admin('POST', '/sales', saleBody());
+    expect(sold.statusCode, sold.body).toBe(201);
+    expect(
+      await query(
+        `SELECT "ISU_REC" received FROM "APR_DETL"
+          WHERE tenant_id=$1 AND "CO_BOOK"='TUR' AND "VCH_NO"=$2`,
+        tenantId,
+        issue.voucherNo,
+      ),
+    ).toEqual([{ received: 'Y' }]);
+    const blocked = await admin(
+      'DELETE',
+      `/tour/${issue.voucherNo}?coBook=TUR&expectedVersion=${issue.version}`,
+    );
+    expect(blocked.statusCode, blocked.body).toBe(400);
+    expect(blocked.json().message).toBe(
+      'You Cant Delete this Voucher Because This Voucher Use In Sales....',
+    );
+
+    const saleDelete = await admin(
+      'DELETE',
+      `/sales/${sold.json().vchNo}?coBook=SL&expectedVersion=${sold.json().version}`,
+    );
+    expect(saleDelete.statusCode, saleDelete.body).toBe(200);
+    expect(
+      await query(
+        `SELECT "ISU_REC" received FROM "APR_DETL"
+          WHERE tenant_id=$1 AND "CO_BOOK"='TUR' AND "VCH_NO"=$2`,
+        tenantId,
+        issue.voucherNo,
+      ),
+    ).toEqual([{ received: 'N' }]);
+  });
+
   it('refuses the same approval source line twice in one return request without writing', async () => {
     // TR_APR_ISU.cs:4817-4824 scans the grid and refuses a repeated selected tag with exactly this text.
     const issue = await createIssue();
