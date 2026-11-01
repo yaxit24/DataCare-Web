@@ -3751,6 +3751,7 @@
         "web/apps/api/src/modules/ops/kernelConformance.ts",
         "web/apps/api/test/kernelConformance.test.ts",
         "web/apps/api/test/orderReport.test.ts",
+        "web/apps/api/test/tourOrderPrint.routes.db.test.ts",
         "web/scripts/check-kernel-conformance.mjs",
         "web/parity/kernel-conformance-baseline.json",
         "web/apps/web/components/VoucherList.tsx",
