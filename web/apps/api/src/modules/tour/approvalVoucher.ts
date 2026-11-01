@@ -271,9 +271,14 @@ async function rowsTx(tx: any, scope: CompleteApprovalScope, voucherNo: string, 
     voucherNo,
   );
   if (header.length !== 1) return null;
+  // Approval Rtn locks these same source rows in sourceLinesTx. Issue edit/delete must take the
+  // row locks before checking ISU_REC or downstream links, otherwise a committing return can be
+  // invisible to the check and lose its source. OLD_SRNO order is the desktop-stable line identity.
   const details: Row[] = await tx.$queryRawUnsafe(
     `SELECT * FROM "APR_DETL" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
-      AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO",row_id`,
+      AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "OLD_SRNO","SR_NO",row_id${
+        lock ? ' FOR UPDATE' : ''
+      }`,
     scope.tenantId,
     scope.coCode,
     scope.lcCode,

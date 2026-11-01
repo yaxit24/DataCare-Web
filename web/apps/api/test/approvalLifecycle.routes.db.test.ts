@@ -48,6 +48,7 @@ const STONE = 'DIA01';
 const TAG = 'APR00001';
 const TAG2 = 'APR00002';
 const TAG_SRNO = 991100001;
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const BUSINESS_TABLES = [
   'APR_DATA',
   'APR_DETL',
@@ -1180,6 +1181,89 @@ type Cookie = string;
       removed: {},
     });
     expect(await stockBalance(TAG)).toBe(0);
+  });
+
+  it('serializes an Approval Rtn against deletion of its source issue', async () => {
+    // TR_APR_ISU.cs:6414-6417 closes the source row and :6618-6633 refuses issue deletion once
+    // that return exists. The two operations must share the APR_DETL row lock so the delete re-checks
+    // the committed return instead of deleting the source underneath it.
+    const issue = await createIssue();
+    const barrierKey = 'apf2-approval-return-source-barrier';
+    await exec(`
+      CREATE OR REPLACE FUNCTION apf2_approval_return_barrier() RETURNS trigger LANGUAGE plpgsql AS $$
+      BEGIN
+        IF NEW.tenant_id='${tenantId}' AND coalesce(OLD."ISU_REC",'N')='N' AND NEW."ISU_REC"='Y' THEN
+          PERFORM pg_advisory_xact_lock(hashtext('${barrierKey}'));
+        END IF;
+        RETURN NEW;
+      END $$;
+      DROP TRIGGER IF EXISTS apf2_approval_return_barrier ON "APR_DETL";
+      CREATE TRIGGER apf2_approval_return_barrier BEFORE UPDATE OF "ISU_REC" ON "APR_DETL"
+        FOR EACH ROW EXECUTE FUNCTION apf2_approval_return_barrier();
+    `);
+    let releaseBarrier!: () => void;
+    const mayRelease = new Promise<void>((resolve) => (releaseBarrier = resolve));
+    let blockerReady!: () => void;
+    const ready = new Promise<void>((resolve) => (blockerReady = resolve));
+    const blocker = owner.$transaction(
+      async (tx) => {
+        await tx.$executeRawUnsafe('SELECT pg_advisory_xact_lock(hashtext($1))', barrierKey);
+        blockerReady();
+        await mayRelease;
+      },
+      { timeout: 20_000 },
+    );
+    let returned: Awaited<ReturnType<typeof admin>> | undefined;
+    let removed: Awaited<ReturnType<typeof admin>> | undefined;
+    let deleteSettled = false;
+    try {
+      await ready;
+      const returning = admin('POST', '/tour/return', returnBody(issue.voucherNo));
+      const waiting = async () =>
+        Number(
+          (
+            await query<Array<{ n: number }>>(
+              `SELECT count(*)::int n FROM pg_locks
+                WHERE locktype='advisory' AND NOT granted AND objsubid=1
+                  AND objid::bigint=(hashtext($1)::bigint & 4294967295)`,
+              barrierKey,
+            )
+          )[0]?.n ?? 0,
+        );
+      for (let i = 0; i < 200 && (await waiting()) === 0; i += 1) await sleep(25);
+      expect(await waiting()).toBe(1);
+
+      const deleting = admin(
+        'DELETE',
+        `/tour/${issue.voucherNo}?coBook=TUR&expectedVersion=${issue.version}`,
+      ).then((response) => {
+        deleteSettled = true;
+        return response;
+      });
+      await sleep(300);
+      expect(deleteSettled).toBe(false);
+      releaseBarrier();
+      [returned, removed] = await Promise.all([returning, deleting]);
+    } finally {
+      releaseBarrier();
+      await blocker.catch(() => undefined);
+      await exec('DROP TRIGGER IF EXISTS apf2_approval_return_barrier ON "APR_DETL"');
+      await exec('DROP FUNCTION IF EXISTS apf2_approval_return_barrier()');
+    }
+
+    expect(returned?.statusCode, returned?.body).toBe(201);
+    expect(removed?.statusCode, removed?.body).toBe(400);
+    expect(removed?.json().message).toBe(
+      'You Cant Delete this Voucher Because This Voucher Is Approval Returne....',
+    );
+    expect(
+      await query(
+        `SELECT "ISU_REC" received FROM "APR_DETL"
+          WHERE tenant_id=$1 AND "CO_BOOK"='TUR' AND "VCH_NO"=$2`,
+        tenantId,
+        issue.voucherNo,
+      ),
+    ).toEqual([{ received: 'Y' }]);
   });
 
   it('creates, reopens, no-ops, edits, prints and deletes Approval Rtn with source and BAR reversals', async () => {
