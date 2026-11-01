@@ -269,7 +269,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Writes:** ADD_MAST, STATE_MAST, OP_DATA, AC_DATA.
 - **Web:** `/masters/addresses`; `GET /masters/address-master`, `GET /masters/address-master/print`, `GET /masters/address-master/names`, `GET /masters/address-master/mobile`, `GET /masters/address-master/:code`, `POST /masters/address-master`, `PUT /masters/address-master/:code`, `DELETE /masters/address-master/:code`, `GET /masters/:name`. Can: create, reopen, edit, delete, list.
 - **Remaining:** The PartyMast print layout is not in the repository (Print lists the addresses on screen); desktop-runtime comparison remains.
-- **Owners:** X10, G38, N58, N77, G225, N212, G229, N216.
+- **Owners:** X10, G38, N58, N77, G225, N212, G230, N217.
 - **Evidence:** [MS_ADD_MAST.cs:3119-4544](../../unified/src/csharp/DataCareNext/MS_ADD_MAST.cs#L3119-L4544).
 
 ### AutoItem

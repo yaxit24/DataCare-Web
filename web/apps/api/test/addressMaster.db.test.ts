@@ -8,7 +8,7 @@ import { seedCompany } from '../src/modules/ops/seedCompany.js';
 import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 /**
- * N216 / G229: the Address master (desktop MS_ADD_MAST, opened by MDI_FORM.cs:7610-7619) through the real Fastify
+ * N217 / G230: the Address master (desktop MS_ADD_MAST, opened by MDI_FORM.cs:7610-7619) through the real Fastify
  * routes on a forced-RLS database. Expected values come from the desktop source:
  *
  * - The list is the location's ADD_MAST rows ordered by AC_CODE (MS_ADD_MAST_Load, MS_ADD_MAST.cs:3119-3396); typing a
@@ -19,7 +19,7 @@ import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
  *   name another code has (:4389-4409). Enter on the mobile of a new entry refuses a mobile the company has (:3867-3887).
  * - BtnDelete_Click (:4517-4544) refuses a blank code and deletes the address with its book-000 OP_DATA and AC_DATA rows
  *   of the year. The combos list the company's distinct values and the states with STATE_MAST's (:3939-4046).
- * Web rules on purpose (gap G229): the next code is the location prefix and four digits; one transaction; versions.
+ * Web rules on purpose (gap G230): the next code is the location prefix and four digits; one transaction; versions.
  */
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const tenantId = 'address-master-db';
@@ -36,7 +36,7 @@ const RIGHTS_SUB_MENU = 'Address';
 type Cookie = string;
 
 (enabled ? describe : describe.skip)(
-  'N216 Address master is the desktop MS_ADD_MAST through HTTP',
+  'N217 Address master is the desktop MS_ADD_MAST through HTTP',
   () => {
     let owner: PrismaClient;
     let runtime: PrismaClient;

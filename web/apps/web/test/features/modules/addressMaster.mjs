@@ -19,7 +19,7 @@ import { SECOND_TENANT } from '../harness.mjs';
  * - Leaving the name refuses a name another code has (:4389-4409).
  * - Delete (:4517-4544): "Please Select AcCode For Delete.", "Are You Sure To Delete This Account now?", the address and
  *   its book-000 OP_DATA and AC_DATA rows of the year deleted, "Delete Success.".
- * Web rules that differ on purpose (gap G229): the next code is the location prefix and four digits; one transaction;
+ * Web rules that differ on purpose (gap G230): the next code is the location prefix and four digits; one transaction;
  * version tokens; Print lists the addresses on screen.
  */
 const as = (user, slot) => ({
@@ -714,7 +714,7 @@ export const addressMaster = {
       'concurrency.two-operators',
       'T12',
       'mutation',
-      'Two operators open one address: the first save wins and the second is refused with 409 (version token, G229) where the desktop lets the later save win',
+      'Two operators open one address: the first save wins and the second is refused with 409 (version token, G230) where the desktop lets the later save win',
       async (ctx) =>
         withCase(ctx, async () => {
           await seedAddress(ctx, '019901', 'E2E RACE');
@@ -852,7 +852,7 @@ export const addressMaster = {
       'output.print',
       'T16',
       'output',
-      "BtnPrint_Click (:3675-3689) prints the location's addresses (PartyMast, {ADD_MAST.CO_CODE} and LC_CODE); the layout is not in the repository, so the web lists them on screen by code (G229)",
+      "BtnPrint_Click (:3675-3689) prints the location's addresses (PartyMast, {ADD_MAST.CO_CODE} and LC_CODE); the layout is not in the repository, so the web lists them on screen by code (G230)",
       async (ctx) =>
         withCase(ctx, async () => {
           await seedAddress(ctx, '019901', 'E2E PRINT', { mobile: '9800000003', city: 'SURAT' });
