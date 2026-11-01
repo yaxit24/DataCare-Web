@@ -126,7 +126,7 @@ function columnsFor(view: AccountLedgerView): XlsxColumn[] {
 
 function sheetFor(result: AccountLedgerResult): XlsxSheet {
   const columns = columnsFor(result.view);
-  const rows = result.rows as Record<string, unknown>[];
+  const rows = result.rows as unknown as Record<string, unknown>[];
   const totals = result.totals as Record<string, unknown>;
   return { name: `Account Ledger ${result.view}`, columns, rows, totals };
 }
@@ -176,7 +176,7 @@ export function registerAccountLedgerRoutes(
         .header('content-type', 'text/csv; charset=utf-8')
         .header('content-disposition', `attachment; filename="account-ledger-${result.view}.csv"`)
         .send(
-          toCsv(result.rows as Record<string, unknown>[], {
+          toCsv(result.rows as unknown as Record<string, unknown>[], {
             columns,
             totals: result.totals as Record<string, unknown>,
           }),
