@@ -155,6 +155,13 @@
         "web/apps/api/src/modules/masters/productMaster.ts",
         "web/apps/api/src/routes/productMaster.ts"
       ]
+    },
+    "addressMaster": {
+      "covers": [
+        "web/apps/web/app/(app)/masters/addresses/page.tsx",
+        "web/apps/api/src/modules/masters/addressMaster.ts",
+        "web/apps/api/src/routes/addressMaster.ts"
+      ]
     }
   }
 }

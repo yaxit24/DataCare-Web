@@ -822,6 +822,17 @@ route('Masters/Products', [
   'PUT /masters/product-master/:code',
   'DELETE /masters/product-master/:code',
 ]);
+// MS_ADD_MAST (N217): the Address master's own screen.
+route('Masters/Addresses', [
+  'GET /masters/address-master',
+  'GET /masters/address-master/print',
+  'GET /masters/address-master/names',
+  'GET /masters/address-master/mobile',
+  'GET /masters/address-master/:code',
+  'POST /masters/address-master',
+  'PUT /masters/address-master/:code',
+  'DELETE /masters/address-master/:code',
+]);
 route('Masters/Opening Balance', [
   'GET /accounts/:acCode/opening',
   'POST /accounts/:acCode/opening',
@@ -954,6 +965,7 @@ const PRINT_ROUTES = new Set([
   'GET /masters/employee-master/print',
   'GET /masters/tax-master/print',
   'GET /masters/group-master/print',
+  'GET /masters/address-master/print',
   'POST /estimate/pdf',
   'GET /reports/account-ledger/:acCode/export.pdf',
   'GET /tour-orders/confirmation',
