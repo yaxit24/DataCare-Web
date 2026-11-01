@@ -113,6 +113,13 @@
         "web/apps/api/src/routes/itemOpening.ts",
         "web/packages/core/src/itemOpening.ts"
       ]
+    },
+    "taxMaster": {
+      "covers": [
+        "web/apps/web/app/(app)/masters/taxes/page.tsx",
+        "web/apps/api/src/modules/masters/taxMaster.ts",
+        "web/apps/api/src/routes/taxMaster.ts"
+      ]
     }
   }
 }

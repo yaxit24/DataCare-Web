@@ -30,6 +30,7 @@ import { partyOpening } from './modules/partyOpening.mjs';
 import { tagOpening } from './modules/tagOpening.mjs';
 import { dailyRate } from './modules/dailyRate.mjs';
 import { itemOpening } from './modules/itemOpening.mjs';
+import { taxMaster } from './modules/taxMaster.mjs';
 import { runSurface } from './surface/runner.mjs';
 
 /**
@@ -61,6 +62,7 @@ const MODULES = [
   tagOpening,
   dailyRate,
   itemOpening,
+  taxMaster,
 ];
 
 const artifacts = resolve(webRoot, 'test-results/feature-e2e');

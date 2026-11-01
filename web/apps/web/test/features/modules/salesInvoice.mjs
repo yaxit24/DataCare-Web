@@ -888,6 +888,42 @@ export const salesInvoice = {
     },
 
     C(
+      'lookup.pick-over-typed-code',
+      'T04',
+      'read-only',
+      "Lookup: typing a code that exists ('BANK') and choosing another row from the list (E2EBANK) keeps the chosen party; the leave that follows the pick must not resolve the typed text again (LookupPicker, found in the 2026-11-01 Tax master run)",
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openSales(page);
+        const party = page.getByPlaceholder('search accounts… (F1)').first();
+        await party.fill('BANK');
+        const list = party.locator('xpath=..').locator('b');
+        await party
+          .locator('xpath=..')
+          .getByText(PARTIES.bank.code, { exact: true })
+          .first()
+          .waitFor();
+        const codes = (await list.allInnerTexts()).map((t) => t.trim());
+        const index = codes.indexOf(PARTIES.bank.code);
+        assert.ok(
+          codes.includes('BANK') && index > 0,
+          `BANK and ${PARTIES.bank.code} listed: ${codes}`,
+        );
+        for (let i = 0; i < index; i++) await party.press('ArrowDown');
+        await party.press('Enter');
+        await page.waitForTimeout(600);
+        const chosen = await party.inputValue();
+        const name = await field(page, 'Customer Name').inputValue();
+        assert.equal(chosen, PARTIES.bank.code, 'the chosen row stands');
+        assert.equal(name, PARTIES.bank.name);
+        return {
+          observation: `typed BANK, chose ${chosen} (${name}) from ${codes.join(', ')}`,
+          expected: { party: PARTIES.bank.code, name: PARTIES.bank.name },
+        };
+      },
+    ),
+
+    C(
       'refusal.unknown-item',
       'T04',
       'refusal',

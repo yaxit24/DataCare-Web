@@ -56,6 +56,12 @@ export interface MasterConfig {
   /** Verbatim desktop message for a repeated business key, e.g. MS_STYLE's name-already-exists guard. */
   duplicateMessage?: string;
   /**
+   * The master has its own screen and writer, and the generic routes only read it: a create, update or delete through
+   * them is refused with this message. TAX_MAST keys several rows (a header and its components) by one code, so a
+   * generic update by CO_CODE + TAX_CODE would write the header's name and rate into every component row (N213).
+   */
+  dedicatedWriter?: string;
+  /**
    * Per-column value rules that are not simple presence checks. Each carries the desktop's exact
    * condition so the comparison direction cannot drift — e.g. MS_PRODUCT rejects a product code of
    * length exactly 1 (`Len(tPrCode.Text) = 1`), which is NOT the same as "must be 2 characters":
@@ -105,6 +111,15 @@ export function groupForColumn(col: string): string {
 /** Fill a group on any FormField lacking one (so curated + generated configs both render tabbed). */
 export function withGroups(fields: FormField[]): FormField[] {
   return fields.map((f) => (f.group ? f : { ...f, group: groupForColumn(f.col) }));
+}
+
+/** A generic write to a master that has its own writer (MasterConfig.dedicatedWriter). */
+export class DedicatedWriterError extends Error {
+  readonly code = 'dedicated-writer';
+  constructor(message: string) {
+    super(message);
+    this.name = 'DedicatedWriterError';
+  }
 }
 
 export class ValidationError extends Error {
@@ -406,6 +421,7 @@ export async function createMaster(
   actor: { user?: string } = {},
 ): Promise<{ created: true }> {
   if (config.table === 'COL_MAST') return createColumnSetting(prisma, scope, source);
+  if (config.dedicatedWriter) throw new DedicatedWriterError(config.dedicatedWriter);
   const data = bindMasterScope(config, scope, source);
   const missing = findMissingRequired(config, data);
   if (missing.length) throw new ValidationError(missing, desktopMessageFor(config, missing));
@@ -445,6 +461,7 @@ export async function updateMaster(
   source: Record<string, unknown>,
 ): Promise<{ updated: true }> {
   if (config.table === 'COL_MAST') return updateColumnSetting(prisma, scope, source);
+  if (config.dedicatedWriter) throw new DedicatedWriterError(config.dedicatedWriter);
   const data = bindMasterScope(config, scope, source);
   // The key columns must be present to identify the row.
   const missingKey = config.keyColumns.filter((k) => {
@@ -489,6 +506,7 @@ export async function deleteMaster(
   source: Record<string, unknown>,
 ): Promise<{ deleted: true }> {
   if (config.table === 'COL_MAST') return deleteColumnSetting(prisma, scope, source);
+  if (config.dedicatedWriter) throw new DedicatedWriterError(config.dedicatedWriter);
   if (config.deleteSelectionMessage) {
     // Desktop masters check their own key textbox before deleting (MS_PRODUCT.cs etc.).
     const unselected = config.keyColumns.filter(
