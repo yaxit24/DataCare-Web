@@ -262,8 +262,9 @@ export const accountLedger = {
               sawRequest = true;
           });
           await button(page, 'Run').click();
-          await page.getByRole('alert').waitFor();
-          const alert = (await page.getByRole('alert').innerText()).trim();
+          const alertBox = page.getByTestId('ledger-error');
+          await alertBox.waitFor();
+          const alert = (await alertBox.innerText()).trim();
           assert.match(alert, /account/i);
           assert.equal(sawRequest, false, 'no report request on an empty account');
           return {
@@ -347,8 +348,12 @@ export const accountLedger = {
           await page.locator('#al-view').selectOption('detail');
           await page.getByLabel('Account', { exact: true }).fill('Z100');
           await button(page, 'Run').click();
+          await page.waitForFunction(() => document.querySelector('#al-view')?.value === 'detail');
           await page.locator('table.grid').waitFor();
-          await page.locator('body').press('Escape');
+          // Close any open lookup dropdown so the page-level Esc handler (not the lookup's) runs, then Esc.
+          await page.getByRole('heading', { name: 'Ledger Report', exact: true }).click();
+          await page.waitForFunction(() => !document.querySelector('[data-lookup-open]'));
+          await page.keyboard.press('Escape');
           await page.waitForFunction(() => document.querySelector('#al-view')?.value === 'summary');
           return {
             observation: 'Enter runs; Esc returns a drill-down to the summary',

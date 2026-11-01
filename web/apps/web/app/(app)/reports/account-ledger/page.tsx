@@ -1,6 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { useAccountLedger } from './useAccountLedger';
 import { AccountLedgerGrid } from './AccountLedgerGrid';
@@ -34,22 +34,30 @@ export default function AccountLedgerPage() {
   const { filters, setFilters, result, error, busy, message } = l;
   const needsAccount = filters.view === 'detail' || filters.view === 'voucher-summary';
 
-  const onPageKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
+  // Esc (desktop RP_LEDR.cs:5998-6095): from a drill-down return to the account summary; from the summary
+  // leave the screen. A document listener so it works regardless of which control holds focus, matching the
+  // desktop form-level key handler. A ref keeps the latest result/run without re-binding the listener.
+  const escState = useRef({ result, run: l.run, back: router.back });
+  escState.current = { result, run: l.run, back: router.back };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape' || e.defaultPrevented) return;
-      // Esc from a drill-down returns to the account summary; from the summary it leaves the screen.
-      if (result && (result.view === 'detail' || result.view === 'voucher-summary')) {
+      // A lookup/dialog open marks itself; let it handle its own Esc first.
+      if (document.querySelector('[data-lookup-open]')) return;
+      const { result: r, run, back } = escState.current;
+      if (r && (r.view === 'detail' || r.view === 'voucher-summary')) {
         e.preventDefault();
-        void l.run({ view: 'summary', acCode: '' });
+        void run({ view: 'summary', acCode: '' });
       } else {
-        router.back();
+        back();
       }
-    },
-    [l, result, router],
-  );
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
 
   return (
-    <div onKeyDown={onPageKeyDown}>
+    <div>
       <h1>Ledger Report</h1>
       <div className="panel">
         <div className="row">
@@ -154,7 +162,7 @@ export default function AccountLedgerPage() {
       </div>
 
       {error && (
-        <div className="msg err" role="alert">
+        <div className="msg err" role="alert" data-testid="ledger-error">
           {error}
         </div>
       )}
