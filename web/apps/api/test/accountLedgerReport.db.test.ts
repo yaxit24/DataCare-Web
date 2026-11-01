@@ -17,8 +17,8 @@ import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
  * writer that produces these rows for this screen), then every assertion is through the real route.
  */
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
-const tenantId = 'account-ledger-report-db';
-const OTHER_TENANT = 'account-ledger-report-db-other';
+const tenantId = 'ac-ledger-report-db';
+const OTHER_TENANT = 'ac-ledger-report-other';
 const PASSWORD = 'Account-Ledger-Report!2026';
 const SECRET = 'account-ledger-report-test-signing-secret-over-32-chars';
 const LOGIN = 'ledger-reader';
