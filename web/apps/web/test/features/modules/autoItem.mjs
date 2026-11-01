@@ -236,7 +236,7 @@ export const autoItem = {
       'entry.defaults',
       'T01',
       'read-only',
-      'MDI_FORM.cs:7640-7649 opens MS_AUTO_ITEM; CLEAR_DATA (:2241-2259) blank boxes and one empty grid row with the cursor in the group code; MSG_CLEAR (:1640-1683) Sr. / Pr Code / Pr Name / MinStk / Y/N',
+      'MDI_FORM.cs:7640-7649 opens MS_AUTO_ITEM; CLEAR_DATA (:2241-2259) blank boxes and one empty grid row with the cursor in the group code; MSG_CLEAR (:1640-1683) Sr. / Pr Code / Pr Name / MinStk / Y/N; Save with no group writes nothing and says "Data Are Saved." (:2876-2923)',
       async (ctx) =>
         withMasters(ctx, async () => {
           const { page } = await ctx.session();
@@ -261,8 +261,19 @@ export const autoItem = {
             drawn.sort((a, b) => a[1] - b[1]).map(([n]) => n),
             ['Print', 'Save', 'Cancel', 'Delete', 'Exit'],
           );
+          // Save without a group: the save loop writes nothing and still answers "Data Are Saved." (:2876-2923).
+          const posts = [];
+          page.on('request', (r) => {
+            if (r.method() === 'POST') posts.push(r.url());
+          });
+          await button(page, 'Save').click();
+          await message(page, SAVED);
+          await page.waitForFunction(
+            () => document.activeElement?.getAttribute('aria-label') === 'Group Code',
+          );
+          assert.deepEqual(posts, []);
           return {
-            observation: `headers ${headers.join('/')}, one empty row, cursor in the group`,
+            observation: `headers ${headers.join('/')}, one empty row, cursor in the group; Save on it said "${SAVED}" and sent nothing`,
             expected: { headers },
           };
         }),
@@ -474,6 +485,10 @@ export const autoItem = {
           const last = rows.length;
           await cell(page, 'Y/N', last).fill('N');
           await cell(page, 'Y/N', last).press('Enter');
+          await page.waitForFunction(
+            (n) => document.activeElement?.getAttribute('aria-label') === `Pr Code row ${n}`,
+            last + 1,
+          );
           await page.keyboard.type('a9');
           await cell(page, 'Pr Name', last + 1).fill('E2E NO SUCH PRODUCT');
           await cell(page, 'Y/N', last + 1).fill('Y');
@@ -486,8 +501,7 @@ export const autoItem = {
             `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","SALE_AC","PURC_AC") VALUES ($1,'01','A','E2E ONE','SALES','PURCHASE')`,
           );
           try {
-            await page.reload();
-            await page.getByRole('heading', { name: 'Auto Item', exact: true }).waitFor();
+            await openScreen(page);
             await chooseGroup(page, 'A');
             await mark(page, 'A1', 'Y');
             response = await save(page);
@@ -590,15 +604,22 @@ export const autoItem = {
           await openScreen(page);
           await chooseGroup(page, 'AIG');
           await mark(page, 'A2', 'N', 1);
-          assert.equal((await save(page)).status(), 200);
+          await mark(page, 'A3', 'Y', 2);
+          const response = await save(page);
+          assert.equal(response.status(), 200, await response.text());
+          assert.deepEqual(await response.json(), { created: ['A3AIG'], existing: [] });
           await saved(page);
           const rows = await madeItems(ctx);
           assert.deepEqual(
             rows.map((r) => [r.code, r.name, r.minstk, r.main]),
-            [['A2AIG', 'E2E KEPT CHAIN', 8, 'DESKUSER']],
+            [
+              ['A2AIG', 'E2E KEPT CHAIN', 8, 'DESKUSER'],
+              ['A3AIG', 'E2E AUTO BANGLE AIG', 2, ''],
+            ],
           );
           return {
-            observation: 'A2AIG kept with its name, MIN_STK 8 and user',
+            observation:
+              'A2AIG (marked N) kept with its name, MIN_STK 8 and user; A3AIG made beside it',
             expected: 'unchanged',
             database: { rows },
             downstream: { kept: true },

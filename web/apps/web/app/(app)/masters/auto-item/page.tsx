@@ -97,8 +97,13 @@ export default function AutoItemPage() {
     if (target && focusCell(target.row, target.column)) pendingFocus.current = null;
   }, [rows, focusCell]);
 
-  /** CLEAR_DATA: blank boxes, one empty grid row, the cursor in the group code. */
+  /** CLEAR_DATA: blank boxes, one empty grid row, the cursor in the group code; then the user's rights. */
   const clear = useCallback(async () => {
+    // Reset first: a group typed while the rights request is out must not be wiped when it answers.
+    setGroup({ code: '', name: '', type: '', trade: '', hsn: '' });
+    setRows([blankRow()]);
+    setShown(false);
+    setTimeout(() => groupBox.current?.querySelector('input')?.focus(), 0);
     setBusy(true);
     try {
       const view = await get<{ rights: Rights }>('/masters/auto-item?grCode=');
@@ -109,11 +114,7 @@ export default function AutoItemPage() {
         text: error instanceof ApiError && error.status === 403 ? NO_RIGHTS : messageOf(error),
       });
     } finally {
-      setGroup({ code: '', name: '', type: '', trade: '', hsn: '' });
-      setRows([blankRow()]);
-      setShown(false);
       setBusy(false);
-      setTimeout(() => groupBox.current?.querySelector('input')?.focus(), 0);
     }
   }, []);
   useEffect(() => {
@@ -158,6 +159,12 @@ export default function AutoItemPage() {
     setMsg(null);
     // DISPLAY_DATA leaves the screen in edit mode, so a shown group needs the edit right (:2648, :2668-2672).
     if (shown && rights && !rights.canUpdate) return setMsg({ kind: 'err', text: NO_RIGHTS });
+    // Without a group or a Y row the save loop writes nothing and still answers "Data Are Saved." (:2876-2923).
+    if (!group.code.trim() || !rows.some((r) => r.yn.trim() === 'Y' && r.prCode.trim())) {
+      setMsg({ kind: 'ok', text: SAVED });
+      await clear();
+      return;
+    }
     setBusy(true);
     try {
       await post('/masters/auto-item', {
