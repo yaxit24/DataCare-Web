@@ -5,7 +5,8 @@ import { get, post, downloadPdf, downloadCsv, ApiError } from '../../../../lib/a
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { reportApiSlug } from '../../../../lib/reportSlug';
 import { openDocument } from '../../../../lib/openDocument';
-import { formatReportCell, type ReportCellDescriptors } from '../../../../lib/reportPresentation';
+import { ReportTable, type ReportRow } from '../../../../components/ReportTable';
+import type { ReportCellDescriptors } from '../../../../lib/reportPresentation';
 
 const TITLES: Record<string, string> = {
   'last-visit': 'Last Visit',
@@ -138,48 +139,6 @@ const REPORT_CELL_DESCRIPTORS: Readonly<Record<string, ReportCellDescriptors>> =
   'contra-register': { date: { type: 'date' } },
 };
 
-function Table({
-  rows,
-  onRowClick,
-  cellDescriptors,
-}: {
-  rows: Record<string, any>[];
-  onRowClick?: (row: Record<string, any>) => void;
-  cellDescriptors?: ReportCellDescriptors;
-}) {
-  if (!rows.length) return <p className="muted">No rows.</p>;
-  const cols = Object.keys(rows[0]);
-  const isNum = (v: any) => typeof v === 'number' || (!isNaN(Number(v)) && v !== '' && v !== null);
-  return (
-    <table className="grid">
-      <thead>
-        <tr>
-          {cols.map((c) => (
-            <th key={c} className={isNum(rows[0][c]) ? 'num' : ''}>
-              {c}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((r, i) => (
-          <tr
-            key={i}
-            onClick={onRowClick ? () => onRowClick(r) : undefined}
-            style={onRowClick ? { cursor: 'pointer' } : undefined}
-          >
-            {cols.map((c) => (
-              <td key={c} className={isNum(r[c]) ? 'num' : ''}>
-                {formatReportCell(r[c], cellDescriptors?.[c])}
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-}
-
 export default function ReportPage() {
   const { coCode, coYear } = useBusinessScope();
   const slug = String(useParams().report);
@@ -238,7 +197,7 @@ export default function ReportPage() {
   const [huidHallmark, setHuidHallmark] = useState('all');
   const [huidItemCode, setHuidItemCode] = useState('');
   const [huidCounter, setHuidCounter] = useState('');
-  const [detailRows, setDetailRows] = useState<Record<string, any>[]>([]);
+  const [detailRows, setDetailRows] = useState<ReportRow[]>([]);
   const [detailErr, setDetailErr] = useState('');
   /**
    * P3: balance-sheet valuation inputs.
@@ -480,7 +439,7 @@ export default function ReportPage() {
   }, [coYear, slug]);
 
   const loadEntryCheckDetail = useCallback(
-    async (row: Record<string, any>) => {
+    async (row: ReportRow) => {
       if (slug !== 'entry-check') return;
       const coBook = String(row.coBook ?? '').trim();
       const vchNo = String(row.vchNo ?? '').trim();
@@ -493,7 +452,7 @@ export default function ReportPage() {
         q.set('vchNo', vchNo);
         if (fromDate) q.set('fromDate', fromDate);
         if (toDate) q.set('toDate', toDate);
-        const result = await get<{ rows: Record<string, any>[] }>(
+        const result = await get<{ rows: ReportRow[] }>(
           `/reports/entry-check/detail?${q.toString()}`,
         );
         setDetailRows(result.rows ?? []);
@@ -505,7 +464,7 @@ export default function ReportPage() {
   );
 
   const loadPointReportDetail = useCallback(
-    async (row: Record<string, any>) => {
+    async (row: ReportRow) => {
       if (slug !== 'point-report') return;
       const memberCode = String(row.memberCode ?? '').trim();
       if (!memberCode) return;
@@ -515,7 +474,7 @@ export default function ReportPage() {
         if (coYear) q.set('coYear', coYear);
         q.set('memberCode', memberCode);
         if (toDate) q.set('toDate', toDate);
-        const result = await get<{ rows: Record<string, any>[] }>(
+        const result = await get<{ rows: ReportRow[] }>(
           `/reports/point-report/detail?${q.toString()}`,
         );
         setDetailRows(result.rows ?? []);
@@ -527,7 +486,7 @@ export default function ReportPage() {
   );
 
   const loadDesignMoveDetail = useCallback(
-    async (row: Record<string, any>) => {
+    async (row: ReportRow) => {
       if (slug !== 'design-move') return;
       const key = String(row.key ?? '').trim();
       const size = String(row.size ?? '').trim();
@@ -544,7 +503,7 @@ export default function ReportPage() {
         });
         q.set('key', key);
         q.set('size', size);
-        const result = await get<{ rows: Record<string, any>[] }>(
+        const result = await get<{ rows: ReportRow[] }>(
           `/reports/design-move/detail?${q.toString()}`,
         );
         setDetailRows(result.rows ?? []);
@@ -556,7 +515,7 @@ export default function ReportPage() {
   );
 
   const loadConsiDetail = useCallback(
-    async (row: Record<string, any>) => {
+    async (row: ReportRow) => {
       if (slug !== 'consi-report') return;
       const rowAcCode = String(row.acCode ?? '').trim();
       if (!rowAcCode) return;
@@ -567,7 +526,7 @@ export default function ReportPage() {
         if (fromDate) q.set('fromDate', fromDate);
         if (toDate) q.set('toDate', toDate);
         q.set('acCode', rowAcCode);
-        const result = await get<{ rows: Record<string, any>[] }>(
+        const result = await get<{ rows: ReportRow[] }>(
           `/reports/consi-report/detail?${q.toString()}`,
         );
         setDetailRows(result.rows ?? []);
@@ -579,7 +538,7 @@ export default function ReportPage() {
   );
 
   const loadMfgLedgerDetail = useCallback(
-    async (row: Record<string, any>) => {
+    async (row: ReportRow) => {
       if (slug !== 'mfg-ledger') return;
       const rowAcCode = String(row.acCode ?? '').trim();
       if (!rowAcCode) return;
@@ -592,7 +551,7 @@ export default function ReportPage() {
         if (ledgerLcCode) q.set('lcCode', ledgerLcCode);
         if (mfgLedgerBook) q.set('coBook', mfgLedgerBook);
         q.set('acCode', rowAcCode);
-        const result = await get<{ rows: Record<string, any>[] }>(
+        const result = await get<{ rows: ReportRow[] }>(
           `/reports/mfg-ledger/detail?${q.toString()}`,
         );
         setDetailRows(result.rows ?? []);
@@ -606,8 +565,8 @@ export default function ReportPage() {
   const markVisibleEntryRows = useCallback(async () => {
     const rows = Array.isArray(data?.rows) ? data.rows : [];
     const targets = rows
-      .filter((row: Record<string, any>) => String(row.entryCheck ?? '') !== 'Y')
-      .map((row: Record<string, any>) => ({
+      .filter((row: ReportRow) => String(row.entryCheck ?? '') !== 'Y')
+      .map((row: ReportRow) => ({
         coBook: row.coBook,
         vchNo: row.vchNo,
         editDate: row.editDate,
@@ -1696,7 +1655,7 @@ export default function ReportPage() {
               Excel
             </button>
           </div>
-          <Table
+          <ReportTable
             rows={v}
             cellDescriptors={REPORT_CELL_DESCRIPTORS[slug]}
             onRowClick={
@@ -1739,7 +1698,7 @@ export default function ReportPage() {
               </button>
             </div>
             {detailErr && <div className="msg err">{detailErr}</div>}
-            {detailRows.length > 0 && <Table rows={detailRows} />}
+            {detailRows.length > 0 && <ReportTable rows={detailRows} />}
           </div>
         )}
       {data && arrays.length === 0 && scalars.length === 0 && (
