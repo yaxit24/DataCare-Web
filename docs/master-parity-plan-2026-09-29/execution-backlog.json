@@ -7179,6 +7179,39 @@
         "web/apps/web/test/features/modules/productMaster.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Verified: productMaster.db.test.ts 7/7, routePolicy (695 routes), the product-master feature module 17 of 17 applicable (T05 not applicable), and a Chrome DevTools pass on the demo stack. Open: desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N216",
+      "status": "implemented-unverified",
+      "action": "Cash/Bank receipts and payments (single and multi-line), the multi-party receipt and Contra refuse a voucher date outside the open year with the TR_CASH/TR_CONTRA text, inside the voucher transaction, before numbering and, on edit, before the lock-date check; a refusal changes no row. The recent-voucher list shows a Contra voucher's summed DR_AMT instead of 0.",
+      "parentLabels": "P9; L1",
+      "startAfter": [
+        "N193",
+        "N194"
+      ],
+      "requiredProof": "DB tests refuse every covered create and edit with the desktop text and compare every write-set row before and after, including the year-before-lock order; a unit test shows no numbering lock is taken; the list test shows a balanced Contra at its one-side total; the cash-bank and contra feature modules pass on a fresh production build with only the G37 register date baselined.",
+      "gapIds": "G229",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/apps/api/src/modules/finance/lifecycle.ts",
+        "web/apps/api/src/modules/finance/finance.ts",
+        "web/apps/api/src/modules/finance/batchReceipt.ts",
+        "web/apps/api/src/modules/finance/contra.ts",
+        "web/apps/api/src/modules/vouchers/list.ts",
+        "web/apps/api/test/finance.test.ts",
+        "web/apps/api/test/cashReceiptLegs.db.test.ts",
+        "web/apps/api/test/batchReceiptLifecycle.db.test.ts",
+        "web/apps/api/test/contraDelete.db.test.ts",
+        "web/apps/api/test/voucherListScope.routes.db.test.ts",
+        "web/apps/web/test/features/modules/cashBank.mjs",
+        "web/apps/web/test/features/modules/contraEntry.mjs",
+        "web/apps/web/test/features/baseline.json"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: finance.test.ts (no numbering lock on an out-of-year create); cashReceiptLegs, batchReceiptLifecycle and contraDelete DB tests (every covered create and edit refused with the desktop text, every write-set row unchanged; the two year-before-lock order tests fail against the previous order with \"period is locked\"); voucherListScope (Contra listed at 12,345.67); full isolated suite API 348 files / 3,719 tests, core 1,821, web 700; cash-bank module 17 passed / 4 blocked, contra 22 passed / 2 blocked / 1 baselined (G37 register date); zero-mock real-stack suite; Chrome DevTools 400 refusals for Contra and Receipt and a 12,345.67 Contra list total. Open: G37 (N57) register date, N52 durable idempotency for T13, desktop-runtime comparison and parent acceptance."
     }
   ],
   "amendments": [
