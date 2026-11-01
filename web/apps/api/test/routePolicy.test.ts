@@ -108,8 +108,9 @@ describe('route policy registry', () => {
     // N211 adds the Employee master's GET (list, print, accounts, one), POST, PUT and DELETE: 668 + 7 = 675.
     // N213 adds the Tax master's GET (list, print, accounts, one), POST, PUT and DELETE: 675 + 7 = 682.
     // N214 adds the Item Group master's GET (list, print, accounts, trade types, one), POST, PUT and DELETE: 682 + 8 = 690.
-    expect(routes).toHaveLength(690);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(690);
+    // N215 adds the Product master's GET (list, one), POST, PUT and DELETE: 690 + 5 = 695.
+    expect(routes).toHaveLength(695);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(695);
 
     const policies = routes.map((route) => ({
       ...route,

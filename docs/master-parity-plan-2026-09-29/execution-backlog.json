@@ -7151,6 +7151,34 @@
         "web/apps/web/test/features/modules/groupMaster.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Verified: groupMaster.db.test.ts 10/10, routePolicy (690 routes), the group-master feature module 18 of 18 (T14 through an injected item-update fault, T18 through a sale crediting the group's sales account with the group's HSN code on the invoice), and a Chrome DevTools pass on the demo stack. Open: the GroupMast print layout (not in the repository), the desktop helps on web-provisioned companies (N58), desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N215",
+      "status": "implemented-unverified",
+      "action": "The Product master is the desktop MS_PRODUCT screen in Product mode: the two-character code and name with the desktop keys, validating texts and rights; Save replaces the row with the signed-in user and DATA_TRFR N in one transaction; Delete asks first and then refuses a product an item uses and the default products; Print does nothing, as on the desktop; version tokens.",
+      "parentLabels": "P1-core; L2; T01-T18",
+      "startAfter": [
+        "N214"
+      ],
+      "requiredProof": "An HTTP/DB test of the write set, every refusal, versions, rights and delete; the product-master feature module passes every case; a Chrome DevTools keyboard, save, reopen, edit, delete and Esc pass.",
+      "gapIds": "G228",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/apps/api/src/modules/masters/productMaster.ts",
+        "web/apps/api/src/routes/productMaster.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/modules/shared/desktopMessages.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/web/app/(app)/masters/products/page.tsx",
+        "web/apps/api/test/productMaster.db.test.ts",
+        "web/apps/api/test/routePolicy.test.ts",
+        "web/apps/web/test/features/modules/productMaster.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: productMaster.db.test.ts 7/7, routePolicy (695 routes), the product-master feature module 17 of 17 applicable (T05 not applicable), and a Chrome DevTools pass on the demo stack. Open: desktop-runtime comparison and parent acceptance."
     }
   ],
   "amendments": [

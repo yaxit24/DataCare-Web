@@ -142,6 +142,13 @@
         "web/apps/api/src/modules/masters/groupMaster.ts",
         "web/apps/api/src/routes/groupMaster.ts"
       ]
+    },
+    "productMaster": {
+      "covers": [
+        "web/apps/web/app/(app)/masters/products/page.tsx",
+        "web/apps/api/src/modules/masters/productMaster.ts",
+        "web/apps/api/src/routes/productMaster.ts"
+      ]
     }
   }
 }

@@ -474,12 +474,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `MS_PRODUCT` — constructor mode 'Product' ([MDI_FORM.cs:7620-7629](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7620-L7629)).
 - **Does:** Maintains product categories that combine with groups to form items.
-- **Looks:** Code/Name grid and a compact code/name form.
-- **Writes:** PRODUCT_MAST.
-- **Web:** `/masters/products`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Reference and default guards, optional image fields, Print and help remain.
-- **Owners:** X10, G38, N58, N77, G225, N212.
-- **Evidence:** [KB_master.md:150-178](../../project-memory/video-research/_kb/KB_master.md#L150-L178).
+- **Looks:** SEARCH RECORD box over a Code / Name list on the left; Code (two characters) and Name on the right; Print (inert, as on the desktop), Save, Cancel, Delete and Exit along the bottom.
+- **Writes:** PRODUCT_MAST, ITEM_MAST.
+- **Web:** `/masters/products`; `GET /masters/product-master`, `GET /masters/product-master/:code`, `POST /masters/product-master`, `PUT /masters/product-master/:code`, `DELETE /masters/product-master/:code`, `GET /masters/:name`. Can: create, reopen, edit, delete, list.
+- **Remaining:** Desktop-runtime comparison remains. The Counter and Scheme Mast modes of MS_PRODUCT belong to other menus.
+- **Owners:** X10, G38, N58, N77, G225, N212, G228, N215.
+- **Evidence:** [MS_PRODUCT.cs:1914-2949](../../unified/src/csharp/DataCareNext/MS_PRODUCT.cs#L1914-L2949).
 
 ### Style
 
