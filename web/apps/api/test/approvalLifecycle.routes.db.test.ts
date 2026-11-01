@@ -1,4 +1,5 @@
-import { PrismaClient } from '@datacare/db';
+import { readFileSync } from 'node:fs';
+import { PrismaClient, withTenant } from '@datacare/db';
 import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
@@ -58,6 +59,16 @@ const BUSINESS_TABLES = [
   'DELETE_DATA',
 ] as const;
 
+const APPROVAL_MIGRATION_SQL = readFileSync(
+  new URL(
+    '../../../packages/db/prisma/migrations/20261101090000_approval_book_identity/migration.sql',
+    import.meta.url,
+  ),
+  'utf8',
+);
+const APPROVAL_MIGRATION_DML = APPROVAL_MIGRATION_SQL.split(/;\s*(?:\n|$)/)
+  .map((statement) => statement.replace(/^\s*--.*$/gm, '').trim())
+  .filter((statement) => /^(UPDATE|INSERT)/.test(statement));
 type Cookie = string;
 
 (enabled ? describe : describe.skip)('N211 desktop Approval Isu / Approval Rtn lifecycle', () => {
@@ -546,6 +557,106 @@ type Cookie = string;
       '>signature.<',
     ])
       expect(printed.body, text).toContain(text);
+  });
+
+  it('migrates a legacy web return pair so issue/delete dependency and return reversal stay lifecycle-safe', async () => {
+    // Legacy writer 8ece8aa8~1 tour.ts:464-525 omitted ISU_YRCD/ISU_DBCD/ISU_LC_CODE and used
+    // line ordinals as VCH_SRNO. Desktop TR_APR_ISU.cs:6412-6421 closes the linked source, while
+    // :6618-6630 blocks issue deletion and :6679-6694 reopens it and restores BAR_DETL.APR_ISU.
+    await exec(
+      `UPDATE "BOOK_DATA" SET "MAIN_BOOK"=CASE "CO_BOOK" WHEN 'TUR' THEN 'APPROVAL ISSUE' ELSE 'APPROVAL RETURN' END
+        WHERE tenant_id=$1 AND "CO_BOOK" IN ('TUR','TRR')`,
+      tenantId,
+    );
+    await exec(
+      `UPDATE "BOOK_DETL" SET "MAIN_BOOK"=CASE "CO_BOOK" WHEN 'TUR' THEN 'APPROVAL ISSUE' ELSE 'APPROVAL RETURN' END
+        WHERE tenant_id=$1 AND "CO_BOOK" IN ('TUR','TRR')`,
+      tenantId,
+    );
+    await exec(
+      `INSERT INTO "APR_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE",
+         "VCH_TIME","HD_VCH_NO","AC_CODE","EMP_CODE","ISU_NO","MAIN_USER","USER_UPDATE","USER_DELETE") VALUES
+       ($1,'01','01',$2,'TUR','00041',$3::date,$3::date,'00041',$4,$5,NULL,$6,'N','N'),
+       ($1,'01','01',$2,'TRR','00042',$3::date,$3::date,'00042',$4,$5,'00041',$6,'N','N')`,
+      tenantId,
+      YEAR,
+      DAY,
+      PARTY,
+      EMP,
+      ADMIN,
+    );
+    await exec(
+      `INSERT INTO "APR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","OLD_SRNO",
+         "VCH_DATE","VCH_TIME","HD_VCH_NO","AC_CODE","EMP_CODE","VCH_TYPE","INOUT_TYPE","ENTRY_TYPE",
+         "BOOK_NAME","VCH_SRNO","IT_CODE","TAG_NO","ISU_REC","EMP_SALE","ISU_NO","ISU_SRNO","ITM_PCS",
+         "ITM_GWT","ITM_NWT","ITM_TOUCH","ITM_FINE","MAIN_USER") VALUES
+       ($1,'01','01',$2,'TUR','00041',1,1,$3::date,$3::date,'00041',$4,$5,'TOUR','O','A','EMP ISU',1,$6,$7,'R','N',NULL,NULL,1,10.5,10,91.6,9.36,$8),
+       ($1,'01','01',$2,'TRR','00042',1,1,$3::date,$3::date,'00042',$4,$5,'TOURR','R','A','EMP REC',1,$6,$7,'R','N','00041',1,1,10.5,10,91.6,9.36,$8)`,
+      tenantId,
+      YEAR,
+      DAY,
+      PARTY,
+      EMP,
+      ITEM,
+      TAG,
+      ADMIN,
+    );
+    await exec(
+      `INSERT INTO "MAIN_STOCK"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","ISR_NO",
+         "VCH_DATE","VCH_TYPE","BOOK_NAME","AC_CODE","IT_CODE","TAG_NO","TR_TYPE","ITM_SIGN","ITM_QTY",
+         "ITM_PCS","ITM_GWT","ITM_NWT","ITM_TOUCH","ITM_FINE") VALUES
+       ($1,'01','01',$2,'TUR','00041',1,1,$3::date,'TOUR','EMP ISU',$4,$5,$6,'O','-',1,1,10.5,10,91.6,9.36),
+       ($1,'01','01',$2,'TRR','00042',1,1,$3::date,'TOURR','EMP REC',$4,$5,$6,'R','+',1,1,10.5,10,91.6,9.36)`,
+      tenantId,
+      YEAR,
+      DAY,
+      PARTY,
+      ITEM,
+      TAG,
+    );
+    await exec(
+      `UPDATE "BAR_DETL" SET "APR_ISU"='N',"APP_TRFR"='N' WHERE tenant_id=$1 AND "TAG_NO"=$2`,
+      tenantId,
+      TAG,
+    );
+
+    await withTenant(runtime, tenantId, async (tx: any) => {
+      for (const statement of APPROVAL_MIGRATION_DML) await tx.$executeRawUnsafe(statement);
+    });
+
+    const issueView = await admin('GET', '/tour/00041?coBook=TUR');
+    expect(issueView.statusCode, issueView.body).toBe(200);
+    const blocked = await admin(
+      'DELETE',
+      `/tour/00041?coBook=TUR&expectedVersion=${issueView.json().version}`,
+    );
+    expect(blocked.statusCode, blocked.body).toBe(400);
+    expect(blocked.json().message).toBe(
+      'You Cant Delete this Voucher Because This Voucher Is Approval Returne....',
+    );
+
+    const returnView = await admin('GET', '/tour/return/00042?coBook=TRR');
+    expect(returnView.statusCode, returnView.body).toBe(200);
+    const removed = await admin(
+      'DELETE',
+      `/tour/return/00042?coBook=TRR&expectedVersion=${returnView.json().version}`,
+    );
+    expect(removed.statusCode, removed.body).toBe(200);
+    expect(
+      await query(
+        `SELECT "ISU_REC" received,"VCH_SRNO"::float8 serial FROM "APR_DETL"
+          WHERE tenant_id=$1 AND "CO_BOOK"='TUR' AND "VCH_NO"='00041'`,
+        tenantId,
+      ),
+    ).toEqual([{ received: 'N', serial: TAG_SRNO }]);
+    expect(
+      await query(
+        `SELECT "APR_ISU" apr,"APP_TRFR" transfer FROM "BAR_DETL"
+          WHERE tenant_id=$1 AND "TAG_NO"=$2`,
+        tenantId,
+        TAG,
+      ),
+    ).toEqual([{ apr: 'Y', transfer: 'N' }]);
   });
 
   it('refuses issue deletion after a return and after Wh Sales, with the exact desktop texts', async () => {
