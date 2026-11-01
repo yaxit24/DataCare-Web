@@ -39,6 +39,7 @@ import { productMaster } from './modules/productMaster.mjs';
 import { addressMaster } from './modules/addressMaster.mjs';
 import { partyMaster } from './modules/partyMaster.mjs';
 import { itemMaster } from './modules/itemMaster.mjs';
+import { wholesaleSale } from './modules/wholesaleSale.mjs';
 import { runSurface } from './surface/runner.mjs';
 
 /**
@@ -79,6 +80,7 @@ const MODULES = [
   addressMaster,
   partyMaster,
   itemMaster,
+  wholesaleSale,
 ];
 
 const artifacts = resolve(webRoot, 'test-results/feature-e2e');

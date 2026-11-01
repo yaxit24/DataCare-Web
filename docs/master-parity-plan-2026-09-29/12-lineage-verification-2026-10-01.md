@@ -243,6 +243,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G230 | Medium | The Address master was a generic field form without the desktop's tabs, combos, helps, mobile check, delete cascade or next code | `unified/src/csharp/DataCareNext/MS_ADD_MAST.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7610-7619`; `web/apps/api/form-specs/DataCareNext.MS_ADD_MAST.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts` | MS_ADD_MAST keeps a location's addresses on three tabs, offers the next code of the location, fills its combos from the company's addresses and STATE_MAST, refuses a mobile the company already has, and deletes an address with its opening rows of the year (`MS_ADD_MAST.cs:3119-4544`). The web rendered the generic form keyed by CO_CODE + AC_CODE: no tabs, no next code, no combos, help or name type-ahead, no mobile check, its config left the three dates out as if the account master kept them, and its delete left the address's OP_DATA and AC_DATA opening rows behind. | N217 |
 | G231 | High | The Item master was a generic field form without the desktop's helps, item code from product and group, exists question, leave checks, settings boxes, delete checks or Tag Value Update | `unified/src/csharp/DataCareNext/MS_ITEM.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7650-7659`; `web/apps/api/form-specs/DataCareNext.MS_ITEM.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts`; `web/apps/web/lib/lookupEnter.ts` | MS_ITEM takes the product and group from their helps, makes the item code and name from them and asks before reusing a code, refuses a taken code or name on leaving it, shows the setting-driven boxes, writes the combo letters and Val of the number boxes, refuses deleting an item with stock or a default code, and updates the item's tags from its Tag Value Update panel (`MS_ITEM.cs:2748-4015`). The web rendered the generic form: free-typed product and group, no item code or name from them, no question or leave checks, no setting-driven boxes, a delete that only failed on a foreign key, and no tag update. Its lookups also dropped every answer for a box that upper-cases typing. | N218 |
 | G232 | High | Auto Item reversed the desktop's item code, offered the default products and had no group help, grid keys, MinStk, rights or most columns | `unified/src/csharp/DataCareNext/MS_AUTO_ITEM.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7640-7649` | `web/apps/web/app/(app)/masters/auto-item/page.tsx`; `web/apps/api/src/modules/masters/autoItem.ts`; `web/apps/api/src/routes/txn.ts` | MS_AUTO_ITEM's AutoItem mode lists the company's products but the default ones for a group chosen from its help, marks the ones the group already has, and makes PR_CODE + GR_CODE items named product name + group code with the desktop's columns, under the edit right (`MS_AUTO_ITEM.cs:1640-3493`). The web made GR_CODE + PR_CODE items named group + product, wrote eight columns, offered every product including the default ones, and had no group help, grid keys, MinStk, rights or Print and Delete checks. | N219 |
+| G233 | High | Wh Sales saved what TR_WH_SALE refuses, and had no print | `unified/src/csharp/DataCareNext/TR_WH_SALE.cs:12779-12896`, `:13553-13592`, `:13654-13800`; `unified/src/csharp/DataCareNext/TR_TOUR_SALE.cs:10585-10690` | `web/apps/api/src/modules/sales/rateCut.ts`; `web/apps/web/components/WholesaleVoucherForm.tsx` | TR_WH_SALE refuses a save for a defaulter party left owing, a missing mandatory employee, a new voucher in a type-B company, a cheque or card amount without its bank account, a date outside the year, a date on or before the lock date and a grid row with weight or value but no item code, each with its own text, before it writes. The web saved every one of them: a cheque without a bank posted to the cash slot, an item-less receive row posted as received fine, and the lock date was refused with web wording. The delete asked a web question and Print (WhSalesBill) did not exist. | N220 |
 
 ## 4. Decisions D23–D28
 
@@ -2084,6 +2085,22 @@ settings, which the web reads as 2 decimals, while the desktop schema defaults t
 Done when: every daily voucher screen has a module like this, run on shared real data, and each fixed defect
 leaves the baseline in the change that fixes it.
 
+### N181 — Sales Return amount basis and whole-rupee stages (G190)
+
+The New return screen and writer now follow `TR_SALE_RTN.cs:4892-5030,16384-16407`. The server resolves
+`CO_SET.SL_AMT_TYPE`; N and blank use net plus ghat, G uses gross, F uses fine, and the desktop's nominal P company
+mode falls through to the N branch while item `RATE_TYPE=P` still prices pieces. Item, labour, line-net and final-total
+stages round directly to whole rupees with midpoint-to-even semantics; tax keeps `TAX_ROF`. The browser preview uses
+the same shared policy as the writer.
+
+The independent N-basis fixture stores 61,234 item plus 2,375 labour, 63,609 net, 1,908.27 tax and 65,517 total. The
+F-basis control stores 56,091 plus 2,375, 58,466 net, 1,753.98 tax and 60,220 total. Core vectors include a 1.499
+case to prove no two-decimal intermediate. The database test checks header, detail, stock, tax, ledger and Rojmel
+amounts. `sales-return.formula.net-basis`, `sales-return.create.amount-net-basis` and the formerly blocked F-basis
+T15 case pass; the two G190 entries left the shrink-only baseline. Latest browser result: 23 passed, 0 failed and 2
+blocked among 25 applicable cases. The quality, API/database, zero-mock browser and UI-surface CI jobs passed.
+Original-Windows side-by-side and operator acceptance remain open.
+
 ### N182 — Sales Return: an imported loose line saves, and Import can be clicked (G191, G192)
 
 G191: the return writer treated any non-blank tag as a tag to verify, so a loose sale line imported with
@@ -2129,6 +2146,20 @@ move the supplier by the return total less the purchase total).
 Failed: G198 twice (amounts keep paise: 58,465.80 where the desktop has 58,466), G199 (a free-standing return
 cannot be saved until an original purchase book is chosen), G200 (Alt+S does nothing on this screen) and G201
 (the Purchase Return Register lists nothing). Blocked: T14 rollback (G173) and T15 settings variant (G174).
+
+### N188 milestone 1 — Purchase Return whole-rupee stages (G198)
+
+The Purchase Return preview and writer now follow `TR_KR_ISU.cs:3938-4036,6517-6538`. The item basis is the
+three-decimal fine cell unless item `RATE_TYPE=P` selects pieces; `1` and `K` only change the divisor. Company
+`PR_AMT_TYPE` does not alter this form. Item and labour amounts round directly to whole rupees with midpoint-to-even
+semantics, fractional other charges remain in the line, header net and final total round to whole rupees, and
+purchase-rate and tax precision remain independent.
+
+The fixture now previews and stores fine 9.160, item 56,091, labour 2,375, net 58,466, tax 1,753.98, round-off 0.02
+and total 60,220. The database test checks PR_DATA, PR_DETL, MAIN_STOCK sign and amounts, TAX_DATA, balanced AC_DATA
+and Rojmel presence. Both G198 cases pass and left the baseline. Latest browser result: 20 passed, 0 failed and 2
+blocked among 22 applicable cases; full quality, database, zero-mock browser and UI-surface CI passed. N188 remains
+in progress because its ordinary Purchase half and paise-producing Purchase proof are still open.
 
 **Scope note for G193.** The purchase-return delete answers 400 for a voucher that is already gone, so G193 is
 narrower than recorded: it is the sale-return delete (and any writer whose route does not map
@@ -2964,6 +2995,48 @@ added row 4 with the cursor in its Pr Code, and Enter on its blank Pr Code went 
 in red; F1 on row 3 copied the Y above and Save made RGG22; Esc in the grid went to Save and Esc in the group code left
 the screen. Desktop-runtime comparison and parent acceptance remain open.
 
+### N220 — Wh Sales refuses a save as TR_WH_SALE does and prints WhSalesBill (G233, Lite L1)
+
+Gap G233 · Parents P1-core · L1 · High · Size M · Start after N219
+
+Transaction → Wh Sales opens TR_WH_SALE on CurBookHelp('WH SALES') (`MDI_FORM.cs:8040-8051`); a web-provisioned
+company has book WHS (`BOOK_SNAME` WSALE, `BOOK_TBL_NAME` RATE_CUT_DATA) with the twelve BOOK_DETL slots of the real
+book 034. BtnSave_Click (`TR_WH_SALE.cs:12779-12896`) refuses, before it writes and with its own texts: a defaulter
+party (AC_MAST.DEFAULTER_AC 'Y') when the sale-side Os Amt plus the fine still due is above zero ("You Cant Save
+Entry Because This Party Is in Defaulter List..."); a blank employee when CO_SET.EMP_CODE_MANDATORY is 'Y'; a new
+voucher in a company whose CO_TYPE is 'B'; a cheque or a card amount in either column without its bank account; a
+date outside the open year; a date on or before the lock date ("You Cant Save and Delete This Voucher Becouse Lock
+Date is = dd/MM/yyyy ...."); and, per row, a row with GrWt, LbrAmt, NetAmt or Mrp but no item code ("Please Select
+Item Code In Row N and Try......"). TR_TOUR_SALE carries the same block (`TR_TOUR_SALE.cs:10585-10690`).
+
+`web/apps/api/src/modules/sales/wholesaleSaveChecks.ts` holds these checks. `writeRateCut` runs the ones that need no
+figures after the book-family guard and before the edit reversal or any tag is reserved, and the defaulter, cheque
+and card checks after the band is computed and before any row is written, all inside its transaction, for the
+TR_WH_SALE engine (Wh Sales, Rate Cut, Wh Quotation, Tour Sales; Bullion Sale keeps its own rules). A refusal leaves
+no row, no voucher or hidden number, and the tags in stock. Delete asks "Are You Sure To Delete This Voucher now?"
+(`:13567`). Print (`:13654-13800`) needs the print right and renders WhSalesBill
+(`web/apps/api/report-specs/WhSalesBill.spec.json`): the party block, Vch Date and Vch No, the issue and receive
+rows, the Purchase / Sales band (fine, rate cut, bill total, cash, card, cheque, kasar, bill outstanding) from the
+stored header, Vch Desc, and the party's opening and closing money, gold and silver (its ledger without and with this
+voucher's legs), through `GET /wholesale-sales/:vchNo/print`.
+
+Deliberate differences: the defaulter check runs after the figure-free checks (the desktop runs it first) because it
+reads the computed band; the order of all other checks is the desktop's. The licence-expiry check and the two
+registration-specific checks (HM176NEKU, HM037NEKU) do not apply. `releaseRateCutTagsTx` moved to
+`web/apps/api/src/modules/sales/rateCutTags.ts`, unchanged, so `rateCut.ts` stays under its size ceiling.
+
+Evidence: `wholesaleSaveChecks.db.test.ts` (9 cases over HTTP on a provisioned company: every refusal with its text
+and an unchanged footprint of RATE_CUT_DATA/ISU/REC, MAIN_STOCK, AC_DATA, ROJ_MEL_DATA and TEMP_BOOK_DATA, the
+paid-in-full defaulter control, the year before the lock date, and the print with opening 0.00 Dr and closing 9,500.00
+Dr) and the existing TR_WH_SALE-family tests (12 files, 153 tests) pass; `rateCutSettlement.db.test.ts` now seeds its
+fiscal year. The new zero-mock `wholesale-sale` module passes 25 of 25 cases over T01-T18, none blocked: T03 checks
+Math.Round(0.125 × 6500) = 812 (banker's) and a 237.50/g net-wise tag labour of 2,375; T05 two tags and 5.000 fine
+received; T08 an unchanged save leaves every row the same; T09 a dropped tag returns to stock; T12 a second delete is
+refused; T14 a fault on the issue row rolls everything back; T18 a 9,500 outstanding is cleared by a Cash Received.
+Against the code before this change, all eight refusal cases saved the voucher and the lock date answered "period is
+locked …". The full workspace suite and the real-stack suite pass. Desktop-runtime comparison and parent acceptance
+remain open.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -3071,14 +3144,14 @@ the screen. Desktop-runtime comparison and parent acceptance remain open.
 | N178 | — | planned (G186: negative-stock and period-lock refusals use the desktop wording) |
 | N179 | — | planned (G188: classify the 141 no-effect buttons as by-design with source, or open a gap) |
 | N180 | — | implemented-unverified, evidence in this change (Sales Return module 14/7/3 on shared real data; found G190–G196; corrects the N161/N170 rounding statement) |
-| N181 | — | planned (G190: the return line is priced on SL_AMT_TYPE and its amounts and total are whole rupees, as TR_SALE_RTN does) |
+| N181 | — | implemented-unverified, evidence in this change (G190: N/G/F Sales Return basis; whole-rupee item, labour, line-net and total; tax precision retained; 23/0/2 browser result) |
 | N182 | — | implemented-unverified, evidence in this change (an imported loose line with tag N saves as loose stock and an unknown tag is still refused; Import stays inside its field; both feature cases pass and leave the baseline) |
 | N183 | — | implemented-unverified, evidence in this change (G193: a second delete answers 404 voucher-not-found; G194: the sales return and seven deletes record the login name; 4 baselined cases pass in the browser) |
 | N184 | — | planned (G195: sale line amounts round to whole rupees unless ALL_ROF_REMOVE = Y; merged feature expectations move to desktop values) |
 | N185 | — | planned (G196: decide under D05 and provision the desktop rounding defaults for new companies, or record the 2-decimal choice) |
 | N186 | — | implemented-unverified, evidence in this change (G197: the web build clears the route cache; unit 2, a real build removed 13 entries) |
 | N187 | — | implemented-unverified, evidence in this change (Purchase Return module 15/5/2 on shared real data; found G198–G201; narrows G193) |
-| N188 | — | planned (G198: purchase return and purchase line amounts and bill total in whole rupees, as TR_KR_ISU and TR_PURC) |
+| N188 | — | in-progress, milestone 1 evidence in this change (G198 Purchase Return: 58,466 net, 1,753.98 tax, 60,220 total; 20/0/2 browser result; ordinary Purchase half remains) |
 | N189 | — | implemented-unverified, evidence in this change (G199: BookSelect `required` opt-out; a free-standing purchase return saves, and a reopened one saves unchanged) |
 | N190 | — | implemented-unverified, evidence in this change (G200: 22 voucher screens marked; a unit scan keeps every voucher page's primary Save marked; purchase-return Alt+S passes in the browser) |
 | N191 | — | implemented-unverified, evidence in this change (G201: desktop BOOK_TBL_NAME/BOOK_TBL_DETL on ten families, backfill migration; purchase-return register case passes) |
@@ -3110,6 +3183,7 @@ the screen. Desktop-runtime comparison and parent acceptance remain open.
 | N217 | — | implemented-unverified, evidence in this change (G230: the Address master is MS_ADD_MAST with its tabs, next code, combos, helps, mobile check, rights and the delete of its opening rows) |
 | N218 | — | implemented-unverified, evidence in this change (G231: the Item master is MS_ITEM with its helps, item code from product and group, exists question, leave checks, setting-driven boxes, delete checks, rights and the Tag Value Update panel) |
 | N219 | — | implemented-unverified, evidence in this change (G232: Auto Item is MS_AUTO_ITEM's AutoItem mode with the group help, the product grid and its keys, the desktop write set, the refusals and the rights) |
+| N220 | — | implemented-unverified, evidence in this change (G233: Wh Sales refuses as TR_WH_SALE does — defaulter, employee, type B, cheque/card bank, year, lock date, item code — with no partial write; the delete asks the desktop question; WhSalesBill prints behind the print right) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

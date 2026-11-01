@@ -382,7 +382,8 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
   }
 
   async function remove() {
-    if (!loadedVoucherNo || !window.confirm(`Delete ${cfg.title} voucher ${loadedVoucherNo}?`)) {
+    // TR_WH_SALE.cs:13567 (and TR_TOUR_SALE): the desktop's own question.
+    if (!loadedVoucherNo || !window.confirm('Are You Sure To Delete This Voucher now?')) {
       return;
     }
     setBusy(true);
@@ -1024,6 +1025,21 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
         >
           Delete
         </button>
+        {workflow === 'wholesale-sale' && loadedVoucherNo ? (
+          <button
+            type="button"
+            className="ghost"
+            onClick={() =>
+              // TR_WH_SALE BtnPrint_Click prints WhSalesBill for a WH SALES book.
+              openDocument(
+                `/api/wholesale-sales/${encodeURIComponent(loadedVoucherNo)}/print?coBook=${encodeURIComponent(coBook)}&format=html`,
+              )
+            }
+            disabled={busy}
+          >
+            Print
+          </button>
+        ) : null}
         {workflow === 'wholesale-quotation' && loadedVoucherNo ? (
           <button
             type="button"
