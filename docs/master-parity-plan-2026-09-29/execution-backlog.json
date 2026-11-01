@@ -6911,7 +6911,7 @@
     },
     {
       "id": "N207",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Require the owning form's view right for the book requested from GET /vouchers/recent and GET /vouchers/neighbour, so a shared table such as CONTRA_DATA lists only the books the user may open.",
       "parentLabels": "P1-core; L1-L6",
       "startAfter": [
@@ -6923,9 +6923,13 @@
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
-      "statusAsOf": "2026-10-31",
-      "evidence": [],
-      "statusNote": "PLANNED."
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/apps/api/src/routes/voucherNavigation.ts",
+        "web/apps/api/src/modules/vouchers/bookForms.ts",
+        "web/apps/api/test/voucherListRights.db.test.ts"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. voucherListRights.db.test.ts 2/2 (red against main); whole feature suite passes."
     }
   ],
   "amendments": [
