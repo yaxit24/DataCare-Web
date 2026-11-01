@@ -1135,6 +1135,77 @@ type Cookie = string;
     });
   });
 
+  it('refuses return creation when the exact source tag instance belongs to another BAR item', async () => {
+    // TR_APR_ISU.cs:5044-5061 reloads the selected TAG_NO + VCH_SRNO BAR_DETL instance and takes
+    // IT_CODE from that row before save. A legacy mismatch must be refused before APR RTN writes.
+    const issue = await createIssue();
+    await exec(
+      `UPDATE "BAR_DETL" SET "IT_CODE"=$3
+        WHERE tenant_id=$1 AND "TAG_NO"=$2 AND "VCH_SRNO"=$4`,
+      tenantId,
+      TAG,
+      STONE,
+      TAG_SRNO,
+    );
+    const before = await snapshotTenant(owner, tenantId, BUSINESS_TABLES);
+
+    const response = await admin('POST', '/tour/return', returnBody(issue.voucherNo));
+
+    expect(response.statusCode, response.body).toBe(400);
+    expect(response.json().message).toBe(
+      'Approval Return source or tag link is missing, ambiguous, or inconsistent; repair this legacy voucher before edit or delete.',
+    );
+    expect(diffTenant(before, await snapshotTenant(owner, tenantId, BUSINESS_TABLES))).toEqual({
+      added: {},
+      removed: {},
+    });
+  });
+
+  it('refuses an unchanged return PUT after its exact BAR item link becomes invalid', async () => {
+    // DISPLAY_DATA can reopen a legacy row, but TR_APR_ISU.cs:5044-5061 still resolves the exact BAR
+    // instance. Validation must run before the web's unchanged-save fast path.
+    const issue = await createIssue();
+    const returned = await admin('POST', '/tour/return', returnBody(issue.voucherNo));
+    expect(returned.statusCode, returned.body).toBe(201);
+    const reopened = await admin(
+      'GET',
+      `/tour/return/${returned.json().voucherNo}?coBook=${RETURN_BOOK}`,
+    );
+    expect(reopened.statusCode, reopened.body).toBe(200);
+    await exec(
+      `UPDATE "BAR_DETL" SET "IT_CODE"=$3
+        WHERE tenant_id=$1 AND "TAG_NO"=$2 AND "VCH_SRNO"=$4`,
+      tenantId,
+      TAG,
+      STONE,
+      TAG_SRNO,
+    );
+    const before = await snapshotTenant(owner, tenantId, BUSINESS_TABLES);
+    const view = reopened.json();
+
+    const response = await admin('PUT', `/tour/return/${returned.json().voucherNo}`, {
+      coBook: RETURN_BOOK,
+      expectedVersion: view.version,
+      origBook: view.origBook,
+      origYear: view.origYear,
+      origVchNo: view.origVchNo,
+      vchDate: view.vchDate,
+      partyAc: view.partyAc,
+      empCode: view.empCode,
+      vchDesc: view.vchDesc,
+      lines: view.lines,
+    });
+
+    expect(response.statusCode, response.body).toBe(400);
+    expect(response.json().message).toBe(
+      'Approval Return source or tag link is missing, ambiguous, or inconsistent; repair this legacy voucher before edit or delete.',
+    );
+    expect(diffTenant(before, await snapshotTenant(owner, tenantId, BUSINESS_TABLES))).toEqual({
+      added: {},
+      removed: {},
+    });
+  });
+
   it('preserves a returned issue line and BAR marker when a sparse issue edit changes only the description', async () => {
     // Desktop DISPLAY_DATA restores OLD_SRNO, discounts, ISU_REC, EMP_SALE, linkage and CON_ISU_REC
     // (TR_APR_ISU.cs:5841-5913), and Save writes them back (:6170-6178,6223-6251).

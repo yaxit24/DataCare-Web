@@ -137,6 +137,28 @@ export async function sourceLinesTx(
     const row = source[0]!;
     if (text(row.AC_CODE) !== text(input.partyAc ?? input.salesmanAc))
       throw new TourValidationError('approval return party must match the original issue');
+    const requestedTag = isApprovalTag(line.tagNo) ? text(line.tagNo) : 'N';
+    if (
+      text(row.IT_CODE) !== text(line.itCode) ||
+      (isApprovalTag(row.TAG_NO) ? text(row.TAG_NO) : 'N') !== requestedTag ||
+      num(row.VCH_SRNO) !== num(line.vchSrno)
+    )
+      throw new TourValidationError(APPROVAL_MESSAGES.LEGACY_RETURN_UNLINKED);
+    if (isApprovalTag(row.TAG_NO)) {
+      const bars: Row[] = await tx.$queryRawUnsafe(
+        `SELECT row_id FROM "BAR_DETL" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+          AND "TAG_NO"=$4 AND coalesce("VCH_SRNO",0)::numeric=$5::numeric
+          AND coalesce("IT_CODE"::text,'')=coalesce($6::text,'') ORDER BY row_id FOR UPDATE`,
+        scope.tenantId,
+        scope.coCode,
+        scope.lcCode,
+        text(row.TAG_NO),
+        num(row.VCH_SRNO),
+        text(row.IT_CODE),
+      );
+      if (bars.length !== 1)
+        throw new TourValidationError(APPROVAL_MESSAGES.LEGACY_RETURN_UNLINKED);
+    }
     const stones: Row[] = await tx.$queryRawUnsafe(
       `SELECT * FROM "APR_IDTL" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
         AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 AND "SR_NO"::numeric=$7::numeric
@@ -502,14 +524,16 @@ export async function setBarFlagsTx(
     // that source row remains open (ISU_REC='N'). A description edit must not reopen a returned tag.
     if (kind === 'issue' && text(row.ISU_REC).toUpperCase() !== 'N') continue;
     const affected = await tx.$executeRawUnsafe(
-      `UPDATE "BAR_DETL" SET "APR_ISU"=$6${kind === 'return' ? ',"APP_TRFR"=\'N\'' : ''}
+      `UPDATE "BAR_DETL" SET "APR_ISU"=$7${kind === 'return' ? ',"APP_TRFR"=\'N\'' : ''}
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "TAG_NO"=$4
-          AND coalesce("VCH_SRNO",0)::numeric=$5::numeric`,
+          AND coalesce("VCH_SRNO",0)::numeric=$5::numeric
+          AND coalesce("IT_CODE"::text,'')=coalesce($6::text,'')`,
       tenantId,
       row.CO_CODE,
       row.LC_CODE,
       row.TAG_NO,
       num(row.VCH_SRNO),
+      text(row.IT_CODE),
       kind === 'issue' ? 'Y' : 'N',
     );
     if (affected !== 1) throw new TourValidationError(APPROVAL_MESSAGES.LEGACY_RETURN_UNLINKED);

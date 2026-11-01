@@ -539,12 +539,14 @@ async function clearEffectsTx(
     for (const row of details.filter((line) => isApprovalTag(line.TAG_NO))) {
       const affected = await tx.$executeRawUnsafe(
         `UPDATE "BAR_DETL" SET "APR_ISU"='N' WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
-          AND "TAG_NO"=$4 AND coalesce("VCH_SRNO",0)::numeric=$5::numeric`,
+          AND "TAG_NO"=$4 AND coalesce("VCH_SRNO",0)::numeric=$5::numeric
+          AND coalesce("IT_CODE"::text,'')=coalesce($6::text,'')`,
         scope.tenantId,
         scope.coCode,
         scope.lcCode,
         row.TAG_NO,
         num(row.VCH_SRNO),
+        text(row.IT_CODE),
       );
       if (affected !== 1) throw new TourValidationError(APPROVAL_MESSAGES.LEGACY_RETURN_UNLINKED);
     }
@@ -606,6 +608,7 @@ async function edit(
         versionKeyOf(scope, voucherNo),
         requiredVersion(input.expectedVersion),
       );
+      if (kind === 'return') await assertReturnLinksTx(tx, scope.tenantId, current.state.details);
       if (comparable(input, current.view) === comparableView(current.view)) {
         const fine = approvalRound3(
           current.view.lines.reduce((sum, line) => sum + tourLineFine(line), 0),
@@ -618,7 +621,6 @@ async function edit(
         };
         return kind === 'return' ? { ...base, closedLines: current.view.lines.length } : base;
       }
-      if (kind === 'return') await assertReturnLinksTx(tx, scope.tenantId, current.state.details);
       const requested = approvalBusinessDate(input.vchDate || current.view.vchDate);
       const partyAc = text(input.partyAc ?? input.salesmanAc) || current.view.partyAc;
       const empCode = input.empCode === undefined ? current.view.empCode : text(input.empCode);
