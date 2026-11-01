@@ -342,12 +342,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `MS_GROUP` — direct constructor ([MDI_FORM.cs:7630-7639](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7630-L7639)).
 - **Does:** Defines metal type, touch, wastage, tax and posting accounts for item groups.
-- **Looks:** Code/name grid; item type, touch, wastage, sales/purchase accounts, HSN and tax fields.
-- **Writes:** GROUP_MAST, ITEM_MAST.
-- **Web:** `/masters/groups`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Downstream policy effects, conditional fields, reference guards and Print remain.
-- **Owners:** X10, X08, G38, N58, N77, G225, N212.
-- **Evidence:** [KB_master.md:150-178](../../project-memory/video-research/_kb/KB_master.md#L150-L178).
+- **Looks:** SEARCH RECORD box over a Code / Name list on the left; Gr Code, Gr Name, Item Type with the trade type, Gr Rate Touch with Purc Touch, Melting % with West %, Sales Ac and Purchase Ac with their names, Hsn Code, Rate Tax % and Rate Display In Main Screen on the right; Print, Save, Cancel, Delete and Exit along the bottom.
+- **Writes:** GROUP_MAST, ITEM_MAST, AC_MAST, BAL_GR.
+- **Web:** `/masters/groups`; `GET /masters/group-master`, `GET /masters/group-master/print`, `GET /masters/group-master/accounts`, `GET /masters/group-master/trade-types`, `GET /masters/group-master/:code`, `POST /masters/group-master`, `PUT /masters/group-master/:code`, `DELETE /masters/group-master/:code`, `GET /masters/:name`. Can: create, reopen, edit, delete, list.
+- **Remaining:** The GroupMast print layout is not in the repository (Print lists the groups on screen); the group-25 and group-30 helps list the wrong accounts on a web-provisioned company (N58); desktop-runtime comparison remains.
+- **Owners:** X10, X08, G38, N58, N77, G225, N212, G227, N214.
+- **Evidence:** [MS_GROUP.cs:1463-2346](../../unified/src/csharp/DataCareNext/MS_GROUP.cs#L1463-L2346).
 
 ### Item
 

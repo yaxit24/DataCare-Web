@@ -803,6 +803,17 @@ route('Masters/Taxes', [
   'PUT /masters/tax-master/:code',
   'DELETE /masters/tax-master/:code',
 ]);
+// MS_GROUP (N214): the Item Group master's own screen, with the item update its save makes.
+route('Masters/Item Groups', [
+  'GET /masters/group-master',
+  'GET /masters/group-master/print',
+  'GET /masters/group-master/accounts',
+  'GET /masters/group-master/trade-types',
+  'GET /masters/group-master/:code',
+  'POST /masters/group-master',
+  'PUT /masters/group-master/:code',
+  'DELETE /masters/group-master/:code',
+]);
 route('Masters/Opening Balance', [
   'GET /accounts/:acCode/opening',
   'POST /accounts/:acCode/opening',
@@ -934,6 +945,7 @@ route('Reports/Scheme Monthly Report', ['GET /reports/scheme-monthly']);
 const PRINT_ROUTES = new Set([
   'GET /masters/employee-master/print',
   'GET /masters/tax-master/print',
+  'GET /masters/group-master/print',
   'POST /estimate/pdf',
   'GET /reports/account-ledger/:acCode/export.pdf',
   'GET /tour-orders/confirmation',
