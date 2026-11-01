@@ -515,8 +515,8 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
     // TR_SALE.cs:20008 imports only an open Approval Isu row and :16112 closes that exact source.
     await owner.$executeRawUnsafe(
       `INSERT INTO "APR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO",
-         "SR_NO","OLD_SRNO","VCH_DATE","AC_CODE","IT_CODE","TAG_NO","ISU_REC")
-       VALUES ($1,$2,$3,$4,'APR','00008',3,3,$5::date,'CUST','LOOSE','N','N')`,
+         "SR_NO","OLD_SRNO","VCH_DATE","AC_CODE","IT_CODE","TAG_NO","ISU_REC","ITM_PCS","ITM_GWT","ITM_NWT")
+       VALUES ($1,$2,$3,$4,'APR','00008',3,3,$5::date,'CUST','LOOSE','N','N',2,5,4.8)`,
       TENANT,
       CO,
       LC,

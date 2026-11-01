@@ -178,6 +178,7 @@ databaseDescribe('database-backed approval sub-detail', () => {
           touch: 91.6,
           stones: [
             {
+              isrNo: 1,
               itCode: 'DIA1',
               dmCode: 'DM1',
               dmName: 'Princess Cut',

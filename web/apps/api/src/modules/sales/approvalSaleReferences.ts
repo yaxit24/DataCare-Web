@@ -237,4 +237,18 @@ export async function consumeSaleReferencesTx(
       }
     }
   }
+  // TR_SALE.cs:16113 marks ordinary sold tags too. Keep that path separate: approval-referenced
+  // rows above update only their locked BAR row, while live-stock rows follow the saved sale identity.
+  await tx.$executeRawUnsafe(
+    `UPDATE "BAR_DETL" b SET "APR_ISU"='N',"APP_TRFR"='Y' FROM "SL_DETL" s
+      WHERE b.tenant_id=$1 AND s.tenant_id=$1 AND s."CO_CODE"=$2 AND s."LC_CODE"=$3
+        AND s."CO_YEAR"=$4 AND s."CO_BOOK"=$5 AND s."VCH_NO"=$6
+        AND nullif(btrim(coalesce(s."ISU_NO"::text,'')),'') IS NULL
+        AND nullif(btrim(coalesce(s."TAG_NO"::text,'')),'') IS NOT NULL
+        AND s."TAG_NO"::text<>'N'
+        AND b."CO_CODE"=s."CO_CODE" AND b."LC_CODE"=s."LC_CODE"
+        AND b."TAG_NO"=s."TAG_NO" AND coalesce(b."VCH_SRNO",0)=coalesce(s."VCH_SRNO",0)
+        AND coalesce(b."IT_CODE"::text,'')=coalesce(s."IT_CODE"::text,'')`,
+    ...params,
+  );
 }
