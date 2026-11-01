@@ -233,14 +233,20 @@ export const approvalFine = (line: ApprovalLine) => {
   return round(purity === 0 ? weight : (weight * purity) / 100, 3);
 };
 
+export const approvalDiscountAmount = (line: ApprovalLine) => {
+  const pct = number(line.discountPct);
+  const labour = number(line.labourAmount);
+  return round(pct !== 0 && labour !== 0 ? (labour * pct) / 100 : number(line.discountAmount), 2);
+};
+
 export const approvalNetAmount = (line: ApprovalLine) =>
   round(
     number(line.amount) +
       number(line.labourAmount) +
       number(line.otherAmount) +
       number(line.mrp) -
-      number(line.discountAmount),
-    2,
+      approvalDiscountAmount(line),
+    1,
   );
 
 const NET_AMOUNT_FIELDS = new Set<keyof ApprovalLine>([
@@ -248,6 +254,7 @@ const NET_AMOUNT_FIELDS = new Set<keyof ApprovalLine>([
   'labourAmount',
   'otherAmount',
   'mrp',
+  'discountPct',
   'discountAmount',
 ]);
 
@@ -275,9 +282,12 @@ export function ApprovalGrid({
       current.map((line, index) => {
         if (index !== row) return line;
         const next = { ...line, [field]: value };
-        return NET_AMOUNT_FIELDS.has(field)
-          ? { ...next, netAmount: String(approvalNetAmount(next)) }
-          : next;
+        if (!NET_AMOUNT_FIELDS.has(field)) return next;
+        const withDiscount = {
+          ...next,
+          discountAmount: String(approvalDiscountAmount(next)),
+        };
+        return { ...withDiscount, netAmount: String(approvalNetAmount(withDiscount)) };
       }),
     );
   const add = () => {
@@ -339,6 +349,8 @@ export function ApprovalGrid({
               rate: String(value.ITM_RATE ?? line.rate),
               amount: String(value.ITM_AMT ?? line.amount),
               mrp: String(value.ITM_MRP ?? line.mrp),
+              discountPct: String(value.DISC_PRC ?? line.discountPct),
+              discountAmount: String(value.DISC_AMT ?? line.discountAmount),
               netAmount: String(
                 approvalNetAmount({
                   ...line,
@@ -346,6 +358,8 @@ export function ApprovalGrid({
                   labourAmount: String(value.LBR_AMT ?? line.labourAmount),
                   otherAmount: String(value.OTH_AMT ?? line.otherAmount),
                   mrp: String(value.ITM_MRP ?? line.mrp),
+                  discountPct: String(value.DISC_PRC ?? line.discountPct),
+                  discountAmount: String(value.DISC_AMT ?? line.discountAmount),
                 }),
               ),
               karigarNetWt: String(value.KR_NET_WT ?? line.karigarNetWt),

@@ -606,6 +606,39 @@ type Cookie = string;
     expect(printed.body).toContain('N - Approval Ring');
   });
 
+  it('derives line discount and persists NET_AMT at the desktop one-decimal stage', async () => {
+    // TR_APR_ISU.cs:3936-3942 derives DISC_AMT from LBR_AMT × LDisc%, then formats NET_AMT
+    // as 0.0; :6218-6225 persists those displayed values.
+    const response = await admin(
+      'POST',
+      '/tour/issue',
+      issueBody({
+        lines: [
+          {
+            itCode: ITEM,
+            grossWt: 1,
+            amount: 100.04,
+            labourAmount: 20.05,
+            otherAmount: 0.02,
+            discountPct: 10,
+            discountAmount: 999,
+            netAmount: 999,
+          },
+        ],
+      }),
+    );
+    expect(response.statusCode, response.body).toBe(201);
+    expect(
+      await query(
+        `SELECT "DISC_AMT"::float8 discount,"NET_AMT"::float8 net FROM "APR_DETL"
+          WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+        tenantId,
+        ISSUE_BOOK,
+        response.json().voucherNo,
+      ),
+    ).toEqual([{ discount: 2.01, net: 118.1 }]);
+  });
+
   it('uses the desktop save-refusal order and exact texts without a partial write', async () => {
     const message = async (payload: Record<string, unknown>) => {
       const response = await admin('POST', '/tour/issue', issueBody(payload));
@@ -758,8 +791,10 @@ type Cookie = string;
       ITM_AMT: 61234,
       ITM_MRP: 63734,
       DISC_PRC: 2.5,
-      DISC_AMT: 1593.35,
-      NET_AMT: 125874.65,
+      // TR_APR_ISU.cs:3936-3942: 2375 × 2.5% = 59.38, then
+      // (61234 + 2375 + 125 + 63734 - 59.38) formatted to one decimal = 127408.6.
+      DISC_AMT: 59.38,
+      NET_AMT: 127408.6,
       IT_TYPE: 'G',
       KR_NET_WT: 10,
       KR_TOUCH: 91,
@@ -889,8 +924,8 @@ type Cookie = string;
           netWt: 10,
           touch: 91.6,
           discountPct: 2.5,
-          discountAmount: 1593.35,
-          netAmount: 125874.65,
+          discountAmount: 59.38,
+          netAmount: 127408.6,
           itType: 'G',
           stones: [
             {

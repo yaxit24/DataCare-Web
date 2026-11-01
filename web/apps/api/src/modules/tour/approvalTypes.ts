@@ -174,13 +174,20 @@ export function tourLineFine(line: TourIssueLine): number {
   return approvalRound3(purity === 0 ? weight : (weight * purity) / 100);
 }
 
+export function tourLineDiscountAmount(line: TourIssueLine): number {
+  const pct = num(line.discountPct);
+  const labour = num(line.labourAmount);
+  return round(pct !== 0 && labour !== 0 ? (labour * pct) / 100 : num(line.discountAmount), 2);
+}
+
 export function tourLineNetAmount(line: TourIssueLine): number {
-  return (
+  return round(
     num(line.amount) +
-    num(line.labourAmount) +
-    num(line.otherAmount) +
-    num(line.mrp) -
-    num(line.discountAmount)
+      num(line.labourAmount) +
+      num(line.otherAmount) +
+      num(line.mrp) -
+      tourLineDiscountAmount(line),
+    1,
   );
 }
 
@@ -269,6 +276,7 @@ export function normalizeApprovalLines(raw: unknown): TourIssueLine[] {
     const itCode = text(line.itCode).slice(0, 5);
     if (!itCode) throw new TourValidationError(`approval line ${index + 1} needs an item`);
     const fineWt = tourLineFine(line);
+    const discountAmount = tourLineDiscountAmount(line);
     const netAmount = tourLineNetAmount(line);
     // APR_DETL.ITM_FINE is DECIMAL(14,3), NET_AMT is DECIMAL(18,2). Inputs fit their
     // individual columns but their desktop formulas can still overflow the derived target.
@@ -284,6 +292,7 @@ export function normalizeApprovalLines(raw: unknown): TourIssueLine[] {
       netWt: approvalRound3(line.netWt),
       touch: approvalRound3(line.touch),
       fineWt,
+      discountAmount,
       netAmount,
       stones: Array.isArray(line.stones) ? line.stones : [],
     };

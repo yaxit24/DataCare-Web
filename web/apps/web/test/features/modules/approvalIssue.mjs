@@ -131,6 +131,39 @@ export const approvalIssue = {
       },
     ),
     C(
+      'formula.net-discount-rounding',
+      'T03',
+      'mutation',
+      'TR_APR_ISU.cs:3936-3942 derives LDiscAmt from labour × LDisc% and formats NetAmt as 0.0; :6218-6225 saves both.',
+      async (ctx) => {
+        const tag = await seedApprovalTag(ctx, 'AIA');
+        const { page } = await openApproval(ctx);
+        await fillIssue(page, tag.tag, 'amount rounding');
+        await page.getByTestId('approval-issue-grid-mode').click();
+        await label(page, 'ItAmt row 1').fill('100.04');
+        await label(page, 'LbrAmt row 1').fill('20.05');
+        await label(page, 'OthAmt row 1').fill('0.02');
+        await label(page, 'LDisc% row 1').fill('10');
+        assert.equal(await label(page, 'LDiscAmt row 1').inputValue(), '2.01');
+        assert.equal(await label(page, 'NetAmt row 1').inputValue(), '118.1');
+        const response = await saveApproval(page);
+        assert.equal(response.status(), 201, await response.text());
+        const result = await response.json();
+        const rows = await ctx.rows(
+          `SELECT "DISC_AMT"::float8 discount,"NET_AMT"::float8 net FROM "APR_DETL"
+            WHERE tenant_id=$1 AND "CO_BOOK"='TUR' AND "VCH_NO"=$2`,
+          result.voucherNo,
+        );
+        assert.deepEqual(rows, [{ discount: 2.01, net: 118.1 }]);
+        return {
+          observation: 'LDiscAmt 2.01 and NetAmt 118.1 shown and saved',
+          expected: { discount: 2.01, net: 118.1 },
+          database: { rows },
+          downstream: await tagState(ctx, tag.tag),
+        };
+      },
+    ),
+    C(
       'refusal.party-required',
       'T04',
       'refusal',

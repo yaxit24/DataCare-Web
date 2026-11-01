@@ -3,6 +3,7 @@ import {
   approvalLineFromApi,
   approvalLineInput,
   approvalLinesWithStableIds,
+  approvalDiscountAmount,
   approvalNetAmount,
   blankApprovalLine,
 } from '../components/ApprovalGrid';
@@ -30,15 +31,16 @@ describe('approval grid round trip', () => {
     ]);
   });
 
-  it('derives NET_AMT from every desktop amount component', () => {
-    // TR_APR_ISU.cs:3936-3942: ITM_AMT + LBR_AMT + OTH_AMT + ITM_MRP - DISC_AMT.
+  it('derives LDisc amount and displays NET_AMT at one decimal', () => {
+    // TR_APR_ISU.cs:3936-3942: 20.05 × 10% = 2.01; 100.04 + 20.05 + .02 - 2.01
+    // is formatted as 118.1 before save.
     const line = approvalLineFromApi({
-      amount: 100,
-      labourAmount: 20,
-      otherAmount: 5,
-      mrp: 300,
-      discountAmount: 10,
+      amount: 100.04,
+      labourAmount: 20.05,
+      otherAmount: 0.02,
+      discountPct: 10,
     });
-    expect(approvalNetAmount(line)).toBe(415);
+    expect(approvalDiscountAmount(line)).toBe(2.01);
+    expect(approvalNetAmount(line)).toBe(118.1);
   });
 });
