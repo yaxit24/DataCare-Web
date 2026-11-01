@@ -89,6 +89,13 @@ const allProducts = (ctx) =>
   ctx.rows(
     `SELECT to_jsonb(p) AS r FROM "PRODUCT_MAST" p WHERE tenant_id=$1 AND "CO_CODE"='01' ORDER BY "PR_CODE",row_id`,
   );
+/** The list MS_PRODUCT_Load reads: every product of the company by code (:2142); other modules may add products. */
+const dbList = async (ctx) =>
+  (
+    await ctx.rows(
+      `SELECT "PR_CODE" code,"PR_NAME" name FROM "PRODUCT_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' ORDER BY "PR_CODE",row_id`,
+    )
+  ).map((r) => [String(r.code ?? '').trim(), String(r.name ?? '').trim()]);
 async function cleanCase(ctx) {
   await exec(
     ctx,
@@ -225,10 +232,14 @@ export const productMaster = {
           assert.equal(await label(page, 'Name').getAttribute('maxlength'), '40');
           assert.equal(await label(page, 'Search record').inputValue(), 'SEARCH RECORD');
           const list = await listed(page);
-          assert.deepEqual(list, [
-            ['PA', 'E2E ANKLET'],
-            ['PB', 'E2E BANGLE'],
-          ]);
+          assert.deepEqual(list, await dbList(ctx));
+          assert.deepEqual(
+            list.filter(([c]) => ['PA', 'PB'].includes(c)),
+            [
+              ['PA', 'E2E ANKLET'],
+              ['PB', 'E2E BANGLE'],
+            ],
+          );
           const order = await page.evaluate(() =>
             [...document.querySelectorAll('main input,main button,[data-testid="product-list"] tr')]
               .filter((el) => !el.closest('nav'))
@@ -248,8 +259,7 @@ export const productMaster = {
             'Delete',
             'Exit',
             'Search record',
-            'list',
-            'list',
+            ...list.map(() => 'list'),
           ]);
           const drawn = [];
           for (const name of ['Save', 'Print', 'Cancel', 'Delete', 'Exit'])
@@ -874,9 +884,10 @@ export const productMaster = {
           assert.equal(created.status(), 201, await created.text());
           await saved(page);
           // Down from the code box goes to the list; Down again moves a row; Enter opens it with the cursor in the name.
+          const codes = (await listed(page)).map(([c]) => c);
           await page.keyboard.press('ArrowDown');
-          assert.equal(await focusedId(page), 'PA');
-          await page.keyboard.press('ArrowDown');
+          assert.equal(await focusedId(page), codes[0], 'the first row of the list');
+          for (let i = 0; i < codes.indexOf('PB'); i++) await page.keyboard.press('ArrowDown');
           assert.equal(await focusedId(page), 'PB');
           const [opened] = await Promise.all([
             page.waitForResponse((r) => isApi(r, 'GET', `${API}/PB`)),
