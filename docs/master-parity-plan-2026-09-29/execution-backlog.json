@@ -6945,7 +6945,7 @@
       "id": "N208",
       "status": "implemented-unverified",
       "action": "Daily Rate is the desktop MS_RATE: GROUP_MAST grid with touch, Enter-on-silver recalculation with banker's rounding, grid saved per company/location/year/date, edit rights for a saved day, delete, F1 list and RateRpt.",
-      "parentLabels": "P1-core; L2",
+      "parentLabels": "P1-core; L3",
       "startAfter": [
         "N206"
       ],

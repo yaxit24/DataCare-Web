@@ -2381,7 +2381,7 @@ Evidence: `web/apps/api/test/voucherListRights.db.test.ts` (red against main) sh
 to an existing form, and a Contra-only user lists CON but is refused FJV and an unknown book while an administrator may
 list both; the whole feature suite still passes.
 
-### N208 — Daily Rate is the desktop MS_RATE (G221, Lite L2)
+### N208 — Daily Rate is the desktop MS_RATE (G221, Lite L3)
 
 The screen is the desktop Rate Master (`MDI_FORM.cs:8564-8573`): Vch Date with F1 (saved days with user, gold and
 silver rate, `MS_RATE.cs:2370-2396`), Gold Rate 10gm, Silver Rate 1Kg and Employee, and a grid of the GROUP_MAST
