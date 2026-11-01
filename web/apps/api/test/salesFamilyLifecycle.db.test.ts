@@ -513,6 +513,93 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
     expect(dr).toBeCloseTo(cr, 6);
   });
 
+  it('uses desktop Sales Return amount basis and whole-rupee stages for N and F companies', async () => {
+    const line = {
+      itCode: 'LOOSE',
+      pcs: 1,
+      grossWt: 10.25,
+      netWt: 10,
+      touch: 91.6,
+      rate: 6123.45,
+      labourType: 'per_gram' as const,
+      labourRate: 237.5,
+    };
+    const readAmounts = async (voucherNo: number) => {
+      const vch = String(voucherNo).padStart(5, '0');
+      const [row] = (await owner.$queryRawUnsafe(
+        `SELECT d."ITM_FINE"::float fine,d."ITM_AMT"::float item,d."LBR_AMT"::float labour,
+                d."NET_AMT"::float line_net,h."NET_AMT"::float net,h."TAX_AMT"::float tax,
+                h."TOT_AMT"::float total,s."ITM_AMT"::float stock_item,s."NET_AMT"::float stock_net,
+                (SELECT coalesce(sum(x."TAX_AMT"),0)::float FROM "TAX_DATA" x
+                  WHERE x.tenant_id=$1 AND x."CO_BOOK"='SRT' AND x."VCH_NO"=$2) tax_rows,
+                (SELECT coalesce(sum(x."DR_AMT"),0)::float FROM "ROJ_MEL_DATA" x
+                  WHERE x.tenant_id=$1 AND x."CO_BOOK"='SRT' AND x."VCH_NO"=$2) rojmel_dr,
+                (SELECT coalesce(sum(x."CR_AMT"),0)::float FROM "ROJ_MEL_DATA" x
+                  WHERE x.tenant_id=$1 AND x."CO_BOOK"='SRT' AND x."VCH_NO"=$2) rojmel_cr
+           FROM "SL_DATA" h
+           JOIN "SL_DETL_RTN" d ON d.tenant_id=h.tenant_id AND d."CO_CODE"=h."CO_CODE"
+            AND d."LC_CODE"=h."LC_CODE" AND d."CO_YEAR"=h."CO_YEAR"
+            AND d."CO_BOOK"=h."CO_BOOK" AND d."VCH_NO"=h."VCH_NO"
+           JOIN "MAIN_STOCK" s ON s.tenant_id=d.tenant_id AND s."CO_CODE"=d."CO_CODE"
+            AND s."LC_CODE"=d."LC_CODE" AND s."CO_YEAR"=d."CO_YEAR"
+            AND s."CO_BOOK"=d."CO_BOOK" AND s."VCH_NO"=d."VCH_NO" AND s."SR_NO"=d."SR_NO"
+          WHERE h.tenant_id=$1 AND h."CO_BOOK"='SRT' AND h."VCH_NO"=$2`,
+        TENANT,
+        vch,
+      )) as Array<Record<string, number>>;
+      return { vch, row: row! };
+    };
+
+    await owner.$executeRawUnsafe(
+      `UPDATE "CO_SET" SET "SL_AMT_TYPE"='N',"TAX_ROF"='2' WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+      TENANT,
+      CO,
+    );
+    const netBased = await createSaleReturn(runtime, returnInput({ origVchNo: undefined }), [line]);
+    const net = await readAmounts(netBased.vchNo);
+    expect(net.row).toMatchObject({
+      fine: 9.16,
+      item: 61234,
+      labour: 2375,
+      line_net: 63609,
+      net: 63609,
+      tax: 1908.27,
+      total: 65517,
+      stock_item: 61234,
+      stock_net: 63609,
+      tax_rows: 1908.27,
+      rojmel_dr: 65517.27,
+      rojmel_cr: 65517,
+    });
+    expect(await footprintOf(owner, await voucherTables(owner), TENANT, net.vch)).toEqual(
+      FOOTPRINT_SALE_RETURN,
+    );
+    expect(await ledgerBalance('SRT', net.vch)).toEqual([65517, 65517]);
+
+    await owner.$executeRawUnsafe(
+      `UPDATE "CO_SET" SET "SL_AMT_TYPE"='F' WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+      TENANT,
+      CO,
+    );
+    const fineBased = await createSaleReturn(runtime, returnInput({ origVchNo: undefined }), [
+      line,
+    ]);
+    const fine = await readAmounts(fineBased.vchNo);
+    expect(fine.row).toMatchObject({
+      fine: 9.16,
+      item: 56091,
+      labour: 2375,
+      line_net: 58466,
+      net: 58466,
+      tax: 1753.98,
+      total: 60220,
+      stock_item: 56091,
+      stock_net: 58466,
+      tax_rows: 1753.98,
+    });
+    expect(await ledgerBalance('SRT', fine.vch)).toEqual([60220, 60220]);
+  });
+
   it('persists every return-grid column the form offers instead of discarding it', async () => {
     const created = await createSaleReturn(runtime, returnInput(), [
       {

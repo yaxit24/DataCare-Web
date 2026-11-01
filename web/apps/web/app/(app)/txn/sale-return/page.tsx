@@ -2,14 +2,18 @@
 import { useState } from 'react';
 import { get, post, ApiError } from '../../../../lib/api';
 import { useBusinessScope, useRoundingPolicy } from '../../../../components/BusinessScope';
-import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
+import { companyFlag, companySetting, useCompanySettings } from '../../../../lib/companySettings';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { VoucherList } from '../../../../components/VoucherList';
 import { TenderPanel, type Tender } from '../../../../components/TenderPanel';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import { SaleReturnSavedPanel } from '../../../../components/SaleReturnSavedPanel';
-import { fineFor, labourCharge, billTotals, lineNet as lineNetAmount } from '@datacare/core';
+import {
+  saleReturnAmountType,
+  saleReturnBillTotals,
+  saleReturnLinePreview,
+} from '../../../../lib/salesReturnCalculation';
 import {
   ExtendedBodyCells,
   ExtendedHeaderCells,
@@ -207,6 +211,7 @@ function LegacySaleReturnForm() {
   // G11: per-gram labour is on (net + ghat) unless the company sets LBR_WITH_GHT='N' (blank default Y).
   const companySettings = useCompanySettings();
   const labourWithGhat = companyFlag(companySettings, 'LBR_WITH_GHT', 'Y');
+  const amountType = saleReturnAmountType(companySetting(companySettings, 'SL_AMT_TYPE'));
   const [coBook, setCoBook] = useState('');
   const [acCode, setAcCode] = useState('');
   const [acName, setAcName] = useState('');
@@ -275,27 +280,10 @@ function LegacySaleReturnForm() {
     }
   }
 
-  // live line preview: fine = net×touch/100, metal = fine×rate, making = net×making/g, net = metal+making
-  const calc = (l: Line) => {
-    const fine = fineFor('sale', {
-      netWt: n(l.netWt),
-      touch: n(l.touch),
-      ghtWt: n(l.ghtWt),
-      westPct: n(l.westPct),
-    });
-    const metal = r2(fine * n(l.rate));
-    // P5/P7: the grid now carries ghat; per-gram labour is (net + ghat) x rate (LBR_WITH_GHT blank 'Y').
-    const mk = labourCharge('per_gram', {
-      netWt: n(l.netWt),
-      ghatWt: n(l.ghtWt),
-      withGhat: labourWithGhat,
-      rate: n(l.making),
-    });
-    const other = n(l.otherAmount);
-    return { fine, metal, mk, net: lineNetAmount({ metal, labour: mk, other }) };
-  };
-  const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
-  const previewTotals = billTotals(
+  const calc = (line: Line) =>
+    saleReturnLinePreview(line, roundingPolicy, amountType, labourWithGhat);
+  const lineNet = lines.reduce((sum, line) => sum + calc(line).net, 0);
+  const previewTotals = saleReturnBillTotals(
     {
       lineNetTotal: lineNet,
       discountAmount: n(discountAmount),
