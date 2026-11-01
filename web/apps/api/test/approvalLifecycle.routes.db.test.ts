@@ -1667,6 +1667,148 @@ type Cookie = string;
     ]);
   });
 
+  it('allocates new line and stone IDs above retained maxima after gaps', async () => {
+    // TR_APR_ISU.cs:3414-3421 assigns a new edit row from the prior durable grid serial, while
+    // :6330-6357 stores stone ISR_NO under that stable parent. Removed IDs are not reused.
+    const issue = await createIssue(
+      issueBody({
+        lines: [
+          { itCode: ITEM, grossWt: 1, amount: 1000 },
+          {
+            itCode: ITEM,
+            grossWt: 2,
+            amount: 2000,
+            stones: [
+              { isrNo: 1, itCode: STONE, dmCode: 'ONE', netAmount: 1 },
+              { isrNo: 2, itCode: STONE, dmCode: 'TWO', netAmount: 2 },
+            ],
+          },
+        ],
+      }),
+    );
+    const opened = await admin('GET', `/tour/${issue.voucherNo}?coBook=${ISSUE_BOOK}`);
+    expect(opened.statusCode, opened.body).toBe(200);
+    const kept = opened.json().lines[1];
+    const edited = await admin('PUT', `/tour/${issue.voucherNo}`, {
+      coBook: ISSUE_BOOK,
+      expectedVersion: opened.json().version,
+      vchDate: opened.json().vchDate,
+      partyAc: opened.json().partyAc,
+      empCode: opened.json().empCode,
+      vchDesc: opened.json().vchDesc,
+      lines: [
+        {
+          ...kept,
+          stones: [kept.stones[1], { itCode: STONE, dmCode: 'THREE', netAmount: 3 }],
+        },
+        { itCode: ITEM, grossWt: 3, amount: 3000 },
+      ],
+    });
+    expect(edited.statusCode, edited.body).toBe(200);
+    expect(
+      await query(
+        `SELECT "SR_NO"::int sr,"OLD_SRNO"::int old FROM "APR_DETL"
+          WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 ORDER BY "SR_NO"`,
+        tenantId,
+        ISSUE_BOOK,
+        issue.voucherNo,
+      ),
+    ).toEqual([
+      { sr: 1, old: 2 },
+      { sr: 2, old: 3 },
+    ]);
+    expect(
+      await query(
+        `SELECT "SR_NO"::int parent,"ISR_NO"::int stone,"DM_CODE" diamond FROM "APR_IDTL"
+          WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 ORDER BY "ISR_NO"`,
+        tenantId,
+        ISSUE_BOOK,
+        issue.voucherNo,
+      ),
+    ).toEqual([
+      { parent: 2, stone: 2, diamond: 'TWO' },
+      { parent: 2, stone: 3, diamond: 'THREE' },
+    ]);
+  });
+
+  it.each([
+    [
+      'duplicate OLD_SRNO',
+      () =>
+        issueBody({
+          lines: [
+            { oldSrNo: 1, itCode: ITEM, grossWt: 1 },
+            { oldSrNo: 1, itCode: ITEM, grossWt: 2 },
+          ],
+        }),
+      /oldSrNo/i,
+    ],
+    [
+      'zero OLD_SRNO',
+      () => issueBody({ lines: [{ oldSrNo: 0, itCode: ITEM, grossWt: 1 }] }),
+      /oldSrNo/i,
+    ],
+    [
+      'fractional OLD_SRNO',
+      () => issueBody({ lines: [{ oldSrNo: 1.5, itCode: ITEM, grossWt: 1 }] }),
+      /oldSrNo/i,
+    ],
+    [
+      'duplicate ISR_NO',
+      () =>
+        issueBody({
+          lines: [
+            {
+              itCode: ITEM,
+              grossWt: 1,
+              stones: [
+                { isrNo: 1, itCode: STONE, netAmount: 1 },
+                { isrNo: 1, itCode: STONE, netAmount: 2 },
+              ],
+            },
+          ],
+        }),
+      /isrNo/i,
+    ],
+    [
+      'zero ISR_NO',
+      () =>
+        issueBody({
+          lines: [
+            {
+              itCode: ITEM,
+              grossWt: 1,
+              stones: [{ isrNo: 0, itCode: STONE, netAmount: 1 }],
+            },
+          ],
+        }),
+      /isrNo/i,
+    ],
+    [
+      'fractional ISR_NO',
+      () =>
+        issueBody({
+          lines: [
+            {
+              itCode: ITEM,
+              grossWt: 1,
+              stones: [{ isrNo: 1.5, itCode: STONE, netAmount: 1 }],
+            },
+          ],
+        }),
+      /isrNo/i,
+    ],
+  ])('refuses %s with no approval write', async (_label, payload, message) => {
+    const before = await snapshotTenant(owner, tenantId, BUSINESS_TABLES);
+    const response = await admin('POST', '/tour/issue', payload());
+    expect(response.statusCode, response.body).toBe(400);
+    expect(response.json().message).toMatch(message);
+    expect(diffTenant(before, await snapshotTenant(owner, tenantId, BUSINESS_TABLES))).toEqual({
+      added: {},
+      removed: {},
+    });
+  });
+
   it('refuses the same approval source line twice in one return request without writing', async () => {
     // TR_APR_ISU.cs:4817-4824 scans the grid and refuses a repeated selected tag with exactly this text.
     const issue = await createIssue();

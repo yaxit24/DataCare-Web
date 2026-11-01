@@ -187,6 +187,24 @@ const NUMERIC = new Set<keyof ApprovalLine>([
   'isuSrNo',
 ]);
 
+export function approvalLinesWithStableIds(lines: ApprovalLine[]): ApprovalLine[] {
+  const retained = lines
+    .map((line) => Number(line.oldSrNo))
+    .filter((value) => Number.isSafeInteger(value) && value > 0);
+  let next = Math.max(0, ...retained);
+  return lines.map((line) => (line.oldSrNo.trim() ? line : { ...line, oldSrNo: String(++next) }));
+}
+
+export function approvalStonesWithStableIds(
+  stones: Record<string, unknown>[],
+): Record<string, unknown>[] {
+  const retained = stones
+    .map((stone) => Number(stone.isrNo))
+    .filter((value) => Number.isSafeInteger(value) && value > 0);
+  let next = Math.max(0, ...retained);
+  return stones.map((stone) => (stone.isrNo == null ? { ...stone, isrNo: ++next } : stone));
+}
+
 export function approvalLineInput(line: ApprovalLine, stones?: Record<string, unknown>[]) {
   const out: Record<string, unknown> = {};
   for (const field of fields) {
@@ -194,7 +212,7 @@ export function approvalLineInput(line: ApprovalLine, stones?: Record<string, un
     if (!value) continue;
     out[field] = NUMERIC.has(field) ? Number(value) : value;
   }
-  if (stones?.length) out.stones = stones;
+  if (stones?.length) out.stones = approvalStonesWithStableIds(stones);
   return out;
 }
 
@@ -263,7 +281,7 @@ export function ApprovalGrid({
       }),
     );
   const add = () => {
-    setLines((current) => [...current, blankApprovalLine()]);
+    setLines((current) => approvalLinesWithStableIds([...current, blankApprovalLine()]));
     sub.appendLine();
   };
   const remove = (row: number) => {

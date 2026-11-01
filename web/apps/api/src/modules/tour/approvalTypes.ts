@@ -208,9 +208,61 @@ export function approvalBusinessDate(value: unknown): { iso: string; date: Date 
   return { iso, date: new Date(`${iso}T00:00:00.000Z`) };
 }
 
+function explicitStableId(value: unknown, label: string): number | undefined {
+  if (value == null) return undefined;
+  const id = Number(value);
+  if (!Number.isSafeInteger(id) || id <= 0)
+    throw new TourValidationError(`${label} must be a positive integer`);
+  return id;
+}
+
+/** TR_APR_ISU.cs:3414-3421 keeps durable row IDs during edit and appends above the saved maximum. */
+export function allocateApprovalStableIds(lines: TourIssueLine[]): TourIssueLine[] {
+  const explicitLineIds = lines.map((line, index) =>
+    explicitStableId(line.oldSrNo, `approval line ${index + 1} oldSrNo`),
+  );
+  const seenLines = new Set<number>();
+  for (const id of explicitLineIds) {
+    if (id === undefined) continue;
+    if (seenLines.has(id)) throw new TourValidationError(`approval oldSrNo is duplicated: ${id}`);
+    seenLines.add(id);
+  }
+  let nextLineId = Math.max(0, ...seenLines);
+  return lines.map((line, lineIndex) => {
+    const oldSrNo = explicitLineIds[lineIndex] ?? ++nextLineId;
+    const rawStones = Array.isArray(line.stones) ? line.stones : [];
+    const explicitStoneIds = rawStones.map((stone, stoneIndex) => {
+      if (!stone || typeof stone !== 'object' || Array.isArray(stone))
+        throw new TourValidationError(
+          `approval line ${lineIndex + 1} stone ${stoneIndex + 1} is invalid`,
+        );
+      return explicitStableId(
+        stone.isrNo,
+        `approval line ${lineIndex + 1} stone ${stoneIndex + 1} isrNo`,
+      );
+    });
+    const seenStones = new Set<number>();
+    for (const id of explicitStoneIds) {
+      if (id === undefined) continue;
+      if (seenStones.has(id))
+        throw new TourValidationError(`approval line ${lineIndex + 1} isrNo is duplicated: ${id}`);
+      seenStones.add(id);
+    }
+    let nextStoneId = Math.max(0, ...seenStones);
+    return {
+      ...line,
+      oldSrNo,
+      stones: rawStones.map((stone, stoneIndex) => ({
+        ...stone,
+        isrNo: explicitStoneIds[stoneIndex] ?? ++nextStoneId,
+      })),
+    };
+  });
+}
+
 export function normalizeApprovalLines(raw: unknown): TourIssueLine[] {
   if (!Array.isArray(raw)) throw new TourValidationError('approval requires item lines');
-  const rows = raw.map((line: TourIssueLine, index) => {
+  const normalizedRows = raw.map((line: TourIssueLine, index) => {
     if (!line || typeof line !== 'object')
       throw new TourValidationError(`approval line ${index + 1} is invalid`);
     assertWestPct(line.westPct);
@@ -224,7 +276,6 @@ export function normalizeApprovalLines(raw: unknown): TourIssueLine[] {
     assertDerivedDecimal(index + 1, 'netAmount', netAmount, 10 ** 16, 'APR_DETL.NET_AMT');
     const normalized = {
       ...line,
-      oldSrNo: line.oldSrNo == null ? index + 1 : num(line.oldSrNo),
       itCode,
       itType: text(line.itType).slice(0, 1),
       tagNo: isApprovalTag(line.tagNo) ? text(line.tagNo).slice(0, 15) : 'N',
@@ -248,7 +299,8 @@ export function normalizeApprovalLines(raw: unknown): TourIssueLine[] {
       );
     return normalized;
   });
-  if (!rows.length) throw new TourValidationError('at least one line item is required');
+  if (!normalizedRows.length) throw new TourValidationError('at least one line item is required');
+  const rows = allocateApprovalStableIds(normalizedRows);
   const seen = new Set<string>();
   for (const line of rows) {
     if (!isApprovalTag(line.tagNo)) continue;

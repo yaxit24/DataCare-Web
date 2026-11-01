@@ -33,6 +33,11 @@ export interface ApprovalRouteHelpers {
 }
 
 const SERIAL = { type: 'number', minimum: 0, maximum: Number.MAX_SAFE_INTEGER } as const;
+const STABLE_SERIAL = {
+  type: 'integer',
+  minimum: 1,
+  maximum: Number.MAX_SAFE_INTEGER,
+} as const;
 const PCS = { type: 'number', minimum: 0, maximum: 999_999_999.999 } as const;
 const WEIGHT = { type: 'number', minimum: 0, maximum: 99_999_999_999.999 } as const;
 const PERCENT = { type: 'number', minimum: 0, maximum: 99_999.9999 } as const;
@@ -43,7 +48,7 @@ const STONE_SCHEMA = {
   additionalProperties: false,
   required: ['itCode'],
   properties: {
-    isrNo: SERIAL,
+    isrNo: STABLE_SERIAL,
     itCode: { type: 'string', minLength: 1, maxLength: 5 },
     dmCode: text(8),
     dmName: text(50),
@@ -82,8 +87,8 @@ const LINE_SCHEMA = {
   additionalProperties: false,
   required: ['itCode'],
   properties: {
-    oldSrNo: SERIAL,
-    origSrNo: SERIAL,
+    oldSrNo: STABLE_SERIAL,
+    origSrNo: STABLE_SERIAL,
     vchSrno: SERIAL,
     itCode: { type: 'string', minLength: 1, maxLength: 5 },
     tagNo: text(15),

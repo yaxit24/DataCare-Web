@@ -315,6 +315,60 @@ export const approvalIssue = {
       },
     ),
     C(
+      'edit.append-after-stable-id-gap',
+      'T09',
+      'mutation',
+      'TR_APR_ISU.cs:3414-3421 keeps an edited row OLD_SRNO and assigns a newly appended row above the retained maximum.',
+      async (ctx) => {
+        const first = await seedApprovalTag(ctx, 'AIGA');
+        const retained = await seedApprovalTag(ctx, 'AIGB');
+        const appended = await seedApprovalTag(ctx, 'AIGC');
+        const { page } = await openApproval(ctx);
+        await fillIssue(page, first.tag, 'stable ids');
+        await page.getByRole('button', { name: '+ Add line', exact: true }).click();
+        const second = label(page, 'TagNo line 2');
+        await second.fill(retained.tag);
+        await second
+          .locator('xpath=..')
+          .getByText(retained.tag, { exact: false })
+          .first()
+          .waitFor();
+        await second.press('Enter');
+        const created = await saveApproval(page);
+        assert.equal(created.status(), 201, await created.text());
+        const result = await created.json();
+        const voucherNo = String(result.voucherNo);
+        await reopenApproval(page, 'issue', voucherNo);
+        await page.getByRole('button', { name: 'Remove line 1', exact: true }).click();
+        await page.getByRole('button', { name: '+ Add line', exact: true }).click();
+        const third = label(page, 'TagNo line 2');
+        await third.fill(appended.tag);
+        await third.locator('xpath=..').getByText(appended.tag, { exact: false }).first().waitFor();
+        await third.press('Enter');
+        const edited = await saveApproval(page, 'issue', 'PUT');
+        assert.equal(edited.status(), 200, await edited.text());
+        const rows = await ctx.rows(
+          `SELECT "SR_NO"::int sr,"OLD_SRNO"::int old,"TAG_NO" tag FROM "APR_DETL"
+            WHERE tenant_id=$1 AND "CO_BOOK"='TUR' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+          voucherNo,
+        );
+        assert.deepEqual(rows, [
+          { sr: 1, old: 2, tag: retained.tag },
+          { sr: 2, old: 3, tag: appended.tag },
+        ]);
+        return {
+          observation: `removed OLD_SRNO 1; retained ${retained.tag}=2; appended ${appended.tag}=3`,
+          expected: 'OLD_SRNO 2,3',
+          database: { rows },
+          downstream: {
+            removed: await tagState(ctx, first.tag),
+            retained: await tagState(ctx, retained.tag),
+            appended: await tagState(ctx, appended.tag),
+          },
+        };
+      },
+    ),
+    C(
       'edit.description',
       'T09',
       'mutation',

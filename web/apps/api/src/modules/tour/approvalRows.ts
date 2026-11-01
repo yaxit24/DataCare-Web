@@ -11,6 +11,7 @@ import { resolveLiveTagIdentityTx } from '../stock/stock.js';
 import { formatVoucherNo } from '../vouchers/numbering.js';
 import {
   APPROVAL_MESSAGES,
+  allocateApprovalStableIds,
   approvalRound3,
   approvalText as t,
   isApprovalTag,
@@ -105,8 +106,10 @@ export async function sourceLinesTx(
     if (!line || typeof line !== 'object')
       throw new TourValidationError(`approval return line ${index + 1} is invalid`);
     const origSrNo = num(line.origSrNo ?? line.oldSrNo);
-    if (!origSrNo)
-      throw new TourValidationError(`approval return line ${index + 1} needs the original Sr No`);
+    if (!Number.isSafeInteger(origSrNo) || origSrNo <= 0)
+      throw new TourValidationError(
+        `approval return line ${index + 1} needs a positive integer original Sr No`,
+      );
     return { ...line, origSrNo };
   });
   const requestedSources = new Set<number>();
@@ -173,11 +176,13 @@ export async function sourceLinesTx(
     );
     rows.push({ ...row, stones });
   }
-  return rows.map((row, index) => ({
-    ...lineFromRow(row),
-    oldSrNo: num(wanted[index]!.oldSrNo) || index + 1,
-    origSrNo: num(row.OLD_SRNO ?? row.SR_NO),
-  }));
+  return allocateApprovalStableIds(
+    rows.map((row, index) => ({
+      ...lineFromRow(row),
+      oldSrNo: wanted[index]!.oldSrNo,
+      origSrNo: num(row.OLD_SRNO ?? row.SR_NO),
+    })),
+  );
 }
 
 export function stoneFromRow(row: Row): TourStoneInput {
@@ -259,6 +264,9 @@ export function detailRow(
   index: number,
   source?: { year: string; book: string; no: string },
 ): Row {
+  const oldSrNo = num(line.oldSrNo);
+  if (!Number.isSafeInteger(oldSrNo) || oldSrNo <= 0)
+    throw new TourValidationError(`approval line ${index + 1} oldSrNo must be a positive integer`);
   return {
     ...key,
     VCH_DATE: identity.voucherDate,
@@ -271,7 +279,7 @@ export function detailRow(
     ENTRY_TYPE: 'A',
     BOOK_NAME: book.mainBook,
     SR_NO: index + 1,
-    OLD_SRNO: num(line.oldSrNo) || index + 1,
+    OLD_SRNO: oldSrNo,
     VCH_SRNO: num(line.vchSrno),
     IT_CODE: line.itCode,
     TAG_NO: isApprovalTag(line.tagNo) ? text(line.tagNo) : 'N',
@@ -346,58 +354,70 @@ export function stoneRows(
   partyAc: string,
   lines: TourIssueLine[],
 ): Row[] {
-  return lines.flatMap((line, index) =>
-    (line.stones ?? [])
-      .map((stone, stoneIndex) => ({
-        ...key,
-        VCH_DATE: identity.voucherDate,
-        HD_VCH_NO: identity.hiddenVoucherNo,
-        VCH_TYPE: book.shortName,
-        INOUT_TYPE: book.inout,
-        ENTRY_TYPE: 'A',
-        BOOK_NAME: book.mainBook,
-        AC_CODE: partyAc,
-        SR_NO: num(line.oldSrNo) || index + 1,
-        TAG_NO: isApprovalTag(line.tagNo) ? text(line.tagNo) : 'N',
-        VCH_SRNO: num(line.vchSrno),
-        ISR_NO: stone.isrNo ?? stoneIndex + 1,
-        IT_CODE: t(stone.itCode, 5),
-        DM_CODE: t(stone.dmCode, 8),
-        DM_NAME: t(stone.dmName, 50),
-        DM_SIZE: t(stone.dmSize, 20),
-        DM_SFNO: t(stone.dmSfNo, 20),
-        IT_PCS: approvalRound3(stone.pcs),
-        IT_GWT: approvalRound3(stone.grossWt),
-        KR_WT: approvalRound3(stone.karigarWt),
-        IT_CON_PRC: num(stone.conPct),
-        IT_RATE_TYPE: t(stone.rateType, 1),
-        IT_RATE: num(stone.rate),
-        IT_AMT: num(stone.amount),
-        IT_LBR_RATE: num(stone.lbrRate),
-        IT_LBR_AMT: num(stone.lbrAmount),
-        IT_NET_AMT: num(stone.netAmount),
-        IT_CON_WT: approvalRound3(stone.conWt),
-        DM_LEB: t(stone.dmLeb, 15),
-        DM_COLOR: t(stone.dmColor, 15),
-        DM_ORIGIN: t(stone.dmOrigin, 20),
-        DM_REMARK: t(stone.dmRemark, 20),
-        IT_PCS_WT: approvalRound3(stone.pcsWt),
-        KR_LESS_PRC: num(stone.karigarLessPct),
-        KR_CON_PRC: num(stone.karigarConPct),
-        KR_CON_WT: approvalRound3(stone.karigarConWt),
-        KR_RATE: num(stone.karigarRate),
-        KR_AMT: num(stone.karigarAmount),
-        KR_LBR_RATE: num(stone.karigarLabourRate),
-        KR_LBR_AMT: num(stone.karigarLabourAmount),
-        KR_NET_AMT: num(stone.karigarNetAmount),
-        IT_TYPE: t(stone.itType, 1),
-        MAIN_USER: identity.mainUser || null,
-      }))
+  return lines.flatMap((line, index) => {
+    const parentId = num(line.oldSrNo);
+    if (!Number.isSafeInteger(parentId) || parentId <= 0)
+      throw new TourValidationError(
+        `approval line ${index + 1} oldSrNo must be a positive integer`,
+      );
+    return (line.stones ?? [])
+      .map((stone, stoneIndex) => {
+        const stoneId = num(stone.isrNo);
+        if (!Number.isSafeInteger(stoneId) || stoneId <= 0)
+          throw new TourValidationError(
+            `approval line ${index + 1} stone ${stoneIndex + 1} isrNo must be a positive integer`,
+          );
+        return {
+          ...key,
+          VCH_DATE: identity.voucherDate,
+          HD_VCH_NO: identity.hiddenVoucherNo,
+          VCH_TYPE: book.shortName,
+          INOUT_TYPE: book.inout,
+          ENTRY_TYPE: 'A',
+          BOOK_NAME: book.mainBook,
+          AC_CODE: partyAc,
+          SR_NO: parentId,
+          TAG_NO: isApprovalTag(line.tagNo) ? text(line.tagNo) : 'N',
+          VCH_SRNO: num(line.vchSrno),
+          ISR_NO: stoneId,
+          IT_CODE: t(stone.itCode, 5),
+          DM_CODE: t(stone.dmCode, 8),
+          DM_NAME: t(stone.dmName, 50),
+          DM_SIZE: t(stone.dmSize, 20),
+          DM_SFNO: t(stone.dmSfNo, 20),
+          IT_PCS: approvalRound3(stone.pcs),
+          IT_GWT: approvalRound3(stone.grossWt),
+          KR_WT: approvalRound3(stone.karigarWt),
+          IT_CON_PRC: num(stone.conPct),
+          IT_RATE_TYPE: t(stone.rateType, 1),
+          IT_RATE: num(stone.rate),
+          IT_AMT: num(stone.amount),
+          IT_LBR_RATE: num(stone.lbrRate),
+          IT_LBR_AMT: num(stone.lbrAmount),
+          IT_NET_AMT: num(stone.netAmount),
+          IT_CON_WT: approvalRound3(stone.conWt),
+          DM_LEB: t(stone.dmLeb, 15),
+          DM_COLOR: t(stone.dmColor, 15),
+          DM_ORIGIN: t(stone.dmOrigin, 20),
+          DM_REMARK: t(stone.dmRemark, 20),
+          IT_PCS_WT: approvalRound3(stone.pcsWt),
+          KR_LESS_PRC: num(stone.karigarLessPct),
+          KR_CON_PRC: num(stone.karigarConPct),
+          KR_CON_WT: approvalRound3(stone.karigarConWt),
+          KR_RATE: num(stone.karigarRate),
+          KR_AMT: num(stone.karigarAmount),
+          KR_LBR_RATE: num(stone.karigarLabourRate),
+          KR_LBR_AMT: num(stone.karigarLabourAmount),
+          KR_NET_AMT: num(stone.karigarNetAmount),
+          IT_TYPE: t(stone.itType, 1),
+          MAIN_USER: identity.mainUser || null,
+        };
+      })
       .filter(
         (stone) =>
           num(stone.IT_PCS) + num(stone.IT_GWT) + num(stone.KR_WT) + num(stone.IT_NET_AMT) !== 0,
-      ),
-  );
+      );
+  });
 }
 
 export function stockRows(details: Row[], book: ApprovalBook, kind: ApprovalKind): Row[] {
