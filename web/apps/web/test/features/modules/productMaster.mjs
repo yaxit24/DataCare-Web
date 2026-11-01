@@ -812,7 +812,7 @@ export const productMaster = {
       async (ctx) =>
         withCase(ctx, async () => {
           // Its own login: opening another year moves the server session, which the other cases' saved login shares.
-          const { page } = await ctx.session(as(USERS.admin.user, `${USERS.admin.user}#history`));
+          const { page } = await ctx.session(as(USERS.admin.user, `${USERS.admin.user}#product-history`));
           await openScreen(page);
           await fill(page, { code: 'PA', name: 'E2E YEAR PRODUCT' });
           assert.equal((await save(page)).status(), 201);
