@@ -803,7 +803,7 @@ route('Masters/Taxes', [
   'PUT /masters/tax-master/:code',
   'DELETE /masters/tax-master/:code',
 ]);
-// MS_ITEM (N217): the Item master's own screen, with its Tag Value Update panel.
+// MS_ITEM (N218): the Item master's own screen, with its Tag Value Update panel.
 route('Masters/Items', [
   'GET /masters/item-master',
   'GET /masters/item-master/products',

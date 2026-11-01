@@ -23,7 +23,7 @@ import { SECOND_TENANT } from '../harness.mjs';
  * - The Tag Value Update panel (PnlBotam double click, :3922-4015) sets zero labour %, karigar touch and wastage on the
  *   item's tags at the location and recomputes KR_FINE = KR_NET_WT × (KR_TOUCH + KR_WEST_PRC) / 100 for the year.
  * - A sale of the item credits the line to its group's SALE_AC (sales.ts, G169) and the invoice prints the item's HSN.
- * Web rules that differ on purpose (gap G230): the row is updated in place (MIN_STK and the averages kept); unknown product
+ * Web rules that differ on purpose (gap G231): the row is updated in place (MIN_STK and the averages kept); unknown product
  * or group and a blank name refused; an opened item's code is read-only; version tokens; the tag update needs the edit
  * right.
  */
@@ -634,7 +634,7 @@ export const itemMaster = {
       'required.refusals',
       'T06',
       'refusal',
-      'Save (:3184-3224) refuses a blank product, group and item code with their texts in that order; leaving the code taken by another item and the name taken by another code (:3497-3629); the web refuses a blank name with the desktop\'s "Please Insert Item Name" (G230); nothing written',
+      'Save (:3184-3224) refuses a blank product, group and item code with their texts in that order; leaving the code taken by another item and the name taken by another code (:3497-3629); the web refuses a blank name with the desktop\'s "Please Insert Item Name" (G231); nothing written',
       async (ctx) =>
         withMasters(ctx, async () => {
           await seedItem(ctx, 'IMIMG', 'E2E TAKEN RING');
@@ -729,7 +729,7 @@ export const itemMaster = {
       'reopen.unchanged-save',
       'T08',
       'mutation',
-      'DISPLAY_DATA then Save with nothing changed writes the same values; the web keeps MIN_STK and the averages (G230) and MAIN_USER stays the stored user (:2990)',
+      'DISPLAY_DATA then Save with nothing changed writes the same values; the web keeps MIN_STK and the averages (G231) and MAIN_USER stays the stored user (:2990)',
       async (ctx) =>
         withMasters(ctx, async () => {
           await seedItem(ctx, 'IMIMG', 'E2E REOPEN RING', { minstk: 5, avg: 91.6, lbr: 9 });
@@ -847,7 +847,7 @@ export const itemMaster = {
       'rights.view-only',
       'T11',
       'refusal',
-      'MS_ITEM_Load reads FRM_EDIT/FRM_DELETE/FRM_PRINT of the user\'s rights row (:2548-2560): Save of an opened item and Delete answer "You Have No Rights.....", Print "You Have No Print Rights....." (:3184-3190, :3311-3315, :3697-3705); a new item needs only the view right; the tag update needs the edit right on the web (G230)',
+      'MS_ITEM_Load reads FRM_EDIT/FRM_DELETE/FRM_PRINT of the user\'s rights row (:2548-2560): Save of an opened item and Delete answer "You Have No Rights.....", Print "You Have No Print Rights....." (:3184-3190, :3311-3315, :3697-3705); a new item needs only the view right; the tag update needs the edit right on the web (G231)',
       async (ctx) =>
         withMasters(ctx, async () => {
           await seedItem(ctx, 'IMIMG', 'E2E RIGHTS RING');
@@ -940,7 +940,7 @@ export const itemMaster = {
       'concurrency.two-operators',
       'T12',
       'mutation',
-      'Two operators open one item: the first save wins and the second is refused with 409 (version token, G230) where the desktop lets the later save win; two new entries with one code: the second is refused with the code text under the company lock',
+      'Two operators open one item: the first save wins and the second is refused with 409 (version token, G231) where the desktop lets the later save win; two new entries with one code: the second is refused with the code text under the company lock',
       async (ctx) =>
         withMasters(ctx, async () => {
           await seedItem(ctx, 'IMIMG', 'E2E RACE RING');

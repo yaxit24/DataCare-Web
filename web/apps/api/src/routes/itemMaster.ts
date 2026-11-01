@@ -105,7 +105,7 @@ export function registerItemMasterRoutes(
       deleteItem(prisma, scope(req), codeOf(req), query(req).expectedVersion),
     );
   });
-  // The Tag Value Update panel (PnlBotam double click); the edit right on the web (the desktop checks none, G230).
+  // The Tag Value Update panel (PnlBotam double click); the edit right on the web (the desktop checks none, G231).
   app.post('/masters/item-master/:code/tag-values', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'update')) return;
     const b = body(req);

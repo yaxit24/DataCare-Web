@@ -7,7 +7,7 @@ import { seedCompany } from '../src/modules/ops/seedCompany.js';
 import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 /**
- * N217 / G230: the Item master (desktop MS_ITEM, opened by MDI_FORM.cs:7650-7659) through the real Fastify routes on a
+ * N218 / G231: the Item master (desktop MS_ITEM, opened by MDI_FORM.cs:7650-7659) through the real Fastify routes on a
  * forced-RLS database. Expected values come from the desktop source:
  *
  * - The list is every ITEM_MAST row of the company ordered by IT_NAME, shown as Code / Name / Safe (MS_ITEM.cs:2548-2843).
@@ -19,7 +19,7 @@ import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
  * - BtnDelete_Click (:3302-3355) refuses an item with stock rows, a default code and a blank code.
  * - btnTagValUpdate_Click (:3969-4015) sets zero labour %, karigar touch and wastage on the item's tags at the location
  *   and recomputes KR_FINE = KR_NET_WT × (KR_TOUCH + KR_WEST_PRC) / 100 for the year.
- * Web rules on purpose (gap G230): the row is updated in place (the desktop's delete and blank insert wipes MIN_STK and
+ * Web rules on purpose (gap G231): the row is updated in place (the desktop's delete and blank insert wipes MIN_STK and
  * the averages); unknown product or group, a blank name and over-long boxes refused; version tokens.
  */
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
@@ -36,7 +36,7 @@ const RIGHTS_SUB_MENU = 'Item';
 
 type Cookie = string;
 
-(enabled ? describe : describe.skip)('N217 Item master is the desktop MS_ITEM through HTTP', () => {
+(enabled ? describe : describe.skip)('N218 Item master is the desktop MS_ITEM through HTTP', () => {
   let owner: PrismaClient;
   let runtime: PrismaClient;
   let app: FastifyInstance;
