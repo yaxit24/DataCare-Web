@@ -234,6 +234,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G221 | High | Daily Rate did not follow MS_RATE and its save deleted other locations' rates | `unified/src/csharp/DataCareNext/MS_RATE.cs:1752-2109,2314-2458` | `web/apps/api/src/modules/masters/dailyRate.ts`; `web/apps/api/src/routes/dailyRate.ts`; `web/apps/web/app/(app)/txn/daily-rate/page.tsx`; `web/packages/core/src/dailyRate.ts` | The desktop lists the groups with a touch (GR_TYPE, GR_NAME), derives TaxRate = Round(Touch × Gold / 100) (silver / 10000) with Rate10gm net of the group's Tax% and PrRate from the purchase touch, using banker's rounding, and saves the grid per company, location, year and date. The web derived silver per kg, added tax on top, rounded half up, used one Tax% for every group, deleted every location's rows for the date, read and listed without the location, wrote GR_NAME, had no delete or print, and allowed any save without edit rights. | N208 |
 | G222 | High | Item Opening was not the desktop TR_ITM_OPBL metal-type grid | `unified/src/csharp/DataCareNext/TR_ITM_OPBL.cs`; `unified/src/csharp/DataCareNext/Ac_Stock.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7690-7699` | `web/apps/web/app/(app)/txn/item-opening/page.tsx`; `web/apps/api/src/modules/stock/stockVoucherLifecycle.ts`; `web/apps/api/src/routes/txn.ts` | The desktop opens TR_ITM_OPBL directly, with no book help (`MDI_FORM.cs:7690-7699`). Enter on the Item Type select lists every item of that metal type (`TR_ITM_OPBL.cs:1269-1370`) in a 17-column grid with a Total row, and Save replaces the type's rows in book '000' with VCH_NO = the type letter (`:1380-1490`); the stock rows come from `Ac_Stock.Itm_Opbl_Stk` (`Ac_Stock.cs:11-21`: AC_CODE '00000', VCH_TYPE ITOBL, BOOK_NAME 'ITM OPBL', P / +, the KR_* fields, dated the year's opening date less one day) and DM_DATA from `Dm_Itm_Opbl_Detl` for OTH_DETL_POSTING items (`:734-741`). The web wrote a numbered BAR_DATA voucher in book IOP on the voucher date; its fine ignored the wastage, its stock rows lacked those fields, it wrote no per-type ITM_OPBL rows and no DM_DATA, and its grid had no West%, labour, other amount, net amount or totals. | N209 |
 | G223 | Med | Tag Cancel had no print, accepted a new voucher in a type B company and answered the lock and fiscal refusals with web wording | `unified/src/csharp/DataCareNext/TR_TAG_CAN.cs:4950-4990,5330-5345,5386-5440` | `web/apps/api/src/modules/stock/tagCancel.ts`; `web/apps/api/src/modules/stock/tagCancelBill.ts`; `web/apps/web/components/TagCancelForm.tsx` | The desktop refuses a new voucher when CO_TYPE is 'B', a date outside the year and a date on or before the lock date with its own texts, in that order, and prints TagCanBill behind UserPrint. The web had no print route, never checked the company type, checked the lock after reading the lines and answered with "period is locked …" / "voucher date … is outside fiscal year …". | N210 |
+| G224 | Medium | The Employee master was a generic field form, not the desktop MS_EMP screen | `unified/src/csharp/DataCareNext/MS_EMP.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7660-7669`; `web/apps/api/form-specs/DataCareNext.MS_EMP.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts`; `web/apps/api/src/modules/rbac/formCatalog.ts` | The desktop opens MS_EMP from the 'Employee' button, whose caption is the USER_SET SUB_MENU (`MDI_FORM.cs:7660-7669`, `:7034`). The screen has a SEARCH RECORD box over a Code / Name list ordered by name, and Employee Code, Employee Name, Account Code with the account name, User Name (the company-01 login names), Amount and Day Hour, in that tab order (form spec). A new entry takes the next code ('001', else the highest + 1 as "000", `MS_EMP.cs:1260-1268`); leaving the code or name refuses one another employee has (`:1350-1411`); Save replaces the row with Val of the numbers, 'ABC' for a blank user and the creator (`:1462-1550`); Delete refuses the default employee '001' (`:1552-1584`). The web rendered the generic master form, which showed EMP_TYPE, TDS and PF as typed boxes, had no search list, next code, duplicate checks, desktop texts or account help, and the rights alias 'Employee' was missing, so a desktop USER_SET row gave no access. Not closed here: the EmpMast report layout is not in the repository, so Print lists the employees on screen; the help list's create path (MsCreat opens MS_ACCT with group 10, `:1659-1665`) is shared MS_HELP behaviour left to the Party master slice. | N211 |
 
 ## 4. Decisions D23–D28
 
@@ -2469,6 +2470,62 @@ Tag Cancel route, lifecycle, identity and row suites (114 tests); the new zero-m
 executable cases (book, tag fill, duplicate tag, lock date, write set and stock out, Enter reopen, unchanged save, add
 a tag, delete back to stock, print rights, TagCanBill, Alt+S) with 5 blocked and 2 not applicable.
 
+### N211 — The Employee master is the desktop MS_EMP screen (G224, Lite L2)
+
+The screen follows MS_EMP's form spec: the SEARCH RECORD box and the Code / Name list on the left, and Employee Code,
+Employee Name, Account Code with the account name, User Name, Amount and Day Hour on the right in that tab order, then
+Save, Print, Cancel, Delete and Exit (Print drawn first, Save first in the tab order). A new entry has the next code
+('001' for a company without employees, else the highest code + 1 as "000", `MS_EMP.cs:1260-1268`), SEARCH RECORD and the
+cursor in the name; the list is ordered by name (`:1144`) and by code right after a delete (`:1579`); the User Name list
+is a blank entry and LOGIN_MAST's names of company '01' (`:1152-1177`). Enter or a double click on the list opens an
+employee with its code read-only and Amount and Day Hour shown as 0.00 (`:1274-1299`, `:1600-1629`).
+
+Keys as the desktop: typed letters are upper-cased and the apostrophe refused (`:1319-1332`); Enter on the code moves on
+and F1 goes to the search box (`:1334-1348`); Enter on a blank name says "Please Insert Employee Name ..." (`:1381`);
+Enter on the account takes a code found in AC_MAST whatever its group, else opens the help of groups 09, 10 and 45
+without 00020 ordered by group and name (`:1631-1680`); Enter on Amount and Day Hour shows Val of the box as 0.00 and
+moves on (`:1681-1724`); Up and Down go to the list and Esc leaves (`:1436-1446`); in the list F1 goes to the search box
+and Backspace shortens it (`:1600-1622`). Leaving the code refuses a code another employee has and leaving the name a
+name another code has, with the desktop texts (`:1350-1411`).
+
+Save (`:1462-1550`) needs the edit right only for an opened employee ("You Have No Rights.....") and refuses a blank code
+and name ("Enter Employee Detail"); it replaces the EMP_MAST row with the code, the name, the account, Conversion.Val of
+Amount and Day Hour as typed (a port of VB Val, `@datacare/core` `vbVal`), the user or 'ABC' when blank, and MAIN_USER:
+the operator for a new entry (CLEAR_DATA `:1253`), the creator for an opened one (`:1293`). Delete needs the delete right,
+says "Please Select Employee For Delete." for a blank code, asks "Are You Sure To Delete This Record now?" and refuses the
+default employee '001' after the question, as the desktop orders them (`:1552-1584`). Print needs the print right
+(`:1585-1599`). The rights row is the desktop's: 'Employee' is added as the form's USER_SET alias (it had none, so a
+desktop rights row did not apply).
+
+Deliberate differences: Save also refuses a blank name, an account not in AC_MAST, a user that is not a company-01 login
+and a name over the 40-character column; it keeps EMP_TYPE, TDS and PF, which the desktop's DELETE + INSERT resets
+although only an import sets them (`UT_IMPORT.cs:9984`) and TR_EMP_JV reads them (`TR_EMP_JV.cs:1567`); the next code
+skips a code that is not a number, where `ORDER BY EMP_CODE DESC` offers '001' again; an opened employee carries a
+version token (N51, D17), so a save or delete after another operator's change or delete is refused with 409 where the
+desktop's later save wins, and a new entry whose code another operator took meanwhile is refused with the code text
+under the company lock; the search box drops SEARCH RECORD whenever it gets the cursor, where the desktop clears it only
+on a click and then searched for "SEARCH RECORD…"; Up and Down stay in the User Name list and an open account help;
+the account box keeps lower-case letters until a code is taken. Print shows the company's employees on screen in code
+order (code, name, user, account, amount, day hours) because the EmpMast report is not in the repository. Not done here:
+the help's create path (MsCreat opens MS_ACCT with group 10, `:1659-1665`), shared MS_HELP behaviour for the Party master
+slice. The generic `/masters/employees` API stays for imports.
+
+Evidence: core `vbVal.test.ts` (6 cases), `employeeMaster.test.ts` (3 cases: next code and the two texts) and
+`employeeMaster.db.test.ts` (13 cases through the real routes on forced RLS: empty company '001' with the login names,
+the write set with Val, 'ABC' and the operator, next code and both orders, every refusal with nothing written, the read
+with the account name and a 404, an edit keeping creator, type, TDS and PF, a same-code new entry as the operator, the
+clerk's desktop 'Employee' row (view and add only, 403 for edit, delete and print, 403 without a row), the account help,
+the print order, stale-version, replay and missing-version refusals, a save after another operator's delete refused, the
+'001' and blank-code refusals and another tenant untouched) and `routePolicy.test.ts` pass. The zero-mock
+`employee-master` feature module passes 17 of 17 applicable cases (T05 not applicable), including a T14 fault injected
+on the insert after the delete, which rolls back with every row id kept, the year switch to 2024-2025 and the Daily
+Rate journey. Chrome DevTools on the demo stack: the keyboard entry upper-cased "o'neil desai", took SAL01 with Enter,
+showed 12500.56 and 8.50 and saved through Enter on Save (EMP_MAST 01 | 001 | ONEIL DESAI | SAL01 | 12500.56 | 8.5 |
+admin | admin); the list opened with Down and Enter, Alt+S saved the change, the question came before the '001' refusal,
+Delete removed 002 with the list read again by code, F1 and the search filtered by name, and Esc left the screen. The
+check found a defect, fixed here: upper-casing the account box as it was typed made the picker drop every answer to a
+lower-case search, so the help never opened. Desktop-runtime comparison and parent acceptance remain open.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2606,6 +2663,7 @@ a tag, delete back to stock, print rights, TagCanBill, Alt+S) with 5 blocked and
 | N208 | — | implemented-unverified, evidence in this change (G221: Daily Rate is MS_RATE — grid source, recalculation, scoped save/delete, F1, RateRpt, rights) |
 | N209 | — | implemented-unverified, evidence in this change (G222: Item Opening is the TR_ITM_OPBL metal-type grid in book 000 with ITOBL stock rows, DM_DATA for OTH_DETL_POSTING items and the desktop messages) |
 | N210 | — | implemented-unverified, evidence in this change (G223: Tag Cancel prints TagCanBill behind print rights and refuses type B, the year and the lock date with the desktop texts in desktop order) |
+| N211 | — | implemented-unverified, evidence in this change (G224: the Employee master is the MS_EMP screen with its list, next code, keys, desktop texts, rights alias and account help; version tokens and the web refusals recorded on the gap) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

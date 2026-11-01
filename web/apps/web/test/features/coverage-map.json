@@ -120,6 +120,14 @@
         "web/apps/api/src/modules/stock/tagCancel.ts",
         "web/apps/api/src/modules/stock/tagCancelBill.ts"
       ]
+    },
+    "employeeMaster": {
+      "covers": [
+        "web/apps/web/app/(app)/masters/employees/page.tsx",
+        "web/apps/api/src/modules/masters/employeeMaster.ts",
+        "web/apps/api/src/routes/employeeMaster.ts",
+        "web/packages/core/src/vbVal.ts"
+      ]
     }
   }
 }

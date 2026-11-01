@@ -31,6 +31,7 @@ import { tagOpening } from './modules/tagOpening.mjs';
 import { dailyRate } from './modules/dailyRate.mjs';
 import { itemOpening } from './modules/itemOpening.mjs';
 import { tagCancel } from './modules/tagCancel.mjs';
+import { employeeMaster } from './modules/employeeMaster.mjs';
 import { runSurface } from './surface/runner.mjs';
 
 /**
@@ -63,6 +64,7 @@ const MODULES = [
   dailyRate,
   itemOpening,
   tagCancel,
+  employeeMaster,
 ];
 
 const artifacts = resolve(webRoot, 'test-results/feature-e2e');
