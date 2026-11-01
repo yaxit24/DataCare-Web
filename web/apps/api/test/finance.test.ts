@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   buildTransferLedger,
   assertCashLimit,
@@ -6,6 +6,10 @@ import {
   settlementAc,
   FinanceValidationError,
 } from '../src/modules/finance/finance.js';
+import {
+  createFinanceIdentityTx,
+  FINANCE_DATE_OUTSIDE_YEAR_MESSAGE,
+} from '../src/modules/finance/lifecycle.js';
 import { PostingAccountValidationError } from '../src/modules/shared/postingAccounts.js';
 import { ledgerBalance } from '../src/modules/posting/posting.js';
 
@@ -44,5 +48,33 @@ describe('finance builders', () => {
     expect(() => assertCashReceiptCeiling(150000, 100000, 200000)).toThrow(FinanceValidationError); // cumulative 250k over
     expect(() => assertCashReceiptCeiling(100000, 0, 200000)).not.toThrow(); // under limit
     expect(() => assertCashReceiptCeiling(200000, 0, 200000)).not.toThrow(); // exactly at limit is allowed
+  });
+
+  it('rejects an out-of-year finance create before allocating either voucher identity', async () => {
+    const tx = {
+      $executeRawUnsafe: vi.fn(),
+      $queryRawUnsafe: vi
+        .fn()
+        .mockResolvedValue([{ OP_DATE: '2024-04-01', CL_DATE: '2025-03-31' }]),
+    };
+    await expect(
+      createFinanceIdentityTx(
+        tx,
+        {
+          tenantId: 'finance-test',
+          coCode: '01',
+          lcCode: '01',
+          coYear: '2024-2025',
+          coBook: 'RCT',
+        },
+        new Date('2024-03-31T00:00:00.000Z'),
+        'operator',
+      ),
+    ).rejects.toThrow(FINANCE_DATE_OUTSIDE_YEAR_MESSAGE);
+
+    expect(tx.$queryRawUnsafe).toHaveBeenCalledTimes(1);
+    expect(tx.$queryRawUnsafe.mock.calls[0]?.[0]).toContain('"YEAR_MAST"');
+    // Both nextVoucherNoTx and nextHiddenVoucherNoTx take an advisory lock through this method.
+    expect(tx.$executeRawUnsafe).not.toHaveBeenCalled();
   });
 });

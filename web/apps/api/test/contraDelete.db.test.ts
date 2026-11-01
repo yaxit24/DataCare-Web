@@ -25,7 +25,9 @@ import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 // deleteContra is what DELETE /contra/:vchNo calls, so the test exercises the route's real path.
-import { postContra, deleteContra } from '../src/modules/finance/finance.js';
+import { postContra, editContra, deleteContra } from '../src/modules/finance/finance.js';
+import { FINANCE_DATE_OUTSIDE_YEAR_MESSAGE } from '../src/modules/finance/lifecycle.js';
+import { PeriodLockValidationError } from '../src/modules/posting/posting.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const TENANT = 'contra-delete';
@@ -118,6 +120,24 @@ async function footprint(vchNo: string) {
       vchNo,
     );
     out[table] = Number(rows[0]?.n ?? 0);
+  }
+  return out;
+}
+
+async function allWriteSet() {
+  const out: Record<string, unknown[]> = {};
+  for (const table of [
+    'CONTRA_DATA',
+    'AC_DATA',
+    'ROJ_MEL_DATA',
+    'REMARK_DATA',
+    'TEMP_BOOK_DATA',
+    'DELETE_DATA',
+  ]) {
+    out[table] = await owner.$queryRawUnsafe(
+      `SELECT to_jsonb(t)::text AS row FROM "${table}" t WHERE tenant_id=$1 ORDER BY 1`,
+      TENANT,
+    );
   }
   return out;
 }
@@ -288,5 +308,78 @@ describe.runIf(RUN)('contra deletion (plan F1.1)', () => {
 
     expect(await footprint(keepNo)).toEqual(keptBefore);
     expect((await footprint(dropNo)).CONTRA_DATA).toBe(0);
+  });
+
+  it('refuses out-of-year create and edit with the desktop message and preserves every row', async () => {
+    const outside = '2024-03-31';
+    const lines = [
+      { crdr: 'DR' as const, acCode: '00008', amount: 500 },
+      { crdr: 'CR' as const, acCode: '00001', amount: 500 },
+    ];
+    const beforeCreate = await allWriteSet();
+    await expect(
+      postContra(runtime, { scope, vchDate: outside, lines, mainUser: 'contra-date' }),
+    ).rejects.toThrow(FINANCE_DATE_OUTSIDE_YEAR_MESSAGE);
+    expect(await allWriteSet()).toEqual(beforeCreate);
+
+    const created = await postContra(runtime, {
+      scope,
+      vchDate: '2024-04-01',
+      lines,
+      mainUser: 'contra-date',
+    });
+    const beforeEdit = await allWriteSet();
+    await expect(
+      editContra(
+        runtime,
+        {
+          scope,
+          vchDate: outside,
+          lines: lines.map((line) => ({ ...line, amount: 900 })),
+          mainUser: 'another-user',
+        },
+        created.vchNo,
+      ),
+    ).rejects.toThrow(FINANCE_DATE_OUTSIDE_YEAR_MESSAGE);
+    expect(await allWriteSet()).toEqual(beforeEdit);
+  });
+
+  it('checks the year before the lock date on create and edit, as TR_CONTRA.cs:2680-2691 does', async () => {
+    const lines = [
+      { crdr: 'DR' as const, acCode: '00008', amount: 300 },
+      { crdr: 'CR' as const, acCode: '00001', amount: 300 },
+    ];
+    const created = await postContra(runtime, {
+      scope,
+      vchDate: '2024-04-10',
+      lines,
+      mainUser: 'contra-order',
+    });
+    await exec(`UPDATE "CO_SET" SET "LOCK_DATE"=$1::date WHERE tenant_id=$2`, '2024-04-05', TENANT);
+    try {
+      const before = await allWriteSet();
+      // 2024-03-31 is outside the year and on or before the lock date: the year text wins.
+      await expect(
+        postContra(runtime, { scope, vchDate: '2024-03-31', lines, mainUser: 'contra-order' }),
+      ).rejects.toThrow(FINANCE_DATE_OUTSIDE_YEAR_MESSAGE);
+      await expect(
+        editContra(
+          runtime,
+          { scope, vchDate: '2024-03-31', lines, mainUser: 'contra-order' },
+          created.vchNo,
+        ),
+      ).rejects.toThrow(FINANCE_DATE_OUTSIDE_YEAR_MESSAGE);
+      // Control: an in-year date on or before the lock date is still refused by the lock.
+      await expect(
+        editContra(
+          runtime,
+          { scope, vchDate: '2024-04-03', lines, mainUser: 'contra-order' },
+          created.vchNo,
+        ),
+      ).rejects.toBeInstanceOf(PeriodLockValidationError);
+      expect(await allWriteSet()).toEqual(before);
+    } finally {
+      await exec(`UPDATE "CO_SET" SET "LOCK_DATE"=NULL WHERE tenant_id=$1`, TENANT);
+    }
   });
 });

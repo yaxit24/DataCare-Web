@@ -47,4 +47,16 @@ describe('isCurrentAnswer', () => {
     expect(isCurrentAnswer('SUP', 'SUPL')).toBe(false);
     expect(isCurrentAnswer('SUPL', 'SUPL')).toBe(true);
   });
+  it('keeps the answer for the same text in another case (the box upper-cases what was typed)', () => {
+    expect(isCurrentAnswer('rin', 'RIN')).toBe(true);
+    expect(isCurrentAnswer('ri', 'RIN')).toBe(false);
+  });
+});
+
+describe('lookupEnterAction with an upper-casing box', () => {
+  it('picks the highlighted row of a list fetched for the lower-case text', () => {
+    expect(lookupEnterAction({ open: true, rowCount: 2, rowsFor: 'gm', value: 'GM' })).toBe(
+      'pick-highlighted',
+    );
+  });
 });

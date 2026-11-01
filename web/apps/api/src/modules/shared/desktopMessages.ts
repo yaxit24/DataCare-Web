@@ -136,6 +136,16 @@ export const DESKTOP_MESSAGES = {
   ITEM_NAME_REQUIRED: 'Please Insert Item Name',
   /** MS_ITEM.cs — delete pressed with no item selected. TR_ITM_OPBL.cs:1505 uses the same text (no metal type). */
   ITEM_SELECT_FOR_DELETE: 'Please Select Item For Delete.',
+  /** MS_ITEM.cs:3210 — Save with no product code. */
+  ITEM_PRODUCT_REQUIRED: 'Product Code Is Null Please Create Item Again..',
+  /** MS_ITEM.cs:3216 — Save with no group code. */
+  ITEM_GROUP_REQUIRED: 'Group Code Is Null Please Create Item Again..',
+  /** MS_ITEM.cs:3222 — Save with no item code. */
+  ITEM_CODE_NULL: 'Item Code Is Null Please Create Item Again..',
+  /** MS_ITEM.cs:3320 — Delete of an item with stock rows (MAIN_STOCK). */
+  ITEM_IN_TRANSACTION: "You Can't Delete Record This Item Use in Transaction....",
+  /** MS_ITEM.cs:3339 — Delete of a default item code. */
+  ITEM_DEFAULT_CODE: 'You Cant Delete Record This Item Code Is Default Code....',
   /** TR_ITM_OPBL.cs:1407 — Item Opening saved with no metal type chosen. */
   ITEM_OPENING_METAL_TYPE_REQUIRED: 'Please Select Metaltype....',
 

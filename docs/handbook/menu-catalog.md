@@ -265,12 +265,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `MS_ADD_MAST` — direct constructor ([MDI_FORM.cs:7610-7619](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7610-L7619)).
 - **Does:** Maintains reusable postal and contact address records.
-- **Looks:** Party-like searchable form with contact, city/state/country and bank fields.
-- **Writes:** ADD_MAST.
-- **Web:** `/masters/addresses`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Conditional fields, import/reference rules, Print and keyboard/help flow are unproven.
-- **Owners:** X10, G38, N58, N77, G225, N212.
-- **Evidence:** [module-map.json:544-558](../../project-memory/catalogs/module-map.json#L544-L558).
+- **Looks:** SEARCH RECORD box over a Code / Name list on the left; Ac Code with its F1 button over the Company Detail, Other Detail and Family Detl tabs on the right; Print, Save, Cancel, Delete and Exit along the bottom.
+- **Writes:** ADD_MAST, STATE_MAST, OP_DATA, AC_DATA.
+- **Web:** `/masters/addresses`; `GET /masters/address-master`, `GET /masters/address-master/print`, `GET /masters/address-master/names`, `GET /masters/address-master/mobile`, `GET /masters/address-master/:code`, `POST /masters/address-master`, `PUT /masters/address-master/:code`, `DELETE /masters/address-master/:code`, `GET /masters/:name`. Can: create, reopen, edit, delete, list.
+- **Remaining:** The PartyMast print layout is not in the repository (Print lists the addresses on screen); desktop-runtime comparison remains.
+- **Owners:** X10, G38, N58, N77, G225, N212, G230, N217.
+- **Evidence:** [MS_ADD_MAST.cs:3119-4544](../../unified/src/csharp/DataCareNext/MS_ADD_MAST.cs#L3119-L4544).
 
 ### AutoItem
 
@@ -353,12 +353,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `MS_ITEM` — direct constructor ([MDI_FORM.cs:7650-7659](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7650-L7659)).
 - **Does:** Defines stock items: product and group, purity, rate, labour, unit and stock policies.
-- **Looks:** Search grid; product/group, code/name, safe, HSN, unit, rate, labour, conversion, discount and weight fields.
-- **Writes:** ITEM_MAST, GROUP_MAST, PRODUCT_MAST, BAR_DETL.
-- **Web:** `/masters/items`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`, `POST /masters/:name/import`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Conditional fields, inline parent creation, tag propagation, referenced deletion, Print and event order are unproven.
-- **Owners:** X10, X08, G38, N58, N77.
-- **Evidence:** [KB_master.md:150-178](../../project-memory/video-research/_kb/KB_master.md#L150-L178).
+- **Looks:** SEARCH RECORD box over a Code / Name / Safe list on the left; Pr Code, Gr Code, Item Code with the types, Item Name, Safe Name with Stk Display, Hsn Code, Unit Name, Rate Per, labour, Ght %, conversion, discount, rates, Oth Dtl Rate Type and Bag Weight on the right; Print, Save, Cancel, Delete and Exit along the bottom; the Tag Value Update panel on a double click of the button bar.
+- **Writes:** ITEM_MAST, GROUP_MAST, PRODUCT_MAST, MAIN_STOCK, BAR_DETL, CO_SET_NEW.
+- **Web:** `/masters/items`; `GET /masters/item-master`, `GET /masters/item-master/products`, `GET /masters/item-master/groups`, `GET /masters/item-master/:code`, `POST /masters/item-master`, `PUT /masters/item-master/:code`, `DELETE /masters/item-master/:code`, `POST /masters/item-master/:code/tag-values`, `POST /masters/:name/import`. Can: create, reopen, edit, delete, list.
+- **Remaining:** The edition-specific boxes (Ac Item, UniCode Name, Tax Free, Tag Oth Detail, Oth Detail Posting, App Item) are not shown in Lite; the Excel import belongs to Data Import; desktop-runtime comparison remains.
+- **Owners:** X10, X08, G38, N58, N77, G231, N218.
+- **Evidence:** [MS_ITEM.cs:2748-4015](../../unified/src/csharp/DataCareNext/MS_ITEM.cs#L2748-L4015).
 
 ### Item Opening
 

@@ -6,11 +6,39 @@ import {
   voucherTimestamp,
 } from '../vouchers/lifecycle.js';
 import { assertPeriodOpen, insertRowTx } from '../posting/posting.js';
+import { assertFiscalDateTx } from '../vouchers/lifecycle.js';
+import { toIsoDate } from '@datacare/core';
 
 export class FinanceLifecycleValidationError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'FinanceLifecycleValidationError';
+  }
+}
+
+export const FINANCE_DATE_OUTSIDE_YEAR_MESSAGE =
+  'You Cant Save Entry Because Voucher Date Not In Current Year... Please Change Date...';
+
+/**
+ * A finance voucher's date must fall inside the open financial year. The Lite desktop checks this before save in
+ * TR_CASH (cash and bank receipts and payments, TR_CASH.cs:2934-2941) and TR_CONTRA (contra,
+ * TR_CONTRA.cs:2680-2685). The same check also exists on later-edition TR_EMP_JV (:2834-2839),
+ * TR_LEDR_ADJ (:2880-2885) and TR_CARD_REC (:3214-3219), so those writers can reuse this helper when their menus
+ * are completed. Dhiran writers do not use it because their desktop forms do not carry this check.
+ */
+export async function assertFinanceVoucherDateTx(
+  tx: any,
+  scope: VoucherScope,
+  date: Date,
+): Promise<void> {
+  try {
+    await assertFiscalDateTx(tx, completeFinanceScope(scope), toIsoDate(date));
+  } catch (error) {
+    // Preserve the fail-closed configuration error when YEAR_MAST is missing or ambiguous. Only translate the
+    // ordinary out-of-range refusal to the exact operator-facing desktop text.
+    if (error instanceof Error && /is outside fiscal year/.test(error.message))
+      throw new FinanceLifecycleValidationError(FINANCE_DATE_OUTSIDE_YEAR_MESSAGE);
+    throw error;
   }
 }
 
@@ -94,6 +122,22 @@ export function requireBookFamily(
     throw new FinanceLifecycleValidationError(
       `${label} requires BOOK_DATA.MAIN_BOOK='${mainBook}' for the configured book`,
     );
+}
+
+/**
+ * Finance creates must validate their voucher date before allocating either the visible or hidden voucher identity.
+ * The allocator takes transaction-scoped advisory locks, so rejecting first avoids an unnecessary lock wait as well as
+ * making the desktop order explicit. Edit paths keep their persisted identity and call the guard before they read and
+ * lock the saved voucher, so the year refusal comes before the lock-date refusal, as in TR_CASH and TR_CONTRA.
+ */
+export async function createFinanceIdentityTx(
+  tx: any,
+  scope: VoucherScope,
+  requestedDate: Date,
+  mainUser?: string,
+): Promise<VoucherIdentity> {
+  await assertFinanceVoucherDateTx(tx, scope, requestedDate);
+  return createIdentityTx(tx, scope, requestedDate, mainUser);
 }
 
 export async function createIdentityTx(
