@@ -186,7 +186,11 @@
         "web/apps/web/app/(app)/txn/wholesale-sale/page.tsx",
         "web/apps/web/components/WholesaleVoucherForm.tsx",
         "web/apps/web/lib/wholesaleVoucher.ts",
-        "web/apps/api/src/modules/sales/rateCut.ts"
+        "web/apps/api/src/modules/sales/rateCut.ts",
+        "web/apps/api/src/modules/sales/rateCutTags.ts",
+        "web/apps/api/src/modules/sales/wholesaleSaveChecks.ts",
+        "web/apps/api/src/modules/sales/wholesaleSaleBill.ts",
+        "web/apps/api/src/routes/wholesaleSale.ts"
       ]
     }
   }

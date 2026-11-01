@@ -22,9 +22,10 @@ import type { VoucherScope } from '../vouchers/numbering.js';
  * Licence expiry (:12779) and the two registration-specific checks (HM176NEKU, HM037NEKU) do not apply to the web.
  * The edit right, the party and the voucher number are checked by the route guard and the writer already.
  *
- * Checks 2, 3, 6, 7 and 8 need no figures, so `assertWholesaleSaveTx` runs them before a voucher number is taken.
- * Checks 1, 4 and 5 read the band, so `assertWholesaleSettlement` runs after the totals are computed and before
- * anything is written. Both run inside the writer's transaction, so a refusal leaves no row and no number.
+ * Checks 2, 3, 6, 7 and 8 need no figures. `writeRateCut` runs them (`assertWholesaleSaveTx`) after it has taken the
+ * voucher number and passed the book-family guard, and before an edit's reversal or any tag reservation. Checks 1, 4
+ * and 5 read the band, so `assertWholesaleSettlementTx` runs after the totals are computed and before any row is
+ * written. Both run inside the writer's transaction: a refusal rolls it back, so no row and no number persist.
  */
 export class WholesaleSaveValidationError extends Error {
   constructor(message: string) {
@@ -73,7 +74,7 @@ export function assertWholesaleItemCodes(lines: readonly WholesaleCheckLine[]): 
   });
 }
 
-/** Checks 2, 3, 6, 7 and 8, before a voucher number is taken. */
+/** Checks 2, 3, 6, 7 and 8: after the book-family guard, before an edit's reversal or any write. */
 export async function assertWholesaleSaveTx(
   tx: any,
   scope: VoucherScope & { coYear: string },
