@@ -1258,7 +1258,7 @@ export const groupMaster = {
           await page.waitForResponse(
             (r) => path(r) === `/api${API}/accounts` && /q=silver/i.test(r.url()),
           );
-          await page.keyboard.press('Enter');
+          // The help for the typed name (tSaleAc_KeyDown) is the list that opens for it; Enter picks from it.
           await label(page, 'Sales Ac')
             .locator('xpath=..')
             .getByText('GMSAS', { exact: true })

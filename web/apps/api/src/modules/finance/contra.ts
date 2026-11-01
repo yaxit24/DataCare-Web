@@ -12,7 +12,7 @@ import {
 import {
   completeFinanceScope,
   configuredBookTx,
-  createIdentityTx,
+  createFinanceIdentityTx,
   editIdentityTx,
   insertDesktopDeleteAuditTx,
   insertHiddenIdentityTx,
@@ -21,6 +21,7 @@ import {
   text,
   voucherKey,
   type VoucherIdentity,
+  assertFinanceVoucherDateTx,
 } from './lifecycle.js';
 import { FinanceValidationError, type FinanceResult } from './finance.js';
 
@@ -150,6 +151,7 @@ export async function postContra(
   const tenantId = input.scope.tenantId;
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
   const write = async (tx: any, identity: VoucherIdentity): Promise<FinanceResult> => {
+    await assertFinanceVoucherDateTx(tx, input.scope, identity.voucherDate);
     const vchNo = identity.vchNo;
     const key = {
       CO_CODE: input.scope.coCode,
@@ -221,7 +223,7 @@ export async function postContra(
   };
   if (lifecycle) return write(lifecycle.tx, lifecycle.identity);
   return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) =>
-    write(tx, await createIdentityTx(tx, input.scope, vchDate, input.mainUser)),
+    write(tx, await createFinanceIdentityTx(tx, input.scope, vchDate, input.mainUser)),
   );
 }
 
@@ -309,6 +311,8 @@ export async function editContra(
   const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
   return withTxBudget(prisma, input.scope.tenantId, 'voucher', async (tx: any) => {
     requireBookFamily(await configuredBookTx(tx, input.scope), 'CONTRA', 'contra');
+    // TR_CONTRA.cs:2680-2691 checks the year before the lock date that editIdentityTx enforces.
+    await assertFinanceVoucherDateTx(tx, input.scope, requestedDate);
     const { identity } = await editIdentityTx(tx, {
       table: 'CONTRA_DATA',
       scope: input.scope,

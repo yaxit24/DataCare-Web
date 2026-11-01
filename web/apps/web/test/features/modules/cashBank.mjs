@@ -16,6 +16,8 @@ import { FIXTURE_MANIFEST, PARTIES, USERS } from '../fixtures/catalogue.mjs';
  */
 const RECEIPT_BOOK = 'RCT';
 const PAYMENT_BOOK = 'PAY';
+const DATE_OUTSIDE_YEAR_MESSAGE =
+  'You Cant Save Entry Because Voucher Date Not In Current Year... Please Change Date...';
 const as = (user, slot) => ({
   user,
   slot,
@@ -95,6 +97,49 @@ const partyBalance = async (ctx, ac) =>
       ac,
     )
   )[0].bal;
+
+const receiptCount = async (ctx) =>
+  (
+    await ctx.rows(
+      `SELECT (SELECT count(DISTINCT "VCH_NO") FROM "CASH_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${RECEIPT_BOOK}')::int vch,
+              (SELECT count(*) FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${RECEIPT_BOOK}')::int ac`,
+    )
+  )[0];
+const yearOpening = async (ctx) =>
+  (
+    await ctx.rows(
+      `SELECT left("OP_DATE"::text,10) op FROM "YEAR_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' ORDER BY "OP_DATE" DESC LIMIT 1`,
+    )
+  )[0].op;
+const dayBefore = (iso) => {
+  const d = new Date(`${iso}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - 1);
+  return d.toISOString().slice(0, 10);
+};
+async function recentRow(page, vchNo) {
+  const toggle = page.getByRole('button', { name: '▸ Recent vouchers', exact: true });
+  if (await toggle.isVisible().catch(() => false)) await toggle.click();
+  const cell = page.getByRole('cell', { name: vchNo, exact: true }).last();
+  await cell.waitFor();
+  return cell.locator('xpath=..');
+}
+async function loadReceipt(page, vchNo) {
+  const row = await recentRow(page, vchNo);
+  await row.getByRole('button', { name: 'Load', exact: true }).click();
+  await page.getByRole('button', { name: `Update #${vchNo}`, exact: true }).waitFor();
+}
+async function deleteLoaded(page, vchNo) {
+  const [response] = await Promise.all([
+    page.waitForResponse(
+      (r) =>
+        /\/api\/receipts\//.test(new URL(r.url()).pathname) && r.request().method() === 'DELETE',
+    ),
+    page.getByRole('button', { name: 'Delete', exact: true }).first().click(),
+  ]);
+  return { response, vchNo };
+}
+const receipt = (page, amount = 5000) =>
+  enter(page, { path: '/txn/receipt', party: PARTIES.local.code, amount, label: 'Save Receipt' });
 
 export const cashBank = {
   feature: 'cash-bank',
@@ -390,35 +435,235 @@ export const cashBank = {
       'T06',
       'Card and UPI receipts (CARD_DATA, UPI_DATA) and bank cheques are the next cases of this module.',
     ),
-    pending(
-      'reopen',
+    C(
+      'refusal.date-outside-year',
+      'T06',
+      'refusal',
+      'TR_CASH.cs:2937: a receipt dated the day before the year opens is refused ("Voucher Date Not In Current Year"), and nothing is written',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const date = dayBefore(await yearOpening(ctx));
+        const before = await receiptCount(ctx);
+        await openForm(page, '/txn/receipt');
+        await page.getByLabel('Voucher date', { exact: true }).fill(date);
+        await pickParty(page, PARTIES.local.code);
+        await page.getByLabel('Amount', { exact: true }).fill('900');
+        const response = await save(page, 'Save Receipt');
+        const body = await response.text();
+        assert.equal(response.status(), 400, body);
+        assert.match(
+          body,
+          new RegExp(DATE_OUTSIDE_YEAR_MESSAGE.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
+        );
+        assert.deepEqual(await receiptCount(ctx), before);
+        return {
+          observation: `dated ${date}: ${response.status()} ${DATE_OUTSIDE_YEAR_MESSAGE}`,
+          expected: { status: 400, message: DATE_OUTSIDE_YEAR_MESSAGE, written: 0 },
+          database: { before },
+        };
+      },
+      {
+        expected: { status: 400, message: DATE_OUTSIDE_YEAR_MESSAGE, written: 0 },
+        observe: async (ctx) => ({ counts: await receiptCount(ctx) }),
+      },
+    ),
+    C(
+      'reopen.recent-list',
       'T07',
-      'Reopen is exercised inside reopen-edit-delete.receipt; a lossless reopen case follows.',
+      'read-only',
+      'The recent list shows the saved receipt with the party and the amount 5,000',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const vchNo = await receipt(page);
+        const cells = (await (await recentRow(page, vchNo)).locator('td').allInnerTexts()).map(
+          (t) => t.trim(),
+        );
+        assert.equal(cells[3], '5,000', `the recent list shows Total ${cells[3]}`);
+        return { observation: `recent list: ${cells.slice(0, 4).join(' | ')}`, expected: '5,000' };
+      },
     ),
-    pending('unchanged-save', 'T08', 'Follows the lossless reopen case.'),
-    pending(
-      'delete',
+    C(
+      'edit.unchanged-save',
+      'T08',
+      'mutation',
+      'An unchanged save of a reopened receipt keeps its number, hidden number, legs and the party balance',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const vchNo = await receipt(page);
+        const head = () =>
+          ctx.rows(
+            `SELECT "VCH_NO","HD_VCH_NO","REC_AMT"::float amt,"VCH_DATE"::date::text d FROM "CASH_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${RECEIPT_BOOK}' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+            vchNo,
+          );
+        const [before, legsBefore] = [await head(), await legs(ctx, RECEIPT_BOOK, vchNo)];
+        const party0 = await partyBalance(ctx, PARTIES.local.code);
+        await loadReceipt(page, vchNo);
+        const response = await save(page, `Update #${vchNo}`);
+        assert.equal(response.status(), 200, await response.text());
+        assert.deepEqual(await head(), before);
+        assert.deepEqual(await legs(ctx, RECEIPT_BOOK, vchNo), legsBefore);
+        assert.equal(await partyBalance(ctx, PARTIES.local.code), party0);
+        return {
+          observation: `receipt ${vchNo}: unchanged save kept ${legsBefore.length} legs`,
+          expected: 'nothing changes',
+          database: { before },
+          downstream: { legs: legsBefore.length },
+        };
+      },
+    ),
+    C(
+      'delete.audit',
       'T10',
-      'Delete is exercised inside reopen-edit-delete.receipt; the DELETE_DATA audit case follows.',
+      'mutation',
+      'TR_CASH delete: the receipt and its legs go, the party balance returns, and DELETE_DATA names the user',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const party0 = await partyBalance(ctx, PARTIES.local.code);
+        const vchNo = await receipt(page);
+        await loadReceipt(page, vchNo);
+        const { response } = await deleteLoaded(page, vchNo);
+        assert.equal(response.status(), 200, await response.text());
+        assert.deepEqual(await legs(ctx, RECEIPT_BOOK, vchNo), []);
+        assert.equal(
+          Math.round(((await partyBalance(ctx, PARTIES.local.code)) - party0) * 100) / 100,
+          0,
+        );
+        const audit = await ctx.rows(
+          `SELECT btrim("DELETE_USER"::text) du FROM "DELETE_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${RECEIPT_BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        assert.deepEqual(
+          audit.map((a) => a.du),
+          [USERS.admin.user],
+        );
+        return {
+          observation: `receipt ${vchNo} deleted; DELETE_USER ${audit[0]?.du}`,
+          expected: { remaining: 0, deleteUser: USERS.admin.user },
+          database: { audit },
+          downstream: { remaining: 0 },
+        };
+      },
     ),
-    pending(
-      'rights',
+    C(
+      'rights.clerk-no-receipt',
       'T11',
-      'The catalogue clerk has no cash/bank rights yet; a rights row follows.',
+      'refusal',
+      'USER_SET grants the clerk Sales Invoice only ("You Have No Rights", TR_CASH): the clerk cannot save a receipt',
+      async (ctx) => {
+        const clerk = await ctx.session(as(USERS.clerk.user));
+        const before = await receiptCount(ctx);
+        await clerk.page.goto('/txn/receipt');
+        await clerk.page.waitForTimeout(1500);
+        let status = null;
+        if (
+          await clerk.page
+            .getByLabel('Party account', { exact: true })
+            .isVisible()
+            .catch(() => false)
+        ) {
+          await pickParty(clerk.page, PARTIES.local.code).catch(() => {});
+          await clerk.page
+            .getByLabel('Amount', { exact: true })
+            .fill('100')
+            .catch(() => {});
+          status = (await save(clerk.page, 'Save Receipt').catch(() => null))?.status() ?? null;
+          assert.notEqual(status, 201);
+        }
+        assert.deepEqual(await receiptCount(ctx), before);
+        return {
+          observation: `clerk save answered ${status ?? 'nothing'}`,
+          expected: 'no write',
+          database: { before },
+        };
+      },
     ),
-    pending(
-      'concurrency',
+    C(
+      'concurrency.double-delete',
       'T12',
-      'Receipts and payments have no version token yet (N51 covers sales and purchases so far).',
+      'refusal',
+      'Two operators delete the same receipt: the second is refused and the party balance returns once',
+      async (ctx) => {
+        const first = await ctx.session(as(USERS.admin.user, 'operator-1'));
+        const vchNo = await receipt(first.page);
+        const second = await ctx.session(as(USERS.admin.user, 'operator-2'));
+        await openForm(second.page, '/txn/receipt');
+        await loadReceipt(second.page, vchNo);
+        await loadReceipt(first.page, vchNo);
+        const before = await partyBalance(ctx, PARTIES.local.code);
+        const one = (await deleteLoaded(first.page, vchNo)).response.status();
+        const two = (await deleteLoaded(second.page, vchNo)).response.status();
+        const after = await partyBalance(ctx, PARTIES.local.code);
+        assert.equal(one, 200);
+        assert(two >= 400 && two < 500, `second delete answered ${two}`);
+        assert.equal(Math.round((after - before) * 100) / 100, 5000);
+        return {
+          observation: `first delete ${one}, second ${two}; party ${before} → ${after}`,
+          expected: 'second refused; balance returned once',
+          database: { before, after },
+        };
+      },
     ),
-    pending('retry', 'T13', 'Idempotency (N52) is not on the receipt routes yet.'),
+    C(
+      'retry.double-click',
+      'T13',
+      'mutation',
+      'A double-click on Save Receipt creates one receipt',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const before = await receiptCount(ctx);
+        await openForm(page, '/txn/receipt');
+        await pickParty(page, PARTIES.local.code);
+        await page.getByLabel('Amount', { exact: true }).fill('750');
+        await page.getByRole('button', { name: 'Save Receipt', exact: true }).dblclick();
+        await page.waitForTimeout(2500);
+        const after = await receiptCount(ctx);
+        assert.equal(after.vch - before.vch, 1);
+        return {
+          observation: `${after.vch - before.vch} receipt created`,
+          expected: 1,
+          database: { before, after },
+          downstream: { created: after.vch - before.vch },
+        };
+      },
+    ),
     pending('rollback', 'T14', 'No fault injector in the harness yet (G173 / N166).'),
     pending(
       'settings',
       'T15',
       'The cash-limit setting is covered by refusal.cash-limit; employee-mandatory follows.',
     ),
-    pending('journey', 'T18', 'The party ledger and cash book reports are checked in package L6.'),
+    C(
+      'journey.receipt-then-payment',
+      'T18',
+      'mutation',
+      'A 5,000 receipt and a 3,000 payment for the same party: the party moves by −2,000 and the cash by +2,000',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const [party0, cash0] = [
+          await partyBalance(ctx, PARTIES.local.code),
+          await partyBalance(ctx, 'CASH'),
+        ];
+        await receipt(page, 5000);
+        await enter(page, {
+          path: '/txn/payment',
+          party: PARTIES.local.code,
+          amount: 3000,
+          label: 'Save Payment',
+        });
+        const [party1, cash1] = [
+          await partyBalance(ctx, PARTIES.local.code),
+          await partyBalance(ctx, 'CASH'),
+        ];
+        const delta = (a, b) => Math.round((a - b) * 100) / 100;
+        assert.deepEqual([delta(party1, party0), delta(cash1, cash0)], [-2000, 2000]);
+        return {
+          observation: `party Δ ${delta(party1, party0)}, cash Δ ${delta(cash1, cash0)}`,
+          expected: { partyDelta: -2000, cashDelta: 2000 },
+          database: { party0, party1, cash0, cash1 },
+          downstream: { partyDelta: delta(party1, party0) },
+        };
+      },
+    ),
     C(
       'create.bank-receipt',
       'T02',

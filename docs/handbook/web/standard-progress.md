@@ -6,10 +6,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 21 | 17 | 0 |
+| Lite (first, D32) | 49 | 24 | 19 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
 | Standard (added by Standard) | 36 | 0 | 0 | 0 |
-| **Standard total** | **114** | **22** | **18** | **0** |
+| **Standard total** | **114** | **25** | **20** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
@@ -26,10 +26,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | ExtraTran | Approval Rtn | `/txn/tour-return` | PARTIAL | — | no module | — |
 | ExtraTran | Fine Jv Entry | `/txn/fine-jv` | PARTIAL | fine-jv | module green | — |
 | Master | Party | `/masters/party`, `/masters/accounts` | PARTIAL | — | no module | — |
-| Master | Address | `/masters/addresses` | PARTIAL | — | no module | — |
-| Master | Product | `/masters/products` | PARTIAL | — | no module | — |
+| Master | Address | `/masters/addresses` | PARTIAL | address-master | module green | — |
+| Master | Product | `/masters/products` | PARTIAL | product-master | module green | — |
 | Master | Group | `/masters/groups` | PARTIAL | group-master | module green | — |
-| Master | Item | `/masters/items` | PARTIAL | — | no module | — |
+| Master | Item | `/masters/items` | PARTIAL | item-master | module green | — |
 | Master | AutoItem | `/masters/auto-item` | PARTIAL | — | no module | — |
 | Master | Employee | `/masters/employees` | PARTIAL | employee-master | module green | — |
 | Master | Tax | `/masters/taxes` | PARTIAL | tax-master | module green | — |
@@ -63,7 +63,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Transaction | Cash Payment | `/txn/payment` | PARTIAL | cash-bank | module green | — |
 | Transaction | Bank Received | `/txn/receipt?mode=BANK` | PARTIAL | cash-bank | module green | — |
 | Transaction | Bank Payment | `/txn/payment?mode=BANK` | PARTIAL | cash-bank | module green | — |
-| Transaction | Contra Entry | `/txn/contra` | PARTIAL | contra-entry | module green | — |
+| Transaction | Contra Entry | `/txn/contra` | PARTIAL | contra | module, 1 open | G37 |
 
 ## Basic — 29 menus (added by Basic)
 

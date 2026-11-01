@@ -35,6 +35,9 @@ import { employeeMaster } from './modules/employeeMaster.mjs';
 import { taxMaster } from './modules/taxMaster.mjs';
 import { autoItem } from './modules/autoItem.mjs';
 import { groupMaster } from './modules/groupMaster.mjs';
+import { productMaster } from './modules/productMaster.mjs';
+import { addressMaster } from './modules/addressMaster.mjs';
+import { itemMaster } from './modules/itemMaster.mjs';
 import { runSurface } from './surface/runner.mjs';
 
 /**
@@ -71,6 +74,9 @@ const MODULES = [
   taxMaster,
   autoItem,
   groupMaster,
+  productMaster,
+  addressMaster,
+  itemMaster,
 ];
 
 const artifacts = resolve(webRoot, 'test-results/feature-e2e');
