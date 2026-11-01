@@ -782,7 +782,13 @@ route('Membership/Gold Adjust', [
   'DELETE /scheme/gold-adjust/:vchNo',
 ]);
 
-route('Masters/Auto Item', ['POST /masters/auto-item']);
+// MS_AUTO_ITEM with CurMast 'AutoItem' (N219): the group help, the product grid and the save (an update, as the
+// desktop's save after DISPLAY_DATA checks the edit right).
+route('Masters/Auto Item', [
+  'GET /masters/auto-item',
+  'GET /masters/auto-item/groups',
+  'POST /masters/auto-item',
+]);
 // MS_EMP (N211): the Employee master's own screen; the generic /masters/employees routes stay for imports.
 route('Masters/Employees', [
   'GET /masters/employee-master',
@@ -1028,6 +1034,7 @@ const PRINT_ROUTES = new Set([
 
 const UPDATE_POST_ROUTES = new Set([
   'POST /masters/item-master/:code/tag-values',
+  'POST /masters/auto-item',
   'POST /stock/tag-image',
   'POST /sales-orders/:vchNo/image',
   'POST /tour-orders/:vchNo/image',

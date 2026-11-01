@@ -169,6 +169,13 @@
         "web/apps/api/src/modules/masters/itemMaster.ts",
         "web/apps/api/src/routes/itemMaster.ts"
       ]
+    },
+    "autoItem": {
+      "covers": [
+        "web/apps/web/app/(app)/masters/auto-item/page.tsx",
+        "web/apps/api/src/modules/masters/autoItem.ts",
+        "web/apps/api/src/routes/autoItem.ts"
+      ]
     }
   }
 }

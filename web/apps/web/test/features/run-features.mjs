@@ -33,6 +33,7 @@ import { itemOpening } from './modules/itemOpening.mjs';
 import { tagCancel } from './modules/tagCancel.mjs';
 import { employeeMaster } from './modules/employeeMaster.mjs';
 import { taxMaster } from './modules/taxMaster.mjs';
+import { autoItem } from './modules/autoItem.mjs';
 import { groupMaster } from './modules/groupMaster.mjs';
 import { productMaster } from './modules/productMaster.mjs';
 import { addressMaster } from './modules/addressMaster.mjs';
@@ -71,6 +72,7 @@ const MODULES = [
   tagCancel,
   employeeMaster,
   taxMaster,
+  autoItem,
   groupMaster,
   productMaster,
   addressMaster,
