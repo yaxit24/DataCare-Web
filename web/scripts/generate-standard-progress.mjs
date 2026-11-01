@@ -50,8 +50,10 @@ const routeOfPage = (file) => {
     .filter((part) => !/^\(.*\)$/.test(part))
     .join('/')}`;
 };
-/** coverage-map key (camelCase) → feature id used by baseline.json (kebab-case). */
-const featureId = (key) => key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+/** coverage-map key → feature id used by the runner and baseline.json. */
+const FEATURE_ID_OVERRIDES = { contraEntry: 'contra' };
+const featureId = (key) =>
+  FEATURE_ID_OVERRIDES[key] ?? key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
 const moduleByRoute = new Map();
 for (const [key, entry] of Object.entries(coverage)) {
   for (const file of entry.covers ?? []) {

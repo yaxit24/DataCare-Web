@@ -89,9 +89,14 @@ export async function recentVouchers(
     const nameSel = cols.has('AC_NAME') ? '"AC_NAME"' : `''`;
     const typeSel = cols.has('VCH_TYPE') ? `coalesce("VCH_TYPE",'')` : `''`;
     const acSel = cols.has('AC_CODE') ? `coalesce("AC_CODE",'')` : `''`;
+    // CONTRA_DATA (contra, fine JV, journal) has no amount column; each money voucher is a set of one-sided
+    // DR_AMT / CR_AMT rows. Its total is the amount transferred, the voucher's summed debits (the desktop voucher
+    // list selects SUM(CR_AMT) and SUM(DR_AMT), TR_CONTRA.cs:3140-3144). Compute it before DISTINCT ON.
     const amtSel = amtCol
       ? `coalesce(NULLIF(${qid(amtCol)}::text,'')::numeric,0)::float`
-      : '0::float';
+      : cols.has('DR_AMT')
+        ? `coalesce(sum(coalesce(NULLIF("DR_AMT"::text,'')::numeric,0)) OVER (PARTITION BY "VCH_NO"),0)::float`
+        : '0::float';
     const dateSel = cols.has('VCH_DATE') ? `"VCH_DATE"::text` : 'NULL';
     // The header table can hold several rows per voucher (party leg + tax + old-gold components share one
     // VCH_NO). The desktop voucher navigator lists ONE row per voucher, so collapse with DISTINCT ON and
@@ -100,6 +105,7 @@ export async function recentVouchers(
       '"VCH_NO"',
       cols.has('AC_CODE') ? `(CASE WHEN coalesce("AC_CODE",'')<>'' THEN 0 ELSE 1 END)` : '',
       amtCol ? `${amtSel} DESC` : '',
+      !amtCol && cols.has('SR_NO') ? '"SR_NO"' : '',
       cols.has('VCH_DATE') ? `"VCH_DATE" DESC NULLS LAST` : '',
     ]
       .filter(Boolean)

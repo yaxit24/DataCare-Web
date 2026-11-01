@@ -67,6 +67,18 @@ const LAST_YEAR = `${startYear - 1}-${startYear}`;
       await sale('01', LAST_YEAR, 'SL1', 'Last year', 2000);
       await sale('02', YEAR, 'SL1', 'Other location', 3000);
       await sale('01', YEAR, 'SL2', 'Other book', 4000);
+      // TR_CONTRA.cs:3140-3144 lists SUM(CR_AMT) and SUM(DR_AMT) per voucher. The one Total column in
+      // VoucherList represents one balanced side, so this transfer is 12,345.67 rather than 0 or 24,691.34.
+      await owner.$executeRawUnsafe(
+        `INSERT INTO "CONTRA_DATA"(
+           tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE",
+           "VCH_TYPE","AC_CODE","AC_NAME","DR_AMT","CR_AMT","CRDR_TYPE")
+         VALUES ($1,'01','01',$2,'CON','00002',1,$3::date,'CON','BANK','BANK A/C',12345.67,0,'D'),
+                ($1,'01','01',$2,'CON','00002',2,$3::date,'CON','CASH','CASH ON HAND',0,12345.67,'C')`,
+        tenantId,
+        YEAR,
+        `${startYear}-06-16`,
+      );
       await owner.$executeRawUnsafe(
         `INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED")
        VALUES($1,'01',$2,$3,'ADMIN','Y','Y','Y','N')`,
@@ -136,6 +148,29 @@ const LAST_YEAR = `${startYear - 1}-${startYear}`;
           )
         ).map((r) => r.acName),
       ).toEqual(['Other location']);
+    });
+
+    it('reports a balanced CONTRA_DATA voucher total from its debit side', async () => {
+      const rows = await recentVouchers(
+        runtime,
+        { tenantId, coCode: '01', lcCode: '01', coYear: YEAR },
+        'CONTRA_DATA',
+        'CON',
+      );
+      expect(rows).toEqual([
+        {
+          coCode: '01',
+          lcCode: '01',
+          coYear: YEAR,
+          coBook: 'CON',
+          vchNo: '00002',
+          vchDate: `${startYear}-06-16`,
+          vchType: 'CON',
+          acCode: 'BANK',
+          acName: 'BANK A/C',
+          total: 12345.67,
+        },
+      ]);
     });
 
     it('fails closed without a complete scope instead of listing every year and location', async () => {

@@ -803,6 +803,36 @@ route('Masters/Taxes', [
   'PUT /masters/tax-master/:code',
   'DELETE /masters/tax-master/:code',
 ]);
+// MS_GROUP (N214): the Item Group master's own screen, with the item update its save makes.
+route('Masters/Item Groups', [
+  'GET /masters/group-master',
+  'GET /masters/group-master/print',
+  'GET /masters/group-master/accounts',
+  'GET /masters/group-master/trade-types',
+  'GET /masters/group-master/:code',
+  'POST /masters/group-master',
+  'PUT /masters/group-master/:code',
+  'DELETE /masters/group-master/:code',
+]);
+// MS_PRODUCT with CurMast 'Product' (N215): the Product master's own screen.
+route('Masters/Products', [
+  'GET /masters/product-master',
+  'GET /masters/product-master/:code',
+  'POST /masters/product-master',
+  'PUT /masters/product-master/:code',
+  'DELETE /masters/product-master/:code',
+]);
+// MS_ADD_MAST (N217): the Address master's own screen.
+route('Masters/Addresses', [
+  'GET /masters/address-master',
+  'GET /masters/address-master/print',
+  'GET /masters/address-master/names',
+  'GET /masters/address-master/mobile',
+  'GET /masters/address-master/:code',
+  'POST /masters/address-master',
+  'PUT /masters/address-master/:code',
+  'DELETE /masters/address-master/:code',
+]);
 // MS_ITEM (N218): the Item master's own screen, with its Tag Value Update panel.
 route('Masters/Items', [
   'GET /masters/item-master',
@@ -945,6 +975,8 @@ route('Reports/Scheme Monthly Report', ['GET /reports/scheme-monthly']);
 const PRINT_ROUTES = new Set([
   'GET /masters/employee-master/print',
   'GET /masters/tax-master/print',
+  'GET /masters/group-master/print',
+  'GET /masters/address-master/print',
   'POST /estimate/pdf',
   'GET /reports/account-ledger/:acCode/export.pdf',
   'GET /tour-orders/confirmation',
