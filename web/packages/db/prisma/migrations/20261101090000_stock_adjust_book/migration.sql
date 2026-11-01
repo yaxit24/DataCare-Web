@@ -1,4 +1,4 @@
--- N220 (desktop TR_TAG_CAN, Stock Adjust). Web provisioning created the Stock Adjust book SAJ as an in book with its
+-- Stock Adjust (desktop TR_TAG_CAN on a STOCK ADJUST book). Web provisioning created the Stock Adjust book SAJ as an in book with its
 -- own code as the short name and no register table. The desktop's Stock Adjust book is an out book with short name
 -- STADJ (MS_UPDATE.cs:24207 "Only Stock Adjust", :25049 BOOK_INOUT 'O'), and TR_TAG_CAN books number from
 -- BAR_CAN_DATA (MS_UPDATE.cs:7825). Only rows the web wrote match: book code SAJ, short name SAJ or blank.

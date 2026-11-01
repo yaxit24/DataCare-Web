@@ -243,6 +243,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G230 | Medium | The Address master was a generic field form without the desktop's tabs, combos, helps, mobile check, delete cascade or next code | `unified/src/csharp/DataCareNext/MS_ADD_MAST.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7610-7619`; `web/apps/api/form-specs/DataCareNext.MS_ADD_MAST.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts` | MS_ADD_MAST keeps a location's addresses on three tabs, offers the next code of the location, fills its combos from the company's addresses and STATE_MAST, refuses a mobile the company already has, and deletes an address with its opening rows of the year (`MS_ADD_MAST.cs:3119-4544`). The web rendered the generic form keyed by CO_CODE + AC_CODE: no tabs, no next code, no combos, help or name type-ahead, no mobile check, its config left the three dates out as if the account master kept them, and its delete left the address's OP_DATA and AC_DATA opening rows behind. | N217 |
 | G231 | High | The Item master was a generic field form without the desktop's helps, item code from product and group, exists question, leave checks, settings boxes, delete checks or Tag Value Update | `unified/src/csharp/DataCareNext/MS_ITEM.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7650-7659`; `web/apps/api/form-specs/DataCareNext.MS_ITEM.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts`; `web/apps/web/lib/lookupEnter.ts` | MS_ITEM takes the product and group from their helps, makes the item code and name from them and asks before reusing a code, refuses a taken code or name on leaving it, shows the setting-driven boxes, writes the combo letters and Val of the number boxes, refuses deleting an item with stock or a default code, and updates the item's tags from its Tag Value Update panel (`MS_ITEM.cs:2748-4015`). The web rendered the generic form: free-typed product and group, no item code or name from them, no question or leave checks, no setting-driven boxes, a delete that only failed on a foreign key, and no tag update. Its lookups also dropped every answer for a box that upper-cases typing. | N218 |
 | G232 | High | Auto Item reversed the desktop's item code, offered the default products and had no group help, grid keys, MinStk, rights or most columns | `unified/src/csharp/DataCareNext/MS_AUTO_ITEM.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7640-7649` | `web/apps/web/app/(app)/masters/auto-item/page.tsx`; `web/apps/api/src/modules/masters/autoItem.ts`; `web/apps/api/src/routes/txn.ts` | MS_AUTO_ITEM's AutoItem mode lists the company's products but the default ones for a group chosen from its help, marks the ones the group already has, and makes PR_CODE + GR_CODE items named product name + group code with the desktop's columns, under the edit right (`MS_AUTO_ITEM.cs:1640-3493`). The web made GR_CODE + PR_CODE items named group + product, wrote eight columns, offered every product including the default ones, and had no group help, grid keys, MinStk, rights or Print and Delete checks. | N219 |
+| G235 | High | Stock Adjust was a separate writer citing a desktop form that does not exist, posting stock rows the desktop never writes, with no register, sign rule, lot columns, reopen or print | `unified/src/csharp/DataCareNext/TR_TAG_CAN.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:8616-8627`; `unified/src/csharp/DataCareNext/Ac_Stock.cs:48-58`; `unified/src/csharp/DataCareNext/MS_UPDATE.cs:24207` | `web/apps/web/app/(app)/txn/stock-adjust/page.tsx`; `web/apps/api/src/modules/stock/stock.ts`; `web/apps/api/src/modules/ops/seedCompany.ts` | The Stock Adjust menu opens TR_TAG_CAN on a STOCK ADJUST book: the Tag Cancel grid with a + / - Sign column and optional lot columns, a signed register, MAIN_STOCK rows in or out by sign, LOT_DETL rows for a lot, reopen, edit, delete and TagCanBill (`TR_TAG_CAN.cs:2514-5440`, `Ac_Stock.cs:53`, `:642-646`). The web had its own writer that cited a form TR_STK_ADJ, posted MAIN_STOCK rows with VCH_TYPE STADJ, BOOK_NAME STOCK ADJ and TR_TYPE A and no register, so nothing could be reopened or printed; and it provisioned the book as an in book with its code as the short name. | N222 |
 
 ## 4. Decisions D23–D28
 
@@ -2964,6 +2965,61 @@ added row 4 with the cursor in its Pr Code, and Enter on its blank Pr Code went 
 in red; F1 on row 3 copied the Y above and Save made RGG22; Esc in the grid went to Save and Esc in the group code left
 the screen. Desktop-runtime comparison and parent acceptance remain open.
 
+### N222 — Stock Adjust is the desktop TR_TAG_CAN on a STOCK ADJUST book (G235, Lite L3)
+
+Other → Stock Adjust opens TR_TAG_CAN after CurBookHelp("STOCK ADJUST") (`MDI_FORM.cs:8616-8627`), the form Tag Cancel and
+Tag Transfer use. Its grid (MSG_CLEAR `TR_TAG_CAN.cs:2514-2566`) is the Tag Cancel grid without LbrRate, LbrAmt and OthAmt,
+with Sign after Size, and TagLot and ItmLot after TagNo only when CO_SET_NEW.PURC_LOT and ITM_WITH_LOT_STK are Y. The web now
+runs it as the Tag Cancel writer's third mode (`web/apps/api/src/modules/stock/tagCancel.ts`,
+`web/apps/api/src/modules/stock/tagCancelRows.ts`) behind its own form right, and the page is the shared form in that
+mode (`web/apps/web/components/TagCancelForm.tsx`). The provisioned book is the desktop's: short name STADJ, an out book
+(`MS_UPDATE.cs:24207`, `:25049`), numbered from BAR_CAN_DATA and BAR_CAN_DETL (`:7825`); a data migration moves the SAJ
+books the web provisioned before.
+
+Keys: Enter on a blank TagNo moves on (`:3866`), so a line may be a loose item from the ItCode help; a tag fills its line
+from BAR_DETL as in Tag Cancel; Enter on Sign needs + or - ("Please Insert Item Sign + or - then Try", `:4259-4263`); a new
+row starts with the sign of the row above (CommPassAdd `:2835-2838`). The TagLot help lists the location's LOT_DETL lots
+with a signed balance and the ItmLot help its loose MAIN_STOCK lots (`:4089-4188`); a choice fills the item, the pieces
+(when the lot has gross weight), the gross and net weight and the less weight between them, and a blank lot is allowed.
+
+Save writes the register with each line's sign (`:5138-5145`); Tag_Can_Stk posts one MAIN_STOCK row per line, TR_TYPE I
+for + and O for - (`Ac_Stock.cs:53`); StkAdj_Lot posts a LOT_DETL row for a line with a TagLot (`Ac_Stock.cs:642-646`); no
+DM_DATA is written (Dm_Tag_Cancel_Detl is for TAG CANCEL books, `Ac_Stock.cs:824-828`). A - tag line takes the instance
+out of stock as a Tag Cancel line does; a + tag line adds a stock row without taking it out, and its delete gives nothing
+back. Delete asks "Are You Sure To Delete This Voucher now?" and removes the write set with one DELETE_DATA row per line;
+Print prints TagCanBill (`:5386-5440`), where a loose line reads "N - item name", as the desktop formula
+`if {BAR_CAN_DETL.TAG_NO} <> ''` gives for the stored N.
+
+Extra code found and removed: the web's Stock Adjust was a separate writer (`stockAdjust` and `deleteStockAdjust` in
+`web/apps/api/src/modules/stock/stock.ts`, routes POST /stock/adjust and DELETE /stock/adjust/:vchNo) that cited a desktop
+form TR_STK_ADJ, which does not exist, and posted MAIN_STOCK rows with VCH_TYPE STADJ, BOOK_NAME STOCK ADJ and TR_TYPE A
+and no register, so a voucher could not be reopened, edited or printed. Its two rounding helpers leave the kernel
+baseline with it.
+
+Deliberate differences: one transaction under the tag locks; a TagLot or ItmLot sent while its setting is off is refused; a
+replayed save of a loose line makes a second voucher (no idempotency key yet; a replayed tag line is refused because the
+tag is already out).
+
+Evidence: `stockAdjust.routes.db.test.ts` (6 cases through the real routes on forced RLS: the provisioned STADJ book; the
+menu's own right and another menu's book refused; the sign refusals, the Sign refused on the Tag Cancel menu and a hidden
+TagLot refused, with nothing written; the lifecycle with the signed register, I and O stock rows, the LOT_DETL row,
+reopen, edit, print with rights, delete and another tenant untouched; a + tag line; both lot helps with their balances),
+the tagCancelRows and tagCancelVoucher unit tests, and `routePolicy.test.ts` (719 routes) pass. The zero-mock
+`stock-adjust` module passes 18 of 18 cases, none blocked: T12 two operators adjusting one tag out (one voucher), T13 a
+replayed tag save refused, T14 a fault on the stock write rolling the voucher back, T15 Purchase LOT showing TagLot, its
+help filling the line and the save posting the - LOT_DETL row, T17 the Enter walk with the Sign refusal and Alt+S, T18 a
+tag adjusted out leaving the available-tags lookup sales use and coming back after the delete; `tag-cancel` T01 now
+checks that its grid keeps the labour columns and shows none of Stock Adjust's. Chrome DevTools on the demo stack: the
+grid showed Sr, TagNo, ItCode, Counter, Design, Size, Sign, BagWt, Pcs, GrWt, LsWt, NetWt, Ght%, GhtWt, Touch, West%,
+Fine, Mrp, KrCode with Save the only main button; Enter on the blank TagNo went to ItCode; GOLD from its help moved to
+Counter; X and Enter in Sign said "Please Insert Item Sign + or - then Try" and kept the cursor, + moved on to BagWt;
+5.5, 0.5 and 91.6 gave NetWt 5.000 and Fine 4.580; tag DT9001 filled line 2 (12.500, 12.000, 10.992) with the sign +
+copied from line 1, changed to -; Alt+S saved voucher 00001 with `1|N|GOLD|+|5.500|0.500|5.000|91.600|4.580|STADJ|O` and
+`2|DT9001|GOLD|-|12.500|0.000|12.000|91.600|10.992|STADJ|O` and the stock rows I/+ and O/-, the tag balance 0; Vch No
+00001 and Enter reopened both lines; TagCanBill showed both lines and the totals 18.000 / 17.000; Delete asked the desktop
+question, removed every row and wrote a DELETE_DATA row per line, and the tag balance went back to 1. Desktop-runtime
+comparison and parent acceptance remain open.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -3110,6 +3166,7 @@ the screen. Desktop-runtime comparison and parent acceptance remain open.
 | N217 | — | implemented-unverified, evidence in this change (G230: the Address master is MS_ADD_MAST with its tabs, next code, combos, helps, mobile check, rights and the delete of its opening rows) |
 | N218 | — | implemented-unverified, evidence in this change (G231: the Item master is MS_ITEM with its helps, item code from product and group, exists question, leave checks, setting-driven boxes, delete checks, rights and the Tag Value Update panel) |
 | N219 | — | implemented-unverified, evidence in this change (G232: Auto Item is MS_AUTO_ITEM's AutoItem mode with the group help, the product grid and its keys, the desktop write set, the refusals and the rights) |
+| N222 | — | implemented-unverified, evidence in this change (G235: Stock Adjust is TR_TAG_CAN on a STOCK ADJUST book with the Sign column, the signed register, I and O stock rows, the lot columns and LOT_DETL, reopen, edit, delete and TagCanBill) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

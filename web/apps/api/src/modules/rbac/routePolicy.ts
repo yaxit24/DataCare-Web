@@ -550,7 +550,7 @@ route('Inventory/Lot Management', [
   'PUT /stock/item-lot/:vchNo',
   'DELETE /stock/item-lot/:vchNo',
 ]);
-// Stock Adjust (N220): TR_TAG_CAN on a STOCK ADJUST book (MDI_FORM.cs:8616-8627), the Tag Cancel writer's third mode.
+// Stock Adjust (N222): TR_TAG_CAN on a STOCK ADJUST book (MDI_FORM.cs:8616-8627), the Tag Cancel writer's third mode.
 route('Inventory/Stock Adjust', [
   'GET /stock/stock-adjust',
   'GET /stock/stock-adjust/source',
