@@ -1,3 +1,4 @@
+import { formatDesktopDate } from '@datacare/core';
 import { formatVoucherNo } from '../vouchers/numbering.js';
 import { withTxBudget, SNAPSHOT_READ } from '../shared/txBudget.js';
 import { stageTagStockPrintRowsTx } from '../stock/tagPrint.js';
@@ -33,6 +34,13 @@ const flat = (prefix: string, row: Record<string, unknown> | undefined): ReportR
 };
 const itemBinding = (alias: string, row: Record<string, unknown> | null) =>
   flat(alias, { IT_NAME: null, HSN_CODE: null, PR_CODE: null, GR_CODE: null, ...row });
+const orderDisplayDates = (row: ReportRow): ReportRow =>
+  Object.fromEntries(
+    Object.entries(row).map(([key, value]) => [
+      key,
+      /(?:^|\.)(?:DATE|[A-Z0-9_]+_DATE)$/.test(key) ? formatDesktopDate(value) : value,
+    ]),
+  );
 
 export interface BindScope {
   tenantId: string;
@@ -198,11 +206,15 @@ export async function bindReport(
       }))
       .map((row) =>
         contract.orderDocument?.orderedItems ? orderParentFormulaValues(spec, row) : row,
-      );
-    const childRows = children.map((d) => ({
-      ...flat(contract.child!, d),
-      ...itemBinding('ITEM_MAST_IDTL', d.__item),
-    }));
+      )
+      .map((row) => (contract.orderDocument ? orderDisplayDates(row) : row));
+    const childRows = children.map((d) => {
+      const row = {
+        ...flat(contract.child!, d),
+        ...itemBinding('ITEM_MAST_IDTL', d.__item),
+      };
+      return contract.orderDocument ? orderDisplayDates(row) : row;
+    });
     const datasets = { [headerTable]: [flat(headerTable, h)], [contract.detail]: detailRows };
     let subreports: Record<string, BoundSubreport> | undefined;
     if (contract.orderDocument) {
@@ -215,7 +227,7 @@ export async function bindReport(
         received.some((row) => row.SR_NO == null)
       )
         return refuse('ambiguous-received-metal-serial');
-      const receivedRows = received.map((row) => flat('SL_PR_DETL', row));
+      const receivedRows = received.map((row) => orderDisplayDates(flat('SL_PR_DETL', row)));
       const timestamp = h.__voucherTime;
       if (
         typeof timestamp !== 'string' ||
@@ -240,13 +252,15 @@ export async function bindReport(
         timestamp,
         dataType,
       );
-      header = orderFormulaValues(
-        spec,
-        completeOrderFields(spec, header),
-        detailRows,
-        receivedRows,
-        { opening: fmt(balances[0]?.opening) || '0', closing: fmt(balances[0]?.closing) || '0' },
-        s.copy,
+      header = orderDisplayDates(
+        orderFormulaValues(
+          spec,
+          completeOrderFields(spec, header),
+          detailRows,
+          receivedRows,
+          { opening: fmt(balances[0]?.opening) || '0', closing: fmt(balances[0]?.closing) || '0' },
+          s.copy,
+        ),
       );
       subreports = {
         OrdRec: {

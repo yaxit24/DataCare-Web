@@ -1941,8 +1941,7 @@ example comment, broadens the direct-string-truncation rule for `dbText`/`txt` a
 the additional direct slices and local date helpers exposed by independent review. The date-normalization baseline is
 now empty, and
 `web/apps/api/test/kernelConformance.test.ts` requires it to stay empty. Browser form hydration now uses
-`toIsoDate`, while dedicated lists, messages and saved views use `formatDesktopDate`; the Order report renderer
-formats bound date fields at display time, and `web/apps/web/test/dateConformance.test.ts` guards the browser
+`toIsoDate`, while dedicated lists, messages and saved views use `formatDesktopDate`; the Order report binder formats bound date fields before rendering, and `web/apps/web/test/dateConformance.test.ts` guards the browser
 policies. The two fixed Sales Order G36 cases leave the shrink-only feature baseline. The original display behavior is covered by `web/packages/core/test/dates.test.ts`, `web/apps/api/test/documents.test.ts` and the
 `print.date-with-year` case of `web/apps/web/test/features/modules/salesInvoice.mjs`.
 
