@@ -208,6 +208,30 @@ export const purchaseInvoice = {
   },
   cases: [
     C(
+      'rights.voucher-list-follows-book-rights',
+      'T11',
+      'refusal',
+      'N207 (G220): the recent-voucher list reads a book only for a user who may open its menu (MDI_FORM.cs CurBookHelp).',
+      async (ctx) => {
+        const clerk = await ctx.session(as(USERS.clerk.user));
+        await clerk.page.goto('/txn/sales');
+        const status = (url) =>
+          clerk.page.evaluate(
+            async (u) => (await fetch(u, { credentials: 'include' })).status,
+            url,
+          );
+        const own = await status(`/api/vouchers/recent?table=PR_DATA&book=${BOOK}`);
+        const contra = await status('/api/vouchers/recent?table=CONTRA_DATA&book=CON');
+        assert.equal(own, 403);
+        assert.equal(contra, 403);
+        return {
+          observation: `clerk: PR_DATA ${BOOK} ${own}, CONTRA_DATA CON ${contra}`,
+          expected: 'the clerk lists only books whose menu it may open',
+          database: { unchanged: true },
+        };
+      },
+    ),
+    C(
       'entry.defaults',
       'T01',
       'read-only',

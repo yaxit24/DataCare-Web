@@ -300,6 +300,7 @@ export {
 export type { EditionAvailability, EditionCode, EditionPolicy, EditionTier } from './editions.js';
 export { FORM_EDITION, ROUTE_EDITION } from './editionTable.js';
 export { formatDesktopDate, toIsoDate } from './dates.js';
+export * from './tagKarigar.js';
 export {
   ITEM_OPENING_TYPES,
   isItemOpeningType,

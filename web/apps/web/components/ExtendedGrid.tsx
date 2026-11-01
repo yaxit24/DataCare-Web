@@ -83,6 +83,7 @@ export function ExtendedBodyCells<K extends string, L extends object>({
   row,
   baseColumns,
   setValue,
+  onLeave,
   cellProps,
   readOnlyFields,
 }: {
@@ -92,6 +93,8 @@ export function ExtendedBodyCells<K extends string, L extends object>({
   row: number;
   baseColumns: number;
   setValue: (row: number, key: K, value: string) => void;
+  /** Runs when a cell is left, for pages whose desktop grid works a row out in its LeaveCell. */
+  onLeave?: (row: number, key: K) => void;
   /** Supplies the page's own grid-cell attributes so keyboard navigation keeps working. */
   cellProps?: (row: number, column: number) => Record<string, unknown>;
   /**
@@ -118,6 +121,7 @@ export function ExtendedBodyCells<K extends string, L extends object>({
             style={{ width: 72, textAlign: 'right' }}
             value={String((line as Record<string, unknown>)[key] ?? '')}
             onChange={(event) => setValue(row, key, event.target.value)}
+            onBlur={onLeave ? () => onLeave(row, key) : undefined}
             readOnly={locked.has(key)}
             aria-readonly={locked.has(key)}
             title={locked.has(key) ? `${label} is locked by a company setting` : undefined}
