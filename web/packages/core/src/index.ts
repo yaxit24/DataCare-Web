@@ -241,6 +241,7 @@ export {
 } from './saleAmount.js';
 export type { SaleAmountLine, SaleAmountBasis } from './saleAmount.js';
 export {
+  normalizePurchaseExplicitFine,
   purchaseAmountType,
   purchaseAmountBasis,
   purchaseItemAmount,

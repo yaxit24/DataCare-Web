@@ -49,6 +49,7 @@ import {
 } from '../shared/settingsBehavior.js';
 import {
   purchaseLineAmounts,
+  normalizePurchaseExplicitFine,
   billTotals,
   toIsoDate,
   type LabourType,
@@ -237,7 +238,8 @@ const round3 = (n: number): number => Math.round((n + Number.EPSILON) * 1000) / 
 /** Resolve a purchase line's 3dp fine: standard items use (net+ght)×(touch+west)/100;
  * old-gold/Kun inputs use the TR_PURC.cs:7310-7317 less-touch + Kun-fine policy. */
 export function lineFine(line: PurchaseLineInput): number {
-  if (line.fineWt != null) return round3(Number(line.fineWt));
+  const explicitFine = normalizePurchaseExplicitFine(line.fineWt);
+  if (explicitFine != null) return explicitFine;
   const workflow =
     line.lesTouch != null || line.kunFine != null ? 'purchaseOldGold' : 'purchaseItem';
   return fineFor(workflow, line);

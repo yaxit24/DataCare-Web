@@ -2185,9 +2185,14 @@ Proof code is in `web/packages/core/test/purchaseAmount.test.ts`, `web/apps/api/
 ordinary-Purchase case in `web/apps/api/test/purchase.lifecycle.db.test.ts`, and
 `purchase-invoice.formula.whole-rupees` in `web/apps/web/test/features/modules/purchaseInvoice.mjs`. The lifecycle
 case checks PR_DETL component/detail values, PR_DATA header values, MAIN_STOCK, TAX_DATA, balanced AC_DATA and the
-Rojmel component projection. The zero-mock browser case checks the preview, saved values, stock, tax, ledger,
-Rojmel and Purchase Register through the real UI/PostgreSQL stack. These package-dependent proofs require CI in
-this checkout because `web/node_modules` is absent and the package registry is unavailable. The G5
+Rojmel component projection. The zero-mock browser proof now also reloads explicit 56,090.80 item and 2,375.25
+labour overrides, preserves an explicit zero, and compares the complete write set before and after an unchanged
+save. A separate zero-mock case loads `PR_AMT_TYPE=G`, enters `RATE_TYPE=P/1/K` through the grid, proves item
+amounts 3,000/1,200/12 in preview and persistence, reloads them, and restores company settings in `finally`. The
+explicit-fine boundary 9.1605 normalizes to 9.161 before item calculation, producing 9,161 at rate 1,000 where the
+raw value would produce 9,160. The original whole-rupee case continues to check the preview, saved values, stock,
+tax, ledger, Rojmel and Purchase Register through the real UI/PostgreSQL stack. These package-dependent proofs
+require CI in this checkout because `web/node_modules` is absent and the package registry is unavailable. The G5
 original-Windows comparison also remains unavailable because this environment has no desktop SQL secrets.
 N188 is therefore implemented-unverified, not accepted or verified.
 

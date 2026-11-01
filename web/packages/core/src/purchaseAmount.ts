@@ -31,6 +31,13 @@ export interface PurchaseLineAmounts {
   net: number;
 }
 
+/** Normalize an operator-entered Purchase fine to the persisted three-decimal cell contract. */
+export function normalizePurchaseExplicitFine(
+  value: Decimal.Value | null | undefined,
+): number | undefined {
+  return value == null ? undefined : round(value, PRECISION.fine);
+}
+
 /** CO_SET.PR_AMT_TYPE as ordinary Purchase uses it: blank/unknown means Fine Wise. */
 export function purchaseAmountType(value: unknown): PurchaseAmountType {
   const code = String(value ?? '')

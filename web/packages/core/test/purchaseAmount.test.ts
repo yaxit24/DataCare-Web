@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  normalizePurchaseExplicitFine,
   purchaseAmountBasis,
   purchaseItemAmount,
   purchaseLabourAmount,
@@ -32,6 +33,17 @@ describe('TR_PURC ordinary Purchase amount stages (G198/N188)', () => {
       labour: 2375,
       net: 58466,
     });
+  });
+
+  it('normalizes explicit fine before the whole-rupee item stage', () => {
+    const fine = normalizePurchaseExplicitFine(9.1605);
+    expect(fine).toBe(9.161);
+    expect(purchaseLineAmounts({ ...primary, fineWt: fine, rate: 1000 }, 'F', policy).item).toBe(
+      9161,
+    );
+    expect(purchaseLineAmounts({ ...primary, fineWt: 9.1605, rate: 1000 }, 'F', policy).item).toBe(
+      9160,
+    );
   });
 
   it('rounds exact item and labour midpoints to the even whole rupee', () => {

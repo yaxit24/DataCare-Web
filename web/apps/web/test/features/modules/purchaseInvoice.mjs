@@ -79,6 +79,27 @@ const EXPECT_ROUND = {
   total: 60220,
 };
 
+// Explicit fine 9.1605 normalizes to 9.161 before the whole-rupee item stage. At rate 1,000,
+// normalized fine produces 9,161; using the raw value would midpoint-to-even round 9,160.5 to 9,160.
+const LINE_FINE_BOUNDARY = {
+  item: ITEMS.gold.code,
+  pcs: '1',
+  gross: '10',
+  net: '10',
+  touch: '91.6',
+  rate: '1000',
+};
+const EXPECT_FINE_BOUNDARY = { fine: 9.161, metal: 9161, labour: 0, net: 9161 };
+
+const LINE_GROSS_RATE_TYPE = {
+  item: ITEMS.gold.code,
+  pcs: '3',
+  gross: '12',
+  net: '10',
+  touch: '90',
+  rate: '1000',
+};
+
 const field = (page, label) =>
   page
     .locator('.field')
@@ -98,6 +119,9 @@ async function openPurchase(page) {
   const book = page.getByRole('combobox', { name: 'Configured book', exact: true });
   for (let i = 0; i < 50 && (await book.inputValue()) !== BOOK; i++) await page.waitForTimeout(100);
   assert.equal(await book.inputValue(), BOOK, 'the provisioned PURCHASE book is selected');
+  const saveButton = page.getByRole('button', { name: 'Save Purchase', exact: true });
+  for (let i = 0; i < 50 && (await saveButton.isDisabled()); i++) await page.waitForTimeout(100);
+  assert.equal(await saveButton.isDisabled(), false, 'purchase settings loaded before save');
   return book;
 }
 async function pickSupplier(page, code) {
@@ -173,6 +197,38 @@ const stock = (ctx, v) =>
     `SELECT "IT_CODE" it,"ITM_SIGN" sign,"ITM_NWT"::float nwt FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "IT_CODE"`,
     v,
   );
+const purchaseWriteSet = async (ctx, v) => ({
+  header: await header(ctx, v),
+  detail: await ctx.rows(
+    `SELECT "SR_NO"::int sr,btrim(coalesce("RATE_TYPE"::text,'')) rate_type,
+            btrim(coalesce("URD_RATE_TYPE"::text,'')) urd_rate_type,"ITM_FINE"::float fine,
+            "ITM_AMT"::float item,"LBR_AMT"::float labour,"OTH_AMT"::float other,
+            "TOT_AMT"::float detail_total,"NET_AMT"::float detail_net
+       FROM "PR_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+    v,
+  ),
+  stock: await ctx.rows(
+    `SELECT "SR_NO"::int sr,btrim("IT_CODE"::text) item,"ITM_SIGN" sign,
+            "ITM_FINE"::float fine,"ITM_AMT"::float item_amount,"LBR_AMT"::float labour,
+            "OTH_AMT"::float other,"NET_AMT"::float net
+       FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+    v,
+  ),
+  tax: await ctx.rows(
+    `SELECT "SR_NO"::int sr,"NET_AMT"::float net,"TAX_AMT"::float tax
+       FROM "TAX_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+    v,
+  ),
+  ledger: await ledger(ctx, v),
+  rojmel: await ctx.rows(
+    `SELECT btrim("AC_CODE"::text) ac,btrim(coalesce("IT_CODE"::text,'')) item,
+            "SIGN" sign,"ITM_FINE"::float fine,"ITM_AMT"::float item_amount,
+            "LBR_AMT"::float labour,"OTH_AMT"::float other,"NET_AMT"::float net,
+            "DR_AMT"::float dr,"CR_AMT"::float cr
+       FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "LEDR_KEY"`,
+    v,
+  ),
+});
 const counts = async (ctx) =>
   (
     await ctx.rows(
@@ -446,6 +502,97 @@ export const purchaseInvoice = {
     ),
 
     C(
+      'formula.non-f-rate-types-round-trip',
+      'T03',
+      'mutation',
+      'N188/G198: loaded PR_AMT_TYPE=G drives real UI preview and RATE_TYPE P/1/K persists across reload',
+      async (ctx) => {
+        const [beforeSettings] = await ctx.rows(
+          `SELECT "PR_AMT_TYPE" amount_type,"TOT_AMT_ROF" total_rounding,"TAX_ROF" tax_rounding
+             FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        );
+        await ctx.owner.$executeRawUnsafe(
+          `UPDATE "CO_SET" SET "PR_AMT_TYPE"='G',"TOT_AMT_ROF"=2,"TAX_ROF"=2
+            WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+          TENANT,
+        );
+        try {
+          const { page } = await ctx.session();
+          await openPurchase(page);
+          await pickSupplier(page, PARTIES.local.code);
+          await fillLine(page, 0, LINE_GROSS_RATE_TYPE);
+          for (let row = 1; row < 3; row++) {
+            await page.getByRole('button', { name: '+ Add line', exact: true }).click();
+            await fillLine(page, row, LINE_GROSS_RATE_TYPE);
+          }
+          await page.getByTestId('purchase-grid-mode').click();
+          for (const [row, rateType] of [
+            [1, 'P'],
+            [2, '1'],
+            [3, 'K'],
+          ])
+            await page.getByLabel(`Rate Type row ${row}`, { exact: true }).fill(rateType);
+
+          const rows = grid(page).locator('tbody tr');
+          await rows.nth(0).filter({ hasText: /3,000/ }).waitFor();
+          await rows.nth(1).filter({ hasText: /1,200/ }).waitFor();
+          await rows.nth(2).filter({ hasText: /12/ }).waitFor();
+          const summary = page.locator('.toolbar .muted').filter({ hasText: 'Taxable ₹' }).first();
+          await summary.filter({ hasText: /Taxable ₹4,212/ }).waitFor();
+          await summary.filter({ hasText: /Tax ₹126\.36/ }).waitFor();
+          await summary.filter({ hasText: /Total ₹4,338\.36/ }).waitFor();
+
+          const createResponse = await save(page);
+          assert.equal(createResponse.status(), 201, await createResponse.text());
+          const vchNo = String((await createResponse.json()).vchNo).padStart(5, '0');
+          const before = await purchaseWriteSet(ctx, vchNo);
+          assert.deepEqual(
+            before.detail.map((line) => [line.rate_type, line.item, line.detail_net]),
+            [
+              ['P', 3000, 3000],
+              ['1', 1200, 1200],
+              ['K', 12, 12],
+            ],
+          );
+          assert.deepEqual(
+            [before.header[0].net, before.header[0].tax, before.header[0].tot],
+            [4212, 126.36, 4338.36],
+          );
+
+          await page.getByRole('button', { name: 'New', exact: true }).click();
+          await loadVoucher(page, vchNo);
+          assert.deepEqual(
+            await Promise.all(
+              [1, 2, 3].map((row) =>
+                page.getByLabel(`Rate Type row ${row}`, { exact: true }).inputValue(),
+              ),
+            ),
+            ['P', '1', 'K'],
+          );
+          const updateResponse = await save(page, 'Update Purchase');
+          assert.equal(updateResponse.status(), 200, await updateResponse.text());
+          const after = await purchaseWriteSet(ctx, vchNo);
+          assert.deepEqual(after, before);
+          return {
+            observation: `PR_AMT_TYPE=G voucher ${vchNo}: P/1/K preview and persisted items 3000/1200/12 survived reload`,
+            expected: { amountType: 'G', rateTypes: { P: 3000, 1: 1200, K: 12 } },
+            database: { before, after },
+            downstream: { identical: true },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `UPDATE "CO_SET" SET "PR_AMT_TYPE"=$2,"TOT_AMT_ROF"=$3,"TAX_ROF"=$4
+              WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+            TENANT,
+            beforeSettings.amount_type,
+            beforeSettings.total_rounding,
+            beforeSettings.tax_rounding,
+          );
+        }
+      },
+    ),
+
+    C(
       'create.single-line',
       'T07',
       'mutation',
@@ -647,30 +794,78 @@ export const purchaseInvoice = {
       'edit.unchanged-no-op',
       'T08',
       'mutation',
-      'Unchanged reopen → save changes no business value',
+      'Explicit component overrides and normalized fine survive reopen → unchanged save across the complete write set',
       async (ctx) => {
         const { page } = await ctx.session();
-        const vchNo = await createOne(ctx, page);
-        const before = {
-          h: await header(ctx, vchNo),
-          l: await lines(ctx, vchNo),
-          g: await ledger(ctx, vchNo),
-          s: await stock(ctx, vchNo),
-        };
+        await openPurchase(page);
+        await pickSupplier(page, PARTIES.local.code);
+        await fillLine(page, 0, LINE_ROUND);
+        await page.getByRole('button', { name: '+ Add line', exact: true }).click();
+        await fillLine(page, 1, LINE_FINE_BOUNDARY);
+        await page.getByTestId('purchase-grid-mode').click();
+        await page.getByLabel('Metal Amt row 1', { exact: true }).fill('56090.8');
+        await page.getByLabel('Labour Amt row 1', { exact: true }).fill('2375.25');
+        await page.getByLabel('Other Amt row 1', { exact: true }).fill('0.4');
+        await page.getByLabel('Fine Wt row 2', { exact: true }).fill('9.1605');
+        await grid(page)
+          .locator('tbody tr')
+          .nth(0)
+          .filter({ hasText: /58,466\.45/ })
+          .waitFor();
+        await grid(page).locator('tbody tr').nth(1).filter({ hasText: /9,161/ }).waitFor();
+
+        const createResponse = await save(page);
+        assert.equal(createResponse.status(), 201, await createResponse.text());
+        const vchNo = String((await createResponse.json()).vchNo).padStart(5, '0');
+        const before = await purchaseWriteSet(ctx, vchNo);
+        assert.deepEqual(
+          before.detail.map((line) => [
+            line.fine,
+            line.item,
+            line.labour,
+            line.other,
+            line.detail_net,
+          ]),
+          [
+            [9.16, 56090.8, 2375.25, 0.4, 58466.45],
+            [
+              EXPECT_FINE_BOUNDARY.fine,
+              EXPECT_FINE_BOUNDARY.metal,
+              EXPECT_FINE_BOUNDARY.labour,
+              0,
+              EXPECT_FINE_BOUNDARY.net,
+            ],
+          ],
+        );
+
         await page.getByRole('button', { name: 'New', exact: true }).click();
         await loadVoucher(page, vchNo);
+        assert.equal(
+          await page.getByLabel('Metal Amt row 1', { exact: true }).inputValue(),
+          '56090.8',
+        );
+        assert.equal(
+          await page.getByLabel('Labour Amt row 1', { exact: true }).inputValue(),
+          '2375.25',
+        );
+        assert.equal(await page.getByLabel('Fine Wt row 2', { exact: true }).inputValue(), '9.161');
+        assert.equal(
+          await page.getByLabel('Metal Amt row 2', { exact: true }).inputValue(),
+          '9161',
+        );
+        assert.equal(
+          await page.getByLabel('Labour Amt row 2', { exact: true }).inputValue(),
+          '0',
+          'persisted explicit zero is hydrated as a value, not blank',
+        );
+
         const response = await save(page, 'Update Purchase');
         assert.equal(response.status(), 200, await response.text());
-        const after = {
-          h: await header(ctx, vchNo),
-          l: await lines(ctx, vchNo),
-          g: await ledger(ctx, vchNo),
-          s: await stock(ctx, vchNo),
-        };
+        const after = await purchaseWriteSet(ctx, vchNo);
         assert.deepEqual(after, before);
         return {
-          observation: `voucher ${vchNo}: identical after unchanged save`,
-          expected: 'no change',
+          observation: `voucher ${vchNo}: explicit 56090.8 / 2375.25 and normalized fine 9.161 remained identical after reload and unchanged save`,
+          expected: { explicit: [56090.8, 2375.25], fineBoundary: EXPECT_FINE_BOUNDARY },
           database: { before, after },
           downstream: { identical: true },
         };

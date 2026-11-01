@@ -16,6 +16,7 @@ describe('purchase builders', () => {
   it('lineFine uses the standard purchase-item policy', () => {
     expect(lineFine({ itCode: 'I1', netWt: 10, touch: 91.6 })).toBe(9.16);
     expect(lineFine({ itCode: 'I1', fineWt: 5 })).toBe(5); // explicit wins
+    expect(lineFine({ itCode: 'I1', fineWt: 9.1605 })).toBe(9.161);
   });
   it('lineFine folds in ghat weight + wastage% (desktop (net+ght)×(touch+west)/100)', () => {
     expect(lineFine({ itCode: 'I1', netWt: 10, ghtWt: 2, touch: 90, westPct: 2 })).toBe(11.04); // (10+2)×(90+2)/100
@@ -163,6 +164,15 @@ describe('TR_PURC whole-rupee component stages (G198/N188)', () => {
       metal: 56091,
       labour: 2375,
       net: 58466,
+    });
+  });
+
+  it('normalizes four-decimal explicit fine before the whole-rupee item stage', () => {
+    expect(computeLine({ ...line, fineWt: 9.1605, rate: 1000 }, policy, 'F', true)).toEqual({
+      fine: 9.161,
+      metal: 9161,
+      labour: 2375,
+      net: 11536,
     });
   });
 

@@ -19,8 +19,18 @@ import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../component
 import { EntityImagePanel } from '../../../../components/EntityImagePanel';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import SubDetailGrid, { stoneRowFromApi, useSubDetail } from '../../../../components/SubDetailGrid';
-import { companyFlag, companySetting, useCompanySettings } from '../../../../lib/companySettings';
-import { billTotals, fineFor, purchaseAmountType, purchaseLineAmounts } from '@datacare/core';
+import {
+  companyFlag,
+  companySetting,
+  useCompanySettingsState,
+} from '../../../../lib/companySettings';
+import {
+  billTotals,
+  fineFor,
+  normalizePurchaseExplicitFine,
+  purchaseAmountType,
+  purchaseLineAmounts,
+} from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
 import { openDocument } from '../../../../lib/openDocument';
 
@@ -76,6 +86,10 @@ interface Line {
   prCode: string;
   rateType: string;
   urdRateType: string;
+  /** Loaded persisted calculations remain authoritative until a derivation input is edited. */
+  loadedFineWt?: boolean;
+  loadedMetalAmount?: boolean;
+  loadedLabourAmount?: boolean;
 }
 const blank = (): Line => ({
   itCode: '', // desktop grids start empty; a demo default posts to the wrong item
@@ -182,9 +196,11 @@ export default function PurchaseEntryPage() {
    * There is nothing for the server to enforce: the value still posts, it just may not be retyped.
    * Blank default 'N' per MS_OPNCOMP.cs.
    */
-  const companySettings = useCompanySettings();
+  const settingsState = useCompanySettingsState();
+  const companySettings = settingsState.values;
+  const settingsReady = settingsState.status === 'ready';
   const amountType = purchaseAmountType(companySetting(companySettings, 'PR_AMT_TYPE'));
-  const fineLocked = companyFlag(companySettings, 'ITM_FINE_LOCK', 'N');
+  const fineLocked = settingsReady && companyFlag(companySettings, 'ITM_FINE_LOCK', 'N');
   // G11: per-gram labour is on (net + ghat) unless the company sets LBR_WITH_GHT='N' (blank default Y).
   const labourWithGhat = companyFlag(companySettings, 'LBR_WITH_GHT', 'Y');
   // Desktop TR_PURC carries TWO sub-detail grids: MSG_IDTL (34 cols, tag side) and MSG_PR_IDTL
@@ -250,10 +266,63 @@ export default function PurchaseEntryPage() {
   // Desktop parity: TR_PURC's item grid exposes the operator-typed fields as columns.
   const [fullGrid, setFullGrid] = useState(false);
   const setLine = (i: number, k: keyof Line, v: string) =>
-    setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
+    setLines((ls) =>
+      ls.map((line, j) => {
+        if (j !== i) return line;
+        const next = { ...line, [k]: v };
+        const metalInputs: Array<keyof Line> = [
+          'pcs',
+          'grossWt',
+          'netWt',
+          'ghtWt',
+          'touch',
+          'westPct',
+          'fineWt',
+          'lesTouch',
+          'kunFine',
+          'rate',
+          'rateType',
+          'urdRateType',
+        ];
+        const labourInputs: Array<keyof Line> = [
+          'pcs',
+          'netWt',
+          'ghtWt',
+          'making',
+          'labourType',
+          'labourRate',
+          'labourPct',
+          'labourFixed',
+        ];
+        const fineInputs: Array<keyof Line> = [
+          'netWt',
+          'ghtWt',
+          'touch',
+          'westPct',
+          'lesTouch',
+          'kunFine',
+        ];
+        if (k === 'fineWt') next.loadedFineWt = false;
+        else if (line.loadedFineWt && fineInputs.includes(k)) {
+          next.fineWt = '';
+          next.loadedFineWt = false;
+        }
+        if (k === 'metalAmount') next.loadedMetalAmount = false;
+        else if (line.loadedMetalAmount && metalInputs.includes(k)) {
+          next.metalAmount = '';
+          next.loadedMetalAmount = false;
+        }
+        if (k === 'labourAmount') next.loadedLabourAmount = false;
+        else if (line.loadedLabourAmount && labourInputs.includes(k)) {
+          next.labourAmount = '';
+          next.loadedLabourAmount = false;
+        }
+        return next;
+      }),
+    );
 
   const calc = (l: Line) => {
-    const enteredFine = optionalNumber(l.fineWt);
+    const enteredFine = normalizePurchaseExplicitFine(optionalNumber(l.fineWt));
     const lesTouch = optionalNumber(l.lesTouch);
     const kunFine = optionalNumber(l.kunFine);
     const fine =
@@ -377,6 +446,12 @@ export default function PurchaseEntryPage() {
         labourFixed: Number(line.labourFixed ?? 0) || undefined,
         otherFineWt: Number(line.otherFineWt ?? 0) || undefined,
         silverFineWt: Number(line.silverFineWt ?? 0) || undefined,
+        fineWt: String(line.fineWt ?? ''),
+        metalAmount: String(line.metalAmount ?? ''),
+        labourAmount: String(line.labourAmount ?? ''),
+        loadedFineWt: true,
+        loadedMetalAmount: true,
+        loadedLabourAmount: true,
         otherAmount: str(line.otherAmount),
         rateType: String(line.rateType ?? ''),
         urdRateType: String(line.urdRateType ?? ''),
@@ -427,6 +502,14 @@ export default function PurchaseEntryPage() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!settingsReady) {
+      setErr(
+        settingsState.status === 'error'
+          ? 'Purchase settings could not be loaded. Reload this page before saving.'
+          : 'Purchase settings are still loading. Wait before saving.',
+      );
+      return;
+    }
     setErr('');
     setResult(null);
     setBusy(true);
@@ -736,6 +819,12 @@ export default function PurchaseEntryPage() {
                                     grossWt: String(r.ITM_GWT ?? x.grossWt),
                                     touch: String(r.ITM_TOUCH ?? x.touch),
                                     rate: String(r.ITM_RATE ?? x.rate),
+                                    fineWt: x.loadedFineWt ? '' : x.fineWt,
+                                    metalAmount: x.loadedMetalAmount ? '' : x.metalAmount,
+                                    labourAmount: x.loadedLabourAmount ? '' : x.labourAmount,
+                                    loadedFineWt: false,
+                                    loadedMetalAmount: false,
+                                    loadedLabourAmount: false,
                                   }
                                 : x,
                             ),
@@ -795,7 +884,7 @@ export default function PurchaseEntryPage() {
                       readOnlyFields={fineLocked ? (['fineWt'] as const) : undefined}
                     />
                     <td className="num">{c.fine.toLocaleString('en-IN')}</td>
-                    <td className="num">{c.net.toLocaleString('en-IN')}</td>
+                    <td className="num">{settingsReady ? c.net.toLocaleString('en-IN') : '—'}</td>
                     <td>
                       <button
                         type="button"
@@ -983,21 +1072,36 @@ export default function PurchaseEntryPage() {
               + Add line
             </button>
             <span className="spacer" />
-            <span className="muted" style={{ marginRight: 16 }}>
-              Taxable ₹{taxable.toLocaleString('en-IN')} · Tax ₹{taxPrev.toLocaleString('en-IN')} ·{' '}
-              <b>Total ₹{totalPrev.toLocaleString('en-IN')}</b>
-            </span>
-            <button className="primary" disabled={busy}>
+            {settingsReady ? (
+              <span className="muted" style={{ marginRight: 16 }}>
+                Taxable ₹{taxable.toLocaleString('en-IN')} · Tax ₹{taxPrev.toLocaleString('en-IN')}{' '}
+                · <b>Total ₹{totalPrev.toLocaleString('en-IN')}</b>
+              </span>
+            ) : (
+              <span className="muted" style={{ marginRight: 16 }}>
+                {settingsState.status === 'error'
+                  ? 'Purchase totals unavailable because settings failed to load.'
+                  : 'Loading purchase settings…'}
+              </span>
+            )}
+            <button className="primary" disabled={busy || !settingsReady}>
               {busy ? 'Saving…' : loadedVchNo ? 'Update Purchase' : 'Save Purchase'}
             </button>
           </div>
         </div>
-        <TenderPanel
-          total={totalPrev}
-          value={tender}
-          onChange={setTender}
-          title="pay the supplier now (blank = full on credit)"
-        />
+        {settingsReady && (
+          <TenderPanel
+            total={totalPrev}
+            value={tender}
+            onChange={setTender}
+            title="pay the supplier now (blank = full on credit)"
+          />
+        )}
+        {settingsState.status === 'error' && (
+          <div className="msg err" role="alert" data-testid="purchase-settings-error">
+            Purchase settings could not be loaded. Reload this page before saving.
+          </div>
+        )}
       </form>
       {err && <div className="msg err">{err}</div>}
       {result && (
