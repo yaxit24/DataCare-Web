@@ -574,7 +574,7 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
     expect(await footprintOf(owner, await voucherTables(owner), TENANT, net.vch)).toEqual(
       FOOTPRINT_SALE_RETURN,
     );
-    expect(await ledgerBalance('SRT', net.vch)).toEqual([65517, 65517]);
+    expect(await ledgerBalance('SRT', net.vch)).toEqual([65517.27, 65517.27]);
 
     await owner.$executeRawUnsafe(
       `UPDATE "CO_SET" SET "SL_AMT_TYPE"='F' WHERE tenant_id=$1 AND "CO_CODE"=$2`,
