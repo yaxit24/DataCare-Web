@@ -22,7 +22,6 @@ import {
   type LedgerLine,
 } from '../posting/posting.js';
 import { issueTagTx, restoreTagTx, type ResolvedTagIdentity, type TagKey } from '../stock/stock.js';
-
 /**
  * RATE CUT (desktop book 064, VCH_TYPE `RCUT`, BOOK_NAME `RATE CUT`).
  *

@@ -24,7 +24,6 @@ import {
   type CompleteFinanceScope,
   type VoucherIdentity,
 } from '../finance/lifecycle.js';
-
 export class WholesaleSaleReturnValidationError extends Error {
   constructor(message: string) {
     super(message);

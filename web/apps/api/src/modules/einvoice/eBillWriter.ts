@@ -32,7 +32,6 @@ import {
   type CompleteFinanceScope,
   type VoucherIdentity,
 } from '../finance/lifecycle.js';
-
 /**
  * TR_SL_EBILL create / edit / delete in both of its modes (card X15):
  *

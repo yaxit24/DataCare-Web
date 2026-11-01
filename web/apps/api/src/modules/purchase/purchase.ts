@@ -57,7 +57,6 @@ import {
   type LabourType,
   type BillTotals,
 } from '@datacare/core';
-
 export class PurchaseValidationError extends Error {
   constructor(msg: string) {
     super(msg);

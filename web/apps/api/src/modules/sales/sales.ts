@@ -66,7 +66,6 @@ import {
 import { partyCashReceivedTx } from '../finance/finance.js';
 import { tenderThresholdDecision } from '../finance/tender.js';
 import { buildLineLegs, lineLegKey, type LineLeg } from '../posting/lineLegs.js';
-
 export class SaleValidationError extends Error {
   constructor(msg: string) {
     super(msg);
