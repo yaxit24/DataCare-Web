@@ -1060,11 +1060,20 @@ async function writeSaleTx(
     kasarAc = validateConfiguredAccount('kasar account', input.kasarAc, configured);
   }
 
-  // Resolve and reserve each exact desktop tag instance inside this voucher transaction.
+  // Approval tags are already out on the APR ISU stock movement. Their exact BAR identity was
+  // locked and validated above, so a sale must reuse it rather than trying to issue live stock twice.
+  const approvalSourceByLine = new Map<number, LockedApprovalSaleSource>(
+    approvalSources.map((source) => [source.line - 1, source]),
+  );
   const issuedTags = new Map<number, Awaited<ReturnType<typeof issueTagTx>>>();
   for (const [index, line] of lines.entries()) {
     if (isSalesQuotation) continue;
     if (!line.tagNo) continue;
+    const approvalSource = approvalSourceByLine.get(index);
+    if (approvalSource?.tagIdentity) {
+      issuedTags.set(index, approvalSource.tagIdentity);
+      continue;
+    }
     issuedTags.set(
       index,
       await issueTagTx(tx, {
@@ -2296,7 +2305,7 @@ async function releaseSaleReferencesTx(
         AND s."CO_YEAR"=$4 AND s."CO_BOOK"=$5 AND s."VCH_NO"=$6
         AND a."CO_CODE"=s."CO_CODE" AND a."LC_CODE"=s."LC_CODE"
         AND a."CO_YEAR"=s."ISU_YRCD" AND a."CO_BOOK"=s."ISU_DBCD"
-        AND a."VCH_NO"=s."ISU_NO" AND coalesce(a."SR_NO",0)=coalesce(s."ISU_SRNO",0)`,
+        AND a."VCH_NO"=s."ISU_NO" AND coalesce(a."OLD_SRNO",0)=coalesce(s."ISU_SRNO",0)`,
     ...params,
   );
   await tx.$executeRawUnsafe(
@@ -2304,7 +2313,8 @@ async function releaseSaleReferencesTx(
       WHERE b.tenant_id=$1 AND s.tenant_id=$1 AND s."CO_CODE"=$2 AND s."LC_CODE"=$3
         AND s."CO_YEAR"=$4 AND s."CO_BOOK"=$5 AND s."VCH_NO"=$6
         AND b."CO_CODE"=s."CO_CODE" AND b."LC_CODE"=s."LC_CODE"
-        AND b."TAG_NO"=s."TAG_NO" AND coalesce(b."VCH_SRNO",0)=coalesce(s."VCH_SRNO",0)`,
+        AND b."TAG_NO"=s."TAG_NO" AND coalesce(b."VCH_SRNO",0)=coalesce(s."VCH_SRNO",0)
+        AND coalesce(b."IT_CODE"::text,'')=coalesce(s."IT_CODE"::text,'')`,
     ...params,
   );
   return legacyRestores;

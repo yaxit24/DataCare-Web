@@ -60,6 +60,18 @@ const BUSINESS_TABLES = [
   'REMARK_DATA',
   'DELETE_DATA',
 ] as const;
+const APPROVAL_SALE_TABLES = [
+  ...BUSINESS_TABLES,
+  'SL_DATA',
+  'SL_DETL',
+  'SL_IDTL',
+  'SL_PR_DETL',
+  'AC_DATA',
+  'ROJ_MEL_DATA',
+  'TAX_DATA',
+  'BILL_OS_DATA',
+  'SL_ORD_ADJ',
+] as const;
 
 const APPROVAL_MIGRATION_SQL = readFileSync(
   new URL(
@@ -1414,6 +1426,178 @@ type Cookie = string;
         issue.voucherNo,
       ),
     ).toEqual([{ received: 'N' }]);
+  });
+
+  it('refuses approval sale tag, BAR instance, or quantity mismatches without writing', async () => {
+    // TR_SALE.cs:20130-20169 imports the approval row's tag, BAR VCH_SRNO, item and quantities as
+    // one source line. The request may not combine that source reference with another tag instance.
+    await exec(
+      `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","SALE_AC")
+       VALUES ($1,'01','AP3','Exact approval sale items','SALES')`,
+      tenantId,
+    );
+    await exec(
+      `UPDATE "ITEM_MAST" SET "GR_CODE"='AP3' WHERE tenant_id=$1 AND "CO_CODE"='01' AND "IT_CODE"=$2`,
+      tenantId,
+      ITEM,
+    );
+    const issue = await createIssue();
+    const source = {
+      itCode: ITEM,
+      tagNo: TAG,
+      vchSrno: TAG_SRNO,
+      pcs: 1,
+      grossWt: 10.5,
+      netWt: 10,
+      touch: 91.6,
+      rate: 6123.45,
+      isuNo: issue.voucherNo,
+      isuYrcd: YEAR,
+      isuDbcd: ISSUE_BOOK,
+      isuSrno: 1,
+    };
+    const mismatches = [
+      { ...source, tagNo: TAG2, vchSrno: TAG_SRNO + 1 },
+      { ...source, vchSrno: TAG_SRNO + 99 },
+      { ...source, pcs: 2 },
+    ];
+    for (const line of mismatches) {
+      const before = await snapshotTenant(owner, tenantId, APPROVAL_SALE_TABLES);
+      const response = await admin('POST', '/sales', {
+        coBook: 'SL',
+        acCode: PARTY,
+        vchDate: DAY,
+        taxRatePct: 0,
+        interState: false,
+        lines: [line],
+      });
+      expect(response.statusCode, response.body).toBe(400);
+      expect(response.json().message).toMatch(/approval reference .*does not match/i);
+      expect(
+        diffTenant(before, await snapshotTenant(owner, tenantId, APPROVAL_SALE_TABLES)),
+      ).toEqual({
+        added: {},
+        removed: {},
+      });
+    }
+
+    const sold = await admin('POST', '/sales', {
+      coBook: 'SL',
+      acCode: PARTY,
+      vchDate: DAY,
+      taxRatePct: 0,
+      interState: false,
+      lines: [source],
+    });
+    expect(sold.statusCode, sold.body).toBe(201);
+    expect(
+      await query(
+        `SELECT a."ISU_REC" received,b."APR_ISU" apr,b."APP_TRFR" transfer
+           FROM "APR_DETL" a JOIN "BAR_DETL" b ON b.tenant_id=a.tenant_id
+            AND b."CO_CODE"=a."CO_CODE" AND b."LC_CODE"=a."LC_CODE"
+            AND b."TAG_NO"=a."TAG_NO" AND b."VCH_SRNO"=a."VCH_SRNO" AND b."IT_CODE"=a."IT_CODE"
+          WHERE a.tenant_id=$1 AND a."CO_BOOK"=$2 AND a."VCH_NO"=$3`,
+        tenantId,
+        ISSUE_BOOK,
+        issue.voucherNo,
+      ),
+    ).toEqual([{ received: 'Y', apr: 'N', transfer: 'Y' }]);
+    const saleDelete = await admin(
+      'DELETE',
+      `/sales/${sold.json().vchNo}?coBook=SL&expectedVersion=${sold.json().version}`,
+    );
+    expect(saleDelete.statusCode, saleDelete.body).toBe(200);
+  });
+
+  it('consumes the stable OLD_SRNO after an approval issue line gap', async () => {
+    // TR_APR_ISU.cs:3414-3421 keeps OLD_SRNO stable while visible SR_NO compacts; TR_SALE.cs:
+    // 20130-20169 copies that OLD_SRNO as ISU_SRNO, so source lookup must not use current SR_NO.
+    await exec(
+      `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","SALE_AC")
+       VALUES ($1,'01','AP4','Gapped approval sale items','SALES')`,
+      tenantId,
+    );
+    await exec(
+      `UPDATE "ITEM_MAST" SET "GR_CODE"='AP4' WHERE tenant_id=$1 AND "CO_CODE"='01' AND "IT_CODE"=$2`,
+      tenantId,
+      ITEM,
+    );
+    const issue = await createIssue(
+      issueBody({
+        lines: [
+          { itCode: ITEM, pcs: 1, grossWt: 1, netWt: 1, touch: 91.6, amount: 1000 },
+          { itCode: ITEM, pcs: 2, grossWt: 2, netWt: 2, touch: 91.6, amount: 2000 },
+        ],
+      }),
+    );
+    const opened = await admin('GET', `/tour/${issue.voucherNo}?coBook=${ISSUE_BOOK}`);
+    expect(opened.statusCode, opened.body).toBe(200);
+    const compacted = await admin('PUT', `/tour/${issue.voucherNo}`, {
+      coBook: ISSUE_BOOK,
+      expectedVersion: opened.json().version,
+      vchDate: opened.json().vchDate,
+      partyAc: opened.json().partyAc,
+      empCode: opened.json().empCode,
+      vchDesc: opened.json().vchDesc,
+      lines: [opened.json().lines[1]],
+    });
+    expect(compacted.statusCode, compacted.body).toBe(200);
+    expect(
+      await query(
+        `SELECT "SR_NO"::int sr,"OLD_SRNO"::int old FROM "APR_DETL"
+          WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+        tenantId,
+        ISSUE_BOOK,
+        issue.voucherNo,
+      ),
+    ).toEqual([{ sr: 1, old: 2 }]);
+
+    const sold = await admin('POST', '/sales', {
+      coBook: 'SL',
+      acCode: PARTY,
+      vchDate: DAY,
+      taxRatePct: 0,
+      interState: false,
+      lines: [
+        {
+          itCode: ITEM,
+          pcs: 2,
+          grossWt: 2,
+          netWt: 2,
+          touch: 91.6,
+          rate: 1000,
+          isuNo: issue.voucherNo,
+          isuYrcd: YEAR,
+          isuDbcd: ISSUE_BOOK,
+          isuSrno: 2,
+        },
+      ],
+    });
+
+    expect(sold.statusCode, sold.body).toBe(201);
+    const saleVoucherNo = String(sold.json().vchNo).padStart(5, '0');
+    expect(
+      await query(
+        `SELECT "SR_NO"::int sr,"OLD_SRNO"::int old,"ISU_REC" received FROM "APR_DETL"
+          WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+        tenantId,
+        ISSUE_BOOK,
+        issue.voucherNo,
+      ),
+    ).toEqual([{ sr: 1, old: 2, received: 'Y' }]);
+    expect(
+      await query(
+        `SELECT "ISU_SRNO"::int source FROM "SL_DETL"
+          WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2`,
+        tenantId,
+        saleVoucherNo,
+      ),
+    ).toEqual([{ source: 2 }]);
+    const saleDelete = await admin(
+      'DELETE',
+      `/sales/${sold.json().vchNo}?coBook=SL&expectedVersion=${sold.json().version}`,
+    );
+    expect(saleDelete.statusCode, saleDelete.body).toBe(200);
   });
 
   it('keeps a return row identity separate from its non-first source identity', async () => {
