@@ -22,6 +22,7 @@ const now = new Date();
 const startYear = now.getMonth() + 1 >= 4 ? now.getFullYear() : now.getFullYear() - 1;
 const YEAR = `${startYear}-${startYear + 1}`;
 const RIGHTS = [
+  'Approval Report',
   'HuId Report',
   'ItStk Level',
   'Bill Wise Profit',
@@ -69,6 +70,14 @@ const D3_SCREENS = [
       YEAR,
     );
     await exec(
+      `INSERT INTO "APR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO",
+         "VCH_DATE","AC_CODE","BOOK_NAME","IT_CODE","TAG_NO","ITM_PCS","ITM_GWT","ITM_NWT","OTH_AMT","ISU_REC","MAIN_USER")
+       VALUES ($1,'01','01',$2,'TUR','00001',1,$3,'OS','Approval Issue','GOLD','APP-ROUTE',2,10,9,5,'Y','REPORTER')`,
+      tenantId,
+      YEAR,
+      `${startYear}-06-10`,
+    );
+    await exec(
       `INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED")
        VALUES($1,'01',$2,$3,'USER','N','N','Y','N')`,
       tenantId,
@@ -112,6 +121,31 @@ const D3_SCREENS = [
     expect(body.totals, `${slug} screen returns totals`).toBeTypeOf('object');
     const csv = await get(`/reports/${slug}/export.csv?coYear=${YEAR}`);
     expect(csv.statusCode, csv.body).toBe(200);
+  });
+
+  it('forwards Approval InOut mode and totals through screen and export routes', async () => {
+    const screen = await get(`/reports/approval-report?coYear=${YEAR}&mode=inout`);
+    expect(screen.statusCode, screen.body).toBe(200);
+    expect(screen.json().rows).toEqual([
+      expect.objectContaining({
+        crystalReport: 'AprInOut',
+        coBook: 'TUR',
+        tagNo: 'APP-ROUTE',
+        outPcs: 2,
+        inPcs: 2,
+        pendingPcs: 0,
+      }),
+    ]);
+    expect(screen.json().totals).toMatchObject({ rows: 1, outPcs: 2, inPcs: 2, pendingPcs: 0 });
+
+    const csv = await get(`/reports/approval-report/export.csv?coYear=${YEAR}&mode=inout`);
+    expect(csv.statusCode, csv.body).toBe(200);
+    expect(csv.body).toContain('outPcs,inPcs,pendingPcs');
+    expect(csv.body).toMatch(/TOTAL.*?,2,2,0,/s);
+
+    const xlsx = await get(`/reports/approval-report/export.xlsx?coYear=${YEAR}&mode=inout`);
+    expect(xlsx.statusCode, xlsx.body).toBe(200);
+    expect(xlsx.headers['content-type']).toContain('spreadsheetml');
   });
 
   it('G13: HUID screen defaults to All and forwards With/Without query modes', async () => {

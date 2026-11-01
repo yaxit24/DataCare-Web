@@ -621,8 +621,17 @@ export default function ReportPage() {
   const arrays = data
     ? (Object.entries(data).filter(([, v]) => Array.isArray(v)) as [string, any[]][])
     : [];
+  const totals =
+    data?.totals && typeof data.totals === 'object' && !Array.isArray(data.totals)
+      ? (data.totals as Record<string, unknown>)
+      : null;
   const scalars = data
-    ? Object.entries(data).filter(([, v]) => !Array.isArray(v) && typeof v !== 'object')
+    ? [
+        ...Object.entries(data).filter(([, v]) => !Array.isArray(v) && typeof v !== 'object'),
+        ...Object.entries(totals ?? {})
+          .filter(([, v]) => v === null || typeof v !== 'object')
+          .map(([k, v]) => [`Total ${k}`, v]),
+      ]
     : [];
 
   return (
@@ -1565,7 +1574,16 @@ export default function ReportPage() {
         <div className="panel" key={k} style={{ overflow: 'auto' }}>
           <div className="toolbar">
             <h2 style={{ textTransform: 'capitalize', margin: 0 }}>{k}</h2>
-            <button className="ghost" onClick={() => downloadCsv(v, `${slug}-${k}`)}>
+            <button
+              className="ghost"
+              onClick={() => {
+                if (totals && pdfPath) {
+                  openDocument(`/api${pdfPath.replace('/export.pdf', '/export.csv')}`);
+                  return;
+                }
+                downloadCsv(v, `${slug}-${k}`);
+              }}
+            >
               CSV
             </button>
             {/* Excel export (desktop BtnExel). The server re-derives the rows from the same builder the

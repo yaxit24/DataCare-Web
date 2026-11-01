@@ -1627,9 +1627,9 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Desktop:** `RP_ALL` — constructor caption 'Approval Rpt' ([MDI_FORM.cs:8921-8930](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8921-L8930)).
 - **Does:** Reports approval issue, in/out and pending custody by party and item.
 - **Looks:** Shared date/book/party/location/item filters with Issue, InOut and Pending buttons.
-- **Reads:** APR_DATA, APR_DETL, BOOK_DATA, AC_MAST, ITEM_MAST.
+- **Reads:** APR_DATA, APR_DETL, BOOK_DATA, AC_MAST, ITEM_MAST, PRODUCT_MAST.
 - **Web:** `/reports/approval-report`; `GET /reports/approval-report`. Can: print, list.
-- **Remaining:** Three data modes exist; RP_ALL selectors, grouping, custody reconciliation and Crystal layouts are uncertified.
+- **Remaining:** Three data modes exist; InOut now calculates the desktop Out/In/Pending piece formulas per APR_DETL issue line: Out=ITM_PCS, In=ITM_PCS when ISU_REC='Y' otherwise 0, and Pending=Out-In. RP_ALL selectors, grouping, Crystal layouts and custody-state reconciliation remain uncertified.
 - **Owners:** N22, X17, N24, X26, N57, N75.
 - **Evidence:** [RP_ALL.cs:8141-8365](../../unified/src/csharp/DataCareNext/RP_ALL.cs#L8141-L8365).
 
