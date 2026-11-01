@@ -58,13 +58,19 @@
       "covers": [
         "web/apps/web/components/PaymentForm.tsx",
         "web/apps/web/app/(app)/txn/receipt/page.tsx",
-        "web/apps/web/app/(app)/txn/payment/page.tsx"
+        "web/apps/web/app/(app)/txn/payment/page.tsx",
+        "web/apps/api/src/modules/finance/finance.ts",
+        "web/apps/api/src/modules/finance/batchReceipt.ts",
+        "web/apps/api/src/modules/finance/lifecycle.ts",
+        "web/apps/api/src/modules/vouchers/list.ts"
       ]
     },
     "contraEntry": {
       "covers": [
         "web/apps/web/app/(app)/txn/contra/page.tsx",
-        "web/apps/api/src/modules/finance/contra.ts"
+        "web/apps/api/src/modules/finance/contra.ts",
+        "web/apps/api/src/modules/finance/lifecycle.ts",
+        "web/apps/api/src/modules/vouchers/list.ts"
       ]
     },
     "fineJv": {

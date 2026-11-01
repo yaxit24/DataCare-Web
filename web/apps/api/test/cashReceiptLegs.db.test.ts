@@ -27,11 +27,15 @@ import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import {
+  editPayment,
+  editReceipt,
   postPayment,
   postPaymentLines,
   postReceipt,
   postReceiptLines,
 } from '../src/modules/finance/finance.js';
+import { FINANCE_DATE_OUTSIDE_YEAR_MESSAGE } from '../src/modules/finance/lifecycle.js';
+import { PeriodLockValidationError } from '../src/modules/posting/posting.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const TENANT = 'cash-legs';
@@ -122,6 +126,175 @@ async function legs() {
     TENANT,
   )) as { k: string; ac: string; ld: string; dr: number; cr: number }[];
 }
+
+async function financeFootprint() {
+  const [row] = (await owner.$queryRawUnsafe(
+    `SELECT
+       (SELECT count(*)::int FROM "CASH_DATA" WHERE tenant_id=$1) cash,
+       (SELECT count(*)::int FROM "PAY_DATA" WHERE tenant_id=$1) pay,
+       (SELECT count(*)::int FROM "PAY_DETL" WHERE tenant_id=$1) detail,
+       (SELECT count(*)::int FROM "AC_DATA" WHERE tenant_id=$1) ledger,
+       (SELECT count(*)::int FROM "ROJ_MEL_DATA" WHERE tenant_id=$1) rojmel,
+       (SELECT count(*)::int FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1) hidden,
+       (SELECT count(*)::int FROM "DELETE_DATA" WHERE tenant_id=$1) audits`,
+    TENANT,
+  )) as Array<Record<string, number>>;
+  return row;
+}
+
+/** Every row of the Cash/Bank write set, so a refused edit can be compared column by column. */
+async function financeRows() {
+  const out: Record<string, unknown[]> = {};
+  for (const table of [
+    'CASH_DATA',
+    'PAY_DATA',
+    'PAY_DETL',
+    'AC_DATA',
+    'ROJ_MEL_DATA',
+    'TEMP_BOOK_DATA',
+    'DELETE_DATA',
+  ]) {
+    out[table] = await owner.$queryRawUnsafe(
+      `SELECT to_jsonb(t)::text AS row FROM "${table}" t WHERE tenant_id=$1 ORDER BY 1`,
+      TENANT,
+    );
+  }
+  return out;
+}
+
+async function seedPaymentBook() {
+  await exec(
+    `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
+     VALUES ($1,$2,$3,'002','Cash Payment','CPAY','CASH PAY','O','Y','CASH_DATA')`,
+    TENANT,
+    CO,
+    LC,
+  );
+  await exec(
+    `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_NAME","MAIN_BOOK","BOOK_INOUT")
+     VALUES ($1,$2,$3,'002',1,$4,'Cash Payment','CASH PAY','O')`,
+    TENANT,
+    CO,
+    LC,
+    CASH,
+  );
+}
+
+describe.runIf(RUN)('cash and bank voucher fiscal-year boundary', () => {
+  beforeEach(async () => {
+    await wipe();
+    await seed();
+  });
+  afterAll(async () => {
+    await wipe();
+  });
+
+  it('refuses every receipt/payment writer outside the open year without changing any voucher table', async () => {
+    const outside = '2024-03-31';
+    const attempts: Array<[string, () => Promise<unknown>]> = [
+      [
+        'single receipt',
+        () =>
+          postReceipt(runtime, {
+            scope,
+            partyAc: PARTY,
+            amount: 900,
+            mode: 'cash',
+            vchDate: outside,
+          } as never),
+      ],
+      [
+        'single payment',
+        () =>
+          postPayment(runtime, {
+            scope: { ...scope, coBook: '002' },
+            partyAc: PARTY,
+            amount: 900,
+            mode: 'cash',
+            vchDate: outside,
+          } as never),
+      ],
+      [
+        'multi-line receipt',
+        () =>
+          postReceiptLines(runtime, {
+            scope,
+            mode: 'cash',
+            vchDate: outside,
+            lines: [{ partyAc: PARTY, amount: 900 }],
+          } as never),
+      ],
+      [
+        'multi-line payment',
+        () =>
+          postPaymentLines(runtime, {
+            scope: { ...scope, coBook: '002' },
+            mode: 'cash',
+            vchDate: outside,
+            lines: [{ partyAc: PARTY, amount: 900 }],
+          } as never),
+      ],
+    ];
+
+    const before = await financeFootprint();
+    for (const [name, attempt] of attempts) {
+      await expect(attempt(), name).rejects.toThrow(FINANCE_DATE_OUTSIDE_YEAR_MESSAGE);
+      expect(await financeFootprint(), name).toEqual(before);
+    }
+  });
+
+  it('refuses an out-of-year receipt or payment edit with the year text before the lock date, changing no row', async () => {
+    await seedPaymentBook();
+    const receipt = await postReceipt(runtime, {
+      scope,
+      partyAc: PARTY,
+      amount: 900,
+      mode: 'cash',
+      vchDate: '2024-04-10',
+    } as never);
+    const payment = await postPayment(runtime, {
+      scope: { ...scope, coBook: '002' },
+      partyAc: PARTY,
+      amount: 400,
+      mode: 'cash',
+      vchDate: '2024-04-10',
+    } as never);
+    // 2024-03-31 is both outside the year and on or before the lock date. TR_CASH.cs:2937-2947 checks the year
+    // first, so the operator must see the year text, not the lock text.
+    await exec(`UPDATE "CO_SET" SET "LOCK_DATE"=$1::date WHERE tenant_id=$2`, '2024-04-05', TENANT);
+    const before = await financeRows();
+
+    await expect(
+      editReceipt(
+        runtime,
+        { scope, partyAc: PARTY, amount: 950, mode: 'cash', vchDate: '2024-03-31' } as never,
+        receipt.vchNo,
+      ),
+    ).rejects.toThrow(FINANCE_DATE_OUTSIDE_YEAR_MESSAGE);
+    await expect(
+      editPayment(
+        runtime,
+        {
+          scope: { ...scope, coBook: '002' },
+          partyAc: PARTY,
+          amount: 450,
+          mode: 'cash',
+          vchDate: '2024-03-31',
+        } as never,
+        payment.vchNo,
+      ),
+    ).rejects.toThrow(FINANCE_DATE_OUTSIDE_YEAR_MESSAGE);
+    // Control: an in-year date on or before the lock date is still refused by the lock.
+    await expect(
+      editReceipt(
+        runtime,
+        { scope, partyAc: PARTY, amount: 950, mode: 'cash', vchDate: '2024-04-03' } as never,
+        receipt.vchNo,
+      ),
+    ).rejects.toBeInstanceOf(PeriodLockValidationError);
+    expect(await financeRows()).toEqual(before);
+  });
+});
 
 describe.runIf(RUN)('cash receipt ledger legs', () => {
   beforeEach(async () => {
