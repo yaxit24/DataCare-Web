@@ -1114,7 +1114,9 @@ export const groupMaster = {
       async (ctx) =>
         withMasters(ctx, async () => {
           // Its own login: opening another year moves the server session, which the other cases' saved login shares.
-          const { page } = await ctx.session(as(USERS.admin.user, `${USERS.admin.user}#group-history`));
+          const { page } = await ctx.session(
+            as(USERS.admin.user, `${USERS.admin.user}#group-history`),
+          );
           await openScreen(page);
           await fillFields(page, GOLD);
           const response = await save(page);
