@@ -33,6 +33,7 @@ import { itemOpening } from './modules/itemOpening.mjs';
 import { tagCancel } from './modules/tagCancel.mjs';
 import { employeeMaster } from './modules/employeeMaster.mjs';
 import { taxMaster } from './modules/taxMaster.mjs';
+import { productMaster } from './modules/productMaster.mjs';
 import { runSurface } from './surface/runner.mjs';
 
 /**
@@ -67,6 +68,7 @@ const MODULES = [
   tagCancel,
   employeeMaster,
   taxMaster,
+  productMaster,
 ];
 
 const artifacts = resolve(webRoot, 'test-results/feature-e2e');

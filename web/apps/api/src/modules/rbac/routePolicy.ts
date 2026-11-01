@@ -803,6 +803,14 @@ route('Masters/Taxes', [
   'PUT /masters/tax-master/:code',
   'DELETE /masters/tax-master/:code',
 ]);
+// MS_PRODUCT with CurMast 'Product' (N215): the Product master's own screen.
+route('Masters/Products', [
+  'GET /masters/product-master',
+  'GET /masters/product-master/:code',
+  'POST /masters/product-master',
+  'PUT /masters/product-master/:code',
+  'DELETE /masters/product-master/:code',
+]);
 route('Masters/Opening Balance', [
   'GET /accounts/:acCode/opening',
   'POST /accounts/:acCode/opening',

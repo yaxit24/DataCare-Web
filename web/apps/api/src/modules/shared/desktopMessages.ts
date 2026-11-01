@@ -101,6 +101,14 @@ export const DESKTOP_MESSAGES = {
   PRODUCT_CODE_TWO_DIGITS: 'Please Insert Product Code 2 Digit...',
   /** MS_PRODUCT.cs — delete pressed with no product selected. */
   PRODUCT_SELECT_FOR_DELETE: 'Please Select Product For Delete.',
+  /** MS_PRODUCT.cs:2617 — Save with a blank product name. */
+  PRODUCT_DESC_REQUIRED: 'Enter Product Name.',
+  /** MS_PRODUCT.cs:2779 — Delete of a product an item uses (the desktop's spelling). */
+  PRODUCT_IN_ITEM_MASTER: 'You Cant Delete Record This Product Use in Itme Master....',
+  /** MS_PRODUCT.cs:2794 — Delete of one of the default products. */
+  PRODUCT_DEFAULT: 'You Cant Delete Record, This Product Is Default Product....',
+  /** MS_PRODUCT.cs:2585, :2725 — Save of an opened product or Delete without the right. */
+  PRODUCT_NO_RIGHTS: 'You Have No Rights.....',
 
   /** MS_PRODUCT.cs, CurMast='Counter' — blank counter/table name. */
   TABLE_NAME_REQUIRED: 'Please Insert Table Name ...',
