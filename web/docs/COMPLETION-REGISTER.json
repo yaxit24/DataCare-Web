@@ -1504,7 +1504,7 @@
    "note": "TR_ITM_OPBL implementation.",
    "webSurface": {
     "kind": "route",
-    "surface": "POST /stock/item-opening"
+    "surface": "PUT /stock/item-opening/type/:type"
    },
    "sharedSurfaceWith": []
   },

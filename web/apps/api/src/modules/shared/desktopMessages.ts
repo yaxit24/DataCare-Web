@@ -126,8 +126,10 @@ export const DESKTOP_MESSAGES = {
 
   /** MS_ITEM.cs — blank item name (`tItName`). */
   ITEM_NAME_REQUIRED: 'Please Insert Item Name',
-  /** MS_ITEM.cs — delete pressed with no item selected. */
+  /** MS_ITEM.cs — delete pressed with no item selected. TR_ITM_OPBL.cs:1505 uses the same text (no metal type). */
   ITEM_SELECT_FOR_DELETE: 'Please Select Item For Delete.',
+  /** TR_ITM_OPBL.cs:1407 — Item Opening saved with no metal type chosen. */
+  ITEM_OPENING_METAL_TYPE_REQUIRED: 'Please Select Metaltype....',
 
   /** MS_ACCT.cs — delete pressed with no account selected. */
   ACCOUNT_SELECT_FOR_DELETE: 'Please Select AcCode For Delete.',

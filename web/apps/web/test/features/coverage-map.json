@@ -105,6 +105,14 @@
         "web/apps/api/src/routes/dailyRate.ts",
         "web/packages/core/src/dailyRate.ts"
       ]
+    },
+    "itemOpening": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/item-opening/page.tsx",
+        "web/apps/api/src/modules/stock/itemOpening.ts",
+        "web/apps/api/src/routes/itemOpening.ts",
+        "web/packages/core/src/itemOpening.ts"
+      ]
     }
   }
 }

@@ -399,6 +399,38 @@ try {
           total: 0,
         },
       });
+    // Item Opening (TR_ITM_OPBL): the form's rights and one metal type's grid.
+    if (path === '/stock/item-opening/rights')
+      return json(route, 200, { canUpdate: true, canDelete: true, canPrint: true });
+    if (path === '/stock/item-opening/type/G' && request.method() === 'GET')
+      return json(route, 200, {
+        type: 'G',
+        stockDate: '2024-03-31',
+        version: '0'.repeat(64),
+        rows: [
+          {
+            srNo: 1,
+            itCode: 'GOLD',
+            itName: 'Gold Ornament',
+            rateType: 'G',
+            itType: 'G',
+            saved: false,
+            pcs: 0,
+            grossWt: 0,
+            netWt: 0,
+            touch: 0,
+            westPct: 0,
+            fineWt: 0,
+            rate: 0,
+            amount: 0,
+            lbrType: '',
+            lbrRate: 0,
+            lbrAmt: 0,
+            othAmt: 0,
+            netAmt: 0,
+          },
+        ],
+      });
     if (path === '/stock/physical-list')
       return json(route, 200, [
         {
@@ -986,38 +1018,48 @@ try {
     true,
   );
 
+  // Item Opening is the desktop TR_ITM_OPBL grid: Enter on the metal type lists the type's items and starts on row 1,
+  // Rtype; Enter moves one cell right; Enter on the last row's NetAmt adds a row at its ItCode; Enter on an empty ItCode
+  // goes to Save; Esc after a change goes to Save (TR_ITM_OPBL.cs:1553-1684).
   await page.goto(`${origin}/txn/item-opening`, { waitUntil: 'domcontentloaded' });
-  await page.getByRole('heading', { name: /Item Opening Balance/ }).waitFor();
-  await expectValue(page.getByLabel('Configured book'), 'IOP', 'configured book');
-  await page.getByLabel('Date').waitFor();
-  for (const label of [
-    'Item code row 1',
-    'Item opening pcs row 1',
-    'Item opening grossWt row 1',
-    'Item opening netWt row 1',
-    'Item opening touch row 1',
-    'Item opening rate row 1',
-    'Remove item row 1',
-  ])
-    await page.getByLabel(label).waitFor();
-  await page.getByLabel('Item opening pcs row 1').press('Enter');
+  await page.getByRole('heading', { name: /^Item Opening$/ }).waitFor();
+  await page.getByLabel('Item Type', { exact: true }).selectOption('G');
+  await page.getByLabel('Item Type', { exact: true }).press('Enter');
+  await page.getByTestId('item-opening-loaded').waitFor();
+  assert.equal(await page.getByLabel('ItCode row 1', { exact: true }).inputValue(), 'GOLD');
   assert.equal(
     await page
-      .getByLabel('Item opening grossWt row 1')
+      .getByLabel('Rtype row 1', { exact: true })
       .evaluate((element) => element === document.activeElement),
     true,
   );
-  await page.getByLabel('Item opening rate row 1').press('Enter');
-  await page.getByLabel('Item code row 2').waitFor();
-  page.once('dialog', (dialog) => dialog.accept());
-  await page.keyboard.press('Control+d');
-  await page.getByLabel('Item code row 2').waitFor({ state: 'detached' });
-  await page.getByLabel('Item opening pcs row 1').focus();
-  await page.keyboard.press('Escape');
+  await page.getByLabel('Rtype row 1', { exact: true }).press('Enter');
+  await page.getByLabel('Pcs row 1', { exact: true }).fill('2');
+  await page.getByLabel('Pcs row 1', { exact: true }).press('Enter');
+  await page.getByLabel('GrWt row 1', { exact: true }).fill('10.5');
+  await page.getByLabel('GrWt row 1', { exact: true }).press('Enter');
+  // Leaving GrWt works the row out: net takes the gross weight and fine = net with no touch.
+  assert.equal(await page.getByLabel('NetWt row 1', { exact: true }).inputValue(), '10.500');
+  assert.equal(await page.getByLabel('Fine row 1', { exact: true }).inputValue(), '10.500');
+  await page.getByLabel('NetAmt row 1', { exact: true }).focus();
+  await page.getByLabel('NetAmt row 1', { exact: true }).press('Enter');
+  await page.getByLabel('ItCode row 2', { exact: true }).waitFor();
   assert.equal(
     await page
-      .getByRole('button', { name: 'Post Opening' })
+      .getByLabel('ItCode row 2', { exact: true })
       .evaluate((element) => element === document.activeElement),
+    true,
+  );
+  await page.getByLabel('ItCode row 2', { exact: true }).press('Enter');
+  const itemOpeningSave = page.getByRole('button', { name: 'Save', exact: true });
+  assert.equal(
+    await itemOpeningSave.evaluate((element) => element === document.activeElement),
+    true,
+  );
+  await page.getByLabel('Pcs row 1', { exact: true }).focus();
+  await page.keyboard.press('Escape');
+  assert.equal(
+    await itemOpeningSave.evaluate((element) => element === document.activeElement),
     true,
   );
 

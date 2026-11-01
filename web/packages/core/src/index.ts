@@ -304,3 +304,11 @@ export * from './tagKarigar.js';
 
 // MS_RATE (Daily Rate) grid recalculation.
 export * from './dailyRate.js';
+export {
+  ITEM_OPENING_TYPES,
+  isItemOpeningType,
+  itemOpeningRow,
+  itemOpeningRowSaved,
+  itemOpeningTotals,
+} from './itemOpening.js';
+export type { ItemOpeningRow, ItemOpeningRowInput, ItemOpeningTypeCode } from './itemOpening.js';
