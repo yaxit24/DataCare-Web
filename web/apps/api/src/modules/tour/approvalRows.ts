@@ -50,7 +50,7 @@ export async function resolveIssueTagsTx(
       throw new TourValidationError(`approval item not found: ${text(line.itCode)}`);
     // DISPLAY_DATA/Save carries consumed rows forward. They no longer have to be live stock and must
     // retain the original tag identity rather than being resolved as a new issue selection.
-    const received = text(line.isuRec).toUpperCase();
+    const received = text((line as Row).isuRec).toUpperCase();
     if (received && received !== 'N') {
       out.push({ ...line, itType: itemType });
       continue;
@@ -249,9 +249,9 @@ export function detailRow(
     VCH_SRNO: num(line.vchSrno),
     IT_CODE: line.itCode,
     TAG_NO: isApprovalTag(line.tagNo) ? text(line.tagNo) : 'N',
-    ISU_REC: t(line.isuRec, 1) || 'N',
-    EMP_SALE: t(line.empSale, 1) || 'N',
-    CON_ISU_REC: t(line.conIsuRec),
+    ISU_REC: t((line as Row).isuRec, 1) || 'N',
+    EMP_SALE: t((line as Row).empSale, 1) || 'N',
+    CON_ISU_REC: t((line as Row).conIsuRec),
     ITM_PCS: approvalRound3(line.pcs),
     ITM_GWT: approvalRound3(line.grossWt),
     ITM_NWT: approvalRound3(line.netWt),
@@ -305,7 +305,7 @@ export function detailRow(
     PR_CODE: t(line.prCode, 2),
     ISU_YRCD: source?.year ?? t(line.isuYrcd, 10),
     ISU_DBCD: source?.book ?? t(line.isuDbcd, 3),
-    ISU_NO: source?.no ?? t(line.isuNo, 10),
+    ISU_NO: source?.no ?? t((line as Row).isuNo, 10),
     ISU_SRNO: source ? num(line.oldSrNo) : num(line.isuSrNo) || null,
     ISU_LC_CODE: key.LC_CODE,
     DESIGN_IMG_ID: t(line.designImageId, 50),

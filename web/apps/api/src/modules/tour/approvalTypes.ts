@@ -118,12 +118,7 @@ export interface TourIssueLine {
   isuYrcd?: string;
   isuDbcd?: string;
   isuLcCode?: string;
-  isuNo?: string;
   isuSrNo?: number;
-  /** Server-owned lifecycle values restored from APR_DETL during edit; HTTP does not accept them. */
-  isuRec?: string;
-  empSale?: string;
-  conIsuRec?: string;
   designImageId?: string;
   stones?: TourStoneInput[];
 }
