@@ -1110,7 +1110,7 @@ export default function PartyMasterPage() {
                   aria-label="Take photo"
                   onClick={() => cameraInput.current?.click()}
                 >
-                  Camera
+                  📷
                 </button>
                 <button
                   type="button"
@@ -1119,7 +1119,7 @@ export default function PartyMasterPage() {
                   aria-label="Select photo"
                   onClick={() => photoInput.current?.click()}
                 >
-                  Select
+                  📂
                 </button>
                 <button
                   type="button"
@@ -1128,7 +1128,7 @@ export default function PartyMasterPage() {
                   aria-label="Delete photo"
                   onClick={() => void deletePhoto()}
                 >
-                  Delete
+                  ✖
                 </button>
               </div>
               <input
@@ -1154,7 +1154,7 @@ export default function PartyMasterPage() {
               />
             </div>
             <div>
-              <fieldset style={{ width: 250 }}>
+              <fieldset style={{ width: 250, boxSizing: 'border-box', margin: 0 }}>
                 <legend>Oppning Balance</legend>
                 {(
                   [
