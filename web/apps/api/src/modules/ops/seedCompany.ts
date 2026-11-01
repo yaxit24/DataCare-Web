@@ -167,6 +167,8 @@ const DESKTOP_BOOK_TABLES: Record<string, { table: string; detail: string }> = {
   'FINE JV': { table: 'CONTRA_DATA', detail: 'CONTRA_DATA' },
   'OTH INC': { table: 'PAY_DATA', detail: 'PAY_DETL' },
   'OTH EXP': { table: 'PAY_DATA', detail: 'PAY_DETL' },
+  // MS_UPDATE.cs:7825: the TR_TAG_CAN books; the Stock Adjust writer (modules/stock/tagCancel.ts) uses BAR_CAN_DATA.
+  'STOCK ADJUST': { table: 'BAR_CAN_DATA', detail: 'BAR_CAN_DETL' },
 };
 
 const BOOKS: {
@@ -277,7 +279,16 @@ const BOOKS: {
   },
   { book: 'TUR', name: 'Approval Issue', mainBook: 'APPROVAL ISSUE', inout: 'O', acCode: 'OS' },
   { book: 'TRR', name: 'Approval Return', mainBook: 'APPROVAL RETURN', inout: 'I', acCode: 'OS' },
-  { book: 'SAJ', name: 'Stock Adjust', mainBook: 'STOCK ADJUST', inout: 'I', acCode: 'KASAR' },
+  // Desktop TR_TAG_CAN on a STOCK ADJUST book (MDI_FORM.cs:8616-8627): the desktop's own book 163 "Only Stock Adjust"
+  // is short name STADJ, an out book (MS_UPDATE.cs:24207, :25049), numbered from BAR_CAN_DATA (DESKTOP_BOOK_TABLES).
+  {
+    book: 'SAJ',
+    name: 'Stock Adjust',
+    mainBook: 'STOCK ADJUST',
+    inout: 'O',
+    acCode: 'KASAR',
+    shortName: 'STADJ',
+  },
   // Desktop Tag Opening (TR_TAG_OPEN): a pure stock-opening voucher writing BAR_DATA and positive MAIN_STOCK,
   // with no ledger entry (AC_DATA lines are empty). Without this book the Tag Opening screen has no book to
   // select on a provisioned company (N101, same class as Stock In/Out and Dhiran). Empty slots: a stock
