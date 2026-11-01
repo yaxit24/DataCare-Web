@@ -241,13 +241,39 @@ function unknownFields(raw: unknown, schema: typeof ISSUE_SCHEMA | typeof RETURN
   return unknown;
 }
 
+function trimStoneItemCodes(raw: unknown): string[] {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return [];
+  const body = raw as Record<string, unknown>;
+  if (!Array.isArray(body.lines)) return [];
+  const missing: string[] = [];
+  body.lines.forEach((line, lineIndex) => {
+    if (!line || typeof line !== 'object' || Array.isArray(line)) return;
+    const stones = (line as Record<string, unknown>).stones;
+    if (!Array.isArray(stones)) return;
+    stones.forEach((stone, stoneIndex) => {
+      if (!stone || typeof stone !== 'object' || Array.isArray(stone)) return;
+      const record = stone as Record<string, unknown>;
+      if (typeof record.itCode !== 'string') return;
+      record.itCode = record.itCode.trim();
+      if (!record.itCode) missing.push(`lines[${lineIndex}].stones[${stoneIndex}].itCode`);
+    });
+  });
+  return missing;
+}
+
 const bodyRoute = (auth: unknown, schema: typeof ISSUE_SCHEMA | typeof RETURN_SCHEMA) => ({
   ...(auth as object),
   schema: { body: schema },
   preValidation: async (req: FastifyRequest, reply: FastifyReply) => {
+    const missingStoneCodes = trimStoneItemCodes(req.body);
+    if (missingStoneCodes.length)
+      return reply.code(400).send({
+        error: 'invalid-input',
+        message: `Approval stone item code is required: ${missingStoneCodes.join(', ')}`,
+      });
     const unknown = unknownFields(req.body, schema);
     if (unknown.length)
-      await reply.code(400).send({
+      return reply.code(400).send({
         error: 'invalid-input',
         message: `Approval request contains unsupported field(s): ${unknown.join(', ')}`,
       });

@@ -164,6 +164,39 @@ export const approvalIssue = {
       },
     ),
     C(
+      'refusal.unknown-stone-item',
+      'T04',
+      'refusal',
+      'TR_APR_ISU.cs:6324-6331 saves coded stone rows selected from ITEM_MAST; an unknown code cannot enter APR_IDTL.',
+      async (ctx) => {
+        const tag = await seedApprovalTag(ctx, 'AIU');
+        const { page } = await openApproval(ctx);
+        await fillIssue(page, tag.tag, 'unknown stone');
+        const before = await ctx.rows(
+          `SELECT count(*)::int rows FROM "APR_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TUR'`,
+        );
+        await label(page, 'ItCode row 1').fill('ZZZ99');
+        await label(page, 'ItCode row 1').press('Escape');
+        await label(page, 'NetAmt row 1').fill('1');
+        const response = await saveApproval(page);
+        assert.equal(response.status(), 400, await response.text());
+        await page
+          .getByRole('alert')
+          .filter({ hasText: 'approval stone item not found' })
+          .waitFor();
+        const after = await ctx.rows(
+          `SELECT count(*)::int rows FROM "APR_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TUR'`,
+        );
+        assert.deepEqual(after, before);
+        assert.deepEqual(await tagState(ctx, tag.tag), { apr: 'N', transfer: 'N', balance: 1 });
+        return {
+          observation: 'unknown ZZZ99 stone refused with no voucher or tag change',
+          expected: '400 approval stone item not found',
+          database: { before, after },
+        };
+      },
+    ),
+    C(
       'refusal.party-required',
       'T04',
       'refusal',

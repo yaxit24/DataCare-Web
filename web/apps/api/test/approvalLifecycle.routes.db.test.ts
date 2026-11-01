@@ -553,6 +553,33 @@ type Cookie = string;
     }
   });
 
+  it.each([
+    ['whitespace-only', '   '],
+    ['unknown', 'ZZZ99'],
+  ])('rejects a %s approval stone item code without writing', async (_label, itCode) => {
+    // TR_APR_ISU.cs:6324-6331 saves only coded stone rows selected from ITEM_MAST.
+    const before = await snapshotTenant(owner, tenantId, BUSINESS_TABLES);
+    const response = await admin(
+      'POST',
+      '/tour/issue',
+      issueBody({
+        lines: [
+          {
+            itCode: ITEM,
+            grossWt: 1,
+            stones: [{ itCode, dmCode: 'BAD', netAmount: 1 }],
+          },
+        ],
+      }),
+    );
+    expect(response.statusCode, response.body).toBe(400);
+    expect(response.json().message).toMatch(/stone item/i);
+    expect(diffTenant(before, await snapshotTenant(owner, tenantId, BUSINESS_TABLES))).toEqual({
+      added: {},
+      removed: {},
+    });
+  });
+
   it('writes APR_IDTL only for coded stones with a nonzero desktop value basis', async () => {
     // TR_APR_ISU.cs:6324-6331 inserts a stone only when pcs + gross + karigar weight + net amount != 0.
     const response = await admin(

@@ -294,7 +294,20 @@ export function normalizeApprovalLines(raw: unknown): TourIssueLine[] {
       fineWt,
       discountAmount,
       netAmount,
-      stones: Array.isArray(line.stones) ? line.stones : [],
+      stones: Array.isArray(line.stones)
+        ? line.stones.map((stone, stoneIndex) => {
+            if (!stone || typeof stone !== 'object' || Array.isArray(stone))
+              throw new TourValidationError(
+                `approval line ${index + 1} stone ${stoneIndex + 1} is invalid`,
+              );
+            const stoneItCode = text(stone.itCode).slice(0, 5);
+            if (!stoneItCode)
+              throw new TourValidationError(
+                `approval line ${index + 1} stone item ${stoneIndex + 1} is required`,
+              );
+            return { ...stone, itCode: stoneItCode };
+          })
+        : [],
     };
     // TR_APR_ISU.cs:6155-6157 inserts only MRP lines or rows with gross/labour/other value.
     if (

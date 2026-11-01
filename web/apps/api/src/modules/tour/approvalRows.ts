@@ -79,6 +79,45 @@ export async function resolveIssueTagsTx(
   return out;
 }
 
+export async function resolveStoneItemsTx(
+  tx: any,
+  scope: CompleteApprovalScope,
+  lines: TourIssueLine[],
+): Promise<TourIssueLine[]> {
+  const codes = [
+    ...new Set(
+      lines.flatMap((line) =>
+        (line.stones ?? []).map((stone, stoneIndex) => {
+          const code = text(stone.itCode).slice(0, 5);
+          if (!code)
+            throw new TourValidationError(
+              `approval line ${num(line.oldSrNo)} stone item ${stoneIndex + 1} is required`,
+            );
+          return code;
+        }),
+      ),
+    ),
+  ];
+  if (!codes.length) return lines;
+  const rows: Array<{ IT_CODE: unknown; IT_TYPE: unknown }> = await tx.$queryRawUnsafe(
+    `SELECT "IT_CODE","IT_TYPE" FROM "ITEM_MAST"
+      WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "IT_CODE"=ANY($3::text[])`,
+    scope.tenantId,
+    scope.coCode,
+    codes,
+  );
+  const items = new Map(rows.map((row) => [text(row.IT_CODE), text(row.IT_TYPE)] as const));
+  for (const code of codes)
+    if (!items.has(code)) throw new TourValidationError(`approval stone item not found: ${code}`);
+  return lines.map((line) => ({
+    ...line,
+    stones: (line.stones ?? []).map((stone) => {
+      const itCode = text(stone.itCode).slice(0, 5);
+      return { ...stone, itCode, itType: text(stone.itType) || items.get(itCode) };
+    }),
+  }));
+}
+
 export async function sourceLinesTx(
   tx: any,
   scope: CompleteApprovalScope,

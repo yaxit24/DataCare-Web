@@ -30,6 +30,7 @@ import {
   dmRowsTx,
   lineFromRow,
   resolveIssueTagsTx,
+  resolveStoneItemsTx,
   setBarFlagsTx,
   setSourceReceivedTx,
   sourceLinesTx,
@@ -585,6 +586,7 @@ async function create(
           no: formatVoucherNo(rtn.origVchNo),
         };
       }
+      lines = await resolveStoneItemsTx(tx, scope, lines);
       const identity = await createIdentityTx(tx, scope, requested.date, input.mainUser);
       return writeTx(tx, kind, input, book, identity, lines, source);
     }),
@@ -648,6 +650,7 @@ async function edit(
       };
       let lines = normalizeApprovalLines(sparseLinesWithFallback(input.lines, current.view.lines));
       if (kind === 'issue') lines = issueLinesWithPersistedLifecycle(lines, current.state.details);
+      lines = await resolveStoneItemsTx(tx, scope, lines);
       await clearEffectsTx(tx, scope, kind, current.state);
       await deleteVoucherWriteSetTx(tx, {
         tables: DELETE_TABLES,
@@ -659,6 +662,7 @@ async function edit(
       else {
         const rtn = mergedInput as TourReturnInput;
         lines = await sourceLinesTx(tx, scope, rtn, true);
+        lines = await resolveStoneItemsTx(tx, scope, lines);
         source = {
           year: text(rtn.origYear) || current.view.origYear,
           book: text(rtn.origBook) || current.view.origBook,
