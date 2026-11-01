@@ -190,7 +190,6 @@ import { partyBalance } from '../modules/finance/partyBalance.js';
 import { bankReconList, bankReconClear } from '../modules/finance/bankRecon.js';
 import { registerDailyRateRoutes } from './dailyRate.js';
 import { tagCancelBillHtml, TagCancelBillNotFoundError } from '../modules/stock/tagCancelBill.js';
-import { bulkAutoItem } from '../modules/masters/autoItem.js';
 import {
   deleteDesignBook,
   getDesignCalculationConfig,
@@ -254,10 +253,12 @@ import { registerFineJvRoutes } from './fineJv.js';
 import { registerItemOpeningRoutes } from './itemOpening.js';
 import { registerEmployeeMasterRoutes } from './employeeMaster.js';
 import { registerTaxMasterRoutes } from './taxMaster.js';
+import { registerAutoItemRoutes } from './autoItem.js';
 import { registerGroupMasterRoutes } from './groupMaster.js';
 import { registerProductMasterRoutes } from './productMaster.js';
 import { registerAddressMasterRoutes } from './addressMaster.js';
 import { registerItemMasterRoutes } from './itemMaster.js';
+import { registerWholesaleSaleRoutes } from './wholesaleSale.js';
 import { VoucherVersionConflictError } from '../modules/vouchers/version.js';
 import { listYears, createYear, carryForwardOpenings } from '../modules/masters/year.js';
 import { reminders } from '../modules/finance/reminders.js';
@@ -1112,10 +1113,12 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerItemOpeningRoutes(app, extraRouteHelpers, formCapabilities);
   registerEmployeeMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerTaxMasterRoutes(app, extraRouteHelpers, formCapabilities);
+  registerAutoItemRoutes(app, extraRouteHelpers, formCapabilities);
   registerGroupMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerProductMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerAddressMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerItemMasterRoutes(app, extraRouteHelpers, formCapabilities);
+  registerWholesaleSaleRoutes(app, extraRouteHelpers);
   const pdfRenderer = (): PdfRenderer => deps.pdfRenderer ?? new PlaywrightPdfRenderer();
   /** Render server-built HTML, mapping limits to 413/422 and a busy or slow renderer to a retryable 503. */
   const sendPdf = async (reply: FastifyReply, html: string, filename: string) => {
@@ -4866,21 +4869,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       prisma,
       { tenantId: s.tenantId, coCode: s.coCode },
       String((req.params as any).acCode),
-    );
-  });
-  app.post('/masters/auto-item', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    const s = readScope(req);
-    const b = body(req);
-    return run(reply, 201, () =>
-      bulkAutoItem(prisma, {
-        scope: { tenantId: s.tenantId, coCode: s.coCode },
-        grCode: b.grCode,
-        grName: b.grName,
-        itType: b.itType,
-        hsnCode: b.hsnCode,
-        products: b.products ?? [],
-      }),
     );
   });
   app.get('/reminders', auth, async (req) => {

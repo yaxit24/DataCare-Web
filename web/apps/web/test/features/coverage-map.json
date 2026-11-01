@@ -173,6 +173,21 @@
         "web/apps/api/src/modules/masters/itemMaster.ts",
         "web/apps/api/src/routes/itemMaster.ts"
       ]
+    },
+    "autoItem": {
+      "covers": [
+        "web/apps/web/app/(app)/masters/auto-item/page.tsx",
+        "web/apps/api/src/modules/masters/autoItem.ts",
+        "web/apps/api/src/routes/autoItem.ts"
+      ]
+    },
+    "wholesaleSale": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/wholesale-sale/page.tsx",
+        "web/apps/web/components/WholesaleVoucherForm.tsx",
+        "web/apps/web/lib/wholesaleVoucher.ts",
+        "web/apps/api/src/modules/sales/rateCut.ts"
+      ]
     }
   }
 }

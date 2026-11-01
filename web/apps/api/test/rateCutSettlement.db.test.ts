@@ -48,6 +48,7 @@ d('rate-cut settlement persistence', () => {
     'BOOK_DATA',
     'BOOK_DETL',
     'BUL_DATA',
+    'YEAR_MAST',
     // The booking draw-down test deletes a voucher, which writes a DELETE_DATA audit row. Without
     // cleaning it the footprint assertion in this same file sees an extra table and fails.
     'DELETE_DATA',
@@ -90,6 +91,15 @@ d('rate-cut settlement persistence', () => {
         tenantId,
         CO,
         LC,
+      );
+      // TR_WH_SALE refuses a date outside the open year (TR_WH_SALE.cs:12833). These cuts are posted undated, so the
+      // writer dates them today; the fixture year's row spans today and the dated 2024 cuts.
+      await tx.$executeRawUnsafe(
+        `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE")
+         VALUES ($1,$2,$3,'2024-04-01',current_date + 1)`,
+        tenantId,
+        CO,
+        YEAR,
       );
       /**
        * BOOK_DETL supplies the book's contra accounts. Rate-cut posting now FAILS CLOSED when a slot is
