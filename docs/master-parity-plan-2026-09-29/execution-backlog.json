@@ -6998,6 +6998,30 @@
         "web/apps/web/test/browser.smoke.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Verified: core itemOpening 8/8, itemOpening.db.test.ts 8/8, the item-opening feature module 17 passed and 1 blocked (T14 fault rollback, no fault injector), browser smoke, and a Chrome DevTools pass on the demo stack (keyboard entry, Alt+S save checked in the database, reopen, Esc both ways, Delete). Open: fault rollback, desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N210",
+      "status": "implemented-unverified",
+      "action": "Tag Cancel: TagCanBill print behind print rights; the type B, current-year and lock-date refusals in TR_TAG_CAN's order with the desktop texts; Print on the form.",
+      "parentLabels": "P1-core; L3",
+      "startAfter": [
+        "N208"
+      ],
+      "requiredProof": "HTTP/DB cases red against main for the refusals and the print; the tag-cancel feature module passes every executable case through the real form.",
+      "gapIds": "G223",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/apps/api/src/modules/stock/tagCancel.ts",
+        "web/apps/api/src/modules/stock/tagCancelBill.ts",
+        "web/apps/web/components/TagCancelForm.tsx",
+        "web/apps/api/test/tagCancel.routes.db.test.ts",
+        "web/apps/web/test/features/modules/tagCancel.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Tag Cancel suites 114/114 (the two new cases red against main); tag-cancel feature module 12 passed / 5 blocked. Open: no captured desktop BAR_CAN rows, idempotency, fault rollback, the Tag Stock report check, desktop-runtime comparison."
     }
   ],
   "amendments": [
