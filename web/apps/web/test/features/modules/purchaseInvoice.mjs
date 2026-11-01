@@ -652,6 +652,48 @@ export const purchaseInvoice = {
     ),
 
     C(
+      'lookup.pick-over-typed-code',
+      'T04',
+      'read-only',
+      "Lookup: typing a code that exists ('BANK') and choosing another supplier from the list (E2EBANK) keeps the chosen supplier; the leave after the pick must not resolve the typed text again (LookupPicker, found in the 2026-11-01 Tax master run)",
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openPurchase(page);
+        const input = page.getByPlaceholder('search accounts… (F1)').first();
+        await input.fill('BANK');
+        await input
+          .locator('xpath=..')
+          .getByText(PARTIES.bank.code, { exact: true })
+          .first()
+          .waitFor();
+        const codes = (await input.locator('xpath=..').locator('b').allInnerTexts()).map((t) =>
+          t.trim(),
+        );
+        const index = codes.indexOf(PARTIES.bank.code);
+        assert.ok(
+          codes.includes('BANK') && index > 0,
+          `BANK and ${PARTIES.bank.code} listed: ${codes}`,
+        );
+        for (let i = 0; i < index; i++) await input.press('ArrowDown');
+        await input.press('Enter');
+        await page.waitForTimeout(600);
+        const chosen = await input.inputValue();
+        const name = await page
+          .locator('.field')
+          .filter({ has: page.locator('label', { hasText: /^Supplier Name$/ }) })
+          .locator('input')
+          .first()
+          .inputValue();
+        assert.equal(chosen, PARTIES.bank.code, 'the chosen supplier stands');
+        assert.equal(name, PARTIES.bank.name);
+        return {
+          observation: `typed BANK, chose ${chosen} (${name}) from ${codes.join(', ')}`,
+          expected: { supplier: PARTIES.bank.code, name: PARTIES.bank.name },
+        };
+      },
+    ),
+
+    C(
       'refusal.unknown-item',
       'T04',
       'refusal',
