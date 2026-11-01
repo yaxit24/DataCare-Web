@@ -18,7 +18,6 @@ import {
   configuredBookTx,
   createIdentityTx,
   editIdentityTx,
-  insertDesktopDeleteAuditTx,
   insertHiddenIdentityTx,
   num,
   requireBookFamily,
@@ -733,6 +732,42 @@ async function assertIssueDeleteAllowedTx(
   if (sales.length) throw new TourValidationError(APPROVAL_MESSAGES.DELETE_WHOLESALE);
 }
 
+async function insertApprovalDeleteAuditTx(
+  tx: any,
+  scope: CompleteApprovalScope,
+  book: ApprovalBook,
+  header: Row,
+  details: Row[],
+  partyName: unknown,
+  deleteUser?: string,
+): Promise<void> {
+  const deletedAt = new Date();
+  for (const row of details) {
+    await insertRowTx(tx, 'DELETE_DATA', scope.tenantId, {
+      ...voucherKey(scope, text(header.VCH_NO)),
+      SR_NO: num(row.SR_NO),
+      VCH_DATE: header.VCH_DATE,
+      DELETE_DATE: deletedAt,
+      VCH_TYPE: book.shortName,
+      VCH_TIME: header.VCH_TIME,
+      DELETE_TIME: deletedAt,
+      BOOK_NAME: book.name,
+      AC_CODE: row.AC_CODE ?? header.AC_CODE ?? null,
+      AC_NAME: partyName ?? null,
+      VCH_VAL_DR: 0,
+      VCH_VAL_CR: 0,
+      FINE_TYPE: row.IT_TYPE,
+      VCH_FINE_DR: 0,
+      // TR_APR_ISU.cs:6648 puts ITM_NWT in VCH_FINE_CR despite that column's name.
+      VCH_FINE_CR: num(row.ITM_NWT),
+      HD_VCH_NO: header.HD_VCH_NO,
+      MAIN_USER: header.MAIN_USER,
+      DELETE_USER: deleteUser ?? 'system',
+      VCH_DESC: `ItCode / ${text(row.IT_CODE)}   TagNo / ${text(row.TAG_NO)}`.slice(0, 150),
+    });
+  }
+}
+
 async function remove(
   prisma: any,
   kind: ApprovalKind,
@@ -764,21 +799,15 @@ async function remove(
         key: { scope, voucherNo },
         tempBook: { voucherNo: identity.hiddenVoucherNo },
       });
-      await insertDesktopDeleteAuditTx(tx, {
+      await insertApprovalDeleteAuditTx(
+        tx,
         scope,
-        configuredBook: current.book,
-        header: persisted,
-        rows: current.state.details.map((row) => ({
-          srNo: num(row.SR_NO),
-          fineType: text(row.IT_TYPE),
-          // TR_APR_ISU.cs:6648 puts ITM_NWT in VCH_FINE_CR despite that column's name.
-          fineCr: num(row.ITM_NWT),
-          acCode: row.AC_CODE,
-          acName: current.state.header.PARTY_NAME,
-          description: `ItCode / ${text(row.IT_CODE)}   TagNo / ${text(row.TAG_NO)}`,
-        })),
-        deleteUser: input.deleteUser,
-      });
+        current.book,
+        persisted,
+        current.state.details,
+        current.state.header.PARTY_NAME,
+        input.deleteUser,
+      );
       return { reversed: true as const };
     }),
   );

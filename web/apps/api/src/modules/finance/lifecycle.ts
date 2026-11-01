@@ -211,7 +211,7 @@ export async function insertDesktopDeleteAuditTx(
       srNo: number;
       valueDr?: number;
       valueCr?: number;
-      fineType?: string | null;
+      fineType?: string;
       fineDr?: number;
       fineCr?: number;
       description?: string;
@@ -237,7 +237,7 @@ export async function insertDesktopDeleteAuditTx(
       AC_NAME: row.acName ?? h.AC_NAME ?? null,
       VCH_VAL_DR: row.valueDr ?? 0,
       VCH_VAL_CR: row.valueCr ?? 0,
-      FINE_TYPE: row.fineType === undefined ? 'A' : row.fineType,
+      FINE_TYPE: row.fineType || 'A',
       VCH_FINE_DR: row.fineDr ?? 0,
       VCH_FINE_CR: row.fineCr ?? 0,
       HD_VCH_NO: h.HD_VCH_NO,

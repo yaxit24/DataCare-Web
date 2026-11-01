@@ -7046,7 +7046,6 @@
         "web/apps/api/src/modules/tour/approvalTypes.ts",
         "web/apps/api/src/modules/sales/sales.ts",
         "web/apps/api/src/modules/sales/approvalSaleReferences.ts",
-        "web/apps/api/src/modules/finance/lifecycle.ts",
         "web/apps/api/src/modules/tour/approvalBill.ts",
         "web/apps/api/src/routes/approval.ts",
         "web/apps/web/components/ApprovalVoucherForm.tsx",
