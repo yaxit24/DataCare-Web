@@ -31,7 +31,7 @@ export const APPROVAL_MESSAGES = {
   PARTY_REQUIRED: 'Please Insert Party and try',
   DUPLICATE_TAG: 'Duplicate Tag No',
   LEGACY_RETURN_UNLINKED:
-    'Approval Return source link is missing; migrate or repair this legacy voucher before edit or delete.',
+    'Approval Return source or tag link is missing, ambiguous, or inconsistent; repair this legacy voucher before edit or delete.',
   DELETE_RETURNED: 'You Cant Delete this Voucher Because This Voucher Is Approval Returne....',
   DELETE_WHOLESALE: 'You Cant Delete this Voucher Because This Voucher Use In Wh Sales....',
   lockDate: (date: string) =>

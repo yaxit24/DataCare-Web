@@ -456,18 +456,51 @@ function comparableView(view: ApprovalView): string {
   });
 }
 
-function assertReturnLinks(details: Row[]): void {
-  if (
-    details.some(
-      (row) =>
-        !text(row.ISU_YRCD) ||
-        !text(row.ISU_DBCD) ||
-        !text(row.ISU_LC_CODE) ||
-        !text(row.ISU_NO) ||
-        !num(row.ISU_SRNO),
+async function assertReturnLinksTx(tx: any, tenantId: string, details: Row[]): Promise<void> {
+  for (const row of details) {
+    if (
+      !text(row.ISU_YRCD) ||
+      !text(row.ISU_DBCD) ||
+      !text(row.ISU_LC_CODE) ||
+      !text(row.ISU_NO) ||
+      !num(row.ISU_SRNO)
     )
-  )
-    throw new TourValidationError(APPROVAL_MESSAGES.LEGACY_RETURN_UNLINKED);
+      throw new TourValidationError(APPROVAL_MESSAGES.LEGACY_RETURN_UNLINKED);
+    const sources: Row[] = await tx.$queryRawUnsafe(
+      `SELECT "row_id","TAG_NO","VCH_SRNO","IT_CODE" FROM "APR_DETL"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+          AND "CO_BOOK"=$5 AND "VCH_NO"=$6 AND "OLD_SRNO"::numeric=$7::numeric
+          AND coalesce("TAG_NO",'N')=coalesce($8,'N')
+          AND coalesce("IT_CODE"::text,'')=coalesce($9::text,'')
+          AND coalesce("VCH_SRNO",0)::numeric=$10::numeric
+        ORDER BY row_id FOR UPDATE`,
+      tenantId,
+      row.CO_CODE,
+      row.ISU_LC_CODE,
+      row.ISU_YRCD,
+      row.ISU_DBCD,
+      row.ISU_NO,
+      num(row.ISU_SRNO),
+      text(row.TAG_NO) || 'N',
+      text(row.IT_CODE),
+      num(row.VCH_SRNO),
+    );
+    if (sources.length !== 1)
+      throw new TourValidationError(APPROVAL_MESSAGES.LEGACY_RETURN_UNLINKED);
+    if (!isApprovalTag(row.TAG_NO)) continue;
+    const bars: Row[] = await tx.$queryRawUnsafe(
+      `SELECT row_id FROM "BAR_DETL" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+        AND "TAG_NO"=$4 AND coalesce("VCH_SRNO",0)::numeric=$5::numeric
+        AND coalesce("IT_CODE"::text,'')=coalesce($6::text,'') ORDER BY row_id FOR UPDATE`,
+      tenantId,
+      row.CO_CODE,
+      row.LC_CODE,
+      row.TAG_NO,
+      num(row.VCH_SRNO),
+      text(row.IT_CODE),
+    );
+    if (bars.length !== 1) throw new TourValidationError(APPROVAL_MESSAGES.LEGACY_RETURN_UNLINKED);
+  }
 }
 
 async function clearEffectsTx(
@@ -481,8 +514,8 @@ async function clearEffectsTx(
     await setSourceReceivedTx(tx, scope.tenantId, details, 'N');
     await setBarFlagsTx(tx, scope.tenantId, details, 'issue');
   } else {
-    for (const row of details.filter((line) => isApprovalTag(line.TAG_NO)))
-      await tx.$executeRawUnsafe(
+    for (const row of details.filter((line) => isApprovalTag(line.TAG_NO))) {
+      const affected = await tx.$executeRawUnsafe(
         `UPDATE "BAR_DETL" SET "APR_ISU"='N' WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
           AND "TAG_NO"=$4 AND coalesce("VCH_SRNO",0)::numeric=$5::numeric`,
         scope.tenantId,
@@ -491,6 +524,8 @@ async function clearEffectsTx(
         row.TAG_NO,
         num(row.VCH_SRNO),
       );
+      if (affected !== 1) throw new TourValidationError(APPROVAL_MESSAGES.LEGACY_RETURN_UNLINKED);
+    }
   }
 }
 
@@ -561,7 +596,7 @@ async function edit(
         };
         return kind === 'return' ? { ...base, closedLines: current.view.lines.length } : base;
       }
-      if (kind === 'return') assertReturnLinks(current.state.details);
+      if (kind === 'return') await assertReturnLinksTx(tx, scope.tenantId, current.state.details);
       const requested = approvalBusinessDate(input.vchDate || current.view.vchDate);
       const partyAc = text(input.partyAc ?? input.salesmanAc) || current.view.partyAc;
       const empCode = input.empCode === undefined ? current.view.empCode : text(input.empCode);
@@ -674,7 +709,7 @@ async function remove(
   return withTxBudget(prisma, scope.tenantId, 'voucher', (tx: any) =>
     withDesktopLockText(async () => {
       const current = await getTx(tx, scope, kind, voucherNo, true);
-      if (kind === 'return') assertReturnLinks(current.state.details);
+      if (kind === 'return') await assertReturnLinksTx(tx, scope.tenantId, current.state.details);
       const { persisted, identity } = await editIdentityTx(tx, {
         table: 'APR_DATA',
         scope,

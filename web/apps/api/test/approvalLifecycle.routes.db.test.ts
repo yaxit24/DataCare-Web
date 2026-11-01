@@ -1025,7 +1025,37 @@ type Cookie = string;
       `/tour/return/00091?coBook=TRR&expectedVersion=${returnView.json().version}`,
     );
     expect(returnDelete.statusCode, returnDelete.body).toBe(400);
-    expect(returnDelete.json().message).toContain('source link is missing');
+    expect(returnDelete.json().message).toContain('source or tag link is missing');
+    expect(diffTenant(before, await snapshotTenant(owner, tenantId, BUSINESS_TABLES))).toEqual({
+      added: {},
+      removed: {},
+    });
+  });
+
+  it.each([
+    [
+      'missing',
+      async () => exec(`DELETE FROM "BAR_DETL" WHERE tenant_id=$1 AND "TAG_NO"=$2`, tenantId, TAG),
+    ],
+    ['ambiguous', async () => seedTag(TAG, TAG_SRNO)],
+  ])('fails closed when a return has a %s BAR instance', async (_case, corruptBar) => {
+    // TR_APR_ISU.cs:6664-6669 reopens exactly the TAG_NO + VCH_SRNO instance. Updating zero or
+    // multiple BAR_DETL rows would silently leave an invalid reversal, so runtime must refuse it.
+    const issue = await createIssue();
+    const returned = await admin('POST', '/tour/return', returnBody(issue.voucherNo));
+    expect(returned.statusCode, returned.body).toBe(201);
+    await corruptBar();
+    const before = await snapshotTenant(owner, tenantId, BUSINESS_TABLES);
+
+    const removed = await admin(
+      'DELETE',
+      `/tour/return/${returned.json().voucherNo}?coBook=TRR&expectedVersion=${returned.json().version}`,
+    );
+
+    expect(removed.statusCode, removed.body).toBe(400);
+    expect(removed.json().message).toBe(
+      'Approval Return source or tag link is missing, ambiguous, or inconsistent; repair this legacy voucher before edit or delete.',
+    );
     expect(diffTenant(before, await snapshotTenant(owner, tenantId, BUSINESS_TABLES))).toEqual({
       added: {},
       removed: {},

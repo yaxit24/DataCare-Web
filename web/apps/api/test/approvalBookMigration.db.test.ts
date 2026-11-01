@@ -38,7 +38,14 @@ const dml = statements.filter((statement) => /^(UPDATE|INSERT)/.test(statement))
   let owner: PrismaClient;
   let runtime: PrismaClient;
   const wipe = async () => {
-    for (const table of ['MAIN_STOCK', 'APR_IDTL', 'APR_DETL', 'BOOK_DETL', 'BOOK_DATA'])
+    for (const table of [
+      'MAIN_STOCK',
+      'APR_IDTL',
+      'APR_DETL',
+      'BAR_DETL',
+      'BOOK_DETL',
+      'BOOK_DATA',
+    ])
       await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, TENANT);
   };
   const run = () =>
@@ -194,5 +201,47 @@ const dml = statements.filter((statement) => /^(UPDATE|INSERT)/.test(statement))
     ]);
     await run();
     expect(await snapshot()).toEqual(after);
+  });
+
+  it('leaves legacy returns unlinked when the source has zero or two BAR tag instances', async () => {
+    // TR_APR_ISU.cs:6414-6417 and :6664-6669 reverse a tag by the real TAG_NO + VCH_SRNO.
+    // A legacy line ordinal is therefore not a source identity when no unique BAR instance proves it.
+    await owner.$executeRawUnsafe(
+      `UPDATE "BOOK_DATA" SET "MAIN_BOOK"=CASE "CO_BOOK"
+         WHEN 'TUR' THEN 'APPROVAL ISSUE' WHEN 'TRR' THEN 'APPROVAL RETURN' ELSE "MAIN_BOOK" END
+        WHERE tenant_id=$1 AND "CO_BOOK" IN ('TUR','TRR')`,
+      TENANT,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "APR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","OLD_SRNO",
+          "VCH_TYPE","BOOK_NAME","INOUT_TYPE","VCH_SRNO","IT_CODE","TAG_NO","ISU_NO","ISU_SRNO") VALUES
+       ($1,'01','01','2026-2027','TUR','00101',1,1,'TOUR','EMP ISU','O',1,'GOLD','NO-BAR',NULL,NULL),
+       ($1,'01','01','2026-2027','TRR','00111',1,1,'TOURR','EMP REC','R',1,'GOLD','NO-BAR','00101',1),
+       ($1,'01','01','2026-2027','TUR','00102',1,1,'TOUR','EMP ISU','O',1,'GOLD','TWO-BAR',NULL,NULL),
+       ($1,'01','01','2026-2027','TRR','00112',1,1,'TOURR','EMP REC','R',1,'GOLD','TWO-BAR','00102',1)`,
+      TENANT,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "BAR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO",
+          "IT_CODE","TAG_NO","VCH_SRNO") VALUES
+       ($1,'01','01','2026-2027','TOP','00901',1,'GOLD','TWO-BAR',81001),
+       ($1,'01','01','2026-2027','TOP','00902',1,'GOLD','TWO-BAR',81002)`,
+      TENANT,
+    );
+
+    await run();
+
+    expect(
+      await owner.$queryRawUnsafe(
+        `SELECT "VCH_NO" no,"ISU_YRCD" iy,"ISU_DBCD" ib,"ISU_LC_CODE" ilc,
+                "VCH_SRNO"::int serial,"INOUT_TYPE" inout
+           FROM "APR_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='TRR' AND "VCH_NO" IN ('00111','00112')
+          ORDER BY "VCH_NO"`,
+        TENANT,
+      ),
+    ).toEqual([
+      { no: '00111', iy: null, ib: null, ilc: null, serial: 1, inout: 'R' },
+      { no: '00112', iy: null, ib: null, ilc: null, serial: 1, inout: 'R' },
+    ]);
   });
 });

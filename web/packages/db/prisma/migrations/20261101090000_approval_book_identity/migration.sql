@@ -44,7 +44,7 @@ UPDATE "APR_DETL" d
        AND upper(btrim(coalesce(issue."BOOK_NAME",'')))='EMP ISU'
        AND coalesce(issue."TAG_NO",'N')<>'N'
      GROUP BY issue.row_id
-    HAVING count(DISTINCT bar."VCH_SRNO")=1
+    HAVING count(DISTINCT bar.row_id)=1
   ) source
  WHERE d.row_id=source.row_id;
 
@@ -74,13 +74,19 @@ UPDATE "APR_DETL" rtn
       JOIN "BOOK_DATA" issue_book
         ON issue_book.tenant_id=issue.tenant_id AND issue_book."CO_CODE"=issue."CO_CODE"
        AND issue_book."LC_CODE"=issue."LC_CODE" AND issue_book."CO_BOOK"=issue."CO_BOOK"
+      JOIN "BAR_DETL" bar
+        ON bar.tenant_id=issue.tenant_id AND bar."CO_CODE"=issue."CO_CODE"
+       AND bar."LC_CODE"=issue."LC_CODE" AND bar."TAG_NO"=issue."TAG_NO"
+       AND coalesce(bar."IT_CODE"::text,'')=coalesce(issue."IT_CODE"::text,'')
      WHERE upper(btrim(return_book."MAIN_BOOK"))='APPROVAL RETURN'
        AND upper(btrim(issue_book."MAIN_BOOK"))='APPROVAL ISSUE'
        AND upper(btrim(coalesce(legacy."VCH_TYPE",'')))='TOURR'
        AND upper(btrim(coalesce(legacy."BOOK_NAME",'')))='EMP REC'
        AND upper(btrim(coalesce(legacy."INOUT_TYPE",'')))='R'
      GROUP BY legacy.row_id
-    HAVING count(issue.row_id)=1
+    HAVING count(DISTINCT issue.row_id)=1
+       AND count(DISTINCT bar.row_id)=1
+       AND min(coalesce(bar."VCH_SRNO",0))::numeric=min(coalesce(issue."VCH_SRNO",0))::numeric
   ) source
  WHERE rtn.row_id=source.row_id;
 

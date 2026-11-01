@@ -486,7 +486,7 @@ export async function setBarFlagsTx(
     // TR_APR_ISU.cs:6412-6431 marks every return unavailable, but re-marks an issue tag only while
     // that source row remains open (ISU_REC='N'). A description edit must not reopen a returned tag.
     if (kind === 'issue' && text(row.ISU_REC).toUpperCase() !== 'N') continue;
-    await tx.$executeRawUnsafe(
+    const affected = await tx.$executeRawUnsafe(
       `UPDATE "BAR_DETL" SET "APR_ISU"=$6${kind === 'return' ? ',"APP_TRFR"=\'N\'' : ''}
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "TAG_NO"=$4
           AND coalesce("VCH_SRNO",0)::numeric=$5::numeric`,
@@ -497,6 +497,7 @@ export async function setBarFlagsTx(
       num(row.VCH_SRNO),
       kind === 'issue' ? 'Y' : 'N',
     );
+    if (affected !== 1) throw new TourValidationError(APPROVAL_MESSAGES.LEGACY_RETURN_UNLINKED);
   }
 }
 
@@ -508,17 +509,18 @@ export async function setSourceReceivedTx(
 ): Promise<void> {
   for (const row of details) {
     if (!text(row.ISU_DBCD) || !text(row.ISU_NO)) continue;
-    await tx.$executeRawUnsafe(
+    const affected = await tx.$executeRawUnsafe(
       `UPDATE "APR_DETL" SET "ISU_REC"=$8 WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
         AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 AND "OLD_SRNO"::numeric=$7::numeric`,
       tenantId,
       row.CO_CODE,
-      row.LC_CODE,
+      row.ISU_LC_CODE,
       row.ISU_YRCD,
       row.ISU_DBCD,
       row.ISU_NO,
       num(row.ISU_SRNO),
       received,
     );
+    if (affected !== 1) throw new TourValidationError(APPROVAL_MESSAGES.LEGACY_RETURN_UNLINKED);
   }
 }
