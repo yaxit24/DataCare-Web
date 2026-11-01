@@ -6,10 +6,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 23 | 20 | 0 |
+| Lite (first, D32) | 49 | 24 | 21 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
 | Standard (added by Standard) | 36 | 0 | 0 | 0 |
-| **Standard total** | **114** | **24** | **21** | **0** |
+| **Standard total** | **114** | **25** | **22** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
@@ -38,7 +38,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Master | Tag Opening | `/txn/tag-opening` | PARTIAL | tag-opening | module green | — |
 | Other | Daily Rate | `/txn/daily-rate` | PARTIAL | daily-rate | module green | — |
 | Other | Only Tag Entry | `/txn/tag-opening` | PARTIAL | tag-opening | module green | — |
-| Other | Tag Cancel | `/txn/tag-cancel` | PARTIAL | — | no module | — |
+| Other | Tag Cancel | `/txn/tag-cancel` | PARTIAL | tag-cancel | module green | — |
 | Other | Tag Print | `/txn/tag-print` | PARTIAL | — | no module | — |
 | Other | Stock Adjust | `/txn/stock-adjust` | PARTIAL | — | no module | — |
 | Other | Order Cancel | `/txn/order-cancel` | PARTIAL | — | no module | — |
