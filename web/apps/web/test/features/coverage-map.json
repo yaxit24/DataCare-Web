@@ -113,6 +113,13 @@
         "web/apps/api/src/routes/itemOpening.ts",
         "web/packages/core/src/itemOpening.ts"
       ]
+    },
+    "tagCancel": {
+      "covers": [
+        "web/apps/web/components/TagCancelForm.tsx",
+        "web/apps/api/src/modules/stock/tagCancel.ts",
+        "web/apps/api/src/modules/stock/tagCancelBill.ts"
+      ]
     }
   }
 }

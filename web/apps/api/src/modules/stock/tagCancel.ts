@@ -1,3 +1,4 @@
+import { formatDesktopDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { tagCancelLineQualifies, tagCancelTotals, type TagCancelTotals } from '@datacare/core';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
@@ -7,7 +8,7 @@ import {
   persistedVoucherHeaderTx,
   voucherTimestamp,
 } from '../vouchers/lifecycle.js';
-import { assertPeriodOpen, insertRowTx } from '../posting/posting.js';
+import { assertPeriodOpen, insertRowTx, PeriodLockValidationError } from '../posting/posting.js';
 import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
 import {
@@ -236,10 +237,29 @@ const isoOf = (value: unknown): string =>
   value instanceof Date ? value.toISOString().slice(0, 10) : dbText(value).slice(0, 10);
 
 async function assertOpenTx(tx: any, scope: CompleteScope, date: Date): Promise<void> {
-  // TR_TAG_CAN.cs:4965 — "You Cant Save and Delete This Voucher Becouse Lock Date is = …".
-  await assertPeriodOpen(tx, scope.tenantId, {
-    ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: date }] },
-  });
+  // TR_TAG_CAN.cs:4974-4978 (save) and :5338-5341 (delete), with the desktop's own text.
+  try {
+    await assertPeriodOpen(tx, scope.tenantId, {
+      ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: date }] },
+    });
+  } catch (error) {
+    if (error instanceof PeriodLockValidationError)
+      error.message = `You Cant Save and Delete This Voucher Becouse Lock Date is = ${formatDesktopDate(error.lockDate)} ....`;
+    throw error;
+  }
+}
+
+/** TR_TAG_CAN.cs:4962-4966: a new voucher is refused when the company's CO_TYPE is 'B'. */
+async function assertCompanyMayCreateTx(tx: any, scope: CompleteScope): Promise<void> {
+  const types: Array<{ type: string }> = await tx.$queryRawUnsafe(
+    `SELECT DISTINCT upper(btrim(coalesce("CO_TYPE"::text,''))) "type" FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"::text=$2::text`,
+    scope.tenantId,
+    scope.coCode,
+  );
+  if (types.some((row) => row.type === 'B'))
+    throw new TagCancelValidationError(
+      'You Cant Save This Voucher Becouse This Company Type is B......',
+    );
 }
 
 // ---- masters ----------------------------------------------------------------------------------------
@@ -601,8 +621,18 @@ async function saveTx(
   const scope = completeScope(input.scope);
   const book = await resolveBookTx(tx, scope, mode);
   const { date, iso } = businessDate(input.vchDate);
-  // TR_TAG_CAN.cs:4960 — "You Cant Save Entry Because Voucher Date Not In Current Year...".
-  await assertFiscalDateTx(tx, scope, iso);
+  if (requestedVoucherNo == null) await assertCompanyMayCreateTx(tx, scope);
+  // TR_TAG_CAN.cs:4968-4972 — the desktop's own text for a date outside the current year.
+  try {
+    await assertFiscalDateTx(tx, scope, iso);
+  } catch (error) {
+    if (error instanceof Error && /is outside fiscal year/.test(error.message))
+      error.message =
+        'You Cant Save Entry Because Voucher Date Not In Current Year... Please Change Date...';
+    throw error;
+  }
+  // TR_TAG_CAN.cs:4974-4978: the lock date is checked before the lines are read.
+  await assertOpenTx(tx, scope, date);
   const behavior = await resolveSettingsBehaviorTx(tx, scope);
   const settings = { labourIncludesGhat: behavior.labourIncludesGhat };
   const companyLabourType = behavior.labourType || 'G';
