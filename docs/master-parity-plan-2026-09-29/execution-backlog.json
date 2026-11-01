@@ -3779,7 +3779,15 @@
       "gapIds": "G37, G81",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/apps/web/lib/reportPresentation.ts",
+        "web/apps/web/app/(app)/reports/[report]/page.tsx",
+        "web/apps/web/test/reportPresentation.test.ts",
+        "web/apps/web/test/features/modules/contraEntry.mjs"
+      ],
+      "statusNote": "PLANNED. The bounded Contra Register date manifestation is implemented-unverified: only contra-register.date has an explicit date descriptor, so its stored calendar date is displayed as dd/MM/yyyy through the shared formatter, and the zero-mock baseline entry is removed. Desktop authority: unified/src/csharp/DataCareNext/TR_CONTRA.cs:1092-1098 configures the 00/00/0000 voucher-date mask and :3136-3162 projects the F1 list date with SQL Server style 103. Broad N57/G37 remains planned/open for typed descriptors across reports, Indian grouping, authoritative totals, and identical screen/PDF/CSV/XLSX output; G81 also remains open. No acceptance or verification is claimed."
     },
     {
       "id": "N58",

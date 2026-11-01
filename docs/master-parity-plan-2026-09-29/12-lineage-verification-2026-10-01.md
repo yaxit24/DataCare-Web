@@ -2810,9 +2810,15 @@ APR_DATA and BAR_DATA have neither column and still list 0.
 Deliberate differences: none in behaviour. The web also checks the year on the server for the multi-party receipt
 and the multi-line writers, which the desktop reaches through the same TR_CASH save.
 
-Open, recorded elsewhere: the generic Contra Register grid prints `2026-11-01T00:00:00.000Z` instead of `01/11/2026`
-(G37 / N57, baselined in the `contra` module); the double-click cases prove one voucher per double-click only, not the
-durable idempotency of N52 (D18).
+Bounded G37 / N57 follow-up (2026-11-01), implemented-unverified: the generic report grid now applies an explicit date
+descriptor only to `contra-register.date`, displaying the stored calendar date as `dd/MM/yyyy` through the shared
+formatter. The zero-mock `contra.report.contra-register` baseline entry is removed; its existing T16 case still asserts
+the date, both accounts and the amount. Desktop authority is the voucher-date mask `00/00/0000`
+(`unified/src/csharp/DataCareNext/TR_CONTRA.cs:1092-1098`) and the Contra F1 projection using SQL Server style 103
+(`TR_CONTRA.cs:3136-3162`). Broad N57 / G37 remains planned and open for typed descriptors across reports, Indian
+number grouping, authoritative totals and identical screen/PDF/CSV/XLSX output; G81 also remains open. This bounded
+change is not accepted or verified. The double-click cases prove one voucher per double-click only, not the durable
+idempotency of N52 (D18).
 
 Evidence: `finance.test.ts` proves an out-of-year create reads YEAR_MAST and takes no numbering lock.
 `cashReceiptLegs.db.test.ts`, `batchReceiptLifecycle.db.test.ts` and `contraDelete.db.test.ts` refuse out-of-year
@@ -3179,7 +3185,7 @@ remain open.
 | N213 | — | implemented-unverified, evidence in this change (G226: the Tax master is the MS_TAX header and component grid with the desktop keys, texts, helps and rights; generic TAX_MAST writes refused; the account picker keeps a chosen row) |
 | N214 | — | implemented-unverified, evidence in this change (G227: the Item Group master is MS_GROUP with the desktop keys, texts, helps, rights and the item update; the row is updated in place in one transaction) |
 | N215 | — | implemented-unverified, evidence in this change (G228: the Product master is MS_PRODUCT's Product mode with the desktop keys, texts, rights and the item-use and default-product guards after the question) |
-| N216 | — | implemented-unverified, evidence in this change (G229: Cash/Bank and Contra refuse dates outside the year with the desktop text before numbering and before the lock-date check, with no partial write; the Contra recent list shows the summed debit once; the register date stays G37) |
+| N216 | — | implemented-unverified, evidence in this change (G229: Cash/Bank and Contra refuse dates outside the year with the desktop text before numbering and before the lock-date check, with no partial write; the Contra recent list shows the summed debit once; the bounded register-date manifestation is now implemented-unverified under N57, while broad N57 / G37 remains planned and open) |
 | N217 | — | implemented-unverified, evidence in this change (G230: the Address master is MS_ADD_MAST with its tabs, next code, combos, helps, mobile check, rights and the delete of its opening rows) |
 | N218 | — | implemented-unverified, evidence in this change (G231: the Item master is MS_ITEM with its helps, item code from product and group, exists question, leave checks, setting-driven boxes, delete checks, rights and the Tag Value Update panel) |
 | N219 | — | implemented-unverified, evidence in this change (G232: Auto Item is MS_AUTO_ITEM's AutoItem mode with the group help, the product grid and its keys, the desktop write set, the refusals and the rights) |

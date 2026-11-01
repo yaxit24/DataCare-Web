@@ -5,6 +5,7 @@ import { get, post, downloadPdf, downloadCsv, ApiError } from '../../../../lib/a
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { reportApiSlug } from '../../../../lib/reportSlug';
 import { openDocument } from '../../../../lib/openDocument';
+import { formatReportCell, type ReportCellDescriptors } from '../../../../lib/reportPresentation';
 
 const TITLES: Record<string, string> = {
   'last-visit': 'Last Visit',
@@ -133,12 +134,18 @@ const REPORT_MODE_DEFAULTS: Record<string, string> = {
   'graph-report': 'last-30-day-sales',
 };
 
+const REPORT_CELL_DESCRIPTORS: Readonly<Record<string, ReportCellDescriptors>> = {
+  'contra-register': { date: { type: 'date' } },
+};
+
 function Table({
   rows,
   onRowClick,
+  cellDescriptors,
 }: {
   rows: Record<string, any>[];
   onRowClick?: (row: Record<string, any>) => void;
+  cellDescriptors?: ReportCellDescriptors;
 }) {
   if (!rows.length) return <p className="muted">No rows.</p>;
   const cols = Object.keys(rows[0]);
@@ -163,7 +170,7 @@ function Table({
           >
             {cols.map((c) => (
               <td key={c} className={isNum(r[c]) ? 'num' : ''}>
-                {String(r[c] ?? '')}
+                {formatReportCell(r[c], cellDescriptors?.[c])}
               </td>
             ))}
           </tr>
@@ -1691,6 +1698,7 @@ export default function ReportPage() {
           </div>
           <Table
             rows={v}
+            cellDescriptors={REPORT_CELL_DESCRIPTORS[slug]}
             onRowClick={
               slug === 'entry-check'
                 ? loadEntryCheckDetail
