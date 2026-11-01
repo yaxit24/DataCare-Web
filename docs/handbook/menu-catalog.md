@@ -276,12 +276,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `MS_AUTO_ITEM` — constructor caption 'AutoItem' ([MDI_FORM.cs:7640-7649](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7640-L7649)).
 - **Does:** Bulk-generates item codes and names for selected product and group combinations.
-- **Looks:** Group header and product grid with code, name, minimum stock and Y/N selection.
-- **Writes:** ITEM_MAST, TOUCH_MAST.
-- **Web:** `/masters/auto-item`; `POST /masters/auto-item`. Can: create.
-- **Remaining:** Web reverses the desktop code/name order and writes a subset; minimum stock, flags, Print and propagation remain.
-- **Owners:** G55, N69, X10, G225, N212.
-- **Evidence:** [KB_master.md:150-181](../../project-memory/video-research/_kb/KB_master.md#L150-L181).
+- **Looks:** Group Code with the group name, type, trade type and HSN code over the Sr. / Pr Code / Pr Name / MinStk / Y/N grid; Print, Save, Cancel, Delete and Exit along the bottom.
+- **Writes:** ITEM_MAST, PRODUCT_MAST, GROUP_MAST.
+- **Web:** `/masters/auto-item`; `GET /masters/auto-item`, `GET /masters/auto-item/groups`, `POST /masters/auto-item`. Can: create.
+- **Remaining:** The web schema has no TAX_FREE_ITEM or EMP_COM_PRC column; desktop-runtime comparison remains.
+- **Owners:** G55, N69, X10, G225, N212, G232, N219.
+- **Evidence:** [MS_AUTO_ITEM.cs:1640-3493](../../unified/src/csharp/DataCareNext/MS_AUTO_ITEM.cs#L1640-L3493).
 
 ### Counter
 
