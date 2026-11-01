@@ -6,10 +6,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 23 | 18 | 0 |
+| Lite (first, D32) | 49 | 23 | 20 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
 | Standard (added by Standard) | 36 | 0 | 0 | 0 |
-| **Standard total** | **114** | **24** | **19** | **0** |
+| **Standard total** | **114** | **24** | **21** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
@@ -54,10 +54,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Report | Gst Report | `/reports/gst-report` | REPORT | — | no module | — |
 | Report | HuId Report | `/reports/huid` | REPORT | — | no module | — |
 | Transaction | Purchase | `/txn/purchase` | PARTIAL | purchase-invoice | module green | — |
-| Transaction | Purchase Rtn | `/txn/purchase-return` | PARTIAL | purchase-return | module, 2 open | G198 |
+| Transaction | Purchase Rtn | `/txn/purchase-return` | PARTIAL | purchase-return | module green | — |
 | Transaction | Sales Order | `/txn/sales-order` | PARTIAL | sales-order | module, 1 open | G206 |
 | Transaction | Sales | `/txn/sales`, `/txn/hallmark-sale` | PARTIAL | sales-invoice | module green | — |
-| Transaction | Sales Return | `/txn/sale-return` | PARTIAL | sales-return | module, 2 open | G190 |
+| Transaction | Sales Return | `/txn/sale-return` | PARTIAL | sales-return | module green | — |
 | Transaction | Wh Sales | `/txn/wholesale-sale` | PARTIAL | — | no module | — |
 | Transaction | Cash Received | `/txn/receipt` | PARTIAL | cash-bank | module green | — |
 | Transaction | Cash Payment | `/txn/payment` | PARTIAL | cash-bank | module green | — |
