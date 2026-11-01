@@ -265,12 +265,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `MS_ADD_MAST` — direct constructor ([MDI_FORM.cs:7610-7619](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7610-L7619)).
 - **Does:** Maintains reusable postal and contact address records.
-- **Looks:** Party-like searchable form with contact, city/state/country and bank fields.
-- **Writes:** ADD_MAST.
-- **Web:** `/masters/addresses`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Conditional fields, import/reference rules, Print and keyboard/help flow are unproven.
-- **Owners:** X10, G38, N58, N77, G225, N212.
-- **Evidence:** [module-map.json:544-558](../../project-memory/catalogs/module-map.json#L544-L558).
+- **Looks:** SEARCH RECORD box over a Code / Name list on the left; Ac Code with its F1 button over the Company Detail, Other Detail and Family Detl tabs on the right; Print, Save, Cancel, Delete and Exit along the bottom.
+- **Writes:** ADD_MAST, STATE_MAST, OP_DATA, AC_DATA.
+- **Web:** `/masters/addresses`; `GET /masters/address-master`, `GET /masters/address-master/print`, `GET /masters/address-master/names`, `GET /masters/address-master/mobile`, `GET /masters/address-master/:code`, `POST /masters/address-master`, `PUT /masters/address-master/:code`, `DELETE /masters/address-master/:code`, `GET /masters/:name`. Can: create, reopen, edit, delete, list.
+- **Remaining:** The PartyMast print layout is not in the repository (Print lists the addresses on screen); desktop-runtime comparison remains.
+- **Owners:** X10, G38, N58, N77, G225, N212, G229, N216.
+- **Evidence:** [MS_ADD_MAST.cs:3119-4544](../../unified/src/csharp/DataCareNext/MS_ADD_MAST.cs#L3119-L4544).
 
 ### AutoItem
 

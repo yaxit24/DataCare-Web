@@ -7179,6 +7179,33 @@
         "web/apps/web/test/features/modules/productMaster.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Verified: productMaster.db.test.ts 7/7, routePolicy (695 routes), the product-master feature module 17 of 17 applicable (T05 not applicable), and a Chrome DevTools pass on the demo stack. Open: desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N216",
+      "status": "implemented-unverified",
+      "action": "The Address master is the desktop MS_ADD_MAST screen: the Company Detail and Other Detail tabs in the desktop tab order, the next code of the location with Ctrl+E to unlock it, the company's combos, the F1 help and the name type-ahead, the mobile check, the IsDate rule for the three dates, the desktop texts and rights, Save replacing the location's row and Delete removing the address with its book-000 opening rows of the year, in one transaction with version tokens.",
+      "parentLabels": "P1-core; L2; T01-T18",
+      "startAfter": [
+        "N215"
+      ],
+      "requiredProof": "An HTTP/DB test of the list, combos, next code, write set, refusals, versions, rights, delete and print; the address-master feature module passes every case; a Chrome DevTools keyboard, mobile check, help, reopen, delete and Esc pass.",
+      "gapIds": "G229",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/apps/api/src/modules/masters/addressMaster.ts",
+        "web/apps/api/src/routes/addressMaster.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/web/app/(app)/masters/addresses/page.tsx",
+        "web/apps/api/test/addressMaster.db.test.ts",
+        "web/apps/api/test/routePolicy.test.ts",
+        "web/apps/web/test/features/modules/addressMaster.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: addressMaster.db.test.ts 8/8, routePolicy (703 routes), the address-master feature module 17 of 17 applicable (T05 not applicable), and a Chrome DevTools pass on the demo stack. Open: the PartyMast print layout (not in the repository), desktop-runtime comparison and parent acceptance."
     }
   ],
   "amendments": [

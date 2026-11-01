@@ -239,6 +239,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G226 | High | The Tax master was a generic field form that could not edit a code's components, and its generic update rewrote them | `unified/src/csharp/DataCareNext/MS_TAX.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7670-7679`; `web/apps/api/form-specs/DataCareNext.MS_TAX.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/master.service.ts`; `web/apps/api/src/modules/masters/configs.ts`; `web/apps/web/components/LookupPicker.tsx` | MS_TAX edits a tax code as a header row (SR_NO 0, TAX_GROUP 'N') with a grid of component rows (SR_NO 1, 2, …: SGST, CGST, IGST), which the sale and purchase postings read by SR_NO; Save replaces every row of the code (`MS_TAX.cs:1824-1933`). The web rendered the generic one-row form keyed by CO_CODE + TAX_CODE: it listed the component rows as duplicates, could not add or change a component, and its update wrote the header's name and rate into every component row of the code, so an edited GST code taxed SGST, CGST and IGST at the full rate. It had no desktop keys, texts, account helps or Print. The browser check also found the shared account picker replacing a row chosen from its help with the typed text's exact code on leave. Not closed here: web provisioning keeps its tax accounts in group 30, outside the desktop help's group 12 (N58), and the Sales screen resolves the code by rate rather than from the desktop's tax-code help (`TR_SALE.cs:18668`), refusing a rate another code's component carries. | N213 |
 | G227 | High | The Item Group master was a generic field form without the desktop's item update, helps, texts or Print | `unified/src/csharp/DataCareNext/MS_GROUP.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7630-7636`; `web/apps/api/form-specs/DataCareNext.MS_GROUP.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts`; `web/apps/api/src/modules/masters/master.service.ts` | MS_GROUP keeps an item group's metal type, trade type, touches, melting and wastage, the sales and purchase accounts the postings use per group, the HSN code and the rate tax %, and its Save sets the trade type, item type and HSN code on every item of the group (`MS_GROUP.cs:1825-1919`, `:1887`). The web rendered the generic form: its Item Type offered only Gold and Silver of the desktop's seven, the trade type box and the Rate Display check box were missing, the account boxes searched every account instead of groups 25 and 30, the save did not update the group's items (so a changed HSN code never reached the invoice), the delete question, the in-use refusal order and Print were missing, and none of the desktop keys or texts applied. Not closed here: web provisioning keeps CAPITAL in group 25 and its GST and TCS accounts in group 30 while SALES and PURCHASE sit in 20 and 21, so the desktop helps list the wrong accounts on a web-provisioned company (N58). | N214 |
 | G228 | Medium | The Product master was a generic field form without the desktop's guards, keys or texts | `unified/src/csharp/DataCareNext/MS_PRODUCT.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7620-7628`; `web/apps/api/form-specs/DataCareNext.MS_PRODUCT.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts` | MS_PRODUCT in Product mode keeps a two-character code and a name; its Save replaces the row with the signed-in user, and its Delete asks first and then refuses a product an item uses and the ten default products (`MS_PRODUCT.cs:2570-2804`). The web rendered the generic form: it had no item-use or default-product guard, no delete question, none of the desktop keys (Up and Down to the list, Enter on the name to Save) or texts, and it kept MAIN_USER from an earlier save where the desktop writes the signed-in user. | N215 |
+| G229 | Medium | The Address master was a generic field form without the desktop's tabs, combos, helps, mobile check, delete cascade or next code | `unified/src/csharp/DataCareNext/MS_ADD_MAST.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7610-7619`; `web/apps/api/form-specs/DataCareNext.MS_ADD_MAST.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts` | MS_ADD_MAST keeps a location's addresses on three tabs, offers the next code of the location, fills its combos from the company's addresses and STATE_MAST, refuses a mobile the company already has, and deletes an address with its opening rows of the year (`MS_ADD_MAST.cs:3119-4544`). The web rendered the generic form keyed by CO_CODE + AC_CODE: no tabs, no next code, no combos, help or name type-ahead, no mobile check, its config left the three dates out as if the account master kept them, and its delete left the address's OP_DATA and AC_DATA opening rows behind. | N216 |
 
 ## 4. Decisions D23–D28
 
@@ -2752,6 +2753,60 @@ and OG (a default product) asked the question and then refused with the desktop 
 after the question; a one-character code was refused with "Please Insert Product Code 2 Digit..."; Esc left the screen.
 Desktop-runtime comparison and parent acceptance remain open.
 
+### N216 — The Address master is the desktop MS_ADD_MAST screen (G229, Lite L2)
+
+Master → Address opens MS_ADD_MAST directly (`MDI_FORM.cs:7610-7619`). The screen follows its form spec: the SEARCH
+RECORD box and the Code / Name list on the left; Ac Code with its F1 button above the Company Detail, Other Detail and
+Family Detl tabs on the right (Ac Name, Ac Group, Mobile No with Phone No, Con Person, Address1-3, City with Pin Code,
+City Area, Country, State, District, Email, Birth Date with Anv Date and L Birth Date; Mobile No2 and Phone No2 on Other
+Detail); Print, Save, Cancel, Delete and Exit along the bottom. The list is the location's ADD_MAST rows by code
+(`MS_ADD_MAST.cs:3119-3396`); a new entry offers the next code of the location, read-only, with the cursor in the name
+(CLEAR_DATA `:3454-3547`), and Ctrl+E unlocks the code box (`:3721-3738`). The combos list the company's distinct groups,
+countries, districts, cities and areas and the states of ADD_MAST with STATE_MAST's, duplicates kept as the desktop's
+UNION ALL keeps them (AddCboItem `:3939-4046`). Enter on the list or a double click opens an address with the cursor in
+the name (`:3690-3719`); DISPLAY_DATA reads the code of the company whatever its location (`:3549-3583`).
+
+Keys as the desktop: typed letters are upper-cased and the apostrophe refused (`:3604-3617`); F1 on the name and the F1
+button open the help of the location's addresses by name with group, address, phone and mobile (`:3740-3775`); typing a
+name refills the list with up to 99 of the company's addresses whose name starts with it (tAcName_KeyUp `:4171-4294`);
+Enter on a blank name says "Please Insert Party Name ..."; Enter on the mobile of a new entry refuses a mobile another
+address of the company has ("This Mobile No = <name>  With this Account .....", `:3867-3887`); Enter moves box to box and
+on L Birth Date goes to Save (`:4296-4325`); the date boxes take the 00/00/0000 mask; Esc leaves. Leaving the name refuses
+a name another code of the location has (`:4389-4409`); the refusal also stops Save, Delete and Print. Save
+(`:4411-4515`) needs the edit right only for an opened address, refuses a blank code or name ("Please Select Customer
+name and try...."), and replaces the code's row of the operator's location with every box upper-cased, a date box that
+is not a date (IsDate) as NULL, MAIN_USER (the user for a new address, the stored one for an opened address) and
+DATA_TRFR 'N'. Delete (`:4517-4544`) needs the delete right, refuses a blank code ("Please Select AcCode For Delete."),
+asks "Are You Sure To Delete This Account now?" and deletes the address with its book-000 OP_DATA and AC_DATA rows of the
+year. Print needs the print right and lists the location's addresses (PartyMast).
+
+Deliberate differences: the next code is the location prefix and the next four-digit number; the desktop adds 1 to Val
+of the whole last code, prefix included, and formats it after the prefix again (`:3505-3540`), so from the second address
+of location 01 it offers 0110002 and then the same code again, and the save replaces the earlier address. The desktop's
+code check (tAcCode_Validating `:3619-3639`) filters CO_CODE by the typed code and never refuses; the web refuses nothing
+there either. Save and Delete run in one transaction; an opened address carries a version token (N51, D17); a box longer
+than its MaxLength is refused; a stale name-search answer is dropped. Print lists the addresses on screen because the
+PartyMast layout is not in the repository. The customer-detail box over the tabs (tCustDetl) and the hidden Excel
+import button (btnAcImport, `:4628-4662`) are left out. The generic `/masters/addresses` routes stay for the CSV import;
+their config still says the dates are kept on the account master, which MS_ADD_MAST contradicts (it writes BR_DATE,
+AN_DATE and L_BR_DATE, `:4459-4461`).
+
+Evidence: `addressMaster.db.test.ts` (8 cases through the real routes on forced RLS: the IsDate rule; the list with the
+rights, combos and next code; the write set with every box upper-cased, 31/02/2020 stored as NULL and the user; one
+address read with its dates, the company-wide name list and the mobile check; every refusal with nothing written; an edit
+keeping the stored user with stale and missing versions; a view-only `Address` rights row; delete with its OP_DATA row,
+the blank refusal, another location's address and another tenant untouched, and print) and `routePolicy.test.ts` pass.
+The zero-mock `address-master` module passes 17 of 17 applicable cases (T05 not applicable: no child rows), none
+blocked: T03 checks the IsDate rule on 29/02/2024 and 29/02/2023, T14 injects a fault on the insert and finds every row
+as before, T15 lists the address in 2024-2025, T18 opens an address of location 02 from the name list and saves it as a
+row of location 01 while location 02's row stays. Chrome DevTools on the demo stack: the keyboard entry of RAMESH SHAH
+(apostrophe dropped, every box upper-cased, 31/02/2020 left as NULL, Enter on L Birth Date going to Save) stored
+`01|010001|RAMESH SHAH|CUSTOMER|<mobile>|<phone>|SURESH|12 RING ROAD|NEAR MARKET|BLOCK B|SURAT|395002|ADAJAN|INDIA|GUJARAT|SURAT|RAMESH@EXAMPLE.COM|15/08/1990|NULL|1960-01-01|admin|N`
+and offered 010002 next; Enter on that mobile in a new entry was refused with "This Mobile No = RAMESH SHAH
+With this Account ....."; F1 on the name opened the help and Enter on it reopened the address with every value; Delete
+asked the desktop question and removed it; Esc left the screen. Desktop-runtime comparison and parent acceptance remain
+open.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2894,6 +2949,7 @@ Desktop-runtime comparison and parent acceptance remain open.
 | N213 | — | implemented-unverified, evidence in this change (G226: the Tax master is the MS_TAX header and component grid with the desktop keys, texts, helps and rights; generic TAX_MAST writes refused; the account picker keeps a chosen row) |
 | N214 | — | implemented-unverified, evidence in this change (G227: the Item Group master is MS_GROUP with the desktop keys, texts, helps, rights and the item update; the row is updated in place in one transaction) |
 | N215 | — | implemented-unverified, evidence in this change (G228: the Product master is MS_PRODUCT's Product mode with the desktop keys, texts, rights and the item-use and default-product guards after the question) |
+| N216 | — | implemented-unverified, evidence in this change (G229: the Address master is MS_ADD_MAST with its tabs, next code, combos, helps, mobile check, rights and the delete of its opening rows) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 
