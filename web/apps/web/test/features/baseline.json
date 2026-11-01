@@ -3,18 +3,7 @@
   "sales-invoice": [],
   "purchase-invoice": [],
   "settings": [],
-  "sales-return": [
-    {
-      "case": "sales-return.formula.net-basis",
-      "gap": "G190",
-      "reason": "The return prices the line on fine weight with paise (58,465.80); the desktop prices on SL_AMT_TYPE (net + ghat) in whole rupees, 63,609 (TR_SALE_RTN.cs:4914-4931, 4955, 4985)."
-    },
-    {
-      "case": "sales-return.create.amount-net-basis",
-      "gap": "G190",
-      "reason": "Stored ITM_AMT/NET_AMT/TOT_AMT follow the fine basis with paise; the desktop stores 61,234 + 2,375 and a whole-rupee total of 65,517 (TR_SALE_RTN.cs:16405)."
-    }
-  ],
+  "sales-return": [],
   "purchase-return": [
     {
       "case": "purchase-return.formula.whole-rupees",

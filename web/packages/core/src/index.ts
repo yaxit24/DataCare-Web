@@ -234,7 +234,10 @@ export {
   companySaleAmountType,
   effectiveSaleRateWith,
   saleAmountBasis,
+  saleReturnAmountBasis,
   saleItemAmount,
+  saleItemAmountWhole,
+  salesReturnRoundingPolicy,
 } from './saleAmount.js';
 export type { SaleAmountLine, SaleAmountBasis } from './saleAmount.js';
 export { salesOrderItemWeight, salesOrderItemAmount, salesOrderBill } from './salesOrderAmount.js';

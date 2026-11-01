@@ -35,7 +35,7 @@ async function setSetting(page, id, value) {
   ]);
   return response;
 }
-async function mustSet(page, id, value) {
+export async function mustSet(page, id, value) {
   const response = await setSetting(page, id, value);
   assert.equal(response.status(), 200, `saving ${id}=${value}: ${await response.text()}`);
   await page
