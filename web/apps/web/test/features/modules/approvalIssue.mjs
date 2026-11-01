@@ -197,8 +197,11 @@ export const approvalIssue = {
         assert.equal(Number(await label(page, 'Weight row 1').inputValue()), 0.25);
         await page.getByTestId('approval-issue-grid-mode').click();
         assert.equal(await label(page, 'LotNo row 1').inputValue(), 'LOT-E2E');
-        assert.equal(await label(page, 'HuId2 row 1').inputValue(), 'HUID2');
-        assert.equal(await label(page, 'ItType row 1').inputValue(), 'G');
+        assert.equal(await label(page, 'HmId2 row 1').inputValue(), 'HUID2');
+        assert.equal(
+          await page.locator('table.grid').first().getByLabel('ItType row 1').inputValue(),
+          'G',
+        );
         const response = await saveApproval(page);
         assert.equal(response.status(), 201, await response.text());
         const result = await response.json();
@@ -319,10 +322,9 @@ export const approvalIssue = {
         const created = await createIssue(ctx, tag.tag);
         await reopenApproval(created.page, 'issue', created.voucherNo);
         const confirmed = new Promise((resolve) => {
-          created.page.once('dialog', async (dialog) => {
+          created.page.once('dialog', (dialog) => {
             assert.equal(dialog.message(), 'Are You Sure To Delete This Voucher now?');
             resolve(dialog.message());
-            await dialog.accept();
           });
         });
         const [response] = await Promise.all([

@@ -5,6 +5,7 @@ import {
   ISSUE_BOOK,
   RETURN_BOOK,
   TENANT,
+  YEAR,
   approvalRows,
   approvalStock,
   as,
@@ -177,12 +178,17 @@ export const approvalReturn = {
         );
         assert.equal(answer.status, 400);
         assert.equal(answer.body.message, 'Duplicate Tag No');
-        assert.deepEqual(await approvalRows(ctx, RETURN_BOOK, '00001'), []);
+        const writes = await ctx.rows(
+          `SELECT count(*)::int rows FROM "APR_DETL"
+            WHERE tenant_id=$1 AND "CO_BOOK"='TRR' AND "ISU_NO"=$2`,
+          issue.voucherNo,
+        );
+        assert.deepEqual(writes, [{ rows: 0 }]);
         assert.deepEqual(await tagState(ctx, issue.tag), { apr: 'Y', transfer: 'N', balance: 0 });
         return {
           observation: answer.body.message,
           expected: 'Duplicate Tag No and no write',
-          database: { returns: [] },
+          database: { writes },
         };
       },
     ),
@@ -318,10 +324,9 @@ export const approvalReturn = {
         const returned = await createReturn(ctx, issue);
         await reopenApproval(returned.page, 'return', returned.voucherNo);
         const confirmed = new Promise((resolve) => {
-          returned.page.once('dialog', async (dialog) => {
+          returned.page.once('dialog', (dialog) => {
             assert.equal(dialog.message(), 'Are You Sure To Delete This Voucher now?');
             resolve(dialog.message());
-            await dialog.accept();
           });
         });
         const [response] = await Promise.all([

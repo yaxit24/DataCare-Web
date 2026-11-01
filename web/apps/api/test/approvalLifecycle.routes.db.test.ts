@@ -980,6 +980,58 @@ type Cookie = string;
     ).toEqual([{ apr: 'Y', transfer: 'N' }]);
   });
 
+  it('fails closed for an unlinked legacy return that cannot be repaired deterministically', async () => {
+    const issue = await createIssue();
+    await exec(
+      `INSERT INTO "APR_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","VCH_TIME",
+         "HD_VCH_NO","AC_CODE","EMP_CODE","ISU_NO","MAIN_USER")
+       VALUES ($1,'01','01',$2,'TRR','00091',$3::date,$3::date,'00091',$4,$5,$6,$7)`,
+      tenantId,
+      YEAR,
+      DAY,
+      PARTY,
+      EMP,
+      issue.voucherNo,
+      ADMIN,
+    );
+    await exec(
+      `INSERT INTO "APR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","OLD_SRNO",
+         "VCH_DATE","VCH_TIME","HD_VCH_NO","AC_CODE","EMP_CODE","VCH_TYPE","INOUT_TYPE","ENTRY_TYPE","BOOK_NAME",
+         "VCH_SRNO","IT_CODE","IT_TYPE","TAG_NO","ISU_REC","EMP_SALE","ISU_NO","ISU_SRNO","ITM_GWT","ITM_NWT")
+       VALUES ($1,'01','01',$2,'TRR','00091',1,1,$3::date,$3::date,'00091',$4,$5,'TRR','I','A','APR RTN',
+               1,$6,'G',$7,'N','N',$8,1,10.5,10)`,
+      tenantId,
+      YEAR,
+      DAY,
+      PARTY,
+      EMP,
+      ITEM,
+      TAG,
+      issue.voucherNo,
+    );
+    const before = await snapshotTenant(owner, tenantId, BUSINESS_TABLES);
+    const issueDelete = await admin(
+      'DELETE',
+      `/tour/${issue.voucherNo}?coBook=TUR&expectedVersion=${issue.version}`,
+    );
+    expect(issueDelete.statusCode, issueDelete.body).toBe(400);
+    expect(issueDelete.json().message).toBe(
+      'You Cant Delete this Voucher Because This Voucher Is Approval Returne....',
+    );
+    const returnView = await admin('GET', '/tour/return/00091?coBook=TRR');
+    expect(returnView.statusCode, returnView.body).toBe(200);
+    const returnDelete = await admin(
+      'DELETE',
+      `/tour/return/00091?coBook=TRR&expectedVersion=${returnView.json().version}`,
+    );
+    expect(returnDelete.statusCode, returnDelete.body).toBe(400);
+    expect(returnDelete.json().message).toContain('source link is missing');
+    expect(diffTenant(before, await snapshotTenant(owner, tenantId, BUSINESS_TABLES))).toEqual({
+      added: {},
+      removed: {},
+    });
+  });
+
   it('preserves a returned issue line and BAR marker when a sparse issue edit changes only the description', async () => {
     // Desktop DISPLAY_DATA restores OLD_SRNO, discounts, ISU_REC, EMP_SALE, linkage and CON_ISU_REC
     // (TR_APR_ISU.cs:5841-5913), and Save writes them back (:6170-6178,6223-6251).
