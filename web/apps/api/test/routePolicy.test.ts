@@ -101,8 +101,9 @@ describe('route policy registry', () => {
     // N172 adds GET /vouchers/neighbour, the voucher number box's Up/Down walk: 657 + 1 = 658.
     // N199 adds the Party Opening list and read (GET /ac-opbl, GET /ac-opbl/:acCode): 658 + 2 = 660.
     // FineJvBill adds GET /fine-jv/:vchNo/print: 660 + 1 = 661.
-    expect(routes).toHaveLength(661);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(661);
+    // N208 adds the MS_RATE delete and RateRpt print (DELETE /daily-rate, GET /daily-rate/print): 661 + 2 = 663.
+    expect(routes).toHaveLength(663);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(663);
 
     const policies = routes.map((route) => ({
       ...route,

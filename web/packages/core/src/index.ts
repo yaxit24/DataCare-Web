@@ -301,3 +301,6 @@ export type { EditionAvailability, EditionCode, EditionPolicy, EditionTier } fro
 export { FORM_EDITION, ROUTE_EDITION } from './editionTable.js';
 export { formatDesktopDate, toIsoDate } from './dates.js';
 export * from './tagKarigar.js';
+
+// MS_RATE (Daily Rate) grid recalculation.
+export * from './dailyRate.js';
