@@ -327,6 +327,67 @@ function viewOf(
 
 type ApprovalView = ReturnType<typeof viewOf>;
 
+function sparseLinesWithFallback(raw: unknown, fallback: TourIssueLine[]): unknown {
+  if (!Array.isArray(raw)) return raw;
+  return raw.map((value) => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
+    const line = value as TourIssueLine;
+    const oldSrNo = num(line.oldSrNo ?? line.origSrNo);
+    if (!oldSrNo) return line;
+    const persisted = fallback.find(
+      (candidate) => num(candidate.oldSrNo ?? candidate.origSrNo) === oldSrNo,
+    );
+    if (!persisted) return line;
+    return {
+      ...persisted,
+      ...line,
+      stones: line.stones === undefined ? persisted.stones : line.stones,
+    };
+  });
+}
+
+function issueLinesWithPersistedLifecycle(lines: TourIssueLine[], details: Row[]): TourIssueLine[] {
+  const byOldSrNo = new Map(details.map((row) => [num(row.OLD_SRNO ?? row.SR_NO), row] as const));
+  const submitted = new Map(lines.map((line) => [num(line.oldSrNo), line] as const));
+  const consumed = (row: Row) => {
+    const received = text(row.ISU_REC).toUpperCase();
+    return (
+      (received !== '' && received !== 'N') ||
+      text(row.EMP_SALE).toUpperCase() === 'Y' ||
+      text(row.CON_ISU_REC).toUpperCase() === 'Y'
+    );
+  };
+  for (const [oldSrNo, row] of byOldSrNo) {
+    if (!consumed(row)) continue;
+    const line = submitted.get(oldSrNo);
+    const sameIdentity =
+      line &&
+      text(line.itCode) === text(row.IT_CODE) &&
+      text(line.tagNo || 'N') === text(row.TAG_NO || 'N') &&
+      num(line.vchSrno) === num(row.VCH_SRNO);
+    if (!sameIdentity)
+      throw new TourValidationError(
+        `approval issue line ${oldSrNo} has already been returned or billed and cannot be removed or retagged`,
+      );
+  }
+  return lines.map((line) => {
+    const row = byOldSrNo.get(num(line.oldSrNo));
+    if (!row) return line;
+    return {
+      ...line,
+      oldSrNo: num(row.OLD_SRNO ?? row.SR_NO),
+      isuRec: text(row.ISU_REC) || 'N',
+      empSale: text(row.EMP_SALE) || 'N',
+      conIsuRec: text(row.CON_ISU_REC),
+      isuNo: text(row.ISU_NO),
+      isuYrcd: text(row.ISU_YRCD),
+      isuDbcd: text(row.ISU_DBCD),
+      isuLcCode: text(row.ISU_LC_CODE),
+      isuSrNo: num(row.ISU_SRNO),
+    };
+  });
+}
+
 async function getTx(
   tx: any,
   scope: CompleteApprovalScope,
@@ -368,7 +429,7 @@ function comparable(input: TourIssueInput, fallback: ApprovalView): string {
     origVchNo: returning && rtn.origVchNo != null ? formatVoucherNo(rtn.origVchNo) : '',
     origBook: returning ? text(rtn.origBook) : '',
     origYear: returning ? text(rtn.origYear) : '',
-    lines: normalizeApprovalLines(input.lines),
+    lines: normalizeApprovalLines(sparseLinesWithFallback(input.lines, fallback.lines)),
   });
 }
 
@@ -492,12 +553,6 @@ async function edit(
         requestedVoucherNo: voucherNo,
         requestedDate: requested.date,
       });
-      await clearEffectsTx(tx, scope, kind, current.state);
-      await deleteVoucherWriteSetTx(tx, {
-        tables: DELETE_TABLES,
-        key: { scope, voucherNo },
-        tempBook: { voucherNo: identity.hiddenVoucherNo },
-      });
       const mergedInput = {
         ...input,
         scope,
@@ -507,7 +562,14 @@ async function edit(
         vchDesc:
           input.vchDesc === undefined ? current.view.vchDesc : text(input.vchDesc).toUpperCase(),
       };
-      let lines = normalizeApprovalLines(input.lines);
+      let lines = normalizeApprovalLines(sparseLinesWithFallback(input.lines, current.view.lines));
+      if (kind === 'issue') lines = issueLinesWithPersistedLifecycle(lines, current.state.details);
+      await clearEffectsTx(tx, scope, kind, current.state);
+      await deleteVoucherWriteSetTx(tx, {
+        tables: DELETE_TABLES,
+        key: { scope, voucherNo },
+        tempBook: { voucherNo: identity.hiddenVoucherNo },
+      });
       let source: { year: string; book: string; no: string } | undefined;
       if (kind === 'issue') lines = await resolveIssueTagsTx(tx, scope, lines);
       else {

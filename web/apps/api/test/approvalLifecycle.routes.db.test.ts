@@ -659,6 +659,71 @@ type Cookie = string;
     ).toEqual([{ apr: 'Y', transfer: 'N' }]);
   });
 
+  it('preserves a returned issue line and BAR marker when a sparse issue edit changes only the description', async () => {
+    // Desktop DISPLAY_DATA restores OLD_SRNO, discounts, ISU_REC, EMP_SALE, linkage and CON_ISU_REC
+    // (TR_APR_ISU.cs:5841-5913), and Save writes them back (:6170-6178,6223-6251).
+    const issue = await createIssue();
+    const returned = await admin('POST', '/tour/return', returnBody(issue.voucherNo));
+    expect(returned.statusCode, returned.body).toBe(201);
+    const reopened = await admin('GET', `/tour/${issue.voucherNo}?coBook=TUR`);
+    expect(reopened.statusCode, reopened.body).toBe(200);
+
+    const sparseLines = [
+      {
+        oldSrNo: 1,
+        itCode: ITEM,
+        tagNo: TAG,
+        vchSrno: TAG_SRNO,
+        pcs: 1,
+        grossWt: 10.5,
+        netWt: 10,
+        touch: 91.6,
+        fineWt: 9.36,
+      },
+    ];
+    const unchangedBody = {
+      coBook: ISSUE_BOOK,
+      expectedVersion: reopened.json().version,
+      vchDate: reopened.json().vchDate,
+      partyAc: reopened.json().partyAc,
+      empCode: reopened.json().empCode,
+      vchDesc: reopened.json().vchDesc,
+      // ApprovalGrid.tsx intentionally sends a sparse row and omits blank/default/internal columns.
+      lines: sparseLines,
+    };
+    const beforeNoop = await snapshotTenant(owner, tenantId, BUSINESS_TABLES);
+    const unchanged = await admin('PUT', `/tour/${issue.voucherNo}`, unchangedBody);
+    expect(unchanged.statusCode, unchanged.body).toBe(200);
+    expect(unchanged.json().version).toBe(reopened.json().version);
+    expect(diffTenant(beforeNoop, await snapshotTenant(owner, tenantId, BUSINESS_TABLES))).toEqual({
+      added: {},
+      removed: {},
+    });
+
+    const edited = await admin('PUT', `/tour/${issue.voucherNo}`, {
+      ...unchangedBody,
+      vchDesc: 'description only after partial return',
+    });
+    expect(edited.statusCode, edited.body).toBe(200);
+    expect(
+      await query(
+        `SELECT "OLD_SRNO"::int old_sr,"ISU_REC" received,"EMP_SALE" sale,
+                coalesce("CON_ISU_REC",'') consignment
+           FROM "APR_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='TUR' AND "VCH_NO"=$2`,
+        tenantId,
+        issue.voucherNo,
+      ),
+    ).toEqual([{ old_sr: 1, received: 'Y', sale: 'N', consignment: '' }]);
+    expect(
+      await query(
+        `SELECT "APR_ISU" apr,"APP_TRFR" transfer FROM "BAR_DETL"
+          WHERE tenant_id=$1 AND "TAG_NO"=$2`,
+        tenantId,
+        TAG,
+      ),
+    ).toEqual([{ apr: 'N', transfer: 'N' }]);
+  });
+
   it('refuses issue deletion after a return and after Wh Sales, with the exact desktop texts', async () => {
     const created = await createIssue();
     const returned = await admin('POST', '/tour/return', returnBody(created.voucherNo));
@@ -692,6 +757,26 @@ type Cookie = string;
     expect(blockedSale.json().message).toBe(
       'You Cant Delete this Voucher Because This Voucher Use In Wh Sales....',
     );
+  });
+
+  it('refuses the same approval source line twice in one return request without writing', async () => {
+    // TR_APR_ISU.cs:4817-4824 scans the grid and refuses a repeated selected tag with exactly this text.
+    const issue = await createIssue();
+    const duplicate = returnBody(issue.voucherNo, {
+      lines: [
+        { origSrNo: 1, itCode: ITEM, tagNo: TAG, vchSrno: TAG_SRNO },
+        { origSrNo: 1, itCode: ITEM, tagNo: TAG, vchSrno: TAG_SRNO },
+      ],
+    });
+    const before = await snapshotTenant(owner, tenantId, BUSINESS_TABLES);
+    const response = await admin('POST', '/tour/return', duplicate);
+    expect(response.statusCode, response.body).toBe(400);
+    expect(response.json().message).toBe('Duplicate Tag No');
+    expect(diffTenant(before, await snapshotTenant(owner, tenantId, BUSINESS_TABLES))).toEqual({
+      added: {},
+      removed: {},
+    });
+    expect(await stockBalance(TAG)).toBe(0);
   });
 
   it('creates, reopens, no-ops, edits, prints and deletes Approval Rtn with source and BAR reversals', async () => {
@@ -838,6 +923,65 @@ type Cookie = string;
         description: `ItCode / ${ITEM}   TagNo / ${TAG}`,
       },
     ]);
+  });
+
+  it('contains the non-atomic approval billing bridge without an orphan sale and refuses wrong rights', async () => {
+    // Desktop bills approvals through the Sales Invoice Apr No workflow; TR_APR_ISU.cs:6618-6642 only
+    // observes the downstream dependency. Until that cross-form transaction exists, this web-only bridge
+    // must write nothing rather than create a sale and fail while marking the approval in a second tx.
+    await exec(
+      `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","SALE_AC")
+       VALUES ($1,'01','APR','Approval items','SALES')`,
+      tenantId,
+    );
+    await exec(
+      `UPDATE "ITEM_MAST" SET "GR_CODE"='APR' WHERE tenant_id=$1 AND "CO_CODE"='01' AND "IT_CODE"=$2`,
+      tenantId,
+      ITEM,
+    );
+    const issue = await createIssue();
+    const saleRows = async () =>
+      query<Array<{ table_name: string; rows: number }>>(
+        `SELECT 'AC_DATA' table_name,count(*)::int rows FROM "AC_DATA" WHERE tenant_id=$1
+         UNION ALL SELECT 'SL_DATA',count(*)::int FROM "SL_DATA" WHERE tenant_id=$1
+         UNION ALL SELECT 'SL_DETL',count(*)::int FROM "SL_DETL" WHERE tenant_id=$1
+         ORDER BY table_name`,
+        tenantId,
+      );
+    const before = await saleRows();
+    const payload = {
+      coBook: 'SL',
+      acCode: PARTY,
+      vchDate: DAY,
+      taxRatePct: 0,
+      interState: false,
+      lines: [{ itCode: ITEM, pcs: 1, grossWt: 1, netWt: 1, touch: 91.6, rate: 1000 }],
+    };
+    const contained = await admin('POST', `/tour/${issue.voucherNo}/bill`, payload);
+    expect(contained.statusCode, contained.body).toBe(409);
+    expect(contained.json()).toEqual({
+      error: 'approval-billing-unavailable',
+      message:
+        'Approval billing is unavailable until Sales Invoice import and approval closure are atomic.',
+    });
+    expect(await saleRows()).toEqual(before);
+    expect(
+      await query(
+        `SELECT "ISU_REC" received FROM "APR_DETL"
+          WHERE tenant_id=$1 AND "CO_BOOK"='TUR' AND "VCH_NO"=$2`,
+        tenantId,
+        issue.voucherNo,
+      ),
+    ).toEqual([{ received: 'N' }]);
+
+    const wrongRights = await request(
+      viewerCookie,
+      'POST',
+      `/tour/${issue.voucherNo}/bill`,
+      payload,
+    );
+    expect(wrongRights.statusCode, wrongRights.body).toBe(403);
+    expect(await saleRows()).toEqual(before);
   });
 
   it('enforces the separate menu rights, including print rights, on both resources', async () => {

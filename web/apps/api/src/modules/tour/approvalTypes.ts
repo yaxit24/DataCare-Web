@@ -29,6 +29,7 @@ export const APPROVAL_MESSAGES = {
     'You Cant Save Entry Because Voucher Date Not In Current Year... Please Change Date...',
   EMPLOYEE_REQUIRED: 'Please Select Employee Code and Try......',
   PARTY_REQUIRED: 'Please Insert Party and try',
+  DUPLICATE_TAG: 'Duplicate Tag No',
   DELETE_RETURNED: 'You Cant Delete this Voucher Because This Voucher Is Approval Returne....',
   DELETE_WHOLESALE: 'You Cant Delete this Voucher Because This Voucher Use In Wh Sales....',
   lockDate: (date: string) =>
@@ -111,7 +112,12 @@ export interface TourIssueLine {
   isuYrcd?: string;
   isuDbcd?: string;
   isuLcCode?: string;
+  isuNo?: string;
   isuSrNo?: number;
+  /** Server-owned lifecycle values restored from APR_DETL during edit; HTTP does not accept them. */
+  isuRec?: string;
+  empSale?: string;
+  conIsuRec?: string;
   designImageId?: string;
   stones?: TourStoneInput[];
 }

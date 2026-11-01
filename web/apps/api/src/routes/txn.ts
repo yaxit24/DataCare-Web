@@ -598,7 +598,6 @@ import {
   getFineSalePurchase,
   editFineSalePurchase,
 } from '../modules/bullion/fineSalePurchase.js';
-import { markApprovalBilled } from '../modules/tour/tour.js';
 import { yearEndPreview, yearEndClose } from '../modules/ops/yearEnd.js';
 import {
   enrollScheme,
@@ -8283,28 +8282,13 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   });
   app.post('/tour/:vchNo/bill', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    const aprVchNo = (req.params as any).vchNo;
-    return run(reply, 201, async () => {
-      const sale = await createSale(
-        prisma,
-        {
-          scope: scopeOf(req),
-          acCode: b.acCode,
-          acName: b.acName,
-          taxRatePct: Number(b.taxRatePct ?? 3),
-          interState: !!b.interState,
-          empCode: b.empCode,
-          cashAmt: b.cashAmt != null ? Number(b.cashAmt) : undefined,
-          cardAmt: b.cardAmt != null ? Number(b.cardAmt) : undefined,
-          chequeAmt: b.chequeAmt != null ? Number(b.chequeAmt) : undefined,
-          cashAc: b.cashAc,
-          bankAc: b.bankAc,
-        },
-        b.lines ?? [],
-      );
-      const m = await markApprovalBilled(prisma, scopeOf(req), aprVchNo, String(sale.vchNo));
-      return { ...sale, approvalBilled: m.marked };
+    // The desktop imports an approval inside Sales Invoice. The former web bridge committed createSale
+    // before trying to close APR_DETL in a second transaction, so any second-step refusal orphaned a
+    // sale. Keep this route fail-closed until one transaction can enforce both form authorities.
+    return reply.code(409).send({
+      error: 'approval-billing-unavailable',
+      message:
+        'Approval billing is unavailable until Sales Invoice import and approval closure are atomic.',
     });
   });
 }

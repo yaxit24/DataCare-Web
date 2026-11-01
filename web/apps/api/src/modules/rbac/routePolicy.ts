@@ -194,6 +194,8 @@ route('Sales/Sales Invoice', [
   'PUT /sales/:vchNo',
   'DELETE /sales/:vchNo',
   'GET /sales/invoice',
+  // Contained pending an atomic Sales Invoice import + approval closure transaction.
+  'POST /tour/:vchNo/bill',
 ]);
 route('Sales/Sales Quotation', [
   'POST /sales-quotations',
@@ -300,7 +302,6 @@ route('Sales/Tour / Approval Sale', [
   'DELETE /tour/:vchNo',
   'GET /tour/:vchNo/print',
   'GET /tour/:vchNo/lines',
-  'POST /tour/:vchNo/bill',
   'POST /tour-sales',
   'GET /tour-sales/:vchNo',
   'PUT /tour-sales/:vchNo',
@@ -1004,7 +1005,6 @@ const UPDATE_POST_ROUTES = new Set([
   'POST /year-end/close',
   'POST /balance-transfer/year-close',
   'POST /balance-transfer/openings',
-  'POST /tour/:vchNo/bill',
   'POST /reports/entry-check/mark-checked',
 ]);
 

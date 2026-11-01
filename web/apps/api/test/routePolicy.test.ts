@@ -891,6 +891,10 @@ describe('route policy registry', () => {
       form: 'Sales/Sales Invoice',
       action: 'delete',
     });
+    expect(routePolicyFor('POST', '/tour/:vchNo/bill')).toMatchObject({
+      form: 'Sales/Sales Invoice',
+      action: 'create',
+    });
   });
 
   it('maps the purchase voucher lifecycle to independent rights', () => {

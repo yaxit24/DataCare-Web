@@ -9,6 +9,7 @@ import {
 import { resolveLiveTagIdentityTx } from '../stock/stock.js';
 import { formatVoucherNo } from '../vouchers/numbering.js';
 import {
+  APPROVAL_MESSAGES,
   approvalRound3,
   approvalText as t,
   isApprovalTag,
@@ -31,6 +32,13 @@ export async function resolveIssueTagsTx(
 ): Promise<TourIssueLine[]> {
   const out: TourIssueLine[] = [];
   for (const line of lines) {
+    // DISPLAY_DATA/Save carries consumed rows forward. They no longer have to be live stock and must
+    // retain the original tag identity rather than being resolved as a new issue selection.
+    const received = text(line.isuRec).toUpperCase();
+    if (received && received !== 'N') {
+      out.push(line);
+      continue;
+    }
     if (!isApprovalTag(line.tagNo)) {
       out.push({ ...line, tagNo: 'N', vchSrno: 0 });
       continue;
@@ -84,6 +92,12 @@ export async function sourceLinesTx(
       throw new TourValidationError(`approval return line ${index + 1} needs the original Sr No`);
     return { ...line, origSrNo };
   });
+  const requestedSources = new Set<number>();
+  for (const line of wanted) {
+    if (requestedSources.has(line.origSrNo))
+      throw new TourValidationError(APPROVAL_MESSAGES.DUPLICATE_TAG);
+    requestedSources.add(line.origSrNo);
+  }
   const rows: Row[] = [];
   for (const line of wanted) {
     const source: Row[] = await tx.$queryRawUnsafe(
@@ -229,12 +243,13 @@ export function detailRow(
     ENTRY_TYPE: 'A',
     BOOK_NAME: book.mainBook,
     SR_NO: index + 1,
-    OLD_SRNO: index + 1,
+    OLD_SRNO: num(line.oldSrNo) || index + 1,
     VCH_SRNO: num(line.vchSrno),
     IT_CODE: line.itCode,
     TAG_NO: isApprovalTag(line.tagNo) ? text(line.tagNo) : 'N',
-    ISU_REC: 'N',
-    EMP_SALE: 'N',
+    ISU_REC: t(line.isuRec, 1) || 'N',
+    EMP_SALE: t(line.empSale, 1) || 'N',
+    CON_ISU_REC: t(line.conIsuRec),
     ITM_PCS: approvalRound3(line.pcs),
     ITM_GWT: approvalRound3(line.grossWt),
     ITM_NWT: approvalRound3(line.netWt),
@@ -285,7 +300,7 @@ export function detailRow(
     PR_CODE: t(line.prCode, 2),
     ISU_YRCD: source?.year ?? t(line.isuYrcd, 10),
     ISU_DBCD: source?.book ?? t(line.isuDbcd, 3),
-    ISU_NO: source?.no ?? null,
+    ISU_NO: source?.no ?? t(line.isuNo, 10),
     ISU_SRNO: source ? num(line.oldSrNo) : num(line.isuSrNo) || null,
     ISU_LC_CODE: source ? key.LC_CODE : t(line.isuLcCode, 2),
     DESIGN_IMG_ID: t(line.designImageId, 50),
@@ -458,7 +473,11 @@ export async function setBarFlagsTx(
   details: Row[],
   kind: ApprovalKind,
 ): Promise<void> {
-  for (const row of details.filter((line) => isApprovalTag(line.TAG_NO)))
+  const tagged = details.filter((line) => isApprovalTag(line.TAG_NO));
+  for (const row of tagged) {
+    // TR_APR_ISU.cs:6412-6431 marks every return unavailable, but re-marks an issue tag only while
+    // that source row remains open (ISU_REC='N'). A description edit must not reopen a returned tag.
+    if (kind === 'issue' && text(row.ISU_REC).toUpperCase() !== 'N') continue;
     await tx.$executeRawUnsafe(
       `UPDATE "BAR_DETL" SET "APR_ISU"=$6${kind === 'return' ? ',"APP_TRFR"=\'N\'' : ''}
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "TAG_NO"=$4
@@ -470,6 +489,7 @@ export async function setBarFlagsTx(
       num(row.VCH_SRNO),
       kind === 'issue' ? 'Y' : 'N',
     );
+  }
 }
 
 export async function setSourceReceivedTx(
