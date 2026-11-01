@@ -2,7 +2,15 @@
 
 import { formatDesktopDate } from '@datacare/core';
 
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+} from 'react';
 import { ApiError, del, get, post, put } from '../lib/api';
 import { useCompanySettings } from '../lib/companySettings';
 import {
@@ -490,6 +498,26 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
   const canSave = !!coBook && hasLines && !busy;
 
   // ---- cells ---------------------------------------------------------------------------------------
+  /**
+   * Enter on a blank help cell that may stay blank (a Stock Adjust tag or lot) moves to the next cell instead of
+   * choosing from the list the cell opened on focus.
+   */
+  function passBlankEnter(event: KeyboardEvent<HTMLTableCellElement>, value: string) {
+    if (event.key !== 'Enter' || event.altKey || event.ctrlKey || String(value ?? '').trim())
+      return;
+    event.preventDefault();
+    event.stopPropagation();
+    let next = event.currentTarget.nextElementSibling;
+    while (next) {
+      const input = next.querySelector<HTMLInputElement>('input:not([readonly]):not([disabled])');
+      if (input) {
+        input.focus();
+        return;
+      }
+      next = next.nextElementSibling;
+    }
+  }
+
   function renderCell(column: GridColumn, row: GridRow, index: number, position: number) {
     // "line N", never "row N": the stone grid under this one labels its own cells "ItCode row N", "Pcs row N", ….
     const where = `line ${index + 1}`;
@@ -504,7 +532,12 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
         );
       case 'tag':
         return (
-          <td key={position} onBlur={() => void resolveTypedTag(index)}>
+          <td
+            key={position}
+            onBlur={() => void resolveTypedTag(index)}
+            // TR_TAG_CAN.cs:3866: a Stock Adjust line may have no tag; Enter on a blank tag moves to ItCode.
+            onKeyDownCapture={(event) => mode === 'adjust' && passBlankEnter(event, row.tagNo)}
+          >
             <LookupPicker
               entity="available-tags"
               value={row.tagNo}
@@ -514,8 +547,6 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
               }
               placeholder="tag… (F1)"
               ariaLabel={`TagNo ${where}`}
-              // TR_TAG_CAN.cs:3866: a Stock Adjust line may have no tag; Enter on a blank tag moves to ItCode.
-              blankEnterPasses={mode === 'adjust'}
               style={{ minWidth: column.width }}
             />
           </td>
@@ -648,7 +679,11 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
       case 'lot': {
         const lotField = field as 'lotNo' | 'itmLot';
         return (
-          <td key={position}>
+          <td
+            key={position}
+            // A blank lot is allowed: Enter moves on (TR_TAG_CAN.cs:4089-4092, :4140-4143).
+            onKeyDownCapture={(event) => passBlankEnter(event, row[lotField])}
+          >
             <LookupPicker
               entity="stock-adjust-lots"
               searchPath={`${cfg.endpoint}/lots?kind=${lotField === 'lotNo' ? 'tag' : 'item'}`}
@@ -661,8 +696,6 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
               }
               placeholder="lot… (F1)"
               ariaLabel={`${column.label} ${where}`}
-              // A blank lot is allowed: Enter moves on (TR_TAG_CAN.cs:4089-4092, :4140-4143).
-              blankEnterPasses
               style={{ minWidth: column.width }}
             />
           </td>

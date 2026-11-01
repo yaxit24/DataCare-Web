@@ -26,7 +26,6 @@ export function LookupPicker({
   style,
   advanceOnPick = true,
   resolveTypedCode = false,
-  blankEnterPasses = false,
 }: {
   entity: string;
   value: string;
@@ -46,11 +45,6 @@ export function LookupPicker({
    * programmatic blur, so they leave this off (G104, found 2026-10-26).
    */
   resolveTypedCode?: boolean;
-  /**
-   * Enter on a blank box closes the list and lets the key through instead of picking the highlighted row. Opt-in:
-   * the Stock Adjust tag cell, where a blank tag number moves on to the item code (TR_TAG_CAN.cs:3866).
-   */
-  blankEnterPasses?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<LookupRow[]>([]);
@@ -204,11 +198,6 @@ export function LookupPicker({
             search(value ?? '');
             return;
           } // desktop F1-LOV: open lookup
-          if (e.key === 'Enter' && blankEnterPasses && !String(value ?? '').trim()) {
-            clearTimeout(tmr.current);
-            setOpen(false);
-            return;
-          }
           if (e.key === 'Enter') {
             const action = lookupEnterAction({
               open,

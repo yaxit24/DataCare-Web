@@ -169,6 +169,12 @@
         "web/apps/api/src/modules/masters/itemMaster.ts",
         "web/apps/api/src/routes/itemMaster.ts"
       ]
+    },
+    "stockAdjust": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/stock-adjust/page.tsx",
+        "web/apps/api/src/modules/stock/stockAdjustLots.ts"
+      ]
     }
   }
 }
