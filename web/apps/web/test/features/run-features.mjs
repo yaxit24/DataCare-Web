@@ -38,6 +38,7 @@ import { groupMaster } from './modules/groupMaster.mjs';
 import { productMaster } from './modules/productMaster.mjs';
 import { addressMaster } from './modules/addressMaster.mjs';
 import { itemMaster } from './modules/itemMaster.mjs';
+import { wholesaleSale } from './modules/wholesaleSale.mjs';
 import { accountLedger } from './modules/accountLedger.mjs';
 import { runSurface } from './surface/runner.mjs';
 
@@ -78,6 +79,7 @@ const MODULES = [
   productMaster,
   addressMaster,
   itemMaster,
+  wholesaleSale,
   accountLedger,
 ];
 

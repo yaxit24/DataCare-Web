@@ -7299,13 +7299,40 @@
     {
       "id": "N220",
       "status": "implemented-unverified",
-      "action": "The Ledger Report is the desktop RP_LEDR screen: the account summary (money=Σ(CR−DR), signed gold/silver fine, a negative net to Dr and a positive net to Cr, display-zero rows dropped unless With Zero), the per-voucher and per-ledger-key drill-down with a running Σ(Cr)−Σ(Dr) balance and its side, the voucher-summary gross Dr/Cr, the debit ageing with oldest-first FIFO over the 0-15..151+ buckets for money and the selected fine, totals, the selectors (view, account, dates, data type, With Zero, fine type), one primary Run action, and Print/PDF/Excel/CSV — all from one read-only resolver, keeping the account-in-path aliases.",
-      "parentLabels": "P1-core; L-report; T01-T18",
+      "action": "Wh Sales refuses a save as TR_WH_SALE does: the defaulter, mandatory-employee, type-B, cheque/card-bank, fiscal-year, lock-date and item-code refusals of TR_WH_SALE.cs:12779-12896 with the desktop texts, inside the writer transaction before any write; the delete asks the desktop question; Print renders WhSalesBill behind the print right.",
+      "parentLabels": "P1-core; L1; T01-T18",
       "startAfter": [
         "N219"
       ],
-      "requiredProof": "Pure vectors for the sign split, the running balance and the FIFO ageing from desktop-derived scenarios; an HTTP/DB test of the four views, the exports, the refusals, the view-vs-print rights and a cross-tenant sentinel on forced RLS; the account-ledger feature module passes every applicable case; the route universe is 717.",
+      "requiredProof": "An HTTP/DB test of every refusal with its text and an unchanged write set, the defaulter control, the year-before-lock order and the print; the wholesale-sale feature module passes every case; the existing TR_WH_SALE-family tests pass.",
       "gapIds": "G233",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/sales/wholesaleSaveChecks.ts",
+        "web/apps/api/src/modules/sales/rateCut.ts",
+        "web/apps/api/src/modules/sales/rateCutTags.ts",
+        "web/apps/api/src/modules/sales/wholesaleSaleBill.ts",
+        "web/apps/api/src/routes/wholesaleSale.ts",
+        "web/apps/web/components/WholesaleVoucherForm.tsx",
+        "web/apps/api/test/wholesaleSaveChecks.db.test.ts",
+        "web/apps/web/test/features/modules/wholesaleSale.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: wholesaleSaveChecks.db.test.ts 9/9, the TR_WH_SALE-family API tests (12 files, 153 tests), the wholesale-sale feature module 25 of 25 (no blocked case), the full workspace suite and the real-stack suite. Open: desktop-runtime comparison and parent acceptance; the Rate Cut, Wh Quotation and Tour Sales menus have no feature module yet."
+    },
+    {
+      "id": "N221",
+      "status": "implemented-unverified",
+      "action": "The Ledger Report is the desktop RP_LEDR screen: the account summary (money=Σ(CR−DR), signed gold/silver fine, a negative net to Dr and a positive net to Cr, display-zero rows dropped unless With Zero), the per-voucher and per-ledger-key drill-down with a running Σ(Cr)−Σ(Dr) balance and its side, the voucher-summary gross Dr/Cr, the debit ageing with oldest-first FIFO over the 0-15..151+ buckets for money and the selected fine, totals, the selectors (view, account, dates, data type, With Zero, fine type), one primary Run action, and Print/PDF/Excel/CSV — all from one read-only resolver, keeping the account-in-path aliases.",
+      "parentLabels": "P1-core; L-report; T01-T18",
+      "startAfter": [
+        "N220"
+      ],
+      "requiredProof": "Pure vectors for the sign split, the running balance and the FIFO ageing from desktop-derived scenarios; an HTTP/DB test of the four views, the exports, the refusals, the view-vs-print rights and a cross-tenant sentinel on forced RLS; the account-ledger feature module passes every applicable case; the route universe is 718.",
+      "gapIds": "G234",
       "entryDefinition": "15-standard-edition-plan.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",

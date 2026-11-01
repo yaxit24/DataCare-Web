@@ -309,6 +309,7 @@ route('Sales/Approval Return', ['POST /tour/return', 'DELETE /tour/return/:vchNo
 route('Sales/Wholesale Sale', [
   'POST /wholesale-sales',
   'GET /wholesale-sales/:vchNo',
+  'GET /wholesale-sales/:vchNo/print',
   'PUT /wholesale-sales/:vchNo',
   'DELETE /wholesale-sales/:vchNo',
 ]);
