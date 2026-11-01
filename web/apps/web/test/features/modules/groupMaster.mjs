@@ -106,6 +106,14 @@ const allGroups = (ctx) =>
   ctx.rows(
     `SELECT to_jsonb(g) AS r FROM "GROUP_MAST" g WHERE tenant_id=$1 AND "CO_CODE"='01' ORDER BY "GR_CODE",row_id`,
   );
+/** CLEAR_DATA's list: every GROUP_MAST row of the company by code (:1732); other modules add groups in a full run. */
+const dbList = async (ctx) =>
+  (
+    await ctx.rows(
+      `SELECT "GR_CODE" code,"GR_NAME" name FROM "GROUP_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' ORDER BY "GR_CODE",row_id`,
+    )
+  ).map((r) => [String(r.code ?? '').trim(), String(r.name ?? '').trim()]);
+const includes = (list, row) => list.some(([c, n]) => c === row[0] && n === row[1]);
 const itemRows = (ctx) =>
   ctx.rows(
     `SELECT "IT_CODE" code,"GR_CODE" grp,"IT_TYPE" type,"TRAD_TYPE" trade,"HSN_CODE" hsn FROM "ITEM_MAST"
@@ -374,7 +382,8 @@ export const groupMaster = {
           });
           assert.equal(await label(page, 'Search record').inputValue(), 'SEARCH RECORD');
           const list = await listed(page);
-          assert.deepEqual(list, CATALOGUE);
+          assert.deepEqual(list, await dbList(ctx));
+          for (const row of CATALOGUE) assert.ok(includes(list, row), `${row} listed`);
           const order = await page.evaluate(() =>
             [
               ...document.querySelectorAll(
@@ -412,8 +421,7 @@ export const groupMaster = {
             'Delete',
             'Exit',
             'Search record',
-            'list',
-            'list',
+            ...list.map(() => 'list'),
             'rate-display',
           ];
           assert.deepEqual(order.slice(0, expectedOrder.length), expectedOrder);
@@ -748,7 +756,8 @@ export const groupMaster = {
           const after = await counts();
           assert.deepEqual(after, { ...before, g: before.g + 1 });
           const list = await listed(page);
-          assert.deepEqual(list, [...CATALOGUE, ['GM1', 'GM GOLD ORNAMENT']]);
+          assert.deepEqual(list, await dbList(ctx));
+          assert.ok(includes(list, ['GM1', 'GM GOLD ORNAMENT']));
           return {
             observation: `GROUP_MAST ${before.g} → ${after.g}; items, accounts and postings unchanged`,
             expected: 'one row',
@@ -866,7 +875,10 @@ export const groupMaster = {
           assert.deepEqual(rows.GM1, []);
           assert.equal(rows.GM2.length, 1);
           const list = await listed(page);
-          assert.deepEqual(list, [...CATALOGUE, ['GM2', 'GM SILVER ORNAMENT']]);
+          assert.deepEqual(list, await dbList(ctx));
+          assert.ok(
+            includes(list, ['GM2', 'GM SILVER ORNAMENT']) && !list.some(([c]) => c === 'GM1'),
+          );
           return {
             observation:
               'blank and used refused without the question; GM1 deleted after one question',
@@ -1121,7 +1133,8 @@ export const groupMaster = {
           assert.equal(me.coYear, '2024-2025');
           await openScreen(page);
           const list = await listed(page);
-          assert.deepEqual(list, [...CATALOGUE, ['GM1', 'GM GOLD ORNAMENT']]);
+          assert.deepEqual(list, await dbList(ctx));
+          assert.ok(includes(list, ['GM1', 'GM GOLD ORNAMENT']));
           await openGroup(page, 'GM1');
           const shown = await shownFields(page);
           assert.equal(shown.saleName, 'GM SALES RENAMED');
@@ -1172,25 +1185,29 @@ export const groupMaster = {
           ]);
           assert.deepEqual(
             body.map((r) => r[0]),
-            ['E1', 'E2', 'GM1'],
+            (await dbList(ctx)).map(([c]) => c),
+            'every group of the company by code',
           );
-          assert.deepEqual(body[2], [
-            'GM1',
-            'GM GOLD ORNAMENT',
-            'Real Stone',
-            'GO',
-            '91.60',
-            '92.00',
-            '0.00',
-            '1.50',
-            'GMSAL',
-            'GMPUR',
-            '7113',
-            '3.00',
-          ]);
+          assert.deepEqual(
+            body.find((r) => r[0] === 'GM1'),
+            [
+              'GM1',
+              'GM GOLD ORNAMENT',
+              'Real Stone',
+              'GO',
+              '91.60',
+              '92.00',
+              '0.00',
+              '1.50',
+              'GMSAL',
+              'GMPUR',
+              '7113',
+              '3.00',
+            ],
+          );
           return {
             observation: `printed ${body.length} groups by code`,
-            expected: { headers, gm1: body[2] },
+            expected: { headers, gm1: body.find((r) => r[0] === 'GM1') },
             output: { headers, rows: body },
           };
         }),
