@@ -29,7 +29,9 @@ const number = (value: unknown): number => Number(value || 0);
 
 /** TR_SALE_RTN.cs:4928-4952: F and G are explicit; N, blank and P use net + ghat. */
 export function saleReturnAmountType(value: unknown): 'N' | 'G' | 'F' {
-  const code = String(value ?? '').trim().toUpperCase();
+  const code = String(value ?? '')
+    .trim()
+    .toUpperCase();
   return code === 'F' || code === 'G' ? code : 'N';
 }
 
