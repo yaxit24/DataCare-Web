@@ -6355,7 +6355,7 @@
     },
     {
       "id": "N181",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Sales Return prices like the desktop: resolve CO_SET.SL_AMT_TYPE for the returned line (net + ghat, gross or fine), round the item and labour amounts and the bill total to whole rupees as TR_SALE_RTN does, in the screen preview and the writer; remove sales-return.formula.net-basis and sales-return.create.amount-net-basis from features/baseline.json.",
       "parentLabels": "P05-03, X13; J07",
       "startAfter": [
@@ -6366,7 +6366,19 @@
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
       "requiredProof": "both cases pass (preview and stored 61,234 + 2,375, tax 1,908.27, total 65,517); a fine-basis company still prices on fine; the baseline entries are removed.",
-      "gapIds": "G190"
+      "gapIds": "G190",
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/packages/core/src/saleAmount.ts",
+        "web/packages/core/test/saleAmount.test.ts",
+        "web/apps/api/src/modules/sales/salesReturn.ts",
+        "web/apps/api/test/salesFamilyLifecycle.db.test.ts",
+        "web/apps/web/lib/salesReturnCalculation.ts",
+        "web/apps/web/test/salesReturnCalculation.test.ts",
+        "web/apps/web/test/features/modules/salesReturn.mjs",
+        "web/apps/web/test/features/baseline.json"
+      ],
+      "statusNote": "IMPLEMENTED-UNVERIFIED. The New return preview and writer resolve server-owned SL_AMT_TYPE, keep the distinct TR_SALE_RTN N/G/F/P behavior, and directly round item, labour, line-net and final-total stages to whole rupees with midpoint-to-even while retaining TAX_ROF. Browser proof: 25 applicable, 23 passed, 0 failed, 2 blocked; both G190 cases and the formerly blocked F-basis T15 case pass. The complete API/database, quality, zero-mock browser and 242-route surface CI run passed. Original-Windows side-by-side and operator acceptance remain open."
     },
     {
       "id": "N182",
@@ -6492,7 +6504,7 @@
     },
     {
       "id": "N188",
-      "status": "planned",
+      "status": "in-progress",
       "action": "Purchase-family amounts like the desktop: round the purchase return's (and purchase's) item and labour amounts and the bill total to whole rupees as TR_KR_ISU and TR_PURC do, in the screen preview and the writer; remove purchase-return.formula.whole-rupees and purchase-return.create.amounts from features/baseline.json. Do it together with N184 (same rounding mechanism).",
       "parentLabels": "P06-01, P10-05; X07",
       "startAfter": [
@@ -6503,7 +6515,19 @@
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
       "requiredProof": "both cases pass (58,466 net, 1,753.98 tax, 60,220 total); a purchase line with paise rounds the same; preview equals posted.",
-      "gapIds": "G198"
+      "gapIds": "G198",
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/packages/core/src/purchaseReturnAmount.ts",
+        "web/packages/core/test/purchaseReturnAmount.test.ts",
+        "web/apps/api/src/modules/purchase/purchaseReturn.ts",
+        "web/apps/api/test/transaction.integrity.db.test.ts",
+        "web/apps/web/lib/purchaseReturnForm.ts",
+        "web/apps/web/test/purchaseReturnForm.test.ts",
+        "web/apps/web/test/features/modules/purchaseReturn.mjs",
+        "web/apps/web/test/features/baseline.json"
+      ],
+      "statusNote": "IN PROGRESS. Purchase Return milestone implemented: the preview and writer use TR_KR_ISU fine/RATE_TYPE basis, directly round item and labour to whole rupees, preserve fractional other charges in the line, round header net and final total to whole rupees, and retain purchase-rate and tax precision. Browser proof: 22 applicable, 20 passed, 0 failed, 2 blocked; both G198 cases pass and left the baseline. Full quality, database, zero-mock browser and UI-surface CI passed. N188 remains in progress because its ordinary Purchase half and paise-producing Purchase proof are not implemented in this milestone."
     },
     {
       "id": "N189",

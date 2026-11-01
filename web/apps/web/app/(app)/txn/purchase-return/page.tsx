@@ -27,7 +27,7 @@ import {
   type Line,
 } from '../../../../lib/purchaseReturnForm';
 import { todayLocal } from '../../../../lib/localDate';
-import { billTotals } from '@datacare/core';
+import { billTotals, purchaseReturnRoundingPolicy } from '@datacare/core';
 
 const n = (v: string) => Number(v || 0);
 const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
@@ -91,7 +91,8 @@ export default function PurchaseReturnPage() {
   const scopeQuery = () =>
     `coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}&lcCode=${encodeURIComponent(lcCode)}`;
 
-  const previews = lines.map((l) => linePreview(l, labourWithGhat));
+  const returnRoundingPolicy = purchaseReturnRoundingPolicy(roundingPolicy);
+  const previews = lines.map((line) => linePreview(line, roundingPolicy, labourWithGhat));
   const lineNet = previews.reduce((s, p) => s + p.net, 0);
   const previewTotals = billTotals(
     {
@@ -100,7 +101,7 @@ export default function PurchaseReturnPage() {
       taxRatePct: n(taxRatePct),
       interState,
     },
-    roundingPolicy,
+    returnRoundingPolicy,
   );
   const taxable = previewTotals.taxable;
   const taxPrev = previewTotals.tax;
@@ -415,7 +416,7 @@ export default function PurchaseReturnPage() {
             </thead>
             <tbody>
               {lines.map((l, i) => {
-                const c = previews[i] ?? linePreview(l, labourWithGhat);
+                const c = previews[i] ?? linePreview(l, roundingPolicy, labourWithGhat);
                 return (
                   <tr key={i} onFocus={() => setImageRow(i)}>
                     <td>

@@ -3,8 +3,12 @@ import {
   companySaleAmountType,
   effectiveSaleRateWith,
   saleAmountBasis,
+  saleReturnAmountBasis,
   saleItemAmount,
+  saleItemAmountWhole,
   saleRateWithCode,
+  salesReturnRoundingPolicy,
+  resolveRoundingPolicy,
 } from '../src/index.js';
 
 /**
@@ -104,6 +108,36 @@ describe('TR_SALE item amount (CommPassTotal)', () => {
     const line = { pcs: 3, grossWt: 10, netWt: 10, ghtWt: 0, fineWt: 9.16 };
     expect(amount(line, 'F', 'N', 500, 'P')).toBe(1500);
     expect(amount(line, 'G', 'N', 500, 'P')).toBe(1500);
+  });
+
+  it('uses the distinct Sales Return N/G/F quantities without adding ghat to gross or fine', () => {
+    const line = { pcs: 2, grossWt: 12, netWt: 10, ghtWt: 0.5, fineWt: 9.618 };
+    expect(saleReturnAmountBasis(line, 'N')).toEqual({ quantity: 10.5, rateDivisor: 1 });
+    expect(saleReturnAmountBasis(line, 'G')).toEqual({ quantity: 12, rateDivisor: 1 });
+    expect(saleReturnAmountBasis(line, 'F')).toEqual({ quantity: 9.618, rateDivisor: 1 });
+    expect(saleReturnAmountBasis(line, 'G', '1')).toEqual({ quantity: 12, rateDivisor: 10 });
+    expect(saleReturnAmountBasis(line, 'P')).toEqual({ quantity: 10.5, rateDivisor: 1 });
+    expect(saleReturnAmountBasis(line, 'N', 'P')).toEqual({ quantity: 2, rateDivisor: 1 });
+  });
+
+  it('rounds Sales Return item amounts directly to whole rupees, without a 2dp intermediate', () => {
+    const netBasis = saleReturnAmountBasis(
+      { pcs: 1, grossWt: 10.25, netWt: 10, ghtWt: 0, fineWt: 9.16 },
+      'N',
+    );
+    expect(saleItemAmountWhole(netBasis, 6123.45)).toBe(61234);
+    expect(saleItemAmountWhole(saleReturnAmountBasis({ netWt: 1 }, 'N'), 1.499)).toBe(1);
+  });
+
+  it('uses whole-rupee half-even return stages while retaining company tax precision', () => {
+    const policy = salesReturnRoundingPolicy(
+      resolveRoundingPolicy({ TAX_ROF: '2', LBR_ROF: '2', TOT_AMT_ROF: '2' }),
+    );
+    expect(policy.billTotalDecimals).toBe(0);
+    expect(policy.labourDecimals).toBe(0);
+    expect(policy.roundBillTotal(61234.5)).toBe(61234);
+    expect(policy.roundLabourAmount(2434.375)).toBe(2434);
+    expect(policy.roundTaxAmount(1908.273)).toBe(1908.27);
   });
 
   it('a zero fine (touch + wastage = 0) falls back to net + ghat, as column 20 does', () => {

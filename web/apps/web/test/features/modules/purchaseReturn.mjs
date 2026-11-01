@@ -272,11 +272,15 @@ export const purchaseReturn = {
     'web/apps/web/lib/purchaseReturnForm.ts',
     'web/apps/api/src/modules/purchase/purchaseReturn.ts',
     'web/apps/api/src/modules/purchase/purchaseReturnLifecycle.ts',
+    'web/packages/core/src/purchaseReturnAmount.ts',
     'web/apps/web/test/features/modules/purchaseReturn.mjs',
     'web/apps/web/test/features/fixtures/catalogue.mjs',
   ],
   fixtureManifest: FIXTURE_MANIFEST,
-  settingsManifest: { TOT_AMT_ROF: 'blank', TAX_ROF: 'blank → 2dp', ALL_ROF_REMOVE: 'blank (N)' },
+  settingsManifest: {
+    TAX_ROF: 'blank → 2dp web fallback',
+    PURCHASE_RETURN_AMOUNTS: 'whole-rupee half-even regardless of TOT_AMT_ROF/LBR_ROF',
+  },
   cases: [
     C(
       'entry.defaults',

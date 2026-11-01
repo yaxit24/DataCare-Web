@@ -540,7 +540,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Stock In | `TR_INOUT` | `/txn/stock-in` | `C R E D - -` | PARTIAL | P1-core |
 | Stock Out | `TR_INOUT` | `/txn/stock-out` | `C R E D - -` | PARTIAL | P1-core |
 | Wh Quotation | `TR_WH_SALE` | `/txn/wholesale-quotation` | `C R E D P -` | PARTIAL | P1-edition |
-| Wh Sales | `TR_WH_SALE` | `/txn/wholesale-sale` | `C R E D - -` | PARTIAL | P1-edition |
+| Wh Sales | `TR_WH_SALE` | `/txn/wholesale-sale` | `C R E D P -` | PARTIAL | P1-edition |
 | Wh Sl Return | `TR_WH_SALE_RTN` | `/txn/wholesale-sale-return` | `C R E D - -` | PARTIAL | P1-edition |
 
 ### Bank Payment
@@ -791,10 +791,10 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Posts two-sided wholesale sales with fine settlement, tags, tenders and rate-cut allocation.
 - **Looks:** Party header, issue and receive grids, fine/conversion band, payment/received matrix and totals.
 - **Writes:** RATE_CUT_DATA, RATE_CUT_ISU, RATE_CUT_REC, RATE_CUT_ISU_REC, MAIN_STOCK, SL_IDTL, DM_DATA, AC_DATA, ROJ_MEL_DATA, TAX_DATA.
-- **Web:** `/txn/wholesale-sale`; `POST /wholesale-sales`, `GET /wholesale-sales/:vchNo`, `PUT /wholesale-sales/:vchNo`, `DELETE /wholesale-sales/:vchNo`. Can: create, reopen, edit, delete.
-- **Remaining:** Rojmel, stone and stock legs, negative-stock refusal, configured roles, list, versions, Print variants and accountant acceptance remain.
-- **Owners:** G15, N45, X13, X16, N59, N74, N77.
-- **Evidence:** [WholesaleVoucherForm.tsx:760-808](../../web/apps/web/components/WholesaleVoucherForm.tsx#L760-L808).
+- **Web:** `/txn/wholesale-sale`; `POST /wholesale-sales`, `GET /wholesale-sales/:vchNo`, `PUT /wholesale-sales/:vchNo`, `DELETE /wholesale-sales/:vchNo`, `GET /wholesale-sales/:vchNo/print`. Can: create, reopen, edit, delete, print.
+- **Remaining:** Rojmel, stone and stock legs, negative-stock refusal, configured roles, the voucher list (Up/Down/F1), versions, the full WhSalesBill layout (Kasar Fine, item-detail, tax and invoice-type lines) and accountant acceptance remain.
+- **Owners:** G15, N45, X13, X16, N59, N74, N77, G233, N220.
+- **Evidence:** [TR_WH_SALE.cs:12779-12896](../../unified/src/csharp/DataCareNext/TR_WH_SALE.cs#L12779-L12896), [TR_WH_SALE.cs:13654-13800](../../unified/src/csharp/DataCareNext/TR_WH_SALE.cs#L13654-L13800).
 
 ### Wh Sl Return
 

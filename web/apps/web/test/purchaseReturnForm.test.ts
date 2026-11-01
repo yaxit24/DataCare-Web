@@ -1,3 +1,4 @@
+import { resolveRoundingPolicy } from '@datacare/core';
 import { describe, expect, it } from 'vitest';
 import {
   blank,
@@ -9,6 +10,13 @@ import {
   setLineCell,
   updateLine,
 } from '../lib/purchaseReturnForm';
+
+const policy = resolveRoundingPolicy({
+  TAX_ROF: '2',
+  LBR_ROF: '2',
+  PR_RATE_ROF: '2',
+  TOT_AMT_ROF: '2',
+});
 
 /**
  * A line of `GET /purchase-returns/:vchNo` for a per-gram tagged line and an untagged line with the return-only
@@ -109,7 +117,30 @@ describe('purchase return form: reopen and save', () => {
     expect(command).not.toHaveProperty('labourAmount');
     expect(command).toMatchObject({ labourType: 'per_gram', labourRate: 40, tagNo: 'TGR1' });
     // 6 x 80 / 100 = 4.8 fine, x 1500 = 7200 metal, 6 x 40 = 240 labour.
-    expect(linePreview(line, true)).toEqual({ fine: 4.8, metal: 7200, labour: 240, net: 7440 });
+    expect(linePreview(line, policy, true)).toEqual({
+      fine: 4.8,
+      metal: 7200,
+      labour: 240,
+      net: 7440,
+    });
+  });
+
+  it('matches the G198 whole-rupee Purchase Return fixture without a 2dp intermediate', () => {
+    const line = updateLine(blank(), {
+      itCode: 'GLD22',
+      pcs: '1',
+      grossWt: '10.25',
+      netWt: '10',
+      touch: '91.6',
+      rate: '6123.45',
+      making: '237.5',
+    });
+    expect(linePreview(line, policy, true)).toEqual({
+      fine: 9.16,
+      metal: 56091,
+      labour: 2375,
+      net: 58466,
+    });
   });
 
   it('a changed rate drops only the metal amount', () => {
@@ -119,7 +150,12 @@ describe('purchase return form: reopen and save', () => {
     const command = lineCommand(line);
     expect(command).toMatchObject({ rate: 1600, fineWt: 4, labourAmount: 200 });
     expect(command).not.toHaveProperty('metalAmount');
-    expect(linePreview(line, true)).toEqual({ fine: 4, metal: 6400, labour: 200, net: 6600 });
+    expect(linePreview(line, policy, true)).toEqual({
+      fine: 4,
+      metal: 6400,
+      labour: 200,
+      net: 6600,
+    });
   });
 
   it('a typed fine override is sent and re-derives the metal amount', () => {
@@ -127,7 +163,7 @@ describe('purchase return form: reopen and save', () => {
     const command = lineCommand(line);
     expect(command.fineWt).toBe(4.5);
     expect(command).not.toHaveProperty('metalAmount');
-    expect(linePreview(line, true).metal).toBe(6750);
+    expect(linePreview(line, policy, true).metal).toBe(6750);
   });
 
   it('clearing the making rate removes per-gram labour, changing it re-derives labour', () => {
@@ -186,7 +222,12 @@ describe('purchase return form: new lines', () => {
       bagWt: 0.5,
     });
     // fine 2 x 91.6 / 100 = 1.832, metal 1.832 x 6000 = 10992, labour 2 x 300 = 600.
-    expect(linePreview(line, true)).toEqual({ fine: 1.832, metal: 10992, labour: 600, net: 11592 });
+    expect(linePreview(line, policy, true)).toEqual({
+      fine: 1.832,
+      metal: 10992,
+      labour: 600,
+      net: 11592,
+    });
   });
 
   it('imports an original purchase line as a new line with its tag instance', () => {

@@ -1,5 +1,6 @@
 import { Decimal } from 'decimal.js';
-import { round, PRECISION } from './money.js';
+import { round, roundHalfEven, PRECISION } from './money.js';
+import type { RoundingPolicy } from './roundingPolicy.js';
 
 /**
  * Retail sale (TR_SALE) item amount: which quantity the item rate multiplies.
@@ -106,10 +107,67 @@ export function saleAmountBasis(
   return { quantity: weight.plus(ghat).toNumber(), rateDivisor: 1 };
 }
 
+/**
+ * Sales Return quantity (`TR_SALE_RTN.cs:4928-4960`). Unlike the ordinary Sale grid, G means gross
+ * without adding ghat and F means the computed fine; N/blank/P use net + ghat. RATE_TYPE=P still
+ * means pieces, while 1 and K only change the divisor of the already-selected quantity.
+ */
+export function saleReturnAmountBasis(
+  line: SaleAmountLine,
+  companyType: unknown,
+  rateType?: unknown,
+): SaleAmountBasis {
+  const code = saleRateWithCode(companyType);
+  const itemRateType = String(rateType ?? '')
+    .trim()
+    .toUpperCase();
+  if (itemRateType === 'P') return { quantity: D(line.pcs).toNumber(), rateDivisor: 1 };
+  const netWithGhat = D(line.netWt).plus(line.ghtWt ?? 0);
+  const fine = D(line.fineWt);
+  const quantity =
+    code === 'F'
+      ? fine.isZero()
+        ? netWithGhat
+        : fine
+      : code === 'G'
+        ? D(line.grossWt)
+        : netWithGhat;
+  return {
+    quantity: quantity.toNumber(),
+    rateDivisor: itemRateType === '1' ? 10 : itemRateType === 'K' ? 1000 : 1,
+  };
+}
+
 /** Item amount = quantity x (rate / divisor), at the web's metal-amount precision. */
 export function saleItemAmount(
   basis: SaleAmountBasis,
   rate: Decimal.Value | null | undefined,
 ): number {
   return round(D(basis.quantity).times(D(rate).div(basis.rateDivisor)), PRECISION.amount);
+}
+
+/**
+ * Sales Return item amount (`TR_SALE_RTN.cs:4953-4960`): the selected quantity × rate is rounded
+ * directly to a whole rupee with .NET `Math.Round(value, 0)` midpoint-to-even semantics. Keeping this
+ * separate avoids a 2dp intermediate that can change values such as 1.499 from 1 to 2.
+ */
+export function saleItemAmountWhole(
+  basis: SaleAmountBasis,
+  rate: Decimal.Value | null | undefined,
+): number {
+  return roundHalfEven(D(basis.quantity).times(D(rate).div(basis.rateDivisor)), 0);
+}
+
+/**
+ * Sales Return hardcodes whole-rupee midpoint-to-even labour, line-net and final-total stages while
+ * retaining the company's item-rate and tax precision (`TR_SALE_RTN.cs:4955,4985,16384-16407`).
+ */
+export function salesReturnRoundingPolicy(policy: RoundingPolicy): RoundingPolicy {
+  return {
+    ...policy,
+    labourDecimals: 0,
+    billTotalDecimals: 0,
+    roundLabourAmount: (value) => roundHalfEven(value, 0),
+    roundBillTotal: (value) => roundHalfEven(value, 0),
+  };
 }
