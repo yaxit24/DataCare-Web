@@ -237,6 +237,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G224 | Medium | The Employee master was a generic field form, not the desktop MS_EMP screen | `unified/src/csharp/DataCareNext/MS_EMP.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7660-7669`; `web/apps/api/form-specs/DataCareNext.MS_EMP.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts`; `web/apps/api/src/modules/rbac/formCatalog.ts` | The desktop opens MS_EMP from the 'Employee' button, whose caption is the USER_SET SUB_MENU (`MDI_FORM.cs:7660-7669`, `:7034`). The screen has a SEARCH RECORD box over a Code / Name list ordered by name, and Employee Code, Employee Name, Account Code with the account name, User Name (the company-01 login names), Amount and Day Hour, in that tab order (form spec). A new entry takes the next code ('001', else the highest + 1 as "000", `MS_EMP.cs:1260-1268`); leaving the code or name refuses one another employee has (`:1350-1411`); Save replaces the row with Val of the numbers, 'ABC' for a blank user and the creator (`:1462-1550`); Delete refuses the default employee '001' (`:1552-1584`). The web rendered the generic master form, which showed EMP_TYPE, TDS and PF as typed boxes, had no search list, next code, duplicate checks, desktop texts or account help, and the rights alias 'Employee' was missing, so a desktop USER_SET row gave no access. Not closed here: the EmpMast report layout is not in the repository, so Print lists the employees on screen; the help list's create path (MsCreat opens MS_ACCT with group 10, `:1659-1665`) is shared MS_HELP behaviour left to the Party master slice. | N211 |
 | G225 | High | Desktop rights rows named by the menu caption did not reach fifteen Lite screens | `unified/src/csharp/DataCareNext/MDI_FORM.cs:7034-7046`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7610-8951`; `unified/src/csharp/DataCareNext/TR_AC_OPBL.cs:2020-2030` | `web/apps/api/src/modules/rbac/formCatalog.ts`; `web/apps/api/src/modules/rbac/authorization.ts`; `web/apps/api/src/routes/partyOpening.ts` | The desktop reads USER_SET by LC_CODE, USER_NAME and SUB_MENU = the menu button's caption (MsUserRightForm = MsSideBtn, `MDI_FORM.cs:7034-7046`), so a migrated or desktop-written rights row names the caption. The web matches a row against the form's name and aliases, and the captions Address, Product, Group, AutoItem, Tax, Party Opening, Purchase Rtn, Approval Isu, Approval Rtn, Fine Jv Entry, Tag Stock, Sales Report, Purchase Rpt, Cash Bank and Gst Report were not aliases of the forms their screens use: a restricted user with the desktop's rights was refused. Party Opening's Save also ignored FRM_EDIT for an existing opening (`TR_AC_OPBL.cs:2647-2650`). Not closed here: captions whose screens also use another menu's form (Company, Data Refresh, Data Import, Order Report, Cash Received, Bank Received, and Approval Rtn's issue lines), and 14 Basic and 19 Standard menus, which follow their tiers. | N212 |
 | G226 | High | The Tax master was a generic field form that could not edit a code's components, and its generic update rewrote them | `unified/src/csharp/DataCareNext/MS_TAX.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7670-7679`; `web/apps/api/form-specs/DataCareNext.MS_TAX.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/master.service.ts`; `web/apps/api/src/modules/masters/configs.ts`; `web/apps/web/components/LookupPicker.tsx` | MS_TAX edits a tax code as a header row (SR_NO 0, TAX_GROUP 'N') with a grid of component rows (SR_NO 1, 2, …: SGST, CGST, IGST), which the sale and purchase postings read by SR_NO; Save replaces every row of the code (`MS_TAX.cs:1824-1933`). The web rendered the generic one-row form keyed by CO_CODE + TAX_CODE: it listed the component rows as duplicates, could not add or change a component, and its update wrote the header's name and rate into every component row of the code, so an edited GST code taxed SGST, CGST and IGST at the full rate. It had no desktop keys, texts, account helps or Print. The browser check also found the shared account picker replacing a row chosen from its help with the typed text's exact code on leave. Not closed here: web provisioning keeps its tax accounts in group 30, outside the desktop help's group 12 (N58), and the Sales screen resolves the code by rate rather than from the desktop's tax-code help (`TR_SALE.cs:18668`), refusing a rate another code's component carries. | N213 |
+| G227 | High | The Item Group master was a generic field form without the desktop's item update, helps, texts or Print | `unified/src/csharp/DataCareNext/MS_GROUP.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7630-7636`; `web/apps/api/form-specs/DataCareNext.MS_GROUP.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts`; `web/apps/api/src/modules/masters/master.service.ts` | MS_GROUP keeps an item group's metal type, trade type, touches, melting and wastage, the sales and purchase accounts the postings use per group, the HSN code and the rate tax %, and its Save sets the trade type, item type and HSN code on every item of the group (`MS_GROUP.cs:1825-1919`, `:1887`). The web rendered the generic form: its Item Type offered only Gold and Silver of the desktop's seven, the trade type box and the Rate Display check box were missing, the account boxes searched every account instead of groups 25 and 30, the save did not update the group's items (so a changed HSN code never reached the invoice), the delete question, the in-use refusal order and Print were missing, and none of the desktop keys or texts applied. Not closed here: web provisioning keeps CAPITAL in group 25 and its GST and TCS accounts in group 30 while SALES and PURCHASE sit in 20 and 21, so the desktop helps list the wrong accounts on a web-provisioned company (N58). | N214 |
 
 ## 4. Decisions D23–D28
 
@@ -2633,6 +2634,77 @@ the double click reopened it with every value; a Sales Invoice at 2% for WALKIN 
 posted Dr WALKIN 64,881.69, Cr SALES 63,609.50 and Cr 00085 1,272.19; Print listed the rows; Delete asked the desktop
 question and removed the code; Esc left the screen. Desktop-runtime comparison and parent acceptance remain open.
 
+### N214 — The Item Group master is the desktop MS_GROUP screen (G227, Lite L2)
+
+The screen follows MS_GROUP's form spec: the SEARCH RECORD box and the Code / Name list on the left; Gr Code, Gr Name,
+Item Type with the trade type box beside it, Gr Rate Touch with Purc Touch, Melting % with West %, Sales Ac and Purchase
+Ac with their names, Hsn Code, Rate Tax % and Rate Display In Main Screen on the right; Print, Save, Cancel, Delete and
+Exit along the bottom. The list is every GROUP_MAST row of the company ordered by code (CLEAR_DATA, `MS_GROUP.cs:1732`);
+a new entry has blank boxes, Item Type Gold and the cursor in the code (`:1713-1736`); the Item Type combo is Gold,
+Silver, Diamond, Real Stone, Emitation, Other and Platinum (`:1642-1648`). Enter on the list or a double click opens a
+group with the cursor in the name, with the touches, melting, wastage and tax % shown as 0.00, each account with its name
+and the code read-only (DISPLAY_DATA `:1738-1808`, `:2110-2139`).
+
+Keys as the desktop: typed letters are upper-cased and the apostrophe refused (`:1975-1988`); Enter on the code moves on
+and F1 goes to the search box (`:1990-2004`); Enter on a blank name says "Please Insert Group Name ..." (`:2091-2108`);
+Enter on the item type moves on (`:2141-2149`); Enter on the trade type takes a BAL_GR code, else opens BAL_GR by name
+(`:2271-2304`); Enter on the touches, melting and wastage shows Val of the box as 0.00 (`:2151-2193`); Enter on Sales Ac
+takes a group-25 code, else opens the help of group 25 by name without 00099 (`:2195-2231`); Enter on Purchase Ac does
+the same over group 30 (`:2233-2269`); Enter on Hsn Code moves on and on Rate Tax %, which is not formatted, goes to Save
+(`:2318-2336`, tab index 12). Esc leaves (`:2073-2081`). Leaving the code refuses a code another group has and leaving
+the name a name another code has, with the desktop texts (`:2006-2048`); a refusal also stops Save, Delete and Print, as
+the desktop's cancelled Validating suppresses the button's click.
+
+Save (`:1825-1919`) needs the edit right only for an opened group, refuses a blank sales or purchase account ("Please
+Select Sales and Purchase Account And Try") and then a blank code or name ("Enter Group Detail"), writes the group with
+Val of each number box, GR_TYPE = the item type's first letter and RATE_DISPLAY Y or N, keeps MAIN_USER for an opened
+group and writes the user for a new one (`:1725`, `:1802`), and sets the trade type, item type and HSN code on every item
+of the group (`:1887`). Delete (`:1921-1954`) needs the delete right, refuses a blank code ("Please Select Group For
+Delete.") and a group an item uses ("You Cant Delete Record This Group Code Use in Item Master....") before it asks "Are
+You Sure To Delete This Group now?". Print needs the print right. The sale credits each line to its item group's SALE_AC
+(`web/apps/api/src/modules/sales/sales.ts`, G169) and the invoice prints the item's HSN code
+(`web/apps/api/src/modules/sales/invoice.ts`), which the group's save sets.
+
+Deliberate differences: Save updates the group's row in place, in one transaction with the item update. The desktop
+deletes the row and inserts one from a blank DataRow (`:1862-1886`), which writes NULL into every column the form does not
+show, among them the day's rate the Daily Rate screen keeps in GR_RATE (`web/apps/api/src/modules/masters/dailyRate.ts`)
+and the average and day-close fields; and a failed item update leaves the new group row written. A second row of the
+same code is removed, as the desktop's delete leaves one. An unknown account, a name over 40 characters and a trade type
+over the 2 characters ITEM_MAST.TRAD_TYPE holds are refused (the desktop's item update fails on a longer one after the
+group is written). An opened group carries a version token over the boxes it shows (N51, D17), so a Daily Rate save does
+not make it stale, and a save or delete after another operator's change is refused with 409. A pick from a help moves on
+at once and does not switch a new group to edit mode (the desktop sets EntryMode "E" after an account help, `:2222` and
+`:2260`, so a user without the edit right cannot save that new group). Cancel and Exit work while a box is refused. Print
+lists the groups on screen because the GroupMast report layout is not in the repository. The Add Touch box (ADD_TOUCH)
+is shown only for one registration (SSRegSrNo VK289NEPH, `:1638-1641`) and the web schema has no such column, so it is
+left out. The generic `/masters/groups` routes stay for the CSV import (UT_IMPORT also imports GROUP_MAST); the screen
+no longer uses them.
+
+Open, recorded on the gap: the web provisioning keeps CAPITAL A/C in group 25 and its GST and TCS accounts in group 30
+(`web/apps/api/src/modules/ops/seedCompany.ts`), the desktop's sales and purchase groups, while its SALES and PURCHASE
+accounts sit in groups 20 and 21; on a web-provisioned company the desktop's helps therefore list the wrong accounts and
+refuse SALES typed into Sales Ac (desktop-equivalent provisioning, N58).
+
+Evidence: `groupMaster.db.test.ts` (10 cases through the real routes on forced RLS: the write set with Val, upper-casing,
+the type letter, Y/N and the user; the list with the rights and one group with its account names; an edit that keeps
+GR_RATE, AVG_TOUCH and MAIN_USER while a Daily Rate write does not make the version stale, and sets the type, trade and
+HSN on the group's two items only; every refusal in the desktop order with nothing written; stale, replayed and missing
+versions and a group deleted meanwhile; a new entry with a group's code and name replacing it under the signed-in user
+and collapsing a duplicate row; a view-only `Group` rights row; the three helps; print; delete with the blank and in-use
+refusals; another tenant untouched) and `routePolicy.test.ts` (690 routes) pass. The zero-mock `group-master` module
+passes 18 of 18 cases, none blocked: T05 checks the item update on the group's items only, T14 injects a fault on the item
+update and finds the group and its item unchanged, T15 reads the group in 2024-2025, T18 sells an item of a new group and
+finds 63,609.50 (10 g × 6,123.45 + 10 g × 237.50) credited to the group's sales account and the HSN code the group's save
+gave the item on the invoice. Chrome DevTools on the demo stack: the keyboard entry of SLV SILVER ORNAMENT (code and name
+upper-cased with the apostrophe dropped, SL taken from the trade type box with Enter, 70 → 70.00, 72.5x → 72.50, a blank
+melting → 0.00, 1.5 → 1.50, SALES SILVER A/C chosen from the group-25 help after typing "silver", 00052 taken with Enter,
+Rate Tax % 3 left unformatted and Enter going to Save, Rate Display ticked, Alt+S) stored
+`SLV|SILVER ORNAMENT|S|SL|70|72.5|0|1.5|3|00042|00052|7114|Y|admin`; a typed 01 was refused on leave with the GOLD
+JEWELLERY text; Enter and a double click reopened SLV with every value and the cursor in the name; an HSN change saved
+with Enter on Save and the group's item took it; Delete of SLV, which that item uses, was refused without the question;
+Print listed both groups; a temporary group was deleted after the desktop question; Esc left the screen.
+Desktop-runtime comparison and parent acceptance remain open.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2773,6 +2845,7 @@ question and removed the code; Esc left the screen. Desktop-runtime comparison a
 | N211 | — | implemented-unverified, evidence in this change (G224: the Employee master is the MS_EMP screen with its list, next code, keys, desktop texts, rights alias and account help; version tokens and the web refusals recorded on the gap) |
 | N212 | — | implemented-unverified, evidence in this change (G225: the Lite menu captions reach their screens' forms as USER_SET aliases; Party Opening's Save checks the edit right for an existing opening) |
 | N213 | — | implemented-unverified, evidence in this change (G226: the Tax master is the MS_TAX header and component grid with the desktop keys, texts, helps and rights; generic TAX_MAST writes refused; the account picker keeps a chosen row) |
+| N214 | — | implemented-unverified, evidence in this change (G227: the Item Group master is MS_GROUP with the desktop keys, texts, helps, rights and the item update; the row is updated in place in one transaction) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

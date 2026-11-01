@@ -133,8 +133,14 @@ export const DESKTOP_MESSAGES = {
 
   /** MS_ACCT.cs — delete pressed with no account selected. */
   ACCOUNT_SELECT_FOR_DELETE: 'Please Select AcCode For Delete.',
-  /** MS_AC_GROUP.cs — delete pressed with no group selected. */
+  /** MS_AC_GROUP.cs and MS_GROUP.cs:1936 — delete pressed with no group selected. */
   GROUP_SELECT_FOR_DELETE: 'Please Select Group For Delete.',
+  /** MS_GROUP.cs:1851 — Save with a blank sales or purchase account. */
+  GROUP_ACCOUNTS_REQUIRED: 'Please Select Sales and Purchase Account And Try',
+  /** MS_GROUP.cs:1859 — Save with a blank group code or name. */
+  GROUP_DETAIL_REQUIRED: 'Enter Group Detail',
+  /** MS_GROUP.cs:1943 — Delete of a group an item uses. */
+  GROUP_IN_ITEM_MASTER: 'You Cant Delete Record This Group Code Use in Item Master....',
   /** MS_DM.cs — delete pressed with no diamond code selected. */
   DM_SELECT_FOR_DELETE: 'Please Select Dm Code For Delete.',
 

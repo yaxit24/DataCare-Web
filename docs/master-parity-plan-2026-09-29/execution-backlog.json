@@ -7123,6 +7123,34 @@
         "web/apps/web/test/features/modules/salesInvoice.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Verified: taxMaster.db.test.ts 11/11, routePolicy, the tax-master feature module 18 of 18 (T14 through an injected component-insert fault, T18 through a 2% sale), sales-invoice 28 passed and 3 blocked with the new picker case (red on the old picker), purchase-invoice, party-opening and daily-rate unchanged, and a Chrome DevTools pass on the demo stack. Open: the TaxMast print layout (not in the repository), the group-12 help on web-provisioned companies (N58), the Sales screen's tax-code help, desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N214",
+      "status": "implemented-unverified",
+      "action": "The Item Group master is the desktop MS_GROUP screen: code, name, the seven item types, the trade type, touches, melting, wastage, the group-25 sales and group-30 purchase accounts, HSN code, rate tax % and Rate Display, with the desktop keys, validating texts, helps, rights and Print; Save updates the row in place with the trade type, item type and HSN code on every item of the group in one transaction, with version tokens.",
+      "parentLabels": "P1-core; L2; T01-T18",
+      "startAfter": [
+        "N213"
+      ],
+      "requiredProof": "An HTTP/DB test of the write set, the item update, every refusal, versions, rights, helps, print and delete; the group-master feature module passes every case; a Chrome DevTools keyboard, help, save, reopen, edit, delete, print and Esc pass.",
+      "gapIds": "G227",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/apps/api/src/modules/masters/groupMaster.ts",
+        "web/apps/api/src/routes/groupMaster.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/modules/shared/desktopMessages.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/web/app/(app)/masters/groups/page.tsx",
+        "web/apps/api/test/groupMaster.db.test.ts",
+        "web/apps/api/test/routePolicy.test.ts",
+        "web/apps/web/test/features/modules/groupMaster.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: groupMaster.db.test.ts 10/10, routePolicy (690 routes), the group-master feature module 18 of 18 (T14 through an injected item-update fault, T18 through a sale crediting the group's sales account with the group's HSN code on the invoice), and a Chrome DevTools pass on the demo stack. Open: the GroupMast print layout (not in the repository), the desktop helps on web-provisioned companies (N58), desktop-runtime comparison and parent acceptance."
     }
   ],
   "amendments": [
