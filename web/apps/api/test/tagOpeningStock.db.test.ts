@@ -19,6 +19,12 @@ import {
  *   refused with the desktop's text (:11383).
  * The migrated desktop data agrees: 1169 opening tag rows are P/TAGOP/'TAG OPBL', and Only Tag Entry has 159 I/+ tag
  * rows with 31 O/- 'N' rows, one per voucher.
+ *
+ * N204 / G217: the karigar weight block (columns 17-23) is saved to BAR_DETL as BtnSave_Click writes it
+ * (TR_TAG_OPBL.cs:10975-11022), and Tag_Opbl_Stk copies KR_NET_WT, KR_TOUCH, KR_WEST_PRC and KR_FINE to MAIN_STOCK
+ * KR_NWT, KR_TOUCH, KR_WEST and KR_FINE (Ac_Stock.cs:28). Without a KrTouch the row takes the tag's own touch,
+ * wastage and fine (:11010-11012). In the migrated data 1327 of 1330 tags store KR_NET_WT = ITM_NWT, and all 1170
+ * opening tag stock rows match their BAR_DETL karigar columns.
  */
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const TENANT = 'tagop-stock';
@@ -213,6 +219,50 @@ describe.skipIf(!RUN)('Tag Opening and Only Tag Entry stock rows (Ac_Stock.Tag_O
     expect((await stock('TGN', vchNo)).map((r) => [r.tr, r.it, r.gwt, r.fine])).toEqual([
       ['O', 'LOOSE', 10.5, 9.36],
       ['I', 'GOLD', 10.5, 9.36],
+    ]);
+  });
+
+  it('saves the karigar weight block to BAR_DETL and copies it to the stock rows (N204)', async () => {
+    const saved = await tagOpening(runtime, {
+      scope: scopeOf('000'),
+      mainUser: 'ADMIN',
+      vchDate: DAY,
+      lines: [
+        line('K-1', 10.5, 10, {
+          karigarOthWt: 0.5,
+          karigarNetWt: 9,
+          karigarGhtPct: 2.5,
+          karigarGhtWt: 0.25,
+          karigarTouch: 92,
+          karigarWestPct: 1.5,
+        }),
+        line('K-2', 5.25, 5, { karigarWestPct: 3, karigarFine: 1 }),
+      ],
+    });
+    const vchNo = String(saved.vchNo).padStart(5, '0');
+    const bar = await rows(
+      `SELECT "TAG_NO" tag, "KR_OTH_WT"::float oth, "KR_NET_WT"::float net, "KR_GHT_PRC"::float ghtp,
+              "KR_GHT_WT"::float ght, "KR_TOUCH"::float touch, "KR_WEST_PRC"::float west, "KR_FINE"::float fine
+         FROM "BAR_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='000' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+      vchNo,
+    );
+    expect(bar).toEqual([
+      // K-1: KrNwt = 10.5 − 0.5 = 10 over the typed 9 (:6679-6686); KrFine = (10 + 0.25) × (92 + 1.5) / 100
+      // = 9.58375, kept to 3 decimals (:6804-6811); the karigar cells are kept because KrTouch is set (:11017-11019).
+      { tag: 'K-1', oth: 0.5, net: 10, ghtp: 2.5, ght: 0.25, touch: 92, west: 1.5, fine: 9.584 },
+      // K-2: no KrTouch, so the tag's own touch 91.6, wastage 2 and fine 5 × 93.6 / 100 = 4.68 (:11010-11012); the
+      // typed KrWst% 3 and KrFine 1 are not kept. KrNwt takes the net weight (:6690-6704).
+      { tag: 'K-2', oth: 0, net: 5, ghtp: 0, ght: 0, touch: 91.6, west: 2, fine: 4.68 },
+    ]);
+    const kr = await rows(
+      `SELECT "TAG_NO" tag, "KR_NWT"::float net, "KR_TOUCH"::float touch, "KR_WEST"::float west,
+              "KR_FINE"::float fine
+         FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_BOOK"='000' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+      vchNo,
+    );
+    expect(kr).toEqual([
+      { tag: 'K-1', net: 10, touch: 92, west: 1.5, fine: 9.584 },
+      { tag: 'K-2', net: 5, touch: 91.6, west: 2, fine: 4.68 },
     ]);
   });
 

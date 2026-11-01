@@ -96,7 +96,8 @@
     "tagOpening": {
       "covers": [
         "web/apps/web/app/(app)/txn/tag-opening/page.tsx",
-        "web/apps/api/src/modules/stock/stockVoucherLifecycle.ts"
+        "web/apps/api/src/modules/stock/stockVoucherLifecycle.ts",
+        "web/packages/core/src/tagKarigar.ts"
       ]
     }
   }

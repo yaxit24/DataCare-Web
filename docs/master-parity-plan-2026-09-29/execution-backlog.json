@@ -6835,7 +6835,7 @@
     },
     {
       "id": "N204",
-      "status": "planned",
+      "status": "implemented-unverified",
       "action": "Add the karigar weight block (KrOthWt, KrNwt, KrGht%, KrGht, KrTouch, KrWst%, KrFine) to the tag grid with the desktop formulas, save it to BAR_DETL and copy it to MAIN_STOCK as Tag_Opbl_Stk does.",
       "parentLabels": "P9; L2",
       "startAfter": [
@@ -6847,9 +6847,19 @@
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
-      "statusAsOf": "2026-10-31",
-      "evidence": [],
-      "statusNote": "PLANNED."
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/packages/core/src/tagKarigar.ts",
+        "web/packages/core/test/tagKarigar.test.ts",
+        "web/apps/api/src/modules/stock/tagKarigarLine.ts",
+        "web/apps/api/src/modules/stock/stockVoucherLifecycle.ts",
+        "web/apps/web/app/(app)/txn/tag-opening/page.tsx",
+        "web/apps/web/components/ExtendedGrid.tsx",
+        "web/apps/api/test/tagOpeningStock.db.test.ts",
+        "web/apps/api/test/tagOpeningRoundTrip.db.test.ts",
+        "web/apps/web/test/features/modules/tagOpening.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: core tagKarigar 9/9; tagOpeningStock.db.test.ts 5/5 (the karigar case fails with main's writer) and tagOpeningRoundTrip.db.test.ts 4/4 with the block on the rich line; the tag-opening module 14 passed and 5 blocked, with the new formula.karigar-block case; a Chrome DevTools pass on the demo stack (block typed in the full grid, worked out on leave, saved, checked in BAR_DETL and MAIN_STOCK, reopened, saved unchanged, deleted). Open: the order, manufacturing and lot paths that fill the block from other vouchers, the KrTouch hide setting (MsUserKrTouchHide), desktop-runtime comparison and parent acceptance."
     },
     {
       "id": "N205",
