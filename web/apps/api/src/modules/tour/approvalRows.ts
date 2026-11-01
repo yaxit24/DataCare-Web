@@ -151,7 +151,11 @@ export async function sourceLinesTx(
     );
     rows.push({ ...row, stones });
   }
-  return rows.map(lineFromRow);
+  return rows.map((row, index) => ({
+    ...lineFromRow(row),
+    oldSrNo: num(wanted[index]!.oldSrNo) || index + 1,
+    origSrNo: num(row.OLD_SRNO ?? row.SR_NO),
+  }));
 }
 
 export function stoneFromRow(row: Row): TourStoneInput {
@@ -306,7 +310,7 @@ export function detailRow(
     ISU_YRCD: source?.year ?? t(line.isuYrcd, 10),
     ISU_DBCD: source?.book ?? t(line.isuDbcd, 3),
     ISU_NO: source?.no ?? t((line as Row).isuNo, 10),
-    ISU_SRNO: source ? num(line.oldSrNo) : num(line.isuSrNo) || null,
+    ISU_SRNO: source ? num(line.origSrNo) : num(line.isuSrNo) || null,
     ISU_LC_CODE: key.LC_CODE,
     DESIGN_IMG_ID: t(line.designImageId, 50),
     MAIN_USER: identity.mainUser || null,
@@ -330,7 +334,7 @@ export function stoneRows(
       ENTRY_TYPE: 'A',
       BOOK_NAME: book.mainBook,
       AC_CODE: partyAc,
-      SR_NO: index + 1,
+      SR_NO: num(line.oldSrNo) || index + 1,
       TAG_NO: isApprovalTag(line.tagNo) ? text(line.tagNo) : 'N',
       VCH_SRNO: num(line.vchSrno),
       ISR_NO: stone.isrNo ?? stoneIndex + 1,
@@ -439,7 +443,13 @@ export async function dmRowsTx(
   return stones
     .filter((row) => posts.has(text(row.IT_CODE)))
     .map((row) => {
-      const parent = details[num(row.SR_NO) - 1]!;
+      const parent = details.find(
+        (detail) => num(detail.OLD_SRNO ?? detail.SR_NO) === num(row.SR_NO),
+      );
+      if (!parent)
+        throw new TourValidationError(
+          `approval stone ${num(row.SR_NO)}/${num(row.ISR_NO)} has no parent line`,
+        );
       return {
         CO_CODE: row.CO_CODE,
         LC_CODE: row.LC_CODE,

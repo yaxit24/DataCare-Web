@@ -282,6 +282,22 @@ type Cookie = string;
     ...overrides,
   });
 
+  const twoLineIssueBody = () => {
+    const first = issueBody().lines[0]!;
+    return issueBody({
+      lines: [
+        first,
+        {
+          ...first,
+          tagNo: TAG2,
+          vchSrno: TAG_SRNO + 1,
+          remark: 'SECOND STABLE LINE',
+          stones: [{ ...first.stones[0]!, isrNo: 7, dmCode: 'OV' }],
+        },
+      ],
+    });
+  };
+
   const stockBalance = async (tagNo: string) => {
     const [row] = await query<Array<{ balance: number }>>(
       `SELECT coalesce(sum(CASE WHEN "ITM_SIGN"='+' THEN 1 ELSE -1 END),0)::int balance
@@ -1271,6 +1287,73 @@ type Cookie = string;
         issue.voucherNo,
       ),
     ).toEqual([{ received: 'N' }]);
+  });
+
+  it('keeps a return row identity separate from its non-first source identity', async () => {
+    // TR_APR_ISU.cs:3414-3426 assigns the return row's stable OLD_SRNO from grid column 57 while
+    // :4832-4835 copies the source OLD_SRNO into column 39; Save writes that second value as ISU_SRNO
+    // at :6170-6171 and :6235-6237.
+    const issue = await createIssue(twoLineIssueBody());
+    const returned = await admin(
+      'POST',
+      '/tour/return',
+      returnBody(issue.voucherNo, {
+        lines: [{ origSrNo: 2, itCode: ITEM, tagNo: TAG2, vchSrno: TAG_SRNO + 1 }],
+      }),
+    );
+    expect(returned.statusCode, returned.body).toBe(201);
+    expect(
+      await query(
+        `SELECT d."SR_NO"::int sr,d."OLD_SRNO"::int old,d."ISU_SRNO"::int source,
+                s."SR_NO"::int stone_parent,s."ISR_NO"::int stone
+           FROM "APR_DETL" d LEFT JOIN "APR_IDTL" s ON s.tenant_id=d.tenant_id
+            AND s."CO_CODE"=d."CO_CODE" AND s."LC_CODE"=d."LC_CODE" AND s."CO_YEAR"=d."CO_YEAR"
+            AND s."CO_BOOK"=d."CO_BOOK" AND s."VCH_NO"=d."VCH_NO"
+          WHERE d.tenant_id=$1 AND d."CO_BOOK"='TRR' AND d."VCH_NO"=$2`,
+        tenantId,
+        returned.json().voucherNo,
+      ),
+    ).toEqual([{ sr: 1, old: 1, source: 2, stone_parent: 1, stone: 7 }]);
+    const reopened = await admin('GET', `/tour/return/${returned.json().voucherNo}?coBook=TRR`);
+    expect(reopened.statusCode, reopened.body).toBe(200);
+    expect(reopened.json().lines).toMatchObject([
+      { oldSrNo: 1, origSrNo: 2, stones: [{ isrNo: 7, dmCode: 'OV' }] },
+    ]);
+  });
+
+  it('keeps an issue line and its stones on the stable OLD_SRNO after removing an earlier row', async () => {
+    // TR_APR_ISU.cs:6330-6357 stores APR_IDTL.SR_NO from the stable parent serial in grid column 57,
+    // rather than the compacted visible row number.
+    const issue = await createIssue(twoLineIssueBody());
+    const reopened = await admin('GET', `/tour/${issue.voucherNo}?coBook=TUR`);
+    expect(reopened.statusCode, reopened.body).toBe(200);
+    const edited = await admin('PUT', `/tour/${issue.voucherNo}`, {
+      coBook: ISSUE_BOOK,
+      expectedVersion: reopened.json().version,
+      vchDate: reopened.json().vchDate,
+      partyAc: reopened.json().partyAc,
+      empCode: reopened.json().empCode,
+      vchDesc: reopened.json().vchDesc,
+      lines: [reopened.json().lines[1]],
+    });
+    expect(edited.statusCode, edited.body).toBe(200);
+    expect(
+      await query(
+        `SELECT d."SR_NO"::int sr,d."OLD_SRNO"::int old,s."SR_NO"::int stone_parent,
+                s."ISR_NO"::int stone,s."DM_CODE" diamond
+           FROM "APR_DETL" d JOIN "APR_IDTL" s ON s.tenant_id=d.tenant_id
+            AND s."CO_CODE"=d."CO_CODE" AND s."LC_CODE"=d."LC_CODE" AND s."CO_YEAR"=d."CO_YEAR"
+            AND s."CO_BOOK"=d."CO_BOOK" AND s."VCH_NO"=d."VCH_NO"
+            AND s."SR_NO"=d."OLD_SRNO"
+          WHERE d.tenant_id=$1 AND d."CO_BOOK"='TUR' AND d."VCH_NO"=$2`,
+        tenantId,
+        issue.voucherNo,
+      ),
+    ).toEqual([{ sr: 1, old: 2, stone_parent: 2, stone: 7, diamond: 'OV' }]);
+    const after = await admin('GET', `/tour/${issue.voucherNo}?coBook=TUR`);
+    expect(after.json().lines).toMatchObject([
+      { oldSrNo: 2, tagNo: TAG2, stones: [{ isrNo: 7, dmCode: 'OV' }] },
+    ]);
   });
 
   it('refuses the same approval source line twice in one return request without writing', async () => {

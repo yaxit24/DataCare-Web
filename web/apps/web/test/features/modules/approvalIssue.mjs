@@ -207,12 +207,19 @@ export const approvalIssue = {
         const result = await response.json();
         const stones = await ctx.rows(
           `SELECT "IT_CODE" item,"DM_CODE" diamond,"IT_GWT"::float8 weight,"IT_NET_AMT"::float8 net,
-                  "HD_VCH_NO" hidden FROM "APR_IDTL"
+                  "ISR_NO"::int stone,"HD_VCH_NO" hidden FROM "APR_IDTL"
             WHERE tenant_id=$1 AND "CO_BOOK"='TUR' AND "VCH_NO"=$2`,
           result.voucherNo,
         );
         assert.deepEqual(stones, [
-          { item: 'DIAE1', diamond: 'RD', weight: 0.25, net: 1275, hidden: result.voucherNo },
+          {
+            item: 'DIAE1',
+            diamond: 'RD',
+            weight: 0.25,
+            net: 1275,
+            stone: 7,
+            hidden: result.voucherNo,
+          },
         ]);
         return {
           observation: `${tag.tag} hydrated one stone`,
@@ -236,6 +243,12 @@ export const approvalIssue = {
       async (ctx) => {
         const tag = await seedApprovalTag(ctx, 'AIL');
         const created = await createIssue(ctx, tag.tag, 'lossless note');
+        // DISPLAY_DATA restores the stored ITM_PCS value; zero must not fall back to CommPassAdd's new-row 1.
+        await ctx.owner.$executeRawUnsafe(
+          `UPDATE "APR_DETL" SET "ITM_PCS"=0 WHERE tenant_id=$1 AND "CO_BOOK"='TUR' AND "VCH_NO"=$2`,
+          TENANT,
+          created.voucherNo,
+        );
         await pageNew(created.page);
         await reopenApproval(created.page, 'issue', created.voucherNo);
         const [header] = await ctx.rows(
@@ -249,6 +262,7 @@ export const approvalIssue = {
         assert.equal(await label(created.page, 'Employee Name').inputValue(), 'APPROVAL EMPLOYEE');
         assert.equal(await label(created.page, 'Vch Time').inputValue(), header.clock);
         assert.equal(await label(created.page, 'TagNo line 1').inputValue(), tag.tag);
+        assert.equal(await label(created.page, 'Pcs line 1').inputValue(), '0');
         assert.equal(await label(created.page, 'Vch Desc').inputValue(), 'LOSSLESS NOTE');
         return {
           observation: `reopened ${created.voucherNo}`,
@@ -265,22 +279,36 @@ export const approvalIssue = {
       'TR_APR_ISU DISPLAY_DATA followed by Save preserves the voucher; web no-ops an identical versioned body.',
       async (ctx) => {
         const tag = await seedApprovalTag(ctx, 'AIN');
+        await seedApprovalStone(ctx, tag);
         const created = await createIssue(ctx, tag.tag);
+        const stones = () =>
+          ctx.rows(
+            `SELECT row_id::text id,"SR_NO"::int parent,"ISR_NO"::int stone,"IT_CODE" item,
+                    "IT_PCS"::float8 pcs,"IT_GWT"::float8 weight,"KR_WT"::float8 karigar,
+                    "IT_NET_AMT"::float8 net FROM "APR_IDTL"
+              WHERE tenant_id=$1 AND "CO_BOOK"='TUR' AND "VCH_NO"=$2 ORDER BY "SR_NO","ISR_NO"`,
+            created.voucherNo,
+          );
         const before = {
           rows: await approvalRows(ctx, ISSUE_BOOK, created.voucherNo),
           stock: await approvalStock(ctx, ISSUE_BOOK, created.voucherNo),
+          stones: await stones(),
         };
         await reopenApproval(created.page, 'issue', created.voucherNo);
         const response = await saveApproval(created.page, 'issue', 'PUT');
         assert.equal(response.status(), 200, await response.text());
+        const result = await response.json();
         const after = {
           rows: await approvalRows(ctx, ISSUE_BOOK, created.voucherNo),
           stock: await approvalStock(ctx, ISSUE_BOOK, created.voucherNo),
+          stones: await stones(),
         };
+        assert.equal(result.version, created.result.version);
         assert.deepEqual(after, before);
+        assert.equal(after.stones[0].stone, 7);
         return {
-          observation: 'unchanged PUT kept rows',
-          expected: 'identical footprint',
+          observation: 'unchanged stone-bearing PUT kept version and physical rows',
+          expected: 'identical footprint and ISR_NO 7',
           database: { before, after },
           downstream: { unchanged: true },
         };

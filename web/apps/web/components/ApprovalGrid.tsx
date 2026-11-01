@@ -141,7 +141,7 @@ export function approvalLineFromApi(raw: Record<string, unknown>): ApprovalLine 
   const line = blankApprovalLine();
   for (const field of fields) {
     const value = raw[field];
-    if (value != null && String(value) !== '0') line[field] = String(value);
+    if (value != null && (String(value) !== '0' || field === 'pcs')) line[field] = String(value);
   }
   if (!line.pcs) line.pcs = '0';
   if (line.tagNo === 'N') line.tagNo = '';

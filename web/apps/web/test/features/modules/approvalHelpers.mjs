@@ -92,7 +92,7 @@ export async function seedApprovalStone(ctx, source) {
        "IT_PCS","IT_PCS_WT","IT_GWT","KR_WT","IT_CON_PRC","IT_CON_WT","IT_RATE_TYPE","IT_RATE","IT_AMT",
        "IT_LBR_RATE","IT_LBR_AMT","IT_NET_AMT","KR_LESS_PRC","KR_CON_PRC","KR_CON_WT","KR_RATE","KR_AMT",
        "KR_LBR_RATE","KR_LBR_AMT","KR_NET_AMT")
-     VALUES ($1,'01','01',$2,'TOP','09001',1,1,$3::date,$4,$5,'DIAE1','D','RD','Round','1.2MM','CERT-1','GIA',
+     VALUES ($1,'01','01',$2,'TOP','09001',1,7,$3::date,$4,$5,'DIAE1','D','RD','Round','1.2MM','CERT-1','GIA',
              2,.02,.25,.24,5,.013,'W',5000,1250,100,25,1275,1,4,.01,4500,1080,90,21.6,1101.6)`,
     TENANT,
     YEAR,

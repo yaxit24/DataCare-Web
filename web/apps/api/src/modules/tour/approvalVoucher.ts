@@ -333,7 +333,7 @@ function viewOf(
     lines: state.details.map((row) => {
       const line = lineFromRow({
         ...row,
-        stones: state.stones.filter((stone) => num(stone.SR_NO) === num(row.SR_NO)),
+        stones: state.stones.filter((stone) => num(stone.SR_NO) === num(row.OLD_SRNO ?? row.SR_NO)),
       });
       return kind === 'return' ? { ...line, origSrNo: num(row.ISU_SRNO) } : line;
     }),
@@ -341,6 +341,21 @@ function viewOf(
 }
 
 type ApprovalView = ReturnType<typeof viewOf>;
+
+function sparseStonesWithFallback(
+  raw: TourIssueLine['stones'],
+  fallback: NonNullable<TourIssueLine['stones']>,
+): TourIssueLine['stones'] {
+  if (!Array.isArray(raw)) return raw;
+  return raw.map((value) => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
+    const isrNo = num(value.isrNo);
+    const persisted = isrNo
+      ? fallback.find((candidate) => num(candidate.isrNo) === isrNo)
+      : undefined;
+    return persisted ? { ...persisted, ...value, isrNo: persisted.isrNo } : value;
+  });
+}
 
 function sparseLinesWithFallback(raw: unknown, fallback: TourIssueLine[]): unknown {
   if (!Array.isArray(raw)) return raw;
@@ -356,7 +371,10 @@ function sparseLinesWithFallback(raw: unknown, fallback: TourIssueLine[]): unkno
     return {
       ...persisted,
       ...line,
-      stones: line.stones === undefined ? persisted.stones : line.stones,
+      stones:
+        line.stones === undefined
+          ? persisted.stones
+          : sparseStonesWithFallback(line.stones, persisted.stones ?? []),
     };
   });
 }

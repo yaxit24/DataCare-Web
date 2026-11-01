@@ -154,8 +154,8 @@ export default function ApprovalVoucherForm({
         `/tour/${encodeURIComponent(origVchNo.trim())}/lines?coBook=${encodeURIComponent(origBook)}`,
       );
       const open = source.filter((line) => line.open !== false);
-      const loaded = open.map((line) =>
-        approvalLineFromApi({ ...line, origSrNo: line.srNo, oldSrNo: line.srNo }),
+      const loaded = open.map((line, index) =>
+        approvalLineFromApi({ ...line, origSrNo: line.srNo, oldSrNo: index + 1 }),
       );
       setLines(loaded.length ? loaded : [blankApprovalLine()]);
       sub.load(loaded.map(() => [{}]));
