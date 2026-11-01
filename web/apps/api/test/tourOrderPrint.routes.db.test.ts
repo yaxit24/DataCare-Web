@@ -180,7 +180,8 @@ const TOUR_URL = '/tour-orders/confirmation';
     // TourOrdVch's actual heading is {@RptTitle} = BOOK_DATA.BOOK_NAME.
     expect(response.body).toContain('<title>TourOrdVch</title>');
     expect(response.body).toContain('Configured Tour');
-    expect(response.body).toContain('2024-07-10');
+    expect(response.body).toContain('10/07/2024');
+    expect(response.body).not.toContain('>2024-07-10<');
     expect(response.body).toContain('TOUR-D17');
     expect(response.body).toMatch(/data-field="\{SL_ORD_DATA.VCH_NO\}"[^>]*>00001</);
     expect(response.body).toContain('Gold ring Dsgn : TOUR-D17');

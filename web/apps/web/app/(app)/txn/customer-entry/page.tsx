@@ -1,4 +1,5 @@
 'use client';
+import { toIsoDate } from '@datacare/core';
 import { useState } from 'react';
 import { post, put, get, del, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
@@ -79,13 +80,13 @@ export default function CustomerEntryPage() {
       );
       setLoadedVch(String(d.voucherNo ?? loadVchNo.trim()));
       setEmployeeName(String(d.employeeName ?? ''));
-      setVchDate(String(d.vchDate ?? todayLocal()).slice(0, 10));
+      setVchDate(toIsoDate(d.vchDate ?? todayLocal()));
       const loaded: Row[] = (d.rows ?? []).map((r: any) => ({
         acCode: String(r.acCode ?? ''),
         acName: String(r.acName ?? ''),
         mobileNo: String(r.mobileNo ?? ''),
         itemRemark: String(r.itemRemark ?? ''),
-        remDate: String(r.remDate ?? '').slice(0, 10) || todayLocal(),
+        remDate: toIsoDate(r.remDate) || todayLocal(),
         itemCode: String(r.itemCode ?? ''),
         itemName: String(r.itemName ?? ''),
         itemLike: String(r.itemLike ?? ''),

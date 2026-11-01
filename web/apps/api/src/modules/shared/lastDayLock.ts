@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from './txBudget.js';
 
 /**
@@ -57,10 +58,8 @@ export async function applyLastDayLockTx(
   if (flag && flag !== 'Y' && flag !== 'N') {
     throw new LastDayLockConfigurationError(`CO_SET.LAST_DAY_LOCK is invalid: ${flag}`);
   }
-  const current = String(rows[0]?.lock_date ?? '')
-    .trim()
-    .slice(0, 10);
-  const yesterday = String(rows[0]?.yesterday ?? '').slice(0, 10);
+  const current = toIsoDate(rows[0]?.lock_date);
+  const yesterday = toIsoDate(rows[0]?.yesterday);
   if (flag !== 'Y') return { applied: false, lockDate: current || null };
   // The lock only moves forward; an existing later lock date is left untouched.
   if (current && current >= yesterday) return { applied: false, lockDate: current };

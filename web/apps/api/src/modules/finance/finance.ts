@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { DEFAULT_CASH_LIMIT, resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
 import { buildCashRojmel, buildJournalRojmel } from '../shared/rojmel.js';
@@ -1303,7 +1304,7 @@ export async function getReceipt(
       voucherNo: text(h.VCH_NO),
       hiddenVoucherNo: text(h.HD_VCH_NO),
       mainUser: text(h.MAIN_USER),
-      vchDate: text(h.VCH_DATE).slice(0, 10),
+      vchDate: toIsoDate(h.VCH_DATE),
       partyAc: text(h.AC_CODE),
       partyName: text(h.AC_NAME),
       amount: numv(h.REC_AMT),
@@ -1449,7 +1450,7 @@ export async function getPayment(
       voucherNo: text(h.VCH_NO),
       hiddenVoucherNo: text(h.HD_VCH_NO),
       mainUser: text(h.MAIN_USER),
-      vchDate: text(h.VCH_DATE).slice(0, 10),
+      vchDate: toIsoDate(h.VCH_DATE),
       partyAc: text(h.AC_CODE),
       partyName: text(h.AC_NAME),
       amount: numv(h.NET_AMT) || numv(h.TOT_AMT),

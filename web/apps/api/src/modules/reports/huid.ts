@@ -1,5 +1,5 @@
 import { withTxBudget } from '../shared/txBudget.js';
-import { PRECISION, round } from '@datacare/core';
+import { PRECISION, round, toIsoDate } from '@datacare/core';
 
 /**
  * HUID report — the hallmarking compliance register (desktop `RP_HUID`).
@@ -163,7 +163,7 @@ export async function huidReport(
     const mapped: HuidRow[] = rows.map((r) => ({
       vchType: txt(r.VCH_TYPE),
       vchNo: txt(r.VCH_NO),
-      vchDate: txt(r.VCH_DATE)?.slice(0, 10) ?? null,
+      vchDate: toIsoDate(r.VCH_DATE) || null,
       tagNo: String(r.TAG_NO ?? ''),
       itCode: txt(r.IT_CODE),
       itName: txt(r.IT_NAME),

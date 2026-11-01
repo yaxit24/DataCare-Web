@@ -1,5 +1,7 @@
 'use client';
 
+import { formatDesktopDate } from '@datacare/core';
+
 import { useEffect, useRef, useState } from 'react';
 import { ApiError, get } from '../../../../lib/api';
 import { BookSelect } from '../../../../components/BookSelect';
@@ -156,7 +158,7 @@ export default function EInvoicePage() {
               {rows.rows.map((row, index) => (
                 <tr key={`${row.VCH_NO}/${index}`}>
                   <td>{row.VCH_NO}</td>
-                  <td>{row.VCH_DATE}</td>
+                  <td>{formatDesktopDate(row.VCH_DATE)}</td>
                   <td>{row.AC_NAME}</td>
                   <td>{row.BILL_NO}</td>
                   <td>{money(row.TOT_AMT)}</td>

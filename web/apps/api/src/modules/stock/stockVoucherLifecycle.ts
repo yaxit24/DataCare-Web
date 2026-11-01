@@ -1,4 +1,4 @@
-import { round } from '@datacare/core';
+import { round, toIsoDate } from '@datacare/core';
 import { tagKarigarLineColumns } from './tagKarigarLine.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
 import { withTxBudget } from '../shared/txBudget.js';
@@ -1125,7 +1125,7 @@ export async function getTagOpening(
     voucherNo,
     hiddenVoucherNo: text(header.HD_VCH_NO),
     mainUser: text(header.MAIN_USER),
-    vchDate: text(header.VCH_DATE).slice(0, 10),
+    vchDate: toIsoDate(header.VCH_DATE),
     stockItCode: text(header.STK_IT_CODE),
     lines: rows.map((row) => ({
       srNo: n(row.SR_NO),
@@ -1226,7 +1226,7 @@ export async function getItemOpening(
     voucherNo,
     hiddenVoucherNo: text(header.HD_VCH_NO),
     mainUser: text(header.MAIN_USER),
-    vchDate: text(header.VCH_DATE).slice(0, 10),
+    vchDate: toIsoDate(header.VCH_DATE),
     lines: rows.map((row) => ({
       srNo: n(row.SR_NO),
       itCode: text(row.IT_CODE),
@@ -1259,7 +1259,7 @@ export async function getItemLot(
     voucherNo,
     hiddenVoucherNo: text(header.HD_VCH_NO),
     mainUser: text(header.MAIN_USER),
-    vchDate: text(header.VCH_DATE).slice(0, 10),
+    vchDate: toIsoDate(header.VCH_DATE),
     acCode: text(header.AC_CODE) || text(rows[0]?.AC_CODE),
     lines: rows.map((row) => ({
       srNo: n(row.SR_NO),
@@ -1389,11 +1389,7 @@ export async function deleteTagOpening(
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const policy = await resolveBookTx(tx, scope, 'tag-opening');
     const persisted = await headerTx(tx, scope, voucherNo, 'tag-opening');
-    const persistedBusinessDate = businessDate(
-      persisted.VCH_DATE instanceof Date
-        ? persisted.VCH_DATE
-        : text(persisted.VCH_DATE).slice(0, 10),
-    );
+    const persistedBusinessDate = businessDate(toIsoDate(persisted.VCH_DATE));
     await assertDatesOpenTx(tx, scope, persistedBusinessDate, persisted.VCH_DATE);
     // TR_TAG_OPBL.cs:11376-11385: a voucher whose tag is already sold cannot be deleted.
     await assertTagOpeningUnconsumedTx(
@@ -1454,11 +1450,7 @@ async function deleteLoose(
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await resolveBookTx(tx, scope, kind);
     const persisted = await headerTx(tx, scope, voucherNo, kind);
-    const persistedBusinessDate = businessDate(
-      persisted.VCH_DATE instanceof Date
-        ? persisted.VCH_DATE
-        : text(persisted.VCH_DATE).slice(0, 10),
-    );
+    const persistedBusinessDate = businessDate(toIsoDate(persisted.VCH_DATE));
     await assertDatesOpenTx(tx, scope, persistedBusinessDate, persisted.VCH_DATE);
     const affected = await assertLooseReplacementSafeTx(tx, scope, voucherNo, []);
     // Desktop emits no DELETE_DATA for either form: TR_ITM_OPBL.cs:1492-1521 and

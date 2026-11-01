@@ -14,6 +14,7 @@ import {
   tagSplitBalance,
   tagSplitConserves,
   tagSplitTotals,
+  toIsoDate,
   type TagSplitSettings,
 } from '@datacare/core';
 import {
@@ -147,22 +148,19 @@ async function resolveBookTx(tx: any, scope: CompleteScope): Promise<TagSplitBoo
 }
 
 function businessDate(value: unknown): { date: Date; iso: string } {
-  const raw =
-    value instanceof Date
-      ? value.toISOString().slice(0, 10)
-      : value == null || String(value).trim() === ''
-        ? new Date().toISOString().slice(0, 10)
-        : String(value).trim().slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw))
+  let raw: string;
+  try {
+    raw = value == null || String(value).trim() === '' ? toIsoDate(new Date()) : toIsoDate(value);
+  } catch {
     throw new TagSplitValidationError('voucher date is missing or invalid');
+  }
   const date = new Date(`${raw}T00:00:00.000Z`);
-  if (Number.isNaN(date.getTime()))
+  if (Number.isNaN(date.getTime()) || toIsoDate(date) !== raw)
     throw new TagSplitValidationError('voucher date is missing or invalid');
   return { date, iso: raw };
 }
 
-const isoOf = (value: unknown): string =>
-  value instanceof Date ? value.toISOString().slice(0, 10) : dbText(value).slice(0, 10);
+const isoOf = (value: unknown): string => toIsoDate(value);
 
 async function assertOpenTx(tx: any, scope: CompleteScope, date: Date): Promise<void> {
   await assertPeriodOpen(tx, scope.tenantId, {

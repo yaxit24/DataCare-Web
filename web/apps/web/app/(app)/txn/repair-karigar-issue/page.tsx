@@ -1,5 +1,7 @@
 'use client';
 
+import { formatDesktopDate } from '@datacare/core';
+
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ApiError, del, get, post, put } from '../../../../lib/api';
@@ -441,7 +443,7 @@ export default function RepairKarigarIssuePage() {
                       style={{ width: 220 }}
                     />
                   </td>
-                  <td>{line.vchDate}</td>
+                  <td>{formatDesktopDate(line.vchDate)}</td>
                   <td>{line.customerName || line.customerCode}</td>
                   <td>
                     {line.itemName || line.itCode}

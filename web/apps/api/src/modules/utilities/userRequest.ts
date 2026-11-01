@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import type { UtilityScope } from './hddRegistry.js';
 
@@ -59,7 +60,7 @@ function rowOf(row: any): UserRequestRow {
     coYear: String(row.coYear),
     coBook: String(row.coBook),
     vchNo: String(row.vchNo),
-    vchDate: row.vchDate ? String(row.vchDate).slice(0, 10) : null,
+    vchDate: row.vchDate ? toIsoDate(row.vchDate) : null,
     acCode: String(row.acCode ?? ''),
     acName: String(row.acName ?? ''),
     totalAmount: Number(row.totalAmount ?? 0),

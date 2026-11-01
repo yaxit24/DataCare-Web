@@ -1,4 +1,5 @@
 'use client';
+import { formatDesktopDate } from '@datacare/core';
 import { useState } from 'react';
 import { get, post, ApiError } from '../../../../lib/api';
 
@@ -213,7 +214,7 @@ export default function VoucherRenumberPage() {
                     <tr key={r.vchNo} style={changed ? { fontWeight: 600 } : undefined}>
                       <td className="num">{r.vchNo}</td>
                       <td className="num">{changed ? `→ ${r.newNo}` : r.newNo}</td>
-                      <td>{r.vchDate || '—'}</td>
+                      <td>{r.vchDate ? formatDesktopDate(r.vchDate) : '—'}</td>
                       <td className="num">{r.legs}</td>
                     </tr>
                   );

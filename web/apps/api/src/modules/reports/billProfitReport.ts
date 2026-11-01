@@ -1,5 +1,5 @@
 import { withTxBudget } from '../shared/txBudget.js';
-import { PRECISION, round } from '@datacare/core';
+import { PRECISION, round, toIsoDate } from '@datacare/core';
 import { lineProfit, todaySaleRateTx, type ProfitBasis } from '../sales/billProfit.js';
 
 /**
@@ -167,7 +167,7 @@ export async function billProfitReport(
       return {
         vchType: txt(r.VCH_TYPE),
         vchNo: txt(r.VCH_NO),
-        vchDate: txt(r.VCH_DATE)?.slice(0, 10) ?? null,
+        vchDate: toIsoDate(r.VCH_DATE) || null,
         acName: txt(r.AC_NAME),
         tagNo: txt(r.TAG_NO),
         itCode: txt(r.IT_CODE),

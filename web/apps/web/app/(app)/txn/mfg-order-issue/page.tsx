@@ -1,4 +1,5 @@
 'use client';
+import { toIsoDate } from '@datacare/core';
 import { useState } from 'react';
 import { get, post, put, del, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
@@ -332,7 +333,7 @@ export default function MfgOrderIssuePage() {
       const voucherNo = String(d.voucherNo ?? requested);
       setKarigarAc(String(d.karigarAc ?? ''));
       setKarigarName(String(d.lines?.[0]?.krName ?? ''));
-      setVchDate(String(d.vchDate ?? '').slice(0, 10));
+      setVchDate(toIsoDate(d.vchDate));
       setRows(
         src.length
           ? src.map((line) => {

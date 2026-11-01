@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { recalcDailyRateGrid } from '@datacare/core';
+import { formatDesktopDate, recalcDailyRateGrid } from '@datacare/core';
 import { get, post, del, ApiError } from '../../../../lib/api';
 import { RateTicker } from '../../../../components/RateTicker';
 import { LookupPicker } from '../../../../components/LookupPicker';
@@ -148,7 +148,10 @@ export default function DailyRatePage() {
           prRate: r.prRate,
         })),
       });
-      setMsg({ kind: 'ok', text: `Saved ${saved.saved} group rate(s) for ${saved.date}` });
+      setMsg({
+        kind: 'ok',
+        text: `Saved ${saved.saved} group rate(s) for ${formatDesktopDate(saved.date)}`,
+      });
       await load(date);
     } catch (err) {
       setMsg({ kind: 'err', text: errText(err, 'failed') });
@@ -270,7 +273,7 @@ export default function DailyRatePage() {
               <tbody>
                 {days.map((d) => (
                   <tr key={d.date}>
-                    <td>{d.date.split('-').reverse().join('/')}</td>
+                    <td>{formatDesktopDate(d.date)}</td>
                     <td>{d.mainUser}</td>
                     <td className="num">{d.goldRate.toFixed(2)}</td>
                     <td className="num">{d.silverRate.toFixed(2)}</td>
@@ -282,7 +285,7 @@ export default function DailyRatePage() {
                           setDate(d.date);
                         }}
                       >
-                        Open {d.date}
+                        Open {formatDesktopDate(d.date)}
                       </button>
                     </td>
                   </tr>

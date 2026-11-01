@@ -802,7 +802,7 @@ export async function exerciseTagCancelTransfer(page, { checkpoint, owner, tenan
   await value(page, 'Fine line 3', '1.600');
   await value(page, 'OthAmt line 1', '1160.00');
   await page.getByTestId('tag-cancel-list-toggle').click();
-  await text(page, 'tag-cancel-voucher-list', /00001\s*2024-06-10\s*DAMAGED\s*browser\s*3/);
+  await text(page, 'tag-cancel-voucher-list', /00001\s*10\/06\/2024\s*DAMAGED\s*browser\s*3/);
   await page.getByTestId('tag-cancel-list-toggle').click();
 
   // ---- delete: DELETE_DATA per line, then the whole write set, and every tag back -------------------

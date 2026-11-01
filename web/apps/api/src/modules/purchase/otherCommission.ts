@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { assertBalanced, assertPeriodOpen, insertRowTx } from '../posting/posting.js';
 import { resolveBookAccountTx, type BookPolicy } from '../shared/bookPolicy.js';
@@ -889,14 +890,14 @@ export async function getOtherCommission(
     const h = headers[0]!;
     return {
       voucherNo,
-      vchDate: text(h.VCH_DAY).slice(0, 10),
+      vchDate: toIsoDate(h.VCH_DAY),
       voucherTime: text(h.VCH_CLOCK),
       hiddenVoucherNo: text(h.HD_VCH_NO),
       mainUser: text(h.MAIN_USER),
       partyCode: text(h.AC_CODE),
       partyName: text(h.MASTER_AC_NAME),
       billNo: text(h.BILL_NO),
-      billDate: text(h.BILL_DAY).slice(0, 10),
+      billDate: toIsoDate(h.BILL_DAY),
       chequeAmount: number(h.CHQ_AMT),
       chequeAccount: text(h.BANK_AC),
       chequeNo: text(h.CHQ_NO),

@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import {
@@ -985,9 +986,7 @@ export async function saveCustomerRepairReceipt(
 }
 
 function dateOnly(value: unknown): string {
-  if (!value) return '';
-  if (value instanceof Date) return value.toISOString().slice(0, 10);
-  return String(value).slice(0, 10);
+  return toIsoDate(value);
 }
 
 function asView(

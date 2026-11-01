@@ -1,4 +1,4 @@
-import { round, stockInoutItemAmount } from '@datacare/core';
+import { round, stockInoutItemAmount, toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { assertPeriodOpen, insertRowTx, postVoucherTx } from '../posting/posting.js';
 import { fineFor, round3 } from '../shared/finePolicy.js';
@@ -1041,7 +1041,7 @@ async function getStockInout(
     const header = headers[0]!;
     return {
       voucherNo,
-      vchDate: text(header.VCH_DATE).slice(0, 10),
+      vchDate: toIsoDate(header.VCH_DATE),
       hiddenVoucherNo: text(header.HD_VCH_NO),
       mainUser: text(header.MAIN_USER),
       employeeCode: text(header.EMP_CODE),
@@ -1134,11 +1134,7 @@ async function deleteStockInout(
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const book = await resolveBookTx(tx, scope, policy);
     const persisted = await headerTx(tx, scope, voucherNo, policy);
-    const persistedBusinessDate = businessDate(
-      persisted.VCH_DATE instanceof Date
-        ? persisted.VCH_DATE
-        : text(persisted.VCH_DATE).slice(0, 10),
-    );
+    const persistedBusinessDate = businessDate(toIsoDate(persisted.VCH_DATE));
     await assertDatesOpenTx(tx, scope, persistedBusinessDate, persisted.VCH_DATE);
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "SR_NO","VCH_DATE","VCH_TIME","AC_CODE","IT_CODE","TAG_NO","IT_TYPE","ITM_NWT","HD_VCH_NO","MAIN_USER"

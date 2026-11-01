@@ -1,4 +1,5 @@
 'use client';
+import { formatDesktopDate } from '@datacare/core';
 import { useCallback, useEffect, useState } from 'react';
 import { get, post, del, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
@@ -129,8 +130,8 @@ export default function ReminderEntryPage() {
             {entries.map((e) => (
               <tr key={e.vchNo}>
                 <td>{e.vchNo}</td>
-                <td>{e.entDate ?? ''}</td>
-                <td>{e.remDate ?? ''}</td>
+                <td>{formatDesktopDate(e.entDate)}</td>
+                <td>{formatDesktopDate(e.remDate)}</td>
                 <td>{e.acName || e.acCode || <span className="muted">—</span>}</td>
                 <td>{e.mobile || <span className="muted">—</span>}</td>
                 <td>{e.remark}</td>

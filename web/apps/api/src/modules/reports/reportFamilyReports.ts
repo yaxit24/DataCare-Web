@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { applyFilters } from './reportFilters.js';
 import type { ReportScope } from './reports.js';
@@ -11,9 +12,11 @@ const num = (v: unknown): number => {
   return Number.isFinite(n) ? n : 0;
 };
 const date = (v: unknown): string | null => {
-  if (v instanceof Date) return v.toISOString().slice(0, 10);
-  const s = text(v);
-  return s ? s.slice(0, 10) : null;
+  try {
+    return toIsoDate(v) || null;
+  } catch {
+    return null;
+  }
 };
 const todayIso = (): string => new Date().toISOString().slice(0, 10);
 

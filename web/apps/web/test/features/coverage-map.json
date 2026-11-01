@@ -136,6 +136,13 @@
         "web/apps/api/src/routes/taxMaster.ts"
       ]
     },
+    "groupMaster": {
+      "covers": [
+        "web/apps/web/app/(app)/masters/groups/page.tsx",
+        "web/apps/api/src/modules/masters/groupMaster.ts",
+        "web/apps/api/src/routes/groupMaster.ts"
+      ]
+    },
     "productMaster": {
       "covers": [
         "web/apps/web/app/(app)/masters/products/page.tsx",

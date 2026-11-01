@@ -280,7 +280,8 @@ export const dailyRate = {
         assert.equal((await save(page)).status(), 201);
         page = await open(ctx);
         await page.getByRole('button', { name: 'F1', exact: true }).click();
-        await page.getByRole('button', { name: `Open ${date}`, exact: true }).click();
+        const shown = date.split('-').reverse().join('/');
+        await page.getByRole('button', { name: `Open ${shown}`, exact: true }).click();
         await page.waitForFunction(() => {
           const el = document.querySelector('input[aria-label="Rate10gm R22"]');
           return el && el.value === '64031';

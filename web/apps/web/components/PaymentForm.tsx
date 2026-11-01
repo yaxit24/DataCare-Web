@@ -1,4 +1,5 @@
 'use client';
+import { toIsoDate } from '@datacare/core';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { post, put, get, del, ApiError } from '../lib/api';
@@ -102,7 +103,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
       setBankAc(String(d.bankAc ?? ''));
       setChqNo(String(d.chqNo ?? ''));
       setKasar(Number(d.kasar ?? 0) ? String(d.kasar) : '');
-      setVchDate(String(d.vchDate ?? todayLocal()).slice(0, 10));
+      setVchDate(toIsoDate(d.vchDate ?? todayLocal()));
       setVoucherLookup(vchNo);
       return true;
     } catch (e) {

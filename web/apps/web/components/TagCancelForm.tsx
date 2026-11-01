@@ -1,5 +1,7 @@
 'use client';
 
+import { formatDesktopDate } from '@datacare/core';
+
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { ApiError, del, get, post, put } from '../lib/api';
 import { useCompanySettings } from '../lib/companySettings';
@@ -783,7 +785,7 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
                     }}
                   >
                     <td>{voucher.vchNo}</td>
-                    <td>{voucher.vchDate}</td>
+                    <td>{formatDesktopDate(voucher.vchDate)}</td>
                     <td>{voucher.partyName}</td>
                     <td>{voucher.vchDesc}</td>
                     <td>{voucher.mainUser}</td>
