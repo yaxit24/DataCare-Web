@@ -6,10 +6,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 21 | 17 | 0 |
+| Lite (first, D32) | 49 | 22 | 18 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
 | Standard (added by Standard) | 36 | 0 | 0 | 0 |
-| **Standard total** | **114** | **22** | **18** | **0** |
+| **Standard total** | **114** | **23** | **19** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
@@ -27,7 +27,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | ExtraTran | Fine Jv Entry | `/txn/fine-jv` | PARTIAL | fine-jv | module green | — |
 | Master | Party | `/masters/party`, `/masters/accounts` | PARTIAL | — | no module | — |
 | Master | Address | `/masters/addresses` | PARTIAL | — | no module | — |
-| Master | Product | `/masters/products` | PARTIAL | — | no module | — |
+| Master | Product | `/masters/products` | PARTIAL | product-master | module green | — |
 | Master | Group | `/masters/groups` | PARTIAL | group-master | module green | — |
 | Master | Item | `/masters/items` | PARTIAL | — | no module | — |
 | Master | AutoItem | `/masters/auto-item` | PARTIAL | — | no module | — |

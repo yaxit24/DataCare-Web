@@ -238,6 +238,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G225 | High | Desktop rights rows named by the menu caption did not reach fifteen Lite screens | `unified/src/csharp/DataCareNext/MDI_FORM.cs:7034-7046`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7610-8951`; `unified/src/csharp/DataCareNext/TR_AC_OPBL.cs:2020-2030` | `web/apps/api/src/modules/rbac/formCatalog.ts`; `web/apps/api/src/modules/rbac/authorization.ts`; `web/apps/api/src/routes/partyOpening.ts` | The desktop reads USER_SET by LC_CODE, USER_NAME and SUB_MENU = the menu button's caption (MsUserRightForm = MsSideBtn, `MDI_FORM.cs:7034-7046`), so a migrated or desktop-written rights row names the caption. The web matches a row against the form's name and aliases, and the captions Address, Product, Group, AutoItem, Tax, Party Opening, Purchase Rtn, Approval Isu, Approval Rtn, Fine Jv Entry, Tag Stock, Sales Report, Purchase Rpt, Cash Bank and Gst Report were not aliases of the forms their screens use: a restricted user with the desktop's rights was refused. Party Opening's Save also ignored FRM_EDIT for an existing opening (`TR_AC_OPBL.cs:2647-2650`). Not closed here: captions whose screens also use another menu's form (Company, Data Refresh, Data Import, Order Report, Cash Received, Bank Received, and Approval Rtn's issue lines), and 14 Basic and 19 Standard menus, which follow their tiers. | N212 |
 | G226 | High | The Tax master was a generic field form that could not edit a code's components, and its generic update rewrote them | `unified/src/csharp/DataCareNext/MS_TAX.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7670-7679`; `web/apps/api/form-specs/DataCareNext.MS_TAX.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/master.service.ts`; `web/apps/api/src/modules/masters/configs.ts`; `web/apps/web/components/LookupPicker.tsx` | MS_TAX edits a tax code as a header row (SR_NO 0, TAX_GROUP 'N') with a grid of component rows (SR_NO 1, 2, …: SGST, CGST, IGST), which the sale and purchase postings read by SR_NO; Save replaces every row of the code (`MS_TAX.cs:1824-1933`). The web rendered the generic one-row form keyed by CO_CODE + TAX_CODE: it listed the component rows as duplicates, could not add or change a component, and its update wrote the header's name and rate into every component row of the code, so an edited GST code taxed SGST, CGST and IGST at the full rate. It had no desktop keys, texts, account helps or Print. The browser check also found the shared account picker replacing a row chosen from its help with the typed text's exact code on leave. Not closed here: web provisioning keeps its tax accounts in group 30, outside the desktop help's group 12 (N58), and the Sales screen resolves the code by rate rather than from the desktop's tax-code help (`TR_SALE.cs:18668`), refusing a rate another code's component carries. | N213 |
 | G227 | High | The Item Group master was a generic field form without the desktop's item update, helps, texts or Print | `unified/src/csharp/DataCareNext/MS_GROUP.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7630-7636`; `web/apps/api/form-specs/DataCareNext.MS_GROUP.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts`; `web/apps/api/src/modules/masters/master.service.ts` | MS_GROUP keeps an item group's metal type, trade type, touches, melting and wastage, the sales and purchase accounts the postings use per group, the HSN code and the rate tax %, and its Save sets the trade type, item type and HSN code on every item of the group (`MS_GROUP.cs:1825-1919`, `:1887`). The web rendered the generic form: its Item Type offered only Gold and Silver of the desktop's seven, the trade type box and the Rate Display check box were missing, the account boxes searched every account instead of groups 25 and 30, the save did not update the group's items (so a changed HSN code never reached the invoice), the delete question, the in-use refusal order and Print were missing, and none of the desktop keys or texts applied. Not closed here: web provisioning keeps CAPITAL in group 25 and its GST and TCS accounts in group 30 while SALES and PURCHASE sit in 20 and 21, so the desktop helps list the wrong accounts on a web-provisioned company (N58). | N214 |
+| G228 | Medium | The Product master was a generic field form without the desktop's guards, keys or texts | `unified/src/csharp/DataCareNext/MS_PRODUCT.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7620-7628`; `web/apps/api/form-specs/DataCareNext.MS_PRODUCT.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts` | MS_PRODUCT in Product mode keeps a two-character code and a name; its Save replaces the row with the signed-in user, and its Delete asks first and then refuses a product an item uses and the ten default products (`MS_PRODUCT.cs:2570-2804`). The web rendered the generic form: it had no item-use or default-product guard, no delete question, none of the desktop keys (Up and Down to the list, Enter on the name to Save) or texts, and it kept MAIN_USER from an earlier save where the desktop writes the signed-in user. | N215 |
 
 ## 4. Decisions D23–D28
 
@@ -2705,6 +2706,52 @@ with Enter on Save and the group's item took it; Delete of SLV, which that item 
 Print listed both groups; a temporary group was deleted after the desktop question; Esc left the screen.
 Desktop-runtime comparison and parent acceptance remain open.
 
+### N215 — The Product master is the desktop MS_PRODUCT screen (G228, Lite L2)
+
+Master → Product opens MS_PRODUCT after setting MsUserRightForm to the menu caption (`MDI_FORM.cs:7111`,
+`:7620-7628`); MS_PRODUCT_Load keeps it as CurMast, shows it as the title and, for 'Product', hides the scheme boxes
+(`MS_PRODUCT.cs:1918-2150`). The screen follows the form spec in that mode: the SEARCH RECORD box and the Code / Name
+list on the left; Code (two characters) and Name on the right; Print, Save, Cancel, Delete and Exit along the bottom. The
+list is every PRODUCT_MAST row of the company by code (`:2142`); a new entry has blank boxes and the cursor in the code
+(CLEAR_DATA `:2217-2264`); Enter on the list or a double click opens a product with the cursor in the name and the code
+read-only (`:2266-2340`, `:2806-2949`).
+
+Keys as the desktop: typed letters are upper-cased and the apostrophe refused (`:2361-2377`); Enter on the code moves on
+and F1 goes to the search box (`:2379-2393`); Enter on a blank name says "Please Insert Product Name ...", else goes to
+Save, the next tab stop (`:2434-2465`); Up and Down from a box move to the list and Esc leaves (MS_PRODUCT_KeyDown
+`:2529-2560`). Leaving the code refuses a code another product has and leaving the name a name another code has, with
+the desktop texts (`:2395-2504`); a refusal also stops Save and Delete. Save (`:2570-2665`) needs the edit right only for
+an opened product, refuses a blank code ("Enter Product Code."), a blank name ("Enter Product Name.") and a one-character
+code ("Please Insert Product Code 2 Digit..."), and replaces the code's row with CO_CODE, PR_CODE, PR_NAME, MAIN_USER =
+the signed-in user (CLEAR_DATA sets MainUser at `:2230` and no product read sets it back) and DATA_TRFR 'N'. Delete
+(`:2706-2804`) needs the delete right, refuses a blank code ("Please Select Product For Delete."), asks "Are You Sure To
+Delete This Record now?" and only then refuses a product an item uses ("You Cant Delete Record This Product Use in Itme
+Master....") and the default products DM, EM, FN, HM, OG, OR, OS, OT, RD and SN ("You Cant Delete Record, This Product
+Is Default Product...."). Print does nothing: BtnPrint_Click is empty (`:1914-1917`). A saved product is offered by the
+Item master's product help (`web/apps/api/src/modules/masters/lookup.ts`, entity products).
+
+Deliberate differences: the delete and insert of a save run in one transaction (the desktop's failed insert leaves the
+product deleted); a name over the box's 40 characters is refused; an opened product carries a version token (N51,
+D17), so a save or delete after another operator's change is refused with 409. The generic `/masters/products` routes
+stay for the CSV import; the screen no longer uses them. MS_PRODUCT's other modes (Counter on TABLE_MAST, Scheme Mast on
+AD_MAST) belong to other menus and are not part of this slice.
+
+Evidence: `productMaster.db.test.ts` (7 cases through the real routes on forced RLS: the write set upper-cased with the
+user and N; the list with the rights and one product with its item count; every refusal in the desktop order with
+nothing written; an edit writing the signed-in user, stale, replayed and missing versions and a product deleted
+meanwhile; a new entry with a product's code and name replacing its row; a view-only `Product` rights row; delete with
+the blank, item-use and default refusals and another tenant untouched) and `routePolicy.test.ts` pass. The zero-mock
+`product-master` module passes 17 of 17 applicable cases (T05 not applicable: no child rows), none blocked: T10 checks
+that the question comes before the item-use and default refusals and that No keeps the product, T14 injects a fault on
+the insert and finds every row as before, T15 reads the product in 2024-2025, T16 checks that Print sends nothing, T18
+finds the product in the Item master's help, blocked by an item and deleted once the item is gone. Chrome DevTools on
+the demo stack: BR BRACELET keyed in (br and brace'let upper-cased with the apostrophe dropped, Enter on the name going
+to Save, Enter there) stored `BR|BRACELET|admin|N`; Down from the code box moved to the list and Enter opened CH with
+the cursor in the name; an edited name saved with Enter on Save as `CH|CHAIN 22K|admin|N`; Delete of RG (an item uses it)
+and OG (a default product) asked the question and then refused with the desktop texts; Print did nothing; BR was deleted
+after the question; a one-character code was refused with "Please Insert Product Code 2 Digit..."; Esc left the screen.
+Desktop-runtime comparison and parent acceptance remain open.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2846,6 +2893,7 @@ Desktop-runtime comparison and parent acceptance remain open.
 | N212 | — | implemented-unverified, evidence in this change (G225: the Lite menu captions reach their screens' forms as USER_SET aliases; Party Opening's Save checks the edit right for an existing opening) |
 | N213 | — | implemented-unverified, evidence in this change (G226: the Tax master is the MS_TAX header and component grid with the desktop keys, texts, helps and rights; generic TAX_MAST writes refused; the account picker keeps a chosen row) |
 | N214 | — | implemented-unverified, evidence in this change (G227: the Item Group master is MS_GROUP with the desktop keys, texts, helps, rights and the item update; the row is updated in place in one transaction) |
+| N215 | — | implemented-unverified, evidence in this change (G228: the Product master is MS_PRODUCT's Product mode with the desktop keys, texts, rights and the item-use and default-product guards after the question) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 
