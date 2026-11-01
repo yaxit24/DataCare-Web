@@ -50,9 +50,11 @@ describe('N56 browser date conformance (D19)', () => {
     const dateSlice =
       /\b(?:String|text|t|txt|str|dbText|inputValue)\([^\n]*(?:[A-Z_]*(?:DATE|DAY)[A-Z_]*|\b[vtforc]d\b|\bed\b|[_\.](?:date|day)\b|[a-z](?:Date|Day)\b|\b(?:date|day|clr|yesterday)\b)[^\n]*\)\.slice\(0,\s*10\)/;
     const offenders = files.flatMap((file) =>
-      file.text.split('\n').flatMap((line, index) =>
-        dateSlice.test(line) ? [`${file.path}:${index + 1} ${line.trim()}`] : [],
-      ),
+      file.text
+        .split('\n')
+        .flatMap((line, index) =>
+          dateSlice.test(line) ? [`${file.path}:${index + 1} ${line.trim()}`] : [],
+        ),
     );
     expect(offenders).toEqual([]);
   });
