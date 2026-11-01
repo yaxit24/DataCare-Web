@@ -111,10 +111,11 @@ describe('route policy registry', () => {
     // N215 adds the Product master's GET (list, one), POST, PUT and DELETE: 690 + 5 = 695.
     // N217 adds the Address master's GET (list, print, names, mobile, one), POST, PUT and DELETE: 695 + 8 = 703.
     // N218 adds the Item master's GET (list, products, groups, one), POST, PUT, DELETE and the tag-value POST: 703 + 8 = 711.
-    // N220 replaces Stock Adjust's POST and DELETE /stock/adjust with the TR_TAG_CAN family (list, source, lots, one,
-    // POST, PUT, DELETE, print): 711 - 2 + 8 = 717.
-    expect(routes).toHaveLength(717);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(717);
+    // N219 adds the Auto Item grid and group help GETs (the POST was there): 711 + 2 = 713.
+    // N222 replaces Stock Adjust's POST and DELETE /stock/adjust with the TR_TAG_CAN family (list, source, lots, one,
+    // POST, PUT, DELETE, print): 713 - 2 + 8 = 719.
+    expect(routes).toHaveLength(719);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(719);
 
     const policies = routes.map((route) => ({
       ...route,
