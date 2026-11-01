@@ -275,6 +275,8 @@ const aliases: Record<string, readonly string[]> = {
   'Masters/Customers': ['Party', 'Party Master', 'Customer'],
   'Masters/Party (rich)': ['Party', 'Party Master'],
   'Masters/Items': ['Item', 'Item Master'],
+  // MDI_FORM.cs:7660 opens MS_EMP from the 'Employee' button, whose name is the USER_SET SUB_MENU (:7034).
+  'Masters/Employees': ['Employee', 'Employee Master'],
   // N212 (G225): the desktop checks USER_SET by the menu button's caption (MsUserRightForm = MsSideBtn, MDI_FORM.cs:7034,
   // :7111, :7264), so each Lite menu's caption must reach the web forms that menu's screen uses. The case labels of the
   // MDI_FORM dispatch: Address :7610, Product :7620, AutoItem :7640, Tax :7670, Party Opening :7680, Purchase Rtn

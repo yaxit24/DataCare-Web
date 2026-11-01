@@ -175,6 +175,12 @@ export const DESKTOP_MESSAGES = {
   EMPLOYEE_NAME_REQUIRED: 'Please Insert Employee Name ...',
   /** MS_EMP.cs — delete pressed with no employee selected. */
   EMPLOYEE_SELECT_FOR_DELETE: 'Please Select Employee For Delete.',
+  /** MS_EMP.cs:1489 — Save with neither a code nor a name. */
+  EMPLOYEE_DETAIL_REQUIRED: 'Enter Employee Detail',
+  /** MS_EMP.cs:1573 — the default employee '001' cannot be deleted (the desktop's spelling). */
+  EMPLOYEE_DEFAULT_UNDELETABLE: 'You Cant Delete Record, This Empoyee Is Default Empoyee....',
+  /** MS_EMP.cs:1482, :1562 — the user's USER_SET row lacks the edit or delete right. */
+  EMPLOYEE_NO_RIGHTS: 'You Have No Rights.....',
   /** MS_TAX.cs — blank tax name. */
   TAX_NAME_REQUIRED: 'Please Insert Tax Name ...',
   /** MS_TAX.cs — delete pressed with no tax code selected. */
