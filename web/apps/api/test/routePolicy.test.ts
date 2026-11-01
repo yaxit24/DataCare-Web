@@ -112,8 +112,9 @@ describe('route policy registry', () => {
     // N217 adds the Address master's GET (list, print, names, mobile, one), POST, PUT and DELETE: 695 + 8 = 703.
     // N218 adds the Item master's GET (list, products, groups, one), POST, PUT, DELETE and the tag-value POST: 703 + 8 = 711.
     // N219 adds the Auto Item grid and group help GETs (the POST was there): 711 + 2 = 713.
-    expect(routes).toHaveLength(713);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(713);
+    // The Wh Sales print (WhSalesBill, TR_WH_SALE.cs:13654) adds GET /wholesale-sales/:vchNo/print: 714.
+    expect(routes).toHaveLength(714);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(714);
 
     const policies = routes.map((route) => ({
       ...route,
