@@ -143,16 +143,35 @@ async function addressVersionTx(tx: any, scope: AddressScope, code: string): Pro
 export async function listAddresses(
   prisma: any,
   scope: AddressScope,
-): Promise<{ rows: Array<{ code: string; name: string }> }> {
+): Promise<{
+  rows: Array<{
+    code: string;
+    name: string;
+    group: string;
+    address: string;
+    phone: string;
+    mobile: string;
+  }>;
+}> {
   return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
-      `SELECT "AC_CODE","AC_NAME" FROM "ADD_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
-        ORDER BY "AC_CODE","row_id"`,
+      `SELECT "AC_CODE","AC_NAME","AC_GR","AC_ADD1","AC_PHONE","AC_MOBILE" FROM "ADD_MAST"
+        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 ORDER BY "AC_CODE","row_id"`,
       scope.tenantId,
       scope.coCode,
       scope.lcCode,
     );
-    return { rows: rows.map((r) => ({ code: text(r.AC_CODE), name: text(r.AC_NAME) })) };
+    // The list shows Code / Name; the F1 help (tAcName_KeyDown :3740-3775) shows name, code, group, address, phone, mobile.
+    return {
+      rows: rows.map((r) => ({
+        code: text(r.AC_CODE),
+        name: text(r.AC_NAME),
+        group: text(r.AC_GR),
+        address: text(r.AC_ADD1),
+        phone: text(r.AC_PHONE),
+        mobile: text(r.AC_MOBILE),
+      })),
+    };
   });
 }
 

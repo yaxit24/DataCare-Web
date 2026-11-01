@@ -223,7 +223,16 @@ type Cookie = string;
         },
       ]);
       const list = await request(adminCookie, 'GET', '/masters/address-master');
-      expect(list.json().rows).toEqual([{ code: '010001', name: 'RAMESH SHAH' }]);
+      expect(list.json().rows).toEqual([
+        {
+          code: '010001',
+          name: 'RAMESH SHAH',
+          group: 'CUSTOMER',
+          address: '12 RING ROAD',
+          phone: '0261-2345678',
+          mobile: '9876543210',
+        },
+      ]);
       expect(list.json().nextCode).toBe('010002');
       expect(list.json().combos.cities).toContain('SURAT');
     });
