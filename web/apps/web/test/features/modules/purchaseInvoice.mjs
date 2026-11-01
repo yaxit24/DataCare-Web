@@ -6,6 +6,7 @@ import {
   USERS,
   sentinelSnapshot,
 } from '../fixtures/catalogue.mjs';
+import { TENANT } from '../harness.mjs';
 
 /**
  * Feature: Purchase → Purchase Invoice (desktop TR_PURC, CurBookHelp("PURCHASE")).
@@ -54,6 +55,29 @@ const EXPECT_G = { fine: 18.32, metal: 110836, labour: 3000, net: 113836 };
 const EXPECT_S = { fine: 92.5, metal: 7400, labour: 0, net: 7400 };
 /** Line G alone, 3% GST: tax = 113,836 × 3% = 3,415.08; halves 1,707.54; total 117,251.08. */
 const ONE = { net: 113836, tax: 3415.08, cgst: 1707.54, sgst: 1707.54, total: 117251.08 };
+
+// G198/N188 ordinary Purchase vector. The raw item value 56,090.802 is rounded directly to 56,091;
+// making is 2,375, and company TOT_AMT_ROF=0 rounds 60,219.98 to 60,220.
+const LINE_ROUND = {
+  item: ITEMS.gold.code,
+  pcs: '1',
+  gross: '10',
+  net: '10',
+  touch: '91.6',
+  rate: '6123.45',
+  making: '237.5',
+};
+const EXPECT_ROUND = {
+  fine: 9.16,
+  metal: 56091,
+  labour: 2375,
+  net: 58466,
+  tax: 1753.98,
+  cgst: 876.99,
+  sgst: 876.99,
+  roundOff: 0.02,
+  total: 60220,
+};
 
 const field = (page, label) =>
   page
@@ -129,7 +153,7 @@ async function createOne(ctx, page, { supplier = PARTIES.local.code, line = LINE
 const header = (ctx, v) =>
   ctx.rows(
     `SELECT "VCH_NO","AC_CODE","NET_AMT"::float net,"DISC_AMT"::float disc,"TAX_AMT"::float tax,"CGST_TAX"::float cgst,
-            "SGST_TAX"::float sgst,"IGST_TAX"::float igst,"TOT_AMT"::float tot
+            "SGST_TAX"::float sgst,"IGST_TAX"::float igst,"ROF_AMT"::float rof,"TOT_AMT"::float tot
        FROM "PR_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
     v,
   );
@@ -300,6 +324,124 @@ export const purchaseInvoice = {
         await row.filter({ hasText: /1,13,836|113,836/ }).waitFor(); // en-IN groups lakhs: 1,13,836
         await ctx.shot(page, 'preview');
         return { observation: 'preview fine 18.32, line 113,836', expected: EXPECT_G };
+      },
+    ),
+
+    C(
+      'formula.whole-rupees',
+      'T03',
+      'mutation',
+      'N188/G198: TR_PURC.cs:7395-7554,12981-13010,13127-13144,15477-15508; whole item/labour, company header and tax precision',
+      async (ctx) => {
+        const [before] = await ctx.rows(
+          `SELECT "PR_AMT_TYPE" amount_type,"TOT_AMT_ROF" total_rounding,"TAX_ROF" tax_rounding
+             FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        );
+        await ctx.owner.$executeRawUnsafe(
+          `UPDATE "CO_SET" SET "PR_AMT_TYPE"='F',"TOT_AMT_ROF"=0,"TAX_ROF"=2
+            WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+          TENANT,
+        );
+        try {
+          const { page } = await ctx.session();
+          await openPurchase(page);
+          await pickSupplier(page, PARTIES.local.code);
+          await fillLine(page, 0, LINE_ROUND);
+          const row = grid(page).locator('tbody tr').first();
+          await row.filter({ hasText: '9.16' }).waitFor();
+          await row.filter({ hasText: /58,466/ }).waitFor();
+          const summary = page.locator('.toolbar .muted').filter({ hasText: 'Taxable ₹' }).first();
+          await summary.filter({ hasText: /Tax ₹1,753\.98/ }).waitFor();
+          await summary.filter({ hasText: /Total ₹60,220/ }).waitFor();
+          await ctx.shot(page, 'whole-rupee-preview');
+
+          const response = await save(page);
+          assert.equal(response.status(), 201, await response.text());
+          const vchNo = String((await response.json()).vchNo).padStart(5, '0');
+          const [h] = await header(ctx, vchNo);
+          const [line] = await lines(ctx, vchNo);
+          assert.deepEqual(
+            [line.fine, line.amt, line.lbr, line.net],
+            [EXPECT_ROUND.fine, EXPECT_ROUND.metal, EXPECT_ROUND.labour, EXPECT_ROUND.net],
+          );
+          assert.deepEqual(
+            [h.net, h.tax, h.cgst, h.sgst, h.igst, h.rof, h.tot],
+            [
+              EXPECT_ROUND.net,
+              EXPECT_ROUND.tax,
+              EXPECT_ROUND.cgst,
+              EXPECT_ROUND.sgst,
+              0,
+              EXPECT_ROUND.roundOff,
+              EXPECT_ROUND.total,
+            ],
+          );
+
+          const [stockAmounts] = await ctx.rows(
+            `SELECT "ITM_SIGN" sign,"ITM_AMT"::float item,"LBR_AMT"::float labour,
+                    "OTH_AMT"::float other,"NET_AMT"::float net
+               FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+            vchNo,
+          );
+          assert.deepEqual(stockAmounts, {
+            sign: '+',
+            item: EXPECT_ROUND.metal,
+            labour: EXPECT_ROUND.labour,
+            other: 0,
+            net: EXPECT_ROUND.net,
+          });
+          const [taxRows] = await ctx.rows(
+            `SELECT count(*)::int n,coalesce(sum("TAX_AMT"),0)::float tax,
+                    min("NET_AMT")::float min_net,max("NET_AMT")::float max_net
+               FROM "TAX_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+            vchNo,
+          );
+          assert.deepEqual(taxRows, {
+            n: 2,
+            tax: EXPECT_ROUND.tax,
+            min_net: EXPECT_ROUND.net,
+            max_net: EXPECT_ROUND.net,
+          });
+          const g = await ledger(ctx, vchNo);
+          assert(balanced(g), `ledger must balance: ${JSON.stringify(g)}`);
+          assert.equal(supplierCredit(g, PARTIES.local.code), EXPECT_ROUND.total);
+          const rojmel = await ctx.rows(
+            `SELECT btrim("AC_CODE"::text) ac,btrim(coalesce("IT_CODE"::text,'')) item,
+                    "SIGN" sign,"ITM_AMT"::float item_amount,"LBR_AMT"::float labour,
+                    "NET_AMT"::float net,"DR_AMT"::float dr,"CR_AMT"::float cr
+               FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2
+               ORDER BY "LEDR_KEY"`,
+            vchNo,
+          );
+          assert(
+            rojmel.some(
+              (r) =>
+                r.item === ITEMS.gold.code &&
+                r.sign === '+' &&
+                r.item_amount === EXPECT_ROUND.metal &&
+                r.labour === EXPECT_ROUND.labour &&
+                r.net === EXPECT_ROUND.net &&
+                r.dr === EXPECT_ROUND.net,
+            ),
+            JSON.stringify(rojmel),
+          );
+          const reg = await registerRow(page, vchNo);
+          return {
+            observation: `preview and voucher ${vchNo}: item ${line.amt}, labour ${line.lbr}, net ${h.net}, tax ${h.tax}, round ${h.rof}, total ${h.tot}`,
+            expected: EXPECT_ROUND,
+            database: { header: h, line, stock: stockAmounts, tax: taxRows, ledger: g, rojmel },
+            downstream: { register: reg, balanced: true },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `UPDATE "CO_SET" SET "PR_AMT_TYPE"=$2,"TOT_AMT_ROF"=$3,"TAX_ROF"=$4
+              WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+            TENANT,
+            before.amount_type,
+            before.total_rounding,
+            before.tax_rounding,
+          );
+        }
       },
     ),
 

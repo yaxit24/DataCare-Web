@@ -8,6 +8,7 @@ import {
 } from '../src/modules/purchase/purchase.js';
 import { ledgerBalance } from '../src/modules/posting/posting.js';
 import { purchaseExpenseSplit } from '../src/modules/shared/settingsBehavior.js';
+import { billTotals, resolveRoundingPolicy } from '@datacare/core';
 
 const key = { CO_CODE: '01', LC_CODE: '01', CO_YEAR: '2024', CO_BOOK: 'PUR', VCH_NO: '1' };
 
@@ -139,6 +140,72 @@ it.each([
     type,
   );
   expect(c.metal).toBe(expected);
+});
+
+describe('TR_PURC whole-rupee component stages (G198/N188)', () => {
+  const line = {
+    itCode: 'GOLD',
+    pcs: 1,
+    grossWt: 10,
+    netWt: 10,
+    ghtWt: 0,
+    touch: 91.6,
+    rate: 6123.45,
+    labourType: 'per_gram' as const,
+    labourRate: 237.5,
+    rateType: 'G' as const,
+  };
+  const policy = resolveRoundingPolicy({ PR_RATE_ROF: 2, TAX_ROF: 2, TOT_AMT_ROF: 0 });
+
+  it('computes the primary desktop vector without a paise intermediate', () => {
+    expect(computeLine(line, policy, 'F', true)).toEqual({
+      fine: 9.16,
+      metal: 56091,
+      labour: 2375,
+      net: 58466,
+    });
+  });
+
+  it('preserves a 0.40 other charge in the detail net', () => {
+    expect(computeLine({ ...line, otherAmount: 0.4 }, policy, 'F', true)).toEqual({
+      fine: 9.16,
+      metal: 56091,
+      labour: 2375,
+      net: 58466.4,
+    });
+  });
+
+  it('leaves explicit item and labour amount overrides unchanged', () => {
+    expect(
+      computeLine({ ...line, metalAmount: 56090.8, labourAmount: 2375.25 }, policy, 'F', true),
+    ).toEqual({ fine: 9.16, metal: 56090.8, labour: 2375.25, net: 58466.05 });
+  });
+
+  it('keeps header TOT_AMT_ROF and TAX_ROF separate from component rounding', () => {
+    const zeroDecimal = billTotals(
+      { lineNetTotal: 58466.4, taxRatePct: 3, interState: false },
+      policy,
+    );
+    expect(zeroDecimal).toMatchObject({
+      net: 58466,
+      taxable: 58466,
+      tax: 1753.98,
+      roundOff: 0.02,
+      total: 60220,
+    });
+
+    const twoDecimal = billTotals(
+      { lineNetTotal: 58466.4, taxRatePct: 3, interState: false },
+      resolveRoundingPolicy({ PR_RATE_ROF: 2, TAX_ROF: 2, TOT_AMT_ROF: 2 }),
+    );
+    expect(twoDecimal).toMatchObject({
+      net: 58466.4,
+      taxable: 58466.4,
+      tax: 1753.99,
+      roundOff: 0,
+      total: 60220.39,
+    });
+  });
 });
 
 it('PURC_WITH_LBR allocates labour and other either with purchase or separately', () => {

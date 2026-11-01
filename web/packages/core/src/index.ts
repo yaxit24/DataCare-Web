@@ -240,6 +240,18 @@ export {
   salesReturnRoundingPolicy,
 } from './saleAmount.js';
 export type { SaleAmountLine, SaleAmountBasis } from './saleAmount.js';
+export {
+  purchaseAmountType,
+  purchaseAmountBasis,
+  purchaseItemAmount,
+  purchaseLabourAmount,
+  purchaseLineAmounts,
+} from './purchaseAmount.js';
+export type {
+  PurchaseAmountType,
+  PurchaseAmountLine,
+  PurchaseLineAmounts,
+} from './purchaseAmount.js';
 export { purchaseReturnAmountBasis, purchaseReturnRoundingPolicy } from './purchaseReturnAmount.js';
 export { salesOrderItemWeight, salesOrderItemAmount, salesOrderBill } from './salesOrderAmount.js';
 export type { SalesOrderAmountLine, SalesOrderBill } from './salesOrderAmount.js';

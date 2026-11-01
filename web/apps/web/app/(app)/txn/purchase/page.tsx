@@ -19,8 +19,8 @@ import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../component
 import { EntityImagePanel } from '../../../../components/EntityImagePanel';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import SubDetailGrid, { stoneRowFromApi, useSubDetail } from '../../../../components/SubDetailGrid';
-import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
-import { fineFor, labourCharge, billTotals, lineNet as lineNetAmount } from '@datacare/core';
+import { companyFlag, companySetting, useCompanySettings } from '../../../../lib/companySettings';
+import { billTotals, fineFor, purchaseAmountType, purchaseLineAmounts } from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
 import { openDocument } from '../../../../lib/openDocument';
 
@@ -32,9 +32,10 @@ interface Line {
   labourType?: 'per_gram' | 'per_piece' | 'percentage' | 'fixed';
   labourRate?: number;
   labourFixed?: number;
+  labourAmount: string;
   otherFineWt?: number;
   silverFineWt?: number;
-  otherAmount?: number;
+  otherAmount: string;
   huid?: string;
   pcs: string;
   grossWt: string;
@@ -73,6 +74,7 @@ interface Line {
   fineCutNetWt: string;
   fineCutFine: string;
   prCode: string;
+  rateType: string;
   urdRateType: string;
 }
 const blank = (): Line => ({
@@ -85,6 +87,8 @@ const blank = (): Line => ({
   touch: '',
   rate: '',
   making: '',
+  labourAmount: '',
+  otherAmount: '',
   tblCode: '',
   designNo: '',
   itDesc: '',
@@ -114,6 +118,7 @@ const blank = (): Line => ({
   fineCutNetWt: '',
   fineCutFine: '',
   prCode: '',
+  rateType: '',
   urdRateType: '',
 });
 const extendedLineFields: Array<[keyof Line, string]> = [
@@ -139,6 +144,8 @@ const extendedLineFields: Array<[keyof Line, string]> = [
   ['otherRate', 'Other Rate'],
   ['mrp', 'MRP'],
   ['metalAmount', 'Metal Amt'],
+  ['labourAmount', 'Labour Amt'],
+  ['otherAmount', 'Other Amt'],
   ['commissionPct', 'Comm %'],
   ['commissionAmount', 'Comm Amt'],
   ['fineCutPcs', 'Fine-cut Pcs'],
@@ -146,11 +153,13 @@ const extendedLineFields: Array<[keyof Line, string]> = [
   ['fineCutNetWt', 'Fine-cut Net'],
   ['fineCutFine', 'Fine-cut Fine'],
   ['prCode', 'PR Code'],
+  ['rateType', 'Rate Type'],
   ['urdRateType', 'URD Rate Type'],
 ];
 const n = (v: string) => Number(v || 0);
 const str = (v: unknown) => (v == null || Number(v) === 0 ? '' : String(v));
-const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
+const optionalNumber = (v: unknown): number | undefined =>
+  v == null || String(v).trim() === '' ? undefined : Number(v);
 
 export default function PurchaseEntryPage() {
   const { lcCode, coYear } = useBusinessScope();
@@ -174,6 +183,7 @@ export default function PurchaseEntryPage() {
    * Blank default 'N' per MS_OPNCOMP.cs.
    */
   const companySettings = useCompanySettings();
+  const amountType = purchaseAmountType(companySetting(companySettings, 'PR_AMT_TYPE'));
   const fineLocked = companyFlag(companySettings, 'ITM_FINE_LOCK', 'N');
   // G11: per-gram labour is on (net + ghat) unless the company sets LBR_WITH_GHT='N' (blank default Y).
   const labourWithGhat = companyFlag(companySettings, 'LBR_WITH_GHT', 'Y');
@@ -243,26 +253,43 @@ export default function PurchaseEntryPage() {
     setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
 
   const calc = (l: Line) => {
-    const fine = fineFor('purchaseItem', {
-      netWt: n(l.netWt),
-      touch: n(l.touch),
-      ghtWt: n(l.ghtWt),
-      westPct: n(l.westPct),
-    });
-    const metal = r2(fine * n(l.rate));
-    // P5: per-gram labour is (net + ghat) x rate unless the company switches ghat off
-    // (LBR_WITH_GHT, blank default 'Y'). This page sends ghtWt to the server, so computing the
-    // preview from netWt alone understated labour by ghat x rate against what actually posts.
-    const mk = labourCharge('per_gram', {
-      netWt: n(l.netWt),
-      ghatWt: n(l.ghtWt),
-      withGhat: labourWithGhat,
-      rate: n(l.making),
-    });
-    // G84: the server's line net is metal + labour + OTHER charges (purchase.ts calcLineNet); previewing
-    // metal + making alone understated any line carrying an other-charge amount.
-    const other = Number(l.otherAmount ?? 0) || 0;
-    return { fine, metal, mk, net: lineNetAmount({ metal, labour: mk, other }) };
+    const enteredFine = optionalNumber(l.fineWt);
+    const lesTouch = optionalNumber(l.lesTouch);
+    const kunFine = optionalNumber(l.kunFine);
+    const fine =
+      enteredFine ??
+      fineFor(lesTouch != null || kunFine != null ? 'purchaseOldGold' : 'purchaseItem', {
+        netWt: n(l.netWt),
+        touch: n(l.touch),
+        ghtWt: n(l.ghtWt),
+        westPct: n(l.westPct),
+        lesTouch,
+        kunFine,
+      });
+    const labourType = l.making ? ('per_gram' as const) : l.labourType;
+    const amounts = purchaseLineAmounts(
+      {
+        pieces: n(l.pcs),
+        grossWt: n(l.grossWt),
+        netWt: n(l.netWt),
+        ghatWt: n(l.ghtWt),
+        fineWt: fine,
+        rate: n(l.rate),
+        rateType: l.rateType,
+        urdRateType: l.urdRateType,
+        itemAmount: optionalNumber(l.metalAmount),
+        labourType,
+        labourRate: l.making ? n(l.making) : l.labourRate,
+        labourPct: optionalNumber(l.labourPct),
+        labourFixed: l.labourFixed,
+        labourAmount: optionalNumber(l.labourAmount),
+        otherAmount: optionalNumber(l.otherAmount),
+      },
+      amountType,
+      roundingPolicy,
+      labourWithGhat,
+    );
+    return { fine, metal: amounts.item, mk: amounts.labour, net: amounts.net };
   };
   const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
   // G102: preview with the same arithmetic and company rounding policy the server posts, so the shown
@@ -334,6 +361,7 @@ export default function PurchaseEntryPage() {
         bankAc: String(view.bankAc ?? ''),
       });
       const loadedLines: Line[] = (view.lines ?? []).map((line: any) => ({
+        ...blank(),
         itCode: String(line.itCode ?? ''),
         tagNo: String(line.tagNo ?? ''),
         vchSrno: Number(line.vchSrno ?? 0) || undefined,
@@ -349,7 +377,9 @@ export default function PurchaseEntryPage() {
         labourFixed: Number(line.labourFixed ?? 0) || undefined,
         otherFineWt: Number(line.otherFineWt ?? 0) || undefined,
         silverFineWt: Number(line.silverFineWt ?? 0) || undefined,
-        otherAmount: Number(line.otherAmount ?? 0) || undefined,
+        otherAmount: str(line.otherAmount),
+        rateType: String(line.rateType ?? ''),
+        urdRateType: String(line.urdRateType ?? ''),
         huid: String(line.huid ?? '') || undefined,
       }));
       setLines(loadedLines.length ? loadedLines : [blank()]);
@@ -459,7 +489,7 @@ export default function PurchaseEntryPage() {
             rate: n(l.rate),
             otherFineWt: l.otherFineWt,
             silverFineWt: l.silverFineWt,
-            otherAmount: l.otherAmount,
+            otherAmount: optionalNumber(l.otherAmount),
             tblCode: l.tblCode || undefined,
             designNo: l.designNo || undefined,
             itDesc: l.itDesc || undefined,
@@ -472,16 +502,17 @@ export default function PurchaseEntryPage() {
             ghtPct: n(l.ghtPct) || undefined,
             ghtWt: n(l.ghtWt) || undefined,
             westPct: n(l.westPct) || undefined,
-            fineWt: n(l.fineWt) || undefined,
-            labourPct: n(l.labourPct) || undefined,
+            fineWt: optionalNumber(l.fineWt),
+            labourPct: optionalNumber(l.labourPct),
+            labourAmount: optionalNumber(l.labourAmount),
             lessTouch: n(l.lessTouch) || undefined,
-            lesTouch: n(l.lesTouch) || undefined,
-            kunFine: n(l.kunFine) || undefined,
+            lesTouch: optionalNumber(l.lesTouch),
+            kunFine: optionalNumber(l.kunFine),
             convRate: n(l.convRate) || undefined,
             convPct: n(l.convPct) || undefined,
             otherRate: n(l.otherRate) || undefined,
             mrp: n(l.mrp) || undefined,
-            metalAmount: n(l.metalAmount) || undefined,
+            metalAmount: optionalNumber(l.metalAmount),
             commissionPct: n(l.commissionPct) || undefined,
             commissionAmount: n(l.commissionAmount) || undefined,
             fineCutPcs: n(l.fineCutPcs) || undefined,
@@ -489,6 +520,7 @@ export default function PurchaseEntryPage() {
             fineCutNetWt: n(l.fineCutNetWt) || undefined,
             fineCutFine: n(l.fineCutFine) || undefined,
             prCode: l.prCode || undefined,
+            rateType: l.rateType || undefined,
             urdRateType: l.urdRateType || undefined,
 
             huid: l.huid,
