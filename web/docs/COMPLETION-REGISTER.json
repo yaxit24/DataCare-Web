@@ -2270,7 +2270,7 @@
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "TR_TAG_CAN on a STOCK ADJUST book (N222).",
+   "note": "TR_TAG_CAN on a STOCK ADJUST book (N221).",
    "webSurface": {
     "kind": "route",
     "surface": "POST /stock/stock-adjust"

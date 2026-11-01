@@ -58,7 +58,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Transaction | Sales Order | `/txn/sales-order` | PARTIAL | sales-order | module, 1 open | G206 |
 | Transaction | Sales | `/txn/sales`, `/txn/hallmark-sale` | PARTIAL | sales-invoice | module green | — |
 | Transaction | Sales Return | `/txn/sale-return` | PARTIAL | sales-return | module, 2 open | G190 |
-| Transaction | Wh Sales | `/txn/wholesale-sale` | PARTIAL | — | no module | — |
+| Transaction | Wh Sales | `/txn/wholesale-sale` | PARTIAL | wholesale-sale | module green | — |
 | Transaction | Cash Received | `/txn/receipt` | PARTIAL | cash-bank | module green | — |
 | Transaction | Cash Payment | `/txn/payment` | PARTIAL | cash-bank | module green | — |
 | Transaction | Bank Received | `/txn/receipt?mode=BANK` | PARTIAL | cash-bank | module green | — |

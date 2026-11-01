@@ -243,7 +243,8 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G230 | Medium | The Address master was a generic field form without the desktop's tabs, combos, helps, mobile check, delete cascade or next code | `unified/src/csharp/DataCareNext/MS_ADD_MAST.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7610-7619`; `web/apps/api/form-specs/DataCareNext.MS_ADD_MAST.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts` | MS_ADD_MAST keeps a location's addresses on three tabs, offers the next code of the location, fills its combos from the company's addresses and STATE_MAST, refuses a mobile the company already has, and deletes an address with its opening rows of the year (`MS_ADD_MAST.cs:3119-4544`). The web rendered the generic form keyed by CO_CODE + AC_CODE: no tabs, no next code, no combos, help or name type-ahead, no mobile check, its config left the three dates out as if the account master kept them, and its delete left the address's OP_DATA and AC_DATA opening rows behind. | N217 |
 | G231 | High | The Item master was a generic field form without the desktop's helps, item code from product and group, exists question, leave checks, settings boxes, delete checks or Tag Value Update | `unified/src/csharp/DataCareNext/MS_ITEM.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7650-7659`; `web/apps/api/form-specs/DataCareNext.MS_ITEM.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts`; `web/apps/web/lib/lookupEnter.ts` | MS_ITEM takes the product and group from their helps, makes the item code and name from them and asks before reusing a code, refuses a taken code or name on leaving it, shows the setting-driven boxes, writes the combo letters and Val of the number boxes, refuses deleting an item with stock or a default code, and updates the item's tags from its Tag Value Update panel (`MS_ITEM.cs:2748-4015`). The web rendered the generic form: free-typed product and group, no item code or name from them, no question or leave checks, no setting-driven boxes, a delete that only failed on a foreign key, and no tag update. Its lookups also dropped every answer for a box that upper-cases typing. | N218 |
 | G232 | High | Auto Item reversed the desktop's item code, offered the default products and had no group help, grid keys, MinStk, rights or most columns | `unified/src/csharp/DataCareNext/MS_AUTO_ITEM.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7640-7649` | `web/apps/web/app/(app)/masters/auto-item/page.tsx`; `web/apps/api/src/modules/masters/autoItem.ts`; `web/apps/api/src/routes/txn.ts` | MS_AUTO_ITEM's AutoItem mode lists the company's products but the default ones for a group chosen from its help, marks the ones the group already has, and makes PR_CODE + GR_CODE items named product name + group code with the desktop's columns, under the edit right (`MS_AUTO_ITEM.cs:1640-3493`). The web made GR_CODE + PR_CODE items named group + product, wrote eight columns, offered every product including the default ones, and had no group help, grid keys, MinStk, rights or Print and Delete checks. | N219 |
-| G235 | High | Stock Adjust was a separate writer citing a desktop form that does not exist, posting stock rows the desktop never writes, with no register, sign rule, lot columns, reopen or print | `unified/src/csharp/DataCareNext/TR_TAG_CAN.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:8616-8627`; `unified/src/csharp/DataCareNext/Ac_Stock.cs:48-58`; `unified/src/csharp/DataCareNext/MS_UPDATE.cs:24207` | `web/apps/web/app/(app)/txn/stock-adjust/page.tsx`; `web/apps/api/src/modules/stock/stock.ts`; `web/apps/api/src/modules/ops/seedCompany.ts` | The Stock Adjust menu opens TR_TAG_CAN on a STOCK ADJUST book: the Tag Cancel grid with a + / - Sign column and optional lot columns, a signed register, MAIN_STOCK rows in or out by sign, LOT_DETL rows for a lot, reopen, edit, delete and TagCanBill (`TR_TAG_CAN.cs:2514-5440`, `Ac_Stock.cs:53`, `:642-646`). The web had its own writer that cited a form TR_STK_ADJ, posted MAIN_STOCK rows with VCH_TYPE STADJ, BOOK_NAME STOCK ADJ and TR_TYPE A and no register, so nothing could be reopened or printed; and it provisioned the book as an in book with its code as the short name. | N222 |
+| G233 | High | Wh Sales saved what TR_WH_SALE refuses, and had no print | `unified/src/csharp/DataCareNext/TR_WH_SALE.cs:12779-12896`, `:13553-13592`, `:13654-13800`; `unified/src/csharp/DataCareNext/TR_TOUR_SALE.cs:10585-10690` | `web/apps/api/src/modules/sales/rateCut.ts`; `web/apps/web/components/WholesaleVoucherForm.tsx` | TR_WH_SALE refuses a save for a defaulter party left owing, a missing mandatory employee, a new voucher in a type-B company, a cheque or card amount without its bank account, a date outside the year, a date on or before the lock date and a grid row with weight or value but no item code, each with its own text, before it writes. The web saved every one of them: a cheque without a bank posted to the cash slot, an item-less receive row posted as received fine, and the lock date was refused with web wording. The delete asked a web question and Print (WhSalesBill) did not exist. | N220 |
+| G234 | High | Stock Adjust was a separate writer citing a desktop form that does not exist, posting stock rows the desktop never writes, with no register, sign rule, lot columns, reopen or print | `unified/src/csharp/DataCareNext/TR_TAG_CAN.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:8616-8627`; `unified/src/csharp/DataCareNext/Ac_Stock.cs:48-58`; `unified/src/csharp/DataCareNext/MS_UPDATE.cs:24207` | `web/apps/web/app/(app)/txn/stock-adjust/page.tsx`; `web/apps/api/src/modules/stock/stock.ts`; `web/apps/api/src/modules/ops/seedCompany.ts` | The Stock Adjust menu opens TR_TAG_CAN on a STOCK ADJUST book: the Tag Cancel grid with a + / - Sign column and optional lot columns, a signed register, MAIN_STOCK rows in or out by sign, LOT_DETL rows for a lot, reopen, edit, delete and TagCanBill (`TR_TAG_CAN.cs:2514-5440`, `Ac_Stock.cs:53`, `:642-646`). The web had its own writer that cited a form TR_STK_ADJ, posted MAIN_STOCK rows with VCH_TYPE STADJ, BOOK_NAME STOCK ADJ and TR_TYPE A and no register, so nothing could be reopened or printed; and it provisioned the book as an in book with its code as the short name. | N221 |
 
 ## 4. Decisions D23–D28
 
@@ -2965,7 +2966,48 @@ added row 4 with the cursor in its Pr Code, and Enter on its blank Pr Code went 
 in red; F1 on row 3 copied the Y above and Save made RGG22; Esc in the grid went to Save and Esc in the group code left
 the screen. Desktop-runtime comparison and parent acceptance remain open.
 
-### N222 — Stock Adjust is the desktop TR_TAG_CAN on a STOCK ADJUST book (G235, Lite L3)
+### N220 — Wh Sales refuses a save as TR_WH_SALE does and prints WhSalesBill (G233, Lite L1)
+
+Gap G233 · Parents P1-core · L1 · High · Size M · Start after N219
+
+Transaction → Wh Sales opens TR_WH_SALE on CurBookHelp('WH SALES') (`MDI_FORM.cs:8040-8051`); a web-provisioned
+company has book WHS (`BOOK_SNAME` WSALE, `BOOK_TBL_NAME` RATE_CUT_DATA) with the twelve BOOK_DETL slots of the real
+book 034. BtnSave_Click (`TR_WH_SALE.cs:12779-12896`) refuses, before it writes and with its own texts: a defaulter
+party (AC_MAST.DEFAULTER_AC 'Y') when the sale-side Os Amt plus the fine still due is above zero ("You Cant Save
+Entry Because This Party Is in Defaulter List..."); a blank employee when CO_SET.EMP_CODE_MANDATORY is 'Y'; a new
+voucher in a company whose CO_TYPE is 'B'; a cheque or a card amount in either column without its bank account; a
+date outside the open year; a date on or before the lock date ("You Cant Save and Delete This Voucher Becouse Lock
+Date is = dd/MM/yyyy ...."); and, per row, a row with GrWt, LbrAmt, NetAmt or Mrp but no item code ("Please Select
+Item Code In Row N and Try......"). TR_TOUR_SALE carries the same block (`TR_TOUR_SALE.cs:10585-10690`).
+
+`web/apps/api/src/modules/sales/wholesaleSaveChecks.ts` holds these checks. `writeRateCut` runs the ones that need no
+figures after the book-family guard and before the edit reversal or any tag is reserved, and the defaulter, cheque
+and card checks after the band is computed and before any row is written, all inside its transaction, for the
+TR_WH_SALE engine (Wh Sales, Rate Cut, Wh Quotation, Tour Sales; Bullion Sale keeps its own rules). A refusal leaves
+no row, no voucher or hidden number, and the tags in stock. Delete asks "Are You Sure To Delete This Voucher now?"
+(`:13567`). Print (`:13654-13800`) needs the print right and renders WhSalesBill
+(`web/apps/api/report-specs/WhSalesBill.spec.json`): the party block, Vch Date and Vch No, the issue and receive
+rows, the Purchase / Sales band (fine, rate cut, bill total, cash, card, cheque, kasar, bill outstanding) from the
+stored header, Vch Desc, and the party's opening and closing money, gold and silver (its ledger without and with this
+voucher's legs), through `GET /wholesale-sales/:vchNo/print`.
+
+Deliberate differences: the defaulter check runs after the figure-free checks (the desktop runs it first) because it
+reads the computed band; the order of all other checks is the desktop's. The licence-expiry check and the two
+registration-specific checks (HM176NEKU, HM037NEKU) do not apply. `releaseRateCutTagsTx` moved to
+`web/apps/api/src/modules/sales/rateCutTags.ts`, unchanged, so `rateCut.ts` stays under its size ceiling.
+
+Evidence: `wholesaleSaveChecks.db.test.ts` (9 cases over HTTP on a provisioned company: every refusal with its text
+and an unchanged footprint of RATE_CUT_DATA/ISU/REC, MAIN_STOCK, AC_DATA, ROJ_MEL_DATA and TEMP_BOOK_DATA, the
+paid-in-full defaulter control, the year before the lock date, and the print with opening 0.00 Dr and closing 9,500.00
+Dr) and the existing TR_WH_SALE-family tests (12 files, 153 tests) pass; `rateCutSettlement.db.test.ts` now seeds its
+fiscal year. The new zero-mock `wholesale-sale` module passes 25 of 25 cases over T01-T18, none blocked: T03 checks
+Math.Round(0.125 × 6500) = 812 (banker's) and a 237.50/g net-wise tag labour of 2,375; T05 two tags and 5.000 fine
+received; T08 an unchanged save leaves every row the same; T09 a dropped tag returns to stock; T12 a second delete is
+refused; T14 a fault on the issue row rolls everything back; T18 a 9,500 outstanding is cleared by a Cash Received.
+Against the code before this change, all eight refusal cases saved the voucher and the lock date answered "period is
+locked …". The full workspace suite and the real-stack suite pass. Desktop-runtime comparison and parent acceptance
+remain open.
+### N221 — Stock Adjust is the desktop TR_TAG_CAN on a STOCK ADJUST book (G234, Lite L3)
 
 Other → Stock Adjust opens TR_TAG_CAN after CurBookHelp("STOCK ADJUST") (`MDI_FORM.cs:8616-8627`), the form Tag Cancel and
 Tag Transfer use. Its grid (MSG_CLEAR `TR_TAG_CAN.cs:2514-2566`) is the Tag Cancel grid without LbrRate, LbrAmt and OthAmt,
@@ -3166,7 +3208,8 @@ comparison and parent acceptance remain open.
 | N217 | — | implemented-unverified, evidence in this change (G230: the Address master is MS_ADD_MAST with its tabs, next code, combos, helps, mobile check, rights and the delete of its opening rows) |
 | N218 | — | implemented-unverified, evidence in this change (G231: the Item master is MS_ITEM with its helps, item code from product and group, exists question, leave checks, setting-driven boxes, delete checks, rights and the Tag Value Update panel) |
 | N219 | — | implemented-unverified, evidence in this change (G232: Auto Item is MS_AUTO_ITEM's AutoItem mode with the group help, the product grid and its keys, the desktop write set, the refusals and the rights) |
-| N222 | — | implemented-unverified, evidence in this change (G235: Stock Adjust is TR_TAG_CAN on a STOCK ADJUST book with the Sign column, the signed register, I and O stock rows, the lot columns and LOT_DETL, reopen, edit, delete and TagCanBill) |
+| N220 | — | implemented-unverified, evidence in this change (G233: Wh Sales refuses as TR_WH_SALE does — defaulter, employee, type B, cheque/card bank, year, lock date, item code — with no partial write; the delete asks the desktop question; WhSalesBill prints behind the print right) |
+| N221 | — | implemented-unverified, evidence in this change (G234: Stock Adjust is TR_TAG_CAN on a STOCK ADJUST book with the Sign column, the signed register, I and O stock rows, the lot columns and LOT_DETL, reopen, edit, delete and TagCanBill) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

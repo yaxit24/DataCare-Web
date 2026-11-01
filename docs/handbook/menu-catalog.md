@@ -2338,7 +2338,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Writes:** BAR_CAN_DATA, BAR_CAN_DETL, BAR_CAN_IDTL, MAIN_STOCK, LOT_DETL, DELETE_DATA, TEMP_BOOK_DATA, BAR_DETL, BOOK_DATA.
 - **Web:** `/txn/stock-adjust`; `GET /stock/stock-adjust`, `GET /stock/stock-adjust/source`, `GET /stock/stock-adjust/lots`, `GET /stock/stock-adjust/:vchNo`, `POST /stock/stock-adjust`, `PUT /stock/stock-adjust/:vchNo`, `DELETE /stock/stock-adjust/:vchNo`, `GET /stock/stock-adjust/:vchNo/print`. Can: create, reopen, edit, delete, print, list.
 - **Remaining:** A replayed loose-line save makes a second voucher (no idempotency key); desktop-runtime comparison remains.
-- **Owners:** X18, P07-02, G40, G41, N59, G235, N222.
+- **Owners:** X18, P07-02, G40, G41, N59, G234, N221.
 - **Evidence:** [TR_TAG_CAN.cs:2514-5440](../../unified/src/csharp/DataCareNext/TR_TAG_CAN.cs#L2514-L5440), [Ac_Stock.cs:48-58](../../unified/src/csharp/DataCareNext/Ac_Stock.cs#L48-L58).
 
 ### Stone/Dm-Cf

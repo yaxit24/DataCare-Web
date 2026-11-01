@@ -69,14 +69,14 @@
     {
       "kind": "menu",
       "path": "web/docs/COMPLETION-REGISTER.json",
-      "sha256": "0e1720d75e367bb0ea45b4a2413353c9e9cc43c5219cbdc49c4d89b79eea9cc8",
+      "sha256": "393315786b551911af2fa64bbcd42646cf5c9c7c94d305e58bdb0e16ef3a91ba",
       "count": 198,
       "arrayPointer": "/items",
       "rebaselined": {
         "date": "2026-11-02",
         "fromSha256": "b57e557f9c25e2e53165b3cec08b1102a5b370de8b3d61aa5725a9f512f0df26",
-        "slice": "N222",
-        "reason": "Stock Adjust's web surface is the TR_TAG_CAN family's save route (POST /stock/stock-adjust) instead of the removed separate writer's POST /stock/adjust (G235). The 198 menu identities are unchanged; nothing is verified.",
+        "slice": "N221",
+        "reason": "Stock Adjust's web surface is the TR_TAG_CAN family's save route (POST /stock/stock-adjust) instead of the removed separate writer's POST /stock/adjust (G234). The 198 menu identities are unchanged; nothing is verified.",
         "previous": {
           "date": "2026-11-01",
           "fromSha256": "89a0c9d10a7511fefffd6491b27a744f09957776abb4c6a02954628d057d8177",

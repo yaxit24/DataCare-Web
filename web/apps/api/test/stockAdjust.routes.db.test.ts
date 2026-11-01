@@ -7,7 +7,7 @@ import { seedCompany } from '../src/modules/ops/seedCompany.js';
 import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 /**
- * Stock Adjust over HTTP (N222): the desktop menu opens TR_TAG_CAN on a STOCK ADJUST book (MDI_FORM.cs:8616-8627).
+ * Stock Adjust over HTTP (N221): the desktop menu opens TR_TAG_CAN on a STOCK ADJUST book (MDI_FORM.cs:8616-8627).
  * Expected values come from the desktop rules:
  * - each line carries a Sign; Enter refuses anything but + or - ("Please Insert Item Sign + or - then Try",
  *   TR_TAG_CAN.cs:4259-4263) and the register keeps it (BAR_CAN_DETL.ITM_SIGN, :5138-5145);
@@ -28,7 +28,7 @@ const DAY = `${startYear}-06-15`;
 const TAG = 'SAG00001';
 const SRNO = 100312000011;
 
-(enabled ? describe : describe.skip)('N222 Stock Adjust through HTTP', () => {
+(enabled ? describe : describe.skip)('N221 Stock Adjust through HTTP', () => {
   let owner: PrismaClient;
   let runtime: PrismaClient;
   let app: FastifyInstance;
