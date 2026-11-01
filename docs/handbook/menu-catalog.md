@@ -859,10 +859,10 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `TR_APR_ISU` — CurBookHelp('APR ISU') ([MDI_FORM.cs:8300-8305](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8300-L8305)).
 - **Does:** Places tagged goods with a party on approval while the business keeps ownership.
-- **Looks:** Voucher/party/employee header, issue reference, item and stone grids, image panel, totals and print.
+- **Looks:** Desktop: voucher/party/employee header, item and stone grids, image panel, totals and print. Web: the persisted header, full audited item fields, hydrated stone grid, totals and print; image id is stored but no image panel is rendered.
 - **Writes:** APR_DATA, APR_DETL, APR_IDTL, MAIN_STOCK, BAR_DETL, DM_DATA.
-- **Web:** `/txn/tour`; `POST /tour/issue`, `GET /tour/:vchNo`, `PUT /tour/:vchNo`, `DELETE /tour/:vchNo`, `GET /tour/:vchNo/print`, `GET /tour/:vchNo/lines`, `POST /tour/:vchNo/bill`. Can: create, reopen, edit, delete, print.
-- **Remaining:** Verified: APR ISU provisioning/backfill, family guard, desktop refusal order, APR/APR_IDTL/stock/DM/BAR effects, lossless reopen, no-op save, versioned edit/delete, returned/Wh Sales delete refusals, DELETE_DATA audit, AprBill rights/layout and zero-mock cases. Open: licence-expiry state, AprBillImg, idempotent create, injected rollback, retained-item sale/Wh Sales browser continuation and desktop-runtime comparison.
+- **Web:** `/txn/tour`; `POST /tour/issue`, `GET /tour/:vchNo`, `PUT /tour/:vchNo`, `DELETE /tour/:vchNo`, `GET /tour/:vchNo/print`. Can: create, reopen, edit, delete, print.
+- **Remaining:** Verified: APR ISU identity and unique legacy linkage, family/refusal/strict-write guards, audited APR/APR_IDTL/stock/DM/BAR fields, rich tag/stone hydration, names/time reopen, sparse no-op, consumed-line-safe edit, dependency delete refusals, AC_NAME/IT_TYPE audit, print right and AprBill data/tag marker. Contained: approval billing has no UI and POST /tour/:vchNo/bill returns 409 after Sales Invoice create authorization. Open: licence state, image panel/AprBillImg, idempotency, fault injection, atomic Sales Invoice/Wh Sales continuation, repeated Crystal pagination and desktop acceptance.
 - **Owners:** N22, X17, P05-05, N62, X07, G224, N211.
 - **Evidence:** [TR_APR_ISU.cs:5788-6772](../../unified/src/csharp/DataCareNext/TR_APR_ISU.cs#L5788-L6772).
 
@@ -870,10 +870,10 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `TR_APR_ISU` — CurBookHelp('APR RTN') ([MDI_FORM.cs:8312-8317](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8312-L8317)).
 - **Does:** Returns unsold approval goods, restores availability and closes the issued quantities.
-- **Looks:** Original-issue selector, party/date header, returned item grid, images and fine totals.
+- **Looks:** Desktop: source selector, party/employee/date header, returned item and stone grids, image panel, totals and print. Web: source selector, persisted names/time, audited read-only item/stone data, totals and print; no image panel.
 - **Writes:** APR_DATA, APR_DETL, APR_IDTL, MAIN_STOCK, BAR_DETL, DM_DATA.
 - **Web:** `/txn/tour-return`; `GET /tour/:vchNo/lines`, `POST /tour/return`, `GET /tour/return/:vchNo`, `PUT /tour/return/:vchNo`, `DELETE /tour/return/:vchNo`, `GET /tour/return/:vchNo/print`. Can: create, reopen, edit, delete, print.
-- **Remaining:** Verified: APR RTN provisioning/backfill, family and source guards, desktop refusal order, partial source closure, APR/APR_IDTL I/+ stock/DM and BAR effects, lossless reopen, no-op save, versioned edit/delete with source reversal and audit, AprBill rights/layout and zero-mock cases. Open: licence-expiry state, AprBillImg, idempotent create, injected rollback, retained-item sale/Wh Sales continuation and desktop-runtime comparison.
+- **Remaining:** Verified: APR RTN identity and linked legacy backfill, source/family/strict guards, return-only source access, exact duplicate-tag no-write refusal, partial closure, audited APR/APR_IDTL I/+ stock/DM/BAR effects, names/time reopen, no-op/edit/delete source reversal, AC_NAME/IT_TYPE audit, print right and AprBill data/tag marker. Open: licence state, image panel/AprBillImg, idempotency, fault injection, retained-item sale continuation, repeated Crystal pagination and desktop acceptance.
 - **Owners:** N22, X17, N59, N62, X07, G224, N211.
 - **Evidence:** [TR_APR_ISU.cs:5788-6772](../../unified/src/csharp/DataCareNext/TR_APR_ISU.cs#L5788-L6772).
 

@@ -7026,12 +7026,12 @@
     {
       "id": "N211",
       "status": "implemented-unverified",
-      "action": "Approval Isu and Approval Rtn are desktop TR_APR_ISU resources on MAIN_BOOK 'APR ISU'/'APR RTN': guarded provisioning/backfill, desktop save/delete rules and stock/BAR/source effects, versioned reopen/edit/delete with DELETE_DATA audit, AprBill behind print rights, and one zero-mock T01-T18 module per menu.",
+      "action": "Approval Isu and Approval Rtn use desktop TR_APR_ISU identity and custody lifecycle on MAIN_BOOK 'APR ISU'/'APR RTN': uniquely linked legacy backfill, strict audited writes, safe consumed-line/duplicate-return handling, source/BAR reversals, versioned reopen/edit/delete and bounded AprBill output. Keep approval-to-sale conversion contained until it can be one authorized transaction.",
       "parentLabels": "P1-core; L4; J09; T01-T18",
       "startAfter": [
         "N210"
       ],
-      "requiredProof": "Source-derived HTTP/DB tests red before implementation for book identity, migration safety, guards, refusal order, complete issue/return write sets, lossless reopen, unchanged save, edit conflict, delete dependency refusals/audit/reversal and AprBill rights/layout; both feature modules pass every executable case on the zero-mock real stack; all repository gates pass.",
+      "requiredProof": "Source-derived HTTP/DB tests red before implementation for the four S1 failures; DB assertions cover the deterministic header/detail/stone/stock columns under review, strict boundary refusals, lifecycle links, reopen/no-op/edit conflict, delete dependencies/audit/reversal, print rights and no-write billing containment. Both zero-mock feature modules pass every executable case; all repository gates pass. Open cases remain listed rather than inferred complete.",
       "gapIds": "G224",
       "entryDefinition": "15-standard-edition-plan.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
@@ -7040,6 +7040,7 @@
       "statusAsOf": "2026-11-01",
       "evidence": [
         "web/packages/db/prisma/migrations/20261101090000_approval_book_identity/migration.sql",
+        "web/packages/db/prisma/migrations/20261101101500_approval_detail_discount/migration.sql",
         "web/apps/api/src/modules/tour/approvalVoucher.ts",
         "web/apps/api/src/modules/tour/approvalRows.ts",
         "web/apps/api/src/modules/tour/approvalTypes.ts",
@@ -7052,7 +7053,7 @@
         "web/apps/web/test/features/modules/approvalIssue.mjs",
         "web/apps/web/test/features/modules/approvalReturn.mjs"
       ],
-      "statusNote": "IMPLEMENTED, not accepted. Verified in source-derived DB/HTTP tests and zero-mock browser modules: desktop APR ISU/APR RTN identity, safe exact-match backfill, family isolation, company-type/year/lock/employee/party refusals, issue and partial-return stock/BAR/source effects, versioned reopen/no-op/edit/delete, dependency delete refusals, per-line DELETE_DATA audit, print rights and the AprBill data/layout. Open: the desktop licence-expiry refusal has no server-owned web state; APR_IMG_PRINT=Y/AprBillImg, idempotent create/lost acknowledgement, injected mid-write rollback, retained-item sale/Wh Sales browser continuation, original-Windows comparison and parent acceptance."
+      "statusNote": "IMPLEMENTED, not accepted. Verified by source-derived DB/HTTP tests: APR ISU/APR RTN identity; unique legacy source/tag linkage and fail-closed ambiguous return lifecycle; family and central-right isolation; type-B/year/lock/employee/party and strict width/range/value/item refusals; audited APR/APR_IDTL/stock columns; rich tag/stone hydration; fine calculation; sparse no-op and consumed-line edit safety; duplicate-return no-write refusal; partial return, delete dependency/source/BAR/audit behavior; return-only source rights; print rights and AprBill's bound data/tag marker. The old billing bridge is hidden and always 409 after Sales Invoice create authorization, with no sale write. Open: licence-expiry state, APR_IMG_PRINT/AprBillImg, idempotent create/lost acknowledgement, injected rollback, atomic retained-item Sales Invoice/Wh Sales continuation, repeated Crystal page header/footer/page number, original-Windows comparison and parent acceptance."
     }
   ],
   "amendments": [
