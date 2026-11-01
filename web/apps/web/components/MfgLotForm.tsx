@@ -283,7 +283,7 @@ export default function MfgLotForm({ kind }: { kind: MfgLotKind }) {
                         'NET_AMT',
                       ].map((key) => (
                         <td key={key}>
-                          {mfgLotValue(row[key])}
+                          {mfgLotValue(row[key], key)}
                           <CurrentName
                             field={key}
                             code={row[key]}
@@ -432,7 +432,7 @@ export default function MfgLotForm({ kind }: { kind: MfgLotKind }) {
                           labels={currentSources.displayLabels}
                         />
                       </td>
-                      <td>{mfgLotValue(row.sourceDate)}</td>
+                      <td>{mfgLotValue(row.sourceDate, 'sourceDate')}</td>
                       <td>
                         {row.kind === 'stock-material'
                           ? 'Stock movement contributors'

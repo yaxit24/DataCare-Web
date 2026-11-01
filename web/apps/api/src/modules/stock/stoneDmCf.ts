@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { assertPeriodOpen, insertRowTx } from '../posting/posting.js';
 import { barTagAvailableSql } from '../shared/stockSql.js';
@@ -636,7 +637,7 @@ export async function getStoneDmCf(
     const h = headers[0]!;
     return {
       voucherNo: text(h.VCH_NO),
-      vchDate: String(h.VCH_DATE).slice(0, 10),
+      vchDate: toIsoDate(h.VCH_DATE),
       employeeCode: text(h.EMP_CODE),
       description: text(h.VCH_DESC),
       hiddenVoucherNo: text(h.HD_VCH_NO),

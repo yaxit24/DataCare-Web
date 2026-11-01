@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { formatVoucherNo } from '../vouchers/numbering.js';
 import { withTxBudget } from '../shared/txBudget.js';
 
@@ -87,13 +88,13 @@ export async function bankReconList(
         coBook: String(r.cob ?? ''),
         vchNo: String(r.vch ?? ''),
         vchType: String(r.vt ?? ''),
-        vchDate: r.vd ? String(r.vd).slice(0, 10) : null,
+        vchDate: r.vd ? toIsoDate(r.vd) : null,
         acName: String(r.acname ?? ''),
         chqNo: String(r.chq ?? ''),
         dr: Number(r.dr),
         cr: Number(r.cr),
         amtBal: run,
-        clrDate: r.clr ? String(r.clr).slice(0, 10) : null,
+        clrDate: r.clr ? toIsoDate(r.clr) : null,
       };
     });
     book = r2(book + openingBal);
@@ -127,7 +128,7 @@ export async function bankReconClear(
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     let updated = 0;
     for (const it of clean) {
-      const clr = it.clrDate && String(it.clrDate).trim() ? String(it.clrDate).slice(0, 10) : null;
+      const clr = it.clrDate && String(it.clrDate).trim() ? toIsoDate(it.clrDate) : null;
       const n: number = await tx.$executeRawUnsafe(
         `UPDATE "AC_DATA" SET "CLR_DATE" = $4::date WHERE "CO_CODE"=$1 AND "AC_CODE"=$2 AND "CO_BOOK"=$3 AND "VCH_NO"=$5`,
         scope.coCode,

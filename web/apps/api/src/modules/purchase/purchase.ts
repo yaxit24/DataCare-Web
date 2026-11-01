@@ -53,10 +53,10 @@ import {
   labourCharge,
   lineNet as calcLineNet,
   billTotals,
+  toIsoDate,
   type LabourType,
   type BillTotals,
 } from '@datacare/core';
-
 export class PurchaseValidationError extends Error {
   constructor(msg: string) {
     super(msg);
@@ -2305,7 +2305,7 @@ export async function getPurchase(
       voucherNo: text(h.VCH_NO),
       hiddenVoucherNo: text(h.HD_VCH_NO),
       mainUser: text(h.MAIN_USER),
-      vchDate: text(h.VCH_DATE).slice(0, 10),
+      vchDate: toIsoDate(h.VCH_DATE),
       billNo: text(h.BILL_NO),
       saleBillNo: text(h.SL_BILL_NO),
       saleBillLc: text(h.SL_BILL_LC),
@@ -2465,7 +2465,7 @@ export async function listOpenConsignmentPurchaseReceipts(
     );
     const receipts = summaryRows.map((row) => ({
       voucherNo: text(row.voucherNo),
-      vchDate: text(row.vchDate).slice(0, 10),
+      vchDate: toIsoDate(row.vchDate),
       acCode: text(row.acCode),
       acName: text(row.acName),
       coYear: text(row.coYear),

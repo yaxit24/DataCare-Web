@@ -206,7 +206,9 @@ databaseDescribe('full order document datasets, subreport and ledger cutoff', ()
         expect(result!.header['#RTotal0']).toBe('3.3');
         expect(result!.header['@OpAmt']).toBe('13.45');
         expect(result!.header['@ClAmt']).toBe('23.7');
+        expect(result!.header['SL_ORD_DATA.VCH_DATE']).toBe('03/04/2026');
         const html = renderReportLayout(spec, result!);
+        expect(html).toMatch(/data-field="\{SL_ORD_DATA\.VCH_DATE\}"[^>]*>03\/04\/2026<\/div>/);
         const savedParentName = result!.detailRows[0]!['ITEM_MAST.IT_NAME'];
         const printedParentName =
           family.report === 'TourOrdVch'

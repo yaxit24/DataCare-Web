@@ -8,7 +8,7 @@ import {
   insertRowTx,
   type LedgerLine,
 } from '../posting/posting.js';
-import { billTotals, type BillTotals } from '@datacare/core';
+import { billTotals, toIsoDate, type BillTotals } from '@datacare/core';
 import {
   assertSaleTaxRate,
   buildIncomeLegs,
@@ -725,7 +725,7 @@ export async function getSaleReturn(
       voucherNo: text(h.VCH_NO),
       hiddenVoucherNo: text(h.HD_VCH_NO),
       mainUser: text(h.MAIN_USER),
-      vchDate: text(h.VCH_DATE).slice(0, 10),
+      vchDate: toIsoDate(h.VCH_DATE),
       billNo: text(h.BILL_NO),
       acCode: text(h.AC_CODE),
       acName: text(h.AC_NAME),

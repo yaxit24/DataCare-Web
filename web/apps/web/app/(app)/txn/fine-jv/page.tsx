@@ -1,4 +1,5 @@
 'use client';
+import { toIsoDate } from '@datacare/core';
 import { useState } from 'react';
 import { post, put, get, del, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
@@ -97,7 +98,7 @@ export default function FineJvPage() {
       setMetal(String(d.metal ?? 'G') === 'S' ? 'S' : 'G');
       setEmpCode(String(d.empCode ?? ''));
       setEmpName('');
-      setVchDate(String(d.vchDate ?? todayLocal()).slice(0, 10));
+      setVchDate(toIsoDate(d.vchDate ?? todayLocal()));
       return true;
     } catch (e) {
       setErr(

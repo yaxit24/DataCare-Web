@@ -1932,13 +1932,22 @@ cache a previous server wrote. Proven by `web/apps/web/test/clearRouteCache.test
 Done when: no local browser run can be answered with a previous build's page.
 
 
-### N56 milestone 1 — Printed dates carry the year (G36, D19)
+### N56 milestones 1–2 — Canonical dates and printed years (G36, D19)
 
 `web/packages/core/src/dates.ts` converts dates for transport (`toIsoDate`) and display (`formatDesktopDate`,
 `dd/MM/yyyy`). The printed documents and `web/apps/web/components/VoucherList.tsx` use them, and
-`web/apps/api/src/modules/ops/kernelConformance.ts` refuses a new date sliced from its string form. Proven by
-`web/packages/core/test/dates.test.ts`, `web/apps/api/test/documents.test.ts` and the `print.date-with-year` case of
-`web/apps/web/test/features/modules/salesInvoice.mjs`.
+`web/apps/api/src/modules/ops/kernelConformance.ts` refuses a new date sliced from its string form. Milestone 2
+migrates the remaining 50 executable API transport sites to `toIsoDate`, removes the detector's self-matching
+example comment, broadens the direct-string-truncation rule for `dbText`/`txt` and date/day aliases, and migrates
+the additional direct slices and local date helpers exposed by independent review. The date-normalization baseline is
+now empty, and
+`web/apps/api/test/kernelConformance.test.ts` requires it to stay empty. Browser form hydration now uses
+`toIsoDate`, while dedicated lists, messages and saved views use `formatDesktopDate`; the Order report binder formats bound date fields before rendering, and `web/apps/web/test/dateConformance.test.ts` guards the browser
+policies. The two fixed Sales Order G36 cases leave the shrink-only feature baseline. The original display behavior is covered by `web/packages/core/test/dates.test.ts`, `web/apps/api/test/documents.test.ts` and the
+`print.date-with-year` case of `web/apps/web/test/features/modules/salesInvoice.mjs`.
+
+Implementation status is `implemented-unverified`: direct execution of the conformance detector reports zero date
+normalization bypasses, while the full dependency-backed and real-browser gates still need a successful run.
 
 Done when: no document or list prints a date without its year and the date-normalization rule is at zero.
 

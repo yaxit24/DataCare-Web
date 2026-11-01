@@ -14,6 +14,7 @@
 import {
   round,
   settleMoneyMetal,
+  toIsoDate,
   wholesaleBand,
   wholesaleGridTotals,
   wholesaleIssueLine,
@@ -833,7 +834,7 @@ export function voucherFromSaved(view: SavedVoucher): VoucherState {
   const received = (view.receivedLines ?? []).map((row) => lineFromSaved(row, 'receive'));
   return {
     header: {
-      vchDate: text(view.vchDate).slice(0, 10) || todayLocal(),
+      vchDate: toIsoDate(view.vchDate) || todayLocal(),
       billNo: text(view.billNo),
       acCode: text(view.acCode),
       acName: text(view.acName),

@@ -19,7 +19,13 @@ import { EntityImagePanel } from '../../../../components/EntityImagePanel';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import SubDetailGrid, { stoneRowFromApi, useSubDetail } from '../../../../components/SubDetailGrid';
 import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
-import { fineFor, labourCharge, billTotals, lineNet as lineNetAmount } from '@datacare/core';
+import {
+  fineFor,
+  formatDesktopDate,
+  labourCharge,
+  billTotals,
+  lineNet as lineNetAmount,
+} from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
 import { openDocument } from '../../../../lib/openDocument';
 
@@ -812,7 +818,7 @@ export default function ConsiPurchaseEntryPage() {
                 {openReceipts.map((receipt) => (
                   <tr key={`${receipt.coYear}-${receipt.coBook}-${receipt.voucherNo}`}>
                     <td>{receipt.voucherNo}</td>
-                    <td>{receipt.vchDate ?? ''}</td>
+                    <td>{formatDesktopDate(receipt.vchDate)}</td>
                     <td>{receipt.acName || receipt.acCode || ''}</td>
                     <td>{receipt.coYear}</td>
                     <td>{receipt.coBook}</td>

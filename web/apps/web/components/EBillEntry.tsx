@@ -1,5 +1,7 @@
 'use client';
 
+import { formatDesktopDate } from '@datacare/core';
+
 import { useEffect, useMemo, useState } from 'react';
 import { ApiError, del, get, getBlob, post, put } from '../lib/api';
 import { LookupPicker } from './LookupPicker';
@@ -668,7 +670,9 @@ export function EBillEntry({
       {loaded?.registration && (
         <p className="muted">
           IRN {loaded.registration.irn} · Ack {loaded.registration.ackNo}
-          {loaded.registration.ackDate ? ` · ${loaded.registration.ackDate}` : ''}
+          {loaded.registration.ackDate
+            ? ` · ${formatDesktopDate(loaded.registration.ackDate)}`
+            : ''}
         </p>
       )}
       {loaded && loaded.componentCount > 0 && (

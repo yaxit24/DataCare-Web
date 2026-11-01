@@ -1,4 +1,5 @@
 'use client';
+import { toIsoDate } from '@datacare/core';
 import { useState } from 'react';
 import { post, put, get, ApiError } from '../../../../lib/api';
 import { BookSelect } from '../../../../components/BookSelect';
@@ -77,7 +78,7 @@ export default function CardReceiptPage() {
       setBankSchPrc(Number(d.bankSchPrc ?? 0) ? String(d.bankSchPrc) : '');
       setCashPaid(Number(d.cashPaid ?? 0) ? String(d.cashPaid) : '');
       setDesc(String(d.desc ?? ''));
-      setVchDate(String(d.vchDate ?? '').slice(0, 10));
+      setVchDate(toIsoDate(d.vchDate));
     } catch (e) {
       setErr(e instanceof ApiError ? e.body?.error || e.message : 'failed to load');
     }

@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 
 /**
@@ -174,7 +175,7 @@ async function buildMapTx(
   const out: RenumberPreviewRow[] = rows.map((r) => ({
     vchNo: num(r.vchNo),
     newNo: num(r.newNo),
-    vchDate: r.vchDate ? String(r.vchDate).slice(0, 10) : '',
+    vchDate: r.vchDate ? toIsoDate(r.vchDate) : '',
     legs: num(r.legs),
   }));
   const changed = out

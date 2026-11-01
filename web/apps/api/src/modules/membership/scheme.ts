@@ -1,4 +1,4 @@
-import { round } from '@datacare/core';
+import { round, toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import {
   buildMoneyRojmel,
@@ -954,7 +954,7 @@ export async function getSchemeInstallment(
       voucherNo: text(x.VCH_NO),
       hiddenVoucherNo: text(x.HD_VCH_NO),
       mainUser: text(x.MAIN_USER),
-      vchDate: text(x.VCH_DATE).slice(0, 10),
+      vchDate: toIsoDate(x.VCH_DATE),
       schmCode: first.schmCode,
       membCode: first.membCode,
       amount: first.amount,
@@ -1986,7 +1986,7 @@ export async function getSchemeGoldAdjust(
       voucherNo: text(x.VCH_NO),
       hiddenVoucherNo: text(x.HD_VCH_NO),
       mainUser: text(x.MAIN_USER),
-      vchDate: text(x.VCH_DATE_TEXT).slice(0, 10),
+      vchDate: toIsoDate(x.VCH_DATE_TEXT),
       book,
       lines,
       goldWt: round3(lines.reduce((sum, l) => sum + numv(l.goldWt), 0)),
@@ -2083,7 +2083,7 @@ export async function getSchemeMaturity(
       voucherNo: text(x.VCH_NO),
       hiddenVoucherNo: text(x.HD_VCH_NO),
       mainUser: text(x.MAIN_USER),
-      vchDate: text(x.VCH_DATE_TEXT).slice(0, 10),
+      vchDate: toIsoDate(x.VCH_DATE_TEXT),
       schmCode: text(x.SCHM_CODE),
       membCode: text(x.MEMB_CODE),
       amount: numv(x.MEMB_AMT),

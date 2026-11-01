@@ -1,3 +1,5 @@
+import { formatDesktopDate } from '@datacare/core';
+
 export type MfgLotKind = 'issue' | 'receive';
 export type MfgLotRow = Record<string, string | number | boolean | null>;
 export type MfgLotDisplayLabels = {
@@ -84,8 +86,19 @@ export function mfgLotDisplayName(key: string, code: unknown, labels?: MfgLotDis
       : undefined;
   return names?.[String(code ?? '').trim()] || null;
 }
-export const mfgLotValue = (value: unknown) =>
-  value == null ? 'Not set' : value === '' ? 'Blank' : String(value);
+const MFG_LOT_DATE_FIELDS = new Set([
+  'VCH_DATE',
+  'BILL_DATE',
+  'ADJ_DATE',
+  'STK_DATE',
+  'sourceDate',
+]);
+
+export const mfgLotValue = (value: unknown, field?: string) => {
+  if (value == null) return 'Not set';
+  if (value === '') return 'Blank';
+  return field && MFG_LOT_DATE_FIELDS.has(field) ? formatDesktopDate(value) : String(value);
+};
 export const mfgLotFamilies = { issue: 'MFG STNG ISU', receive: 'MFG STNG REC' } as const;
 export function mfgLotComponents(document: MfgLotDocument, line: MfgLotRow) {
   // TR_MFG_WITH_LOT uses the persisted parent SR_NO. OLD_SRNO is the separate source link.
@@ -250,6 +263,6 @@ export function mfgLotFields(row: MfgLotRow) {
   return [...preferred, ...extra].map((key) => ({
     key,
     label: mfgLotLabels[key] ?? key,
-    value: mfgLotValue(row[key]),
+    value: mfgLotValue(row[key], key),
   }));
 }

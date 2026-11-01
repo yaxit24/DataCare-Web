@@ -1,4 +1,5 @@
 'use client';
+import { formatDesktopDate } from '@datacare/core';
 import { useCallback, useEffect, useState } from 'react';
 import { get, ApiError } from '../../../../lib/api';
 
@@ -224,7 +225,7 @@ export default function RemindersPage() {
                 >
                   <td>{o.vchNo}</td>
                   <td>{o.acName || o.acCode}</td>
-                  <td>{o.delDate ?? ''}</td>
+                  <td>{formatDesktopDate(o.delDate)}</td>
                   <td className="num">{money(o.total)}</td>
                   <td>
                     {o.daysToDelivery == null ? (

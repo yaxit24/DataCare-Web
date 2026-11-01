@@ -1,4 +1,4 @@
-import { round, roundHalfEven } from '@datacare/core';
+import { round, roundHalfEven, toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { assertBalanced, assertPeriodOpen, insertRowTx } from '../posting/posting.js';
 import { resolveTaxPolicyTx, type ResolvedTaxPolicy } from '../shared/taxPolicy.js';
@@ -1018,7 +1018,7 @@ export async function getOtherPurc(
     const h = headers[0]!;
     return {
       voucherNo,
-      vchDate: text(h.VCH_DAY).slice(0, 10),
+      vchDate: toIsoDate(h.VCH_DAY),
       voucherTime: text(h.VCH_CLOCK),
       hiddenVoucherNo: text(h.HD_VCH_NO),
       mainUser: text(h.MAIN_USER),
@@ -1027,7 +1027,7 @@ export async function getOtherPurc(
       ledgerCode: text(h.LEDR_CODE),
       ledgerName: text(h.LEDR_NAME),
       billNo: text(h.BILL_NO),
-      billDate: text(h.BILL_DAY).slice(0, 10),
+      billDate: toIsoDate(h.BILL_DAY),
       chequeAmount: number(h.CHQ_AMT),
       chequeAccount: text(h.BANK_AC),
       chequeNo: text(h.CHQ_NO),

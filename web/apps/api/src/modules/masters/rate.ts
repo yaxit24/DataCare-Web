@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 
 const NN = (c: string): string => `coalesce(NULLIF(${c}::text,'')::numeric,0)`;
@@ -18,7 +19,7 @@ export async function fetchRate(
   fineSilver: number;
   date: string;
 } | null> {
-  const d = date && /^\d{4}-\d{2}-\d{2}/.test(date) ? date.slice(0, 10) : '9999-12-31';
+  const d = date && /^\d{4}-\d{2}-\d{2}/.test(date) ? toIsoDate(date) : '9999-12-31';
   return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "GR_CODE", "VCH_DATE", ${NN('"GR_RATE"')} AS rate, ${NN('"GR_TOUCH"')} AS touch,
@@ -47,7 +48,7 @@ export async function fetchRate(
       touch: Number(r.touch),
       fineGold: Number(r.finegl),
       fineSilver: Number(r.finesl),
-      date: String(r.VCH_DATE).slice(0, 10),
+      date: toIsoDate(r.VCH_DATE),
     };
   });
 }
