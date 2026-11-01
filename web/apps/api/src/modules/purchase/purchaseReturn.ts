@@ -4,10 +4,17 @@ import { nextHiddenVoucherNoTx, voucherTimestamp } from '../vouchers/lifecycle.j
 import { issueTagTx } from '../stock/stock.js';
 import { postVoucherTx, assertBalanced, insertRowTx, type LedgerLine } from '../posting/posting.js';
 import { receiptLegs } from '../finance/tender.js';
-import { billTotals, type BillTotals } from '@datacare/core';
+import {
+  billTotals,
+  purchaseReturnAmountBasis,
+  purchaseReturnRoundingPolicy,
+  saleItemAmountWhole,
+  type BillTotals,
+} from '@datacare/core';
 import {
   buildExpenseLegs,
   computeLine,
+  lineFine,
   type PurchaseLineInput,
   PurchaseValidationError,
 } from './purchase.js';
@@ -292,6 +299,7 @@ export async function writePurchaseReturnTx(
   const { vchNo, hdVchNo, bookPolicy } = ctx;
   const key = keyOf(input.scope, vchNo);
   const roundingPolicy = await resolveRoundingPolicyTx(tx, input.scope);
+  const returnRoundingPolicy = purchaseReturnRoundingPolicy(roundingPolicy);
   const taxPolicy = await resolveTaxPolicyTx(tx, input.scope, {
     acCode: input.acCode,
     taxPct: input.taxRatePct,
@@ -303,7 +311,25 @@ export async function writePurchaseReturnTx(
   const computed = lines.map((line) => {
     const rounded =
       line.rate == null ? line : { ...line, rate: roundingPolicy.roundPurchaseRate(line.rate) };
-    return { in: rounded, calc: computeLine(rounded, roundingPolicy) };
+    const fine = lineFine(rounded);
+    const basis = purchaseReturnAmountBasis(
+      { pieces: rounded.pcs, fineWt: fine },
+      rounded.rateType,
+    );
+    const metalAmount =
+      rounded.metalAmount != null
+        ? returnRoundingPolicy.roundBillTotal(rounded.metalAmount)
+        : basis.quantity > 0 && rounded.rate != null
+          ? saleItemAmountWhole(basis, rounded.rate)
+          : 0;
+    const labourAmount =
+      rounded.labourAmount == null
+        ? undefined
+        : returnRoundingPolicy.roundLabourAmount(rounded.labourAmount);
+    return {
+      in: rounded,
+      calc: computeLine({ ...rounded, metalAmount, labourAmount }, returnRoundingPolicy, '', true),
+    };
   });
   const lineNetTotal = computed.reduce((sum, line) => sum + line.calc.net, 0);
   const totals = billTotals(
@@ -313,7 +339,7 @@ export async function writePurchaseReturnTx(
       taxRatePct: input.taxRatePct,
       interState: taxPolicy.interState,
     },
-    roundingPolicy,
+    returnRoundingPolicy,
   );
   const issued = await resolvePurchaseReturnTags(tx, input, lines);
 

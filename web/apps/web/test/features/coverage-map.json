@@ -40,7 +40,9 @@
     "salesReturn": {
       "covers": [
         "web/apps/web/app/(app)/txn/sale-return/page.tsx",
-        "web/apps/api/src/modules/sales/salesReturn.ts"
+        "web/apps/web/lib/salesReturnCalculation.ts",
+        "web/apps/api/src/modules/sales/salesReturn.ts",
+        "web/packages/core/src/saleAmount.ts"
       ]
     },
     "companyOpen": {
@@ -51,7 +53,8 @@
         "web/apps/web/app/(app)/txn/purchase-return/page.tsx",
         "web/apps/web/lib/purchaseReturnForm.ts",
         "web/apps/api/src/modules/purchase/purchaseReturn.ts",
-        "web/apps/api/src/modules/purchase/purchaseReturnLifecycle.ts"
+        "web/apps/api/src/modules/purchase/purchaseReturnLifecycle.ts",
+        "web/packages/core/src/purchaseReturnAmount.ts"
       ]
     },
     "cashBank": {
@@ -122,6 +125,7 @@
     },
     "tagCancel": {
       "covers": [
+        "web/apps/web/app/(app)/txn/tag-cancel/page.tsx",
         "web/apps/web/components/TagCancelForm.tsx",
         "web/apps/api/src/modules/stock/tagCancel.ts",
         "web/apps/api/src/modules/stock/tagCancelBill.ts"
@@ -182,7 +186,11 @@
         "web/apps/web/app/(app)/txn/wholesale-sale/page.tsx",
         "web/apps/web/components/WholesaleVoucherForm.tsx",
         "web/apps/web/lib/wholesaleVoucher.ts",
-        "web/apps/api/src/modules/sales/rateCut.ts"
+        "web/apps/api/src/modules/sales/rateCut.ts",
+        "web/apps/api/src/modules/sales/rateCutTags.ts",
+        "web/apps/api/src/modules/sales/wholesaleSaveChecks.ts",
+        "web/apps/api/src/modules/sales/wholesaleSaleBill.ts",
+        "web/apps/api/src/routes/wholesaleSale.ts"
       ]
     },
     "stockAdjust": {

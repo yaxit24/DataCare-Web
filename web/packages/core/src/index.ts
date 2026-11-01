@@ -234,9 +234,13 @@ export {
   companySaleAmountType,
   effectiveSaleRateWith,
   saleAmountBasis,
+  saleReturnAmountBasis,
   saleItemAmount,
+  saleItemAmountWhole,
+  salesReturnRoundingPolicy,
 } from './saleAmount.js';
 export type { SaleAmountLine, SaleAmountBasis } from './saleAmount.js';
+export { purchaseReturnAmountBasis, purchaseReturnRoundingPolicy } from './purchaseReturnAmount.js';
 export { salesOrderItemWeight, salesOrderItemAmount, salesOrderBill } from './salesOrderAmount.js';
 export type { SalesOrderAmountLine, SalesOrderBill } from './salesOrderAmount.js';
 export { rateFactor, settleMoneyMetal, settlementBalance } from './settlement.js';

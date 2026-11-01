@@ -8,11 +8,19 @@ import {
   insertRowTx,
   type LedgerLine,
 } from '../posting/posting.js';
-import { billTotals, toIsoDate, type BillTotals } from '@datacare/core';
+import {
+  billTotals,
+  saleReturnAmountBasis,
+  saleItemAmountWhole,
+  salesReturnRoundingPolicy,
+  toIsoDate,
+  type BillTotals,
+} from '@datacare/core';
 import {
   assertSaleTaxRate,
   buildIncomeLegs,
   computeLine,
+  lineFine,
   type SaleLineInput,
   SaleValidationError,
 } from './sales.js';
@@ -21,6 +29,7 @@ import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
 import { gstTaxRows } from '../shared/taxDataRows.js';
 import { resolveBookAccountTx, resolveBookPolicyTx } from '../shared/bookPolicy.js';
 import { resolveRoundingPolicyTx } from '../shared/roundingPolicyLoader.js';
+import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
 import { buildSaleRojmel, rojmelMetalFor } from '../shared/rojmel.js';
 import {
   deleteVoucherWriteSetTx,
@@ -274,6 +283,14 @@ export async function createSaleReturn(
     const key = keyOf(input.scope, vchNo);
     const bookPolicy = await resolveBookPolicyTx(tx, input.scope, 'SALES RETURN');
     const roundingPolicy = await resolveRoundingPolicyTx(tx, input.scope);
+    const returnRoundingPolicy = salesReturnRoundingPolicy(roundingPolicy);
+    const behavior = await resolveSettingsBehaviorTx(tx, input.scope);
+    // TR_SALE_RTN.cs:4928-4952 has explicit F and G branches; every other company value, including
+    // N, blank and the nominal P mode, prices on net + ghat. RATE_TYPE=P still prices by pieces.
+    const amountType =
+      behavior.saleAmountType === 'F' || behavior.saleAmountType === 'G'
+        ? behavior.saleAmountType
+        : 'N';
     const taxPolicy = await resolveTaxPolicyTx(tx, input.scope, {
       acCode: input.acCode,
       taxPct: input.taxRatePct,
@@ -287,7 +304,27 @@ export async function createSaleReturn(
     const computed = lines.map((line) => {
       const rounded =
         line.rate == null ? line : { ...line, rate: roundingPolicy.roundItemRate(line.rate) };
-      return { in: rounded, calc: computeLine(rounded, roundingPolicy) };
+      const fine = lineFine(rounded);
+      const basis = saleReturnAmountBasis(
+        { ...rounded, fineWt: fine },
+        amountType,
+        rounded.rateType,
+      );
+      const metalAmount =
+        rounded.metalAmount != null
+          ? rounded.metalAmount
+          : basis.quantity > 0 && rounded.rate != null
+            ? saleItemAmountWhole(basis, rounded.rate)
+            : 0;
+      return {
+        in: rounded,
+        calc: computeLine(
+          { ...rounded, metalAmount },
+          returnRoundingPolicy,
+          amountType,
+          behavior.labourIncludesGhat,
+        ),
+      };
     });
     const lineNetTotal = computed.reduce((sum, line) => sum + line.calc.net, 0);
     const totals = billTotals(
@@ -297,7 +334,7 @@ export async function createSaleReturn(
         taxRatePct: input.taxRatePct,
         interState: taxPolicy.interState,
       },
-      roundingPolicy,
+      returnRoundingPolicy,
     );
     const identities = await resolveReturnedTagIdentities(tx, input, lines);
 
