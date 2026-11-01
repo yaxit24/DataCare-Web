@@ -318,13 +318,17 @@ export default function AddressMasterPage() {
   }
 
   /** tAcName_KeyUp: the list shows up to 99 of the company's addresses whose name starts with the name typed. */
+  const nameSearch = useRef(0);
   async function nameTyped(value: string) {
+    const asked = ++nameSearch.current;
     try {
-      setMatches(
-        await get<ListRow[]>(`/masters/address-master/names?q=${encodeURIComponent(value)}`),
+      const found = await get<ListRow[]>(
+        `/masters/address-master/names?q=${encodeURIComponent(value)}`,
       );
+      // An answer for older text (the operator kept typing) must not replace the current list.
+      if (asked === nameSearch.current) setMatches(found);
     } catch {
-      setMatches(null);
+      if (asked === nameSearch.current) setMatches(null);
     }
   }
 
@@ -487,8 +491,9 @@ export default function AddressMasterPage() {
       )}
       {(Object.keys(combos) as Combo[]).map((name) => (
         <datalist key={name} id={`address-${name}`}>
-          {combos[name].filter(Boolean).map((v) => (
-            <option key={v} value={v} />
+          {/* The states list keeps the desktop's UNION ALL, so a state can appear twice (:4004). */}
+          {combos[name].filter(Boolean).map((v, i) => (
+            <option key={`${v}-${i}`} value={v} />
           ))}
         </datalist>
       ))}
