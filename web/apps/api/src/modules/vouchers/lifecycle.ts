@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { formatVoucherNo, type VoucherScope } from './numbering.js';
 
 type CompleteVoucherScope = VoucherScope & { coYear: string; coBook: string };
@@ -105,8 +106,8 @@ export async function assertFiscalDateTx(
       `fiscal year ${scope.coYear} has no unambiguous opening and closing dates`,
     );
   }
-  const opening = text(rows[0].OP_DATE).slice(0, 10);
-  const closing = text(rows[0].CL_DATE).slice(0, 10);
+  const opening = toIsoDate(rows[0].OP_DATE);
+  const closing = toIsoDate(rows[0].CL_DATE);
   if (isoDate < opening || isoDate > closing) {
     throw new FiscalDateValidationError(
       `voucher date ${isoDate} is outside fiscal year ${opening} to ${closing}`,

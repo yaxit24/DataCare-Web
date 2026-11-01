@@ -35,6 +35,7 @@ import {
   labourCharge,
   lineNet as calcLineNet,
   billTotals,
+  toIsoDate,
   type LabourType,
   type BillTotals,
   lineTotalDesktop,
@@ -65,7 +66,6 @@ import {
 import { partyCashReceivedTx } from '../finance/finance.js';
 import { tenderThresholdDecision } from '../finance/tender.js';
 import { buildLineLegs, lineLegKey, type LineLeg } from '../posting/lineLegs.js';
-
 export class SaleValidationError extends Error {
   constructor(msg: string) {
     super(msg);
@@ -2401,7 +2401,7 @@ export async function getSale(
       voucherNo: text(h.VCH_NO),
       hiddenVoucherNo: text(h.HD_VCH_NO),
       mainUser: text(h.MAIN_USER),
-      vchDate: text(h.VCH_DATE).slice(0, 10),
+      vchDate: toIsoDate(h.VCH_DATE),
       billNo: text(h.BILL_NO),
       acCode: text(h.AC_CODE),
       acName: text(h.AC_NAME),

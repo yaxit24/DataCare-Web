@@ -1,4 +1,5 @@
 'use client';
+import { toIsoDate } from '@datacare/core';
 import { useState } from 'react';
 import { post, put, get, del, ApiError } from '../../../../lib/api';
 import { BookSelect } from '../../../../components/BookSelect';
@@ -73,7 +74,7 @@ export default function ContraPage() {
         })),
       );
       setItDesc(String(d.itDesc ?? ''));
-      setVchDate(String(d.vchDate ?? todayLocal()).slice(0, 10));
+      setVchDate(toIsoDate(d.vchDate ?? todayLocal()));
       return true;
     } catch (e) {
       setErr(

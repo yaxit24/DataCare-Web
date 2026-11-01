@@ -1,5 +1,7 @@
 'use client';
 
+import { formatDesktopDate } from '@datacare/core';
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ApiError, post } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
@@ -79,7 +81,7 @@ export default function EstimateResetPage() {
       return;
     }
     const ok = window.confirm(
-      `Estimate Reset will permanently delete ${num(preview.totals.delete)} row${preview.totals.delete === 1 ? '' : 's'} and insert ${num(preview.totals.insert)} stock-adjust row${preview.totals.insert === 1 ? '' : 's'} for company ${scope.coCode}, location ${scope.lcCode}, year ${scope.coYear} through ${preview.asOfDate}.`,
+      `Estimate Reset will permanently delete ${num(preview.totals.delete)} row${preview.totals.delete === 1 ? '' : 's'} and insert ${num(preview.totals.insert)} stock-adjust row${preview.totals.insert === 1 ? '' : 's'} for company ${scope.coCode}, location ${scope.lcCode}, year ${scope.coYear} through ${formatDesktopDate(preview.asOfDate)}.`,
     );
     if (!ok) return;
     setBusy('apply');

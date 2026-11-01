@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
 import {
@@ -447,7 +448,7 @@ export async function getCardReceipt(p: any, s: VoucherScope, x: number | string
       voucherNo: no,
       hiddenVoucherNo: text(h.HD_VCH_NO),
       mainUser: text(h.MAIN_USER),
-      vchDate: text(h.VCH_DATE).slice(0, 10),
+      vchDate: toIsoDate(h.VCH_DATE),
       partyAc: text(h.AC_CODE),
       partyName: text(h.AC_NAME),
       billNo: text(h.BILL_NO),

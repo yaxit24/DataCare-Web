@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 
 /**
@@ -122,7 +123,7 @@ export async function recentVouchers(
       coYear: scope.coYear,
       coBook: book,
       vchNo: String(r.vch ?? ''),
-      vchDate: r.vd ? String(r.vd).slice(0, 10) : null,
+      vchDate: r.vd ? toIsoDate(r.vd) : null,
       vchType: r.vt ?? null,
       acCode: String(r.ac ?? ''),
       acName: String(r.acn ?? ''),

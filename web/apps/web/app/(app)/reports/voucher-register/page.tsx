@@ -1,4 +1,5 @@
 'use client';
+import { formatDesktopDate } from '@datacare/core';
 import { useCallback, useEffect, useState } from 'react';
 import { get, ApiError } from '../../../../lib/api';
 
@@ -19,8 +20,8 @@ interface VoucherReport {
 const fmtAmt = (n: number): string =>
   Number(n ?? 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmtInt = (n: number): string => Number(n ?? 0).toLocaleString('en-IN');
-/** API serialises VCH_DATE (a SQL date) as an ISO string — show just the YYYY-MM-DD part. */
-const fmtDate = (d: string | null): string => (d ? String(d).slice(0, 10) : '\u2014');
+/** API serialises VCH_DATE as ISO transport; screens use the desktop date format. */
+const fmtDate = (d: string | null): string => (d ? formatDesktopDate(d) : '\u2014');
 
 export default function VoucherRegisterPage() {
   const [book, setBook] = useState('');

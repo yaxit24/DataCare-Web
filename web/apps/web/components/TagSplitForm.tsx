@@ -1,5 +1,7 @@
 'use client';
 
+import { formatDesktopDate } from '@datacare/core';
+
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { ApiError, del, get, post, put } from '../lib/api';
 import { useCompanySettings } from '../lib/companySettings';
@@ -708,7 +710,7 @@ export function TagSplitForm() {
                     }}
                   >
                     <td>{v.vchNo}</td>
-                    <td>{v.vchDate}</td>
+                    <td>{formatDesktopDate(v.vchDate)}</td>
                     <td>{v.partyName}</td>
                     <td>{v.vchDesc}</td>
                     <td>{v.mainUser}</td>

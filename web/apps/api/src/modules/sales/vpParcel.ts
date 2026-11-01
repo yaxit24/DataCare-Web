@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { assertBalanced, assertPeriodOpen, insertRowTx } from '../posting/posting.js';
 import {
@@ -1259,7 +1260,7 @@ export async function getVpParcel(
     const header = headers[0]!;
     return {
       voucherNo,
-      vchDate: text(header.VCH_DAY).slice(0, 10),
+      vchDate: toIsoDate(header.VCH_DAY),
       voucherTime: text(header.VCH_CLOCK),
       hiddenVoucherNo: text(header.HD_VCH_NO),
       mainUser: text(header.MAIN_USER),

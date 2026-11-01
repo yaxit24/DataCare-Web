@@ -1,4 +1,5 @@
 'use client';
+import { formatDesktopDate } from '@datacare/core';
 import { useCallback, useEffect, useState } from 'react';
 import { get, post, del, ApiError } from '../../../../lib/api';
 import { BookSelect } from '../../../../components/BookSelect';
@@ -227,12 +228,12 @@ export default function OrderCancelPage() {
             {orders.map((o) => (
               <tr key={`${o.book}-${o.vchNo}`}>
                 <td>{o.vchNo}</td>
-                <td>{o.vchDate ? String(o.vchDate).slice(0, 10) : ''}</td>
+                <td>{formatDesktopDate(o.vchDate)}</td>
                 <td>{o.acName || o.acCode}</td>
                 <td className="num">{money(o.total)}</td>
                 <td className="num">{o.advance ? money(o.advance) : ''}</td>
                 <td>
-                  {o.delDate ? String(o.delDate).slice(0, 10) : <span className="muted">—</span>}
+                  {o.delDate ? formatDesktopDate(o.delDate) : <span className="muted">—</span>}
                 </td>
                 <td style={{ whiteSpace: 'nowrap' }}>
                   {o.advance > 0 && (

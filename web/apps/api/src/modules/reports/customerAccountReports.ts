@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { applyFilters } from './reportFilters.js';
 import type { ReportScope } from './reports.js';
@@ -8,9 +9,11 @@ const t = (v: unknown): string | null => {
 };
 
 const d = (v: unknown): string | null => {
-  if (v instanceof Date) return v.toISOString().slice(0, 10);
-  const s = t(v);
-  return s ? s.slice(0, 10) : null;
+  try {
+    return toIsoDate(v) || null;
+  } catch {
+    return null;
+  }
 };
 
 export interface LastVisitRow {

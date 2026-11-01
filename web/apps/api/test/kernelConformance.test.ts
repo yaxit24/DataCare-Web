@@ -394,19 +394,29 @@ describe('kernel adoption in this repository', () => {
     expect(offenders).toEqual([]);
   });
 
+  it('has no grandfathered date-normalization bypasses after N56 completes', () => {
+    const dateBypasses = findBypasses(files).filter((b) => b.concern === 'date-normalization');
+    expect(dateBypasses.map((b) => `${b.path}:${b.line} ${b.snippet}`)).toEqual([]);
+  });
+
   // N56 (G36, D19): String(date).slice(0, 10) printed "Thu Oct 01" with no year.
   it('flags a date sliced from its string form, but not other ten-character slices or the core helper', () => {
     const text = [
       "const vchDate = h.VCH_DATE ? String(h.VCH_DATE).slice(0, 10) : '';",
       '      vchDate: text(x.VCH_DATE).slice(0, 10),',
       "      fromDate: String(m.fd ?? '').slice(0, 10),",
+      '      billDate: text(x.BILL_DAY).slice(0, 10),',
+      '      vchDate: dbText(x.VCH_DAY).slice(0, 10),',
+      "      yesterday: String(x.yesterday ?? '').slice(0, 10),",
+      '      vchDate: txt(x.vd).slice(0, 10),',
+      '      reminderDate: txt(x.rd).slice(0, 10),',
       '      HM_ID: str(line.in.huid).slice(0, 10) || null,',
       '      ITM_LOT: str(line.in.itemLot).slice(0, 10) || null,',
     ].join('\n');
     const found = findBypasses([{ path: 'modules/x/y.ts', text }]).filter(
       (b) => b.concern === 'date-normalization',
     );
-    expect(found.map((b) => b.line)).toEqual([1, 2, 3]);
+    expect(found.map((b) => b.line)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
     expect(
       findBypasses([{ path: 'packages/core/dates.ts', text }]).filter(
         (b) => b.concern === 'date-normalization',

@@ -8,6 +8,7 @@ import {
   eBillTaxDigits,
   eInvoiceTcs,
   round,
+  toIsoDate,
   type EBillLineResult,
   type EBillPolicy,
   type EBillTotals,
@@ -31,7 +32,6 @@ import {
   type CompleteFinanceScope,
   type VoucherIdentity,
 } from '../finance/lifecycle.js';
-
 /**
  * TR_SL_EBILL create / edit / delete in both of its modes (card X15):
  *
@@ -1682,7 +1682,7 @@ export async function getEBillEntry(
       family,
       voucherNo,
       hiddenVoucherNo: text(h.HD_VCH_NO),
-      vchDate: text(h.VCH_DAY).slice(0, 10),
+      vchDate: toIsoDate(h.VCH_DAY),
       voucherTime: text(h.VCH_CLOCK),
       mainUser: text(h.MAIN_USER),
       partyCode: text(h.AC_CODE),

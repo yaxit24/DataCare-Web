@@ -1,4 +1,5 @@
 'use client';
+import { formatDesktopDate } from '@datacare/core';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { get, post, put, del, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
@@ -675,7 +676,7 @@ export default function TourOrderPage() {
             {orders.map((o, i) => (
               <tr key={i}>
                 <td>{o.vchNo}</td>
-                <td>{o.vchDate ? String(o.vchDate).slice(0, 10) : ''}</td>
+                <td>{formatDesktopDate(o.vchDate)}</td>
                 <td>{o.acCode}</td>
                 <td>{o.acName}</td>
                 <td className="num">{Number(o.total).toLocaleString('en-IN')}</td>

@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import {
   DEFAULT_INT_YEAR_DAYS,
@@ -1157,9 +1158,9 @@ export async function getDhrnIssue(prisma: any, scope: VoucherScope, isuNo: numb
       voucherNo: no,
       hiddenVoucherNo: String(h.HD_VCH_NO ?? ''),
       mainUser: String(h.MAIN_USER ?? ''),
-      vchDate: String(h.vd ?? '').slice(0, 10),
-      fromDate: String(m.fd ?? '').slice(0, 10),
-      toDate: String(h.td ?? '').slice(0, 10),
+      vchDate: toIsoDate(h.vd),
+      fromDate: toIsoDate(m.fd),
+      toDate: toIsoDate(h.td),
       borrowerAc: String(h.AC_CODE ?? ''),
       borrowerName: String(h.AC_NAME ?? ''),
       principal: Number(h.amt ?? 0),
@@ -1280,9 +1281,9 @@ export async function getDhrnReceipt(prisma: any, scope: VoucherScope, vchNo: nu
       voucherNo: no,
       hiddenVoucherNo: String(h.HD_VCH_NO ?? ''),
       mainUser: String(h.MAIN_USER ?? ''),
-      vchDate: String(h.vd ?? '').slice(0, 10),
-      fromDate: String(h.fd ?? '').slice(0, 10),
-      toDate: String(h.td ?? '').slice(0, 10),
+      vchDate: toIsoDate(h.vd),
+      fromDate: toIsoDate(h.fd),
+      toDate: toIsoDate(h.td),
       borrowerAc: String(h.AC_CODE ?? ''),
       borrowerName: String(h.AC_NAME ?? ''),
       isuNo: String(h.ISU_NO ?? ''),

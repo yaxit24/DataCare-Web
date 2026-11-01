@@ -1,4 +1,5 @@
 'use client';
+import { toIsoDate } from '@datacare/core';
 import { useState } from 'react';
 import { post, put, get, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
@@ -60,7 +61,7 @@ export default function JournalEntryPage() {
       );
       setLoadedVch(vchNo);
       setNarration(String(d.narration ?? ''));
-      setVchDate(String(d.vchDate ?? todayLocal()).slice(0, 10));
+      setVchDate(toIsoDate(d.vchDate ?? todayLocal()));
       const rows: Line[] = (d.lines ?? []).map((l: any) => ({
         acCode: String(l.acCode ?? ''),
         desc: String(l.desc ?? ''),

@@ -1,6 +1,11 @@
-import { formatDesktopDate } from '@datacare/core';
+import {
+  formatDesktopDate,
+  tagCancelLineQualifies,
+  tagCancelTotals,
+  toIsoDate,
+  type TagCancelTotals,
+} from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
-import { tagCancelLineQualifies, tagCancelTotals, type TagCancelTotals } from '@datacare/core';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import {
   assertFiscalDateTx,
@@ -217,24 +222,20 @@ function todayIso(): string {
 }
 
 function businessDate(value: unknown): { date: Date; iso: string } {
-  const raw =
-    value instanceof Date
-      ? value.toISOString().slice(0, 10)
-      : value == null || String(value).trim() === ''
-        ? todayIso()
-        : String(value).trim().slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+  let raw: string;
+  try {
+    raw = value == null || String(value).trim() === '' ? todayIso() : toIsoDate(value);
+  } catch {
     throw new TagCancelValidationError('voucher date is missing or invalid');
   }
   const date = new Date(`${raw}T00:00:00.000Z`);
-  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== raw) {
+  if (Number.isNaN(date.getTime()) || toIsoDate(date) !== raw) {
     throw new TagCancelValidationError('voucher date is missing or invalid');
   }
   return { date, iso: raw };
 }
 
-const isoOf = (value: unknown): string =>
-  value instanceof Date ? value.toISOString().slice(0, 10) : dbText(value).slice(0, 10);
+const isoOf = (value: unknown): string => toIsoDate(value);
 
 async function assertOpenTx(tx: any, scope: CompleteScope, date: Date): Promise<void> {
   // TR_TAG_CAN.cs:4974-4978 (save) and :5338-5341 (delete), with the desktop's own text.
@@ -1061,7 +1062,7 @@ export async function getTagCancel(
       },
       vchNo: Number(voucherNo),
       voucherNo,
-      vchDate: dbText(header.VCH_DAY).slice(0, 10),
+      vchDate: toIsoDate(header.VCH_DAY),
       voucherTime: dbText(header.VCH_CLOCK),
       hiddenVoucherNo: dbText(header.HD_VCH_NO),
       mainUser: dbText(header.MAIN_USER),
@@ -1123,7 +1124,7 @@ export async function listTagCancel(
       nextVoucherNo: formatVoucherNo(max + 1),
       vouchers: rows.map((row) => ({
         vchNo: dbText(row.VCH_NO),
-        vchDate: dbText(row.VCH_DAY).slice(0, 10),
+        vchDate: toIsoDate(row.VCH_DAY),
         partyName: dbText(row.AC_NAME),
         vchDesc: dbText(row.VCH_DESC),
         mainUser: dbText(row.MAIN_USER),

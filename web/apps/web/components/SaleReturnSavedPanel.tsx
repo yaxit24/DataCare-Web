@@ -1,5 +1,7 @@
 'use client';
 
+import { formatDesktopDate } from '@datacare/core';
+
 import { useEffect, useRef, useState } from 'react';
 import { ApiError, get, put } from '../lib/api';
 import {
@@ -512,7 +514,7 @@ export function SaleReturnSavedPanel({
               {listed.map((row, index) => (
                 <tr key={`${row.voucherNo}:${index}`}>
                   <td>{row.voucherNo}</td>
-                  <td>{String(row.display.date ?? row.raw.VCH_DATE ?? '')}</td>
+                  <td>{formatDesktopDate(row.display.date ?? row.raw.VCH_DATE)}</td>
                   <td>
                     {String(row.display.customer ?? row.raw.AC_NAME ?? row.raw.AC_CODE ?? '')}
                   </td>
@@ -546,7 +548,7 @@ export function SaleReturnSavedPanel({
           </p>
           <p>
             Customer {selected.document.header.raw.AC_CODE} {selected.document.header.raw.AC_NAME} ·
-            Date {selected.document.header.raw.VCH_DATE}
+            Date {formatDesktopDate(selected.document.header.raw.VCH_DATE)}
           </p>
           <p data-testid="sale-return-saved-original">
             Original sale: location {selected.document.header.raw.ISU_LC_CODE ?? '—'}, year{' '}

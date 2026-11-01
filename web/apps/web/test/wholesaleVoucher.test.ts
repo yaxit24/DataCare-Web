@@ -416,6 +416,14 @@ describe('reopen: a saved voucher comes back exactly as stored', () => {
     expect(state.received[0]!.tagNo).toBe('');
   });
 
+  it('normalizes saved voucher dates without shifting timestamp calendar days', () => {
+    expect(voucherFromSaved({ ...saved, vchDate: '2026-10-01' }).header.vchDate).toBe('2026-10-01');
+    expect(
+      voucherFromSaved({ ...saved, vchDate: '2026-10-01T23:30:00+05:30' }).header.vchDate,
+    ).toBe('2026-10-01');
+    expect(() => voucherFromSaved({ ...saved, vchDate: 'not-a-date' })).toThrow(RangeError);
+  });
+
   it('re-sends the stored figures unchanged: fine, typed ghat weight, tag instance and settlement', () => {
     const body = voucherPayload(voucherFromSaved(saved), { coBook: '034' });
     expect(body).toMatchObject({ fineRate: 6500, settleDrAmt: 3517, settleCrFine: 0.541 });

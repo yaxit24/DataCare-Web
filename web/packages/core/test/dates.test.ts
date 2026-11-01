@@ -19,11 +19,20 @@ describe('toIsoDate (N56, D19)', () => {
   });
 
   it('refuses what is not a date, and treats empty as empty', () => {
-    for (const bad of ['Thu Oct 01 2026', '01/10/2026', '2026-13-01', 'abc', new Date('x')])
+    for (const bad of [
+      'Thu Oct 01 2026',
+      '01/10/2026',
+      '2026-13-01',
+      '2026-10-01T99:00:00',
+      '2026-10-01T12:garbage',
+      'abc',
+      new Date('x'),
+    ])
       expect(() => toIsoDate(bad)).toThrow(RangeError);
     expect(toIsoDate(null)).toBe('');
     expect(toIsoDate(undefined)).toBe('');
     expect(toIsoDate('')).toBe('');
+    expect(toIsoDate('   ')).toBe('');
   });
 });
 

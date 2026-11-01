@@ -1,4 +1,5 @@
 'use client';
+import { formatDesktopDate } from '@datacare/core';
 import { useEffect, useState } from 'react';
 import { get } from '../lib/api';
 
@@ -59,7 +60,7 @@ export function RateTicker() {
       <span>
         Fine Silver <b>₹{f(r?.fineSilver)}</b>
       </span>
-      {r?.date && <span className="muted">Rate {String(r.date).slice(0, 10)}</span>}
+      {r?.date && <span className="muted">Rate {formatDesktopDate(r.date)}</span>}
     </div>
   );
 }

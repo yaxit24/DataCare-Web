@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { applyFilters } from './reportFilters.js';
 import type { ReportScope } from './reports.js';
@@ -10,9 +11,19 @@ const text = (v: unknown): string | null => {
 const str = (v: unknown): string => String(v ?? '').trim();
 
 const dateText = (v: unknown): string | null => {
-  if (v instanceof Date) return v.toISOString().slice(0, 10);
-  const s = text(v);
-  return s ? s.slice(0, 10) : null;
+  try {
+    return toIsoDate(v) || null;
+  } catch {
+    return null;
+  }
+};
+
+const isoDateOrEmpty = (value: unknown): string => {
+  try {
+    return toIsoDate(value);
+  } catch {
+    return '';
+  }
 };
 
 const boolFlag = (v: unknown, fallback = true): boolean => {
@@ -238,7 +249,7 @@ export async function markEntryChecked(
     .map((row) => ({
       coBook: str(row.coBook).slice(0, 8),
       vchNo: str(row.vchNo).slice(0, 12),
-      editDate: str(row.editDate).slice(0, 10),
+      editDate: isoDateOrEmpty(row.editDate),
     }))
     .filter((row) => row.coBook && row.vchNo && /^\d{4}-\d{2}-\d{2}$/.test(row.editDate));
   if (!normalized.length) {

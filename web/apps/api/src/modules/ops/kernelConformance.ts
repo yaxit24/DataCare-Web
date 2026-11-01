@@ -122,9 +122,9 @@ const HELPER_DECLARATION =
   /^\s*(?:export\s+)?(?:const\s+\w+\s*(?::[^=\n]*)?=\s*(?:\([^)]*\)|\w+)\s*(?::[^=>\n]*)?=>|function\s+\w+\s*\()/;
 const ROUNDS = /Math\.round\(/;
 const BOOK_DETL = /FROM\s+"BOOK_DETL"/;
-/** `String(x.VCH_DATE).slice(0, 10)`, `text(h.vd ?? '').slice(0, 10)` and the like: a date read by slicing its text. */
+/** A direct date/day value normalized by truncating String/text/t/txt/str/dbText output. */
 const DATE_SLICE =
-  /\b(?:String|text|t|str)\([^()]*(?:[A-Z_]*DATE[A-Z_]*|\b[vtf]d\b|[Dd]ate)[^()]*\)\.slice\(0, ?10\)/;
+  /\b(?:String|text|t|txt|str|dbText)\([^()]*(?:[A-Z_]*(?:DATE|DAY)[A-Z_]*|\b[vtforc]d\b|\bed\b|[_\.](?:date|day)\b|[a-z](?:Date|Day)\b|\b(?:date|day|clr|yesterday)\b)[^()]*\)\.slice\(0, ?10\)/;
 
 const isExempt = (concern: KernelConcern, path: string): boolean =>
   concern.exempt.some((e) => path === e || path.endsWith(`/${e}`));
