@@ -833,6 +833,17 @@ route('Masters/Addresses', [
   'PUT /masters/address-master/:code',
   'DELETE /masters/address-master/:code',
 ]);
+// MS_ITEM (N218): the Item master's own screen, with its Tag Value Update panel.
+route('Masters/Items', [
+  'GET /masters/item-master',
+  'GET /masters/item-master/products',
+  'GET /masters/item-master/groups',
+  'GET /masters/item-master/:code',
+  'POST /masters/item-master',
+  'PUT /masters/item-master/:code',
+  'DELETE /masters/item-master/:code',
+  'POST /masters/item-master/:code/tag-values',
+]);
 route('Masters/Opening Balance', [
   'GET /accounts/:acCode/opening',
   'POST /accounts/:acCode/opening',
@@ -1016,6 +1027,7 @@ const PRINT_ROUTES = new Set([
 ]);
 
 const UPDATE_POST_ROUTES = new Set([
+  'POST /masters/item-master/:code/tag-values',
   'POST /stock/tag-image',
   'POST /sales-orders/:vchNo/image',
   'POST /tour-orders/:vchNo/image',

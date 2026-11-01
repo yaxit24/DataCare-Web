@@ -241,6 +241,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G228 | Medium | The Product master was a generic field form without the desktop's guards, keys or texts | `unified/src/csharp/DataCareNext/MS_PRODUCT.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7620-7628`; `web/apps/api/form-specs/DataCareNext.MS_PRODUCT.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts` | MS_PRODUCT in Product mode keeps a two-character code and a name; its Save replaces the row with the signed-in user, and its Delete asks first and then refuses a product an item uses and the ten default products (`MS_PRODUCT.cs:2570-2804`). The web rendered the generic form: it had no item-use or default-product guard, no delete question, none of the desktop keys (Up and Down to the list, Enter on the name to Save) or texts, and it kept MAIN_USER from an earlier save where the desktop writes the signed-in user. | N215 |
 | G229 | High | Cash/Bank and Contra accepted a date outside the year, and the Contra recent list showed Total 0 | `unified/src/csharp/DataCareNext/TR_CASH.cs:2934-2947`; `unified/src/csharp/DataCareNext/TR_CONTRA.cs:2680-2691,3140-3144` | `web/apps/api/src/modules/finance/finance.ts`; `web/apps/api/src/modules/finance/batchReceipt.ts`; `web/apps/api/src/modules/finance/contra.ts`; `web/apps/api/src/modules/vouchers/list.ts` | TR_CASH and TR_CONTRA refuse a voucher dated outside the open year with "You Cant Save Entry Because Voucher Date Not In Current Year... Please Change Date...", before the lock-date check and before any write. The web receipt, payment, multi-line, multi-party receipt and Contra writers saved such vouchers (a Contra dated 2026-03-31 in year 2026-2027 answered 201). The recent-voucher list reads one of nine amount columns, none of which CONTRA_DATA has, so every Contra listed Total 0 where the desktop list sums the voucher's CR_AMT and DR_AMT. | N216 |
 | G230 | Medium | The Address master was a generic field form without the desktop's tabs, combos, helps, mobile check, delete cascade or next code | `unified/src/csharp/DataCareNext/MS_ADD_MAST.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7610-7619`; `web/apps/api/form-specs/DataCareNext.MS_ADD_MAST.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts` | MS_ADD_MAST keeps a location's addresses on three tabs, offers the next code of the location, fills its combos from the company's addresses and STATE_MAST, refuses a mobile the company already has, and deletes an address with its opening rows of the year (`MS_ADD_MAST.cs:3119-4544`). The web rendered the generic form keyed by CO_CODE + AC_CODE: no tabs, no next code, no combos, help or name type-ahead, no mobile check, its config left the three dates out as if the account master kept them, and its delete left the address's OP_DATA and AC_DATA opening rows behind. | N217 |
+| G231 | High | The Item master was a generic field form without the desktop's helps, item code from product and group, exists question, leave checks, settings boxes, delete checks or Tag Value Update | `unified/src/csharp/DataCareNext/MS_ITEM.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7650-7659`; `web/apps/api/form-specs/DataCareNext.MS_ITEM.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts`; `web/apps/web/lib/lookupEnter.ts` | MS_ITEM takes the product and group from their helps, makes the item code and name from them and asks before reusing a code, refuses a taken code or name on leaving it, shows the setting-driven boxes, writes the combo letters and Val of the number boxes, refuses deleting an item with stock or a default code, and updates the item's tags from its Tag Value Update panel (`MS_ITEM.cs:2748-4015`). The web rendered the generic form: free-typed product and group, no item code or name from them, no question or leave checks, no setting-driven boxes, a delete that only failed on a foreign key, and no tag update. Its lookups also dropped every answer for a box that upper-cases typing. | N218 |
 
 ## 4. Decisions D23–D28
 
@@ -2877,6 +2878,76 @@ With this Account ....."; F1 on the name opened the help and Enter on it reopene
 asked the desktop question and removed it; Esc left the screen. Desktop-runtime comparison and parent acceptance remain
 open.
 
+### N218 — The Item master is the desktop MS_ITEM screen (G231, Lite L2)
+
+Master → Item opens MS_ITEM directly (`MDI_FORM.cs:7650-7659`). The screen follows its form spec: the SEARCH RECORD box
+and the Code / Name / Safe list on the left; Pr Code with the product name, Gr Code with the group name and trade type,
+Item Code with the item and tag types, Item Name, Safe Name with Stk Display, Hsn Code, Unit Name, Rate Per, Labour Rate,
+Labour % with Ght %, Conversion %, Discount %, Item Rate, Oth itm Rate with Oth Dtl Rate Type and Bag Weight on the right;
+Print, Save, Cancel, Delete and Exit along the bottom. The list is every ITEM_MAST row of the company by name
+(`MS_ITEM.cs:2776`); a search keeps the items whose name or code starts with the text (`:3118-3139`). A new entry has
+blank boxes, Safe MAIN, Gram Wise, Yes and Weight with the cursor in the product (CLEAR_DATA `:2845-2877`); the units and
+safes are the company's distinct values (AddCboItem `:3631-3673`). The Oth Item Wt Less In Wh Sal and Lot Wise Stock
+boxes show when CO_SET_NEW.OTH_ITM_WT_REMOVE and ITM_WITH_LOT_STK are Y (`:2748-2768`, read at company open,
+`MS_OPNCOMP.cs:1008-1011`).
+
+The product and group boxes take their codes from the helps (read-only boxes, `:2135`, `:2139`): the product help lists
+PRODUCT_MAST by name (`:3081-3116`), the group help GROUP_MAST by name with its type and trade type (`:3397-3450`). A
+chosen group fills the item type, tag type and trade type and, on a new entry, the item code (product + group) and name
+(product name + " " + group code); when that item code exists the desktop asks "This Item already Exist in '<name>'
+Item Name...You Want to Creat New Item...", Yes clearing the code and name for a new code and No clearing the group
+(`:3452-3495`). Leaving the item code refuses a code another item has under another name and leaving the name a name
+another code has (`:3497-3629`); the refusals also stop Save and Delete. Enter moves box to box in the desktop order
+(the product-dependent boxes only once a product is chosen); Enter on the number boxes shows Val as 0.00, the bag weight
+as 0.0000, and on Bag Weight goes to Save (`:3559-3754`); Esc leaves (`:3141-3155`). Save (`:3165-3300`) needs the edit
+right only for an opened item, refuses a blank product ("Product Code Is Null Please Create Item Again.."), group and item
+code (the last with the cursor in the group, `:3223`), and writes Val of the number boxes, the first letter of Rate Per,
+Stk Display and Oth Dtl Rate Type, and MAIN_USER (the user for a new item, the stored one for an opened item,
+`:2857`, `:2990`). Delete (`:3302-3355`) needs the delete right and refuses an item with stock rows ("You Can't Delete
+Record This Item Use in Transaction...."), a default code (SN, RD, OS, OG, OE, HM, FSL, DM, 24CT, 999, ORG, ORS, ORD, OO)
+and a blank code before it asks. Print runs BtnPrint_Click_1 (`:3697-3705`, wired at `:990`), which only checks the print
+right. A double click on the button bar opens the Item Wise Tag Value Update panel (`:3922-3934`): after its question the
+item's tags at the location take each non-zero box where their value is zero (the karigar wastage only with a karigar
+touch), outside the desktop's sold-tag subquery, and KR_FINE = KR_NET_WT × (KR_TOUCH + KR_WEST_PRC) / 100 is recomputed
+for the year (`:3969-4015`).
+
+Shared fix found by the browser check: `web/apps/web/lib/lookupEnter.ts` compared a lookup's answer with the box's text
+exactly, so a master that upper-cases what is typed (the box shows RIN while the search went out for rin) dropped every
+answer and the help kept the list fetched on focus. The comparison is now case-insensitive, as the searches are (ILIKE);
+`item-master` T04 types in lower case and fails on main's file, and new `sales-invoice` and `purchase-invoice` cases take
+a code typed in lower case.
+
+Deliberate differences: Save updates the row in place in one transaction (the desktop's delete and blank insert,
+`:3225-3263`, writes NULL into the minimum stock of the Item Stock Limit screen, the averages and the opening touch and
+fine); an unknown product or group, a blank name (the desktop warns on leaving the name but saves it) and over-long boxes
+are refused; an opened item's code is read-only (the desktop leaves it open, and a changed code saves a copy while the old
+item stays); Enter on the list opens the item as the double click does (the desktop's Enter puts the item code into the
+product box and reads the blank item code, which clears the entry, `:3366-3389`); a new entry unlocks the product box
+(the desktop keeps it read-only once an item was opened); a pick from a help moves on at once; an opened item carries a
+version token over the boxes it shows (N51, D17); the Tag Value Update needs the edit right (the desktop checks none);
+the boxes the desktop reaches late in its tab order follow Bag Weight. The edition- and registration-specific boxes (Ac
+Item, UniCode Name, Tax Free, Tag Oth Detail, Oth Detail Posting, App Item) are not shown in Lite; an opened item keeps
+their stored values and a new item writes them blank or N. The web schema has no TAX_FREE_ITEM, APP_ITEM or
+EMP_COM_PRC column. The Excel import (Ctrl+O, `:3856-3909`) belongs to Data Import.
+
+Evidence: `itemMaster.db.test.ts` (8 cases through the real routes on forced RLS: the write set with Val, the combo
+letters, the setting-driven flag and the user; the list with the rights, combos and settings, and one item; both helps;
+every refusal in the desktop order with nothing written; an edit keeping MIN_STK, the averages and the stored user while a
+moved average does not make the version stale, with stale and missing versions; a view-only `Item` rights row including
+the tag update; the tag value update on four tags across locations and years; delete with the stock, default and blank
+refusals and another tenant untouched) and `routePolicy.test.ts` pass. The zero-mock `item-master` module passes 18 of 18
+cases, none blocked: T04 checks the lower-case help and both answers to the question, T05 the tag value update across
+locations and items, T14 injects a fault on the item write and finds every row as before, T18 sells an item made on the
+screen and finds 63,609.50 credited to its group's sales account and its HSN code on the invoice. Chrome DevTools on the
+demo stack: RG RING chosen by typing "rin", G22 typed, giving RGG22 RING G22 with types G/G/GO, then 711319, gm, 10Gm Wise (chosen in its list),
+350, 12.5, 0.75, a blank conversion, 2, 6123.45 and 150x keyed in with Enter, Pcs chosen in its list, 0.0125 shown as 0.0125 and Enter on
+Save stored `RG|G22|RGG22|RING G22|G|G|GO|MAIN|711319|GM|1|Y|350.00|12.5000|0.7500|0.0000|2.0000|6123.45|150.00|P|0.013|admin|N`;
+CHG22 reopened from the list with the product, group and code read-only, and Alt+S saved a new labour % with its MIN_STK
+5 kept; Delete of CHG22 (with a stock row) was refused without the question; the tag panel set DT1 to 12/92/1.5 with
+KR_FINE 9.350 and DT2's wastage to 1.5 with KR_FINE 4.655; RG with G22 again asked the desktop question, No cleared the
+group and Yes cleared the code and name; a typed CHG22 was refused on leave; Print did nothing; RGG22 was deleted after
+the question; Esc left the screen. Desktop-runtime comparison and parent acceptance remain open.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -3021,6 +3092,7 @@ open.
 | N215 | — | implemented-unverified, evidence in this change (G228: the Product master is MS_PRODUCT's Product mode with the desktop keys, texts, rights and the item-use and default-product guards after the question) |
 | N216 | — | implemented-unverified, evidence in this change (G229: Cash/Bank and Contra refuse dates outside the year with the desktop text before numbering and before the lock-date check, with no partial write; the Contra recent list shows the summed debit once; the register date stays G37) |
 | N217 | — | implemented-unverified, evidence in this change (G230: the Address master is MS_ADD_MAST with its tabs, next code, combos, helps, mobile check, rights and the delete of its opening rows) |
+| N218 | — | implemented-unverified, evidence in this change (G231: the Item master is MS_ITEM with its helps, item code from product and group, exists question, leave checks, setting-driven boxes, delete checks, rights and the Tag Value Update panel) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

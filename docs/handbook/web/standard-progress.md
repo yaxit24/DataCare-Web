@@ -6,10 +6,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 24 | 21 | 0 |
+| Lite (first, D32) | 49 | 25 | 22 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
 | Standard (added by Standard) | 36 | 0 | 0 | 0 |
-| **Standard total** | **114** | **25** | **22** | **0** |
+| **Standard total** | **114** | **26** | **23** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
@@ -29,7 +29,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Master | Address | `/masters/addresses` | PARTIAL | address-master | module green | — |
 | Master | Product | `/masters/products` | PARTIAL | product-master | module green | — |
 | Master | Group | `/masters/groups` | PARTIAL | group-master | module green | — |
-| Master | Item | `/masters/items` | PARTIAL | — | no module | — |
+| Master | Item | `/masters/items` | PARTIAL | item-master | module green | — |
 | Master | AutoItem | `/masters/auto-item` | PARTIAL | — | no module | — |
 | Master | Employee | `/masters/employees` | PARTIAL | employee-master | module green | — |
 | Master | Tax | `/masters/taxes` | PARTIAL | tax-master | module green | — |

@@ -7263,6 +7263,35 @@
         "web/apps/web/test/features/modules/addressMaster.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Verified: addressMaster.db.test.ts 8/8, routePolicy (703 routes), the address-master feature module 17 of 17 applicable (T05 not applicable), and a Chrome DevTools pass on the demo stack. Open: the PartyMast print layout (not in the repository), desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N218",
+      "status": "implemented-unverified",
+      "action": "The Item master is the desktop MS_ITEM screen: the list and search, the product and group helps that make the item code and name, the exists question, the leave checks on code and name, the company's unit and safe combos, the setting-driven boxes, the desktop texts and rights, Save updating the row in place (MIN_STK and the averages kept) with version tokens, Delete refusing an item with stock, a default code or a blank code, and the Tag Value Update panel; lookups compare a box's text case-insensitively.",
+      "parentLabels": "P1-core; L2; T01-T18",
+      "startAfter": [
+        "N217"
+      ],
+      "requiredProof": "An HTTP/DB test of the write set, list, helps, refusals, versions, rights, tag value update and delete; the item-master feature module passes every case; the sales-invoice and purchase-invoice lower-case lookup cases pass; a Chrome DevTools keyboard, helps, question, leave check, tag panel, delete and Esc pass.",
+      "gapIds": "G231",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/apps/api/src/modules/masters/itemMaster.ts",
+        "web/apps/api/src/routes/itemMaster.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/web/app/(app)/masters/items/page.tsx",
+        "web/apps/web/lib/lookupEnter.ts",
+        "web/apps/api/test/itemMaster.db.test.ts",
+        "web/apps/api/test/routePolicy.test.ts",
+        "web/apps/web/test/lookupEnter.test.ts",
+        "web/apps/web/test/features/modules/itemMaster.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: itemMaster.db.test.ts 8/8, routePolicy (711 routes), lookupEnter unit tests, the item-master feature module 18 of 18 applicable, the sales-invoice and purchase-invoice lower-case lookup cases, and a Chrome DevTools pass on the demo stack. Open: the edition-specific boxes (Ac Item, UniCode Name, Tax Free, Tag Oth Detail, Oth Detail Posting, App Item), the Excel import (Data Import), desktop-runtime comparison and parent acceptance."
     }
   ],
   "amendments": [
