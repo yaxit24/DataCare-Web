@@ -7026,12 +7026,12 @@
     {
       "id": "N211",
       "status": "implemented-unverified",
-      "action": "Approval Isu and Approval Rtn use desktop TR_APR_ISU identity and custody lifecycle on MAIN_BOOK 'APR ISU'/'APR RTN': uniquely linked legacy backfill, strict audited writes, safe consumed-line/duplicate-return handling, source/BAR reversals, versioned reopen/edit/delete and bounded AprBill output. Keep approval-to-sale conversion contained until it can be one authorized transaction.",
+      "action": "Approval Isu and Approval Rtn use desktop TR_APR_ISU identity and custody lifecycle on MAIN_BOOK 'APR ISU'/'APR RTN': uniquely proven legacy links, stable line/stone identities, strict audited writes, serialized return/source changes, checked source/BAR reversals, and validated atomic approval references on /sales. Keep the hidden approval-to-sale bridge contained until the operator Apr No import flow, tagged continuation and Wh Sales continuation are implemented and browser-proven.",
       "parentLabels": "P1-core; L4; J09; T01-T18",
       "startAfter": [
         "N210"
       ],
-      "requiredProof": "Source-derived HTTP/DB tests red before implementation for the four S1 failures; DB assertions cover the deterministic header/detail/stone/stock columns under review, strict boundary refusals, lifecycle links, reopen/no-op/edit conflict, delete dependencies/audit/reversal, print rights and no-write billing containment. Both zero-mock feature modules pass every executable case; all repository gates pass. Open cases remain listed rather than inferred complete.",
+      "requiredProof": "Source-derived tests are red before each fix and green after it. DB assertions cover zero/two-candidate legacy links, runtime source/BAR uniqueness and affected counts, a barrier-controlled return-versus-issue race, complete/open/same-party/request-unique /sales references and SL_DETL delete dependency, separate OLD_SRNO/ISU_SRNO and stable APR_IDTL identities, desktop NET_AMT/CON_ISU_REC/FINE_TYPE values, coded/value-bearing stones, derived precision 400/no-write behavior, reopen/no-op/edit/delete/audit/print. Both zero-mock feature modules pass every executable case; all repository gates pass. Open cases remain listed rather than inferred complete.",
       "gapIds": "G224",
       "entryDefinition": "15-standard-edition-plan.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
@@ -7044,16 +7044,22 @@
         "web/apps/api/src/modules/tour/approvalVoucher.ts",
         "web/apps/api/src/modules/tour/approvalRows.ts",
         "web/apps/api/src/modules/tour/approvalTypes.ts",
+        "web/apps/api/src/modules/sales/sales.ts",
+        "web/apps/api/src/modules/finance/lifecycle.ts",
         "web/apps/api/src/modules/tour/approvalBill.ts",
         "web/apps/api/src/routes/approval.ts",
         "web/apps/web/components/ApprovalVoucherForm.tsx",
         "web/apps/web/components/ApprovalGrid.tsx",
+        "web/apps/web/components/SubDetailGrid.tsx",
         "web/apps/api/test/approvalLifecycle.routes.db.test.ts",
         "web/apps/api/test/approvalBookMigration.db.test.ts",
+        "web/apps/api/test/sales.lifecycle.db.test.ts",
+        "web/apps/web/test/approvalGrid.test.ts",
+        "web/apps/web/test/subDetailGrid.test.ts",
         "web/apps/web/test/features/modules/approvalIssue.mjs",
         "web/apps/web/test/features/modules/approvalReturn.mjs"
       ],
-      "statusNote": "IMPLEMENTED, not accepted. Verified by source-derived DB/HTTP tests: APR ISU/APR RTN identity; unique legacy source/tag linkage and fail-closed ambiguous return lifecycle; family and central-right isolation; type-B/year/lock/employee/party and strict width/range/value/item refusals; audited APR/APR_IDTL/stock columns; rich tag/stone hydration; fine calculation; sparse no-op and consumed-line edit safety; duplicate-return no-write refusal; partial return, delete dependency/source/BAR/audit behavior; return-only source rights; print rights and AprBill's bound data/tag marker. The old billing bridge is hidden and always 409 after Sales Invoice create authorization, with no sale write. Open: licence-expiry state, APR_IMG_PRINT/AprBillImg, idempotent create/lost acknowledgement, injected rollback, atomic retained-item Sales Invoice/Wh Sales continuation, repeated Crystal page header/footer/page number, original-Windows comparison and parent acceptance."
+      "statusNote": "IMPLEMENTED, not accepted. Verified by source-derived DB/HTTP/unit/browser tests: APR ISU/APR RTN identity; legacy repair only with one source and one consistent BAR instance; locked runtime source/BAR verification and checked reversals; issue edit/delete serialization against return; complete/open/same-party/request-unique /sales source locking and checked atomic consumption; SL_DETL approval-delete dependency and sale-delete reopen; stable return OLD_SRNO versus source ISU_SRNO; stable APR_IDTL parent/ISR_NO after gaps; stone-bearing unchanged-save physical no-op and zero-piece reopen; NET_AMT = ITM_AMT + LBR_AMT + OTH_AMT + ITM_MRP - DISC_AMT; CON_ISU_REC N; verbatim delete FINE_TYPE; coded/value-bearing stones and derived DECIMAL overflow 400/no-write; existing guards, write sets, reversals, audit, rights and AprBill output. The hidden /tour/:vchNo/bill bridge remains authorized but always 409 with no write. Open: operator-facing Apr No Sales Invoice import, tagged approval and Wh Sales continuation in browser, licence-expiry state, APR_IMG_PRINT/AprBillImg, idempotent create/lost acknowledgement, injected rollback, repeated Crystal page furniture/numbers, original-Windows comparison and parent acceptance."
     }
   ],
   "amendments": [
