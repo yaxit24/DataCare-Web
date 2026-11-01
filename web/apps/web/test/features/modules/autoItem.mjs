@@ -20,7 +20,7 @@ import { SECOND_TENANT } from '../harness.mjs';
  *   (blank for a listed product, the user for an added row, CommPassAdd :1957-1976), STK_DISPLAY Y, DATA_TRFR N, flags N;
  *   existing items and N rows are untouched; "Data Are Saved."; the save needs the edit right once a group is shown.
  * - Print and Delete only check their rights in this mode (:2652-2659, :2927-2944).
- * Web rules that differ on purpose (gap G231): one transaction; a code another group's item has and an added unknown
+ * Web rules that differ on purpose (gap G232): one transaction; a code another group's item has and an added unknown
  * product are refused; a typed group code fills the HSN code too.
  */
 const as = (user, slot) => ({
@@ -452,7 +452,7 @@ export const autoItem = {
       'required.refusals',
       'T06',
       'refusal',
-      'Enter on a Y/N that is neither Y nor N says "Please Enter Y or N and Try Again..." (:3176-3183); the web refuses an added product that is not in the product master and a code another group already has (G231); nothing written',
+      'Enter on a Y/N that is neither Y nor N says "Please Enter Y or N and Try Again..." (:3176-3183); the web refuses an added product that is not in the product master and a code another group already has (G232); nothing written',
       async (ctx) =>
         withMasters(ctx, async () => {
           await exec(

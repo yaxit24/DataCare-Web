@@ -7,7 +7,7 @@ import { seedCompany } from '../src/modules/ops/seedCompany.js';
 import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 /**
- * N218 / G231: Auto Item (desktop MS_AUTO_ITEM with CurMast 'AutoItem', opened by MDI_FORM.cs:7640-7649) through the
+ * N219 / G232: Auto Item (desktop MS_AUTO_ITEM with CurMast 'AutoItem', opened by MDI_FORM.cs:7640-7649) through the
  * real Fastify routes on a forced-RLS database. Expected values come from the desktop source:
  *
  * - DISPLAY_DATA (MS_AUTO_ITEM.cs:2614-2650) lists the company's products except HM, DM, OG, OS, SN, FN, RD, EM and OT by
@@ -18,7 +18,7 @@ import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
  *   the HSN code, UNIT_NAME GMS, RATE_TYPE G, MIN_STK = Val of the MinStk cell, MAIN_USER = the row's hidden user cell
  *   (blank for a listed product, the user for an added row), STK_DISPLAY Y, DATA_TRFR N, the flags N. The save needs the
  *   edit right once a group is shown (:2648, :2668-2672).
- * Web rules on purpose (gap G231): one transaction; a code another group's item has is refused; an added row's product
+ * Web rules on purpose (gap G232): one transaction; a code another group's item has is refused; an added row's product
  * must be in the product master.
  */
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
@@ -36,7 +36,7 @@ const RIGHTS_SUB_MENU = 'AutoItem';
 type Cookie = string;
 
 (enabled ? describe : describe.skip)(
-  'N218 Auto Item is the desktop MS_AUTO_ITEM through HTTP',
+  'N219 Auto Item is the desktop MS_AUTO_ITEM through HTTP',
   () => {
     let owner: PrismaClient;
     let runtime: PrismaClient;

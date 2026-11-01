@@ -782,7 +782,7 @@ route('Membership/Gold Adjust', [
   'DELETE /scheme/gold-adjust/:vchNo',
 ]);
 
-// MS_AUTO_ITEM with CurMast 'AutoItem' (N218): the group help, the product grid and the save (an update, as the
+// MS_AUTO_ITEM with CurMast 'AutoItem' (N219): the group help, the product grid and the save (an update, as the
 // desktop's save after DISPLAY_DATA checks the edit right).
 route('Masters/Auto Item', [
   'GET /masters/auto-item',
