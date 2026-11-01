@@ -287,6 +287,17 @@ export const addressMaster = {
           assert.deepEqual(list, await dbList(ctx));
           const tabs = (await page.getByRole('tab').allInnerTexts()).map((t) => t.trim());
           assert.deepEqual(tabs, ['Company Detail', 'Other Detail', 'Family Detl']);
+          // Save is the main action (the surface crawl presses the first `primary` button); the selected tab is not.
+          const primaries = (await page.locator('main button.primary').allInnerTexts()).map((t) =>
+            t.trim(),
+          );
+          assert.deepEqual(primaries, ['Save']);
+          assert.equal(
+            await page
+              .getByRole('tab', { name: 'Company Detail', exact: true })
+              .getAttribute('aria-selected'),
+            'true',
+          );
           const order = await page.evaluate(() =>
             [...document.querySelectorAll('main input,main button')]
               .filter((el) => !el.closest('nav') && el.tabIndex >= 0 && el.offsetParent !== null)
@@ -437,11 +448,19 @@ export const addressMaster = {
           await page.keyboard.press('Escape');
           await page.waitForFunction(() => !document.querySelector('[data-testid="address-help"]'));
           await label(page, 'Ac Name').focus();
-          await page.keyboard.type('e2e alp');
-          await page.waitForResponse((r) => path(r) === `/api${API}/names`);
-          await page.waitForFunction(
-            () => document.querySelectorAll('[data-testid="address-list"] tr').length === 2,
+          // Every key asks again; answers for shorter text are dropped, so wait for the answer to the whole text
+          // (attached before typing) and for the other location's row.
+          const typedAnswer = page.waitForResponse(
+            (r) =>
+              path(r) === `/api${API}/names` &&
+              (new URL(r.url()).searchParams.get('q') ?? '').toUpperCase() === 'E2E ALP',
           );
+          await page.keyboard.type('e2e alp');
+          await typedAnswer;
+          await page.waitForFunction(() => {
+            const rows = [...document.querySelectorAll('[data-testid="address-list"] tr')];
+            return rows.length === 2 && rows.some((tr) => tr.textContent.includes('029903'));
+          });
           const typedList = await listed(page);
           assert.deepEqual(
             typedList.map((r) => r[0]).sort(),

@@ -532,7 +532,13 @@ export default function AddressMasterPage() {
               F1
             </button>
           </div>
-          <div role="tablist" className="row" style={{ gap: 4, marginBottom: 8 }}>
+          {/* The selected tab is not a `primary` button: Save is the screen's main action. */}
+          <div
+            role="tablist"
+            aria-label="Address details"
+            className="row"
+            style={{ gap: 4, marginBottom: 8 }}
+          >
             {(
               [
                 ['company', 'Company Detail'],
@@ -545,7 +551,12 @@ export default function AddressMasterPage() {
                 type="button"
                 role="tab"
                 aria-selected={tab === id}
-                className={tab === id ? 'primary' : 'ghost'}
+                className="ghost"
+                style={
+                  tab === id
+                    ? { borderColor: 'var(--accent)', color: 'var(--accent)', fontWeight: 600 }
+                    : undefined
+                }
                 tabIndex={-1}
                 onClick={() => setTab(id)}
               >
