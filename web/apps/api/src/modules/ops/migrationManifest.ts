@@ -153,4 +153,8 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261031090000_book_tables_and_advance_slots',
     checksum: '289966d3b25b66efd6f6957f6ec58fcea91edbd6df6ff8bb014dd43a09e07849',
   },
+  {
+    name: '20261101090000_stock_adjust_book',
+    checksum: 'd91d5f73bea67965575f00fa87969322f4c509c1cff9a210b5cf1f43b19ce87d',
+  },
 ];

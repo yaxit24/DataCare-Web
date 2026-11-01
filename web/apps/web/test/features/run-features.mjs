@@ -31,6 +31,7 @@ import { tagOpening } from './modules/tagOpening.mjs';
 import { dailyRate } from './modules/dailyRate.mjs';
 import { itemOpening } from './modules/itemOpening.mjs';
 import { tagCancel } from './modules/tagCancel.mjs';
+import { stockAdjust } from './modules/stockAdjust.mjs';
 import { employeeMaster } from './modules/employeeMaster.mjs';
 import { taxMaster } from './modules/taxMaster.mjs';
 import { autoItem } from './modules/autoItem.mjs';
@@ -71,6 +72,7 @@ const MODULES = [
   dailyRate,
   itemOpening,
   tagCancel,
+  stockAdjust,
   employeeMaster,
   taxMaster,
   autoItem,

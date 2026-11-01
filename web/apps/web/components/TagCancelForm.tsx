@@ -2,7 +2,15 @@
 
 import { formatDesktopDate } from '@datacare/core';
 
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+} from 'react';
 import { ApiError, del, get, post, put } from '../lib/api';
 import { useCompanySettings } from '../lib/companySettings';
 import {
@@ -16,6 +24,7 @@ import {
   gridTotals,
   neighbourVoucher,
   rowFromSaved,
+  rowFromLot,
   rowFromSource,
   setCell,
   showCell,
@@ -26,6 +35,7 @@ import {
   withSpareRow,
   type GridRow,
   type NumericCell,
+  type StockAdjustLotView,
   type StoneDraft,
   type TagCancelMode,
   type TagSourceView,
@@ -44,7 +54,16 @@ import SubDetailGrid, { type SubDetailField, type SubDetailRow } from './SubDeta
  */
 
 type ColumnKind =
-  'index' | 'tag' | 'item' | 'text' | 'number' | 'display' | 'transferItem' | 'transferName';
+  | 'index'
+  | 'tag'
+  | 'item'
+  | 'text'
+  | 'number'
+  | 'display'
+  | 'transferItem'
+  | 'transferName'
+  | 'sign'
+  | 'lot';
 
 interface GridColumn {
   label: string;
@@ -105,6 +124,36 @@ const TRANSFER_COLUMNS: readonly GridColumn[] = [
   { label: 'TrfrItmName', kind: 'transferName', field: 'trfrItName', width: 150 },
 ];
 
+/**
+ * The Stock Adjust grid (MSG_CLEAR, TR_TAG_CAN.cs:2514-2566): the Tag Cancel columns without LbrRate, LbrAmt and
+ * OthAmt, with Sign after Size; TagLot and ItmLot after TagNo only with Purchase LOT / Item With LOT Stock
+ * (:2514-2540, widths 1100).
+ */
+function adjustColumns(lots: { tagLot: boolean; itemLot: boolean }): readonly GridColumn[] {
+  return CANCEL_COLUMNS.filter(
+    (column) => !['LbrRate', 'LbrAmt', 'OthAmt'].includes(column.label),
+  ).flatMap((column): GridColumn[] => {
+    if (column.label === 'Size') {
+      return [column, { label: 'Sign', kind: 'sign', field: 'itmSign', width: 48 }];
+    }
+    if (column.label === 'TagNo') {
+      return [
+        column,
+        ...(lots.tagLot
+          ? [{ label: 'TagLot', kind: 'lot' as const, field: 'lotNo' as const, width: 66 }]
+          : []),
+        ...(lots.itemLot
+          ? [{ label: 'ItmLot', kind: 'lot' as const, field: 'itmLot' as const, width: 66 }]
+          : []),
+      ];
+    }
+    return [column];
+  });
+}
+
+/** TEXT_ENTRY_KeyDown col 8 (TR_TAG_CAN.cs:4259-4263). */
+const ITEM_SIGN_REQUIRED = 'Please Insert Item Sign + or - then Try';
+
 /** The stone grid's visible columns (`MSG_IDTL`, TR_TAG_CAN.cs:1865-1953; ItName is shown beside the picker). */
 const STONE_COLUMNS: readonly SubDetailField[] = [
   'itCode',
@@ -157,10 +206,18 @@ interface VoucherListing {
 
 export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
   const cfg = TAG_CANCEL_MODES[mode];
-  const columns = mode === 'cancel' ? CANCEL_COLUMNS : TRANSFER_COLUMNS;
   const { lcCode, coYear } = useBusinessScope();
   const companyValues = useCompanySettings();
   const settings = useMemo(() => tagCancelSettings(companyValues), [companyValues]);
+  const columns = useMemo(
+    () =>
+      mode === 'cancel'
+        ? CANCEL_COLUMNS
+        : mode === 'transfer'
+          ? TRANSFER_COLUMNS
+          : adjustColumns({ tagLot: settings.tagLot, itemLot: settings.itemLot }),
+    [mode, settings.tagLot, settings.itemLot],
+  );
   const [coBook, setCoBook] = useState('');
   const [header, setHeader] = useState<VoucherHeaderDraft>(() => blankHeader());
   const [rows, setRows] = useState<GridRow[]>(() => [blankRow(settings, mode)]);
@@ -441,6 +498,26 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
   const canSave = !!coBook && hasLines && !busy;
 
   // ---- cells ---------------------------------------------------------------------------------------
+  /**
+   * Enter on a blank help cell that may stay blank (a Stock Adjust tag or lot) moves to the next cell instead of
+   * choosing from the list the cell opened on focus.
+   */
+  function passBlankEnter(event: KeyboardEvent<HTMLTableCellElement>, value: string) {
+    if (event.key !== 'Enter' || event.altKey || event.ctrlKey || String(value ?? '').trim())
+      return;
+    event.preventDefault();
+    event.stopPropagation();
+    let next = event.currentTarget.nextElementSibling;
+    while (next) {
+      const input = next.querySelector<HTMLInputElement>('input:not([readonly]):not([disabled])');
+      if (input) {
+        input.focus();
+        return;
+      }
+      next = next.nextElementSibling;
+    }
+  }
+
   function renderCell(column: GridColumn, row: GridRow, index: number, position: number) {
     // "line N", never "row N": the stone grid under this one labels its own cells "ItCode row N", "Pcs row N", ….
     const where = `line ${index + 1}`;
@@ -455,7 +532,12 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
         );
       case 'tag':
         return (
-          <td key={position} onBlur={() => void resolveTypedTag(index)}>
+          <td
+            key={position}
+            onBlur={() => void resolveTypedTag(index)}
+            // TR_TAG_CAN.cs:3866: a Stock Adjust line may have no tag; Enter on a blank tag moves to ItCode.
+            onKeyDownCapture={(event) => mode === 'adjust' && passBlankEnter(event, row.tagNo)}
+          >
             <LookupPicker
               entity="available-tags"
               value={row.tagNo}
@@ -594,6 +676,55 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
             />
           </td>
         );
+      case 'lot': {
+        const lotField = field as 'lotNo' | 'itmLot';
+        return (
+          <td
+            key={position}
+            // A blank lot is allowed: Enter moves on (TR_TAG_CAN.cs:4089-4092, :4140-4143).
+            onKeyDownCapture={(event) => passBlankEnter(event, row[lotField])}
+          >
+            <LookupPicker
+              entity="stock-adjust-lots"
+              searchPath={`${cfg.endpoint}/lots?kind=${lotField === 'lotNo' ? 'tag' : 'item'}`}
+              value={row[lotField]}
+              onChange={(value) => updateRow(index, (r) => setCell(r, lotField, value))}
+              onPick={(picked) =>
+                updateRow(index, (r) =>
+                  rowFromLot(r, lotField, picked as unknown as StockAdjustLotView, settings),
+                )
+              }
+              placeholder="lot… (F1)"
+              ariaLabel={`${column.label} ${where}`}
+              style={{ minWidth: column.width }}
+            />
+          </td>
+        );
+      }
+      case 'sign':
+        return (
+          <td key={position}>
+            <input
+              aria-label={`Sign ${where}`}
+              value={row.itmSign}
+              maxLength={1}
+              onChange={(event) =>
+                updateRow(index, (r) => setCell(r, 'itmSign', event.target.value))
+              }
+              onFocus={() => setActive(index)}
+              onKeyDown={(event) => {
+                if (event.key !== 'Enter') return;
+                // TEXT_ENTRY_KeyDown col 8 (TR_TAG_CAN.cs:4259-4263): only + or - moves on.
+                const sign = event.currentTarget.value.trim();
+                if (sign !== '+' && sign !== '-') {
+                  event.preventDefault();
+                  setError(ITEM_SIGN_REQUIRED);
+                } else setError('');
+              }}
+              style={{ width: column.width, textAlign: 'center' }}
+            />
+          </td>
+        );
     }
   }
 
@@ -632,9 +763,16 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
       <h1>{cfg.title}</h1>
       <p className="muted">
         Desktop TR_TAG_CAN on a {cfg.mainBook} book.{' '}
-        {mode === 'cancel'
-          ? 'Each tag leaves stock (MAIN_STOCK, ITM_SIGN −) and is recorded in the cancel register with its stones.'
-          : 'Each tag leaves stock and its metal moves to the transfer item as loose stock (MAIN_STOCK − and +).'}
+        {
+          {
+            cancel:
+              'Each tag leaves stock (MAIN_STOCK, ITM_SIGN −) and is recorded in the cancel register with its stones.',
+            transfer:
+              'Each tag leaves stock and its metal moves to the transfer item as loose stock (MAIN_STOCK − and +).',
+            adjust:
+              'Each line adds to stock (Sign +) or takes it out (Sign −); a line needs no tag (MAIN_STOCK I or O).',
+          }[mode]
+        }
       </p>
       <div className="panel">
         <div className="row" style={{ flexWrap: 'wrap', alignItems: 'flex-end' }}>
@@ -910,12 +1048,12 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
         >
           Delete
         </button>
-        {mode === 'cancel' && loaded && (
-          // TagCanBill (TR_TAG_CAN.cs:5386-5440); the server checks print rights.
+        {mode !== 'transfer' && loaded && (
+          // TagCanBill (TR_TAG_CAN.cs:5386-5440), the same bill for both menus; the server checks print rights.
           <a
             className="btn"
             data-testid={id('print')}
-            href={`/api/stock/tag-cancel/${encodeURIComponent(loaded.voucherNo)}/print?coBook=${encodeURIComponent(coBook)}&format=html`}
+            href={`/api${cfg.endpoint}/${encodeURIComponent(loaded.voucherNo)}/print?coBook=${encodeURIComponent(coBook)}&format=html`}
             target="_blank"
             rel="noreferrer"
           >

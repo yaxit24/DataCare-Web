@@ -7346,6 +7346,38 @@
         "web/apps/web/test/features/modules/wholesaleSale.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Verified: wholesaleSaveChecks.db.test.ts 9/9, the TR_WH_SALE-family API tests (12 files, 153 tests), the wholesale-sale feature module 25 of 25 (no blocked case), the full workspace suite and the real-stack suite. Open: desktop-runtime comparison and parent acceptance; the Rate Cut, Wh Quotation and Tour Sales menus have no feature module yet."
+    },
+    {
+      "id": "N221",
+      "status": "implemented-unverified",
+      "action": "Stock Adjust is the desktop TR_TAG_CAN on a STOCK ADJUST book, as the Tag Cancel writer's third mode: the grid with the Sign column and the setting-driven TagLot and ItmLot columns with their helps, the desktop keys, the signed register, MAIN_STOCK I or O by sign, LOT_DETL for a lot, reopen, edit, delete and TagCanBill; the provisioned book becomes the desktop's STADJ out book numbered from BAR_CAN_DATA, with a data migration; the old separate writer is removed.",
+      "parentLabels": "P1-core; L3; T01-T18",
+      "startAfter": [
+        "N220"
+      ],
+      "requiredProof": "An HTTP/DB test of the book, rights, refusals, lifecycle, lots and a + tag line; the stock-adjust feature module passes every case and tag-cancel stays green; a Chrome DevTools keyboard, save, reopen, print and delete pass.",
+      "gapIds": "G234",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/stock/tagCancel.ts",
+        "web/apps/api/src/modules/stock/tagCancelRows.ts",
+        "web/apps/api/src/modules/stock/stockAdjustLots.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/packages/db/prisma/migrations/20261101090000_stock_adjust_book/migration.sql",
+        "web/apps/web/components/TagCancelForm.tsx",
+        "web/apps/web/lib/tagCancelVoucher.ts",
+        "web/apps/web/app/(app)/txn/stock-adjust/page.tsx",
+        "web/apps/api/test/stockAdjust.routes.db.test.ts",
+        "web/apps/web/test/tagCancelVoucher.test.ts",
+        "web/apps/web/test/features/modules/stockAdjust.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: stockAdjust.routes.db.test.ts 6/6, the Tag Cancel unit tests, routePolicy (719 routes), the stock-adjust feature module 18 of 18 applicable, tag-cancel unchanged, and a Chrome DevTools pass on the demo stack. Open: a replayed loose-line save makes a second voucher (no idempotency key); desktop-runtime comparison and parent acceptance."
     }
   ],
   "amendments": [
