@@ -333,7 +333,7 @@ interface PartyRules extends NextCodeRules {
 async function partyRulesTx(tx: any, scope: PartyScope): Promise<PartyRules> {
   const behavior = await resolveSettingsBehaviorTx(tx, scope);
   const [co]: any[] = await tx.$queryRawUnsafe(
-    `SELECT "CO_TYPE","CO_STATE","CO_STATE_CODE" FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 ORDER BY row_id LIMIT 1`,
+    `SELECT "CO_TYPE","CO_STATE","CO_STATE_CODE" FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 LIMIT 1`,
     scope.tenantId,
     scope.coCode,
   );
@@ -356,7 +356,11 @@ export interface PartyListRow {
 }
 
 /** MS_ACCT_Load's list (RsMast) for the location and settings. */
-async function partyListTx(tx: any, scope: PartyScope, allBranch: boolean): Promise<PartyListRow[]> {
+async function partyListTx(
+  tx: any,
+  scope: PartyScope,
+  allBranch: boolean,
+): Promise<PartyListRow[]> {
   const rows: any[] = await tx.$queryRawUnsafe(
     `SELECT "AC_CODE","AC_NAME","AC_MOBILE","LC_CODE" FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 ORDER BY row_id`,
     scope.tenantId,
@@ -370,8 +374,7 @@ async function partyListTx(tx: any, scope: PartyScope, allBranch: boolean): Prom
   }));
   const byCode = (a: PartyListRow, b: PartyListRow) =>
     a.code < b.code ? -1 : a.code > b.code ? 1 : 0;
-  if (allBranch)
-    return all.sort((a, b) => (a.lc < b.lc ? -1 : a.lc > b.lc ? 1 : byCode(a, b)));
+  if (allBranch) return all.sort((a, b) => (a.lc < b.lc ? -1 : a.lc > b.lc ? 1 : byCode(a, b)));
   if (scope.lcCode !== '00')
     return all
       .filter((r) =>
@@ -575,8 +578,20 @@ export async function saveParty(
   if (code.length > 8)
     throw new PartyMasterValidationError('account code must be at most 8 characters');
   const expected = input.entryMode === 'E' ? requiredVersion(input.expectedVersion) : null;
-  const heads = input.entryMode === 'A' ? openingHeads(input.opening ?? {}) : null;
-  if (heads && String(input.opening?.amount ?? '').trim().length > 8)
+  const o = input.opening ?? {};
+  // Val() of the three boxes and the first letter of each Cr/Dr combo (:7871-7880).
+  const heads =
+    input.entryMode === 'A'
+      ? openingHeads({
+          amount: vbVal(o.amount),
+          sign: (text(o.sign).slice(0, 1).toUpperCase() || 'C') as 'C' | 'D',
+          gold: vbVal(o.gold),
+          goldSign: (text(o.goldSign).slice(0, 1).toUpperCase() || 'C') as 'C' | 'D',
+          silver: vbVal(o.silver),
+          silverSign: (text(o.silverSign).slice(0, 1).toUpperCase() || 'C') as 'C' | 'D',
+        })
+      : null;
+  if (heads && text(o.amount).length > 8)
     throw new PartyMasterValidationError('opening amount must be at most 8 characters');
   return withTxBudget(prisma, input.scope.tenantId, 'voucher', async (tx: any) => {
     const scope = input.scope;
@@ -772,7 +787,8 @@ export async function partyCombos(
 }
 
 /** The help lists of the screen. */
-export type PartyHelp = 'names' | 'f1' | 'groups' | 'short' | 'main' | 'address' | 'member' | 'account';
+export type PartyHelp =
+  'names' | 'f1' | 'groups' | 'short' | 'main' | 'address' | 'member' | 'account';
 
 /**
  * - names: tAcName F1 and tRefAc's help, the location's accounts by name (:6776, :7493);
@@ -869,13 +885,19 @@ export async function partyHelp(
             `SELECT "AC_NAME","AC_CODE","AC_AREA","AC_ADD1","AC_CITY" FROM "ADD_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2
               ORDER BY "AC_NAME", row_id`,
           ),
-          { name: 'AC_NAME', code: 'AC_CODE', area: 'AC_AREA', address: 'AC_ADD1', city: 'AC_CITY' },
+          {
+            name: 'AC_NAME',
+            code: 'AC_CODE',
+            area: 'AC_AREA',
+            address: 'AC_ADD1',
+            city: 'AC_CITY',
+          },
         );
       case 'member':
         return map(
           await q(
             `SELECT "MEMB_NAME","MEMB_CODE","SCHM_CODE","AC_ADD1","AC_CITY" FROM "AD_MEMB" WHERE tenant_id=$1
-              AND "CO_CODE"=$2 AND "LC_CODE"=$3 ORDER BY "MEMB_NAME", row_id`,
+              AND "CO_CODE"=$2 AND "LC_CODE"=$3 ORDER BY "MEMB_NAME", "MEMB_CODE"`,
             lcCode,
           ),
           {
@@ -894,7 +916,13 @@ export async function partyHelp(
         // BtnAcimp lists the codes above 99 (CAST(AC_CODE AS INT) > 99).
         return map(
           rows.filter((r) => numeric(text(r.AC_CODE)) && Number(text(r.AC_CODE)) > 99),
-          { name: 'AC_NAME', code: 'AC_CODE', area: 'AC_AREA', address: 'AC_ADD1', city: 'AC_CITY' },
+          {
+            name: 'AC_NAME',
+            code: 'AC_CODE',
+            area: 'AC_AREA',
+            address: 'AC_ADD1',
+            city: 'AC_CITY',
+          },
         );
       }
     }
@@ -922,7 +950,7 @@ export async function partyCopySource(
         : kind === 'member'
           ? await tx.$queryRawUnsafe(
               `SELECT *, "MEMB_NAME" "AC_NAME", "BIRTH_DATE" "BR_DATE", "ANV_DATE" "AN_DATE" FROM "AD_MEMB"
-                WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "MEMB_CODE"=$4 AND "SCHM_CODE"=$5 ORDER BY row_id LIMIT 1`,
+                WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "MEMB_CODE"=$4 AND "SCHM_CODE"=$5 LIMIT 1`,
               tenantId,
               coCode,
               lcCode,
@@ -1130,7 +1158,7 @@ export async function setPartyPhoto(
   if (!code) throw new PartyMasterValidationError('account code is required for a photo');
   const m = /^data:image\/(jpeg|jpg|png);base64,([A-Za-z0-9+/=]+)$/.exec(String(dataUrl ?? ''));
   if (!m) throw new PartyMasterValidationError('the photo must be a JPEG or PNG image');
-  const buf = Buffer.from(m[2], 'base64');
+  const buf = Buffer.from(m[2] ?? '', 'base64');
   if (!buf.length || buf.length > PARTY_PHOTO_MAX_BYTES)
     throw new PartyMasterValidationError('the photo must be at most 2 MB');
   await withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
@@ -1181,4 +1209,3 @@ export function filterPartyList(
     ? rows.filter((r) => r.name.toUpperCase().includes(t) || r.mobile.startsWith(t))
     : rows.filter((r) => r.name.toUpperCase().startsWith(t));
 }
-

@@ -850,7 +850,7 @@ route('Masters/Items', [
   'DELETE /masters/item-master/:code',
   'POST /masters/item-master/:code/tag-values',
 ]);
-// MS_ACCT (N220): the Party master's own screen, with its helps, Enter checks and photo.
+// MS_ACCT (N223): the Party master's own screen, with its helps, Enter checks and photo.
 route('Masters/Party (rich)', [
   'GET /masters/party-master',
   'GET /masters/party-master/print',
