@@ -1,4 +1,5 @@
 'use client';
+import { formatDesktopDate } from '@datacare/core';
 import { useCallback, useEffect, useState } from 'react';
 import { get, post, ApiError } from '../../../../lib/api';
 import {
@@ -52,9 +53,7 @@ const inr = (n: number): string =>
   (Number(n) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 function fmtDate(d: string | null): string {
-  if (!d) return '—';
-  const dt = new Date(d);
-  return isNaN(dt.getTime()) ? String(d) : dt.toLocaleDateString('en-IN');
+  return d ? formatDesktopDate(d) : '—';
 }
 
 function todayIso(): string {
@@ -358,7 +357,9 @@ export default function RemindersPage() {
             {bdayLoading ? (
               <span className="muted">Loading birthday reminders…</span>
             ) : bdayRows.length === 0 ? (
-              <span className="muted">No birthdays or anniversaries on {onDate || '—'}.</span>
+              <span className="muted">
+                No birthdays or anniversaries on {onDate ? formatDesktopDate(onDate) : '—'}.
+              </span>
             ) : (
               <table className="grid">
                 <thead>

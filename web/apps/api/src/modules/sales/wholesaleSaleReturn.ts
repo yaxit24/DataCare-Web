@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { assertBalanced, assertPeriodOpen, insertRowTx } from '../posting/posting.js';
 import {
@@ -1395,7 +1396,7 @@ export async function getWholesaleSaleReturn(
     const h = headers[0]!;
     return {
       voucherNo,
-      vchDate: text(h.VCH_DAY).slice(0, 10),
+      vchDate: toIsoDate(h.VCH_DAY),
       voucherTime: text(h.VCH_CLOCK),
       hiddenVoucherNo: text(h.HD_VCH_NO),
       mainUser: text(h.MAIN_USER),

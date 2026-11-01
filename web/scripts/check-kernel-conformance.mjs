@@ -60,10 +60,14 @@ const result = compareToBaseline(files, baseline);
 
 const rounding = result.liveSites.filter((s) => s.startsWith('rounding:')).length;
 const bookAccount = result.liveSites.filter((s) => s.startsWith('book-account:')).length;
+const dateNormalization = result.liveSites.filter((s) =>
+  s.startsWith('date-normalization:'),
+).length;
 
 console.log(
   `kernel conformance across ${files.length} source files (apps/api/src + packages/core/src)\n` +
-    `  ${result.liveSites.length} live bypass site(s): ${rounding} rounding, ${bookAccount} book-account\n` +
+    `  ${result.liveSites.length} live bypass site(s): ${rounding} rounding, ${bookAccount} book-account, ` +
+    `${dateNormalization} date-normalization\n` +
     `  ${baseline.sites.length} site(s) in the baseline`,
 );
 

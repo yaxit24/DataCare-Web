@@ -13,6 +13,9 @@ describe('lossless saved lot presentation', () => {
     expect(mfgLotValue(null)).toBe('Not set');
     expect(mfgLotValue('')).toBe('Blank');
     expect(mfgLotValue('2024-01-01T23:59:59.123456')).toBe('2024-01-01T23:59:59.123456');
+    expect(mfgLotValue('2024-01-01T23:59:59.123456', 'VCH_DATE')).toBe('01/01/2024');
+    expect(mfgLotValue('2024-02-29', 'BILL_DATE')).toBe('29/02/2024');
+    expect(mfgLotValue(null, 'STK_DATE')).toBe('Not set');
   });
   it('attaches components through persisted SR_NO and retains all noncontiguous child identities', () => {
     const document = {

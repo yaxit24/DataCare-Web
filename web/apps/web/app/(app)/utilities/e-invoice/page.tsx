@@ -1,4 +1,5 @@
 'use client';
+import { formatDesktopDate } from '@datacare/core';
 import { useCallback, useEffect, useState } from 'react';
 import { get, post, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
@@ -44,9 +45,7 @@ const inr = (n: number): string =>
   (Number(n) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 function fmtDate(d: string | null): string {
-  if (!d) return '—';
-  const dt = new Date(d);
-  return isNaN(dt.getTime()) ? String(d) : dt.toLocaleDateString('en-IN');
+  return d ? formatDesktopDate(d) : '—';
 }
 
 const bookOf = (row: Row): string => String(row.coBook ?? '').trim();

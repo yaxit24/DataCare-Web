@@ -1,4 +1,5 @@
 'use client';
+import { formatDesktopDate } from '@datacare/core';
 import { useCallback, useEffect, useState } from 'react';
 import { ApiError, del, get, post, put } from '../../../../lib/api';
 
@@ -196,7 +197,7 @@ export default function UserRequestPage() {
               <tr key={`${row.coBook}/${row.vchNo}`}>
                 <td>{row.coBook}</td>
                 <td>{row.vchNo}</td>
-                <td>{row.vchDate ?? ''}</td>
+                <td>{formatDesktopDate(row.vchDate)}</td>
                 <td>{row.acName || row.acCode}</td>
                 <td>{row.requestType === 'D' ? 'Delete' : 'Edit'}</td>
                 <td>{row.remark}</td>

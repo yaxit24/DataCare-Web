@@ -1,3 +1,4 @@
+import { formatDesktopDate } from '@datacare/core';
 import type { RptObject, RptSection, RptSpec } from './reportEngine.js';
 import type { ParentChildBands, ReportRow } from './reportBindingContract.js';
 import { UnsupportedReportBindingError, resolveReportBinding } from './reportBindingContract.js';
@@ -34,10 +35,10 @@ export function renderOrderReportLayout(spec: RptSpec, options: OrderLayoutOptio
   const header = options.header;
   const field = (source: string, row: ReportRow): string => {
     if (source === '{@CurPag}') return '__ORDER_PAGE_NUMBER__';
-    if (source in row) return row[source]!;
     const key = source.replace(/^\{|\}$/g, '');
-    if (key in row) return row[key]!;
-    return fail(`missing-order-field:${source}`);
+    const value =
+      source in row ? row[source]! : key in row ? row[key]! : fail(`missing-order-field:${source}`);
+    return /(?:^|\.)(?:DATE|[A-Z0-9_]+_DATE)$/.test(key) ? formatDesktopDate(value) : value;
   };
   const object = (o: RptObject, row: ReportRow): { html: string; bottom: number } => {
     if (o.suppressed || suppressOrderField(o.suppressWhen, row)) return { html: '', bottom: 0 };

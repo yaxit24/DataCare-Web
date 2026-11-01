@@ -140,6 +140,7 @@ describe('recovered order document contract', () => {
       expect(html.match(/>Received gold</g)).toHaveLength(1);
       expect(html.match(/>Received silver</g)).toHaveLength(1);
       expect(html).toContain('data-field="Sum ({SL_PR_DETL.ITM_NWT})"');
+      expect(html).toMatch(/data-field="\{SL_ORD_DATA\.VCH_DATE\}"[^>]*>03\/04\/2026<\/div>/);
       expect(html.replace(/<[^>]+>/g, '')).not.toMatch(/\[IT_|ToWords|PageNumber|undefined/);
     },
   );

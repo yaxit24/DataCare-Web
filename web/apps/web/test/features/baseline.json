@@ -32,16 +32,6 @@
       "case": "sales-order.create.tender-modes",
       "gap": "G206",
       "reason": "UPI, old metal and scheme amounts are read-only on the order (cash, cheque and card are taken since N197), so an advance cannot include them (TR_SALE_ORD.cs:11368, Ac_Ledr.cs:48-61)."
-    },
-    {
-      "case": "sales-order.reopen.recent-list",
-      "gap": "G36",
-      "reason": "The Recent Sales Orders list prints the date as 2026-10-31 (sales-order/page.tsx String(o.vchDate).slice(0, 10)); D19 needs dd/MM/yyyy. N56 is in progress."
-    },
-    {
-      "case": "sales-order.print.order",
-      "gap": "G36",
-      "reason": "The printed order bill (report spec OrderBill) prints the date as 2026-10-31; D19 needs dd/MM/yyyy. N56 is in progress."
     }
   ]
 }

@@ -1,5 +1,7 @@
 'use client';
 
+import { toIsoDate } from '@datacare/core';
+
 import { useState } from 'react';
 import { ApiError, del, get, post, put } from '../../../../lib/api';
 import { BookSelect } from '../../../../components/BookSelect';
@@ -34,7 +36,6 @@ const msg = (e: unknown, fallback: string): string =>
   e instanceof ApiError
     ? e.body?.message || e.body?.error || e.body?.detail || e.message
     : fallback;
-const dateText = (value: unknown): string => String(value ?? '').slice(0, 10);
 
 export default function TagAdjustPage() {
   const scope = useBusinessScope();
@@ -111,7 +112,7 @@ export default function TagAdjustPage() {
         return;
       }
       setLoadedNo(lookupNo.trim().padStart(5, '0'));
-      setVchDate(dateText(loaded.header.VCH_DATE) || today());
+      setVchDate(toIsoDate(loaded.header.VCH_DATE) || today());
       setVchDesc(String(loaded.header.VCH_DESC ?? ''));
       setAcCode(String(loaded.header.AC_CODE ?? ''));
       setLines(

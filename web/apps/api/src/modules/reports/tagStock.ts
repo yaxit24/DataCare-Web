@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { barTagAvailableSql } from '../shared/stockSql.js';
 
@@ -92,7 +93,7 @@ export async function tagStockReport(
       designNo: r.dn ?? null,
       tblCode: r.tc ?? null,
       vchType: r.vt ?? null,
-      vchDate: r.vd ? String(r.vd).slice(0, 10) : null,
+      vchDate: r.vd ? toIsoDate(r.vd) : null,
       pcs: Number(r.pcs),
       grossWt: Number(r.gwt),
       netWt: Number(r.nwt),

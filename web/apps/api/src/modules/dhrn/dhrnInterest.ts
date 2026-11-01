@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
 import { resolveBookAccountTx, type BookPolicy } from '../shared/bookPolicy.js';
@@ -476,7 +477,7 @@ export async function getDhrnInterest(prisma: any, scope: VoucherScope, vchNo: n
       voucherNo: no,
       hiddenVoucherNo: String(h.HD_VCH_NO ?? ''),
       mainUser: String(h.MAIN_USER ?? ''),
-      vchDate: String(h.vd ?? '').slice(0, 10),
+      vchDate: toIsoDate(h.vd),
       borrowerAc: String(h.AC_CODE ?? ''),
       borrowerName: String(h.AC_NAME ?? ''),
       settlementAc: String(h.LEDR_ACCD ?? ''),
@@ -486,8 +487,8 @@ export async function getDhrnInterest(prisma: any, scope: VoucherScope, vchNo: n
       isuYear: String(h.ISU_YRCD ?? ''),
       principalReceived: Number(h.p ?? 0),
       unchakReceived: Number(h.u ?? 0),
-      fromDate: String(h.fd ?? '').slice(0, 10),
-      toDate: String(h.td ?? '').slice(0, 10),
+      fromDate: toIsoDate(h.fd),
+      toDate: toIsoDate(h.td),
       intMonth: Number(h.im ?? 0),
       intDay: Number(h.idd ?? 0),
       intPrc: Number(h.prc ?? 0),

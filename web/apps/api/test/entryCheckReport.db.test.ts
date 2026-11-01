@@ -138,7 +138,10 @@ databaseDescribe('RP_USER Entry Check parity', () => {
         lcCode: LC,
         coYear: YEAR,
       },
-      [{ coBook: 'SAL', vchNo: '00001', editDate: '2024-06-10' }],
+      [
+        { coBook: 'BAD', vchNo: '99999', editDate: 'not-a-date' },
+        { coBook: 'SAL', vchNo: '00001', editDate: '2024-06-10' },
+      ],
     );
 
     expect(result.updated).toBe(2);

@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { barTagAvailableSql } from '../shared/stockSql.js';
 
@@ -147,7 +148,7 @@ export async function lookupBullionBookings(
         IT_CODE: text(r.IT_CODE),
         IT_TYPE: text(r.IT_TYPE),
         IT_DESC: text(r.IT_DESC),
-        VCH_DATE: text(r.VCH_DATE).slice(0, 10),
+        VCH_DATE: toIsoDate(r.VCH_DATE),
         ITM_GWT: num(r.ITM_GWT),
         ADJ_WT: num(r.ADJ_WT),
         AVAILABLE_WT: availableWt,

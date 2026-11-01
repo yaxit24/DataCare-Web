@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 
 /**
@@ -95,7 +96,7 @@ export async function reminders(
           vchNo: String(r.vch),
           acCode: String(r.ac ?? ''),
           acName: String(r.nm ?? ''),
-          delDate: r.dd ? String(r.dd).slice(0, 10) : null,
+          delDate: r.dd ? toIsoDate(r.dd) : null,
           total: r2(Number(r.tot) || 0),
           daysToDelivery: dtd,
           overdue: dtd != null && dtd < 0,

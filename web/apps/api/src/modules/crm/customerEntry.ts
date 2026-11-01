@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import type { VoucherScope } from '../vouchers/numbering.js';
 
@@ -241,14 +242,14 @@ export async function getCustomerEntry(
       employeeCode: txt(h.EMP_CODE),
       employeeName: txt(h.EMP_NAME),
       mainUser: txt(h.MAIN_USER),
-      vchDate: txt(h.vd).slice(0, 10),
+      vchDate: toIsoDate(h.vd),
       rows: rows.map((r) => ({
         srNo: Number(r.sr),
         acCode: txt(r.AC_CODE),
         custCode: txt(r.CUST_CODE),
         acName: txt(r.AC_NAME),
         mobileNo: txt(r.MOBILE_NO),
-        remDate: txt(r.rd).slice(0, 10),
+        remDate: toIsoDate(r.rd),
         itemRemark: txt(r.ITM_REMARK),
         tagNo: txt(r.TAG_NO),
         tagVoucherSerial: r.vsr == null ? null : Number(r.vsr),

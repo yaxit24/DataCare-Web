@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useId, useMemo, useState } from 'react';
-import { fiscalYearDates } from '@datacare/core';
+import { fiscalYearDates, formatDesktopDate } from '@datacare/core';
 import { get, post, ApiError } from '../../../../lib/api';
 
 /** Year Create (desktop MS_YEAR, YEAR_MAST): create a financial year and carry the prior year's closing
@@ -133,7 +133,7 @@ export default function YearCreatePage() {
                       yearMonth,
                     },
                   );
-                  return `Year ${r.coYear} created (${r.opDate} to ${r.clDate})`;
+                  return `Year ${r.coYear} created (${formatDesktopDate(r.opDate)} to ${formatDesktopDate(r.clDate)})`;
                 })
               }
             >
@@ -143,7 +143,8 @@ export default function YearCreatePage() {
         </div>
         {coYear.trim() && (
           <div className={preview.error ? 'msg err' : 'muted'} aria-live="polite">
-            {preview.error ?? `Opens ${preview.opDate}, closes ${preview.clDate}`}
+            {preview.error ??
+              `Opens ${formatDesktopDate(preview.opDate)}, closes ${formatDesktopDate(preview.clDate)}`}
           </div>
         )}
       </div>
@@ -163,9 +164,11 @@ export default function YearCreatePage() {
             {years.map((y) => (
               <tr key={y.coYear}>
                 <td>{y.coYear}</td>
-                <td>{y.opDate ?? ''}</td>
+                <td>{formatDesktopDate(y.opDate)}</td>
                 <td>
-                  {y.clDate ?? (
+                  {y.clDate ? (
+                    formatDesktopDate(y.clDate)
+                  ) : (
                     <span style={{ color: 'var(--err)' }}>
                       missing — vouchers cannot be posted in this year
                     </span>

@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
 
 export class RepairWorkflowValidationError extends Error {
@@ -303,7 +304,5 @@ export async function deleteRepairVoucherRowsTx(
 }
 
 export function repairDateOnly(value: unknown): string {
-  if (!value) return '';
-  if (value instanceof Date) return value.toISOString().slice(0, 10);
-  return String(value).slice(0, 10);
+  return toIsoDate(value);
 }

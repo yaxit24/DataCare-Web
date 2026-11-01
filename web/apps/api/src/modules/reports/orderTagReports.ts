@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { dateWhere, type ListReport, type ReportScope } from './reports.js';
 import { applyFilters, type ReportFilters } from './reportFilters.js';
@@ -329,8 +330,8 @@ export async function deleteDataReport(prisma: any, s: ReportScope): Promise<Lis
         book: String(r.book ?? ''),
         vchNo: String(r.vchNo ?? ''),
         lineSrNo: num(r.lineSrNo),
-        deleteDate: String(r.deleteDate ?? '').slice(0, 10),
-        vchDate: String(r.vchDate ?? '').slice(0, 10),
+        deleteDate: toIsoDate(r.deleteDate),
+        vchDate: toIsoDate(r.vchDate),
         acName: String(r.acName ?? ''),
         acCode: String(r.acCode ?? ''),
         drAmt: round2(num(r.drAmt)),
@@ -400,7 +401,7 @@ export async function pointReport(prisma: any, s: ReportScope): Promise<ListRepo
         totalPoint: round2(num(r.totalPoint)),
         adjustedPoint: round2(num(r.adjustedPoint)),
         balancePoint: round2(num(r.balancePoint)),
-        delDate: r.delDate ? String(r.delDate).slice(0, 10) : '',
+        delDate: r.delDate ? toIsoDate(r.delDate) : '',
       })),
     };
   });
@@ -454,7 +455,7 @@ export async function pointReportDetail(
         srNo: num(r.srNo),
         book: String(r.book ?? ''),
         vchNo: String(r.vchNo ?? ''),
-        vchDate: String(r.vchDate ?? '').slice(0, 10),
+        vchDate: toIsoDate(r.vchDate),
         memberName: String(r.memberName ?? ''),
         coBook: String(r.coBook ?? ''),
         memberCode: String(r.memberCode ?? ''),

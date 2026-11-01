@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
 import {
@@ -166,7 +167,7 @@ export async function getEmployeeJv(p: any, s: VoucherScope, x: number | string)
       voucherNo: no,
       hiddenVoucherNo: text(h.HD_VCH_NO),
       mainUser: text(h.MAIN_USER),
-      vchDate: text(h.VCH_DATE).slice(0, 10),
+      vchDate: toIsoDate(h.VCH_DATE),
       empAc: text(h.AC_CODE),
       empName: text(h.AC_NAME),
       paidAc: text(h.PAID_AC_CODE),
