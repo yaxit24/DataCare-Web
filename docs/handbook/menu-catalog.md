@@ -2168,7 +2168,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Stock Adjust | `TR_TAG_CAN` | `/txn/stock-adjust` | `C - - D - -` | PARTIAL | P1-core |
 | Stone/Dm-Cf | `TR_PHYSTK` | `/txn/stone-dm-cf` | `C R E D P -` | PARTIAL | P1-core |
 | Tag Adjust | `TR_TAG_CAN` | `/txn/tag-adjust` | `C R E D - -` | PARTIAL | P1-core |
-| Tag Cancel | `TR_TAG_CAN` | `/txn/tag-cancel` | `C R E D - L` | PARTIAL | P1-core |
+| Tag Cancel | `TR_TAG_CAN` | `/txn/tag-cancel` | `C R E D P L` | PARTIAL | P1-core |
 | Tag Print | `UT_TAG_PRINT` | `/txn/tag-print` | `- - - - P L` | PARTIAL | P1-core |
 | Tag Split | `TR_TAG_SPLIT` | `/txn/tag-split` | `C R E D - L` | PARTIAL | P1-core |
 | Tag Transfer | `TR_TAG_CAN` | `/txn/tag-transfer` | `C R E D - L` | PARTIAL | P1-core |
@@ -2369,9 +2369,9 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Writes off a missing or unusable tagged piece without a sales bill.
 - **Looks:** Voucher/date header and a scan-driven tag grid with item, counter, weights, fine and karigar detail.
 - **Writes:** BAR_CAN_DATA, BAR_CAN_DETL, BAR_CAN_IDTL, BAR_DETL, BAR_IDTL, MAIN_STOCK, DM_DATA, DELETE_DATA.
-- **Web:** `/txn/tag-cancel`; `GET /stock/tag-cancel`, `POST /stock/tag-cancel`, `GET /stock/tag-cancel/:vchNo`, `PUT /stock/tag-cancel/:vchNo`, `DELETE /stock/tag-cancel/:vchNo`, `GET /stock/tag-cancel/source`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Implemented from source (N18), but no captured desktop BAR_CAN rows or independent business acceptance exist.
-- **Owners:** N18, X19, X18, P07-03.
+- **Web:** `/txn/tag-cancel`; `GET /stock/tag-cancel`, `POST /stock/tag-cancel`, `GET /stock/tag-cancel/:vchNo`, `PUT /stock/tag-cancel/:vchNo`, `DELETE /stock/tag-cancel/:vchNo`, `GET /stock/tag-cancel/source`, `GET /stock/tag-cancel/:vchNo/print`. Can: create, reopen, edit, delete, print, list.
+- **Remaining:** Implemented from source (N18, N210): TagCanBill behind print rights and the desktop refusals pass 12 browser cases. Open: no captured desktop BAR_CAN rows, idempotency retry, fault rollback, the Tag Stock report check and a desktop-runtime comparison.
+- **Owners:** G223, N18, N210, P07-03, X18, X19.
 - **Evidence:** [KB_other.md:106-149](../../project-memory/video-research/_kb/KB_other.md#L106-L149).
 
 ### Tag Print

@@ -104,9 +104,10 @@ describe('route policy registry', () => {
     // N208 adds the MS_RATE delete and RateRpt print (DELETE /daily-rate, GET /daily-rate/print): 661 + 2 = 663.
     // N209 adds the TR_ITM_OPBL Item Opening grid: GET /stock/item-opening/rights and
     // GET|PUT|DELETE /stock/item-opening/type/:type: 663 + 4 = 667.
-    // N211 adds the Employee master's GET (list, print, accounts, one), POST, PUT and DELETE: 667 + 7 = 674.
-    expect(routes).toHaveLength(674);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(674);
+    // N210 adds the TagCanBill print GET /stock/tag-cancel/:vchNo/print: 667 + 1 = 668.
+    // N211 adds the Employee master's GET (list, print, accounts, one), POST, PUT and DELETE: 668 + 7 = 675.
+    expect(routes).toHaveLength(675);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(675);
 
     const policies = routes.map((route) => ({
       ...route,

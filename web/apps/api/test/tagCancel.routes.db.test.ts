@@ -413,4 +413,135 @@ const SRNO = 100312000009;
     expect(await balance(TAG)).toBe(1);
     expect(await balance(SECOND)).toBe(1);
   }, 60_000);
+
+  // N210 (G223): TR_TAG_CAN.cs:4959-4980 refuses, before anything is written, a new voucher in a company of type B
+  // and a date on or before the lock date, with the desktop texts; :5390-5440 prints TagCanBill behind UserPrint.
+  it('refuses a new voucher in a type B company and a locked date with the desktop texts, writing nothing', async () => {
+    const before = await balance(TAG);
+    expect(before).toBe(1);
+    await exec(`UPDATE "CO_MAST" SET "CO_TYPE"='B' WHERE tenant_id=$1`, tenantId);
+    try {
+      const typeB = await request('canceller', 'POST', '/stock/tag-cancel', {
+        coBook: 'TGC',
+        vchDate: DAY,
+        lines: [{ tagNo: TAG }],
+      });
+      expect(typeB.statusCode, typeB.body).toBe(400);
+      expect(typeB.json().message).toBe(
+        'You Cant Save This Voucher Becouse This Company Type is B......',
+      );
+    } finally {
+      await exec(`UPDATE "CO_MAST" SET "CO_TYPE"=NULL WHERE tenant_id=$1`, tenantId);
+    }
+    await exec(`UPDATE "CO_SET" SET "LOCK_DATE"=$2 WHERE tenant_id=$1`, tenantId, DAY);
+    try {
+      const locked = await request('canceller', 'POST', '/stock/tag-cancel', {
+        coBook: 'TGC',
+        vchDate: DAY,
+        lines: [{ tagNo: TAG }],
+      });
+      expect(locked.statusCode, locked.body).toBe(400);
+      const [y, m, d] = DAY.split('-');
+      expect(locked.json().message).toBe(
+        `You Cant Save and Delete This Voucher Becouse Lock Date is = ${d}/${m}/${y} ....`,
+      );
+    } finally {
+      await exec(`UPDATE "CO_SET" SET "LOCK_DATE"=NULL WHERE tenant_id=$1`, tenantId);
+    }
+    expect(await balance(TAG)).toBe(before);
+    const rows = await query<Array<{ n: number }>>(
+      `SELECT count(*)::int n FROM "BAR_CAN_DATA" WHERE tenant_id=$1`,
+      tenantId,
+    );
+    expect(rows[0]?.n).toBe(0);
+  });
+
+  it('prints TagCanBill for a saved cancel behind print rights', async () => {
+    await exec(
+      `INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED")
+       VALUES($1,'01','tcviewer',$2,'USER','Y','N','N','N')`,
+      tenantId,
+      await hashPassword(PASSWORD),
+    );
+    await exec(
+      `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
+       VALUES($1,'01','01','tcviewer','Other','Tag Cancel','Y','N','N','N')`,
+      tenantId,
+    );
+    const signed = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      headers: { 'x-tenant-id': tenantId },
+      payload: {
+        coCode: '01',
+        lcCode: '01',
+        coYear: YEAR,
+        loginName: 'tcviewer',
+        password: PASSWORD,
+      },
+    });
+    expect(signed.statusCode, signed.body).toBe(200);
+    const value = signed.headers['set-cookie'];
+    cookies.tcviewer = (Array.isArray(value) ? value : [value ?? ''])
+      .map((part) => part.split(';', 1)[0])
+      .join('; ');
+    await exec(`UPDATE "CO_MAST" SET "CO_NAME"='Cancel Jewellers' WHERE tenant_id=$1`, tenantId);
+
+    const created = await request('canceller', 'POST', '/stock/tag-cancel', {
+      coBook: 'TGC',
+      vchDate: DAY,
+      vchDesc: 'damaged clasp',
+      lines: [{ tagNo: TAG }],
+    });
+    expect(created.statusCode, created.body).toBe(201);
+    const voucherNo = String(created.json().voucherNo);
+    const url = `/stock/tag-cancel/${voucherNo}/print?coBook=TGC&format=html`;
+    const denied = await request('tcviewer', 'GET', url);
+    expect(denied.statusCode, denied.body).toBe(403);
+    expect(denied.json()).toMatchObject({ error: 'forbidden', action: 'print' });
+    const printed = await request('canceller', 'GET', url);
+    expect(printed.statusCode, printed.body).toBe(200);
+    const [y, m, d] = DAY.split('-');
+    for (const text of [
+      '<title>Tag Cancel</title>',
+      'ORIGINAL',
+      'Cancel Jewellers',
+      'Vch Date :',
+      `${d}/${m}/${y}`,
+      'Vch No :',
+      voucherNo,
+      'Party :',
+      'SNO',
+      'Item Name',
+      'Pcs.',
+      'Gr Wt.',
+      'Net Wt',
+      'Rate',
+      'Item Amt',
+      'Oth Amt',
+      'Net Amount',
+      `${TAG} - L RING 916`,
+      '12.300',
+      'Total :',
+      'Vch Desc :',
+      'DAMAGED CLASP',
+      'For : Cancel Jewellers',
+      'Party signature.',
+      '>signature.<',
+    ])
+      expect(printed.body, text).toContain(text);
+    const missing = await request(
+      'canceller',
+      'GET',
+      '/stock/tag-cancel/99999/print?coBook=TGC&format=html',
+    );
+    expect(missing.statusCode, missing.body).toBe(404);
+    const removed = await request(
+      'canceller',
+      'DELETE',
+      `/stock/tag-cancel/${voucherNo}?coBook=TGC`,
+    );
+    expect(removed.statusCode, removed.body).toBe(200);
+    expect(await balance(TAG)).toBe(1);
+  });
 });

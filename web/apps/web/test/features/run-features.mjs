@@ -30,6 +30,7 @@ import { partyOpening } from './modules/partyOpening.mjs';
 import { tagOpening } from './modules/tagOpening.mjs';
 import { dailyRate } from './modules/dailyRate.mjs';
 import { itemOpening } from './modules/itemOpening.mjs';
+import { tagCancel } from './modules/tagCancel.mjs';
 import { employeeMaster } from './modules/employeeMaster.mjs';
 import { runSurface } from './surface/runner.mjs';
 
@@ -62,6 +63,7 @@ const MODULES = [
   tagOpening,
   dailyRate,
   itemOpening,
+  tagCancel,
   employeeMaster,
 ];
 

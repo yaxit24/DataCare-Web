@@ -908,6 +908,18 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
         >
           Delete
         </button>
+        {mode === 'cancel' && loaded && (
+          // TagCanBill (TR_TAG_CAN.cs:5386-5440); the server checks print rights.
+          <a
+            className="btn"
+            data-testid={id('print')}
+            href={`/api/stock/tag-cancel/${encodeURIComponent(loaded.voucherNo)}/print?coBook=${encodeURIComponent(coBook)}&format=html`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Print
+          </a>
+        )}
         <button
           type="button"
           className="ghost"

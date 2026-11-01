@@ -571,6 +571,7 @@ route('Inventory/Tag Cancel', [
   'POST /stock/tag-cancel',
   'PUT /stock/tag-cancel/:vchNo',
   'DELETE /stock/tag-cancel/:vchNo',
+  'GET /stock/tag-cancel/:vchNo/print',
 ]);
 route('Inventory/Tag Adjust', [
   'POST /stock/tag-adjust',
@@ -967,6 +968,8 @@ const PRINT_ROUTES = new Set([
   'GET /journal/:vchNo/print',
   // MS_RATE.cs:1834-1838: RateRpt needs print rights.
   'GET /daily-rate/print',
+  // TR_TAG_CAN.cs:5390-5393: TagCanBill needs print rights.
+  'GET /stock/tag-cancel/:vchNo/print',
 ]);
 
 const UPDATE_POST_ROUTES = new Set([
