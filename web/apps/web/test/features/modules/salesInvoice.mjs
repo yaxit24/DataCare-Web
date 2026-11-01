@@ -240,6 +240,7 @@ export const salesInvoice = {
   inputs: [
     'web/apps/web/app/(app)/txn/sales/page.tsx',
     'web/apps/api/src/modules/sales/sales.ts',
+    'web/apps/api/src/modules/sales/approvalSaleReferences.ts',
     'web/apps/api/src/routes/txn.ts',
     'web/apps/web/test/features/modules/salesInvoice.mjs',
     'web/apps/web/test/features/fixtures/catalogue.mjs',
