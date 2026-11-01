@@ -888,6 +888,35 @@ export const salesInvoice = {
     },
 
     C(
+      'lookup.lower-case-code',
+      'T04',
+      'read-only',
+      "Lookup: a party code typed in lower case ('e2eloc') and Enter picks that party with its name (tAcCode_KeyDown looks the code up as typed; the lookups compare case-insensitively, lookupEnter.ts)",
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openSales(page);
+        const party = page.getByPlaceholder('search accounts… (F1)').first();
+        // The box starts with the default party (WALKIN, G124); the operator clears it and types.
+        await party.fill('');
+        await page.keyboard.type(PARTIES.local.code.toLowerCase());
+        await party
+          .locator('xpath=..')
+          .getByText(PARTIES.local.code, { exact: true })
+          .first()
+          .waitFor();
+        await party.press('Enter');
+        await page.waitForTimeout(600);
+        const chosen = await party.inputValue();
+        const name = await field(page, 'Customer Name').inputValue();
+        assert.equal(chosen, PARTIES.local.code);
+        assert.equal(name, PARTIES.local.name);
+        return {
+          observation: `typed ${PARTIES.local.code.toLowerCase()}, Enter took ${chosen} (${name})`,
+          expected: { party: PARTIES.local.code, name: PARTIES.local.name },
+        };
+      },
+    ),
+    C(
       'lookup.pick-over-typed-code',
       'T04',
       'read-only',

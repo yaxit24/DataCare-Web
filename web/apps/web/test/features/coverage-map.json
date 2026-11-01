@@ -162,6 +162,13 @@
         "web/apps/api/src/modules/masters/addressMaster.ts",
         "web/apps/api/src/routes/addressMaster.ts"
       ]
+    },
+    "itemMaster": {
+      "covers": [
+        "web/apps/web/app/(app)/masters/items/page.tsx",
+        "web/apps/api/src/modules/masters/itemMaster.ts",
+        "web/apps/api/src/routes/itemMaster.ts"
+      ]
     }
   }
 }
