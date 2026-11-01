@@ -233,6 +233,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G220 | Med | The generic voucher list and number-box routes read any book of an allow-listed table | `unified/src/csharp/DataCareNext/MDI_FORM.cs:8100-8111,8360-8365`; `unified/src/csharp/DataCareNext/TR_CONTRA.cs:3136-3146` | `web/apps/api/src/routes/voucherNavigation.ts`; `web/apps/api/src/modules/vouchers/list.ts`; `web/apps/api/src/modules/rbac/routePolicy.ts` | Found in the N206 review. `GET /vouchers/recent` and `GET /vouchers/neighbour` are SYSTEM routes that take the table and book from the request, so any signed-in user of the company can list another menu's vouchers of a shared table (for example a Fine JV book through CONTRA_DATA) with their dates, accounts and totals, within the session's tenant, company, location and year. The desktop's list (TR_CONTRA.cs:3136-3146) only lists the open form's own book. The routes should require view rights on the form that owns the requested book. | N207 |
 | G221 | High | Daily Rate did not follow MS_RATE and its save deleted other locations' rates | `unified/src/csharp/DataCareNext/MS_RATE.cs:1752-2109,2314-2458` | `web/apps/api/src/modules/masters/dailyRate.ts`; `web/apps/api/src/routes/dailyRate.ts`; `web/apps/web/app/(app)/txn/daily-rate/page.tsx`; `web/packages/core/src/dailyRate.ts` | The desktop lists the groups with a touch (GR_TYPE, GR_NAME), derives TaxRate = Round(Touch × Gold / 100) (silver / 10000) with Rate10gm net of the group's Tax% and PrRate from the purchase touch, using banker's rounding, and saves the grid per company, location, year and date. The web derived silver per kg, added tax on top, rounded half up, used one Tax% for every group, deleted every location's rows for the date, read and listed without the location, wrote GR_NAME, had no delete or print, and allowed any save without edit rights. | N208 |
 | G222 | High | Item Opening was not the desktop TR_ITM_OPBL metal-type grid | `unified/src/csharp/DataCareNext/TR_ITM_OPBL.cs`; `unified/src/csharp/DataCareNext/Ac_Stock.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7690-7699` | `web/apps/web/app/(app)/txn/item-opening/page.tsx`; `web/apps/api/src/modules/stock/stockVoucherLifecycle.ts`; `web/apps/api/src/routes/txn.ts` | The desktop opens TR_ITM_OPBL directly, with no book help (`MDI_FORM.cs:7690-7699`). Enter on the Item Type select lists every item of that metal type (`TR_ITM_OPBL.cs:1269-1370`) in a 17-column grid with a Total row, and Save replaces the type's rows in book '000' with VCH_NO = the type letter (`:1380-1490`); the stock rows come from `Ac_Stock.Itm_Opbl_Stk` (`Ac_Stock.cs:11-21`: AC_CODE '00000', VCH_TYPE ITOBL, BOOK_NAME 'ITM OPBL', P / +, the KR_* fields, dated the year's opening date less one day) and DM_DATA from `Dm_Itm_Opbl_Detl` for OTH_DETL_POSTING items (`:734-741`). The web wrote a numbered BAR_DATA voucher in book IOP on the voucher date; its fine ignored the wastage, its stock rows lacked those fields, it wrote no per-type ITM_OPBL rows and no DM_DATA, and its grid had no West%, labour, other amount, net amount or totals. | N209 |
+| G225 | High | Desktop rights rows named by the menu caption did not reach fifteen Lite screens | `unified/src/csharp/DataCareNext/MDI_FORM.cs:7034-7046`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7610-8951`; `unified/src/csharp/DataCareNext/TR_AC_OPBL.cs:2020-2030` | `web/apps/api/src/modules/rbac/formCatalog.ts`; `web/apps/api/src/modules/rbac/authorization.ts`; `web/apps/api/src/routes/partyOpening.ts` | The desktop reads USER_SET by LC_CODE, USER_NAME and SUB_MENU = the menu button's caption (MsUserRightForm = MsSideBtn, `MDI_FORM.cs:7034-7046`), so a migrated or desktop-written rights row names the caption. The web matches a row against the form's name and aliases, and the captions Address, Product, Group, AutoItem, Tax, Party Opening, Purchase Rtn, Approval Isu, Approval Rtn, Fine Jv Entry, Tag Stock, Sales Report, Purchase Rpt, Cash Bank and Gst Report were not aliases of the forms their screens use: a restricted user with the desktop's rights was refused. Party Opening's Save also ignored FRM_EDIT for an existing opening (`TR_AC_OPBL.cs:2647-2650`). Not closed here: captions whose screens also use another menu's form (Company, Data Refresh, Data Import, Order Report, Cash Received, Bank Received, and Approval Rtn's issue lines), and 14 Basic and 19 Standard menus, which follow their tiers. | N212 |
 
 ## 4. Decisions D23–D28
 
@@ -2450,6 +2451,36 @@ removed both rows. The check found two keyboard defects, fixed here: Enter on th
 select's value changed without a React change event, and Esc from the type select left the screen. Desktop-runtime
 comparison and parent acceptance remain open.
 
+### N212 — Desktop rights rows reach the Lite screens by their menu captions (G225, Lite)
+
+The desktop names a rights row by the menu button's caption: MDI_FORM sets MsUserRightForm = MsSideBtn and reads USER_SET
+WHERE LC_CODE, USER_NAME and SUB_MENU = the caption (`MDI_FORM.cs:7034-7046`, `:7111-7116`, `:7264-7269`), and the form
+reads FRM_EDIT, FRM_DELETE and FRM_PRINT of the same row (for example `TR_AC_OPBL.cs:2020-2030`). The web looks a row up
+by the form's name and its aliases (`authorization.ts`), and fifteen Lite captions were not aliases of the forms their
+screens use, so a migrated shop's restricted users were refused: Address, Product, Group, AutoItem, Tax, Party Opening,
+Purchase Rtn, Approval Isu, Approval Rtn, Fine Jv Entry, Tag Stock, Sales Report, Purchase Rpt, Cash Bank and Gst Report.
+The captions are now aliases of those forms (the dispatch case labels `:7610`, `:7620`, `:7630`, `:7640`, `:7670`,
+`:7680`, `:7893`, `:8300`, `:8312`, `:8360`, `:8891`, `:8901`, `:8911`, `:8941`, `:8951`; RP_GST's Gstr 1, 2 and 3 views at
+`RP_GST.cs:1340-1392`), and 'Party' also reaches the Party page's opening routes, which MS_ACCT shows itself.
+
+Party Opening's Save now checks the edit right for an opening that exists, as TR_AC_OPBL does (`:2647-2650`, EntryMode E
+set at `:2621`): a new opening needs only the view right, a change answers "You Have No Rights....." and writes nothing.
+The screen shows the desktop text for a refused change or delete (`:2649`, `:2864`).
+
+Not closed here, recorded on the gap: the captions whose screens also use another menu's form are left, because an alias
+would grant that menu (Company → Provision Company, an administrator screen; Data Refresh → Data Repair; Data Import →
+the Party master; Order Report → Sales Order; Cash Received and Bank Received → the Multi-Party Receipt routes the
+receipt screen's multi-party mode posts to; Approval Rtn → the issue lines read under Tour / Approval Sale). The Basic
+tier has 14 and the Standard tier 19 more menus whose captions do not reach their forms; they follow their tiers.
+
+Evidence: `desktopRightsCaptions.db.test.ts` (28 cases) logs a view-only user in for each caption with the rights row the
+desktop writes (SUB_MENU = the caption) and reads the screen's routes (200) and another menu's (403), checks that each
+caption reaches its forms and no other menu's, and saves a new party opening, is refused the change and the delete, and
+saves the change once FRM_EDIT is 'Y'. Against main's form catalog 27 of the 28 fail. `partyOpening.db.test.ts` passes.
+The `party-opening` feature module's T11, blocked before, passes through a desktop 'Party Opening' row (new opening saved,
+change and delete refused on screen with the desktop text, OP_DATA unchanged): 15 passed, 0 failed, 3 blocked. The full
+API suite (343 files, 3665 tests), web unit tests and the smoke pass.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2586,6 +2617,7 @@ comparison and parent acceptance remain open.
 | N207 | — | implemented-unverified, evidence in this change (G220: the voucher list and number-box routes require read rights on a form that owns the book's MAIN_BOOK) |
 | N208 | — | implemented-unverified, evidence in this change (G221: Daily Rate is MS_RATE — grid source, recalculation, scoped save/delete, F1, RateRpt, rights) |
 | N209 | — | implemented-unverified, evidence in this change (G222: Item Opening is the TR_ITM_OPBL metal-type grid in book 000 with ITOBL stock rows, DM_DATA for OTH_DETL_POSTING items and the desktop messages) |
+| N212 | — | implemented-unverified, evidence in this change (G225: the Lite menu captions reach their screens' forms as USER_SET aliases; Party Opening's Save checks the edit right for an existing opening) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

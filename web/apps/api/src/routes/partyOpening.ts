@@ -8,6 +8,9 @@ import {
   type OpeningBalanceType,
 } from '../modules/finance/partyOpening.js';
 
+/** The rights row of the screen (routePolicy 'Cash / Bank/Account Opening Bal', desktop SUB_MENU 'Party Opening'). */
+const FORM = 'Cash / Bank/Account Opening Bal';
+
 /**
  * Party Opening (TR_AC_OPBL): the opening list, one party's opening, save and delete. The Party master's inline opening
  * keeps its `/accounts/:acCode/opening` paths and goes through the same module, so every opening writes OP_DATA in
@@ -16,6 +19,10 @@ import {
 export function registerPartyOpeningRoutes(
   app: FastifyInstance,
   h: Pick<CrmRouteHelpers, 'prisma' | 'auth' | 'guard' | 'scopeOf' | 'run' | 'body' | 'mainUserOf'>,
+  formMutationCapabilities: (
+    req: FastifyRequest,
+    form: string,
+  ) => Promise<{ canUpdate: boolean; canDelete: boolean }>,
 ): void {
   const { prisma, auth, guard, scopeOf, run, body, mainUserOf } = h;
   const scope = (req: FastifyRequest) => {
@@ -44,6 +51,15 @@ export function registerPartyOpeningRoutes(
   app.post('/ac-opbl', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
+    // N212: TR_AC_OPBL.cs:2647-2650 — an opening that exists (EntryMode E, :2621) needs the edit right; a new one needs
+    // only the view right the menu opened with.
+    const existing = await getPartyOpening(prisma, scope(req), String(b.acCode ?? '')).catch(
+      () => null,
+    );
+    if (existing?.exists && !(await formMutationCapabilities(req, FORM)).canUpdate)
+      return reply
+        .code(403)
+        .send({ error: 'forbidden', action: 'update', message: 'You Have No Rights.....' });
     return run(reply, 200, () =>
       savePartyOpening(prisma, {
         scope: scope(req),
