@@ -301,13 +301,13 @@ route('Sales/Tour / Approval Sale', [
   'PUT /tour/:vchNo',
   'DELETE /tour/:vchNo',
   'GET /tour/:vchNo/print',
-  'GET /tour/:vchNo/lines',
   'POST /tour-sales',
   'GET /tour-sales/:vchNo',
   'PUT /tour-sales/:vchNo',
   'DELETE /tour-sales/:vchNo',
 ]);
 route('Sales/Approval Return', [
+  'GET /tour/:vchNo/lines',
   'POST /tour/return',
   'GET /tour/return/:vchNo',
   'PUT /tour/return/:vchNo',

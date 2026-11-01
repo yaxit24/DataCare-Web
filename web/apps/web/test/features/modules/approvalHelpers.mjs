@@ -67,6 +67,41 @@ export async function seedApprovalTag(ctx, prefix = 'AIE') {
   return { tag, serial };
 }
 
+/** Add the BAR_DETL richness and BAR_IDTL component copied by TR_APR_ISU tag selection. */
+export async function seedApprovalStone(ctx, source) {
+  await ctx.owner.$executeRawUnsafe(
+    `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","PR_CODE","OTH_DETL_POSTING")
+     SELECT $1::text,'01','DIAE1','E2E ROUND DIAMOND','D','DI','Y'
+      WHERE NOT EXISTS (SELECT 1 FROM "ITEM_MAST" WHERE tenant_id=$1::text AND "CO_CODE"='01' AND "IT_CODE"='DIAE1')`,
+    TENANT,
+  );
+  await ctx.owner.$executeRawUnsafe(
+    `UPDATE "BAR_DETL" SET "LOT_NO"='LOT-E2E',"ITM_COLOR"='ROSE',"TAG_COST"=501.25,
+            "HM_ID"='HUID1',"HM_ID2"='HUID2',"HM_ID_WT"=.101,"HM_ID2_WT"=.102,
+            "BAG_WT"=.15,"ITM_OTH_WT"=.5,"ITM_GHT_WT"=.25,"ITM_WEST_PRC"=2,
+            "LBR_PRC"=1.25,"ITM_AMT"=61234,"KR_NET_WT"=10,"KR_TOUCH"=91,
+            "KR_WEST_PRC"=1,"KR_FINE"=9.2,"RATE_TYPE"='W',"DESIGN_IMG_ID"='IMG-E2E'
+      WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01' AND "TAG_NO"=$2 AND "VCH_SRNO"=$3`,
+    TENANT,
+    source.tag,
+    source.serial,
+  );
+  await ctx.owner.$executeRawUnsafe(
+    `INSERT INTO "BAR_IDTL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","ISR_NO",
+       "VCH_DATE","TAG_NO","VCH_SRNO","IT_CODE","IT_TYPE","DM_CODE","DM_NAME","DM_SIZE","DM_SFNO","DM_LEB",
+       "IT_PCS","IT_PCS_WT","IT_GWT","KR_WT","IT_CON_PRC","IT_CON_WT","IT_RATE_TYPE","IT_RATE","IT_AMT",
+       "IT_LBR_RATE","IT_LBR_AMT","IT_NET_AMT","KR_LESS_PRC","KR_CON_PRC","KR_CON_WT","KR_RATE","KR_AMT",
+       "KR_LBR_RATE","KR_LBR_AMT","KR_NET_AMT")
+     VALUES ($1,'01','01',$2,'TOP','09001',1,1,$3::date,$4,$5,'DIAE1','D','RD','Round','1.2MM','CERT-1','GIA',
+             2,.02,.25,.24,5,.013,'W',5000,1250,100,25,1275,1,4,.01,4500,1080,90,21.6,1101.6)`,
+    TENANT,
+    YEAR,
+    DAY,
+    source.tag,
+    source.serial,
+  );
+}
+
 async function pick(input, code) {
   await input.fill(code);
   await input.locator('xpath=..').getByText(code, { exact: false }).first().waitFor();
@@ -76,6 +111,7 @@ async function pick(input, code) {
 export async function openApproval(ctx, kind = 'issue', session) {
   await ensureApprovalFixture(ctx);
   const current = session ?? (await ctx.session());
+
   const { page } = current;
   await page.goto(kind === 'issue' ? '/txn/tour' : '/txn/tour-return');
   await page

@@ -55,6 +55,10 @@ export interface ApprovalLine {
   rate: string;
   amount: string;
   mrp: string;
+  discountPct: string;
+  discountAmount: string;
+  netAmount: string;
+  itType: string;
   karigarNetWt: string;
   karigarTouch: string;
   karigarWestPct: string;
@@ -114,6 +118,10 @@ export const blankApprovalLine = (): ApprovalLine => ({
   rate: '',
   amount: '',
   mrp: '',
+  discountPct: '',
+  discountAmount: '',
+  netAmount: '',
+  itType: '',
   karigarNetWt: '',
   karigarTouch: '',
   karigarWestPct: '',
@@ -169,6 +177,9 @@ const NUMERIC = new Set<keyof ApprovalLine>([
   'rate',
   'amount',
   'mrp',
+  'discountPct',
+  'discountAmount',
+  'netAmount',
   'karigarNetWt',
   'karigarTouch',
   'karigarWestPct',
@@ -197,10 +208,12 @@ export function approvalStonesFromApi(raw: Record<string, unknown>): SubDetailRo
 export type ApprovalExtendedField = [keyof ApprovalLine, string];
 
 const number = (value: string) => Number(value || 0);
-export const approvalFine = (line: ApprovalLine) =>
-  line.fineWt.trim()
-    ? Number(line.fineWt)
-    : round((number(line.netWt) * number(line.touch)) / 100, 3);
+export const approvalFine = (line: ApprovalLine) => {
+  if (line.fineWt.trim()) return Number(line.fineWt);
+  const weight = number(line.netWt) + number(line.ghtWt);
+  const purity = number(line.touch) + number(line.westPct);
+  return round(purity === 0 ? weight : (weight * purity) / 100, 3);
+};
 
 export function ApprovalGrid({
   kind,
@@ -258,22 +271,50 @@ export function ApprovalGrid({
               netWt: String(value.ITM_NWT ?? line.netWt),
               touch: String(value.ITM_TOUCH ?? line.touch),
               fineWt: String(value.ITM_FINE ?? line.fineWt),
+              lotNo: String(value.LOT_NO ?? line.lotNo),
+              itmColor: String(value.ITM_COLOR ?? line.itmColor),
+              tagCost: String(value.TAG_COST ?? line.tagCost),
+              hallmarkId2: String(value.HM_ID2 ?? line.hallmarkId2),
+              hallmarkId3: String(value.HM_ID3 ?? line.hallmarkId3),
+              hallmarkId4: String(value.HM_ID4 ?? line.hallmarkId4),
+              hallmarkIdWt: String(value.HM_ID_WT ?? line.hallmarkIdWt),
+              hallmarkId2Wt: String(value.HM_ID2_WT ?? line.hallmarkId2Wt),
+              hallmarkId3Wt: String(value.HM_ID3_WT ?? line.hallmarkId3Wt),
+              hallmarkId4Wt: String(value.HM_ID4_WT ?? line.hallmarkId4Wt),
               tblCode: String(value.TBL_CODE ?? line.tblCode),
               designNo: String(value.DESIGN_NO ?? line.designNo),
               itmSize: String(value.ITM_SIZE ?? line.itmSize),
               huid: String(value.HM_ID ?? line.huid),
+              bagWt: String(value.BAG_WT ?? line.bagWt),
+              lessWt: String(value.ITM_OTH_WT ?? line.lessWt),
+              ghtWt: String(value.ITM_GHT_WT ?? line.ghtWt),
+              westPct: String(value.ITM_WEST_PRC ?? line.westPct),
+              labourPct: String(value.LBR_PRC ?? line.labourPct),
               labourType: String(value.LBR_TYPE ?? line.labourType),
               labourRate: String(value.LBR_RATE ?? line.labourRate),
               labourAmount: String(value.LBR_AMT ?? line.labourAmount),
               otherAmount: String(value.OTH_AMT ?? line.otherAmount),
               rate: String(value.ITM_RATE ?? line.rate),
+              amount: String(value.ITM_AMT ?? line.amount),
               mrp: String(value.ITM_MRP ?? line.mrp),
+              netAmount: Number(value.ITM_MRP ?? 0) !== 0 ? String(value.ITM_MRP) : line.netAmount,
+              karigarNetWt: String(value.KR_NET_WT ?? line.karigarNetWt),
+              karigarTouch: String(value.KR_TOUCH ?? line.karigarTouch),
+              karigarWestPct: String(value.KR_WEST_PRC ?? line.karigarWestPct),
+              karigarFine: String(value.KR_FINE ?? line.karigarFine),
               karigarName: String(value.KR_NAME ?? line.karigarName),
+              rateType: String(value.RATE_TYPE ?? line.rateType),
+              itType: String(value.IT_TYPE ?? line.itType),
               prCode: String(value.PR_CODE ?? line.prCode),
+              designImageId: String(value.DESIGN_IMG_ID ?? line.designImageId),
             }
           : line,
       ),
     );
+    const stones = Array.isArray(value.stones)
+      ? value.stones.map((stone) => stoneRowFromApi(stone as Record<string, unknown>))
+      : [];
+    sub.setRowsFor(row, stones.length ? stones : [{}]);
   };
   return (
     <div className="panel" style={{ overflow: 'auto' }}>

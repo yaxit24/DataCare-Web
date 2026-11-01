@@ -6,6 +6,7 @@ import {
   voucherKey,
   type VoucherIdentity,
 } from '../finance/lifecycle.js';
+import { readStoneSubDetail } from '../shared/stoneSubDetail.js';
 import { resolveLiveTagIdentityTx } from '../stock/stock.js';
 import { formatVoucherNo } from '../vouchers/numbering.js';
 import {
@@ -14,6 +15,7 @@ import {
   approvalText as t,
   isApprovalTag,
   tourLineFine,
+  tourLineNetAmount,
   TourValidationError,
   type ApprovalKind,
   type ApprovalRow as Row,
@@ -30,17 +32,31 @@ export async function resolveIssueTagsTx(
   scope: CompleteApprovalScope,
   lines: TourIssueLine[],
 ): Promise<TourIssueLine[]> {
+  const codes = [...new Set(lines.map((line) => text(line.itCode)).filter(Boolean))];
+  const itemRows: Array<{ IT_CODE: unknown; IT_TYPE: unknown }> = codes.length
+    ? await tx.$queryRawUnsafe(
+        `SELECT "IT_CODE","IT_TYPE" FROM "ITEM_MAST"
+          WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "IT_CODE"=ANY($3::text[])`,
+        scope.tenantId,
+        scope.coCode,
+        codes,
+      )
+    : [];
+  const items = new Map(itemRows.map((row) => [text(row.IT_CODE), text(row.IT_TYPE)] as const));
   const out: TourIssueLine[] = [];
   for (const line of lines) {
+    const itemType = items.get(text(line.itCode));
+    if (itemType === undefined)
+      throw new TourValidationError(`approval item not found: ${text(line.itCode)}`);
     // DISPLAY_DATA/Save carries consumed rows forward. They no longer have to be live stock and must
     // retain the original tag identity rather than being resolved as a new issue selection.
     const received = text(line.isuRec).toUpperCase();
     if (received && received !== 'N') {
-      out.push(line);
+      out.push({ ...line, itType: itemType });
       continue;
     }
     if (!isApprovalTag(line.tagNo)) {
-      out.push({ ...line, tagNo: 'N', vchSrno: 0 });
+      out.push({ ...line, tagNo: 'N', vchSrno: 0, itType: itemType });
       continue;
     }
     const identity = await resolveLiveTagIdentityTx(tx, {
@@ -56,6 +72,7 @@ export async function resolveIssueTagsTx(
       ...line,
       vchSrno: identity.VCH_SRNO,
       itCode: text(identity.IT_CODE) || line.itCode,
+      itType: itemType,
     });
   }
   return out;
@@ -138,26 +155,7 @@ export async function sourceLinesTx(
 }
 
 export function stoneFromRow(row: Row): TourStoneInput {
-  return {
-    isrNo: num(row.ISR_NO),
-    itCode: text(row.IT_CODE),
-    dmCode: text(row.DM_CODE),
-    dmName: text(row.DM_NAME),
-    dmSize: text(row.DM_SIZE),
-    dmSfNo: text(row.DM_SFNO),
-    pcs: num(row.IT_PCS),
-    grossWt: num(row.IT_GWT),
-    karigarWt: num(row.KR_WT),
-    conPct: num(row.IT_CON_PRC),
-    rateType: text(row.IT_RATE_TYPE),
-    rate: num(row.IT_RATE),
-    amount: num(row.IT_AMT),
-    lbrRate: num(row.IT_LBR_RATE),
-    lbrAmount: num(row.IT_LBR_AMT),
-    netAmount: num(row.IT_NET_AMT),
-    conWt: num(row.IT_CON_WT),
-    itType: text(row.IT_TYPE),
-  };
+  return readStoneSubDetail(row) as TourStoneInput;
 }
 
 export function lineFromRow(row: Row): TourIssueLine {
@@ -205,6 +203,10 @@ export function lineFromRow(row: Row): TourIssueLine {
     rate: num(row.ITM_RATE),
     amount: num(row.ITM_AMT),
     mrp: num(row.ITM_MRP),
+    discountPct: num(row.DISC_PRC),
+    discountAmount: num(row.DISC_AMT),
+    netAmount: num(row.NET_AMT),
+    itType: text(row.IT_TYPE),
     karigarNetWt: num(row.KR_NET_WT),
     karigarTouch: num(row.KR_TOUCH),
     karigarWestPct: num(row.KR_WEST_PRC),
@@ -255,7 +257,6 @@ export function detailRow(
     ITM_NWT: approvalRound3(line.netWt),
     ITM_TOUCH: approvalRound3(line.touch),
     ITM_FINE: tourLineFine(line),
-    NET_AMT: num(line.amount) + num(line.labourAmount) + num(line.otherAmount),
     ITM_REMARK: t(line.remark),
     ORNA_REC_DATE: toIsoDate(identity.voucherDate),
     LOT_NO: t(line.lotNo, 15),
@@ -291,6 +292,10 @@ export function detailRow(
     ITM_RATE: num(line.rate),
     ITM_AMT: num(line.amount),
     ITM_MRP: num(line.mrp),
+    DISC_PRC: num(line.discountPct),
+    DISC_AMT: num(line.discountAmount),
+    NET_AMT: tourLineNetAmount(line),
+    IT_TYPE: t(line.itType, 1),
     KR_NET_WT: approvalRound3(line.karigarNetWt),
     KR_TOUCH: num(line.karigarTouch),
     KR_WEST_PRC: num(line.karigarWestPct),
@@ -302,7 +307,7 @@ export function detailRow(
     ISU_DBCD: source?.book ?? t(line.isuDbcd, 3),
     ISU_NO: source?.no ?? t(line.isuNo, 10),
     ISU_SRNO: source ? num(line.oldSrNo) : num(line.isuSrNo) || null,
-    ISU_LC_CODE: source ? key.LC_CODE : t(line.isuLcCode, 2),
+    ISU_LC_CODE: key.LC_CODE,
     DESIGN_IMG_ID: t(line.designImageId, 50),
     MAIN_USER: identity.mainUser || null,
   };
@@ -319,6 +324,7 @@ export function stoneRows(
     (line.stones ?? []).map((stone, stoneIndex) => ({
       ...key,
       VCH_DATE: identity.voucherDate,
+      HD_VCH_NO: identity.hiddenVoucherNo,
       VCH_TYPE: book.shortName,
       INOUT_TYPE: book.inout,
       ENTRY_TYPE: 'A',
@@ -401,7 +407,9 @@ export function stockRows(details: Row[], book: ApprovalBook, kind: ApprovalKind
     KR_TOUCH: row.KR_TOUCH,
     KR_WEST: row.KR_WEST_PRC,
     KR_FINE: row.KR_FINE,
-    EMP_CODE: null,
+    EMP_CODE: '',
+    ITM_LOT: '',
+    ITM_DISC: 0,
     ENTRY_TIME: row.VCH_TIME,
     MAIN_USER: row.MAIN_USER,
     DATA_TYPE: 'A',

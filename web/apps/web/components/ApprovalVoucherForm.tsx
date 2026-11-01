@@ -22,8 +22,11 @@ import {
 interface ApprovalView {
   voucherNo: string;
   vchDate: string;
+  vchTime: string;
   partyAc: string;
+  partyName: string;
   empCode: string;
+  empName: string;
   vchDesc: string;
   origVchNo: string;
   origBook: string;
@@ -67,7 +70,9 @@ export default function ApprovalVoucherForm({
   const [loadedNo, setLoadedNo] = useState('');
   const [version, setVersion] = useState('');
   const [vchDate, setVchDate] = useState(todayLocal());
-  const [vchTime] = useState(() => new Date().toLocaleTimeString('en-GB', { hour12: false }));
+  const [vchTime, setVchTime] = useState(() =>
+    new Date().toLocaleTimeString('en-GB', { hour12: false }),
+  );
   const [partyAc, setPartyAc] = useState('');
   const [partyName, setPartyName] = useState('');
   const [empCode, setEmpCode] = useState('');
@@ -84,6 +89,7 @@ export default function ApprovalVoucherForm({
     setLoadedNo('');
     setVersion('');
     setVchDate(todayLocal());
+    setVchTime(new Date().toLocaleTimeString('en-GB', { hour12: false }));
     setPartyAc('');
     setPartyName('');
     setEmpCode('');
@@ -102,8 +108,11 @@ export default function ApprovalVoucherForm({
     setLoadedNo(view.voucherNo);
     setVersion(view.version);
     setVchDate(String(view.vchDate || todayLocal()).slice(0, 10));
+    setVchTime(String(view.vchTime || '').slice(0, 8));
     setPartyAc(String(view.partyAc || ''));
+    setPartyName(String(view.partyName || ''));
     setEmpCode(String(view.empCode || ''));
+    setEmpName(String(view.empName || ''));
     setVchDesc(String(view.vchDesc || ''));
     setOrigVchNo(String(view.origVchNo || ''));
     setOrigBook(String(view.origBook || ''));
@@ -196,7 +205,8 @@ export default function ApprovalVoucherForm({
   }
 
   async function remove() {
-    if (!loadedNo || !version) return;
+    if (!loadedNo || !version || !window.confirm('Are You Sure To Delete This Voucher now?'))
+      return;
     setBusy(true);
     try {
       await del(

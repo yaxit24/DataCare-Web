@@ -137,6 +137,56 @@ export const approvalReturn = {
       },
     ),
     C(
+      'refusal.duplicate-source',
+      'T04',
+      'refusal',
+      'TR_APR_ISU.cs:4817-4824 refuses a repeated selected tag with exactly "Duplicate Tag No".',
+      async (ctx) => {
+        const issue = await issueFor(ctx, 'ARDU');
+        const answer = await issue.page.evaluate(
+          async ({ issueBook, returnBook, year, day, voucherNo, tag, serial }) => {
+            const response = await fetch('/api/tour/return', {
+              method: 'POST',
+              credentials: 'include',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({
+                coBook: returnBook,
+                origBook: issueBook,
+                origYear: year,
+                origVchNo: voucherNo,
+                vchDate: day,
+                partyAc: 'E2ELOC',
+                empCode: 'E01',
+                lines: [
+                  { origSrNo: 1, itCode: 'GLD22', tagNo: tag, vchSrno: serial },
+                  { origSrNo: 1, itCode: 'GLD22', tagNo: tag, vchSrno: serial },
+                ],
+              }),
+            });
+            return { status: response.status, body: await response.json() };
+          },
+          {
+            issueBook: ISSUE_BOOK,
+            returnBook: RETURN_BOOK,
+            year: YEAR,
+            day: DAY,
+            voucherNo: issue.voucherNo,
+            tag: issue.tag,
+            serial: issue.serial,
+          },
+        );
+        assert.equal(answer.status, 400);
+        assert.equal(answer.body.message, 'Duplicate Tag No');
+        assert.deepEqual(await approvalRows(ctx, RETURN_BOOK, '00001'), []);
+        assert.deepEqual(await tagState(ctx, issue.tag), { apr: 'Y', transfer: 'N', balance: 0 });
+        return {
+          observation: answer.body.message,
+          expected: 'Duplicate Tag No and no write',
+          database: { returns: [] },
+        };
+      },
+    ),
+    C(
       'create.desktop-write-set',
       'T05',
       'mutation',
@@ -182,6 +232,15 @@ export const approvalReturn = {
         const returned = await createReturn(ctx, issue, 'return reopen');
         await returned.page.getByTestId('approval-return-new').click();
         await reopenApproval(returned.page, 'return', returned.voucherNo);
+        const [header] = await ctx.rows(
+          `SELECT to_char("VCH_TIME",'HH24:MI:SS') clock FROM "APR_DATA"
+            WHERE tenant_id=$1 AND "CO_BOOK"='TRR' AND "VCH_NO"=$2`,
+          returned.voucherNo,
+        );
+        assert.equal(await label(returned.page, 'Vch No').inputValue(), returned.voucherNo);
+        assert.equal(await label(returned.page, 'Party Name').inputValue(), 'E2E LOCAL CUSTOMER');
+        assert.equal(await label(returned.page, 'Employee Name').inputValue(), 'APPROVAL EMPLOYEE');
+        assert.equal(await label(returned.page, 'Vch Time').inputValue(), header.clock);
         assert.equal(
           await label(returned.page, 'Original Issue Vch No').inputValue(),
           issue.voucherNo,
@@ -258,21 +317,32 @@ export const approvalReturn = {
         const issue = await issueFor(ctx, 'ARD');
         const returned = await createReturn(ctx, issue);
         await reopenApproval(returned.page, 'return', returned.voucherNo);
+        const confirmed = new Promise((resolve) => {
+          returned.page.once('dialog', async (dialog) => {
+            assert.equal(dialog.message(), 'Are You Sure To Delete This Voucher now?');
+            resolve(dialog.message());
+            await dialog.accept();
+          });
+        });
         const [response] = await Promise.all([
           returned.page.waitForResponse((r) =>
             isApi(r, 'DELETE', `/tour/return/${returned.voucherNo}`),
           ),
           returned.page.getByTestId('approval-return-delete').click(),
         ]);
+        await confirmed;
         assert.equal(response.status(), 200, await response.text());
         assert.deepEqual(await approvalRows(ctx, RETURN_BOOK, returned.voucherNo), []);
         assert.equal((await approvalRows(ctx, ISSUE_BOOK, issue.voucherNo))[0].received, 'N');
         assert.deepEqual(await tagState(ctx, issue.tag), { apr: 'Y', transfer: 'N', balance: 0 });
         const audit = await ctx.rows(
-          `SELECT "DELETE_USER" "user","VCH_FINE_CR"::float8 fine FROM "DELETE_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TRR' AND "VCH_NO"=$2`,
+          `SELECT "DELETE_USER" "user","AC_NAME" account,"FINE_TYPE" type,
+                  "VCH_FINE_CR"::float8 fine FROM "DELETE_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TRR' AND "VCH_NO"=$2`,
           returned.voucherNo,
         );
-        assert.deepEqual(audit, [{ user: USERS.admin.user, fine: 10 }]);
+        assert.deepEqual(audit, [
+          { user: USERS.admin.user, account: 'E2E LOCAL CUSTOMER', type: 'G', fine: 10 },
+        ]);
         return {
           observation: 'return deleted/source reopened',
           expected: 'pending approval',
@@ -291,6 +361,10 @@ export const approvalReturn = {
         const issue = await issueFor(ctx, 'ARP');
         const returned = await createReturn(ctx, issue);
         const viewer = await ctx.session(as(USERS.printViewer.user));
+        const source = await viewer.page.request.get(
+          `/api/tour/${issue.voucherNo}/lines?coBook=TUR`,
+        );
+        assert.equal(source.status(), 200, await source.text());
         const answer = await viewer.page.request.get(
           `/api/tour/return/${returned.voucherNo}/print?coBook=TRR&format=html`,
         );

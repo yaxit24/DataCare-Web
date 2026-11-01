@@ -124,6 +124,19 @@ const dml = statements.filter((statement) => /^(UPDATE|INSERT)/.test(statement))
     if (owner) await owner.$disconnect();
   });
 
+  it('adds the desktop APR_DETL discount columns with their exact numeric storage', async () => {
+    const columns = await owner.$queryRawUnsafe(
+      `SELECT column_name,"numeric_precision"::int AS "precision","numeric_scale"::int AS "scale"
+         FROM information_schema.columns
+        WHERE table_schema='public' AND table_name='APR_DETL'
+          AND column_name IN ('DISC_PRC','DISC_AMT') ORDER BY column_name`,
+    );
+    expect(columns).toEqual([
+      { column_name: 'DISC_AMT', precision: 18, scale: 2 },
+      { column_name: 'DISC_PRC', precision: 9, scale: 4 },
+    ]);
+  });
+
   it('ships as one guarded transaction and refuses an RLS-bound migration role', async () => {
     expect(sql, 'the N211 migration file is missing').not.toBe('');
     expect(statements[0]).toBe('BEGIN');

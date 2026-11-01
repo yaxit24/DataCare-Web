@@ -209,7 +209,7 @@ async function writeTx(
     EMP_CODE: empCode || null,
     VCH_DESC: description || null,
     ISU_NO: source?.no ?? null,
-    ISU_LC_CODE: source ? scope.lcCode : null,
+    ISU_LC_CODE: scope.lcCode,
     ISU_YRCD: source?.year ?? null,
     ISU_DBCD: source?.book ?? null,
     MAIN_USER: identity.mainUser || null,
@@ -253,9 +253,16 @@ async function writeTx(
 
 async function rowsTx(tx: any, scope: CompleteApprovalScope, voucherNo: string, lock = false) {
   const header: Row[] = await tx.$queryRawUnsafe(
-    `SELECT *,to_char("VCH_TIME",'HH24:MI:SS.MS') "VCH_CLOCK" FROM "APR_DATA"
-      WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5
-        AND "VCH_NO"=$6 ORDER BY row_id${lock ? ' FOR UPDATE' : ''}`,
+    `SELECT h.*,to_char(h."VCH_TIME",'HH24:MI:SS.MS') "VCH_CLOCK",
+            (SELECT a."AC_NAME" FROM "AC_MAST" a
+              WHERE a.tenant_id=h.tenant_id AND a."CO_CODE"=h."CO_CODE" AND a."AC_CODE"=h."AC_CODE"
+              ORDER BY CASE WHEN a."LC_CODE"=h."LC_CODE" THEN 0 ELSE 1 END,a.row_id LIMIT 1) "PARTY_NAME",
+            (SELECT e."EMP_NAME" FROM "EMP_MAST" e
+              WHERE e.tenant_id=h.tenant_id AND e."CO_CODE"=h."CO_CODE" AND e."EMP_CODE"=h."EMP_CODE"
+              ORDER BY e.row_id LIMIT 1) "EMP_NAME"
+       FROM "APR_DATA" h
+      WHERE h.tenant_id=$1 AND h."CO_CODE"=$2 AND h."LC_CODE"=$3 AND h."CO_YEAR"=$4 AND h."CO_BOOK"=$5
+        AND h."VCH_NO"=$6 ORDER BY h.row_id${lock ? ' FOR UPDATE OF h' : ''}`,
     scope.tenantId,
     scope.coCode,
     scope.lcCode,
@@ -307,8 +314,11 @@ function viewOf(
     },
     hiddenVoucherNo: text(header.HD_VCH_NO),
     vchDate: toIsoDate(header.VCH_DATE),
+    vchTime: text(header.VCH_CLOCK),
     partyAc: text(header.AC_CODE),
+    partyName: text(header.PARTY_NAME),
     empCode: text(header.EMP_CODE),
+    empName: text(header.EMP_NAME),
     vchDesc: text(header.VCH_DESC),
     mainUser: text(header.MAIN_USER),
     origVchNo: text(header.ISU_NO),
@@ -446,6 +456,20 @@ function comparableView(view: ApprovalView): string {
   });
 }
 
+function assertReturnLinks(details: Row[]): void {
+  if (
+    details.some(
+      (row) =>
+        !text(row.ISU_YRCD) ||
+        !text(row.ISU_DBCD) ||
+        !text(row.ISU_LC_CODE) ||
+        !text(row.ISU_NO) ||
+        !num(row.ISU_SRNO),
+    )
+  )
+    throw new TourValidationError(APPROVAL_MESSAGES.LEGACY_RETURN_UNLINKED);
+}
+
 async function clearEffectsTx(
   tx: any,
   scope: CompleteApprovalScope,
@@ -537,6 +561,7 @@ async function edit(
         };
         return kind === 'return' ? { ...base, closedLines: current.view.lines.length } : base;
       }
+      if (kind === 'return') assertReturnLinks(current.state.details);
       const requested = approvalBusinessDate(input.vchDate || current.view.vchDate);
       const partyAc = text(input.partyAc ?? input.salesmanAc) || current.view.partyAc;
       const empCode = input.empCode === undefined ? current.view.empCode : text(input.empCode);
@@ -607,8 +632,17 @@ async function assertIssueDeleteAllowedTx(
   voucherNo: string,
 ): Promise<void> {
   const returns: unknown[] = await tx.$queryRawUnsafe(
-    `SELECT 1 FROM "APR_DETL" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
-      AND "ISU_YRCD"=$4 AND "ISU_DBCD"=$5 AND "ISU_NO"=$6 LIMIT 1`,
+    `SELECT 1 FROM "APR_DETL" rtn
+      JOIN "BOOK_DATA" book ON book.tenant_id=rtn.tenant_id AND book."CO_CODE"=rtn."CO_CODE"
+       AND book."LC_CODE"=rtn."LC_CODE" AND book."CO_BOOK"=rtn."CO_BOOK"
+     WHERE rtn.tenant_id=$1 AND rtn."CO_CODE"=$2 AND rtn."ISU_NO"=$6
+       AND upper(btrim(book."MAIN_BOOK"))='APR RTN'
+       AND ((rtn."ISU_YRCD"=$4 AND rtn."ISU_DBCD"=$5 AND rtn."ISU_LC_CODE"=$3)
+         OR ((rtn."ISU_YRCD" IS NULL OR btrim(rtn."ISU_YRCD")=''
+              OR rtn."ISU_DBCD" IS NULL OR btrim(rtn."ISU_DBCD")=''
+              OR rtn."ISU_LC_CODE" IS NULL OR btrim(rtn."ISU_LC_CODE")='')
+             AND rtn."CO_YEAR"=$4 AND rtn."LC_CODE"=$3))
+     LIMIT 1`,
     scope.tenantId,
     scope.coCode,
     scope.lcCode,
@@ -640,6 +674,7 @@ async function remove(
   return withTxBudget(prisma, scope.tenantId, 'voucher', (tx: any) =>
     withDesktopLockText(async () => {
       const current = await getTx(tx, scope, kind, voucherNo, true);
+      if (kind === 'return') assertReturnLinks(current.state.details);
       const { persisted, identity } = await editIdentityTx(tx, {
         table: 'APR_DATA',
         scope,
@@ -670,6 +705,7 @@ async function remove(
           // TR_APR_ISU.cs:6648 puts ITM_NWT in VCH_FINE_CR despite that column's name.
           fineCr: num(row.ITM_NWT),
           acCode: row.AC_CODE,
+          acName: current.state.header.PARTY_NAME,
           description: `ItCode / ${text(row.IT_CODE)}   TagNo / ${text(row.TAG_NO)}`,
         })),
         deleteUser: input.deleteUser,

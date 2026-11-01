@@ -9,12 +9,14 @@ import {
   approvalStock,
   as,
   createIssue,
+  createReturn,
   fillIssue,
   isApi,
   label,
   openApproval,
   reopenApproval,
   saveApproval,
+  seedApprovalStone,
   seedApprovalTag,
   tagState,
 } from './approvalHelpers.mjs';
@@ -180,6 +182,43 @@ export const approvalIssue = {
         };
       },
     ),
+    C(
+      'entry.tag-stone-hydration',
+      'T05',
+      'mutation',
+      'TR_APR_ISU.cs:5044-5137 copies BAR_DETL and :5153-5202 copies BAR_IDTL on tag pick.',
+      async (ctx) => {
+        const tag = await seedApprovalTag(ctx, 'AIZ');
+        await seedApprovalStone(ctx, tag);
+        const { page } = await openApproval(ctx);
+        await fillIssue(page, tag.tag, 'stone hydration');
+        assert.equal(await label(page, 'ItCode row 1').inputValue(), 'DIAE1');
+        assert.equal(await label(page, 'DmCode row 1').inputValue(), 'RD');
+        assert.equal(Number(await label(page, 'Weight row 1').inputValue()), 0.25);
+        await page.getByTestId('approval-issue-grid-mode').click();
+        assert.equal(await label(page, 'LotNo row 1').inputValue(), 'LOT-E2E');
+        assert.equal(await label(page, 'HuId2 row 1').inputValue(), 'HUID2');
+        assert.equal(await label(page, 'ItType row 1').inputValue(), 'G');
+        const response = await saveApproval(page);
+        assert.equal(response.status(), 201, await response.text());
+        const result = await response.json();
+        const stones = await ctx.rows(
+          `SELECT "IT_CODE" item,"DM_CODE" diamond,"IT_GWT"::float8 weight,"IT_NET_AMT"::float8 net,
+                  "HD_VCH_NO" hidden FROM "APR_IDTL"
+            WHERE tenant_id=$1 AND "CO_BOOK"='TUR' AND "VCH_NO"=$2`,
+          result.voucherNo,
+        );
+        assert.deepEqual(stones, [
+          { item: 'DIAE1', diamond: 'RD', weight: 0.25, net: 1275, hidden: result.voucherNo },
+        ]);
+        return {
+          observation: `${tag.tag} hydrated one stone`,
+          expected: 'BAR fields and APR_IDTL persisted',
+          database: { stones },
+          downstream: await tagState(ctx, tag.tag),
+        };
+      },
+    ),
     notApplicable(
       'settlement',
       'T06',
@@ -196,7 +235,16 @@ export const approvalIssue = {
         const created = await createIssue(ctx, tag.tag, 'lossless note');
         await pageNew(created.page);
         await reopenApproval(created.page, 'issue', created.voucherNo);
+        const [header] = await ctx.rows(
+          `SELECT to_char("VCH_TIME",'HH24:MI:SS') clock FROM "APR_DATA"
+            WHERE tenant_id=$1 AND "CO_BOOK"='TUR' AND "VCH_NO"=$2`,
+          created.voucherNo,
+        );
+        assert.equal(await label(created.page, 'Vch No').inputValue(), created.voucherNo);
         assert.equal(await label(created.page, 'Party Code').inputValue(), 'E2ELOC');
+        assert.equal(await label(created.page, 'Party Name').inputValue(), 'E2E LOCAL CUSTOMER');
+        assert.equal(await label(created.page, 'Employee Name').inputValue(), 'APPROVAL EMPLOYEE');
+        assert.equal(await label(created.page, 'Vch Time').inputValue(), header.clock);
         assert.equal(await label(created.page, 'TagNo line 1').inputValue(), tag.tag);
         assert.equal(await label(created.page, 'Vch Desc').inputValue(), 'LOSSLESS NOTE');
         return {
@@ -239,22 +287,25 @@ export const approvalIssue = {
       'edit.description',
       'T09',
       'mutation',
-      'TR_APR_ISU.cs:6070-6431 replaces the loaded voucher without a DELETE_DATA audit.',
+      'TR_APR_ISU.cs:5841-5913,6170-6178,6223-6251 preserves consumed fields when an issue is edited.',
       async (ctx) => {
         const tag = await seedApprovalTag(ctx, 'AIE');
         const created = await createIssue(ctx, tag.tag);
+        await createReturn(ctx, created, 'consume before edit', { page: created.page });
+        await openApproval(ctx, 'issue', { page: created.page });
         await reopenApproval(created.page, 'issue', created.voucherNo);
-        await label(created.page, 'Vch Desc').fill('changed in browser');
+        await label(created.page, 'Vch Desc').fill('changed after return');
         const response = await saveApproval(created.page, 'issue', 'PUT');
         assert.equal(response.status(), 200, await response.text());
         const rows = await approvalRows(ctx, ISSUE_BOOK, created.voucherNo);
-        assert.equal(rows[0].description, 'CHANGED IN BROWSER');
-        assert.equal((await tagState(ctx, tag.tag)).balance, 0);
+        assert.equal(rows[0].description, 'CHANGED AFTER RETURN');
+        assert.equal(rows[0].received, 'Y');
+        assert.deepEqual(await tagState(ctx, tag.tag), { apr: 'N', transfer: 'N', balance: 1 });
         return {
-          observation: 'description edited',
-          expected: 'CHANGED IN BROWSER',
+          observation: 'description edited after return without reopening source',
+          expected: 'ISU_REC=Y and APR_ISU=N',
           database: { rows },
-          downstream: { balance: 0 },
+          downstream: await tagState(ctx, tag.tag),
         };
       },
     ),
@@ -267,18 +318,29 @@ export const approvalIssue = {
         const tag = await seedApprovalTag(ctx, 'AID');
         const created = await createIssue(ctx, tag.tag);
         await reopenApproval(created.page, 'issue', created.voucherNo);
+        const confirmed = new Promise((resolve) => {
+          created.page.once('dialog', async (dialog) => {
+            assert.equal(dialog.message(), 'Are You Sure To Delete This Voucher now?');
+            resolve(dialog.message());
+            await dialog.accept();
+          });
+        });
         const [response] = await Promise.all([
           created.page.waitForResponse((r) => isApi(r, 'DELETE', `/tour/${created.voucherNo}`)),
           created.page.getByTestId('approval-issue-delete').click(),
         ]);
+        await confirmed;
         assert.equal(response.status(), 200, await response.text());
         assert.deepEqual(await approvalRows(ctx, ISSUE_BOOK, created.voucherNo), []);
         assert.deepEqual(await tagState(ctx, tag.tag), { apr: 'N', transfer: 'N', balance: 1 });
         const audits = await ctx.rows(
-          `SELECT "DELETE_USER" "user","VCH_FINE_CR"::float8 fine FROM "DELETE_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TUR' AND "VCH_NO"=$2`,
+          `SELECT "DELETE_USER" "user","AC_NAME" account,"FINE_TYPE" type,
+                  "VCH_FINE_CR"::float8 fine FROM "DELETE_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TUR' AND "VCH_NO"=$2`,
           created.voucherNo,
         );
-        assert.deepEqual(audits, [{ user: USERS.admin.user, fine: 10 }]);
+        assert.deepEqual(audits, [
+          { user: USERS.admin.user, account: 'E2E LOCAL CUSTOMER', type: 'G', fine: 10 },
+        ]);
         return {
           observation: 'deleted and audited',
           expected: 'tag available',

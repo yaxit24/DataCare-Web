@@ -466,6 +466,8 @@ model APR_DETL {
   ISU_DBCD      String?   @db.VarChar(3)
   ISU_SRNO      Float?
   ITM_MRP       Decimal?  @db.Decimal(18, 2)
+  DISC_PRC      Decimal?  @db.Decimal(9, 4)
+  DISC_AMT      Decimal?  @db.Decimal(18, 2)
   EMP_SALE      String?   @db.VarChar(255)
   ISU_AC_CODE   String?   @db.VarChar(8)
   ISU_AC_NAME   String?   @db.VarChar(50)
@@ -2220,7 +2222,7 @@ model DM_DATA {
   VCH_SRNO     Float?
   INOUT_TYPE   String?   @db.VarChar(255)
   MAIN_IT_CODE String?   @db.VarChar(255)
-  TBL_CODE      String?   @db.VarChar(3)
+  TBL_CODE     String?   @db.VarChar(3)
 
   @@id([tenantId, CO_CODE, LC_CODE, CO_YEAR, CO_BOOK, VCH_NO, MAIN_SRNO, SR_NO, ISR_NO])
   @@map("DM_DATA")

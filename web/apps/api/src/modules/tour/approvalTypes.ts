@@ -30,6 +30,8 @@ export const APPROVAL_MESSAGES = {
   EMPLOYEE_REQUIRED: 'Please Select Employee Code and Try......',
   PARTY_REQUIRED: 'Please Insert Party and try',
   DUPLICATE_TAG: 'Duplicate Tag No',
+  LEGACY_RETURN_UNLINKED:
+    'Approval Return source link is missing; migrate or repair this legacy voucher before edit or delete.',
   DELETE_RETURNED: 'You Cant Delete this Voucher Because This Voucher Is Approval Returne....',
   DELETE_WHOLESALE: 'You Cant Delete this Voucher Because This Voucher Use In Wh Sales....',
   lockDate: (date: string) =>
@@ -102,6 +104,10 @@ export interface TourIssueLine {
   rate?: number;
   amount?: number;
   mrp?: number;
+  discountPct?: number;
+  discountAmount?: number;
+  netAmount?: number;
+  itType?: string;
   karigarNetWt?: number;
   karigarTouch?: number;
   karigarWestPct?: number;
@@ -167,7 +173,15 @@ export const isApprovalTag = (value: unknown): boolean =>
 
 export function tourLineFine(line: TourIssueLine): number {
   if (line.fineWt != null) return approvalRound3(line.fineWt);
-  return approvalRound3((num(line.netWt) * num(line.touch)) / 100);
+  const weight = num(line.netWt) + num(line.ghtWt);
+  const purity = num(line.touch) + num(line.westPct);
+  return approvalRound3(purity === 0 ? weight : (weight * purity) / 100);
+}
+
+export function tourLineNetAmount(line: TourIssueLine): number {
+  if (line.netAmount != null) return num(line.netAmount);
+  const basis = num(line.mrp) || num(line.amount) + num(line.labourAmount) + num(line.otherAmount);
+  return basis - num(line.discountAmount);
 }
 
 export function completeApprovalScope(scope: VoucherScope): CompleteApprovalScope {
@@ -182,33 +196,43 @@ export function approvalBusinessDate(value: unknown): { iso: string; date: Date 
 
 export function normalizeApprovalLines(raw: unknown): TourIssueLine[] {
   if (!Array.isArray(raw)) throw new TourValidationError('approval requires item lines');
-  const rows = raw
-    .map((line: TourIssueLine, index) => {
-      if (!line || typeof line !== 'object')
-        throw new TourValidationError(`approval line ${index + 1} is invalid`);
-      assertWestPct(line.westPct);
-      const itCode = text(line.itCode).slice(0, 5);
-      if (!itCode) throw new TourValidationError(`approval line ${index + 1} needs an item`);
-      return {
-        ...line,
-        oldSrNo: line.oldSrNo == null ? index + 1 : num(line.oldSrNo),
-        itCode,
-        tagNo: isApprovalTag(line.tagNo) ? text(line.tagNo).slice(0, 15) : 'N',
-        pcs: approvalRound3(line.pcs),
-        grossWt: approvalRound3(line.grossWt),
-        netWt: approvalRound3(line.netWt),
-        touch: approvalRound3(line.touch),
-        fineWt: tourLineFine(line),
-        stones: Array.isArray(line.stones) ? line.stones : [],
-      };
-    })
-    .filter((line) => num(line.pcs) || num(line.grossWt) || num(line.netWt) || num(line.mrp));
+  const rows = raw.map((line: TourIssueLine, index) => {
+    if (!line || typeof line !== 'object')
+      throw new TourValidationError(`approval line ${index + 1} is invalid`);
+    assertWestPct(line.westPct);
+    const itCode = text(line.itCode).slice(0, 5);
+    if (!itCode) throw new TourValidationError(`approval line ${index + 1} needs an item`);
+    const normalized = {
+      ...line,
+      oldSrNo: line.oldSrNo == null ? index + 1 : num(line.oldSrNo),
+      itCode,
+      itType: text(line.itType).slice(0, 1),
+      tagNo: isApprovalTag(line.tagNo) ? text(line.tagNo).slice(0, 15) : 'N',
+      pcs: approvalRound3(line.pcs),
+      grossWt: approvalRound3(line.grossWt),
+      netWt: approvalRound3(line.netWt),
+      touch: approvalRound3(line.touch),
+      fineWt: tourLineFine(line),
+      stones: Array.isArray(line.stones) ? line.stones : [],
+    };
+    // TR_APR_ISU.cs:6155-6157 inserts only MRP lines or rows with gross/labour/other value.
+    if (
+      !num(normalized.mrp) &&
+      !num(normalized.grossWt) &&
+      !num(normalized.labourAmount) &&
+      !num(normalized.otherAmount)
+    )
+      throw new TourValidationError(
+        `approval line ${index + 1} needs MRP, gross weight, labour amount, or other amount`,
+      );
+    return normalized;
+  });
   if (!rows.length) throw new TourValidationError('at least one line item is required');
   const seen = new Set<string>();
   for (const line of rows) {
     if (!isApprovalTag(line.tagNo)) continue;
     const key = `${text(line.tagNo)}|${num(line.vchSrno)}`;
-    if (seen.has(key)) throw new TourValidationError(`Duplicate Tag No: ${text(line.tagNo)}`);
+    if (seen.has(key)) throw new TourValidationError(APPROVAL_MESSAGES.DUPLICATE_TAG);
     seen.add(key);
   }
   return rows;

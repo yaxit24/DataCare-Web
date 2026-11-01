@@ -114,7 +114,7 @@ export async function approvalBillHtml(
         totals.other += num(line.other);
         totals.total += num(line.net);
         const tag = text(line.tag);
-        const name = tag && tag !== 'N' ? `${tag} - ${text(line.name)}` : text(line.name);
+        const name = tag ? `${tag} - ${text(line.name)}` : text(line.name);
         const components = stones
           .filter((stone) => num(stone.SR_NO) === num(line.SR_NO))
           .map(

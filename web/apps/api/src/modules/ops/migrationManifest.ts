@@ -156,6 +156,11 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
   {
     // N211/G224: old web Approval book names and row stamps become desktop APR ISU/APR RTN.
     name: '20261101090000_approval_book_identity',
-    checksum: 'fd9cc42845d8130af2dc4690fd252c4a4d82bedc6b986d2be1751f38712b83a4',
+    checksum: 'fba5b6e1f99a9b69b570266955782d353e4db9f93a636d178e22eb6632751e6f',
+  },
+  {
+    // TR_APR_ISU.cs:6223-6225 stores per-line approval discount percentage and amount.
+    name: '20261101101500_approval_detail_discount',
+    checksum: 'dc1b07c946d648de4210505936186b1c0c8b825fa0de2dd7c9da143218c689b1',
   },
 ];
