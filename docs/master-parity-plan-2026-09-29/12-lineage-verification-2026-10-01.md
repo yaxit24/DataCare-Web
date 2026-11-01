@@ -239,6 +239,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G226 | High | The Tax master was a generic field form that could not edit a code's components, and its generic update rewrote them | `unified/src/csharp/DataCareNext/MS_TAX.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7670-7679`; `web/apps/api/form-specs/DataCareNext.MS_TAX.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/master.service.ts`; `web/apps/api/src/modules/masters/configs.ts`; `web/apps/web/components/LookupPicker.tsx` | MS_TAX edits a tax code as a header row (SR_NO 0, TAX_GROUP 'N') with a grid of component rows (SR_NO 1, 2, …: SGST, CGST, IGST), which the sale and purchase postings read by SR_NO; Save replaces every row of the code (`MS_TAX.cs:1824-1933`). The web rendered the generic one-row form keyed by CO_CODE + TAX_CODE: it listed the component rows as duplicates, could not add or change a component, and its update wrote the header's name and rate into every component row of the code, so an edited GST code taxed SGST, CGST and IGST at the full rate. It had no desktop keys, texts, account helps or Print. The browser check also found the shared account picker replacing a row chosen from its help with the typed text's exact code on leave. Not closed here: web provisioning keeps its tax accounts in group 30, outside the desktop help's group 12 (N58), and the Sales screen resolves the code by rate rather than from the desktop's tax-code help (`TR_SALE.cs:18668`), refusing a rate another code's component carries. | N213 |
 | G227 | High | The Item Group master was a generic field form without the desktop's item update, helps, texts or Print | `unified/src/csharp/DataCareNext/MS_GROUP.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7630-7636`; `web/apps/api/form-specs/DataCareNext.MS_GROUP.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts`; `web/apps/api/src/modules/masters/master.service.ts` | MS_GROUP keeps an item group's metal type, trade type, touches, melting and wastage, the sales and purchase accounts the postings use per group, the HSN code and the rate tax %, and its Save sets the trade type, item type and HSN code on every item of the group (`MS_GROUP.cs:1825-1919`, `:1887`). The web rendered the generic form: its Item Type offered only Gold and Silver of the desktop's seven, the trade type box and the Rate Display check box were missing, the account boxes searched every account instead of groups 25 and 30, the save did not update the group's items (so a changed HSN code never reached the invoice), the delete question, the in-use refusal order and Print were missing, and none of the desktop keys or texts applied. Not closed here: web provisioning keeps CAPITAL in group 25 and its GST and TCS accounts in group 30 while SALES and PURCHASE sit in 20 and 21, so the desktop helps list the wrong accounts on a web-provisioned company (N58). | N214 |
 | G228 | Medium | The Product master was a generic field form without the desktop's guards, keys or texts | `unified/src/csharp/DataCareNext/MS_PRODUCT.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7620-7628`; `web/apps/api/form-specs/DataCareNext.MS_PRODUCT.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts` | MS_PRODUCT in Product mode keeps a two-character code and a name; its Save replaces the row with the signed-in user, and its Delete asks first and then refuses a product an item uses and the ten default products (`MS_PRODUCT.cs:2570-2804`). The web rendered the generic form: it had no item-use or default-product guard, no delete question, none of the desktop keys (Up and Down to the list, Enter on the name to Save) or texts, and it kept MAIN_USER from an earlier save where the desktop writes the signed-in user. | N215 |
+| G229 | High | Cash/Bank and Contra accepted a date outside the year, and the Contra recent list showed Total 0 | `unified/src/csharp/DataCareNext/TR_CASH.cs:2934-2947`; `unified/src/csharp/DataCareNext/TR_CONTRA.cs:2680-2691,3140-3144` | `web/apps/api/src/modules/finance/finance.ts`; `web/apps/api/src/modules/finance/batchReceipt.ts`; `web/apps/api/src/modules/finance/contra.ts`; `web/apps/api/src/modules/vouchers/list.ts` | TR_CASH and TR_CONTRA refuse a voucher dated outside the open year with "You Cant Save Entry Because Voucher Date Not In Current Year... Please Change Date...", before the lock-date check and before any write. The web receipt, payment, multi-line, multi-party receipt and Contra writers saved such vouchers (a Contra dated 2026-03-31 in year 2026-2027 answered 201). The recent-voucher list reads one of nine amount columns, none of which CONTRA_DATA has, so every Contra listed Total 0 where the desktop list sums the voucher's CR_AMT and DR_AMT. | N216 |
 
 ## 4. Decisions D23–D28
 
@@ -2752,6 +2753,45 @@ and OG (a default product) asked the question and then refused with the desktop 
 after the question; a one-character code was refused with "Please Insert Product Code 2 Digit..."; Esc left the screen.
 Desktop-runtime comparison and parent acceptance remain open.
 
+### N216 — Cash/Bank and Contra refuse dates outside the year; the Contra list shows its total (G229, Lite L1)
+
+Gap G229 · Parents P9 · L1 · High · Size M · Start after N193, N194
+
+TR_CASH (`TR_CASH.cs:2934-2947`) and TR_CONTRA (`TR_CONTRA.cs:2680-2691`) check the voucher date against the open
+year before the lock date and before any row is written, and refuse with "You Cant Save Entry Because Voucher Date Not
+In Current Year... Please Change Date...". The Contra voucher list selects `SUM(CR_AMT)` and `SUM(DR_AMT)` per voucher
+(`TR_CONTRA.cs:3140-3144`); one side is the amount transferred.
+
+The receipt and payment writers (single and multi-line), the multi-party receipt and Contra now call
+`assertFinanceVoucherDateTx` (`web/apps/api/src/modules/finance/lifecycle.ts`) inside their voucher transaction. A
+create checks the year before it allocates the visible or hidden voucher number (`createFinanceIdentityTx`), so a
+refusal takes no numbering lock. An edit checks the requested date before it reads and locks the saved voucher, so the
+year text comes before the lock text, as on the desktop, and a refusal leaves the saved voucher untouched. Only the
+ordinary out-of-range refusal is translated to the desktop text; a missing or ambiguous YEAR_MAST row still fails
+closed with its own message. The recent-voucher list (`web/apps/api/src/modules/vouchers/list.ts`) shows the summed
+`DR_AMT` of the scoped voucher for a table that has no amount column but has `DR_AMT`, and orders such a table's rows
+by `SR_NO` so the listed row does not change between reads. Among the 17 listed tables this is CONTRA_DATA alone;
+APR_DATA and BAR_DATA have neither column and still list 0.
+
+Deliberate differences: none in behaviour. The web also checks the year on the server for the multi-party receipt
+and the multi-line writers, which the desktop reaches through the same TR_CASH save.
+
+Open, recorded elsewhere: the generic Contra Register grid prints `2026-11-01T00:00:00.000Z` instead of `01/11/2026`
+(G37 / N57, baselined in the `contra` module); the double-click cases prove one voucher per double-click only, not the
+durable idempotency of N52 (D18).
+
+Evidence: `finance.test.ts` proves an out-of-year create reads YEAR_MAST and takes no numbering lock.
+`cashReceiptLegs.db.test.ts`, `batchReceiptLifecycle.db.test.ts` and `contraDelete.db.test.ts` refuse out-of-year
+creates and edits through every writer with the desktop text and compare every row of the write set before and after;
+two of them set a lock date and require the year text first, with an in-year locked edit as the control. Those two
+order tests failed against the previous order with "period is locked" and pass now.
+`voucherListScope.routes.db.test.ts` lists a balanced two-row Contra at 12,345.67, not 0 or 24,691.34. The full
+isolated workspace suite passes (API 348 files / 3,719 tests, core 44 / 1,821, web 59 / 700); the zero-mock
+`cash-bank` module passes 17 cases with 4 blocked, `contra` 22 with 2 blocked and the G37 register case baselined; the
+real-stack suite passes with zero mocks. Chrome DevTools on a disposable stack: a Contra and a Receipt dated before the
+year answered 400 with the desktop text and saved nothing; the Contra saved on the year's first day listed
+`01/04/2026` and `12,345.67`. Desktop-runtime comparison and parent acceptance remain open.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2894,6 +2934,7 @@ Desktop-runtime comparison and parent acceptance remain open.
 | N213 | — | implemented-unverified, evidence in this change (G226: the Tax master is the MS_TAX header and component grid with the desktop keys, texts, helps and rights; generic TAX_MAST writes refused; the account picker keeps a chosen row) |
 | N214 | — | implemented-unverified, evidence in this change (G227: the Item Group master is MS_GROUP with the desktop keys, texts, helps, rights and the item update; the row is updated in place in one transaction) |
 | N215 | — | implemented-unverified, evidence in this change (G228: the Product master is MS_PRODUCT's Product mode with the desktop keys, texts, rights and the item-use and default-product guards after the question) |
+| N216 | — | implemented-unverified, evidence in this change (G229: Cash/Bank and Contra refuse dates outside the year with the desktop text before numbering and before the lock-date check, with no partial write; the Contra recent list shows the summed debit once; the register date stays G37) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

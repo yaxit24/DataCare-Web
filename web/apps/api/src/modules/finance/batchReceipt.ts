@@ -7,6 +7,7 @@ import {
   type LedgerLine,
 } from '../posting/posting.js';
 import { type PayMode, kasarAccountTx } from './finance.js';
+import { assertFinanceVoucherDateTx } from './lifecycle.js';
 import { requirePostingAccount, resolveBookSlotAccountTx } from '../shared/postingAccounts.js';
 
 export class BatchReceiptValidationError extends Error {
@@ -132,6 +133,7 @@ export async function postBatchReceipt(
   // (one rollback unit) — a re-post failure must not leave the reversal committed and the voucher
   // destroyed. A plain create opens its own voucher transaction.
   const run = async (tx: any): Promise<BatchReceiptResult> => {
+    await assertFinanceVoucherDateTx(tx, input.scope, vchDate);
     const vchNo =
       input.forceVchNo == null ? await nextVoucherNoTx(tx, input.scope) : Number(input.forceVchNo);
     const key = keyOf(input.scope, vchNo, RCT_BOOK);
@@ -384,8 +386,10 @@ export async function editBatchReceipt(
   input: EditBatchReceiptInput,
 ): Promise<BatchReceiptResult> {
   const tenantId = input.scope.tenantId;
+  const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
   const key = keyOf(input.scope, Number(input.vchNo), input.book ?? RCT_BOOK);
   return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
+    await assertFinanceVoucherDateTx(tx, input.scope, requestedDate);
     await reverseBatchReceiptTx(tx, tenantId, key, input.deleteUser ?? 'system');
     return postBatchReceipt(prisma, { ...input, forceVchNo: input.vchNo }, { tx });
   });

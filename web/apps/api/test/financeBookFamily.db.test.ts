@@ -260,6 +260,7 @@ describe.runIf(RUN)('D1 receipt/payment book family and slot-2 kasar', () => {
       partyAc: PARTY,
       amount: 100,
       mode: 'cash',
+      vchDate: '2024-04-01',
     } as never);
     await expect(payment).rejects.toThrow(/a payment needs a CASH PAY, BANK PAY, PAYMENT book/);
     // A payment book cannot take a receipt either.
@@ -269,6 +270,7 @@ describe.runIf(RUN)('D1 receipt/payment book family and slot-2 kasar', () => {
         partyAc: PARTY,
         amount: 100,
         mode: 'cash',
+        vchDate: '2024-04-01',
       } as never),
     ).rejects.toThrow(/CASH PAY book; a receipt needs/);
     expect(await rowCount()).toBe(0);
@@ -281,6 +283,7 @@ describe.runIf(RUN)('D1 receipt/payment book family and slot-2 kasar', () => {
         partyAc: PARTY,
         amount: 100,
         mode: 'cash',
+        vchDate: '2024-04-01',
       } as never),
     ).rejects.toThrow(/BANK REC book and cannot take a cash receipt/);
     expect(await rowCount()).toBe(0);
@@ -311,6 +314,7 @@ describe.runIf(RUN)('D1 receipt/payment book family and slot-2 kasar', () => {
         amount: 100,
         kasar: 10,
         mode: 'cash',
+        vchDate: '2024-04-01',
       } as never),
     ).rejects.toThrow(/slot 2 \(kasar\) names the settlement account CASH/);
     expect(await rowCount()).toBe(0);
