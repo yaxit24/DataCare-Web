@@ -242,7 +242,8 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G229 | High | Cash/Bank and Contra accepted a date outside the year, and the Contra recent list showed Total 0 | `unified/src/csharp/DataCareNext/TR_CASH.cs:2934-2947`; `unified/src/csharp/DataCareNext/TR_CONTRA.cs:2680-2691,3140-3144` | `web/apps/api/src/modules/finance/finance.ts`; `web/apps/api/src/modules/finance/batchReceipt.ts`; `web/apps/api/src/modules/finance/contra.ts`; `web/apps/api/src/modules/vouchers/list.ts` | TR_CASH and TR_CONTRA refuse a voucher dated outside the open year with "You Cant Save Entry Because Voucher Date Not In Current Year... Please Change Date...", before the lock-date check and before any write. The web receipt, payment, multi-line, multi-party receipt and Contra writers saved such vouchers (a Contra dated 2026-03-31 in year 2026-2027 answered 201). The recent-voucher list reads one of nine amount columns, none of which CONTRA_DATA has, so every Contra listed Total 0 where the desktop list sums the voucher's CR_AMT and DR_AMT. | N216 |
 | G230 | Medium | The Address master was a generic field form without the desktop's tabs, combos, helps, mobile check, delete cascade or next code | `unified/src/csharp/DataCareNext/MS_ADD_MAST.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7610-7619`; `web/apps/api/form-specs/DataCareNext.MS_ADD_MAST.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts` | MS_ADD_MAST keeps a location's addresses on three tabs, offers the next code of the location, fills its combos from the company's addresses and STATE_MAST, refuses a mobile the company already has, and deletes an address with its opening rows of the year (`MS_ADD_MAST.cs:3119-4544`). The web rendered the generic form keyed by CO_CODE + AC_CODE: no tabs, no next code, no combos, help or name type-ahead, no mobile check, its config left the three dates out as if the account master kept them, and its delete left the address's OP_DATA and AC_DATA opening rows behind. | N217 |
 | G231 | High | The Item master was a generic field form without the desktop's helps, item code from product and group, exists question, leave checks, settings boxes, delete checks or Tag Value Update | `unified/src/csharp/DataCareNext/MS_ITEM.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7650-7659`; `web/apps/api/form-specs/DataCareNext.MS_ITEM.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts`; `web/apps/web/lib/lookupEnter.ts` | MS_ITEM takes the product and group from their helps, makes the item code and name from them and asks before reusing a code, refuses a taken code or name on leaving it, shows the setting-driven boxes, writes the combo letters and Val of the number boxes, refuses deleting an item with stock or a default code, and updates the item's tags from its Tag Value Update panel (`MS_ITEM.cs:2748-4015`). The web rendered the generic form: free-typed product and group, no item code or name from them, no question or leave checks, no setting-driven boxes, a delete that only failed on a foreign key, and no tag update. Its lookups also dropped every answer for a box that upper-cases typing. | N218 |
-| G232 | High | The Ledger Report was a single-account money statement with the wrong balance sign and none of the desktop's summary, drill-down, ageing or metal columns | `unified/src/csharp/DataCareNext/RP_LEDR.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:8871-8880` | `web/apps/api/src/modules/accounting/accounting.ts`; `web/apps/web/app/(app)/reports/[report]/page.tsx` | RP_LEDR is an account-summary screen (DGV_AC) that drills into a per-voucher or per-ledger-key detail (DGV_VCH/DGV_DETL) and a debit-ageing view (DGV_MONTH), reporting money AND signed gold/silver fine. The summary nets money as Σ(CR−DR), gold/silver as signed fine, splits a negative net to Dr and a positive net to Cr, and drops display-zero rows unless With Zero; detail keeps a running Σ(Cr)−Σ(Dr) balance with its side; voucher summary keeps gross Dr/Cr; ageing consumes the oldest debit first (`RP_LEDR.cs:6408-6435,6862-7266,7694-8205,9514-10314`). The web answered only `/reports/account-ledger/:acCode` with a money statement whose running balance used DR−CR (the opposite sign) and had no summary, drill-down, ageing, metal columns, selectors or Excel/CSV export. | N219 |
+| G232 | High | Auto Item reversed the desktop's item code, offered the default products and had no group help, grid keys, MinStk, rights or most columns | `unified/src/csharp/DataCareNext/MS_AUTO_ITEM.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7640-7649` | `web/apps/web/app/(app)/masters/auto-item/page.tsx`; `web/apps/api/src/modules/masters/autoItem.ts`; `web/apps/api/src/routes/txn.ts` | MS_AUTO_ITEM's AutoItem mode lists the company's products but the default ones for a group chosen from its help, marks the ones the group already has, and makes PR_CODE + GR_CODE items named product name + group code with the desktop's columns, under the edit right (`MS_AUTO_ITEM.cs:1640-3493`). The web made GR_CODE + PR_CODE items named group + product, wrote eight columns, offered every product including the default ones, and had no group help, grid keys, MinStk, rights or Print and Delete checks. | N219 |
+| G233 | High | The Ledger Report was a single-account money statement with the wrong balance sign and none of the desktop's summary, drill-down, ageing or metal columns | `unified/src/csharp/DataCareNext/RP_LEDR.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:8871-8880` | `web/apps/api/src/modules/accounting/accounting.ts`; `web/apps/web/app/(app)/reports/[report]/page.tsx` | RP_LEDR is an account-summary screen (DGV_AC) that drills into a per-voucher or per-ledger-key detail (DGV_VCH/DGV_DETL) and a debit-ageing view (DGV_MONTH), reporting money AND signed gold/silver fine. The summary nets money as Σ(CR−DR), gold/silver as signed fine, splits a negative net to Dr and a positive net to Cr, and drops display-zero rows unless With Zero; detail keeps a running Σ(Cr)−Σ(Dr) balance with its side; voucher summary keeps gross Dr/Cr; ageing consumes the oldest debit first (`RP_LEDR.cs:6408-6435,6862-7266,7694-8205,9514-10314`). The web answered only `/reports/account-ledger/:acCode` with a money statement whose running balance used DR−CR (the opposite sign) and had no summary, drill-down, ageing, metal columns, selectors or Excel/CSV export. | N220 |
 
 ## 4. Decisions D23–D28
 
@@ -2919,7 +2920,7 @@ KR_FINE 9.350 and DT2's wastage to 1.5 with KR_FINE 4.655; RG with G22 again ask
 group and Yes cleared the code and name; a typed CHG22 was refused on leave; Print did nothing; RGG22 was deleted after
 the question; Esc left the screen. Desktop-runtime comparison and parent acceptance remain open.
 
-### N219 — The Ledger Report is the desktop RP_LEDR screen (G232, Lite L-report)
+### N220 — The Ledger Report is the desktop RP_LEDR screen (G233, Lite L-report)
 
 Report → Ledger Report opens RP_LEDR (`MDI_FORM.cs:8871-8880`). The desktop form is an account-summary screen first and a
 drill-down second. The summary grid (DGV_AC, `AcSumm` `RP_LEDR.cs:6403-6435`) lists one row per account with a money
@@ -2957,9 +2958,54 @@ desktop-derived scenarios, and the query parser's refusals) and `accountLedgerRe
 on forced RLS: the summary sign split and zero-row drop, With Zero, the voucher-summary gross netting with aggregated
 remarks, the detail opening and running balance, the FIFO ageing, the PDF/Excel/CSV exports, the account-in-path alias,
 the invalid-request and missing-account refusals, the view-vs-print rights, and a same-number sentinel in another tenant
-untouched). `routePolicy.test.ts` carries the four new routes (711 → 715). The zero-mock `account-ledger` feature module
+untouched). `routePolicy.test.ts` carries the four new routes (713 → 717). The zero-mock `account-ledger` feature module
 covers T01, T03-T06, T11, T15-T18, with T02 and the write groups T07-T10/T12-T14 marked not-applicable with reasons
 (a read-only report). Desktop-runtime comparison and parent acceptance remain open.
+
+### N219 — Auto Item is the desktop MS_AUTO_ITEM screen in its AutoItem mode (G232, Lite L2)
+
+Master → AutoItem opens MS_AUTO_ITEM with the menu caption as its mode (`MDI_FORM.cs:7640-7649`); the Labour Disc,
+Labour Update, Labour and Item Touch modes belong to other menus. The screen shows Group Code with the group name, type,
+trade type and HSN code over the Sr. / Pr Code / Pr Name / MinStk / Y/N grid (MSG_CLEAR `MS_AUTO_ITEM.cs:1640-1683`), and
+Print, Save, Cancel, Delete and Exit, with the cursor in the group code. The group comes from its help by name
+(`tGrCode_KeyDown :3432-3493`), which fills the name, type, trade type and HSN code; DISPLAY_DATA (`:2614-2650`) then lists
+the company's products but HM, DM, OG, OS, SN, FN, RD, EM and OT by code, Y (in red) for a product the group already has
+an item of and N otherwise, and the cursor goes to row 1's Y/N.
+
+Grid keys (`TEXT_ENTRY_KeyDown :3040-3239`, MSG_EnterCell and MSG_LeaveCell `:1712-1956`): typed letters are upper-cased;
+Enter on Y/N needs Y or N ("Please Enter Y or N and Try Again...") and moves to the next row's Y/N, and on the last row
+adds a row with the cursor in its Pr Code (CommPassAdd `:1957-1976`); Enter on a blank Pr Code goes to Save; Enter
+elsewhere moves one cell right; MinStk keeps Val as a whole number; the arrows move a cell; F1 copies the cell above; Esc
+in the grid goes to Save and elsewhere leaves the screen (`:2980-3007`).
+
+Save (`:2876-2923`) needs the edit right once a group is shown (DISPLAY_DATA sets EntryMode "E", `:2648`, checked at
+`:2668-2672`). For each Y row whose item the group lacks it writes PR_CODE + GR_CODE with IT_NAME = product name + " " +
+group code, IT_TYPE and TAG_TYPE from the type box, TRAD_TYPE, SAFE_NAME MAIN, the HSN code, UNIT_NAME GMS, RATE_TYPE G,
+MIN_STK, MAIN_USER (blank for a listed product, the user for an added row), STK_DISPLAY Y, DATA_TRFR N and the flags N;
+existing items and N rows are left as they are; it answers "Data Are Saved." and clears the screen. Print and Delete only
+check their rights in this mode (`:2652-2659`, `:2927-2944`).
+
+Deliberate differences: one transaction under the item master's lock; a code another group's item already has and an
+added product that is not in the product master are refused (the desktop would insert a duplicate code or an item of an
+unknown product); Save with no group or no Y row writes nothing and answers "Data Are Saved." without a request (the
+desktop would also make a group-less item from a Pr Code and Y typed into the blank row); the red marker colours the made
+product's row (DISPLAY_DATA colours the grid's current cell, `:2632`, which is row 1, column 1); a typed group code fills
+the HSN code too; the HSN box holds ten characters (its designer MaxLength is 1). The web schema has no TAX_FREE_ITEM or
+EMP_COM_PRC column (`:2892-2912`).
+
+Evidence: `autoItem.db.test.ts` (5 cases through the real routes on forced RLS: the grid without the default products
+and with Y for the group's own, with the rights; the write set of the Y rows the group lacks; the refusals of a code
+another group has, an added unknown product and an unknown group with nothing written; a blank group or no Y row writing
+nothing; a view-only rights row) and `routePolicy.test.ts` pass. The zero-mock `auto-item` module passes 18 of 18 cases:
+T04 checks the help by name and the red rows, T05 an added row made under the user, T12 two operators saving the same
+item (one row), T13 a replayed save, T14 a fault on the second item rolling the first back, T15 the items in the historic
+year, T17 every desktop key, T18 a made item offered by the items lookup. Chrome DevTools on the demo stack: G22 and Enter
+showed GOLD 22K, G, GO, 7113 and the grid BG BANGLE N, CH CHAIN Y in red, RG RING N with the cursor on row 1's Y/N; X and
+Enter said "Please Enter Y or N and Try Again..." and kept the cursor; Y and Enter moved down, Enter on the last row
+added row 4 with the cursor in its Pr Code, and Enter on its blank Pr Code went to Save; Save stored
+`BGG22|BANGLE G22|G|G|GO|BG|G22|MAIN|7113|GMS|G|0||Y|N|N|N|N` and left CHG22 as it was; reopening G22 showed BG and CH as Y
+in red; F1 on row 3 copied the Y above and Save made RGG22; Esc in the grid went to Save and Esc in the group code left
+the screen. Desktop-runtime comparison and parent acceptance remain open.
 
 ## 6. Status corrections
 
@@ -3106,7 +3152,8 @@ covers T01, T03-T06, T11, T15-T18, with T02 and the write groups T07-T10/T12-T14
 | N216 | — | implemented-unverified, evidence in this change (G229: Cash/Bank and Contra refuse dates outside the year with the desktop text before numbering and before the lock-date check, with no partial write; the Contra recent list shows the summed debit once; the register date stays G37) |
 | N217 | — | implemented-unverified, evidence in this change (G230: the Address master is MS_ADD_MAST with its tabs, next code, combos, helps, mobile check, rights and the delete of its opening rows) |
 | N218 | — | implemented-unverified, evidence in this change (G231: the Item master is MS_ITEM with its helps, item code from product and group, exists question, leave checks, setting-driven boxes, delete checks, rights and the Tag Value Update panel) |
-| N219 | — | implemented-unverified, evidence in this change (G232: the Ledger Report is RP_LEDR with its account summary, voucher/detail drill-down, debit ageing, signed money/gold/silver balances, totals, selectors and PDF/Excel/CSV, from one read-only resolver) |
+| N219 | — | implemented-unverified, evidence in this change (G232: Auto Item is MS_AUTO_ITEM's AutoItem mode with the group help, the product grid and its keys, the desktop write set, the refusals and the rights) |
+| N220 | — | implemented-unverified, evidence in this change (G233: the Ledger Report is RP_LEDR with its account summary, voucher/detail drill-down, debit ageing, signed money/gold/silver balances, totals, selectors and PDF/Excel/CSV, from one read-only resolver) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

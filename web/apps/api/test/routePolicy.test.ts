@@ -111,11 +111,12 @@ describe('route policy registry', () => {
     // N215 adds the Product master's GET (list, one), POST, PUT and DELETE: 690 + 5 = 695.
     // N217 adds the Address master's GET (list, print, names, mobile, one), POST, PUT and DELETE: 695 + 8 = 703.
     // N218 adds the Item master's GET (list, products, groups, one), POST, PUT, DELETE and the tag-value POST: 703 + 8 = 711.
-    // N219 adds the RP_LEDR Ledger Report: the canonical screen GET /reports/account-ledger and its three
+    // N219 adds the Auto Item grid and group help GETs (the POST was there): 711 + 2 = 713.
+    // N220 adds the RP_LEDR Ledger Report: the canonical screen GET /reports/account-ledger and its three
     //   exports (.pdf/.xlsx/.csv), keeping the two account-in-path aliases. The two old literals move into
-    //   routes/accountLedger.ts, so the net change is +4: 711 + 4 = 715.
-    expect(routes).toHaveLength(715);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(715);
+    //   routes/accountLedger.ts, so the net change is +4: 713 + 4 = 717.
+    expect(routes).toHaveLength(717);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(717);
 
     const policies = routes.map((route) => ({
       ...route,

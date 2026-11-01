@@ -276,12 +276,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `MS_AUTO_ITEM` — constructor caption 'AutoItem' ([MDI_FORM.cs:7640-7649](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7640-L7649)).
 - **Does:** Bulk-generates item codes and names for selected product and group combinations.
-- **Looks:** Group header and product grid with code, name, minimum stock and Y/N selection.
-- **Writes:** ITEM_MAST, TOUCH_MAST.
-- **Web:** `/masters/auto-item`; `POST /masters/auto-item`. Can: create.
-- **Remaining:** Web reverses the desktop code/name order and writes a subset; minimum stock, flags, Print and propagation remain.
-- **Owners:** G55, N69, X10, G225, N212.
-- **Evidence:** [KB_master.md:150-181](../../project-memory/video-research/_kb/KB_master.md#L150-L181).
+- **Looks:** Group Code with the group name, type, trade type and HSN code over the Sr. / Pr Code / Pr Name / MinStk / Y/N grid; Print, Save, Cancel, Delete and Exit along the bottom.
+- **Writes:** ITEM_MAST, PRODUCT_MAST, GROUP_MAST.
+- **Web:** `/masters/auto-item`; `GET /masters/auto-item`, `GET /masters/auto-item/groups`, `POST /masters/auto-item`. Can: create.
+- **Remaining:** The web schema has no TAX_FREE_ITEM or EMP_COM_PRC column; desktop-runtime comparison remains.
+- **Owners:** G55, N69, X10, G225, N212, G232, N219.
+- **Evidence:** [MS_AUTO_ITEM.cs:1640-3493](../../unified/src/csharp/DataCareNext/MS_AUTO_ITEM.cs#L1640-L3493).
 
 ### Counter
 
@@ -1717,8 +1717,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** View/account/date/data-type filters and a With-Zero toggle, with account-summary, voucher, detail and debit-ageing grids and totals.
 - **Reads:** AC_DATA, AC_MAST, BOOK_DATA, REMARK_DATA.
 - **Web:** `/reports/account-ledger`; `GET /reports/account-ledger`, `GET /reports/account-ledger/export.pdf`, `GET /reports/account-ledger/export.xlsx`, `GET /reports/account-ledger/export.csv`, `GET /reports/account-ledger/:acCode`, `GET /reports/account-ledger/:acCode/export.pdf`. Can: print, list.
-- **Remaining:** N219 builds the account summary, voucher/detail drill-down, debit ageing, signed money/gold/silver balances, totals and PDF/Excel/CSV from one read-only resolver; the OP_LDR opening-ledger ageing union, the staging-table gold/silver fine prints and the Crystal layout comparison remain.
-- **Owners:** N219, N57, N75.
+- **Remaining:** N220 builds the account summary, voucher/detail drill-down, debit ageing, signed money/gold/silver balances, totals and PDF/Excel/CSV from one read-only resolver; the OP_LDR opening-ledger ageing union, the staging-table gold/silver fine prints and the Crystal layout comparison remain.
+- **Owners:** N220, N57, N75.
 - **Evidence:** [RP_LEDR.cs:4658-7694](../../unified/src/csharp/DataCareNext/RP_LEDR.cs#L4658-L7694), [accountLedgerReport.ts](../../web/apps/api/src/modules/reports/accountLedgerReport.ts), [accountLedger.ts](../../web/apps/api/src/routes/accountLedger.ts).
 
 ### Old Stock
