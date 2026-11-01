@@ -28,6 +28,7 @@ import { contraEntry } from './modules/contraEntry.mjs';
 import { fineJv } from './modules/fineJv.mjs';
 import { partyOpening } from './modules/partyOpening.mjs';
 import { tagOpening } from './modules/tagOpening.mjs';
+import { dailyRate } from './modules/dailyRate.mjs';
 import { itemOpening } from './modules/itemOpening.mjs';
 import { runSurface } from './surface/runner.mjs';
 
@@ -58,6 +59,7 @@ const MODULES = [
   salesOrder,
   partyOpening,
   tagOpening,
+  dailyRate,
   itemOpening,
 ];
 

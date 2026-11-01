@@ -2153,7 +2153,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 |---|---|---|---|---|---|
 | Bank Reconcile | `UT_BANK` | `/txn/bank-recon` | `- - E - - L` | PARTIAL | P1-core |
 | Counter Trfr | `TR_PHYSTK` | `/txn/counter-transfer` | `C - - D - -` | PARTIAL | P1-core |
-| Daily Rate | `MS_RATE` | `/txn/daily-rate` | `C R E - - L` | PARTIAL | P1-core |
+| Daily Rate | `MS_RATE` | `/txn/daily-rate` | `C R E D P L` | PARTIAL | P1-core |
 | Data Export | `UT_EXPORT` | `/utilities/data-export` | `- - E - P L` | PARTIAL | P1-core |
 | Data Import | `UT_IMPORT` | `/masters/accounts` | `C - - - - -` | PARTIAL | P1-core |
 | E-Excel | `UT_E_INVOICE` | `/utilities/e-invoice` | `- - - - P -` | PARTIAL | P1-edition |
@@ -2202,12 +2202,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `MS_RATE` — constructor mode 'Daily Rate' ([MDI_FORM.cs:8564-8573](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8564-L8573)).
 - **Does:** Stores the daily gold and silver rates and derives group sale and purchase rates by touch.
-- **Looks:** Voucher date, gold per 10 g, silver per kg and employee fields above a group touch/tax/rate grid.
+- **Looks:** Rate Master: Vch Date with F1, Gold Rate 10gm, Silver Rate 1Kg and Employee (UAE: purchase and USD rates) above the Sr./GrCode/GrName/Touch/Tax%/Rate10gm/TaxRate/PrTouch/PrRate grid; Save, Delete, Cancel, Print.
 - **Writes:** RATE_MAST, GROUP_MAST, EMP_MAST, BOOK_IDTL.
-- **Web:** `/txn/daily-rate`; `GET /daily-rate`, `GET /daily-rate/dates`, `POST /daily-rate`. Can: create, reopen, edit, list.
-- **Remaining:** Core derivation works; the tax-inclusive grid, employee capture, delete/print actions and the final comparison remain.
-- **Owners:** X10, P03-02, X08, N29, X33.
-- **Evidence:** [KB_other.md:44-103](../../project-memory/video-research/_kb/KB_other.md#L44-L103).
+- **Web:** `/txn/daily-rate`; `GET /daily-rate`, `GET /daily-rate/dates`, `POST /daily-rate`, `DELETE /daily-rate`, `GET /daily-rate/print`. Can: create, reopen, edit, delete, print, list.
+- **Remaining:** The MS_RATE grid, recalculation, scoped save/delete, rights, F1 and RateRpt pass 10 browser cases. Open: the sale/purchase rate lookup ignores the location, the customer-specific per-location copy, the external app push, the MDI rate labels and a desktop-runtime comparison.
+- **Owners:** G221, N208, X10, P03-02, X08, N29, X33.
+- **Evidence:** [MS_RATE.cs:1752-1832](../../unified/src/csharp/DataCareNext/MS_RATE.cs#L1752-L1832), [MS_RATE.cs:1867-1947](../../unified/src/csharp/DataCareNext/MS_RATE.cs#L1867-L1947), [MS_RATE.cs:2095-2109](../../unified/src/csharp/DataCareNext/MS_RATE.cs#L2095-L2109), [MS_RATE.cs:2314-2368](../../unified/src/csharp/DataCareNext/MS_RATE.cs#L2314-L2368), [page.tsx](../../web/apps/web/app/%28app%29/txn/daily-rate/page.tsx).
 
 ### Data Export
 
