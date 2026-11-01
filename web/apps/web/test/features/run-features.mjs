@@ -37,6 +37,7 @@ import { autoItem } from './modules/autoItem.mjs';
 import { groupMaster } from './modules/groupMaster.mjs';
 import { productMaster } from './modules/productMaster.mjs';
 import { addressMaster } from './modules/addressMaster.mjs';
+import { partyMaster } from './modules/partyMaster.mjs';
 import { itemMaster } from './modules/itemMaster.mjs';
 import { runSurface } from './surface/runner.mjs';
 
@@ -76,6 +77,7 @@ const MODULES = [
   groupMaster,
   productMaster,
   addressMaster,
+  partyMaster,
   itemMaster,
 ];
 

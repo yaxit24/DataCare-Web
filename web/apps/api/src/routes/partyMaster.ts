@@ -189,6 +189,7 @@ export function registerPartyMasterRoutes(
       deleteParty(prisma, scope(req), codeOf(req), {
         expectedVersion: q?.expectedVersion,
         unlocked: q?.unlocked === 'Y',
+        dryRun: q?.dryRun === 'Y',
       }),
     );
   });

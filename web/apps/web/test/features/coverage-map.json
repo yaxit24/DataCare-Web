@@ -176,6 +176,13 @@
         "web/apps/api/src/modules/masters/autoItem.ts",
         "web/apps/api/src/routes/autoItem.ts"
       ]
+    },
+    "partyMaster": {
+      "covers": [
+        "web/apps/web/app/(app)/masters/party/page.tsx",
+        "web/apps/api/src/modules/masters/partyMaster.ts",
+        "web/apps/api/src/routes/partyMaster.ts"
+      ]
     }
   }
 }

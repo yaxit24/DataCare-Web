@@ -563,8 +563,9 @@ function cleanValues(values: PartyValues): Record<string, unknown> {
     const date = partyDate(values[key]);
     row[column] = !date ? null : kind === 'text' ? date.text : new Date(`${date.iso}T00:00:00Z`);
   }
+  // Mid(cboAcType.Text, 1, 1): a party opened with no type shows a blank DropDownList and saves '' (:7828).
   const acType = typed(values.acType).slice(0, 1);
-  row.AC_TYPE = (PARTY_AC_TYPES as readonly string[]).includes(acType) ? acType : 'A';
+  row.AC_TYPE = (PARTY_AC_TYPES as readonly string[]).includes(acType) ? acType : '';
   row.AC_GST_TYPE = typed(values.gstType) === 'I' ? 'I' : 'L';
   return row;
 }
@@ -701,7 +702,7 @@ export async function deleteParty(
   prisma: any,
   scope: PartyScope,
   codeRaw: string,
-  options: { expectedVersion?: unknown; unlocked?: boolean } = {},
+  options: { expectedVersion?: unknown; unlocked?: boolean; dryRun?: boolean } = {},
 ): Promise<{ code: string; deleted: number }> {
   const code = typed(codeRaw);
   if (!code) throw new PartyMasterValidationError(PARTY_MESSAGES.SELECT_FOR_DELETE);
@@ -725,6 +726,9 @@ export async function deleteParty(
     const rules = await partyRulesTx(tx, scope);
     const problem = defaultAccountProblem(code, rules, Boolean(options.unlocked), 'delete');
     if (problem) throw new PartyMasterValidationError(problem);
+    // The desktop refuses before it asks "Are You Sure To Delete This Account now?" (:7975-7998): the screen runs the
+    // checks first and deletes after the answer.
+    if (options.dryRun) return 0;
     await tx.$executeRawUnsafe(
       `DELETE FROM "AC_MAST_SRNO" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "AC_CODE"=$4`,
       tenantId,

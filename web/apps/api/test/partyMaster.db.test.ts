@@ -627,6 +627,14 @@ type Cookie = string;
       expect(response.statusCode).toBe(400);
       expect(response.json().message).toBe(" You Can't Delete Software Default Account....");
       expect(await count('AC_MAST', 'SALES')).toBe(1);
+      // The screen's dry run answers the refusals before the question and deletes nothing.
+      response = await request(adminCookie, 'DELETE', '/masters/party-master/100202?dryRun=Y');
+      expect(response.json().message).toBe(
+        "You Can't Delete Record This Party Code Use in Transection....",
+      );
+      response = await request(adminCookie, 'DELETE', '/masters/party-master/100201?dryRun=Y');
+      expect(response.json()).toEqual({ code: '100201', deleted: 0 });
+      expect(await count('AC_MAST', '100201')).toBe(1);
       response = await request(
         adminCookie,
         'DELETE',
