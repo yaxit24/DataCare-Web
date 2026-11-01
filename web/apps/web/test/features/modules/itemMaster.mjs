@@ -450,7 +450,7 @@ export const itemMaster = {
       'formula.val-and-format',
       'T03',
       'mutation',
-      'Conversion.Val of each number box (:3243-3250); Enter shows Strings.Format(Val, "0.00"), the bag weight "0.0000" (:3559-3754); MS_ITEM_KeyPress upper-cases and drops the apostrophe (:3066-3079)',
+      'Conversion.Val of each number box (:3245-3251); Enter shows Strings.Format(Val, "0.00"), the bag weight "0.0000" (:3559-3754); MS_ITEM_KeyPress upper-cases and drops the apostrophe (:3066-3079)',
       async (ctx) =>
         withMasters(ctx, async () => {
           const { page } = await ctx.session();
@@ -729,7 +729,7 @@ export const itemMaster = {
       'reopen.unchanged-save',
       'T08',
       'mutation',
-      'DISPLAY_DATA then Save with nothing changed writes the same values; the web keeps MIN_STK and the averages (G230) and MAIN_USER stays the stored user (:3018)',
+      'DISPLAY_DATA then Save with nothing changed writes the same values; the web keeps MIN_STK and the averages (G230) and MAIN_USER stays the stored user (:2990)',
       async (ctx) =>
         withMasters(ctx, async () => {
           await seedItem(ctx, 'IMIMG', 'E2E REOPEN RING', { minstk: 5, avg: 91.6, lbr: 9 });

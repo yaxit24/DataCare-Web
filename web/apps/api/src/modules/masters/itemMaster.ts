@@ -21,7 +21,7 @@ import { requiredVersion, versionOf } from '../vouchers/version.js';
  *   name another item has (:3603-3629).
  * - BtnSave_Click (:3165-3300) needs the edit right only for an opened item, refuses a blank product, group and item code
  *   with the desktop texts, and writes the item with Val of the number boxes, the first letter of the three combos and
- *   Y/N of the check boxes; MAIN_USER is the user for a new item and the stored one for an opened item (:2862, :3018).
+ *   Y/N of the check boxes; MAIN_USER is the user for a new item and the stored one for an opened item (:2857, :2990).
  * - BtnDelete_Click (:3302-3355) needs the delete right and refuses an item with stock rows ("You Can't Delete Record
  *   This Item Use in Transaction...."), a default item ("You Cant Delete Record This Item Code Is Default Code....") and
  *   a blank code before it asks.
@@ -65,14 +65,14 @@ export interface ItemScope {
   coYear: string;
 }
 
-/** Rate Per (cboRateType, MS_ITEM_Load :2696-2700); RATE_TYPE stores the first letter (:3241). */
+/** Rate Per (cboRateType, MS_ITEM_Load :2731-2734); RATE_TYPE stores the first letter (:3243). */
 export const ITEM_RATE_TYPES = [
   { letter: 'G', label: 'Gram Wise' },
   { letter: '1', label: '10Gm Wise' },
   { letter: 'K', label: 'Kg Wise' },
   { letter: 'P', label: 'Pcs Wise' },
 ] as const;
-/** Oth Dtl Rate Type (cboOthRateType :2704-2707); OTH_RATE_TYPE stores the first letter (:3254). */
+/** Oth Dtl Rate Type (cboOthRateType :2739-2741); OTH_RATE_TYPE stores the first letter (:3256). */
 export const ITEM_OTHER_RATE_TYPES = [
   { letter: 'W', label: 'Weight' },
   { letter: 'P', label: 'Pcs' },
@@ -115,7 +115,7 @@ const NUMBER_FIELDS = [
   ['othRate', 'OTH_RATE'],
   ['bagWt', 'IT_BAG_WT'],
 ] as const;
-/** The check boxes Lite shows when the company setting is on (MS_ITEM_Load :2716-2733). */
+/** The check boxes Lite shows when the company setting is on (MS_ITEM_Load :2748-2768). */
 const FLAG_FIELDS = [
   ['othItmWtRemove', 'OTH_ITM_WT_REMOVE'],
   ['lotStock', 'ITM_WITH_LOT_STK'],
@@ -415,7 +415,7 @@ export async function saveItem(prisma: any, input: ItemSaveInput): Promise<{ cod
     if (!group)
       throw new ItemMasterValidationError(`group ${groupCode} is not in the group master`);
     if (same) {
-      // MainUser: the stored user of an opened item (DISPLAY_DATA :3018), the signed-in user for a new entry (:2862).
+      // MainUser: the stored user of an opened item (DISPLAY_DATA :2990), the signed-in user for a new entry (:2857).
       const set: Record<string, unknown> = {
         ...values,
         ...(input.entryMode === 'A' ? { MAIN_USER: input.user, ...HIDDEN_DEFAULTS } : {}),
