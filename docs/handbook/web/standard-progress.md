@@ -6,10 +6,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 18 | 14 | 0 |
+| Lite (first, D32) | 49 | 20 | 16 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
 | Standard (added by Standard) | 36 | 0 | 0 | 0 |
-| **Standard total** | **114** | **19** | **15** | **0** |
+| **Standard total** | **114** | **21** | **17** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
@@ -22,8 +22,8 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Company | User Create | `/admin/users` | PARTIAL | users-rights | module green | — |
 | Company | Data Refresh | `/utilities/data-refresh`, `/utilities/data-repair` | PARTIAL | — | no module | — |
 | Company | Data Backup | `/backup` | CONTAINED | — | no module | — |
-| ExtraTran | Approval Isu | `/txn/tour` | PARTIAL | — | no module | — |
-| ExtraTran | Approval Rtn | `/txn/tour-return` | PARTIAL | — | no module | — |
+| ExtraTran | Approval Isu | `/txn/tour` | PARTIAL | approval-issue | module green | — |
+| ExtraTran | Approval Rtn | `/txn/tour-return` | PARTIAL | approval-return | module green | — |
 | ExtraTran | Fine Jv Entry | `/txn/fine-jv` | PARTIAL | fine-jv | module green | — |
 | Master | Party | `/masters/party`, `/masters/accounts` | PARTIAL | — | no module | — |
 | Master | Address | `/masters/addresses` | PARTIAL | — | no module | — |

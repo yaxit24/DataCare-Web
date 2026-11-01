@@ -813,8 +813,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 |---|---|---|---|---|---|
 | Amt In | `TR_LOCT_AMT` | `/txn/location-amount` | `C R E D - -` | PARTIAL | P1-edition |
 | Amt Out | `TR_LOCT_AMT` | `/txn/location-amount` | `C R E D - -` | PARTIAL | P1-edition |
-| Approval Isu | `TR_APR_ISU` | `/txn/tour` | `C - - - - -` | PARTIAL | P1-core |
-| Approval Rtn | `TR_APR_ISU` | `/txn/tour-return` | `C - - - - -` | PARTIAL | P1-core |
+| Approval Isu | `TR_APR_ISU` | `/txn/tour` | `C R E D P -` | PARTIAL | P1-core |
+| Approval Rtn | `TR_APR_ISU` | `/txn/tour-return` | `C R E D P -` | PARTIAL | P1-core |
 | Bill Wise Rec | `TR_BILL_TO` | `/txn/bill-to-bill` | `C - - - - -` | PARTIAL | P1-core |
 | Card Rec | `TR_CARD_REC` | — | `- - - - - -` | MISSING | P1-core |
 | Consi Isu | `TR_APR_ISU` | `/txn/tour` | `C - - - - -` | PARTIAL | P1-edition |
@@ -861,10 +861,10 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Places tagged goods with a party on approval while the business keeps ownership.
 - **Looks:** Voucher/party/employee header, issue reference, item and stone grids, image panel, totals and print.
 - **Writes:** APR_DATA, APR_DETL, APR_IDTL, MAIN_STOCK, BAR_DETL, DM_DATA.
-- **Web:** `/txn/tour`; `POST /tour/issue`, `DELETE /tour/:vchNo`. Can: create.
-- **Remaining:** Create-only shared Tour page; APR ISU book enforcement, reopen/edit/delete/print and the partial sale/return custody chain remain.
-- **Owners:** N22, X17, P05-05, N62, X07.
-- **Evidence:** [KB_transaction.md:331-357](../../project-memory/video-research/_kb/KB_transaction.md#L331-L357).
+- **Web:** `/txn/tour`; `POST /tour/issue`, `GET /tour/:vchNo`, `PUT /tour/:vchNo`, `DELETE /tour/:vchNo`, `GET /tour/:vchNo/print`, `GET /tour/:vchNo/lines`, `POST /tour/:vchNo/bill`. Can: create, reopen, edit, delete, print.
+- **Remaining:** Verified: APR ISU provisioning/backfill, family guard, desktop refusal order, APR/APR_IDTL/stock/DM/BAR effects, lossless reopen, no-op save, versioned edit/delete, returned/Wh Sales delete refusals, DELETE_DATA audit, AprBill rights/layout and zero-mock cases. Open: licence-expiry state, AprBillImg, idempotent create, injected rollback, retained-item sale/Wh Sales browser continuation and desktop-runtime comparison.
+- **Owners:** N22, X17, P05-05, N62, X07, G224, N211.
+- **Evidence:** [TR_APR_ISU.cs:5788-6772](../../unified/src/csharp/DataCareNext/TR_APR_ISU.cs#L5788-L6772).
 
 ### Approval Rtn
 
@@ -872,10 +872,10 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Returns unsold approval goods, restores availability and closes the issued quantities.
 - **Looks:** Original-issue selector, party/date header, returned item grid, images and fine totals.
 - **Writes:** APR_DATA, APR_DETL, APR_IDTL, MAIN_STOCK, BAR_DETL, DM_DATA.
-- **Web:** `/txn/tour-return`; `GET /tour/:vchNo/lines`, `POST /tour/return`, `DELETE /tour/return/:vchNo`. Can: create.
-- **Remaining:** Source lines load, but the saved-return lifecycle, the APR RTN book, partial billing, print and dependency reversal remain.
-- **Owners:** N22, X17, N59, N62, X07.
-- **Evidence:** [KB_transaction.md:331-357](../../project-memory/video-research/_kb/KB_transaction.md#L331-L357).
+- **Web:** `/txn/tour-return`; `GET /tour/:vchNo/lines`, `POST /tour/return`, `GET /tour/return/:vchNo`, `PUT /tour/return/:vchNo`, `DELETE /tour/return/:vchNo`, `GET /tour/return/:vchNo/print`. Can: create, reopen, edit, delete, print.
+- **Remaining:** Verified: APR RTN provisioning/backfill, family and source guards, desktop refusal order, partial source closure, APR/APR_IDTL I/+ stock/DM and BAR effects, lossless reopen, no-op save, versioned edit/delete with source reversal and audit, AprBill rights/layout and zero-mock cases. Open: licence-expiry state, AprBillImg, idempotent create, injected rollback, retained-item sale/Wh Sales continuation and desktop-runtime comparison.
+- **Owners:** N22, X17, N59, N62, X07, G224, N211.
+- **Evidence:** [TR_APR_ISU.cs:5788-6772](../../unified/src/csharp/DataCareNext/TR_APR_ISU.cs#L5788-L6772).
 
 ### Bill Wise Rec
 

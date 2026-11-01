@@ -1,0 +1,458 @@
+import assert from 'node:assert/strict';
+import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
+import {
+  DAY,
+  ISSUE_BOOK,
+  RETURN_BOOK,
+  TENANT,
+  approvalRows,
+  approvalStock,
+  as,
+  createIssue,
+  fillIssue,
+  isApi,
+  label,
+  openApproval,
+  reopenApproval,
+  saveApproval,
+  seedApprovalTag,
+  tagState,
+} from './approvalHelpers.mjs';
+
+/**
+ * ExtraTran → Approval Isu. Authority: MDI_FORM.cs:8300-8305; TR_APR_ISU.cs:5788-5981,
+ * 6015-6431,6608-6772; Ac_Stock.cs:60-72,887-890; AprBill.spec.json.
+ */
+const C = (id, group, kind, source, run, extra = {}) => ({
+  id: `approval-issue.${id}`,
+  group,
+  kind,
+  source,
+  applicable: true,
+  requiredEvidence:
+    kind === 'mutation'
+      ? ['browser', 'expected', 'database', 'downstream']
+      : kind === 'refusal'
+        ? ['browser', 'expected', 'database']
+        : kind === 'output'
+          ? ['browser', 'expected', 'output']
+          : ['browser', 'expected'],
+  run,
+  ...extra,
+});
+const blocked = (id, group, reason) => ({
+  ...C(`${id}.pending`, group, 'read-only', `Playbook ${group}`, async () => ({})),
+  blocked: reason,
+});
+const notApplicable = (id, group, source, reason) => ({
+  ...C(`${id}.not-applicable`, group, 'read-only', source, async () => ({})),
+  applicable: false,
+  reason,
+});
+
+export const approvalIssue = {
+  feature: 'approval-issue',
+  title: 'ExtraTran → Approval Isu (TR_APR_ISU, APR ISU)',
+  defaultUser: as(USERS.admin.user),
+  inputs: [
+    'web/apps/web/app/(app)/txn/tour/page.tsx',
+    'web/apps/api/src/modules/tour/approvalVoucher.ts',
+    'web/apps/api/src/modules/tour/approvalRows.ts',
+    'web/apps/api/src/modules/tour/approvalTypes.ts',
+    'web/apps/api/src/modules/tour/approvalBill.ts',
+    'web/apps/api/src/routes/approval.ts',
+    'web/apps/web/test/features/modules/approvalIssue.mjs',
+  ],
+  fixtureManifest: FIXTURE_MANIFEST,
+  settingsManifest: { companySettings: 'catalogue defaults; cases seed live BAR_DETL tags' },
+  cases: [
+    C(
+      'entry.desktop-book',
+      'T01',
+      'read-only',
+      "MDI_FORM.cs:8300-8305 calls CurBookHelp('APR ISU'); CLEAR_DATA TR_APR_ISU.cs:5697-5786 starts a new voucher.",
+      async (ctx) => {
+        const { page, book } = await openApproval(ctx);
+        const values = await book
+          .locator('option')
+          .evaluateAll((o) => o.map((x) => x.getAttribute('value')).filter(Boolean));
+        assert.deepEqual(values, [ISSUE_BOOK]);
+        assert.match(await label(page, 'Vch Date').inputValue(), /^\d{4}-\d{2}-\d{2}$/);
+        await ctx.shot(page, 'entry');
+        return { observation: `book ${values.join(',')}`, expected: ISSUE_BOOK };
+      },
+    ),
+    C(
+      'book.family-guard',
+      'T02',
+      'refusal',
+      "MDI_FORM.cs:8301 limits this menu to MAIN_BOOK 'APR ISU'.",
+      async (ctx) => {
+        const { page } = await openApproval(ctx);
+        const answer = await page.evaluate(
+          async ({ day, returnBook }) => {
+            const response = await fetch('/api/tour/issue', {
+              method: 'POST',
+              credentials: 'include',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({
+                coBook: returnBook,
+                vchDate: day,
+                partyAc: 'E2ELOC',
+                lines: [{ itCode: 'GLD22', pcs: 1 }],
+              }),
+            });
+            return { status: response.status, text: await response.text() };
+          },
+          { day: DAY, returnBook: RETURN_BOOK },
+        );
+        assert.equal(answer.status, 400);
+        assert.match(answer.text, /MAIN_BOOK='APR ISU'/);
+        return {
+          observation: `wrong family answered ${answer.status}: ${answer.text}`,
+          expected: "400 MAIN_BOOK='APR ISU'",
+          database: {},
+        };
+      },
+    ),
+    C(
+      'formula.fine',
+      'T03',
+      'read-only',
+      'TR_APR_ISU CommPassTotal and Ac_Stock.cs:68 copy ITM_FINE; 10.000 × 91.6 / 100 = 9.160.',
+      async (ctx) => {
+        const tag = await seedApprovalTag(ctx, 'AIF');
+        const { page } = await openApproval(ctx);
+        await fillIssue(page, tag.tag);
+        await page.getByText(/Fine 9\.16(?:0)? g/).waitFor();
+        return { observation: '10.000 × 91.6% displayed as 9.16 g', expected: 9.16 };
+      },
+    ),
+    C(
+      'refusal.party-required',
+      'T04',
+      'refusal',
+      'TR_APR_ISU.cs:6055-6060: "Please Insert Party and try" after year/lock/employee checks.',
+      async (ctx) => {
+        const tag = await seedApprovalTag(ctx, 'AIR');
+        const { page } = await openApproval(ctx);
+        await label(page, 'Vch Date').fill(DAY);
+        const tagInput = label(page, 'TagNo line 1');
+        await tagInput.fill(tag.tag);
+        await tagInput.locator('xpath=..').getByText(tag.tag, { exact: false }).first().waitFor();
+        await tagInput.press('Enter');
+        const response = await saveApproval(page);
+        assert.equal(response.status(), 400, await response.text());
+        await page.getByRole('alert').filter({ hasText: 'Please Insert Party and try' }).waitFor();
+        assert.equal((await tagState(ctx, tag.tag)).balance, 1);
+        return {
+          observation: 'desktop party refusal, tag unchanged',
+          expected: 'no write',
+          database: { balance: 1 },
+        };
+      },
+    ),
+    C(
+      'create.desktop-write-set',
+      'T05',
+      'mutation',
+      'TR_APR_ISU.cs:6123-6431 and Ac_Stock.cs:60-72: APR rows, O/- stock and BAR_DETL.APR_ISU=Y; no money ledger.',
+      async (ctx) => {
+        const tag = await seedApprovalTag(ctx, 'AIC');
+        const created = await createIssue(ctx, tag.tag);
+        const rows = await approvalRows(ctx, ISSUE_BOOK, created.voucherNo);
+        const stock = await approvalStock(ctx, ISSUE_BOOK, created.voucherNo);
+        assert.deepEqual(
+          rows.map((r) => [r.book, r.type, r.inout, r.tag, r.serial, r.net, r.fine]),
+          [['APR ISU', 'TUR', 'O', tag.tag, tag.serial, 10, 9.16]],
+        );
+        assert.deepEqual(
+          stock.map((r) => [r.book, r.type, r.tr, r.sign]),
+          [['APR ISU', 'TUR', 'O', '-']],
+        );
+        assert.deepEqual(await tagState(ctx, tag.tag), { apr: 'Y', transfer: 'N', balance: 0 });
+        await ctx.shot(created.page, 'created');
+        return {
+          observation: created.voucherNo,
+          expected: 'APR ISU + O/- + pending',
+          database: { rows, stock },
+          downstream: { balance: 0 },
+        };
+      },
+    ),
+    notApplicable(
+      'settlement',
+      'T06',
+      'TR_APR_ISU and Ac_Stock.Apr_Isu_Stk write no AC_DATA.',
+      'Approval issue is custody only; money is posted only by the later sale.',
+    ),
+    C(
+      'reopen.lossless',
+      'T07',
+      'mutation',
+      'TR_APR_ISU.cs:5788-5981 DISPLAY_DATA restores the header, item grid and APR_IDTL rows.',
+      async (ctx) => {
+        const tag = await seedApprovalTag(ctx, 'AIL');
+        const created = await createIssue(ctx, tag.tag, 'lossless note');
+        await pageNew(created.page);
+        await reopenApproval(created.page, 'issue', created.voucherNo);
+        assert.equal(await label(created.page, 'Party Code').inputValue(), 'E2ELOC');
+        assert.equal(await label(created.page, 'TagNo line 1').inputValue(), tag.tag);
+        assert.equal(await label(created.page, 'Vch Desc').inputValue(), 'LOSSLESS NOTE');
+        return {
+          observation: `reopened ${created.voucherNo}`,
+          expected: 'party, tag and description',
+          database: { rows: await approvalRows(ctx, ISSUE_BOOK, created.voucherNo) },
+          downstream: { loaded: true },
+        };
+      },
+    ),
+    C(
+      'edit.unchanged',
+      'T08',
+      'mutation',
+      'TR_APR_ISU DISPLAY_DATA followed by Save preserves the voucher; web no-ops an identical versioned body.',
+      async (ctx) => {
+        const tag = await seedApprovalTag(ctx, 'AIN');
+        const created = await createIssue(ctx, tag.tag);
+        const before = {
+          rows: await approvalRows(ctx, ISSUE_BOOK, created.voucherNo),
+          stock: await approvalStock(ctx, ISSUE_BOOK, created.voucherNo),
+        };
+        await reopenApproval(created.page, 'issue', created.voucherNo);
+        const response = await saveApproval(created.page, 'issue', 'PUT');
+        assert.equal(response.status(), 200, await response.text());
+        const after = {
+          rows: await approvalRows(ctx, ISSUE_BOOK, created.voucherNo),
+          stock: await approvalStock(ctx, ISSUE_BOOK, created.voucherNo),
+        };
+        assert.deepEqual(after, before);
+        return {
+          observation: 'unchanged PUT kept rows',
+          expected: 'identical footprint',
+          database: { before, after },
+          downstream: { unchanged: true },
+        };
+      },
+    ),
+    C(
+      'edit.description',
+      'T09',
+      'mutation',
+      'TR_APR_ISU.cs:6070-6431 replaces the loaded voucher without a DELETE_DATA audit.',
+      async (ctx) => {
+        const tag = await seedApprovalTag(ctx, 'AIE');
+        const created = await createIssue(ctx, tag.tag);
+        await reopenApproval(created.page, 'issue', created.voucherNo);
+        await label(created.page, 'Vch Desc').fill('changed in browser');
+        const response = await saveApproval(created.page, 'issue', 'PUT');
+        assert.equal(response.status(), 200, await response.text());
+        const rows = await approvalRows(ctx, ISSUE_BOOK, created.voucherNo);
+        assert.equal(rows[0].description, 'CHANGED IN BROWSER');
+        assert.equal((await tagState(ctx, tag.tag)).balance, 0);
+        return {
+          observation: 'description edited',
+          expected: 'CHANGED IN BROWSER',
+          database: { rows },
+          downstream: { balance: 0 },
+        };
+      },
+    ),
+    C(
+      'delete.audit-and-stock',
+      'T10',
+      'mutation',
+      'TR_APR_ISU.cs:6648-6704 audits each line, clears APR_ISU and removes the O/- stock row.',
+      async (ctx) => {
+        const tag = await seedApprovalTag(ctx, 'AID');
+        const created = await createIssue(ctx, tag.tag);
+        await reopenApproval(created.page, 'issue', created.voucherNo);
+        const [response] = await Promise.all([
+          created.page.waitForResponse((r) => isApi(r, 'DELETE', `/tour/${created.voucherNo}`)),
+          created.page.getByTestId('approval-issue-delete').click(),
+        ]);
+        assert.equal(response.status(), 200, await response.text());
+        assert.deepEqual(await approvalRows(ctx, ISSUE_BOOK, created.voucherNo), []);
+        assert.deepEqual(await tagState(ctx, tag.tag), { apr: 'N', transfer: 'N', balance: 1 });
+        const audits = await ctx.rows(
+          `SELECT "DELETE_USER" "user","VCH_FINE_CR"::float8 fine FROM "DELETE_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='TUR' AND "VCH_NO"=$2`,
+          created.voucherNo,
+        );
+        assert.deepEqual(audits, [{ user: USERS.admin.user, fine: 10 }]);
+        return {
+          observation: 'deleted and audited',
+          expected: 'tag available',
+          database: { audits },
+          downstream: { balance: 1 },
+        };
+      },
+    ),
+    C(
+      'rights.print-denied',
+      'T11',
+      'refusal',
+      'TR_APR_ISU.cs:6712-6717: UserPrint is required before AprBill opens.',
+      async (ctx) => {
+        await ensureViewerRight(ctx);
+        const tag = await seedApprovalTag(ctx, 'AIP');
+        const created = await createIssue(ctx, tag.tag);
+        const viewer = await ctx.session(as(USERS.printViewer.user));
+        const answer = await viewer.page.request.get(
+          `/api/tour/${created.voucherNo}/print?coBook=TUR&format=html`,
+        );
+        assert.equal(answer.status(), 403);
+        assert.equal((await tagState(ctx, tag.tag)).balance, 0);
+        return {
+          observation: 'view-only user refused print',
+          expected: 403,
+          database: { balance: 0 },
+        };
+      },
+    ),
+    C(
+      'concurrency.stale-edit',
+      'T12',
+      'refusal',
+      'D17 hardening: two loaded TR_APR_ISU editors cannot silently overwrite the first committed edit.',
+      async (ctx) => {
+        const tag = await seedApprovalTag(ctx, 'AIX');
+        const first = await createIssue(ctx, tag.tag);
+        const secondSession = await ctx.session(as(USERS.admin.user, 'approval-issue-second'));
+        await openApproval(ctx, 'issue', secondSession);
+        await reopenApproval(first.page, 'issue', first.voucherNo);
+        await reopenApproval(secondSession.page, 'issue', first.voucherNo);
+        await label(first.page, 'Vch Desc').fill('first wins');
+        assert.equal((await saveApproval(first.page, 'issue', 'PUT')).status(), 200);
+        await label(secondSession.page, 'Vch Desc').fill('second loses');
+        const stale = await saveApproval(secondSession.page, 'issue', 'PUT');
+        assert.equal(stale.status(), 409, await stale.text());
+        return {
+          observation: 'second editor received 409',
+          expected: 'voucher-version-conflict',
+          database: { rows: await approvalRows(ctx, ISSUE_BOOK, first.voucherNo) },
+        };
+      },
+    ),
+    blocked(
+      'retry',
+      'T13',
+      'Approval POST has no idempotency-key contract; duplicate/lost acknowledgement remains open.',
+    ),
+    blocked(
+      'rollback',
+      'T14',
+      'The feature harness has no declared mid-write database fault injector (G173/N166).',
+    ),
+    C(
+      'config.lock-date',
+      'T15',
+      'refusal',
+      'TR_APR_ISU.cs:6036-6041 uses the exact lock-date refusal before employee/party checks.',
+      async (ctx) => {
+        const tag = await seedApprovalTag(ctx, 'AIK');
+        const { page } = await openApproval(ctx);
+        await fillIssue(page, tag.tag);
+        await ctx.owner.$executeRawUnsafe(
+          `UPDATE "CO_SET" SET "LOCK_DATE"=$2 WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+          TENANT,
+          DAY,
+        );
+        try {
+          const response = await saveApproval(page);
+          assert.equal(response.status(), 400, await response.text());
+          await page
+            .getByRole('alert')
+            .filter({ hasText: 'You Cant Save and Delete This Voucher Becouse Lock Date is =' })
+            .waitFor();
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `UPDATE "CO_SET" SET "LOCK_DATE"=NULL WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+            TENANT,
+          );
+        }
+        assert.equal((await tagState(ctx, tag.tag)).balance, 1);
+        return {
+          observation: 'locked date refused',
+          expected: 'desktop text/no write',
+          database: { balance: 1 },
+        };
+      },
+    ),
+    C(
+      'print.apr-bill',
+      'T16',
+      'output',
+      'TR_APR_ISU.cs:6742,6771-6772 selects AprBill; AprBill.spec.json fixes title, columns, totals and signatures.',
+      async (ctx) => {
+        const tag = await seedApprovalTag(ctx, 'AIO');
+        const created = await createIssue(ctx, tag.tag, 'print note');
+        await reopenApproval(created.page, 'issue', created.voucherNo);
+        const [popup] = await Promise.all([
+          created.page.waitForEvent('popup'),
+          created.page.getByTestId('approval-issue-print').click(),
+        ]);
+        await popup.waitForLoadState();
+        const html = await popup.content();
+        await ctx.shot(popup, 'apr-bill');
+        await popup.close();
+        for (const text of [
+          'Approval Issue',
+          'ORIGINAL',
+          'Item Name',
+          `${tag.tag} - ${'GOLD 22K ORNAMENT'}`,
+          'Total :',
+          'PRINT NOTE',
+          'Party signature.',
+        ])
+          assert(html.includes(text), `AprBill contains ${text}`);
+        return {
+          observation: `AprBill ${html.length} bytes`,
+          expected: 'AprBill layout',
+          output: Buffer.from(html),
+        };
+      },
+    ),
+    C(
+      'keyboard.alt-s-saves',
+      'T17',
+      'mutation',
+      'TR_APR_ISU Save is the desktop &Save mnemonic; Alt+S invokes the marked web save.',
+      async (ctx) => {
+        const tag = await seedApprovalTag(ctx, 'AIS');
+        const { page } = await openApproval(ctx);
+        await fillIssue(page, tag.tag);
+        const [response] = await Promise.all([
+          page.waitForResponse((r) => isApi(r, 'POST', '/tour/issue')),
+          page.keyboard.press('Alt+s'),
+        ]);
+        assert.equal(response.status(), 201, await response.text());
+        assert.equal((await tagState(ctx, tag.tag)).balance, 0);
+        return {
+          observation: 'Alt+S saved',
+          expected: 'tag pending approval',
+          database: { balance: 0 },
+          downstream: { pending: true },
+        };
+      },
+    ),
+    blocked(
+      'downstream-sale',
+      'T18',
+      'Approval Return is covered by its own module; the retained-item Sales Apr No journey and reversal remain open.',
+    ),
+  ],
+};
+
+async function pageNew(page) {
+  await page.getByTestId('approval-issue-new').click();
+}
+
+async function ensureViewerRight(ctx) {
+  await ctx.owner.$executeRawUnsafe(
+    `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
+     SELECT $1::text,'01','01',$2::text,'Sales','Approval Isu','Y','N','N','N'
+      WHERE NOT EXISTS (SELECT 1 FROM "USER_SET" WHERE tenant_id=$1::text AND "USER_NAME"=$2::text AND "MAIN_MENU"='Sales' AND "SUB_MENU"='Approval Isu')`,
+    TENANT,
+    USERS.printViewer.user,
+  );
+}

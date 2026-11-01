@@ -164,7 +164,6 @@
     "rounding:modules/stock/stockVoucherLifecycle.ts#r2",
     "rounding:modules/stock/tagOps.ts#r2",
     "rounding:modules/stock/tagOps.ts#r3",
-    "rounding:modules/tour/tour.ts#r3",
     "rounding:packages/core/finePolicy.ts#round3"
   ]
 }

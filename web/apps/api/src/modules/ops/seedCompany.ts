@@ -167,6 +167,8 @@ const DESKTOP_BOOK_TABLES: Record<string, { table: string; detail: string }> = {
   'FINE JV': { table: 'CONTRA_DATA', detail: 'CONTRA_DATA' },
   'OTH INC': { table: 'PAY_DATA', detail: 'PAY_DETL' },
   'OTH EXP': { table: 'PAY_DATA', detail: 'PAY_DETL' },
+  'APR ISU': { table: 'APR_DATA', detail: 'APR_DETL' },
+  'APR RTN': { table: 'APR_DATA', detail: 'APR_DETL' },
 };
 
 const BOOKS: {
@@ -275,8 +277,10 @@ const BOOKS: {
     shortName: 'SADJ',
     table: 'SL_ORD_ADJ',
   },
-  { book: 'TUR', name: 'Approval Issue', mainBook: 'APPROVAL ISSUE', inout: 'O', acCode: 'OS' },
-  { book: 'TRR', name: 'Approval Return', mainBook: 'APPROVAL RETURN', inout: 'I', acCode: 'OS' },
+  // Desktop Approval Isu / Approval Rtn both open TR_APR_ISU through these exact MAIN_BOOK values
+  // (MDI_FORM.cs:8300-8317) and route to APR_DATA/APR_DETL (MS_UPDATE.cs:7833).
+  { book: 'TUR', name: 'Approval Issue', mainBook: 'APR ISU', inout: 'O', acCode: 'OS' },
+  { book: 'TRR', name: 'Approval Return', mainBook: 'APR RTN', inout: 'I', acCode: 'OS' },
   { book: 'SAJ', name: 'Stock Adjust', mainBook: 'STOCK ADJUST', inout: 'I', acCode: 'KASAR' },
   // Desktop Tag Opening (TR_TAG_OPEN): a pure stock-opening voucher writing BAR_DATA and positive MAIN_STOCK,
   // with no ledger entry (AC_DATA lines are empty). Without this book the Tag Opening screen has no book to

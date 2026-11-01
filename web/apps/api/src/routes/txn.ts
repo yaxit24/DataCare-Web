@@ -252,6 +252,7 @@ import { registerPurchaseVoucherRoutes } from './purchaseVoucher.js';
 import { registerPartyOpeningRoutes } from './partyOpening.js';
 import { registerFineJvRoutes } from './fineJv.js';
 import { registerItemOpeningRoutes } from './itemOpening.js';
+import { registerApprovalRoutes } from './approval.js';
 import { VoucherVersionConflictError } from '../modules/vouchers/version.js';
 import { listYears, createYear, carryForwardOpenings } from '../modules/masters/year.js';
 import { reminders } from '../modules/finance/reminders.js';
@@ -597,14 +598,7 @@ import {
   getFineSalePurchase,
   editFineSalePurchase,
 } from '../modules/bullion/fineSalePurchase.js';
-import {
-  tourIssue,
-  deleteTour,
-  tourReturn,
-  deleteTourReturn,
-  tourLines,
-  markApprovalBilled,
-} from '../modules/tour/tour.js';
+import { markApprovalBilled } from '../modules/tour/tour.js';
 import { yearEndPreview, yearEndClose } from '../modules/ops/yearEnd.js';
 import {
   enrollScheme,
@@ -966,6 +960,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         return reply.code(e.statusCode).send({ error: e.code, message: e.message });
       if (n === 'FineJvNotFoundError')
         return reply.code(404).send({ error: 'fine-jv-not-found', message: e.message });
+      if (n === 'ApprovalNotFoundError' || n === 'ApprovalBillNotFoundError')
+        return reply.code(404).send({ error: 'approval-not-found', message: e.message });
       if (e instanceof SavedSaleReturnError)
         return reply.code(e.statusCode).send({ error: e.code, message: e.message });
       if (e instanceof SaleReturnSourceError)
@@ -1104,6 +1100,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerFineJvRoutes(app, extraRouteHelpers);
   registerDailyRateRoutes(app, { ...extraRouteHelpers, formMutationCapabilities });
   registerItemOpeningRoutes(app, extraRouteHelpers, formCapabilities);
+  registerApprovalRoutes(app, extraRouteHelpers);
   const pdfRenderer = (): PdfRenderer => deps.pdfRenderer ?? new PlaywrightPdfRenderer();
   /** Render server-built HTML, mapping limits to 413/422 and a busy or slow renderer to a retryable 503. */
   const sendPdf = async (reply: FastifyReply, html: string, filename: string) => {
@@ -8229,21 +8226,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
-  app.post('/tour/issue', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      tourIssue(prisma, {
-        scope: scopeOf(req),
-        vchDate: b.vchDate,
-        salesmanAc: b.salesmanAc,
-        salesmanName: b.salesmanName,
-        vchDesc: b.vchDesc,
-        mainUser: sess(req).sub,
-        lines: b.lines ?? [],
-      }),
-    );
-  });
   app.post('/year-end/preview', auth, async (req) =>
     yearEndPreview(prisma, {
       scope: scopeOf(req) as any,
@@ -8299,31 +8281,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       ),
     );
   });
-  app.delete('/tour/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
-      deleteTour(prisma, { scope: scopeOf(req), vchNo: (req.params as any).vchNo }),
-    );
-  });
-  app.post('/tour/return', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      tourReturn(prisma, {
-        scope: scopeOf(req),
-        origVchNo: b.origVchNo,
-        vchDate: b.vchDate,
-        salesmanAc: b.salesmanAc,
-        salesmanName: b.salesmanName,
-        vchDesc: b.vchDesc,
-        mainUser: sess(req).sub,
-        lines: b.lines ?? [],
-      }),
-    );
-  });
-  app.get('/tour/:vchNo/lines', auth, async (req) =>
-    tourLines(prisma, scopeOf(req), (req.params as any).vchNo),
-  );
   app.post('/tour/:vchNo/bill', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
@@ -8349,11 +8306,5 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       const m = await markApprovalBilled(prisma, scopeOf(req), aprVchNo, String(sale.vchNo));
       return { ...sale, approvalBilled: m.marked };
     });
-  });
-  app.delete('/tour/return/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
-      deleteTourReturn(prisma, { scope: scopeOf(req), vchNo: (req.params as any).vchNo }),
-    );
   });
 }

@@ -7022,6 +7022,37 @@
         "web/apps/web/test/features/modules/tagCancel.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Tag Cancel suites 114/114 (the two new cases red against main); tag-cancel feature module 12 passed / 5 blocked. Open: no captured desktop BAR_CAN rows, idempotency, fault rollback, the Tag Stock report check, desktop-runtime comparison."
+    },
+    {
+      "id": "N211",
+      "status": "implemented-unverified",
+      "action": "Approval Isu and Approval Rtn are desktop TR_APR_ISU resources on MAIN_BOOK 'APR ISU'/'APR RTN': guarded provisioning/backfill, desktop save/delete rules and stock/BAR/source effects, versioned reopen/edit/delete with DELETE_DATA audit, AprBill behind print rights, and one zero-mock T01-T18 module per menu.",
+      "parentLabels": "P1-core; L4; J09; T01-T18",
+      "startAfter": [
+        "N210"
+      ],
+      "requiredProof": "Source-derived HTTP/DB tests red before implementation for book identity, migration safety, guards, refusal order, complete issue/return write sets, lossless reopen, unchanged save, edit conflict, delete dependency refusals/audit/reversal and AprBill rights/layout; both feature modules pass every executable case on the zero-mock real stack; all repository gates pass.",
+      "gapIds": "G224",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/packages/db/prisma/migrations/20261101090000_approval_book_identity/migration.sql",
+        "web/apps/api/src/modules/tour/approvalVoucher.ts",
+        "web/apps/api/src/modules/tour/approvalRows.ts",
+        "web/apps/api/src/modules/tour/approvalTypes.ts",
+        "web/apps/api/src/modules/tour/approvalBill.ts",
+        "web/apps/api/src/routes/approval.ts",
+        "web/apps/web/components/ApprovalVoucherForm.tsx",
+        "web/apps/web/components/ApprovalGrid.tsx",
+        "web/apps/api/test/approvalLifecycle.routes.db.test.ts",
+        "web/apps/api/test/approvalBookMigration.db.test.ts",
+        "web/apps/web/test/features/modules/approvalIssue.mjs",
+        "web/apps/web/test/features/modules/approvalReturn.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified in source-derived DB/HTTP tests and zero-mock browser modules: desktop APR ISU/APR RTN identity, safe exact-match backfill, family isolation, company-type/year/lock/employee/party refusals, issue and partial-return stock/BAR/source effects, versioned reopen/no-op/edit/delete, dependency delete refusals, per-line DELETE_DATA audit, print rights and the AprBill data/layout. Open: the desktop licence-expiry refusal has no server-owned web state; APR_IMG_PRINT=Y/AprBillImg, idempotent create/lost acknowledgement, injected mid-write rollback, retained-item sale/Wh Sales browser continuation, original-Windows comparison and parent acceptance."
     }
   ],
   "amendments": [

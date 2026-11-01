@@ -72,8 +72,8 @@ databaseDescribe('RP_ALL report family parity builders', () => {
     );
     await exec(
       `INSERT INTO "APR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","AC_CODE","BOOK_NAME","IT_CODE","TAG_NO","DESIGN_NO","ITM_PCS","ITM_GWT","ITM_NWT","ITM_FINE","ITM_AMT","LBR_AMT","OTH_AMT","NET_AMT","ISU_REC","EMP_CODE","MAIN_USER")
-       VALUES ($1,$2,$3,$4,'APR','00001',1,'2024-06-10','C001','APPROVAL ISSUE','GOLD','TAG1','D1',1,10,9,8.7,1000,100,25,1125,'N','E01','USER1'),
-              ($1,$2,$3,$4,'APR','00002',1,'2024-06-11','C002','APPROVAL ISSUE','SILV','TAG2','D2',1,20,19,18.5,2000,150,50,2200,'Y','E02','USER2')`,
+       VALUES ($1,$2,$3,$4,'APR','00001',1,'2024-06-10','C001','APR ISU','GOLD','TAG1','D1',1,10,9,8.7,1000,100,25,1125,'N','E01','USER1'),
+              ($1,$2,$3,$4,'APR','00002',1,'2024-06-11','C002','APR ISU','SILV','TAG2','D2',1,20,19,18.5,2000,150,50,2200,'Y','E02','USER2')`,
       TENANT,
       CO,
       LC,

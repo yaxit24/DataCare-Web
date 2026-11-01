@@ -231,4 +231,34 @@ databaseDescribe('provisioning leaves a company able to trade', () => {
     expect(rows[0]!.MAIN_BOOK).toBe('OPSTK');
     expect(rows[0]!.BOOK_TBL_NAME).toBe('BAR_DATA');
   });
+
+  it('provisions the desktop Approval Isu and Approval Rtn books (N211/G224)', async () => {
+    // MDI_FORM.cs:8300-8317 selects APR ISU/APR RTN; MS_UPDATE.cs:7833 routes both to
+    // APR_DATA/APR_DETL. APPROVAL ISSUE/APPROVAL RETURN are web-only names the desktop never opens.
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT "CO_BOOK","BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","BOOK_TBL_NAME","BOOK_TBL_DETL"
+         FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "CO_BOOK" IN ('TUR','TRR')
+        ORDER BY "CO_BOOK"`,
+      TENANT,
+      CO,
+    )) as Array<Record<string, unknown>>;
+    expect(rows).toEqual([
+      {
+        CO_BOOK: 'TRR',
+        BOOK_SNAME: 'TRR',
+        MAIN_BOOK: 'APR RTN',
+        BOOK_INOUT: 'I',
+        BOOK_TBL_NAME: 'APR_DATA',
+        BOOK_TBL_DETL: 'APR_DETL',
+      },
+      {
+        CO_BOOK: 'TUR',
+        BOOK_SNAME: 'TUR',
+        MAIN_BOOK: 'APR ISU',
+        BOOK_INOUT: 'O',
+        BOOK_TBL_NAME: 'APR_DATA',
+        BOOK_TBL_DETL: 'APR_DETL',
+      },
+    ]);
+  });
 });

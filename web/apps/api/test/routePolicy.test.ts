@@ -105,8 +105,9 @@ describe('route policy registry', () => {
     // N209 adds the TR_ITM_OPBL Item Opening grid: GET /stock/item-opening/rights and
     // GET|PUT|DELETE /stock/item-opening/type/:type: 663 + 4 = 667.
     // N210 adds the TagCanBill print GET /stock/tag-cancel/:vchNo/print: 667 + 1 = 668.
-    expect(routes).toHaveLength(668);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(668);
+    // N211 adds Approval Isu GET/PUT/print and Approval Rtn GET/PUT/print: 668 + 6 = 674.
+    expect(routes).toHaveLength(674);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(674);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -161,6 +162,7 @@ describe('route policy registry', () => {
       ['POST', '/sales-returns/:vchNo/incoming-bill-replay', 'read'],
       ['GET', '/sales-returns/:vchNo/incoming-labour-replay-state', 'read'],
       ['POST', '/sales-returns/:vchNo/incoming-labour-observation', 'read'],
+
       ['POST', '/sales-returns/:vchNo/incoming-labour-replay', 'read'],
       ['PUT', '/sales-returns/:vchNo/incoming-metadata', 'update'],
       ['PUT', '/sales-returns/:vchNo/incoming-numeric', 'update'],
@@ -171,6 +173,20 @@ describe('route policy registry', () => {
         action,
         businessScope: true,
       });
+  });
+
+  it('binds the two TR_APR_ISU resources to their separate menu rights and print action', () => {
+    // MDI_FORM.cs:8300-8317 opens the same form through separate APR ISU and APR RTN menu rows;
+    // TR_APR_ISU.cs:6712-6717 checks UserPrint before AprBill.
+    for (const [form, base] of [
+      ['Sales/Tour / Approval Sale', '/tour/:vchNo'],
+      ['Sales/Approval Return', '/tour/return/:vchNo'],
+    ] as const) {
+      expect(routePolicyFor('GET', base)).toMatchObject({ form, action: 'read' });
+      expect(routePolicyFor('PUT', base)).toMatchObject({ form, action: 'update' });
+      expect(routePolicyFor('DELETE', base)).toMatchObject({ form, action: 'delete' });
+      expect(routePolicyFor('GET', `${base}/print`)).toMatchObject({ form, action: 'print' });
+    }
   });
 
   it('binds generic, Design and repair image state and replacement to their own route rights', () => {

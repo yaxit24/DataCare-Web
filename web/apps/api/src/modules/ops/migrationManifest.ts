@@ -153,4 +153,9 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261031090000_book_tables_and_advance_slots',
     checksum: '289966d3b25b66efd6f6957f6ec58fcea91edbd6df6ff8bb014dd43a09e07849',
   },
+  {
+    // N211/G224: old web Approval book names and row stamps become desktop APR ISU/APR RTN.
+    name: '20261101090000_approval_book_identity',
+    checksum: 'fd9cc42845d8130af2dc4690fd252c4a4d82bedc6b986d2be1751f38712b83a4',
+  },
 ];
