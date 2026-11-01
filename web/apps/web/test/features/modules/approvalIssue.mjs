@@ -140,12 +140,19 @@ export const approvalIssue = {
         const { page } = await openApproval(ctx);
         await fillIssue(page, tag.tag, 'amount rounding');
         await page.getByTestId('approval-issue-grid-mode').click();
-        await label(page, 'ItAmt row 1').fill('100.04');
-        await label(page, 'LbrAmt row 1').fill('20.05');
-        await label(page, 'OthAmt row 1').fill('0.02');
-        await label(page, 'LDisc% row 1').fill('10');
-        assert.equal(await label(page, 'LDiscAmt row 1').inputValue(), '2.01');
-        assert.equal(await label(page, 'NetAmt row 1').inputValue(), '118.1');
+        const itemGrid = page.locator('table.grid').first();
+        await itemGrid.getByLabel('ItAmt row 1', { exact: true }).fill('100.04');
+        await itemGrid.getByLabel('LbrAmt row 1', { exact: true }).fill('20.05');
+        await itemGrid.getByLabel('OthAmt row 1', { exact: true }).fill('0.02');
+        await itemGrid.getByLabel('LDisc% row 1', { exact: true }).fill('10');
+        assert.equal(
+          await itemGrid.getByLabel('LDiscAmt row 1', { exact: true }).inputValue(),
+          '2.01',
+        );
+        assert.equal(
+          await itemGrid.getByLabel('NetAmt row 1', { exact: true }).inputValue(),
+          '118.1',
+        );
         const response = await saveApproval(page);
         assert.equal(response.status(), 201, await response.text());
         const result = await response.json();
