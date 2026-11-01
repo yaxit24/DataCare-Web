@@ -652,6 +652,39 @@ export const purchaseInvoice = {
     ),
 
     C(
+      'lookup.lower-case-code',
+      'T04',
+      'read-only',
+      "Lookup: a supplier code typed in lower case ('e2ebank') and Enter picks that supplier with its name (tAcCode_KeyDown, TR_PURC.cs:14619-14628; the lookups compare case-insensitively, lookupEnter.ts)",
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openPurchase(page);
+        const input = page.getByPlaceholder('search accounts… (F1)').first();
+        await input.focus();
+        await page.keyboard.type(PARTIES.bank.code.toLowerCase());
+        await input
+          .locator('xpath=..')
+          .getByText(PARTIES.bank.code, { exact: true })
+          .first()
+          .waitFor();
+        await input.press('Enter');
+        await page.waitForTimeout(600);
+        const chosen = await input.inputValue();
+        const name = await page
+          .locator('.field')
+          .filter({ has: page.locator('label', { hasText: /^Supplier Name$/ }) })
+          .locator('input')
+          .first()
+          .inputValue();
+        assert.equal(chosen, PARTIES.bank.code);
+        assert.equal(name, PARTIES.bank.name);
+        return {
+          observation: `typed ${PARTIES.bank.code.toLowerCase()}, Enter took ${chosen} (${name})`,
+          expected: { supplier: PARTIES.bank.code, name: PARTIES.bank.name },
+        };
+      },
+    ),
+    C(
       'lookup.pick-over-typed-code',
       'T04',
       'read-only',
