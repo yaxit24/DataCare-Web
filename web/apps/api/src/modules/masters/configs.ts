@@ -13,6 +13,8 @@ export const TAX_MAST_CONFIG: MasterConfig = {
   requiredColumns: ['CO_CODE', 'TAX_CODE', 'TAX_NAME'],
   columnMessages: { TAX_NAME: DESKTOP_MESSAGES.TAX_NAME_REQUIRED },
   references: [],
+  dedicatedWriter:
+    "Tax codes are saved by the Tax master (POST /masters/tax-master, PUT /masters/tax-master/:code), which writes a code's header and component rows together.",
 };
 export const GROUP_MAST_CONFIG: MasterConfig = {
   // Desktop-evidence exclusions: desktop_editable_columns.py found no control binding

@@ -793,6 +793,16 @@ route('Masters/Employees', [
   'PUT /masters/employee-master/:code',
   'DELETE /masters/employee-master/:code',
 ]);
+// MS_TAX (N213): the Tax master's own screen, a header row with its component rows per code.
+route('Masters/Taxes', [
+  'GET /masters/tax-master',
+  'GET /masters/tax-master/print',
+  'GET /masters/tax-master/accounts',
+  'GET /masters/tax-master/:code',
+  'POST /masters/tax-master',
+  'PUT /masters/tax-master/:code',
+  'DELETE /masters/tax-master/:code',
+]);
 route('Masters/Opening Balance', [
   'GET /accounts/:acCode/opening',
   'POST /accounts/:acCode/opening',
@@ -923,6 +933,7 @@ route('Reports/Scheme Monthly Report', ['GET /reports/scheme-monthly']);
 
 const PRINT_ROUTES = new Set([
   'GET /masters/employee-master/print',
+  'GET /masters/tax-master/print',
   'POST /estimate/pdf',
   'GET /reports/account-ledger/:acCode/export.pdf',
   'GET /tour-orders/confirmation',

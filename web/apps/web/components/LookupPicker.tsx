@@ -54,6 +54,12 @@ export function LookupPicker({
   const tmr = useRef<any>(null);
   /** The code last chosen from the list or resolved from typing, so a resolve never fires twice for it. */
   const picked = useRef<string | null>(null);
+  /**
+   * The text the box held when that code was chosen. A pick moves the focus on at once, so the leave-resolve runs with
+   * the render's typed text, before the parent has shown the picked code: typing 'GST' and choosing 00085 from the list
+   * then resolved 'GST' (an exact code too) on leave and replaced the choice (found in the 2026-11-01 Tax master run).
+   */
+  const pickedFrom = useRef<string | null>(null);
   /** G185: the text the shown rows were fetched for, and the latest typed text (an answer for older text is dropped). */
   const rowsFor = useRef<string | null>(null);
   const latest = useRef<string>(value ?? '');
@@ -92,6 +98,7 @@ export function LookupPicker({
   }
   const pick = (r: LookupRow) => {
     picked.current = String(r.code);
+    pickedFrom.current = String(value ?? '').trim();
     onChange(String(r.code));
     onPick?.(r);
     setOpen(false);
@@ -108,6 +115,8 @@ export function LookupPicker({
   async function resolveTyped(): Promise<void> {
     const typed = String(value ?? '').trim();
     if (!resolveTypedCode || !typed || !onPick || picked.current === typed) return;
+    // The leave that follows a pick still sees the text the pick replaced; the pick stands.
+    if (picked.current !== null && pickedFrom.current === typed) return;
     try {
       const base = searchPath || `/lookup/${entity}`;
       const separator = base.includes('?') ? '&' : '?';

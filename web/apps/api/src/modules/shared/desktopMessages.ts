@@ -185,6 +185,12 @@ export const DESKTOP_MESSAGES = {
   TAX_NAME_REQUIRED: 'Please Insert Tax Name ...',
   /** MS_TAX.cs — delete pressed with no tax code selected. */
   TAX_SELECT_FOR_DELETE: 'Please Select Tax Code For Delete.',
+  /** MS_TAX.cs:1854 — Save with a blank tax code. */
+  TAX_CODE_REQUIRED: 'Enter Tax Code.',
+  /** MS_TAX.cs:1860 — Save with a blank tax name. */
+  TAX_DESC_REQUIRED: 'Enter Tax Name.',
+  /** MS_TAX.cs:1847, :1944 — Save of an opened code or Delete without the right. */
+  TAX_NO_RIGHTS: 'You Have No Rights.....',
   /** MS_BOOK.cs — blank book short name (BOOK_SNAME drives voucher prefixes and audit rows). */
   BOOK_SHORT_NAME_REQUIRED: 'Please Insert Book Short Name',
   /** MS_TRADE.cs — blank trading/balance-group name. */

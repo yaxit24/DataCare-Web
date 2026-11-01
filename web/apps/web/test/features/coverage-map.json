@@ -128,6 +128,13 @@
         "web/apps/api/src/routes/employeeMaster.ts",
         "web/packages/core/src/vbVal.ts"
       ]
+    },
+    "taxMaster": {
+      "covers": [
+        "web/apps/web/app/(app)/masters/taxes/page.tsx",
+        "web/apps/api/src/modules/masters/taxMaster.ts",
+        "web/apps/api/src/routes/taxMaster.ts"
+      ]
     }
   }
 }

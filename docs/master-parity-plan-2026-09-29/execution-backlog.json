@@ -7079,6 +7079,39 @@
         "web/apps/web/test/features/modules/partyOpening.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Verified: desktopRightsCaptions.db.test.ts 28/28 (27 fail on main's catalog), partyOpening.db.test.ts, the full API suite (343 files, 3665 tests), web unit tests, smoke, and the party-opening feature module 15 passed, 0 failed, 3 blocked (T11 now passes). Open: Company, Data Refresh, Data Import, Order Report, Cash/Bank Received and Approval Rtn's issue lines (shared forms), and the Basic and Standard captions."
+    },
+    {
+      "id": "N213",
+      "status": "implemented-unverified",
+      "action": "The Tax master is the desktop MS_TAX screen: the header (code, name, Tax %, Add Tax %, account) over the component grid (type, name, account, Tax %) with SR_NO = the grid row, the desktop keys, validating texts, account helps, rights and Print, version tokens, one transaction, generic TAX_MAST writes refused, and the shared account picker keeping a row chosen from its help.",
+      "parentLabels": "P1-core; L2; T01-T18",
+      "startAfter": [
+        "N211"
+      ],
+      "requiredProof": "An HTTP/DB test of the list, the header and component write set, every refusal, versions, rights, helps, print, delete, the sale resolver and the refused generic writes; the tax-master feature module passes every case; a sales-invoice case that fails on the old picker; a Chrome DevTools keyboard, help, save, reopen, sale, print and delete pass.",
+      "gapIds": "G226",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/apps/api/src/modules/masters/taxMaster.ts",
+        "web/apps/api/src/routes/taxMaster.ts",
+        "web/apps/api/src/modules/masters/master.service.ts",
+        "web/apps/api/src/modules/masters/configs.ts",
+        "web/apps/api/src/app.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/modules/shared/desktopMessages.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/web/app/(app)/masters/taxes/page.tsx",
+        "web/apps/web/components/LookupPicker.tsx",
+        "web/apps/api/test/taxMaster.db.test.ts",
+        "web/apps/api/test/routePolicy.test.ts",
+        "web/apps/web/test/features/modules/taxMaster.mjs",
+        "web/apps/web/test/features/modules/salesInvoice.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: taxMaster.db.test.ts 11/11, routePolicy, the tax-master feature module 18 of 18 (T14 through an injected component-insert fault, T18 through a 2% sale), sales-invoice 28 passed and 3 blocked with the new picker case (red on the old picker), purchase-invoice, party-opening and daily-rate unchanged, and a Chrome DevTools pass on the demo stack. Open: the TaxMast print layout (not in the repository), the group-12 help on web-provisioned companies (N58), the Sales screen's tax-code help, desktop-runtime comparison and parent acceptance."
     }
   ],
   "amendments": [

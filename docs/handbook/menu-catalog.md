@@ -507,12 +507,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `MS_TAX` — direct constructor ([MDI_FORM.cs:7670-7679](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7670-L7679)).
 - **Does:** Defines tax codes, rates, additional tax, ledger accounts and split components.
-- **Looks:** Search grid; code, name, rate and account fields with a tax-component grid.
+- **Looks:** SEARCH RECORD box over a Code / Name list on the left; Tax Type, Tax Desc, Tax % with Add Tax %, and Ac Code with the account name on the right over the Sr / Tax Type / Tax Name / Ac Code / Tax % component grid; Print, Save, Cancel, Delete and Exit along the bottom.
 - **Writes:** TAX_MAST, AC_MAST.
-- **Web:** `/masters/taxes`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Component and effective-date policy, statutory mappings, reference guards and Print remain.
-- **Owners:** X10, X08, G38, N58, N77, G225, N212.
-- **Evidence:** [MS_TAX.cs:1704-2065](../../unified/src/csharp/DataCareNext/MS_TAX.cs#L1704-L2065).
+- **Web:** `/masters/taxes`; `GET /masters/tax-master`, `GET /masters/tax-master/print`, `GET /masters/tax-master/accounts`, `GET /masters/tax-master/:code`, `POST /masters/tax-master`, `PUT /masters/tax-master/:code`, `DELETE /masters/tax-master/:code`, `GET /masters/:name`. Can: create, reopen, edit, delete, list.
+- **Remaining:** The TaxMast print layout is not in the repository (Print lists the rows on screen); the group-12 help lists none of a web-provisioned company's tax accounts (N58); the Sales screen resolves the code by rate instead of the desktop tax-code help; desktop-runtime comparison remains.
+- **Owners:** X10, X08, G38, N58, N77, G225, N212, G226, N213.
+- **Evidence:** [MS_TAX.cs:1094-2108](../../unified/src/csharp/DataCareNext/MS_TAX.cs#L1094-L2108).
 
 ## Transaction
 
