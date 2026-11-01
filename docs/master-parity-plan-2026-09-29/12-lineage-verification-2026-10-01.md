@@ -244,6 +244,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G231 | High | The Item master was a generic field form without the desktop's helps, item code from product and group, exists question, leave checks, settings boxes, delete checks or Tag Value Update | `unified/src/csharp/DataCareNext/MS_ITEM.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7650-7659`; `web/apps/api/form-specs/DataCareNext.MS_ITEM.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts`; `web/apps/web/lib/lookupEnter.ts` | MS_ITEM takes the product and group from their helps, makes the item code and name from them and asks before reusing a code, refuses a taken code or name on leaving it, shows the setting-driven boxes, writes the combo letters and Val of the number boxes, refuses deleting an item with stock or a default code, and updates the item's tags from its Tag Value Update panel (`MS_ITEM.cs:2748-4015`). The web rendered the generic form: free-typed product and group, no item code or name from them, no question or leave checks, no setting-driven boxes, a delete that only failed on a foreign key, and no tag update. Its lookups also dropped every answer for a box that upper-cases typing. | N218 |
 | G232 | High | Auto Item reversed the desktop's item code, offered the default products and had no group help, grid keys, MinStk, rights or most columns | `unified/src/csharp/DataCareNext/MS_AUTO_ITEM.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7640-7649` | `web/apps/web/app/(app)/masters/auto-item/page.tsx`; `web/apps/api/src/modules/masters/autoItem.ts`; `web/apps/api/src/routes/txn.ts` | MS_AUTO_ITEM's AutoItem mode lists the company's products but the default ones for a group chosen from its help, marks the ones the group already has, and makes PR_CODE + GR_CODE items named product name + group code with the desktop's columns, under the edit right (`MS_AUTO_ITEM.cs:1640-3493`). The web made GR_CODE + PR_CODE items named group + product, wrote eight columns, offered every product including the default ones, and had no group help, grid keys, MinStk, rights or Print and Delete checks. | N219 |
 | G233 | High | Wh Sales saved what TR_WH_SALE refuses, and had no print | `unified/src/csharp/DataCareNext/TR_WH_SALE.cs:12779-12896`, `:13553-13592`, `:13654-13800`; `unified/src/csharp/DataCareNext/TR_TOUR_SALE.cs:10585-10690` | `web/apps/api/src/modules/sales/rateCut.ts`; `web/apps/web/components/WholesaleVoucherForm.tsx` | TR_WH_SALE refuses a save for a defaulter party left owing, a missing mandatory employee, a new voucher in a type-B company, a cheque or card amount without its bank account, a date outside the year, a date on or before the lock date and a grid row with weight or value but no item code, each with its own text, before it writes. The web saved every one of them: a cheque without a bank posted to the cash slot, an item-less receive row posted as received fine, and the lock date was refused with web wording. The delete asked a web question and Print (WhSalesBill) did not exist. | N220 |
+| G236 | High | The Party menu opened a generic page that skipped MS_ACCT's rules | `unified/src/csharp/DataCareNext/MS_ACCT.cs:5584-6587`, `:6606-7648`, `:7650-8025`, `:8162-8574`, `:9024-9640`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7600-7609` | `web/apps/web/app/(app)/masters/party/page.tsx`; `web/apps/api/src/modules/masters/master.service.ts` | Master → Party opens MS_ACCT: the location's Code / Name / Mobile list, the next code of the location, Company Detail and Other Detail with Enter in the form's tab order, the group, mobile, second mobile, short name, GST number, main account and reference checks, a new entry's opening (OP_DATA book 000 and the AcOp_Ledr legs), the AC_MAST_SRNO row, the photo, the D, S and A copy helps, Print and Delete with their refusals. The web's Party page saved only code, name, khata, mobile and group through the generic master (no group or default-account rule, no name check), set the opening through a second request after the account, had no delete or print, and AC_MAST lacked the five columns the desktop's updater adds (LCS_NO, TRN_DATE, CUST_ID_DATE, AC_WITH_MEMB_COM, AC_SHARE_HOLDER_COM). | N223 |
 
 ## 4. Decisions D23–D28
 
@@ -3037,6 +3038,73 @@ Against the code before this change, all eight refusal cases saved the voucher a
 locked …". The full workspace suite and the real-stack suite pass. Desktop-runtime comparison and parent acceptance
 remain open.
 
+### N223 — Party is the desktop MS_ACCT screen (G236, Lite L2)
+
+Gap G236 · Parents P1-core · L2 · High · Size L · Start after N222
+
+Master → Party opens MS_ACCT directly (`MDI_FORM.cs:7600-7609`). `web/apps/api/src/modules/masters/partyMaster.ts`
+and `web/apps/api/src/routes/partyMaster.ts` (registered through `web/apps/api/src/routes/masterScreens.ts`) carry
+it, and `web/apps/web/app/(app)/masters/party/page.tsx` is the screen. The list is MS_ACCT_Load's (`:5944-5958`): with
+BRANCH_ALL_AC_SHOW every account of the company by location and code, at a location other than 00 the company's codes
+below 100 and the location's codes from 200 by code, at location 00 the location's accounts by their first two
+characters, length and code. CLEAR_DATA (`:6134-6355`) offers the next code read-only with the cursor in the name,
+type A, GST Local, the company's state, Cr openings and today's Last Visit; the next code follows VB_IMPORT,
+AC_LC_CODE_LEN (blank is 1) and the company type (the 80000 series for P and B). DISPLAY_DATA (`:6356-6587`) fills
+every box, the group's name and the reference's name, and the year's opening (book 000), read-only.
+
+The form upper-cases every key and drops the apostrophe (`:6606-6619`); the email is lower case (`:5050`). Enter
+moves in the form's tab order: a blank name says "Please Insert Party Name ..."; the group code fills its name and
+main group or opens the AC_GROUP help (`:7030-7069`); the mobile, second mobile and short name refuse a value another
+account has, with the desktop's texts (`:6893-6956`, `:7230-7278`); the GST number's first two digits give the state
+and the GST type against CO_MAST.CO_STATE_CODE (`:6978-7018`); the main account and the reference open the account
+help when the code is unknown (`:7481-7528`, `:9542-9598`); the opening and percentage boxes are formatted
+(`:7573`, `:8071-8160`, `:9059`); Silver's Cr/Dr goes to Mobile No2 on Other Detail and Khata No to Save. F1 on the
+name, the F1 button and F1 on the short name (administrator) open their helps, the D, S and A buttons copy an address,
+a scheme member or another account (`:8501-8574`, `:9024-9058`); Ctrl+E unlocks the code; Esc leaves. The photo
+(AC_IMAGE) is picked or taken, saved at once, zoomed on a double click and deleted after "Are You Sure To Delete This
+Image now?" (`:8162-8466`).
+
+Save (`:7650-7962`) needs the edit right for an opened party and refuses, with the desktop's texts, a blank mobile
+with BRANCH_ALL_AC_SHOW, a five-character (software default) code without Ctrl+E or away from location 00, a blank
+code, name or group ("Enter Party Name and Account group Detail") and a name another listed code has; a new entry
+whose code exists takes the next code. It replaces the code's AC_MAST row of the location with every box (AC_TYPE's
+first letter, AC_GST_TYPE I or L, Val() of the numbers, Y/N flags, a date box that is not a date as NULL, MAIN_USER,
+DATA_TRFR 'N', VISIT_TRAN 'AC'), writes a new entry's opening as OP_DATA book 000, voucher 00000, DATA_TRFR 'Y' with
+the AcOp_Ledr legs (`web/apps/api/src/modules/finance/partyOpening.ts`), and replaces the AC_MAST_SRNO row. Delete
+(`:7963-8025`) needs the delete right and refuses a blank code, a code used outside the opening voucher ("You Can't
+Delete Record This Party Code Use in Transection....") and a software default account, before the question; Yes
+deletes the AC_MAST_SRNO, AC_MAST, OP_DATA and AC_DATA (book 000 of the year) rows. Print needs the print right.
+Migration `20261102090000_ac_mast_party_columns` adds the five AC_MAST columns of the desktop's updater
+(`Ac_Image.cs:8094`, `:8318`, `:8405`, `:8439`).
+
+Deliberate differences: Save writes AC_MAST, the opening and AC_MAST_SRNO in one transaction (the desktop commits
+AC_MAST first and writes the rest after it); an opened party carries a version token; a new entry never replaces an
+account (the desktop would delete and rewrite one when the next code is taken too); the next code also counts AC_MAST's
+codes, as migrated companies have no AC_MAST_SRNO rows, and the two-character prefix and the 80000 series add 1 to the
+last five digits (the desktop adds 1 to the whole code, so location 01's second party would get 01100202 and the third
+the same code again); a code that is not a number (the web's seeded accounts) is listed with its location (the
+desktop's CAST fails on it); the opening boxes of an opened party are read-only (Party Opening edits them) and show the
+year's opening; Delete refuses a software default account (the desktop shows the text and then still deletes after the
+question); a code of another location answers "This Ac Code Is Branch With : <lc> You Cant Change..." without
+BRANCH_ALL_AC_SHOW too; Print lists the accounts on screen because the AcMast report layout is not in the repository.
+The hidden admin panel, the defaulter box and the three limits (Advance and Enterprise software types, `:5964-5973`),
+the UAE boxes and the hidden Excel and old-year import buttons are left out; Family Detl is empty as on the desktop.
+
+Evidence: `partyMaster.test.ts` (7 cases: every next-code branch, the date boxes, the list filters, the message
+texts) and `partyMaster.db.test.ts` (10 cases over HTTP on a forced-RLS database: the list and next code, the full
+write set with OP_DATA, the legs and AC_MAST_SRNO, the read-back, every refusal with an unchanged footprint, the
+taken-code path, the edit's MAIN_USER and version, the Enter checks and helps, the clerk's rights, the photo, and the
+delete with its refusals and dry run) pass; the full API suite passes (353 files, 3,757 tests). The new zero-mock
+`party-master` module passes 18 of 18 cases over T01-T18, none blocked: T05 an opening of 1,000 Dr, 1.5 gold Cr and
+2 silver Dr writes the legs 02, 03 and 06; T06 every refusal with its text and no row changed; T14 a fault on the
+AC_MAST insert or on the opening leaves every row as it was; T15 the historic year lists the party without this
+year's opening; T17 Enter through both tabs and the opening, Ctrl+E, Alt+S and Esc; T18 the D help copies an address
+and Party Opening reads the opening saved here. A Chrome DevTools pass on the demo stack keyed a party through every
+box (the GST number 27… gave MAHARASHTRA and Inter state), saved 100203 with OP_DATA 1500.5 C / 2 C, legs 01 and 03
+dated 2026-03-31 and its AC_MAST_SRNO row, reopened it with the opening read-only, picked, zoomed and deleted a photo,
+refused SALES' save and delete with the desktop texts, copied PATEL TRADERS with the A help, printed the list and
+deleted 100203 with all its rows. Desktop-runtime comparison and parent acceptance remain.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -3184,6 +3252,7 @@ remain open.
 | N218 | — | implemented-unverified, evidence in this change (G231: the Item master is MS_ITEM with its helps, item code from product and group, exists question, leave checks, setting-driven boxes, delete checks, rights and the Tag Value Update panel) |
 | N219 | — | implemented-unverified, evidence in this change (G232: Auto Item is MS_AUTO_ITEM's AutoItem mode with the group help, the product grid and its keys, the desktop write set, the refusals and the rights) |
 | N220 | — | implemented-unverified, evidence in this change (G233: Wh Sales refuses as TR_WH_SALE does — defaulter, employee, type B, cheque/card bank, year, lock date, item code — with no partial write; the delete asks the desktop question; WhSalesBill prints behind the print right) |
+| N223 | — | implemented-unverified, evidence in this change (G236: Party is MS_ACCT — the list and next code of the location, both tabs in tab order with the group, mobile, short-name, GST and account checks, the opening and AC_MAST_SRNO in one transaction with the save, the photo, the copy helps, Print and Delete with the desktop's refusals) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

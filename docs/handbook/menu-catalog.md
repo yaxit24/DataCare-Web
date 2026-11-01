@@ -253,7 +253,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Labour Disc | `MS_AUTO_ITEM` | `/masters/labour-update` | `- R E - - L` | PARTIAL | P1-edition |
 | Labour Type | `MS_LBR_TYPE` | `/masters/labour` | `C R E D - L` | PARTIAL | P1-core |
 | Lot Opening | `TR_ITM_LOT` | `/txn/item-lot` | `C R E D - -` | PARTIAL | P1-edition |
-| Party | `MS_ACCT` | `/masters/party`, `/masters/accounts` | `C R E D - L` | PARTIAL | P1-core |
+| Party | `MS_ACCT` | `/masters/party` | `C R E D - L` | PARTIAL | P1-core |
 | Party Opening | `TR_AC_OPBL` | `/txn/ac-opbl` | `C R E D - L` | PARTIAL | P1-core |
 | Point Mast | `MS_POINT` | `/masters/points` | `C R E D - L` | PARTIAL | P1-edition |
 | Product | `MS_PRODUCT` | `/masters/products` | `C R E D - L` | PARTIAL | P1-core |
@@ -441,12 +441,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `MS_ACCT` — direct constructor ([MDI_FORM.cs:7600-7609](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7600-L7609)).
 - **Does:** Creates customer, supplier, karigar and bank accounts with contacts, tax and bank data and openings.
-- **Looks:** Code/Name/Mobile grid; address, tax and bank tabs; opening money and metal; family and photo panels.
-- **Writes:** AC_MAST, OP_DATA, AC_DATA.
-- **Web:** `/masters/party`, `/masters/accounts`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`, `GET /party/:acCode/family`, `GET /party/:acCode/photo`, `POST /party/:acCode/photo`, `GET /accounts/:acCode/opening`, `POST /accounts/:acCode/opening`. Can: create, reopen, edit, delete, list.
-- **Remaining:** The rich party page ignores duplicate-detail updates and lacks delete and print; capabilities are split across two routes.
-- **Owners:** G53, N67, X10, G38, N58, N77, G225, N212.
-- **Evidence:** [KB_master.md:113-145](../../project-memory/video-research/_kb/KB_master.md#L113-L145).
+- **Looks:** Search box over a Code / Name / Mobile list, the photo with its three buttons and the Oppning Balance box with Last Visit and Ledger Date on the left; the customer line over the Company Detail, Other Detail and Family Detl tabs with Ac Code, F1 and the A, D, S buttons on the right; Print, Save, Cancel, Delete and Exit along the bottom.
+- **Writes:** AC_MAST, AC_MAST_SRNO, OP_DATA, AC_DATA, AC_GROUP, STATE_MAST, AC_IMAGE, ADD_MAST, AD_MEMB.
+- **Web:** `/masters/party`; `GET /masters/party-master`, `GET /masters/party-master/print`, `GET /masters/party-master/help/:kind`, `GET /masters/party-master/copy/:kind`, `GET /masters/party-master/taken/:kind`, `GET /masters/party-master/gst-state`, `GET /masters/party-master/account`, `GET /masters/party-master/:code`, `GET /masters/party-master/:code/photo`, `POST /masters/party-master/:code/photo`, `POST /masters/party-master/:code/photo/delete`, `POST /masters/party-master`, `PUT /masters/party-master/:code`, `DELETE /masters/party-master/:code`. Can: create, reopen, edit, delete, list.
+- **Remaining:** The AcMast print layout is not in the repository (Print lists the accounts on screen); the Advance and Enterprise admin panel, defaulter box and limits, the UAE boxes and the hidden Excel and old-year imports are not on the screen; desktop-runtime comparison remains.
+- **Owners:** G53, N67, X10, G38, N58, N77, G225, N212, G236, N223.
+- **Evidence:** [MS_ACCT.cs:5584-9640](../../unified/src/csharp/DataCareNext/MS_ACCT.cs#L5584-L9640).
 
 ### Party Opening
 
