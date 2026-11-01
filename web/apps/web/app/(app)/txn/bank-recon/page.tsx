@@ -1,4 +1,5 @@
 'use client';
+import { formatDesktopDate } from '@datacare/core';
 import { useCallback, useState } from 'react';
 import { get, post, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
@@ -173,7 +174,7 @@ export default function BankReconPage() {
                     <td>{t.vchNo}</td>
                     <td>{t.vchType}</td>
                     <td>{t.acName || <span className="muted">—</span>}</td>
-                    <td>{t.vchDate ?? ''}</td>
+                    <td>{formatDesktopDate(t.vchDate)}</td>
                     <td>{t.chqNo || <span className="muted">—</span>}</td>
                     <td className="num">{t.dr ? money(t.dr) : ''}</td>
                     <td className="num">{t.cr ? money(t.cr) : ''}</td>
@@ -185,7 +186,9 @@ export default function BankReconPage() {
                         onChange={(e) => toggle(t, e.target.checked)}
                       />
                     </td>
-                    <td>{t.clrDate ?? <span className="muted">—</span>}</td>
+                    <td>
+                      {t.clrDate ? formatDesktopDate(t.clrDate) : <span className="muted">—</span>}
+                    </td>
                   </tr>
                 ))}
                 {data.rows.length === 0 && (

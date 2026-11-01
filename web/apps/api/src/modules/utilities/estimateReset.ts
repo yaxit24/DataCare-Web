@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 
 export const ESTIMATE_RESET_KIND = 'datacare.ut-import-estimate-reset/1.0' as const;
@@ -916,8 +917,7 @@ function toDb(value: unknown): unknown {
 }
 
 function isoDate(value: unknown): string {
-  if (value instanceof Date) return value.toISOString().slice(0, 10);
-  return String(value ?? '').slice(0, 10);
+  return toIsoDate(value);
 }
 
 async function ensureAdjustmentVoucherTx(

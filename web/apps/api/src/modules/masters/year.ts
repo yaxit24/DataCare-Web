@@ -1,4 +1,4 @@
-import { fiscalYearDates } from '@datacare/core';
+import { fiscalYearDates, toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { CLONE_TEMPLATE_CO_CODE, cloneCompanyTx } from './companyClone.js';
 import { OPENING_BOOK, writePartyOpeningTx } from '../finance/partyOpening.js';
@@ -38,8 +38,8 @@ export async function listYears(
     );
     return rows.map((r) => ({
       coYear: String(r.y ?? ''),
-      opDate: r.od ? String(r.od).slice(0, 10) : null,
-      clDate: r.cd ? String(r.cd).slice(0, 10) : null,
+      opDate: r.od ? toIsoDate(r.od) : null,
+      clDate: r.cd ? toIsoDate(r.cd) : null,
       yearMonth: String(r.ym ?? ''),
     }));
   });

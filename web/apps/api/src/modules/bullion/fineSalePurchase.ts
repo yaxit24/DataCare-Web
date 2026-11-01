@@ -1,4 +1,4 @@
-import { gstSplit } from '@datacare/core';
+import { gstSplit, toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
 import { gstTaxRows } from '../shared/taxDataRows.js';
@@ -43,11 +43,7 @@ const num = (v: unknown): number => (v == null ? 0 : Number(v));
 const r2 = (n: number): number => Math.round((n + 1e-9) * 100) / 100;
 const r3 = (n: number): number => Math.round((n + 1e-9) * 1000) / 1000;
 /** An ISO yyyy-mm-dd regardless of whether the column comes back as a Date or a text string. */
-const isoDate = (v: unknown): string => {
-  if (v == null) return '';
-  if (v instanceof Date) return v.toISOString().slice(0, 10);
-  return String(v).slice(0, 10);
-};
+const isoDate = (v: unknown): string => toIsoDate(v);
 
 export interface FineLine {
   itCode?: string;

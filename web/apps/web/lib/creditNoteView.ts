@@ -1,3 +1,5 @@
+import { formatDesktopDate } from '@datacare/core';
+
 export type CreditNoteRow = Record<string, string | number | boolean | null>;
 export type CreditNoteDocument = {
   book: CreditNoteRow;
@@ -130,8 +132,13 @@ export const creditNoteLabels: Record<string, string> = {
   MAIN_USER: 'Entered by',
 };
 
-export const creditNoteValue = (value: unknown): string =>
-  value == null ? 'Not set' : value === '' ? 'Blank' : String(value);
+const CREDIT_NOTE_DATE_FIELDS = new Set(['VCH_DATE', 'ACK_DATE']);
+
+export const creditNoteValue = (value: unknown, field?: string): string => {
+  if (value == null) return 'Not set';
+  if (value === '') return 'Blank';
+  return field && CREDIT_NOTE_DATE_FIELDS.has(field) ? formatDesktopDate(value) : String(value);
+};
 
 export function creditNoteComponents(
   document: CreditNoteDocument,

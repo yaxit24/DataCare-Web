@@ -3731,7 +3731,7 @@
     },
     {
       "id": "N56",
-      "status": "in-progress",
+      "status": "implemented-unverified",
       "action": "Canonical date transport and dd/MM/yyyy display on every document and list",
       "parentLabels": "P10-05, P02-05, X25",
       "startAfter": [
@@ -3743,17 +3743,28 @@
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
-      "statusAsOf": "2026-10-30",
+      "statusAsOf": "2026-11-01",
       "evidence": [
         "web/packages/core/src/dates.ts",
         "web/packages/core/test/dates.test.ts",
         "web/apps/api/test/documents.test.ts",
         "web/apps/api/src/modules/ops/kernelConformance.ts",
+        "web/apps/api/test/kernelConformance.test.ts",
+        "web/apps/api/src/modules/reports/reportBind.ts",
+        "web/apps/api/test/orderReport.db.test.ts",
+        "web/apps/api/test/tourOrderPrint.routes.db.test.ts",
+        "web/scripts/check-kernel-conformance.mjs",
         "web/parity/kernel-conformance-baseline.json",
         "web/apps/web/components/VoucherList.tsx",
-        "web/apps/web/test/features/modules/salesInvoice.mjs"
+        "web/apps/web/test/dateConformance.test.ts",
+        "web/apps/web/test/creditNoteView.test.ts",
+        "web/apps/web/test/mfgLotView.test.ts",
+        "web/apps/web/test/features/baseline.json",
+        "web/apps/web/test/features/modules/dailyRate.mjs",
+        "web/apps/web/test/features/modules/salesInvoice.mjs",
+        "web/apps/web/test/tag-cancel-transfer.journey.mjs"
       ],
-      "statusNote": "IN PROGRESS. @datacare/core dates.ts: toIsoDate (a date column's UTC parts, an ISO date, or the calendar day written in an ISO or space-separated timestamp; anything else throws) and formatDesktopDate (dd/MM/yyyy). Every printed document that sliced its date now prints dd/MM/yyyy: sale invoice, sale bill, sale-return credit note, purchase bill (also purchase return), contra (2), finance, karigar, order, Dhiran receipt and khata, scheme passbook; the Dhiran OS letter's interest dates and the reports4 DTO use toIsoDate. The recent-voucher list shows dd/MM/yyyy. Kernel conformance gains the date-normalization concern (String/text(date).slice(0, 10)); its 55 live sites at introduction are grandfathered by identity, so a new one fails. Verified: core dates.test.ts 5 passed; documents.test.ts prints 01/10/2026 for a Date on the sale, purchase, finance and karigar documents; kernelConformance.test.ts 20 passed; feature case sales-invoice.print.date-with-year (the invoice and the recent list show the DB date as DD/MM/YYYY) passes and fails against main's invoice and list. Remaining: migrate the 55 grandfathered transport sites to toIsoDate (rule at zero) and the other screens' date columns."
+      "statusNote": "IMPLEMENTED-UNVERIFIED. The shared toIsoDate/formatDesktopDate contract and document display fixes from milestone 1 remain. Milestone 2 removes all 51 original API detector identities (50 executable calls plus the self-matching example comment), broadens the direct-string-truncation rule for dbText/txt and date/day aliases, migrates the 14 additional sites that first expansion exposed, and migrates further detector-blind local date helpers identified by independent review. The baseline contains zero date-normalization exceptions, kernelConformance.test.ts requires the live set to remain empty, and direct execution against both API/core roots reports 0. Browser form hydration now uses toIsoDate instead of slicing at all 11 identified sites; dedicated lists, browse panels, messages and saved-detail views use formatDesktopDate, with the N57 generic report grid explicitly remaining in N57. The order report binder formats date fields before rendering, web dateConformance.test.ts guards browser policies, field-aware tests cover credit-note and manufacturing dates, and the two fixed Sales Order G36 cases were removed from the shrink-only feature baseline. toIsoDate preserves whitespace-as-empty and now rejects malformed timestamp times. Full pnpm, database and real-browser gates remain unrun in the current integration-only sandbox because registry.npmjs.org is blocked; no acceptance is claimed."
     },
     {
       "id": "N57",
@@ -7112,6 +7123,62 @@
         "web/apps/web/test/features/modules/salesInvoice.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Verified: taxMaster.db.test.ts 11/11, routePolicy, the tax-master feature module 18 of 18 (T14 through an injected component-insert fault, T18 through a 2% sale), sales-invoice 28 passed and 3 blocked with the new picker case (red on the old picker), purchase-invoice, party-opening and daily-rate unchanged, and a Chrome DevTools pass on the demo stack. Open: the TaxMast print layout (not in the repository), the group-12 help on web-provisioned companies (N58), the Sales screen's tax-code help, desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N214",
+      "status": "implemented-unverified",
+      "action": "The Item Group master is the desktop MS_GROUP screen: code, name, the seven item types, the trade type, touches, melting, wastage, the group-25 sales and group-30 purchase accounts, HSN code, rate tax % and Rate Display, with the desktop keys, validating texts, helps, rights and Print; Save updates the row in place with the trade type, item type and HSN code on every item of the group in one transaction, with version tokens.",
+      "parentLabels": "P1-core; L2; T01-T18",
+      "startAfter": [
+        "N213"
+      ],
+      "requiredProof": "An HTTP/DB test of the write set, the item update, every refusal, versions, rights, helps, print and delete; the group-master feature module passes every case; a Chrome DevTools keyboard, help, save, reopen, edit, delete, print and Esc pass.",
+      "gapIds": "G227",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/apps/api/src/modules/masters/groupMaster.ts",
+        "web/apps/api/src/routes/groupMaster.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/modules/shared/desktopMessages.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/web/app/(app)/masters/groups/page.tsx",
+        "web/apps/api/test/groupMaster.db.test.ts",
+        "web/apps/api/test/routePolicy.test.ts",
+        "web/apps/web/test/features/modules/groupMaster.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: groupMaster.db.test.ts 10/10, routePolicy (690 routes), the group-master feature module 18 of 18 (T14 through an injected item-update fault, T18 through a sale crediting the group's sales account with the group's HSN code on the invoice), and a Chrome DevTools pass on the demo stack. Open: the GroupMast print layout (not in the repository), the desktop helps on web-provisioned companies (N58), desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N215",
+      "status": "implemented-unverified",
+      "action": "The Product master is the desktop MS_PRODUCT screen in Product mode: the two-character code and name with the desktop keys, validating texts and rights; Save replaces the row with the signed-in user and DATA_TRFR N in one transaction; Delete asks first and then refuses a product an item uses and the default products; Print does nothing, as on the desktop; version tokens.",
+      "parentLabels": "P1-core; L2; T01-T18",
+      "startAfter": [
+        "N214"
+      ],
+      "requiredProof": "An HTTP/DB test of the write set, every refusal, versions, rights and delete; the product-master feature module passes every case; a Chrome DevTools keyboard, save, reopen, edit, delete and Esc pass.",
+      "gapIds": "G228",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/apps/api/src/modules/masters/productMaster.ts",
+        "web/apps/api/src/routes/productMaster.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/modules/shared/desktopMessages.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/web/app/(app)/masters/products/page.tsx",
+        "web/apps/api/test/productMaster.db.test.ts",
+        "web/apps/api/test/routePolicy.test.ts",
+        "web/apps/web/test/features/modules/productMaster.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: productMaster.db.test.ts 7/7, routePolicy (695 routes), the product-master feature module 17 of 17 applicable (T05 not applicable), and a Chrome DevTools pass on the demo stack. Open: desktop-runtime comparison and parent acceptance."
     }
   ],
   "amendments": [

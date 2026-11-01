@@ -8,7 +8,7 @@ import {
   insertRowTx,
   type LedgerLine,
 } from '../posting/posting.js';
-import { billTotals, fineFor } from '@datacare/core';
+import { billTotals, fineFor, toIsoDate } from '@datacare/core';
 import { receiptLegs } from '../finance/tender.js';
 import { SaleValidationError } from './sales.js';
 import { resolveTaxPolicyTx, type ResolvedTaxPolicy } from '../shared/taxPolicy.js';
@@ -650,7 +650,7 @@ export async function getLabourInvoice(
       voucherNo: text(x.VCH_NO),
       hiddenVoucherNo: text(x.HD_VCH_NO),
       mainUser: text(x.MAIN_USER),
-      vchDate: text(x.VCH_DATE).slice(0, 10),
+      vchDate: toIsoDate(x.VCH_DATE),
       billNo: text(x.BILL_NO),
       acCode: text(x.AC_CODE),
       acName: text(x.AC_NAME),

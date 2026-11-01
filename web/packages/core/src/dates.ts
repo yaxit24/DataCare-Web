@@ -6,7 +6,8 @@
  * "Thu Oct 01", so the printed tax invoice showed no year.
  */
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
-const ISO_TIMESTAMP = /^(\d{4})-(\d{2})-(\d{2})[T ]\d{2}:/; // also a timestamp column read as text
+const ISO_TIMESTAMP =
+  /^(\d{4})-(\d{2})-(\d{2})[T ](?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d{1,9})?)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)?$/;
 
 const pad = (n: number, width = 2): string => String(n).padStart(width, '0');
 
@@ -29,6 +30,7 @@ export function toIsoDate(value: unknown): string {
     return `${pad(value.getUTCFullYear(), 4)}-${pad(value.getUTCMonth() + 1)}-${pad(value.getUTCDate())}`;
   }
   const text = String(value).trim();
+  if (!text) return '';
   const match = ISO_DATE.exec(text) ?? ISO_TIMESTAMP.exec(text);
   if (!match) throw new RangeError(`not a date: ${text.slice(0, 40)}`);
   const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])];

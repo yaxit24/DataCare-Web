@@ -2,6 +2,7 @@ import { withTxBudget } from '../shared/txBudget.js';
 import {
   round,
   roundHalfEven,
+  toIsoDate,
   wholesaleBand,
   wholesaleGridTotals,
   wholesaleIssueLine,
@@ -21,7 +22,6 @@ import {
   type LedgerLine,
 } from '../posting/posting.js';
 import { issueTagTx, restoreTagTx, type ResolvedTagIdentity, type TagKey } from '../stock/stock.js';
-
 /**
  * RATE CUT (desktop book 064, VCH_TYPE `RCUT`, BOOK_NAME `RATE CUT`).
  *
@@ -1699,7 +1699,7 @@ export async function readRateCut(
     return {
       voucherNo: t(h.VCH_NO),
       hiddenVoucherNo: t(h.HD_VCH_NO),
-      vchDate: t(h.VCH_DATE).slice(0, 10),
+      vchDate: toIsoDate(h.VCH_DATE),
       billNo: t(h.BILL_NO),
       acCode: t(h.AC_CODE),
       acName: t(h.AC_NAME),

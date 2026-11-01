@@ -1,4 +1,5 @@
 'use client';
+import { formatDesktopDate } from '@datacare/core';
 import { useCallback, useEffect, useState } from 'react';
 import { get, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
@@ -174,7 +175,7 @@ export default function TagStockReportPage() {
                   {(tab === 'in' || tab === 'out' || tab === 'apr') && (
                     <>
                       <td>{r.vchType || ''}</td>
-                      <td>{r.vchDate || ''}</td>
+                      <td>{formatDesktopDate(r.vchDate)}</td>
                     </>
                   )}
                   <td className="num">{r.pcs || ''}</td>

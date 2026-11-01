@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { buildJournalRojmel } from '../shared/rojmel.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
@@ -180,7 +181,7 @@ export async function getJournal(prisma: any, scope: VoucherScope, requested: nu
       voucherNo,
       hiddenVoucherNo: text(rows[0]!.HD_VCH_NO),
       mainUser: text(rows[0]!.MAIN_USER),
-      vchDate: text(rows[0]!.VCH_DATE).slice(0, 10),
+      vchDate: toIsoDate(rows[0]!.VCH_DATE),
       narration: text(rows[0]!.IT_DESC),
       lines: rows.map((r) => ({
         acCode: text(r.AC_CODE),

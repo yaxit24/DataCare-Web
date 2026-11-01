@@ -107,9 +107,11 @@ describe('route policy registry', () => {
     // N210 adds the TagCanBill print GET /stock/tag-cancel/:vchNo/print: 667 + 1 = 668.
     // N211 adds the Employee master's GET (list, print, accounts, one), POST, PUT and DELETE: 668 + 7 = 675.
     // N213 adds the Tax master's GET (list, print, accounts, one), POST, PUT and DELETE: 675 + 7 = 682.
-    // N216 adds the Address master's GET (list, print, names, mobile, one), POST, PUT and DELETE: 682 + 8 = 690.
-    expect(routes).toHaveLength(690);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(690);
+    // N214 adds the Item Group master's GET (list, print, accounts, trade types, one), POST, PUT and DELETE: 682 + 8 = 690.
+    // N215 adds the Product master's GET (list, one), POST, PUT and DELETE: 690 + 5 = 695.
+    // N216 adds the Address master's GET (list, print, names, mobile, one), POST, PUT and DELETE: 695 + 8 = 703.
+    expect(routes).toHaveLength(703);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(703);
 
     const policies = routes.map((route) => ({
       ...route,

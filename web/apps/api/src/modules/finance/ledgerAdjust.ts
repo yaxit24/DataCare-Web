@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, type VoucherScope } from '../vouchers/numbering.js';
 import {
@@ -158,7 +159,7 @@ export async function getLedgerAdjust(
       voucherNo: no,
       hiddenVoucherNo: text(h.HD_VCH_NO),
       mainUser: text(h.MAIN_USER),
-      vchDate: text(h.VCH_DATE).slice(0, 10),
+      vchDate: toIsoDate(h.VCH_DATE),
       acCode: text(h.AC_CODE),
       amount: num(h.DIFF_AMT),
       direction: num(h.DR_AMT) > 0 ? 'debit' : 'credit',

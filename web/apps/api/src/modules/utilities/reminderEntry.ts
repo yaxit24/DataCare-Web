@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 
@@ -65,8 +66,8 @@ export async function listReminderEntries(
     );
     return rows.map((r) => ({
       vchNo: String(r.v),
-      entDate: r.ed ? String(r.ed).slice(0, 10) : null,
-      remDate: r.rd ? String(r.rd).slice(0, 10) : null,
+      entDate: r.ed ? toIsoDate(r.ed) : null,
+      remDate: r.rd ? toIsoDate(r.rd) : null,
       acCode: String(r.ac),
       acName: String(r.nm),
       mobile: String(r.mob),

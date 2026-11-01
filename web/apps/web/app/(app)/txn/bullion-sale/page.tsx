@@ -1,4 +1,5 @@
 'use client';
+import { toIsoDate } from '@datacare/core';
 import { useState } from 'react';
 import { ApiError, del, get, post, put } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
@@ -598,7 +599,7 @@ export default function BullionSalePage() {
       const issueLines = (view.lines ?? []).map(lineFromView);
       const receiptLines = (view.receivedLines ?? []).map(lineFromView);
       const voucherNo = inputValue(view.voucherNo);
-      setVchDate(inputValue(view.vchDate).slice(0, 10));
+      setVchDate(toIsoDate(view.vchDate));
       setAcCode(inputValue(view.acCode));
       setAcName(inputValue(view.acName));
       setItType(view.itType === 'S' ? 'S' : 'G');

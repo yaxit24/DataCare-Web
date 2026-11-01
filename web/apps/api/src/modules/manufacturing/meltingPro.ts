@@ -1,3 +1,4 @@
+import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { assertPeriodOpen, insertRowTx } from '../posting/posting.js';
 import {
@@ -789,7 +790,7 @@ export async function getMeltingPro(
     return {
       voucherNo: text(h.VCH_NO),
       hiddenVoucherNo: text(h.HD_VCH_NO),
-      vchDate: text(h.VCH_DATE_TEXT).slice(0, 10),
+      vchDate: toIsoDate(h.VCH_DATE_TEXT),
       acCode: text(h.AC_CODE),
       acName: text(h.AC_NAME),
       employeeCode: text(h.EMP_CODE),

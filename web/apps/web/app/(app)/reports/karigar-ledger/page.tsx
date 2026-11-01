@@ -1,4 +1,5 @@
 'use client';
+import { formatDesktopDate } from '@datacare/core';
 import { useState } from 'react';
 import { get, ApiError } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
@@ -119,7 +120,7 @@ export default function KarigarLedgerPage() {
               {rep.rows.map((r, i) => (
                 <tr key={i}>
                   <td>{r.vchNo}</td>
-                  <td>{r.vchDate ?? ''}</td>
+                  <td>{formatDesktopDate(r.vchDate)}</td>
                   <td>{r.direction}</td>
                   <td>{r.itCode}</td>
                   <td className="num">{r.netWt || ''}</td>

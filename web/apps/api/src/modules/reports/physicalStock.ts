@@ -1,5 +1,5 @@
 import { withTxBudget } from '../shared/txBudget.js';
-import { PRECISION, round } from '@datacare/core';
+import { PRECISION, round, toIsoDate } from '@datacare/core';
 
 /**
  * Physical stock verification (desktop `RP_PHY_STOCK`, menu caption "Physical Stock").
@@ -149,7 +149,7 @@ export async function physicalStockReport(
         bookName: txt(r.BOOK_NAME),
         vchNo: txt(r.VCH_NO),
         vchType: txt(r.VCH_TYPE),
-        vchDate: txt(r.VCH_DATE)?.slice(0, 10) ?? null,
+        vchDate: toIsoDate(r.VCH_DATE) || null,
         acCode: txt(r.AC_CODE),
         karigarName: txt(r.KR_NAME),
         pcs: num(r.ITM_PCS),

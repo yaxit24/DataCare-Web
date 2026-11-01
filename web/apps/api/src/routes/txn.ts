@@ -254,6 +254,8 @@ import { registerFineJvRoutes } from './fineJv.js';
 import { registerItemOpeningRoutes } from './itemOpening.js';
 import { registerEmployeeMasterRoutes } from './employeeMaster.js';
 import { registerTaxMasterRoutes } from './taxMaster.js';
+import { registerGroupMasterRoutes } from './groupMaster.js';
+import { registerProductMasterRoutes } from './productMaster.js';
 import { registerAddressMasterRoutes } from './addressMaster.js';
 import { VoucherVersionConflictError } from '../modules/vouchers/version.js';
 import { listYears, createYear, carryForwardOpenings } from '../modules/masters/year.js';
@@ -1109,6 +1111,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerItemOpeningRoutes(app, extraRouteHelpers, formCapabilities);
   registerEmployeeMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerTaxMasterRoutes(app, extraRouteHelpers, formCapabilities);
+  registerGroupMasterRoutes(app, extraRouteHelpers, formCapabilities);
+  registerProductMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerAddressMasterRoutes(app, extraRouteHelpers, formCapabilities);
   const pdfRenderer = (): PdfRenderer => deps.pdfRenderer ?? new PlaywrightPdfRenderer();
   /** Render server-built HTML, mapping limits to 413/422 and a busy or slow renderer to a retryable 503. */

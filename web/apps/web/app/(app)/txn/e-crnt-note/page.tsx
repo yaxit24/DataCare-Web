@@ -1,5 +1,7 @@
 'use client';
 
+import { formatDesktopDate } from '@datacare/core';
+
 import { useEffect, useRef, useState } from 'react';
 import { ApiError, get, post } from '../../../../lib/api';
 import { BookSelect } from '../../../../components/BookSelect';
@@ -31,7 +33,9 @@ function Fields({ row }: { row: CreditNoteRow }) {
         .map(([key, label]) => (
           <div key={key} style={{ minWidth: 150, maxWidth: 350 }}>
             <dt className="muted">{label}</dt>
-            <dd style={{ margin: 0, overflowWrap: 'anywhere' }}>{creditNoteValue(row[key])}</dd>
+            <dd style={{ margin: 0, overflowWrap: 'anywhere' }}>
+              {creditNoteValue(row[key], key)}
+            </dd>
           </div>
         ))}
     </dl>
@@ -218,7 +222,7 @@ export default function ECrntNotePage() {
               {browse.rows.map((row, index) => (
                 <tr key={`${row.VCH_NO}/${index}`}>
                   <td>{String(row.VCH_NO ?? '')}</td>
-                  <td>{String(row.VCH_DATE ?? '')}</td>
+                  <td>{formatDesktopDate(row.VCH_DATE)}</td>
                   <td>{String(row.AC_NAME ?? '')}</td>
                   <td>{String(row.BILL_NO ?? '')}</td>
                   <td>{creditNoteValue(row.TOT_AMT)}</td>
