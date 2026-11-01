@@ -42,8 +42,8 @@ const ACCOUNTS = [
   ['00013', 'TDS A/C', '18'],
   ['00099', 'GST SUSPENSE', '30'],
 ] as const;
-/** The rights SUB_MENU the clerk's row names (the web form's own name until the caption alias 'Tax' lands, N212). */
-const RIGHTS_SUB_MENU = 'Taxes';
+/** The rights SUB_MENU the clerk's row names: the desktop menu caption 'Tax' (MDI_FORM.cs:7670, alias N212). */
+const RIGHTS_SUB_MENU = 'Tax';
 
 type Cookie = string;
 type TaxRow = {

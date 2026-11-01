@@ -913,7 +913,7 @@ export const taxMaster = {
           await exec(
             ctx,
             `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
-             VALUES ($1,'01','01',$2,'Master','Taxes','Y','N','N','N')`,
+             VALUES ($1,'01','01',$2,'Master','Tax','Y','N','N','N')`,
             USERS.clerk.user,
           );
           try {
@@ -974,7 +974,7 @@ export const taxMaster = {
           } finally {
             await exec(
               ctx,
-              `DELETE FROM "USER_SET" WHERE tenant_id=$1 AND "USER_NAME"=$2 AND "SUB_MENU"='Taxes'`,
+              `DELETE FROM "USER_SET" WHERE tenant_id=$1 AND "USER_NAME"=$2 AND "SUB_MENU"='Tax'`,
               USERS.clerk.user,
             );
             await ctx.owner.$executeRawUnsafe(

@@ -1102,7 +1102,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerCrmRoutes(app, extraRouteHelpers);
   registerLoanInterestRoutes(app, extraRouteHelpers);
   registerVoucherNavigationRoutes(app, extraRouteHelpers);
-  registerPartyOpeningRoutes(app, extraRouteHelpers);
+  registerPartyOpeningRoutes(app, extraRouteHelpers, formMutationCapabilities);
   registerFineJvRoutes(app, extraRouteHelpers);
   registerDailyRateRoutes(app, { ...extraRouteHelpers, formMutationCapabilities });
   registerItemOpeningRoutes(app, extraRouteHelpers, formCapabilities);
