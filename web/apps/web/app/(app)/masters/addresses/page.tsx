@@ -116,6 +116,12 @@ const blank = (): Values =>
   Object.fromEntries([...COMPANY, ...OTHER].map((f) => [f.key, ''])) as Values;
 /** MS_ADD_MAST_KeyPress: every typed key upper-cased, the apostrophe refused. */
 const typed = (value: string) => value.toUpperCase().replace(/'/g, '');
+/** The masked date boxes (mask 00/00/0000): digits only, with the slashes the mask shows. */
+const maskDate = (value: string) => {
+  const d = value.replace(/\D/g, '').slice(0, 8);
+  if (d.length > 4) return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4)}`;
+  return d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d;
+};
 const messageOf = (error: unknown) =>
   error instanceof ApiError
     ? String(error.body?.message || error.body?.detail || error.body?.error || error.message)
@@ -436,7 +442,7 @@ export default function AddressMasterPage() {
       list={f.combo ? `address-${f.combo}` : undefined}
       style={{ width: f.width }}
       onChange={(e) => {
-        const value = f.date ? e.target.value.replace(/[^0-9/]/g, '') : typed(e.target.value);
+        const value = f.date ? maskDate(e.target.value) : typed(e.target.value);
         set(f.key, value);
         if (f.key === 'name') void nameTyped(value);
       }}
