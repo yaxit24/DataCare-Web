@@ -2186,8 +2186,11 @@ ordinary-Purchase case in `web/apps/api/test/purchase.lifecycle.db.test.ts`, and
 `purchase-invoice.formula.whole-rupees` in `web/apps/web/test/features/modules/purchaseInvoice.mjs`. The lifecycle
 case checks PR_DETL component/detail values, PR_DATA header values, MAIN_STOCK, TAX_DATA, balanced AC_DATA and the
 Rojmel component projection. The zero-mock browser proof now also reloads explicit 56,090.80 item and 2,375.25
-labour overrides, preserves an explicit zero, and compares the complete write set before and after an unchanged
-save. A separate zero-mock case loads `PR_AMT_TYPE=G`, enters `RATE_TYPE=P/1/K` through the grid, proves item
+labour overrides, preserves an explicit zero, restores persisted ghat weight, wastage, labour percentage/rate/type
+and item rate basis inputs, and compares those PR_DETL sources plus the existing component/downstream write set
+before and after an unchanged save. Its edit proof keeps loaded per-gram labour authoritative for an item-rate-only
+change, then clears and recalculates it when net weight, an actual per-gram dependency, changes. A separate
+zero-mock case loads `PR_AMT_TYPE=G`, enters `RATE_TYPE=P/1/K` through the grid, proves item
 amounts 3,000/1,200/12 in preview and persistence, reloads them, and restores company settings in `finally`. The
 explicit-fine boundary 9.1605 normalizes to 9.161 before item calculation, producing 9,161 at rate 1,000 where the
 raw value would produce 9,160. The original whole-rupee case continues to check the preview, saved values, stock,

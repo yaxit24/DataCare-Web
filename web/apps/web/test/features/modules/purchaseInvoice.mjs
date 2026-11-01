@@ -200,10 +200,15 @@ const stock = (ctx, v) =>
 const purchaseWriteSet = async (ctx, v) => ({
   header: await header(ctx, v),
   detail: await ctx.rows(
-    `SELECT "SR_NO"::int sr,btrim(coalesce("RATE_TYPE"::text,'')) rate_type,
-            btrim(coalesce("URD_RATE_TYPE"::text,'')) urd_rate_type,"ITM_FINE"::float fine,
-            "ITM_AMT"::float item,"LBR_AMT"::float labour,"OTH_AMT"::float other,
-            "TOT_AMT"::float detail_total,"NET_AMT"::float detail_net
+    `SELECT "SR_NO"::int sr,"ITM_PCS"::float pcs,"ITM_GWT"::float gross,
+            "ITM_NWT"::float net,"ITM_TOUCH"::float touch,"ITM_GHT_WT"::float ghat,
+            "ITM_WEST_PRC"::float wastage,"ITM_RATE"::float item_rate,
+            btrim(coalesce("RATE_TYPE"::text,'')) rate_type,
+            btrim(coalesce("URD_RATE_TYPE"::text,'')) urd_rate_type,
+            "ITM_FINE"::float fine,"ITM_AMT"::float item,
+            "LBR_PRC"::float labour_pct,btrim(coalesce("LBR_TYPE"::text,'')) labour_type,
+            "LBR_RATE"::float labour_rate,"LBR_AMT"::float labour,
+            "OTH_AMT"::float other,"TOT_AMT"::float detail_total,"NET_AMT"::float detail_net
        FROM "PR_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
     v,
   ),
@@ -803,6 +808,9 @@ export const purchaseInvoice = {
         await page.getByRole('button', { name: '+ Add line', exact: true }).click();
         await fillLine(page, 1, LINE_FINE_BOUNDARY);
         await page.getByTestId('purchase-grid-mode').click();
+        await page.getByLabel('Ghat Wt row 1', { exact: true }).fill('0.5');
+        await page.getByLabel('Wastage % row 1', { exact: true }).fill('0.4');
+        await page.getByLabel('Labour % row 1', { exact: true }).fill('2.5');
         await page.getByLabel('Metal Amt row 1', { exact: true }).fill('56090.8');
         await page.getByLabel('Labour Amt row 1', { exact: true }).fill('2375.25');
         await page.getByLabel('Other Amt row 1', { exact: true }).fill('0.4');
@@ -827,7 +835,7 @@ export const purchaseInvoice = {
             line.detail_net,
           ]),
           [
-            [9.16, 56090.8, 2375.25, 0.4, 58466.45],
+            [9.66, 56090.8, 2375.25, 0.4, 58466.45],
             [
               EXPECT_FINE_BOUNDARY.fine,
               EXPECT_FINE_BOUNDARY.metal,
@@ -837,9 +845,24 @@ export const purchaseInvoice = {
             ],
           ],
         );
+        assert.deepEqual(
+          [
+            before.detail[0].ghat,
+            before.detail[0].wastage,
+            before.detail[0].labour_pct,
+            before.detail[0].labour_type,
+            before.detail[0].labour_rate,
+          ],
+          [0.5, 0.4, 2.5, 'N', 237.5],
+          'calculation sources are persisted alongside their derived/overridden components',
+        );
 
         await page.getByRole('button', { name: 'New', exact: true }).click();
         await loadVoucher(page, vchNo);
+        assert.equal(await page.getByLabel('Ghat Wt row 1', { exact: true }).inputValue(), '0.5');
+        assert.equal(await page.getByLabel('Wastage % row 1', { exact: true }).inputValue(), '0.4');
+        assert.equal(await page.getByLabel('Labour % row 1', { exact: true }).inputValue(), '2.5');
+        assert.equal(await cell(page, 0, 8).inputValue(), '237.5');
         assert.equal(
           await page.getByLabel('Metal Amt row 1', { exact: true }).inputValue(),
           '56090.8',
@@ -876,24 +899,56 @@ export const purchaseInvoice = {
       'edit.change-rate',
       'T09',
       'mutation',
-      'Edit re-prices on fine: rate 6200 → metal 18.32 × 6200 = 113,584; net 116,584; tax 3,497.52',
+      'Loaded per-gram labour survives item-only rate edit, then recalculates when net weight changes',
       async (ctx) => {
         const { page } = await ctx.session();
         const vchNo = await createOne(ctx, page);
         await page.getByRole('button', { name: 'New', exact: true }).click();
         await loadVoucher(page, vchNo);
+
+        // Item rate is not an input to per-gram labour: the loaded 3,000 amount must stay authoritative.
         await cell(page, 0, 7).fill('6200');
-        const response = await save(page, 'Update Purchase');
-        assert.equal(response.status(), 200, await response.text());
-        const [h] = await header(ctx, vchNo);
-        const [l] = await lines(ctx, vchNo);
-        assert.deepEqual([l.amt, h.net, h.tax], [113584, 116584, 3497.52]);
+        const rateResponse = await save(page, 'Update Purchase');
+        assert.equal(rateResponse.status(), 200, await rateResponse.text());
+        const [rateHeader] = await header(ctx, vchNo);
+        const [rateLine] = await lines(ctx, vchNo);
+        assert.deepEqual(
+          [rateLine.amt, rateLine.lbr, rateHeader.net, rateHeader.tax],
+          [113584, 3000, 116584, 3497.52],
+        );
+
+        await page.getByRole('button', { name: 'New', exact: true }).click();
+        await loadVoucher(page, vchNo);
+        await page.getByTestId('purchase-grid-mode').click();
+        await cell(page, 0, 5).fill('21');
+        assert.equal(
+          await page.getByLabel('Labour Amt row 1', { exact: true }).inputValue(),
+          '',
+          'editing net weight invalidates the loaded per-gram labour amount',
+        );
+        const netResponse = await save(page, 'Update Purchase');
+        assert.equal(netResponse.status(), 200, await netResponse.text());
+        const [netHeader] = await header(ctx, vchNo);
+        const [netLine] = await lines(ctx, vchNo);
+        assert.deepEqual(
+          [netLine.fine, netLine.amt, netLine.lbr, netLine.net, netHeader.tax],
+          [19.236, 119263, 3150, 122413, 3672.39],
+        );
         const g = await ledger(ctx, vchNo);
         assert(balanced(g));
         return {
-          observation: `voucher ${vchNo}: line ${l.amt}, net ${h.net}, tax ${h.tax}`,
-          expected: { metal: 113584, net: 116584, tax: 3497.52 },
-          database: { header: h, line: l, ledger: g },
+          observation: `voucher ${vchNo}: rate-only edit kept labour 3000; net 21 recalculated it to 3150`,
+          expected: {
+            rateOnly: { metal: 113584, labour: 3000, net: 116584, tax: 3497.52 },
+            netDependency: {
+              fine: 19.236,
+              metal: 119263,
+              labour: 3150,
+              net: 122413,
+              tax: 3672.39,
+            },
+          },
+          database: { header: netHeader, line: netLine, ledger: g },
           downstream: { balanced: true },
         };
       },

@@ -172,8 +172,55 @@ const extendedLineFields: Array<[keyof Line, string]> = [
 ];
 const n = (v: string) => Number(v || 0);
 const str = (v: unknown) => (v == null || Number(v) === 0 ? '' : String(v));
+const editableString = (v: unknown) => (v == null ? '' : String(v));
 const optionalNumber = (v: unknown): number | undefined =>
   v == null || String(v).trim() === '' ? undefined : Number(v);
+
+const metalDerivationInputs: Array<keyof Line> = [
+  'pcs',
+  'grossWt',
+  'netWt',
+  'ghtWt',
+  'touch',
+  'westPct',
+  'fineWt',
+  'lesTouch',
+  'kunFine',
+  'rate',
+  'rateType',
+  'urdRateType',
+];
+
+function loadedLabourDependsOn(line: Line, field: keyof Line, labourWithGhat: boolean): boolean {
+  const mode = line.making ? 'per_gram' : line.labourType;
+  switch (mode) {
+    case 'per_gram':
+      return (
+        field === 'netWt' ||
+        (labourWithGhat && field === 'ghtWt') ||
+        field === 'making' ||
+        (!line.making && field === 'labourRate') ||
+        field === 'labourType'
+      );
+    case 'per_piece':
+      return (
+        field === 'pcs' || field === 'labourRate' || field === 'making' || field === 'labourType'
+      );
+    case 'percentage':
+      return (
+        field === 'labourPct' ||
+        field === 'labourType' ||
+        field === 'metalAmount' ||
+        metalDerivationInputs.includes(field)
+      );
+    case 'fixed':
+      return field === 'labourFixed' || field === 'labourType';
+    default:
+      // Persisted G/K or ambiguous legacy/web modes cannot be recovered safely. Keep their loaded
+      // labour amount authoritative instead of clearing it and recomputing under a guessed mode.
+      return false;
+  }
+}
 
 export default function PurchaseEntryPage() {
   const { lcCode, coYear } = useBusinessScope();
@@ -270,30 +317,6 @@ export default function PurchaseEntryPage() {
       ls.map((line, j) => {
         if (j !== i) return line;
         const next = { ...line, [k]: v };
-        const metalInputs: Array<keyof Line> = [
-          'pcs',
-          'grossWt',
-          'netWt',
-          'ghtWt',
-          'touch',
-          'westPct',
-          'fineWt',
-          'lesTouch',
-          'kunFine',
-          'rate',
-          'rateType',
-          'urdRateType',
-        ];
-        const labourInputs: Array<keyof Line> = [
-          'pcs',
-          'netWt',
-          'ghtWt',
-          'making',
-          'labourType',
-          'labourRate',
-          'labourPct',
-          'labourFixed',
-        ];
         const fineInputs: Array<keyof Line> = [
           'netWt',
           'ghtWt',
@@ -308,12 +331,12 @@ export default function PurchaseEntryPage() {
           next.loadedFineWt = false;
         }
         if (k === 'metalAmount') next.loadedMetalAmount = false;
-        else if (line.loadedMetalAmount && metalInputs.includes(k)) {
+        else if (line.loadedMetalAmount && metalDerivationInputs.includes(k)) {
           next.metalAmount = '';
           next.loadedMetalAmount = false;
         }
         if (k === 'labourAmount') next.loadedLabourAmount = false;
-        else if (line.loadedLabourAmount && labourInputs.includes(k)) {
+        else if (line.loadedLabourAmount && loadedLabourDependsOn(line, k, labourWithGhat)) {
           next.labourAmount = '';
           next.loadedLabourAmount = false;
         }
@@ -439,11 +462,14 @@ export default function PurchaseEntryPage() {
         grossWt: str(line.grossWt),
         netWt: str(line.netWt),
         touch: str(line.touch),
+        ghtWt: str(line.ghtWt),
+        westPct: str(line.westPct),
         rate: str(line.rate),
-        making: line.labourType === 'per_gram' ? str(line.labourRate) : '',
+        making: line.labourType === 'per_gram' ? editableString(line.labourRate) : '',
         labourType: line.labourType,
-        labourRate: Number(line.labourRate ?? 0) || undefined,
-        labourFixed: Number(line.labourFixed ?? 0) || undefined,
+        labourPct: editableString(line.labourPct),
+        labourRate: line.labourRate == null ? undefined : Number(line.labourRate),
+        labourFixed: line.labourFixed == null ? undefined : Number(line.labourFixed),
         otherFineWt: Number(line.otherFineWt ?? 0) || undefined,
         silverFineWt: Number(line.silverFineWt ?? 0) || undefined,
         fineWt: String(line.fineWt ?? ''),
@@ -809,25 +835,29 @@ export default function PurchaseEntryPage() {
                         style={{ width: 110 }}
                         onPick={(r) =>
                           setLines((ls) =>
-                            ls.map((x, j) =>
-                              j === i
-                                ? {
-                                    ...x,
-                                    tagNo: String(r.code),
-                                    itCode: String(r.name || x.itCode),
-                                    netWt: String(r.ITM_NWT ?? x.netWt),
-                                    grossWt: String(r.ITM_GWT ?? x.grossWt),
-                                    touch: String(r.ITM_TOUCH ?? x.touch),
-                                    rate: String(r.ITM_RATE ?? x.rate),
-                                    fineWt: x.loadedFineWt ? '' : x.fineWt,
-                                    metalAmount: x.loadedMetalAmount ? '' : x.metalAmount,
-                                    labourAmount: x.loadedLabourAmount ? '' : x.labourAmount,
-                                    loadedFineWt: false,
-                                    loadedMetalAmount: false,
-                                    loadedLabourAmount: false,
-                                  }
-                                : x,
-                            ),
+                            ls.map((x, j) => {
+                              if (j !== i) return x;
+                              const invalidateLabour =
+                                !!x.loadedLabourAmount &&
+                                (['grossWt', 'netWt', 'touch', 'rate'] as Array<keyof Line>).some(
+                                  (field) => loadedLabourDependsOn(x, field, labourWithGhat),
+                                );
+                              return {
+                                ...x,
+                                tagNo: String(r.code),
+                                itCode: String(r.name || x.itCode),
+                                netWt: String(r.ITM_NWT ?? x.netWt),
+                                grossWt: String(r.ITM_GWT ?? x.grossWt),
+                                touch: String(r.ITM_TOUCH ?? x.touch),
+                                rate: String(r.ITM_RATE ?? x.rate),
+                                fineWt: x.loadedFineWt ? '' : x.fineWt,
+                                metalAmount: x.loadedMetalAmount ? '' : x.metalAmount,
+                                labourAmount: invalidateLabour ? '' : x.labourAmount,
+                                loadedFineWt: false,
+                                loadedMetalAmount: false,
+                                loadedLabourAmount: invalidateLabour ? false : x.loadedLabourAmount,
+                              };
+                            }),
                           )
                         }
                       />
