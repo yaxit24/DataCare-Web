@@ -235,6 +235,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G222 | High | Item Opening was not the desktop TR_ITM_OPBL metal-type grid | `unified/src/csharp/DataCareNext/TR_ITM_OPBL.cs`; `unified/src/csharp/DataCareNext/Ac_Stock.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7690-7699` | `web/apps/web/app/(app)/txn/item-opening/page.tsx`; `web/apps/api/src/modules/stock/stockVoucherLifecycle.ts`; `web/apps/api/src/routes/txn.ts` | The desktop opens TR_ITM_OPBL directly, with no book help (`MDI_FORM.cs:7690-7699`). Enter on the Item Type select lists every item of that metal type (`TR_ITM_OPBL.cs:1269-1370`) in a 17-column grid with a Total row, and Save replaces the type's rows in book '000' with VCH_NO = the type letter (`:1380-1490`); the stock rows come from `Ac_Stock.Itm_Opbl_Stk` (`Ac_Stock.cs:11-21`: AC_CODE '00000', VCH_TYPE ITOBL, BOOK_NAME 'ITM OPBL', P / +, the KR_* fields, dated the year's opening date less one day) and DM_DATA from `Dm_Itm_Opbl_Detl` for OTH_DETL_POSTING items (`:734-741`). The web wrote a numbered BAR_DATA voucher in book IOP on the voucher date; its fine ignored the wastage, its stock rows lacked those fields, it wrote no per-type ITM_OPBL rows and no DM_DATA, and its grid had no West%, labour, other amount, net amount or totals. | N209 |
 | G223 | Med | Tag Cancel had no print, accepted a new voucher in a type B company and answered the lock and fiscal refusals with web wording | `unified/src/csharp/DataCareNext/TR_TAG_CAN.cs:4950-4990,5330-5345,5386-5440` | `web/apps/api/src/modules/stock/tagCancel.ts`; `web/apps/api/src/modules/stock/tagCancelBill.ts`; `web/apps/web/components/TagCancelForm.tsx` | The desktop refuses a new voucher when CO_TYPE is 'B', a date outside the year and a date on or before the lock date with its own texts, in that order, and prints TagCanBill behind UserPrint. The web had no print route, never checked the company type, checked the lock after reading the lines and answered with "period is locked …" / "voucher date … is outside fiscal year …". | N210 |
 | G224 | Medium | The Employee master was a generic field form, not the desktop MS_EMP screen | `unified/src/csharp/DataCareNext/MS_EMP.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7660-7669`; `web/apps/api/form-specs/DataCareNext.MS_EMP.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts`; `web/apps/api/src/modules/rbac/formCatalog.ts` | The desktop opens MS_EMP from the 'Employee' button, whose caption is the USER_SET SUB_MENU (`MDI_FORM.cs:7660-7669`, `:7034`). The screen has a SEARCH RECORD box over a Code / Name list ordered by name, and Employee Code, Employee Name, Account Code with the account name, User Name (the company-01 login names), Amount and Day Hour, in that tab order (form spec). A new entry takes the next code ('001', else the highest + 1 as "000", `MS_EMP.cs:1260-1268`); leaving the code or name refuses one another employee has (`:1350-1411`); Save replaces the row with Val of the numbers, 'ABC' for a blank user and the creator (`:1462-1550`); Delete refuses the default employee '001' (`:1552-1584`). The web rendered the generic master form, which showed EMP_TYPE, TDS and PF as typed boxes, had no search list, next code, duplicate checks, desktop texts or account help, and the rights alias 'Employee' was missing, so a desktop USER_SET row gave no access. Not closed here: the EmpMast report layout is not in the repository, so Print lists the employees on screen; the help list's create path (MsCreat opens MS_ACCT with group 10, `:1659-1665`) is shared MS_HELP behaviour left to the Party master slice. | N211 |
+| G226 | High | The Tax master was a generic field form that could not edit a code's components, and its generic update rewrote them | `unified/src/csharp/DataCareNext/MS_TAX.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7670-7679`; `web/apps/api/form-specs/DataCareNext.MS_TAX.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/master.service.ts`; `web/apps/api/src/modules/masters/configs.ts`; `web/apps/web/components/LookupPicker.tsx` | MS_TAX edits a tax code as a header row (SR_NO 0, TAX_GROUP 'N') with a grid of component rows (SR_NO 1, 2, …: SGST, CGST, IGST), which the sale and purchase postings read by SR_NO; Save replaces every row of the code (`MS_TAX.cs:1824-1933`). The web rendered the generic one-row form keyed by CO_CODE + TAX_CODE: it listed the component rows as duplicates, could not add or change a component, and its update wrote the header's name and rate into every component row of the code, so an edited GST code taxed SGST, CGST and IGST at the full rate. It had no desktop keys, texts, account helps or Print. The browser check also found the shared account picker replacing a row chosen from its help with the typed text's exact code on leave. Not closed here: web provisioning keeps its tax accounts in group 30, outside the desktop help's group 12 (N58), and the Sales screen resolves the code by rate rather than from the desktop's tax-code help (`TR_SALE.cs:18668`), refusing a rate another code's component carries. | N213 |
 
 ## 4. Decisions D23–D28
 
@@ -2526,6 +2527,72 @@ Delete removed 002 with the list read again by code, F1 and the search filtered 
 check found a defect, fixed here: upper-casing the account box as it was typed made the picker drop every answer to a
 lower-case search, so the help never opened. Desktop-runtime comparison and parent acceptance remain open.
 
+### N213 — The Tax master is the desktop MS_TAX screen (G226, Lite L2)
+
+The screen follows MS_TAX's form spec: the SEARCH RECORD box and the Code / Name list on the left; Tax Type (the code),
+Tax Desc, Tax % with Add Tax %, and Ac Code with the account name on the right, over the component grid Sr / Tax Type /
+Tax Name / Ac Code / Tax %; Print, Save, Cancel, Delete and Exit along the bottom. The list is TAX_MAST's header rows
+(SR_NO 0) ordered by code (`MS_TAX.cs:1608`); a new entry has blank boxes, one empty grid row and the cursor in the code
+(CLEAR_DATA `:1590-1614`). Enter on the list opens a code with the cursor in the name and a double click with it in the
+code; the code is read-only once opened, Tax % and Add Tax % show as 0.00 and the components' Tax % as 0.000
+(`:1616-1668`, `:1973-2002`).
+
+Keys as the desktop: typed letters are upper-cased and the apostrophe refused (`:1689-1702`); Enter on the code moves on
+and F1 goes to the search box (`:1704-1718`); Enter on a blank name says "Please Insert Tax Name ..." (`:1751`); Enter on
+Tax % and Add Tax % shows Val of the box as 0.00 (`:2004-2024`); Enter on Ac Code takes a code found in the account
+master and goes to row 1 of the grid, else opens the help of group 12 and account 00013 by name (`:2026-2063`). In the
+grid Enter moves one cell right; on Ac Code it takes a found code or opens the help of every account; on Tax % it shows
+0.000 and goes to the next row, adds a row on the last one, and on a blank last Tax % goes to Save; the arrows move one
+cell (TEXT_ENTRY_KeyDown `:1200-1310`). Esc leaves (`:1806-1814`). Leaving the code refuses a code another tax has and
+leaving the name a name another code has, with the desktop texts (`:1720-1781`).
+
+Save (`:1824-1933`) needs the edit right only for an opened code, refuses a blank code ("Enter Tax Code.") and name
+("Enter Tax Name."), and replaces the code's rows: the header (SR_NO 0, TAX_GROUP 'N', Val of Tax % and Add Tax %, the
+account) and one row per grid row whose Tax % is not zero (`:1886`), SR_NO = the grid row (`:1889`), with the row's type,
+name, account, Val(Tax %) and the header's Add Tax %; MAIN_USER is not written. Delete (`:1935-1956`) needs the delete
+right, refuses a blank code ("Please Select Tax Code For Delete."), asks the desktop question and removes every row of
+the code. Print needs the print right. A sale reads the code by its header (SR_NO 0) and its components by SR_NO
+(`web/apps/api/src/modules/shared/taxPolicy.ts`) and posts its tax to the header's account (Ac_Ledr Sales_Ledr).
+
+The generic `/masters/taxes` routes now only read TAX_MAST (`MasterConfig.dedicatedWriter`): a generic update keyed by
+CO_CODE + TAX_CODE wrote the header's name and rate into every component row, so SGST/CGST/IGST of an edited code all
+became the header's rate. The desktop import does not import TAX_MAST.
+
+Deliberate differences: Save runs in one transaction (the desktop deletes the rows first, so an insert that fails leaves
+the code deleted); Val of a blank or text box is 0; an unknown account in the header or a component, a name over 40
+characters and a component type over 5 are refused; an opened code's components are shown at their SR_NO rows with a
+blank row in a gap, so a save keeps IGST at SR_NO 3 where the desktop packs and renumbers the rows; an opened code
+carries a version token (N51, D17), so a save or delete after another operator's change is refused with 409 and a new
+code another operator took meanwhile is refused with the code text; a pick from an account help moves on at once; Print
+lists the rows on screen because the TaxMast report layout is not in the repository. The Input Tax account
+(INPUT_TAX_AC) is shown only for one registration (SSRegSrNo VK195NEPH, `:1518-1527`) and is left out.
+
+Shared fix found by the browser check: in `web/apps/web/components/LookupPicker.tsx` a pick moved the focus on at once, and the leave
+that followed resolved the text the pick had replaced; typing 'GST' (an account code) and choosing 00085 from the help
+therefore took GST. The picker now keeps the chosen row. The Sales Invoice party box had the same defect (typing 'BANK'
+and choosing E2EBANK took BANK); a new `sales-invoice` case covers it and fails on the old picker.
+
+Open, recorded on the gap: the web provisioning puts its tax accounts in group 30 (`seedCompany.ts`), so on a
+web-provisioned company the desktop's group-12 help lists none of them (desktop-equivalent provisioning, N58); and the
+Sales screen takes a Tax % and resolves the code by rate, where TR_SALE picks the code from the header rows
+(`TR_SALE.cs:18668`), so a rate that another code's component also carries (1.5%: code 10's SGST and CGST) is refused as
+ambiguous.
+
+Evidence: `taxMaster.db.test.ts` (11 cases through the real routes on forced RLS: the list, the write set with Val,
+upper-casing and no MAIN_USER, the sale resolver reading the new code, a 0% row skipped with SR_NO kept and the Add Tax %
+on every row, every refusal with nothing written, the read with the account name, the edit with stale, replayed and
+missing versions and a code deleted meanwhile, a view-only rights row, both helps, print and delete, another tenant
+untouched, and the refused generic writes) and `routePolicy.test.ts` pass. The zero-mock `tax-master` module passes 18
+of 18 cases, none blocked: a T14 fault injected on a component insert rolls the delete back with every row id kept, T15
+reads the code in 2024-2025, T18 sells at the code's 2% rate (tax 1,272.19 = 63,609.50 × 2%, SGST = CGST = 636.095,
+1,272.19 Cr to the header account). The `sales-invoice` module passes 28 cases with 3 blocked, `purchase-invoice` 25 with
+2 blocked. Chrome DevTools on the demo stack: the keyboard entry of 15 GST 2% (code, name, 2.00, 0.00, 00085 picked from
+the help after typing GST, three components with Enter adding rows and a blank last Tax % going to Save, Enter on Save)
+stored `15|0|N|GST 2% ONLY|2|0|00085`, `15|1|SGST|1|00085`, `15|2|CGST|1|00086`, `15|3|IGST|2|00087` with no MAIN_USER;
+the double click reopened it with every value; a Sales Invoice at 2% for WALKIN stored TAX_CODE 15, TAX_AMT 1272.19 and
+posted Dr WALKIN 64,881.69, Cr SALES 63,609.50 and Cr 00085 1,272.19; Print listed the rows; Delete asked the desktop
+question and removed the code; Esc left the screen. Desktop-runtime comparison and parent acceptance remain open.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -2664,6 +2731,7 @@ lower-case search, so the help never opened. Desktop-runtime comparison and pare
 | N209 | — | implemented-unverified, evidence in this change (G222: Item Opening is the TR_ITM_OPBL metal-type grid in book 000 with ITOBL stock rows, DM_DATA for OTH_DETL_POSTING items and the desktop messages) |
 | N210 | — | implemented-unverified, evidence in this change (G223: Tag Cancel prints TagCanBill behind print rights and refuses type B, the year and the lock date with the desktop texts in desktop order) |
 | N211 | — | implemented-unverified, evidence in this change (G224: the Employee master is the MS_EMP screen with its list, next code, keys, desktop texts, rights alias and account help; version tokens and the web refusals recorded on the gap) |
+| N213 | — | implemented-unverified, evidence in this change (G226: the Tax master is the MS_TAX header and component grid with the desktop keys, texts, helps and rights; generic TAX_MAST writes refused; the account picker keeps a chosen row) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 
