@@ -20,6 +20,7 @@ import {
   editBatchReceipt,
   deleteBatchReceipt,
 } from '../src/modules/finance/batchReceipt.js';
+import { FINANCE_DATE_OUTSIDE_YEAR_MESSAGE } from '../src/modules/finance/lifecycle.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const TENANT = 'batch-lifecycle';
@@ -142,6 +143,21 @@ const deleteAudits = async () =>
       )) as { n: number }[]
     )[0]!.n,
   );
+
+const batchWriteSet = async () => ({
+  cash: await owner.$queryRawUnsafe(
+    `SELECT * FROM "CASH_DATA" WHERE tenant_id=$1 ORDER BY "CO_BOOK","VCH_NO","SR_NO",row_id`,
+    TENANT,
+  ),
+  ledger: await owner.$queryRawUnsafe(
+    `SELECT * FROM "AC_DATA" WHERE tenant_id=$1 ORDER BY "LEDR_KEY",row_id`,
+    TENANT,
+  ),
+  audits: await owner.$queryRawUnsafe(
+    `SELECT * FROM "DELETE_DATA" WHERE tenant_id=$1 ORDER BY "CO_BOOK","VCH_NO","SR_NO",row_id`,
+    TENANT,
+  ),
+});
 
 describe.runIf(RUN)('multi-party receipt reopen/edit/delete lifecycle', () => {
   beforeEach(async () => {
@@ -314,5 +330,39 @@ describe.runIf(RUN)('multi-party receipt reopen/edit/delete lifecycle', () => {
     const nowSums = await legSums();
     expect(nowSums).toEqual(beforeSums);
     expect(nowSums.dr).toBe(nowSums.cr);
+  });
+
+  it('refuses an out-of-year create and edit without consuming or changing the batch write set', async () => {
+    const outside = '2024-03-31';
+    const beforeCreate = await batchWriteSet();
+    await expect(
+      postBatchReceipt(runtime, {
+        scope,
+        vchDate: outside,
+        lines: [{ partyAc: PARTY_A, amount: 500, mode: 'cash' }],
+      } as never),
+    ).rejects.toThrow(FINANCE_DATE_OUTSIDE_YEAR_MESSAGE);
+    expect(await batchWriteSet()).toEqual(beforeCreate);
+
+    const created = await postBatchReceipt(runtime, {
+      scope,
+      vchDate: '2024-04-01',
+      lines: [{ partyAc: PARTY_A, amount: 500, mode: 'cash' }],
+    } as never);
+    expect(created.vchNo).toBe(1);
+    const beforeEdit = await batchWriteSet();
+    const view = await getBatchReceipt(runtime, scope, created.vchNo);
+
+    await expect(
+      editBatchReceipt(runtime, {
+        scope,
+        vchNo: created.vchNo,
+        vchDate: outside,
+        lines: [{ partyAc: PARTY_A, amount: 900, mode: 'cash' }],
+        deleteUser: 'editor1',
+      } as never),
+    ).rejects.toThrow(FINANCE_DATE_OUTSIDE_YEAR_MESSAGE);
+    expect(await batchWriteSet()).toEqual(beforeEdit);
+    expect(await getBatchReceipt(runtime, scope, created.vchNo)).toEqual(view);
   });
 });

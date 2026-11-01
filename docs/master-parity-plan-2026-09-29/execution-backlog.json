@@ -7151,6 +7151,94 @@
         "web/apps/web/test/features/modules/groupMaster.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Verified: groupMaster.db.test.ts 10/10, routePolicy (690 routes), the group-master feature module 18 of 18 (T14 through an injected item-update fault, T18 through a sale crediting the group's sales account with the group's HSN code on the invoice), and a Chrome DevTools pass on the demo stack. Open: the GroupMast print layout (not in the repository), the desktop helps on web-provisioned companies (N58), desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N215",
+      "status": "implemented-unverified",
+      "action": "The Product master is the desktop MS_PRODUCT screen in Product mode: the two-character code and name with the desktop keys, validating texts and rights; Save replaces the row with the signed-in user and DATA_TRFR N in one transaction; Delete asks first and then refuses a product an item uses and the default products; Print does nothing, as on the desktop; version tokens.",
+      "parentLabels": "P1-core; L2; T01-T18",
+      "startAfter": [
+        "N214"
+      ],
+      "requiredProof": "An HTTP/DB test of the write set, every refusal, versions, rights and delete; the product-master feature module passes every case; a Chrome DevTools keyboard, save, reopen, edit, delete and Esc pass.",
+      "gapIds": "G228",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/apps/api/src/modules/masters/productMaster.ts",
+        "web/apps/api/src/routes/productMaster.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/modules/shared/desktopMessages.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/web/app/(app)/masters/products/page.tsx",
+        "web/apps/api/test/productMaster.db.test.ts",
+        "web/apps/api/test/routePolicy.test.ts",
+        "web/apps/web/test/features/modules/productMaster.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: productMaster.db.test.ts 7/7, routePolicy (695 routes), the product-master feature module 17 of 17 applicable (T05 not applicable), and a Chrome DevTools pass on the demo stack. Open: desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N216",
+      "status": "implemented-unverified",
+      "action": "Cash/Bank receipts and payments (single and multi-line), the multi-party receipt and Contra refuse a voucher date outside the open year with the TR_CASH/TR_CONTRA text, inside the voucher transaction, before numbering and, on edit, before the lock-date check; a refusal changes no row. The recent-voucher list shows a Contra voucher's summed DR_AMT instead of 0.",
+      "parentLabels": "P9; L1",
+      "startAfter": [
+        "N193",
+        "N194"
+      ],
+      "requiredProof": "DB tests refuse every covered create and edit with the desktop text and compare every write-set row before and after, including the year-before-lock order; a unit test shows no numbering lock is taken; the list test shows a balanced Contra at its one-side total; the cash-bank and contra feature modules pass on a fresh production build with only the G37 register date baselined.",
+      "gapIds": "G229",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/apps/api/src/modules/finance/lifecycle.ts",
+        "web/apps/api/src/modules/finance/finance.ts",
+        "web/apps/api/src/modules/finance/batchReceipt.ts",
+        "web/apps/api/src/modules/finance/contra.ts",
+        "web/apps/api/src/modules/vouchers/list.ts",
+        "web/apps/api/test/finance.test.ts",
+        "web/apps/api/test/cashReceiptLegs.db.test.ts",
+        "web/apps/api/test/batchReceiptLifecycle.db.test.ts",
+        "web/apps/api/test/contraDelete.db.test.ts",
+        "web/apps/api/test/voucherListScope.routes.db.test.ts",
+        "web/apps/web/test/features/modules/cashBank.mjs",
+        "web/apps/web/test/features/modules/contraEntry.mjs",
+        "web/apps/web/test/features/baseline.json"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: finance.test.ts (no numbering lock on an out-of-year create); cashReceiptLegs, batchReceiptLifecycle and contraDelete DB tests (every covered create and edit refused with the desktop text, every write-set row unchanged; the two year-before-lock order tests fail against the previous order with \"period is locked\"); voucherListScope (Contra listed at 12,345.67); full isolated suite API 348 files / 3,719 tests, core 1,821, web 700; cash-bank module 17 passed / 4 blocked, contra 22 passed / 2 blocked / 1 baselined (G37 register date); zero-mock real-stack suite; Chrome DevTools 400 refusals for Contra and Receipt and a 12,345.67 Contra list total. Open: G37 (N57) register date, N52 durable idempotency for T13, desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N217",
+      "status": "implemented-unverified",
+      "action": "The Address master is the desktop MS_ADD_MAST screen: the Company Detail and Other Detail tabs in the desktop tab order, the next code of the location with Ctrl+E to unlock it, the company's combos, the F1 help and the name type-ahead, the mobile check, the IsDate rule for the three dates, the desktop texts and rights, Save replacing the location's row and Delete removing the address with its book-000 opening rows of the year, in one transaction with version tokens.",
+      "parentLabels": "P1-core; L2; T01-T18",
+      "startAfter": [
+        "N216"
+      ],
+      "requiredProof": "An HTTP/DB test of the list, combos, next code, write set, refusals, versions, rights, delete and print; the address-master feature module passes every case; a Chrome DevTools keyboard, mobile check, help, reopen, delete and Esc pass.",
+      "gapIds": "G230",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/apps/api/src/modules/masters/addressMaster.ts",
+        "web/apps/api/src/routes/addressMaster.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/web/app/(app)/masters/addresses/page.tsx",
+        "web/apps/api/test/addressMaster.db.test.ts",
+        "web/apps/api/test/routePolicy.test.ts",
+        "web/apps/web/test/features/modules/addressMaster.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: addressMaster.db.test.ts 8/8, routePolicy (703 routes), the address-master feature module 17 of 17 applicable (T05 not applicable), and a Chrome DevTools pass on the demo stack. Open: the PartyMast print layout (not in the repository), desktop-runtime comparison and parent acceptance."
     }
   ],
   "amendments": [

@@ -481,12 +481,14 @@ export async function exerciseLabourPreviewLifecycle(
     await el('check').click();
     const leavingUpstream = await leaving.upstream();
     const documentNode = await page.locator('html').elementHandle();
-    const productReads = ['/api/masters/products', '/api/masters/products/meta'].map((path) =>
+    // The destination is a page of the generic master screen (Search records over its meta); Products has its own
+    // screen since N215, so the generic States page stands in for it.
+    const destinationReads = ['/api/masters/states', '/api/masters/states/meta'].map((path) =>
       page.waitForResponse((r) => pathname(r.request()) === path && r.status() === 200),
     );
-    await page.getByRole('link', { name: 'Products', exact: true }).click();
-    await page.waitForURL('**/masters/products');
-    await Promise.all(productReads);
+    await page.getByRole('link', { name: 'States', exact: true }).click();
+    await page.waitForURL('**/masters/states');
+    await Promise.all(destinationReads);
     assert.equal(await documentNode.evaluate((node) => node.isConnected), true);
     const search = page.getByLabel('Search records', { exact: true });
     await search.fill('LABOUR DEPARTURE DRAFT');
@@ -498,7 +500,7 @@ export async function exerciseLabourPreviewLifecycle(
     assert.deepEqual(await json(lateReply), leavingUpstream.body);
     assert.equal(await lateReply.finished(), null);
     await flushFrames(page);
-    assert.equal(new URL(page.url()).pathname, '/masters/products');
+    assert.equal(new URL(page.url()).pathname, '/masters/states');
     assert.equal(await search.inputValue(), 'LABOUR DEPARTURE DRAFT');
     assert.equal(
       await destinationNode.evaluate((node) => node.isConnected && node === document.activeElement),

@@ -14,7 +14,7 @@ import {
 import {
   completeFinanceScope,
   configuredBookTx,
-  createIdentityTx,
+  createFinanceIdentityTx,
   editIdentityTx,
   insertDesktopDeleteAuditTx,
   insertHiddenIdentityTx,
@@ -22,6 +22,7 @@ import {
   text,
   voucherKey,
   type VoucherIdentity,
+  assertFinanceVoucherDateTx,
 } from './lifecycle.js';
 import { tenderThresholdDecision } from './tender.js';
 
@@ -365,6 +366,7 @@ export async function postReceipt(
   const tenantId = input.scope.tenantId;
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
   const write = async (tx: any, identity: VoucherIdentity): Promise<FinanceResult> => {
+    await assertFinanceVoucherDateTx(tx, input.scope, identity.voucherDate);
     // The book first: a receipt must land in a receipt book whose layout matches the mode.
     const configuredBook = await financeBookTx(tx, input.scope, 'receipt', mode);
     // The cash/bank account is the book's BOOK_DETL slot 1 unless the caller names one.
@@ -587,7 +589,7 @@ export async function postReceipt(
   };
   if (lifecycle) return write(lifecycle.tx, lifecycle.identity);
   return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) =>
-    write(tx, await createIdentityTx(tx, input.scope, vchDate, input.mainUser)),
+    write(tx, await createFinanceIdentityTx(tx, input.scope, vchDate, input.mainUser)),
   );
 }
 
@@ -626,6 +628,7 @@ export async function postPayment(
   const tenantId = input.scope.tenantId;
   const payVchDate = input.vchDate ? new Date(input.vchDate) : new Date();
   const write = async (tx: any, identity: VoucherIdentity): Promise<FinanceResult> => {
+    await assertFinanceVoucherDateTx(tx, input.scope, identity.voucherDate);
     // The book first, before numbering: a payment must land in a payment book matching the mode.
     const configuredBook = await financeBookTx(tx, input.scope, 'payment', mode);
     const vchNo = identity.vchNo;
@@ -775,7 +778,7 @@ export async function postPayment(
   };
   if (lifecycle) return write(lifecycle.tx, lifecycle.identity);
   return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) =>
-    write(tx, await createIdentityTx(tx, input.scope, payVchDate, input.mainUser)),
+    write(tx, await createFinanceIdentityTx(tx, input.scope, payVchDate, input.mainUser)),
   );
 }
 
@@ -790,6 +793,8 @@ export async function editPayment(
   completeFinanceScope(input.scope);
   const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
   return withTxBudget(prisma, input.scope.tenantId, 'voucher', async (tx: any) => {
+    // TR_CASH.cs:2937-2947 checks the year before the lock date that editIdentityTx enforces.
+    await assertFinanceVoucherDateTx(tx, input.scope, requestedDate);
     const { identity } = await editIdentityTx(tx, {
       table: 'PAY_DATA',
       scope: input.scope,
@@ -862,6 +867,11 @@ export async function postReceiptLines(
   const totalAmt = round2(lines.reduce((s, l) => s + Number(l.amount), 0));
   const totalKasar = round2(lines.reduce((s, l) => s + Number(l.kasar ?? 0), 0));
   return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
+    await assertFinanceVoucherDateTx(
+      tx,
+      input.scope,
+      input.vchDate ? new Date(input.vchDate) : new Date(),
+    );
     const receiptBook = await financeBookTx(tx, input.scope, 'receipt', mode);
     // Resolved before the ceiling check and before numbering: the ceiling counts prior cash against THIS
     // account, so a placeholder would have measured the wrong ledger as well as posting to it.
@@ -1033,6 +1043,11 @@ export async function postPaymentLines(
   const totalAmt = round2(lines.reduce((s, l) => s + Number(l.amount), 0));
   const totalKasar = round2(lines.reduce((s, l) => s + Number(l.kasar ?? 0), 0));
   return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
+    await assertFinanceVoucherDateTx(
+      tx,
+      input.scope,
+      input.vchDate ? new Date(input.vchDate) : new Date(),
+    );
     const paymentBook = await financeBookTx(tx, input.scope, 'payment', mode);
     const vchNo = await nextVoucherNoTx(tx, input.scope);
     const key = keyOf(input.scope, vchNo, 'PAY');
@@ -1334,6 +1349,8 @@ export async function editReceipt(
   completeFinanceScope(input.scope);
   const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
   return withTxBudget(prisma, input.scope.tenantId, 'voucher', async (tx: any) => {
+    // TR_CASH.cs:2937-2947 checks the year before the lock date that editIdentityTx enforces.
+    await assertFinanceVoucherDateTx(tx, input.scope, requestedDate);
     const { identity } = await editIdentityTx(tx, {
       table: 'CASH_DATA',
       scope: input.scope,

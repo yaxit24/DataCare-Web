@@ -53,6 +53,7 @@ databaseDescribe('restricted-role CO_SET behavior integration', () => {
       'TEMP_BOOK_DATA',
       'BOOK_DETL',
       'BOOK_DATA',
+      'YEAR_MAST',
       'CO_SET',
     ]) {
       await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, TENANT);
@@ -73,6 +74,13 @@ databaseDescribe('restricted-role CO_SET behavior integration', () => {
         NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL)`,
       TENANT,
       CO,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE")
+       VALUES ($1,$2,$3,'2026-04-01','2027-03-31')`,
+      TENANT,
+      CO,
+      YEAR,
     );
     await owner.$executeRawUnsafe(
       `INSERT INTO "BOOK_DATA"(
