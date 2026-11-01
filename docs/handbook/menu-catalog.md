@@ -331,12 +331,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `MS_EMP` — direct constructor ([MDI_FORM.cs:7660-7669](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7660-L7669)).
 - **Does:** Maintains employees with linked ledger, user, amount and work-hour attributes.
-- **Looks:** Search grid beside code, name, account, amount, user and day-hour fields.
+- **Looks:** SEARCH RECORD box over a Code / Name list on the left; Employee Code, Employee Name, Account Code with the account name, User Name, Amount and Day Hour on the right; Print, Save, Cancel, Delete and Exit along the bottom.
 - **Writes:** EMP_MAST.
-- **Web:** `/masters/employees`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Conditional links, reference guards, Print and layout/help remain.
-- **Owners:** X10, G38, N58, N77.
-- **Evidence:** [MS_EMP.cs:1334-1725](../../unified/src/csharp/DataCareNext/MS_EMP.cs#L1334-L1725).
+- **Web:** `/masters/employees`; `GET /masters/employee-master`, `GET /masters/employee-master/print`, `GET /masters/employee-master/accounts`, `GET /masters/employee-master/:code`, `POST /masters/employee-master`, `PUT /masters/employee-master/:code`, `DELETE /masters/employee-master/:code`. Can: create, reopen, edit, delete, list.
+- **Remaining:** The EmpMast print layout is not in the repository (Print lists the employees on screen); the help cannot create an account (MsCreat); desktop-runtime comparison remains.
+- **Owners:** X10, G38, N58, N77, G224, N211.
+- **Evidence:** [MS_EMP.cs:1144-1725](../../unified/src/csharp/DataCareNext/MS_EMP.cs#L1144-L1725).
 
 ### Group
 

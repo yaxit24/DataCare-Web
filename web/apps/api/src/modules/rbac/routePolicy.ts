@@ -782,6 +782,16 @@ route('Membership/Gold Adjust', [
 ]);
 
 route('Masters/Auto Item', ['POST /masters/auto-item']);
+// MS_EMP (N211): the Employee master's own screen; the generic /masters/employees routes stay for imports.
+route('Masters/Employees', [
+  'GET /masters/employee-master',
+  'GET /masters/employee-master/print',
+  'GET /masters/employee-master/accounts',
+  'GET /masters/employee-master/:code',
+  'POST /masters/employee-master',
+  'PUT /masters/employee-master/:code',
+  'DELETE /masters/employee-master/:code',
+]);
 route('Masters/Opening Balance', [
   'GET /accounts/:acCode/opening',
   'POST /accounts/:acCode/opening',
@@ -911,6 +921,7 @@ route('Reports/Mfg Ledger', ['GET /reports/mfg-ledger', 'GET /reports/mfg-ledger
 route('Reports/Scheme Monthly Report', ['GET /reports/scheme-monthly']);
 
 const PRINT_ROUTES = new Set([
+  'GET /masters/employee-master/print',
   'POST /estimate/pdf',
   'GET /reports/account-ledger/:acCode/export.pdf',
   'GET /tour-orders/confirmation',
