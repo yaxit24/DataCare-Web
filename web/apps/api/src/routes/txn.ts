@@ -5228,9 +5228,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
-  // Tag Cancel (X19), Tag Transfer (X18) and Stock Adjust: desktop TR_TAG_CAN on a TAG CANCEL / TAG TRFR /
-  // STOCK ADJUST book. One writer (modules/stock/tagCancel.ts), one route family per menu, so each keeps its own
-  // form right.
+  // Tag Cancel (X19), Tag Transfer (X18), Stock Adjust: TR_TAG_CAN on a TAG CANCEL / TAG TRFR / STOCK ADJUST book.
+  // One writer (modules/stock/tagCancel.ts), one route family per menu, so each keeps its own form right.
   const tagCancelInput = (req: FastifyRequest, b = body(req)) => ({
     scope: scopeOf(req),
     vchDate: b.vchDate,
@@ -5292,8 +5291,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.post('/stock/tag-cancel', auth, tagCancelRoute.create);
   app.put('/stock/tag-cancel/:vchNo', auth, tagCancelRoute.update);
   app.delete('/stock/tag-cancel/:vchNo', auth, tagCancelRoute.remove);
-  // TagCanBill (TR_TAG_CAN.cs:5386-5440): print rights are required (:5390-5393). One handler per menu so each
-  // keeps its own print right; both print the same TR_TAG_CAN register.
+  // TagCanBill (TR_TAG_CAN.cs:5386-5440) needs the print right (:5390-5393); each menu keeps its own print right.
   const tagCancelPrint =
     (filenamePrefix: string) => async (req: FastifyRequest, reply: FastifyReply) => {
       if (!guard(req, reply, 'print')) return;
