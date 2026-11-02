@@ -73,6 +73,36 @@ static class FnvHalfProbe
 
         Console.WriteLine("RESULT total=" + total + " equalsHalfUp=" + upMatch + " equalsHalfEven=" + evenMatch +
                           " equalsBoth=" + bothMatch + " equalsNeither=" + neither + " differsFromHalfUp=" + upMiss);
+        // Part 2: negatives (sales-return rows enter the HSN sum as SUM(-RTN_IT_TAX_AMT)) and 3-4 decimal taxes
+        // (SUM(IT_TAX_AMT) is not limited to paise). Reference = System.Decimal, half away from zero, which is what
+        // decimal.js ROUND_HALF_UP does in the web.
+        long negTotal = 0, negMiss = 0, decTotal = 0, decMiss = 0;
+        var sb2 = new StringBuilder("kind,tax,dotnet,reference\n");
+        Action<string, decimal> ref2 = (kind, tax) =>
+        {
+            string txt = tax.ToString(CultureInfo.InvariantCulture);
+            string fx = Strings.Format((object)(Conversion.Val(txt) / 2.0), "0.00");
+            string rf = Math.Round(tax / 2m, 2, MidpointRounding.AwayFromZero).ToString("0.00", CultureInfo.InvariantCulture);
+            if (kind == "neg") negTotal++; else decTotal++;
+            if (fx != rf)
+            {
+                if (kind == "neg") negMiss++; else decMiss++;
+                sb2.Append(kind).Append(',').Append(txt).Append(',').Append(fx).Append(',').Append(rf).Append('\n');
+                if (shown++ < 60) Console.WriteLine("  " + kind + " differs: tax " + txt + " -> " + fx + " (reference " + rf + ")");
+            }
+        };
+        for (long t = 1; t <= 2000001; t += 2) ref2("neg", -(decimal)t / 100m);                 // negative midpoints
+        for (long t = 1; t <= 2000001; t += 2) ref2("neg", -(decimal)t / 100m - 0.0001m);       // just past a negative midpoint
+        for (long t = 1; t <= 2000001; t += 2) ref2("dec", (decimal)t / 100m + 0.0001m);        // just past a midpoint
+        for (long t = 1; t <= 2000001; t += 2) ref2("dec", (decimal)t / 100m - 0.0001m);        // just before a midpoint
+        for (int i = 0; i < 1000000; i++)
+        {
+            long raw = (long)(rnd.NextDouble() * 99999999999L);  // up to 9,999,999.9999 with 4 decimals
+            ref2("dec", (decimal)raw / 10000m);
+        }
+        Console.WriteLine("RESULT2 negatives=" + negTotal + " negativeMismatches=" + negMiss + " fractional=" + decTotal + " fractionalMismatches=" + decMiss);
+        File.WriteAllText(csv.Replace(".csv", "-part2.csv"), sb2.ToString());
+
         // Spot values named in the plan / probe: 1908.29 (3% of 63,609.50 rounded) and the 2043.29 bill of G181.
         foreach (long t in new long[] { 190829, 204329, 1, 3, 5, 7, 9, 99999999999L / 100 | 1 })
             Console.WriteLine("SPOT tax " + Paise(t) + " -> " + Fx(t));

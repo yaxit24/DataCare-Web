@@ -41,3 +41,4 @@ jobs:
           path: |
             ${{ runner.temp }}/probe.log
             ${{ runner.temp }}/mismatch.csv
+            ${{ runner.temp }}/mismatch-part2.csv
