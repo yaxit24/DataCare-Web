@@ -288,4 +288,48 @@ describe('RP_GST CSV bytes', () => {
         '"\'=24DANGER","Buyer, ""North""\nUnit",S-00001,05-Apr-24,1250.50,24 - Gujarat,N,,Regular,,3.00,1200,0\r\n',
     );
   });
+
+  // RP_GST.SaveCSV (RP_GST.cs:3114-3145) writes the grid cells joined by commas, so a sale return reaches the
+  // file as the plain number -206.00. A leading '-' only makes a formula out of text; a signed decimal the report
+  // computed itself has to stay numeric for the GST portal and for sums.
+  it('keeps negative amounts numeric while still neutralising text that begins with a formula sign', () => {
+    const hsn = presentHsn([
+      {
+        hsn: '7113',
+        rateType: 'G',
+        itemType: 'G',
+        gstType: 'I',
+        quantity: '-1.25',
+        itemAmount: '-200',
+        itemTax: '-6',
+        itemDiscount: '0',
+      },
+    ]);
+    const [header, line] = serializeGstCsv(hsn).split('\r\n') as [string, string];
+    const names = header.split(',');
+    const cells = line.split(',');
+    const at = (name: string) => cells[names.indexOf(name)];
+    expect(at('Total Qty')).toBe('-1.25');
+    expect(at('Total Value')).toBe('-206.00');
+    expect(at('Taxable Value')).toBe('-200.00');
+    expect(at('IGST Amount')).toBe('-6.00');
+
+    const b2b = presentTaxSection('gstr1', 'B2B', [
+      tax({ acName: '-Dash Traders', gstin: '=24DANGER', invoiceValue: '10' }),
+    ]);
+    const row = serializeGstCsv(b2b).split('\r\n')[1]!;
+    expect(row).toContain('"\'=24DANGER"');
+    expect(row).toContain('"\'-Dash Traders"');
+  });
+
+  it('does not let a look-alike number through the numeric exemption', () => {
+    // Only a bare -digits[.digits] string is exempt. Each of these starts with '-' but can be a formula or is not
+    // a number, so it must still be neutralised. (The report trims names first, so '-1\t' would reach the CSV as
+    // the plain number '-1' and is not a hostile case.)
+    for (const hostile of ['-1+1', '-1E5', '-1,5', '- 1', '-1.', '-.5', '--1', '-cmd|calc']) {
+      const section = presentTaxSection('gstr1', 'B2B', [tax({ acName: hostile })]);
+      const name = serializeGstCsv(section).split('\r\n')[1]!.split(',')[1]!;
+      expect(name.startsWith('"\'-'), `${JSON.stringify(hostile)} -> ${name}`).toBe(true);
+    }
+  });
 });
