@@ -19,5 +19,12 @@
       "reason": "The scheme amount is read-only on the order. The Lite desktop types it (TR_SALE_ORD.cs:11264-11290) and adds it to the advance (:11368), but its day-book row, type 05 to the fixed account 00079 (Ac_Rojmel.cs:19), is absent from the real data for the 7 of 76 orders that carry a scheme amount (web/docs/PLAN-SALESORDER-ROJMEL.md section 2.4); building it would add rows the desktop's data does not have. Old gold and old silver are taken since this change."
     }
   ],
-  "contra": []
+  "contra": [],
+  "data-backup": [
+    {
+      "case": "data-backup.config.nextmain-allowlist",
+      "gap": "G64/N80",
+      "reason": "The real v2 archive has no versioned tenantConfig section or allowlist because D-BKP-3 has not approved the NextMain-equivalent configuration and credential envelope."
+    }
+  ]
 }

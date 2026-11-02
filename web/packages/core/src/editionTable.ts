@@ -275,6 +275,7 @@ export const FORM_EDITION: Readonly<Record<string, EditionTier>> = Object.freeze
   'Cash / Bank/Reminders': 'B',
   'Cash / Bank/VP Adjustment': 'S',
   'Company/Balance TrFr': 'L',
+  'Company/Data Backup': 'L',
   'ExtraTran/Customer Entry': 'A',
   'ExtraTran/Old Item Sales': 'S',
   'Inventory/Counter Transfer': 'B',
