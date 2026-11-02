@@ -1,7 +1,14 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { get, post, downloadPdf, downloadCsv, ApiError } from '../../../../lib/api';
+import {
+  get,
+  post,
+  downloadPdf,
+  downloadServerCsv,
+  downloadCsv,
+  ApiError,
+} from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { reportApiSlug } from '../../../../lib/reportSlug';
 import { openDocument } from '../../../../lib/openDocument';
@@ -587,8 +594,17 @@ export default function ReportPage() {
   const arrays = data
     ? (Object.entries(data).filter(([, v]) => Array.isArray(v)) as [string, any[]][])
     : [];
-  const scalars = data
-    ? Object.entries(data).filter(([, v]) => !Array.isArray(v) && typeof v !== 'object')
+  const totals =
+    data?.totals && typeof data.totals === 'object' && !Array.isArray(data.totals)
+      ? (data.totals as Record<string, unknown>)
+      : null;
+  const scalars: Array<[string, unknown]> = data
+    ? [
+        ...Object.entries(data).filter(([, v]) => !Array.isArray(v) && typeof v !== 'object'),
+        ...Object.entries(totals ?? {})
+          .filter(([, v]) => v === null || typeof v !== 'object')
+          .map(([k, v]): [string, unknown] => [`Total ${k}`, v]),
+      ]
     : [];
 
   return (
@@ -1531,7 +1547,18 @@ export default function ReportPage() {
         <div className="panel" key={k} style={{ overflow: 'auto' }}>
           <div className="toolbar">
             <h2 style={{ textTransform: 'capitalize', margin: 0 }}>{k}</h2>
-            <button className="ghost" onClick={() => downloadCsv(v, `${slug}-${k}`)}>
+            <button
+              className="ghost"
+              onClick={() => {
+                if (totals && pdfPath) {
+                  void downloadServerCsv(pdfPath.replace('/export.pdf', '/export.csv'), slug).catch(
+                    () => setErr('csv failed'),
+                  );
+                  return;
+                }
+                downloadCsv(v, `${slug}-${k}`);
+              }}
+            >
               CSV
             </button>
             {/* Excel export (desktop BtnExel). The server re-derives the rows from the same builder the
