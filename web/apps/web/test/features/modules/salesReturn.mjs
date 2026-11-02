@@ -202,6 +202,7 @@ export const salesReturn = {
     'web/apps/web/app/(app)/txn/sale-return/page.tsx',
     'web/apps/api/src/modules/sales/salesReturn.ts',
     'web/apps/web/test/features/modules/salesReturn.mjs',
+    'web/apps/web/test/features/faults.mjs',
     'web/apps/web/test/features/fixtures/catalogue.mjs',
   ],
   fixtureManifest: FIXTURE_MANIFEST,

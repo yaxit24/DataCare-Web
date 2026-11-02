@@ -406,6 +406,7 @@ export const salesOrder = {
     'web/apps/api/src/modules/sales/salesOrder.ts',
     'web/apps/api/src/modules/sales/orderDoc.ts',
     'web/apps/web/test/features/modules/salesOrder.mjs',
+    'web/apps/web/test/features/faults.mjs',
     'web/apps/web/test/features/fixtures/catalogue.mjs',
   ],
   fixtureManifest: FIXTURE_MANIFEST,

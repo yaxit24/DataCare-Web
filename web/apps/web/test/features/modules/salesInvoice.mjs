@@ -243,6 +243,7 @@ export const salesInvoice = {
     'web/apps/api/src/modules/sales/sales.ts',
     'web/apps/api/src/routes/txn.ts',
     'web/apps/web/test/features/modules/salesInvoice.mjs',
+    'web/apps/web/test/features/faults.mjs',
     'web/apps/web/test/features/fixtures/catalogue.mjs',
   ],
   fixtureManifest: FIXTURE_MANIFEST,

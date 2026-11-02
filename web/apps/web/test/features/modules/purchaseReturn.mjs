@@ -303,6 +303,7 @@ export const purchaseReturn = {
     'web/apps/api/src/modules/purchase/purchaseReturnLifecycle.ts',
     'web/packages/core/src/purchaseReturnAmount.ts',
     'web/apps/web/test/features/modules/purchaseReturn.mjs',
+    'web/apps/web/test/features/faults.mjs',
     'web/apps/web/test/features/fixtures/catalogue.mjs',
   ],
   fixtureManifest: FIXTURE_MANIFEST,
