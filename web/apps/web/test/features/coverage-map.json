@@ -195,9 +195,17 @@
     },
     "gstReport": {
       "covers": [
-        "web/apps/web/app/(app)/reports/[report]/page.tsx",
+        "web/apps/web/app/(app)/reports/gst-report/page.tsx",
+        "web/apps/web/app/(app)/reports/gst-report/useGstReport.ts",
+        "web/apps/web/app/(app)/reports/gst-report/GstReportGrid.tsx",
+        "web/apps/web/app/(app)/reports/gst-report/types.ts",
         "web/apps/web/lib/nav.ts",
         "web/apps/api/src/modules/reports/gstLauncherReport.ts",
+        "web/apps/api/src/modules/reports/gstReport.ts",
+        "web/apps/api/src/modules/reports/gstReportTypes.ts",
+        "web/apps/api/src/modules/reports/gstReportSections.ts",
+        "web/apps/api/src/modules/reports/gstReportQueries.ts",
+        "web/apps/api/src/modules/reports/gstReportCsv.ts",
         "web/apps/api/src/modules/gst/gst.ts",
         "web/apps/api/src/modules/gst/gstr1Doc.ts",
         "web/apps/api/src/modules/reports/reports.ts",
@@ -205,6 +213,7 @@
         "web/apps/api/src/modules/reports/reports3.ts",
         "web/apps/api/src/modules/reports/statementDocs.ts",
         "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/routes/gstReport.ts",
         "web/apps/api/src/routes/txn.ts"
       ]
     },

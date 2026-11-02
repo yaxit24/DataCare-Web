@@ -115,8 +115,10 @@ describe('route policy registry', () => {
     // The Wh Sales print (WhSalesBill, TR_WH_SALE.cs:13654) adds GET /wholesale-sales/:vchNo/print: 714.
     // N221 replaces Stock Adjust's POST and DELETE /stock/adjust with the TR_TAG_CAN family (list, source, lots, one,
     // POST, PUT, DELETE, print): 714 - 2 + 8 = 720.
-    expect(routes).toHaveLength(720);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(720);
+    // Agent 07 moves the existing GST launcher route into a dedicated plugin and adds three exports:
+    // 720 - 1 moved declaration + 4 dedicated declarations = 723.
+    expect(routes).toHaveLength(723);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(723);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -492,11 +494,19 @@ describe('route policy registry', () => {
     });
   });
 
-  it('maps the desktop GST report launcher to its report rights', () => {
+  it('maps the canonical GST dataset and exports to the RP_GST list/print rights', () => {
     expect(routePolicyFor('GET', '/reports/gst-report')).toMatchObject({
       form: 'Reports/GST Report',
       action: 'read',
+      businessScope: true,
     });
+    for (const extension of ['csv', 'xlsx', 'pdf']) {
+      expect(routePolicyFor('GET', `/reports/gst-report/export.${extension}`)).toMatchObject({
+        form: 'Reports/GST Report',
+        action: 'print',
+        businessScope: true,
+      });
+    }
   });
 
   it('maps RP_ORDER Delete Data and Point Report routes to report rights', () => {

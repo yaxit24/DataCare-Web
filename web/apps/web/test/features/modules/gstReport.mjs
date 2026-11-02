@@ -152,7 +152,7 @@ const SECTION_COLUMNS = Object.freeze({
   ],
 });
 
-const DESKTOP_FILTERS = ['From Date', 'To Date', 'Book', 'Party', 'Location', 'Section Type'];
+const DESKTOP_FILTERS = ['From Date', 'To Date', 'Book', 'Party', 'Section Type'];
 const DESKTOP_ACTIONS = ['Csv Fil', 'Gstr 1', 'Gstr 2', 'Gstr 3', 'Gsrt1 Csv'];
 
 async function openFromNavigation(ctx, credentials) {
@@ -228,9 +228,17 @@ export const gstReport = {
   title: 'Report → Gst Report (RP_GST, non-UAE)',
   defaultUser: as(USERS.admin.user),
   inputs: [
-    'web/apps/web/app/(app)/reports/[report]/page.tsx',
+    'web/apps/web/app/(app)/reports/gst-report/page.tsx',
+    'web/apps/web/app/(app)/reports/gst-report/useGstReport.ts',
+    'web/apps/web/app/(app)/reports/gst-report/GstReportGrid.tsx',
+    'web/apps/web/app/(app)/reports/gst-report/types.ts',
     'web/apps/web/lib/nav.ts',
-    'web/apps/api/src/modules/reports/gstLauncherReport.ts',
+    'web/apps/api/src/modules/reports/gstReport.ts',
+    'web/apps/api/src/modules/reports/gstReportTypes.ts',
+    'web/apps/api/src/modules/reports/gstReportSections.ts',
+    'web/apps/api/src/modules/reports/gstReportQueries.ts',
+    'web/apps/api/src/modules/reports/gstReportCsv.ts',
+    'web/apps/api/src/routes/gstReport.ts',
     'web/apps/api/src/modules/gst/gst.ts',
     'web/apps/api/src/modules/gst/gstr1Doc.ts',
     'web/apps/api/src/modules/reports/reports.ts',
@@ -289,8 +297,13 @@ export const gstReport = {
       ],
       ['filters.book-exact-rows', { changed: 'Book', expected: 'only selected CO_BOOK' }],
       ['filters.party-exact-rows', { changed: 'Party', expected: 'only selected AC_CODE' }],
-      ['filters.location-exact-rows', { changed: 'Location', expected: 'only selected LC_CODE' }],
     ].map(([id, expected]) => desiredCase(id, 'T02', 'read-only', FILTER_SOURCE, expected)),
+    notApplicable(
+      'filters.location-hidden-in-lite.not-applicable',
+      'T02',
+      'RP_GST.cs:1681-1717 shows the Location selector only when MsSoftType is E',
+      'The non-UAE Lite menu reads the selected session location and does not expose a Location field.',
+    ),
 
     desiredCase(
       'section.b2b-calculation',
@@ -479,7 +492,6 @@ export const gstReport = {
     ...[
       ['lookup.book-enter-help-cancel-stale-scope', 'RP_GST.cs:1837-1883'],
       ['lookup.party-enter-help-cancel-stale-scope', 'RP_GST.cs:1885-1943'],
-      ['lookup.location-enter-help-cancel-stale-scope', 'RP_GST.cs:1945-1985'],
     ].map(([id, lines]) =>
       desiredCase(
         id,
@@ -493,6 +505,12 @@ export const gstReport = {
           scope: ['company', 'location where applicable'],
         },
       ),
+    ),
+    notApplicable(
+      'lookup.location-hidden-in-lite.not-applicable',
+      'T04',
+      'RP_GST.cs:1681-1717 hides Location unless MsSoftType is E',
+      'The Lite screen takes location from the authenticated business context; there is no location help control.',
     ),
 
     notApplicable(

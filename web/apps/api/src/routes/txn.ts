@@ -700,6 +700,7 @@ import {
 import { addressPrintReport, lastVisitReport } from '../modules/reports/customerAccountReports.js';
 import { dhrnLoanReport } from '../modules/reports/dhrnLoanReports.js';
 import { gstLauncherReport } from '../modules/reports/gstLauncherReport.js';
+import { registerGstReportRoutes } from './gstReport.js';
 import {
   approvalReport,
   bullionReport,
@@ -1118,6 +1119,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerAddressMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerItemMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerWholesaleSaleRoutes(app, extraRouteHelpers);
+  registerGstReportRoutes(app, { prisma, auth, scopeOf: readScope, pdfRenderer: deps.pdfRenderer });
   const pdfRenderer = (): PdfRenderer => deps.pdfRenderer ?? new PlaywrightPdfRenderer();
   /** Render server-built HTML, mapping limits to 413/422 and a busy or slow renderer to a retryable 503. */
   const sendPdf = async (reply: FastifyReply, html: string, filename: string) => {
@@ -6354,7 +6356,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
-  app.get('/reports/gst-report', auth, async (req) => gstLauncherReport(prisma, readScope(req)));
   app.get('/reports/delete-data', auth, async (req, reply) => {
     return run(reply, 200, () => deleteDataReport(prisma, readScope(req)));
   });
