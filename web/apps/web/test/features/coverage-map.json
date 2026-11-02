@@ -226,6 +226,13 @@
         "web/apps/api/src/modules/masters/partyMaster.ts",
         "web/apps/api/src/routes/partyMaster.ts"
       ]
+    },
+    "tagPrint": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/tag-print/page.tsx",
+        "web/apps/api/src/modules/stock/tagPrintScreen.ts",
+        "web/apps/api/src/routes/tagPrintScreen.ts"
+      ]
     }
   }
 }
