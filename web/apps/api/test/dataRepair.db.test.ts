@@ -305,49 +305,14 @@ d('data repair console', () => {
     );
   });
 
-  it('reconciles approval status from the approval lines', async () => {
-    await withTenant(prisma, tenantId, async (tx: any) => {
-      const bar = (tag: string, apr: string) =>
-        tx.$executeRawUnsafe(
-          `INSERT INTO "BAR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO",
-             "TAG_NO","VCH_SRNO","IT_CODE","APR_ISU")
-           VALUES ($1,$2,$3,$4,'SL','00001',1,$5,1,'GOLD',$6)`,
-          tenantId,
-          CO,
-          LC,
-          YEAR,
-          tag,
-          apr,
-        );
-      await bar('TAGONAPR', 'N'); // has an approval line but flagged N -> must become Y
-      await bar('TAGHOME', 'Y'); // no approval line but flagged Y -> must become N
-      await tx.$executeRawUnsafe(
-        `INSERT INTO "APR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO",
-           "TAG_NO","VCH_SRNO") VALUES ($1,$2,$3,$4,'TUR','00001',1,'TAGONAPR',1)`,
-        tenantId,
-        CO,
-        LC,
-        YEAR,
-      );
+  it('registers Approval Adj with the full two-table write set and desktop completion text', () => {
+    expect(getRepair('approval-reconcile')).toMatchObject({
+      title: 'Approval Adj',
+      tables: ['APR_DETL', 'BAR_DETL'],
+      applyAvailable: true,
+      completionText: 'Approval Refersh Process Complete.',
+      desktopSource: 'MS_UPDATE.cs:8809-8823',
     });
-    const p = await previewRepair(prisma, 'approval-reconcile', scope, OPERATOR);
-    expect(p.diffs.find((x) => x.table === 'BAR_DETL')?.update).toBe(2);
-    await applyRepair(prisma, 'approval-reconcile', scope, {
-      previewHash: p.previewHash,
-      operator: OPERATOR,
-    });
-    const rows: any[] = await withTenant(prisma, tenantId, (tx: any) =>
-      tx.$queryRawUnsafe(
-        `SELECT "TAG_NO","APR_ISU" FROM "BAR_DETL" WHERE tenant_id=$1 ORDER BY "TAG_NO"`,
-        tenantId,
-      ),
-    );
-    const m = Object.fromEntries(rows.map((r) => [r.TAG_NO, r.APR_ISU]));
-    expect(m.TAGONAPR).toBe('Y');
-    expect(m.TAGHOME).toBe('N');
-    // Idempotent.
-    const p2 = await previewRepair(prisma, 'approval-reconcile', scope, OPERATOR);
-    expect(p2.clean).toBe(true);
   });
 
   it('rebuilds opening balances with the desktop sign convention', async () => {

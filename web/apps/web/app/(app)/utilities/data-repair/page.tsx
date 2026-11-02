@@ -25,6 +25,9 @@ interface Operation {
   desktopSource: string;
   risk: 'low' | 'medium' | 'high' | 'danger';
   tables: string[];
+  applyAvailable: boolean;
+  blockedReason: string | null;
+  completionText: string | null;
 }
 interface TableDiff {
   table: string;
@@ -47,6 +50,9 @@ interface Preview {
   risk: string;
   requiresConfirmation: string | null;
   authority: Authority;
+  applyAvailable: boolean;
+  blockedReason: string | null;
+  completionText: string | null;
 }
 interface RunRow {
   operation_id: string;
@@ -222,7 +228,7 @@ export default function DataRepairPage() {
         </table>
       </div>
 
-      {preview && active && !preview.clean && (
+      {preview && active && (
         <div className="panel">
           <h2>
             {active.title} <span className="muted">— review before applying</span>
@@ -328,21 +334,28 @@ export default function DataRepairPage() {
               )}
             </div>
           )}
-          <button
-            className="primary"
-            disabled={
-              busy ||
-              Boolean(
-                preview.requiresConfirmation && confirmation !== preview.requiresConfirmation,
-              ) ||
-              Boolean(preview.authority?.reason && reason.trim().length < REASON_MIN_LENGTH) ||
-              Boolean(preview.authority?.reauthentication && !operatorPassword) ||
-              Boolean(preview.authority?.backupReference && !backupReference.trim())
-            }
-            onClick={runApply}
-          >
-            {busy ? 'Applying…' : 'Apply repair'}
-          </button>
+          {!preview.applyAvailable && (
+            <div className="msg err" role="status">
+              Preview only: {preview.blockedReason}
+            </div>
+          )}
+          {preview.applyAvailable && !preview.clean && (
+            <button
+              className="primary"
+              disabled={
+                busy ||
+                Boolean(
+                  preview.requiresConfirmation && confirmation !== preview.requiresConfirmation,
+                ) ||
+                Boolean(preview.authority?.reason && reason.trim().length < REASON_MIN_LENGTH) ||
+                Boolean(preview.authority?.reauthentication && !operatorPassword) ||
+                Boolean(preview.authority?.backupReference && !backupReference.trim())
+              }
+              onClick={runApply}
+            >
+              {busy ? 'Applying…' : 'Apply repair'}
+            </button>
+          )}
         </div>
       )}
 

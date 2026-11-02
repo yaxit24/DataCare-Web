@@ -1,4 +1,5 @@
 import { diff, registerRepair, type RepairScope, type RepairTableDiff } from './dataRepair.js';
+import './dataRefreshOps.js';
 
 /**
  * Repair operations ported from the desktop's `MS_UPDATE` maintenance console.
@@ -180,70 +181,7 @@ registerRepair({
 });
 
 // ---------------------------------------------------------------------------------------------------
-// approval-reconcile — MS_UPDATE.cs:8809-8824 (btnAprUpdate)
-//
-//   UPDATE APR_DETL SET ISU_REC = 'N' WHERE <company>
-//   UPDATE BAR_DETL SET APR_ISU = 'N' WHERE <company>
-//   UPDATE BAR_DETL SET APR_ISU = 'Y' FROM APR_DETL B
-//    WHERE BAR_DETL.CO_CODE=B.CO_CODE AND BAR_DETL.TAG_NO=B.TAG_NO AND BAR_DETL.VCH_SRNO=B.VCH_SRNO
-//
-// The desktop resets both flags and then re-asserts 'Y' for tags that still have an approval line. The
-// diff form computes the target state per tag and touches only rows that disagree, which yields the same
-// end state without rewriting every row in the company.
-// ---------------------------------------------------------------------------------------------------
-registerRepair({
-  id: 'approval-reconcile',
-  title: 'Reconcile approval (tour) status',
-  description:
-    'Recomputes the approval-issued flag on tag records from the approval detail lines, so tags released ' +
-    'on approval and tags returned show the correct status.',
-  desktopSource: 'MS_UPDATE.cs:8809-8824',
-  risk: 'medium',
-  tables: ['BAR_DETL'],
-  async preview(tx, scope) {
-    const rows: any[] = await tx.$queryRawUnsafe(
-      `SELECT b."TAG_NO", coalesce(b."APR_ISU",'') AS stored,
-              CASE WHEN EXISTS (
-                SELECT 1 FROM "APR_DETL" d
-                 WHERE d.tenant_id=b.tenant_id AND d."CO_CODE"=b."CO_CODE"
-                   AND d."TAG_NO"=b."TAG_NO" AND d."VCH_SRNO"=b."VCH_SRNO"
-              ) THEN 'Y' ELSE 'N' END AS expected
-         FROM "BAR_DETL" b
-        WHERE b.tenant_id=current_setting('app.tenant_id', true) AND b."CO_CODE"=$1
-          AND coalesce(b."APR_ISU",'') <> CASE WHEN EXISTS (
-                SELECT 1 FROM "APR_DETL" d
-                 WHERE d.tenant_id=b.tenant_id AND d."CO_CODE"=b."CO_CODE"
-                   AND d."TAG_NO"=b."TAG_NO" AND d."VCH_SRNO"=b."VCH_SRNO"
-              ) THEN 'Y' ELSE 'N' END
-        ORDER BY b."TAG_NO" LIMIT 200`,
-      scope.coCode,
-    );
-    return {
-      diffs: rows.length ? [diff('BAR_DETL', { update: rows.length })] : [],
-      samples: rows
-        .slice(0, 5)
-        .map((r) => `BAR_DETL ${r.TAG_NO}: APR_ISU ${r.stored || '(blank)'} -> ${r.expected}`),
-    };
-  },
-  async apply(tx, scope) {
-    const n: number = await tx.$executeRawUnsafe(
-      `UPDATE "BAR_DETL" b
-          SET "APR_ISU" = CASE WHEN EXISTS (
-                SELECT 1 FROM "APR_DETL" d
-                 WHERE d.tenant_id=b.tenant_id AND d."CO_CODE"=b."CO_CODE"
-                   AND d."TAG_NO"=b."TAG_NO" AND d."VCH_SRNO"=b."VCH_SRNO"
-              ) THEN 'Y' ELSE 'N' END
-        WHERE b.tenant_id=current_setting('app.tenant_id', true) AND b."CO_CODE"=$1
-          AND coalesce(b."APR_ISU",'') <> CASE WHEN EXISTS (
-                SELECT 1 FROM "APR_DETL" d
-                 WHERE d.tenant_id=b.tenant_id AND d."CO_CODE"=b."CO_CODE"
-                   AND d."TAG_NO"=b."TAG_NO" AND d."VCH_SRNO"=b."VCH_SRNO"
-              ) THEN 'Y' ELSE 'N' END`,
-      scope.coCode,
-    );
-    return n ? [diff('BAR_DETL', { update: n })] : [];
-  },
-});
+// Approval Adj is registered in dataRefreshOps.ts with the full APR_DETL consumed-source reconciliation.
 
 // ---------------------------------------------------------------------------------------------------
 // sale-tag-weight — MS_UPDATE.cs:32537-32560 (BtnSlWtDiff)

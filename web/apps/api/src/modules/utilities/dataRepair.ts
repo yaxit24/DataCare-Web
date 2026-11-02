@@ -16,8 +16,9 @@ import { verifyWithMigration } from '../auth/password.js';
  *
  * Every operation therefore goes through the same three steps:
  *
- *   1. PREVIEW  — compute the expected state, diff it against what is stored, and return exact
- *                 insert/update/delete counts plus a bounded sample of business keys. Reads only.
+ *   1. PREVIEW  — compute the expected state, diff it against what is stored, return exact
+ *                 insert/update/delete counts plus a bounded sample, and append an audit row. It writes
+ *                 no business data, but it is deliberately not literally read-only because it is audited.
  *   2. REVIEW   — the operator sees those counts. A destructive operation additionally requires a typed
  *                 confirmation and, where marked, a backup reference.
  *   3. APPLY    — re-derive the candidate set inside ONE transaction under an advisory lock, refuse if the
@@ -64,6 +65,12 @@ export interface RepairPreview {
   operationId: string;
   /** Binds a later apply to exactly this candidate set. */
   previewHash: string;
+  /** False means the operation is an audited classification and the server will refuse apply. */
+  applyAvailable: boolean;
+  /** Source-backed reason an apply is unavailable. */
+  blockedReason: string | null;
+  /** Exact desktop success text, shown only after a successful apply. */
+  completionText: string | null;
   diffs: RepairTableDiff[];
   /** Bounded, human-readable business keys so the operator can spot a wrong scope before committing. */
   samples: string[];
@@ -103,16 +110,26 @@ export interface RepairOperation {
   /** Exact desktop evidence, e.g. `MS_UPDATE.cs:32561-32596`. */
   desktopSource: string;
   risk: RepairRisk;
+  /** Defaults to true. False marks an audited preview-only classification. */
+  applyAvailable?: boolean;
+  /** Required when applyAvailable is false. */
+  blockedReason?: string;
+  /** Exact desktop success text. It is never shown for a refused preview-only apply. */
+  completionText?: string;
   /** Tables the operation may write. Used for the cleanup contract in tests and for the audit record. */
   tables: readonly string[];
   /**
-   * Compute the diff WITHOUT writing. Must be pure with respect to the database: the framework asserts
-   * read-only behaviour in tests by comparing row counts before and after a preview.
+   * Compute the diff WITHOUT writing business data. The framework itself records an audited preview.
+   * `candidateFingerprint` may bind the hash to the complete candidate set while `samples` stays bounded.
    */
   preview: (
     tx: any,
     scope: RepairScope,
-  ) => Promise<{ diffs: RepairTableDiff[]; samples: string[] }>;
+  ) => Promise<{
+    diffs: RepairTableDiff[];
+    samples: string[];
+    candidateFingerprint?: string;
+  }>;
   /** Apply only the diff. Runs inside the framework's transaction and advisory lock. */
   apply: (tx: any, scope: RepairScope) => Promise<RepairTableDiff[]>;
 }
@@ -190,6 +207,7 @@ function hashPreview(
   scope: RepairScope,
   diffs: RepairTableDiff[],
   samples: string[],
+  candidateFingerprint?: string,
 ): string {
   const canonical = JSON.stringify({
     op: op.id,
@@ -201,6 +219,7 @@ function hashPreview(
       .sort((a, b) => a.table.localeCompare(b.table))
       .map((d) => [d.table, d.insert, d.update, d.delete]),
     samples: [...samples].sort(),
+    candidates: candidateFingerprint ?? null,
   });
   return createHash('sha256').update(canonical).digest('hex');
 }
@@ -208,7 +227,7 @@ function hashPreview(
 const totalChanges = (diffs: RepairTableDiff[]): number =>
   diffs.reduce((a, d) => a + d.insert + d.update + d.delete, 0);
 
-/** Preview an operation. Reads only; records the reviewed set so a later apply can be bound to it. */
+/** Preview an operation without business-data writes; append the reviewed set to the audit ledger. */
 export async function previewRepair(
   prisma: any,
   operationId: string,
@@ -217,8 +236,8 @@ export async function previewRepair(
 ): Promise<RepairPreview> {
   const op = getRepair(operationId);
   return withTxBudget(prisma, scope.tenantId, 'heavy', async (tx: any) => {
-    const { diffs, samples } = await op.preview(tx, scope);
-    const previewHash = hashPreview(op, scope, diffs, samples);
+    const { diffs, samples, candidateFingerprint } = await op.preview(tx, scope);
+    const previewHash = hashPreview(op, scope, diffs, samples, candidateFingerprint);
     const clean = totalChanges(diffs) === 0;
     await tx.$executeRawUnsafe(
       `INSERT INTO "data_repair_run"
@@ -237,6 +256,9 @@ export async function previewRepair(
     return {
       operationId: op.id,
       previewHash,
+      applyAvailable: op.applyAvailable !== false,
+      blockedReason: op.blockedReason ?? null,
+      completionText: op.completionText ?? null,
       diffs,
       samples: samples.slice(0, 50),
       clean,
@@ -353,6 +375,12 @@ export async function applyRepair(
   input: RepairApplyInput,
 ): Promise<RepairApplied> {
   const op = getRepair(operationId);
+  if (op.applyAvailable === false) {
+    throw new RepairError(
+      'preview-only',
+      op.blockedReason ?? 'this operation is available for audited preview only',
+    );
+  }
   const authority = authorityFor(op, scope);
   if (authority.confirmation && input.confirmation !== authority.confirmation) {
     throw new RepairError(
@@ -398,8 +426,8 @@ export async function applyRepair(
     }
 
     // Re-derive under the lock and refuse if the data moved since the review.
-    const { diffs, samples } = await op.preview(tx, scope);
-    const recomputed = hashPreview(op, scope, diffs, samples);
+    const { diffs, samples, candidateFingerprint } = await op.preview(tx, scope);
+    const recomputed = hashPreview(op, scope, diffs, samples, candidateFingerprint);
     if (recomputed !== input.previewHash) {
       throw new RepairError(
         'stale-preview',

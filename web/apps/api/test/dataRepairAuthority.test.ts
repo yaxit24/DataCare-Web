@@ -259,6 +259,27 @@ describe('data repair console authority', () => {
     ).toEqual([]);
   });
 
+  it('publishes preview-only metadata and refuses direct apply before any business transaction', async () => {
+    Object.assign(h.state, { role: 'ADMIN' as Role });
+    const operations = await call('GET', '/utilities/data-repair/operations');
+    const account = operations
+      .json()
+      .operations.find((operation: any) => operation.id === 'data-refresh-account');
+    expect(account).toMatchObject({
+      title: 'Account',
+      applyAvailable: false,
+      completionText: 'Account Refersh Process Complete.',
+    });
+    expect(account.blockedReason).toContain('Ac_Ledr');
+
+    const response = await call('POST', '/utilities/data-repair/data-refresh-account/apply', {
+      previewHash: '0'.repeat(64),
+    });
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({ error: 'RepairError', code: 'preview-only' });
+    expect(h.businessQueries, 'preview-only apply must stop before business data').toEqual([]);
+  });
+
   it('refuses an unknown operation id without disclosing anything else', async () => {
     Object.assign(h.state, { role: 'ADMIN' as Role });
     const response = await call('POST', '/utilities/data-repair/not-an-operation/apply', {

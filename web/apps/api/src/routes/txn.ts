@@ -4668,6 +4668,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         desktopSource: o.desktopSource,
         risk: o.risk,
         tables: o.tables,
+        applyAvailable: o.applyAvailable !== false,
+        blockedReason: o.blockedReason ?? null,
+        completionText: o.completionText ?? null,
       })),
     };
   });
