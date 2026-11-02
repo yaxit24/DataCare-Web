@@ -222,6 +222,17 @@ db('Data Refresh Approval Adj write set', () => {
     });
 
     const after = await physical();
+    const beforeApr = before.APR_DETL;
+    const afterApr = after.APR_DETL;
+    const beforeBars = before.BAR_DETL;
+    const afterBars = after.BAR_DETL;
+    if (!beforeApr || !afterApr || !beforeBars || !afterBars) {
+      throw new Error('physical approval snapshots must include APR_DETL and BAR_DETL');
+    }
+    expect(beforeApr).toHaveLength(10);
+    expect(afterApr).toHaveLength(10);
+    expect(beforeBars).toHaveLength(9);
+    expect(afterBars).toHaveLength(9);
     const changedKeys = (beforeRaw: string, afterRaw: string) => {
       const beforeRow = JSON.parse(beforeRaw);
       const afterRow = JSON.parse(afterRaw);
@@ -230,14 +241,10 @@ db('Data Refresh Approval Adj write set', () => {
       );
     };
     for (let index = 0; index < 5; index++) {
-      expect(changedKeys(before.APR_DETL[index]!.raw, after.APR_DETL[index]!.raw)).toEqual([
-        'ISU_REC',
-      ]);
+      expect(changedKeys(beforeApr[index]!.raw, afterApr[index]!.raw)).toEqual(['ISU_REC']);
     }
     for (let index = 0; index < 6; index++) {
-      expect(changedKeys(before.BAR_DETL[index]!.raw, after.BAR_DETL[index]!.raw)).toEqual([
-        'APR_ISU',
-      ]);
+      expect(changedKeys(beforeBars[index]!.raw, afterBars[index]!.raw)).toEqual(['APR_ISU']);
     }
     expect(after.SL_DETL).toEqual(before.SL_DETL);
     expect(after.RATE_CUT_ISU).toEqual(before.RATE_CUT_ISU);
@@ -249,8 +256,8 @@ db('Data Refresh Approval Adj write set', () => {
     }
     expect(await physical(otherTenant)).toEqual(otherBefore);
     // Complete row JSON changes only where the source authorizes; unchanged-scope rows retain xmin too.
-    expect(after.APR_DETL.slice(5)).toEqual(before.APR_DETL.slice(5));
-    expect(after.BAR_DETL.slice(6)).toEqual(before.BAR_DETL.slice(6));
+    expect(afterApr.slice(5)).toEqual(beforeApr.slice(5));
+    expect(afterBars.slice(6)).toEqual(beforeBars.slice(6));
 
     const history = await repairHistory(prisma, { tenantId, coCode: '01' });
     expect(history.filter((row) => row.state === 'applied')).toHaveLength(1);

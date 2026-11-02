@@ -51,6 +51,11 @@ const previewOnlyOperations = [
   ['data-refresh-old-field', 'Old Field'],
 ];
 const hidden = ['Crm Data', 'Problem Qry', 'TagDiff Set', 'Mfg Refresh', 'Scheme Data'];
+const now = new Date();
+const startYear = now.getMonth() + 1 >= 4 ? now.getFullYear() : now.getFullYear() - 1;
+const YEAR = `${startYear}-${startYear + 1}`;
+const PADDED_YEAR = `${YEAR} `;
+const WRONG_YEAR = `${startYear - 1}-${startYear}`;
 const apiPath = (response) => new URL(response.url()).pathname;
 const isApi = (response, suffix) => apiPath(response) === `/api${suffix}`;
 const exec = (ctx, sql, ...params) => ctx.owner.$executeRawUnsafe(sql, ctx.tenantId, ...params);
@@ -63,64 +68,141 @@ async function openScreen(page) {
   await page.getByRole('button', { name: 'Account', exact: true }).waitFor();
 }
 
-async function cleanApproval(ctx) {
-  await ctx.owner.$transaction(async (tx) => {
-    await tx.$executeRawUnsafe(`SET LOCAL "app.allow_repair_purge"='on'`);
+async function cleanApprovalFixtures(ctx, tx = ctx.owner) {
+  for (const table of ['APR_DETL', 'SL_DETL', 'RATE_CUT_ISU', 'BAR_DETL'])
     await tx.$executeRawUnsafe(
-      `DELETE FROM "data_repair_run" WHERE tenant_id=$1 AND operation_id='approval-reconcile'`,
+      `DELETE FROM "${table}" WHERE tenant_id=$1
+        AND (coalesce("TAG_NO",'') LIKE 'DRF%' OR coalesce("VCH_NO",'') LIKE 'DRF%')`,
       ctx.tenantId,
     );
-    for (const table of ['APR_DETL', 'SL_DETL', 'RATE_CUT_ISU', 'BAR_DETL'])
+}
+
+async function approvalSnapshot(ctx) {
+  const [apr, bars, runs] = await Promise.all([
+    ctx.rows(
+      `SELECT row_id::text id,"ISU_REC" flag FROM "APR_DETL"
+        WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01' AND "CO_YEAR"=$2
+          AND "BOOK_NAME"='APR ISU' ORDER BY row_id`,
+      YEAR,
+    ),
+    ctx.rows(
+      `SELECT row_id::text id,"APR_ISU" flag FROM "BAR_DETL"
+        WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01' AND "CO_YEAR"=$2
+        ORDER BY row_id`,
+      YEAR,
+    ),
+    ctx.rows(
+      `SELECT row_id::text id FROM "data_repair_run"
+        WHERE tenant_id=$1 AND operation_id='approval-reconcile' ORDER BY row_id`,
+    ),
+  ]);
+  return { apr, bars, runIds: runs.map((row) => row.id) };
+}
+
+async function restoreApprovalSnapshot(ctx, snapshot) {
+  await ctx.owner.$transaction(async (tx) => {
+    await tx.$executeRawUnsafe(`SET LOCAL "app.allow_repair_purge"='on'`);
+    await cleanApprovalFixtures(ctx, tx);
+    if (snapshot.runIds.length) {
       await tx.$executeRawUnsafe(
-        `DELETE FROM "${table}" WHERE tenant_id=$1
-          AND (coalesce("TAG_NO",'') LIKE 'DRF%' OR coalesce("VCH_NO",'') LIKE 'DRF%')`,
+        `DELETE FROM "data_repair_run"
+          WHERE tenant_id=$1 AND operation_id='approval-reconcile'
+            AND NOT (row_id::text = ANY($2::text[]))`,
         ctx.tenantId,
+        snapshot.runIds,
+      );
+    } else {
+      await tx.$executeRawUnsafe(
+        `DELETE FROM "data_repair_run"
+          WHERE tenant_id=$1 AND operation_id='approval-reconcile'`,
+        ctx.tenantId,
+      );
+    }
+    for (const row of snapshot.apr)
+      await tx.$executeRawUnsafe(
+        `UPDATE "APR_DETL" SET "ISU_REC"=$3
+          WHERE tenant_id=$1 AND row_id=$2::bigint AND "ISU_REC" IS DISTINCT FROM $3`,
+        ctx.tenantId,
+        row.id,
+        row.flag,
+      );
+    for (const row of snapshot.bars)
+      await tx.$executeRawUnsafe(
+        `UPDATE "BAR_DETL" SET "APR_ISU"=$3
+          WHERE tenant_id=$1 AND row_id=$2::bigint AND "APR_ISU" IS DISTINCT FROM $3`,
+        ctx.tenantId,
+        row.id,
+        row.flag,
       );
   });
 }
 
+async function withApprovalFixtures(ctx, run) {
+  await cleanApprovalFixtures(ctx);
+  const snapshot = await approvalSnapshot(ctx);
+  try {
+    await seedApproval(ctx);
+    return await run();
+  } finally {
+    // Approval Adj intentionally normalizes the whole selected scope. Restore every pre-existing flag and remove
+    // this case's fixture/history so repeated cases cannot affect one another or modules that run afterward.
+    await restoreApprovalSnapshot(ctx, snapshot);
+  }
+}
+
 async function seedApproval(ctx) {
-  await cleanApproval(ctx);
   await exec(
     ctx,
     `INSERT INTO "APR_DETL"
       (tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","OLD_SRNO","BOOK_NAME","TAG_NO","VCH_SRNO","ISU_REC")
-     VALUES ($1,'01','01','2024-2025','AI','DRFI1',1,1,'APR ISU','DRF-APRRTN',901,'N'),
-            ($1,'01','01','2024-2025','AI','DRFI2',1,2,'APR ISU','DRF-SALES',902,'N'),
-            ($1,'01','01','2024-2025','AI','DRFI3',1,3,'APR ISU','DRF-WH',903,'N'),
-            ($1,'01','01','2024-2025','AI','DRFI4',1,4,'APR ISU','DRF-RATE',904,'N'),
-            ($1,'01','01','2024-2025','AI','DRFI5',1,5,'APR ISU','DRF-OPEN',905,'Y'),
-            ($1,'01','02','2024-2025','AI','DRFI6',1,6,'APR ISU','DRF-OTHER-LC',906,'Y'),
-            ($1,'01','01','2024-2025','ART','DRFR1',1,1,'APR RTN','N',0,'N')`,
+     VALUES ($1,'01','01',$2,'AI','DRFI1',1,1,'APR ISU','DRF-APRRTN',901,'N'),
+            ($1,'01','01',$2,'AI','DRFI2',1,2,'APR ISU','DRF-SALES',902,'N'),
+            ($1,'01','01',$2,'AI','DRFI3',1,3,'APR ISU','DRF-WH',903,'N'),
+            ($1,'01','01',$2,'AI','DRFI4',1,4,'APR ISU','DRF-RATE',904,'N'),
+            ($1,'01','01',$2,'AI','DRFI5',1,5,'APR ISU','DRF-OPEN',905,'Y'),
+            ($1,'01','02',$2,'AI','DRFI6',1,6,'APR ISU','DRF-OTHER-LC',906,'Y'),
+            ($1,'01','01',$3,'AI','DRFI7',1,7,'APR ISU','DRF-WRONG-YR',907,'Y'),
+            ($1,'01','01',$2,'ART','DRFR1',1,1,'APR RTN','N',0,'N')`,
+    YEAR,
+    WRONG_YEAR,
   );
   await exec(
     ctx,
-    `UPDATE "APR_DETL" SET "ISU_YRCD"='2024-2025 ',"ISU_DBCD"='AI ',"ISU_NO"='DRFI1  ',"ISU_SRNO"=1
+    `UPDATE "APR_DETL" SET "ISU_YRCD"=$2,"ISU_DBCD"='AI ',"ISU_NO"='DRFI1  ',"ISU_SRNO"=1
       WHERE tenant_id=$1 AND "VCH_NO"='DRFR1'`,
+    PADDED_YEAR,
   );
   await exec(
     ctx,
     `INSERT INTO "SL_DETL"
       (tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","BOOK_NAME","TAG_NO","ISU_YRCD","ISU_DBCD","ISU_NO","ISU_SRNO")
-     VALUES ($1,'01','01','2024-2025','SL','DRFS1',1,'SALES','N','2024-2025 ','AI ','DRFI2  ',2)`,
+     VALUES ($1,'01','01',$2,'SL','DRFS1',1,'SALES','N',$3,'AI ','DRFI2  ',2),
+            ($1,'01','01',$2,'SL','DRFS2',1,'SALES','N',$3,'AI ',' DRFI5',5)`,
+    YEAR,
+    PADDED_YEAR,
   );
   await exec(
     ctx,
     `INSERT INTO "RATE_CUT_ISU"
       (tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","BOOK_NAME","TAG_NO","ISU_YRCD","ISU_DBCD","ISU_NO","ISU_SRNO")
-     VALUES ($1,'01','01','2024-2025','WHS','DRFW1',1,'WH SALES','N','2024-2025 ','AI ','DRFI3  ',3),
-            ($1,'01','01','2024-2025','RTC','DRFC1',1,'RATE CUT','N','2024-2025 ','AI ','DRFI4  ',4)`,
+     VALUES ($1,'01','01',$2,'WHS','DRFW1',1,'WH SALES','N',$3,'AI ','DRFI3  ',3),
+            ($1,'01','01',$2,'RTC','DRFC1',1,'RATE CUT','N',$3,'AI ','DRFI4  ',4)`,
+    YEAR,
+    PADDED_YEAR,
   );
   await exec(
     ctx,
     `INSERT INTO "BAR_DETL"
       (tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","BOOK_NAME","TAG_NO","VCH_SRNO","IT_CODE","APR_ISU")
-     VALUES ($1,'01','01','2024-2025','TAG','DRFB1',1,'TAG OPENING','DRF-APRRTN',901,'GLD22','Y'),
-            ($1,'01','01','2024-2025','TAG','DRFB2',1,'TAG OPENING','DRF-SALES',902,'GLD22','Y'),
-            ($1,'01','01','2024-2025','TAG','DRFB3',1,'TAG OPENING','DRF-WH',903,'GLD22','Y'),
-            ($1,'01','01','2024-2025','TAG','DRFB4',1,'TAG OPENING','DRF-RATE',904,'GLD22','Y'),
-            ($1,'01','01','2024-2025','TAG','DRFB5',1,'TAG OPENING','DRF-OPEN',905,'GLD22','N'),
-            ($1,'01','02','2024-2025','TAG','DRFB6',1,'TAG OPENING','DRF-OTHER-LC',906,'GLD22','N')`,
+     VALUES ($1,'01','01',$2,'TAG','DRFB1',1,'TAG OPENING','DRF-APRRTN',901,'GLD22','Y'),
+            ($1,'01','01',$2,'TAG','DRFB2',1,'TAG OPENING','DRF-SALES',902,'GLD22','Y'),
+            ($1,'01','01',$2,'TAG','DRFB3',1,'TAG OPENING','DRF-WH',903,'GLD22','Y'),
+            ($1,'01','01',$2,'TAG','DRFB4',1,'TAG OPENING','DRF-RATE',904,'GLD22','Y'),
+            ($1,'01','01',$2,'TAG','DRFB5',1,'TAG OPENING','DRF-OPEN',905,'GLD22','N'),
+            ($1,'01','02',$2,'TAG','DRFB6',1,'TAG OPENING','DRF-OTHER-LC',906,'GLD22','N'),
+            ($1,'01','01',$3,'TAG','DRFB7',1,'TAG OPENING','DRF-WRONG-YR',907,'GLD22','N')`,
+    YEAR,
+    WRONG_YEAR,
   );
 }
 
@@ -133,6 +215,106 @@ const flags = (ctx) =>
       WHERE tenant_id=$1 AND "TAG_NO" LIKE 'DRF%'
      ORDER BY kind,tag`,
   );
+
+const rtrimSpaces = (value) => String(value ?? '').replace(/ +$/u, '');
+const sqlEqual = (left, right) => left != null && right != null && left === right;
+
+/**
+ * Independent source oracle for MS_UPDATE.cs:8815-8820. The queries only fetch raw rows; JavaScript performs the
+ * four-source trailing-space match and then derives every issue and BAR flag in the selected whole scope.
+ */
+async function approvalOracle(ctx) {
+  const [issues, sources, bars] = await Promise.all([
+    ctx.rows(
+      `SELECT row_id::text id,"CO_CODE" co,"LC_CODE" lc,"CO_YEAR" yr,"CO_BOOK" book,
+              "VCH_NO" vch,"OLD_SRNO" oldsr,"TAG_NO" tag,"VCH_SRNO" vchsr,
+              coalesce("ISU_REC",'') stored
+         FROM "APR_DETL" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01'
+          AND "CO_YEAR"=$2 AND "BOOK_NAME"='APR ISU' ORDER BY row_id`,
+      YEAR,
+    ),
+    ctx.rows(
+      `SELECT 'APR_DETL' source,"CO_CODE" co,"LC_CODE" lc,"BOOK_NAME" bookname,
+              "ISU_YRCD" isuyr,"ISU_DBCD" isubook,"ISU_NO" isuno,"ISU_SRNO" isusr
+         FROM "APR_DETL" WHERE tenant_id=$1
+       UNION ALL
+       SELECT 'SL_DETL',"CO_CODE","LC_CODE","BOOK_NAME","ISU_YRCD","ISU_DBCD","ISU_NO","ISU_SRNO"
+         FROM "SL_DETL" WHERE tenant_id=$1
+       UNION ALL
+       SELECT 'RATE_CUT_ISU',"CO_CODE","LC_CODE","BOOK_NAME","ISU_YRCD","ISU_DBCD","ISU_NO","ISU_SRNO"
+         FROM "RATE_CUT_ISU" WHERE tenant_id=$1`,
+    ),
+    ctx.rows(
+      `SELECT row_id::text id,"CO_CODE" co,"LC_CODE" lc,"CO_YEAR" yr,"TAG_NO" tag,
+              "VCH_SRNO" vchsr,coalesce("APR_ISU",'') stored
+         FROM "BAR_DETL" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01'
+          AND "CO_YEAR"=$2 ORDER BY row_id`,
+      YEAR,
+    ),
+  ]);
+  const acceptedBook = (row) =>
+    (row.source === 'APR_DETL' && row.bookname === 'APR RTN') ||
+    (row.source === 'SL_DETL' && row.bookname === 'SALES') ||
+    (row.source === 'RATE_CUT_ISU' && ['WH SALES', 'RATE CUT'].includes(row.bookname));
+  const consumed = (issue) =>
+    sources.some(
+      (source) =>
+        acceptedBook(source) &&
+        rtrimSpaces(source.isuno) !== '' &&
+        sqlEqual(source.co, issue.co) &&
+        sqlEqual(source.lc, issue.lc) &&
+        rtrimSpaces(source.isuyr) === rtrimSpaces(issue.yr) &&
+        rtrimSpaces(source.isubook) === rtrimSpaces(issue.book) &&
+        rtrimSpaces(source.isuno) === rtrimSpaces(issue.vch) &&
+        source.isusr != null &&
+        issue.oldsr != null &&
+        Number(source.isusr) === Number(issue.oldsr),
+    );
+  const issueStates = issues.map((issue) => ({ ...issue, consumed: consumed(issue) }));
+  const issueUpdates = issueStates.filter(
+    (issue) => issue.stored !== (issue.consumed ? 'Y' : 'N'),
+  ).length;
+  const barUpdates = bars.filter((bar) => {
+    const unconsumed = issueStates.some(
+      (issue) =>
+        !issue.consumed &&
+        sqlEqual(issue.co, bar.co) &&
+        sqlEqual(issue.lc, bar.lc) &&
+        sqlEqual(issue.yr, bar.yr) &&
+        sqlEqual(issue.tag, bar.tag) &&
+        issue.vchsr != null &&
+        bar.vchsr != null &&
+        Number(issue.vchsr) === Number(bar.vchsr),
+    );
+    return bar.stored !== (unconsumed ? 'Y' : 'N');
+  }).length;
+  return [
+    ...(issueUpdates ? [{ table: 'APR_DETL', insert: 0, update: issueUpdates, delete: 0 }] : []),
+    ...(barUpdates ? [{ table: 'BAR_DETL', insert: 0, update: barUpdates, delete: 0 }] : []),
+  ];
+}
+
+function assertApprovalFixture(rows) {
+  assert.deepEqual(
+    rows.map((row) => [row.kind, row.tag, row.flag]),
+    [
+      ['APR', 'DRF-APRRTN', 'Y'],
+      ['APR', 'DRF-OPEN', 'N'],
+      ['APR', 'DRF-OTHER-LC', 'Y'],
+      ['APR', 'DRF-RATE', 'Y'],
+      ['APR', 'DRF-SALES', 'Y'],
+      ['APR', 'DRF-WH', 'Y'],
+      ['APR', 'DRF-WRONG-YR', 'Y'],
+      ['BAR', 'DRF-APRRTN', 'N'],
+      ['BAR', 'DRF-OPEN', 'Y'],
+      ['BAR', 'DRF-OTHER-LC', 'N'],
+      ['BAR', 'DRF-RATE', 'N'],
+      ['BAR', 'DRF-SALES', 'N'],
+      ['BAR', 'DRF-WH', 'N'],
+      ['BAR', 'DRF-WRONG-YR', 'N'],
+    ],
+  );
+}
 
 async function previewApproval(page) {
   const [response] = await Promise.all([
@@ -156,37 +338,21 @@ async function applyApproval(page) {
   return response.json();
 }
 
-async function approvalLifecycle(ctx) {
-  await seedApproval(ctx);
-  const before = await flags(ctx);
-  const { page } = await ctx.session(as(USERS.admin.user, 'data-refresh-approval'));
-  await openScreen(page);
-  const preview = await previewApproval(page);
-  assert.deepEqual(preview.diffs, [
-    { table: 'APR_DETL', insert: 0, update: 5, delete: 0 },
-    { table: 'BAR_DETL', insert: 0, update: 5, delete: 0 },
-  ]);
-  const result = await applyApproval(page);
-  await page.getByText('Approval Refersh Process Complete.', { exact: true }).waitFor();
-  const after = await flags(ctx);
-  assert.deepEqual(
-    after.map((row) => [row.kind, row.tag, row.flag]),
-    [
-      ['APR', 'DRF-APRRTN', 'Y'],
-      ['APR', 'DRF-OPEN', 'N'],
-      ['APR', 'DRF-OTHER-LC', 'Y'],
-      ['APR', 'DRF-RATE', 'Y'],
-      ['APR', 'DRF-SALES', 'Y'],
-      ['APR', 'DRF-WH', 'Y'],
-      ['BAR', 'DRF-APRRTN', 'N'],
-      ['BAR', 'DRF-OPEN', 'Y'],
-      ['BAR', 'DRF-OTHER-LC', 'N'],
-      ['BAR', 'DRF-RATE', 'N'],
-      ['BAR', 'DRF-SALES', 'N'],
-      ['BAR', 'DRF-WH', 'N'],
-    ],
-  );
-  return { page, preview, result, before, after };
+async function approvalLifecycle(ctx, inspect) {
+  return withApprovalFixtures(ctx, async () => {
+    const before = await flags(ctx);
+    const expectedDiffs = await approvalOracle(ctx);
+    const { page } = await ctx.session(as(USERS.admin.user, 'data-refresh-approval'));
+    await openScreen(page);
+    const preview = await previewApproval(page);
+    assert.deepEqual(preview.diffs, expectedDiffs);
+    const result = await applyApproval(page);
+    assert.deepEqual(result.applied, expectedDiffs);
+    await page.getByText('Approval Refersh Process Complete.', { exact: true }).waitFor();
+    const after = await flags(ctx);
+    assertApprovalFixture(after);
+    return inspect({ page, preview, result, before, after, expectedDiffs });
+  });
 }
 
 export const dataRefresh = {
@@ -198,13 +364,16 @@ export const dataRefresh = {
     'web/apps/api/src/modules/utilities/dataRepair.ts',
     'web/apps/api/src/modules/utilities/dataRepairOps.ts',
     'web/apps/api/src/modules/utilities/dataRefreshOps.ts',
+    'web/apps/api/src/modules/shared/postingAccounts.ts',
     'web/apps/api/src/routes/dataRepair.ts',
     'web/apps/web/app/(app)/utilities/data-refresh/page.tsx',
     'web/apps/web/app/(app)/utilities/data-repair/page.tsx',
     'web/apps/web/test/features/modules/dataRefresh.mjs',
   ],
   fixtureManifest: FIXTURE_MANIFEST,
-  settingsManifest: { operationScope: 'company 01, location 01, year 2024-2025' },
+  settingsManifest: {
+    operationScope: `company 01, location 01, year ${YEAR} (current April-March)`,
+  },
   cases: [
     C(
       'entry.six-visible-actions',
@@ -248,16 +417,14 @@ export const dataRefresh = {
       'T03',
       'mutation',
       'MS_UPDATE.cs:8815-8820: APR RTN, SALES, WH SALES and RATE CUT consume APR ISU by issue year/book/no/old serial',
-      async (ctx) => {
-        const result = await approvalLifecycle(ctx);
-        return {
+      async (ctx) =>
+        approvalLifecycle(ctx, async (result) => ({
           observation:
             'consumed issue became Y, open issue became N, and BAR flags were their inverse',
           expected: result.preview.diffs,
           database: result.after,
           downstream: 'BAR_DETL now exposes only the unconsumed tag as APR_ISU=Y',
-        };
-      },
+        })),
     ),
     notApplicable(
       'lookup.not-applicable',
@@ -306,29 +473,27 @@ export const dataRefresh = {
       'T07',
       'mutation',
       'MS_UPDATE.cs:8815-8821; D-REF-2: preview then one audited transaction',
-      async (ctx) => {
-        const result = await approvalLifecycle(ctx);
-        return {
+      async (ctx) =>
+        approvalLifecycle(ctx, async (result) => ({
           observation:
             'Approval Adj applied both two-row diffs and showed the source completion text',
           expected: result.preview.diffs,
           database: result.after,
           downstream: 'APR_DETL and BAR_DETL agree on consumed/open state',
-        };
-      },
+        })),
     ),
     C(
       'reopen.clean-preview',
       'T08',
       'read-only',
       'D-REF-2: a fresh preview after apply is clean',
-      async (ctx) => {
-        const { page } = await approvalLifecycle(ctx);
-        const preview = await previewApproval(page);
-        assert.equal(preview.clean, true);
-        assert.deepEqual(preview.diffs, []);
-        return { observation: 'fresh Approval Adj preview was clean', expected: [] };
-      },
+      async (ctx) =>
+        approvalLifecycle(ctx, async ({ page }) => {
+          const preview = await previewApproval(page);
+          assert.equal(preview.clean, true);
+          assert.deepEqual(preview.diffs, []);
+          return { observation: 'fresh Approval Adj preview was clean', expected: [] };
+        }),
     ),
     C(
       'edit.account-stock-classification',
@@ -376,37 +541,39 @@ export const dataRefresh = {
       'T10',
       'read-only',
       'D-REF-2: previews and applies remain visible in the compatibility history',
-      async (ctx) => {
-        const { page } = await approvalLifecycle(ctx);
-        await page.goto('/utilities/data-repair');
-        await page.getByRole('heading', { name: /Data Repair/ }).waitFor();
-        const operationTable = page.getByRole('table').first();
-        for (const [id, caption] of previewOnlyOperations) {
-          const row = operationTable.locator(`tr[data-operation-id="${id}"]`);
-          const [response] = await Promise.all([
-            page.waitForResponse((value) => isApi(value, `/utilities/data-repair/${id}/preview`)),
-            row.getByRole('button', { name: 'Preview', exact: true }).click(),
-          ]);
-          assert.equal(response.status(), 200, `${caption}: ${await response.text()}`);
-          await page.getByText(/Preview only:/).waitFor();
-          assert.equal(
-            await page.getByRole('button', { name: 'Apply repair', exact: true }).count(),
-            0,
-          );
-          assert.equal(
-            await page.locator('#reason,#confirmation,#operatorPassword,#backupReference').count(),
-            0,
-          );
-        }
-        const history = await page.getByRole('table').last().innerText();
-        assert.match(history, /approval-reconcile/);
-        assert.match(history, /applied/);
-        return {
-          observation:
-            'advanced Data Repair shows shared history and suppresses Apply and authority inputs for all five preview-only operations',
-          expected: 'history retained; preview-only capability honored',
-        };
-      },
+      async (ctx) =>
+        approvalLifecycle(ctx, async ({ page }) => {
+          await page.goto('/utilities/data-repair');
+          await page.getByRole('heading', { name: /Data Repair/ }).waitFor();
+          const operationTable = page.getByRole('table').first();
+          for (const [id, caption] of previewOnlyOperations) {
+            const row = operationTable.locator(`tr[data-operation-id="${id}"]`);
+            const [response] = await Promise.all([
+              page.waitForResponse((value) => isApi(value, `/utilities/data-repair/${id}/preview`)),
+              row.getByRole('button', { name: 'Preview', exact: true }).click(),
+            ]);
+            assert.equal(response.status(), 200, `${caption}: ${await response.text()}`);
+            await page.getByText(/Preview only:/).waitFor();
+            assert.equal(
+              await page.getByRole('button', { name: 'Apply repair', exact: true }).count(),
+              0,
+            );
+            assert.equal(
+              await page
+                .locator('#reason,#confirmation,#operatorPassword,#backupReference')
+                .count(),
+              0,
+            );
+          }
+          const history = await page.getByRole('table').last().innerText();
+          assert.match(history, /approval-reconcile/);
+          assert.match(history, /applied/);
+          return {
+            observation:
+              'advanced Data Repair shows shared history and suppresses Apply and authority inputs for all five preview-only operations',
+            expected: 'history retained; preview-only capability honored',
+          };
+        }),
     ),
     blocked(
       'rights.caption-print-handoff',
@@ -425,24 +592,24 @@ export const dataRefresh = {
       'T13',
       'mutation',
       'D-REF-2: replaying the reviewed hash resolves to the existing applied run',
-      async (ctx) => {
-        const result = await approvalLifecycle(ctx);
-        const replay = await result.page.request.post(
-          '/api/utilities/data-repair/approval-reconcile/apply',
-          {
-            data: { previewHash: result.preview.previewHash },
-          },
-        );
-        assert.equal(replay.status(), 200);
-        const body = await replay.json();
-        assert.equal(body.deduplicated, true);
-        return {
-          observation: 'same hash returned deduplicated=true',
-          expected: true,
-          database: result.after,
-          downstream: 'no repeated writes',
-        };
-      },
+      async (ctx) =>
+        approvalLifecycle(ctx, async (result) => {
+          const replay = await result.page.request.post(
+            '/api/utilities/data-repair/approval-reconcile/apply',
+            {
+              data: { previewHash: result.preview.previewHash },
+            },
+          );
+          assert.equal(replay.status(), 200);
+          const body = await replay.json();
+          assert.equal(body.deduplicated, true);
+          return {
+            observation: 'same hash returned deduplicated=true',
+            expected: true,
+            database: result.after,
+            downstream: 'no repeated writes',
+          };
+        }),
     ),
     blocked(
       'rollback.browser-fault-boundary',
@@ -455,102 +622,114 @@ export const dataRefresh = {
       'T15',
       'mutation',
       'MS_UPDATE.cs:8815-8820 plus safe tenant/company/location/year containment',
-      async (ctx) => {
-        const result = await approvalLifecycle(ctx);
-        const sentinels = result.after.filter((row) => String(row.tag).includes('OTHER-LC'));
-        assert.deepEqual(
-          sentinels.map((row) => row.flag),
-          ['Y', 'N'],
-        );
-        return {
-          observation: 'wrong-location issue and tag remained in deliberately opposite states',
-          expected: ['Y', 'N'],
-          database: sentinels,
-          downstream: 'selected location only',
-        };
-      },
+      async (ctx) =>
+        approvalLifecycle(ctx, async (result) => {
+          const sentinels = result.after.filter((row) =>
+            /OTHER-LC|WRONG-YR/u.test(String(row.tag)),
+          );
+          assert.deepEqual(
+            sentinels.map((row) => [row.tag, row.flag]),
+            [
+              ['DRF-OTHER-LC', 'Y'],
+              ['DRF-WRONG-YR', 'Y'],
+              ['DRF-OTHER-LC', 'N'],
+              ['DRF-WRONG-YR', 'N'],
+            ],
+          );
+          return {
+            observation: 'wrong-location and wrong-year issue/tag sentinels remained unchanged',
+            expected: ['Y', 'Y', 'N', 'N'],
+            database: sentinels,
+            downstream: 'selected location and current April-March year only',
+          };
+        }),
     ),
     C(
       'output.message-and-history',
       'T16',
       'output',
       'MS_UPDATE.cs:8821: exact message; this maintenance screen has no PDF/CSV output',
-      async (ctx) => {
-        const { page } = await approvalLifecycle(ctx);
-        const text = await page
-          .getByText('Approval Refersh Process Complete.', { exact: true })
-          .innerText();
-        const history = await page.getByRole('table').last().innerText();
-        assert.match(history, /approval-reconcile/);
-        return { observation: `${text}; history rendered`, expected: text, output: history };
-      },
+      async (ctx) =>
+        approvalLifecycle(ctx, async ({ page }) => {
+          const text = await page
+            .getByText('Approval Refersh Process Complete.', { exact: true })
+            .innerText();
+          const history = await page.getByRole('table').last().innerText();
+          assert.match(history, /approval-reconcile/);
+          return { observation: `${text}; history rendered`, expected: text, output: history };
+        }),
     ),
     C(
       'keyboard.native-order-no-secret-shortcut',
       'T17',
       'mutation',
       'MS_UPDATE.cs:1371-1504,1606-1615,2275-2301: desktop tab order; Ctrl+O tools excluded by D-REF-1',
-      async (ctx) => {
-        await seedApproval(ctx);
-        const before = await flags(ctx);
-        const { page } = await ctx.session();
-        await openScreen(page);
-        await page.getByRole('button', { name: 'Account', exact: true }).focus();
-        const order = [];
-        for (let index = 0; index < captions.length; index++) {
-          order.push(await page.evaluate(() => document.activeElement?.textContent?.trim()));
-          if (index < captions.length - 1) await page.keyboard.press('Tab');
-        }
-        assert.deepEqual(order, captions);
-        await page.keyboard.press('Control+O');
-        for (const name of hidden)
-          assert.equal(await page.getByText(name, { exact: true }).count(), 0);
+      async (ctx) =>
+        withApprovalFixtures(ctx, async () => {
+          const before = await flags(ctx);
+          const expectedDiffs = await approvalOracle(ctx);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          await page.getByRole('button', { name: 'Account', exact: true }).focus();
+          const order = [];
+          for (let index = 0; index < captions.length; index++) {
+            order.push(await page.evaluate(() => document.activeElement?.textContent?.trim()));
+            if (index < captions.length - 1) await page.keyboard.press('Tab');
+          }
+          assert.deepEqual(order, captions);
+          await page.keyboard.press('Control+O');
+          for (const name of hidden)
+            assert.equal(await page.getByText(name, { exact: true }).count(), 0);
 
-        const operation = page.getByRole('button', { name: 'Approval Adj', exact: true });
-        await operation.focus();
-        const [previewResponse] = await Promise.all([
-          page.waitForResponse((value) =>
-            isApi(value, '/utilities/data-repair/approval-reconcile/preview'),
-          ),
-          page.keyboard.press('Enter'),
-        ]);
-        assert.equal(previewResponse.status(), 200, await previewResponse.text());
-        const heading = page.getByRole('heading', { name: 'Approval Adj preview', exact: true });
-        await heading.waitFor();
-        await page.waitForFunction(
-          (element) => document.activeElement === element,
-          await heading.elementHandle(),
-        );
+          const operation = page.getByRole('button', { name: 'Approval Adj', exact: true });
+          await operation.focus();
+          const [previewResponse] = await Promise.all([
+            page.waitForResponse((value) =>
+              isApi(value, '/utilities/data-repair/approval-reconcile/preview'),
+            ),
+            page.keyboard.press('Enter'),
+          ]);
+          assert.equal(previewResponse.status(), 200);
+          const preview = await previewResponse.json();
+          assert.deepEqual(preview.diffs, expectedDiffs);
+          const heading = page.getByRole('heading', { name: 'Approval Adj preview', exact: true });
+          await heading.waitFor();
+          await page.waitForFunction(
+            (element) => document.activeElement === element,
+            await heading.elementHandle(),
+          );
 
-        const apply = page.getByRole('button', { name: 'Apply Approval Adj', exact: true });
-        await apply.waitFor();
-        await page.waitForFunction(
-          (element) => !(element instanceof HTMLButtonElement) || !element.disabled,
-          await apply.elementHandle(),
-        );
-        await page.keyboard.press('Tab');
-        assert.equal(await apply.evaluate((element) => document.activeElement === element), true);
-        const [applyResponse] = await Promise.all([
-          page.waitForResponse((value) =>
-            isApi(value, '/utilities/data-repair/approval-reconcile/apply'),
-          ),
-          page.keyboard.press('Enter'),
-        ]);
-        assert.equal(applyResponse.status(), 200, await applyResponse.text());
-        await page.getByText('Approval Refersh Process Complete.', { exact: true }).waitFor();
-        await page.waitForFunction(
-          (element) => document.activeElement === element,
-          await operation.elementHandle(),
-        );
+          const apply = page.getByRole('button', { name: 'Apply Approval Adj', exact: true });
+          await apply.waitFor();
+          await page.waitForFunction(
+            (element) => !(element instanceof HTMLButtonElement) || !element.disabled,
+            await apply.elementHandle(),
+          );
+          await page.keyboard.press('Tab');
+          assert.equal(await apply.evaluate((element) => document.activeElement === element), true);
+          const [applyResponse] = await Promise.all([
+            page.waitForResponse((value) =>
+              isApi(value, '/utilities/data-repair/approval-reconcile/apply'),
+            ),
+            page.keyboard.press('Enter'),
+          ]);
+          assert.equal(applyResponse.status(), 200);
+          assert.deepEqual((await applyResponse.json()).applied, expectedDiffs);
+          await page.getByText('Approval Refersh Process Complete.', { exact: true }).waitFor();
+          await page.waitForFunction(
+            (element) => document.activeElement === element,
+            await operation.elementHandle(),
+          );
 
-        const after = await flags(ctx);
-        return {
-          observation: `Tab order ${order.join(' → ')}; focus Approval Adj → preview heading → Apply → Approval Adj; Ctrl+O inert`,
-          expected: captions,
-          database: { before, after },
-          downstream: 'successful apply restored focus to its originating operation',
-        };
-      },
+          const after = await flags(ctx);
+          assertApprovalFixture(after);
+          return {
+            observation: `Tab order ${order.join(' → ')}; focus Approval Adj → preview heading → Apply → Approval Adj; Ctrl+O inert`,
+            expected: { captions, diffs: expectedDiffs },
+            database: { before, after },
+            downstream: 'successful apply restored focus to its originating operation',
+          };
+        }),
     ),
     blocked(
       'journey.account-full-builder',

@@ -349,15 +349,15 @@ d('data repair console', () => {
         operator: OPERATOR,
       }),
     ).rejects.toMatchObject({ code: 'preview-only' });
-    const stored = await withTenant(prisma, tenantId, (tx: any) =>
+    const stored = (await withTenant(prisma, tenantId, (tx: any) =>
       tx.$queryRawUnsafe(
         `SELECT "ITM_FINE" fine FROM "BAR_DETL" WHERE tenant_id=$1 AND "TAG_NO"='STKFINE'
          UNION ALL
          SELECT "ITM_FINE" FROM "SL_DETL_RTN" WHERE tenant_id=$1 AND "TAG_NO"='STKFINE'`,
         tenantId,
       ),
-    );
-    expect(stored.map((row: any) => Number(row.fine))).toEqual([0, 1]);
+    )) as Array<{ fine: unknown }>;
+    expect(stored.map((row) => Number(row.fine))).toEqual([0, 1]);
   });
 
   it('rebuilds opening balances with the desktop sign convention', async () => {

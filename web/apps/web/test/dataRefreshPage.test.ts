@@ -3,9 +3,9 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const source = (path: string) => readFileSync(resolve(process.cwd(), path), 'utf8');
-const page = source('apps/web/app/(app)/utilities/data-refresh/page.tsx');
-const compatibilityPage = source('apps/web/app/(app)/utilities/data-repair/page.tsx');
-const operations = source('apps/api/src/modules/utilities/dataRefreshOps.ts');
+const page = source('app/(app)/utilities/data-refresh/page.tsx');
+const compatibilityPage = source('app/(app)/utilities/data-repair/page.tsx');
+const operations = source('../api/src/modules/utilities/dataRefreshOps.ts');
 
 describe('Data Refresh operator surface', () => {
   it('pins the six desktop captions in operator order', () => {

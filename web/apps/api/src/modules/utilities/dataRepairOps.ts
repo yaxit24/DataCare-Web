@@ -1,3 +1,7 @@
+import {
+  selectDataRefreshAccountCandidatesTx,
+  type DataRefreshAccountCandidate,
+} from '../shared/postingAccounts.js';
 import { diff, registerRepair, type RepairScope, type RepairTableDiff } from './dataRepair.js';
 import './dataRefreshOps.js';
 
@@ -1024,56 +1028,10 @@ registerRepair({
     // Keep every candidate's stable scoped business key, physical identity, stored value and expected value.
     // The complete ordered query is deliberately uncapped: display samples stay small, while the preview
     // hash changes when one same-count candidate is replaced by another.
-    const candidates: Array<{ part: string }> = await tx.$queryRawUnsafe(
-      `SELECT * FROM (
-         SELECT 'BOOK_DATA'::text AS part,t.row_id::text AS "rowId",
-                jsonb_build_array(t."CO_CODE",t."LC_CODE",t."CO_BOOK")::text AS "businessKey",
-                NULL::text AS "sourceKey",t."DATA_TYPE" AS stored,'A'::text AS expected
-           FROM "BOOK_DATA" t
-          WHERE t.tenant_id=current_setting('app.tenant_id', true)
-            AND t."CO_CODE"=$1 AND ($2::text='' OR t."LC_CODE"=$2)
-            AND coalesce(t."DATA_TYPE",'')=''
-         UNION ALL
-         SELECT 'BOOK_DETL',t.row_id::text,
-                jsonb_build_array(t."CO_CODE",t."LC_CODE",t."CO_BOOK",t."SR_NO",t."AC_CODE")::text,
-                NULL::text,t."DATA_TYPE",'A'::text
-           FROM "BOOK_DETL" t
-          WHERE t.tenant_id=current_setting('app.tenant_id', true)
-            AND t."CO_CODE"=$1 AND ($2::text='' OR t."LC_CODE"=$2)
-            AND coalesce(t."DATA_TYPE",'')=''
-         UNION ALL
-         SELECT 'CASH_DATA',c.row_id::text,
-                jsonb_build_array(c."CO_CODE",c."LC_CODE",c."CO_YEAR",c."CO_BOOK",c."VCH_NO",c."SR_NO")::text,
-                NULL::text,to_char(c."CLR_DATE",'YYYY-MM-DD'),to_char(c."VCH_DATE",'YYYY-MM-DD')
-           FROM "CASH_DATA" c
-          WHERE c.tenant_id=current_setting('app.tenant_id', true)
-            AND c."CO_CODE"=$1 AND ($2::text='' OR c."LC_CODE"=$2)
-            AND ($3::text='' OR c."CO_YEAR"=$3)
-            AND c."CLR_DATE" IS NULL AND c."VCH_DATE" IS NOT NULL
-         UNION ALL
-         SELECT 'BANK_RECONCILE_CURRENT',r.row_id::text,
-                jsonb_build_array(r."CO_CODE",r."LC_CODE",r."LEDR_KEY")::text,
-                NULL::text,to_char(r."CLR_DATE",'YYYY-MM-DD'),NULL::text
-           FROM "BANK_RECONCILE" r
-          WHERE r.tenant_id=current_setting('app.tenant_id', true)
-            AND r."CO_CODE"=$1 AND ($2::text='' OR r."LC_CODE"=$2)
-         UNION ALL
-         SELECT 'BANK_RECONCILE_EXPECTED',a.row_id::text,
-                jsonb_build_array(a."CO_CODE",a."LC_CODE",a."LEDR_KEY")::text,
-                jsonb_build_array(a."CO_YEAR",a."CO_BOOK",a."VCH_NO",a."AC_CODE")::text,
-                NULL::text,to_char(a."CLR_DATE",'YYYY-MM-DD')
-           FROM "AC_DATA" a
-           JOIN "AC_MAST" b ON b.tenant_id=a.tenant_id AND b."CO_CODE"=a."CO_CODE"
-                AND b."AC_CODE"::text=a."AC_CODE"::text
-          WHERE a.tenant_id=current_setting('app.tenant_id', true)
-            AND a."CO_CODE"=$1 AND ($2::text='' OR a."LC_CODE"=$2)
-            AND b."AC_GR" = ANY($4::text[])
-       ) candidate
-       ORDER BY part,"businessKey","sourceKey","rowId"`,
-      scope.coCode,
-      scope.lcCode ?? '',
-      scope.coYear ?? '',
-      [...RECONCILE_AC_GROUPS],
+    const candidates: DataRefreshAccountCandidate[] = await selectDataRefreshAccountCandidatesTx(
+      tx,
+      scope,
+      RECONCILE_AC_GROUPS,
     );
     const count = (part: string) => candidates.filter((row) => row.part === part).length;
     const bookData = count('BOOK_DATA');
