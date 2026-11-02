@@ -893,6 +893,12 @@ route('Reports/Trial Balance', ['GET /reports/trial-balance', 'GET /reports/tria
 route('Reports/Trial Balance (Full)', ['GET /reports/trial-balance-full']);
 route('Reports/Balance Sheet', ['GET /reports/balance-sheet', 'GET /reports/balance-sheet-doc']);
 route('Reports/Account Ledger', [
+  // RP_LEDR: the canonical screen (view=summary|detail|voucher-summary|ageing) and its three exports,
+  // plus the two account-in-path aliases kept for the current screen during the UI migration.
+  'GET /reports/account-ledger',
+  'GET /reports/account-ledger/export.pdf',
+  'GET /reports/account-ledger/export.xlsx',
+  'GET /reports/account-ledger/export.csv',
   'GET /reports/account-ledger/:acCode',
   'GET /reports/account-ledger/:acCode/export.pdf',
 ]);
@@ -995,6 +1001,9 @@ const PRINT_ROUTES = new Set([
   'GET /masters/group-master/print',
   'GET /masters/address-master/print',
   'POST /estimate/pdf',
+  'GET /reports/account-ledger/export.pdf',
+  'GET /reports/account-ledger/export.xlsx',
+  'GET /reports/account-ledger/export.csv',
   'GET /reports/account-ledger/:acCode/export.pdf',
   'GET /tour-orders/confirmation',
   'GET /sales/invoice',
