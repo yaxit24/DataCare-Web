@@ -6,7 +6,6 @@ import {
   USERS,
   sentinelSnapshot,
 } from '../fixtures/catalogue.mjs';
-import { TENANT } from '../harness.mjs';
 
 /**
  * Feature: Purchase → Purchase Invoice (desktop TR_PURC, CurBookHelp("PURCHASE")).
@@ -90,6 +89,9 @@ const LINE_FINE_BOUNDARY = {
   rate: '1000',
 };
 const EXPECT_FINE_BOUNDARY = { fine: 9.161, metal: 9161, labour: 0, net: 9161 };
+
+const WHOLE_RUPEE_SETTINGS = { amountType: 'F', totalRounding: 0, taxRounding: 2 };
+const NON_F_SETTINGS = { amountType: 'G', totalRounding: 2, taxRounding: 2 };
 
 const LINE_GROSS_RATE_TYPE = {
   item: ITEMS.gold.code,
@@ -257,6 +259,122 @@ async function registerRow(page, vchNo) {
   return row.innerText();
 }
 
+async function withPurchaseSettings(ctx, { amountType, totalRounding, taxRounding }, run) {
+  const [beforeCoSet] = await ctx.rows(
+    `SELECT "PR_AMT_TYPE" amount_type,"TAX_ROF" tax_rounding
+       FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+  );
+  assert(beforeCoSet, 'purchase settings require a CO_SET row for company 01');
+  const beforeCoSetNewRows = await ctx.rows(
+    `SELECT "TOT_AMT_ROF" total_rounding
+       FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+  );
+  assert(beforeCoSetNewRows.length <= 1, 'company 01 must have at most one CO_SET_NEW row');
+  const beforeCoSetNew = beforeCoSetNewRows[0];
+  let insertedCoSetNew = null;
+
+  try {
+    const coSetRows = await ctx.owner.$executeRawUnsafe(
+      `UPDATE "CO_SET" SET "PR_AMT_TYPE"=$2,"TAX_ROF"=$3
+        WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+      ctx.tenantId,
+      amountType,
+      taxRounding,
+    );
+    assert.equal(coSetRows, 1, 'updated the company 01 purchase settings');
+
+    if (beforeCoSetNew) {
+      const coSetNewRows = await ctx.owner.$executeRawUnsafe(
+        `UPDATE "CO_SET_NEW" SET "TOT_AMT_ROF"=$2
+          WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        ctx.tenantId,
+        totalRounding,
+      );
+      assert.equal(coSetNewRows, 1, 'updated the company 01 total rounding setting');
+    } else {
+      const inserted = await ctx.rows(
+        `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","TOT_AMT_ROF")
+           VALUES ($1,'01',$2)
+         RETURNING tenant_id,"CO_CODE" company`,
+        totalRounding,
+      );
+      assert.equal(inserted.length, 1, 'inserted the missing company 01 settings row');
+      insertedCoSetNew = inserted[0];
+    }
+
+    const [configured] = await ctx.rows(
+      `SELECT btrim(s."PR_AMT_TYPE") amount_type,s."TAX_ROF"::float tax_rounding,
+              n."TOT_AMT_ROF"::int total_rounding
+         FROM "CO_SET" s
+         JOIN "CO_SET_NEW" n ON n.tenant_id=s.tenant_id AND n."CO_CODE"=s."CO_CODE"
+        WHERE s.tenant_id=$1 AND s."CO_CODE"='01'`,
+    );
+    assert.deepEqual(configured, {
+      amount_type: amountType,
+      tax_rounding: taxRounding,
+      total_rounding: totalRounding,
+    });
+
+    return await run();
+  } finally {
+    const cleanup = [
+      ctx.owner.$executeRawUnsafe(
+        `UPDATE "CO_SET" SET "PR_AMT_TYPE"=$2,"TAX_ROF"=$3
+          WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        ctx.tenantId,
+        beforeCoSet.amount_type,
+        beforeCoSet.tax_rounding,
+      ),
+    ];
+    if (beforeCoSetNew) {
+      cleanup.push(
+        ctx.owner.$executeRawUnsafe(
+          `UPDATE "CO_SET_NEW" SET "TOT_AMT_ROF"=$2
+            WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+          ctx.tenantId,
+          beforeCoSetNew.total_rounding,
+        ),
+      );
+    } else if (insertedCoSetNew) {
+      cleanup.push(
+        ctx.owner.$executeRawUnsafe(
+          `DELETE FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+          insertedCoSetNew.tenant_id,
+          insertedCoSetNew.company,
+        ),
+      );
+    }
+
+    const cleanupResults = await Promise.allSettled(cleanup);
+    const cleanupErrors = cleanupResults.flatMap((result, index) => {
+      if (result.status === 'rejected') return [result.reason];
+      try {
+        assert.equal(result.value, 1, `settings cleanup operation ${index + 1} changed one row`);
+        return [];
+      } catch (error) {
+        return [error];
+      }
+    });
+    try {
+      const restoredCoSet = await ctx.rows(
+        `SELECT "PR_AMT_TYPE" amount_type,"TAX_ROF" tax_rounding
+           FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+      );
+      assert.deepEqual(restoredCoSet, [beforeCoSet]);
+      const restoredCoSetNew = await ctx.rows(
+        `SELECT "TOT_AMT_ROF" total_rounding
+           FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+      );
+      assert.deepEqual(restoredCoSetNew, beforeCoSetNew ? [beforeCoSetNew] : []);
+    } catch (error) {
+      cleanupErrors.push(error);
+    }
+    if (cleanupErrors.length === 1) throw cleanupErrors[0];
+    if (cleanupErrors.length > 1)
+      throw new AggregateError(cleanupErrors, 'failed to restore purchase settings fixture');
+  }
+}
+
 const C = (id, group, kind, source, run, extra = {}) => ({
   id: `purchase-invoice.${id}`,
   group,
@@ -394,25 +512,7 @@ export const purchaseInvoice = {
       'mutation',
       'N188/G198: TR_PURC.cs:7395-7554,12981-13010,13127-13144,15477-15508; whole item/labour, company header and tax precision',
       async (ctx) => {
-        const [beforeCoSet] = await ctx.rows(
-          `SELECT "PR_AMT_TYPE" amount_type,"TAX_ROF" tax_rounding
-             FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
-        );
-        const [beforeCoSetNew] = await ctx.rows(
-          `SELECT "TOT_AMT_ROF" total_rounding
-             FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
-        );
-        await ctx.owner.$executeRawUnsafe(
-          `UPDATE "CO_SET" SET "PR_AMT_TYPE"='F',"TAX_ROF"=2
-            WHERE tenant_id=$1 AND "CO_CODE"='01'`,
-          TENANT,
-        );
-        await ctx.owner.$executeRawUnsafe(
-          `UPDATE "CO_SET_NEW" SET "TOT_AMT_ROF"=0
-            WHERE tenant_id=$1 AND "CO_CODE"='01'`,
-          TENANT,
-        );
-        try {
+        return withPurchaseSettings(ctx, WHOLE_RUPEE_SETTINGS, async () => {
           const { page } = await ctx.session();
           await openPurchase(page);
           await pickSupplier(page, PARTIES.local.code);
@@ -502,23 +602,7 @@ export const purchaseInvoice = {
             database: { header: h, line, stock: stockAmounts, tax: taxRows, ledger: g, rojmel },
             downstream: { register: reg, balanced: true },
           };
-        } finally {
-          await Promise.all([
-            ctx.owner.$executeRawUnsafe(
-              `UPDATE "CO_SET" SET "PR_AMT_TYPE"=$2,"TAX_ROF"=$3
-                WHERE tenant_id=$1 AND "CO_CODE"='01'`,
-              TENANT,
-              beforeCoSet.amount_type,
-              beforeCoSet.tax_rounding,
-            ),
-            ctx.owner.$executeRawUnsafe(
-              `UPDATE "CO_SET_NEW" SET "TOT_AMT_ROF"=$2
-                WHERE tenant_id=$1 AND "CO_CODE"='01'`,
-              TENANT,
-              beforeCoSetNew.total_rounding,
-            ),
-          ]);
-        }
+        });
       },
     ),
 
@@ -528,25 +612,7 @@ export const purchaseInvoice = {
       'mutation',
       'N188/G198: loaded PR_AMT_TYPE=G drives real UI preview and RATE_TYPE P/1/K persists across reload',
       async (ctx) => {
-        const [beforeCoSet] = await ctx.rows(
-          `SELECT "PR_AMT_TYPE" amount_type,"TAX_ROF" tax_rounding
-             FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
-        );
-        const [beforeCoSetNew] = await ctx.rows(
-          `SELECT "TOT_AMT_ROF" total_rounding
-             FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
-        );
-        await ctx.owner.$executeRawUnsafe(
-          `UPDATE "CO_SET" SET "PR_AMT_TYPE"='G',"TAX_ROF"=2
-            WHERE tenant_id=$1 AND "CO_CODE"='01'`,
-          TENANT,
-        );
-        await ctx.owner.$executeRawUnsafe(
-          `UPDATE "CO_SET_NEW" SET "TOT_AMT_ROF"=2
-            WHERE tenant_id=$1 AND "CO_CODE"='01'`,
-          TENANT,
-        );
-        try {
+        return withPurchaseSettings(ctx, NON_F_SETTINGS, async () => {
           const { page } = await ctx.session();
           await openPurchase(page);
           await pickSupplier(page, PARTIES.local.code);
@@ -609,23 +675,7 @@ export const purchaseInvoice = {
             database: { before, after },
             downstream: { identical: true },
           };
-        } finally {
-          await Promise.all([
-            ctx.owner.$executeRawUnsafe(
-              `UPDATE "CO_SET" SET "PR_AMT_TYPE"=$2,"TAX_ROF"=$3
-                WHERE tenant_id=$1 AND "CO_CODE"='01'`,
-              TENANT,
-              beforeCoSet.amount_type,
-              beforeCoSet.tax_rounding,
-            ),
-            ctx.owner.$executeRawUnsafe(
-              `UPDATE "CO_SET_NEW" SET "TOT_AMT_ROF"=$2
-                WHERE tenant_id=$1 AND "CO_CODE"='01'`,
-              TENANT,
-              beforeCoSetNew.total_rounding,
-            ),
-          ]);
-        }
+        });
       },
     ),
 
