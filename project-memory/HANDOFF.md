@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ## 2026-11-02 — Stock Adjust legacy voucher safety follow-up (N221 / G234)
 
 - The forward repair preserves pre-N221 MAIN_STOCK-only Stock Adjust rows instead of fabricating missing register data.
@@ -12,7 +11,7 @@
   Dependency-backed migration/API/browser execution remains for CI. Rows already destroyed before this repair cannot
   be reconstructed without database backup or external audit evidence. N221 remains implemented-unverified/PARTIAL;
   loose-save idempotency, stale versioning, full write-set/counter/component/report proofs and desktop comparison remain.
-=======
+
 ## 2026-11-02 — Data Refresh PR-1 milestone (branch `feat/lite-data-refresh`)
 
 - The operator screen now has the six `MS_UPDATE` captions in desktop tab order. Ctrl+O/vendor, Mfg and Scheme controls are absent. Approval Adj is the only full writer: it reconciles APR ISU consumption from APR RTN, SALES, WH SALES and RATE CUT, then updates only `APR_DETL.ISU_REC` and `BAR_DETL.APR_ISU` in one audited transaction.
@@ -20,7 +19,6 @@
 - Approval Adj matches issue year/book/voucher references with SQL Server-compatible trailing-space equality while preserving exact numeric serial matching. The four padded source fixtures prove APR RTN, SALES, WH SALES and RATE CUT are consumed and `BAR_DETL.APR_ISU` remains the inverse. T17 now proves native operation order plus operation → preview heading → Apply → originating operation focus; browser execution remains pending while dependencies are unavailable.
 - Frozen `data-refresh` T01-T18 matrix: 22 cases, 2 N/A (T04/T05), 8 blocked (T11 G225 Print-right handoff, T12 save/apply synchronization, T14 browser fault injection, and five T18 full Account/Stock, Field/Old Field, and Image continuations). Seven product/evidence gaps are baselined so generated progress does not report green. Browser execution is pending because dependencies are unavailable in this sandbox; desktop match remains 0%. Catalog stays PARTIAL; P11-01/X27/X06/N26 and G225 remain open.
 - Next: PR-2 statement-by-statement Field Update/Old Field classification, complete Account/Stock builder proof, Image migration semantics, and the active-owned Data Refresh caption Print-right handoff.
->>>>>>> origin/main
 
 ## 2026-11-02 — Tag Cancel closure milestone 1 (N210 / G223)
 
