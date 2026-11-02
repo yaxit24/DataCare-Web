@@ -11,7 +11,7 @@ import {
 } from '../src/modules/masters/partyMaster.js';
 
 /**
- * N223 / G236: the pure rules of the Party master (desktop MS_ACCT). Expected values come from CLEAR_DATA's next-code
+ * N223 / G235: the pure rules of the Party master (desktop MS_ACCT). Expected values come from CLEAR_DATA's next-code
  * queries (MS_ACCT.cs:6230-6340), the masked date boxes' IsDate (:7801-7805), the list filters (Text1_TextChanged
  * :6647-6690, tAcName_TextChanged :7280-7470) and the message texts.
  */

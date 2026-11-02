@@ -445,7 +445,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Writes:** AC_MAST, AC_MAST_SRNO, OP_DATA, AC_DATA, AC_GROUP, STATE_MAST, AC_IMAGE, ADD_MAST, AD_MEMB.
 - **Web:** `/masters/party`; `GET /masters/party-master`, `GET /masters/party-master/print`, `GET /masters/party-master/help/:kind`, `GET /masters/party-master/copy/:kind`, `GET /masters/party-master/taken/:kind`, `GET /masters/party-master/gst-state`, `GET /masters/party-master/account`, `GET /masters/party-master/:code`, `GET /masters/party-master/:code/photo`, `POST /masters/party-master/:code/photo`, `POST /masters/party-master/:code/photo/delete`, `POST /masters/party-master`, `PUT /masters/party-master/:code`, `DELETE /masters/party-master/:code`. Can: create, reopen, edit, delete, list.
 - **Remaining:** The AcMast print layout is not in the repository (Print lists the accounts on screen); the Advance and Enterprise admin panel, defaulter box and limits, the UAE boxes and the hidden Excel and old-year imports are not on the screen; desktop-runtime comparison remains.
-- **Owners:** G53, N67, X10, G38, N58, N77, G225, N212, G236, N223.
+- **Owners:** G53, N67, X10, G38, N58, N77, G225, N212, G235, N223.
 - **Evidence:** [MS_ACCT.cs:5584-9640](../../unified/src/csharp/DataCareNext/MS_ACCT.cs#L5584-L9640).
 
 ### Party Opening
@@ -726,9 +726,9 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Sales-like item, component and old-metal grids with an advance panel, delivery date, images and order document.
 - **Writes:** SL_ORD_DATA, SL_ORD_DETL, SL_ORD_IDTL, SL_ORD_ADJ, SL_PR_DETL, AC_DATA, ROJ_MEL_DATA, UPI_DATA, TAG_IMAGE_DATA.
 - **Web:** `/txn/sales-order`; `GET /sales-orders`, `POST /sales-orders`, `GET /sales-orders/:vchNo`, `PUT /sales-orders/:vchNo`, `DELETE /sales-orders/:vchNo`, `GET /sales/order-confirmation`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** Tender and old-metal rows, partial delivery, manufacturing and invoice conversion, reservation/refund and the order document need acceptance.
-- **Owners:** G14, N44, G16, N46, X14, N77, X25.
-- **Evidence:** [KB_transaction.md:208-235](../../project-memory/video-research/_kb/KB_transaction.md#L208-L235).
+- **Remaining:** Old-metal and scheme tenders, partial delivery, manufacturing and invoice conversion, reservation/refund and the order document need acceptance.
+- **Owners:** G14, N44, G16, N46, X14, N77, X25, G206, N197, N222.
+- **Evidence:** [KB_transaction.md:208-235](../../project-memory/video-research/_kb/KB_transaction.md#L208-L235), [TR_SALE_ORD.cs:9520-9556](../../unified/src/csharp/DataCareNext/TR_SALE_ORD.cs#L9520-L9556).
 
 ### Sales Return
 
@@ -2165,7 +2165,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Physical Stock | `TR_PHYSTK` | `/txn/physical-stock` | `C R E D - -` | PARTIAL | P1-core |
 | Reminder Entry | `UT_REMINDER` | `/utilities/reminder-entry` | `C - - D - L` | PARTIAL | P1-core |
 | Sms | `UT_SMS` | `/integrations` | `C - - - - -` | PARTIAL | P1-edition |
-| Stock Adjust | `TR_TAG_CAN` | `/txn/stock-adjust` | `C - - D - -` | PARTIAL | P1-core |
+| Stock Adjust | `TR_TAG_CAN` | `/txn/stock-adjust` | `C R E D P L` | PARTIAL | P1-core |
 | Stone/Dm-Cf | `TR_PHYSTK` | `/txn/stone-dm-cf` | `C R E D P -` | PARTIAL | P1-core |
 | Tag Adjust | `TR_TAG_CAN` | `/txn/tag-adjust` | `C R E D - -` | PARTIAL | P1-core |
 | Tag Cancel | `TR_TAG_CAN` | `/txn/tag-cancel` | `C R E D P L` | PARTIAL | P1-core |
@@ -2334,12 +2334,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `TR_TAG_CAN` — CurBookHelp('STOCK ADJUST') ([MDI_FORM.cs:8616-8627](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8616-L8627)).
 - **Does:** Posts signed piece and weight stock corrections without a financial ledger entry.
-- **Looks:** Voucher/date header, signed tag/item/counter weight grid, component sub-grid and totals.
-- **Writes:** BAR_CAN_DATA, BAR_CAN_DETL, MAIN_STOCK, BAR_DETL, DM_DATA.
-- **Web:** `/txn/stock-adjust`; `POST /stock/adjust`, `DELETE /stock/adjust/:vchNo`. Can: create, delete.
-- **Remaining:** No saved reopen/edit/print; counter, loss-weight, karigar and component-grid depth and configured-book handling remain.
-- **Owners:** X18, P07-02, G40, G41, N59.
-- **Evidence:** [KB_other.md:150-213](../../project-memory/video-research/_kb/KB_other.md#L150-L213).
+- **Looks:** Book, Vch No, Vch Date, Employee and Vch Desc over the Sr / TagNo / (TagLot / ItmLot) / ItCode / Counter / Design / Size / Sign / BagWt / Pcs / GrWt / LsWt / NetWt / Ght% / GhtWt / Touch / West% / Fine / Mrp / KrCode grid, the stone grid, totals; Save, Delete, Cancel and Print.
+- **Writes:** BAR_CAN_DATA, BAR_CAN_DETL, BAR_CAN_IDTL, MAIN_STOCK, LOT_DETL, DELETE_DATA, TEMP_BOOK_DATA, BAR_DETL, BOOK_DATA.
+- **Web:** `/txn/stock-adjust`; `GET /stock/stock-adjust`, `GET /stock/stock-adjust/source`, `GET /stock/stock-adjust/lots`, `GET /stock/stock-adjust/:vchNo`, `POST /stock/stock-adjust`, `PUT /stock/stock-adjust/:vchNo`, `DELETE /stock/stock-adjust/:vchNo`, `GET /stock/stock-adjust/:vchNo/print`. Can: create, reopen, edit, delete, print, list.
+- **Remaining:** A replayed loose-line save makes a second voucher (no idempotency key); desktop-runtime comparison remains.
+- **Owners:** X18, P07-02, G40, G41, N59, G234, N221.
+- **Evidence:** [TR_TAG_CAN.cs:2514-5440](../../unified/src/csharp/DataCareNext/TR_TAG_CAN.cs#L2514-L5440), [Ac_Stock.cs:48-58](../../unified/src/csharp/DataCareNext/Ac_Stock.cs#L48-L58).
 
 ### Stone/Dm-Cf
 

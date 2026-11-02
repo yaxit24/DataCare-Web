@@ -339,9 +339,9 @@ const FAMILIES = [
   },
   {
     name: 'Stock adjust',
-    desktopForms: ['TR_INOUT'],
-    basePath: '/stock/adjust',
-    module: 'stock/stock.ts',
+    desktopForms: ['TR_TAG_CAN'],
+    basePath: '/stock/stock-adjust',
+    module: 'stock/tagCancel.ts',
     liveVouchers: 0,
   },
   {
