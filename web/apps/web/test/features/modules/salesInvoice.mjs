@@ -6,6 +6,7 @@ import {
   USERS,
   sentinelSnapshot,
 } from '../fixtures/catalogue.mjs';
+import { rollbackMatrix } from '../faults.mjs';
 
 /**
  * Feature: Sales → Sales Invoice (desktop TR_SALE, opened by MDI_FORM.cs:7918-7919 CurBookHelp("SALES")).
@@ -1249,17 +1250,49 @@ export const salesInvoice = {
       },
     ),
 
-    {
-      id: 'sales-invoice.rollback.mid-write',
-      group: 'T14',
-      kind: 'refusal',
-      source: 'Playbook T14: fail after each effect family before commit; complete rollback',
-      applicable: true,
-      requiredEvidence: ['browser', 'expected', 'database'],
-      blocked:
-        'Needs declared transport/DB fault injection at each effect boundary; the harness has no fault injector yet (tracked as a framework gap).',
-      run: async () => ({}),
-    },
+    C(
+      'rollback.mid-write',
+      'T14',
+      'mutation',
+      'A cash sale writes eight tables (SL_DATA, SL_DETL, MAIN_STOCK, AC_DATA, TAX_DATA, ROJ_MEL_DATA, BILL_OS_DATA, TEMP_BOOK_DATA). The desktop is not atomic (it writes table by table and a fault leaves earlier tables behind); the web must be: a fault on any one of those writes leaves the whole tenant byte-for-byte as it was, takes no voucher number, and the same screen then saves normally. The faulted tables must be exactly the tables a real save writes, and the last write must find every other table already pending, so no fault passes vacuously',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openSales(page);
+        await pickParty(page, PARTIES.local.code);
+        await fillLine(page, 0, LINE_A);
+        await field(page, 'Cash ₹').fill('65517.79');
+        // Measured on the first run: one save of this bill changes exactly these eight tables.
+        const r = await rollbackMatrix(ctx, {
+          tables: [
+            'AC_DATA',
+            'BILL_OS_DATA',
+            'MAIN_STOCK',
+            'ROJ_MEL_DATA',
+            'SL_DATA',
+            'SL_DETL',
+            'TAX_DATA',
+            'TEMP_BOOK_DATA',
+          ],
+          book: BOOK,
+          headerTable: 'SL_DATA',
+          submit: () => save(page),
+        });
+        const [h] = await header(ctx, r.vchNo);
+        assert.equal(h.cash, 65517.79);
+        return {
+          observation: `${r.attempts.map((a) => `${a.table} fault -> ${a.status}`).join(', ')}; every table of the tenant unchanged after each; then voucher ${r.vchNo} saved (201) with the expected number`,
+          expected: { unchangedAfterEachFault: true, nextVoucherNo: r.expectedNo },
+          database: { attempts: r.attempts, voucherNo: r.vchNo, header: h },
+          downstream: {
+            tablesWrittenBySuccessfulSave: r.written,
+            pendingWhenTheFaultFired: Object.fromEntries(
+              r.attempts.map((x) => [x.table, x.pendingElsewhere]),
+            ),
+          },
+        };
+      },
+    ),
+
     {
       id: 'sales-invoice.config.setting-change',
       group: 'T15',

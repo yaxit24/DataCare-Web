@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { FIXTURE_MANIFEST, ITEMS, PARTIES, USERS } from '../fixtures/catalogue.mjs';
+import { rollbackMatrix } from '../faults.mjs';
 
 /**
  * Feature: Purchase → Purchase Return (desktop TR_KR_ISU in PURC RETURN mode, MDI_FORM.cs:7893-7917).
@@ -14,6 +15,16 @@ import { FIXTURE_MANIFEST, ITEMS, PARTIES, USERS } from '../fixtures/catalogue.m
  * - Delete removes the voucher rows and writes DELETE_DATA with the deleting user.
  */
 const BOOK = 'PRT';
+/** Measured on the first run: one saved free-standing return changes exactly these tables. */
+const RETURN_WRITE_SET = [
+  'AC_DATA',
+  'MAIN_STOCK',
+  'PR_DATA',
+  'PR_DETL',
+  'ROJ_MEL_DATA',
+  'TAX_DATA',
+  'TEMP_BOOK_DATA',
+];
 const PURCHASE_BOOK = 'PR';
 const as = (user, slot) => ({
   user,
@@ -939,10 +950,35 @@ export const purchaseReturn = {
       { expected: 'the saved return is listed with its total' },
     ),
 
-    {
-      ...C('rollback.mid-write', 'T14', 'refusal', 'Playbook T14', async () => ({})),
-      blocked: 'No fault injector in the harness yet (G173 / N166).',
-    },
+    C(
+      'rollback.mid-write',
+      'T14',
+      'mutation',
+      'TR_KR_ISU writes the return header, lines, stock out and ledger legs table by table with no transaction around them, so a fault leaves the earlier tables behind; the web must leave the whole tenant byte-for-byte as it was after a fault on any one write, take no voucher number, and then save normally from the same screen. The faulted tables must be exactly the tables a real save writes',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openReturn(page);
+        await pickSupplier(page, PARTIES.local.code);
+        await fillLine(page, 0, LINE_W);
+        const r = await rollbackMatrix(ctx, {
+          tables: RETURN_WRITE_SET,
+          book: BOOK,
+          headerTable: 'PR_DATA',
+          submit: async () => (await submit(page)).response,
+        });
+        return {
+          observation: `${r.attempts.map((a) => `${a.table} fault -> ${a.status}`).join(', ')}; every table of the tenant unchanged after each; then return ${r.vchNo} saved (201) with the expected number`,
+          expected: { unchangedAfterEachFault: true, nextVoucherNo: r.expectedNo },
+          database: { attempts: r.attempts, voucherNo: r.vchNo },
+          downstream: {
+            tablesWrittenBySuccessfulSave: r.written,
+            pendingWhenTheFaultFired: Object.fromEntries(
+              r.attempts.map((x) => [x.table, x.pendingElsewhere]),
+            ),
+          },
+        };
+      },
+    ),
     {
       ...C(
         'config.setting-variant',
