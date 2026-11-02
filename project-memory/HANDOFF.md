@@ -6,6 +6,17 @@
 - Frozen `data-refresh` T01-T18 matrix: 22 cases, 2 N/A (T04/T05), 8 blocked (T11 G225 Print-right handoff, T12 save/apply synchronization, T14 browser fault injection, and five T18 full Account/Stock, Field/Old Field, and Image continuations). Seven product/evidence gaps are baselined so generated progress does not report green. Browser execution is pending because dependencies are unavailable in this sandbox; desktop match remains 0%. Catalog stays PARTIAL; P11-01/X27/X06/N26 and G225 remain open.
 - Next: PR-2 statement-by-statement Field Update/Old Field classification, complete Account/Stock builder proof, Image migration semantics, and the active-owned Data Refresh caption Print-right handoff.
 
+## 2026-11-02 — Company master milestone 1 (N58 / G38 / G39)
+
+- Follow-up evidence correction on `feat/lite-company-master`: generic `CO_MAST` create/update/delete/CSV business
+  writes are blocked by `dedicatedWriter` before the generic master transaction. The authenticated requests still
+  add their expected rejection/result rows to `audit_log`. `/masters/companies` remains an authenticated,
+  tenant-scoped, read-only Code/Name surface; T11 now proves admin, restricted-user and cross-tenant list scope.
+- N58 remains planned and the Company catalog remains PARTIAL. T02 is an executable G38 baseline failure because the
+  rich identity workflow is absent, so generated progress reports `module, 1 open` rather than green. Rich identity
+  editing, the versioned writer, first `YEAR_MAST` plus 17-family provisioning, G39 identity conventions,
+  `Company.RPT`, the full keyboard/journey evidence, and a safe hosted-delete decision remain.
+
 ## 2026-10-31 — Lite first, then Basic, then Standard
 
 - Owner instruction (31 October): finish every **Lite** menu end to end first, then the Basic additions, then the
