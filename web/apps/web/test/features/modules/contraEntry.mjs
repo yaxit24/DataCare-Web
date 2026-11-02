@@ -805,8 +805,80 @@ export const contraEntry = {
         };
       },
     ),
-    pending('rollback', 'T14', 'No fault injector in the harness yet (G173 / N166).'),
-    pending('settings', 'T15', 'Employee-code mandatory and the lock date follow (G174 / N166).'),
+    C(
+      'rollback.ledger-write-fault',
+      'T14',
+      'refusal',
+      'A fault on the ledger write, after the CONTRA_DATA rows are written, rolls the whole contra back: no CONTRA_DATA or AC_DATA rows',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await ctx.owner.$executeRawUnsafe(
+          `CREATE OR REPLACE FUNCTION e2e_contra_fault() RETURNS trigger LANGUAGE plpgsql AS $f$
+           BEGIN
+             IF NEW."CO_BOOK" = '${BOOK}' AND (NEW."DR_AMT" = 777.77 OR NEW."CR_AMT" = 777.77) THEN RAISE EXCEPTION 'e2e contra fault'; END IF;
+             RETURN NEW;
+           END $f$`,
+        );
+        await ctx.owner.$executeRawUnsafe(
+          `CREATE TRIGGER e2e_contra_fault BEFORE INSERT ON "AC_DATA" FOR EACH ROW EXECUTE FUNCTION e2e_contra_fault()`,
+        );
+        try {
+          const before = await counts(ctx);
+          await openContra(page);
+          await fillRow(page, 1, { crdr: 'DR', account: 'BANK', amount: 777.77 });
+          await fillRow(page, 2, { crdr: 'CR', account: 'CASH', amount: 777.77 });
+          const response = await save(page);
+          assert.ok(response.status() >= 400, `the save failed: ${response.status()}`);
+          assert.deepEqual(await counts(ctx), before);
+          return {
+            observation: `the save answered ${response.status()}; the counts are unchanged`,
+            expected: 'no contra rows',
+            database: { before, after: await counts(ctx) },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(`DROP TRIGGER IF EXISTS e2e_contra_fault ON "AC_DATA"`);
+          await ctx.owner.$executeRawUnsafe(`DROP FUNCTION IF EXISTS e2e_contra_fault()`);
+        }
+      },
+    ),
+    C(
+      'settings.lock-date',
+      'T15',
+      'refusal',
+      'TR_CONTRA.cs:2686-2691: a contra dated on or before CO_SET.LOCK_DATE is refused with the lock-date text after the year check passes; the setting is set for this case and cleared',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const { op } = await yearOf(ctx);
+        await ctx.owner.$executeRawUnsafe(
+          `UPDATE "CO_SET" SET "LOCK_DATE"=$2::date WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+          'feature-e2e',
+          op,
+        );
+        try {
+          const before = await counts(ctx);
+          await openContra(page);
+          await page.getByLabel('Voucher date', { exact: true }).fill(op);
+          await fillRow(page, 1, { crdr: 'DR', account: 'BANK', amount: 710 });
+          await fillRow(page, 2, { crdr: 'CR', account: 'CASH', amount: 710 });
+          const response = await trySave(page);
+          assert(response, 'the screen did not send the locked-date contra to the server');
+          const body = await response.text();
+          assert.equal(response.status(), 400, body);
+          assert.match(body, new RegExp(`Lock Date is = ${dmy(op)} \\.\\.\\.\\.`), body);
+          assert.deepEqual(await counts(ctx), before);
+          return {
+            observation: `dated ${op} (the lock date): 400 with the lock-date text`,
+            expected: { status: 400, lockDate: dmy(op), written: 0 },
+            database: { before, after: await counts(ctx) },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `UPDATE "CO_SET" SET "LOCK_DATE"=NULL WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+            'feature-e2e',
+          );
+        }
+      },
+    ),
     C(
       'report.contra-register',
       'T16',

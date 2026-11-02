@@ -1,3 +1,4 @@
+import { formatDesktopDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { DESKTOP_COLUMN_DEFAULTS } from './desktopColumnDefaults.js';
 import { tableColumnsTx, warmSchemaCatalog } from '../shared/schemaCatalog.js';
@@ -270,7 +271,10 @@ export class PeriodLockValidationError extends Error {
     public vchDate: string,
     public lockDate: string,
   ) {
-    super(`period is locked: voucher date ${vchDate} is on or before the lock date ${lockDate}`);
+    // Every desktop voucher form shows this one text (for example TR_SALE.cs:15066, TR_KR_ISU.cs:4980).
+    super(
+      `You Cant Save and Delete This Voucher Becouse Lock Date is = ${formatDesktopDate(lockDate)} ....`,
+    );
     this.name = 'PeriodLockValidationError';
   }
 }

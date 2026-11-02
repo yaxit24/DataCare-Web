@@ -18,6 +18,7 @@ const RECEIPT_BOOK = 'RCT';
 const PAYMENT_BOOK = 'PAY';
 const DATE_OUTSIDE_YEAR_MESSAGE =
   'You Cant Save Entry Because Voucher Date Not In Current Year... Please Change Date...';
+const EMPLOYEE_REQUIRED_MESSAGE = 'Please Select Employee Code and Try......';
 const as = (user, slot) => ({
   user,
   slot,
@@ -626,11 +627,135 @@ export const cashBank = {
         };
       },
     ),
-    pending('rollback', 'T14', 'No fault injector in the harness yet (G173 / N166).'),
-    pending(
-      'settings',
+    C(
+      'rollback.ledger-write-fault',
+      'T14',
+      'refusal',
+      'A fault on the ledger write, after the CASH_DATA row is written, rolls the whole receipt back: no CASH_DATA or AC_DATA rows',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await ctx.owner.$executeRawUnsafe(
+          `CREATE OR REPLACE FUNCTION e2e_receipt_fault() RETURNS trigger LANGUAGE plpgsql AS $f$
+           BEGIN
+             IF NEW."CO_BOOK" = '${RECEIPT_BOOK}' AND (NEW."DR_AMT" = 777.77 OR NEW."CR_AMT" = 777.77) THEN RAISE EXCEPTION 'e2e receipt fault'; END IF;
+             RETURN NEW;
+           END $f$`,
+        );
+        await ctx.owner.$executeRawUnsafe(
+          `CREATE TRIGGER e2e_receipt_fault BEFORE INSERT ON "AC_DATA" FOR EACH ROW EXECUTE FUNCTION e2e_receipt_fault()`,
+        );
+        try {
+          const before = await receiptCount(ctx);
+          await openForm(page, '/txn/receipt');
+          await pickParty(page, PARTIES.local.code);
+          await page.getByLabel('Amount', { exact: true }).fill('777.77');
+          const response = await save(page, 'Save Receipt');
+          assert.ok(response.status() >= 400, `the save failed: ${response.status()}`);
+          assert.deepEqual(await receiptCount(ctx), before);
+          return {
+            observation: `the save answered ${response.status()}; the counts are unchanged`,
+            expected: 'no receipt rows',
+            database: { before, after: await receiptCount(ctx) },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `DROP TRIGGER IF EXISTS e2e_receipt_fault ON "AC_DATA"`,
+          );
+          await ctx.owner.$executeRawUnsafe(`DROP FUNCTION IF EXISTS e2e_receipt_fault()`);
+        }
+      },
+    ),
+    C(
+      'config.employee-mandatory',
       'T15',
-      'The cash-limit setting is covered by refusal.cash-limit; employee-mandatory follows.',
+      'mutation',
+      'TR_CASH.cs:2907-2911 with CO_SET.EMP_CODE_MANDATORY = Y: a receipt without an employee is refused ("Please Select Employee Code and Try......") and nothing is written; with the employee chosen it saves with EMP_CODE in CASH_DATA (:3050) and shows it when the voucher is opened (:2753)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const EMP = 'E15'; // EMP_CODE is varchar(3)
+        const [{ n: hadRow }] = await ctx.rows(
+          `SELECT count(*)::int n FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        );
+        const [{ v: previous } = { v: null }] = await ctx.rows(
+          `SELECT "EMP_CODE_MANDATORY" v FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"='01' LIMIT 1`,
+        );
+        try {
+          if (hadRow)
+            await ctx.owner.$executeRawUnsafe(
+              `UPDATE "CO_SET" SET "EMP_CODE_MANDATORY"='Y' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+              'feature-e2e',
+            );
+          else
+            await ctx.owner.$executeRawUnsafe(
+              `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","EMP_CODE_MANDATORY") VALUES ($1,'01','Y')`,
+              'feature-e2e',
+            );
+          await ctx.owner.$executeRawUnsafe(
+            `INSERT INTO "EMP_MAST"(tenant_id,"CO_CODE","EMP_CODE","EMP_NAME") VALUES ($1,'01',$2,'E2E Cashier')`,
+            'feature-e2e',
+            EMP,
+          );
+          const before = await receiptCount(ctx);
+          await openForm(page, '/txn/receipt');
+          await pickParty(page, PARTIES.local.code);
+          await page.getByLabel('Amount', { exact: true }).fill('640');
+          const refused = await save(page, 'Save Receipt');
+          assert.equal(refused.status(), 400, await refused.text());
+          await page.getByText(EMPLOYEE_REQUIRED_MESSAGE, { exact: false }).first().waitFor();
+          assert.deepEqual(await receiptCount(ctx), before, 'the refused save wrote nothing');
+
+          const employee = page.getByPlaceholder('search employees… (F1)', { exact: true });
+          await employee.fill(EMP);
+          await employee.locator('xpath=..').getByText(EMP, { exact: true }).first().waitFor();
+          await employee.press('Enter');
+          const response = await save(page, 'Save Receipt');
+          assert.equal(response.status(), 201, await response.text());
+          const vchNo = String((await response.json()).vchNo).padStart(5, '0');
+          const stored = await ctx.rows(
+            `SELECT "EMP_CODE" emp FROM "CASH_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${RECEIPT_BOOK}' AND "VCH_NO"=$2`,
+            vchNo,
+          );
+          assert.deepEqual(
+            stored.map((r) => r.emp),
+            [EMP],
+          );
+          const rows = await legs(ctx, RECEIPT_BOOK, vchNo);
+          assert.deepEqual(
+            rows.map((r) => [r.code, r.ac, r.dr, r.cr]),
+            [
+              ['01', PARTIES.local.code, 0, 640],
+              ['02', 'CASH', 640, 0],
+            ],
+          );
+          // TR_CASH.cs:2753: opening the voucher shows its employee again.
+          await openForm(page, '/txn/receipt');
+          await loadReceipt(page, vchNo);
+          assert.equal(await employee.inputValue(), EMP);
+          return {
+            observation: `blank employee refused (400); voucher ${vchNo} saved with EMP_CODE ${EMP} and shows it when opened`,
+            expected: { refusal: EMPLOYEE_REQUIRED_MESSAGE, empCode: EMP },
+            database: { before, stored, legs: rows },
+            downstream: { empCode: stored[0]?.emp, legs: rows.length },
+          };
+        } finally {
+          if (hadRow)
+            await ctx.owner.$executeRawUnsafe(
+              `UPDATE "CO_SET" SET "EMP_CODE_MANDATORY"=$2 WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+              'feature-e2e',
+              previous,
+            );
+          else
+            await ctx.owner.$executeRawUnsafe(
+              `DELETE FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+              'feature-e2e',
+            );
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM "EMP_MAST" WHERE tenant_id=$1 AND "EMP_CODE"=$2`,
+            'feature-e2e',
+            EMP,
+          );
+        }
+      },
     ),
     C(
       'journey.receipt-then-payment',
