@@ -23,6 +23,7 @@ import { salesReturn } from './modules/salesReturn.mjs';
 import { settingsEffects } from './modules/settingsEffects.mjs';
 import { usersRights } from './modules/usersRights.mjs';
 import { companyOpen } from './modules/companyOpen.mjs';
+import { companyMaster } from './modules/companyMaster.mjs';
 import { cashBank } from './modules/cashBank.mjs';
 import { contraEntry } from './modules/contraEntry.mjs';
 import { fineJv } from './modules/fineJv.mjs';
@@ -64,6 +65,7 @@ const MODULES = [
   usersRights,
   salesReturn,
   companyOpen,
+  companyMaster,
   purchaseReturn,
   cashBank,
   contraEntry,

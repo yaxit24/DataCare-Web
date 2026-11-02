@@ -1,3 +1,14 @@
+## 2026-11-02 — Company master milestone 1 (N58 / G38 / G39)
+
+- Follow-up evidence correction on `feat/lite-company-master`: generic `CO_MAST` create/update/delete/CSV business
+  writes are blocked by `dedicatedWriter` before the generic master transaction. The authenticated requests still
+  add their expected rejection/result rows to `audit_log`. `/masters/companies` remains an authenticated,
+  tenant-scoped, read-only Code/Name surface; T11 now proves admin, restricted-user and cross-tenant list scope.
+- N58 remains planned and the Company catalog remains PARTIAL. T02 is an executable G38 baseline failure because the
+  rich identity workflow is absent, so generated progress reports `module, 1 open` rather than green. Rich identity
+  editing, the versioned writer, first `YEAR_MAST` plus 17-family provisioning, G39 identity conventions,
+  `Company.RPT`, the full keyboard/journey evidence, and a safe hosted-delete decision remain.
+
 ## 2026-11-02 — Data Backup milestone 1 (engineering only)
 
 - Branch `feat/lite-data-backup` implements the operator-visible Backup-only `UT_BKP` adaptation: in-memory Select acknowledgment, browser Save-dialog handoff, progress/busy control, exact path/completion messages, source-backed `Next<YY>[_<type>]_ddMMyy_HH.json`, and immutable `company_backup_run` audit before response handoff.
