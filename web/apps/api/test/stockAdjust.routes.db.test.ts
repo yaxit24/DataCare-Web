@@ -555,4 +555,167 @@ const SRNO = 100312000011;
       await exec(`DELETE FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "VCH_NO"='00095'`, tenantId);
     }
   });
+
+  it('reserves legacy MAIN_STOCK voucher keys and preserves colliding old rows on edit and delete', async () => {
+    const marker = 'legacy-saj';
+    const oldYear = `${startYear - 1}-${startYear}`;
+    const legacy = (
+      tenant: string,
+      coCode: string,
+      lcCode: string,
+      year: string,
+      book: string,
+      voucherNo: string,
+      srNo: number,
+    ) =>
+      exec(
+        `INSERT INTO "MAIN_STOCK"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","ISR_NO",
+           "VCH_DATE","VCH_TYPE","BOOK_NAME","IT_CODE","TAG_NO","VCH_SRNO","TR_TYPE","ITM_SIGN",
+           "ITM_QTY","ITM_PCS","ITM_GWT","ITM_NWT","MAIN_USER")
+         VALUES ($1,$2,$3,$4,$5,$6,$7,2,$8::date,'STADJ','STOCK ADJ','SAL22','N',0,'A','+',1,1,1,1,$9)`,
+        tenant,
+        coCode,
+        lcCode,
+        year,
+        book,
+        voucherNo,
+        srNo,
+        DAY,
+        marker,
+      );
+    const legacySnapshot = () =>
+      query<Array<{ raw: string; revision: string; locator: string }>>(
+        `SELECT to_jsonb(s)::text raw,xmin::text revision,ctid::text locator
+           FROM "MAIN_STOCK" s WHERE "MAIN_USER"=$1 ORDER BY tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO"`,
+        marker,
+      );
+
+    const [index] = await query<Array<{ indexdef: string }>>(
+      `SELECT indexdef FROM pg_indexes
+        WHERE schemaname='public' AND tablename='MAIN_STOCK' AND indexname='idx_main_stock_voucher_identity'`,
+    );
+    expect(index?.indexdef).toContain(
+      '(tenant_id, "CO_CODE", "LC_CODE", "CO_YEAR", "CO_BOOK", "VCH_NO")',
+    );
+    expect(index?.indexdef).not.toContain('UNIQUE');
+
+    await legacy(tenantId, '01', '01', YEAR, 'SAJ', '00040', 1);
+    await legacy(tenantId, '01', '01', YEAR, 'SAJ', '00041', 2);
+    await legacy(OTHER, '01', '01', YEAR, 'SAJ', '99999', 3);
+    await legacy(tenantId, '02', '01', YEAR, 'SAJ', '88888', 4);
+    await legacy(tenantId, '01', '02', YEAR, 'SAJ', '77777', 5);
+    await legacy(tenantId, '01', '01', oldYear, 'SAJ', '66666', 6);
+    await legacy(tenantId, '01', '01', YEAR, 'PR', '55555', 7);
+    const beforeLegacy = await legacySnapshot();
+
+    const list = await request('adjuster', 'GET', '/stock/stock-adjust?coBook=SAJ');
+    expect(list.statusCode, list.body).toBe(200);
+    expect(list.json()).toMatchObject({ nextVoucherNo: '00042', vouchers: [] });
+
+    const missingRead = await request('adjuster', 'GET', '/stock/stock-adjust/00041?coBook=SAJ');
+    expect(missingRead.statusCode, missingRead.body).toBe(400);
+    expect(missingRead.json().message).toBe('voucher not found: 00041');
+    const missingEdit = await request('adjuster', 'PUT', '/stock/stock-adjust/00041', {
+      coBook: 'SAJ',
+      vchDate: DAY,
+      lines: [{ oldSrNo: 1, itCode: 'SAL22', itmSign: '+', grossWt: 2, netWt: 2 }],
+    });
+    expect(missingEdit.statusCode, missingEdit.body).toBe(400);
+    const missingDelete = await request(
+      'adjuster',
+      'DELETE',
+      '/stock/stock-adjust/00041?coBook=SAJ',
+    );
+    expect(missingDelete.statusCode, missingDelete.body).toBe(400);
+    expect(await legacySnapshot()).toEqual(beforeLegacy);
+
+    await exec(
+      `INSERT INTO "BAR_CAN_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE",
+         "VCH_DESC","HD_VCH_NO","MAIN_USER")
+       VALUES ($1,'01','01',$2,'SAJ','00040',$3::date,'CURRENT COLLISION','00940','adjuster')`,
+      tenantId,
+      YEAR,
+      DAY,
+    );
+    await exec(
+      `INSERT INTO "BAR_CAN_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","OLD_SRNO",
+         "VCH_DATE","VCH_TYPE","INOUT_TYPE","BOOK_NAME","IT_CODE","TAG_NO","VCH_SRNO","ITM_SIGN",
+         "ITM_PCS","ITM_GWT","ITM_NWT","MAIN_USER")
+       VALUES ($1,'01','01',$2,'SAJ','00040',1,1,$3::date,'STADJ','O','STOCK ADJUST','SAL22','N',0,'+',1,2,2,'adjuster')`,
+      tenantId,
+      YEAR,
+      DAY,
+    );
+    await exec(
+      `INSERT INTO "MAIN_STOCK"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","ISR_NO",
+         "VCH_DATE","VCH_TYPE","BOOK_NAME","IT_CODE","TAG_NO","VCH_SRNO","TR_TYPE","ITM_SIGN",
+         "ITM_QTY","ITM_PCS","ITM_GWT","ITM_NWT","MAIN_USER")
+       VALUES ($1,'01','01',$2,'SAJ','00040',1,1,$3::date,'STADJ','STOCK ADJUST','SAL22','N',0,'I','+',1,1,2,2,'adjuster')`,
+      tenantId,
+      YEAR,
+      DAY,
+    );
+
+    const updated = await request('adjuster', 'PUT', '/stock/stock-adjust/00040', {
+      coBook: 'SAJ',
+      vchDate: DAY,
+      vchDesc: 'current collision edited',
+      lines: [{ oldSrNo: 1, itCode: 'SAL22', itmSign: '-', grossWt: 3, netWt: 3 }],
+    });
+    expect(updated.statusCode, updated.body).toBe(200);
+    expect(await legacySnapshot()).toEqual(beforeLegacy);
+    const afterEdit = await query<Array<Record<string, unknown>>>(
+      `SELECT "ISR_NO","BOOK_NAME","TR_TYPE","ITM_SIGN","ITM_NWT"::text nwt
+         FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01'
+          AND "CO_YEAR"=$2 AND "CO_BOOK"='SAJ' AND "VCH_NO"='00040' ORDER BY "ISR_NO"`,
+      tenantId,
+      YEAR,
+    );
+    expect(afterEdit).toEqual([
+      { ISR_NO: 1, BOOK_NAME: 'STOCK ADJUST', TR_TYPE: 'O', ITM_SIGN: '-', nwt: '3.000' },
+      { ISR_NO: 2, BOOK_NAME: 'STOCK ADJ', TR_TYPE: 'A', ITM_SIGN: '+', nwt: '1.000' },
+    ]);
+
+    const removed = await request('adjuster', 'DELETE', '/stock/stock-adjust/00040?coBook=SAJ');
+    expect(removed.statusCode, removed.body).toBe(200);
+    expect(await legacySnapshot()).toEqual(beforeLegacy);
+    const [remainingCollision] = await query<Array<{ n: number }>>(
+      `SELECT count(*)::int n FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01'
+        AND "CO_YEAR"=$2 AND "CO_BOOK"='SAJ' AND "VCH_NO"='00040'`,
+      tenantId,
+      YEAR,
+    );
+    expect(remainingCollision?.n).toBe(1);
+    const [deleteAudits] = await query<Array<{ n: number }>>(
+      `SELECT count(*)::int n FROM "DELETE_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SAJ' AND "VCH_NO"='00040'`,
+      tenantId,
+    );
+    expect(deleteAudits?.n).toBe(1);
+
+    const created = await Promise.all([
+      request('adjuster', 'POST', '/stock/stock-adjust', {
+        coBook: 'SAJ',
+        vchDate: DAY,
+        lines: [{ itCode: 'SAL22', itmSign: '+', grossWt: 4, netWt: 4 }],
+      }),
+      request('adjuster', 'POST', '/stock/stock-adjust', {
+        coBook: 'SAJ',
+        vchDate: DAY,
+        lines: [{ itCode: 'SAL22', itmSign: '-', grossWt: 5, netWt: 5 }],
+      }),
+    ]);
+    expect(created.map((response) => response.statusCode).sort()).toEqual([201, 201]);
+    const numbers = created.map((response) => response.json().voucherNo as string).sort();
+    expect(numbers).toEqual(['00042', '00043']);
+    expect(await legacySnapshot()).toEqual(beforeLegacy);
+    for (const voucherNo of numbers) {
+      const deleted = await request(
+        'adjuster',
+        'DELETE',
+        `/stock/stock-adjust/${voucherNo}?coBook=SAJ`,
+      );
+      expect(deleted.statusCode, deleted.body).toBe(200);
+    }
+    expect(await legacySnapshot()).toEqual(beforeLegacy);
+  });
 });

@@ -3916,6 +3916,7 @@ model MAIN_STOCK {
   ITM_COLOR   String?   @db.VarChar(15)
 
   @@index([tenantId])
+  @@index([tenantId, CO_CODE, LC_CODE, CO_YEAR, CO_BOOK, VCH_NO], map: "idx_main_stock_voucher_identity")
   @@index([tenantId, CO_CODE, LC_CODE, TAG_NO, VCH_SRNO, IT_CODE], map: "idx_main_stock_tag_identity")
   @@map("MAIN_STOCK")
 }

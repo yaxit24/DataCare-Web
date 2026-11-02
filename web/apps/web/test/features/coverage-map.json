@@ -158,7 +158,8 @@
         "web/apps/web/app/(app)/reports/tag-stock/page.tsx",
         "web/apps/web/components/TagCancelForm.tsx",
         "web/apps/api/src/modules/stock/tagCancel.ts",
-        "web/apps/api/src/modules/stock/tagCancelBill.ts"
+        "web/apps/api/src/modules/stock/tagCancelBill.ts",
+        "web/apps/api/src/modules/vouchers/numbering.ts"
       ]
     },
     "employeeMaster": {
@@ -242,7 +243,13 @@
     "stockAdjust": {
       "covers": [
         "web/apps/web/app/(app)/txn/stock-adjust/page.tsx",
-        "web/apps/api/src/modules/stock/stockAdjustLots.ts"
+        "web/apps/web/components/TagCancelForm.tsx",
+        "web/apps/web/lib/tagCancelVoucher.ts",
+        "web/apps/api/src/modules/stock/tagCancel.ts",
+        "web/apps/api/src/modules/stock/tagCancelRows.ts",
+        "web/apps/api/src/modules/stock/stockAdjustLots.ts",
+        "web/apps/api/src/modules/vouchers/numbering.ts",
+        "web/apps/api/src/routes/txn.ts"
       ]
     },
     "dataBackup": {

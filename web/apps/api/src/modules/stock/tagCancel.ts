@@ -575,11 +575,37 @@ const WRITE_SET = [
 
 async function deleteWriteSetTx(
   tx: any,
+  mode: TagCancelMode,
   scope: CompleteScope,
   voucherNo: string,
   hiddenVoucherNo: string,
 ): Promise<void> {
+  if (mode === 'adjust') {
+    // Before N221, Stock Adjust wrote MAIN_STOCK-only rows with STOCK ADJ / A / ISR_NO 2. A migrated book can
+    // therefore contain an old row and a current register voucher under one key. Delete only stock rows positively
+    // owned by the current BAR_CAN_DETL lines; preserving the legacy generation is safer than fabricating a register.
+    await tx.$executeRawUnsafe(
+      `DELETE FROM "MAIN_STOCK" s
+        WHERE s.tenant_id=$1 AND s."CO_CODE"=$2 AND s."LC_CODE"=$3 AND s."CO_YEAR"=$4
+          AND s."CO_BOOK"=$5 AND s."VCH_NO"=$6
+          AND btrim(coalesce(s."BOOK_NAME"::text,''))='STOCK ADJUST'
+          AND s."TR_TYPE" IN ('I','O') AND coalesce(s."ISR_NO",0)::numeric=1::numeric
+          AND EXISTS (
+            SELECT 1 FROM "BAR_CAN_DETL" d
+             WHERE d.tenant_id=s.tenant_id AND d."CO_CODE"=s."CO_CODE" AND d."LC_CODE"=s."LC_CODE"
+               AND d."CO_YEAR"=s."CO_YEAR" AND d."CO_BOOK"=s."CO_BOOK" AND d."VCH_NO"=s."VCH_NO"
+               AND d."SR_NO" IS NOT DISTINCT FROM s."SR_NO"
+               AND d."VCH_TYPE" IS NOT DISTINCT FROM s."VCH_TYPE"
+               AND d."IT_CODE" IS NOT DISTINCT FROM s."IT_CODE"
+               AND d."TAG_NO" IS NOT DISTINCT FROM s."TAG_NO"
+               AND d."VCH_SRNO" IS NOT DISTINCT FROM s."VCH_SRNO"
+               AND d."ITM_SIGN" IS NOT DISTINCT FROM s."ITM_SIGN"
+          )`,
+      ...voucherParams(scope, voucherNo),
+    );
+  }
   for (const table of WRITE_SET) {
+    if (mode === 'adjust' && table === 'MAIN_STOCK') continue;
     await tx.$executeRawUnsafe(
       `DELETE FROM "${table}" WHERE ${VOUCHER_WHERE}`,
       ...voucherParams(scope, voucherNo),
@@ -729,7 +755,7 @@ async function saveTx(
   // K10: give the voucher's own tags back and clear its rows before the lines are resolved again.
   if (saved) {
     const restores = await tagStockRestoresTx(tx, scope, saved.lines);
-    await deleteWriteSetTx(tx, scope, voucherNo, persistedHidden);
+    await deleteWriteSetTx(tx, mode, scope, voucherNo, persistedHidden);
     for (const restore of restores) await restoreTagTx(tx, scope.tenantId, restore);
     // Web adaptation: a voucher saved without a hidden number gets one rather than a blank TEMP_BOOK_DATA row.
     if (!hiddenVoucherNo) hiddenVoucherNo = await nextHiddenVoucherNoTx(tx, scope);
@@ -1138,14 +1164,11 @@ export async function listTagCancel(
       scope.coYear,
       scope.coBook,
     );
-    const max = rows.reduce(
-      (high, row) =>
-        Math.max(high, /^\d+$/.test(dbText(row.VCH_NO).trim()) ? Number(row.VCH_NO) : 0),
-      0,
-    );
     return {
       book: { code: scope.coBook, name: book.name, mainBook: book.mainBook },
-      nextVoucherNo: formatVoucherNo(max + 1),
+      // CLEAR_DATA and Save must reserve the same legacy/current key space. For Stock Adjust this includes
+      // pre-register MAIN_STOCK-only vouchers as well as BAR_CAN_DATA headers.
+      nextVoucherNo: formatVoucherNo(await nextVoucherNoTx(tx, scope)),
       vouchers: rows.map((row) => ({
         vchNo: dbText(row.VCH_NO),
         vchDate: toIsoDate(row.VCH_DAY),
@@ -1249,7 +1272,7 @@ export async function deleteTagCancel(
     )) {
       await insertRowTx(tx, 'DELETE_DATA', scope.tenantId, row);
     }
-    await deleteWriteSetTx(tx, scope, voucherNo, dbText(persisted.HD_VCH_NO).trim());
+    await deleteWriteSetTx(tx, mode, scope, voucherNo, dbText(persisted.HD_VCH_NO).trim());
     for (const restore of restores) await restoreTagTx(tx, scope.tenantId, restore);
     return {
       reversed: true,

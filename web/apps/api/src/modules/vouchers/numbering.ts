@@ -62,8 +62,9 @@ function completeScope(
  * desktop MAX(VCH_NO)+1 reuse rule.
  */
 async function numberingTables(tx: any, s: VoucherScope): Promise<string[]> {
-  const books: Array<{ table_name: unknown }> = await tx.$queryRawUnsafe(
-    `SELECT DISTINCT NULLIF(btrim(coalesce("BOOK_TBL_NAME"::text,'')),'') AS table_name
+  const books: Array<{ table_name: unknown; main_book: unknown }> = await tx.$queryRawUnsafe(
+    `SELECT DISTINCT NULLIF(btrim(coalesce("BOOK_TBL_NAME"::text,'')),'') AS table_name,
+                     upper(btrim(coalesce("MAIN_BOOK"::text,''))) AS main_book
        FROM "BOOK_DATA"
       WHERE tenant_id=$1 AND "CO_CODE"::text=$2 AND "LC_CODE"::text=$3 AND "CO_BOOK"::text=$4`,
     s.tenantId,
@@ -74,23 +75,40 @@ async function numberingTables(tx: any, s: VoucherScope): Promise<string[]> {
   const configured = Array.from(
     new Set(books.map((r) => String(r.table_name ?? '').trim()).filter(Boolean)),
   );
+  const mainBooks = Array.from(
+    new Set(books.map((r) => String(r.main_book ?? '').trim()).filter(Boolean)),
+  );
   if (configured.length > 1) {
     throw new NumberingConfigurationError(
       `book ${s.coBook} has conflicting BOOK_TBL_NAME values: ${configured.join(', ')}`,
     );
   }
+  if (mainBooks.length > 1) {
+    throw new NumberingConfigurationError(
+      `book ${s.coBook} has conflicting MAIN_BOOK values: ${mainBooks.join(', ')}`,
+    );
+  }
   if (configured.length === 1) {
-    const table = configured[0] as string;
-    if (!IDENTIFIER.test(table)) {
-      throw new NumberingConfigurationError(`unsafe BOOK_TBL_NAME for book ${s.coBook}: ${table}`);
+    const tables = [configured[0] as string];
+    // Pre-N221 Stock Adjust wrote only MAIN_STOCK. Those voucher numbers remain occupied even though the migrated
+    // book now names BAR_CAN_DATA, so include both generations under the same complete voucher scope.
+    if (mainBooks[0] === 'STOCK ADJUST' && !tables.includes('MAIN_STOCK')) {
+      tables.push('MAIN_STOCK');
     }
-    const identity = await tableColumnsTx(tx, table);
-    if (!VOUCHER_IDENTITY_COLUMNS.every((column) => identity.has(column))) {
-      throw new NumberingConfigurationError(
-        `BOOK_TBL_NAME ${table} does not carry the complete voucher identity`,
-      );
+    for (const table of tables) {
+      if (!IDENTIFIER.test(table)) {
+        throw new NumberingConfigurationError(
+          `unsafe BOOK_TBL_NAME for book ${s.coBook}: ${table}`,
+        );
+      }
+      const identity = await tableColumnsTx(tx, table);
+      if (!VOUCHER_IDENTITY_COLUMNS.every((column) => identity.has(column))) {
+        throw new NumberingConfigurationError(
+          `BOOK_TBL_NAME ${table} does not carry the complete voucher identity`,
+        );
+      }
     }
-    return [table];
+    return tables;
   }
 
   const tables = (
