@@ -24,8 +24,13 @@ import {
   readonlyRowFields,
   readonlyHeaderFields,
   salesOrderTenderFields,
+  upiTotal,
   type Row,
+  type UpiRow,
 } from '../../../../lib/salesOrderForm';
+import { SalesOrderUpiGrid } from '../../../../components/SalesOrderUpiGrid';
+import { SalesOrderOldMetalGrid } from '../../../../components/SalesOrderOldMetalGrid';
+import { oldMetalGridTotals, type OldMetalRow } from '../../../../lib/salesOrderOldMetal';
 import { OrderImagePanel } from '../../../../components/OrderImagePanel';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import { round, type SalesOrderDesignOption } from '@datacare/core';
@@ -35,6 +40,14 @@ import {
 } from '../../../../components/SalesOrderDesignPicker';
 
 const r2 = (x: number) => round(x, 2);
+
+/** The header totals the old metal grid fills (BILL_TOTAL, `TR_SALE_ORD.cs:11345-11365`). */
+const oldMetalTotalFields = {
+  oldGoldAmount: 'goldAmount',
+  oldSilverAmount: 'silverAmount',
+  oldGoldFine: 'goldFine',
+  oldSilverFine: 'silverFine',
+} as const;
 
 export default function SalesOrderPage() {
   const scope = useBusinessScope();
@@ -162,6 +175,10 @@ export default function SalesOrderPage() {
   }
   // Desktop SL_ORD_DATA header fields (TR_SALE_ORD:9120-9161).
   const [header, setHeader] = useState<Record<string, string>>({});
+  // G206: the UPI grid (TR_SALE_ORD MSG_UPI); UPI Amt shows its total.
+  const [upiRows, setUpiRows] = useState<UpiRow[]>([]);
+  // G206: the old gold / old silver grid (TR_SALE_ORD MSG_OLD); Old Gold / Old Silver Amt show its totals.
+  const [oldMetalRows, setOldMetalRows] = useState<OldMetalRow[]>([]);
   const [orderList, setOrderList] = useState<{ scope: string; rows: Record<string, any>[] }>({
     scope: scopeQuery,
     rows: [],
@@ -213,6 +230,8 @@ export default function SalesOrderPage() {
     setDesignPreview(null);
     setF(blankOrderHeader());
     setHeader({});
+    setUpiRows([]);
+    setOldMetalRows([]);
     setRows([blank(1)]);
     setSelected(null);
     setVoucherLookup('');
@@ -333,6 +352,8 @@ export default function SalesOrderPage() {
       });
       setF(hydrated.f);
       setHeader(hydrated.header);
+      setUpiRows(hydrated.upiRows);
+      setOldMetalRows(hydrated.oldMetalRows);
       setRows(hydrated.rows);
       setImageRow(0);
       setSelected({
@@ -394,6 +415,8 @@ export default function SalesOrderPage() {
         selected?.version,
         selected?.original,
         [...headerDirty.current],
+        upiRows,
+        oldMetalRows,
       );
       const result = selected
         ? await put(
@@ -750,8 +773,9 @@ export default function SalesOrderPage() {
             <details style={{ marginTop: 8 }}>
               <summary>Order details</summary>
               <p className="muted">
-                Saved settlement values are shown for reference. Separate tender, metal and
-                allocation workflows are not available here.
+                Read-only values are saved settlement values, shown for reference: scheme, rate-cut
+                and allocations are not taken here. UPI Amt is the total of the UPI rows below, and
+                Old Gold / Old Silver Amt and Fine are the totals of the old metal rows.
               </p>
               <div className="row">
                 {[...extendedHeaderFields, ...salesOrderTenderFields].map(([key, label]) => (
@@ -767,7 +791,17 @@ export default function SalesOrderPage() {
                     </label>
                     <input
                       id={`sales-header-${key}`}
-                      value={header[key] ?? ''}
+                      value={
+                        key === 'upiAmount' && upiRows.length
+                          ? String(upiTotal(upiRows) || '')
+                          : oldMetalRows.length && key in oldMetalTotalFields
+                            ? String(
+                                oldMetalGridTotals(oldMetalRows)[
+                                  oldMetalTotalFields[key as keyof typeof oldMetalTotalFields]
+                                ] || '',
+                              )
+                            : (header[key] ?? '')
+                      }
                       readOnly={readonlyHeaderFields.has(key)}
                       style={
                         readonlyHeaderFields.has(key)
@@ -782,9 +816,13 @@ export default function SalesOrderPage() {
                       aria-description={
                         key === 'netAmount'
                           ? 'Saved calculated amount; update the item values to change the order.'
-                          : readonlyHeaderFields.has(key)
-                            ? 'Saved value; settlement workflow is not available here'
-                            : undefined
+                          : key === 'upiAmount'
+                            ? 'Total of the UPI rows below'
+                            : key in oldMetalTotalFields
+                              ? 'Total of the old metal rows below'
+                              : readonlyHeaderFields.has(key)
+                                ? 'Saved value; settlement workflow is not available here'
+                                : undefined
                       }
                       onChange={(e) => {
                         headerDirty.current.add(key);
@@ -794,6 +832,12 @@ export default function SalesOrderPage() {
                   </div>
                 ))}
               </div>
+              <SalesOrderUpiGrid rows={upiRows} onChange={setUpiRows} disabled={busy} />
+              <SalesOrderOldMetalGrid
+                rows={oldMetalRows}
+                onChange={setOldMetalRows}
+                disabled={busy}
+              />
             </details>
             {(editorCurrent ? rows : []).map((row, index) => (
               <details

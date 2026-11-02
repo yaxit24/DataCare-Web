@@ -32,6 +32,7 @@ import {
 import { SaleValidationError } from './sales.js';
 import * as pricing from './salesOrderPricing.js';
 import * as tenders from './salesOrderTender.js';
+import * as oldMetal from './salesOrderOldMetal.js';
 export { orderTenderRequest } from './salesOrderTender.js';
 import { fineWt } from '../shared/fine.js';
 import { resolveSalesOrderDesignTx } from './orderDesignSelection.js';
@@ -43,6 +44,7 @@ import {
   salesOrderFiscalConfigurationTx,
   assertSalesOrderDateTx,
   preserveOrderRow,
+  unsupportedOrderEdit,
   preserveOrderInputRow,
   orderDirtyColumns,
   exactOrderValues,
@@ -50,7 +52,6 @@ import {
   ORDER_PARENT_FIELDS,
   ORDER_COMPONENT_FIELDS,
 } from './orderLifecyclePolicy.js';
-import { buildOrderRojmel } from '../shared/rojmel.js';
 import {
   deleteVoucherWriteSetTx,
   nextHiddenVoucherNoTx,
@@ -91,7 +92,9 @@ export interface SalesOrderInput {
   orderMainBook?: OrderMainBook;
   // Desktop SL_ORD_DATA header fields (TR_SALE_ORD.cs:9120-9161).
   taxCode?: string; // MSG2_TOTAL[1,4] :9120
-  upiAmount?: number; // MSG2_TOTAL[3,1] :9141
+  upiAmount?: number; // MSG2_TOTAL[3,1] :9141, the total of upiRows on a Sales Order
+  upiRows?: unknown; // G206: the MSG_UPI grid, [{ upiAc, upiType, upiId, amount }]
+  oldMetalRows?: unknown; // G206: the MSG_OLD grid (salesOrderOldMetal.ts)
   bankAc?: string; // MSG2_TOTAL[4,4] :9149
   chequeNo?: string; // MSG2_TOTAL[4,2] :9150
   bankName?: string; // tBankName.Text  :9151
@@ -822,7 +825,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
     // is actually taken does the account matter. Explicit request account wins, else resolve slot 1
     // on this transaction and FAIL-CLOSED when unconfigured.
     const cashAc =
-      tender.cash > 0
+      tender.cash > 0 || tender.oldMetal.length > 0
         ? await resolveBookSlotAccountTx(
             tx,
             { ...input.scope, coBook: book.coBook },
@@ -831,6 +834,8 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
             input.cashAc,
           )
         : (input.cashAc ?? '');
+    await tenders.resolveOrderUpiTx(tx, input.scope, tender, !lifecycle);
+    await oldMetal.resolveOrderOldMetalTx(tx, input.scope, tender.oldMetal);
     if (mode.mainBook === 'SALES ORDER')
       await assertSalesOrderDateTx(tx, input.scope, requestedDate);
     const configuration = await orderLabourConfigurationTx(tx, input.scope);
@@ -937,7 +942,11 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
           ? undefined
           : orderClock(lifecycle.persistedClock)
         : orderClock(input.vchTime);
-    const headerFields = tenders.orderHeaderFields(ORDER_HEADER_FIELDS, salesOrderForm);
+    const headerFields = tenders.orderHeaderFields(
+      ORDER_HEADER_FIELDS,
+      salesOrderForm,
+      tender.oldMetalSent,
+    );
     const headerDirty = orderDirtyColumns(input, headerFields);
     const parentDirty = orderLines.map((line, index) =>
       orderDirtyColumns(
@@ -991,7 +1000,6 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         // settlement grid, old-metal and rate-cut adjustment, delivery/function dates and the party
         // address block. A blank desktop grid cell persists as ''/0.
         TAX_CODE: txt(input.taxCode, 2), // MSG2_TOTAL[1,4] :9120
-        UPI_AMT: round2(N(input.upiAmount)), // MSG2_TOTAL[3,1] :9141
         BANK_AC: txt(input.bankAc, 9), // MSG2_TOTAL[4,4] :9149
         CHQ_NO: txt(input.chequeNo, 10), // MSG2_TOTAL[4,2] :9150
         BANK_NAME: txt(input.bankName, 50), // tBankName.Text  :9151
@@ -1002,6 +1010,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         OLD_SL: N(input.oldSilverFine), // MSG2_TOTAL[7,2] :9144
         OLD_SL_AMT: round2(N(input.oldSilverAmount)), // MSG2_TOTAL[7,3] :9137
         SCHM_AMT: round2(N(input.schemeAmount)), // MSG2_TOTAL[8,3] :9142
+        ...tenders.orderOldMetalColumns(tender, salesOrderForm), // G206: OLD_GL* from the grid when it is sent :9136-9144
         RCUT_RATE: N(input.rateCutRate), // MSG2_TOTAL[9,1] :9134
         RCUT_FINE: N(input.rateCutFine), // MSG2_TOTAL[9,2] :9135
         RCUT_AMT: round2(N(input.rateCutAmount)), // MSG2_TOTAL[9,3] :9126
@@ -1198,51 +1207,28 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
       cashAc,
       tender,
       salesOrderForm,
+      book.inoutType,
     );
 
-    // The Rojmel (day book). Book 020 carries 55 real rows across four types; the other four in
-    // Ac_Rojmel.Order_Rojmel never fired here. Type 01 is the advance as a CREDIT with the book's slot-1
-    // account as contra - verified: slot 1 on book 020 is 00001 and every real type-01 row has LD_CODE
-    // 00001. Type 02 is a cheque, and note it names the BANK in AC_CODE with the party in LD_CODE, the
-    // reverse of the advance row.
-    //
-    // NOT written, on evidence: type 03 card (CARD_AMT is 0 of 76 orders), type 07 rate-cut fine
-    // (RCUT_FINE 0 of 76), type 08 UPI (UPI_DATA has 1 row company-wide), and type 05 scheme adjustment -
-    // which is an unresolved ANOMALY: SCHM_AMT is non-zero on 7 of 76 orders yet there are ZERO type-05
-    // rows. Emitting it would add rows the desktop does not have, which is harder to notice than a
-    // missing row and equally a parity failure. See docs/PLAN-SALESORDER-ROJMEL.md section 2.4.
-    //
-    // The old-metal detail rows (types 04 and 06) come from SL_PR_DETL, which this function does not
-    // currently write on an order - so they cannot fire yet. They are implemented in the shared builder
-    // and will be exercised when an order accepts metal in part-exchange.
-    const rojmelRows = tenders.withCardRojmel(
-      buildOrderRojmel(
-        {
-          scope: {
-            coCode: input.scope.coCode,
-            lcCode: input.scope.lcCode,
-            coYear: input.scope.coYear!,
-          },
-          key,
-          coBook: key.CO_BOOK,
-          vchNo: key.VCH_NO,
-          vchDate,
-          vchType: book.vchType,
-          bookName: book.mainBook,
-          partyName: input.acName ?? '',
-          partyCode: input.acCode,
+    // The Rojmel (day book), Ac_Rojmel.Order_Rojmel: see orderRojmelRows.
+    const rojmelRows = tenders.orderRojmelRows(
+      {
+        scope: {
+          coCode: input.scope.coCode,
+          lcCode: input.scope.lcCode,
+          coYear: input.scope.coYear!,
         },
-        {
-          // Slot 1 is the book's advance contra. `cashAc` is what the ledger already debits for the
-          // advance, which is the same account the desktop names in LD_CODE.
-          // N197: 01 credits ADV_AMT, 02 debits the cheque's bank; withCardRojmel adds 03 (Ac_Rojmel.cs:11-16).
-          advanceContraAc: cashAc,
-          bankAc: tender.bankAc,
-          advanceAmount: adv,
-          chequeAmount: tender.cheque,
-        },
-      ),
-      input.acCode,
+        key,
+        coBook: key.CO_BOOK,
+        vchNo: key.VCH_NO,
+        vchDate,
+        vchType: book.vchType,
+        bookName: book.mainBook,
+        partyName: input.acName ?? '',
+        partyCode: input.acCode,
+      },
+      cashAc,
+      adv,
       tender,
     );
     await insertRowTx(tx, 'TEMP_BOOK_DATA', tenantId, {
@@ -1259,6 +1245,13 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         ...(detl.length ? [{ table: 'SL_ORD_DETL', rows: detl }] : []),
         ...(idtl.length ? [{ table: 'SL_ORD_IDTL', rows: idtl }] : []),
         ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
+        ...tenders.orderUpiWrites(key, input.acCode, vchDate, tender),
+        ...oldMetal.orderOldMetalWrites(key, tender.oldMetal, book, {
+          partyAc: input.acCode,
+          vchDate,
+          hdVchNo,
+          mainUser,
+        }),
       ],
     });
     // Shared insertion defaults apply to new rows. An unchanged imported NULL belongs to the
@@ -1395,19 +1388,6 @@ function orderVersion(state: Record<(typeof ORDER_WRITE_TABLES)[number], any[]>)
 const dateText = (value: unknown): string =>
   value instanceof Date ? value.toISOString().slice(0, 10) : text(value).slice(0, 10);
 
-function unsupportedOrderEdit(
-  state: Record<(typeof ORDER_WRITE_TABLES)[number], any[]>,
-): string | undefined {
-  if (
-    (['SL_PR_DETL', 'SL_ORD_ADJ', 'UPI_DATA', 'MAIN_STOCK'] as const).some(
-      (table) => state[table]?.length,
-    )
-  )
-    return 'This order has metal, settlement or stock allocations that must be resolved before editing.';
-  // N197: cash, cheque and card tenders are edited on the screen, so they no longer block an edit.
-  return undefined;
-}
-
 async function assertOrderVersionTx(
   tx: any,
   scope: CompleteOrderScope,
@@ -1441,7 +1421,7 @@ export async function getSalesOrder(
     const d = [...state.SL_ORD_DETL].sort((a, b) => n(a.SR_NO) - n(b.SR_NO));
     const x = h[0];
     const salesOrderForm = options.orderMainBook !== 'TOUR ORDER';
-    const tenderView = tenders.orderTenderView(x, state.AC_DATA, salesOrderForm);
+    const tenderView = tenders.orderTenderView(x, state, salesOrderForm);
     const dto = {
       voucherNo: text(x.VCH_NO),
       hiddenVoucherNo: text(x.HD_VCH_NO),
@@ -1450,7 +1430,7 @@ export async function getSalesOrder(
       version: orderVersion(state),
       labourIncludesGhat: state.COMPANY_POLICY[0].labourIncludesGhat,
       labourRateDecimals: state.COMPANY_POLICY[0].labourRateDecimals,
-      editBlockedReason: unsupportedOrderEdit(state),
+      editBlockedReason: unsupportedOrderEdit(state, salesOrderForm),
       coCode: scope.coCode,
       lcCode: scope.lcCode,
       coYear: scope.coYear,
@@ -1664,8 +1644,10 @@ async function runSalesOrderEditTx(
     extraColumns: [],
   });
   const state = await assertOrderVersionTx(tx, scope, voucherNo, input.expectedVersion);
-  const editBlockedReason = unsupportedOrderEdit(state);
+  const editBlockedReason = unsupportedOrderEdit(state, input.orderMainBook !== 'TOUR ORDER');
   if (editBlockedReason) throw new SaleValidationError(editBlockedReason);
+  tenders.assertUpiRowsSent(state.UPI_DATA, input);
+  oldMetal.assertOldMetalRowsSent(state.SL_PR_DETL, input);
   const childCounts = new Map<number, number>();
   for (const child of state.SL_ORD_IDTL)
     childCounts.set(n(child.SR_NO), (childCounts.get(n(child.SR_NO)) ?? 0) + 1);
@@ -1859,7 +1841,7 @@ async function runSalesOrderCancelTx(
     ],
   });
   const state = await assertOrderVersionTx(tx, scope, voucherNo, input.expectedVersion);
-  const blocked = unsupportedOrderEdit(state);
+  const blocked = unsupportedOrderEdit(state, input.orderMainBook !== 'TOUR ORDER');
   if (blocked) throw new SaleValidationError(blocked);
   if (state.SL_ORD_DETL.some((row) => text(row.TAG_NO) && text(row.TAG_NO) !== 'N'))
     throw new SaleValidationError(

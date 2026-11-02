@@ -1,3 +1,43 @@
+## 2026-11-02 — Data Refresh PR-1 milestone (branch `feat/lite-data-refresh`)
+
+- The operator screen now has the six `MS_UPDATE` captions in desktop tab order. Ctrl+O/vendor, Mfg and Scheme controls are absent. Approval Adj is the only full writer: it reconciles APR ISU consumption from APR RTN, SALES, WH SALES and RATE CUT, then updates only `APR_DETL.ISU_REC` and `BAR_DETL.APR_ISU` in one audited transaction.
+- Account and Stock report exact proven partial anomalies but refuse full Apply because their builder graphs are unproved. Account hashes complete ordered candidate identities and stored/expected values independently of bounded display samples. Field Update and Old Field are classification-pending. Image Data classifies the committed `TAG_IMAGE_DATA` architecture and performs no runtime DDL or byte copy. All five preview-only operations publish neutral apply-authority metadata, and server refusal still occurs before a transaction.
+- Approval Adj matches issue year/book/voucher references with SQL Server-compatible trailing-space equality while preserving exact numeric serial matching. The four padded source fixtures prove APR RTN, SALES, WH SALES and RATE CUT are consumed and `BAR_DETL.APR_ISU` remains the inverse. T17 now proves native operation order plus operation → preview heading → Apply → originating operation focus; browser execution remains pending while dependencies are unavailable.
+- Frozen `data-refresh` T01-T18 matrix: 22 cases, 2 N/A (T04/T05), 8 blocked (T11 G225 Print-right handoff, T12 save/apply synchronization, T14 browser fault injection, and five T18 full Account/Stock, Field/Old Field, and Image continuations). Seven product/evidence gaps are baselined so generated progress does not report green. Browser execution is pending because dependencies are unavailable in this sandbox; desktop match remains 0%. Catalog stays PARTIAL; P11-01/X27/X06/N26 and G225 remain open.
+- Next: PR-2 statement-by-statement Field Update/Old Field classification, complete Account/Stock builder proof, Image migration semantics, and the active-owned Data Refresh caption Print-right handoff.
+
+## 2026-11-02 — Tag Cancel closure milestone 1 (N210 / G223)
+
+- Tag Cancel remains PARTIAL and N210 remains implemented-unverified. The browser matrix now freezes 16 executable
+  cases, 2 blocked and 2 not applicable: exact-caption `USER_SET` rights and near-miss refusal, two-browser same-tag
+  concurrency, a deepest-applicable DM_DATA rollback/retry, Tag Stock output after create, and a full
+  create → edit (drop/keep/add) → delete Tag Stock journey.
+- `tagCancelFaultMatrix.db.test.ts` conditions faults to its fixture and covers 8 create, 14 edit and 8 delete stages,
+  with whole-tenant/source/sentinel equality after every failure and a successful retry. The HTTP feature cases
+  compare business-table snapshots separately from their required `audit_log` appends. LOT_DETL is N/A in cancel
+  mode. No production route, writer, schema, form or shared RBAC registry changed.
+- Still open: T13 durable lost-acknowledgement replay pending a production idempotency key and replay contract, T15
+  history/configuration, captured desktop BAR_CAN rows, Windows comparison and parent acceptance. The sandbox lacked
+  workspace dependencies and could not download pnpm, so dependency-backed DB/browser execution remains for CI;
+  syntax, Prettier and repository Python/Node document gates are the local evidence.
+
+## 2026-11-02 — Company master milestone 1 (N58 / G38 / G39)
+
+- Follow-up evidence correction on `feat/lite-company-master`: generic `CO_MAST` create/update/delete/CSV business
+  writes are blocked by `dedicatedWriter` before the generic master transaction. The authenticated requests still
+  add their expected rejection/result rows to `audit_log`. `/masters/companies` remains an authenticated,
+  tenant-scoped, read-only Code/Name surface; T11 now proves admin, restricted-user and cross-tenant list scope.
+- N58 remains planned and the Company catalog remains PARTIAL. T02 is an executable G38 baseline failure because the
+  rich identity workflow is absent, so generated progress reports `module, 1 open` rather than green. Rich identity
+  editing, the versioned writer, first `YEAR_MAST` plus 17-family provisioning, G39 identity conventions,
+  `Company.RPT`, the full keyboard/journey evidence, and a safe hosted-delete decision remain.
+
+## 2026-11-02 — Data Backup milestone 1 (engineering only)
+
+- Branch `feat/lite-data-backup` implements the operator-visible Backup-only `UT_BKP` adaptation: in-memory Select acknowledgment, browser Save-dialog handoff, prominent warning that the JSON company archive is not production disaster recovery and has no operator restore path, progress/busy control, exact path/completion messages, pre-generation `Next<YY>[_<type>]_ddMMyy_HH.json` naming, and immutable `company_backup_run` audit before response handoff.
+- The current v2 160-table company archive remains the basis. The executable `data-backup.config.nextmain-allowlist` case downloads that real archive and is baselined under G64/N80 because no approved versioned tenant-config/credential envelope exists. No tenant-shared USER_MAST/APP_USER_DATA/MENU_DATA allowlist or new credential export was guessed. Restore and Dattach remain absent from the UI, and `logical-restore` containment is unchanged.
+- Status remains CONTAINED/PARTIAL engineering evidence, with one executable archive-scope baseline rather than a green module. Still blocked: D-BKP-3/G64/N80 allowlist and credential treatment, G225 exact Print-right route policy, X31 actual-browser scratch zero-diff, physical overwrite confirmation, full-Lite fixture, production DR, and desktop-runtime comparison.
+
 ## 2026-10-31 — Lite first, then Basic, then Standard
 
 - Owner instruction (31 October): finish every **Lite** menu end to end first, then the Basic additions, then the

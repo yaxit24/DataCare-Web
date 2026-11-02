@@ -37,6 +37,7 @@ import {
   diamondRows,
   headerRow,
   looseCells,
+  lotRows,
   num,
   replayBaseline,
   stockRows,
@@ -46,6 +47,7 @@ import {
   stonesFromInput,
   tempBookRow,
   typedText,
+  TAG_CANCEL_VERBS,
   type TagCancelBookPolicy,
   type TagCancelItem,
   type TagCancelLineInput,
@@ -66,17 +68,19 @@ export {
 export type { TagCancelStoneInput } from './tagCancelRows.js';
 
 /**
- * Tag Cancel (X19) and Tag Transfer (X18) — desktop `TR_TAG_CAN`, which serves both menus on a book of its own
- * `MAIN_BOOK` (MDI_FORM.cs:8586 "TAG CANCEL", :8664 "TAG TRFR").
+ * Tag Cancel (X19), Tag Transfer (X18) and Stock Adjust — desktop `TR_TAG_CAN`, which serves the three menus on a
+ * book of its own `MAIN_BOOK` (MDI_FORM.cs:8586 "TAG CANCEL", :8664 "TAG TRFR", :8616-8627 "STOCK ADJUST").
  *
  * Contract: `parity-plan-2026-09-10/evidence/implementation-2026-09-29-n18/contract.md` (K1-K16). Summary:
  *
- * - One writer, two modes; the book must be a `CUR_USE = 'Y'` book of the mode's `MAIN_BOOK` (K1).
+ * - One writer, three modes; the book must be a `CUR_USE = 'Y'` book of the mode's `MAIN_BOOK` (K1).
  * - A tag line cancels exactly one LIVE instance, through the resolver a sale uses (`issueTagTx`); every tag the save
- *   touches is locked first, in sorted order, so a cancel, a transfer and a sale of one tag serialise (K2).
+ *   touches is locked first, in sorted order, so a cancel, a transfer and a sale of one tag serialise (K2). A Stock
+ *   Adjust `+` line resolves the live tag without taking it out: it adds stock.
  * - The register rows carry exactly the desktop's columns; the source tag (BAR_DETL, BAR_IDTL, its image) is never
  *   modified, so its children and image are what a reversal makes available again (K6).
- * - MAIN_STOCK follows `Tag_Can_Stk`, DM_DATA `Dm_Tag_Cancel_Detl`, TEMP_BOOK_DATA the hidden number (K7-K9).
+ * - MAIN_STOCK follows `Tag_Can_Stk` (a Stock Adjust line's sign decides I or O), LOT_DETL `StkAdj_Lot` (Stock Adjust
+ *   lines with a TagLot), DM_DATA `Dm_Tag_Cancel_Detl` (Tag Cancel), TEMP_BOOK_DATA the hidden number (K7-K9).
  * - Edit releases the voucher's own tags and resolves every line again; delete writes the desktop's DELETE_DATA and
  *   removes the whole write set in one transaction (K10-K11).
  */
@@ -103,6 +107,8 @@ export interface TagCancelSaveResult {
   lines: number;
   stones: number;
   stockRows: number;
+  /** LOT_DETL rows (Stock Adjust lines with a TagLot). */
+  lotRows: number;
   diamondRows: number;
 }
 
@@ -194,11 +200,15 @@ async function resolveBookTx(
   const expected = TAG_CANCEL_MAIN_BOOKS[mode];
   const mainBook = typedText(row.MAIN_BOOK);
   if (mainBook !== expected) {
-    const other = mode === 'cancel' ? 'Tag Transfer' : 'Tag Cancel';
-    const hint =
-      mainBook === TAG_CANCEL_MAIN_BOOKS[mode === 'cancel' ? 'transfer' : 'cancel']
-        ? ` — use ${other}`
-        : '';
+    const menus: Record<TagCancelMode, string> = {
+      cancel: 'Tag Cancel',
+      transfer: 'Tag Transfer',
+      adjust: 'Stock Adjust',
+    };
+    const other = (Object.keys(TAG_CANCEL_MAIN_BOOKS) as TagCancelMode[]).find(
+      (m) => m !== mode && TAG_CANCEL_MAIN_BOOKS[m] === mainBook,
+    );
+    const hint = other ? ` — use ${menus[other]}` : '';
     throw new TagCancelValidationError(
       `book ${scope.coBook} is ${mainBook || 'blank'}, not ${expected}${hint}`,
     );
@@ -504,6 +514,8 @@ async function tagStockRestoresTx(
   for (const line of lines) {
     const tagNo = dbText(line.TAG_NO).trim();
     if (!tagNo || tagNo.toUpperCase() === 'N') continue;
+    // A Stock Adjust `+` line never took its tag out of stock, so there is nothing to give back.
+    if (dbText(line.ITM_SIGN).trim() === '+') continue;
     const vchSrno = num(line.VCH_SRNO);
     const counts: Array<{ bar: number; stock: number }> = await tx.$queryRawUnsafe(
       `SELECT (SELECT count(*)::int FROM "BAR_DETL" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
@@ -636,6 +648,7 @@ async function saveTx(
   await assertOpenTx(tx, scope, date);
   const behavior = await resolveSettingsBehaviorTx(tx, scope);
   const settings = { labourIncludesGhat: behavior.labourIncludesGhat };
+  const lotColumns = { tagLot: behavior.purchaseLot, itemLot: behavior.itemWithLotStock };
   const companyLabourType = behavior.labourType || 'G';
   const empCode = await employeeTx(tx, scope, input.empCode);
   const vchDesc = typedText(input.vchDesc, 255);
@@ -792,6 +805,12 @@ async function saveTx(
     let loaded: TagCancelRowCells | null;
     let sourceStones: TagCancelStoneRow[] = [];
     if (tagged) {
+      // A Stock Adjust `+` line adds the tag's stock (Tag_Can_Stk 'I', Ac_Stock.cs:53); only a `-` line takes the
+      // instance out, as every Tag Cancel and Tag Transfer line does.
+      const lineSign =
+        mode === 'adjust'
+          ? String(line.itmSign ?? (sameTag ? dbText(kept!.ITM_SIGN) : '')).trim()
+          : '-';
       const source = await tagSourceTx(
         tx,
         scope,
@@ -806,7 +825,7 @@ async function saveTx(
           itCode: typedText(line.itCode, 5) || undefined,
           row,
         },
-        true,
+        lineSign !== '+',
       );
       base = sameTag
         ? { ...cellsFromSaved(kept!), vchSrno: num(source.identity.VCH_SRNO) }
@@ -848,6 +867,7 @@ async function saveTx(
       stones,
       stonesGiven,
       settings,
+      lots: lotColumns,
     });
 
     if (mode === 'transfer') {
@@ -888,7 +908,7 @@ async function saveTx(
     if (!qualifies && tagged) {
       // Web adaptation: the desktop skips such a row and leaves the tag in stock without saying so.
       throw new TagCancelValidationError(
-        `row ${row}: tag ${cells.tagNo} has no pieces, weight or amount to ${mode === 'cancel' ? 'cancel' : 'transfer'}`,
+        `row ${row}: tag ${cells.tagNo} has no pieces, weight or amount to ${TAG_CANCEL_VERBS[mode]}`,
       );
     }
     if (qualifies && !cells.itCode.trim()) {
@@ -952,6 +972,9 @@ async function saveTx(
   }
   const stock = stockRows(ctx, details);
   for (const row of stock) await insertRowTx(tx, 'MAIN_STOCK', scope.tenantId, row);
+  // StkAdj_Lot (TR_TAG_CAN.cs:5273-5275): a Stock Adjust line with a TagLot moves the lot's stock too.
+  const lots = lotRows(ctx, details);
+  for (const row of lots) await insertRowTx(tx, 'LOT_DETL', scope.tenantId, row);
   const diamonds = diamondRows(ctx, writeLines, stoneItems);
   for (const row of diamonds) await insertRowTx(tx, 'DM_DATA', scope.tenantId, row);
 
@@ -962,6 +985,7 @@ async function saveTx(
     lines: writeLines.length,
     stones: stoneCount,
     stockRows: stock.length,
+    lotRows: lots.length,
     diamondRows: diamonds.length,
   };
 }

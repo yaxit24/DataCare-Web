@@ -523,6 +523,9 @@
       "title": "Complete safe correction, renumber, transfer and refresh utilities",
       "phase": "P11",
       "acceptance": "open",
+      "statusAsOf": "2026-11-02",
+      "evidence": ["docs/handbook/web/data-refresh.md", "web/apps/api/src/modules/utilities/dataRefreshOps.ts", "web/apps/api/test/dataRefreshApproval.db.test.ts", "web/apps/api/test/dataRepairBatch2.db.test.ts", "web/apps/web/test/features/modules/dataRefresh.mjs"],
+      "statusNote": "Data Refresh PR-1 milestone only: the six-button surface is frozen; Approval Adj has preview/apply/audit/idempotency, rollback and trailing-padded reference coverage; Account candidate identity, neutral preview-only authority and keyboard focus transitions have regression proof. Parent acceptance stays open for complete Account/Stock graphs, Field Update/Old Field classification, Image migration semantics, G225 rights and desktop-runtime comparison.",
       "detailFile": "previous-package-reconciliation.json",
       "detailId": "P11-01"
     },
@@ -596,7 +599,13 @@
       "phase": "P12",
       "acceptance": "open",
       "detailFile": "previous-package-reconciliation.json",
-      "detailId": "P12-05"
+      "detailId": "P12-05",
+      "milestoneEvidence": {
+        "asOf": "2026-11-02",
+        "status": "partial-engineering-only",
+        "evidence": "Data Backup milestone 1 adds the authenticated company-scoped v2 browser download, pre-generation source-backed filename, operator recovery-boundary warning, handoff audit and frozen T01-T18 matrix. The executable data-backup.config.nextmain-allowlist archive-scope case is baselined under G64/N80 because the required versioned tenant-config envelope is absent.",
+        "remaining": "Acceptance stays open for an approved D-BKP-3 NextMain-equivalent configuration/credential allowlist, actual-browser scratch import and zero diff, physical save evidence, full-Lite fixture, exact Print rights, production deployment, encrypted off-site retention, restore drills, RPO/RTO, upgrade and rollback."
+      }
     },
     {
       "id": "P13-01",
@@ -964,6 +973,8 @@
       "id": "X06",
       "title": "Replay exact posting footprints and reconcile history",
       "status": "open",
+      "statusAsOf": "2026-11-02",
+      "statusNote": "The Approval Adj synthetic oracle proves the current PostgreSQL result and complete scoped write set, but no original-Windows run exists. Desktop-match coverage therefore remains 0%, and X06 stays open.",
       "parents": [
         "P01-03"
       ],
@@ -2259,6 +2270,8 @@
       "id": "X27",
       "title": "Complete correction and bulk utility reference closure",
       "status": "open",
+      "statusAsOf": "2026-11-02",
+      "statusNote": "Data Refresh PR-1 implements Approval Adj with trailing-padded reference proof and makes the other five visible actions explicit preview-only classifications with neutral authority metadata where their full graph or semantics are unproved. Account previews now bind complete candidates independently of bounded samples. X27 remains open for Account/Stock builder closure, PR-2 Field/Old Field classification, Image migration semantics, and all other utilities.",
       "parents": [
         "P11-01"
       ],
@@ -2548,7 +2561,13 @@
         "source": "42-implementation-progress-round15.md",
         "qualification": "Remaining work or acceptance, not a claim that all code in this area is absent."
       },
-      "findingQualification": "Read with currentRemainingGap and implementationProgress; older CR counts are historical observations requiring current revalidation."
+      "findingQualification": "Read with currentRemainingGap and implementationProgress; older CR counts are historical observations requiring current revalidation.",
+      "milestoneEvidence": {
+        "asOf": "2026-11-02",
+        "status": "partial-engineering-only",
+        "evidence": "The operator Backup path downloads the authenticated company's v2 160-table JSON document with a pre-generation source-backed filename, immutable company_backup_run audit, recovery-boundary warning, scope/checksum tests and no Restore/Dattach UI. The executable data-backup.config.nextmain-allowlist case is baselined under G64/N80 and fails on the real archive's absent versioned tenantConfig envelope.",
+        "remaining": "Restore containment remains. Approve D-BKP-3 tenant-shared configuration and credential handling; then prove actual browser-artifact scratch zero-diff. Physical-save, full-Lite fixture, exact rights, production-like timed recovery/outage proof and controlled release remain blocked."
+      }
     },
     {
       "id": "X32",
@@ -3126,6 +3145,9 @@
     {
       "id": "N26",
       "status": "planned",
+      "statusAsOf": "2026-11-02",
+      "statusNote": "Data Refresh PR-1 milestone complete in branch scope: Approval Adj has exact consumed-source results including trailing-padded references; Account same-count candidate replacement, preview-only neutral authority and safe focus transitions have regression proof. Five unsafe actions remain preview-only classifications. N26 stays planned until the remaining reference graphs and recovery evidence close.",
+      "evidence": ["docs/handbook/web/data-refresh.md", "web/apps/api/test/dataRefreshApproval.db.test.ts", "web/apps/api/test/dataRepairBatch2.db.test.ts", "web/apps/web/test/features/modules/dataRefresh.mjs"],
       "action": "Close correction, renumber, transfer, imports and maintenance utility reference graphs",
       "parentLabels": "P11-01, X27",
       "startAfter": [
@@ -3779,7 +3801,15 @@
       "gapIds": "G37, G81",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/apps/web/lib/reportPresentation.ts",
+        "web/apps/web/app/(app)/reports/[report]/page.tsx",
+        "web/apps/web/test/reportPresentation.test.ts",
+        "web/apps/web/test/features/modules/contraEntry.mjs"
+      ],
+      "statusNote": "PLANNED. The bounded Contra Register date manifestation is implemented-unverified: only contra-register.date has an explicit date descriptor, so its stored calendar date is displayed as dd/MM/yyyy through the shared formatter, and the zero-mock baseline entry is removed. Desktop authority: unified/src/csharp/DataCareNext/TR_CONTRA.cs:1092-1098 configures the 00/00/0000 voucher-date mask and :3136-3162 projects the F1 list date with SQL Server style 103. Broad N57/G37 remains planned/open for typed descriptors across reports, Indian grouping, authoritative totals, and identical screen/PDF/CSV/XLSX output; G81 also remains open. No acceptance or verification is claimed."
     },
     {
       "id": "N58",
@@ -3794,7 +3824,16 @@
       "gapIds": "G38, G39, G82, G86, G100",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "docs/handbook/web/company-master.md",
+        "web/apps/api/src/modules/masters/configs.ts",
+        "web/apps/api/test/companyMasterContainment.db.test.ts",
+        "web/apps/web/app/(app)/masters/companies/page.tsx",
+        "web/apps/web/test/features/modules/companyMaster.mjs"
+      ],
+      "statusNote": "Milestone 1 containment code is present; overall N58 remains planned. Generic CO_MAST create/update/delete/CSV business paths are blocked by dedicatedWriter before the master transaction, while authenticated rejection/result audits remain expected. /masters/companies is a dedicated tenant-scoped read-only page; executable T11 covers admin, restricted-user, and cross-tenant listing, and executable T02 remains a G38 baseline failure because the rich identity workflow is absent. Pending: rich identity form, versioned/idempotent writer, first YEAR_MAST plus 17-family provisioning, desktop identity conventions, semantic print, complete keyboard/journey evidence, and an accepted safe-delete decision."
     },
     {
       "id": "N59",
@@ -4129,7 +4168,13 @@
       "gapIds": "G64",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "milestoneEvidence": {
+        "asOf": "2026-11-02",
+        "status": "partial-engineering-only",
+        "evidence": "Data Backup milestone 1 implements the Backup-only browser handoff, operator recovery-boundary warning and v2 company scope/audit evidence. The executable data-backup.config.nextmain-allowlist case is baselined under G64/N80 because the real archive has no approved versioned tenantConfig envelope.",
+        "remaining": "Approve the D-BKP-3 NextMain-equivalent allowlist and credential treatment; prove actual-artifact scratch reconciliation, physical save behavior, a full-Lite fixture, exact Print rights, encrypted off-host retention, scheduled restore, RPO/RTO, deployment hardening, upgrade and rollback."
+      }
     },
     {
       "id": "N81",
@@ -6504,7 +6549,7 @@
     },
     {
       "id": "N188",
-      "status": "in-progress",
+      "status": "implemented-unverified",
       "action": "Purchase-family amounts like the desktop: round the purchase return's (and purchase's) item and labour amounts and the bill total to whole rupees as TR_KR_ISU and TR_PURC do, in the screen preview and the writer; remove purchase-return.formula.whole-rupees and purchase-return.create.amounts from features/baseline.json. Do it together with N184 (same rounding mechanism).",
       "parentLabels": "P06-01, P10-05; X07",
       "startAfter": [
@@ -6516,7 +6561,7 @@
       "verification": "04-verification-playbook.md",
       "requiredProof": "both cases pass (58,466 net, 1,753.98 tax, 60,220 total); a purchase line with paise rounds the same; preview equals posted.",
       "gapIds": "G198",
-      "statusAsOf": "2026-11-01",
+      "statusAsOf": "2026-11-02",
       "evidence": [
         "web/packages/core/src/purchaseReturnAmount.ts",
         "web/packages/core/test/purchaseReturnAmount.test.ts",
@@ -6525,9 +6570,16 @@
         "web/apps/web/lib/purchaseReturnForm.ts",
         "web/apps/web/test/purchaseReturnForm.test.ts",
         "web/apps/web/test/features/modules/purchaseReturn.mjs",
-        "web/apps/web/test/features/baseline.json"
+        "web/apps/web/test/features/baseline.json",
+        "web/packages/core/src/purchaseAmount.ts",
+        "web/packages/core/test/purchaseAmount.test.ts",
+        "web/apps/api/src/modules/purchase/purchase.ts",
+        "web/apps/api/test/purchase.test.ts",
+        "web/apps/api/test/purchase.lifecycle.db.test.ts",
+        "web/apps/web/app/(app)/txn/purchase/page.tsx",
+        "web/apps/web/test/features/modules/purchaseInvoice.mjs"
       ],
-      "statusNote": "IN PROGRESS. Purchase Return milestone implemented: the preview and writer use TR_KR_ISU fine/RATE_TYPE basis, directly round item and labour to whole rupees, preserve fractional other charges in the line, round header net and final total to whole rupees, and retain purchase-rate and tax precision. Browser proof: 22 applicable, 20 passed, 0 failed, 2 blocked; both G198 cases pass and left the baseline. Full quality, database, zero-mock browser and UI-surface CI passed. N188 remains in progress because its ordinary Purchase half and paise-producing Purchase proof are not implemented in this milestone."
+      "statusNote": "IMPLEMENTED, NOT DESKTOP-VERIFIED. Purchase Return remains the distinct TR_KR_ISU contract delivered in milestone 1. Ordinary Purchase now shares one focused TR_PURC component helper between API and preview: PR_AMT_TYPE plus URD_RATE_TYPE and RATE_TYPE P/1/K/default select the item basis/divisor; derived item and labour amounts round directly midpoint-to-even to whole rupees; explicit amount overrides remain unchanged; and fractional other charge remains in the two-decimal detail net. Header net/final total still use company TOT_AMT_ROF, tax still uses TAX_ROF, and purchase-rate precision remains separate. Core, pure writer, lifecycle database, and zero-mock browser proofs pin the 9.160 / 56,091 / 2,375 / 58,466 / 1,753.98 / 60,220 vector; the database adjunct pins detail 58,466.40 and downstream PR_DATA, PR_DETL, MAIN_STOCK, TAX_DATA, balanced AC_DATA, and Rojmel. The strengthened browser proof reloads explicit 56,090.80 item and 2,375.25 labour amounts (including zero-value hydration), restores persisted ghat weight, wastage, labour percentage/rate/type and item rate-basis inputs, saves unchanged, and compares those PR_DETL sources plus the existing component/downstream write set. Its edit proof preserves loaded per-gram labour for an item-rate-only change, then invalidates and recalculates labour after a net-weight dependency change. A separate restored-in-finally PR_AMT_TYPE=G case enters RATE_TYPE P/1/K through the real grid and proves preview/persisted 3,000/1,200/12 values across reload. Shared API/browser explicit-fine normalization pins 9.1605 to 9.161 and item 9,161 at rate 1,000 (raw would produce 9,160). Local package tests were not executable because web/node_modules is absent and the registry is unavailable; CI execution remains required. G5 original-Windows comparison remains unavailable because this environment has no desktop SQL secrets, so this slice is not accepted or verified."
     },
     {
       "id": "N189",
@@ -7048,15 +7100,16 @@
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
-      "statusAsOf": "2026-11-01",
+      "statusAsOf": "2026-11-02",
       "evidence": [
         "web/apps/api/src/modules/stock/tagCancel.ts",
         "web/apps/api/src/modules/stock/tagCancelBill.ts",
         "web/apps/web/components/TagCancelForm.tsx",
         "web/apps/api/test/tagCancel.routes.db.test.ts",
+        "web/apps/api/test/tagCancelFaultMatrix.db.test.ts",
         "web/apps/web/test/features/modules/tagCancel.mjs"
       ],
-      "statusNote": "IMPLEMENTED, not accepted. Tag Cancel suites 114/114 (the two new cases red against main); tag-cancel feature module 12 passed / 5 blocked. Open: no captured desktop BAR_CAN rows, idempotency, fault rollback, the Tag Stock report check, desktop-runtime comparison."
+      "statusNote": "IMPLEMENTED, not accepted. The feature matrix now freezes 16 executable cases, 2 blocked and 2 not applicable. New evidence covers exact 'Tag Cancel' caption rights with a near-miss refusal, an exact two-browser same-tag race, create/edit/delete rollback at every executed write-set stage, and Tag Stock create/edit/delete agreement. T13 durable lost-acknowledgement replay remains blocked pending a production idempotency key and replay contract; T15 history/configuration stays blocked. Open: no captured desktop BAR_CAN rows, durable idempotency and desktop-runtime comparison. Final dependency-backed execution is pending CI."
     },
     {
       "id": "N211",
@@ -7113,7 +7166,7 @@
         "web/apps/api/test/desktopRightsCaptions.db.test.ts",
         "web/apps/web/test/features/modules/partyOpening.mjs"
       ],
-      "statusNote": "IMPLEMENTED, not accepted. Verified: desktopRightsCaptions.db.test.ts 28/28 (27 fail on main's catalog), partyOpening.db.test.ts, the full API suite (343 files, 3665 tests), web unit tests, smoke, and the party-opening feature module 15 passed, 0 failed, 3 blocked (T11 now passes). Open: Company, Data Refresh, Data Import, Order Report, Cash/Bank Received and Approval Rtn's issue lines (shared forms), and the Basic and Standard captions."
+      "statusNote": "IMPLEMENTED, not accepted. Verified before the Data Refresh PR-1 milestone: desktopRightsCaptions.db.test.ts 28/28 and Party Opening T11. Data Refresh now has an explicit feature case for the owner-decided all-six Print gate, but it remains blocked because the existing Data Repair routes are admin-only and the active-owned route-policy/form-catalog handoff was intentionally not changed. Other shared-form captions and the Basic/Standard tiers remain open."
     },
     {
       "id": "N213",
@@ -7346,6 +7399,244 @@
         "web/apps/web/test/features/modules/wholesaleSale.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Verified: wholesaleSaveChecks.db.test.ts 9/9, the TR_WH_SALE-family API tests (12 files, 153 tests), the wholesale-sale feature module 25 of 25 (no blocked case), the full workspace suite and the real-stack suite. Open: desktop-runtime comparison and parent acceptance; the Rate Cut, Wh Quotation and Tour Sales menus have no feature module yet."
+    },
+    {
+      "id": "N221",
+      "status": "implemented-unverified",
+      "action": "Stock Adjust is the desktop TR_TAG_CAN on a STOCK ADJUST book, as the Tag Cancel writer's third mode: the grid with the Sign column and the setting-driven TagLot and ItmLot columns with their helps, the desktop keys, the signed register, MAIN_STOCK I or O by sign, LOT_DETL for a lot, reopen, edit, delete and TagCanBill; the provisioned book becomes the desktop's STADJ out book numbered from BAR_CAN_DATA, with a data migration; the old separate writer is removed.",
+      "parentLabels": "P1-core; L3; T01-T18",
+      "startAfter": [
+        "N220"
+      ],
+      "requiredProof": "An HTTP/DB test of the book, rights, refusals, lifecycle, lots and a + tag line; the stock-adjust feature module passes every case and tag-cancel stays green; a Chrome DevTools keyboard, save, reopen, print and delete pass.",
+      "gapIds": "G234",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/stock/tagCancel.ts",
+        "web/apps/api/src/modules/stock/tagCancelRows.ts",
+        "web/apps/api/src/modules/stock/stockAdjustLots.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/packages/db/prisma/migrations/20261101090000_stock_adjust_book/migration.sql",
+        "web/apps/web/components/TagCancelForm.tsx",
+        "web/apps/web/lib/tagCancelVoucher.ts",
+        "web/apps/web/app/(app)/txn/stock-adjust/page.tsx",
+        "web/apps/api/test/stockAdjust.routes.db.test.ts",
+        "web/apps/web/test/tagCancelVoucher.test.ts",
+        "web/apps/web/test/features/modules/stockAdjust.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: stockAdjust.routes.db.test.ts 6/6, the Tag Cancel unit tests, routePolicy (719 routes), the stock-adjust feature module 18 of 18 applicable, tag-cancel unchanged, and a Chrome DevTools pass on the demo stack. Open: a replayed loose-line save makes a second voucher (no idempotency key); desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N222",
+      "status": "implemented-unverified",
+      "action": "The Sales Order's UPI tender like TR_SALE_ORD: the MSG_UPI grid (account from the master, type, id, amount), UPI_AMT its total and part of ADV_AMT, UPI_DATA one row per grid line, Order_Ledr legs 12/13 and Order_Rojmel type 08 per row, the used-Upi-Id refusal on a new order, and edit and delete of a UPI order.",
+      "startAfter": [
+        "N221"
+      ],
+      "requiredProof": "sales-order.create.upi-tender, sales-order.edit.upi-amount-then-delete and sales-order.refusal.duplicate-upi-id pass in the browser; the UPI DB write-set test passes.",
+      "gapIds": "G206",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "parentLabels": "P9; R03",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/sales/salesOrderTender.ts",
+        "web/apps/api/src/modules/sales/salesOrder.ts",
+        "web/apps/api/src/modules/sales/orderLifecyclePolicy.ts",
+        "web/apps/web/components/SalesOrderUpiGrid.tsx",
+        "web/apps/web/lib/salesOrderForm.ts",
+        "web/apps/api/test/salesOrderRound4.db.test.ts",
+        "web/apps/web/test/features/modules/salesOrder.mjs"
+      ],
+      "statusNote": "IMPLEMENTED (UPI), not accepted. The UPI DB test passes (red before this change), the order-related API tests pass (22 files, 272), and the sales-order module passes 27 of 30 (the three UPI cases pass; old metal and scheme stay baselined under G206; two cases blocked as before). Open: old gold, old silver and scheme tenders; desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N223",
+      "status": "implemented-unverified",
+      "action": "The Ledger Report is the desktop RP_LEDR screen: the account summary (money=Σ(CR−DR), signed gold/silver fine, a negative net to Dr and a positive net to Cr, display-zero rows dropped unless With Zero), the per-voucher and per-ledger-key drill-down with a running Σ(Cr)−Σ(Dr) balance and its side, the voucher-summary gross Dr/Cr, the debit ageing with oldest-first FIFO over the 0-15..151+ buckets for money and the selected fine, totals, the selectors (view, account, dates, data type, With Zero, fine type), one primary Run action, and Print/PDF/Excel/CSV — all from one read-only resolver, keeping the account-in-path aliases.",
+      "parentLabels": "P1-core; L-report; T01-T18",
+      "startAfter": [
+        "N222"
+      ],
+      "requiredProof": "Pure vectors for the sign split, the running balance and the FIFO ageing from desktop-derived scenarios; an HTTP/DB test of the four views, the exports, the refusals, the view-vs-print rights and a cross-tenant sentinel on forced RLS; the account-ledger feature module passes every applicable case; the route universe is 724.",
+      "gapIds": "G235",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/reports/accountLedgerReport.ts",
+        "web/apps/api/src/routes/accountLedger.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/app.ts",
+        "web/apps/web/app/(app)/reports/account-ledger/page.tsx",
+        "web/apps/web/app/(app)/reports/account-ledger/useAccountLedger.ts",
+        "web/apps/web/app/(app)/reports/account-ledger/AccountLedgerGrid.tsx",
+        "web/apps/web/app/(app)/reports/account-ledger/types.ts",
+        "web/apps/api/test/accountLedgerReport.test.ts",
+        "web/apps/api/test/accountLedgerReport.db.test.ts",
+        "web/apps/api/test/routePolicy.test.ts",
+        "web/apps/web/test/features/modules/accountLedger.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. The RP_LEDR account summary, voucher/detail drill-down, debit ageing and signed money/gold/silver balances are served read-only from accountLedgerReport.ts, with PDF/Excel/CSV from the same dataset and a dedicated page; the shared report-filter guard in app.ts exempts the account-ledger routes, whose selectors are typed. Quality, static-gates and the Real-stack browser journeys passed after each functional fix and before this latest main merge. Open: the desktop's OP_LDR opening-ledger ageing union and the staging-table gold/silver fine prints (intentionally not reproduced), desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N224",
+      "status": "implemented-unverified",
+      "action": "The Party master is the desktop MS_ACCT screen: the location's Code / Name / Mobile list and next code, Company Detail and Other Detail in the desktop tab order with the group, mobile, second mobile, short name, GST, main account and reference checks, a new entry's opening (OP_DATA and the AcOp_Ledr legs) and AC_MAST_SRNO row written with the save in one transaction, the photo, the D/S/A copy helps, Print and Delete with the desktop's refusals, and the five AC_MAST columns of the desktop's updater.",
+      "parentLabels": "P1-core; L2; T01-T18",
+      "startAfter": [
+        "N223"
+      ],
+      "requiredProof": "An HTTP/DB test of the list, next code, write set (AC_MAST, OP_DATA, AC_DATA legs, AC_MAST_SRNO), refusals, versions, rights, helps, photo and delete; the party-master feature module passes every case; a Chrome DevTools keyboard, help, photo and delete pass on the demo stack.",
+      "gapIds": "G236",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/masters/partyMaster.ts",
+        "web/apps/api/src/routes/partyMaster.ts",
+        "web/apps/api/src/routes/masterScreens.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/packages/db/prisma/migrations/20261102090000_ac_mast_party_columns/migration.sql",
+        "web/apps/web/app/(app)/masters/party/page.tsx",
+        "web/apps/api/test/partyMaster.test.ts",
+        "web/apps/api/test/partyMaster.db.test.ts",
+        "web/apps/web/test/features/modules/partyMaster.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: partyMaster.test.ts 7/7, partyMaster.db.test.ts 10/10, the full API suite (353 files, 3,757 tests), routePolicy (728 routes), the party-master feature module 18 of 18 applicable (none blocked), the surface crawl and the session-context and labour-preview lifecycle checks, and a Chrome DevTools pass on the demo stack. Desktop-runtime comparison and parent acceptance remain."
+    },
+    {
+      "id": "N225",
+      "status": "implemented-unverified",
+      "action": "Tag Print is the desktop UT_TAG_PRINT screen: the voucher and stock selection by book, group, product and item type, typed tags, Y/N rows with Ctrl+D, Hm Id Update with Save, the default label file (Set) and a print that stages TAG_PRINT_DATA after the Lable Skip blanks.",
+      "parentLabels": "P1-core; L3; T01-T18",
+      "startAfter": [
+        "N224"
+      ],
+      "requiredProof": "An HTTP/DB test of the load, stock and voucher fills, typed tag, staging, Hm Id Update, Set and rights; the tag-print feature module passes every applicable case; a Chrome DevTools keyboard and label pass on the demo stack.",
+      "gapIds": "G237",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/stock/tagPrintScreen.ts",
+        "web/apps/api/src/routes/tagPrintScreen.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/web/app/(app)/txn/tag-print/page.tsx",
+        "web/apps/api/test/tagPrintScreen.db.test.ts",
+        "web/apps/web/test/features/modules/tagPrint.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: tagPrintScreen.db.test.ts 9/9, the tag-print feature module 17 of 17 applicable (T10 not applicable), the surface crawl, and a Chrome DevTools pass on the demo stack. Desktop-runtime comparison and physical-printer acceptance (D29) remain."
+    },
+    {
+      "id": "N226",
+      "status": "implemented-unverified",
+      "action": "The Sales Order's old gold and old silver like TR_SALE_ORD: the MSG_OLD grid (item, weights, touch, rate type, rate, amount with the CommPassTotal_Old derivation), SL_PR_DETL one row per saved grid row, OLD_GL* totals and the amounts in ADV_AMT, Order_Rojmel types 04/06, the book-direction-gated Order_Ledr legs 07-10, and edit and delete of an order with old metal.",
+      "startAfter": [
+        "N225"
+      ],
+      "requiredProof": "sales-order.create.old-metal-tenders, create.old-metal-unvalued-fine and edit.old-metal-then-delete pass in the browser; the old metal DB write-set test passes.",
+      "gapIds": "G206",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "parentLabels": "P9; R03",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/sales/salesOrderOldMetal.ts",
+        "web/apps/api/src/modules/sales/salesOrderTender.ts",
+        "web/apps/api/src/modules/sales/salesOrder.ts",
+        "web/apps/api/src/modules/sales/orderLifecyclePolicy.ts",
+        "web/apps/web/components/SalesOrderOldMetalGrid.tsx",
+        "web/apps/web/lib/salesOrderOldMetal.ts",
+        "web/apps/api/test/salesOrderOldMetal.db.test.ts",
+        "web/apps/api/test/salesOrderOldMetal.test.ts",
+        "web/apps/web/test/features/modules/salesOrder.mjs"
+      ],
+      "statusNote": "IMPLEMENTED (old gold and old silver), not accepted. The DB write-set test passes (red before this change) and the three browser cases pass. Open: the scheme amount (baselined), the real Sales Order BOOK_INOUT for legs 07-10, the T book variant, the SL_ORD_ADJ O row, desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N227",
+      "status": "implemented-unverified",
+      "action": "Browser cases recorded as blocked for Tag Cancel, Daily Rate, Purchase Invoice, Contra and Cash/Bank now run against the real stack, and the four defects they found are fixed: two operators saving one Daily Rate day no longer hit the RATE_MAST key, the rate lookup is scoped to the session's location, every voucher form's lock-date refusal carries the desktop text, and the Cash Received/Payment Employee box is stored, enforced when CO_SET.EMP_CODE_MANDATORY is Y, and read back.",
+      "parentLabels": "P1-core; L1; L3; T01-T18",
+      "startAfter": [
+        "N226"
+      ],
+      "requiredProof": "A DB test that fails on the old Daily Rate writer, one that fails on the old location-blind lookup, unit and DB tests of the desktop lock text and the employee code (stored, mandatory refusal, unknown employee, kept through an edit); the tag-cancel, daily-rate, purchase-invoice, contra and cash-bank modules pass on a fresh production build, and sales-invoice and sales-order show no new failure.",
+      "gapIds": "G238",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/masters/dailyRate.ts",
+        "web/apps/api/src/modules/masters/rate.ts",
+        "web/apps/api/src/routes/dailyRate.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/posting/posting.ts",
+        "web/apps/api/src/modules/finance/lifecycle.ts",
+        "web/apps/api/src/modules/finance/finance.ts",
+        "web/apps/web/components/PaymentForm.tsx",
+        "web/apps/api/test/dailyRate.routes.db.test.ts",
+        "web/apps/api/test/cashReceiptLegs.db.test.ts",
+        "web/apps/api/test/periodLockMessage.test.ts",
+        "web/apps/web/test/features/modules/tagCancel.mjs",
+        "web/apps/web/test/features/modules/dailyRate.mjs",
+        "web/apps/web/test/features/modules/purchaseInvoice.mjs",
+        "web/apps/web/test/features/modules/contraEntry.mjs",
+        "web/apps/web/test/features/modules/cashBank.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: the daily-rate, lock-message and cash-employee DB and unit tests; full isolated suite API 356 files / 3,789 tests, web 713; modules tag-cancel 16/16, purchase-invoice 29/29, contra 25/25, daily-rate 15 of 16, cash-bank 19 of 21, sales-invoice and sales-order with no new failure (the sales-order old-metal case is the known G206 baseline). Open: daily-rate T15 needs a location-00 session in the harness; cash-bank T03 and T06; the desktop's default employee from the session (TR_CASH.cs:2671); desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N228",
+      "status": "implemented-unverified",
+      "action": "Wh Sales like TR_WH_SALE: the voucher number box keys (F1 list, Up, Down, Enter), the issued tag stones written to SL_IDTL and DM_DATA, and the WhSalesBill layout (book title, Issue and Received groups, the four-column band with the report formulas, Kasar Fine, Ref No, ESTIMATE, Cr/Dr labels).",
+      "startAfter": [
+        "N227"
+      ],
+      "requiredProof": "wholesale-sale.keyboard.voucher-number-keys, create.tag-stones and output.print-bill pass in the browser; wholesaleSaleStones, wholesaleSaleBill and voucherNeighbour tests pass.",
+      "gapIds": "G15",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "parentLabels": "P1-core",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/sales/wholesaleTagStones.ts",
+        "web/apps/api/src/modules/sales/wholesaleSaleBill.ts",
+        "web/apps/api/src/modules/sales/rateCut.ts",
+        "web/apps/api/src/modules/sales/rateCutBookingDrawDown.ts",
+        "web/apps/api/src/modules/vouchers/list.ts",
+        "web/apps/api/src/routes/wholesaleSale.ts",
+        "web/apps/web/components/WholesaleVoucherForm.tsx",
+        "web/apps/api/test/wholesaleSaleStones.db.test.ts",
+        "web/apps/api/test/wholesaleSaleBill.test.ts",
+        "web/apps/api/test/voucherNeighbour.routes.db.test.ts",
+        "web/apps/web/test/features/modules/wholesaleSale.mjs"
+      ],
+      "statusNote": "IMPLEMENTED (voucher keys, tag stones, bill layout), not accepted. The three new test files fail against the old code and pass; the wholesale-sale browser module passes 27 of 27. Open: hand-typed item-detail rows for loose items, SL_IDTL rows on the printed bill, fine kasar, the Rojmel alignment for lined vouchers, desktop-runtime comparison and parent acceptance."
     }
   ],
   "amendments": [

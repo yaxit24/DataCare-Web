@@ -42,16 +42,14 @@ import {
 import {
   cashPurchaseParty,
   generatedLabourRate,
-  purchaseAmountBase,
   purchaseExpenseSplit,
   resolveSettingsBehaviorTx,
   tagSerialWidth,
   type LineAmountType,
 } from '../shared/settingsBehavior.js';
 import {
-  metalAmount,
-  labourCharge,
-  lineNet as calcLineNet,
+  purchaseLineAmounts,
+  normalizePurchaseExplicitFine,
   billTotals,
   toIsoDate,
   type LabourType,
@@ -240,7 +238,8 @@ const round3 = (n: number): number => Math.round((n + Number.EPSILON) * 1000) / 
 /** Resolve a purchase line's 3dp fine: standard items use (net+ght)×(touch+west)/100;
  * old-gold/Kun inputs use the TR_PURC.cs:7310-7317 less-touch + Kun-fine policy. */
 export function lineFine(line: PurchaseLineInput): number {
-  if (line.fineWt != null) return round3(Number(line.fineWt));
+  const explicitFine = normalizePurchaseExplicitFine(line.fineWt);
+  if (explicitFine != null) return explicitFine;
   const workflow =
     line.lesTouch != null || line.kunFine != null ? 'purchaseOldGold' : 'purchaseItem';
   return fineFor(workflow, line);
@@ -260,54 +259,29 @@ export function computeLine(
   net: number;
 } {
   const fine = lineFine(line);
-  const rate =
-    line.rate == null
-      ? undefined
-      : policy
-        ? policy.roundPurchaseRate(line.rate)
-        : Number(line.rate);
-  // TR_PURC.cs:7396 selects the rate base from CO_SET.PR_AMT_TYPE; this mode is never accepted
-  // from the request. An explicit metalAmount remains the authoritative desktop-style line value.
-  const amountBase = purchaseAmountBase({ ...line, fineWt: fine }, amountType);
-  const metal =
-    line.metalAmount != null
-      ? Number(line.metalAmount)
-      : rate != null
-        ? metalAmount(amountBase, rate)
-        : 0;
-  const labour =
-    // An explicitly stated labour amount wins, exactly as `metalAmount` does for metal above.
-    //
-    // WP-08: without this, reopening a purchase and saving it unchanged SILENTLY ZEROED the labour charge and
-    // reduced the voucher total by that amount. `LBR_TYPE` cannot represent the web's `percentage` and `fixed`
-    // modes — `desktopLabourTypeFor` collapses both to the company default code — so the reader cannot recover
-    // the mode, `line.labourType` comes back undefined, and this expression used to fall through to 0. The
-    // amount, however, IS persisted in `LBR_AMT`, and the reader returns it; honouring it keeps the money
-    // while inventing no labour mode that the desktop column cannot hold.
-    line.labourAmount != null
-      ? Number(line.labourAmount)
-      : line.labourType
-        ? labourCharge(
-            line.labourType,
-            {
-              netWt: line.netWt,
-              pcs: line.pcs,
-              rate: line.labourRate,
-              pct: line.labourPct,
-              metalAmount: metal,
-              fixed: line.labourFixed,
-              // P4: (net + ghat) x rate is the desktop's per-gram labour base; the ghat term is
-              // dropped only when CO_SET_NEW.LBR_WITH_GHT = 'N' (TR_SALE.cs:11112-11123, blank
-              // default 'Y' at MS_OPNCOMP.cs:1224-1226). This was omitted entirely, so labour was
-              // understated by ghat x rate on every line carrying ghat weight.
-              ghatWt: line.ghtWt,
-              withGhat: labourWithGhat,
-            },
-            policy,
-          )
-        : 0;
-  const net = calcLineNet({ metal, labour, other: line.otherAmount });
-  return { fine, metal, labour, net };
+  const amounts = purchaseLineAmounts(
+    {
+      pieces: line.pcs,
+      grossWt: line.grossWt,
+      netWt: line.netWt,
+      ghatWt: line.ghtWt,
+      fineWt: fine,
+      rate: line.rate,
+      rateType: line.rateType,
+      urdRateType: line.urdRateType,
+      itemAmount: line.metalAmount,
+      labourType: line.labourType,
+      labourRate: line.labourRate,
+      labourPct: line.labourPct,
+      labourFixed: line.labourFixed,
+      labourAmount: line.labourAmount,
+      otherAmount: line.otherAmount,
+    },
+    amountType,
+    policy,
+    labourWithGhat,
+  );
+  return { fine, metal: amounts.item, labour: amounts.labour, net: amounts.net };
 }
 
 /**
@@ -1620,6 +1594,11 @@ async function writePurchaseTx(
         wastage: num(c.in.westPct),
         fine: c.calc.fine,
         rate: num(c.in.rate),
+        itemAmount: c.calc.metal,
+        labourRate: num(c.in.labourRate),
+        labourAmount: c.calc.labour,
+        otherAmount: num(c.in.otherAmount),
+        netAmount: c.calc.net,
       };
     }),
     {
@@ -2221,7 +2200,7 @@ export async function getPurchase(
       `SELECT "SR_NO","IT_CODE","IT_TYPE","TAG_NO","VCH_SRNO","ITM_PCS","ITM_GWT",
               "ITM_NWT","ITM_TOUCH","ITM_GHT_WT","ITM_WEST_PRC","ITM_FINE",
               "ITM_OTH_FINE","SILVER_FINE","ITM_RATE","ITM_AMT","LBR_TYPE","LBR_PRC",
-               "LBR_RATE","LBR_AMT","OTH_AMT","NET_AMT","HM_ID",
+              "LBR_RATE","LBR_AMT","OTH_AMT","NET_AMT","HM_ID","RATE_TYPE","URD_RATE_TYPE",
                -- WP-08: selecting a column is half the job; the mapping below must read it. Both halves
                -- were missing for these, so an unchanged save wiped them.
                "DESIGN_NO","TBL_CODE","IT_DESC","BAG_WT","ITM_MRP","ITM_OTH_RATE","COMM_PRC","ITM_OTH_WT",
@@ -2363,6 +2342,8 @@ export async function getPurchase(
         otherFineWt: num(row.ITM_OTH_FINE),
         silverFineWt: num(row.SILVER_FINE),
         rate: num(row.ITM_RATE),
+        rateType: text(row.RATE_TYPE),
+        urdRateType: text(row.URD_RATE_TYPE),
         metalAmount: num(row.ITM_AMT),
         labourType: labourType(row.LBR_TYPE),
         labourPct: num(row.LBR_PRC),

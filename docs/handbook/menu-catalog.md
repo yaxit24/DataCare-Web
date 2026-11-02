@@ -110,31 +110,31 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Creates the company identity and seeds its year, masters, settings and operating parameters.
 - **Looks:** Search list plus address, country/state/city, work type, metal type, tax and bank fields.
 - **Writes:** CO_MAST, CO_SET, CO_SET_NEW, AC_GROUP, BOOK_DATA, LOCT_MAST, MENU_DATA.
-- **Web:** `/masters/companies`, `/admin/provision`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`, `POST /admin/companies/:coCode/provision`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Bare CRUD and provisioning do not reproduce the rich form or the desktop 17-table copy (NewCompParmCreat); Print and conditional fields remain.
+- **Web:** `/masters/companies`, `/admin/provision`; `GET /context/companies`, `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`, `POST /admin/companies/:coCode/provision`. Can: create, reopen, edit, delete, list.
+- **Remaining:** Milestone 1 blocks generic CO_MAST create/update/delete/CSV business mutations before the master transaction; authenticated rejection audits remain expected. It provides a dedicated tenant-scoped read-only Company list with executable admin, restricted-user and cross-tenant scope evidence. The rich identity form, dedicated versioned writer, first-year and 17-family provisioning, Company.RPT print, and an accepted safe-delete decision remain.
 - **Owners:** G38, G39, N58, X10, N77.
-- **Evidence:** [KB_master.md:45-75](../../project-memory/video-research/_kb/KB_master.md#L45-L75), [MS_YEAR.cs:1504-1595](../../unified/src/csharp/DataCareNext/MS_YEAR.cs#L1504-L1595).
+- **Evidence:** [KB_master.md:45-75](../../project-memory/video-research/_kb/KB_master.md#L45-L75), [MS_YEAR.cs:1504-1595](../../unified/src/csharp/DataCareNext/MS_YEAR.cs#L1504-L1595), [company-master.md](../../docs/handbook/web/company-master.md).
 
 ### Data Backup
 
 - **Desktop:** `UT_BKP` — direct constructor ([MDI_FORM.cs:7471-7480](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7471-L7480)).
 - **Does:** Creates full SQL Server backups (yearly database plus NextMain) on a chosen drive and restores them.
-- **Looks:** Path selector, progress bar, Backup and Restore buttons.
+- **Looks:** Backup Data header, read-only browser destination, Select, accessible progress, Backup and Cancel; no operator Restore or Dattach.
 - **Web:** `/backup`; `GET /backup`, `POST /backup/restore`. Can: create.
-- **Remaining:** Web offers a logical JSON export; restore is contained; encrypted off-site backup, scheduled restore drill and rollback remain.
-- **Owners:** G64, N80, X31, P12-05.
-- **Evidence:** [KB_master.md:225-253](../../project-memory/video-research/_kb/KB_master.md#L225-L253).
+- **Remaining:** Milestone 1 implements the scoped v2 download, desktop-visible Backup flow, pre-generation source-backed filename, operator recovery-boundary warning and audit. The executable data-backup.config.nextmain-allowlist archive-scope case remains baselined under G64/N80 because D-BKP-3 has no approved versioned tenant-config/credential envelope. G225 Print-right policy, actual-browser scratch zero-diff, physical overwrite confirmation, full-Lite fixture, production DR and desktop-runtime comparison remain blocked; restore stays contained.
+- **Owners:** G64, N80, X31, P12-05, G225.
+- **Evidence:** [KB_master.md:225-253](../../project-memory/video-research/_kb/KB_master.md#L225-L253), [data-backup.md](../../docs/handbook/web/data-backup.md).
 
 ### Data Refresh
 
 - **Desktop:** `MS_UPDATE` — direct constructor ([MDI_FORM.cs:7461-7470](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7461-L7470)).
 - **Does:** Rebuilds or repairs derived ledger, stock, schema, image, scheme and manufacturing data.
-- **Looks:** Maintenance console of module buttons; the web shows integrity results and preview/apply repair tables.
-- **Writes:** AC_DATA, MAIN_STOCK, BAR_DETL, BOOK_DATA, TAX_DATA, OP_DATA, MFG_DATA.
+- **Looks:** Six operator actions in desktop tab order: Account, Stock, Field Update, Approval Adj, Image Data and Old Field; each opens an audited preview and only Approval Adj can apply in PR-1.
+- **Writes:** APR_DETL, SL_DETL, RATE_CUT_ISU, BAR_DETL, AC_DATA, MAIN_STOCK, BOOK_DATA, CASH_DATA, BANK_RECONCILE, TAG_IMAGE_DATA.
 - **Web:** `/utilities/data-refresh`, `/utilities/data-repair`; `POST /utilities/data-refresh`, `GET /utilities/data-repair/operations`, `POST /utilities/data-repair/:id/preview`, `POST /utilities/data-repair/:id/apply`. Can: create, list.
-- **Remaining:** Refresh deliberately avoids write-back; the repair registry covers a subset of desktop operations; ownership graph, rollback and recovery are unproven.
-- **Owners:** X27, P11-01, X06.
-- **Evidence:** [VARIANTS.md:99-119](../../web-implementation-spec/03_Modules/13_Utilities_Settings_Integrations/VARIANTS.md#L99-L119).
+- **Remaining:** Approval Adj has full preview/apply, exact two-table write-set, audit, rollback and replay proof. Account and Stock are explicit preview-only classifications until their complete builder graphs are proved; Field Update and Old Field await PR-2 classification; Image Data has no proved legacy-flag or byte-migration semantics; G225 Data Refresh caption Print handoff and desktop-runtime comparison remain open.
+- **Owners:** X27, P11-01, X06, N26, G225, N212.
+- **Evidence:** [MS_UPDATE.cs:2042-3047](../../unified/src/csharp/DataCareNext/MS_UPDATE.cs#L2042-L3047), [MS_UPDATE.cs:8809-9038](../../unified/src/csharp/DataCareNext/MS_UPDATE.cs#L8809-L9038), [data-refresh.md](../../docs/handbook/web/data-refresh.md).
 
 ### Location
 
@@ -253,7 +253,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Labour Disc | `MS_AUTO_ITEM` | `/masters/labour-update` | `- R E - - L` | PARTIAL | P1-edition |
 | Labour Type | `MS_LBR_TYPE` | `/masters/labour` | `C R E D - L` | PARTIAL | P1-core |
 | Lot Opening | `TR_ITM_LOT` | `/txn/item-lot` | `C R E D - -` | PARTIAL | P1-edition |
-| Party | `MS_ACCT` | `/masters/party`, `/masters/accounts` | `C R E D - L` | PARTIAL | P1-core |
+| Party | `MS_ACCT` | `/masters/party` | `C R E D - L` | PARTIAL | P1-core |
 | Party Opening | `TR_AC_OPBL` | `/txn/ac-opbl` | `C R E D - L` | PARTIAL | P1-core |
 | Point Mast | `MS_POINT` | `/masters/points` | `C R E D - L` | PARTIAL | P1-edition |
 | Product | `MS_PRODUCT` | `/masters/products` | `C R E D - L` | PARTIAL | P1-core |
@@ -441,12 +441,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `MS_ACCT` — direct constructor ([MDI_FORM.cs:7600-7609](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7600-L7609)).
 - **Does:** Creates customer, supplier, karigar and bank accounts with contacts, tax and bank data and openings.
-- **Looks:** Code/Name/Mobile grid; address, tax and bank tabs; opening money and metal; family and photo panels.
-- **Writes:** AC_MAST, OP_DATA, AC_DATA.
-- **Web:** `/masters/party`, `/masters/accounts`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`, `GET /party/:acCode/family`, `GET /party/:acCode/photo`, `POST /party/:acCode/photo`, `GET /accounts/:acCode/opening`, `POST /accounts/:acCode/opening`. Can: create, reopen, edit, delete, list.
-- **Remaining:** The rich party page ignores duplicate-detail updates and lacks delete and print; capabilities are split across two routes.
-- **Owners:** G53, N67, X10, G38, N58, N77, G225, N212.
-- **Evidence:** [KB_master.md:113-145](../../project-memory/video-research/_kb/KB_master.md#L113-L145).
+- **Looks:** Search box over a Code / Name / Mobile list, the photo with its three buttons and the Oppning Balance box with Last Visit and Ledger Date on the left; the customer line over the Company Detail, Other Detail and Family Detl tabs with Ac Code, F1 and the A, D, S buttons on the right; Print, Save, Cancel, Delete and Exit along the bottom.
+- **Writes:** AC_MAST, AC_MAST_SRNO, OP_DATA, AC_DATA, AC_GROUP, STATE_MAST, AC_IMAGE, ADD_MAST, AD_MEMB.
+- **Web:** `/masters/party`; `GET /masters/party-master`, `GET /masters/party-master/print`, `GET /masters/party-master/help/:kind`, `GET /masters/party-master/copy/:kind`, `GET /masters/party-master/taken/:kind`, `GET /masters/party-master/gst-state`, `GET /masters/party-master/account`, `GET /masters/party-master/:code`, `GET /masters/party-master/:code/photo`, `POST /masters/party-master/:code/photo`, `POST /masters/party-master/:code/photo/delete`, `POST /masters/party-master`, `PUT /masters/party-master/:code`, `DELETE /masters/party-master/:code`. Can: create, reopen, edit, delete, list.
+- **Remaining:** The AcMast print layout is not in the repository (Print lists the accounts on screen); the Advance and Enterprise admin panel, defaulter box and limits, the UAE boxes and the hidden Excel and old-year imports are not on the screen; desktop-runtime comparison remains.
+- **Owners:** G53, N67, X10, G38, N58, N77, G225, N212, G236, N224.
+- **Evidence:** [MS_ACCT.cs:5584-9640](../../unified/src/csharp/DataCareNext/MS_ACCT.cs#L5584-L9640).
 
 ### Party Opening
 
@@ -726,9 +726,9 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Sales-like item, component and old-metal grids with an advance panel, delivery date, images and order document.
 - **Writes:** SL_ORD_DATA, SL_ORD_DETL, SL_ORD_IDTL, SL_ORD_ADJ, SL_PR_DETL, AC_DATA, ROJ_MEL_DATA, UPI_DATA, TAG_IMAGE_DATA.
 - **Web:** `/txn/sales-order`; `GET /sales-orders`, `POST /sales-orders`, `GET /sales-orders/:vchNo`, `PUT /sales-orders/:vchNo`, `DELETE /sales-orders/:vchNo`, `GET /sales/order-confirmation`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** Tender and old-metal rows, partial delivery, manufacturing and invoice conversion, reservation/refund and the order document need acceptance.
-- **Owners:** G14, N44, G16, N46, X14, N77, X25.
-- **Evidence:** [KB_transaction.md:208-235](../../project-memory/video-research/_kb/KB_transaction.md#L208-L235).
+- **Remaining:** Scheme tender, partial delivery, manufacturing and invoice conversion, reservation/refund and the order document need acceptance.
+- **Owners:** G14, N44, G16, N46, X14, N77, X25, G206, N197, N222, N226.
+- **Evidence:** [KB_transaction.md:208-235](../../project-memory/video-research/_kb/KB_transaction.md#L208-L235), [TR_SALE_ORD.cs:9520-9556](../../unified/src/csharp/DataCareNext/TR_SALE_ORD.cs#L9520-L9556), [TR_SALE_ORD.cs:9421-9475](../../unified/src/csharp/DataCareNext/TR_SALE_ORD.cs#L9421-L9475).
 
 ### Sales Return
 
@@ -792,9 +792,9 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Party header, issue and receive grids, fine/conversion band, payment/received matrix and totals.
 - **Writes:** RATE_CUT_DATA, RATE_CUT_ISU, RATE_CUT_REC, RATE_CUT_ISU_REC, MAIN_STOCK, SL_IDTL, DM_DATA, AC_DATA, ROJ_MEL_DATA, TAX_DATA.
 - **Web:** `/txn/wholesale-sale`; `POST /wholesale-sales`, `GET /wholesale-sales/:vchNo`, `PUT /wholesale-sales/:vchNo`, `DELETE /wholesale-sales/:vchNo`, `GET /wholesale-sales/:vchNo/print`. Can: create, reopen, edit, delete, print.
-- **Remaining:** Rojmel, stone and stock legs, negative-stock refusal, configured roles, the voucher list (Up/Down/F1), versions, the full WhSalesBill layout (Kasar Fine, item-detail, tax and invoice-type lines) and accountant acceptance remain.
-- **Owners:** G15, N45, X13, X16, N59, N74, N77, G233, N220.
-- **Evidence:** [TR_WH_SALE.cs:12779-12896](../../unified/src/csharp/DataCareNext/TR_WH_SALE.cs#L12779-L12896), [TR_WH_SALE.cs:13654-13800](../../unified/src/csharp/DataCareNext/TR_WH_SALE.cs#L13654-L13800).
+- **Remaining:** Hand-typed item-detail rows for loose items, SL_IDTL rows on the printed bill, fine kasar, the Rojmel alignment for lined vouchers, configured roles, versions and accountant acceptance remain.
+- **Owners:** G15, N45, X13, X16, N59, N74, N77, G233, N220, N227, N228.
+- **Evidence:** [TR_WH_SALE.cs:12779-12896](../../unified/src/csharp/DataCareNext/TR_WH_SALE.cs#L12779-L12896), [TR_WH_SALE.cs:13654-13800](../../unified/src/csharp/DataCareNext/TR_WH_SALE.cs#L13654-L13800), [TR_WH_SALE.cs:14393-14418](../../unified/src/csharp/DataCareNext/TR_WH_SALE.cs#L14393-L14418), [TR_WH_SALE.cs:13162-13250](../../unified/src/csharp/DataCareNext/TR_WH_SALE.cs#L13162-L13250), [Ac_Stock.cs:857-861](../../unified/src/csharp/DataCareNext/Ac_Stock.cs#L857-L861).
 
 ### Wh Sl Return
 
@@ -1627,9 +1627,9 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Desktop:** `RP_ALL` — constructor caption 'Approval Rpt' ([MDI_FORM.cs:8921-8930](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8921-L8930)).
 - **Does:** Reports approval issue, in/out and pending custody by party and item.
 - **Looks:** Shared date/book/party/location/item filters with Issue, InOut and Pending buttons.
-- **Reads:** APR_DATA, APR_DETL, BOOK_DATA, AC_MAST, ITEM_MAST.
+- **Reads:** APR_DATA, APR_DETL, BOOK_DATA, AC_MAST, ITEM_MAST, PRODUCT_MAST.
 - **Web:** `/reports/approval-report`; `GET /reports/approval-report`. Can: print, list.
-- **Remaining:** Three data modes exist; RP_ALL selectors, grouping, custody reconciliation and Crystal layouts are uncertified.
+- **Remaining:** Three data modes exist; InOut now calculates the desktop Out/In/Pending piece formulas per APR_DETL issue line: Out=ITM_PCS, In=ITM_PCS when ISU_REC='Y' otherwise 0, and Pending=Out-In. RP_ALL selectors, grouping, Crystal layouts and custody-state reconciliation remain uncertified.
 - **Owners:** N22, X17, N24, X26, N57, N75.
 - **Evidence:** [RP_ALL.cs:8141-8365](../../unified/src/csharp/DataCareNext/RP_ALL.cs#L8141-L8365).
 
@@ -1713,13 +1713,13 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 ### Ledger Report
 
 - **Desktop:** `RP_LEDR` — constructor caption 'Ledger Report' ([MDI_FORM.cs:8871-8880](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8871-L8880)).
-- **Does:** Shows account opening, movements and closing in money, gold and silver with voucher drill-down.
-- **Looks:** Account/group/date/location/city/area filters with account, detail, voucher and month/ageing grids.
-- **Reads:** AC_DATA, AC_MAST, MAIN_STOCK, FINE_DATA, LEDR_AC_DATA, BOOK_DATA, LDR_ADJ_DATA.
-- **Web:** `/reports/account-ledger`; `GET /reports/account-ledger/:acCode`, `GET /reports/account-ledger/:acCode/export.pdf`. Can: print, list.
-- **Remaining:** A basic ledger exists; metal/time/ageing/purchase modes, zero/sign semantics, nested drill-down and many Crystal variants remain.
-- **Owners:** N24, X26, P10-02, N57, N75.
-- **Evidence:** [RP_LEDR.cs:4658-7694](../../unified/src/csharp/DataCareNext/RP_LEDR.cs#L4658-L7694).
+- **Does:** Shows account opening, movements and closing in money, gold and silver with voucher drill-down and debit ageing.
+- **Looks:** View/account/date/data-type filters and a With-Zero toggle, with account-summary, voucher, detail and debit-ageing grids and totals.
+- **Reads:** AC_DATA, AC_MAST, BOOK_DATA, REMARK_DATA.
+- **Web:** `/reports/account-ledger`; `GET /reports/account-ledger`, `GET /reports/account-ledger/export.pdf`, `GET /reports/account-ledger/export.xlsx`, `GET /reports/account-ledger/export.csv`, `GET /reports/account-ledger/:acCode`, `GET /reports/account-ledger/:acCode/export.pdf`. Can: print, list.
+- **Remaining:** N223 builds the account summary, voucher/detail drill-down, debit ageing, signed money/gold/silver balances, totals and PDF/Excel/CSV from one read-only resolver; the OP_LDR opening-ledger ageing union, the staging-table gold/silver fine prints and the Crystal layout comparison remain.
+- **Owners:** N223, N57, N75.
+- **Evidence:** [RP_LEDR.cs:4658-7694](../../unified/src/csharp/DataCareNext/RP_LEDR.cs#L4658-L7694), [accountLedgerReport.ts](../../web/apps/api/src/modules/reports/accountLedgerReport.ts), [accountLedger.ts](../../web/apps/api/src/routes/accountLedger.ts).
 
 ### Old Stock
 
@@ -2165,7 +2165,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Physical Stock | `TR_PHYSTK` | `/txn/physical-stock` | `C R E D - -` | PARTIAL | P1-core |
 | Reminder Entry | `UT_REMINDER` | `/utilities/reminder-entry` | `C - - D - L` | PARTIAL | P1-core |
 | Sms | `UT_SMS` | `/integrations` | `C - - - - -` | PARTIAL | P1-edition |
-| Stock Adjust | `TR_TAG_CAN` | `/txn/stock-adjust` | `C - - D - -` | PARTIAL | P1-core |
+| Stock Adjust | `TR_TAG_CAN` | `/txn/stock-adjust` | `C R E D P L` | PARTIAL | P1-core |
 | Stone/Dm-Cf | `TR_PHYSTK` | `/txn/stone-dm-cf` | `C R E D P -` | PARTIAL | P1-core |
 | Tag Adjust | `TR_TAG_CAN` | `/txn/tag-adjust` | `C R E D - -` | PARTIAL | P1-core |
 | Tag Cancel | `TR_TAG_CAN` | `/txn/tag-cancel` | `C R E D P L` | PARTIAL | P1-core |
@@ -2334,12 +2334,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `TR_TAG_CAN` — CurBookHelp('STOCK ADJUST') ([MDI_FORM.cs:8616-8627](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8616-L8627)).
 - **Does:** Posts signed piece and weight stock corrections without a financial ledger entry.
-- **Looks:** Voucher/date header, signed tag/item/counter weight grid, component sub-grid and totals.
-- **Writes:** BAR_CAN_DATA, BAR_CAN_DETL, MAIN_STOCK, BAR_DETL, DM_DATA.
-- **Web:** `/txn/stock-adjust`; `POST /stock/adjust`, `DELETE /stock/adjust/:vchNo`. Can: create, delete.
-- **Remaining:** No saved reopen/edit/print; counter, loss-weight, karigar and component-grid depth and configured-book handling remain.
-- **Owners:** X18, P07-02, G40, G41, N59.
-- **Evidence:** [KB_other.md:150-213](../../project-memory/video-research/_kb/KB_other.md#L150-L213).
+- **Looks:** Book, Vch No, Vch Date, Employee and Vch Desc over the Sr / TagNo / (TagLot / ItmLot) / ItCode / Counter / Design / Size / Sign / BagWt / Pcs / GrWt / LsWt / NetWt / Ght% / GhtWt / Touch / West% / Fine / Mrp / KrCode grid, the stone grid, totals; Save, Delete, Cancel and Print.
+- **Writes:** BAR_CAN_DATA, BAR_CAN_DETL, BAR_CAN_IDTL, MAIN_STOCK, LOT_DETL, DELETE_DATA, TEMP_BOOK_DATA, BAR_DETL, BOOK_DATA.
+- **Web:** `/txn/stock-adjust`; `GET /stock/stock-adjust`, `GET /stock/stock-adjust/source`, `GET /stock/stock-adjust/lots`, `GET /stock/stock-adjust/:vchNo`, `POST /stock/stock-adjust`, `PUT /stock/stock-adjust/:vchNo`, `DELETE /stock/stock-adjust/:vchNo`, `GET /stock/stock-adjust/:vchNo/print`. Can: create, reopen, edit, delete, print, list.
+- **Remaining:** A replayed loose-line save makes a second voucher (no idempotency key); desktop-runtime comparison remains.
+- **Owners:** X18, P07-02, G40, G41, N59, G234, N221.
+- **Evidence:** [TR_TAG_CAN.cs:2514-5440](../../unified/src/csharp/DataCareNext/TR_TAG_CAN.cs#L2514-L5440), [Ac_Stock.cs:48-58](../../unified/src/csharp/DataCareNext/Ac_Stock.cs#L48-L58).
 
 ### Stone/Dm-Cf
 
@@ -2370,7 +2370,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header and a scan-driven tag grid with item, counter, weights, fine and karigar detail.
 - **Writes:** BAR_CAN_DATA, BAR_CAN_DETL, BAR_CAN_IDTL, BAR_DETL, BAR_IDTL, MAIN_STOCK, DM_DATA, DELETE_DATA.
 - **Web:** `/txn/tag-cancel`; `GET /stock/tag-cancel`, `POST /stock/tag-cancel`, `GET /stock/tag-cancel/:vchNo`, `PUT /stock/tag-cancel/:vchNo`, `DELETE /stock/tag-cancel/:vchNo`, `GET /stock/tag-cancel/source`, `GET /stock/tag-cancel/:vchNo/print`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** Implemented from source (N18, N210): TagCanBill behind print rights and the desktop refusals pass 12 browser cases. Open: no captured desktop BAR_CAN rows, idempotency retry, fault rollback, the Tag Stock report check and a desktop-runtime comparison.
+- **Remaining:** Implemented from source (N18, N210): TagCanBill and desktop refusals, exact-caption rights, a two-browser same-tag race, create/edit/delete fault rollback, and the Tag Stock create/edit/delete lifecycle have executable evidence. Open: no captured desktop BAR_CAN rows, durable lost-acknowledgement idempotency, and a desktop-runtime comparison.
 - **Owners:** G223, N18, N210, P07-03, X18, X19.
 - **Evidence:** [KB_other.md:106-149](../../project-memory/video-research/_kb/KB_other.md#L106-L149).
 
@@ -2378,12 +2378,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `UT_TAG_PRINT` — constructor mode 'Tag Print' ([MDI_FORM.cs:8596-8605](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8596-L8605)).
 - **Does:** Selects in-stock tags by tag, product or voucher and reprints barcode and QR labels.
-- **Looks:** Book/voucher/item/product filters, a selectable tag grid, print-file selector, Set and label-skip controls.
-- **Writes:** TAG_PRINT_DATA, BAR_DETL, BAR_IDTL, PRINT_MAST, MAIN_STOCK.
-- **Web:** `/txn/tag-print`; `GET /stock/tag-print`, `POST /stock/tag-print/stage`, `GET /stock/tag-print/label`. Can: print, list.
-- **Remaining:** Basic label sheets work; PRINT_MAST variants, voucher/product selection, label skip, dimensions, fonts and physical-printer evidence remain.
-- **Owners:** N25, X28, G59, N73, G60, N75, X25.
-- **Evidence:** [KB_other.md:117-139](../../project-memory/video-research/_kb/KB_other.md#L117-L139).
+- **Looks:** Book, Vch No with F1, Gr Code, Pr Code and Item Type over a Y/N tag grid with the Hm Id Update columns; Print file Name with Set; Item Name and Lable Skip under the grid; Print, Save, Cancel, Delete and Exit along the bottom.
+- **Writes:** TAG_PRINT_DATA, BAR_DETL, BAR_CAN_DETL, MAIN_STOCK, PRINT_MAST, ITEM_MAST, GROUP_MAST, PRODUCT_MAST.
+- **Web:** `/txn/tag-print`; `GET /stock/tag-print-screen`, `GET /stock/tag-print-screen/books`, `GET /stock/tag-print-screen/book`, `GET /stock/tag-print-screen/vouchers`, `GET /stock/tag-print-screen/voucher`, `GET /stock/tag-print-screen/stock`, `GET /stock/tag-print-screen/tag`, `GET /stock/tag-print-screen/tags`, `GET /stock/tag-print-screen/lookups/:kind`, `POST /stock/tag-print-screen/hm-update`, `POST /stock/tag-print-screen/default-file`, `POST /stock/tag-print-screen/print`, `GET /stock/tag-print-screen/labels`. Can: print, list.
+- **Remaining:** The Crystal label files are not in the repository (the web prints its own label sheet) and physical-printer acceptance (D29) remains; the RFID writer, Print Type box and QR picture (named registrations) are not on the screen.
+- **Owners:** N25, X28, G59, N73, G60, N75, X25, G237, N225.
+- **Evidence:** [UT_TAG_PRINT.cs:1816-5666](../../unified/src/csharp/DataCareNext/UT_TAG_PRINT.cs#L1816-L5666).
 
 ### Tag Split
 

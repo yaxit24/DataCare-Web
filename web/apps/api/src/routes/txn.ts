@@ -189,6 +189,7 @@ import { getUserFormRights, setUserFormRights } from '../modules/rbac/formRights
 import { partyBalance } from '../modules/finance/partyBalance.js';
 import { bankReconList, bankReconClear } from '../modules/finance/bankRecon.js';
 import { registerDailyRateRoutes } from './dailyRate.js';
+import { stockAdjustLots } from '../modules/stock/stockAdjustLots.js';
 import { tagCancelBillHtml, TagCancelBillNotFoundError } from '../modules/stock/tagCancelBill.js';
 import {
   deleteDesignBook,
@@ -238,11 +239,7 @@ import {
   SCALE_TARGET_GRID_COLUMN,
   scaleCaptureEnabled,
 } from '../modules/integrations/scaleProtocol.js';
-import {
-  listPrintableTags,
-  renderTagLabels,
-  stageTagPrintRowsTx,
-} from '../modules/stock/tagPrint.js';
+import { registerTagPrintScreenRoutes } from './tagPrintScreen.js';
 import { tagStockReport, tagStockCsv } from '../modules/reports/tagStock.js';
 import { registerVoucherNavigationRoutes } from './voucherNavigation.js';
 import { postContra, deleteContra, getContra, editContra } from '../modules/finance/contra.js';
@@ -256,9 +253,9 @@ import { registerTaxMasterRoutes } from './taxMaster.js';
 import { registerAutoItemRoutes } from './autoItem.js';
 import { registerGroupMasterRoutes } from './groupMaster.js';
 import { registerProductMasterRoutes } from './productMaster.js';
-import { registerAddressMasterRoutes } from './addressMaster.js';
-import { registerItemMasterRoutes } from './itemMaster.js';
+import { registerMasterScreenRoutes } from './masterScreens.js';
 import { registerWholesaleSaleRoutes } from './wholesaleSale.js';
+import { registerAccountLedgerRoutes } from './accountLedger.js';
 import { VoucherVersionConflictError } from '../modules/vouchers/version.js';
 import { listYears, createYear, carryForwardOpenings } from '../modules/masters/year.js';
 import { reminders } from '../modules/finance/reminders.js';
@@ -278,13 +275,7 @@ import {
   listEntityImageKeys,
   saveEntityImage,
 } from '../modules/images/entityImage.js';
-import {
-  applyRepair,
-  listRepairs,
-  previewRepair,
-  repairHistory,
-} from '../modules/utilities/dataRepair.js';
-import '../modules/utilities/dataRepairOps.js';
+import { registerDataRepairRoutes } from './dataRepair.js';
 import {
   createReminderEntry,
   listReminderEntries,
@@ -437,8 +428,6 @@ import {
   getItemLot,
   editItemLot,
   deleteItemLot,
-  stockAdjust,
-  deleteStockAdjust,
   counterTransfer,
   deleteCounterTransfer,
   StockVoucherValidationError,
@@ -544,7 +533,7 @@ import {
   schemeAdjustments,
   itemStockLedger,
 } from '../modules/reports/reports2.js';
-import { fetchRate, rateGroups } from '../modules/masters/rate.js';
+import { rateGroups } from '../modules/masters/rate.js';
 import { enrollMember, postPoints, listMembers } from '../modules/membership/membership.js';
 import { fetchLiveRates } from '../modules/integrations/rates.js';
 import {
@@ -569,7 +558,6 @@ import {
   purchaseRegister,
   dayBook,
   trialBalance,
-  accountLedger,
   gstr1,
   dhrnOutstandingList,
   karigarBalances,
@@ -701,6 +689,7 @@ import {
 import { addressPrintReport, lastVisitReport } from '../modules/reports/customerAccountReports.js';
 import { dhrnLoanReport } from '../modules/reports/dhrnLoanReports.js';
 import { gstLauncherReport } from '../modules/reports/gstLauncherReport.js';
+import { registerGstReportRoutes } from './gstReport.js';
 import {
   approvalReport,
   bullionReport,
@@ -1116,9 +1105,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerAutoItemRoutes(app, extraRouteHelpers, formCapabilities);
   registerGroupMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerProductMasterRoutes(app, extraRouteHelpers, formCapabilities);
-  registerAddressMasterRoutes(app, extraRouteHelpers, formCapabilities);
-  registerItemMasterRoutes(app, extraRouteHelpers, formCapabilities);
+  registerTagPrintScreenRoutes(app, extraRouteHelpers, formCapabilities);
+  registerMasterScreenRoutes(app, extraRouteHelpers, formCapabilities);
   registerWholesaleSaleRoutes(app, extraRouteHelpers);
+  registerGstReportRoutes(app, { prisma, auth, scopeOf: readScope, pdfRenderer: deps.pdfRenderer });
   const pdfRenderer = (): PdfRenderer => deps.pdfRenderer ?? new PlaywrightPdfRenderer();
   /** Render server-built HTML, mapping limits to 413/422 and a busy or slow renderer to a retryable 503. */
   const sendPdf = async (reply: FastifyReply, html: string, filename: string) => {
@@ -2805,6 +2795,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     upiId: b.upiId,
     kasar: b.kasar != null ? Number(b.kasar) : undefined,
     kasarAc: b.kasarAc,
+    empCode: b.empCode,
   });
   app.post('/receipts', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
@@ -2827,6 +2818,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     vchDate: b.vchDate,
     kasar: b.kasar != null ? Number(b.kasar) : undefined,
     kasarAc: b.kasarAc,
+    empCode: b.empCode,
     mainUser: sess(req).sub,
   });
   app.post('/payments', auth, async (req, reply) => {
@@ -4499,13 +4491,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const { result } = await resolveReport(slug, req);
     return sendReportPdf(req, reply, slug, REPORT_FORM_BY_SLUG[slug], result);
   });
-  // The account ledger's screen carries the account in the path, so its PDF does too.
-  app.get('/reports/account-ledger/:acCode/export.pdf', auth, async (req, reply) => {
-    if (!guard(req, reply, 'print')) return;
-    const acCode = String((req.params as any).acCode ?? '');
-    const result = await accountLedger(prisma, readScope(req), acCode, range(req));
-    return sendReportPdf(req, reply, 'account-ledger', 'Reports/Account Ledger', result);
-  });
   const sendReportPdf = async (
     req: FastifyRequest,
     reply: FastifyReply,
@@ -4531,6 +4516,11 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     }
     return sendPdf(reply, html, slug);
   };
+
+  // The desktop Ledger Report (RP_LEDR): account summary, per-voucher / per-ledger-key drill-down,
+  // debit ageing, and its Excel/CSV/PDF outputs. The resolver feeds the screen and every export from
+  // one path. Registered here (not with the other plugins above) because it needs `sendReportPdf`.
+  registerAccountLedgerRoutes(app, { prisma, auth, guard, readScope, sendReportPdf });
 
   // Screens for five reports registered only in REPORT_BUILDERS (exports worked, screens 404'd —
   // PARITY-EVALUATION-2026-09-28 D3). Each calls the export's own builder with its own inputs (so the
@@ -4657,73 +4647,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
 
-  // Data repair console (desktop MS_UPDATE). Admin-only (routePolicy ADMIN_ONLY + SCOPED_ADMIN_ONLY); a
-  // destructive apply also requires a reason, re-authentication and a verified recent backup (applyRepair).
-  app.get('/utilities/data-repair/operations', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    return {
-      operations: listRepairs().map((o) => ({
-        id: o.id,
-        title: o.title,
-        description: o.description,
-        desktopSource: o.desktopSource,
-        risk: o.risk,
-        tables: o.tables,
-      })),
-    };
-  });
-  app.post('/utilities/data-repair/:id/preview', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    const s = sess(req);
-    return run(reply, 200, () =>
-      previewRepair(
-        prisma,
-        String((req.params as any).id),
-        { tenantId: s.tenantId, coCode: s.coCode, lcCode: s.lcCode, coYear: s.coYear },
-        s.sub ?? 'unknown',
-      ),
-    );
-  });
-  app.post('/utilities/data-repair/:id/apply', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    const s = sess(req);
-    const b = body(req);
-    try {
-      const applied = await applyRepair(
-        prisma,
-        String((req.params as any).id),
-        { tenantId: s.tenantId, coCode: s.coCode, lcCode: s.lcCode, coYear: s.coYear },
-        {
-          previewHash: String(b.previewHash ?? ''),
-          confirmation: b.confirmation ? String(b.confirmation) : undefined,
-          operator: s.sub ?? 'unknown',
-          loginCoCode: s.loginCoCode,
-          reason: b.reason ? String(b.reason) : undefined,
-          operatorPassword: b.operatorPassword ? String(b.operatorPassword) : undefined,
-          backupReference: b.backupReference ? String(b.backupReference) : undefined,
-        },
-      );
-      return reply.code(200).send(applied);
-    } catch (e: any) {
-      // A failed or missing re-authentication is an authorization outcome, not a bad request: the operator
-      // has not proved they may act, so it must not read as "fix your payload".
-      if (
-        e?.name === 'RepairError' &&
-        (e.code === 'reauthentication-required' || e.code === 'reauthentication-failed')
-      ) {
-        return reply.code(403).send({ error: 'RepairError', code: e.code, message: e.message });
-      }
-      if (e?.name === 'RepairError') {
-        return reply.code(400).send({ error: 'RepairError', code: e.code, message: e.message });
-      }
-      throw e;
-    }
-  });
-  app.get('/utilities/data-repair/runs', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    const s = sess(req);
-    return { runs: await repairHistory(prisma, { tenantId: s.tenantId, coCode: s.coCode }) };
-  });
+  // Data repair console (desktop MS_UPDATE). Kept on the existing URLs and policy; extracted because this
+  // shared transaction route file has a frozen size ceiling.
+  registerDataRepairRoutes(app, { prisma, auth, guard, sess, run });
   app.post('/admin/companies/:coCode/provision', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return; // admin-gate
     const s = sess(req);
@@ -4846,17 +4772,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         },
         { book: String(b.book ?? ''), tables: b.tables, confirm: b.confirm === true },
       ),
-    );
-  });
-  app.get('/rate', auth, async (req) => {
-    const s = readScope(req);
-    const qy = (req.query as any) || {};
-    return fetchRate(
-      prisma,
-      s.tenantId,
-      s.coCode,
-      String(qy.group ?? ''),
-      qy.date ? String(qy.date) : undefined,
     );
   });
   app.get('/rate-groups', auth, async (req) => {
@@ -5229,24 +5144,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
-  app.post('/stock/adjust', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      stockAdjust(prisma, { scope: scopeOf(req), vchDate: b.vchDate, lines: b.lines ?? [] }),
-    );
-  });
-  app.delete('/stock/adjust/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
-      deleteStockAdjust(prisma, {
-        scope: scopeOf(req),
-        vchNo: (req.params as any).vchNo,
-      }),
-    );
-  });
-  // Tag Cancel (X19) and Tag Transfer (X18): desktop TR_TAG_CAN on a TAG CANCEL / TAG TRFR book. One writer
-  // (modules/stock/tagCancel.ts), one route family per menu, so each keeps its own form right.
+  // Tag Cancel (X19), Tag Transfer (X18), Stock Adjust: TR_TAG_CAN on a TAG CANCEL / TAG TRFR / STOCK ADJUST book.
+  // One writer (modules/stock/tagCancel.ts), one route family per menu, so each keeps its own form right.
   const tagCancelInput = (req: FastifyRequest, b = body(req)) => ({
     scope: scopeOf(req),
     vchDate: b.vchDate,
@@ -5308,31 +5207,48 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.post('/stock/tag-cancel', auth, tagCancelRoute.create);
   app.put('/stock/tag-cancel/:vchNo', auth, tagCancelRoute.update);
   app.delete('/stock/tag-cancel/:vchNo', auth, tagCancelRoute.remove);
-  // TagCanBill (TR_TAG_CAN.cs:5386-5440): print rights are required (:5390-5393).
-  app.get('/stock/tag-cancel/:vchNo/print', auth, async (req, reply) => {
-    if (!guard(req, reply, 'print')) return;
-    const q = req.query as any;
-    const copyLabel = standardDocumentCopy(q.copy, reply);
-    if (copyLabel === null) return reply;
-    try {
-      const html = await tagCancelBillHtml(
-        prisma,
-        readScope(req),
-        (req.params as any).vchNo,
-        copyLabel,
-      );
-      return sendVoucherDocument(reply, html, {
-        format: q.format,
-        filename: `tag-cancel-${(req.params as any).vchNo}`,
-      });
-    } catch (e: any) {
-      if (e instanceof TagCancelBillNotFoundError)
-        return reply.code(404).send({ error: e.code, message: e.message });
-      if (/(ValidationError|NumberingConfigurationError)$/.test(e?.name ?? ''))
-        return reply.code(400).send({ error: e.name, message: e.message });
-      throw e;
-    }
+  // TagCanBill (TR_TAG_CAN.cs:5386-5440) needs the print right (:5390-5393); each menu keeps its own print right.
+  const tagCancelPrint =
+    (filenamePrefix: string) => async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'print')) return;
+      const q = req.query as any;
+      const copyLabel = standardDocumentCopy(q.copy, reply);
+      if (copyLabel === null) return reply;
+      try {
+        const html = await tagCancelBillHtml(
+          prisma,
+          readScope(req),
+          (req.params as any).vchNo,
+          copyLabel,
+        );
+        return sendVoucherDocument(reply, html, {
+          format: q.format,
+          filename: `${filenamePrefix}-${(req.params as any).vchNo}`,
+        });
+      } catch (e: any) {
+        if (e instanceof TagCancelBillNotFoundError)
+          return reply.code(404).send({ error: e.code, message: e.message });
+        if (/(ValidationError|NumberingConfigurationError)$/.test(e?.name ?? ''))
+          return reply.code(400).send({ error: e.name, message: e.message });
+        throw e;
+      }
+    };
+  app.get('/stock/tag-cancel/:vchNo/print', auth, tagCancelPrint('tag-cancel'));
+  // Stock Adjust (MDI_FORM.cs:8616-8627): TR_TAG_CAN on a STOCK ADJUST book, with the Sign column.
+  const stockAdjustRoute = tagCancelHandlers('adjust');
+  app.get('/stock/stock-adjust', auth, stockAdjustRoute.list);
+  app.get('/stock/stock-adjust/source', auth, stockAdjustRoute.source);
+  // The TagLot / ItmLot helps (TR_TAG_CAN.cs:4089-4188), shown with Purchase LOT / Item With LOT Stock.
+  app.get('/stock/stock-adjust/lots', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () => stockAdjustLots(prisma, scopeOf(req), q.kind, q.q, q.limit));
   });
+  app.get('/stock/stock-adjust/:vchNo', auth, stockAdjustRoute.read);
+  app.post('/stock/stock-adjust', auth, stockAdjustRoute.create);
+  app.put('/stock/stock-adjust/:vchNo', auth, stockAdjustRoute.update);
+  app.delete('/stock/stock-adjust/:vchNo', auth, stockAdjustRoute.remove);
+  app.get('/stock/stock-adjust/:vchNo/print', auth, tagCancelPrint('stock-adjust'));
   app.post('/stock/counter-transfer', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);
@@ -5852,21 +5768,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       },
     );
   });
-  app.get('/stock/tag-print', auth, async (req) => {
-    const s = scopeOf(req);
-    const qy = (req.query as any) || {};
-    return listPrintableTags(
-      prisma,
-      s.tenantId,
-      { CO_CODE: s.coCode, LC_CODE: s.lcCode },
-      {
-        tblCode: qy.tblCode || undefined,
-        itCode: qy.itCode || undefined,
-        tagFrom: qy.tagFrom || undefined,
-        tagTo: qy.tagTo || undefined,
-      },
-    );
-  });
   app.get('/masters/design-book/component-defaults', auth, async (req, reply) => {
     const s = scopeOf(req);
     return run(reply, 200, () =>
@@ -5991,57 +5892,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         requireImageVersion((req.query as any)?.version ?? (req.body as any)?.version),
       ),
     );
-  });
-  app.post('/stock/tag-print/stage', auth, async (req) => {
-    const s = scopeOf(req);
-    const body = (req.body as any) || {};
-    const vchNo = String(body.vchNo ?? '').trim();
-    if (!vchNo) throw new StockVoucherValidationError('vchNo is required');
-    const srNos = Array.isArray(body.srNos)
-      ? body.srNos.map((v: unknown) => Number(v)).filter((v: number) => Number.isFinite(v))
-      : undefined;
-    // Staging copies one voucher's BAR_DETL rows, so the full book scope is mandatory. Fail closed
-    // rather than staging against a partial scope.
-    const coYear = s.coYear;
-    const coBook = s.coBook;
-    if (!coYear || !coBook) {
-      throw new StockVoucherValidationError('scope-incomplete: company year and book are required');
-    }
-    const staged = await withTxBudget(prisma, s.tenantId, 'voucher', (tx: any) =>
-      stageTagPrintRowsTx(
-        tx,
-        s.tenantId,
-        { coCode: s.coCode, lcCode: s.lcCode, coYear, coBook },
-        vchNo,
-        srNos,
-        // Blank stickers to leave before the first real label (desktop nLableSkip).
-        Number(body.labelSkip ?? 0),
-      ),
-    );
-    return { staged };
-  });
-  app.get('/stock/tag-print/label', auth, async (req, reply) => {
-    const s = scopeOf(req);
-    const qy = (req.query as any) || {};
-    const all = await listPrintableTags(
-      prisma,
-      s.tenantId,
-      { CO_CODE: s.coCode, LC_CODE: s.lcCode },
-      {
-        tblCode: qy.tblCode || undefined,
-        itCode: qy.itCode || undefined,
-        tagFrom: qy.tagFrom || undefined,
-        tagTo: qy.tagTo || undefined,
-      },
-    );
-    const wanted = qy.tags
-      ? String(qy.tags)
-          .split(',')
-          .map((t) => t.trim())
-          .filter(Boolean)
-      : null;
-    const tags = wanted ? all.filter((t) => wanted.includes(t.tagNo)) : all;
-    return reply.type('text/html').send(renderTagLabels(tags, Number(qy.labelSkip ?? 0)));
   });
 
   // ---- Membership / loyalty ----
@@ -6285,9 +6135,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // route because route-policy analysis reads literal path strings - a loop would be invisible to it.
   app.get('/reports/rojmel', auth, async (req) => rojmel(prisma, readScope(req)));
   app.get('/reports/trial-balance', auth, async (req) => trialBalance(prisma, readScope(req)));
-  app.get('/reports/account-ledger/:acCode', auth, async (req) =>
-    accountLedger(prisma, readScope(req), (req.params as any).acCode, range(req)),
-  );
+  // GET /reports/account-ledger and the account-in-path aliases live in routes/accountLedger.ts
+  // (registered above as registerAccountLedgerRoutes), the dedicated RP_LEDR plugin.
   app.get('/reports/dhrn-outstanding', auth, async (req) =>
     dhrnOutstandingList(prisma, readScope(req)),
   );
@@ -6354,7 +6203,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
-  app.get('/reports/gst-report', auth, async (req) => gstLauncherReport(prisma, readScope(req)));
   app.get('/reports/delete-data', auth, async (req, reply) => {
     return run(reply, 200, () => deleteDataReport(prisma, readScope(req)));
   });

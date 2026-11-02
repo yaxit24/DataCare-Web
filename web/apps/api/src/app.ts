@@ -78,6 +78,8 @@ import {
 import { registerTxnRoutes } from './routes/txn.js';
 import { logAudit, listAudit } from './modules/ops/audit.js';
 import { backupCompany, recordCompanyBackup } from './modules/ops/backup.js';
+import { prepareBackupDownload } from './modules/ops/backupDownload.js';
+import { loadBackupCompanyType } from './modules/ops/backupFilename.js';
 import { healthPayload, readiness, type PdfRendererProbe } from './modules/ops/health.js';
 import type { PdfRenderer } from './modules/reports/render.js';
 import { correlationId, requestCompletedFields } from './modules/ops/requestContext.js';
@@ -397,6 +399,10 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
   const enforceReportFilters = async (req: FastifyRequest, reply: FastifyReply): Promise<void> => {
     const url = req.routeOptions.url ?? '';
     if (!url.startsWith('/reports/')) return;
+    // The Account Ledger (RP_LEDR) owns a typed query parser (accountLedgerReport.ts) in which acCode, city,
+    // area and state are first-class selectors, not the shared RP_ALL dimensions this guard polices. Its own
+    // parser validates and fails closed, so exempt its routes rather than refusing their selectors here.
+    if (url.startsWith('/reports/account-ledger')) return;
     const q = (req.query ?? {}) as Record<string, string | undefined>;
     const asked = REPORT_FILTER_KEYS.filter((k) => String(q[k] ?? '').trim());
     if (!asked.length) return;
@@ -685,16 +691,19 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     '/backup',
     { preHandler: requireAuth },
     async (req: FastifyRequest, reply: FastifyReply) => {
-      const data = await backupCompany(prisma, sess(req).tenantId, sess(req).coCode);
-      // The artefact is now in the operator's hands, so record its identity append-only. This is what a
-      // destructive data repair must later name as its recovery cover.
-      await recordCompanyBackup(prisma, data, sess(req).sub);
+      const session = sess(req);
+      const filenameTime = new Date();
+      const { data, filename } = await prepareBackupDownload(session.coYear ?? '', {
+        now: () => filenameTime,
+        generate: () => backupCompany(prisma, session.tenantId, session.coCode),
+        loadCompanyType: () => loadBackupCompanyType(prisma, session.tenantId, session.coCode),
+        // Record the completed v2 snapshot before response handoff. This proves generation and admission to the
+        // download response; the browser/OS remains responsible for the physical save.
+        record: (document) => recordCompanyBackup(prisma, document, session.sub),
+      });
       return reply
         .header('content-type', 'application/json')
-        .header(
-          'content-disposition',
-          `attachment; filename="backup-${sess(req).coCode}-${new Date().toISOString().slice(0, 10)}.json"`,
-        )
+        .header('content-disposition', `attachment; filename="${filename}"`)
         .send(data);
     },
   );

@@ -177,8 +177,31 @@ export const put = <T = any>(p: string, b?: Json) =>
 export const del = <T = any>(p: string, b?: Json) =>
   call<T>(p, { method: 'DELETE', body: JSON.stringify(b ?? {}) });
 
-/** Read exact binary bytes with page guards; no automatic retry or error-body download. */
-export async function getBlob(path: string): Promise<Blob> {
+/** A context-safe binary response and its server-suggested, path-safe filename. */
+export interface BinaryDownload {
+  blob: Blob;
+  filename: string;
+}
+
+export function filenameFromContentDisposition(value: string | null): string {
+  const extended = value?.match(/filename\*\s*=\s*UTF-8''([^;]+)/i)?.[1];
+  const ordinary = value?.match(/filename\s*=\s*(?:"([^"]*)"|([^;\s]*))/i);
+  let candidate = extended ?? ordinary?.[1] ?? ordinary?.[2] ?? 'download';
+  try {
+    candidate = decodeURIComponent(candidate);
+  } catch {
+    candidate = 'download';
+  }
+  candidate = candidate.replaceAll('\\', '/').split('/').at(-1) ?? '';
+  candidate = candidate
+    .replace(/[\u0000-\u001f\u007f]/g, '_')
+    .replace(/^\.+/, '')
+    .trim();
+  return candidate.slice(0, 180) || 'download';
+}
+
+/** Read exact binary bytes and filename with page guards; no retry or error-body download. */
+export async function getDownload(path: string): Promise<BinaryDownload> {
   const ticket = page.capture();
   try {
     const response = await fetch('/api' + path, {
@@ -192,13 +215,19 @@ export async function getBlob(path: string): Promise<Blob> {
       if (response.status === 409 && body?.error === 'context-stale') page.reject(ticket);
       throw new ApiError(body?.error || response.statusText, response.status, body);
     }
+    const filename = filenameFromContentDisposition(response.headers.get('content-disposition'));
     const blob = await response.blob();
     page.assertCurrent(ticket);
-    return blob;
+    return { blob, filename };
   } catch (error) {
     page.assertCurrent(ticket);
     throw error;
   }
+}
+
+/** Backward-compatible exact-byte helper for existing callers. */
+export async function getBlob(path: string): Promise<Blob> {
+  return (await getDownload(path)).blob;
 }
 
 /** Export an array of row objects to a downloaded CSV (client-side, no server). */
@@ -229,6 +258,24 @@ export async function downloadPdf(
   filename: string,
   init?: { method: 'POST'; body: unknown },
 ): Promise<void> {
+  return downloadServerFile(path, filename, 'pdf', init);
+}
+
+/**
+ * Download a CSV the server builds from the report's own builder (`/reports/<slug>/export.csv?…`), as a file of this
+ * page. A document opened in a new window is not a download of this page, and the export must carry the server's
+ * totals rows, which the on-screen rows alone do not.
+ */
+export async function downloadServerCsv(path: string, filename: string): Promise<void> {
+  return downloadServerFile(path, filename, 'csv');
+}
+
+async function downloadServerFile(
+  path: string,
+  filename: string,
+  extension: 'pdf' | 'csv',
+  init?: { method: 'POST'; body: unknown },
+): Promise<void> {
   const ticket = page.capture();
   let res: Response;
   try {
@@ -243,14 +290,14 @@ export async function downloadPdf(
       const body = await readBody(res);
       page.assertCurrent(ticket);
       if (res.status === 409 && body?.error === 'context-stale') page.reject(ticket);
-      throw new ApiError('pdf failed', res.status, body);
+      throw new ApiError(`${extension} failed`, res.status, body);
     }
     const blob = await res.blob();
     page.assertCurrent(ticket);
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${filename}.pdf`;
+    a.download = `${filename}.${extension}`;
     document.body.appendChild(a);
     a.click();
     a.remove();

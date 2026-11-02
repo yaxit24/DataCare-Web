@@ -24,6 +24,7 @@ import { salesReturn } from './modules/salesReturn.mjs';
 import { settingsEffects } from './modules/settingsEffects.mjs';
 import { usersRights } from './modules/usersRights.mjs';
 import { companyOpen } from './modules/companyOpen.mjs';
+import { companyMaster } from './modules/companyMaster.mjs';
 import { cashBank } from './modules/cashBank.mjs';
 import { contraEntry } from './modules/contraEntry.mjs';
 import { fineJv } from './modules/fineJv.mjs';
@@ -32,14 +33,21 @@ import { tagOpening } from './modules/tagOpening.mjs';
 import { dailyRate } from './modules/dailyRate.mjs';
 import { itemOpening } from './modules/itemOpening.mjs';
 import { tagCancel } from './modules/tagCancel.mjs';
+import { stockAdjust } from './modules/stockAdjust.mjs';
 import { employeeMaster } from './modules/employeeMaster.mjs';
 import { taxMaster } from './modules/taxMaster.mjs';
 import { autoItem } from './modules/autoItem.mjs';
 import { groupMaster } from './modules/groupMaster.mjs';
 import { productMaster } from './modules/productMaster.mjs';
 import { addressMaster } from './modules/addressMaster.mjs';
+import { partyMaster } from './modules/partyMaster.mjs';
+import { tagPrint } from './modules/tagPrint.mjs';
 import { itemMaster } from './modules/itemMaster.mjs';
 import { wholesaleSale } from './modules/wholesaleSale.mjs';
+import { dataRefresh } from './modules/dataRefresh.mjs';
+import { accountLedger } from './modules/accountLedger.mjs';
+import { dataBackup } from './modules/dataBackup.mjs';
+import { gstReport } from './modules/gstReport.mjs';
 import { runSurface } from './surface/runner.mjs';
 
 /**
@@ -63,6 +71,7 @@ const MODULES = [
   usersRights,
   salesReturn,
   companyOpen,
+  companyMaster,
   purchaseReturn,
   cashBank,
   contraEntry,
@@ -73,14 +82,21 @@ const MODULES = [
   dailyRate,
   itemOpening,
   tagCancel,
+  stockAdjust,
   employeeMaster,
   taxMaster,
   autoItem,
   groupMaster,
   productMaster,
   addressMaster,
+  partyMaster,
+  tagPrint,
   itemMaster,
   wholesaleSale,
+  dataRefresh,
+  accountLedger,
+  dataBackup,
+  gstReport,
 ];
 
 const artifacts = resolve(webRoot, 'test-results/feature-e2e');

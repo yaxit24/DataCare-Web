@@ -524,9 +524,20 @@ route('Masters/Design Book', [
   'DELETE /masters/design-book/image',
 ]);
 route('Inventory/Tag Print', [
-  'GET /stock/tag-print',
-  'GET /stock/tag-print/label',
-  'POST /stock/tag-print/stage',
+  // UT_TAG_PRINT (N225): the Tag Print screen's helps, grid sources, Hm Id Update, default file and print.
+  'GET /stock/tag-print-screen',
+  'GET /stock/tag-print-screen/books',
+  'GET /stock/tag-print-screen/book',
+  'GET /stock/tag-print-screen/vouchers',
+  'GET /stock/tag-print-screen/voucher',
+  'GET /stock/tag-print-screen/stock',
+  'GET /stock/tag-print-screen/tag',
+  'GET /stock/tag-print-screen/tags',
+  'GET /stock/tag-print-screen/lookups/:kind',
+  'POST /stock/tag-print-screen/hm-update',
+  'POST /stock/tag-print-screen/default-file',
+  'POST /stock/tag-print-screen/print',
+  'GET /stock/tag-print-screen/labels',
   // Tag photographs belong to the same surface: the right that shows a tag governs its image.
   'GET /stock/tag-image',
   'GET /stock/tag-image/state',
@@ -551,7 +562,17 @@ route('Inventory/Lot Management', [
   'PUT /stock/item-lot/:vchNo',
   'DELETE /stock/item-lot/:vchNo',
 ]);
-route('Inventory/Stock Adjust', ['POST /stock/adjust', 'DELETE /stock/adjust/:vchNo']);
+// Stock Adjust (N221): TR_TAG_CAN on a STOCK ADJUST book (MDI_FORM.cs:8616-8627), the Tag Cancel writer's third mode.
+route('Inventory/Stock Adjust', [
+  'GET /stock/stock-adjust',
+  'GET /stock/stock-adjust/source',
+  'GET /stock/stock-adjust/lots',
+  'GET /stock/stock-adjust/:vchNo',
+  'POST /stock/stock-adjust',
+  'PUT /stock/stock-adjust/:vchNo',
+  'DELETE /stock/stock-adjust/:vchNo',
+  'GET /stock/stock-adjust/:vchNo/print',
+]);
 // TR_TAG_CAN in its two menus (N18): each keeps its own form right, as the desktop menus check their own.
 route('Inventory/Tag Transfer', [
   'GET /stock/tag-transfer',
@@ -851,6 +872,23 @@ route('Masters/Items', [
   'DELETE /masters/item-master/:code',
   'POST /masters/item-master/:code/tag-values',
 ]);
+// MS_ACCT (N224): the Party master's own screen, with its helps, Enter checks and photo.
+route('Masters/Party (rich)', [
+  'GET /masters/party-master',
+  'GET /masters/party-master/print',
+  'GET /masters/party-master/help/:kind',
+  'GET /masters/party-master/copy/:kind',
+  'GET /masters/party-master/taken/:kind',
+  'GET /masters/party-master/gst-state',
+  'GET /masters/party-master/account',
+  'GET /masters/party-master/:code',
+  'GET /masters/party-master/:code/photo',
+  'POST /masters/party-master/:code/photo',
+  'POST /masters/party-master/:code/photo/delete',
+  'POST /masters/party-master',
+  'PUT /masters/party-master/:code',
+  'DELETE /masters/party-master/:code',
+]);
 route('Masters/Opening Balance', [
   'GET /accounts/:acCode/opening',
   'POST /accounts/:acCode/opening',
@@ -883,6 +921,12 @@ route('Reports/Trial Balance', ['GET /reports/trial-balance', 'GET /reports/tria
 route('Reports/Trial Balance (Full)', ['GET /reports/trial-balance-full']);
 route('Reports/Balance Sheet', ['GET /reports/balance-sheet', 'GET /reports/balance-sheet-doc']);
 route('Reports/Account Ledger', [
+  // RP_LEDR: the canonical screen (view=summary|detail|voucher-summary|ageing) and its three exports,
+  // plus the two account-in-path aliases kept for the current screen during the UI migration.
+  'GET /reports/account-ledger',
+  'GET /reports/account-ledger/export.pdf',
+  'GET /reports/account-ledger/export.xlsx',
+  'GET /reports/account-ledger/export.csv',
   'GET /reports/account-ledger/:acCode',
   'GET /reports/account-ledger/:acCode/export.pdf',
 ]);
@@ -956,7 +1000,12 @@ route('Reports/Entry Check', [
 route('Reports/User Report', ['GET /reports/user-report']);
 route('Reports/Dhiran Report', ['GET /reports/dhiran-report']);
 route('Reports/Loan Report', ['GET /reports/loan-report']);
-route('Reports/GST Report', ['GET /reports/gst-report']);
+route('Reports/GST Report', [
+  'GET /reports/gst-report',
+  'GET /reports/gst-report/export.csv',
+  'GET /reports/gst-report/export.xlsx',
+  'GET /reports/gst-report/export.pdf',
+]);
 route('Reports/Delete Data', ['GET /reports/delete-data']);
 route('Reports/Point Report', ['GET /reports/point-report', 'GET /reports/point-report/detail']);
 route('Reports/Approval Report', ['GET /reports/approval-report']);
@@ -980,11 +1029,15 @@ route('Reports/Mfg Ledger', ['GET /reports/mfg-ledger', 'GET /reports/mfg-ledger
 route('Reports/Scheme Monthly Report', ['GET /reports/scheme-monthly']);
 
 const PRINT_ROUTES = new Set([
+  'GET /masters/party-master/print',
   'GET /masters/employee-master/print',
   'GET /masters/tax-master/print',
   'GET /masters/group-master/print',
   'GET /masters/address-master/print',
   'POST /estimate/pdf',
+  'GET /reports/account-ledger/export.pdf',
+  'GET /reports/account-ledger/export.xlsx',
+  'GET /reports/account-ledger/export.csv',
   'GET /reports/account-ledger/:acCode/export.pdf',
   'GET /tour-orders/confirmation',
   'GET /sales/invoice',
@@ -1013,10 +1066,14 @@ const PRINT_ROUTES = new Set([
   'POST /e-invoices/:vchNo/irn/cancel',
   'GET /e-invoices/:vchNo/print',
   'GET /utilities/data-export/download',
-  'GET /stock/tag-print/label',
+  'POST /stock/tag-print-screen/print',
+  'GET /stock/tag-print-screen/labels',
   'POST /integrations/notify',
   'GET /reports/tag-stock.csv',
   'GET /reports/karigar-ledger.print',
+  'GET /reports/gst-report/export.csv',
+  'GET /reports/gst-report/export.xlsx',
+  'GET /reports/gst-report/export.pdf',
   'GET /reports/gstr2-doc',
   'GET /reports/gstr1-doc',
   'GET /reports/gstr3b-doc',
@@ -1031,9 +1088,12 @@ const PRINT_ROUTES = new Set([
   'GET /daily-rate/print',
   // TR_TAG_CAN.cs:5390-5393: TagCanBill needs print rights.
   'GET /stock/tag-cancel/:vchNo/print',
+  'GET /stock/stock-adjust/:vchNo/print',
 ]);
 
 const UPDATE_POST_ROUTES = new Set([
+  'POST /stock/tag-print-screen/hm-update',
+  'POST /stock/tag-print-screen/default-file',
   'POST /masters/item-master/:code/tag-values',
   'POST /masters/auto-item',
   'POST /stock/tag-image',
