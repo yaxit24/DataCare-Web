@@ -16,7 +16,10 @@ export interface NavGroup {
 export const NAV: NavGroup[] = [
   {
     label: 'Company',
-    items: [{ label: 'Balance TrFr', href: '/company/balance-transfer', ready: true }],
+    items: [
+      { label: 'Balance TrFr', href: '/company/balance-transfer', ready: true },
+      { label: 'Data Backup', href: '/backup', ready: true },
+    ],
   },
   {
     label: 'Masters',
@@ -342,7 +345,6 @@ export const NAV: NavGroup[] = [
       { label: 'Import / Export', href: '/masters/accounts', ready: true },
       { label: 'Data Export', href: '/utilities/data-export', ready: true },
       { label: 'Estimate Reset', href: '/utilities/estimate-reset', ready: true },
-      { label: 'Backup', href: '/backup', ready: true },
       { label: 'Data Refresh', href: '/utilities/data-refresh', ready: true },
       { label: 'Data Repair', href: '/utilities/data-repair', ready: true },
       { label: 'Users & Rights', href: '/admin/users', ready: true },

@@ -397,4 +397,47 @@ type Cookie = string;
       { gr: 'SLV', rate: 763 },
     ]);
   });
+  it('serializes two operators saving the same new day: both succeed and the last writer keeps one set of rows', async () => {
+    const date = `${startYear}-07-04`;
+    const results = await Promise.allSettled(
+      [72000, 73000].map((goldRate) =>
+        saveDailyRate(runtime, {
+          scope: { tenantId, coCode: '01', lcCode: '01', coYear: YEAR },
+          date,
+          goldRate,
+          silverRate: 85000,
+          rows: savedGrid,
+          mainUser: ADMIN,
+        }),
+      ),
+    );
+    expect(results.map((r) => r.status)).toEqual(['fulfilled', 'fulfilled']);
+    const rows = await rateRows('01', date);
+    expect(rows).toHaveLength(savedGrid.length);
+    expect(new Set(rows.map((r: { gold?: number }) => r.gold)).size).toBe(1);
+  });
+  it("serves the rate lookup from the session's own location (TR_SALE.cs:12547 filters RATE_MAST by LC_CODE)", async () => {
+    const own = `${startYear}-07-05`;
+    const other = `${startYear}-07-06`;
+    const grid = (rate: number) => [{ ...savedGrid[2]!, rate, taxRate: rate }];
+    await saveDailyRate(runtime, {
+      scope: { tenantId, coCode: '01', lcCode: '01', coYear: YEAR },
+      date: own,
+      goldRate: 72000,
+      silverRate: 85000,
+      rows: grid(64031),
+      mainUser: ADMIN,
+    });
+    await saveDailyRate(runtime, {
+      scope: { tenantId, coCode: '01', lcCode: '02', coYear: YEAR },
+      date: other,
+      goldRate: 99000,
+      silverRate: 99000,
+      rows: grid(11111),
+      mainUser: ADMIN,
+    });
+    const response = await request(adminCookie, 'GET', `/rate?group=G22&date=${other}`);
+    expect(response.statusCode, response.body).toBe(200);
+    expect(response.json()).toMatchObject({ group: 'G22', rate: 64031, date: own });
+  });
 });

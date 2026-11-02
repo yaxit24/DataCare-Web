@@ -119,11 +119,11 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `UT_BKP` — direct constructor ([MDI_FORM.cs:7471-7480](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7471-L7480)).
 - **Does:** Creates full SQL Server backups (yearly database plus NextMain) on a chosen drive and restores them.
-- **Looks:** Path selector, progress bar, Backup and Restore buttons.
+- **Looks:** Backup Data header, read-only browser destination, Select, accessible progress, Backup and Cancel; no operator Restore or Dattach.
 - **Web:** `/backup`; `GET /backup`, `POST /backup/restore`. Can: create.
-- **Remaining:** Web offers a logical JSON export; restore is contained; encrypted off-site backup, scheduled restore drill and rollback remain.
-- **Owners:** G64, N80, X31, P12-05.
-- **Evidence:** [KB_master.md:225-253](../../project-memory/video-research/_kb/KB_master.md#L225-L253).
+- **Remaining:** Milestone 1 implements the scoped v2 download, desktop-visible Backup flow, pre-generation source-backed filename, operator recovery-boundary warning and audit. The executable data-backup.config.nextmain-allowlist archive-scope case remains baselined under G64/N80 because D-BKP-3 has no approved versioned tenant-config/credential envelope. G225 Print-right policy, actual-browser scratch zero-diff, physical overwrite confirmation, full-Lite fixture, production DR and desktop-runtime comparison remain blocked; restore stays contained.
+- **Owners:** G64, N80, X31, P12-05, G225.
+- **Evidence:** [KB_master.md:225-253](../../project-memory/video-research/_kb/KB_master.md#L225-L253), [data-backup.md](../../docs/handbook/web/data-backup.md).
 
 ### Data Refresh
 
@@ -726,9 +726,9 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Sales-like item, component and old-metal grids with an advance panel, delivery date, images and order document.
 - **Writes:** SL_ORD_DATA, SL_ORD_DETL, SL_ORD_IDTL, SL_ORD_ADJ, SL_PR_DETL, AC_DATA, ROJ_MEL_DATA, UPI_DATA, TAG_IMAGE_DATA.
 - **Web:** `/txn/sales-order`; `GET /sales-orders`, `POST /sales-orders`, `GET /sales-orders/:vchNo`, `PUT /sales-orders/:vchNo`, `DELETE /sales-orders/:vchNo`, `GET /sales/order-confirmation`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** Old-metal and scheme tenders, partial delivery, manufacturing and invoice conversion, reservation/refund and the order document need acceptance.
-- **Owners:** G14, N44, G16, N46, X14, N77, X25, G206, N197, N222.
-- **Evidence:** [KB_transaction.md:208-235](../../project-memory/video-research/_kb/KB_transaction.md#L208-L235), [TR_SALE_ORD.cs:9520-9556](../../unified/src/csharp/DataCareNext/TR_SALE_ORD.cs#L9520-L9556).
+- **Remaining:** Scheme tender, partial delivery, manufacturing and invoice conversion, reservation/refund and the order document need acceptance.
+- **Owners:** G14, N44, G16, N46, X14, N77, X25, G206, N197, N222, N226.
+- **Evidence:** [KB_transaction.md:208-235](../../project-memory/video-research/_kb/KB_transaction.md#L208-L235), [TR_SALE_ORD.cs:9520-9556](../../unified/src/csharp/DataCareNext/TR_SALE_ORD.cs#L9520-L9556), [TR_SALE_ORD.cs:9421-9475](../../unified/src/csharp/DataCareNext/TR_SALE_ORD.cs#L9421-L9475).
 
 ### Sales Return
 
@@ -2370,7 +2370,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header and a scan-driven tag grid with item, counter, weights, fine and karigar detail.
 - **Writes:** BAR_CAN_DATA, BAR_CAN_DETL, BAR_CAN_IDTL, BAR_DETL, BAR_IDTL, MAIN_STOCK, DM_DATA, DELETE_DATA.
 - **Web:** `/txn/tag-cancel`; `GET /stock/tag-cancel`, `POST /stock/tag-cancel`, `GET /stock/tag-cancel/:vchNo`, `PUT /stock/tag-cancel/:vchNo`, `DELETE /stock/tag-cancel/:vchNo`, `GET /stock/tag-cancel/source`, `GET /stock/tag-cancel/:vchNo/print`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** Implemented from source (N18, N210): TagCanBill behind print rights and the desktop refusals pass 12 browser cases. Open: no captured desktop BAR_CAN rows, idempotency retry, fault rollback, the Tag Stock report check and a desktop-runtime comparison.
+- **Remaining:** Implemented from source (N18, N210): TagCanBill and desktop refusals, exact-caption rights, a two-browser same-tag race, create/edit/delete fault rollback, and the Tag Stock create/edit/delete lifecycle have executable evidence. Open: no captured desktop BAR_CAN rows, durable lost-acknowledgement idempotency, and a desktop-runtime comparison.
 - **Owners:** G223, N18, N210, P07-03, X18, X19.
 - **Evidence:** [KB_other.md:106-149](../../project-memory/video-research/_kb/KB_other.md#L106-L149).
 

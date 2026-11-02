@@ -5,6 +5,7 @@ import {
   COMPANY_BACKUP_VERSION,
   assertCompanyBackupIntegrity,
   backupCompany,
+  recordCompanyBackup,
   restoreCompany,
   type CompanyBackup,
 } from '../src/modules/ops/backup.js';
@@ -15,6 +16,7 @@ import {
   schemaFingerprint,
   type BackupColumnManifest,
 } from '../src/modules/ops/backupManifest.js';
+import { buildBackupFilename, loadBackupCompanyType } from '../src/modules/ops/backupFilename.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const databaseDescribe = RUN ? describe : describe.skip;
@@ -72,11 +74,12 @@ databaseDescribe('WP-02A company logical backup/restore', () => {
     bytes: Buffer,
   ): Promise<void> => {
     await owner.$executeRawUnsafe(
-      `INSERT INTO "CO_MAST"(tenant_id,"CO_CODE","CO_NAME","LC_CODE")
-       VALUES ($1,$2,$3,'00')`,
+      `INSERT INTO "CO_MAST"(tenant_id,"CO_CODE","CO_NAME","LC_CODE","CO_TYPE")
+       VALUES ($1,$2,$3,'00',$4)`,
       tenantId,
       companyCode,
       `Company ${label}`,
+      label.slice(0, 1),
     );
     await owner.$executeRawUnsafe(
       `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","FINE_STK_TYPE","IP_WITH_PC","THEME")
@@ -131,6 +134,18 @@ databaseDescribe('WP-02A company logical backup/restore', () => {
        VALUES ($1,'IN','India A','wp02'),($2,'GB','Britain B','wp02')`,
       TENANT_A,
       TENANT_B,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "LOCT_MAST"(tenant_id,"CO_CODE","LC_CODE","LC_NAME")
+       VALUES ($1,$2,'00','Head Office'),($1,$2,'02','Branch Sentinel')`,
+      TENANT_A,
+      COMPANY_A,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR")
+       VALUES ($1,$2,'2024-2025'),($1,$2,'2025-2026')`,
+      TENANT_A,
+      COMPANY_A,
     );
   };
 
@@ -274,6 +289,58 @@ databaseDescribe('WP-02A company logical backup/restore', () => {
     });
     expect(JSON.stringify(document)).not.toContain('[binary]');
     expect(() => assertCompanyBackupIntegrity(document)).not.toThrow();
+  });
+
+  it('records one append-only backup handoff and derives metadata only from the selected company', async () => {
+    await seedBase();
+    const document = await backupCompany(runtime, TENANT_A, COMPANY_A);
+    expect(await loadBackupCompanyType(runtime, TENANT_A, COMPANY_A)).toBe('A');
+    expect(
+      buildBackupFilename({
+        fiscalYear: '2024-2025',
+        companyType: await loadBackupCompanyType(runtime, TENANT_A, COMPANY_A),
+        now: new Date(2026, 10, 2, 17, 59, 0),
+      }),
+    ).toBe('Next24_A_021126_17.json');
+
+    await recordCompanyBackup(runtime, document, 'backup-operator');
+    await recordCompanyBackup(runtime, document, 'duplicate-does-not-create-another-row');
+    const rows = await owner.$queryRawUnsafe<
+      Array<{ checksum: string; operator: string; table_count: number; row_count: bigint }>
+    >(
+      `SELECT checksum,operator,table_count,row_count FROM "company_backup_run"
+        WHERE tenant_id=$1 AND co_code=$2`,
+      TENANT_A,
+      COMPANY_A,
+    );
+    expect(rows).toEqual([
+      {
+        checksum: document.checksum,
+        operator: 'backup-operator',
+        table_count: document.totals.companyTables,
+        row_count: BigInt(document.totals.rows),
+      },
+    ]);
+  });
+
+  it('serializes every selected-company location/year, excludes scope sentinels, and repeats normalized checksums', async () => {
+    await seedBase();
+    const first = await backupCompany(runtime, TENANT_A, COMPANY_A);
+    const second = await backupCompany(runtime, TENANT_A, COMPANY_A);
+    const serialized = JSON.stringify(first);
+
+    expect(first.tables.LOCT_MAST?.rows).toHaveLength(2);
+    expect(first.tables.YEAR_MAST?.rows).toHaveLength(2);
+    expect(serialized).toContain('Branch Sentinel');
+    expect(serialized).toContain('2024-2025');
+    expect(serialized).toContain('2025-2026');
+    expect(serialized).not.toContain('Company A02');
+    expect(serialized).not.toContain('Account A02');
+    expect(serialized).not.toContain('Company B01');
+    expect(serialized).not.toContain('Account B01');
+    expect(first.manifest.fingerprint).toBe(second.manifest.fingerprint);
+    expect(checksums(first)).toEqual(checksums(second));
+    expect(first.totals).toEqual(second.totals);
   });
 
   it('preserves exact PostgreSQL JSON text without JavaScript numeric coercion', () => {

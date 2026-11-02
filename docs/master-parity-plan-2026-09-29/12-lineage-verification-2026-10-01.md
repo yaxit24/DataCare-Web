@@ -72,6 +72,8 @@ the authority for each item.
 | 21 Behavioural parity verification | carried; 21.1 decided by D24 (enforced by tests and release gates) | X03, X06, X34, N82 |
 | 22 Phased delivery | carried | X31, X33, N80, N82, D25 |
 
+Data Backup milestone 1 evidence (2 November 2026) is carried by the existing recovery lineage `P12-05 → X31 → G64/N80`: the authenticated company-scoped v2 download, source-backed browser filename, immutable backup-run audit and Backup-only matrix are implemented engineering evidence. The lineage remains open for D-BKP-3 configuration/credential scope, actual-browser scratch zero-diff, physical save, production recovery and desktop-runtime proof. No new N/G identifier is allocated.
+
 ## 3. Gap register G69–G83
 
 Severity as in documents 10 and 11. G69–G74, G79 and G81–G83 are Phase 1 (desktop parity in the web); G75–G78 and G80 are
@@ -216,7 +218,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G203 | Med | A cheque receipt or payment lost its cheque number on the ledger | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/api/src/modules/finance/finance.ts` | Found by `cash-bank.create.cheque-receipt`: the cheque number was saved on CASH_DATA but every AC_DATA leg had an empty CHQ_NO, while the desktop `Bank_Ledr` (`Ac_Ledr.cs:585-593`) writes `A.CHQ_NO` on each leg; bank reconciliation and cheque reports read it from the ledger. | N193 |
 | G204 | High | Contra Entry was a fixed two-account form, not the desktop grid | `unified/src/csharp/DataCareNext/TR_CONTRA.cs` | `web/apps/web/app/(app)/txn/contra/page.tsx` | Found while writing the contra module: the desktop grid holds any number of rows and writes a CONTRA_DATA pair per row against row 1 (`TR_CONTRA.cs:2760-2866`), one Contra_Ledr leg per row, and refuses unequal totals with its own message (`:2694`); the web took one Dr and one Cr account, wrote one row with both amounts and used its own wording. A shop could not deposit cash into two banks in one voucher. | N194 |
 | G205 | High | Sales Order line priced on fine weight with paise | `unified/src/csharp/DataCareNext/TR_SALE_ORD.cs` | `web/apps/api/src/modules/sales/salesOrder.ts`; `web/apps/web/lib/salesOrderForm.ts` | Found by `sales-order.formula.whole-rupees` and `sales-order.create.amounts`. The desktop prices a line's metal as weight × rate rounded to whole rupees, the weight following SL_AMT_TYPE: fine for F, gross for G, otherwise net + ghat (`TR_SALE_ORD.cs:6560-6672`). The bill takes tax as round(net × %, 0) and the total as round(net + tax, 0) (`:11340-11342`). The web always uses the fine weight and keeps paise (`salesOrder.ts` `calculateOrderLine`, `fineWt` then `round2(fine × rate)`), and `billTotals` runs without a rounding policy, so tax keeps paise. Net 10 g, touch 91.6, rate 6,123.45, labour 237.5 /g on a company with SL_AMT_TYPE N: desktop 61,234 + 2,375 = 63,609, tax 1,908, total 65,517; web 56,090.80 + 2,375 = 58,465.80, tax 1,753.97, total 60,220. | N196 |
-| G206 | Med | Sales Order takes one cash advance and stores no tender breakdown | `unified/src/csharp/DataCareNext/TR_SALE_ORD.cs`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/web/app/(app)/txn/sales-order/page.tsx`; `web/apps/api/src/modules/sales/salesOrder.ts` | Found by `sales-order.create.header-tender` and `sales-order.create.tender-modes`. The desktop advance is the sum of its tender rows: cash, UPI, cheque, card, old gold, old silver and scheme (`TR_SALE_ORD.cs:11368`); each is stored on SL_ORD_DATA (`:9126-9142`: CASH_AMT, UPI_AMT, CHQ_AMT, CARD_AMT, OLD_GL_AMT, OLD_SL_AMT, SCHM_AMT) and Order_Ledr posts each to its own account (`Ac_Ledr.cs:28-61`, legs 01-06 and 12-13). The web screen has one Advance amount, saved as ADV_AMT with CASH_AMT 0, and shows the other tender fields read-only. | N197, N222 |
+| G206 | Med | Sales Order takes one cash advance and stores no tender breakdown | `unified/src/csharp/DataCareNext/TR_SALE_ORD.cs`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/web/app/(app)/txn/sales-order/page.tsx`; `web/apps/api/src/modules/sales/salesOrder.ts` | Found by `sales-order.create.header-tender` and `sales-order.create.tender-modes`. The desktop advance is the sum of its tender rows: cash, UPI, cheque, card, old gold, old silver and scheme (`TR_SALE_ORD.cs:11368`); each is stored on SL_ORD_DATA (`:9126-9142`: CASH_AMT, UPI_AMT, CHQ_AMT, CARD_AMT, OLD_GL_AMT, OLD_SL_AMT, SCHM_AMT) and Order_Ledr posts each to its own account (`Ac_Ledr.cs:28-61`, legs 01-06 and 12-13). The web screen has one Advance amount, saved as ADV_AMT with CASH_AMT 0, and shows the other tender fields read-only. | N197, N222, N225 |
 | G207 | Med | Order advance debits the sales account on a provisioned company | `unified/src/csharp/DataCareNext/Ac_Ledr.cs`; `unified/src/csharp/DataCareNext/Ac_Rojmel.cs` | `web/apps/api/src/modules/ops/seedCompany.ts` | Found by `sales-order.create.advance-ledger`: a 5,000 cash advance posts Dr SALES / Cr customer. Order_Ledr debits the order book's BOOK_DETL slot 1 with CASH_AMT (`Ac_Ledr.cs:28-35`) and Order_Rojmel uses slot 1 as the advance contra (`Ac_Rojmel.cs:11`); on the real data slot 1 of book 020 is 00001, the cash account (recorded in `salesOrder.ts`). `seedCompany.ts:219` gives the SOR book the sale layout (1 SALES, 2 CASH, 3 ROUNDOFF). | N198 |
 | G208 | Med | A sale cannot adjust an order advance on a provisioned company | `unified/src/csharp/DataCareNext/Ac_Rojmel.cs` | `web/apps/api/src/modules/ops/seedCompany.ts`; `web/apps/api/src/modules/sales/sales.ts` | Found by `sales-order.journey.order-to-sale`: Sales Invoice with Ord No and Order Amt answers 400 "book SL account row 4 is missing". Sales_Rojmel posts the sale's ADV_AMT against BOOK_DETL slot 4 (`Ac_Rojmel.cs:96`) and `sales.ts` resolves slot 4 when an advance applies, but provisioned sale books get slots 1-3 only. | N198 |
 | G209 | High | Party Opening was a balanced multi-account voucher, not the desktop's per-party opening | `unified/src/csharp/DataCareNext/TR_AC_OPBL.cs`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/web/app/(app)/txn/ac-opbl/page.tsx`; `web/apps/api/src/modules/finance/partyOpening.ts` | Found while writing the Party Opening case list: the desktop keeps one OP_DATA row per party in book '000' with Cr/Dr signs (`TR_AC_OPBL.cs:2694-2722`) and posts it through AcOp_Ledr (`Ac_Ledr.cs:9-28`) as up to six legs dated the day before the year opens. The web numbered an 'ACO' voucher, demanded that debits equal credits, wrote no OP_DATA and had no reopen, edit, list or desktop messages, so a shop could not enter one party's opening on its own. The balanced-voucher module is removed. | N199 |
@@ -233,7 +235,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G220 | Med | The generic voucher list and number-box routes read any book of an allow-listed table | `unified/src/csharp/DataCareNext/MDI_FORM.cs:8100-8111,8360-8365`; `unified/src/csharp/DataCareNext/TR_CONTRA.cs:3136-3146` | `web/apps/api/src/routes/voucherNavigation.ts`; `web/apps/api/src/modules/vouchers/list.ts`; `web/apps/api/src/modules/rbac/routePolicy.ts` | Found in the N206 review. `GET /vouchers/recent` and `GET /vouchers/neighbour` are SYSTEM routes that take the table and book from the request, so any signed-in user of the company can list another menu's vouchers of a shared table (for example a Fine JV book through CONTRA_DATA) with their dates, accounts and totals, within the session's tenant, company, location and year. The desktop's list (TR_CONTRA.cs:3136-3146) only lists the open form's own book. The routes should require view rights on the form that owns the requested book. | N207 |
 | G221 | High | Daily Rate did not follow MS_RATE and its save deleted other locations' rates | `unified/src/csharp/DataCareNext/MS_RATE.cs:1752-2109,2314-2458` | `web/apps/api/src/modules/masters/dailyRate.ts`; `web/apps/api/src/routes/dailyRate.ts`; `web/apps/web/app/(app)/txn/daily-rate/page.tsx`; `web/packages/core/src/dailyRate.ts` | The desktop lists the groups with a touch (GR_TYPE, GR_NAME), derives TaxRate = Round(Touch × Gold / 100) (silver / 10000) with Rate10gm net of the group's Tax% and PrRate from the purchase touch, using banker's rounding, and saves the grid per company, location, year and date. The web derived silver per kg, added tax on top, rounded half up, used one Tax% for every group, deleted every location's rows for the date, read and listed without the location, wrote GR_NAME, had no delete or print, and allowed any save without edit rights. | N208 |
 | G222 | High | Item Opening was not the desktop TR_ITM_OPBL metal-type grid | `unified/src/csharp/DataCareNext/TR_ITM_OPBL.cs`; `unified/src/csharp/DataCareNext/Ac_Stock.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7690-7699` | `web/apps/web/app/(app)/txn/item-opening/page.tsx`; `web/apps/api/src/modules/stock/stockVoucherLifecycle.ts`; `web/apps/api/src/routes/txn.ts` | The desktop opens TR_ITM_OPBL directly, with no book help (`MDI_FORM.cs:7690-7699`). Enter on the Item Type select lists every item of that metal type (`TR_ITM_OPBL.cs:1269-1370`) in a 17-column grid with a Total row, and Save replaces the type's rows in book '000' with VCH_NO = the type letter (`:1380-1490`); the stock rows come from `Ac_Stock.Itm_Opbl_Stk` (`Ac_Stock.cs:11-21`: AC_CODE '00000', VCH_TYPE ITOBL, BOOK_NAME 'ITM OPBL', P / +, the KR_* fields, dated the year's opening date less one day) and DM_DATA from `Dm_Itm_Opbl_Detl` for OTH_DETL_POSTING items (`:734-741`). The web wrote a numbered BAR_DATA voucher in book IOP on the voucher date; its fine ignored the wastage, its stock rows lacked those fields, it wrote no per-type ITM_OPBL rows and no DM_DATA, and its grid had no West%, labour, other amount, net amount or totals. | N209 |
-| G223 | Med | Tag Cancel had no print, accepted a new voucher in a type B company and answered the lock and fiscal refusals with web wording | `unified/src/csharp/DataCareNext/TR_TAG_CAN.cs:4950-4990,5330-5345,5386-5440` | `web/apps/api/src/modules/stock/tagCancel.ts`; `web/apps/api/src/modules/stock/tagCancelBill.ts`; `web/apps/web/components/TagCancelForm.tsx` | The desktop refuses a new voucher when CO_TYPE is 'B', a date outside the year and a date on or before the lock date with its own texts, in that order, and prints TagCanBill behind UserPrint. The web had no print route, never checked the company type, checked the lock after reading the lines and answered with "period is locked …" / "voucher date … is outside fiscal year …". | N210 |
+| G223 | Med | Tag Cancel had no print, accepted a new voucher in a type B company and answered the lock and fiscal refusals with web wording | `unified/src/csharp/DataCareNext/TR_TAG_CAN.cs:4950-4990,5330-5345,5386-5440`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7034-7046,8585-8595` | `web/apps/api/src/modules/stock/tagCancel.ts`; `web/apps/api/src/modules/stock/tagCancelBill.ts`; `web/apps/web/components/TagCancelForm.tsx`; `web/apps/api/test/tagCancelFaultMatrix.db.test.ts`; `web/apps/web/test/features/modules/tagCancel.mjs` | The desktop refuses a new voucher when CO_TYPE is 'B', a date outside the year and a date on or before the lock date with its own texts, in that order, and prints TagCanBill behind UserPrint. The web had no print route, never checked the company type, checked the lock after reading the lines and answered with "period is locked …" / "voucher date … is outside fiscal year …". N210 milestone 1 adds executable evidence for the exact `Tag Cancel` caption and a near-miss refusal, one-winner same-tag browser concurrency, create/edit/delete rollback through the executed register/detail/component/stock/diamond/audit/source stages, and Tag Stock create/edit/delete agreement. Durable lost-acknowledgement idempotency, captured desktop BAR_CAN rows and Windows comparison remain open. | N210 |
 | G224 | Medium | The Employee master was a generic field form, not the desktop MS_EMP screen | `unified/src/csharp/DataCareNext/MS_EMP.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7660-7669`; `web/apps/api/form-specs/DataCareNext.MS_EMP.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/configs.ts`; `web/apps/api/src/modules/rbac/formCatalog.ts` | The desktop opens MS_EMP from the 'Employee' button, whose caption is the USER_SET SUB_MENU (`MDI_FORM.cs:7660-7669`, `:7034`). The screen has a SEARCH RECORD box over a Code / Name list ordered by name, and Employee Code, Employee Name, Account Code with the account name, User Name (the company-01 login names), Amount and Day Hour, in that tab order (form spec). A new entry takes the next code ('001', else the highest + 1 as "000", `MS_EMP.cs:1260-1268`); leaving the code or name refuses one another employee has (`:1350-1411`); Save replaces the row with Val of the numbers, 'ABC' for a blank user and the creator (`:1462-1550`); Delete refuses the default employee '001' (`:1552-1584`). The web rendered the generic master form, which showed EMP_TYPE, TDS and PF as typed boxes, had no search list, next code, duplicate checks, desktop texts or account help, and the rights alias 'Employee' was missing, so a desktop USER_SET row gave no access. Not closed here: the EmpMast report layout is not in the repository, so Print lists the employees on screen; the help list's create path (MsCreat opens MS_ACCT with group 10, `:1659-1665`) is shared MS_HELP behaviour left to the Party master slice. | N211 |
 | G225 | High | Desktop rights rows named by the menu caption did not reach fifteen Lite screens | `unified/src/csharp/DataCareNext/MDI_FORM.cs:7034-7046`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7610-8951`; `unified/src/csharp/DataCareNext/TR_AC_OPBL.cs:2020-2030` | `web/apps/api/src/modules/rbac/formCatalog.ts`; `web/apps/api/src/modules/rbac/authorization.ts`; `web/apps/api/src/routes/partyOpening.ts` | The desktop reads USER_SET by LC_CODE, USER_NAME and SUB_MENU = the menu button's caption (MsUserRightForm = MsSideBtn, `MDI_FORM.cs:7034-7046`), so a migrated or desktop-written rights row names the caption. The web matches a row against the form's name and aliases, and the captions Address, Product, Group, AutoItem, Tax, Party Opening, Purchase Rtn, Approval Isu, Approval Rtn, Fine Jv Entry, Tag Stock, Sales Report, Purchase Rpt, Cash Bank and Gst Report were not aliases of the forms their screens use: a restricted user with the desktop's rights was refused. Party Opening's Save also ignored FRM_EDIT for an existing opening (`TR_AC_OPBL.cs:2647-2650`). Not closed here: captions whose screens also use another menu's form (Company, Data Refresh, Data Import, Order Report, Cash Received, Bank Received, and Approval Rtn's issue lines), and 14 Basic and 19 Standard menus, which follow their tiers. | N212 |
 | G226 | High | The Tax master was a generic field form that could not edit a code's components, and its generic update rewrote them | `unified/src/csharp/DataCareNext/MS_TAX.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7670-7679`; `web/apps/api/form-specs/DataCareNext.MS_TAX.layout.json` | `web/apps/web/app/(app)/masters/[name]/page.tsx`; `web/apps/api/src/modules/masters/master.service.ts`; `web/apps/api/src/modules/masters/configs.ts`; `web/apps/web/components/LookupPicker.tsx` | MS_TAX edits a tax code as a header row (SR_NO 0, TAX_GROUP 'N') with a grid of component rows (SR_NO 1, 2, …: SGST, CGST, IGST), which the sale and purchase postings read by SR_NO; Save replaces every row of the code (`MS_TAX.cs:1824-1933`). The web rendered the generic one-row form keyed by CO_CODE + TAX_CODE: it listed the component rows as duplicates, could not add or change a component, and its update wrote the header's name and rate into every component row of the code, so an edited GST code taxed SGST, CGST and IGST at the full rate. It had no desktop keys, texts, account helps or Print. The browser check also found the shared account picker replacing a row chosen from its help with the typed text's exact code on leave. Not closed here: web provisioning keeps its tax accounts in group 30, outside the desktop help's group 12 (N58), and the Sales screen resolves the code by rate rather than from the desktop's tax-code help (`TR_SALE.cs:18668`), refusing a rate another code's component carries. | N213 |
@@ -248,6 +250,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G235 | High | The Ledger Report was a single-account money statement with the wrong balance sign and none of the desktop's summary, drill-down, ageing or metal columns | `unified/src/csharp/DataCareNext/RP_LEDR.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:8871-8880` | `web/apps/api/src/modules/accounting/accounting.ts`; `web/apps/web/app/(app)/reports/[report]/page.tsx` | RP_LEDR is an account-summary screen (DGV_AC) that drills into a per-voucher or per-ledger-key detail (DGV_VCH/DGV_DETL) and a debit-ageing view (DGV_MONTH), reporting money AND signed gold/silver fine. The summary nets money as Σ(CR−DR), gold/silver as signed fine, splits a negative net to Dr and a positive net to Cr, and drops display-zero rows unless With Zero; detail keeps a running Σ(Cr)−Σ(Dr) balance with its side; voucher summary keeps gross Dr/Cr; ageing consumes the oldest debit first (`RP_LEDR.cs:6408-6435,6862-7266,7694-8205,9514-10314`). The web answered only `/reports/account-ledger/:acCode` with a money statement whose running balance used DR−CR (the opposite sign) and had no summary, drill-down, ageing, metal columns, selectors or Excel/CSV export. | N223 |
 | G236 | High | The Party menu opened a generic page that skipped MS_ACCT's rules | `unified/src/csharp/DataCareNext/MS_ACCT.cs:5584-6587`, `:6606-7648`, `:7650-8025`, `:8162-8574`, `:9024-9640`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7600-7609` | `web/apps/web/app/(app)/masters/party/page.tsx`; `web/apps/api/src/modules/masters/master.service.ts` | Master → Party opens MS_ACCT: the location's Code / Name / Mobile list, the next code of the location, Company Detail and Other Detail with Enter in the form's tab order, the group, mobile, second mobile, short name, GST number, main account and reference checks, a new entry's opening (OP_DATA book 000 and the AcOp_Ledr legs), the AC_MAST_SRNO row, the photo, the D, S and A copy helps, Print and Delete with their refusals. The web's Party page saved only code, name, khata, mobile and group through the generic master (no group or default-account rule, no name check), set the opening through a second request after the account, had no delete or print, and AC_MAST lacked the five columns the desktop's updater adds (LCS_NO, TRN_DATE, CUST_ID_DATE, AC_WITH_MEMB_COM, AC_SHARE_HOLDER_COM). | N224 |
 | G237 | High | Tag Print listed tags by range and skipped UT_TAG_PRINT's voucher, group and stock selection | `unified/src/csharp/DataCareNext/UT_TAG_PRINT.cs:1816-2077`, `:4735-5013`, `:5073-5226`, `:5284-5403`, `:5499-5635`, `:5636-5666`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:8596-8605` | `web/apps/web/app/(app)/txn/tag-print/page.tsx`; `web/apps/api/src/modules/stock/tagPrint.ts` | Other → Tag Print opens UT_TAG_PRINT: Book and Vch No fill the grid with a voucher's tags, Gr Code, Pr Code and Item Type with the in-stock tags, a typed tag is looked up in the stock, Y/N and Ctrl+D choose the rows, Hm Id Update edits the four HM ids, weights, LRate, Mrp and Lbr%, Set marks the default label file, and Print copies each Y row's BAR_DETL row after the Lable Skip blanks. The web page listed in-stock tags by counter, item and tag range, had no voucher, group, product or item-type selection, no Y/N, no Hm Id Update and no default file, and its print staged by voucher only. | N225 |
+| G238 | High | Four web defects found by un-blocking old browser cases: two operators saving one Daily Rate day hit the RATE_MAST key and the screen showed database text; the rate lookup ignored the session's location; every voucher form's lock-date refusal used a web-only message; and the Cash Received/Payment Employee box was sent by the page but dropped by the API | `unified/src/csharp/DataCareNext/MS_RATE.cs:1867-1947`; `unified/src/csharp/DataCareNext/TR_SALE.cs:12547`; `unified/src/csharp/DataCareNext/TR_CASH.cs:2753,2907-2911,2943,3050` | `web/apps/api/src/modules/masters/dailyRate.ts`; `web/apps/api/src/modules/masters/rate.ts`; `web/apps/api/src/routes/dailyRate.ts`; `web/apps/api/src/modules/posting/posting.ts`; `web/apps/api/src/modules/finance/lifecycle.ts`; `web/apps/api/src/modules/finance/finance.ts`; `web/apps/web/components/PaymentForm.tsx` | MS_RATE deletes the day and inserts it again with no lock, so the web (which keeps the RATE_MAST primary key) failed the second of two operators; saves of one day now run one after the other and the last writer's rows stay. TR_SALE reads RATE_MAST for the user's own CO_CODE and LC_CODE; the web lookup read every location. Every desktop voucher form refuses a locked date with "You Cant Save and Delete This Voucher Becouse Lock Date is = dd/MM/yyyy ...."; the web carried its own sentence. TR_CASH stores the Employee box on the voucher (:3050), refuses a blank one when CO_SET.EMP_CODE_MANDATORY = 'Y' (:2907-2911) and shows it again when the voucher is opened (:2753); the web page sent it and the API dropped it. Deliberate difference: the desktop fills the box with the logged-in user's employee code (:2671); the web session has no such field yet. | N226 |
 
 ## 4. Decisions D23–D28
 
@@ -2165,6 +2168,44 @@ and Rojmel presence. Both G198 cases pass and left the baseline. Latest browser 
 blocked among 22 applicable cases; full quality, database, zero-mock browser and UI-surface CI passed. N188 remains
 in progress because its ordinary Purchase half and paise-producing Purchase proof are still open.
 
+### N188 milestone 2 — ordinary Purchase whole-rupee components (G198)
+
+Ordinary Purchase now follows its own `TR_PURC` contract rather than reusing Purchase Return's header policy.
+The desktop chooses the amount basis from `URD_RATE_TYPE` and `PR_AMT_TYPE`, then applies `RATE_TYPE=P/1/K/default`
+as pieces, rate/10, rate/1000 or the ordinary rate (`TR_PURC.cs:7395-7417`). It rounds each derived item amount
+directly with `Math.Round(..., 0)` at `:7407-7416`. Derived labour likewise rounds directly to whole rupees across
+its pieces, net-plus-ghat, per-kilogram and gross modes (`:7449-7465`). The detail total remains item + labour +
+other at two decimals, and its normal net adds commission without a whole-detail round (`:7546-7554`). PR_DATA
+persists header net, tax, round-off, total, labour and other at `:12981-13010`; PR_DETL persists item, labour, other,
+total and net at `:13127-13144`. The header remains setting-controlled: net and final total use `MsTotAmtRof`, while
+tax independently uses `MsTaxRof` (`:15477-15508`).
+
+`web/packages/core/src/purchaseAmount.ts` is the focused ordinary-Purchase component contract used by both
+`web/apps/api/src/modules/purchase/purchase.ts` and `web/apps/web/app/(app)/txn/purchase/page.tsx`. It preserves
+explicit item/labour overrides, applies the company purchase-rate precision before the derived item calculation,
+and leaves the existing `billTotals` company policy unchanged. The primary vector is fine 9.160; raw item
+56,090.802 to item 56,091; labour 2,375; line/header net 58,466; tax 1,753.98; round-off 0.02; final total 60,220
+when `PR_AMT_TYPE=F`, `TAX_ROF=2` and `TOT_AMT_ROF=0`. Its 0.40 adjunct persists detail total/net 58,466.40,
+while the header follows `TOT_AMT_ROF` and remains 58,466 for that explicit setting.
+
+Proof code is in `web/packages/core/test/purchaseAmount.test.ts`, `web/apps/api/test/purchase.test.ts`, the focused
+ordinary-Purchase case in `web/apps/api/test/purchase.lifecycle.db.test.ts`, and
+`purchase-invoice.formula.whole-rupees` in `web/apps/web/test/features/modules/purchaseInvoice.mjs`. The lifecycle
+case checks PR_DETL component/detail values, PR_DATA header values, MAIN_STOCK, TAX_DATA, balanced AC_DATA and the
+Rojmel component projection. The zero-mock browser proof now also reloads explicit 56,090.80 item and 2,375.25
+labour overrides, preserves an explicit zero, restores persisted ghat weight, wastage, labour percentage/rate/type
+and item rate basis inputs, and compares those PR_DETL sources plus the existing component/downstream write set
+before and after an unchanged save. Its edit proof keeps loaded per-gram labour authoritative for an item-rate-only
+change, then clears and recalculates it when net weight, an actual per-gram dependency, changes. A separate
+zero-mock case loads `PR_AMT_TYPE=G`, enters `RATE_TYPE=P/1/K` through the grid, proves item
+amounts 3,000/1,200/12 in preview and persistence, reloads them, and restores company settings in `finally`. The
+explicit-fine boundary 9.1605 normalizes to 9.161 before item calculation, producing 9,161 at rate 1,000 where the
+raw value would produce 9,160. The original whole-rupee case continues to check the preview, saved values, stock,
+tax, ledger, Rojmel and Purchase Register through the real UI/PostgreSQL stack. These package-dependent proofs
+require CI in this checkout because `web/node_modules` is absent and the package registry is unavailable. The G5
+original-Windows comparison also remains unavailable because this environment has no desktop SQL secrets.
+N188 is therefore implemented-unverified, not accepted or verified.
+
 **Scope note for G193.** The purchase-return delete answers 400 for a voucher that is already gone, so G193 is
 narrower than recorded: it is the sale-return delete (and any writer whose route does not map
 `PersistedVoucherNotFoundError`) that answers 500.
@@ -2517,12 +2558,22 @@ No, the party, the SNO / Item Name / Pcs. / Gr Wt. / Net Wt / Rate / Item Amt / 
 TAG - item name per line and its stone rows, the Total row, Vch Desc, 'For : ' + CO_NAME and the two signatures. The
 form shows Print for a loaded voucher.
 
-Evidence: two new cases in `web/apps/api/test/tagCancel.routes.db.test.ts` (red against main) pass with the existing
-Tag Cancel route, lifecycle, identity and row suites (114 tests); the zero-mock `tag-cancel` module previously passed 12
-executable cases (book, tag fill, duplicate tag, lock date, write set and stock out, Enter reopen, unchanged save, add
-a tag, delete back to stock, print rights, TagCanBill, Alt+S) with 5 blocked and 2 not applicable. The Stock Adjust
-legacy-number repair adds a thirteenth executable T15 isolation case proving that a high MAIN_STOCK-only row does not
-change TAG CANCEL's BAR_CAN_DATA candidate; dependency-backed execution is pending CI.
+Evidence: the route/database cases continue to cover the desktop refusals and TagCanBill. The zero-mock
+`tag-cancel` matrix now freezes 16 executable cases, 2 blocked and 2 not applicable. Milestone 1 adds: the exact
+`USER_SET.SUB_MENU='Tag Cancel'` caption granting source/create/list/view/edit/print/delete while `Tag Cancelled`
+refuses every direct action with no write; two independent browser sessions selecting one live tag before concurrent saves, with
+one voucher/hidden number/O-minus movement; a deepest-applicable browser DM_DATA fault and successful retry; exact
+Tag Stock In Stock/Out rows and hand-computed totals after create; and the create → edit (drop/keep/add) → delete Tag
+Stock journey. `tagCancelFaultMatrix.db.test.ts` injects conditioned failures at 8 create stages, 14 edit stages and 8
+delete stages, compares whole-tenant and complete source snapshots, checks company/location/tenant sentinels, and
+retries every operation. The HTTP rights and deepest-fault cases compare business-table snapshots separately from
+required `audit_log` appends. LOT_DETL is not executed because Tag Cancel mode never writes it. N210 remains
+implemented-unverified. T13 durable lost-acknowledgement replay remains blocked pending a production idempotency key
+and replay contract; T15 history/configuration, captured desktop BAR_CAN rows, Windows comparison and parent
+acceptance remain open. Dependency-backed execution of the new cases is left to CI because this checkout has
+no installed workspace dependencies.
+The Stock Adjust legacy-number repair (N221, PR #214) adds one T15 isolation case proving that a high
+MAIN_STOCK-only row does not change TAG CANCEL's BAR_CAN_DATA candidate number.
 
 ### N211 — The Employee master is the desktop MS_EMP screen (G224, Lite L2)
 
@@ -3292,6 +3343,93 @@ the clerk's rights) and the existing staging tests pass. The new zero-mock `tag-
 MAIN_STOCK, AC_DATA and BAR_DATA do not change; T14 a fault on the third copied label leaves the earlier labels; T16 the sheet shows two blanks
 for 2.5, then three labels with barcodes and the MRP; T18 an HM id keyed here reaches the next plain print's label. Desktop-runtime comparison,
 physical-printer acceptance (D29) and parent acceptance remain.
+### N226 — Sales Order old gold and old silver rows (G206, part)
+
+Gap G206 · Parents P9; R03 · L1 · Med · Size L · Start after N225
+
+TR_SALE_ORD takes old metal in its own grid, MSG_OLD (Sr, ItCode, ItName, Pcs, GrWt, OthWt, NetWt, Touch, Fine, RTyp,
+Rate, NetAmt; `TR_SALE_ORD.cs:3957-4020`). The item comes from the item master, which gives the name and the type
+(`:4207-4210`). CommPassTotal_Old derives net weight (gross minus other weight), fine (net x touch / 100, or the typed
+fine, or the net weight when there is no touch) and, from the rate type N (net wise) or F (fine wise), the rate from a
+typed amount or the amount from a typed rate, in whole rupees with `Math.Round` (`:4427-4500`). A rate type other than
+N or F is refused with "Please Slelect Rate type = N - Net Wise Or F - Fine Wise" (`:4157-4161`). BILL_TOTAL sums the
+rows by item type into OLD_GL_AMT and OLD_GL (type G) and OLD_SL_AMT and OLD_SL (any other type), and the advance adds
+both amounts (`:11345-11368`). The save rewrites SL_PR_DETL with one row for each grid row that has an item code and a
+net weight or an amount, SR_NO the grid row (`:9421-9475`). Order_Rojmel keys a valued row 04 + STR(SR_NO) and a row
+with fine and no amount 06 + STR(SR_NO) (`Ac_Rojmel.cs:17-21`). Order_Ledr legs 07-10 (`Ac_Ledr.cs:42-50`) join
+BOOK_DATA with `BOOK_INOUT = 'I'`.
+
+The order screen now has the old metal grid in its Order details (`web/apps/web/components/SalesOrderOldMetalGrid.tsx`,
+`web/apps/web/lib/salesOrderOldMetal.ts`), and Old Gold / Old Silver Amt and Fine show the grid totals.
+`web/apps/api/src/modules/sales/salesOrderOldMetal.ts` repeats the derivation on save, resolves each item and its
+group's purchase account, writes SL_PR_DETL, fills the OLD_GL* header columns, adds the amounts to ADV_AMT and feeds the
+shared Rojmel builder. An order with old metal can be reopened, edited and deleted; an edit that omits the rows is
+refused rather than deleting them.
+
+Deliberate differences and what stays open:
+- Legs 07-10 are built and tested, but a Sales Order book is always BOOK_INOUT 'O' here (the book check refuses any
+  other), so the screen's ledger carries the cash legs only and the old metal reaches the day book (Rojmel 04/06) and
+  ADV_AMT. The desktop's own default order books (Mobile Order 1-4, `MS_UPDATE.cs:17799`) are 'I'. If the real Sales
+  Order books are 'I', the book check must accept it and the legs will post; this needs the real BOOK_INOUT.
+- The 'T' book variant (the Old Gold Amt cell typed, an URD Purchase voucher opened, `:11080-11195`) is not built. An
+  order with old metal amounts but no SL_PR_DETL rows cannot be edited here, so an edit cannot zero them.
+- The SL_ORD_ADJ 'O' row with ORD_GOLD and ORD_SILVER (`:9481-9516`) is not written, so metal taken without a value
+  cannot yet be set against a later sale. Leg 11 (trading fine) belongs to rate cut.
+- An item that is not in the master, or whose group has no purchase account, is refused with a web message; the
+  desktop would insert a blank account.
+- The scheme amount stays open under G206 as the baselined case `sales-order.create.scheme-tender`: the desktop types
+  it in the Lite edition and adds it to the advance, but its day-book row, type 05 to the fixed account 00079, is
+  absent from the real data for the 7 of 76 orders that carry a scheme amount (`web/docs/PLAN-SALESORDER-ROJMEL.md`
+  section 2.4).
+
+Evidence: `salesOrderOldMetal.test.ts` (the derivation vectors, the totals, the legs 07-10 keys for an 'I' book and
+none for 'O') and `salesOrderOldMetal.db.test.ts` (refusals that leave nothing, the SL_PR_DETL rows, header totals,
+ADV_AMT, Rojmel 01/04/06 with 33-character keys, reopen, the edit that omits the rows, an amount edit, the delete, an
+old-metal-only advance, the edit block for amounts without rows) pass under forced RLS and fail against the code
+before this change. The new browser cases `create.old-metal-tenders`, `create.old-metal-unvalued-fine` and
+`edit.old-metal-then-delete` pass through the real screen (they failed before: the screen had no grid). Desktop-runtime
+comparison and operator acceptance are not claimed.
+
+### N227 — Un-blocked Lite browser cases and the four defects they found (G238, Lite L1/L3)
+
+Gap G238 · Parents P1-core · L1 · L3 · High · Size M · Start after N226
+
+Browser cases that had been recorded as blocked now run against the real stack. Four of them failed on a real defect,
+which this slice fixes. Each fix cites the desktop line it follows.
+
+- **Daily Rate, two operators on one day** (`MS_RATE.cs:1867-1947`). The desktop deletes the day's RATE_MAST rows and
+  inserts them again with no lock; the web keeps the table's primary key, so the second of two concurrent first saves
+  of a day failed with raw database text. `saveDailyRate` (`web/apps/api/src/modules/masters/dailyRate.ts`) now takes a transaction
+  advisory lock keyed on tenant, company, location and date, so saves of one day run in turn and the last writer's rows
+  stay.
+- **Rate lookup by location** (`TR_SALE.cs:12547`). The desktop reads the day's RATE_MAST rows for its own CO_CODE and
+  LC_CODE. `GET /rate` (behind the ticker and the sale forms) read every location; it now filters by the session's
+  location (`web/apps/api/src/modules/masters/rate.ts`). The route moved from `web/apps/api/src/routes/txn.ts`, which is at its size ceiling, to
+  `web/apps/api/src/routes/dailyRate.ts` with the same literal path.
+- **Lock-date text** (`TR_CASH.cs:2943,3209`, `TR_SALE.cs:15066`, `TR_KR_ISU.cs:4980`). Every desktop voucher form
+  refuses a locked date with "You Cant Save and Delete This Voucher Becouse Lock Date is = dd/MM/yyyy ....".
+  `PeriodLockValidationError` (`web/apps/api/src/modules/posting/posting.ts`) carried a web-only sentence for every form that uses it; it
+  now carries the desktop text with the lock date as dd/MM/yyyy.
+- **Cash Received / Payment Employee box** (`TR_CASH.cs:2907-2911,3050,2753`). The page sent `empCode`; the API ignored
+  it. `financeEmployeeTx` (`web/apps/api/src/modules/finance/lifecycle.ts`) refuses a blank when CO_SET.EMP_CODE_MANDATORY = 'Y' with
+  "Please Select Employee Code and Try......" (before the cash limit, year and lock checks, as on the desktop) and
+  refuses a code that is not a company employee; `EMP_CODE` is written to CASH_DATA and PAY_DATA, and `getReceipt` and
+  `getPayment` return it so the page shows it when a voucher is opened.
+
+Deliberate differences: the desktop defaults the Employee box to the logged-in user's employee code
+(`TR_CASH.cs:2671`); the web session has no such field, so the box starts empty. Daily Rate T15 (location 00 also
+stores `GROUP_MAST.GR_RATE`) stays blocked because the harness cannot start a session at location 00.
+
+New or un-blocked browser cases: Tag Cancel T12, T13, T14, T18 (T15 is not applicable: only the STOCK ADJUST book reads
+`MsPurcLot`, `TR_TAG_CAN.cs:2514-2535`), Daily Rate T11-T14 and T18, Purchase Invoice T14 and T15 (`PR_AMT_TYPE = G`),
+Contra T14 and T15, Cash/Bank T14 and T15 (employee mandatory).
+
+Evidence: `dailyRate.routes.db.test.ts` (two operators, one day; the location-scoped lookup), `cashReceiptLegs.db.test.ts`
+(employee code), `periodLockMessage.test.ts`; the daily-rate DB test and the lookup test fail on the previous code. The
+modules tag-cancel 16/16, purchase-invoice 29/29, contra 25/25, daily-rate 15 of 16 (1 blocked), cash-bank 19 of 21
+(T03 and T06 blocked) pass on a fresh production build, and sales-invoice and sales-order (shared lock text and rate
+lookup) have no new failure. Sales Return and Purchase Return were left alone; their cases are patches for their owners.
+Not accepted: no desktop-runtime comparison was made.
 
 ## 6. Status corrections
 
@@ -3407,7 +3545,7 @@ physical-printer acceptance (D29) and parent acceptance remain.
 | N185 | — | planned (G196: decide under D05 and provision the desktop rounding defaults for new companies, or record the 2-decimal choice) |
 | N186 | — | implemented-unverified, evidence in this change (G197: the web build clears the route cache; unit 2, a real build removed 13 entries) |
 | N187 | — | implemented-unverified, evidence in this change (Purchase Return module 15/5/2 on shared real data; found G198–G201; narrows G193) |
-| N188 | — | in-progress, milestone 1 evidence in this change (G198 Purchase Return: 58,466 net, 1,753.98 tax, 60,220 total; 20/0/2 browser result; ordinary Purchase half remains) |
+| N188 | — | implemented-unverified, milestone 1 Purchase Return plus milestone 2 ordinary Purchase evidence in this change (G198: ordinary Purchase 9.160 fine, 56,091 item, 2,375 labour, 58,466 net, 1,753.98 tax, 60,220 total; 0.40 detail adjunct preserved; core, writer, DB and zero-mock browser proofs added; CI and G5 desktop comparison remain open) |
 | N189 | — | implemented-unverified, evidence in this change (G199: BookSelect `required` opt-out; a free-standing purchase return saves, and a reopened one saves unchanged) |
 | N190 | — | implemented-unverified, evidence in this change (G200: 22 voucher screens marked; a unit scan keeps every voucher page's primary Save marked; purchase-return Alt+S passes in the browser) |
 | N191 | — | implemented-unverified, evidence in this change (G201: desktop BOOK_TBL_NAME/BOOK_TBL_DETL on ten families, backfill migration; purchase-return register case passes) |
@@ -3445,6 +3583,8 @@ physical-printer acceptance (D29) and parent acceptance remain.
 | N223 | — | implemented-unverified, evidence in this change (G235: the Ledger Report is RP_LEDR with its account summary, voucher/detail drill-down, debit ageing, signed money/gold/silver balances, totals, selectors and PDF/Excel/CSV, from one read-only resolver) |
 | N224 | — | implemented-unverified, evidence in this change (G236: Party is MS_ACCT — the list and next code of the location, both tabs in tab order with the group, mobile, short-name, GST and account checks, the opening and AC_MAST_SRNO in one transaction with the save, the photo, the copy helps, Print and Delete with the desktop's refusals) |
 | N225 | — | implemented-unverified, evidence in this change (G237: Tag Print is UT_TAG_PRINT — the voucher and stock selection, typed tags, Y/N rows, Hm Id Update, the default file and a print that stages after the Lable Skip blanks) |
+| N226 | — | implemented-unverified, evidence in this change (G206 part: old gold and old silver rows stored in SL_PR_DETL, totalled into the header and ADV_AMT, day book 04/06, editable and deletable; scheme stays open) |
+| N227 | — | implemented-unverified, evidence in this change (G238: two operators saving one Daily Rate day no longer collide, the rate lookup is scoped to the session's location, every voucher form's lock-date refusal carries the desktop text, and the Cash Received/Payment Employee box is stored, enforced when mandatory and read back; browser cases un-blocked for Tag Cancel, Daily Rate, Purchase Invoice, Contra and Cash/Bank) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

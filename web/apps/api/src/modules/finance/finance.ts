@@ -23,6 +23,7 @@ import {
   voucherKey,
   type VoucherIdentity,
   assertFinanceVoucherDateTx,
+  financeEmployeeTx,
 } from './lifecycle.js';
 import { tenderThresholdDecision } from './tender.js';
 
@@ -337,6 +338,8 @@ export interface ReceiptInput {
   lineNo?: number;
   chqNo?: string;
   vchDate?: Date | string;
+  /** The employee box (TR_CASH tEmpCode), stored in CASH_DATA.EMP_CODE. */
+  empCode?: string;
   // Payment-mode detail (desktop TR_CARD_REC / TR_UPI_REC):
   cardCommissionPct?: number; // card mode: bank/card commission % (default 0) → CARD_COM_AMT, net to bank
   bankName?: string; // card/upi: acquiring bank / UPI handle name
@@ -366,6 +369,7 @@ export async function postReceipt(
   const tenantId = input.scope.tenantId;
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
   const write = async (tx: any, identity: VoucherIdentity): Promise<FinanceResult> => {
+    const empCode = await financeEmployeeTx(tx, input.scope, input.empCode);
     await assertFinanceVoucherDateTx(tx, input.scope, identity.voucherDate);
     // The book first: a receipt must land in a receipt book whose layout matches the mode.
     const configuredBook = await financeBookTx(tx, input.scope, 'receipt', mode);
@@ -513,6 +517,7 @@ export async function postReceipt(
             VCH_TIME: identity.voucherTime,
             HD_VCH_NO: identity.hiddenVoucherNo,
             MAIN_USER: identity.mainUser || null,
+            EMP_CODE: empCode || null,
             BOOK_NAME: configuredBook.name,
             INOUT_TYPE: 'I',
             ENTRY_TYPE: mode === 'cash' ? 'C' : 'B',
@@ -605,6 +610,8 @@ export interface PaymentInput {
   vchDate?: Date | string;
   kasar?: number; // discount received / round-off (Cr KASAR), clears amount+kasar on the party
   kasarAc?: string; // default 'KASAR'
+  /** The employee box (TR_CASH tEmpCode), stored in PAY_DATA.EMP_CODE. */
+  empCode?: string;
   /**
    * The CASH_DATA line this movement belongs to; becomes the leading digits of the key's 12-character tail.
    *
@@ -628,6 +635,7 @@ export async function postPayment(
   const tenantId = input.scope.tenantId;
   const payVchDate = input.vchDate ? new Date(input.vchDate) : new Date();
   const write = async (tx: any, identity: VoucherIdentity): Promise<FinanceResult> => {
+    const empCode = await financeEmployeeTx(tx, input.scope, input.empCode);
     await assertFinanceVoucherDateTx(tx, input.scope, identity.voucherDate);
     // The book first, before numbering: a payment must land in a payment book matching the mode.
     const configuredBook = await financeBookTx(tx, input.scope, 'payment', mode);
@@ -767,6 +775,7 @@ export async function postPayment(
               CHQ_NO: input.chqNo ?? null,
               VCH_DATE: input.vchDate ? new Date(input.vchDate) : new Date(),
               HD_VCH_NO: identity.hiddenVoucherNo,
+              EMP_CODE: empCode || null,
             },
           ],
         },
@@ -1278,7 +1287,7 @@ export async function getReceipt(
   return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"VCH_TIME","HD_VCH_NO","MAIN_USER","AC_CODE","AC_NAME",
-              "REC_AMT","KASAR_AMT","REC_AC_CODE","CHQ_NO","IT_DESC","BOOK_NAME"
+              "REC_AMT","KASAR_AMT","REC_AC_CODE","CHQ_NO","IT_DESC","BOOK_NAME","EMP_CODE"
          FROM "CASH_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
           AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO"`,
       scope.tenantId,
@@ -1326,6 +1335,7 @@ export async function getReceipt(
       kasar: numv(h.KASAR_AMT),
       bankAc: text(h.REC_AC_CODE),
       chqNo: text(h.CHQ_NO),
+      empCode: text(h.EMP_CODE),
       mode: card.length
         ? 'card'
         : upi.length
@@ -1442,7 +1452,7 @@ export async function getPayment(
     const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"VCH_TIME","HD_VCH_NO","MAIN_USER","AC_CODE","AC_NAME",
               "NET_AMT","TOT_AMT","KASAR_AMT","BANK_AC","CASH_AMT","CHQ_AMT","CARD_AMT","CHQ_NO",
-              "VCH_DESC","BOOK_NAME"
+              "VCH_DESC","BOOK_NAME","EMP_CODE"
          FROM "PAY_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
           AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
       scope.tenantId,
@@ -1474,6 +1484,7 @@ export async function getPayment(
       kasar: numv(h.KASAR_AMT),
       bankAc: text(h.BANK_AC),
       chqNo: text(h.CHQ_NO),
+      empCode: text(h.EMP_CODE),
       mode,
       // PAY_DATA's narration column is VCH_DESC; CASH_DATA's is IT_DESC.
       description: text(h.VCH_DESC),

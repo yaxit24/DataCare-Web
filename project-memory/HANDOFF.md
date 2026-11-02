@@ -12,6 +12,21 @@
   be reconstructed without database backup or external audit evidence. N221 remains implemented-unverified/PARTIAL;
   loose-save idempotency, stale versioning, full write-set/counter/component/report proofs and desktop comparison remain.
 
+## 2026-11-02 — Tag Cancel closure milestone 1 (N210 / G223)
+
+- Tag Cancel remains PARTIAL and N210 remains implemented-unverified. The browser matrix now freezes 16 executable
+  cases, 2 blocked and 2 not applicable: exact-caption `USER_SET` rights and near-miss refusal, two-browser same-tag
+  concurrency, a deepest-applicable DM_DATA rollback/retry, Tag Stock output after create, and a full
+  create → edit (drop/keep/add) → delete Tag Stock journey.
+- `tagCancelFaultMatrix.db.test.ts` conditions faults to its fixture and covers 8 create, 14 edit and 8 delete stages,
+  with whole-tenant/source/sentinel equality after every failure and a successful retry. The HTTP feature cases
+  compare business-table snapshots separately from their required `audit_log` appends. LOT_DETL is N/A in cancel
+  mode. No production route, writer, schema, form or shared RBAC registry changed.
+- Still open: T13 durable lost-acknowledgement replay pending a production idempotency key and replay contract, T15
+  history/configuration, captured desktop BAR_CAN rows, Windows comparison and parent acceptance. The sandbox lacked
+  workspace dependencies and could not download pnpm, so dependency-backed DB/browser execution remains for CI;
+  syntax, Prettier and repository Python/Node document gates are the local evidence.
+
 ## 2026-11-02 — Company master milestone 1 (N58 / G38 / G39)
 
 - Follow-up evidence correction on `feat/lite-company-master`: generic `CO_MAST` create/update/delete/CSV business
@@ -22,6 +37,12 @@
   rich identity workflow is absent, so generated progress reports `module, 1 open` rather than green. Rich identity
   editing, the versioned writer, first `YEAR_MAST` plus 17-family provisioning, G39 identity conventions,
   `Company.RPT`, the full keyboard/journey evidence, and a safe hosted-delete decision remain.
+
+## 2026-11-02 — Data Backup milestone 1 (engineering only)
+
+- Branch `feat/lite-data-backup` implements the operator-visible Backup-only `UT_BKP` adaptation: in-memory Select acknowledgment, browser Save-dialog handoff, prominent warning that the JSON company archive is not production disaster recovery and has no operator restore path, progress/busy control, exact path/completion messages, pre-generation `Next<YY>[_<type>]_ddMMyy_HH.json` naming, and immutable `company_backup_run` audit before response handoff.
+- The current v2 160-table company archive remains the basis. The executable `data-backup.config.nextmain-allowlist` case downloads that real archive and is baselined under G64/N80 because no approved versioned tenant-config/credential envelope exists. No tenant-shared USER_MAST/APP_USER_DATA/MENU_DATA allowlist or new credential export was guessed. Restore and Dattach remain absent from the UI, and `logical-restore` containment is unchanged.
+- Status remains CONTAINED/PARTIAL engineering evidence, with one executable archive-scope baseline rather than a green module. Still blocked: D-BKP-3/G64/N80 allowlist and credential treatment, G225 exact Print-right route policy, X31 actual-browser scratch zero-diff, physical overwrite confirmation, full-Lite fixture, production DR, and desktop-runtime comparison.
 
 ## 2026-10-31 — Lite first, then Basic, then Standard
 

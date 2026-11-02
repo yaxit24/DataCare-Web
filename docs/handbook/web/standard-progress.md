@@ -6,10 +6,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 32 | 29 | 0 |
+| Lite (first, D32) | 49 | 35 | 31 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
-| Standard (added by Standard) | 36 | 0 | 0 | 0 |
-| **Standard total** | **114** | **33** | **30** | **0** |
+| Standard (added by Standard) | 36 | 1 | 1 | 0 |
+| **Standard total** | **114** | **37** | **33** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
@@ -21,7 +21,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Company | Books | `/masters/books` | PARTIAL | — | no module | — |
 | Company | User Create | `/admin/users` | PARTIAL | users-rights | module green | — |
 | Company | Data Refresh | `/utilities/data-refresh`, `/utilities/data-repair` | PARTIAL | — | no module | — |
-| Company | Data Backup | `/backup` | CONTAINED | — | no module | — |
+| Company | Data Backup | `/backup` | CONTAINED | data-backup | module, 1 open | G64/N80 |
 | ExtraTran | Approval Isu | `/txn/tour` | PARTIAL | — | no module | — |
 | ExtraTran | Approval Rtn | `/txn/tour-return` | PARTIAL | — | no module | — |
 | ExtraTran | Fine Jv Entry | `/txn/fine-jv` | PARTIAL | fine-jv | module green | — |
@@ -44,8 +44,8 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Other | Order Cancel | `/txn/order-cancel` | PARTIAL | — | no module | — |
 | Other | Data Import | `/masters/accounts` | PARTIAL | — | no module | — |
 | Report | Ledger Report | `/reports/account-ledger` | REPORT | account-ledger | module green | — |
-| Report | Stock Report | `/reports/tag-stock` | REPORT | — | no module | — |
-| Report | Tag Stock | `/reports/tag-stock` | REPORT | — | no module | — |
+| Report | Stock Report | `/reports/tag-stock` | REPORT | tag-cancel | module green | — |
+| Report | Tag Stock | `/reports/tag-stock` | REPORT | tag-cancel | module green | — |
 | Report | Sales Report | `/reports/sales-register` | REPORT | — | no module | — |
 | Report | Purchase Rpt | `/reports/purchase-register` | REPORT | — | no module | — |
 | Report | Approval Rpt | `/reports/approval-report` | REPORT | — | no module | — |
@@ -125,7 +125,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Other | Data Export | `/utilities/data-export` | PARTIAL | — | no module | — |
 | Other | Estimate Reset | `/utilities/estimate-reset` | PARTIAL | — | no module | — |
 | Report | Final Reports | `/reports/final-reports`, `/reports/profit-loss`, `/reports/balance-sheet`, `/reports/trial-balance` | REPORT | — | no module | — |
-| Report | Tag Image | `/reports/tag-stock` | REPORT | — | no module | — |
+| Report | Tag Image | `/reports/tag-stock` | REPORT | tag-cancel | module green | — |
 | Report | Bul Report | `/reports/bullion-report` | REPORT | — | no module | — |
 | Report | Sale Zoom | `/reports/sales-register` | REPORT | — | no module | — |
 | Report | Purc Zoom | `/reports/purchase-register` | REPORT | — | no module | — |
