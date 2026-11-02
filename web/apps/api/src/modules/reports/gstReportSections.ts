@@ -59,13 +59,16 @@ function halfDecimal(raw: unknown): string {
   return decimalString({ value: part.value * 5n, scale: part.scale + 1 });
 }
 
-function isRoundingMidpoint(raw: unknown, decimals: number): boolean {
-  const part = decimalParts(raw);
-  if (part.scale <= decimals) return false;
-  const factor = 10n ** BigInt(part.scale - decimals);
-  const absolute = part.value < 0n ? -part.value : part.value;
-  return (absolute % factor) * 2n === factor;
-}
+/**
+ * `Strings.Format(x, "0.00")` as the desktop runs it (.NET Framework 4.8): half away from zero at an exact midpoint,
+ * and a value that rounds to zero prints `0.00`, never `-0.00` (`decimalCellText` keeps the sign of a tiny negative).
+ * Measured on a windows-latest runner (CLR 4.0.30319.42000): 2.5 M positive and 2 M negative 2-decimal midpoints,
+ * 3 M 3-4 decimal taxes and 8 M IGST values all agree with half away from zero (`web/scripts/dotnet-fx-probe`).
+ */
+const framework2dp = (value: unknown): string => {
+  const shown = money(value);
+  return shown === '-0.00' ? '0.00' : shown;
+};
 
 function sumDisplayed(rows: readonly GstDisplayRow[], key: string): string {
   return money(addDecimal(...rows.map((row) => row[key] || '0')));
@@ -413,12 +416,6 @@ export function presentHsn(source: RawHsnReportRow[]): GstReportResult {
   const rows = source.map((row) => {
     const local = text(row.gstType) === 'L';
     const localHalf = halfDecimal(row.itemTax);
-    if (local && isRoundingMidpoint(localHalf, 2)) {
-      throw new GstReportRequestError('section-not-supported', 422, {
-        section: 'HSN',
-        reason: 'fnv-midpoint-uncertain',
-      });
-    }
     const taxable = subtractDecimal(row.itemAmount, row.itemDiscount);
     return {
       hsn: text(row.hsn),
@@ -436,9 +433,9 @@ export function presentHsn(source: RawHsnReportRow[]): GstReportResult {
         ),
       ),
       taxableValue: money(taxable),
-      igstAmount: money(local ? '0' : row.itemTax),
-      cgstAmount: money(local ? localHalf : '0'),
-      sgstAmount: money(local ? localHalf : '0'),
+      igstAmount: framework2dp(local ? '0' : row.itemTax),
+      cgstAmount: framework2dp(local ? localHalf : '0'),
+      sgstAmount: framework2dp(local ? localHalf : '0'),
       cessAmount: '0.00',
     };
   });
@@ -457,12 +454,7 @@ export function presentHsn(source: RawHsnReportRow[]): GstReportResult {
       sgstAmount: sumDisplayed(rows, 'sgstAmount'),
       cessAmount: sumDisplayed(rows, 'cessAmount'),
     },
-    metadata: {
-      source: 'RP_GST',
-      limitations: [
-        'HSN rows whose local tax split lands on an exact 2-decimal midpoint fail closed as fnv-midpoint-uncertain.',
-      ],
-    },
+    metadata: { source: 'RP_GST' },
   };
 }
 

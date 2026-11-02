@@ -184,9 +184,50 @@ describe('RP_GST source-settled pure sections', () => {
     });
   });
 
-  it('fails HSN closed when a local Fnv half-tax lands on an unresolved midpoint', () => {
-    try {
+  describe('HSN local half-tax at an exact 2-decimal midpoint (RP_GST.cs:2951-2964)', () => {
+    // Expected values are NOT computed by the code under test. They were measured on windows-latest, .NET Framework
+    // 4.8 (CLR 4.0.30319.42000), by calling the desktop's own functions, Strings.Format(Conversion.Val(tax) / 2.0,
+    // "0.00"): workflow dotnet-fx-probe.yml, run 41448006972 and its successors (SPOT lines and RESULT/RESULT2/RESULT3).
+    const hsn = (itemTax: string, gstType = 'L') =>
       presentHsn([
+        {
+          hsn: '7113',
+          rateType: 'G',
+          itemType: 'G',
+          gstType,
+          quantity: '1',
+          itemAmount: '10',
+          itemTax,
+          itemDiscount: '0',
+        },
+      ]).rows[0]!;
+
+    it.each([
+      ['1.21', '0.61'],
+      ['1908.29', '954.15'], // the 3% gold bill of the 2 Nov probe; Framework SPOT line: 1908.29 -> 954.15
+      ['2043.29', '1021.65'], // the printed-invoice bill of G181
+      ['0.01', '0.01'],
+      ['0.03', '0.02'],
+      ['0.05', '0.03'],
+      ['0.07', '0.04'],
+      ['0.09', '0.05'],
+      ['9999999.99', '5000000.00'],
+    ])('rounds the half of %s to %s, away from zero, for both CGST and SGST', (tax, half) => {
+      expect(hsn(tax)).toMatchObject({ cgstAmount: half, sgstAmount: half, igstAmount: '0.00' });
+    });
+
+    it('rounds a negative (sales-return) midpoint away from zero too', () => {
+      expect(hsn('-1.21')).toMatchObject({ cgstAmount: '-0.61', sgstAmount: '-0.61' });
+      expect(hsn('-1908.29')).toMatchObject({ cgstAmount: '-954.15', sgstAmount: '-954.15' });
+    });
+
+    it('prints a value that rounds to zero as 0.00, never -0.00 (Framework NEGZERO line)', () => {
+      expect(hsn('-0.004')).toMatchObject({ cgstAmount: '0.00', sgstAmount: '0.00' });
+      expect(hsn('-0.004', 'I')).toMatchObject({ igstAmount: '0.00' });
+    });
+
+    it('does not refuse the section, so the totals add the displayed halves', () => {
+      const out = presentHsn([
         {
           hsn: '7113',
           rateType: 'G',
@@ -197,15 +238,20 @@ describe('RP_GST source-settled pure sections', () => {
           itemTax: '1.21',
           itemDiscount: '0',
         },
+        {
+          hsn: '7113',
+          rateType: 'P',
+          itemType: 'G',
+          gstType: 'L',
+          quantity: '1',
+          itemAmount: '10',
+          itemTax: '1.21',
+          itemDiscount: '0',
+        },
       ]);
-      throw new Error('expected midpoint refusal');
-    } catch (error: any) {
-      expect(error).toMatchObject({
-        code: 'section-not-supported',
-        statusCode: 422,
-        details: { section: 'HSN', reason: 'fnv-midpoint-uncertain' },
-      });
-    }
+      expect(out.totals).toMatchObject({ cgstAmount: '1.22', sgstAmount: '1.22' });
+      expect(out.metadata.limitations).toBeUndefined();
+    });
   });
 
   it('presents only the settled GSTR-3B outward, reverse-charge and other-ITC rows', () => {

@@ -474,12 +474,86 @@ export const gstReport = {
         columns: SECTION_COLUMNS.HSN,
       },
     ),
-    blocked(
-      'formula.hsn-fnv-midpoint.pending',
+    C(
+      'formula.hsn-fnv-midpoint',
       'T03',
-      'read-only',
-      'RP_GST.cs:2951-2964 calls DC_Main.Fnv before formatting IGST or halved CGST/SGST',
-      'The reviewed RP_GST source does not define Fnv midpoint rounding. Freeze no half-cent expectation until DC_Main.Fnv is traced or measured on Windows.',
+      'mutation',
+      'RP_GST.cs:2951-2964 formats Strings.Format(DC_Main.Fnv(tax) / 2.0, "0.00") for local CGST/SGST; DC_Main.cs:2088-2102 Fnv = Conversion.Val. Measured on .NET Framework 4.8 (windows-latest, web/scripts/dotnet-fx-probe): half away from zero at every 2-decimal midpoint, so 1908.29 -> 954.15',
+      async (ctx) => {
+        const page = await openFromNavigation(ctx);
+        // Books master "Invoice Type" (MS_BOOK.cs:2625 stores its first letter); RP_GST's HSN query only reads 'T' books
+        // (RP_GST.cs:2719), and web-provisioned books leave it blank, so this is the one setup step the case owns.
+        await ctx.rows(
+          `UPDATE "BOOK_DATA" SET "BOOK_TYPE"='T' WHERE tenant_id=$1 AND "CO_BOOK"='SL' RETURNING 1`,
+        );
+
+        // A real sale through the Sales screen: Line A is gold 10 g, net 63,609.50, GST 3% = 1,908.285 -> 1,908.29,
+        // which the local split stores as 954.145 CGST + 954.145 SGST (an exact midpoint at two decimals).
+        await page.goto('/txn/sales');
+        await salesScreen.openSales(page);
+        await salesScreen.pickParty(page, 'E2ELOC');
+        await salesScreen.fillLine(page, 0, salesScreen.LINE_A);
+        const saved = await salesScreen.save(page);
+        assert.equal(saved.status(), 201, await saved.text());
+        const stored = await ctx.rows(
+          `SELECT "TAX_TYPE","TAX_AMT"::text tax FROM "TAX_DATA" WHERE tenant_id=$1 AND "TAX_TYPE" IN ('CGST','SGST') ORDER BY "TAX_TYPE"`,
+        );
+        assert.deepEqual(
+          stored.map((row) => [row.TAX_TYPE, row.tax]),
+          [
+            ['CGST', '954.145'],
+            ['SGST', '954.145'],
+          ],
+          'the sale must really sit on the midpoint, or this case proves nothing',
+        );
+
+        await page.goto('/reports/gst-report');
+        await page.getByRole('heading', { name: 'GST Report', exact: true }).waitFor();
+        await page
+          .getByRole('combobox', { name: 'Section Type', exact: true })
+          .selectOption({ label: 'HSN - Summary For HSN' });
+        const ran = page.waitForResponse(
+          (r) =>
+            new URL(r.url()).pathname === '/api/reports/gst-report' &&
+            r.request().method() === 'GET',
+        );
+        await page.getByRole('button', { name: 'Gstr 1', exact: true }).click();
+        const response = await ran;
+        assert.equal(response.status(), 200, `HSN must not be refused: ${await response.text()}`);
+        await page.locator('table.grid tbody tr').first().waitFor();
+
+        const headers = await page.locator('table.grid thead th').allTextContents();
+        const cells = async (selector) =>
+          page
+            .locator(selector)
+            .first()
+            .locator('td')
+            .evaluateAll((tds) => tds.map((td) => td.textContent.trim()));
+        const row = await cells('table.grid tbody tr');
+        const totals = await cells('table.grid tfoot tr');
+        assert.deepEqual(headers, SECTION_COLUMNS.HSN);
+        const cgst = headers.indexOf('CGST Amount');
+        const sgst = headers.indexOf('SGST Amount');
+        assert.equal(row[cgst], '954.15', 'CGST half of 1,908.29 is 954.15 on the desktop runtime');
+        assert.equal(row[sgst], '954.15', 'SGST half of 1,908.29 is 954.15 on the desktop runtime');
+        assert.equal(totals[cgst], '954.15');
+        assert.equal(totals[sgst], '954.15');
+        await ctx.shot(page, 'formula-hsn-fnv-midpoint');
+
+        const csv = await page.request.fetch(
+          `/api/reports/gst-report/export.csv?${new URL(response.url()).searchParams.toString()}`,
+        );
+        assert.equal(csv.status(), 200);
+        const dataLine = (await csv.text()).split('\r\n').filter(Boolean)[1].split(',');
+        assert.equal(dataLine[cgst], '954.15', 'the HSNSUM.csv carries the same displayed halves');
+        return {
+          observation:
+            'HSN section answered 200; local CGST and SGST halves of 1,908.29 show 954.15 in grid, totals and CSV',
+          expected: { cgst: '954.15', sgst: '954.15', stored: '954.145 each' },
+          database: { storedHalves: '954.145 + 954.145' },
+          downstream: { gridRow: row, gridTotals: totals, csvRow: dataLine },
+        };
+      },
     ),
     desiredCase(
       'formula.mixed-rates-and-making',
