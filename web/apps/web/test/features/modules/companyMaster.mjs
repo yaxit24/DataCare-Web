@@ -47,9 +47,7 @@ const MESSAGE =
   'Company uses a dedicated workflow for identity and provisioning; generic create, update, delete, and CSV import are unavailable.';
 const rows = (ctx, table) => {
   const order = table === 'CO_MAST' ? '"CO_CODE"' : 'row_id';
-  return ctx.rows(
-    `SELECT to_jsonb(t) row FROM "${table}" t WHERE tenant_id=$1 ORDER BY ${order}`,
-  );
+  return ctx.rows(`SELECT to_jsonb(t) row FROM "${table}" t WHERE tenant_id=$1 ORDER BY ${order}`);
 };
 const footprint = async (ctx) => ({
   company: await rows(ctx, 'CO_MAST'),
