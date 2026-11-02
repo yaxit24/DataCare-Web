@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 const source = (path: string) => readFileSync(resolve(process.cwd(), path), 'utf8');
 const page = source('apps/web/app/(app)/utilities/data-refresh/page.tsx');
+const compatibilityPage = source('apps/web/app/(app)/utilities/data-repair/page.tsx');
 const operations = source('apps/api/src/modules/utilities/dataRefreshOps.ts');
 
 describe('Data Refresh operator surface', () => {
@@ -57,6 +58,33 @@ describe('Data Refresh operator surface', () => {
     }
     expect(operations).toContain("completionText: 'Approval Refersh Process Complete.'");
     expect(page).toContain('Preview only: {preview.blockedReason}');
+  });
+
+  it('gates every authority input and Apply control for preview-only results', () => {
+    for (const input of [
+      'id="reason"',
+      'id="confirmation"',
+      'id="operatorPassword"',
+      'id="backupReference"',
+    ]) {
+      expect(page).not.toContain(input);
+    }
+    const authorityGate = compatibilityPage.indexOf('{preview.applyAvailable && (');
+    const reasonInput = compatibilityPage.indexOf('id="reason"');
+    const previewOnlyStatus = compatibilityPage.indexOf('{!preview.applyAvailable && (');
+    expect(authorityGate).toBeGreaterThan(-1);
+    expect(reasonInput).toBeGreaterThan(authorityGate);
+    expect(reasonInput).toBeLessThan(previewOnlyStatus);
+    expect(compatibilityPage).toContain('{preview.applyAvailable && !preview.clean && (');
+  });
+
+  it('moves focus through preview and completion without changing native tab order', () => {
+    expect(page).toContain('ref={previewHeadingRef}');
+    expect(page).toContain('tabIndex={-1}');
+    expect(page).toContain('aria-live="polite"');
+    expect(page).toContain('if (busy === null && preview) previewHeadingRef.current?.focus()');
+    expect(page).toContain('operationRefs.current[operationId]?.focus()');
+    expect(page).not.toContain('tabIndex={0}');
   });
 
   it('uses native buttons and an accessible progress/status surface', () => {

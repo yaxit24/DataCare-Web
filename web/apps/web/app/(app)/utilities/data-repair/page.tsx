@@ -195,7 +195,7 @@ export default function DataRepairPage() {
           </thead>
           <tbody>
             {ops.map((o) => (
-              <tr key={o.id}>
+              <tr key={o.id} data-operation-id={o.id}>
                 <td>
                   <b>{o.title}</b>
                   <div className="muted">{o.description}</div>
@@ -265,74 +265,78 @@ export default function DataRepairPage() {
               </ul>
             </>
           )}
-          <div className="row">
-            <div className="field">
-              <label htmlFor="reason">
-                Reason (recorded)
-                {preview.authority?.reason
-                  ? ` — required, min ${REASON_MIN_LENGTH} characters`
-                  : ''}
-              </label>
-              <input
-                id="reason"
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                required={preview.authority?.reason}
-                aria-describedby="reason-help"
-              />
-              <span id="reason-help" className="muted">
-                Recorded permanently against this run.
-              </span>
-            </div>
-            {preview.requiresConfirmation && (
-              <div className="field">
-                <label htmlFor="confirmation">
-                  Type <code>{preview.requiresConfirmation}</code> to confirm
-                </label>
-                <input
-                  id="confirmation"
-                  value={confirmation}
-                  onChange={(e) => setConfirmation(e.target.value)}
-                />
+          {preview.applyAvailable && (
+            <>
+              <div className="row">
+                <div className="field">
+                  <label htmlFor="reason">
+                    Reason (recorded)
+                    {preview.authority?.reason
+                      ? ` — required, min ${REASON_MIN_LENGTH} characters`
+                      : ''}
+                  </label>
+                  <input
+                    id="reason"
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    required={preview.authority?.reason}
+                    aria-describedby="reason-help"
+                  />
+                  <span id="reason-help" className="muted">
+                    Recorded permanently against this run.
+                  </span>
+                </div>
+                {preview.requiresConfirmation && (
+                  <div className="field">
+                    <label htmlFor="confirmation">
+                      Type <code>{preview.requiresConfirmation}</code> to confirm
+                    </label>
+                    <input
+                      id="confirmation"
+                      value={confirmation}
+                      onChange={(e) => setConfirmation(e.target.value)}
+                    />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-          {(preview.authority?.reauthentication || preview.authority?.backupReference) && (
-            <div className="row">
-              {preview.authority?.backupReference && (
-                <div className="field">
-                  <label htmlFor="backupReference">Backup checksum (last 24 hours)</label>
-                  <input
-                    id="backupReference"
-                    value={backupReference}
-                    onChange={(e) => setBackupReference(e.target.value)}
-                    required
-                    aria-describedby="backup-help"
-                  />
-                  <span id="backup-help" className="muted">
-                    The <code>checksum</code> field of a recent backup of this company. Download one
-                    from Backup first; the server verifies it exists and is recent.
-                  </span>
+              {(preview.authority?.reauthentication || preview.authority?.backupReference) && (
+                <div className="row">
+                  {preview.authority?.backupReference && (
+                    <div className="field">
+                      <label htmlFor="backupReference">Backup checksum (last 24 hours)</label>
+                      <input
+                        id="backupReference"
+                        value={backupReference}
+                        onChange={(e) => setBackupReference(e.target.value)}
+                        required
+                        aria-describedby="backup-help"
+                      />
+                      <span id="backup-help" className="muted">
+                        The <code>checksum</code> field of a recent backup of this company. Download
+                        one from Backup first; the server verifies it exists and is recent.
+                      </span>
+                    </div>
+                  )}
+                  {preview.authority?.reauthentication && (
+                    <div className="field">
+                      <label htmlFor="operatorPassword">Confirm your password</label>
+                      <input
+                        id="operatorPassword"
+                        type="password"
+                        autoComplete="current-password"
+                        value={operatorPassword}
+                        onChange={(e) => setOperatorPassword(e.target.value)}
+                        required
+                        aria-describedby="reauth-help"
+                      />
+                      <span id="reauth-help" className="muted">
+                        Re-entered so an unattended session cannot rewrite history.
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
-              {preview.authority?.reauthentication && (
-                <div className="field">
-                  <label htmlFor="operatorPassword">Confirm your password</label>
-                  <input
-                    id="operatorPassword"
-                    type="password"
-                    autoComplete="current-password"
-                    value={operatorPassword}
-                    onChange={(e) => setOperatorPassword(e.target.value)}
-                    required
-                    aria-describedby="reauth-help"
-                  />
-                  <span id="reauth-help" className="muted">
-                    Re-entered so an unattended session cannot rewrite history.
-                  </span>
-                </div>
-              )}
-            </div>
+            </>
           )}
           {!preview.applyAvailable && (
             <div className="msg err" role="status">

@@ -50,7 +50,10 @@ registerRepair({
     return {
       ...partial,
       samples: [...partial.samples, blocked.account],
-      candidateFingerprint: fingerprint([partial.diffs, partial.samples]),
+      candidateFingerprint: fingerprint({
+        classifiedPrefix: 'ledger-normalise',
+        candidates: partial.candidateFingerprint,
+      }),
     };
   },
   apply: refuseApply(blocked.account),
@@ -157,27 +160,35 @@ const CONSUMED = `
   EXISTS (
     SELECT 1 FROM "APR_DETL" r
      WHERE r.tenant_id=i.tenant_id AND r."CO_CODE"=i."CO_CODE" AND r."LC_CODE"=i."LC_CODE"
-       AND r."BOOK_NAME"='APR RTN' AND coalesce(btrim(r."ISU_NO"),'')<>''
-       AND r."ISU_YRCD"=i."CO_YEAR" AND r."ISU_DBCD"=i."CO_BOOK"
-       AND r."ISU_NO"=i."VCH_NO" AND r."ISU_SRNO"=i."OLD_SRNO"
+       AND r."BOOK_NAME"='APR RTN' AND rtrim(coalesce(r."ISU_NO",''))<>''
+       AND rtrim(coalesce(r."ISU_YRCD",''))=rtrim(coalesce(i."CO_YEAR",''))
+       AND rtrim(coalesce(r."ISU_DBCD",''))=rtrim(coalesce(i."CO_BOOK",''))
+       AND rtrim(coalesce(r."ISU_NO",''))=rtrim(coalesce(i."VCH_NO",''))
+       AND r."ISU_SRNO"=i."OLD_SRNO"
   ) OR EXISTS (
     SELECT 1 FROM "SL_DETL" s
      WHERE s.tenant_id=i.tenant_id AND s."CO_CODE"=i."CO_CODE" AND s."LC_CODE"=i."LC_CODE"
-       AND s."BOOK_NAME"='SALES' AND coalesce(btrim(s."ISU_NO"),'')<>''
-       AND s."ISU_YRCD"=i."CO_YEAR" AND s."ISU_DBCD"=i."CO_BOOK"
-       AND s."ISU_NO"=i."VCH_NO" AND s."ISU_SRNO"=i."OLD_SRNO"
+       AND s."BOOK_NAME"='SALES' AND rtrim(coalesce(s."ISU_NO",''))<>''
+       AND rtrim(coalesce(s."ISU_YRCD",''))=rtrim(coalesce(i."CO_YEAR",''))
+       AND rtrim(coalesce(s."ISU_DBCD",''))=rtrim(coalesce(i."CO_BOOK",''))
+       AND rtrim(coalesce(s."ISU_NO",''))=rtrim(coalesce(i."VCH_NO",''))
+       AND s."ISU_SRNO"=i."OLD_SRNO"
   ) OR EXISTS (
     SELECT 1 FROM "RATE_CUT_ISU" w
      WHERE w.tenant_id=i.tenant_id AND w."CO_CODE"=i."CO_CODE" AND w."LC_CODE"=i."LC_CODE"
-       AND w."BOOK_NAME"='WH SALES' AND coalesce(btrim(w."ISU_NO"),'')<>''
-       AND w."ISU_YRCD"=i."CO_YEAR" AND w."ISU_DBCD"=i."CO_BOOK"
-       AND w."ISU_NO"=i."VCH_NO" AND w."ISU_SRNO"=i."OLD_SRNO"
+       AND w."BOOK_NAME"='WH SALES' AND rtrim(coalesce(w."ISU_NO",''))<>''
+       AND rtrim(coalesce(w."ISU_YRCD",''))=rtrim(coalesce(i."CO_YEAR",''))
+       AND rtrim(coalesce(w."ISU_DBCD",''))=rtrim(coalesce(i."CO_BOOK",''))
+       AND rtrim(coalesce(w."ISU_NO",''))=rtrim(coalesce(i."VCH_NO",''))
+       AND w."ISU_SRNO"=i."OLD_SRNO"
   ) OR EXISTS (
     SELECT 1 FROM "RATE_CUT_ISU" c
      WHERE c.tenant_id=i.tenant_id AND c."CO_CODE"=i."CO_CODE" AND c."LC_CODE"=i."LC_CODE"
-       AND c."BOOK_NAME"='RATE CUT' AND coalesce(btrim(c."ISU_NO"),'')<>''
-       AND c."ISU_YRCD"=i."CO_YEAR" AND c."ISU_DBCD"=i."CO_BOOK"
-       AND c."ISU_NO"=i."VCH_NO" AND c."ISU_SRNO"=i."OLD_SRNO"
+       AND c."BOOK_NAME"='RATE CUT' AND rtrim(coalesce(c."ISU_NO",''))<>''
+       AND rtrim(coalesce(c."ISU_YRCD",''))=rtrim(coalesce(i."CO_YEAR",''))
+       AND rtrim(coalesce(c."ISU_DBCD",''))=rtrim(coalesce(i."CO_BOOK",''))
+       AND rtrim(coalesce(c."ISU_NO",''))=rtrim(coalesce(i."VCH_NO",''))
+       AND c."ISU_SRNO"=i."OLD_SRNO"
   )`;
 
 const ISSUE_EXPECTED = `CASE WHEN (${CONSUMED}) THEN 'Y' ELSE 'N' END`;

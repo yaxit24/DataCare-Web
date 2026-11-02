@@ -34,7 +34,7 @@ db('Data Refresh Approval Adj write set', () => {
       `INSERT INTO "APR_DETL"
         (tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","OLD_SRNO",
          "BOOK_NAME","TAG_NO","VCH_SRNO","ISU_REC")
-       VALUES ($1,$2,$3,$4,'AIS',$5,1,$6,'APR ISU',$7,$8,$9)`,
+       VALUES ($1,$2,$3,$4,'AI',$5,1,$6,'APR ISU',$7,$8,$9)`,
       tenant,
       overrides.co ?? '01',
       overrides.lc ?? '01',
@@ -51,17 +51,19 @@ db('Data Refresh Approval Adj write set', () => {
     table: 'APR_DETL' | 'SL_DETL' | 'RATE_CUT_ISU',
     bookName: string,
     index: number,
-    overrides: { lc?: string; isuNo?: string } = {},
+    overrides: { lc?: string; isuYear?: string; isuBook?: string; isuNo?: string } = {},
   ) =>
     tx.$executeRawUnsafe(
       `INSERT INTO "${table}"
         (tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","BOOK_NAME",
          "ISU_YRCD","ISU_DBCD","ISU_NO","ISU_SRNO")
-       VALUES ($1,'01',$2,'2024-2025','REF',$3,1,$4,'2024-2025','AIS',$5,$6)`,
+       VALUES ($1,'01',$2,'2024-2025','REF',$3,1,$4,$5,$6,$7,$8)`,
       tenantId,
       overrides.lc ?? '01',
       `R${index}`,
       bookName,
+      overrides.isuYear ?? '2024-2025',
+      overrides.isuBook ?? 'AI',
       overrides.isuNo ?? `I${index}`,
       index,
     );
@@ -95,13 +97,21 @@ db('Data Refresh Approval Adj write set', () => {
       for (let index = 1; index <= 5; index++)
         await bar(tx, tenantId, index, index < 5 ? 'Y' : 'N');
       await bar(tx, tenantId, 6, 'Y', { tag: 'UNRELATED' });
-      await reference(tx, 'APR_DETL', 'APR RTN', 1);
-      await reference(tx, 'SL_DETL', 'SALES', 2);
-      await reference(tx, 'RATE_CUT_ISU', 'WH SALES', 3);
-      await reference(tx, 'RATE_CUT_ISU', 'RATE CUT', 4);
+      // Every valid source carries trailing padding on all text identity fields. SQL Server varchar equality
+      // ignores that padding, so all four must still consume their issue while serial remains exact.
+      const padded = (index: number) => ({
+        isuYear: '2024-2025 ',
+        isuBook: 'AI ',
+        isuNo: `I${index}  `,
+      });
+      await reference(tx, 'APR_DETL', 'APR RTN', 1, padded(1));
+      await reference(tx, 'SL_DETL', 'SALES', 2, padded(2));
+      await reference(tx, 'RATE_CUT_ISU', 'WH SALES', 3, padded(3));
+      await reference(tx, 'RATE_CUT_ISU', 'RATE CUT', 4, padded(4));
       // Distractors must not consume TAG5.
       await reference(tx, 'SL_DETL', 'QUOTATION', 5);
       await reference(tx, 'SL_DETL', 'SALES', 5, { lc: '02' });
+      await reference(tx, 'SL_DETL', 'SALES', 5, { isuNo: ' I5' });
       await reference(tx, 'APR_DETL', 'APR RTN', 5, { isuNo: '' });
       // Same visible keys outside the selected location/year/company and tenant must remain byte-for-byte.
       await issue(tx, tenantId, 8, 'Y', { lc: '02', tag: 'WRONG-LC' });
@@ -156,7 +166,7 @@ db('Data Refresh Approval Adj write set', () => {
     await prisma.$disconnect();
   });
 
-  it('applies the five-issue oracle, preserves every other byte, audits, and deduplicates replay', async () => {
+  it('applies the padded five-issue oracle, preserves every other byte, audits, and deduplicates replay', async () => {
     await seed();
     await seedOther();
     const before = await physical();

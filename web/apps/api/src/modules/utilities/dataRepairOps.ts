@@ -1021,61 +1021,87 @@ registerRepair({
   async preview(tx, scope) {
     const diffs: RepairTableDiff[] = [];
     const samples: string[] = [];
-
-    for (const table of ['BOOK_DATA', 'BOOK_DETL'] as const) {
-      // BOOK_DATA and BOOK_DETL carry no CO_YEAR column.
-      const s = scoped('t', scope, 1, { year: false });
-      const rows: any[] = await tx.$queryRawUnsafe(
-        `SELECT count(*)::int AS n FROM "${table}" t
-          WHERE t.tenant_id=current_setting('app.tenant_id', true)${s.sql}
-            AND coalesce(t."DATA_TYPE",'') = ''`,
-        ...s.params,
-      );
-      if (rows[0]?.n) {
-        diffs.push(diff(table, { update: rows[0].n }));
-        samples.push(`${table}: ${rows[0].n} book(s) get DATA_TYPE='A'`);
-      }
-    }
-
-    const sc = scoped('c', scope);
-    const cash: any[] = await tx.$queryRawUnsafe(
-      `SELECT count(*)::int AS n FROM "CASH_DATA" c
-        WHERE c.tenant_id=current_setting('app.tenant_id', true)${sc.sql}
-          AND c."CLR_DATE" IS NULL AND c."VCH_DATE" IS NOT NULL`,
-      ...sc.params,
-    );
-    if (cash[0]?.n) {
-      diffs.push(diff('CASH_DATA', { update: cash[0].n }));
-      samples.push(`CASH_DATA: ${cash[0].n} row(s) get CLR_DATE = VCH_DATE`);
-    }
-
-    // The reconciliation index is rebuilt wholesale, so the diff is "delete the existing, insert the derived".
-    const existing: any[] = await tx.$queryRawUnsafe(
-      `SELECT count(*)::int AS n FROM "BANK_RECONCILE" r
-        WHERE r.tenant_id=current_setting('app.tenant_id', true)
-          AND r."CO_CODE"=$1 AND ($2::text='' OR r."LC_CODE"=$2)`,
+    // Keep every candidate's stable scoped business key, physical identity, stored value and expected value.
+    // The complete ordered query is deliberately uncapped: display samples stay small, while the preview
+    // hash changes when one same-count candidate is replaced by another.
+    const candidates: Array<{ part: string }> = await tx.$queryRawUnsafe(
+      `SELECT * FROM (
+         SELECT 'BOOK_DATA'::text AS part,t.row_id::text AS "rowId",
+                jsonb_build_array(t."CO_CODE",t."LC_CODE",t."CO_BOOK")::text AS "businessKey",
+                NULL::text AS "sourceKey",t."DATA_TYPE" AS stored,'A'::text AS expected
+           FROM "BOOK_DATA" t
+          WHERE t.tenant_id=current_setting('app.tenant_id', true)
+            AND t."CO_CODE"=$1 AND ($2::text='' OR t."LC_CODE"=$2)
+            AND coalesce(t."DATA_TYPE",'')=''
+         UNION ALL
+         SELECT 'BOOK_DETL',t.row_id::text,
+                jsonb_build_array(t."CO_CODE",t."LC_CODE",t."CO_BOOK",t."SR_NO",t."AC_CODE")::text,
+                NULL::text,t."DATA_TYPE",'A'::text
+           FROM "BOOK_DETL" t
+          WHERE t.tenant_id=current_setting('app.tenant_id', true)
+            AND t."CO_CODE"=$1 AND ($2::text='' OR t."LC_CODE"=$2)
+            AND coalesce(t."DATA_TYPE",'')=''
+         UNION ALL
+         SELECT 'CASH_DATA',c.row_id::text,
+                jsonb_build_array(c."CO_CODE",c."LC_CODE",c."CO_YEAR",c."CO_BOOK",c."VCH_NO",c."SR_NO")::text,
+                NULL::text,to_char(c."CLR_DATE",'YYYY-MM-DD'),to_char(c."VCH_DATE",'YYYY-MM-DD')
+           FROM "CASH_DATA" c
+          WHERE c.tenant_id=current_setting('app.tenant_id', true)
+            AND c."CO_CODE"=$1 AND ($2::text='' OR c."LC_CODE"=$2)
+            AND ($3::text='' OR c."CO_YEAR"=$3)
+            AND c."CLR_DATE" IS NULL AND c."VCH_DATE" IS NOT NULL
+         UNION ALL
+         SELECT 'BANK_RECONCILE_CURRENT',r.row_id::text,
+                jsonb_build_array(r."CO_CODE",r."LC_CODE",r."LEDR_KEY")::text,
+                NULL::text,to_char(r."CLR_DATE",'YYYY-MM-DD'),NULL::text
+           FROM "BANK_RECONCILE" r
+          WHERE r.tenant_id=current_setting('app.tenant_id', true)
+            AND r."CO_CODE"=$1 AND ($2::text='' OR r."LC_CODE"=$2)
+         UNION ALL
+         SELECT 'BANK_RECONCILE_EXPECTED',a.row_id::text,
+                jsonb_build_array(a."CO_CODE",a."LC_CODE",a."LEDR_KEY")::text,
+                jsonb_build_array(a."CO_YEAR",a."CO_BOOK",a."VCH_NO",a."AC_CODE")::text,
+                NULL::text,to_char(a."CLR_DATE",'YYYY-MM-DD')
+           FROM "AC_DATA" a
+           JOIN "AC_MAST" b ON b.tenant_id=a.tenant_id AND b."CO_CODE"=a."CO_CODE"
+                AND b."AC_CODE"::text=a."AC_CODE"::text
+          WHERE a.tenant_id=current_setting('app.tenant_id', true)
+            AND a."CO_CODE"=$1 AND ($2::text='' OR a."LC_CODE"=$2)
+            AND b."AC_GR" = ANY($4::text[])
+       ) candidate
+       ORDER BY part,"businessKey","sourceKey","rowId"`,
       scope.coCode,
       scope.lcCode ?? '',
-    );
-    const derived: any[] = await tx.$queryRawUnsafe(
-      `SELECT count(*)::int AS n FROM "AC_DATA" a
-        JOIN "AC_MAST" b ON b.tenant_id=a.tenant_id AND b."CO_CODE"=a."CO_CODE"
-             AND b."AC_CODE"::text=a."AC_CODE"::text
-       WHERE a.tenant_id=current_setting('app.tenant_id', true)
-         AND a."CO_CODE"=$1 AND ($2::text='' OR a."LC_CODE"=$2)
-         AND b."AC_GR" = ANY($3::text[])`,
-      scope.coCode,
-      scope.lcCode ?? '',
+      scope.coYear ?? '',
       [...RECONCILE_AC_GROUPS],
     );
-    if (existing[0]?.n) diffs.push(diff('BANK_RECONCILE', { delete: existing[0].n }));
-    if (derived[0]?.n) diffs.push(diff('BANK_RECONCILE', { insert: derived[0].n }));
-    if (existing[0]?.n || derived[0]?.n) {
+    const count = (part: string) => candidates.filter((row) => row.part === part).length;
+    const bookData = count('BOOK_DATA');
+    const bookDetail = count('BOOK_DETL');
+    const cash = count('CASH_DATA');
+    const currentReconcile = count('BANK_RECONCILE_CURRENT');
+    const expectedReconcile = count('BANK_RECONCILE_EXPECTED');
+
+    if (bookData) {
+      diffs.push(diff('BOOK_DATA', { update: bookData }));
+      samples.push(`BOOK_DATA: ${bookData} book(s) get DATA_TYPE='A'`);
+    }
+    if (bookDetail) {
+      diffs.push(diff('BOOK_DETL', { update: bookDetail }));
+      samples.push(`BOOK_DETL: ${bookDetail} book(s) get DATA_TYPE='A'`);
+    }
+    if (cash) {
+      diffs.push(diff('CASH_DATA', { update: cash }));
+      samples.push(`CASH_DATA: ${cash} row(s) get CLR_DATE = VCH_DATE`);
+    }
+    if (currentReconcile) diffs.push(diff('BANK_RECONCILE', { delete: currentReconcile }));
+    if (expectedReconcile) diffs.push(diff('BANK_RECONCILE', { insert: expectedReconcile }));
+    if (currentReconcile || expectedReconcile) {
       samples.push(
-        `BANK_RECONCILE: replace ${existing[0]?.n ?? 0} row(s) with ${derived[0]?.n ?? 0} derived from the ledger`,
+        `BANK_RECONCILE: replace ${currentReconcile} row(s) with ${expectedReconcile} derived from the ledger`,
       );
     }
-    return { diffs, samples };
+    return { diffs, samples, candidateFingerprint: JSON.stringify(candidates) };
   },
   async apply(tx, scope) {
     const applied: RepairTableDiff[] = [];

@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { buildApp } from '../src/app.js';
+import { authorityFor, confirmationFor, getRepair } from '../src/modules/utilities/dataRepair.js';
 import { issueAccess } from '../src/modules/auth/jwt.js';
 import { rightNamesForForm } from '../src/modules/rbac/formCatalog.js';
 import { routePolicyFor } from '../src/modules/rbac/routePolicy.js';
@@ -65,6 +66,39 @@ describe('data repair route policy', () => {
     expect(routePolicyFor('POST', '/utilities/data-repair/:id/apply')).toMatchObject({
       adminOnly: true,
       businessScope: true,
+    });
+  });
+});
+
+describe('data repair preview authority metadata', () => {
+  const scope = { tenantId: TENANT_ID, coCode: COMPANY, lcCode: LOCATION, coYear: YEAR };
+
+  it('publishes neutral confirmation and authority for all five preview-only operations', () => {
+    for (const id of [
+      'data-refresh-account',
+      'data-refresh-stock',
+      'data-refresh-field-update',
+      'data-refresh-image-data',
+      'data-refresh-old-field',
+    ]) {
+      const operation = getRepair(id);
+      expect(operation.applyAvailable, id).toBe(false);
+      expect(confirmationFor(operation, scope), id).toBeNull();
+      expect(authorityFor(operation, scope), id).toEqual({
+        confirmation: null,
+        reason: false,
+        reauthentication: false,
+        backupReference: false,
+      });
+    }
+  });
+
+  it('retains destructive authority for an applicable high-risk operation', () => {
+    expect(authorityFor(getRepair('opening-balance'), scope)).toEqual({
+      confirmation: `opening-balance ${COMPANY}`,
+      reason: true,
+      reauthentication: true,
+      backupReference: true,
     });
   });
 });

@@ -160,9 +160,9 @@ export function getRepair(id: string): RepairOperation {
   return op;
 }
 
-/** Typed confirmation a destructive operation demands before it will run. */
+/** Typed confirmation a destructive, applicable operation demands before it will run. */
 export function confirmationFor(op: RepairOperation, scope: RepairScope): string | null {
-  if (op.risk === 'low' || op.risk === 'medium') return null;
+  if (op.applyAvailable === false || op.risk === 'low' || op.risk === 'medium') return null;
   return `${op.id} ${scope.coCode}`;
 }
 
@@ -189,7 +189,7 @@ export const REPAIR_BACKUP_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 /** Everything the apply will demand for this operation, in the shape the console needs. */
 export function authorityFor(op: RepairOperation, scope: RepairScope): RepairAuthority {
-  const destructive = isDestructive(op);
+  const destructive = op.applyAvailable !== false && isDestructive(op);
   return {
     confirmation: confirmationFor(op, scope),
     reason: destructive,

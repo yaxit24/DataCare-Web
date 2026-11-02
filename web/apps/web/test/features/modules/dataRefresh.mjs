@@ -43,6 +43,13 @@ const blocked = (id, group, source, reason) => ({
 });
 
 const captions = ['Account', 'Stock', 'Field Update', 'Approval Adj', 'Image Data', 'Old Field'];
+const previewOnlyOperations = [
+  ['data-refresh-account', 'Account'],
+  ['data-refresh-stock', 'Stock'],
+  ['data-refresh-field-update', 'Field Update'],
+  ['data-refresh-image-data', 'Image Data'],
+  ['data-refresh-old-field', 'Old Field'],
+];
 const hidden = ['Crm Data', 'Problem Qry', 'TagDiff Set', 'Mfg Refresh', 'Scheme Data'];
 const apiPath = (response) => new URL(response.url()).pathname;
 const isApi = (response, suffix) => apiPath(response) === `/api${suffix}`;
@@ -78,31 +85,31 @@ async function seedApproval(ctx) {
     ctx,
     `INSERT INTO "APR_DETL"
       (tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","OLD_SRNO","BOOK_NAME","TAG_NO","VCH_SRNO","ISU_REC")
-     VALUES ($1,'01','01','2024-2025','AIS','DRFI1',1,1,'APR ISU','DRF-APRRTN',901,'N'),
-            ($1,'01','01','2024-2025','AIS','DRFI2',1,2,'APR ISU','DRF-SALES',902,'N'),
-            ($1,'01','01','2024-2025','AIS','DRFI3',1,3,'APR ISU','DRF-WH',903,'N'),
-            ($1,'01','01','2024-2025','AIS','DRFI4',1,4,'APR ISU','DRF-RATE',904,'N'),
-            ($1,'01','01','2024-2025','AIS','DRFI5',1,5,'APR ISU','DRF-OPEN',905,'Y'),
-            ($1,'01','02','2024-2025','AIS','DRFI6',1,6,'APR ISU','DRF-OTHER-LC',906,'Y'),
+     VALUES ($1,'01','01','2024-2025','AI','DRFI1',1,1,'APR ISU','DRF-APRRTN',901,'N'),
+            ($1,'01','01','2024-2025','AI','DRFI2',1,2,'APR ISU','DRF-SALES',902,'N'),
+            ($1,'01','01','2024-2025','AI','DRFI3',1,3,'APR ISU','DRF-WH',903,'N'),
+            ($1,'01','01','2024-2025','AI','DRFI4',1,4,'APR ISU','DRF-RATE',904,'N'),
+            ($1,'01','01','2024-2025','AI','DRFI5',1,5,'APR ISU','DRF-OPEN',905,'Y'),
+            ($1,'01','02','2024-2025','AI','DRFI6',1,6,'APR ISU','DRF-OTHER-LC',906,'Y'),
             ($1,'01','01','2024-2025','ART','DRFR1',1,1,'APR RTN','N',0,'N')`,
   );
   await exec(
     ctx,
-    `UPDATE "APR_DETL" SET "ISU_YRCD"='2024-2025',"ISU_DBCD"='AIS',"ISU_NO"='DRFI1',"ISU_SRNO"=1
+    `UPDATE "APR_DETL" SET "ISU_YRCD"='2024-2025 ',"ISU_DBCD"='AI ',"ISU_NO"='DRFI1  ',"ISU_SRNO"=1
       WHERE tenant_id=$1 AND "VCH_NO"='DRFR1'`,
   );
   await exec(
     ctx,
     `INSERT INTO "SL_DETL"
       (tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","BOOK_NAME","TAG_NO","ISU_YRCD","ISU_DBCD","ISU_NO","ISU_SRNO")
-     VALUES ($1,'01','01','2024-2025','SL','DRFS1',1,'SALES','N','2024-2025','AIS','DRFI2',2)`,
+     VALUES ($1,'01','01','2024-2025','SL','DRFS1',1,'SALES','N','2024-2025 ','AI ','DRFI2  ',2)`,
   );
   await exec(
     ctx,
     `INSERT INTO "RATE_CUT_ISU"
       (tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","BOOK_NAME","TAG_NO","ISU_YRCD","ISU_DBCD","ISU_NO","ISU_SRNO")
-     VALUES ($1,'01','01','2024-2025','WHS','DRFW1',1,'WH SALES','N','2024-2025','AIS','DRFI3',3),
-            ($1,'01','01','2024-2025','RTC','DRFC1',1,'RATE CUT','N','2024-2025','AIS','DRFI4',4)`,
+     VALUES ($1,'01','01','2024-2025','WHS','DRFW1',1,'WH SALES','N','2024-2025 ','AI ','DRFI3  ',3),
+            ($1,'01','01','2024-2025','RTC','DRFC1',1,'RATE CUT','N','2024-2025 ','AI ','DRFI4  ',4)`,
   );
   await exec(
     ctx,
@@ -331,16 +338,35 @@ export const dataRefresh = {
       async (ctx) => {
         const { page } = await ctx.session();
         await openScreen(page);
-        for (const caption of ['Account', 'Stock']) {
-          await page.getByRole('button', { name: caption, exact: true }).click();
+        for (const [id, caption] of previewOnlyOperations) {
+          const [response] = await Promise.all([
+            page.waitForResponse((value) => isApi(value, `/utilities/data-repair/${id}/preview`)),
+            page.getByRole('button', { name: caption, exact: true }).click(),
+          ]);
+          assert.equal(response.status(), 200, `${caption}: ${await response.text()}`);
+          const preview = await response.json();
+          assert.equal(preview.applyAvailable, false);
+          assert.equal(preview.requiresConfirmation, null);
+          assert.deepEqual(preview.authority, {
+            confirmation: null,
+            reason: false,
+            reauthentication: false,
+            backupReference: false,
+          });
+          await page.getByRole('heading', { name: `${caption} preview`, exact: true }).waitFor();
           await page.getByText(/Preview only:/).waitFor();
           assert.equal(
             await page.getByRole('button', { name: `Apply ${caption}`, exact: true }).count(),
             0,
           );
+          assert.equal(
+            await page.locator('#reason,#confirmation,#operatorPassword,#backupReference').count(),
+            0,
+          );
         }
         return {
-          observation: 'Account and Stock state the unproved graph and offer no Apply',
+          observation:
+            'all five classifications state the unproved work and show no Apply or authority inputs',
           expected: 'preview-only',
         };
       },
@@ -354,19 +380,30 @@ export const dataRefresh = {
         const { page } = await approvalLifecycle(ctx);
         await page.goto('/utilities/data-repair');
         await page.getByRole('heading', { name: /Data Repair/ }).waitFor();
-        const accountRow = page.getByRole('row').filter({ hasText: 'Account' });
-        await accountRow.getByRole('button', { name: 'Preview', exact: true }).click();
-        await page.getByText(/Preview only: Full Account apply is unavailable/).waitFor();
-        assert.equal(
-          await page.getByRole('button', { name: 'Apply repair', exact: true }).count(),
-          0,
-        );
+        const operationTable = page.getByRole('table').first();
+        for (const [id, caption] of previewOnlyOperations) {
+          const row = operationTable.locator(`tr[data-operation-id="${id}"]`);
+          const [response] = await Promise.all([
+            page.waitForResponse((value) => isApi(value, `/utilities/data-repair/${id}/preview`)),
+            row.getByRole('button', { name: 'Preview', exact: true }).click(),
+          ]);
+          assert.equal(response.status(), 200, `${caption}: ${await response.text()}`);
+          await page.getByText(/Preview only:/).waitFor();
+          assert.equal(
+            await page.getByRole('button', { name: 'Apply repair', exact: true }).count(),
+            0,
+          );
+          assert.equal(
+            await page.locator('#reason,#confirmation,#operatorPassword,#backupReference').count(),
+            0,
+          );
+        }
         const history = await page.getByRole('table').last().innerText();
         assert.match(history, /approval-reconcile/);
         assert.match(history, /applied/);
         return {
           observation:
-            'advanced Data Repair shows shared history and suppresses Apply for full Account',
+            'advanced Data Repair shows shared history and suppresses Apply and authority inputs for all five preview-only operations',
           expected: 'history retained; preview-only capability honored',
         };
       },
@@ -451,9 +488,11 @@ export const dataRefresh = {
     C(
       'keyboard.native-order-no-secret-shortcut',
       'T17',
-      'read-only',
+      'mutation',
       'MS_UPDATE.cs:1371-1504,1606-1615,2275-2301: desktop tab order; Ctrl+O tools excluded by D-REF-1',
       async (ctx) => {
+        await seedApproval(ctx);
+        const before = await flags(ctx);
         const { page } = await ctx.session();
         await openScreen(page);
         await page.getByRole('button', { name: 'Account', exact: true }).focus();
@@ -466,7 +505,51 @@ export const dataRefresh = {
         await page.keyboard.press('Control+O');
         for (const name of hidden)
           assert.equal(await page.getByText(name, { exact: true }).count(), 0);
-        return { observation: `Tab order ${order.join(' → ')}; Ctrl+O inert`, expected: captions };
+
+        const operation = page.getByRole('button', { name: 'Approval Adj', exact: true });
+        await operation.focus();
+        const [previewResponse] = await Promise.all([
+          page.waitForResponse((value) =>
+            isApi(value, '/utilities/data-repair/approval-reconcile/preview'),
+          ),
+          page.keyboard.press('Enter'),
+        ]);
+        assert.equal(previewResponse.status(), 200, await previewResponse.text());
+        const heading = page.getByRole('heading', { name: 'Approval Adj preview', exact: true });
+        await heading.waitFor();
+        await page.waitForFunction(
+          (element) => document.activeElement === element,
+          await heading.elementHandle(),
+        );
+
+        const apply = page.getByRole('button', { name: 'Apply Approval Adj', exact: true });
+        await apply.waitFor();
+        await page.waitForFunction(
+          (element) => !(element instanceof HTMLButtonElement) || !element.disabled,
+          await apply.elementHandle(),
+        );
+        await page.keyboard.press('Tab');
+        assert.equal(await apply.evaluate((element) => document.activeElement === element), true);
+        const [applyResponse] = await Promise.all([
+          page.waitForResponse((value) =>
+            isApi(value, '/utilities/data-repair/approval-reconcile/apply'),
+          ),
+          page.keyboard.press('Enter'),
+        ]);
+        assert.equal(applyResponse.status(), 200, await applyResponse.text());
+        await page.getByText('Approval Refersh Process Complete.', { exact: true }).waitFor();
+        await page.waitForFunction(
+          (element) => document.activeElement === element,
+          await operation.elementHandle(),
+        );
+
+        const after = await flags(ctx);
+        return {
+          observation: `Tab order ${order.join(' → ')}; focus Approval Adj → preview heading → Apply → Approval Adj; Ctrl+O inert`,
+          expected: captions,
+          database: { before, after },
+          downstream: 'successful apply restored focus to its originating operation',
+        };
       },
     ),
     blocked(

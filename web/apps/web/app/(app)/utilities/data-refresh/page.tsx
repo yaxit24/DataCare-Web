@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ApiError, get, post } from '../../../../lib/api';
 
 const ORDER = [
@@ -73,6 +73,11 @@ export default function DataRefreshPage() {
   const [preview, setPreview] = useState<Preview | null>(null);
   const [busy, setBusy] = useState<'loading' | 'preview' | 'apply' | null>('loading');
   const [message, setMessage] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
+  const operationRefs = useRef<Partial<Record<(typeof ORDER)[number], HTMLButtonElement | null>>>(
+    {},
+  );
+  const previewHeadingRef = useRef<HTMLHeadingElement>(null);
+  const restoreFocusRef = useRef<(typeof ORDER)[number] | null>(null);
 
   const loadRuns = useCallback(async () => {
     try {
@@ -97,6 +102,17 @@ export default function DataRefreshPage() {
       )
       .finally(() => setBusy(null));
   }, []);
+
+  useEffect(() => {
+    if (busy === null && preview) previewHeadingRef.current?.focus();
+  }, [busy, preview]);
+
+  useEffect(() => {
+    if (busy !== null || !restoreFocusRef.current) return;
+    const operationId = restoreFocusRef.current;
+    restoreFocusRef.current = null;
+    operationRefs.current[operationId]?.focus();
+  }, [busy]);
 
   const visible = useMemo(() => {
     const byId = new Map(operations.map((operation) => [operation.id, operation]));
@@ -141,6 +157,7 @@ export default function DataRefreshPage() {
           ? 'This repair had already been applied; nothing was repeated.'
           : preview.completionText || `Repaired ${total(result.applied)} record(s).`,
       });
+      restoreFocusRef.current = active.id as (typeof ORDER)[number];
       setPreview(null);
       setActive(null);
       await loadRuns();
@@ -186,6 +203,9 @@ export default function DataRefreshPage() {
               className="primary"
               disabled={busy !== null || !operation}
               aria-describedby={`${id}-description`}
+              ref={(element) => {
+                operationRefs.current[id] = element;
+              }}
               onClick={() => operation && runPreview(operation)}
             >
               {caption}
@@ -203,7 +223,9 @@ export default function DataRefreshPage() {
 
       {active && preview && (
         <section className="panel" aria-labelledby="preview-heading">
-          <h2 id="preview-heading">{CAPTIONS[active.id as (typeof ORDER)[number]]} preview</h2>
+          <h2 id="preview-heading" ref={previewHeadingRef} tabIndex={-1} aria-live="polite">
+            {CAPTIONS[active.id as (typeof ORDER)[number]]} preview
+          </h2>
           <p>
             <code>{active.desktopSource}</code>
           </p>

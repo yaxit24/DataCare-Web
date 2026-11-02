@@ -524,8 +524,8 @@
       "phase": "P11",
       "acceptance": "open",
       "statusAsOf": "2026-11-02",
-      "evidence": ["docs/handbook/web/data-refresh.md", "web/apps/api/src/modules/utilities/dataRefreshOps.ts", "web/apps/api/test/dataRefreshApproval.db.test.ts", "web/apps/web/test/features/modules/dataRefresh.mjs"],
-      "statusNote": "Data Refresh PR-1 milestone only: the six-button surface is frozen, Approval Adj is implemented with preview/apply/audit/idempotency and rollback coverage, and unsafe operations refuse apply. Parent acceptance stays open for complete Account/Stock graphs, Field Update/Old Field classification, Image migration semantics, G225 rights and desktop-runtime comparison.",
+      "evidence": ["docs/handbook/web/data-refresh.md", "web/apps/api/src/modules/utilities/dataRefreshOps.ts", "web/apps/api/test/dataRefreshApproval.db.test.ts", "web/apps/api/test/dataRepairBatch2.db.test.ts", "web/apps/web/test/features/modules/dataRefresh.mjs"],
+      "statusNote": "Data Refresh PR-1 milestone only: the six-button surface is frozen; Approval Adj has preview/apply/audit/idempotency, rollback and trailing-padded reference coverage; Account candidate identity, neutral preview-only authority and keyboard focus transitions have regression proof. Parent acceptance stays open for complete Account/Stock graphs, Field Update/Old Field classification, Image migration semantics, G225 rights and desktop-runtime comparison.",
       "detailFile": "previous-package-reconciliation.json",
       "detailId": "P11-01"
     },
@@ -2265,7 +2265,7 @@
       "title": "Complete correction and bulk utility reference closure",
       "status": "open",
       "statusAsOf": "2026-11-02",
-      "statusNote": "Data Refresh PR-1 implements Approval Adj and makes the other five visible actions explicit preview-only classifications where their full graph or semantics are unproved. X27 remains open for Account/Stock builder closure, PR-2 Field/Old Field classification, Image migration semantics, and all other utilities.",
+      "statusNote": "Data Refresh PR-1 implements Approval Adj with trailing-padded reference proof and makes the other five visible actions explicit preview-only classifications with neutral authority metadata where their full graph or semantics are unproved. Account previews now bind complete candidates independently of bounded samples. X27 remains open for Account/Stock builder closure, PR-2 Field/Old Field classification, Image migration semantics, and all other utilities.",
       "parents": [
         "P11-01"
       ],
@@ -3134,8 +3134,8 @@
       "id": "N26",
       "status": "planned",
       "statusAsOf": "2026-11-02",
-      "statusNote": "Data Refresh PR-1 milestone complete in branch scope: Approval Adj has the exact consumed-source result and transactional evidence; five unsafe actions are contained as preview-only classifications. N26 stays planned until the remaining reference graphs and recovery evidence close.",
-      "evidence": ["docs/handbook/web/data-refresh.md", "web/apps/api/test/dataRefreshApproval.db.test.ts", "web/apps/web/test/features/modules/dataRefresh.mjs"],
+      "statusNote": "Data Refresh PR-1 milestone complete in branch scope: Approval Adj has exact consumed-source results including trailing-padded references; Account same-count candidate replacement, preview-only neutral authority and safe focus transitions have regression proof. Five unsafe actions remain preview-only classifications. N26 stays planned until the remaining reference graphs and recovery evidence close.",
+      "evidence": ["docs/handbook/web/data-refresh.md", "web/apps/api/test/dataRefreshApproval.db.test.ts", "web/apps/api/test/dataRepairBatch2.db.test.ts", "web/apps/web/test/features/modules/dataRefresh.mjs"],
       "action": "Close correction, renumber, transfer, imports and maintenance utility reference graphs",
       "parentLabels": "P11-01, X27",
       "startAfter": [

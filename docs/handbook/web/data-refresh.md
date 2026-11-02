@@ -17,7 +17,7 @@ The screen shows exactly these actions:
 5. Image Data
 6. Old Field
 
-This order follows the controls' desktop declaration and tab order (`MS_UPDATE.cs:1371-1504,1606-1615`). Ctrl+O reveals eleven vendor controls and conditionally Scheme Data on the desktop (`MS_UPDATE.cs:2275-2301`); none is exposed on the web. Mfg Refresh is edition/setting controlled (`MS_UPDATE.cs:2178-2183`) and is also absent.
+This order follows the controls' desktop declaration and tab order (`MS_UPDATE.cs:1371-1504,1606-1615`). After an asynchronous preview, focus moves to the preview heading without adding that heading to the native tab order; after a successful apply removes the preview panel, focus returns to the operation that started it. Ctrl+O reveals eleven vendor controls and conditionally Scheme Data on the desktop (`MS_UPDATE.cs:2275-2301`); none is exposed on the web. Mfg Refresh is edition/setting controlled (`MS_UPDATE.cs:2178-2183`) and is also absent.
 
 Account and Stock locally check `UserPrint` and answer `You Have No Print Rights.....` (`MS_UPDATE.cs:2334-2342,2671-2679`). Approval Adj and Image Data do not contain that local check (`MS_UPDATE.cs:8809-9038`). The owner chose one consistent Data Refresh Print boundary for all six web actions. The current Data Repair endpoints are admin-only, but the exact `USER_SET.SUB_MENU = 'Data Refresh'` Print-right handoff remains the G225 blocked case because `routePolicy.ts` and `formCatalog.ts` are owned by active work outside this milestone.
 
@@ -30,6 +30,8 @@ The preview identifies the independently safe prefix of the desktop action:
 - blank `BOOK_DATA.DATA_TYPE` and `BOOK_DETL.DATA_TYPE` values;
 - `CASH_DATA.CLR_DATE IS NULL` where a voucher date exists;
 - the scoped `BANK_RECONCILE` replacement derived from ledger rows in account groups 02, 22 and 23.
+
+The Account preview hash binds one complete, deterministically ordered candidate query rather than aggregate counts: scoped book and voucher business keys, physical row identities, stored values, expected values, and both the current and expected `BANK_RECONCILE` replacement sides. Display samples remain bounded summaries. A database regression replaces one book candidate with another while preserving every diff count and displayed sample, then proves the Account hash changes and the old applicable prefix hash is rejected as stale.
 
 The desktop then calls `AcRefresh()` and a long `Ac_Ledr`, `Ac_Rojmel` and `Ac_Tax` builder sequence (`MS_UPDATE.cs:2334-2669`). That complete graph is not proved. The full Account operation therefore refuses Apply. The separately named advanced `ledger-normalise` repair remains available; it is not presented as full Account parity.
 
@@ -50,11 +52,11 @@ For the selected tenant, company, location and year, Approval Adj sets each `APR
 - `RATE_CUT_ISU`, `BOOK_NAME='WH SALES'`;
 - `RATE_CUT_ISU`, `BOOK_NAME='RATE CUT'`.
 
-Every source requires non-empty `ISU_NO`. Matching is source `ISU_YRCD/ISU_DBCD/ISU_NO/ISU_SRNO` to issue `CO_YEAR/CO_BOOK/VCH_NO/OLD_SRNO`, as in `MS_UPDATE.cs:8815-8817`.
+Every source requires non-empty `ISU_NO`. Matching is source `ISU_YRCD/ISU_DBCD/ISU_NO/ISU_SRNO` to issue `CO_YEAR/CO_BOOK/VCH_NO/OLD_SRNO`, as in `MS_UPDATE.cs:8815-8817`. The three text identities use right-trimmed equality to preserve SQL Server varchar trailing-space behavior without accepting leading-space changes; the numeric serial remains an exact comparison.
 
 The operation then sets `BAR_DETL.APR_ISU='Y'` only for a tag/serial matching an unconsumed APR ISU row; every other in-scope tag becomes `N` (`MS_UPDATE.cs:8818-8820`). Unlike the desktop's final cross-location-weak update, the web includes tenant, company, location and year containment. Apply writes only `APR_DETL.ISU_REC` and `BAR_DETL.APR_ISU` and returns `Approval Refersh Process Complete.` (`MS_UPDATE.cs:8821`).
 
-The database fixture covers five issue rows consumed by APR RTN, SALES, WH SALES, RATE CUT, and no source; opposite starting flags; invalid book, blank reference, wrong location, wrong year, wrong company, and second-tenant sentinels; complete row snapshots; audit; clean second preview; replay deduplication; and rollback when a fault is injected between the APR and BAR updates.
+The database fixture covers five issue rows consumed by APR RTN, SALES, WH SALES, RATE CUT, and no source; trailing-padded year, book and voucher references for all four valid source families; a leading-space distractor; opposite starting flags; invalid book, blank reference, wrong location, wrong year, wrong company, and second-tenant sentinels; complete row snapshots; audit; clean second preview; replay deduplication; and rollback when a fault is injected between the APR and BAR updates.
 
 ### Image Data: preview-only
 
@@ -62,6 +64,6 @@ The desktop creates a local SQL Server database/table and adds `MOB_IMAGE`, `IMG
 
 ## Compatibility and remaining work
 
-`/utilities/data-repair` remains the advanced operation/history console. It also consumes the new apply capability metadata, so it cannot render an Apply control for preview-only operations. Direct API calls are independently refused with `code: preview-only` before a transaction starts.
+`/utilities/data-repair` remains the advanced operation/history console. Preview-only operations publish neutral authority metadata: no confirmation, reason, reauthentication or backup requirement. Both consoles independently gate Apply and authority inputs on `applyAvailable`, and direct API calls are refused with `code: preview-only` before a transaction starts.
 
 PR-2 must classify Field Update and Old Field statement by statement. Later work must prove the complete Account and Stock builder graphs, settle G225's Data Refresh caption Print handoff, and define any legacy image migration semantics. No current record claims FULL, accepted, verified desktop parity, or a non-zero desktop match.
