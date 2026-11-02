@@ -17,6 +17,20 @@
         "web/apps/api/src/routes/voucherNavigation.ts"
       ]
     },
+    "purchaseReport": {
+      "covers": [
+        "web/apps/web/app/(app)/reports/purchase-report/page.tsx",
+        "web/apps/web/app/(app)/reports/purchase-report/usePurchaseReport.ts",
+        "web/apps/web/app/(app)/reports/purchase-report/PurchaseReportGrid.tsx",
+        "web/apps/web/app/(app)/reports/purchase-report/types.ts",
+        "web/apps/api/src/modules/reports/purchaseReport.ts",
+        "web/apps/api/src/routes/purchaseReport.ts",
+        "web/apps/web/app/(app)/reports/[report]/page.tsx",
+        "web/apps/api/src/modules/reports/reports.ts",
+        "web/apps/api/src/modules/reports/reports3.ts",
+        "web/apps/api/src/modules/reports/reports7.ts"
+      ]
+    },
     "purchaseInvoice": {
       "covers": [
         "web/apps/web/app/(app)/txn/purchase/page.tsx",
