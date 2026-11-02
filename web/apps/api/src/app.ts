@@ -78,6 +78,7 @@ import {
 import { registerTxnRoutes } from './routes/txn.js';
 import { logAudit, listAudit } from './modules/ops/audit.js';
 import { backupCompany, recordCompanyBackup } from './modules/ops/backup.js';
+import { buildBackupFilename, loadBackupCompanyType } from './modules/ops/backupFilename.js';
 import { healthPayload, readiness, type PdfRendererProbe } from './modules/ops/health.js';
 import type { PdfRenderer } from './modules/reports/render.js';
 import { correlationId, requestCompletedFields } from './modules/ops/requestContext.js';
@@ -689,16 +690,20 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     '/backup',
     { preHandler: requireAuth },
     async (req: FastifyRequest, reply: FastifyReply) => {
-      const data = await backupCompany(prisma, sess(req).tenantId, sess(req).coCode);
-      // The artefact is now in the operator's hands, so record its identity append-only. This is what a
-      // destructive data repair must later name as its recovery cover.
-      await recordCompanyBackup(prisma, data, sess(req).sub);
+      const session = sess(req);
+      const data = await backupCompany(prisma, session.tenantId, session.coCode);
+      const companyType = await loadBackupCompanyType(prisma, session.tenantId, session.coCode);
+      const filename = buildBackupFilename({
+        fiscalYear: session.coYear ?? '',
+        companyType,
+        now: new Date(data.generatedAt),
+      });
+      // Record the completed v2 snapshot before response handoff. This proves generation and admission to the
+      // download response; the browser/OS remains responsible for the physical save.
+      await recordCompanyBackup(prisma, data, session.sub);
       return reply
         .header('content-type', 'application/json')
-        .header(
-          'content-disposition',
-          `attachment; filename="backup-${sess(req).coCode}-${new Date().toISOString().slice(0, 10)}.json"`,
-        )
+        .header('content-disposition', `attachment; filename="${filename}"`)
         .send(data);
     },
   );

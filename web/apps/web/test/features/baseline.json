@@ -12,5 +12,6 @@
       "reason": "Old gold, old silver (SL_PR_DETL) and scheme amounts are read-only on the order (cash, cheque and card are taken since N197, UPI since this change), so an advance cannot include them (TR_SALE_ORD.cs:11368, Ac_Ledr.cs:42-50)."
     }
   ],
-  "contra": []
+  "contra": [],
+  "data-backup": []
 }

@@ -107,10 +107,12 @@ describe('WP-01 operator containment', () => {
     expect(form).not.toContain('containment.blocked');
   });
 
-  it('labels logical JSON backup as non-DR and restore as contained', () => {
+  it('keeps Data Backup operator-only while restore remains absent', () => {
     const text = source('app/(app)/backup/page.tsx');
-    expect(text).toContain('operation="logical-restore"');
-    expect(text).toContain('not a production disaster-recovery backup');
-    expect(text).toContain('Download Company Backup (JSON)');
+    expect(text).toContain('<h1>Backup Data</h1>');
+    expect(text).toContain('Please Select Path and Try');
+    expect(text).toContain('Backup Process Complete.');
+    expect(text).not.toContain('logical-restore');
+    expect(text).not.toMatch(/Restore|Dattach/);
   });
 });
