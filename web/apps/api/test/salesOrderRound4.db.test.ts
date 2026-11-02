@@ -413,6 +413,175 @@ run('Sales ordinary saved state and ordered design source replay', () => {
       [reopened.advanceAmount, reopened.chequeAmount, reopened.cardAmount].map(Number),
     ).toEqual([300, 200, 100]);
   });
+  // G206 (UPI): TR_SALE_ORD's MSG_UPI rows. UPI_AMT is the total of the rows with an account and an amount (TotAmt,
+  // :3698-3711), each such row is a UPI_DATA row with SR_NO its grid line (:9520-9556), Order_Ledr posts legs 12/13
+  // + STR(SR_NO) (Ac_Ledr.cs:55-57) and Order_Rojmel type 08 + STR(SR_NO) (Ac_Rojmel.cs:25); ADV_AMT includes UPI.
+  it('stores and posts UPI rows, refuses a used UPI id on a new order, and edits and deletes them', async () => {
+    await sql(
+      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME") VALUES($1,'01','01','UPIAC','Upi Bank')`,
+      tenantId,
+    );
+    const upiRows = [
+      { upiAc: 'UPIAC', upiType: 'GPAY', upiId: 'TX1', amount: 250 },
+      { upiAc: '', upiType: 'GPAY', upiId: 'TX2', amount: 50 },
+      { upiAc: 'UPIAC', upiType: 'GPAY', upiId: 'TX3', amount: 0 },
+      { upiAc: 'UPIAC', upiType: 'PHONEPE', upiId: 'TX4', amount: 75 },
+    ];
+    const order = { ...input(), advanceAmount: 100, upiRows };
+    const counts = async () =>
+      (
+        await query(
+          `SELECT (SELECT count(*) FROM "SL_ORD_DATA" WHERE tenant_id=$1)::int ord,
+                  (SELECT count(*) FROM "UPI_DATA" WHERE tenant_id=$1)::int upi,
+                  (SELECT count(*) FROM "AC_DATA" WHERE tenant_id=$1)::int ac`,
+          tenantId,
+        )
+      )[0];
+    await expect(createSalesOrder(runtime, { ...input(), upiAmount: 200 } as any)).rejects.toThrow(
+      'Enter the UPI amount in the UPI rows',
+    );
+    await expect(
+      createSalesOrder(runtime, {
+        ...order,
+        upiRows: [{ upiAc: 'NOPE', upiId: 'TX9', amount: 10 }],
+      } as any),
+    ).rejects.toThrow('UPI account NOPE on line 1 is not in the account master');
+    expect(await counts()).toEqual({ ord: 0, upi: 0, ac: 0 });
+
+    await createSalesOrder(runtime, order as any);
+    const header = async () =>
+      (
+        await query(
+          `SELECT "CASH_AMT"::float cash,"UPI_AMT"::float upi,"ADV_AMT"::float adv FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "VCH_NO"='00001'`,
+          tenantId,
+        )
+      )[0];
+    const upi = () =>
+      query(
+        `SELECT "SR_NO"::int sr,"ISR_NO"::int isr,"AC_CODE" ac,"UPI_AC_CODE" "upiAc","UPI_AC_NAME" name,"UPI_TYPE" type,
+                "UPI_ID" id,"UPI_AMT"::float amt,"VCH_DATE"::date::text dt
+           FROM "UPI_DATA" WHERE tenant_id=$1 ORDER BY "SR_NO"`,
+        tenantId,
+      );
+    const keyed = (table: string) =>
+      query(
+        `SELECT substr("LEDR_KEY",22,2) leg,btrim(substr("LEDR_KEY",24)) line,length("LEDR_KEY")::int len,"AC_CODE" ac,
+                "LD_CODE" ld,"DR_AMT"::float dr,"CR_AMT"::float cr,
+                ${table === 'AC_DATA' ? `coalesce("LDR_NAME",'')` : `coalesce("AC_NAME",'')`} name
+           FROM "${table}" WHERE tenant_id=$1 ORDER BY "LEDR_KEY"`,
+        tenantId,
+      );
+    expect(await header()).toEqual({ cash: 100, upi: 325, adv: 425 });
+    expect(await upi()).toEqual([
+      {
+        sr: 1,
+        isr: 1,
+        ac: 'PARTY',
+        upiAc: 'UPIAC',
+        name: 'Upi Bank',
+        type: 'GPAY',
+        id: 'TX1',
+        amt: 250,
+        dt: '2024-07-10',
+      },
+      {
+        sr: 4,
+        isr: 1,
+        ac: 'PARTY',
+        upiAc: 'UPIAC',
+        name: 'Upi Bank',
+        type: 'PHONEPE',
+        id: 'TX4',
+        amt: 75,
+        dt: '2024-07-10',
+      },
+    ]);
+    expect(
+      (await keyed('AC_DATA')).map((r) => [r.leg, r.line, r.len, r.ac, r.ld, r.dr, r.cr, r.name]),
+    ).toEqual([
+      ['01', '', 23, 'PARTY', 'CASH', 0, 100, 'CASH - Saved customer'],
+      ['02', '', 23, 'CASH', 'PARTY', 100, 0, ''],
+      ['12', '1', 33, 'PARTY', 'UPIAC', 0, 250, 'UPI - Saved customer'],
+      ['12', '4', 33, 'PARTY', 'UPIAC', 0, 75, 'UPI - Saved customer'],
+      ['13', '1', 33, 'UPIAC', 'PARTY', 250, 0, ''],
+      ['13', '4', 33, 'UPIAC', 'PARTY', 75, 0, ''],
+    ]);
+    expect(
+      (await keyed('ROJ_MEL_DATA')).map((r) => [
+        r.leg,
+        r.line,
+        r.len,
+        r.ac,
+        r.ld,
+        r.dr,
+        r.cr,
+        r.name,
+      ]),
+    ).toEqual([
+      ['01', '', 23, 'PARTY', 'CASH', 0, 425, 'Saved customer'],
+      ['08', '1', 33, 'UPIAC', 'PARTY', 250, 0, ''],
+      ['08', '4', 33, 'UPIAC', 'PARTY', 75, 0, ''],
+    ]);
+    const doc = await loaded();
+    expect([doc.advanceAmount, doc.upiAmount]).toEqual([100, 325]);
+    expect(doc.upiRows).toEqual([
+      { srNo: 1, upiAc: 'UPIAC', upiName: 'Upi Bank', upiType: 'GPAY', upiId: 'TX1', amount: 250 },
+      {
+        srNo: 4,
+        upiAc: 'UPIAC',
+        upiName: 'Upi Bank',
+        upiType: 'PHONEPE',
+        upiId: 'TX4',
+        amount: 75,
+      },
+    ]);
+    expect(doc.editBlockedReason).toBeUndefined();
+
+    // TR_SALE_ORD.cs:3913-3925: a new order may not reuse a UPI id; nothing is written.
+    const before = await counts();
+    await expect(
+      createSalesOrder(runtime, {
+        ...input(),
+        upiRows: [{ upiAc: 'UPIAC', upiType: 'GPAY', upiId: 'TX4', amount: 10 }],
+      } as any),
+    ).rejects.toThrow(
+      'This UpiId already Exist In Book No =  S91 AND VchNo = 00001 Please Change Upi Id ...',
+    );
+    expect(await counts()).toEqual(before);
+
+    // An edit must send the rows (never delete by omission); an unchanged edit keeps its own ids.
+    const { upiRows: _omitted, ...withoutRows } = replacement(doc);
+    await expect(editSalesOrder(runtime, withoutRows as any, 1)).rejects.toThrow(
+      'This order has UPI rows. Reload it and submit its UPI rows before editing.',
+    );
+    const stored = await upi();
+    await editSalesOrder(runtime, replacement(doc), 1);
+    expect((await upi()).map(({ sr, id, amt }) => [sr, id, amt])).toEqual([
+      [1, 'TX1', 250],
+      [2, 'TX4', 75],
+    ]);
+    expect(stored.map(({ id, amt }) => [id, amt])).toEqual([
+      ['TX1', 250],
+      ['TX4', 75],
+    ]);
+    const again = await loaded();
+    await editSalesOrder(
+      runtime,
+      { ...replacement(again), upiRows: [{ ...again.upiRows[0], amount: 300 }, again.upiRows[1]] },
+      1,
+    );
+    expect(await header()).toEqual({ cash: 100, upi: 375, adv: 475 });
+    expect(
+      (await keyed('AC_DATA')).filter((r) => r.leg === '13').map((r) => [r.line, r.dr]),
+    ).toEqual([
+      ['1', 300],
+      ['2', 75],
+    ]);
+
+    const last = await loaded();
+    await cancelSalesOrder(runtime, { scope: scope(), vchNo: 1, expectedVersion: last.version });
+    expect(await counts()).toEqual({ ord: 0, upi: 0, ac: 0 });
+  });
   it('rejects stale Design sources and forged journal values without any order writes', async () => {
     const selection = (await listSalesOrderDesigns(runtime, scope(), { itCode: 'GL' })).rows[0]!;
     const raw: any = {
