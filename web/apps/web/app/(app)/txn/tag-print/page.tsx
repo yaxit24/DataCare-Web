@@ -230,6 +230,7 @@ export default function TagPrintPage() {
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const refs = useRef<Record<string, HTMLElement | null>>({});
+  const screenRef = useRef<HTMLDivElement>(null);
   const helpBack = useRef<string>('book');
   const defaultType = useRef('');
 
@@ -636,7 +637,10 @@ export default function TagPrintPage() {
     router.replace('/dashboard');
   }
 
-  function onScreenKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+  /** TR_TAG_CAN_KeyDown (:5101-5105): Esc closes the form, or the open help first. */
+  function onScreenKeyDown(
+    event: Pick<KeyboardEvent, 'key' | 'defaultPrevented' | 'preventDefault'>,
+  ) {
     if (event.defaultPrevented) return;
     if (event.key === 'Escape') {
       event.preventDefault();
@@ -644,6 +648,26 @@ export default function TagPrintPage() {
       else closeScreen();
     }
   }
+  /**
+   * The desktop form sets KeyPreview (:1805), so it sees Esc wherever the focus is. A browser can leave the focus on no
+   * control: after a click on the page background, or when a print disables the focused Print button until it is done.
+   * A key aimed at the page around the screen never reaches the wrapper's own handler, so take it here. Only a key whose
+   * target contains the screen (the body, a page container) is taken: a key aimed inside the screen is the wrapper's,
+   * and one aimed at the header or sidebar controls stays theirs.
+   */
+  const screenKeys = useRef(onScreenKeyDown);
+  screenKeys.current = onScreenKeyDown;
+  useEffect(() => {
+    const onPageKeyDown = (event: DocumentEventMap['keydown']) => {
+      const screen = screenRef.current;
+      const target = event.target;
+      if (!screen || !(target instanceof Node) || target === screen || !target.contains(screen))
+        return;
+      screenKeys.current(event);
+    };
+    document.addEventListener('keydown', onPageKeyDown);
+    return () => document.removeEventListener('keydown', onPageKeyDown);
+  }, []);
   function onHelpKeyDown(event: KeyboardEvent<HTMLElement>) {
     if (!help) return;
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
@@ -702,7 +726,7 @@ export default function TagPrintPage() {
   );
 
   return (
-    <div onKeyDown={onScreenKeyDown}>
+    <div ref={screenRef} onKeyDown={onScreenKeyDown}>
       <h1>Tag Print</h1>
       {msg && (
         <div className={`msg ${msg.kind}`} role={msg.kind === 'err' ? 'alert' : 'status'}>

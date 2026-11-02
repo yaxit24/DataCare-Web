@@ -2382,7 +2382,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Writes:** TAG_PRINT_DATA, BAR_DETL, BAR_CAN_DETL, MAIN_STOCK, PRINT_MAST, ITEM_MAST, GROUP_MAST, PRODUCT_MAST.
 - **Web:** `/txn/tag-print`; `GET /stock/tag-print-screen`, `GET /stock/tag-print-screen/books`, `GET /stock/tag-print-screen/book`, `GET /stock/tag-print-screen/vouchers`, `GET /stock/tag-print-screen/voucher`, `GET /stock/tag-print-screen/stock`, `GET /stock/tag-print-screen/tag`, `GET /stock/tag-print-screen/tags`, `GET /stock/tag-print-screen/lookups/:kind`, `POST /stock/tag-print-screen/hm-update`, `POST /stock/tag-print-screen/default-file`, `POST /stock/tag-print-screen/print`, `GET /stock/tag-print-screen/labels`. Can: print, list.
 - **Remaining:** The Crystal label files are not in the repository (the web prints its own label sheet) and physical-printer acceptance (D29) remains; the RFID writer, Print Type box and QR picture (named registrations) are not on the screen.
-- **Owners:** N25, X28, G59, N73, G60, N75, X25, G237, N225.
+- **Owners:** N25, X28, G59, N73, G60, N75, X25, G237, N225, G239.
 - **Evidence:** [UT_TAG_PRINT.cs:1816-5666](../../unified/src/csharp/DataCareNext/UT_TAG_PRINT.cs#L1816-L5666).
 
 ### Tag Split

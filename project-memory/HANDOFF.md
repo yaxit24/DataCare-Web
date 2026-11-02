@@ -1,3 +1,19 @@
+## 2026-11-02 — Tag Print Esc with no focused control (G239, on N225)
+
+- `tag-print.keyboard.desktop-keys` failed intermittently in CI (7 of 24 runs between 06:30 and 09:01 UTC, including main after #210 and
+  #213, and main again after #209 once #212 had changed Esc to `router.replace('/dashboard')`). Cause: the page handled Esc only in a
+  React handler on its wrapper `<div>`, so Esc was lost when no control had the focus (a click on the background; the focused Print
+  button disabled while a print runs). The desktop form sets KeyPreview (`UT_TAG_PRINT.cs:1805`) and closes on Esc from any control
+  (`:5101-5109`; OldValTot and NewValTot are only ever 0.0, `:5035-5036`).
+- `tag-print/page.tsx` now also takes an Esc whose target contains the screen (the body, a page container). Keys aimed inside the screen
+  and at the header or sidebar controls behave as before. New case `tag-print.keyboard.esc-with-focus-on-the-page` (T17) timed out on the
+  unrepaired page and passes now; the tag-print module passes 18 of 18 applicable cases. Under 8x CPU throttling a scratch replay of the
+  Print-then-Esc sequence had the focus on the body in 6 of 8 runs and 2 of 8 timed out without the change (none with it). That replay is not
+  committed.
+- Not done: PR #216 (another session) retries Esc in the old case; the two changes merge cleanly in either order. The Party, Item, Item
+  Group, Product, Tax, Address, Employee, Auto Item and Item Opening screens also handle Esc only in a wrapper handler. No desktop-runtime
+  comparison exists; nothing here is accepted.
+
 ## 2026-11-02 — Data Refresh PR-1 milestone (branch `feat/lite-data-refresh`)
 
 - The operator screen now has the six `MS_UPDATE` captions in desktop tab order. Ctrl+O/vendor, Mfg and Scheme controls are absent. Approval Adj is the only full writer: it reconciles APR ISU consumption from APR RTN, SALES, WH SALES and RATE CUT, then updates only `APR_DETL.ISU_REC` and `BAR_DETL.APR_ISU` in one audited transaction.
