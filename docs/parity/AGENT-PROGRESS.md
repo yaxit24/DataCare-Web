@@ -1,6 +1,6 @@
 # Agent progress and claims
 
-Shared coordination file for parallel Kiro sessions on the Lite parity goal. Last updated: 2 November 2026, about 16:50 IST, by session `52f05ab4`
+Shared coordination file for parallel Kiro sessions on the Lite parity goal. Last updated: 2 November 2026, about 17:20 IST, by session `52f05ab4`
 (lane "C", worktree `~/dc-wt/parity-coord`). It complements, and does not replace, `~/dc-wt/LANES.md` (the live board on the shared laptop),
 `python3 docs/tools/session_status.py` and the backlogs. Status lives in `docs/master-parity-plan-2026-09-29/execution-backlog.json`.
 
@@ -10,12 +10,11 @@ Edit this file only in a pull request, never in a shared working tree. If two PR
 
 | Claim | Holder | Branch / PR | Files claimed | State | Since |
 |---|---|---|---|---|---|
-| Tag Print Esc with no focused control (G239, on N225) | session `52f05ab4` | `agent/parity-tag-print-escape` / PR #218 | `web/apps/web/app/(app)/txn/tag-print/page.tsx`, `web/apps/web/test/features/modules/tagPrint.mjs` | open; static-gates passed, quality and real-stack pending at last look | 2 Nov 15:25 |
-| This coordination set (`docs/parity/*`) | session `52f05ab4` | `agent/parity-coordination` / PR #220 | new files only, plus two rules in `docs/handbook/doc-register.json` | open | 2 Nov 16:30 |
-| Order Cancel | not this session; `~/dc-wt/order-cancel` | `feat/order-cancel`, nothing pushed | `modules/sales/orderCancel.ts`, `test/orderCancel.db.test.ts`, edits to `salesOrder.ts` | **stale suspect**: uncommitted for about 16 h | 1 Nov 23:00 |
-| GST CSV negative amounts | `ysmtb` identity | PR #217 | GST report CSV | open | 2 Nov |
+| Tag label text rules (G240, on N225) | session `52f05ab4` | `agent/parity-tag-label-content`, PR to follow | `web/apps/api/src/modules/stock/tagPrint.ts` (renderer only), `tagPrintScreen.ts` (two lines), `test/tagLabelText.test.ts`, the label cases in `modules/tagPrint.mjs` | code and tests done and red-then-green; records written; PR not yet opened | 2 Nov 17:05 |
+| Order Cancel | not this session; `~/dc-wt/order-cancel` | `feat/order-cancel`, nothing pushed | `modules/sales/orderCancel.ts`, `test/orderCancel.db.test.ts`, edits to `salesOrder.ts` | **stale suspect**: uncommitted for about 17 h | 1 Nov 23:00 |
 
-No other Lite menu has an open PR or a pushed branch with unmerged work (checked against `gh pr list` and `git branch -r` at 16:40).
+Merged today from this session: #218 (Tag Print Esc, G239) and #220 (this coordination set), by the repository owner with all CI jobs green.
+There was no open pull request on `main` at 17:15. Every other Lite menu has no open PR and no pushed branch with unmerged work (`gh pr list`, `git branch -r`).
 
 ## Do not touch (other sessions' work)
 
@@ -25,42 +24,44 @@ No other Lite menu has an open PR or a pushed branch with unmerged work (checked
 
 ## Risks for the owner
 
-1. **`feat/lite-approval` has 31 commits that exist on no remote branch.** Approval Isu and Approval Rtn exist only on this laptop. Push the branch, or back it up, before any worktree cleanup. `~/dc-wt` is 73 GB and the disk is at 97%, so cleanup is likely.
-2. **Disk and memory.** The data volume had 11 GiB free at 98% at 16:00; swap was 6.7 of 8 GiB. Do not run more than one browser stack at a time unless you took a slot; clean finished worktrees whose PR merged.
-3. **Order Cancel claim looks abandoned** (see the table). Someone should push its partial work or release the claim.
+1. **`feat/lite-approval` has 31 commits that exist on no remote branch.** Approval Isu and Approval Rtn exist only on this laptop. Push the branch, or back it up, before any worktree cleanup. `~/dc-wt` is 73 GB and the disk is at 97 to 98%, so cleanup is likely.
+2. **The LFS cache is the only copy of the desktop reference material on this machine.** All 3,026 LFS objects of the working tree (1,130 JPG, 870 DLL, 609 RPT, 42 EXE, the SQL Server backups) are cached in `~/Desktop/imodule-extracted/.git/lfs/objects` (1.0 GB). Deleting that clone would turn them back into pointers; a fresh clone needs `git lfs pull`.
+3. **Disk and memory.** The data volume had 11 GiB free at 98%; swap was about 6 GB of 8 GB used. Run one browser stack at a time unless you took a slot; clean finished worktrees whose PR merged.
+4. **Order Cancel claim looks abandoned** (see the table). Someone should push its partial work or release the claim.
 
 ## Done this session
 
 | Item | Result | Evidence |
 |---|---|---|
-| Repository reconnaissance | desktop is source only; binaries, `.rpt` and the SQL Server backup are Git LFS pointers; 1,069 keyframes and 254 report XML specs exist | `TEST-EVIDENCE.md` §1 |
+| Repository reconnaissance | desktop is source plus report templates plus 2021 keyframes; the executable exists (23 MB Windows .NET assembly) but cannot run on this Apple-silicon Mac | `TEST-EVIDENCE.md` §1 |
 | Found why `main` was red | `tag-print.keyboard.desktop-keys`, a lost Esc when no control has the focus | `GAP-BACKLOG.md` GB-01 |
-| Fix + deterministic case, PR #218 | red before, green after; tag-print 18/18; full feature suite 539 passed, 3 baselined failures, 91 blocked, 0 untested | `TEST-EVIDENCE.md` §2-§4 |
-| Static gates on the pushed code | 20 commands, all exit 0 | `TEST-EVIDENCE.md` §5 |
-| Matrix and backlog | 49 Lite menus classified; 0 VERIFIED PARITY | `FEATURE-MATRIX.md`, `GAP-BACKLOG.md` |
-| Found a stale spec | Year Create's prompt and catalog row overstate the work | `GAP-BACKLOG.md` GB-07 |
+| Esc fix + deterministic case, PR #218 (merged) | red before, green after; tag-print 18/18; full feature suite 539 passed, 3 baselined failures, 91 blocked, 0 untested; all three CI jobs green | `TEST-EVIDENCE.md` §2-§4 |
+| Coordination docs, PR #220 (merged) | 49 Lite menus classified; 0 VERIFIED PARITY | `FEATURE-MATRIX.md`, `GAP-BACKLOG.md` |
+| Tag label text (G240), branch ready | unit tests 10 plus browser cases `output.label-sheet` and `output.label-labour-lines`: red on the old renderer, green on the new | `GAP-BACKLOG.md` GB-08 |
+| Stale specs found | Year Create's prompt and catalog row overstate the work (GB-07); several "template not in the repository" notes are wrong (GB-09); the cash-bank catalog text is stale (GB-05) | `GAP-BACKLOG.md` |
+| User Create desktop study | done, not built: it needs owner decisions (see GB-10) | `GAP-BACKLOG.md` GB-10 |
 
 ## Not done, and why
 
-- No second implementation task was finished. The next candidates were studied, not built (see "Exact next tasks").
-- Desktop-runtime comparison: impossible here (no Windows, no binaries).
-- API and core packages: untouched, so the 3,789-test DB suite was not run for #218. CI runs it.
-- Docker failure and recovery scenarios, restart persistence, mobile layouts, role matrices beyond what the existing modules cover: not executed.
+- No desktop-runtime comparison: the executable cannot run here (no Windows, Wine, Mono or Windows container).
+- API and core packages were untouched by #218; for the label change the new code is in the API, so its DB-backed suite should run in CI (the unit file and the browser module were run locally).
+- Docker failure and recovery, restart persistence, mobile layouts and role matrices beyond what the existing modules cover: not executed.
+- User Create, Cash Bank, HuId, Sales Report, Stock Report, Tag Stock, Books, Year Create, Balance TrFr, Data Import, Approval Isu/Rtn: not implemented in this session.
 
 ## Checkpoint (to resume without repeating discovery)
 
-- Repository `~/DataCare-Web`, GitHub `yaxit24/DataCare-Web`. Working worktree `~/dc-wt/parity-coord`. `main` was `a25994c6` at 16:40.
-- Branch `agent/parity-tag-print-escape`, head `b8bf5185`, PR #218 (open, mergeable). Commits: `18e68380` (the change), then three merges of `main`.
-- Branch `agent/parity-coordination` carries this file set (PR #220).
+- Repository `~/DataCare-Web`, GitHub `yaxit24/DataCare-Web`. Working worktree `~/dc-wt/parity-coord`. `main` was `9c651837` at 17:15.
+- Branch `agent/parity-tag-label-content`: two commits ahead of `main` (the change, then a merge of `main`), plus uncommitted record edits to doc 12, the backlog, the catalog and these files. Open the PR after committing them.
 - Build: Node 24.22.2 from `~/.nvm/versions/node/v24.22.2/bin`, `pnpm install --frozen-lockfile`, then build in this order: `@datacare/db` (generate, then build), `types`, `core`, `api`, then `web` with `API_ORIGIN=http://127.0.0.1:<API port>`. Slot 1 ports: DB 55501, API 4611, web 4612, project `dc-parity-coord`. Release the slot (`rmdir ~/.cache/datacare-stack-slots/slot-N`) after every run.
 - A full feature run takes about 8 minutes once built; the web build is 2-3 minutes with a warm Turbo cache.
 - Re-run `python3 docs/parity/build_matrix.py` after any change to the catalog, the progress page, `run-snapshot.json` or `ownership.json`.
 
 ## Exact next independent tasks (in order)
 
-1. **Watch PR #218 to green.** If real-stack fails, read `gh run view --job <id> --log-failed` and compare with `TEST-EVIDENCE.md` §3 before assuming a flake. Do not merge it.
-2. **User Create (`MS_USER`, 5,312 lines).** Unowned, security-relevant, 15 of 18 cases still `.pending` in `users`. Start with the desktop study of `MS_USER.cs` and write the pending cases first; the handoff note names it as the next step.
-3. **Land `feat/lite-approval`** (GB-03) if its owner does not: it needs the owner's consent because it is another session's branch.
-4. **Cash Bank report (`RP_CASH_BANK`)** or **HuId Report (`RP_HUID`)**, whichever is still unowned; each in its own route directory, never in `reports/[report]/page.tsx` (at its size ceiling).
-5. **Esc on the nine other wrapper-handler screens** (GB-02): one case per screen first.
-6. **Correct the four cash-bank catalog rows** (GB-05) when that module is next touched.
+1. **Open the PR for `agent/parity-tag-label-content`** (G240) and watch CI. Do not merge.
+2. **Add the PRINT_MAST label-file choice to Tag Print.** The desktop picks one of QrPrint10, BarPrint10, BarPrint13, GhatTagPrnt; the web prints one sheet. Read `SubTagPrint.rpt` first (not extracted; it is in `~/Desktop/imodule-extracted/.git/lfs/objects` as an LFS object if the file is tracked, otherwise ask for it).
+3. **Cash Bank report (`RP_CASH_BANK`)** or **HuId Report (`RP_HUID`)**: both unowned; `TagHuIdRpt` and `RojMelCash` templates exist. Each in its own route directory, never in `reports/[report]/page.tsx` (at its size ceiling).
+4. **User Create (`MS_USER`)** once the owner decides the password policy and delete semantics (GB-10).
+5. **Land `feat/lite-approval`** (GB-03) if its owner does not: it needs the owner's consent because it is another session's branch.
+6. **Esc on the nine other wrapper-handler screens** (GB-02): one case per screen first.
+7. **Correct the four cash-bank catalog rows** (GB-05) when that module is next touched.

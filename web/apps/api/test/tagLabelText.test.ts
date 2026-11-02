@@ -107,7 +107,9 @@ describe('tag label text rules (QrPrint10 / BarPrint10 / BarPrint13 / GhatTagPrn
     expect(html).toContain('MRP: 55000');
   });
 
-  it('keeps the hallmark id: BarPrint13, GhatTagPrnt and ItmLotPrint print HM_ID and a hallmarked piece must show it', () => {
+  it('keeps the hallmark id line, a deliberate web addition (no desktop label file places HM_ID in its own sections)', () => {
+    // A hallmarked piece should show its HUID. QrPrint10, BarPrint10 and GhatTagPrnt embed SubTagPrint.rpt, which is not
+    // extracted, so the desktop's own HUID printing (if any) is unknown; this is a guard, not a parity claim.
     expect(renderTagLabels([tag({ hmId: 'AB12CD' })])).toContain('HUID: AB12CD');
   });
 
