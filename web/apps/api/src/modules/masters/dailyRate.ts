@@ -226,6 +226,12 @@ export async function saveDailyRate(prisma: any, input: DailyRateInput) {
   }
   const empCode = text(input.empCode);
   return withTxBudget(prisma, s.tenantId, 'voucher', async (tx: any) => {
+    // The desktop deletes the day and inserts it again with no lock, so a second operator saving the same new day hits
+    // the RATE_MAST primary key. Saves of one day run one after the other instead; the last writer's rates stay.
+    await tx.$executeRawUnsafe(
+      'SELECT pg_advisory_xact_lock(hashtext($1))',
+      `daily-rate|${s.tenantId}|${s.coCode}|${s.lcCode}|${date}`,
+    );
     const groups = await gridGroupsTx(tx, s);
     const known = new Set(groups.map((g) => g.code));
     for (const code of requested.keys())

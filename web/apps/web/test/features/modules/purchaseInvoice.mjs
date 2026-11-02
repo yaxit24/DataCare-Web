@@ -1100,19 +1100,96 @@ export const purchaseInvoice = {
       },
     ),
 
-    {
-      ...C('rollback.mid-write', 'T14', 'refusal', 'Playbook T14', async () => ({})),
-      blocked: 'No fault injector in the harness yet (G173 / N166).',
-    },
-    {
-      ...C(
-        'config.amount-type',
-        'T15',
-        'mutation',
-        'Playbook T15: PR_AMT_TYPE=N company prices on net',
-        async () => ({}),
-      ),
-      blocked: 'No settings-variant company in the catalogue yet (G174 / N166).',
-    },
+    C(
+      'rollback.stock-write-fault',
+      'T14',
+      'refusal',
+      'A fault on the stock write, after the header, lines and ledger are written, rolls the whole purchase back: no PR_DATA, PR_DETL, AC_DATA or MAIN_STOCK rows',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await ctx.owner.$executeRawUnsafe(
+          `CREATE OR REPLACE FUNCTION e2e_purchase_fault() RETURNS trigger LANGUAGE plpgsql AS $f$
+           BEGIN
+             IF NEW."CO_BOOK" = '${BOOK}' AND NEW."ITM_NWT" = 7.777 THEN RAISE EXCEPTION 'e2e purchase fault'; END IF;
+             RETURN NEW;
+           END $f$`,
+        );
+        await ctx.owner.$executeRawUnsafe(
+          `CREATE TRIGGER e2e_purchase_fault BEFORE INSERT ON "MAIN_STOCK" FOR EACH ROW EXECUTE FUNCTION e2e_purchase_fault()`,
+        );
+        try {
+          const before = await counts(ctx);
+          await openPurchase(page);
+          await pickSupplier(page, PARTIES.local.code);
+          await fillLine(page, 0, { ...LINE_G, gross: '8', net: '7.777' });
+          const response = await save(page);
+          assert.ok(response.status() >= 400, `the save failed: ${response.status()}`);
+          assert.deepEqual(await counts(ctx), before);
+          return {
+            observation: `the save answered ${response.status()}; the counts are unchanged`,
+            expected: 'no purchase rows',
+            database: { before, after: await counts(ctx) },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `DROP TRIGGER IF EXISTS e2e_purchase_fault ON "MAIN_STOCK"`,
+          );
+          await ctx.owner.$executeRawUnsafe(`DROP FUNCTION IF EXISTS e2e_purchase_fault()`);
+        }
+      },
+    ),
+    C(
+      'config.amount-type-gross',
+      'T15',
+      'mutation',
+      'PR_AMT_TYPE=G (MS_OPNCOMP.cs:881-888): the purchase metal amount is priced on the gross weight, not the fine weight; the setting is switched for this case and restored',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const [{ n: hadRow }] = await ctx.rows(
+          `SELECT count(*)::int n FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        );
+        const [{ v: previous } = { v: null }] = await ctx.rows(
+          `SELECT "PR_AMT_TYPE" v FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"='01' LIMIT 1`,
+        );
+        if (hadRow)
+          await ctx.owner.$executeRawUnsafe(
+            `UPDATE "CO_SET" SET "PR_AMT_TYPE"='G' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+            'feature-e2e',
+          );
+        else
+          await ctx.owner.$executeRawUnsafe(
+            `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","PR_AMT_TYPE") VALUES ($1,'01','G')`,
+            'feature-e2e',
+          );
+        try {
+          const vchNo = await createOne(ctx, page);
+          const [row] = await lines(ctx, vchNo);
+          // gross 20.5 x rate 6050 = 124,025.00 (fine-priced: 18.32 x 6050 = 110,836.00); labour 20 x 150 = 3,000.00
+          assert.equal(row.amt, 124025, `metal amount on gross: ${row.amt}`);
+          assert.equal(row.lbr, 3000);
+          assert.equal(row.net, 127025);
+          const led = await ledger(ctx, vchNo);
+          assert.ok(balanced(led), 'the ledger legs balance');
+          return {
+            observation: `PR_AMT_TYPE=G priced ${row.amt} (fine-priced would be ${EXPECT_G.metal})`,
+            expected: { metal: 124025, net: 127025 },
+            database: { line: row, ledger: led },
+            downstream: { ledgerBalanced: true },
+          };
+        } finally {
+          if (hadRow)
+            await ctx.owner.$executeRawUnsafe(
+              `UPDATE "CO_SET" SET "PR_AMT_TYPE"=$2 WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+              'feature-e2e',
+              previous,
+            );
+          else
+            await ctx.owner.$executeRawUnsafe(
+              `DELETE FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+              'feature-e2e',
+            );
+        }
+      },
+    ),
   ],
 };

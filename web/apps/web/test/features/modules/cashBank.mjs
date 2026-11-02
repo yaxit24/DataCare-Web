@@ -626,7 +626,44 @@ export const cashBank = {
         };
       },
     ),
-    pending('rollback', 'T14', 'No fault injector in the harness yet (G173 / N166).'),
+    C(
+      'rollback.ledger-write-fault',
+      'T14',
+      'refusal',
+      'A fault on the ledger write, after the CASH_DATA row is written, rolls the whole receipt back: no CASH_DATA or AC_DATA rows',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await ctx.owner.$executeRawUnsafe(
+          `CREATE OR REPLACE FUNCTION e2e_receipt_fault() RETURNS trigger LANGUAGE plpgsql AS $f$
+           BEGIN
+             IF NEW."CO_BOOK" = '${RECEIPT_BOOK}' AND (NEW."DR_AMT" = 777.77 OR NEW."CR_AMT" = 777.77) THEN RAISE EXCEPTION 'e2e receipt fault'; END IF;
+             RETURN NEW;
+           END $f$`,
+        );
+        await ctx.owner.$executeRawUnsafe(
+          `CREATE TRIGGER e2e_receipt_fault BEFORE INSERT ON "AC_DATA" FOR EACH ROW EXECUTE FUNCTION e2e_receipt_fault()`,
+        );
+        try {
+          const before = await receiptCount(ctx);
+          await openForm(page, '/txn/receipt');
+          await pickParty(page, PARTIES.local.code);
+          await page.getByLabel('Amount', { exact: true }).fill('777.77');
+          const response = await save(page, 'Save Receipt');
+          assert.ok(response.status() >= 400, `the save failed: ${response.status()}`);
+          assert.deepEqual(await receiptCount(ctx), before);
+          return {
+            observation: `the save answered ${response.status()}; the counts are unchanged`,
+            expected: 'no receipt rows',
+            database: { before, after: await receiptCount(ctx) },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `DROP TRIGGER IF EXISTS e2e_receipt_fault ON "AC_DATA"`,
+          );
+          await ctx.owner.$executeRawUnsafe(`DROP FUNCTION IF EXISTS e2e_receipt_fault()`);
+        }
+      },
+    ),
     pending(
       'settings',
       'T15',
