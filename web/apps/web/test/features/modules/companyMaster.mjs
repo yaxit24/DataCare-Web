@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
+import { SECOND_TENANT, TENANT } from '../harness.mjs';
 import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
 
 /**
- * Frozen Company → Company matrix. Milestone 1 contains generic CO_MAST writes and replaces the generic editor with
+ * Frozen Company → Company matrix. Milestone 1 blocks generic CO_MAST writes and replaces the generic editor with
  * a tenant-scoped read-only surface. Identity, provisioning, print, and safe-delete behavior remain future work.
  */
 const as = (user, slot) => ({
@@ -31,7 +32,7 @@ const C = (id, group, kind, source, run, extra = {}) => ({
 });
 const pending = (id, group, kind, source, reason) => ({
   ...C(`${id}.pending`, group, kind, source, async () => ({})),
-  blocked: `Pending later Company milestone: ${reason}`,
+  blocked: `Blocked by the known open G38/G39 Company prerequisite or its unavailable downstream stage: ${reason}`,
 });
 const blocked = (id, group, kind, source, reason) => ({
   ...C(`${id}.blocked`, group, kind, source, async () => ({})),
@@ -45,11 +46,38 @@ const notApplicable = (id, group, source, reason) => ({
 
 const MESSAGE =
   'Company uses a dedicated workflow for identity and provisioning; generic create, update, delete, and CSV import are unavailable.';
+const EXTRA_COMPANY = { code: '02', name: 'E2E COMPANY TWO' };
+const FOREIGN_COMPANY = { code: '98', name: 'FOREIGN COMPANY SENTINEL' };
+
+async function withCompanyFixtures(ctx, { foreign = false } = {}, run) {
+  const fixtures = [
+    { tenant: TENANT, ...EXTRA_COMPANY },
+    ...(foreign ? [{ tenant: SECOND_TENANT, ...FOREIGN_COMPANY }] : []),
+  ];
+  try {
+    for (const fixture of fixtures)
+      await ctx.owner.$executeRawUnsafe(
+        `INSERT INTO "CO_MAST"(tenant_id,"CO_CODE","CO_NAME") VALUES ($1,$2,$3)`,
+        fixture.tenant,
+        fixture.code,
+        fixture.name,
+      );
+    return await run();
+  } finally {
+    for (const fixture of fixtures)
+      await ctx.owner.$executeRawUnsafe(
+        `DELETE FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+        fixture.tenant,
+        fixture.code,
+      );
+  }
+}
+
 const rows = (ctx, table) => {
   const order = table === 'CO_MAST' ? '"CO_CODE"' : 'row_id';
   return ctx.rows(`SELECT to_jsonb(t) row FROM "${table}" t WHERE tenant_id=$1 ORDER BY ${order}`);
 };
-const footprint = async (ctx) => ({
+const representativeDependentRows = async (ctx) => ({
   company: await rows(ctx, 'CO_MAST'),
   locations: await rows(ctx, 'LOCT_MAST'),
   years: await rows(ctx, 'YEAR_MAST'),
@@ -101,54 +129,110 @@ export const companyMaster = {
     'web/apps/web/test/features/modules/companyMaster.mjs',
   ],
   fixtureManifest: FIXTURE_MANIFEST,
-  settingsManifest: { companySettings: 'catalogue defaults; milestone 1 performs no writes' },
+  settingsManifest: {
+    companySettings:
+      'catalogue defaults; no Company business writes; request audits remain expected',
+  },
   cases: [
     C(
       'entry.read-only-list',
       'T01',
       'read-only',
       'MS_COMPANY.cs:5704-6001 clears, lists, selects, and displays companies; milestone 1 exposes only Code/Name from authenticated GET /context/companies',
-      async (ctx) => {
-        const { page } = await ctx.session();
-        await open(page);
-        const listed = await page
-          .getByTestId('company-list')
-          .locator('tbody tr[data-code]')
-          .evaluateAll((items) =>
-            items.map((item) =>
-              [...item.querySelectorAll('td')].map((cell) => cell.textContent.trim()),
-            ),
+      async (ctx) =>
+        withCompanyFixtures(ctx, {}, async () => {
+          const { page } = await ctx.session();
+          await open(page);
+          const listed = await page
+            .getByTestId('company-list')
+            .locator('tbody tr[data-code]')
+            .evaluateAll((items) =>
+              items.map((item) =>
+                [...item.querySelectorAll('td')].map((cell) => cell.textContent.trim()),
+              ),
+            );
+          const expected = await expectedCompanies(ctx);
+          assert.deepEqual(
+            listed.map(([code, name]) => [code, name.replace(/\s*\(Current\)$/, '')]),
+            expected,
           );
-        const expected = await expectedCompanies(ctx);
-        assert.deepEqual(
-          listed.map(([code, name]) => [code, name.replace(/\s*\(Current\)$/, '')]),
-          expected,
-        );
-        assert.equal(await page.locator('#company-code').inputValue(), '01');
-        assert.equal(
-          await page.locator('#current-company').inputValue(),
-          'Current session company',
-        );
-        const main = page.locator('main');
-        for (const name of ['New', 'Edit', 'Delete', 'CSV'])
-          assert.equal(await main.getByRole('button', { name, exact: true }).count(), 0);
-        await page.getByLabel('Search company').fill(expected[0][1].slice(0, 5));
-        assert.equal(
-          await page.getByTestId('company-list').locator('tbody tr[data-code]').count(),
-          1,
-        );
-        return {
-          observation: `${listed.length} scoped company row(s), current 01, read-only actions absent`,
-          expected: { companies: expected, current: '01', actions: [] },
-        };
-      },
+          assert.equal(await page.locator('#company-code').inputValue(), '01');
+          assert.equal(
+            await page.locator('#current-company').inputValue(),
+            'Current session company',
+          );
+          const main = page.locator('main');
+          for (const name of ['New', 'Edit', 'Delete', 'CSV'])
+            assert.equal(await main.getByRole('button', { name, exact: true }).count(), 0);
+
+          const search = page.getByLabel('Search company');
+          await search.fill(EXTRA_COMPANY.name);
+          const other = page
+            .getByTestId('company-list')
+            .locator(`tbody tr[data-code="${EXTRA_COMPANY.code}"]`);
+          assert.equal(await other.count(), 1);
+          assert.equal(await other.getAttribute('tabindex'), '0');
+          assert.equal(await other.getAttribute('aria-selected'), 'true');
+          assert.equal(await page.locator('#company-code').inputValue(), EXTRA_COMPANY.code);
+          assert.equal(await page.locator('#company-name').inputValue(), EXTRA_COMPANY.name);
+          await page.keyboard.press('Tab');
+          assert.equal(await other.evaluate((row) => row === document.activeElement), true);
+
+          await search.fill('NO SUCH COMPANY');
+          assert.equal(
+            await page.getByTestId('company-list').locator('tbody tr[data-code]').count(),
+            0,
+          );
+          await page.getByText('No companies match the search.', { exact: true }).waitFor();
+          assert.equal(await page.locator('#company-code').inputValue(), '');
+          assert.equal(await page.locator('#company-name').inputValue(), '');
+          return {
+            observation:
+              'scoped company rows rendered; filtering moved the active details and Tab stop to company 02, then no match cleared details',
+            expected: {
+              companies: expected,
+              current: '01',
+              filtered: EXTRA_COMPANY,
+              noMatchDetails: { code: '', name: '' },
+              actions: [],
+            },
+          };
+        }),
     ),
-    pending(
+    C(
       'fields.complete-round-trip',
       'T02',
       'mutation',
       'MS_COMPANY.cs:5882-6001,6074-6189 reads and writes the complete CO_MAST identity field set',
-      'the rich identity form and dedicated versioned writer are not implemented',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await open(page);
+        const newAction = page.getByRole('button', { name: 'New', exact: true });
+        assert.equal(
+          await newAction.count(),
+          1,
+          'Company requires the desktop New action to begin editable identity entry',
+        );
+        await newAction.click();
+        for (const label of ['Name', 'Address 1', 'State', 'City', 'GST No', 'PAN No'])
+          assert.equal(
+            await page.getByLabel(label, { exact: true }).isEditable(),
+            true,
+            `${label} must be editable in the Company identity workflow`,
+          );
+        return {
+          observation: 'the rich Company identity workflow is available and editable',
+          expected: { action: 'New', editableIdentityFields: 6 },
+        };
+      },
+      {
+        expected: {
+          route: '/masters/companies',
+          action: 'New',
+          editableIdentityFields: ['Name', 'Address 1', 'State', 'City', 'GST No', 'PAN No'],
+        },
+        observe: (ctx) => rows(ctx, 'CO_MAST'),
+      },
     ),
     notApplicable(
       'formula',
@@ -244,17 +328,17 @@ export const companyMaster = {
       'refusal',
       'MS_COMPANY.cs:6254-6418 is an unsafe broad cascade; milestone 1 blocks generic DELETE before it can orphan dependent rows',
       async (ctx) => {
-        const before = await footprint(ctx);
+        const before = await representativeDependentRows(ctx);
         const { page } = await ctx.session();
         await open(page);
         const response = await request(page, 'DELETE', '/masters/companies', { CO_CODE: '01' });
         assert.equal(response.status(), 400, await response.text());
         assert.deepEqual(await response.json(), { error: 'dedicated-writer', message: MESSAGE });
-        const after = await footprint(ctx);
+        const after = await representativeDependentRows(ctx);
         assert.deepEqual(after, before);
         return {
           observation:
-            'generic DELETE returned dedicated-writer; company and dependent footprint unchanged',
+            'generic DELETE returned dedicated-writer; representative Company/dependent rows unchanged',
           expected: { status: 400, error: 'dedicated-writer', message: MESSAGE },
           database: after,
         };
@@ -280,7 +364,7 @@ export const companyMaster = {
       'refusal',
       'MDI_FORM.cs:7032-7049,7411-7420 gates Company by caption; generic writes cannot bypass the dedicated workflow',
       async (ctx) => {
-        const before = await footprint(ctx);
+        const before = await representativeDependentRows(ctx);
         const { page } = await ctx.session();
         await open(page);
         const outcomes = [];
@@ -298,22 +382,56 @@ export const companyMaster = {
             body: { error: 'dedicated-writer', message: MESSAGE },
           })),
         );
-        const after = await footprint(ctx);
+        const after = await representativeDependentRows(ctx);
         assert.deepEqual(after, before);
         return {
           observation:
-            'generic POST and PUT returned dedicated-writer; company and dependent footprint unchanged',
+            'generic POST and PUT returned dedicated-writer; representative Company/dependent rows unchanged',
           expected: outcomes,
           database: after,
         };
       },
     ),
-    pending(
+    C(
       'rights.caption-admin-tenant',
       'T11',
-      'refusal',
+      'read-only',
       'MDI_FORM.cs:7032-7049 reads USER_SET by the Company caption; tenant isolation is a web safety requirement',
-      'dedicated create/edit rights and cross-tenant direct-API cases await dedicated routes',
+      async (ctx) =>
+        withCompanyFixtures(ctx, { foreign: true }, async () => {
+          const { page: adminPage } = await ctx.session();
+          await open(adminPage);
+          const adminCodes = await adminPage
+            .getByTestId('company-list')
+            .locator('tbody tr[data-code]')
+            .evaluateAll((items) => items.map((item) => item.getAttribute('data-code')));
+          assert.deepEqual(adminCodes, ['01', EXTRA_COMPANY.code]);
+          assert.equal(adminCodes.includes(FOREIGN_COMPANY.code), false);
+
+          const { page: restrictedPage } = await ctx.session(
+            as(USERS.clerk.user, 'company-master-scoped-clerk'),
+          );
+          await open(restrictedPage);
+          const restrictedCodes = await restrictedPage
+            .getByTestId('company-list')
+            .locator('tbody tr[data-code]')
+            .evaluateAll((items) => items.map((item) => item.getAttribute('data-code')));
+          assert.deepEqual(restrictedCodes, ['01']);
+          return {
+            observation:
+              'admin listed companies 01 and 02 only in the feature tenant; the existing clerk assigned only to 01 listed only 01; second-tenant company 98 stayed hidden',
+            expected: {
+              admin: ['01', EXTRA_COMPANY.code],
+              restricted: ['01'],
+              hiddenForeignTenant: FOREIGN_COMPANY.code,
+            },
+            database: {
+              sameTenantFixture: EXTRA_COMPANY,
+              foreignTenantFixture: FOREIGN_COMPANY,
+              restrictedLogin: USERS.clerk.user,
+            },
+          };
+        }),
     ),
     pending(
       'concurrency.version',
@@ -328,7 +446,7 @@ export const companyMaster = {
       'refusal',
       'Generic CSV import delegates each row to createMaster; Company dedicatedWriter must prevent every row from writing',
       async (ctx) => {
-        const before = await footprint(ctx);
+        const before = await representativeDependentRows(ctx);
         const { page } = await ctx.session();
         await open(page);
         const response = await request(page, 'POST', '/masters/companies/import', {
@@ -340,11 +458,11 @@ export const companyMaster = {
           failed: 1,
           errors: [{ row: 1, error: 'error' }],
         });
-        const after = await footprint(ctx);
+        const after = await representativeDependentRows(ctx);
         assert.deepEqual(after, before);
         return {
           observation:
-            'CSV row reached the blocked writer; created 0 and the footprint stayed unchanged',
+            'CSV row reached the blocked writer; created 0 and representative rows stayed unchanged',
           expected: { created: 0, failed: 1, errors: [{ row: 1, error: 'error' }] },
           database: after,
         };
@@ -390,19 +508,37 @@ export const companyMaster = {
       'T17',
       'read-only',
       'MS_COMPANY.cs:6428-6477 uses Enter and arrows in the company list',
-      async (ctx) => {
-        const { page } = await ctx.session();
-        await open(page);
-        const row = page.getByTestId('company-list').locator('tbody tr[data-code="01"]');
-        await row.focus();
-        await row.press('Enter');
-        assert.equal(await page.locator('#company-code').inputValue(), '01');
-        assert.equal(await row.getAttribute('aria-selected'), 'true');
-        return {
-          observation: 'Enter selected company 01 and displayed its read-only Code/Name',
-          expected: { selected: '01', focusFlow: 'list Enter -> details' },
-        };
-      },
+      async (ctx) =>
+        withCompanyFixtures(ctx, {}, async () => {
+          const { page } = await ctx.session();
+          await open(page);
+          const first = page.getByTestId('company-list').locator('tbody tr[data-code="01"]');
+          const second = page
+            .getByTestId('company-list')
+            .locator(`tbody tr[data-code="${EXTRA_COMPANY.code}"]`);
+          await second.focus();
+          assert.equal(await second.getAttribute('aria-selected'), 'false');
+          await second.press('Enter');
+          assert.equal(await second.getAttribute('aria-selected'), 'true');
+          assert.equal(await page.locator('#company-code').inputValue(), EXTRA_COMPANY.code);
+          assert.equal(await page.locator('#company-name').inputValue(), EXTRA_COMPANY.name);
+          await second.press('ArrowUp');
+          assert.equal(await first.evaluate((row) => row === document.activeElement), true);
+          assert.equal(await first.getAttribute('aria-selected'), 'true');
+          assert.equal(await page.locator('#company-code').inputValue(), '01');
+          await first.press('ArrowDown');
+          assert.equal(await second.evaluate((row) => row === document.activeElement), true);
+          assert.equal(await second.getAttribute('aria-selected'), 'true');
+          assert.equal(await page.locator('#company-code').inputValue(), EXTRA_COMPANY.code);
+          return {
+            observation:
+              'Enter selected focused company 02; ArrowUp moved focus/selection to 01 and ArrowDown restored 02',
+            expected: {
+              selected: ['01', EXTRA_COMPANY.code, '01', EXTRA_COMPANY.code],
+              focusFlow: 'focus row 02 Enter -> ArrowUp row 01 -> ArrowDown row 02',
+            },
+          };
+        }),
     ),
     pending(
       'keyboard.full-workflow',

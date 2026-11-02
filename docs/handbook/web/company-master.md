@@ -75,10 +75,11 @@ defaults (`MS_YEAR.cs:1504-1595`):
 
 ## Milestone 1: generic containment and read-only surface
 
-Implementation status: **implemented-unverified**.
+N58 remains **planned** in the execution backlog. This milestone adds containment code and executable evidence; it does not complete G38 or G39.
 
 - `CO_MAST_CONFIG.dedicatedWriter` blocks generic create, update, and delete before the generic master service starts
-  a transaction. Generic CSV import delegates each row to the same blocked create function, so it creates zero rows.
+  a business transaction. Generic CSV import delegates each row to the same blocked create function, so it creates
+  zero business rows. The normal authenticated request audit still records each rejected request.
 - Direct generic POST, PUT, and DELETE keep the existing `400` response contract:
   `{"error":"dedicated-writer","message":"Company uses a dedicated workflow for identity and provisioning; generic create, update, delete, and CSV import are unavailable."}`
 - CSV import keeps the existing aggregate response semantics for a blocked row: HTTP `200`, `created: 0`, `failed: 1`,
@@ -86,14 +87,21 @@ Implementation status: **implemented-unverified**.
   master behavior.
 - `/masters/companies` is a static dedicated page that shadows the generic `[name]` editor. It uses authenticated,
   tenant-scoped `GET /context/companies` and displays only Code and Name plus the current session company identity.
-- The page has search and keyboard row selection. It has no New, Edit, Delete, or CSV action and does not display
-  credentials or placeholder identity fields.
-- Focused service, HTTP/database, and zero-mock feature cases prove the containment and no-write contract once their
-  dependency-backed gates run.
+- The page has search and roving keyboard row selection. Filtering selects the first visible company, keeps one
+  visible row in the Tab order, and clears the read-only details when no company matches. It has no New, Edit,
+  Delete, or CSV action and does not display credentials or placeholder identity fields.
+- The service unit test asserts that the generic writer transaction never opens. The HTTP/database test snapshots
+  every tenant-scoped table around the combined POST/PUT/DELETE/import containment requests: every non-audit table
+  is unchanged, while the four expected `audit_log` rows record the three `400` refusals and the `200` import result.
+  Feature cases call their four-table checks “representative dependent rows,” not a complete-tenant snapshot.
+- The executable T02 case is baselined under G38 because `/masters/companies` still lacks the desktop New action and
+  editable identity fields. The generated progress page therefore reports one open Company case rather than green.
 
-The safe list is implemented by `web/apps/api/src/modules/auth/businessScope.ts:193-211`. Administrators see tenant
-companies; other users see only companies assigned to their login. The current company code comes from the
-server-authenticated business scope.
+The safe list is implemented by `web/apps/api/src/modules/auth/businessScope.ts:193-211`. Executable T11 evidence
+seeds a second same-tenant company and a foreign-tenant `CO_MAST` sentinel with owner-only fixture SQL, then removes
+both in `finally`. The admin sees both same-tenant companies and never the foreign sentinel; the existing restricted
+user assigned only to company `01` sees only `01`. The current company code comes from the server-authenticated
+business scope.
 
 ## Why Company delete stays blocked
 

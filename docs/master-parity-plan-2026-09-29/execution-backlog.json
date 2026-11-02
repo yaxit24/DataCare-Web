@@ -3803,7 +3803,7 @@
         "web/apps/web/app/(app)/masters/companies/page.tsx",
         "web/apps/web/test/features/modules/companyMaster.mjs"
       ],
-      "statusNote": "MILESTONE 1 IMPLEMENTED-UNVERIFIED; overall N58 remains planned. Generic CO_MAST create/update/delete/CSV paths are contained by dedicatedWriter and /masters/companies is a dedicated tenant-scoped read-only page. Pending: rich identity form, versioned/idempotent writer, first YEAR_MAST plus 17-family provisioning, desktop identity conventions, semantic print, complete keyboard/journey evidence, and an accepted safe-delete decision."
+      "statusNote": "Milestone 1 containment code is present; overall N58 remains planned. Generic CO_MAST create/update/delete/CSV business paths are blocked by dedicatedWriter before the master transaction, while authenticated rejection/result audits remain expected. /masters/companies is a dedicated tenant-scoped read-only page; executable T11 covers admin, restricted-user, and cross-tenant listing, and executable T02 remains a G38 baseline failure because the rich identity workflow is absent. Pending: rich identity form, versioned/idempotent writer, first YEAR_MAST plus 17-family provisioning, desktop identity conventions, semantic print, complete keyboard/journey evidence, and an accepted safe-delete decision."
     },
     {
       "id": "N59",

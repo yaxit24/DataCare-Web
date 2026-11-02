@@ -111,7 +111,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Search list plus address, country/state/city, work type, metal type, tax and bank fields.
 - **Writes:** CO_MAST, CO_SET, CO_SET_NEW, AC_GROUP, BOOK_DATA, LOCT_MAST, MENU_DATA.
 - **Web:** `/masters/companies`, `/admin/provision`; `GET /context/companies`, `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`, `POST /admin/companies/:coCode/provision`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Milestone 1 contains generic CO_MAST create/update/delete/CSV mutations and provides a dedicated tenant-scoped read-only Company list. The rich identity form, dedicated versioned writer, first-year and 17-family provisioning, Company.RPT print, and an accepted safe-delete decision remain.
+- **Remaining:** Milestone 1 blocks generic CO_MAST create/update/delete/CSV business mutations before the master transaction; authenticated rejection audits remain expected. It provides a dedicated tenant-scoped read-only Company list with executable admin, restricted-user and cross-tenant scope evidence. The rich identity form, dedicated versioned writer, first-year and 17-family provisioning, Company.RPT print, and an accepted safe-delete decision remain.
 - **Owners:** G38, G39, N58, X10, N77.
 - **Evidence:** [KB_master.md:45-75](../../project-memory/video-research/_kb/KB_master.md#L45-L75), [MS_YEAR.cs:1504-1595](../../unified/src/csharp/DataCareNext/MS_YEAR.cs#L1504-L1595), [company-master.md](../../docs/handbook/web/company-master.md).
 

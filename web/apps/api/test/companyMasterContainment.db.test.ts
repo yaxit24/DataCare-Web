@@ -5,6 +5,7 @@ import { buildApp } from '../src/app.js';
 import { hashPassword } from '../src/modules/auth/password.js';
 import { seedCompany } from '../src/modules/ops/seedCompany.js';
 import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
+import { diffTenant, snapshotTenant, tenantTables } from './support/tenantSnapshot.js';
 
 /**
  * Company milestone 1 containment. The desktop saves company identity and then opens Year Create
@@ -13,7 +14,7 @@ import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
  * The desktop delete is an unsafe unscoped cascade (MS_COMPANY.cs:6254-6418), so it is not ported.
  */
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
-const tenantId = 'company-master-containment';
+const TENANT = 'company-master-containment';
 const PASSWORD = 'Company-Containment!2026';
 const SECRET = 'company-containment-test-secret-over-thirty-two';
 const ADMIN = 'companyadmin';
@@ -30,28 +31,13 @@ type Cookie = string;
   let runtime: PrismaClient;
   let app: FastifyInstance;
   let cookie: Cookie;
+  let tables: string[];
 
   const wipe = async () => {
-    const tables: Array<{ table_name: string }> = await owner.$queryRawUnsafe(
-      `SELECT DISTINCT table_name FROM information_schema.columns
-        WHERE table_schema='public' AND column_name='tenant_id'`,
-    );
-    for (const { table_name } of tables)
-      await owner.$executeRawUnsafe(`DELETE FROM "${table_name}" WHERE tenant_id=$1`, tenantId);
+    for (const table of tables)
+      await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, TENANT);
   };
-  const rows = (table: string) => {
-    const order = table === 'CO_MAST' ? '"CO_CODE"' : 'row_id';
-    return owner.$queryRawUnsafe(
-      `SELECT to_jsonb(t) AS row FROM "${table}" t WHERE tenant_id=$1 ORDER BY ${order}`,
-      tenantId,
-    );
-  };
-  const footprint = async () => ({
-    company: await rows('CO_MAST'),
-    locations: await rows('LOCT_MAST'),
-    years: await rows('YEAR_MAST'),
-    settings: await rows('CO_SET'),
-  });
+  const snapshot = () => snapshotTenant(owner, TENANT, tables);
   const request = (method: string, url: string, payload?: unknown) =>
     app.inject({
       method: method as never,
@@ -64,13 +50,14 @@ type Cookie = string;
     assertIsolatedTestDatabase();
     owner = new PrismaClient({ datasources: { db: { url: process.env.MIGRATE_DATABASE_URL } } });
     runtime = new PrismaClient();
+    tables = await tenantTables(owner);
     await wipe();
-    await seedCompany(runtime, tenantId, '01', { coName: 'CONTAINMENT COMPANY' });
+    await seedCompany(runtime, TENANT, '01', { coName: 'CONTAINMENT COMPANY' });
     const passwordHash = await hashPassword(PASSWORD);
     await owner.$executeRawUnsafe(
       `INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED")
        VALUES ($1,'01',$2,$3,'ADMIN','Y','Y','Y','N')`,
-      tenantId,
+      TENANT,
       ADMIN,
       passwordHash,
     );
@@ -78,7 +65,7 @@ type Cookie = string;
     const login = await app.inject({
       method: 'POST',
       url: '/auth/login',
-      headers: { 'x-tenant-id': tenantId },
+      headers: { 'x-tenant-id': TENANT },
       payload: { coCode: '01', lcCode: '01', coYear: YEAR, loginName: ADMIN, password: PASSWORD },
     });
     expect(login.statusCode, login.body).toBe(200);
@@ -90,37 +77,48 @@ type Cookie = string;
 
   afterAll(async () => {
     if (app) await app.close();
-    if (owner) await wipe();
+    if (owner && tables) await wipe();
     if (runtime) await runtime.$disconnect();
     if (owner) await owner.$disconnect();
   });
 
-  it.each([
-    ['POST', '/masters/companies', { CO_CODE: '02', CO_NAME: 'UNSAFE CREATE' }],
-    ['PUT', '/masters/companies', { CO_CODE: '01', CO_NAME: 'UNSAFE UPDATE' }],
-    ['DELETE', '/masters/companies', { CO_CODE: '01' }],
-  ] as const)(
-    '%s %s returns the dedicated-writer contract and changes no company rows',
-    async (method, url, payload) => {
-      const before = await footprint();
+  it('rejects all generic mutations, changes no non-audit tenant table, and records exact rejection audits', async () => {
+    const before = await snapshot();
+    for (const [method, url, payload] of [
+      ['POST', '/masters/companies', { CO_CODE: '02', CO_NAME: 'UNSAFE CREATE' }],
+      ['PUT', '/masters/companies', { CO_CODE: '01', CO_NAME: 'UNSAFE UPDATE' }],
+      ['DELETE', '/masters/companies', { CO_CODE: '01' }],
+    ] as const) {
       const response = await request(method, url, payload);
       expect(response.statusCode, response.body).toBe(400);
       expect(response.json()).toEqual({ error: 'dedicated-writer', message: MESSAGE });
-      expect(await footprint()).toEqual(before);
-    },
-  );
+    }
 
-  it('CSV import reaches the blocked writer and changes no company or dependent rows', async () => {
-    const before = await footprint();
-    const response = await request('POST', '/masters/companies/import', {
+    const imported = await request('POST', '/masters/companies/import', {
       rows: [{ CO_CODE: '02', CO_NAME: 'UNSAFE IMPORT' }],
     });
-    expect(response.statusCode, response.body).toBe(200);
-    expect(response.json()).toEqual({
+    expect(imported.statusCode, imported.body).toBe(200);
+    expect(imported.json()).toEqual({
       created: 0,
       failed: 1,
       errors: [{ row: 1, error: 'error' }],
     });
-    expect(await footprint()).toEqual(before);
+
+    const diff = diffTenant(before, await snapshot());
+    const { audit_log: audits = [], ...nonAuditAdded } = diff.added;
+    expect({ added: nonAuditAdded, removed: diff.removed }).toEqual({ added: {}, removed: {} });
+    expect(audits).toHaveLength(4);
+    expect(
+      audits
+        .map(({ action, path, status, login_name }) => ({ action, path, status, login_name }))
+        .sort((left, right) =>
+          `${left.action}:${left.path}`.localeCompare(`${right.action}:${right.path}`),
+        ),
+    ).toEqual([
+      { action: 'DELETE', path: '/masters/:name', status: 400, login_name: ADMIN },
+      { action: 'POST', path: '/masters/:name', status: 400, login_name: ADMIN },
+      { action: 'POST', path: '/masters/:name/import', status: 200, login_name: ADMIN },
+      { action: 'PUT', path: '/masters/:name', status: 400, login_name: ADMIN },
+    ]);
   });
 });

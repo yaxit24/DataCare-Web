@@ -19,6 +19,16 @@ const errorText = (error: unknown) =>
     ? String(error.body?.message || error.body?.error || error.message)
     : String((error as Error)?.message ?? error);
 
+const filterCompanies = (companies: Company[], search: string) => {
+  const wanted = search.trim().toLocaleUpperCase();
+  if (!wanted) return companies;
+  return companies.filter(
+    (company) =>
+      company.CO_CODE.toLocaleUpperCase().includes(wanted) ||
+      (company.CO_NAME ?? '').toLocaleUpperCase().includes(wanted),
+  );
+};
+
 export default function CompanyPage() {
   const { coCode } = useBusinessScope();
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -43,16 +53,21 @@ export default function CompanyPage() {
     };
   }, [coCode]);
 
-  const shown = useMemo(() => {
-    const wanted = search.trim().toLocaleUpperCase();
-    if (!wanted) return companies;
-    return companies.filter(
-      (company) =>
-        company.CO_CODE.toLocaleUpperCase().includes(wanted) ||
-        (company.CO_NAME ?? '').toLocaleUpperCase().includes(wanted),
+  const shown = useMemo(() => filterCompanies(companies, search), [companies, search]);
+  const activeCode = shown.some((company) => company.CO_CODE === selected)
+    ? selected
+    : (shown[0]?.CO_CODE ?? '');
+  const detail = shown.find((company) => company.CO_CODE === activeCode) ?? null;
+
+  function changeSearch(value: string) {
+    const visible = filterCompanies(companies, value);
+    setSearch(value);
+    setSelected((current) =>
+      visible.some((company) => company.CO_CODE === current)
+        ? current
+        : (visible[0]?.CO_CODE ?? ''),
     );
-  }, [companies, search]);
-  const detail = companies.find((company) => company.CO_CODE === selected) ?? null;
+  }
 
   function rowKey(event: KeyboardEvent<HTMLTableRowElement>, index: number) {
     if (event.key === 'Enter' || event.key === ' ') {
@@ -87,7 +102,7 @@ export default function CompanyPage() {
               id="company-search"
               autoFocus
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => changeSearch(event.target.value)}
               placeholder="Code or name"
             />
           </div>
@@ -102,7 +117,7 @@ export default function CompanyPage() {
               <tbody>
                 {shown.map((company, index) => {
                   const current = company.CO_CODE === coCode;
-                  const chosen = company.CO_CODE === selected;
+                  const chosen = company.CO_CODE === activeCode;
                   return (
                     <tr
                       key={company.CO_CODE}
