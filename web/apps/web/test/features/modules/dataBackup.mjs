@@ -152,8 +152,8 @@ async function seedScopeSentinels(ctx) {
   );
   await ctx.owner.$executeRawUnsafe(
     `INSERT INTO "LOCT_MAST"(tenant_id,"CO_CODE","LC_CODE","LC_NAME")
-     SELECT $1,'01','02','BACKUP BRANCH SENTINEL'
-      WHERE NOT EXISTS (SELECT 1 FROM "LOCT_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='02')`,
+     SELECT $1::text,'01','02','BACKUP BRANCH SENTINEL'
+      WHERE NOT EXISTS (SELECT 1 FROM "LOCT_MAST" WHERE tenant_id=$1::text AND "CO_CODE"='01' AND "LC_CODE"='02')`,
     ctx.tenantId,
   );
   await ctx.owner.$executeRawUnsafe(
@@ -163,8 +163,8 @@ async function seedScopeSentinels(ctx) {
   );
   await ctx.owner.$executeRawUnsafe(
     `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME")
-     SELECT $1,'02','01','BKSENT','OTHER COMPANY ROW SENTINEL'
-      WHERE NOT EXISTS (SELECT 1 FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"='02' AND "AC_CODE"='BKSENT')`,
+     SELECT $1::text,'02','01','BKSENT','OTHER COMPANY ROW SENTINEL'
+      WHERE NOT EXISTS (SELECT 1 FROM "AC_MAST" WHERE tenant_id=$1::text AND "CO_CODE"='02' AND "AC_CODE"='BKSENT')`,
     ctx.tenantId,
   );
 }
@@ -203,7 +203,7 @@ export const dataBackup = {
           .allTextContents();
         const body = await page.locator('main').innerText();
         assert.match(body, /Backup Data/);
-        assert.match(body, /Backup Path/);
+        assert.equal(await page.getByLabel('Backup Path', { exact: true }).isVisible(), true);
         assert.match(body, /Select/);
         assert.match(body, /Backup/);
         await assertRecoveryBoundary(page);
@@ -451,17 +451,29 @@ export const dataBackup = {
       'Current GET /backup policy is authenticated/admin; UT_BKP.cs:1198-1204 refuses unauthorized operators before backup',
       async (ctx) => {
         const before = await backupRuns(ctx);
-        const { page, requests } = await ctx.session(as(USERS.clerk.user, 'backup-clerk'));
+        const { page } = await ctx.session(as(USERS.clerk.user, 'backup-clerk'));
         await open(page);
         await select(page);
-        await page.getByRole('button', { name: 'Backup', exact: true }).click();
-        await page.getByRole('alert').waitFor();
+        const [response] = await Promise.all([
+          page.waitForResponse(
+            (candidate) =>
+              new URL(candidate.url()).pathname === '/api/backup' &&
+              candidate.request().method() === 'GET',
+          ),
+          page.getByRole('button', { name: 'Backup', exact: true }).click(),
+        ]);
+        assert.equal(new URL(response.url()).pathname, '/api/backup');
+        assert.equal(response.request().method(), 'GET');
+        assert.equal(response.status(), 403);
+        const alert = page.getByRole('alert');
+        await alert.waitFor();
+        assert.notEqual((await alert.innerText()).trim(), '');
         assert.equal(await page.getByText('Backup Process Complete.', { exact: true }).count(), 0);
-        assert.equal(countRequests(requests, 'GET', '/api/backup'), 1);
         assert.deepEqual(await backupRuns(ctx), before);
         return {
-          observation: 'non-admin failure displayed an error, no success, and no audit row',
-          expected: { success: false },
+          observation:
+            'non-admin GET returned 403, displayed an error, no success, and no audit row',
+          expected: { method: 'GET', path: '/api/backup', status: 403, success: false },
           database: { before, after: before },
         };
       },
@@ -474,16 +486,10 @@ export const dataBackup = {
       async (ctx) => {
         const { page } = await ctx.session();
         await open(page);
-        const response = await page.evaluate(async () => {
-          const result = await fetch('/api/backup/restore', {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: '{}',
-          });
-          return { status: result.status, body: await result.json() };
-        });
-        assert.equal(response.status, 503);
-        assert.equal(response.body.operation, 'logical-restore');
+        const response = await page.request.post('/api/backup/restore', { data: {} });
+        const body = await response.json();
+        assert.equal(response.status(), 503);
+        assert.equal(body.operation, 'logical-restore');
         return {
           observation: 'direct restore POST returned the 503 logical-restore containment refusal',
           expected: { status: 503 },

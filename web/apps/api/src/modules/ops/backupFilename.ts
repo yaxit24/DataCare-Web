@@ -1,4 +1,5 @@
-import { type PrismaClient, withTenant } from '@datacare/db';
+import type { PrismaClient } from '@datacare/db';
+import { withTxBudget } from '../shared/txBudget.js';
 
 const two = (value: number): string => String(value).padStart(2, '0');
 
@@ -38,7 +39,7 @@ export async function loadBackupCompanyType(
   tenantId: string,
   companyCode: string,
 ): Promise<string | undefined> {
-  return withTenant(prisma, tenantId, async (tx) => {
+  return withTxBudget(prisma, tenantId, 'read', async (tx) => {
     const rows = await tx.$queryRawUnsafe<Array<{ type: string }>>(
       `SELECT DISTINCT upper(btrim("CO_TYPE")) AS type
          FROM "CO_MAST"
