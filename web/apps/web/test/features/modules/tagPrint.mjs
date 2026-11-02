@@ -1035,6 +1035,45 @@ export const tagPrint = {
         }),
     ),
     C(
+      'keyboard.esc-with-focus-on-the-page',
+      'T17',
+      'read-only',
+      'The form sets KeyPreview (:1805) and subscribes its own KeyDown (:1154), so Esc reaches TR_TAG_CAN_KeyDown (:5101-5105) wherever the focus is. OldValTot and NewValTot are only ever assigned 0.0 (:5035-5036), so they are equal and the form closes (:5107-5109). A browser has a state the desktop form never has: focus on no control, after a click on the page background or when the focused Print button is disabled while a print runs. Esc must close Tag Print there too',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          const { page } = await ctx.session();
+          await openScreen(page);
+          await loadVoucher(page);
+          // Focus on no control at all: what a click on the page background leaves, and what a disabled focused button leaves.
+          await page.getByRole('heading', { name: 'Tag Print', exact: true }).click();
+          const focusOnBody = await page.evaluate(() => document.activeElement === document.body);
+          assert.equal(focusOnBody, true, 'the click left the focus on the page body');
+          assert.equal(new URL(page.url()).pathname, '/txn/tag-print');
+          // The boundary: a key aimed at a header control (the MDI parent, not this form) is not the form's, as before.
+          await page.getByLabel('Company', { exact: true }).focus();
+          await assert.rejects(
+            Promise.all([
+              page.waitForURL((url) => url.pathname === '/dashboard', { timeout: 1500 }),
+              page.keyboard.press('Escape'),
+            ]),
+            /Timeout/,
+            'Esc on the header Company box must leave Tag Print open',
+          );
+          assert.equal(new URL(page.url()).pathname, '/txn/tag-print');
+          await page.getByRole('heading', { name: 'Tag Print', exact: true }).click();
+          assert.equal(await page.evaluate(() => document.activeElement === document.body), true);
+          await Promise.all([
+            page.waitForURL((url) => url.pathname === '/dashboard', { timeout: 10_000 }),
+            page.keyboard.press('Escape'),
+          ]);
+          return {
+            observation: 'Esc with the focus on the page body closed Tag Print',
+            expected: { focusOnBody: true, leftTo: '/dashboard' },
+            downstream: { leftTo: new URL(page.url()).pathname },
+          };
+        }),
+    ),
+    C(
       'journey.hm-id-reaches-the-label',
       'T18',
       'mutation',
