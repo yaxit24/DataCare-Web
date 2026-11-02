@@ -115,8 +115,11 @@ describe('route policy registry', () => {
     // The Wh Sales print (WhSalesBill, TR_WH_SALE.cs:13654) adds GET /wholesale-sales/:vchNo/print: 714.
     // N221 replaces Stock Adjust's POST and DELETE /stock/adjust with the TR_TAG_CAN family (list, source, lots, one,
     // POST, PUT, DELETE, print): 714 - 2 + 8 = 720.
-    expect(routes).toHaveLength(720);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(720);
+    // N223 adds the RP_LEDR Ledger Report: the canonical screen GET /reports/account-ledger and its three
+    // exports (.pdf/.xlsx/.csv), keeping the two account-in-path aliases. The two old literals move into
+    // routes/accountLedger.ts, so the net change is +4: 720 + 4 = 724.
+    expect(routes).toHaveLength(724);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(724);
 
     const policies = routes.map((route) => ({
       ...route,
