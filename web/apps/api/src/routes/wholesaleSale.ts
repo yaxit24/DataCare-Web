@@ -28,10 +28,16 @@ export interface WholesaleSaleRouteHelpers {
 
 const BAND_COLUMNS = [
   'FINE_RATE',
-  'PR_FINE',
-  'SL_FINE',
-  'DR_FINE',
   'CR_FINE',
+  'DR_FINE',
+  'KSR_FINE_CR',
+  'KSR_FINE_DR',
+  'TOT_FINE_CR',
+  'TOT_FINE_DR',
+  'CR_AMT',
+  'DR_AMT',
+  'PR_LBR_AMT',
+  'SL_LBR_AMT',
   'PR_NET_AMT',
   'SL_NET_AMT',
   'PR_CASH_AMT',
@@ -96,6 +102,14 @@ export function registerWholesaleSaleRoutes(
         scope.coBook,
         voucherNo,
       )) as WholesaleBillBand[];
+      const [book] = await tx.$queryRawUnsafe(
+        `SELECT "BOOK_NAME" FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4
+          ORDER BY row_id LIMIT 1`,
+        scope.tenantId,
+        scope.coCode,
+        scope.lcCode,
+        scope.coBook,
+      );
       const [company] = await tx.$queryRawUnsafe(
         `SELECT * FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 LIMIT 1`,
         scope.tenantId,
@@ -136,7 +150,7 @@ export function registerWholesaleSaleRoutes(
           silver: r3(closing.silver - own.silver),
         },
       };
-      return { band, company, party, balances };
+      return { band, company, party, balances, bookName: String(book?.BOOK_NAME ?? '') };
     });
     if (!context.band)
       return reply
@@ -149,6 +163,7 @@ export function registerWholesaleSaleRoutes(
         party: context.party,
         copy: copy ?? undefined,
         balances: context.balances,
+        bookName: context.bookName,
       }),
       { format: q.format, filename: `wholesale-sale-${voucherNo}` },
     );
