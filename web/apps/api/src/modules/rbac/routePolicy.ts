@@ -524,9 +524,20 @@ route('Masters/Design Book', [
   'DELETE /masters/design-book/image',
 ]);
 route('Inventory/Tag Print', [
-  'GET /stock/tag-print',
-  'GET /stock/tag-print/label',
-  'POST /stock/tag-print/stage',
+  // UT_TAG_PRINT (N225): the Tag Print screen's helps, grid sources, Hm Id Update, default file and print.
+  'GET /stock/tag-print-screen',
+  'GET /stock/tag-print-screen/books',
+  'GET /stock/tag-print-screen/book',
+  'GET /stock/tag-print-screen/vouchers',
+  'GET /stock/tag-print-screen/voucher',
+  'GET /stock/tag-print-screen/stock',
+  'GET /stock/tag-print-screen/tag',
+  'GET /stock/tag-print-screen/tags',
+  'GET /stock/tag-print-screen/lookups/:kind',
+  'POST /stock/tag-print-screen/hm-update',
+  'POST /stock/tag-print-screen/default-file',
+  'POST /stock/tag-print-screen/print',
+  'GET /stock/tag-print-screen/labels',
   // Tag photographs belong to the same surface: the right that shows a tag governs its image.
   'GET /stock/tag-image',
   'GET /stock/tag-image/state',
@@ -1050,7 +1061,8 @@ const PRINT_ROUTES = new Set([
   'POST /e-invoices/:vchNo/irn/cancel',
   'GET /e-invoices/:vchNo/print',
   'GET /utilities/data-export/download',
-  'GET /stock/tag-print/label',
+  'POST /stock/tag-print-screen/print',
+  'GET /stock/tag-print-screen/labels',
   'POST /integrations/notify',
   'GET /reports/tag-stock.csv',
   'GET /reports/karigar-ledger.print',
@@ -1072,6 +1084,8 @@ const PRINT_ROUTES = new Set([
 ]);
 
 const UPDATE_POST_ROUTES = new Set([
+  'POST /stock/tag-print-screen/hm-update',
+  'POST /stock/tag-print-screen/default-file',
   'POST /masters/item-master/:code/tag-values',
   'POST /masters/auto-item',
   'POST /stock/tag-image',
