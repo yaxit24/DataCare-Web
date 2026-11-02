@@ -127,8 +127,8 @@ const vouchers = (ctx) =>
     .rows(`SELECT count(*)::int n FROM "BAR_CAN_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}'`)
     .then(([r]) => r.n);
 
-async function open(ctx) {
-  const { page } = await ctx.session();
+async function open(ctx, who) {
+  const { page } = await ctx.session(who);
   await page.goto('/txn/tag-cancel');
   await page.getByRole('heading', { name: 'Tag Cancel', exact: true }).waitFor();
   const book = page.getByRole('combobox', { name: 'Configured book', exact: true });
@@ -482,17 +482,99 @@ export const tagCancel = {
         };
       },
     ),
-    blocked(
-      'concurrency',
+    C(
+      'concurrency.two-operators-one-tag',
       'T12',
-      'Two-writer races are covered in tagCancelLifecycle.db.test.ts (V7).',
+      'mutation',
+      'Two operators cancelling the same tag at once: the tag lock lets one voucher take it, the other is refused',
+      async (ctx) => {
+        const t = await seedTag(ctx);
+        const a = await open(ctx);
+        const b = await open(ctx, as(USERS.admin.user, `${USERS.admin.user}#2`));
+        for (const page of [a, b]) await pickTag(page, 1, t.tag);
+        const before = await vouchers(ctx);
+        const [first, second] = await Promise.all([save(a), save(b)]);
+        const statuses = [first.status(), second.status()].sort();
+        assert.equal(statuses[0], 201, `statuses ${statuses}`);
+        assert.ok(statuses[1] >= 400, `the second save is refused: ${statuses}`);
+        assert.equal(await vouchers(ctx), before + 1);
+        assert.equal(await balance(ctx, t.tag), 0);
+        return {
+          observation: `statuses ${statuses.join(', ')}`,
+          expected: 'one voucher, the tag out once',
+          database: { vouchers: before + 1 },
+          downstream: { tagBalance: 0 },
+        };
+      },
     ),
-    blocked('retry', 'T13', 'Tag Cancel POST has no idempotency key yet.'),
-    blocked('rollback', 'T14', 'No fault injector in the harness yet (G173 / N166).'),
-    blocked(
+    C(
+      'retry.replayed-save',
+      'T13',
+      'mutation',
+      'A replayed save finds the tag already cancelled and is refused; one voucher stays (the desktop has no idempotency key either)',
+      async (ctx) => {
+        const t = await seedTag(ctx);
+        const page = await open(ctx);
+        await pickTag(page, 1, t.tag);
+        const first = await save(page);
+        assert.equal(first.status(), 201, await first.text());
+        const before = await vouchers(ctx);
+        const replay = await page.request.fetch(first.request());
+        assert.ok(replay.status() >= 400, `replay refused: ${replay.status()}`);
+        assert.equal(await vouchers(ctx), before);
+        assert.equal(await balance(ctx, t.tag), 0);
+        return {
+          observation: `the replay answered ${replay.status()}`,
+          expected: 'no second voucher',
+          database: { vouchers: before },
+          downstream: { tagBalance: 0 },
+        };
+      },
+    ),
+    C(
+      'rollback.stock-write-fault',
+      'T14',
+      'mutation',
+      'A fault on the stock write rolls the whole cancel voucher back: no header, no lines, the tag still in stock',
+      async (ctx) => {
+        const t = await seedTag(ctx, { gross: 7.777, net: 7.777 });
+        await ctx.owner.$executeRawUnsafe(
+          `CREATE OR REPLACE FUNCTION e2e_tag_cancel_fault() RETURNS trigger LANGUAGE plpgsql AS $f$
+           BEGIN
+             IF NEW."CO_BOOK" = '${BOOK}' AND NEW."ITM_NWT" = 7.777 THEN RAISE EXCEPTION 'e2e tag cancel fault'; END IF;
+             RETURN NEW;
+           END $f$`,
+        );
+        await ctx.owner.$executeRawUnsafe(
+          `CREATE TRIGGER e2e_tag_cancel_fault BEFORE INSERT ON "MAIN_STOCK" FOR EACH ROW EXECUTE FUNCTION e2e_tag_cancel_fault()`,
+        );
+        try {
+          const before = await vouchers(ctx);
+          const page = await open(ctx);
+          await pickTag(page, 1, t.tag);
+          const response = await save(page);
+          assert.ok(response.status() >= 400, `the save failed: ${response.status()}`);
+          assert.equal(await vouchers(ctx), before);
+          assert.equal(await balance(ctx, t.tag), 1);
+          return {
+            observation: `the save answered ${response.status()}; nothing kept`,
+            expected: 'no voucher, the tag in stock',
+            database: { vouchers: before },
+            downstream: { tagBalance: 1 },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `DROP TRIGGER IF EXISTS e2e_tag_cancel_fault ON "MAIN_STOCK"`,
+          );
+          await ctx.owner.$executeRawUnsafe(`DROP FUNCTION IF EXISTS e2e_tag_cancel_fault()`);
+        }
+      },
+    ),
+    notApplicable(
       'settings',
       'T15',
-      'Company type B and the fiscal year are covered through HTTP in tagCancel.routes.db.test.ts.',
+      'TR_TAG_CAN.cs:2514-2535',
+      'Only the STOCK ADJUST book reads MsPurcLot and MsItmWitLotStk (TagLot / ItmLot columns); the TAG CANCEL book has no company-setting variant. The setting columns are tested in the stock-adjust module (T15).',
     ),
     C(
       'print.tag-can-bill',
@@ -561,6 +643,41 @@ export const tagCancel = {
         };
       },
     ),
-    blocked('downstream-report', 'T18', 'The Tag Stock report (L6) is checked in its own module.'),
+    C(
+      'journey.cancelled-tag-leaves-the-sale-lookup',
+      'T18',
+      'mutation',
+      'A cancelled tag (O row) is not offered by the available-tags lookup every sale uses; the voucher delete offers it again (the Tag Stock report reads the same rows)',
+      async (ctx) => {
+        const t = await seedTag(ctx);
+        const page = await open(ctx);
+        const offered = async () =>
+          (
+            await (await page.request.get(`/api/lookup/available-tags?q=${t.tag}&limit=10`)).json()
+          ).some((r) => String(r.code ?? '').trim() === t.tag);
+        assert.equal(await offered(), true);
+        await pickTag(page, 1, t.tag);
+        const response = await save(page);
+        assert.equal(response.status(), 201, await response.text());
+        const { voucherNo } = await response.json();
+        assert.equal(await offered(), false, 'cancelled');
+        await reopen(page, String(voucherNo));
+        await Promise.all([
+          page.waitForResponse(
+            (r) =>
+              r.request().method() === 'DELETE' &&
+              new URL(r.url()).pathname === `/api/stock/tag-cancel/${voucherNo}`,
+          ),
+          page.getByTestId('tag-cancel-delete').click(),
+        ]);
+        assert.equal(await offered(), true, 'offered again after the delete');
+        return {
+          observation: `${t.tag} left the sale lookup and came back after the delete`,
+          expected: 'out, then in',
+          database: { tagBalance: await balance(ctx, t.tag) },
+          downstream: { offered: true },
+        };
+      },
+    ),
   ],
 };

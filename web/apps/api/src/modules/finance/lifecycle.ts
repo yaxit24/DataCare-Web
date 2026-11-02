@@ -42,6 +42,38 @@ export async function assertFinanceVoucherDateTx(
   }
 }
 
+export const FINANCE_EMPLOYEE_REQUIRED_MESSAGE = 'Please Select Employee Code and Try......';
+
+/**
+ * TR_CASH's employee box (tEmpCode): with CO_SET.EMP_CODE_MANDATORY = 'Y' (DC_Main.MsEmpCodeMendetry) a blank
+ * employee is refused (TR_CASH.cs:2907-2911, before the cash limit, year and lock checks); a typed code must be a
+ * company employee (the box is filled from the EMP_MAST help, :3608-3623). Returns the code the row stores.
+ */
+export async function financeEmployeeTx(
+  tx: any,
+  scope: VoucherScope,
+  raw: unknown,
+): Promise<string> {
+  const code = text(raw);
+  const settings: Array<{ mandatory: unknown }> = await tx.$queryRawUnsafe(
+    `SELECT "EMP_CODE_MANDATORY" mandatory FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"=$2 ORDER BY row_id LIMIT 1`,
+    scope.tenantId,
+    scope.coCode,
+  );
+  if (!code && text(settings[0]?.mandatory).toUpperCase() === 'Y')
+    throw new FinanceLifecycleValidationError(FINANCE_EMPLOYEE_REQUIRED_MESSAGE);
+  if (!code) return '';
+  const found: unknown[] = await tx.$queryRawUnsafe(
+    `SELECT 1 FROM "EMP_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "EMP_CODE"=$3 LIMIT 1`,
+    scope.tenantId,
+    scope.coCode,
+    code,
+  );
+  if (!found.length)
+    throw new FinanceLifecycleValidationError(`Employee ${code} is not in this company`);
+  return code;
+}
+
 export type CompleteFinanceScope = VoucherScope & { coYear: string; coBook: string };
 export type VoucherIdentity = {
   vchNo: number;

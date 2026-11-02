@@ -29,12 +29,17 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import {
   editPayment,
   editReceipt,
+  getPayment,
+  getReceipt,
   postPayment,
   postPaymentLines,
   postReceipt,
   postReceiptLines,
 } from '../src/modules/finance/finance.js';
-import { FINANCE_DATE_OUTSIDE_YEAR_MESSAGE } from '../src/modules/finance/lifecycle.js';
+import {
+  FINANCE_DATE_OUTSIDE_YEAR_MESSAGE,
+  FINANCE_EMPLOYEE_REQUIRED_MESSAGE,
+} from '../src/modules/finance/lifecycle.js';
 import { PeriodLockValidationError } from '../src/modules/posting/posting.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
@@ -576,5 +581,95 @@ describe.runIf(RUN)('bank leg codes are not a mirror of cash', () => {
     expect(rows[0]!.dr).toBe(5000);
     expect(rows[1]!.ac).toBe('000754');
     expect(rows[1]!.cr).toBe(5000);
+  });
+  /**
+   * TR_CASH's employee box (tEmpCode): EMP_CODE_MANDATORY = 'Y' refuses a blank (TR_CASH.cs:2907-2911, before the
+   * year and lock checks), the code is stored on the CASH_DATA / PAY_DATA row (:3050) and shown again when the
+   * voucher is opened (:2753-2754).
+   */
+  describe('employee code', () => {
+    const rec = (empCode?: string) =>
+      postReceipt(runtime, {
+        scope,
+        partyAc: PARTY,
+        amount: 1000,
+        mode: 'cash',
+        vchDate: '2024-04-01',
+        empCode,
+      } as never);
+    const pay = (empCode?: string) =>
+      postPayment(runtime, {
+        scope: { ...scope, coBook: '002' },
+        partyAc: PARTY,
+        amount: 1000,
+        mode: 'cash',
+        vchDate: '2024-04-01',
+        empCode,
+      } as never);
+    const setMandatory = (v: string) =>
+      exec(
+        `UPDATE "CO_SET" SET "EMP_CODE_MANDATORY"=$3 WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+        TENANT,
+        CO,
+        v,
+      );
+
+    beforeEach(async () => {
+      await seedPaymentBook();
+      await exec(
+        `INSERT INTO "EMP_MAST"(tenant_id,"CO_CODE","EMP_CODE","EMP_NAME") VALUES ($1,$2,'E01','RAJU')`,
+        TENANT,
+        CO,
+      );
+    });
+
+    it('refuses a blank employee when it is mandatory, before anything is written', async () => {
+      await setMandatory('Y');
+      const before = await financeFootprint();
+      await expect(rec()).rejects.toThrow(FINANCE_EMPLOYEE_REQUIRED_MESSAGE);
+      await expect(pay('  ')).rejects.toThrow(FINANCE_EMPLOYEE_REQUIRED_MESSAGE);
+      expect(await financeFootprint()).toEqual(before);
+    });
+
+    it('refuses an employee who is not in the company', async () => {
+      const before = await financeFootprint();
+      await expect(rec('E99')).rejects.toThrow('Employee E99 is not in this company');
+      expect(await financeFootprint()).toEqual(before);
+    });
+
+    it('stores the employee on the receipt and payment header, reads it back, and keeps it through an edit', async () => {
+      await setMandatory('Y');
+      const r = await rec('E01');
+      const p = await pay('E01');
+      const heads = (await owner.$queryRawUnsafe(
+        `SELECT 'R' k, "EMP_CODE" e FROM "CASH_DATA" WHERE tenant_id=$1
+         UNION ALL SELECT 'P', "EMP_CODE" FROM "PAY_DATA" WHERE tenant_id=$1 ORDER BY 1`,
+        TENANT,
+      )) as Array<{ k: string; e: string }>;
+      expect(heads).toEqual([
+        { k: 'P', e: 'E01' },
+        { k: 'R', e: 'E01' },
+      ]);
+      expect((await getReceipt(runtime, scope, r.vchNo)).empCode).toBe('E01');
+      expect((await getPayment(runtime, { ...scope, coBook: '002' }, p.vchNo)).empCode).toBe('E01');
+      await editReceipt(
+        runtime,
+        {
+          scope,
+          partyAc: PARTY,
+          amount: 1200,
+          mode: 'cash',
+          vchDate: '2024-04-01',
+          empCode: 'E01',
+        } as never,
+        r.vchNo,
+      );
+      expect((await getReceipt(runtime, scope, r.vchNo)).empCode).toBe('E01');
+    });
+
+    it('leaves the employee empty when it is not mandatory and none is given', async () => {
+      const r = await rec();
+      expect((await getReceipt(runtime, scope, r.vchNo)).empCode).toBe('');
+    });
   });
 });
