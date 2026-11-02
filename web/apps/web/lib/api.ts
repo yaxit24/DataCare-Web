@@ -229,6 +229,24 @@ export async function downloadPdf(
   filename: string,
   init?: { method: 'POST'; body: unknown },
 ): Promise<void> {
+  return downloadServerFile(path, filename, 'pdf', init);
+}
+
+/**
+ * Download a CSV the server builds from the report's own builder (`/reports/<slug>/export.csv?…`), as a file of this
+ * page. A document opened in a new window is not a download of this page, and the export must carry the server's
+ * totals rows, which the on-screen rows alone do not.
+ */
+export async function downloadServerCsv(path: string, filename: string): Promise<void> {
+  return downloadServerFile(path, filename, 'csv');
+}
+
+async function downloadServerFile(
+  path: string,
+  filename: string,
+  extension: 'pdf' | 'csv',
+  init?: { method: 'POST'; body: unknown },
+): Promise<void> {
   const ticket = page.capture();
   let res: Response;
   try {
@@ -243,14 +261,14 @@ export async function downloadPdf(
       const body = await readBody(res);
       page.assertCurrent(ticket);
       if (res.status === 409 && body?.error === 'context-stale') page.reject(ticket);
-      throw new ApiError('pdf failed', res.status, body);
+      throw new ApiError(`${extension} failed`, res.status, body);
     }
     const blob = await res.blob();
     page.assertCurrent(ticket);
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${filename}.pdf`;
+    a.download = `${filename}.${extension}`;
     document.body.appendChild(a);
     a.click();
     a.remove();

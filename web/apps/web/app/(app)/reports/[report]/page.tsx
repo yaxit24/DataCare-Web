@@ -1,7 +1,14 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { get, post, downloadPdf, downloadCsv, ApiError } from '../../../../lib/api';
+import {
+  get,
+  post,
+  downloadPdf,
+  downloadServerCsv,
+  downloadCsv,
+  ApiError,
+} from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { reportApiSlug } from '../../../../lib/reportSlug';
 import { openDocument } from '../../../../lib/openDocument';
@@ -1544,7 +1551,9 @@ export default function ReportPage() {
               className="ghost"
               onClick={() => {
                 if (totals && pdfPath) {
-                  openDocument(`/api${pdfPath.replace('/export.pdf', '/export.csv')}`);
+                  void downloadServerCsv(pdfPath.replace('/export.pdf', '/export.csv'), slug).catch(
+                    () => setErr('csv failed'),
+                  );
                   return;
                 }
                 downloadCsv(v, `${slug}-${k}`);
