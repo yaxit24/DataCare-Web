@@ -275,13 +275,7 @@ import {
   listEntityImageKeys,
   saveEntityImage,
 } from '../modules/images/entityImage.js';
-import {
-  applyRepair,
-  listRepairs,
-  previewRepair,
-  repairHistory,
-} from '../modules/utilities/dataRepair.js';
-import '../modules/utilities/dataRepairOps.js';
+import { registerDataRepairRoutes } from './dataRepair.js';
 import {
   createReminderEntry,
   listReminderEntries,
@@ -4651,73 +4645,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
 
-  // Data repair console (desktop MS_UPDATE). Admin-only (routePolicy ADMIN_ONLY + SCOPED_ADMIN_ONLY); a
-  // destructive apply also requires a reason, re-authentication and a verified recent backup (applyRepair).
-  app.get('/utilities/data-repair/operations', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    return {
-      operations: listRepairs().map((o) => ({
-        id: o.id,
-        title: o.title,
-        description: o.description,
-        desktopSource: o.desktopSource,
-        risk: o.risk,
-        tables: o.tables,
-      })),
-    };
-  });
-  app.post('/utilities/data-repair/:id/preview', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    const s = sess(req);
-    return run(reply, 200, () =>
-      previewRepair(
-        prisma,
-        String((req.params as any).id),
-        { tenantId: s.tenantId, coCode: s.coCode, lcCode: s.lcCode, coYear: s.coYear },
-        s.sub ?? 'unknown',
-      ),
-    );
-  });
-  app.post('/utilities/data-repair/:id/apply', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    const s = sess(req);
-    const b = body(req);
-    try {
-      const applied = await applyRepair(
-        prisma,
-        String((req.params as any).id),
-        { tenantId: s.tenantId, coCode: s.coCode, lcCode: s.lcCode, coYear: s.coYear },
-        {
-          previewHash: String(b.previewHash ?? ''),
-          confirmation: b.confirmation ? String(b.confirmation) : undefined,
-          operator: s.sub ?? 'unknown',
-          loginCoCode: s.loginCoCode,
-          reason: b.reason ? String(b.reason) : undefined,
-          operatorPassword: b.operatorPassword ? String(b.operatorPassword) : undefined,
-          backupReference: b.backupReference ? String(b.backupReference) : undefined,
-        },
-      );
-      return reply.code(200).send(applied);
-    } catch (e: any) {
-      // A failed or missing re-authentication is an authorization outcome, not a bad request: the operator
-      // has not proved they may act, so it must not read as "fix your payload".
-      if (
-        e?.name === 'RepairError' &&
-        (e.code === 'reauthentication-required' || e.code === 'reauthentication-failed')
-      ) {
-        return reply.code(403).send({ error: 'RepairError', code: e.code, message: e.message });
-      }
-      if (e?.name === 'RepairError') {
-        return reply.code(400).send({ error: 'RepairError', code: e.code, message: e.message });
-      }
-      throw e;
-    }
-  });
-  app.get('/utilities/data-repair/runs', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    const s = sess(req);
-    return { runs: await repairHistory(prisma, { tenantId: s.tenantId, coCode: s.coCode }) };
-  });
+  // Data repair console (desktop MS_UPDATE). Kept on the existing URLs and policy; extracted because this
+  // shared transaction route file has a frozen size ceiling.
+  registerDataRepairRoutes(app, { prisma, auth, guard, sess, run });
   app.post('/admin/companies/:coCode/provision', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return; // admin-gate
     const s = sess(req);
