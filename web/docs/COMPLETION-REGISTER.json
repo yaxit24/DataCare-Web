@@ -2341,7 +2341,7 @@
    "note": "tag print workflow.",
    "webSurface": {
     "kind": "route",
-    "surface": "GET /stock/tag-print"
+    "surface": "POST /stock/tag-print-screen/print"
    },
    "sharedSurfaceWith": []
   },

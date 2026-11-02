@@ -118,8 +118,12 @@ describe('route policy registry', () => {
     // N223 adds the RP_LEDR Ledger Report: the canonical screen GET /reports/account-ledger and its three
     // exports (.pdf/.xlsx/.csv), keeping the two account-in-path aliases. The two old literals move into
     // routes/accountLedger.ts, so the net change is +4: 720 + 4 = 724.
-    expect(routes).toHaveLength(724);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(724);
+    // N224 adds the Party master's GETs (list, print, help, copy, taken, gst-state, account, one, photo), the photo
+    // POSTs (save, delete), POST, PUT and DELETE: 724 + 14 = 738.
+    // N225 replaces Tag Print's list, stage and label routes with the UT_TAG_PRINT screen's (setup, books, book,
+    // vouchers, voucher, stock, tag, tags, lookups, hm-update, default-file, print, labels): 738 - 3 + 13 = 748.
+    expect(routes).toHaveLength(748);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(748);
 
     const policies = routes.map((route) => ({
       ...route,

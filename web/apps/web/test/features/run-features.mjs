@@ -39,6 +39,8 @@ import { autoItem } from './modules/autoItem.mjs';
 import { groupMaster } from './modules/groupMaster.mjs';
 import { productMaster } from './modules/productMaster.mjs';
 import { addressMaster } from './modules/addressMaster.mjs';
+import { partyMaster } from './modules/partyMaster.mjs';
+import { tagPrint } from './modules/tagPrint.mjs';
 import { itemMaster } from './modules/itemMaster.mjs';
 import { wholesaleSale } from './modules/wholesaleSale.mjs';
 import { dataRefresh } from './modules/dataRefresh.mjs';
@@ -83,6 +85,8 @@ const MODULES = [
   groupMaster,
   productMaster,
   addressMaster,
+  partyMaster,
+  tagPrint,
   itemMaster,
   wholesaleSale,
   dataRefresh,

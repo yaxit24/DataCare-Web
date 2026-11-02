@@ -253,7 +253,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Labour Disc | `MS_AUTO_ITEM` | `/masters/labour-update` | `- R E - - L` | PARTIAL | P1-edition |
 | Labour Type | `MS_LBR_TYPE` | `/masters/labour` | `C R E D - L` | PARTIAL | P1-core |
 | Lot Opening | `TR_ITM_LOT` | `/txn/item-lot` | `C R E D - -` | PARTIAL | P1-edition |
-| Party | `MS_ACCT` | `/masters/party`, `/masters/accounts` | `C R E D - L` | PARTIAL | P1-core |
+| Party | `MS_ACCT` | `/masters/party` | `C R E D - L` | PARTIAL | P1-core |
 | Party Opening | `TR_AC_OPBL` | `/txn/ac-opbl` | `C R E D - L` | PARTIAL | P1-core |
 | Point Mast | `MS_POINT` | `/masters/points` | `C R E D - L` | PARTIAL | P1-edition |
 | Product | `MS_PRODUCT` | `/masters/products` | `C R E D - L` | PARTIAL | P1-core |
@@ -441,12 +441,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `MS_ACCT` — direct constructor ([MDI_FORM.cs:7600-7609](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7600-L7609)).
 - **Does:** Creates customer, supplier, karigar and bank accounts with contacts, tax and bank data and openings.
-- **Looks:** Code/Name/Mobile grid; address, tax and bank tabs; opening money and metal; family and photo panels.
-- **Writes:** AC_MAST, OP_DATA, AC_DATA.
-- **Web:** `/masters/party`, `/masters/accounts`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`, `GET /party/:acCode/family`, `GET /party/:acCode/photo`, `POST /party/:acCode/photo`, `GET /accounts/:acCode/opening`, `POST /accounts/:acCode/opening`. Can: create, reopen, edit, delete, list.
-- **Remaining:** The rich party page ignores duplicate-detail updates and lacks delete and print; capabilities are split across two routes.
-- **Owners:** G53, N67, X10, G38, N58, N77, G225, N212.
-- **Evidence:** [KB_master.md:113-145](../../project-memory/video-research/_kb/KB_master.md#L113-L145).
+- **Looks:** Search box over a Code / Name / Mobile list, the photo with its three buttons and the Oppning Balance box with Last Visit and Ledger Date on the left; the customer line over the Company Detail, Other Detail and Family Detl tabs with Ac Code, F1 and the A, D, S buttons on the right; Print, Save, Cancel, Delete and Exit along the bottom.
+- **Writes:** AC_MAST, AC_MAST_SRNO, OP_DATA, AC_DATA, AC_GROUP, STATE_MAST, AC_IMAGE, ADD_MAST, AD_MEMB.
+- **Web:** `/masters/party`; `GET /masters/party-master`, `GET /masters/party-master/print`, `GET /masters/party-master/help/:kind`, `GET /masters/party-master/copy/:kind`, `GET /masters/party-master/taken/:kind`, `GET /masters/party-master/gst-state`, `GET /masters/party-master/account`, `GET /masters/party-master/:code`, `GET /masters/party-master/:code/photo`, `POST /masters/party-master/:code/photo`, `POST /masters/party-master/:code/photo/delete`, `POST /masters/party-master`, `PUT /masters/party-master/:code`, `DELETE /masters/party-master/:code`. Can: create, reopen, edit, delete, list.
+- **Remaining:** The AcMast print layout is not in the repository (Print lists the accounts on screen); the Advance and Enterprise admin panel, defaulter box and limits, the UAE boxes and the hidden Excel and old-year imports are not on the screen; desktop-runtime comparison remains.
+- **Owners:** G53, N67, X10, G38, N58, N77, G225, N212, G236, N224.
+- **Evidence:** [MS_ACCT.cs:5584-9640](../../unified/src/csharp/DataCareNext/MS_ACCT.cs#L5584-L9640).
 
 ### Party Opening
 
@@ -2378,12 +2378,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `UT_TAG_PRINT` — constructor mode 'Tag Print' ([MDI_FORM.cs:8596-8605](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8596-L8605)).
 - **Does:** Selects in-stock tags by tag, product or voucher and reprints barcode and QR labels.
-- **Looks:** Book/voucher/item/product filters, a selectable tag grid, print-file selector, Set and label-skip controls.
-- **Writes:** TAG_PRINT_DATA, BAR_DETL, BAR_IDTL, PRINT_MAST, MAIN_STOCK.
-- **Web:** `/txn/tag-print`; `GET /stock/tag-print`, `POST /stock/tag-print/stage`, `GET /stock/tag-print/label`. Can: print, list.
-- **Remaining:** Basic label sheets work; PRINT_MAST variants, voucher/product selection, label skip, dimensions, fonts and physical-printer evidence remain.
-- **Owners:** N25, X28, G59, N73, G60, N75, X25.
-- **Evidence:** [KB_other.md:117-139](../../project-memory/video-research/_kb/KB_other.md#L117-L139).
+- **Looks:** Book, Vch No with F1, Gr Code, Pr Code and Item Type over a Y/N tag grid with the Hm Id Update columns; Print file Name with Set; Item Name and Lable Skip under the grid; Print, Save, Cancel, Delete and Exit along the bottom.
+- **Writes:** TAG_PRINT_DATA, BAR_DETL, BAR_CAN_DETL, MAIN_STOCK, PRINT_MAST, ITEM_MAST, GROUP_MAST, PRODUCT_MAST.
+- **Web:** `/txn/tag-print`; `GET /stock/tag-print-screen`, `GET /stock/tag-print-screen/books`, `GET /stock/tag-print-screen/book`, `GET /stock/tag-print-screen/vouchers`, `GET /stock/tag-print-screen/voucher`, `GET /stock/tag-print-screen/stock`, `GET /stock/tag-print-screen/tag`, `GET /stock/tag-print-screen/tags`, `GET /stock/tag-print-screen/lookups/:kind`, `POST /stock/tag-print-screen/hm-update`, `POST /stock/tag-print-screen/default-file`, `POST /stock/tag-print-screen/print`, `GET /stock/tag-print-screen/labels`. Can: print, list.
+- **Remaining:** The Crystal label files are not in the repository (the web prints its own label sheet) and physical-printer acceptance (D29) remains; the RFID writer, Print Type box and QR picture (named registrations) are not on the screen.
+- **Owners:** N25, X28, G59, N73, G60, N75, X25, G237, N225.
+- **Evidence:** [UT_TAG_PRINT.cs:1816-5666](../../unified/src/csharp/DataCareNext/UT_TAG_PRINT.cs#L1816-L5666).
 
 ### Tag Split
 
