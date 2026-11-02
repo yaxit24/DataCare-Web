@@ -202,9 +202,21 @@ export function reportPdfSections(result: unknown): {
     string,
     Record<string, unknown>[],
   ][];
-  const scalars = entries.filter(
-    ([, v]) => !Array.isArray(v) && (v === null || typeof v !== 'object'),
-  );
+  const totals =
+    result &&
+    typeof result === 'object' &&
+    'totals' in result &&
+    result.totals &&
+    typeof result.totals === 'object' &&
+    !Array.isArray(result.totals)
+      ? Object.entries(result.totals)
+          .filter(([, value]) => value === null || typeof value !== 'object')
+          .map(([key, value]): [string, unknown] => [`Total ${key}`, value])
+      : [];
+  const scalars = [
+    ...entries.filter(([, v]) => !Array.isArray(v) && (v === null || typeof v !== 'object')),
+    ...totals,
+  ];
   return { scalars, arrays, rows: arrays.reduce((sum, [, v]) => sum + v.length, 0) };
 }
 

@@ -129,12 +129,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `MS_UPDATE` — direct constructor ([MDI_FORM.cs:7461-7470](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7461-L7470)).
 - **Does:** Rebuilds or repairs derived ledger, stock, schema, image, scheme and manufacturing data.
-- **Looks:** Maintenance console of module buttons; the web shows integrity results and preview/apply repair tables.
-- **Writes:** AC_DATA, MAIN_STOCK, BAR_DETL, BOOK_DATA, TAX_DATA, OP_DATA, MFG_DATA.
+- **Looks:** Six operator actions in desktop tab order: Account, Stock, Field Update, Approval Adj, Image Data and Old Field; each opens an audited preview and only Approval Adj can apply in PR-1.
+- **Writes:** APR_DETL, SL_DETL, RATE_CUT_ISU, BAR_DETL, AC_DATA, MAIN_STOCK, BOOK_DATA, CASH_DATA, BANK_RECONCILE, TAG_IMAGE_DATA.
 - **Web:** `/utilities/data-refresh`, `/utilities/data-repair`; `POST /utilities/data-refresh`, `GET /utilities/data-repair/operations`, `POST /utilities/data-repair/:id/preview`, `POST /utilities/data-repair/:id/apply`. Can: create, list.
-- **Remaining:** Refresh deliberately avoids write-back; the repair registry covers a subset of desktop operations; ownership graph, rollback and recovery are unproven.
-- **Owners:** X27, P11-01, X06.
-- **Evidence:** [VARIANTS.md:99-119](../../web-implementation-spec/03_Modules/13_Utilities_Settings_Integrations/VARIANTS.md#L99-L119).
+- **Remaining:** Approval Adj has full preview/apply, exact two-table write-set, audit, rollback and replay proof. Account and Stock are explicit preview-only classifications until their complete builder graphs are proved; Field Update and Old Field await PR-2 classification; Image Data has no proved legacy-flag or byte-migration semantics; G225 Data Refresh caption Print handoff and desktop-runtime comparison remain open.
+- **Owners:** X27, P11-01, X06, N26, G225, N212.
+- **Evidence:** [MS_UPDATE.cs:2042-3047](../../unified/src/csharp/DataCareNext/MS_UPDATE.cs#L2042-L3047), [MS_UPDATE.cs:8809-9038](../../unified/src/csharp/DataCareNext/MS_UPDATE.cs#L8809-L9038), [data-refresh.md](../../docs/handbook/web/data-refresh.md).
 
 ### Location
 
@@ -792,9 +792,9 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Party header, issue and receive grids, fine/conversion band, payment/received matrix and totals.
 - **Writes:** RATE_CUT_DATA, RATE_CUT_ISU, RATE_CUT_REC, RATE_CUT_ISU_REC, MAIN_STOCK, SL_IDTL, DM_DATA, AC_DATA, ROJ_MEL_DATA, TAX_DATA.
 - **Web:** `/txn/wholesale-sale`; `POST /wholesale-sales`, `GET /wholesale-sales/:vchNo`, `PUT /wholesale-sales/:vchNo`, `DELETE /wholesale-sales/:vchNo`, `GET /wholesale-sales/:vchNo/print`. Can: create, reopen, edit, delete, print.
-- **Remaining:** Rojmel, stone and stock legs, negative-stock refusal, configured roles, the voucher list (Up/Down/F1), versions, the full WhSalesBill layout (Kasar Fine, item-detail, tax and invoice-type lines) and accountant acceptance remain.
-- **Owners:** G15, N45, X13, X16, N59, N74, N77, G233, N220.
-- **Evidence:** [TR_WH_SALE.cs:12779-12896](../../unified/src/csharp/DataCareNext/TR_WH_SALE.cs#L12779-L12896), [TR_WH_SALE.cs:13654-13800](../../unified/src/csharp/DataCareNext/TR_WH_SALE.cs#L13654-L13800).
+- **Remaining:** Hand-typed item-detail rows for loose items, SL_IDTL rows on the printed bill, fine kasar, the Rojmel alignment for lined vouchers, configured roles, versions and accountant acceptance remain.
+- **Owners:** G15, N45, X13, X16, N59, N74, N77, G233, N220, N227, N228.
+- **Evidence:** [TR_WH_SALE.cs:12779-12896](../../unified/src/csharp/DataCareNext/TR_WH_SALE.cs#L12779-L12896), [TR_WH_SALE.cs:13654-13800](../../unified/src/csharp/DataCareNext/TR_WH_SALE.cs#L13654-L13800), [TR_WH_SALE.cs:14393-14418](../../unified/src/csharp/DataCareNext/TR_WH_SALE.cs#L14393-L14418), [TR_WH_SALE.cs:13162-13250](../../unified/src/csharp/DataCareNext/TR_WH_SALE.cs#L13162-L13250), [Ac_Stock.cs:857-861](../../unified/src/csharp/DataCareNext/Ac_Stock.cs#L857-L861).
 
 ### Wh Sl Return
 
@@ -1627,9 +1627,9 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Desktop:** `RP_ALL` — constructor caption 'Approval Rpt' ([MDI_FORM.cs:8921-8930](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8921-L8930)).
 - **Does:** Reports approval issue, in/out and pending custody by party and item.
 - **Looks:** Shared date/book/party/location/item filters with Issue, InOut and Pending buttons.
-- **Reads:** APR_DATA, APR_DETL, BOOK_DATA, AC_MAST, ITEM_MAST.
+- **Reads:** APR_DATA, APR_DETL, BOOK_DATA, AC_MAST, ITEM_MAST, PRODUCT_MAST.
 - **Web:** `/reports/approval-report`; `GET /reports/approval-report`. Can: print, list.
-- **Remaining:** Three data modes exist; RP_ALL selectors, grouping, custody reconciliation and Crystal layouts are uncertified.
+- **Remaining:** Three data modes exist; InOut now calculates the desktop Out/In/Pending piece formulas per APR_DETL issue line: Out=ITM_PCS, In=ITM_PCS when ISU_REC='Y' otherwise 0, and Pending=Out-In. RP_ALL selectors, grouping, Crystal layouts and custody-state reconciliation remain uncertified.
 - **Owners:** N22, X17, N24, X26, N57, N75.
 - **Evidence:** [RP_ALL.cs:8141-8365](../../unified/src/csharp/DataCareNext/RP_ALL.cs#L8141-L8365).
 

@@ -62,8 +62,16 @@ databaseDescribe('RP_ALL report family parity builders', () => {
       CO,
     );
     await exec(
+      `INSERT INTO "PRODUCT_MAST"(tenant_id,"CO_CODE","PR_CODE","PR_NAME")
+       VALUES ($1,$2,'P1','Gold Product'),
+              ($1,$2,'P2','Silver Product')`,
+      TENANT,
+      CO,
+    );
+    await exec(
       `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","MAIN_BOOK","DATA_TYPE")
        VALUES ($1,$2,$3,'APR','Approval Book','APR ISU','A'),
+              ($1,$2,$3,'TUR','Web Approval Book','APPROVAL ISSUE','A'),
               ($1,$2,$3,'KRI','Karigar Issue Book','KARIGAR','A'),
               ($1,$2,$3,'BLS','Bullion Sale Book','BUL SALE','A')`,
       TENANT,
@@ -73,7 +81,7 @@ databaseDescribe('RP_ALL report family parity builders', () => {
     await exec(
       `INSERT INTO "APR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","AC_CODE","BOOK_NAME","IT_CODE","TAG_NO","DESIGN_NO","ITM_PCS","ITM_GWT","ITM_NWT","ITM_FINE","ITM_AMT","LBR_AMT","OTH_AMT","NET_AMT","ISU_REC","EMP_CODE","MAIN_USER")
        VALUES ($1,$2,$3,$4,'APR','00001',1,'2024-06-10','C001','APPROVAL ISSUE','GOLD','TAG1','D1',1,10,9,8.7,1000,100,25,1125,'N','E01','USER1'),
-              ($1,$2,$3,$4,'APR','00002',1,'2024-06-11','C002','APPROVAL ISSUE','SILV','TAG2','D2',1,20,19,18.5,2000,150,50,2200,'Y','E02','USER2')`,
+              ($1,$2,$3,$4,'TUR','00002',1,'2024-06-11','C002','APPROVAL ISSUE','SILV','TAG2','D2',1,20,19,18.5,2000,150,50,2200,'Y','E02','USER2')`,
       TENANT,
       CO,
       LC,
@@ -161,6 +169,71 @@ databaseDescribe('RP_ALL report family parity builders', () => {
       status: 'N',
       netAmount: 1125,
     });
+  });
+
+  it('reconciles Approval Rpt InOut pieces with the desktop AprInOut formulas', async () => {
+    await exec(
+      `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","MAIN_BOOK","DATA_TYPE")
+       VALUES ($1,$2,$3,'APR','Duplicate Approval Book','APR ISU','A'),
+              ($1,$2,'02','APR','Other Location Approval','APR ISU','A'),
+              ($1,$2,$3,'OTH','Non Approval Book','OTHER','A')`,
+      TENANT,
+      CO,
+      LC,
+    );
+    await exec(
+      `INSERT INTO "APR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","AC_CODE","BOOK_NAME","IT_CODE","TAG_NO","DESIGN_NO","ITM_PCS","ITM_GWT","ITM_NWT","OTH_AMT","ISU_REC","EMP_CODE","MAIN_USER")
+       VALUES ($1,$2,'02',$4,'APR','00003',1,'2024-06-12','C001','OTHER LOCATION','GOLD','TAG3','D3',4,40,36,100,'N','E01','USER3'),
+              ($1,$2,$3,$4,'OTH','00004',1,'2024-06-13','C001','OTHER BOOK','GOLD','TAG4','D4',8,80,72,200,'N','E01','USER4')`,
+      TENANT,
+      CO,
+      LC,
+      YEAR,
+    );
+
+    const report = await approvalReport(runtime, { ...baseScope }, { mode: 'inout' });
+
+    // AprInOut.spec.json and RP_ALL.cs:8216-8289: Out=APR ISU ITM_PCS;
+    // In=ITM_PCS only for ISU_REC=Y; Pending=Out-In.
+    expect(report.rows).toHaveLength(2);
+    expect(report.rows[0]).toMatchObject({
+      reportType: 'Approval In Out',
+      crystalReport: 'AprInOut',
+      vchNo: '00001',
+      productCode: 'P1',
+      productName: 'Gold Product',
+      outPcs: 1,
+      inPcs: 0,
+      pendingPcs: 1,
+      status: 'N',
+    });
+    expect(report.rows[1]).toMatchObject({
+      vchNo: '00002',
+      coBook: 'TUR',
+      productCode: 'P2',
+      productName: 'Silver Product',
+      outPcs: 1,
+      inPcs: 1,
+      pendingPcs: 0,
+      status: 'Y',
+    });
+    expect(report.totals).toEqual({
+      rows: 2,
+      pcs: 2,
+      grossWt: 30,
+      netWt: 28,
+      otherAmount: 75,
+      outPcs: 2,
+      inPcs: 1,
+      pendingPcs: 1,
+    });
+
+    const product = await approvalReport(
+      runtime,
+      { ...baseScope, filters: { prCode: 'P1' } },
+      { mode: 'inout' },
+    );
+    expect(product.rows.map((row) => row.vchNo)).toEqual(['00001']);
   });
 
   it('runs Kr Report issue/receipt modes from KR_DETL book names', async () => {

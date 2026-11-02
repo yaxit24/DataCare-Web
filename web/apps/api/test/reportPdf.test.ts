@@ -31,12 +31,18 @@ describe('server report PDF builder', () => {
     expect(html).toContain('<h1>Sales Register</h1>');
     expect(html).toContain('<b>2026-2027</b>');
     expect(html).toContain('<div class="k">count</div><div class="v">2</div>');
+    expect(html).toContain('<div class="k">Total TOT_AMT</div><div class="v">3500.5</div>');
     // VCH_NO reads as an identifier: right-aligned but never summed. TOT_AMT is totalled.
     expect(html).toContain('<td class="num">Total (2 rows)</td>');
     expect(html).toContain('<td class="num">3,500.5</td>');
     expect(html).not.toContain('>3,503<');
-    // The nested `totals` object is not a section, as on the screen.
+    // Totals are summary cards rather than a duplicate table section; nested breakdowns stay out of
+    // scalar cards instead of rendering as "[object Object]".
     expect(html.match(/<h2 class="section">/g)).toHaveLength(1);
+    expect(
+      reportPdfSections({ rows: [{ amount: 1 }], totals: { amount: 1, gold: { fine: 2 } } })
+        .scalars,
+    ).toEqual([['Total amount', 1]]);
   });
 
   it('escapes stored business text, so a party name cannot inject markup into the PDF', () => {

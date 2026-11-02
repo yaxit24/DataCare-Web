@@ -147,6 +147,96 @@ function mapLineRow(r: Record<string, unknown>): LineReportRow {
   };
 }
 
+interface ApprovalInOutRow {
+  srNo: number;
+  reportType: string;
+  mode: 'inout';
+  crystalReport: 'AprInOut';
+  coYear: string | null;
+  coBook: string | null;
+  bookName: string | null;
+  vchNo: string | null;
+  vchDate: string | null;
+  acCode: string | null;
+  acName: string | null;
+  city: string | null;
+  area: string | null;
+  productCode: string | null;
+  productName: string | null;
+  itemCode: string | null;
+  itemName: string | null;
+  tagNo: string | null;
+  designNo: string | null;
+  pcs: number;
+  grossWt: number;
+  netWt: number;
+  otherAmount: number;
+  outPcs: number;
+  inPcs: number;
+  pendingPcs: number;
+  status: string | null;
+  mainUser: string | null;
+}
+
+interface ApprovalInOutTotals {
+  rows: number;
+  pcs: number;
+  grossWt: number;
+  netWt: number;
+  otherAmount: number;
+  outPcs: number;
+  inPcs: number;
+  pendingPcs: number;
+}
+
+function mapApprovalInOutRow(r: Record<string, unknown>): ApprovalInOutRow {
+  return {
+    srNo: num(r.srNo),
+    reportType: text(r.reportType) ?? '',
+    mode: 'inout',
+    crystalReport: 'AprInOut',
+    coYear: text(r.coYear),
+    coBook: text(r.coBook),
+    bookName: text(r.bookName),
+    vchNo: text(r.vchNo),
+    vchDate: date(r.vchDate),
+    acCode: text(r.acCode),
+    acName: text(r.acName),
+    city: text(r.city),
+    area: text(r.area),
+    productCode: text(r.productCode),
+    productName: text(r.productName),
+    itemCode: text(r.itemCode),
+    itemName: text(r.itemName),
+    tagNo: text(r.tagNo),
+    designNo: text(r.designNo),
+    pcs: num(r.pcs),
+    grossWt: num(r.grossWt),
+    netWt: num(r.netWt),
+    otherAmount: num(r.otherAmount),
+    outPcs: num(r.outPcs),
+    inPcs: num(r.inPcs),
+    pendingPcs: num(r.pendingPcs),
+    status: text(r.status),
+    mainUser: text(r.mainUser),
+  };
+}
+
+function approvalInOutTotals(rows: ApprovalInOutRow[]): ApprovalInOutTotals {
+  const sum = (field: keyof ApprovalInOutRow, decimals: number): number =>
+    Number(rows.reduce((total, row) => total + num(row[field]), 0).toFixed(decimals));
+  return {
+    rows: rows.length,
+    pcs: sum('pcs', 3),
+    grossWt: sum('grossWt', 3),
+    netWt: sum('netWt', 3),
+    otherAmount: sum('otherAmount', 2),
+    outPcs: sum('outPcs', 3),
+    inPcs: sum('inPcs', 3),
+    pendingPcs: sum('pendingPcs', 3),
+  };
+}
+
 const approvalModes: Record<
   ApprovalReportMode,
   { label: string; crystal: string; pending?: boolean }
@@ -165,14 +255,107 @@ export async function approvalReport(
   prisma: any,
   s: ReportScope,
   options: ReportFamilyOptions<ApprovalReportMode> = {},
-): Promise<{ rows: LineReportRow[] }> {
+): Promise<{
+  rows: Array<LineReportRow | ApprovalInOutRow>;
+  totals?: ApprovalInOutTotals;
+}> {
   return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const mode = approvalMode(options.mode);
     const spec = approvalModes[mode];
     const params: unknown[] = [];
     const where = scopedWhere('a', s, params);
-    where.push(`b."MAIN_BOOK"::text='APR ISU'`);
-    if (spec.pending) where.push(`coalesce(a."ISU_REC",'N')='N'`);
+    // Desktop data uses APR ISU (RP_ALL.cs:8216-8289); provisioned web companies use the
+    // equivalent APPROVAL ISSUE family (seedCompany.ts). Reports must include both stores.
+    params.push('APR ISU', 'APPROVAL ISSUE');
+    const desktopApprovalIssueBookIndex = params.length - 1;
+    const webApprovalIssueBookIndex = params.length;
+
+    if (mode === 'inout') {
+      // AprInOut.rpt reports each original issue line as outbound. Desktop return and sale writes both
+      // resolve that line by setting ISU_REC='Y' (RP_ALL.cs:8216-8289; TR_APR_ISU.cs:6412-6426;
+      // TR_SALE.cs:16110-16114), so “In” means resolved rather than return-only. Joining descendants would
+      // multiply issue quantities and cannot represent the desktop's all-or-nothing line status.
+      // Web adaptation: the desktop writes only 'N' and 'Y' to APR_DETL.ISU_REC, but the web's Approval Rtn
+      // screen is served by the Tour return writer, which closes a returned issue line with 'R'
+      // (tour.ts, tourReturn). The Pending mode already treats anything but 'N' as no longer outstanding, so
+      // 'R' counts as resolved here too; otherwise a returned approval would read In 0 / Pending n in this
+      // mode and disappear from the Pending mode.
+      params.push(['Y', 'R']);
+      const resolvedStatusIndex = params.length;
+      const filterSql = applyFilters('approval-report', s.filters, params);
+      const rows = await tx.$queryRawUnsafe(
+        `SELECT row_number() OVER (
+                  ORDER BY a."AC_CODE",i."PR_CODE",a."VCH_DATE",a."TAG_NO",a."CO_BOOK",a."VCH_NO",a."SR_NO",a.row_id
+                ) AS "srNo",
+                $${params.length + 1}::text AS "reportType",
+                $${params.length + 2}::text AS "mode",
+                $${params.length + 3}::text AS "crystalReport",
+                a."CO_YEAR" AS "coYear",a."CO_BOOK" AS "coBook",coalesce(a."BOOK_NAME",b."BOOK_NAME") AS "bookName",
+                a."VCH_NO" AS "vchNo",a."VCH_DATE"::text AS "vchDate",
+                a."AC_CODE" AS "acCode",coalesce(a."ISU_AC_NAME",m."AC_NAME") AS "acName",
+                m."AC_CITY" AS "city",m."AC_AREA" AS "area",
+                i."PR_CODE" AS "productCode",p."PR_NAME" AS "productName",
+                a."IT_CODE" AS "itemCode",i."IT_NAME" AS "itemName",a."TAG_NO" AS "tagNo",a."DESIGN_NO" AS "designNo",
+                coalesce(a."ITM_PCS",0) AS "pcs",coalesce(a."ITM_GWT",0) AS "grossWt",
+                coalesce(a."ITM_NWT",0) AS "netWt",coalesce(a."OTH_AMT",0) AS "otherAmount",
+                coalesce(a."ITM_PCS",0) AS "outPcs",
+                CASE WHEN a."ISU_REC"::text=ANY($${resolvedStatusIndex}::text[]) THEN coalesce(a."ITM_PCS",0) ELSE 0 END AS "inPcs",
+                coalesce(a."ITM_PCS",0)-CASE WHEN a."ISU_REC"::text=ANY($${resolvedStatusIndex}::text[]) THEN coalesce(a."ITM_PCS",0) ELSE 0 END AS "pendingPcs",
+                a."ISU_REC" AS "status",a."MAIN_USER" AS "mainUser"
+           FROM "APR_DETL" a
+           JOIN LATERAL (
+             SELECT b0."BOOK_NAME"
+               FROM "BOOK_DATA" b0
+              WHERE b0.tenant_id=a.tenant_id
+                AND b0."CO_CODE"::text=a."CO_CODE"::text
+                AND b0."LC_CODE"::text=a."LC_CODE"::text
+                AND b0."CO_BOOK"::text=a."CO_BOOK"::text
+                AND b0."MAIN_BOOK"::text IN ($${desktopApprovalIssueBookIndex},$${webApprovalIssueBookIndex})
+              ORDER BY b0.row_id
+              LIMIT 1
+           ) b ON true
+           LEFT JOIN LATERAL (
+             SELECT m0."AC_NAME",m0."AC_CITY",m0."AC_AREA",m0."AC_STATE"
+               FROM "AC_MAST" m0
+              WHERE m0.tenant_id=a.tenant_id
+                AND m0."CO_CODE"::text=a."CO_CODE"::text
+                AND m0."AC_CODE"::text=a."AC_CODE"::text
+              ORDER BY m0.row_id
+              LIMIT 1
+           ) m ON true
+           LEFT JOIN LATERAL (
+             SELECT i0."IT_NAME",i0."PR_CODE",i0."GR_CODE",i0."IT_TYPE"
+               FROM "ITEM_MAST" i0
+              WHERE i0.tenant_id=a.tenant_id
+                AND i0."CO_CODE"::text=a."CO_CODE"::text
+                AND i0."IT_CODE"::text=a."IT_CODE"::text
+              ORDER BY i0."IT_CODE"
+              LIMIT 1
+           ) i ON true
+           LEFT JOIN LATERAL (
+             SELECT p0."PR_NAME"
+               FROM "PRODUCT_MAST" p0
+              WHERE p0.tenant_id=a.tenant_id
+                AND p0."CO_CODE"::text=a."CO_CODE"::text
+                AND p0."PR_CODE"::text=i."PR_CODE"::text
+              ORDER BY p0.row_id
+              LIMIT 1
+           ) p ON true
+          WHERE ${where.join(' AND ')}${filterSql}
+          ORDER BY a."AC_CODE",i."PR_CODE",a."VCH_DATE",a."TAG_NO",a."CO_BOOK",a."VCH_NO",a."SR_NO",a.row_id`,
+        ...params,
+        spec.label,
+        mode,
+        spec.crystal,
+      );
+      const mapped = (rows as Array<Record<string, unknown>>).map(mapApprovalInOutRow);
+      return { rows: mapped, totals: approvalInOutTotals(mapped) };
+    }
+
+    if (spec.pending) {
+      params.push('N');
+      where.push(`coalesce(a."ISU_REC",$${params.length})=$${params.length}`);
+    }
     const filterSql = applyFilters('approval-report', s.filters, params);
     const rows = await tx.$queryRawUnsafe(
       `SELECT row_number() OVER (ORDER BY a."VCH_DATE",a."CO_BOOK",a."VCH_NO",a."SR_NO") AS "srNo",
@@ -191,12 +374,14 @@ export async function approvalReport(
               a."ISU_REC" AS "status",a."MAIN_USER" AS "mainUser"
          FROM "APR_DETL" a
          LEFT JOIN "BOOK_DATA" b
-           ON b.tenant_id=a.tenant_id AND b."CO_CODE"::text=a."CO_CODE"::text AND b."CO_BOOK"::text=a."CO_BOOK"::text
+           ON b.tenant_id=a.tenant_id AND b."CO_CODE"::text=a."CO_CODE"::text
+          AND b."LC_CODE"::text=a."LC_CODE"::text AND b."CO_BOOK"::text=a."CO_BOOK"::text
          LEFT JOIN "AC_MAST" m
            ON m.tenant_id=a.tenant_id AND m."CO_CODE"::text=a."CO_CODE"::text AND m."AC_CODE"::text=a."AC_CODE"::text
          LEFT JOIN "ITEM_MAST" i
            ON i.tenant_id=a.tenant_id AND i."CO_CODE"::text=a."CO_CODE"::text AND i."IT_CODE"::text=a."IT_CODE"::text
-        WHERE ${where.join(' AND ')}${filterSql}
+        WHERE ${where.join(' AND ')}
+          AND b."MAIN_BOOK"::text IN ($${desktopApprovalIssueBookIndex},$${webApprovalIssueBookIndex})${filterSql}
         ORDER BY a."VCH_DATE",a."CO_BOOK",a."VCH_NO",a."SR_NO"`,
       ...params,
       spec.label,
