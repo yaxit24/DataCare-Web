@@ -2573,6 +2573,8 @@ implemented-unverified. T13 durable lost-acknowledgement replay remains blocked 
 and replay contract; T15 history/configuration, captured desktop BAR_CAN rows, Windows comparison and parent
 acceptance remain open. Dependency-backed execution of the new cases is left to CI because this checkout has
 no installed workspace dependencies.
+The Stock Adjust legacy-number repair (N221, PR #214) adds one T15 isolation case proving that a high
+MAIN_STOCK-only row does not change TAG CANCEL's BAR_CAN_DATA candidate number.
 
 ### N211 — The Employee master is the desktop MS_EMP screen (G224, Lite L2)
 
@@ -3176,16 +3178,28 @@ form TR_STK_ADJ, which does not exist, and posted MAIN_STOCK rows with VCH_TYPE 
 and no register, so a voucher could not be reopened, edited or printed. Its two rounding helpers leave the kernel
 baseline with it.
 
+Forward compatibility keeps those reduced vouchers as read-only historical stock rows rather than inventing missing
+register data. Stock Adjust numbering now reserves both BAR_CAN_DATA and legacy MAIN_STOCK numbers under the complete
+tenant/company/location/year/book key. Edit and delete remove only current STOCK ADJUST I/O rows that match the saved
+BAR_CAN_DETL line, so an already-colliding STOCK ADJ/A/ISR 2 row survives. The forward
+`20261102120000_stock_adjust_legacy_numbering` migration adds the matching non-unique MAIN_STOCK scope/voucher index;
+`stockAdjust.routes.db.test.ts` freezes a same-key old/current edit/delete, legacy-only refusal, scoped sentinels and
+concurrent allocation after the legacy maximum. Rows destroyed before this repair still require backup/audit-led
+recovery and are not fabricated.
+
 Deliberate differences: one transaction under the tag locks; a TagLot or ItmLot sent while its setting is off is refused; a
 replayed save of a loose line makes a second voucher (no idempotency key yet; a replayed tag line is refused because the
 tag is already out).
 
-Evidence: `stockAdjust.routes.db.test.ts` (6 cases through the real routes on forced RLS: the provisioned STADJ book; the
+Evidence: `stockAdjust.routes.db.test.ts` (7 cases through the real routes on forced RLS: the provisioned STADJ book; the
 menu's own right and another menu's book refused; the sign refusals, the Sign refused on the Tag Cancel menu and a hidden
 TagLot refused, with nothing written; the lifecycle with the signed register, I and O stock rows, the LOT_DETL row,
-reopen, edit, print with rights, delete and another tenant untouched; a + tag line; both lot helps with their balances),
+reopen, edit, print with rights, delete and another tenant untouched; a + tag line; both lot helps with their balances;
+and legacy MAIN_STOCK key reservation with same-key edit/delete preservation and concurrent scoped allocation),
 the tagCancelRows and tagCancelVoucher unit tests, and `routePolicy.test.ts` (719 routes) pass. The zero-mock
-`stock-adjust` module passes 18 of 18 cases, none blocked: T12 two operators adjusting one tag out (one voucher), T13 a
+`stock-adjust` module previously passed 18 of 18 cases, none blocked, and the forward repair adds a nineteenth T15 case
+that displays and saves 00091 after a physical legacy 00090, then deletes the current voucher while preserving the old
+row's bytes, revision and tuple identity; dependency-backed execution of that case is pending CI. T12 two operators adjusting one tag out (one voucher), T13 a
 replayed tag save refused, T14 a fault on the stock write rolling the voucher back, T15 Purchase LOT showing TagLot, its
 help filling the line and the save posting the - LOT_DETL row, T17 the Enter walk with the Sign refusal and Alt+S, T18 a
 tag adjusted out leaving the available-tags lookup sales use and coming back after the delete; `tag-cancel` T01 now

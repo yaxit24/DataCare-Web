@@ -63,5 +63,92 @@
       "gap": "X27/P11-01",
       "reason": "Legacy MOB_IMAGE, IMG_IMPORT and CONV_IMAGE semantics and byte migration are unproved."
     }
+  ],
+  "purchase-report": [
+    {
+      "case": "purchase-report.entry.defaults-and-seven-modes",
+      "gap": "G06",
+      "reason": "Purchase Rpt (RP_ALL.cs:6656-6707, MDI_FORM.cs:8911-8920) has no dedicated screen yet: the Reports navigation offers no Purchase Rpt link. The shared RP_ALL selector, filter and grouping engine comes first with the Sales Report (prompt 01); this frozen case then turns green and its entry is removed."
+    },
+    {
+      "case": "purchase-report.filters.header-dimensions",
+      "gap": "G06",
+      "reason": "Purchase Rpt (RP_ALL.cs:6656-6707, MDI_FORM.cs:8911-8920) has no dedicated screen yet: the Reports navigation offers no Purchase Rpt link. The shared RP_ALL selector, filter and grouping engine comes first with the Sales Report (prompt 01); this frozen case then turns green and its entry is removed."
+    },
+    {
+      "case": "purchase-report.filters.item-product-group-type",
+      "gap": "G06",
+      "reason": "Purchase Rpt (RP_ALL.cs:6656-6707, MDI_FORM.cs:8911-8920) has no dedicated screen yet: the Reports navigation offers no Purchase Rpt link. The shared RP_ALL selector, filter and grouping engine comes first with the Sales Report (prompt 01); this frozen case then turns green and its entry is removed."
+    },
+    {
+      "case": "purchase-report.formula.register-item-party-group-totals",
+      "gap": "G06",
+      "reason": "Purchase Rpt (RP_ALL.cs:6656-6707, MDI_FORM.cs:8911-8920) has no dedicated screen yet: the Reports navigation offers no Purchase Rpt link. The shared RP_ALL selector, filter and grouping engine comes first with the Sales Report (prompt 01); this frozen case then turns green and its entry is removed."
+    },
+    {
+      "case": "purchase-report.lookup.party-book-location",
+      "gap": "G06",
+      "reason": "Purchase Rpt (RP_ALL.cs:6656-6707, MDI_FORM.cs:8911-8920) has no dedicated screen yet: the Reports navigation offers no Purchase Rpt link. The shared RP_ALL selector, filter and grouping engine comes first with the Sales Report (prompt 01); this frozen case then turns green and its entry is removed."
+    },
+    {
+      "case": "purchase-report.lookup.product-group-and-item-type",
+      "gap": "G06",
+      "reason": "Purchase Rpt (RP_ALL.cs:6656-6707, MDI_FORM.cs:8911-8920) has no dedicated screen yet: the Reports navigation offers no Purchase Rpt link. The shared RP_ALL selector, filter and grouping engine comes first with the Sales Report (prompt 01); this frozen case then turns green and its entry is removed."
+    },
+    {
+      "case": "purchase-report.grouping.seven-template-variants",
+      "gap": "G06",
+      "reason": "Purchase Rpt (RP_ALL.cs:6656-6707, MDI_FORM.cs:8911-8920) has no dedicated screen yet: the Reports navigation offers no Purchase Rpt link. The shared RP_ALL selector, filter and grouping engine comes first with the Sales Report (prompt 01); this frozen case then turns green and its entry is removed."
+    },
+    {
+      "case": "purchase-report.invalid.reversed-date-and-empty-result",
+      "gap": "G06",
+      "reason": "Purchase Rpt (RP_ALL.cs:6656-6707, MDI_FORM.cs:8911-8920) has no dedicated screen yet: the Reports navigation offers no Purchase Rpt link. The shared RP_ALL selector, filter and grouping engine comes first with the Sales Report (prompt 01); this frozen case then turns green and its entry is removed."
+    },
+    {
+      "case": "purchase-report.source.create-appears-in-modes",
+      "gap": "G06",
+      "reason": "Purchase Rpt (RP_ALL.cs:6656-6707, MDI_FORM.cs:8911-8920) has no dedicated screen yet: the Reports navigation offers no Purchase Rpt link. The shared RP_ALL selector, filter and grouping engine comes first with the Sales Report (prompt 01); this frozen case then turns green and its entry is removed."
+    },
+    {
+      "case": "purchase-report.source.unchanged-save-is-stable",
+      "gap": "G06",
+      "reason": "Purchase Rpt (RP_ALL.cs:6656-6707, MDI_FORM.cs:8911-8920) has no dedicated screen yet: the Reports navigation offers no Purchase Rpt link. The shared RP_ALL selector, filter and grouping engine comes first with the Sales Report (prompt 01); this frozen case then turns green and its entry is removed."
+    },
+    {
+      "case": "purchase-report.source.edit-reaggregates",
+      "gap": "G06",
+      "reason": "Purchase Rpt (RP_ALL.cs:6656-6707, MDI_FORM.cs:8911-8920) has no dedicated screen yet: the Reports navigation offers no Purchase Rpt link. The shared RP_ALL selector, filter and grouping engine comes first with the Sales Report (prompt 01); this frozen case then turns green and its entry is removed."
+    },
+    {
+      "case": "purchase-report.source.delete-and-return-follow-direction",
+      "gap": "G06",
+      "reason": "Purchase Rpt (RP_ALL.cs:6656-6707, MDI_FORM.cs:8911-8920) has no dedicated screen yet: the Reports navigation offers no Purchase Rpt link. The shared RP_ALL selector, filter and grouping engine comes first with the Sales Report (prompt 01); this frozen case then turns green and its entry is removed."
+    },
+    {
+      "case": "purchase-report.scope.tenant-location-year-book-and-rights",
+      "gap": "G06",
+      "reason": "Purchase Rpt (RP_ALL.cs:6656-6707, MDI_FORM.cs:8911-8920) has no dedicated screen yet: the Reports navigation offers no Purchase Rpt link. The shared RP_ALL selector, filter and grouping engine comes first with the Sales Report (prompt 01); this frozen case then turns green and its entry is removed."
+    },
+    {
+      "case": "purchase-report.history.live-master-and-voucher-state",
+      "gap": "G06",
+      "reason": "Purchase Rpt (RP_ALL.cs:6656-6707, MDI_FORM.cs:8911-8920) has no dedicated screen yet: the Reports navigation offers no Purchase Rpt link. The shared RP_ALL selector, filter and grouping engine comes first with the Sales Report (prompt 01); this frozen case then turns green and its entry is removed."
+    },
+    {
+      "case": "purchase-report.output.grid-pdf-xlsx-csv-print-match",
+      "gap": "G06",
+      "reason": "Purchase Rpt (RP_ALL.cs:6656-6707, MDI_FORM.cs:8911-8920) has no dedicated screen yet: the Reports navigation offers no Purchase Rpt link. The shared RP_ALL selector, filter and grouping engine comes first with the Sales Report (prompt 01); this frozen case then turns green and its entry is removed."
+    },
+    {
+      "case": "purchase-report.keyboard.complete-selector-run-flow",
+      "gap": "G06",
+      "reason": "Purchase Rpt (RP_ALL.cs:6656-6707, MDI_FORM.cs:8911-8920) has no dedicated screen yet: the Reports navigation offers no Purchase Rpt link. The shared RP_ALL selector, filter and grouping engine comes first with the Sales Report (prompt 01); this frozen case then turns green and its entry is removed."
+    },
+    {
+      "case": "purchase-report.journey.create-edit-delete-return-reconcile",
+      "gap": "G06",
+      "reason": "Purchase Rpt (RP_ALL.cs:6656-6707, MDI_FORM.cs:8911-8920) has no dedicated screen yet: the Reports navigation offers no Purchase Rpt link. The shared RP_ALL selector, filter and grouping engine comes first with the Sales Report (prompt 01); this frozen case then turns green and its entry is removed."
+    }
   ]
 }

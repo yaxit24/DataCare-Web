@@ -1,3 +1,17 @@
+## 2026-11-02 — Stock Adjust legacy voucher safety follow-up (N221 / G234)
+
+- The forward repair preserves pre-N221 MAIN_STOCK-only Stock Adjust rows instead of fabricating missing register data.
+  Number allocation reserves numeric vouchers from both BAR_CAN_DATA and MAIN_STOCK only for a configured STOCK ADJUST
+  book, under the complete tenant/company/location/year/book lock and scope.
+- Current edit/delete removes only STOCK ADJUST I/O/ISR 1 stock rows matched to the saved BAR_CAN_DETL line. A deployed
+  same-key legacy STOCK ADJ/A/ISR 2 row therefore survives. A new non-unique scoped voucher index supports the union
+  lookup without rejecting legitimate multiple lines or existing collisions.
+- `stockAdjust.routes.db.test.ts` adds legacy-only read/edit/delete refusal, one-dimension scope sentinels, exact physical
+  preservation through a same-key current edit/delete, and concurrent allocation at 00042/00043 after legacy 00041.
+  Dependency-backed migration/API/browser execution remains for CI. Rows already destroyed before this repair cannot
+  be reconstructed without database backup or external audit evidence. N221 remains implemented-unverified/PARTIAL;
+  loose-save idempotency, stale versioning, full write-set/counter/component/report proofs and desktop comparison remain.
+
 ## 2026-11-02 — Tag Print Esc with no focused control (G239, on N225)
 
 - `tag-print.keyboard.desktop-keys` failed intermittently in CI (7 of 24 runs between 06:30 and 09:01 UTC, including main after #210 and

@@ -17,6 +17,20 @@
         "web/apps/api/src/routes/voucherNavigation.ts"
       ]
     },
+    "purchaseReport": {
+      "covers": [
+        "web/apps/web/app/(app)/reports/purchase-report/page.tsx",
+        "web/apps/web/app/(app)/reports/purchase-report/usePurchaseReport.ts",
+        "web/apps/web/app/(app)/reports/purchase-report/PurchaseReportGrid.tsx",
+        "web/apps/web/app/(app)/reports/purchase-report/types.ts",
+        "web/apps/api/src/modules/reports/purchaseReport.ts",
+        "web/apps/api/src/routes/purchaseReport.ts",
+        "web/apps/web/app/(app)/reports/[report]/page.tsx",
+        "web/apps/api/src/modules/reports/reports.ts",
+        "web/apps/api/src/modules/reports/reports3.ts",
+        "web/apps/api/src/modules/reports/reports7.ts"
+      ]
+    },
     "purchaseInvoice": {
       "covers": [
         "web/apps/web/app/(app)/txn/purchase/page.tsx",
@@ -144,7 +158,8 @@
         "web/apps/web/app/(app)/reports/tag-stock/page.tsx",
         "web/apps/web/components/TagCancelForm.tsx",
         "web/apps/api/src/modules/stock/tagCancel.ts",
-        "web/apps/api/src/modules/stock/tagCancelBill.ts"
+        "web/apps/api/src/modules/stock/tagCancelBill.ts",
+        "web/apps/api/src/modules/vouchers/numbering.ts"
       ]
     },
     "employeeMaster": {
@@ -228,7 +243,13 @@
     "stockAdjust": {
       "covers": [
         "web/apps/web/app/(app)/txn/stock-adjust/page.tsx",
-        "web/apps/api/src/modules/stock/stockAdjustLots.ts"
+        "web/apps/web/components/TagCancelForm.tsx",
+        "web/apps/web/lib/tagCancelVoucher.ts",
+        "web/apps/api/src/modules/stock/tagCancel.ts",
+        "web/apps/api/src/modules/stock/tagCancelRows.ts",
+        "web/apps/api/src/modules/stock/stockAdjustLots.ts",
+        "web/apps/api/src/modules/vouchers/numbering.ts",
+        "web/apps/api/src/routes/txn.ts"
       ]
     },
     "dataBackup": {

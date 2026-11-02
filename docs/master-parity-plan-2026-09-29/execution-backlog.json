@@ -7109,7 +7109,7 @@
         "web/apps/api/test/tagCancelFaultMatrix.db.test.ts",
         "web/apps/web/test/features/modules/tagCancel.mjs"
       ],
-      "statusNote": "IMPLEMENTED, not accepted. The feature matrix now freezes 16 executable cases, 2 blocked and 2 not applicable. New evidence covers exact 'Tag Cancel' caption rights with a near-miss refusal, an exact two-browser same-tag race, create/edit/delete rollback at every executed write-set stage, and Tag Stock create/edit/delete agreement. T13 durable lost-acknowledgement replay remains blocked pending a production idempotency key and replay contract; T15 history/configuration stays blocked. Open: no captured desktop BAR_CAN rows, durable idempotency and desktop-runtime comparison. Final dependency-backed execution is pending CI."
+      "statusNote": "IMPLEMENTED, not accepted. The feature matrix now freezes 16 executable cases, 2 blocked and 2 not applicable. New evidence covers exact 'Tag Cancel' caption rights with a near-miss refusal, an exact two-browser same-tag race, create/edit/delete rollback at every executed write-set stage, and Tag Stock create/edit/delete agreement. T13 durable lost-acknowledgement replay remains blocked pending a production idempotency key and replay contract; T15 history/configuration stays blocked. Open: no captured desktop BAR_CAN rows, durable idempotency and desktop-runtime comparison. Final dependency-backed execution is pending CI. The Stock Adjust legacy-number repair (N221, PR #214) adds one T15 isolation case proving that a high MAIN_STOCK-only row does not change TAG CANCEL's BAR_CAN_DATA numbering."
     },
     {
       "id": "N211",
@@ -7403,12 +7403,12 @@
     {
       "id": "N221",
       "status": "implemented-unverified",
-      "action": "Stock Adjust is the desktop TR_TAG_CAN on a STOCK ADJUST book, as the Tag Cancel writer's third mode: the grid with the Sign column and the setting-driven TagLot and ItmLot columns with their helps, the desktop keys, the signed register, MAIN_STOCK I or O by sign, LOT_DETL for a lot, reopen, edit, delete and TagCanBill; the provisioned book becomes the desktop's STADJ out book numbered from BAR_CAN_DATA, with a data migration; the old separate writer is removed.",
+      "action": "Stock Adjust is the desktop TR_TAG_CAN on a STOCK ADJUST book, as the Tag Cancel writer's third mode: the grid with the Sign column and the setting-driven TagLot and ItmLot columns with their helps, the desktop keys, the signed register, MAIN_STOCK I or O by sign, LOT_DETL for a lot, reopen, edit, delete and TagCanBill; the provisioned book becomes the desktop's STADJ out book numbered from BAR_CAN_DATA while reserving legacy MAIN_STOCK-only voucher keys, with forward migrations; the old separate writer is removed.",
       "parentLabels": "P1-core; L3; T01-T18",
       "startAfter": [
         "N220"
       ],
-      "requiredProof": "An HTTP/DB test of the book, rights, refusals, lifecycle, lots and a + tag line; the stock-adjust feature module passes every case and tag-cancel stays green; a Chrome DevTools keyboard, save, reopen, print and delete pass.",
+      "requiredProof": "An HTTP/DB test of the book, rights, refusals, lifecycle, lots, a + tag line, and pre-register MAIN_STOCK-only numbering/collision preservation; the stock-adjust feature module passes every case and tag-cancel stays green; a Chrome DevTools keyboard, save, reopen, print and delete pass.",
       "gapIds": "G234",
       "entryDefinition": "15-standard-edition-plan.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
@@ -7419,10 +7419,12 @@
         "web/apps/api/src/modules/stock/tagCancel.ts",
         "web/apps/api/src/modules/stock/tagCancelRows.ts",
         "web/apps/api/src/modules/stock/stockAdjustLots.ts",
+        "web/apps/api/src/modules/vouchers/numbering.ts",
         "web/apps/api/src/routes/txn.ts",
         "web/apps/api/src/modules/rbac/routePolicy.ts",
         "web/apps/api/src/modules/ops/seedCompany.ts",
         "web/packages/db/prisma/migrations/20261101090000_stock_adjust_book/migration.sql",
+        "web/packages/db/prisma/migrations/20261102120000_stock_adjust_legacy_numbering/migration.sql",
         "web/apps/web/components/TagCancelForm.tsx",
         "web/apps/web/lib/tagCancelVoucher.ts",
         "web/apps/web/app/(app)/txn/stock-adjust/page.tsx",
@@ -7430,7 +7432,7 @@
         "web/apps/web/test/tagCancelVoucher.test.ts",
         "web/apps/web/test/features/modules/stockAdjust.mjs"
       ],
-      "statusNote": "IMPLEMENTED, not accepted. Verified: stockAdjust.routes.db.test.ts 6/6, the Tag Cancel unit tests, routePolicy (719 routes), the stock-adjust feature module 18 of 18 applicable, tag-cancel unchanged, and a Chrome DevTools pass on the demo stack. Open: a replayed loose-line save makes a second voucher (no idempotency key); desktop-runtime comparison and parent acceptance."
+      "statusNote": "IMPLEMENTED, not accepted. Verified before the forward repair: the original stockAdjust.routes.db.test.ts 6/6, the Tag Cancel unit tests, routePolicy (719 routes), the stock-adjust feature module 18 of 18 applicable, tag-cancel unchanged, and a Chrome DevTools pass on the demo stack. Forward repair evidence adds legacy MAIN_STOCK-only number reservation, same-key current edit/delete preservation, scope sentinels, concurrent allocation, and a zero-mock UI create/delete after a hidden legacy maximum; dependency-backed execution is pending CI. Open: a replayed loose-line save makes a second voucher (no idempotency key); desktop-runtime comparison and parent acceptance."
     },
     {
       "id": "N222",

@@ -375,6 +375,27 @@ async function withPurchaseSettings(ctx, { amountType, totalRounding, taxRoundin
   }
 }
 
+/** Narrow browser/DB setup reused by report feature matrices; the voucher still goes through the real screen. */
+export const purchaseInvoiceSetup = Object.freeze({
+  BOOK,
+  LINE_G,
+  LINE_S,
+  EXPECT_G,
+  EXPECT_S,
+  ONE,
+  openPurchase,
+  pickSupplier,
+  fillLine,
+  save,
+  loadVoucher,
+  createOne,
+  header,
+  lines,
+  ledger,
+  stock,
+  counts,
+});
+
 const C = (id, group, kind, source, run, extra = {}) => ({
   id: `purchase-invoice.${id}`,
   group,
