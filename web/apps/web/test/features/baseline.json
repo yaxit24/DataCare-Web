@@ -3,6 +3,13 @@
   "sales-invoice": [],
   "purchase-invoice": [],
   "settings": [],
+  "company-master": [
+    {
+      "case": "company-master.fields.complete-round-trip",
+      "gap": "G38",
+      "reason": "The executable T02 case opens /masters/companies and requires the desktop New action plus editable identity fields; the current milestone intentionally exposes only a read-only Code/Name list, so the rich identity workflow remains missing under G38/N58."
+    }
+  ],
   "sales-return": [],
   "purchase-return": [],
   "sales-order": [
