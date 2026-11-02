@@ -207,6 +207,9 @@
         "web/apps/api/src/modules/sales/wholesaleSaleBill.ts",
         "web/apps/api/src/modules/sales/wholesaleTagStones.ts",
         "web/apps/api/src/modules/sales/rateCutBookingDrawDown.ts",
+        "web/apps/web/components/VoucherNumberKeys.tsx",
+        "web/apps/web/components/VoucherList.tsx",
+        "web/apps/api/src/modules/vouchers/list.ts",
         "web/apps/api/src/routes/wholesaleSale.ts"
       ]
     },
