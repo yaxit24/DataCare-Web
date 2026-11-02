@@ -3802,7 +3802,16 @@
       "gapIds": "G38, G39, G82, G86, G100",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "docs/handbook/web/company-master.md",
+        "web/apps/api/src/modules/masters/configs.ts",
+        "web/apps/api/test/companyMasterContainment.db.test.ts",
+        "web/apps/web/app/(app)/masters/companies/page.tsx",
+        "web/apps/web/test/features/modules/companyMaster.mjs"
+      ],
+      "statusNote": "Milestone 1 containment code is present; overall N58 remains planned. Generic CO_MAST create/update/delete/CSV business paths are blocked by dedicatedWriter before the master transaction, while authenticated rejection/result audits remain expected. /masters/companies is a dedicated tenant-scoped read-only page; executable T11 covers admin, restricted-user, and cross-tenant listing, and executable T02 remains a G38 baseline failure because the rich identity workflow is absent. Pending: rich identity form, versioned/idempotent writer, first YEAR_MAST plus 17-family provisioning, desktop identity conventions, semantic print, complete keyboard/journey evidence, and an accepted safe-delete decision."
     },
     {
       "id": "N59",
@@ -7412,6 +7421,93 @@
         "web/apps/web/test/features/modules/salesOrder.mjs"
       ],
       "statusNote": "IMPLEMENTED (UPI), not accepted. The UPI DB test passes (red before this change), the order-related API tests pass (22 files, 272), and the sales-order module passes 27 of 30 (the three UPI cases pass; old metal and scheme stay baselined under G206; two cases blocked as before). Open: old gold, old silver and scheme tenders; desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N223",
+      "status": "implemented-unverified",
+      "action": "The Ledger Report is the desktop RP_LEDR screen: the account summary (money=Σ(CR−DR), signed gold/silver fine, a negative net to Dr and a positive net to Cr, display-zero rows dropped unless With Zero), the per-voucher and per-ledger-key drill-down with a running Σ(Cr)−Σ(Dr) balance and its side, the voucher-summary gross Dr/Cr, the debit ageing with oldest-first FIFO over the 0-15..151+ buckets for money and the selected fine, totals, the selectors (view, account, dates, data type, With Zero, fine type), one primary Run action, and Print/PDF/Excel/CSV — all from one read-only resolver, keeping the account-in-path aliases.",
+      "parentLabels": "P1-core; L-report; T01-T18",
+      "startAfter": [
+        "N222"
+      ],
+      "requiredProof": "Pure vectors for the sign split, the running balance and the FIFO ageing from desktop-derived scenarios; an HTTP/DB test of the four views, the exports, the refusals, the view-vs-print rights and a cross-tenant sentinel on forced RLS; the account-ledger feature module passes every applicable case; the route universe is 724.",
+      "gapIds": "G235",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/reports/accountLedgerReport.ts",
+        "web/apps/api/src/routes/accountLedger.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/app.ts",
+        "web/apps/web/app/(app)/reports/account-ledger/page.tsx",
+        "web/apps/web/app/(app)/reports/account-ledger/useAccountLedger.ts",
+        "web/apps/web/app/(app)/reports/account-ledger/AccountLedgerGrid.tsx",
+        "web/apps/web/app/(app)/reports/account-ledger/types.ts",
+        "web/apps/api/test/accountLedgerReport.test.ts",
+        "web/apps/api/test/accountLedgerReport.db.test.ts",
+        "web/apps/api/test/routePolicy.test.ts",
+        "web/apps/web/test/features/modules/accountLedger.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. The RP_LEDR account summary, voucher/detail drill-down, debit ageing and signed money/gold/silver balances are served read-only from accountLedgerReport.ts, with PDF/Excel/CSV from the same dataset and a dedicated page; the shared report-filter guard in app.ts exempts the account-ledger routes, whose selectors are typed. Quality, static-gates and the Real-stack browser journeys passed after each functional fix and before this latest main merge. Open: the desktop's OP_LDR opening-ledger ageing union and the staging-table gold/silver fine prints (intentionally not reproduced), desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N224",
+      "status": "implemented-unverified",
+      "action": "The Party master is the desktop MS_ACCT screen: the location's Code / Name / Mobile list and next code, Company Detail and Other Detail in the desktop tab order with the group, mobile, second mobile, short name, GST, main account and reference checks, a new entry's opening (OP_DATA and the AcOp_Ledr legs) and AC_MAST_SRNO row written with the save in one transaction, the photo, the D/S/A copy helps, Print and Delete with the desktop's refusals, and the five AC_MAST columns of the desktop's updater.",
+      "parentLabels": "P1-core; L2; T01-T18",
+      "startAfter": [
+        "N223"
+      ],
+      "requiredProof": "An HTTP/DB test of the list, next code, write set (AC_MAST, OP_DATA, AC_DATA legs, AC_MAST_SRNO), refusals, versions, rights, helps, photo and delete; the party-master feature module passes every case; a Chrome DevTools keyboard, help, photo and delete pass on the demo stack.",
+      "gapIds": "G236",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/masters/partyMaster.ts",
+        "web/apps/api/src/routes/partyMaster.ts",
+        "web/apps/api/src/routes/masterScreens.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/packages/db/prisma/migrations/20261102090000_ac_mast_party_columns/migration.sql",
+        "web/apps/web/app/(app)/masters/party/page.tsx",
+        "web/apps/api/test/partyMaster.test.ts",
+        "web/apps/api/test/partyMaster.db.test.ts",
+        "web/apps/web/test/features/modules/partyMaster.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: partyMaster.test.ts 7/7, partyMaster.db.test.ts 10/10, the full API suite (353 files, 3,757 tests), routePolicy (728 routes), the party-master feature module 18 of 18 applicable (none blocked), the surface crawl and the session-context and labour-preview lifecycle checks, and a Chrome DevTools pass on the demo stack. Desktop-runtime comparison and parent acceptance remain."
+    },
+    {
+      "id": "N225",
+      "status": "implemented-unverified",
+      "action": "Tag Print is the desktop UT_TAG_PRINT screen: the voucher and stock selection by book, group, product and item type, typed tags, Y/N rows with Ctrl+D, Hm Id Update with Save, the default label file (Set) and a print that stages TAG_PRINT_DATA after the Lable Skip blanks.",
+      "parentLabels": "P1-core; L3; T01-T18",
+      "startAfter": [
+        "N224"
+      ],
+      "requiredProof": "An HTTP/DB test of the load, stock and voucher fills, typed tag, staging, Hm Id Update, Set and rights; the tag-print feature module passes every applicable case; a Chrome DevTools keyboard and label pass on the demo stack.",
+      "gapIds": "G237",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/stock/tagPrintScreen.ts",
+        "web/apps/api/src/routes/tagPrintScreen.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/web/app/(app)/txn/tag-print/page.tsx",
+        "web/apps/api/test/tagPrintScreen.db.test.ts",
+        "web/apps/web/test/features/modules/tagPrint.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: tagPrintScreen.db.test.ts 9/9, the tag-print feature module 17 of 17 applicable (T10 not applicable), the surface crawl, and a Chrome DevTools pass on the demo stack. Desktop-runtime comparison and physical-printer acceptance (D29) remain."
     }
   ],
   "amendments": [

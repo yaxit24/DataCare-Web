@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import { CO_MAST_CONFIG } from '../src/modules/masters/configs.js';
 import {
   findMissingRequired,
   buildInsert,
@@ -6,6 +7,10 @@ import {
   buildDeleteGuards,
   bindMasterScope,
   normalizeBlankMasterValues,
+  createMaster,
+  updateMaster,
+  deleteMaster,
+  importMaster,
   AC_MAST_CONFIG,
   ITEM_MAST_CONFIG,
 } from '../src/modules/masters/master.service.js';
@@ -110,5 +115,27 @@ describe('master builders', () => {
   it('configs expose expected keys', () => {
     expect(ITEM_MAST_CONFIG.keyColumns).toEqual(['CO_CODE', 'IT_CODE']);
     expect(AC_MAST_CONFIG.references).toEqual(['AC_DATA']);
+  });
+
+  it('blocks every generic Company mutation before opening a transaction', async () => {
+    const transaction = vi.fn();
+    const prisma = { $transaction: transaction };
+    const scope = { tenantId: 'tenant-a', coCode: '01', lcCode: '01' };
+    const message =
+      'Company uses a dedicated workflow for identity and provisioning; generic create, update, delete, and CSV import are unavailable.';
+
+    for (const call of [
+      () => createMaster(prisma, scope, CO_MAST_CONFIG, { CO_CODE: '02', CO_NAME: 'UNSAFE' }),
+      () => updateMaster(prisma, scope, CO_MAST_CONFIG, { CO_CODE: '01', CO_NAME: 'UNSAFE' }),
+      () => deleteMaster(prisma, scope, CO_MAST_CONFIG, { CO_CODE: '01' }),
+    ])
+      await expect(call()).rejects.toMatchObject({ code: 'dedicated-writer', message });
+
+    expect(await importMaster(prisma, scope, CO_MAST_CONFIG, [{ CO_CODE: '02' }])).toEqual({
+      created: 0,
+      failed: 1,
+      errors: [{ row: 1, error: 'error' }],
+    });
+    expect(transaction).not.toHaveBeenCalled();
   });
 });
