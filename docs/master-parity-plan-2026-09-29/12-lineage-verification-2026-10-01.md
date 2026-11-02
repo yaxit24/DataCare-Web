@@ -2523,12 +2523,13 @@ Evidence: the route/database cases continue to cover the desktop refusals and Ta
 refuses every direct action with no write; two independent browser sessions selecting one live tag before concurrent saves, with
 one voucher/hidden number/O-minus movement; a deepest-applicable browser DM_DATA fault and successful retry; exact
 Tag Stock In Stock/Out rows and hand-computed totals after create; and the create → edit (drop/keep/add) → delete Tag
-Stock journey. `tagCancelFaultMatrix.db.test.ts` injects conditioned failures at 8 create stages, 13 edit stages and 8
+Stock journey. `tagCancelFaultMatrix.db.test.ts` injects conditioned failures at 8 create stages, 14 edit stages and 8
 delete stages, compares whole-tenant and complete source snapshots, checks company/location/tenant sentinels, and
-retries every operation. LOT_DETL is not executed because Tag Cancel mode never writes it. N210 remains
-implemented-unverified. T13 durable lost-acknowledgement idempotency is explicitly blocked for a later production
-slice while Tag Print owns `txn.ts`; T15 history/configuration, captured desktop BAR_CAN rows, Windows comparison and
-parent acceptance remain open. Dependency-backed execution of the new cases is left to CI because this checkout has
+retries every operation. The HTTP rights and deepest-fault cases compare business-table snapshots separately from
+required `audit_log` appends. LOT_DETL is not executed because Tag Cancel mode never writes it. N210 remains
+implemented-unverified. T13 durable lost-acknowledgement replay remains blocked pending a production idempotency key
+and replay contract; T15 history/configuration, captured desktop BAR_CAN rows, Windows comparison and parent
+acceptance remain open. Dependency-backed execution of the new cases is left to CI because this checkout has
 no installed workspace dependencies.
 
 ### N211 — The Employee master is the desktop MS_EMP screen (G224, Lite L2)

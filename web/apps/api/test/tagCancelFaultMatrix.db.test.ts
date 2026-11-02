@@ -373,6 +373,13 @@ const EDIT_STAGES: FaultStage[] = [
   },
   { name: 'edit delete TEMP_BOOK_DATA', table: 'TEMP_BOOK_DATA', operation: 'DELETE' },
   { name: 'edit source TAG_STOCK restore', table: 'TAG_STOCK', operation: 'INSERT' },
+  {
+    name: 'edit source TAG_STOCK re-consume',
+    table: 'TAG_STOCK',
+    operation: 'DELETE',
+    column: 'TAG_NO',
+    value: WEB_TAG,
+  },
   { name: 'edit rebuild TEMP_BOOK_DATA', table: 'TEMP_BOOK_DATA', operation: 'INSERT' },
   { name: 'edit rebuild BAR_CAN_DATA', table: 'BAR_CAN_DATA', operation: 'INSERT' },
   {

@@ -152,7 +152,8 @@ const json = (value) =>
 async function tenantSnapshot(ctx) {
   const tables = await ctx.owner.$queryRawUnsafe(
     `SELECT table_name name FROM information_schema.columns
-      WHERE table_schema='public' AND column_name='tenant_id' GROUP BY table_name ORDER BY table_name`,
+      WHERE table_schema='public' AND column_name='tenant_id' AND table_name<>'audit_log'
+      GROUP BY table_name ORDER BY table_name`,
   );
   const snapshot = {};
   for (const { name } of tables) {
@@ -161,6 +162,28 @@ async function tenantSnapshot(ctx) {
       .sort();
   }
   return snapshot;
+}
+const auditSnapshot = (ctx) =>
+  ctx.rows(
+    `SELECT id::text id,login_name login,co_code company,action,path,status
+       FROM audit_log WHERE tenant_id=$1 ORDER BY id`,
+  );
+async function assertAuditAppend(ctx, before, expected) {
+  let after = [];
+  const deadline = Date.now() + 5_000;
+  do {
+    after = await auditSnapshot(ctx);
+    if (after.length >= before.length + expected.length) break;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  } while (Date.now() < deadline);
+  assert.deepEqual(after.slice(0, before.length), before, 'existing audit rows stay unchanged');
+  const added = after.slice(before.length);
+  assert.equal(added.length, expected.length, `expected ${expected.length} audit appends`);
+  const facts = added.map(({ id: _id, ...row }) => row);
+  const byFacts = (left, right) => json(left).localeCompare(json(right));
+  assert.deepEqual(facts.sort(byFacts), [...expected].sort(byFacts));
+  for (const row of added) assert.match(row.id, /^[1-9][0-9]*$/);
+  return added;
 }
 const sourceRows = (ctx, tag) =>
   ctx.rows(
@@ -624,12 +647,16 @@ export const tagCancel = {
         const deniedTag = await seedTag(ctx);
         const user = USERS.clerk.user;
         const oldRows = await ctx.rows(
-          `SELECT "MAIN_MENU" main,"SUB_MENU" sub,"FRM_VIEW" view,"FRM_EDIT" edit,"FRM_DELETE" del,"FRM_PRINT" print
-             FROM "USER_SET" WHERE tenant_id=$1 AND "USER_NAME"=$2 AND "SUB_MENU" IN ('Tag Cancel','Tag Cancelled') ORDER BY row_id`,
+          `SELECT row_id::text id,"CO_CODE" co,"LC_CODE" lc,"MAIN_SRNO" main_srno,
+                  "SUB_SRNO" sub_srno,"USER_NAME" user_name,"MAIN_MENU" main,"SUB_MENU" sub,
+                  "FRM_VIEW" view,"FRM_EDIT" edit,"FRM_DELETE" del,"FRM_PRINT" print
+             FROM "USER_SET" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01'
+               AND "USER_NAME"=$2 AND "SUB_MENU" IN ('Tag Cancel','Tag Cancelled') ORDER BY row_id`,
           user,
         );
         await ctx.owner.$executeRawUnsafe(
-          `DELETE FROM "USER_SET" WHERE tenant_id=$1 AND "USER_NAME"=$2 AND "SUB_MENU" IN ('Tag Cancel','Tag Cancelled')`,
+          `DELETE FROM "USER_SET" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01'
+             AND "USER_NAME"=$2 AND "SUB_MENU" IN ('Tag Cancel','Tag Cancelled')`,
           TENANT,
           user,
         );
@@ -641,6 +668,7 @@ export const tagCancel = {
         );
         try {
           const { page } = await ctx.session(as(user, 'tag-cancel-caption-clerk'));
+          const allowedAudit = await auditSnapshot(ctx);
           const source = await page.request.get(
             `/api/stock/tag-cancel/source?coBook=${BOOK}&tagNo=${allowedTag.tag}`,
           );
@@ -685,14 +713,34 @@ export const tagCancel = {
           );
           assert.match(await printed.text(), /Tag Cancel/);
           assert.equal(await balance(ctx, deleteTag.tag), 1);
+          await assertAuditAppend(ctx, allowedAudit, [
+            { login: user, company: '01', action: 'POST', path: '/stock/tag-cancel', status: 201 },
+            {
+              login: user,
+              company: '01',
+              action: 'PUT',
+              path: '/stock/tag-cancel/:vchNo',
+              status: 200,
+            },
+            { login: user, company: '01', action: 'POST', path: '/stock/tag-cancel', status: 201 },
+            {
+              login: user,
+              company: '01',
+              action: 'DELETE',
+              path: '/stock/tag-cancel/:vchNo',
+              status: 200,
+            },
+          ]);
 
           await ctx.owner.$executeRawUnsafe(
             `UPDATE "USER_SET" SET "SUB_MENU"='Tag Cancelled'
-              WHERE tenant_id=$1 AND "USER_NAME"=$2 AND "SUB_MENU"='Tag Cancel'`,
+              WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01'
+                AND "USER_NAME"=$2 AND "SUB_MENU"='Tag Cancel'`,
             TENANT,
             user,
           );
           const beforeDenied = await tenantSnapshot(ctx);
+          const beforeDeniedAudit = await auditSnapshot(ctx);
           const deniedSource = await sourceRows(ctx, deniedTag.tag);
           const denied = [
             await page.request.get(`/api/stock/tag-cancel?coBook=${BOOK}`),
@@ -715,6 +763,23 @@ export const tagCancel = {
             denied.map((response) => response.status()),
             [403, 403, 403, 403, 403, 403, 403],
           );
+          await assertAuditAppend(ctx, beforeDeniedAudit, [
+            { login: user, company: '01', action: 'POST', path: '/stock/tag-cancel', status: 403 },
+            {
+              login: user,
+              company: '01',
+              action: 'PUT',
+              path: '/stock/tag-cancel/:vchNo',
+              status: 403,
+            },
+            {
+              login: user,
+              company: '01',
+              action: 'DELETE',
+              path: '/stock/tag-cancel/:vchNo',
+              status: 403,
+            },
+          ]);
           assert.deepEqual(await tenantSnapshot(ctx), beforeDenied);
           assert.deepEqual(await sourceRows(ctx, deniedTag.tag), deniedSource);
           assert.equal(await balance(ctx, allowedTag.tag), 0);
@@ -732,16 +797,22 @@ export const tagCancel = {
           };
         } finally {
           await ctx.owner.$executeRawUnsafe(
-            `DELETE FROM "USER_SET" WHERE tenant_id=$1 AND "USER_NAME"=$2 AND "SUB_MENU" IN ('Tag Cancel','Tag Cancelled')`,
+            `DELETE FROM "USER_SET" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01'
+               AND "USER_NAME"=$2 AND "SUB_MENU" IN ('Tag Cancel','Tag Cancelled')`,
             TENANT,
             user,
           );
           for (const row of oldRows) {
             await ctx.owner.$executeRawUnsafe(
-              `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
-               VALUES ($1,'01','01',$2,$3,$4,$5,$6,$7,$8)`,
+              `INSERT INTO "USER_SET"(tenant_id,row_id,"CO_CODE","LC_CODE","MAIN_SRNO","SUB_SRNO","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
+               VALUES ($1,$2::bigint,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
               TENANT,
-              user,
+              row.id,
+              row.co,
+              row.lc,
+              row.main_srno,
+              row.sub_srno,
+              row.user_name,
               row.main,
               row.sub,
               row.view,
@@ -831,7 +902,7 @@ export const tagCancel = {
     blocked(
       'retry',
       'T13',
-      'Durable lost-acknowledgement idempotency is deferred while PR #208 owns txn.ts.',
+      'Durable lost-acknowledgement replay remains blocked pending a production idempotency key and replay contract.',
     ),
     C(
       'rollback.deepest-dm-data',
@@ -867,10 +938,20 @@ export const tagCancel = {
           const page = await open(ctx);
           await pickTag(page, 1, tag.tag);
           const before = await tenantSnapshot(ctx);
+          const beforeAudit = await auditSnapshot(ctx);
           const beforeCounts = await writeCounts(ctx);
           const failed = await save(page);
           assert.ok(failed.status() >= 400, await failed.text());
           assert.deepEqual(await tenantSnapshot(ctx), before);
+          await assertAuditAppend(ctx, beforeAudit, [
+            {
+              login: USERS.admin.user,
+              company: '01',
+              action: 'POST',
+              path: '/stock/tag-cancel',
+              status: failed.status(),
+            },
+          ]);
           assert.equal(await balance(ctx, tag.tag), 1);
           await ctx.owner.$executeRawUnsafe(`DROP TRIGGER IF EXISTS ${triggerName} ON "DM_DATA"`);
           await ctx.owner.$executeRawUnsafe(`DROP FUNCTION IF EXISTS ${functionName}()`);
