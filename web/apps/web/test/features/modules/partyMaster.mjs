@@ -18,7 +18,7 @@ import { SECOND_TENANT } from '../harness.mjs';
  * - Keys (:6704-9640): Enter moves on in tab order with the group, mobile, short-name, GST, main-account and reference
  *   checks; Silver's Cr/Dr goes to Mobile No2 and Khata No to Save; F1 helps; Ctrl+E unlocks the code; Esc leaves.
  * - Delete (:7963-8025): in use outside the opening voucher, software default accounts, the question, the rows gone.
- * Web rules that differ on purpose (gap G235): one transaction; version tokens; the opening is read-only on an opened
+ * Web rules that differ on purpose (gap G236): one transaction; version tokens; the opening is read-only on an opened
  * party; Print lists the accounts on screen.
  */
 const as = (user, slot) => ({
@@ -1103,7 +1103,7 @@ export const partyMaster = {
       'concurrency.two-operators',
       'T12',
       'mutation',
-      'Two operators open one party: the first save wins and the second is refused with 409 (version token, G235) where the desktop lets the later save win',
+      'Two operators open one party: the first save wins and the second is refused with 409 (version token, G236) where the desktop lets the later save win',
       async (ctx) =>
         withCase(ctx, async () => {
           await seedParty(ctx, '199901', 'E2EP RACE');
@@ -1259,7 +1259,7 @@ export const partyMaster = {
       'output.print',
       'T16',
       'output',
-      "BtnPrint_Click (:8657-8668) opens the AcMast report of the accounts; the layout is not in the repository, so the web lists the screen's accounts by code with their group, address, city, mobile and GST number (G235)",
+      "BtnPrint_Click (:8657-8668) opens the AcMast report of the accounts; the layout is not in the repository, so the web lists the screen's accounts by code with their group, address, city, mobile and GST number (G236)",
       async (ctx) =>
         withCase(ctx, async () => {
           await seedParty(ctx, '199901', 'E2EP PRINT', { mobile: '9800000003', city: 'SURAT' });

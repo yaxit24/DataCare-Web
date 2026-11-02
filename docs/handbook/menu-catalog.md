@@ -445,7 +445,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Writes:** AC_MAST, AC_MAST_SRNO, OP_DATA, AC_DATA, AC_GROUP, STATE_MAST, AC_IMAGE, ADD_MAST, AD_MEMB.
 - **Web:** `/masters/party`; `GET /masters/party-master`, `GET /masters/party-master/print`, `GET /masters/party-master/help/:kind`, `GET /masters/party-master/copy/:kind`, `GET /masters/party-master/taken/:kind`, `GET /masters/party-master/gst-state`, `GET /masters/party-master/account`, `GET /masters/party-master/:code`, `GET /masters/party-master/:code/photo`, `POST /masters/party-master/:code/photo`, `POST /masters/party-master/:code/photo/delete`, `POST /masters/party-master`, `PUT /masters/party-master/:code`, `DELETE /masters/party-master/:code`. Can: create, reopen, edit, delete, list.
 - **Remaining:** The AcMast print layout is not in the repository (Print lists the accounts on screen); the Advance and Enterprise admin panel, defaulter box and limits, the UAE boxes and the hidden Excel and old-year imports are not on the screen; desktop-runtime comparison remains.
-- **Owners:** G53, N67, X10, G38, N58, N77, G225, N212, G235, N223.
+- **Owners:** G53, N67, X10, G38, N58, N77, G225, N212, G236, N224.
 - **Evidence:** [MS_ACCT.cs:5584-9640](../../unified/src/csharp/DataCareNext/MS_ACCT.cs#L5584-L9640).
 
 ### Party Opening
@@ -1713,13 +1713,13 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 ### Ledger Report
 
 - **Desktop:** `RP_LEDR` — constructor caption 'Ledger Report' ([MDI_FORM.cs:8871-8880](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8871-L8880)).
-- **Does:** Shows account opening, movements and closing in money, gold and silver with voucher drill-down.
-- **Looks:** Account/group/date/location/city/area filters with account, detail, voucher and month/ageing grids.
-- **Reads:** AC_DATA, AC_MAST, MAIN_STOCK, FINE_DATA, LEDR_AC_DATA, BOOK_DATA, LDR_ADJ_DATA.
-- **Web:** `/reports/account-ledger`; `GET /reports/account-ledger/:acCode`, `GET /reports/account-ledger/:acCode/export.pdf`. Can: print, list.
-- **Remaining:** A basic ledger exists; metal/time/ageing/purchase modes, zero/sign semantics, nested drill-down and many Crystal variants remain.
-- **Owners:** N24, X26, P10-02, N57, N75.
-- **Evidence:** [RP_LEDR.cs:4658-7694](../../unified/src/csharp/DataCareNext/RP_LEDR.cs#L4658-L7694).
+- **Does:** Shows account opening, movements and closing in money, gold and silver with voucher drill-down and debit ageing.
+- **Looks:** View/account/date/data-type filters and a With-Zero toggle, with account-summary, voucher, detail and debit-ageing grids and totals.
+- **Reads:** AC_DATA, AC_MAST, BOOK_DATA, REMARK_DATA.
+- **Web:** `/reports/account-ledger`; `GET /reports/account-ledger`, `GET /reports/account-ledger/export.pdf`, `GET /reports/account-ledger/export.xlsx`, `GET /reports/account-ledger/export.csv`, `GET /reports/account-ledger/:acCode`, `GET /reports/account-ledger/:acCode/export.pdf`. Can: print, list.
+- **Remaining:** N223 builds the account summary, voucher/detail drill-down, debit ageing, signed money/gold/silver balances, totals and PDF/Excel/CSV from one read-only resolver; the OP_LDR opening-ledger ageing union, the staging-table gold/silver fine prints and the Crystal layout comparison remain.
+- **Owners:** N223, N57, N75.
+- **Evidence:** [RP_LEDR.cs:4658-7694](../../unified/src/csharp/DataCareNext/RP_LEDR.cs#L4658-L7694), [accountLedgerReport.ts](../../web/apps/api/src/modules/reports/accountLedgerReport.ts), [accountLedger.ts](../../web/apps/api/src/routes/accountLedger.ts).
 
 ### Old Stock
 

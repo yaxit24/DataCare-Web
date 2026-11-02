@@ -7,7 +7,7 @@ import { seedCompany } from '../src/modules/ops/seedCompany.js';
 import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 /**
- * N223 / G235: the Party master (desktop MS_ACCT, opened by MDI_FORM.cs:7600-7609) through the real Fastify routes on a
+ * N224 / G236: the Party master (desktop MS_ACCT, opened by MDI_FORM.cs:7600-7609) through the real Fastify routes on a
  * forced-RLS database. Expected values come from the desktop source:
  *
  * - The list at a location other than 00 is the company's codes below 100 and the location's codes from 200
@@ -20,7 +20,7 @@ import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
  * - BtnDelete_Click (:7963-8025) refuses a code used outside the opening voucher and a software default account, and
  *   deletes AC_MAST_SRNO, AC_MAST and the year's book-000 OP_DATA and AC_DATA rows.
  * - The Enter checks (mobile :6893, mobile 2 :6930, short name :7230, GST number :6978) and the helps.
- * Web rules on purpose (gap G235): one transaction, versions, read-only opening on an opened party.
+ * Web rules on purpose (gap G236): one transaction, versions, read-only opening on an opened party.
  */
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const tenantId = 'party-master-db';
@@ -36,7 +36,7 @@ const YEAR = `${startYear}-${startYear + 1}`;
 type Cookie = string;
 
 (enabled ? describe : describe.skip)(
-  'N223 Party master is the desktop MS_ACCT through HTTP',
+  'N224 Party master is the desktop MS_ACCT through HTTP',
   () => {
     let owner: PrismaClient;
     let runtime: PrismaClient;

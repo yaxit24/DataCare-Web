@@ -201,6 +201,16 @@
         "web/apps/api/src/modules/stock/stockAdjustLots.ts"
       ]
     },
+    "accountLedger": {
+      "covers": [
+        "web/apps/web/app/(app)/reports/account-ledger/page.tsx",
+        "web/apps/web/app/(app)/reports/account-ledger/useAccountLedger.ts",
+        "web/apps/web/app/(app)/reports/account-ledger/AccountLedgerGrid.tsx",
+        "web/apps/web/app/(app)/reports/account-ledger/types.ts",
+        "web/apps/api/src/modules/reports/accountLedgerReport.ts",
+        "web/apps/api/src/routes/accountLedger.ts"
+      ]
+    },
     "partyMaster": {
       "covers": [
         "web/apps/web/app/(app)/masters/party/page.tsx",

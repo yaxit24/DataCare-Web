@@ -11,7 +11,7 @@ import {
 } from '../src/modules/masters/partyMaster.js';
 
 /**
- * N223 / G235: the pure rules of the Party master (desktop MS_ACCT). Expected values come from CLEAR_DATA's next-code
+ * N224 / G236: the pure rules of the Party master (desktop MS_ACCT). Expected values come from CLEAR_DATA's next-code
  * queries (MS_ACCT.cs:6230-6340), the masked date boxes' IsDate (:7801-7805), the list filters (Text1_TextChanged
  * :6647-6690, tAcName_TextChanged :7280-7470) and the message texts.
  */
@@ -23,7 +23,7 @@ const rules = (over: Partial<Parameters<typeof nextPartyCode>[1]> = {}) => ({
   ...over,
 });
 
-describe('N223 Party master next code (CLEAR_DATA)', () => {
+describe('N224 Party master next code (CLEAR_DATA)', () => {
   it("AC_LC_CODE_LEN 1: the location's second character and five digits, 00201 first", () => {
     expect(nextPartyCode([], rules())).toBe('100201');
     expect(nextPartyCode([], rules({ lcCode: '00' }))).toBe('000201');
@@ -59,7 +59,7 @@ describe('N223 Party master next code (CLEAR_DATA)', () => {
   });
 });
 
-describe('N223 Party master boxes and texts', () => {
+describe('N224 Party master boxes and texts', () => {
   it('reads a masked date box as IsDate does', () => {
     expect(partyDate('15/08/1990')).toEqual({ text: '15/08/1990', iso: '1990-08-15' });
     expect(partyDate('1/2/2020')).toEqual({ text: '01/02/2020', iso: '2020-02-01' });
