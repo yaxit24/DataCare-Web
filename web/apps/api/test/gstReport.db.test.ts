@@ -140,7 +140,7 @@ class CapturingRenderer implements PdfRenderer {
     for (const [code, main, prefix] of books) {
       await exec(
         `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","MAIN_BOOK","BOOK_TYPE","BOOK_SR_NAME","CUR_USE")
-         VALUES($1,'01','01',$2,$3,$3,'T',$4,'Y')`,
+         VALUES($1,'01','01',$2,$3::text,$3::varchar(30),'T',$4,'Y')`,
         TENANT,
         code,
         main,
