@@ -240,7 +240,7 @@ async function seed(): Promise<void> {
         CO_CODE: coCode,
         LC_CODE: lcCode,
         CO_YEAR: YEAR,
-        CO_BOOK: 'SENT',
+        CO_BOOK: 'SNT',
         VCH_NO: '99999',
         SR_NO: 1,
         ISR_NO: 1,

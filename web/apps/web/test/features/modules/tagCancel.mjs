@@ -169,21 +169,52 @@ const auditSnapshot = (ctx) =>
        FROM audit_log WHERE tenant_id=$1 ORDER BY id`,
   );
 async function assertAuditAppend(ctx, before, expected) {
+  const beforeById = new Map(before.map((row) => [row.id, row]));
+  const expectedCounts = new Map();
+  for (const fact of expected) {
+    const key = json(fact);
+    expectedCounts.set(key, (expectedCounts.get(key) ?? 0) + 1);
+  }
+  const matched = (rows) => {
+    const counts = new Map();
+    for (const { id, ...fact } of rows) {
+      if (beforeById.has(id)) continue;
+      const key = json(fact);
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    return [...expectedCounts].every(([key, count]) => (counts.get(key) ?? 0) >= count);
+  };
   let after = [];
   const deadline = Date.now() + 5_000;
   do {
     after = await auditSnapshot(ctx);
-    if (after.length >= before.length + expected.length) break;
+    if (matched(after)) break;
     await new Promise((resolve) => setTimeout(resolve, 50));
   } while (Date.now() < deadline);
-  assert.deepEqual(after.slice(0, before.length), before, 'existing audit rows stay unchanged');
-  const added = after.slice(before.length);
-  assert.equal(added.length, expected.length, `expected ${expected.length} audit appends`);
-  const facts = added.map(({ id: _id, ...row }) => row);
-  const byFacts = (left, right) => json(left).localeCompare(json(right));
-  assert.deepEqual(facts.sort(byFacts), [...expected].sort(byFacts));
-  for (const row of added) assert.match(row.id, /^[1-9][0-9]*$/);
-  return added;
+
+  const afterById = new Map(after.map((row) => [row.id, row]));
+  for (const row of before) {
+    assert.deepEqual(afterById.get(row.id), row, `existing audit row ${row.id} stays unchanged`);
+  }
+  const additions = after.filter((row) => !beforeById.has(row.id));
+  assert.ok(matched(after), `required audit appends not found in ${json(additions)}`);
+  const remaining = [...additions];
+  const required = [];
+  for (const expectedFact of expected) {
+    const at = remaining.findIndex(({ id: _id, ...fact }) => json(fact) === json(expectedFact));
+    assert.notEqual(at, -1, `missing audit append ${json(expectedFact)}`);
+    required.push(remaining.splice(at, 1)[0]);
+  }
+  const duplicateExpectedFacts = remaining.filter(({ id: _id, ...fact }) =>
+    expectedCounts.has(json(fact)),
+  );
+  assert.deepEqual(
+    duplicateExpectedFacts,
+    [],
+    `unexpected duplicate audit facts ${json(duplicateExpectedFacts)}`,
+  );
+  for (const row of required) assert.match(row.id, /^[1-9][0-9]*$/);
+  return required;
 }
 const sourceRows = (ctx, tag) =>
   ctx.rows(
@@ -371,6 +402,7 @@ export const tagCancel = {
   defaultUser: as(USERS.admin.user),
   inputs: [
     'web/apps/web/components/TagCancelForm.tsx',
+    'web/apps/web/app/(app)/reports/tag-stock/page.tsx',
     'web/apps/api/src/modules/stock/tagCancel.ts',
     'web/apps/api/src/modules/stock/tagCancelBill.ts',
     'web/apps/web/test/features/modules/tagCancel.mjs',

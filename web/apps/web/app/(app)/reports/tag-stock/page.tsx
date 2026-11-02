@@ -85,8 +85,9 @@ export default function TagStockReportPage() {
           ))}
           <span className="spacer" />
           <div className="field">
-            <label>Counter</label>
+            <label htmlFor="tag-stock-counter">Counter</label>
             <input
+              id="tag-stock-counter"
               value={tblCode}
               onChange={(e) => setTblCode(e.target.value)}
               style={{ width: 64 }}
