@@ -28,7 +28,7 @@ import { SaleValidationError } from './sales.js';
  * grid line (`:9520-9556`), Order_Ledr posts legs 12/13 + STR(SR_NO) per row (`Ac_Ledr.cs:55-57`) and Order_Rojmel
  * type 08 + STR(SR_NO) (`Ac_Rojmel.cs:25`).
  *
- * N224 (G206): old gold and old silver are the grid MSG_OLD (`salesOrderOldMetal.ts`). Their amounts join ADV_AMT
+ * N225 (G206): old gold and old silver are the grid MSG_OLD (`salesOrderOldMetal.ts`). Their amounts join ADV_AMT
  * (`:11368`) and the header's OLD_GL* columns come from the grid, so the request cannot set them. The scheme tender is
  * not taken by this screen yet.
  */

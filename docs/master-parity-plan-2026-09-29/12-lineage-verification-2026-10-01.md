@@ -216,7 +216,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G203 | Med | A cheque receipt or payment lost its cheque number on the ledger | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/api/src/modules/finance/finance.ts` | Found by `cash-bank.create.cheque-receipt`: the cheque number was saved on CASH_DATA but every AC_DATA leg had an empty CHQ_NO, while the desktop `Bank_Ledr` (`Ac_Ledr.cs:585-593`) writes `A.CHQ_NO` on each leg; bank reconciliation and cheque reports read it from the ledger. | N193 |
 | G204 | High | Contra Entry was a fixed two-account form, not the desktop grid | `unified/src/csharp/DataCareNext/TR_CONTRA.cs` | `web/apps/web/app/(app)/txn/contra/page.tsx` | Found while writing the contra module: the desktop grid holds any number of rows and writes a CONTRA_DATA pair per row against row 1 (`TR_CONTRA.cs:2760-2866`), one Contra_Ledr leg per row, and refuses unequal totals with its own message (`:2694`); the web took one Dr and one Cr account, wrote one row with both amounts and used its own wording. A shop could not deposit cash into two banks in one voucher. | N194 |
 | G205 | High | Sales Order line priced on fine weight with paise | `unified/src/csharp/DataCareNext/TR_SALE_ORD.cs` | `web/apps/api/src/modules/sales/salesOrder.ts`; `web/apps/web/lib/salesOrderForm.ts` | Found by `sales-order.formula.whole-rupees` and `sales-order.create.amounts`. The desktop prices a line's metal as weight × rate rounded to whole rupees, the weight following SL_AMT_TYPE: fine for F, gross for G, otherwise net + ghat (`TR_SALE_ORD.cs:6560-6672`). The bill takes tax as round(net × %, 0) and the total as round(net + tax, 0) (`:11340-11342`). The web always uses the fine weight and keeps paise (`salesOrder.ts` `calculateOrderLine`, `fineWt` then `round2(fine × rate)`), and `billTotals` runs without a rounding policy, so tax keeps paise. Net 10 g, touch 91.6, rate 6,123.45, labour 237.5 /g on a company with SL_AMT_TYPE N: desktop 61,234 + 2,375 = 63,609, tax 1,908, total 65,517; web 56,090.80 + 2,375 = 58,465.80, tax 1,753.97, total 60,220. | N196 |
-| G206 | Med | Sales Order takes one cash advance and stores no tender breakdown | `unified/src/csharp/DataCareNext/TR_SALE_ORD.cs`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/web/app/(app)/txn/sales-order/page.tsx`; `web/apps/api/src/modules/sales/salesOrder.ts` | Found by `sales-order.create.header-tender` and `sales-order.create.tender-modes`. The desktop advance is the sum of its tender rows: cash, UPI, cheque, card, old gold, old silver and scheme (`TR_SALE_ORD.cs:11368`); each is stored on SL_ORD_DATA (`:9126-9142`: CASH_AMT, UPI_AMT, CHQ_AMT, CARD_AMT, OLD_GL_AMT, OLD_SL_AMT, SCHM_AMT) and Order_Ledr posts each to its own account (`Ac_Ledr.cs:28-61`, legs 01-06 and 12-13). The web screen has one Advance amount, saved as ADV_AMT with CASH_AMT 0, and shows the other tender fields read-only. | N197, N222 |
+| G206 | Med | Sales Order takes one cash advance and stores no tender breakdown | `unified/src/csharp/DataCareNext/TR_SALE_ORD.cs`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/web/app/(app)/txn/sales-order/page.tsx`; `web/apps/api/src/modules/sales/salesOrder.ts` | Found by `sales-order.create.header-tender` and `sales-order.create.tender-modes`. The desktop advance is the sum of its tender rows: cash, UPI, cheque, card, old gold, old silver and scheme (`TR_SALE_ORD.cs:11368`); each is stored on SL_ORD_DATA (`:9126-9142`: CASH_AMT, UPI_AMT, CHQ_AMT, CARD_AMT, OLD_GL_AMT, OLD_SL_AMT, SCHM_AMT) and Order_Ledr posts each to its own account (`Ac_Ledr.cs:28-61`, legs 01-06 and 12-13). The web screen has one Advance amount, saved as ADV_AMT with CASH_AMT 0, and shows the other tender fields read-only. | N197, N222, N225 |
 | G207 | Med | Order advance debits the sales account on a provisioned company | `unified/src/csharp/DataCareNext/Ac_Ledr.cs`; `unified/src/csharp/DataCareNext/Ac_Rojmel.cs` | `web/apps/api/src/modules/ops/seedCompany.ts` | Found by `sales-order.create.advance-ledger`: a 5,000 cash advance posts Dr SALES / Cr customer. Order_Ledr debits the order book's BOOK_DETL slot 1 with CASH_AMT (`Ac_Ledr.cs:28-35`) and Order_Rojmel uses slot 1 as the advance contra (`Ac_Rojmel.cs:11`); on the real data slot 1 of book 020 is 00001, the cash account (recorded in `salesOrder.ts`). `seedCompany.ts:219` gives the SOR book the sale layout (1 SALES, 2 CASH, 3 ROUNDOFF). | N198 |
 | G208 | Med | A sale cannot adjust an order advance on a provisioned company | `unified/src/csharp/DataCareNext/Ac_Rojmel.cs` | `web/apps/api/src/modules/ops/seedCompany.ts`; `web/apps/api/src/modules/sales/sales.ts` | Found by `sales-order.journey.order-to-sale`: Sales Invoice with Ord No and Order Amt answers 400 "book SL account row 4 is missing". Sales_Rojmel posts the sale's ADV_AMT against BOOK_DETL slot 4 (`Ac_Rojmel.cs:96`) and `sales.ts` resolves slot 4 when an advance applies, but provisioned sale books get slots 1-3 only. | N198 |
 | G209 | High | Party Opening was a balanced multi-account voucher, not the desktop's per-party opening | `unified/src/csharp/DataCareNext/TR_AC_OPBL.cs`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/web/app/(app)/txn/ac-opbl/page.tsx`; `web/apps/api/src/modules/finance/partyOpening.ts` | Found while writing the Party Opening case list: the desktop keeps one OP_DATA row per party in book '000' with Cr/Dr signs (`TR_AC_OPBL.cs:2694-2722`) and posts it through AcOp_Ledr (`Ac_Ledr.cs:9-28`) as up to six legs dated the day before the year opens. The web numbered an 'ACO' voucher, demanded that debits equal credits, wrote no OP_DATA and had no reopen, edit, list or desktop messages, so a shop could not enter one party's opening on its own. The balanced-voucher module is removed. | N199 |
@@ -3245,6 +3245,53 @@ dated 2026-03-31 and its AC_MAST_SRNO row, reopened it with the opening read-onl
 refused SALES' save and delete with the desktop texts, copied PATEL TRADERS with the A help, printed the list and
 deleted 100203 with all its rows. Desktop-runtime comparison and parent acceptance remain.
 
+### N225 — Sales Order old gold and old silver rows (G206, part)
+
+Gap G206 · Parents P9; R03 · L1 · Med · Size L · Start after N224
+
+TR_SALE_ORD takes old metal in its own grid, MSG_OLD (Sr, ItCode, ItName, Pcs, GrWt, OthWt, NetWt, Touch, Fine, RTyp,
+Rate, NetAmt; `TR_SALE_ORD.cs:3957-4020`). The item comes from the item master, which gives the name and the type
+(`:4207-4210`). CommPassTotal_Old derives net weight (gross minus other weight), fine (net x touch / 100, or the typed
+fine, or the net weight when there is no touch) and, from the rate type N (net wise) or F (fine wise), the rate from a
+typed amount or the amount from a typed rate, in whole rupees with `Math.Round` (`:4427-4500`). A rate type other than
+N or F is refused with "Please Slelect Rate type = N - Net Wise Or F - Fine Wise" (`:4157-4161`). BILL_TOTAL sums the
+rows by item type into OLD_GL_AMT and OLD_GL (type G) and OLD_SL_AMT and OLD_SL (any other type), and the advance adds
+both amounts (`:11345-11368`). The save rewrites SL_PR_DETL with one row for each grid row that has an item code and a
+net weight or an amount, SR_NO the grid row (`:9421-9475`). Order_Rojmel keys a valued row 04 + STR(SR_NO) and a row
+with fine and no amount 06 + STR(SR_NO) (`Ac_Rojmel.cs:17-21`). Order_Ledr legs 07-10 (`Ac_Ledr.cs:42-50`) join
+BOOK_DATA with `BOOK_INOUT = 'I'`.
+
+The order screen now has the old metal grid in its Order details (`web/apps/web/components/SalesOrderOldMetalGrid.tsx`,
+`web/apps/web/lib/salesOrderOldMetal.ts`), and Old Gold / Old Silver Amt and Fine show the grid totals.
+`web/apps/api/src/modules/sales/salesOrderOldMetal.ts` repeats the derivation on save, resolves each item and its
+group's purchase account, writes SL_PR_DETL, fills the OLD_GL* header columns, adds the amounts to ADV_AMT and feeds the
+shared Rojmel builder. An order with old metal can be reopened, edited and deleted; an edit that omits the rows is
+refused rather than deleting them.
+
+Deliberate differences and what stays open:
+- Legs 07-10 are built and tested, but a Sales Order book is always BOOK_INOUT 'O' here (the book check refuses any
+  other), so the screen's ledger carries the cash legs only and the old metal reaches the day book (Rojmel 04/06) and
+  ADV_AMT. The desktop's own default order books (Mobile Order 1-4, `MS_UPDATE.cs:17799`) are 'I'. If the real Sales
+  Order books are 'I', the book check must accept it and the legs will post; this needs the real BOOK_INOUT.
+- The 'T' book variant (the Old Gold Amt cell typed, an URD Purchase voucher opened, `:11080-11195`) is not built. An
+  order with old metal amounts but no SL_PR_DETL rows cannot be edited here, so an edit cannot zero them.
+- The SL_ORD_ADJ 'O' row with ORD_GOLD and ORD_SILVER (`:9481-9516`) is not written, so metal taken without a value
+  cannot yet be set against a later sale. Leg 11 (trading fine) belongs to rate cut.
+- An item that is not in the master, or whose group has no purchase account, is refused with a web message; the
+  desktop would insert a blank account.
+- The scheme amount stays open under G206 as the baselined case `sales-order.create.scheme-tender`: the desktop types
+  it in the Lite edition and adds it to the advance, but its day-book row, type 05 to the fixed account 00079, is
+  absent from the real data for the 7 of 76 orders that carry a scheme amount (`web/docs/PLAN-SALESORDER-ROJMEL.md`
+  section 2.4).
+
+Evidence: `salesOrderOldMetal.test.ts` (the derivation vectors, the totals, the legs 07-10 keys for an 'I' book and
+none for 'O') and `salesOrderOldMetal.db.test.ts` (refusals that leave nothing, the SL_PR_DETL rows, header totals,
+ADV_AMT, Rojmel 01/04/06 with 33-character keys, reopen, the edit that omits the rows, an amount edit, the delete, an
+old-metal-only advance, the edit block for amounts without rows) pass under forced RLS and fail against the code
+before this change. The new browser cases `create.old-metal-tenders`, `create.old-metal-unvalued-fine` and
+`edit.old-metal-then-delete` pass through the real screen (they failed before: the screen had no grid). Desktop-runtime
+comparison and operator acceptance are not claimed.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -3396,6 +3443,7 @@ deleted 100203 with all its rows. Desktop-runtime comparison and parent acceptan
 | N222 | — | implemented-unverified, evidence in this change (G206 part: UPI tender rows stored in UPI_DATA, posted on legs 12/13 and Rojmel 08, included in ADV_AMT, editable and deletable; old metal and scheme stay open) |
 | N223 | — | implemented-unverified, evidence in this change (G235: the Ledger Report is RP_LEDR with its account summary, voucher/detail drill-down, debit ageing, signed money/gold/silver balances, totals, selectors and PDF/Excel/CSV, from one read-only resolver) |
 | N224 | — | implemented-unverified, evidence in this change (G236: Party is MS_ACCT — the list and next code of the location, both tabs in tab order with the group, mobile, short-name, GST and account checks, the opening and AC_MAST_SRNO in one transaction with the save, the photo, the copy helps, Print and Delete with the desktop's refusals) |
+| N225 | — | implemented-unverified, evidence in this change (G206 part: old gold and old silver rows stored in SL_PR_DETL, totalled into the header and ADV_AMT, day book 04/06, editable and deletable; scheme stays open) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 
