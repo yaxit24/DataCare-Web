@@ -7090,15 +7090,16 @@
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
-      "statusAsOf": "2026-11-01",
+      "statusAsOf": "2026-11-02",
       "evidence": [
         "web/apps/api/src/modules/stock/tagCancel.ts",
         "web/apps/api/src/modules/stock/tagCancelBill.ts",
         "web/apps/web/components/TagCancelForm.tsx",
         "web/apps/api/test/tagCancel.routes.db.test.ts",
+        "web/apps/api/test/tagCancelFaultMatrix.db.test.ts",
         "web/apps/web/test/features/modules/tagCancel.mjs"
       ],
-      "statusNote": "IMPLEMENTED, not accepted. Tag Cancel suites 114/114 (the two new cases red against main); tag-cancel feature module 12 passed / 5 blocked. Open: no captured desktop BAR_CAN rows, idempotency, fault rollback, the Tag Stock report check, desktop-runtime comparison."
+      "statusNote": "IMPLEMENTED, not accepted. The feature matrix now freezes 16 executable cases, 2 blocked and 2 not applicable. New evidence covers exact 'Tag Cancel' caption rights with a near-miss refusal, an exact two-browser same-tag race, create/edit/delete rollback at every executed write-set stage, and Tag Stock create/edit/delete agreement. T13 durable lost-acknowledgement replay remains blocked pending a production idempotency key and replay contract; T15 history/configuration stays blocked. Open: no captured desktop BAR_CAN rows, durable idempotency and desktop-runtime comparison. Final dependency-backed execution is pending CI."
     },
     {
       "id": "N211",
@@ -7561,6 +7562,41 @@
         "web/apps/web/test/features/modules/salesOrder.mjs"
       ],
       "statusNote": "IMPLEMENTED (old gold and old silver), not accepted. The DB write-set test passes (red before this change) and the three browser cases pass. Open: the scheme amount (baselined), the real Sales Order BOOK_INOUT for legs 07-10, the T book variant, the SL_ORD_ADJ O row, desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N227",
+      "status": "implemented-unverified",
+      "action": "Browser cases recorded as blocked for Tag Cancel, Daily Rate, Purchase Invoice, Contra and Cash/Bank now run against the real stack, and the four defects they found are fixed: two operators saving one Daily Rate day no longer hit the RATE_MAST key, the rate lookup is scoped to the session's location, every voucher form's lock-date refusal carries the desktop text, and the Cash Received/Payment Employee box is stored, enforced when CO_SET.EMP_CODE_MANDATORY is Y, and read back.",
+      "parentLabels": "P1-core; L1; L3; T01-T18",
+      "startAfter": [
+        "N226"
+      ],
+      "requiredProof": "A DB test that fails on the old Daily Rate writer, one that fails on the old location-blind lookup, unit and DB tests of the desktop lock text and the employee code (stored, mandatory refusal, unknown employee, kept through an edit); the tag-cancel, daily-rate, purchase-invoice, contra and cash-bank modules pass on a fresh production build, and sales-invoice and sales-order show no new failure.",
+      "gapIds": "G238",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/masters/dailyRate.ts",
+        "web/apps/api/src/modules/masters/rate.ts",
+        "web/apps/api/src/routes/dailyRate.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/posting/posting.ts",
+        "web/apps/api/src/modules/finance/lifecycle.ts",
+        "web/apps/api/src/modules/finance/finance.ts",
+        "web/apps/web/components/PaymentForm.tsx",
+        "web/apps/api/test/dailyRate.routes.db.test.ts",
+        "web/apps/api/test/cashReceiptLegs.db.test.ts",
+        "web/apps/api/test/periodLockMessage.test.ts",
+        "web/apps/web/test/features/modules/tagCancel.mjs",
+        "web/apps/web/test/features/modules/dailyRate.mjs",
+        "web/apps/web/test/features/modules/purchaseInvoice.mjs",
+        "web/apps/web/test/features/modules/contraEntry.mjs",
+        "web/apps/web/test/features/modules/cashBank.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: the daily-rate, lock-message and cash-employee DB and unit tests; full isolated suite API 356 files / 3,789 tests, web 713; modules tag-cancel 16/16, purchase-invoice 29/29, contra 25/25, daily-rate 15 of 16, cash-bank 19 of 21, sales-invoice and sales-order with no new failure (the sales-order old-metal case is the known G206 baseline). Open: daily-rate T15 needs a location-00 session in the harness; cash-bank T03 and T06; the desktop's default employee from the session (TR_CASH.cs:2671); desktop-runtime comparison and parent acceptance."
     }
   ],
   "amendments": [

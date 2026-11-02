@@ -8,6 +8,7 @@ import {
   getDailyRate,
   saveDailyRate,
 } from '../modules/masters/dailyRate.js';
+import { fetchRate } from '../modules/masters/rate.js';
 import { sendVoucherDocument } from '../modules/documents/voucherPrint.js';
 
 /** Daily Rate (desktop MS_RATE) routes, extracted from `txn.ts` so its size ceiling keeps falling. */
@@ -95,6 +96,19 @@ export function registerDailyRateRoutes(app: FastifyInstance, h: DailyRateRouteH
     throw error;
   };
 
+  // The rate lookup behind the ticker and the sale forms: the session's own location (TR_SALE.cs:12547).
+  app.get('/rate', auth, async (req) => {
+    const scope = readScope(req);
+    const query = (req.query as Record<string, unknown>) || {};
+    return fetchRate(
+      prisma,
+      scope.tenantId,
+      scope.coCode,
+      String(query.group ?? ''),
+      query.date ? String(query.date) : undefined,
+      scope.lcCode,
+    );
+  });
   app.get('/daily-rate', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, () => getDailyRate(prisma, readScope(req), dateOf(req)));

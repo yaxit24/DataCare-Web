@@ -1008,8 +1008,10 @@ export const tagPrint = {
             (await staged(ctx)).map((r) => r.TAG_NO),
             ['TP0001', 'TP0003'],
           );
-          await page.keyboard.press('Escape');
-          await page.waitForURL((url) => !url.pathname.startsWith('/txn/tag-print'));
+          await Promise.all([
+            page.waitForURL((url) => url.pathname === '/dashboard'),
+            page.keyboard.press('Escape'),
+          ]);
           return {
             observation:
               'Enter through Book and Vch No, Y/N, Space, the arrows, Alt+S, Print with Enter and Esc',

@@ -11,6 +11,7 @@ export async function fetchRate(
   coCode: string,
   group: string,
   date?: string,
+  lcCode?: string,
 ): Promise<{
   group: string;
   rate: number;
@@ -21,23 +22,33 @@ export async function fetchRate(
 } | null> {
   const d = date && /^\d{4}-\d{2}-\d{2}/.test(date) ? toIsoDate(date) : '9999-12-31';
   return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
+    // TR_SALE.cs:12547 reads the day's RATE_MAST rows for the user's own CO_CODE and LC_CODE, so a rate saved at one
+    // location is not another location's rate. The web keeps its fallback to the latest earlier day, and to another
+    // location only when this one has no rate at all.
+    const where = lcCode ? ' AND "LC_CODE"=$4' : '';
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "GR_CODE", "VCH_DATE", ${NN('"GR_RATE"')} AS rate, ${NN('"GR_TOUCH"')} AS touch,
               ${NN('"FINE_GL_RATE"')} AS finegl, ${NN('"FINE_SL_RATE"')} AS finesl
-       FROM "RATE_MAST" WHERE "CO_CODE"=$1 AND "GR_CODE"::text=$2 AND "VCH_DATE"::text <= $3
+       FROM "RATE_MAST" WHERE "CO_CODE"=$1 AND "GR_CODE"::text=$2 AND "VCH_DATE"::text <= $3${where}
        ORDER BY "VCH_DATE" DESC, "SR_NO" DESC LIMIT 1`,
       coCode,
       group,
       d,
+      ...(lcCode ? [lcCode] : []),
     );
     let r = rows[0];
     if (!r) {
       // fallback: a given group's latest row; if NO group (e.g. the rate ticker) the latest row of ANY group.
       const hasGroup = !!(group && String(group).trim());
+      const params: unknown[] = [coCode];
+      if (hasGroup) params.push(group);
+      const lcOrder = lcCode
+        ? `(CASE WHEN "LC_CODE"=$${params.push(lcCode)} THEN 0 ELSE 1 END), `
+        : '';
       const any: any[] = await tx.$queryRawUnsafe(
         `SELECT "GR_CODE", "VCH_DATE", ${NN('"GR_RATE"')} AS rate, ${NN('"GR_TOUCH"')} AS touch, ${NN('"FINE_GL_RATE"')} AS finegl, ${NN('"FINE_SL_RATE"')} AS finesl
-         FROM "RATE_MAST" WHERE "CO_CODE"=$1 ${hasGroup ? 'AND "GR_CODE"::text=$2' : ''} ORDER BY "VCH_DATE" DESC LIMIT 1`,
-        ...(hasGroup ? [coCode, group] : [coCode]),
+         FROM "RATE_MAST" WHERE "CO_CODE"=$1 ${hasGroup ? 'AND "GR_CODE"::text=$2' : ''} ORDER BY ${lcOrder}"VCH_DATE" DESC LIMIT 1`,
+        ...params,
       );
       r = any[0];
     }
