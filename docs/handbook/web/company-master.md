@@ -80,8 +80,10 @@ N58 remains **planned** in the execution backlog. This milestone adds containmen
 - `CO_MAST_CONFIG.dedicatedWriter` blocks generic create, update, and delete before the generic master service starts
   a business transaction. Generic CSV import delegates each row to the same blocked create function, so it creates
   zero business rows. The normal authenticated request audit still records each rejected request.
-- Direct generic POST, PUT, and DELETE keep the existing `400` response contract:
-  `{"error":"dedicated-writer","message":"Company uses a dedicated workflow for identity and provisioning; generic create, update, delete, and CSV import are unavailable."}`
+- Business-scope protection runs before the generic writer. A cross-company POST, such as creating code `02` while
+  scoped to company `01`, returns HTTP `409` with `{"error":"scope-mismatch"}`. Same-company PUT and DELETE reach
+  dedicated containment and return HTTP `400` with
+  `{"error":"dedicated-writer","message":"Company uses a dedicated workflow for identity and provisioning; generic create, update, delete, and CSV import are unavailable."}`.
 - CSV import keeps the existing aggregate response semantics for a blocked row: HTTP `200`, `created: 0`, `failed: 1`,
   and the generic row error. A later dedicated-route milestone may standardize that response without changing broad
   master behavior.
@@ -92,7 +94,8 @@ N58 remains **planned** in the execution backlog. This milestone adds containmen
   Delete, or CSV action and does not display credentials or placeholder identity fields.
 - The service unit test asserts that the generic writer transaction never opens. The HTTP/database test snapshots
   every tenant-scoped table around the combined POST/PUT/DELETE/import containment requests: every non-audit table
-  is unchanged, while the four expected `audit_log` rows record the three `400` refusals and the `200` import result.
+  is unchanged, while the four expected `audit_log` rows record the scope-first POST `409`, two same-scope `400`
+  dedicated refusals, and the `200` import result.
   Feature cases call their four-table checks “representative dependent rows,” not a complete-tenant snapshot.
 - The executable T02 case is baselined under G38 because `/masters/companies` still lacks the desktop New action and
   editable identity fields. The generated progress page therefore reports one open Company case rather than green.
@@ -110,9 +113,10 @@ would risk partial deletion, tenant escape, orphaned rows, and unrecoverable los
 preserve business results without copying desktop weaknesses, and G80 identifies destructive desktop operations that
 need managed hosted replacements (`docs/master-parity-plan-2026-09-29/12-lineage-verification-2026-10-01.md:93,258`).
 
-Milestone 1 therefore blocks generic deletion with the same dedicated-writer response as other generic mutations. A
-future route may use a different method/status only after the owner accepts a safe-delete contract. No delete cascade
-is implemented here.
+Milestone 1 therefore blocks same-scope generic deletion with the dedicated-writer response used by other requests
+that reach containment. Cross-company requests can be refused earlier by business-scope protection. A future route may
+use a different method/status only after the owner accepts a safe-delete contract. No delete cascade is implemented
+here.
 
 ## Remaining stages under N58, G38, and G39
 

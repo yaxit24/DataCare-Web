@@ -14,7 +14,7 @@ import { diffTenant, snapshotTenant, tenantTables } from './support/tenantSnapsh
  * The desktop delete is an unsafe unscoped cascade (MS_COMPANY.cs:6254-6418), so it is not ported.
  */
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
-const TENANT = 'company-master-containment';
+const TENANT = 'company-master-ct';
 const PASSWORD = 'Company-Containment!2026';
 const SECRET = 'company-containment-test-secret-over-thirty-two';
 const ADMIN = 'companyadmin';
@@ -84,12 +84,18 @@ type Cookie = string;
 
   it('rejects all generic mutations, changes no non-audit tenant table, and records exact rejection audits', async () => {
     const before = await snapshot();
-    for (const [method, url, payload] of [
-      ['POST', '/masters/companies', { CO_CODE: '02', CO_NAME: 'UNSAFE CREATE' }],
-      ['PUT', '/masters/companies', { CO_CODE: '01', CO_NAME: 'UNSAFE UPDATE' }],
-      ['DELETE', '/masters/companies', { CO_CODE: '01' }],
+    const created = await request('POST', '/masters/companies', {
+      CO_CODE: '02',
+      CO_NAME: 'UNSAFE CREATE',
+    });
+    expect(created.statusCode, created.body).toBe(409);
+    expect(created.json()).toEqual({ error: 'scope-mismatch' });
+
+    for (const [method, payload] of [
+      ['PUT', { CO_CODE: '01', CO_NAME: 'UNSAFE UPDATE' }],
+      ['DELETE', { CO_CODE: '01' }],
     ] as const) {
-      const response = await request(method, url, payload);
+      const response = await request(method, '/masters/companies', payload);
       expect(response.statusCode, response.body).toBe(400);
       expect(response.json()).toEqual({ error: 'dedicated-writer', message: MESSAGE });
     }
@@ -116,7 +122,7 @@ type Cookie = string;
         ),
     ).toEqual([
       { action: 'DELETE', path: '/masters/:name', status: 400, login_name: ADMIN },
-      { action: 'POST', path: '/masters/:name', status: 400, login_name: ADMIN },
+      { action: 'POST', path: '/masters/:name', status: 409, login_name: ADMIN },
       { action: 'POST', path: '/masters/:name/import', status: 200, login_name: ADMIN },
       { action: 'PUT', path: '/masters/:name', status: 400, login_name: ADMIN },
     ]);

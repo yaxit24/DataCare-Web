@@ -375,19 +375,17 @@ export const companyMaster = {
           const response = await request(page, method, '/masters/companies', data);
           outcomes.push({ status: response.status(), body: await response.json() });
         }
-        assert.deepEqual(
-          outcomes,
-          [400, 400].map((status) => ({
-            status,
-            body: { error: 'dedicated-writer', message: MESSAGE },
-          })),
-        );
+        const expectedOutcomes = [
+          { status: 409, body: { error: 'scope-mismatch' } },
+          { status: 400, body: { error: 'dedicated-writer', message: MESSAGE } },
+        ];
+        assert.deepEqual(outcomes, expectedOutcomes);
         const after = await representativeDependentRows(ctx);
         assert.deepEqual(after, before);
         return {
           observation:
-            'generic POST and PUT returned dedicated-writer; representative Company/dependent rows unchanged',
-          expected: outcomes,
+            'cross-company POST returned scope-mismatch before the writer; same-company PUT returned dedicated-writer; representative Company/dependent rows unchanged',
+          expected: expectedOutcomes,
           database: after,
         };
       },
