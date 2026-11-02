@@ -41,14 +41,33 @@ describe('guarded direct server reads (fetch doubles only)', () => {
 
   it('keeps exact backup bytes and sends both captured context headers', async () => {
     const raw = '{"raw":9007199254740993,"decimal":"9999999999999999.99","null":null}\n';
-    fetcher.mockResolvedValueOnce(new Response(raw));
-    const blob = await api.getBlob('/backup');
-    expect(await blob.text()).toBe(raw);
+    fetcher.mockResolvedValueOnce(
+      new Response(raw, {
+        headers: { 'content-disposition': 'attachment; filename="Next24_R_021126_17.json"' },
+      }),
+    );
+    const download = await api.getDownload('/backup');
+    expect(await download.blob.text()).toBe(raw);
+    expect(download.filename).toBe('Next24_R_021126_17.json');
     expect(fetcher.mock.calls[0]?.[0]).toBe('/api/backup');
     const headers = new Headers(fetcher.mock.calls[0]?.[1]?.headers);
     expect(headers.get('x-session-context-id')).toBe(A.sessionId);
     expect(headers.get('x-session-context-epoch')).toBe('7');
     expect(fetcher.mock.calls[0]?.[1]?.body).toBeUndefined();
+  });
+
+  it('keeps getBlob compatible and sanitizes header filenames', async () => {
+    fetcher.mockResolvedValueOnce(new Response('legacy')).mockResolvedValueOnce(
+      new Response('safe', {
+        headers: {
+          'content-disposition': `attachment; filename*=UTF-8''..%2F..%5Cunsafe%00.json`,
+        },
+      }),
+    );
+    expect(await (await api.getBlob('/backup')).text()).toBe('legacy');
+    const download = await api.getDownload('/backup');
+    expect(download.filename).toBe('unsafe_.json');
+    expect(download.filename).not.toMatch(/[\\/\u0000-\u001f\u007f]/);
   });
 
   it('rejects a late blob before the caller can download it', async () => {

@@ -19,8 +19,18 @@ import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../component
 import { EntityImagePanel } from '../../../../components/EntityImagePanel';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import SubDetailGrid, { stoneRowFromApi, useSubDetail } from '../../../../components/SubDetailGrid';
-import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
-import { fineFor, labourCharge, billTotals, lineNet as lineNetAmount } from '@datacare/core';
+import {
+  companyFlag,
+  companySetting,
+  useCompanySettingsState,
+} from '../../../../lib/companySettings';
+import {
+  billTotals,
+  fineFor,
+  normalizePurchaseExplicitFine,
+  purchaseAmountType,
+  purchaseLineAmounts,
+} from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
 import { openDocument } from '../../../../lib/openDocument';
 
@@ -32,9 +42,10 @@ interface Line {
   labourType?: 'per_gram' | 'per_piece' | 'percentage' | 'fixed';
   labourRate?: number;
   labourFixed?: number;
+  labourAmount: string;
   otherFineWt?: number;
   silverFineWt?: number;
-  otherAmount?: number;
+  otherAmount: string;
   huid?: string;
   pcs: string;
   grossWt: string;
@@ -73,7 +84,12 @@ interface Line {
   fineCutNetWt: string;
   fineCutFine: string;
   prCode: string;
+  rateType: string;
   urdRateType: string;
+  /** Loaded persisted calculations remain authoritative until a derivation input is edited. */
+  loadedFineWt?: boolean;
+  loadedMetalAmount?: boolean;
+  loadedLabourAmount?: boolean;
 }
 const blank = (): Line => ({
   itCode: '', // desktop grids start empty; a demo default posts to the wrong item
@@ -85,6 +101,8 @@ const blank = (): Line => ({
   touch: '',
   rate: '',
   making: '',
+  labourAmount: '',
+  otherAmount: '',
   tblCode: '',
   designNo: '',
   itDesc: '',
@@ -114,6 +132,7 @@ const blank = (): Line => ({
   fineCutNetWt: '',
   fineCutFine: '',
   prCode: '',
+  rateType: '',
   urdRateType: '',
 });
 const extendedLineFields: Array<[keyof Line, string]> = [
@@ -139,6 +158,8 @@ const extendedLineFields: Array<[keyof Line, string]> = [
   ['otherRate', 'Other Rate'],
   ['mrp', 'MRP'],
   ['metalAmount', 'Metal Amt'],
+  ['labourAmount', 'Labour Amt'],
+  ['otherAmount', 'Other Amt'],
   ['commissionPct', 'Comm %'],
   ['commissionAmount', 'Comm Amt'],
   ['fineCutPcs', 'Fine-cut Pcs'],
@@ -146,11 +167,60 @@ const extendedLineFields: Array<[keyof Line, string]> = [
   ['fineCutNetWt', 'Fine-cut Net'],
   ['fineCutFine', 'Fine-cut Fine'],
   ['prCode', 'PR Code'],
+  ['rateType', 'Rate Type'],
   ['urdRateType', 'URD Rate Type'],
 ];
 const n = (v: string) => Number(v || 0);
 const str = (v: unknown) => (v == null || Number(v) === 0 ? '' : String(v));
-const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
+const editableString = (v: unknown) => (v == null ? '' : String(v));
+const optionalNumber = (v: unknown): number | undefined =>
+  v == null || String(v).trim() === '' ? undefined : Number(v);
+
+const metalDerivationInputs: Array<keyof Line> = [
+  'pcs',
+  'grossWt',
+  'netWt',
+  'ghtWt',
+  'touch',
+  'westPct',
+  'fineWt',
+  'lesTouch',
+  'kunFine',
+  'rate',
+  'rateType',
+  'urdRateType',
+];
+
+function loadedLabourDependsOn(line: Line, field: keyof Line, labourWithGhat: boolean): boolean {
+  const mode = line.making ? 'per_gram' : line.labourType;
+  switch (mode) {
+    case 'per_gram':
+      return (
+        field === 'netWt' ||
+        (labourWithGhat && field === 'ghtWt') ||
+        field === 'making' ||
+        (!line.making && field === 'labourRate') ||
+        field === 'labourType'
+      );
+    case 'per_piece':
+      return (
+        field === 'pcs' || field === 'labourRate' || field === 'making' || field === 'labourType'
+      );
+    case 'percentage':
+      return (
+        field === 'labourPct' ||
+        field === 'labourType' ||
+        field === 'metalAmount' ||
+        metalDerivationInputs.includes(field)
+      );
+    case 'fixed':
+      return field === 'labourFixed' || field === 'labourType';
+    default:
+      // Persisted G/K or ambiguous legacy/web modes cannot be recovered safely. Keep their loaded
+      // labour amount authoritative instead of clearing it and recomputing under a guessed mode.
+      return false;
+  }
+}
 
 export default function PurchaseEntryPage() {
   const { lcCode, coYear } = useBusinessScope();
@@ -173,8 +243,11 @@ export default function PurchaseEntryPage() {
    * There is nothing for the server to enforce: the value still posts, it just may not be retyped.
    * Blank default 'N' per MS_OPNCOMP.cs.
    */
-  const companySettings = useCompanySettings();
-  const fineLocked = companyFlag(companySettings, 'ITM_FINE_LOCK', 'N');
+  const settingsState = useCompanySettingsState();
+  const companySettings = settingsState.values;
+  const settingsReady = settingsState.status === 'ready';
+  const amountType = purchaseAmountType(companySetting(companySettings, 'PR_AMT_TYPE'));
+  const fineLocked = settingsReady && companyFlag(companySettings, 'ITM_FINE_LOCK', 'N');
   // G11: per-gram labour is on (net + ghat) unless the company sets LBR_WITH_GHT='N' (blank default Y).
   const labourWithGhat = companyFlag(companySettings, 'LBR_WITH_GHT', 'Y');
   // Desktop TR_PURC carries TWO sub-detail grids: MSG_IDTL (34 cols, tag side) and MSG_PR_IDTL
@@ -240,29 +313,75 @@ export default function PurchaseEntryPage() {
   // Desktop parity: TR_PURC's item grid exposes the operator-typed fields as columns.
   const [fullGrid, setFullGrid] = useState(false);
   const setLine = (i: number, k: keyof Line, v: string) =>
-    setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
+    setLines((ls) =>
+      ls.map((line, j) => {
+        if (j !== i) return line;
+        const next = { ...line, [k]: v };
+        const fineInputs: Array<keyof Line> = [
+          'netWt',
+          'ghtWt',
+          'touch',
+          'westPct',
+          'lesTouch',
+          'kunFine',
+        ];
+        if (k === 'fineWt') next.loadedFineWt = false;
+        else if (line.loadedFineWt && fineInputs.includes(k)) {
+          next.fineWt = '';
+          next.loadedFineWt = false;
+        }
+        if (k === 'metalAmount') next.loadedMetalAmount = false;
+        else if (line.loadedMetalAmount && metalDerivationInputs.includes(k)) {
+          next.metalAmount = '';
+          next.loadedMetalAmount = false;
+        }
+        if (k === 'labourAmount') next.loadedLabourAmount = false;
+        else if (line.loadedLabourAmount && loadedLabourDependsOn(line, k, labourWithGhat)) {
+          next.labourAmount = '';
+          next.loadedLabourAmount = false;
+        }
+        return next;
+      }),
+    );
 
   const calc = (l: Line) => {
-    const fine = fineFor('purchaseItem', {
-      netWt: n(l.netWt),
-      touch: n(l.touch),
-      ghtWt: n(l.ghtWt),
-      westPct: n(l.westPct),
-    });
-    const metal = r2(fine * n(l.rate));
-    // P5: per-gram labour is (net + ghat) x rate unless the company switches ghat off
-    // (LBR_WITH_GHT, blank default 'Y'). This page sends ghtWt to the server, so computing the
-    // preview from netWt alone understated labour by ghat x rate against what actually posts.
-    const mk = labourCharge('per_gram', {
-      netWt: n(l.netWt),
-      ghatWt: n(l.ghtWt),
-      withGhat: labourWithGhat,
-      rate: n(l.making),
-    });
-    // G84: the server's line net is metal + labour + OTHER charges (purchase.ts calcLineNet); previewing
-    // metal + making alone understated any line carrying an other-charge amount.
-    const other = Number(l.otherAmount ?? 0) || 0;
-    return { fine, metal, mk, net: lineNetAmount({ metal, labour: mk, other }) };
+    const enteredFine = normalizePurchaseExplicitFine(optionalNumber(l.fineWt));
+    const lesTouch = optionalNumber(l.lesTouch);
+    const kunFine = optionalNumber(l.kunFine);
+    const fine =
+      enteredFine ??
+      fineFor(lesTouch != null || kunFine != null ? 'purchaseOldGold' : 'purchaseItem', {
+        netWt: n(l.netWt),
+        touch: n(l.touch),
+        ghtWt: n(l.ghtWt),
+        westPct: n(l.westPct),
+        lesTouch,
+        kunFine,
+      });
+    const labourType = l.making ? ('per_gram' as const) : l.labourType;
+    const amounts = purchaseLineAmounts(
+      {
+        pieces: n(l.pcs),
+        grossWt: n(l.grossWt),
+        netWt: n(l.netWt),
+        ghatWt: n(l.ghtWt),
+        fineWt: fine,
+        rate: n(l.rate),
+        rateType: l.rateType,
+        urdRateType: l.urdRateType,
+        itemAmount: optionalNumber(l.metalAmount),
+        labourType,
+        labourRate: l.making ? n(l.making) : l.labourRate,
+        labourPct: optionalNumber(l.labourPct),
+        labourFixed: l.labourFixed,
+        labourAmount: optionalNumber(l.labourAmount),
+        otherAmount: optionalNumber(l.otherAmount),
+      },
+      amountType,
+      roundingPolicy,
+      labourWithGhat,
+    );
+    return { fine, metal: amounts.item, mk: amounts.labour, net: amounts.net };
   };
   const lineNet = lines.reduce((s, l) => s + calc(l).net, 0);
   // G102: preview with the same arithmetic and company rounding policy the server posts, so the shown
@@ -334,6 +453,7 @@ export default function PurchaseEntryPage() {
         bankAc: String(view.bankAc ?? ''),
       });
       const loadedLines: Line[] = (view.lines ?? []).map((line: any) => ({
+        ...blank(),
         itCode: String(line.itCode ?? ''),
         tagNo: String(line.tagNo ?? ''),
         vchSrno: Number(line.vchSrno ?? 0) || undefined,
@@ -342,14 +462,25 @@ export default function PurchaseEntryPage() {
         grossWt: str(line.grossWt),
         netWt: str(line.netWt),
         touch: str(line.touch),
+        ghtWt: str(line.ghtWt),
+        westPct: str(line.westPct),
         rate: str(line.rate),
-        making: line.labourType === 'per_gram' ? str(line.labourRate) : '',
+        making: line.labourType === 'per_gram' ? editableString(line.labourRate) : '',
         labourType: line.labourType,
-        labourRate: Number(line.labourRate ?? 0) || undefined,
-        labourFixed: Number(line.labourFixed ?? 0) || undefined,
+        labourPct: editableString(line.labourPct),
+        labourRate: line.labourRate == null ? undefined : Number(line.labourRate),
+        labourFixed: line.labourFixed == null ? undefined : Number(line.labourFixed),
         otherFineWt: Number(line.otherFineWt ?? 0) || undefined,
         silverFineWt: Number(line.silverFineWt ?? 0) || undefined,
-        otherAmount: Number(line.otherAmount ?? 0) || undefined,
+        fineWt: String(line.fineWt ?? ''),
+        metalAmount: String(line.metalAmount ?? ''),
+        labourAmount: String(line.labourAmount ?? ''),
+        loadedFineWt: true,
+        loadedMetalAmount: true,
+        loadedLabourAmount: true,
+        otherAmount: str(line.otherAmount),
+        rateType: String(line.rateType ?? ''),
+        urdRateType: String(line.urdRateType ?? ''),
         huid: String(line.huid ?? '') || undefined,
       }));
       setLines(loadedLines.length ? loadedLines : [blank()]);
@@ -397,6 +528,14 @@ export default function PurchaseEntryPage() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!settingsReady) {
+      setErr(
+        settingsState.status === 'error'
+          ? 'Purchase settings could not be loaded. Reload this page before saving.'
+          : 'Purchase settings are still loading. Wait before saving.',
+      );
+      return;
+    }
     setErr('');
     setResult(null);
     setBusy(true);
@@ -459,7 +598,7 @@ export default function PurchaseEntryPage() {
             rate: n(l.rate),
             otherFineWt: l.otherFineWt,
             silverFineWt: l.silverFineWt,
-            otherAmount: l.otherAmount,
+            otherAmount: optionalNumber(l.otherAmount),
             tblCode: l.tblCode || undefined,
             designNo: l.designNo || undefined,
             itDesc: l.itDesc || undefined,
@@ -472,16 +611,17 @@ export default function PurchaseEntryPage() {
             ghtPct: n(l.ghtPct) || undefined,
             ghtWt: n(l.ghtWt) || undefined,
             westPct: n(l.westPct) || undefined,
-            fineWt: n(l.fineWt) || undefined,
-            labourPct: n(l.labourPct) || undefined,
+            fineWt: optionalNumber(l.fineWt),
+            labourPct: optionalNumber(l.labourPct),
+            labourAmount: optionalNumber(l.labourAmount),
             lessTouch: n(l.lessTouch) || undefined,
-            lesTouch: n(l.lesTouch) || undefined,
-            kunFine: n(l.kunFine) || undefined,
+            lesTouch: optionalNumber(l.lesTouch),
+            kunFine: optionalNumber(l.kunFine),
             convRate: n(l.convRate) || undefined,
             convPct: n(l.convPct) || undefined,
             otherRate: n(l.otherRate) || undefined,
             mrp: n(l.mrp) || undefined,
-            metalAmount: n(l.metalAmount) || undefined,
+            metalAmount: optionalNumber(l.metalAmount),
             commissionPct: n(l.commissionPct) || undefined,
             commissionAmount: n(l.commissionAmount) || undefined,
             fineCutPcs: n(l.fineCutPcs) || undefined,
@@ -489,6 +629,7 @@ export default function PurchaseEntryPage() {
             fineCutNetWt: n(l.fineCutNetWt) || undefined,
             fineCutFine: n(l.fineCutFine) || undefined,
             prCode: l.prCode || undefined,
+            rateType: l.rateType || undefined,
             urdRateType: l.urdRateType || undefined,
 
             huid: l.huid,
@@ -694,19 +835,29 @@ export default function PurchaseEntryPage() {
                         style={{ width: 110 }}
                         onPick={(r) =>
                           setLines((ls) =>
-                            ls.map((x, j) =>
-                              j === i
-                                ? {
-                                    ...x,
-                                    tagNo: String(r.code),
-                                    itCode: String(r.name || x.itCode),
-                                    netWt: String(r.ITM_NWT ?? x.netWt),
-                                    grossWt: String(r.ITM_GWT ?? x.grossWt),
-                                    touch: String(r.ITM_TOUCH ?? x.touch),
-                                    rate: String(r.ITM_RATE ?? x.rate),
-                                  }
-                                : x,
-                            ),
+                            ls.map((x, j) => {
+                              if (j !== i) return x;
+                              const invalidateLabour =
+                                !!x.loadedLabourAmount &&
+                                (['grossWt', 'netWt', 'touch', 'rate'] as Array<keyof Line>).some(
+                                  (field) => loadedLabourDependsOn(x, field, labourWithGhat),
+                                );
+                              return {
+                                ...x,
+                                tagNo: String(r.code),
+                                itCode: String(r.name || x.itCode),
+                                netWt: String(r.ITM_NWT ?? x.netWt),
+                                grossWt: String(r.ITM_GWT ?? x.grossWt),
+                                touch: String(r.ITM_TOUCH ?? x.touch),
+                                rate: String(r.ITM_RATE ?? x.rate),
+                                fineWt: x.loadedFineWt ? '' : x.fineWt,
+                                metalAmount: x.loadedMetalAmount ? '' : x.metalAmount,
+                                labourAmount: invalidateLabour ? '' : x.labourAmount,
+                                loadedFineWt: false,
+                                loadedMetalAmount: false,
+                                loadedLabourAmount: invalidateLabour ? false : x.loadedLabourAmount,
+                              };
+                            }),
                           )
                         }
                       />
@@ -763,7 +914,7 @@ export default function PurchaseEntryPage() {
                       readOnlyFields={fineLocked ? (['fineWt'] as const) : undefined}
                     />
                     <td className="num">{c.fine.toLocaleString('en-IN')}</td>
-                    <td className="num">{c.net.toLocaleString('en-IN')}</td>
+                    <td className="num">{settingsReady ? c.net.toLocaleString('en-IN') : '—'}</td>
                     <td>
                       <button
                         type="button"
@@ -951,21 +1102,36 @@ export default function PurchaseEntryPage() {
               + Add line
             </button>
             <span className="spacer" />
-            <span className="muted" style={{ marginRight: 16 }}>
-              Taxable ₹{taxable.toLocaleString('en-IN')} · Tax ₹{taxPrev.toLocaleString('en-IN')} ·{' '}
-              <b>Total ₹{totalPrev.toLocaleString('en-IN')}</b>
-            </span>
-            <button className="primary" disabled={busy}>
+            {settingsReady ? (
+              <span className="muted" style={{ marginRight: 16 }}>
+                Taxable ₹{taxable.toLocaleString('en-IN')} · Tax ₹{taxPrev.toLocaleString('en-IN')}{' '}
+                · <b>Total ₹{totalPrev.toLocaleString('en-IN')}</b>
+              </span>
+            ) : (
+              <span className="muted" style={{ marginRight: 16 }}>
+                {settingsState.status === 'error'
+                  ? 'Purchase totals unavailable because settings failed to load.'
+                  : 'Loading purchase settings…'}
+              </span>
+            )}
+            <button className="primary" disabled={busy || !settingsReady}>
               {busy ? 'Saving…' : loadedVchNo ? 'Update Purchase' : 'Save Purchase'}
             </button>
           </div>
         </div>
-        <TenderPanel
-          total={totalPrev}
-          value={tender}
-          onChange={setTender}
-          title="pay the supplier now (blank = full on credit)"
-        />
+        {settingsReady && (
+          <TenderPanel
+            total={totalPrev}
+            value={tender}
+            onChange={setTender}
+            title="pay the supplier now (blank = full on credit)"
+          />
+        )}
+        {settingsState.status === 'error' && (
+          <div className="msg err" role="alert" data-testid="purchase-settings-error">
+            Purchase settings could not be loaded. Reload this page before saving.
+          </div>
+        )}
       </form>
       {err && <div className="msg err">{err}</div>}
       {result && (

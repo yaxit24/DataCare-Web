@@ -287,6 +287,75 @@ const keyedLegs = (ctx, table, v) =>
        FROM "${table}" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "LEDR_KEY"`,
     v,
   );
+/**
+ * G206 (old metal): the order's old gold / old silver grid, TR_SALE_ORD MSG_OLD (ItCode, ItName, Pcs, GrWt, OthWt,
+ * NetWt, Touch, Fine, RTyp, Rate, NetAmt). Net weight, fine, rate and amount are derived the way CommPassTotal_Old
+ * does (:4427-4500); the operator types gross, other, touch, rate type and the amount.
+ */
+async function fillOldMetal(page, n, row) {
+  const label = (name) => `Old metal ${name} line ${n}`;
+  if (!(await page.getByLabel(label('item'), { exact: true }).count()))
+    await page.getByRole('button', { name: '+ Add old metal row', exact: true }).click();
+  const item = page.getByLabel(label('item'), { exact: true });
+  await item.fill(row.item);
+  await item.press('Enter');
+  // The picked item fills ItName and its type, which decides gold or silver in the totals.
+  await page.waitForFunction(
+    (testId) => !!document.querySelector(`[data-testid="${testId}"]`)?.textContent?.trim(),
+    `old-metal-name-${n}`,
+  );
+  for (const [name, key] of [
+    ['pcs', 'pcs'],
+    ['gross', 'gross'],
+    ['other', 'other'],
+    ['touch', 'touch'],
+    ['amount', 'amount'],
+  ])
+    if (row[key] !== undefined) await page.getByLabel(label(name), { exact: true }).fill(row[key]);
+  if (row.rateType)
+    await page.getByLabel(label('rate type'), { exact: true }).selectOption(row.rateType);
+}
+const oldMetalInputs = async (page, n) => {
+  const read = (name) =>
+    page.getByLabel(`Old metal ${name} line ${n}`, { exact: true }).inputValue();
+  return {
+    item: await read('item'),
+    pcs: await read('pcs'),
+    gross: await read('gross'),
+    other: await read('other'),
+    net: await read('net'),
+    touch: await read('touch'),
+    fine: await read('fine'),
+    rateType: await read('rate type'),
+    rate: await read('rate'),
+    amount: await read('amount'),
+  };
+};
+const oldMetalHeader = (ctx, v) =>
+  ctx.rows(
+    `SELECT "CASH_AMT"::float cash,"ADV_AMT"::float adv,"OLD_GL_AMT"::float "glAmt","OLD_SL_AMT"::float "slAmt",
+            "OLD_GL"::float gl,"OLD_SL"::float sl
+       FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+    v,
+  );
+const oldMetalDetail = (ctx, v) =>
+  ctx.rows(
+    `SELECT "SR_NO"::int sr,btrim("IT_CODE") it,btrim("IT_TYPE") typ,btrim("IT_DESC") descr,"ITM_PCS"::float pcs,
+            "ITM_GWT"::float gwt,"ITM_OTH"::float oth,"ITM_NWT"::float nwt,"ITM_TOUCH"::float touch,
+            "ITM_FINE"::float fine,btrim("ITM_RATE_TYPE") rtype,"ITM_RATE"::float rate,"NET_AMT"::float net,
+            btrim("ENTRY_TYPE") entry,btrim("VCH_TYPE") vtype,btrim("AC_CODE") ac,btrim("MAIN_USER") mu
+       FROM "SL_PR_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+    v,
+  );
+/** Day-book rows with the metal columns Order_Rojmel keeps on types 04 and 06. */
+const metalDayBook = (ctx, v) =>
+  ctx.rows(
+    `SELECT substr("LEDR_KEY",22,2) leg,btrim(substr("LEDR_KEY",24)) line,length("LEDR_KEY")::int len,
+            btrim("AC_CODE") ac,btrim("LD_CODE") ld,"DR_AMT"::float dr,"CR_AMT"::float cr,
+            btrim("IT_TYPE") typ,btrim(coalesce("SIGN",'')) sign,"ITM_FINE"::float fine,"ITM_NWT"::float nwt
+       FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "LEDR_KEY"`,
+    v,
+  );
 const yearOf = async (ctx) =>
   (
     await ctx.rows(
@@ -736,34 +805,279 @@ export const salesOrder = {
     ),
 
     C(
-      'create.old-metal-and-scheme-tenders',
+      'create.old-metal-tenders',
       'T02',
       'mutation',
-      'TR_SALE_ORD.cs:11368, Order_Ledr legs 07-10 (Ac_Ledr.cs:42-50) and Order_Rojmel types 04/06 (Ac_Rojmel.cs:17-21): an advance can include old gold and old silver taken in (SL_PR_DETL rows) and a scheme amount',
+      'TR_SALE_ORD MSG_OLD (:3957-4020, :4427-4500), :9421-9475, :11345-11368, Order_Rojmel types 01/04 (Ac_Rojmel.cs:11, :17): old gold and old silver taken in are stored in SL_PR_DETL (net weight = gross - other, fine = net x touch / 100, rate back-calculated from the typed amount), summed into OLD_GL_AMT / OLD_SL_AMT / OLD_GL / OLD_SL and into ADV_AMT with the cash, and each valued row is a day-book debit keyed 04 + STR(SR_NO)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const party = PARTIES.local.code;
+        await enterOrder(page, { advance: 3000 });
+        await openDetails(page);
+        await page.getByLabel('Cash A/c', { exact: true }).fill(CASH);
+        await fillOldMetal(page, 1, {
+          item: ITEMS.gold.code,
+          pcs: '1',
+          gross: '10.5',
+          other: '0.5',
+          touch: '91.6',
+          rateType: 'F',
+          amount: '2000',
+        });
+        await fillOldMetal(page, 2, {
+          item: ITEMS.silver.code,
+          pcs: '3',
+          gross: '50',
+          touch: '80',
+          rateType: 'N',
+          amount: '3000',
+        });
+        const shown = [await oldMetalInputs(page, 1), await oldMetalInputs(page, 2)];
+        assert.deepEqual(
+          shown.map((r) => [r.net, r.fine, r.rate, r.amount]),
+          [
+            ['10.000', '9.160', '218.00', '2000'],
+            ['50.000', '40.000', '60.00', '3000'],
+          ],
+          'the grid derives net, fine and rate as CommPassTotal_Old does (the typed amount stays as typed)',
+        );
+        assert.deepEqual(
+          [
+            await page.locator('#sales-header-oldGoldAmount').inputValue(),
+            await page.locator('#sales-header-oldSilverAmount').inputValue(),
+          ],
+          ['2000', '3000'],
+          'Old Gold Amt and Old Silver Amt are the grid totals',
+        );
+        const response = await save(page);
+        assert.equal(response.status(), 201, await response.text());
+        const vchNo = String((await response.json()).vchNo).padStart(5, '0');
+        const [h] = await oldMetalHeader(ctx, vchNo);
+        const d = await oldMetalDetail(ctx, vchNo);
+        const day = await metalDayBook(ctx, vchNo);
+        const g = await keyedLegs(ctx, 'AC_DATA', vchNo);
+        assert.deepEqual(h, { cash: 3000, adv: 8000, glAmt: 2000, slAmt: 3000, gl: 9.16, sl: 40 });
+        assert.deepEqual(
+          d.map((r) => [
+            r.sr,
+            r.it,
+            r.typ,
+            r.pcs,
+            r.gwt,
+            r.oth,
+            r.nwt,
+            r.touch,
+            r.fine,
+            r.rtype,
+            r.rate,
+            r.net,
+          ]),
+          [
+            [1, ITEMS.gold.code, 'G', 1, 10.5, 0.5, 10, 91.6, 9.16, 'F', 218, 2000],
+            [2, ITEMS.silver.code, 'S', 3, 50, 0, 50, 80, 40, 'N', 60, 3000],
+          ],
+        );
+        assert.deepEqual(
+          d.map((r) => [r.entry, r.ac]),
+          [
+            ['A', party],
+            ['A', party],
+          ],
+          'SL_PR_DETL rows are ENTRY_TYPE A for the order customer',
+        );
+        assert.deepEqual(
+          day.map((r) => [r.leg, r.line, r.len, r.ac, r.dr, r.cr, r.fine]),
+          [
+            ['01', '', 23, party, 0, 8000, 0],
+            ['04', '1', 33, 'PURCHASE', 2000, 0, 9.16],
+            ['04', '2', 33, 'SLVPURC', 3000, 0, 40],
+          ],
+          'the day book credits the 8,000 advance and debits each purchase account (Ac_Rojmel.cs:17)',
+        );
+        // Order_Ledr posts legs 07-10 only for a book whose BOOK_INOUT is 'I' (Ac_Ledr.cs:42-50); the provisioned
+        // SALES ORDER book is 'O', so the ledger carries the cash legs alone.
+        assert.deepEqual(
+          g.map((x) => x.leg),
+          ['01', '02'],
+        );
+        await loadOrder(page, vchNo);
+        await openDetails(page);
+        const reopened = [await oldMetalInputs(page, 1), await oldMetalInputs(page, 2)];
+        assert.deepEqual(
+          reopened.map((r) => [
+            r.item,
+            r.gross,
+            r.other,
+            r.net,
+            r.touch,
+            r.fine,
+            r.rateType,
+            r.rate,
+            r.amount,
+          ]),
+          [
+            [
+              ITEMS.gold.code,
+              '10.500',
+              '0.500',
+              '10.000',
+              '91.60',
+              '9.160',
+              'F',
+              '218.00',
+              '2000.00',
+            ],
+            [ITEMS.silver.code, '50.000', '', '50.000', '80.00', '40.000', 'N', '60.00', '3000.00'],
+          ],
+        );
+        return {
+          observation: `order ${vchNo}: ${JSON.stringify(h)}; SL_PR_DETL ${d.length} rows; day book ${day.map((x) => x.leg).join('/')}`,
+          expected: {
+            cash: 3000,
+            oldGold: 2000,
+            oldSilver: 3000,
+            advance: 8000,
+            dayBook: '01/04/04',
+          },
+          database: { header: h, detail: d, dayBook: day, ledger: g },
+          downstream: { reopened },
+        };
+      },
+    ),
+
+    C(
+      'create.old-metal-unvalued-fine',
+      'T02',
+      'mutation',
+      'Order_Rojmel type 06 (Ac_Rojmel.cs:21) and TR_SALE_ORD.cs:9421-9475: old silver taken in with no amount (NET_AMT 0, ITM_FINE <> 0) is a money-free fine row: the advance stays the cash, OLD_SL holds the fine, OLD_SL_AMT is 0, and the day book keeps a type 06 row keyed 06 + STR(SR_NO) with SIGN + and the metal letter',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const party = PARTIES.local.code;
+        await enterOrder(page, { advance: 1000 });
+        await openDetails(page);
+        await page.getByLabel('Cash A/c', { exact: true }).fill(CASH);
+        await fillOldMetal(page, 1, {
+          item: ITEMS.silver.code,
+          pcs: '2',
+          gross: '20',
+          touch: '100',
+        });
+        assert.equal(
+          (await oldMetalInputs(page, 1)).fine,
+          '20.000',
+          'touch 100 makes the fine the net weight',
+        );
+        const response = await save(page);
+        assert.equal(response.status(), 201, await response.text());
+        const vchNo = String((await response.json()).vchNo).padStart(5, '0');
+        const [h] = await oldMetalHeader(ctx, vchNo);
+        const [row] = await oldMetalDetail(ctx, vchNo);
+        const day = await metalDayBook(ctx, vchNo);
+        assert.deepEqual(h, { cash: 1000, adv: 1000, glAmt: 0, slAmt: 0, gl: 0, sl: 20 });
+        assert.deepEqual(
+          [row.it, row.typ, row.nwt, row.fine, row.rate, row.net],
+          [ITEMS.silver.code, 'S', 20, 20, 0, 0],
+        );
+        assert.deepEqual(
+          day.map((r) => [r.leg, r.line, r.ac, r.ld, r.dr, r.cr, r.typ, r.sign, r.fine]),
+          [
+            ['01', '', party, CASH, 0, 1000, 'A', '', 0],
+            ['06', '1', party, 'SLVPURC', 0, 0, 'S', '+', 20],
+          ],
+        );
+        return {
+          observation: `order ${vchNo}: ${JSON.stringify(h)}; day book ${day.map((x) => x.leg).join('/')}`,
+          expected: { advance: 1000, oldSilverFine: 20, dayBook: '01/06' },
+          database: { header: h, detail: row, dayBook: day },
+          downstream: { advance: h.adv },
+        };
+      },
+    ),
+
+    C(
+      'edit.old-metal-then-delete',
+      'T09',
+      'mutation',
+      'TR_SALE_ORD rewrites SL_PR_DETL on every save (:9421-9475) and deletes it with the order: an order with old metal can be edited (the old gold amount 2,000 to 2,500 moves SL_PR_DETL, OLD_GL_AMT, ADV_AMT and the day book together) and deleting it leaves no old-metal row or day-book row',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await enterOrder(page, { advance: 1000 });
+        await openDetails(page);
+        await page.getByLabel('Cash A/c', { exact: true }).fill(CASH);
+        await fillOldMetal(page, 1, {
+          item: ITEMS.gold.code,
+          pcs: '1',
+          gross: '5',
+          touch: '100',
+          rateType: 'F',
+          amount: '2000',
+        });
+        const created = await save(page);
+        assert.equal(created.status(), 201, await created.text());
+        const vchNo = String((await created.json()).vchNo).padStart(5, '0');
+        await loadOrder(page, vchNo);
+        await openDetails(page);
+        await page.getByLabel('Old metal amount line 1', { exact: true }).fill('2500');
+        const edited = await save(page, 'Update Sales Order');
+        assert.equal(edited.status(), 200, await edited.text());
+        const [h] = await oldMetalHeader(ctx, vchNo);
+        const [row] = await oldMetalDetail(ctx, vchNo);
+        const day = await metalDayBook(ctx, vchNo);
+        assert.deepEqual([h.cash, h.glAmt, h.adv], [1000, 2500, 3500]);
+        assert.deepEqual([row.net, row.rate], [2500, 500]);
+        assert.deepEqual(
+          day.map((r) => [r.leg, r.dr, r.cr]),
+          [
+            ['01', 0, 3500],
+            ['04', 2500, 0],
+          ],
+        );
+        await loadOrder(page, vchNo);
+        const removed = await deleteLoaded(page, vchNo);
+        assert.equal(removed.status(), 200, await removed.text());
+        const after = {
+          detail: (await oldMetalDetail(ctx, vchNo)).length,
+          dayBook: (await metalDayBook(ctx, vchNo)).length,
+          legs: (await keyedLegs(ctx, 'AC_DATA', vchNo)).length,
+        };
+        assert.deepEqual(after, { detail: 0, dayBook: 0, legs: 0 });
+        return {
+          observation: `order ${vchNo}: edited to ${JSON.stringify(h)}; deleted, ${JSON.stringify(after)}`,
+          expected: {
+            edited: { glAmt: 2500, adv: 3500 },
+            deleted: { detail: 0, dayBook: 0, legs: 0 },
+          },
+          database: { header: h, detail: row, after },
+          downstream: { advance: h.adv },
+        };
+      },
+    ),
+
+    C(
+      'create.scheme-tender',
+      'T02',
+      'mutation',
+      'TR_SALE_ORD.cs:9142, :10006, :11264-11290 and Order_Rojmel type 05 (Ac_Rojmel.cs:19): the Scheme Amt cell is typed on the Lite edition and joins the advance; the desktop day book posts it to the fixed account 00079, but the real data holds no type 05 row for the 7 of 76 orders that carry a scheme amount (PLAN-SALESORDER-ROJMEL.md section 2.4), so the web leaves it open',
       async (ctx) => {
         const { page } = await ctx.session();
         await enterOrder(page, { advance: 3000 });
         await openDetails(page);
         const editable = await page
-          .locator('#sales-header-oldGoldAmount')
+          .locator('#sales-header-schemeAmount')
           .evaluate((input) => !input.readOnly && !input.disabled);
         assert(
           editable,
-          'old gold, old silver and scheme amounts are read-only on the order, so an advance cannot include them',
+          'the scheme amount is read-only on the order, so an advance cannot include it',
         );
         return {
-          observation: 'old gold amount editable',
-          expected: 'cash 3,000 and old gold 2,000',
+          observation: 'scheme amount editable',
+          expected: 'cash 3,000 and scheme 1,000',
           database: {},
           downstream: {},
         };
       },
       {
-        expected: {
-          cash: 3000,
-          oldGold: 2000,
-          legs: 'customer Cr 5,000; cash Dr 3,000; old-gold purchase account Dr 2,000 (legs 07/08)',
-        },
+        expected: { cash: 3000, scheme: 1000 },
         observe: async (ctx) => ({ orders: await latest(ctx) }),
       },
     ),

@@ -22,6 +22,16 @@ export type CompanySettingValues = Record<string, unknown>;
 let cached: CompanySettingValues | null = null;
 let inFlight: Promise<CompanySettingValues> | null = null;
 
+export type CompanySettingsLoadStatus = 'loading' | 'ready' | 'error';
+export interface CompanySettingsState {
+  values: CompanySettingValues | null;
+  status: CompanySettingsLoadStatus;
+  error: Error | null;
+}
+
+const asError = (error: unknown): Error =>
+  error instanceof Error ? error : new Error('Company settings could not be loaded');
+
 const load = async (): Promise<CompanySettingValues> => {
   if (cached) return cached;
   if (!inFlight) {
@@ -30,7 +40,6 @@ const load = async (): Promise<CompanySettingValues> => {
         cached = response.values ?? {};
         return cached;
       })
-      .catch(() => ({}) as CompanySettingValues)
       .finally(() => {
         inFlight = null;
       });
@@ -88,12 +97,44 @@ export function useCompanySettings(): CompanySettingValues | null {
       return;
     }
     let alive = true;
-    load().then((next) => {
-      if (alive) setValues(next);
-    });
+    load()
+      .then((next) => {
+        if (alive) setValues(next);
+      })
+      .catch(() => {
+        // Preserve the legacy hook contract: callers still receive an empty value map after failure.
+        if (alive) setValues({});
+      });
     return () => {
       alive = false;
     };
   }, []);
   return values;
+}
+
+/** Company settings with explicit readiness for screens whose calculations cannot safely default. */
+export function useCompanySettingsState(): CompanySettingsState {
+  const [state, setState] = useState<CompanySettingsState>(() =>
+    cached
+      ? { values: cached, status: 'ready', error: null }
+      : { values: null, status: 'loading', error: null },
+  );
+  useEffect(() => {
+    if (cached) {
+      setState({ values: cached, status: 'ready', error: null });
+      return;
+    }
+    let alive = true;
+    load()
+      .then((values) => {
+        if (alive) setState({ values, status: 'ready', error: null });
+      })
+      .catch((error: unknown) => {
+        if (alive) setState({ values: null, status: 'error', error: asError(error) });
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+  return state;
 }

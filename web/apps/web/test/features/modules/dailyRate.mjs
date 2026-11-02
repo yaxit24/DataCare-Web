@@ -371,14 +371,162 @@ export const dailyRate = {
         };
       },
     ),
-    blocked(
-      'rights',
+    C(
+      'scope.no-rights-user',
       'T11',
-      'Edit, delete and print rights are covered through HTTP in dailyRate.routes.db.test.ts; the catalogue has no Daily Rate restricted user yet.',
+      'refusal',
+      "MS_RATE.cs:1867-1886, 2095, 1834: Rate Master saves, deletes and prints only with the user's rights; a user with no Daily Rate rights is refused all three",
+      async (ctx) => {
+        const date = nextDay();
+        const admin = await open(ctx, date);
+        await priceDay(admin);
+        assert.equal((await save(admin)).status(), 201);
+        const before = await savedRows(ctx, date);
+        const clerk = await ctx.session(as(USERS.clerk.user));
+        await clerk.page.goto('/txn/sales');
+        const statuses = await clerk.page.evaluate(async (d) => {
+          const call = async (method, url, body) =>
+            (
+              await fetch(url, {
+                method,
+                credentials: 'include',
+                headers: body ? { 'content-type': 'application/json' } : {},
+                body: body ? JSON.stringify(body) : undefined,
+              })
+            ).status;
+          return {
+            read: await call('GET', `/api/daily-rate?date=${d}`),
+            print: await call('GET', `/api/daily-rate/print?date=${d}&format=html`),
+            delete: await call('DELETE', `/api/daily-rate?date=${d}`),
+            save: await call('POST', '/api/daily-rate', {
+              date: d,
+              goldRate: 1,
+              silverRate: 1,
+              rows: [],
+            }),
+          };
+        }, date);
+        for (const [what, status] of Object.entries(statuses))
+          assert.ok(status === 403, `${what} refused for a user without the right: ${status}`);
+        assert.deepEqual(await savedRows(ctx, date), before);
+        return {
+          observation: `read ${statuses.read}, print ${statuses.print}, delete ${statuses.delete}, save ${statuses.save}`,
+          expected: '403 on all four, the day untouched',
+          database: { rows: before },
+        };
+      },
     ),
-    blocked('concurrency', 'T12', 'Daily Rate has no version token.'),
-    blocked('retry', 'T13', 'Daily Rate POST has no idempotency key; a re-save replaces the day.'),
-    blocked('rollback', 'T14', 'No fault injector in the harness yet (G173 / N166).'),
+    C(
+      'concurrency.two-operators-same-day',
+      'T12',
+      'mutation',
+      'MS_RATE.cs:1867-1947 deletes and rewrites the day with no version check, so two operators saving one day leave exactly one complete set of rows (the last writer wins), never a mixture or duplicates',
+      async (ctx) => {
+        const date = nextDay();
+        const a = await open(ctx, date);
+        const second = await ctx.session(as(USERS.admin.user, `${USERS.admin.user}#2`));
+        const b = second.page;
+        await b.goto('/txn/daily-rate');
+        await b.getByRole('heading', { name: 'Rate Master', exact: true }).waitFor();
+        await label(b, 'Touch R22').waitFor();
+        await Promise.all([
+          b.waitForResponse((r) => r.url().includes(`/api/daily-rate?date=${date}`)),
+          label(b, 'Vch Date').fill(date),
+        ]);
+        await priceDay(a);
+        await label(b, 'Gold Rate 10gm').fill('73000');
+        await label(b, 'Silver Rate 1Kg').fill('86000');
+        await label(b, 'Silver Rate 1Kg').press('Enter');
+        await b.waitForFunction(
+          () => document.querySelector('input[aria-label="Rate10gm R22"]')?.value,
+        );
+        const [first, other] = await Promise.all([save(a), save(b)]);
+        const statuses = [first.status(), other.status()];
+        assert.ok(
+          statuses.every((s) => s === 201 || s === 409),
+          `statuses ${statuses}: ${(await first.text()).slice(0, 160)} | ${(await other.text()).slice(0, 160)}`,
+        );
+        assert.ok(statuses.includes(201));
+        const rows = await savedRows(ctx, date);
+        assert.deepEqual(
+          rows.map((r) => r.gr),
+          ['R18', 'R22', 'RSV'],
+          'one complete set, no duplicates',
+        );
+        assert.equal(new Set(rows.map((r) => r.gold)).size, 1, "one writer's rates, not a mixture");
+        assert.ok([72000, 73000].includes(rows[0].gold));
+        return {
+          observation: `statuses ${statuses.join(', ')}; the day holds the ${rows[0].gold} set`,
+          expected: 'three rows from a single writer',
+          database: { rows },
+          downstream: { gold: rows[0].gold },
+        };
+      },
+    ),
+    C(
+      'retry.replayed-save',
+      'T13',
+      'mutation',
+      'A replayed save writes the same day again (delete and rewrite): still one set of rows with the same rates',
+      async (ctx) => {
+        const date = nextDay();
+        const page = await open(ctx, date);
+        await priceDay(page);
+        const first = await save(page);
+        assert.equal(first.status(), 201, await first.text());
+        const before = await savedRows(ctx, date);
+        const replay = await page.request.fetch(first.request());
+        assert.equal(replay.status(), 201, await replay.text());
+        const after = await savedRows(ctx, date);
+        assert.deepEqual(after, before);
+        return {
+          observation: `the replay answered ${replay.status()}`,
+          expected: 'identical rows, no duplicates',
+          database: { rows: after },
+          downstream: { rows: after.length },
+        };
+      },
+    ),
+    C(
+      'rollback.rate-write-fault',
+      'T14',
+      'mutation',
+      'A fault while rewriting a saved day rolls back the delete too: the day keeps its earlier rates',
+      async (ctx) => {
+        const date = nextDay();
+        const page = await open(ctx, date);
+        await priceDay(page);
+        assert.equal((await save(page)).status(), 201);
+        const before = await savedRows(ctx, date);
+        await ctx.owner.$executeRawUnsafe(
+          `CREATE OR REPLACE FUNCTION e2e_rate_fault() RETURNS trigger LANGUAGE plpgsql AS $f$
+           BEGIN
+             IF NEW."VCH_DATE" = '${date}'::date AND NEW."GR_CODE" = 'RSV' THEN RAISE EXCEPTION 'e2e rate fault'; END IF;
+             RETURN NEW;
+           END $f$`,
+        );
+        await ctx.owner.$executeRawUnsafe(
+          `CREATE TRIGGER e2e_rate_fault BEFORE INSERT ON "RATE_MAST" FOR EACH ROW EXECUTE FUNCTION e2e_rate_fault()`,
+        );
+        try {
+          await label(page, 'Gold Rate 10gm').fill('74000');
+          await label(page, 'Silver Rate 1Kg').press('Enter');
+          const response = await save(page);
+          assert.ok(response.status() >= 400, `the save failed: ${response.status()}`);
+          const after = await savedRows(ctx, date);
+          assert.deepEqual(after, before);
+          return {
+            observation: `the save answered ${response.status()}; the day kept ${after[0]?.gold}`,
+            expected: 'the earlier three rows',
+            database: { rows: after },
+            downstream: { rows: after.length },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(`DROP TRIGGER IF EXISTS e2e_rate_fault ON "RATE_MAST"`);
+          await ctx.owner.$executeRawUnsafe(`DROP FUNCTION IF EXISTS e2e_rate_fault()`);
+        }
+      },
+    ),
     blocked(
       'settings',
       'T15',
@@ -441,10 +589,49 @@ export const dailyRate = {
         };
       },
     ),
-    blocked(
-      'downstream-sale-rate',
+    C(
+      'downstream.rate-lookup-own-location',
       'T18',
-      'The sale/purchase rate lookup (rate.ts) does not yet scope RATE_MAST by location as TR_SALE.cs:12547 does.',
+      'mutation',
+      "TR_SALE.cs:12547 reads the day's RATE_MAST rows for the user's CO_CODE and LC_CODE: the rate lookup behind the sale forms and the ticker returns this location's saved rate, not a later one saved at another location",
+      async (ctx) => {
+        const date = nextDay();
+        const page = await open(ctx, date);
+        await priceDay(page);
+        assert.equal((await save(page)).status(), 201);
+        const later = new Date(`${date}T00:00:00Z`);
+        later.setUTCDate(later.getUTCDate() + 1);
+        const laterDay = later.toISOString().slice(0, 10);
+        await ctx.owner.$executeRawUnsafe(
+          `DO $d$ BEGIN
+             CREATE TEMP TABLE e2e_rate_copy ON COMMIT DROP AS
+               SELECT * FROM "RATE_MAST" WHERE tenant_id='feature-e2e' AND "CO_CODE"='01' AND "VCH_DATE"='${date}'::date AND "GR_CODE"='R22';
+             UPDATE e2e_rate_copy SET "LC_CODE"='98', "VCH_DATE"='${laterDay}'::date, "GR_RATE"=11111;
+             INSERT INTO "RATE_MAST" SELECT * FROM e2e_rate_copy;
+           END $d$`,
+        );
+        try {
+          const lookup = await (
+            await page.request.get(`/api/rate?group=R22&date=${laterDay}`)
+          ).json();
+          assert.equal(
+            lookup.rate,
+            DERIVED.R22[1],
+            `this location's rate, not 11111: ${JSON.stringify(lookup)}`,
+          );
+          assert.equal(lookup.date, date);
+          return {
+            observation: `the lookup for ${laterDay} returned ${lookup.rate} dated ${lookup.date}`,
+            expected: `${DERIVED.R22[1]} from this location`,
+            database: { other: 11111 },
+            downstream: { lookup },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM "RATE_MAST" WHERE tenant_id='feature-e2e' AND "CO_CODE"='01' AND "LC_CODE"='98'`,
+          );
+        }
+      },
     ),
   ],
 };

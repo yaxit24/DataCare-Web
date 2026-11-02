@@ -596,7 +596,13 @@
       "phase": "P12",
       "acceptance": "open",
       "detailFile": "previous-package-reconciliation.json",
-      "detailId": "P12-05"
+      "detailId": "P12-05",
+      "milestoneEvidence": {
+        "asOf": "2026-11-02",
+        "status": "partial-engineering-only",
+        "evidence": "Data Backup milestone 1 adds the authenticated company-scoped v2 browser download, pre-generation source-backed filename, operator recovery-boundary warning, handoff audit and frozen T01-T18 matrix. The executable data-backup.config.nextmain-allowlist archive-scope case is baselined under G64/N80 because the required versioned tenant-config envelope is absent.",
+        "remaining": "Acceptance stays open for an approved D-BKP-3 NextMain-equivalent configuration/credential allowlist, actual-browser scratch import and zero diff, physical save evidence, full-Lite fixture, exact Print rights, production deployment, encrypted off-site retention, restore drills, RPO/RTO, upgrade and rollback."
+      }
     },
     {
       "id": "P13-01",
@@ -2548,7 +2554,13 @@
         "source": "42-implementation-progress-round15.md",
         "qualification": "Remaining work or acceptance, not a claim that all code in this area is absent."
       },
-      "findingQualification": "Read with currentRemainingGap and implementationProgress; older CR counts are historical observations requiring current revalidation."
+      "findingQualification": "Read with currentRemainingGap and implementationProgress; older CR counts are historical observations requiring current revalidation.",
+      "milestoneEvidence": {
+        "asOf": "2026-11-02",
+        "status": "partial-engineering-only",
+        "evidence": "The operator Backup path downloads the authenticated company's v2 160-table JSON document with a pre-generation source-backed filename, immutable company_backup_run audit, recovery-boundary warning, scope/checksum tests and no Restore/Dattach UI. The executable data-backup.config.nextmain-allowlist case is baselined under G64/N80 and fails on the real archive's absent versioned tenantConfig envelope.",
+        "remaining": "Restore containment remains. Approve D-BKP-3 tenant-shared configuration and credential handling; then prove actual browser-artifact scratch zero-diff. Physical-save, full-Lite fixture, exact rights, production-like timed recovery/outage proof and controlled release remain blocked."
+      }
     },
     {
       "id": "X32",
@@ -4146,7 +4158,13 @@
       "gapIds": "G64",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "milestoneEvidence": {
+        "asOf": "2026-11-02",
+        "status": "partial-engineering-only",
+        "evidence": "Data Backup milestone 1 implements the Backup-only browser handoff, operator recovery-boundary warning and v2 company scope/audit evidence. The executable data-backup.config.nextmain-allowlist case is baselined under G64/N80 because the real archive has no approved versioned tenantConfig envelope.",
+        "remaining": "Approve the D-BKP-3 NextMain-equivalent allowlist and credential treatment; prove actual-artifact scratch reconciliation, physical save behavior, a full-Lite fixture, exact Print rights, encrypted off-host retention, scheduled restore, RPO/RTO, deployment hardening, upgrade and rollback."
+      }
     },
     {
       "id": "N81",
@@ -6521,7 +6539,7 @@
     },
     {
       "id": "N188",
-      "status": "in-progress",
+      "status": "implemented-unverified",
       "action": "Purchase-family amounts like the desktop: round the purchase return's (and purchase's) item and labour amounts and the bill total to whole rupees as TR_KR_ISU and TR_PURC do, in the screen preview and the writer; remove purchase-return.formula.whole-rupees and purchase-return.create.amounts from features/baseline.json. Do it together with N184 (same rounding mechanism).",
       "parentLabels": "P06-01, P10-05; X07",
       "startAfter": [
@@ -6533,7 +6551,7 @@
       "verification": "04-verification-playbook.md",
       "requiredProof": "both cases pass (58,466 net, 1,753.98 tax, 60,220 total); a purchase line with paise rounds the same; preview equals posted.",
       "gapIds": "G198",
-      "statusAsOf": "2026-11-01",
+      "statusAsOf": "2026-11-02",
       "evidence": [
         "web/packages/core/src/purchaseReturnAmount.ts",
         "web/packages/core/test/purchaseReturnAmount.test.ts",
@@ -6542,9 +6560,16 @@
         "web/apps/web/lib/purchaseReturnForm.ts",
         "web/apps/web/test/purchaseReturnForm.test.ts",
         "web/apps/web/test/features/modules/purchaseReturn.mjs",
-        "web/apps/web/test/features/baseline.json"
+        "web/apps/web/test/features/baseline.json",
+        "web/packages/core/src/purchaseAmount.ts",
+        "web/packages/core/test/purchaseAmount.test.ts",
+        "web/apps/api/src/modules/purchase/purchase.ts",
+        "web/apps/api/test/purchase.test.ts",
+        "web/apps/api/test/purchase.lifecycle.db.test.ts",
+        "web/apps/web/app/(app)/txn/purchase/page.tsx",
+        "web/apps/web/test/features/modules/purchaseInvoice.mjs"
       ],
-      "statusNote": "IN PROGRESS. Purchase Return milestone implemented: the preview and writer use TR_KR_ISU fine/RATE_TYPE basis, directly round item and labour to whole rupees, preserve fractional other charges in the line, round header net and final total to whole rupees, and retain purchase-rate and tax precision. Browser proof: 22 applicable, 20 passed, 0 failed, 2 blocked; both G198 cases pass and left the baseline. Full quality, database, zero-mock browser and UI-surface CI passed. N188 remains in progress because its ordinary Purchase half and paise-producing Purchase proof are not implemented in this milestone."
+      "statusNote": "IMPLEMENTED, NOT DESKTOP-VERIFIED. Purchase Return remains the distinct TR_KR_ISU contract delivered in milestone 1. Ordinary Purchase now shares one focused TR_PURC component helper between API and preview: PR_AMT_TYPE plus URD_RATE_TYPE and RATE_TYPE P/1/K/default select the item basis/divisor; derived item and labour amounts round directly midpoint-to-even to whole rupees; explicit amount overrides remain unchanged; and fractional other charge remains in the two-decimal detail net. Header net/final total still use company TOT_AMT_ROF, tax still uses TAX_ROF, and purchase-rate precision remains separate. Core, pure writer, lifecycle database, and zero-mock browser proofs pin the 9.160 / 56,091 / 2,375 / 58,466 / 1,753.98 / 60,220 vector; the database adjunct pins detail 58,466.40 and downstream PR_DATA, PR_DETL, MAIN_STOCK, TAX_DATA, balanced AC_DATA, and Rojmel. The strengthened browser proof reloads explicit 56,090.80 item and 2,375.25 labour amounts (including zero-value hydration), restores persisted ghat weight, wastage, labour percentage/rate/type and item rate-basis inputs, saves unchanged, and compares those PR_DETL sources plus the existing component/downstream write set. Its edit proof preserves loaded per-gram labour for an item-rate-only change, then invalidates and recalculates labour after a net-weight dependency change. A separate restored-in-finally PR_AMT_TYPE=G case enters RATE_TYPE P/1/K through the real grid and proves preview/persisted 3,000/1,200/12 values across reload. Shared API/browser explicit-fine normalization pins 9.1605 to 9.161 and item 9,161 at rate 1,000 (raw would produce 9,160). Local package tests were not executable because web/node_modules is absent and the registry is unavailable; CI execution remains required. G5 original-Windows comparison remains unavailable because this environment has no desktop SQL secrets, so this slice is not accepted or verified."
     },
     {
       "id": "N189",
@@ -7509,6 +7534,69 @@
         "web/apps/web/test/features/modules/tagPrint.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Verified: tagPrintScreen.db.test.ts 9/9, the tag-print feature module 17 of 17 applicable (T10 not applicable), the surface crawl, and a Chrome DevTools pass on the demo stack. Desktop-runtime comparison and physical-printer acceptance (D29) remain."
+    },
+    {
+      "id": "N226",
+      "status": "implemented-unverified",
+      "action": "The Sales Order's old gold and old silver like TR_SALE_ORD: the MSG_OLD grid (item, weights, touch, rate type, rate, amount with the CommPassTotal_Old derivation), SL_PR_DETL one row per saved grid row, OLD_GL* totals and the amounts in ADV_AMT, Order_Rojmel types 04/06, the book-direction-gated Order_Ledr legs 07-10, and edit and delete of an order with old metal.",
+      "startAfter": [
+        "N225"
+      ],
+      "requiredProof": "sales-order.create.old-metal-tenders, create.old-metal-unvalued-fine and edit.old-metal-then-delete pass in the browser; the old metal DB write-set test passes.",
+      "gapIds": "G206",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "parentLabels": "P9; R03",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/sales/salesOrderOldMetal.ts",
+        "web/apps/api/src/modules/sales/salesOrderTender.ts",
+        "web/apps/api/src/modules/sales/salesOrder.ts",
+        "web/apps/api/src/modules/sales/orderLifecyclePolicy.ts",
+        "web/apps/web/components/SalesOrderOldMetalGrid.tsx",
+        "web/apps/web/lib/salesOrderOldMetal.ts",
+        "web/apps/api/test/salesOrderOldMetal.db.test.ts",
+        "web/apps/api/test/salesOrderOldMetal.test.ts",
+        "web/apps/web/test/features/modules/salesOrder.mjs"
+      ],
+      "statusNote": "IMPLEMENTED (old gold and old silver), not accepted. The DB write-set test passes (red before this change) and the three browser cases pass. Open: the scheme amount (baselined), the real Sales Order BOOK_INOUT for legs 07-10, the T book variant, the SL_ORD_ADJ O row, desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N227",
+      "status": "implemented-unverified",
+      "action": "Browser cases recorded as blocked for Tag Cancel, Daily Rate, Purchase Invoice, Contra and Cash/Bank now run against the real stack, and the four defects they found are fixed: two operators saving one Daily Rate day no longer hit the RATE_MAST key, the rate lookup is scoped to the session's location, every voucher form's lock-date refusal carries the desktop text, and the Cash Received/Payment Employee box is stored, enforced when CO_SET.EMP_CODE_MANDATORY is Y, and read back.",
+      "parentLabels": "P1-core; L1; L3; T01-T18",
+      "startAfter": [
+        "N226"
+      ],
+      "requiredProof": "A DB test that fails on the old Daily Rate writer, one that fails on the old location-blind lookup, unit and DB tests of the desktop lock text and the employee code (stored, mandatory refusal, unknown employee, kept through an edit); the tag-cancel, daily-rate, purchase-invoice, contra and cash-bank modules pass on a fresh production build, and sales-invoice and sales-order show no new failure.",
+      "gapIds": "G238",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/masters/dailyRate.ts",
+        "web/apps/api/src/modules/masters/rate.ts",
+        "web/apps/api/src/routes/dailyRate.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/posting/posting.ts",
+        "web/apps/api/src/modules/finance/lifecycle.ts",
+        "web/apps/api/src/modules/finance/finance.ts",
+        "web/apps/web/components/PaymentForm.tsx",
+        "web/apps/api/test/dailyRate.routes.db.test.ts",
+        "web/apps/api/test/cashReceiptLegs.db.test.ts",
+        "web/apps/api/test/periodLockMessage.test.ts",
+        "web/apps/web/test/features/modules/tagCancel.mjs",
+        "web/apps/web/test/features/modules/dailyRate.mjs",
+        "web/apps/web/test/features/modules/purchaseInvoice.mjs",
+        "web/apps/web/test/features/modules/contraEntry.mjs",
+        "web/apps/web/test/features/modules/cashBank.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: the daily-rate, lock-message and cash-employee DB and unit tests; full isolated suite API 356 files / 3,789 tests, web 713; modules tag-cancel 16/16, purchase-invoice 29/29, contra 25/25, daily-rate 15 of 16, cash-bank 19 of 21, sales-invoice and sales-order with no new failure (the sales-order old-metal case is the known G206 baseline). Open: daily-rate T15 needs a location-00 session in the harness; cash-bank T03 and T06; the desktop's default employee from the session (TR_CASH.cs:2671); desktop-runtime comparison and parent acceptance."
     }
   ],
   "amendments": [

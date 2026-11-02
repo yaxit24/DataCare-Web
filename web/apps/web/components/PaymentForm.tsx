@@ -83,6 +83,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
     setAmount('');
     setKasar('');
     setChqNo('');
+    setEmpCode('');
     setRes(null);
     setErr('');
   }
@@ -103,6 +104,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
       setBankAc(String(d.bankAc ?? ''));
       setChqNo(String(d.chqNo ?? ''));
       setKasar(Number(d.kasar ?? 0) ? String(d.kasar) : '');
+      setEmpCode(String(d.empCode ?? ''));
       setVchDate(toIsoDate(d.vchDate ?? todayLocal()));
       setVoucherLookup(vchNo);
       return true;
@@ -183,6 +185,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
           chqNo: chqNo || undefined,
           pan: pan || undefined,
           kasar: kasar ? Number(kasar) : undefined,
+          empCode: empCode || undefined,
           ...(kind === 'receipt' && mode === 'card'
             ? {
                 cardCommissionPct: cardCommissionPct ? Number(cardCommissionPct) : undefined,
