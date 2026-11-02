@@ -1,50 +1,120 @@
 'use client';
-import { useState } from 'react';
-import { getBlob } from '../../../lib/api';
-import { ParityContainmentNotice } from '../../../components/ParityContainmentNotice';
-import { todayLocal } from '../../../lib/localDate';
+import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { getDownload } from '../../../lib/api';
+
+const DESTINATION = 'Browser Save dialog';
 
 export default function BackupPage() {
+  const pathname = usePathname();
+  const [destinationSelected, setDestinationSelected] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  async function download() {
+  const [message, setMessage] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
+  const busyRef = useRef(false);
+  const selectButton = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    setDestinationSelected(false);
+    setMessage(null);
+  }, [pathname]);
+
+  function selectDestination() {
+    if (busyRef.current) return;
+    setDestinationSelected(true);
+    setMessage(null);
+  }
+
+  function cancel() {
+    if (busyRef.current) return;
+    setDestinationSelected(false);
+    setMessage(null);
+    selectButton.current?.focus();
+  }
+
+  async function backup() {
+    if (busyRef.current) return;
+    setMessage(null);
+    if (!destinationSelected) {
+      setMessage({ kind: 'err', text: 'Please Select Path and Try' });
+      selectButton.current?.focus();
+      return;
+    }
+
+    busyRef.current = true;
     setBusy(true);
-    setError('');
     try {
-      const blob = await getBlob('/backup');
+      const { blob, filename } = await getDownload('/backup');
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
-      a.download = `backup-${todayLocal()}.json`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      try {
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+      } finally {
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+      setMessage({ kind: 'ok', text: 'Backup Process Complete.' });
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Could not download the company backup.');
+      setMessage({
+        kind: 'err',
+        text: error instanceof Error ? error.message : 'Could not download the company backup.',
+      });
     } finally {
+      busyRef.current = false;
       setBusy(false);
     }
   }
+
   return (
-    <div>
-      <h1>Backup</h1>
-      <ParityContainmentNotice operation="logical-restore" />
-      <div className="panel">
-        <p>
-          Download the current logical JSON export for inspection or parity evidence. It covers an
-          allowlisted subset and is not a production disaster-recovery backup.
-        </p>
-        <p className="muted">
-          For full physical database backups, the server cron uses <code>deploy/backup.sh</code>{' '}
-          (pg_dump).
-        </p>
-        <button className="primary" onClick={download} disabled={busy}>
-          {busy ? 'Preparing…' : 'Download Company Backup (JSON)'}
+    <div onKeyDown={(event) => event.key === 'Escape' && cancel()}>
+      <h1>Backup Data</h1>
+      <aside className="msg err" aria-label="Backup recovery limitation">
+        <strong>Recovery limitation:</strong> This integrity-checked JSON company archive does not
+        replace the production disaster-recovery backup. DataCare Web provides no operator restore
+        path for this archive.
+      </aside>
+      <div className="panel" aria-busy={busy}>
+        <p>The browser Save dialog chooses the download location. No path is sent or stored.</p>
+        <div className="field">
+          <label htmlFor="backup-destination">Backup Path</label>
+          <input
+            id="backup-destination"
+            value={destinationSelected ? DESTINATION : ''}
+            placeholder="Select a download destination"
+            readOnly
+            tabIndex={-1}
+          />
+        </div>
+        <button
+          ref={selectButton}
+          type="button"
+          className="ghost"
+          onClick={selectDestination}
+          disabled={busy}
+          autoFocus
+        >
+          Select
         </button>
-        {error && (
-          <p className="msg err" role="alert">
-            {error}
+        {busy && (
+          <progress
+            role="progressbar"
+            aria-label="Backup progress"
+            aria-valuetext="Preparing backup"
+          />
+        )}
+        <div className="row" style={{ marginTop: 12 }}>
+          <button type="button" className="primary" onClick={backup} disabled={busy}>
+            Backup
+          </button>
+          <button type="button" className="ghost" onClick={cancel} disabled={busy}>
+            Cancel
+          </button>
+        </div>
+        {message && (
+          <p className={`msg ${message.kind}`} role={message.kind === 'err' ? 'alert' : 'status'}>
+            {message.text}
           </p>
         )}
       </div>

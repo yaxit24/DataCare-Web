@@ -72,6 +72,8 @@ the authority for each item.
 | 21 Behavioural parity verification | carried; 21.1 decided by D24 (enforced by tests and release gates) | X03, X06, X34, N82 |
 | 22 Phased delivery | carried | X31, X33, N80, N82, D25 |
 
+Data Backup milestone 1 evidence (2 November 2026) is carried by the existing recovery lineage `P12-05 → X31 → G64/N80`: the authenticated company-scoped v2 download, source-backed browser filename, immutable backup-run audit and Backup-only matrix are implemented engineering evidence. The lineage remains open for D-BKP-3 configuration/credential scope, actual-browser scratch zero-diff, physical save, production recovery and desktop-runtime proof. No new N/G identifier is allocated.
+
 ## 3. Gap register G69–G83
 
 Severity as in documents 10 and 11. G69–G74, G79 and G81–G83 are Phase 1 (desktop parity in the web); G75–G78 and G80 are

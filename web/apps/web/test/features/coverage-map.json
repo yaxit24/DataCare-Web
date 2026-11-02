@@ -214,6 +214,19 @@
         "web/apps/api/src/modules/stock/stockAdjustLots.ts"
       ]
     },
+    "dataBackup": {
+      "covers": [
+        "web/apps/web/app/(app)/backup/page.tsx",
+        "web/apps/web/app/(app)/utilities/page.tsx",
+        "web/apps/web/lib/nav.ts",
+        "web/apps/web/lib/api.ts",
+        "web/apps/api/src/app.ts",
+        "web/apps/api/src/modules/ops/backup.ts",
+        "web/apps/api/src/modules/ops/backupManifest.ts",
+        "web/apps/api/src/modules/ops/backupDownload.ts",
+        "web/apps/api/src/modules/ops/backupFilename.ts"
+      ]
+    },
     "accountLedger": {
       "covers": [
         "web/apps/web/app/(app)/reports/account-ledger/page.tsx",
