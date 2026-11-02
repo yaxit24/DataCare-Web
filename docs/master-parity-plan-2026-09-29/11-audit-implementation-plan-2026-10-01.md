@@ -107,7 +107,7 @@ or is a security exposure; **S2** wrong or incomplete in a supported branch; **S
 | G61 | S2 | Language | `Translator.cs:117-128`, `UT_SMS.cs:3218-3222`; Gujarati Crystal font KAP139 (`extraction_output/rpt_xml/Form8.xml:353`) | No internationalisation; `app/layout.tsx` fixes English; no Gujarati or Hindi labels or prints | Reviewed catalogues, per-user UI language, per-template print language, embedded Unicode fonts | N76 |
 | G62 | S2 | Operator layout parity | WinForms field and tab order; `COL_MAST` captions and visibility (`TR_SALE.cs:9038-9049`) | No screen uses the extracted layout data; the column-settings editor exists but transaction grids ignore `COL_MAST` | Semantic layout and tab/focus parity for the top 20 forms; grids apply `COL_MAST` | N77 |
 | G63 | S1 | Data migration | 145 desktop tables in the real-schema baseline | `api/integration/cutover.mjs` covers 42 tables, extracts without scope, deletes the whole tenant table (`:450`), labels mismatches `dry-run` (`:336`) and continues on missing tables (`:262`); production load is contained | Signed ownership manifest for every table, scoped shadow loads, fail-closed validators, two rehearsals | N78, N79 |
-| G64 | S1 | Deployment and recovery | — | `web/docker-compose.yml` publishes database 5433, API 4000 and web 4001 on all interfaces; no `.dockerignore`; stale `web/deploy/docker-compose.prod.yml`; `web/deploy/backup.sh` keeps a local unencrypted dump with no off-host copy; no scheduled restore drill; no upgrade or rollback runbook | TLS edge only; private services; sanitized build context; encrypted off-host backups; timed restore drill; rehearsed upgrade and rollback | N80 |
+| G64 | S1 | Deployment and recovery | — | Data Backup milestone 1 now provides an authenticated company-scoped v2 download, source-backed browser filename and immutable backup-run audit, while restore remains contained. Production compose exposure, build context, off-site encryption, scheduled restore, upgrade/rollback, D-BKP-3 allowlist and actual-browser scratch zero-diff evidence remain open. | TLS edge only; private services; sanitized build context; approved configuration/credential scope; encrypted off-host backups; timed restore drill; rehearsed upgrade and rollback | N80 |
 | G65 | S1 | Secrets and delivery source | — | `SECURITY-NOTICE.md` records intentionally tracked credentials; tracked `web/.env`, `web/.env.parity-test`, `web/packages/db/.env`; no secret scanning in CI | Sanitized history-free deployment source; rotated credentials; CI scanning and push protection | N81 |
 | G66 | S2 | Release-certification coverage | Document 04 gates R02, R03, R08, R09, R12 | `ops/releaseCertification.ts` declares 19 gates; none covers test type compilation, documentation/plan integrity, the two additional real-browser suites, hardware/providers, migration continuation or business UAT | Exact-set, candidate-bound gates for each missing family | N82 |
 | G67 | S2 | `DM_DATA` counter column | `Ac_Stock.Dm_PrRtn_Detl` and `Dm_Purc_Detl` (`Ac_Stock.cs:774-790`) insert `TBL_CODE` on every diamond/detail row | Found while implementing N34: the PostgreSQL `DM_DATA` table had no `TBL_CODE`, so the first faithful insert failed with "column does not exist" and every writer silently omitted the counter | Additive nullable `TBL_CODE varchar(3)` (migration `20261001090000_dm_data_tbl_code`) written by every `DM_DATA` writer | N34 |
@@ -1064,6 +1064,11 @@ Steps:
 
 Done when: an external scan shows only port 443, the restore drill meets the approved RPO and RTO, and upgrade and
 rollback have been rehearsed.
+
+Milestone 1 evidence (2 November 2026, engineering only): Company → Data Backup now has the Backup-only browser
+handoff, source-backed same-hour JSON filename, v2 company-scope/checksum tests and immutable backup-run audit. It
+does not close G64 or N80. D-BKP-3 configuration/credential scope, actual-browser scratch zero-diff, physical-save
+behavior, encrypted off-host retention, timed restore, production topology, upgrade and rollback remain open.
 
 #### N81 — Secrets hygiene and sanitized delivery source
 

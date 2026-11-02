@@ -596,7 +596,13 @@
       "phase": "P12",
       "acceptance": "open",
       "detailFile": "previous-package-reconciliation.json",
-      "detailId": "P12-05"
+      "detailId": "P12-05",
+      "milestoneEvidence": {
+        "asOf": "2026-11-02",
+        "status": "partial-engineering-only",
+        "evidence": "Data Backup milestone 1 adds the authenticated company-scoped v2 browser download, source-backed filename, operator handoff audit, Backup-only UI and frozen T01-T18 matrix.",
+        "remaining": "Acceptance stays open for approved NextMain-equivalent configuration/credential scope, actual-browser scratch import and zero diff, physical save evidence, production deployment, encrypted off-site retention, restore drills, RPO/RTO, upgrade and rollback."
+      }
     },
     {
       "id": "P13-01",
@@ -2548,7 +2554,13 @@
         "source": "42-implementation-progress-round15.md",
         "qualification": "Remaining work or acceptance, not a claim that all code in this area is absent."
       },
-      "findingQualification": "Read with currentRemainingGap and implementationProgress; older CR counts are historical observations requiring current revalidation."
+      "findingQualification": "Read with currentRemainingGap and implementationProgress; older CR counts are historical observations requiring current revalidation.",
+      "milestoneEvidence": {
+        "asOf": "2026-11-02",
+        "status": "partial-engineering-only",
+        "evidence": "The operator Backup path now downloads the authenticated company's v2 160-table JSON document with a source-backed filename, immutable company_backup_run audit, scope/checksum tests and no Restore/Dattach UI.",
+        "remaining": "Restore containment remains. D-BKP-3 tenant-shared configuration and credential handling, actual browser-artifact scratch zero-diff, production-like timed recovery/outage proof and controlled release remain open."
+      }
     },
     {
       "id": "X32",
@@ -4137,7 +4149,13 @@
       "gapIds": "G64",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "milestoneEvidence": {
+        "asOf": "2026-11-02",
+        "status": "partial-engineering-only",
+        "evidence": "Data Backup milestone 1 implements the Backup-only browser handoff and v2 company scope/audit evidence while leaving logical restore contained.",
+        "remaining": "Approve the D-BKP-3 NextMain-equivalent allowlist and credential treatment; prove actual-artifact scratch reconciliation, physical save behavior, encrypted off-host retention, scheduled restore, RPO/RTO, deployment hardening, upgrade and rollback."
+      }
     },
     {
       "id": "N81",
