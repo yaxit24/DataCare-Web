@@ -12,6 +12,19 @@
   be reconstructed without database backup or external audit evidence. N221 remains implemented-unverified/PARTIAL;
   loose-save idempotency, stale versioning, full write-set/counter/component/report proofs and desktop comparison remain.
 
+## 2026-11-02 — Two timing races that turned main red (G241, on N210 and N217)
+
+- Main CI failed twice on 2 Nov (runs 41437285568, 41438044967) on two different NEW failures that pass on other runs of the same code.
+  The failing case's `01-failure.png` in the run's `real-stack-browser-*` artifact showed each cause directly (`gh run download <id>`).
+- Address Master: Ctrl+E focused the code box from `setTimeout(..., 0)`. The case saw the box editable, typed in Ac Name, and the timer
+  then took the cursor (screenshot: Ac Name `E2`, Ac Code `019902E`). Fixed with a layout effect. New case
+  `address-master.field.ctrl-e-focuses-code-at-once` (red before, green after; module 18 of 18).
+- Tag Cancel: entering the screen sets Vch No to the next number when the list read answers. A number typed before that answer was
+  replaced (screenshot: `voucher not found: 00014`). The form now applies the answer only if the box was untouched. New case
+  `tag-cancel.reopen.late-list-keeps-typed-voucher-number` holds the list response (red before, green after; module 22 of 22).
+- Not done: other voucher forms that fill a next number on entry may have the same race; Esc on the nine wrapper-handler screens
+  (G239 note) is still open. No desktop-runtime comparison; nothing here is accepted.
+
 ## 2026-11-02 — Tag Print Esc with no focused control (G239, on N225)
 
 - `tag-print.keyboard.desktop-keys` failed intermittently in CI (7 of 24 runs between 06:30 and 09:01 UTC, including main after #210 and

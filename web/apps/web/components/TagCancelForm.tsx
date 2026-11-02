@@ -222,6 +222,8 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
   const [header, setHeader] = useState<VoucherHeaderDraft>(() => blankHeader());
   const [rows, setRows] = useState<GridRow[]>(() => [blankRow(settings, mode)]);
   const [voucherNo, setVoucherNo] = useState('');
+  /** Counts the times the voucher number was set by the operator or by opening a voucher. */
+  const numberTouched = useRef(0);
   const [loaded, setLoaded] = useState<SavedVoucherView | null>(null);
   const [listing, setListing] = useState<VoucherListing | null>(null);
   const [showList, setShowList] = useState(false);
@@ -388,7 +390,12 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
     setActive(0);
     setError('');
     setStatus('');
-    void refreshListing(coBook).then((view) => setVoucherNo(view?.nextVoucherNo ?? ''));
+    // A number the operator typed (or a voucher opened) while the list was still on its way is theirs: the late
+    // next-number answer must not replace it.
+    const touched = numberTouched.current;
+    void refreshListing(coBook).then((view) => {
+      if (numberTouched.current === touched) setVoucherNo(view?.nextVoucherNo ?? '');
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [coBook]);
 
@@ -397,6 +404,7 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
       `${cfg.endpoint}/${encodeURIComponent(no)}?coBook=${encodeURIComponent(coBook)}`,
     );
     setLoaded(view);
+    numberTouched.current += 1;
     setVoucherNo(view.voucherNo);
     setHeader({
       vchDate: view.vchDate,
@@ -798,9 +806,10 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
                 data-testid={id('vch-no')}
                 value={voucherNo}
                 style={{ width: 80 }}
-                onChange={(event) =>
-                  setVoucherNo(event.target.value.replace(/\D/g, '').slice(0, 5))
-                }
+                onChange={(event) => {
+                  numberTouched.current += 1;
+                  setVoucherNo(event.target.value.replace(/\D/g, '').slice(0, 5));
+                }}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') {
                     event.preventDefault();
