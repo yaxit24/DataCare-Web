@@ -1,5 +1,15 @@
 import { round } from '@datacare/core';
 import { assertBalanced, type LedgerLine } from '../posting/posting.js';
+import { buildOrderRojmel, type RojmelContext } from '../shared/rojmel.js';
+import {
+  oldMetalAdvance,
+  oldMetalHeader,
+  orderOldMetalLedger,
+  orderOldMetalOf,
+  orderOldMetalRojmel,
+  orderOldMetalView,
+  type OrderOldMetalRow,
+} from './salesOrderOldMetal.js';
 import { SaleValidationError } from './sales.js';
 
 /**
@@ -18,7 +28,9 @@ import { SaleValidationError } from './sales.js';
  * grid line (`:9520-9556`), Order_Ledr posts legs 12/13 + STR(SR_NO) per row (`Ac_Ledr.cs:55-57`) and Order_Rojmel
  * type 08 + STR(SR_NO) (`Ac_Rojmel.cs:25`).
  *
- * Old metal and scheme tenders are not taken by this screen yet.
+ * N224 (G206): old gold and old silver are the grid MSG_OLD (`salesOrderOldMetal.ts`). Their amounts join ADV_AMT
+ * (`:11368`) and the header's OLD_GL* columns come from the grid, so the request cannot set them. The scheme tender is
+ * not taken by this screen yet.
  */
 export interface OrderUpiRow {
   srNo: number;
@@ -42,6 +54,10 @@ export interface OrderTender {
   upiRows: OrderUpiRow[];
   /** UPI_AMT as stored: the UPI tender on a Sales Order; the request's value on a Tour Order, as before. */
   upiColumn: number;
+  /** The saved old gold and old silver grid rows (a Sales Order only), part of ADV_AMT. */
+  oldMetal: OrderOldMetalRow[];
+  /** The request carried the grid (the screen always does). Without it the header totals pass through as before. */
+  oldMetalSent: boolean;
 }
 
 export const CHEQUE_NEEDS_BANK =
@@ -86,8 +102,15 @@ function orderUpiRowsOf(value: unknown): OrderUpiRow[] {
 export function orderHeaderFields(
   fields: Record<string, string>,
   salesOrder: boolean,
+  oldMetalSent = false,
 ): Record<string, string> {
-  return salesOrder ? { ...fields, advanceAmount: 'CASH_AMT' } : fields;
+  if (!salesOrder) return fields;
+  const withCash = { ...fields, advanceAmount: 'CASH_AMT' };
+  if (!oldMetalSent) return withCash;
+  // The old gold and old silver totals are the grid's (BILL_TOTAL), so a request that carries it cannot set them.
+  const { oldGoldFine, oldGoldAmount, oldSilverFine, oldSilverAmount, ...rest } = fields;
+  void [oldGoldFine, oldGoldAmount, oldSilverFine, oldSilverAmount];
+  return { ...rest, advanceAmount: 'CASH_AMT' };
 }
 
 const num = (value: unknown): number => (value == null || value === '' ? 0 : Number(value));
@@ -98,13 +121,24 @@ const num = (value: unknown): number => (value == null || value === '' ? 0 : Num
  */
 export function orderTenderView(
   header: Record<string, any>,
-  saved: { AC_DATA: Array<Record<string, any>>; UPI_DATA: Array<Record<string, any>> },
+  saved: {
+    AC_DATA: Array<Record<string, any>>;
+    UPI_DATA: Array<Record<string, any>>;
+    SL_PR_DETL?: Array<Record<string, any>>;
+  },
   salesOrder: boolean,
 ) {
   const ledger = saved.AC_DATA;
   const tendered =
     salesOrder &&
-    !!(num(header.CASH_AMT) || num(header.CHQ_AMT) || num(header.CARD_AMT) || num(header.UPI_AMT));
+    !!(
+      num(header.CASH_AMT) ||
+      num(header.CHQ_AMT) ||
+      num(header.CARD_AMT) ||
+      num(header.UPI_AMT) ||
+      // An order whose only tender is old metal keeps its cash at CASH_AMT = 0; ADV_AMT is the metal's value.
+      saved.SL_PR_DETL?.length
+    );
   // A tendered order names its cash account on leg 02 only; a cheque or card leg is never the cash account.
   const cashLeg = tendered
     ? ledger.find((row) => /^.{21}02$/.test(String(row.LEDR_KEY ?? '')) && num(row.DR_AMT) > 0)
@@ -118,6 +152,7 @@ export function orderTenderView(
         ? {
             chequeAmount: num(header.CHQ_AMT),
             cardAmount: num(header.CARD_AMT),
+            oldMetalRows: orderOldMetalView(saved.SL_PR_DETL ?? []),
             upiRows: [...saved.UPI_DATA]
               .sort((a, b) => num(a.SR_NO) - num(b.SR_NO))
               .map((row) => ({
@@ -141,11 +176,12 @@ export function orderTenderView(
 
 /** The request's tender fields as the HTTP route hands them to the writer. */
 export function orderTenderRequest(body: Record<string, any>) {
-  const { upiAmount, upiRows, bankAc, chequeNo, bankName, cardAc, cardAdj } = body;
+  const { upiAmount, upiRows, oldMetalRows, bankAc, chequeNo, bankName, cardAc, cardAdj } = body;
   const { chequeAmount, cardAmount } = body;
   return {
     upiAmount,
     upiRows,
+    oldMetalRows,
     bankAc,
     chequeNo,
     bankName,
@@ -170,6 +206,7 @@ export function orderTenderOf(
     cardAc?: unknown;
     upiAmount?: unknown;
     upiRows?: unknown;
+    oldMetalRows?: unknown;
   },
   salesOrder = true,
 ): OrderTender {
@@ -191,15 +228,25 @@ export function orderTenderOf(
     upi,
     upiRows,
     upiColumn: salesOrder ? upi : round(num(input.upiAmount), 2),
+    oldMetal: salesOrder ? orderOldMetalOf(input.oldMetalRows) : [],
+    oldMetalSent: salesOrder && input.oldMetalRows !== undefined,
   };
   if (tender.cheque && !tender.bankAc) throw new SaleValidationError(CHEQUE_NEEDS_BANK);
   if (tender.card && !tender.cardAc) throw new SaleValidationError(CARD_NEEDS_ACCOUNT);
   return tender;
 }
 
-/** ADV_AMT: the sum of the tenders taken here (`TR_SALE_ORD.cs:11368`). */
+/** ADV_AMT: the sum of the tenders taken here (`TR_SALE_ORD.cs:11368`), old gold and old silver included. */
 export function orderAdvanceTotal(tender: OrderTender): number {
-  return round(tender.cash + tender.cheque + tender.card + tender.upi, 2);
+  return round(
+    tender.cash + tender.cheque + tender.card + tender.upi + oldMetalAdvance(tender.oldMetal),
+    2,
+  );
+}
+
+/** OLD_GL, OLD_GL_AMT, OLD_SL and OLD_SL_AMT from the grid (`:9136-9144`); a Tour Order writes the request's. */
+export function orderOldMetalColumns(tender: OrderTender, salesOrder = true) {
+  return salesOrder && tender.oldMetalSent ? oldMetalHeader(tender.oldMetal) : {};
 }
 
 /** The header's tender columns (`TR_SALE_ORD.cs:9131-9150`); the Tour Order writes ADV_AMT alone, as before. */
@@ -222,6 +269,7 @@ export function orderTenderLedger(
   cashAc: string,
   tender: OrderTender,
   salesOrder = true,
+  bookInout = '',
 ): LedgerLine[] {
   if (!salesOrder) {
     // The Tour Order keeps its previous two legs: Dr the cash account, Cr the customer.
@@ -278,7 +326,8 @@ export function orderTenderLedger(
   pair(tender.card, tender.cardAc, 'CARD', 6, tender.chequeNo);
   for (const row of tender.upiRows) pair(row.amount, row.upiAc, 'UPI', 13, '', row.srNo);
   if (legs.length) assertBalanced(legs);
-  return legs;
+  // Old metal legs 07-10 post only for a book whose BOOK_INOUT is 'I' (Ac_Ledr.cs:42-50); see salesOrderOldMetal.ts.
+  return [...legs, ...orderOldMetalLedger(key, vchType, party.code, tender.oldMetal, bookInout)];
 }
 
 /**
@@ -384,4 +433,30 @@ export function assertUpiRowsSent(saved: readonly unknown[], input: { upiRows?: 
     throw new SaleValidationError(
       'This order has UPI rows. Reload it and submit its UPI rows before editing.',
     );
+}
+
+/**
+ * The order's whole day book. Slot 1 is the book's advance contra: `cashAc` is what the ledger already debits for the
+ * advance, which is the same account the desktop names in LD_CODE. Type 01 credits ADV_AMT, 02 debits the cheque's
+ * bank, 03 the card (Ac_Rojmel.cs:11-16), 04/06 each old metal row (:17-21) and 08 each UPI row (:25). Not written:
+ * type 07 rate-cut fine (RCUT_FINE 0 of 76 orders) and type 05 scheme (an unresolved ANOMALY: SCHM_AMT is non-zero on
+ * 7 of 76 orders yet there are ZERO type-05 rows; docs/PLAN-SALESORDER-ROJMEL.md section 2.4).
+ */
+export function orderRojmelRows(
+  context: RojmelContext,
+  cashAc: string,
+  advance: number,
+  tender: OrderTender,
+) {
+  return withTenderRojmel(
+    buildOrderRojmel(context, {
+      advanceContraAc: cashAc,
+      bankAc: tender.bankAc,
+      advanceAmount: advance,
+      chequeAmount: tender.cheque,
+      oldMetal: orderOldMetalRojmel(tender.oldMetal),
+    }),
+    context.partyCode,
+    tender,
+  );
 }
