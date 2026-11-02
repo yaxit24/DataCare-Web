@@ -119,6 +119,29 @@ static class FnvHalfProbe
         Console.WriteLine("RESULT3 igstChecked=" + igTotal + " igstMismatches=" + igMiss);
         Console.WriteLine("NEGZERO " + Strings.Format((object)Conversion.Val("-0.004"), "0.00") + " / half " + Strings.Format((object)(Conversion.Val("-0.004") / 2.0), "0.00"));
 
+        // Part 4: the Total Value / Taxable cells, RP_GST.cs:2939-2940:  Format(Val(amt) + Val(tax) - Val(disc), "0.00")
+        // (double arithmetic) against exact decimal arithmetic rounded half away from zero (the web).
+        long vTotal = 0, vMiss = 0;
+        Action<decimal, decimal, decimal> value = (a, t, d) =>
+        {
+            string fx = Strings.Format((object)(Conversion.Val(a.ToString(CultureInfo.InvariantCulture)) + Conversion.Val(t.ToString(CultureInfo.InvariantCulture)) - Conversion.Val(d.ToString(CultureInfo.InvariantCulture))), "0.00");
+            string rf = Math.Round(a + t - d, 2, MidpointRounding.AwayFromZero).ToString("0.00", CultureInfo.InvariantCulture);
+            if (rf == "-0.00") rf = "0.00";
+            vTotal++;
+            if (fx != rf) { vMiss++; if (shown++ < 100) Console.WriteLine("  value differs: " + a + " + " + t + " - " + d + " -> " + fx + " (reference " + rf + ")"); }
+        };
+        for (int i = 0; i < 3000000; i++)
+        {
+            decimal a = (decimal)((long)(rnd.NextDouble() * 99999999999L) - (rnd.Next(4) == 0 ? 99999999999L / 2 : 0)) / 10000m;
+            decimal t = (decimal)(long)(rnd.NextDouble() * 9999999999L) / 1000m;
+            decimal d = (decimal)(long)(rnd.NextDouble() * 999999999L) / 1000m;
+            value(a, t, d);
+        }
+        // adversarial: amounts that sit exactly on x.xx5 so any double error flips the digit
+        for (long k = 1; k <= 1500000; k++) value((decimal)k * 0.01m + 0.005m, 0m, 0m);
+        for (long k = 1; k <= 1500000; k++) value((decimal)k * 0.1m, (decimal)k * 0.03m + 0.005m, (decimal)k * 0.01m);
+        Console.WriteLine("RESULT4 valueChecked=" + vTotal + " valueMismatches=" + vMiss);
+
         // Spot values named in the plan / probe: 1908.29 (3% of 63,609.50 rounded) and the 2043.29 bill of G181.
         foreach (long t in new long[] { 190829, 204329, 1, 3, 5, 7, 9, 99999999999L / 100 | 1 })
             Console.WriteLine("SPOT tax " + Paise(t) + " -> " + Fx(t));
