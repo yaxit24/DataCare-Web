@@ -439,6 +439,144 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
     }
   }, 30_000);
 
+  it('stores whole-rupee Purchase components and preserves a 0.40 line adjunct downstream', async () => {
+    await owner.$executeRawUnsafe(
+      `UPDATE "CO_SET"
+          SET "PR_AMT_TYPE"='F',"TAX_ROF"=2,"LBR_ROF"=2
+        WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+      TENANT,
+      CO,
+    );
+    await owner.$executeRawUnsafe(
+      `UPDATE "CO_SET_NEW"
+          SET "TOT_AMT_ROF"=0,"LBR_WITH_GHT"='Y'
+        WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+      TENANT,
+      CO,
+    );
+
+    const created = await createPurchase(
+      runtime,
+      purchaseInput({ cashAmt: 0, cardAmt: 0, chequeAmt: 0, tcsAmount: 0, tdsAmount: 0 }),
+      [
+        {
+          itCode: 'LOOSE',
+          pcs: 1,
+          grossWt: 10,
+          netWt: 10,
+          ghtWt: 0,
+          touch: 91.6,
+          rate: 6123.45,
+          rateType: 'G',
+          labourType: 'per_gram',
+          labourRate: 237.5,
+          otherAmount: 0.4,
+          metal: 'G' as const,
+        },
+      ],
+    );
+    const vchNo = String(created.vchNo).padStart(5, '0');
+
+    const rows = (await owner.$queryRawUnsafe(
+      `SELECT d."ITM_FINE"::float fine,d."ITM_AMT"::float item,d."LBR_AMT"::float labour,
+              d."OTH_AMT"::float other,d."TOT_AMT"::float detail_total,d."NET_AMT"::float detail_net,
+              h."LBR_AMT"::float header_labour,h."OTH_AMT"::float header_other,
+              h."NET_AMT"::float header_net,h."TAX_AMT"::float tax,h."CGST_TAX"::float cgst,
+              h."SGST_TAX"::float sgst,h."IGST_TAX"::float igst,h."ROF_AMT"::float round_off,
+              h."TOT_AMT"::float total,h."BILL_OS"::float bill_os,
+              s."ITM_SIGN" stock_sign,s."ITM_AMT"::float stock_item,
+              s."LBR_AMT"::float stock_labour,s."OTH_AMT"::float stock_other,
+              s."NET_AMT"::float stock_net
+         FROM "PR_DETL" d
+         JOIN "PR_DATA" h USING (tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO")
+         JOIN "MAIN_STOCK" s USING (tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO")
+        WHERE d.tenant_id=$1 AND d."CO_BOOK"=$2 AND d."VCH_NO"=$3`,
+      TENANT,
+      BOOK,
+      vchNo,
+    )) as Array<Record<string, unknown>>;
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      fine: 9.16,
+      item: 56091,
+      labour: 2375,
+      other: 0.4,
+      detail_total: 58466.4,
+      detail_net: 58466.4,
+      header_labour: 2375,
+      header_other: 0.4,
+      header_net: 58466,
+      tax: 1753.98,
+      cgst: 876.99,
+      sgst: 876.99,
+      igst: 0,
+      round_off: 0.02,
+      total: 60220,
+      bill_os: 60220,
+      stock_sign: '+',
+      stock_item: 56091,
+      stock_labour: 2375,
+      stock_other: 0.4,
+      stock_net: 58466.4,
+    });
+
+    const taxRows = (await owner.$queryRawUnsafe(
+      `SELECT "NET_AMT"::float net,"TAX_AMT"::float tax
+         FROM "TAX_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 ORDER BY "SR_NO"`,
+      TENANT,
+      BOOK,
+      vchNo,
+    )) as Array<{ net: number; tax: number }>;
+    expect(taxRows).toHaveLength(2);
+    expect(taxRows.every((row) => row.net === 58466)).toBe(true);
+    expect(taxRows.reduce((sum, row) => sum + row.tax, 0)).toBeCloseTo(1753.98, 2);
+
+    const ledger = (await owner.$queryRawUnsafe(
+      `SELECT btrim("AC_CODE"::text) ac,"DR_AMT"::float dr,"CR_AMT"::float cr
+         FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 ORDER BY "LEDR_KEY"`,
+      TENANT,
+      BOOK,
+      vchNo,
+    )) as Array<{ ac: string; dr: number; cr: number }>;
+    expect(ledger).toEqual(
+      expect.arrayContaining([
+        { ac: 'SUPP', dr: 0, cr: 60220 },
+        { ac: 'PURCAC', dr: 58466, cr: 0 },
+        { ac: 'GSTLED', dr: 1753.98, cr: 0 },
+        { ac: 'ROUND', dr: 0.02, cr: 0 },
+      ]),
+    );
+    expect(ledger.reduce((sum, row) => sum + row.dr, 0)).toBeCloseTo(60220, 2);
+    expect(ledger.reduce((sum, row) => sum + row.cr, 0)).toBeCloseTo(60220, 2);
+
+    const rojmel = (await owner.$queryRawUnsafe(
+      `SELECT btrim("AC_CODE"::text) ac,btrim(coalesce("IT_CODE"::text,'')) item,
+              "SIGN" stock_sign,"ITM_AMT"::float item_amount,"LBR_AMT"::float labour,
+              "OTH_AMT"::float other,"NET_AMT"::float net,"DR_AMT"::float dr,"CR_AMT"::float cr
+         FROM "ROJ_MEL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 ORDER BY "LEDR_KEY"`,
+      TENANT,
+      BOOK,
+      vchNo,
+    )) as Array<Record<string, unknown>>;
+    expect(rojmel).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ac: 'PURCAC',
+          item: 'LOOSE',
+          stock_sign: '+',
+          item_amount: 56091,
+          labour: 2375,
+          other: 0.4,
+          net: 58466.4,
+          dr: 58466.4,
+          cr: 0,
+        }),
+        expect.objectContaining({ ac: 'GSTLED', item: '', dr: 1753.98, cr: 0 }),
+        expect.objectContaining({ ac: 'SUPP', item: '', dr: 0, cr: 60220 }),
+      ]),
+    );
+  }, 30_000);
+
   it('rejects and fully rolls back edit after a created tag was sold', async () => {
     const created = await createPurchase(runtime, purchaseInput(), [firstLines[0]!]);
     await createSale(
