@@ -779,10 +779,23 @@ export const partyMaster = {
           const locked = await save(page);
           assert.equal(locked.status(), 400);
           await message(page, " You Can't Change Software Default Account....");
-          await exec(
-            ctx,
-            `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","BRANCH_ALL_AC_SHOW") VALUES ($1,'01','Y')`,
+          // Other modules may have left a CO_SET_NEW row: switch the setting on that row and put its value back.
+          const [{ n: hadRow }] = await ctx.rows(
+            `SELECT count(*)::int n FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
           );
+          const [{ v: previous } = { v: null }] = await ctx.rows(
+            `SELECT "BRANCH_ALL_AC_SHOW" v FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"='01' LIMIT 1`,
+          );
+          if (hadRow)
+            await exec(
+              ctx,
+              `UPDATE "CO_SET_NEW" SET "BRANCH_ALL_AC_SHOW"='Y' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+            );
+          else
+            await exec(
+              ctx,
+              `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","BRANCH_ALL_AC_SHOW") VALUES ($1,'01','Y')`,
+            );
           try {
             await cancel(page);
             await fill(page, { 'Ac Name': 'e2ep branch', 'Ac Group': GROUP.code });
@@ -793,7 +806,13 @@ export const partyMaster = {
               'Please Insert Mobile No Because This Ac With Multi Branch Acconut so Mobile No Is Mandatory....',
             );
           } finally {
-            await exec(ctx, `DELETE FROM "CO_SET_NEW" WHERE tenant_id=$1`);
+            if (hadRow)
+              await exec(
+                ctx,
+                `UPDATE "CO_SET_NEW" SET "BRANCH_ALL_AC_SHOW"=$2 WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+                previous,
+              );
+            else await exec(ctx, `DELETE FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"='01'`);
           }
           const writes = requests
             .filter((r) => ['POST', 'PUT', 'DELETE'].includes(r.method))
