@@ -726,9 +726,9 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Sales-like item, component and old-metal grids with an advance panel, delivery date, images and order document.
 - **Writes:** SL_ORD_DATA, SL_ORD_DETL, SL_ORD_IDTL, SL_ORD_ADJ, SL_PR_DETL, AC_DATA, ROJ_MEL_DATA, UPI_DATA, TAG_IMAGE_DATA.
 - **Web:** `/txn/sales-order`; `GET /sales-orders`, `POST /sales-orders`, `GET /sales-orders/:vchNo`, `PUT /sales-orders/:vchNo`, `DELETE /sales-orders/:vchNo`, `GET /sales/order-confirmation`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** Tender and old-metal rows, partial delivery, manufacturing and invoice conversion, reservation/refund and the order document need acceptance.
-- **Owners:** G14, N44, G16, N46, X14, N77, X25.
-- **Evidence:** [KB_transaction.md:208-235](../../project-memory/video-research/_kb/KB_transaction.md#L208-L235).
+- **Remaining:** Old-metal and scheme tenders, partial delivery, manufacturing and invoice conversion, reservation/refund and the order document need acceptance.
+- **Owners:** G14, N44, G16, N46, X14, N77, X25, G206, N197, N222.
+- **Evidence:** [KB_transaction.md:208-235](../../project-memory/video-research/_kb/KB_transaction.md#L208-L235), [TR_SALE_ORD.cs:9520-9556](../../unified/src/csharp/DataCareNext/TR_SALE_ORD.cs#L9520-L9556).
 
 ### Sales Return
 

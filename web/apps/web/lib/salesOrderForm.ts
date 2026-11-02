@@ -108,6 +108,34 @@ export const readonlyHeaderFields = new Set([
   'orderAdjustAmount',
 ]);
 let nextClientKey = 0;
+/**
+ * G206: one row of the order's UPI grid (TR_SALE_ORD MSG_UPI: AcCode, Upi Bank Name, UpiType, Upi Id, UpiAmt). The
+ * bank name is the account's master name; the server stores it.
+ */
+export type UpiRow = {
+  key: string;
+  upiAc: string;
+  upiName: string;
+  upiType: string;
+  upiId: string;
+  amount: string;
+};
+export const blankUpiRow = (): UpiRow => ({
+  key: `upi-${++nextClientKey}`,
+  upiAc: '',
+  upiName: '',
+  upiType: '',
+  upiId: '',
+  amount: '',
+});
+/** UPI Amt (TotAmt, TR_SALE_ORD.cs:3698-3711): the rows with an account and a non-zero amount. */
+export function upiTotal(rows: readonly UpiRow[]): number {
+  const counted = rows.filter((row) => row.upiAc.trim() && Number(row.amount));
+  return round(
+    counted.reduce((sum, row) => sum + Number(row.amount), 0),
+    2,
+  );
+}
 export const blank = (srNo?: number): Row => ({
   ...blankTourRow(),
   // TR_SALE_ORD:5558 uses N for a new row with no selected master image.
@@ -398,10 +426,21 @@ export function hydrateSalesOrder(document: Record<string, any>) {
   const header = { ...hydrated.header };
   for (const [field] of salesOrderTenderFields)
     header[field] = Number(document[field] ?? 0) ? String(document[field]) : '';
+  const upiRows: UpiRow[] = (Array.isArray(document.upiRows) ? document.upiRows : []).map(
+    (row: Record<string, unknown>) => ({
+      key: `upi-${++nextClientKey}`,
+      upiAc: String(row.upiAc ?? ''),
+      upiName: String(row.upiName ?? ''),
+      upiType: String(row.upiType ?? ''),
+      upiId: String(row.upiId ?? ''),
+      amount: Number(row.amount ?? 0) ? String(row.amount) : '',
+    }),
+  );
   return {
     ...hydrated,
     header,
     rows,
+    upiRows,
   };
 }
 
@@ -437,6 +476,7 @@ export function salesOrderPayload(
   expectedVersion?: string,
   original?: Record<string, any>,
   dirtyFields: readonly string[] = [],
+  upiRows: readonly UpiRow[] = [],
 ) {
   validateSalesOrderDate(f.vchDate);
   // A saved parent with a cleared item code is an invalid edit, not an implicit row deletion.
@@ -454,6 +494,18 @@ export function salesOrderPayload(
     calculated[field] = raw ? Number(raw) : undefined;
   }
   calculated.dirtyFields = [...dirtyFields];
+  // Every grid row is sent; the server keeps those with an account and an amount, as TotAmt does.
+  calculated.upiRows = upiRows.map((row, index) => {
+    const raw = row.amount.trim();
+    if (raw && !Number.isFinite(Number(raw)))
+      throw new Error(`UPI Amt line ${index + 1} must be a valid number`);
+    return {
+      upiAc: row.upiAc.trim(),
+      upiType: row.upiType.trim(),
+      upiId: row.upiId.trim(),
+      amount: raw ? Number(raw) : 0,
+    };
+  });
   const keptRows = rows.filter((row) => row.itCode.trim());
   for (const [index, line] of (calculated.lines as Record<string, any>[]).entries()) {
     const row = keptRows[index]!;
