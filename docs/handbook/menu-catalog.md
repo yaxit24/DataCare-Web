@@ -727,7 +727,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Writes:** SL_ORD_DATA, SL_ORD_DETL, SL_ORD_IDTL, SL_ORD_ADJ, SL_PR_DETL, AC_DATA, ROJ_MEL_DATA, UPI_DATA, TAG_IMAGE_DATA.
 - **Web:** `/txn/sales-order`; `GET /sales-orders`, `POST /sales-orders`, `GET /sales-orders/:vchNo`, `PUT /sales-orders/:vchNo`, `DELETE /sales-orders/:vchNo`, `GET /sales/order-confirmation`. Can: create, reopen, edit, delete, print, list.
 - **Remaining:** Scheme tender, partial delivery, manufacturing and invoice conversion, reservation/refund and the order document need acceptance.
-- **Owners:** G14, N44, G16, N46, X14, N77, X25, G206, N197, N222, N225.
+- **Owners:** G14, N44, G16, N46, X14, N77, X25, G206, N197, N222, N226.
 - **Evidence:** [KB_transaction.md:208-235](../../project-memory/video-research/_kb/KB_transaction.md#L208-L235), [TR_SALE_ORD.cs:9520-9556](../../unified/src/csharp/DataCareNext/TR_SALE_ORD.cs#L9520-L9556), [TR_SALE_ORD.cs:9421-9475](../../unified/src/csharp/DataCareNext/TR_SALE_ORD.cs#L9421-L9475).
 
 ### Sales Return
@@ -2378,12 +2378,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `UT_TAG_PRINT` — constructor mode 'Tag Print' ([MDI_FORM.cs:8596-8605](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8596-L8605)).
 - **Does:** Selects in-stock tags by tag, product or voucher and reprints barcode and QR labels.
-- **Looks:** Book/voucher/item/product filters, a selectable tag grid, print-file selector, Set and label-skip controls.
-- **Writes:** TAG_PRINT_DATA, BAR_DETL, BAR_IDTL, PRINT_MAST, MAIN_STOCK.
-- **Web:** `/txn/tag-print`; `GET /stock/tag-print`, `POST /stock/tag-print/stage`, `GET /stock/tag-print/label`. Can: print, list.
-- **Remaining:** Basic label sheets work; PRINT_MAST variants, voucher/product selection, label skip, dimensions, fonts and physical-printer evidence remain.
-- **Owners:** N25, X28, G59, N73, G60, N75, X25.
-- **Evidence:** [KB_other.md:117-139](../../project-memory/video-research/_kb/KB_other.md#L117-L139).
+- **Looks:** Book, Vch No with F1, Gr Code, Pr Code and Item Type over a Y/N tag grid with the Hm Id Update columns; Print file Name with Set; Item Name and Lable Skip under the grid; Print, Save, Cancel, Delete and Exit along the bottom.
+- **Writes:** TAG_PRINT_DATA, BAR_DETL, BAR_CAN_DETL, MAIN_STOCK, PRINT_MAST, ITEM_MAST, GROUP_MAST, PRODUCT_MAST.
+- **Web:** `/txn/tag-print`; `GET /stock/tag-print-screen`, `GET /stock/tag-print-screen/books`, `GET /stock/tag-print-screen/book`, `GET /stock/tag-print-screen/vouchers`, `GET /stock/tag-print-screen/voucher`, `GET /stock/tag-print-screen/stock`, `GET /stock/tag-print-screen/tag`, `GET /stock/tag-print-screen/tags`, `GET /stock/tag-print-screen/lookups/:kind`, `POST /stock/tag-print-screen/hm-update`, `POST /stock/tag-print-screen/default-file`, `POST /stock/tag-print-screen/print`, `GET /stock/tag-print-screen/labels`. Can: print, list.
+- **Remaining:** The Crystal label files are not in the repository (the web prints its own label sheet) and physical-printer acceptance (D29) remains; the RFID writer, Print Type box and QR picture (named registrations) are not on the screen.
+- **Owners:** N25, X28, G59, N73, G60, N75, X25, G237, N225.
+- **Evidence:** [UT_TAG_PRINT.cs:1816-5666](../../unified/src/csharp/DataCareNext/UT_TAG_PRINT.cs#L1816-L5666).
 
 ### Tag Split
 

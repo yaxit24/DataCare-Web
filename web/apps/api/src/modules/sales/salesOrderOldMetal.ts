@@ -4,7 +4,7 @@ import type { OrderOldMetalLine } from '../shared/rojmel.js';
 import { SaleValidationError } from './sales.js';
 
 /**
- * N225 (G206): the Sales Order's old gold and old silver, as TR_SALE_ORD stores and posts them.
+ * N226 (G206): the Sales Order's old gold and old silver, as TR_SALE_ORD stores and posts them.
  *
  * - The grid is MSG_OLD (`:3957-4020`): Sr, ItCode, ItName, Pcs, GrWt, OthWt, NetWt, Touch, Fine, RTyp, Rate, NetAmt.
  *   The operator types the item, pieces, gross and other weight, touch, the rate type (N net wise, F fine wise) and
