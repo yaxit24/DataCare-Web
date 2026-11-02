@@ -26,15 +26,15 @@ import {
 } from '@datacare/core';
 import { companyFlag, companySetting, type CompanySettingValues } from './companySettings';
 
-export type TagCancelMode = 'cancel' | 'transfer';
+export type TagCancelMode = 'cancel' | 'transfer' | 'adjust';
 
 export interface TagCancelModeConfig {
   mode: TagCancelMode;
   title: string;
   /** API resource; each refuses a book of the other menu. */
-  endpoint: '/stock/tag-cancel' | '/stock/tag-transfer';
+  endpoint: '/stock/tag-cancel' | '/stock/tag-transfer' | '/stock/stock-adjust';
   /** `BOOK_DATA.MAIN_BOOK` the book picker offers. */
-  mainBook: 'TAG CANCEL' | 'TAG TRFR';
+  mainBook: 'TAG CANCEL' | 'TAG TRFR' | 'STOCK ADJUST';
   testId: string;
 }
 
@@ -52,6 +52,14 @@ export const TAG_CANCEL_MODES: Record<TagCancelMode, TagCancelModeConfig> = {
     endpoint: '/stock/tag-transfer',
     mainBook: 'TAG TRFR',
     testId: 'tag-transfer',
+  },
+  // MDI_FORM.cs:8616-8627: the Stock Adjust menu opens TR_TAG_CAN on a STOCK ADJUST book.
+  adjust: {
+    mode: 'adjust',
+    title: 'Stock Adjust',
+    endpoint: '/stock/stock-adjust',
+    mainBook: 'STOCK ADJUST',
+    testId: 'stock-adjust',
   },
 };
 
@@ -72,7 +80,16 @@ export type NumericCell =
   | 'mrp';
 
 export type TextCell =
-  'tagNo' | 'itCode' | 'tblCode' | 'designNo' | 'itmSize' | 'krName' | 'trfrItCode';
+  | 'tagNo'
+  | 'itCode'
+  | 'tblCode'
+  | 'designNo'
+  | 'itmSize'
+  | 'krName'
+  | 'trfrItCode'
+  | 'itmSign'
+  | 'lotNo'
+  | 'itmLot';
 
 /** Decimal places of each numeric cell (`MSG_LeaveCell`): weights 3, rates / money / purity 2, pieces 0. */
 export const CELL_DECIMALS: Record<NumericCell, number> = {
@@ -162,6 +179,12 @@ export interface GridRow {
   designImageId: string;
   trfrItCode: string;
   trfrItName: string;
+  /** Col 8 Sign (Stock Adjust): `+` adds the line to stock, `-` takes it out. */
+  itmSign: string;
+  /** Col 2 TagLot (Stock Adjust, Purchase LOT) → LOT_NO. */
+  lotNo: string;
+  /** Col 3 ItmLot (Stock Adjust, Item With LOT Stock) → ITM_LOT. */
+  itmLot: string;
   /** Hidden cols 56/57/60-64: what each input was when the row was last computed. */
   baseline: TagCancelBaseline;
   stones: StoneDraft[];
@@ -172,6 +195,10 @@ export interface GridRow {
 export interface TagCancelScreenSettings extends TagCancelSettings {
   /** `CO_SET.LBR_TYPE` (`MsLbrType`, blank is 'G'): the labour basis of a new row (`CommPassAdd` col 23). */
   companyLabourType: string;
+  /** `CO_SET_NEW.PURC_LOT` (`MsPurcLot`): the Stock Adjust grid shows TagLot (MSG_CLEAR :2514-2526). */
+  tagLot: boolean;
+  /** `CO_SET_NEW.ITM_WITH_LOT_STK` (`MsItmWitLotStk`): the Stock Adjust grid shows ItmLot (:2528-2540). */
+  itemLot: boolean;
 }
 
 /** The settings the grid honours, from `GET /settings`. */
@@ -183,6 +210,8 @@ export function tagCancelSettings(values: CompanySettingValues | null): TagCance
   return {
     labourIncludesGhat: companyFlag(values, 'LBR_WITH_GHT', 'Y'),
     companyLabourType: ['G', 'N', 'K', 'P'].includes(labourType) ? labourType : 'G',
+    tagLot: companyFlag(values, 'PURC_LOT'),
+    itemLot: companyFlag(values, 'ITM_WITH_LOT_STK'),
   };
 }
 
@@ -261,6 +290,10 @@ export function blankRow(
     designImageId: 'N',
     trfrItCode: mode === 'transfer' && previous ? previous.trfrItCode : '',
     trfrItName: mode === 'transfer' && previous ? previous.trfrItName : '',
+    // CommPassAdd (TR_TAG_CAN.cs:2835-2838): a new Stock Adjust row starts with the previous row's sign.
+    itmSign: mode === 'adjust' && previous ? previous.itmSign : '',
+    lotNo: '',
+    itmLot: '',
     baseline: baselineFromCells(null),
     stones: [],
     stonesEdited: false,
@@ -274,22 +307,27 @@ export function isActiveRow(row: GridRow): boolean {
 }
 
 /**
- * `CommPassAdd` in Tag Transfer: a new row starts with the previous row's transfer item (TR_TAG_CAN.cs:2830). The desktop
- * adds the row after the previous one is finished; the web keeps a spare row ready before the previous row's transfer
- * item is chosen, so the copy is made when the spare row is put to use — and only if it has no transfer item of its own.
+ * `CommPassAdd`: a new Tag Transfer row starts with the previous row's transfer item (TR_TAG_CAN.cs:2830-2834), a new
+ * Stock Adjust row with the previous row's sign (:2835-2838). The desktop adds the row after the previous one is
+ * finished; the web keeps a spare row ready before the previous row is finished, so the copy is made when the spare
+ * row is put to use, and only into a cell the row has not filled itself.
  */
-export function withPreviousTransfer(
+export function withPreviousRow(
   row: GridRow,
   previous: GridRow | undefined,
   mode: TagCancelMode,
 ): GridRow {
-  if (mode !== 'transfer' || !previous || row.trfrItCode.trim() || !previous.trfrItCode.trim()) {
-    return row;
+  if (!previous) return row;
+  if (mode === 'transfer' && !row.trfrItCode.trim() && previous.trfrItCode.trim()) {
+    return { ...row, trfrItCode: previous.trfrItCode, trfrItName: previous.trfrItName };
   }
-  return { ...row, trfrItCode: previous.trfrItCode, trfrItName: previous.trfrItName };
+  if (mode === 'adjust' && !row.itmSign.trim() && previous.itmSign.trim()) {
+    return { ...row, itmSign: previous.itmSign };
+  }
+  return row;
 }
 
-/** A row change, with `CommPassAdd`'s transfer-item copy when the change puts a spare row to use. */
+/** A row change, with `CommPassAdd`'s copy from the row above when the change puts a spare row to use. */
 export function changeRow(
   rows: readonly GridRow[],
   index: number,
@@ -299,9 +337,7 @@ export function changeRow(
   return rows.map((row, i) => {
     if (i !== index) return row;
     const next = change(row);
-    return !isActiveRow(row) && isActiveRow(next)
-      ? withPreviousTransfer(next, rows[i - 1], mode)
-      : next;
+    return !isActiveRow(row) && isActiveRow(next) ? withPreviousRow(next, rows[i - 1], mode) : next;
   });
 }
 
@@ -420,6 +456,10 @@ export function rowFromSource(
       itName: source.itName,
       trfrItCode: current.trfrItCode,
       trfrItName: current.trfrItName,
+      // The tag fills the row; the sign typed (or copied from the row above) and the lots stay.
+      itmSign: current.itmSign,
+      lotNo: current.lotNo,
+      itmLot: current.itmLot,
       stones: source.stones.map(stoneFromApi),
     },
     settings,
@@ -440,6 +480,9 @@ export function rowFromSaved(
       itName: String(line.itName ?? ''),
       trfrItCode: String(line.trfrItCode ?? ''),
       trfrItName: String(line.trfrItName ?? ''),
+      itmSign: mode === 'adjust' ? String(line.itmSign ?? '').trim() : '',
+      lotNo: String(line.lotNo ?? '').trim(),
+      itmLot: String(line.itmLot ?? '').trim(),
       stones: Array.isArray(line.stones)
         ? (line.stones as Array<Record<string, unknown>>).map(stoneFromApi)
         : [],
@@ -550,6 +593,45 @@ export function commitCell(row: GridRow, field: NumericCell, settings: TagCancel
   return recompute(withStones, settings);
 }
 
+/** One row of the TagLot / ItmLot help (`GET /stock/stock-adjust/lots`). */
+export interface StockAdjustLotView {
+  code: string;
+  name?: string;
+  itCode?: string;
+  pcs?: number;
+  grossWt?: number;
+  netWt?: number;
+}
+
+/**
+ * A lot chosen in the TagLot or ItmLot cell (TR_TAG_CAN.cs:4113-4122, :4164-4175): the lot, the item, the pieces (when
+ * the lot has gross weight), the gross and net weight and the less weight between them; the row then computes.
+ */
+export function rowFromLot(
+  row: GridRow,
+  field: 'lotNo' | 'itmLot',
+  lot: StockAdjustLotView,
+  settings: TagCancelSettings,
+): GridRow {
+  const gross = n(lot.grossWt);
+  const net = n(lot.netWt);
+  const filled: GridRow = {
+    ...row,
+    [field]: typedText(String(lot.code ?? '')),
+    ...(row.fromTag
+      ? {}
+      : {
+          itCode: String(lot.itCode ?? row.itCode),
+          itName: String(lot.name ?? row.itName),
+          ...(gross !== 0 ? { pcs: cellText(lot.pcs, 0) } : {}),
+          grossWt: cellText(gross, 3),
+          netWt: cellText(net, 3),
+          lessWt: cellText(gross - net, 3),
+        }),
+  };
+  return row.fromTag ? filled : commitCell(filled, 'netWt', settings);
+}
+
 /**
  * Leaving a stone cell (`MSG_IDTL_LeaveCell` → `CommPassTotal_Idtl`): the stone row recomputes, and the row's stone
  * sums act on it (less / net weight, karigar weight, other amount). The main row's fine is not recomputed until one
@@ -656,6 +738,11 @@ export function linePayload(row: GridRow, mode: TagCancelMode): Record<string, u
     krFine: n(row.krFine),
   };
   if (mode === 'transfer') line.trfrItCode = row.trfrItCode.trim();
+  if (mode === 'adjust') {
+    line.itmSign = row.itmSign.trim();
+    line.lotNo = row.lotNo.trim();
+    line.itmLot = row.itmLot.trim();
+  }
   if (row.stonesEdited) {
     line.stones = row.stones.filter(filledStone).map((stone) => ({
       itCode: String(stone.itCode ?? '').trim() || undefined,

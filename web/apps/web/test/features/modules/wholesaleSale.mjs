@@ -336,10 +336,10 @@ const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
  * 400 with exactly `message` shown to the operator, nothing may be written and the tag must stay in stock; `restore`
  * always runs.
  */
-async function refused(ctx, { setup, restore, message, options = {} }) {
+async function refused(ctx, { setup, message, options = {} }) {
   const t = await seedTag(ctx);
   const before = await counts(ctx);
-  if (setup) await setup();
+  const undo = setup ? await setup() : undefined;
   try {
     const { page } = await open(ctx);
     const response = await sell(page, { tag: t.tag, cutFine: t.fine, cash: 59540, ...options });
@@ -361,10 +361,45 @@ async function refused(ctx, { setup, restore, message, options = {} }) {
       database: { before },
     };
   } finally {
-    if (restore) await restore();
+    if (undo) await undo();
   }
 }
-const sql = (ctx, query, ...params) => ctx.owner.$executeRawUnsafe(query, ctx.tenantId, ...params);
+
+/**
+ * Set one company or party flag for a case. Returns the undo, which puts back the exact earlier value (NULL
+ * included), so later cases and modules in the same company see the provisioned setting, not a guessed one. The
+ * table, column and row filter are this module's constants; the values travel as parameters.
+ */
+async function setFlag(ctx, { table, column, where, keys = [] }, value) {
+  const read = async () =>
+    (
+      await ctx.owner.$queryRawUnsafe(
+        `SELECT DISTINCT "${column}" AS v FROM "${table}" WHERE tenant_id=$1 AND ${where}`,
+        ctx.tenantId,
+        ...keys,
+      )
+    ).map((row) => row.v ?? null);
+  const values = await read();
+  assert.equal(
+    values.length,
+    1,
+    `${table}.${column} must have one value on the matched rows to restore it`,
+  );
+  const [earlier] = values;
+  const update = `UPDATE "${table}" SET "${column}"=$${keys.length + 2} WHERE tenant_id=$1 AND ${where}`;
+  await ctx.owner.$executeRawUnsafe(update, ctx.tenantId, ...keys, value);
+  return async () => {
+    await ctx.owner.$executeRawUnsafe(update, ctx.tenantId, ...keys, earlier);
+    assert.deepEqual(await read(), [earlier], `${table}.${column} is back to its earlier value`);
+  };
+}
+const companyFlag = (column) => ({ table: 'CO_SET', column, where: `"CO_CODE"='01'` });
+const defaulterFlag = () => ({
+  table: 'AC_MAST',
+  column: 'DEFAULTER_AC',
+  where: `"AC_CODE"=$2`,
+  keys: [PARTIES.local.code],
+});
 
 export const wholesaleSale = {
   feature: 'wholesale-sale',
@@ -825,18 +860,7 @@ export const wholesaleSale = {
       'TR_WH_SALE.cs:12784-12789: a party flagged AC_MAST.DEFAULTER_AC = Y cannot be left owing (Received Os > 0): "You Cant Save Entry Because This Party Is in Defaulter List..."',
       (ctx) =>
         refused(ctx, {
-          setup: () =>
-            sql(
-              ctx,
-              `UPDATE "AC_MAST" SET "DEFAULTER_AC"='Y' WHERE tenant_id=$1 AND "AC_CODE"=$2`,
-              PARTIES.local.code,
-            ),
-          restore: () =>
-            sql(
-              ctx,
-              `UPDATE "AC_MAST" SET "DEFAULTER_AC"=NULL WHERE tenant_id=$1 AND "AC_CODE"=$2`,
-              PARTIES.local.code,
-            ),
+          setup: () => setFlag(ctx, defaulterFlag(), 'Y'),
           message: MSG.defaulter,
           options: { cash: 50000 },
         }),
@@ -848,11 +872,7 @@ export const wholesaleSale = {
       'Control for the defaulter rule: the desktop refuses only an outstanding (MSG2_TOTAL[7,4] + nDiffFine > 0), so a defaulter who pays in full saves',
       async (ctx) => {
         const t = await seedTag(ctx);
-        await sql(
-          ctx,
-          `UPDATE "AC_MAST" SET "DEFAULTER_AC"='Y' WHERE tenant_id=$1 AND "AC_CODE"=$2`,
-          PARTIES.local.code,
-        );
+        const undo = await setFlag(ctx, defaulterFlag(), 'Y');
         try {
           const { page } = await open(ctx);
           const response = await sell(page, { tag: t.tag, cutFine: t.fine, cash: 59540 });
@@ -866,11 +886,7 @@ export const wholesaleSale = {
             downstream: { tagBalance: await tagBalance(ctx, t.tag) },
           };
         } finally {
-          await sql(
-            ctx,
-            `UPDATE "AC_MAST" SET "DEFAULTER_AC"=NULL WHERE tenant_id=$1 AND "AC_CODE"=$2`,
-            PARTIES.local.code,
-          );
+          await undo();
         }
       },
     ),
@@ -881,16 +897,7 @@ export const wholesaleSale = {
       'TR_WH_SALE.cs:12790-12795: with CO_SET.EMP_CODE_MANDATORY = Y a voucher without an employee is refused with "Please Select Employee Code and Try......"',
       (ctx) =>
         refused(ctx, {
-          setup: () =>
-            sql(
-              ctx,
-              `UPDATE "CO_SET" SET "EMP_CODE_MANDATORY"='Y' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
-            ),
-          restore: () =>
-            sql(
-              ctx,
-              `UPDATE "CO_SET" SET "EMP_CODE_MANDATORY"=NULL WHERE tenant_id=$1 AND "CO_CODE"='01'`,
-            ),
+          setup: () => setFlag(ctx, companyFlag('EMP_CODE_MANDATORY'), 'Y'),
           message: MSG.employee,
         }),
     ),
@@ -902,9 +909,7 @@ export const wholesaleSale = {
       (ctx) =>
         refused(ctx, {
           setup: () =>
-            sql(ctx, `UPDATE "CO_MAST" SET "CO_TYPE"='B' WHERE tenant_id=$1 AND "CO_CODE"='01'`),
-          restore: () =>
-            sql(ctx, `UPDATE "CO_MAST" SET "CO_TYPE"=NULL WHERE tenant_id=$1 AND "CO_CODE"='01'`),
+            setFlag(ctx, { table: 'CO_MAST', column: 'CO_TYPE', where: `"CO_CODE"='01'` }, 'B'),
           message: MSG.companyB,
         }),
     ),
@@ -944,14 +949,7 @@ export const wholesaleSale = {
       (ctx) => {
         const lock = `${startYear}-07-20`;
         return refused(ctx, {
-          setup: () =>
-            sql(
-              ctx,
-              `UPDATE "CO_SET" SET "LOCK_DATE"=$2 WHERE tenant_id=$1 AND "CO_CODE"='01'`,
-              lock,
-            ),
-          restore: () =>
-            sql(ctx, `UPDATE "CO_SET" SET "LOCK_DATE"=NULL WHERE tenant_id=$1 AND "CO_CODE"='01'`),
+          setup: () => setFlag(ctx, companyFlag('LOCK_DATE'), lock),
           message: lockMessage(`20/07/${startYear}`),
         });
       },
