@@ -122,8 +122,10 @@ describe('route policy registry', () => {
     // POSTs (save, delete), POST, PUT and DELETE: 724 + 14 = 738.
     // N225 replaces Tag Print's list, stage and label routes with the UT_TAG_PRINT screen's (setup, books, book,
     // vouchers, voucher, stock, tag, tags, lookups, hm-update, default-file, print, labels): 738 - 3 + 13 = 748.
-    expect(routes).toHaveLength(748);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(748);
+    // Agent 07 moves the existing GST launcher route into a dedicated plugin and adds three exports:
+    // 1 moved declaration out, 4 dedicated declarations in = +3: 748 + 3 = 751.
+    expect(routes).toHaveLength(751);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(751);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -499,11 +501,19 @@ describe('route policy registry', () => {
     });
   });
 
-  it('maps the desktop GST report launcher to its report rights', () => {
+  it('maps the canonical GST dataset and exports to the RP_GST list/print rights', () => {
     expect(routePolicyFor('GET', '/reports/gst-report')).toMatchObject({
       form: 'Reports/GST Report',
       action: 'read',
+      businessScope: true,
     });
+    for (const extension of ['csv', 'xlsx', 'pdf']) {
+      expect(routePolicyFor('GET', `/reports/gst-report/export.${extension}`)).toMatchObject({
+        form: 'Reports/GST Report',
+        action: 'print',
+        businessScope: true,
+      });
+    }
   });
 
   it('maps RP_ORDER Delete Data and Point Report routes to report rights', () => {

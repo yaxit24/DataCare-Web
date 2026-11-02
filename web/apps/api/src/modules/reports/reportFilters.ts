@@ -281,6 +281,9 @@ export const REPORT_FILTER_BINDINGS: Record<string, FilterBinding> = {
   'user-report': { data: 'v', dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK'], party: 'ac' },
   'dhiran-report': { data: 'i', dataColumns: ['AC_CODE', 'LC_CODE'], party: 'm' },
   'loan-report': { data: 'i', dataColumns: ['AC_CODE', 'LC_CODE'], party: 'm' },
+  // RP_GST selectors are handled by the dedicated parameterised report engine. This binding only tells
+  // the shared pre-handler that the canonical route really applies its book/location selectors.
+  'gst-report': { data: 'a', dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK'] },
   'approval-report': {
     data: 'a',
     dataColumns: ['AC_CODE', 'LC_CODE', 'CO_BOOK', 'EMP_CODE'],
