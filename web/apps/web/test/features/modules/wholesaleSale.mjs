@@ -69,7 +69,7 @@ let seq = 0;
  * A live gold tag of the fixture item, as a tag opening leaves it: BAR_DETL plus a '+' MAIN_STOCK row. Gross equals
  * net (no stone), so the stored fine is round(net × touch / 100, 3). `lbrRate` gives the tag a net-wise labour rate.
  */
-async function seedTag(ctx, { net = 10, touch = 91.6, lbrRate = 0 } = {}) {
+async function seedTag(ctx, { net = 10, touch = 91.6, lbrRate = 0, stones = [] } = {}) {
   seq += 1;
   const tag = `WSE${String(seq).padStart(5, '0')}`;
   const srno = 900200000000 + seq;
@@ -107,6 +107,29 @@ async function seedTag(ctx, { net = 10, touch = 91.6, lbrRate = 0 } = {}) {
     srno,
     net,
   );
+  // The tag's stones (BAR_IDTL): [dm code, pcs, weight, rate, amount]; a stone with nothing in it is not copied.
+  for (const [i, [dm, pcs, wt, rate, amt]] of stones.entries())
+    await ctx.owner.$executeRawUnsafe(
+      `INSERT INTO "BAR_IDTL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","ISR_NO","TAG_NO","VCH_SRNO",
+         "IT_CODE","IT_TYPE","DM_CODE","DM_NAME","DM_COLOR","DM_SIZE","DM_ORIGIN","IT_PCS","IT_GWT","IT_RATE_TYPE","IT_RATE",
+         "IT_AMT","IT_LBR_RATE","IT_LBR_AMT","IT_NET_AMT","KR_WT")
+       VALUES ($1::text,'01','01',$2::text,'TOP','09201',$3::float8,$4::float8,$5::text,$6::float8,$7::text,'G',$8::text,
+               $9::text,'WHITE','1.5','NATURAL',$10::numeric,$11::numeric,'C',$12::numeric,$13::numeric,0,0,$13::numeric,
+               $11::numeric)`,
+      ctx.tenantId,
+      YEAR,
+      seq,
+      i + 1,
+      tag,
+      srno,
+      ITEMS.gold.code,
+      dm,
+      `${dm} STONE`,
+      pcs,
+      wt,
+      rate,
+      amt,
+    );
   return { tag, srno, net, fine };
 }
 
@@ -305,6 +328,8 @@ async function writeSet(ctx, vchNo) {
     'MAIN_STOCK',
     'AC_DATA',
     'ROJ_MEL_DATA',
+    'SL_IDTL',
+    'DM_DATA',
   ])
     out[table] = (
       await ctx.rows(
@@ -1055,11 +1080,27 @@ export const wholesaleSale = {
         await doc.waitForURL(/\/api\/wholesale-sales\/\d+\/print/);
         await doc.waitForLoadState();
         const body = (await doc.textContent('body')) ?? '';
-        for (const expected of [PARTIES.local.name, t.tag, '59,540.00'])
-          assert(body.includes(expected), `the bill shows ${expected}`);
+        // @RptTitle is the book's name; the lines sit under "Issue Item"; the band has the report's four columns.
+        const [{ name: bookName }] = await ctx.rows(
+          `SELECT "BOOK_NAME" AS name FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}'`,
+        );
+        const shows = [
+          PARTIES.local.name,
+          t.tag,
+          '59,540.00',
+          'Issue Item',
+          'Purchase Fine',
+          'Sales Fine',
+          'Purchase Amt',
+          'Sales Amt',
+          'Kasar Fine',
+          'ESTIMATE',
+        ];
+        for (const expected of shows) assert(body.includes(expected), `the bill shows ${expected}`);
+        assert.equal(await doc.title(), bookName, 'the bill is titled with the book name');
         return {
-          observation: 'the bill shows the party, the tag and the net amount',
-          expected: { shows: [PARTIES.local.name, t.tag, '59,540.00'] },
+          observation: `the bill, titled ${bookName}, shows the party, the tag, the net amount and the four-column band`,
+          expected: { title: bookName, shows },
           output: Buffer.from(body),
         };
       },
@@ -1096,6 +1137,169 @@ export const wholesaleSale = {
           expected: { status: 201 },
           database: { vchNo },
           downstream: { tagBalance: await tagBalance(ctx, t.tag) },
+        };
+      },
+    ),
+    C(
+      'create.tag-stones',
+      'T05',
+      'mutation',
+      "A tag's stones travel with the sale: save copies its BAR_IDTL rows to SL_IDTL (ENTRY_TYPE W, ISR_NO 1.. per line, an empty stone skipped) and, for an item with OTH_DETL_POSTING, projects them into DM_DATA (TR_WH_SALE.cs:10113-10148, :13162-13250; Ac_Stock.cs:857-861); an unchanged save rewrites them and Delete removes them",
+      async (ctx) => {
+        const undo = await setFlag(
+          ctx,
+          {
+            table: 'ITEM_MAST',
+            column: 'OTH_DETL_POSTING',
+            where: `"CO_CODE"='01' AND "IT_CODE"=$2`,
+            keys: [ITEMS.gold.code],
+          },
+          'Y',
+        );
+        try {
+          const t = await seedTag(ctx, {
+            stones: [
+              ['DIA01', 3, 0.3, 20000, 6000],
+              ['ZER00', 0, 0, 0, 0],
+              ['CZ02', 5, 0.5, 100, 500],
+            ],
+          });
+          const { page } = await open(ctx);
+          const created = await sell(page, { tag: t.tag, cutFine: t.fine, cash: 50000, kasar: 40 });
+          assert.equal(created.status(), 201, await created.text());
+          const vchNo = await voucherOf(created);
+          const stoneRows = (table, columns) =>
+            ctx.rows(
+              `SELECT ${columns} FROM "${table}" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "ISR_NO"`,
+              vchNo,
+            );
+          const idtl = await stoneRows(
+            'SL_IDTL',
+            `"SR_NO"::int AS sr,"ISR_NO"::int AS isr,"ENTRY_TYPE" AS et,"TAG_NO" AS tag,"DM_CODE" AS dm,"IT_PCS"::float8 AS pcs,"IT_GWT"::float8 AS wt,"IT_AMT"::float8 AS amt`,
+          );
+          assert.deepEqual(idtl, [
+            { sr: 1, isr: 1, et: 'W', tag: t.tag, dm: 'DIA01', pcs: 3, wt: 0.3, amt: 6000 },
+            { sr: 1, isr: 2, et: 'W', tag: t.tag, dm: 'CZ02', pcs: 5, wt: 0.5, amt: 500 },
+          ]);
+          const projected = await stoneRows(
+            'DM_DATA',
+            `"ISR_NO"::int AS isr,"ENTRY_TYPE" AS et,"DM_CODE" AS dm,"DM_PCS"::float8 AS pcs,"DM_WT"::float8 AS wt,"DM_SIGN" AS sign,"MAIN_IT_CODE" AS main,"TAG_NO" AS tag`,
+          );
+          assert.deepEqual(projected, [
+            {
+              isr: 1,
+              et: 'S',
+              dm: 'DIA01',
+              pcs: 3,
+              wt: 0.3,
+              sign: '-',
+              main: ITEMS.gold.code,
+              tag: t.tag,
+            },
+            {
+              isr: 2,
+              et: 'S',
+              dm: 'CZ02',
+              pcs: 5,
+              wt: 0.5,
+              sign: '-',
+              main: ITEMS.gold.code,
+              tag: t.tag,
+            },
+          ]);
+          const before = await writeSet(ctx, vchNo);
+          await load(page, vchNo);
+          const updated = await save(page);
+          assert.equal(updated.status(), 200, await updated.text());
+          assert.deepEqual(
+            await writeSet(ctx, vchNo),
+            before,
+            'an unchanged save keeps the stone rows',
+          );
+          const { response } = await deleteLoaded(page);
+          assert.equal(response.status(), 200, await response.text());
+          const remaining = await writeSet(ctx, vchNo);
+          assert.deepEqual([remaining.SL_IDTL, remaining.DM_DATA], [[], []], 'Delete removes them');
+          return {
+            observation: `voucher ${vchNo}: 2 SL_IDTL and 2 DM_DATA stone rows, kept on an unchanged save, gone after Delete`,
+            expected: { idtl, projected },
+            database: { idtl, projected },
+            downstream: { afterDelete: [0, 0], tagBalance: await tagBalance(ctx, t.tag) },
+          };
+        } finally {
+          await undo();
+        }
+      },
+    ),
+    C(
+      'keyboard.voucher-number-keys',
+      'T17',
+      'read-only',
+      'The voucher number box: F1 lists the book, Up steps to the next saved voucher, Down to the previous one, Enter opens the typed number (tVchNo_KeyDown, TR_WH_SALE.cs:14393-14418)',
+      async (ctx) => {
+        const first = await (async () => {
+          const t = await seedTag(ctx);
+          const { page } = await open(ctx);
+          const response = await sell(page, { tag: t.tag, cutFine: t.fine });
+          assert.equal(response.status(), 201, await response.text());
+          return voucherOf(response);
+        })();
+        const t2 = await seedTag(ctx);
+        const { page } = await open(ctx);
+        const response = await sell(page, { tag: t2.tag, cutFine: t2.fine });
+        assert.equal(response.status(), 201, await response.text());
+        const second = await voucherOf(response);
+        await page.getByRole('button', { name: 'New', exact: true }).click();
+        const box = page.getByLabel('Voucher No', { exact: true });
+        const note = page.getByTestId('voucher-number-note');
+        const seen = [];
+        const expectLoaded = async (vchNo, step) => {
+          await text(page, 'wholesale-sale-status', `Loaded voucher ${vchNo}`);
+          seen.push(`${step}: #${vchNo}`);
+        };
+        await box.focus();
+        await page.keyboard.press('ArrowDown');
+        await expectLoaded(second, 'Down');
+        await page.keyboard.press('ArrowDown');
+        await expectLoaded(first, 'Down');
+        assert.equal(
+          await box.evaluate((el) => el === document.activeElement),
+          true,
+          'Up/Down keep the focus in the box',
+        );
+        await page.keyboard.press('ArrowUp');
+        await expectLoaded(second, 'Up');
+        await page.keyboard.press('ArrowUp');
+        for (let i = 0; i < 50 && (await box.inputValue()) !== ''; i++)
+          await page.waitForTimeout(100);
+        assert.equal(await box.inputValue(), '', 'a blank new voucher');
+        seen.push('Up: new voucher');
+        await page.keyboard.press('ArrowUp');
+        await note.filter({ hasText: 'Last Record...' }).waitFor();
+        seen.push('Up: Last Record...');
+        await box.fill(first);
+        await page.keyboard.press('Enter');
+        await expectLoaded(first, 'Enter');
+        await page.waitForFunction(() => document.activeElement?.getAttribute('type') === 'date');
+        seen.push('Enter: focus on the date');
+        await box.focus();
+        await page.keyboard.press('F1');
+        await page.waitForFunction(() => document.activeElement?.hasAttribute('data-voucher-load'));
+        await page.keyboard.press('ArrowDown');
+        await page.keyboard.press('Enter');
+        await expectLoaded(first, 'F1 list');
+        return {
+          observation: seen.join('; '),
+          expected: [
+            `Down: #${second}`,
+            `Down: #${first}`,
+            `Up: #${second}`,
+            'Up: new voucher',
+            'Up: Last Record...',
+            `Enter: #${first}`,
+            'Enter: focus on the date',
+            `F1 list: #${first}`,
+          ].join('; '),
         };
       },
     ),

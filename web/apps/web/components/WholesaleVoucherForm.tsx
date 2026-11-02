@@ -34,6 +34,8 @@ import { GridModeToggle } from './ExtendedGrid';
 import { useGridKeyboard } from './GridKeyboard';
 import { LookupPicker, type LookupRow } from './LookupPicker';
 import { openDocument } from '../lib/openDocument';
+import { VoucherList } from './VoucherList';
+import { useVoucherNumberKeys, VoucherNumberNote } from './VoucherNumberKeys';
 
 /**
  * TR_WH_SALE on the web: one form for "Wh Sales" and "Rate Cut" (lib/wholesaleVoucher.ts explains the split).
@@ -348,6 +350,30 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
       setBusy(false);
     }
   }
+
+  // The voucher number box's F1, Up, Down and Enter (tVchNo_KeyDown, TR_WH_SALE.cs:14393-14418).
+  async function openFromKeys(no: string): Promise<boolean> {
+    setBusy(true);
+    setError('');
+    setStatus('');
+    try {
+      const view = await open(no);
+      setStatus(`Loaded voucher ${view.voucherNo}`);
+      return true;
+    } catch (caught) {
+      setError(message(caught, `${cfg.title} load failed`));
+      return false;
+    } finally {
+      setBusy(false);
+    }
+  }
+  const numberKeys = useVoucherNumberKeys({
+    table: 'RATE_CUT_DATA',
+    book: coBook,
+    value: voucherNo,
+    open: openFromKeys,
+    fresh: reset,
+  });
 
   async function save() {
     setBusy(true);
@@ -772,12 +798,7 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
                 id={id('voucher-no')}
                 value={voucherNo}
                 onChange={(event) => setVoucherNo(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') {
-                    event.preventDefault();
-                    void load();
-                  }
-                }}
+                onKeyDown={numberKeys.onKeyDown}
                 placeholder="new"
                 style={{ width: 90 }}
               />
@@ -789,12 +810,14 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
               >
                 Load
               </button>
+              <VoucherNumberNote note={numberKeys.note} />
             </div>
           </div>
           <div className="field">
             <label htmlFor={id('date')}>Date</label>
             <input
               id={id('date')}
+              ref={numberKeys.dateRef}
               type="date"
               value={h.vchDate}
               onChange={(event) => setHeader('vchDate', event.target.value)}
@@ -1058,6 +1081,19 @@ export function WholesaleVoucherForm({ workflow }: { workflow: WholesaleWorkflow
           New
         </button>
       </div>
+      <VoucherList
+        table="RATE_CUT_DATA"
+        book={coBook}
+        onLoad={(vchNo) => void openFromKeys(vchNo)}
+        openKey={numberKeys.listKey}
+        printHref={
+          workflow === 'wholesale-sale' || workflow === 'wholesale-quotation'
+            ? (vchNo) =>
+                `/api${cfg.endpoint}/${encodeURIComponent(vchNo)}/print?coBook=${encodeURIComponent(coBook)}&format=html`
+            : undefined
+        }
+        reloadKey={loadedVoucherNo || status}
+      />
     </div>
   );
 }

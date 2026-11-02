@@ -32,6 +32,9 @@ const ALLOWED = new Set([
   'MFG_DATA',
   // Tag Opening and Only Tag Entry (TR_TAG_OPBL): the voucher number box and the F1 list (N172).
   'BAR_DATA',
+  // Wh Sales, Rate Cut, Wh Quotation and Tour Sales (TR_WH_SALE): the voucher number box and the F1 list
+  // (TR_WH_SALE.cs:14393-14418, :13916-13927). The total shown is SL_NET_AMT, the sale side of the desktop list.
+  'RATE_CUT_DATA',
 ]);
 const IDENTITY_COLUMNS = ['CO_CODE', 'LC_CODE', 'CO_YEAR', 'CO_BOOK', 'VCH_NO'];
 const qid = (c: string): string => '"' + c.replace(/[^A-Za-z0-9_]/g, '') + '"';
