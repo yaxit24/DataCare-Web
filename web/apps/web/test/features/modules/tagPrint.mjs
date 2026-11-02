@@ -973,6 +973,10 @@ export const tagPrint = {
       async (ctx) =>
         withCase(ctx, async () => {
           const { page } = await ctx.session();
+          // Esc closes the form with router.back(): arrive from another screen so there is an entry to go back to
+          // (a goto to the URL the page is already on replaces the entry, and then back stays on Tag Print).
+          await page.goto('/utilities');
+          await page.waitForLoadState();
           await openScreen(page);
           await label(page, 'Book').fill(BOOK);
           await page.keyboard.press('Enter');
