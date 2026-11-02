@@ -2370,7 +2370,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header and a scan-driven tag grid with item, counter, weights, fine and karigar detail.
 - **Writes:** BAR_CAN_DATA, BAR_CAN_DETL, BAR_CAN_IDTL, BAR_DETL, BAR_IDTL, MAIN_STOCK, DM_DATA, DELETE_DATA.
 - **Web:** `/txn/tag-cancel`; `GET /stock/tag-cancel`, `POST /stock/tag-cancel`, `GET /stock/tag-cancel/:vchNo`, `PUT /stock/tag-cancel/:vchNo`, `DELETE /stock/tag-cancel/:vchNo`, `GET /stock/tag-cancel/source`, `GET /stock/tag-cancel/:vchNo/print`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** Implemented from source (N18, N210): TagCanBill behind print rights and the desktop refusals pass 12 browser cases. Open: no captured desktop BAR_CAN rows, idempotency retry, fault rollback, the Tag Stock report check and a desktop-runtime comparison.
+- **Remaining:** Implemented from source (N18, N210): TagCanBill and desktop refusals, exact-caption rights, a two-browser same-tag race, create/edit/delete fault rollback, and the Tag Stock create/edit/delete lifecycle have executable evidence. Open: no captured desktop BAR_CAN rows, durable lost-acknowledgement idempotency, and a desktop-runtime comparison.
 - **Owners:** G223, N18, N210, P07-03, X18, X19.
 - **Evidence:** [KB_other.md:106-149](../../project-memory/video-research/_kb/KB_other.md#L106-L149).
 

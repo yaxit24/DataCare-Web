@@ -7065,15 +7065,16 @@
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
       "verification": "04-verification-playbook.md",
-      "statusAsOf": "2026-11-01",
+      "statusAsOf": "2026-11-02",
       "evidence": [
         "web/apps/api/src/modules/stock/tagCancel.ts",
         "web/apps/api/src/modules/stock/tagCancelBill.ts",
         "web/apps/web/components/TagCancelForm.tsx",
         "web/apps/api/test/tagCancel.routes.db.test.ts",
+        "web/apps/api/test/tagCancelFaultMatrix.db.test.ts",
         "web/apps/web/test/features/modules/tagCancel.mjs"
       ],
-      "statusNote": "IMPLEMENTED, not accepted. Tag Cancel suites 114/114 (the two new cases red against main); tag-cancel feature module 12 passed / 5 blocked. Open: no captured desktop BAR_CAN rows, idempotency, fault rollback, the Tag Stock report check, desktop-runtime comparison."
+      "statusNote": "IMPLEMENTED, not accepted. The feature matrix now freezes 16 executable cases, 2 blocked and 2 not applicable. New evidence covers exact 'Tag Cancel' caption rights with a near-miss refusal, an exact two-browser same-tag race, create/edit/delete rollback at every executed write-set stage, and Tag Stock create/edit/delete agreement. T13 durable lost-acknowledgement idempotency remains blocked while the Tag Print slice owns txn.ts; T15 history/configuration stays blocked. Open: no captured desktop BAR_CAN rows, durable idempotency and desktop-runtime comparison. Final dependency-backed execution is pending CI."
     },
     {
       "id": "N211",
