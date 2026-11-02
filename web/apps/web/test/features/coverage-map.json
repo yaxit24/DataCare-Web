@@ -141,6 +141,7 @@
     "tagCancel": {
       "covers": [
         "web/apps/web/app/(app)/txn/tag-cancel/page.tsx",
+        "web/apps/web/app/(app)/reports/tag-stock/page.tsx",
         "web/apps/web/components/TagCancelForm.tsx",
         "web/apps/api/src/modules/stock/tagCancel.ts",
         "web/apps/api/src/modules/stock/tagCancelBill.ts"

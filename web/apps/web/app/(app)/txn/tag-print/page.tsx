@@ -632,12 +632,16 @@ export default function TagPrintPage() {
     }
   }
 
+  function closeScreen() {
+    router.replace('/dashboard');
+  }
+
   function onScreenKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (event.defaultPrevented) return;
     if (event.key === 'Escape') {
       event.preventDefault();
       if (help) closeHelp();
-      else router.back();
+      else closeScreen();
     }
   }
   function onHelpKeyDown(event: KeyboardEvent<HTMLElement>) {
@@ -1026,7 +1030,7 @@ export default function TagPrintPage() {
         >
           Delete
         </button>
-        <button type="button" className="ghost" onClick={() => router.back()}>
+        <button type="button" className="ghost" onClick={closeScreen}>
           Exit
         </button>
       </div>

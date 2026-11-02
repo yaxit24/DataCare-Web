@@ -1,3 +1,18 @@
+## 2026-11-02 — Tag Cancel closure milestone 1 (N210 / G223)
+
+- Tag Cancel remains PARTIAL and N210 remains implemented-unverified. The browser matrix now freezes 16 executable
+  cases, 2 blocked and 2 not applicable: exact-caption `USER_SET` rights and near-miss refusal, two-browser same-tag
+  concurrency, a deepest-applicable DM_DATA rollback/retry, Tag Stock output after create, and a full
+  create → edit (drop/keep/add) → delete Tag Stock journey.
+- `tagCancelFaultMatrix.db.test.ts` conditions faults to its fixture and covers 8 create, 14 edit and 8 delete stages,
+  with whole-tenant/source/sentinel equality after every failure and a successful retry. The HTTP feature cases
+  compare business-table snapshots separately from their required `audit_log` appends. LOT_DETL is N/A in cancel
+  mode. No production route, writer, schema, form or shared RBAC registry changed.
+- Still open: T13 durable lost-acknowledgement replay pending a production idempotency key and replay contract, T15
+  history/configuration, captured desktop BAR_CAN rows, Windows comparison and parent acceptance. The sandbox lacked
+  workspace dependencies and could not download pnpm, so dependency-backed DB/browser execution remains for CI;
+  syntax, Prettier and repository Python/Node document gates are the local evidence.
+
 ## 2026-11-02 — Company master milestone 1 (N58 / G38 / G39)
 
 - Follow-up evidence correction on `feat/lite-company-master`: generic `CO_MAST` create/update/delete/CSV business
