@@ -3,6 +3,7 @@
   "sales-invoice": [],
   "purchase-invoice": [],
   "settings": [],
+  "company-master": [],
   "sales-return": [],
   "purchase-return": [],
   "sales-order": [

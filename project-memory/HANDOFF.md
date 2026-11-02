@@ -1,3 +1,12 @@
+## 2026-11-02 — Company master milestone 1 (N58 / G38 / G39)
+
+- Implemented-unverified on `feat/lite-company-master`: generic `CO_MAST` create/update/delete/CSV writes are contained
+  by `dedicatedWriter`, and `/masters/companies` now shadows generic CRUD with an authenticated tenant-scoped,
+  read-only Code/Name surface. The frozen Company T01–T18 matrix and focused no-write tests are registered.
+- N58 remains planned and the Company catalog remains PARTIAL. Rich identity editing, the versioned writer, first
+  `YEAR_MAST` plus 17-family provisioning, G39 identity conventions, `Company.RPT`, full keyboard/journey evidence,
+  and a safe hosted-delete decision remain. No new N/G ID was allocated.
+
 ## 2026-10-31 — Lite first, then Basic, then Standard
 
 - Owner instruction (31 October): finish every **Lite** menu end to end first, then the Basic additions, then the

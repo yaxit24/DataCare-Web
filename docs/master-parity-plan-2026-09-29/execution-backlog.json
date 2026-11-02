@@ -3794,7 +3794,16 @@
       "gapIds": "G38, G39, G82, G86, G100",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "docs/handbook/web/company-master.md",
+        "web/apps/api/src/modules/masters/configs.ts",
+        "web/apps/api/test/companyMasterContainment.db.test.ts",
+        "web/apps/web/app/(app)/masters/companies/page.tsx",
+        "web/apps/web/test/features/modules/companyMaster.mjs"
+      ],
+      "statusNote": "MILESTONE 1 IMPLEMENTED-UNVERIFIED; overall N58 remains planned. Generic CO_MAST create/update/delete/CSV paths are contained by dedicatedWriter and /masters/companies is a dedicated tenant-scoped read-only page. Pending: rich identity form, versioned/idempotent writer, first YEAR_MAST plus 17-family provisioning, desktop identity conventions, semantic print, complete keyboard/journey evidence, and an accepted safe-delete decision."
     },
     {
       "id": "N59",

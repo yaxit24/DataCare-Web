@@ -6,16 +6,16 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 28 | 25 | 0 |
+| Lite (first, D32) | 49 | 29 | 26 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
 | Standard (added by Standard) | 36 | 0 | 0 | 0 |
-| **Standard total** | **114** | **29** | **26** | **0** |
+| **Standard total** | **114** | **30** | **27** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
 | Tab | Menu | Web routes | Catalog | Feature module | State | Open gaps |
 |---|---|---|---|---|---|---|
-| Company | Company | `/masters/companies`, `/admin/provision` | PARTIAL | — | no module | — |
+| Company | Company | `/masters/companies`, `/admin/provision` | PARTIAL | company-master | module green | — |
 | Company | Year Create | `/masters/year-create` | PARTIAL | — | no module | — |
 | Company | Balance TrFr | `/company/balance-transfer` | PARTIAL | — | no module | — |
 | Company | Books | `/masters/books` | PARTIAL | — | no module | — |
