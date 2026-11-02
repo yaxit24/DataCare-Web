@@ -120,8 +120,10 @@ describe('route policy registry', () => {
     // routes/accountLedger.ts, so the net change is +4: 720 + 4 = 724.
     // N224 adds the Party master's GETs (list, print, help, copy, taken, gst-state, account, one, photo), the photo
     // POSTs (save, delete), POST, PUT and DELETE: 724 + 14 = 738.
-    expect(routes).toHaveLength(738);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(738);
+    // N225 replaces Tag Print's list, stage and label routes with the UT_TAG_PRINT screen's (setup, books, book,
+    // vouchers, voucher, stock, tag, tags, lookups, hm-update, default-file, print, labels): 738 - 3 + 13 = 748.
+    expect(routes).toHaveLength(748);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(748);
 
     const policies = routes.map((route) => ({
       ...route,
