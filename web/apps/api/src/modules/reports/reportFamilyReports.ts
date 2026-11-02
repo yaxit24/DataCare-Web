@@ -275,7 +275,12 @@ export async function approvalReport(
       // resolve that line by setting ISU_REC='Y' (RP_ALL.cs:8216-8289; TR_APR_ISU.cs:6412-6426;
       // TR_SALE.cs:16110-16114), so “In” means resolved rather than return-only. Joining descendants would
       // multiply issue quantities and cannot represent the desktop's all-or-nothing line status.
-      params.push('Y');
+      // Web adaptation: the desktop writes only 'N' and 'Y' to APR_DETL.ISU_REC, but the web's Approval Rtn
+      // screen is served by the Tour return writer, which closes a returned issue line with 'R'
+      // (tour.ts, tourReturn). The Pending mode already treats anything but 'N' as no longer outstanding, so
+      // 'R' counts as resolved here too; otherwise a returned approval would read In 0 / Pending n in this
+      // mode and disappear from the Pending mode.
+      params.push(['Y', 'R']);
       const resolvedStatusIndex = params.length;
       const filterSql = applyFilters('approval-report', s.filters, params);
       const rows = await tx.$queryRawUnsafe(
@@ -294,8 +299,8 @@ export async function approvalReport(
                 coalesce(a."ITM_PCS",0) AS "pcs",coalesce(a."ITM_GWT",0) AS "grossWt",
                 coalesce(a."ITM_NWT",0) AS "netWt",coalesce(a."OTH_AMT",0) AS "otherAmount",
                 coalesce(a."ITM_PCS",0) AS "outPcs",
-                CASE WHEN a."ISU_REC"::text=$${resolvedStatusIndex} THEN coalesce(a."ITM_PCS",0) ELSE 0 END AS "inPcs",
-                coalesce(a."ITM_PCS",0)-CASE WHEN a."ISU_REC"::text=$${resolvedStatusIndex} THEN coalesce(a."ITM_PCS",0) ELSE 0 END AS "pendingPcs",
+                CASE WHEN a."ISU_REC"::text=ANY($${resolvedStatusIndex}::text[]) THEN coalesce(a."ITM_PCS",0) ELSE 0 END AS "inPcs",
+                coalesce(a."ITM_PCS",0)-CASE WHEN a."ISU_REC"::text=ANY($${resolvedStatusIndex}::text[]) THEN coalesce(a."ITM_PCS",0) ELSE 0 END AS "pendingPcs",
                 a."ISU_REC" AS "status",a."MAIN_USER" AS "mainUser"
            FROM "APR_DETL" a
            JOIN LATERAL (
