@@ -1008,10 +1008,19 @@ export const tagPrint = {
             (await staged(ctx)).map((r) => r.TAG_NO),
             ['TP0001', 'TP0003'],
           );
-          await Promise.all([
-            page.waitForURL((url) => url.pathname === '/dashboard'),
-            page.keyboard.press('Escape'),
-          ]);
+          // The print window can open late on a slow runner and take the keyboard from this page; bring the page back
+          // and press Esc again rather than counting on the first key reaching it.
+          for (let attempt = 0; attempt < 3; attempt++) {
+            await page.bringToFront();
+            await page.evaluate(() => window.focus());
+            await page.keyboard.press('Escape');
+            const left = await page
+              .waitForURL((url) => url.pathname === '/dashboard', { timeout: 8000 })
+              .then(() => true)
+              .catch(() => false);
+            if (left) break;
+          }
+          assert.equal(new URL(page.url()).pathname, '/dashboard', 'Esc closes Tag Print');
           return {
             observation:
               'Enter through Book and Vch No, Y/N, Space, the arrows, Alt+S, Print with Enter and Esc',
