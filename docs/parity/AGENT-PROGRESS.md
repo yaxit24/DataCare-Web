@@ -11,7 +11,7 @@ Edit this file only in a pull request, never in a shared working tree. If two PR
 | Claim | Holder | Branch / PR | Files claimed | State | Since |
 |---|---|---|---|---|---|
 | Tag Print Esc with no focused control (G239, on N225) | session `52f05ab4` | `agent/parity-tag-print-escape` / PR #218 | `web/apps/web/app/(app)/txn/tag-print/page.tsx`, `web/apps/web/test/features/modules/tagPrint.mjs` | open; static-gates passed, quality and real-stack pending at last look | 2 Nov 15:25 |
-| This coordination set (`docs/parity/*`) | session `52f05ab4` | `agent/parity-coordination` | new files only, plus one rule in `docs/handbook/doc-register.json` | being opened as a PR | 2 Nov 16:30 |
+| This coordination set (`docs/parity/*`) | session `52f05ab4` | `agent/parity-coordination` / PR #220 | new files only, plus two rules in `docs/handbook/doc-register.json` | open | 2 Nov 16:30 |
 | Order Cancel | not this session; `~/dc-wt/order-cancel` | `feat/order-cancel`, nothing pushed | `modules/sales/orderCancel.ts`, `test/orderCancel.db.test.ts`, edits to `salesOrder.ts` | **stale suspect**: uncommitted for about 16 h | 1 Nov 23:00 |
 | GST CSV negative amounts | `ysmtb` identity | PR #217 | GST report CSV | open | 2 Nov |
 
@@ -51,7 +51,7 @@ No other Lite menu has an open PR or a pushed branch with unmerged work (checked
 
 - Repository `~/DataCare-Web`, GitHub `yaxit24/DataCare-Web`. Working worktree `~/dc-wt/parity-coord`. `main` was `a25994c6` at 16:40.
 - Branch `agent/parity-tag-print-escape`, head `b8bf5185`, PR #218 (open, mergeable). Commits: `18e68380` (the change), then three merges of `main`.
-- Branch `agent/parity-coordination` carries this file set; if it is not pushed yet it is in the worktree untracked: `docs/parity/`.
+- Branch `agent/parity-coordination` carries this file set (PR #220).
 - Build: Node 24.22.2 from `~/.nvm/versions/node/v24.22.2/bin`, `pnpm install --frozen-lockfile`, then build in this order: `@datacare/db` (generate, then build), `types`, `core`, `api`, then `web` with `API_ORIGIN=http://127.0.0.1:<API port>`. Slot 1 ports: DB 55501, API 4611, web 4612, project `dc-parity-coord`. Release the slot (`rmdir ~/.cache/datacare-stack-slots/slot-N`) after every run.
 - A full feature run takes about 8 minutes once built; the web build is 2-3 minutes with a warm Turbo cache.
 - Re-run `python3 docs/parity/build_matrix.py` after any change to the catalog, the progress page, `run-snapshot.json` or `ownership.json`.
