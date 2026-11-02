@@ -245,6 +245,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G232 | High | Auto Item reversed the desktop's item code, offered the default products and had no group help, grid keys, MinStk, rights or most columns | `unified/src/csharp/DataCareNext/MS_AUTO_ITEM.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7640-7649` | `web/apps/web/app/(app)/masters/auto-item/page.tsx`; `web/apps/api/src/modules/masters/autoItem.ts`; `web/apps/api/src/routes/txn.ts` | MS_AUTO_ITEM's AutoItem mode lists the company's products but the default ones for a group chosen from its help, marks the ones the group already has, and makes PR_CODE + GR_CODE items named product name + group code with the desktop's columns, under the edit right (`MS_AUTO_ITEM.cs:1640-3493`). The web made GR_CODE + PR_CODE items named group + product, wrote eight columns, offered every product including the default ones, and had no group help, grid keys, MinStk, rights or Print and Delete checks. | N219 |
 | G233 | High | Wh Sales saved what TR_WH_SALE refuses, and had no print | `unified/src/csharp/DataCareNext/TR_WH_SALE.cs:12779-12896`, `:13553-13592`, `:13654-13800`; `unified/src/csharp/DataCareNext/TR_TOUR_SALE.cs:10585-10690` | `web/apps/api/src/modules/sales/rateCut.ts`; `web/apps/web/components/WholesaleVoucherForm.tsx` | TR_WH_SALE refuses a save for a defaulter party left owing, a missing mandatory employee, a new voucher in a type-B company, a cheque or card amount without its bank account, a date outside the year, a date on or before the lock date and a grid row with weight or value but no item code, each with its own text, before it writes. The web saved every one of them: a cheque without a bank posted to the cash slot, an item-less receive row posted as received fine, and the lock date was refused with web wording. The delete asked a web question and Print (WhSalesBill) did not exist. | N220 |
 | G234 | High | Stock Adjust was a separate writer citing a desktop form that does not exist, posting stock rows the desktop never writes, with no register, sign rule, lot columns, reopen or print | `unified/src/csharp/DataCareNext/TR_TAG_CAN.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:8616-8627`; `unified/src/csharp/DataCareNext/Ac_Stock.cs:48-58`; `unified/src/csharp/DataCareNext/MS_UPDATE.cs:24207` | `web/apps/web/app/(app)/txn/stock-adjust/page.tsx`; `web/apps/api/src/modules/stock/stock.ts`; `web/apps/api/src/modules/ops/seedCompany.ts` | The Stock Adjust menu opens TR_TAG_CAN on a STOCK ADJUST book: the Tag Cancel grid with a + / - Sign column and optional lot columns, a signed register, MAIN_STOCK rows in or out by sign, LOT_DETL rows for a lot, reopen, edit, delete and TagCanBill (`TR_TAG_CAN.cs:2514-5440`, `Ac_Stock.cs:53`, `:642-646`). The web had its own writer that cited a form TR_STK_ADJ, posted MAIN_STOCK rows with VCH_TYPE STADJ, BOOK_NAME STOCK ADJ and TR_TYPE A and no register, so nothing could be reopened or printed; and it provisioned the book as an in book with its code as the short name. | N221 |
+| G236 | High | Tag Print listed tags by range and skipped UT_TAG_PRINT's voucher, group and stock selection | `unified/src/csharp/DataCareNext/UT_TAG_PRINT.cs:1816-2077`, `:4735-5013`, `:5073-5226`, `:5284-5403`, `:5499-5635`, `:5636-5666`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:8596-8605` | `web/apps/web/app/(app)/txn/tag-print/page.tsx`; `web/apps/api/src/modules/stock/tagPrint.ts` | Other → Tag Print opens UT_TAG_PRINT: Book and Vch No fill the grid with a voucher's tags, Gr Code, Pr Code and Item Type with the in-stock tags, a typed tag is looked up in the stock, Y/N and Ctrl+D choose the rows, Hm Id Update edits the four HM ids, weights, LRate, Mrp and Lbr%, Set marks the default label file, and Print copies each Y row's BAR_DETL row after the Lable Skip blanks. The web page listed in-stock tags by counter, item and tag range, had no voucher, group, product or item-type selection, no Y/N, no Hm Id Update and no default file, and its print staged by voucher only. | N224 |
 
 ## 4. Decisions D23–D28
 
@@ -3128,6 +3129,40 @@ edit, and the delete) passes, and fails against the code before this change. The
 the module passes 27 of 30 with the old-metal case baselined and two cases blocked as before. Desktop-runtime
 comparison and parent acceptance remain open.
 
+### N224 — Tag Print is the desktop UT_TAG_PRINT screen (G236, Lite L3)
+
+Gap G236 · Parents P1-core · L3 · High · Size L · Start after N223
+
+Other → Tag Print opens UT_TAG_PRINT directly (`MDI_FORM.cs:8596-8605`). `web/apps/api/src/modules/stock/tagPrintScreen.ts` and
+`web/apps/api/src/routes/tagPrintScreen.ts` carry it, and `web/apps/web/app/(app)/txn/tag-print/page.tsx` is the screen.
+Load (`:4735-5013`) lists the label files of PRINT_MAST (type TAG, QR with QR_CODE_GEN), selects the one marked PRINT_SET_A 'Y' and
+the item type Gold, or Silver for CO_MAST.METAL_TYPE S. The grid is filled from a voucher (Book and Vch No; a book of the Tag Cancel
+family reads BAR_CAN_DETL joined to BAR_DETL, `:5284-5403`) or from the stock (Gr Code, Pr Code and Item Type, MSG_VCH_FILL
+`:5575-5635`), every row Y; a tag typed in the TagNo column is looked up in the stock, the latest instance first, "Duplicate Tag No"
+when it is already in the grid, the tag help when it is unknown (`:3508`, `:4102-4420`); Y/N toggles a row and Ctrl+D removes one
+after "This Row Record will Removed permantley ?" (`:3532-3561`). Print (`:5122-5226`) needs the print right ("You Have No Print
+Rights....."), clears TAG_PRINT_DATA, writes the Lable Skip blanks (Math.Round, banker's: SR_NO 1..n, VCH_NO 00000, IT_CODE '00') and
+copies the BAR_DETL row of every Y row; with Hm Id Update it first says "Please First Update Hmid Data and Then print". Save
+(`:5073-5096`) writes HM_ID..HM_ID4 with their weights, LBR_PRC, ITM_MRP and LBR_RATE to BAR_DETL for rows with a tag and an HM id
+or a Lbr% / Mrp, then prints. Set (`:5636-5655`) makes the chosen file the default of its type.
+
+Deliberate differences: the label sheet is the web's (the Crystal label files are not in the repository); a blank Gr Code goes on and a
+blank Pr Code loads the stock (the desktop opens the help); F1 on Vch No keeps the Book (the desktop's CLEAR_DATA clears it); the
+typed cells of ItCode, Counter and GrWt are not editable because a label is copied from BAR_DETL; Delete does nothing (the desktop's
+BtnDelete_Click is empty); Save outside Hm Id Update says so; Hm Id Update and Set need the edit right; TAG_PRINT_DATA is cleared for the
+tenant and IMAGE_DATA is not cleared (the desktop's unqualified DELETE FROM IMAGE_DATA also removes scheme member pictures); the stock rule is
+the tag balance over MAIN_STOCK of every year; the RFID writer, the Print Type box and the QR picture (named registrations only) are left
+out. The older `GET /stock/tag-print`, `POST /stock/tag-print/stage` and `GET /stock/tag-print/label` routes had no other caller and are
+removed; `stageTagPrintRowsTx` stays for the other forms that stage labels.
+
+Evidence: `tagPrintScreen.db.test.ts` (9 cases over HTTP on a forced-RLS database: the load, the stock lists with filters, the typed tag and
+helps, a voucher and a Tag Cancel voucher, Print with the skip rows and banker's rounding, the tenant-only staging, Hm Id Update, Set and
+the clerk's rights) and the existing staging tests pass. The new zero-mock `tag-print` module passes 17 of 17 applicable cases over T01-T18
+(T10 is not applicable: Tag Print has no delete), none blocked: T02 the three staged rows equal their BAR_DETL rows; T07 BAR_DETL (hashed),
+MAIN_STOCK, AC_DATA and BAR_DATA do not change; T14 a fault on the third copied label leaves the earlier labels; T16 the sheet shows two blanks
+for 2.5, then three labels with barcodes and the MRP; T18 an HM id keyed here reaches the next plain print's label. Desktop-runtime comparison,
+physical-printer acceptance (D29) and parent acceptance remain.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -3277,6 +3312,7 @@ comparison and parent acceptance remain open.
 | N220 | — | implemented-unverified, evidence in this change (G233: Wh Sales refuses as TR_WH_SALE does — defaulter, employee, type B, cheque/card bank, year, lock date, item code — with no partial write; the delete asks the desktop question; WhSalesBill prints behind the print right) |
 | N221 | — | implemented-unverified, evidence in this change (G234: Stock Adjust is TR_TAG_CAN on a STOCK ADJUST book with the Sign column, the signed register, I and O stock rows, the lot columns and LOT_DETL, reopen, edit, delete and TagCanBill) |
 | N222 | — | implemented-unverified, evidence in this change (G206 part: UPI tender rows stored in UPI_DATA, posted on legs 12/13 and Rojmel 08, included in ADV_AMT, editable and deletable; old metal and scheme stay open) |
+| N224 | — | implemented-unverified, evidence in this change (G236: Tag Print is UT_TAG_PRINT — the voucher and stock selection, typed tags, Y/N rows, Hm Id Update, the default file and a print that stages after the Lable Skip blanks) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

@@ -7,7 +7,7 @@ import { seedCompany } from '../src/modules/ops/seedCompany.js';
 import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 /**
- * N224 / G237: Tag Print (desktop UT_TAG_PRINT, opened by MDI_FORM.cs:8596-8605) through the real Fastify routes on a
+ * N224 / G236: Tag Print (desktop UT_TAG_PRINT, opened by MDI_FORM.cs:8596-8605) through the real Fastify routes on a
  * forced-RLS database. Expected values come from the desktop source:
  *
  * - Load (UT_TAG_PRINT.cs:4735-5013): the label files of PRINT_MAST of type TAG (QR with QR_CODE_GEN), the one marked

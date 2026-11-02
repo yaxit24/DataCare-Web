@@ -307,7 +307,8 @@ export default function TagPrintPage() {
   }
 
   const cols = hm ? HM_COLS : NORMAL_COLS;
-  const filled = useMemo(() => rows.filter((r) => r.tagNo), [rows]);
+  // A typed tag that was not found has no ItCode and is not a row to print.
+  const filled = useMemo(() => rows.filter((r) => r.tagNo && r.itCode), [rows]);
   const itemName = rows[current]?.itName ?? '';
 
   function setRowsFrom(list: Row[]) {
@@ -453,6 +454,8 @@ export default function TagPrintPage() {
     if (!tagNo) return;
     if (rows.some((r, i) => i !== current && r.tagNo === tagNo)) {
       setMsg({ kind: 'err', text: M.DUPLICATE });
+      setRows((list) => list.map((r, i) => (i === current ? { ...r, tagNo: '' } : r)));
+      focus(`cell-${current}-tagNo`);
       return;
     }
     try {
@@ -614,6 +617,7 @@ export default function TagPrintPage() {
       setMsg({ kind: 'err', text: refusal(error, M.NO_RIGHTS) });
     } finally {
       setBusy(false);
+      focus('print');
     }
   }
   /** BtnTagSet_Click (:5636-5655). */
@@ -702,11 +706,17 @@ export default function TagPrintPage() {
         </div>
       )}
       <div className="panel">
+        {/* The form spec's two rows: Book / Vch No at x 36-408, Gr Code / Pr Code at 413-792, Hm Id Update and the label file at 895+. */}
         <div
-          className="row"
-          style={{ gap: 8, alignItems: 'center', marginBottom: 6, flexWrap: 'wrap' }}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '66px 76px 224px 70px 66px 240px 24px auto',
+            gap: '6px 6px',
+            alignItems: 'center',
+            marginBottom: 8,
+          }}
         >
-          {label('Book', 'book', 50)}
+          {label('Book', 'book', 60)}
           {input(
             'book',
             'Book',
@@ -722,9 +732,9 @@ export default function TagPrintPage() {
             value={bookName}
             readOnly
             tabIndex={-1}
-            style={{ width: 200 }}
+            style={{ width: 224 }}
           />
-          {label('Gr Code', 'group', 60)}
+          {label('Gr Code', 'group', 66)}
           {input(
             'group',
             'Gr Code',
@@ -740,9 +750,10 @@ export default function TagPrintPage() {
             value={groupName}
             readOnly
             tabIndex={-1}
-            style={{ width: 220 }}
+            style={{ width: 240 }}
           />
-          <label style={{ display: 'inline-flex', gap: 6, alignItems: 'center', marginLeft: 12 }}>
+          <span />
+          <label style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
             <input
               type="checkbox"
               aria-label="Hm Id Update"
@@ -757,12 +768,7 @@ export default function TagPrintPage() {
             />
             Hm Id Update
           </label>
-        </div>
-        <div
-          className="row"
-          style={{ gap: 8, alignItems: 'center', marginBottom: 6, flexWrap: 'wrap' }}
-        >
-          {label('Vch No', 'vchNo', 50)}
+          {label('Vch No', 'vchNo', 60)}
           {input(
             'vchNo',
             'Vch No',
@@ -773,29 +779,32 @@ export default function TagPrintPage() {
             () => void openHelp('vouchers', 'vchNo'),
             8,
           )}
-          <button
-            type="button"
-            className="ghost"
-            tabIndex={-1}
-            onClick={() => void openHelp('vouchers', 'vchNo')}
-          >
-            F1
-          </button>
-          {label('Item Type', 'itemType', 70)}
-          <select
-            id="tp-itemType"
-            ref={reg('itemType')}
-            aria-label="Item Type"
-            value={itemType}
-            onChange={(e) => setItemType(e.target.value)}
-          >
-            {itemTypes.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-          {label('Pr Code', 'product', 60)}
+          <span className="row" style={{ gap: 6, alignItems: 'center', flexWrap: 'nowrap' }}>
+            <button
+              type="button"
+              className="ghost"
+              tabIndex={-1}
+              onClick={() => void openHelp('vouchers', 'vchNo')}
+            >
+              F1
+            </button>
+            {label('Item Type', 'itemType', 66)}
+            <select
+              id="tp-itemType"
+              ref={reg('itemType')}
+              aria-label="Item Type"
+              value={itemType}
+              onChange={(e) => setItemType(e.target.value)}
+              style={{ width: 99 }}
+            >
+              {itemTypes.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </span>
+          {label('Pr Code', 'product', 66)}
           {input(
             'product',
             'Pr Code',
@@ -811,24 +820,27 @@ export default function TagPrintPage() {
             value={productName}
             readOnly
             tabIndex={-1}
-            style={{ width: 200 }}
+            style={{ width: 240 }}
           />
-          <span style={{ marginLeft: 12 }}>Print file Name</span>
-          <select
-            aria-label="Print file Name"
-            value={file}
-            onChange={(e) => setFile(e.target.value)}
-            style={{ minWidth: 113 }}
-          >
-            {files.map((f) => (
-              <option key={f} value={f}>
-                {f}
-              </option>
-            ))}
-          </select>
-          <button type="button" className="ghost" onClick={() => void setDefault()}>
-            Set
-          </button>
+          <span />
+          <span className="row" style={{ gap: 6, alignItems: 'center', flexWrap: 'nowrap' }}>
+            <span style={{ whiteSpace: 'nowrap' }}>Print file Name</span>
+            <select
+              aria-label="Print file Name"
+              value={file}
+              onChange={(e) => setFile(e.target.value)}
+              style={{ minWidth: 113 }}
+            >
+              {files.map((f) => (
+                <option key={f} value={f}>
+                  {f}
+                </option>
+              ))}
+            </select>
+            <button type="button" className="ghost" onClick={() => void setDefault()}>
+              Set
+            </button>
+          </span>
         </div>
         <div style={{ overflowX: 'auto', maxHeight: 360, overflowY: 'auto' }}>
           <table className="grid" data-testid="tag-print-grid">

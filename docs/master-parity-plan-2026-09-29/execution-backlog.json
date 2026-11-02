@@ -7404,6 +7404,32 @@
         "web/apps/web/test/features/modules/salesOrder.mjs"
       ],
       "statusNote": "IMPLEMENTED (UPI), not accepted. The UPI DB test passes (red before this change), the order-related API tests pass (22 files, 272), and the sales-order module passes 27 of 30 (the three UPI cases pass; old metal and scheme stay baselined under G206; two cases blocked as before). Open: old gold, old silver and scheme tenders; desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N224",
+      "status": "implemented-unverified",
+      "action": "Tag Print is the desktop UT_TAG_PRINT screen: the voucher and stock selection by book, group, product and item type, typed tags, Y/N rows with Ctrl+D, Hm Id Update with Save, the default label file (Set) and a print that stages TAG_PRINT_DATA after the Lable Skip blanks.",
+      "parentLabels": "P1-core; L3; T01-T18",
+      "startAfter": [
+        "N223"
+      ],
+      "requiredProof": "An HTTP/DB test of the load, stock and voucher fills, typed tag, staging, Hm Id Update, Set and rights; the tag-print feature module passes every applicable case; a Chrome DevTools keyboard and label pass on the demo stack.",
+      "gapIds": "G236",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/stock/tagPrintScreen.ts",
+        "web/apps/api/src/routes/tagPrintScreen.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/web/app/(app)/txn/tag-print/page.tsx",
+        "web/apps/api/test/tagPrintScreen.db.test.ts",
+        "web/apps/web/test/features/modules/tagPrint.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: tagPrintScreen.db.test.ts 9/9, the tag-print feature module 17 of 17 applicable (T10 not applicable), the surface crawl, and a Chrome DevTools pass on the demo stack. Desktop-runtime comparison and physical-printer acceptance (D29) remain."
     }
   ],
   "amendments": [

@@ -43,38 +43,37 @@ export function registerTagPrintScreenRoutes(
     return { tenantId: s.tenantId, coCode: s.coCode, lcCode: s.lcCode, coYear: s.coYear ?? '' };
   };
   const q = (req: FastifyRequest, key: string) => String((req.query as any)?.[key] ?? '');
-  const base = '/stock/tag-print-screen';
 
-  app.get(base, auth as any, async (req, reply) => {
+  app.get('/stock/tag-print-screen', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, async () => ({
       ...(await tagPrintSetup(prisma, scope(req))),
       rights: await capabilities(req, FORM),
     }));
   });
-  app.get(`${base}/books`, auth as any, async (req, reply) => {
+  app.get('/stock/tag-print-screen/books', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, async () => ({ rows: await tagPrintBooks(prisma, scope(req)) }));
   });
-  app.get(`${base}/book`, auth as any, async (req, reply) => {
+  app.get('/stock/tag-print-screen/book', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, async () => ({
       book: await tagPrintBook(prisma, scope(req), q(req, 'code')),
     }));
   });
-  app.get(`${base}/vouchers`, auth as any, async (req, reply) => {
+  app.get('/stock/tag-print-screen/vouchers', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, async () => ({
       rows: await tagPrintVouchers(prisma, scope(req), q(req, 'bookCode')),
     }));
   });
-  app.get(`${base}/voucher`, auth as any, async (req, reply) => {
+  app.get('/stock/tag-print-screen/voucher', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, async () => ({
       rows: await tagPrintVoucher(prisma, scope(req), q(req, 'bookCode'), q(req, 'vchNo')),
     }));
   });
-  app.get(`${base}/stock`, auth as any, async (req, reply) => {
+  app.get('/stock/tag-print-screen/stock', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, async () => ({
       rows: await tagPrintStock(prisma, scope(req), {
@@ -84,35 +83,35 @@ export function registerTagPrintScreenRoutes(
       }),
     }));
   });
-  app.get(`${base}/tag`, auth as any, async (req, reply) => {
+  app.get('/stock/tag-print-screen/tag', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, async () => ({
       row: await tagPrintTag(prisma, scope(req), q(req, 'tagNo')),
     }));
   });
-  app.get(`${base}/tags`, auth as any, async (req, reply) => {
+  app.get('/stock/tag-print-screen/tags', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, async () => ({ rows: await tagPrintTags(prisma, scope(req)) }));
   });
-  app.get(`${base}/lookups/:kind`, auth as any, async (req, reply) => {
+  app.get('/stock/tag-print-screen/lookups/:kind', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     const kind = String((req.params as any).kind ?? '');
     if (kind !== 'groups' && kind !== 'products')
       return reply.code(400).send({ error: 'invalid-data', message: `unknown lookup ${kind}` });
     return run(reply, 200, async () => ({ rows: await tagPrintLookups(prisma, scope(req), kind) }));
   });
-  app.post(`${base}/hm-update`, auth as any, async (req, reply) => {
+  app.post('/stock/tag-print-screen/hm-update', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'update')) return;
     const rows = Array.isArray(body(req).rows) ? body(req).rows : [];
     return run(reply, 200, () => tagPrintHmUpdate(prisma, scope(req), rows));
   });
-  app.post(`${base}/default-file`, auth as any, async (req, reply) => {
+  app.post('/stock/tag-print-screen/default-file', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'update')) return;
     return run(reply, 200, () =>
       tagPrintSetDefault(prisma, scope(req), String(body(req).file ?? '')),
     );
   });
-  app.post(`${base}/print`, auth as any, async (req, reply) => {
+  app.post('/stock/tag-print-screen/print', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'print')) return;
     const b = body(req);
     return run(reply, 200, () =>
@@ -123,7 +122,7 @@ export function registerTagPrintScreenRoutes(
       }),
     );
   });
-  app.get(`${base}/labels`, auth as any, async (req, reply) => {
+  app.get('/stock/tag-print-screen/labels', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'print')) return;
     const html = await tagPrintLabels(prisma, scope(req));
     return reply.code(200).type('text/html; charset=utf-8').send(html);

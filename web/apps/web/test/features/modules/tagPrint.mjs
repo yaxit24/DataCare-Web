@@ -16,7 +16,7 @@ import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
  *   and Then print"), TAG_PRINT_DATA cleared, Lable Skip blank rows (SR_NO 1..n, VCH_NO 00000, IT_CODE '00', Math.Round
  *   of Val), then the BAR_DETL row of every Y row copied. Save (:5073-5096) writes the HM ids, weights, Lbr%, Mrp and LRate
  *   back to BAR_DETL (only with Hm Id Update). Set (:5636-5655) makes the chosen file the default.
- * Web rules that differ on purpose (gap G237): the label sheet is the web's (the Crystal files are not in the repository);
+ * Web rules that differ on purpose (gap G236): the label sheet is the web's (the Crystal files are not in the repository);
  * a blank Gr Code or Pr Code goes on or loads the stock; Delete does nothing (the desktop's BtnDelete_Click is empty).
  */
 const as = (user, slot) => ({
