@@ -157,4 +157,8 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261101090000_stock_adjust_book',
     checksum: 'd91d5f73bea67965575f00fa87969322f4c509c1cff9a210b5cf1f43b19ce87d',
   },
+  {
+    name: '20261102090000_ac_mast_party_columns',
+    checksum: '149bbbfb4059aabb5d9020a352cc6bafb34ffd7b6d568a00181d508d9bf57f0e',
+  },
 ];
