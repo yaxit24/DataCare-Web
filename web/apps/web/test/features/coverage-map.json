@@ -219,6 +219,7 @@
         "web/apps/api/src/app.ts",
         "web/apps/api/src/modules/ops/backup.ts",
         "web/apps/api/src/modules/ops/backupManifest.ts",
+        "web/apps/api/src/modules/ops/backupDownload.ts",
         "web/apps/api/src/modules/ops/backupFilename.ts"
       ]
     },

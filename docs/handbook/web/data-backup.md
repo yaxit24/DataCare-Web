@@ -12,7 +12,7 @@ Backup requires `FRM_PRINT`, refuses a blank path with `Please Select Path and T
 
 ## Web milestone behavior
 
-The `/backup` page shows `Backup Data`, a read-only Backup Path field, Select, an accessible indeterminate progress indicator, Backup, and Cancel. It has no Restore or Dattach control.
+The `/backup` page shows `Backup Data`, followed by a prominent recovery limitation: the integrity-checked JSON company archive does not replace the production disaster-recovery backup, and DataCare Web provides no operator restore path for it. The desktop control order remains a read-only Backup Path field, Select, an accessible indeterminate progress indicator, Backup, and Cancel. It has no Restore or Dattach control.
 
 Select records only an in-memory acknowledgment that the browser Save dialog will choose the destination. The browser never sends or stores a path. Cancel and navigation clear that acknowledgment. Backup before Select performs no request and shows the exact message `Please Select Path and Try`. During a selected backup the page prevents duplicate dispatch, keeps progress visible through generation and browser handoff, uses the server filename, and shows `Backup Process Complete.` only after download initiation succeeds. A failed request shows its error and never shows success.
 
@@ -28,11 +28,11 @@ The download remains the current JSON company-backup v2 document. It contains an
 
 No tenant-shared USER_MAST, APP_USER_DATA, or MENU_DATA content is added. No new credential source or credential-export envelope is added. The inherited v2 table rule does classify company-scoped `LOGIN_MAST` as included, including its existing columns; credential treatment therefore remains an explicit part of the D-BKP-3 allowlist/reconciliation decision rather than being silently changed in milestone 1.
 
-Database tests verify that selected-company rows from multiple locations and years are present, same-tenant other-company and other-tenant sentinels are absent, and repeated snapshots have stable normalized schema and table checksums. The existing 100,001-row database case remains the large-row ceiling evidence and is not duplicated.
+The frozen browser matrix downloads the real archive in `data-backup.config.nextmain-allowlist` and requires a versioned `tenantConfig` section with a non-empty allowlist. That executable archive-scope case is baselined under G64/N80 and currently fails because milestone 1 intentionally has no approved D-BKP-3 envelope. Database tests separately verify that selected-company rows from multiple locations and years are present, same-tenant other-company and other-tenant sentinels are absent, and repeated snapshots have stable normalized schema and table checksums. The existing 100,001-row database case remains the large-row ceiling evidence and is not duplicated. Physical-save confirmation, the full-Lite fixture, scratch import, and exact rights cases remain blocked rather than being represented as executable successes.
 
 ## Filename and same-hour adaptation
 
-The response suggests `Next<YY>[_<type>]_ddMMyy_HH.json`. `YY` comes from the authenticated session fiscal year. The optional sanitized type comes from persisted `CO_MAST.CO_TYPE`; blank or ambiguous type omits the segment. Date and hour use the API process's configured local business clock, matching the desktop's `DateAndTime.Now` semantics while the v2 archive timestamp itself remains UTC. Tenant, user, company code, request input, and server paths are not included.
+The response suggests `Next<YY>[_<type>]_ddMMyy_HH.json`. `YY` comes from the authenticated session fiscal year. The optional sanitized type comes from persisted `CO_MAST.CO_TYPE`; blank or ambiguous type omits the segment. The route captures the API process's configured local business time before archive generation starts, matching the desktop path construction before backup at `UT_BKP.cs:1216-1248`; a generation that crosses an hour boundary keeps the starting hour in the filename. The v2 archive independently keeps its UTC `generatedAt`. Tenant, user, company code, request input, and server paths are not included.
 
 Two snapshots generated in the same hour receive the same suggested filename, matching the desktop replacement intent. The browser and operating system control the physical save, overwrite prompt, and duplicate-name behavior. The page cannot force the desktop `Kill`/replace semantics. File System Access physical-save confirmation remains open when that API is unavailable.
 
@@ -44,7 +44,7 @@ After the v2 document is generated and before response handoff, `recordCompanyBa
 
 ## Open work
 
-- **D-BKP-3 / G64 / N80:** approve a source-reviewed, export-only NextMain-equivalent tenant configuration allowlist and credential handling. Do not infer tenant-shared ownership.
+- **D-BKP-3 / G64 / N80:** the executable `data-backup.config.nextmain-allowlist` archive-scope baseline remains open until a source-reviewed, export-only NextMain-equivalent tenant configuration allowlist and credential handling are approved. Do not infer tenant-shared ownership.
 - **X31 / G64 / N80:** import an actual browser artifact into an isolated scratch target through an approved offline procedure, prove zero unexplained differences, and keep web restore contained.
 - **G225:** hand off the exact non-admin Data Backup `FRM_PRINT` route policy after the shared policy owners finish their work.
 - **Browser/desktop runtime:** confirm physical save and overwrite behavior, and run the frozen matrix against the original Windows desktop. Desktop-match coverage remains 0%.

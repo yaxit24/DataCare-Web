@@ -11,9 +11,9 @@
 
 ## 2026-11-02 — Data Backup milestone 1 (engineering only)
 
-- Branch `feat/lite-data-backup` implements the operator-visible Backup-only `UT_BKP` adaptation: in-memory Select acknowledgment, browser Save-dialog handoff, progress/busy control, exact path/completion messages, source-backed `Next<YY>[_<type>]_ddMMyy_HH.json`, and immutable `company_backup_run` audit before response handoff.
-- The current v2 160-table company archive remains the basis. No tenant-shared USER_MAST/APP_USER_DATA/MENU_DATA allowlist or new credential export was guessed. Restore and Dattach remain absent from the UI, and `logical-restore` containment is unchanged.
-- Status remains CONTAINED/PARTIAL engineering evidence. Open: D-BKP-3/G64/N80 NextMain-equivalent allowlist and credential treatment, G225 exact Print-right route policy, X31 actual-browser scratch zero-diff, physical overwrite confirmation, full-Lite fixture, production DR, and desktop-runtime comparison.
+- Branch `feat/lite-data-backup` implements the operator-visible Backup-only `UT_BKP` adaptation: in-memory Select acknowledgment, browser Save-dialog handoff, prominent warning that the JSON company archive is not production disaster recovery and has no operator restore path, progress/busy control, exact path/completion messages, pre-generation `Next<YY>[_<type>]_ddMMyy_HH.json` naming, and immutable `company_backup_run` audit before response handoff.
+- The current v2 160-table company archive remains the basis. The executable `data-backup.config.nextmain-allowlist` case downloads that real archive and is baselined under G64/N80 because no approved versioned tenant-config/credential envelope exists. No tenant-shared USER_MAST/APP_USER_DATA/MENU_DATA allowlist or new credential export was guessed. Restore and Dattach remain absent from the UI, and `logical-restore` containment is unchanged.
+- Status remains CONTAINED/PARTIAL engineering evidence, with one executable archive-scope baseline rather than a green module. Still blocked: D-BKP-3/G64/N80 allowlist and credential treatment, G225 exact Print-right route policy, X31 actual-browser scratch zero-diff, physical overwrite confirmation, full-Lite fixture, production DR, and desktop-runtime comparison.
 
 ## 2026-10-31 — Lite first, then Basic, then Standard
 

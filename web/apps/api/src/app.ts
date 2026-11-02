@@ -78,7 +78,8 @@ import {
 import { registerTxnRoutes } from './routes/txn.js';
 import { logAudit, listAudit } from './modules/ops/audit.js';
 import { backupCompany, recordCompanyBackup } from './modules/ops/backup.js';
-import { buildBackupFilename, loadBackupCompanyType } from './modules/ops/backupFilename.js';
+import { prepareBackupDownload } from './modules/ops/backupDownload.js';
+import { loadBackupCompanyType } from './modules/ops/backupFilename.js';
 import { healthPayload, readiness, type PdfRendererProbe } from './modules/ops/health.js';
 import type { PdfRenderer } from './modules/reports/render.js';
 import { correlationId, requestCompletedFields } from './modules/ops/requestContext.js';
@@ -691,16 +692,15 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     { preHandler: requireAuth },
     async (req: FastifyRequest, reply: FastifyReply) => {
       const session = sess(req);
-      const data = await backupCompany(prisma, session.tenantId, session.coCode);
-      const companyType = await loadBackupCompanyType(prisma, session.tenantId, session.coCode);
-      const filename = buildBackupFilename({
-        fiscalYear: session.coYear ?? '',
-        companyType,
-        now: new Date(data.generatedAt),
+      const filenameTime = new Date();
+      const { data, filename } = await prepareBackupDownload(session.coYear ?? '', {
+        now: () => filenameTime,
+        generate: () => backupCompany(prisma, session.tenantId, session.coCode),
+        loadCompanyType: () => loadBackupCompanyType(prisma, session.tenantId, session.coCode),
+        // Record the completed v2 snapshot before response handoff. This proves generation and admission to the
+        // download response; the browser/OS remains responsible for the physical save.
+        record: (document) => recordCompanyBackup(prisma, document, session.sub),
       });
-      // Record the completed v2 snapshot before response handoff. This proves generation and admission to the
-      // download response; the browser/OS remains responsible for the physical save.
-      await recordCompanyBackup(prisma, data, session.sub);
       return reply
         .header('content-type', 'application/json')
         .header('content-disposition', `attachment; filename="${filename}"`)

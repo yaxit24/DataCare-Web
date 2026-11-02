@@ -4,7 +4,6 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { hashPassword } from '../src/modules/auth/password.js';
 import { seedCompany } from '../src/modules/ops/seedCompany.js';
-import { buildBackupFilename } from '../src/modules/ops/backupFilename.js';
 import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
@@ -95,12 +94,11 @@ const fiscalYear = `${yearStart}-${yearStart + 1}`;
       company: companyCode,
       source: { tenantId, companyCode },
     });
-    const expected = buildBackupFilename({
-      fiscalYear,
-      companyType: 'R',
-      now: new Date(document.generatedAt),
-    });
-    expect(response.headers['content-disposition']).toBe(`attachment; filename="${expected}"`);
+    expect(response.headers['content-disposition']).toMatch(
+      new RegExp(
+        `^attachment; filename="Next${yearStart.toString().slice(-2)}_R_\\d{6}_\\d{2}\\.json"$`,
+      ),
+    );
 
     const rows = await owner.$queryRawUnsafe<
       Array<{ checksum: string; operator: string; count: bigint }>

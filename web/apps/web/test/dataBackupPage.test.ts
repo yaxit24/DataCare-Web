@@ -13,7 +13,14 @@ describe('Data Backup operator page source contract', () => {
     expect(text).toContain('role="progressbar"');
     expect(text).toContain('Please Select Path and Try');
     expect(text).toContain('Backup Process Complete.');
-    expect(text).not.toMatch(/Restore|Dattach|logical-restore|server path|registry/i);
+    expect(text).toContain('aria-label="Backup recovery limitation"');
+    expect(text).toContain('This integrity-checked JSON company archive does not');
+    expect(text).toContain('replace the production disaster-recovery backup.');
+    expect(text).toContain('DataCare Web provides no operator restore');
+    expect(text).toContain('path for this archive.');
+    expect(text).not.toMatch(/>\s*(Restore|Dattach)\s*</i);
+    expect(text).not.toMatch(/can be restored|restorable|disaster-recovery ready/i);
+    expect(text).not.toMatch(/logical-restore|server path|registry/i);
     expect(text.split('\n').length).toBeLessThan(300);
   });
 

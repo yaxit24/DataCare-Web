@@ -53,6 +53,8 @@ const backupRuns = (ctx) =>
        FROM "company_backup_run" WHERE tenant_id=$1 AND co_code='01' ORDER BY row_id`,
   );
 const hashText = (value) => createHash('sha256').update(value, 'utf8').digest('hex');
+const RECOVERY_WARNING =
+  'Recovery limitation: This integrity-checked JSON company archive does not replace the production disaster-recovery backup. DataCare Web provides no operator restore path for this archive.';
 const stable = (value) => {
   if (
     value === null ||
@@ -119,6 +121,15 @@ async function open(page, throughMenu = false) {
   } else await page.goto('/backup');
   await page.getByRole('heading', { name: 'Backup Data', exact: true }).waitFor();
 }
+async function assertRecoveryBoundary(page) {
+  const warning = await page.getByLabel('Backup recovery limitation').innerText();
+  assert.equal(warning.replace(/\s+/g, ' ').trim(), RECOVERY_WARNING);
+  assert.equal(await page.getByRole('button', { name: /^(Restore|Dattach)$/i }).count(), 0);
+  assert.doesNotMatch(
+    await page.locator('main').innerText(),
+    /can be restored|restorable|disaster-recovery ready/i,
+  );
+}
 async function select(page) {
   await page.getByRole('button', { name: 'Select', exact: true }).click();
   assert.equal(
@@ -170,6 +181,7 @@ export const dataBackup = {
     'web/apps/api/src/app.ts',
     'web/apps/api/src/modules/ops/backup.ts',
     'web/apps/api/src/modules/ops/backupManifest.ts',
+    'web/apps/api/src/modules/ops/backupDownload.ts',
     'web/apps/api/src/modules/ops/backupFilename.ts',
     'web/apps/web/test/features/modules/dataBackup.mjs',
   ],
@@ -194,9 +206,10 @@ export const dataBackup = {
         assert.match(body, /Backup Path/);
         assert.match(body, /Select/);
         assert.match(body, /Backup/);
-        assert.doesNotMatch(body, /Restore|Dattach/);
+        await assertRecoveryBoundary(page);
         return {
-          observation: 'opened through Data Backup menu with Select/Backup only',
+          observation:
+            'opened through Data Backup menu with the recovery limitation and Select/Backup only',
           expected: { controls },
         };
       },
@@ -478,11 +491,39 @@ export const dataBackup = {
         };
       },
     ),
-    blocked(
+    C(
       'config.nextmain-allowlist',
       'T15',
-      'D-BKP-3 requires selected tenant company/user/rights/menu configuration equivalent to NextMain',
-      'D-BKP-3/G64/N80 needs an approved export-only tenant-config allowlist. USER_MAST, APP_USER_DATA and MENU_DATA are tenant-shared or ambiguous, so milestone 1 does not guess or export credentials.',
+      'output',
+      'D-BKP-3 requires a versioned allowlist for selected tenant company/user/rights/menu configuration equivalent to NextMain',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await open(page);
+        await select(page);
+        const result = await download(page);
+        const tenantConfig = result.document.tenantConfig;
+        assert(
+          tenantConfig && typeof tenantConfig === 'object' && !Array.isArray(tenantConfig),
+          'archive is missing the versioned tenantConfig section',
+        );
+        assert(
+          Number.isInteger(tenantConfig.version) && tenantConfig.version > 0,
+          'tenantConfig.version must be a positive integer',
+        );
+        assert(
+          Array.isArray(tenantConfig.allowlist) && tenantConfig.allowlist.length > 0,
+          'tenantConfig.allowlist must be a non-empty array',
+        );
+        return {
+          observation: `archive includes tenantConfig v${tenantConfig.version} with ${tenantConfig.allowlist.length} allowlisted entries`,
+          expected: { versionedTenantConfig: true, nonEmptyAllowlist: true },
+          output: result.bytes,
+        };
+      },
+      {
+        expected: { versionedTenantConfig: true, nonEmptyAllowlist: true },
+        requiredEvidence: ['browser', 'expected', 'output'],
+      },
     ),
     blocked(
       'output.physical-save-confirmation',
@@ -532,8 +573,7 @@ export const dataBackup = {
       async (ctx) => {
         const { page, requests } = await ctx.session();
         await open(page);
-        const body = await page.locator('main').innerText();
-        assert.doesNotMatch(body, /Restore|Dattach/);
+        await assertRecoveryBoundary(page);
         assert.equal(
           requests.some((request) => request.path === '/api/backup/restore'),
           false,

@@ -600,8 +600,8 @@
       "milestoneEvidence": {
         "asOf": "2026-11-02",
         "status": "partial-engineering-only",
-        "evidence": "Data Backup milestone 1 adds the authenticated company-scoped v2 browser download, source-backed filename, operator handoff audit, Backup-only UI and frozen T01-T18 matrix.",
-        "remaining": "Acceptance stays open for approved NextMain-equivalent configuration/credential scope, actual-browser scratch import and zero diff, physical save evidence, production deployment, encrypted off-site retention, restore drills, RPO/RTO, upgrade and rollback."
+        "evidence": "Data Backup milestone 1 adds the authenticated company-scoped v2 browser download, pre-generation source-backed filename, operator recovery-boundary warning, handoff audit and frozen T01-T18 matrix. The executable data-backup.config.nextmain-allowlist archive-scope case is baselined under G64/N80 because the required versioned tenant-config envelope is absent.",
+        "remaining": "Acceptance stays open for an approved D-BKP-3 NextMain-equivalent configuration/credential allowlist, actual-browser scratch import and zero diff, physical save evidence, full-Lite fixture, exact Print rights, production deployment, encrypted off-site retention, restore drills, RPO/RTO, upgrade and rollback."
       }
     },
     {
@@ -2558,8 +2558,8 @@
       "milestoneEvidence": {
         "asOf": "2026-11-02",
         "status": "partial-engineering-only",
-        "evidence": "The operator Backup path now downloads the authenticated company's v2 160-table JSON document with a source-backed filename, immutable company_backup_run audit, scope/checksum tests and no Restore/Dattach UI.",
-        "remaining": "Restore containment remains. D-BKP-3 tenant-shared configuration and credential handling, actual browser-artifact scratch zero-diff, production-like timed recovery/outage proof and controlled release remain open."
+        "evidence": "The operator Backup path downloads the authenticated company's v2 160-table JSON document with a pre-generation source-backed filename, immutable company_backup_run audit, recovery-boundary warning, scope/checksum tests and no Restore/Dattach UI. The executable data-backup.config.nextmain-allowlist case is baselined under G64/N80 and fails on the real archive's absent versioned tenantConfig envelope.",
+        "remaining": "Restore containment remains. Approve D-BKP-3 tenant-shared configuration and credential handling; then prove actual browser-artifact scratch zero-diff. Physical-save, full-Lite fixture, exact rights, production-like timed recovery/outage proof and controlled release remain blocked."
       }
     },
     {
@@ -4162,8 +4162,8 @@
       "milestoneEvidence": {
         "asOf": "2026-11-02",
         "status": "partial-engineering-only",
-        "evidence": "Data Backup milestone 1 implements the Backup-only browser handoff and v2 company scope/audit evidence while leaving logical restore contained.",
-        "remaining": "Approve the D-BKP-3 NextMain-equivalent allowlist and credential treatment; prove actual-artifact scratch reconciliation, physical save behavior, encrypted off-host retention, scheduled restore, RPO/RTO, deployment hardening, upgrade and rollback."
+        "evidence": "Data Backup milestone 1 implements the Backup-only browser handoff, operator recovery-boundary warning and v2 company scope/audit evidence. The executable data-backup.config.nextmain-allowlist case is baselined under G64/N80 because the real archive has no approved versioned tenantConfig envelope.",
+        "remaining": "Approve the D-BKP-3 NextMain-equivalent allowlist and credential treatment; prove actual-artifact scratch reconciliation, physical save behavior, a full-Lite fixture, exact Print rights, encrypted off-host retention, scheduled restore, RPO/RTO, deployment hardening, upgrade and rollback."
       }
     },
     {

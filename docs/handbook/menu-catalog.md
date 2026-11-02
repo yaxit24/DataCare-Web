@@ -121,7 +121,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Creates full SQL Server backups (yearly database plus NextMain) on a chosen drive and restores them.
 - **Looks:** Backup Data header, read-only browser destination, Select, accessible progress, Backup and Cancel; no operator Restore or Dattach.
 - **Web:** `/backup`; `GET /backup`, `POST /backup/restore`. Can: create.
-- **Remaining:** Milestone 1 implements the scoped v2 download, desktop-visible Backup flow, source-backed filename and audit. D-BKP-3 NextMain allowlist/credential reconciliation, G225 Print-right policy, actual-browser scratch zero-diff, physical overwrite confirmation, full-Lite fixture, production DR and desktop-runtime comparison remain open; restore stays contained.
+- **Remaining:** Milestone 1 implements the scoped v2 download, desktop-visible Backup flow, pre-generation source-backed filename, operator recovery-boundary warning and audit. The executable data-backup.config.nextmain-allowlist archive-scope case remains baselined under G64/N80 because D-BKP-3 has no approved versioned tenant-config/credential envelope. G225 Print-right policy, actual-browser scratch zero-diff, physical overwrite confirmation, full-Lite fixture, production DR and desktop-runtime comparison remain blocked; restore stays contained.
 - **Owners:** G64, N80, X31, P12-05, G225.
 - **Evidence:** [KB_master.md:225-253](../../project-memory/video-research/_kb/KB_master.md#L225-L253), [data-backup.md](../../docs/handbook/web/data-backup.md).
 

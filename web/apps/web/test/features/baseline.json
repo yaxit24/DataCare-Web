@@ -20,5 +20,11 @@
     }
   ],
   "contra": [],
-  "data-backup": []
+  "data-backup": [
+    {
+      "case": "data-backup.config.nextmain-allowlist",
+      "gap": "G64/N80",
+      "reason": "The real v2 archive has no versioned tenantConfig section or allowlist because D-BKP-3 has not approved the NextMain-equivalent configuration and credential envelope."
+    }
+  ]
 }

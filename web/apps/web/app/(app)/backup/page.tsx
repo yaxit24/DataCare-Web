@@ -70,6 +70,11 @@ export default function BackupPage() {
   return (
     <div onKeyDown={(event) => event.key === 'Escape' && cancel()}>
       <h1>Backup Data</h1>
+      <aside className="msg err" aria-label="Backup recovery limitation">
+        <strong>Recovery limitation:</strong> This integrity-checked JSON company archive does not
+        replace the production disaster-recovery backup. DataCare Web provides no operator restore
+        path for this archive.
+      </aside>
       <div className="panel" aria-busy={busy}>
         <p>The browser Save dialog chooses the download location. No path is sent or stored.</p>
         <div className="field">
