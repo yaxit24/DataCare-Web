@@ -1,4 +1,5 @@
 import { roundHalfEven } from '@datacare/core';
+import { decimalCellText } from '@datacare/core';
 import { insertRowTx } from '../posting/posting.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import { barTagAvailableSql } from '../shared/stockSql.js';
@@ -284,6 +285,41 @@ export interface PrintableTag {
   rate: number;
   hmId: string | null;
   pcs: number;
+  /** TAG_PRINT_DATA.LBR_RATE, the labour per gram the `Labour` formula prints as `LP:`. */
+  lbrRate?: number;
+  /** TAG_PRINT_DATA.LBR_AMT, the labour amount the `Labour` formula prints as `LF:`. */
+  lbrAmt?: number;
+}
+
+/**
+ * The weight and labour lines of one tag label, from the formulas the desktop label files share (QrPrint10, BarPrint10,
+ * BarPrint13 and GhatTagPrnt: `ItmWt`, `OtherAmt`, `Labour`; extraction_output/rpt_xml/*.xml).
+ *
+ * Crystal's `totext(x, n)` shows n decimals and rounds half away from zero, which is `decimalCellText` (decimal.js
+ * ROUND_HALF_UP rounds ties away from zero). `Labour` tests the raw value against 0 before it formats, so a value such
+ * as 0.4 still prints its line (as `LP: 0`); with all three amounts at 0 the formula has no final else and the line is
+ * empty. A value that is not a finite number prints as 0, so one bad row cannot blank the sheet.
+ */
+export function tagLabelLines(t: PrintableTag): { gross: string; net: string; labour: string } {
+  const n = (v: number | undefined): number =>
+    typeof v === 'number' && Number.isFinite(v) ? v : 0;
+  const whole = (v: number): string => decimalCellText(v, 0);
+  const mrp = n(t.mrp);
+  const rate = n(t.lbrRate);
+  const amt = n(t.lbrAmt);
+  const labour =
+    mrp !== 0
+      ? `MRP: ${whole(mrp)}`
+      : rate !== 0
+        ? `LP: ${whole(rate)}`
+        : amt !== 0
+          ? `LF: ${whole(amt)}`
+          : '';
+  return {
+    gross: `G.${decimalCellText(n(t.grossWt), 3)}`,
+    net: `N.${decimalCellText(n(t.netWt), 3)}`,
+    labour,
+  };
 }
 
 export async function listPrintableTags(
@@ -432,17 +468,19 @@ export function renderTagLabels(tags: PrintableTag[], labelSkip = 0): string {
     () => '<div class="lbl blank" aria-hidden="true"></div>',
   ).join('');
   const cells = tags
-    .map(
-      (t) => `
+    .map((t) => {
+      const lines = tagLabelLines(t);
+      return `
     <div class="lbl">
       <div class="bcode">${code39Svg(t.tagNo, { height: 26 })}</div>
       <div class="bcnum">${esc(t.tagNo)}</div>
-      <div class="row"><b>${esc(t.itCode)}</b>${t.designNo ? ' · ' + esc(t.designNo) : ''}${t.pcs > 1 ? ' · ' + t.pcs + ' pc' : ''}</div>
-      <div class="row">Net ${t.netWt} g · Gr ${t.grossWt} g${t.touch ? ' · ' + t.touch + '%' : ''}</div>
-      ${t.mrp ? `<div class="row">MRP ₹${t.mrp.toLocaleString('en-IN')}</div>` : ''}
+      <div class="row"><b>${esc(t.itCode)}</b>${t.designNo ? ' · ' + esc(t.designNo) : ''}${t.pcs > 1 ? ' · ' + t.pcs + ' pc' : ''}${t.touch ? ' · ' + t.touch + '%' : ''}</div>
+      <div class="row">${esc(lines.gross)}</div>
+      <div class="row">${esc(lines.net)}</div>
+      ${lines.labour ? `<div class="row">${esc(lines.labour)}</div>` : ''}
       ${t.hmId ? `<div class="row huid">HUID: ${esc(t.hmId)}</div>` : ''}
-    </div>`,
-    )
+    </div>`;
+    })
     .join('');
   return `<!doctype html><html><head><meta charset="utf-8"><title>Tag Labels (${tags.length})</title>
     <style>

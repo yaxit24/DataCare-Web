@@ -2381,8 +2381,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Book, Vch No with F1, Gr Code, Pr Code and Item Type over a Y/N tag grid with the Hm Id Update columns; Print file Name with Set; Item Name and Lable Skip under the grid; Print, Save, Cancel, Delete and Exit along the bottom.
 - **Writes:** TAG_PRINT_DATA, BAR_DETL, BAR_CAN_DETL, MAIN_STOCK, PRINT_MAST, ITEM_MAST, GROUP_MAST, PRODUCT_MAST.
 - **Web:** `/txn/tag-print`; `GET /stock/tag-print-screen`, `GET /stock/tag-print-screen/books`, `GET /stock/tag-print-screen/book`, `GET /stock/tag-print-screen/vouchers`, `GET /stock/tag-print-screen/voucher`, `GET /stock/tag-print-screen/stock`, `GET /stock/tag-print-screen/tag`, `GET /stock/tag-print-screen/tags`, `GET /stock/tag-print-screen/lookups/:kind`, `POST /stock/tag-print-screen/hm-update`, `POST /stock/tag-print-screen/default-file`, `POST /stock/tag-print-screen/print`, `GET /stock/tag-print-screen/labels`. Can: print, list.
-- **Remaining:** The Crystal label files are not in the repository (the web prints its own label sheet) and physical-printer acceptance (D29) remains; the RFID writer, Print Type box and QR picture (named registrations) are not on the screen.
-- **Owners:** N25, X28, G59, N73, G60, N75, X25, G237, N225, G239.
+- **Remaining:** The label text follows the shared formulas of the desktop label files (G./N. weights, MRP:/LP:/LF: labour line, G240), but the web prints one sheet: the PRINT_MAST file choice, shop name, purity group, karigar name, QR picture, the SubTagPrint.rpt sub-report (not extracted) and the label layouts are not reproduced, and physical-printer acceptance (D29) remains; the RFID writer, Print Type box and QR picture (named registrations) are not on the screen.
+- **Owners:** N25, X28, G59, N73, G60, N75, X25, G237, N225, G239, G240.
 - **Evidence:** [UT_TAG_PRINT.cs:1816-5666](../../unified/src/csharp/DataCareNext/UT_TAG_PRINT.cs#L1816-L5666).
 
 ### Tag Split

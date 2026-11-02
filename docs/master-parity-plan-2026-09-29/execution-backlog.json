@@ -7530,7 +7530,7 @@
         "N224"
       ],
       "requiredProof": "An HTTP/DB test of the load, stock and voucher fills, typed tag, staging, Hm Id Update, Set and rights; the tag-print feature module passes every applicable case; a Chrome DevTools keyboard and label pass on the demo stack.",
-      "gapIds": "G237, G239",
+      "gapIds": "G237, G239, G240",
       "entryDefinition": "02-execution-plan.md section 4",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
@@ -7543,9 +7543,11 @@
         "web/apps/api/src/modules/rbac/routePolicy.ts",
         "web/apps/web/app/(app)/txn/tag-print/page.tsx",
         "web/apps/api/test/tagPrintScreen.db.test.ts",
-        "web/apps/web/test/features/modules/tagPrint.mjs"
+        "web/apps/web/test/features/modules/tagPrint.mjs",
+        "web/apps/api/src/modules/stock/tagPrint.ts",
+        "web/apps/api/test/tagLabelText.test.ts"
       ],
-      "statusNote": "IMPLEMENTED, not accepted. Verified: tagPrintScreen.db.test.ts 9/9, the tag-print feature module 17 of 17 applicable (T10 not applicable), the surface crawl, and a Chrome DevTools pass on the demo stack. Desktop-runtime comparison and physical-printer acceptance (D29) remain. G239 follow-up (2 November): Esc now closes Tag Print when no control has the focus (the desktop form's KeyPreview, UT_TAG_PRINT.cs:1805, :5101-5109); the tag-print module passes 18 of 18 applicable cases including the new T17 case tag-print.keyboard.esc-with-focus-on-the-page, which timed out on the unrepaired page. Not verified: the same wrapper-only Esc handling on the other Lite screens, and any desktop-runtime comparison."
+      "statusNote": "IMPLEMENTED, not accepted. Verified: tagPrintScreen.db.test.ts 9/9, the tag-print feature module 17 of 17 applicable (T10 not applicable), the surface crawl, and a Chrome DevTools pass on the demo stack. Desktop-runtime comparison and physical-printer acceptance (D29) remain. G239 follow-up (2 November): Esc now closes Tag Print when no control has the focus (the desktop form's KeyPreview, UT_TAG_PRINT.cs:1805, :5101-5109); the tag-print module passes 18 of 18 applicable cases including the new T17 case tag-print.keyboard.esc-with-focus-on-the-page, which timed out on the unrepaired page. Not verified: the same wrapper-only Esc handling on the other Lite screens, and any desktop-runtime comparison. G240 follow-up (2 November): the printed tag label follows the desktop label files' shared formulas (G. and N. weights at three decimals; MRP: / LP: / LF: labour line); tagLabelText.test.ts and the browser cases tag-print.output.label-sheet and tag-print.output.label-labour-lines failed on the old renderer and pass now; the web's HUID line is kept as a deliberate addition. Not verified: the PRINT_MAST file choice, shop name, purity group, karigar name, QR picture and the SubTagPrint.rpt sub-report (not extracted); no desktop-runtime or physical-printer comparison."
     },
     {
       "id": "N226",
