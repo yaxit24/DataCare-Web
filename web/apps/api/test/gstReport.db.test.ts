@@ -758,6 +758,28 @@ class CapturingRenderer implements PdfRenderer {
     expect(renderer.html.at(-1)).toContain('Invoice Value');
   });
 
+  it('keeps return amounts numeric in the HSN CSV, as RP_GST.SaveCSV writes them', async () => {
+    // RP_GST.cs:3114-3145 joins the grid cells with commas, so the sale-return HSN row (7113, -1.25 g) reaches the
+    // file as plain numbers. A leading apostrophe would make them text for the GST portal and for Excel sums.
+    const csv = await get(
+      'printer',
+      url('gstr1', 'HSN').replace('gst-report?', 'gst-report/export.csv?'),
+    );
+    expect(csv.statusCode, csv.body).toBe(200);
+    expect(csv.headers['content-disposition']).toBe('attachment; filename="HSNSUM.csv"');
+    const [header, ...lines] = csv.body.split('\r\n').filter(Boolean);
+    const names = header!.split(',');
+    const returnLine = lines.map((line) => line.split(',')).find((cells) => cells[3] === '-1.25');
+    expect(returnLine, csv.body).toBeDefined();
+    const at = (name: string) => returnLine![names.indexOf(name)];
+    expect(at('Total Qty')).toBe('-1.25');
+    expect(at('Total Value')).toBe('-206.00');
+    expect(at('Taxable Value')).toBe('-200.00');
+    expect(at('IGST Amount')).toBe('-6.00');
+    // No numeric column of any row may carry the spreadsheet-neutralising apostrophe.
+    for (const line of lines) expect(line).not.toMatch(/"'-?\d/);
+  });
+
   it('does not change business or staging data while executing reports and exports', async () => {
     const snapshot = async () =>
       owner.$queryRawUnsafe<Array<{ table_name: string; rows: number }>>(
