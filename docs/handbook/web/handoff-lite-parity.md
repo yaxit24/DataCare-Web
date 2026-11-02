@@ -49,7 +49,7 @@ Worktree used so far: `/Users/yakshitsavaliya/dc-wt/kiro-impl`. Highest ids on m
 |---|---|---|
 | Party master (MS_ACCT), N224 / G236 | PR #200 | Merged. It renumbered from N223 / G235 when #195 (Ledger Report) merged first. |
 | Tag Print (UT_TAG_PRINT), N225 / G237 | PR #208 | Merged after #200. It renumbered from N224 / G236. |
-| Un-blocked browser cases and four defects, N226 / G238 | `feat/lite-unblock-cases`, PR from this branch | See section 6. |
+| Un-blocked browser cases and four defects, N227 / G238 | `feat/lite-unblock-cases`, PR from this branch | See section 6. |
 | Sales Order old gold and old silver rows (G206 part) | PR #211 | Another session. It took N225 on a stale base and has to renumber. |
 | Data Refresh (#209), Data Backup (#210), Purchase Report (#202), GST Report (#206), Approval In/Out (#203), Purchase whole rupees (#204) | other PRs | Other sessions; do not touch. |
 | Data Import, Company, Year Create, Balance TrFr, Books, User Create | not started | Several are in the prompt pack (13-19). User Create is not in the pack: `usersRights` has 15 blocked cases. Check the open PRs first: Data Refresh and Data Backup are taken. |
@@ -85,7 +85,7 @@ Based on `origin/main` (merged up to #208). What it contains:
 3. Lock date: `PeriodLockValidationError` carried a web-only message. It now carries the desktop text `You Cant Save and Delete This Voucher Becouse Lock Date is = dd/MM/yyyy ....` for every form that uses it (`web/apps/api/src/modules/posting/posting.ts`, unit test `periodLockMessage.test.ts`).
 4. Cash Received / Payment: the Employee box was sent by the page but dropped by the API. The desktop stores it (`TR_CASH.cs:3050`), refuses a blank when `CO_SET.EMP_CODE_MANDATORY = 'Y'` (`:2907-2911`) and shows it when the voucher is opened (`:2753`). Fixed: `financeEmployeeTx` in `web/apps/api/src/modules/finance/lifecycle.ts`, `EMP_CODE` written to `CASH_DATA` and `PAY_DATA`, read back by `getReceipt` / `getPayment`, the route and `PaymentForm.tsx` pass and load it. DB tests added to `cashReceiptLegs.db.test.ts`; 24 of 24 pass together with the Daily Rate and lock-message tests. Not yet done: the browser case for it (cash-bank T15) and a Chrome pass. The desktop also defaults the box to the logged-in user's employee code (`:2671`); the web has no such field on the session yet.
 
-**Done on this branch:** the cash-bank T15 browser case (blank employee refused with the desktop text and nothing written; the employee chosen is stored in CASH_DATA and shown when the voucher is opened; `CO_SET` and the temporary `EMP_MAST` row are restored in `finally`). Result: cash-bank 19 of 21 (T03 and T06 stay blocked). The modules cash-bank, tag-cancel, daily-rate, purchase-invoice, contra, sales-invoice and sales-order ran on a fresh build with no new failure (the sales-order old-metal case is the known G206 baseline). The full API suite (356 files, 3,789 tests), the web unit tests (713), the smoke test, the session-context and labour-preview checks and every gate in section 8 pass. The plan records are N226 / G238. No separate Chrome pass was made for the Employee box: the page change is two lines (send and load `empCode`) and the browser case drives it through the real UI.
+**Done on this branch:** the cash-bank T15 browser case (blank employee refused with the desktop text and nothing written; the employee chosen is stored in CASH_DATA and shown when the voucher is opened; `CO_SET` and the temporary `EMP_MAST` row are restored in `finally`). Result: cash-bank 19 of 21 (T03 and T06 stay blocked). The modules cash-bank, tag-cancel, daily-rate, purchase-invoice, contra, sales-invoice and sales-order ran on a fresh build with no new failure (the sales-order old-metal case is the known G206 baseline). The full API suite (356 files, 3,789 tests), the web unit tests (713), the smoke test, the session-context and labour-preview checks and every gate in section 8 pass. The plan records are N227 / G238. No separate Chrome pass was made for the Employee box: the page change is two lines (send and load `empCode`) and the browser case drives it through the real UI.
 
 
 ## 7. How a menu is done (the loop)
@@ -111,7 +111,7 @@ Based on `origin/main` (merged up to #208). What it contains:
 - Lifecycle checks: `web/apps/web/test/session-context.real-stack.additive.mjs` and `labour-preview-lifecycle.real-stack.mjs` (with `LABOUR_PREVIEW_ARTIFACT_DIR=<dir>`), both through `parity-test-env.mjs`.
 - Gates: `pnpm lint`, `typecheck:tests`, `format:check`, `size:budget`, `depth:parity`, `depth:deadcells`, `test:routes`, `settings:parity`, `runtime:check`, `docs:refs`, `register:check`; `node scripts/check-kernel-conformance.mjs`; `node scripts/generate-edition-table.mjs --check`; `pnpm progress` then `node scripts/generate-standard-progress.mjs --check`; `pnpm parity:measure --reuse`. From the repo root: `python3 docs/master-parity-plan-2026-09-29/validate_plan.py` and `python3 docs/tools/docs_check.py --write`. Browser-test gate: `PR_BODY="$(cat body.md)" node scripts/check-browser-test-coverage.mjs --base origin/main --head HEAD`.
 - Demo stack: `/tmp/kiro-impl/restart-demo.sh [--no-build]` (ports API 4510, web 4511, DB 55533; it may be gone, in which case use `parity-test-env.mjs` to start a database and run `web/apps/web/test/features/serve.mjs`). Restarting resets its data. Stop it before a feature run: kill the listeners on 4510 and 4511.
-- Chrome: DevTools MCP page id changes; log in by navigating to `/login`, running `web/test-results/visual/G179/login.js` through `evaluate_script`, then clicking Sign In.
+- Chrome: DevTools MCP page id changes; log in by navigating to `/login`, filling the demo credentials with the React-safe native setter through `evaluate_script` (a login script from the G179 pass was kept locally under test-results and is not in the repository), then clicking Sign In.
 - Merge: `gh pr merge N --squash --subject "<title> (#N)"`.
 
 ## 9. Traps already met
@@ -127,7 +127,7 @@ Based on `origin/main` (merged up to #208). What it contains:
 
 ## 10. Next steps, in order
 
-1. Merge this branch's PR when green (renumber N226 / G238 if another PR with records merges first).
+1. Merge this branch's PR when green (renumber N227 / G238 if another PR with records merges first).
 2. User Create (MS_USER, 5,312 lines; module `usersRights` has 15 blocked cases).
 3. The company utilities and Data Import that the prompt pack has not yet had picked up (check which of 13-19 are claimed first; Data Refresh and Data Backup are open PRs).
 4. Remaining blocked cases in older modules: daily-rate T15 (needs a location-00 session in the harness), cash-bank T03 / T06, tag-opening, fine-jv, party-opening, item-opening, company-open, settings.
