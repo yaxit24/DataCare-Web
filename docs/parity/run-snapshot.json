@@ -1,0 +1,349 @@
+{
+  "meta": {
+    "date": "2026-11-02",
+    "commit": "a2231cc7",
+    "commitNote": "30 modules ran on a2231cc7 (the Tag Print Esc fix merged with main at 212b65c1); tag-print and gst-report were re-run on 2d75b0cb (the same plus #203, #206 and #216).",
+    "candidates": {
+      "a2231cc7": 30,
+      "2d75b0cb": 2
+    },
+    "command": "node scripts/parity-test-env.mjs -- node apps/web/test/features/run-features.mjs (all modules), then FEATURE_E2E_MODULES=tag-print,gst-report",
+    "machine": "one 8 GB Mac, Node 24.22.2, isolated Postgres from parity-test-env.mjs on port 55501",
+    "baselinedFailures": [
+      "company-master.fields.complete-round-trip (G38)",
+      "sales-order.create.scheme-tender (G206)",
+      "data-backup.config.nextmain-allowlist (G64/N80)"
+    ],
+    "totals": {
+      "cases": 743,
+      "applicable": 703,
+      "passed": 596,
+      "failed": 3,
+      "blocked": 104,
+      "notApplicable": 40
+    },
+    "mocks": "businessResponseMocks and requestInterceptions are 0 in every module's run.json"
+  },
+  "modules": {
+    "account-ledger": {
+      "cases": 18,
+      "applicable": 10,
+      "passed": 10,
+      "failed": 0,
+      "blocked": 0,
+      "notApplicable": 8,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "address-master": {
+      "cases": 18,
+      "applicable": 17,
+      "passed": 17,
+      "failed": 0,
+      "blocked": 0,
+      "notApplicable": 1,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "auto-item": {
+      "cases": 18,
+      "applicable": 18,
+      "passed": 18,
+      "failed": 0,
+      "blocked": 0,
+      "notApplicable": 0,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "cash-bank": {
+      "cases": 21,
+      "applicable": 21,
+      "passed": 19,
+      "failed": 0,
+      "blocked": 2,
+      "notApplicable": 0,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "company-master": {
+      "cases": 31,
+      "applicable": 28,
+      "passed": 6,
+      "failed": 1,
+      "blocked": 21,
+      "notApplicable": 3,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "company-open": {
+      "cases": 18,
+      "applicable": 18,
+      "passed": 2,
+      "failed": 0,
+      "blocked": 16,
+      "notApplicable": 0,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "contra": {
+      "cases": 25,
+      "applicable": 25,
+      "passed": 25,
+      "failed": 0,
+      "blocked": 0,
+      "notApplicable": 0,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "daily-rate": {
+      "cases": 18,
+      "applicable": 16,
+      "passed": 15,
+      "failed": 0,
+      "blocked": 1,
+      "notApplicable": 2,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "data-backup": {
+      "cases": 21,
+      "applicable": 18,
+      "passed": 13,
+      "failed": 1,
+      "blocked": 4,
+      "notApplicable": 3,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "data-refresh": {
+      "cases": 22,
+      "applicable": 20,
+      "passed": 12,
+      "failed": 0,
+      "blocked": 8,
+      "notApplicable": 2,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "employee-master": {
+      "cases": 18,
+      "applicable": 17,
+      "passed": 17,
+      "failed": 0,
+      "blocked": 0,
+      "notApplicable": 1,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "fine-jv": {
+      "cases": 24,
+      "applicable": 23,
+      "passed": 19,
+      "failed": 0,
+      "blocked": 4,
+      "notApplicable": 1,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "group-master": {
+      "cases": 18,
+      "applicable": 18,
+      "passed": 18,
+      "failed": 0,
+      "blocked": 0,
+      "notApplicable": 0,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "gst-report": {
+      "cases": 73,
+      "applicable": 70,
+      "passed": 57,
+      "failed": 0,
+      "blocked": 13,
+      "notApplicable": 3,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "item-master": {
+      "cases": 18,
+      "applicable": 18,
+      "passed": 18,
+      "failed": 0,
+      "blocked": 0,
+      "notApplicable": 0,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "item-opening": {
+      "cases": 18,
+      "applicable": 18,
+      "passed": 17,
+      "failed": 0,
+      "blocked": 1,
+      "notApplicable": 0,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "party-master": {
+      "cases": 18,
+      "applicable": 18,
+      "passed": 18,
+      "failed": 0,
+      "blocked": 0,
+      "notApplicable": 0,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "party-opening": {
+      "cases": 18,
+      "applicable": 18,
+      "passed": 15,
+      "failed": 0,
+      "blocked": 3,
+      "notApplicable": 0,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "product-master": {
+      "cases": 18,
+      "applicable": 17,
+      "passed": 17,
+      "failed": 0,
+      "blocked": 0,
+      "notApplicable": 1,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "purchase-invoice": {
+      "cases": 31,
+      "applicable": 31,
+      "passed": 31,
+      "failed": 0,
+      "blocked": 0,
+      "notApplicable": 0,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "purchase-return": {
+      "cases": 22,
+      "applicable": 22,
+      "passed": 20,
+      "failed": 0,
+      "blocked": 2,
+      "notApplicable": 0,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "sales-invoice": {
+      "cases": 32,
+      "applicable": 32,
+      "passed": 29,
+      "failed": 0,
+      "blocked": 3,
+      "notApplicable": 0,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "sales-order": {
+      "cases": 33,
+      "applicable": 33,
+      "passed": 30,
+      "failed": 1,
+      "blocked": 2,
+      "notApplicable": 0,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "sales-return": {
+      "cases": 25,
+      "applicable": 25,
+      "passed": 23,
+      "failed": 0,
+      "blocked": 2,
+      "notApplicable": 0,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "settings": {
+      "cases": 25,
+      "applicable": 14,
+      "passed": 12,
+      "failed": 0,
+      "blocked": 2,
+      "notApplicable": 11,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "stock-adjust": {
+      "cases": 18,
+      "applicable": 18,
+      "passed": 18,
+      "failed": 0,
+      "blocked": 0,
+      "notApplicable": 0,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "tag-cancel": {
+      "cases": 23,
+      "applicable": 20,
+      "passed": 20,
+      "failed": 0,
+      "blocked": 0,
+      "notApplicable": 3,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "tag-opening": {
+      "cases": 19,
+      "applicable": 19,
+      "passed": 14,
+      "failed": 0,
+      "blocked": 5,
+      "notApplicable": 0,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "tag-print": {
+      "cases": 19,
+      "applicable": 18,
+      "passed": 18,
+      "failed": 0,
+      "blocked": 0,
+      "notApplicable": 1,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "tax-master": {
+      "cases": 18,
+      "applicable": 18,
+      "passed": 18,
+      "failed": 0,
+      "blocked": 0,
+      "notApplicable": 0,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "users": {
+      "cases": 18,
+      "applicable": 18,
+      "passed": 3,
+      "failed": 0,
+      "blocked": 15,
+      "notApplicable": 0,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    },
+    "wholesale-sale": {
+      "cases": 27,
+      "applicable": 27,
+      "passed": 27,
+      "failed": 0,
+      "blocked": 0,
+      "notApplicable": 0,
+      "businessResponseMocks": 0,
+      "requestInterceptions": 0
+    }
+  }
+}
