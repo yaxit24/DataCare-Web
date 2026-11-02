@@ -8,9 +8,10 @@ import {
   type TagCancelSettings,
   type TagCancelStoneCells,
 } from '@datacare/core';
+import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
 
 /**
- * TR_TAG_CAN row model — Tag Cancel and Tag Transfer (contract:
+ * TR_TAG_CAN row model — Tag Cancel, Tag Transfer and Stock Adjust (contract:
  * `parity-plan-2026-09-10/evidence/implementation-2026-09-29-n18/contract.md`, clauses K3-K8, K11).
  *
  * Pure functions only: the tag fill, the operator's edits replayed through the desktop grid arithmetic, and the
@@ -21,12 +22,23 @@ import {
  * in comments are the desktop `MSG` grid's.
  */
 
-export type TagCancelMode = 'cancel' | 'transfer';
+export type TagCancelMode = 'cancel' | 'transfer' | 'adjust';
 
-/** The `MAIN_BOOK` each menu opens the form on (MDI_FORM.cs:8586 "TAG CANCEL", :8664 "TAG TRFR"). */
+/**
+ * The `MAIN_BOOK` each menu opens the form on (MDI_FORM.cs:8586 "TAG CANCEL", :8664 "TAG TRFR", :8616-8627
+ * "STOCK ADJUST").
+ */
 export const TAG_CANCEL_MAIN_BOOKS: Readonly<Record<TagCancelMode, string>> = Object.freeze({
   cancel: 'TAG CANCEL',
   transfer: 'TAG TRFR',
+  adjust: 'STOCK ADJUST',
+});
+
+/** The verb a refusal uses for each menu ("has nothing to cancel / transfer / adjust"). */
+export const TAG_CANCEL_VERBS: Readonly<Record<TagCancelMode, string>> = Object.freeze({
+  cancel: 'cancel',
+  transfer: 'transfer',
+  adjust: 'adjust',
 });
 
 export class TagCancelValidationError extends Error {
@@ -130,6 +142,12 @@ export interface TagCancelLineInput {
   krFine?: number;
   /** Col 20 TrfrItm (Tag Transfer grid only) → TRFR_IT_CODE: the loose item the metal moves to. */
   trfrItCode?: string;
+  /** Col 8 Sign (Stock Adjust grid only) → ITM_SIGN: `+` adds the line to stock, `-` takes it out. */
+  itmSign?: string;
+  /** Col 2 TagLot (Stock Adjust grid, Purchase LOT on) → LOT_NO, and the line's LOT_DETL row. */
+  lotNo?: string;
+  /** Col 3 ItmLot (Stock Adjust grid, Item With LOT Stock on) → ITM_LOT on the register and stock rows. */
+  itmLot?: string;
   /**
    * The line's stones. Omitted: a new tag line copies the tag's `BAR_IDTL` rows (K5.1) and a line kept from the
    * saved voucher keeps its saved stones (K5.2). Given (an empty array included): exactly these.
@@ -179,6 +197,8 @@ export interface TagCancelRowCells {
   prCode: string;
   designImageId: string;
   trfrItCode: string;
+  /** Col 8 Sign: `+` or `-` on a Stock Adjust line; every other menu's line is `-`. */
+  itmSign: string;
 }
 
 /** One stone row as the stone grid holds it (DtIdtl, TR_TAG_CAN.cs:1252). */
@@ -314,6 +334,7 @@ export function cellsFromBarDetl(source: Record<string, unknown>): TagCancelRowC
     prCode: dbText(source.PR_CODE),
     designImageId: dbText(source.DESIGN_IMG_ID),
     trfrItCode: '',
+    itmSign: '',
   };
 }
 
@@ -416,6 +437,7 @@ export function cellsFromSaved(row: Record<string, unknown>): TagCancelRowCells 
     prCode: dbText(row.PR_CODE),
     designImageId: dbText(row.DESIGN_IMG_ID),
     trfrItCode: dbText(row.TRFR_IT_CODE),
+    itmSign: dbText(row.ITM_SIGN),
   };
 }
 
@@ -459,6 +481,7 @@ function blankCells(): TagCancelRowCells {
     prCode: '',
     designImageId: '',
     trfrItCode: '',
+    itmSign: '',
   };
 }
 
@@ -652,6 +675,8 @@ export function applyLineInput(options: {
   stones: readonly TagCancelStoneRow[];
   stonesGiven: boolean;
   settings: TagCancelSettings;
+  /** Stock Adjust: whether the grid shows TagLot (`PURC_LOT`) and ItmLot (`ITM_WITH_LOT_STK`). */
+  lots?: { tagLot: boolean; itemLot: boolean };
 }): Cells {
   const { mode, row, tagged, base, input, settings } = options;
   const refuse = (message: string): never => {
@@ -679,8 +704,46 @@ export function applyLineInput(options: {
   } else if (given(input.trfrItCode)) {
     refuse('TrfrItm is a Tag Transfer column');
   }
+  if (mode === 'adjust') {
+    // LbrRate (col 24) is hidden on the Stock Adjust grid (MSG_CLEAR :2542); it keeps the tag's value.
+    if (given(input.lbrRate) && f2(input.lbrRate) !== f2(base.lbrRate)) {
+      refuse('LbrRate is not a Stock Adjust column');
+    }
+  } else if (given(input.itmSign) && String(input.itmSign).trim() !== '-') {
+    refuse('Sign is a Stock Adjust column');
+  }
 
   let cells: Cells = { ...base };
+  if (mode === 'adjust') {
+    // TEXT_ENTRY_KeyDown col 8 (TR_TAG_CAN.cs:4259-4263): a Stock Adjust line needs `+` or `-`.
+    const sign = String(input.itmSign ?? base.itmSign ?? '').trim();
+    if (sign !== '+' && sign !== '-') {
+      throw new TagCancelValidationError(DESKTOP_MESSAGES.ITEM_SIGN_REQUIRED);
+    }
+    cells.itmSign = sign;
+    // TagLot / ItmLot (cols 2, 3) are shown only with Purchase LOT / Item With LOT Stock (MSG_CLEAR :2514-2540).
+    const lots = options.lots ?? { tagLot: false, itemLot: false };
+    for (const [field, shown, label, max] of [
+      ['lotNo', lots.tagLot, 'TagLot', 15],
+      ['itmLot', lots.itemLot, 'ItmLot', 10],
+    ] as const) {
+      const value = input[field];
+      if (value == null) continue;
+      const next = typedText(value, max);
+      if (!shown && next !== typedText(base[field], max)) {
+        refuse(
+          `${label} is shown only with ${label === 'TagLot' ? 'Purchase LOT' : 'Item With LOT Stock'}`,
+        );
+      }
+      cells[field] = next;
+    }
+  } else {
+    for (const field of ['lotNo', 'itmLot'] as const) {
+      if (given(input[field]) && typedText(input[field], 15) !== typedText(base[field], 15)) {
+        refuse(`${field === 'lotNo' ? 'TagLot' : 'ItmLot'} is a Stock Adjust column`);
+      }
+    }
+  }
   const setText = (field: 'designNo' | 'itmSize' | 'tblCode' | 'krName', max: number) => {
     const value = input[field];
     if (value == null) return;
@@ -698,8 +761,8 @@ export function applyLineInput(options: {
   let baseline = { ...options.baseline };
   for (const step of REPLAY) {
     const value = input[step.field];
-    // A hidden computed cell of the Transfer grid is not an operator edit; its value is stored below.
-    if (given(value) && !(mode === 'transfer' && TRANSFER_COMPUTED.has(step.field))) {
+    // A hidden computed cell of the Transfer and Stock Adjust grids is not an operator edit; its value is stored below.
+    if (given(value) && !(mode !== 'cancel' && TRANSFER_COMPUTED.has(step.field))) {
       const next = step.format(value);
       if (next !== num(cells[step.field])) {
         cells = { ...cells, [step.field]: next };
@@ -777,7 +840,8 @@ export function detailRow(
     LOT_NO: c.lotNo,
     ITM_LOT: c.itmLot,
     ITM_SIZE: c.itmSize,
-    ITM_SIGN: '-',
+    // The Sign column on a Stock Adjust book, `-` on every other (TR_TAG_CAN.cs:5138-5145).
+    ITM_SIGN: ctx.mode === 'adjust' ? c.itmSign : '-',
     // Written only by the transfer mode (:5125-5128); a cancel leaves the column untouched.
     ...(ctx.mode === 'transfer' ? { TRFR_IT_CODE: c.trfrItCode } : {}),
     BAG_WT: c.bagWt,
@@ -852,7 +916,8 @@ export function stoneRows(
  * MAIN_STOCK, `Ac_Stock.Tag_Can_Stk` (Ac_Stock.cs:48-58), built from the very register rows written, as the
  * desktop's `INSERT … SELECT FROM BAR_CAN_DETL` does.
  *
- *   insert 1, every line:      ISR_NO 1, TR_TYPE 'O', '-', the line's item, tag and figures, NET_AMT 0, KR_COST 0
+ *   insert 1, every line:      ISR_NO 1, TR_TYPE 'I' / ITM_SIGN '+' for a Stock Adjust `+` line, else 'O' / '-';
+ *                              the line's item, tag and figures, NET_AMT 0, KR_COST 0
  *   insert 2, transfer lines:  ISR_NO 2, TRFR_IT_CODE, TAG_NO 'N', VCH_SRNO 0, TBL_CODE '001', TR_TYPE 'I', '+',
  *                              the same pieces, weights, touch, wastage, fine and karigar figures; every rate and
  *                              amount 0; ITM_LOT ''
@@ -902,8 +967,10 @@ export function stockRows(
     TAG_NO: isLoose(d.TAG_NO) ? 'N' : d.TAG_NO,
     VCH_SRNO: d.VCH_SRNO,
     TBL_CODE: d.TBL_CODE,
-    TR_TYPE: 'O',
-    ITM_SIGN: '-',
+    // `CASE WHEN A.ITM_SIGN = '+' THEN 'I' ELSE 'O' END, A.ITM_SIGN` (Ac_Stock.cs:53): only a Stock Adjust
+    // line can be `+`.
+    TR_TYPE: dbText(d.ITM_SIGN) === '+' ? 'I' : 'O',
+    ITM_SIGN: dbText(d.ITM_SIGN) === '+' ? '+' : '-',
     ITM_RATE: d.ITM_RATE,
     ITM_AMT: d.ITM_AMT,
     LBR_RATE: d.LBR_RATE,
@@ -935,6 +1002,47 @@ export function stockRows(
     }
   }
   return out;
+}
+
+/**
+ * LOT_DETL, `Ac_Stock.StkAdj_Lot` (Ac_Stock.cs:642-646) — Stock Adjust only: one row per register line with a
+ * TagLot (`LOT_NO <> ''`), signed as the line, `ENTRY_TYPE 'L'`, `HD_VCH_NO` the voucher number and `EMP_CODE` the
+ * header's.
+ */
+export function lotRows(
+  ctx: TagCancelWriteContext,
+  details: readonly Record<string, unknown>[],
+): Record<string, unknown>[] {
+  if (ctx.mode !== 'adjust') return [];
+  return details
+    .filter((d) => dbText(d.LOT_NO).trim() !== '')
+    .map((d) => ({
+      ...ctx.key,
+      SR_NO: d.SR_NO,
+      VCH_DATE: ctx.vchDate,
+      VCH_TYPE: ctx.book.shortName,
+      INOUT_TYPE: ctx.book.inout,
+      ENTRY_TYPE: 'L',
+      BOOK_NAME: ctx.book.mainBook,
+      AC_CODE: d.AC_CODE,
+      IT_CODE: d.IT_CODE,
+      IT_TYPE: d.IT_TYPE,
+      LOT_NO: d.LOT_NO,
+      IT_PCS: d.ITM_PCS,
+      IT_GWT: d.ITM_GWT,
+      IT_NWT: d.ITM_NWT,
+      IT_SIGN: d.ITM_SIGN,
+      HD_VCH_NO: ctx.key.VCH_NO,
+      MAIN_USER: d.MAIN_USER,
+      DATA_TYPE: ctx.book.dataType,
+      DATA_TRFR: 'N',
+      TAG_NO: '',
+      VCH_SRNO: 0,
+      TAG_IT_CODE: '',
+      EMP_CODE: ctx.empCode,
+      PR_CODE: '',
+      KR_CODE: '',
+    }));
 }
 
 /**

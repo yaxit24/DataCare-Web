@@ -13,6 +13,7 @@ import {
   isActiveRow,
   linePayload,
   neighbourVoucher,
+  rowFromLot,
   rowFromSaved,
   rowFromSource,
   setCell,
@@ -102,11 +103,92 @@ const tagRow = (mode: 'cancel' | 'transfer' = 'cancel'): GridRow =>
 
 describe('settings', () => {
   it('reads the company labour basis and LBR_WITH_GHT with the desktop blank defaults', () => {
-    expect(tagCancelSettings(null)).toEqual({ labourIncludesGhat: true, companyLabourType: 'G' });
+    expect(tagCancelSettings(null)).toEqual({
+      labourIncludesGhat: true,
+      companyLabourType: 'G',
+      tagLot: false,
+      itemLot: false,
+    });
     expect(tagCancelSettings({ LBR_TYPE: 'n', LBR_WITH_GHT: 'N' })).toEqual({
       labourIncludesGhat: false,
       companyLabourType: 'N',
+      tagLot: false,
+      itemLot: false,
     });
+    // MsPurcLot / MsItmWitLotStk show the Stock Adjust TagLot / ItmLot columns (MSG_CLEAR :2514-2540).
+    expect(tagCancelSettings({ PURC_LOT: 'y', ITM_WITH_LOT_STK: 'Y' })).toMatchObject({
+      tagLot: true,
+      itemLot: true,
+    });
+  });
+});
+
+describe('Stock Adjust rows', () => {
+  const settings = {
+    companyLabourType: 'G',
+    labourIncludesGhat: true,
+    tagLot: true,
+    itemLot: false,
+  };
+  it("starts a row with the row above's sign (CommPassAdd :2835-2838) and only in Stock Adjust", () => {
+    const first = { ...blankRow(settings, 'adjust'), itCode: 'G22', itmSign: '+' };
+    expect(blankRow(settings, 'adjust', first).itmSign).toBe('+');
+    expect(blankRow(settings, 'cancel', first).itmSign).toBe('');
+    // The web's spare row takes the sign when it is put to use, unless it has one of its own.
+    const rows = [first, blankRow(settings, 'adjust')];
+    expect(changeRow(rows, 1, (r) => setCell(r, 'itCode', 'g18'), 'adjust')[1]).toMatchObject({
+      itCode: 'G18',
+      itmSign: '+',
+    });
+    const own = [first, { ...blankRow(settings, 'adjust'), itmSign: '-' }];
+    expect(changeRow(own, 1, (r) => setCell(r, 'itCode', 'g18'), 'adjust')[1]!.itmSign).toBe('-');
+  });
+
+  it('fills a loose row from the chosen lot: item, pieces, gross, net and less weight (:4113-4122)', () => {
+    const row = { ...blankRow(settings, 'adjust'), itmSign: '-' };
+    const filled = rowFromLot(
+      row,
+      'lotNo',
+      { code: 'pl009', name: 'GOLD 22K', itCode: 'G22', pcs: 2, grossWt: 5, netWt: 4.8 },
+      settings,
+    );
+    expect(filled).toMatchObject({
+      lotNo: 'PL009',
+      itCode: 'G22',
+      itName: 'GOLD 22K',
+      pcs: '2',
+      grossWt: '5.000',
+      netWt: '4.800',
+      lessWt: '0.200',
+      itmSign: '-',
+    });
+    // A lot with no gross weight leaves the pieces as they were.
+    const noGross = rowFromLot(
+      { ...row, pcs: '3' },
+      'itmLot',
+      { code: 'IL1', itCode: 'G22', pcs: 9, grossWt: 0, netWt: 0 },
+      settings,
+    );
+    expect([noGross.itmLot, noGross.pcs]).toEqual(['IL1', '3']);
+  });
+
+  it('sends the sign and the lots only for Stock Adjust', () => {
+    const row = {
+      ...blankRow(settings, 'adjust'),
+      itCode: 'G22',
+      itmSign: '+',
+      lotNo: 'PL009',
+      itmLot: 'IL1',
+      grossWt: '1',
+      netWt: '1',
+    };
+    expect(linePayload(row, 'adjust')).toMatchObject({
+      itmSign: '+',
+      lotNo: 'PL009',
+      itmLot: 'IL1',
+    });
+    const cancel = linePayload(row, 'cancel');
+    expect(['itmSign', 'lotNo', 'itmLot'].filter((k) => k in cancel)).toEqual([]);
   });
 });
 

@@ -192,6 +192,12 @@
         "web/apps/api/src/modules/sales/wholesaleSaleBill.ts",
         "web/apps/api/src/routes/wholesaleSale.ts"
       ]
+    },
+    "stockAdjust": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/stock-adjust/page.tsx",
+        "web/apps/api/src/modules/stock/stockAdjustLots.ts"
+      ]
     }
   }
 }

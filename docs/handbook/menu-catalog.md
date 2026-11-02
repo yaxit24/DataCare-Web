@@ -2165,7 +2165,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Physical Stock | `TR_PHYSTK` | `/txn/physical-stock` | `C R E D - -` | PARTIAL | P1-core |
 | Reminder Entry | `UT_REMINDER` | `/utilities/reminder-entry` | `C - - D - L` | PARTIAL | P1-core |
 | Sms | `UT_SMS` | `/integrations` | `C - - - - -` | PARTIAL | P1-edition |
-| Stock Adjust | `TR_TAG_CAN` | `/txn/stock-adjust` | `C - - D - -` | PARTIAL | P1-core |
+| Stock Adjust | `TR_TAG_CAN` | `/txn/stock-adjust` | `C R E D P L` | PARTIAL | P1-core |
 | Stone/Dm-Cf | `TR_PHYSTK` | `/txn/stone-dm-cf` | `C R E D P -` | PARTIAL | P1-core |
 | Tag Adjust | `TR_TAG_CAN` | `/txn/tag-adjust` | `C R E D - -` | PARTIAL | P1-core |
 | Tag Cancel | `TR_TAG_CAN` | `/txn/tag-cancel` | `C R E D P L` | PARTIAL | P1-core |
@@ -2334,12 +2334,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `TR_TAG_CAN` — CurBookHelp('STOCK ADJUST') ([MDI_FORM.cs:8616-8627](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8616-L8627)).
 - **Does:** Posts signed piece and weight stock corrections without a financial ledger entry.
-- **Looks:** Voucher/date header, signed tag/item/counter weight grid, component sub-grid and totals.
-- **Writes:** BAR_CAN_DATA, BAR_CAN_DETL, MAIN_STOCK, BAR_DETL, DM_DATA.
-- **Web:** `/txn/stock-adjust`; `POST /stock/adjust`, `DELETE /stock/adjust/:vchNo`. Can: create, delete.
-- **Remaining:** No saved reopen/edit/print; counter, loss-weight, karigar and component-grid depth and configured-book handling remain.
-- **Owners:** X18, P07-02, G40, G41, N59.
-- **Evidence:** [KB_other.md:150-213](../../project-memory/video-research/_kb/KB_other.md#L150-L213).
+- **Looks:** Book, Vch No, Vch Date, Employee and Vch Desc over the Sr / TagNo / (TagLot / ItmLot) / ItCode / Counter / Design / Size / Sign / BagWt / Pcs / GrWt / LsWt / NetWt / Ght% / GhtWt / Touch / West% / Fine / Mrp / KrCode grid, the stone grid, totals; Save, Delete, Cancel and Print.
+- **Writes:** BAR_CAN_DATA, BAR_CAN_DETL, BAR_CAN_IDTL, MAIN_STOCK, LOT_DETL, DELETE_DATA, TEMP_BOOK_DATA, BAR_DETL, BOOK_DATA.
+- **Web:** `/txn/stock-adjust`; `GET /stock/stock-adjust`, `GET /stock/stock-adjust/source`, `GET /stock/stock-adjust/lots`, `GET /stock/stock-adjust/:vchNo`, `POST /stock/stock-adjust`, `PUT /stock/stock-adjust/:vchNo`, `DELETE /stock/stock-adjust/:vchNo`, `GET /stock/stock-adjust/:vchNo/print`. Can: create, reopen, edit, delete, print, list.
+- **Remaining:** A replayed loose-line save makes a second voucher (no idempotency key); desktop-runtime comparison remains.
+- **Owners:** X18, P07-02, G40, G41, N59, G234, N221.
+- **Evidence:** [TR_TAG_CAN.cs:2514-5440](../../unified/src/csharp/DataCareNext/TR_TAG_CAN.cs#L2514-L5440), [Ac_Stock.cs:48-58](../../unified/src/csharp/DataCareNext/Ac_Stock.cs#L48-L58).
 
 ### Stone/Dm-Cf
 
