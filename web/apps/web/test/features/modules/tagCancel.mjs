@@ -197,6 +197,7 @@ export const tagCancel = {
     'web/apps/web/components/TagCancelForm.tsx',
     'web/apps/api/src/modules/stock/tagCancel.ts',
     'web/apps/api/src/modules/stock/tagCancelBill.ts',
+    'web/apps/api/src/modules/vouchers/numbering.ts',
     'web/apps/web/test/features/modules/tagCancel.mjs',
   ],
   fixtureManifest: FIXTURE_MANIFEST,
@@ -493,6 +494,53 @@ export const tagCancel = {
       'settings',
       'T15',
       'Company type B and the fiscal year are covered through HTTP in tagCancel.routes.db.test.ts.',
+    ),
+    C(
+      'settings.stock-adjust-numbering-is-isolated',
+      'T15',
+      'read-only',
+      'The forward legacy-number reservation applies only when BOOK_DATA.MAIN_BOOK is STOCK ADJUST; TAG CANCEL keeps BAR_CAN_DATA numbering.',
+      async (ctx) => {
+        const marker = 'e2e-tgcan-no';
+        const [{ max }] = await ctx.rows(
+          `SELECT coalesce(max(CASE WHEN "VCH_NO"::text ~ '^[0-9]+$' THEN "VCH_NO"::int END),0)::int max
+             FROM "BAR_CAN_DATA" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01'
+               AND "CO_YEAR"=$2 AND "CO_BOOK"='${BOOK}'`,
+          YEAR,
+        );
+        const expected = String(Number(max) + 1).padStart(5, '0');
+        await ctx.owner.$executeRawUnsafe(
+          `INSERT INTO "MAIN_STOCK"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","ISR_NO",
+             "VCH_DATE","VCH_TYPE","BOOK_NAME","IT_CODE","TAG_NO","VCH_SRNO","TR_TYPE","ITM_SIGN","MAIN_USER")
+           VALUES ($1,'01','01',$2,'${BOOK}','90000',1,2,$3::date,'TGCAN','TAG CANCEL',$4,'N',0,'A','+', $5)`,
+          TENANT,
+          YEAR,
+          DAY,
+          ITEMS.gold.code,
+          marker,
+        );
+        try {
+          const page = await open(ctx);
+          await page.waitForFunction(
+            (next) => document.querySelector('input[aria-label="Vch No"]')?.value === next,
+            expected,
+          );
+          assert.equal(await page.getByLabel('Vch No', { exact: true }).inputValue(), expected);
+          return {
+            observation: `TAG CANCEL displayed ${expected} despite unrelated MAIN_STOCK voucher 90000`,
+            expected: 'Tag Cancel still numbers from its configured BAR_CAN_DATA register only',
+            database: { mainStockSentinel: '90000', nextVoucherNo: expected },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01'
+               AND "CO_YEAR"=$2 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"='90000' AND "MAIN_USER"=$3`,
+            TENANT,
+            YEAR,
+            marker,
+          );
+        }
+      },
     ),
     C(
       'print.tag-can-bill',

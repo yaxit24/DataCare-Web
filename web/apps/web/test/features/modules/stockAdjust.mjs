@@ -247,11 +247,14 @@ export const stockAdjust = {
     'web/apps/api/src/modules/stock/tagCancel.ts',
     'web/apps/api/src/modules/stock/tagCancelRows.ts',
     'web/apps/api/src/modules/stock/stockAdjustLots.ts',
+    'web/apps/api/src/modules/vouchers/numbering.ts',
+    'web/packages/db/prisma/migrations/20261102120000_stock_adjust_legacy_numbering/migration.sql',
     'web/apps/web/test/features/modules/stockAdjust.mjs',
   ],
   fixtureManifest: FIXTURE_MANIFEST,
   settingsManifest: {
-    companySettings: 'catalogue defaults; T15 turns CO_SET_NEW.PURC_LOT on and restores it',
+    companySettings:
+      'catalogue defaults; T15 covers Purchase LOT and legacy-number isolation, restoring both fixtures',
   },
   cases: [
     C(
@@ -828,6 +831,186 @@ export const stockAdjust = {
             `DELETE FROM "LOT_DETL" WHERE tenant_id=$1 AND "LOT_NO"=$2 AND "CO_BOOK"='PR'`,
             TENANT,
             lot,
+          );
+        }
+      },
+    ),
+    C(
+      'migration.legacy-main-stock-number-reservation',
+      'T15',
+      'mutation',
+      'Pre-N221 web Stock Adjust rows have only MAIN_STOCK; the migrated STOCK ADJUST book must reserve those numbers without making the reduced row editable',
+      async (ctx) => {
+        const marker = 'e2e-legacy-saj';
+        const currentWriteSet = async (voucherNo, hiddenVoucherNo) => {
+          const rows = {};
+          for (const table of [
+            'BAR_CAN_DATA',
+            'BAR_CAN_DETL',
+            'BAR_CAN_IDTL',
+            'MAIN_STOCK',
+            'LOT_DETL',
+            'DM_DATA',
+          ]) {
+            rows[table] = await ctx.rows(
+              `SELECT to_jsonb(t)::text raw FROM "${table}" t
+                WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01' AND "CO_YEAR"=$2
+                  AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$3 ORDER BY to_jsonb(t)::text`,
+              YEAR,
+              voucherNo,
+            );
+          }
+          rows.TEMP_BOOK_DATA = hiddenVoucherNo
+            ? await ctx.rows(
+                `SELECT to_jsonb(t)::text raw FROM "TEMP_BOOK_DATA" t
+                  WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01'
+                    AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY to_jsonb(t)::text`,
+                hiddenVoucherNo,
+              )
+            : [];
+          return rows;
+        };
+        await ctx.owner.$executeRawUnsafe(
+          `INSERT INTO "MAIN_STOCK"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","ISR_NO",
+             "VCH_DATE","VCH_TYPE","BOOK_NAME","IT_CODE","TAG_NO","VCH_SRNO","TR_TYPE","ITM_SIGN",
+             "ITM_QTY","ITM_PCS","ITM_GWT","ITM_NWT","MAIN_USER")
+           VALUES ($1,'01','01',$2,'${BOOK}','00090',90,2,$3::date,'STADJ','STOCK ADJ',$4,'N',0,'A','+',1,1,1,1,$5)`,
+          TENANT,
+          YEAR,
+          DAY,
+          ITEMS.gold.code,
+          marker,
+        );
+        const legacy = () =>
+          ctx.rows(
+            `SELECT to_jsonb(s)::text raw,xmin::text revision,ctid::text locator
+               FROM "MAIN_STOCK" s WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"='00090'
+                 AND "MAIN_USER"=$2`,
+            marker,
+          );
+        const before = await legacy();
+        assert.equal(before.length, 1, 'the legacy MAIN_STOCK fixture is visible');
+        let voucherNo = '';
+        let hiddenVoucherNo = '';
+        try {
+          const { page } = await open(ctx);
+          await page.waitForFunction(
+            (expected) => document.querySelector('input[aria-label="Vch No"]')?.value === expected,
+            '00091',
+          );
+          assert.equal(await page.getByLabel('Vch No', { exact: true }).inputValue(), '00091');
+          await looseLine(page, 1, { gross: 2, touch: 91.6, sign: '+' });
+          const response = await save(page);
+          assert.equal(response.status(), 201, await response.text());
+          const saved = await response.json();
+          voucherNo = String(saved.voucherNo);
+          hiddenVoucherNo = String(saved.hiddenVoucherNo ?? '');
+          assert.equal(voucherNo, '00091');
+          const createdRows = await currentWriteSet(voucherNo, hiddenVoucherNo);
+          assert.deepEqual(
+            Object.fromEntries(
+              Object.entries(createdRows).map(([table, rows]) => [table, rows.length]),
+            ),
+            {
+              BAR_CAN_DATA: 1,
+              BAR_CAN_DETL: 1,
+              BAR_CAN_IDTL: 0,
+              MAIN_STOCK: 1,
+              LOT_DETL: 0,
+              DM_DATA: 0,
+              TEMP_BOOK_DATA: 1,
+            },
+          );
+          assert.deepEqual(await legacy(), before);
+
+          await reopen(page, voucherNo);
+          page.removeAllListeners('dialog');
+          page.on('dialog', (dialog) => void dialog.accept());
+          const [removed] = await Promise.all([
+            page.waitForResponse(
+              (candidate) =>
+                candidate.request().method() === 'DELETE' &&
+                new URL(candidate.url()).pathname === `${API}/${voucherNo}`,
+            ),
+            page.getByTestId('stock-adjust-delete').click(),
+          ]);
+          assert.equal(removed.status(), 200, await removed.text());
+          const afterDelete = await currentWriteSet(voucherNo, hiddenVoucherNo);
+          assert.deepEqual(
+            Object.fromEntries(
+              Object.entries(afterDelete).map(([table, rows]) => [table, rows.length]),
+            ),
+            {
+              BAR_CAN_DATA: 0,
+              BAR_CAN_DETL: 0,
+              BAR_CAN_IDTL: 0,
+              MAIN_STOCK: 0,
+              LOT_DETL: 0,
+              DM_DATA: 0,
+              TEMP_BOOK_DATA: 0,
+            },
+          );
+          const deleteAudit = await ctx.rows(
+            `SELECT to_jsonb(d)::text raw FROM "DELETE_DATA" d
+              WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01' AND "CO_YEAR"=$2
+                AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$3 ORDER BY row_id`,
+            YEAR,
+            voucherNo,
+          );
+          assert.equal(deleteAudit.length, 1);
+          await page.waitForFunction(
+            (expected) => document.querySelector('input[aria-label="Vch No"]')?.value === expected,
+            '00091',
+          );
+          const nextVoucherNo = await page.getByLabel('Vch No', { exact: true }).inputValue();
+          assert.deepEqual(await legacy(), before);
+          return {
+            observation: `legacy 00090 remained physical while the UI offered, saved and deleted ${voucherNo}`,
+            expected:
+              '00091 reserved after the hidden legacy key; legacy row byte/tuple identity unchanged',
+            database: { legacy: before, created: createdRows, current: afterDelete, deleteAudit },
+            downstream: { nextVoucherNo },
+          };
+        } finally {
+          if (voucherNo) {
+            for (const table of [
+              'BAR_CAN_IDTL',
+              'BAR_CAN_DETL',
+              'BAR_CAN_DATA',
+              'MAIN_STOCK',
+              'LOT_DETL',
+              'DM_DATA',
+            ]) {
+              await ctx.owner.$executeRawUnsafe(
+                `DELETE FROM "${table}" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01'
+                   AND "CO_YEAR"=$2 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$3`,
+                TENANT,
+                YEAR,
+                voucherNo,
+              );
+            }
+            await ctx.owner.$executeRawUnsafe(
+              `DELETE FROM "DELETE_DATA" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01'
+                 AND "CO_YEAR"=$2 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$3`,
+              TENANT,
+              YEAR,
+              voucherNo,
+            );
+          }
+          if (hiddenVoucherNo) {
+            await ctx.owner.$executeRawUnsafe(
+              `DELETE FROM "TEMP_BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01'
+                 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+              TENANT,
+              hiddenVoucherNo,
+            );
+          }
+          await ctx.owner.$executeRawUnsafe(
+            `DELETE FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "LC_CODE"='01'
+               AND "CO_YEAR"=$2 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"='00090' AND "MAIN_USER"=$3`,
+            TENANT,
+            YEAR,
+            marker,
           );
         }
       },
