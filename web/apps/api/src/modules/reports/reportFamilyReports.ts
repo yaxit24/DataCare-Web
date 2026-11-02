@@ -324,7 +324,7 @@ export async function approvalReport(
               WHERE i0.tenant_id=a.tenant_id
                 AND i0."CO_CODE"::text=a."CO_CODE"::text
                 AND i0."IT_CODE"::text=a."IT_CODE"::text
-              ORDER BY i0.row_id
+              ORDER BY i0."IT_CODE"
               LIMIT 1
            ) i ON true
            LEFT JOIN LATERAL (

@@ -26,6 +26,12 @@ Every Markdown file in the repository, classified by the first matching rule in 
 | [`.kiro/skills/third-party/README.md`](../../.kiro/skills/third-party/README.md) | 1 | attribution | reference | — | Source and MIT licence of the three skills adapted from Superpowers. |
 | `.kiro/skills/*/SKILL.md`<br>`.kiro/steering/*.md`<br>`.kiro/skills/*/references/*.md` | 13 | agent skill | current | — | Kiro skills and steering that encode the repository's working procedures. |
 
+## Delivery method
+
+| Path | Files | Kind | Status | Superseded by / see | Purpose |
+|---|---:|---|---|---|---|
+| `docs/agent-prompts/lite/*.md` | 47 | agent prompts | reference | — | Prompt pack for independent agents that take one Lite menu each to done (generic method, report addendum, 22 menu prompts, launch bundles). Facts are generated from the menu catalog by build.py; the catalog and backlog stay the status authority. |
+
 ## Master plan
 
 | Path | Files | Kind | Status | Superseded by / see | Purpose |

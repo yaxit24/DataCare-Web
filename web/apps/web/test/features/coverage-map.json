@@ -90,7 +90,9 @@
         "web/apps/web/app/(app)/txn/sales-order/page.tsx",
         "web/apps/web/lib/salesOrderForm.ts",
         "web/apps/api/src/modules/sales/salesOrder.ts",
-        "web/apps/api/src/modules/sales/orderDoc.ts"
+        "web/apps/api/src/modules/sales/orderDoc.ts",
+        "web/apps/api/src/modules/sales/salesOrderTender.ts",
+        "web/apps/web/components/SalesOrderUpiGrid.tsx"
       ]
     },
     "partyOpening": {
@@ -191,6 +193,12 @@
         "web/apps/api/src/modules/sales/wholesaleSaveChecks.ts",
         "web/apps/api/src/modules/sales/wholesaleSaleBill.ts",
         "web/apps/api/src/routes/wholesaleSale.ts"
+      ]
+    },
+    "stockAdjust": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/stock-adjust/page.tsx",
+        "web/apps/api/src/modules/stock/stockAdjustLots.ts"
       ]
     }
   }

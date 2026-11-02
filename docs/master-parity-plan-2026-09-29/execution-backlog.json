@@ -3779,7 +3779,15 @@
       "gapIds": "G37, G81",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-01",
+      "evidence": [
+        "web/apps/web/lib/reportPresentation.ts",
+        "web/apps/web/app/(app)/reports/[report]/page.tsx",
+        "web/apps/web/test/reportPresentation.test.ts",
+        "web/apps/web/test/features/modules/contraEntry.mjs"
+      ],
+      "statusNote": "PLANNED. The bounded Contra Register date manifestation is implemented-unverified: only contra-register.date has an explicit date descriptor, so its stored calendar date is displayed as dd/MM/yyyy through the shared formatter, and the zero-mock baseline entry is removed. Desktop authority: unified/src/csharp/DataCareNext/TR_CONTRA.cs:1092-1098 configures the 00/00/0000 voucher-date mask and :3136-3162 projects the F1 list date with SQL Server style 103. Broad N57/G37 remains planned/open for typed descriptors across reports, Indian grouping, authoritative totals, and identical screen/PDF/CSV/XLSX output; G81 also remains open. No acceptance or verification is claimed."
     },
     {
       "id": "N58",
@@ -7346,6 +7354,64 @@
         "web/apps/web/test/features/modules/wholesaleSale.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Verified: wholesaleSaveChecks.db.test.ts 9/9, the TR_WH_SALE-family API tests (12 files, 153 tests), the wholesale-sale feature module 25 of 25 (no blocked case), the full workspace suite and the real-stack suite. Open: desktop-runtime comparison and parent acceptance; the Rate Cut, Wh Quotation and Tour Sales menus have no feature module yet."
+    },
+    {
+      "id": "N221",
+      "status": "implemented-unverified",
+      "action": "Stock Adjust is the desktop TR_TAG_CAN on a STOCK ADJUST book, as the Tag Cancel writer's third mode: the grid with the Sign column and the setting-driven TagLot and ItmLot columns with their helps, the desktop keys, the signed register, MAIN_STOCK I or O by sign, LOT_DETL for a lot, reopen, edit, delete and TagCanBill; the provisioned book becomes the desktop's STADJ out book numbered from BAR_CAN_DATA, with a data migration; the old separate writer is removed.",
+      "parentLabels": "P1-core; L3; T01-T18",
+      "startAfter": [
+        "N220"
+      ],
+      "requiredProof": "An HTTP/DB test of the book, rights, refusals, lifecycle, lots and a + tag line; the stock-adjust feature module passes every case and tag-cancel stays green; a Chrome DevTools keyboard, save, reopen, print and delete pass.",
+      "gapIds": "G234",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/stock/tagCancel.ts",
+        "web/apps/api/src/modules/stock/tagCancelRows.ts",
+        "web/apps/api/src/modules/stock/stockAdjustLots.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/packages/db/prisma/migrations/20261101090000_stock_adjust_book/migration.sql",
+        "web/apps/web/components/TagCancelForm.tsx",
+        "web/apps/web/lib/tagCancelVoucher.ts",
+        "web/apps/web/app/(app)/txn/stock-adjust/page.tsx",
+        "web/apps/api/test/stockAdjust.routes.db.test.ts",
+        "web/apps/web/test/tagCancelVoucher.test.ts",
+        "web/apps/web/test/features/modules/stockAdjust.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: stockAdjust.routes.db.test.ts 6/6, the Tag Cancel unit tests, routePolicy (719 routes), the stock-adjust feature module 18 of 18 applicable, tag-cancel unchanged, and a Chrome DevTools pass on the demo stack. Open: a replayed loose-line save makes a second voucher (no idempotency key); desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N222",
+      "status": "implemented-unverified",
+      "action": "The Sales Order's UPI tender like TR_SALE_ORD: the MSG_UPI grid (account from the master, type, id, amount), UPI_AMT its total and part of ADV_AMT, UPI_DATA one row per grid line, Order_Ledr legs 12/13 and Order_Rojmel type 08 per row, the used-Upi-Id refusal on a new order, and edit and delete of a UPI order.",
+      "startAfter": [
+        "N221"
+      ],
+      "requiredProof": "sales-order.create.upi-tender, sales-order.edit.upi-amount-then-delete and sales-order.refusal.duplicate-upi-id pass in the browser; the UPI DB write-set test passes.",
+      "gapIds": "G206",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "parentLabels": "P9; R03",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/sales/salesOrderTender.ts",
+        "web/apps/api/src/modules/sales/salesOrder.ts",
+        "web/apps/api/src/modules/sales/orderLifecyclePolicy.ts",
+        "web/apps/web/components/SalesOrderUpiGrid.tsx",
+        "web/apps/web/lib/salesOrderForm.ts",
+        "web/apps/api/test/salesOrderRound4.db.test.ts",
+        "web/apps/web/test/features/modules/salesOrder.mjs"
+      ],
+      "statusNote": "IMPLEMENTED (UPI), not accepted. The UPI DB test passes (red before this change), the order-related API tests pass (22 files, 272), and the sales-order module passes 27 of 30 (the three UPI cases pass; old metal and scheme stay baselined under G206; two cases blocked as before). Open: old gold, old silver and scheme tenders; desktop-runtime comparison and parent acceptance."
     }
   ],
   "amendments": [
