@@ -177,8 +177,31 @@ export const put = <T = any>(p: string, b?: Json) =>
 export const del = <T = any>(p: string, b?: Json) =>
   call<T>(p, { method: 'DELETE', body: JSON.stringify(b ?? {}) });
 
-/** Read exact binary bytes with page guards; no automatic retry or error-body download. */
-export async function getBlob(path: string): Promise<Blob> {
+/** A context-safe binary response and its server-suggested, path-safe filename. */
+export interface BinaryDownload {
+  blob: Blob;
+  filename: string;
+}
+
+export function filenameFromContentDisposition(value: string | null): string {
+  const extended = value?.match(/filename\*\s*=\s*UTF-8''([^;]+)/i)?.[1];
+  const ordinary = value?.match(/filename\s*=\s*(?:"([^"]*)"|([^;\s]*))/i);
+  let candidate = extended ?? ordinary?.[1] ?? ordinary?.[2] ?? 'download';
+  try {
+    candidate = decodeURIComponent(candidate);
+  } catch {
+    candidate = 'download';
+  }
+  candidate = candidate.replaceAll('\\', '/').split('/').at(-1) ?? '';
+  candidate = candidate
+    .replace(/[\u0000-\u001f\u007f]/g, '_')
+    .replace(/^\.+/, '')
+    .trim();
+  return candidate.slice(0, 180) || 'download';
+}
+
+/** Read exact binary bytes and filename with page guards; no retry or error-body download. */
+export async function getDownload(path: string): Promise<BinaryDownload> {
   const ticket = page.capture();
   try {
     const response = await fetch('/api' + path, {
@@ -192,13 +215,19 @@ export async function getBlob(path: string): Promise<Blob> {
       if (response.status === 409 && body?.error === 'context-stale') page.reject(ticket);
       throw new ApiError(body?.error || response.statusText, response.status, body);
     }
+    const filename = filenameFromContentDisposition(response.headers.get('content-disposition'));
     const blob = await response.blob();
     page.assertCurrent(ticket);
-    return blob;
+    return { blob, filename };
   } catch (error) {
     page.assertCurrent(ticket);
     throw error;
   }
+}
+
+/** Backward-compatible exact-byte helper for existing callers. */
+export async function getBlob(path: string): Promise<Blob> {
+  return (await getDownload(path)).blob;
 }
 
 /** Export an array of row objects to a downloaded CSV (client-side, no server). */

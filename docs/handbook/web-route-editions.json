@@ -474,6 +474,11 @@
    "menu": "Report/Tag Estmate",
    "reason": "The Tag Estmate menu (Basic)."
   },
+  "Utilities/Backup": {
+   "edition": "L",
+   "menu": "Company/Data Backup",
+   "reason": "Retained admin-only API-policy alias for the Lite Data Backup route while G225 exact Print-right authorization remains open."
+  },
   "Utilities/Customer Entry": {
    "edition": "A",
    "menu": "Crm/Cust Entry",
