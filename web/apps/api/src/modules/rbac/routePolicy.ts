@@ -1000,7 +1000,12 @@ route('Reports/Entry Check', [
 route('Reports/User Report', ['GET /reports/user-report']);
 route('Reports/Dhiran Report', ['GET /reports/dhiran-report']);
 route('Reports/Loan Report', ['GET /reports/loan-report']);
-route('Reports/GST Report', ['GET /reports/gst-report']);
+route('Reports/GST Report', [
+  'GET /reports/gst-report',
+  'GET /reports/gst-report/export.csv',
+  'GET /reports/gst-report/export.xlsx',
+  'GET /reports/gst-report/export.pdf',
+]);
 route('Reports/Delete Data', ['GET /reports/delete-data']);
 route('Reports/Point Report', ['GET /reports/point-report', 'GET /reports/point-report/detail']);
 route('Reports/Approval Report', ['GET /reports/approval-report']);
@@ -1066,6 +1071,9 @@ const PRINT_ROUTES = new Set([
   'POST /integrations/notify',
   'GET /reports/tag-stock.csv',
   'GET /reports/karigar-ledger.print',
+  'GET /reports/gst-report/export.csv',
+  'GET /reports/gst-report/export.xlsx',
+  'GET /reports/gst-report/export.pdf',
   'GET /reports/gstr2-doc',
   'GET /reports/gstr1-doc',
   'GET /reports/gstr3b-doc',

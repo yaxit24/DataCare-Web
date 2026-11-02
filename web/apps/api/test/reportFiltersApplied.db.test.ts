@@ -154,6 +154,7 @@ d('report filters end to end', () => {
       'design-move',
       'dhiran-report',
       'entry-check',
+      'gst-report',
       'item-group-stock',
       'karigar-report',
       'last-visit',
