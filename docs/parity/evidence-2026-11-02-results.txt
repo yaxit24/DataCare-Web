@@ -52,8 +52,8 @@ PROBE 8 rate=8: {"tag":"BODY","label":null,"text":"(self.__ne","printDisabled":f
   FAIL tag-print.stress.8
        FAILED: page.waitForURL: Timeout 8000ms exceeded.
 STRESS RESULT {"passed":6,"failed":2}
-  not passed: tag-print.stress.6 failed 
-  not passed: tag-print.stress.8 failed 
+  not passed: tag-print.stress.6 failed
+  not passed: tag-print.stress.8 failed
 ## stress_fixed.log
 PROBE 1 rate=8: {"tag":"BUTTON","label":null,"text":"Print","printDisabled":false}
   PASS tag-print.stress.1
