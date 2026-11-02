@@ -26,7 +26,8 @@ export const NAV: NavGroup[] = [
     items: [
       { label: 'Accounts', href: '/masters/accounts', ready: true },
       { label: 'Customers', href: '/masters/customers', ready: true },
-      { label: 'Party (rich)', href: '/masters/party', ready: true },
+      // The desktop Party menu (MS_ACCT); the rights form keeps its name, so USER_SET 'Party' rows still apply.
+      { label: 'Party', href: '/masters/party', ready: true, form: 'Masters/Party (rich)' },
       { label: 'Items', href: '/masters/items', ready: true },
       { label: 'Auto Item', href: '/masters/auto-item', ready: true },
       { label: 'Item Groups', href: '/masters/groups', ready: true },

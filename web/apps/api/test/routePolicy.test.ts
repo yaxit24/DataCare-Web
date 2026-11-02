@@ -118,8 +118,10 @@ describe('route policy registry', () => {
     // N223 adds the RP_LEDR Ledger Report: the canonical screen GET /reports/account-ledger and its three
     // exports (.pdf/.xlsx/.csv), keeping the two account-in-path aliases. The two old literals move into
     // routes/accountLedger.ts, so the net change is +4: 720 + 4 = 724.
-    expect(routes).toHaveLength(724);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(724);
+    // N224 adds the Party master's GETs (list, print, help, copy, taken, gst-state, account, one, photo), the photo
+    // POSTs (save, delete), POST, PUT and DELETE: 724 + 14 = 738.
+    expect(routes).toHaveLength(738);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(738);
 
     const policies = routes.map((route) => ({
       ...route,
