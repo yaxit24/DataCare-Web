@@ -6,10 +6,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 29 | 26 | 0 |
+| Lite (first, D32) | 49 | 29 | 27 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
 | Standard (added by Standard) | 36 | 0 | 0 | 0 |
-| **Standard total** | **114** | **30** | **27** | **0** |
+| **Standard total** | **114** | **30** | **28** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
@@ -63,7 +63,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Transaction | Cash Payment | `/txn/payment` | PARTIAL | cash-bank | module green | — |
 | Transaction | Bank Received | `/txn/receipt?mode=BANK` | PARTIAL | cash-bank | module green | — |
 | Transaction | Bank Payment | `/txn/payment?mode=BANK` | PARTIAL | cash-bank | module green | — |
-| Transaction | Contra Entry | `/txn/contra` | PARTIAL | contra | module, 1 open | G37 |
+| Transaction | Contra Entry | `/txn/contra` | PARTIAL | contra | module green | — |
 
 ## Basic — 29 menus (added by Basic)
 

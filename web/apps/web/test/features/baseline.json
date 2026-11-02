@@ -12,11 +12,5 @@
       "reason": "Old gold, old silver (SL_PR_DETL) and scheme amounts are read-only on the order (cash, cheque and card are taken since N197, UPI since this change), so an advance cannot include them (TR_SALE_ORD.cs:11368, Ac_Ledr.cs:42-50)."
     }
   ],
-  "contra": [
-    {
-      "case": "contra.report.contra-register",
-      "gap": "G37",
-      "reason": "The generic Contra Register grid prints a date-column timestamp such as 2026-11-01T00:00:00.000Z; D19 requires dd/MM/yyyy. This generic report-grid presentation defect is G37/N57."
-    }
-  ]
+  "contra": []
 }
