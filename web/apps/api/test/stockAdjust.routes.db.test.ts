@@ -640,8 +640,8 @@ const SRNO = 100312000011;
     await exec(
       `INSERT INTO "BAR_CAN_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","OLD_SRNO",
          "VCH_DATE","VCH_TYPE","INOUT_TYPE","BOOK_NAME","IT_CODE","TAG_NO","VCH_SRNO","ITM_SIGN",
-         "ITM_QTY","ITM_PCS","ITM_GWT","ITM_NWT","MAIN_USER")
-       VALUES ($1,'01','01',$2,'SAJ','00040',1,1,$3::date,'STADJ','O','STOCK ADJUST','SAL22','N',0,'+',1,1,2,2,'adjuster')`,
+         "ITM_PCS","ITM_GWT","ITM_NWT","MAIN_USER")
+       VALUES ($1,'01','01',$2,'SAJ','00040',1,1,$3::date,'STADJ','O','STOCK ADJUST','SAL22','N',0,'+',1,2,2,'adjuster')`,
       tenantId,
       YEAR,
       DAY,

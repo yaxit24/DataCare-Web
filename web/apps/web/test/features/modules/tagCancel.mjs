@@ -176,6 +176,20 @@ async function create(ctx, tags, { desc } = {}) {
   return { page, voucherNo: String(voucherNo) };
 }
 
+/**
+ * Wait until the Vch No box shows `expected`. The input has no aria-label attribute; it is named by
+ * `<label for>`, so resolve it through that association exactly as `getByLabel('Vch No')` does.
+ */
+async function waitForVoucherNo(page, expected) {
+  await page.waitForFunction((value) => {
+    const label = [...document.querySelectorAll('label')].find(
+      (candidate) => candidate.textContent?.trim() === 'Vch No',
+    );
+    const input = label?.htmlFor ? document.getElementById(label.htmlFor) : null;
+    return input instanceof HTMLInputElement && input.value === value;
+  }, expected);
+}
+
 async function reopen(page, voucherNo) {
   const box = page.getByLabel('Vch No', { exact: true });
   await box.fill(voucherNo);
@@ -521,10 +535,7 @@ export const tagCancel = {
         );
         try {
           const page = await open(ctx);
-          await page.waitForFunction(
-            (next) => document.querySelector('input[aria-label="Vch No"]')?.value === next,
-            expected,
-          );
+          await waitForVoucherNo(page, expected);
           assert.equal(await page.getByLabel('Vch No', { exact: true }).inputValue(), expected);
           return {
             observation: `TAG CANCEL displayed ${expected} despite unrelated MAIN_STOCK voucher 90000`,
