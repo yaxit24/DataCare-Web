@@ -214,8 +214,22 @@ export const tagCancel = {
           .locator('option')
           .evaluateAll((o) => o.map((x) => x.getAttribute('value')).filter(Boolean));
         assert.deepEqual(books, [BOOK]);
+        // MSG_CLEAR (TR_TAG_CAN.cs:2604-2629): the Tag Cancel grid has the labour columns and none of Stock Adjust's
+        // (Sign, TagLot, ItmLot, :2514-2566), although the three menus share the form.
+        const headers = (
+          await page.getByTestId('tag-cancel-grid').locator('thead th').allInnerTexts()
+        )
+          .map((t) => t.trim())
+          .filter(Boolean);
+        for (const h of ['LbrRate', 'LbrAmt', 'OthAmt', 'Mrp', 'KrCode'])
+          assert.ok(headers.includes(h), `Tag Cancel shows ${h}: ${headers}`);
+        for (const h of ['Sign', 'TagLot', 'ItmLot', 'TrfrItm'])
+          assert.ok(!headers.includes(h), `Tag Cancel hides ${h}`);
         await ctx.shot(page, 'entry');
-        return { observation: `books ${books.join(',')}`, expected: BOOK };
+        return {
+          observation: `books ${books.join(',')}; columns ${headers.join(' ')}`,
+          expected: BOOK,
+        };
       },
     ),
     notApplicable(

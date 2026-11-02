@@ -49,6 +49,13 @@
       "purpose": "Web handbook: stack, architecture, modules, engineering standards and testing."
     },
     {
+      "match": "docs/agent-prompts/lite/*.md",
+      "area": "Delivery method",
+      "kind": "agent prompts",
+      "status": "reference",
+      "purpose": "Prompt pack for independent agents that take one Lite menu each to done (generic method, report addendum, 22 menu prompts, launch bundles). Facts are generated from the menu catalog by build.py; the catalog and backlog stay the status authority."
+    },
+    {
       "match": "AGENTS.md",
       "area": "Documentation hub",
       "kind": "agent instructions",

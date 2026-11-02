@@ -7350,13 +7350,45 @@
     {
       "id": "N221",
       "status": "implemented-unverified",
-      "action": "The Ledger Report is the desktop RP_LEDR screen: the account summary (money=Σ(CR−DR), signed gold/silver fine, a negative net to Dr and a positive net to Cr, display-zero rows dropped unless With Zero), the per-voucher and per-ledger-key drill-down with a running Σ(Cr)−Σ(Dr) balance and its side, the voucher-summary gross Dr/Cr, the debit ageing with oldest-first FIFO over the 0-15..151+ buckets for money and the selected fine, totals, the selectors (view, account, dates, data type, With Zero, fine type), one primary Run action, and Print/PDF/Excel/CSV — all from one read-only resolver, keeping the account-in-path aliases.",
-      "parentLabels": "P1-core; L-report; T01-T18",
+      "action": "Stock Adjust is the desktop TR_TAG_CAN on a STOCK ADJUST book, as the Tag Cancel writer's third mode: the grid with the Sign column and the setting-driven TagLot and ItmLot columns with their helps, the desktop keys, the signed register, MAIN_STOCK I or O by sign, LOT_DETL for a lot, reopen, edit, delete and TagCanBill; the provisioned book becomes the desktop's STADJ out book numbered from BAR_CAN_DATA, with a data migration; the old separate writer is removed.",
+      "parentLabels": "P1-core; L3; T01-T18",
       "startAfter": [
         "N220"
       ],
-      "requiredProof": "Pure vectors for the sign split, the running balance and the FIFO ageing from desktop-derived scenarios; an HTTP/DB test of the four views, the exports, the refusals, the view-vs-print rights and a cross-tenant sentinel on forced RLS; the account-ledger feature module passes every applicable case; the route universe is 718.",
+      "requiredProof": "An HTTP/DB test of the book, rights, refusals, lifecycle, lots and a + tag line; the stock-adjust feature module passes every case and tag-cancel stays green; a Chrome DevTools keyboard, save, reopen, print and delete pass.",
       "gapIds": "G234",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/stock/tagCancel.ts",
+        "web/apps/api/src/modules/stock/tagCancelRows.ts",
+        "web/apps/api/src/modules/stock/stockAdjustLots.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/packages/db/prisma/migrations/20261101090000_stock_adjust_book/migration.sql",
+        "web/apps/web/components/TagCancelForm.tsx",
+        "web/apps/web/lib/tagCancelVoucher.ts",
+        "web/apps/web/app/(app)/txn/stock-adjust/page.tsx",
+        "web/apps/api/test/stockAdjust.routes.db.test.ts",
+        "web/apps/web/test/tagCancelVoucher.test.ts",
+        "web/apps/web/test/features/modules/stockAdjust.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Verified: stockAdjust.routes.db.test.ts 6/6, the Tag Cancel unit tests, routePolicy (719 routes), the stock-adjust feature module 18 of 18 applicable, tag-cancel unchanged, and a Chrome DevTools pass on the demo stack. Open: a replayed loose-line save makes a second voucher (no idempotency key); desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N222",
+      "status": "implemented-unverified",
+      "action": "The Ledger Report is the desktop RP_LEDR screen: the account summary (money=Σ(CR−DR), signed gold/silver fine, a negative net to Dr and a positive net to Cr, display-zero rows dropped unless With Zero), the per-voucher and per-ledger-key drill-down with a running Σ(Cr)−Σ(Dr) balance and its side, the voucher-summary gross Dr/Cr, the debit ageing with oldest-first FIFO over the 0-15..151+ buckets for money and the selected fine, totals, the selectors (view, account, dates, data type, With Zero, fine type), one primary Run action, and Print/PDF/Excel/CSV — all from one read-only resolver, keeping the account-in-path aliases.",
+      "parentLabels": "P1-core; L-report; T01-T18",
+      "startAfter": [
+        "N221"
+      ],
+      "requiredProof": "Pure vectors for the sign split, the running balance and the FIFO ageing from desktop-derived scenarios; an HTTP/DB test of the four views, the exports, the refusals, the view-vs-print rights and a cross-tenant sentinel on forced RLS; the account-ledger feature module passes every applicable case; the route universe is 724.",
+      "gapIds": "G235",
       "entryDefinition": "15-standard-edition-plan.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
@@ -7377,7 +7409,7 @@
         "web/apps/api/test/routePolicy.test.ts",
         "web/apps/web/test/features/modules/accountLedger.mjs"
       ],
-      "statusNote": "IMPLEMENTED, not accepted. The RP_LEDR account summary, voucher/detail drill-down, debit ageing and signed money/gold/silver balances are served read-only from accountLedgerReport.ts, with PDF/Excel/CSV from the same dataset and a dedicated page; the shared report-filter guard in app.ts exempts the account-ledger routes, whose selectors are typed. Local gates could not run in this environment (offline: pnpm/node_modules unavailable); CI's Real-stack browser journeys job must be green before merge. Open: the desktop's OP_LDR opening-ledger ageing union and the staging-table gold/silver fine prints (intentionally not reproduced), desktop-runtime comparison and parent acceptance."
+      "statusNote": "IMPLEMENTED, not accepted. The RP_LEDR account summary, voucher/detail drill-down, debit ageing and signed money/gold/silver balances are served read-only from accountLedgerReport.ts, with PDF/Excel/CSV from the same dataset and a dedicated page; the shared report-filter guard in app.ts exempts the account-ledger routes, whose selectors are typed. Quality, static-gates and the Real-stack browser journeys passed on the pre-merge candidate; the branch is re-running them after the latest main merge. Open: the desktop's OP_LDR opening-ledger ageing union and the staging-table gold/silver fine prints (intentionally not reproduced), desktop-runtime comparison and parent acceptance."
     }
   ],
   "amendments": [

@@ -189,6 +189,7 @@ import { getUserFormRights, setUserFormRights } from '../modules/rbac/formRights
 import { partyBalance } from '../modules/finance/partyBalance.js';
 import { bankReconList, bankReconClear } from '../modules/finance/bankRecon.js';
 import { registerDailyRateRoutes } from './dailyRate.js';
+import { stockAdjustLots } from '../modules/stock/stockAdjustLots.js';
 import { tagCancelBillHtml, TagCancelBillNotFoundError } from '../modules/stock/tagCancelBill.js';
 import {
   deleteDesignBook,
@@ -438,8 +439,6 @@ import {
   getItemLot,
   editItemLot,
   deleteItemLot,
-  stockAdjust,
-  deleteStockAdjust,
   counterTransfer,
   deleteCounterTransfer,
   StockVoucherValidationError,
@@ -5227,24 +5226,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
-  app.post('/stock/adjust', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      stockAdjust(prisma, { scope: scopeOf(req), vchDate: b.vchDate, lines: b.lines ?? [] }),
-    );
-  });
-  app.delete('/stock/adjust/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
-      deleteStockAdjust(prisma, {
-        scope: scopeOf(req),
-        vchNo: (req.params as any).vchNo,
-      }),
-    );
-  });
-  // Tag Cancel (X19) and Tag Transfer (X18): desktop TR_TAG_CAN on a TAG CANCEL / TAG TRFR book. One writer
-  // (modules/stock/tagCancel.ts), one route family per menu, so each keeps its own form right.
+  // Tag Cancel (X19), Tag Transfer (X18), Stock Adjust: TR_TAG_CAN on a TAG CANCEL / TAG TRFR / STOCK ADJUST book.
+  // One writer (modules/stock/tagCancel.ts), one route family per menu, so each keeps its own form right.
   const tagCancelInput = (req: FastifyRequest, b = body(req)) => ({
     scope: scopeOf(req),
     vchDate: b.vchDate,
@@ -5306,31 +5289,48 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.post('/stock/tag-cancel', auth, tagCancelRoute.create);
   app.put('/stock/tag-cancel/:vchNo', auth, tagCancelRoute.update);
   app.delete('/stock/tag-cancel/:vchNo', auth, tagCancelRoute.remove);
-  // TagCanBill (TR_TAG_CAN.cs:5386-5440): print rights are required (:5390-5393).
-  app.get('/stock/tag-cancel/:vchNo/print', auth, async (req, reply) => {
-    if (!guard(req, reply, 'print')) return;
-    const q = req.query as any;
-    const copyLabel = standardDocumentCopy(q.copy, reply);
-    if (copyLabel === null) return reply;
-    try {
-      const html = await tagCancelBillHtml(
-        prisma,
-        readScope(req),
-        (req.params as any).vchNo,
-        copyLabel,
-      );
-      return sendVoucherDocument(reply, html, {
-        format: q.format,
-        filename: `tag-cancel-${(req.params as any).vchNo}`,
-      });
-    } catch (e: any) {
-      if (e instanceof TagCancelBillNotFoundError)
-        return reply.code(404).send({ error: e.code, message: e.message });
-      if (/(ValidationError|NumberingConfigurationError)$/.test(e?.name ?? ''))
-        return reply.code(400).send({ error: e.name, message: e.message });
-      throw e;
-    }
+  // TagCanBill (TR_TAG_CAN.cs:5386-5440) needs the print right (:5390-5393); each menu keeps its own print right.
+  const tagCancelPrint =
+    (filenamePrefix: string) => async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!guard(req, reply, 'print')) return;
+      const q = req.query as any;
+      const copyLabel = standardDocumentCopy(q.copy, reply);
+      if (copyLabel === null) return reply;
+      try {
+        const html = await tagCancelBillHtml(
+          prisma,
+          readScope(req),
+          (req.params as any).vchNo,
+          copyLabel,
+        );
+        return sendVoucherDocument(reply, html, {
+          format: q.format,
+          filename: `${filenamePrefix}-${(req.params as any).vchNo}`,
+        });
+      } catch (e: any) {
+        if (e instanceof TagCancelBillNotFoundError)
+          return reply.code(404).send({ error: e.code, message: e.message });
+        if (/(ValidationError|NumberingConfigurationError)$/.test(e?.name ?? ''))
+          return reply.code(400).send({ error: e.name, message: e.message });
+        throw e;
+      }
+    };
+  app.get('/stock/tag-cancel/:vchNo/print', auth, tagCancelPrint('tag-cancel'));
+  // Stock Adjust (MDI_FORM.cs:8616-8627): TR_TAG_CAN on a STOCK ADJUST book, with the Sign column.
+  const stockAdjustRoute = tagCancelHandlers('adjust');
+  app.get('/stock/stock-adjust', auth, stockAdjustRoute.list);
+  app.get('/stock/stock-adjust/source', auth, stockAdjustRoute.source);
+  // The TagLot / ItmLot helps (TR_TAG_CAN.cs:4089-4188), shown with Purchase LOT / Item With LOT Stock.
+  app.get('/stock/stock-adjust/lots', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    const q = (req.query ?? {}) as Record<string, string | undefined>;
+    return run(reply, 200, () => stockAdjustLots(prisma, scopeOf(req), q.kind, q.q, q.limit));
   });
+  app.get('/stock/stock-adjust/:vchNo', auth, stockAdjustRoute.read);
+  app.post('/stock/stock-adjust', auth, stockAdjustRoute.create);
+  app.put('/stock/stock-adjust/:vchNo', auth, stockAdjustRoute.update);
+  app.delete('/stock/stock-adjust/:vchNo', auth, stockAdjustRoute.remove);
+  app.get('/stock/stock-adjust/:vchNo/print', auth, tagCancelPrint('stock-adjust'));
   app.post('/stock/counter-transfer', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
     const b = body(req);

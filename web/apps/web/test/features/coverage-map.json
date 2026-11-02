@@ -193,6 +193,12 @@
         "web/apps/api/src/routes/wholesaleSale.ts"
       ]
     },
+    "stockAdjust": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/stock-adjust/page.tsx",
+        "web/apps/api/src/modules/stock/stockAdjustLots.ts"
+      ]
+    },
     "accountLedger": {
       "covers": [
         "web/apps/web/app/(app)/reports/account-ledger/page.tsx",

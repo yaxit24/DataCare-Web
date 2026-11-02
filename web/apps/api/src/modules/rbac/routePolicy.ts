@@ -551,7 +551,17 @@ route('Inventory/Lot Management', [
   'PUT /stock/item-lot/:vchNo',
   'DELETE /stock/item-lot/:vchNo',
 ]);
-route('Inventory/Stock Adjust', ['POST /stock/adjust', 'DELETE /stock/adjust/:vchNo']);
+// Stock Adjust (N221): TR_TAG_CAN on a STOCK ADJUST book (MDI_FORM.cs:8616-8627), the Tag Cancel writer's third mode.
+route('Inventory/Stock Adjust', [
+  'GET /stock/stock-adjust',
+  'GET /stock/stock-adjust/source',
+  'GET /stock/stock-adjust/lots',
+  'GET /stock/stock-adjust/:vchNo',
+  'POST /stock/stock-adjust',
+  'PUT /stock/stock-adjust/:vchNo',
+  'DELETE /stock/stock-adjust/:vchNo',
+  'GET /stock/stock-adjust/:vchNo/print',
+]);
 // TR_TAG_CAN in its two menus (N18): each keeps its own form right, as the desktop menus check their own.
 route('Inventory/Tag Transfer', [
   'GET /stock/tag-transfer',
@@ -1040,6 +1050,7 @@ const PRINT_ROUTES = new Set([
   'GET /daily-rate/print',
   // TR_TAG_CAN.cs:5390-5393: TagCanBill needs print rights.
   'GET /stock/tag-cancel/:vchNo/print',
+  'GET /stock/stock-adjust/:vchNo/print',
 ]);
 
 const UPDATE_POST_ROUTES = new Set([
