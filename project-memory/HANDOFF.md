@@ -1,3 +1,11 @@
+## 2026-11-02 — Data Refresh PR-1 milestone (branch `feat/lite-data-refresh`)
+
+- The operator screen now has the six `MS_UPDATE` captions in desktop tab order. Ctrl+O/vendor, Mfg and Scheme controls are absent. Approval Adj is the only full writer: it reconciles APR ISU consumption from APR RTN, SALES, WH SALES and RATE CUT, then updates only `APR_DETL.ISU_REC` and `BAR_DETL.APR_ISU` in one audited transaction.
+- Account and Stock report exact proven partial anomalies but refuse full Apply because their builder graphs are unproved. Account hashes complete ordered candidate identities and stored/expected values independently of bounded display samples. Field Update and Old Field are classification-pending. Image Data classifies the committed `TAG_IMAGE_DATA` architecture and performs no runtime DDL or byte copy. All five preview-only operations publish neutral apply-authority metadata, and server refusal still occurs before a transaction.
+- Approval Adj matches issue year/book/voucher references with SQL Server-compatible trailing-space equality while preserving exact numeric serial matching. The four padded source fixtures prove APR RTN, SALES, WH SALES and RATE CUT are consumed and `BAR_DETL.APR_ISU` remains the inverse. T17 now proves native operation order plus operation → preview heading → Apply → originating operation focus; browser execution remains pending while dependencies are unavailable.
+- Frozen `data-refresh` T01-T18 matrix: 22 cases, 2 N/A (T04/T05), 8 blocked (T11 G225 Print-right handoff, T12 save/apply synchronization, T14 browser fault injection, and five T18 full Account/Stock, Field/Old Field, and Image continuations). Seven product/evidence gaps are baselined so generated progress does not report green. Browser execution is pending because dependencies are unavailable in this sandbox; desktop match remains 0%. Catalog stays PARTIAL; P11-01/X27/X06/N26 and G225 remain open.
+- Next: PR-2 statement-by-statement Field Update/Old Field classification, complete Account/Stock builder proof, Image migration semantics, and the active-owned Data Refresh caption Print-right handoff.
+
 ## 2026-11-02 — Tag Cancel closure milestone 1 (N210 / G223)
 
 - Tag Cancel remains PARTIAL and N210 remains implemented-unverified. The browser matrix now freezes 16 executable
