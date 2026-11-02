@@ -245,6 +245,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G232 | High | Auto Item reversed the desktop's item code, offered the default products and had no group help, grid keys, MinStk, rights or most columns | `unified/src/csharp/DataCareNext/MS_AUTO_ITEM.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7640-7649` | `web/apps/web/app/(app)/masters/auto-item/page.tsx`; `web/apps/api/src/modules/masters/autoItem.ts`; `web/apps/api/src/routes/txn.ts` | MS_AUTO_ITEM's AutoItem mode lists the company's products but the default ones for a group chosen from its help, marks the ones the group already has, and makes PR_CODE + GR_CODE items named product name + group code with the desktop's columns, under the edit right (`MS_AUTO_ITEM.cs:1640-3493`). The web made GR_CODE + PR_CODE items named group + product, wrote eight columns, offered every product including the default ones, and had no group help, grid keys, MinStk, rights or Print and Delete checks. | N219 |
 | G233 | High | Wh Sales saved what TR_WH_SALE refuses, and had no print | `unified/src/csharp/DataCareNext/TR_WH_SALE.cs:12779-12896`, `:13553-13592`, `:13654-13800`; `unified/src/csharp/DataCareNext/TR_TOUR_SALE.cs:10585-10690` | `web/apps/api/src/modules/sales/rateCut.ts`; `web/apps/web/components/WholesaleVoucherForm.tsx` | TR_WH_SALE refuses a save for a defaulter party left owing, a missing mandatory employee, a new voucher in a type-B company, a cheque or card amount without its bank account, a date outside the year, a date on or before the lock date and a grid row with weight or value but no item code, each with its own text, before it writes. The web saved every one of them: a cheque without a bank posted to the cash slot, an item-less receive row posted as received fine, and the lock date was refused with web wording. The delete asked a web question and Print (WhSalesBill) did not exist. | N220 |
 | G234 | High | Stock Adjust was a separate writer citing a desktop form that does not exist, posting stock rows the desktop never writes, with no register, sign rule, lot columns, reopen or print | `unified/src/csharp/DataCareNext/TR_TAG_CAN.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:8616-8627`; `unified/src/csharp/DataCareNext/Ac_Stock.cs:48-58`; `unified/src/csharp/DataCareNext/MS_UPDATE.cs:24207` | `web/apps/web/app/(app)/txn/stock-adjust/page.tsx`; `web/apps/api/src/modules/stock/stock.ts`; `web/apps/api/src/modules/ops/seedCompany.ts` | The Stock Adjust menu opens TR_TAG_CAN on a STOCK ADJUST book: the Tag Cancel grid with a + / - Sign column and optional lot columns, a signed register, MAIN_STOCK rows in or out by sign, LOT_DETL rows for a lot, reopen, edit, delete and TagCanBill (`TR_TAG_CAN.cs:2514-5440`, `Ac_Stock.cs:53`, `:642-646`). The web had its own writer that cited a form TR_STK_ADJ, posted MAIN_STOCK rows with VCH_TYPE STADJ, BOOK_NAME STOCK ADJ and TR_TYPE A and no register, so nothing could be reopened or printed; and it provisioned the book as an in book with its code as the short name. | N221 |
+| G235 | High | The Ledger Report was a single-account money statement with the wrong balance sign and none of the desktop's summary, drill-down, ageing or metal columns | `unified/src/csharp/DataCareNext/RP_LEDR.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:8871-8880` | `web/apps/api/src/modules/accounting/accounting.ts`; `web/apps/web/app/(app)/reports/[report]/page.tsx` | RP_LEDR is an account-summary screen (DGV_AC) that drills into a per-voucher or per-ledger-key detail (DGV_VCH/DGV_DETL) and a debit-ageing view (DGV_MONTH), reporting money AND signed gold/silver fine. The summary nets money as Σ(CR−DR), gold/silver as signed fine, splits a negative net to Dr and a positive net to Cr, and drops display-zero rows unless With Zero; detail keeps a running Σ(Cr)−Σ(Dr) balance with its side; voucher summary keeps gross Dr/Cr; ageing consumes the oldest debit first (`RP_LEDR.cs:6408-6435,6862-7266,7694-8205,9514-10314`). The web answered only `/reports/account-ledger/:acCode` with a money statement whose running balance used DR−CR (the opposite sign) and had no summary, drill-down, ageing, metal columns, selectors or Excel/CSV export. | N223 |
 
 ## 4. Decisions D23–D28
 
@@ -2962,6 +2963,48 @@ KR_FINE 9.350 and DT2's wastage to 1.5 with KR_FINE 4.655; RG with G22 again ask
 group and Yes cleared the code and name; a typed CHG22 was refused on leave; Print did nothing; RGG22 was deleted after
 the question; Esc left the screen. Desktop-runtime comparison and parent acceptance remain open.
 
+### N223 — The Ledger Report is the desktop RP_LEDR screen (G235, Lite L-report)
+
+Report → Ledger Report opens RP_LEDR (`MDI_FORM.cs:8871-8880`). The desktop form is an account-summary screen first and a
+drill-down second. The summary grid (DGV_AC, `AcSumm` `RP_LEDR.cs:6403-6435`) lists one row per account with a money
+balance of Σ(CR_AMT−DR_AMT), a gold balance of the signed FINE_WT where IT_TYPE='G' (SIGN '+' adds, any other sign
+subtracts) and the same for silver; a negative net shows as an absolute Dr column and a positive net as an absolute Cr
+column (`:6408,6417,6426`). The nonzero mode drops a row whose displayed components are all zero; With Zero keeps it; the
+opening-only mode balances before the company opening date (`:6415-6433`). Double-clicking an account drills into its
+ledger detail (DGV_DETL, `DGV_DETL_FILL` `:6862-7266`): an opening balance strictly before the From date, the inclusive
+period's rows netted per book/voucher/ledger-key then split into Dr/Cr, and a running Σ(Cr)−Σ(Dr) balance labelled
+Cr (positive), Dr (negative) or blank (`:6989-7160`). The voucher-summary variant (DGV_VCH, `:7694-8205`) keeps gross
+Dr/Cr and gross +/- fine per complete voucher. The time-wise view (DGV_MONTH, `TimeLedr_Dr` `:9514-10314`) ages each
+account's debit into the buckets 0-15, 16-30, 31-45, 46-60, 61-90, 91-120, 121-150 and 151+, consuming the oldest debit
+first with the account's total credit, for money and the selected fine independently. The desktop prints the summary and
+the selected account and exports the active grid to Excel.
+
+The web now serves all of this from one read-only resolver. `web/apps/api/src/modules/reports/accountLedgerReport.ts`
+answers the four views (summary, detail, voucher-summary, ageing) with the desktop sign conventions and totals; the route
+plugin `web/apps/api/src/routes/accountLedger.ts` exposes the canonical screen `GET /reports/account-ledger`
+(view/acCode/from/to/dataType/withZero/fineType selectors) and its `export.pdf`, `export.xlsx` and `export.csv`, all from
+the same dataset, keeping the two account-in-path aliases so the earlier screen and its PDF keep working. The dedicated
+page `web/apps/web/app/(app)/reports/account-ledger/page.tsx` (with `useAccountLedger.ts` and `AccountLedgerGrid.tsx`)
+offers the selectors, the account lookup, one primary Run action, the account summary and drill-down grids with their
+totals, debit ageing, and Print/PDF/Excel/CSV, with Enter running and Esc leaving a drill-down back to the summary.
+
+Deliberate differences: the balance sign is the desktop's Σ(CR−DR) (the old web statement used DR−CR); the zero test is
+numeric at display precision, not a comparison of SQL FORMAT strings; the four views have stable tie-break ordering the
+desktop lacks (account code for the summary; book, voucher and row for the drill-down); the youngest ageing bucket is
+bounded by the as-of date and ageing is scoped to the requested location, fixing two desktop defects (future-dated rows
+leaking into 0-15, and the OP_LDR presence test using a different location); the desktop's OP_LDR opening-ledger union and
+its staging-table gold/silver fine PRINTS (which DELETE and repopulate a shared table) are not reproduced, because an
+unscoped staging write is unsafe in a multi-tenant web app.
+
+Evidence: `accountLedgerReport.test.ts` (pure vectors for the sign split, the running balance and the FIFO ageing from the
+desktop-derived scenarios, and the query parser's refusals) and `accountLedgerReport.db.test.ts` (through the real routes
+on forced RLS: the summary sign split and zero-row drop, With Zero, the voucher-summary gross netting with aggregated
+remarks, the detail opening and running balance, the FIFO ageing, the PDF/Excel/CSV exports, the account-in-path alias,
+the invalid-request and missing-account refusals, the view-vs-print rights, and a same-number sentinel in another tenant
+untouched). `routePolicy.test.ts` carries the four new routes (720 → 724). The zero-mock `account-ledger` feature module
+covers T01, T03-T06, T11, T15-T18, with T02 and the write groups T07-T10/T12-T14 marked not-applicable with reasons
+(a read-only report). Desktop-runtime comparison and parent acceptance remain open.
+
 ### N219 — Auto Item is the desktop MS_AUTO_ITEM screen in its AutoItem mode (G232, Lite L2)
 
 Master → AutoItem opens MS_AUTO_ITEM with the menu caption as its mode (`MDI_FORM.cs:7640-7649`); the Labour Disc,
@@ -3288,6 +3331,7 @@ comparison and parent acceptance remain open.
 | N220 | — | implemented-unverified, evidence in this change (G233: Wh Sales refuses as TR_WH_SALE does — defaulter, employee, type B, cheque/card bank, year, lock date, item code — with no partial write; the delete asks the desktop question; WhSalesBill prints behind the print right) |
 | N221 | — | implemented-unverified, evidence in this change (G234: Stock Adjust is TR_TAG_CAN on a STOCK ADJUST book with the Sign column, the signed register, I and O stock rows, the lot columns and LOT_DETL, reopen, edit, delete and TagCanBill) |
 | N222 | — | implemented-unverified, evidence in this change (G206 part: UPI tender rows stored in UPI_DATA, posted on legs 12/13 and Rojmel 08, included in ADV_AMT, editable and deletable; old metal and scheme stay open) |
+| N223 | — | implemented-unverified, evidence in this change (G235: the Ledger Report is RP_LEDR with its account summary, voucher/detail drill-down, debit ageing, signed money/gold/silver balances, totals, selectors and PDF/Excel/CSV, from one read-only resolver) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

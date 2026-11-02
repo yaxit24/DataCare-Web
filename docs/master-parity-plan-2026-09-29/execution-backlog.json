@@ -7422,6 +7422,38 @@
         "web/apps/web/test/features/modules/salesOrder.mjs"
       ],
       "statusNote": "IMPLEMENTED (UPI), not accepted. The UPI DB test passes (red before this change), the order-related API tests pass (22 files, 272), and the sales-order module passes 27 of 30 (the three UPI cases pass; old metal and scheme stay baselined under G206; two cases blocked as before). Open: old gold, old silver and scheme tenders; desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N223",
+      "status": "implemented-unverified",
+      "action": "The Ledger Report is the desktop RP_LEDR screen: the account summary (money=Σ(CR−DR), signed gold/silver fine, a negative net to Dr and a positive net to Cr, display-zero rows dropped unless With Zero), the per-voucher and per-ledger-key drill-down with a running Σ(Cr)−Σ(Dr) balance and its side, the voucher-summary gross Dr/Cr, the debit ageing with oldest-first FIFO over the 0-15..151+ buckets for money and the selected fine, totals, the selectors (view, account, dates, data type, With Zero, fine type), one primary Run action, and Print/PDF/Excel/CSV — all from one read-only resolver, keeping the account-in-path aliases.",
+      "parentLabels": "P1-core; L-report; T01-T18",
+      "startAfter": [
+        "N222"
+      ],
+      "requiredProof": "Pure vectors for the sign split, the running balance and the FIFO ageing from desktop-derived scenarios; an HTTP/DB test of the four views, the exports, the refusals, the view-vs-print rights and a cross-tenant sentinel on forced RLS; the account-ledger feature module passes every applicable case; the route universe is 724.",
+      "gapIds": "G235",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/reports/accountLedgerReport.ts",
+        "web/apps/api/src/routes/accountLedger.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/api/src/app.ts",
+        "web/apps/web/app/(app)/reports/account-ledger/page.tsx",
+        "web/apps/web/app/(app)/reports/account-ledger/useAccountLedger.ts",
+        "web/apps/web/app/(app)/reports/account-ledger/AccountLedgerGrid.tsx",
+        "web/apps/web/app/(app)/reports/account-ledger/types.ts",
+        "web/apps/api/test/accountLedgerReport.test.ts",
+        "web/apps/api/test/accountLedgerReport.db.test.ts",
+        "web/apps/api/test/routePolicy.test.ts",
+        "web/apps/web/test/features/modules/accountLedger.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. The RP_LEDR account summary, voucher/detail drill-down, debit ageing and signed money/gold/silver balances are served read-only from accountLedgerReport.ts, with PDF/Excel/CSV from the same dataset and a dedicated page; the shared report-filter guard in app.ts exempts the account-ledger routes, whose selectors are typed. Quality, static-gates and the Real-stack browser journeys passed after each functional fix and before this latest main merge. Open: the desktop's OP_LDR opening-ledger ageing union and the staging-table gold/silver fine prints (intentionally not reproduced), desktop-runtime comparison and parent acceptance."
     }
   ],
   "amendments": [
