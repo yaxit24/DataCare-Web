@@ -23,6 +23,7 @@ import {
   type SalesOrderDesignOption,
   salesOrderItemAmount,
 } from '@datacare/core';
+import { hydrateOldMetal, oldMetalPayload, type OldMetalRow } from './salesOrderOldMetal';
 
 export { extendedHeaderFields, extendedRowFields };
 export const salesOrderQuery = tourOrderQuery;
@@ -441,6 +442,7 @@ export function hydrateSalesOrder(document: Record<string, any>) {
     header,
     rows,
     upiRows,
+    oldMetalRows: hydrateOldMetal(document.oldMetalRows),
   };
 }
 
@@ -477,6 +479,7 @@ export function salesOrderPayload(
   original?: Record<string, any>,
   dirtyFields: readonly string[] = [],
   upiRows: readonly UpiRow[] = [],
+  oldMetalRows: readonly OldMetalRow[] = [],
 ) {
   validateSalesOrderDate(f.vchDate);
   // A saved parent with a cleared item code is an invalid edit, not an implicit row deletion.
@@ -506,6 +509,10 @@ export function salesOrderPayload(
       amount: raw ? Number(raw) : 0,
     };
   });
+  // G206: every grid row is sent so the Sr numbering holds; the totals (OLD_GL*) are the grid's, not the header's.
+  calculated.oldMetalRows = oldMetalPayload(oldMetalRows);
+  for (const field of ['oldGoldFine', 'oldGoldAmount', 'oldSilverFine', 'oldSilverAmount'])
+    delete calculated[field];
   const keptRows = rows.filter((row) => row.itCode.trim());
   for (const [index, line] of (calculated.lines as Record<string, any>[]).entries()) {
     const row = keptRows[index]!;

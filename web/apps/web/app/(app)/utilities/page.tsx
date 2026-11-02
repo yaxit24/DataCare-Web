@@ -17,11 +17,6 @@ const UTILITIES: Utility[] = [
     desc: 'Company settings — GST, interest, cash-limit, SMS templates & printing.',
   },
   {
-    title: 'Backup',
-    href: '/backup',
-    desc: 'Create and download database backups for safekeeping.',
-  },
-  {
     title: 'Audit Log',
     href: '/audit',
     desc: 'Review user activity and a trail of system changes.',

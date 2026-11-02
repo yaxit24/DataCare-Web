@@ -101,7 +101,11 @@
         "web/apps/api/src/modules/sales/salesOrder.ts",
         "web/apps/api/src/modules/sales/orderDoc.ts",
         "web/apps/api/src/modules/sales/salesOrderTender.ts",
-        "web/apps/web/components/SalesOrderUpiGrid.tsx"
+        "web/apps/api/src/modules/sales/salesOrderOldMetal.ts",
+        "web/apps/api/src/modules/sales/orderLifecyclePolicy.ts",
+        "web/apps/web/components/SalesOrderUpiGrid.tsx",
+        "web/apps/web/components/SalesOrderOldMetalGrid.tsx",
+        "web/apps/web/lib/salesOrderOldMetal.ts"
       ]
     },
     "partyOpening": {
@@ -232,6 +236,19 @@
       "covers": [
         "web/apps/web/app/(app)/txn/stock-adjust/page.tsx",
         "web/apps/api/src/modules/stock/stockAdjustLots.ts"
+      ]
+    },
+    "dataBackup": {
+      "covers": [
+        "web/apps/web/app/(app)/backup/page.tsx",
+        "web/apps/web/app/(app)/utilities/page.tsx",
+        "web/apps/web/lib/nav.ts",
+        "web/apps/web/lib/api.ts",
+        "web/apps/api/src/app.ts",
+        "web/apps/api/src/modules/ops/backup.ts",
+        "web/apps/api/src/modules/ops/backupManifest.ts",
+        "web/apps/api/src/modules/ops/backupDownload.ts",
+        "web/apps/api/src/modules/ops/backupFilename.ts"
       ]
     },
     "accountLedger": {

@@ -44,6 +44,7 @@ import { tagPrint } from './modules/tagPrint.mjs';
 import { itemMaster } from './modules/itemMaster.mjs';
 import { wholesaleSale } from './modules/wholesaleSale.mjs';
 import { accountLedger } from './modules/accountLedger.mjs';
+import { dataBackup } from './modules/dataBackup.mjs';
 import { gstReport } from './modules/gstReport.mjs';
 import { runSurface } from './surface/runner.mjs';
 
@@ -90,6 +91,7 @@ const MODULES = [
   itemMaster,
   wholesaleSale,
   accountLedger,
+  dataBackup,
   gstReport,
 ];
 
