@@ -1420,11 +1420,18 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
   // adjustment, delivery/function dates, the party address block and 40 further grid columns on the
   // line (TR_SALE_ORD.cs:9120-9161 header, 9205-9306 detail).
   it('persists every desktop sales-order header and line column', async () => {
+    // G206: a Sales Order's UPI_AMT is the total of its UPI rows (TR_SALE_ORD.cs:3698-3711), whose account is checked.
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME") VALUES ($1,$2,$3,'UPIAC','Lifecycle UPI')`,
+      TENANT,
+      CO,
+      LC,
+    );
     const created = await createSalesOrder(
       runtime,
       orderInput({
         taxCode: 'G3',
-        upiAmount: 250.5,
+        upiRows: [{ upiAc: 'UPIAC', upiType: 'GPAY', upiId: 'LIFE-UPI-1', amount: 250.5 }],
         bankAc: 'BANKAC',
         chequeNo: 'CHQ-42',
         bankName: 'Union Bank',
