@@ -4,9 +4,9 @@
   "defaultCap": 1500,
   "ceilings": {
     "apps/api/src/routes/txn.ts": 8360,
-    "apps/api/src/modules/sales/rateCut.ts": 2909,
     "apps/api/src/modules/purchase/purchase.ts": 2908,
     "apps/api/src/modules/sales/sales.ts": 2865,
+    "apps/api/src/modules/sales/rateCut.ts": 2732,
     "apps/api/src/modules/sales/salesOrder.ts": 2354,
     "apps/api/src/modules/membership/scheme.ts": 2205,
     "apps/api/src/modules/posting/desktopColumnDefaults.ts": 2010,
