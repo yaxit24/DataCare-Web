@@ -442,13 +442,15 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
   it('stores whole-rupee Purchase components and preserves a 0.40 line adjunct downstream', async () => {
     await owner.$executeRawUnsafe(
       `UPDATE "CO_SET"
-          SET "PR_AMT_TYPE"='F',"TAX_ROF"=2,"LBR_ROF"=2,"TOT_AMT_ROF"=0
+          SET "PR_AMT_TYPE"='F',"TAX_ROF"=2,"LBR_ROF"=2
         WHERE tenant_id=$1 AND "CO_CODE"=$2`,
       TENANT,
       CO,
     );
     await owner.$executeRawUnsafe(
-      `UPDATE "CO_SET_NEW" SET "LBR_WITH_GHT"='Y' WHERE tenant_id=$1 AND "CO_CODE"=$2`,
+      `UPDATE "CO_SET_NEW"
+          SET "TOT_AMT_ROF"=0,"LBR_WITH_GHT"='Y'
+        WHERE tenant_id=$1 AND "CO_CODE"=$2`,
       TENANT,
       CO,
     );

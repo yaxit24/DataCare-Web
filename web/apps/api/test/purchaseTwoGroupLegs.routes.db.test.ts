@@ -187,7 +187,7 @@ const SILVER = { itCode: 'SLV01', pcs: 3, grossWt: 100.4, netWt: 100, touch: 92.
 
   it('T09 edit: re-pricing the silver line moves only its leg, the tax and the party leg', async () => {
     const vchNo = await create(purchase([GOLD, SILVER]));
-    // Silver rate 80 → 85: 92.5 × 85 = 7,862.50; taxable 121,698.50; GST 3% = 3,650.955 → 3,650.96; total 125,349.46.
+    // Silver rate 80 → 85: desktop midpoint-even whole-rupee item stage makes 92.5 × 85 = 7,862; taxable 121,698; GST 3% = 3,650.94; total 125,348.94.
     const { version } = (await call('GET', `/purchases/${vchNo}?coBook=${BOOK}`)).json();
     const edited = await call('PUT', `/purchases/${vchNo}`, {
       ...purchase([GOLD, { ...SILVER, rate: 85 }]),
@@ -195,10 +195,10 @@ const SILVER = { itCode: 'SLV01', pcs: 3, grossWt: 100.4, netWt: 100, touch: 92.
     });
     expect(edited.statusCode, edited.body).toBe(200);
     expect((await ledger(vchNo)).map((r) => [r.tail, r.ac, r.dr, r.cr])).toEqual([
-      ['01', 'SUPL', 0, 125349.46],
-      ['06', 'GSTINPUT', 3650.96, 0],
+      ['01', 'SUPL', 0, 125348.94],
+      ['06', 'GSTINPUT', 3650.94, 0],
       ['         103', 'PURCHASE', 113836, 0],
-      ['         203', 'SLVPURC', 7862.5, 0],
+      ['         203', 'SLVPURC', 7862, 0],
     ]);
   });
 

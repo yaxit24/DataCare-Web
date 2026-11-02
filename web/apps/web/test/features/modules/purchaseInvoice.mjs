@@ -394,12 +394,21 @@ export const purchaseInvoice = {
       'mutation',
       'N188/G198: TR_PURC.cs:7395-7554,12981-13010,13127-13144,15477-15508; whole item/labour, company header and tax precision',
       async (ctx) => {
-        const [before] = await ctx.rows(
-          `SELECT "PR_AMT_TYPE" amount_type,"TOT_AMT_ROF" total_rounding,"TAX_ROF" tax_rounding
+        const [beforeCoSet] = await ctx.rows(
+          `SELECT "PR_AMT_TYPE" amount_type,"TAX_ROF" tax_rounding
              FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
         );
+        const [beforeCoSetNew] = await ctx.rows(
+          `SELECT "TOT_AMT_ROF" total_rounding
+             FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        );
         await ctx.owner.$executeRawUnsafe(
-          `UPDATE "CO_SET" SET "PR_AMT_TYPE"='F',"TOT_AMT_ROF"=0,"TAX_ROF"=2
+          `UPDATE "CO_SET" SET "PR_AMT_TYPE"='F',"TAX_ROF"=2
+            WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+          TENANT,
+        );
+        await ctx.owner.$executeRawUnsafe(
+          `UPDATE "CO_SET_NEW" SET "TOT_AMT_ROF"=0
             WHERE tenant_id=$1 AND "CO_CODE"='01'`,
           TENANT,
         );
@@ -494,14 +503,21 @@ export const purchaseInvoice = {
             downstream: { register: reg, balanced: true },
           };
         } finally {
-          await ctx.owner.$executeRawUnsafe(
-            `UPDATE "CO_SET" SET "PR_AMT_TYPE"=$2,"TOT_AMT_ROF"=$3,"TAX_ROF"=$4
-              WHERE tenant_id=$1 AND "CO_CODE"='01'`,
-            TENANT,
-            before.amount_type,
-            before.total_rounding,
-            before.tax_rounding,
-          );
+          await Promise.all([
+            ctx.owner.$executeRawUnsafe(
+              `UPDATE "CO_SET" SET "PR_AMT_TYPE"=$2,"TAX_ROF"=$3
+                WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+              TENANT,
+              beforeCoSet.amount_type,
+              beforeCoSet.tax_rounding,
+            ),
+            ctx.owner.$executeRawUnsafe(
+              `UPDATE "CO_SET_NEW" SET "TOT_AMT_ROF"=$2
+                WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+              TENANT,
+              beforeCoSetNew.total_rounding,
+            ),
+          ]);
         }
       },
     ),
@@ -512,12 +528,21 @@ export const purchaseInvoice = {
       'mutation',
       'N188/G198: loaded PR_AMT_TYPE=G drives real UI preview and RATE_TYPE P/1/K persists across reload',
       async (ctx) => {
-        const [beforeSettings] = await ctx.rows(
-          `SELECT "PR_AMT_TYPE" amount_type,"TOT_AMT_ROF" total_rounding,"TAX_ROF" tax_rounding
+        const [beforeCoSet] = await ctx.rows(
+          `SELECT "PR_AMT_TYPE" amount_type,"TAX_ROF" tax_rounding
              FROM "CO_SET" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
         );
+        const [beforeCoSetNew] = await ctx.rows(
+          `SELECT "TOT_AMT_ROF" total_rounding
+             FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        );
         await ctx.owner.$executeRawUnsafe(
-          `UPDATE "CO_SET" SET "PR_AMT_TYPE"='G',"TOT_AMT_ROF"=2,"TAX_ROF"=2
+          `UPDATE "CO_SET" SET "PR_AMT_TYPE"='G',"TAX_ROF"=2
+            WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+          TENANT,
+        );
+        await ctx.owner.$executeRawUnsafe(
+          `UPDATE "CO_SET_NEW" SET "TOT_AMT_ROF"=2
             WHERE tenant_id=$1 AND "CO_CODE"='01'`,
           TENANT,
         );
@@ -585,14 +610,21 @@ export const purchaseInvoice = {
             downstream: { identical: true },
           };
         } finally {
-          await ctx.owner.$executeRawUnsafe(
-            `UPDATE "CO_SET" SET "PR_AMT_TYPE"=$2,"TOT_AMT_ROF"=$3,"TAX_ROF"=$4
-              WHERE tenant_id=$1 AND "CO_CODE"='01'`,
-            TENANT,
-            beforeSettings.amount_type,
-            beforeSettings.total_rounding,
-            beforeSettings.tax_rounding,
-          );
+          await Promise.all([
+            ctx.owner.$executeRawUnsafe(
+              `UPDATE "CO_SET" SET "PR_AMT_TYPE"=$2,"TAX_ROF"=$3
+                WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+              TENANT,
+              beforeCoSet.amount_type,
+              beforeCoSet.tax_rounding,
+            ),
+            ctx.owner.$executeRawUnsafe(
+              `UPDATE "CO_SET_NEW" SET "TOT_AMT_ROF"=$2
+                WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+              TENANT,
+              beforeCoSetNew.total_rounding,
+            ),
+          ]);
         }
       },
     ),
