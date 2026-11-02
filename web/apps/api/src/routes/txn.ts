@@ -257,8 +257,7 @@ import { registerTaxMasterRoutes } from './taxMaster.js';
 import { registerAutoItemRoutes } from './autoItem.js';
 import { registerGroupMasterRoutes } from './groupMaster.js';
 import { registerProductMasterRoutes } from './productMaster.js';
-import { registerAddressMasterRoutes } from './addressMaster.js';
-import { registerItemMasterRoutes } from './itemMaster.js';
+import { registerMasterScreenRoutes } from './masterScreens.js';
 import { registerWholesaleSaleRoutes } from './wholesaleSale.js';
 import { registerAccountLedgerRoutes } from './accountLedger.js';
 import { VoucherVersionConflictError } from '../modules/vouchers/version.js';
@@ -1115,8 +1114,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerAutoItemRoutes(app, extraRouteHelpers, formCapabilities);
   registerGroupMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerProductMasterRoutes(app, extraRouteHelpers, formCapabilities);
-  registerAddressMasterRoutes(app, extraRouteHelpers, formCapabilities);
-  registerItemMasterRoutes(app, extraRouteHelpers, formCapabilities);
+  registerMasterScreenRoutes(app, extraRouteHelpers, formCapabilities);
   registerWholesaleSaleRoutes(app, extraRouteHelpers);
   const pdfRenderer = (): PdfRenderer => deps.pdfRenderer ?? new PlaywrightPdfRenderer();
   /** Render server-built HTML, mapping limits to 413/422 and a busy or slow renderer to a retryable 503. */

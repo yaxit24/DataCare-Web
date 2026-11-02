@@ -861,6 +861,23 @@ route('Masters/Items', [
   'DELETE /masters/item-master/:code',
   'POST /masters/item-master/:code/tag-values',
 ]);
+// MS_ACCT (N224): the Party master's own screen, with its helps, Enter checks and photo.
+route('Masters/Party (rich)', [
+  'GET /masters/party-master',
+  'GET /masters/party-master/print',
+  'GET /masters/party-master/help/:kind',
+  'GET /masters/party-master/copy/:kind',
+  'GET /masters/party-master/taken/:kind',
+  'GET /masters/party-master/gst-state',
+  'GET /masters/party-master/account',
+  'GET /masters/party-master/:code',
+  'GET /masters/party-master/:code/photo',
+  'POST /masters/party-master/:code/photo',
+  'POST /masters/party-master/:code/photo/delete',
+  'POST /masters/party-master',
+  'PUT /masters/party-master/:code',
+  'DELETE /masters/party-master/:code',
+]);
 route('Masters/Opening Balance', [
   'GET /accounts/:acCode/opening',
   'POST /accounts/:acCode/opening',
@@ -996,6 +1013,7 @@ route('Reports/Mfg Ledger', ['GET /reports/mfg-ledger', 'GET /reports/mfg-ledger
 route('Reports/Scheme Monthly Report', ['GET /reports/scheme-monthly']);
 
 const PRINT_ROUTES = new Set([
+  'GET /masters/party-master/print',
   'GET /masters/employee-master/print',
   'GET /masters/tax-master/print',
   'GET /masters/group-master/print',
