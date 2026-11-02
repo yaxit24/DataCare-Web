@@ -944,7 +944,7 @@ export const tagPrint = {
       'output.label-sheet',
       'T16',
       'output',
-      "The label file reads TAG_PRINT_DATA (:5200-5215); the web's sheet shows one label per staged row, the Lable Skip blanks first (Math.Round banker's: 2.5 skips 2), each with its tag, item, design, weights, touch, MRP and a scannable barcode",
+      "The label file reads TAG_PRINT_DATA (:5200-5215); the web's sheet shows one label per staged row, the Lable Skip blanks first (Math.Round banker's: 2.5 skips 2), each with its tag, item, design, weights, touch, MRP and a scannable barcode. The weight and labour lines are the label files' formulas (QrPrint10, BarPrint10, BarPrint13, GhatTagPrnt): 'G.' + totext(ITM_GWT,3), 'N.' + totext(ITM_NWT,3) and MRP: / LP: / LF: totext(x,'0'), worked by hand for the fixture (gross 10.5, net 10, MRP 55000): G.10.500, N.10.000, MRP: 55000",
       async (ctx) =>
         withCase(ctx, async () => {
           const { page } = await ctx.session();
@@ -957,10 +957,60 @@ export const tagPrint = {
           for (const t of ['TP0001', 'TP0002', 'TP0003']) assert.ok(html.includes(t), t);
           assert.ok(html.indexOf('lbl blank') < html.indexOf('TP0001'), 'blanks first');
           assert.ok(html.includes('<svg'), 'a barcode');
-          assert.ok(html.includes('55,000'), 'the MRP');
+          // The three labels each carry the desktop's text for gross 10.5, net 10 and MRP 55000.
+          const count = (s) => html.split(s).length - 1;
+          assert.equal(count('G.10.500'), 3, 'gross: G. and three decimals');
+          assert.equal(count('N.10.000'), 3, 'net: N. and three decimals');
+          assert.equal(count('MRP: 55000'), 3, "labour line: MRP: totext(55000,'0')");
+          assert.ok(!html.includes('55,000') && !html.includes('₹'), 'no web-only wording');
           return {
             observation: `${html.length} bytes, two blanks then three labels`,
             expected: 'blanks, labels, barcodes',
+            output: Buffer.from(html),
+          };
+        }),
+    ),
+    C(
+      'output.label-labour-lines',
+      'T16',
+      'output',
+      "The Labour formula of the label files (QrPrint10, BarPrint10, BarPrint13, GhatTagPrnt): MRP: totext(ITM_MRP,'0') when MRP <> 0, else LP: totext(LBR_RATE,'0') when the rate <> 0, else LF: totext(LBR_AMT,'0') when the amount <> 0, else no line. Staged from BAR_DETL through Print (:5200-5215). Worked by hand: tag 1 MRP 0, rate 600 -> LP: 600; tag 2 MRP 0, rate 0, amount 90 -> LF: 90; tag 3 all zero -> no labour line",
+      async (ctx) =>
+        withCase(ctx, async () => {
+          const set = (tagNo, rate, amt) =>
+            exec(
+              ctx,
+              `UPDATE "BAR_DETL" SET "ITM_MRP"=0,"LBR_RATE"=$2,"LBR_AMT"=$3 WHERE tenant_id=$1 AND "TAG_NO"=$4`,
+              rate,
+              amt,
+              tagNo,
+            );
+          await set('TP0001', 600, 0);
+          await set('TP0002', 0, 90);
+          await set('TP0003', 0, 0);
+          const { page } = await ctx.session();
+          await openScreen(page);
+          await loadVoucher(page);
+          assert.equal((await printNow(page)).status(), 200);
+          const html = await labelsHtml(page);
+          const blocks = html.split('<div class="lbl">').slice(1);
+          assert.equal(blocks.length, 3, 'one label per staged row');
+          const of = (tagNo) => blocks.find((b) => b.includes(`>${tagNo}<`)) ?? '';
+          const [one, two, three] = [of('TP0001'), of('TP0002'), of('TP0003')];
+          assert.ok(one.includes('LP: 600'), 'tag 1: LP:');
+          assert.ok(!one.includes('MRP') && !one.includes('LF:'), 'tag 1 has only the LP line');
+          assert.ok(two.includes('LF: 90'), 'tag 2: LF:');
+          assert.ok(!two.includes('MRP') && !two.includes('LP:'), 'tag 2 has only the LF line');
+          assert.ok(
+            !three.includes('MRP') && !three.includes('LP:') && !three.includes('LF:'),
+            'tag 3: no labour line',
+          );
+          for (const b of [one, two, three]) {
+            assert.ok(b.includes('G.10.500') && b.includes('N.10.000'), 'weights on every label');
+          }
+          return {
+            observation: 'LP: 600, LF: 90 and no labour line on the three labels',
+            expected: { one: 'LP: 600', two: 'LF: 90', three: '' },
             output: Buffer.from(html),
           };
         }),

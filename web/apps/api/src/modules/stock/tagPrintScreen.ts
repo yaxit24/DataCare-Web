@@ -558,6 +558,8 @@ export async function tagPrintLabels(prisma: any, scope: TagPrintScope): Promise
       rate: vbVal(r.ITM_RATE),
       hmId: text(r.HM_ID) || null,
       pcs: vbVal(r.ITM_PCS),
+      lbrRate: vbVal(r.LBR_RATE),
+      lbrAmt: vbVal(r.LBR_AMT),
     }));
   return renderTagLabels(tags, skip);
 }
