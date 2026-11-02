@@ -820,10 +820,46 @@ export const fineJv = {
       'T14',
       'The feature harness has no declared Fine JV mid-write transport or database fault injector (G173 / N166).',
     ),
-    blocked(
-      'settings-and-lock',
+    C(
+      'settings.lock-date',
       'T15',
-      'Employee-code mandatory, company type B and the lock date are covered through HTTP in fineJv.routes.db.test.ts and financeLifecycle.db.test.ts; the feature catalogue does not change company settings, so no browser settings matrix is frozen yet.',
+      'refusal',
+      'TR_CONTRA.cs:2686-2691: a Fine JV dated on or before CO_SET.LOCK_DATE is refused with the lock-date text after the year check passes; the setting is set for this case and cleared. Employee-code mandatory and company type B stay covered through HTTP in fineJv.routes.db.test.ts and financeLifecycle.db.test.ts.',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const [{ op }] = await ctx.rows(
+          `SELECT left("OP_DATE"::text,10) op FROM "YEAR_MAST"
+            WHERE tenant_id=$1 AND "CO_CODE"='01' ORDER BY "OP_DATE" DESC LIMIT 1`,
+        );
+        const dmy = op.split('-').reverse().join('/');
+        await ctx.owner.$executeRawUnsafe(
+          `UPDATE "CO_SET" SET "LOCK_DATE"=$2::date WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+          'feature-e2e',
+          op,
+        );
+        try {
+          const before = await countRows(ctx);
+          await openFineJv(page);
+          await fillGrid(page, twoRows({ fine: '1.5' }));
+          await label(page, 'Vch Date').fill(op);
+          const response = await save(page);
+          const body = await response.text();
+          assert.equal(response.status(), 400, body);
+          assert.match(body, new RegExp(`Lock Date is = ${dmy} \\.\\.\\.\\.`), body);
+          const after = await countRows(ctx);
+          assert.deepEqual(after, before);
+          return {
+            observation: `dated ${op} (the lock date): 400 with the lock-date text; nothing written`,
+            expected: { status: 400, lockDate: dmy, written: 0 },
+            database: { before, after },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `UPDATE "CO_SET" SET "LOCK_DATE"=NULL WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+            'feature-e2e',
+          );
+        }
+      },
     ),
     C(
       'print.fine-jv-bill',

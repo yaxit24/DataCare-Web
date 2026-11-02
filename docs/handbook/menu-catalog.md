@@ -793,7 +793,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Writes:** RATE_CUT_DATA, RATE_CUT_ISU, RATE_CUT_REC, RATE_CUT_ISU_REC, MAIN_STOCK, SL_IDTL, DM_DATA, AC_DATA, ROJ_MEL_DATA, TAX_DATA.
 - **Web:** `/txn/wholesale-sale`; `POST /wholesale-sales`, `GET /wholesale-sales/:vchNo`, `PUT /wholesale-sales/:vchNo`, `DELETE /wholesale-sales/:vchNo`, `GET /wholesale-sales/:vchNo/print`. Can: create, reopen, edit, delete, print.
 - **Remaining:** Hand-typed item-detail rows for loose items, SL_IDTL rows on the printed bill, fine kasar, the Rojmel alignment for lined vouchers, configured roles, versions and accountant acceptance remain.
-- **Owners:** G15, N45, X13, X16, N59, N74, N77, G233, N220, N227.
+- **Owners:** G15, N45, X13, X16, N59, N74, N77, G233, N220, N227, N228.
 - **Evidence:** [TR_WH_SALE.cs:12779-12896](../../unified/src/csharp/DataCareNext/TR_WH_SALE.cs#L12779-L12896), [TR_WH_SALE.cs:13654-13800](../../unified/src/csharp/DataCareNext/TR_WH_SALE.cs#L13654-L13800), [TR_WH_SALE.cs:14393-14418](../../unified/src/csharp/DataCareNext/TR_WH_SALE.cs#L14393-L14418), [TR_WH_SALE.cs:13162-13250](../../unified/src/csharp/DataCareNext/TR_WH_SALE.cs#L13162-L13250), [Ac_Stock.cs:857-861](../../unified/src/csharp/DataCareNext/Ac_Stock.cs#L857-L861).
 
 ### Wh Sl Return
@@ -2370,7 +2370,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header and a scan-driven tag grid with item, counter, weights, fine and karigar detail.
 - **Writes:** BAR_CAN_DATA, BAR_CAN_DETL, BAR_CAN_IDTL, BAR_DETL, BAR_IDTL, MAIN_STOCK, DM_DATA, DELETE_DATA.
 - **Web:** `/txn/tag-cancel`; `GET /stock/tag-cancel`, `POST /stock/tag-cancel`, `GET /stock/tag-cancel/:vchNo`, `PUT /stock/tag-cancel/:vchNo`, `DELETE /stock/tag-cancel/:vchNo`, `GET /stock/tag-cancel/source`, `GET /stock/tag-cancel/:vchNo/print`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** Implemented from source (N18, N210): TagCanBill behind print rights and the desktop refusals pass 12 browser cases. Open: no captured desktop BAR_CAN rows, idempotency retry, fault rollback, the Tag Stock report check and a desktop-runtime comparison.
+- **Remaining:** Implemented from source (N18, N210): TagCanBill and desktop refusals, exact-caption rights, a two-browser same-tag race, create/edit/delete fault rollback, and the Tag Stock create/edit/delete lifecycle have executable evidence. Open: no captured desktop BAR_CAN rows, durable lost-acknowledgement idempotency, and a desktop-runtime comparison.
 - **Owners:** G223, N18, N210, P07-03, X18, X19.
 - **Evidence:** [KB_other.md:106-149](../../project-memory/video-research/_kb/KB_other.md#L106-L149).
 
