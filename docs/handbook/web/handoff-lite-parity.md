@@ -1,4 +1,4 @@
-# Handoff: Lite parity work (state at 2 Nov 2026, 10:30 IST)
+# Handoff: Lite parity work (state at 2 Nov 2026, evening)
 
 This note lets another session continue the Lite-first parity work without asking the previous session anything. It states the goal, the rules, the open work with exact branches, how each menu is taken to done, the test commands, and the traps found so far. The catalog (`docs/handbook/menu-catalog.jsonl`) and `execution-backlog.json` stay the status authority; this note is a guide, not a record.
 
@@ -25,9 +25,9 @@ Read `AGENTS.md` first. The ones that bit this work:
   The PR that merges first keeps the id; the other renumbers. N and G ids must be contiguous and `startAfter` must name an existing slice, so PRs with new records merge one after another.
 - Status lives only in `execution-backlog.json`. New Markdown must match a rule in `docs/handbook/doc-register.json` (`docs/handbook/web/*.md` already does). `docs_check` forbids Indian mobile numbers in docs.
 - A behaviour change needs a browser-test change or a `Browser-Test-Exempt:` line in the PR body; a file listed in `coverage-map.json` needs a change to that module.
-- Size budget: 1,500 lines per file, ceilings only fall. `routes/txn.ts` is near its ceiling (8,360); put new routes in their own file and register them with one line.
+- Size budget: 1,500 lines per file, ceilings only fall. `web/apps/api/src/routes/txn.ts` is near its ceiling (8,360); put new routes in their own file and register them with one line.
 - No new `Math.round` helpers (use `round` / `roundHalfEven` from `@datacare/core`).
-- Every migration needs its sha256 in `apps/api/src/modules/ops/migrationManifest.ts` and in the Prisma model.
+- Every migration needs its sha256 in `web/apps/api/src/modules/ops/migrationManifest.ts` and in the Prisma model.
 - Changing `web/docs/COMPLETION-REGISTER.json` means re-baselining its pinned sha256 in `docs/master-parity-plan-2026-09-29/requirement-index.json` (a dated `rebaselined` block that chains the previous one).
 - Surface crawl: Save must be the only `button.primary`.
 - Feature modules: every `mutation` case returns `downstream` evidence; refusal cases return `database`.
@@ -43,16 +43,19 @@ Read `AGENTS.md` first. The ones that bit this work:
 
 ## 4. Open work, exactly where it is
 
-Worktree used so far: `/Users/yakshitsavaliya/dc-wt/kiro-impl`. Main at the last fetch: `e6113450` (#199). Highest ids on main: N222 / G234.
+Worktree used so far: `/Users/yakshitsavaliya/dc-wt/kiro-impl`. Highest ids on main at the last fetch: N225 / G237.
 
 | Item | Branch / PR | State |
 |---|---|---|
-| Party master (MS_ACCT), N223 / G235 | `feat/party-master`, PR #200 | Merged main again; CI's one failure was the module's own `CO_SET_NEW` insert colliding with a row left by the settings module. Fixed and pushed (`4cd5043d`); CI re-running. Merge when green (`gh pr merge 200 --squash --subject "<title> (#200)"`). |
-| Tag Print (UT_TAG_PRINT), N224 / G236 | `feat/tag-print`, PR #208 | Code, 9 DB tests, 17/17 browser cases, Chrome pass done. PR is DIRTY after #199: merge `origin/main` and re-run `pnpm progress` + the doc steps once #200 has merged. Its static-gates wait for #200's N223. |
-| Unblocking old browser cases plus four defects, N225 / G237 (proposed) | `feat/lite-unblock-cases`, **not yet a PR** (pushed as work in progress) | See section 6. |
-| Data Import, company utilities (Company, Year Create, Balance TrFr, Books, Data Refresh, Data Backup), User Create | not started | Several are in the prompt pack (13-19). User Create is not in the pack: `usersRights` has 15 blocked cases. |
+| Party master (MS_ACCT), N224 / G236 | PR #200 | Merged. It renumbered from N223 / G235 when #195 (Ledger Report) merged first. |
+| Tag Print (UT_TAG_PRINT), N225 / G237 | PR #208 | Merged after #200. It renumbered from N224 / G236. |
+| Un-blocked browser cases and four defects, N226 / G238 | `feat/lite-unblock-cases`, PR from this branch | See section 6. |
+| Sales Order old gold and old silver rows (G206 part) | PR #211 | Another session. It took N225 on a stale base and has to renumber. |
+| Data Refresh (#209), Data Backup (#210), Purchase Report (#202), GST Report (#206), Approval In/Out (#203), Purchase whole rupees (#204) | other PRs | Other sessions; do not touch. |
+| Data Import, Company, Year Create, Balance TrFr, Books, User Create | not started | Several are in the prompt pack (13-19). User Create is not in the pack: `usersRights` has 15 blocked cases. Check the open PRs first: Data Refresh and Data Backup are taken. |
 
-If #195 or #204 merges first, renumber your N and G ids and update the comments on the PRs.
+PRs that carry plan records merge one after another, because N and G ids must be contiguous. Whoever merges second
+merges `origin/main`, renumbers and waits for CI again; this cost a full CI cycle three times on 2 Nov.
 
 ## 5. Parked patches (not part of any branch)
 
@@ -65,7 +68,7 @@ Give these to whoever owns those menus.
 
 ## 6. The `feat/lite-unblock-cases` work
 
-Based on `origin/main` (`e6113450`). Uncommitted until the commit that accompanies this note. What it contains:
+Based on `origin/main` (merged up to #208). What it contains:
 
 **Browser cases that were "blocked" and now run (all against the real stack):**
 
@@ -77,18 +80,13 @@ Based on `origin/main` (`e6113450`). Uncommitted until the commit that accompani
 
 **Defects found by those cases and fixed:**
 
-1. Daily Rate: two operators saving the same new day hit the `RATE_MAST` primary key and the screen showed raw database text. Saves of one day now take an advisory lock; the last writer wins (`modules/masters/dailyRate.ts`). DB test fails on the old writer.
-2. Rate lookup (`GET /rate`, behind the ticker): not scoped by location. `TR_SALE.cs:12547` filters `RATE_MAST` by `CO_CODE` and `LC_CODE`. Fixed in `modules/masters/rate.ts`; the route moved to `routes/dailyRate.ts` to keep `txn.ts` under its ceiling. DB test fails on the old code.
-3. Lock date: `PeriodLockValidationError` carried a web-only message. It now carries the desktop text `You Cant Save and Delete This Voucher Becouse Lock Date is = dd/MM/yyyy ....` for every form that uses it (`modules/posting/posting.ts`, unit test `periodLockMessage.test.ts`).
-4. Cash Received / Payment: the Employee box was sent by the page but dropped by the API. The desktop stores it (`TR_CASH.cs:3050`), refuses a blank when `CO_SET.EMP_CODE_MANDATORY = 'Y'` (`:2907-2911`) and shows it when the voucher is opened (`:2753`). Fixed: `financeEmployeeTx` in `modules/finance/lifecycle.ts`, `EMP_CODE` written to `CASH_DATA` and `PAY_DATA`, read back by `getReceipt` / `getPayment`, the route and `PaymentForm.tsx` pass and load it. DB tests added to `cashReceiptLegs.db.test.ts`; 24 of 24 pass together with the Daily Rate and lock-message tests. Not yet done: the browser case for it (cash-bank T15) and a Chrome pass. The desktop also defaults the box to the logged-in user's employee code (`:2671`); the web has no such field on the session yet.
+1. Daily Rate: two operators saving the same new day hit the `RATE_MAST` primary key and the screen showed raw database text. Saves of one day now take an advisory lock; the last writer wins (`web/apps/api/src/modules/masters/dailyRate.ts`). DB test fails on the old writer.
+2. Rate lookup (`GET /rate`, behind the ticker): not scoped by location. `TR_SALE.cs:12547` filters `RATE_MAST` by `CO_CODE` and `LC_CODE`. Fixed in `web/apps/api/src/modules/masters/rate.ts`; the route moved to `web/apps/api/src/routes/dailyRate.ts` to keep `txn.ts` under its ceiling. DB test fails on the old code.
+3. Lock date: `PeriodLockValidationError` carried a web-only message. It now carries the desktop text `You Cant Save and Delete This Voucher Becouse Lock Date is = dd/MM/yyyy ....` for every form that uses it (`web/apps/api/src/modules/posting/posting.ts`, unit test `periodLockMessage.test.ts`).
+4. Cash Received / Payment: the Employee box was sent by the page but dropped by the API. The desktop stores it (`TR_CASH.cs:3050`), refuses a blank when `CO_SET.EMP_CODE_MANDATORY = 'Y'` (`:2907-2911`) and shows it when the voucher is opened (`:2753`). Fixed: `financeEmployeeTx` in `web/apps/api/src/modules/finance/lifecycle.ts`, `EMP_CODE` written to `CASH_DATA` and `PAY_DATA`, read back by `getReceipt` / `getPayment`, the route and `PaymentForm.tsx` pass and load it. DB tests added to `cashReceiptLegs.db.test.ts`; 24 of 24 pass together with the Daily Rate and lock-message tests. Not yet done: the browser case for it (cash-bank T15) and a Chrome pass. The desktop also defaults the box to the logged-in user's employee code (`:2671`); the web has no such field on the session yet.
 
-**Still to do on this branch before the PR:**
+**Done on this branch:** the cash-bank T15 browser case (blank employee refused with the desktop text and nothing written; the employee chosen is stored in CASH_DATA and shown when the voucher is opened; `CO_SET` and the temporary `EMP_MAST` row are restored in `finally`). Result: cash-bank 19 of 21 (T03 and T06 stay blocked). The modules cash-bank, tag-cancel, daily-rate, purchase-invoice, contra, sales-invoice and sales-order ran on a fresh build with no new failure (the sales-order old-metal case is the known G206 baseline). The full API suite (356 files, 3,789 tests), the web unit tests (713), the smoke test, the session-context and labour-preview checks and every gate in section 8 pass. The plan records are N226 / G238. No separate Chrome pass was made for the Employee box: the page change is two lines (send and load `empCode`) and the browser case drives it through the real UI.
 
-1. Rebuild (`rm -rf apps/web/.next && API_ORIGIN=http://127.0.0.1:4510 pnpm build`) and run the modules `cash-bank,tag-cancel,daily-rate,purchase-invoice,contra`, plus `sales-invoice` and `sales-order` (shared code changed: lock message, rate lookup).
-2. Add the cash-bank T15 browser case (employee mandatory: set `CO_SET.EMP_CODE_MANDATORY='Y'`, save a receipt without an employee, expect the message and no rows; restore the setting).
-3. Run the full API suite, the web unit tests, the smoke test, the session-context and labour-preview checks, and every gate (section 8).
-4. Write the plan records: slice N225, gap G237 (startAfter N224) in `12-lineage-verification-2026-10-01.md`, `execution-backlog.json`, run `docs_check --write`, `pnpm progress`. Recheck the ids against open PRs first.
-5. Write the PR body (mention each defect, the parked patches, that Sales Return / Purchase Return were left alone), run the browser-test gate, push, open the PR.
 
 ## 7. How a menu is done (the loop)
 
@@ -109,10 +107,10 @@ Based on `origin/main` (`e6113450`). Uncommitted until the commit that accompani
 - Typecheck: `pnpm --filter @datacare/api exec tsc --noEmit -p tsconfig.json`; for web, `rm -rf apps/web/.next/types` first.
 - DB tests: `PARITY_TEST_PORT=55535 RUN_DB_INTEGRITY_TESTS=1 node scripts/parity-test-env.mjs -- pnpm --filter @datacare/api exec vitest run test/<file>` (run from `web/`, not from `apps/`).
 - Feature modules: `PARITY_TEST_PORT=55533 PARITY_API_PORT=4510 PARITY_WEB_PORT=4511 FEATURE_E2E_MODULES=<name,name> node scripts/parity-test-env.mjs -- node apps/web/test/features/run-features.mjs`. Results: `test-results/feature-e2e/<module>/run.json`. Module names are the `feature:` value in the module file (for example `settings`, not `settings-effects`). Failure messages in the log show only the first line; read `run.json` or add the body to the assertion message.
-- Surface crawl: add `SURFACE_ROUTES=/path` and run `apps/web/test/features/run-surface.mjs` the same way.
-- Lifecycle checks: `apps/web/test/session-context.real-stack.additive.mjs` and `labour-preview-lifecycle.real-stack.mjs` (with `LABOUR_PREVIEW_ARTIFACT_DIR=<dir>`), both through `parity-test-env.mjs`.
+- Surface crawl: add `SURFACE_ROUTES=/path` and run `web/apps/web/test/features/run-surface.mjs` the same way.
+- Lifecycle checks: `web/apps/web/test/session-context.real-stack.additive.mjs` and `labour-preview-lifecycle.real-stack.mjs` (with `LABOUR_PREVIEW_ARTIFACT_DIR=<dir>`), both through `parity-test-env.mjs`.
 - Gates: `pnpm lint`, `typecheck:tests`, `format:check`, `size:budget`, `depth:parity`, `depth:deadcells`, `test:routes`, `settings:parity`, `runtime:check`, `docs:refs`, `register:check`; `node scripts/check-kernel-conformance.mjs`; `node scripts/generate-edition-table.mjs --check`; `pnpm progress` then `node scripts/generate-standard-progress.mjs --check`; `pnpm parity:measure --reuse`. From the repo root: `python3 docs/master-parity-plan-2026-09-29/validate_plan.py` and `python3 docs/tools/docs_check.py --write`. Browser-test gate: `PR_BODY="$(cat body.md)" node scripts/check-browser-test-coverage.mjs --base origin/main --head HEAD`.
-- Demo stack: `/tmp/kiro-impl/restart-demo.sh [--no-build]` (ports API 4510, web 4511, DB 55533; it may be gone, in which case use `parity-test-env.mjs` to start a database and run `apps/web/test/features/serve.mjs`). Restarting resets its data. Stop it before a feature run: kill the listeners on 4510 and 4511.
+- Demo stack: `/tmp/kiro-impl/restart-demo.sh [--no-build]` (ports API 4510, web 4511, DB 55533; it may be gone, in which case use `parity-test-env.mjs` to start a database and run `web/apps/web/test/features/serve.mjs`). Restarting resets its data. Stop it before a feature run: kill the listeners on 4510 and 4511.
 - Chrome: DevTools MCP page id changes; log in by navigating to `/login`, running `web/test-results/visual/G179/login.js` through `evaluate_script`, then clicking Sign In.
 - Merge: `gh pr merge N --squash --subject "<title> (#N)"`.
 
@@ -122,15 +120,18 @@ Based on `origin/main` (`e6113450`). Uncommitted until the commit that accompani
 - A query parameter named `book` triggers the session book-scope guard; use another name (`bookCode`).
 - After merging main: regenerate `pnpm progress` and the standard-progress page rather than merging them by hand. Usual conflicts: `txn.ts` imports and registrations (keep both), the `routePolicy.test.ts` route count (main's count plus yours, keep the comment lines), `migrationManifest` (both entries, name order), `coverage-map.json` (rebuild from main's JSON plus your entry, then prettier), doc 12 / backlog / catalog (rebuild from main plus your records).
 - Modules run in one database in CI: another module can leave rows behind (`CO_SET_NEW`, `RATE_MAST`). Cases must tolerate existing rows and clean up their own.
+- `EMP_CODE` columns are `varchar(3)`: a longer test code fails the insert. Put a case's setting changes inside the `try` that restores them; a failed setup before the `try` left `EMP_CODE_MANDATORY = Y` on and broke the later cases of three modules.
+- Register a new route file in `web/apps/api/src/routes/masterScreens.ts` (masters) or beside it in `web/apps/api/src/routes/txn.ts`; one line, no new import block.
+- `docs_check` wants cited paths repo-relative (`web/apps/api/src/...`), not relative to `web/`.
 - Real-stack CI takes about 20 minutes; `quality` about 15. Reproduce locally with the same module order before blaming a flaky run.
 
 ## 10. Next steps, in order
 
-1. Merge #200 when green; then bring #208 up to date and merge it.
-2. Finish `feat/lite-unblock-cases` (section 6) and open its PR.
-3. User Create (MS_USER, 5,312 lines; module `usersRights` has 15 blocked cases).
-4. The company utilities and Data Import that the prompt pack has not yet had picked up (check which of 13-19 are claimed first).
-5. Remaining blocked cases in older modules: daily-rate T15 (needs a location-00 session in the harness), cash-bank T03 / T06, tag-opening, fine-jv, party-opening, item-opening, company-open, settings.
+1. Merge this branch's PR when green (renumber N226 / G238 if another PR with records merges first).
+2. User Create (MS_USER, 5,312 lines; module `usersRights` has 15 blocked cases).
+3. The company utilities and Data Import that the prompt pack has not yet had picked up (check which of 13-19 are claimed first; Data Refresh and Data Backup are open PRs).
+4. Remaining blocked cases in older modules: daily-rate T15 (needs a location-00 session in the harness), cash-bank T03 / T06, tag-opening, fine-jv, party-opening, item-opening, company-open, settings.
+5. Give the parked patches (section 5) to the sessions that own Sales Return and Purchase Return.
 6. Mark a catalog row FULL only when every desktop mode, the lifecycle and print exist and its module has no failing or blocked case; then `pnpm progress`.
 7. Final report: FULL counts out of 49, 78 and 114; test results; the extra pages and code found (the removed fake Stock Adjust writer, the old Tag Print routes, the generic Party page, the employee box that was dropped); readiness per edition; end with every steering note verbatim.
 

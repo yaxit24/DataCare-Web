@@ -6,10 +6,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 30 | 27 | 0 |
+| Lite (first, D32) | 49 | 32 | 29 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
 | Standard (added by Standard) | 36 | 0 | 0 | 0 |
-| **Standard total** | **114** | **31** | **28** | **0** |
+| **Standard total** | **114** | **33** | **30** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
@@ -25,7 +25,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | ExtraTran | Approval Isu | `/txn/tour` | PARTIAL | — | no module | — |
 | ExtraTran | Approval Rtn | `/txn/tour-return` | PARTIAL | — | no module | — |
 | ExtraTran | Fine Jv Entry | `/txn/fine-jv` | PARTIAL | fine-jv | module green | — |
-| Master | Party | `/masters/party`, `/masters/accounts` | PARTIAL | — | no module | — |
+| Master | Party | `/masters/party` | PARTIAL | party-master | module green | — |
 | Master | Address | `/masters/addresses` | PARTIAL | address-master | module green | — |
 | Master | Product | `/masters/products` | PARTIAL | product-master | module green | — |
 | Master | Group | `/masters/groups` | PARTIAL | group-master | module green | — |
@@ -39,7 +39,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Other | Daily Rate | `/txn/daily-rate` | PARTIAL | daily-rate | module green | — |
 | Other | Only Tag Entry | `/txn/tag-opening` | PARTIAL | tag-opening | module green | — |
 | Other | Tag Cancel | `/txn/tag-cancel` | PARTIAL | tag-cancel | module green | — |
-| Other | Tag Print | `/txn/tag-print` | PARTIAL | — | no module | — |
+| Other | Tag Print | `/txn/tag-print` | PARTIAL | tag-print | module green | — |
 | Other | Stock Adjust | `/txn/stock-adjust` | PARTIAL | stock-adjust | module green | — |
 | Other | Order Cancel | `/txn/order-cancel` | PARTIAL | — | no module | — |
 | Other | Data Import | `/masters/accounts` | PARTIAL | — | no module | — |

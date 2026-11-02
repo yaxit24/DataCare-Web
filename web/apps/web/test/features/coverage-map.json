@@ -219,6 +219,20 @@
         "web/apps/api/src/modules/reports/accountLedgerReport.ts",
         "web/apps/api/src/routes/accountLedger.ts"
       ]
+    },
+    "partyMaster": {
+      "covers": [
+        "web/apps/web/app/(app)/masters/party/page.tsx",
+        "web/apps/api/src/modules/masters/partyMaster.ts",
+        "web/apps/api/src/routes/partyMaster.ts"
+      ]
+    },
+    "tagPrint": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/tag-print/page.tsx",
+        "web/apps/api/src/modules/stock/tagPrintScreen.ts",
+        "web/apps/api/src/routes/tagPrintScreen.ts"
+      ]
     }
   }
 }
