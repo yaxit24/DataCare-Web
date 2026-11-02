@@ -45,6 +45,7 @@ import { itemMaster } from './modules/itemMaster.mjs';
 import { wholesaleSale } from './modules/wholesaleSale.mjs';
 import { dataRefresh } from './modules/dataRefresh.mjs';
 import { accountLedger } from './modules/accountLedger.mjs';
+import { dataBackup } from './modules/dataBackup.mjs';
 import { runSurface } from './surface/runner.mjs';
 
 /**
@@ -91,6 +92,7 @@ const MODULES = [
   wholesaleSale,
   dataRefresh,
   accountLedger,
+  dataBackup,
 ];
 
 const artifacts = resolve(webRoot, 'test-results/feature-e2e');

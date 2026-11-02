@@ -72,6 +72,8 @@ the authority for each item.
 | 21 Behavioural parity verification | carried; 21.1 decided by D24 (enforced by tests and release gates) | X03, X06, X34, N82 |
 | 22 Phased delivery | carried | X31, X33, N80, N82, D25 |
 
+Data Backup milestone 1 evidence (2 November 2026) is carried by the existing recovery lineage `P12-05 → X31 → G64/N80`: the authenticated company-scoped v2 download, source-backed browser filename, immutable backup-run audit and Backup-only matrix are implemented engineering evidence. The lineage remains open for D-BKP-3 configuration/credential scope, actual-browser scratch zero-diff, physical save, production recovery and desktop-runtime proof. No new N/G identifier is allocated.
+
 ## 3. Gap register G69–G83
 
 Severity as in documents 10 and 11. G69–G74, G79 and G81–G83 are Phase 1 (desktop parity in the web); G75–G78 and G80 are
@@ -2165,6 +2167,44 @@ and Rojmel presence. Both G198 cases pass and left the baseline. Latest browser 
 blocked among 22 applicable cases; full quality, database, zero-mock browser and UI-surface CI passed. N188 remains
 in progress because its ordinary Purchase half and paise-producing Purchase proof are still open.
 
+### N188 milestone 2 — ordinary Purchase whole-rupee components (G198)
+
+Ordinary Purchase now follows its own `TR_PURC` contract rather than reusing Purchase Return's header policy.
+The desktop chooses the amount basis from `URD_RATE_TYPE` and `PR_AMT_TYPE`, then applies `RATE_TYPE=P/1/K/default`
+as pieces, rate/10, rate/1000 or the ordinary rate (`TR_PURC.cs:7395-7417`). It rounds each derived item amount
+directly with `Math.Round(..., 0)` at `:7407-7416`. Derived labour likewise rounds directly to whole rupees across
+its pieces, net-plus-ghat, per-kilogram and gross modes (`:7449-7465`). The detail total remains item + labour +
+other at two decimals, and its normal net adds commission without a whole-detail round (`:7546-7554`). PR_DATA
+persists header net, tax, round-off, total, labour and other at `:12981-13010`; PR_DETL persists item, labour, other,
+total and net at `:13127-13144`. The header remains setting-controlled: net and final total use `MsTotAmtRof`, while
+tax independently uses `MsTaxRof` (`:15477-15508`).
+
+`web/packages/core/src/purchaseAmount.ts` is the focused ordinary-Purchase component contract used by both
+`web/apps/api/src/modules/purchase/purchase.ts` and `web/apps/web/app/(app)/txn/purchase/page.tsx`. It preserves
+explicit item/labour overrides, applies the company purchase-rate precision before the derived item calculation,
+and leaves the existing `billTotals` company policy unchanged. The primary vector is fine 9.160; raw item
+56,090.802 to item 56,091; labour 2,375; line/header net 58,466; tax 1,753.98; round-off 0.02; final total 60,220
+when `PR_AMT_TYPE=F`, `TAX_ROF=2` and `TOT_AMT_ROF=0`. Its 0.40 adjunct persists detail total/net 58,466.40,
+while the header follows `TOT_AMT_ROF` and remains 58,466 for that explicit setting.
+
+Proof code is in `web/packages/core/test/purchaseAmount.test.ts`, `web/apps/api/test/purchase.test.ts`, the focused
+ordinary-Purchase case in `web/apps/api/test/purchase.lifecycle.db.test.ts`, and
+`purchase-invoice.formula.whole-rupees` in `web/apps/web/test/features/modules/purchaseInvoice.mjs`. The lifecycle
+case checks PR_DETL component/detail values, PR_DATA header values, MAIN_STOCK, TAX_DATA, balanced AC_DATA and the
+Rojmel component projection. The zero-mock browser proof now also reloads explicit 56,090.80 item and 2,375.25
+labour overrides, preserves an explicit zero, restores persisted ghat weight, wastage, labour percentage/rate/type
+and item rate basis inputs, and compares those PR_DETL sources plus the existing component/downstream write set
+before and after an unchanged save. Its edit proof keeps loaded per-gram labour authoritative for an item-rate-only
+change, then clears and recalculates it when net weight, an actual per-gram dependency, changes. A separate
+zero-mock case loads `PR_AMT_TYPE=G`, enters `RATE_TYPE=P/1/K` through the grid, proves item
+amounts 3,000/1,200/12 in preview and persistence, reloads them, and restores company settings in `finally`. The
+explicit-fine boundary 9.1605 normalizes to 9.161 before item calculation, producing 9,161 at rate 1,000 where the
+raw value would produce 9,160. The original whole-rupee case continues to check the preview, saved values, stock,
+tax, ledger, Rojmel and Purchase Register through the real UI/PostgreSQL stack. These package-dependent proofs
+require CI in this checkout because `web/node_modules` is absent and the package registry is unavailable. The G5
+original-Windows comparison also remains unavailable because this environment has no desktop SQL secrets.
+N188 is therefore implemented-unverified, not accepted or verified.
+
 **Scope note for G193.** The purchase-return delete answers 400 for a voucher that is already gone, so G193 is
 narrower than recorded: it is the sale-return delete (and any writer whose route does not map
 `PersistedVoucherNotFoundError`) that answers 500.
@@ -3445,7 +3485,7 @@ comparison and operator acceptance are not claimed.
 | N185 | — | planned (G196: decide under D05 and provision the desktop rounding defaults for new companies, or record the 2-decimal choice) |
 | N186 | — | implemented-unverified, evidence in this change (G197: the web build clears the route cache; unit 2, a real build removed 13 entries) |
 | N187 | — | implemented-unverified, evidence in this change (Purchase Return module 15/5/2 on shared real data; found G198–G201; narrows G193) |
-| N188 | — | in-progress, milestone 1 evidence in this change (G198 Purchase Return: 58,466 net, 1,753.98 tax, 60,220 total; 20/0/2 browser result; ordinary Purchase half remains) |
+| N188 | — | implemented-unverified, milestone 1 Purchase Return plus milestone 2 ordinary Purchase evidence in this change (G198: ordinary Purchase 9.160 fine, 56,091 item, 2,375 labour, 58,466 net, 1,753.98 tax, 60,220 total; 0.40 detail adjunct preserved; core, writer, DB and zero-mock browser proofs added; CI and G5 desktop comparison remain open) |
 | N189 | — | implemented-unverified, evidence in this change (G199: BookSelect `required` opt-out; a free-standing purchase return saves, and a reopened one saves unchanged) |
 | N190 | — | implemented-unverified, evidence in this change (G200: 22 voucher screens marked; a unit scan keeps every voucher page's primary Save marked; purchase-return Alt+S passes in the browser) |
 | N191 | — | implemented-unverified, evidence in this change (G201: desktop BOOK_TBL_NAME/BOOK_TBL_DETL on ten families, backfill migration; purchase-return register case passes) |
