@@ -126,12 +126,12 @@ async function prepareFilterMasters(ctx) {
   await exec(
     ctx,
     `INSERT INTO "PRODUCT_MAST"(tenant_id,"CO_CODE","PR_CODE","PR_NAME") VALUES
-       ($1,'01','P01','E2E GOLD PRODUCT'),($1,'01','P02','E2E SILVER PRODUCT')
+       ($1,'01','P1','E2E GOLD PRODUCT'),($1,'01','P2','E2E SILVER PRODUCT')
      ON CONFLICT DO NOTHING`,
   );
   await exec(
     ctx,
-    `UPDATE "ITEM_MAST" SET "PR_CODE"=CASE WHEN "IT_CODE"=$2 THEN 'P01' ELSE 'P02' END
+    `UPDATE "ITEM_MAST" SET "PR_CODE"=CASE WHEN "IT_CODE"=$2 THEN 'P1' ELSE 'P2' END
       WHERE tenant_id=$1 AND "CO_CODE"='01' AND "IT_CODE" IN ($2,$3)`,
     ITEMS.gold.code,
     ITEMS.silver.code,
@@ -237,7 +237,7 @@ export const purchaseReport = {
         await prepareFilterMasters(ctx);
         const vouchers = await createPair(ctx, page);
         await openReport(page);
-        await field(page, 'product').fill('P02');
+        await field(page, 'product').fill('P2');
         await field(page, 'group').fill(ITEMS.silver.group);
         await field(page, 'item-type').selectOption('S');
         await runMode(page, 'item');
@@ -315,7 +315,7 @@ export const purchaseReport = {
         const { page } = await ctx.session();
         await openReport(page);
         for (const [id, code] of [
-          ['product', 'P01'],
+          ['product', 'P1'],
           ['group', ITEMS.gold.group],
         ]) {
           const lookup = field(page, id);
