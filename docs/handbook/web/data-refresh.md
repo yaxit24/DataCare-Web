@@ -35,7 +35,7 @@ The desktop then calls `AcRefresh()` and a long `Ac_Ledr`, `Ac_Rojmel` and `Ac_T
 
 ### Stock: preview-only
 
-The preview reports exact missing-fine candidates from the opening Stock step, using net weight × (touch + wastage) / 100 (`MS_UPDATE.cs:2671-2705`). The complete `StockRefresh()` and `Ac_Stock` builder graph is not proved (`MS_UPDATE.cs:2671-3047`), so the full Stock operation refuses Apply. The separately named advanced `stock-fine-refresh` operation remains available and is not relabelled as full Stock parity.
+The preview reports exact missing-fine candidates from the opening Stock step, using net weight × (touch + wastage) / 100, and exact matching `SL_DETL_RTN` rows whose copied fine value differs (`MS_UPDATE.cs:2671-2705`). The complete `StockRefresh()` and `Ac_Stock` builder graph is not proved (`MS_UPDATE.cs:2671-3047`), so the full Stock operation refuses Apply. The separately named advanced `stock-fine-refresh` operation remains available and is not relabelled as full Stock parity.
 
 ### Field Update and Old Field: classification pending
 
@@ -58,7 +58,7 @@ The database fixture covers five issue rows consumed by APR RTN, SALES, WH SALES
 
 ### Image Data: preview-only
 
-The desktop creates a local SQL Server database/table and adds `MOB_IMAGE`, `IMG_IMPORT` and `CONV_IMAGE` columns (`MS_UPDATE.cs:8825-9038`). The web already has committed, tenant-scoped `TAG_IMAGE_DATA` schema. No source proves semantics for the legacy flags or a byte-copy operation. Runtime `CREATE`/`ALTER`, byte copying and Apply are forbidden in this milestone. The preview reports zero row changes and explains the classification.
+The desktop creates a local SQL Server database/table and adds `MOB_IMAGE`, `IMG_IMPORT` and `CONV_IMAGE` columns (`MS_UPDATE.cs:8825-9038`). The web already has committed, tenant-scoped `TAG_IMAGE_DATA` metadata and the generic `ENTITY_IMAGE` byte store. No source proves semantics for the legacy flags or a byte-copy operation. Runtime `CREATE`/`ALTER`, byte copying and Apply are forbidden in this milestone. The preview reports zero row changes and explains the classification.
 
 ## Compatibility and remaining work
 

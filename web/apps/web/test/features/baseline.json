@@ -20,6 +20,11 @@
       "reason": "The existing Data Repair routes are admin-only, but the owner-decided Data Refresh caption FRM_PRINT handoff remains active-owned work."
     },
     {
+      "case": "data-refresh.concurrency.voucher-save-during-apply",
+      "gap": "X27/P11-01",
+      "reason": "The browser stack has no approved synchronization hook at the repair lock; parallel previews do not prove the required voucher-save/apply race."
+    },
+    {
       "case": "data-refresh.journey.account-full-builder",
       "gap": "X27/P11-01",
       "reason": "The full Ac_Ledr, Ac_Rojmel and Ac_Tax builder graph is unproved; Account is explicitly preview-only."

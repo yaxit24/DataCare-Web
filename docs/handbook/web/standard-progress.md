@@ -20,7 +20,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Company | Balance TrFr | `/company/balance-transfer` | PARTIAL | — | no module | — |
 | Company | Books | `/masters/books` | PARTIAL | — | no module | — |
 | Company | User Create | `/admin/users` | PARTIAL | users-rights | module green | — |
-| Company | Data Refresh | `/utilities/data-refresh`, `/utilities/data-repair` | PARTIAL | data-refresh | module, 6 open | G225, X27/P11-01 |
+| Company | Data Refresh | `/utilities/data-refresh`, `/utilities/data-repair` | PARTIAL | data-refresh | module, 7 open | G225, X27/P11-01 |
 | Company | Data Backup | `/backup` | CONTAINED | — | no module | — |
 | ExtraTran | Approval Isu | `/txn/tour` | PARTIAL | — | no module | — |
 | ExtraTran | Approval Rtn | `/txn/tour-return` | PARTIAL | — | no module | — |

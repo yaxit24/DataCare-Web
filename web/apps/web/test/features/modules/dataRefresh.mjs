@@ -65,7 +65,8 @@ async function cleanApproval(ctx) {
     );
     for (const table of ['APR_DETL', 'SL_DETL', 'RATE_CUT_ISU', 'BAR_DETL'])
       await tx.$executeRawUnsafe(
-        `DELETE FROM "${table}" WHERE tenant_id=$1 AND coalesce("TAG_NO",'') LIKE 'DRF%'`,
+        `DELETE FROM "${table}" WHERE tenant_id=$1
+          AND (coalesce("TAG_NO",'') LIKE 'DRF%' OR coalesce("VCH_NO",'') LIKE 'DRF%')`,
         ctx.tenantId,
       );
   });
@@ -77,23 +78,42 @@ async function seedApproval(ctx) {
     ctx,
     `INSERT INTO "APR_DETL"
       (tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","OLD_SRNO","BOOK_NAME","TAG_NO","VCH_SRNO","ISU_REC")
-     VALUES ($1,'01','01','2024-2025','AIS','DRFI1',1,1,'APR ISU','DRF-CONSUMED',901,'N'),
-            ($1,'01','01','2024-2025','AIS','DRFI2',1,2,'APR ISU','DRF-OPEN',902,'Y'),
-            ($1,'01','02','2024-2025','AIS','DRFI3',1,3,'APR ISU','DRF-OTHER-LC',903,'N')`,
+     VALUES ($1,'01','01','2024-2025','AIS','DRFI1',1,1,'APR ISU','DRF-APRRTN',901,'N'),
+            ($1,'01','01','2024-2025','AIS','DRFI2',1,2,'APR ISU','DRF-SALES',902,'N'),
+            ($1,'01','01','2024-2025','AIS','DRFI3',1,3,'APR ISU','DRF-WH',903,'N'),
+            ($1,'01','01','2024-2025','AIS','DRFI4',1,4,'APR ISU','DRF-RATE',904,'N'),
+            ($1,'01','01','2024-2025','AIS','DRFI5',1,5,'APR ISU','DRF-OPEN',905,'Y'),
+            ($1,'01','02','2024-2025','AIS','DRFI6',1,6,'APR ISU','DRF-OTHER-LC',906,'Y'),
+            ($1,'01','01','2024-2025','ART','DRFR1',1,1,'APR RTN','N',0,'N')`,
+  );
+  await exec(
+    ctx,
+    `UPDATE "APR_DETL" SET "ISU_YRCD"='2024-2025',"ISU_DBCD"='AIS',"ISU_NO"='DRFI1',"ISU_SRNO"=1
+      WHERE tenant_id=$1 AND "VCH_NO"='DRFR1'`,
   );
   await exec(
     ctx,
     `INSERT INTO "SL_DETL"
       (tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","BOOK_NAME","TAG_NO","ISU_YRCD","ISU_DBCD","ISU_NO","ISU_SRNO")
-     VALUES ($1,'01','01','2024-2025','SL','DRFS1',1,'SALES','N','2024-2025','AIS','DRFI1',1)`,
+     VALUES ($1,'01','01','2024-2025','SL','DRFS1',1,'SALES','N','2024-2025','AIS','DRFI2',2)`,
+  );
+  await exec(
+    ctx,
+    `INSERT INTO "RATE_CUT_ISU"
+      (tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","BOOK_NAME","TAG_NO","ISU_YRCD","ISU_DBCD","ISU_NO","ISU_SRNO")
+     VALUES ($1,'01','01','2024-2025','WHS','DRFW1',1,'WH SALES','N','2024-2025','AIS','DRFI3',3),
+            ($1,'01','01','2024-2025','RTC','DRFC1',1,'RATE CUT','N','2024-2025','AIS','DRFI4',4)`,
   );
   await exec(
     ctx,
     `INSERT INTO "BAR_DETL"
       (tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","BOOK_NAME","TAG_NO","VCH_SRNO","IT_CODE","APR_ISU")
-     VALUES ($1,'01','01','2024-2025','TAG','DRFB1',1,'TAG OPENING','DRF-CONSUMED',901,'GLD22','Y'),
-            ($1,'01','01','2024-2025','TAG','DRFB2',1,'TAG OPENING','DRF-OPEN',902,'GLD22','N'),
-            ($1,'01','02','2024-2025','TAG','DRFB3',1,'TAG OPENING','DRF-OTHER-LC',903,'GLD22','Y')`,
+     VALUES ($1,'01','01','2024-2025','TAG','DRFB1',1,'TAG OPENING','DRF-APRRTN',901,'GLD22','Y'),
+            ($1,'01','01','2024-2025','TAG','DRFB2',1,'TAG OPENING','DRF-SALES',902,'GLD22','Y'),
+            ($1,'01','01','2024-2025','TAG','DRFB3',1,'TAG OPENING','DRF-WH',903,'GLD22','Y'),
+            ($1,'01','01','2024-2025','TAG','DRFB4',1,'TAG OPENING','DRF-RATE',904,'GLD22','Y'),
+            ($1,'01','01','2024-2025','TAG','DRFB5',1,'TAG OPENING','DRF-OPEN',905,'GLD22','N'),
+            ($1,'01','02','2024-2025','TAG','DRFB6',1,'TAG OPENING','DRF-OTHER-LC',906,'GLD22','N')`,
   );
 }
 
@@ -136,8 +156,8 @@ async function approvalLifecycle(ctx) {
   await openScreen(page);
   const preview = await previewApproval(page);
   assert.deepEqual(preview.diffs, [
-    { table: 'APR_DETL', insert: 0, update: 2, delete: 0 },
-    { table: 'BAR_DETL', insert: 0, update: 2, delete: 0 },
+    { table: 'APR_DETL', insert: 0, update: 5, delete: 0 },
+    { table: 'BAR_DETL', insert: 0, update: 5, delete: 0 },
   ]);
   const result = await applyApproval(page);
   await page.getByText('Approval Refersh Process Complete.', { exact: true }).waitFor();
@@ -145,12 +165,18 @@ async function approvalLifecycle(ctx) {
   assert.deepEqual(
     after.map((row) => [row.kind, row.tag, row.flag]),
     [
-      ['APR', 'DRF-CONSUMED', 'Y'],
+      ['APR', 'DRF-APRRTN', 'Y'],
       ['APR', 'DRF-OPEN', 'N'],
-      ['APR', 'DRF-OTHER-LC', 'N'],
-      ['BAR', 'DRF-CONSUMED', 'N'],
+      ['APR', 'DRF-OTHER-LC', 'Y'],
+      ['APR', 'DRF-RATE', 'Y'],
+      ['APR', 'DRF-SALES', 'Y'],
+      ['APR', 'DRF-WH', 'Y'],
+      ['BAR', 'DRF-APRRTN', 'N'],
       ['BAR', 'DRF-OPEN', 'Y'],
-      ['BAR', 'DRF-OTHER-LC', 'Y'],
+      ['BAR', 'DRF-OTHER-LC', 'N'],
+      ['BAR', 'DRF-RATE', 'N'],
+      ['BAR', 'DRF-SALES', 'N'],
+      ['BAR', 'DRF-WH', 'N'],
     ],
   );
   return { page, preview, result, before, after };
@@ -163,8 +189,11 @@ export const dataRefresh = {
   inputs: [
     'unified/src/csharp/DataCareNext/MS_UPDATE.cs',
     'web/apps/api/src/modules/utilities/dataRepair.ts',
+    'web/apps/api/src/modules/utilities/dataRepairOps.ts',
     'web/apps/api/src/modules/utilities/dataRefreshOps.ts',
+    'web/apps/api/src/routes/dataRepair.ts',
     'web/apps/web/app/(app)/utilities/data-refresh/page.tsx',
+    'web/apps/web/app/(app)/utilities/data-repair/page.tsx',
     'web/apps/web/test/features/modules/dataRefresh.mjs',
   ],
   fixtureManifest: FIXTURE_MANIFEST,
@@ -323,13 +352,22 @@ export const dataRefresh = {
       'D-REF-2: previews and applies remain visible in the compatibility history',
       async (ctx) => {
         const { page } = await approvalLifecycle(ctx);
-        await page.getByRole('heading', { name: 'Audited history', exact: true }).waitFor();
+        await page.goto('/utilities/data-repair');
+        await page.getByRole('heading', { name: /Data Repair/ }).waitFor();
+        const accountRow = page.getByRole('row').filter({ hasText: 'Account' });
+        await accountRow.getByRole('button', { name: 'Preview', exact: true }).click();
+        await page.getByText(/Preview only: Full Account apply is unavailable/).waitFor();
+        assert.equal(
+          await page.getByRole('button', { name: 'Apply repair', exact: true }).count(),
+          0,
+        );
         const history = await page.getByRole('table').last().innerText();
         assert.match(history, /approval-reconcile/);
         assert.match(history, /applied/);
         return {
-          observation: 'audited history contains previewed and applied Approval Adj runs',
-          expected: 'history retained',
+          observation:
+            'advanced Data Repair shows shared history and suppresses Apply for full Account',
+          expected: 'history retained; preview-only capability honored',
         };
       },
     ),
@@ -339,27 +377,11 @@ export const dataRefresh = {
       'MS_UPDATE.cs:2042-2050,2334-2342,2671-2679; owner adaptation gates all six through Data Refresh Print',
       'G225 remains open: existing Data Repair routes are admin-only, but the exact Data Refresh caption FRM_PRINT handoff requires active-owned route-policy/form-catalog work.',
     ),
-    C(
-      'concurrency.parallel-previews',
+    blocked(
+      'concurrency.voucher-save-during-apply',
       'T12',
-      'read-only',
-      'D-REF-2: independent sessions may preview the same stable candidate set without business writes',
-      async (ctx) => {
-        await seedApproval(ctx);
-        const sessions = await Promise.all([
-          ctx.session(as(USERS.admin.user, 'refresh-c1')),
-          ctx.session(as(USERS.admin.user, 'refresh-c2')),
-        ]);
-        for (const session of sessions) await openScreen(session.page);
-        const previews = await Promise.all(
-          sessions.map((session) => previewApproval(session.page)),
-        );
-        assert.equal(previews[0].previewHash, previews[1].previewHash);
-        return {
-          observation: 'parallel sessions received the same candidate hash',
-          expected: previews[0].previewHash,
-        };
-      },
+      'D-REF-2: a voucher saved while Approval Adj applies must invalidate the reviewed set without losing the voucher',
+      'X27/P11-01: the browser stack has no approved synchronization hook at the apply lock; parallel previews are not accepted as a substitute for the required save/apply race.',
     ),
     C(
       'retry.replay-hash-deduplicates',
@@ -401,11 +423,11 @@ export const dataRefresh = {
         const sentinels = result.after.filter((row) => String(row.tag).includes('OTHER-LC'));
         assert.deepEqual(
           sentinels.map((row) => row.flag),
-          ['N', 'Y'],
+          ['Y', 'N'],
         );
         return {
-          observation: 'wrong-location issue and tag remained unchanged',
-          expected: ['N', 'Y'],
+          observation: 'wrong-location issue and tag remained in deliberately opposite states',
+          expected: ['Y', 'N'],
           database: sentinels,
           downstream: 'selected location only',
         };

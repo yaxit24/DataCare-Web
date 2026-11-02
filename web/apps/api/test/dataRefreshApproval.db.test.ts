@@ -94,6 +94,7 @@ db('Data Refresh Approval Adj write set', () => {
         await issue(tx, tenantId, index, index < 5 ? 'N' : 'Y');
       for (let index = 1; index <= 5; index++)
         await bar(tx, tenantId, index, index < 5 ? 'Y' : 'N');
+      await bar(tx, tenantId, 6, 'Y', { tag: 'UNRELATED' });
       await reference(tx, 'APR_DETL', 'APR RTN', 1);
       await reference(tx, 'SL_DETL', 'SALES', 2);
       await reference(tx, 'RATE_CUT_ISU', 'WH SALES', 3);
@@ -103,18 +104,18 @@ db('Data Refresh Approval Adj write set', () => {
       await reference(tx, 'SL_DETL', 'SALES', 5, { lc: '02' });
       await reference(tx, 'APR_DETL', 'APR RTN', 5, { isuNo: '' });
       // Same visible keys outside the selected location/year/company and tenant must remain byte-for-byte.
-      await issue(tx, tenantId, 8, 'N', { lc: '02', tag: 'WRONG-LC' });
-      await bar(tx, tenantId, 8, 'Y', { lc: '02', tag: 'WRONG-LC' });
-      await issue(tx, tenantId, 9, 'N', { year: '2023-2024', tag: 'WRONG-YR' });
-      await bar(tx, tenantId, 9, 'Y', { year: '2023-2024', tag: 'WRONG-YR' });
-      await issue(tx, tenantId, 10, 'N', { co: '02', tag: 'WRONG-CO' });
-      await bar(tx, tenantId, 10, 'Y', { co: '02', tag: 'WRONG-CO' });
+      await issue(tx, tenantId, 8, 'Y', { lc: '02', tag: 'WRONG-LC' });
+      await bar(tx, tenantId, 8, 'N', { lc: '02', tag: 'WRONG-LC' });
+      await issue(tx, tenantId, 9, 'Y', { year: '2023-2024', tag: 'WRONG-YR' });
+      await bar(tx, tenantId, 9, 'N', { year: '2023-2024', tag: 'WRONG-YR' });
+      await issue(tx, tenantId, 10, 'Y', { co: '02', tag: 'WRONG-CO' });
+      await bar(tx, tenantId, 10, 'N', { co: '02', tag: 'WRONG-CO' });
     });
 
   const seedOther = () =>
     withTenant(prisma, otherTenant, async (tx: any) => {
-      await issue(tx, otherTenant, 1, 'N');
-      await bar(tx, otherTenant, 1, 'Y');
+      await issue(tx, otherTenant, 1, 'Y');
+      await bar(tx, otherTenant, 1, 'N');
     });
 
   const physical = async (tenant = tenantId) => {
@@ -129,6 +130,26 @@ db('Data Refresh Approval Adj write set', () => {
     return result;
   };
 
+  const tenantSnapshot = async (tenant = tenantId) => {
+    const names = await prisma.$queryRawUnsafe<Array<{ table_name: string }>>(
+      `SELECT DISTINCT c.table_name FROM information_schema.columns c
+         JOIN information_schema.tables t
+           ON t.table_schema=c.table_schema AND t.table_name=c.table_name
+        WHERE c.table_schema='public' AND c.column_name='tenant_id'
+          AND t.table_type='BASE TABLE' ORDER BY c.table_name`,
+    );
+    const result: Record<string, string[]> = {};
+    for (const { table_name: table } of names) {
+      const rows = await prisma.$queryRawUnsafe<Array<{ raw: string }>>(
+        `SELECT to_jsonb(t)::text AS raw FROM "${table}" t
+          WHERE tenant_id=$1 ORDER BY to_jsonb(t)::text`,
+        tenant,
+      );
+      result[table] = rows.map((row) => row.raw);
+    }
+    return result;
+  };
+
   beforeEach(wipe);
   afterAll(async () => {
     await wipe();
@@ -139,6 +160,7 @@ db('Data Refresh Approval Adj write set', () => {
     await seed();
     await seedOther();
     const before = await physical();
+    const completeBefore = await tenantSnapshot();
     const otherBefore = await physical(otherTenant);
 
     const preview = await previewRepair(prisma, 'approval-reconcile', scope, 'admin');
@@ -146,7 +168,7 @@ db('Data Refresh Approval Adj write set', () => {
     expect(preview.completionText).toBe('Approval Refersh Process Complete.');
     expect(preview.diffs).toEqual([
       { table: 'APR_DETL', insert: 0, update: 5, delete: 0 },
-      { table: 'BAR_DETL', insert: 0, update: 5, delete: 0 },
+      { table: 'BAR_DETL', insert: 0, update: 6, delete: 0 },
     ]);
 
     const applied = await applyRepair(prisma, 'approval-reconcile', scope, {
@@ -167,10 +189,27 @@ db('Data Refresh Approval Adj write set', () => {
         tenantId,
       ),
     }));
-    expect(oracle.issue.slice(0, 5).map((row: any) => row.flag)).toEqual(['Y', 'Y', 'Y', 'Y', 'N']);
-    expect(oracle.bar.slice(0, 5).map((row: any) => row.flag)).toEqual(['N', 'N', 'N', 'N', 'Y']);
-    expect(oracle.issue.slice(5).map((row: any) => row.flag)).toEqual(['N', 'N', 'N']);
-    expect(oracle.bar.slice(5).map((row: any) => row.flag)).toEqual(['Y', 'Y', 'Y']);
+    expect(Object.fromEntries(oracle.issue.map((row: any) => [row.tag, row.flag]))).toEqual({
+      TAG1: 'Y',
+      TAG2: 'Y',
+      TAG3: 'Y',
+      TAG4: 'Y',
+      TAG5: 'N',
+      'WRONG-LC': 'Y',
+      'WRONG-YR': 'Y',
+      'WRONG-CO': 'Y',
+    });
+    expect(Object.fromEntries(oracle.bar.map((row: any) => [row.tag, row.flag]))).toEqual({
+      TAG1: 'N',
+      TAG2: 'N',
+      TAG3: 'N',
+      TAG4: 'N',
+      TAG5: 'Y',
+      UNRELATED: 'N',
+      'WRONG-LC': 'N',
+      'WRONG-YR': 'N',
+      'WRONG-CO': 'N',
+    });
 
     const after = await physical();
     const changedKeys = (beforeRaw: string, afterRaw: string) => {
@@ -184,16 +223,24 @@ db('Data Refresh Approval Adj write set', () => {
       expect(changedKeys(before.APR_DETL[index]!.raw, after.APR_DETL[index]!.raw)).toEqual([
         'ISU_REC',
       ]);
+    }
+    for (let index = 0; index < 6; index++) {
       expect(changedKeys(before.BAR_DETL[index]!.raw, after.BAR_DETL[index]!.raw)).toEqual([
         'APR_ISU',
       ]);
     }
     expect(after.SL_DETL).toEqual(before.SL_DETL);
     expect(after.RATE_CUT_ISU).toEqual(before.RATE_CUT_ISU);
+    const completeAfter = await tenantSnapshot();
+    for (const table of Object.keys(completeBefore)) {
+      if (!['APR_DETL', 'BAR_DETL', 'data_repair_run'].includes(table)) {
+        expect(completeAfter[table], `unexpected write in ${table}`).toEqual(completeBefore[table]);
+      }
+    }
     expect(await physical(otherTenant)).toEqual(otherBefore);
     // Complete row JSON changes only where the source authorizes; unchanged-scope rows retain xmin too.
     expect(after.APR_DETL.slice(5)).toEqual(before.APR_DETL.slice(5));
-    expect(after.BAR_DETL.slice(5)).toEqual(before.BAR_DETL.slice(5));
+    expect(after.BAR_DETL.slice(6)).toEqual(before.BAR_DETL.slice(6));
 
     const history = await repairHistory(prisma, { tenantId, coCode: '01' });
     expect(history.filter((row) => row.state === 'applied')).toHaveLength(1);

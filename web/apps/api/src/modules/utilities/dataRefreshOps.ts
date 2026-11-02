@@ -90,15 +90,48 @@ registerRepair({
       scope.lcCode ?? '',
       scope.coYear ?? '',
     );
+    const returns: any[] = await tx.$queryRawUnsafe(
+      `SELECT concat_ws('/',r."CO_YEAR",r."CO_BOOK",r."VCH_NO",r."SR_NO") AS id,
+              r."TAG_NO" AS tag,r."VCH_SRNO" AS serial,
+              coalesce(r."ITM_FINE",0)::text AS stored,x.expected::text AS expected
+         FROM "SL_DETL_RTN" r
+         JOIN LATERAL (
+           SELECT round(CASE WHEN coalesce(b."ITM_NWT",0) <> 0
+                    THEN coalesce(b."ITM_NWT",0) *
+                         (coalesce(b."ITM_TOUCH",0) + coalesce(b."ITM_WEST_PRC",0)) / 100.0
+                    ELSE 0 END,3) AS expected
+             FROM "BAR_DETL" b
+            WHERE b.tenant_id=r.tenant_id AND b."CO_CODE"=$1
+              AND ($2::text='' OR b."LC_CODE"=$2) AND ($3::text='' OR b."CO_YEAR"=$3)
+              AND b."TAG_NO"=r."TAG_NO" AND b."VCH_SRNO"=r."VCH_SRNO"
+              AND (coalesce(b."ITM_TOUCH",0)+coalesce(b."ITM_WEST_PRC",0))<>0
+              AND coalesce(b."ITM_FINE",0)<=0
+            ORDER BY b.row_id LIMIT 1
+         ) x ON true
+        WHERE r.tenant_id=current_setting('app.tenant_id',true)
+          AND r."CO_CODE"=$1 AND ($2::text='' OR r."LC_CODE"=$2)
+          AND ($3::text='' OR r."CO_YEAR"=$3)
+          AND coalesce(r."ITM_FINE",0)<>x.expected
+        ORDER BY r."TAG_NO",r."VCH_SRNO",r."CO_YEAR",r."CO_BOOK",r."VCH_NO",r."SR_NO"`,
+      scope.coCode,
+      scope.lcCode ?? '',
+      scope.coYear ?? '',
+    );
+    const diffs: RepairTableDiff[] = [];
+    if (rows.length) diffs.push(diff('BAR_DETL', { update: rows.length }));
+    if (returns.length) diffs.push(diff('SL_DETL_RTN', { update: returns.length }));
     return {
-      diffs: rows.length ? [diff('BAR_DETL', { update: rows.length })] : [],
+      diffs,
       samples: [
         ...rows
-          .slice(0, 20)
+          .slice(0, 10)
           .map((r) => `BAR_DETL ${r.tag}/${r.serial}: ITM_FINE ${r.stored} -> ${r.expected}`),
+        ...returns
+          .slice(0, 10)
+          .map((r) => `SL_DETL_RTN ${r.tag}/${r.serial}: ITM_FINE ${r.stored} -> ${r.expected}`),
         blocked.stock,
       ],
-      candidateFingerprint: fingerprint(rows),
+      candidateFingerprint: fingerprint({ rows, returns }),
     };
   },
   apply: refuseApply(blocked.stock),
@@ -242,10 +275,11 @@ registerRepair({
   applyAvailable: false,
   blockedReason: blocked.image,
   completionText: 'Image Data Carete Process Complete.',
-  tables: ['TAG_IMAGE_DATA'],
+  tables: ['TAG_IMAGE_DATA', 'ENTITY_IMAGE'],
   async preview() {
     const samples = [
-      'TAG_IMAGE_DATA is committed with tenant/company/location/tag/serial identity.',
+      'TAG_IMAGE_DATA keeps committed tenant/company/location/tag/serial metadata identity.',
+      'ENTITY_IMAGE keeps committed tenant/company/location/entity/key/instance bytes and metadata.',
       'Legacy MOB_IMAGE, IMG_IMPORT and CONV_IMAGE flags have no proven web semantics.',
       blocked.image,
     ];

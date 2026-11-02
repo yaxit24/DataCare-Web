@@ -45,6 +45,7 @@ d('data repair console', () => {
   const TABLES = [
     'BAR_DETL',
     'SL_DETL',
+    'SL_DETL_RTN',
     'RATE_CUT_ISU',
     'MAIN_STOCK',
     'APR_DETL',
@@ -313,6 +314,50 @@ d('data repair console', () => {
       completionText: 'Approval Refersh Process Complete.',
       desktopSource: 'MS_UPDATE.cs:8809-8823',
     });
+  });
+
+  it('classifies exact Stock fine and matching sales-return anomalies but refuses full apply', async () => {
+    await withTenant(prisma, tenantId, async (tx: any) => {
+      await tx.$executeRawUnsafe(
+        `INSERT INTO "BAR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO",
+           "TAG_NO","VCH_SRNO","IT_CODE","ITM_NWT","ITM_TOUCH","ITM_WEST_PRC","ITM_FINE")
+         VALUES ($1,$2,$3,$4,'TAG','00001',1,'STKFINE',77,'GOLD',10,90,4,0)`,
+        tenantId,
+        CO,
+        LC,
+        YEAR,
+      );
+      await tx.$executeRawUnsafe(
+        `INSERT INTO "SL_DETL_RTN"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO",
+           "TAG_NO","VCH_SRNO","IT_CODE","ITM_FINE")
+         VALUES ($1,$2,$3,$4,'SRT','00001',1,'STKFINE',77,'GOLD',1)`,
+        tenantId,
+        CO,
+        LC,
+        YEAR,
+      );
+    });
+    const preview = await previewRepair(prisma, 'data-refresh-stock', scope, OPERATOR);
+    expect(preview.diffs).toEqual([
+      { table: 'BAR_DETL', insert: 0, update: 1, delete: 0 },
+      { table: 'SL_DETL_RTN', insert: 0, update: 1, delete: 0 },
+    ]);
+    expect(preview.applyAvailable).toBe(false);
+    await expect(
+      applyRepair(prisma, 'data-refresh-stock', scope, {
+        previewHash: preview.previewHash,
+        operator: OPERATOR,
+      }),
+    ).rejects.toMatchObject({ code: 'preview-only' });
+    const stored = await withTenant(prisma, tenantId, (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT "ITM_FINE" fine FROM "BAR_DETL" WHERE tenant_id=$1 AND "TAG_NO"='STKFINE'
+         UNION ALL
+         SELECT "ITM_FINE" FROM "SL_DETL_RTN" WHERE tenant_id=$1 AND "TAG_NO"='STKFINE'`,
+        tenantId,
+      ),
+    );
+    expect(stored.map((row: any) => Number(row.fine))).toEqual([0, 1]);
   });
 
   it('rebuilds opening balances with the desktop sign convention', async () => {
