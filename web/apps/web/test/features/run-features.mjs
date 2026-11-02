@@ -43,6 +43,7 @@ import { partyMaster } from './modules/partyMaster.mjs';
 import { tagPrint } from './modules/tagPrint.mjs';
 import { itemMaster } from './modules/itemMaster.mjs';
 import { wholesaleSale } from './modules/wholesaleSale.mjs';
+import { dataRefresh } from './modules/dataRefresh.mjs';
 import { accountLedger } from './modules/accountLedger.mjs';
 import { dataBackup } from './modules/dataBackup.mjs';
 import { gstReport } from './modules/gstReport.mjs';
@@ -90,6 +91,7 @@ const MODULES = [
   tagPrint,
   itemMaster,
   wholesaleSale,
+  dataRefresh,
   accountLedger,
   dataBackup,
   gstReport,

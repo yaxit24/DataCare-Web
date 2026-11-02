@@ -209,28 +209,15 @@
         "web/apps/api/src/routes/wholesaleSale.ts"
       ]
     },
-    "gstReport": {
+    "dataRefresh": {
       "covers": [
-        "web/apps/web/app/(app)/reports/gst-report/page.tsx",
-        "web/apps/web/app/(app)/reports/gst-report/useGstReport.ts",
-        "web/apps/web/app/(app)/reports/gst-report/GstReportGrid.tsx",
-        "web/apps/web/app/(app)/reports/gst-report/types.ts",
-        "web/apps/web/lib/nav.ts",
-        "web/apps/api/src/modules/reports/gstLauncherReport.ts",
-        "web/apps/api/src/modules/reports/gstReport.ts",
-        "web/apps/api/src/modules/reports/gstReportTypes.ts",
-        "web/apps/api/src/modules/reports/gstReportSections.ts",
-        "web/apps/api/src/modules/reports/gstReportQueries.ts",
-        "web/apps/api/src/modules/reports/gstReportCsv.ts",
-        "web/apps/api/src/modules/gst/gst.ts",
-        "web/apps/api/src/modules/gst/gstr1Doc.ts",
-        "web/apps/api/src/modules/reports/reports.ts",
-        "web/apps/api/src/modules/reports/reports2.ts",
-        "web/apps/api/src/modules/reports/reports3.ts",
-        "web/apps/api/src/modules/reports/statementDocs.ts",
-        "web/apps/api/src/modules/rbac/routePolicy.ts",
-        "web/apps/api/src/routes/gstReport.ts",
-        "web/apps/api/src/routes/txn.ts"
+        "web/apps/web/app/(app)/utilities/data-refresh/page.tsx",
+        "web/apps/web/app/(app)/utilities/data-repair/page.tsx",
+        "web/apps/api/src/modules/utilities/dataRepair.ts",
+        "web/apps/api/src/modules/utilities/dataRepairOps.ts",
+        "web/apps/api/src/modules/utilities/dataRefreshOps.ts",
+        "web/apps/api/src/modules/shared/postingAccounts.ts",
+        "web/apps/api/src/routes/dataRepair.ts"
       ]
     },
     "stockAdjust": {
@@ -274,6 +261,30 @@
         "web/apps/web/app/(app)/txn/tag-print/page.tsx",
         "web/apps/api/src/modules/stock/tagPrintScreen.ts",
         "web/apps/api/src/routes/tagPrintScreen.ts"
+      ]
+    },
+    "gstReport": {
+      "covers": [
+        "web/apps/web/app/(app)/reports/gst-report/page.tsx",
+        "web/apps/web/app/(app)/reports/gst-report/useGstReport.ts",
+        "web/apps/web/app/(app)/reports/gst-report/GstReportGrid.tsx",
+        "web/apps/web/app/(app)/reports/gst-report/types.ts",
+        "web/apps/web/lib/nav.ts",
+        "web/apps/api/src/modules/reports/gstLauncherReport.ts",
+        "web/apps/api/src/modules/reports/gstReport.ts",
+        "web/apps/api/src/modules/reports/gstReportTypes.ts",
+        "web/apps/api/src/modules/reports/gstReportSections.ts",
+        "web/apps/api/src/modules/reports/gstReportQueries.ts",
+        "web/apps/api/src/modules/reports/gstReportCsv.ts",
+        "web/apps/api/src/modules/gst/gst.ts",
+        "web/apps/api/src/modules/gst/gstr1Doc.ts",
+        "web/apps/api/src/modules/reports/reports.ts",
+        "web/apps/api/src/modules/reports/reports2.ts",
+        "web/apps/api/src/modules/reports/reports3.ts",
+        "web/apps/api/src/modules/reports/statementDocs.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/routes/gstReport.ts",
+        "web/apps/api/src/routes/txn.ts"
       ]
     }
   }

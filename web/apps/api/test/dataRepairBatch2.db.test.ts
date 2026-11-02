@@ -2,6 +2,7 @@ import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import {
+  applyRepair,
   confirmationFor,
   getRepair,
   listRepairs,
@@ -428,6 +429,87 @@ d('data repair operations (batch 2)', () => {
         rec2.map((r) => r.LEDR_KEY),
         'rebuild must not duplicate',
       ).toEqual(['K1']);
+    });
+
+    it('binds same-count Account previews to complete candidate identity and rejects the stale prefix hash', async () => {
+      await run(async (tx: any) => {
+        await tx.$executeRawUnsafe(
+          `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","DATA_TYPE")
+           VALUES ($1,$2,$3,'901','First candidate','')`,
+          tenantId,
+          CO,
+          LC,
+        );
+        await tx.$executeRawUnsafe(
+          `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","DATA_TYPE")
+           VALUES ($1,$2,$3,'901',1,'BANK1',NULL)`,
+          tenantId,
+          CO,
+          LC,
+        );
+        await tx.$executeRawUnsafe(
+          `INSERT INTO "CASH_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO",
+               "VCH_DATE","CLR_DATE")
+           VALUES ($1,$2,$3,$4,'CSH','00001',1,'2024-06-10'::date,NULL)`,
+          tenantId,
+          CO,
+          LC,
+          YR,
+        );
+        await tx.$executeRawUnsafe(
+          `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","AC_CODE","AC_NAME","AC_GR")
+           VALUES ($1,$2,'BANK1','Bank','02')`,
+          tenantId,
+          CO,
+        );
+        await tx.$executeRawUnsafe(
+          `INSERT INTO "AC_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO",
+               "VCH_DATE","AC_CODE","LEDR_KEY","CLR_DATE","DR_AMT","CR_AMT")
+           VALUES ($1,$2,$3,$4,'CSH','00001','2024-06-10'::date,'BANK1','K1','2024-06-10'::date,100,0)`,
+          tenantId,
+          CO,
+          LC,
+          YR,
+        );
+        await tx.$executeRawUnsafe(
+          `INSERT INTO "BANK_RECONCILE"(tenant_id,"CO_CODE","LC_CODE","LEDR_KEY","CLR_DATE")
+           VALUES ($1,$2,$3,'STALE','2020-01-01'::date)`,
+          tenantId,
+          CO,
+          LC,
+        );
+      });
+
+      const prefixBefore = await previewRepair(prisma, 'ledger-normalise', scope, OPERATOR);
+      const accountBefore = await previewRepair(prisma, 'data-refresh-account', scope, OPERATOR);
+
+      await run(async (tx: any) => {
+        await tx.$executeRawUnsafe(
+          `UPDATE "BOOK_DATA" SET "DATA_TYPE"='A'
+            WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"='901'`,
+          tenantId,
+          CO,
+          LC,
+        );
+        await tx.$executeRawUnsafe(
+          `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","DATA_TYPE")
+           VALUES ($1,$2,$3,'904','Replacement candidate','')`,
+          tenantId,
+          CO,
+          LC,
+        );
+      });
+
+      const accountAfter = await previewRepair(prisma, 'data-refresh-account', scope, OPERATOR);
+      expect(accountAfter.diffs).toEqual(accountBefore.diffs);
+      expect(accountAfter.samples).toEqual(accountBefore.samples);
+      expect(accountAfter.previewHash).not.toBe(accountBefore.previewHash);
+      await expect(
+        applyRepair(prisma, 'ledger-normalise', scope, {
+          previewHash: prefixBefore.previewHash,
+          operator: OPERATOR,
+        }),
+      ).rejects.toMatchObject({ code: 'stale-preview' });
     });
 
     it('scopes the reconciliation delete, unlike the desktop', async () => {

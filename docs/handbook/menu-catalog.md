@@ -129,12 +129,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `MS_UPDATE` — direct constructor ([MDI_FORM.cs:7461-7470](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7461-L7470)).
 - **Does:** Rebuilds or repairs derived ledger, stock, schema, image, scheme and manufacturing data.
-- **Looks:** Maintenance console of module buttons; the web shows integrity results and preview/apply repair tables.
-- **Writes:** AC_DATA, MAIN_STOCK, BAR_DETL, BOOK_DATA, TAX_DATA, OP_DATA, MFG_DATA.
+- **Looks:** Six operator actions in desktop tab order: Account, Stock, Field Update, Approval Adj, Image Data and Old Field; each opens an audited preview and only Approval Adj can apply in PR-1.
+- **Writes:** APR_DETL, SL_DETL, RATE_CUT_ISU, BAR_DETL, AC_DATA, MAIN_STOCK, BOOK_DATA, CASH_DATA, BANK_RECONCILE, TAG_IMAGE_DATA.
 - **Web:** `/utilities/data-refresh`, `/utilities/data-repair`; `POST /utilities/data-refresh`, `GET /utilities/data-repair/operations`, `POST /utilities/data-repair/:id/preview`, `POST /utilities/data-repair/:id/apply`. Can: create, list.
-- **Remaining:** Refresh deliberately avoids write-back; the repair registry covers a subset of desktop operations; ownership graph, rollback and recovery are unproven.
-- **Owners:** X27, P11-01, X06.
-- **Evidence:** [VARIANTS.md:99-119](../../web-implementation-spec/03_Modules/13_Utilities_Settings_Integrations/VARIANTS.md#L99-L119).
+- **Remaining:** Approval Adj has full preview/apply, exact two-table write-set, audit, rollback and replay proof. Account and Stock are explicit preview-only classifications until their complete builder graphs are proved; Field Update and Old Field await PR-2 classification; Image Data has no proved legacy-flag or byte-migration semantics; G225 Data Refresh caption Print handoff and desktop-runtime comparison remain open.
+- **Owners:** X27, P11-01, X06, N26, G225, N212.
+- **Evidence:** [MS_UPDATE.cs:2042-3047](../../unified/src/csharp/DataCareNext/MS_UPDATE.cs#L2042-L3047), [MS_UPDATE.cs:8809-9038](../../unified/src/csharp/DataCareNext/MS_UPDATE.cs#L8809-L9038), [data-refresh.md](../../docs/handbook/web/data-refresh.md).
 
 ### Location
 

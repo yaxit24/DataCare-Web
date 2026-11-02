@@ -1,4 +1,9 @@
+import {
+  selectDataRefreshAccountCandidatesTx,
+  type DataRefreshAccountCandidate,
+} from '../shared/postingAccounts.js';
 import { diff, registerRepair, type RepairScope, type RepairTableDiff } from './dataRepair.js';
+import './dataRefreshOps.js';
 
 /**
  * Repair operations ported from the desktop's `MS_UPDATE` maintenance console.
@@ -180,70 +185,7 @@ registerRepair({
 });
 
 // ---------------------------------------------------------------------------------------------------
-// approval-reconcile — MS_UPDATE.cs:8809-8824 (btnAprUpdate)
-//
-//   UPDATE APR_DETL SET ISU_REC = 'N' WHERE <company>
-//   UPDATE BAR_DETL SET APR_ISU = 'N' WHERE <company>
-//   UPDATE BAR_DETL SET APR_ISU = 'Y' FROM APR_DETL B
-//    WHERE BAR_DETL.CO_CODE=B.CO_CODE AND BAR_DETL.TAG_NO=B.TAG_NO AND BAR_DETL.VCH_SRNO=B.VCH_SRNO
-//
-// The desktop resets both flags and then re-asserts 'Y' for tags that still have an approval line. The
-// diff form computes the target state per tag and touches only rows that disagree, which yields the same
-// end state without rewriting every row in the company.
-// ---------------------------------------------------------------------------------------------------
-registerRepair({
-  id: 'approval-reconcile',
-  title: 'Reconcile approval (tour) status',
-  description:
-    'Recomputes the approval-issued flag on tag records from the approval detail lines, so tags released ' +
-    'on approval and tags returned show the correct status.',
-  desktopSource: 'MS_UPDATE.cs:8809-8824',
-  risk: 'medium',
-  tables: ['BAR_DETL'],
-  async preview(tx, scope) {
-    const rows: any[] = await tx.$queryRawUnsafe(
-      `SELECT b."TAG_NO", coalesce(b."APR_ISU",'') AS stored,
-              CASE WHEN EXISTS (
-                SELECT 1 FROM "APR_DETL" d
-                 WHERE d.tenant_id=b.tenant_id AND d."CO_CODE"=b."CO_CODE"
-                   AND d."TAG_NO"=b."TAG_NO" AND d."VCH_SRNO"=b."VCH_SRNO"
-              ) THEN 'Y' ELSE 'N' END AS expected
-         FROM "BAR_DETL" b
-        WHERE b.tenant_id=current_setting('app.tenant_id', true) AND b."CO_CODE"=$1
-          AND coalesce(b."APR_ISU",'') <> CASE WHEN EXISTS (
-                SELECT 1 FROM "APR_DETL" d
-                 WHERE d.tenant_id=b.tenant_id AND d."CO_CODE"=b."CO_CODE"
-                   AND d."TAG_NO"=b."TAG_NO" AND d."VCH_SRNO"=b."VCH_SRNO"
-              ) THEN 'Y' ELSE 'N' END
-        ORDER BY b."TAG_NO" LIMIT 200`,
-      scope.coCode,
-    );
-    return {
-      diffs: rows.length ? [diff('BAR_DETL', { update: rows.length })] : [],
-      samples: rows
-        .slice(0, 5)
-        .map((r) => `BAR_DETL ${r.TAG_NO}: APR_ISU ${r.stored || '(blank)'} -> ${r.expected}`),
-    };
-  },
-  async apply(tx, scope) {
-    const n: number = await tx.$executeRawUnsafe(
-      `UPDATE "BAR_DETL" b
-          SET "APR_ISU" = CASE WHEN EXISTS (
-                SELECT 1 FROM "APR_DETL" d
-                 WHERE d.tenant_id=b.tenant_id AND d."CO_CODE"=b."CO_CODE"
-                   AND d."TAG_NO"=b."TAG_NO" AND d."VCH_SRNO"=b."VCH_SRNO"
-              ) THEN 'Y' ELSE 'N' END
-        WHERE b.tenant_id=current_setting('app.tenant_id', true) AND b."CO_CODE"=$1
-          AND coalesce(b."APR_ISU",'') <> CASE WHEN EXISTS (
-                SELECT 1 FROM "APR_DETL" d
-                 WHERE d.tenant_id=b.tenant_id AND d."CO_CODE"=b."CO_CODE"
-                   AND d."TAG_NO"=b."TAG_NO" AND d."VCH_SRNO"=b."VCH_SRNO"
-              ) THEN 'Y' ELSE 'N' END`,
-      scope.coCode,
-    );
-    return n ? [diff('BAR_DETL', { update: n })] : [];
-  },
-});
+// Approval Adj is registered in dataRefreshOps.ts with the full APR_DETL consumed-source reconciliation.
 
 // ---------------------------------------------------------------------------------------------------
 // sale-tag-weight — MS_UPDATE.cs:32537-32560 (BtnSlWtDiff)
@@ -1083,61 +1025,41 @@ registerRepair({
   async preview(tx, scope) {
     const diffs: RepairTableDiff[] = [];
     const samples: string[] = [];
+    // Keep every candidate's stable scoped business key, physical identity, stored value and expected value.
+    // The complete ordered query is deliberately uncapped: display samples stay small, while the preview
+    // hash changes when one same-count candidate is replaced by another.
+    const candidates: DataRefreshAccountCandidate[] = await selectDataRefreshAccountCandidatesTx(
+      tx,
+      scope,
+      RECONCILE_AC_GROUPS,
+    );
+    const count = (part: string) => candidates.filter((row) => row.part === part).length;
+    const bookData = count('BOOK_DATA');
+    const bookDetail = count('BOOK_DETL');
+    const cash = count('CASH_DATA');
+    const currentReconcile = count('BANK_RECONCILE_CURRENT');
+    const expectedReconcile = count('BANK_RECONCILE_EXPECTED');
 
-    for (const table of ['BOOK_DATA', 'BOOK_DETL'] as const) {
-      // BOOK_DATA and BOOK_DETL carry no CO_YEAR column.
-      const s = scoped('t', scope, 1, { year: false });
-      const rows: any[] = await tx.$queryRawUnsafe(
-        `SELECT count(*)::int AS n FROM "${table}" t
-          WHERE t.tenant_id=current_setting('app.tenant_id', true)${s.sql}
-            AND coalesce(t."DATA_TYPE",'') = ''`,
-        ...s.params,
-      );
-      if (rows[0]?.n) {
-        diffs.push(diff(table, { update: rows[0].n }));
-        samples.push(`${table}: ${rows[0].n} book(s) get DATA_TYPE='A'`);
-      }
+    if (bookData) {
+      diffs.push(diff('BOOK_DATA', { update: bookData }));
+      samples.push(`BOOK_DATA: ${bookData} book(s) get DATA_TYPE='A'`);
     }
-
-    const sc = scoped('c', scope);
-    const cash: any[] = await tx.$queryRawUnsafe(
-      `SELECT count(*)::int AS n FROM "CASH_DATA" c
-        WHERE c.tenant_id=current_setting('app.tenant_id', true)${sc.sql}
-          AND c."CLR_DATE" IS NULL AND c."VCH_DATE" IS NOT NULL`,
-      ...sc.params,
-    );
-    if (cash[0]?.n) {
-      diffs.push(diff('CASH_DATA', { update: cash[0].n }));
-      samples.push(`CASH_DATA: ${cash[0].n} row(s) get CLR_DATE = VCH_DATE`);
+    if (bookDetail) {
+      diffs.push(diff('BOOK_DETL', { update: bookDetail }));
+      samples.push(`BOOK_DETL: ${bookDetail} book(s) get DATA_TYPE='A'`);
     }
-
-    // The reconciliation index is rebuilt wholesale, so the diff is "delete the existing, insert the derived".
-    const existing: any[] = await tx.$queryRawUnsafe(
-      `SELECT count(*)::int AS n FROM "BANK_RECONCILE" r
-        WHERE r.tenant_id=current_setting('app.tenant_id', true)
-          AND r."CO_CODE"=$1 AND ($2::text='' OR r."LC_CODE"=$2)`,
-      scope.coCode,
-      scope.lcCode ?? '',
-    );
-    const derived: any[] = await tx.$queryRawUnsafe(
-      `SELECT count(*)::int AS n FROM "AC_DATA" a
-        JOIN "AC_MAST" b ON b.tenant_id=a.tenant_id AND b."CO_CODE"=a."CO_CODE"
-             AND b."AC_CODE"::text=a."AC_CODE"::text
-       WHERE a.tenant_id=current_setting('app.tenant_id', true)
-         AND a."CO_CODE"=$1 AND ($2::text='' OR a."LC_CODE"=$2)
-         AND b."AC_GR" = ANY($3::text[])`,
-      scope.coCode,
-      scope.lcCode ?? '',
-      [...RECONCILE_AC_GROUPS],
-    );
-    if (existing[0]?.n) diffs.push(diff('BANK_RECONCILE', { delete: existing[0].n }));
-    if (derived[0]?.n) diffs.push(diff('BANK_RECONCILE', { insert: derived[0].n }));
-    if (existing[0]?.n || derived[0]?.n) {
+    if (cash) {
+      diffs.push(diff('CASH_DATA', { update: cash }));
+      samples.push(`CASH_DATA: ${cash} row(s) get CLR_DATE = VCH_DATE`);
+    }
+    if (currentReconcile) diffs.push(diff('BANK_RECONCILE', { delete: currentReconcile }));
+    if (expectedReconcile) diffs.push(diff('BANK_RECONCILE', { insert: expectedReconcile }));
+    if (currentReconcile || expectedReconcile) {
       samples.push(
-        `BANK_RECONCILE: replace ${existing[0]?.n ?? 0} row(s) with ${derived[0]?.n ?? 0} derived from the ledger`,
+        `BANK_RECONCILE: replace ${currentReconcile} row(s) with ${expectedReconcile} derived from the ledger`,
       );
     }
-    return { diffs, samples };
+    return { diffs, samples, candidateFingerprint: JSON.stringify(candidates) };
   },
   async apply(tx, scope) {
     const applied: RepairTableDiff[] = [];
