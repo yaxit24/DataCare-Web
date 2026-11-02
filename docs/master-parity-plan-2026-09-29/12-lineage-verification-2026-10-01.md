@@ -216,7 +216,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G203 | Med | A cheque receipt or payment lost its cheque number on the ledger | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/api/src/modules/finance/finance.ts` | Found by `cash-bank.create.cheque-receipt`: the cheque number was saved on CASH_DATA but every AC_DATA leg had an empty CHQ_NO, while the desktop `Bank_Ledr` (`Ac_Ledr.cs:585-593`) writes `A.CHQ_NO` on each leg; bank reconciliation and cheque reports read it from the ledger. | N193 |
 | G204 | High | Contra Entry was a fixed two-account form, not the desktop grid | `unified/src/csharp/DataCareNext/TR_CONTRA.cs` | `web/apps/web/app/(app)/txn/contra/page.tsx` | Found while writing the contra module: the desktop grid holds any number of rows and writes a CONTRA_DATA pair per row against row 1 (`TR_CONTRA.cs:2760-2866`), one Contra_Ledr leg per row, and refuses unequal totals with its own message (`:2694`); the web took one Dr and one Cr account, wrote one row with both amounts and used its own wording. A shop could not deposit cash into two banks in one voucher. | N194 |
 | G205 | High | Sales Order line priced on fine weight with paise | `unified/src/csharp/DataCareNext/TR_SALE_ORD.cs` | `web/apps/api/src/modules/sales/salesOrder.ts`; `web/apps/web/lib/salesOrderForm.ts` | Found by `sales-order.formula.whole-rupees` and `sales-order.create.amounts`. The desktop prices a line's metal as weight × rate rounded to whole rupees, the weight following SL_AMT_TYPE: fine for F, gross for G, otherwise net + ghat (`TR_SALE_ORD.cs:6560-6672`). The bill takes tax as round(net × %, 0) and the total as round(net + tax, 0) (`:11340-11342`). The web always uses the fine weight and keeps paise (`salesOrder.ts` `calculateOrderLine`, `fineWt` then `round2(fine × rate)`), and `billTotals` runs without a rounding policy, so tax keeps paise. Net 10 g, touch 91.6, rate 6,123.45, labour 237.5 /g on a company with SL_AMT_TYPE N: desktop 61,234 + 2,375 = 63,609, tax 1,908, total 65,517; web 56,090.80 + 2,375 = 58,465.80, tax 1,753.97, total 60,220. | N196 |
-| G206 | Med | Sales Order takes one cash advance and stores no tender breakdown | `unified/src/csharp/DataCareNext/TR_SALE_ORD.cs`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/web/app/(app)/txn/sales-order/page.tsx`; `web/apps/api/src/modules/sales/salesOrder.ts` | Found by `sales-order.create.header-tender` and `sales-order.create.tender-modes`. The desktop advance is the sum of its tender rows: cash, UPI, cheque, card, old gold, old silver and scheme (`TR_SALE_ORD.cs:11368`); each is stored on SL_ORD_DATA (`:9126-9142`: CASH_AMT, UPI_AMT, CHQ_AMT, CARD_AMT, OLD_GL_AMT, OLD_SL_AMT, SCHM_AMT) and Order_Ledr posts each to its own account (`Ac_Ledr.cs:28-61`, legs 01-06 and 12-13). The web screen has one Advance amount, saved as ADV_AMT with CASH_AMT 0, and shows the other tender fields read-only. | N197 |
+| G206 | Med | Sales Order takes one cash advance and stores no tender breakdown | `unified/src/csharp/DataCareNext/TR_SALE_ORD.cs`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/web/app/(app)/txn/sales-order/page.tsx`; `web/apps/api/src/modules/sales/salesOrder.ts` | Found by `sales-order.create.header-tender` and `sales-order.create.tender-modes`. The desktop advance is the sum of its tender rows: cash, UPI, cheque, card, old gold, old silver and scheme (`TR_SALE_ORD.cs:11368`); each is stored on SL_ORD_DATA (`:9126-9142`: CASH_AMT, UPI_AMT, CHQ_AMT, CARD_AMT, OLD_GL_AMT, OLD_SL_AMT, SCHM_AMT) and Order_Ledr posts each to its own account (`Ac_Ledr.cs:28-61`, legs 01-06 and 12-13). The web screen has one Advance amount, saved as ADV_AMT with CASH_AMT 0, and shows the other tender fields read-only. | N197, N222 |
 | G207 | Med | Order advance debits the sales account on a provisioned company | `unified/src/csharp/DataCareNext/Ac_Ledr.cs`; `unified/src/csharp/DataCareNext/Ac_Rojmel.cs` | `web/apps/api/src/modules/ops/seedCompany.ts` | Found by `sales-order.create.advance-ledger`: a 5,000 cash advance posts Dr SALES / Cr customer. Order_Ledr debits the order book's BOOK_DETL slot 1 with CASH_AMT (`Ac_Ledr.cs:28-35`) and Order_Rojmel uses slot 1 as the advance contra (`Ac_Rojmel.cs:11`); on the real data slot 1 of book 020 is 00001, the cash account (recorded in `salesOrder.ts`). `seedCompany.ts:219` gives the SOR book the sale layout (1 SALES, 2 CASH, 3 ROUNDOFF). | N198 |
 | G208 | Med | A sale cannot adjust an order advance on a provisioned company | `unified/src/csharp/DataCareNext/Ac_Rojmel.cs` | `web/apps/api/src/modules/ops/seedCompany.ts`; `web/apps/api/src/modules/sales/sales.ts` | Found by `sales-order.journey.order-to-sale`: Sales Invoice with Ord No and Order Amt answers 400 "book SL account row 4 is missing". Sales_Rojmel posts the sale's ADV_AMT against BOOK_DETL slot 4 (`Ac_Rojmel.cs:96`) and `sales.ts` resolves slot 4 when an advance applies, but provisioned sale books get slots 1-3 only. | N198 |
 | G209 | High | Party Opening was a balanced multi-account voucher, not the desktop's per-party opening | `unified/src/csharp/DataCareNext/TR_AC_OPBL.cs`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/web/app/(app)/txn/ac-opbl/page.tsx`; `web/apps/api/src/modules/finance/partyOpening.ts` | Found while writing the Party Opening case list: the desktop keeps one OP_DATA row per party in book '000' with Cr/Dr signs (`TR_AC_OPBL.cs:2694-2722`) and posts it through AcOp_Ledr (`Ac_Ledr.cs:9-28`) as up to six legs dated the day before the year opens. The web numbered an 'ACO' voucher, demanded that debits equal credits, wrote no OP_DATA and had no reopen, edit, list or desktop messages, so a shop could not enter one party's opening on its own. The balanced-voucher module is removed. | N199 |
@@ -245,6 +245,9 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G232 | High | Auto Item reversed the desktop's item code, offered the default products and had no group help, grid keys, MinStk, rights or most columns | `unified/src/csharp/DataCareNext/MS_AUTO_ITEM.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7640-7649` | `web/apps/web/app/(app)/masters/auto-item/page.tsx`; `web/apps/api/src/modules/masters/autoItem.ts`; `web/apps/api/src/routes/txn.ts` | MS_AUTO_ITEM's AutoItem mode lists the company's products but the default ones for a group chosen from its help, marks the ones the group already has, and makes PR_CODE + GR_CODE items named product name + group code with the desktop's columns, under the edit right (`MS_AUTO_ITEM.cs:1640-3493`). The web made GR_CODE + PR_CODE items named group + product, wrote eight columns, offered every product including the default ones, and had no group help, grid keys, MinStk, rights or Print and Delete checks. | N219 |
 | G233 | High | Wh Sales saved what TR_WH_SALE refuses, and had no print | `unified/src/csharp/DataCareNext/TR_WH_SALE.cs:12779-12896`, `:13553-13592`, `:13654-13800`; `unified/src/csharp/DataCareNext/TR_TOUR_SALE.cs:10585-10690` | `web/apps/api/src/modules/sales/rateCut.ts`; `web/apps/web/components/WholesaleVoucherForm.tsx` | TR_WH_SALE refuses a save for a defaulter party left owing, a missing mandatory employee, a new voucher in a type-B company, a cheque or card amount without its bank account, a date outside the year, a date on or before the lock date and a grid row with weight or value but no item code, each with its own text, before it writes. The web saved every one of them: a cheque without a bank posted to the cash slot, an item-less receive row posted as received fine, and the lock date was refused with web wording. The delete asked a web question and Print (WhSalesBill) did not exist. | N220 |
 | G234 | High | Stock Adjust was a separate writer citing a desktop form that does not exist, posting stock rows the desktop never writes, with no register, sign rule, lot columns, reopen or print | `unified/src/csharp/DataCareNext/TR_TAG_CAN.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:8616-8627`; `unified/src/csharp/DataCareNext/Ac_Stock.cs:48-58`; `unified/src/csharp/DataCareNext/MS_UPDATE.cs:24207` | `web/apps/web/app/(app)/txn/stock-adjust/page.tsx`; `web/apps/api/src/modules/stock/stock.ts`; `web/apps/api/src/modules/ops/seedCompany.ts` | The Stock Adjust menu opens TR_TAG_CAN on a STOCK ADJUST book: the Tag Cancel grid with a + / - Sign column and optional lot columns, a signed register, MAIN_STOCK rows in or out by sign, LOT_DETL rows for a lot, reopen, edit, delete and TagCanBill (`TR_TAG_CAN.cs:2514-5440`, `Ac_Stock.cs:53`, `:642-646`). The web had its own writer that cited a form TR_STK_ADJ, posted MAIN_STOCK rows with VCH_TYPE STADJ, BOOK_NAME STOCK ADJ and TR_TYPE A and no register, so nothing could be reopened or printed; and it provisioned the book as an in book with its code as the short name. | N221 |
+| G235 | High | The Ledger Report was a single-account money statement with the wrong balance sign and none of the desktop's summary, drill-down, ageing or metal columns | `unified/src/csharp/DataCareNext/RP_LEDR.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:8871-8880` | `web/apps/api/src/modules/accounting/accounting.ts`; `web/apps/web/app/(app)/reports/[report]/page.tsx` | RP_LEDR is an account-summary screen (DGV_AC) that drills into a per-voucher or per-ledger-key detail (DGV_VCH/DGV_DETL) and a debit-ageing view (DGV_MONTH), reporting money AND signed gold/silver fine. The summary nets money as Σ(CR−DR), gold/silver as signed fine, splits a negative net to Dr and a positive net to Cr, and drops display-zero rows unless With Zero; detail keeps a running Σ(Cr)−Σ(Dr) balance with its side; voucher summary keeps gross Dr/Cr; ageing consumes the oldest debit first (`RP_LEDR.cs:6408-6435,6862-7266,7694-8205,9514-10314`). The web answered only `/reports/account-ledger/:acCode` with a money statement whose running balance used DR−CR (the opposite sign) and had no summary, drill-down, ageing, metal columns, selectors or Excel/CSV export. | N223 |
+| G236 | High | The Party menu opened a generic page that skipped MS_ACCT's rules | `unified/src/csharp/DataCareNext/MS_ACCT.cs:5584-6587`, `:6606-7648`, `:7650-8025`, `:8162-8574`, `:9024-9640`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7600-7609` | `web/apps/web/app/(app)/masters/party/page.tsx`; `web/apps/api/src/modules/masters/master.service.ts` | Master → Party opens MS_ACCT: the location's Code / Name / Mobile list, the next code of the location, Company Detail and Other Detail with Enter in the form's tab order, the group, mobile, second mobile, short name, GST number, main account and reference checks, a new entry's opening (OP_DATA book 000 and the AcOp_Ledr legs), the AC_MAST_SRNO row, the photo, the D, S and A copy helps, Print and Delete with their refusals. The web's Party page saved only code, name, khata, mobile and group through the generic master (no group or default-account rule, no name check), set the opening through a second request after the account, had no delete or print, and AC_MAST lacked the five columns the desktop's updater adds (LCS_NO, TRN_DATE, CUST_ID_DATE, AC_WITH_MEMB_COM, AC_SHARE_HOLDER_COM). | N224 |
+| G237 | High | Tag Print listed tags by range and skipped UT_TAG_PRINT's voucher, group and stock selection | `unified/src/csharp/DataCareNext/UT_TAG_PRINT.cs:1816-2077`, `:4735-5013`, `:5073-5226`, `:5284-5403`, `:5499-5635`, `:5636-5666`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:8596-8605` | `web/apps/web/app/(app)/txn/tag-print/page.tsx`; `web/apps/api/src/modules/stock/tagPrint.ts` | Other → Tag Print opens UT_TAG_PRINT: Book and Vch No fill the grid with a voucher's tags, Gr Code, Pr Code and Item Type with the in-stock tags, a typed tag is looked up in the stock, Y/N and Ctrl+D choose the rows, Hm Id Update edits the four HM ids, weights, LRate, Mrp and Lbr%, Set marks the default label file, and Print copies each Y row's BAR_DETL row after the Lable Skip blanks. The web page listed in-stock tags by counter, item and tag range, had no voucher, group, product or item-type selection, no Y/N, no Hm Id Update and no default file, and its print staged by voucher only. | N225 |
 
 ## 4. Decisions D23–D28
 
@@ -2811,9 +2814,15 @@ APR_DATA and BAR_DATA have neither column and still list 0.
 Deliberate differences: none in behaviour. The web also checks the year on the server for the multi-party receipt
 and the multi-line writers, which the desktop reaches through the same TR_CASH save.
 
-Open, recorded elsewhere: the generic Contra Register grid prints `2026-11-01T00:00:00.000Z` instead of `01/11/2026`
-(G37 / N57, baselined in the `contra` module); the double-click cases prove one voucher per double-click only, not the
-durable idempotency of N52 (D18).
+Bounded G37 / N57 follow-up (2026-11-01), implemented-unverified: the generic report grid now applies an explicit date
+descriptor only to `contra-register.date`, displaying the stored calendar date as `dd/MM/yyyy` through the shared
+formatter. The zero-mock `contra.report.contra-register` baseline entry is removed; its existing T16 case still asserts
+the date, both accounts and the amount. Desktop authority is the voucher-date mask `00/00/0000`
+(`unified/src/csharp/DataCareNext/TR_CONTRA.cs:1092-1098`) and the Contra F1 projection using SQL Server style 103
+(`TR_CONTRA.cs:3136-3162`). Broad N57 / G37 remains planned and open for typed descriptors across reports, Indian
+number grouping, authoritative totals and identical screen/PDF/CSV/XLSX output; G81 also remains open. This bounded
+change is not accepted or verified. The double-click cases prove one voucher per double-click only, not the durable
+idempotency of N52 (D18).
 
 Evidence: `finance.test.ts` proves an out-of-year create reads YEAR_MAST and takes no numbering lock.
 `cashReceiptLegs.db.test.ts`, `batchReceiptLifecycle.db.test.ts` and `contraDelete.db.test.ts` refuse out-of-year
@@ -2950,6 +2959,48 @@ CHG22 reopened from the list with the product, group and code read-only, and Alt
 KR_FINE 9.350 and DT2's wastage to 1.5 with KR_FINE 4.655; RG with G22 again asked the desktop question, No cleared the
 group and Yes cleared the code and name; a typed CHG22 was refused on leave; Print did nothing; RGG22 was deleted after
 the question; Esc left the screen. Desktop-runtime comparison and parent acceptance remain open.
+
+### N223 — The Ledger Report is the desktop RP_LEDR screen (G235, Lite L-report)
+
+Report → Ledger Report opens RP_LEDR (`MDI_FORM.cs:8871-8880`). The desktop form is an account-summary screen first and a
+drill-down second. The summary grid (DGV_AC, `AcSumm` `RP_LEDR.cs:6403-6435`) lists one row per account with a money
+balance of Σ(CR_AMT−DR_AMT), a gold balance of the signed FINE_WT where IT_TYPE='G' (SIGN '+' adds, any other sign
+subtracts) and the same for silver; a negative net shows as an absolute Dr column and a positive net as an absolute Cr
+column (`:6408,6417,6426`). The nonzero mode drops a row whose displayed components are all zero; With Zero keeps it; the
+opening-only mode balances before the company opening date (`:6415-6433`). Double-clicking an account drills into its
+ledger detail (DGV_DETL, `DGV_DETL_FILL` `:6862-7266`): an opening balance strictly before the From date, the inclusive
+period's rows netted per book/voucher/ledger-key then split into Dr/Cr, and a running Σ(Cr)−Σ(Dr) balance labelled
+Cr (positive), Dr (negative) or blank (`:6989-7160`). The voucher-summary variant (DGV_VCH, `:7694-8205`) keeps gross
+Dr/Cr and gross +/- fine per complete voucher. The time-wise view (DGV_MONTH, `TimeLedr_Dr` `:9514-10314`) ages each
+account's debit into the buckets 0-15, 16-30, 31-45, 46-60, 61-90, 91-120, 121-150 and 151+, consuming the oldest debit
+first with the account's total credit, for money and the selected fine independently. The desktop prints the summary and
+the selected account and exports the active grid to Excel.
+
+The web now serves all of this from one read-only resolver. `web/apps/api/src/modules/reports/accountLedgerReport.ts`
+answers the four views (summary, detail, voucher-summary, ageing) with the desktop sign conventions and totals; the route
+plugin `web/apps/api/src/routes/accountLedger.ts` exposes the canonical screen `GET /reports/account-ledger`
+(view/acCode/from/to/dataType/withZero/fineType selectors) and its `export.pdf`, `export.xlsx` and `export.csv`, all from
+the same dataset, keeping the two account-in-path aliases so the earlier screen and its PDF keep working. The dedicated
+page `web/apps/web/app/(app)/reports/account-ledger/page.tsx` (with `useAccountLedger.ts` and `AccountLedgerGrid.tsx`)
+offers the selectors, the account lookup, one primary Run action, the account summary and drill-down grids with their
+totals, debit ageing, and Print/PDF/Excel/CSV, with Enter running and Esc leaving a drill-down back to the summary.
+
+Deliberate differences: the balance sign is the desktop's Σ(CR−DR) (the old web statement used DR−CR); the zero test is
+numeric at display precision, not a comparison of SQL FORMAT strings; the four views have stable tie-break ordering the
+desktop lacks (account code for the summary; book, voucher and row for the drill-down); the youngest ageing bucket is
+bounded by the as-of date and ageing is scoped to the requested location, fixing two desktop defects (future-dated rows
+leaking into 0-15, and the OP_LDR presence test using a different location); the desktop's OP_LDR opening-ledger union and
+its staging-table gold/silver fine PRINTS (which DELETE and repopulate a shared table) are not reproduced, because an
+unscoped staging write is unsafe in a multi-tenant web app.
+
+Evidence: `accountLedgerReport.test.ts` (pure vectors for the sign split, the running balance and the FIFO ageing from the
+desktop-derived scenarios, and the query parser's refusals) and `accountLedgerReport.db.test.ts` (through the real routes
+on forced RLS: the summary sign split and zero-row drop, With Zero, the voucher-summary gross netting with aggregated
+remarks, the detail opening and running balance, the FIFO ageing, the PDF/Excel/CSV exports, the account-in-path alias,
+the invalid-request and missing-account refusals, the view-vs-print rights, and a same-number sentinel in another tenant
+untouched). `routePolicy.test.ts` carries the four new routes (720 → 724). The zero-mock `account-ledger` feature module
+covers T01, T03-T06, T11, T15-T18, with T02 and the write groups T07-T10/T12-T14 marked not-applicable with reasons
+(a read-only report). Desktop-runtime comparison and parent acceptance remain open.
 
 ### N219 — Auto Item is the desktop MS_AUTO_ITEM screen in its AutoItem mode (G232, Lite L2)
 
@@ -3091,6 +3142,142 @@ copied from line 1, changed to -; Alt+S saved voucher 00001 with `1|N|GOLD|+|5.5
 00001 and Enter reopened both lines; TagCanBill showed both lines and the totals 18.000 / 17.000; Delete asked the desktop
 question, removed every row and wrote a DELETE_DATA row per line, and the tag balance went back to 1. Desktop-runtime
 comparison and parent acceptance remain open.
+
+### N222 — Sales Order UPI tender rows (G206, part)
+
+Gap G206 · Parents P9; R03 · L1 · Med · Size M · Start after N221
+
+TR_SALE_ORD takes UPI in its own grid, MSG_UPI (Sr., AcCode, Upi Bank Name, UpiType, Upi Id, UpiAmt). The account
+comes from the account master, whose name fills Upi Bank Name (TEXT_UPI_KeyDown, `TR_SALE_ORD.cs:3814-3879`). UPI
+Amt is the total of the rows with an account and a non-zero amount (TotAmt, `:3698-3711`), and the advance ADV_AMT
+adds it to the other tenders (`:11368`). The save rewrites UPI_DATA with one row per such row, SR_NO its grid line
+(`:9520-9556`). Order_Ledr posts each row as leg 12 (party credit, LDR_NAME 'UPI - ' and the party name) and leg 13
+(UPI account debit), keyed with STR(SR_NO) after the leg type (`Ac_Ledr.cs:55-57`); Order_Rojmel adds type 08 per row
+(`Ac_Rojmel.cs:25`), and its type 01 credits the whole advance. On a new order an Upi Id already in UPI_DATA for the
+company and location is refused: "This UpiId already Exist In Book No =  <book> AND VchNo = <no> Please Change Upi
+Id ..." (`:3913-3925`). The web showed UPI Amt read-only, stored it without rows or legs and left it out of ADV_AMT,
+and refused to edit an order that had UPI rows.
+
+The order screen now has the UPI grid in its Order details (`web/apps/web/components/SalesOrderUpiGrid.tsx`), and UPI
+Amt shows the grid total. `web/apps/api/src/modules/sales/salesOrderTender.ts` keeps the rows with an account and an
+amount, checks the account in AC_MAST and takes its name, refuses a used Upi Id on a new order, and builds the
+UPI_DATA rows, legs 12/13 and Rojmel type 08. ADV_AMT includes UPI. An order with UPI rows can be edited and deleted;
+an edit that omits the rows is refused rather than deleting them. A bare UPI amount without rows is refused on a Sales
+Order. The Tour Order keeps its previous behaviour, and its UPI rows still block an edit.
+
+Deliberate differences: the desktop checks the Upi Id as it is typed; the web checks the rows it saves. UPI_DATA's
+ISR_NO, a web split key added for TR_MEMB_ENT, is 1. An unknown account is refused with a web message, where the
+desktop opens its account help. Old gold, old silver (SL_PR_DETL, legs 07-10, Rojmel 04/06) and the scheme amount stay
+open under G206, as the baselined case `sales-order.create.old-metal-and-scheme-tenders`.
+
+Evidence: `salesOrderRound4.db.test.ts` (UPI_DATA rows with their grid lines 1 and 4, legs 12/13 with 33-character
+keys and the party-name label, Rojmel 01 for the whole advance and 08 per row, the reopened rows, the used-id refusal
+with its text and no write, the unknown-account and bare-amount refusals, the edit that omits the rows, an amount
+edit, and the delete) passes, and fails against the code before this change. The order-related API tests (22 files,
+272 tests) pass. In the zero-mock `sales-order` module the new cases `create.upi-tender`,
+`edit.upi-amount-then-delete` and `refusal.duplicate-upi-id` pass (they failed before: the screen had no UPI grid);
+the module passes 27 of 30 with the old-metal case baselined and two cases blocked as before. Desktop-runtime
+comparison and parent acceptance remain open.
+
+### N224 — Party is the desktop MS_ACCT screen (G236, Lite L2)
+
+Gap G236 · Parents P1-core · L2 · High · Size L · Start after N223
+
+Master → Party opens MS_ACCT directly (`MDI_FORM.cs:7600-7609`). `web/apps/api/src/modules/masters/partyMaster.ts`
+and `web/apps/api/src/routes/partyMaster.ts` (registered through `web/apps/api/src/routes/masterScreens.ts`) carry
+it, and `web/apps/web/app/(app)/masters/party/page.tsx` is the screen. The list is MS_ACCT_Load's (`:5944-5958`): with
+BRANCH_ALL_AC_SHOW every account of the company by location and code, at a location other than 00 the company's codes
+below 100 and the location's codes from 200 by code, at location 00 the location's accounts by their first two
+characters, length and code. CLEAR_DATA (`:6134-6355`) offers the next code read-only with the cursor in the name,
+type A, GST Local, the company's state, Cr openings and today's Last Visit; the next code follows VB_IMPORT,
+AC_LC_CODE_LEN (blank is 1) and the company type (the 80000 series for P and B). DISPLAY_DATA (`:6356-6587`) fills
+every box, the group's name and the reference's name, and the year's opening (book 000), read-only.
+
+The form upper-cases every key and drops the apostrophe (`:6606-6619`); the email is lower case (`:5050`). Enter
+moves in the form's tab order: a blank name says "Please Insert Party Name ..."; the group code fills its name and
+main group or opens the AC_GROUP help (`:7030-7069`); the mobile, second mobile and short name refuse a value another
+account has, with the desktop's texts (`:6893-6956`, `:7230-7278`); the GST number's first two digits give the state
+and the GST type against CO_MAST.CO_STATE_CODE (`:6978-7018`); the main account and the reference open the account
+help when the code is unknown (`:7481-7528`, `:9542-9598`); the opening and percentage boxes are formatted
+(`:7573`, `:8071-8160`, `:9059`); Silver's Cr/Dr goes to Mobile No2 on Other Detail and Khata No to Save. F1 on the
+name, the F1 button and F1 on the short name (administrator) open their helps, the D, S and A buttons copy an address,
+a scheme member or another account (`:8501-8574`, `:9024-9058`); Ctrl+E unlocks the code; Esc leaves. The photo
+(AC_IMAGE) is picked or taken, saved at once, zoomed on a double click and deleted after "Are You Sure To Delete This
+Image now?" (`:8162-8466`).
+
+Save (`:7650-7962`) needs the edit right for an opened party and refuses, with the desktop's texts, a blank mobile
+with BRANCH_ALL_AC_SHOW, a five-character (software default) code without Ctrl+E or away from location 00, a blank
+code, name or group ("Enter Party Name and Account group Detail") and a name another listed code has; a new entry
+whose code exists takes the next code. It replaces the code's AC_MAST row of the location with every box (AC_TYPE's
+first letter, AC_GST_TYPE I or L, Val() of the numbers, Y/N flags, a date box that is not a date as NULL, MAIN_USER,
+DATA_TRFR 'N', VISIT_TRAN 'AC'), writes a new entry's opening as OP_DATA book 000, voucher 00000, DATA_TRFR 'Y' with
+the AcOp_Ledr legs (`web/apps/api/src/modules/finance/partyOpening.ts`), and replaces the AC_MAST_SRNO row. Delete
+(`:7963-8025`) needs the delete right and refuses a blank code, a code used outside the opening voucher ("You Can't
+Delete Record This Party Code Use in Transection....") and a software default account, before the question; Yes
+deletes the AC_MAST_SRNO, AC_MAST, OP_DATA and AC_DATA (book 000 of the year) rows. Print needs the print right.
+Migration `20261102090000_ac_mast_party_columns` adds the five AC_MAST columns of the desktop's updater
+(`Ac_Image.cs:8094`, `:8318`, `:8405`, `:8439`).
+
+Deliberate differences: Save writes AC_MAST, the opening and AC_MAST_SRNO in one transaction (the desktop commits
+AC_MAST first and writes the rest after it); an opened party carries a version token; a new entry never replaces an
+account (the desktop would delete and rewrite one when the next code is taken too); the next code also counts AC_MAST's
+codes, as migrated companies have no AC_MAST_SRNO rows, and the two-character prefix and the 80000 series add 1 to the
+last five digits (the desktop adds 1 to the whole code, so location 01's second party would get 01100202 and the third
+the same code again); a code that is not a number (the web's seeded accounts) is listed with its location (the
+desktop's CAST fails on it); the opening boxes of an opened party are read-only (Party Opening edits them) and show the
+year's opening; Delete refuses a software default account (the desktop shows the text and then still deletes after the
+question); a code of another location answers "This Ac Code Is Branch With : <lc> You Cant Change..." without
+BRANCH_ALL_AC_SHOW too; Print lists the accounts on screen because the AcMast report layout is not in the repository.
+The hidden admin panel, the defaulter box and the three limits (Advance and Enterprise software types, `:5964-5973`),
+the UAE boxes and the hidden Excel and old-year import buttons are left out; Family Detl is empty as on the desktop.
+
+Evidence: `partyMaster.test.ts` (7 cases: every next-code branch, the date boxes, the list filters, the message
+texts) and `partyMaster.db.test.ts` (10 cases over HTTP on a forced-RLS database: the list and next code, the full
+write set with OP_DATA, the legs and AC_MAST_SRNO, the read-back, every refusal with an unchanged footprint, the
+taken-code path, the edit's MAIN_USER and version, the Enter checks and helps, the clerk's rights, the photo, and the
+delete with its refusals and dry run) pass; the full API suite passes (353 files, 3,757 tests). The new zero-mock
+`party-master` module passes 18 of 18 cases over T01-T18, none blocked: T05 an opening of 1,000 Dr, 1.5 gold Cr and
+2 silver Dr writes the legs 02, 03 and 06; T06 every refusal with its text and no row changed; T14 a fault on the
+AC_MAST insert or on the opening leaves every row as it was; T15 the historic year lists the party without this
+year's opening; T17 Enter through both tabs and the opening, Ctrl+E, Alt+S and Esc; T18 the D help copies an address
+and Party Opening reads the opening saved here. A Chrome DevTools pass on the demo stack keyed a party through every
+box (the GST number 27… gave MAHARASHTRA and Inter state), saved 100203 with OP_DATA 1500.5 C / 2 C, legs 01 and 03
+dated 2026-03-31 and its AC_MAST_SRNO row, reopened it with the opening read-only, picked, zoomed and deleted a photo,
+refused SALES' save and delete with the desktop texts, copied PATEL TRADERS with the A help, printed the list and
+deleted 100203 with all its rows. Desktop-runtime comparison and parent acceptance remain.
+### N225 — Tag Print is the desktop UT_TAG_PRINT screen (G237, Lite L3)
+
+Gap G237 · Parents P1-core · L3 · High · Size L · Start after N224
+
+Other → Tag Print opens UT_TAG_PRINT directly (`MDI_FORM.cs:8596-8605`). `web/apps/api/src/modules/stock/tagPrintScreen.ts` and
+`web/apps/api/src/routes/tagPrintScreen.ts` carry it, and `web/apps/web/app/(app)/txn/tag-print/page.tsx` is the screen.
+Load (`:4735-5013`) lists the label files of PRINT_MAST (type TAG, QR with QR_CODE_GEN), selects the one marked PRINT_SET_A 'Y' and
+the item type Gold, or Silver for CO_MAST.METAL_TYPE S. The grid is filled from a voucher (Book and Vch No; a book of the Tag Cancel
+family reads BAR_CAN_DETL joined to BAR_DETL, `:5284-5403`) or from the stock (Gr Code, Pr Code and Item Type, MSG_VCH_FILL
+`:5575-5635`), every row Y; a tag typed in the TagNo column is looked up in the stock, the latest instance first, "Duplicate Tag No"
+when it is already in the grid, the tag help when it is unknown (`:3508`, `:4102-4420`); Y/N toggles a row and Ctrl+D removes one
+after "This Row Record will Removed permantley ?" (`:3532-3561`). Print (`:5122-5226`) needs the print right ("You Have No Print
+Rights....."), clears TAG_PRINT_DATA, writes the Lable Skip blanks (Math.Round, banker's: SR_NO 1..n, VCH_NO 00000, IT_CODE '00') and
+copies the BAR_DETL row of every Y row; with Hm Id Update it first says "Please First Update Hmid Data and Then print". Save
+(`:5073-5096`) writes HM_ID..HM_ID4 with their weights, LBR_PRC, ITM_MRP and LBR_RATE to BAR_DETL for rows with a tag and an HM id
+or a Lbr% / Mrp, then prints. Set (`:5636-5655`) makes the chosen file the default of its type.
+
+Deliberate differences: the label sheet is the web's (the Crystal label files are not in the repository); a blank Gr Code goes on and a
+blank Pr Code loads the stock (the desktop opens the help); F1 on Vch No keeps the Book (the desktop's CLEAR_DATA clears it); the
+typed cells of ItCode, Counter and GrWt are not editable because a label is copied from BAR_DETL; Delete does nothing (the desktop's
+BtnDelete_Click is empty); Save outside Hm Id Update says so; Hm Id Update and Set need the edit right; TAG_PRINT_DATA is cleared for the
+tenant and IMAGE_DATA is not cleared (the desktop's unqualified DELETE FROM IMAGE_DATA also removes scheme member pictures); the stock rule is
+the tag balance over MAIN_STOCK of every year; the RFID writer, the Print Type box and the QR picture (named registrations only) are left
+out. The older `GET /stock/tag-print`, `POST /stock/tag-print/stage` and `GET /stock/tag-print/label` routes had no other caller and are
+removed; `stageTagPrintRowsTx` stays for the other forms that stage labels.
+
+Evidence: `tagPrintScreen.db.test.ts` (9 cases over HTTP on a forced-RLS database: the load, the stock lists with filters, the typed tag and
+helps, a voucher and a Tag Cancel voucher, Print with the skip rows and banker's rounding, the tenant-only staging, Hm Id Update, Set and
+the clerk's rights) and the existing staging tests pass. The new zero-mock `tag-print` module passes 17 of 17 applicable cases over T01-T18
+(T10 is not applicable: Tag Print has no delete), none blocked: T02 the three staged rows equal their BAR_DETL rows; T07 BAR_DETL (hashed),
+MAIN_STOCK, AC_DATA and BAR_DATA do not change; T14 a fault on the third copied label leaves the earlier labels; T16 the sheet shows two blanks
+for 2.5, then three labels with barcodes and the MRP; T18 an HM id keyed here reaches the next plain print's label. Desktop-runtime comparison,
+physical-printer acceptance (D29) and parent acceptance remain.
 
 ## 6. Status corrections
 
@@ -3234,12 +3421,16 @@ comparison and parent acceptance remain open.
 | N213 | — | implemented-unverified, evidence in this change (G226: the Tax master is the MS_TAX header and component grid with the desktop keys, texts, helps and rights; generic TAX_MAST writes refused; the account picker keeps a chosen row) |
 | N214 | — | implemented-unverified, evidence in this change (G227: the Item Group master is MS_GROUP with the desktop keys, texts, helps, rights and the item update; the row is updated in place in one transaction) |
 | N215 | — | implemented-unverified, evidence in this change (G228: the Product master is MS_PRODUCT's Product mode with the desktop keys, texts, rights and the item-use and default-product guards after the question) |
-| N216 | — | implemented-unverified, evidence in this change (G229: Cash/Bank and Contra refuse dates outside the year with the desktop text before numbering and before the lock-date check, with no partial write; the Contra recent list shows the summed debit once; the register date stays G37) |
+| N216 | — | implemented-unverified, evidence in this change (G229: Cash/Bank and Contra refuse dates outside the year with the desktop text before numbering and before the lock-date check, with no partial write; the Contra recent list shows the summed debit once; the bounded register-date manifestation is now implemented-unverified under N57, while broad N57 / G37 remains planned and open) |
 | N217 | — | implemented-unverified, evidence in this change (G230: the Address master is MS_ADD_MAST with its tabs, next code, combos, helps, mobile check, rights and the delete of its opening rows) |
 | N218 | — | implemented-unverified, evidence in this change (G231: the Item master is MS_ITEM with its helps, item code from product and group, exists question, leave checks, setting-driven boxes, delete checks, rights and the Tag Value Update panel) |
 | N219 | — | implemented-unverified, evidence in this change (G232: Auto Item is MS_AUTO_ITEM's AutoItem mode with the group help, the product grid and its keys, the desktop write set, the refusals and the rights) |
 | N220 | — | implemented-unverified, evidence in this change (G233: Wh Sales refuses as TR_WH_SALE does — defaulter, employee, type B, cheque/card bank, year, lock date, item code — with no partial write; the delete asks the desktop question; WhSalesBill prints behind the print right) |
 | N221 | — | implemented-unverified, evidence in this change (G234: Stock Adjust is TR_TAG_CAN on a STOCK ADJUST book with the Sign column, the signed register, I and O stock rows, the lot columns and LOT_DETL, reopen, edit, delete and TagCanBill) |
+| N222 | — | implemented-unverified, evidence in this change (G206 part: UPI tender rows stored in UPI_DATA, posted on legs 12/13 and Rojmel 08, included in ADV_AMT, editable and deletable; old metal and scheme stay open) |
+| N223 | — | implemented-unverified, evidence in this change (G235: the Ledger Report is RP_LEDR with its account summary, voucher/detail drill-down, debit ageing, signed money/gold/silver balances, totals, selectors and PDF/Excel/CSV, from one read-only resolver) |
+| N224 | — | implemented-unverified, evidence in this change (G236: Party is MS_ACCT — the list and next code of the location, both tabs in tab order with the group, mobile, short-name, GST and account checks, the opening and AC_MAST_SRNO in one transaction with the save, the photo, the copy helps, Print and Delete with the desktop's refusals) |
+| N225 | — | implemented-unverified, evidence in this change (G237: Tag Print is UT_TAG_PRINT — the voucher and stock selection, typed tags, Y/N rows, Hm Id Update, the default file and a print that stages after the Lable Skip blanks) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

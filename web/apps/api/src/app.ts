@@ -397,6 +397,10 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
   const enforceReportFilters = async (req: FastifyRequest, reply: FastifyReply): Promise<void> => {
     const url = req.routeOptions.url ?? '';
     if (!url.startsWith('/reports/')) return;
+    // The Account Ledger (RP_LEDR) owns a typed query parser (accountLedgerReport.ts) in which acCode, city,
+    // area and state are first-class selectors, not the shared RP_ALL dimensions this guard polices. Its own
+    // parser validates and fails closed, so exempt its routes rather than refusing their selectors here.
+    if (url.startsWith('/reports/account-ledger')) return;
     const q = (req.query ?? {}) as Record<string, string | undefined>;
     const asked = REPORT_FILTER_KEYS.filter((k) => String(q[k] ?? '').trim());
     if (!asked.length) return;

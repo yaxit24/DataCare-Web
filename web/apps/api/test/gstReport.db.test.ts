@@ -417,8 +417,8 @@ class CapturingRenderer implements PdfRenderer {
       DAY,
     );
     await exec(
-      `INSERT INTO "LBR_ISU_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","BOOK_NAME","AC_CODE","IT_CODE","ITM_PCS","ITM_NWT","NET_AMT","DISC_AMT","IT_TAX_AMT","LBR_AMT","IT_LBR_TAX")
-       VALUES($1,'01','01',$2,'GLB','H003',1,$3::date,'LABOUR WORK','CREG','ZO1',2,2,40,0,'1.2',10,'0.3')`,
+      `INSERT INTO "LBR_ISU_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","BOOK_NAME","AC_CODE","IT_CODE","ITM_PCS","ITM_NWT","NET_AMT","IT_TAX_AMT","LBR_AMT","IT_LBR_TAX")
+       VALUES($1,'01','01',$2,'GLB','H003',1,$3::date,'LABOUR WORK','CREG','ZO1',2,2,40,'1.2',10,'0.3')`,
       TENANT,
       YEAR,
       DAY,
@@ -479,6 +479,13 @@ class CapturingRenderer implements PdfRenderer {
         { header: 'Invoice Date' },
         { header: 'Invoice Value' },
         { header: 'Plase Of Supply' },
+        { header: 'R Charg' },
+        { header: 'App% Rate' },
+        { header: 'Invoice Type' },
+        { header: 'E-Com GSTIN' },
+        { header: 'Rate' },
+        { header: 'Taxable Value' },
+        { header: 'Cess Amt' },
       ],
       rows: [
         { invoiceNo: 'S-00001', rate: '3.00', taxableValue: '990' },

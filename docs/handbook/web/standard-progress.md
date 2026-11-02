@@ -6,16 +6,16 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 28 | 25 | 0 |
+| Lite (first, D32) | 49 | 33 | 30 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
 | Standard (added by Standard) | 36 | 0 | 0 | 0 |
-| **Standard total** | **114** | **29** | **26** | **0** |
+| **Standard total** | **114** | **34** | **31** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
 | Tab | Menu | Web routes | Catalog | Feature module | State | Open gaps |
 |---|---|---|---|---|---|---|
-| Company | Company | `/masters/companies`, `/admin/provision` | PARTIAL | — | no module | — |
+| Company | Company | `/masters/companies`, `/admin/provision` | PARTIAL | company-master | module, 1 open | G38 |
 | Company | Year Create | `/masters/year-create` | PARTIAL | — | no module | — |
 | Company | Balance TrFr | `/company/balance-transfer` | PARTIAL | — | no module | — |
 | Company | Books | `/masters/books` | PARTIAL | — | no module | — |
@@ -25,7 +25,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | ExtraTran | Approval Isu | `/txn/tour` | PARTIAL | — | no module | — |
 | ExtraTran | Approval Rtn | `/txn/tour-return` | PARTIAL | — | no module | — |
 | ExtraTran | Fine Jv Entry | `/txn/fine-jv` | PARTIAL | fine-jv | module green | — |
-| Master | Party | `/masters/party`, `/masters/accounts` | PARTIAL | — | no module | — |
+| Master | Party | `/masters/party` | PARTIAL | party-master | module green | — |
 | Master | Address | `/masters/addresses` | PARTIAL | address-master | module green | — |
 | Master | Product | `/masters/products` | PARTIAL | product-master | module green | — |
 | Master | Group | `/masters/groups` | PARTIAL | group-master | module green | — |
@@ -39,11 +39,11 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Other | Daily Rate | `/txn/daily-rate` | PARTIAL | daily-rate | module green | — |
 | Other | Only Tag Entry | `/txn/tag-opening` | PARTIAL | tag-opening | module green | — |
 | Other | Tag Cancel | `/txn/tag-cancel` | PARTIAL | tag-cancel | module green | — |
-| Other | Tag Print | `/txn/tag-print` | PARTIAL | — | no module | — |
+| Other | Tag Print | `/txn/tag-print` | PARTIAL | tag-print | module green | — |
 | Other | Stock Adjust | `/txn/stock-adjust` | PARTIAL | stock-adjust | module green | — |
 | Other | Order Cancel | `/txn/order-cancel` | PARTIAL | — | no module | — |
 | Other | Data Import | `/masters/accounts` | PARTIAL | — | no module | — |
-| Report | Ledger Report | `/reports/account-ledger` | REPORT | — | no module | — |
+| Report | Ledger Report | `/reports/account-ledger` | REPORT | account-ledger | module green | — |
 | Report | Stock Report | `/reports/tag-stock` | REPORT | — | no module | — |
 | Report | Tag Stock | `/reports/tag-stock` | REPORT | — | no module | — |
 | Report | Sales Report | `/reports/sales-register` | REPORT | — | no module | — |
@@ -51,7 +51,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Report | Approval Rpt | `/reports/approval-report` | REPORT | — | no module | — |
 | Report | Order Report | `/txn/sales-order` | REPORT | sales-order | module, 1 open | G206 |
 | Report | Cash Bank | `/reports/cash-book` | REPORT | — | no module | — |
-| Report | Gst Report | `/reports/gst-report` | REPORT | — | no module | — |
+| Report | Gst Report | `/reports/gst-report` | REPORT | gst-report | module green | — |
 | Report | HuId Report | `/reports/huid` | REPORT | — | no module | — |
 | Transaction | Purchase | `/txn/purchase` | PARTIAL | purchase-invoice | module green | — |
 | Transaction | Purchase Rtn | `/txn/purchase-return` | PARTIAL | purchase-return | module green | — |
@@ -63,7 +63,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Transaction | Cash Payment | `/txn/payment` | PARTIAL | cash-bank | module green | — |
 | Transaction | Bank Received | `/txn/receipt?mode=BANK` | PARTIAL | cash-bank | module green | — |
 | Transaction | Bank Payment | `/txn/payment?mode=BANK` | PARTIAL | cash-bank | module green | — |
-| Transaction | Contra Entry | `/txn/contra` | PARTIAL | contra | module, 1 open | G37 |
+| Transaction | Contra Entry | `/txn/contra` | PARTIAL | contra | module green | — |
 
 ## Basic — 29 menus (added by Basic)
 

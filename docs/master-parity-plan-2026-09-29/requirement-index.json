@@ -69,29 +69,35 @@
     {
       "kind": "menu",
       "path": "web/docs/COMPLETION-REGISTER.json",
-      "sha256": "393315786b551911af2fa64bbcd42646cf5c9c7c94d305e58bdb0e16ef3a91ba",
+      "sha256": "e4831e55309b741ed7cc30a025e31928a5ab119794a7f90c7cc037b7e7a034d4",
       "count": 198,
       "arrayPointer": "/items",
       "rebaselined": {
         "date": "2026-11-02",
-        "fromSha256": "b57e557f9c25e2e53165b3cec08b1102a5b370de8b3d61aa5725a9f512f0df26",
-        "slice": "N221",
-        "reason": "Stock Adjust's web surface is the TR_TAG_CAN family's save route (POST /stock/stock-adjust) instead of the removed separate writer's POST /stock/adjust (G234). The 198 menu identities are unchanged; nothing is verified.",
+        "fromSha256": "393315786b551911af2fa64bbcd42646cf5c9c7c94d305e58bdb0e16ef3a91ba",
+        "slice": "N225",
+        "reason": "Tag Print's web surface is the UT_TAG_PRINT screen's print route (POST /stock/tag-print-screen/print) instead of the older list route GET /stock/tag-print, which the screen no longer uses (G236). The 198 menu identities are unchanged; nothing is verified.",
         "previous": {
-          "date": "2026-11-01",
-          "fromSha256": "89a0c9d10a7511fefffd6491b27a744f09957776abb4c6a02954628d057d8177",
-          "slice": "N209",
-          "reason": "Item Opening's web surface is the TR_ITM_OPBL grid's save route (PUT /stock/item-opening/type/:type) instead of the older numbered-voucher POST /stock/item-opening, which the screen no longer uses (G222). The 198 menu identities are unchanged; nothing is verified.",
+          "date": "2026-11-02",
+          "fromSha256": "b57e557f9c25e2e53165b3cec08b1102a5b370de8b3d61aa5725a9f512f0df26",
+          "slice": "N221",
+          "reason": "Stock Adjust's web surface is the TR_TAG_CAN family's save route (POST /stock/stock-adjust) instead of the removed separate writer's POST /stock/adjust (G234). The 198 menu identities are unchanged; nothing is verified.",
           "previous": {
-            "date": "2026-10-01",
-            "fromSha256": "d13c417b063266fb725ed6bf91949a2d26ed7d7207f2cccb38637e9de7fa9453",
-            "slice": "N85",
-            "reason": "Completion-register corrections (G71): 26 rows corrected to the MDI_FORM.cs dispatch and the real web surfaces in the menu catalog (the 20 the catalog listed and 6 found by the new catalog-agreement check). Five menus with no web workflow are now absent instead of mapped to a different workflow. The 198 menu identities are unchanged; nothing is verified.",
+            "date": "2026-11-01",
+            "fromSha256": "89a0c9d10a7511fefffd6491b27a744f09957776abb4c6a02954628d057d8177",
+            "slice": "N209",
+            "reason": "Item Opening's web surface is the TR_ITM_OPBL grid's save route (PUT /stock/item-opening/type/:type) instead of the older numbered-voucher POST /stock/item-opening, which the screen no longer uses (G222). The 198 menu identities are unchanged; nothing is verified.",
             "previous": {
               "date": "2026-10-01",
-              "fromSha256": "53864274581403da71d2049f6571f1216475da7be1b9ace26e5161d5ccac427c",
-              "atCommit": "c7d02c7a50a36ef5f3594b5d6855944adc240235",
-              "reason": "Register notes and evidence advanced on main (X15, D1-D6, X16, N18, N19). The 198 menu identities are unchanged and every entry remains implemented-unverified."
+              "fromSha256": "d13c417b063266fb725ed6bf91949a2d26ed7d7207f2cccb38637e9de7fa9453",
+              "slice": "N85",
+              "reason": "Completion-register corrections (G71): 26 rows corrected to the MDI_FORM.cs dispatch and the real web surfaces in the menu catalog (the 20 the catalog listed and 6 found by the new catalog-agreement check). Five menus with no web workflow are now absent instead of mapped to a different workflow. The 198 menu identities are unchanged; nothing is verified.",
+              "previous": {
+                "date": "2026-10-01",
+                "fromSha256": "53864274581403da71d2049f6571f1216475da7be1b9ace26e5161d5ccac427c",
+                "atCommit": "c7d02c7a50a36ef5f3594b5d6855944adc240235",
+                "reason": "Register notes and evidence advanced on main (X15, D1-D6, X16, N18, N19). The 198 menu identities are unchanged and every entry remains implemented-unverified."
+              }
             }
           }
         }

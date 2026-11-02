@@ -247,6 +247,46 @@ const latest = (ctx) =>
             "ADV_AMT"::float adv,"CASH_AMT"::float cash,btrim("MAIN_USER"::text) mu
        FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' ORDER BY "VCH_NO" DESC LIMIT 2`,
   );
+/** A UPI Id unique to this run (UPI_DATA.UPI_ID is checked company-wide). */
+const RUN = Date.now().toString(36).slice(-6).toUpperCase();
+const upiId = (tag) => `E2E${RUN}${tag}`;
+async function fillUpi(page, n, { ac, type, id, amount }) {
+  if (!(await page.getByLabel(`UPI AcCode line ${n}`, { exact: true }).count()))
+    await page.getByRole('button', { name: '+ Add UPI row', exact: true }).click();
+  await page.getByLabel(`UPI AcCode line ${n}`, { exact: true }).fill(ac);
+  await page.getByLabel(`UPI Type line ${n}`, { exact: true }).fill(type);
+  await page.getByLabel(`UPI Id line ${n}`, { exact: true }).fill(id);
+  await page.getByLabel(`UPI Amt line ${n}`, { exact: true }).fill(amount);
+}
+const upiInputs = async (page, n) => ({
+  ac: await page.getByLabel(`UPI AcCode line ${n}`, { exact: true }).inputValue(),
+  name: (await page.getByTestId(`upi-name-${n}`).textContent())?.trim(),
+  type: await page.getByLabel(`UPI Type line ${n}`, { exact: true }).inputValue(),
+  id: await page.getByLabel(`UPI Id line ${n}`, { exact: true }).inputValue(),
+  amount: await page.getByLabel(`UPI Amt line ${n}`, { exact: true }).inputValue(),
+});
+const tenderTotals = (ctx, v) =>
+  ctx.rows(
+    `SELECT "CASH_AMT"::float cash,"UPI_AMT"::float upi,"ADV_AMT"::float adv
+       FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+    v,
+  );
+const upiRows = (ctx, v) =>
+  ctx.rows(
+    `SELECT "SR_NO"::int sr,btrim("AC_CODE") ac,btrim("UPI_AC_CODE") "upiAc",btrim("UPI_AC_NAME") name,
+            btrim("UPI_TYPE") type,btrim("UPI_ID") id,"UPI_AMT"::float amt
+       FROM "UPI_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+    v,
+  );
+/** Ledger or day-book rows with the leg type (key characters 22-23) and the STR(SR_NO) line after it. */
+const keyedLegs = (ctx, table, v) =>
+  ctx.rows(
+    `SELECT substr("LEDR_KEY",22,2) leg,btrim(substr("LEDR_KEY",24)) line,length("LEDR_KEY")::int len,
+            btrim("AC_CODE") ac,"DR_AMT"::float dr,"CR_AMT"::float cr
+            ${table === 'AC_DATA' ? `,coalesce(btrim("LDR_NAME"),'') name` : ''}
+       FROM "${table}" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "LEDR_KEY"`,
+    v,
+  );
 const yearOf = async (ctx) =>
   (
     await ctx.rows(
@@ -523,24 +563,197 @@ export const salesOrder = {
     ),
 
     C(
-      'create.tender-modes',
+      'create.upi-tender',
       'T02',
       'mutation',
-      'TR_SALE_ORD.cs:11368 and Order_Ledr legs 12/13: an advance can include UPI (and old metal and scheme), each posted to its own account',
+      'TR_SALE_ORD MSG_UPI (:3698-3711, :9520-9556), :11368, Order_Ledr legs 12/13 (Ac_Ledr.cs:55-57) and Order_Rojmel type 08 (Ac_Rojmel.cs:25): cash 3,000 and a UPI row of 2,000 make ADV_AMT 5,000; the row is stored in UPI_DATA and posted to its UPI account',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const id = upiId('A');
+        await enterOrder(page, { advance: 3000 });
+        await openDetails(page);
+        await page.getByLabel('Cash A/c', { exact: true }).fill(CASH);
+        await fillUpi(page, 1, { ac: PARTIES.bank.code, type: 'GPAY', id, amount: '2000' });
+        assert.equal(
+          await page.locator('#sales-header-upiAmount').inputValue(),
+          '2000',
+          'UPI Amt is the total of the UPI rows (TotAmt)',
+        );
+        const response = await save(page);
+        assert.equal(response.status(), 201, await response.text());
+        const vchNo = String((await response.json()).vchNo).padStart(5, '0');
+        const party = PARTIES.local.code;
+        const bank = PARTIES.bank.code;
+        const [h] = await tenderTotals(ctx, vchNo);
+        const u = await upiRows(ctx, vchNo);
+        const g = await keyedLegs(ctx, 'AC_DATA', vchNo);
+        const r = await keyedLegs(ctx, 'ROJ_MEL_DATA', vchNo);
+        assert.deepEqual(h, { cash: 3000, upi: 2000, adv: 5000 });
+        assert.deepEqual(u, [
+          { sr: 1, ac: party, upiAc: bank, name: PARTIES.bank.name, type: 'GPAY', id, amt: 2000 },
+        ]);
+        assert.deepEqual(
+          g.map((x) => [x.leg, x.line, x.len, x.ac, x.dr, x.cr]),
+          [
+            ['01', '', 23, party, 0, 3000],
+            ['02', '', 23, CASH, 3000, 0],
+            ['12', '1', 33, party, 0, 2000],
+            ['13', '1', 33, bank, 2000, 0],
+          ],
+        );
+        assert.equal(g[2].name, `UPI - ${PARTIES.local.name}`, 'leg 12 names the tender');
+        assert.deepEqual(
+          r.map((x) => [x.leg, x.line, x.ac, x.dr, x.cr]),
+          [
+            ['01', '', party, 0, 5000],
+            ['08', '1', bank, 2000, 0],
+          ],
+        );
+        await loadOrder(page, vchNo);
+        await openDetails(page);
+        const reopened = {
+          cash: await page.getByLabel('Advance ₹', { exact: true }).inputValue(),
+          upi: await page.locator('#sales-header-upiAmount').inputValue(),
+          row: await upiInputs(page, 1),
+        };
+        assert.deepEqual(reopened, {
+          cash: '3000',
+          upi: '2000',
+          row: { ac: bank, name: PARTIES.bank.name, type: 'GPAY', id, amount: '2000' },
+        });
+        return {
+          observation: `order ${vchNo}: ${JSON.stringify(h)}; UPI_DATA ${u.length} row; legs ${g.map((x) => x.leg).join('/')}; day book ${r.map((x) => x.leg).join('/')}`,
+          expected: { cash: 3000, upi: 2000, advance: 5000, legs: '01/02/12/13', dayBook: '01/08' },
+          database: { header: h, upi: u, ledger: g, dayBook: r },
+          downstream: { reopened },
+        };
+      },
+    ),
+
+    C(
+      'edit.upi-amount-then-delete',
+      'T09',
+      'mutation',
+      'TR_SALE_ORD rewrites UPI_DATA on every save (:9520-9556) and deletes it with the order (:9732): a UPI order can be edited (2,000 to 2,500 moves UPI_DATA, legs 12/13 and ADV_AMT together) and deleting it leaves no UPI row or leg',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const bank = PARTIES.bank.code;
+        const bankBefore = await balance(ctx, bank);
+        await enterOrder(page, { advance: 1000 });
+        await openDetails(page);
+        await page.getByLabel('Cash A/c', { exact: true }).fill(CASH);
+        await fillUpi(page, 1, { ac: bank, type: 'PHONEPE', id: upiId('B'), amount: '2000' });
+        const created = await save(page);
+        assert.equal(created.status(), 201, await created.text());
+        const vchNo = String((await created.json()).vchNo).padStart(5, '0');
+        await loadOrder(page, vchNo);
+        await openDetails(page);
+        await page.getByLabel('UPI Amt line 1', { exact: true }).fill('2500');
+        const edited = await save(page, 'Update Sales Order');
+        assert.equal(edited.status(), 200, await edited.text());
+        const [h] = await tenderTotals(ctx, vchNo);
+        assert.deepEqual(h, { cash: 1000, upi: 2500, adv: 3500 });
+        assert.deepEqual(
+          (await upiRows(ctx, vchNo)).map((x) => x.amt),
+          [2500],
+        );
+        const upiLegs = (await keyedLegs(ctx, 'AC_DATA', vchNo)).filter((x) =>
+          ['12', '13'].includes(x.leg),
+        );
+        assert.deepEqual(
+          upiLegs.map((x) => [x.leg, x.dr, x.cr]),
+          [
+            ['12', 0, 2500],
+            ['13', 2500, 0],
+          ],
+        );
+        const bankAfterEdit = await balance(ctx, bank);
+        assert.equal(
+          Math.round((bankAfterEdit - bankBefore) * 100) / 100,
+          2500,
+          'the UPI account is debited the edited 2,500',
+        );
+        await loadOrder(page, vchNo);
+        const removed = await deleteLoaded(page, vchNo);
+        assert.equal(removed.status(), 200, await removed.text());
+        const after = {
+          upi: (await upiRows(ctx, vchNo)).length,
+          legs: (await keyedLegs(ctx, 'AC_DATA', vchNo)).length,
+          dayBook: (await keyedLegs(ctx, 'ROJ_MEL_DATA', vchNo)).length,
+        };
+        assert.deepEqual(after, { upi: 0, legs: 0, dayBook: 0 });
+        const bankAfterDelete = await balance(ctx, bank);
+        assert.equal(bankAfterDelete, bankBefore, 'the delete takes the UPI debit back');
+        return {
+          observation: `order ${vchNo}: edited to ${JSON.stringify(h)}; deleted, ${JSON.stringify(after)}`,
+          expected: { edited: { upi: 2500, adv: 3500 }, deleted: { upi: 0, legs: 0, dayBook: 0 } },
+          database: { header: h, after },
+          downstream: {
+            upiAccountBalance: {
+              before: bankBefore,
+              afterEdit: bankAfterEdit,
+              afterDelete: bankAfterDelete,
+            },
+          },
+        };
+      },
+    ),
+
+    C(
+      'refusal.duplicate-upi-id',
+      'T06',
+      'refusal',
+      'TR_SALE_ORD.cs:3913-3925: on a new order a UPI Id already in UPI_DATA is refused with "This UpiId already Exist In Book No =  <book> AND VchNo = <no> Please Change Upi Id ..." and nothing is written',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const bank = PARTIES.bank.code;
+        const id = upiId('C');
+        await enterOrder(page, { advance: 500 });
+        await openDetails(page);
+        await page.getByLabel('Cash A/c', { exact: true }).fill(CASH);
+        await fillUpi(page, 1, { ac: bank, type: 'GPAY', id, amount: '700' });
+        const first = await save(page);
+        assert.equal(first.status(), 201, await first.text());
+        const firstNo = String((await first.json()).vchNo).padStart(5, '0');
+        const before = await counts(ctx);
+        await enterOrder(page, { advance: 500 });
+        await openDetails(page);
+        await page.getByLabel('Cash A/c', { exact: true }).fill(CASH);
+        await fillUpi(page, 1, { ac: bank, type: 'GPAY', id, amount: '900' });
+        const { response, blocked } = await trySave(page);
+        assert.equal(response?.status(), 400, `answered ${response?.status()} ${blocked ?? ''}`);
+        const message = `This UpiId already Exist In Book No =  ${BOOK} AND VchNo = ${firstNo} Please Change Upi Id ...`;
+        const body = await response.text();
+        assert(body.includes(message), `the API answers with the desktop text, got ${body}`);
+        await page.getByText(message, { exact: false }).waitFor();
+        assert.deepEqual(await counts(ctx), before, 'nothing written');
+        return {
+          observation: `refused: ${message}`,
+          expected: { status: 400, message, written: 0 },
+          database: { before },
+        };
+      },
+    ),
+
+    C(
+      'create.old-metal-and-scheme-tenders',
+      'T02',
+      'mutation',
+      'TR_SALE_ORD.cs:11368, Order_Ledr legs 07-10 (Ac_Ledr.cs:42-50) and Order_Rojmel types 04/06 (Ac_Rojmel.cs:17-21): an advance can include old gold and old silver taken in (SL_PR_DETL rows) and a scheme amount',
       async (ctx) => {
         const { page } = await ctx.session();
         await enterOrder(page, { advance: 3000 });
         await openDetails(page);
-        // A locked field's label carries a "· Read only" suffix, so the field is found by its id.
-        const upi = page.locator('#sales-header-upiAmount');
-        const editable = await upi.evaluate((input) => !input.readOnly && !input.disabled);
+        const editable = await page
+          .locator('#sales-header-oldGoldAmount')
+          .evaluate((input) => !input.readOnly && !input.disabled);
         assert(
           editable,
-          'the UPI amount on the order is read-only, so an advance can only be cash',
+          'old gold, old silver and scheme amounts are read-only on the order, so an advance cannot include them',
         );
         return {
-          observation: 'UPI amount editable',
-          expected: 'cash 3,000 and UPI 2,000',
+          observation: 'old gold amount editable',
+          expected: 'cash 3,000 and old gold 2,000',
           database: {},
           downstream: {},
         };
@@ -548,8 +761,8 @@ export const salesOrder = {
       {
         expected: {
           cash: 3000,
-          upi: 2000,
-          legs: 'customer Cr 5,000; cash Dr 3,000; UPI account Dr 2,000',
+          oldGold: 2000,
+          legs: 'customer Cr 5,000; cash Dr 3,000; old-gold purchase account Dr 2,000 (legs 07/08)',
         },
         observe: async (ctx) => ({ orders: await latest(ctx) }),
       },

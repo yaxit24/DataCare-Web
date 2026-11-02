@@ -207,7 +207,8 @@ export async function gstHsnRowsTx(tx: Tx, input: GstReportInput): Promise<RawHs
               (CASE WHEN i."RATE_TYPE"='P' THEN COALESCE(l."ITM_PCS",0) ELSE COALESCE(l."ITM_NWT",0) END)::numeric,
               COALESCE(l."NET_AMT",0)::numeric,
               COALESCE(NULLIF(l."IT_TAX_AMT",''),'0')::numeric,
-              COALESCE(l."DISC_AMT",0)::numeric
+              -- RP_GST.cs:2719 sums IT_DISC_AMT; the web LBR_ISU_DETL has no discount column, so a labour row carries none.
+              0::numeric
          FROM "LBR_ISU_DETL" l
          JOIN "ITEM_MAST" i ON i.tenant_id=l.tenant_id AND i."CO_CODE"=l."CO_CODE" AND i."IT_CODE"=l."IT_CODE"
          JOIN "BOOK_DATA" bk ON bk.tenant_id=l.tenant_id AND bk."CO_CODE"=l."CO_CODE" AND bk."LC_CODE"=l."LC_CODE" AND bk."CO_BOOK"=l."CO_BOOK"

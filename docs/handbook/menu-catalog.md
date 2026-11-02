@@ -110,10 +110,10 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Creates the company identity and seeds its year, masters, settings and operating parameters.
 - **Looks:** Search list plus address, country/state/city, work type, metal type, tax and bank fields.
 - **Writes:** CO_MAST, CO_SET, CO_SET_NEW, AC_GROUP, BOOK_DATA, LOCT_MAST, MENU_DATA.
-- **Web:** `/masters/companies`, `/admin/provision`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`, `POST /admin/companies/:coCode/provision`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Bare CRUD and provisioning do not reproduce the rich form or the desktop 17-table copy (NewCompParmCreat); Print and conditional fields remain.
+- **Web:** `/masters/companies`, `/admin/provision`; `GET /context/companies`, `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`, `POST /admin/companies/:coCode/provision`. Can: create, reopen, edit, delete, list.
+- **Remaining:** Milestone 1 blocks generic CO_MAST create/update/delete/CSV business mutations before the master transaction; authenticated rejection audits remain expected. It provides a dedicated tenant-scoped read-only Company list with executable admin, restricted-user and cross-tenant scope evidence. The rich identity form, dedicated versioned writer, first-year and 17-family provisioning, Company.RPT print, and an accepted safe-delete decision remain.
 - **Owners:** G38, G39, N58, X10, N77.
-- **Evidence:** [KB_master.md:45-75](../../project-memory/video-research/_kb/KB_master.md#L45-L75), [MS_YEAR.cs:1504-1595](../../unified/src/csharp/DataCareNext/MS_YEAR.cs#L1504-L1595).
+- **Evidence:** [KB_master.md:45-75](../../project-memory/video-research/_kb/KB_master.md#L45-L75), [MS_YEAR.cs:1504-1595](../../unified/src/csharp/DataCareNext/MS_YEAR.cs#L1504-L1595), [company-master.md](../../docs/handbook/web/company-master.md).
 
 ### Data Backup
 
@@ -253,7 +253,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Labour Disc | `MS_AUTO_ITEM` | `/masters/labour-update` | `- R E - - L` | PARTIAL | P1-edition |
 | Labour Type | `MS_LBR_TYPE` | `/masters/labour` | `C R E D - L` | PARTIAL | P1-core |
 | Lot Opening | `TR_ITM_LOT` | `/txn/item-lot` | `C R E D - -` | PARTIAL | P1-edition |
-| Party | `MS_ACCT` | `/masters/party`, `/masters/accounts` | `C R E D - L` | PARTIAL | P1-core |
+| Party | `MS_ACCT` | `/masters/party` | `C R E D - L` | PARTIAL | P1-core |
 | Party Opening | `TR_AC_OPBL` | `/txn/ac-opbl` | `C R E D - L` | PARTIAL | P1-core |
 | Point Mast | `MS_POINT` | `/masters/points` | `C R E D - L` | PARTIAL | P1-edition |
 | Product | `MS_PRODUCT` | `/masters/products` | `C R E D - L` | PARTIAL | P1-core |
@@ -441,12 +441,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `MS_ACCT` — direct constructor ([MDI_FORM.cs:7600-7609](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7600-L7609)).
 - **Does:** Creates customer, supplier, karigar and bank accounts with contacts, tax and bank data and openings.
-- **Looks:** Code/Name/Mobile grid; address, tax and bank tabs; opening money and metal; family and photo panels.
-- **Writes:** AC_MAST, OP_DATA, AC_DATA.
-- **Web:** `/masters/party`, `/masters/accounts`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`, `GET /party/:acCode/family`, `GET /party/:acCode/photo`, `POST /party/:acCode/photo`, `GET /accounts/:acCode/opening`, `POST /accounts/:acCode/opening`. Can: create, reopen, edit, delete, list.
-- **Remaining:** The rich party page ignores duplicate-detail updates and lacks delete and print; capabilities are split across two routes.
-- **Owners:** G53, N67, X10, G38, N58, N77, G225, N212.
-- **Evidence:** [KB_master.md:113-145](../../project-memory/video-research/_kb/KB_master.md#L113-L145).
+- **Looks:** Search box over a Code / Name / Mobile list, the photo with its three buttons and the Oppning Balance box with Last Visit and Ledger Date on the left; the customer line over the Company Detail, Other Detail and Family Detl tabs with Ac Code, F1 and the A, D, S buttons on the right; Print, Save, Cancel, Delete and Exit along the bottom.
+- **Writes:** AC_MAST, AC_MAST_SRNO, OP_DATA, AC_DATA, AC_GROUP, STATE_MAST, AC_IMAGE, ADD_MAST, AD_MEMB.
+- **Web:** `/masters/party`; `GET /masters/party-master`, `GET /masters/party-master/print`, `GET /masters/party-master/help/:kind`, `GET /masters/party-master/copy/:kind`, `GET /masters/party-master/taken/:kind`, `GET /masters/party-master/gst-state`, `GET /masters/party-master/account`, `GET /masters/party-master/:code`, `GET /masters/party-master/:code/photo`, `POST /masters/party-master/:code/photo`, `POST /masters/party-master/:code/photo/delete`, `POST /masters/party-master`, `PUT /masters/party-master/:code`, `DELETE /masters/party-master/:code`. Can: create, reopen, edit, delete, list.
+- **Remaining:** The AcMast print layout is not in the repository (Print lists the accounts on screen); the Advance and Enterprise admin panel, defaulter box and limits, the UAE boxes and the hidden Excel and old-year imports are not on the screen; desktop-runtime comparison remains.
+- **Owners:** G53, N67, X10, G38, N58, N77, G225, N212, G236, N224.
+- **Evidence:** [MS_ACCT.cs:5584-9640](../../unified/src/csharp/DataCareNext/MS_ACCT.cs#L5584-L9640).
 
 ### Party Opening
 
@@ -726,9 +726,9 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Sales-like item, component and old-metal grids with an advance panel, delivery date, images and order document.
 - **Writes:** SL_ORD_DATA, SL_ORD_DETL, SL_ORD_IDTL, SL_ORD_ADJ, SL_PR_DETL, AC_DATA, ROJ_MEL_DATA, UPI_DATA, TAG_IMAGE_DATA.
 - **Web:** `/txn/sales-order`; `GET /sales-orders`, `POST /sales-orders`, `GET /sales-orders/:vchNo`, `PUT /sales-orders/:vchNo`, `DELETE /sales-orders/:vchNo`, `GET /sales/order-confirmation`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** Tender and old-metal rows, partial delivery, manufacturing and invoice conversion, reservation/refund and the order document need acceptance.
-- **Owners:** G14, N44, G16, N46, X14, N77, X25.
-- **Evidence:** [KB_transaction.md:208-235](../../project-memory/video-research/_kb/KB_transaction.md#L208-L235).
+- **Remaining:** Old-metal and scheme tenders, partial delivery, manufacturing and invoice conversion, reservation/refund and the order document need acceptance.
+- **Owners:** G14, N44, G16, N46, X14, N77, X25, G206, N197, N222.
+- **Evidence:** [KB_transaction.md:208-235](../../project-memory/video-research/_kb/KB_transaction.md#L208-L235), [TR_SALE_ORD.cs:9520-9556](../../unified/src/csharp/DataCareNext/TR_SALE_ORD.cs#L9520-L9556).
 
 ### Sales Return
 
@@ -1713,13 +1713,13 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 ### Ledger Report
 
 - **Desktop:** `RP_LEDR` — constructor caption 'Ledger Report' ([MDI_FORM.cs:8871-8880](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8871-L8880)).
-- **Does:** Shows account opening, movements and closing in money, gold and silver with voucher drill-down.
-- **Looks:** Account/group/date/location/city/area filters with account, detail, voucher and month/ageing grids.
-- **Reads:** AC_DATA, AC_MAST, MAIN_STOCK, FINE_DATA, LEDR_AC_DATA, BOOK_DATA, LDR_ADJ_DATA.
-- **Web:** `/reports/account-ledger`; `GET /reports/account-ledger/:acCode`, `GET /reports/account-ledger/:acCode/export.pdf`. Can: print, list.
-- **Remaining:** A basic ledger exists; metal/time/ageing/purchase modes, zero/sign semantics, nested drill-down and many Crystal variants remain.
-- **Owners:** N24, X26, P10-02, N57, N75.
-- **Evidence:** [RP_LEDR.cs:4658-7694](../../unified/src/csharp/DataCareNext/RP_LEDR.cs#L4658-L7694).
+- **Does:** Shows account opening, movements and closing in money, gold and silver with voucher drill-down and debit ageing.
+- **Looks:** View/account/date/data-type filters and a With-Zero toggle, with account-summary, voucher, detail and debit-ageing grids and totals.
+- **Reads:** AC_DATA, AC_MAST, BOOK_DATA, REMARK_DATA.
+- **Web:** `/reports/account-ledger`; `GET /reports/account-ledger`, `GET /reports/account-ledger/export.pdf`, `GET /reports/account-ledger/export.xlsx`, `GET /reports/account-ledger/export.csv`, `GET /reports/account-ledger/:acCode`, `GET /reports/account-ledger/:acCode/export.pdf`. Can: print, list.
+- **Remaining:** N223 builds the account summary, voucher/detail drill-down, debit ageing, signed money/gold/silver balances, totals and PDF/Excel/CSV from one read-only resolver; the OP_LDR opening-ledger ageing union, the staging-table gold/silver fine prints and the Crystal layout comparison remain.
+- **Owners:** N223, N57, N75.
+- **Evidence:** [RP_LEDR.cs:4658-7694](../../unified/src/csharp/DataCareNext/RP_LEDR.cs#L4658-L7694), [accountLedgerReport.ts](../../web/apps/api/src/modules/reports/accountLedgerReport.ts), [accountLedger.ts](../../web/apps/api/src/routes/accountLedger.ts).
 
 ### Old Stock
 
@@ -2378,12 +2378,12 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `UT_TAG_PRINT` — constructor mode 'Tag Print' ([MDI_FORM.cs:8596-8605](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8596-L8605)).
 - **Does:** Selects in-stock tags by tag, product or voucher and reprints barcode and QR labels.
-- **Looks:** Book/voucher/item/product filters, a selectable tag grid, print-file selector, Set and label-skip controls.
-- **Writes:** TAG_PRINT_DATA, BAR_DETL, BAR_IDTL, PRINT_MAST, MAIN_STOCK.
-- **Web:** `/txn/tag-print`; `GET /stock/tag-print`, `POST /stock/tag-print/stage`, `GET /stock/tag-print/label`. Can: print, list.
-- **Remaining:** Basic label sheets work; PRINT_MAST variants, voucher/product selection, label skip, dimensions, fonts and physical-printer evidence remain.
-- **Owners:** N25, X28, G59, N73, G60, N75, X25.
-- **Evidence:** [KB_other.md:117-139](../../project-memory/video-research/_kb/KB_other.md#L117-L139).
+- **Looks:** Book, Vch No with F1, Gr Code, Pr Code and Item Type over a Y/N tag grid with the Hm Id Update columns; Print file Name with Set; Item Name and Lable Skip under the grid; Print, Save, Cancel, Delete and Exit along the bottom.
+- **Writes:** TAG_PRINT_DATA, BAR_DETL, BAR_CAN_DETL, MAIN_STOCK, PRINT_MAST, ITEM_MAST, GROUP_MAST, PRODUCT_MAST.
+- **Web:** `/txn/tag-print`; `GET /stock/tag-print-screen`, `GET /stock/tag-print-screen/books`, `GET /stock/tag-print-screen/book`, `GET /stock/tag-print-screen/vouchers`, `GET /stock/tag-print-screen/voucher`, `GET /stock/tag-print-screen/stock`, `GET /stock/tag-print-screen/tag`, `GET /stock/tag-print-screen/tags`, `GET /stock/tag-print-screen/lookups/:kind`, `POST /stock/tag-print-screen/hm-update`, `POST /stock/tag-print-screen/default-file`, `POST /stock/tag-print-screen/print`, `GET /stock/tag-print-screen/labels`. Can: print, list.
+- **Remaining:** The Crystal label files are not in the repository (the web prints its own label sheet) and physical-printer acceptance (D29) remains; the RFID writer, Print Type box and QR picture (named registrations) are not on the screen.
+- **Owners:** N25, X28, G59, N73, G60, N75, X25, G237, N225.
+- **Evidence:** [UT_TAG_PRINT.cs:1816-5666](../../unified/src/csharp/DataCareNext/UT_TAG_PRINT.cs#L1816-L5666).
 
 ### Tag Split
 

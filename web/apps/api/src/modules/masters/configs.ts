@@ -197,6 +197,8 @@ export const CO_MAST_CONFIG: MasterConfig = {
   table: 'CO_MAST',
   keyColumns: ['CO_CODE'],
   requiredColumns: ['CO_CODE', 'CO_NAME'],
+  dedicatedWriter:
+    'Company uses a dedicated workflow for identity and provisioning; generic create, update, delete, and CSV import are unavailable.',
   deleteSelectionMessage: DESKTOP_MESSAGES.COMPANY_SELECT_FOR_DELETE,
   columnMessages: {
     CO_CODE: DESKTOP_MESSAGES.CO_CODE_REQUIRED,

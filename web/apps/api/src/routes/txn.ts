@@ -239,11 +239,7 @@ import {
   SCALE_TARGET_GRID_COLUMN,
   scaleCaptureEnabled,
 } from '../modules/integrations/scaleProtocol.js';
-import {
-  listPrintableTags,
-  renderTagLabels,
-  stageTagPrintRowsTx,
-} from '../modules/stock/tagPrint.js';
+import { registerTagPrintScreenRoutes } from './tagPrintScreen.js';
 import { tagStockReport, tagStockCsv } from '../modules/reports/tagStock.js';
 import { registerVoucherNavigationRoutes } from './voucherNavigation.js';
 import { postContra, deleteContra, getContra, editContra } from '../modules/finance/contra.js';
@@ -257,9 +253,9 @@ import { registerTaxMasterRoutes } from './taxMaster.js';
 import { registerAutoItemRoutes } from './autoItem.js';
 import { registerGroupMasterRoutes } from './groupMaster.js';
 import { registerProductMasterRoutes } from './productMaster.js';
-import { registerAddressMasterRoutes } from './addressMaster.js';
-import { registerItemMasterRoutes } from './itemMaster.js';
+import { registerMasterScreenRoutes } from './masterScreens.js';
 import { registerWholesaleSaleRoutes } from './wholesaleSale.js';
+import { registerAccountLedgerRoutes } from './accountLedger.js';
 import { VoucherVersionConflictError } from '../modules/vouchers/version.js';
 import { listYears, createYear, carryForwardOpenings } from '../modules/masters/year.js';
 import { reminders } from '../modules/finance/reminders.js';
@@ -568,7 +564,6 @@ import {
   purchaseRegister,
   dayBook,
   trialBalance,
-  accountLedger,
   gstr1,
   dhrnOutstandingList,
   karigarBalances,
@@ -1116,8 +1111,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerAutoItemRoutes(app, extraRouteHelpers, formCapabilities);
   registerGroupMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerProductMasterRoutes(app, extraRouteHelpers, formCapabilities);
-  registerAddressMasterRoutes(app, extraRouteHelpers, formCapabilities);
-  registerItemMasterRoutes(app, extraRouteHelpers, formCapabilities);
+  registerTagPrintScreenRoutes(app, extraRouteHelpers, formCapabilities);
+  registerMasterScreenRoutes(app, extraRouteHelpers, formCapabilities);
   registerWholesaleSaleRoutes(app, extraRouteHelpers);
   registerGstReportRoutes(app, { prisma, auth, scopeOf: readScope, pdfRenderer: deps.pdfRenderer });
   const pdfRenderer = (): PdfRenderer => deps.pdfRenderer ?? new PlaywrightPdfRenderer();
@@ -4500,13 +4495,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const { result } = await resolveReport(slug, req);
     return sendReportPdf(req, reply, slug, REPORT_FORM_BY_SLUG[slug], result);
   });
-  // The account ledger's screen carries the account in the path, so its PDF does too.
-  app.get('/reports/account-ledger/:acCode/export.pdf', auth, async (req, reply) => {
-    if (!guard(req, reply, 'print')) return;
-    const acCode = String((req.params as any).acCode ?? '');
-    const result = await accountLedger(prisma, readScope(req), acCode, range(req));
-    return sendReportPdf(req, reply, 'account-ledger', 'Reports/Account Ledger', result);
-  });
   const sendReportPdf = async (
     req: FastifyRequest,
     reply: FastifyReply,
@@ -4532,6 +4520,11 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     }
     return sendPdf(reply, html, slug);
   };
+
+  // The desktop Ledger Report (RP_LEDR): account summary, per-voucher / per-ledger-key drill-down,
+  // debit ageing, and its Excel/CSV/PDF outputs. The resolver feeds the screen and every export from
+  // one path. Registered here (not with the other plugins above) because it needs `sendReportPdf`.
+  registerAccountLedgerRoutes(app, { prisma, auth, guard, readScope, sendReportPdf });
 
   // Screens for five reports registered only in REPORT_BUILDERS (exports worked, screens 404'd —
   // PARITY-EVALUATION-2026-09-28 D3). Each calls the export's own builder with its own inputs (so the
@@ -5854,21 +5847,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       },
     );
   });
-  app.get('/stock/tag-print', auth, async (req) => {
-    const s = scopeOf(req);
-    const qy = (req.query as any) || {};
-    return listPrintableTags(
-      prisma,
-      s.tenantId,
-      { CO_CODE: s.coCode, LC_CODE: s.lcCode },
-      {
-        tblCode: qy.tblCode || undefined,
-        itCode: qy.itCode || undefined,
-        tagFrom: qy.tagFrom || undefined,
-        tagTo: qy.tagTo || undefined,
-      },
-    );
-  });
   app.get('/masters/design-book/component-defaults', auth, async (req, reply) => {
     const s = scopeOf(req);
     return run(reply, 200, () =>
@@ -5993,57 +5971,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         requireImageVersion((req.query as any)?.version ?? (req.body as any)?.version),
       ),
     );
-  });
-  app.post('/stock/tag-print/stage', auth, async (req) => {
-    const s = scopeOf(req);
-    const body = (req.body as any) || {};
-    const vchNo = String(body.vchNo ?? '').trim();
-    if (!vchNo) throw new StockVoucherValidationError('vchNo is required');
-    const srNos = Array.isArray(body.srNos)
-      ? body.srNos.map((v: unknown) => Number(v)).filter((v: number) => Number.isFinite(v))
-      : undefined;
-    // Staging copies one voucher's BAR_DETL rows, so the full book scope is mandatory. Fail closed
-    // rather than staging against a partial scope.
-    const coYear = s.coYear;
-    const coBook = s.coBook;
-    if (!coYear || !coBook) {
-      throw new StockVoucherValidationError('scope-incomplete: company year and book are required');
-    }
-    const staged = await withTxBudget(prisma, s.tenantId, 'voucher', (tx: any) =>
-      stageTagPrintRowsTx(
-        tx,
-        s.tenantId,
-        { coCode: s.coCode, lcCode: s.lcCode, coYear, coBook },
-        vchNo,
-        srNos,
-        // Blank stickers to leave before the first real label (desktop nLableSkip).
-        Number(body.labelSkip ?? 0),
-      ),
-    );
-    return { staged };
-  });
-  app.get('/stock/tag-print/label', auth, async (req, reply) => {
-    const s = scopeOf(req);
-    const qy = (req.query as any) || {};
-    const all = await listPrintableTags(
-      prisma,
-      s.tenantId,
-      { CO_CODE: s.coCode, LC_CODE: s.lcCode },
-      {
-        tblCode: qy.tblCode || undefined,
-        itCode: qy.itCode || undefined,
-        tagFrom: qy.tagFrom || undefined,
-        tagTo: qy.tagTo || undefined,
-      },
-    );
-    const wanted = qy.tags
-      ? String(qy.tags)
-          .split(',')
-          .map((t) => t.trim())
-          .filter(Boolean)
-      : null;
-    const tags = wanted ? all.filter((t) => wanted.includes(t.tagNo)) : all;
-    return reply.type('text/html').send(renderTagLabels(tags, Number(qy.labelSkip ?? 0)));
   });
 
   // ---- Membership / loyalty ----
@@ -6287,9 +6214,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // route because route-policy analysis reads literal path strings - a loop would be invisible to it.
   app.get('/reports/rojmel', auth, async (req) => rojmel(prisma, readScope(req)));
   app.get('/reports/trial-balance', auth, async (req) => trialBalance(prisma, readScope(req)));
-  app.get('/reports/account-ledger/:acCode', auth, async (req) =>
-    accountLedger(prisma, readScope(req), (req.params as any).acCode, range(req)),
-  );
+  // GET /reports/account-ledger and the account-in-path aliases live in routes/accountLedger.ts
+  // (registered above as registerAccountLedgerRoutes), the dedicated RP_LEDR plugin.
   app.get('/reports/dhrn-outstanding', auth, async (req) =>
     dhrnOutstandingList(prisma, readScope(req)),
   );
