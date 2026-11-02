@@ -489,6 +489,7 @@ export const FORM_EDITION: Readonly<Record<string, EditionTier>> = Object.freeze
   'Transaction/Stock In': 'E',
   'Transaction/Stock Out': 'E',
   'Utilities/Audit Log': 'platform',
+  'Utilities/Backup': 'L',
   'Utilities/Customer Entry': 'A',
   'Utilities/Data Export': 'S',
   'Utilities/Data Refresh': 'L',

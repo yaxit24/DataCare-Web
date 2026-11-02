@@ -465,9 +465,9 @@ export const dataBackup = {
         assert.equal(new URL(response.url()).pathname, '/api/backup');
         assert.equal(response.request().method(), 'GET');
         assert.equal(response.status(), 403);
-        const alert = page.getByRole('alert');
+        const alert = page.locator('.panel').getByRole('alert').filter({ hasText: 'forbidden' });
         await alert.waitFor();
-        assert.notEqual((await alert.innerText()).trim(), '');
+        assert.equal((await alert.innerText()).trim(), 'forbidden');
         assert.equal(await page.getByText('Backup Process Complete.', { exact: true }).count(), 0);
         assert.deepEqual(await backupRuns(ctx), before);
         return {
