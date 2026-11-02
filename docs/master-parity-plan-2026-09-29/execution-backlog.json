@@ -7607,6 +7607,36 @@
         "web/apps/web/test/features/modules/cashBank.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Verified: the daily-rate, lock-message and cash-employee DB and unit tests; full isolated suite API 356 files / 3,789 tests, web 713; modules tag-cancel 16/16, purchase-invoice 29/29, contra 25/25, daily-rate 15 of 16, cash-bank 19 of 21, sales-invoice and sales-order with no new failure (the sales-order old-metal case is the known G206 baseline). Open: daily-rate T15 needs a location-00 session in the harness; cash-bank T03 and T06; the desktop's default employee from the session (TR_CASH.cs:2671); desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N228",
+      "status": "implemented-unverified",
+      "action": "Wh Sales like TR_WH_SALE: the voucher number box keys (F1 list, Up, Down, Enter), the issued tag stones written to SL_IDTL and DM_DATA, and the WhSalesBill layout (book title, Issue and Received groups, the four-column band with the report formulas, Kasar Fine, Ref No, ESTIMATE, Cr/Dr labels).",
+      "startAfter": [
+        "N227"
+      ],
+      "requiredProof": "wholesale-sale.keyboard.voucher-number-keys, create.tag-stones and output.print-bill pass in the browser; wholesaleSaleStones, wholesaleSaleBill and voucherNeighbour tests pass.",
+      "gapIds": "G15",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "parentLabels": "P1-core",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/sales/wholesaleTagStones.ts",
+        "web/apps/api/src/modules/sales/wholesaleSaleBill.ts",
+        "web/apps/api/src/modules/sales/rateCut.ts",
+        "web/apps/api/src/modules/sales/rateCutBookingDrawDown.ts",
+        "web/apps/api/src/modules/vouchers/list.ts",
+        "web/apps/api/src/routes/wholesaleSale.ts",
+        "web/apps/web/components/WholesaleVoucherForm.tsx",
+        "web/apps/api/test/wholesaleSaleStones.db.test.ts",
+        "web/apps/api/test/wholesaleSaleBill.test.ts",
+        "web/apps/api/test/voucherNeighbour.routes.db.test.ts",
+        "web/apps/web/test/features/modules/wholesaleSale.mjs"
+      ],
+      "statusNote": "IMPLEMENTED (voucher keys, tag stones, bill layout), not accepted. The three new test files fail against the old code and pass; the wholesale-sale browser module passes 27 of 27. Open: hand-typed item-detail rows for loose items, SL_IDTL rows on the printed bill, fine kasar, the Rojmel alignment for lined vouchers, desktop-runtime comparison and parent acceptance."
     }
   ],
   "amendments": [
