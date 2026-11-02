@@ -239,11 +239,7 @@ import {
   SCALE_TARGET_GRID_COLUMN,
   scaleCaptureEnabled,
 } from '../modules/integrations/scaleProtocol.js';
-import {
-  listPrintableTags,
-  renderTagLabels,
-  stageTagPrintRowsTx,
-} from '../modules/stock/tagPrint.js';
+import { registerTagPrintScreenRoutes } from './tagPrintScreen.js';
 import { tagStockReport, tagStockCsv } from '../modules/reports/tagStock.js';
 import { registerVoucherNavigationRoutes } from './voucherNavigation.js';
 import { postContra, deleteContra, getContra, editContra } from '../modules/finance/contra.js';
@@ -1117,6 +1113,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerProductMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerAddressMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerItemMasterRoutes(app, extraRouteHelpers, formCapabilities);
+  registerTagPrintScreenRoutes(app, extraRouteHelpers, formCapabilities);
   registerWholesaleSaleRoutes(app, extraRouteHelpers);
   const pdfRenderer = (): PdfRenderer => deps.pdfRenderer ?? new PlaywrightPdfRenderer();
   /** Render server-built HTML, mapping limits to 413/422 and a busy or slow renderer to a retryable 503. */
@@ -5852,21 +5849,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       },
     );
   });
-  app.get('/stock/tag-print', auth, async (req) => {
-    const s = scopeOf(req);
-    const qy = (req.query as any) || {};
-    return listPrintableTags(
-      prisma,
-      s.tenantId,
-      { CO_CODE: s.coCode, LC_CODE: s.lcCode },
-      {
-        tblCode: qy.tblCode || undefined,
-        itCode: qy.itCode || undefined,
-        tagFrom: qy.tagFrom || undefined,
-        tagTo: qy.tagTo || undefined,
-      },
-    );
-  });
   app.get('/masters/design-book/component-defaults', auth, async (req, reply) => {
     const s = scopeOf(req);
     return run(reply, 200, () =>
@@ -5991,57 +5973,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         requireImageVersion((req.query as any)?.version ?? (req.body as any)?.version),
       ),
     );
-  });
-  app.post('/stock/tag-print/stage', auth, async (req) => {
-    const s = scopeOf(req);
-    const body = (req.body as any) || {};
-    const vchNo = String(body.vchNo ?? '').trim();
-    if (!vchNo) throw new StockVoucherValidationError('vchNo is required');
-    const srNos = Array.isArray(body.srNos)
-      ? body.srNos.map((v: unknown) => Number(v)).filter((v: number) => Number.isFinite(v))
-      : undefined;
-    // Staging copies one voucher's BAR_DETL rows, so the full book scope is mandatory. Fail closed
-    // rather than staging against a partial scope.
-    const coYear = s.coYear;
-    const coBook = s.coBook;
-    if (!coYear || !coBook) {
-      throw new StockVoucherValidationError('scope-incomplete: company year and book are required');
-    }
-    const staged = await withTxBudget(prisma, s.tenantId, 'voucher', (tx: any) =>
-      stageTagPrintRowsTx(
-        tx,
-        s.tenantId,
-        { coCode: s.coCode, lcCode: s.lcCode, coYear, coBook },
-        vchNo,
-        srNos,
-        // Blank stickers to leave before the first real label (desktop nLableSkip).
-        Number(body.labelSkip ?? 0),
-      ),
-    );
-    return { staged };
-  });
-  app.get('/stock/tag-print/label', auth, async (req, reply) => {
-    const s = scopeOf(req);
-    const qy = (req.query as any) || {};
-    const all = await listPrintableTags(
-      prisma,
-      s.tenantId,
-      { CO_CODE: s.coCode, LC_CODE: s.lcCode },
-      {
-        tblCode: qy.tblCode || undefined,
-        itCode: qy.itCode || undefined,
-        tagFrom: qy.tagFrom || undefined,
-        tagTo: qy.tagTo || undefined,
-      },
-    );
-    const wanted = qy.tags
-      ? String(qy.tags)
-          .split(',')
-          .map((t) => t.trim())
-          .filter(Boolean)
-      : null;
-    const tags = wanted ? all.filter((t) => wanted.includes(t.tagNo)) : all;
-    return reply.type('text/html').send(renderTagLabels(tags, Number(qy.labelSkip ?? 0)));
   });
 
   // ---- Membership / loyalty ----

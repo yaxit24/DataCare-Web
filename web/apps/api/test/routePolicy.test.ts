@@ -115,8 +115,10 @@ describe('route policy registry', () => {
     // The Wh Sales print (WhSalesBill, TR_WH_SALE.cs:13654) adds GET /wholesale-sales/:vchNo/print: 714.
     // N221 replaces Stock Adjust's POST and DELETE /stock/adjust with the TR_TAG_CAN family (list, source, lots, one,
     // POST, PUT, DELETE, print): 714 - 2 + 8 = 720.
-    expect(routes).toHaveLength(720);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(720);
+    // N224 replaces Tag Print's list, stage and label routes with the UT_TAG_PRINT screen's (setup, books, book,
+    // vouchers, voucher, stock, tag, tags, lookups, hm-update, default-file, print, labels): 720 - 3 + 13 = 730.
+    expect(routes).toHaveLength(730);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(730);
 
     const policies = routes.map((route) => ({
       ...route,
