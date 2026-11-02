@@ -128,37 +128,39 @@ db('Data Refresh Approval Adj write set', () => {
       await bar(tx, otherTenant, 1, 'N');
     });
 
-  const physical = async (tenant = tenantId) => {
-    const result: Record<string, Array<{ raw: string; revision: string }>> = {};
-    for (const table of ['APR_DETL', 'SL_DETL', 'RATE_CUT_ISU', 'BAR_DETL']) {
-      result[table] = await prisma.$queryRawUnsafe(
-        `SELECT to_jsonb(t)::text AS raw,xmin::text AS revision FROM "${table}" t
-          WHERE tenant_id=$1 ORDER BY row_id`,
-        tenant,
-      );
-    }
-    return result;
-  };
+  const physical = (tenant = tenantId) =>
+    withTenant(prisma, tenant, async (tx: any) => {
+      const result: Record<string, Array<{ raw: string; revision: string }>> = {};
+      for (const table of ['APR_DETL', 'SL_DETL', 'RATE_CUT_ISU', 'BAR_DETL']) {
+        result[table] = await tx.$queryRawUnsafe(
+          `SELECT to_jsonb(t)::text AS raw,xmin::text AS revision FROM "${table}" t
+            WHERE tenant_id=$1 ORDER BY row_id`,
+          tenant,
+        );
+      }
+      return result;
+    });
 
-  const tenantSnapshot = async (tenant = tenantId) => {
-    const names = await prisma.$queryRawUnsafe<Array<{ table_name: string }>>(
-      `SELECT DISTINCT c.table_name FROM information_schema.columns c
-         JOIN information_schema.tables t
-           ON t.table_schema=c.table_schema AND t.table_name=c.table_name
-        WHERE c.table_schema='public' AND c.column_name='tenant_id'
-          AND t.table_type='BASE TABLE' ORDER BY c.table_name`,
-    );
-    const result: Record<string, string[]> = {};
-    for (const { table_name: table } of names) {
-      const rows = await prisma.$queryRawUnsafe<Array<{ raw: string }>>(
-        `SELECT to_jsonb(t)::text AS raw FROM "${table}" t
-          WHERE tenant_id=$1 ORDER BY to_jsonb(t)::text`,
-        tenant,
-      );
-      result[table] = rows.map((row) => row.raw);
-    }
-    return result;
-  };
+  const tenantSnapshot = (tenant = tenantId) =>
+    withTenant(prisma, tenant, async (tx: any) => {
+      const names = (await tx.$queryRawUnsafe(
+        `SELECT DISTINCT c.table_name FROM information_schema.columns c
+           JOIN information_schema.tables t
+             ON t.table_schema=c.table_schema AND t.table_name=c.table_name
+          WHERE c.table_schema='public' AND c.column_name='tenant_id'
+            AND t.table_type='BASE TABLE' ORDER BY c.table_name`,
+      )) as Array<{ table_name: string }>;
+      const result: Record<string, string[]> = {};
+      for (const { table_name: table } of names) {
+        const rows = (await tx.$queryRawUnsafe(
+          `SELECT to_jsonb(t)::text AS raw FROM "${table}" t
+            WHERE tenant_id=$1 ORDER BY to_jsonb(t)::text`,
+          tenant,
+        )) as Array<{ raw: string }>;
+        result[table] = rows.map((row) => row.raw);
+      }
+      return result;
+    });
 
   beforeEach(wipe);
   afterAll(async () => {
