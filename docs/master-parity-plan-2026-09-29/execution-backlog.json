@@ -7515,6 +7515,34 @@
         "web/apps/web/test/features/modules/tagPrint.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Verified: tagPrintScreen.db.test.ts 9/9, the tag-print feature module 17 of 17 applicable (T10 not applicable), the surface crawl, and a Chrome DevTools pass on the demo stack. Desktop-runtime comparison and physical-printer acceptance (D29) remain."
+    },
+    {
+      "id": "N226",
+      "status": "implemented-unverified",
+      "action": "The Sales Order's old gold and old silver like TR_SALE_ORD: the MSG_OLD grid (item, weights, touch, rate type, rate, amount with the CommPassTotal_Old derivation), SL_PR_DETL one row per saved grid row, OLD_GL* totals and the amounts in ADV_AMT, Order_Rojmel types 04/06, the book-direction-gated Order_Ledr legs 07-10, and edit and delete of an order with old metal.",
+      "startAfter": [
+        "N225"
+      ],
+      "requiredProof": "sales-order.create.old-metal-tenders, create.old-metal-unvalued-fine and edit.old-metal-then-delete pass in the browser; the old metal DB write-set test passes.",
+      "gapIds": "G206",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "parentLabels": "P9; R03",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/sales/salesOrderOldMetal.ts",
+        "web/apps/api/src/modules/sales/salesOrderTender.ts",
+        "web/apps/api/src/modules/sales/salesOrder.ts",
+        "web/apps/api/src/modules/sales/orderLifecyclePolicy.ts",
+        "web/apps/web/components/SalesOrderOldMetalGrid.tsx",
+        "web/apps/web/lib/salesOrderOldMetal.ts",
+        "web/apps/api/test/salesOrderOldMetal.db.test.ts",
+        "web/apps/api/test/salesOrderOldMetal.test.ts",
+        "web/apps/web/test/features/modules/salesOrder.mjs"
+      ],
+      "statusNote": "IMPLEMENTED (old gold and old silver), not accepted. The DB write-set test passes (red before this change) and the three browser cases pass. Open: the scheme amount (baselined), the real Sales Order BOOK_INOUT for legs 07-10, the T book variant, the SL_ORD_ADJ O row, desktop-runtime comparison and parent acceptance."
     }
   ],
   "amendments": [
