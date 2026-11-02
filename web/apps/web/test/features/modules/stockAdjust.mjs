@@ -536,6 +536,56 @@ export const stockAdjust = {
       },
     ),
     C(
+      'reopen.late-list-keeps-typed-voucher-number',
+      'T08',
+      'read-only',
+      'TR_TAG_CAN.cs:4702-4880: the number typed in Vch No is the one Enter opens; the next-number read that fills the box on entry must not overwrite it when it answers late (the Stock Adjust screen shares the Tag Cancel form)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        let release;
+        const gate = new Promise((resolve) => (release = resolve));
+        let held;
+        const heldSeen = new Promise((resolve) => (held = resolve));
+        const listing = (url) => url.pathname === '/api/stock/stock-adjust';
+        await page.route(
+          (url) => listing(url),
+          async (route) => {
+            if (route.request().method() !== 'GET') return route.continue();
+            held();
+            await gate;
+            return route.continue();
+          },
+        );
+        try {
+          await page.goto('/txn/stock-adjust');
+          await page.getByRole('heading', { name: 'Stock Adjust', exact: true }).waitFor();
+          await heldSeen;
+          const box = page.getByLabel('Vch No', { exact: true });
+          await box.fill('98765');
+          const answered = page.waitForResponse(
+            (r) => listing(new URL(r.url())) && r.request().method() === 'GET',
+          );
+          release();
+          await answered;
+          await page.waitForTimeout(300);
+          assert.equal(
+            await box.inputValue(),
+            '98765',
+            'the late next-number answer must not replace the typed voucher number',
+          );
+        } finally {
+          release();
+          await page.unroute((url) => listing(url));
+        }
+        return {
+          observation: 'a voucher number typed before the list answered is still there afterwards',
+          expected: '98765',
+          database: {},
+          downstream: { typed: '98765' },
+        };
+      },
+    ),
+    C(
       'edit.flip-a-sign',
       'T09',
       'mutation',
