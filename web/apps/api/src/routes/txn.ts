@@ -253,9 +253,9 @@ import { registerTaxMasterRoutes } from './taxMaster.js';
 import { registerAutoItemRoutes } from './autoItem.js';
 import { registerGroupMasterRoutes } from './groupMaster.js';
 import { registerProductMasterRoutes } from './productMaster.js';
-import { registerAddressMasterRoutes } from './addressMaster.js';
-import { registerItemMasterRoutes } from './itemMaster.js';
+import { registerMasterScreenRoutes } from './masterScreens.js';
 import { registerWholesaleSaleRoutes } from './wholesaleSale.js';
+import { registerAccountLedgerRoutes } from './accountLedger.js';
 import { VoucherVersionConflictError } from '../modules/vouchers/version.js';
 import { listYears, createYear, carryForwardOpenings } from '../modules/masters/year.js';
 import { reminders } from '../modules/finance/reminders.js';
@@ -564,7 +564,6 @@ import {
   purchaseRegister,
   dayBook,
   trialBalance,
-  accountLedger,
   gstr1,
   dhrnOutstandingList,
   karigarBalances,
@@ -1111,9 +1110,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerAutoItemRoutes(app, extraRouteHelpers, formCapabilities);
   registerGroupMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerProductMasterRoutes(app, extraRouteHelpers, formCapabilities);
-  registerAddressMasterRoutes(app, extraRouteHelpers, formCapabilities);
-  registerItemMasterRoutes(app, extraRouteHelpers, formCapabilities);
   registerTagPrintScreenRoutes(app, extraRouteHelpers, formCapabilities);
+  registerMasterScreenRoutes(app, extraRouteHelpers, formCapabilities);
   registerWholesaleSaleRoutes(app, extraRouteHelpers);
   const pdfRenderer = (): PdfRenderer => deps.pdfRenderer ?? new PlaywrightPdfRenderer();
   /** Render server-built HTML, mapping limits to 413/422 and a busy or slow renderer to a retryable 503. */
@@ -4495,13 +4493,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const { result } = await resolveReport(slug, req);
     return sendReportPdf(req, reply, slug, REPORT_FORM_BY_SLUG[slug], result);
   });
-  // The account ledger's screen carries the account in the path, so its PDF does too.
-  app.get('/reports/account-ledger/:acCode/export.pdf', auth, async (req, reply) => {
-    if (!guard(req, reply, 'print')) return;
-    const acCode = String((req.params as any).acCode ?? '');
-    const result = await accountLedger(prisma, readScope(req), acCode, range(req));
-    return sendReportPdf(req, reply, 'account-ledger', 'Reports/Account Ledger', result);
-  });
   const sendReportPdf = async (
     req: FastifyRequest,
     reply: FastifyReply,
@@ -4527,6 +4518,11 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     }
     return sendPdf(reply, html, slug);
   };
+
+  // The desktop Ledger Report (RP_LEDR): account summary, per-voucher / per-ledger-key drill-down,
+  // debit ageing, and its Excel/CSV/PDF outputs. The resolver feeds the screen and every export from
+  // one path. Registered here (not with the other plugins above) because it needs `sendReportPdf`.
+  registerAccountLedgerRoutes(app, { prisma, auth, guard, readScope, sendReportPdf });
 
   // Screens for five reports registered only in REPORT_BUILDERS (exports worked, screens 404'd —
   // PARITY-EVALUATION-2026-09-28 D3). Each calls the export's own builder with its own inputs (so the
@@ -6216,9 +6212,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // route because route-policy analysis reads literal path strings - a loop would be invisible to it.
   app.get('/reports/rojmel', auth, async (req) => rojmel(prisma, readScope(req)));
   app.get('/reports/trial-balance', auth, async (req) => trialBalance(prisma, readScope(req)));
-  app.get('/reports/account-ledger/:acCode', auth, async (req) =>
-    accountLedger(prisma, readScope(req), (req.params as any).acCode, range(req)),
-  );
+  // GET /reports/account-ledger and the account-in-path aliases live in routes/accountLedger.ts
+  // (registered above as registerAccountLedgerRoutes), the dedicated RP_LEDR plugin.
   app.get('/reports/dhrn-outstanding', auth, async (req) =>
     dhrnOutstandingList(prisma, readScope(req)),
   );

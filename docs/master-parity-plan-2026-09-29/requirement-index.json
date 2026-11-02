@@ -75,7 +75,7 @@
       "rebaselined": {
         "date": "2026-11-02",
         "fromSha256": "393315786b551911af2fa64bbcd42646cf5c9c7c94d305e58bdb0e16ef3a91ba",
-        "slice": "N224",
+        "slice": "N225",
         "reason": "Tag Print's web surface is the UT_TAG_PRINT screen's print route (POST /stock/tag-print-screen/print) instead of the older list route GET /stock/tag-print, which the screen no longer uses (G236). The 198 menu identities are unchanged; nothing is verified.",
         "previous": {
           "date": "2026-11-02",

@@ -37,6 +37,15 @@
         "web/apps/api/src/modules/rbac/users.ts"
       ]
     },
+    "companyMaster": {
+      "covers": [
+        "web/apps/web/app/(app)/masters/companies/page.tsx",
+        "web/apps/api/src/modules/masters/configs.ts",
+        "web/apps/api/src/modules/masters/master.service.ts",
+        "web/apps/api/src/modules/auth/businessScope.ts",
+        "web/apps/api/src/app.ts"
+      ]
+    },
     "salesReturn": {
       "covers": [
         "web/apps/web/app/(app)/txn/sale-return/page.tsx",
@@ -199,6 +208,23 @@
       "covers": [
         "web/apps/web/app/(app)/txn/stock-adjust/page.tsx",
         "web/apps/api/src/modules/stock/stockAdjustLots.ts"
+      ]
+    },
+    "accountLedger": {
+      "covers": [
+        "web/apps/web/app/(app)/reports/account-ledger/page.tsx",
+        "web/apps/web/app/(app)/reports/account-ledger/useAccountLedger.ts",
+        "web/apps/web/app/(app)/reports/account-ledger/AccountLedgerGrid.tsx",
+        "web/apps/web/app/(app)/reports/account-ledger/types.ts",
+        "web/apps/api/src/modules/reports/accountLedgerReport.ts",
+        "web/apps/api/src/routes/accountLedger.ts"
+      ]
+    },
+    "partyMaster": {
+      "covers": [
+        "web/apps/web/app/(app)/masters/party/page.tsx",
+        "web/apps/api/src/modules/masters/partyMaster.ts",
+        "web/apps/api/src/routes/partyMaster.ts"
       ]
     },
     "tagPrint": {
