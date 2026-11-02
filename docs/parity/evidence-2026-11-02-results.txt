@@ -1,0 +1,74 @@
+# Result lines copied from the local runs of 2 November 2026 (session 52f05ab4).
+# Only the runner's own PASS/FAIL/summary lines, no environment or connection lines. Sections: the Esc case red then green,
+# the Esc stress replay unfixed vs fixed, the tag label cases red then green. Sources are scratch logs that are not kept.
+
+## run_label_red.log
+=== tag-print: Other → Tag Print (UT_TAG_PRINT) (19 cases) ===
+  FAIL tag-print.output.label-sheet
+       FAILED: gross: G. and three decimals
+  FAIL tag-print.output.label-labour-lines
+       FAILED: tag 1: LP:
+  -> applicable 18, passed 0, failed 2, blocked 0, untested 16; browser pass 0%
+FEATURE_E2E_FAILED:
+- tag-print: NEW failure tag-print.output.label-sheet
+- tag-print: NEW failure tag-print.output.label-labour-lines
+## run_label_green2.log
+=== tag-print: Other → Tag Print (UT_TAG_PRINT) (19 cases) ===
+  PASS tag-print.output.label-sheet
+  PASS tag-print.output.label-labour-lines
+  -> applicable 18, passed 2, failed 0, blocked 0, untested 16; browser pass 11.11%
+FEATURE_E2E_PASSED
+## run_red.log
+=== tag-print: Other → Tag Print (UT_TAG_PRINT) (19 cases) ===
+  PASS tag-print.keyboard.desktop-keys
+  FAIL tag-print.keyboard.esc-with-focus-on-the-page
+       FAILED: page.waitForURL: Timeout 10000ms exceeded.
+  -> applicable 18, passed 1, failed 1, blocked 0, untested 16; browser pass 5.56%
+FEATURE_E2E_FAILED:
+- tag-print: NEW failure tag-print.keyboard.esc-with-focus-on-the-page
+## run_green.log
+=== tag-print: Other → Tag Print (UT_TAG_PRINT) (19 cases) ===
+  PASS tag-print.keyboard.desktop-keys
+  PASS tag-print.keyboard.esc-with-focus-on-the-page
+  -> applicable 18, passed 2, failed 0, blocked 0, untested 16; browser pass 11.11%
+FEATURE_E2E_PASSED
+## stress_unfixed.log
+PROBE 1 rate=8: {"tag":"BUTTON","label":null,"text":"Print","printDisabled":false}
+  PASS tag-print.stress.1
+PROBE 2 rate=8: {"tag":"BODY","label":null,"text":"(self.__ne","printDisabled":false}
+  PASS tag-print.stress.2
+PROBE 3 rate=8: {"tag":"BUTTON","label":null,"text":"Print","printDisabled":false}
+  PASS tag-print.stress.3
+PROBE 4 rate=8: {"tag":"BODY","label":null,"text":"(self.__ne","printDisabled":false}
+  PASS tag-print.stress.4
+PROBE 5 rate=8: {"tag":"BODY","label":null,"text":"(self.__ne","printDisabled":false}
+  PASS tag-print.stress.5
+PROBE 6 rate=8: {"tag":"BODY","label":null,"text":"(self.__ne","printDisabled":false}
+  FAIL tag-print.stress.6
+       FAILED: page.waitForURL: Timeout 8000ms exceeded.
+PROBE 7 rate=8: {"tag":"BODY","label":null,"text":"(self.__ne","printDisabled":false}
+  PASS tag-print.stress.7
+PROBE 8 rate=8: {"tag":"BODY","label":null,"text":"(self.__ne","printDisabled":false}
+  FAIL tag-print.stress.8
+       FAILED: page.waitForURL: Timeout 8000ms exceeded.
+STRESS RESULT {"passed":6,"failed":2}
+  not passed: tag-print.stress.6 failed
+  not passed: tag-print.stress.8 failed
+## stress_fixed.log
+PROBE 1 rate=8: {"tag":"BUTTON","label":null,"text":"Print","printDisabled":false}
+  PASS tag-print.stress.1
+PROBE 2 rate=8: {"tag":"BODY","label":null,"text":"(self.__ne","printDisabled":false}
+  PASS tag-print.stress.2
+PROBE 3 rate=8: {"tag":"BUTTON","label":null,"text":"Print","printDisabled":false}
+  PASS tag-print.stress.3
+PROBE 4 rate=8: {"tag":"BODY","label":null,"text":"(self.__ne","printDisabled":false}
+  PASS tag-print.stress.4
+PROBE 5 rate=8: {"tag":"BODY","label":null,"text":"(self.__ne","printDisabled":false}
+  PASS tag-print.stress.5
+PROBE 6 rate=8: {"tag":"BODY","label":null,"text":"(self.__ne","printDisabled":false}
+  PASS tag-print.stress.6
+PROBE 7 rate=8: {"tag":"BODY","label":null,"text":"(self.__ne","printDisabled":false}
+  PASS tag-print.stress.7
+PROBE 8 rate=8: {"tag":"BODY","label":null,"text":"(self.__ne","printDisabled":false}
+  PASS tag-print.stress.8
+STRESS RESULT {"passed":8}

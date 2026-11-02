@@ -129,10 +129,11 @@ def build() -> str:
         'Status authority stays in `docs/master-parity-plan-2026-09-29/execution-backlog.json`; this table is a view.',
         '',
         '**Desktop reference limit.** The desktop is available as decompiled C# source (`unified/src/csharp/DataCareNext/`),'
-        ' 1,069 tutorial-video keyframes and 254 extracted report XML specs. The Windows binaries, `.rpt` templates and the'
-        ' SQL Server backup are Git LFS pointers (about 130 bytes each), there is no Windows runtime and no desktop screenshot'
-        ' set to diff against. So *Desktop Behavior* below is what the source and the catalog say, and **desktop-match coverage'
-        ' is 0% for every row**. No row can be VERIFIED PARITY until a case runs on the original Windows desktop.',
+        ' 1,069 tutorial-video keyframes (2021 build) and 254 extracted report XML specs. The Windows executable, the `.rpt`'
+        ' templates and the SQL Server backup are Git LFS objects (pointers in a fresh clone; all cached on the machine that'
+        ' produced this file), but the executable is a Windows .NET assembly and there is no Windows runtime to run it. So *Desktop'
+        ' Behavior* below is what the source, the templates and the catalog say, and **desktop-match coverage is 0% for every row**.'
+        ' No row can be VERIFIED PARITY until a case runs on the original Windows desktop.',
         '',
     ]
     counts: dict[str, int] = {}

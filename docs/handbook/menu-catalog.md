@@ -1629,7 +1629,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Shared date/book/party/location/item filters with Issue, InOut and Pending buttons.
 - **Reads:** APR_DATA, APR_DETL, BOOK_DATA, AC_MAST, ITEM_MAST, PRODUCT_MAST.
 - **Web:** `/reports/approval-report`; `GET /reports/approval-report`. Can: print, list.
-- **Remaining:** Three data modes exist; InOut now calculates the desktop Out/In/Pending piece formulas per APR_DETL issue line: Out=ITM_PCS, In=ITM_PCS when ISU_REC='Y' otherwise 0, and Pending=Out-In. RP_ALL selectors, grouping, Crystal layouts and custody-state reconciliation remain uncertified.
+- **Remaining:** Three data modes exist; InOut calculates the desktop Out/In/Pending piece formulas per APR_DETL issue line (AprInOut.spec.json): Out=ITM_PCS, In=ITM_PCS when ISU_REC is resolved, Pending=Out-In. The desktop writes only 'N' and 'Y' (TR_APR_ISU.cs:6414, TR_SALE.cs:16113); the web Approval Rtn screen runs on the Tour return writer, which closes a returned line with 'R', so 'Y' and 'R' both count as In and the Pending mode agrees. Grid, CSV, XLSX and PDF carry the same totals but print raw field names, not the Crystal AprInOut layout. RP_ALL selectors, grouping, Crystal layouts and custody-state reconciliation remain uncertified.
 - **Owners:** N22, X17, N24, X26, N57, N75.
 - **Evidence:** [RP_ALL.cs:8141-8365](../../unified/src/csharp/DataCareNext/RP_ALL.cs#L8141-L8365).
 
@@ -1684,7 +1684,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Date/book/account/location/section filters with return, zoom, summary and CSV buttons.
 - **Reads:** TAX_DATA, TAX_MAST, BOOK_DATA, AC_MAST, LOCT_MAST.
 - **Web:** `/reports/gst-report`; `GET /reports/gst-report`, `GET /reports/gstr1`, `GET /reports/gstr2`, `GET /reports/gstr3b`, `GET /reports/hsn-summary`. Can: print, list.
-- **Remaining:** The web is a launcher over reports; RP_GST/RP_TAX jurisdiction modes, exact grids and CSV and the Crystal outputs are not certified.
+- **Remaining:** The RP_GST screen exists: GSTR-1 B2B, B2CL, B2CS, CDNR, CDNUR, AT, ATADJ and HSN, GSTR-2 equivalents and the three settled GSTR-3B rows, with CSV, XLSX and PDF exports. EXP, EXEMP, DOCS and TCS are blocked, and the UAE variant is out of scope (the page is the non-UAE RP_GST screen). A sale made on the Sales screen reconciles with the hand-computed tax in B2CS and GSTR-3B. Open: HSN is empty for a web-provisioned company because no book sets BOOK_TYPE 'T' (MS_BOOK.cs:2109-2111) and the Books screen has no Invoice Type control; labour HSN rows carry no discount because LBR_ISU_DETL has no discount column (RP_GST.cs:2719); most gst-report browser cases only open the screen and do not compare numbers; the desktop CSV and Crystal outputs were never compared at runtime.
 - **Owners:** N24, X26, P10-03, N36, G48, N57, N75, G225, N212.
 - **Evidence:** [gst-engine.md:8-45](../../web-implementation-spec/04_Cross_Cutting_Engines/gst-engine.md#L8-L45).
 
@@ -2381,8 +2381,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Book, Vch No with F1, Gr Code, Pr Code and Item Type over a Y/N tag grid with the Hm Id Update columns; Print file Name with Set; Item Name and Lable Skip under the grid; Print, Save, Cancel, Delete and Exit along the bottom.
 - **Writes:** TAG_PRINT_DATA, BAR_DETL, BAR_CAN_DETL, MAIN_STOCK, PRINT_MAST, ITEM_MAST, GROUP_MAST, PRODUCT_MAST.
 - **Web:** `/txn/tag-print`; `GET /stock/tag-print-screen`, `GET /stock/tag-print-screen/books`, `GET /stock/tag-print-screen/book`, `GET /stock/tag-print-screen/vouchers`, `GET /stock/tag-print-screen/voucher`, `GET /stock/tag-print-screen/stock`, `GET /stock/tag-print-screen/tag`, `GET /stock/tag-print-screen/tags`, `GET /stock/tag-print-screen/lookups/:kind`, `POST /stock/tag-print-screen/hm-update`, `POST /stock/tag-print-screen/default-file`, `POST /stock/tag-print-screen/print`, `GET /stock/tag-print-screen/labels`. Can: print, list.
-- **Remaining:** The Crystal label files are not in the repository (the web prints its own label sheet) and physical-printer acceptance (D29) remains; the RFID writer, Print Type box and QR picture (named registrations) are not on the screen.
-- **Owners:** N25, X28, G59, N73, G60, N75, X25, G237, N225, G239.
+- **Remaining:** The label text follows the shared formulas of the desktop label files (G./N. weights, MRP:/LP:/LF: labour line, G240), but the web prints one sheet: the PRINT_MAST file choice, shop name, purity group, karigar name, QR picture, the SubTagPrint.rpt sub-report (not extracted) and the label layouts are not reproduced, and physical-printer acceptance (D29) remains; the RFID writer, Print Type box and QR picture (named registrations) are not on the screen.
+- **Owners:** N25, X28, G59, N73, G60, N75, X25, G237, N225, G239, G240.
 - **Evidence:** [UT_TAG_PRINT.cs:1816-5666](../../unified/src/csharp/DataCareNext/UT_TAG_PRINT.cs#L1816-L5666).
 
 ### Tag Split
