@@ -103,6 +103,22 @@ static class FnvHalfProbe
         Console.WriteLine("RESULT2 negatives=" + negTotal + " negativeMismatches=" + negMiss + " fractional=" + decTotal + " fractionalMismatches=" + decMiss);
         File.WriteAllText(csv.Replace(".csv", "-part2.csv"), sb2.ToString());
 
+        // Part 3: the IGST column, RP_GST.cs:2951-2956: Strings.Format(Fnv(ItmTax), "0.00") with no halving.
+        long igTotal = 0, igMiss = 0;
+        Action<decimal> igst = tax =>
+        {
+            string txt = tax.ToString(CultureInfo.InvariantCulture);
+            string fx = Strings.Format((object)Conversion.Val(txt), "0.00");
+            string rf = Math.Round(tax, 2, MidpointRounding.AwayFromZero).ToString("0.00", CultureInfo.InvariantCulture);
+            if (rf == "-0.00") rf = "0.00";
+            igTotal++;
+            if (fx != rf) { igMiss++; if (shown++ < 80) Console.WriteLine("  igst differs: tax " + txt + " -> " + fx + " (reference " + rf + ")"); }
+        };
+        for (long m = 1; m <= 2000000; m++) { igst((decimal)m / 1000m); igst(-(decimal)m / 1000m); igst((decimal)m / 10000m + 0.00005m); }
+        for (int i = 0; i < 1000000; i++) { long raw = (long)(rnd.NextDouble() * 99999999999L); igst((decimal)raw / 10000m); igst(-(decimal)raw / 10000m); }
+        Console.WriteLine("RESULT3 igstChecked=" + igTotal + " igstMismatches=" + igMiss);
+        Console.WriteLine("NEGZERO " + Strings.Format((object)Conversion.Val("-0.004"), "0.00") + " / half " + Strings.Format((object)(Conversion.Val("-0.004") / 2.0), "0.00"));
+
         // Spot values named in the plan / probe: 1908.29 (3% of 63,609.50 rounded) and the 2043.29 bill of G181.
         foreach (long t in new long[] { 190829, 204329, 1, 3, 5, 7, 9, 99999999999L / 100 | 1 })
             Console.WriteLine("SPOT tax " + Paise(t) + " -> " + Fx(t));
