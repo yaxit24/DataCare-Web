@@ -32,6 +32,7 @@ import {
 import { SaleValidationError } from './sales.js';
 import * as pricing from './salesOrderPricing.js';
 import * as tenders from './salesOrderTender.js';
+import * as oldMetal from './salesOrderOldMetal.js';
 export { orderTenderRequest } from './salesOrderTender.js';
 import { fineWt } from '../shared/fine.js';
 import { resolveSalesOrderDesignTx } from './orderDesignSelection.js';
@@ -51,7 +52,6 @@ import {
   ORDER_PARENT_FIELDS,
   ORDER_COMPONENT_FIELDS,
 } from './orderLifecyclePolicy.js';
-import { buildOrderRojmel } from '../shared/rojmel.js';
 import {
   deleteVoucherWriteSetTx,
   nextHiddenVoucherNoTx,
@@ -94,6 +94,7 @@ export interface SalesOrderInput {
   taxCode?: string; // MSG2_TOTAL[1,4] :9120
   upiAmount?: number; // MSG2_TOTAL[3,1] :9141, the total of upiRows on a Sales Order
   upiRows?: unknown; // G206: the MSG_UPI grid, [{ upiAc, upiType, upiId, amount }]
+  oldMetalRows?: unknown; // G206: the MSG_OLD grid (salesOrderOldMetal.ts)
   bankAc?: string; // MSG2_TOTAL[4,4] :9149
   chequeNo?: string; // MSG2_TOTAL[4,2] :9150
   bankName?: string; // tBankName.Text  :9151
@@ -824,7 +825,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
     // is actually taken does the account matter. Explicit request account wins, else resolve slot 1
     // on this transaction and FAIL-CLOSED when unconfigured.
     const cashAc =
-      tender.cash > 0
+      tender.cash > 0 || tender.oldMetal.length > 0
         ? await resolveBookSlotAccountTx(
             tx,
             { ...input.scope, coBook: book.coBook },
@@ -834,6 +835,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
           )
         : (input.cashAc ?? '');
     await tenders.resolveOrderUpiTx(tx, input.scope, tender, !lifecycle);
+    await oldMetal.resolveOrderOldMetalTx(tx, input.scope, tender.oldMetal);
     if (mode.mainBook === 'SALES ORDER')
       await assertSalesOrderDateTx(tx, input.scope, requestedDate);
     const configuration = await orderLabourConfigurationTx(tx, input.scope);
@@ -940,7 +942,11 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
           ? undefined
           : orderClock(lifecycle.persistedClock)
         : orderClock(input.vchTime);
-    const headerFields = tenders.orderHeaderFields(ORDER_HEADER_FIELDS, salesOrderForm);
+    const headerFields = tenders.orderHeaderFields(
+      ORDER_HEADER_FIELDS,
+      salesOrderForm,
+      tender.oldMetalSent,
+    );
     const headerDirty = orderDirtyColumns(input, headerFields);
     const parentDirty = orderLines.map((line, index) =>
       orderDirtyColumns(
@@ -1004,6 +1010,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         OLD_SL: N(input.oldSilverFine), // MSG2_TOTAL[7,2] :9144
         OLD_SL_AMT: round2(N(input.oldSilverAmount)), // MSG2_TOTAL[7,3] :9137
         SCHM_AMT: round2(N(input.schemeAmount)), // MSG2_TOTAL[8,3] :9142
+        ...tenders.orderOldMetalColumns(tender, salesOrderForm), // G206: OLD_GL* from the grid when it is sent :9136-9144
         RCUT_RATE: N(input.rateCutRate), // MSG2_TOTAL[9,1] :9134
         RCUT_FINE: N(input.rateCutFine), // MSG2_TOTAL[9,2] :9135
         RCUT_AMT: round2(N(input.rateCutAmount)), // MSG2_TOTAL[9,3] :9126
@@ -1200,42 +1207,28 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
       cashAc,
       tender,
       salesOrderForm,
+      book.inoutType,
     );
 
-    // The Rojmel (day book), Ac_Rojmel.Order_Rojmel. Type 01 credits the advance against the book's slot-1
-    // account (book 020: every real type-01 row has LD_CODE 00001); type 02 debits the cheque's bank. N197 adds
-    // type 03 (card) and G206 type 08 + STR(SR_NO) per UPI row (withTenderRojmel). Not written: type 07 rate-cut
-    // fine (RCUT_FINE 0 of 76 orders), type 05 scheme (an unresolved ANOMALY: SCHM_AMT is non-zero on 7 of 76
-    // orders yet there are ZERO type-05 rows; docs/PLAN-SALESORDER-ROJMEL.md section 2.4), and the old-metal
-    // types 04/06, which need SL_PR_DETL rows an order does not write yet.
-    const rojmelRows = tenders.withTenderRojmel(
-      buildOrderRojmel(
-        {
-          scope: {
-            coCode: input.scope.coCode,
-            lcCode: input.scope.lcCode,
-            coYear: input.scope.coYear!,
-          },
-          key,
-          coBook: key.CO_BOOK,
-          vchNo: key.VCH_NO,
-          vchDate,
-          vchType: book.vchType,
-          bookName: book.mainBook,
-          partyName: input.acName ?? '',
-          partyCode: input.acCode,
+    // The Rojmel (day book), Ac_Rojmel.Order_Rojmel: see orderRojmelRows.
+    const rojmelRows = tenders.orderRojmelRows(
+      {
+        scope: {
+          coCode: input.scope.coCode,
+          lcCode: input.scope.lcCode,
+          coYear: input.scope.coYear!,
         },
-        {
-          // Slot 1 is the book's advance contra. `cashAc` is what the ledger already debits for the
-          // advance, which is the same account the desktop names in LD_CODE.
-          // N197: 01 credits ADV_AMT, 02 debits the cheque's bank; withCardRojmel adds 03 (Ac_Rojmel.cs:11-16).
-          advanceContraAc: cashAc,
-          bankAc: tender.bankAc,
-          advanceAmount: adv,
-          chequeAmount: tender.cheque,
-        },
-      ),
-      input.acCode,
+        key,
+        coBook: key.CO_BOOK,
+        vchNo: key.VCH_NO,
+        vchDate,
+        vchType: book.vchType,
+        bookName: book.mainBook,
+        partyName: input.acName ?? '',
+        partyCode: input.acCode,
+      },
+      cashAc,
+      adv,
       tender,
     );
     await insertRowTx(tx, 'TEMP_BOOK_DATA', tenantId, {
@@ -1253,6 +1246,12 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
         ...(idtl.length ? [{ table: 'SL_ORD_IDTL', rows: idtl }] : []),
         ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
         ...tenders.orderUpiWrites(key, input.acCode, vchDate, tender),
+        ...oldMetal.orderOldMetalWrites(key, tender.oldMetal, book, {
+          partyAc: input.acCode,
+          vchDate,
+          hdVchNo,
+          mainUser,
+        }),
       ],
     });
     // Shared insertion defaults apply to new rows. An unchanged imported NULL belongs to the
@@ -1648,6 +1647,7 @@ async function runSalesOrderEditTx(
   const editBlockedReason = unsupportedOrderEdit(state, input.orderMainBook !== 'TOUR ORDER');
   if (editBlockedReason) throw new SaleValidationError(editBlockedReason);
   tenders.assertUpiRowsSent(state.UPI_DATA, input);
+  oldMetal.assertOldMetalRowsSent(state.SL_PR_DETL, input);
   const childCounts = new Map<number, number>();
   for (const child of state.SL_ORD_IDTL)
     childCounts.set(n(child.SR_NO), (childCounts.get(n(child.SR_NO)) ?? 0) + 1);

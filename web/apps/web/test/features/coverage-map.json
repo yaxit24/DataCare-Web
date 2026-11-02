@@ -101,7 +101,11 @@
         "web/apps/api/src/modules/sales/salesOrder.ts",
         "web/apps/api/src/modules/sales/orderDoc.ts",
         "web/apps/api/src/modules/sales/salesOrderTender.ts",
-        "web/apps/web/components/SalesOrderUpiGrid.tsx"
+        "web/apps/api/src/modules/sales/salesOrderOldMetal.ts",
+        "web/apps/api/src/modules/sales/orderLifecyclePolicy.ts",
+        "web/apps/web/components/SalesOrderUpiGrid.tsx",
+        "web/apps/web/components/SalesOrderOldMetalGrid.tsx",
+        "web/apps/web/lib/salesOrderOldMetal.ts"
       ]
     },
     "partyOpening": {
