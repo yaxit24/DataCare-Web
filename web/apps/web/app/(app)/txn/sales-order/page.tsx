@@ -24,8 +24,11 @@ import {
   readonlyRowFields,
   readonlyHeaderFields,
   salesOrderTenderFields,
+  upiTotal,
   type Row,
+  type UpiRow,
 } from '../../../../lib/salesOrderForm';
+import { SalesOrderUpiGrid } from '../../../../components/SalesOrderUpiGrid';
 import { OrderImagePanel } from '../../../../components/OrderImagePanel';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import { round, type SalesOrderDesignOption } from '@datacare/core';
@@ -162,6 +165,8 @@ export default function SalesOrderPage() {
   }
   // Desktop SL_ORD_DATA header fields (TR_SALE_ORD:9120-9161).
   const [header, setHeader] = useState<Record<string, string>>({});
+  // G206: the UPI grid (TR_SALE_ORD MSG_UPI); UPI Amt shows its total.
+  const [upiRows, setUpiRows] = useState<UpiRow[]>([]);
   const [orderList, setOrderList] = useState<{ scope: string; rows: Record<string, any>[] }>({
     scope: scopeQuery,
     rows: [],
@@ -213,6 +218,7 @@ export default function SalesOrderPage() {
     setDesignPreview(null);
     setF(blankOrderHeader());
     setHeader({});
+    setUpiRows([]);
     setRows([blank(1)]);
     setSelected(null);
     setVoucherLookup('');
@@ -333,6 +339,7 @@ export default function SalesOrderPage() {
       });
       setF(hydrated.f);
       setHeader(hydrated.header);
+      setUpiRows(hydrated.upiRows);
       setRows(hydrated.rows);
       setImageRow(0);
       setSelected({
@@ -394,6 +401,7 @@ export default function SalesOrderPage() {
         selected?.version,
         selected?.original,
         [...headerDirty.current],
+        upiRows,
       );
       const result = selected
         ? await put(
@@ -750,8 +758,9 @@ export default function SalesOrderPage() {
             <details style={{ marginTop: 8 }}>
               <summary>Order details</summary>
               <p className="muted">
-                Saved settlement values are shown for reference. Separate tender, metal and
-                allocation workflows are not available here.
+                Read-only values are saved settlement values, shown for reference: old metal,
+                scheme, rate-cut and allocations are not taken here. UPI Amt is the total of the UPI
+                rows below.
               </p>
               <div className="row">
                 {[...extendedHeaderFields, ...salesOrderTenderFields].map(([key, label]) => (
@@ -767,7 +776,11 @@ export default function SalesOrderPage() {
                     </label>
                     <input
                       id={`sales-header-${key}`}
-                      value={header[key] ?? ''}
+                      value={
+                        key === 'upiAmount' && upiRows.length
+                          ? String(upiTotal(upiRows) || '')
+                          : (header[key] ?? '')
+                      }
                       readOnly={readonlyHeaderFields.has(key)}
                       style={
                         readonlyHeaderFields.has(key)
@@ -782,9 +795,11 @@ export default function SalesOrderPage() {
                       aria-description={
                         key === 'netAmount'
                           ? 'Saved calculated amount; update the item values to change the order.'
-                          : readonlyHeaderFields.has(key)
-                            ? 'Saved value; settlement workflow is not available here'
-                            : undefined
+                          : key === 'upiAmount'
+                            ? 'Total of the UPI rows below'
+                            : readonlyHeaderFields.has(key)
+                              ? 'Saved value; settlement workflow is not available here'
+                              : undefined
                       }
                       onChange={(e) => {
                         headerDirty.current.add(key);
@@ -794,6 +809,7 @@ export default function SalesOrderPage() {
                   </div>
                 ))}
               </div>
+              <SalesOrderUpiGrid rows={upiRows} onChange={setUpiRows} disabled={busy} />
             </details>
             {(editorCurrent ? rows : []).map((row, index) => (
               <details

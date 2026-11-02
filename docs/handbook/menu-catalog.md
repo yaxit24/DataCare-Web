@@ -726,9 +726,9 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Sales-like item, component and old-metal grids with an advance panel, delivery date, images and order document.
 - **Writes:** SL_ORD_DATA, SL_ORD_DETL, SL_ORD_IDTL, SL_ORD_ADJ, SL_PR_DETL, AC_DATA, ROJ_MEL_DATA, UPI_DATA, TAG_IMAGE_DATA.
 - **Web:** `/txn/sales-order`; `GET /sales-orders`, `POST /sales-orders`, `GET /sales-orders/:vchNo`, `PUT /sales-orders/:vchNo`, `DELETE /sales-orders/:vchNo`, `GET /sales/order-confirmation`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** Tender and old-metal rows, partial delivery, manufacturing and invoice conversion, reservation/refund and the order document need acceptance.
-- **Owners:** G14, N44, G16, N46, X14, N77, X25.
-- **Evidence:** [KB_transaction.md:208-235](../../project-memory/video-research/_kb/KB_transaction.md#L208-L235).
+- **Remaining:** Old-metal and scheme tenders, partial delivery, manufacturing and invoice conversion, reservation/refund and the order document need acceptance.
+- **Owners:** G14, N44, G16, N46, X14, N77, X25, G206, N197, N222.
+- **Evidence:** [KB_transaction.md:208-235](../../project-memory/video-research/_kb/KB_transaction.md#L208-L235), [TR_SALE_ORD.cs:9520-9556](../../unified/src/csharp/DataCareNext/TR_SALE_ORD.cs#L9520-L9556).
 
 ### Sales Return
 
@@ -1717,8 +1717,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** View/account/date/data-type filters and a With-Zero toggle, with account-summary, voucher, detail and debit-ageing grids and totals.
 - **Reads:** AC_DATA, AC_MAST, BOOK_DATA, REMARK_DATA.
 - **Web:** `/reports/account-ledger`; `GET /reports/account-ledger`, `GET /reports/account-ledger/export.pdf`, `GET /reports/account-ledger/export.xlsx`, `GET /reports/account-ledger/export.csv`, `GET /reports/account-ledger/:acCode`, `GET /reports/account-ledger/:acCode/export.pdf`. Can: print, list.
-- **Remaining:** N222 builds the account summary, voucher/detail drill-down, debit ageing, signed money/gold/silver balances, totals and PDF/Excel/CSV from one read-only resolver; the OP_LDR opening-ledger ageing union, the staging-table gold/silver fine prints and the Crystal layout comparison remain.
-- **Owners:** N222, N57, N75.
+- **Remaining:** N223 builds the account summary, voucher/detail drill-down, debit ageing, signed money/gold/silver balances, totals and PDF/Excel/CSV from one read-only resolver; the OP_LDR opening-ledger ageing union, the staging-table gold/silver fine prints and the Crystal layout comparison remain.
+- **Owners:** N223, N57, N75.
 - **Evidence:** [RP_LEDR.cs:4658-7694](../../unified/src/csharp/DataCareNext/RP_LEDR.cs#L4658-L7694), [accountLedgerReport.ts](../../web/apps/api/src/modules/reports/accountLedgerReport.ts), [accountLedger.ts](../../web/apps/api/src/routes/accountLedger.ts).
 
 ### Old Stock
