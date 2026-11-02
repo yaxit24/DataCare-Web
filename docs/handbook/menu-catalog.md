@@ -550,7 +550,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header; account, cheque, amount and kasar grid; employee/description footer; cheque print.
 - **Writes:** PAY_DATA, PAY_DETL, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, TEMP_BOOK_DATA.
 - **Web:** `/txn/payment?mode=BANK`; `POST /payments`, `POST /payments/multi`, `GET /payments/:vchNo`, `DELETE /payments/:vchNo`, `GET /finance/payment-voucher`. Can: create, print.
-- **Remaining:** The UI has no browse, reopen, edit, delete or reprint; cheque/bank fields, versions, idempotency and copies need acceptance.
+- **Remaining:** Browser cases prove the screen opens in bank mode; none creates a Bank Payment yet. Reopen, edit, delete and reprint are proven only on Cash Received, which shares the form. Cheque and bank fields, versions, copies and a desktop-runtime comparison remain.
 - **Owners:** G50, N64, X16, N51, N52, N74.
 - **Evidence:** [KB_transaction.md:176-200](../../project-memory/video-research/_kb/KB_transaction.md#L176-L200).
 
@@ -561,7 +561,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header; account, cheque, amount and kasar grid; bank/employee footer and print dialog.
 - **Writes:** CASH_DATA, AC_DATA, ROJ_MEL_DATA, CARD_DATA, UPI_DATA, REMARK_DATA, TEMP_BOOK_DATA.
 - **Web:** `/txn/receipt?mode=BANK`; `POST /receipts`, `POST /receipts/multi`, `GET /receipts/:vchNo`, `DELETE /receipts/:vchNo`, `GET /finance/receipt-voucher`. Can: create, print.
-- **Remaining:** The UI lacks reopen, edit, delete and list; per-bank slots, cheque/card/UPI identities, versions, idempotency and copies remain.
+- **Remaining:** Browser cases prove bank and cheque receipts are created and that the screen opens in bank mode. Reopen, edit, delete and reprint are proven only on Cash Received, which shares the form. Per-bank slots, card and UPI identities, copies and a desktop-runtime comparison remain.
 - **Owners:** G50, N64, X16, N51, N52, N74.
 - **Evidence:** [KB_transaction.md:176-200](../../project-memory/video-research/_kb/KB_transaction.md#L176-L200).
 
@@ -594,7 +594,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header; multi-line account, amount and kasar grid; description/employee footer; print dialog.
 - **Writes:** PAY_DATA, PAY_DETL, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, TEMP_BOOK_DATA.
 - **Web:** `/txn/payment`; `POST /payments`, `POST /payments/multi`, `GET /payments/:vchNo`, `DELETE /payments/:vchNo`. Can: create, print.
-- **Remaining:** No reopen, edit, delete or reprint in the UI; versions, idempotency, multi-line fields, copies and account roles remain.
+- **Remaining:** Browser cases prove a payment is created with the right ledger legs. Reopen, edit, delete and reprint are proven on Cash Received, which shares the form, and have no case of their own on the Payment screen. Versions, multi-line fields, copies and account roles remain.
 - **Owners:** G50, N64, X16, N51, N52, N74.
 - **Evidence:** [KB_transaction.md:112-139](../../project-memory/video-research/_kb/KB_transaction.md#L112-L139).
 
@@ -605,7 +605,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header; multi-line account, amount and kasar grid; description/employee footer; print dialog.
 - **Writes:** CASH_DATA, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, TEMP_BOOK_DATA.
 - **Web:** `/txn/receipt`; `POST /receipts`, `POST /receipts/multi`, `GET /receipts/:vchNo`, `DELETE /receipts/:vchNo`. Can: create, print.
-- **Remaining:** No reopen, edit, delete or reprint in the UI; a repeated submit creates a second voucher (no idempotency); cash-limit and copies need comparison.
+- **Remaining:** Browser cases (cash-bank module, 19 of 21 applicable pass) prove create with kasar, reopen from the recent list and Vch No, edit, unchanged save, delete with audit, reprint, the cash-limit and out-of-year refusals, a double click saving one voucher and a rolled-back ledger fault. Still open: card and UPI settlement (CARD_DATA, UPI_DATA), multi-line totals, copies and a desktop-runtime comparison.
 - **Owners:** G50, N64, G29, N52, X16, N51, N74.
 - **Evidence:** [KB_transaction.md:112-139](../../project-memory/video-research/_kb/KB_transaction.md#L112-L139).
 
