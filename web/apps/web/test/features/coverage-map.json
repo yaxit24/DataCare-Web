@@ -195,6 +195,13 @@
         "web/apps/api/src/routes/wholesaleSale.ts"
       ]
     },
+    "dataRefresh": {
+      "covers": [
+        "web/apps/web/app/(app)/utilities/data-refresh/page.tsx",
+        "web/apps/api/src/modules/utilities/dataRepair.ts",
+        "web/apps/api/src/modules/utilities/dataRefreshOps.ts"
+      ]
+    },
     "stockAdjust": {
       "covers": [
         "web/apps/web/app/(app)/txn/stock-adjust/page.tsx",

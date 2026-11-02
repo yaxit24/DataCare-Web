@@ -12,5 +12,37 @@
       "reason": "Old gold, old silver (SL_PR_DETL) and scheme amounts are read-only on the order (cash, cheque and card are taken since N197, UPI since this change), so an advance cannot include them (TR_SALE_ORD.cs:11368, Ac_Ledr.cs:42-50)."
     }
   ],
-  "contra": []
+  "contra": [],
+  "data-refresh": [
+    {
+      "case": "data-refresh.rights.caption-print-handoff",
+      "gap": "G225",
+      "reason": "The existing Data Repair routes are admin-only, but the owner-decided Data Refresh caption FRM_PRINT handoff remains active-owned work."
+    },
+    {
+      "case": "data-refresh.journey.account-full-builder",
+      "gap": "X27/P11-01",
+      "reason": "The full Ac_Ledr, Ac_Rojmel and Ac_Tax builder graph is unproved; Account is explicitly preview-only."
+    },
+    {
+      "case": "data-refresh.journey.stock-full-builder",
+      "gap": "X27/P11-01",
+      "reason": "The remaining StockRefresh and Ac_Stock builder graph is unproved; Stock is explicitly preview-only."
+    },
+    {
+      "case": "data-refresh.journey.field-update-classification",
+      "gap": "X27/P11-01",
+      "reason": "Field Update awaits PR-2 statement-by-statement classification under D-REF-3."
+    },
+    {
+      "case": "data-refresh.journey.old-field-classification",
+      "gap": "X27/P11-01",
+      "reason": "Old Field awaits PR-2 statement-by-statement classification under D-REF-3."
+    },
+    {
+      "case": "data-refresh.journey.image-semantic-migration",
+      "gap": "X27/P11-01",
+      "reason": "Legacy MOB_IMAGE, IMG_IMPORT and CONV_IMAGE semantics and byte migration are unproved."
+    }
+  ]
 }

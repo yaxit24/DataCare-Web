@@ -2597,6 +2597,11 @@ the Party master; Order Report → Sales Order; Cash Received and Bank Received 
 receipt screen's multi-party mode posts to; Approval Rtn → the issue lines read under Tour / Approval Sale). The Basic
 tier has 14 and the Standard tier 19 more menus whose captions do not reach their forms; they follow their tiers.
 
+Data Refresh PR-1 (2 November) freezes the owner-decided consistency adaptation that all six actions require the Data
+Refresh caption's Print right. Its current Data Repair routes remain admin-only, but this is not the same proof as a
+`USER_SET.SUB_MENU = 'Data Refresh'` Print grant. The `data-refresh` feature module therefore records T11 as blocked on
+G225; the active-owned `routePolicy.ts` and `formCatalog.ts` were intentionally not changed in this milestone.
+
 Evidence: `desktopRightsCaptions.db.test.ts` (28 cases) logs a view-only user in for each caption with the rights row the
 desktop writes (SUB_MENU = the caption) and reads the screen's routes (200) and another menu's (403), checks that each
 caption reaches its forms and no other menu's, and saves a new party opening, is refused the change and the delete, and

@@ -40,6 +40,7 @@ import { productMaster } from './modules/productMaster.mjs';
 import { addressMaster } from './modules/addressMaster.mjs';
 import { itemMaster } from './modules/itemMaster.mjs';
 import { wholesaleSale } from './modules/wholesaleSale.mjs';
+import { dataRefresh } from './modules/dataRefresh.mjs';
 import { runSurface } from './surface/runner.mjs';
 
 /**
@@ -81,6 +82,7 @@ const MODULES = [
   addressMaster,
   itemMaster,
   wholesaleSale,
+  dataRefresh,
 ];
 
 const artifacts = resolve(webRoot, 'test-results/feature-e2e');
