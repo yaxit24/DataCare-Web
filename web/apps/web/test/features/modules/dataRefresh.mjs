@@ -66,6 +66,8 @@ async function openScreen(page) {
   await link.click();
   await page.getByRole('heading', { name: 'Data Refresh', exact: true }).waitFor();
   await page.getByRole('button', { name: 'Account', exact: true }).waitFor();
+  // The operation buttons are disabled while the screen loads, and a disabled button cannot take focus.
+  await page.locator('main[aria-busy="false"]').waitFor();
 }
 
 async function cleanApprovalFixtures(ctx, tx = ctx.owner) {
