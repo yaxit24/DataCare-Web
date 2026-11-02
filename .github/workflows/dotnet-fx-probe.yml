@@ -1,0 +1,43 @@
+name: .NET Framework rounding probe (Windows)
+
+# Measures, on the desktop's own runtime (.NET Framework 4.8 + Microsoft.VisualBasic), how the RP_GST HSN summary
+# rounds the local half-tax (RP_GST.cs:2933-2939). Evidence tool only: it changes no product code and has no secrets.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'web/scripts/dotnet-fx-probe/**'
+      - '.github/workflows/dotnet-fx-probe.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - name: Build and run the probe with the Framework compiler
+        shell: pwsh
+        run: |
+          $csc = "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
+          Get-Item $csc | Select-Object FullName, @{n='Version';e={$_.VersionInfo.FileVersion}} | Format-List
+          Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full' | Select-Object Release, Version | Format-List
+          Push-Location web/scripts/dotnet-fx-probe
+          & $csc /nologo /r:Microsoft.VisualBasic.dll /out:FnvHalfProbe.exe FnvHalfProbe.cs
+          if ($LASTEXITCODE -ne 0) { throw "csc failed" }
+          .\FnvHalfProbe.exe "$env:RUNNER_TEMP\mismatch.csv" | Tee-Object -FilePath "$env:RUNNER_TEMP\probe.log"
+          Pop-Location
+
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: fnv-half-probe
+          path: |
+            ${{ runner.temp }}/probe.log
+            ${{ runner.temp }}/mismatch.csv
