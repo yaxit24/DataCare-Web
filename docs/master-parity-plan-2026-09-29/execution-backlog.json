@@ -523,6 +523,9 @@
       "title": "Complete safe correction, renumber, transfer and refresh utilities",
       "phase": "P11",
       "acceptance": "open",
+      "statusAsOf": "2026-11-02",
+      "evidence": ["docs/handbook/web/data-refresh.md", "web/apps/api/src/modules/utilities/dataRefreshOps.ts", "web/apps/api/test/dataRefreshApproval.db.test.ts", "web/apps/api/test/dataRepairBatch2.db.test.ts", "web/apps/web/test/features/modules/dataRefresh.mjs"],
+      "statusNote": "Data Refresh PR-1 milestone only: the six-button surface is frozen; Approval Adj has preview/apply/audit/idempotency, rollback and trailing-padded reference coverage; Account candidate identity, neutral preview-only authority and keyboard focus transitions have regression proof. Parent acceptance stays open for complete Account/Stock graphs, Field Update/Old Field classification, Image migration semantics, G225 rights and desktop-runtime comparison.",
       "detailFile": "previous-package-reconciliation.json",
       "detailId": "P11-01"
     },
@@ -970,6 +973,8 @@
       "id": "X06",
       "title": "Replay exact posting footprints and reconcile history",
       "status": "open",
+      "statusAsOf": "2026-11-02",
+      "statusNote": "The Approval Adj synthetic oracle proves the current PostgreSQL result and complete scoped write set, but no original-Windows run exists. Desktop-match coverage therefore remains 0%, and X06 stays open.",
       "parents": [
         "P01-03"
       ],
@@ -2265,6 +2270,8 @@
       "id": "X27",
       "title": "Complete correction and bulk utility reference closure",
       "status": "open",
+      "statusAsOf": "2026-11-02",
+      "statusNote": "Data Refresh PR-1 implements Approval Adj with trailing-padded reference proof and makes the other five visible actions explicit preview-only classifications with neutral authority metadata where their full graph or semantics are unproved. Account previews now bind complete candidates independently of bounded samples. X27 remains open for Account/Stock builder closure, PR-2 Field/Old Field classification, Image migration semantics, and all other utilities.",
       "parents": [
         "P11-01"
       ],
@@ -3138,6 +3145,9 @@
     {
       "id": "N26",
       "status": "planned",
+      "statusAsOf": "2026-11-02",
+      "statusNote": "Data Refresh PR-1 milestone complete in branch scope: Approval Adj has exact consumed-source results including trailing-padded references; Account same-count candidate replacement, preview-only neutral authority and safe focus transitions have regression proof. Five unsafe actions remain preview-only classifications. N26 stays planned until the remaining reference graphs and recovery evidence close.",
+      "evidence": ["docs/handbook/web/data-refresh.md", "web/apps/api/test/dataRefreshApproval.db.test.ts", "web/apps/api/test/dataRepairBatch2.db.test.ts", "web/apps/web/test/features/modules/dataRefresh.mjs"],
       "action": "Close correction, renumber, transfer, imports and maintenance utility reference graphs",
       "parentLabels": "P11-01, X27",
       "startAfter": [
@@ -7156,7 +7166,7 @@
         "web/apps/api/test/desktopRightsCaptions.db.test.ts",
         "web/apps/web/test/features/modules/partyOpening.mjs"
       ],
-      "statusNote": "IMPLEMENTED, not accepted. Verified: desktopRightsCaptions.db.test.ts 28/28 (27 fail on main's catalog), partyOpening.db.test.ts, the full API suite (343 files, 3665 tests), web unit tests, smoke, and the party-opening feature module 15 passed, 0 failed, 3 blocked (T11 now passes). Open: Company, Data Refresh, Data Import, Order Report, Cash/Bank Received and Approval Rtn's issue lines (shared forms), and the Basic and Standard captions."
+      "statusNote": "IMPLEMENTED, not accepted. Verified before the Data Refresh PR-1 milestone: desktopRightsCaptions.db.test.ts 28/28 and Party Opening T11. Data Refresh now has an explicit feature case for the owner-decided all-six Print gate, but it remains blocked because the existing Data Repair routes are admin-only and the active-owned route-policy/form-catalog handoff was intentionally not changed. Other shared-form captions and the Basic/Standard tiers remain open."
     },
     {
       "id": "N213",
@@ -7597,6 +7607,36 @@
         "web/apps/web/test/features/modules/cashBank.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Verified: the daily-rate, lock-message and cash-employee DB and unit tests; full isolated suite API 356 files / 3,789 tests, web 713; modules tag-cancel 16/16, purchase-invoice 29/29, contra 25/25, daily-rate 15 of 16, cash-bank 19 of 21, sales-invoice and sales-order with no new failure (the sales-order old-metal case is the known G206 baseline). Open: daily-rate T15 needs a location-00 session in the harness; cash-bank T03 and T06; the desktop's default employee from the session (TR_CASH.cs:2671); desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N228",
+      "status": "implemented-unverified",
+      "action": "Wh Sales like TR_WH_SALE: the voucher number box keys (F1 list, Up, Down, Enter), the issued tag stones written to SL_IDTL and DM_DATA, and the WhSalesBill layout (book title, Issue and Received groups, the four-column band with the report formulas, Kasar Fine, Ref No, ESTIMATE, Cr/Dr labels).",
+      "startAfter": [
+        "N227"
+      ],
+      "requiredProof": "wholesale-sale.keyboard.voucher-number-keys, create.tag-stones and output.print-bill pass in the browser; wholesaleSaleStones, wholesaleSaleBill and voucherNeighbour tests pass.",
+      "gapIds": "G15",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "parentLabels": "P1-core",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/api/src/modules/sales/wholesaleTagStones.ts",
+        "web/apps/api/src/modules/sales/wholesaleSaleBill.ts",
+        "web/apps/api/src/modules/sales/rateCut.ts",
+        "web/apps/api/src/modules/sales/rateCutBookingDrawDown.ts",
+        "web/apps/api/src/modules/vouchers/list.ts",
+        "web/apps/api/src/routes/wholesaleSale.ts",
+        "web/apps/web/components/WholesaleVoucherForm.tsx",
+        "web/apps/api/test/wholesaleSaleStones.db.test.ts",
+        "web/apps/api/test/wholesaleSaleBill.test.ts",
+        "web/apps/api/test/voucherNeighbour.routes.db.test.ts",
+        "web/apps/web/test/features/modules/wholesaleSale.mjs"
+      ],
+      "statusNote": "IMPLEMENTED (voucher keys, tag stones, bill layout), not accepted. The three new test files fail against the old code and pass; the wholesale-sale browser module passes 27 of 27. Open: hand-typed item-detail rows for loose items, SL_IDTL rows on the printed bill, fine kasar, the Rojmel alignment for lined vouchers, desktop-runtime comparison and parent acceptance."
     }
   ],
   "amendments": [

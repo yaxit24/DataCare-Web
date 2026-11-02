@@ -181,3 +181,84 @@ export async function resolveBookSlotRowsTx(
   }
   return slots;
 }
+
+export type DataRefreshAccountCandidatePart =
+  'BANK_RECONCILE_CURRENT' | 'BANK_RECONCILE_EXPECTED' | 'BOOK_DATA' | 'BOOK_DETL' | 'CASH_DATA';
+
+/** Complete, ordered identity and value record used to bind a Data Refresh Account preview. */
+export interface DataRefreshAccountCandidate {
+  part: DataRefreshAccountCandidatePart;
+  rowId: string;
+  businessKey: string;
+  sourceKey: string | null;
+  stored: string | null;
+  expected: string | null;
+}
+
+export interface DataRefreshAccountCandidateScope {
+  coCode: string;
+  lcCode?: string;
+  coYear?: string;
+}
+
+/**
+ * Read every Account-classification candidate in one statement. This belongs at the shared BOOK_DETL boundary:
+ * it inventories incomplete slot metadata but does not resolve a posting account or collapse duplicate slots.
+ */
+export async function selectDataRefreshAccountCandidatesTx(
+  tx: any,
+  scope: DataRefreshAccountCandidateScope,
+  reconcileAccountGroups: readonly string[],
+): Promise<DataRefreshAccountCandidate[]> {
+  return tx.$queryRawUnsafe(
+    `SELECT * FROM (
+       SELECT 'BOOK_DATA'::text AS part,t.row_id::text AS "rowId",
+              jsonb_build_array(t."CO_CODE",t."LC_CODE",t."CO_BOOK")::text AS "businessKey",
+              NULL::text AS "sourceKey",t."DATA_TYPE" AS stored,'A'::text AS expected
+         FROM "BOOK_DATA" t
+        WHERE t.tenant_id=current_setting('app.tenant_id', true)
+          AND t."CO_CODE"=$1 AND ($2::text='' OR t."LC_CODE"=$2)
+          AND coalesce(t."DATA_TYPE",'')=''
+       UNION ALL
+       SELECT 'BOOK_DETL',t.row_id::text,
+              jsonb_build_array(t."CO_CODE",t."LC_CODE",t."CO_BOOK",t."SR_NO",t."AC_CODE")::text,
+              NULL::text,t."DATA_TYPE",'A'::text
+         FROM "BOOK_DETL" t
+        WHERE t.tenant_id=current_setting('app.tenant_id', true)
+          AND t."CO_CODE"=$1 AND ($2::text='' OR t."LC_CODE"=$2)
+          AND coalesce(t."DATA_TYPE",'')=''
+       UNION ALL
+       SELECT 'CASH_DATA',c.row_id::text,
+              jsonb_build_array(c."CO_CODE",c."LC_CODE",c."CO_YEAR",c."CO_BOOK",c."VCH_NO",c."SR_NO")::text,
+              NULL::text,to_char(c."CLR_DATE",'YYYY-MM-DD'),to_char(c."VCH_DATE",'YYYY-MM-DD')
+         FROM "CASH_DATA" c
+        WHERE c.tenant_id=current_setting('app.tenant_id', true)
+          AND c."CO_CODE"=$1 AND ($2::text='' OR c."LC_CODE"=$2)
+          AND ($3::text='' OR c."CO_YEAR"=$3)
+          AND c."CLR_DATE" IS NULL AND c."VCH_DATE" IS NOT NULL
+       UNION ALL
+       SELECT 'BANK_RECONCILE_CURRENT',r.row_id::text,
+              jsonb_build_array(r."CO_CODE",r."LC_CODE",r."LEDR_KEY")::text,
+              NULL::text,to_char(r."CLR_DATE",'YYYY-MM-DD'),NULL::text
+         FROM "BANK_RECONCILE" r
+        WHERE r.tenant_id=current_setting('app.tenant_id', true)
+          AND r."CO_CODE"=$1 AND ($2::text='' OR r."LC_CODE"=$2)
+       UNION ALL
+       SELECT 'BANK_RECONCILE_EXPECTED',a.row_id::text,
+              jsonb_build_array(a."CO_CODE",a."LC_CODE",a."LEDR_KEY")::text,
+              jsonb_build_array(a."CO_YEAR",a."CO_BOOK",a."VCH_NO",a."AC_CODE")::text,
+              NULL::text,to_char(a."CLR_DATE",'YYYY-MM-DD')
+         FROM "AC_DATA" a
+         JOIN "AC_MAST" b ON b.tenant_id=a.tenant_id AND b."CO_CODE"=a."CO_CODE"
+              AND b."AC_CODE"::text=a."AC_CODE"::text
+        WHERE a.tenant_id=current_setting('app.tenant_id', true)
+          AND a."CO_CODE"=$1 AND ($2::text='' OR a."LC_CODE"=$2)
+          AND b."AC_GR" = ANY($4::text[])
+     ) candidate
+     ORDER BY part,"businessKey","sourceKey","rowId"`,
+    scope.coCode,
+    scope.lcCode ?? '',
+    scope.coYear ?? '',
+    [...reconcileAccountGroups],
+  );
+}

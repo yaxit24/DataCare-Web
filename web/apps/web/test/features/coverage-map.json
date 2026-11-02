@@ -206,7 +206,23 @@
         "web/apps/api/src/modules/sales/rateCutTags.ts",
         "web/apps/api/src/modules/sales/wholesaleSaveChecks.ts",
         "web/apps/api/src/modules/sales/wholesaleSaleBill.ts",
+        "web/apps/api/src/modules/sales/wholesaleTagStones.ts",
+        "web/apps/api/src/modules/sales/rateCutBookingDrawDown.ts",
+        "web/apps/web/components/VoucherNumberKeys.tsx",
+        "web/apps/web/components/VoucherList.tsx",
+        "web/apps/api/src/modules/vouchers/list.ts",
         "web/apps/api/src/routes/wholesaleSale.ts"
+      ]
+    },
+    "dataRefresh": {
+      "covers": [
+        "web/apps/web/app/(app)/utilities/data-refresh/page.tsx",
+        "web/apps/web/app/(app)/utilities/data-repair/page.tsx",
+        "web/apps/api/src/modules/utilities/dataRepair.ts",
+        "web/apps/api/src/modules/utilities/dataRepairOps.ts",
+        "web/apps/api/src/modules/utilities/dataRefreshOps.ts",
+        "web/apps/api/src/modules/shared/postingAccounts.ts",
+        "web/apps/api/src/routes/dataRepair.ts"
       ]
     },
     "stockAdjust": {

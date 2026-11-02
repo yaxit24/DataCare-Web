@@ -2651,6 +2651,11 @@ the Party master; Order Report → Sales Order; Cash Received and Bank Received 
 receipt screen's multi-party mode posts to; Approval Rtn → the issue lines read under Tour / Approval Sale). The Basic
 tier has 14 and the Standard tier 19 more menus whose captions do not reach their forms; they follow their tiers.
 
+Data Refresh PR-1 (2 November) freezes the owner-decided consistency adaptation that all six actions require the Data
+Refresh caption's Print right. Its current Data Repair routes remain admin-only, but this is not the same proof as a
+`USER_SET.SUB_MENU = 'Data Refresh'` Print grant. The `data-refresh` feature module therefore records T11 as blocked on
+G225; the active-owned `routePolicy.ts` and `formCatalog.ts` were intentionally not changed in this milestone.
+
 Evidence: `desktopRightsCaptions.db.test.ts` (28 cases) logs a view-only user in for each caption with the rights row the
 desktop writes (SUB_MENU = the caption) and reads the screen's routes (200) and another menu's (403), checks that each
 caption reaches its forms and no other menu's, and saves a new party opening, is refused the change and the delete, and
@@ -3417,6 +3422,53 @@ modules tag-cancel 16/16, purchase-invoice 29/29, contra 25/25, daily-rate 15 of
 lookup) have no new failure. Sales Return and Purchase Return were left alone; their cases are patches for their owners.
 Not accepted: no desktop-runtime comparison was made.
 
+### N228 — Wh Sales voucher keys, tag stones and the WhSalesBill layout
+
+Gap G15 (N45 follow-up) · Parents P1-core · L1 · Med · Size M · Start after N227
+
+Transaction → Wh Sales (TR_WH_SALE) had three open items after N220. (1) The voucher number box: F1 opens the book's
+voucher list (BtnF1_Click, `TR_WH_SALE.cs:13916-13956`), Up and Down step to the next and previous saved voucher
+(`tVchNo_KeyDown`, `:14393-14418`; BtnLast_Click and BtnFirst_Click) and Enter opens the typed number (DISPLAY_DATA).
+`RATE_CUT_DATA` is now in the voucher list's allowed tables (`web/apps/api/src/modules/vouchers/list.ts`), so the shared
+`GET /vouchers/recent` and `GET /vouchers/neighbour` serve the Wh Sales, Rate Cut, Wh Quotation and Tour Sales screens,
+which use `useVoucherNumberKeys` and `VoucherList` in `WholesaleVoucherForm.tsx`. The list shows the voucher, date, party
+and SL_NET_AMT; the desktop list also shows the fine and the purchase amount columns, which the shared list does not.
+(2) The tag's stones. Picking a tag reads its BAR_IDTL rows into the item-detail grid (`:10113-10148`); Save writes them to
+SL_IDTL (`:13162-13250`: ENTRY_TYPE W, SR_NO the line serial, ISR_NO 1.. per line, a row with no pieces, weight, less
+weight or net amount skipped), and Dm_Wh_Tour_Sale_Detl (`Ac_Stock.cs:857-861`, called at `:13358`) projects them into
+DM_DATA for an item with OTH_DETL_POSTING = 'Y' on a WH SALES or TOUR SALES book. `web/apps/api/src/modules/sales/wholesaleTagStones.ts`
+builds both row sets from the issued tags and `writeRateCut` writes them with the voucher; edit and delete already
+reversed both tables. (3) The WhSalesBill print now follows `WhSalesBill.spec.json`: the title is the book name
+(`@RptTitle`), the lines sit under an Issue Item and a Received Item group with the running `@SrNo` and the group's gross
+weight, the band has the report's four columns (Purchase Fine, Sales Fine, Purchase Amt, Sales Amt) with its formulas
+(`@RecFine`, `@IsuFine`, `@PurcAmt`, `@SlAmt`, `@CrTot`, `@DrTot`, `@TotIsuFine`) and a Kasar Fine row, the header
+carries Ref No and the constant `@InVoiceType` ESTIMATE, and the party block carries the `@AcMobile` choice and the GST
+number. The opening and closing gold and silver are labelled as the report does: Cr when the signed fine is above zero
+(`@OpGodCrDr`); the earlier print had Dr and Cr the wrong way round for metal.
+
+Checked and not built: TR_WH_SALE has no negative-stock refusal in BtnSave_Click (`:12779-12896`); a tag without a
+tag instance is refused with "This TagNo Has No Tag Id" on edit (`:12875`), which the web tag resolver already covers.
+
+Deliberate differences and what stays open:
+- The hand-typed item-detail rows for a loose item (the item-detail dialog, `DtIdtl`) are not built; only the stones of an
+  issued tag travel. SL_IDTL item-detail rows are not yet printed under each bill line (`SL_IDTL.IT_NAME`, pieces, weight,
+  rate, net amount in the report's Detail section).
+- The fine kasar (KSR_FINE_CR and KSR_FINE_DR) is not modelled, so the Kasar Fine row prints zeros.
+- The bill's `@AcMobile` formula prints an empty mobile in its phone branch (a slip in the report); the web prints the
+  phone. The party's GST number is AC_GSTNO here and AC_LSTNO on the desktop.
+- The shared voucher list has no fine columns. The Crystal page number and the tax and print-file variants chosen by
+  `cboPrintfile` (RateCutBill, WhQuotation, WhHuidPrint, WhSalesImage) are not built.
+- The Rojmel alignment for lined vouchers (types 05/06/14/27) stays open under N45.
+
+Evidence: `voucherNeighbour.routes.db.test.ts` (RATE_CUT_DATA walk and list over HTTP), `wholesaleSaleStones.db.test.ts`
+(SL_IDTL and DM_DATA exact rows, the empty stone skipped, no DM_DATA without OTH_DETL_POSTING, edit rewrites the same rows,
+delete removes them) and `wholesaleSaleBill.test.ts` (title, groups, serials, gross weights, the band formulas, Cr/Dr
+labels) fail against the code before this change and pass under forced RLS. The `wholesale-sale` browser module has two
+new cases, `keyboard.voucher-number-keys` and `create.tag-stones`, and `output.print-bill` checks the title and the
+four-column band; the module passes 27 of 27. The booking draw-down block moved from `rateCut.ts` to
+`rateCutBookingDrawDown.ts` unchanged, to keep the file under its size ceiling (2909 to 2732 lines). Desktop-runtime
+comparison and operator acceptance are not claimed.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -3571,6 +3623,7 @@ Not accepted: no desktop-runtime comparison was made.
 | N225 | — | implemented-unverified, evidence in this change (G237: Tag Print is UT_TAG_PRINT — the voucher and stock selection, typed tags, Y/N rows, Hm Id Update, the default file and a print that stages after the Lable Skip blanks) |
 | N226 | — | implemented-unverified, evidence in this change (G206 part: old gold and old silver rows stored in SL_PR_DETL, totalled into the header and ADV_AMT, day book 04/06, editable and deletable; scheme stays open) |
 | N227 | — | implemented-unverified, evidence in this change (G238: two operators saving one Daily Rate day no longer collide, the rate lookup is scoped to the session's location, every voucher form's lock-date refusal carries the desktop text, and the Cash Received/Payment Employee box is stored, enforced when mandatory and read back; browser cases un-blocked for Tag Cancel, Daily Rate, Purchase Invoice, Contra and Cash/Bank) |
+| N228 | — | implemented-unverified, evidence in this change (Wh Sales voucher keys F1/Up/Down, the issued tag stones in SL_IDTL and DM_DATA, the WhSalesBill layout and its Cr/Dr labels) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

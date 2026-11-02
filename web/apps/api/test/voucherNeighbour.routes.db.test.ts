@@ -173,4 +173,47 @@ const OTHER_YEAR = `${startYear - 1}-${startYear}`;
         .sort(),
     ).toEqual(['00001', '00002', '00003', '00005', '00020']);
   });
+
+  it('Wh Sales, Rate Cut and Wh Quotation vouchers (RATE_CUT_DATA) are listed and walked like the desktop TR_WH_SALE (TR_WH_SALE.cs:14393-14418, :13916-13927)', async () => {
+    for (const [vchNo, net] of [
+      ['00001', 1250.5],
+      ['00003', 99],
+    ] as const)
+      await owner.$executeRawUnsafe(
+        `INSERT INTO "RATE_CUT_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","AC_CODE","AC_NAME","SL_NET_AMT")
+         VALUES($1,'01','01',$2,'WHS',$3,$4::date,'00001','WALK PARTY',$5::float8)`,
+        tenantId,
+        YEAR,
+        vchNo,
+        `${startYear}-07-15`,
+        net,
+      );
+    expect((await walk('WHS', '', 'previous', 'RATE_CUT_DATA')).body).toEqual({
+      action: 'open',
+      vchNo: '00003',
+    });
+    expect((await walk('WHS', '00001', 'next', 'RATE_CUT_DATA')).body).toEqual({
+      action: 'open',
+      vchNo: '00003',
+    });
+    expect((await walk('WHS', '00003', 'next', 'RATE_CUT_DATA')).body).toEqual({ action: 'new' });
+    const list = await app.inject({
+      method: 'GET',
+      url: '/vouchers/recent?table=RATE_CUT_DATA&book=WHS',
+      headers: { cookie },
+    });
+    expect(list.statusCode).toBe(200);
+    expect(
+      list
+        .json()
+        .map((row: { vchNo: string; acName: string; total: number }) => [
+          row.vchNo,
+          row.acName,
+          row.total,
+        ]),
+    ).toEqual([
+      ['00003', 'WALK PARTY', 99],
+      ['00001', 'WALK PARTY', 1250.5],
+    ]);
+  });
 });
