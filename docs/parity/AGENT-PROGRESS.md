@@ -13,7 +13,8 @@ Edit this file only in a pull request, never in a shared working tree. If two PR
 | Tag Print Esc with no focused control (G239, on N225) | session `52f05ab4` | `agent/parity-tag-print-escape` / PR #218 | `web/apps/web/app/(app)/txn/tag-print/page.tsx`, `web/apps/web/test/features/modules/tagPrint.mjs` | open; static-gates passed, quality and real-stack pending at last look | 2 Nov 15:25 |
 | This coordination set (`docs/parity/*`) | session `52f05ab4` | `agent/parity-coordination` / PR #220 | new files only, plus two rules in `docs/handbook/doc-register.json` | open | 2 Nov 16:30 |
 | Order Cancel | not this session; `~/dc-wt/order-cancel` | `feat/order-cancel`, nothing pushed | `modules/sales/orderCancel.ts`, `test/orderCancel.db.test.ts`, edits to `salesOrder.ts` | **stale suspect**: uncommitted for about 16 h | 1 Nov 23:00 |
-| GST CSV negative amounts | `ysmtb` identity | PR #217 | GST report CSV | open | 2 Nov |
+| GST CSV negative amounts | `ysmtb` identity | PR #217 | GST report CSV | merged (2 Nov) | 2 Nov |
+| Lite gap analysis, feature-level matrix and P0-P3 backlog (docs only, `PA-01` to `PA-44`) | gap-analysis session | `agent/parity-gap-analysis-2026-11-02` (local, not pushed) | new files `docs/parity/{GAP-ANALYSIS-2026-11-02,FEATURE-PARITY-MATRIX,PRIORITISED-BACKLOG}.md`, `docs/parity/evidence/*`, regenerated `docs/handbook/doc-register.md` | done locally; no code touched | 2 Nov evening |
 
 No other Lite menu has an open PR or a pushed branch with unmerged work (checked against `gh pr list` and `git branch -r` at 16:40).
 

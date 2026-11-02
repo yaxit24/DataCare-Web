@@ -1,0 +1,27 @@
+=== 1. WEB closing query (computeClosingsTx): one row per account, one fine number, one IT_TYPE ===
+ acCode | dr  | cr  | web_fine | web_it_type 
+--------+-----+-----+----------+-------------
+ P1     | 100 |   0 |       64 | S
+ SALES  |   0 | 100 |        0 | 
+(2 rows)
+
+=== 2. Opening leg the web writes for P1 (buildOpeningRow): SIGN D, FINE_WT 64, IT_TYPE S ===
+ AC_CODE | DR_AMT | CR_AMT | SIGN | FINE_WT | IT_TYPE 
+---------+--------+--------+------+---------+---------
+ P1      |    100 |      0 | D    |      64 | S
+ SALES   |      0 |    100 | C    |       0 | 
+(2 rows)
+
+=== 3. What the web ledger reads back from that opening (SIGNED_GOLD / SIGNED_SILVER formulas) ===
+ AC_CODE | web_gold | web_silver 
+---------+----------+------------
+ P1      |        0 |        -64
+ SALES   |        0 |          0
+(2 rows)
+
+=== 4. DESKTOP semantics for the same data (BtmSchm Rtl_AcOpbl): gold and silver separate, + = Cr, party accounts only ===
+ AC_CODE | amount_cr_minus_dr | gold | silver 
+---------+--------------------+------+--------
+ P1      |               -100 |    6 |     50
+(1 row)
+

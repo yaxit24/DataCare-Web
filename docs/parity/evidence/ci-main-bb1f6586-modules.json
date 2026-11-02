@@ -1,0 +1,378 @@
+{
+ "_comment": "Per-module result of the feature E2E suite in CI run 41437234529 (workflow CI, job \"Real-stack browser journeys (zero mocks)\", main commit bb1f6586, 2 Nov 2026). Parsed from the job log by counting the \"-> applicable N, passed N, failed N, blocked N\" line under each \"=== module\" header. Blocked reasons are read from web/apps/web/test/features/modules/*.mjs at 9c651837. A pass means the web behaved as the frozen case expects; it is not a comparison with the Windows desktop.",
+ "meta": {
+  "run": 41437234529,
+  "commit": "bb1f6586",
+  "date": "2026-11-02"
+ },
+ "modules": {
+  "sales-invoice:": {
+   "applicable": 32,
+   "passed": 29,
+   "failed": 0,
+   "blocked": 3,
+   "untested": 0
+  },
+  "purchase-invoice:": {
+   "applicable": 31,
+   "passed": 31,
+   "failed": 0,
+   "blocked": 0,
+   "untested": 0
+  },
+  "purchase-report:": {
+   "applicable": 17,
+   "passed": 0,
+   "failed": 17,
+   "blocked": 0,
+   "untested": 0
+  },
+  "settings:": {
+   "applicable": 14,
+   "passed": 12,
+   "failed": 0,
+   "blocked": 2,
+   "untested": 0
+  },
+  "users:": {
+   "applicable": 18,
+   "passed": 3,
+   "failed": 0,
+   "blocked": 15,
+   "untested": 0
+  },
+  "sales-return:": {
+   "applicable": 25,
+   "passed": 23,
+   "failed": 0,
+   "blocked": 2,
+   "untested": 0
+  },
+  "company-open:": {
+   "applicable": 18,
+   "passed": 2,
+   "failed": 0,
+   "blocked": 16,
+   "untested": 0
+  },
+  "company-master:": {
+   "applicable": 28,
+   "passed": 6,
+   "failed": 1,
+   "blocked": 21,
+   "untested": 0
+  },
+  "purchase-return:": {
+   "applicable": 22,
+   "passed": 20,
+   "failed": 0,
+   "blocked": 2,
+   "untested": 0
+  },
+  "cash-bank:": {
+   "applicable": 21,
+   "passed": 19,
+   "failed": 0,
+   "blocked": 2,
+   "untested": 0
+  },
+  "contra:": {
+   "applicable": 25,
+   "passed": 25,
+   "failed": 0,
+   "blocked": 0,
+   "untested": 0
+  },
+  "fine-jv:": {
+   "applicable": 23,
+   "passed": 19,
+   "failed": 0,
+   "blocked": 4,
+   "untested": 0
+  },
+  "sales-order:": {
+   "applicable": 33,
+   "passed": 30,
+   "failed": 1,
+   "blocked": 2,
+   "untested": 0
+  },
+  "party-opening:": {
+   "applicable": 18,
+   "passed": 15,
+   "failed": 0,
+   "blocked": 3,
+   "untested": 0
+  },
+  "tag-opening:": {
+   "applicable": 19,
+   "passed": 14,
+   "failed": 0,
+   "blocked": 5,
+   "untested": 0
+  },
+  "daily-rate:": {
+   "applicable": 16,
+   "passed": 15,
+   "failed": 0,
+   "blocked": 1,
+   "untested": 0
+  },
+  "item-opening:": {
+   "applicable": 18,
+   "passed": 17,
+   "failed": 0,
+   "blocked": 1,
+   "untested": 0
+  },
+  "tag-cancel:": {
+   "applicable": 21,
+   "passed": 21,
+   "failed": 0,
+   "blocked": 0,
+   "untested": 0
+  },
+  "stock-adjust:": {
+   "applicable": 19,
+   "passed": 19,
+   "failed": 0,
+   "blocked": 0,
+   "untested": 0
+  },
+  "employee-master:": {
+   "applicable": 17,
+   "passed": 17,
+   "failed": 0,
+   "blocked": 0,
+   "untested": 0
+  },
+  "tax-master:": {
+   "applicable": 18,
+   "passed": 18,
+   "failed": 0,
+   "blocked": 0,
+   "untested": 0
+  },
+  "auto-item:": {
+   "applicable": 18,
+   "passed": 18,
+   "failed": 0,
+   "blocked": 0,
+   "untested": 0
+  },
+  "group-master:": {
+   "applicable": 18,
+   "passed": 18,
+   "failed": 0,
+   "blocked": 0,
+   "untested": 0
+  },
+  "product-master:": {
+   "applicable": 17,
+   "passed": 17,
+   "failed": 0,
+   "blocked": 0,
+   "untested": 0
+  },
+  "address-master:": {
+   "applicable": 17,
+   "passed": 17,
+   "failed": 0,
+   "blocked": 0,
+   "untested": 0
+  },
+  "party-master:": {
+   "applicable": 18,
+   "passed": 18,
+   "failed": 0,
+   "blocked": 0,
+   "untested": 0
+  },
+  "tag-print:": {
+   "applicable": 18,
+   "passed": 18,
+   "failed": 0,
+   "blocked": 0,
+   "untested": 0
+  },
+  "item-master:": {
+   "applicable": 18,
+   "passed": 18,
+   "failed": 0,
+   "blocked": 0,
+   "untested": 0
+  },
+  "wholesale-sale:": {
+   "applicable": 27,
+   "passed": 27,
+   "failed": 0,
+   "blocked": 0,
+   "untested": 0
+  },
+  "data-refresh:": {
+   "applicable": 20,
+   "passed": 12,
+   "failed": 0,
+   "blocked": 8,
+   "untested": 0
+  },
+  "account-ledger:": {
+   "applicable": 10,
+   "passed": 10,
+   "failed": 0,
+   "blocked": 0,
+   "untested": 0
+  },
+  "data-backup:": {
+   "applicable": 18,
+   "passed": 13,
+   "failed": 1,
+   "blocked": 4,
+   "untested": 0
+  },
+  "gst-report:": {
+   "applicable": 70,
+   "passed": 57,
+   "failed": 0,
+   "blocked": 13,
+   "untested": 0
+  }
+ },
+ "totals": {
+  "applicable": 722,
+  "passed": 598,
+  "failed": 20,
+  "blocked": 104,
+  "untested": 0
+ },
+ "blockedReasons": {
+  "company-master": [
+   {
+    "case": "?",
+    "reason": "Blocked by the known open G38/G39 Company prerequisite or its unavailable downstream stage: ${reason}"
+   }
+  ],
+  "company-open": [
+   {
+    "case": "?",
+    "reason": "Not written yet: the Open Company module is completed in document 15 step E11."
+   }
+  ],
+  "purchase-return": [
+   {
+    "case": "rollback.mid-write",
+    "reason": "No fault injector in the harness yet (G173 / N166)."
+   },
+   {
+    "case": "config.setting-variant",
+    "reason": "No settings-variant company in the catalogue yet (G174 / N166)."
+   }
+  ],
+  "sales-invoice": [
+   {
+    "case": "refusal.negative-weight",
+    "reason": "Expected behaviour undecided: no desktop source refuses a negative weight, and the web saves it. Needs an original-Windows run to decide refuse vs accept."
+   },
+   {
+    "case": "?",
+    "reason": "Needs declared transport/DB fault injection at each effect boundary; the harness has no fault injector yet (tracked as a framework gap)."
+   },
+   {
+    "case": "?",
+    "reason": "Settings-variant fixture pack (SL_AMT_TYPE=F company) not yet in the catalogue."
+   }
+  ],
+  "sales-order": [
+   {
+    "case": "rollback.mid-write",
+    "reason": "No fault injector in the harness yet (G173 / N166)."
+   },
+   {
+    "case": "config.setting-variant",
+    "reason": "No settings-variant company in the catalogue yet (G174 / N166)."
+   }
+  ],
+  "sales-return": [
+   {
+    "case": "edit.numeric",
+    "reason": "Numeric edit of a saved return is not exposed in the web yet; it is planned in the Return programme (N10 atomic numeric update, N11 saved-return Save/reopen). The Saved returns panel edits metadata only."
+   },
+   {
+    "case": "rollback.mid-write",
+    "reason": "No fault injector in the harness yet (G173 / N166)."
+   }
+  ],
+  "settings": [
+   {
+    "case": "concurrency.two-admins",
+    "reason": "Desktop rule for concurrent settings saves is undecided (UT_SETTING writes the whole row); needs an original-Windows run."
+   },
+   {
+    "case": "rollback.n-a",
+    "reason": "No fault injector in the harness yet (G173 / N166)."
+   }
+  ],
+  "users": [
+   {
+    "case": "branches.pending",
+    "reason": "Not written yet: the Users & Rights module is completed in document 15 step E11."
+   },
+   {
+    "case": "calculations.pending",
+    "reason": "Not written yet: the Users & Rights module is completed in document 15 step E11."
+   },
+   {
+    "case": "lines.pending",
+    "reason": "Not written yet: the Users & Rights module is completed in document 15 step E11."
+   },
+   {
+    "case": "settlement.pending",
+    "reason": "Not written yet: the Users & Rights module is completed in document 15 step E11."
+   },
+   {
+    "case": "reopen.pending",
+    "reason": "Not written yet: the Users & Rights module is completed in document 15 step E11."
+   },
+   {
+    "case": "unchanged-save.pending",
+    "reason": "Not written yet: the Users & Rights module is completed in document 15 step E11."
+   },
+   {
+    "case": "edit.pending",
+    "reason": "Not written yet: the Users & Rights module is completed in document 15 step E11."
+   },
+   {
+    "case": "delete.pending",
+    "reason": "Not written yet: the Users & Rights module is completed in document 15 step E11."
+   },
+   {
+    "case": "concurrency.pending",
+    "reason": "Not written yet: the Users & Rights module is completed in document 15 step E11."
+   },
+   {
+    "case": "retry.pending",
+    "reason": "Not written yet: the Users & Rights module is completed in document 15 step E11."
+   },
+   {
+    "case": "rollback.pending",
+    "reason": "Not written yet: the Users & Rights module is completed in document 15 step E11."
+   },
+   {
+    "case": "settings.pending",
+    "reason": "Not written yet: the Users & Rights module is completed in document 15 step E11."
+   },
+   {
+    "case": "output.pending",
+    "reason": "Not written yet: the Users & Rights module is completed in document 15 step E11."
+   },
+   {
+    "case": "keyboard.pending",
+    "reason": "Not written yet: the Users & Rights module is completed in document 15 step E11."
+   },
+   {
+    "case": "journey.pending",
+    "reason": "Not written yet: the Users & Rights module is completed in document 15 step E11."
+   }
+  ]
+ }
+}
