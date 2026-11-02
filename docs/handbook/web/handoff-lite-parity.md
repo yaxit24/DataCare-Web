@@ -43,19 +43,20 @@ Read `AGENTS.md` first. The ones that bit this work:
 
 ## 4. Open work, exactly where it is
 
-Worktree used so far: `/Users/yakshitsavaliya/dc-wt/kiro-impl`. Highest ids on main at the last fetch: N225 / G237.
+State at the end of 2 Nov 2026. Highest ids on main: N228 / G238 (next free N229 / G239; check `~/dc-wt/lanes.sh ids`).
 
-| Item | Branch / PR | State |
-|---|---|---|
-| Party master (MS_ACCT), N224 / G236 | PR #200 | Merged. It renumbered from N223 / G235 when #195 (Ledger Report) merged first. |
-| Tag Print (UT_TAG_PRINT), N225 / G237 | PR #208 | Merged after #200. It renumbered from N224 / G236. |
-| Un-blocked browser cases and four defects, N227 / G238 | `feat/lite-unblock-cases`, PR from this branch | See section 6. |
-| Sales Order old gold and old silver rows (G206 part) | PR #211 | Another session. It took N225 on a stale base and has to renumber. |
-| Data Refresh (#209), Data Backup (#210), Purchase Report (#202), GST Report (#206), Approval In/Out (#203), Purchase whole rupees (#204) | other PRs | Other sessions; do not touch. |
-| Data Import, Company, Year Create, Balance TrFr, Books, User Create | not started | Several are in the prompt pack (13-19). User Create is not in the pack: `usersRights` has 15 blocked cases. Check the open PRs first: Data Refresh and Data Backup are taken. |
+All PRs that were open on the morning of 2 Nov are merged: #200 Party (N224 / G236), #208 Tag Print (N225 / G237), #211 Sales Order old metal (N226), #213 un-blocked cases (N227 / G238), #204 Purchase whole rupees, #210 Data Backup, #212 Tag Cancel closure, #209 Data Refresh PR 1, #206 GST Report, #203 Approval In/Out, #214 Stock Adjust numbering, #216 Tag Print Esc retry, #202 Purchase Rpt frozen matrix.
+
+| Item                                    | State                                                                                                                                                                                                                                                                                                                              |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Purchase Rpt (#202)                     | Merged as a **frozen matrix only**. All 17 applicable cases fail because there is no Purchase Rpt screen, and they are baselined under G06 in `baseline.json`. The shared RP_ALL selector/filter/grouping engine comes first with the Sales Report (prompt 01); each case that turns green must leave the baseline in the same PR. |
+| GST Report (#206)                       | Merged. 13 cases still blocked. The labour-work discount is 0 because the web `LBR_ISU_DETL` has no discount column (desktop sums `IT_DISC_AMT`, RP_GST.cs:2719).                                                                                                                                                                  |
+| Data Refresh (#209), Data Backup (#210) | Merged as PARTIAL / CONTAINED. Data Refresh has 8 blocked cases; Data Backup has one baselined case (G64/N80, missing tenant-config envelope).                                                                                                                                                                                     |
+| Open at the time of writing             | #217 (GST CSV negative amounts) and #218 (Tag Print Esc, G239) from other sessions.                                                                                                                                                                                                                                                |
+| Not started                             | Data Import, Company, Year Create, Balance TrFr, Books, User Create. Several are in the prompt pack (13-19); User Create is not (`usersRights` has 15 blocked cases).                                                                                                                                                              |
 
 PRs that carry plan records merge one after another, because N and G ids must be contiguous. Whoever merges second
-merges `origin/main`, renumbers and waits for CI again; this cost a full CI cycle three times on 2 Nov.
+merges `origin/main`, renumbers and waits for CI again.
 
 ## 5. Parked patches (not part of any branch)
 
@@ -66,9 +67,9 @@ In `/tmp/kiro-impl/patches/` (they may be gone; each is small and easy to redo):
 
 Give these to whoever owns those menus.
 
-## 6. The `feat/lite-unblock-cases` work
+## 6. The `feat/lite-unblock-cases` work (merged as #213)
 
-Based on `origin/main` (merged up to #208). What it contains:
+What it contained:
 
 **Browser cases that were "blocked" and now run (all against the real stack):**
 
@@ -86,7 +87,6 @@ Based on `origin/main` (merged up to #208). What it contains:
 4. Cash Received / Payment: the Employee box was sent by the page but dropped by the API. The desktop stores it (`TR_CASH.cs:3050`), refuses a blank when `CO_SET.EMP_CODE_MANDATORY = 'Y'` (`:2907-2911`) and shows it when the voucher is opened (`:2753`). Fixed: `financeEmployeeTx` in `web/apps/api/src/modules/finance/lifecycle.ts`, `EMP_CODE` written to `CASH_DATA` and `PAY_DATA`, read back by `getReceipt` / `getPayment`, the route and `PaymentForm.tsx` pass and load it. DB tests added to `cashReceiptLegs.db.test.ts`; 24 of 24 pass together with the Daily Rate and lock-message tests. Not yet done: the browser case for it (cash-bank T15) and a Chrome pass. The desktop also defaults the box to the logged-in user's employee code (`:2671`); the web has no such field on the session yet.
 
 **Done on this branch:** the cash-bank T15 browser case (blank employee refused with the desktop text and nothing written; the employee chosen is stored in CASH_DATA and shown when the voucher is opened; `CO_SET` and the temporary `EMP_MAST` row are restored in `finally`). Result: cash-bank 19 of 21 (T03 and T06 stay blocked). The modules cash-bank, tag-cancel, daily-rate, purchase-invoice, contra, sales-invoice and sales-order ran on a fresh build with no new failure (the sales-order old-metal case is the known G206 baseline). The full API suite (356 files, 3,789 tests), the web unit tests (713), the smoke test, the session-context and labour-preview checks and every gate in section 8 pass. The plan records are N227 / G238. No separate Chrome pass was made for the Employee box: the page change is two lines (send and load `empCode`) and the browser case drives it through the real UI.
-
 
 ## 7. How a menu is done (the loop)
 
@@ -125,12 +125,18 @@ Based on `origin/main` (merged up to #208). What it contains:
 - `docs_check` wants cited paths repo-relative (`web/apps/api/src/...`), not relative to `web/`.
 - Real-stack CI takes about 20 minutes; `quality` about 15. Reproduce locally with the same module order before blaming a flaky run.
 
+- A `git add -u` after a merge with conflicts stages the conflict markers. Check `git status --short | grep -E '^(UU|AA)'` and `git grep -n -E '^(<<<<<<< |>>>>>>> )'` before committing; this reached two pushed branches on 2 Nov and was fixed within minutes.
+- `ORDER BY id` on a query that selects `id::text id` sorts the text alias ('10' before '2'). Order by the table column.
+- A disabled button cannot take focus: wait for the screen's loading state to end (for example `main[aria-busy=false]`) before `focus()`.
+- A full disk (under 1 GB free) stops Docker Desktop; the parity test environment then fails with "Docker Desktop is unable to start". Remove old build trees (`.next`, `dist`, unused worktrees) and restart Docker.
+- `gh pr merge` does not require the branch to be up to date; the lane rule (merge `origin/main`, wait for static-gates, then merge under the lock) is what protects plan ids and generated pages.
+
 ## 10. Next steps, in order
 
-1. Merge this branch's PR when green (renumber N227 / G238 if another PR with records merges first).
+1. Sales Report (prompt 01) and the shared RP_ALL engine, then Purchase Rpt: remove the 17 G06 baseline entries as cases pass.
 2. User Create (MS_USER, 5,312 lines; module `usersRights` has 15 blocked cases).
-3. The company utilities and Data Import that the prompt pack has not yet had picked up (check which of 13-19 are claimed first; Data Refresh and Data Backup are open PRs).
-4. Remaining blocked cases in older modules: daily-rate T15 (needs a location-00 session in the harness), cash-bank T03 / T06, tag-opening, fine-jv, party-opening, item-opening, company-open, settings.
+3. The company utilities and Data Import that the prompt pack has not yet had picked up (check which of 13-19 are claimed first).
+4. Remaining blocked cases in older modules: daily-rate T15 (needs a location-00 session in the harness), cash-bank T03 / T06, fine-jv (4 blocked), tag-opening, party-opening, item-opening, company-open, settings, gst-report (13), data-refresh (8).
 5. Give the parked patches (section 5) to the sessions that own Sales Return and Purchase Return.
 6. Mark a catalog row FULL only when every desktop mode, the lifecycle and print exist and its module has no failing or blocked case; then `pnpm progress`.
 7. Final report: FULL counts out of 49, 78 and 114; test results; the extra pages and code found (the removed fake Stock Adjust writer, the old Tag Print routes, the generic Party page, the employee box that was dropped); readiness per edition; end with every steering note verbatim.
