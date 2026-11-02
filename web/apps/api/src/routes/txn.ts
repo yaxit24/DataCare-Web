@@ -533,7 +533,7 @@ import {
   schemeAdjustments,
   itemStockLedger,
 } from '../modules/reports/reports2.js';
-import { fetchRate, rateGroups } from '../modules/masters/rate.js';
+import { rateGroups } from '../modules/masters/rate.js';
 import { enrollMember, postPoints, listMembers } from '../modules/membership/membership.js';
 import { fetchLiveRates } from '../modules/integrations/rates.js';
 import {
@@ -2793,6 +2793,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     upiId: b.upiId,
     kasar: b.kasar != null ? Number(b.kasar) : undefined,
     kasarAc: b.kasarAc,
+    empCode: b.empCode,
   });
   app.post('/receipts', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
@@ -2815,6 +2816,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     vchDate: b.vchDate,
     kasar: b.kasar != null ? Number(b.kasar) : undefined,
     kasarAc: b.kasarAc,
+    empCode: b.empCode,
     mainUser: sess(req).sub,
   });
   app.post('/payments', auth, async (req, reply) => {
@@ -4768,17 +4770,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         },
         { book: String(b.book ?? ''), tables: b.tables, confirm: b.confirm === true },
       ),
-    );
-  });
-  app.get('/rate', auth, async (req) => {
-    const s = readScope(req);
-    const qy = (req.query as any) || {};
-    return fetchRate(
-      prisma,
-      s.tenantId,
-      s.coCode,
-      String(qy.group ?? ''),
-      qy.date ? String(qy.date) : undefined,
     );
   });
   app.get('/rate-groups', auth, async (req) => {

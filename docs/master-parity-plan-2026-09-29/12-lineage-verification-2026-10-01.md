@@ -250,6 +250,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G235 | High | The Ledger Report was a single-account money statement with the wrong balance sign and none of the desktop's summary, drill-down, ageing or metal columns | `unified/src/csharp/DataCareNext/RP_LEDR.cs`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:8871-8880` | `web/apps/api/src/modules/accounting/accounting.ts`; `web/apps/web/app/(app)/reports/[report]/page.tsx` | RP_LEDR is an account-summary screen (DGV_AC) that drills into a per-voucher or per-ledger-key detail (DGV_VCH/DGV_DETL) and a debit-ageing view (DGV_MONTH), reporting money AND signed gold/silver fine. The summary nets money as Σ(CR−DR), gold/silver as signed fine, splits a negative net to Dr and a positive net to Cr, and drops display-zero rows unless With Zero; detail keeps a running Σ(Cr)−Σ(Dr) balance with its side; voucher summary keeps gross Dr/Cr; ageing consumes the oldest debit first (`RP_LEDR.cs:6408-6435,6862-7266,7694-8205,9514-10314`). The web answered only `/reports/account-ledger/:acCode` with a money statement whose running balance used DR−CR (the opposite sign) and had no summary, drill-down, ageing, metal columns, selectors or Excel/CSV export. | N223 |
 | G236 | High | The Party menu opened a generic page that skipped MS_ACCT's rules | `unified/src/csharp/DataCareNext/MS_ACCT.cs:5584-6587`, `:6606-7648`, `:7650-8025`, `:8162-8574`, `:9024-9640`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7600-7609` | `web/apps/web/app/(app)/masters/party/page.tsx`; `web/apps/api/src/modules/masters/master.service.ts` | Master → Party opens MS_ACCT: the location's Code / Name / Mobile list, the next code of the location, Company Detail and Other Detail with Enter in the form's tab order, the group, mobile, second mobile, short name, GST number, main account and reference checks, a new entry's opening (OP_DATA book 000 and the AcOp_Ledr legs), the AC_MAST_SRNO row, the photo, the D, S and A copy helps, Print and Delete with their refusals. The web's Party page saved only code, name, khata, mobile and group through the generic master (no group or default-account rule, no name check), set the opening through a second request after the account, had no delete or print, and AC_MAST lacked the five columns the desktop's updater adds (LCS_NO, TRN_DATE, CUST_ID_DATE, AC_WITH_MEMB_COM, AC_SHARE_HOLDER_COM). | N224 |
 | G237 | High | Tag Print listed tags by range and skipped UT_TAG_PRINT's voucher, group and stock selection | `unified/src/csharp/DataCareNext/UT_TAG_PRINT.cs:1816-2077`, `:4735-5013`, `:5073-5226`, `:5284-5403`, `:5499-5635`, `:5636-5666`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:8596-8605` | `web/apps/web/app/(app)/txn/tag-print/page.tsx`; `web/apps/api/src/modules/stock/tagPrint.ts` | Other → Tag Print opens UT_TAG_PRINT: Book and Vch No fill the grid with a voucher's tags, Gr Code, Pr Code and Item Type with the in-stock tags, a typed tag is looked up in the stock, Y/N and Ctrl+D choose the rows, Hm Id Update edits the four HM ids, weights, LRate, Mrp and Lbr%, Set marks the default label file, and Print copies each Y row's BAR_DETL row after the Lable Skip blanks. The web page listed in-stock tags by counter, item and tag range, had no voucher, group, product or item-type selection, no Y/N, no Hm Id Update and no default file, and its print staged by voucher only. | N225 |
+| G238 | High | Four web defects found by un-blocking old browser cases: two operators saving one Daily Rate day hit the RATE_MAST key and the screen showed database text; the rate lookup ignored the session's location; every voucher form's lock-date refusal used a web-only message; and the Cash Received/Payment Employee box was sent by the page but dropped by the API | `unified/src/csharp/DataCareNext/MS_RATE.cs:1867-1947`; `unified/src/csharp/DataCareNext/TR_SALE.cs:12547`; `unified/src/csharp/DataCareNext/TR_CASH.cs:2753,2907-2911,2943,3050` | `web/apps/api/src/modules/masters/dailyRate.ts`; `web/apps/api/src/modules/masters/rate.ts`; `web/apps/api/src/routes/dailyRate.ts`; `web/apps/api/src/modules/posting/posting.ts`; `web/apps/api/src/modules/finance/lifecycle.ts`; `web/apps/api/src/modules/finance/finance.ts`; `web/apps/web/components/PaymentForm.tsx` | MS_RATE deletes the day and inserts it again with no lock, so the web (which keeps the RATE_MAST primary key) failed the second of two operators; saves of one day now run one after the other and the last writer's rows stay. TR_SALE reads RATE_MAST for the user's own CO_CODE and LC_CODE; the web lookup read every location. Every desktop voucher form refuses a locked date with "You Cant Save and Delete This Voucher Becouse Lock Date is = dd/MM/yyyy ...."; the web carried its own sentence. TR_CASH stores the Employee box on the voucher (:3050), refuses a blank one when CO_SET.EMP_CODE_MANDATORY = 'Y' (:2907-2911) and shows it again when the voucher is opened (:2753); the web page sent it and the API dropped it. Deliberate difference: the desktop fills the box with the logged-in user's employee code (:2671); the web session has no such field yet. | N226 |
 
 ## 4. Decisions D23–D28
 
@@ -3323,7 +3324,6 @@ the clerk's rights) and the existing staging tests pass. The new zero-mock `tag-
 MAIN_STOCK, AC_DATA and BAR_DATA do not change; T14 a fault on the third copied label leaves the earlier labels; T16 the sheet shows two blanks
 for 2.5, then three labels with barcodes and the MRP; T18 an HM id keyed here reaches the next plain print's label. Desktop-runtime comparison,
 physical-printer acceptance (D29) and parent acceptance remain.
-
 ### N226 — Sales Order old gold and old silver rows (G206, part)
 
 Gap G206 · Parents P9; R03 · L1 · Med · Size L · Start after N225
@@ -3370,6 +3370,47 @@ old-metal-only advance, the edit block for amounts without rows) pass under forc
 before this change. The new browser cases `create.old-metal-tenders`, `create.old-metal-unvalued-fine` and
 `edit.old-metal-then-delete` pass through the real screen (they failed before: the screen had no grid). Desktop-runtime
 comparison and operator acceptance are not claimed.
+
+### N227 — Un-blocked Lite browser cases and the four defects they found (G238, Lite L1/L3)
+
+Gap G238 · Parents P1-core · L1 · L3 · High · Size M · Start after N226
+
+Browser cases that had been recorded as blocked now run against the real stack. Four of them failed on a real defect,
+which this slice fixes. Each fix cites the desktop line it follows.
+
+- **Daily Rate, two operators on one day** (`MS_RATE.cs:1867-1947`). The desktop deletes the day's RATE_MAST rows and
+  inserts them again with no lock; the web keeps the table's primary key, so the second of two concurrent first saves
+  of a day failed with raw database text. `saveDailyRate` (`web/apps/api/src/modules/masters/dailyRate.ts`) now takes a transaction
+  advisory lock keyed on tenant, company, location and date, so saves of one day run in turn and the last writer's rows
+  stay.
+- **Rate lookup by location** (`TR_SALE.cs:12547`). The desktop reads the day's RATE_MAST rows for its own CO_CODE and
+  LC_CODE. `GET /rate` (behind the ticker and the sale forms) read every location; it now filters by the session's
+  location (`web/apps/api/src/modules/masters/rate.ts`). The route moved from `web/apps/api/src/routes/txn.ts`, which is at its size ceiling, to
+  `web/apps/api/src/routes/dailyRate.ts` with the same literal path.
+- **Lock-date text** (`TR_CASH.cs:2943,3209`, `TR_SALE.cs:15066`, `TR_KR_ISU.cs:4980`). Every desktop voucher form
+  refuses a locked date with "You Cant Save and Delete This Voucher Becouse Lock Date is = dd/MM/yyyy ....".
+  `PeriodLockValidationError` (`web/apps/api/src/modules/posting/posting.ts`) carried a web-only sentence for every form that uses it; it
+  now carries the desktop text with the lock date as dd/MM/yyyy.
+- **Cash Received / Payment Employee box** (`TR_CASH.cs:2907-2911,3050,2753`). The page sent `empCode`; the API ignored
+  it. `financeEmployeeTx` (`web/apps/api/src/modules/finance/lifecycle.ts`) refuses a blank when CO_SET.EMP_CODE_MANDATORY = 'Y' with
+  "Please Select Employee Code and Try......" (before the cash limit, year and lock checks, as on the desktop) and
+  refuses a code that is not a company employee; `EMP_CODE` is written to CASH_DATA and PAY_DATA, and `getReceipt` and
+  `getPayment` return it so the page shows it when a voucher is opened.
+
+Deliberate differences: the desktop defaults the Employee box to the logged-in user's employee code
+(`TR_CASH.cs:2671`); the web session has no such field, so the box starts empty. Daily Rate T15 (location 00 also
+stores `GROUP_MAST.GR_RATE`) stays blocked because the harness cannot start a session at location 00.
+
+New or un-blocked browser cases: Tag Cancel T12, T13, T14, T18 (T15 is not applicable: only the STOCK ADJUST book reads
+`MsPurcLot`, `TR_TAG_CAN.cs:2514-2535`), Daily Rate T11-T14 and T18, Purchase Invoice T14 and T15 (`PR_AMT_TYPE = G`),
+Contra T14 and T15, Cash/Bank T14 and T15 (employee mandatory).
+
+Evidence: `dailyRate.routes.db.test.ts` (two operators, one day; the location-scoped lookup), `cashReceiptLegs.db.test.ts`
+(employee code), `periodLockMessage.test.ts`; the daily-rate DB test and the lookup test fail on the previous code. The
+modules tag-cancel 16/16, purchase-invoice 29/29, contra 25/25, daily-rate 15 of 16 (1 blocked), cash-bank 19 of 21
+(T03 and T06 blocked) pass on a fresh production build, and sales-invoice and sales-order (shared lock text and rate
+lookup) have no new failure. Sales Return and Purchase Return were left alone; their cases are patches for their owners.
+Not accepted: no desktop-runtime comparison was made.
 
 ## 6. Status corrections
 
@@ -3524,6 +3565,7 @@ comparison and operator acceptance are not claimed.
 | N224 | — | implemented-unverified, evidence in this change (G236: Party is MS_ACCT — the list and next code of the location, both tabs in tab order with the group, mobile, short-name, GST and account checks, the opening and AC_MAST_SRNO in one transaction with the save, the photo, the copy helps, Print and Delete with the desktop's refusals) |
 | N225 | — | implemented-unverified, evidence in this change (G237: Tag Print is UT_TAG_PRINT — the voucher and stock selection, typed tags, Y/N rows, Hm Id Update, the default file and a print that stages after the Lable Skip blanks) |
 | N226 | — | implemented-unverified, evidence in this change (G206 part: old gold and old silver rows stored in SL_PR_DETL, totalled into the header and ADV_AMT, day book 04/06, editable and deletable; scheme stays open) |
+| N227 | — | implemented-unverified, evidence in this change (G238: two operators saving one Daily Rate day no longer collide, the rate lookup is scoped to the session's location, every voucher form's lock-date refusal carries the desktop text, and the Cash Received/Payment Employee box is stored, enforced when mandatory and read back; browser cases un-blocked for Tag Cancel, Daily Rate, Purchase Invoice, Contra and Cash/Bank) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 
