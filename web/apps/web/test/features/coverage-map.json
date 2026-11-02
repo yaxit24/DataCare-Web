@@ -193,6 +193,21 @@
         "web/apps/api/src/routes/wholesaleSale.ts"
       ]
     },
+    "gstReport": {
+      "covers": [
+        "web/apps/web/app/(app)/reports/[report]/page.tsx",
+        "web/apps/web/lib/nav.ts",
+        "web/apps/api/src/modules/reports/gstLauncherReport.ts",
+        "web/apps/api/src/modules/gst/gst.ts",
+        "web/apps/api/src/modules/gst/gstr1Doc.ts",
+        "web/apps/api/src/modules/reports/reports.ts",
+        "web/apps/api/src/modules/reports/reports2.ts",
+        "web/apps/api/src/modules/reports/reports3.ts",
+        "web/apps/api/src/modules/reports/statementDocs.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/api/src/routes/txn.ts"
+      ]
+    },
     "stockAdjust": {
       "covers": [
         "web/apps/web/app/(app)/txn/stock-adjust/page.tsx",
