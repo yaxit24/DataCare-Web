@@ -605,6 +605,56 @@ export const tagCancel = {
       },
     ),
     C(
+      'reopen.late-list-keeps-typed-voucher-number',
+      'T07',
+      'read-only',
+      'TR_TAG_CAN.cs:4702-4880: the number the operator types in Vch No is the one Enter opens; the next-number read that fills the box on entry (CLEAR_DATA) must not overwrite it when it answers late',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        let release;
+        const gate = new Promise((resolve) => (release = resolve));
+        let held;
+        const heldSeen = new Promise((resolve) => (held = resolve));
+        const listing = (url) => url.pathname === '/api/stock/tag-cancel';
+        await page.route(
+          (url) => listing(url),
+          async (route) => {
+            if (route.request().method() !== 'GET') return route.continue();
+            held();
+            await gate;
+            return route.continue();
+          },
+        );
+        try {
+          await page.goto('/txn/tag-cancel');
+          await page.getByRole('heading', { name: 'Tag Cancel', exact: true }).waitFor();
+          await heldSeen;
+          const box = page.getByLabel('Vch No', { exact: true });
+          await box.fill('98765');
+          const answered = page.waitForResponse(
+            (r) => listing(new URL(r.url())) && r.request().method() === 'GET',
+          );
+          release();
+          await answered;
+          await page.waitForTimeout(300);
+          assert.equal(
+            await box.inputValue(),
+            '98765',
+            'the late next-number answer must not replace the typed voucher number',
+          );
+        } finally {
+          release();
+          await page.unroute((url) => listing(url));
+        }
+        return {
+          observation: 'a voucher number typed before the list answered is still there afterwards',
+          expected: '98765',
+          database: {},
+          downstream: { typed: '98765' },
+        };
+      },
+    ),
+    C(
       'edit.add-a-tag',
       'T09',
       'mutation',

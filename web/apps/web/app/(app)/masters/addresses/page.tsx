@@ -1,5 +1,13 @@
 'use client';
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import { del, get, post, put, ApiError } from '../../../../lib/api';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
@@ -159,12 +167,23 @@ export default function AddressMasterPage() {
   const listRef = useRef<HTMLTableSectionElement>(null);
   const helpRef = useRef<HTMLTableSectionElement>(null);
   const focusName = useRef(false);
+  const focusCode = useRef(false);
 
   useEffect(() => {
     if (busy || !focusName.current) return;
     focusName.current = false;
     boxes.current.name?.focus();
   }, [busy, entryMode, code]);
+  /**
+   * Ctrl+E unlocks the code box and puts the cursor in it as one step (MS_ADD_MAST_KeyDown, :3721-3738). A layout effect
+   * runs in the commit that makes the box editable; a timer left a gap in which a late tick took the cursor from the
+   * name the operator had already started typing.
+   */
+  useLayoutEffect(() => {
+    if (codeLocked || !focusCode.current) return;
+    focusCode.current = false;
+    boxes.current.code?.focus();
+  }, [codeLocked]);
   useEffect(() => {
     if (help !== null) helpRef.current?.querySelectorAll<HTMLTableRowElement>('tr')[help]?.focus();
   }, [help]);
@@ -382,8 +401,10 @@ export default function AddressMasterPage() {
     if (event.defaultPrevented) return;
     if (event.ctrlKey && (event.key === 'e' || event.key === 'E')) {
       event.preventDefault();
-      setCodeLocked(false);
-      setTimeout(() => boxes.current.code?.focus(), 0);
+      if (codeLocked) {
+        focusCode.current = true;
+        setCodeLocked(false);
+      } else boxes.current.code?.focus();
     } else if (event.key === 'Escape') {
       event.preventDefault();
       if (help !== null) setHelp(null);

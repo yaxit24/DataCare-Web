@@ -7095,7 +7095,7 @@
         "N208"
       ],
       "requiredProof": "HTTP/DB cases red against main for the refusals and the print; the tag-cancel feature module passes every executable case through the real form.",
-      "gapIds": "G223",
+      "gapIds": "G223, G241",
       "entryDefinition": "15-standard-edition-plan.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
@@ -7109,7 +7109,7 @@
         "web/apps/api/test/tagCancelFaultMatrix.db.test.ts",
         "web/apps/web/test/features/modules/tagCancel.mjs"
       ],
-      "statusNote": "IMPLEMENTED, not accepted. The feature matrix now freezes 16 executable cases, 2 blocked and 2 not applicable. New evidence covers exact 'Tag Cancel' caption rights with a near-miss refusal, an exact two-browser same-tag race, create/edit/delete rollback at every executed write-set stage, and Tag Stock create/edit/delete agreement. T13 durable lost-acknowledgement replay remains blocked pending a production idempotency key and replay contract; T15 history/configuration stays blocked. Open: no captured desktop BAR_CAN rows, durable idempotency and desktop-runtime comparison. Final dependency-backed execution is pending CI. The Stock Adjust legacy-number repair (N221, PR #214) adds one T15 isolation case proving that a high MAIN_STOCK-only row does not change TAG CANCEL's BAR_CAN_DATA numbering."
+      "statusNote": "IMPLEMENTED, not accepted. The feature matrix now freezes 16 executable cases, 2 blocked and 2 not applicable. New evidence covers exact 'Tag Cancel' caption rights with a near-miss refusal, an exact two-browser same-tag race, create/edit/delete rollback at every executed write-set stage, and Tag Stock create/edit/delete agreement. T13 durable lost-acknowledgement replay remains blocked pending a production idempotency key and replay contract; T15 history/configuration stays blocked. Open: no captured desktop BAR_CAN rows, durable idempotency and desktop-runtime comparison. Final dependency-backed execution is pending CI. The Stock Adjust legacy-number repair (N221, PR #214) adds one T15 isolation case proving that a high MAIN_STOCK-only row does not change TAG CANCEL's BAR_CAN_DATA numbering. G241 follow-up (2 November): a late next-number answer no longer replaces a typed Vch No (new case tag-cancel.reopen.late-list-keeps-typed-voucher-number; module 22 of 22)."
     },
     {
       "id": "N211",
@@ -7299,7 +7299,7 @@
         "N216"
       ],
       "requiredProof": "An HTTP/DB test of the list, combos, next code, write set, refusals, versions, rights, delete and print; the address-master feature module passes every case; a Chrome DevTools keyboard, mobile check, help, reopen, delete and Esc pass.",
-      "gapIds": "G230",
+      "gapIds": "G230, G241",
       "entryDefinition": "15-standard-edition-plan.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
@@ -7315,7 +7315,7 @@
         "web/apps/api/test/routePolicy.test.ts",
         "web/apps/web/test/features/modules/addressMaster.mjs"
       ],
-      "statusNote": "IMPLEMENTED, not accepted. Verified: addressMaster.db.test.ts 8/8, routePolicy (703 routes), the address-master feature module 17 of 17 applicable (T05 not applicable), and a Chrome DevTools pass on the demo stack. Open: the PartyMast print layout (not in the repository), desktop-runtime comparison and parent acceptance."
+      "statusNote": "IMPLEMENTED, not accepted. Verified: addressMaster.db.test.ts 8/8, routePolicy (703 routes), the address-master feature module 17 of 17 applicable (T05 not applicable), and a Chrome DevTools pass on the demo stack. Open: the PartyMast print layout (not in the repository), desktop-runtime comparison and parent acceptance. G241 follow-up (2 November): Ctrl+E puts the cursor in the code box in the commit that unlocks it (new case address-master.field.ctrl-e-focuses-code-at-once; module 18 of 18)."
     },
     {
       "id": "N218",

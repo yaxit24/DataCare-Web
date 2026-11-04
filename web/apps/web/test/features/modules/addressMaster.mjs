@@ -427,6 +427,42 @@ export const addressMaster = {
         }),
     ),
     C(
+      'field.ctrl-e-focuses-code-at-once',
+      'T03',
+      'read-only',
+      'Ctrl+E (MS_ADD_MAST_KeyDown, :3721-3738) unlocks the code box and puts the cursor in it in one step; the web must not leave a gap in which the box is editable but the cursor is elsewhere (a late timer then stole the cursor from the name being typed)',
+      async (ctx) =>
+        withCase(ctx, async () => {
+          const { page } = await ctx.session();
+          await openScreen(page);
+          await page.evaluate(() => {
+            const box = document.querySelector('#address-code');
+            window.__codeFocusWhenEditable = [];
+            new MutationObserver(() => {
+              if (!box.readOnly)
+                window.__codeFocusWhenEditable.push(document.activeElement === box);
+            }).observe(box, { attributes: true, attributeFilter: ['readonly'] });
+          });
+          await page.keyboard.press('Control+e');
+          await page.waitForFunction(() => !document.querySelector('#address-code')?.readOnly);
+          // A timer (the old code) fires after this wait; give it its chance before looking.
+          await page.waitForTimeout(250);
+          const seen = await page.evaluate(() => window.__codeFocusWhenEditable);
+          assert.deepEqual(
+            seen,
+            [true],
+            'the code box has the cursor in the commit that unlocks it',
+          );
+          assert.equal(await focusedId(page), 'address-code');
+          return {
+            observation: 'the code box had the cursor the moment it became editable',
+            expected: { codeFocusWhenEditable: [true] },
+            database: {},
+            downstream: { focused: 'address-code' },
+          };
+        }),
+    ),
+    C(
       'lookup.help-and-name-list',
       'T04',
       'read-only',
