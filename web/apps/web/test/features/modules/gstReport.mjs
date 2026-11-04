@@ -474,12 +474,166 @@ export const gstReport = {
         columns: SECTION_COLUMNS.HSN,
       },
     ),
-    blocked(
-      'formula.hsn-fnv-midpoint.pending',
+    C(
+      'formula.hsn-fnv-midpoint',
       'T03',
-      'read-only',
-      'RP_GST.cs:2951-2964 calls DC_Main.Fnv before formatting IGST or halved CGST/SGST',
-      'The reviewed RP_GST source does not define Fnv midpoint rounding. Freeze no half-cent expectation until DC_Main.Fnv is traced or measured on Windows.',
+      'mutation',
+      'RP_GST.cs:2951-2964 formats Strings.Format(DC_Main.Fnv(tax) / 2.0, "0.00") for local CGST/SGST and Strings.Format(Fnv(tax), "0.00") for IGST; DC_Main.cs:2088-2102 Fnv = Conversion.Val. Measured on .NET Framework 4.8 (windows-latest, web/scripts/dotnet-fx-probe): half away from zero at every 2-decimal midpoint, so 1908.29 -> 954.15',
+      async (ctx) => {
+        // The case owns its item and HSN code, so the grid row it checks cannot include any other module's sales.
+        const ITEM = 'HSNM1';
+        const HSN = '711319';
+        await ctx.rows(
+          `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","GR_CODE","HSN_CODE","RATE_TYPE")
+           VALUES ($1,'01',$2,'HSN MIDPOINT GOLD','G','E1',$3,'G') RETURNING 1`,
+          ITEM,
+          HSN,
+        );
+        await ctx.rows(
+          `INSERT INTO "MAIN_STOCK"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","IT_CODE","ITM_SIGN","ITM_GWT","ITM_NWT","TAG_NO")
+           VALUES ($1,'01','01','2024-2025','OPN','00002','2024-04-01',$2,'+',500,500,'N') RETURNING 1`,
+          ITEM,
+        );
+        // RP_GST.cs:2719 reads only books whose Invoice Type (BOOK_DATA.BOOK_TYPE, MS_BOOK.cs:2625) is 'T'. Web-provisioned
+        // books leave it blank, so the case sets it and puts the previous value back, as the e-invoice export reads it too.
+        const [book] = await ctx.rows(
+          `SELECT "BOOK_TYPE" prior FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL'`,
+        );
+        await ctx.rows(
+          `UPDATE "BOOK_DATA" SET "BOOK_TYPE"='T' WHERE tenant_id=$1 AND "CO_BOOK"='SL' RETURNING 1`,
+        );
+        try {
+          const page = await openFromNavigation(ctx);
+          // Two real sales of the same gold line (net 63,609.50, GST 3% = 1,908.285 -> 1,908.29): one local, which the
+          // desktop stores as 954.145 CGST + 954.145 SGST (an exact midpoint at two decimals), one inter-state (IGST).
+          const line = { ...salesScreen.LINE_A, item: ITEM };
+          for (const [party, interState] of [
+            ['E2ELOC', false],
+            ['E2EINT', true],
+          ]) {
+            await page.goto('/txn/sales');
+            await salesScreen.openSales(page);
+            await salesScreen.pickParty(page, party);
+            if (interState) await salesScreen.field(page, 'Inter-state').selectOption('y');
+            await salesScreen.fillLine(page, 0, line);
+            const saved = await salesScreen.save(page);
+            assert.equal(saved.status(), 201, await saved.text());
+          }
+          const lines = await ctx.rows(
+            `SELECT "CO_BOOK","VCH_NO","NET_AMT"::text net,"IT_TAX_AMT"::text tax FROM "SL_DETL"
+              WHERE tenant_id=$1 AND "IT_CODE"=$2 ORDER BY "VCH_NO"`,
+            ITEM,
+          );
+          assert.deepEqual(
+            lines.map((r) => [r.net, r.tax]),
+            [
+              ['63609.50', '1908.29'],
+              ['63609.50', '1908.29'],
+            ],
+          );
+          const taxRows = await ctx.rows(
+            `SELECT "VCH_NO","TAX_TYPE","TAX_AMT"::text tax FROM "TAX_DATA"
+              WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO" = ANY($3::text[]) ORDER BY "VCH_NO","TAX_TYPE"`,
+            lines[0].CO_BOOK,
+            lines.map((r) => r.VCH_NO),
+          );
+          const stored = taxRows.map((r) => `${r.TAX_TYPE}=${r.tax}`).sort();
+          assert.deepEqual(
+            stored,
+            ['CGST=954.145', 'IGST=1908.290', 'SGST=954.145'],
+            `the local sale must really sit on the midpoint, or this case proves nothing; found ${JSON.stringify(taxRows)} for ${JSON.stringify(lines)}`,
+          );
+
+          await page.goto('/reports/gst-report');
+          await page.getByRole('heading', { name: 'GST Report', exact: true }).waitFor();
+          await page
+            .getByRole('combobox', { name: 'Section Type', exact: true })
+            .selectOption({ label: 'HSN - Summary For HSN' });
+          const ran = page.waitForResponse(
+            (r) =>
+              new URL(r.url()).pathname === '/api/reports/gst-report' &&
+              r.request().method() === 'GET',
+          );
+          await page.getByRole('button', { name: 'Gstr 1', exact: true }).click();
+          const response = await ran;
+          assert.equal(response.status(), 200, `HSN must not be refused: ${await response.text()}`);
+          await page.locator('table.grid tbody tr').first().waitFor();
+
+          const headers = await page.locator('table.grid thead th').allTextContents();
+          assert.deepEqual(headers, SECTION_COLUMNS.HSN);
+          const grid = await page
+            .locator('table.grid tbody tr')
+            .evaluateAll((trs) =>
+              trs.map((tr) => [...tr.querySelectorAll('td')].map((td) => td.textContent.trim())),
+            );
+          const col = (name) => headers.indexOf(name);
+          const mine = grid.filter((row) => row[col('HSN')] === HSN);
+          assert.equal(mine.length, 2, `one local and one inter-state row for HSN ${HSN}`);
+          const local = mine.find((row) => row[col('IGST Amount')] === '0.00');
+          const inter = mine.find((row) => row[col('IGST Amount')] !== '0.00');
+          assert.ok(local && inter, 'a local row and an inter-state row');
+          // Windows-measured: Format(Val("1908.29") / 2.0, "0.00") = 954.15; Format(Val("1908.29"), "0.00") = 1908.29.
+          assert.equal(local[col('CGST Amount')], '954.15');
+          assert.equal(local[col('SGST Amount')], '954.15');
+          assert.equal(inter[col('IGST Amount')], '1908.29');
+          assert.equal(inter[col('CGST Amount')], '0.00');
+          for (const row of [local, inter]) {
+            assert.equal(row[col('Taxable Value')], '63609.50');
+            assert.equal(row[col('Total Value')], '65517.79');
+            assert.equal(row[col('UQC')], 'GMS-GRAMMES');
+            assert.equal(row[col('Total Qty')], '10.00');
+          }
+          // The footer adds the displayed cells, as the desktop does (RP_GST.cs:2960-2985).
+          const footer = await page
+            .locator('table.grid tfoot tr td')
+            .evaluateAll((tds) => tds.map((td) => td.textContent.trim()));
+          for (const name of [
+            'Total Value',
+            'Taxable Value',
+            'IGST Amount',
+            'CGST Amount',
+            'SGST Amount',
+          ]) {
+            const cents = grid.reduce(
+              (sum, row) => sum + Math.round(Number(row[col(name)]) * 100),
+              0,
+            );
+            assert.equal(
+              footer[col(name)],
+              (cents / 100).toFixed(2),
+              `footer ${name} is the sum of the rows`,
+            );
+          }
+          await ctx.shot(page, 'formula-hsn-fnv-midpoint');
+
+          const csv = await page.request.fetch(
+            `/api/reports/gst-report/export.csv?${new URL(response.url()).searchParams.toString()}`,
+          );
+          assert.equal(csv.status(), 200);
+          const csvRows = (await csv.text())
+            .split('\r\n')
+            .filter(Boolean)
+            .map((l) => l.split(','));
+          const csvLocal = csvRows.find((c) => c[0] === HSN && c[col('IGST Amount')] === '0.00');
+          assert.equal(
+            csvLocal?.[col('CGST Amount')],
+            '954.15',
+            'HSNSUM.csv carries the displayed halves',
+          );
+          return {
+            observation:
+              'HSN answered 200; the local row shows CGST and SGST 954.15 each for a 1,908.29 tax, the inter-state row IGST 1,908.29, and the footer adds the rows',
+            expected: { cgst: '954.15', sgst: '954.15', igst: '1908.29', stored: '954.145 each' },
+            database: { sales: lines, taxRows: stored },
+            downstream: { gridRows: mine, csvRow: csvLocal },
+          };
+        } finally {
+          await ctx.rows(
+            `UPDATE "BOOK_DATA" SET "BOOK_TYPE"=$2 WHERE tenant_id=$1 AND "CO_BOOK"='SL' RETURNING 1`,
+            book?.prior ?? null,
+          );
+        }
+      },
     ),
     desiredCase(
       'formula.mixed-rates-and-making',
