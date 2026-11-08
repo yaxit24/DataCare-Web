@@ -306,10 +306,10 @@ schedule the fix in WP-26/27.
 
 | WP | Menu(s) | Item | Pri | Size | Depends | Prompt | State |
 |---|---|---|---|---|---|---|---|
-| WP-01 | Approval Isu, Approval Rtn | Land the built branch | P1 | L | — | 12 | backed up, not landed |
+| WP-01 | Approval Isu, Approval Rtn | Land the built branch | P1 | L | — | 12 | PR #228 (N229/G242); 3 cases blocked on WP-04 follow-up and a Sales Apr No import |
 | WP-02 | Order Cancel | Finish from the saved patch | P1 | M | — | 11 | patch saved |
 | WP-03 | Sales Order, Order Report | Scheme tender (G206), un-break the rows | P1 | M | — | — | baselined |
-| WP-04 | Every voucher create route (Stock Adjust first) | Server-side idempotency: a replayed request never makes a second voucher | P0 | M | — | 20 (Stock Adjust part) | open: no writer has it |
+| WP-04 | Every voucher create route (Stock Adjust first) | Server-side idempotency: a replayed request never makes a second voucher | P0 | M | — | 20 (Stock Adjust part) | PR #229 (6 routes); follow-up queue for the rest |
 | WP-05 | Cash Received/Payment, Bank Received/Payment | T03 calculations, T06 card/UPI settlement | P1 | M | — | — | 2 blocked |
 | WP-06 | User Create | MS_USER with OD-1..OD-3 | P0 | L | — | — (see card) | 15 of 18 blocked |
 | WP-07 | Company | Identity workflow (G38, N58), delete per OD-5 | P1 | L | — | 16 | BROKEN |
@@ -361,7 +361,10 @@ schedule the fix in WP-26/27.
   `Idempotency-Key` header (a UUID made when the form opens, renewed after a successful save); the API stores
   `(tenant_id, key, route, request_hash, response_status, response_body, created_at)` in a new table inside the **same
   transaction** as the voucher; a repeat with the same key and hash returns the stored response; the same key with a
-  different body answers 422. Rows expire after 24 h (a cleanup job). (2) Apply it to Stock Adjust first (its T13 case
+  different body answers `409 idempotency-key-reused`. Retention 30 days. This is the accepted decision **D18** and
+  slice **N52** (gap G29) in `docs/master-parity-plan-2026-09-29/11-audit-implementation-plan-2026-10-01.md`: reuse
+  those ids, take no new ones. In progress: PR #229 (the mechanism; Stock Adjust, Tag Cancel, Cash/Bank Received and
+  Payment); the other voucher create routes are its follow-up queue, enforced by `idempotencyRoutePolicy.test.ts`. (2) Apply it to Stock Adjust first (its T13 case
   replays with `page.request.fetch(response.request())`), then to every voucher create route, one module per commit.
   (3) A route-policy test that fails when a voucher create route lacks the guard.
 - Done when: a DB test per writer replays the same request and finds one voucher; every voucher module has a T13 replay
