@@ -1,3 +1,12 @@
+## 2026-11-09 — Idempotent voucher creates, first routes (N52 / G29, WP-04)
+
+- 2026-11-09: `api_command_receipt` (forced RLS) and `web/apps/api/src/modules/shared/idempotency.ts` guard Stock
+  Adjust, Tag Cancel and the four Cash/Bank creates: the receipt is claimed and completed inside the voucher's own
+  transaction, a replay with the same Idempotency-Key and request answers the first response byte for byte, a changed
+  request is 409.
+- 2026-11-09: still queued (the follow-up list in `web/apps/api/test/idempotencyRoutePolicy.test.ts`): Contra, Sales,
+  Sales Order, Sales Return, Purchase, Purchase Return, Wh Sales, Fine JV and the other voucher creates.
+
 ## 2026-11-02 — Stock Adjust legacy voucher safety follow-up (N221 / G234)
 
 - The forward repair preserves pre-N221 MAIN_STOCK-only Stock Adjust rows instead of fabricating missing register data.

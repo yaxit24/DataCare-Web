@@ -550,8 +550,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header; account, cheque, amount and kasar grid; employee/description footer; cheque print.
 - **Writes:** PAY_DATA, PAY_DETL, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, TEMP_BOOK_DATA.
 - **Web:** `/txn/payment?mode=BANK`; `POST /payments`, `POST /payments/multi`, `GET /payments/:vchNo`, `DELETE /payments/:vchNo`, `GET /finance/payment-voucher`. Can: create, print.
-- **Remaining:** Browser cases prove the screen opens in bank mode; none creates a Bank Payment yet. Reopen, edit, delete and reprint are proven only on Cash Received, which shares the form. Cheque and bank fields, versions, copies and a desktop-runtime comparison remain.
-- **Owners:** G50, N64, X16, N51, N52, N74.
+- **Remaining:** Browser cases prove the screen opens in bank mode; none creates a Bank Payment yet. Reopen, edit, delete and reprint are proven only on Cash Received, which shares the form. Cheque and bank fields, versions, copies and a desktop-runtime comparison remain. The N52 Idempotency-Key guard covers the shared routes; no bank-mode replay case yet.
+- **Owners:** G50, N64, X16, N51, G29, N52, N74.
 - **Evidence:** [KB_transaction.md:176-200](../../project-memory/video-research/_kb/KB_transaction.md#L176-L200).
 
 ### Bank Received
@@ -561,8 +561,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header; account, cheque, amount and kasar grid; bank/employee footer and print dialog.
 - **Writes:** CASH_DATA, AC_DATA, ROJ_MEL_DATA, CARD_DATA, UPI_DATA, REMARK_DATA, TEMP_BOOK_DATA.
 - **Web:** `/txn/receipt?mode=BANK`; `POST /receipts`, `POST /receipts/multi`, `GET /receipts/:vchNo`, `DELETE /receipts/:vchNo`, `GET /finance/receipt-voucher`. Can: create, print.
-- **Remaining:** Browser cases prove bank and cheque receipts are created and that the screen opens in bank mode. Reopen, edit, delete and reprint are proven only on Cash Received, which shares the form. Per-bank slots, card and UPI identities, copies and a desktop-runtime comparison remain.
-- **Owners:** G50, N64, X16, N51, N52, N74.
+- **Remaining:** Browser cases prove bank and cheque receipts are created and that the screen opens in bank mode. Reopen, edit, delete and reprint are proven only on Cash Received, which shares the form. Per-bank slots, card and UPI identities, copies and a desktop-runtime comparison remain. The N52 Idempotency-Key guard covers the shared routes; no bank-mode replay case yet.
+- **Owners:** G50, N64, X16, N51, G29, N52, N74.
 - **Evidence:** [KB_transaction.md:176-200](../../project-memory/video-research/_kb/KB_transaction.md#L176-L200).
 
 ### Bul LcBook
@@ -594,8 +594,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header; multi-line account, amount and kasar grid; description/employee footer; print dialog.
 - **Writes:** PAY_DATA, PAY_DETL, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, TEMP_BOOK_DATA.
 - **Web:** `/txn/payment`; `POST /payments`, `POST /payments/multi`, `GET /payments/:vchNo`, `DELETE /payments/:vchNo`. Can: create, print.
-- **Remaining:** Browser cases prove a payment is created with the right ledger legs. Reopen, edit, delete and reprint are proven on Cash Received, which shares the form, and have no case of their own on the Payment screen. Versions, multi-line fields, copies and account roles remain.
-- **Owners:** G50, N64, X16, N51, N52, N74.
+- **Remaining:** Browser cases prove a payment is created with the right ledger legs and that a replayed save request answers the first payment and posts nothing (N52). Reopen, edit, delete and reprint are proven on Cash Received, which shares the form, and have no case of their own on the Payment screen. Versions, multi-line fields, copies and account roles remain.
+- **Owners:** G50, N64, X16, N51, G29, N52, N74.
 - **Evidence:** [KB_transaction.md:112-139](../../project-memory/video-research/_kb/KB_transaction.md#L112-L139).
 
 ### Cash Received
@@ -605,7 +605,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header; multi-line account, amount and kasar grid; description/employee footer; print dialog.
 - **Writes:** CASH_DATA, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, TEMP_BOOK_DATA.
 - **Web:** `/txn/receipt`; `POST /receipts`, `POST /receipts/multi`, `GET /receipts/:vchNo`, `DELETE /receipts/:vchNo`. Can: create, print.
-- **Remaining:** Browser cases (cash-bank module, 19 of 21 applicable pass) prove create with kasar, reopen from the recent list and Vch No, edit, unchanged save, delete with audit, reprint, the cash-limit and out-of-year refusals, a double click saving one voucher and a rolled-back ledger fault. Still open: card and UPI settlement (CARD_DATA, UPI_DATA), multi-line totals, copies and a desktop-runtime comparison.
+- **Remaining:** Browser cases (cash-bank module, 20 of 22 applicable pass) prove create with kasar, reopen from the recent list and Vch No, edit, unchanged save, delete with audit, reprint, the cash-limit and out-of-year refusals, a double click saving one voucher, a replayed save request answering the first voucher (N52 Idempotency-Key) and a rolled-back ledger fault. Still open: card and UPI settlement (CARD_DATA, UPI_DATA), multi-line totals, copies and a desktop-runtime comparison.
 - **Owners:** G50, N64, G29, N52, X16, N51, N74.
 - **Evidence:** [KB_transaction.md:112-139](../../project-memory/video-research/_kb/KB_transaction.md#L112-L139).
 
@@ -2337,8 +2337,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Book, Vch No, Vch Date, Employee and Vch Desc over the Sr / TagNo / (TagLot / ItmLot) / ItCode / Counter / Design / Size / Sign / BagWt / Pcs / GrWt / LsWt / NetWt / Ght% / GhtWt / Touch / West% / Fine / Mrp / KrCode grid, the stone grid, totals; Save, Delete, Cancel and Print.
 - **Writes:** BAR_CAN_DATA, BAR_CAN_DETL, BAR_CAN_IDTL, MAIN_STOCK, LOT_DETL, DELETE_DATA, TEMP_BOOK_DATA, BAR_DETL, BOOK_DATA.
 - **Web:** `/txn/stock-adjust`; `GET /stock/stock-adjust`, `GET /stock/stock-adjust/source`, `GET /stock/stock-adjust/lots`, `GET /stock/stock-adjust/:vchNo`, `POST /stock/stock-adjust`, `PUT /stock/stock-adjust/:vchNo`, `DELETE /stock/stock-adjust/:vchNo`, `GET /stock/stock-adjust/:vchNo/print`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** A replayed loose-line save makes a second voucher (no idempotency key); desktop-runtime comparison remains.
-- **Owners:** X18, P07-02, G40, G41, N59, G234, N221.
+- **Remaining:** A replayed save request (same Idempotency-Key and body) answers the first voucher and posts nothing (N52); desktop-runtime comparison remains.
+- **Owners:** X18, P07-02, G40, G41, N59, G234, N221, G29, N52.
 - **Evidence:** [TR_TAG_CAN.cs:2514-5440](../../unified/src/csharp/DataCareNext/TR_TAG_CAN.cs#L2514-L5440), [Ac_Stock.cs:48-58](../../unified/src/csharp/DataCareNext/Ac_Stock.cs#L48-L58).
 
 ### Stone/Dm-Cf
@@ -2370,8 +2370,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header and a scan-driven tag grid with item, counter, weights, fine and karigar detail.
 - **Writes:** BAR_CAN_DATA, BAR_CAN_DETL, BAR_CAN_IDTL, BAR_DETL, BAR_IDTL, MAIN_STOCK, DM_DATA, DELETE_DATA.
 - **Web:** `/txn/tag-cancel`; `GET /stock/tag-cancel`, `POST /stock/tag-cancel`, `GET /stock/tag-cancel/:vchNo`, `PUT /stock/tag-cancel/:vchNo`, `DELETE /stock/tag-cancel/:vchNo`, `GET /stock/tag-cancel/source`, `GET /stock/tag-cancel/:vchNo/print`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** Implemented from source (N18, N210): TagCanBill and desktop refusals, exact-caption rights, a two-browser same-tag race, create/edit/delete fault rollback, and the Tag Stock create/edit/delete lifecycle have executable evidence. Open: no captured desktop BAR_CAN rows, durable lost-acknowledgement idempotency, and a desktop-runtime comparison.
-- **Owners:** G223, N18, N210, P07-03, X18, X19.
+- **Remaining:** Implemented from source (N18, N210): TagCanBill and desktop refusals, exact-caption rights, a two-browser same-tag race, create/edit/delete fault rollback, and the Tag Stock create/edit/delete lifecycle have executable evidence. A replayed save request (same Idempotency-Key and body) answers the first voucher instead of refusing the cancelled tag (N52). Open: no captured desktop BAR_CAN rows and a desktop-runtime comparison.
+- **Owners:** G223, N18, N210, P07-03, X18, X19, G29, N52.
 - **Evidence:** [KB_other.md:106-149](../../project-memory/video-research/_kb/KB_other.md#L106-L149).
 
 ### Tag Print

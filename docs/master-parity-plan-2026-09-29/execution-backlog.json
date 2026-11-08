@@ -3670,7 +3670,7 @@
     },
     {
       "id": "N52",
-      "status": "planned",
+      "status": "in-progress",
       "action": "Idempotent financial commands with a transactional command receipt",
       "parentLabels": "P01-05, X05",
       "startAfter": [
@@ -3681,7 +3681,19 @@
       "gapIds": "G29",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-09",
+      "evidence": [
+        "web/apps/api/src/modules/shared/idempotency.ts",
+        "web/apps/api/src/modules/shared/idempotencyContext.ts",
+        "web/packages/db/prisma/migrations/20261109090000_api_command_receipt/migration.sql",
+        "web/apps/api/test/idempotency.routes.db.test.ts",
+        "web/apps/api/test/idempotencyRoutePolicy.test.ts",
+        "web/apps/web/test/features/modules/stockAdjust.mjs",
+        "web/apps/web/test/features/modules/cashBank.mjs",
+        "web/apps/web/test/features/modules/tagCancel.mjs"
+      ],
+      "statusNote": "WP-04 first PR: the api_command_receipt mechanism (receipt claimed and completed inside the voucher's own withTxBudget transaction; same key and request replays byte for byte with Idempotency-Replayed; same key with another request is 409 idempotency-key-reused; D18 30-day retention with a per-tenant purge) guards Stock Adjust, Tag Cancel and the four Cash/Bank menus (POST /stock/stock-adjust, /stock/tag-cancel, /receipts, /receipts/multi, /payments, /payments/multi). Sequential and concurrent replays, tenant isolation, rollback and purge pass on forced RLS; browser T13 replay cases pass. The header stays optional for old clients; every other voucher create is queued in idempotencyRoutePolicy.test.ts."
     },
     {
       "id": "N53",
