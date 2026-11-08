@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { round } from '@datacare/core';
+import { round, toIsoDate } from '@datacare/core';
 import { ApiError, del, get, post, put } from '../lib/api';
 import { todayLocal } from '../lib/localDate';
 import { useBusinessScope } from './BusinessScope';
@@ -107,7 +107,7 @@ export default function ApprovalVoucherForm({
     setVoucherNo(view.voucherNo);
     setLoadedNo(view.voucherNo);
     setVersion(view.version);
-    setVchDate(String(view.vchDate || todayLocal()).slice(0, 10));
+    setVchDate(toIsoDate(view.vchDate || todayLocal()));
     setVchTime(String(view.vchTime || '').slice(0, 8));
     setPartyAc(String(view.partyAc || ''));
     setPartyName(String(view.partyName || ''));
