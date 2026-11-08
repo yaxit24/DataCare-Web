@@ -29,6 +29,10 @@ const GUARDED: Record<string, { page: string; sends: RegExp }> = {
     page: 'components/TagCancelForm.tsx',
     sends: /postCommand<[^>]*>\(\s*cfg\.endpoint,\s*body,\s*command\.key\s*\)/,
   },
+  'POST /stock/tag-cancel': {
+    page: 'components/TagCancelForm.tsx',
+    sends: /postCommand<[^>]*>\(\s*cfg\.endpoint,\s*body,\s*command\.key\s*\)/,
+  },
   'POST /receipts': {
     page: 'components/PaymentForm.tsx',
     sends: /postCommand<[^>]*>\(\s*ep,\s*singleBody,\s*command\.key\s*\)/,
@@ -57,7 +61,6 @@ const NOT_YET_GUARDED = [
   'POST /purchase-returns',
   'POST /wholesale-sales',
   'POST /fine-jv',
-  'POST /stock/tag-cancel',
   'POST /ac-opbl',
   'POST /bill-to-bill/settle',
   'POST /bullion-sales',

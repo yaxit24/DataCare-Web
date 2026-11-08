@@ -11,7 +11,8 @@ import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 /**
  * N52 (G29, D18; LITE-MASTER-PLAN WP-04): a replayed voucher create never posts a second voucher.
  *
- * Through the real Fastify routes on forced RLS, for Stock Adjust (TR_TAG_CAN on a STOCK ADJUST book) and the four
+ * Through the real Fastify routes on forced RLS, for Stock Adjust and Tag Cancel (TR_TAG_CAN on a STOCK ADJUST or
+ * TAG CANCEL book, MDI_FORM.cs:8585-8627) and the four
  * TR_CASH menus (Cash/Bank Received → POST /receipts, /receipts/multi; Cash/Bank Payment → POST /payments,
  * /payments/multi). Expected values are the contract, not the current output: the same key and request replay the
  * first answer byte for byte and write nothing; the same key with another request is 409 idempotency-key-reused;
@@ -27,6 +28,7 @@ const now = new Date();
 const startYear = now.getMonth() + 1 >= 4 ? now.getFullYear() : now.getFullYear() - 1;
 const YEAR = `${startYear}-${startYear + 1}`;
 const DAY = `${startYear}-06-15`;
+const TAG = 'IDT00001';
 
 const adjust = (netWt: number) => ({
   coBook: 'SAJ',
@@ -125,6 +127,7 @@ const lines = (coBook: string, amount: number) => ({
     );
     for (const [mainMenu, subMenu] of [
       ['Other', 'Stock Adjust'],
+      ['Other', 'Tag Cancel'],
       ['Transaction', 'Cash Received'],
       ['Transaction', 'Cash Payment'],
       ['Cash / Bank', 'Multi-Party Receipt'],
@@ -137,6 +140,40 @@ const lines = (coBook: string, amount: number) => ({
         mainMenu,
         subMenu,
       );
+  };
+
+  const tagBalance = async (tenant: string, tagNo: string) => {
+    const [row] = await query<Array<{ bal: number }>>(
+      `SELECT coalesce(sum(CASE WHEN "ITM_SIGN"='+' THEN 1 ELSE -1 END),0)::int AS bal FROM "MAIN_STOCK"
+        WHERE tenant_id=$1 AND "TAG_NO"=$2`,
+      tenant,
+      tagNo,
+    );
+    return Number(row?.bal ?? 0);
+  };
+  /** A purchased tag in stock (BAR_DETL + its MAIN_STOCK in-row), as stockAdjust.routes.db.test.ts seeds it. */
+  const seedTag = async (tenant: string, tagNo: string) => {
+    await exec(
+      `INSERT INTO "BAR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","OLD_SRNO",
+         "VCH_DATE","BOOK_NAME","INOUT_TYPE","TAG_NO","VCH_SRNO","IT_CODE","ITM_PCS","ITM_GWT","ITM_NWT",
+         "ITM_TOUCH","ITM_WEST_PRC","ITM_FINE","KR_NET_WT","KR_TOUCH","KR_FINE","TBL_CODE","KR_NAME",
+         "PR_CODE","IT_TYPE","EMP_ISU")
+       VALUES ($1,'01','01',$2,'PR','00001',1,1,$3::date,'PURCHASE','I',$4,100312000021,'IDL22',1,8.5,8.2,
+               92,5,7.954,8.2,92,7.544,'001','KJ','ID','G','N')`,
+      tenant,
+      YEAR,
+      DAY,
+      tagNo,
+    );
+    await exec(
+      `INSERT INTO "MAIN_STOCK"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","ISR_NO",
+         "VCH_DATE","IT_CODE","TAG_NO","VCH_SRNO","TR_TYPE","ITM_SIGN","ITM_QTY","ITM_PCS","ITM_GWT","ITM_NWT")
+       VALUES ($1,'01','01',$2,'PR','00001',1,1,$3::date,'IDL22',$4,100312000021,'P','+',1,1,8.5,8.2)`,
+      tenant,
+      YEAR,
+      DAY,
+      tagNo,
+    );
   };
 
   beforeAll(async () => {
@@ -292,6 +329,26 @@ const lines = (coBook: string, amount: number) => ({
         SELECT tenant_id FROM "api_command_receipt" WHERE idempotency_key = ${key}`,
     );
     expect(visible).toEqual([{ tenant_id: TENANT }]);
+  });
+
+  it('Tag Cancel: a replayed cancel answers the first voucher instead of refusing the already-cancelled tag', async () => {
+    await seedTag(TENANT, TAG);
+    const key = 'b6f1a0de-5d0c-4a59-9a43-000000000008';
+    const body = { coBook: 'TGC', vchDate: DAY, lines: [{ tagNo: TAG }] };
+    const before = await count(TENANT, 'BAR_CAN_DATA', 'TGC');
+    const first = await post(TENANT, '/stock/tag-cancel', body, key);
+    expect(first.statusCode, first.body).toBe(201);
+    expect(await tagBalance(TENANT, TAG)).toBe(0);
+    const replay = await post(TENANT, '/stock/tag-cancel', body, key);
+    expect(replay.statusCode, replay.body).toBe(201);
+    expect(replay.body).toBe(first.body);
+    expect(replay.headers['idempotency-replayed']).toBe('true');
+    expect(await count(TENANT, 'BAR_CAN_DATA', 'TGC')).toBe(before + 1);
+    expect(await tagBalance(TENANT, TAG)).toBe(0);
+    // Without the key the second save is the desktop's refusal: the tag is no longer in stock.
+    const unkeyed = await post(TENANT, '/stock/tag-cancel', body);
+    expect(unkeyed.statusCode, unkeyed.body).toBe(400);
+    expect(await count(TENANT, 'BAR_CAN_DATA', 'TGC')).toBe(before + 1);
   });
 
   it('without the header a create behaves as before (an older page is not broken)', async () => {
