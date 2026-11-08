@@ -26,10 +26,10 @@ import { diffTenant, snapshotTenant } from './support/tenantSnapshot.js';
  *   fixes the header, item/stone columns, totals, Vch Desc and signature footer asserted below.
  */
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
-const tenantId = 'n211-approval-routes';
-const sentinelTenant = 'n211-approval-sentinel';
+const tenantId = 'n229-approval-routes';
+const sentinelTenant = 'n229-approval-sentinel';
 const PASSWORD = 'N229-Approval-Test!2026';
-const SECRET = 'n211-approval-route-signing-secret-over-thirty-two';
+const SECRET = 'n229-approval-route-signing-secret-over-thirty-two';
 const ADMIN = 'apadmin';
 const VIEWER = 'apviewer';
 const RETURN_ONLY = 'aprreturn';

@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { PrismaClient, withTenant } from '@datacare/db';
+import { seedCompany } from '../src/modules/ops/seedCompany.js';
 import { approvalReport } from '../src/modules/reports/reportFamilyReports.js';
 import { deleteTourReturn, tourIssue, tourReturn } from '../src/modules/tour/tour.js';
 
@@ -11,10 +12,11 @@ import { deleteTourReturn, tourIssue, tourReturn } from '../src/modules/tour/tou
  * for every line. The desktop only ever writes 'N' and 'Y' (TR_APR_ISU.cs:6414 sets 'Y' on a return,
  * :6666 sets 'N' when it is deleted; TR_SALE.cs:16113 sets 'Y' on a sale).
  *
- * The web's Approval Rtn screen is served by the Tour return writer, which closes a returned issue line with
- * 'R' (tour.ts) instead of 'Y'. A report that counts only 'Y' as In would show a returned approval as still
- * outstanding in In Out while the Pending mode, which lists only 'N', no longer shows it. These tests drive the
- * real writers and then both report modes.
+ * The web's Approval Rtn screen is served by the approval return writer (modules/tour/approvalVoucher.ts). Before
+ * N229 it closed a returned issue line with 'R' instead of 'Y'; the report counts both as In, so a returned approval
+ * must never stay outstanding in In Out while the Pending mode, which lists only 'N', no longer shows it. These tests
+ * drive the real writers on the desktop APR ISU / APR RTN books, with tagged stock in BAR_DETL, and then both report
+ * modes.
  */
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const databaseDescribe = RUN ? describe : describe.skip;
@@ -22,17 +24,24 @@ const databaseDescribe = RUN ? describe : describe.skip;
 const TENANT = 'apr-inout-web-return'; // tenant_id is varchar(24)
 const CO = '01';
 const LC = '01';
-const YEAR = '2024-2025';
-const DAY = '2024-06-10';
+const TAG_SRNO = 772200000;
+// The approval writer refuses a date outside the session year (TR_APR_ISU.cs fiscal guard); seedCompany provisions
+// the current fiscal year, so the fixture uses it.
+const now = new Date();
+const startYear = now.getMonth() + 1 >= 4 ? now.getFullYear() : now.getFullYear() - 1;
+const YEAR = `${startYear}-${startYear + 1}`;
+const DAY = `${startYear}-06-10`;
 
 const scope = { tenantId: TENANT, coCode: CO, lcCode: LC, coYear: YEAR, coBook: 'TUR' };
+// Approval Rtn opens its own APR RTN book and names the issue's book as the source (TR_APR_ISU.cs:4741-4835).
+const returnScope = { ...scope, coBook: 'TRR' };
 const reportScope = {
   tenantId: TENANT,
   coCode: CO,
   lcCode: LC,
   coYear: YEAR,
-  fromDate: '2024-06-01',
-  toDate: '2024-06-30',
+  fromDate: `${startYear}-06-01`,
+  toDate: `${startYear}-06-30`,
 };
 
 databaseDescribe('Approval In Out reconciles web-written approvals with the Pending mode', () => {
@@ -67,17 +76,18 @@ databaseDescribe('Approval In Out reconciles web-written approvals with the Pend
 
   beforeEach(async () => {
     await wipe();
+    await seedCompany(runtime, TENANT, CO);
     await exec(
-      `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","LOCK_DATE") VALUES ($1,$2,NULL)`,
-      TENANT,
-      CO,
-    );
-    await exec(
-      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_CITY","AC_AREA","AC_STATE")
-       VALUES ($1,$2,$3,'C001','Surat Customer','Surat','Ring Road','GJ')`,
+      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_CITY","AC_AREA","AC_STATE","AC_GR")
+       VALUES ($1,$2,$3,'C001','Surat Customer','Surat','Ring Road','GJ','10')`,
       TENANT,
       CO,
       LC,
+    );
+    await exec(
+      `INSERT INTO "EMP_MAST"(tenant_id,"CO_CODE","EMP_CODE","EMP_NAME") VALUES ($1,$2,'E01','Approval Employee')`,
+      TENANT,
+      CO,
     );
     await exec(
       `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","PR_CODE","GR_CODE")
@@ -86,21 +96,47 @@ databaseDescribe('Approval In Out reconciles web-written approvals with the Pend
       TENANT,
       CO,
     );
-    await exec(
-      `INSERT INTO "PRODUCT_MAST"(tenant_id,"CO_CODE","PR_CODE","PR_NAME")
-       VALUES ($1,$2,'P1','Gold Product'),($1,$2,'P2','Silver Product')`,
-      TENANT,
-      CO,
-    );
-    // seedCompany.ts: the web's approval books are TUR / TRR, named APPROVAL ISSUE / APPROVAL RETURN.
-    await exec(
-      `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","MAIN_BOOK","DATA_TYPE")
-       VALUES ($1,$2,$3,'TUR','Approval Issue','APPROVAL ISSUE','A'),
-              ($1,$2,$3,'TRR','Approval Return','APPROVAL RETURN','A')`,
-      TENANT,
-      CO,
-      LC,
-    );
+    // The two tags are in stock (BAR_DETL + MAIN_STOCK), as an Approval Isu needs (TR_APR_ISU.cs:5044-5137).
+    for (const [sr, tag, item, pcs, gwt, nwt] of [
+      [1, 'TAGA', 'GOLD', 3, 12, 11],
+      [2, 'TAGB', 'SILV', 2, 20, 19],
+    ] as const) {
+      await exec(
+        `INSERT INTO "BAR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","OLD_SRNO",
+           "VCH_DATE","BOOK_NAME","INOUT_TYPE","TAG_NO","VCH_SRNO","IT_CODE","ITM_PCS","ITM_GWT","ITM_NWT",
+           "ITM_TOUCH","APR_ISU","APP_TRFR")
+         VALUES ($1,$2,$3,$4,'TOP','09001',$5,$5,$6::date,'TAG OPENING','I',$7,$8,$9,$10,$11,$12,91.6,'N','N')`,
+        TENANT,
+        CO,
+        LC,
+        YEAR,
+        sr,
+        DAY,
+        tag,
+        TAG_SRNO + sr,
+        item,
+        pcs,
+        gwt,
+        nwt,
+      );
+      await exec(
+        `INSERT INTO "MAIN_STOCK"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","ISR_NO",
+           "VCH_DATE","IT_CODE","TAG_NO","VCH_SRNO","TR_TYPE","ITM_SIGN","ITM_QTY","ITM_PCS","ITM_GWT","ITM_NWT")
+         VALUES ($1,$2,$3,$4,'TOP','09001',$5,1,$6::date,$7,$8,$9,'P','+',$10,$10,$11,$12)`,
+        TENANT,
+        CO,
+        LC,
+        YEAR,
+        sr,
+        DAY,
+        item,
+        tag,
+        TAG_SRNO + sr,
+        pcs,
+        gwt,
+        nwt,
+      );
+    }
   });
 
   const issue = () =>
@@ -111,8 +147,24 @@ databaseDescribe('Approval In Out reconciles web-written approvals with the Pend
       empCode: 'E01',
       mainUser: 'approver',
       lines: [
-        { itCode: 'GOLD', tagNo: 'TAGA', pcs: 3, grossWt: 12, netWt: 11, touch: 91.6 },
-        { itCode: 'SILV', tagNo: 'TAGB', pcs: 2, grossWt: 20, netWt: 19, touch: 80 },
+        {
+          itCode: 'GOLD',
+          tagNo: 'TAGA',
+          vchSrno: TAG_SRNO + 1,
+          pcs: 3,
+          grossWt: 12,
+          netWt: 11,
+          touch: 91.6,
+        },
+        {
+          itCode: 'SILV',
+          tagNo: 'TAGB',
+          vchSrno: TAG_SRNO + 2,
+          pcs: 2,
+          grossWt: 20,
+          netWt: 19,
+          touch: 80,
+        },
       ],
     });
 
@@ -146,13 +198,24 @@ databaseDescribe('Approval In Out reconciles web-written approvals with the Pend
   it('counts a line returned through the web Approval Rtn writer as In, and as no longer Pending', async () => {
     const created = await issue();
     await tourReturn(runtime, {
-      scope,
+      scope: returnScope,
       origVchNo: created.vchNo,
+      origBook: 'TUR',
       vchDate: DAY,
       salesmanAc: 'C001',
       empCode: 'E01',
       mainUser: 'approver',
-      lines: [{ origSrNo: 1, itCode: 'GOLD', tagNo: 'TAGA', pcs: 3, grossWt: 12, netWt: 11 }],
+      lines: [
+        {
+          origSrNo: 1,
+          itCode: 'GOLD',
+          tagNo: 'TAGA',
+          vchSrno: TAG_SRNO + 1,
+          pcs: 3,
+          grossWt: 12,
+          netWt: 11,
+        },
+      ],
     });
 
     const view = await modes();
@@ -171,15 +234,30 @@ databaseDescribe('Approval In Out reconciles web-written approvals with the Pend
   it('reopens the line in both modes when the return voucher is deleted', async () => {
     const created = await issue();
     const returned = await tourReturn(runtime, {
-      scope,
+      scope: returnScope,
       origVchNo: created.vchNo,
+      origBook: 'TUR',
       vchDate: DAY,
       salesmanAc: 'C001',
       empCode: 'E01',
       mainUser: 'approver',
-      lines: [{ origSrNo: 1, itCode: 'GOLD', tagNo: 'TAGA', pcs: 3, grossWt: 12, netWt: 11 }],
+      lines: [
+        {
+          origSrNo: 1,
+          itCode: 'GOLD',
+          tagNo: 'TAGA',
+          vchSrno: TAG_SRNO + 1,
+          pcs: 3,
+          grossWt: 12,
+          netWt: 11,
+        },
+      ],
     });
-    await deleteTourReturn(runtime, { scope, vchNo: returned.vchNo });
+    await deleteTourReturn(runtime, {
+      scope: returnScope,
+      vchNo: returned.vchNo,
+      expectedVersion: returned.version,
+    });
 
     const view = await modes();
     expect(view.inout).toEqual([
