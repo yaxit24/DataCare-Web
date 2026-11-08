@@ -9,8 +9,8 @@
 export const MAIN_BOOK_FORMS: Readonly<Record<string, readonly string[]>> = {
   'AMT IN': ['Cash / Bank/Location Amount Transfer'],
   'AMT OUT': ['Cash / Bank/Location Amount Transfer'],
-  'APPROVAL ISSUE': ['Sales/Tour / Approval Sale'],
-  'APPROVAL RETURN': ['Sales/Approval Return'],
+  'APR ISU': ['Sales/Tour / Approval Sale'],
+  'APR RTN': ['Sales/Approval Return'],
   'BANK PAY': ['Cash / Bank/Payment'],
   'BANK REC': ['Cash / Bank/Receipt'],
   'BUL SALE': ['Sales/Bul Sales', 'Sales/Bullion Booking'],

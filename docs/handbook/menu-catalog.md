@@ -813,8 +813,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 |---|---|---|---|---|---|
 | Amt In | `TR_LOCT_AMT` | `/txn/location-amount` | `C R E D - -` | PARTIAL | P1-edition |
 | Amt Out | `TR_LOCT_AMT` | `/txn/location-amount` | `C R E D - -` | PARTIAL | P1-edition |
-| Approval Isu | `TR_APR_ISU` | `/txn/tour` | `C - - - - -` | PARTIAL | P1-core |
-| Approval Rtn | `TR_APR_ISU` | `/txn/tour-return` | `C - - - - -` | PARTIAL | P1-core |
+| Approval Isu | `TR_APR_ISU` | `/txn/tour` | `C R E D P -` | PARTIAL | P1-core |
+| Approval Rtn | `TR_APR_ISU` | `/txn/tour-return` | `C R E D P -` | PARTIAL | P1-core |
 | Bill Wise Rec | `TR_BILL_TO` | `/txn/bill-to-bill` | `C - - - - -` | PARTIAL | P1-core |
 | Card Rec | `TR_CARD_REC` | — | `- - - - - -` | MISSING | P1-core |
 | Consi Isu | `TR_APR_ISU` | `/txn/tour` | `C - - - - -` | PARTIAL | P1-edition |
@@ -859,23 +859,23 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `TR_APR_ISU` — CurBookHelp('APR ISU') ([MDI_FORM.cs:8300-8305](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8300-L8305)).
 - **Does:** Places tagged goods with a party on approval while the business keeps ownership.
-- **Looks:** Voucher/party/employee header, issue reference, item and stone grids, image panel, totals and print.
+- **Looks:** Desktop: voucher/party/employee header, item and stone grids, image panel, totals and print. Web: the persisted header, full audited item fields, hydrated stone grid, totals and print; image id is stored but no image panel is rendered.
 - **Writes:** APR_DATA, APR_DETL, APR_IDTL, MAIN_STOCK, BAR_DETL, DM_DATA.
-- **Web:** `/txn/tour`; `POST /tour/issue`, `DELETE /tour/:vchNo`. Can: create.
-- **Remaining:** Create-only shared Tour page; APR ISU book enforcement, reopen/edit/delete/print and the partial sale/return custody chain remain.
-- **Owners:** N22, X17, P05-05, N62, X07, G225, N212.
-- **Evidence:** [KB_transaction.md:331-357](../../project-memory/video-research/_kb/KB_transaction.md#L331-L357).
+- **Web:** `/txn/tour`; `POST /tour/issue`, `GET /tour/:vchNo`, `PUT /tour/:vchNo`, `DELETE /tour/:vchNo`, `GET /tour/:vchNo/print`. Can: create, reopen, edit, delete, print.
+- **Remaining:** Verified by DB/HTTP and browser-unit/feature cases: APR ISU identity and audited custody lifecycle; return creation and every return mutation require the exact stable source and item-scoped BAR instance; issue/return changes serialize; missing line and stone IDs append above retained maxima and invalid explicit IDs are refused; LDisc derives DISC_AMT and NET_AMT is one decimal; stone codes are trimmed and ITEM_MAST checked. /sales uses OLD_SRNO, exact party/item/tag/instance/quantity matching, the locked BAR row and atomic consume/release; tagged mismatch is no-write and tagged success plus a gapped source are DB-tested. The hidden /tour/:vchNo/bill route remains a no-write 409. Open: the Sales Invoice screen still has no Apr No selector/import control, so successful tagged approval consumption and sale-delete reopening are DB-tested but not operator-driven; Wh Sales approval continuation; desktop licence-expiry state; the approval image panel and APR_IMG_PRINT/AprBillImg branch; idempotent create and lost-acknowledgement recovery; injected mid-write rollback cases; repeated Crystal page headers, footers and page numbers; an independent original-Windows runtime comparison; operator sign-off and parent acceptance.
+- **Owners:** N22, X17, P05-05, N62, X07, G225, N212, G242, N229.
+- **Evidence:** [TR_APR_ISU.cs:5788-6772](../../unified/src/csharp/DataCareNext/TR_APR_ISU.cs#L5788-L6772).
 
 ### Approval Rtn
 
 - **Desktop:** `TR_APR_ISU` — CurBookHelp('APR RTN') ([MDI_FORM.cs:8312-8317](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8312-L8317)).
 - **Does:** Returns unsold approval goods, restores availability and closes the issued quantities.
-- **Looks:** Original-issue selector, party/date header, returned item grid, images and fine totals.
+- **Looks:** Desktop: source selector, party/employee/date header, returned item and stone grids, image panel, totals and print. Web: source selector, persisted names/time, audited read-only item/stone data, totals and print; no image panel.
 - **Writes:** APR_DATA, APR_DETL, APR_IDTL, MAIN_STOCK, BAR_DETL, DM_DATA.
-- **Web:** `/txn/tour-return`; `GET /tour/:vchNo/lines`, `POST /tour/return`, `DELETE /tour/return/:vchNo`. Can: create.
-- **Remaining:** Source lines load, but the saved-return lifecycle, the APR RTN book, partial billing, print and dependency reversal remain.
-- **Owners:** N22, X17, N59, N62, X07, G225, N212.
-- **Evidence:** [KB_transaction.md:331-357](../../project-memory/video-research/_kb/KB_transaction.md#L331-L357).
+- **Web:** `/txn/tour-return`; `GET /tour/:vchNo/lines`, `POST /tour/return`, `GET /tour/return/:vchNo`, `PUT /tour/return/:vchNo`, `DELETE /tour/return/:vchNo`, `GET /tour/return/:vchNo/print`. Can: create, reopen, edit, delete, print.
+- **Remaining:** Verified by DB/HTTP and browser-unit/feature cases: APR RTN identity, exact requested OLD_SRNO source matching and exact TAG_NO + VCH_SRNO + IT_CODE BAR locking before create; unchanged PUT validates before no-op; return/source operations serialize and checked reversals fail closed. Return OLD_SRNO remains separate from source ISU_SRNO; line and stone IDs append above retained maxima; invalid explicit IDs, whitespace/unknown stones and duplicate sources are 400/no-write. Read-only hydration, partial closure, I/+ stock/DM effects, audit, rights and AprBill output remain covered. Open: the Sales Invoice screen still has no Apr No selector/import control, so successful tagged approval consumption and sale-delete reopening are DB-tested but not operator-driven; Wh Sales approval continuation; desktop licence-expiry state; the approval image panel and APR_IMG_PRINT/AprBillImg branch; idempotent create and lost-acknowledgement recovery; injected mid-write rollback cases; repeated Crystal page headers, footers and page numbers; an independent original-Windows runtime comparison; operator sign-off and parent acceptance.
+- **Owners:** N22, X17, N59, N62, X07, G225, N212, G242, N229.
+- **Evidence:** [TR_APR_ISU.cs:5788-6772](../../unified/src/csharp/DataCareNext/TR_APR_ISU.cs#L5788-L6772).
 
 ### Bill Wise Rec
 

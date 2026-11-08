@@ -31,18 +31,114 @@ databaseDescribe('database-backed approval sub-detail', () => {
   let runtime: PrismaClient;
 
   const cleanup = async (): Promise<void> => {
-    for (const table of ['APR_IDTL', 'APR_DETL', 'APR_DATA', 'MAIN_STOCK', 'CO_SET']) {
+    for (const table of [
+      'APR_IDTL',
+      'APR_DETL',
+      'APR_DATA',
+      'MAIN_STOCK',
+      'BAR_DETL',
+      'ITEM_MAST',
+      'EMP_MAST',
+      'AC_MAST',
+      'BOOK_DETL',
+      'BOOK_DATA',
+      'YEAR_MAST',
+      'CO_MAST',
+      'CO_SET',
+    ]) {
       await owner.$executeRawUnsafe(`DELETE FROM "${table}" WHERE tenant_id=$1`, TENANT);
     }
   };
 
-  /** Period-lock configuration must exist: the posting layer fails closed without it. */
+  /**
+   * TR_APR_ISU.cs:6166-6169 and Ac_Stock.cs:60-72 take VCH_TYPE/BOOK_NAME/direction from the
+   * configured APR ISU book. Tagged lines retain the BAR_DETL VCH_SRNO, not the grid row number.
+   */
   const seed = async (): Promise<void> => {
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "CO_MAST"(tenant_id,"CO_CODE","LC_CODE") VALUES ($1,$2,$3)`,
+      TENANT,
+      CO,
+      LC,
+    );
     await owner.$executeRawUnsafe(
       `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","LOCK_DATE") VALUES ($1,$2,NULL)`,
       TENANT,
       CO,
     );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE")
+       VALUES ($1,$2,$3,'2024-04-01','2025-03-31')`,
+      TENANT,
+      CO,
+      YEAR,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME",
+         "MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","BOOK_TBL_DETL")
+       VALUES ($1,$2,$3,$4,'Approval Test','AISU','APR ISU','O','Y','APR_DATA','APR_DETL')`,
+      TENANT,
+      CO,
+      LC,
+      BOOK,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","MAIN_BOOK","BOOK_INOUT","AC_CODE")
+       VALUES ($1,$2,$3,$4,1,'APR ISU','O','SALES1')`,
+      TENANT,
+      CO,
+      LC,
+      BOOK,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GR")
+       VALUES ($1,$2,$3,'SALES1','Approval Party','10')`,
+      TENANT,
+      CO,
+      LC,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "EMP_MAST"(tenant_id,"CO_CODE","EMP_CODE","EMP_NAME") VALUES ($1,$2,'E01','Employee')`,
+      TENANT,
+      CO,
+    );
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE")
+       VALUES ($1,$2,'GOLD1','Gold','G'),($1,$2,'DIA1','Diamond 1','D'),($1,$2,'DIA2','Diamond 2','D')`,
+      TENANT,
+      CO,
+    );
+    for (const [tag, serial] of [
+      ['TOUR-TAG-1', 881001],
+      ['APR-TAG-1', 881002],
+    ] as const) {
+      await owner.$executeRawUnsafe(
+        `INSERT INTO "BAR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO",
+           "OLD_SRNO","VCH_DATE","TAG_NO","VCH_SRNO","IT_CODE","ITM_PCS","ITM_GWT","ITM_NWT","ITM_TOUCH")
+         VALUES ($1,$2,$3,$4,'TOP','09001',$5,$5,$6::date,$7,$8,'GOLD1',1,9,8.5,91.6)`,
+        TENANT,
+        CO,
+        LC,
+        YEAR,
+        serial - 881000,
+        DAY,
+        tag,
+        serial,
+      );
+      await owner.$executeRawUnsafe(
+        `INSERT INTO "MAIN_STOCK"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","ISR_NO",
+           "VCH_DATE","IT_CODE","TAG_NO","VCH_SRNO","ITM_SIGN")
+         VALUES ($1,$2,$3,$4,'TOP','09001',$5,1,$6::date,'GOLD1',$7,$8,'+')`,
+        TENANT,
+        CO,
+        LC,
+        YEAR,
+        serial - 881000,
+        DAY,
+        tag,
+        serial,
+      );
+    }
   };
 
   beforeAll(async () => {
@@ -68,19 +164,21 @@ databaseDescribe('database-backed approval sub-detail', () => {
     const created = await tourIssue(runtime, {
       scope,
       vchDate: DAY,
-      salesmanAc: 'SALES1',
+      partyAc: 'SALES1',
       empCode: 'E01',
       mainUser: 'tour-user',
       lines: [
         {
           itCode: 'GOLD1',
           tagNo: 'TOUR-TAG-1',
+          vchSrno: 881001,
           pcs: 1,
           grossWt: 8,
           netWt: 7.5,
           touch: 91.6,
           stones: [
             {
+              isrNo: 1,
               itCode: 'DIA1',
               dmCode: 'DM1',
               dmName: 'Princess Cut',
@@ -141,15 +239,19 @@ databaseDescribe('database-backed approval sub-detail', () => {
     expect(String(first.IT_TYPE).trim()).toBe('D');
     // Header-derived columns: book/scope, never the request body.
     expect(String(first.AC_CODE).trim()).toBe('SALES1');
-    expect(String(first.VCH_TYPE).trim()).toBe('TOUR');
+    expect(String(first.VCH_TYPE).trim()).toBe('AISU');
     expect(String(first.INOUT_TYPE).trim()).toBe('O');
     expect(String(first.ENTRY_TYPE).trim()).toBe('A');
-    expect(String(first.BOOK_NAME).trim()).toBe('EMP ISU');
+    expect(String(first.BOOK_NAME).trim()).toBe('APR ISU');
     expect(String(first.TAG_NO).trim()).toBe('TOUR-TAG-1');
     expect(String(first.MAIN_USER).trim()).toBe('tour-user');
     expect(rows[1]!.isr_no).toBe(3);
 
-    await deleteTour(runtime, { scope, vchNo: created.vchNo });
+    await deleteTour(runtime, {
+      scope,
+      vchNo: created.vchNo,
+      expectedVersion: created.version,
+    });
     const after = (await owner.$queryRawUnsafe(
       `SELECT count(*)::int n FROM "APR_IDTL" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
       TENANT,
@@ -162,7 +264,7 @@ databaseDescribe('database-backed approval sub-detail', () => {
     const created = await tourIssue(runtime, {
       scope,
       vchDate: DAY,
-      salesmanAc: 'SALES1',
+      partyAc: 'SALES1',
       empCode: 'E01',
       lines: [{ itCode: 'GOLD1', pcs: 1, grossWt: 5, netWt: 5, touch: 91.6 }],
     });
@@ -180,13 +282,14 @@ databaseDescribe('database-backed approval sub-detail', () => {
     const created = await tourIssue(runtime, {
       scope,
       vchDate: DAY,
-      salesmanAc: 'SALES1',
+      partyAc: 'SALES1',
       empCode: 'E01',
       mainUser: 'tour-user',
       lines: [
         {
           itCode: 'GOLD1',
           tagNo: 'APR-TAG-1',
+          vchSrno: 881002,
           pcs: 1,
           grossWt: 9,
           netWt: 8.5,

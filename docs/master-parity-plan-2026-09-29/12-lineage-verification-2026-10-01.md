@@ -254,6 +254,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G239 | Medium | Esc did not close Tag Print when no control had the focus (after a click on the page background, or while a running print had disabled the focused Print button), so the keyboard case that presses Esc after Print failed intermittently in CI | `unified/src/csharp/DataCareNext/UT_TAG_PRINT.cs:1154,1805,5035-5036,5101-5109` | `web/apps/web/app/(app)/txn/tag-print/page.tsx`; `web/apps/web/test/features/modules/tagPrint.mjs` | The desktop form sets KeyPreview (`:1805`) and subscribes its own KeyDown (`:1154`), so TR_TAG_CAN_KeyDown (`:5101-5105`) sees Esc whichever control has the focus. OldValTot and NewValTot are only ever assigned 0.0 (`:5035-5036`), so they are equal and Esc closes the form (`:5107-5109`). The web handled Esc only in a React handler on the screen's wrapper, so a key aimed at the page body, which is where the focus is after a click on the background or after a print disables the focused button, never reached it. `tag-print.keyboard.desktop-keys` (Esc right after Print) failed in 7 of the 24 CI runs between 06:30 and 09:01 UTC on 2 November that executed it (on main after #210 and #213 and on five branches) and again on main after #209, after #212 had changed Esc from `router.back()` to `router.replace('/dashboard')`. Replaying the sequence Book, Vch No, Print with Enter, Esc eight times under 8x CPU throttling, the focus was on the body before Esc in 6 of 8 runs; without this change 2 of the 8 timed out, with it none did. A document listener now takes Esc when its target contains the screen (the body or a page container); a key aimed inside the screen stays with the wrapper's handler and one aimed at the header or sidebar controls stays theirs. Not closed here: the Party, Item, Item Group, Product, Tax, Address, Employee, Auto Item and Item Opening screens also handle Esc only in a wrapper handler and have the same gap when their focus is on the body. | N225 |
 | G240 | High | The printed tag label showed web-only text where the desktop label files print `G.` and `N.` weights at three decimals and a `MRP:` / `LP:` / `LF:` labour line | `extraction_output/rpt_xml/QrPrint10.xml`; `extraction_output/rpt_xml/BarPrint10.xml`; `extraction_output/rpt_xml/BarPrint13.xml`; `extraction_output/rpt_xml/GhatTagPrnt.xml`; `unified/src/csharp/DataCareNext/UT_TAG_PRINT.cs:4930` | `web/apps/api/src/modules/stock/tagPrint.ts`; `web/apps/api/src/modules/stock/tagPrintScreen.ts` | UT_TAG_PRINT lists the label files of PRINT_MAST type TAG (`:4930`) and each reads `SELECT * FROM TAG_PRINT_DATA`. QrPrint10, BarPrint10, BarPrint13 and GhatTagPrnt use the same data formulas: `ItmWt` = `'G.' + totext(ITM_GWT, 3)`, `OtherAmt` = `'N.' + totext(ITM_NWT, 3)` and `Labour` = `MRP: ` + totext(ITM_MRP, '0') when MRP is not 0, else `LP: ` + totext(LBR_RATE, '0') when the rate is not 0, else `LF: ` + totext(LBR_AMT, '0') when the amount is not 0, else nothing (the formula has no final else). The desktop preview of a printed label in the tutorial video reads `G.14.300`, `N.14.300`, `LP: 600` (keyframe `project-memory/video-research/other/VzkTOy9vGL0/keyframes/kf_004.jpg`). The web label printed `Net 14.3 g · Gr 14.3 g · 91.6%` and `MRP ₹55,000` only: no prefixes, no fixed decimals, Indian grouping and a rupee sign, and no `LP:` or `LF:` fallback, so a tag priced by labour rate printed no price line. The earlier note that the Crystal label files are not in the repository was wrong: the four files are tracked as Git LFS objects and their XML is extracted. Closed here: the weight and labour lines of the shared formulas, through `decimalCellText`; the web's hallmark id line is kept as a deliberate addition: none of QrPrint10, BarPrint10, BarPrint13, GhatTagPrnt or ItmLotPrint places an HM_ID field in its own sections, but QrPrint10, BarPrint10 and GhatTagPrnt embed `SubTagPrint.rpt`, which is not extracted, so what that sub-report prints is unknown. Not closed: the PRINT_MAST file choice (the web has one sheet), the shop name, the purity group and the karigar name that the templates place at different positions, the QR picture, the `SubTagPrint.rpt` sub-report (not extracted), `BarPrint13`'s `L.` less-weight line, and the layout sizes, none of which are in the shared formulas. | N225 |
 | G241 | Medium | Two web-only timing defects made `main` CI fail on 2 November: on Address Master a late timer moved the cursor from the name being typed to the code box, and on Tag Cancel a late next-number answer replaced a voucher number the operator had typed | `unified/src/csharp/DataCareNext/MS_ADD_MAST.cs:3721-3738`; `unified/src/csharp/DataCareNext/TR_TAG_CAN.cs:4702-4880` | `web/apps/web/app/(app)/masters/addresses/page.tsx`; `web/apps/web/components/TagCancelForm.tsx`; `web/apps/web/test/features/modules/addressMaster.mjs`; `web/apps/web/test/features/modules/tagCancel.mjs` | The desktop has no equivalent: a WinForms handler runs to the end before the next key, so Ctrl+E unlocks the code box and puts the cursor in it in one step (`MS_ADD_MAST.cs:3721-3738`) and the Vch No box keeps what the operator typed until Enter opens it (`TR_TAG_CAN.cs:4702-4880`). The web split each into two steps. Address: Ctrl+E set `codeLocked` false and focused the code box from a `setTimeout(..., 0)`; a test (or a fast operator) that saw the box editable and began typing in Ac Name was then robbed of the cursor when the timer fired, so `address-master.field.typing-and-dates` failed on main with `E2` in Ac Name and `019902E` in Ac Code (CI artifact of run 41438044967). Tag Cancel: entering the screen read the book's list and then set the Vch No box to the next number unconditionally, so a number typed before that answer arrived was replaced and Enter opened `00014` instead of `00013` (`voucher not found: 00014`, run 41437285568, `tag-cancel.journey.tag-stock-create-edit-delete`). The Address page now focuses the code box in a layout effect, in the commit that unlocks it; the Tag Cancel form fills the next number only when the operator has not typed or opened a voucher since the read began. New cases `address-master.field.ctrl-e-focuses-code-at-once` (a MutationObserver records whether the box already has the cursor when it becomes editable) and `tag-cancel.reopen.late-list-keeps-typed-voucher-number` (the list response is held, a number is typed, the response is released) were red on the old code and pass now. Stock Adjust and Tag Transfer share the Tag Cancel form, so the same held-list case was added to `web/apps/web/test/features/modules/stockAdjust.mjs` (`stock-adjust.reopen.late-list-keeps-typed-voucher-number`, red on the old form, module 20 of 20); Tag Transfer has no browser module. | N217, N210 |
+| G242 | High | Approval Isu/Approval Rtn used web-only book families and Tour row stamps and lacked the desktop lifecycle, guards, delete refusals, audit and print | `unified/src/csharp/DataCareNext/MDI_FORM.cs:8300-8317`; `unified/src/csharp/DataCareNext/TR_APR_ISU.cs:3414-3421,3936-3942,4741-4835,5788-6772`; `unified/src/csharp/DataCareNext/TR_SALE.cs:20130-20169,20399-20411`; `unified/src/csharp/DataCareNext/Ac_Stock.cs:60-85,887-892` | `web/apps/api/src/modules/tour/approvalVoucher.ts`; `web/apps/api/src/modules/tour/approvalRows.ts`; `web/apps/api/src/modules/sales/approvalSaleReferences.ts`; `web/apps/web/components/ApprovalGrid.tsx`; `web/apps/api/test/approvalLifecycle.routes.db.test.ts` | Implemented-unverified in N229. Tests prove exact source and item-scoped BAR validation before return creation and before an unchanged PUT no-op; OLD_SRNO-keyed, exact tag/instance/item/quantity `/sales` locking with tagged mismatch no-write, tagged consume/release and a gapped source; max-plus-one OLD_SRNO/ISR_NO allocation with duplicate/zero/fraction refusal; one-decimal NET_AMT with LDisc-derived DISC_AMT; strict company-master stone codes; and the existing lifecycle/audit/print cases. Still open: operator Apr No import (including browser-driven tagged consume/delete reversal), Wh Sales continuation, licence expiry, image panel and AprBillImg, create idempotency/lost acknowledgement, injected rollback, Crystal repeated-page furniture/numbers, original-Windows comparison, operator sign-off and parent acceptance. | N229 |
 
 ## 4. Decisions D23–D28
 
@@ -3508,6 +3509,71 @@ four-column band; the module passes 27 of 27. The booking draw-down block moved 
 `rateCutBookingDrawDown.ts` unchanged, to keep the file under its size ceiling (2909 to 2732 lines). Desktop-runtime
 comparison and operator acceptance are not claimed.
 
+### N229 — Approval Isu and Approval Rtn are desktop TR_APR_ISU (G242, Lite L4)
+
+The menu dispatches admit only `APR ISU` and `APR RTN` books (`MDI_FORM.cs:8300-8317`). Provisioning uses those
+families over APR_DATA/APR_DETL. The identity migration changes only former web approval families and former
+TOUR/TOURR + EMP ISU/EMP REC stamps. It repairs a legacy link only when one source row and one matching BAR instance
+can be proved; zero or multiple candidates remain unlinked. Existing desktop/custom book metadata and unrelated Tour
+Sales rows remain unchanged. The detail migration adds the desktop `DISC_PRC` and `DISC_AMT` columns.
+
+Return creation now locks the source by its durable OLD_SRNO and compares the submitted IT_CODE, TAG_NO and VCH_SRNO
+with that row. For a tagged line it also locks exactly one BAR_DETL row on company, location, TAG_NO, VCH_SRNO and
+IT_CODE before allocating the return identity or posting rows. Return edit/delete checks the same source and BAR
+identity. An unchanged PUT performs that check before its no-op fast path. Every BAR flag update includes IT_CODE and
+requires one affected row. The corruption tests change only BAR_DETL.IT_CODE and prove POST and unchanged PUT both
+return 400 with no business-table change (`TR_APR_ISU.cs:4741-4835,5044-5061,6412-6431,6664-6680`).
+
+Line identity follows the desktop's durable grid serial (`TR_APR_ISU.cs:3414-3421`): explicit OLD_SRNO and per-line
+stone ISR_NO values must be unique positive safe integers, and each missing value is allocated above the greatest
+retained value. The persistence layer has no positional fallback. A DB edit removes line/stone 1, retains ID 2 and
+adds ID 3; separate HTTP cases refuse duplicate, zero and fractional IDs. Browser units prove the same max-plus-one
+line and stone payload rule, and the Approval Isu feature matrix performs the line-gap edit through the screen.
+
+The amount test follows `TR_APR_ISU.cs:3936-3942,6218-6225`: LDisc% derives DISC_AMT from LBR_AMT, then NET_AMT is
+rounded with `@datacare/core` to one decimal before persistence and display. The independent vector is
+20.05 × 10% = 2.01 and 100.04 + 20.05 + 0.02 − 2.01 = 118.1. The full-row fixture now expects 59.38 discount and
+127408.6 net from its own inputs rather than the request's inconsistent posted totals. The screen feature case checks
+both visible cells and the persisted row.
+
+Stone IT_CODE is trimmed before the route's required check. Service normalization repeats the check for non-HTTP
+callers, and the writer requires every distinct code to exist in ITEM_MAST for the session company before identity
+allocation. Whitespace-only and unknown codes each return 400 with no approval write; the browser module also enters
+an unknown code through the stone grid and observes the refusal (`TR_APR_ISU.cs:6324-6331`).
+
+`POST /sales` treats a line-level approval reference as the source's four-part voucher identity plus stable OLD_SRNO.
+It locks one open APR ISU row, verifies the sale party, IT_CODE, TAG_NO, VCH_SRNO, pieces, gross weight and net weight,
+and locks the exact BAR row. An approval-held tag reuses that locked identity instead of attempting a second live-stock
+issue. Consumption updates only the locked APR and BAR rows; sale edit/delete releases the source through OLD_SRNO and
+the exact BAR item. DB tests prove a different tag/instance/quantity returns 400 without business writes, an exact
+tagged source consumes and reverses, and OLD_SRNO 2 still binds after SR_NO compacts to 1
+(`TR_SALE.cs:20130-20169,20399-20411`). The zero-mock Sales Invoice matrix covers the mismatched-tag refusal through a
+real authenticated browser session, but the page still has no operator import control.
+
+Existing tests continue to cover family isolation; type-B, fiscal-year, lock-date, employee and party refusals;
+complete APR_DATA/APR_DETL/APR_IDTL/TEMP_BOOK_DATA/REMARK_DATA/MAIN_STOCK/DM_DATA writes; source and BAR reversals;
+zero-piece reopen; sparse stone-bearing no-op; consumed-issue edit; concurrent return versus issue delete; duplicate
+return selection; audited delete; separate rights; and AprBill's bound data. These are engineering tests, not desktop
+runtime acceptance.
+
+Evidence: `web/apps/api/test/approvalLifecycle.routes.db.test.ts`, `web/apps/api/test/approvalBookMigration.db.test.ts`,
+`web/apps/api/test/sales.lifecycle.db.test.ts`, `web/apps/web/test/approvalGrid.test.ts`,
+`web/apps/web/test/subDetailGrid.test.ts`, and the zero-mock `approval-issue`, `approval-return` and `sales-invoice`
+feature modules.
+
+Open work remains explicit:
+
+- Add the Sales Invoice Apr No selector/import control. Drive exact tagged consumption and sale-delete source reopening
+  through that screen; the API/DB path alone is not an operator workflow.
+- Implement and browser-prove the separate Wh Sales approval continuation.
+- Model the desktop licence-expiry save state.
+- Render the approval image panel and the `APR_IMG_PRINT=Y` / AprBillImg branch.
+- Add create idempotency and lost-acknowledgement recovery.
+- Add declared mid-write fault injection and prove rollback after each effect family.
+- Reproduce or explicitly disposition repeated Crystal page headers, footers and visible page numbers.
+- Execute an independent original-Windows comparison on sanitized fixtures.
+- Obtain operator sign-off and parent-package acceptance; N229 remains implemented-unverified.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -3663,6 +3729,7 @@ comparison and operator acceptance are not claimed.
 | N226 | — | implemented-unverified, evidence in this change (G206 part: old gold and old silver rows stored in SL_PR_DETL, totalled into the header and ADV_AMT, day book 04/06, editable and deletable; scheme stays open) |
 | N227 | — | implemented-unverified, evidence in this change (G238: two operators saving one Daily Rate day no longer collide, the rate lookup is scoped to the session's location, every voucher form's lock-date refusal carries the desktop text, and the Cash Received/Payment Employee box is stored, enforced when mandatory and read back; browser cases un-blocked for Tag Cancel, Daily Rate, Purchase Invoice, Contra and Cash/Bank) |
 | N228 | — | implemented-unverified, evidence in this change (Wh Sales voucher keys F1/Up/Down, the issued tag stones in SL_IDTL and DM_DATA, the WhSalesBill layout and its Cr/Dr labels) |
+| N229 | — | implemented-unverified, evidence in this change (G242: exact source/BAR checks precede return create and unchanged PUT; `/sales` matches stable OLD_SRNO plus party/item/tag/instance/quantities and updates the locked BAR row; max-plus-one line/stone IDs reject duplicate/zero/fraction values; LDisc-derived discount and one-decimal NET_AMT; strict company stone codes; existing lifecycle/audit/print coverage. Operator Apr No import, Wh Sales continuation, licence/image/idempotency/fault-injection/Crystal pagination, Windows comparison and acceptance remain open) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

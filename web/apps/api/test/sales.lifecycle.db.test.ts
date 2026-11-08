@@ -356,6 +356,7 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
       'SL_PR_DETL',
       'SL_DETL',
       'SL_DATA',
+      'APR_DETL',
       'TEMP_BOOK_DATA',
       'MAIN_STOCK',
       'TAG_STOCK',
@@ -418,7 +419,8 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
       `INSERT INTO "BOOK_DATA"(
          tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME","MAIN_BOOK",
          "BOOK_INOUT","CUR_USE","BOOK_TBL_NAME")
-       VALUES ($1,$2,$3,$4,'Configured Sales Book','CSB','SALES','O','Y','SL_DATA')`,
+       VALUES ($1,$2,$3,$4,'Configured Sales Book','CSB','SALES','O','Y','SL_DATA'),
+              ($1,$2,$3,'APR','Approval Issue','APRI','APR ISU','O','Y','APR_DATA')`,
       TENANT,
       CO,
       LC,
@@ -509,6 +511,17 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
        VALUES ($1,$2,'Y','N')`,
       TENANT,
       CO,
+    );
+    // TR_SALE.cs:20008 imports only an open Approval Isu row and :16112 closes that exact source.
+    await owner.$executeRawUnsafe(
+      `INSERT INTO "APR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO",
+         "SR_NO","OLD_SRNO","VCH_DATE","AC_CODE","IT_CODE","TAG_NO","ISU_REC","ITM_PCS","ITM_GWT","ITM_NWT")
+       VALUES ($1,$2,$3,$4,'APR','00008',3,3,$5::date,'CUST','LOOSE','N','N',2,5,4.8)`,
+      TENANT,
+      CO,
+      LC,
+      YEAR,
+      DAY,
     );
     const created = await createSale(
       runtime,
@@ -619,7 +632,7 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
           ordYrcd: YEAR,
           ordDbcd: 'SOR',
           ordSrno: 2,
-          isuNo: 'APR-8',
+          isuNo: '00008',
           isuYrcd: YEAR,
           isuDbcd: 'APR',
           isuSrno: 3,
