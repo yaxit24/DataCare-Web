@@ -8,6 +8,7 @@ import {
   YEAR,
   approvalRows,
   approvalStock,
+  approvalWriteCounts,
   as,
   createIssue,
   createReturn,
@@ -20,6 +21,7 @@ import {
   saveApproval,
   seedApprovalTag,
   tagState,
+  withRemarkFault,
 } from './approvalHelpers.mjs';
 
 /** ExtraTran → Approval Rtn, the inward branch of desktop TR_APR_ISU. */
@@ -411,10 +413,50 @@ export const approvalReturn = {
       'T13',
       'Approval Rtn POST has no idempotency-key contract; duplicate/lost acknowledgement remains open.',
     ),
-    blocked(
-      'rollback',
+    C(
+      'rollback.last-write-fault',
       'T14',
-      'The feature harness has no declared mid-write database fault injector (G173/N166).',
+      'mutation',
+      'TR_APR_ISU.cs:6412-6431 closes the source line (ISU_REC=Y), restores the tag and writes REMARK_DATA in the same save; a fault on REMARK_DATA, the last write, must leave the source pending and the tag out, and the same screen then saves.',
+      async (ctx) => {
+        const issue = await issueFor(ctx, 'ARF');
+        const remark = 'rollback probe return';
+        const page = await prepareReturn(ctx, issue);
+        await label(page, 'Vch Desc').fill(remark);
+        const before = await approvalWriteCounts(ctx);
+        const failed = await withRemarkFault(ctx, RETURN_BOOK, remark, () =>
+          saveApproval(page, 'return'),
+        );
+        assert.ok(failed.status() >= 400, `the faulted save answered ${failed.status()}`);
+        assert.deepEqual(await approvalWriteCounts(ctx), before);
+        const [source] = await approvalRows(ctx, ISSUE_BOOK, issue.voucherNo);
+        assert.equal(source.received, 'N');
+        assert.deepEqual(await tagState(ctx, issue.tag), { apr: 'Y', transfer: 'N', balance: 0 });
+        const retried = await saveApproval(page, 'return');
+        assert.equal(retried.status(), 201, await retried.text());
+        const voucherNo = String((await retried.json()).voucherNo);
+        const after = await approvalWriteCounts(ctx);
+        const delta = Object.fromEntries(
+          Object.keys(after)
+            .map((table) => [table, after[table] - before[table]])
+            .filter(([, n]) => n !== 0),
+        );
+        assert.deepEqual(delta, {
+          APR_DATA: 1,
+          APR_DETL: 1,
+          MAIN_STOCK: 1,
+          REMARK_DATA: 1,
+          TEMP_BOOK_DATA: 1,
+        });
+        assert.equal((await approvalRows(ctx, ISSUE_BOOK, issue.voucherNo))[0].received, 'Y');
+        assert.deepEqual(await tagState(ctx, issue.tag), { apr: 'N', transfer: 'N', balance: 1 });
+        return {
+          observation: `faulted return ${failed.status()} kept nothing; retry saved ${voucherNo}`,
+          expected: 'source pending and tag out after the fault; one complete return after retry',
+          database: { before, delta },
+          downstream: await tagState(ctx, issue.tag),
+        };
+      },
     ),
     C(
       'config.lock-date',

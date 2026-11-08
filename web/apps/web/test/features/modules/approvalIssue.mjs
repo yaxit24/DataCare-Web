@@ -7,6 +7,7 @@ import {
   TENANT,
   approvalRows,
   approvalStock,
+  approvalWriteCounts,
   as,
   createIssue,
   createReturn,
@@ -19,6 +20,7 @@ import {
   seedApprovalStone,
   seedApprovalTag,
   tagState,
+  withRemarkFault,
 } from './approvalHelpers.mjs';
 
 /**
@@ -557,10 +559,45 @@ export const approvalIssue = {
       'T13',
       'Approval POST has no idempotency-key contract; duplicate/lost acknowledgement remains open.',
     ),
-    blocked(
-      'rollback',
+    C(
+      'rollback.last-write-fault',
       'T14',
-      'The feature harness has no declared mid-write database fault injector (G173/N166).',
+      'mutation',
+      'TR_APR_ISU.cs:6123-6431 writes APR_DATA, APR_DETL, MAIN_STOCK, the BAR_DETL flag and REMARK_DATA as one save; a fault on REMARK_DATA, the last write, must leave none of them, and the same screen then saves.',
+      async (ctx) => {
+        const tag = await seedApprovalTag(ctx, 'AIF');
+        const remark = 'rollback probe issue';
+        const { page } = await openApproval(ctx);
+        await fillIssue(page, tag.tag, remark);
+        const before = await approvalWriteCounts(ctx);
+        const failed = await withRemarkFault(ctx, ISSUE_BOOK, remark, () => saveApproval(page));
+        assert.ok(failed.status() >= 400, `the faulted save answered ${failed.status()}`);
+        assert.deepEqual(await approvalWriteCounts(ctx), before);
+        assert.deepEqual(await tagState(ctx, tag.tag), { apr: 'N', transfer: 'N', balance: 1 });
+        const retried = await saveApproval(page);
+        assert.equal(retried.status(), 201, await retried.text());
+        const voucherNo = String((await retried.json()).voucherNo);
+        const after = await approvalWriteCounts(ctx);
+        const delta = Object.fromEntries(
+          Object.keys(after)
+            .map((table) => [table, after[table] - before[table]])
+            .filter(([, n]) => n !== 0),
+        );
+        assert.deepEqual(delta, {
+          APR_DATA: 1,
+          APR_DETL: 1,
+          MAIN_STOCK: 1,
+          REMARK_DATA: 1,
+          TEMP_BOOK_DATA: 1,
+        });
+        assert.deepEqual(await tagState(ctx, tag.tag), { apr: 'Y', transfer: 'N', balance: 0 });
+        return {
+          observation: `faulted save ${failed.status()} kept nothing; retry saved ${voucherNo}`,
+          expected: 'pre-save counts and tag after the fault; one complete voucher after retry',
+          database: { before, delta },
+          downstream: await tagState(ctx, tag.tag),
+        };
+      },
     ),
     C(
       'config.lock-date',

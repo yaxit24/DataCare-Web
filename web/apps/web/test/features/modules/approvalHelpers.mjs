@@ -242,3 +242,49 @@ export const tagState = async (ctx, tag) =>
       tag,
     )
   )[0];
+
+/** Every table an approval save or delete writes (TR_APR_ISU.cs:6123-6431, :6608-6680), counted per tenant. */
+const WRITE_TABLES = [
+  'APR_DATA',
+  'APR_DETL',
+  'APR_IDTL',
+  'MAIN_STOCK',
+  'DM_DATA',
+  'REMARK_DATA',
+  'TEMP_BOOK_DATA',
+  'DELETE_DATA',
+];
+export async function approvalWriteCounts(ctx) {
+  const counts = {};
+  for (const table of WRITE_TABLES) {
+    const [row] = await ctx.rows(`SELECT count(*)::int n FROM "${table}" WHERE tenant_id=$1`);
+    counts[table] = row.n;
+  }
+  return counts;
+}
+
+/**
+ * T14: run `work` while REMARK_DATA refuses the voucher's description row. REMARK_DATA is the writer's last
+ * effect (after the APR rows, stock, BAR flag and source closure), so a committed partial save would show.
+ */
+export async function withRemarkFault(ctx, book, remark, work) {
+  const name = `e2e_approval_fault_${book.toLowerCase()}`;
+  await ctx.owner.$executeRawUnsafe(
+    `CREATE OR REPLACE FUNCTION ${name}() RETURNS trigger LANGUAGE plpgsql AS $fault$
+     BEGIN
+       IF NEW.tenant_id='${TENANT}' AND NEW."CO_BOOK"='${book}' AND upper(btrim(NEW."VCH_REMARK"))=upper('${remark}') THEN
+         RAISE EXCEPTION 'e2e approval fault after every other write';
+       END IF;
+       RETURN NEW;
+     END $fault$`,
+  );
+  await ctx.owner.$executeRawUnsafe(
+    `CREATE TRIGGER ${name} AFTER INSERT ON "REMARK_DATA" FOR EACH ROW EXECUTE FUNCTION ${name}()`,
+  );
+  try {
+    return await work();
+  } finally {
+    await ctx.owner.$executeRawUnsafe(`DROP TRIGGER IF EXISTS ${name} ON "REMARK_DATA"`);
+    await ctx.owner.$executeRawUnsafe(`DROP FUNCTION IF EXISTS ${name}()`);
+  }
+}
