@@ -554,6 +554,38 @@ export const approvalIssue = {
         };
       },
     ),
+    C(
+      'concurrency.same-tag-two-sessions',
+      'T12',
+      'refusal',
+      'TR_APR_ISU.cs:5015-5061 lets a tag be picked only while it is live stock; Ac_Stock.cs:60-72 takes it out on save. Two operators who picked the same tag cannot both issue it: the second save is refused and the tag carries one approval line.',
+      async (ctx) => {
+        const tag = await seedApprovalTag(ctx, 'AIT');
+        const first = await openApproval(ctx);
+        const secondSession = await ctx.session(as(USERS.admin.user, 'approval-issue-race'));
+        await openApproval(ctx, 'issue', secondSession);
+        await fillIssue(first.page, tag.tag, 'race first');
+        await fillIssue(secondSession.page, tag.tag, 'race second');
+        const won = await saveApproval(first.page);
+        assert.equal(won.status(), 201, await won.text());
+        const lost = await saveApproval(secondSession.page);
+        assert.ok(
+          lost.status() >= 400 && lost.status() < 500,
+          `the second save of the same tag answered ${lost.status()}: ${await lost.text()}`,
+        );
+        const lines = await ctx.rows(
+          `SELECT "CO_BOOK" book,"VCH_NO" voucher FROM "APR_DETL" WHERE tenant_id=$1 AND "TAG_NO"=$2`,
+          tag.tag,
+        );
+        assert.equal(lines.length, 1, JSON.stringify(lines));
+        assert.deepEqual(await tagState(ctx, tag.tag), { apr: 'Y', transfer: 'N', balance: 0 });
+        return {
+          observation: `first 201, second ${lost.status()}`,
+          expected: 'one approval line; the tag out once',
+          database: { lines, tag: await tagState(ctx, tag.tag) },
+        };
+      },
+    ),
     blocked(
       'retry',
       'T13',
