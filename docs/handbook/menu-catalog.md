@@ -550,7 +550,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header; account, cheque, amount and kasar grid; employee/description footer; cheque print.
 - **Writes:** PAY_DATA, PAY_DETL, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, TEMP_BOOK_DATA.
 - **Web:** `/txn/payment?mode=BANK`; `POST /payments`, `POST /payments/multi`, `GET /payments/:vchNo`, `DELETE /payments/:vchNo`, `GET /finance/payment-voucher`. Can: create, print.
-- **Remaining:** The UI has no browse, reopen, edit, delete or reprint; cheque/bank fields, versions, idempotency and copies need acceptance.
+- **Remaining:** Browser cases prove the screen opens in bank mode; none creates a Bank Payment yet. Reopen, edit, delete and reprint are proven only on Cash Received, which shares the form. Cheque and bank fields, versions, copies and a desktop-runtime comparison remain.
 - **Owners:** G50, N64, X16, N51, N52, N74.
 - **Evidence:** [KB_transaction.md:176-200](../../project-memory/video-research/_kb/KB_transaction.md#L176-L200).
 
@@ -561,7 +561,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header; account, cheque, amount and kasar grid; bank/employee footer and print dialog.
 - **Writes:** CASH_DATA, AC_DATA, ROJ_MEL_DATA, CARD_DATA, UPI_DATA, REMARK_DATA, TEMP_BOOK_DATA.
 - **Web:** `/txn/receipt?mode=BANK`; `POST /receipts`, `POST /receipts/multi`, `GET /receipts/:vchNo`, `DELETE /receipts/:vchNo`, `GET /finance/receipt-voucher`. Can: create, print.
-- **Remaining:** The UI lacks reopen, edit, delete and list; per-bank slots, cheque/card/UPI identities, versions, idempotency and copies remain.
+- **Remaining:** Browser cases prove bank and cheque receipts are created and that the screen opens in bank mode. Reopen, edit, delete and reprint are proven only on Cash Received, which shares the form. Per-bank slots, card and UPI identities, copies and a desktop-runtime comparison remain.
 - **Owners:** G50, N64, X16, N51, N52, N74.
 - **Evidence:** [KB_transaction.md:176-200](../../project-memory/video-research/_kb/KB_transaction.md#L176-L200).
 
@@ -594,7 +594,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header; multi-line account, amount and kasar grid; description/employee footer; print dialog.
 - **Writes:** PAY_DATA, PAY_DETL, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, TEMP_BOOK_DATA.
 - **Web:** `/txn/payment`; `POST /payments`, `POST /payments/multi`, `GET /payments/:vchNo`, `DELETE /payments/:vchNo`. Can: create, print.
-- **Remaining:** No reopen, edit, delete or reprint in the UI; versions, idempotency, multi-line fields, copies and account roles remain.
+- **Remaining:** Browser cases prove a payment is created with the right ledger legs. Reopen, edit, delete and reprint are proven on Cash Received, which shares the form, and have no case of their own on the Payment screen. Versions, multi-line fields, copies and account roles remain.
 - **Owners:** G50, N64, X16, N51, N52, N74.
 - **Evidence:** [KB_transaction.md:112-139](../../project-memory/video-research/_kb/KB_transaction.md#L112-L139).
 
@@ -605,7 +605,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header; multi-line account, amount and kasar grid; description/employee footer; print dialog.
 - **Writes:** CASH_DATA, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, TEMP_BOOK_DATA.
 - **Web:** `/txn/receipt`; `POST /receipts`, `POST /receipts/multi`, `GET /receipts/:vchNo`, `DELETE /receipts/:vchNo`. Can: create, print.
-- **Remaining:** No reopen, edit, delete or reprint in the UI; a repeated submit creates a second voucher (no idempotency); cash-limit and copies need comparison.
+- **Remaining:** Browser cases (cash-bank module, 19 of 21 applicable pass) prove create with kasar, reopen from the recent list and Vch No, edit, unchanged save, delete with audit, reprint, the cash-limit and out-of-year refusals, a double click saving one voucher and a rolled-back ledger fault. Still open: card and UPI settlement (CARD_DATA, UPI_DATA), multi-line totals, copies and a desktop-runtime comparison.
 - **Owners:** G50, N64, G29, N52, X16, N51, N74.
 - **Evidence:** [KB_transaction.md:112-139](../../project-memory/video-research/_kb/KB_transaction.md#L112-L139).
 
@@ -1684,7 +1684,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Date/book/account/location/section filters with return, zoom, summary and CSV buttons.
 - **Reads:** TAX_DATA, TAX_MAST, BOOK_DATA, AC_MAST, LOCT_MAST.
 - **Web:** `/reports/gst-report`; `GET /reports/gst-report`, `GET /reports/gstr1`, `GET /reports/gstr2`, `GET /reports/gstr3b`, `GET /reports/hsn-summary`. Can: print, list.
-- **Remaining:** The RP_GST screen exists: GSTR-1 B2B, B2CL, B2CS, CDNR, CDNUR, AT, ATADJ and HSN, GSTR-2 equivalents and the three settled GSTR-3B rows, with CSV, XLSX and PDF exports. EXP, EXEMP, DOCS and TCS are blocked, and the UAE variant is out of scope (the page is the non-UAE RP_GST screen). A sale made on the Sales screen reconciles with the hand-computed tax in B2CS and GSTR-3B. Open: HSN is empty for a web-provisioned company because no book sets BOOK_TYPE 'T' (MS_BOOK.cs:2109-2111) and the Books screen has no Invoice Type control; labour HSN rows carry no discount because LBR_ISU_DETL has no discount column (RP_GST.cs:2719); most gst-report browser cases only open the screen and do not compare numbers; the desktop CSV and Crystal outputs were never compared at runtime.
+- **Remaining:** The RP_GST screen exists: GSTR-1 B2B, B2CL, B2CS, CDNR, CDNUR, AT, ATADJ and HSN, GSTR-2 equivalents and the three settled GSTR-3B rows, with CSV, XLSX and PDF exports. EXP, EXEMP, DOCS and TCS are blocked, and the UAE variant is out of scope (the page is the non-UAE RP_GST screen). A sale made on the Sales screen reconciles with the hand-computed tax in B2CS and GSTR-3B. The HSN local CGST/SGST halves round half away from zero and print 0.00 for a tiny negative, as the desktop's .NET Framework 4.8 does (measured on a windows-latest runner by web/scripts/dotnet-fx-probe: 2.5 M positive and 2 M negative midpoints, 0 differences), so a bill with an odd-paise tax such as 1,908.29 gives 954.15 and 954.15 instead of the earlier 422 refusal. Open: HSN is empty for a web-provisioned company because no book sets BOOK_TYPE 'T' (MS_BOOK.cs:2109-2111) and the Books screen has no Invoice Type control; labour HSN rows carry no discount because LBR_ISU_DETL has no discount column (RP_GST.cs:2719); most gst-report browser cases only open the screen and do not compare numbers; the desktop CSV and Crystal outputs were never compared at runtime.
 - **Owners:** N24, X26, P10-03, N36, G48, N57, N75, G225, N212.
 - **Evidence:** [gst-engine.md:8-45](../../web-implementation-spec/04_Cross_Cutting_Engines/gst-engine.md#L8-L45).
 

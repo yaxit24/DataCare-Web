@@ -65,3 +65,19 @@ There was no open pull request on `main` at 17:15. Every other Lite menu has no 
 5. **Land `feat/lite-approval`** (GB-03) if its owner does not: it needs the owner's consent because it is another session's branch.
 6. **Esc on the nine other wrapper-handler screens** (GB-02): one case per screen first.
 7. **Correct the four cash-bank catalog rows** (GB-05) when that module is next touched.
+
+## Session D (Kiro, worktree `~/dc-wt/parity-d`), checkpoint 2 Nov 2026, about 20:15 IST
+
+| Item | Result | Evidence |
+|---|---|---|
+| Main CI red on 2 Nov | Two different NEW failures, each with a readable cause in the run's `real-stack-browser-*` artifact (`gh run download <id>`; open `01-failure.png`) | runs 41438044967, 41437285568 |
+| Address Ctrl+E focus race | Fixed, PR #223: focus the code box in a layout effect instead of `setTimeout(0)` | new case `address-master.field.ctrl-e-focuses-code-at-once`: red before, green after; module 18 of 18 |
+| Typed Vch No overwritten by the next-number read (Tag Cancel, Stock Adjust, Tag Transfer share the form) | Fixed, PR #223 (G241 under N210 and N217) | `tag-cancel.reopen.late-list-keeps-typed-voucher-number` 22 of 22; `stock-adjust...` red on the old form, 20 of 20 |
+| GB-05 cash-bank catalog text | Corrected, PR #224 (docs only) | cash-bank module 19 passed, 2 blocked, 0 failed |
+| GB-07 Year Create entry rules | Studied and dropped: the web already validates year code, month and dates (`core/fiscalYear.ts`); what is left is a desktop "restart the software" message | `MS_YEAR.cs:1090-1200, 1394` |
+
+Both PRs had static-gates, quality and real-stack green on CI at the time of writing. Neither is merged; the owner or lane A merges them by the LANES rules (renumber G241 if another PR took it).
+
+Still open, in order: User Create (needs owner decisions on password policy and delete), Balance TrFr (waits on Year Create design), Esc on the nine wrapper-handler screens (GB-02, a shared hook belongs in lane A's `lib/`), the RP_ALL report engine (blocks Sales Report, Purchase Rpt, Order Report), Cash Bank report, HuId Report. Other voucher forms that fill a "next number" when their list read answers may have the same race as Tag Cancel; each needs a held-response case.
+
+Not done: the DB suite (no API or core file changed), desktop-runtime comparison (no Windows runtime), Docker failure/recovery scenarios, mobile layouts, role matrices beyond the existing modules.
