@@ -3569,7 +3569,8 @@ Open work remains explicit:
 - Model the desktop licence-expiry save state.
 - Render the approval image panel and the `APR_IMG_PRINT=Y` / AprBillImg branch.
 - Add create idempotency and lost-acknowledgement recovery.
-- Add declared mid-write fault injection and prove rollback after each effect family.
+- Extend fault injection to every effect family (a fault on the last write, REMARK_DATA, is browser-proven to roll
+  back issue and return: `approval-issue.rollback.last-write-fault`, `approval-return.rollback.last-write-fault`).
 - Reproduce or explicitly disposition repeated Crystal page headers, footers and visible page numbers.
 - Execute an independent original-Windows comparison on sanitized fixtures.
 - Obtain operator sign-off and parent-package acceptance; N229 remains implemented-unverified.
