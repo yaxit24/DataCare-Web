@@ -29,14 +29,26 @@ const GUARDED: Record<string, { page: string; sends: RegExp }> = {
     page: 'components/TagCancelForm.tsx',
     sends: /postCommand<[^>]*>\(\s*cfg\.endpoint,\s*body,\s*command\.key\s*\)/,
   },
+  'POST /receipts': {
+    page: 'components/PaymentForm.tsx',
+    sends: /postCommand<[^>]*>\(\s*ep,\s*singleBody,\s*command\.key\s*\)/,
+  },
+  'POST /payments': {
+    page: 'components/PaymentForm.tsx',
+    sends: /postCommand<[^>]*>\(\s*ep,\s*singleBody,\s*command\.key\s*\)/,
+  },
+  'POST /receipts/multi': {
+    page: 'components/PaymentForm.tsx',
+    sends: /postCommand<[^>]*>\(\s*`\$\{ep\}\/multi`,[\s\S]*?command\.key,?\s*\)/,
+  },
+  'POST /payments/multi': {
+    page: 'components/PaymentForm.tsx',
+    sends: /postCommand<[^>]*>\(\s*`\$\{ep\}\/multi`,[\s\S]*?command\.key,?\s*\)/,
+  },
 };
 
 /** WP-04 follow-ups, in the plan's order first (Contra, Sales, Sales Order, ... Tag Cancel), then the rest. */
 const NOT_YET_GUARDED = [
-  'POST /receipts',
-  'POST /receipts/multi',
-  'POST /payments',
-  'POST /payments/multi',
   'POST /contra',
   'POST /sales',
   'POST /sales-orders',

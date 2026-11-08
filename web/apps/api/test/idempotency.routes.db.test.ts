@@ -11,7 +11,9 @@ import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 /**
  * N52 (G29, D18; LITE-MASTER-PLAN WP-04): a replayed voucher create never posts a second voucher.
  *
- * Through the real Fastify routes on forced RLS, for Stock Adjust (TR_TAG_CAN on a STOCK ADJUST book). Expected values are the contract, not the current output: the same key and request replay the
+ * Through the real Fastify routes on forced RLS, for Stock Adjust (TR_TAG_CAN on a STOCK ADJUST book) and the four
+ * TR_CASH menus (Cash/Bank Received → POST /receipts, /receipts/multi; Cash/Bank Payment → POST /payments,
+ * /payments/multi). Expected values are the contract, not the current output: the same key and request replay the
  * first answer byte for byte and write nothing; the same key with another request is 409 idempotency-key-reused;
  * keys are per tenant; a refused save keeps no receipt; an expired receipt is purged and frees its key.
  */
@@ -32,6 +34,22 @@ const adjust = (netWt: number) => ({
   vchDesc: 'idempotency',
   lines: [{ itCode: 'IDL22', itmSign: '+', grossWt: netWt, netWt, touch: 91.6 }],
 });
+const receipt = (amount: number) => ({
+  coBook: 'RCT',
+  vchDate: DAY,
+  partyAc: 'CUST01',
+  partyName: 'Walk-in Customer',
+  amount,
+  mode: 'cash',
+});
+const payment = (amount: number) => ({ ...receipt(amount), coBook: 'PAY' });
+const lines = (coBook: string, amount: number) => ({
+  coBook,
+  vchDate: DAY,
+  mode: 'cash',
+  lines: [{ partyAc: 'CUST01', partyName: 'Walk-in Customer', amount }],
+});
+
 (enabled ? describe : describe.skip)('N52 Idempotency-Key on voucher creates through HTTP', () => {
   let owner: PrismaClient;
   let runtime: PrismaClient;
@@ -72,6 +90,14 @@ const adjust = (netWt: number) => ({
     );
     return row!.n;
   };
+  const ledgerRows = async (tenant: string, book: string) => {
+    const [row] = await query<Array<{ n: number }>>(
+      `SELECT count(*)::int n FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2`,
+      tenant,
+      book,
+    );
+    return row!.n;
+  };
   const receipts = async (tenant: string, key: string) =>
     query<Array<{ route: string; status: number; actor: string }>>(
       `SELECT route, response_status status, actor FROM "api_command_receipt"
@@ -87,13 +113,22 @@ const adjust = (netWt: number) => ({
       tenant,
     );
     await exec(
+      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GR") VALUES ($1,'01','01','CUST01','Walk-in Customer','10')`,
+      tenant,
+    );
+    await exec(
       `INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED")
        VALUES($1,'01',$2,$3,'USER','Y','Y','Y','N')`,
       tenant,
       LOGIN,
       await hashPassword(PASSWORD),
     );
-    for (const [mainMenu, subMenu] of [['Other', 'Stock Adjust']])
+    for (const [mainMenu, subMenu] of [
+      ['Other', 'Stock Adjust'],
+      ['Transaction', 'Cash Received'],
+      ['Transaction', 'Cash Payment'],
+      ['Cash / Bank', 'Multi-Party Receipt'],
+    ])
       await exec(
         `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
          VALUES($1,'01','01',$2,$3,$4,'Y','Y','Y','Y')`,
@@ -275,6 +310,44 @@ const adjust = (netWt: number) => ({
       expect(response.json()).toMatchObject({ error: 'invalid-idempotency-key' });
     }
     expect(await count(TENANT, 'BAR_CAN_DATA', 'SAJ')).toBe(before);
+  });
+
+  it.each([
+    ['/receipts', receipt(1250), 'CASH_DATA', 'RCT'],
+    ['/payments', payment(640), 'PAY_DATA', 'PAY'],
+    ['/receipts/multi', lines('RCT', 310), 'CASH_DATA', 'RCT'],
+    ['/payments/multi', lines('PAY', 220), 'PAY_DATA', 'PAY'],
+  ] as const)(
+    'Cash/Bank %s: a replay posts one voucher and one set of ledger legs; a changed body is 409',
+    async (url, body, table, book) => {
+      const key = `cash-bank-${url.replace(/\W/g, '')}-0001`;
+      const before = {
+        vouchers: await count(TENANT, table, book),
+        legs: await ledgerRows(TENANT, book),
+      };
+      const first = await post(TENANT, url, body, key);
+      expect(first.statusCode, first.body).toBe(201);
+      const legs = (await ledgerRows(TENANT, book)) - before.legs;
+      expect(legs).toBeGreaterThan(0);
+      const replay = await post(TENANT, url, body, key);
+      expect(replay.statusCode, replay.body).toBe(201);
+      expect(replay.body).toBe(first.body);
+      expect(replay.headers['idempotency-replayed']).toBe('true');
+      const changed = await post(TENANT, url, { ...body, vchDate: `${startYear}-06-16` }, key);
+      expect(changed.statusCode, changed.body).toBe(409);
+      expect(await count(TENANT, table, book)).toBe(before.vouchers + 1);
+      expect(await ledgerRows(TENANT, book)).toBe(before.legs + legs);
+    },
+  );
+
+  it('a key used on one route is refused on another route', async () => {
+    const key = 'b6f1a0de-5d0c-4a59-9a43-000000000007';
+    const first = await post(TENANT, '/receipts', receipt(90), key);
+    expect(first.statusCode, first.body).toBe(201);
+    const before = await count(TENANT, 'PAY_DATA', 'PAY');
+    const elsewhere = await post(TENANT, '/payments', payment(90), key);
+    expect(elsewhere.statusCode, elsewhere.body).toBe(409);
+    expect(await count(TENANT, 'PAY_DATA', 'PAY')).toBe(before);
   });
 
   it('purges expired receipts of one tenant only, and an expired key is free again', async () => {
