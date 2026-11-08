@@ -165,4 +165,9 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261102120000_stock_adjust_legacy_numbering',
     checksum: '60a75cf235a57b858d637400c0617603a69937b4399aea7e57e5f9493fb95be2',
   },
+  {
+    // N52 (D18): Idempotency-Key receipts written in the voucher's own transaction.
+    name: '20261109090000_api_command_receipt',
+    checksum: '65761595951988799d746fdd0c1020fab5d16ff20ef11000153f50602f0cfec2',
+  },
 ];

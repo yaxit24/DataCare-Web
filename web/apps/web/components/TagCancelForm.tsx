@@ -11,7 +11,8 @@ import {
   type CSSProperties,
   type KeyboardEvent,
 } from 'react';
-import { ApiError, del, get, post, put } from '../lib/api';
+import { ApiError, del, get, postCommand, put } from '../lib/api';
+import { useIdempotencyKey } from '../lib/idempotencyKey';
 import { useCompanySettings } from '../lib/companySettings';
 import {
   TAG_CANCEL_MODES,
@@ -219,6 +220,8 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
     [mode, settings.tagLot, settings.itemLot],
   );
   const [coBook, setCoBook] = useState('');
+  // N52: one key per draft; a retried save of the same draft replays instead of posting twice.
+  const command = useIdempotencyKey();
   const [header, setHeader] = useState<VoucherHeaderDraft>(() => blankHeader());
   const [rows, setRows] = useState<GridRow[]>(() => [blankRow(settings, mode)]);
   const [voucherNo, setVoucherNo] = useState('');
@@ -465,7 +468,8 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
             `${cfg.endpoint}/${encodeURIComponent(loaded.voucherNo)}`,
             body,
           )
-        : await post<{ vchNo: number; voucherNo: string }>(cfg.endpoint, body);
+        : await postCommand<{ vchNo: number; voucherNo: string }>(cfg.endpoint, body, command.key);
+      if (!loaded) command.renew();
       const saved = result.voucherNo ?? String(result.vchNo).padStart(5, '0');
       try {
         // Reload what was stored, so every figure on screen is the saved one.
