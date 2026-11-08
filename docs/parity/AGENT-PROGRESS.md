@@ -81,3 +81,13 @@ Both PRs had static-gates, quality and real-stack green on CI at the time of wri
 Still open, in order: User Create (needs owner decisions on password policy and delete), Balance TrFr (waits on Year Create design), Esc on the nine wrapper-handler screens (GB-02, a shared hook belongs in lane A's `lib/`), the RP_ALL report engine (blocks Sales Report, Purchase Rpt, Order Report), Cash Bank report, HuId Report. Other voucher forms that fill a "next number" when their list read answers may have the same race as Tag Cancel; each needs a held-response case.
 
 Not done: the DB suite (no API or core file changed), desktop-runtime comparison (no Windows runtime), Docker failure/recovery scenarios, mobile layouts, role matrices beyond the existing modules.
+
+## Session of 9 Nov 2026 (Claude Code, worktree `~/dc-wt/master-plan`), about 02:30 IST
+
+| Item | Result | Evidence |
+|---|---|---|
+| Risk 1 (Approval branch on no remote) | Resolved as a backup: pushed, not merged | `origin/backup/lite-approval-2026-11-09` at `a9f68b85` |
+| Risk 4 (stale Order Cancel claim) | Uncommitted work saved without touching the worktree; the claim is released to the plan (OD-8) | `~/dc-backups/order-cancel-uncommitted-2026-11-09.patch`, `~/dc-backups/order-cancel-untracked-2026-11-09.tgz` |
+| Risk 3 (disk) | Disk was at 100% (2.7 GiB free). Removed eight clean, merged worktrees (`base impl live main-ci main n49 pr2 pr3`) | 11.6 GiB free. `slot-1` still holds a stale lock from session `52f05ab4` (2 Nov) |
+| Master plan | `docs/parity/LITE-MASTER-PLAN.md`: one ordered work order (WP-00 to WP-56), adopted owner defaults OD-1 to OD-8, the slice runbook, Track O (desktop oracle on the .NET Framework runner) and Track P (go-live gates) | this PR |
+| New finding | No voucher writer has server-side replay protection; the cash-bank double-click case passes through the disabled button only. Planned as WP-04 (P0) | `LITE-MASTER-PLAN.md` WP-04 |
