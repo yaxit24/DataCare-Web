@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent }
 import { useRouter } from 'next/navigation';
 import { round, vbVal } from '@datacare/core';
 import { del, get, post, put, ApiError } from '../../../../lib/api';
+import { useScreenEscape, type ScreenKeyEvent } from '../../../../lib/screenEscape';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 
@@ -351,12 +352,13 @@ export default function TaxMasterPage() {
   };
 
   /** MS_TAX_KeyDown with KeyPreview: Esc leaves the screen. */
-  function onScreenKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+  function onScreenKeyDown(event: ScreenKeyEvent) {
     if (event.defaultPrevented || event.key !== 'Escape') return;
     if ((event.target as HTMLElement).closest?.('[data-lookup-open="true"]')) return;
     event.preventDefault();
     router.back();
   }
+  const screenRef = useScreenEscape<HTMLDivElement>(onScreenKeyDown);
 
   function onListKeyDown(event: KeyboardEvent<HTMLTableSectionElement>) {
     if (event.key === 'F1') {
@@ -433,7 +435,7 @@ export default function TaxMasterPage() {
   };
 
   return (
-    <div onKeyDown={onScreenKeyDown}>
+    <div ref={screenRef} onKeyDown={onScreenKeyDown}>
       <h1>Tax Master</h1>
       {msg && (
         <div className={`msg ${msg.kind}`} role={msg.kind === 'err' ? 'alert' : 'status'}>
