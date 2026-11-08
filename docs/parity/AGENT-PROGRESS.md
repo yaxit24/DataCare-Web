@@ -64,7 +64,7 @@ There was no open pull request on `main` at 17:15. Every other Lite menu has no 
 3. **Cash Bank report (`RP_CASH_BANK`)** or **HuId Report (`RP_HUID`)**: both unowned; `TagHuIdRpt` and `RojMelCash` templates exist. Each in its own route directory, never in `reports/[report]/page.tsx` (at its size ceiling).
 4. **User Create (`MS_USER`)** once the owner decides the password policy and delete semantics (GB-10).
 5. **Land `feat/lite-approval`** (GB-03) if its owner does not: it needs the owner's consent because it is another session's branch.
-6. **Esc on the nine other wrapper-handler screens** (GB-02): one case per screen first.
+6. **Esc on the nine other wrapper-handler screens** (GB-02): one case per screen first. Taken as WP-09 on `agent/wp09-esc-no-focus` (9 Nov): cases red then green, shared hook `web/apps/web/lib/screenEscape.ts`.
 7. **Correct the four cash-bank catalog rows** (GB-05) when that module is next touched.
 
 ## Session D (Kiro, worktree `~/dc-wt/parity-d`), checkpoint 2 Nov 2026, about 20:15 IST

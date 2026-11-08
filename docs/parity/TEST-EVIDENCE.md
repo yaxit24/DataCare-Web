@@ -130,4 +130,4 @@ Limits: the harness records `/api` calls and Playwright console errors only; it 
 - The 3,789-test API database suite (the API and core packages are unchanged in #218; CI runs it).
 - Role matrices beyond the existing modules' T11 cases.
 - Performance and load. The only timing evidence is the 7 min 44 s suite and the throttled replay.
-- The Esc behaviour of the nine other wrapper-handler screens (GB-02).
+- The Esc behaviour of the nine other wrapper-handler screens (GB-02). Since run (WP-09, 9 Nov): `keyboard.esc-with-focus-on-the-page` in each of the nine modules, red on the old pages, green with `web/apps/web/lib/screenEscape.ts`.
