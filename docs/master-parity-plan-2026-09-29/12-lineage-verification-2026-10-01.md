@@ -218,7 +218,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G203 | Med | A cheque receipt or payment lost its cheque number on the ledger | `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/api/src/modules/finance/finance.ts` | Found by `cash-bank.create.cheque-receipt`: the cheque number was saved on CASH_DATA but every AC_DATA leg had an empty CHQ_NO, while the desktop `Bank_Ledr` (`Ac_Ledr.cs:585-593`) writes `A.CHQ_NO` on each leg; bank reconciliation and cheque reports read it from the ledger. | N193 |
 | G204 | High | Contra Entry was a fixed two-account form, not the desktop grid | `unified/src/csharp/DataCareNext/TR_CONTRA.cs` | `web/apps/web/app/(app)/txn/contra/page.tsx` | Found while writing the contra module: the desktop grid holds any number of rows and writes a CONTRA_DATA pair per row against row 1 (`TR_CONTRA.cs:2760-2866`), one Contra_Ledr leg per row, and refuses unequal totals with its own message (`:2694`); the web took one Dr and one Cr account, wrote one row with both amounts and used its own wording. A shop could not deposit cash into two banks in one voucher. | N194 |
 | G205 | High | Sales Order line priced on fine weight with paise | `unified/src/csharp/DataCareNext/TR_SALE_ORD.cs` | `web/apps/api/src/modules/sales/salesOrder.ts`; `web/apps/web/lib/salesOrderForm.ts` | Found by `sales-order.formula.whole-rupees` and `sales-order.create.amounts`. The desktop prices a line's metal as weight × rate rounded to whole rupees, the weight following SL_AMT_TYPE: fine for F, gross for G, otherwise net + ghat (`TR_SALE_ORD.cs:6560-6672`). The bill takes tax as round(net × %, 0) and the total as round(net + tax, 0) (`:11340-11342`). The web always uses the fine weight and keeps paise (`salesOrder.ts` `calculateOrderLine`, `fineWt` then `round2(fine × rate)`), and `billTotals` runs without a rounding policy, so tax keeps paise. Net 10 g, touch 91.6, rate 6,123.45, labour 237.5 /g on a company with SL_AMT_TYPE N: desktop 61,234 + 2,375 = 63,609, tax 1,908, total 65,517; web 56,090.80 + 2,375 = 58,465.80, tax 1,753.97, total 60,220. | N196 |
-| G206 | Med | Sales Order takes one cash advance and stores no tender breakdown | `unified/src/csharp/DataCareNext/TR_SALE_ORD.cs`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/web/app/(app)/txn/sales-order/page.tsx`; `web/apps/api/src/modules/sales/salesOrder.ts` | Found by `sales-order.create.header-tender` and `sales-order.create.tender-modes`. The desktop advance is the sum of its tender rows: cash, UPI, cheque, card, old gold, old silver and scheme (`TR_SALE_ORD.cs:11368`); each is stored on SL_ORD_DATA (`:9126-9142`: CASH_AMT, UPI_AMT, CHQ_AMT, CARD_AMT, OLD_GL_AMT, OLD_SL_AMT, SCHM_AMT) and Order_Ledr posts each to its own account (`Ac_Ledr.cs:28-61`, legs 01-06 and 12-13). The web screen has one Advance amount, saved as ADV_AMT with CASH_AMT 0, and shows the other tender fields read-only. | N197, N222, N225 |
+| G206 | Med | Sales Order takes one cash advance and stores no tender breakdown | `unified/src/csharp/DataCareNext/TR_SALE_ORD.cs`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/web/app/(app)/txn/sales-order/page.tsx`; `web/apps/api/src/modules/sales/salesOrder.ts` | Found by `sales-order.create.header-tender` and `sales-order.create.tender-modes`. The desktop advance is the sum of its tender rows: cash, UPI, cheque, card, old gold, old silver and scheme (`TR_SALE_ORD.cs:11368`); each is stored on SL_ORD_DATA (`:9126-9142`: CASH_AMT, UPI_AMT, CHQ_AMT, CARD_AMT, OLD_GL_AMT, OLD_SL_AMT, SCHM_AMT) and Order_Ledr posts each to its own account (`Ac_Ledr.cs:28-61`, legs 01-06 and 12-13). The web screen has one Advance amount, saved as ADV_AMT with CASH_AMT 0, and shows the other tender fields read-only. Scheme (N230): owner decision to follow the source. The typed Scheme Amt joins ADV_AMT and Order_Rojmel type 05 (`Ac_Rojmel.cs:19`) debits the MEMB ADJUST book's slot-1 account. Live24 lacks the row for its 7 scheme orders because 3 are of a year the day book no longer holds and 4 were taken on the non-Lite MEMB ADJUST path, likely by an older build (aggregate counts, N230). | N197, N222, N225, N230 |
 | G207 | Med | Order advance debits the sales account on a provisioned company | `unified/src/csharp/DataCareNext/Ac_Ledr.cs`; `unified/src/csharp/DataCareNext/Ac_Rojmel.cs` | `web/apps/api/src/modules/ops/seedCompany.ts` | Found by `sales-order.create.advance-ledger`: a 5,000 cash advance posts Dr SALES / Cr customer. Order_Ledr debits the order book's BOOK_DETL slot 1 with CASH_AMT (`Ac_Ledr.cs:28-35`) and Order_Rojmel uses slot 1 as the advance contra (`Ac_Rojmel.cs:11`); on the real data slot 1 of book 020 is 00001, the cash account (recorded in `salesOrder.ts`). `seedCompany.ts:219` gives the SOR book the sale layout (1 SALES, 2 CASH, 3 ROUNDOFF). | N198 |
 | G208 | Med | A sale cannot adjust an order advance on a provisioned company | `unified/src/csharp/DataCareNext/Ac_Rojmel.cs` | `web/apps/api/src/modules/ops/seedCompany.ts`; `web/apps/api/src/modules/sales/sales.ts` | Found by `sales-order.journey.order-to-sale`: Sales Invoice with Ord No and Order Amt answers 400 "book SL account row 4 is missing". Sales_Rojmel posts the sale's ADV_AMT against BOOK_DETL slot 4 (`Ac_Rojmel.cs:96`) and `sales.ts` resolves slot 4 when an advance applies, but provisioned sale books get slots 1-3 only. | N198 |
 | G209 | High | Party Opening was a balanced multi-account voucher, not the desktop's per-party opening | `unified/src/csharp/DataCareNext/TR_AC_OPBL.cs`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs` | `web/apps/web/app/(app)/txn/ac-opbl/page.tsx`; `web/apps/api/src/modules/finance/partyOpening.ts` | Found while writing the Party Opening case list: the desktop keeps one OP_DATA row per party in book '000' with Cr/Dr signs (`TR_AC_OPBL.cs:2694-2722`) and posts it through AcOp_Ledr (`Ac_Ledr.cs:9-28`) as up to six legs dated the day before the year opens. The web numbered an 'ACO' voucher, demanded that debits equal credits, wrote no OP_DATA and had no reopen, edit, list or desktop messages, so a shop could not enter one party's opening on its own. The balanced-voucher module is removed. | N199 |
@@ -3508,6 +3508,57 @@ four-column band; the module passes 27 of 27. The booking draw-down block moved 
 `rateCutBookingDrawDown.ts` unchanged, to keep the file under its size ceiling (2909 to 2732 lines). Desktop-runtime
 comparison and operator acceptance are not claimed.
 
+### N230 — Sales Order scheme tender (G206, scheme part; owner decision: follow the source)
+
+Gap G206 · Parents P9; R03 · L1 · Med · Size M · Start after N226
+
+**Why the real data has no type-05 row, from the source (aggregate counts only).** Order_Rojmel type 05
+(`Ac_Rojmel.cs:19`) selects the same rows as the advance type 01 (`:11`): the current CO_YEAR, `VCH_DATE >= MOp_dt`,
+MAIN_BOOK SALES ORDER or TOUR ORDER, BOOK_DETL slot 1, plus `SCHM_AMT <> 0`. Both callers run it with no edition or
+tender check: the order save (`TR_SALE_ORD.cs:9142` stores SCHM_AMT, `:9561-9563` deletes and rebuilds the day book)
+and Account Refresh (`MS_UPDATE.cs:2411` delete, `:2456` rebuild). Nothing else writes SL_ORD_DATA.SCHM_AMT. In Live24:
+- All 3179 ROJ_MEL_DATA rows are CO_YEAR 2024-2025, so the **3** scheme orders of 2023-2024 have no day-book row of any
+  type (the routine keeps the current year; `MS_YEAR.cs:1477` deletes other years).
+- The **4** scheme orders of 2024-2025 have day-book rows (type 01 under the identical WHERE) and ADV_AMT equal to the
+  tender sum including SCHM_AMT. Every other type matches its guard in 2024-25 (01: 41 of 41 orders with ADV_AMT; 02:
+  11 of 11 with CHQ_AMT); only 05 is absent.
+- All 4 are linked to MEMB ADJUST (book 076) vouchers through AD_ADJ.SBILL_*: they were taken on the **non-Lite** path,
+  where the Scheme Amt cell opens TR_MEMB_ADJ (`TR_SALE_ORD.cs:11269-11287`); Lite and Silver type it
+  (`:11257-11267`). `web/docs/PLAN-SALESORDER-ROJMEL.md` section 0.2 already shows that `Ac_Rojmel.cs` is a later
+  version than the code that wrote Live24, so the likely cause is an older build without the 05 insert. That cannot be
+  proved from the data. The owner chose to follow the source (WP-03, option a).
+
+**What changed.** The Sales Order screen takes the typed Scheme Amt; it is stored as SCHM_AMT and joins ADV_AMT
+(`:11368`). The day book gets type 05: AC_CODE the MEMB ADJUST book's BOOK_DETL slot 1 (the desktop's literal 00079 is
+its SCHEME BONUS A/C, `MS_UPDATE.cs:27378`; in Live24 book 076 names 00079 on its bonus rows, `Ac_Rojmel.cs:462`),
+LD_CODE the party, DR the scheme, AC_NAME `MADJ - ` + party name, the advance row's other columns, key head + `05`
+(23 characters). No MEMB ADJUST book is refused with the desktop text "Please Creat Book From MEMB ADJUST...."
+(`DC_Main.cs:1508`); two books, or a missing or blank slot 1, fail closed. Order_Ledr has no scheme leg
+(`Ac_Ledr.cs:28-61`), so the ledger is unchanged. A scheme-only order resolves the order book's slot 1 for the advance
+row's contra. Reopen shows the cash advance (CASH_AMT) and the scheme on their own cells; edit moves ADV_AMT and the 05
+row, clearing the scheme removes it, delete removes it. New code is in
+`web/apps/api/src/modules/sales/salesOrderScheme.ts`; `salesOrder.ts` stays at its size ceiling (2,353 lines).
+The web has no Account Refresh rebuild (`web/apps/api/src/modules/utilities/dataRefreshOps.ts` refuses the full Account apply), so the save is the only
+writer.
+
+Deliberate differences and what stays open:
+- The non-Lite path (the Scheme Amt cell opening a MEMB ADJUST voucher and linking it through AD_ADJ.SBILL_*) is not
+  built; every Sales Order takes the typed scheme. The edition gate is per deployment and does not reach the writer.
+- A web-provisioned company has no MEMB ADJUST book (`web/apps/api/src/modules/ops/seedCompany.ts`), so a scheme is refused there until one is set
+  up. The membership module reads book 076 slot 1 as the maturity payout account (`web/apps/api/src/modules/membership/scheme.ts`), while the
+  desktop's slot 1 is the scheme bonus account; provisioning the book needs that reconciled first.
+- The order day-book rows carry no VCH_DESC in IT_DESC (the shared builder leaves it blank; the desktop selects
+  `A.VCH_DESC` on every Order_Rojmel row, `Ac_Rojmel.cs:11-25`). Type 05 copies the advance row, so it shares that gap.
+- The Tour Order (TR_TOUR_ORD) keeps its previous behaviour: SCHM_AMT stored, not added to the advance, no type 05.
+
+Evidence: `salesOrderScheme.db.test.ts` (header CASH/SCHM/ADV, ledger without a scheme leg, day-book 01 and 05 exact
+rows, reopen, edit 1,000 to 1,500, clear to 0, delete; the scheme as the only tender; no book, negative scheme, missing
+slot and two books refused with nothing written; another tenant's book not used) fails 4 of 5 against the code before
+this change and passes under forced RLS; `salesOrderScheme.test.ts` covers the advance sum and the row builder. The
+browser case `sales-order.create.scheme-tender` types the scheme on the screen and checks the header, ledger, day book
+and reopen; it passes and leaves `baseline.json`. The `sales-order` module passes 32 of 33 (one blocked,
+`config.setting-variant`, G174). Desktop-runtime comparison and operator acceptance are not claimed.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -3663,6 +3714,7 @@ comparison and operator acceptance are not claimed.
 | N226 | — | implemented-unverified, evidence in this change (G206 part: old gold and old silver rows stored in SL_PR_DETL, totalled into the header and ADV_AMT, day book 04/06, editable and deletable; scheme stays open) |
 | N227 | — | implemented-unverified, evidence in this change (G238: two operators saving one Daily Rate day no longer collide, the rate lookup is scoped to the session's location, every voucher form's lock-date refusal carries the desktop text, and the Cash Received/Payment Employee box is stored, enforced when mandatory and read back; browser cases un-blocked for Tag Cancel, Daily Rate, Purchase Invoice, Contra and Cash/Bank) |
 | N228 | — | implemented-unverified, evidence in this change (Wh Sales voucher keys F1/Up/Down, the issued tag stones in SL_IDTL and DM_DATA, the WhSalesBill layout and its Cr/Dr labels) |
+| N230 | — | implemented-unverified, evidence in this change (G206 scheme part, owner decision to follow the source: the typed Scheme Amt joins ADV_AMT and writes Order_Rojmel type 05 to the MEMB ADJUST book's slot-1 account; the non-Lite MEMB ADJUST voucher path stays open) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

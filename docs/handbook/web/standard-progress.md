@@ -6,10 +6,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 37 | 32 | 0 |
+| Lite (first, D32) | 49 | 37 | 34 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
 | Standard (added by Standard) | 36 | 1 | 1 | 0 |
-| **Standard total** | **114** | **39** | **34** | **0** |
+| **Standard total** | **114** | **39** | **36** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
@@ -49,13 +49,13 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Report | Sales Report | `/reports/sales-register` | REPORT | — | no module | — |
 | Report | Purchase Rpt | `/reports/purchase-register` | REPORT | — | no module | — |
 | Report | Approval Rpt | `/reports/approval-report` | REPORT | — | no module | — |
-| Report | Order Report | `/txn/sales-order` | REPORT | sales-order | module, 1 open | G206 |
+| Report | Order Report | `/txn/sales-order` | REPORT | sales-order | module green | — |
 | Report | Cash Bank | `/reports/cash-book` | REPORT | — | no module | — |
 | Report | Gst Report | `/reports/gst-report` | REPORT | gst-report | module green | — |
 | Report | HuId Report | `/reports/huid` | REPORT | — | no module | — |
 | Transaction | Purchase | `/txn/purchase` | PARTIAL | purchase-invoice | module green | — |
 | Transaction | Purchase Rtn | `/txn/purchase-return` | PARTIAL | purchase-return | module green | — |
-| Transaction | Sales Order | `/txn/sales-order` | PARTIAL | sales-order | module, 1 open | G206 |
+| Transaction | Sales Order | `/txn/sales-order` | PARTIAL | sales-order | module green | — |
 | Transaction | Sales | `/txn/sales`, `/txn/hallmark-sale` | PARTIAL | sales-invoice | module green | — |
 | Transaction | Sales Return | `/txn/sale-return` | PARTIAL | sales-return | module green | — |
 | Transaction | Wh Sales | `/txn/wholesale-sale` | PARTIAL | wholesale-sale | module green | — |

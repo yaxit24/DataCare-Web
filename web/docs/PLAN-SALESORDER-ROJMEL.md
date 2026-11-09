@@ -191,6 +191,12 @@ SELECT '  rows='+CAST(count(*) AS varchar)
 
   then check whether those vouchers have any Rojmel rows at all.
 
+  **Resolved 9 November 2026 (WP-03, N230).** Of the 7, 3 are of 2023-2024 and the day book holds only 2024-2025 (no
+  2023-24 voucher has any row); the other 4 have type 01 under the identical WHERE and are linked to MEMB ADJUST vouchers
+  (AD_ADJ.SBILL_*), i.e. they came through the non-Lite path, most likely on an older build without the 05 insert. The
+  source writes 05 whenever SCHM_AMT <> 0, and the owner chose to follow the source: the web now writes type 05 to the
+  MEMB ADJUST book's slot-1 account (`web/apps/api/src/modules/sales/salesOrderScheme.ts`). See doc 12, N230.
+
 ### 2.5 `BOOK_DETL` slot for book 020
 
 **Slots are per-book.** Book 020's differ from 026's and 064's — this has already caused one plan error.
@@ -379,7 +385,7 @@ Rules, each traceable to §2.2/§2.3/§2.6:
   both amounts **0**, `IT_TYPE` = metal, `SIGN '+'`, weights populated, `lineNo` passed.
 - Types `04` and `06` are **mutually exclusive per line** — the guards are `NET_AMT <> 0` and
   `NET_AMT = 0`.
-- **Do not implement types `03`, `05`, `07`, `08`.** See §2.4; `05` in particular is an unresolved anomaly.
+- **Do not implement types `03`, `05`, `07`, `08`.** See §2.4. (Later work built `03` and `08` (N197, N222) and `05` (N230, owner decision).)
 
 ### Step 4 — wire `salesOrder.ts`
 

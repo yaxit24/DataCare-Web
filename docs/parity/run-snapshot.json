@@ -2,24 +2,24 @@
   "meta": {
     "date": "2026-11-02",
     "commit": "a2231cc7",
-    "commitNote": "30 modules ran on a2231cc7 (the Tag Print Esc fix merged with main at 212b65c1); tag-print and gst-report were re-run on 2d75b0cb (the same plus #203, #206 and #216).",
+    "commitNote": "30 modules ran on a2231cc7 (the Tag Print Esc fix merged with main at 212b65c1); tag-print and gst-report were re-run on 2d75b0cb (the same plus #203, #206 and #216). sales-order was re-run on 67cbd47b (WP-03, N230: origin/main 4585481a with the scheme tender): 32 passed, 1 blocked of 33.",
     "candidates": {
-      "a2231cc7": 30,
-      "2d75b0cb": 2
+      "a2231cc7": 29,
+      "2d75b0cb": 2,
+      "67cbd47b": 1
     },
     "command": "node scripts/parity-test-env.mjs -- node apps/web/test/features/run-features.mjs (all modules), then FEATURE_E2E_MODULES=tag-print,gst-report",
     "machine": "one 8 GB Mac, Node 24.22.2, isolated Postgres from parity-test-env.mjs on port 55501",
     "baselinedFailures": [
       "company-master.fields.complete-round-trip (G38)",
-      "sales-order.create.scheme-tender (G206)",
       "data-backup.config.nextmain-allowlist (G64/N80)"
     ],
     "totals": {
       "cases": 743,
       "applicable": 703,
-      "passed": 596,
-      "failed": 3,
-      "blocked": 104,
+      "passed": 598,
+      "failed": 2,
+      "blocked": 103,
       "notApplicable": 40
     },
     "mocks": "businessResponseMocks and requestInterceptions are 0 in every module's run.json"
@@ -248,9 +248,9 @@
     "sales-order": {
       "cases": 33,
       "applicable": 33,
-      "passed": 30,
-      "failed": 1,
-      "blocked": 2,
+      "passed": 32,
+      "failed": 0,
+      "blocked": 1,
       "notApplicable": 0,
       "businessResponseMocks": 0,
       "requestInterceptions": 0

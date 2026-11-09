@@ -7650,6 +7650,31 @@
         "web/apps/web/test/features/modules/wholesaleSale.mjs"
       ],
       "statusNote": "IMPLEMENTED (voucher keys, tag stones, bill layout), not accepted. The three new test files fail against the old code and pass; the wholesale-sale browser module passes 27 of 27. Open: hand-typed item-detail rows for loose items, SL_IDTL rows on the printed bill, fine kasar, the Rojmel alignment for lined vouchers, desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N230",
+      "status": "implemented-unverified",
+      "action": "Sales Order scheme tender (G206, scheme part), owner decision to follow the source: the typed Scheme Amt (TR_SALE_ORD.cs:11257-11267) is stored as SCHM_AMT and joins ADV_AMT (:11368); Order_Rojmel type 05 (Ac_Rojmel.cs:19) debits the MEMB ADJUST book's BOOK_DETL slot-1 account against the party; no ledger leg (Ac_Ledr.cs:28-61).",
+      "startAfter": [
+        "N226"
+      ],
+      "requiredProof": "sales-order.create.scheme-tender passes in the browser and leaves baseline.json; salesOrderScheme.db.test.ts and salesOrderScheme.test.ts pass.",
+      "gapIds": "G206",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "parentLabels": "P9; R03",
+      "statusAsOf": "2026-11-09",
+      "evidence": [
+        "web/apps/api/src/modules/sales/salesOrderScheme.ts",
+        "web/apps/api/src/modules/sales/salesOrderTender.ts",
+        "web/apps/web/lib/salesOrderForm.ts",
+        "web/apps/api/test/salesOrderScheme.db.test.ts",
+        "web/apps/api/test/salesOrderScheme.test.ts",
+        "web/apps/web/test/features/modules/salesOrder.mjs"
+      ],
+      "statusNote": "IMPLEMENTED (scheme tender), not accepted. The scheme DB test fails 4 of 5 against the old code and passes; the sales-order browser module passes 32 of 33 (config.setting-variant blocked, G174). Live24 lacks type 05 for its 7 scheme orders: 3 are of a year the day book no longer holds, 4 were taken on the non-Lite MEMB ADJUST path, likely by an older build (aggregate counts only). Open: the non-Lite MEMB ADJUST voucher path, a MEMB ADJUST book in web provisioning (the membership module reads its slot 1 as the payout account), VCH_DESC in the order day-book IT_DESC, desktop-runtime comparison and acceptance."
     }
   ],
   "amendments": [
