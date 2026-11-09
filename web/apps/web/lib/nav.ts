@@ -18,6 +18,8 @@ export const NAV: NavGroup[] = [
     label: 'Company',
     items: [
       { label: 'Balance TrFr', href: '/company/balance-transfer', ready: true },
+      // Desktop Company → User Create (MS_USER); the rights form keeps its name, so existing USER_SET rows still apply.
+      { label: 'User Create', href: '/admin/users', ready: true, form: 'Utilities/Users & Rights' },
       { label: 'Data Backup', href: '/backup', ready: true },
     ],
   },
@@ -347,7 +349,6 @@ export const NAV: NavGroup[] = [
       { label: 'Estimate Reset', href: '/utilities/estimate-reset', ready: true },
       { label: 'Data Refresh', href: '/utilities/data-refresh', ready: true },
       { label: 'Data Repair', href: '/utilities/data-repair', ready: true },
-      { label: 'Users & Rights', href: '/admin/users', ready: true },
       { label: 'Provision Company', href: '/admin/provision', ready: true },
       { label: 'e-Invoice (IRN)', href: '/utilities/e-invoice', ready: true },
       { label: 'Year-End Close', href: '/utilities/year-end', ready: true },

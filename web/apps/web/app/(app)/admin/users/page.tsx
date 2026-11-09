@@ -1,495 +1,445 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
-import { get, post, ApiError } from '../../../../lib/api';
-import { useBusinessScope } from '../../../../components/BusinessScope';
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useRouter } from 'next/navigation';
+import { del, get, post, ApiError } from '../../../../lib/api';
+import { useScreenEscape, type ScreenKeyEvent } from '../../../../lib/screenEscape';
+import {
+  passwordReasonText,
+  rightsScreenVisible,
+  typedUserName,
+  USER_NAME_MAX,
+  USER_TEXT,
+  USER_TYPES,
+  userTypeOf,
+  type UserType,
+} from '../../../../lib/userCreate';
+import { UserRightsGrid } from '../../../../components/UserRightsGrid';
 
 interface UserRow {
   loginName: string;
   role: string;
   coCode: string;
-  userUpdate: boolean;
-  userDelete: boolean;
-  userPrint: boolean;
 }
+type Box = 'name' | 'oldPassword' | 'newPassword' | 'confirmPassword' | 'userType';
+/** The tab order of the form (MS_USER designer TabIndex 0-4, :1067-1098); Enter walks it and then Save (TabIndex 5). */
+const ORDER: Box[] = ['name', 'oldPassword', 'newPassword', 'confirmPassword', 'userType'];
+const LABEL: Record<Box, string> = {
+  name: 'Create New User',
+  oldPassword: 'Old Password',
+  newPassword: 'New Password',
+  confirmPassword: 'Confirm Password',
+  userType: 'User Type',
+};
+const same = (a: string, b: string) => a.toUpperCase() === b.toUpperCase();
 
-/** Per-row editable state for the rights matrix (mirrors LOGIN_MAST USER_* + LOGIN_CATG). */
-type RightsEdit = { catg: string; userUpdate: boolean; userDelete: boolean; userPrint: boolean };
-
-const ROLES = ['ADMIN', 'USER'] as const;
-const isAdmin = (role: string) => role.toUpperCase().startsWith('A');
-const rowKey = (u: { coCode: string; loginName: string }) => `${u.coCode}/${u.loginName}`;
-
-export default function UsersAdminPage() {
-  const { coCode } = useBusinessScope();
-  const [rows, setRows] = useState<UserRow[]>([]);
-  const [form, setForm] = useState({ loginName: '', password: '', role: 'USER' });
+/**
+ * User Create (desktop MS_USER, Company → User Create), laid out as the desktop form: Create New User, Old Password, New
+ * Password, Confirm Password and User Type down the form, the User Name box of existing users beside them, and Save,
+ * Print, Cancel, Delete and Exit along the bottom.
+ *
+ * - Typed letters are upper-cased and the apostrophe refused (MS_USER_KeyPress, :1786-1799); Enter moves on, but not from
+ *   a blank name (:2153-2203, :2256-2263); Esc and Exit leave the screen (:1772-1810); Alt+S/P/C/D/X are the buttons.
+ * - Leaving Create New User refuses an existing name unless a user was picked in User Name ("This User Name already
+ *   Exist.Please Change User Name...", :2131-2150); a name that exists then selects its User Type (:2478-2498).
+ *   Leaving Old Password blank for an existing user says "Please Insert Old Password" (:2222-2236); leaving Confirm
+ *   Password different from New Password says "Password Not Match" and clears it (:2205-2220).
+ * - Save, Delete and Print answer with the desktop's texts (:1820-2093); Print has no report on the desktop either.
+ * - D36: the rights grid and Update User Right are hidden in the Lite edition (:1489-1495).
+ *
+ * Deliberate differences: a wrong old password is reported at Save (no endpoint answers "is this the password?");
+ * a blank New Password in edit mode keeps the current one (the desktop would store a blank password); F1 in Old
+ * Password does not show the stored password; Delete deactivates (D35); passwords follow D34.
+ */
+export default function UserCreatePage() {
+  const router = useRouter();
+  const [users, setUsers] = useState<UserRow[]>([]);
+  const [showRights, setShowRights] = useState(false);
+  const [values, setValues] = useState({
+    name: '',
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [userType, setUserType] = useState<UserType>('User');
+  const [entryMode, setEntryMode] = useState<'A' | 'E'>('A');
+  const [picked, setPicked] = useState('');
   const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
-  const [showNew, setShowNew] = useState(false);
   const [busy, setBusy] = useState(false);
-  // Phase 13 rights matrix: per-user editable USER_UPDATE/USER_DELETE/USER_PRINT + LOGIN_CATG.
-  const [rights, setRights] = useState<Record<string, RightsEdit>>({});
-  const [savingKey, setSavingKey] = useState<string | null>(null);
-  // P1-3 per-form rights matrix (USER_SET Main/Sub × View/Edit/Delete/Print).
-  const [catalog, setCatalog] = useState<{ mainMenu: string; subMenu: string }[]>([]);
   const [resetUser, setResetUser] = useState('');
   const [resetPassword, setResetPassword] = useState('');
-  const [resetBusy, setResetBusy] = useState(false);
-  const [frUser, setFrUser] = useState('');
-  const [fr, setFr] = useState<
-    Record<string, { view: boolean; edit: boolean; del: boolean; print: boolean }>
-  >({});
-  const [frBusy, setFrBusy] = useState(false);
-  const fkey = (m: string, s: string) => `${m}/${s}`;
-  const setFrCell = (
-    k: string,
-    patch: Partial<{ view: boolean; edit: boolean; del: boolean; print: boolean }>,
-  ) =>
-    setFr((m) => ({
-      ...m,
-      [k]: { ...(m[k] ?? { view: false, edit: false, del: false, print: false }), ...patch },
-    }));
+  const boxes = useRef<Partial<Record<Box, HTMLInputElement | HTMLSelectElement | null>>>({});
+  const saveRef = useRef<HTMLButtonElement>(null);
+  /** The name box's Validating refused: like the desktop, the refusal also stops Save and Delete. */
+  const nameRefused = useRef(false);
 
-  async function loadFormRights(user: string) {
-    setFrUser(user);
-    setMsg(null);
-    if (!user) {
-      setFr({});
+  const focusBox = (box: Box, select = false) =>
+    setTimeout(() => {
+      const el = boxes.current[box];
+      el?.focus();
+      if (select && el instanceof HTMLInputElement) el.select();
+    }, 0);
+  const say = useCallback((kind: 'ok' | 'err', text: string) => setMsg({ kind, text }), []);
+
+  /** CLEAR_DATA / BtnCancel_Click (:2095-2117): blank boxes, the list read again, type User, add mode, cursor in name. */
+  const clear = useCallback(async () => {
+    setValues({ name: '', oldPassword: '', newPassword: '', confirmPassword: '' });
+    setUserType('User');
+    setEntryMode('A');
+    setPicked('');
+    nameRefused.current = false;
+    try {
+      setUsers(await get<UserRow[]>('/admin/users'));
+    } catch (error) {
+      say(
+        'err',
+        error instanceof ApiError && error.status === 403
+          ? USER_TEXT.NO_RIGHTS
+          : 'Failed to load users',
+      );
+    }
+    focusBox('name');
+  }, [say]);
+
+  useEffect(() => {
+    void clear();
+    get<{ edition?: { code?: string } | null }>('/me')
+      .then((me) => setShowRights(rightsScreenVisible(me?.edition)))
+      .catch(() => setShowRights(false));
+  }, [clear]);
+
+  const set = (key: keyof typeof values, value: string) =>
+    setValues((v) => ({ ...v, [key]: value }));
+  const existing = (name: string) => users.find((u) => same(u.loginName, name.trim()));
+
+  /** tUserName_Validating then tUserName_LostFocus. */
+  function leaveName() {
+    const name = values.name.trim();
+    const found = name ? existing(name) : undefined;
+    nameRefused.current = false;
+    if (found && entryMode !== 'E') {
+      nameRefused.current = true;
+      say('err', USER_TEXT.NAME_EXISTS);
+      focusBox('name', true);
       return;
     }
-    try {
-      const cat = catalog.length
-        ? catalog
-        : await get<{ mainMenu: string; subMenu: string }[]>('/admin/form-catalog');
-      if (!catalog.length) setCatalog(cat);
-      const cur = await get<any[]>(`/admin/users/${encodeURIComponent(user)}/form-rights`);
-      const m: Record<string, { view: boolean; edit: boolean; del: boolean; print: boolean }> = {};
-      for (const r of cur)
-        m[fkey(r.mainMenu, r.subMenu)] = {
-          view: !!r.view,
-          edit: !!r.edit,
-          del: !!r.del,
-          print: !!r.print,
-        };
-      setFr(m);
-    } catch (e) {
-      setMsg({
-        kind: 'err',
-        text:
-          e instanceof ApiError && e.status === 403
-            ? 'Admin access required'
-            : 'Failed to load form rights',
-      });
-    }
+    if (found) setUserType(userTypeOf(found.role));
+    else setEntryMode('A');
   }
-  async function saveFormRights() {
-    if (!frUser) return;
-    setFrBusy(true);
-    setMsg(null);
-    try {
-      const rows = catalog
-        .map((c) => ({
-          mainMenu: c.mainMenu,
-          subMenu: c.subMenu,
-          ...(fr[fkey(c.mainMenu, c.subMenu)] ?? {
-            view: false,
-            edit: false,
-            del: false,
-            print: false,
-          }),
-        }))
-        .filter((r) => r.view || r.edit || r.del || r.print);
-      const r = await post(`/admin/users/${encodeURIComponent(frUser)}/form-rights`, { rows });
-      setMsg({
-        kind: 'ok',
-        text: `Form rights saved for "${frUser}" — ${(r as any).saved} form(s) (none ⇒ no form access)`,
-      });
-    } catch {
-      setMsg({ kind: 'err', text: 'Failed to save form rights' });
-    } finally {
-      setFrBusy(false);
+
+  /** tOldPasword_Validating: an existing user's old password may not be left blank. */
+  function leaveOldPassword() {
+    if (entryMode === 'E' && existing(values.name) && !values.oldPassword) {
+      say('err', USER_TEXT.OLD_PASSWORD_REQUIRED);
+      focusBox('oldPassword');
     }
   }
 
-  const load = useCallback(async () => {
-    setMsg(null);
-    const list = await get<UserRow[]>('/admin/users');
-    setRows(list);
-  }, []);
-
-  // Default the new-user company to the active session company (falls back to '01').
-
-  useEffect(() => {
-    load().catch((e) => {
-      const status = e instanceof ApiError ? e.status : 0;
-      setMsg({
-        kind: 'err',
-        text: status === 403 ? 'Admin access required' : 'Failed to load users',
-      });
-    });
-  }, [load]);
-
-  // Seed the editable rights matrix from the loaded rows (admins normalise to 'ADMIN').
-  useEffect(() => {
-    const next: Record<string, RightsEdit> = {};
-    for (const u of rows) {
-      next[rowKey(u)] = {
-        catg: isAdmin(u.role) ? 'ADMIN' : 'USER',
-        userUpdate: u.userUpdate,
-        userDelete: u.userDelete,
-        userPrint: u.userPrint,
-      };
-    }
-    setRights(next);
-  }, [rows]);
-
-  const editRight = (key: string, patch: Partial<RightsEdit>) =>
-    setRights((m) => ({ ...m, [key]: { ...m[key], ...patch } }));
-
-  async function saveRights(u: UserRow) {
-    const key = rowKey(u);
-    const e = rights[key];
-    if (!e) return;
-    const effAdmin = isAdmin(e.catg); // admins implicitly hold every right
-    setMsg(null);
-    setSavingKey(key);
-    try {
-      await post(`/admin/users/${encodeURIComponent(u.loginName)}/rights`, {
-        catg: e.catg,
-        userUpdate: effAdmin ? true : e.userUpdate,
-        userDelete: effAdmin ? true : e.userDelete,
-        userPrint: effAdmin ? true : e.userPrint,
-      });
-      setMsg({ kind: 'ok', text: `Rights saved for "${u.loginName}"` });
-      await load();
-    } catch (err) {
-      const status = err instanceof ApiError ? err.status : 0;
-      // G178: show the server's reason (for example the last-administrator refusal) instead of a generic failure.
-      const reason = err instanceof ApiError && status === 400 ? (err.body as any)?.message : null;
-      setMsg({
-        kind: 'err',
-        text:
-          status === 403
-            ? 'Admin access required'
-            : reason
-              ? `Rights not saved for "${u.loginName}": ${reason}`
-              : `Failed to save rights for "${u.loginName}"`,
-      });
-    } finally {
-      setSavingKey(null);
+  /** tConPasword_Validating: Confirm Password must equal New Password, else it is cleared. */
+  function leaveConfirm() {
+    if (values.newPassword !== values.confirmPassword) {
+      say('err', USER_TEXT.PASSWORD_MISMATCH);
+      set('confirmPassword', '');
+      focusBox('confirmPassword');
     }
   }
 
-  async function resetPasswordForUser() {
-    if (!resetUser || !resetPassword) return;
-    setResetBusy(true);
-    setMsg(null);
-    try {
-      await post(`/admin/users/${encodeURIComponent(resetUser)}/password-reset`, {
-        newPassword: resetPassword,
-      });
-      setMsg({
-        kind: 'ok',
-        text: `Password reset for "${resetUser}"; active sessions were revoked and a change is required at login.`,
-      });
-      setResetUser('');
-      setResetPassword('');
-    } catch (error) {
-      const body = error instanceof ApiError ? error.body : null;
-      setMsg({
-        kind: 'err',
-        text:
-          body?.error === 'weak-password'
-            ? `Weak password: ${(body.reasons ?? []).join(', ')}`
-            : `Failed to reset password for "${resetUser}"`,
-      });
-    } finally {
-      setResetBusy(false);
+  const failure = (error: unknown) => {
+    const body = error instanceof ApiError ? (error.body as any) : null;
+    if (error instanceof ApiError && error.status === 403) return say('err', USER_TEXT.NO_RIGHTS);
+    if (body?.error === 'weak-password') {
+      say('err', passwordReasonText(body.reasons));
+      return focusBox('newPassword');
     }
-  }
-  async function create(e: React.FormEvent) {
-    e.preventDefault();
+    say('err', String(body?.message ?? body?.error ?? (error as Error)?.message ?? error));
+    const field = body?.field as string | undefined;
+    if (field === 'loginName') focusBox('name', true);
+    else if (field && field in LABEL) focusBox(field as Box, true);
+  };
+
+  async function save() {
     setMsg(null);
+    if (nameRefused.current) return say('err', USER_TEXT.NAME_EXISTS);
+    const name = values.name.trim();
+    if (!name) {
+      say('err', USER_TEXT.NAME_REQUIRED);
+      return focusBox('name');
+    }
+    if (values.newPassword !== values.confirmPassword) {
+      say('err', USER_TEXT.PASSWORD_MISMATCH);
+      return focusBox('confirmPassword');
+    }
+    const found = existing(name);
     setBusy(true);
     try {
-      await post('/admin/users', {
-        coCode,
-        loginName: form.loginName,
-        password: form.password,
-        role: form.role,
-      });
-      setMsg({ kind: 'ok', text: `User "${form.loginName}" created` });
-      setForm({ loginName: '', password: '', role: 'USER' });
-      setShowNew(false);
-      await load();
-    } catch (e) {
-      const b = e instanceof ApiError ? e.body : null;
-      const status = e instanceof ApiError ? e.status : 0;
-      const text =
-        b?.error === 'duplicate-user'
-          ? 'Login name already exists'
-          : b?.error === 'missing-or-invalid'
-            ? 'Missing/invalid: ' + (b.fields?.join(', ') ?? 'fields')
-            : status === 403
-              ? 'Admin access required'
-              : 'Create failed';
-      setMsg({ kind: 'err', text });
+      if (entryMode === 'E' && found)
+        await post(`/admin/users/${encodeURIComponent(found.loginName)}/update`, {
+          oldPassword: values.oldPassword,
+          newPassword: values.newPassword,
+          confirmPassword: values.confirmPassword,
+          userType,
+        });
+      else
+        await post('/admin/users', {
+          loginName: name,
+          password: values.newPassword,
+          confirmPassword: values.confirmPassword,
+          userType,
+        });
+      await clear();
+      say('ok', USER_TEXT.CREATED);
+    } catch (error) {
+      failure(error);
     } finally {
       setBusy(false);
     }
   }
 
-  const set = (k: keyof typeof form, v: string) => setForm((f) => ({ ...f, [k]: v }));
+  async function remove() {
+    setMsg(null);
+    if (nameRefused.current) return say('err', USER_TEXT.NAME_EXISTS);
+    const name = values.name.trim();
+    if (!name) return say('err', USER_TEXT.SELECT_FOR_DELETE);
+    if (!window.confirm(USER_TEXT.DELETE_CONFIRM)) return;
+    setBusy(true);
+    try {
+      await del(`/admin/users/${encodeURIComponent(existing(name)?.loginName ?? name)}`);
+      await clear();
+      say('ok', USER_TEXT.DELETED);
+    } catch (error) {
+      failure(error);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /** BtnPrint_Click (:1811-1818) checks the print right and prints nothing: MS_USER has no report. */
+  function print() {
+    setMsg(null);
+  }
+
+  async function resetPasswordForUser() {
+    if (!resetUser || !resetPassword) return;
+    setBusy(true);
+    try {
+      await post(`/admin/users/${encodeURIComponent(resetUser)}/password-reset`, {
+        newPassword: resetPassword,
+      });
+      say(
+        'ok',
+        `Password reset for "${resetUser}"; active sessions were revoked and a change is required at login.`,
+      );
+      setResetUser('');
+      setResetPassword('');
+    } catch (error) {
+      failure(error);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function onBoxKeyDown(event: KeyboardEvent<HTMLElement>, box: Box) {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    if (box === 'name' && !values.name.trim()) return;
+    const next = ORDER[ORDER.indexOf(box) + 1];
+    if (next) boxes.current[next]?.focus();
+    else saveRef.current?.focus();
+  }
+
+  function onScreenKeyDown(event: ScreenKeyEvent & { altKey?: boolean; code?: string }) {
+    if (event.defaultPrevented) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      router.back();
+      return;
+    }
+    if (!event.altKey) return;
+    const action = {
+      KeyS: save,
+      KeyP: print,
+      KeyC: clear,
+      KeyD: remove,
+      KeyX: () => router.back(),
+    }[event.code ?? ''];
+    if (!action) return;
+    event.preventDefault();
+    void action();
+  }
+  const screenRef = useScreenEscape<HTMLDivElement>(onScreenKeyDown);
+
+  const password = (box: 'oldPassword' | 'newPassword' | 'confirmPassword', onBlur: () => void) => (
+    <input
+      id={`user-${box}`}
+      type="password"
+      autoComplete={box === 'oldPassword' ? 'current-password' : 'new-password'}
+      ref={(el) => {
+        boxes.current[box] = el;
+      }}
+      value={values[box]}
+      style={{ width: 200 }}
+      onChange={(e) => set(box, e.target.value)}
+      onBlur={onBlur}
+      onKeyDown={(e) => onBoxKeyDown(e, box)}
+    />
+  );
+  const row = (box: Box, control: React.ReactNode) => (
+    <div className="row" style={{ alignItems: 'center', gap: 8, marginBottom: 6 }}>
+      <label htmlFor={`user-${box}`} style={{ width: 140 }}>
+        {LABEL[box]}
+      </label>
+      {control}
+    </div>
+  );
 
   return (
-    <div>
-      <h1>
-        Users &amp; Rights <span className="muted">— LOGIN_MAST</span>
-      </h1>
-
+    <div ref={screenRef} onKeyDown={onScreenKeyDown}>
+      <h1>User Create</h1>
+      {msg && (
+        <div className={`msg ${msg.kind}`} role={msg.kind === 'err' ? 'alert' : 'status'}>
+          {msg.text}
+        </div>
+      )}
+      <div className="panel" style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
+        <div>
+          {row(
+            'name',
+            <input
+              id="user-name"
+              ref={(el) => {
+                boxes.current.name = el;
+              }}
+              value={values.name}
+              maxLength={USER_NAME_MAX}
+              autoComplete="off"
+              style={{ width: 200 }}
+              onChange={(e) => {
+                nameRefused.current = false;
+                set('name', typedUserName(e.target.value));
+              }}
+              onBlur={leaveName}
+              onKeyDown={(e) => onBoxKeyDown(e, 'name')}
+            />,
+          )}
+          {row('oldPassword', password('oldPassword', leaveOldPassword))}
+          {row(
+            'newPassword',
+            password('newPassword', () => {}),
+          )}
+          {row('confirmPassword', password('confirmPassword', leaveConfirm))}
+          {row(
+            'userType',
+            <select
+              id="user-userType"
+              ref={(el) => {
+                boxes.current.userType = el;
+              }}
+              value={userType}
+              style={{ width: 200 }}
+              onChange={(e) => setUserType(e.target.value as UserType)}
+              onKeyDown={(e) => onBoxKeyDown(e, 'userType')}
+            >
+              {USER_TYPES.map((t) => (
+                <option key={t}>{t}</option>
+              ))}
+            </select>,
+          )}
+        </div>
+        <div className="row" style={{ alignItems: 'center', gap: 8, alignSelf: 'flex-start' }}>
+          <label htmlFor="user-pick">User Name</label>
+          {/* cboUser (AddCboItem :1507-1532): a blank entry, then the company's users by name. Picking one is the
+              desktop's DISPLAY_DATA: edit mode, boxes cleared, and outside Lite the user's rights grid. */}
+          <select
+            id="user-pick"
+            value={picked}
+            style={{ width: 200 }}
+            onChange={(e) => {
+              setPicked(e.target.value);
+              setValues({ name: '', oldPassword: '', newPassword: '', confirmPassword: '' });
+              nameRefused.current = false;
+              setEntryMode('E');
+            }}
+          >
+            <option value="" />
+            {users.map((u) => (
+              <option key={u.loginName}>{u.loginName}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+      {showRights && <UserRightsGrid user={picked} onMessage={say} />}
       <div className="toolbar">
-        <button className="primary" onClick={() => setShowNew((s) => !s)}>
-          {showNew ? 'Cancel' : '+ New user'}
+        <button ref={saveRef} className="primary" disabled={busy} onClick={() => void save()}>
+          Save
         </button>
-        <button
-          className="ghost"
-          onClick={() => load().catch(() => setMsg({ kind: 'err', text: 'Failed to load users' }))}
-        >
-          Refresh
+        <button className="ghost" disabled={busy} onClick={print}>
+          Print
         </button>
-        <span className="muted">{rows.length} user(s)</span>
+        <button className="ghost" disabled={busy} onClick={() => void clear()}>
+          Cancel
+        </button>
+        <button className="ghost" disabled={busy} onClick={() => void remove()}>
+          Delete
+        </button>
+        <button className="ghost" onClick={() => router.back()}>
+          Exit
+        </button>
       </div>
 
-      {msg && <div className={`msg ${msg.kind}`}>{msg.text}</div>}
-
-      {showNew && (
-        <form className="panel" onSubmit={create}>
-          <h2>New user</h2>
-          <div className="row">
+      {/* Web addition: an administrator sets a temporary password, which forces a change at the next sign-in. It
+          replaces the desktop's F1 in Old Password, which showed the stored password (not ported). */}
+      <div className="panel" style={{ overflow: 'auto' }}>
+        <h2>Users</h2>
+        <table className="grid">
+          <thead>
+            <tr>
+              <th>User Name</th>
+              <th>User Type</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((u) => (
+              <tr key={u.loginName}>
+                <td>{u.loginName}</td>
+                <td>{userTypeOf(u.role)}</td>
+                <td>
+                  <button
+                    className="ghost"
+                    onClick={() => {
+                      setResetUser(u.loginName);
+                      setResetPassword('');
+                    }}
+                  >
+                    Reset password
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {resetUser && (
+          <div className="row" style={{ alignItems: 'flex-end', marginTop: 8 }}>
             <div className="field">
-              <label>Company (CO_CODE)</label>
-              <input value={coCode} readOnly title="Current authenticated company" />
-            </div>
-            <div className="field">
-              <label>Login name *</label>
+              <label htmlFor="user-reset">Temporary password for {resetUser}</label>
               <input
-                value={form.loginName}
-                autoComplete="off"
-                onChange={(e) => set('loginName', e.target.value)}
-              />
-            </div>
-            <div className="field">
-              <label>Password * (12+ mixed characters)</label>
-              <input
-                type="password"
-                value={form.password}
-                autoComplete="new-password"
-                onChange={(e) => set('password', e.target.value)}
-              />
-            </div>
-            <div className="field">
-              <label>Role *</label>
-              <select value={form.role} onChange={(e) => set('role', e.target.value)}>
-                {ROLES.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <button className="primary" disabled={busy}>
-            {busy ? 'Saving…' : 'Create user'}
-          </button>
-        </form>
-      )}
-
-      {resetUser && (
-        <div className="panel">
-          <h2>Reset password — {resetUser}</h2>
-          <div className="row">
-            <div className="field">
-              <label>Temporary password (12+ mixed characters)</label>
-              <input
+                id="user-reset"
                 type="password"
                 autoComplete="new-password"
                 value={resetPassword}
                 onChange={(event) => setResetPassword(event.target.value)}
               />
             </div>
-            <div className="field" style={{ alignSelf: 'end' }}>
-              <button
-                className="primary"
-                disabled={resetBusy || !resetPassword}
-                onClick={resetPasswordForUser}
-              >
-                {resetBusy ? 'Resetting…' : 'Reset and revoke sessions'}
-              </button>
-            </div>
-            <div className="field" style={{ alignSelf: 'end' }}>
-              <button
-                className="ghost"
-                disabled={resetBusy}
-                onClick={() => {
-                  setResetUser('');
-                  setResetPassword('');
-                }}
-              >
-                Cancel
-              </button>
-            </div>
+            <button
+              className="ghost"
+              disabled={busy || !resetPassword}
+              onClick={resetPasswordForUser}
+            >
+              Reset and revoke sessions
+            </button>
+            <button className="ghost" onClick={() => setResetUser('')}>
+              Close
+            </button>
           </div>
-        </div>
-      )}
-
-      <div className="panel" style={{ overflow: 'auto' }}>
-        <table className="grid">
-          <thead>
-            <tr>
-              <th>Login name</th>
-              <th>Role</th>
-              <th>Company</th>
-              <th style={{ textAlign: 'center' }}>Update</th>
-              <th style={{ textAlign: 'center' }}>Delete</th>
-              <th style={{ textAlign: 'center' }}>Print</th>
-              <th>Category</th>
-              <th>Rights</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((u) => {
-              const key = rowKey(u);
-              const e: RightsEdit = rights[key] ?? {
-                catg: isAdmin(u.role) ? 'ADMIN' : 'USER',
-                userUpdate: u.userUpdate,
-                userDelete: u.userDelete,
-                userPrint: u.userPrint,
-              };
-              const effAdmin = isAdmin(e.catg); // admins implicitly hold all rights → all-on/disabled
-              const saving = savingKey === key;
-              const box = (field: 'userUpdate' | 'userDelete' | 'userPrint') => (
-                <input
-                  type="checkbox"
-                  aria-label={`${field} for ${u.loginName}`}
-                  checked={effAdmin ? true : e[field]}
-                  disabled={effAdmin || saving}
-                  onChange={(ev) =>
-                    editRight(key, { [field]: ev.target.checked } as Partial<RightsEdit>)
-                  }
-                />
-              );
-              return (
-                <tr key={key}>
-                  <td>{u.loginName}</td>
-                  <td>
-                    {u.role}
-                    {isAdmin(u.role) && <span className="muted"> (admin)</span>}
-                  </td>
-                  <td>{u.coCode}</td>
-                  <td style={{ textAlign: 'center' }}>{box('userUpdate')}</td>
-                  <td style={{ textAlign: 'center' }}>{box('userDelete')}</td>
-                  <td style={{ textAlign: 'center' }}>{box('userPrint')}</td>
-                  <td>
-                    <select
-                      aria-label={`Category for ${u.loginName}`}
-                      value={effAdmin ? 'ADMIN' : 'USER'}
-                      disabled={saving}
-                      onChange={(ev) => editRight(key, { catg: ev.target.value })}
-                    >
-                      <option value="ADMIN">Admin</option>
-                      <option value="USER">User</option>
-                    </select>
-                  </td>
-                  <td>
-                    <button className="ghost" disabled={saving} onClick={() => saveRights(u)}>
-                      {saving ? 'Saving…' : 'Save'}
-                    </button>
-                    <button
-                      className="ghost"
-                      disabled={saving}
-                      onClick={() => {
-                        setResetUser(u.loginName);
-                        setResetPassword('');
-                      }}
-                    >
-                      Reset password
-                    </button>
-                    {effAdmin && <span className="muted"> all rights</span>}
-                  </td>
-                </tr>
-              );
-            })}
-            {rows.length === 0 && (
-              <tr>
-                <td colSpan={8} className="muted">
-                  No users.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="panel" style={{ overflow: 'auto' }}>
-        <div className="row" style={{ alignItems: 'flex-end' }}>
-          <div className="field">
-            <label>Form rights for user</label>
-            <select value={frUser} onChange={(e) => loadFormRights(e.target.value)}>
-              <option value="">— pick a user —</option>
-              {rows.map((u) => (
-                <option key={rowKey(u)} value={u.loginName}>
-                  {u.loginName}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="field muted" style={{ flex: 1, alignSelf: 'center' }}>
-            Tick the forms this user may access. Leaving every form unticked means{' '}
-            <b>no form access</b>. Administrators are the only explicit all-access bootstrap role.
-          </div>
-          {frUser && (
-            <div className="field" style={{ alignSelf: 'end' }}>
-              <button className="primary" disabled={frBusy} onClick={saveFormRights}>
-                {frBusy ? 'Saving…' : 'Save form rights'}
-              </button>
-            </div>
-          )}
-        </div>
-        {frUser && catalog.length > 0 && (
-          <table className="grid" style={{ marginTop: 8 }}>
-            <thead>
-              <tr>
-                <th>Main</th>
-                <th>Form</th>
-                <th style={{ textAlign: 'center' }}>View</th>
-                <th style={{ textAlign: 'center' }}>Edit</th>
-                <th style={{ textAlign: 'center' }}>Delete</th>
-                <th style={{ textAlign: 'center' }}>Print</th>
-              </tr>
-            </thead>
-            <tbody>
-              {catalog.map((c) => {
-                const k = fkey(c.mainMenu, c.subMenu);
-                const e = fr[k] ?? { view: false, edit: false, del: false, print: false };
-                const cb = (f: 'view' | 'edit' | 'del' | 'print') => (
-                  <input
-                    type="checkbox"
-                    checked={e[f]}
-                    onChange={(ev) => setFrCell(k, { [f]: ev.target.checked } as any)}
-                  />
-                );
-                return (
-                  <tr key={k}>
-                    <td className="muted">{c.mainMenu}</td>
-                    <td>{c.subMenu}</td>
-                    <td style={{ textAlign: 'center' }}>{cb('view')}</td>
-                    <td style={{ textAlign: 'center' }}>{cb('edit')}</td>
-                    <td style={{ textAlign: 'center' }}>{cb('del')}</td>
-                    <td style={{ textAlign: 'center' }}>{cb('print')}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
         )}
       </div>
     </div>
