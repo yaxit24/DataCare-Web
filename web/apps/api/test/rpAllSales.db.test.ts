@@ -494,7 +494,7 @@ const lines = (vs: Voucher[]) => vs.flatMap((v) => v.lines);
       expect(xlsx.statusCode).toBe(200);
     });
 
-    it('validates input like the desktop: bad date 400, reversed range empty, locked location 400', async () => {
+    it('validates input like the desktop: bad date 400, reversed range empty, locked location 409', async () => {
       const bad = await get('printer', `/reports/sales-report?fromDate=2026-13-01&toDate=${TO}`);
       expect(bad.statusCode).toBe(400);
       expect(bad.json().error).toBe('invalid-date');
@@ -510,7 +510,11 @@ const lines = (vs: Voucher[]) => vs.flatMap((v) => v.lines);
         'printer',
         `/reports/sales-report?fromDate=${FROM}&toDate=${TO}&lcCode=02`,
       );
-      expect(locked.statusCode).toBe(400);
+      // The desktop disables tLcCode outside head office (RP_ALL.cs:6660-6665), so no other location can be
+      // asked. The web refuses one centrally, like every scoped route (businessScope.ts enforceRequestScope):
+      // 409 scope-mismatch, as the GST report does (gstReport.db.test.ts).
+      expect(locked.statusCode).toBe(409);
+      expect(locked.json()).toEqual({ error: 'scope-mismatch' });
       const lacks = await get(
         'printer',
         `/reports/sales-report?fromDate=${FROM}&toDate=${TO}&mode=item&city=SURAT`,
