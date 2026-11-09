@@ -321,9 +321,7 @@ export function computeLine(
       `labourType must be one of ${[...SALE_LABOUR_TYPES].join(', ')}: ${String(line.labourType)}`,
     );
   }
-  // LBR_AMT is ONE Math.Round (TR_SALE.cs:11100-11127): `saleLineLabourAmount` skips the LBR_ROF stage when it is
-  // finer than the line precision, which rounded 1.495 to 1.50 and then to 2 where the desktop stores 1 (desktop
-  // oracle vector labour.mid.n0.299xr5.rof2).
+  // LBR_AMT is ONE Math.Round (TR_SALE.cs:11100-11127; desktop oracle vector labour.mid.n0.299xr5.rof2).
   const labourOf = (type: LabourType, input: Parameters<typeof labourCharge>[1]): number =>
     policy ? saleLineLabourAmount(type, input, policy) : labourCharge(type, input);
   const labour = line.labourType
@@ -356,9 +354,7 @@ export function computeLine(
   // Precision comes from CO_SET_NEW.TOT_AMT_ROF, which is 0 for this customer. It is not hardcoded: the same
   // policy at 2 leaves 354.20 alone, which is what a customer configured that way would expect.
   const roundAmount = (v: number): number => (policy ? policy.roundBillTotal(v) : v);
-  // ITM_AMT is ONE Math.Round of quantity x rate (TR_SALE.cs:10905-10932). Rounding the 2 dp `metal` again made
-  // 3.495 into 3.50 and then 4 where the desktop stores 3 (desktop oracle vector amount.mid.n3.495xr1). `metal`
-  // itself stays the 2 dp figure the percentage labour below has always been taken from.
+  // ITM_AMT: one Math.Round (TR_SALE.cs:10905-10932, oracle amount.mid.n3.495xr1); `metal` keeps feeding % labour.
   const metalRounded = (() => {
     if (!policy || line.metalAmount != null || amountType === '' || rate == null)
       return roundAmount(metal);
@@ -370,9 +366,8 @@ export function computeLine(
     return basis.quantity > 0 ? saleItemAmountRounded(basis, rate, policy) : roundAmount(metal);
   })();
   const labourRounded = roundAmount(labour);
-  // NET_AMT is the 2 dp sum, not re-rounded to the line precision: CommPassTotal formats 23 + 27 + 29 with "0.00"
-  // (TR_SALE.cs:11548, :11570), so a paise OTH_AMT survives (desktop oracle vector total.stone: 66863.50, not
-  // 66864). Item and labour are already rounded above, so only the other amount can carry paise here.
+  // NET_AMT is the 2 dp sum, not re-rounded: TR_SALE.cs:11548/:11570 format it "0.00", so a paise OTH_AMT
+  // survives (desktop oracle vector total.stone: 66863.50).
   const net = calcLineNet({ metal: metalRounded, labour: labourRounded, other: line.otherAmount });
   return { fine, metal: metalRounded, labour: labourRounded, net };
 }
