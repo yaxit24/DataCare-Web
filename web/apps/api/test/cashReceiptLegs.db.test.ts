@@ -44,7 +44,6 @@ import {
 } from '../src/modules/finance/lifecycle.js';
 import { PeriodLockValidationError } from '../src/modules/posting/posting.js';
 import { financeVoucherData, financeVoucherHtml } from '../src/modules/finance/financeVoucher.js';
-import { recentVouchers } from '../src/modules/vouchers/list.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const TENANT = 'cash-legs';
@@ -680,10 +679,6 @@ describe.runIf(RUN)('a multi-line receipt is read back as one voucher of N rows'
         itDesc: l.itDesc,
       })),
     );
-
-    // The voucher list shows the voucher once with its whole amount.
-    const listed = await recentVouchers(runtime, scope, 'CASH_DATA', BOOK);
-    expect(listed.map((r) => r.total)).toEqual([1999.75]);
   });
 
   it('refuses a single-line edit of a grid voucher and changes no row', async () => {

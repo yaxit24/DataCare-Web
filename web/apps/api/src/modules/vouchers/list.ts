@@ -95,11 +95,8 @@ export async function recentVouchers(
     // CONTRA_DATA (contra, fine JV, journal) has no amount column; each money voucher is a set of one-sided
     // DR_AMT / CR_AMT rows. Its total is the amount transferred, the voucher's summed debits (the desktop voucher
     // list selects SUM(CR_AMT) and SUM(DR_AMT), TR_CONTRA.cs:3140-3144). Compute it before DISTINCT ON.
-    // A TR_CASH grid voucher is one CASH_DATA row per line (TR_CASH.cs:2995-3060): its total is Σ REC_AMT.
     const amtSel = amtCol
-      ? table === 'CASH_DATA'
-        ? `coalesce(sum(coalesce(NULLIF(${qid(amtCol)}::text,'')::numeric,0)) OVER (PARTITION BY "VCH_NO"),0)::float`
-        : `coalesce(NULLIF(${qid(amtCol)}::text,'')::numeric,0)::float`
+      ? `coalesce(NULLIF(${qid(amtCol)}::text,'')::numeric,0)::float`
       : cols.has('DR_AMT')
         ? `coalesce(sum(coalesce(NULLIF("DR_AMT"::text,'')::numeric,0)) OVER (PARTITION BY "VCH_NO"),0)::float`
         : '0::float';
