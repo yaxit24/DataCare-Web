@@ -197,6 +197,8 @@ route('Sales/Sales Invoice', [
   'PUT /sales/:vchNo',
   'DELETE /sales/:vchNo',
   'GET /sales/invoice',
+  // Contained pending an atomic Sales Invoice import + approval closure transaction.
+  'POST /tour/:vchNo/bill',
 ]);
 route('Sales/Sales Quotation', [
   'POST /sales-quotations',
@@ -298,15 +300,23 @@ route('Sales/Bul Sales', [
 ]);
 route('Sales/Tour / Approval Sale', [
   'POST /tour/issue',
+  'GET /tour/:vchNo',
+  'PUT /tour/:vchNo',
   'DELETE /tour/:vchNo',
-  'GET /tour/:vchNo/lines',
-  'POST /tour/:vchNo/bill',
+  'GET /tour/:vchNo/print',
   'POST /tour-sales',
   'GET /tour-sales/:vchNo',
   'PUT /tour-sales/:vchNo',
   'DELETE /tour-sales/:vchNo',
 ]);
-route('Sales/Approval Return', ['POST /tour/return', 'DELETE /tour/return/:vchNo']);
+route('Sales/Approval Return', [
+  'GET /tour/:vchNo/lines',
+  'POST /tour/return',
+  'GET /tour/return/:vchNo',
+  'PUT /tour/return/:vchNo',
+  'DELETE /tour/return/:vchNo',
+  'GET /tour/return/:vchNo/print',
+]);
 // Desktop menu "Wh Sales" opens TR_WH_SALE scoped to MAIN_BOOK 'WH SALES' (MDI_FORM.cs:8038-8046), under its
 // own right; "Rate Cut" opens the same form scoped to 'RATE CUT' (:8110-8118). One right no longer grants both.
 route('Sales/Wholesale Sale', [
@@ -1092,6 +1102,9 @@ const PRINT_ROUTES = new Set([
   // TR_TAG_CAN.cs:5390-5393: TagCanBill needs print rights.
   'GET /stock/tag-cancel/:vchNo/print',
   'GET /stock/stock-adjust/:vchNo/print',
+  // TR_APR_ISU.cs:6712-6717: AprBill needs the selected menu's print right.
+  'GET /tour/:vchNo/print',
+  'GET /tour/return/:vchNo/print',
 ]);
 
 const UPDATE_POST_ROUTES = new Set([
@@ -1130,7 +1143,6 @@ const UPDATE_POST_ROUTES = new Set([
   'POST /year-end/close',
   'POST /balance-transfer/year-close',
   'POST /balance-transfer/openings',
-  'POST /tour/:vchNo/bill',
   'POST /reports/entry-check/mark-checked',
 ]);
 

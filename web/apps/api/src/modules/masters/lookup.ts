@@ -243,20 +243,117 @@ export async function lookupAvailableTags(
       lcCode,
       find,
     );
+    const sourceIds = rows
+      .filter((row) => text(row.source) === 'BAR_DETL')
+      .map((row) => text(row.sort_key));
+    const richRows: Record<string, unknown>[] = sourceIds.length
+      ? await tx.$queryRawUnsafe(
+          `SELECT b.row_id::text source_id,b."LOT_NO",b."ITM_COLOR",
+                  coalesce(b."TAG_COST",0)::float8 "TAG_COST",b."HM_ID",b."HM_ID2",b."HM_ID3",b."HM_ID4",
+                  coalesce(b."HM_ID_WT",0)::float8 "HM_ID_WT",coalesce(b."HM_ID2_WT",0)::float8 "HM_ID2_WT",
+                  coalesce(b."HM_ID3_WT",0)::float8 "HM_ID3_WT",coalesce(b."HM_ID4_WT",0)::float8 "HM_ID4_WT",
+                  coalesce(b."BAG_WT",0)::float8 "BAG_WT",coalesce(b."ITM_GHT_WT",0)::float8 "ITM_GHT_WT",
+                  coalesce(b."LBR_PRC",0)::float8 "LBR_PRC",coalesce(b."ITM_AMT",0)::float8 "ITM_AMT",
+                  coalesce(b."KR_NET_WT",0)::float8 "KR_NET_WT",coalesce(b."KR_TOUCH",0)::float8 "KR_TOUCH",
+                  coalesce(b."KR_WEST_PRC",0)::float8 "KR_WEST_PRC",coalesce(b."KR_FINE",0)::float8 "KR_FINE",
+                  b."RATE_TYPE",b."IT_TYPE",b."DESIGN_IMG_ID"
+             FROM "BAR_DETL" b WHERE b.tenant_id=$1 AND b.row_id::text=ANY($2::text[])`,
+          tenantId,
+          sourceIds,
+        )
+      : [];
+    const richById = new Map(
+      richRows.map(({ source_id: sourceId, ...row }) => [text(sourceId), row] as const),
+    );
+    const componentTags = [
+      ...new Set(
+        rows
+          .filter((row) => text(row.source) === 'BAR_DETL')
+          .map((row) => text(row.TAG_NO))
+          .filter(Boolean),
+      ),
+    ];
+    const componentRows: Record<string, unknown>[] = componentTags.length
+      ? await tx.$queryRawUnsafe(
+          `SELECT i."TAG_NO",coalesce(i."VCH_SRNO",0)::float8 "VCH_SRNO",
+                  coalesce(i."ISR_NO",0)::float8 "ISR_NO",i."IT_CODE",i."DM_CODE",i."DM_NAME",i."DM_SIZE",
+                  i."DM_SFNO",i."DM_LEB",i."DM_COLOR",i."DM_ORIGIN",i."DM_REMARK",i."IT_RATE_TYPE",i."IT_TYPE",
+                  coalesce(i."IT_PCS",0)::float8 "IT_PCS",coalesce(i."IT_PCS_WT",0)::float8 "IT_PCS_WT",
+                  coalesce(i."IT_GWT",0)::float8 "IT_GWT",coalesce(i."KR_WT",0)::float8 "KR_WT",
+                  coalesce(i."IT_CON_PRC",0)::float8 "IT_CON_PRC",coalesce(i."IT_CON_WT",0)::float8 "IT_CON_WT",
+                  coalesce(i."IT_RATE",0)::float8 "IT_RATE",coalesce(i."IT_AMT",0)::float8 "IT_AMT",
+                  coalesce(i."IT_LBR_RATE",0)::float8 "IT_LBR_RATE",coalesce(i."IT_LBR_AMT",0)::float8 "IT_LBR_AMT",
+                  coalesce(i."IT_NET_AMT",0)::float8 "IT_NET_AMT",coalesce(i."KR_LESS_PRC",0)::float8 "KR_LESS_PRC",
+                  coalesce(i."KR_CON_PRC",0)::float8 "KR_CON_PRC",coalesce(i."KR_CON_WT",0)::float8 "KR_CON_WT",
+                  coalesce(i."KR_RATE",0)::float8 "KR_RATE",coalesce(i."KR_AMT",0)::float8 "KR_AMT",
+                  coalesce(i."KR_LBR_RATE",0)::float8 "KR_LBR_RATE",coalesce(i."KR_LBR_AMT",0)::float8 "KR_LBR_AMT",
+                  coalesce(i."KR_NET_AMT",0)::float8 "KR_NET_AMT"
+             FROM "BAR_IDTL" i
+            WHERE i.tenant_id=$1 AND i."CO_CODE"=$2 AND ($3::text='' OR i."LC_CODE"=$3)
+              AND i."TAG_NO"=ANY($4::text[])
+            ORDER BY i."TAG_NO",i."VCH_SRNO",i."ISR_NO",i.row_id`,
+          tenantId,
+          coCode,
+          lcCode,
+          componentTags,
+        )
+      : [];
+    const stonesByIdentity = new Map<string, Record<string, unknown>[]>();
+    for (const stone of componentRows) {
+      const key = `${text(stone.TAG_NO)}|${num(stone.VCH_SRNO)}`;
+      const values = stonesByIdentity.get(key) ?? [];
+      values.push({
+        isrNo: num(stone.ISR_NO),
+        itCode: text(stone.IT_CODE),
+        dmCode: text(stone.DM_CODE),
+        dmName: text(stone.DM_NAME),
+        dmSize: text(stone.DM_SIZE),
+        dmSfNo: text(stone.DM_SFNO),
+        dmLeb: text(stone.DM_LEB),
+        dmColor: text(stone.DM_COLOR),
+        dmOrigin: text(stone.DM_ORIGIN),
+        dmRemark: text(stone.DM_REMARK),
+        pcs: num(stone.IT_PCS),
+        pcsWt: num(stone.IT_PCS_WT),
+        grossWt: num(stone.IT_GWT),
+        karigarWt: num(stone.KR_WT),
+        conPct: num(stone.IT_CON_PRC),
+        conWt: num(stone.IT_CON_WT),
+        rateType: text(stone.IT_RATE_TYPE),
+        rate: num(stone.IT_RATE),
+        amount: num(stone.IT_AMT),
+        lbrRate: num(stone.IT_LBR_RATE),
+        lbrAmount: num(stone.IT_LBR_AMT),
+        netAmount: num(stone.IT_NET_AMT),
+        karigarLessPct: num(stone.KR_LESS_PRC),
+        karigarConPct: num(stone.KR_CON_PRC),
+        karigarConWt: num(stone.KR_CON_WT),
+        karigarRate: num(stone.KR_RATE),
+        karigarAmount: num(stone.KR_AMT),
+        karigarLabourRate: num(stone.KR_LBR_RATE),
+        karigarLabourAmount: num(stone.KR_LBR_AMT),
+        karigarNetAmount: num(stone.KR_NET_AMT),
+        itType: text(stone.IT_TYPE),
+      });
+      stonesByIdentity.set(key, values);
+    }
     // Two live instances may share a tag number. `ambiguous` marks them; the screen sends the picked row's
     // VCH_SRNO and IT_CODE with the tag, so the save reserves exactly that instance.
     const counts = new Map<string, number>();
     for (const row of rows) counts.set(text(row.TAG_NO), (counts.get(text(row.TAG_NO)) ?? 0) + 1);
-    return rows.map(({ sort_key: _sort, ...row }) => {
+    return rows.map(({ sort_key: sourceId, ...row }) => {
       const ambiguous = (counts.get(text(row.TAG_NO)) ?? 0) > 1;
       const name =
         [text(row.IT_CODE), text(row.IT_NAME)].filter(Boolean).join(' · ') || text(row.PR_CODE);
+      const rich = richById.get(text(sourceId)) ?? {};
       return {
         code: text(row.TAG_NO),
         // The operator must be able to tell the instances apart in the list itself.
         name: ambiguous ? `${name} · #${serialText(row.VCH_SRNO)}` : name,
         ambiguous,
         ...row,
+        ...rich,
+        stones: stonesByIdentity.get(`${text(row.TAG_NO)}|${num(row.VCH_SRNO)}`) ?? [],
       };
     });
   });
