@@ -3,6 +3,14 @@
 - Desktop texts, tab order, Confirm Password on leaving the box, edit-mode Save with the Old Password check and Delete (`MS_USER.cs:1820-2253`); D34 8+ character passwords with deny-lists and per-account back-off, D35 delete = deactivate with every session revoked (a deleted admin's open session is refused on its next request), D36 Lite hides the rights grid. Not ported: plaintext LOGIN_PWD, F1 password reveal, the ABC reset tool.
 - `userMaster.routes.db.test.ts` 13 of 13; users browser module 22 of 22 (T01-T18, none blocked). Catalog stays PARTIAL: action-level enforcement of the stored rights and desktop-runtime comparison remain.
 
+## 2026-11-09 — Sales Order scheme tender (WP-03, N230, G206 scheme part)
+
+- Owner decision: follow the source. The typed Scheme Amt joins ADV_AMT and Order_Rojmel type 05 (`Ac_Rojmel.cs:19`) debits the MEMB
+  ADJUST book's BOOK_DETL slot 1 (never the literal 00079); Live24's 7 scheme orders lack 05 because 3 are of a year the day book no
+  longer holds and 4 came through the non-Lite MEMB ADJUST path on a likely older build (aggregate counts, doc 12 N230).
+- `sales-order.create.scheme-tender` passes and left `baseline.json`; `salesOrderScheme.db.test.ts` red 4/5 before, green after; module
+  32 of 33 (one blocked, G174). Open: the non-Lite path, a MEMB ADJUST book in provisioning, VCH_DESC on order day-book rows.
+
 ## 2026-11-09 — Esc with no focused control on nine more screens (WP-09, GB-02, under G239)
 
 - Party, Item, Item Group, Product, Tax, Address, Employee, Auto Item and Item Opening lost Esc when the focus was on the page body (each
@@ -15,6 +23,15 @@
 
 - Branch `agent/wp01-approval-land` merges `origin/backup/lite-approval-2026-11-09`; the older Item Opening / Tag Cancel commits on that branch are kept at main's version, the approval work is renumbered from N211/G224 (now the Employee master) to N229/G242, and its two migrations are renamed to 20261109090000 / 20261109091500.
 - Approval modules: issue 20 passed / 2 blocked (T13 retry waits for WP-04 idempotency; T18 Sales Apr No import control not built), return 17 / 1 blocked (T13); new T14 last-write fault cases and a T12 same-tag race pass. Catalog rows stay PARTIAL; desktop match 0%.
+
+## 2026-11-09 — Idempotent voucher creates, first routes (N52 / G29, WP-04)
+
+- 2026-11-09: `api_command_receipt` (forced RLS) and `web/apps/api/src/modules/shared/idempotency.ts` guard Stock
+  Adjust, Tag Cancel and the four Cash/Bank creates: the receipt is claimed and completed inside the voucher's own
+  transaction, a replay with the same Idempotency-Key and request answers the first response byte for byte, a changed
+  request is 409.
+- 2026-11-09: still queued (the follow-up list in `web/apps/api/test/idempotencyRoutePolicy.test.ts`): Contra, Sales,
+  Sales Order, Sales Return, Purchase, Purchase Return, Wh Sales, Fine JV and the other voucher creates.
 
 ## 2026-11-02 — Stock Adjust legacy voucher safety follow-up (N221 / G234)
 

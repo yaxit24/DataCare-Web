@@ -3681,7 +3681,7 @@
     },
     {
       "id": "N52",
-      "status": "planned",
+      "status": "in-progress",
       "action": "Idempotent financial commands with a transactional command receipt",
       "parentLabels": "P01-05, X05",
       "startAfter": [
@@ -3692,7 +3692,19 @@
       "gapIds": "G29",
       "sourceAndModuleDetail": "11-audit-implementation-plan-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-09",
+      "evidence": [
+        "web/apps/api/src/modules/shared/idempotency.ts",
+        "web/apps/api/src/modules/shared/idempotencyContext.ts",
+        "web/packages/db/prisma/migrations/20261109120000_api_command_receipt/migration.sql",
+        "web/apps/api/test/idempotency.routes.db.test.ts",
+        "web/apps/api/test/idempotencyRoutePolicy.test.ts",
+        "web/apps/web/test/features/modules/stockAdjust.mjs",
+        "web/apps/web/test/features/modules/cashBank.mjs",
+        "web/apps/web/test/features/modules/tagCancel.mjs"
+      ],
+      "statusNote": "WP-04 first PR: the api_command_receipt mechanism (receipt claimed and completed inside the voucher's own withTxBudget transaction; same key and request replays byte for byte with Idempotency-Replayed; same key with another request is 409 idempotency-key-reused; D18 30-day retention with a per-tenant purge) guards Stock Adjust, Tag Cancel and the four Cash/Bank menus (POST /stock/stock-adjust, /stock/tag-cancel, /receipts, /receipts/multi, /payments, /payments/multi). Sequential and concurrent replays, tenant isolation, rollback and purge pass on forced RLS; browser T13 replay cases pass. The header stays optional for old clients; every other voucher create is queued in idempotencyRoutePolicy.test.ts."
     },
     {
       "id": "N53",
@@ -7699,6 +7711,31 @@
         "web/apps/web/test/features/modules/approvalReturn.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Source-derived DB/HTTP tests now prove: return POST compares the requested stable source line and locks one exact TAG_NO + VCH_SRNO + IT_CODE BAR row before identity/write; unchanged return PUT validates its source/BAR link before the no-op path; every BAR mutation is item-scoped and affected-count checked. /sales keys APR_DETL by OLD_SRNO, compares party, item, tag, BAR instance, pieces, gross and net weight, reuses the locked approval-held tag identity, updates the locked BAR row, and releases by the same stable key; tagged mismatch is 400/no-write, tagged exact consumption/reversal succeeds, and an OLD_SRNO 2 / SR_NO 1 gap binds source 2. Missing line OLD_SRNO and per-line stone ISR_NO allocate above retained maxima; duplicate, zero and fractional explicit IDs return 400. LDisc% derives DISC_AMT and NET_AMT persists at one decimal. Stone codes are trimmed, required and checked in company ITEM_MAST. Existing identity, lifecycle, locking, no-op, audit, rights, print, legacy-repair and precision coverage remains. The hidden /tour/:vchNo/bill bridge stays authorized but always returns 409 with no write. Open: the Sales Invoice screen still has no Apr No selector/import control, so successful tagged approval consumption and sale-delete reopening are DB-tested but not operator-driven; Wh Sales approval continuation; desktop licence-expiry state; the approval image panel and APR_IMG_PRINT/AprBillImg branch; idempotent create and lost-acknowledgement recovery; a per-table fault matrix (a fault on the last write, REMARK_DATA, is browser-proven to roll back issue and return); repeated Crystal page headers, footers and page numbers; an independent original-Windows runtime comparison; operator sign-off and parent acceptance."
+    },
+    {
+      "id": "N230",
+      "status": "implemented-unverified",
+      "action": "Sales Order scheme tender (G206, scheme part), owner decision to follow the source: the typed Scheme Amt (TR_SALE_ORD.cs:11257-11267) is stored as SCHM_AMT and joins ADV_AMT (:11368); Order_Rojmel type 05 (Ac_Rojmel.cs:19) debits the MEMB ADJUST book's BOOK_DETL slot-1 account against the party; no ledger leg (Ac_Ledr.cs:28-61).",
+      "startAfter": [
+        "N226"
+      ],
+      "requiredProof": "sales-order.create.scheme-tender passes in the browser and leaves baseline.json; salesOrderScheme.db.test.ts and salesOrderScheme.test.ts pass.",
+      "gapIds": "G206",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "parentLabels": "P9; R03",
+      "statusAsOf": "2026-11-09",
+      "evidence": [
+        "web/apps/api/src/modules/sales/salesOrderScheme.ts",
+        "web/apps/api/src/modules/sales/salesOrderTender.ts",
+        "web/apps/web/lib/salesOrderForm.ts",
+        "web/apps/api/test/salesOrderScheme.db.test.ts",
+        "web/apps/api/test/salesOrderScheme.test.ts",
+        "web/apps/web/test/features/modules/salesOrder.mjs"
+      ],
+      "statusNote": "IMPLEMENTED (scheme tender), not accepted. The scheme DB test fails 4 of 5 against the old code and passes; the sales-order browser module passes 32 of 33 (config.setting-variant blocked, G174). Live24 lacks type 05 for its 7 scheme orders: 3 are of a year the day book no longer holds, 4 were taken on the non-Lite MEMB ADJUST path, likely by an older build (aggregate counts only). Open: the non-Lite MEMB ADJUST voucher path, a MEMB ADJUST book in web provisioning (the membership module reads its slot 1 as the payout account), VCH_DESC in the order day-book IT_DESC, desktop-runtime comparison and acceptance."
     },
     {
       "id": "N231",

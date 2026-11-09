@@ -33,6 +33,7 @@ import {
 import {
   metalAmount,
   labourCharge,
+  saleLineLabourAmount,
   lineNet as calcLineNet,
   billTotals,
   toIsoDate,
@@ -42,6 +43,7 @@ import {
   effectiveSaleRateWith,
   saleAmountBasis,
   saleItemAmount,
+  saleItemAmountRounded,
 } from '@datacare/core';
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
 import { gstTaxRows } from '../shared/taxDataRows.js';
@@ -319,25 +321,24 @@ export function computeLine(
       `labourType must be one of ${[...SALE_LABOUR_TYPES].join(', ')}: ${String(line.labourType)}`,
     );
   }
+  // LBR_AMT is ONE Math.Round (TR_SALE.cs:11100-11127; desktop oracle vector labour.mid.n0.299xr5.rof2).
+  const labourOf = (type: LabourType, input: Parameters<typeof labourCharge>[1]): number =>
+    policy ? saleLineLabourAmount(type, input, policy) : labourCharge(type, input);
   const labour = line.labourType
-    ? labourCharge(
-        line.labourType,
-        {
-          netWt: line.netWt,
-          pcs: line.pcs,
-          rate: line.labourRate,
-          pct: line.labourPct,
-          metalAmount: metal,
-          fixed: line.labourFixed,
-          // P4: (net + ghat) x rate is the desktop's per-gram labour base; the ghat term is
-          // dropped only when CO_SET_NEW.LBR_WITH_GHT = 'N' (TR_SALE.cs:11112-11123, blank
-          // default 'Y' at MS_OPNCOMP.cs:1224-1226). This was omitted entirely, so labour was
-          // understated by ghat x rate on every line carrying ghat weight.
-          ghatWt: line.ghtWt,
-          withGhat: labourWithGhat,
-        },
-        policy,
-      )
+    ? labourOf(line.labourType, {
+        netWt: line.netWt,
+        pcs: line.pcs,
+        rate: line.labourRate,
+        pct: line.labourPct,
+        metalAmount: metal,
+        fixed: line.labourFixed,
+        // P4: (net + ghat) x rate is the desktop's per-gram labour base; the ghat term is
+        // dropped only when CO_SET_NEW.LBR_WITH_GHT = 'N' (TR_SALE.cs:11112-11123, blank
+        // default 'Y' at MS_OPNCOMP.cs:1224-1226). This was omitted entirely, so labour was
+        // understated by ghat x rate on every line carrying ghat weight.
+        ghatWt: line.ghtWt,
+        withGhat: labourWithGhat,
+      })
     : 0;
   // Each line COMPONENT is rounded to the bill-amount precision, not just the grand total.
   //
@@ -353,11 +354,21 @@ export function computeLine(
   // Precision comes from CO_SET_NEW.TOT_AMT_ROF, which is 0 for this customer. It is not hardcoded: the same
   // policy at 2 leaves 354.20 alone, which is what a customer configured that way would expect.
   const roundAmount = (v: number): number => (policy ? policy.roundBillTotal(v) : v);
-  const metalRounded = roundAmount(metal);
+  // ITM_AMT: one Math.Round (TR_SALE.cs:10905-10932, oracle amount.mid.n3.495xr1); `metal` keeps feeding % labour.
+  const metalRounded = (() => {
+    if (!policy || line.metalAmount != null || amountType === '' || rate == null)
+      return roundAmount(metal);
+    const basis = saleAmountBasis(
+      { ...line, fineWt: fine },
+      effectiveSaleRateWith(line.rateWith, amountType),
+      line.rateType,
+    );
+    return basis.quantity > 0 ? saleItemAmountRounded(basis, rate, policy) : roundAmount(metal);
+  })();
   const labourRounded = roundAmount(labour);
-  const net = roundAmount(
-    calcLineNet({ metal: metalRounded, labour: labourRounded, other: line.otherAmount }),
-  );
+  // NET_AMT is the 2 dp sum, not re-rounded: TR_SALE.cs:11548/:11570 format it "0.00", so a paise OTH_AMT
+  // survives (desktop oracle vector total.stone: 66863.50).
+  const net = calcLineNet({ metal: metalRounded, labour: labourRounded, other: line.otherAmount });
   return { fine, metal: metalRounded, labour: labourRounded, net };
 }
 
@@ -1244,9 +1255,8 @@ async function writeSaleTx(
       ITM_RATE: input.rateUnfix ? 0 : num(c.in.rate),
       ITM_AMT: c.calc.metal,
       ITM_MRP: num(c.in.mrp),
-      // TR_SALE.cs: mSG[X,35] = Round(itemAmt + labourAmt + othAmt, 0) and mSG[X,37] = mSG[X,35], so
-      // both persisted columns are the same tax-EXCLUSIVE whole-rupee figure. `Math.Round` in .NET is
-      // half-to-even, which `lineTotalDesktop` reproduces.
+      // TR_SALE.cs CommPassTotal :11548: mSG[Row,35] = Format(lbr + oth + itm - disc, "0.00") and :11570
+      // mSG[Row,37] = mSG[Row,35]: one tax-EXCLUSIVE 2 dp figure in both columns (`lineTotalDesktop`).
       TOT_AMT: lineTotalDesktop({
         itemAmount: c.calc.metal,
         labourAmount: c.calc.labour,
@@ -1254,9 +1264,8 @@ async function writeSaleTx(
       }),
       TAX_PRC: input.taxRatePct,
       // `c.calc.net` already sums the components and rounds them with the company's amount precision, so
-      // `lineTotalDesktop` is not called here. That helper hardcodes roundHalfEven(..., 0) - whole rupees
-      // always - which happens to be right for this customer (TOT_AMT_ROF 0) and would silently ignore a
-      // customer configured to 2. A test that set the precision to 2 and asserted 428.21 is what exposed it.
+      // `c.calc.net` is the same 2 dp sum of the components computeLine already rounded with the company's
+      // line precision, so a customer configured to 2 keeps 428.21 and one configured to 0 keeps whole rupees.
       NET_AMT: c.calc.net,
       HM_AMT: 0,
       // KR_NET_WT defaults to the LINE's net weight, it is not only a karigar-supplied figure.

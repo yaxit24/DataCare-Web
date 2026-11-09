@@ -5,6 +5,8 @@ apps/api/report-specs/
 # Frozen independent fixtures and retained execution evidence are byte-addressed inputs.
 **/test/fixtures/
 docs/parity-evidence/
+# Desktop oracle: vectors.json is generated, expected.json is the workflow artifact byte for byte.
+scripts/desktop-oracle/**/*.json
 docs/COMPLETION-REGISTER.json
 output/
 

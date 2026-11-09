@@ -14,7 +14,8 @@ import { roundHalfEven } from '@datacare/core';
  *   K  "Kg Wise"     (ITM_NWT + ITM_GHT_WT) x LBR_RATE / 1000    TR_SALE.cs:11108
  *   P  "Pcs Wise"    ITM_PCS x LBR_RATE                          TR_SALE.cs:11127
  *
- * When `MsLbrWithGht <> 'N'` the weight bases include `ITM_GHT_WT` (TR_SALE.cs:11112, :11100, :11123).
+ * When `MsLbrWithGht <> 'N'` the NET basis includes `ITM_GHT_WT` (TR_SALE.cs:11112, :11123); the gross basis never
+ * does (:11104).
  *
  * A percentage is a SEPARATE input that derives the rate rather than a type of its own:
  *
@@ -108,8 +109,10 @@ export function desktopLabourAmount(
   let raw: number;
   switch (type) {
     case 'G':
-      // TR_SALE.cs:11104 — gross weight. Note it is NOT net, which is the confusion this module exists to fix.
-      raw = (n(basis.grossWt) + (options.withGhat ? ghat : 0)) * rate;
+      // TR_SALE.cs:11104 — gross weight ALONE: no ghat term under either LBR_WITH_GHT value. Note it is NOT net,
+      // which is the confusion this module exists to fix. Desktop oracle (run 42580947381) vectors
+      // labour.rate.G.ghtY / .ghtN: gross 10.555 x 12.50 = 132 with ghat 0.120 on the line, under Y and N alike.
+      raw = n(basis.grossWt) * rate;
       break;
     case 'N':
       // TR_SALE.cs:11119, and :11100/:11123 for the with-ghat variant.

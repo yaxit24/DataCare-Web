@@ -147,6 +147,26 @@ export function saleItemAmount(
 }
 
 /**
+ * Sale ITM_AMT as `CommPassTotal` stores it: ONE rounding of the raw quantity x rate.
+ *
+ * Every pricing branch is `Math.Round(quantity x rate, digits)` (TR_SALE.cs:10905, :10916, :10920, :10924, :10928,
+ * :10932). Rounding `saleItemAmount`'s 2 dp result again to the line precision rounds twice, and an amount whose
+ * third decimal is 5 crosses a rupee: 3.495 becomes 3.50 and then 4, where the desktop stores 3 (desktop oracle
+ * vector `amount.mid.n3.495xr1`, run 42580947381). The raw product is therefore handed straight to the line rounding.
+ * A company line precision finer than 2 dp keeps the 2 dp stage, which is then not a double rounding of the result.
+ */
+export function saleItemAmountRounded(
+  basis: SaleAmountBasis,
+  rate: Decimal.Value | null | undefined,
+  policy: Pick<RoundingPolicy, 'billTotalDecimals' | 'roundBillTotal'>,
+): number {
+  if (policy.billTotalDecimals > PRECISION.amount) {
+    return policy.roundBillTotal(saleItemAmount(basis, rate));
+  }
+  return policy.roundBillTotal(D(basis.quantity).times(D(rate).div(basis.rateDivisor)).toNumber());
+}
+
+/**
  * Sales Return item amount (`TR_SALE_RTN.cs:4953-4960`): the selected quantity × rate is rounded
  * directly to a whole rupee with .NET `Math.Round(value, 0)` midpoint-to-even semantics. Keeping this
  * separate avoids a 2dp intermediate that can change values such as 1.499 from 1 to 2.

@@ -729,27 +729,64 @@ export const stockAdjust = {
       },
     ),
     C(
-      'retry.replayed-tag-save',
+      'retry.replayed-save',
       'T13',
       'mutation',
-      'A replayed save of a tag line finds the tag already out and is refused; one voucher stays',
+      'N52 (D18): the save request replayed byte for byte (a network or proxy retry) answers the first save again with Idempotency-Replayed and posts nothing: one voucher, the loose weight and the tag moved once',
       async (ctx) => {
         const t = await seedTag(ctx);
         const { page } = await open(ctx);
-        await pickTag(page, 1, t.tag);
-        await cell(page, 'Sign', 1).fill('-');
+        await looseLine(page, 1, { gross: 3.25, sign: '+' });
+        await pickTag(page, 2, t.tag);
+        await cell(page, 'Sign', 2).fill('-');
+        const loose = await looseNet(ctx, ITEMS.gold.code);
+        const before = await vouchers(ctx);
+        const first = await save(page);
+        assert.equal(first.status(), 201, await first.text());
+        assert.match(first.request().headers()['idempotency-key'] ?? '', /^[0-9a-f-]{36}$/);
+        const after = {
+          vouchers: await vouchers(ctx),
+          loose: await looseNet(ctx, ITEMS.gold.code),
+        };
+        assert.equal(after.vouchers, before + 1);
+        assert.equal(Number((after.loose - loose).toFixed(3)), 3.25);
+        const replay = await page.request.fetch(first.request());
+        assert.equal(replay.status(), 201, await replay.text());
+        assert.equal(replay.headers()['idempotency-replayed'], 'true');
+        assert.equal(await replay.text(), await first.text());
+        assert.equal(await vouchers(ctx), before + 1);
+        assert.equal(await looseNet(ctx, ITEMS.gold.code), after.loose);
+        assert.equal(await balance(ctx, t.tag), 0);
+        return {
+          observation: `the replay answered ${replay.status()} with the first body (${await replay.text()})`,
+          expected: 'the first answer again; one voucher',
+          database: { vouchers: before + 1 },
+          downstream: { tagBalance: 0, looseNet: after.loose },
+        };
+      },
+    ),
+    C(
+      'retry.reused-key-other-body',
+      'T13',
+      'refusal',
+      'N52 (D18): the same Idempotency-Key with a changed body is refused with 409 idempotency-key-reused; nothing is posted',
+      async (ctx) => {
+        const { page } = await open(ctx);
+        await looseLine(page, 1, { gross: 1.75, sign: '+' });
         const first = await save(page);
         assert.equal(first.status(), 201, await first.text());
         const before = await vouchers(ctx);
-        const replay = await page.request.fetch(first.request());
-        assert.ok(replay.status() >= 400, `replay refused: ${replay.status()}`);
+        const request = first.request();
+        const body = JSON.parse(request.postData() ?? '{}');
+        body.vchDesc = `${body.vchDesc ?? ''} changed`;
+        const changed = await page.request.fetch(request, { data: body });
+        assert.equal(changed.status(), 409, await changed.text());
+        assert.equal((await changed.json()).error, 'idempotency-key-reused');
         assert.equal(await vouchers(ctx), before);
-        assert.equal(await balance(ctx, t.tag), 0);
         return {
-          observation: `the replay answered ${replay.status()}`,
-          expected: 'no second voucher',
+          observation: `the changed replay answered ${changed.status()}`,
+          expected: '409 idempotency-key-reused',
           database: { vouchers: before },
-          downstream: { tagBalance: 0 },
         };
       },
     ),

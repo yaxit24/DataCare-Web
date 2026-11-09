@@ -2,7 +2,8 @@ import {
   billTotals,
   fineFor,
   labourCharge,
-  lineTotalDesktop,
+  round,
+  roundHalfEven,
   saleReturnAmountBasis,
   saleItemAmountWhole,
   salesReturnRoundingPolicy,
@@ -84,11 +85,9 @@ export function saleReturnLinePreview(
     fine,
     metal,
     mk,
-    net: lineTotalDesktop({
-      itemAmount: metal,
-      labourAmount: mk,
-      otherAmount: number(line.otherAmount),
-    }),
+    // Sales Return keeps a whole-rupee, midpoint-to-even line net (salesReturnRoundingPolicy, TR_SALE_RTN.cs).
+    // This is deliberately not `lineTotalDesktop`, which follows the Sale grid and keeps paise.
+    net: roundHalfEven(round(metal + mk + number(line.otherAmount), 2), 0),
   };
 }
 
