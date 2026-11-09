@@ -11,6 +11,7 @@ Edit this file only in a pull request, never in a shared working tree. If two PR
 | Claim | Holder | Branch / PR | Files claimed | State | Since |
 |---|---|---|---|---|---|
 | Tag label text rules (G240, on N225) | session `52f05ab4` | `agent/parity-tag-label-content`, PR to follow | `web/apps/api/src/modules/stock/tagPrint.ts` (renderer only), `tagPrintScreen.ts` (two lines), `test/tagLabelText.test.ts`, the label cases in `modules/tagPrint.mjs` | code and tests done and red-then-green; records written; PR not yet opened | 2 Nov 17:05 |
+| WP-03 Sales Order scheme tender (G206), owner decision option (a) | WP-03 agent | `agent/wp03-so-scheme-tender`, PR to follow | new `web/apps/api/src/modules/sales/salesOrderScheme.ts`, its tests, the scheme cases in `modules/salesOrder.mjs`, `baseline.json` entry | started; stack slot 2 | 9 Nov |
 | Order Cancel | not this session; `~/dc-wt/order-cancel` | `feat/order-cancel`, nothing pushed | `modules/sales/orderCancel.ts`, `test/orderCancel.db.test.ts`, edits to `salesOrder.ts` | **stale suspect**: uncommitted for about 17 h | 1 Nov 23:00 |
 
 Merged today from this session: #218 (Tag Print Esc, G239) and #220 (this coordination set), by the repository owner with all CI jobs green.
