@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
-import { SECOND_TENANT } from '../harness.mjs';
+import { escLeavesWithNoFocus, SECOND_TENANT } from '../harness.mjs';
 
 /**
  * Feature: Master → AutoItem (desktop MS_AUTO_ITEM with CurMast 'AutoItem', web /masters/auto-item).
@@ -225,6 +225,7 @@ export const autoItem = {
   defaultUser: as(USERS.admin.user),
   inputs: [
     'web/apps/web/app/(app)/masters/auto-item/page.tsx',
+    'web/apps/web/lib/screenEscape.ts',
     'web/apps/api/src/modules/masters/autoItem.ts',
     'web/apps/api/src/routes/autoItem.ts',
     'web/apps/web/test/features/modules/autoItem.mjs',
@@ -954,6 +955,25 @@ export const autoItem = {
             downstream: { leftTo: new URL(page.url()).pathname },
           };
         }),
+    ),
+    C(
+      'keyboard.esc-with-focus-on-the-page',
+      'T17',
+      'read-only',
+      "MS_AUTO_ITEM sets KeyPreview (:1382) and subscribes MS_AUTO_ITEM_KeyDown (:902), so the form sees Esc wherever the focus is; with no grid cell editor (TEXT_ENTRY) visible, Esc closes the form (:2984-3005). A browser has a state the desktop form never has: focus on no control, after a click on the page background. Esc must close Auto Item there too, and a key aimed at the header Company box stays the header's (GB-02, the G239 pattern)",
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openScreen(page);
+        const left = await escLeavesWithNoFocus(page, {
+          heading: 'Auto Item',
+          path: '/masters/auto-item',
+        });
+        return {
+          observation: `Esc with the focus on the page body left Auto Item for ${left.leftTo}`,
+          expected: { focusOnBody: true, leaves: '/masters/auto-item' },
+          downstream: left,
+        };
+      },
     ),
     C(
       'journey.made-item-in-the-item-lookup',

@@ -11,6 +11,7 @@ Edit this file only in a pull request, never in a shared working tree. If two PR
 | Claim | Holder | Branch / PR | Files claimed | State | Since |
 |---|---|---|---|---|---|
 | Tag label text rules (G240, on N225) | session `52f05ab4` | `agent/parity-tag-label-content`, PR to follow | `web/apps/api/src/modules/stock/tagPrint.ts` (renderer only), `tagPrintScreen.ts` (two lines), `test/tagLabelText.test.ts`, the label cases in `modules/tagPrint.mjs` | code and tests done and red-then-green; records written; PR not yet opened | 2 Nov 17:05 |
+| WP-09 Esc with no focused control on nine screens (GB-02, under G239) | agent session (wp09) | `agent/wp09-esc-no-focus`, PR to follow | `web/apps/web/lib/screenEscape.ts`, the `onScreenKeyDown` wrappers of Party, Item, Item Group, Product, Tax, Address, Employee, Auto Item, Item Opening and Tag Print, one case per screen in their feature modules | started | 9 Nov |
 | Order Cancel | not this session; `~/dc-wt/order-cancel` | `feat/order-cancel`, nothing pushed | `modules/sales/orderCancel.ts`, `test/orderCancel.db.test.ts`, edits to `salesOrder.ts` | **stale suspect**: uncommitted for about 17 h | 1 Nov 23:00 |
 
 Merged today from this session: #218 (Tag Print Esc, G239) and #220 (this coordination set), by the repository owner with all CI jobs green.
@@ -63,7 +64,7 @@ There was no open pull request on `main` at 17:15. Every other Lite menu has no 
 3. **Cash Bank report (`RP_CASH_BANK`)** or **HuId Report (`RP_HUID`)**: both unowned; `TagHuIdRpt` and `RojMelCash` templates exist. Each in its own route directory, never in `reports/[report]/page.tsx` (at its size ceiling).
 4. **User Create (`MS_USER`)** once the owner decides the password policy and delete semantics (GB-10).
 5. **Land `feat/lite-approval`** (GB-03) if its owner does not: it needs the owner's consent because it is another session's branch.
-6. **Esc on the nine other wrapper-handler screens** (GB-02): one case per screen first.
+6. **Esc on the nine other wrapper-handler screens** (GB-02): one case per screen first. Taken as WP-09 on `agent/wp09-esc-no-focus` (9 Nov): cases red then green, shared hook `web/apps/web/lib/screenEscape.ts`.
 7. **Correct the four cash-bank catalog rows** (GB-05) when that module is next touched.
 
 ## Session D (Kiro, worktree `~/dc-wt/parity-d`), checkpoint 2 Nov 2026, about 20:15 IST

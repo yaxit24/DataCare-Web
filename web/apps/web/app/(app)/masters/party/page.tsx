@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { del, get, post, put, ApiError } from '../../../../lib/api';
+import { useScreenEscape, type ScreenKeyEvent } from '../../../../lib/screenEscape';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 
 /**
@@ -807,7 +808,7 @@ export default function PartyMasterPage() {
   };
 
   /** MS_ACCT_KeyDown with KeyPreview: Ctrl+E unlocks the code box, Esc leaves the screen. */
-  function onScreenKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+  function onScreenKeyDown(event: ScreenKeyEvent) {
     if (event.defaultPrevented) return;
     if (event.ctrlKey && (event.key === 'e' || event.key === 'E')) {
       event.preventDefault();
@@ -821,6 +822,7 @@ export default function PartyMasterPage() {
       else router.back();
     }
   }
+  const screenRef = useScreenEscape<HTMLDivElement>(onScreenKeyDown);
 
   function onListKeyDown(event: KeyboardEvent<HTMLTableSectionElement>) {
     if (event.key === 'F1') {
@@ -1008,7 +1010,7 @@ export default function PartyMasterPage() {
     : M.RECORD_TEXT;
 
   return (
-    <div onKeyDown={onScreenKeyDown}>
+    <div ref={screenRef} onKeyDown={onScreenKeyDown}>
       <h1>Party Master</h1>
       {msg && (
         <div className={`msg ${msg.kind}`} role={msg.kind === 'err' ? 'alert' : 'status'}>

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent }
 import { useRouter } from 'next/navigation';
 import { round, vbVal } from '@datacare/core';
 import { del, get, post, put, ApiError } from '../../../../lib/api';
+import { useScreenEscape, type ScreenKeyEvent } from '../../../../lib/screenEscape';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 
@@ -301,7 +302,7 @@ export default function EmployeeMasterPage() {
   };
 
   /** MS_EMP_KeyDown with KeyPreview: Esc leaves, Up and Down go to the list. */
-  function onScreenKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+  function onScreenKeyDown(event: ScreenKeyEvent) {
     if (event.defaultPrevented) return;
     const target = event.target as HTMLElement;
     if (target.closest?.('[data-lookup-open="true"]')) return;
@@ -316,6 +317,7 @@ export default function EmployeeMasterPage() {
       focusList();
     }
   }
+  const screenRef = useScreenEscape<HTMLDivElement>(onScreenKeyDown);
 
   function onListKeyDown(event: KeyboardEvent<HTMLTableSectionElement>) {
     if (event.key === 'F1') {
@@ -348,7 +350,7 @@ export default function EmployeeMasterPage() {
     };
 
   return (
-    <div onKeyDown={onScreenKeyDown}>
+    <div ref={screenRef} onKeyDown={onScreenKeyDown}>
       <h1>Employee Master</h1>
       {msg && (
         <div className={`msg ${msg.kind}`} role={msg.kind === 'err' ? 'alert' : 'status'}>
