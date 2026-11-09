@@ -7711,6 +7711,37 @@
         "web/apps/web/test/features/modules/approvalReturn.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Source-derived DB/HTTP tests now prove: return POST compares the requested stable source line and locks one exact TAG_NO + VCH_SRNO + IT_CODE BAR row before identity/write; unchanged return PUT validates its source/BAR link before the no-op path; every BAR mutation is item-scoped and affected-count checked. /sales keys APR_DETL by OLD_SRNO, compares party, item, tag, BAR instance, pieces, gross and net weight, reuses the locked approval-held tag identity, updates the locked BAR row, and releases by the same stable key; tagged mismatch is 400/no-write, tagged exact consumption/reversal succeeds, and an OLD_SRNO 2 / SR_NO 1 gap binds source 2. Missing line OLD_SRNO and per-line stone ISR_NO allocate above retained maxima; duplicate, zero and fractional explicit IDs return 400. LDisc% derives DISC_AMT and NET_AMT persists at one decimal. Stone codes are trimmed, required and checked in company ITEM_MAST. Existing identity, lifecycle, locking, no-op, audit, rights, print, legacy-repair and precision coverage remains. The hidden /tour/:vchNo/bill bridge stays authorized but always returns 409 with no write. Open: the Sales Invoice screen still has no Apr No selector/import control, so successful tagged approval consumption and sale-delete reopening are DB-tested but not operator-driven; Wh Sales approval continuation; desktop licence-expiry state; the approval image panel and APR_IMG_PRINT/AprBillImg branch; idempotent create and lost-acknowledgement recovery; a per-table fault matrix (a fault on the last write, REMARK_DATA, is browser-proven to roll back issue and return); repeated Crystal page headers, footers and page numbers; an independent original-Windows runtime comparison; operator sign-off and parent acceptance."
+    },
+    {
+      "id": "N234",
+      "status": "in-progress",
+      "action": "Report → Sales Report is the desktop RP_ALL screen: a shared pure RP_ALL engine (selectors, record order, group bands, count-once totals, titles, exports) with one adapter per branch, Sales first. Phase one: the engine, the Sales adapter for Sales Report, Sales Reg, Item Wise, Group Sales, Employ Sales and Sale With Order (with the Sales Return prompt variants) and GET /reports/sales-report plus CSV/XLSX. Phase two: the dedicated route directory, the remaining seven buttons, PDF in the template layouts and the browser run.",
+      "parentLabels": "P1-core; L6; WP-11; T01-T18",
+      "startAfter": [
+        "N36"
+      ],
+      "requiredProof": "Unit tests compute every total from fixture vouchers with the template formula (never read back from the web) and prove grouping, count-once totals, band suppression, formatting, selector parsing and per-button SQL predicates with no request value in the SQL text. A DB/HTTP test under forced RLS proves the row set per selector, the hand totals per mode, sentinels in another tenant, company, location, year and date never appear, List and Print rights are refused by the API, and the export equals the grid. Phase two adds the screen and runs the frozen sales-report browser cases.",
+      "gapIds": "G06, G246",
+      "entryDefinition": "docs/parity/LITE-MASTER-PLAN.md section 5 (WP-11)",
+      "sourceAndModuleDetail": "docs/parity/rpall-sales-inventory.md; 12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-09",
+      "evidence": [
+        "docs/parity/rpall-sales-inventory.md",
+        "web/apps/api/src/modules/reports/rpAll/engine.ts",
+        "web/apps/api/src/modules/reports/rpAll/filters.ts",
+        "web/apps/api/src/modules/reports/rpAll/salesLayouts.ts",
+        "web/apps/api/src/modules/reports/rpAll/salesQuery.ts",
+        "web/apps/api/src/modules/reports/rpAll/index.ts",
+        "web/apps/api/src/modules/reports/rpAll/exportRows.ts",
+        "web/apps/api/src/routes/rpAllReport.ts",
+        "web/apps/api/test/rpAllEngine.test.ts",
+        "web/apps/api/test/rpAllSales.test.ts",
+        "web/apps/api/test/rpAllSales.db.test.ts",
+        "web/apps/web/test/features/modules/salesReport.mjs"
+      ],
+      "statusNote": "IN PROGRESS (phase one). Engine, Sales adapter and API are built and unit-tested; the DB/HTTP test and the frozen browser module were written without a local stack and run in CI only. No screen yet: every sales-report browser case is blocked. G246 (the web Sales Return writes its amount to NET_AMT instead of RTN_NET_AMT) is open and keeps the return variant empty for web-written returns."
     }
   ],
   "amendments": [

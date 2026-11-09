@@ -683,6 +683,7 @@ import { addressPrintReport, lastVisitReport } from '../modules/reports/customer
 import { dhrnLoanReport } from '../modules/reports/dhrnLoanReports.js';
 import { gstLauncherReport } from '../modules/reports/gstLauncherReport.js';
 import { registerGstReportRoutes } from './gstReport.js';
+import { registerRpAllReportRoutes } from './rpAllReport.js';
 import {
   approvalReport,
   bullionReport,
@@ -4517,6 +4518,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // debit ageing, and its Excel/CSV/PDF outputs. The resolver feeds the screen and every export from
   // one path. Registered here (not with the other plugins above) because it needs `sendReportPdf`.
   registerAccountLedgerRoutes(app, { prisma, auth, guard, readScope, sendReportPdf });
+  registerRpAllReportRoutes(app, { prisma, auth, guard, readScope }); // WP-11 Sales Report (RP_ALL)
 
   // Screens for five reports registered only in REPORT_BUILDERS (exports worked, screens 404'd —
   // PARITY-EVALUATION-2026-09-28 D3). Each calls the export's own builder with its own inputs (so the

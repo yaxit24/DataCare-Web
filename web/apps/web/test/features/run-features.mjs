@@ -17,6 +17,7 @@ import {
 import { seedCatalogue } from './fixtures/catalogue.mjs';
 import { purchaseInvoice } from './modules/purchaseInvoice.mjs';
 import { purchaseReport } from './modules/purchaseReport.mjs';
+import { salesReport } from './modules/salesReport.mjs';
 import { purchaseReturn } from './modules/purchaseReturn.mjs';
 import { salesOrder } from './modules/salesOrder.mjs';
 import { salesInvoice } from './modules/salesInvoice.mjs';
@@ -69,6 +70,7 @@ const MODULES = [
   salesInvoice,
   purchaseInvoice,
   purchaseReport,
+  salesReport,
   settingsEffects,
   usersRights,
   salesReturn,

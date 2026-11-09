@@ -1,3 +1,11 @@
+## 2026-11-09 — Sales Report on the shared RP_ALL engine, phase one (N234 / G246, WP-11)
+
+- 2026-11-09: `web/apps/api/src/modules/reports/rpAll/` is the shared RP_ALL engine (pure: order, bands, count-once totals, titles, exports) with
+  the Sales adapter; `GET /reports/sales-report` (+ `.csv`, `.xlsx`, `routes/rpAllReport.ts`) serves six buttons and three return variants.
+  Inventory with citations: `docs/parity/rpall-sales-inventory.md`. Purchase Rpt / Approval Rpt / Order Report add an adapter, not an engine.
+- 2026-11-09: no local stack was run (two slots busy): `rpAllSales.db.test.ts` and the frozen, all-blocked `sales-report` browser module run in
+  CI only. Next: the dedicated screen, the other seven buttons, PDF, and G246 (web Sales Return writes NET_AMT, not RTN_NET_AMT).
+
 ## 2026-11-09 — Esc with no focused control on nine more screens (WP-09, GB-02, under G239)
 
 - Party, Item, Item Group, Product, Tax, Address, Employee, Auto Item and Item Opening lost Esc when the focus was on the page body (each

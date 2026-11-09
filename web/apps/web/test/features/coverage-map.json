@@ -17,6 +17,12 @@
         "web/apps/api/src/routes/voucherNavigation.ts"
       ]
     },
+    "salesReport": {
+      "covers": [
+        "web/apps/api/src/modules/reports/rpAll/",
+        "web/apps/api/src/routes/rpAllReport.ts"
+      ]
+    },
     "purchaseReport": {
       "covers": [
         "web/apps/web/app/(app)/reports/purchase-report/page.tsx",
