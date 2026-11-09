@@ -311,7 +311,7 @@ schedule the fix in WP-26/27.
 | WP-03 | Sales Order, Order Report | Scheme tender (G206), un-break the rows | P1 | M | — | — | baselined |
 | WP-04 | Every voucher create route (Stock Adjust first) | Server-side idempotency: a replayed request never makes a second voucher | P0 | M | — | 20 (Stock Adjust part) | PR #229 (6 routes); follow-up queue for the rest |
 | WP-05 | Cash Received/Payment, Bank Received/Payment | T03 calculations, T06 card/UPI settlement | P1 | M | — | — | 2 blocked |
-| WP-06 | User Create | MS_USER with OD-1..OD-3 | P0 | L | — | — (see card) | PR to follow (N231/G243); users 22 of 22, none blocked; action-level rights open |
+| WP-06 | User Create | MS_USER with OD-1..OD-3 | P0 | L | — | — (see card) | PR #234 (N231/G243); users 22 of 22, none blocked; action-level rights open |
 | WP-07 | Company | Identity workflow (G38, N58), delete per OD-5 | P1 | L | — | 16 | BROKEN |
 | WP-08 | Data Backup | D-BKP-3 allowlist per OD-4 (G64/N80) | P1 | M | — | 18 | BROKEN |
 | WP-09 | Party, Item, Item Group, Product, Tax, Address, Employee, Auto Item, Item Opening | Esc with no focused control (GB-02) | P2 | S | — | — | open |

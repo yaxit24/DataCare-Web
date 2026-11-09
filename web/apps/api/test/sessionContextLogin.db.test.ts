@@ -336,7 +336,7 @@ databaseDescribe('atomic login context on real PostgreSQL', () => {
   );
 
   it.each(['wrong-password', 'missing-credential', 'duplicate-credential'] as const)(
-    'refuses %s before signing/session insertion with no writes',
+    'refuses %s before signing/session insertion; only the D34 failure counter is written',
     async (kind) => {
       if (kind === 'missing-credential')
         await owner.$executeRawUnsafe(`DELETE FROM "LOGIN_MAST" WHERE "tenant_id"=$1`, tenant);
@@ -356,7 +356,34 @@ databaseDescribe('atomic login context on real PostgreSQL', () => {
         ),
       ).rejects.toMatchObject({ name: 'AuthError', reason: 'invalid-credentials' });
       expect(signer).not.toHaveBeenCalled();
-      expect(await snapshot()).toEqual(before);
+      const after = await snapshot();
+      if (kind !== 'wrong-password') {
+        expect(after).toEqual(before);
+        return;
+      }
+      // D34 per-account back-off: a wrong password's one durable effect is this tenant's failure counter going up by
+      // one. Every other table, every other column and the foreign tenant's row (to its revision) stay as they were.
+      const { LOGIN_MAST: loginBefore, ...restBefore } = before;
+      const { LOGIN_MAST: loginAfter, ...restAfter } = after;
+      expect(restAfter).toEqual(restBefore);
+      type Snap = { raw: string; revision: string; locator: string };
+      const parse = (rows: unknown) =>
+        (rows as Snap[]).map((row) => ({
+          ...row,
+          json: JSON.parse(row.raw) as Record<string, unknown>,
+        }));
+      const [b, a] = [parse(loginBefore), parse(loginAfter)];
+      expect(a.map((r) => r.json.tenant_id)).toEqual(b.map((r) => r.json.tenant_id));
+      for (const [i, prior] of b.entries()) {
+        const now = a[i]!;
+        if (prior.json.tenant_id === tenant) {
+          expect(now.json.FAILED_LOGIN_COUNT).toBe(Number(prior.json.FAILED_LOGIN_COUNT) + 1);
+          expect({ ...now.json, FAILED_LOGIN_COUNT: 0 }).toEqual({
+            ...prior.json,
+            FAILED_LOGIN_COUNT: 0,
+          });
+        } else expect(now).toEqual(prior);
+      }
     },
   );
 
