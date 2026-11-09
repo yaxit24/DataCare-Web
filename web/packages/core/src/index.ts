@@ -237,6 +237,7 @@ export {
   saleReturnAmountBasis,
   saleItemAmount,
   saleItemAmountWhole,
+  saleItemAmountRounded,
   salesReturnRoundingPolicy,
 } from './saleAmount.js';
 export type { SaleAmountLine, SaleAmountBasis } from './saleAmount.js';

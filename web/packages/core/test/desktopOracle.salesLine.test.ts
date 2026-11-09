@@ -9,6 +9,7 @@ import {
   PRECISION,
   saleAmountBasis,
   saleItemAmount,
+  saleItemAmountRounded,
   vbVal,
   type LabourType,
   type RoundingPolicy,
@@ -124,8 +125,9 @@ function webStage(v: Vector, stage: Stage, d: Record<string, string>): number | 
         text(input, 21),
         text(input, 58),
       );
-      const metal = basis.quantity > 0 ? saleItemAmount(basis, policy.roundItemRate(rate)) : 0;
-      return policy.roundBillTotal(metal);
+      return basis.quantity > 0
+        ? saleItemAmountRounded(basis, policy.roundItemRate(rate), policy)
+        : 0;
     }
     case 'labour': {
       const pct = cell(input, 24);
@@ -213,8 +215,6 @@ const KNOWN_MISMATCHES: Record<string, string> = {
   'labour.pct.P.rtF:labour': PCT_LABOUR,
   'labour.pct.P.rtN:labour': PCT_LABOUR,
   'labour.pct.rof0:labour': PCT_LABOUR,
-  'amount.allrof.1.005x1:amount': 'FIXED in the next commit: two roundings of the item amount',
-  'amount.mid.n3.495xr1:amount': 'FIXED in the next commit: two roundings of the item amount',
   'labour.mid.n0.299xr5.rof2:labour':
     'FIXED in a following commit: two roundings of the labour amount',
   'labour.mid.n3.495xr1.rof2:labour':
