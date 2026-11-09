@@ -4,9 +4,14 @@
 // Microsoft.VisualBasic) and writes what it computes. It is an evidence tool: it changes no product code.
 //
 // What is verbatim and what is not:
-//   * `TR_SALE.CommPassTotal` below is TR_SALE.cs:9524-11891 copied verbatim, with ONE textual change that C# needs
-//     to compile ILSpy output: `catch (object obj)` becomes `catch (Exception obj)` (C# only catches Exception
-//     types; the `when (obj is Exception && ...)` filter is unchanged, so the behaviour is the same).
+//   * `TR_SALE.CommPassTotal` below is TR_SALE.cs:9524-11891 copied verbatim, line for line, except the two lines of
+//     its single catch clause, which the Framework csc (C# 5) cannot compile as ILSpy wrote them:
+//       desktop:  catch (object obj) when (obj is Exception && num3 != 0 && num == 0)
+//                 {
+//       here:     catch (Exception obj)
+//                 { if (!(obj is Exception && num3 != 0 && num == 0)) throw;
+//     C# 5 has no exception filters and only catches Exception types. The rewrite catches the same exceptions and
+//     handles exactly the ones the filter admitted (VB "On Error Resume Next"); any other is rethrown, as before.
 //     `web/packages/core/test/desktopOracle.salesLine.test.ts` re-reads TR_SALE.cs and fails if this copy drifts.
 //   * `DC_Main.Fnv` is DC_Main.cs:2088-2102 copied verbatim.
 //   * Everything else is a STAND-IN for the Windows Forms surroundings the method touches, and nothing more:
@@ -2481,8 +2486,8 @@ namespace DesktopOracle.SalesLine
 				break;
 				end_IL_0001:;
 			}
-			catch (Exception obj) when (obj is Exception && num3 != 0 && num == 0)
-			{
+			catch (Exception obj)
+			{ if (!(obj is Exception && num3 != 0 && num == 0)) throw;
 				ProjectData.SetProjectError((Exception)obj);
 				try0001_dispatch = 20508;
 				continue;
