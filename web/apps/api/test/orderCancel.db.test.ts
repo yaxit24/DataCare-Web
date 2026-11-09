@@ -929,12 +929,12 @@ describe.runIf(RUN)('Order Cancel voucher (TR_SL_ORD_ADJ)', () => {
         const sold = sale.status === 'fulfilled' ? sale.value : 0;
         expect(cancelled + sold, `round ${round}`).toBeLessThanOrEqual(1000);
         expect(cancelled + sold, `round ${round}: one of them got its share`).toBeGreaterThan(0);
-        const [{ total }] = await query<{ total: number }>(
+        const [sum] = await query<{ total: number }>(
           `SELECT coalesce(sum(CASE WHEN "ORD_SIGN"='-' THEN "ORD_AMT" ELSE "PAID_AMT"+coalesce("KASAR_AMT",0) END),0)::float total
              FROM "SL_ORD_ADJ" WHERE tenant_id=$1 AND "ORD_NO"='00007' AND "ORD_SIGN" IN ('-','C','D')`,
           TENANT,
         );
-        expect(total).toBeLessThanOrEqual(1000);
+        expect(sum!.total).toBeLessThanOrEqual(1000);
       }
     });
   });
