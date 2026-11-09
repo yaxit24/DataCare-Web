@@ -125,7 +125,7 @@ describe('route policy registry', () => {
     // Agent 07 moves the existing GST launcher route into a dedicated plugin and adds three exports:
     // 1 moved declaration out, 4 dedicated declarations in = +3: 748 + 3 = 751.
     // N229 adds Approval Isu GET/PUT/print and Approval Rtn GET/PUT/print: 751 + 6 = 757.
-    // N232 (WP-11) adds the RP_ALL Sales Report GET /reports/sales-report and its CSV/XLSX exports: 757 + 3 = 760.
+    // N234 (WP-11) adds the RP_ALL Sales Report GET /reports/sales-report and its CSV/XLSX exports: 757 + 3 = 760.
     expect(routes).toHaveLength(760);
     expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(760);
 

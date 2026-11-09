@@ -3,7 +3,7 @@
 Inventory of what the desktop `RP_ALL` form does for the **Report → Sales Report** menu, read from
 `unified/src/csharp/DataCareNext/RP_ALL.cs` (12,662 lines) and the extracted Crystal templates in
 `extraction_output/rpt_xml/`. Every row cites the source line. It is the specification of the shared RP_ALL engine
-in `web/apps/api/src/modules/reports/rpAll/` (N232) and of the Sales adapter built on it.
+in `web/apps/api/src/modules/reports/rpAll/` (N234) and of the Sales adapter built on it.
 
 Written 9 November 2026 against `origin/main` `f6645ce6`. Line numbers are `RP_ALL.cs` unless another file is named.
 
@@ -186,11 +186,11 @@ They become further Sales adapter variants on the same engine; none needs an eng
 8. **Employ Sales detail band on lines without sub-lines.** Section6 prints `SL_IDTL` values on every line record
    where `IT_CODE <> ''`; for a line with no `SL_IDTL` row Crystal prints a row of nulls whose rendering depends on the
    template's null option (not extracted). The web prints sub-line rows only where a sub-line exists.
-9. **Web Sales Return writes the wrong columns (G244).** The desktop return/exchange form stores the sold part in
+9. **Web Sales Return writes the wrong columns (G246).** The desktop return/exchange form stores the sold part in
    `SL_DATA.NET_AMT` and the returned part in `RTN_NET_AMT`/`RTN_TOT_AMT` (`TR_SALE_RTN.cs:12623`, `:12707`,
    `:12789`, values from `:16385-16386`). The web Sales Return (`modules/sales/salesReturn.ts` header) stores the
    return value in `NET_AMT`/`TOT_AMT` and leaves `RTN_NET_AMT` 0, so by the desktop rule a web return lists as a
-   sale and the return variant is empty. A writer defect, recorded as G244; the report is not bent around it.
+   sale and the return variant is empty. A writer defect, recorded as G246; the report is not bent around it.
 
 ## 7. Web design (phase one)
 
@@ -224,7 +224,7 @@ T16).
 | lookup.party-book-product-group | T04 | Enter → help, pick, Esc, stale response |
 | grouping.templates-and-zoom | T05 | bands per template; zoom to the voucher and back |
 | invalid.dates-and-empty | T06 | bad date refused; From after To → empty, no crash |
-| source.create-edit-delete-return | T07 | create, edit, delete through the Sales screen; return only under the prompt (needs G244) |
+| source.create-edit-delete-return | T07 | create, edit, delete through the Sales screen; return only under the prompt (needs G246) |
 | scope.tenant-company-location-year-book-rights | T11 | sentinels never appear; List and Print rights refused by the API |
 | history.live-master-and-snapshot | T15 | SaleReport keeps `SL_DATA.AC_NAME`; SalesSumm shows the live `AC_MAST.AC_NAME` |
 | output.grid-pdf-xlsx-csv-match | T16 | grid = CSV = Excel = print over more rows than a page; `SalesRtnA4Print` missing (blocked) |

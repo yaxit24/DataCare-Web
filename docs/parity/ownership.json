@@ -32,7 +32,7 @@
   "Report/Ledger Report": "none active (merged #195)",
   "Report/Stock Report": "unowned",
   "Report/Tag Stock": "unowned (the tag-cancel module covers only its Tag Stock output cases)",
-  "Report/Sales Report": "WP-11 agent, branch agent/wp11-rpall-engine (N232 phase one: engine + Sales API); screen unclaimed",
+  "Report/Sales Report": "WP-11 agent, branch agent/wp11-rpall-engine (N234 phase one: engine + Sales API); screen unclaimed",
   "Report/Purchase Rpt": "none active (frozen cases merged #202); waits for the RP_ALL engine",
   "Report/Approval Rpt": "none active (merged #203)",
   "Report/Order Report": "unowned beyond the Sales Order list (RP_ALL order modes)",
