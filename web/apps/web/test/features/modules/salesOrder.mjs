@@ -1132,7 +1132,12 @@ export const salesOrder = {
           assert.deepEqual(reopened, { advance: '3000', scheme: '1000' });
           return {
             observation: `order ${vchNo}: ${JSON.stringify(h)}; day book ${day.map((r) => `${r.leg} ${r.ac} dr ${r.dr} cr ${r.cr}`).join(', ')}; ledger cash only; reopened ${JSON.stringify(reopened)}`,
-            expected: { cash: 3000, scheme: 1000, advance: 4000, dayBook: '01 cr 4000 / 05 dr 1000' },
+            expected: {
+              cash: 3000,
+              scheme: 1000,
+              advance: 4000,
+              dayBook: '01 cr 4000 / 05 dr 1000',
+            },
             database: { header: h, dayBook: day, ledger: posted },
             downstream: { advance: h.adv, schemeAccount: SCHEME_AC },
           };
