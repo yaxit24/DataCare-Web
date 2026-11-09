@@ -39,8 +39,9 @@ export async function financeVoucherData(
     // kasar and each row becomes an allocation line. Older web multi-line receipts kept one aggregate row
     // plus PAY_DETL lines; those still print from PAY_DETL.
     const h: any[] = await tx.$queryRawUnsafe(
-      `SELECT * FROM "${headTable}" WHERE ${voucherKeyWhere()}
-        ORDER BY ${kind === 'receipt' ? '"SR_NO" NULLS FIRST, ' : ''}row_id`,
+      `SELECT * FROM "${headTable}" WHERE ${voucherKeyWhere()}${
+        kind === 'receipt' ? ' ORDER BY "SR_NO" NULLS FIRST' : ' LIMIT 1'
+      }`,
       ...params,
     );
     if (!h.length) return null;
