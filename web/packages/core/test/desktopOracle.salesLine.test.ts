@@ -215,7 +215,6 @@ const KNOWN_MISMATCHES: Record<string, string> = {
   'labour.pct.P.rtF:labour': PCT_LABOUR,
   'labour.pct.P.rtN:labour': PCT_LABOUR,
   'labour.pct.rof0:labour': PCT_LABOUR,
-  'total.stone:total': 'FIXED in a following commit: the line total keeps paise',
 };
 
 describe('desktop oracle: sales line (TR_SALE.cs CommPassTotal)', () => {

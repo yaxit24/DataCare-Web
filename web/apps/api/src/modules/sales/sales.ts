@@ -370,9 +370,10 @@ export function computeLine(
     return basis.quantity > 0 ? saleItemAmountRounded(basis, rate, policy) : roundAmount(metal);
   })();
   const labourRounded = roundAmount(labour);
-  const net = roundAmount(
-    calcLineNet({ metal: metalRounded, labour: labourRounded, other: line.otherAmount }),
-  );
+  // NET_AMT is the 2 dp sum, not re-rounded to the line precision: CommPassTotal formats 23 + 27 + 29 with "0.00"
+  // (TR_SALE.cs:11548, :11570), so a paise OTH_AMT survives (desktop oracle vector total.stone: 66863.50, not
+  // 66864). Item and labour are already rounded above, so only the other amount can carry paise here.
+  const net = calcLineNet({ metal: metalRounded, labour: labourRounded, other: line.otherAmount });
   return { fine, metal: metalRounded, labour: labourRounded, net };
 }
 
@@ -1259,9 +1260,8 @@ async function writeSaleTx(
       ITM_RATE: input.rateUnfix ? 0 : num(c.in.rate),
       ITM_AMT: c.calc.metal,
       ITM_MRP: num(c.in.mrp),
-      // TR_SALE.cs: mSG[X,35] = Round(itemAmt + labourAmt + othAmt, 0) and mSG[X,37] = mSG[X,35], so
-      // both persisted columns are the same tax-EXCLUSIVE whole-rupee figure. `Math.Round` in .NET is
-      // half-to-even, which `lineTotalDesktop` reproduces.
+      // TR_SALE.cs CommPassTotal :11548: mSG[Row,35] = Format(lbr + oth + itm - disc, "0.00") and :11570
+      // mSG[Row,37] = mSG[Row,35]: one tax-EXCLUSIVE 2 dp figure in both columns (`lineTotalDesktop`).
       TOT_AMT: lineTotalDesktop({
         itemAmount: c.calc.metal,
         labourAmount: c.calc.labour,
@@ -1269,9 +1269,8 @@ async function writeSaleTx(
       }),
       TAX_PRC: input.taxRatePct,
       // `c.calc.net` already sums the components and rounds them with the company's amount precision, so
-      // `lineTotalDesktop` is not called here. That helper hardcodes roundHalfEven(..., 0) - whole rupees
-      // always - which happens to be right for this customer (TOT_AMT_ROF 0) and would silently ignore a
-      // customer configured to 2. A test that set the precision to 2 and asserted 428.21 is what exposed it.
+      // `c.calc.net` is the same 2 dp sum of the components computeLine already rounded with the company's
+      // line precision, so a customer configured to 2 keeps 428.21 and one configured to 0 keeps whole rupees.
       NET_AMT: c.calc.net,
       HM_AMT: 0,
       // KR_NET_WT defaults to the LINE's net weight, it is not only a karigar-supplied figure.
