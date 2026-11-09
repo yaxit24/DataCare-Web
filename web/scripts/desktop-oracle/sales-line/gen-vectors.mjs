@@ -171,10 +171,13 @@ add('labour.discount.half', { 11: 1, 12: w(1), 21: 'N', 22: m(1000), 25: 'N', 26
 
 // ---- 4. Other (stone) amount and the line total -----------------------------------------------------------------
 add('total.stone', { ...lb, 25: 'N', 26: m(250), 29: m(1234.5) }, { checks: ['net', 'fine', 'amount', 'labour', 'total'] });
-add('total.stone.discount', { ...lb, 25: 'N', 26: m(250), 29: m(999), 31: m(7.5) }, { checks: ['net', 'fine', 'amount', 'labour', 'discount', 'total'] });
+// The labour discount (column 32) comes off the line total (TR_SALE.cs:11548); the web line total has no discount.
+add('total.stone.discount', { ...lb, 25: 'N', 26: m(250), 29: m(999), 31: m(7.5) }, { checks: ['net', 'fine', 'amount', 'labour', 'discount'] });
 add('total.plain', { ...lb, 25: 'N', 26: m(250) }, { checks: ['net', 'fine', 'amount', 'labour', 'total'] });
+// A line TAX_PRC (column 36) makes CommPassTotal treat the line total as tax-inclusive: NET_AMT is backed out of it
+// and the labour absorbs the difference (TR_SALE.cs:11596-11688). The web keeps tax at bill level only.
 for (const tax of [0.25, 3, 5]) {
-  add(`total.tax${tax}`, { ...lb, 25: 'N', 26: m(250), 29: m(100), 36: m(tax) }, { checks: ['net', 'fine', 'amount', 'labour', 'total'] });
+  add(`total.tax${tax}`, { ...lb, 25: 'N', 26: m(250), 29: m(100), 36: m(tax) }, { checks: ['net', 'fine', 'amount', 'taxInclusive'] });
 }
 
 // ---- 5. MRP lines (column 30) -----------------------------------------------------------------------------------

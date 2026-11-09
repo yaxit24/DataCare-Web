@@ -3649,8 +3649,7 @@
     "fine",
     "amount",
     "labour",
-    "discount",
-    "total"
+    "discount"
    ],
    "cells": {
     "11": "3",
@@ -3695,8 +3694,7 @@
     "net",
     "fine",
     "amount",
-    "labour",
-    "total"
+    "taxInclusive"
    ],
    "cells": {
     "11": "3",
@@ -3719,8 +3717,7 @@
     "net",
     "fine",
     "amount",
-    "labour",
-    "total"
+    "taxInclusive"
    ],
    "cells": {
     "11": "3",
@@ -3743,8 +3740,7 @@
     "net",
     "fine",
     "amount",
-    "labour",
-    "total"
+    "taxInclusive"
    ],
    "cells": {
     "11": "3",
