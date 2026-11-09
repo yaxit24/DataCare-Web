@@ -165,4 +165,8 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261102120000_stock_adjust_legacy_numbering',
     checksum: '60a75cf235a57b858d637400c0617603a69937b4399aea7e57e5f9493fb95be2',
   },
+  {
+    name: '20261109150000_login_mast_active_backoff',
+    checksum: 'b13f8ce87226403aa889cc662246a7dcdf64d9844cf3cf51ae2d253c5582d910',
+  },
 ];

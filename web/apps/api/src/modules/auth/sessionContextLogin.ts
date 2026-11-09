@@ -13,6 +13,41 @@ import type {
 interface CredentialObservation extends LoginMastRow {
   rowId: string;
   passwordChangedAt: string | null;
+  /** D34: true while the account's back-off window is open. */
+  blocked?: boolean;
+}
+
+/** D34 per-account back-off: after this many consecutive failures the account waits before the next try. */
+export const LOGIN_BACKOFF_THRESHOLD = 5;
+/** The first wait, doubled for each further failure, capped at LOGIN_BACKOFF_MAX_SECONDS. */
+export const LOGIN_BACKOFF_BASE_SECONDS = 30;
+export const LOGIN_BACKOFF_MAX_SECONDS = 15 * 60;
+
+/**
+ * Count one failed password for an existing, active account of this tenant and open the back-off window once the
+ * threshold is reached. Runs in its own transaction: the refused login writes nothing else. A login name that does not
+ * exist (or was deleted, D35) records nothing, so the counter cannot be used to probe for names.
+ */
+async function recordFailedLogin(
+  prisma: TxBudgetPrisma,
+  input: { tenantId: string; rowId: string },
+): Promise<void> {
+  await withTxBudget(prisma, input.tenantId, 'voucher', (tx) =>
+    tx.$executeRawUnsafe(
+      `UPDATE "LOGIN_MAST"
+          SET "FAILED_LOGIN_COUNT"="FAILED_LOGIN_COUNT"+1,
+              "LOGIN_BLOCKED_UNTIL"=CASE
+                WHEN "FAILED_LOGIN_COUNT"+1 >= $3 THEN clock_timestamp() + make_interval(secs =>
+                  LEAST($5::int, $4::int * (2 ^ LEAST("FAILED_LOGIN_COUNT"+1-$3, 10))::int))
+                ELSE "LOGIN_BLOCKED_UNTIL" END
+        WHERE "tenant_id"=$1 AND "row_id"=$2::bigint`,
+      input.tenantId,
+      input.rowId,
+      LOGIN_BACKOFF_THRESHOLD,
+      LOGIN_BACKOFF_BASE_SECONDS,
+      LOGIN_BACKOFF_MAX_SECONDS,
+    ),
+  );
 }
 
 interface LoginContextDependencies {
@@ -22,10 +57,13 @@ interface LoginContextDependencies {
   newRefreshJti?: () => string;
 }
 
+// D35: a deleted (inactive) login is not a credential at all.
 const credentialSql = `SELECT "row_id"::text AS "rowId","CO_CODE","LOGIN_NAME","LOGIN_PWD",
   "LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED",
-  "PASSWORD_CHANGED_AT"::text AS "passwordChangedAt"
+  "PASSWORD_CHANGED_AT"::text AS "passwordChangedAt",
+  COALESCE("LOGIN_BLOCKED_UNTIL" > clock_timestamp(), false) AS "blocked"
   FROM "LOGIN_MAST" WHERE "tenant_id"=$1 AND "CO_CODE"=$2 AND "LOGIN_NAME"=$3
+    AND "LOGIN_ACTIVE"='Y'
   ORDER BY "row_id" LIMIT 2`;
 
 /**
@@ -60,6 +98,7 @@ export async function loginSessionContext(
     throw new AuthError('invalid-credentials');
   }
   let observed: CredentialObservation | undefined;
+  let refusedRowId: string | undefined;
   const authenticated = await authenticate(
     {
       loadUser: async (tenantId, coCode, loginName) =>
@@ -72,10 +111,17 @@ export async function loginSessionContext(
           );
           // Explicit web admission: duplicate credential identities never select an arbitrary owner.
           if (rows.length !== 1 || !rows[0]?.LOGIN_PWD) return null;
+          // D34 back-off: inside the window even the right password is refused, with the same generic answer, and
+          // the password is not even checked (no oracle while blocked).
+          if (rows[0].blocked) throw new AuthError('invalid-credentials');
+          refusedRowId = rows[0].rowId;
           observed = { ...rows[0] };
           return observed;
         }),
-      audit: async () => {},
+      audit: async (attempt) => {
+        if (attempt.success || attempt.reason !== 'bad-password' || !refusedRowId) return;
+        await recordFailedLogin(prisma, { tenantId: request.tenantId, rowId: refusedRowId });
+      },
     },
     request,
   );
@@ -111,6 +157,14 @@ export async function loginSessionContext(
     ) {
       throw new AuthError('invalid-credentials');
     }
+    // A successful sign-in ends the back-off run (D34).
+    await tx.$executeRawUnsafe(
+      `UPDATE "LOGIN_MAST" SET "FAILED_LOGIN_COUNT"=0,"LOGIN_BLOCKED_UNTIL"=NULL
+        WHERE "tenant_id"=$1 AND "row_id"=$2::bigint
+          AND ("FAILED_LOGIN_COUNT"<>0 OR "LOGIN_BLOCKED_UNTIL" IS NOT NULL)`,
+      request.tenantId,
+      proof.rowId,
+    );
     if (upgradedHash !== null) {
       const changed = await tx.$executeRawUnsafe(
         `UPDATE "LOGIN_MAST" SET "LOGIN_PWD"=$1,"PASSWORD_RESET_REQUIRED"='Y',

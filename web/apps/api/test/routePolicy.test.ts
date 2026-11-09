@@ -124,8 +124,10 @@ describe('route policy registry', () => {
     // vouchers, voucher, stock, tag, tags, lookups, hm-update, default-file, print, labels): 738 - 3 + 13 = 748.
     // Agent 07 moves the existing GST launcher route into a dedicated plugin and adds three exports:
     // 1 moved declaration out, 4 dedicated declarations in = +3: 748 + 3 = 751.
-    expect(routes).toHaveLength(751);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(751);
+    // WP-06 moves the seven Users & Rights routes into routes/userMaster.ts and adds the MS_USER edit-mode Save
+    // (POST /admin/users/:loginName/update) and Delete (DELETE /admin/users/:loginName): 751 + 2 = 753.
+    expect(routes).toHaveLength(753);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(753);
 
     const policies = routes.map((route) => ({
       ...route,
