@@ -33,6 +33,7 @@ import {
 import {
   metalAmount,
   labourCharge,
+  saleLineLabourAmount,
   lineNet as calcLineNet,
   billTotals,
   toIsoDate,
@@ -320,25 +321,26 @@ export function computeLine(
       `labourType must be one of ${[...SALE_LABOUR_TYPES].join(', ')}: ${String(line.labourType)}`,
     );
   }
+  // LBR_AMT is ONE Math.Round (TR_SALE.cs:11100-11127): `saleLineLabourAmount` skips the LBR_ROF stage when it is
+  // finer than the line precision, which rounded 1.495 to 1.50 and then to 2 where the desktop stores 1 (desktop
+  // oracle vector labour.mid.n0.299xr5.rof2).
+  const labourOf = (type: LabourType, input: Parameters<typeof labourCharge>[1]): number =>
+    policy ? saleLineLabourAmount(type, input, policy) : labourCharge(type, input);
   const labour = line.labourType
-    ? labourCharge(
-        line.labourType,
-        {
-          netWt: line.netWt,
-          pcs: line.pcs,
-          rate: line.labourRate,
-          pct: line.labourPct,
-          metalAmount: metal,
-          fixed: line.labourFixed,
-          // P4: (net + ghat) x rate is the desktop's per-gram labour base; the ghat term is
-          // dropped only when CO_SET_NEW.LBR_WITH_GHT = 'N' (TR_SALE.cs:11112-11123, blank
-          // default 'Y' at MS_OPNCOMP.cs:1224-1226). This was omitted entirely, so labour was
-          // understated by ghat x rate on every line carrying ghat weight.
-          ghatWt: line.ghtWt,
-          withGhat: labourWithGhat,
-        },
-        policy,
-      )
+    ? labourOf(line.labourType, {
+        netWt: line.netWt,
+        pcs: line.pcs,
+        rate: line.labourRate,
+        pct: line.labourPct,
+        metalAmount: metal,
+        fixed: line.labourFixed,
+        // P4: (net + ghat) x rate is the desktop's per-gram labour base; the ghat term is
+        // dropped only when CO_SET_NEW.LBR_WITH_GHT = 'N' (TR_SALE.cs:11112-11123, blank
+        // default 'Y' at MS_OPNCOMP.cs:1224-1226). This was omitted entirely, so labour was
+        // understated by ghat x rate on every line carrying ghat weight.
+        ghatWt: line.ghtWt,
+        withGhat: labourWithGhat,
+      })
     : 0;
   // Each line COMPONENT is rounded to the bill-amount precision, not just the grand total.
   //

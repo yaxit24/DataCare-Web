@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
   fineFor,
-  labourCharge,
+  saleLineLabourAmount,
   lineTotalDesktop,
   resolveRoundingPolicy,
   round,
@@ -29,7 +29,7 @@ import {
  *
  * The web composition mirrors the API's posting path (`apps/api/src/modules/sales/sales.ts` `computeLine`): the item
  * rate is rounded by `ITM_RATE_ROF`, the item and labour amounts are rounded by the company line precision, and the
- * labour charge is `labourCharge` in the web's labour vocabulary.
+ * labour charge is `saleLineLabourAmount` (core `labourCharge`, rounded once) in the web's labour vocabulary.
  */
 
 const oracleDir = new URL('../../../scripts/desktop-oracle/sales-line/', import.meta.url);
@@ -149,7 +149,7 @@ function webStage(v: Vector, stage: Stage, d: Record<string, string>): number | 
       );
       const metal =
         rate !== 0 && basis.quantity > 0 ? saleItemAmount(basis, policy.roundItemRate(rate)) : 0;
-      const labour = labourCharge(
+      const labour = saleLineLabourAmount(
         type,
         {
           netWt: cell(d, 14),
@@ -162,7 +162,7 @@ function webStage(v: Vector, stage: Stage, d: Record<string, string>): number | 
         },
         policy,
       );
-      return policy.roundBillTotal(labour);
+      return labour;
     }
     case 'total':
       // SL_DETL.TOT_AMT, from the desktop's own components.
@@ -215,10 +215,6 @@ const KNOWN_MISMATCHES: Record<string, string> = {
   'labour.pct.P.rtF:labour': PCT_LABOUR,
   'labour.pct.P.rtN:labour': PCT_LABOUR,
   'labour.pct.rof0:labour': PCT_LABOUR,
-  'labour.mid.n0.299xr5.rof2:labour':
-    'FIXED in a following commit: two roundings of the labour amount',
-  'labour.mid.n3.495xr1.rof2:labour':
-    'FIXED in a following commit: two roundings of the labour amount',
   'total.stone:total': 'FIXED in a following commit: the line total keeps paise',
 };
 

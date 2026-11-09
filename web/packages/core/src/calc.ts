@@ -49,6 +49,31 @@ export function labourCharge(
   i: LabourInput,
   policy?: MoneyRoundingPolicy,
 ): number {
+  const v = labourChargeExact(type, i);
+  return policy ? policy.roundLabourAmount(v.toNumber()) : round(v, PRECISION.amount);
+}
+
+/**
+ * Sale LBR_AMT rounded ONCE, as `CommPassTotal` does.
+ *
+ * Every labour branch is a single `Math.Round(basis x LBR_RATE, digits2)` (TR_SALE.cs:11100-11127). The web rounded
+ * by LBR_ROF and then by the line precision (TOT_AMT_ROF); with LBR_ROF 2 and a whole-rupee line, 0.299 g x 5 =
+ * 1.495 became 1.50 and then 2, where the desktop stores 1 (desktop oracle vectors `labour.mid.n0.299xr5.rof2` and
+ * `labour.mid.n3.495xr1.rof2`, run 42580947381). When LBR_ROF is the coarser of the two it still decides the amount,
+ * exactly as before; when it is finer, its stage is skipped and only the line precision rounds.
+ */
+export function saleLineLabourAmount(
+  type: LabourType,
+  i: LabourInput,
+  policy: MoneyRoundingPolicy & { labourDecimals: number; billTotalDecimals: number },
+): number {
+  const v = labourChargeExact(type, i).toNumber();
+  return policy.labourDecimals <= policy.billTotalDecimals
+    ? policy.roundBillTotal(policy.roundLabourAmount(v))
+    : policy.roundBillTotal(v);
+}
+
+function labourChargeExact(type: LabourType, i: LabourInput): DecimalJs {
   let v: DecimalJs;
   switch (type) {
     case 'per_gram':
@@ -67,7 +92,7 @@ export function labourCharge(
       v = D(i.fixed);
       break;
   }
-  return policy ? policy.roundLabourAmount(v.toNumber()) : round(v, PRECISION.amount);
+  return v;
 }
 
 /** Metal amount = fine weight × rate. */

@@ -8,6 +8,7 @@ export {
 } from './money.js';
 export {
   labourCharge,
+  saleLineLabourAmount,
   metalAmount,
   lineNet,
   lineTotalDesktop,
