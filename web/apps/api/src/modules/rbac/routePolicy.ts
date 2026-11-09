@@ -282,6 +282,7 @@ route('Transaction/E Invoice', [
 route('Sales/Order Cancel', [
   'GET /sales-orders/:vchNo/adjustment',
   'GET /order-cancel/pending-orders',
+  'GET /order-cancel/defaults',
   'POST /order-cancel',
   'GET /order-cancel/:vchNo',
   'PUT /order-cancel/:vchNo',

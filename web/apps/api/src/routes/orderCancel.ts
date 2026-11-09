@@ -4,7 +4,8 @@ import {
   deleteOrderCancel,
   editOrderCancel,
   getOrderCancel,
-  listPendingOrders,
+  listPendingOrdersWithTags,
+  orderCancelDefaults,
   postOrderCancel,
 } from '../modules/sales/orderCancel.js';
 import {
@@ -105,7 +106,12 @@ export function registerOrderCancelRoutes(app: FastifyInstance, h: OrderCancelRo
   // The OrdNo cell's help (TR_SL_ORD_ADJ.cs:2499-2526): orders of this location with advance still open.
   app.get('/order-cancel/pending-orders', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
-    return run(reply, 200, () => listPendingOrders(prisma, scopeOf(req)));
+    return run(reply, 200, () => listPendingOrdersWithTags(prisma, scopeOf(req)));
+  });
+  // A new row's PaiidAc (TR_SL_ORD_ADJ.cs:2255-2263): slot 1 of the cancel book.
+  app.get('/order-cancel/defaults', auth, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => orderCancelDefaults(prisma, scopeOf(req)));
   });
   app.post('/order-cancel', bodyRoute, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;

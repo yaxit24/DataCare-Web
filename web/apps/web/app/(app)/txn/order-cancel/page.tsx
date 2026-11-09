@@ -1,280 +1,550 @@
 'use client';
-import { formatDesktopDate } from '@datacare/core';
-import { useCallback, useEffect, useState } from 'react';
-import { get, post, del, ApiError } from '../../../../lib/api';
-import { BookSelect } from '../../../../components/BookSelect';
+import { toIsoDate } from '@datacare/core';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { get, post, put, del, ApiError } from '../../../../lib/api';
 import { useBusinessScope } from '../../../../components/BusinessScope';
+import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
-import { EntityImagePanel } from '../../../../components/EntityImagePanel';
-import { salesOrderQuery } from '../../../../lib/salesOrderForm';
+import { VoucherList } from '../../../../components/VoucherList';
+import { useVoucherNumberKeys, VoucherNumberNote } from '../../../../components/VoucherNumberKeys';
+import {
+  OrderCancelGridRow,
+  f2,
+  n,
+  paidOf,
+  r2,
+  type Row,
+} from '../../../../components/OrderCancelGridRow';
+import {
+  OrderCancelOrderHelp,
+  OrderCancelTagGrid,
+  type OrderTag,
+  type PendingOrder,
+} from '../../../../components/OrderCancelOrderHelp';
+import { useScreenEscape, type ScreenKeyEvent } from '../../../../lib/screenEscape';
+import { todayLocal } from '../../../../lib/localDate';
 
-/** The order book whose orders are listed; the list, void and refund all need its complete scope. */
-const ORDER_MAIN_BOOKS = ['SALES ORDER'];
+/** Desktop "Order Cancel" opens TR_SL_ORD_ADJ with `CurBookHelp('ORDER CANCEL')` (MDI_FORM.cs:8628-8639). */
+const ORDER_CANCEL_MAIN_BOOKS = ['ORDER CANCEL'];
 
-interface Order {
-  vchNo: string;
-  book: string;
-  vchDate: string | null;
-  acCode: string;
-  acName: string | null;
-  total: number;
-  advance: number;
-  delDate: string | null;
-}
-const money = (n: number) =>
-  Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const weekday = (iso: string) =>
+  iso ? new Date(`${iso}T00:00:00`).toLocaleDateString('en-GB', { weekday: 'long' }) : '';
+const clock = () => new Date().toTimeString().slice(0, 8);
+const errorText = (e: unknown, fallback: string) =>
+  e instanceof ApiError
+    ? e.body?.message || e.body?.detail || e.body?.error || e.message
+    : fallback;
 
+/**
+ * Order Cancel (TR_SL_ORD_ADJ). One voucher cancels the open advance of any number of orders. The grid is the
+ * desktop's MSG: Sr, OrdNo, AcCode, Ac Name, It Desc, OrdAmt, AdjAmt, KsarAmt, PaidAmt, PaiidAc, Paid Ac Name
+ * (MSG_CLEAR, TR_SL_ORD_ADJ.cs:2140-2218). Enter on a blank OrdNo opens the pending-order help (:2499-2526); picking one
+ * fills the party and puts the open advance in OrdAmt, AdjAmt and PaidAmt (:2542-2560). PaidAmt is AdjAmt - KsarAmt
+ * (:2447); a new row's PaiidAc is the book's cash account (:2255-2263). The tag grid below lists the tags the picked
+ * orders hold; Save puts them back in stock.
+ */
 export default function OrderCancelPage() {
-  // The page used to load `/sales-orders` with no scope at all, so it opened on a 400 "complete voucher
-  // scope" error, and Void sent neither the scope nor the saved version (PARITY-EVALUATION-2026-09-28 D5).
-  const scope = useBusinessScope();
+  const router = useRouter();
+  const { lcCode, coYear } = useBusinessScope();
   const [coBook, setCoBook] = useState('');
-  const scopeQuery = salesOrderQuery(scope, coBook);
-  const [orders, setOrders] = useState<Order[]>([]);
-  // The party on the highlighted order owns the photograph.
-  const [imageRow, setImageRow] = useState(0);
-  const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
+  const [vchDate, setVchDate] = useState(todayLocal());
+  const [vchTime, setVchTime] = useState(clock());
+  const [empCode, setEmpCode] = useState('');
+  const [empName, setEmpName] = useState('');
+  const [defaults, setDefaults] = useState({ paidAc: '', paidAcName: '' });
+  const blankRow = useCallback(
+    (): Row => ({
+      ordNo: '',
+      ordYear: '',
+      ordBook: '',
+      acCode: '',
+      acName: '',
+      itDesc: '',
+      ordAmt: 0,
+      adjAmt: '',
+      kasarAmt: '',
+      paidAc: defaults.paidAc,
+      paidAcName: defaults.paidAcName,
+    }),
+    [defaults],
+  );
+  const [rows, setRows] = useState<Row[]>([]);
+  const [tags, setTags] = useState<OrderTag[]>([]);
+  const [pending, setPending] = useState<PendingOrder[]>([]);
+  const [helpRow, setHelpRow] = useState<number | null>(null);
+  const [loadedVch, setLoadedVch] = useState('');
+  const [version, setVersion] = useState('');
+  const [voucherLookup, setVoucherLookup] = useState('');
+  const [savedVch, setSavedVch] = useState('');
+  const [notice, setNotice] = useState('');
+  const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
-  const [cancelling, setCancelling] = useState<string | null>(null);
-  // Refund flow (desktop Order Cancel: PaiidAc + Paid Amt + Kasar)
-  const [refundFor, setRefundFor] = useState<Order | null>(null);
-  const [paidAc, setPaidAc] = useState('CASH');
-  const [paidAmt, setPaidAmt] = useState('');
-  const [kasarAmt, setKasarAmt] = useState('');
+  const [openedTotal, setOpenedTotal] = useState(0);
+  const grid = useRef<HTMLTableSectionElement | null>(null);
 
-  const load = useCallback(async () => {
-    if (!coBook) {
-      setOrders([]);
+  const bookQuery = `coBook=${encodeURIComponent(coBook)}`;
+  const totals = {
+    ord: r2(rows.reduce((s, r) => s + n(r.ordAmt), 0)),
+    adj: r2(rows.reduce((s, r) => s + n(r.adjAmt), 0)),
+    kasar: r2(rows.reduce((s, r) => s + n(r.kasarAmt), 0)),
+    paid: r2(rows.reduce((s, r) => s + paidOf(r), 0)),
+  };
+  const filled = rows.filter((r) => r.ordNo.trim());
+  const canSave = !!coBook && filled.length > 0;
+
+  useEffect(() => {
+    if (!coBook) return;
+    get<{ paidAc: string; paidAcName: string }>(`/order-cancel/defaults?${bookQuery}`)
+      .then(setDefaults)
+      .catch(() => setDefaults({ paidAc: '', paidAcName: '' }));
+  }, [coBook, bookQuery]);
+  useEffect(() => {
+    setRows((rs) => (rs.length ? rs : [blankRow()]));
+  }, [blankRow]);
+
+  const cell = (row: number, column: string) =>
+    grid.current?.querySelector<HTMLInputElement>(`[data-cell="${column}-${row}"]`) ?? null;
+  const focusCell = (row: number, column: string) =>
+    // The row may only appear in the next render (a new last row), so look again for a short while.
+    (function attempt(left: number) {
+      const found = cell(row, column);
+      const el = found?.matches('input') ? found : found?.querySelector('input');
+      if (!el && left > 0) return void setTimeout(() => attempt(left - 1), 20);
+      el?.focus();
+      el?.select?.();
+    })(10);
+  const setRow = (i: number, patch: Partial<Row>) =>
+    setRows((rs) => rs.map((r, j) => (j === i ? { ...r, ...patch } : r)));
+
+  function resetForm() {
+    setLoadedVch('');
+    setVersion('');
+    setVoucherLookup('');
+    setRows([blankRow()]);
+    setTags([]);
+    setVchDate(todayLocal());
+    setVchTime(clock());
+    setEmpCode('');
+    setEmpName('');
+    setHelpRow(null);
+    setErr('');
+    setOpenedTotal(0);
+  }
+
+  async function openHelp(i: number) {
+    setErr('');
+    try {
+      setPending(await get<PendingOrder[]>(`/order-cancel/pending-orders?${bookQuery}`));
+      setHelpRow(i);
+    } catch (e) {
+      setErr(errorText(e, 'failed to load the pending orders'));
+    }
+  }
+
+  function pickOrder(order: PendingOrder) {
+    const i = helpRow ?? 0;
+    // :2542-2560: OrdAmt, AdjAmt and (when blank) PaidAmt take the advance still open.
+    setRows((rs) =>
+      rs.map((r, j) =>
+        j === i
+          ? {
+              ...r,
+              ordNo: order.ordNo,
+              ordYear: order.ordYear,
+              ordBook: order.ordBook,
+              acCode: order.acCode,
+              acName: order.acName,
+              ordAmt: order.openAmt,
+              adjAmt: f2(order.openAmt),
+              kasarAmt: r.kasarAmt || '0.00',
+            }
+          : r,
+      ),
+    );
+    setTags((ts) => {
+      const others = ts.filter((t) => t.ordNo !== order.ordNo);
+      return [...others, ...order.tags].map((t, k) => ({ ...t, srNo: k + 1 }));
+    });
+    setHelpRow(null);
+    focusCell(i, 'desc');
+  }
+
+  function nextRow(i: number) {
+    if (i === rows.length - 1) setRows((rs) => [...rs, blankRow()]);
+    focusCell(i + 1, 'ord');
+  }
+
+  function removeRow(i: number) {
+    // The desktop's grid row prompt (TR_SL_ORD_ADJ.cs:1841).
+    if (!window.confirm('This Row Record will Removed permantley ?')) return;
+    const gone = rows[i]?.ordNo;
+    setRows((rs) => (rs.length > 1 ? rs.filter((_, j) => j !== i) : [blankRow()]));
+    if (gone && !rows.some((r, j) => j !== i && r.ordNo === gone))
+      setTags((ts) => ts.filter((t) => t.ordNo !== gone).map((t, k) => ({ ...t, srNo: k + 1 })));
+  }
+
+  /** TEXT_ENTRY_KeyDown (:2481-2850): Enter walks OrdNo, It Desc, AdjAmt, KsarAmt, PaiidAc, then the next row. */
+  function onCellKey(e: React.KeyboardEvent, i: number, column: string) {
+    // The account picker took the key itself (it picked from its open list).
+    if (e.defaultPrevented) return;
+    if (e.ctrlKey && (e.key === 'd' || e.key === 'D')) {
+      e.preventDefault();
+      removeRow(i);
       return;
     }
+    if (e.key === 'F1' && column === 'ord') {
+      e.preventDefault();
+      void openHelp(i);
+      return;
+    }
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const row = rows[i]!;
+    if (column === 'ord') {
+      if (!row.acCode) void openHelp(i);
+      else focusCell(i, 'desc');
+    } else if (column === 'desc') focusCell(i, 'adj');
+    // :2733 — Enter on a zero AdjAmt stays in the cell.
+    else if (column === 'adj') {
+      if (n(row.adjAmt) !== 0) focusCell(i, 'kasar');
+    } else if (column === 'kasar') focusCell(i, 'paidac');
+    else if (column === 'paidac') nextRow(i);
+  }
+
+  async function loadVoucher(vchNo: string): Promise<boolean> {
+    setErr('');
+    setNotice('');
+    setSavedVch('');
+    try {
+      const d = await get<any>(`/order-cancel/${encodeURIComponent(vchNo)}?${bookQuery}`);
+      const no = String(d.voucherNo ?? vchNo);
+      setLoadedVch(no);
+      setVoucherLookup(no);
+      setVersion(String(d.version ?? ''));
+      const loaded: Row[] = (d.rows ?? []).map((r: any) => ({
+        ordNo: String(r.ordNo ?? ''),
+        ordYear: String(r.ordYear ?? ''),
+        ordBook: String(r.ordBook ?? ''),
+        acCode: String(r.acCode ?? ''),
+        acName: String(r.acName ?? ''),
+        itDesc: String(r.itDesc ?? ''),
+        ordAmt: n(r.ordAmt),
+        adjAmt: f2(n(r.adjAmt)),
+        kasarAmt: f2(n(r.kasarAmt)),
+        paidAc: String(r.paidAc ?? ''),
+        paidAcName: String(r.paidAcName ?? ''),
+      }));
+      setRows(loaded.length ? loaded : [blankRow()]);
+      setTags(d.tags ?? []);
+      setEmpCode(String(d.empCode ?? ''));
+      setEmpName(String(d.empName ?? ''));
+      setVchDate(toIsoDate(d.vchDate ?? todayLocal()));
+      setOpenedTotal(r2(loaded.reduce((s, r) => s + r.ordAmt + n(r.adjAmt), 0)));
+      return true;
+    } catch (e) {
+      setErr(errorText(e, 'failed to load'));
+      return false;
+    }
+  }
+
+  // tVchNo_KeyDown (:3951-3977): F1 lists the vouchers, Up/Down step through them, Enter opens one.
+  const numberKeys = useVoucherNumberKeys({
+    table: 'SL_ORD_ADJ',
+    book: coBook,
+    value: voucherLookup,
+    open: (vchNo) => loadVoucher(vchNo),
+    fresh: resetForm,
+  });
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setErr('');
+    setNotice('');
+    setSavedVch('');
     setBusy(true);
     try {
-      setOrders(await get<Order[]>(`/sales-orders?${scopeQuery}`));
+      const body = {
+        coBook,
+        coYear,
+        lcCode,
+        vchDate,
+        empCode: empCode.trim(),
+        ...(loadedVch ? { expectedVersion: version } : {}),
+        rows: filled.map((r) => ({
+          ordNo: r.ordNo.trim(),
+          ...(r.ordYear ? { ordYear: r.ordYear } : {}),
+          ...(r.ordBook ? { ordBook: r.ordBook } : {}),
+          adjAmt: r2(n(r.adjAmt)),
+          kasarAmt: r2(n(r.kasarAmt)),
+          paidAmt: paidOf(r),
+          paidAc: r.paidAc.trim(),
+          itDesc: r.itDesc,
+        })),
+      };
+      const saved = loadedVch
+        ? await put<{ vchNo: number }>(`/order-cancel/${encodeURIComponent(loadedVch)}`, body)
+        : await post<{ vchNo: number }>('/order-cancel', body);
+      const no = String(saved.vchNo).padStart(5, '0');
+      resetForm();
+      setSavedVch(no);
+      setNotice(`${loadedVch ? 'Updated' : 'Posted'} — Order Cancel #${saved.vchNo}`);
     } catch (e) {
-      setMsg({
-        kind: 'err',
-        text:
-          e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed to load',
-      });
+      setErr(errorText(e, 'failed'));
     } finally {
       setBusy(false);
     }
-  }, [coBook, scopeQuery]);
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  function openRefund(o: Order) {
-    setRefundFor(o);
-    setPaidAc('CASH');
-    setPaidAmt(String(o.advance || 0));
-    setKasarAmt('');
-    setMsg(null);
   }
 
-  async function voidOrder(o: Order) {
-    if (
-      !window.confirm(
-        `Void order #${o.vchNo} (${o.acName || o.acCode})? This reverses the order + any advance by voucher key.`,
-      )
-    )
+  async function removeVoucher() {
+    // BtnDelete_Click (:3741, :3753).
+    if (!loadedVch || !window.confirm('Are You Sure To Delete This Voucher now?')) return;
+    setBusy(true);
+    setErr('');
+    try {
+      await del(`/order-cancel/${encodeURIComponent(loadedVch)}?${bookQuery}`, {
+        expectedVersion: version,
+      });
+      resetForm();
+      setNotice('Delete Success.');
+    } catch (e) {
+      setErr(errorText(e, 'delete failed'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /** TR_SL_ORD_ADJ_KeyDown (:3758-3790): Esc closes the form when the totals are what it opened with. */
+  function onScreenKeyDown(event: ScreenKeyEvent) {
+    if (event.defaultPrevented || event.key !== 'Escape') return;
+    const target = event.target as HTMLElement;
+    if (target.closest?.('[data-lookup-open="true"]')) return;
+    if (target.closest?.('[data-cell]')) {
+      event.preventDefault();
+      document.getElementById('order-cancel-emp')?.querySelector('input')?.focus();
       return;
-    setCancelling(o.vchNo);
-    setMsg(null);
-    try {
-      // The delete is version-guarded, as on the Sales Order screen: read the saved order first so a
-      // concurrent edit is refused rather than silently overwritten.
-      const path = `/sales-orders/${encodeURIComponent(o.vchNo)}?${scopeQuery}`;
-      const saved = await get<{ version?: string }>(path);
-      await del(path, { expectedVersion: saved.version });
-      setMsg({ kind: 'ok', text: `Order #${o.vchNo} voided` });
-      await load();
-    } catch (e) {
-      setMsg({
-        kind: 'err',
-        text:
-          e instanceof ApiError
-            ? e.body?.detail || e.body?.message || e.body?.error || 'void failed'
-            : 'void failed',
-      });
-    } finally {
-      setCancelling(null);
+    }
+    if (r2(totals.ord + totals.adj) === openedTotal) {
+      event.preventDefault();
+      router.back();
     }
   }
-
-  async function submitRefund() {
-    if (!refundFor) return;
-    setCancelling(refundFor.vchNo);
-    setMsg(null);
-    try {
-      const r = await post<{ vchNo: number; refunded: number; kasar: number }>(
-        `/sales-orders/${encodeURIComponent(refundFor.vchNo)}/cancel-refund?${scopeQuery}`,
-        {
-          paidAc: paidAc.trim() || 'CASH',
-          paidAmt: Number(paidAmt || 0),
-          kasarAmt: Number(kasarAmt || 0),
-        },
-      );
-      setMsg({
-        kind: 'ok',
-        text: `Order #${refundFor.vchNo} cancelled — refunded ₹${money(r.refunded)} via ${paidAc}${r.kasar ? ` (kasar ₹${money(r.kasar)})` : ''}`,
-      });
-      setRefundFor(null);
-      await load();
-    } catch (e) {
-      setMsg({
-        kind: 'err',
-        text:
-          e instanceof ApiError
-            ? e.body?.detail || e.body?.message || e.body?.error || 'refund failed'
-            : 'refund failed',
-      });
-    } finally {
-      setCancelling(null);
-    }
-  }
+  const screenRef = useScreenEscape<HTMLDivElement>(onScreenKeyDown);
+  const printHref = (v: string) =>
+    `/api/order-cancel/${encodeURIComponent(v)}/print?${bookQuery}&format=html`;
 
   return (
-    <div>
-      <h1>
-        Order Cancel{' '}
-        <span className="muted">— void, or cancel with a refund through a chosen account</span>
-      </h1>
-      {msg && <div className={`msg ${msg.kind}`}>{msg.text}</div>}
-
-      {refundFor && (
+    <div ref={screenRef} onKeyDown={onScreenKeyDown}>
+      <h1>Order Cancel</h1>
+      <form onSubmit={submit}>
         <div className="panel">
-          <h2>
-            Refund &amp; cancel order #{refundFor.vchNo}{' '}
-            <span className="muted">
-              — {refundFor.acName || refundFor.acCode} · advance ₹{money(refundFor.advance)}
-            </span>
-          </h2>
-          <div className="row" style={{ alignItems: 'flex-end', gap: 12 }}>
+          <div className="row">
             <div className="field">
-              <label>Refund via (PaiidAc)</label>
-              <LookupPicker
-                entity="accounts"
-                value={paidAc}
-                onChange={setPaidAc}
-                placeholder="CASH"
-              />
-            </div>
-            <div className="field">
-              <label>Paid Amt</label>
+              <label htmlFor="order-cancel-vch-no">Vch No</label>
               <input
-                value={paidAmt}
-                onChange={(e) => setPaidAmt(e.target.value)}
-                style={{ width: 120, textAlign: 'right' }}
+                id="order-cancel-vch-no"
+                value={voucherLookup}
+                onChange={(e) => setVoucherLookup(e.target.value)}
+                onKeyDown={numberKeys.onKeyDown}
+                placeholder="new"
+                style={{ width: 90 }}
+              />
+              <VoucherNumberNote note={numberKeys.note} />
+            </div>
+            <div className="field">
+              <label>Book</label>
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                preferred="ORC"
+                mainBooks={ORDER_CANCEL_MAIN_BOOKS}
               />
             </div>
             <div className="field">
-              <label>Kasar (write-off)</label>
+              <label htmlFor="order-cancel-date">Vch Date</label>
               <input
-                value={kasarAmt}
-                onChange={(e) => setKasarAmt(e.target.value)}
-                style={{ width: 120, textAlign: 'right' }}
+                id="order-cancel-date"
+                type="date"
+                ref={numberKeys.dateRef}
+                value={vchDate}
+                onChange={(e) => setVchDate(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    focusCell(0, 'ord');
+                  }
+                }}
               />
             </div>
-            <button
-              type="button"
-              className="primary"
-              disabled={cancelling === refundFor.vchNo}
-              onClick={submitRefund}
-            >
-              {cancelling === refundFor.vchNo ? 'Processing…' : 'Refund & Cancel'}
+            <div className="field">
+              <label htmlFor="order-cancel-time">Time</label>
+              <input id="order-cancel-time" value={vchTime} readOnly style={{ width: 90 }} />
+            </div>
+            <div className="field">
+              <label htmlFor="order-cancel-day">Day</label>
+              <input
+                id="order-cancel-day"
+                value={weekday(vchDate)}
+                readOnly
+                style={{ width: 110 }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="panel" style={{ overflow: 'auto' }}>
+          <table className="grid" aria-label="Orders to cancel">
+            <thead>
+              <tr>
+                <th>Sr</th>
+                <th>OrdNo</th>
+                <th>AcCode</th>
+                <th>Ac Name</th>
+                <th>It Desc</th>
+                <th className="num">OrdAmt</th>
+                <th className="num">AdjAmt</th>
+                <th className="num">KsarAmt</th>
+                <th className="num">PaidAmt</th>
+                <th>PaiidAc</th>
+                <th>Paid Ac Name</th>
+              </tr>
+            </thead>
+            <tbody ref={grid}>
+              {rows.map((r, i) => (
+                <OrderCancelGridRow
+                  key={i}
+                  row={r}
+                  index={i}
+                  setRow={setRow}
+                  onCellKey={onCellKey}
+                />
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan={3}></td>
+                <td style={{ fontWeight: 600 }}>Total :</td>
+                <td></td>
+                <td className="num" aria-label="OrdAmt total">
+                  {f2(totals.ord)}
+                </td>
+                <td className="num" aria-label="AdjAmt total">
+                  {f2(totals.adj)}
+                </td>
+                <td className="num" aria-label="KsarAmt total">
+                  {f2(totals.kasar)}
+                </td>
+                <td className="num" aria-label="PaidAmt total">
+                  {f2(totals.paid)}
+                </td>
+                <td colSpan={2}></td>
+              </tr>
+            </tfoot>
+          </table>
+          <div className="toolbar" style={{ marginTop: 8 }}>
+            <button type="button" className="ghost" onClick={() => void openHelp(rows.length - 1)}>
+              Pending orders (F1)
             </button>
-            <button type="button" className="ghost" onClick={() => setRefundFor(null)}>
-              Close
+            <button type="button" className="ghost" onClick={() => nextRow(rows.length - 1)}>
+              + Add line
             </button>
           </div>
-          <p className="muted" style={{ margin: '6px 0 0' }}>
-            Posts Dr customer (Paid + Kasar) / Cr {paidAc || 'CASH'} (refund) + Cr KASAR
-            (write-off), and records an SL_ORD_ADJ row.
-          </p>
+        </div>
+
+        {helpRow !== null && (
+          <OrderCancelOrderHelp
+            orders={pending.filter(
+              (o) =>
+                !rows.some(
+                  (r, j) => j !== helpRow && r.ordNo === o.ordNo && r.ordBook === o.ordBook,
+                ),
+            )}
+            onPick={pickOrder}
+            onClose={() => {
+              setHelpRow(null);
+              focusCell(helpRow, 'ord');
+            }}
+          />
+        )}
+
+        <OrderCancelTagGrid tags={tags} />
+
+        <div className="panel">
+          <div className="row">
+            <div className="field" style={{ flex: 2 }} id="order-cancel-emp">
+              <label>Employee</label>
+              <LookupPicker
+                entity="employees"
+                value={empCode}
+                onChange={(code) => {
+                  setEmpCode(code);
+                  setEmpName('');
+                }}
+                onPick={(picked) => setEmpName(String(picked.name || ''))}
+                ariaLabel="Employee"
+                placeholder="search employees…"
+                resolveTypedCode
+              />
+              {empName && (
+                <span className="muted" style={{ fontSize: 12 }}>
+                  {empName}
+                </span>
+              )}
+            </div>
+            <span className="spacer" />
+            {loadedVch && (
+              <a className="button" href={printHref(loadedVch)} target="_blank" rel="noreferrer">
+                Print
+              </a>
+            )}
+            <button type="button" onClick={resetForm} disabled={busy}>
+              Cancel
+            </button>
+            {loadedVch && (
+              <button
+                type="button"
+                className="danger"
+                onClick={() => void removeVoucher()}
+                disabled={busy}
+              >
+                Delete
+              </button>
+            )}
+            <button className="primary" data-save-mnemonic disabled={busy || !canSave}>
+              {busy ? 'Saving…' : loadedVch ? `Update #${loadedVch}` : 'Save Order Cancel'}
+            </button>
+          </div>
+        </div>
+      </form>
+
+      {err && (
+        <div className="msg err" role="alert">
+          {err}
         </div>
       )}
-
-      <div className="panel" style={{ overflow: 'auto' }}>
-        <div className="toolbar">
-          <div className="field" style={{ margin: 0 }}>
-            <label>Order book</label>
-            <BookSelect
-              key={`${scope.coCode}/${scope.lcCode}/${scope.coYear}`}
-              value={coBook}
-              onChange={setCoBook}
-              mainBooks={ORDER_MAIN_BOOKS}
-            />
-          </div>
-          <h2>{orders.length} order(s)</h2>
-          <span className="spacer" />
-          <button type="button" className="ghost" onClick={() => load()} disabled={busy || !coBook}>
-            {busy ? 'Loading…' : 'Refresh'}
-          </button>
+      {notice && (
+        <div className="msg ok" role="status">
+          {notice}
+          {savedVch && (
+            <>
+              {' '}
+              <a href={printHref(savedVch)} target="_blank" rel="noreferrer">
+                Print
+              </a>
+            </>
+          )}
         </div>
-        <table className="grid">
-          <thead>
-            <tr>
-              <th>Vch</th>
-              <th>Date</th>
-              <th>Customer</th>
-              <th className="num">Total</th>
-              <th className="num">Advance</th>
-              <th>Delivery</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((o) => (
-              <tr key={`${o.book}-${o.vchNo}`}>
-                <td>{o.vchNo}</td>
-                <td>{formatDesktopDate(o.vchDate)}</td>
-                <td>{o.acName || o.acCode}</td>
-                <td className="num">{money(o.total)}</td>
-                <td className="num">{o.advance ? money(o.advance) : ''}</td>
-                <td>
-                  {o.delDate ? formatDesktopDate(o.delDate) : <span className="muted">—</span>}
-                </td>
-                <td style={{ whiteSpace: 'nowrap' }}>
-                  {o.advance > 0 && (
-                    <button
-                      type="button"
-                      className="primary"
-                      style={{ marginRight: 6 }}
-                      disabled={cancelling === o.vchNo}
-                      onClick={() => openRefund(o)}
-                    >
-                      Refund…
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    className="danger"
-                    disabled={cancelling === o.vchNo}
-                    onClick={() => voidOrder(o)}
-                  >
-                    {cancelling === o.vchNo ? '…' : 'Void'}
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {orders.length === 0 && !busy && (
-              <tr>
-                <td colSpan={7} className="muted">
-                  {coBook ? 'No sales orders.' : 'Select the order book.'}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-      <EntityImagePanel
-        entityType="AC"
-        entityKey={orders[imageRow]?.acCode ?? ''}
-        instance={0}
-        label="Party photo"
-        testId="order-cancel-image"
-      />
+      )}
+      {coBook && (
+        <VoucherList
+          table="SL_ORD_ADJ"
+          book={coBook}
+          onLoad={(vchNo) => void loadVoucher(vchNo)}
+          openKey={numberKeys.listKey}
+          printHref={printHref}
+          reloadKey={notice}
+        />
+      )}
     </div>
   );
 }

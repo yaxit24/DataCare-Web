@@ -203,6 +203,46 @@ export async function listPendingOrders(prisma: any, scope: VoucherScope): Promi
   );
 }
 
+/** The help list with each order's held tags, which picking it puts in the tag grid (TR_SL_ORD_ADJ.cs:2598-2631). */
+export async function listPendingOrdersWithTags(
+  prisma: any,
+  scope: VoucherScope,
+): Promise<Array<PendingOrder & { tags: OrderTagRow[] }>> {
+  const complete = completeFinanceScope(scope);
+  return withTxBudget(prisma, complete.tenantId, 'read', async (tx: any) => {
+    const open = (await ordersWithAdvanceTx(tx, complete)).filter((o) => o.openAmt > TOLERANCE);
+    const out: Array<PendingOrder & { tags: OrderTagRow[] }> = [];
+    for (const order of open)
+      out.push({ ...order, tags: await reservedOrderTagsTx(tx, complete, [order]) });
+    return out;
+  });
+}
+
+/**
+ * A new grid row's refund account: the desktop puts 00001 CASH ON HAND in PaiidAc (CommPassAdd, TR_SL_ORD_ADJ.cs:2255-
+ * 2263); the web reads it from slot 1 of the cancel book. Blank when the book has no slot 1 (Save then asks for one).
+ */
+export async function orderCancelDefaults(
+  prisma: any,
+  scope: VoucherScope,
+): Promise<{ paidAc: string; paidAcName: string }> {
+  const complete = completeFinanceScope(scope);
+  return withTxBudget(prisma, complete.tenantId, 'read', async (tx: any) => {
+    requireBookFamily(await configuredBookTx(tx, complete), 'ORDER CANCEL', 'order cancel');
+    const paidAc = await cashAccountTx(tx, complete);
+    if (!paidAc) return { paidAc: '', paidAcName: '' };
+    const rows: Array<{ name: unknown }> = await tx.$queryRawUnsafe(
+      `SELECT "AC_NAME" AS name FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "AC_CODE"::text=$3::text
+        ORDER BY CASE WHEN "LC_CODE"::text=$4 THEN 0 ELSE 1 END, row_id LIMIT 1`,
+      complete.tenantId,
+      complete.coCode,
+      paidAc,
+      complete.lcCode,
+    );
+    return { paidAc, paidAcName: text(rows[0]?.name) };
+  });
+}
+
 /**
  * Open advance of one order, for the sale that wants to use it. Same rule and the same lock as the cancel, so a sale
  * and a cancel never use the same money twice. Call it inside the writer's transaction.

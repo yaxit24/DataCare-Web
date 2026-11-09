@@ -122,6 +122,17 @@
         "web/apps/web/lib/salesOrderOldMetal.ts"
       ]
     },
+    "orderCancel": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/order-cancel/page.tsx",
+        "web/apps/web/components/OrderCancelGridRow.tsx",
+        "web/apps/web/components/OrderCancelOrderHelp.tsx",
+        "web/apps/api/src/modules/sales/orderCancel.ts",
+        "web/apps/api/src/modules/sales/orderCancelTags.ts",
+        "web/apps/api/src/modules/sales/orderCancelPrint.ts",
+        "web/apps/api/src/routes/orderCancel.ts"
+      ]
+    },
     "partyOpening": {
       "covers": [
         "web/apps/web/app/(app)/txn/ac-opbl/page.tsx",
