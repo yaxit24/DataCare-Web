@@ -384,6 +384,50 @@ type Row = Record<string, any>;
     );
   });
 
+  it('D35: a deleted administrator in mid-session is refused on the next request and writes nothing', async () => {
+    const created = await create({
+      loginName: 'KAMAL',
+      password: 'panna-bazaar',
+      confirmPassword: 'panna-bazaar',
+      userType: 'Admin',
+    });
+    expect(created.statusCode, created.body).toBe(201);
+    await signIn('KAMAL', 'panna-bazaar');
+    // The session works on a rights-checked route before the delete.
+    const before = await app.inject({ method: 'GET', url: '/admin/users', headers: as('KAMAL') });
+    expect(before.statusCode, before.body).toBe(200);
+
+    const deleted = await app.inject({
+      method: 'DELETE',
+      url: '/admin/users/KAMAL',
+      headers: as('owner'),
+    });
+    expect(deleted.statusCode, deleted.body).toBe(200);
+    expect(deleted.json()).toMatchObject({ message: 'Delete Success.' });
+
+    // Same cookie, very next request: refused, on a read and on a write, and the write leaves no trace.
+    const footprint = await fingerprint();
+    const read = await app.inject({ method: 'GET', url: '/admin/users', headers: as('KAMAL') });
+    expect(read.statusCode).toBe(401);
+    const write = await app.inject({
+      method: 'POST',
+      url: '/admin/users',
+      headers: as('KAMAL'),
+      payload: {
+        loginName: 'GHOST',
+        password: 'heera-panna',
+        confirmPassword: 'heera-panna',
+        userType: 'Admin',
+      },
+    });
+    expect(write.statusCode).toBe(401);
+    expect(changed(footprint, await fingerprint())).toEqual([]);
+    expect(await loginRow('GHOST')).toBeUndefined();
+    expect(
+      (await app.inject({ method: 'POST', url: '/auth/refresh', headers: as('KAMAL') })).statusCode,
+    ).toBe(401);
+  });
+
   it('N169: the last administrator cannot be deleted; with another admin it can', async () => {
     // SURESH is an admin (T03), so first delete SURESH while owner remains, then owner is the last one.
     const first = await app.inject({
