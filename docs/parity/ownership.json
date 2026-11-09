@@ -41,7 +41,7 @@
   "Report/HuId Report": "unowned",
   "Transaction/Purchase": "none active (merged #204)",
   "Transaction/Purchase Rtn": "none active (merged #157)",
-  "Transaction/Sales Order": "WP-03 `agent/wp03-so-scheme-tender` (N230): the scheme tender of G206, PR open",
+  "Transaction/Sales Order": "WP-03 PR #232 (N230): the scheme tender of G206",
   "Transaction/Sales": "none active (module merged #135; later fixes #158, #162, #204)",
   "Transaction/Sales Return": "none active (merged #189)",
   "Transaction/Wh Sales": "none active (merged #196, #215)",
