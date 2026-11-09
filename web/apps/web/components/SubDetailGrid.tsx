@@ -182,7 +182,7 @@ export const SUB_DETAIL_KARIGAR: readonly SubDetailField[] = [
 ];
 
 /** A row is held as strings, matching every other grid on the web so inputs stay uncontrolled-free. */
-export type SubDetailRow = Partial<Record<SubDetailField, string>>;
+export type SubDetailRow = Partial<Record<SubDetailField, string>> & { isrNo?: string };
 
 export const blankSubDetailRow = (): SubDetailRow => ({});
 
@@ -206,6 +206,8 @@ const textual = (value: string | undefined): string | undefined => {
  */
 export const toSubDetailInput = (row: SubDetailRow): Record<string, unknown> => {
   const out: Record<string, unknown> = {};
+  const isrNo = numeric(row.isrNo);
+  if (isrNo !== undefined) out.isrNo = isrNo;
   for (const field of Object.keys(SUB_DETAIL_COLUMNS) as SubDetailField[]) {
     const spec = SUB_DETAIL_COLUMNS[field];
     const value = spec.numeric ? numeric(row[field]) : textual(row[field]);
@@ -229,6 +231,8 @@ export const stoneRowFromApi = (
 ): SubDetailRow => {
   const row: SubDetailRow = {};
   if (!source) return row;
+  const isrNo = numeric(String(source.isrNo ?? ''));
+  if (isrNo !== undefined) row.isrNo = String(isrNo);
   for (const field of Object.keys(SUB_DETAIL_COLUMNS) as SubDetailField[]) {
     const raw = (source as Record<string, unknown>)[field];
     if (raw == null) continue;

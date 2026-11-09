@@ -61,7 +61,7 @@ databaseDescribe('RP_CONSI_APR consignment report parity builder', () => {
        VALUES ($1,$2,$3,$4,'CON','00001',1,'2024-06-10','CON REC','C001','GOLD',10,4),
               ($1,$2,$3,$4,'CON','00002',1,'2024-06-11','CON REC','C001','SILV',20,5),
               ($1,$2,$3,$4,'CON','00003',1,'2024-07-01','CON REC','C001','GOLD',99,0),
-              ($1,$2,$3,$4,'APR','00004',1,'2024-06-10','APPROVAL ISSUE','C001','GOLD',50,0)`,
+              ($1,$2,$3,$4,'APR','00004',1,'2024-06-10','APR ISU','C001','GOLD',50,0)`,
       TENANT,
       CO,
       LC,
