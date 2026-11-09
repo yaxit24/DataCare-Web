@@ -824,17 +824,16 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
     // book's BOOK_DETL slot-1 account for the advance (verified at :1197 below); only when an advance
     // is actually taken does the account matter. Explicit request account wins, else resolve slot 1
     // on this transaction and FAIL-CLOSED when unconfigured.
-    const cashAc =
-      tender.cash > 0 || tender.oldMetal.length > 0
-        ? await resolveBookSlotAccountTx(
-            tx,
-            { ...input.scope, coBook: book.coBook },
-            'cash-settlement',
-            1,
-            input.cashAc,
-          )
-        : (input.cashAc ?? '');
-    await tenders.resolveOrderUpiTx(tx, input.scope, tender, !lifecycle);
+    const cashAc = tenders.needsAdvanceContra(tender)
+      ? await resolveBookSlotAccountTx(
+          tx,
+          { ...input.scope, coBook: book.coBook },
+          'cash-settlement',
+          1,
+          input.cashAc,
+        )
+      : (input.cashAc ?? '');
+    await tenders.resolveOrderTenderTx(tx, input.scope, tender, !lifecycle);
     await oldMetal.resolveOrderOldMetalTx(tx, input.scope, tender.oldMetal);
     if (mode.mainBook === 'SALES ORDER')
       await assertSalesOrderDateTx(tx, input.scope, requestedDate);

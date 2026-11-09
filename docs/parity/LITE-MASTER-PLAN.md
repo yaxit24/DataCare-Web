@@ -308,7 +308,7 @@ schedule the fix in WP-26/27.
 |---|---|---|---|---|---|---|---|
 | WP-01 | Approval Isu, Approval Rtn | Land the built branch | P1 | L | — | 12 | PR #228 (N229/G242); 3 cases blocked on WP-04 follow-up and a Sales Apr No import |
 | WP-02 | Order Cancel | Finish from the saved patch | P1 | M | — | 11 | patch saved |
-| WP-03 | Sales Order, Order Report | Scheme tender (G206), un-break the rows | P1 | M | — | — | baselined |
+| WP-03 | Sales Order, Order Report | Scheme tender (G206), un-break the rows | P1 | M | — | — | PR #232 (N230); owner chose option (a), follow the source; case passes, baseline entry removed |
 | WP-04 | Every voucher create route (Stock Adjust first) | Server-side idempotency: a replayed request never makes a second voucher | P0 | M | — | 20 (Stock Adjust part) | PR #229 (6 routes); follow-up queue for the rest |
 | WP-05 | Cash Received/Payment, Bank Received/Payment | T03 calculations, T06 card/UPI settlement | P1 | M | — | — | 2 blocked |
 | WP-06 | User Create | MS_USER with OD-1..OD-3 | P0 | L | — | — (see card) | 15 of 18 blocked |
@@ -406,7 +406,7 @@ browser case per screen first (red), then the hook (green).
 | WP-11 | Sales Report + the shared RP_ALL engine | `RP_ALL.cs` (12,662) sales branch | P1 | XL | — | 01 | not started |
 | WP-12 | Purchase Rpt (removes 17 G06 baselines) | `RP_ALL` purchase branch | P1 | M | WP-11 | 02 | frozen cases merged |
 | WP-13 | Approval Rpt | `RP_ALL` approval branch | P2 | M | WP-11, WP-01 | 03 | partial |
-| WP-14 | Order Report | `RP_ALL` order branch | P2 | M | WP-11, WP-03 | — (use 01's pattern) | BROKEN via G206 |
+| WP-14 | Order Report | `RP_ALL` order branch | P2 | M | WP-11, WP-03 | — (use 01's pattern) | no longer BROKEN once WP-03 (#232) merges |
 | WP-15 | Tag Stock | `RP_TAG.cs` (10,813) | P1 | L | — | 04 | partial |
 | WP-16 | Stock Report (new route) | `RP_STOCK.cs` (6,407) | P1 | L | WP-15 | 05 | not started |
 | WP-17 | Cash Bank | `RP_CASH_BANK.cs` (4,813) | P1 | L | — | 06 | not started |

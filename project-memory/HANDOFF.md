@@ -1,3 +1,11 @@
+## 2026-11-09 — Sales Order scheme tender (WP-03, N230, G206 scheme part)
+
+- Owner decision: follow the source. The typed Scheme Amt joins ADV_AMT and Order_Rojmel type 05 (`Ac_Rojmel.cs:19`) debits the MEMB
+  ADJUST book's BOOK_DETL slot 1 (never the literal 00079); Live24's 7 scheme orders lack 05 because 3 are of a year the day book no
+  longer holds and 4 came through the non-Lite MEMB ADJUST path on a likely older build (aggregate counts, doc 12 N230).
+- `sales-order.create.scheme-tender` passes and left `baseline.json`; `salesOrderScheme.db.test.ts` red 4/5 before, green after; module
+  32 of 33 (one blocked, G174). Open: the non-Lite path, a MEMB ADJUST book in provisioning, VCH_DESC on order day-book rows.
+
 ## 2026-11-09 — Esc with no focused control on nine more screens (WP-09, GB-02, under G239)
 
 - Party, Item, Item Group, Product, Tax, Address, Employee, Auto Item and Item Opening lost Esc when the focus was on the page body (each
