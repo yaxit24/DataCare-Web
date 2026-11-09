@@ -256,6 +256,7 @@ import { registerProductMasterRoutes } from './productMaster.js';
 import { registerMasterScreenRoutes } from './masterScreens.js';
 import { registerWholesaleSaleRoutes } from './wholesaleSale.js';
 import { registerAccountLedgerRoutes } from './accountLedger.js';
+import { registerApprovalRoutes } from './approval.js';
 import { VoucherVersionConflictError } from '../modules/vouchers/version.js';
 import { listYears, createYear, carryForwardOpenings } from '../modules/masters/year.js';
 import { reminders } from '../modules/finance/reminders.js';
@@ -592,14 +593,6 @@ import {
   getFineSalePurchase,
   editFineSalePurchase,
 } from '../modules/bullion/fineSalePurchase.js';
-import {
-  tourIssue,
-  deleteTour,
-  tourReturn,
-  deleteTourReturn,
-  tourLines,
-  markApprovalBilled,
-} from '../modules/tour/tour.js';
 import { yearEndPreview, yearEndClose } from '../modules/ops/yearEnd.js';
 import {
   enrollScheme,
@@ -962,6 +955,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         return reply.code(e.statusCode).send({ error: e.code, message: e.message });
       if (n === 'FineJvNotFoundError')
         return reply.code(404).send({ error: 'fine-jv-not-found', message: e.message });
+      if (n === 'ApprovalNotFoundError' || n === 'ApprovalBillNotFoundError')
+        return reply.code(404).send({ error: 'approval-not-found', message: e.message });
       if (e instanceof SavedSaleReturnError)
         return reply.code(e.statusCode).send({ error: e.code, message: e.message });
       if (e instanceof SaleReturnSourceError)
@@ -1109,6 +1104,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerMasterScreenRoutes(app, extraRouteHelpers, formCapabilities);
   registerWholesaleSaleRoutes(app, extraRouteHelpers);
   registerGstReportRoutes(app, { prisma, auth, scopeOf: readScope, pdfRenderer: deps.pdfRenderer });
+  registerApprovalRoutes(app, extraRouteHelpers);
   const pdfRenderer = (): PdfRenderer => deps.pdfRenderer ?? new PlaywrightPdfRenderer();
   /** Render server-built HTML, mapping limits to 413/422 and a busy or slow renderer to a retryable 503. */
   const sendPdf = async (reply: FastifyReply, html: string, filename: string) => {
@@ -8077,21 +8073,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
-  app.post('/tour/issue', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      tourIssue(prisma, {
-        scope: scopeOf(req),
-        vchDate: b.vchDate,
-        salesmanAc: b.salesmanAc,
-        salesmanName: b.salesmanName,
-        vchDesc: b.vchDesc,
-        mainUser: sess(req).sub,
-        lines: b.lines ?? [],
-      }),
-    );
-  });
   app.post('/year-end/preview', auth, async (req) =>
     yearEndPreview(prisma, {
       scope: scopeOf(req) as any,
@@ -8147,61 +8128,15 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       ),
     );
   });
-  app.delete('/tour/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
-      deleteTour(prisma, { scope: scopeOf(req), vchNo: (req.params as any).vchNo }),
-    );
-  });
-  app.post('/tour/return', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      tourReturn(prisma, {
-        scope: scopeOf(req),
-        origVchNo: b.origVchNo,
-        vchDate: b.vchDate,
-        salesmanAc: b.salesmanAc,
-        salesmanName: b.salesmanName,
-        vchDesc: b.vchDesc,
-        mainUser: sess(req).sub,
-        lines: b.lines ?? [],
-      }),
-    );
-  });
-  app.get('/tour/:vchNo/lines', auth, async (req) =>
-    tourLines(prisma, scopeOf(req), (req.params as any).vchNo),
-  );
   app.post('/tour/:vchNo/bill', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    const aprVchNo = (req.params as any).vchNo;
-    return run(reply, 201, async () => {
-      const sale = await createSale(
-        prisma,
-        {
-          scope: scopeOf(req),
-          acCode: b.acCode,
-          acName: b.acName,
-          taxRatePct: Number(b.taxRatePct ?? 3),
-          interState: !!b.interState,
-          empCode: b.empCode,
-          cashAmt: b.cashAmt != null ? Number(b.cashAmt) : undefined,
-          cardAmt: b.cardAmt != null ? Number(b.cardAmt) : undefined,
-          chequeAmt: b.chequeAmt != null ? Number(b.chequeAmt) : undefined,
-          cashAc: b.cashAc,
-          bankAc: b.bankAc,
-        },
-        b.lines ?? [],
-      );
-      const m = await markApprovalBilled(prisma, scopeOf(req), aprVchNo, String(sale.vchNo));
-      return { ...sale, approvalBilled: m.marked };
+    // The desktop imports an approval inside Sales Invoice. The former web bridge committed createSale
+    // before trying to close APR_DETL in a second transaction, so any second-step refusal orphaned a
+    // sale. Keep this route fail-closed until one transaction can enforce both form authorities.
+    return reply.code(409).send({
+      error: 'approval-billing-unavailable',
+      message:
+        'Approval billing is unavailable until Sales Invoice import and approval closure are atomic.',
     });
-  });
-  app.delete('/tour/return/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
-      deleteTourReturn(prisma, { scope: scopeOf(req), vchNo: (req.params as any).vchNo }),
-    );
   });
 }

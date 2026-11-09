@@ -14,6 +14,11 @@
   contains the screen. New case `keyboard.esc-with-focus-on-the-page` per module: 9 of 9 red before, green after; the ten modules pass
   every applicable case (item-opening keeps its one blocked `rollback.pending`). No new ids; recorded on the G239 row and N225's note.
 
+## 2026-11-09 — Approval Isu / Approval Rtn landed from the backup branch (N229 / G242, WP-01)
+
+- Branch `agent/wp01-approval-land` merges `origin/backup/lite-approval-2026-11-09`; the older Item Opening / Tag Cancel commits on that branch are kept at main's version, the approval work is renumbered from N211/G224 (now the Employee master) to N229/G242, and its two migrations are renamed to 20261109090000 / 20261109091500.
+- Approval modules: issue 20 passed / 2 blocked (T13 retry waits for WP-04 idempotency; T18 Sales Apr No import control not built), return 17 / 1 blocked (T13); new T14 last-write fault cases and a T12 same-tag race pass. Catalog rows stay PARTIAL; desktop match 0%.
+
 ## 2026-11-02 — Stock Adjust legacy voucher safety follow-up (N221 / G234)
 
 - The forward repair preserves pre-N221 MAIN_STOCK-only Stock Adjust rows instead of fabricating missing register data.

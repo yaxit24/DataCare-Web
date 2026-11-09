@@ -48,6 +48,8 @@ import { dataRefresh } from './modules/dataRefresh.mjs';
 import { accountLedger } from './modules/accountLedger.mjs';
 import { dataBackup } from './modules/dataBackup.mjs';
 import { gstReport } from './modules/gstReport.mjs';
+import { approvalIssue } from './modules/approvalIssue.mjs';
+import { approvalReturn } from './modules/approvalReturn.mjs';
 import { runSurface } from './surface/runner.mjs';
 
 /**
@@ -97,6 +99,8 @@ const MODULES = [
   accountLedger,
   dataBackup,
   gstReport,
+  approvalIssue,
+  approvalReturn,
 ];
 
 const artifacts = resolve(webRoot, 'test-results/feature-e2e');

@@ -5,6 +5,7 @@ import {
   SUB_DETAIL_KARIGAR,
   blankSubDetailRow,
   isSubDetailRowFilled,
+  stoneRowFromApi,
   subDetailInputs,
   toSubDetailInput,
   type SubDetailField,
@@ -75,6 +76,13 @@ describe('sub-detail grid contract', () => {
     expect(isSubDetailRowFilled(blankSubDetailRow())).toBe(false);
     expect(isSubDetailRowFilled({ dmCode: '   ' })).toBe(false);
     expect(isSubDetailRowFilled({ dmCode: 'DM1' })).toBe(true);
+  });
+
+  it('round-trips the hidden stable stone serial while keeping zero display cells sparse', () => {
+    // TR_APR_ISU.cs:6330-6357 writes the original ISR_NO and stable parent SR_NO back to APR_IDTL.
+    const reopened = stoneRowFromApi({ isrNo: 7, itCode: 'DIA', pcs: 0, grossWt: 0 });
+    expect(reopened).toEqual({ isrNo: '7', itCode: 'DIA' });
+    expect(toSubDetailInput(reopened)).toEqual({ isrNo: 7, itCode: 'DIA' });
   });
 
   it('submits only filled rows, so a trailing blank entry row is never persisted', () => {

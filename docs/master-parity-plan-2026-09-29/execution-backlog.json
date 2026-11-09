@@ -524,7 +524,13 @@
       "phase": "P11",
       "acceptance": "open",
       "statusAsOf": "2026-11-02",
-      "evidence": ["docs/handbook/web/data-refresh.md", "web/apps/api/src/modules/utilities/dataRefreshOps.ts", "web/apps/api/test/dataRefreshApproval.db.test.ts", "web/apps/api/test/dataRepairBatch2.db.test.ts", "web/apps/web/test/features/modules/dataRefresh.mjs"],
+      "evidence": [
+        "docs/handbook/web/data-refresh.md",
+        "web/apps/api/src/modules/utilities/dataRefreshOps.ts",
+        "web/apps/api/test/dataRefreshApproval.db.test.ts",
+        "web/apps/api/test/dataRepairBatch2.db.test.ts",
+        "web/apps/web/test/features/modules/dataRefresh.mjs"
+      ],
       "statusNote": "Data Refresh PR-1 milestone only: the six-button surface is frozen; Approval Adj has preview/apply/audit/idempotency, rollback and trailing-padded reference coverage; Account candidate identity, neutral preview-only authority and keyboard focus transitions have regression proof. Parent acceptance stays open for complete Account/Stock graphs, Field Update/Old Field classification, Image migration semantics, G225 rights and desktop-runtime comparison.",
       "detailFile": "previous-package-reconciliation.json",
       "detailId": "P11-01"
@@ -3147,7 +3153,12 @@
       "status": "planned",
       "statusAsOf": "2026-11-02",
       "statusNote": "Data Refresh PR-1 milestone complete in branch scope: Approval Adj has exact consumed-source results including trailing-padded references; Account same-count candidate replacement, preview-only neutral authority and safe focus transitions have regression proof. Five unsafe actions remain preview-only classifications. N26 stays planned until the remaining reference graphs and recovery evidence close.",
-      "evidence": ["docs/handbook/web/data-refresh.md", "web/apps/api/test/dataRefreshApproval.db.test.ts", "web/apps/api/test/dataRepairBatch2.db.test.ts", "web/apps/web/test/features/modules/dataRefresh.mjs"],
+      "evidence": [
+        "docs/handbook/web/data-refresh.md",
+        "web/apps/api/test/dataRefreshApproval.db.test.ts",
+        "web/apps/api/test/dataRepairBatch2.db.test.ts",
+        "web/apps/web/test/features/modules/dataRefresh.mjs"
+      ],
       "action": "Close correction, renumber, transfer, imports and maintenance utility reference graphs",
       "parentLabels": "P11-01, X27",
       "startAfter": [
@@ -7650,6 +7661,44 @@
         "web/apps/web/test/features/modules/wholesaleSale.mjs"
       ],
       "statusNote": "IMPLEMENTED (voucher keys, tag stones, bill layout), not accepted. The three new test files fail against the old code and pass; the wholesale-sale browser module passes 27 of 27. Open: hand-typed item-detail rows for loose items, SL_IDTL rows on the printed bill, fine kasar, the Rojmel alignment for lined vouchers, desktop-runtime comparison and parent acceptance."
+    },
+    {
+      "id": "N229",
+      "status": "implemented-unverified",
+      "action": "Approval Isu and Approval Rtn use desktop TR_APR_ISU identity and custody lifecycle on MAIN_BOOK 'APR ISU'/'APR RTN': return create/edit validate the exact OLD_SRNO source and TAG_NO + VCH_SRNO + IT_CODE BAR instance before a durable write; new line/stone IDs append above retained maxima; line discounts and one-decimal NET_AMT follow the desktop; stone codes are company-master checked; and /sales locks and consumes the exact stable approval source. Keep the hidden approval-to-sale bridge contained until the operator Apr No import and Wh Sales continuations are implemented and browser-proven.",
+      "parentLabels": "P1-core; L4; J09; T01-T18",
+      "startAfter": [
+        "N228"
+      ],
+      "requiredProof": "Source-derived tests are red before each fix and green after it. DB/HTTP assertions cover return-create and unchanged-PUT source/BAR corruption with no business write; /sales tag, instance, item and quantity mismatch refusals plus tagged success, delete reversal and OLD_SRNO!=SR_NO binding; max-plus-one OLD_SRNO/ISR_NO allocation and duplicate/zero/fraction refusal; one-decimal NET_AMT with LDisc-derived DISC_AMT; whitespace/unknown stone-code refusal; the complete issue/return lifecycle. Browser units cover amount/ID payload calculation, and zero-mock modules cover the changed visible/refusal paths. Full suite and all repository gates must pass; open cases remain listed rather than inferred complete.",
+      "gapIds": "G242",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-09",
+      "evidence": [
+        "web/packages/db/prisma/migrations/20261109090000_approval_book_identity/migration.sql",
+        "web/packages/db/prisma/migrations/20261109091500_approval_detail_discount/migration.sql",
+        "web/apps/api/src/modules/tour/approvalVoucher.ts",
+        "web/apps/api/src/modules/tour/approvalRows.ts",
+        "web/apps/api/src/modules/tour/approvalTypes.ts",
+        "web/apps/api/src/modules/sales/sales.ts",
+        "web/apps/api/src/modules/sales/approvalSaleReferences.ts",
+        "web/apps/api/src/modules/tour/approvalBill.ts",
+        "web/apps/api/src/routes/approval.ts",
+        "web/apps/web/components/ApprovalVoucherForm.tsx",
+        "web/apps/web/components/ApprovalGrid.tsx",
+        "web/apps/web/components/SubDetailGrid.tsx",
+        "web/apps/api/test/approvalLifecycle.routes.db.test.ts",
+        "web/apps/api/test/approvalBookMigration.db.test.ts",
+        "web/apps/api/test/sales.lifecycle.db.test.ts",
+        "web/apps/web/test/approvalGrid.test.ts",
+        "web/apps/web/test/subDetailGrid.test.ts",
+        "web/apps/web/test/features/modules/approvalIssue.mjs",
+        "web/apps/web/test/features/modules/approvalReturn.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Source-derived DB/HTTP tests now prove: return POST compares the requested stable source line and locks one exact TAG_NO + VCH_SRNO + IT_CODE BAR row before identity/write; unchanged return PUT validates its source/BAR link before the no-op path; every BAR mutation is item-scoped and affected-count checked. /sales keys APR_DETL by OLD_SRNO, compares party, item, tag, BAR instance, pieces, gross and net weight, reuses the locked approval-held tag identity, updates the locked BAR row, and releases by the same stable key; tagged mismatch is 400/no-write, tagged exact consumption/reversal succeeds, and an OLD_SRNO 2 / SR_NO 1 gap binds source 2. Missing line OLD_SRNO and per-line stone ISR_NO allocate above retained maxima; duplicate, zero and fractional explicit IDs return 400. LDisc% derives DISC_AMT and NET_AMT persists at one decimal. Stone codes are trimmed, required and checked in company ITEM_MAST. Existing identity, lifecycle, locking, no-op, audit, rights, print, legacy-repair and precision coverage remains. The hidden /tour/:vchNo/bill bridge stays authorized but always returns 409 with no write. Open: the Sales Invoice screen still has no Apr No selector/import control, so successful tagged approval consumption and sale-delete reopening are DB-tested but not operator-driven; Wh Sales approval continuation; desktop licence-expiry state; the approval image panel and APR_IMG_PRINT/AprBillImg branch; idempotent create and lost-acknowledgement recovery; a per-table fault matrix (a fault on the last write, REMARK_DATA, is browser-proven to roll back issue and return); repeated Crystal page headers, footers and page numbers; an independent original-Windows runtime comparison; operator sign-off and parent acceptance."
     },
     {
       "id": "N230",

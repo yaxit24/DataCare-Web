@@ -313,6 +313,36 @@
         "web/apps/api/src/routes/gstReport.ts",
         "web/apps/api/src/routes/txn.ts"
       ]
+    },
+    "approvalIssue": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/tour/page.tsx",
+        "web/apps/web/components/ApprovalVoucherForm.tsx",
+        "web/apps/web/components/ApprovalGrid.tsx",
+        "web/apps/api/src/modules/tour/approvalVoucher.ts",
+        "web/apps/api/src/modules/tour/approvalRows.ts",
+        "web/apps/api/src/modules/tour/approvalTypes.ts",
+        "web/apps/api/src/modules/tour/approvalBill.ts",
+        "web/apps/api/src/routes/approval.ts",
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/apps/api/src/modules/vouchers/bookForms.ts",
+        "web/packages/db/prisma/migrations/20261109090000_approval_book_identity/migration.sql"
+      ]
+    },
+    "approvalReturn": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/tour-return/page.tsx",
+        "web/apps/web/components/ApprovalVoucherForm.tsx",
+        "web/apps/web/components/ApprovalGrid.tsx",
+        "web/apps/api/src/modules/tour/approvalVoucher.ts",
+        "web/apps/api/src/modules/tour/approvalRows.ts",
+        "web/apps/api/src/modules/tour/approvalTypes.ts",
+        "web/apps/api/src/modules/tour/approvalBill.ts",
+        "web/apps/api/src/routes/approval.ts",
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/apps/api/src/modules/vouchers/bookForms.ts",
+        "web/packages/db/prisma/migrations/20261109090000_approval_book_identity/migration.sql"
+      ]
     }
   }
 }

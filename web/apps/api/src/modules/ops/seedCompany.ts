@@ -169,6 +169,8 @@ const DESKTOP_BOOK_TABLES: Record<string, { table: string; detail: string }> = {
   'OTH EXP': { table: 'PAY_DATA', detail: 'PAY_DETL' },
   // MS_UPDATE.cs:7825: the TR_TAG_CAN books; the Stock Adjust writer (modules/stock/tagCancel.ts) uses BAR_CAN_DATA.
   'STOCK ADJUST': { table: 'BAR_CAN_DATA', detail: 'BAR_CAN_DETL' },
+  'APR ISU': { table: 'APR_DATA', detail: 'APR_DETL' },
+  'APR RTN': { table: 'APR_DATA', detail: 'APR_DETL' },
 };
 
 const BOOKS: {
@@ -277,8 +279,10 @@ const BOOKS: {
     shortName: 'SADJ',
     table: 'SL_ORD_ADJ',
   },
-  { book: 'TUR', name: 'Approval Issue', mainBook: 'APPROVAL ISSUE', inout: 'O', acCode: 'OS' },
-  { book: 'TRR', name: 'Approval Return', mainBook: 'APPROVAL RETURN', inout: 'I', acCode: 'OS' },
+  // Desktop Approval Isu / Approval Rtn both open TR_APR_ISU through these exact MAIN_BOOK values
+  // (MDI_FORM.cs:8300-8317) and route to APR_DATA/APR_DETL (MS_UPDATE.cs:7833).
+  { book: 'TUR', name: 'Approval Issue', mainBook: 'APR ISU', inout: 'O', acCode: 'OS' },
+  { book: 'TRR', name: 'Approval Return', mainBook: 'APR RTN', inout: 'I', acCode: 'OS' },
   // Desktop TR_TAG_CAN on a STOCK ADJUST book (MDI_FORM.cs:8616-8627): the desktop's own book 163 "Only Stock Adjust"
   // is short name STADJ, an out book (MS_UPDATE.cs:24207, :25049), numbered from BAR_CAN_DATA (DESKTOP_BOOK_TABLES).
   {
