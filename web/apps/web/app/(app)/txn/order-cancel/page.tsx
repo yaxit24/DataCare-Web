@@ -2,7 +2,8 @@
 import { toIsoDate } from '@datacare/core';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { get, post, put, del, ApiError } from '../../../../lib/api';
+import { get, postCommand, put, del, ApiError } from '../../../../lib/api';
+import { useIdempotencyKey } from '../../../../lib/idempotencyKey';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { BookSelect } from '../../../../components/BookSelect';
 import { LookupPicker } from '../../../../components/LookupPicker';
@@ -82,6 +83,8 @@ export default function OrderCancelPage() {
   const [busy, setBusy] = useState(false);
   const [openedTotal, setOpenedTotal] = useState(0);
   const grid = useRef<HTMLTableSectionElement | null>(null);
+  // N52: one Idempotency-Key per draft, so a replayed save answers the first one instead of refunding twice.
+  const command = useIdempotencyKey();
 
   const bookQuery = `coBook=${encodeURIComponent(coBook)}`;
   const totals = {
@@ -293,7 +296,8 @@ export default function OrderCancelPage() {
       };
       const saved = loadedVch
         ? await put<{ vchNo: number }>(`/order-cancel/${encodeURIComponent(loadedVch)}`, body)
-        : await post<{ vchNo: number }>('/order-cancel', body);
+        : await postCommand<{ vchNo: number }>('/order-cancel', body, command.key);
+      if (!loadedVch) command.renew();
       const no = String(saved.vchNo).padStart(5, '0');
       resetForm();
       setSavedVch(no);

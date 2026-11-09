@@ -134,7 +134,11 @@ export async function rollbackMatrix(ctx, o) {
   const vchNo = (await voucherNoOf(response)).padStart(5, '0');
   assert.equal(vchNo, String(expectedNo).padStart(5, '0'), 'no voucher number was consumed');
 
-  const written = changedTables(before, await tenantFingerprint(ctx));
+  // The Idempotency-Key guard (N52) records its receipt beside the voucher in the same transaction. It is not part of
+  // the voucher's write set, so it is left out here; a faulted save still had to leave it unchanged (checked above).
+  const written = changedTables(before, await tenantFingerprint(ctx)).filter(
+    (table) => table !== 'api_command_receipt',
+  );
   assert.deepEqual(
     [...written].sort(),
     [...tables].sort(),

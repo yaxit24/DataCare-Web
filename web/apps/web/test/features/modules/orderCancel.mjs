@@ -993,11 +993,35 @@ export const orderCancel = {
         };
       },
     ),
-    blocked(
-      'retry.lost-acknowledgement',
+    C(
+      'retry.replayed-save',
       'T13',
-      'Playbook T13: a lost acknowledgement after commit must give one durable result',
-      'POST /order-cancel has no Idempotency-Key guard yet: the WP-04 mechanism (PR #229) is not on main. The double-click case above passes; a replayed request after a lost answer is a second voucher until the route is guarded (WP-04 follow-up queue).',
+      'mutation',
+      'N52 (D18): the save request replayed byte for byte (a lost answer, a proxy retry) answers the first save again with Idempotency-Replayed; it does not refund the advance twice (the replay would otherwise be refused for want of open advance, or with a partial cancel refund a second time).',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const ordNo = await createOrder(page, { advance: 1100 });
+        await openCancel(page);
+        await pickOrder(page, 1, ordNo);
+        await setAmount(page, 'AdjAmt', 1, 500);
+        const first = await save(page);
+        assert.equal(first.status(), 201, await first.text());
+        assert.match(first.request().headers()['idempotency-key'] ?? '', /^[0-9a-f-]{36}$/);
+        const before = await counts(ctx);
+        const replay = await page.request.fetch(first.request());
+        assert.equal(replay.status(), 201, await replay.text());
+        assert.equal(replay.headers()['idempotency-replayed'], 'true');
+        assert.equal(await replay.text(), await first.text());
+        assert.deepEqual(await counts(ctx), before);
+        const open = (await pendingOf(page)).find((o) => o.ordNo === ordNo)?.openAmt;
+        assert.equal(open, 600, 'only the first 500 was refunded');
+        return {
+          observation: `the replay answered ${replay.status()} with the first body; ${open} still open`,
+          expected: 'the first answer again; one voucher; 600 open',
+          database: { counts: before },
+          downstream: { openAdvance: open },
+        };
+      },
     ),
     C(
       'rollback.mid-write',
