@@ -547,8 +547,8 @@ describe.runIf(RUN)('multi-line cash paths write a Rojmel row per line', () => {
       })),
     );
     const after = await financeFootprint();
-    expect(after.detail - before.detail).toBe(0);
-    expect(after.cash - before.cash).toBe(2);
+    expect(after!.detail! - before!.detail!).toBe(0);
+    expect(after!.cash! - before!.cash!).toBe(2);
     // Per line: 01 party Cr amount / 02 cash Dr amount / 03 party Cr kasar / 04 kasar Dr kasar.
     expect((await legs()).map((r) => [r.k.slice(21).trim(), r.ac, r.dr, r.cr])).toEqual([
       ['101', PARTY, 0, 1250.5],
