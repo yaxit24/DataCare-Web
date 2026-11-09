@@ -242,6 +242,7 @@ export const tagPrint = {
   defaultUser: as(USERS.admin.user),
   inputs: [
     'web/apps/web/app/(app)/txn/tag-print/page.tsx',
+    'web/apps/web/lib/screenEscape.ts',
     'web/apps/api/src/modules/stock/tagPrintScreen.ts',
     'web/apps/api/src/routes/tagPrintScreen.ts',
     'web/apps/web/test/features/modules/tagPrint.mjs',

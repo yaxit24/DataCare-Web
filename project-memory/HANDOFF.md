@@ -1,3 +1,11 @@
+## 2026-11-09 — Esc with no focused control on nine more screens (WP-09, GB-02, under G239)
+
+- Party, Item, Item Group, Product, Tax, Address, Employee, Auto Item and Item Opening lost Esc when the focus was on the page body (each
+  desktop form sets KeyPreview and closes on Esc from any control, e.g. `MS_ACCT.cs:5559`, `:6760-6762`). One shared hook,
+  `useScreenEscape` in `web/apps/web/lib/screenEscape.ts`, now serves them and Tag Print; it forwards only Esc, only when the key's target
+  contains the screen. New case `keyboard.esc-with-focus-on-the-page` per module: 9 of 9 red before, green after; the ten modules pass
+  every applicable case (item-opening keeps its one blocked `rollback.pending`). No new ids; recorded on the G239 row and N225's note.
+
 ## 2026-11-09 — Approval Isu / Approval Rtn landed from the backup branch (N229 / G242, WP-01)
 
 - Branch `agent/wp01-approval-land` merges `origin/backup/lite-approval-2026-11-09`; the older Item Opening / Tag Cancel commits on that branch are kept at main's version, the approval work is renumbered from N211/G224 (now the Employee master) to N229/G242, and its two migrations are renamed to 20261109090000 / 20261109091500.

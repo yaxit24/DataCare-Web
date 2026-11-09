@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { FIXTURE_MANIFEST, ITEMS, PARTIES, USERS } from '../fixtures/catalogue.mjs';
+import { escLeavesWithNoFocus } from '../harness.mjs';
 
 /**
  * Feature: Master → Item Opening (desktop TR_ITM_OPBL, web /txn/item-opening).
@@ -213,6 +214,7 @@ export const itemOpening = {
   defaultUser: as(USERS.admin.user),
   inputs: [
     'web/apps/web/app/(app)/txn/item-opening/page.tsx',
+    'web/apps/web/lib/screenEscape.ts',
     'web/apps/api/src/modules/stock/itemOpening.ts',
     'web/apps/api/src/routes/itemOpening.ts',
     'web/packages/core/src/itemOpening.ts',
@@ -1042,6 +1044,25 @@ export const itemOpening = {
         } finally {
           await removeOpening(page, 'G');
         }
+      },
+    ),
+    C(
+      'keyboard.esc-with-focus-on-the-page',
+      'T17',
+      'read-only',
+      "TR_ITM_OPBL sets KeyPreview (:684) and subscribes TR_ITM_OPBL_KeyDown (:450), so the form sees Esc wherever the focus is; with the totals unchanged (OldValTot == NewValTot), Esc closes the form (:1557-1561). A browser has a state the desktop form never has: focus on no control, after a click on the page background. Esc must close Item Opening there too, and a key aimed at the header Company box stays the header's (GB-02, the G239 pattern)",
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openScreen(page);
+        const left = await escLeavesWithNoFocus(page, {
+          heading: 'Item Opening',
+          path: '/txn/item-opening',
+        });
+        return {
+          observation: `Esc with the focus on the page body left Item Opening for ${left.leftTo}`,
+          expected: { focusOnBody: true, leaves: '/txn/item-opening' },
+          downstream: left,
+        };
       },
     ),
     C(

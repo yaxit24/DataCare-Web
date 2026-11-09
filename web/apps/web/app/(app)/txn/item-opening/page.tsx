@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 're
 import { useRouter } from 'next/navigation';
 import { ITEM_OPENING_TYPES, itemOpeningRow, round } from '@datacare/core';
 import { del, get, put, ApiError } from '../../../../lib/api';
+import { useScreenEscape, type ScreenKeyEvent } from '../../../../lib/screenEscape';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 
@@ -428,7 +429,7 @@ export default function ItemOpeningPage() {
     handleGridKey(event);
   }
 
-  function onScreenKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+  function onScreenKeyDown(event: ScreenKeyEvent) {
     if (event.key !== 'Escape' || event.defaultPrevented) return;
     // Esc that closes the metal-type list (a native dropdown) must not also close the screen.
     if ((event.target as HTMLElement).closest?.('select')) return;
@@ -436,10 +437,11 @@ export default function ItemOpeningPage() {
     if (weightTotal(rowsRef.current) === loadedWeight.current) return router.back();
     saveRef.current?.focus();
   }
+  const screenRef = useScreenEscape<HTMLDivElement>(onScreenKeyDown);
 
   const total = totals(rows);
   return (
-    <div onKeyDown={onScreenKeyDown}>
+    <div ref={screenRef} onKeyDown={onScreenKeyDown}>
       <h1>Item Opening</h1>
       {msg && (
         <div className={`msg ${msg.kind}`} role={msg.kind === 'err' ? 'alert' : 'status'}>

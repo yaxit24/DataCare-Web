@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { del, get, post, put, ApiError } from '../../../../lib/api';
+import { useScreenEscape, type ScreenKeyEvent } from '../../../../lib/screenEscape';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 
 /**
@@ -231,7 +232,7 @@ export default function ProductMasterPage() {
   };
 
   /** MS_PRODUCT_KeyDown with KeyPreview: Esc leaves the screen; Up and Down from a box move to the list. */
-  function onScreenKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+  function onScreenKeyDown(event: ScreenKeyEvent) {
     if (event.defaultPrevented) return;
     if (event.key === 'Escape') {
       event.preventDefault();
@@ -244,6 +245,7 @@ export default function ProductMasterPage() {
       (listRows()[current] ?? listRows()[0])?.focus();
     }
   }
+  const screenRef = useScreenEscape<HTMLDivElement>(onScreenKeyDown);
 
   function onListKeyDown(event: KeyboardEvent<HTMLTableSectionElement>) {
     if (event.key === 'F1') {
@@ -269,7 +271,7 @@ export default function ProductMasterPage() {
   }
 
   return (
-    <div onKeyDown={onScreenKeyDown}>
+    <div ref={screenRef} onKeyDown={onScreenKeyDown}>
       <h1>Product</h1>
       {msg && (
         <div className={`msg ${msg.kind}`} role={msg.kind === 'err' ? 'alert' : 'status'}>
