@@ -14,6 +14,7 @@ import { FIXTURE_MANIFEST, ITEMS, PARTIES, USERS } from '../fixtures/catalogue.m
  * - The bill sums the line nets, takes tax as round(net × tax %, 0) and the total as round(net + tax, 0)
  *   (:11340-11342).
  * - The advance is the sum of the tender rows: cash, UPI, cheque, card, old gold, old silver and scheme (:11368).
+ *   The scheme posts no ledger leg; Order_Rojmel type 05 debits the MEMB ADJUST book's slot-1 account (Ac_Rojmel.cs:19).
  *   The header stores CASH_AMT and ADV_AMT (:9126-9142). Order_Ledr credits the customer and debits the order
  *   book's slot-1 account with the cash (legs 01/02), and posts cheque, card and UPI legs of their own
  *   (Ac_Ledr.cs:28-61). An order moves no stock.
@@ -401,6 +402,8 @@ export const salesOrder = {
     'web/apps/web/lib/salesOrderForm.ts',
     'web/apps/web/lib/tourOrderForm.ts',
     'web/apps/api/src/modules/sales/salesOrder.ts',
+    'web/apps/api/src/modules/sales/salesOrderTender.ts',
+    'web/apps/api/src/modules/sales/salesOrderScheme.ts',
     'web/apps/api/src/modules/sales/orderDoc.ts',
     'web/apps/web/test/features/modules/salesOrder.mjs',
     'web/apps/web/test/features/fixtures/catalogue.mjs',
@@ -1057,28 +1060,82 @@ export const salesOrder = {
       'create.scheme-tender',
       'T02',
       'mutation',
-      'TR_SALE_ORD.cs:9142, :10006, :11264-11290 and Order_Rojmel type 05 (Ac_Rojmel.cs:19): the Scheme Amt cell is typed on the Lite edition and joins the advance; the desktop day book posts it to the fixed account 00079, but the real data holds no type 05 row for the 7 of 76 orders that carry a scheme amount (PLAN-SALESORDER-ROJMEL.md section 2.4), so the web leaves it open',
+      'TR_SALE_ORD.cs:9142, :11257-11267 and :11368, Order_Rojmel type 05 (Ac_Rojmel.cs:19): on the Lite edition the Scheme Amt cell is typed and joins the advance (cash 3,000 + scheme 1,000 = ADV_AMT 4,000); the day book credits the party 4,000 (type 01) and debits the scheme account 1,000 against the party (type 05, AC_NAME MADJ - party), the MEMB ADJUST book slot-1 account the desktop names 00079 (owner decision, G206); Order_Ledr has no scheme leg (Ac_Ledr.cs:28-61), so the ledger carries the cash 3,000 only',
       async (ctx) => {
-        const { page } = await ctx.session();
-        await enterOrder(page, { advance: 3000 });
-        await openDetails(page);
-        const editable = await page
-          .locator('#sales-header-schemeAmount')
-          .evaluate((input) => !input.readOnly && !input.disabled);
-        assert(
-          editable,
-          'the scheme amount is read-only on the order, so an advance cannot include it',
+        const exec = (sql, ...params) => ctx.owner.$executeRawUnsafe(sql, ctx.tenantId, ...params);
+        const SCHEME_AC = 'E2ESCHM';
+        await exec(
+          `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GR")
+           SELECT $1::text,'01','01',$2::text,'E2E SCHEME BONUS A/C','02'
+            WHERE NOT EXISTS (SELECT 1 FROM "AC_MAST" WHERE tenant_id=$1::text AND "CO_CODE"='01' AND btrim("AC_CODE")=$2::text)`,
+          SCHEME_AC,
         );
-        return {
-          observation: 'scheme amount editable',
-          expected: 'cash 3,000 and scheme 1,000',
-          database: {},
-          downstream: {},
-        };
-      },
-      {
-        expected: { cash: 3000, scheme: 1000 },
-        observe: async (ctx) => ({ orders: await latest(ctx) }),
+        try {
+          await exec(
+            `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","MAIN_BOOK","BOOK_INOUT","BOOK_SNAME","BOOK_NAME","CUR_USE","BOOK_TBL_NAME")
+             VALUES($1,'01','01','E76','MEMB ADJUST','O','MBADJ','E2E Member Adjust','Y','AD_ADJ')`,
+          );
+          await exec(
+            `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","MAIN_BOOK","BOOK_INOUT")
+             VALUES($1,'01','01','E76',1,$2,'MEMB ADJUST','O')`,
+            SCHEME_AC,
+          );
+          const { page } = await ctx.session();
+          await enterOrder(page, { advance: 3000 });
+          await openDetails(page);
+          const scheme = page.locator('#sales-header-schemeAmount');
+          assert(
+            await scheme.evaluate((input) => !input.readOnly && !input.disabled),
+            'the Scheme Amt cell is typed on the Lite edition (TR_SALE_ORD.cs:11257-11267)',
+          );
+          await scheme.fill('1000');
+          const response = await save(page);
+          assert.equal(response.status(), 201, await response.text());
+          const vchNo = String((await response.json()).vchNo).padStart(5, '0');
+          const [h] = await ctx.rows(
+            `SELECT "CASH_AMT"::float cash,"SCHM_AMT"::float schm,"ADV_AMT"::float adv
+               FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+            vchNo,
+          );
+          const party = PARTIES.local.code;
+          const day = await metalDayBook(ctx, vchNo);
+          const names = await ctx.rows(
+            `SELECT substr("LEDR_KEY",22,2) leg,btrim("AC_NAME") name FROM "ROJ_MEL_DATA"
+              WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "LEDR_KEY"`,
+            vchNo,
+          );
+          const posted = await ledger(ctx, vchNo);
+          assert.deepEqual(h, { cash: 3000, schm: 1000, adv: 4000 });
+          assert.deepEqual(
+            day.map((r) => [r.leg, r.len, r.ac, r.ld, r.dr, r.cr, r.typ]),
+            [
+              ['01', 23, party, CASH, 0, 4000, 'A'],
+              ['05', 23, SCHEME_AC, party, 1000, 0, 'A'],
+            ],
+          );
+          assert.equal(names[1].name, `MADJ - ${PARTIES.local.name}`);
+          assert.deepEqual(legs(posted), [
+            { ac: CASH, dr: 3000, cr: 0 },
+            { ac: party, dr: 0, cr: 3000 },
+          ]);
+          // Reopened, the cash advance and the scheme come back on their own cells.
+          await loadOrder(page, vchNo);
+          await openDetails(page);
+          const reopened = {
+            advance: await page.getByLabel('Advance ₹', { exact: true }).inputValue(),
+            scheme: await scheme.inputValue(),
+          };
+          assert.deepEqual(reopened, { advance: '3000', scheme: '1000' });
+          return {
+            observation: `order ${vchNo}: ${JSON.stringify(h)}; day book ${day.map((r) => `${r.leg} ${r.ac} dr ${r.dr} cr ${r.cr}`).join(', ')}; ledger cash only; reopened ${JSON.stringify(reopened)}`,
+            expected: { cash: 3000, scheme: 1000, advance: 4000, dayBook: '01 cr 4000 / 05 dr 1000' },
+            database: { header: h, dayBook: day, ledger: posted },
+            downstream: { advance: h.adv, schemeAccount: SCHEME_AC },
+          };
+        } finally {
+          await exec(`DELETE FROM "BOOK_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='E76'`);
+          await exec(`DELETE FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='E76'`);
+        }
       },
     ),
 

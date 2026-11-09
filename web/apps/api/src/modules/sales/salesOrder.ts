@@ -825,7 +825,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
     // is actually taken does the account matter. Explicit request account wins, else resolve slot 1
     // on this transaction and FAIL-CLOSED when unconfigured.
     const cashAc =
-      tender.cash > 0 || tender.oldMetal.length > 0
+      tenders.needsAdvanceContra(tender)
         ? await resolveBookSlotAccountTx(
             tx,
             { ...input.scope, coBook: book.coBook },
@@ -834,7 +834,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
             input.cashAc,
           )
         : (input.cashAc ?? '');
-    await tenders.resolveOrderUpiTx(tx, input.scope, tender, !lifecycle);
+    await tenders.resolveOrderTenderTx(tx, input.scope, tender, !lifecycle);
     await oldMetal.resolveOrderOldMetalTx(tx, input.scope, tender.oldMetal);
     if (mode.mainBook === 'SALES ORDER')
       await assertSalesOrderDateTx(tx, input.scope, requestedDate);

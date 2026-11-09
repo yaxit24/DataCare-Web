@@ -773,9 +773,10 @@ export default function SalesOrderPage() {
             <details style={{ marginTop: 8 }}>
               <summary>Order details</summary>
               <p className="muted">
-                Read-only values are saved settlement values, shown for reference: scheme, rate-cut
-                and allocations are not taken here. UPI Amt is the total of the UPI rows below, and
-                Old Gold / Old Silver Amt and Fine are the totals of the old metal rows.
+                Read-only values are saved settlement values, shown for reference: rate-cut and
+                allocations are not taken here. Scheme Amt joins the advance. UPI Amt is the total of
+                the UPI rows below, and Old Gold / Old Silver Amt and Fine are the totals of the old
+                metal rows.
               </p>
               <div className="row">
                 {[...extendedHeaderFields, ...salesOrderTenderFields].map(([key, label]) => (

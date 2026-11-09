@@ -100,7 +100,6 @@ export const readonlyHeaderFields = new Set([
   'oldGoldAmount',
   'oldSilverFine',
   'oldSilverAmount',
-  'schemeAmount',
   'rateCutRate',
   'rateCutFine',
   'rateCutAmount',
