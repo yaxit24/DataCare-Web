@@ -2,7 +2,8 @@
 import { toIsoDate } from '@datacare/core';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { post, put, get, del, ApiError } from '../lib/api';
+import { postCommand, put, get, del, ApiError } from '../lib/api';
+import { useIdempotencyKey } from '../lib/idempotencyKey';
 import { financeMainBooks, initialFinanceMode } from '../lib/financeBooks';
 import { BookSelect } from './BookSelect';
 import { VoucherList } from './VoucherList';
@@ -27,6 +28,8 @@ const nn = (v: string) => Number(v || 0);
 export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
   const ep = kind === 'receipt' ? '/receipts' : '/payments';
   const title = kind === 'receipt' ? 'Receipt' : 'Payment';
+  // N52: one key per draft; a retried save of the same draft replays instead of posting twice.
+  const command = useIdempotencyKey();
   const [partyAc, setPartyAc] = useState('');
   const [partyName, setPartyName] = useState('');
   const [amount, setAmount] = useState('');
@@ -162,15 +165,20 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
           setErr('add at least one line (party + amount)');
           return;
         }
-        const r = await post<{ vchNo: number; total?: number }>(`${ep}/multi`, {
-          coBook,
-          vchDate,
-          mode,
-          bankAc: bankAc || undefined,
-          chqNo: chqNo || undefined,
-          empCode: empCode || undefined,
-          lines,
-        });
+        const r = await postCommand<{ vchNo: number; total?: number }>(
+          `${ep}/multi`,
+          {
+            coBook,
+            vchDate,
+            mode,
+            bankAc: bankAc || undefined,
+            chqNo: chqNo || undefined,
+            empCode: empCode || undefined,
+            lines,
+          },
+          command.key,
+        );
+        command.renew();
         setRes({ ...r, coBook });
         setMlines([mblank()]);
       } else {
@@ -201,7 +209,8 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
               `${ep}/${encodeURIComponent(loadedVch)}`,
               singleBody,
             )
-          : await post<{ vchNo: number; total?: number }>(ep, singleBody);
+          : await postCommand<{ vchNo: number; total?: number }>(ep, singleBody, command.key);
+        if (!loadedVch) command.renew();
         setRes({ ...r, coBook });
         if (!loadedVch) {
           // Clear the entry inputs for the next voucher but KEEP `res` so the

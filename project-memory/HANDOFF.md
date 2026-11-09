@@ -19,6 +19,15 @@
 - Branch `agent/wp01-approval-land` merges `origin/backup/lite-approval-2026-11-09`; the older Item Opening / Tag Cancel commits on that branch are kept at main's version, the approval work is renumbered from N211/G224 (now the Employee master) to N229/G242, and its two migrations are renamed to 20261109090000 / 20261109091500.
 - Approval modules: issue 20 passed / 2 blocked (T13 retry waits for WP-04 idempotency; T18 Sales Apr No import control not built), return 17 / 1 blocked (T13); new T14 last-write fault cases and a T12 same-tag race pass. Catalog rows stay PARTIAL; desktop match 0%.
 
+## 2026-11-09 — Idempotent voucher creates, first routes (N52 / G29, WP-04)
+
+- 2026-11-09: `api_command_receipt` (forced RLS) and `web/apps/api/src/modules/shared/idempotency.ts` guard Stock
+  Adjust, Tag Cancel and the four Cash/Bank creates: the receipt is claimed and completed inside the voucher's own
+  transaction, a replay with the same Idempotency-Key and request answers the first response byte for byte, a changed
+  request is 409.
+- 2026-11-09: still queued (the follow-up list in `web/apps/api/test/idempotencyRoutePolicy.test.ts`): Contra, Sales,
+  Sales Order, Sales Return, Purchase, Purchase Return, Wh Sales, Fine JV and the other voucher creates.
+
 ## 2026-11-02 — Stock Adjust legacy voucher safety follow-up (N221 / G234)
 
 - The forward repair preserves pre-N221 MAIN_STOCK-only Stock Adjust rows instead of fabricating missing register data.

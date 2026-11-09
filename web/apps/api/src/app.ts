@@ -76,6 +76,7 @@ import {
   type MasterScope,
 } from './modules/masters/master.service.js';
 import { registerTxnRoutes } from './routes/txn.js';
+import { registerIdempotency } from './modules/shared/idempotency.js';
 import { logAudit, listAudit } from './modules/ops/audit.js';
 import { backupCompany, recordCompanyBackup } from './modules/ops/backup.js';
 import { prepareBackupDownload } from './modules/ops/backupDownload.js';
@@ -983,6 +984,11 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     },
   );
 
+  // N52: Idempotency-Key replay guard on the voucher creates it lists (wraps them as txn.ts registers them).
+  registerIdempotency(app, prisma, {
+    session: (req) => (req as RequestState).session,
+    authorized: (req) => isRouteAuthorizedMarker((req as RequestState).routeAuthorized),
+  });
   registerTxnRoutes(app, {
     prisma,
     pdfRenderer: opts.pdfRenderer,

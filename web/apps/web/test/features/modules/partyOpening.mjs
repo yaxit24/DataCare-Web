@@ -639,6 +639,16 @@ export const partyOpening = {
             (
               await region.locator('tr', { hasText: PARTY.code }).locator('td').allInnerTexts()
             ).slice(1);
+          // The list re-renders after its response arrives: wait for the row to change before reading it.
+          const cellsAfter = async (previous) => {
+            const deadline = Date.now() + 5000;
+            let current = await cells();
+            while (current.join('|') === previous.join('|') && Date.now() < deadline) {
+              await page.waitForTimeout(100);
+              current = await cells();
+            }
+            return current;
+          };
           await region.locator('tr', { hasText: PARTY.code }).waitFor();
           const amount = await cells();
           await Promise.all([
@@ -647,14 +657,14 @@ export const partyOpening = {
             ),
             page.getByLabel('Balance Type', { exact: true }).selectOption('gold'),
           ]);
-          const gold = await cells();
+          const gold = await cellsAfter(amount);
           await Promise.all([
             page.waitForResponse(
               (r) => isApi(r, 'GET', '/ac-opbl') && r.url().includes('balanceType=silver'),
             ),
             page.getByLabel('Balance Type', { exact: true }).selectOption('silver'),
           ]);
-          const silver = await cells();
+          const silver = await cellsAfter(gold);
           assert.deepEqual(amount, [PARTY.code, PARTY.name, '700.00', '']);
           assert.deepEqual(gold, [PARTY.code, PARTY.name, '', '1.250']);
           assert.deepEqual(silver, [PARTY.code, PARTY.name, '3.000', '']);

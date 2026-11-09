@@ -132,8 +132,14 @@ ratcheted (G22, N48).
 - Visible numbers: full-scope advisory lock and `MAX(VCH_NO)+1`; hidden numbers have their own lock
   (`web/apps/api/src/modules/vouchers/numbering.ts`).
 - Lock date and fiscal year are checked inside the transaction (`web/apps/api/src/modules/vouchers/lifecycle.ts`).
-- Still missing on most vouchers: version tokens for edit and delete (D17, N51) and idempotency keys for financial
-  creates (D18, N52).
+- Idempotency keys for financial creates (D18, N52): a page sends `Idempotency-Key` with a create; the API writes a
+  receipt row (`api_command_receipt`) in the voucher's own transaction, replays the stored response for the same key
+  and request, answers `409 idempotency-key-reused` for the same key with another request, and purges receipts
+  after the retention (`web/apps/api/src/modules/shared/idempotency.ts`). Guarded so far: Stock Adjust, Tag Cancel and the
+  four Cash/Bank menus (`POST /stock/stock-adjust`, `/stock/tag-cancel`, `/receipts`, `/receipts/multi`, `/payments`,
+  `/payments/multi`); the other voucher creates are queued in `web/apps/api/test/idempotencyRoutePolicy.test.ts`.
+- Still missing on most vouchers: version tokens for edit and delete (D17, N51) and the Idempotency-Key guard on the
+  queued creates (N52).
 
 ## 9. Frontend
 
