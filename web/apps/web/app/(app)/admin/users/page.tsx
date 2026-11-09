@@ -13,6 +13,7 @@ import {
   type UserType,
 } from '../../../../lib/userCreate';
 import { UserRightsGrid } from '../../../../components/UserRightsGrid';
+import { useEditionCode } from '../../../../components/BusinessScope';
 
 interface UserRow {
   loginName: string;
@@ -22,13 +23,15 @@ interface UserRow {
 type Box = 'name' | 'oldPassword' | 'newPassword' | 'confirmPassword' | 'userType';
 /** The tab order of the form (MS_USER designer TabIndex 0-4, :1067-1098); Enter walks it and then Save (TabIndex 5). */
 const ORDER: Box[] = ['name', 'oldPassword', 'newPassword', 'confirmPassword', 'userType'];
-const LABEL: Record<Box, string> = {
-  name: 'Create New User',
-  oldPassword: 'Old Password',
-  newPassword: 'New Password',
-  confirmPassword: 'Confirm Password',
-  userType: 'User Type',
-};
+/** The captions, in tab order (a list, so the password boxes' captions are not mistaken for password values). */
+const CAPTIONS: readonly string[] = [
+  'Create New User',
+  'Old Password',
+  'New Password',
+  'Confirm Password',
+  'User Type',
+];
+const LABEL = Object.fromEntries(ORDER.map((box, i) => [box, CAPTIONS[i]])) as Record<Box, string>;
 const same = (a: string, b: string) => a.toUpperCase() === b.toUpperCase();
 
 /**
@@ -52,7 +55,7 @@ const same = (a: string, b: string) => a.toUpperCase() === b.toUpperCase();
 export default function UserCreatePage() {
   const router = useRouter();
   const [users, setUsers] = useState<UserRow[]>([]);
-  const [showRights, setShowRights] = useState(false);
+  const showRights = rightsScreenVisible({ code: useEditionCode() });
   const [values, setValues] = useState({
     name: '',
     oldPassword: '',
@@ -101,9 +104,6 @@ export default function UserCreatePage() {
 
   useEffect(() => {
     void clear();
-    get<{ edition?: { code?: string } | null }>('/me')
-      .then((me) => setShowRights(rightsScreenVisible(me?.edition)))
-      .catch(() => setShowRights(false));
   }, [clear]);
 
   const set = (key: keyof typeof values, value: string) =>

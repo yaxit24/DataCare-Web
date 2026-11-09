@@ -34,7 +34,8 @@ type Row = Record<string, any>;
   const cookies: Record<string, string> = {};
 
   const rows = (sql: string, ...params: unknown[]) =>
-    owner.$queryRawUnsafe(sql, ...params) as Promise<Row[]>;
+    // A tuple type: `[0]` of a query that must return a row reads as a Row (an absent one is asserted by the test).
+    owner.$queryRawUnsafe(sql, ...params) as Promise<[Row, ...Row[]]>;
   const wipe = async () => {
     const tables: Array<{ table_name: string }> = await owner.$queryRawUnsafe(
       `SELECT DISTINCT table_name FROM information_schema.columns WHERE table_schema='public' AND column_name='tenant_id'`,
@@ -552,7 +553,7 @@ type Row = Record<string, any>;
         `SELECT "FAILED_LOGIN_COUNT" n, "LOGIN_BLOCKED_UNTIL" > clock_timestamp() blocked
            FROM "LOGIN_MAST" WHERE tenant_id=$1 AND "LOGIN_NAME"='KAMAL'`,
         tenant,
-      )) as Row[]
+      )) as [Row, ...Row[]]
     )[0];
 
   beforeAll(async () => {
