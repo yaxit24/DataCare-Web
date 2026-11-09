@@ -503,3 +503,35 @@ export function compareBaseline(feature, run, baseline) {
   const missing = [...known.keys()].filter((id) => !run.cases.some((c) => c.id === id));
   return { failed, newFailures, fixed, missing };
 }
+
+/**
+ * Esc with no focused control (GB-02, the G239 pattern). The desktop forms set KeyPreview, so their KeyDown sees Esc
+ * wherever the focus is. A browser can leave the focus on no control at all (a click on the page background). This
+ * blurs every control, proves the focus is on the page body, proves a key aimed at the header's Company box (the MDI
+ * parent, not the form) is not the screen's, then presses Esc on the body and waits until the page has left `path`.
+ */
+export async function escLeavesWithNoFocus(page, { heading, path }) {
+  const onScreen = () => new URL(page.url()).pathname.startsWith(path);
+  const blur = async () => {
+    await page.getByRole('heading', { name: heading, exact: true }).click();
+    await page.evaluate(() => {
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    });
+    assert.equal(
+      await page.evaluate(() => document.activeElement === document.body),
+      true,
+      'no control has the focus',
+    );
+  };
+  await blur();
+  await page.getByLabel('Company', { exact: true }).focus();
+  await page.keyboard.press('Escape');
+  await wait(750);
+  assert.equal(onScreen(), true, `Esc on the header Company box must leave ${heading} open`);
+  await blur();
+  await Promise.all([
+    page.waitForURL((url) => !url.pathname.startsWith(path), { timeout: 10_000 }),
+    page.keyboard.press('Escape'),
+  ]);
+  return { focusOnBody: true, leftTo: new URL(page.url()).pathname };
+}

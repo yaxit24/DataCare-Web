@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
-import { SECOND_TENANT } from '../harness.mjs';
+import { escLeavesWithNoFocus, SECOND_TENANT } from '../harness.mjs';
 
 /**
  * Feature: Master → Address (desktop MS_ADD_MAST, web /masters/addresses).
@@ -261,6 +261,7 @@ export const addressMaster = {
   defaultUser: as(USERS.admin.user),
   inputs: [
     'web/apps/web/app/(app)/masters/addresses/page.tsx',
+    'web/apps/web/lib/screenEscape.ts',
     'web/apps/api/src/modules/masters/addressMaster.ts',
     'web/apps/api/src/routes/addressMaster.ts',
     'web/apps/web/test/features/modules/addressMaster.mjs',
@@ -1015,6 +1016,25 @@ export const addressMaster = {
             downstream: { leftTo: new URL(page.url()).pathname },
           };
         }),
+    ),
+    C(
+      'keyboard.esc-with-focus-on-the-page',
+      'T17',
+      'read-only',
+      "MS_ADD_MAST sets KeyPreview (:3102) and subscribes MS_ADD_MAST_KeyDown (:2242), so the form sees Esc wherever the focus is; Esc closes the form (:3734-3736). A browser has a state the desktop form never has: focus on no control, after a click on the page background. Esc must close Address Master there too, and a key aimed at the header Company box stays the header's (GB-02, the G239 pattern)",
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openScreen(page);
+        const left = await escLeavesWithNoFocus(page, {
+          heading: 'Address Master',
+          path: '/masters/addresses',
+        });
+        return {
+          observation: `Esc with the focus on the page body left Address Master for ${left.leftTo}`,
+          expected: { focusOnBody: true, leaves: '/masters/addresses' },
+          downstream: left,
+        };
+      },
     ),
     C(
       'journey.address-across-locations',

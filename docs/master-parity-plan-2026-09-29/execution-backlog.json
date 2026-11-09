@@ -6082,7 +6082,7 @@
     },
     {
       "id": "N166",
-      "status": "planned",
+      "status": "in-progress",
       "action": "Feature E2E infrastructure: declared fault injection at each write boundary for T14 rollback cases, and a settings-variant fixture company (SL_AMT_TYPE=F, TOT_AMT_ROF=0, NEGATIVE_STK_SALE=N, ALL_ROF_REMOVE=Y) for T15 cases; unblock sales-invoice.rollback.mid-write and sales-invoice.config.setting-change.",
       "parentLabels": "P9; R03; T14; T15",
       "startAfter": [
@@ -6093,7 +6093,16 @@
       "entryDefinition": "02-execution-plan.md section 4",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/web/test/features/faults.mjs",
+        "web/apps/web/test/features/modules/salesInvoice.mjs",
+        "web/apps/web/test/features/modules/salesOrder.mjs",
+        "web/apps/web/test/features/modules/salesReturn.mjs",
+        "web/apps/web/test/features/modules/purchaseReturn.mjs"
+      ],
+      "statusNote": "The T14 half (G173) is implemented as engineering evidence: rollbackMatrix in web/apps/web/test/features/faults.mjs faults each table of the measured write set through the real screen for the Sales Invoice (8 tables), Sales Order (5), Sales Return (7) and Purchase Return (7); every case passes, and fails when a side effect is committed in its own transaction. Not done: G174, the settings-variant fixture company for T15 (sales-invoice.config.setting-change stays blocked); the Purchase Invoice and the other voucher families have no matrix; edit and delete are not faulted. No acceptance is claimed."
     },
     {
       "id": "N167",
@@ -7559,7 +7568,7 @@
         "web/apps/api/src/modules/stock/tagPrint.ts",
         "web/apps/api/test/tagLabelText.test.ts"
       ],
-      "statusNote": "IMPLEMENTED, not accepted. Verified: tagPrintScreen.db.test.ts 9/9, the tag-print feature module 17 of 17 applicable (T10 not applicable), the surface crawl, and a Chrome DevTools pass on the demo stack. Desktop-runtime comparison and physical-printer acceptance (D29) remain. G239 follow-up (2 November): Esc now closes Tag Print when no control has the focus (the desktop form's KeyPreview, UT_TAG_PRINT.cs:1805, :5101-5109); the tag-print module passes 18 of 18 applicable cases including the new T17 case tag-print.keyboard.esc-with-focus-on-the-page, which timed out on the unrepaired page. Not verified: the same wrapper-only Esc handling on the other Lite screens, and any desktop-runtime comparison. G240 follow-up (2 November): the printed tag label follows the desktop label files' shared formulas (G. and N. weights at three decimals; MRP: / LP: / LF: labour line); tagLabelText.test.ts and the browser cases tag-print.output.label-sheet and tag-print.output.label-labour-lines failed on the old renderer and pass now; the web's HUID line is kept as a deliberate addition. Not verified: the PRINT_MAST file choice, shop name, purity group, karigar name, QR picture and the SubTagPrint.rpt sub-report (not extracted); no desktop-runtime or physical-printer comparison."
+      "statusNote": "IMPLEMENTED, not accepted. Verified: tagPrintScreen.db.test.ts 9/9, the tag-print feature module 17 of 17 applicable (T10 not applicable), the surface crawl, and a Chrome DevTools pass on the demo stack. Desktop-runtime comparison and physical-printer acceptance (D29) remain. G239 follow-up (2 November): Esc now closes Tag Print when no control has the focus (the desktop form's KeyPreview, UT_TAG_PRINT.cs:1805, :5101-5109); the tag-print module passes 18 of 18 applicable cases including the new T17 case tag-print.keyboard.esc-with-focus-on-the-page, which timed out on the unrepaired page. Not verified: any desktop-runtime comparison. WP-09 follow-up (9 November, GB-02): Tag Print's no-focus Esc listener is now the shared hook web/apps/web/lib/screenEscape.ts, also used by Party, Item, Item Group, Product, Tax, Address, Employee, Auto Item and Item Opening (each desktop form sets KeyPreview and closes on Esc from any control, e.g. MS_ACCT.cs:5559, :6760-6762); each of those modules gained keyboard.esc-with-focus-on-the-page, 9 of 9 red on the old pages and green now. G240 follow-up (2 November): the printed tag label follows the desktop label files' shared formulas (G. and N. weights at three decimals; MRP: / LP: / LF: labour line); tagLabelText.test.ts and the browser cases tag-print.output.label-sheet and tag-print.output.label-labour-lines failed on the old renderer and pass now; the web's HUID line is kept as a deliberate addition. Not verified: the PRINT_MAST file choice, shop name, purity group, karigar name, QR picture and the SubTagPrint.rpt sub-report (not extracted); no desktop-runtime or physical-printer comparison."
     },
     {
       "id": "N226",

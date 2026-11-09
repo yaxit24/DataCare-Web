@@ -1,3 +1,11 @@
+## 2026-11-09 — Esc with no focused control on nine more screens (WP-09, GB-02, under G239)
+
+- Party, Item, Item Group, Product, Tax, Address, Employee, Auto Item and Item Opening lost Esc when the focus was on the page body (each
+  desktop form sets KeyPreview and closes on Esc from any control, e.g. `MS_ACCT.cs:5559`, `:6760-6762`). One shared hook,
+  `useScreenEscape` in `web/apps/web/lib/screenEscape.ts`, now serves them and Tag Print; it forwards only Esc, only when the key's target
+  contains the screen. New case `keyboard.esc-with-focus-on-the-page` per module: 9 of 9 red before, green after; the ten modules pass
+  every applicable case (item-opening keeps its one blocked `rollback.pending`). No new ids; recorded on the G239 row and N225's note.
+
 ## 2026-11-09 — Idempotent voucher creates, first routes (N52 / G29, WP-04)
 
 - 2026-11-09: `api_command_receipt` (forced RLS) and `web/apps/api/src/modules/shared/idempotency.ts` guard Stock
