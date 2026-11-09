@@ -3791,6 +3791,13 @@ model LOGIN_MAST {
   USER_PRINT              String?   @db.VarChar(1)
   PASSWORD_RESET_REQUIRED String    @default("N") @db.VarChar(1)
   PASSWORD_CHANGED_AT     DateTime? @db.Timestamptz(6)
+  /// D35: 'N' = deleted on the User Create screen; the row stays for vouchers and the audit (check constraint migration-owned).
+  LOGIN_ACTIVE            String    @default("Y") @db.VarChar(1)
+  DEACTIVATED_AT          DateTime? @db.Timestamptz(6)
+  DEACTIVATED_BY          String?   @db.VarChar(15)
+  /// D34 per-account login back-off.
+  FAILED_LOGIN_COUNT      Int       @default(0)
+  LOGIN_BLOCKED_UNTIL     DateTime? @db.Timestamptz(6)
 
   @@index([tenantId])
   @@index([tenantId, CO_CODE, LOGIN_NAME], map: "LOGIN_MAST_identity_idx")

@@ -61,12 +61,15 @@ export async function changeOwnPassword(
   if (input.newPassword !== input.confirmPassword) {
     throw new PasswordChangeError('password-confirmation-mismatch');
   }
-  assertStrongPassword(input.newPassword);
+  assertStrongPassword(input.newPassword, {
+    loginName: input.loginName,
+    coCode: input.loginCoCode,
+  });
   const nextHash = await hashPassword(input.newPassword);
   const outcome = await withTxBudget(prisma, input.tenantId, 'voucher', async (tx: any) => {
     const rows: Array<{ LOGIN_PWD?: string | null }> = await tx.$queryRawUnsafe(
       `SELECT "LOGIN_PWD" FROM "LOGIN_MAST"
-        WHERE "CO_CODE"=$1 AND "LOGIN_NAME"=$2 LIMIT 1 FOR UPDATE`,
+        WHERE "CO_CODE"=$1 AND "LOGIN_NAME"=$2 AND "LOGIN_ACTIVE"='Y' LIMIT 1 FOR UPDATE`,
       input.loginCoCode,
       input.loginName,
     );
@@ -105,7 +108,7 @@ export async function resetUserPassword(
     newPassword: string;
   },
 ): Promise<void> {
-  assertStrongPassword(input.newPassword);
+  assertStrongPassword(input.newPassword, { loginName: input.loginName, coCode: input.coCode });
   const nextHash = await hashPassword(input.newPassword);
   const changed = Number(
     await withTxBudget(prisma, input.tenantId, 'voucher', async (tx: any) => {
@@ -113,7 +116,7 @@ export async function resetUserPassword(
         await tx.$executeRawUnsafe(
           `UPDATE "LOGIN_MAST"
               SET "LOGIN_PWD"=$1,"PASSWORD_RESET_REQUIRED"='Y',"PASSWORD_CHANGED_AT"=NOW()
-            WHERE "CO_CODE"=$2 AND "LOGIN_NAME"=$3`,
+            WHERE "CO_CODE"=$2 AND "LOGIN_NAME"=$3 AND "LOGIN_ACTIVE"='Y'`,
           nextHash,
           input.coCode,
           input.loginName,

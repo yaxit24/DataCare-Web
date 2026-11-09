@@ -1,4 +1,5 @@
 import { hash, verify } from '@node-rs/argon2';
+import { COMMON_PASSWORDS } from './commonPasswords.js';
 
 /** Argon2id hash for new/reset passwords. */
 export async function hashPassword(plain: string): Promise<string> {
@@ -41,14 +42,50 @@ export class PasswordPolicyError extends Error {
   }
 }
 
-/** Security upgrade over the plaintext desktop password: long, mixed-class, and bounded. */
-export function assertStrongPassword(plain: string): void {
+/** The account a password is set for: its own login name and company code are denied (D34). */
+export interface PasswordContext {
+  loginName?: string | null;
+  coCode?: string | null;
+}
+
+export const PASSWORD_MIN_LENGTH = 8;
+export const PASSWORD_MAX_LENGTH = 128;
+
+/**
+ * True when the password is built from `word` plus digits and symbols only ("01010101", "Ramesh@2026" for RAMESH).
+ * A login name of four or more letters is refused anywhere in the password.
+ */
+function builtFrom(lowered: string, word: string, anywhere: boolean): boolean {
+  if (!word || !lowered.includes(word)) return false;
+  if (anywhere) return true;
+  return !/\p{L}/u.test(lowered.split(word).join(''));
+}
+
+/**
+ * D34 (document 12 §4): the desktop accepts any password (MS_USER.cs:1981); the web asks only what an internet login
+ * needs, following NIST SP 800-63B: at least 8 characters with no composition rules, at most 128, not a common
+ * password, not built from the account's own login name or company code. Returns the refusal reasons, in order.
+ */
+export function passwordProblems(plain: string, context: PasswordContext = {}): string[] {
+  const value = typeof plain === 'string' ? plain : '';
   const reasons: string[] = [];
-  if (plain.length < 12) reasons.push('min-12');
-  if (plain.length > 128) reasons.push('max-128');
-  if (!/[a-z]/.test(plain)) reasons.push('lowercase');
-  if (!/[A-Z]/.test(plain)) reasons.push('uppercase');
-  if (!/[0-9]/.test(plain)) reasons.push('number');
-  if (!/[^A-Za-z0-9]/.test(plain)) reasons.push('symbol');
+  if (value.length < PASSWORD_MIN_LENGTH) reasons.push('min-8');
+  if (value.length > PASSWORD_MAX_LENGTH) reasons.push('max-128');
+  const lowered = value.trim().toLowerCase();
+  if (COMMON_PASSWORDS.has(lowered)) reasons.push('common-password');
+  const login = String(context.loginName ?? '')
+    .trim()
+    .toLowerCase();
+  if (login && builtFrom(lowered, login, login.length >= 4)) reasons.push('login-name');
+  const company = String(context.coCode ?? '')
+    .trim()
+    .toLowerCase();
+  if (company && builtFrom(lowered, company, company.length >= 4)) reasons.push('company-code');
+  return reasons;
+}
+
+/** Throws PasswordPolicyError with every D34 reason the password breaks. */
+export function assertStrongPassword(plain: string, context: PasswordContext = {}): void {
+  const reasons = passwordProblems(plain, context);
   if (reasons.length) throw new PasswordPolicyError(reasons);
 }
