@@ -7,6 +7,7 @@ import {
   sentinelSnapshot,
 } from '../fixtures/catalogue.mjs';
 import { rollbackMatrix } from '../faults.mjs';
+import { TENANT, seedApprovalTag } from './approvalHelpers.mjs';
 
 /**
  * Feature: Other → Order Cancel (desktop TR_SL_ORD_ADJ, opened with CurBookHelp('ORDER CANCEL'), MDI_FORM.cs:8628-8639;
@@ -66,10 +67,6 @@ const C = (id, group, kind, source, run, extra = {}) => ({
           : ['browser', 'expected'],
   run,
   ...extra,
-});
-const blocked = (name, group, source, reason) => ({
-  ...C(`${name}.pending`, group, 'read-only', source, async () => ({})),
-  blocked: reason,
 });
 const label = (page, text) => page.getByLabel(text, { exact: true });
 /** The harness accepts every confirm; this records what each one asked. */
@@ -1238,11 +1235,89 @@ export const orderCancel = {
         };
       },
     ),
-    blocked(
+    C(
       'stock.held-tag-released',
       'T18',
-      'TR_SL_ORD_ADJ.cs:2598-2631 and :3593-3660, Ac_Stock.cs:610-622: a tag the order holds (TAG_STK_LESS Y) comes back to stock',
-      'The web Sales Order screen cannot make an order that holds a tag: a new order line is always saved with TAG_NO N (salesOrder.ts, SL_ORD_DETL.TAG_NO "new untagged row sentinel"), so the order under test cannot be created through the screen. The write set is proven by the DB test (orderCancel.db.test.ts "tags the order held come back to stock").',
+      'mutation',
+      'TR_SL_ORD_ADJ.cs:2598-2631 (picking an order lists its lines TAG_SALE N, TAG_STK_LESS Y), :3610-3660 (APR_DETL ISU_REC Y, a BAR_DETL/BAR_IDTL copy with a new VCH_SRNO and the order link cleared, SL_ORD_DETL.TAG_SALE Y) and Ac_Stock.cs:610-622 (Ord_Adj_Stk: MAIN_STOCK SR_NO 2, TR_TYPE I, +): a tag the order holds comes back to stock. The order is made on the Sales Order screen; only the tag hold is seeded, because the web Sales Order never saves a tagged line (SL_ORD_DETL.TAG_NO "N").',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const ordNo = await createOrder(page, { advance: 700 });
+        const year = await yearOf(ctx);
+        const source = await seedApprovalTag(ctx, 'OCT');
+        const held = await ctx.owner.$executeRawUnsafe(
+          `UPDATE "SL_ORD_DETL" SET "TAG_NO"=$2,"VCH_SRNO"=$3,"TAG_STK_LESS"='Y',"TAG_SALE"='N'
+            WHERE tenant_id=$1 AND "CO_YEAR"=$4 AND "CO_BOOK"='${ORDER_BOOK}' AND "VCH_NO"=$5 AND "SR_NO"=1`,
+          TENANT,
+          source.tag,
+          source.serial,
+          year,
+          ordNo,
+        );
+        assert.equal(held, 1, 'the order line now holds the tag');
+        const stock = async () =>
+          (
+            await ctx.rows(
+              `SELECT coalesce(sum(CASE WHEN "ITM_SIGN"='+' THEN "ITM_QTY" ELSE -"ITM_QTY" END),0)::float n
+                 FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "TAG_NO"=$2`,
+              source.tag,
+            )
+          )[0].n;
+        const stockBefore = await stock();
+        await openCancel(page);
+        await pickOrder(page, 1, ordNo);
+        const tagRow = page
+          .getByRole('table', { name: 'Order tags' })
+          .locator(`tr[data-tag="${source.tag}"]`);
+        await tagRow.waitFor();
+        const shown = await tagRow.locator('td').allTextContents();
+        assert.deepEqual([shown[1], shown[2], shown[3]], [source.tag, ordNo, ITEMS.gold.code]);
+        const response = await save(page);
+        assert.equal(response.status(), 201, await response.text());
+        const vchNo = String((await response.json()).vchNo).padStart(5, '0');
+        const apr = await ctx.rows(
+          `SELECT "ENTRY_TYPE" e,"ISU_NO" isu,"ISU_DBCD" book,"ISU_SRNO"::int isr,"ISU_REC" rec,"TAG_NO" tag
+             FROM "APR_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        assert.deepEqual(apr, [
+          { e: 'I', isu: ordNo, book: ORDER_BOOK, isr: 1, rec: 'Y', tag: source.tag },
+        ]);
+        const bar = await ctx.rows(
+          `SELECT "ENTRY_TYPE" e,"TAG_NO" tag,"VCH_SRNO"::bigint::text vsr,coalesce("ORD_NO",'') ord,"ITM_GWT"::float gwt
+             FROM "BAR_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        assert.equal(bar.length, 1);
+        assert.deepEqual(
+          [bar[0].e, bar[0].tag, bar[0].ord, bar[0].gwt],
+          ['D', source.tag, '', 10.5],
+        );
+        assert.notEqual(bar[0].vsr, String(source.serial), 'a new tag instance');
+        const ms = await ctx.rows(
+          `SELECT "SR_NO"::int sr,"TR_TYPE" t,"ITM_SIGN" sign,"ITM_QTY"::float qty,"VCH_SRNO"::bigint::text vsr
+             FROM "MAIN_STOCK" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        assert.deepEqual(ms, [{ sr: 2, t: 'I', sign: '+', qty: 1, vsr: bar[0].vsr }]);
+        const [line] = await ctx.rows(
+          `SELECT "TAG_SALE" sale FROM "SL_ORD_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='${ORDER_BOOK}' AND "VCH_NO"=$2 AND "SR_NO"=1`,
+          ordNo,
+        );
+        assert.equal(line.sale, 'Y', 'the order line is marked sold (:3659)');
+        const stockAfter = await stock();
+        assert.equal(stockAfter, stockBefore + 1, 'the tag is back in stock');
+        return {
+          observation: `order ${ordNo} holding tag ${source.tag} cancelled by ${vchNo}: APR_DETL I/Y, BAR_DETL copy D with instance ${bar[0].vsr}, MAIN_STOCK +1; tag stock ${stockBefore} -> ${stockAfter}`,
+          expected: {
+            apr: 'I, ISU_REC Y',
+            bar: 'D, ORD_NO cleared',
+            stock: '+1 (SR_NO 2, TR_TYPE I)',
+          },
+          database: { apr, bar, ms, line },
+          downstream: { tagStock: stockAfter },
+        };
+      },
     ),
     C(
       'create.cheque-advance-partly-adjusted',
