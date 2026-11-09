@@ -7711,6 +7711,32 @@
         "web/apps/web/test/features/modules/approvalReturn.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Source-derived DB/HTTP tests now prove: return POST compares the requested stable source line and locks one exact TAG_NO + VCH_SRNO + IT_CODE BAR row before identity/write; unchanged return PUT validates its source/BAR link before the no-op path; every BAR mutation is item-scoped and affected-count checked. /sales keys APR_DETL by OLD_SRNO, compares party, item, tag, BAR instance, pieces, gross and net weight, reuses the locked approval-held tag identity, updates the locked BAR row, and releases by the same stable key; tagged mismatch is 400/no-write, tagged exact consumption/reversal succeeds, and an OLD_SRNO 2 / SR_NO 1 gap binds source 2. Missing line OLD_SRNO and per-line stone ISR_NO allocate above retained maxima; duplicate, zero and fractional explicit IDs return 400. LDisc% derives DISC_AMT and NET_AMT persists at one decimal. Stone codes are trimmed, required and checked in company ITEM_MAST. Existing identity, lifecycle, locking, no-op, audit, rights, print, legacy-repair and precision coverage remains. The hidden /tour/:vchNo/bill bridge stays authorized but always returns 409 with no write. Open: the Sales Invoice screen still has no Apr No selector/import control, so successful tagged approval consumption and sale-delete reopening are DB-tested but not operator-driven; Wh Sales approval continuation; desktop licence-expiry state; the approval image panel and APR_IMG_PRINT/AprBillImg branch; idempotent create and lost-acknowledgement recovery; a per-table fault matrix (a fault on the last write, REMARK_DATA, is browser-proven to roll back issue and return); repeated Crystal page headers, footers and page numbers; an independent original-Windows runtime comparison; operator sign-off and parent acceptance."
+    },
+    {
+      "id": "N232",
+      "status": "implemented-unverified",
+      "action": "Cash Received, Cash Payment, Bank Received and Bank Payment follow desktop TR_CASH calculations: the multi-line grid's totals row prints Σ Amount as \"0.00\" and Σ Kasar as \"0.000\" after rounding each cell to two places (TR_CASH.cs:1832-1859,1962-1988); a multi-line receipt writes one CASH_DATA row per grid line with SR_NO, party, amount, kasar and remark and no PAY_DETL (TR_CASH.cs:2995-3060); a Bank Payment's kasar posts on legs 09/10 (Ac_Ledr.cs:585-610) instead of colliding with its amount legs 07/08.",
+      "parentLabels": "P1-core; L1; T03",
+      "startAfter": [
+        "N229"
+      ],
+      "requiredProof": "DB tests red before the fix (Bank Payment with kasar refused on AC_DATA_tenant_ledr_key_key; one aggregate CASH_DATA row) and green after; a @datacare/core kernel vector for the totals row; the cash-bank browser module executes the two T03 cases through the screen with desktop-derived expected values.",
+      "gapIds": "G244",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-09",
+      "evidence": [
+        "web/apps/api/src/modules/finance/finance.ts",
+        "web/apps/api/src/modules/finance/legCodes.ts",
+        "web/packages/core/src/cashGridTotals.ts",
+        "web/packages/core/test/cashGridTotals.test.ts",
+        "web/apps/web/components/PaymentForm.tsx",
+        "web/apps/api/test/cashReceiptLegs.db.test.ts",
+        "web/apps/web/test/features/modules/cashBank.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. cash-bank module: 23 applicable, 22 passed, 0 failed, 1 blocked. Blocked: T06 card/UPI settlement, stopped for an owner call because TR_CASH has no card or UPI mode (the web modes subtract a two-place commission and write CARD_DATA/UPI_DATA; the desktop Card Rec form adds a whole-rupee commission, TR_CARD_REC.cs:3796-3799). Still open: the bank layout's Charges column (BANK_CHARGES, legs 05/06 and 11/12 against BOOK_DETL slot 3) and Clearing Dt (bank legs dated CLR_DATE); payments still write PAY_DATA where TR_CASH writes CASH_DATA for all four menus; desktop-runtime comparison."
     }
   ],
   "amendments": [

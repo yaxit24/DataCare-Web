@@ -1,5 +1,5 @@
 'use client';
-import { toIsoDate } from '@datacare/core';
+import { cashGridTotals, toIsoDate } from '@datacare/core';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { postCommand, put, get, del, ApiError } from '../lib/api';
@@ -76,7 +76,10 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
   const [voucherLookup, setVoucherLookup] = useState('');
   const setM = (i: number, k: keyof MLine, v: string) =>
     setMlines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
-  const mTotal = mlines.reduce((s, l) => s + nn(l.amount), 0);
+  // TR_CASH MSG_TOT_FILL (TR_CASH.cs:1832-1859): Σ Amount "0.00", Σ Kasar "0.000".
+  const mTotals = cashGridTotals(
+    mlines.map((l) => ({ account: l.partyAc, amount: l.amount, kasar: l.kasar })),
+  );
 
   function resetForm() {
     setVoucherLookup('');
@@ -99,7 +102,19 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
         `${ep}/${encodeURIComponent(vchNo)}?coBook=${encodeURIComponent(coBook)}`,
       );
       setLoadedVch(vchNo);
-      setMulti(false);
+      // TR_CASH DISPLAY_DATA refills the grid from every CASH_DATA row (TR_CASH.cs:2742-2834).
+      const rows: any[] = Array.isArray(d.lines) ? d.lines : [];
+      setMulti(rows.length > 1);
+      if (rows.length > 1)
+        setMlines(
+          rows.map((l) => ({
+            partyAc: String(l.partyAc ?? ''),
+            partyName: String(l.partyName ?? ''),
+            amount: String(l.amount ?? ''),
+            kasar: Number(l.kasar ?? 0) ? String(l.kasar) : '',
+            itDesc: String(l.itDesc ?? ''),
+          })),
+        );
       setPartyAc(String(d.partyAc ?? d.acCode ?? ''));
       setPartyName(String(d.partyName ?? d.acName ?? ''));
       setAmount(String(d.amount ?? d.recAmt ?? d.totAmt ?? ''));
@@ -399,7 +414,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
                   <th>Name</th>
                   <th className="num">Amount</th>
                   <th className="num">Kasar</th>
-                  <th>Description</th>
+                  <th>Remark</th>
                   <th></th>
                 </tr>
               </thead>
@@ -412,6 +427,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
                         value={l.partyAc}
                         onChange={(v) => setM(i, 'partyAc', v)}
                         onPick={(r) => setM(i, 'partyName', String(r.name || ''))}
+                        ariaLabel={`Line ${i + 1} party`}
                         style={{ width: 130 }}
                       />
                     </td>
@@ -424,6 +440,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
                     </td>
                     <td className="num">
                       <input
+                        aria-label={`Line ${i + 1} amount`}
                         value={l.amount}
                         onChange={(e) => setM(i, 'amount', e.target.value)}
                         style={{ width: 100, textAlign: 'right' }}
@@ -431,6 +448,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
                     </td>
                     <td className="num">
                       <input
+                        aria-label={`Line ${i + 1} kasar`}
                         value={l.kasar}
                         onChange={(e) => setM(i, 'kasar', e.target.value)}
                         style={{ width: 70, textAlign: 'right' }}
@@ -438,6 +456,7 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
                     </td>
                     <td>
                       <input
+                        aria-label={`Line ${i + 1} remark`}
                         value={l.itDesc}
                         onChange={(e) => setM(i, 'itDesc', e.target.value)}
                         style={{ width: 160 }}
@@ -461,13 +480,15 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
               </tbody>
               <tfoot>
                 <tr>
-                  <td colSpan={2} style={{ textAlign: 'right', fontWeight: 600 }}>
-                    Total
+                  <td></td>
+                  <td style={{ fontWeight: 600 }}>Total :</td>
+                  <td className="num" aria-label="Total amount">
+                    <b>{mTotals.amount}</b>
                   </td>
-                  <td className="num">
-                    <b>{mTotal.toLocaleString('en-IN')}</b>
+                  <td className="num" aria-label="Total kasar">
+                    <b>{mTotals.kasar}</b>
                   </td>
-                  <td colSpan={3}></td>
+                  <td colSpan={2}></td>
                 </tr>
               </tfoot>
             </table>
