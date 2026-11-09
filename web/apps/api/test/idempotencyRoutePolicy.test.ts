@@ -49,6 +49,10 @@ const GUARDED: Record<string, { page: string; sends: RegExp }> = {
     page: 'components/PaymentForm.tsx',
     sends: /postCommand<[^>]*>\(\s*`\$\{ep\}\/multi`,[\s\S]*?command\.key,?\s*\)/,
   },
+  'POST /order-cancel': {
+    page: 'app/(app)/txn/order-cancel/page.tsx',
+    sends: /postCommand<[^>]*>\(\s*'\/order-cancel',\s*body,\s*command\.key\s*\)/,
+  },
 };
 
 /** WP-04 follow-ups, in the plan's order first (Contra, Sales, Sales Order, ... Tag Cancel), then the rest. */
@@ -106,7 +110,6 @@ const NOT_YET_GUARDED = [
   'POST /repair-karigar-issues',
   'POST /repair-karigar-receipts',
   'POST /repair-receipts',
-  'POST /sales-orders/:vchNo/cancel-refund',
   'POST /sales-quotations',
   'POST /sales/vp-parcel',
   'POST /sales/wholesale-sale-return',

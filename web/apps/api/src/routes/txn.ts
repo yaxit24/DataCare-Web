@@ -73,7 +73,6 @@ import {
 } from '../modules/sales/saleReturnBillReplay.js';
 import {
   cancelSalesOrderInSession,
-  cancelSalesOrderAdjust,
   cancelTourOrderInSession,
   getTourOrderConfiguration,
   getSalesOrderConfiguration,
@@ -247,6 +246,7 @@ import { registerSaleVoucherRoutes } from './saleVoucher.js';
 import { registerPurchaseVoucherRoutes } from './purchaseVoucher.js';
 import { registerPartyOpeningRoutes } from './partyOpening.js';
 import { registerFineJvRoutes } from './fineJv.js';
+import { registerOrderCancelRoutes } from './orderCancel.js';
 import { registerItemOpeningRoutes } from './itemOpening.js';
 import { registerEmployeeMasterRoutes } from './employeeMaster.js';
 import { registerTaxMasterRoutes } from './taxMaster.js';
@@ -1093,6 +1093,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerVoucherNavigationRoutes(app, extraRouteHelpers);
   registerPartyOpeningRoutes(app, extraRouteHelpers, formMutationCapabilities);
   registerFineJvRoutes(app, extraRouteHelpers);
+  registerOrderCancelRoutes(app, extraRouteHelpers);
   registerDailyRateRoutes(app, { ...extraRouteHelpers, formMutationCapabilities });
   registerItemOpeningRoutes(app, extraRouteHelpers, formCapabilities);
   registerEmployeeMasterRoutes(app, extraRouteHelpers, formCapabilities);
@@ -1995,22 +1996,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
-  app.post('/sales-orders/:vchNo/cancel-refund', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    const b = body(req);
-    return run(reply, 200, () =>
-      cancelSalesOrderAdjust(prisma, {
-        scope: scopeOf(req),
-        vchNo: (req.params as any).vchNo,
-        paidAc: b.paidAc,
-        paidAmt: b.paidAmt != null ? Number(b.paidAmt) : undefined,
-        kasarAmt: b.kasarAmt != null ? Number(b.kasarAmt) : undefined,
-        kasarAc: b.kasarAc,
-        itDesc: b.itDesc,
-      }),
-    );
-  });
-
   // ---- Tour Order (TR_SALE_ORD.cs with MAIN_BOOK='TOUR ORDER') ----
   app.get('/tour-orders/configuration', auth, async (req, reply) => {
     return run(reply, 200, () => getTourOrderConfiguration(prisma, scopeOf(req)));

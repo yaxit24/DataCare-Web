@@ -19,6 +19,8 @@ function sourceFiles(dir: string): Array<{ path: string; text: string }> {
 const files = sourceRoots.flatMap(sourceFiles);
 const displayOwners: Record<string, number> = {
   'components/EBillEntry.tsx': 1,
+  // The Order Cancel page shows no date as text; its pending-order help shows each order's date (N233).
+  'components/OrderCancelOrderHelp.tsx': 1,
   'components/RateTicker.tsx': 1,
   'components/SaleReturnSavedPanel.tsx': 2,
   'components/TagCancelForm.tsx': 1,
@@ -32,7 +34,6 @@ const displayOwners: Record<string, number> = {
   'app/(app)/txn/daily-rate/page.tsx': 3,
   'app/(app)/txn/e-crnt-note/page.tsx': 1,
   'app/(app)/txn/e-invoice/page.tsx': 1,
-  'app/(app)/txn/order-cancel/page.tsx': 2,
   'app/(app)/txn/reminders/page.tsx': 1,
   'app/(app)/txn/repair-karigar-issue/page.tsx': 1,
   'app/(app)/txn/sales-order/page.tsx': 1,

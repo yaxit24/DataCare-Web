@@ -307,7 +307,7 @@ schedule the fix in WP-26/27.
 | WP | Menu(s) | Item | Pri | Size | Depends | Prompt | State |
 |---|---|---|---|---|---|---|---|
 | WP-01 | Approval Isu, Approval Rtn | Land the built branch | P1 | L | — | 12 | PR #228 (N229/G242); 3 cases blocked on WP-04 follow-up and a Sales Apr No import |
-| WP-02 | Order Cancel | Finish from the saved patch | P1 | M | — | 11 | patch saved |
+| WP-02 | Order Cancel | Finish from the saved patch | P1 | M | — | 11 | PR #238 (N233/G245): 24 cases, none blocked |
 | WP-03 | Sales Order, Order Report | Scheme tender (G206), un-break the rows | P1 | M | — | — | baselined |
 | WP-04 | Every voucher create route (Stock Adjust first) | Server-side idempotency: a replayed request never makes a second voucher | P0 | M | — | 20 (Stock Adjust part) | PR #229 (6 routes); follow-up queue for the rest |
 | WP-05 | Cash Received/Payment, Bank Received/Payment | T03 calculations, T06 card/UPI settlement | P1 | M | — | — | 2 blocked |

@@ -6,10 +6,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 39 | 34 | 0 |
+| Lite (first, D32) | 49 | 40 | 35 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
 | Standard (added by Standard) | 36 | 1 | 1 | 0 |
-| **Standard total** | **114** | **41** | **36** | **0** |
+| **Standard total** | **114** | **42** | **37** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
@@ -41,7 +41,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Other | Tag Cancel | `/txn/tag-cancel` | PARTIAL | tag-cancel | module green | — |
 | Other | Tag Print | `/txn/tag-print` | PARTIAL | tag-print | module green | — |
 | Other | Stock Adjust | `/txn/stock-adjust` | PARTIAL | stock-adjust | module green | — |
-| Other | Order Cancel | `/txn/order-cancel` | PARTIAL | — | no module | — |
+| Other | Order Cancel | `/txn/order-cancel` | PARTIAL | order-cancel | module green | — |
 | Other | Data Import | `/masters/accounts` | PARTIAL | — | no module | — |
 | Report | Ledger Report | `/reports/account-ledger` | REPORT | account-ledger | module green | — |
 | Report | Stock Report | `/reports/tag-stock` | REPORT | tag-cancel | module green | — |
