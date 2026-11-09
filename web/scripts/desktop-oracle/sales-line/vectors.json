@@ -2680,6 +2680,36 @@
    }
   },
   {
+   "id": "amount.mid.n3.495xr1",
+   "col": 22,
+   "checks": [
+    "net",
+    "fine",
+    "amount"
+   ],
+   "cells": {
+    "11": "1",
+    "12": "3.495",
+    "21": "N",
+    "22": "1.00"
+   }
+  },
+  {
+   "id": "amount.mid.n2.495xr1",
+   "col": 22,
+   "checks": [
+    "net",
+    "fine",
+    "amount"
+   ],
+   "cells": {
+    "11": "1",
+    "12": "2.495",
+    "21": "N",
+    "22": "1.00"
+   }
+  },
+  {
    "id": "amount.mid.fine",
    "col": 22,
    "checks": [
@@ -3486,6 +3516,44 @@
     "21": "N",
     "25": "N",
     "26": "10.00"
+   }
+  },
+  {
+   "id": "labour.mid.n3.495xr1.rof0",
+   "col": 22,
+   "settings": {
+    "MsLbrRof": 0
+   },
+   "checks": [
+    "net",
+    "fine",
+    "labour"
+   ],
+   "cells": {
+    "11": "1",
+    "12": "3.495",
+    "21": "N",
+    "25": "N",
+    "26": "1.00"
+   }
+  },
+  {
+   "id": "labour.mid.n3.495xr1.rof2",
+   "col": 22,
+   "settings": {
+    "MsLbrRof": 2
+   },
+   "checks": [
+    "net",
+    "fine",
+    "labour"
+   ],
+   "cells": {
+    "11": "1",
+    "12": "3.495",
+    "21": "N",
+    "25": "N",
+    "26": "1.00"
    }
   },
   {

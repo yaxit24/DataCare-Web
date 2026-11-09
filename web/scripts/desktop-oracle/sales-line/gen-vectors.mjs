@@ -106,6 +106,8 @@ const mid = [
   ['n1.005xr100', 1.005, 100], // 100.5 in decimal; the double product decides
   ['n2.675xr2', 2.675, 2], // 5.35
   ['n0.001xr500', 0.001, 500], // 0.5
+  ['n3.495xr1', 3.495, 1], // 3.495: one rounding gives 3, a 2 dp stage first gives 3.50 and then 4
+  ['n2.495xr1', 2.495, 1], // 2.495
 ];
 for (const [name, net, rate] of mid) {
   add(`amount.mid.${name}`, { 11: 1, 12: w(net), 21: 'N', 22: m(rate) }, { checks: ['net', 'fine', 'amount'] });
@@ -152,6 +154,7 @@ const lmid = [
   ['n1.5xr1', 1.5, 1], // 1.5 -> 2
   ['n1.234xr10', 1.234, 10], // 12.34 -> 12
   ['n0.105xr10', 0.105, 10], // 1.05
+  ['n3.495xr1', 3.495, 1], // 3.495: one rounding gives 3, LBR_ROF 2 first gives 3.50 and then 4
 ];
 for (const [name, net, rate] of lmid) {
   for (const lbrRof of [0, 2]) {
