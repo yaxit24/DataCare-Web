@@ -124,8 +124,9 @@ describe('route policy registry', () => {
     // vouchers, voucher, stock, tag, tags, lookups, hm-update, default-file, print, labels): 738 - 3 + 13 = 748.
     // Agent 07 moves the existing GST launcher route into a dedicated plugin and adds three exports:
     // 1 moved declaration out, 4 dedicated declarations in = +3: 748 + 3 = 751.
-    expect(routes).toHaveLength(751);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(751);
+    // N229 adds Approval Isu GET/PUT/print and Approval Rtn GET/PUT/print: 751 + 6 = 757.
+    expect(routes).toHaveLength(757);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(757);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -180,6 +181,7 @@ describe('route policy registry', () => {
       ['POST', '/sales-returns/:vchNo/incoming-bill-replay', 'read'],
       ['GET', '/sales-returns/:vchNo/incoming-labour-replay-state', 'read'],
       ['POST', '/sales-returns/:vchNo/incoming-labour-observation', 'read'],
+
       ['POST', '/sales-returns/:vchNo/incoming-labour-replay', 'read'],
       ['PUT', '/sales-returns/:vchNo/incoming-metadata', 'update'],
       ['PUT', '/sales-returns/:vchNo/incoming-numeric', 'update'],
@@ -190,6 +192,20 @@ describe('route policy registry', () => {
         action,
         businessScope: true,
       });
+  });
+
+  it('binds the two TR_APR_ISU resources to their separate menu rights and print action', () => {
+    // MDI_FORM.cs:8300-8317 opens the same form through separate APR ISU and APR RTN menu rows;
+    // TR_APR_ISU.cs:6712-6717 checks UserPrint before AprBill.
+    for (const [form, base] of [
+      ['Sales/Tour / Approval Sale', '/tour/:vchNo'],
+      ['Sales/Approval Return', '/tour/return/:vchNo'],
+    ] as const) {
+      expect(routePolicyFor('GET', base)).toMatchObject({ form, action: 'read' });
+      expect(routePolicyFor('PUT', base)).toMatchObject({ form, action: 'update' });
+      expect(routePolicyFor('DELETE', base)).toMatchObject({ form, action: 'delete' });
+      expect(routePolicyFor('GET', `${base}/print`)).toMatchObject({ form, action: 'print' });
+    }
   });
 
   it('binds generic, Design and repair image state and replacement to their own route rights', () => {
@@ -901,6 +917,14 @@ describe('route policy registry', () => {
     expect(routePolicyFor('DELETE', '/sales/:vchNo')).toMatchObject({
       form: 'Sales/Sales Invoice',
       action: 'delete',
+    });
+    expect(routePolicyFor('POST', '/tour/:vchNo/bill')).toMatchObject({
+      form: 'Sales/Sales Invoice',
+      action: 'create',
+    });
+    expect(routePolicyFor('GET', '/tour/:vchNo/lines')).toMatchObject({
+      form: 'Sales/Approval Return',
+      action: 'read',
     });
   });
 

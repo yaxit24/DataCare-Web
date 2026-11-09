@@ -6,6 +6,15 @@ import {
   USERS,
   sentinelSnapshot,
 } from '../fixtures/catalogue.mjs';
+import {
+  DAY as APPROVAL_DAY,
+  ISSUE_BOOK as APPROVAL_BOOK,
+  YEAR as APPROVAL_YEAR,
+  approvalRows,
+  createIssue as createApprovalIssue,
+  seedApprovalTag,
+  tagState,
+} from './approvalHelpers.mjs';
 import { rollbackMatrix } from '../faults.mjs';
 
 /**
@@ -241,6 +250,7 @@ export const salesInvoice = {
   inputs: [
     'web/apps/web/app/(app)/txn/sales/page.tsx',
     'web/apps/api/src/modules/sales/sales.ts',
+    'web/apps/api/src/modules/sales/approvalSaleReferences.ts',
     'web/apps/api/src/routes/txn.ts',
     'web/apps/web/test/features/modules/salesInvoice.mjs',
     'web/apps/web/test/features/faults.mjs',
@@ -827,6 +837,72 @@ export const salesInvoice = {
           observation: `invoice and recent list show ${listed}`,
           expected: bill.shown,
           output: Buffer.from(html),
+        };
+      },
+    ),
+
+    C(
+      'refusal.approval-tag-mismatch',
+      'T18',
+      'refusal',
+      'TR_SALE.cs:20130-20169 imports TAG_NO, VCH_SRNO, item and quantities from one APR_DETL source; :20399-20411 keeps OLD_SRNO as ISU_SRNO.',
+      async (ctx) => {
+        const sourceTag = await seedApprovalTag(ctx, 'SAI');
+        const otherTag = await seedApprovalTag(ctx, 'SAO');
+        const issue = await createApprovalIssue(ctx, sourceTag.tag, 'sales source');
+        const before = {
+          sales: await counts(ctx),
+          source: await approvalRows(ctx, APPROVAL_BOOK, issue.voucherNo),
+          sourceTag: await tagState(ctx, sourceTag.tag),
+          otherTag: await tagState(ctx, otherTag.tag),
+        };
+        const answer = await issue.page.evaluate(
+          async (payload) => {
+            const response = await fetch('/api/sales', {
+              method: 'POST',
+              credentials: 'include',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify(payload),
+            });
+            return { status: response.status, body: await response.json() };
+          },
+          {
+            coBook: BOOK,
+            acCode: PARTIES.local.code,
+            vchDate: APPROVAL_DAY,
+            taxRatePct: 0,
+            interState: false,
+            lines: [
+              {
+                itCode: ITEMS.gold.code,
+                tagNo: otherTag.tag,
+                vchSrno: otherTag.serial,
+                pcs: 1,
+                grossWt: 10.5,
+                netWt: 10,
+                touch: 91.6,
+                rate: 6123.45,
+                isuNo: issue.voucherNo,
+                isuYrcd: APPROVAL_YEAR,
+                isuDbcd: APPROVAL_BOOK,
+                isuSrno: 1,
+              },
+            ],
+          },
+        );
+        const after = {
+          sales: await counts(ctx),
+          source: await approvalRows(ctx, APPROVAL_BOOK, issue.voucherNo),
+          sourceTag: await tagState(ctx, sourceTag.tag),
+          otherTag: await tagState(ctx, otherTag.tag),
+        };
+        assert.equal(answer.status, 400);
+        assert.match(answer.body.message, /approval reference tag does not match/i);
+        assert.deepEqual(after, before);
+        return {
+          observation: `different tag answered ${answer.status}: ${answer.body.message}`,
+          expected: '400 and no sale/source/BAR change',
+          database: { before, after },
         };
       },
     ),

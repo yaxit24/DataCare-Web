@@ -132,6 +132,8 @@ const NOT_YET_GUARDED = [
   'POST /tour-sales',
   'POST /tour/issue',
   'POST /tour/return',
+  // Contained (routePolicy.ts) until the atomic Sales Invoice import + approval closure; guard it when it opens.
+  'POST /tour/:vchNo/bill',
   'POST /wholesale-quotations',
 ];
 

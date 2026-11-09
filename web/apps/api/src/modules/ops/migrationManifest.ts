@@ -166,6 +166,16 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     checksum: '60a75cf235a57b858d637400c0617603a69937b4399aea7e57e5f9493fb95be2',
   },
   {
+    // N229/G242: old web Approval names/links become desktop identity only with one BAR instance.
+    name: '20261109090000_approval_book_identity',
+    checksum: 'fb0eca467115825e7752b47ab3a0981cab8fe209e76042e5670c4afab525ef39',
+  },
+  {
+    // TR_APR_ISU.cs:6223-6225 stores per-line approval discount percentage and amount.
+    name: '20261109091500_approval_detail_discount',
+    checksum: 'dc1b07c946d648de4210505936186b1c0c8b825fa0de2dd7c9da143218c689b1',
+  },
+  {
     // N52 (D18): Idempotency-Key receipts written in the voucher's own transaction.
     name: '20261109120000_api_command_receipt',
     checksum: '65761595951988799d746fdd0c1020fab5d16ff20ef11000153f50602f0cfec2',
