@@ -395,9 +395,21 @@ export const usersRights = {
             : '';
         });
         assert.equal(selected, USERS.clerk.user.toUpperCase());
-        await fillPasswords(page, 'tulsibag');
+        // The refusal keeps the cursor in the box (e.Cancel = true): moving on to New Password brings it back.
+        await box(page, 'New Password').click();
+        await shown(page, T.NAME_EXISTS);
+        await page.waitForFunction(() => document.activeElement?.id === 'user-name');
+        const saveResponses = [];
+        const onResponse = (r) => {
+          if (r.request().method() === 'POST' && isApi(r, 'POST', '/admin/users'))
+            saveResponses.push(r);
+        };
+        page.on('response', onResponse);
         await page.getByRole('button', { name: 'Save', exact: true }).click();
         await shown(page, T.NAME_EXISTS);
+        await page.waitForTimeout(300);
+        page.off('response', onResponse);
+        assert.equal(saveResponses.length, 0, 'Save sent nothing');
         assert.deepEqual(changedTables(before, await tenantFingerprint(ctx)), []);
         return {
           observation: `"${await msgText(page)}"; name selected; Save refused; nothing written`,

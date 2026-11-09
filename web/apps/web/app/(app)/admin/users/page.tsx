@@ -7,7 +7,6 @@ import {
   passwordReasonText,
   rightsScreenVisible,
   typedUserName,
-  USER_NAME_MAX,
   USER_TEXT,
   USER_TYPES,
   userTypeOf,
@@ -294,11 +293,6 @@ export default function UserCreatePage() {
   return (
     <div ref={screenRef} onKeyDown={onScreenKeyDown}>
       <h1>User Create</h1>
-      {msg && (
-        <div className={`msg ${msg.kind}`} role={msg.kind === 'err' ? 'alert' : 'status'}>
-          {msg.text}
-        </div>
-      )}
       <div className="panel" style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
         <div>
           {row(
@@ -309,11 +303,12 @@ export default function UserCreatePage() {
                 boxes.current.name = el;
               }}
               value={values.name}
-              maxLength={USER_NAME_MAX}
               autoComplete="off"
               style={{ width: 200 }}
               onChange={(e) => {
                 nameRefused.current = false;
+                // No maxLength attribute: the desktop refuses the apostrophe in KeyPress, before it counts towards
+                // MaxLength 15, so typedUserName drops it first and then keeps 15 characters.
                 set('name', typedUserName(e.target.value));
               }}
               onBlur={leaveName}
@@ -384,6 +379,13 @@ export default function UserCreatePage() {
           Exit
         </button>
       </div>
+      {/* The desktop answers in a modal MsgBox. Here the answer appears below the buttons, so a message raised while
+          leaving a box (Validating) never moves Save or Delete from under the pointer between press and release. */}
+      {msg && (
+        <div className={`msg ${msg.kind}`} role={msg.kind === 'err' ? 'alert' : 'status'}>
+          {msg.text}
+        </div>
+      )}
 
       {/* Web addition: an administrator sets a temporary password, which forces a change at the next sign-in. It
           replaces the desktop's F1 in Old Password, which showed the stored password (not ported). */}
