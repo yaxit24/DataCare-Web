@@ -48,6 +48,26 @@ The failed CI run's evidence bundle contained a screenshot with the page still o
 Expected values come from hand-evaluating the shared Crystal formulas (`extraction_output/rpt_xml/QrPrint10.xml` and the three other label files) for the fixture (gross 10.5, net 10, MRP 55000, then labour rate 600 and amount 90), never from the web's output. The desktop's own preview (tutorial keyframe `VzkTOy9vGL0/kf_004`, a printed label reading `G.14.300`, `N.14.300`, `LP: 600`) agrees with the formulas.
 The 3,789-test API database suite was not run for this change; CI does.
 
+## 2c. T14 rollback matrices (G173, part of N166; branch `agent/parity-sales-rollback`)
+
+`rollbackMatrix` (`web/apps/web/test/features/faults.mjs`) runs, through the real screen, one attempt per table of a save's write set. A trigger makes that table's insert fail; the save must be refused; the fingerprint of every row of every `tenant_id` table (per-table count and MD5) must equal the one taken before; then the fault is removed and the same screen saves and takes the voucher number the failures did not use. The faulted tables must equal the tables a real save writes (measured on a first run: the equality assertion prints the set), and a non-transactional probe sequence written from inside the failing transaction records how many of the other write-set tables already held uncommitted rows (the last write must have found all of them).
+
+| Voucher | Tables faulted (measured) | Result on the real writer | Result with a side effect committed in its own transaction |
+|---|---|---|---|
+| Sales Invoice | `AC_DATA`, `BILL_OS_DATA`, `MAIN_STOCK`, `ROJ_MEL_DATA`, `SL_DATA`, `SL_DETL`, `TAX_DATA`, `TEMP_BOOK_DATA` (8) | PASS; pending counts 0 to 7; retry took voucher 00001 | **FAIL** at the first fault: `fault on SL_DATA: every table of the tenant is unchanged` |
+| Sales Order (with an advance) | `AC_DATA`, `ROJ_MEL_DATA`, `SL_ORD_DATA`, `SL_ORD_DETL`, `TEMP_BOOK_DATA` (5) | PASS; `TEMP_BOOK_DATA` is written first (0 pending), `AC_DATA` last (4); retry took 00001 | not run |
+| Sales Return (free-standing) | `AC_DATA`, `MAIN_STOCK`, `ROJ_MEL_DATA`, `SL_DATA`, `SL_DETL_RTN`, `TAX_DATA`, `TEMP_BOOK_DATA` (7) | PASS; retry took 00001 | not run |
+| Purchase Return (free-standing) | `AC_DATA`, `MAIN_STOCK`, `PR_DATA`, `PR_DETL`, `ROJ_MEL_DATA`, `TAX_DATA`, `TEMP_BOOK_DATA` (7) | PASS; retry took 00001 | **FAIL** at `AC_DATA`: the stray row stayed |
+
+Every refused save answered HTTP 400. That is the route's documented mapping of a failed raw query (`routes/txn.ts`, `run()`: `Raw query failed` becomes `400 invalid-data`), not a defect found here.
+The sabotage was a temporary environment-gated edit to `createSale` / `createPurchaseReturn` that commits one `TEMP_BOOK_DATA` row in a separate transaction first; it was reverted with `git checkout`, and the source and the compiled `dist` were checked for the marker afterwards (0 hits). Sales Order and Sales Return were not sabotaged: the helper is shared and the two sabotages above exercise its failure path through two different writers.
+Neighbouring modules `cash-bank` and `contra` (same tables, same tenant) ran together with the four on the final build with no new failure. One earlier version of the case asserted a write order I had guessed (a permutation of positions); the probe disproved the guess, so the assertion was rewritten to hold for any order.
+
+## 2d. Full feature run on the rollback tree (`8ea9e29b`, 18:24 to 18:32 IST)
+
+`node scripts/parity-test-env.mjs -- node apps/web/test/features/run-features.mjs`, verdict `FEATURE_E2E_PASSED`: **33 modules, 766 cases, 723 applicable: 603 passed, 20 failed, 100 blocked, 0 untested.** All 20 failures are baselined: 17 in `purchase-report` (G06, the RP_ALL engine does not exist; added by #202) and the known `company-master` (G38), `sales-order` scheme tender (G206) and `data-backup` allowlist (G64/N80). Against section 4: passed 596 to 603, blocked 104 to 100, and `purchase-report` is new.
+`address-master.field.typing-and-dates` and `tag-cancel.journey.tag-stock-create-edit-delete` failed on `main` in CI after #217 and #220 and passed here; PR #223 fixes both. My own attempt to reproduce the address failure under 6x CPU throttling and with a blocked main thread passed 10 of 10 and 8 of 8, so throttling did not find that race; #223 finds it deterministically with a held response. Across 53 CI runs that executed the address case it failed once.
+
 ## 3. CI history used to size the flake (2 Nov, from `gh run` logs)
 
 26 recent real-stack runs were read; 24 executed the Tag Print module. `tag-print.keyboard.desktop-keys` failed in 7 of those 24 (main after #210 and #213, and branches `feat/lite-data-refresh`, `agent/03-approval-report`, `feat/lite-gst-report`, `feat/lite-unblock-cases`, `feat/lite-tag-cancel-close`) and passed in 17.

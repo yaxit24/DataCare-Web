@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { FIXTURE_MANIFEST, ITEMS, PARTIES, USERS } from '../fixtures/catalogue.mjs';
+import { rollbackMatrix } from '../faults.mjs';
 
 /**
  * Feature: Transaction → Sales Order (desktop TR_SALE_ORD, opened with CurBookHelp("SALES ORDER"),
@@ -20,6 +21,8 @@ import { FIXTURE_MANIFEST, ITEMS, PARTIES, USERS } from '../fixtures/catalogue.m
  * - Save refuses a missing party ("Please Insert Party and try", :9040) and a date after the year closes (:9012-9015).
  */
 const BOOK = 'SOR';
+/** Measured on the first run: one saved order with an advance changes exactly these tables. */
+const ORDER_WRITE_SET = ['AC_DATA', 'ROJ_MEL_DATA', 'SL_ORD_DATA', 'SL_ORD_DETL', 'TEMP_BOOK_DATA'];
 const CASH = 'CASH';
 const as = (user, slot) => ({
   user,
@@ -403,6 +406,7 @@ export const salesOrder = {
     'web/apps/api/src/modules/sales/salesOrder.ts',
     'web/apps/api/src/modules/sales/orderDoc.ts',
     'web/apps/web/test/features/modules/salesOrder.mjs',
+    'web/apps/web/test/features/faults.mjs',
     'web/apps/web/test/features/fixtures/catalogue.mjs',
   ],
   fixtureManifest: FIXTURE_MANIFEST,
@@ -1661,10 +1665,33 @@ export const salesOrder = {
       },
     ),
 
-    {
-      ...C('rollback.mid-write', 'T14', 'refusal', 'Playbook T14', async () => ({})),
-      blocked: 'No fault injector in the harness yet (G173 / N166).',
-    },
+    C(
+      'rollback.mid-write',
+      'T14',
+      'mutation',
+      'TR_SALE_ORD writes the order header and lines, and with an advance its ledger and day-book legs. The desktop writes table by table with no transaction, so a fault leaves the earlier tables behind; the web must leave the whole tenant byte-for-byte as it was after a fault on any one write, take no order number, and then save normally from the same screen. The faulted tables must be exactly the tables a real save writes',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await enterOrder(page, { advance: ADVANCE });
+        const r = await rollbackMatrix(ctx, {
+          tables: ORDER_WRITE_SET,
+          book: BOOK,
+          headerTable: 'SL_ORD_DATA',
+          submit: () => save(page),
+        });
+        return {
+          observation: `${r.attempts.map((a) => `${a.table} fault -> ${a.status}`).join(', ')}; every table of the tenant unchanged after each; then order ${r.vchNo} saved (201) with the expected number`,
+          expected: { unchangedAfterEachFault: true, nextOrderNo: r.expectedNo },
+          database: { attempts: r.attempts, orderNo: r.vchNo },
+          downstream: {
+            tablesWrittenBySuccessfulSave: r.written,
+            pendingWhenTheFaultFired: Object.fromEntries(
+              r.attempts.map((x) => [x.table, x.pendingElsewhere]),
+            ),
+          },
+        };
+      },
+    ),
     {
       ...C(
         'config.setting-variant',

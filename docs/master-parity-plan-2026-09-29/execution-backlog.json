@@ -6070,7 +6070,7 @@
     },
     {
       "id": "N166",
-      "status": "planned",
+      "status": "in-progress",
       "action": "Feature E2E infrastructure: declared fault injection at each write boundary for T14 rollback cases, and a settings-variant fixture company (SL_AMT_TYPE=F, TOT_AMT_ROF=0, NEGATIVE_STK_SALE=N, ALL_ROF_REMOVE=Y) for T15 cases; unblock sales-invoice.rollback.mid-write and sales-invoice.config.setting-change.",
       "parentLabels": "P9; R03; T14; T15",
       "startAfter": [
@@ -6081,7 +6081,16 @@
       "entryDefinition": "02-execution-plan.md section 4",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
       "universalContract": "03-shared-contracts.md",
-      "verification": "04-verification-playbook.md"
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-02",
+      "evidence": [
+        "web/apps/web/test/features/faults.mjs",
+        "web/apps/web/test/features/modules/salesInvoice.mjs",
+        "web/apps/web/test/features/modules/salesOrder.mjs",
+        "web/apps/web/test/features/modules/salesReturn.mjs",
+        "web/apps/web/test/features/modules/purchaseReturn.mjs"
+      ],
+      "statusNote": "The T14 half (G173) is implemented as engineering evidence: rollbackMatrix in web/apps/web/test/features/faults.mjs faults each table of the measured write set through the real screen for the Sales Invoice (8 tables), Sales Order (5), Sales Return (7) and Purchase Return (7); every case passes, and fails when a side effect is committed in its own transaction. Not done: G174, the settings-variant fixture company for T15 (sales-invoice.config.setting-change stays blocked); the Purchase Invoice and the other voucher families have no matrix; edit and delete are not faulted. No acceptance is claimed."
     },
     {
       "id": "N167",
