@@ -35,6 +35,8 @@ const ALLOWED = new Set([
   // Wh Sales, Rate Cut, Wh Quotation and Tour Sales (TR_WH_SALE): the voucher number box and the F1 list
   // (TR_WH_SALE.cs:14393-14418, :13916-13927). The total shown is SL_NET_AMT, the sale side of the desktop list.
   'RATE_CUT_DATA',
+  // Order Cancel (TR_SL_ORD_ADJ): one row per cancelled order; the F1 list sums ORD_AMT (TR_SL_ORD_ADJ.cs:3885-3887).
+  'SL_ORD_ADJ',
 ]);
 const IDENTITY_COLUMNS = ['CO_CODE', 'LC_CODE', 'CO_YEAR', 'CO_BOOK', 'VCH_NO'];
 const qid = (c: string): string => '"' + c.replace(/[^A-Za-z0-9_]/g, '') + '"';
@@ -97,9 +99,11 @@ export async function recentVouchers(
     // list selects SUM(CR_AMT) and SUM(DR_AMT), TR_CONTRA.cs:3140-3144). Compute it before DISTINCT ON.
     const amtSel = amtCol
       ? `coalesce(NULLIF(${qid(amtCol)}::text,'')::numeric,0)::float`
-      : cols.has('DR_AMT')
-        ? `coalesce(sum(coalesce(NULLIF("DR_AMT"::text,'')::numeric,0)) OVER (PARTITION BY "VCH_NO"),0)::float`
-        : '0::float';
+      : table === 'SL_ORD_ADJ'
+        ? `coalesce(sum(coalesce(NULLIF("ORD_AMT"::text,'')::numeric,0)) OVER (PARTITION BY "VCH_NO"),0)::float`
+        : cols.has('DR_AMT')
+          ? `coalesce(sum(coalesce(NULLIF("DR_AMT"::text,'')::numeric,0)) OVER (PARTITION BY "VCH_NO"),0)::float`
+          : '0::float';
     const dateSel = cols.has('VCH_DATE') ? `"VCH_DATE"::text` : 'NULL';
     // The header table can hold several rows per voucher (party leg + tax + old-gold components share one
     // VCH_NO). The desktop voucher navigator lists ONE row per voucher, so collapse with DISTINCT ON and

@@ -280,8 +280,13 @@ route('Transaction/E Invoice', [
   'POST /e-invoices/:vchNo/irn/cancel',
 ]);
 route('Sales/Order Cancel', [
-  'POST /sales-orders/:vchNo/cancel-refund',
   'GET /sales-orders/:vchNo/adjustment',
+  'GET /order-cancel/pending-orders',
+  'POST /order-cancel',
+  'GET /order-cancel/:vchNo',
+  'PUT /order-cancel/:vchNo',
+  'DELETE /order-cancel/:vchNo',
+  'GET /order-cancel/:vchNo/print',
 ]);
 route('Sales/Labour Sale', [
   'POST /labour-invoice',
@@ -1091,6 +1096,8 @@ const PRINT_ROUTES = new Set([
   'GET /reports/balance-sheet-doc',
   'GET /reports/render',
   'GET /fine-jv/:vchNo/print',
+  // TR_SL_ORD_ADJ.cs:3796-3800: OrderCancelVch needs the print right.
+  'GET /order-cancel/:vchNo/print',
   // TR_CONTRA.cs:3000-3004: Contra and Journal documents are printed from the same form as Fine JV.
   'GET /contra/:vchNo/print',
   'GET /journal/:vchNo/print',

@@ -1,4 +1,5 @@
 import { withTxBudget, SNAPSHOT_READ, type TxBudgetPrisma, type Tx } from '../shared/txBudget.js';
+import { openAdvanceOfOrderTx } from './orderCancel.js';
 import { withSessionContextCommand } from '../auth/sessionContextCommand.js';
 import { createHash } from 'node:crypto';
 import {
@@ -2003,34 +2004,24 @@ export async function editTourOrderInSession(
 
 // ───────────────────────── F4 · SL_ORD_ADJ order-adjust helpers ─────────────────────────
 
-/** Advance still available on an order to consume into a sale = ADV_AMT − Σ already-adjusted PAID_AMT. */
+/**
+ * Advance still available on an order to consume into a sale. The rule is shared with Order Cancel
+ * (`openAdvanceOfOrderTx`), so a sale and a cancellation can never use the same advance twice: it counts what earlier
+ * sales and cancellations used, including a cancellation's kasar.
+ */
 export async function orderAdvanceAvailableTx(
   tx: any,
   scope: VoucherScope,
   ordNo: number | string,
   ordBook = 'SOR',
 ): Promise<{ custAc: string; custName: string | null; advance: number; available: number }> {
-  const ord: any = (
-    await tx.$queryRawUnsafe(
-      `SELECT "AC_CODE" ac, "AC_NAME" nm, coalesce(NULLIF("ADV_AMT"::text,'')::numeric,0)::float adv FROM "SL_ORD_DATA" WHERE "CO_CODE"=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 LIMIT 1`,
-      scope.coCode,
-      ordBook,
-      formatVoucherNo(ordNo),
-    )
-  )[0];
+  const ord = await openAdvanceOfOrderTx(tx, scope, ordNo, ordBook);
   if (!ord) throw new SaleValidationError(`sales order #${ordNo} not found`);
-  const used: any = (
-    await tx.$queryRawUnsafe(
-      `SELECT coalesce(sum(coalesce(NULLIF("PAID_AMT"::text,'')::numeric,0)),0)::float u FROM "SL_ORD_ADJ" WHERE "CO_CODE"=$1 AND "ORD_NO"=$2`,
-      scope.coCode,
-      formatVoucherNo(ordNo),
-    )
-  )[0];
   return {
-    custAc: String(ord.ac),
-    custName: ord.nm ?? null,
-    advance: round2(Number(ord.adv)),
-    available: round2(Number(ord.adv) - Number(used.u)),
+    custAc: ord.acCode,
+    custName: ord.acName || null,
+    advance: ord.advAmt,
+    available: ord.openAmt,
   };
 }
 
