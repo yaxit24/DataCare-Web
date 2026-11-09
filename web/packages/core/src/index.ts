@@ -8,6 +8,7 @@ export {
 } from './money.js';
 export {
   labourCharge,
+  saleLineLabourAmount,
   metalAmount,
   lineNet,
   lineTotalDesktop,
@@ -237,6 +238,7 @@ export {
   saleReturnAmountBasis,
   saleItemAmount,
   saleItemAmountWhole,
+  saleItemAmountRounded,
   salesReturnRoundingPolicy,
 } from './saleAmount.js';
 export type { SaleAmountLine, SaleAmountBasis } from './saleAmount.js';
