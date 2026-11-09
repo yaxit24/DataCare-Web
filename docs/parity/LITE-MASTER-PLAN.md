@@ -310,7 +310,7 @@ schedule the fix in WP-26/27.
 | WP-02 | Order Cancel | Finish from the saved patch | P1 | M | — | 11 | patch saved |
 | WP-03 | Sales Order, Order Report | Scheme tender (G206), un-break the rows | P1 | M | — | — | baselined |
 | WP-04 | Every voucher create route (Stock Adjust first) | Server-side idempotency: a replayed request never makes a second voucher | P0 | M | — | 20 (Stock Adjust part) | PR #229 (6 routes); follow-up queue for the rest |
-| WP-05 | Cash Received/Payment, Bank Received/Payment | T03 calculations, T06 card/UPI settlement | P1 | M | — | — | 2 blocked |
+| WP-05 | Cash Received/Payment, Bank Received/Payment | T03 calculations, T06 card/UPI settlement | P1 | M | — | — | N232/G244: T03 executed and passing; T06 blocked for an owner call (TR_CASH has no card/UPI mode) |
 | WP-06 | User Create | MS_USER with OD-1..OD-3 | P0 | L | — | — (see card) | 15 of 18 blocked |
 | WP-07 | Company | Identity workflow (G38, N58), delete per OD-5 | P1 | L | — | 16 | BROKEN |
 | WP-08 | Data Backup | D-BKP-3 allowlist per OD-4 (G64/N80) | P1 | M | — | 18 | BROKEN |

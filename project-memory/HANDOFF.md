@@ -1,3 +1,8 @@
+## 2026-11-09 — Cash and Bank vouchers follow the TR_CASH calculations (N232 / G244, WP-05)
+
+- 2026-11-09: the multi-line grid shows the TR_CASH totals row (Σ Amount "0.00", Σ Kasar "0.000", kernel `cashGridTotals`), a multi-line receipt writes one CASH_DATA row per line and no PAY_DETL, and a Bank Payment posts its kasar on 09/10 (it was refused on the ledger key). `cash-bank`: 22 of 23 pass.
+- 2026-11-09: T06 card/UPI stays blocked for an owner call: TR_CASH has no card or UPI mode, and Card Rec (TR_CARD_REC, Pro) adds a whole-rupee commission where the web subtracts a two-place one. Open: bank Charges (slot 3) and Clearing Dt; payments in PAY_DATA instead of CASH_DATA.
+
 ## 2026-11-09 — Esc with no focused control on nine more screens (WP-09, GB-02, under G239)
 
 - Party, Item, Item Group, Product, Tax, Address, Employee, Auto Item and Item Opening lost Esc when the focus was on the page body (each
