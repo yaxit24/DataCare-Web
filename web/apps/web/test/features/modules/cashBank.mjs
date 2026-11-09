@@ -426,15 +426,150 @@ export const cashBank = {
         };
       },
     ),
-    pending(
-      'calculations',
+    C(
+      'calculations.multi-line-receipt-totals',
       'T03',
-      'Covered by create.cash-receipt-with-kasar; multi-line totals follow with the grid cases.',
+      'mutation',
+      'TR_CASH grid: each Amount/Kasar cell is stored as Format(Val, "0.00") on leaving it (TR_CASH.cs:1978-1982); MSG_TOT_FILL prints "Total :", Σ Amount "0.00" and Σ Kasar "0.000" (:1846-1853); Save writes ONE CASH_DATA row per grid line with SR_NO, AC_CODE, REC_AMT, KASAR_AMT and the Remark (:2995-3060); Cash_Ledr keys each line STR(SR_NO)+01..04 (Ac_Ledr.cs:565-575)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const grid = [
+          { party: PARTIES.local.code, amount: '1250.50', kasar: '10.50', remark: 'E2E line one' },
+          {
+            party: PARTIES.interState.code,
+            amount: '749.25',
+            kasar: '0.25',
+            remark: 'E2E line two',
+          },
+        ];
+        // Desktop formula, worked here and not read back from the screen: Format(Val(cell), "0.00") per cell
+        // (half-up to 2 places), then Σ printed "0.00" for Amount and "0.000" for Kasar.
+        const cell = (v) => Math.round(Number(v) * 100 + 1e-9) / 100;
+        const sumAmount = grid.reduce((s, l) => s + cell(l.amount) * 100, 0) / 100;
+        const sumKasar = grid.reduce((s, l) => s + cell(l.kasar) * 100, 0) / 100;
+        const expected = { amount: sumAmount.toFixed(2), kasar: sumKasar.toFixed(3) };
+        assert.deepEqual(expected, { amount: '1999.75', kasar: '10.750' });
+        const balances = async () => Promise.all(grid.map((l) => partyBalance(ctx, l.party)));
+        const before = await balances();
+        await openForm(page, '/txn/receipt');
+        await page.getByRole('checkbox', { name: 'Multi-line' }).check();
+        await page.getByRole('button', { name: '+ Add line', exact: true }).click();
+        for (const [i, l] of grid.entries()) {
+          const n = i + 1;
+          const party = page.getByLabel(`Line ${n} party`, { exact: true });
+          await party.fill(l.party);
+          await party.locator('xpath=..').getByText(l.party, { exact: true }).first().waitFor();
+          await party.press('Enter');
+          await page.getByLabel(`Line ${n} amount`, { exact: true }).fill(l.amount);
+          await page.getByLabel(`Line ${n} kasar`, { exact: true }).fill(l.kasar);
+          await page.getByLabel(`Line ${n} remark`, { exact: true }).fill(l.remark);
+        }
+        const shown = {
+          amount: (await page.getByLabel('Total amount', { exact: true }).innerText()).trim(),
+          kasar: (await page.getByLabel('Total kasar', { exact: true }).innerText()).trim(),
+        };
+        assert.deepEqual(shown, expected, 'the totals row');
+        const response = await save(page, 'Save Receipt');
+        assert.equal(response.status(), 201, await response.text());
+        const vchNo = String((await response.json()).vchNo).padStart(5, '0');
+        const rows = await ctx.rows(
+          `SELECT "SR_NO"::int sr,"AC_CODE" ac,"REC_AMT"::float amt,"KASAR_AMT"::float kasar,"IT_DESC" remark
+             FROM "CASH_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${RECEIPT_BOOK}' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+          vchNo,
+        );
+        assert.deepEqual(
+          rows,
+          grid.map((l, i) => ({
+            sr: i + 1,
+            ac: l.party,
+            amt: cell(l.amount),
+            kasar: cell(l.kasar),
+            remark: l.remark,
+          })),
+        );
+        const [{ n: detail }] = await ctx.rows(
+          `SELECT count(*)::int n FROM "PAY_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='${RECEIPT_BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        assert.equal(detail, 0, 'TR_CASH writes no PAY_DETL');
+        const ledger = await ctx.rows(
+          `SELECT btrim(substr("LEDR_KEY",22)) k,"AC_CODE" ac,"DR_AMT"::float dr,"CR_AMT"::float cr
+             FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${RECEIPT_BOOK}' AND "VCH_NO"=$2 ORDER BY "LEDR_KEY"`,
+          vchNo,
+        );
+        assert.deepEqual(
+          ledger.map((r) => [r.k, r.ac, r.dr, r.cr]),
+          grid.flatMap((l, i) => [
+            [`${i + 1}01`, l.party, 0, cell(l.amount)],
+            [`${i + 1}02`, 'CASH', cell(l.amount), 0],
+            [`${i + 1}03`, l.party, 0, cell(l.kasar)],
+            [`${i + 1}04`, 'KASAR', cell(l.kasar), 0],
+          ]),
+        );
+        const after = await balances();
+        const moved = after.map((b, i) => Math.round((before[i] - b) * 100) / 100);
+        assert.deepEqual(
+          moved,
+          grid.map((l) => Math.round((cell(l.amount) + cell(l.kasar)) * 100) / 100),
+          'each party owes its amount + kasar less',
+        );
+        return {
+          observation: `totals ${shown.amount} / ${shown.kasar}; voucher ${vchNo}: ${rows.length} CASH_DATA rows, ${ledger.length} legs`,
+          expected: { ...expected, rows: 2, legs: 8 },
+          database: { rows, ledger },
+          downstream: { partyMoved: moved },
+        };
+      },
+    ),
+    C(
+      'calculations.bank-payment-kasar',
+      'T03',
+      'mutation',
+      'Bank_Ledr (Ac_Ledr.cs:585-610): BANK PAY posts 07 party Dr / 08 bank Cr the amount and 09 party Dr / 10 kasar (BOOK_DETL slot 2) Cr the kasar; the cash payment kasar codes 07/08 are the bank payment amount codes',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const amount = 3000;
+        const kasar = 25.5;
+        const party0 = await partyBalance(ctx, PARTIES.local.code);
+        await openForm(page, '/txn/payment?mode=BANK');
+        assert.equal(await page.getByLabel('Mode', { exact: true }).inputValue(), 'bank');
+        const bank = page.getByLabel('Bank account', { exact: true });
+        await bank.fill(PARTIES.bank.code);
+        await bank
+          .locator('xpath=..')
+          .getByText(PARTIES.bank.code, { exact: true })
+          .first()
+          .waitFor();
+        await bank.press('Enter');
+        await pickParty(page, PARTIES.local.code);
+        await page.getByLabel('Amount', { exact: true }).fill(String(amount));
+        await page.getByLabel('Kasar ₹ (write-off)', { exact: true }).fill(String(kasar));
+        const response = await save(page, 'Save Payment');
+        assert.equal(response.status(), 201, await response.text());
+        const vchNo = String((await response.json()).vchNo).padStart(5, '0');
+        const rows = await legs(ctx, PAYMENT_BOOK, vchNo);
+        const shape = rows.map((r) => [r.code, r.ac, r.dr, r.cr]);
+        assert.deepEqual(shape, [
+          ['07', PARTIES.local.code, amount, 0],
+          ['08', PARTIES.bank.code, 0, amount],
+          ['09', PARTIES.local.code, kasar, 0],
+          ['10', 'KASAR', 0, kasar],
+        ]);
+        const party1 = await partyBalance(ctx, PARTIES.local.code);
+        const moved = Math.round((party1 - party0) * 100) / 100;
+        assert.equal(moved, amount + kasar, 'the party is debited the amount and the kasar');
+        return {
+          observation: `voucher ${vchNo}: ${JSON.stringify(shape)}`,
+          expected: 'legs 07/08 amount, 09/10 kasar; party debited 3,025.50',
+          database: { legs: rows },
+          downstream: { partyMoved: moved },
+        };
+      },
     ),
     pending(
       'settlement',
       'T06',
-      'Card and UPI receipts (CARD_DATA, UPI_DATA) and bank cheques are the next cases of this module.',
+      'STOPPED for an owner call, not a test gap. TR_CASH (the form behind all four menus) has no card or UPI mode: the book alone decides cash or bank (TR_CASH.cs:1743-1797), the grid has Chq No, Clearing Dt, Charges, Kasar and Amount only, and Save writes CASH_DATA alone (:2995-3060), never CARD_DATA or UPI_DATA. Card settlement is the separate Pro menu Card Rec (TR_CARD_REC, CARD ADJUST books), whose commission is Math.Round(card × % / 100) to a whole rupee and ADDED to the card amount (TR_CARD_REC.cs:3796-3799); TR_UPI_REC is opened by no form. The web CARD/UPI modes on these screens (finance.ts postReceipt) subtract a 2-place commission and write CARD_DATA/UPI_DATA into the receipt book, so no desktop rule gives this case an expected value.',
     ),
     C(
       'refusal.date-outside-year',

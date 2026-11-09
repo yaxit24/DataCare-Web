@@ -500,6 +500,68 @@ describe.runIf(RUN)('multi-line cash paths write a Rojmel row per line', () => {
     expect(roj.map((r) => r.cr)).toEqual([5000, 1000]);
   });
 
+  it('a multi-line RECEIPT writes one CASH_DATA row per grid line, numbered by SR_NO, and no PAY_DETL', async () => {
+    // TR_CASH.cs:2995-3060 walks the grid and adds ONE CASH_DATA row per line that has an account and a
+    // non-zero amount + kasar: SR_NO = the grid's Sr column (:3027), AC_CODE/AC_NAME (:3032-3033), REC_AMT
+    // (:3034), KASAR_AMT (:3036), IT_DESC from the Remark column (:3037). Cash_Ledr then keys each line's legs
+    // STR(SR_NO)+code (Ac_Ledr.cs:567). TR_CASH writes no PAY_DETL. The web wrote one aggregate row carrying the
+    // first party and the summed amount, plus a PAY_DETL row per line.
+    const lines = [
+      { partyAc: PARTY, partyName: 'CASH PARTY', amount: 1250.5, kasar: 10.5, itDesc: 'first' },
+      { partyAc: PARTY, partyName: 'CASH PARTY', amount: 749.25, kasar: 0.25, itDesc: 'second' },
+    ];
+    await exec(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_NAME","MAIN_BOOK","BOOK_INOUT")
+       VALUES ($1,$2,$3,$4,2,$5,'Cash Received','CASH REC','I')`,
+      TENANT,
+      CO,
+      LC,
+      BOOK,
+      KASAR,
+    );
+    const before = await financeFootprint();
+    const result = await postReceiptLines(runtime, {
+      scope,
+      mode: 'cash',
+      vchDate: '2024-04-03',
+      lines,
+    } as never);
+    // MSG_TOT_FILL (TR_CASH.cs:1848-1855): the Amount total is Σ column 5.
+    expect(result.total).toBe(1999.75);
+    const heads = (await owner.$queryRawUnsafe(
+      `SELECT "SR_NO"::int sr, "AC_CODE" ac, "AC_NAME" name, "REC_AMT"::float amt, "KASAR_AMT"::float kasar,
+              "IT_DESC" descr, "REC_AC_CODE" rec, "VCH_NO" vch
+         FROM "CASH_DATA" WHERE tenant_id=$1 ORDER BY "SR_NO"`,
+      TENANT,
+    )) as Array<Record<string, unknown>>;
+    expect(heads).toEqual(
+      lines.map((l, i) => ({
+        sr: i + 1,
+        ac: l.partyAc,
+        name: l.partyName,
+        amt: l.amount,
+        kasar: l.kasar,
+        descr: l.itDesc,
+        rec: CASH,
+        vch: '00001',
+      })),
+    );
+    const after = await financeFootprint();
+    expect(after.detail - before.detail).toBe(0);
+    expect(after.cash - before.cash).toBe(2);
+    // Per line: 01 party Cr amount / 02 cash Dr amount / 03 party Cr kasar / 04 kasar Dr kasar.
+    expect((await legs()).map((r) => [r.k.slice(21).trim(), r.ac, r.dr, r.cr])).toEqual([
+      ['101', PARTY, 0, 1250.5],
+      ['102', CASH, 1250.5, 0],
+      ['103', PARTY, 0, 10.5],
+      ['104', KASAR, 10.5, 0],
+      ['201', PARTY, 0, 749.25],
+      ['202', CASH, 749.25, 0],
+      ['203', PARTY, 0, 0.25],
+      ['204', KASAR, 0.25, 0],
+    ]);
+  });
+
   it('a multi-line PAYMENT writes nine type-04 rows for nine lines', async () => {
     // Measured: real voucher 002/00029 has nine CASH_DATA lines and NINE type-04 Rojmel rows. The web wrote
     // zero, because postPaymentLines never called the builder.
@@ -581,6 +643,56 @@ describe.runIf(RUN)('bank leg codes are not a mirror of cash', () => {
     expect(rows[0]!.dr).toBe(5000);
     expect(rows[1]!.ac).toBe('000754');
     expect(rows[1]!.cr).toBe(5000);
+  });
+
+  it('a BANK payment writes its kasar on 09/10, not on its own amount legs 07/08', async () => {
+    // Bank_Ledr (Ac_Ledr.cs:585-610): BANK PAY 07 party Dr REC_AMT / 08 bank Cr REC_AMT, then 09 party Dr
+    // KASAR_AMT / 10 kasar (BOOK_DETL slot 2) Cr KASAR_AMT. The cash payment's kasar codes 07/08 (Cash_Ledr,
+    // :581-583) are the bank payment's amount codes, so reusing them wrote two legs under each key.
+    await exec(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_NAME","MAIN_BOOK","BOOK_INOUT")
+       VALUES ($1,$2,$3,'012',2,$4,'Bank Payment','BANK PAY','O')`,
+      TENANT,
+      CO,
+      LC,
+      KASAR,
+    );
+    // The web writes payments to PAY_DATA, so number this book from it (otherwise the second voucher re-draws 00001).
+    await exec(
+      `UPDATE "BOOK_DATA" SET "BOOK_TBL_NAME"='PAY_DATA' WHERE tenant_id=$1 AND "CO_BOOK"='012'`,
+      TENANT,
+    );
+    const amount = 3000;
+    const kasar = 25.5;
+    await postPayment(runtime, {
+      scope: { ...scope, coBook: '012' },
+      partyAc: PARTY,
+      amount,
+      kasar,
+      mode: 'cheque',
+      bankAc: '000754',
+      vchDate: '2024-04-01',
+    } as never);
+    await postPaymentLines(runtime, {
+      scope: { ...scope, coBook: '012' },
+      mode: 'cheque',
+      bankAc: '000754',
+      vchDate: '2024-04-02',
+      lines: [{ partyAc: PARTY, amount, kasar }],
+    } as never);
+    const rows = await legs();
+    const shape = (vch: string) =>
+      rows
+        .filter((r) => r.k.slice(16, 21) === vch)
+        .map((r) => [r.k.slice(21).trim(), r.ac, r.dr, r.cr]);
+    const expected = [
+      ['107', PARTY, amount, 0],
+      ['108', '000754', 0, amount],
+      ['109', PARTY, kasar, 0],
+      ['110', KASAR, 0, kasar],
+    ];
+    expect(shape('00001')).toEqual(expected);
+    expect(shape('00002')).toEqual(expected);
   });
   /**
    * TR_CASH's employee box (tEmpCode): EMP_CODE_MANDATORY = 'Y' refuses a blank (TR_CASH.cs:2907-2911, before the

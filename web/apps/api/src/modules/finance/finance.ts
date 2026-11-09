@@ -26,6 +26,7 @@ import {
   financeEmployeeTx,
 } from './lifecycle.js';
 import { tenderThresholdDecision } from './tender.js';
+import { CASH_LEG, legsFor } from './legCodes.js';
 
 export class FinanceValidationError extends Error {
   constructor(msg: string) {
@@ -247,43 +248,6 @@ export function assertCashReceiptCeiling(
 }
 
 /** A balanced two-line transfer ledger: Dr `drAc` / Cr `crAc` for `amount` (Req 13.1). */
-/**
- * Desktop cash-book leg codes (direction-specific; receipt/payment share none):
- *   CASH REC 01 party Cr / 02 cash Dr · 03 party Cr / 04 kasar Dr (kasar 00057 JAVK)
- *   CASH PAY 05 party Dr / 06 cash Cr · 07 party Dr / 08 kasar Cr (kasar 00042 AVAK)
- * The kasar account mirrors the money (JAVK out / AVAK in). Bank codes are measured separately.
- */
-const CASH_LEG = {
-  recParty: 1,
-  recCash: 2,
-  recKasarParty: 3,
-  recKasar: 4,
-  payParty: 5,
-  payCash: 6,
-  payKasarParty: 7,
-  payKasar: 8,
-} as const;
-
-/** BANK leg codes, measured across all 228 legs of the 11 active bank books. NOT a mirror of cash. (detail condensed; see git history / plan doc 06.) */
-const BANK_LEG = {
-  recParty: 1,
-  recBank: 2,
-  recKasarParty: 3,
-  recKasar: 4,
-  recChargesBank: 5,
-  recCharges: 6,
-  payParty: 7,
-  payBank: 8,
-  payChargesBank: 11,
-  payCharges: 12,
-} as const;
-
-/** The leg map for a mode: bank payments use 07/08 where cash payments use 05/06. */
-const legsFor = (mode: PayMode) =>
-  mode === 'cash'
-    ? { party: CASH_LEG.payParty, account: CASH_LEG.payCash }
-    : { party: BANK_LEG.payParty, account: BANK_LEG.payBank };
-
 export function buildTransferLedger(
   key: VoucherKey,
   vchType: string,
@@ -698,7 +662,7 @@ export async function postPayment(
       ledger.push(
         {
           ...lbase,
-          legKeySuffix: suffix(CASH_LEG.payKasarParty),
+          legKeySuffix: suffix(legsFor(mode).kasarParty),
           AC_CODE: input.partyAc,
           LD_CODE: kasarAc,
           DR_AMT: kasar,
@@ -707,7 +671,7 @@ export async function postPayment(
         },
         {
           ...lbase,
-          legKeySuffix: suffix(CASH_LEG.payKasar),
+          legKeySuffix: suffix(legsFor(mode).kasar),
           AC_CODE: kasarAc,
           LD_CODE: input.partyAc,
           DR_AMT: 0,
@@ -862,8 +826,8 @@ function detlLines(
   }));
 }
 
-/** Multi-line receipt (money IN): one bank/cash Dr for the total + a Cr per party (each with its own
- *  kasar write-off). Header → CASH_DATA, per-party detail → PAY_DETL. Desktop TR_CASH multi-grid. */
+/** Multi-line receipt (money IN), the desktop TR_CASH grid: one CASH_DATA row per line and a self-balanced
+ *  party/cash pair (plus a kasar pair) per line, keyed by the line's SR_NO (Ac_Ledr.cs:565-583). */
 export async function postReceiptLines(
   prisma: any,
   input: ReceiptPaymentLinesInput,
@@ -1013,25 +977,27 @@ export async function postReceiptLines(
         ...(recLinesRojmelRows.length
           ? [{ table: 'ROJ_MEL_DATA' as const, rows: recLinesRojmelRows }]
           : []),
+        // TR_CASH.cs:2995-3060: ONE CASH_DATA row per grid line, SR_NO = the grid's Sr column (:3027), with that
+        // line's party, amount, kasar and Remark (:3032-3037). TR_CASH writes no PAY_DETL; this wrote one
+        // aggregate row (first party, summed amount) plus a PAY_DETL row per line.
         {
           table: 'CASH_DATA',
-          rows: [
-            {
-              ...key,
-              VCH_TYPE: vchType,
-              REC_AMT: totalAmt,
-              KASAR_AMT: totalKasar,
-              AC_CODE: lines[0]!.partyAc,
-              REC_AC_CODE: recAcLines,
-              CHQ_NO: input.chqNo ?? null,
-              EMP_CODE: input.empCode ?? null,
-              VCH_DATE: vchDate,
-            },
-          ],
-        },
-        {
-          table: 'PAY_DETL',
-          rows: detlLines(key, vchType, mode === 'cash' ? 'CASH REC' : 'BANK REC', vchDate, lines),
+          rows: lines.map((l, idx) => ({
+            ...key,
+            SR_NO: idx + 1,
+            VCH_TYPE: vchType,
+            REC_AMT: round2(Number(l.amount)),
+            KASAR_AMT: round2(Number(l.kasar ?? 0)),
+            AC_CODE: l.partyAc,
+            AC_NAME: l.partyName ?? null,
+            IT_DESC: l.itDesc ?? null,
+            REC_AC_CODE: recAcLines,
+            CHQ_NO: input.chqNo ?? null,
+            EMP_CODE: input.empCode ?? null,
+            VCH_DATE: vchDate,
+            INOUT_TYPE: 'I',
+            ENTRY_TYPE: mode === 'cash' ? 'C' : 'B',
+          })),
         },
       ],
     });
@@ -1116,7 +1082,7 @@ export async function postPaymentLines(
         ledger.push(
           {
             ...lbase,
-            legKeySuffix: lineSuffix(lineNo, CASH_LEG.payKasarParty),
+            legKeySuffix: lineSuffix(lineNo, legsFor(mode).kasarParty),
             AC_CODE: l.partyAc,
             LD_CODE: kasarAc,
             DR_AMT: lineKasar,
@@ -1125,7 +1091,7 @@ export async function postPaymentLines(
           },
           {
             ...lbase,
-            legKeySuffix: lineSuffix(lineNo, CASH_LEG.payKasar),
+            legKeySuffix: lineSuffix(lineNo, legsFor(mode).kasar),
             AC_CODE: kasarAc,
             LD_CODE: l.partyAc,
             DR_AMT: 0,

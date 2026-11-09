@@ -318,6 +318,8 @@ export type { EditionAvailability, EditionCode, EditionPolicy, EditionTier } fro
 export { FORM_EDITION, ROUTE_EDITION } from './editionTable.js';
 export { formatDesktopDate, toIsoDate } from './dates.js';
 export { vbVal } from './vbVal.js';
+export { cashGridTotals } from './cashGridTotals.js';
+export type { CashGridRow, CashGridTotals } from './cashGridTotals.js';
 export * from './tagKarigar.js';
 
 // MS_RATE (Daily Rate) grid recalculation.

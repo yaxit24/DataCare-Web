@@ -86,6 +86,8 @@
         "web/apps/web/app/(app)/txn/receipt/page.tsx",
         "web/apps/web/app/(app)/txn/payment/page.tsx",
         "web/apps/api/src/modules/finance/finance.ts",
+        "web/apps/api/src/modules/finance/legCodes.ts",
+        "web/packages/core/src/cashGridTotals.ts",
         "web/apps/api/src/modules/finance/batchReceipt.ts",
         "web/apps/api/src/modules/finance/lifecycle.ts",
         "web/apps/api/src/modules/vouchers/list.ts"
