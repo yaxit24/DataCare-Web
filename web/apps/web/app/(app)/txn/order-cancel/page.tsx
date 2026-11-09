@@ -100,8 +100,17 @@ export default function OrderCancelPage() {
       .catch(() => setDefaults({ paidAc: '', paidAcName: '' }));
   }, [coBook, bookQuery]);
   useEffect(() => {
-    setRows((rs) => (rs.length ? rs : [blankRow()]));
-  }, [blankRow]);
+    // A row the operator has not touched takes the book's refund account once it is known.
+    setRows((rs) =>
+      rs.length
+        ? rs.map((r) =>
+            !r.ordNo && !r.paidAc
+              ? { ...r, paidAc: defaults.paidAc, paidAcName: defaults.paidAcName }
+              : r,
+          )
+        : [blankRow()],
+    );
+  }, [blankRow, defaults]);
 
   const cell = (row: number, column: string) =>
     grid.current?.querySelector<HTMLInputElement>(`[data-cell="${column}-${row}"]`) ?? null;

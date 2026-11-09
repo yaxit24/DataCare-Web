@@ -72,6 +72,12 @@ const blocked = (name, group, source, reason) => ({
   blocked: reason,
 });
 const label = (page, text) => page.getByLabel(text, { exact: true });
+/** The harness accepts every confirm; this records what each one asked. */
+const dialogs = (page) => {
+  const asked = [];
+  page.on('dialog', (dialog) => asked.push(dialog.message()));
+  return asked;
+};
 const pathOf = (response) => new URL(response.url()).pathname;
 
 // ───────────── the Sales Order screen makes the orders (the thing under test is never seeded) ─────────────
@@ -85,7 +91,7 @@ const LINE = {
   labour: '40',
 };
 
-async function createOrder(page, { customer = CUSTOMER.code, advance = 0, upi } = {}) {
+async function createOrder(page, { customer = CUSTOMER.code, advance = 0, upi, cheque } = {}) {
   await page.goto('/txn/sales-order');
   await page.getByRole('heading', { name: 'Sales Order', exact: true }).waitFor();
   const book = page.getByRole('combobox', { name: 'Configured book', exact: true }).first();
@@ -113,10 +119,17 @@ async function createOrder(page, { customer = CUSTOMER.code, advance = 0, upi } 
     await label(page, `${name} item 1`).fill(LINE[key]);
   await label(page, 'Labour rate item 1').press('Tab');
   if (advance) await label(page, 'Advance ₹').fill(String(advance));
-  if (upi) {
+  if (upi || cheque) {
     const summary = page.getByText('Order details', { exact: true });
     if (!(await summary.locator('..').evaluate((element) => element.open))) await summary.click();
     await label(page, 'Cash A/c').fill(CASH);
+  }
+  if (cheque) {
+    await label(page, 'Cheque Amt').fill(String(cheque));
+    await label(page, 'Bank A/c').fill(BANK.code);
+    await label(page, 'Cheque No').fill('654321');
+  }
+  if (upi) {
     if (!(await label(page, 'UPI AcCode line 1').count()))
       await page.getByRole('button', { name: '+ Add UPI row', exact: true }).click();
     await label(page, 'UPI AcCode line 1').fill(BANK.code);
@@ -373,13 +386,9 @@ export const orderCancel = {
         await openCancel(page);
         await page.locator('#order-cancel-date').fill(date);
         await pickOrder(page, 1, ordNo);
-        const desc = `ROUTE ${RUN} ${'x'.repeat(130)}`.slice(0, 150);
-        await label(page, 'It Desc row 1').fill(`${desc}OVERFLOW`);
-        assert.equal(
-          await label(page, 'It Desc row 1').inputValue(),
-          desc,
-          'the cell takes 150 characters',
-        );
+        const desc = `ROUTE ${RUN} ${'x'.repeat(150)}`.slice(0, 150);
+        assert.equal(await label(page, 'It Desc row 1').getAttribute('maxlength'), '150');
+        await label(page, 'It Desc row 1').fill(desc);
         const response = await save(page);
         assert.equal(response.status(), 201, await response.text());
         const vchNo = String((await response.json()).vchNo).padStart(5, '0');
@@ -414,7 +423,7 @@ export const orderCancel = {
         await openCancel(page);
         await pickOrder(page, 1, ordNo);
         const picked = {
-          ac: await page.getByLabel('AcCode row 1').textContent(),
+          ac: await label(page, 'AcCode row 1').textContent(),
           ord: await page.getByLabel('OrdAmt row 1').textContent(),
           adj: await label(page, 'AdjAmt row 1').inputValue(),
           paid: await page.getByLabel('PaidAmt row 1').textContent(),
@@ -501,7 +510,7 @@ export const orderCancel = {
         await label(page, 'Search pending orders').press('Escape');
         await help.waitFor({ state: 'detached' });
         assert.equal(await label(page, 'OrdNo row 1').inputValue(), '');
-        assert.equal(await page.getByLabel('AcCode row 1').textContent(), '');
+        assert.equal(await label(page, 'AcCode row 1').textContent(), '');
         return {
           observation: `help columns ${headers.join('/')}; ${open} listed with 2500.00/0.00; ${none} not listed; Esc left the row blank`,
           expected: 'desktop help columns, only orders with open advance, Esc cancels',
@@ -522,12 +531,10 @@ export const orderCancel = {
         await fillRow(page, 1, { ordNo: first, desc: 'first order' });
         await fillRow(page, 2, { ordNo: second, paidAc: BANK.code, desc: 'second order' });
         await fillRow(page, 3, { ordNo: third });
-        page.once('dialog', (dialog) => {
-          assert.equal(dialog.message(), 'This Row Record will Removed permantley ?');
-          void dialog.accept();
-        });
+        const asked = dialogs(page);
         await label(page, 'OrdNo row 3').press('Control+d');
         await label(page, 'OrdNo row 3').waitFor({ state: 'detached' });
+        assert.deepEqual(asked, ['This Row Record will Removed permantley ?']);
         const response = await save(page);
         assert.equal(response.status(), 201, await response.text());
         const vchNo = String((await response.json()).vchNo).padStart(5, '0');
@@ -863,10 +870,7 @@ export const orderCancel = {
           undefined,
         );
         await load(page, vchNo);
-        page.once('dialog', (dialog) => {
-          assert.equal(dialog.message(), 'Are You Sure To Delete This Voucher now?');
-          void dialog.accept();
-        });
+        const asked = dialogs(page);
         const [response] = await Promise.all([
           page.waitForResponse(
             (r) => r.request().method() === 'DELETE' && pathOf(r) === `/api/order-cancel/${vchNo}`,
@@ -875,6 +879,7 @@ export const orderCancel = {
         ]);
         assert.equal(response.status(), 200, await response.text());
         await page.getByRole('status').filter({ hasText: 'Delete Success.' }).waitFor();
+        assert.deepEqual(asked, ['Are You Sure To Delete This Voucher now?']);
         const left = await ctx.rows(
           `SELECT (SELECT count(*) FROM "SL_ORD_ADJ" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2)::int adj,
                   (SELECT count(*) FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2)::int ledger,
@@ -949,7 +954,6 @@ export const orderCancel = {
           .getByRole('alert')
           .filter({ hasText: 'This voucher was changed by someone else after you opened it.' })
           .waitFor();
-        two.page.once('dialog', (dialog) => void dialog.accept());
         const [gone] = await Promise.all([
           two.page.waitForResponse((r) => r.request().method() === 'DELETE'),
           two.page.getByRole('button', { name: 'Delete', exact: true }).click(),
@@ -1036,7 +1040,7 @@ export const orderCancel = {
         );
         try {
           await load(page, vchNo);
-          assert.equal(await page.getByLabel('Ac Name row 1').textContent(), OTHER.name);
+          assert.equal(await label(page, 'Ac Name row 1').textContent(), OTHER.name);
         } finally {
           await ctx.owner.$executeRawUnsafe(
             `UPDATE "AC_MAST" SET "AC_NAME"=$3 WHERE tenant_id=$1 AND "AC_CODE"=$2`,
@@ -1216,11 +1220,46 @@ export const orderCancel = {
       'TR_SL_ORD_ADJ.cs:2598-2631 and :3593-3660, Ac_Stock.cs:610-622: a tag the order holds (TAG_STK_LESS Y) comes back to stock',
       'The web Sales Order screen cannot make an order that holds a tag: a new order line is always saved with TAG_NO N (salesOrder.ts, SL_ORD_DETL.TAG_NO "new untagged row sentinel"), so the order under test cannot be created through the screen. The write set is proven by the DB test (orderCancel.db.test.ts "tags the order held come back to stock").',
     ),
-    blocked(
-      'create.cheque-advance',
+    C(
+      'create.cheque-advance-partly-adjusted',
       'T02',
-      'Prompt 11 case emphasis: orders with advances by cash, bank and cheque',
-      'The web Sales Order screen has no cheque tender (TR_SALE_ORD takes one); cash and UPI/bank advances are covered by the other cases.',
+      'mutation',
+      'An order whose advance came by cash and cheque (TR_SALE_ORD.cs:9131-9150, ADV_AMT 1,500) is cancelled in two vouchers: 1,000 first; the help then shows AdjAmt 1,000 (SUM of ORD_AMT where ORD_SIGN is -, :2499-2526) and picking it puts the 500 left in OrdAmt and AdjAmt (:2542-2560), saved with ORD_BAL_AMT 500.',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const ordNo = await createOrder(page, { advance: 300, cheque: 1200 });
+        const [{ adv, chq }] = await ctx.rows(
+          `SELECT "ADV_AMT"::float adv,"CHQ_AMT"::float chq FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${ORDER_BOOK}' AND "VCH_NO"=$2`,
+          ordNo,
+        );
+        assert.deepEqual({ adv, chq }, { adv: 1500, chq: 1200 });
+        const first = await create(page, [{ ordNo, adj: 1000, paidAc: BANK.code }]);
+        await openCancel(page);
+        await label(page, 'OrdNo row 1').press('F1');
+        const help = page.getByRole('dialog', { name: 'Pending orders' });
+        await label(page, 'Search pending orders').fill(ordNo);
+        const cells = await help.locator(`tr[data-order="${ordNo}"] td`).allTextContents();
+        assert.deepEqual([cells[4], cells[5]], ['1500.00', '1000.00']);
+        await label(page, 'Search pending orders').press('Enter');
+        await help.waitFor({ state: 'detached' });
+        assert.equal(await label(page, 'OrdAmt row 1').textContent(), '500.00');
+        assert.equal(await label(page, 'AdjAmt row 1').inputValue(), '500.00');
+        const response = await save(page);
+        assert.equal(response.status(), 201, await response.text());
+        const second = String((await response.json()).vchNo).padStart(5, '0');
+        const [row] = await adjRows(ctx, second);
+        assert.deepEqual([row.adj, row.bal, row.paid], [500, 500, 500]);
+        assert.equal(
+          (await pendingOf(page)).find((o) => o.ordNo === ordNo),
+          undefined,
+        );
+        return {
+          observation: `order ${ordNo} (cash 300 + cheque 1200) cancelled by ${first} (1000) and ${second} (the 500 left)`,
+          expected: { firstAdj: 1000, secondOrdAmt: 500 },
+          database: { adv, chq, second: row },
+          downstream: { pending: false },
+        };
+      },
     ),
   ],
 };
