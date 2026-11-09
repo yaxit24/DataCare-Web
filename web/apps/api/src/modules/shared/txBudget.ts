@@ -1,6 +1,12 @@
 import type { Prisma } from '@datacare/db';
 import { withTenant, type Tx } from '@datacare/db';
 import { hasPostgresErrorCode } from './prismaError.js';
+import {
+  claimCommandTx,
+  commandForTransaction,
+  completeCommandTx,
+  settleCommandTransaction,
+} from './idempotencyContext.js';
 
 /**
  * Explicit interactive-transaction budgets (N53 / G30).
@@ -15,8 +21,8 @@ import { hasPostgresErrorCode } from './prismaError.js';
  *   heavy   30 s, 10 s to start  multi-voucher and bulk commands
  *
  * A timeout still rolls back the whole transaction. `app.ts` maps it to `503 {error:'transaction-timeout',
- * retryable:true}` with `Retry-After: 1`. Nothing retries automatically; a manual retry becomes safe once
- * N52 adds idempotency keys.
+ * retryable:true}` with `Retry-After: 1`. Nothing retries automatically. A manual retry of a guarded create
+ * that sends the same Idempotency-Key (N52, `idempotency.ts`) is safe: it replays, it never posts twice.
  *
  * Operators can tune a class with DATACARE_TX_BUDGET_<CLASS>_MS (100 ms to 10 min). Its start wait stays the
  * class default, capped at the new timeout.
@@ -203,6 +209,17 @@ export async function withTxBudget<T>(
 ): Promise<T> {
   const budgetClass = typeof profile === 'string' ? profile : profile.budget;
   const budget = txBudget(budgetClass);
+  // N52: inside a guarded create, the first non-read transaction also claims and completes the request's
+  // Idempotency-Key receipt, so the receipt commits or rolls back with the voucher (idempotencyContext.ts).
+  const command = commandForTransaction(tenantId, budgetClass === 'read');
+  const body = command
+    ? async (tx: Tx): Promise<T> => {
+        await claimCommandTx(tx, command);
+        const result = await fn(tx);
+        await completeCommandTx(tx, command, result);
+        return result;
+      }
+    : fn;
   const started = performance.now();
   let outcome: TxOutcome = 'committed';
   try {
@@ -210,13 +227,16 @@ export async function withTxBudget<T>(
     // waiting on a lock: measured, a save queued behind another session's numbering lock waited for as
     // long as that lock was held. statement_timeout makes PostgreSQL cancel such a statement within the
     // budget. Transaction-local, so the pooled connection is unaffected afterwards.
-    return await withTenant(prisma, tenantId, fn, {
+    const result = await withTenant(prisma, tenantId, body, {
       timeout: budget.timeout,
       maxWait: budget.maxWait,
       statementTimeoutMs: budget.timeout,
       ...(typeof profile === 'string' ? {} : { isolationLevel: profile.isolationLevel }),
     });
+    if (command) settleCommandTransaction(command, true);
+    return result;
   } catch (error) {
+    if (command) settleCommandTransaction(command, false);
     outcome = isTransactionTimeout(error) ? 'timeout' : 'rolled_back';
     throw error;
   } finally {

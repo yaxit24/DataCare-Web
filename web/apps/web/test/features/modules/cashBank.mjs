@@ -628,6 +628,51 @@ export const cashBank = {
       },
     ),
     C(
+      'retry.replayed-request',
+      'T13',
+      'mutation',
+      'N52 (D18): the Save Receipt / Save Payment request replayed byte for byte (a network or proxy retry, not a double-click) answers the first save again with Idempotency-Replayed; one voucher and one set of legs',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const seen = {};
+        for (const [path, label, table, book] of [
+          ['/txn/receipt', 'Save Receipt', 'CASH_DATA', RECEIPT_BOOK],
+          ['/txn/payment', 'Save Payment', 'PAY_DATA', PAYMENT_BOOK],
+        ]) {
+          const count = async () =>
+            (
+              await ctx.rows(
+                `SELECT (SELECT count(DISTINCT "VCH_NO") FROM "${table}" WHERE tenant_id=$1 AND "CO_BOOK"='${book}')::int vch,
+                        (SELECT count(*) FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${book}')::int ac`,
+              )
+            )[0];
+          const before = await count();
+          await openForm(page, path);
+          await pickParty(page, PARTIES.local.code);
+          await page.getByLabel('Amount', { exact: true }).fill('615');
+          const first = await save(page, label);
+          assert.equal(first.status(), 201, await first.text());
+          assert.match(first.request().headers()['idempotency-key'] ?? '', /^[0-9a-f-]{36}$/);
+          const saved = await count();
+          assert.equal(saved.vch - before.vch, 1);
+          const replay = await page.request.fetch(first.request());
+          assert.equal(replay.status(), 201, await replay.text());
+          assert.equal(replay.headers()['idempotency-replayed'], 'true');
+          assert.equal(await replay.text(), await first.text());
+          assert.deepEqual(await count(), saved, `${label}: the replay wrote nothing`);
+          seen[label] = { body: await replay.text(), before, after: saved };
+        }
+        return {
+          observation: JSON.stringify(seen),
+          expected: 'each replay answers the first body; one voucher each',
+          database: seen,
+          downstream: Object.fromEntries(
+            Object.entries(seen).map(([k, v]) => [k, v.after.vch - v.before.vch]),
+          ),
+        };
+      },
+    ),
+    C(
       'rollback.ledger-write-fault',
       'T14',
       'refusal',

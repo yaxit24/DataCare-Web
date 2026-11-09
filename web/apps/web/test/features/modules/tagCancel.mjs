@@ -1029,21 +1029,24 @@ export const tagCancel = {
       'retry.replayed-save',
       'T13',
       'mutation',
-      'A replayed save finds the tag already cancelled and is refused; one voucher stays (the desktop has no idempotency key either)',
+      'N52 (D18): the save request replayed byte for byte (a network or proxy retry) answers the first save again with Idempotency-Replayed instead of refusing the already-cancelled tag; one voucher stays',
       async (ctx) => {
         const t = await seedTag(ctx);
         const page = await open(ctx);
         await pickTag(page, 1, t.tag);
         const first = await save(page);
         assert.equal(first.status(), 201, await first.text());
+        assert.match(first.request().headers()['idempotency-key'] ?? '', /^[0-9a-f-]{36}$/);
         const before = await vouchers(ctx);
         const replay = await page.request.fetch(first.request());
-        assert.ok(replay.status() >= 400, `replay refused: ${replay.status()}`);
+        assert.equal(replay.status(), 201, await replay.text());
+        assert.equal(replay.headers()['idempotency-replayed'], 'true');
+        assert.equal(await replay.text(), await first.text());
         assert.equal(await vouchers(ctx), before);
         assert.equal(await balance(ctx, t.tag), 0);
         return {
-          observation: `the replay answered ${replay.status()}`,
-          expected: 'no second voucher',
+          observation: `the replay answered ${replay.status()} with the first body`,
+          expected: 'the first answer again; no second voucher',
           database: { vouchers: before },
           downstream: { tagBalance: 0 },
         };

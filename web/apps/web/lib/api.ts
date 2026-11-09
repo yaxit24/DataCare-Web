@@ -172,6 +172,16 @@ export async function loadPageSession<T = any>(): Promise<T> {
 
 export const post = <T = any>(p: string, b?: Json) =>
   call<T>(p, { method: 'POST', body: JSON.stringify(b ?? {}) });
+/**
+ * A voucher create carrying the draft's Idempotency-Key (lib/idempotencyKey.ts). The token-refresh retry above
+ * resends the same headers, so it cannot post twice either.
+ */
+export const postCommand = <T = any>(p: string, b: Json, idempotencyKey: string) =>
+  call<T>(p, {
+    method: 'POST',
+    body: JSON.stringify(b),
+    headers: { 'idempotency-key': idempotencyKey },
+  });
 export const put = <T = any>(p: string, b?: Json) =>
   call<T>(p, { method: 'PUT', body: JSON.stringify(b ?? {}) });
 export const del = <T = any>(p: string, b?: Json) =>

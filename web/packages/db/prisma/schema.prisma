@@ -7168,6 +7168,23 @@ model CompanyBackupRun {
   @@map("company_backup_run")
 }
 
+/// Idempotency-Key receipts of voucher creates (N52, D18). Written in the voucher's own transaction; forced RLS is migration-owned.
+model ApiCommandReceipt {
+  tenantId       String   @map("tenant_id") @db.VarChar(24)
+  idempotencyKey String   @map("idempotency_key") @db.VarChar(128)
+  route          String   @db.VarChar(160)
+  requestSha256  String   @map("request_sha256") @db.Char(64)
+  actor          String   @db.VarChar(64)
+  responseStatus Int      @map("response_status")
+  responseBody   Json?    @map("response_body") @db.Json
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  expiresAt      DateTime @map("expires_at") @db.Timestamptz(6)
+
+  @@id([tenantId, idempotencyKey])
+  @@index([tenantId, expiresAt], map: "api_command_receipt_expiry_idx")
+  @@map("api_command_receipt")
+}
+
 /// Append-only repair audit evidence. Partial uniqueness, immutability trigger, comments, and RLS remain migration-owned.
 model DataRepairRun {
   rowId             BigInt    @id @default(autoincrement()) @map("row_id")

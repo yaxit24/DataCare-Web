@@ -230,11 +230,13 @@ databaseDescribe('WP-02A company logical backup/restore', () => {
 
     expect(document.kind).toBe(COMPANY_BACKUP_KIND);
     expect(document.version).toBe(COMPANY_BACKUP_VERSION);
-    expect(document.manifest.tables).toHaveLength(175);
+    // N52 adds api_command_receipt: tenant_id without CO_CODE, so tenant-shared and excluded (Idempotency-Key
+    // receipts are transient request state, not company data).
+    expect(document.manifest.tables).toHaveLength(176);
     expect(document.manifest.tables.filter((table) => table.included)).toHaveLength(160);
     expect(
       document.manifest.tables.filter((table) => table.scope === 'tenant-shared'),
-    ).toHaveLength(14);
+    ).toHaveLength(15);
     expect(document.manifest.tables.filter((table) => table.scope === 'system')).toHaveLength(1);
     expect(document.manifest.tables.every((table) => table.primaryKey.length > 0)).toBe(true);
     expect(document.manifest.fingerprint).toMatch(/^[a-f0-9]{64}$/);
@@ -253,6 +255,9 @@ databaseDescribe('WP-02A company logical backup/restore', () => {
       scope: 'tenant-shared',
       included: false,
     });
+    expect(
+      document.manifest.tables.find((table) => table.name === 'api_command_receipt'),
+    ).toMatchObject({ scope: 'tenant-shared', included: false });
     expect(
       document.manifest.tables.find((table) => table.name === '_prisma_migrations'),
     ).toMatchObject({ scope: 'system', included: false });
