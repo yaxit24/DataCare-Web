@@ -102,7 +102,19 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
         `${ep}/${encodeURIComponent(vchNo)}?coBook=${encodeURIComponent(coBook)}`,
       );
       setLoadedVch(vchNo);
-      setMulti(false);
+      // TR_CASH DISPLAY_DATA refills the grid from every CASH_DATA row (TR_CASH.cs:2742-2834).
+      const rows: any[] = Array.isArray(d.lines) ? d.lines : [];
+      setMulti(rows.length > 1);
+      if (rows.length > 1)
+        setMlines(
+          rows.map((l) => ({
+            partyAc: String(l.partyAc ?? ''),
+            partyName: String(l.partyName ?? ''),
+            amount: String(l.amount ?? ''),
+            kasar: Number(l.kasar ?? 0) ? String(l.kasar) : '',
+            itDesc: String(l.itDesc ?? ''),
+          })),
+        );
       setPartyAc(String(d.partyAc ?? d.acCode ?? ''));
       setPartyName(String(d.partyName ?? d.acName ?? ''));
       setAmount(String(d.amount ?? d.recAmt ?? d.totAmt ?? ''));

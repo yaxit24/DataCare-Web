@@ -801,6 +801,7 @@ export interface ReceiptPaymentLinesInput {
   vchDate?: Date | string;
   kasarAc?: string; // default 'KASAR'
   empCode?: string; // header-level employee
+  mainUser?: string;
   lines: ReceiptPaymentLine[];
 }
 
@@ -863,7 +864,15 @@ export async function postReceiptLines(
         assertCashReceiptCeiling(Number(line.amount), prior, limit, line.partyName);
       }
     }
-    const vchNo = await nextVoucherNoTx(tx, input.scope);
+    // The same identity as a single receipt (number, hidden number, time, user), so every grid row of the
+    // voucher carries identical identity columns and the reopen/delete paths can treat them as one voucher.
+    const identity = await createFinanceIdentityTx(
+      tx,
+      input.scope,
+      input.vchDate ? new Date(input.vchDate) : new Date(),
+      input.mainUser,
+    );
+    const vchNo = identity.vchNo;
     const key = keyOf(input.scope, vchNo, 'RCT');
     const vchType = mode === 'cash' ? 'CREC' : 'BREC';
     const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
@@ -970,6 +979,7 @@ export async function postReceiptLines(
       ),
     );
     assertBalanced(ledger);
+    await insertHiddenIdentityTx(tx, input.scope, identity, receiptBook.name);
     await postVoucherTx(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: ledger },
       bookName: mode === 'cash' ? 'CASH REC' : 'BANK REC',
@@ -995,6 +1005,10 @@ export async function postReceiptLines(
             CHQ_NO: input.chqNo ?? null,
             EMP_CODE: input.empCode ?? null,
             VCH_DATE: vchDate,
+            VCH_TIME: identity.voucherTime,
+            HD_VCH_NO: identity.hiddenVoucherNo,
+            MAIN_USER: identity.mainUser || null,
+            BOOK_NAME: receiptBook.name,
             INOUT_TYPE: 'I',
             ENTRY_TYPE: mode === 'cash' ? 'C' : 'B',
           })),
@@ -1173,19 +1187,9 @@ export async function deleteReceiptLines(
   prisma: any,
   input: { scope: VoucherScope; vchNo: number | string; deleteUser?: string; book?: unknown },
 ): Promise<{ reversed: true }> {
-  const tenantId = input.scope.tenantId;
-  const key = keyOf(input.scope, Number(input.vchNo), 'RCT');
-  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
-    await reverseVoucherTx(tx, tenantId, {
-      tables: ['CASH_DATA', 'PAY_DETL', 'AC_DATA'],
-      key,
-      deleteLog: {
-        table: 'DELETE_DATA',
-        row: { ...key, VCH_TYPE: 'CREC', DELETE_USER: input.deleteUser ?? 'system' },
-      },
-    });
-    return { reversed: true };
-  });
+  // A grid receipt is the same voucher as a single one (one CASH_DATA row per line): one delete path, which
+  // audits every row and removes the hidden identity (TR_CASH.cs:3200-3227).
+  return deleteReceipt(prisma, input);
 }
 export async function deletePaymentLines(
   prisma: any,
@@ -1263,12 +1267,22 @@ export async function getReceipt(
       scope.coBook,
       voucherNo,
     );
-    if (rows.length !== 1)
-      throw new FinanceValidationError(
-        rows.length
-          ? `receipt voucher is ambiguous: ${voucherNo}`
-          : `receipt voucher not found: ${voucherNo}`,
-      );
+    if (!rows.length) throw new FinanceValidationError(`receipt voucher not found: ${voucherNo}`);
+    // A TR_CASH grid voucher is one CASH_DATA row per line (TR_CASH.cs:2995-3060); DISPLAY_DATA refills the grid
+    // from every row in SR_NO order (:2742-2834). Its rows must agree on the voucher identity.
+    const identityOf = (r: Record<string, unknown>) =>
+      ['VCH_DATE', 'VCH_TIME', 'HD_VCH_NO', 'MAIN_USER', 'REC_AC_CODE']
+        .map((c) => text(r[c]))
+        .join('|');
+    if (rows.some((r) => identityOf(r) !== identityOf(rows[0]!)))
+      throw new FinanceValidationError(`receipt voucher is ambiguous: ${voucherNo}`);
+    const lines = rows.map((r) => ({
+      partyAc: text(r.AC_CODE),
+      partyName: text(r.AC_NAME),
+      amount: numv(r.REC_AMT),
+      kasar: numv(r.KASAR_AMT),
+      itDesc: text(r.IT_DESC),
+    }));
     const card: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "CARD_COM_PRC","BANK_NAME" FROM "CARD_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2
         AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
@@ -1297,8 +1311,9 @@ export async function getReceipt(
       vchDate: toIsoDate(h.VCH_DATE),
       partyAc: text(h.AC_CODE),
       partyName: text(h.AC_NAME),
-      amount: numv(h.REC_AMT),
-      kasar: numv(h.KASAR_AMT),
+      amount: round2(lines.reduce((t, l) => t + l.amount, 0)),
+      kasar: round2(lines.reduce((t, l) => t + l.kasar, 0)),
+      lines,
       bankAc: text(h.REC_AC_CODE),
       chqNo: text(h.CHQ_NO),
       empCode: text(h.EMP_CODE),
@@ -1332,6 +1347,9 @@ export async function editReceipt(
       scope: input.scope,
       requestedVoucherNo,
       requestedDate,
+      // A grid voucher's rows differ in SR_NO, so this refuses ("voucher is ambiguous") rather than collapse a
+      // multi-line receipt into one line; the screen offers no single-line edit for it.
+      extraColumns: ['SR_NO'],
     });
     await replaceWriteSetTx(
       tx,
@@ -1357,8 +1375,20 @@ export async function deleteReceipt(
       scope,
       requestedVoucherNo: voucherNo,
       requestedDate: new Date(),
-      extraColumns: ['AC_CODE', 'AC_NAME', 'REC_AMT', 'INOUT_TYPE', 'IT_DESC'],
+      extraColumns: ['INOUT_TYPE'],
     });
+    // TR_CASH.cs:3209 audits every CASH_DATA row of the voucher (SR_NO, party, REC_AMT by INOUT_TYPE).
+    const lineRows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT "SR_NO","AC_CODE","AC_NAME","REC_AMT","IT_DESC" FROM "CASH_DATA" WHERE tenant_id=$1
+        AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6
+        ORDER BY "SR_NO" NULLS FIRST, row_id`,
+      scope.tenantId,
+      scope.coCode,
+      scope.lcCode,
+      scope.coYear,
+      scope.coBook,
+      voucherNo,
+    );
     const book = await configuredBookTx(tx, scope);
     const card: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
       `SELECT "CARD_AMT","IT_DESC" FROM "CARD_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2
@@ -1383,23 +1413,20 @@ export async function deleteReceipt(
       identity.hiddenVoucherNo,
     );
     const source = card[0];
+    const inout = text(header.INOUT_TYPE);
     await insertDesktopDeleteAuditTx(tx, {
       scope,
       configuredBook: book,
       header,
-      rows: [
-        {
-          srNo: 1,
-          valueDr: source ? 0 : text(header.INOUT_TYPE) === 'O' ? numv(header.REC_AMT) : 0,
-          valueCr: source
-            ? numv(source.CARD_AMT)
-            : text(header.INOUT_TYPE) === 'I'
-              ? numv(header.REC_AMT)
-              : 0,
-          fineType: 'A',
-          description: text(source?.IT_DESC ?? header.IT_DESC),
-        },
-      ],
+      rows: lineRows.map((r, i) => ({
+        srNo: Number(r.SR_NO ?? 0) || i + 1,
+        acCode: r.AC_CODE,
+        acName: r.AC_NAME,
+        valueDr: source ? 0 : inout === 'O' ? numv(r.REC_AMT) : 0,
+        valueCr: source ? numv(source.CARD_AMT) : inout === 'I' ? numv(r.REC_AMT) : 0,
+        fineType: 'A',
+        description: text(source?.IT_DESC ?? r.IT_DESC),
+      })),
       deleteUser: input.deleteUser,
     });
     return { reversed: true };

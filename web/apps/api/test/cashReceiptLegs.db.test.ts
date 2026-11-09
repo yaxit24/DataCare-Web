@@ -27,6 +27,8 @@ import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import {
+  deleteReceipt,
+  deleteReceiptLines,
   editPayment,
   editReceipt,
   getPayment,
@@ -41,6 +43,8 @@ import {
   FINANCE_EMPLOYEE_REQUIRED_MESSAGE,
 } from '../src/modules/finance/lifecycle.js';
 import { PeriodLockValidationError } from '../src/modules/posting/posting.js';
+import { financeVoucherData, financeVoucherHtml } from '../src/modules/finance/financeVoucher.js';
+import { recentVouchers } from '../src/modules/vouchers/list.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const TENANT = 'cash-legs';
@@ -594,6 +598,125 @@ describe.runIf(RUN)('multi-line cash paths write a Rojmel row per line', () => {
     expect(roj).toHaveLength(3);
     expect(roj.map((r) => r.k.slice(21, 23))).toEqual(['04', '04', '04']);
     expect(roj.map((r) => r.k.slice(23).trim())).toEqual(['1', '2', '3']);
+  });
+});
+
+describe.runIf(RUN)('a multi-line receipt is read back as one voucher of N rows', () => {
+  const lines = [
+    { partyAc: PARTY, partyName: 'CASH PARTY', amount: 1250.5, kasar: 10.5, itDesc: 'first' },
+    { partyAc: '000927', partyName: 'SECOND PARTY', amount: 749.25, kasar: 0.25, itDesc: 'second' },
+  ];
+  beforeEach(async () => {
+    await wipe();
+    await seed();
+    await exec(
+      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GST_TYPE")
+       VALUES ($1,$2,$3,'000927','SECOND PARTY','L')`,
+      TENANT,
+      CO,
+      LC,
+    );
+    await exec(
+      `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_NAME","MAIN_BOOK","BOOK_INOUT")
+       VALUES ($1,$2,$3,$4,2,$5,'Cash Received','CASH REC','I')`,
+      TENANT,
+      CO,
+      LC,
+      BOOK,
+      KASAR,
+    );
+  });
+  afterAll(async () => {
+    await wipe();
+  });
+  const post = () =>
+    postReceiptLines(runtime, {
+      scope,
+      mode: 'cash',
+      vchDate: '2024-04-03',
+      mainUser: 'ADMIN',
+      lines,
+    } as never);
+
+  it('shares one voucher identity, prints every line and reopens every line', async () => {
+    const { vchNo } = await post();
+    // Every row carries the same hidden number, time and user (the single receipt's identity) and one
+    // TEMP_BOOK_DATA row holds the hidden number.
+    const ids = (await owner.$queryRawUnsafe(
+      `SELECT DISTINCT "HD_VCH_NO" hd, "VCH_TIME"::text t, "MAIN_USER" u FROM "CASH_DATA" WHERE tenant_id=$1`,
+      TENANT,
+    )) as Array<{ hd: string; t: string; u: string }>;
+    expect(ids).toHaveLength(1);
+    expect(ids[0]!.hd).toMatch(/^\d{5}$/);
+    expect(ids[0]!.u).toBe('ADMIN');
+    expect((await financeFootprint())!.hidden).toBe(1);
+
+    // TR_CASH prints all CASH_DATA rows in SR_NO order (TR_CASH.cs:3151, :3288, :3333).
+    const doc = await financeVoucherData(runtime, 'receipt', { ...scope, vchNo });
+    expect(doc).not.toBeNull();
+    expect(doc!.header.REC_AMT).toBe(1999.75);
+    expect(doc!.header.KASAR_AMT).toBe(10.75);
+    expect(doc!.lines.map((l) => [l.AC_CODE, l.IT_REMARK, l.NET_AMT])).toEqual([
+      [PARTY, 'first', 1250.5],
+      ['000927', 'second', 749.25],
+    ]);
+    const html = financeVoucherHtml('receipt', doc!.header, doc!.lines, { party: doc!.party });
+    expect(html).toContain('CASH PARTY, SECOND PARTY');
+    expect(html).toContain('1,250.50');
+    expect(html).toContain('749.25');
+    // Net received = Σ amount + Σ kasar = 1999.75 + 10.75.
+    expect(html).toContain('2,010.50');
+
+    // DISPLAY_DATA refills the grid from every row (TR_CASH.cs:2742-2834).
+    const opened = await getReceipt(runtime, scope, vchNo);
+    expect(opened.amount).toBe(1999.75);
+    expect(opened.kasar).toBe(10.75);
+    expect(opened.lines).toEqual(
+      lines.map((l) => ({
+        partyAc: l.partyAc,
+        partyName: l.partyName,
+        amount: l.amount,
+        kasar: l.kasar,
+        itDesc: l.itDesc,
+      })),
+    );
+
+    // The voucher list shows the voucher once with its whole amount.
+    const listed = await recentVouchers(runtime, scope, 'CASH_DATA', BOOK);
+    expect(listed.map((r) => r.total)).toEqual([1999.75]);
+  });
+
+  it('refuses a single-line edit of a grid voucher and changes no row', async () => {
+    const { vchNo } = await post();
+    const before = await financeRows();
+    await expect(
+      editReceipt(
+        runtime,
+        { scope, partyAc: PARTY, amount: 10, mode: 'cash', vchDate: '2024-04-03' } as never,
+        vchNo,
+      ),
+    ).rejects.toThrow('voucher is ambiguous');
+    expect(await financeRows()).toEqual(before);
+  });
+
+  it('deletes the whole grid voucher with one DELETE_DATA row per line (TR_CASH.cs:3209), by either route', async () => {
+    for (const remove of [deleteReceipt, deleteReceiptLines]) {
+      const { vchNo } = await post();
+      await remove(runtime, { scope, vchNo, deleteUser: 'ADMIN' });
+      const left = await financeFootprint();
+      expect([left!.cash, left!.ledger, left!.rojmel, left!.hidden]).toEqual([0, 0, 0, 0]);
+      const audit = (await owner.$queryRawUnsafe(
+        `SELECT "SR_NO"::int sr, "AC_CODE" ac, "VCH_VAL_CR"::float cr FROM "DELETE_DATA"
+          WHERE tenant_id=$1 AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+        TENANT,
+        String(vchNo).padStart(5, '0'),
+      )) as Array<Record<string, unknown>>;
+      expect(audit).toEqual([
+        { sr: 1, ac: PARTY, cr: 1250.5 },
+        { sr: 2, ac: '000927', cr: 749.25 },
+      ]);
+      await owner.$executeRawUnsafe(`DELETE FROM "DELETE_DATA" WHERE tenant_id=$1`, TENANT);
+    }
   });
 });
 

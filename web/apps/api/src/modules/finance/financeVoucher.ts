@@ -1,4 +1,4 @@
-import { formatDesktopDate } from '@datacare/core';
+import { formatDesktopDate, round } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import {
   docShell,
@@ -34,16 +34,39 @@ export async function financeVoucherData(
   const s = requireVoucherDocumentScope(scope);
   return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params = voucherKeyParams(s);
+    // TR_CASH prints every CASH_DATA row of the voucher in SR_NO order (TR_CASH.cs:3151, :3288, :3333): a
+    // multi-line receipt is one row per grid line (:2995-3060), so the header carries the summed amount and
+    // kasar and each row becomes an allocation line. Older web multi-line receipts kept one aggregate row
+    // plus PAY_DETL lines; those still print from PAY_DETL.
     const h: any[] = await tx.$queryRawUnsafe(
-      `SELECT * FROM "${headTable}" WHERE ${voucherKeyWhere()} LIMIT 1`,
+      `SELECT * FROM "${headTable}" WHERE ${voucherKeyWhere()}
+        ORDER BY ${kind === 'receipt' ? '"SR_NO" NULLS FIRST, ' : ''}row_id`,
       ...params,
     );
     if (!h.length) return null;
-    const header = h[0];
-    const lines: any[] = await tx.$queryRawUnsafe(
+    const detail: any[] = await tx.$queryRawUnsafe(
       `SELECT * FROM "PAY_DETL" WHERE ${voucherKeyWhere()} ORDER BY "SR_NO"`,
       ...params,
     );
+    const sum = (col: string) =>
+      round(
+        h.reduce((t, r) => t + num(r[col]), 0),
+        2,
+      );
+    const header =
+      kind === 'receipt' && h.length > 1
+        ? { ...h[0], REC_AMT: sum('REC_AMT'), KASAR_AMT: sum('KASAR_AMT') }
+        : h[0];
+    const lines =
+      detail.length || kind !== 'receipt' || h.length < 2
+        ? detail
+        : h.map((r) => ({
+            AC_CODE: r.AC_CODE,
+            IT_NAME: r.AC_NAME ?? r.AC_CODE,
+            IT_REMARK: r.IT_DESC,
+            NET_AMT: num(r.REC_AMT),
+            KASAR_AMT: num(r.KASAR_AMT),
+          }));
     const company = await documentCompanyTx(tx, s);
     const party = await documentPartyTx(tx, s, header.AC_CODE);
     return { header, lines, company, party };
