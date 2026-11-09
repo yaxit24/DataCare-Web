@@ -403,7 +403,7 @@ browser case per screen first (red), then the hook (green).
 
 | WP | Menu(s) | Desktop form | Pri | Size | Depends | Prompt | State |
 |---|---|---|---|---|---|---|---|
-| WP-11 | Sales Report + the shared RP_ALL engine | `RP_ALL.cs` (12,662) sales branch | P1 | XL | — | 01 | not started |
+| WP-11 | Sales Report + the shared RP_ALL engine | `RP_ALL.cs` (12,662) sales branch | P1 | XL | — | 01 | phase one (engine + Sales API, N232) in PR; screen open |
 | WP-12 | Purchase Rpt (removes 17 G06 baselines) | `RP_ALL` purchase branch | P1 | M | WP-11 | 02 | frozen cases merged |
 | WP-13 | Approval Rpt | `RP_ALL` approval branch | P2 | M | WP-11, WP-01 | 03 | partial |
 | WP-14 | Order Report | `RP_ALL` order branch | P2 | M | WP-11, WP-03 | — (use 01's pattern) | BROKEN via G206 |

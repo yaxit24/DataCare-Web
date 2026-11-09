@@ -1815,10 +1815,10 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Runs sales register, party, item, group, employee, order-linked and summary variants.
 - **Looks:** Shared date/book/party/location/product/group/item/employee filters with many sales mode buttons.
 - **Reads:** SL_DATA, SL_DETL, SL_DETL_RTN, AC_MAST, ITEM_MAST, BOOK_DATA.
-- **Web:** `/reports/sales-register`; `GET /reports/sales-register`, `GET /reports/sales-by-party`, `GET /reports/sales-by-item`, `GET /reports/sales-by-group`. Can: print, list.
-- **Remaining:** A register exists; the RP_ALL sales variants, the MAIN_BOOK classification remainder, filters and Crystal templates remain.
-- **Owners:** N36, G06, G48, N24, X26, N57, N75, G225, N212.
-- **Evidence:** [RP_ALL.cs:7572-7945](../../unified/src/csharp/DataCareNext/RP_ALL.cs#L7572-L7945).
+- **Web:** `/reports/sales-register`; `GET /reports/sales-register`, `GET /reports/sales-by-party`, `GET /reports/sales-by-item`, `GET /reports/sales-by-group`, `GET /reports/sales-report`, `GET /reports/sales-report/export.csv`, `GET /reports/sales-report/export.xlsx`. Can: print, list.
+- **Remaining:** The shared RP_ALL engine and the Sales adapter serve GET /reports/sales-report (Sales Report, Sales Reg, Item Wise, Group Sales, Employ Sales, Sale With Order and the Sales Return prompt variants) with CSV/XLSX (N232 phase one, inventory docs/parity/rpall-sales-inventory.md); the dedicated screen, the other seven buttons, PDF in the template layouts, drill-down and the browser run remain; G244: the web Sales Return writes NET_AMT instead of RTN_NET_AMT, so web returns list as sales.
+- **Owners:** N36, G06, G48, N24, X26, N57, N75, G225, N212, N232, G244.
+- **Evidence:** [RP_ALL.cs:6656-6707](../../unified/src/csharp/DataCareNext/RP_ALL.cs#L6656-L6707), [RP_ALL.cs:7572-7945](../../unified/src/csharp/DataCareNext/RP_ALL.cs#L7572-L7945), [RP_ALL.cs:8913-12110](../../unified/src/csharp/DataCareNext/RP_ALL.cs#L8913-L12110).
 
 ### Stock Report
 
