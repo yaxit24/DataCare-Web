@@ -2,7 +2,7 @@
 
 - 2026-11-09: one voucher cancels the open advance of many orders (SL_ORD_ADJ, Order_Adj_Ledr/Rojmel, held-tag release), version-guarded
   edit/delete, Idempotency-Key on POST /order-cancel, OrderCancelVch print; the open-advance rule is shared with the sale under a row lock.
-- 2026-11-09: order-cancel module 23 passed / 1 blocked (held tag: the web Sales Order cannot hold a tag); ORC book now provisioned CASH/KASAR.
+- 2026-11-09: order-cancel module 24 cases, none blocked (the held-tag case seeds only the hold on a screen-made order); ORC book now provisioned CASH/KASAR.
 
 ## 2026-11-09 — Esc with no focused control on nine more screens (WP-09, GB-02, under G239)
 

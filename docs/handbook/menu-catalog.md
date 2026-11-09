@@ -2293,7 +2293,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header and a pending-order grid with order, adjusted, kasar, paid and refund-account columns.
 - **Writes:** SL_ORD_ADJ, SL_ORD_DATA, SL_ORD_DETL, AC_DATA, ROJ_MEL_DATA, APR_DETL, BAR_DETL, BAR_IDTL, MAIN_STOCK, TEMP_BOOK_DATA.
 - **Web:** `/txn/order-cancel`; `GET /order-cancel/pending-orders`, `GET /order-cancel/defaults`, `POST /order-cancel`, `GET /order-cancel/:vchNo`, `PUT /order-cancel/:vchNo`, `DELETE /order-cancel/:vchNo`, `GET /order-cancel/:vchNo/print`. Can: create, list.
-- **Remaining:** Multi-order voucher, advance/kasar/refund bounds, the ledger/Rojmel/tag/stock write set, version-guarded edit/delete, idempotent create and OrderCancelVch print are built (N233). Open: the release of a tag the order holds is proven by DB tests only (the web Sales Order cannot make such an order); the party balance label (LOpAmt) and the F1 voucher list's own columns are not shown; desktop-runtime comparison is 0%.
+- **Remaining:** Multi-order voucher, advance/kasar/refund bounds, the ledger/Rojmel/tag/stock write set, version-guarded edit/delete, idempotent create and OrderCancelVch print are built (N233). Open: an order that holds a tag cannot be made on the web Sales Order, so the held-tag browser case seeds the hold on a screen-made order; the party balance label (LOpAmt) and the F1 voucher list's own columns are not shown; desktop-runtime comparison is 0%.
 - **Owners:** N37, G07, X14, P05-04, N233, G245.
 - **Evidence:** [KB_other.md:277-369](../../project-memory/video-research/_kb/KB_other.md#L277-L369).
 

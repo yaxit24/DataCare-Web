@@ -7738,7 +7738,7 @@
         "web/apps/api/test/orderCancel.db.test.ts",
         "web/apps/web/test/features/modules/orderCancel.mjs"
       ],
-      "statusNote": "IMPLEMENTED, not accepted. order-cancel module: 23 passed, 1 blocked (stock.held-tag-released: the web Sales Order cannot make an order that holds a tag; the tag write set is proven by orderCancel.db.test.ts). Desktop match 0%."
+      "statusNote": "IMPLEMENTED, not accepted. order-cancel module: 24 cases over T01-T18, none blocked; stock.held-tag-released is a real browser case (the order is made on the Sales Order screen, only the tag hold is seeded because the web Sales Order never saves a tagged line). Desktop match 0%."
     }
   ],
   "amendments": [
