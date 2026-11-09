@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { FIXTURE_MANIFEST, PARTIES, USERS } from '../fixtures/catalogue.mjs';
-import { SECOND_TENANT } from '../harness.mjs';
+import { escLeavesWithNoFocus, SECOND_TENANT } from '../harness.mjs';
 
 /**
  * Feature: Master → Item (desktop MS_ITEM, web /masters/items).
@@ -300,6 +300,7 @@ export const itemMaster = {
   defaultUser: as(USERS.admin.user),
   inputs: [
     'web/apps/web/app/(app)/masters/items/page.tsx',
+    'web/apps/web/lib/screenEscape.ts',
     'web/apps/api/src/modules/masters/itemMaster.ts',
     'web/apps/api/src/routes/itemMaster.ts',
     'web/apps/web/test/features/modules/itemMaster.mjs',
@@ -1196,6 +1197,25 @@ export const itemMaster = {
             downstream: { leftTo: new URL(page.url()).pathname },
           };
         }),
+    ),
+    C(
+      'keyboard.esc-with-focus-on-the-page',
+      'T17',
+      'read-only',
+      "MS_ITEM sets KeyPreview (:2538) and subscribes MS_ITEM_KeyDown (:1838), so the form sees Esc wherever the focus is; Esc closes the form (:3147-3149). A browser has a state the desktop form never has: focus on no control, after a click on the page background. Esc must close Item Master there too, and a key aimed at the header Company box stays the header's (GB-02, the G239 pattern)",
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openScreen(page);
+        const left = await escLeavesWithNoFocus(page, {
+          heading: 'Item Master',
+          path: '/masters/items',
+        });
+        return {
+          observation: `Esc with the focus on the page body left Item Master for ${left.leftTo}`,
+          expected: { focusOnBody: true, leaves: '/masters/items' },
+          downstream: left,
+        };
+      },
     ),
     C(
       'journey.item-on-a-sale',

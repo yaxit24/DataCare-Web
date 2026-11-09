@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { rollbackMatrix } from '../faults.mjs';
 import { FIXTURE_MANIFEST, ITEMS, PARTIES, USERS } from '../fixtures/catalogue.mjs';
 import { salesScreen as S } from './salesInvoice.mjs';
 import { mustSet } from './settingsEffects.mjs';
@@ -15,6 +16,16 @@ import { mustSet } from './settingsEffects.mjs';
  */
 
 const BOOK = 'SRT';
+/** Measured on the first run: one saved free-standing return changes exactly these tables. */
+const RETURN_WRITE_SET = [
+  'AC_DATA',
+  'MAIN_STOCK',
+  'ROJ_MEL_DATA',
+  'SL_DATA',
+  'SL_DETL_RTN',
+  'TAX_DATA',
+  'TEMP_BOOK_DATA',
+];
 const as = (user, slot) => ({
   user,
   slot,
@@ -191,6 +202,7 @@ export const salesReturn = {
     'web/apps/web/app/(app)/txn/sale-return/page.tsx',
     'web/apps/api/src/modules/sales/salesReturn.ts',
     'web/apps/web/test/features/modules/salesReturn.mjs',
+    'web/apps/web/test/features/faults.mjs',
     'web/apps/web/test/features/fixtures/catalogue.mjs',
   ],
   fixtureManifest: FIXTURE_MANIFEST,
@@ -972,10 +984,35 @@ export const salesReturn = {
       },
     ),
 
-    {
-      ...C('rollback.mid-write', 'T14', 'refusal', 'Playbook T14', async () => ({})),
-      blocked: 'No fault injector in the harness yet (G173 / N166).',
-    },
+    C(
+      'rollback.mid-write',
+      'T14',
+      'mutation',
+      'TR_SALE_RTN writes the return header, lines, stock in and ledger legs table by table with no transaction around them, so a fault leaves the earlier tables behind; the web must leave the whole tenant byte-for-byte as it was after a fault on any one write, take no voucher number, and then save normally from the same screen. The faulted tables must be exactly the tables a real save writes',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openReturn(page);
+        await pickParty(page, PARTIES.local.code);
+        await fillLine(page, 0, LINE_R);
+        const r = await rollbackMatrix(ctx, {
+          tables: RETURN_WRITE_SET,
+          book: BOOK,
+          headerTable: 'SL_DATA',
+          submit: () => saveReturn(page),
+        });
+        return {
+          observation: `${r.attempts.map((a) => `${a.table} fault -> ${a.status}`).join(', ')}; every table of the tenant unchanged after each; then return ${r.vchNo} saved (201) with the expected number`,
+          expected: { unchangedAfterEachFault: true, nextVoucherNo: r.expectedNo },
+          database: { attempts: r.attempts, voucherNo: r.vchNo },
+          downstream: {
+            tablesWrittenBySuccessfulSave: r.written,
+            pendingWhenTheFaultFired: Object.fromEntries(
+              r.attempts.map((x) => [x.table, x.pendingElsewhere]),
+            ),
+          },
+        };
+      },
+    ),
     C(
       'config.amount-type',
       'T15',

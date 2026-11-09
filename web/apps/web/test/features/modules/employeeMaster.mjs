@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
-import { SECOND_TENANT } from '../harness.mjs';
+import { escLeavesWithNoFocus, SECOND_TENANT } from '../harness.mjs';
 
 /**
  * Feature: Master → Employee (desktop MS_EMP, web /masters/employees).
@@ -233,6 +233,7 @@ export const employeeMaster = {
   defaultUser: as(USERS.admin.user),
   inputs: [
     'web/apps/web/app/(app)/masters/employees/page.tsx',
+    'web/apps/web/lib/screenEscape.ts',
     'web/apps/api/src/modules/masters/employeeMaster.ts',
     'web/apps/api/src/routes/employeeMaster.ts',
     'web/packages/core/src/vbVal.ts',
@@ -1320,6 +1321,25 @@ export const employeeMaster = {
             downstream: { leftTo: new URL(page.url()).pathname },
           };
         }),
+    ),
+    C(
+      'keyboard.esc-with-focus-on-the-page',
+      'T17',
+      'read-only',
+      "MS_EMP sets KeyPreview (:968) and subscribes MS_EMP_KeyDown (:648), so the form sees Esc wherever the focus is; Esc closes the form (:1444-1446). A browser has a state the desktop form never has: focus on no control, after a click on the page background. Esc must close Employee Master there too, and a key aimed at the header Company box stays the header's (GB-02, the G239 pattern)",
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openScreen(page);
+        const left = await escLeavesWithNoFocus(page, {
+          heading: 'Employee Master',
+          path: '/masters/employees',
+        });
+        return {
+          observation: `Esc with the focus on the page body left Employee Master for ${left.leftTo}`,
+          expected: { focusOnBody: true, leaves: '/masters/employees' },
+          downstream: left,
+        };
+      },
     ),
     C(
       'journey.employee-on-daily-rate',
