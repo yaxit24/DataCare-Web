@@ -1497,7 +1497,7 @@ try {
   await ctrlChord('F1', '/txn/daily-rate'); // F1CtrlDailyRate -> MS_RATE
   await ctrlChord('F5', '/txn/bill-to-bill'); // ShoCtrlF5BillRec -> TR_BILL_TO
   await ctrlChord('F6', '/txn/rate-cut'); // ShoCtrlF6RateCut -> TR_WH_SALE on a RATE CUT book
-  await ctrlChord('F11', '/reports/cash-book'); // F11CtrlCashBank -> RP_CASH_BANK
+  await ctrlChord('F11', '/reports/cash-bank'); // F11CtrlCashBank -> RP_CASH_BANK
   // These two were unmapped until their report families existed (MDI_FORM.cs:7147, :8994).
   await ctrlChord('F2', '/reports/order-lot-zoom'); // F2CtrlOrderZoom -> RP_ORDER
   await ctrlChord('F12', '/reports/tag-estimate'); // ShoCtrlF12TagEstmate -> RP_TAG_ESTMATE
