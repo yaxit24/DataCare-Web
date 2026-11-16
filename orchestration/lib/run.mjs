@@ -5,7 +5,30 @@ import { checkCitationFile } from './cite.mjs';
 import { compilePrompt, writeFormIndexes } from './compile.mjs';
 import { runGuards } from './guards.mjs';
 import { effectiveScope, parsePacket, validatePacket } from './packet.mjs';
-import { DESKTOP_SRC, REPO, fill, findPython, git, launch, layout, loadConfig, loadEnvFile, nowStamp, sh } from './util.mjs';
+import { DESKTOP_SRC, REPO, fill, findBash, findPython, git, launch, layout, loadConfig, loadEnvFile, nowStamp, sh } from './util.mjs';
+
+/**
+ * On Windows, package scripts run through cmd.exe, which rejects the Unix forms the repository's scripts use
+ * (`NODE_OPTIONS=... tsc`). Pointing npm and pnpm at Git bash for the gates and the worker sessions makes those
+ * scripts run as they do on CI, without changing the user's own npm configuration.
+ */
+function scriptShellEnv() {
+  const bash = process.platform === 'win32' ? findBash() : null;
+  return bash ? { npm_config_script_shell: bash } : {};
+}
+
+/**
+ * Per-machine facts the repository cannot know, read from <root>/state/machine.json when it exists:
+ * { "skipGates": ["pnpm lint", ...] } lists gate commands (matched as substrings) that misreport on this machine.
+ * A skipped gate is shown as skipped, never as passed, and CI remains the judge of it.
+ */
+export function machineProfile() {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(layout().stateRoot, 'machine.json'), 'utf8'));
+  } catch {
+    return {};
+  }
+}
 
 export function providerEnv(stateRoot) {
   return loadEnvFile(path.join(stateRoot, 'providers.env'));
@@ -73,7 +96,7 @@ function buildCommand(candidate, vars) {
 function workerEnv(candidate, stateRoot) {
   const keys = providerEnv(stateRoot);
   const provider = candidate.provider ? loadConfig('providers.json').providers[candidate.provider] : null;
-  const env = { ...keys };
+  const env = { ...scriptShellEnv(), ...keys };
   for (const [name, template] of Object.entries(provider?.set || {})) env[name] = fill(template, { ...process.env, ...keys });
   return env;
 }
@@ -116,9 +139,15 @@ function lastVerdict(stateRoot, packetId) {
 async function runGates(packet, worktree, runDir) {
   const results = [];
   let n = 0;
+  const skip = machineProfile().skipGates || [];
   for (const gate of packet.gates || []) {
     n++;
     const started = Date.now();
+    const unreliable = gate.type === 'cmd' && skip.find((x) => gate.run.includes(x));
+    if (unreliable) {
+      results.push({ gate: `${gate.cwd || '.'}: ${gate.run}`, ok: true, skipped: true, detail: [`skipped: this machine cannot run "${unreliable}" reliably (state/machine.json); CI runs it`] });
+      continue;
+    }
     if (gate.type === 'cite') {
       const file = path.join(worktree, gate.file);
       if (!fs.existsSync(file)) {
@@ -138,7 +167,7 @@ async function runGates(packet, worktree, runDir) {
     const command = gate.type === 'node-test' ? `node --test ${gate.path || ''}` : gate.run.replaceAll('{python}', python || 'python3');
     const logFile = path.join(runDir, `gate-${n}.log`);
     // PYTHONUTF8: the repository's Python gates read UTF-8 files without naming the encoding, which fails on Windows.
-    const r = await launch(command, { cwd: path.join(worktree, gate.cwd || '.'), env: { PYTHONUTF8: '1', ...(gate.env || {}) }, logFile, timeoutMs: (gate.timeoutMin ?? 20) * 60_000 });
+    const r = await launch(command, { cwd: path.join(worktree, gate.cwd || '.'), env: { PYTHONUTF8: '1', ...scriptShellEnv(), ...(gate.env || {}) }, logFile, timeoutMs: (gate.timeoutMin ?? 20) * 60_000 });
     results.push({
       gate: `${gate.cwd || '.'}: ${command}`,
       ok: r.code === 0,
@@ -164,7 +193,7 @@ function summarise(result) {
   lines.push('', 'Gates:');
   if (!result.gates.length) lines.push('  (none run)');
   for (const g of result.gates) {
-    lines.push(`  ${g.ok ? 'pass' : 'FAIL'} ${g.gate}`);
+    lines.push(`  ${g.skipped ? 'skip' : g.ok ? 'pass' : 'FAIL'} ${g.gate}`);
     for (const d of g.ok ? g.detail.slice(0, 1) : g.detail) lines.push(`      ${d}`);
   }
   lines.push('', `Worker report: ${result.reportFile || '(none written)'}`, `Full record: ${result.runDir}`);
@@ -205,7 +234,7 @@ export async function runPacket(packetFile, opts = {}) {
   const maxAttempts = opts.noWorker ? 1 : Math.max(1, Number(opts.attempts || 1));
   while (attempt < maxAttempts) {
     attempt++;
-    const prompt = compilePrompt(packet, scope, { worktree, indexes, attempt, previousFailures: failures });
+    const prompt = compilePrompt(packet, scope, { worktree, indexes, attempt, previousFailures: failures, skipGates: machineProfile().skipGates || [] });
     fs.writeFileSync(promptPath, prompt);
     fs.writeFileSync(path.join(runDir, `prompt-${attempt}.md`), prompt);
     if (opts.dryRun) {

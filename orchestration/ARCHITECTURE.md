@@ -70,6 +70,7 @@ result. A lead is a worker on a stronger model with a harder packet; it is launc
 | `<root>/state/runs/<run>/` | Per run: the prompts, the worker log, gate logs, `result.json`, `summary.md`, `report.md` |
 | `<root>/state/ledger.jsonl` | One line per run: packet, role, tier, worker, minutes, verdict |
 | `<root>/state/providers.env` | Provider keys as `NAME=value` lines |
+| `<root>/state/machine.json` | Optional. Gate commands this machine cannot run reliably (`skipGates`); example in `orchestration/config/machine.example.json` |
 
 `DATACARE_WT_ROOT` and `DATACARE_STATE_ROOT` move the last two groups. Nothing else is configured per machine.
 
@@ -102,7 +103,13 @@ result. A lead is a worker on a stronger model with a harder packet; it is launc
 11. **Record.** `result.json`, `summary.md` and a ledger line are written. With `--commit` and a pass, the changed
     files are staged by name and committed with the packet id, the worker and the run id in the message.
 
-Exit codes: 0 pass, 2 fail, 3 blocked, 1 the dispatcher itself could not run.
+Exit codes: 0 pass (or partial work accepted with `--accept-partial`), 2 fail, 3 blocked, 1 the dispatcher itself could not run.
+
+**Machines that cannot run everything.** Two things keep one packet usable on every machine. On Windows the
+dispatcher points npm and pnpm at Git bash for the gates and the worker session, so package scripts written in
+Unix form (`NODE_OPTIONS=... tsc`) run as they do on CI. And a gate command listed in `<root>/state/machine.json`
+is shown as `skip`, never as `pass`; the worker is told in its prompt not to run it or chase what it prints, and
+CI remains its judge.
 
 ## 4. Scope enforcement
 

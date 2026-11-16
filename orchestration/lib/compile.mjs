@@ -45,7 +45,7 @@ export function writeFormIndexes(packet, worktree) {
   return made;
 }
 
-export function compilePrompt(packet, scope, { worktree = REPO, indexes = [], attempt = 1, previousFailures = [] } = {}) {
+export function compilePrompt(packet, scope, { worktree = REPO, indexes = [], attempt = 1, previousFailures = [], skipGates = [] } = {}) {
   const role = (name) => fs.readFileSync(path.join(ORCH, 'roles', `${name}.md`), 'utf8').trim();
   const list = (items, empty = '(none)') => (items && items.length ? items.map((i) => `- \`${i}\``).join('\n') : empty);
   const gates = (packet.gates || []).map((g) => {
@@ -89,6 +89,19 @@ export function compilePrompt(packet, scope, { worktree = REPO, indexes = [], at
       `Limits: ${scope.limits.minutes} minutes, ${scope.limits.maxChangedFiles} changed files, ${scope.limits.maxDiffLines} added lines.`,
     ].join('\n'),
   );
+  if (skipGates.length) {
+    parts.push(
+      [
+        '## 4a. Commands that cannot be trusted on this machine',
+        '',
+        'These commands misreport or cannot run here, whatever the task text says. Do not run them, do not try to fix what they',
+        'print, and do not count them against your work. GitHub CI runs them after the push. List them under "Not done or not',
+        'verified" in your report.',
+        '',
+        ...skipGates.map((g) => `- \`${g}\``),
+      ].join('\n'),
+    );
+  }
   parts.push(`## 5. Read these first\n\n${list([...indexes, ...(packet.context || [])])}\n\nA form index under \`.orch/index/\` maps a desktop form by line range: use it to open only the parts you need.`);
   if (packet.inline?.length) parts.push(`## 6. Excerpts\n\n${packet.inline.map((ref) => excerpt(worktree, ref)).join('\n')}`);
   if (packet.skills?.length) parts.push(`## 7. Project skills that apply\n\n${packet.skills.map((s) => skillBody(worktree, s)).join('\n')}`);

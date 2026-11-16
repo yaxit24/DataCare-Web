@@ -102,6 +102,10 @@ The repository's gates were written and run on macOS and Linux. Measured on nati
 | `node scripts/check-kernel-conformance.mjs` | **Fails** | Imports by absolute `D:\` path, which Node refuses as a module URL |
 | Database and browser tests | Cannot run | They need Docker |
 
+The dispatcher makes `pnpm typecheck:tests` work on Windows by running package scripts through Git bash. For the
+gates marked **Misreports** or **Fails**, copy `orchestration/config/machine.example.json` to
+`<root>/state/machine.json`: the dispatcher then skips them, says so in every result, and leaves them to CI.
+
 So a native Windows machine is sound for study, case lists, implementation, reviews, type checks and the Python
 gates, and relies on GitHub CI for the rest. To run every gate locally on Windows, install an Ubuntu distribution in WSL 2
 (`wsl --install -d Ubuntu`) and repeat sections 2 to 4 inside it, with `<root>` on the Linux file system; the

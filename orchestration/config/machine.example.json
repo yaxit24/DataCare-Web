@@ -1,0 +1,4 @@
+{
+  "_comment": "Optional per-machine facts. Copy to <root>/state/machine.json. skipGates lists gate commands (matched as substrings) that misreport on this machine; the dispatcher shows them as skipped, never as passed, and CI remains their judge. The list below is what native Windows needs (orchestration/SETUP.md section 5). Linux, macOS and WSL need no file.",
+  "skipGates": ["pnpm lint", "check-size-budget", "size:budget", "check-kernel-conformance", "pnpm docs:refs"]
+}
