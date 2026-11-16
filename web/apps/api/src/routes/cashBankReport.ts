@@ -6,6 +6,9 @@ import {
   parseCashBankQuery,
   type CashBankResult,
 } from '../modules/reports/cashBankReport.js';
+import { documentCompanyTx } from '../modules/documents/voucherDocument.js';
+import { cashBankPrintHtml } from '../modules/reports/cashBankPrint.js';
+import { withTxBudget } from '../modules/shared/txBudget.js';
 import { toCsv } from '../modules/reports/reportCsv.js';
 import { renderXlsx, type XlsxColumn, type XlsxSheet } from '../modules/reports/xlsx.js';
 
@@ -142,6 +145,44 @@ export function registerCashBankReportRoutes(app: FastifyInstance, h: CashBankRo
     try {
       const q = String(((req.query ?? {}) as Record<string, unknown>).q ?? '');
       return reply.send({ accounts: await cashBankAccountHelp(prisma, readScope(req), q) });
+    } catch (error) {
+      if (fail(reply, error)) return reply;
+      throw error;
+    }
+  });
+
+  // Print html in the AcLedger layout, from the same resolver result as the screen (WP-17.print).
+  app.get('/reports/cash-bank/print', auth as any, async (req, reply) => {
+    if (!printAllowed(req, reply)) return reply;
+    try {
+      const result = await resolve(req);
+      const s = readScope(req);
+      const co = await withTxBudget(prisma, s.tenantId, 'read', (tx: any) =>
+        documentCompanyTx(tx, { tenantId: s.tenantId, coCode: s.coCode } as any),
+      );
+      const html = cashBankPrintHtml(result, {
+        company: String(co?.CO_NAME ?? '').trim(),
+        coYear: s.coYear ?? '',
+      });
+      return reply.header('content-type', 'text/html; charset=utf-8').send(html);
+    } catch (error) {
+      if (fail(reply, error)) return reply;
+      throw error;
+    }
+  });
+
+  // PARTIAL: sendReportPdf builds its own generic html from `result` and cannot take the AcLedger html, so this
+  // PDF is the generic report PDF of the same resolver result (same figures), not the AcLedger layout.
+  app.get('/reports/cash-bank/export.pdf', auth as any, async (req, reply) => {
+    if (!printAllowed(req, reply)) return reply;
+    try {
+      return await h.sendReportPdf(
+        req,
+        reply,
+        'cash-bank',
+        'Reports/Cash Bank',
+        await resolve(req),
+      );
     } catch (error) {
       if (fail(reply, error)) return reply;
       throw error;
