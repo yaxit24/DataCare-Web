@@ -394,7 +394,7 @@ Steps: 1. Run the In view for the window with Gold. 2. Double-click the TG-001 r
 Expected: a screen for the source voucher of TG-001 opens and shows the voucher number held in the row's VchNo column. The
 desktop reads the row's voucher number and opens the form for its book: `RP_HUID.cs:2272 {{DC_Main.CurBookVch = ((ColumnView)GridView1).GetFocusedRowCellValue("V}}`
 inside `RP_HUID.cs:2252 {{private void DGV_DoubleClick(object sender, EventArgs e)}}`.
-Status: executable
+Status: blocked: the target voucher screens were not traced in the study (its open question 4) and this package builds no drill-down handler (supervisor decision, 16 November 2026). Unblocks when the drill-down targets are studied.
 Fails today: no drill-down (study Gap 23; `page.tsx` has no `onDoubleClick`).
 Note: the identity of the target screen for each book is a separate case below (blocked).
 
@@ -947,7 +947,7 @@ the N/A status.
 | T02 | Field route | 17 | 1 | 16 | 0 |
 | T03 | Formula sequence | 6 | 1 | 5 | 0 |
 | T04 | Lookup | 5 | 0 | 5 | 0 |
-| T05 | Children (drill-down) | 3 | 2 | 1 | 0 |
+| T05 | Children (drill-down) | 3 | 3 | 0 | 0 |
 | T06 | Required and invalid | 4 | 1 | 3 | 0 |
 | T07 | Create | 1 | 0 | 0 | 1 |
 | T08 | Reopen and no-op | 1 | 0 | 0 | 1 |
@@ -961,7 +961,7 @@ the N/A status.
 | T16 | Report output | 15 | 4 | 10 | 1 |
 | T17 | Keyboard and usability | 10 | 1 | 9 | 0 |
 | T18 | Full journey | 4 | 1 | 3 | 0 |
-| **Total** | | **90** | **15** | **69** | **6** |
+| **Total** | | **90** | **16** | **68** | **6** |
 
 ## Not covered
 
