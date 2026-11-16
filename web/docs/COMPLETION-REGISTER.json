@@ -2199,11 +2199,11 @@
    ],
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
-   "evidence": "apps/web/app/(app)/txn/order-cancel/page.tsx; desktop source MDI_FORM.cs:8628-8639, TR_SL_ORD_ADJ.cs:2523",
-   "note": "order cancel adjustment. D5 fixed 2026-09-29: the page selects the SALES ORDER book and sends the complete scope to list, void (version-guarded) and refund. The desktop lists every order with an open advance; the web lists one order book at a time (open, X14). Engineering evidence only; see ../parity-plan-2026-09-10/evidence/implementation-2026-09-29-eval-defects/contract.md.",
+   "evidence": "apps/web/app/(app)/txn/order-cancel/page.tsx; apps/api/src/routes/orderCancel.ts; desktop source MDI_FORM.cs:8628-8639, TR_SL_ORD_ADJ.cs:2140-3849",
+   "note": "Order Cancel is the TR_SL_ORD_ADJ multi-order voucher (N233/G245, WP-02): the pending-order help lists every order of the location with open advance, the grid, the ledger/Rojmel/tag write set, version-guarded edit/delete and OrderCancelVch print. Engineering evidence only.",
    "webSurface": {
     "kind": "route",
-    "surface": "POST /sales-orders/:vchNo/cancel-refund"
+    "surface": "POST /order-cancel"
    },
    "sharedSurfaceWith": []
   },

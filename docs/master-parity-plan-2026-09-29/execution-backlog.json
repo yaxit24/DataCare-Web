@@ -7793,6 +7793,34 @@
         "web/apps/web/test/features/modules/cashBank.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. cash-bank module: 23 applicable, 22 passed, 0 failed, 1 blocked. Blocked: T06 card/UPI settlement, stopped for an owner call because TR_CASH has no card or UPI mode (the web modes subtract a two-place commission and write CARD_DATA/UPI_DATA; the desktop Card Rec form adds a whole-rupee commission, TR_CARD_REC.cs:3796-3799). Still open: the bank layout's Charges column (BANK_CHARGES, legs 05/06 and 11/12 against BOOK_DETL slot 3) and Clearing Dt (bank legs dated CLR_DATE); payments still write PAY_DATA where TR_CASH writes CASH_DATA for all four menus; desktop-runtime comparison."
+    },
+    {
+      "id": "N233",
+      "status": "implemented-unverified",
+      "action": "Order Cancel is the desktop TR_SL_ORD_ADJ voucher on MAIN_BOOK 'ORDER CANCEL': multi-order grid with AdjAmt/KsarAmt/PaidAmt and the refund account, the SL_ORD_ADJ/AC_DATA/ROJ_MEL_DATA/TEMP_BOOK_DATA and tag/stock write set in one transaction, the open-advance rule shared with the sale under a row lock, version-guarded edit/delete, an idempotent create and the OrderCancelVch print; the per-order cancel-refund route is removed.",
+      "parentLabels": "P1-core; L3; T01-T18; WP-02",
+      "startAfter": [
+        "N229"
+      ],
+      "requiredProof": "DB tests derived from the desktop rules for the write set, tag release, rollback after every table, version tokens and the advance shared with the sale (including a race); the order-cancel browser module through the real screen with orders made on the Sales Order screen; the Sales Order module still green; all repository gates.",
+      "gapIds": "G245",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-09",
+      "evidence": [
+        "web/apps/api/src/modules/sales/orderCancel.ts",
+        "web/apps/api/src/modules/sales/orderCancelTags.ts",
+        "web/apps/api/src/modules/sales/orderCancelPrint.ts",
+        "web/apps/api/src/routes/orderCancel.ts",
+        "web/apps/web/app/(app)/txn/order-cancel/page.tsx",
+        "web/apps/web/components/OrderCancelGridRow.tsx",
+        "web/apps/web/components/OrderCancelOrderHelp.tsx",
+        "web/apps/api/test/orderCancel.db.test.ts",
+        "web/apps/web/test/features/modules/orderCancel.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. order-cancel module: 24 cases over T01-T18, none blocked; stock.held-tag-released is a real browser case (the order is made on the Sales Order screen, only the tag hold is seeded because the web Sales Order never saves a tagged line). Desktop match 0%."
     }
   ],
   "amendments": [
