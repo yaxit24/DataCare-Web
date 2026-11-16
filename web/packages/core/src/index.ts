@@ -8,6 +8,7 @@ export {
 } from './money.js';
 export {
   labourCharge,
+  saleLineLabourAmount,
   metalAmount,
   lineNet,
   lineTotalDesktop,
@@ -237,6 +238,7 @@ export {
   saleReturnAmountBasis,
   saleItemAmount,
   saleItemAmountWhole,
+  saleItemAmountRounded,
   salesReturnRoundingPolicy,
 } from './saleAmount.js';
 export type { SaleAmountLine, SaleAmountBasis } from './saleAmount.js';
@@ -318,6 +320,8 @@ export type { EditionAvailability, EditionCode, EditionPolicy, EditionTier } fro
 export { FORM_EDITION, ROUTE_EDITION } from './editionTable.js';
 export { formatDesktopDate, toIsoDate } from './dates.js';
 export { vbVal } from './vbVal.js';
+export { cashGridTotals } from './cashGridTotals.js';
+export type { CashGridRow, CashGridTotals } from './cashGridTotals.js';
 export * from './tagKarigar.js';
 
 // MS_RATE (Daily Rate) grid recalculation.

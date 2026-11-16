@@ -180,4 +180,9 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261109120000_api_command_receipt',
     checksum: '65761595951988799d746fdd0c1020fab5d16ff20ef11000153f50602f0cfec2',
   },
+  {
+    // WP-06 D34/D35: LOGIN_MAST active flag and per-account login back-off.
+    name: '20261109150000_login_mast_active_backoff',
+    checksum: 'b13f8ce87226403aa889cc662246a7dcdf64d9844cf3cf51ae2d253c5582d910',
+  },
 ];

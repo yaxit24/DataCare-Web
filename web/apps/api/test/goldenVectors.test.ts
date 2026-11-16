@@ -44,23 +44,27 @@ describe('GV-ROUND: .NET Math.Round is half-to-even', () => {
 
 describe('GV-SLDETL: sale line total', () => {
   /**
-   * GV-SLDETL-001 pins `TR_SALE.cs`:
-   *   `mSG[X,35] = Format(Math.Round(Val(mSG[X,23]) + Val(mSG[X,27]) + Val(mSG[X,29]), 0), "0.00")`
-   * 23 = item amount, 27 = labour amount, 29 = other amount. Rounded to WHOLE RUPEES with a hardcoded
-   * 0, not `MsItmRateRof`, and tax-exclusive.
+   * GV-SLDETL-001 pins `TR_SALE.cs` `CommPassTotal` (:11548, :11570), the per-row rule every cell exit runs:
+   *   `mSG[Row,35] = Format(Val(mSG[Row,27]) + Val(mSG[Row,29]) + Val(mSG[Row,23]) - Val(mSG[Row,32]), "0.00")`
+   * 23 = item amount, 27 = labour amount, 29 = other amount. Kept at 2 dp, tax-exclusive. The desktop oracle
+   * (desktop-oracle.yml run 42580947381, vector `total.stone`) stores 63085 + 2544 + 1234.50 as 66863.50.
+   *
+   * These vectors used to pin a whole-rupee `Math.Round(23 + 27 + 29, 0)`. That statement is real but it is
+   * `NetAmtChange` (TR_SALE.cs:18416), which runs only when the operator presses F1 on the bill-net cell.
    */
-  it('GV-SLDETL-001 sums item, labour and other, rounded to whole rupees', () => {
+  it('GV-SLDETL-001 sums item, labour and other, keeping paise', () => {
     expect(lineTotalDesktop({ itemAmount: 74400, labourAmount: 1800, otherAmount: 25 })).toBe(
       76225,
     );
-    expect(lineTotalDesktop({ itemAmount: 1000.4, labourAmount: 0, otherAmount: 0 })).toBe(1000);
-    expect(lineTotalDesktop({ itemAmount: 1000.6, labourAmount: 0, otherAmount: 0 })).toBe(1001);
+    expect(lineTotalDesktop({ itemAmount: 63085, labourAmount: 2544, otherAmount: 1234.5 })).toBe(
+      66863.5,
+    );
+    expect(lineTotalDesktop({ itemAmount: 1000.4, labourAmount: 0, otherAmount: 0 })).toBe(1000.4);
   });
 
-  it('GV-SLDETL-002 breaks the midpoint tie toward even, as Math.Round does', () => {
-    // 10.50 total → 10 on the desktop. Half-up would give 11 and overstate every such bill by ₹1.
-    expect(lineTotalDesktop({ itemAmount: 10, labourAmount: 0.5 })).toBe(10);
-    expect(lineTotalDesktop({ itemAmount: 11, labourAmount: 0.5 })).toBe(12);
+  it('GV-SLDETL-002 does not re-round a half rupee', () => {
+    expect(lineTotalDesktop({ itemAmount: 10, labourAmount: 0.5 })).toBe(10.5);
+    expect(lineTotalDesktop({ itemAmount: 11, labourAmount: 0.5 })).toBe(11.5);
   });
 
   it('GV-SLDETL-003 omits tax, because the desktop keeps tax in its own column', () => {
@@ -79,14 +83,11 @@ describe('GV-PRDETL: purchase line total', () => {
    * GV-PRDETL-001 pins `TR_PURC.cs`:
    *   `mSG_PR[Row,40] = Format(Val([Row,35]) + Val([Row,36]) + Val([Row,31]), "0.00")`
    * 35 = cPrLbrAmt, 36 = cPrOthAmt, 31 = cPrItAmt. There is **no `Math.Round`** here, so paise survive
-   * at two decimals. This is deliberately DIFFERENT from the sale line total (GV-SLDETL-001), which the
-   * desktop rounds to whole rupees — the two families must not be unified.
+   * at two decimals, as the sale line total does on its normal path (GV-SLDETL-001).
    */
-  it('GV-PRDETL-001 keeps paise, unlike the sale line total', () => {
+  it('GV-PRDETL-001 keeps paise', () => {
     const purchase = round(1000.4 + 0 + 0, 2);
     expect(purchase).toBe(1000.4);
-    // The same inputs on a sale collapse to whole rupees.
-    expect(lineTotalDesktop({ itemAmount: 1000.4, labourAmount: 0 })).toBe(1000);
   });
 
   /**

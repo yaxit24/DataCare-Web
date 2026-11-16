@@ -128,16 +128,22 @@ export function recalcLine(
   const gross = n(line.grossWt);
   const less = n(line.lessWt);
 
+  const netWt = supplied(line.netWt) ? n(line.netWt) : round(gross - less, PRECISION.weight);
+
   // Ghat weight is derived from its percentage unless the operator typed a weight directly, which is
   // the desktop's precedence: the explicit cell wins over the percentage.
+  //
+  // On the Sale grid the percentage is of NET weight: TR_SALE.cs:10581 writes
+  // `ITM_GHT_WT = Format(ITM_NWT x ITM_GHT_PRC / 100, "0.000")`. The desktop oracle (run 42580947381, vector
+  // ghat.pct1) gives 0.101 for gross 10.555, less 0.500 and 1 %; the gross basis previewed 0.106. Other forms keep
+  // the gross basis until their own desktop rule is checked.
   const ghtPct = n(line.ghtPct);
+  const ghtBase = policy === 'sale' ? netWt : gross;
   const ghtWt = supplied(line.ghtWt)
     ? n(line.ghtWt)
     : ghtPct > 0
-      ? round((gross * ghtPct) / 100, PRECISION.weight)
+      ? round((ghtBase * ghtPct) / 100, PRECISION.weight)
       : 0;
-
-  const netWt = supplied(line.netWt) ? n(line.netWt) : round(gross - less, PRECISION.weight);
 
   // Fine comes from the server's own policy table, so the preview cannot disagree with the posting.
   const fine = supplied(line.fineWt)
