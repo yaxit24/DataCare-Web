@@ -276,6 +276,16 @@
         "web/apps/api/src/routes/accountLedger.ts"
       ]
     },
+    "huidReport": {
+      "covers": [
+        "web/apps/web/app/(app)/reports/huid/page.tsx",
+        "web/apps/web/app/(app)/reports/huid/useHuidReport.ts",
+        "web/apps/web/app/(app)/reports/huid/HuidGrid.tsx",
+        "web/apps/web/app/(app)/reports/huid/types.ts",
+        "web/apps/api/src/modules/reports/huidTagReport.ts",
+        "web/apps/api/src/routes/huidReport.ts"
+      ]
+    },
     "partyMaster": {
       "covers": [
         "web/apps/web/app/(app)/masters/party/page.tsx",

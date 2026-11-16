@@ -46,6 +46,7 @@ import { itemMaster } from './modules/itemMaster.mjs';
 import { wholesaleSale } from './modules/wholesaleSale.mjs';
 import { dataRefresh } from './modules/dataRefresh.mjs';
 import { accountLedger } from './modules/accountLedger.mjs';
+import { huidReport } from './modules/huidReport.mjs';
 import { dataBackup } from './modules/dataBackup.mjs';
 import { gstReport } from './modules/gstReport.mjs';
 import { approvalIssue } from './modules/approvalIssue.mjs';
@@ -97,6 +98,7 @@ const MODULES = [
   wholesaleSale,
   dataRefresh,
   accountLedger,
+  huidReport,
   dataBackup,
   gstReport,
   approvalIssue,
