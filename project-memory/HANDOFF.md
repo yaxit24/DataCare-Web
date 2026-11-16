@@ -1,3 +1,9 @@
+## 2026-11-09 — Order Cancel is the desktop TR_SL_ORD_ADJ voucher (N233 / G245, WP-02)
+
+- 2026-11-09: one voucher cancels the open advance of many orders (SL_ORD_ADJ, Order_Adj_Ledr/Rojmel, held-tag release), version-guarded
+  edit/delete, Idempotency-Key on POST /order-cancel, OrderCancelVch print; the open-advance rule is shared with the sale under a row lock.
+- 2026-11-09: order-cancel module 24 cases, none blocked (the held-tag case seeds only the hold on a screen-made order); ORC book now provisioned CASH/KASAR.
+
 ## 2026-11-09 — Cash and Bank vouchers follow the TR_CASH calculations (N232 / G244, WP-05)
 
 - 2026-11-09: the multi-line grid shows the TR_CASH totals row (Σ Amount "0.00", Σ Kasar "0.000", kernel `cashGridTotals`), a multi-line receipt writes one CASH_DATA row per line and no PAY_DETL, and a Bank Payment posts its kasar on 09/10 (it was refused on the ledger key). `cash-bank`: 22 of 23 pass.

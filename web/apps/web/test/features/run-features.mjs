@@ -28,6 +28,7 @@ import { companyMaster } from './modules/companyMaster.mjs';
 import { cashBank } from './modules/cashBank.mjs';
 import { contraEntry } from './modules/contraEntry.mjs';
 import { fineJv } from './modules/fineJv.mjs';
+import { orderCancel } from './modules/orderCancel.mjs';
 import { partyOpening } from './modules/partyOpening.mjs';
 import { tagOpening } from './modules/tagOpening.mjs';
 import { dailyRate } from './modules/dailyRate.mjs';
@@ -79,6 +80,7 @@ const MODULES = [
   contraEntry,
   fineJv,
   salesOrder,
+  orderCancel,
   partyOpening,
   tagOpening,
   dailyRate,

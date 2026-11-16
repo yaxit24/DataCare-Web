@@ -268,16 +268,23 @@ const BOOKS: {
     ],
   },
   // Desktop MDI_FORM.cs:8629 CurBookHelp("ORDER CANCEL"); the Order Cancel screen refunds an order's
-  // advance through SL_ORD_ADJ + a balanced AC_DATA refund (accounts from the payload). Without this
-  // book a provisioned company could not cancel/refund an order (N113).
+  // advance through SL_ORD_ADJ + a balanced AC_DATA refund. Without this book a provisioned company could not
+  // cancel/refund an order (N113). Slot 1 is the default refund account, the desktop's PaiidAc 00001 CASH ON HAND
+  // (TR_SL_ORD_ADJ.cs:2255-2263), and slot 2 the kasar account, the desktop's fixed 00042 (Ac_Ledr.cs:932-935). The
+  // sale-book default would have put SALES in slot 1 and CASH in slot 2, refunding through sales and writing a kasar
+  // off to cash.
   {
     book: 'ORC',
     name: 'Order Cancel',
     mainBook: 'ORDER CANCEL',
     inout: 'O',
-    acCode: 'SALES',
+    acCode: 'CASH',
     shortName: 'SADJ',
     table: 'SL_ORD_ADJ',
+    slots: [
+      { srNo: 1, acCode: 'CASH' },
+      { srNo: 2, acCode: 'KASAR' },
+    ],
   },
   // Desktop Approval Isu / Approval Rtn both open TR_APR_ISU through these exact MAIN_BOOK values
   // (MDI_FORM.cs:8300-8317) and route to APR_DATA/APR_DETL (MS_UPDATE.cs:7833).
