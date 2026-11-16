@@ -903,3 +903,190 @@ describe.runIf(RUN)('bank leg codes are not a mirror of cash', () => {
     });
   });
 });
+
+/**
+ * A grid line is saved when its account is not empty and Amount + Kasar is not zero (TR_CASH.cs:3014
+ * `Conversion.Val(mSG[DC_Main.i, 7]) + Conversion.Val(mSG[DC_Main.i, 5]) != 0.0`). The ledger pair for the
+ * Amount is written only when REC_AMT is not zero (Ac_Ledr.cs:567 `A.REC_AMT <> 0`, :575 for a payment) and the
+ * kasar pair only when KASAR_AMT is not zero (Ac_Ledr.cs:571, :579). So a line of Amount 0.00 and Kasar 5.00 is
+ * saved, posts the kasar pair alone and moves no cash.
+ */
+describe.runIf(RUN)(
+  'a kasar-only grid line is saved, as the desktop does (TR_CASH.cs:3014)',
+  () => {
+    const PAY_KASAR = '00042';
+    const sums = (rows: Awaited<ReturnType<typeof legs>>) => ({
+      dr: Math.round(rows.reduce((s, r) => s + r.dr, 0) * 100) / 100,
+      cr: Math.round(rows.reduce((s, r) => s + r.cr, 0) * 100) / 100,
+    });
+    const shape = (rows: Awaited<ReturnType<typeof legs>>) =>
+      rows.map((r) => [r.k.slice(21).trim(), r.ac, r.dr, r.cr]);
+
+    beforeEach(async () => {
+      await wipe();
+      await seed();
+      await exec(
+        `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_NAME","MAIN_BOOK","BOOK_INOUT")
+       VALUES ($1,$2,$3,$4,2,$5,'Cash Received','CASH REC','I')`,
+        TENANT,
+        CO,
+        LC,
+        BOOK,
+        KASAR,
+      );
+      await seedPaymentBook();
+      await exec(
+        `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GST_TYPE")
+       VALUES ($1,$2,$3,$4,'KASAR AVAK A/C.','L')`,
+        TENANT,
+        CO,
+        LC,
+        PAY_KASAR,
+      );
+      await exec(
+        `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","AC_CODE","BOOK_NAME","MAIN_BOOK","BOOK_INOUT")
+       VALUES ($1,$2,$3,'002',2,$4,'Cash Payment','CASH PAY','O')`,
+        TENANT,
+        CO,
+        LC,
+        PAY_KASAR,
+      );
+    });
+    afterAll(async () => {
+      await wipe();
+    });
+
+    const cashRows = async () =>
+      (await owner.$queryRawUnsafe(
+        `SELECT "SR_NO"::int sr, "AC_CODE" ac, "REC_AMT"::float amt, "KASAR_AMT"::float kasar
+         FROM "CASH_DATA" WHERE tenant_id=$1 ORDER BY "SR_NO"`,
+        TENANT,
+      )) as Array<Record<string, unknown>>;
+
+    it('receipt: an ordinary line and a kasar-only line save two CASH_DATA rows and four balanced legs', async () => {
+      const result = await postReceiptLines(runtime, {
+        scope,
+        mode: 'cash',
+        vchDate: '2024-04-03',
+        lines: [
+          { partyAc: PARTY, amount: 1000 },
+          { partyAc: PARTY, amount: 0, kasar: 5 },
+        ],
+      } as never);
+      // Footer Amount total = 1000 + 0.
+      expect(result.total).toBe(1000);
+      // TR_CASH.cs:3014: both rows pass (1000 + 0 != 0 and 0 + 5 != 0); SR_NO is the grid row.
+      expect(await cashRows()).toEqual([
+        { sr: 1, ac: PARTY, amt: 1000, kasar: 0 },
+        { sr: 2, ac: PARTY, amt: 0, kasar: 5 },
+      ]);
+      // Line 1 Amount pair only (Ac_Ledr.cs:567-569, REC_AMT <> 0): 101 party Cr 1000, 102 cash Dr 1000.
+      // Line 2 REC_AMT = 0, so no 201/202; KASAR_AMT = 5 gives (Ac_Ledr.cs:571-573) 203 party Cr 5, 204 kasar Dr 5.
+      const rows = await legs();
+      expect(shape(rows)).toEqual([
+        ['101', PARTY, 0, 1000],
+        ['102', CASH, 1000, 0],
+        ['203', PARTY, 0, 5],
+        ['204', KASAR, 5, 0],
+      ]);
+      // Total debit 1000 + 5 = 1005 equals total credit 1000 + 5 = 1005.
+      expect(sums(rows)).toEqual({ dr: 1005, cr: 1005 });
+    });
+
+    it('receipt: a voucher of only a kasar-only line is saved, not refused', async () => {
+      const result = await postReceiptLines(runtime, {
+        scope,
+        mode: 'cash',
+        vchDate: '2024-04-03',
+        lines: [{ partyAc: PARTY, amount: 0, kasar: 5 }],
+      } as never);
+      expect(result.total).toBe(0);
+      expect(await cashRows()).toEqual([{ sr: 1, ac: PARTY, amt: 0, kasar: 5 }]);
+      // Only 103 party Cr 5 and 104 kasar Dr 5 (Ac_Ledr.cs:571-573); no amount pair. 5 Dr = 5 Cr.
+      const rows = await legs();
+      expect(shape(rows)).toEqual([
+        ['103', PARTY, 0, 5],
+        ['104', KASAR, 5, 0],
+      ]);
+      expect(sums(rows)).toEqual({ dr: 5, cr: 5 });
+    });
+
+    it('payment: an ordinary line and a kasar-only line post 105/106 and 207/208 and balance', async () => {
+      const result = await postPaymentLines(runtime, {
+        scope: { ...scope, coBook: '002' },
+        mode: 'cash',
+        vchDate: '2024-04-03',
+        lines: [
+          { partyAc: PARTY, amount: 2000 },
+          { partyAc: PARTY, amount: 0, kasar: 7.5 },
+        ],
+      } as never);
+      expect(result.total).toBe(2000);
+      // Line 1: 105 party Dr 2000 / 106 cash Cr 2000 (Ac_Ledr.cs:575-577, REC_AMT <> 0).
+      // Line 2: REC_AMT = 0 so no 205/206; KASAR_AMT 7.5 gives 207 party Dr 7.5 / 208 kasar Cr 7.5 (:579-581).
+      const rows = await legs();
+      expect(shape(rows)).toEqual([
+        ['105', PARTY, 2000, 0],
+        ['106', CASH, 0, 2000],
+        ['207', PARTY, 7.5, 0],
+        ['208', PAY_KASAR, 0, 7.5],
+      ]);
+      // Debit 2000 + 7.5 = 2007.5 equals credit 2000 + 7.5 = 2007.5.
+      expect(sums(rows)).toEqual({ dr: 2007.5, cr: 2007.5 });
+      const [head] = (await owner.$queryRawUnsafe(
+        `SELECT "NET_AMT"::float net, "KASAR_AMT"::float kasar FROM "PAY_DATA" WHERE tenant_id=$1`,
+        TENANT,
+      )) as Array<Record<string, number>>;
+      expect(head).toEqual({ net: 2000, kasar: 7.5 });
+      expect((await financeFootprint())!.detail).toBe(2);
+    });
+
+    it('payment: a voucher of only a kasar-only line is saved with just the kasar pair', async () => {
+      const result = await postPaymentLines(runtime, {
+        scope: { ...scope, coBook: '002' },
+        mode: 'cash',
+        vchDate: '2024-04-03',
+        lines: [{ partyAc: PARTY, amount: 0, kasar: 7.5 }],
+      } as never);
+      expect(result.total).toBe(0);
+      // Only 107 party Dr 7.5 and 108 kasar Cr 7.5 (Ac_Ledr.cs:579-581). 7.5 Dr = 7.5 Cr.
+      const rows = await legs();
+      expect(shape(rows)).toEqual([
+        ['107', PARTY, 7.5, 0],
+        ['108', PAY_KASAR, 0, 7.5],
+      ]);
+      expect(sums(rows)).toEqual({ dr: 7.5, cr: 7.5 });
+    });
+
+    it('refuses a line whose Amount + Kasar is zero, and a negative Amount or Kasar, writing nothing', async () => {
+      const before = await financeFootprint();
+      // TR_CASH.cs:3014 skips Amount 0 + Kasar 0, so no line remains: the empty-voucher message stays.
+      await expect(
+        postReceiptLines(runtime, {
+          scope,
+          mode: 'cash',
+          vchDate: '2024-04-03',
+          lines: [{ partyAc: PARTY, amount: 0, kasar: 0 }],
+        } as never),
+      ).rejects.toThrow('at least one receipt line (party + amount) is required');
+      // Deliberate difference: the desktop would post a negative figure; the web refuses it visibly.
+      await expect(
+        postReceiptLines(runtime, {
+          scope,
+          mode: 'cash',
+          vchDate: '2024-04-03',
+          lines: [{ partyAc: PARTY, amount: -10, kasar: 0 }],
+        } as never),
+      ).rejects.toThrow('cannot be negative');
+      await expect(
+        postPaymentLines(runtime, {
+          scope: { ...scope, coBook: '002' },
+          mode: 'cash',
+          vchDate: '2024-04-03',
+          lines: [{ partyAc: PARTY, amount: 100, kasar: -5 }],
+        } as never),
+      ).rejects.toThrow('cannot be negative');
+      expect(await financeFootprint()).toEqual(before);
+    });
+  },
+);

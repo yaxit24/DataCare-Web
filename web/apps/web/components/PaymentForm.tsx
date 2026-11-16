@@ -168,7 +168,8 @@ export default function PaymentForm({ kind }: { kind: 'receipt' | 'payment' }) {
     try {
       if (multi) {
         const lines = mlines
-          .filter((l) => l.partyAc.trim() && nn(l.amount) > 0)
+          // TR_CASH.cs:3014 saves a row with an account and Amount + Kasar not zero.
+          .filter((l) => l.partyAc.trim() && nn(l.amount) + nn(l.kasar) !== 0)
           .map((l) => ({
             partyAc: l.partyAc.trim(),
             partyName: l.partyName || undefined,

@@ -827,15 +827,42 @@ function detlLines(
   }));
 }
 
+/**
+ * The grid lines the desktop saves. TR_CASH.cs:3014 saves a row when its account is not empty and
+ * Amount + Kasar is not zero, so a line of Amount 0.00 with Kasar 5.00 (a balance written off with no cash
+ * moving) is saved. Cash_Ledr/Bank_Ledr then write each ledger pair only for a non-zero column
+ * (Ac_Ledr.cs:567 `A.REC_AMT <> 0`, :571 `A.KASAR_AMT <> 0`), so such a line posts the kasar pair alone.
+ *
+ * DELIBERATE DIFFERENCE: the desktop's `<> 0` tests would also post a negative Amount or Kasar as a negative
+ * ledger figure. The web refuses it with a visible error instead of writing negative legs.
+ */
+function gridLinesToSave(
+  rawLines: ReceiptPaymentLine[] | undefined,
+  emptyMessage: string,
+): ReceiptPaymentLine[] {
+  const num = (v: unknown): number => round2(Number(v) || 0);
+  const withAccount = (rawLines ?? []).filter((l) => l && String(l.partyAc ?? '').trim());
+  for (const l of withAccount) {
+    if (num(l.amount) < 0 || num(l.kasar) < 0)
+      throw new FinanceValidationError(
+        `amount and kasar cannot be negative (account ${l.partyAc})`,
+      );
+  }
+  const lines = withAccount.filter((l) => round2(num(l.amount) + num(l.kasar)) !== 0);
+  if (!lines.length) throw new FinanceValidationError(emptyMessage);
+  return lines;
+}
+
 /** Multi-line receipt (money IN), the desktop TR_CASH grid: one CASH_DATA row per line and a self-balanced
  *  party/cash pair (plus a kasar pair) per line, keyed by the line's SR_NO (Ac_Ledr.cs:565-583). */
 export async function postReceiptLines(
   prisma: any,
   input: ReceiptPaymentLinesInput,
 ): Promise<FinanceResult & { total: number }> {
-  const lines = (input.lines ?? []).filter((l) => l && l.partyAc && Number(l.amount) > 0);
-  if (!lines.length)
-    throw new FinanceValidationError('at least one receipt line (party + amount) is required');
+  const lines = gridLinesToSave(
+    input.lines,
+    'at least one receipt line (party + amount) is required',
+  );
   const mode = String(input.mode || 'cash').toLowerCase() as PayMode;
   const tenantId = input.scope.tenantId;
   const totalAmt = round2(lines.reduce((s, l) => s + Number(l.amount), 0));
@@ -860,6 +887,8 @@ export async function postReceiptLines(
     if (mode === 'cash') {
       const limit = await cashLimitTx(tx, tenantId, input.scope.coCode);
       for (const line of lines) {
+        // A kasar-only line moves no cash, so the cash ceiling has nothing to measure.
+        if (round2(Number(line.amount) || 0) === 0) continue;
         const prior = await partyCashReceivedTx(tx, input.scope, line.partyAc, recAcLines);
         assertCashReceiptCeiling(Number(line.amount), prior, limit, line.partyName);
       }
@@ -906,26 +935,28 @@ export async function postReceiptLines(
       const lineNo = idx + 1;
       const amt = round2(Number(l.amount));
       const lineKasar = round2(Number(l.kasar ?? 0));
-      ledger.push(
-        {
-          ...lbase,
-          legKeySuffix: recLineSuffix(lineNo, CASH_LEG.recParty),
-          AC_CODE: l.partyAc,
-          LD_CODE: recAcLines,
-          DR_AMT: 0,
-          CR_AMT: amt,
-          SIGN: 'C',
-        },
-        {
-          ...lbase,
-          legKeySuffix: recLineSuffix(lineNo, CASH_LEG.recCash),
-          AC_CODE: recAcLines,
-          LD_CODE: l.partyAc,
-          DR_AMT: amt,
-          CR_AMT: 0,
-          SIGN: 'D',
-        },
-      );
+      // Ac_Ledr.cs:567 `A.REC_AMT <> 0`: no amount pair for a kasar-only line.
+      if (amt !== 0)
+        ledger.push(
+          {
+            ...lbase,
+            legKeySuffix: recLineSuffix(lineNo, CASH_LEG.recParty),
+            AC_CODE: l.partyAc,
+            LD_CODE: recAcLines,
+            DR_AMT: 0,
+            CR_AMT: amt,
+            SIGN: 'C',
+          },
+          {
+            ...lbase,
+            legKeySuffix: recLineSuffix(lineNo, CASH_LEG.recCash),
+            AC_CODE: recAcLines,
+            LD_CODE: l.partyAc,
+            DR_AMT: amt,
+            CR_AMT: 0,
+            SIGN: 'D',
+          },
+        );
       if (lineKasar > 0) {
         const kasarAc = recKasarAc;
         ledger.push(
@@ -1024,9 +1055,10 @@ export async function postPaymentLines(
   prisma: any,
   input: ReceiptPaymentLinesInput,
 ): Promise<FinanceResult & { total: number }> {
-  const lines = (input.lines ?? []).filter((l) => l && l.partyAc && Number(l.amount) > 0);
-  if (!lines.length)
-    throw new FinanceValidationError('at least one payment line (party + amount) is required');
+  const lines = gridLinesToSave(
+    input.lines,
+    'at least one payment line (party + amount) is required',
+  );
   const mode = String(input.mode || 'cash').toLowerCase() as PayMode;
   const tenantId = input.scope.tenantId;
   const totalAmt = round2(lines.reduce((s, l) => s + Number(l.amount), 0));
@@ -1071,26 +1103,28 @@ export async function postPaymentLines(
       const lineNo = idx + 1;
       const amt = round2(Number(l.amount));
       const lineKasar = round2(Number(l.kasar ?? 0));
-      ledger.push(
-        {
-          ...lbase,
-          legKeySuffix: lineSuffix(lineNo, legsFor(mode).party),
-          AC_CODE: l.partyAc,
-          LD_CODE: payAcLinesResolved,
-          DR_AMT: amt,
-          CR_AMT: 0,
-          SIGN: 'D',
-        },
-        {
-          ...lbase,
-          legKeySuffix: lineSuffix(lineNo, legsFor(mode).account),
-          AC_CODE: payAcLinesResolved,
-          LD_CODE: l.partyAc,
-          DR_AMT: 0,
-          CR_AMT: amt,
-          SIGN: 'C',
-        },
-      );
+      // Ac_Ledr.cs:575 `A.REC_AMT <> 0`: no amount pair for a kasar-only line.
+      if (amt !== 0)
+        ledger.push(
+          {
+            ...lbase,
+            legKeySuffix: lineSuffix(lineNo, legsFor(mode).party),
+            AC_CODE: l.partyAc,
+            LD_CODE: payAcLinesResolved,
+            DR_AMT: amt,
+            CR_AMT: 0,
+            SIGN: 'D',
+          },
+          {
+            ...lbase,
+            legKeySuffix: lineSuffix(lineNo, legsFor(mode).account),
+            AC_CODE: payAcLinesResolved,
+            LD_CODE: l.partyAc,
+            DR_AMT: 0,
+            CR_AMT: amt,
+            SIGN: 'C',
+          },
+        );
       if (lineKasar > 0) {
         const kasarAc = payKasarAc;
         ledger.push(
