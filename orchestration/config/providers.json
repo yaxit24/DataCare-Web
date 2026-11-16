@@ -1,0 +1,83 @@
+{
+  "_comment": "Catalog of the model providers and plans this project can use. 'env' lists the names of the keys a provider needs (values live outside the repository, in state/providers.env). 'set' maps a key onto the variables a worker tool reads. 'automation' says whether the plan's terms allow unattended, scripted runs: only 'yes' entries belong in config/routing.json. 'checked' is the date the facts were read from the provider's own pages; re-check before paying. Prices are the published list prices on that date.",
+  "providers": {
+    "anthropic-subscription": {
+      "name": "Claude subscription (Claude Code sign-in)",
+      "kind": "subscription",
+      "env": [],
+      "automation": "yes",
+      "use": "Tiers A and B. The scarce resource: architect, leads, high-risk review. Never bulk reading.",
+      "checked": "2026-11-16",
+      "notes": "Used by the claude runner when no provider is named. Models are chosen per session with --model (opus, sonnet, haiku, fable) and --effort."
+    },
+    "opencode-go": {
+      "name": "OpenCode Go",
+      "kind": "subscription",
+      "env": [],
+      "automation": "unknown",
+      "use": "Tier C default once a model is chosen: flat-fee access to several open-weight coding models through OpenCode.",
+      "checked": "2026-11-16",
+      "price": "10 USD per month; Plus 40 USD per month; limits are dollar budgets per 5 hours, week and month",
+      "notes": "Connected inside OpenCode with /connect; OpenCode stores the key itself, so no variable is needed here. Check with 'opencode auth list'. Model list changes: run 'opencode models'. Terms for scripted use were not confirmed: read them before unattended runs.",
+      "url": "https://opencode.ai/docs/console/go/"
+    },
+    "deepseek": {
+      "name": "DeepSeek API",
+      "kind": "pay-as-you-go",
+      "env": ["DEEPSEEK_API_KEY"],
+      "automation": "yes",
+      "use": "Tier C: bulk desktop study and routine implementation at token prices.",
+      "checked": "not checked",
+      "notes": "Standard API, so scripted use is normal. Check the provider's data-retention terms against SECURITY-NOTICE.md before sending source."
+    },
+    "openrouter": {
+      "name": "OpenRouter",
+      "kind": "gateway",
+      "env": ["OPENROUTER_API_KEY"],
+      "automation": "yes",
+      "use": "Any tier: one key for many models, useful for escalation and for comparing models on the same packet.",
+      "checked": "2026-11-16",
+      "notes": "OpenCode reads OPENROUTER_API_KEY from the environment. Model ids look like openrouter/<vendor>/<model>.",
+      "url": "https://opencode.ai/docs/providers/"
+    },
+    "anthropic-compatible": {
+      "name": "Any Anthropic-compatible endpoint driven by the claude runner",
+      "kind": "gateway",
+      "env": ["DC_ANTHROPIC_BASE_URL", "DC_ANTHROPIC_AUTH_TOKEN"],
+      "set": { "ANTHROPIC_BASE_URL": "{DC_ANTHROPIC_BASE_URL}", "ANTHROPIC_AUTH_TOKEN": "{DC_ANTHROPIC_AUTH_TOKEN}" },
+      "automation": "depends",
+      "use": "Tier C with the Claude Code tool but a cheaper model behind it.",
+      "checked": "2026-11-16",
+      "notes": "The two DC_ variables keep the endpoint away from the supervisor's own Claude session: the dispatcher sets ANTHROPIC_BASE_URL only inside the worker process."
+    },
+    "alibaba-coding-plan": {
+      "name": "Alibaba Cloud Model Studio Coding Plan",
+      "kind": "subscription",
+      "env": ["DASHSCOPE_CODING_API_KEY"],
+      "automation": "no",
+      "use": "Interactive sessions only (a person at the terminal, for example in a herdr pane). Not for the dispatcher.",
+      "checked": "2026-11-16",
+      "price": "Pro 50 USD per month: 6,000 requests per 5 hours, 45,000 per week, 90,000 per month. Lite is no longer sold.",
+      "notes": "The plan's terms prohibit automated scripts and non-interactive use and name suspension as the consequence. Endpoints: OpenAI-compatible https://coding-intl.dashscope.aliyuncs.com/v1 and Anthropic-compatible https://coding-intl.dashscope.aliyuncs.com/apps/anthropic. For scripted Qwen use, take a pay-as-you-go Model Studio key instead and add it as its own provider.",
+      "url": "https://www.alibabacloud.com/help/en/model-studio/coding-plan"
+    },
+    "openai-codex": {
+      "name": "Codex CLI with a ChatGPT plan or an OpenAI API key",
+      "kind": "subscription or pay-as-you-go",
+      "env": [],
+      "automation": "yes",
+      "use": "Tier B: independent review by a different model family, and hard implementation.",
+      "checked": "2026-11-16",
+      "notes": "Sign in once with 'codex login'. For API-key runs set CODEX_API_KEY in state/providers.env. OpenAI's guide says not to use the ChatGPT-sign-in automation flow for public repositories in CI.",
+      "url": "https://learn.chatgpt.com/docs/non-interactive-mode.md"
+    }
+  },
+  "candidatesNotYetEvaluated": [
+    "OpenCode Zen (pay-as-you-go model gateway from the OpenCode team)",
+    "Z.AI GLM coding plan",
+    "Moonshot Kimi coding plan",
+    "MiniMax coding plan",
+    "Alibaba Model Studio pay-as-you-go and Token Plan",
+    "Qwen Code CLI, Gemini CLI, Kiro CLI (the repository's earlier agent tool), Cursor CLI, GitHub Copilot CLI as worker tools"
+  ]
+}
