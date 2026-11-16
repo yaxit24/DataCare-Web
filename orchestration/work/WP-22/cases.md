@@ -135,7 +135,7 @@ Steps: 1. Create company `04` with year code `2026-2027-AB` (12 characters), ope
 Expected: accepted; stored `CO_YEAR` = `2026-2027-AB`. Desktop: the field accepts up to 15 characters
 (`MS_YEAR.cs:680 {{((TextBoxBase)tYearCode).MaxLength = 15;}}`), and Save has no length check (`MS_YEAR.cs:1140 {{private void BtnSave_Click(object sender, EventArgs e)}}`).
 Today: fails. The web refuses codes over nine characters: `web/apps/api/src/modules/masters/year.ts:77 {{year code is at most 9 characters}}`.
-Status: executable (fails today: gap 7)
+Status: blocked: storing the desktop's year code needs the CO_YEAR columns widened in about 100 tables and the web's yyyy-yyyy rule dropped; that is a schema change for its own work package and an owner decision (supervisor, 16 November 2026). Was: executable (fails today: gap 7)
 
 ### year-create.validate.year-code-stops-at-15   (T06 Required/invalid, gap 7)
 Layer: browser
@@ -143,7 +143,7 @@ Steps: 1. In the year code field type `ABCDEFGHIJKLMNOP` (16 characters). 2. Rea
 Expected: the field holds `ABCDEFGHIJKLMNO` (15 characters) and the stored code is the same 15 characters. Desktop: the control stops at 15
 characters (`MS_YEAR.cs:680 {{MaxLength = 15;}}`). The letters are upper-cased (`MS_YEAR.cs:942 {{num = (short)Strings.Asc(Strings.UCase(Strings.Chr(unchecked((int)num))));}}`).
 Today: fails (the web refuses at nine characters and does not cap the input).
-Status: executable (fails today: gap 7)
+Status: blocked: storing the desktop's year code needs the CO_YEAR columns widened in about 100 tables and the web's yyyy-yyyy rule dropped; that is a schema change for its own work package and an owner decision (supervisor, 16 November 2026). Was: executable (fails today: gap 7)
 
 ### year-create.validate.year-code-any-text-accepted   (T06 Required/invalid, gap 8)
 Layer: browser
@@ -151,7 +151,7 @@ Steps: 1. Create company `04` with year code `FY2027`, opening `01/04/2026`, clo
 Expected: accepted; stored `CO_YEAR` = `FY2027` (upper case, as typed). Desktop: the code is not checked for a form (no check in Save,
 `MS_YEAR.cs:1140 {{private void BtnSave_Click(object sender, EventArgs e)}}`). Today the web refuses with
 `web/packages/core/src/fiscalYear.ts:37 {{must span consecutive years}}`.
-Status: executable (fails today: gap 8)
+Status: blocked: storing the desktop's year code needs the CO_YEAR columns widened in about 100 tables and the web's yyyy-yyyy rule dropped; that is a schema change for its own work package and an owner decision (supervisor, 16 November 2026). Was: executable (fails today: gap 8)
 
 ### year-create.validate.closing-before-opening-refused   (T06 Required/invalid)
 Layer: browser
