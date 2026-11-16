@@ -95,9 +95,12 @@ const route = (form: string, paths: readonly string[]): void => {
 
 route('Utilities/Audit Log', ['GET /audit', 'GET /ops/metrics', 'GET /ops/invariants']);
 route('Utilities/Backup', ['GET /backup', 'POST /backup/restore']);
+// Desktop MS_USER, menu caption "User Create" (formCatalog alias). Save of an existing user is Edit, Delete is Delete.
 route('Utilities/Users & Rights', [
   'GET /admin/users',
   'POST /admin/users',
+  'POST /admin/users/:loginName/update',
+  'DELETE /admin/users/:loginName',
   'POST /admin/users/:loginName/rights',
   'GET /admin/form-catalog',
   'GET /admin/users/:loginName/form-rights',
@@ -1114,6 +1117,7 @@ const UPDATE_POST_ROUTES = new Set([
   'POST /tour-orders/:vchNo/image',
   'POST /masters/design-book/image',
   'POST /repair-images',
+  'POST /admin/users/:loginName/update',
   'POST /admin/users/:loginName/rights',
   'POST /admin/users/:loginName/form-rights',
   'POST /admin/users/:loginName/password-reset',
@@ -1171,6 +1175,8 @@ const ADMIN_ONLY = new Set([
   'POST /backup/restore',
   'GET /admin/users',
   'POST /admin/users',
+  'POST /admin/users/:loginName/update',
+  'DELETE /admin/users/:loginName',
   'POST /admin/users/:loginName/rights',
   'GET /admin/form-catalog',
   'GET /admin/users/:loginName/form-rights',

@@ -53,7 +53,8 @@ interface PrincipalInput {
 
 /**
  * Resolve the user on every authenticated request so role changes, password resets, and deletion
- * take effect immediately rather than waiting for a JWT to expire. The selected company is tried
+ * take effect immediately rather than waiting for a JWT to expire. A deleted (inactive, D35) login has no principal,
+ * so its still-unexpired access token is refused on the next request even before its session revocation is seen. The selected company is tried
  * first; `loginCoCode` is the immutable authentication company used when an admin selected another
  * company context.
  */
@@ -67,7 +68,7 @@ export async function loadPrincipalTx(tx: Tx, input: PrincipalInput): Promise<Pr
     `SELECT "CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG",
               "USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED"
          FROM "LOGIN_MAST"
-        WHERE "LOGIN_NAME"=$1 AND "CO_CODE" IN ($2,$3)
+        WHERE "LOGIN_NAME"=$1 AND "CO_CODE" IN ($2,$3) AND "LOGIN_ACTIVE"='Y'
         ORDER BY CASE WHEN "CO_CODE"=$2 THEN 0 ELSE 1 END
         LIMIT 1`,
     input.loginName,

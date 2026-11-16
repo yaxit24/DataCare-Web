@@ -1,3 +1,8 @@
+## 2026-11-09 — User Create is the desktop MS_USER form (N231 / G243, WP-06, D34-D36)
+
+- Desktop texts, tab order, Confirm Password on leaving the box, edit-mode Save with the Old Password check and Delete (`MS_USER.cs:1820-2253`); D34 8+ character passwords with deny-lists and per-account back-off, D35 delete = deactivate with every session revoked (a deleted admin's open session is refused on its next request), D36 Lite hides the rights grid. Not ported: plaintext LOGIN_PWD, F1 password reveal, the ABC reset tool.
+- `userMaster.routes.db.test.ts` 13 of 13; users browser module 22 of 22 (T01-T18, none blocked). Catalog stays PARTIAL: action-level enforcement of the stored rights and desktop-runtime comparison remain.
+
 ## 2026-11-09 — Sales Order scheme tender (WP-03, N230, G206 scheme part)
 
 - Owner decision: follow the source. The typed Scheme Amt joins ADV_AMT and Order_Rojmel type 05 (`Ac_Rojmel.cs:19`) debits the MEMB

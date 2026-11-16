@@ -20,20 +20,24 @@ const BusinessScopeContext = createContext<BusinessScope | null>(null);
  * a document's previewed total matches the saved total (G102/G84). Null keeps the 2dp default.
  */
 const RoundingFlagsContext = createContext<RoundingFlagValues | null>(null);
+/** The running edition code from the session (`/me`, N171/D33); null when the deployment has no edition gate. */
+const EditionContext = createContext<string | null>(null);
 
 export function BusinessScopeProvider({
   scope,
   roundingFlags = null,
+  editionCode = null,
   children,
 }: {
   scope: BusinessScope;
   roundingFlags?: RoundingFlagValues | null;
+  editionCode?: string | null;
   children: React.ReactNode;
 }) {
   return (
     <BusinessScopeContext.Provider value={scope}>
       <RoundingFlagsContext.Provider value={roundingFlags}>
-        {children}
+        <EditionContext.Provider value={editionCode}>{children}</EditionContext.Provider>
       </RoundingFlagsContext.Provider>
     </BusinessScopeContext.Provider>
   );
@@ -57,4 +61,9 @@ export function useBusinessScope(): BusinessScope {
 export function useRoundingPolicy(): RoundingPolicy {
   const flags = useContext(RoundingFlagsContext);
   return useMemo(() => resolveRoundingPolicy(flags ?? {}), [flags]);
+}
+
+/** The running edition code of the session (for example 'L' for Lite), or null when no edition gate is configured. */
+export function useEditionCode(): string | null {
+  return useContext(EditionContext);
 }

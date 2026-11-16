@@ -48,7 +48,13 @@
     "usersRights": {
       "covers": [
         "web/apps/web/app/(app)/admin/users/page.tsx",
-        "web/apps/api/src/modules/rbac/users.ts"
+        "web/apps/web/components/UserRightsGrid.tsx",
+        "web/apps/web/lib/userCreate.ts",
+        "web/apps/api/src/modules/rbac/users.ts",
+        "web/apps/api/src/modules/rbac/userMaster.ts",
+        "web/apps/api/src/routes/userMaster.ts",
+        "web/apps/api/src/modules/auth/password.ts",
+        "web/apps/api/src/modules/auth/commonPasswords.ts"
       ]
     },
     "companyMaster": {
