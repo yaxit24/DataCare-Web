@@ -15,6 +15,15 @@ The offline Windows jewellery ERP **DataCareNext** (decompiled in `unified/`) is
 - The boundary and the rule that SaaS changes never alter business results:
   [ADR-0004](project-memory/decisions/ADR-0004-two-phase-delivery.md).
 
+## Dispatched worker sessions
+
+If the orchestration dispatcher started you (your first instruction points to a prompt file under the `.orch` folder
+of your worktree), that file is your whole job. Do not start through `kiro-cli`, do not pick a slice, and skip
+"Start of every session" below. Do not commit, push or open a pull request: the dispatcher and the supervising
+session do that. The hard rules and the definition of done in this file still apply. The layer is described in
+[`orchestration/README.md`](orchestration/README.md); the supervising session follows
+[`orchestration/PLAN.md`](orchestration/PLAN.md) and the entry file for Claude Code is [`CLAUDE.md`](CLAUDE.md).
+
 ## Start of every session
 
 1. Start with `kiro-cli chat --agent datacare` from the repository root: it loads this file, the handbooks, the
