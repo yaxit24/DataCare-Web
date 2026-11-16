@@ -3,7 +3,9 @@
 // - JSON (the backlog): a three-way merge of the parsed documents; arrays of objects with an `id` merge by id.
 // - Markdown tables: rows are keyed by their first cell; a row changed on one side only takes that side.
 // - project-memory/HANDOFF.md: both sides' new sections are kept, this branch's first.
-// Anything the rules cannot decide stops the script with the file and the key, and leaves the file conflicted.
+// - Generated views (progress page, menu catalog, document register, feature matrix): main's copy is taken;
+//   regenerate them afterwards.
+// A file the rules cannot decide is listed at the end and left conflicted; the others are still resolved.
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -107,13 +109,36 @@ function resolveMarkdown(file, mode) {
   fs.writeFileSync(path.join(wt, file), out.join('\n'));
 }
 
+// Generated views are never merged by hand: main's copy is taken and the caller regenerates them afterwards.
+const GENERATED = new Set([
+  'docs/handbook/web/standard-progress.md',
+  'docs/handbook/menu-catalog.md',
+  'docs/handbook/doc-register.md',
+  'docs/parity/FEATURE-MATRIX.md',
+]);
+
 const conflicted = git('diff', '--name-only', '--diff-filter=U').split('\n').filter(Boolean);
+const undecided = [];
 for (const file of conflicted) {
-  if (file.endsWith('.json')) resolveJson(file);
-  else if (file === 'project-memory/HANDOFF.md') resolveMarkdown(file, 'sections');
-  else if (file.endsWith('.md')) resolveMarkdown(file, 'rows');
-  else throw new Error(`${file}: no rule for this file; resolve by hand`);
-  const left = fs.readFileSync(path.join(wt, file), 'utf8').split('\n').filter((l) => /^(<<<<<<< |>>>>>>> )/.test(l)).length;
-  if (left) throw new Error(`${file}: ${left} conflict markers remain`);
-  console.log(`resolved ${file}`);
+  try {
+    if (GENERATED.has(file)) {
+      fs.writeFileSync(path.join(wt, file), stage(3, file));
+      console.log(`took main's copy of generated ${file} (regenerate it)`);
+      continue;
+    }
+    if (file.endsWith('.json')) resolveJson(file);
+    else if (file === 'project-memory/HANDOFF.md') resolveMarkdown(file, 'sections');
+    else if (file.endsWith('.md')) resolveMarkdown(file, 'rows');
+    else throw new Error('no rule for this file');
+    const left = fs.readFileSync(path.join(wt, file), 'utf8').split('\n').filter((l) => /^(<<<<<<< |>>>>>>> )/.test(l)).length;
+    if (left) throw new Error(`${left} conflict markers remain`);
+    console.log(`resolved ${file}`);
+  } catch (error) {
+    undecided.push(`${file}: ${error.message}`);
+  }
+}
+if (undecided.length) {
+  console.log('\nNOT RESOLVED, decide these by hand:');
+  for (const u of undecided) console.log(`  ${u}`);
+  process.exit(2);
 }

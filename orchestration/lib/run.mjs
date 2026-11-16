@@ -178,7 +178,7 @@ export async function runPacket(packetFile, opts = {}) {
   if (problems.length) throw new Error(`${packetFile} is not a valid packet:\n  - ${problems.join('\n  - ')}`);
   const { stateRoot } = layout();
   for (const dep of packet.dependsOn || []) {
-    if (lastVerdict(stateRoot, dep) !== 'pass' && !opts.force) throw new Error(`packet ${dep} has not passed on this machine (use --force if its work is already on the branch)`);
+    if (!['pass', 'partial'].includes(lastVerdict(stateRoot, dep)) && !opts.force) throw new Error(`packet ${dep} has not passed on this machine (use --force if its work is already on the branch)`);
   }
   const scope = effectiveScope(packet, routing);
   if (opts.tier) scope.tier = opts.tier;
@@ -240,6 +240,10 @@ export async function runPacket(packetFile, opts = {}) {
   if (failures.length) verdict = 'fail';
   else if (!opts.noWorker && (worker.code !== 0 || worker.timedOut)) verdict = 'fail';
   else if (reportStatus === 'BLOCKED') verdict = 'blocked';
+  // A machine without Docker cannot run database or browser tests, so a worker that wrote them honestly reports
+  // PARTIAL. With --accept-partial the supervisor has agreed in advance that CI will run them: the work is
+  // committed when the guards and the gates pass, and the verdict says `partial` so nobody reads it as proven.
+  else if (!opts.noWorker && reportStatus === 'PARTIAL' && opts.acceptPartial) verdict = 'partial';
   else if (!opts.noWorker && reportStatus !== 'DONE') verdict = 'fail';
 
   // Tools that end with one JSON object (claude -p --output-format json) report turns and cost: keep them.
@@ -253,7 +257,7 @@ export async function runPacket(packetFile, opts = {}) {
   }
 
   let commit = null;
-  if (verdict === 'pass' && opts.commit && guards.changed.length) {
+  if ((verdict === 'pass' || verdict === 'partial') && opts.commit && guards.changed.length) {
     git(['add', '--', ...guards.changed.map((c) => c.file)], worktree);
     const message = [packet.commit || `${packet.wp || packet.id}: ${packet.title}`, '', `Packet: ${packet.id} (${packet.role})`, `Worker: ${workerName}`, `Run: ${runId}`].join('\n');
     const staged = git(['diff', '--cached', '--quiet'], worktree, { allowFail: true }).code !== 0;

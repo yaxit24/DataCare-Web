@@ -230,3 +230,16 @@ test('a dry run builds the context pack and starts nothing', async () => {
   assert.ok(result.dryRun && result.approxTokens > 500);
   assert.equal(git(['status', '--porcelain'], repo).out, '');
 });
+
+test('end to end: a PARTIAL report is a fail, unless the supervisor accepted partial work in advance', async () => {
+  reset();
+  // A different document from the one an earlier test committed, so there is something to commit.
+  const partial = GOOD_WORKER.replace('STATUS: DONE', 'STATUS: PARTIAL').replace('# Study', '# Study, written without a database');
+  const refused = await runPacket(writePacket(), { worktree: repo, runnerCmd: worker('partial-a', partial), commit: true });
+  assert.equal(refused.verdict, 'fail');
+  assert.equal(refused.commit, null);
+  reset();
+  const accepted = await runPacket(writePacket(), { worktree: repo, runnerCmd: worker('partial-b', partial), commit: true, acceptPartial: true });
+  assert.equal(accepted.verdict, 'partial');
+  assert.ok(accepted.commit, 'accepted partial work is committed so CI can run what could not run here');
+});

@@ -22,6 +22,8 @@ const HELP = `DataCare-Web orchestration dispatcher
       --no-worker              Re-run guards and gates on the worktree as it is
       --attempts <n>           Re-launch the worker with the failed checks, up to n times (default 1)
       --commit                 Commit the worker's files when the verdict is pass
+      --accept-partial         Also commit when the worker reports PARTIAL (tests it could not run here) and the
+                               guards and gates pass; the verdict is then "partial" and CI must run the tests
       --force                  Ignore dependsOn
       --no-fetch               Do not fetch origin before creating a worktree
   check <packet.md>            Validate a packet file
@@ -181,13 +183,13 @@ async function main() {
       return 0;
     }
     case 'run': {
-      const result = await runPacket(rest[0], { dryRun: flags.dryRun, tier: flags.tier, runner: flags.runner, model: flags.model, runnerCmd: flags.runnerCmd, noWorker: flags.noWorker, attempts: flags.attempts, commit: flags.commit, force: flags.force, fetch: !flags.noFetch });
+      const result = await runPacket(rest[0], { dryRun: flags.dryRun, tier: flags.tier, runner: flags.runner, model: flags.model, runnerCmd: flags.runnerCmd, noWorker: flags.noWorker, attempts: flags.attempts, commit: flags.commit, force: flags.force, fetch: !flags.noFetch, acceptPartial: flags.acceptPartial });
       if (result.dryRun) {
         console.log(JSON.stringify(result, null, 2));
         return 0;
       }
       process.stdout.write(summarise(result));
-      return result.verdict === 'pass' ? 0 : result.verdict === 'blocked' ? 3 : 2;
+      return result.verdict === 'pass' || result.verdict === 'partial' ? 0 : result.verdict === 'blocked' ? 3 : 2;
     }
     default:
       process.stdout.write(HELP);
