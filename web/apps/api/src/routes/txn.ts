@@ -256,6 +256,7 @@ import { registerProductMasterRoutes } from './productMaster.js';
 import { registerMasterScreenRoutes } from './masterScreens.js';
 import { registerWholesaleSaleRoutes } from './wholesaleSale.js';
 import { registerAccountLedgerRoutes } from './accountLedger.js';
+import { registerCashBankReportRoutes } from './cashBankReport.js';
 import { registerApprovalRoutes } from './approval.js';
 import { VoucherVersionConflictError } from '../modules/vouchers/version.js';
 import { listYears, createYear, carryForwardOpenings } from '../modules/masters/year.js';
@@ -4517,6 +4518,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // debit ageing, and its Excel/CSV/PDF outputs. The resolver feeds the screen and every export from
   // one path. Registered here (not with the other plugins above) because it needs `sendReportPdf`.
   registerAccountLedgerRoutes(app, { prisma, auth, guard, readScope, sendReportPdf });
+  registerCashBankReportRoutes(app, { prisma, auth, guard, readScope, sendReportPdf });
 
   // Screens for five reports registered only in REPORT_BUILDERS (exports worked, screens 404'd —
   // PARITY-EVALUATION-2026-09-28 D3). Each calls the export's own builder with its own inputs (so the

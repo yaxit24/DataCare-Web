@@ -943,7 +943,13 @@ route('Reports/Account Ledger', [
 route('Reports/Account Balances', ['GET /reports/account-balances']);
 route('Reports/Outstanding (Debtors/Creditors)', ['GET /reports/outstanding']);
 route('Reports/Bill-wise Outstanding', ['GET /reports/bill-outstanding']);
-route('Reports/Cash / Bank Book', ['GET /reports/cash-book']);
+route('Reports/Cash / Bank Book', [
+  'GET /reports/cash-book',
+  'GET /reports/cash-bank',
+  'GET /reports/cash-bank/accounts',
+  'GET /reports/cash-bank/export.xlsx',
+  'GET /reports/cash-bank/export.csv',
+]);
 route('Reports/Party Statement', ['GET /reports/party-statement']);
 route('Reports/HSN Tax Summary', ['GET /reports/hsn-summary']);
 route('Reports/Scheme / Member Adjustments', ['GET /reports/scheme-adjustments']);
@@ -1049,6 +1055,8 @@ const PRINT_ROUTES = new Set([
   'GET /reports/account-ledger/export.xlsx',
   'GET /reports/account-ledger/export.csv',
   'GET /reports/account-ledger/:acCode/export.pdf',
+  'GET /reports/cash-bank/export.xlsx',
+  'GET /reports/cash-bank/export.csv',
   'GET /tour-orders/confirmation',
   'GET /sales/invoice',
   'GET /sales-quotations/quotation',
