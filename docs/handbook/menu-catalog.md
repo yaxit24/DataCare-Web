@@ -56,7 +56,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Setting | `UT_SETTING` | `/settings` | `- R E - - L` | PARTIAL | P1-core |
 | Setting Main | `UT_SETTING_MAIN` | `/settings` | `- R E - - L` | PARTIAL | P1-core |
 | Trade Master | `MS_TRADE` | `/masters/trade` | `C R E D - L` | PARTIAL | P1-core |
-| User Create | `MS_USER` | `/admin/users` | `C R E - - L` | PARTIAL | P1-core |
+| User Create | `MS_USER` | `/admin/users` | `C R E D - L` | PARTIAL | P1-core |
 | Year Create | `MS_YEAR` | `/masters/year-create` | `C - - - - L` | PARTIAL | P1-core |
 | Year Select | `MS_OPNCOMP` | `/select` | `- R E - - L` | PARTIAL | P1-core |
 
@@ -205,11 +205,11 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `MS_USER` — direct constructor ([MDI_FORM.cs:7451-7460](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7451-L7460)).
 - **Does:** Creates users and assigns global and per-form View/Edit/Delete/Print rights.
-- **Looks:** User, password and type fields, an existing-user table and a per-menu rights matrix.
+- **Looks:** Desktop: Create New User, Old/New/Confirm Password and User Type boxes, the User Name box of existing users, Save/Print/Cancel/Delete/Exit and (non-Lite) the per-menu rights grid. Web: the same boxes and buttons in tab order; the rights grid only outside Lite (D36); an administrator's temporary-password reset replaces F1.
 - **Writes:** LOGIN_MAST, USER_SET, MENU_DATA, BOOK_IDTL, TILE_DATA.
-- **Web:** `/admin/users`; `GET /admin/users`, `POST /admin/users`, `GET /admin/users/:loginName/form-rights`, `POST /admin/users/:loginName/form-rights`, `POST /admin/users/:loginName/rights`, `POST /admin/users/:loginName/password-reset`. Can: create, reopen, edit, list.
-- **Remaining:** User delete and print, complete action-level enforcement, atomic audit and acceptance remain.
-- **Owners:** X29, G34, G35, N55, N77.
+- **Web:** `/admin/users`; `GET /admin/users`, `POST /admin/users`, `POST /admin/users/:loginName/update`, `DELETE /admin/users/:loginName`, `GET /admin/users/:loginName/form-rights`, `POST /admin/users/:loginName/form-rights`, `POST /admin/users/:loginName/rights`, `POST /admin/users/:loginName/password-reset`. Can: create, reopen, edit, delete, list.
+- **Remaining:** N231/G243 (D34-D36): desktop texts, Confirm Password, edit-mode Save, Delete as deactivation with every session revoked, 8+ character passwords with deny-lists, Lite hides the rights grid; DB 13 of 13 and browser module users 22 of 22. Print prints nothing on the desktop either. Open: action-level enforcement of the stored rights on every route, desktop-runtime comparison and acceptance.
+- **Owners:** X29, G34, G35, N55, N77, G243, N231.
 - **Evidence:** [KB_master.md:79-106](../../project-memory/video-research/_kb/KB_master.md#L79-L106).
 
 ### Year Create
@@ -726,9 +726,9 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Sales-like item, component and old-metal grids with an advance panel, delivery date, images and order document.
 - **Writes:** SL_ORD_DATA, SL_ORD_DETL, SL_ORD_IDTL, SL_ORD_ADJ, SL_PR_DETL, AC_DATA, ROJ_MEL_DATA, UPI_DATA, TAG_IMAGE_DATA.
 - **Web:** `/txn/sales-order`; `GET /sales-orders`, `POST /sales-orders`, `GET /sales-orders/:vchNo`, `PUT /sales-orders/:vchNo`, `DELETE /sales-orders/:vchNo`, `GET /sales/order-confirmation`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** Scheme tender, partial delivery, manufacturing and invoice conversion, reservation/refund and the order document need acceptance.
-- **Owners:** G14, N44, G16, N46, X14, N77, X25, G206, N197, N222, N226.
-- **Evidence:** [KB_transaction.md:208-235](../../project-memory/video-research/_kb/KB_transaction.md#L208-L235), [TR_SALE_ORD.cs:9520-9556](../../unified/src/csharp/DataCareNext/TR_SALE_ORD.cs#L9520-L9556), [TR_SALE_ORD.cs:9421-9475](../../unified/src/csharp/DataCareNext/TR_SALE_ORD.cs#L9421-L9475).
+- **Remaining:** Partial delivery, manufacturing and invoice conversion, reservation/refund, the order document and the non-Lite scheme path (a MEMB ADJUST voucher from the Scheme Amt cell) need acceptance.
+- **Owners:** G14, N44, G16, N46, X14, N77, X25, G206, N197, N222, N226, N230.
+- **Evidence:** [KB_transaction.md:208-235](../../project-memory/video-research/_kb/KB_transaction.md#L208-L235), [TR_SALE_ORD.cs:9520-9556](../../unified/src/csharp/DataCareNext/TR_SALE_ORD.cs#L9520-L9556), [TR_SALE_ORD.cs:9421-9475](../../unified/src/csharp/DataCareNext/TR_SALE_ORD.cs#L9421-L9475), [Ac_Rojmel.cs:19](../../unified/src/csharp/DataCareNext/Ac_Rojmel.cs#L19).
 
 ### Sales Return
 

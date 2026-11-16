@@ -59,7 +59,7 @@ PRIORITY = {
     'Report/HuId Report': ('P2', 'Hallmark register exists; tabs, filters and layout uncertified'),
     'Report/Gst Report': ('P1', 'Statutory output; jurisdiction modes and exact grids uncertified'),
     'Report/Ledger Report': ('P2', 'Opening-ledger ageing union and layout comparison remain'),
-    'Transaction/Sales Order': ('P1', 'Scheme tender (G206) fails an executed case'),
+    'Transaction/Sales Order': ('P1', 'Partial delivery, conversion and refund need acceptance; the non-Lite scheme path is not built'),
     'Transaction/Sales Return': ('P1', 'Lossless edit, admissibility and residual branches remain'),
     'Transaction/Sales': ('P1', 'Lossless reopen, tender and source branches remain'),
     'Transaction/Purchase': ('P1', 'Hallmark receive branch and lossless reopen remain'),
@@ -171,7 +171,7 @@ def build() -> str:
         '- **Status** is assigned in this order: BROKEN (an executed case fails), BLOCKED (half or more of the applicable cases are blocked, or the'
         ' catalog row is CONTAINED), NOT YET VERIFIED (no module), MISSING (no web screen), else PARTIAL.',
         '- A failing case outranks blocked ones, so Company shows BROKEN although most of its cases are blocked. Sales Order and Order Report share the'
-        ' `sales-order` module, so one failing case (`sales-order.create.scheme-tender`, G206) makes both rows BROKEN: that is one defect, not two.',
+        ' `sales-order` module, so one failing case there makes both rows BROKEN (until WP-03, N230, `sales-order.create.scheme-tender` did).',
         '- **Priority** is written by a person per menu in `PRIORITY` (P0 data integrity, security or business correctness; P1 missing core'
         ' functionality or broken workflow; P2 behavioural or UI/UX mismatch; P3 minor, or not provable without a desktop runtime).',
         '- **Owner** comes from `docs/parity/ownership.json`, which records open pull requests, branches and claims at the date in'
