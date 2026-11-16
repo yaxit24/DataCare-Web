@@ -724,7 +724,7 @@ entry exists for it, the entry's status is N/A.
 | T16 Report/output | 1 | 1 | 1 | Success text (blocked, decision). N/A: Print (gap 13) |
 | T17 Keyboard/usability | 6 | 0 | 0 | Enter moves, invalid date keeps focus, Esc, upper case, apostrophe |
 | T18 Full journey | 2 | 1 | 0 | First year, party and opening, second year (executable); shared master (blocked, gap 12) |
-| **Total** | **74** | **8** | **9** | 74 cases; 5 N/A entries in this file. The N/A column also counts four kind-level N/A rows (T03, T05, T08, T15) |
+| **Total** | **74** | **11** | **9** | 74 cases; 5 N/A entries in this file. The N/A column also counts four kind-level N/A rows (T03, T05, T08, T15) |
 
 Counts are from `cases.md` itself. The blocked count includes the blocked decision cases.
 
