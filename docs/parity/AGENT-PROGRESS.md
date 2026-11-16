@@ -10,6 +10,7 @@ Edit this file only in a pull request, never in a shared working tree. If two PR
 
 | Claim | Holder | Branch / PR | Files claimed | State | Since |
 |---|---|---|---|---|---|
+| WP-22 Year Create (`MS_YEAR`), orchestrated packets | architect session on the Windows laptop, workers through `orchestration/bin/orch.mjs` | `agent/wp22-year-create` | `orchestration/work/WP-22/**`, `orchestration/packets/WP-22.*`; later `modules/masters/year.ts` and the year-create page | study started | 16 Nov |
 | Tag label text rules (G240, on N225) | session `52f05ab4` | `agent/parity-tag-label-content`, PR to follow | `web/apps/api/src/modules/stock/tagPrint.ts` (renderer only), `tagPrintScreen.ts` (two lines), `test/tagLabelText.test.ts`, the label cases in `modules/tagPrint.mjs` | code and tests done and red-then-green; records written; PR not yet opened | 2 Nov 17:05 |
 | WP-03 Sales Order scheme tender (G206), owner decision option (a) | WP-03 agent | `agent/wp03-so-scheme-tender`, PR #232 | new `web/apps/api/src/modules/sales/salesOrderScheme.ts`, its tests, the scheme cases in `modules/salesOrder.mjs`, `baseline.json` entry | started; stack slot 2 | 9 Nov |
 | WP-04 Idempotent voucher creates (N52 / G29) | WP-04 agent | `agent/wp04-idempotency`, PR to follow | `web/apps/api/src/modules/shared/idempotency*.ts`, `txBudget.ts` (hook), migration `20261109120000_api_command_receipt`, `PaymentForm.tsx`, `TagCancelForm.tsx`, `modules/stockAdjust.mjs`, `modules/cashBank.mjs` | mechanism + Stock Adjust + Cash/Bank in this PR; other creates queued | 9 Nov |
