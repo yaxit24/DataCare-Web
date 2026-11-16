@@ -13,7 +13,12 @@ echo "--- checks (exit $rc)"
 gh pr checks "$pr" 2>&1 | cut -f1,2 | head -12
 if [ "$rc" -ne 0 ]; then echo "RESULT: not merged, CI is not green"; exit 2; fi
 
-read -r oid mergeable state < <(gh pr view "$pr" --json headRefOid,mergeable,state --jq '[.headRefOid,.mergeable,.state]|@tsv')
+# GitHub works out "mergeable" lazily and answers UNKNOWN for a while after main moves: ask again before giving up.
+for try in 1 2 3 4 5 6; do
+  read -r oid mergeable state < <(gh pr view "$pr" --json headRefOid,mergeable,state --jq '[.headRefOid,.mergeable,.state]|@tsv')
+  [ "$mergeable" != "UNKNOWN" ] && break
+  sleep 20
+done
 if [ "$state" != "OPEN" ]; then echo "RESULT: not merged, pull request is $state"; exit 3; fi
 if [ "$oid" != "$head_sha" ]; then echo "RESULT: not merged, the remote head ($oid) is not the commit that was checked ($head_sha)"; exit 3; fi
 if [ "$mergeable" != "MERGEABLE" ]; then echo "RESULT: not merged, GitHub reports $mergeable"; exit 3; fi
