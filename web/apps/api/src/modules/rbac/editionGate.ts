@@ -41,6 +41,19 @@ export function editionRefusal(
     : null;
 }
 
+/**
+ * The refusal for a feature that exists in every edition except Lite (D36: the Lite rights grid is hidden and every right is
+ * seeded Y, `MS_USER.cs:1489-1495`), or null outside Lite / without a configured edition.
+ */
+export function aboveLiteRefusal(
+  form: string,
+  policy: EditionPolicy | null | undefined,
+): EditionRefusal | null {
+  return policy && policy.code === 'L'
+    ? { error: 'edition-unavailable', form, edition: policy.code }
+    : null;
+}
+
 /** A route's static rights form must be classified, or a gated deployment refuses to start. */
 export function assertFormClassified(form: string): void {
   if (form.startsWith('@')) return; // dynamic (@master, @report): checked per request after resolution

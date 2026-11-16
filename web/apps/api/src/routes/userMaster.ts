@@ -1,6 +1,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { PasswordChangeError, resetUserPassword } from '../modules/auth/passwordAccount.js';
 import { PasswordPolicyError } from '../modules/auth/password.js';
+import { aboveLiteRefusal } from '../modules/rbac/editionGate.js';
 import { getFormCatalog } from '../modules/rbac/formCatalog.js';
 import { getUserFormRights, setUserFormRights } from '../modules/rbac/formRights.js';
 import { listUsers, setUserRights } from '../modules/rbac/users.js';
@@ -11,6 +12,8 @@ import {
   UserMasterNotFoundError,
   UserMasterValidationError,
 } from '../modules/rbac/userMaster.js';
+
+const USERS_FORM = 'Utilities/Users & Rights';
 
 interface UserRouteHelpers {
   prisma: any;
@@ -111,7 +114,14 @@ export function registerUserMasterRoutes(app: FastifyInstance, h: UserRouteHelpe
       }),
     );
   });
+  // D36: the rights grid does not exist in Lite (every right is seeded Y), so its four routes are refused there.
+  const liteRefused = (reply: FastifyReply) => {
+    const refusal = aboveLiteRefusal(USERS_FORM, (app as any).editionPolicy);
+    if (refusal) reply.code(403).send(refusal);
+    return !!refusal;
+  };
   app.post('/admin/users/:loginName/rights', auth, async (req, reply) => {
+    if (liteRefused(reply)) return;
     if (!guard(req, reply, 'update')) return;
     const b = body(req);
     return run(reply, 200, () =>
@@ -130,10 +140,12 @@ export function registerUserMasterRoutes(app: FastifyInstance, h: UserRouteHelpe
   });
   // Per-form RBAC (USER_SET): the rights grid of the Basic and higher editions (hidden in Lite, D36).
   app.get('/admin/form-catalog', auth, async (req, reply) => {
+    if (liteRefused(reply)) return;
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, async () => getFormCatalog((app as any).editionPolicy));
   });
   app.get('/admin/users/:loginName/form-rights', auth, async (req, reply) => {
+    if (liteRefused(reply)) return;
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, () =>
       getUserFormRights(
@@ -144,6 +156,7 @@ export function registerUserMasterRoutes(app: FastifyInstance, h: UserRouteHelpe
     );
   });
   app.post('/admin/users/:loginName/form-rights', auth, async (req, reply) => {
+    if (liteRefused(reply)) return;
     if (!guard(req, reply, 'update')) return;
     const b = body(req);
     return run(reply, 200, () =>
