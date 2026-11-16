@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { USERS } from '../fixtures/catalogue.mjs';
 import { API, COL, HEADERS, ROUTE, as, assertRow, C, field, openAccountHelp, openReport, readGrid, readHeaders, refillBy, withSeed, withoutSeed } from './cashBankReportKit.mjs';
+import * as kit from './cashBankReportKit.mjs';
+import { ioCases } from './cashBankReportIo.mjs';
 
 /**
  * Feature: Report → Cash Bank (desktop RP_CASH_BANK; web /reports/cash-bank): grid, filter, account and text cases.
@@ -302,5 +304,6 @@ export const cashBankReport = {
       assert.equal(await page.getByText('Cash / Bank Book', { exact: true }).count(), 0, 'old menu label gone');
       return { observation: 'menu entry Cash Bank', expected: { label: 'Cash Bank' } };
     })),
+    ...ioCases(kit),
   ],
 };
