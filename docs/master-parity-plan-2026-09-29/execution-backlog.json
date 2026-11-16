@@ -7736,6 +7736,37 @@
         "web/apps/web/test/features/modules/salesOrder.mjs"
       ],
       "statusNote": "IMPLEMENTED (scheme tender), not accepted. The scheme DB test fails 4 of 5 against the old code and passes; the sales-order browser module passes 32 of 33 (config.setting-variant blocked, G174). Live24 lacks type 05 for its 7 scheme orders: 3 are of a year the day book no longer holds, 4 were taken on the non-Lite MEMB ADJUST path, likely by an older build (aggregate counts only). Open: the non-Lite MEMB ADJUST voucher path, a MEMB ADJUST book in web provisioning (the membership module reads its slot 1 as the payout account), VCH_DESC in the order day-book IT_DESC, desktop-runtime comparison and acceptance."
+    },
+    {
+      "id": "N231",
+      "status": "implemented-unverified",
+      "action": "User Create is the desktop MS_USER form: desktop texts, tab order and Enter walk, upper-cased 15-character name, Confirm Password checked on leaving the box, edit-mode Save with the Old Password check, Delete; D34 passwords (8+, deny-lists, per-account back-off), D35 delete = deactivate with every session and refresh token revoked in the same transaction and the last administrator kept, D36 the Lite edition hides the rights grid and Update User Right.",
+      "parentLabels": "P1-core; Lite WP-06; T01-T18",
+      "startAfter": [
+        "N229"
+      ],
+      "requiredProof": "Source-derived DB/HTTP tests under forced RLS for the LOGIN_MAST/USER_SET write set, the desktop texts, the D34 refusals, deactivation with session revocation and a deleted user's live session refused on the next request, the last administrator, concurrency and tenant isolation; the zero-mock users module executes every T01-T18 case.",
+      "gapIds": "G243",
+      "entryDefinition": "docs/parity/LITE-MASTER-PLAN.md section 5 (WP-06)",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-09",
+      "evidence": [
+        "web/packages/db/prisma/migrations/20261109150000_login_mast_active_backoff/migration.sql",
+        "web/apps/api/src/modules/rbac/userMaster.ts",
+        "web/apps/api/src/routes/userMaster.ts",
+        "web/apps/api/src/modules/auth/password.ts",
+        "web/apps/api/src/modules/auth/commonPasswords.ts",
+        "web/apps/web/app/(app)/admin/users/page.tsx",
+        "web/apps/web/lib/userCreate.ts",
+        "web/apps/web/components/UserRightsGrid.tsx",
+        "web/apps/api/test/userMaster.routes.db.test.ts",
+        "web/apps/api/test/auth.password.test.ts",
+        "web/apps/web/test/userCreate.test.ts",
+        "web/apps/web/test/features/modules/usersRights.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. userMaster.routes.db.test.ts 13 of 13 and the users browser module 22 of 22 (every T01-T18 case executed, none blocked). Open: action-level enforcement of the stored rights on every route, desktop-runtime comparison and operator acceptance."
     }
   ],
   "amendments": [

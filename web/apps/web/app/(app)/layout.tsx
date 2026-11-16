@@ -74,6 +74,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <BusinessScopeProvider
       scope={{ coCode: session.coCode, lcCode: session.lcCode, coYear: session.coYear }}
       roundingFlags={session.roundingFlags ?? null}
+      editionCode={session.edition?.code ?? null}
     >
       <Shell session={session} contextStale={contextState.status === 'stale'}>
         {contextState.status === 'stale' && (
