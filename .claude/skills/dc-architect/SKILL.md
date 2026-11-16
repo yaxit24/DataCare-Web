@@ -14,7 +14,7 @@ Workers read, type and run tests. The plan you follow is `orchestration/PLAN.md`
 - read a whole desktop form or a long worker log into this conversation (use a form index, a line range, a
   summary, or the `dc-scout` subagent);
 - write routine code, tests or records yourself when a packet can ask for them;
-- merge a pull request, push to `main`, or change repository visibility: those are the owner's;
+- push to `main`, change repository visibility, or merge a pull request the owner has not delegated to you;
 - accept a worker's claim without the dispatcher's result.
 
 ## Start of a session
@@ -58,15 +58,22 @@ Do not take a package another session, worktree or open pull request holds.
    - `blocked`: answer the worker's question in a revised packet, or record the blocker and switch lane.
 7. **Review** with the `dc-review` skill, to the depth the risk tier requires. Tier A: you read the tests and
    every changed writer. Dispatch the `review` packet first so its findings guide your reading.
-8. **Records.** Merge the newest `origin/main` into the branch, resolve, then dispatch the `records` packet. Ids
-   are taken there, last.
+8. **Records.** Merge the newest `origin/main` into the branch. The same record files conflict every time:
+   resolve them by rule with `node orchestration/tools/resolve-records.mjs <worktree>`, regenerate the
+   generated views, and run the plan and docs validators (`orchestration/ARCHITECTURE.md` section 9). Then
+   dispatch the `records` packet. Ids are taken there, last.
 9. **Pull request.** Push with `node orchestration/bin/orch.mjs push <branch>`, then `gh pr create --base main`
    with the body sections of the master plan's step S11: what the desktop does (cited), what changed, cases
    executed, passed, failed, blocked, the three coverage numbers, gate output, not verified and why, deliberate
    differences, open items. Name each worker tool and model used. Watch CI as a background command:
    `gh pr checks <n> --watch`.
-10. **Hand over.** Tell the owner the pull request is ready and what you did and did not verify. After the merge:
-    set the package's State cell, remove the worktree, move the claim to done.
+   When a check is red, read the failing step first (`gh run view <run> --job <job> --log-failed`), and for a
+   browser case the screenshot in the run's artifact. Re-run a job at most once, and only after reading it.
+10. **Hand over.** Tell the owner the pull request is ready and what you did and did not verify. If, and only
+    if, the owner has delegated merging for this pull request, arm the watcher as a background command:
+    `bash orchestration/tools/merge-when-green.sh <pr> <worktree>`. It merges only when every check passed, the
+    head is the commit that was checked and the branch contains the newest `main`. After the merge: set the
+    package's State cell, remove the worktree, move the claim to done.
 
 ## Choosing who does a piece of work
 

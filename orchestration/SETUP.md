@@ -94,10 +94,16 @@ The repository's gates were written and run on macOS and Linux. Measured on nati
 | `python docs/tools/docs_check.py` | Works | With `--write` Python emits CRLF line endings: convert the regenerated files back to LF before committing. The dispatcher refuses a run that turns an LF file into CRLF |
 | `python docs/master-parity-plan-2026-09-29/validate_plan.py` | Works only with `PYTHONUTF8=1` | The dispatcher sets it for every gate |
 | `pnpm docs:refs` | **Fails** | The script runs POSIX shell snippets (`test $(ls ... | wc -l) -ge ...`) through the system shell, which is `cmd.exe` on Windows |
-| Type checks, lint, database and browser tests | Not yet run here | The database and browser tests need Docker |
+| `pnpm typecheck`, and `tsc -p tsconfig.test.json --noEmit` in `apps/api` | Works (about 40 s cold, 15 s warm) | `pnpm typecheck:tests` itself fails: its script sets `NODE_OPTIONS=` in front of the command |
+| `pnpm progress`, `pnpm progress:check`, `node scripts/generate-edition-table.mjs --check`, `python docs/parity/build_matrix.py` | Work | Convert Python's output back to LF |
+| Unit tests that need no database (`pnpm --filter @datacare/core exec vitest run ...`) | Work | |
+| `pnpm size:budget` | **Misreports** | It flagged a file that CI accepts; its recorded ceilings are keyed by forward-slash paths |
+| `pnpm lint` | **Misreports** | It scans the generated Prisma client and reports its column names as secrets |
+| `node scripts/check-kernel-conformance.mjs` | **Fails** | Imports by absolute `D:\` path, which Node refuses as a module URL |
+| Database and browser tests | Cannot run | They need Docker |
 
-So a native Windows machine is sound for study, case lists, implementation, reviews and the Python gates, and
-relies on GitHub CI for the rest. To run every gate locally on Windows, install an Ubuntu distribution in WSL 2
+So a native Windows machine is sound for study, case lists, implementation, reviews, type checks and the Python
+gates, and relies on GitHub CI for the rest. To run every gate locally on Windows, install an Ubuntu distribution in WSL 2
 (`wsl --install -d Ubuntu`) and repeat sections 2 to 4 inside it, with `<root>` on the Linux file system; the
 layout and every command stay the same.
 

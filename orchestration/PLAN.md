@@ -320,11 +320,26 @@ five passes in six.
   3.12, OpenCode 2.3.0, Codex CLI 0.169.0. `pnpm install` works on native Windows; the Python plan and
   documentation gates pass.
 
+- **First day of use (16 November).** The first packet runs with real models, all on Claude (Haiku for study and case
+  lists, Sonnet for reviews, fixes and a lead):
+  - three open pull requests reviewed by independent Sonnet sessions; two real defects fixed before merge (Lite
+    could change user rights through the API; a cash or bank grid line with a write-off only was silently
+    dropped), and the remaining notes posted on each pull request;
+  - `main` found red since 10 November: one browser case looked its voucher up by row text and matched another
+    voucher on any date from the 10th to the 19th. The cause was read from the CI screenshot and fixed;
+  - pull request #234 merged by the watcher with every check green;
+  - studies for the HuId Report, the Cash Bank report and Year Create (250, 299 and 219 citations, all
+    verified), and the HuId Report's frozen list of 91 cases.
+
 **Not yet done**
 
-- No cheap provider is connected, so tier C falls back to Claude Haiku. The OpenCode and Codex command lines are
+- No cheap provider is connected, so tier C runs on Claude Haiku. The OpenCode and Codex command lines are
   written from each tool's own help output and have not run a real packet.
-- Only the `study` role has run with a real model. The other roles have contracts and no run yet.
+- The `study`, `cases`, `review`, `fix` and `lead` roles have run with a real model. `tests`, `implement`, `ui`,
+  `verify` and `records` have contracts and no run yet.
+- What the first day showed is missing: a worker's database tests cannot run on this machine, so twice they
+  were first executed on CI (they passed); one fix pushed a file over the 1,500-line cap, which only CI caught.
+  [PACKETS.md](PACKETS.md) section 1 now says how packets must allow for both.
 - Docker cannot start until WSL 2 is installed (an administrator step, see [SETUP.md](SETUP.md)); until then
   database and browser tests run only on CI. Stages P3 to P6 are therefore unproven on this machine.
 - One repository gate, `pnpm docs:refs`, cannot pass on native Windows because it runs POSIX shell snippets;

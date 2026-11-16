@@ -45,6 +45,18 @@ The first fenced `json` block in the file.
 Gates stop at the first failure unless a gate sets `"stopOnFail": false`. Environment variables go in `env`, not
 in front of the command, so the same packet runs on Windows, macOS and Linux.
 
+**Gates for a packet that changes code.** At least `pnpm typecheck`, and on Linux, macOS or WSL also
+`pnpm size:budget` and `pnpm lint`. On native Windows those two and `check-kernel-conformance.mjs` misreport
+(section 5 of SETUP.md), so there CI is the gate. Because of that, state the size rule in the brief itself: a
+source file may not pass 1,500 lines, and a file that is already near its ceiling gets new code in a new file.
+Give the line count of each file the packet will touch (`wc -l`) under "Facts you need".
+
+**When the machine cannot run the database or the browser** (no Docker), a `tests`, `implement` or `fix` session
+can only type-check what it wrote. It reports `PARTIAL` and lists the tests it could not run; the dispatcher's
+verdict is then `fail` and nothing is committed. The supervisor reads the diff, commits with `--no-worker
+--commit`, pushes, and lets CI run the tests: on a draft pull request for a work package, the tests-only push
+must show the new tests failing and the implementation push must turn them green.
+
 ## 2. Brief
 
 Everything after the header. Required sections: `## Goal` and `## Done when`. Recommended: `## What to cover` or

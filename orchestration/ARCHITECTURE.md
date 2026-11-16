@@ -55,6 +55,7 @@ result. A lead is a worker on a stronger model with a harder packet; it is launc
 | `orchestration/packets/` | Work packets, one file per session to run |
 | `orchestration/work/<WP>/` | What workers produced that later sessions need: study, cases, red list, verification |
 | `orchestration/setup/` | Machine bootstrap scripts |
+| `orchestration/tools/` | Two helpers for the merge queue (section 10): the rule-based resolver for record-file conflicts and the merge watcher |
 | `.claude/skills/`, `.claude/agents/`, `CLAUDE.md` | The architect's and lead's skills, the two subagents, the entry file Claude Code reads |
 | `.opencode/agents/dc-worker.md` | Permission rules for OpenCode worker sessions |
 | `AGENTS.md` | The project rules every tool reads, with a section for dispatched workers |
@@ -168,7 +169,35 @@ Write `roles/<name>.md` (what it reads, what it produces, its method, its own ru
 `routing.json` with a tier and any locked paths, and add a row to [PLAN.md](PLAN.md) section 4 if it is a stage of
 the pipeline. `common.md` and `report.md` are included for every role and are not roles themselves.
 
-## 9. Limits of the design
+## 9. The merge queue: two helpers
+
+Every pull request that carries plan ids edits the same record files, so after `git merge origin/main` the same
+five files conflict each time: the backlog JSON, document 12, the claims file, the master plan's state table and
+the handoff. Both helpers contain no model.
+
+**`node orchestration/tools/resolve-records.mjs <worktree>`** resolves those conflicts by rule and stops, leaving
+the file conflicted, on anything the rules cannot decide:
+
+- the backlog: a three-way merge of the parsed JSON, where arrays of objects with an `id` merge by id;
+- Markdown tables: rows are keyed by their first cell, and a row changed on one side only takes that side;
+- `project-memory/HANDOFF.md`: both sides' new sections are kept, the branch's first.
+
+After it, regenerate and check, exactly as the master plan's step S9 says:
+`python3 docs/tools/docs_check.py --write`, `pnpm progress` (from `web/`), `python3 docs/parity/build_matrix.py`,
+then `validate_plan.py`, `docs_check.py` and `pnpm progress:check`. Stage the files by name and commit the merge.
+
+**`bash orchestration/tools/merge-when-green.sh <pr> <worktree>`** waits for the pull request's checks and
+squash-merges it only if all of these hold: every check passed; the pull request is open and mergeable; its
+remote head is the commit that was checked; the branch contains the newest `origin/main`. Otherwise it prints
+why and merges nothing. Use it only when the owner has delegated merging for that pull request. It is a
+background process: stopping the supervising session does not always stop it, so when work is paused, check that
+no `merge-when-green` process is left.
+
+A red check is read from the run itself before anything is re-run: `gh run view <run> --job <job> --log-failed`
+for the failing step, and for a browser case the run's artifact (`gh api repos/<owner>/<repo>/actions/artifacts/<id>/zip`),
+whose `01-*.png` shows what the screen held.
+
+## 10. Limits of the design
 
 - The dispatcher runs one packet per invocation. Parallelism is several invocations, each on a different branch;
   two packets on the same branch must not run at once.

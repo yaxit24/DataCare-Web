@@ -29,6 +29,7 @@ export const UNIVERSAL_DENY = [
   'orchestration/roles/**',
   'orchestration/setup/**',
   'orchestration/test/**',
+  'orchestration/tools/**',
   '**/.env',
   '**/.env.*',
 ];
