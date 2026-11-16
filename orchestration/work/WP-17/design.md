@@ -32,8 +32,8 @@ desktop query filters on the location (study Calculations, detail query).
 
 **Tenant isolation.** Both queries run inside `withTxBudget(prisma, s.tenantId, 'read', …)` (forced row-level security applies to
 `AC_DATA`, `BOOK_DATA`, `AC_MAST`, `SL_DATA`, `PR_DATA`); each also states `CO_CODE` and `LC_CODE` explicitly. All values are bound
-parameters. The desktop's string-built SQL is not ported (study weakness 1). No company-year filter and no data-type filter
-on the screen (section 10, decisions 3 and 4).
+parameters. The desktop's string-built SQL is not ported (study weakness 1). **Supervisor decision, 16 November 2026: the company year of the session is applied** to the opening query, the detail query and the print (`"CO_YEAR" = $n`), on the screen and on paper alike. The desktop keeps each financial year in its own database (see the Year Create study, `orchestration/work/WP-22/study.md` on its branch: a new year is a restored copy that is then purged of other years), so its grid can never see another year. In the web's single database the `CO_YEAR` column is that boundary. Without it the opening balance would add earlier years' movements to the opening that was already carried into this year. No data-type filter
+on the screen (section 10, decision 3). Decision 4 of section 10 is replaced by this paragraph.
 
 **Opening query** (study Calculations step 1: the SQL at `RP_CASH_BANK.cs:3160`). One row:
 `SUM(CR_AMT - DR_AMT)` over `AC_DATA` where company, location, `AC_CODE = $acCode`, `VCH_DATE < $from`, and `CO_BOOK = $bookCode`

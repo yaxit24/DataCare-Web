@@ -357,8 +357,8 @@ Status: executable
 ### cash-bank-report.scope.year-sentinel   (T11 Scope/rights; gaps 11)
 Layer: database
 Steps: 1. Use seed A plus a line of company year 2025-26 on account 00001 (06/11/2026, DR 333.00). 2. Run the grid and the print.
-Expected: Blocked (see Status).
-Status: blocked: owner decision. The desktop grid has no company-year filter (RP_CASH_BANK.cs:3162 {{WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.AC_CODE = '" + tAcCode.Text + "'}} filters on company, location and account only), but the print has one: RP_CASH_BANK.cs:3547 {{{AC_DATA.CO_YEAR} = '}}. So the screen would show the 2025-26 line and the print would not. The owner must choose one rule.
+Expected: the 2025-26 line (DR 333.00) appears neither in the grid nor in the print, and neither the opening balance nor the totals include it; the figures are exactly those of seed A alone.
+Status: executable (supervisor decision, 16 November 2026: the session's company year is applied on the screen and in the print, because the desktop keeps each year in its own database). Background: the desktop grid has no company-year filter (RP_CASH_BANK.cs:3162 {{WHERE A.CO_CODE = '" + DC_Main.MCo_code + "' AND A.LC_CODE = '" + DC_Main.MLc_code + "' AND A.AC_CODE = '" + tAcCode.Text + "'}} filters on company, location and account only), but the print has one: RP_CASH_BANK.cs:3547 {{{AC_DATA.CO_YEAR} = '}}. So the screen would show the 2025-26 line and the print would not. The owner must choose one rule.
 
 ### cash-bank-report.rights.menu-no-right   (T11 Scope/rights)
 Layer: browser
@@ -595,7 +595,7 @@ Behaviours in the study that no executable case covers. Each has a reason; the o
 5. **How the web page renders dates (study open question 5).** Not read. `cash-bank-report.row.date-format` fails until it is read, so it is not a blind pass.
 6. **Generic CSV, Excel and PDF layout (study open question 6).** Blocked: `cash-bank-report.print.generic-export-layout`.
 7. **Data-type rule for screen, totals and print (study weakness 3).** Blocked: `cash-bank-report.filter.data-type-rule`. Owner question: which rule applies? The desktop grid and print disagree, and the Lite value of MsDataType was not read.
-8. **Company year on the screen (gap 11).** Blocked: `cash-bank-report.scope.year-sentinel`. Owner question: should the screen filter on company year, as the print does?
+8. **Company year on the screen (gap 11).** Decided by the supervisor on 16 November 2026: the session's company year is applied on the screen and in the print (the desktop keeps each year in its own database). The case `cash-bank-report.scope.year-sentinel` is executable. The owner may confirm.
 9. **Date change does not refill the grid (desktop behaviour).** Blocked: `cash-bank-report.filter.date-change-no-refresh`. Owner question: does the web refresh on a date change?
 10. **Zero balance: the grid shows blank, the print shows `Cr`.** Blocked: `cash-bank-report.print.balance-zero-side`. Owner question: which side should a zero balance show?
 11. **Visible Delete button with an empty handler (study weakness 5).** Blocked: `cash-bank-report.reset.delete-button-inert`. Owner question: should the web show a Delete button at all?
@@ -622,7 +622,7 @@ Behaviours in the study that no executable case covers. Each has a reason; the o
 | T08 Reopen/no-op | 1 | 0 | 1 |
 | T09 Edit | 1 | 0 | 1 |
 | T10 Delete/cancel/reverse | 2 | 1 | 0 |
-| T11 Scope/rights | 7 | 2 | 0 |
+| T11 Scope/rights | 7 | 1 | 0 |
 | T12 Concurrency | 1 | 0 | 1 |
 | T13 Retry/unknown | 1 | 0 | 1 |
 | T14 Rollback | 1 | 0 | 1 |
@@ -630,7 +630,7 @@ Behaviours in the study that no executable case covers. Each has a reason; the o
 | T16 Report/output | 11 | 5 | 0 |
 | T17 Keyboard/usability | 9 | 0 | 0 |
 | T18 Full journey | 2 | 2 | 0 |
-| **All** | **87** | **19** | **7** |
+| **All** | **87** | **18** | **7** |
 
 Counts come from the case headings in this file. Blocked cases stay in the denominator. T07 to T09, T12 to T14 are N/A because the report writes nothing (Report addendum). T04 stale-result is N/A because the desktop lookup is synchronous.
 The 19 gaps are each named in at least one case heading (gap 19 by `balance.seed-a-hand-totals`).
