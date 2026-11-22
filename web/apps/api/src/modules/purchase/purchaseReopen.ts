@@ -1,4 +1,4 @@
-import { toIsoDate, type LabourType } from '@datacare/core';
+import { round, toIsoDate, type LabourType } from '@datacare/core';
 import { legacyLabourModeFor } from '../shared/labourDesktop.js';
 import { hallmarkLineView } from './purchaseHallmark.js';
 
@@ -16,7 +16,6 @@ const text = (value: unknown): string => String(value ?? '').trim();
 const num = (value: unknown): number => (value == null ? 0 : Number(value));
 const optional = (value: unknown): number | undefined =>
   value == null ? undefined : Number(value);
-const round2 = (n: number): number => Math.round((n + Number.EPSILON) * 100) / 100;
 
 export function purchaseStoneView(row: Record<string, unknown>): Record<string, unknown> {
   return {
@@ -187,7 +186,7 @@ export function purchaseHeaderView(h: Record<string, unknown>): Record<string, u
     totals: {
       net: num(h.NET_AMT),
       discount: num(h.DISC_AMT),
-      taxable: round2(num(h.NET_AMT) - num(h.DISC_AMT)),
+      taxable: round(num(h.NET_AMT) - num(h.DISC_AMT), 2),
       tax: num(h.TAX_AMT),
       cgst: num(h.CGST_TAX),
       sgst: num(h.SGST_TAX),
