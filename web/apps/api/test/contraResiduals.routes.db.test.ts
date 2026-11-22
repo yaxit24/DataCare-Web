@@ -445,7 +445,7 @@ const threeRows = (): Line[] => [
             BOOK,
             vch,
           )
-        )[0];
+        )[0]!;
         expect(s.dr, `${t} ${vch}`).toBe(s.cr);
         expect(s.dr).toBe(100);
       }
