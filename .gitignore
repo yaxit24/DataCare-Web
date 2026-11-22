@@ -54,6 +54,8 @@ __pycache__/
 # Local runtime volumes and disposable scratch space
 pgdata/
 tmp/
+# Per-session scratch of a dispatched worker (prompt, form indexes, report): orchestration/ARCHITECTURE.md
+.orch/
 *.pid
 *.sock
 
