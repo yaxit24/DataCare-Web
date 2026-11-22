@@ -1603,7 +1603,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Rojmel | `RP_ROJMEL` | `/reports/rojmel` | `- - - - P L` | REPORT | P1-core |
 | Sale Zoom | `RP_SLPR_ZOOM` | `/reports/sales-register` | `- - - - P L` | REPORT | P1-core |
 | Sales Report | `RP_ALL` | `/reports/sales-register` | `- - - - P L` | REPORT | P1-core |
-| Stock Report | `RP_STOCK` | `/reports/tag-stock` | `- - - - P L` | REPORT | P1-core |
+| Stock Report | `RP_STOCK` | `/reports/stock-report` | `- - - - P L` | REPORT | P1-core |
 | Stock With Fine | `RP_STOCK_FINE` | `/reports/stock-valuation` | `- - - - P L` | REPORT | P1-core |
 | Tag Estmate | `RP_TAG_ESTMATE` | `/reports/tag-estimate` | `- - - - P L` | REPORT | P1-core |
 | Tag Image | `RP_TAG_IMAGE` | `/reports/tag-stock` | `C - - D - L` | REPORT | P1-core |
@@ -1824,11 +1824,11 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `RP_STOCK` — constructor caption 'Stock Report' ([MDI_FORM.cs:8881-8890](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8881-L8890)).
 - **Does:** Summarises stock by group, product, item, design, safe, table or trading dimension.
-- **Looks:** Date/item/group/product/location selectors, seven dimension buttons, a summary grid and voucher detail.
+- **Looks:** Date/item/group/product/location selectors, eight dimension buttons, a summary grid and voucher detail.
 - **Reads:** MAIN_STOCK, ITEM_MAST, GROUP_MAST, PRODUCT_MAST, LOCT_MAST, TABLE_MAST, BOOK_DATA.
-- **Web:** `/reports/tag-stock`; `GET /reports/tag-stock`. Can: print, list.
-- **Remaining:** Tag Stock is not RP_STOCK: group/product/item/design/safe/table/trading summaries, gross-weight options and drill-down are missing.
-- **Owners:** N24, X26, P10-04, N57, N75, G71, N85.
+- **Web:** `/reports/stock-report`; `GET /reports/stock-report`, `GET /reports/stock-report/movements`, `GET /reports/stock-report/export.csv`, `GET /reports/stock-report/export.xlsx`. Can: print, list.
+- **Remaining:** RP_STOCK is on its own route: eight dimensions, date-range columns with hidden transfer columns, gross-weight check box, filters, drill-down with KR_FINE/ITM_FINE, Total row, name search, G/I/P keys and Print/Excel behind the Print right (N241, G253). Remaining: voucher zoom, the InOut item-ledger print, Crystal template layouts, EMP ISU adjustment, Item Lot dimension and the LC box.
+- **Owners:** N24, X26, P10-04, N57, N75, G71, N85, N241, G253.
 - **Evidence:** [RP_STOCK.cs:4277-5160](../../unified/src/csharp/DataCareNext/RP_STOCK.cs#L4277-L5160).
 
 ### Stock With Fine

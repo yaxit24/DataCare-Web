@@ -408,7 +408,7 @@ browser case per screen first (red), then the hook (green).
 | WP-13 | Approval Rpt | `RP_ALL` approval branch | P2 | M | WP-11, WP-01 | 03 | partial |
 | WP-14 | Order Report | `RP_ALL` order branch | P2 | M | WP-11, WP-03 | — (use 01's pattern) | no longer BROKEN once WP-03 (#232) merges |
 | WP-15 | Tag Stock | `RP_TAG.cs` (10,813) | P1 | L | — | 04 | partial |
-| WP-16 | Stock Report (new route) | `RP_STOCK.cs` (6,407) | P1 | L | WP-15 | 05 | not started |
+| WP-16 | Stock Report (new route) | `RP_STOCK.cs` (6,407) | P1 | L | WP-15 | 05 | PR open (N241, G253) |
 | WP-17 | Cash Bank | `RP_CASH_BANK.cs` (4,813) | P1 | L | — | 06 | not started |
 | WP-18 | HuId Report | `RP_HUID.cs` (2,731) | P2 | M | — | 08 | filters only |
 | WP-19 | Gst Report: the 13 blocked cases | `RP_GST.cs` (3,944) | P1 | M | — | 07 | 57/70 |

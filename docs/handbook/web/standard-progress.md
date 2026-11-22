@@ -6,10 +6,10 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 
 | Tier | Menus | With a feature module | Module with no open defect | Done |
 |---|---:|---:|---:|---:|
-| Lite (first, D32) | 49 | 40 | 37 | 0 |
+| Lite (first, D32) | 49 | 39 | 36 | 0 |
 | Basic (added by Basic) | 29 | 1 | 1 | 0 |
 | Standard (added by Standard) | 36 | 1 | 1 | 0 |
-| **Standard total** | **114** | **42** | **39** | **0** |
+| **Standard total** | **114** | **41** | **38** | **0** |
 
 ## Lite — 49 menus (first, D32)
 
@@ -44,7 +44,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Other | Order Cancel | `/txn/order-cancel` | PARTIAL | order-cancel | module green | — |
 | Other | Data Import | `/masters/accounts` | PARTIAL | — | no module | — |
 | Report | Ledger Report | `/reports/account-ledger` | REPORT | account-ledger | module green | — |
-| Report | Stock Report | `/reports/tag-stock` | REPORT | tag-cancel | module green | — |
+| Report | Stock Report | `/reports/stock-report` | REPORT | — | no module | — |
 | Report | Tag Stock | `/reports/tag-stock` | REPORT | tag-cancel | module green | — |
 | Report | Sales Report | `/reports/sales-register` | REPORT | — | no module | — |
 | Report | Purchase Rpt | `/reports/purchase-register` | REPORT | — | no module | — |
