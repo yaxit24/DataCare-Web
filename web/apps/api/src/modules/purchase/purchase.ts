@@ -1017,7 +1017,7 @@ async function writePurchaseTx(
         round2(c.calc.metal + c.calc.labour + num(c.in.otherAmount)) + num(c.in.commissionAmount),
       ),
       TAX_PRC: taxPct,
-      HM_ID: c.in.huid ?? null,
+      HM_ID: text(c.in.huid) || null, // a reopened blank HUID stays NULL (WP-28)
       // Desktop PR_DETL columns (TR_PURC.cs:13100-13192). Grid cells left blank persist as ''/0,
       // which is what an absent input reproduces here.
       IT_DESC: text(c.in.itDesc).slice(0, 100) || null, // mSG_PR[i,2]  :13100
@@ -1156,9 +1156,20 @@ async function writePurchaseTx(
             ITM_AMT: c.calc.metal,
             LBR_AMT: c.calc.labour,
             OTH_AMT: num(c.in.otherAmount),
-            RATE_TYPE: c.in.metalAmount != null ? 'A' : 'P',
+            // 'A' only when the amount was typed over the computed one: a reopened line always sends its stored
+            // amount back and must keep its 'P' (WP-28, D6).
+            RATE_TYPE:
+              c.in.metalAmount != null &&
+              computeLine(
+                { ...c.in, metalAmount: undefined },
+                roundingPolicy,
+                behavior.purchaseAmountType,
+                behavior.labourIncludesGhat,
+              ).metal !== c.calc.metal
+                ? 'A'
+                : 'P',
             IT_TYPE: lineItemType(idx),
-            HM_ID: c.in.huid ?? null,
+            HM_ID: text(c.in.huid) || null, // a reopened blank HUID stays NULL (WP-28)
             // TR_PURC_HM.cs:8237-8316: a TAG PURCHASE tag takes its net, rate, amount, cost and margin from the band.
             ...(isTagBook
               ? tagBandBarColumns(c.in, { rate: num(c.in.rate), metal: c.calc.metal })
@@ -1287,10 +1298,10 @@ async function writePurchaseTx(
     FX_CODE: '', // literal            :13055
     MTL_RATE: 0, // literal            :13056
     // G4/G91: stored with a charge or a chosen hallmark tax code, even a zero charge (TR_PURC_HM.cs:7854-7856).
-    HM_AMT: hmAmt > 0 || hmTaxCode ? hmAmt : null,
+    HM_AMT: hmAmt,
     HM_TAX_CODE: hmTaxCode || null,
-    HM_TAX_PRC: hmAmt > 0 || hmTaxCode ? hmTaxPct : null,
-    HM_TAX_AMT: hmAmt > 0 || hmTaxCode ? hmTax : null,
+    HM_TAX_PRC: hmAmt > 0 || hmTaxCode ? hmTaxPct : 0, // 0 = the stored default
+    HM_TAX_AMT: hmAmt > 0 || hmTaxCode ? hmTax : 0,
     EMP_CODE: text(input.empCode).slice(0, 10) || null, // tEmpCode (TR_PURC_HM.cs:7897)
     VCH_DESC: text(input.vchDesc) || null,
   });
@@ -1516,7 +1527,7 @@ async function writePurchaseTx(
     BOOK_NAME: bookPolicy.bookName,
     AC_CODE: input.acCode,
     IT_CODE: c.in.itCode,
-    TAG_NO: c.in.tagNo ?? 'N',
+    TAG_NO: c.in.tagNo || 'N', // '' from a reopened untagged line is still the 'N' sentinel (WP-28)
     VCH_SRNO: tagSrnos.get(idx) ?? 0,
     TR_TYPE: 'P',
     ITM_SIGN: '+',

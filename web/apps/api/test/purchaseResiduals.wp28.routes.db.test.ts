@@ -22,7 +22,7 @@ import { tenantTables } from './support/tenantSnapshot.js';
  * `row_id` is ignored, because a rewritten row is a new physical row).
  */
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
-const tenantId = 'wp28-purchase-residuals-db';
+const tenantId = 'wp28-purc-db';
 const PASSWORD = 'Wp28-Purchase-Residuals!2026';
 const SECRET = 'wp28-purchase-residuals-route-test-signing-secret';
 const LOGIN = 'buyer28';
@@ -115,6 +115,8 @@ const SILVER_FULL = { ...SILVER, hmIdAmount: 40, itmColor: 'WHT' };
   const snapshot = async (): Promise<Record<string, string[]>> => {
     const out: Record<string, string[]> = {};
     for (const table of await tenantTables(owner)) {
+      // audit_log is the request trail (one row per HTTP call, with a clock), not voucher data.
+      if (table === 'audit_log') continue;
       const rows = (await owner.$queryRawUnsafe(
         `SELECT (to_jsonb(t) - 'row_id')::text AS r FROM "${table}" t WHERE tenant_id=$1`,
         tenantId,
@@ -474,7 +476,10 @@ const SILVER_FULL = { ...SILVER, hmIdAmount: 40, itmColor: 'WHT' };
     const empty = await counts();
     for (const book of ['SL', 'PX', 'PB', 'ZZ']) {
       const refused = await call('POST', '/purchases', purchase([GOLD], { coBook: book }));
-      expect(refused.statusCode, `${book}: ${refused.body}`).toBe(400);
+      // SL and PB reach the purchase writer (400); PX (not in use) and ZZ (unknown) are refused earlier by the
+      // business-scope check as book-unavailable (409). Either way nothing is written.
+      expect([400, 409], `${book}: ${refused.body}`).toContain(refused.statusCode);
+      if (book === 'SL' || book === 'PB') expect(refused.statusCode, refused.body).toBe(400);
     }
     expect(await counts()).toEqual(empty);
     await create(purchase([GOLD], { coBook: TAG_BOOK }));
