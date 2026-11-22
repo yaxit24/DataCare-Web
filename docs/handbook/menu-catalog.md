@@ -56,7 +56,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Setting | `UT_SETTING` | `/settings` | `- R E - - L` | PARTIAL | P1-core |
 | Setting Main | `UT_SETTING_MAIN` | `/settings` | `- R E - - L` | PARTIAL | P1-core |
 | Trade Master | `MS_TRADE` | `/masters/trade` | `C R E D - L` | PARTIAL | P1-core |
-| User Create | `MS_USER` | `/admin/users` | `C R E - - L` | PARTIAL | P1-core |
+| User Create | `MS_USER` | `/admin/users` | `C R E D - L` | PARTIAL | P1-core |
 | Year Create | `MS_YEAR` | `/masters/year-create` | `C - - - - L` | PARTIAL | P1-core |
 | Year Select | `MS_OPNCOMP` | `/select` | `- R E - - L` | PARTIAL | P1-core |
 
@@ -205,11 +205,11 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `MS_USER` — direct constructor ([MDI_FORM.cs:7451-7460](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7451-L7460)).
 - **Does:** Creates users and assigns global and per-form View/Edit/Delete/Print rights.
-- **Looks:** User, password and type fields, an existing-user table and a per-menu rights matrix.
+- **Looks:** Desktop: Create New User, Old/New/Confirm Password and User Type boxes, the User Name box of existing users, Save/Print/Cancel/Delete/Exit and (non-Lite) the per-menu rights grid. Web: the same boxes and buttons in tab order; the rights grid only outside Lite (D36); an administrator's temporary-password reset replaces F1.
 - **Writes:** LOGIN_MAST, USER_SET, MENU_DATA, BOOK_IDTL, TILE_DATA.
-- **Web:** `/admin/users`; `GET /admin/users`, `POST /admin/users`, `GET /admin/users/:loginName/form-rights`, `POST /admin/users/:loginName/form-rights`, `POST /admin/users/:loginName/rights`, `POST /admin/users/:loginName/password-reset`. Can: create, reopen, edit, list.
-- **Remaining:** User delete and print, complete action-level enforcement, atomic audit and acceptance remain.
-- **Owners:** X29, G34, G35, N55, N77.
+- **Web:** `/admin/users`; `GET /admin/users`, `POST /admin/users`, `POST /admin/users/:loginName/update`, `DELETE /admin/users/:loginName`, `GET /admin/users/:loginName/form-rights`, `POST /admin/users/:loginName/form-rights`, `POST /admin/users/:loginName/rights`, `POST /admin/users/:loginName/password-reset`. Can: create, reopen, edit, delete, list.
+- **Remaining:** N231/G243 (D34-D36): desktop texts, Confirm Password, edit-mode Save, Delete as deactivation with every session revoked, 8+ character passwords with deny-lists, Lite hides the rights grid; DB 13 of 13 and browser module users 22 of 22. Print prints nothing on the desktop either. Open: action-level enforcement of the stored rights on every route, desktop-runtime comparison and acceptance.
+- **Owners:** X29, G34, G35, N55, N77, G243, N231.
 - **Evidence:** [KB_master.md:79-106](../../project-memory/video-research/_kb/KB_master.md#L79-L106).
 
 ### Year Create
@@ -550,8 +550,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header; account, cheque, amount and kasar grid; employee/description footer; cheque print.
 - **Writes:** PAY_DATA, PAY_DETL, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, TEMP_BOOK_DATA.
 - **Web:** `/txn/payment?mode=BANK`; `POST /payments`, `POST /payments/multi`, `GET /payments/:vchNo`, `DELETE /payments/:vchNo`, `GET /finance/payment-voucher`. Can: create, print.
-- **Remaining:** Browser cases prove the screen opens in bank mode; none creates a Bank Payment yet. Reopen, edit, delete and reprint are proven only on Cash Received, which shares the form. Cheque and bank fields, versions, copies and a desktop-runtime comparison remain. The N52 Idempotency-Key guard covers the shared routes; no bank-mode replay case yet.
-- **Owners:** G50, N64, X16, N51, G29, N52, N74.
+- **Remaining:** Browser cases prove the screen opens in bank mode and that a Bank Payment with kasar posts 07/08 amount and 09/10 kasar legs (N232, G244; it used to be refused on the ledger key). Reopen, edit, delete and reprint are proven only on Cash Received, which shares the form. The Charges column (BANK_CHARGES, legs 11/12), Clearing Dt, versions, copies and a desktop-runtime comparison remain. The N52 Idempotency-Key guard covers the shared routes; no bank-mode replay case yet.
+- **Owners:** G50, N64, X16, N51, G29, N52, N74, G244, N232.
 - **Evidence:** [KB_transaction.md:176-200](../../project-memory/video-research/_kb/KB_transaction.md#L176-L200).
 
 ### Bank Received
@@ -561,8 +561,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header; account, cheque, amount and kasar grid; bank/employee footer and print dialog.
 - **Writes:** CASH_DATA, AC_DATA, ROJ_MEL_DATA, CARD_DATA, UPI_DATA, REMARK_DATA, TEMP_BOOK_DATA.
 - **Web:** `/txn/receipt?mode=BANK`; `POST /receipts`, `POST /receipts/multi`, `GET /receipts/:vchNo`, `DELETE /receipts/:vchNo`, `GET /finance/receipt-voucher`. Can: create, print.
-- **Remaining:** Browser cases prove bank and cheque receipts are created and that the screen opens in bank mode. Reopen, edit, delete and reprint are proven only on Cash Received, which shares the form. Per-bank slots, card and UPI identities, copies and a desktop-runtime comparison remain. The N52 Idempotency-Key guard covers the shared routes; no bank-mode replay case yet.
-- **Owners:** G50, N64, X16, N51, G29, N52, N74.
+- **Remaining:** Browser cases prove bank and cheque receipts are created and that the screen opens in bank mode. Reopen, edit, delete and reprint are proven only on Cash Received, which shares the form. The Charges column (BANK_CHARGES, legs 05/06), Clearing Dt, per-bank slots, card and UPI modes (no TR_CASH counterpart; owner call, G244), copies and a desktop-runtime comparison remain. The N52 Idempotency-Key guard covers the shared routes; no bank-mode replay case yet.
+- **Owners:** G50, N64, X16, N51, G29, N52, N74, G244, N232.
 - **Evidence:** [KB_transaction.md:176-200](../../project-memory/video-research/_kb/KB_transaction.md#L176-L200).
 
 ### Bul LcBook
@@ -605,8 +605,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/date header; multi-line account, amount and kasar grid; description/employee footer; print dialog.
 - **Writes:** CASH_DATA, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, TEMP_BOOK_DATA.
 - **Web:** `/txn/receipt`; `POST /receipts`, `POST /receipts/multi`, `GET /receipts/:vchNo`, `DELETE /receipts/:vchNo`. Can: create, print.
-- **Remaining:** Browser cases (cash-bank module, 20 of 22 applicable pass) prove create with kasar, reopen from the recent list and Vch No, edit, unchanged save, delete with audit, reprint, the cash-limit and out-of-year refusals, a double click saving one voucher, a replayed save request answering the first voucher (N52 Idempotency-Key) and a rolled-back ledger fault. Still open: card and UPI settlement (CARD_DATA, UPI_DATA), multi-line totals, copies and a desktop-runtime comparison.
-- **Owners:** G50, N64, G29, N52, X16, N51, N74.
+- **Remaining:** Browser cases (cash-bank module, 22 of 23 applicable pass, 1 blocked) prove create with kasar, the multi-line grid's TR_CASH totals row and one CASH_DATA row per line (N232), reopen from the recent list and Vch No, edit, unchanged save, delete with audit, reprint, the cash-limit and out-of-year refusals, a double click saving one voucher, a replayed save request answering the first voucher (N52 Idempotency-Key) and a rolled-back ledger fault. Still open: card and UPI modes have no TR_CASH counterpart (T06 blocked for an owner call, G244), copies and a desktop-runtime comparison.
+- **Owners:** G50, N64, G29, N52, X16, N51, N74, G244, N232.
 - **Evidence:** [KB_transaction.md:112-139](../../project-memory/video-research/_kb/KB_transaction.md#L112-L139).
 
 ### Contra Entry
@@ -2291,10 +2291,10 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Desktop:** `TR_SL_ORD_ADJ` — CurBookHelp('ORDER CANCEL') ([MDI_FORM.cs:8628-8639](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8628-L8639)).
 - **Does:** Cancels pending orders and adjusts advance, kasar and refund through a chosen cash or bank account.
 - **Looks:** Voucher/date header and a pending-order grid with order, adjusted, kasar, paid and refund-account columns.
-- **Writes:** SL_ORD_ADJ, SL_ORD_DATA, SL_ORD_DETL, AC_DATA, ROJ_MEL_DATA, APR_DETL, MAIN_STOCK.
-- **Web:** `/txn/order-cancel`; `POST /sales-orders/:vchNo/cancel-refund`. Can: create, list.
-- **Remaining:** Single order only; multi-order adjustment, bounds, the full ledger/Rojmel/stock/tag write set, lifecycle and print remain.
-- **Owners:** N37, G07, X14, P05-04.
+- **Writes:** SL_ORD_ADJ, SL_ORD_DATA, SL_ORD_DETL, AC_DATA, ROJ_MEL_DATA, APR_DETL, BAR_DETL, BAR_IDTL, MAIN_STOCK, TEMP_BOOK_DATA.
+- **Web:** `/txn/order-cancel`; `GET /order-cancel/pending-orders`, `GET /order-cancel/defaults`, `POST /order-cancel`, `GET /order-cancel/:vchNo`, `PUT /order-cancel/:vchNo`, `DELETE /order-cancel/:vchNo`, `GET /order-cancel/:vchNo/print`. Can: create, list.
+- **Remaining:** Multi-order voucher, advance/kasar/refund bounds, the ledger/Rojmel/tag/stock write set, version-guarded edit/delete, idempotent create and OrderCancelVch print are built (N233). Open: an order that holds a tag cannot be made on the web Sales Order, so the held-tag browser case seeds the hold on a screen-made order; the party balance label (LOpAmt) and the F1 voucher list's own columns are not shown; desktop-runtime comparison is 0%.
+- **Owners:** N37, G07, X14, P05-04, N233, G245.
 - **Evidence:** [KB_other.md:277-369](../../project-memory/video-research/_kb/KB_other.md#L277-L369).
 
 ### Physical Stock

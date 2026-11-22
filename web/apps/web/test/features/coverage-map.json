@@ -48,7 +48,13 @@
     "usersRights": {
       "covers": [
         "web/apps/web/app/(app)/admin/users/page.tsx",
-        "web/apps/api/src/modules/rbac/users.ts"
+        "web/apps/web/components/UserRightsGrid.tsx",
+        "web/apps/web/lib/userCreate.ts",
+        "web/apps/api/src/modules/rbac/users.ts",
+        "web/apps/api/src/modules/rbac/userMaster.ts",
+        "web/apps/api/src/routes/userMaster.ts",
+        "web/apps/api/src/modules/auth/password.ts",
+        "web/apps/api/src/modules/auth/commonPasswords.ts"
       ]
     },
     "companyMaster": {
@@ -86,6 +92,8 @@
         "web/apps/web/app/(app)/txn/receipt/page.tsx",
         "web/apps/web/app/(app)/txn/payment/page.tsx",
         "web/apps/api/src/modules/finance/finance.ts",
+        "web/apps/api/src/modules/finance/legCodes.ts",
+        "web/packages/core/src/cashGridTotals.ts",
         "web/apps/api/src/modules/finance/batchReceipt.ts",
         "web/apps/api/src/modules/finance/lifecycle.ts",
         "web/apps/api/src/modules/vouchers/list.ts"
@@ -121,6 +129,17 @@
         "web/apps/web/components/SalesOrderUpiGrid.tsx",
         "web/apps/web/components/SalesOrderOldMetalGrid.tsx",
         "web/apps/web/lib/salesOrderOldMetal.ts"
+      ]
+    },
+    "orderCancel": {
+      "covers": [
+        "web/apps/web/app/(app)/txn/order-cancel/page.tsx",
+        "web/apps/web/components/OrderCancelGridRow.tsx",
+        "web/apps/web/components/OrderCancelOrderHelp.tsx",
+        "web/apps/api/src/modules/sales/orderCancel.ts",
+        "web/apps/api/src/modules/sales/orderCancelTags.ts",
+        "web/apps/api/src/modules/sales/orderCancelPrint.ts",
+        "web/apps/api/src/routes/orderCancel.ts"
       ]
     },
     "partyOpening": {

@@ -1,3 +1,20 @@
+## 2026-11-09 — Order Cancel is the desktop TR_SL_ORD_ADJ voucher (N233 / G245, WP-02)
+
+- 2026-11-09: one voucher cancels the open advance of many orders (SL_ORD_ADJ, Order_Adj_Ledr/Rojmel, held-tag release), version-guarded
+  edit/delete, Idempotency-Key on POST /order-cancel, OrderCancelVch print; the open-advance rule is shared with the sale under a row lock.
+- 2026-11-09: order-cancel module 24 cases, none blocked (the held-tag case seeds only the hold on a screen-made order); ORC book now provisioned CASH/KASAR.
+
+## 2026-11-09 — Cash and Bank vouchers follow the TR_CASH calculations (N232 / G244, WP-05)
+
+- 2026-11-09: the multi-line grid shows the TR_CASH totals row (Σ Amount "0.00", Σ Kasar "0.000", kernel `cashGridTotals`), a multi-line receipt writes one CASH_DATA row per line and no PAY_DETL, and a Bank Payment posts its kasar on 09/10 (it was refused on the ledger key). `cash-bank`: 22 of 23 pass.
+- 2026-11-09: T06 card/UPI stays blocked for an owner call: TR_CASH has no card or UPI mode, and Card Rec (TR_CARD_REC, Pro) adds a whole-rupee commission where the web subtracts a two-place one. Open: bank Charges (slot 3) and Clearing Dt; payments in PAY_DATA instead of CASH_DATA.
+- 2026-11-16: a grid line is saved when Amount + Kasar is not zero (`TR_CASH.cs:3014`); a line with a kasar and no amount was dropped before, on the page and in both writers. It posts the kasar pair only (`Ac_Ledr.cs:567`, `:571`). A negative Amount or Kasar is refused with a visible error (deliberate difference: the desktop posts it signed). Found by the pre-merge review of PR #237.
+
+## 2026-11-09 — User Create is the desktop MS_USER form (N231 / G243, WP-06, D34-D36)
+
+- Desktop texts, tab order, Confirm Password on leaving the box, edit-mode Save with the Old Password check and Delete (`MS_USER.cs:1820-2253`); D34 8+ character passwords with deny-lists and per-account back-off, D35 delete = deactivate with every session revoked (a deleted admin's open session is refused on its next request), D36 Lite hides the rights grid. Not ported: plaintext LOGIN_PWD, F1 password reveal, the ABC reset tool.
+- `userMaster.routes.db.test.ts` 13 of 13; users browser module 22 of 22 (T01-T18, none blocked). Catalog stays PARTIAL: action-level enforcement of the stored rights and desktop-runtime comparison remain.
+
 ## 2026-11-09 — Sales Order scheme tender (WP-03, N230, G206 scheme part)
 
 - Owner decision: follow the source. The typed Scheme Amt joins ADV_AMT and Order_Rojmel type 05 (`Ac_Rojmel.cs:19`) debits the MEMB

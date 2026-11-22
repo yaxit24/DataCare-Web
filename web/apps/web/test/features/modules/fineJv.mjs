@@ -129,9 +129,21 @@ async function create(page, rows = twoRows(), options = {}) {
   return formatted;
 }
 
+/**
+ * The Recent vouchers row of one voucher, found by its Vch cell alone. Do not search the row text: its cells sit
+ * together in it, so voucher 00001 beside a date that begins with 1 reads "0000116/11/2026" and matched voucher 00011.
+ * That sent print.fine-jv-bill to the wrong voucher on the 10th to the 19th of every month.
+ */
+function recentRow(page, vchNo) {
+  return page
+    .locator('table.grid tr')
+    .filter({ has: page.getByRole('cell', { name: vchNo, exact: true }) })
+    .last();
+}
+
 async function load(page, vchNo) {
   await page.getByRole('button', { name: '▸ Recent vouchers', exact: true }).click();
-  const row = page.locator('table.grid tr', { hasText: vchNo }).last();
+  const row = recentRow(page, vchNo);
   await row.getByRole('button', { name: 'Load', exact: true }).click();
   await page.getByRole('button', { name: `Update #${vchNo}`, exact: true }).waitFor();
 }
@@ -689,7 +701,7 @@ export const fineJv = {
         const vchNo = await create(page, twoRows({ fine: '5.5', toDesc: 'to be deleted' }));
         assert.equal((await remarkRows(ctx, vchNo)).length, 1);
         await page.getByRole('button', { name: '▸ Recent vouchers', exact: true }).click();
-        const row = page.locator('table.grid tr', { hasText: vchNo }).last();
+        const row = recentRow(page, vchNo);
         await Promise.all([
           page.waitForResponse((response) => isApi(response, 'DELETE', `/fine-jv/${vchNo}`)),
           row.getByRole('button', { name: 'Delete', exact: true }).click(),
@@ -756,7 +768,7 @@ export const fineJv = {
         const viewer = await ctx.session(as(USERS.printViewer.user));
         await openFineJv(viewer.page);
         await viewer.page.getByRole('button', { name: '▸ Recent vouchers', exact: true }).click();
-        const row = viewer.page.locator('table.grid tr', { hasText: vchNo }).last();
+        const row = recentRow(viewer.page, vchNo);
         const [printed] = await Promise.all([
           viewer.page.waitForEvent('popup'),
           row.getByRole('link', { name: 'Print', exact: true }).click(),
@@ -872,7 +884,7 @@ export const fineJv = {
           metal: 'G',
         });
         await page.getByRole('button', { name: '▸ Recent vouchers', exact: true }).click();
-        const row = page.locator('table.grid tr', { hasText: vchNo }).last();
+        const row = recentRow(page, vchNo);
         const [printed] = await Promise.all([
           page.waitForEvent('popup'),
           row.getByRole('link', { name: 'Print', exact: true }).click(),
