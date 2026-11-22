@@ -7883,6 +7883,39 @@
       "statusNote": "IMPLEMENTED, not accepted. Desktop oracle sales-line: KNOWN_MISMATCHES empty (the eight labour.pct.* entries removed and passing). sales-invoice module 34 applicable, 32 passed, 0 failed, 2 blocked (both pre-existing, unrelated); new case formula.percentage-labour passes. sales-return 25 of 26 (1 blocked, pre-existing; new case config.all-rof-remove-keeps-whole-rupees). gst-report, group-master and item-master expectations moved to whole-rupee lines and pass. Not modelled: the registration-serial branches (DM035NPDM, HM199NEPK). Desktop match 0% beyond the oracle vectors."
     },
     {
+      "id": "N236",
+      "status": "implemented-unverified",
+      "action": "Balance TrFr is the desktop BtmSchm form with the five Lite dataset buttons. Ac Balance carries parties to the closing date per AC_CODE and DATA_TYPE into OP_DATA with Party Opening legs (Cr-positive, gold and silver by IT_TYPE, decimal half-away rounding, zero-skip); Item Stock carries untagged MAIN_STOCK into ITM_OPBL (fine = net x AVG_TOUCH / 100); server-computed Transfer Year, target-year replace, one transaction under an advisory lock. Tag Stock, Sales Order and Approval are implicit in the one-database web: the buttons run the desktop selection, report the open count and write nothing.",
+      "parentLabels": "P0; L3; T01-T18; WP-23",
+      "startAfter": [
+        "N233"
+      ],
+      "requiredProof": "closing(N) = opening(N+1) database tests per account and DATA_TYPE and per item, worked from the desktop formulas, failing on the previous writer and passing now; re-run, rollback after the first table, scope, concurrency and refusal cases; unit vectors for the rounding half-cases and the tag/order/approval value lists; the balance-transfer browser module in CI; all repository gates.",
+      "gapIds": "G248",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/apps/api/src/modules/ops/balanceTransfer.ts",
+        "web/apps/api/src/modules/ops/balanceTransferRules.ts",
+        "web/apps/api/src/modules/ops/balanceTransferSelect.ts",
+        "web/apps/api/src/routes/balanceTransfer.ts",
+        "web/apps/web/app/(app)/company/balance-transfer/page.tsx",
+        "web/apps/api/test/balanceTransfer.db.test.ts",
+        "web/apps/api/test/balanceTransferRules.test.ts",
+        "web/apps/api/test/balanceTransferSelect.db.test.ts",
+        "web/apps/web/test/features/modules/balanceTransfer.mjs",
+        "orchestration/work/WP-23/cases.md",
+        "web/apps/api/src/modules/shared/carriedOpening.ts",
+        "web/apps/api/test/balanceTransferReaders.db.test.ts",
+        "web/packages/db/prisma/migrations/20261122090000_itm_opbl_carried_from/migration.sql",
+        "web/packages/db/prisma/migrations/20261122100000_legacy_year_end_openings_carried/migration.sql"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Decisions (decided 2026-11-22 by the architect, owner may override): Q1/Q8 Tag Stock, Sales Order and Approval are implicit in the one-database web (tag stock, open orders and open approvals already read every year), so those buttons run the desktop selection, report the open count with the completion text and write nothing; Q9 no web stock reader adds ITM_OPBL (stock.ts onHandNet reads MAIN_STOCK of every year), so Item Stock writes ITM_OPBL as the desktop does and changes no balance; Q2/Q3 offsetting money/gold and pcs/weight are carried, not dropped (deliberate difference). Cases: 81 executable, 3 blocked (Q6, AvgTouch, tag-counter contradiction), 25 N/A. DB/unit 65/65 locally; browser module green in CI on the previous push. Opening model (decided 2026-11-22 by the architect, owner may override): a carried opening is an AC_DATA leg in book 000 with BOOK_NAME 'BAL TRFR' (shared/carriedOpening.ts) next to its OP_DATA row; year-scoped readers (trial balance/balances/balance sheet/P&L/outstanding with a year, desktopAccountBalance, Party Opening) count it; cross-year readers (Account Ledger, accounting ledger and trial balance without a year, partyBalance, cash book, bank book, Wh Sales balance, consignment opening, graph, day book) exclude it. One writer per account: the party carry (carryPartiesTx) serves Balance TrFr and Year-End Close; Year-End Close writes only non-party accounts, scoped by location, and replaces its legacy ACOP/OPENING/1 legs. Item Stock writes ITM_OPBL with CARRIED_FROM; stock (onHandNet) reads MAIN_STOCK of every year and never ITM_OPBL; Item Opening Save posts no MAIN_STOCK leg for a carried item; the carry replaces a hand-keyed N+1 opening together with its ITOBL stock and DM rows. Re-review decisions (architect, 2026-11-22, owner may override): Year Create's Carry Forward routes through the same single writer (carryOpeningsTx); migration 20261122100000 relabels legacy Year-End Close legs (ACOP/OPENING/1) as carried; editing or deleting a carried opening on Party Opening, the Party master or Item Opening is refused (unchanged master saves pass); group summary, voucher register without a year and Data Refresh totals exclude carried legs; the carries replace only the rows they own. Desktop match 0%."
+    },
+    {
       "id": "N248",
       "status": "implemented-unverified",
       "action": "Wh Sales like TR_WH_SALE: hand-typed item-detail rows for a loose line (CommPassTotal_Idtl, SL_IDTL, DM_DATA, roll-up), fine kasar (Ksr Fine boxes, Tot Fine, ledger legs 27/28/33/34, day book 07/08), SL_IDTL rows under the printed line, the desktop Wh_Sales_Rojmel rows for a gold voucher (05/06/14/27, names, keys) and the version token on edit and delete.",

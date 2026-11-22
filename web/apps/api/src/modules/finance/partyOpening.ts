@@ -2,6 +2,7 @@ import { round, toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { insertRowTx } from '../posting/posting.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
+import { CARRIED_OPENING_BOOK_NAME } from '../shared/carriedOpening.js';
 
 /**
  * Party Opening (desktop TR_AC_OPBL, menu Master → Party Opening). The Party master's inline opening (MS_ACCT.cs:7856-7905)
@@ -447,6 +448,120 @@ async function partyNameTx(
   return rows.length ? String(rows[0].nm ?? '') : null;
 }
 
+/**
+ * A carried opening (Balance TrFr / Year-End Close, shared/carriedOpening.ts) cannot be edited or deleted here: in the
+ * one-database web the closed year's history is the balance, so a different opening would show one figure to the
+ * year-scoped readers and another to the cross-year ones (architect, 2026-11-22, owner may override; the desktop edits
+ * OP_DATA freely). A hand-keyed opening stays editable.
+ */
+export async function refuseCarriedOpeningTx(
+  tx: any,
+  scope: PartyOpeningScope,
+  acCode: string,
+  dataType: string = DATA_TYPE,
+): Promise<void> {
+  const { coCode, lcCode, coYear } = scopeOf(scope);
+  const carried: any[] = await tx.$queryRawUnsafe(
+    `SELECT 1 FROM "AC_DATA" WHERE ${opDataWhere} AND "DATA_TYPE"=$5 AND "BOOK_NAME"=$6 LIMIT 1`,
+    coCode,
+    lcCode,
+    coYear,
+    acCode,
+    dataType,
+    CARRIED_OPENING_BOOK_NAME,
+  );
+  if (!carried.length) return;
+  const prior: any[] = await tx.$queryRawUnsafe(
+    `SELECT max("CO_YEAR") y FROM "YEAR_MAST" WHERE "CO_CODE"=$1 AND "CO_YEAR" < $2`,
+    coCode,
+    coYear,
+  );
+  throw new PartyOpeningValidationError(
+    carriedOpeningMessage(String(prior[0]?.y ?? 'the previous year')),
+  );
+}
+
+/**
+ * The Party master's inline opening (MS_ACCT.cs:7856-7905) for a party whose opening was carried: an unchanged opening
+ * is left as it is (the master is saved for its other fields), a changed one is refused like Party Opening. Returns
+ * false when nothing was written.
+ */
+export async function writeMasterOpeningTx(
+  tx: any,
+  scope: PartyOpeningScope,
+  acCode: string,
+  heads: PartyOpeningHeads,
+  mainUser: string,
+): Promise<boolean> {
+  const { coCode, lcCode, coYear } = scopeOf(scope);
+  const carried: any[] = await tx.$queryRawUnsafe(
+    `SELECT 1 FROM "AC_DATA" WHERE ${opDataWhere} AND "DATA_TYPE"=$5 AND "BOOK_NAME"=$6 LIMIT 1`,
+    coCode,
+    lcCode,
+    coYear,
+    acCode,
+    DATA_TYPE,
+    CARRIED_OPENING_BOOK_NAME,
+  );
+  if (carried.length) {
+    const cur: any[] = await tx.$queryRawUnsafe(
+      `SELECT coalesce("OP_AMT",0)::float a, "OP_SIGN" s, coalesce("FINE_BAL",0)::float g, "FINE_SIGN" gs,
+              coalesce("SL_FINE_BAL",0)::float v, "SL_FINE_SIGN" vs
+         FROM "OP_DATA" WHERE ${opDataWhere} AND "DATA_TYPE"=$5 LIMIT 1`,
+      coCode,
+      lcCode,
+      coYear,
+      acCode,
+      DATA_TYPE,
+    );
+    const c = cur[0];
+    const same =
+      c &&
+      round(c.a, 2) === heads.amount &&
+      (heads.amount === 0 || c.s === heads.sign) &&
+      round(c.g, 3) === heads.gold &&
+      (heads.gold === 0 || c.gs === heads.goldSign) &&
+      round(c.v, 3) === heads.silver &&
+      (heads.silver === 0 || c.vs === heads.silverSign);
+    if (same) return false;
+    await refuseCarriedOpeningTx(tx, scope, acCode);
+  }
+  await writePartyOpeningTx(tx, scope, acCode, heads, mainUser);
+  return true;
+}
+
+/**
+ * The message when an account with a carried opening in any year of the company and location is about to be deleted
+ * (Party master, Address master), or null. Deleting it would orphan or drop a balance carried from the closed year.
+ */
+export async function carriedOpeningDeleteProblemTx(
+  tx: any,
+  scope: { coCode: string; lcCode?: string },
+  acCode: string,
+): Promise<string | null> {
+  const legs: any[] = await tx.$queryRawUnsafe(
+    `SELECT d."CO_YEAR" y FROM "AC_DATA" d
+      WHERE d."CO_CODE"=$1 AND d."LC_CODE"=$2 AND d."AC_CODE"=$3 AND d."CO_BOOK"='000' AND d."BOOK_NAME"=$4
+      ORDER BY d."CO_YEAR" DESC LIMIT 1`,
+    scope.coCode,
+    scope.lcCode ?? '01',
+    acCode,
+    CARRIED_OPENING_BOOK_NAME,
+  );
+  if (!legs.length) return null;
+  const prior: any[] = await tx.$queryRawUnsafe(
+    `SELECT max("CO_YEAR") y FROM "YEAR_MAST" WHERE "CO_CODE"=$1 AND "CO_YEAR" < $2`,
+    scope.coCode,
+    legs[0].y,
+  );
+  return carriedOpeningMessage(String(prior[0]?.y ?? 'the previous year'));
+}
+
+/** The refusal text for an edit or delete of a carried opening (Party Opening and Item Opening). */
+export function carriedOpeningMessage(fromYear: string): string {
+  return `This opening was carried from ${fromYear}; correct the closing year and run Balance TrFr again`;
+}
+
 /** Save (TR_AC_OPBL BtnSave). The party row is locked so two saves of the same party cannot both insert. */
 export async function savePartyOpening(
   prisma: any,
@@ -461,6 +576,7 @@ export async function savePartyOpening(
   return withTxBudget(prisma, input.scope.tenantId, 'voucher', async (tx: any) => {
     const acName = await partyNameTx(tx, input.scope.coCode, acCode, true);
     if (acName === null) throw new PartyOpeningValidationError(`party ${acCode} does not exist`);
+    await refuseCarriedOpeningTx(tx, input.scope, acCode);
     await writePartyOpeningTx(tx, input.scope, acCode, heads, input.mainUser ?? 'system', bills);
     return {
       acCode,
@@ -659,6 +775,7 @@ export async function deletePartyOpening(
   const { coCode, lcCode, coYear } = scopeOf(scope);
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     await partyNameTx(tx, coCode, acCode, true);
+    await refuseCarriedOpeningTx(tx, scope, acCode);
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT a."VCH_NO" vch, a."MAIN_USER" mu, m."AC_NAME" nm,
               a."OP_SIGN" osg, coalesce(a."OP_AMT",0)::float amt, a."FINE_SIGN" gsg, coalesce(a."FINE_BAL",0)::float g,
