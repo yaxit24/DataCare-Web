@@ -58,6 +58,40 @@ export function candidateProblem(candidate, runners, providers, env) {
   return null;
 }
 
+/** Usage limits: a worker whose plan or credits refuse requests is skipped until its window resets. */
+const LIMIT_RE = /usage limit|rate[- ]?limit|too many requests|\b429\b|\b402\b|exceed your available credits|insufficient (credits|balance|quota)|EntitlementError|quota exceeded/i;
+const candidateKey = (c) => `${c.runner}/${c.provider || ''}:${c.model || ''}`;
+function limitsFile(stateRoot) {
+  return path.join(stateRoot, 'limits.json');
+}
+export function readLimits(stateRoot) {
+  try {
+    const all = JSON.parse(fs.readFileSync(limitsFile(stateRoot), 'utf8'));
+    return Object.fromEntries(Object.entries(all).filter(([, until]) => until > Date.now()));
+  } catch {
+    return {};
+  }
+}
+/** Reads a worker log; when it shows a usage limit, records the candidate as limited and returns the reset time. */
+export function noteLimit(stateRoot, candidate, logText) {
+  const m = logText.match(LIMIT_RE);
+  if (!m) return null;
+  let until = Date.now() + 5 * 3600_000; // the plans' short window is five hours
+  const at = logText.match(/try again at (\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+  if (at) {
+    const d = new Date();
+    let h = Number(at[1]) % 12;
+    if ((at[3] || '').toUpperCase() === 'PM') h += 12;
+    d.setHours(h, Number(at[2]) + 2, 0, 0);
+    if (d.getTime() < Date.now()) d.setDate(d.getDate() + 1);
+    until = d.getTime();
+  }
+  const all = readLimits(stateRoot);
+  all[candidateKey(candidate)] = until;
+  fs.writeFileSync(limitsFile(stateRoot), JSON.stringify(all, null, 2));
+  return { until, reason: m[0] };
+}
+
 export function pickCandidate(tier, { runnerName, model } = {}, stateRoot) {
   const routing = loadConfig('routing.json');
   const runners = loadConfig('runners.json');
@@ -71,9 +105,11 @@ export function pickCandidate(tier, { runnerName, model } = {}, stateRoot) {
     return candidate;
   }
   const skipped = [];
+  const limited = readLimits(stateRoot);
   for (const candidate of routing.tiers[tier]?.candidates || []) {
     const c = model ? { ...candidate, model } : candidate;
-    const problem = candidateProblem(c, runners, providers, env);
+    const until = limited[candidateKey(c)];
+    const problem = until ? `usage limit until ${new Date(until).toLocaleTimeString()}` : candidateProblem(c, runners, providers, env);
     if (!problem) return { ...c, skipped };
     skipped.push(`${c.runner}${c.provider ? `/${c.provider}` : ''}: ${problem}`);
   }
@@ -246,9 +282,10 @@ export async function runPacket(packetFile, opts = {}) {
 
   let candidate = null;
   if (!opts.noWorker && !opts.runnerCmd) candidate = pickCandidate(scope.tier, { runnerName: opts.runner, model: opts.model }, stateRoot);
-  const workerName = opts.noWorker ? 'none (checks only)' : opts.runnerCmd ? 'custom command' : `${candidate.runner}${candidate.provider ? `/${candidate.provider}` : ''}:${candidate.model || 'default'}`;
+  let workerName = opts.noWorker ? 'none (checks only)' : opts.runnerCmd ? 'custom command' : `${candidate.runner}${candidate.provider ? `/${candidate.provider}` : ''}:${candidate.model || 'default'}`;
 
   let attempt = 0;
+  let switches = 0;
   let worker = { code: 0, timedOut: false, tail: '' };
   let guards;
   let gates = [];
@@ -272,6 +309,20 @@ export async function runPacket(packetFile, opts = {}) {
       else {
         const command = buildCommand(candidate, { model: candidate.model || '', worktree, runId, pointer, lastMessage: path.join(runDir, `last-message-${attempt}.txt`) });
         worker = await launch({ bin: command.bin, args: command.args }, { cwd: worktree, env: workerEnv(candidate, stateRoot), logFile, stdin: command.prompt === 'stdin' ? prompt : undefined, timeoutMs });
+        // A plan or credit limit is not the worker's fault: mark that model limited and move to the next one in the
+        // tier without spending an attempt. A forced --runner has no next one, so it fails as before.
+        const logText = fs.existsSync(logFile) ? fs.readFileSync(logFile, 'utf8').slice(-20000) : '';
+        // Only the end of the log decides: the middle holds file contents the worker read, which may mention limits.
+        const hit = worker.code !== 0 || !fs.existsSync(reportPath) ? noteLimit(stateRoot, candidate, logText.slice(-3000)) : null;
+        if (hit && !opts.runner && switches < 6) {
+          switches++;
+          console.error(`orch: ${workerName} hit a usage limit (${hit.reason}); limited until ${new Date(hit.until).toLocaleTimeString()}`);
+          candidate = pickCandidate(scope.tier, { model: opts.model }, stateRoot);
+          workerName = `${candidate.runner}${candidate.provider ? `/${candidate.provider}` : ''}:${candidate.model || 'default'}`;
+          console.error(`orch: switching to ${workerName}`);
+          attempt--;
+          continue;
+        }
       }
     }
     guards = runGuards(worktree, startSha, scope, packet);

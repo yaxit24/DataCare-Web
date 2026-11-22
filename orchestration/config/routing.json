@@ -20,6 +20,21 @@
           "effort": "medium"
         },
         {
+          "runner": "opencode",
+          "provider": "opencode-go",
+          "model": "opencode-go/kimi-k2.7-code"
+        },
+        {
+          "runner": "opencode",
+          "provider": "opencode-go",
+          "model": "opencode-go/qwen4-max"
+        },
+        {
+          "runner": "opencode",
+          "provider": "opencode-go",
+          "model": "opencode-go/deepseek-v4-pro"
+        },
+        {
           "runner": "codex",
           "model": "gpt-6-astra"
         },
@@ -33,6 +48,21 @@
     "C": {
       "use": "Bulk grade: desktop study, case lists, tests, routine implementation, records",
       "candidates": [
+        {
+          "runner": "opencode",
+          "provider": "opencode-go",
+          "model": "opencode-go/deepseek-v4.1-flash"
+        },
+        {
+          "runner": "opencode",
+          "provider": "opencode-go",
+          "model": "opencode-go/mimo-v2.6-flash"
+        },
+        {
+          "runner": "opencode",
+          "provider": "opencode-go",
+          "model": "opencode-go/hy4-flash-free"
+        },
         {
           "runner": "codex",
           "model": "gpt-6-astra"
@@ -51,11 +81,6 @@
           "runner": "opencode",
           "provider": "openrouter",
           "model": "openrouter/tencent/hy4-flash"
-        },
-        {
-          "runner": "opencode",
-          "provider": "opencode-go",
-          "model": ""
         },
         {
           "runner": "opencode",
