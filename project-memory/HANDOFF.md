@@ -3,7 +3,9 @@
 - 2026-11-22: /masters/books is its own page with the slot grid; /masters/books-master writes header and slots in one transaction with the
   MS_BOOK save/delete checks and texts; generic BOOK_DATA writes are refused. D4 family lock on a book with vouchers is a web message.
 - 2026-11-22: provisioning adds the template slots (OIN/OEX 2-3, TSP 1-9 with 6 SALES / 7 PURCHASE / 8 SLVSALE / 9 SLVPURC, PR/TPR 5 DISCOUNT,
-  LBR 8-11), Data Type A, AC_NAME = account name; only new companies. Fine families and old companies untouched.
+  LBR 8-11), Data Type A, AC_NAME = account name; only new companies. Fine families untouched.
+- 2026-11-22: existing companies: migration 20261122090000_book_template_slots rewrites a web-seeded slot only while it still holds the old seed's account
+  (TSP 6/7/8/9), inserts absent template slots and the DISCOUNT account; operator-changed slots kept; idempotent.
 
 ## 2026-11-09 — Order Cancel is the desktop TR_SL_ORD_ADJ voucher (N233 / G245, WP-02)
 

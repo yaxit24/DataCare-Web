@@ -7856,7 +7856,7 @@
     {
       "id": "N240",
       "status": "implemented-unverified",
-      "action": "Company → Books is the desktop MS_BOOK screen: a dedicated Books module and routes (/masters/books-master) write the BOOK_DATA header and its BOOK_DETL posting slots in one transaction (the generic master CRUD now refuses BOOK_DATA writes); BtnSave_Click's checks and texts in order (reserved 218/888/999, short name, code/name), duplicate code/name texts, box limits and first-letter combos; family templates from the MS_UPDATE.cs BOOK_IDTL inserts (decision D1) matched by SR_NO; blank slots allowed with Data Type A (D5); direction and invoice type locked on a saved book (Ctrl+O not ported, D6); a book with vouchers keeps its family (D4); the desktop delete guards inside the deleting transaction; version tokens; provisioning gives the template slots the seed missed (OTH INC/OTH EXP 2-3, TAG SPLIT 1-9, PURCHASE/TAG PURCHASE 5 with a DISCOUNT account, LABOUR WORK 8-11), Data Type A and the account's name. The page is its own route with a slot-grid component.",
+      "action": "Company → Books is the desktop MS_BOOK screen: a dedicated Books module and routes (/masters/books-master) write the BOOK_DATA header and its BOOK_DETL posting slots in one transaction (the generic master CRUD now refuses BOOK_DATA writes); BtnSave_Click's checks and texts in order (reserved 218/888/999, short name, code/name), duplicate code/name texts, box limits and first-letter combos; family templates from the MS_UPDATE.cs BOOK_IDTL inserts (decision D1) matched by SR_NO; blank slots allowed with Data Type A (D5); direction and invoice type locked on a saved book (Ctrl+O not ported, D6); a book with vouchers keeps its family (D4); the desktop delete guards inside the deleting transaction; version tokens; provisioning gives the template slots the seed missed (OTH INC/OTH EXP 2-3, TAG SPLIT 1-9, PURCHASE/TAG PURCHASE 5 with a DISCOUNT account, LABOUR WORK 8-11), Data Type A and the account's name; existing companies: migration 20261122090000_book_template_slots (a web-seeded slot still at the old seed's account takes the template account, absent template slots are added, operator changes kept). The page is its own route with a slot-grid component.",
       "parentLabels": "P1-core; L5; WP-21; T01-T18",
       "startAfter": [
         "N234"
@@ -7877,6 +7877,8 @@
         "web/apps/web/components/BookSlotGrid.tsx",
         "web/apps/api/test/booksMaster.db.test.ts",
         "web/apps/api/test/booksPosting.routes.db.test.ts",
+        "web/packages/db/prisma/migrations/20261122090000_book_template_slots/migration.sql",
+        "web/apps/api/test/bookTemplateSlotsMigration.db.test.ts",
         "web/apps/web/test/features/modules/books.mjs"
       ]
     }

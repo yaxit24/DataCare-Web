@@ -185,4 +185,9 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261109150000_login_mast_active_backoff',
     checksum: 'b13f8ce87226403aa889cc662246a7dcdf64d9844cf3cf51ae2d253c5582d910',
   },
+  {
+    // N240/G252: existing companies' web-seeded books get the desktop template slots (TAG SPLIT 6-9 sale/purchase).
+    name: '20261122090000_book_template_slots',
+    checksum: '5d31ad3136d6d02a24da51d789e3ad3ef30724303756b3921b549df2bfb735ca',
+  },
 ];
