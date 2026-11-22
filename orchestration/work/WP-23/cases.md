@@ -222,7 +222,7 @@ Layer: database
 Seed: items I4 with tag T010 (two BAR_IDTL rows: diamond 0.250 ct, stone 0.100 ct) and tag T011 (one BAR_IDTL row 0.050 ct), both in stock.
 Steps: 1. Run `Tag Stock`.
 Expected: next-year BAR_IDTL has 2 rows owned by T010 with `ISR_NO` 1 and 2 and 1 row owned by T011 with `ISR_NO` 1 (BtmSchm.cs:2520 {{INSERT INTO BAR_IDTL(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,ISR_NO}} insert; `ISR_NO` = R+1 per tag, study §C). No stone row moved to the other tag.
-Status: executable (gap 10)
+Status: blocked at the database layer (WP-23 build): Q8, see `tag.create.footprint`. The mapping layer (ISR_NO renumbered 1.. per tag, parent voucher and SR_NO; BtmSchm.cs:2520) passes in balanceTransferMapping.test.ts.
 
 ### balance-transfer.order.children.lines-and-stones   (T05 Children)
 Layer: unit
@@ -283,13 +283,13 @@ Layer: database
 Seed: item I4 (type G) with tags T001 and T002 in stock and item I5 with tag T003 in stock; next year has no book-000 vouchers. T001: 5.000 gross, 4.800 net, touch 91.600, fine 4.397; T002: 7.000 / 6.500 / 91.600 / 5.954.
 Steps: 1. Click `Tag Stock`; confirm.
 Expected: 3 BAR_DETL rows (CO_YEAR 2026-27, CO_BOOK '000', INOUT 'I', ENTRY 'O', VCH_DATE 2026-03-31, STK_DATE copied, all weights/fine/touch copied unchanged); BAR_DATA headers: I4 → VCH_NO 00001, I5 → 00002, OP_STK 'Y' (BtmSchm.cs:2324 {{string text = "00001";}}, BtmSchm.cs:2627 {{INSERT INTO BAR_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,VCH_DATE, AC}}). BAR_DETL for I4 carry VCH_NO 00001, SR_NO 1 and 2; I5 carries VCH_NO 00002.
-Status: executable (gap 10)
+Status: blocked (WP-23 build, 2026-11-22): Q8: the web keeps every year in one database and counts a tag in stock in any year (`web/apps/api/src/modules/shared/stockSql.ts:3-16` barTagAvailableSql has no CO_YEAR filter; used by `reports/tagStock.ts:57` and `stock/stock.ts:340`), so writing the desktop copy of each tag into year N+1 would count every carried tag twice (count 3 becomes 6). Owner: year-scope tag availability, mark carried copies, or decide that one database needs no tag carry. The selection (tag.rule.carried-when-positive) and the column mapping are ported and pass.
 
 ### balance-transfer.tag.create.date-is-day-before-opening   (T07 Create)
 Layer: database
 Seed: as above.
 Expected: VCH_DATE on every carried BAR_DETL and BAR_DATA row is 2026-03-31 = `OP_DATE` 2026-04-01 minus one day (BtmSchm.cs:2378 {{mTrfr_dt.AddDays(-1.0)}}).
-Status: executable (gap 10)
+Status: blocked (WP-23 build): Q8, see `tag.create.footprint`. The day-before-opening date is pinned by the unit layer (`dayBefore`, tag mapping).
 
 ## T08 Reopen and no-op
 
@@ -309,13 +309,13 @@ Status: executable (gap 21)
 Layer: browser
 Steps: 1. Run `Tag Stock`. 2. Year N+1, Tag Opening and Tag Stock report.
 Expected: T001, T002, T003 listed with their original weights and fines; count 3.
-Status: executable (gap 10)
+Status: blocked (WP-23 build): Q8, see `tag.create.footprint`. The day-before-opening date is pinned by the unit layer (`dayBefore`, tag mapping).
 
 ### balance-transfer.reopen.rerun-unchanged-is-identical   (T08 Reopen/no-op)
 Layer: database
 Steps: 1. Run each of the five buttons twice with nothing changed in between. 2. Compare a full dump of the carried rows (all columns, including NULLs and `ADD_DATE`) between run 1 and run 2.
 Expected: identical, row for row; `ADD_DATE` NULL stays NULL (study §A.6).
-Status: executable for Ac Balance, Item Stock and Tag Stock. blocked for Sales Order and Approval: Q1 (representation of the carried row).
+Status: executable for Ac Balance and Item Stock (pass at the database layer). blocked for Tag Stock (Q8, see `tag.create.footprint`), Sales Order and Approval (Q1).
 
 ## T09 Edit (re-run after a change replaces, never doubles)
 
@@ -353,13 +353,13 @@ Status: executable (gap 9)
 Layer: database
 Seed: `tag.create.footprint` once; sell T002 in year N dated 2026-03-28; run again.
 Expected: BAR_DETL carry rows 2 (T001, T003), BAR_DATA 2 headers: I4 → 00001, I5 → 00002 (counter restarts at 00001: BtmSchm.cs:2321 {{DELETE FROM BAR_DATA WHERE CO_CODE}}, :2322 and :2323 delete the day's rows; BtmSchm.cs:2324 {{string text = "00001";}}). No row for T002.
-Status: executable (gap 10)
+Status: blocked (WP-23 build): Q8, see `tag.create.footprint`. The day-before-opening date is pinned by the unit layer (`dayBefore`, tag mapping).
 
 ### balance-transfer.rerun.tag-counter-continues-after-other-vouchers   (T09 Edit)
 Layer: database
 Seed: next year already holds a book-'000' BAR_DATA voucher 00007 on 2026-04-10 (a user entry, not the opening day); run `Tag Stock`.
 Expected: the headers start at 00008 (MAX+1: BtmSchm.cs:2338 {{SELECT MAX((VCH_NO)) AS CoCode  From BAR_DATA}}); the 2026-04-10 voucher is untouched.
-Status: executable (gap 10)
+Status: blocked (WP-23 build): Q8, see `tag.create.footprint`. Also the expectation conflicts with the code: the counter moves on only when it reaches the first existing book-000 voucher (BtmSchm.cs:2369-2371 `if (text2 == text) text = text3`), so with only 00007 present two items get 00001 and 00002, not 00008; the case needs re-deriving before it runs.
 
 ### balance-transfer.rerun.sales-order-replaces   (T09 Edit)
 Layer: database
@@ -436,7 +436,7 @@ Status: executable
 Layer: database
 Steps: 1. Start `Tag Stock` while another session sells T001 in year N.
 Expected: T001 is carried in a run that read it as in stock and not carried after the sale commits; never carried twice, and the opening is consistent with a rerun.
-Status: executable
+Status: blocked (WP-23 build): Q8, see `tag.create.footprint`. The day-before-opening date is pinned by the unit layer (`dayBefore`, tag mapping).
 
 ## T13 Retry and unknown outcome
 
@@ -469,7 +469,7 @@ Status: executable (gap 15)
 Layer: database
 Steps: 1. Inject a failure after the first BAR_DETL insert, once after BAR_IDTL, once after BAR_DATA.
 Expected: after each: no carry rows at all (BAR_DATA, BAR_DETL, BAR_IDTL for the opening day all as before the run); a pre-existing 2026-04-10 sentinel voucher untouched.
-Status: executable (gap 15)
+Status: blocked (WP-23 build): Q8, see `tag.create.footprint`. The day-before-opening date is pinned by the unit layer (`dayBefore`, tag mapping).
 
 ### balance-transfer.rollback.sales-order-after-header   (T14 Rollback)
 Layer: database
@@ -493,7 +493,7 @@ Status: executable (gap 16)
 Layer: database
 Steps: 1. Load the page (target 2026-27, `OP_DATE` 2026-04-01). 2. Change that year's `OP_DATE` to 2026-04-05 before the click. 3. Click `Tag Stock`.
 Expected: VCH_DATE of carried rows is 2026-04-04 (the current `OP_DATE` minus one day), not 2026-03-31: no stale value from page load.
-Status: executable (gap 10)
+Status: blocked (WP-23 build): Q8, see `tag.create.footprint`. The day-before-opening date is pinned by the unit layer (`dayBefore`, tag mapping).
 
 ### balance-transfer.config.new-year-created-after-load   (T15 Config/history)
 Layer: browser
@@ -547,7 +547,7 @@ Status: executable (gap 21)
 Layer: database
 Seed: the tags of `tag.create.footprint`.
 Expected: per tag: carried BAR_DETL count 3, Σ gross 5.000 + 7.000 + (T003's gross), Σ fine 4.397 + 5.954 + T003 fine; every tag number carried exactly once; the Tag Stock report of N closing lists the same 3 tags with the same weights.
-Status: executable (gap 21)
+Status: blocked (WP-23 build): Q8, see `tag.create.footprint`. The day-before-opening date is pinned by the unit layer (`dayBefore`, tag mapping).
 
 ### balance-transfer.identity.order-open-equals-carried   (T16 Report/output)
 Layer: database
@@ -677,13 +677,13 @@ Status: executable (gap 21)
 Layer: browser
 Steps: 1. Run `Tag Stock`. 2. In N+1 sell T001 at the counter.
 Expected: the tag is found at the carried weights, sale accepted, T001 gone from the Tag Stock report of N+1, T002 still there, count 3 → 2.
-Status: executable (gap 10)
+Status: blocked (WP-23 build): Q8, see `tag.create.footprint`. The day-before-opening date is pinned by the unit layer (`dayBefore`, tag mapping).
 
 ### balance-transfer.journey.item-carry-then-issue   (T18 Full journey)
 Layer: browser
 Steps: 1. Run `Item Stock`. 2. In N+1 issue 2 pcs of I1 (gross 20.000, net 19.600).
 Expected: I1 balance 6 − 2 = 4 pcs, net 58.950 − 19.600 = 39.350.
-Status: executable (gap 9)
+Status: blocked (WP-23 build): Q9: the desktop Item Stock writes only ITM_OPBL (BtmSchm.cs:2966) and the web stock reads MAIN_STOCK of every year, while the web Item Opening screen also writes MAIN_STOCK 'ITOBL' rows for its year; whether the N+1 item balance should count the carried opening (and how, without doubling year N's movements) is an owner decision. The ITM_OPBL row itself passes (item.create.footprint).
 
 ### balance-transfer.journey.order-carry-then-adjust   (T18 Full journey)
 Layer: browser
