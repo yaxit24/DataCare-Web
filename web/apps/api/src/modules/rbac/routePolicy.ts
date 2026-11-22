@@ -989,7 +989,11 @@ route('Reports/GST Input Register', ['GET /reports/gst-input-register']);
 route('Reports/Pledge Outstanding', ['GET /reports/dhrn-outstanding', 'GET /dhrn/os-letter']);
 route('Reports/Karigar Balances', ['GET /reports/karigar-balances']);
 route('Reports/Stock Valuation', ['GET /reports/stock-valuation']);
-route('Reports/Tag-Stock Report', ['GET /reports/tag-stock', 'GET /reports/tag-stock.csv']);
+route('Reports/Tag-Stock Report', [
+  'GET /reports/tag-stock',
+  'GET /reports/tag-stock.csv',
+  'GET /reports/tag-stock.xlsx',
+]);
 route('Reports/HuId Report', ['GET /reports/huid']);
 route('Reports/ItStk Level', ['GET /reports/item-weight-levels']);
 route('Reports/Bill Wise Profit', ['GET /reports/bill-profit']);
@@ -1089,6 +1093,7 @@ const PRINT_ROUTES = new Set([
   'GET /stock/tag-print-screen/labels',
   'POST /integrations/notify',
   'GET /reports/tag-stock.csv',
+  'GET /reports/tag-stock.xlsx',
   'GET /reports/karigar-ledger.print',
   'GET /reports/gst-report/export.csv',
   'GET /reports/gst-report/export.xlsx',

@@ -234,7 +234,6 @@ import {
   scaleCaptureEnabled,
 } from '../modules/integrations/scaleProtocol.js';
 import { registerTagPrintScreenRoutes } from './tagPrintScreen.js';
-import { tagStockReport, tagStockCsv } from '../modules/reports/tagStock.js';
 import { registerVoucherNavigationRoutes } from './voucherNavigation.js';
 import { postContra, deleteContra, getContra, editContra } from '../modules/finance/contra.js';
 import { registerSaleVoucherRoutes } from './saleVoucher.js';
@@ -251,6 +250,7 @@ import { registerProductMasterRoutes } from './productMaster.js';
 import { registerMasterScreenRoutes } from './masterScreens.js';
 import { registerWholesaleSaleRoutes } from './wholesaleSale.js';
 import { registerAccountLedgerRoutes } from './accountLedger.js';
+import { registerTagStockRoutes } from './tagStock.js';
 import { registerApprovalRoutes } from './approval.js';
 import { VoucherVersionConflictError } from '../modules/vouchers/version.js';
 import { listYears, createYear, carryForwardOpenings } from '../modules/masters/year.js';
@@ -4477,6 +4477,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // debit ageing, and its Excel/CSV/PDF outputs. The resolver feeds the screen and every export from
   // one path. Registered here (not with the other plugins above) because it needs `sendReportPdf`.
   registerAccountLedgerRoutes(app, { prisma, auth, guard, readScope, sendReportPdf });
+  registerTagStockRoutes(app, { prisma, auth, guard, scopeOf });
 
   // Screens for five reports registered only in REPORT_BUILDERS (exports worked, screens 404'd —
   // PARITY-EVALUATION-2026-09-28 D3). Each calls the export's own builder with its own inputs (so the
@@ -6369,32 +6370,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const q = (req.query ?? {}) as Record<string, string | undefined>;
     return run(reply, 200, () => orderLotZoom(prisma, readScope(req), q.lotNo ?? ''));
   });
-  app.get('/reports/tag-stock', auth, async (req) => {
-    const s = scopeOf(req);
-    const qy = (req.query as any) || {};
-    return tagStockReport(
-      prisma,
-      s.tenantId,
-      { CO_CODE: s.coCode, LC_CODE: s.lcCode },
-      (qy.tab || 'stock') as any,
-      { tblCode: qy.tblCode || undefined, itCode: qy.itCode || undefined },
-    );
-  });
-  app.get('/reports/tag-stock.csv', auth, async (req, reply) => {
-    const s = scopeOf(req);
-    const qy = (req.query as any) || {};
-    const rep = await tagStockReport(
-      prisma,
-      s.tenantId,
-      { CO_CODE: s.coCode, LC_CODE: s.lcCode },
-      (qy.tab || 'stock') as any,
-      { tblCode: qy.tblCode || undefined, itCode: qy.itCode || undefined },
-    );
-    return reply
-      .type('text/csv')
-      .header('content-disposition', `attachment; filename="tag-stock-${qy.tab || 'stock'}.csv"`)
-      .send(tagStockCsv(rep));
-  });
+  // GET /reports/tag-stock, .csv and .xlsx live in routes/tagStock.ts (the RP_TAG report), registered below.
   app.get('/reports/karigar-balances', auth, async (req) =>
     karigarBalances(prisma, readScope(req)),
   );

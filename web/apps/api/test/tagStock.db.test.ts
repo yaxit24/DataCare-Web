@@ -19,7 +19,7 @@ const TENANT = 'tag-stock-db';
 const OTHER_TENANT = 'tag-stock-oth';
 const CO = '01';
 const LC = '01';
-const YEAR = '2026-27';
+const YEAR = '2026-2027';
 const SYS = '2026-05-31';
 
 const owner = new PrismaClient({
@@ -602,7 +602,7 @@ d('Tag Stock report (RP_TAG) selections, stock state and totals', () => {
 
   it('only the session year and data type count (movements of another year or type never balance a tag)', async () => {
     const ay1 = T('AY1', 501, 'GR', 1, 1, 1, 100, 80, 5, 1, '7', 'C1', '2025-06-05');
-    await seedWith(ay1, [{ ...open(ay1) }], { year: '2025-26' });
+    await seedWith(ay1, [{ ...open(ay1) }], { year: '2025-2026' });
     const ad1 = T('AD1', 502, 'GR', 1, 1, 1, 100, 80, 5, 1, '7', 'C1', '2026-04-05');
     await seedWith(ad1, [open(ad1)], { dataType: 'B' });
     for (const tab of ['stock', 'out', 'all'])
@@ -767,19 +767,25 @@ d('Tag Stock report (RP_TAG) selections, stock state and totals', () => {
       A005: 'RG-9',
       A007: 'SC-1',
     };
-    for (const [tag, dsg] of Object.entries(designs))
-      await withTenant(owner, TENANT, (tx: any) =>
+    const setDesign = (tag: string, dsg: string) =>
+      withTenant(owner, TENANT, (tx: any) =>
         tx.$executeRawUnsafe(
-          `UPDATE "BAR_DETL" SET "DESIGN_NO"=$1 WHERE tenant_id=$2 AND "TAG_NO"=$3`,
+          `UPDATE "BAR_DETL" SET "DESIGN_NO"=$1 WHERE tenant_id=$2 AND "TAG_NO"=$3 AND "CO_CODE"=$4 AND "LC_CODE"=$5`,
           dsg,
           TENANT,
           tag,
+          CO,
+          LC,
         ),
       );
-    const rep = await run('stock', { designHelp: true });
-    const tags = tagsOf(rep);
-    expect(tags.slice(0, 2).sort()).toEqual(['A002', 'A005']);
-    expect(tags.slice(2)).toEqual(['A001', 'A007']);
+    try {
+      for (const [tag, dsg] of Object.entries(designs)) await setDesign(tag, dsg);
+      const tags = tagsOf(await run('stock', { designHelp: true }));
+      expect(tags.slice(0, 2).sort()).toEqual(['A002', 'A005']);
+      expect(tags.slice(2)).toEqual(['A001', 'A007']);
+    } finally {
+      for (const t of TAGS) await setDesign(t.tag, t.design!);
+    }
   });
 
   it('All with design help sorts by date then design', async () => {
