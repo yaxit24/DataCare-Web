@@ -959,13 +959,11 @@ export function buildRateCutRojmel(ctx: RojmelContext, legs: RateCutRojmelLegs):
  * one. `Ac_Rojmel.cs` is a later version than the code that wrote this data, but the divergence is not
  * uniform across routines, so each type is verified rather than assumed either way.
  *
- * Dead and deliberately not built: `03` card (`CARD_AMT` is 0 of 76), `07` rate-cut fine (`RCUT_FINE` 0 of
- * 76), `08` UPI (`UPI_DATA` has 1 row company-wide).
- *
- * **`05` scheme adjustment is an unresolved ANOMALY and must not be implemented on a guess.** `SCHM_AMT` is
- * non-zero on **7 of 76** orders, yet there are **zero** type-05 Rojmel rows — seven populated source rows
- * produced no output. Writing it would add rows the desktop does not have, which is a parity failure in the
- * opposite direction from a missing row and considerably harder to notice.
+ * Not built here: `07` rate-cut fine (`RCUT_FINE` 0 of 76; rate cut is not taken on the order screen).
+ * Types `03` card, `05` scheme and `08` UPI are written by the Sales Order tender module
+ * (`sales/salesOrderTender.ts`, `sales/salesOrderScheme.ts`). `05` follows the source by owner decision (N230):
+ * the 7 real orders without it are 3 of a year the day book no longer holds and 4 taken on the non-Lite MEMB
+ * ADJUST path, likely by an older build.
  */
 export const ROJMEL_ORDER_ROW_TYPE = {
   /** Advance received against the order. CREDIT, contra = `BOOK_DETL` slot 1 (book 020: `00001`). */

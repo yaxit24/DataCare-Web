@@ -163,3 +163,20 @@ describe('lineRecalc agrees with the core primitives the server uses', () => {
     );
   });
 });
+
+describe('sale ghat percentage (desktop oracle, family 1)', () => {
+  // desktop-oracle.yml run 42580947381, vectors ghat.pct1 / ghat.pct2.5 / ghat.pct3.33: TR_SALE.cs:10581 takes
+  // the percentage of NET weight (gross 10.555 - less 0.500 = 10.055).
+  it.each([
+    ['1.00', 0.101],
+    ['2.50', 0.251],
+    ['3.33', 0.335],
+  ])('ITM_GHT_PRC %s gives the desktop ghat weight', (pct, ghat) => {
+    const r = recalcLine(
+      { grossWt: '10.555', lessWt: '0.500', ghtPct: pct, touch: '91.60' },
+      'sale',
+    );
+    expect(r.netWt).toBe(10.055);
+    expect(r.ghtWt).toBe(ghat);
+  });
+});

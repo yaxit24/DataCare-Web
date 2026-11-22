@@ -227,3 +227,11 @@ describe('GV-LBR type codes', () => {
     });
   });
 });
+
+describe('desktop oracle, family 1: gross-wise labour has no ghat term', () => {
+  // desktop-oracle.yml run 42580947381, vectors labour.rate.G.ghtY and labour.rate.G.ghtN (TR_SALE.cs:11104).
+  it.each([true, false])('withGhat %s still prices gross weight alone', (withGhat) => {
+    const line = { grossWt: 10.555, netWt: 10.055, pcs: 3, ghatWt: 0.12, rate: 12.5 };
+    expect(desktopLabourAmount('G', line, { withGhat, decimals: 0 })).toBe(132);
+  });
+});

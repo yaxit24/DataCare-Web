@@ -10,6 +10,7 @@ import {
   orderOldMetalView,
   type OrderOldMetalRow,
 } from './salesOrderOldMetal.js';
+import { orderSchemeOf, resolveSchemeAccountTx, withSchemeRojmel } from './salesOrderScheme.js';
 import { SaleValidationError } from './sales.js';
 
 /**
@@ -29,8 +30,9 @@ import { SaleValidationError } from './sales.js';
  * type 08 + STR(SR_NO) (`Ac_Rojmel.cs:25`).
  *
  * N226 (G206): old gold and old silver are the grid MSG_OLD (`salesOrderOldMetal.ts`). Their amounts join ADV_AMT
- * (`:11368`) and the header's OLD_GL* columns come from the grid, so the request cannot set them. The scheme tender is
- * not taken by this screen yet.
+ * (`:11368`) and the header's OLD_GL* columns come from the grid, so the request cannot set them.
+ *
+ * G206 (scheme): the typed Scheme Amt joins ADV_AMT and writes Order_Rojmel type 05 (`salesOrderScheme.ts`).
  */
 export interface OrderUpiRow {
   srNo: number;
@@ -58,6 +60,10 @@ export interface OrderTender {
   oldMetal: OrderOldMetalRow[];
   /** The request carried the grid (the screen always does). Without it the header totals pass through as before. */
   oldMetalSent: boolean;
+  /** The typed Scheme Amt (SCHM_AMT, a Sales Order only), part of ADV_AMT (`:11368`). */
+  scheme: number;
+  /** The MEMB ADJUST book's slot-1 account that day-book type 05 debits, filled in the writer's transaction. */
+  schemeAc: string;
 }
 
 export const CHEQUE_NEEDS_BANK =
@@ -136,6 +142,7 @@ export function orderTenderView(
       num(header.CHQ_AMT) ||
       num(header.CARD_AMT) ||
       num(header.UPI_AMT) ||
+      num(header.SCHM_AMT) ||
       // An order whose only tender is old metal keeps its cash at CASH_AMT = 0; ADV_AMT is the metal's value.
       saved.SL_PR_DETL?.length
     );
@@ -207,6 +214,7 @@ export function orderTenderOf(
     upiAmount?: unknown;
     upiRows?: unknown;
     oldMetalRows?: unknown;
+    schemeAmount?: unknown;
   },
   salesOrder = true,
 ): OrderTender {
@@ -230,19 +238,30 @@ export function orderTenderOf(
     upiColumn: salesOrder ? upi : round(num(input.upiAmount), 2),
     oldMetal: salesOrder ? orderOldMetalOf(input.oldMetalRows) : [],
     oldMetalSent: salesOrder && input.oldMetalRows !== undefined,
+    scheme: salesOrder ? orderSchemeOf(input.schemeAmount) : 0,
+    schemeAc: '',
   };
   if (tender.cheque && !tender.bankAc) throw new SaleValidationError(CHEQUE_NEEDS_BANK);
   if (tender.card && !tender.cardAc) throw new SaleValidationError(CARD_NEEDS_ACCOUNT);
   return tender;
 }
 
-/** ADV_AMT: the sum of the tenders taken here (`TR_SALE_ORD.cs:11368`), old gold and old silver included. */
+/** ADV_AMT: the sum of the tenders taken here (`TR_SALE_ORD.cs:11368`), old gold, old silver and scheme included. */
 export function orderAdvanceTotal(tender: OrderTender): number {
   return round(
-    tender.cash + tender.cheque + tender.card + tender.upi + oldMetalAdvance(tender.oldMetal),
+    tender.cash +
+      tender.cheque +
+      tender.card +
+      tender.upi +
+      oldMetalAdvance(tender.oldMetal) +
+      tender.scheme,
     2,
   );
 }
+
+/** The order book's slot 1 is needed when the day book's advance row has no cash leg to name it: old metal, scheme. */
+export const needsAdvanceContra = (tender: OrderTender): boolean =>
+  tender.cash > 0 || tender.oldMetal.length > 0 || tender.scheme > 0;
 
 /** OLD_GL, OLD_GL_AMT, OLD_SL and OLD_SL_AMT from the grid (`:9136-9144`); a Tour Order writes the request's. */
 export function orderOldMetalColumns(tender: OrderTender, salesOrder = true) {
@@ -403,6 +422,17 @@ export async function resolveOrderUpiTx(
   }
 }
 
+/** The tenders' accounts in the writer's transaction: the UPI rows and, for a scheme, the MEMB ADJUST slot 1. */
+export async function resolveOrderTenderTx(
+  tx: any,
+  scope: { tenantId: string; coCode: string; lcCode: string },
+  tender: OrderTender,
+  isNew: boolean,
+): Promise<void> {
+  await resolveOrderUpiTx(tx, scope, tender, isNew);
+  if (tender.scheme) tender.schemeAc = await resolveSchemeAccountTx(tx, scope);
+}
+
 /** UPI_DATA (`TR_SALE_ORD.cs:9520-9556`): one row per UPI row; ISR_NO is the web's split key, 1 here. */
 export function orderUpiWrites(
   key: Record<string, unknown>,
@@ -438,9 +468,8 @@ export function assertUpiRowsSent(saved: readonly unknown[], input: { upiRows?: 
 /**
  * The order's whole day book. Slot 1 is the book's advance contra: `cashAc` is what the ledger already debits for the
  * advance, which is the same account the desktop names in LD_CODE. Type 01 credits ADV_AMT, 02 debits the cheque's
- * bank, 03 the card (Ac_Rojmel.cs:11-16), 04/06 each old metal row (:17-21) and 08 each UPI row (:25). Not written:
- * type 07 rate-cut fine (RCUT_FINE 0 of 76 orders) and type 05 scheme (an unresolved ANOMALY: SCHM_AMT is non-zero on
- * 7 of 76 orders yet there are ZERO type-05 rows; docs/PLAN-SALESORDER-ROJMEL.md section 2.4).
+ * bank, 03 the card (Ac_Rojmel.cs:11-16), 04/06 each old metal row (:17-21), 05 the scheme (:19, salesOrderScheme.ts)
+ * and 08 each UPI row (:25). Not written: type 07 rate-cut fine (rate cut is not taken on this screen).
  */
 export function orderRojmelRows(
   context: RojmelContext,
@@ -448,15 +477,21 @@ export function orderRojmelRows(
   advance: number,
   tender: OrderTender,
 ) {
-  return withTenderRojmel(
-    buildOrderRojmel(context, {
-      advanceContraAc: cashAc,
-      bankAc: tender.bankAc,
-      advanceAmount: advance,
-      chequeAmount: tender.cheque,
-      oldMetal: orderOldMetalRojmel(tender.oldMetal),
-    }),
+  return withSchemeRojmel(
+    withTenderRojmel(
+      buildOrderRojmel(context, {
+        advanceContraAc: cashAc,
+        bankAc: tender.bankAc,
+        advanceAmount: advance,
+        chequeAmount: tender.cheque,
+        oldMetal: orderOldMetalRojmel(tender.oldMetal),
+      }),
+      context.partyCode,
+      tender,
+    ),
     context.partyCode,
-    tender,
+    context.partyName,
+    tender.scheme,
+    tender.schemeAc,
   );
 }

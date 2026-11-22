@@ -23,8 +23,6 @@ import {
   getMfgLot,
   listMfgLotSources,
 } from '../modules/manufacturing/mfgLot.js';
-import { PasswordChangeError, resetUserPassword } from '../modules/auth/passwordAccount.js';
-import { PasswordPolicyError } from '../modules/auth/password.js';
 import {
   createSale,
   createSalesQuotation,
@@ -73,7 +71,6 @@ import {
 } from '../modules/sales/saleReturnBillReplay.js';
 import {
   cancelSalesOrderInSession,
-  cancelSalesOrderAdjust,
   cancelTourOrderInSession,
   getTourOrderConfiguration,
   getSalesOrderConfiguration,
@@ -181,11 +178,8 @@ import {
   outstanding,
 } from '../modules/dhrn/dhrn.js';
 import { fineInout, deleteFineInout } from '../modules/inout/fineInout.js';
-import { listUsers, createUser, setUserRights } from '../modules/rbac/users.js';
-import { getFormCatalog } from '../modules/rbac/formCatalog.js';
 import { restoreCompany } from '../modules/ops/backup.js';
 import type { MetricsRegistry } from '../modules/ops/metrics.js';
-import { getUserFormRights, setUserFormRights } from '../modules/rbac/formRights.js';
 import { partyBalance } from '../modules/finance/partyBalance.js';
 import { bankReconList, bankReconClear } from '../modules/finance/bankRecon.js';
 import { registerDailyRateRoutes } from './dailyRate.js';
@@ -247,6 +241,7 @@ import { registerSaleVoucherRoutes } from './saleVoucher.js';
 import { registerPurchaseVoucherRoutes } from './purchaseVoucher.js';
 import { registerPartyOpeningRoutes } from './partyOpening.js';
 import { registerFineJvRoutes } from './fineJv.js';
+import { registerOrderCancelRoutes } from './orderCancel.js';
 import { registerItemOpeningRoutes } from './itemOpening.js';
 import { registerEmployeeMasterRoutes } from './employeeMaster.js';
 import { registerTaxMasterRoutes } from './taxMaster.js';
@@ -1094,6 +1089,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerVoucherNavigationRoutes(app, extraRouteHelpers);
   registerPartyOpeningRoutes(app, extraRouteHelpers, formMutationCapabilities);
   registerFineJvRoutes(app, extraRouteHelpers);
+  registerOrderCancelRoutes(app, extraRouteHelpers);
   registerDailyRateRoutes(app, { ...extraRouteHelpers, formMutationCapabilities });
   registerItemOpeningRoutes(app, extraRouteHelpers, formCapabilities);
   registerEmployeeMasterRoutes(app, extraRouteHelpers, formCapabilities);
@@ -1996,22 +1992,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
-  app.post('/sales-orders/:vchNo/cancel-refund', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    const b = body(req);
-    return run(reply, 200, () =>
-      cancelSalesOrderAdjust(prisma, {
-        scope: scopeOf(req),
-        vchNo: (req.params as any).vchNo,
-        paidAc: b.paidAc,
-        paidAmt: b.paidAmt != null ? Number(b.paidAmt) : undefined,
-        kasarAmt: b.kasarAmt != null ? Number(b.kasarAmt) : undefined,
-        kasarAc: b.kasarAc,
-        itDesc: b.itDesc,
-      }),
-    );
-  });
-
   // ---- Tour Order (TR_SALE_ORD.cs with MAIN_BOOK='TOUR ORDER') ----
   app.get('/tour-orders/configuration', auth, async (req, reply) => {
     return run(reply, 200, () => getTourOrderConfiguration(prisma, scopeOf(req)));
@@ -4127,26 +4107,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       },
     );
   });
-  app.get('/admin/users', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return; // admin-gate (admins hold all rights)
-    const s = sess(req);
-    return run(reply, 200, () => listUsers(prisma, s.tenantId, s.coCode));
-  });
-  app.post('/admin/users', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    const s = sess(req);
-    const b = body(req);
-    return run(reply, 201, () =>
-      createUser(prisma, s.tenantId, {
-        coCode: s.coCode,
-        lcCode: s.lcCode,
-        loginName: b.loginName,
-        password: b.password,
-        role: b.role,
-      }),
-    );
-  });
-
   // ---- One XLSX export for every report (desktop BtnExel, on 38 forms, absent from the web) ----
   // The registry reuses the SAME builder each report route calls, so an export cannot disagree with the
   // on-screen report; rows are re-derived server-side (the client cannot supply them).
@@ -4659,30 +4619,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       }),
     );
   });
-  app.post('/admin/users/:loginName/rights', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return; // admin-gate
-    const s = sess(req);
-    const b = body(req);
-    const { loginName } = req.params as any;
-    return run(reply, 200, () =>
-      setUserRights(
-        prisma,
-        { tenantId: s.tenantId, coCode: s.coCode },
-        {
-          loginName: String(loginName),
-          catg: b.catg,
-          userUpdate: !!b.userUpdate,
-          userDelete: !!b.userDelete,
-          userPrint: !!b.userPrint,
-        },
-      ),
-    );
-  });
-  // Per-form RBAC (USER_SET): read/replace a user's per-menu FRM_VIEW/EDIT/DELETE/PRINT rows.
-  app.get('/admin/form-catalog', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return; // admin-gate
-    return run(reply, 200, async () => getFormCatalog((app as any).editionPolicy));
-  });
   app.post('/backup/restore', auth, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return; // admin-gate — HIGH-RISK: replaces this tenant's company data
     if (containMutation(reply, 'logical-restore')) return;
@@ -4695,52 +4631,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         { mode: 'replace' },
       ),
     );
-  });
-  app.get('/admin/users/:loginName/form-rights', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return; // admin-gate
-    const s = sess(req);
-    return run(reply, 200, () =>
-      getUserFormRights(
-        prisma,
-        { tenantId: s.tenantId, lcCode: s.lcCode },
-        String((req.params as any).loginName),
-      ),
-    );
-  });
-  app.post('/admin/users/:loginName/form-rights', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return; // admin-gate
-    const s = sess(req);
-    const b = body(req);
-    return run(reply, 200, () =>
-      setUserFormRights(
-        prisma,
-        { tenantId: s.tenantId, coCode: s.coCode, lcCode: s.lcCode },
-        String((req.params as any).loginName),
-        b.rows ?? [],
-      ),
-    );
-  });
-  app.post('/admin/users/:loginName/password-reset', auth, async (req, reply) => {
-    if (!guard(req, reply, 'update')) return;
-    const s = sess(req);
-    const b = body(req);
-    try {
-      await resetUserPassword(prisma, {
-        tenantId: s.tenantId,
-        coCode: s.coCode,
-        loginName: String((req.params as any).loginName),
-        newPassword: String(b.newPassword ?? ''),
-      });
-      return { reset: true, forcedChange: true };
-    } catch (error) {
-      if (error instanceof PasswordPolicyError) {
-        return reply.code(400).send({ error: 'weak-password', reasons: error.reasons });
-      }
-      if (error instanceof PasswordChangeError) {
-        return reply.code(404).send({ error: error.code });
-      }
-      throw error;
-    }
   });
   app.get('/utilities/vch-renumber/preview', auth, async (req) => {
     const sc = readScope(req);

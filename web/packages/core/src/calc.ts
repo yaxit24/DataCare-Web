@@ -1,5 +1,5 @@
 import { Decimal as DecimalJs } from 'decimal.js';
-import { round, roundHalfEven, PRECISION } from './money.js';
+import { round, PRECISION } from './money.js';
 
 /** Structurally implemented by the API's company rounding policy. */
 export interface MoneyRoundingPolicy {
@@ -49,6 +49,31 @@ export function labourCharge(
   i: LabourInput,
   policy?: MoneyRoundingPolicy,
 ): number {
+  const v = labourChargeExact(type, i);
+  return policy ? policy.roundLabourAmount(v.toNumber()) : round(v, PRECISION.amount);
+}
+
+/**
+ * Sale LBR_AMT rounded ONCE, as `CommPassTotal` does.
+ *
+ * Every labour branch is a single `Math.Round(basis x LBR_RATE, digits2)` (TR_SALE.cs:11100-11127). The web rounded
+ * by LBR_ROF and then by the line precision (TOT_AMT_ROF); with LBR_ROF 2 and a whole-rupee line, 0.299 g x 5 =
+ * 1.495 became 1.50 and then 2, where the desktop stores 1 (desktop oracle vectors `labour.mid.n0.299xr5.rof2` and
+ * `labour.mid.n3.495xr1.rof2`, run 42580947381). When LBR_ROF is the coarser of the two it still decides the amount,
+ * exactly as before; when it is finer, its stage is skipped and only the line precision rounds.
+ */
+export function saleLineLabourAmount(
+  type: LabourType,
+  i: LabourInput,
+  policy: MoneyRoundingPolicy & { labourDecimals: number; billTotalDecimals: number },
+): number {
+  const v = labourChargeExact(type, i).toNumber();
+  return policy.labourDecimals <= policy.billTotalDecimals
+    ? policy.roundBillTotal(policy.roundLabourAmount(v))
+    : policy.roundBillTotal(v);
+}
+
+function labourChargeExact(type: LabourType, i: LabourInput): DecimalJs {
   let v: DecimalJs;
   switch (type) {
     case 'per_gram':
@@ -67,7 +92,7 @@ export function labourCharge(
       v = D(i.fixed);
       break;
   }
-  return policy ? policy.roundLabourAmount(v.toNumber()) : round(v, PRECISION.amount);
+  return v;
 }
 
 /** Metal amount = fine weight × rate. */
@@ -90,31 +115,33 @@ export function lineNet(parts: {
 }
 
 /**
- * Desktop sale/purchase LINE total, persisted to `SL_DETL.TOT_AMT` and `SL_DETL.NET_AMT`.
+ * Desktop sale LINE total, persisted to `SL_DETL.TOT_AMT` and `SL_DETL.NET_AMT`.
  *
- * `TR_SALE.cs`, end of the per-row calculation loop:
- *   `mSG[X,35] = Format(Math.Round(Val(mSG[X,23]) + Val(mSG[X,27]) + Val(mSG[X,29]), 0), "0.00")`
- *   `mSG[X,37] = mSG[X,35]`
- * where 23 = item amount, 27 = labour amount, 29 = other amount.
+ * `TR_SALE.cs` `CommPassTotal`, the per-row calculation every cell exit runs (:11548 and :11559, then :11570):
+ *   `mSG[Row,35] = Format(Val(mSG[Row,27]) + Val(mSG[Row,29]) + Val(mSG[Row,23]) - Val(mSG[Row,32]), "0.00")`
+ *   `mSG[Row,37] = Format(Val(mSG[Row,35]), "0.00")`          (when the line has no TAX_PRC)
+ * where 23 = item amount, 27 = labour amount, 29 = other amount, 32 = labour discount.
  *
- * Three details matter and are easy to get wrong:
- *  1. the sum is rounded to **0 decimal places** — whole rupees — with a hardcoded 0, NOT `MsItmRateRof`;
- *  2. it is **tax-exclusive** (tax lives in its own column, 36, as a percentage);
- *  3. `NET_AMT` is a copy of `TOT_AMT`, so the two persisted columns are always equal.
+ * - The sum is NOT rounded to whole rupees: it keeps paise at 2 dp. Item and labour amounts are already whole rupees
+ *   (one `Math.Round(..., 0)` each), so only a paise OTHER amount reaches the total: 63085 + 2544 + 1234.50 =
+ *   66863.50 on the desktop (desktop oracle vector `total.stone`, run 42580947381).
+ * - The whole-rupee `Math.Round(23 + 27 + 29, 0)` this function used to apply is `NetAmtChange` (TR_SALE.cs:18416),
+ *   which runs only when the operator presses F1 on the bill-net cell to spread a new net amount over the lines.
+ * - Tax-exclusive; `NET_AMT` equals `TOT_AMT` on a line without TAX_PRC.
+ * - The labour discount (column 32) is not modelled by the web line yet; callers pass none.
  *
- * The write-set extraction confirms the binding: `SL_DETL.TOT_AMT` ← `Val(mSG[i,35])` (line 15436) and
- * `SL_DETL.NET_AMT` ← `Val(mSG[i,37])` (line 15438).
+ * Write set: `SL_DETL.TOT_AMT` <- `Val(mSG[i,35])` (line 15436) and `SL_DETL.NET_AMT` <- `Val(mSG[i,37])` (line 15438).
  */
 export function lineTotalDesktop(parts: {
   itemAmount: DecimalJs.Value;
   labourAmount: DecimalJs.Value;
   otherAmount?: DecimalJs.Value;
 }): number {
-  return roundHalfEven(
+  return round(
     D(parts.itemAmount)
       .plus(parts.labourAmount)
       .plus(parts.otherAmount ?? 0),
-    0,
+    PRECISION.amount,
   );
 }
 

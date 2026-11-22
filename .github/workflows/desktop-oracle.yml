@@ -1,0 +1,57 @@
+name: Desktop oracle (Windows, .NET Framework)
+
+# Track O, WP-40 (docs/parity/LITE-MASTER-PLAN.md §6 O2). Each family under web/scripts/desktop-oracle/<family>/
+# holds the desktop's own method bodies copied verbatim (Oracle.cs) and the inputs (vectors.json). This job compiles
+# each family with the .NET Framework 4.8 compiler the desktop was built for, runs it, and uploads expected.json as
+# an artifact. It commits nothing: a refreshed expected.json is copied into the repository by hand FROM THE ARTIFACT,
+# and its "source.runId" names this run. Evidence tool only: no product code, no secrets, no customer data.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'web/scripts/desktop-oracle/**'
+      - '.github/workflows/desktop-oracle.yml'
+  pull_request:
+    paths:
+      - 'web/scripts/desktop-oracle/**'
+      - '.github/workflows/desktop-oracle.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  oracle:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - name: Build and run every family with the Framework compiler
+        shell: pwsh
+        run: |
+          $csc = "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
+          Get-Item $csc | Select-Object FullName, @{n='Version';e={$_.VersionInfo.FileVersion}} | Format-List
+          Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full' | Select-Object Release, Version | Format-List
+          $out = Join-Path $env:RUNNER_TEMP 'desktop-oracle'
+          New-Item -ItemType Directory -Force -Path $out | Out-Null
+          $sha = if ($env:GITHUB_EVENT_NAME -eq 'pull_request') { '${{ github.event.pull_request.head.sha }}' } else { $env:GITHUB_SHA }
+          foreach ($dir in Get-ChildItem -Directory web/scripts/desktop-oracle) {
+            $family = $dir.Name
+            Write-Host "== $family"
+            $exe = Join-Path $out "$family.exe"
+            & $csc /nologo /r:Microsoft.VisualBasic.dll /r:System.Web.Extensions.dll "/out:$exe" (Join-Path $dir.FullName 'Oracle.cs')
+            if ($LASTEXITCODE -ne 0) { throw "csc failed for $family" }
+            New-Item -ItemType Directory -Force -Path (Join-Path $out $family) | Out-Null
+            & $exe (Join-Path $dir.FullName 'vectors.json') (Join-Path $out "$family/expected.json") $env:GITHUB_RUN_ID $sha
+            if ($LASTEXITCODE -ne 0) { throw "oracle failed for $family" }
+          }
+
+      - name: Upload expected.json
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-oracle-expected
+          path: ${{ runner.temp }}/desktop-oracle/*/expected.json
+          if-no-files-found: error

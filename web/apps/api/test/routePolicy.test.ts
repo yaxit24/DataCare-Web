@@ -125,9 +125,13 @@ describe('route policy registry', () => {
     // Agent 07 moves the existing GST launcher route into a dedicated plugin and adds three exports:
     // 1 moved declaration out, 4 dedicated declarations in = +3: 748 + 3 = 751.
     // N229 adds Approval Isu GET/PUT/print and Approval Rtn GET/PUT/print: 751 + 6 = 757.
-    // N234 (WP-11) adds the RP_ALL Sales Report GET /reports/sales-report and its CSV/XLSX exports: 757 + 3 = 760.
-    expect(routes).toHaveLength(760);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(760);
+    // WP-06 moves the seven Users & Rights routes into routes/userMaster.ts and adds the MS_USER edit-mode Save
+    // (POST /admin/users/:loginName/update) and Delete (DELETE /admin/users/:loginName): 757 + 2 = 759.
+    // N233 removes POST /sales-orders/:vchNo/cancel-refund and adds Order Cancel's pending-orders, defaults, POST,
+    // GET, PUT, DELETE and print: 759 - 1 + 7 = 765.
+    // N234 (WP-11) adds the RP_ALL Sales Report GET /reports/sales-report and its CSV/XLSX exports: 765 + 3 = 768.
+    expect(routes).toHaveLength(768);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(768);
 
     const policies = routes.map((route) => ({
       ...route,
