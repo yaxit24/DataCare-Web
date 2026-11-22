@@ -1418,23 +1418,24 @@ export const taxMaster = {
                  FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2`,
               vchNo,
             );
-            // 63,609.50 × 2% = 1,272.19; SGST = CGST = 1,272.19 / 2 (TR_SALE.cs, no rounding).
+            // Line 61,234 + 2,375 = 63,609 (whole-rupee line amounts, TR_SALE.cs:10343-10362); × 2% = 1,272.18;
+            // SGST = CGST = 1,272.18 / 2 (TR_SALE.cs, no rounding).
             assert.deepEqual(sale, {
               code: '15',
               pct: 2,
-              tax: 1272.19,
-              sgst: 636.095,
-              cgst: 636.095,
+              tax: 1272.18,
+              sgst: 636.09,
+              cgst: 636.09,
             });
             const legs = await ctx.rows(
               `SELECT "AC_CODE" ac,"CR_AMT"::float cr FROM "AC_DATA"
                 WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2 AND "AC_CODE"='TXGST'`,
               vchNo,
             );
-            assert.deepEqual(legs, [{ ac: 'TXGST', cr: 1272.19 }]);
+            assert.deepEqual(legs, [{ ac: 'TXGST', cr: 1272.18 }]);
             return {
-              observation: `sale ${vchNo} at 2% resolved code 15 and posted 1272.19 Cr to TXGST`,
-              expected: { tax: 1272.19, sgst: 636.095, legAccount: 'TXGST' },
+              observation: `sale ${vchNo} at 2% resolved code 15 and posted 1272.18 Cr to TXGST`,
+              expected: { tax: 1272.18, sgst: 636.09, legAccount: 'TXGST' },
               database: { sale, legs },
               downstream: { vchNo },
             };

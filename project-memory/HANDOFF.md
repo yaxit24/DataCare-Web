@@ -1,3 +1,8 @@
+## 2026-11-22 — Sales line percentage labour and line precision follow TR_SALE (N235 / G247, WP-41)
+
+- 2026-11-22: a Lbr% line derives LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, LBR_ROF) and multiplies the LBR_TYPE basis (`TR_SALE.cs:11021`, `:11084-11127`); it was LBR_PRC of the item amount. The eight `labour.pct.*` oracle baselines are gone and pass.
+- 2026-11-22: ITM_AMT and LBR_AMT round to a hardcoded 0 decimals (2 under ALL_ROF_REMOVE, `TR_SALE.cs:10343-10362`), no longer by TOT_AMT_ROF. Every Sale line on a blank-ALL_ROF_REMOVE company is now whole rupees (61,234.5 -> 61,234), so the sales-invoice, gst-report, group-master and item-master expectations moved; the gst-report midpoint case now sits on 954.135.
+
 ## 2026-11-09 — Order Cancel is the desktop TR_SL_ORD_ADJ voucher (N233 / G245, WP-02)
 
 - 2026-11-09: one voucher cancels the open advance of many orders (SL_ORD_ADJ, Order_Adj_Ledr/Rojmel, held-tag release), version-guarded
