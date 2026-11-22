@@ -18,9 +18,12 @@ import type { SaleLineInput } from './sales.js';
 const text = (value: unknown): string => String(value ?? '').trim();
 const optionalText = (value: unknown): string | undefined => text(value) || undefined;
 const num = (value: unknown): number => (value == null ? 0 : Number(value));
-const optionalNum = (value: unknown): number | undefined => (value == null ? undefined : Number(value));
+const optionalNum = (value: unknown): number | undefined =>
+  value == null ? undefined : Number(value);
 
-export function savedReturnLine(row: Record<string, unknown>): SaleLineInput & Record<string, unknown> {
+export function savedReturnLine(
+  row: Record<string, unknown>,
+): SaleLineInput & Record<string, unknown> {
   const rate = num(row.ITM_RATE);
   const labourPct = num(row.LBR_PRC);
   const labourRate = num(row.LBR_RATE);

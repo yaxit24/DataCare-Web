@@ -71,7 +71,11 @@ export async function assertSaleReturnSaveTx(
       throw new SaleValidationError(WHOLESALE_MESSAGES.companyTypeB);
   }
   try {
-    await assertFiscalDateTx(tx, { ...scope, coYear: scope.coYear ?? '' }, toIsoDate(input.vchDate));
+    await assertFiscalDateTx(
+      tx,
+      { ...scope, coYear: scope.coYear ?? '' },
+      toIsoDate(input.vchDate),
+    );
   } catch (error) {
     // A missing or ambiguous YEAR_MAST row keeps its own fail-closed message.
     if (error instanceof Error && /is outside fiscal year/.test(error.message))
@@ -88,5 +92,6 @@ export async function assertSaleReturnSaveTx(
  * sale side (`nAcDrAmt` = 0) and `num6` is one registration's hallmark term (0). An empty grid totals 0 too.
  */
 export function assertSaleReturnValue(lineNetTotal: number): void {
-  if (roundHalfEven(lineNetTotal, 0) === 0) throw new SaleValidationError(SALE_RETURN_MESSAGES.itemValue);
+  if (roundHalfEven(lineNetTotal, 0) === 0)
+    throw new SaleValidationError(SALE_RETURN_MESSAGES.itemValue);
 }

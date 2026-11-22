@@ -54,7 +54,15 @@ const LINE_R = {
   labourRate: 237.5,
 };
 const LINE_R9 = { ...LINE_R, netWt: 9 };
-const TAGGED = { itCode: 'GOLD', tagNo: 'TAGRT', pcs: 1, grossWt: 3, netWt: 3, touch: 100, rate: 100 };
+const TAGGED = {
+  itCode: 'GOLD',
+  tagNo: 'TAGRT',
+  pcs: 1,
+  grossWt: 3,
+  netWt: 3,
+  touch: 100,
+  rate: 100,
+};
 const LOOSE = { itCode: 'LOOSE', pcs: 1, grossWt: 1, netWt: 1, touch: 90, rate: 100 };
 const WRITE_TABLES = [
   'SL_DATA',
@@ -282,8 +290,7 @@ databaseDescribe('WP-27 Sales Return residuals (writer)', () => {
 
   it('sales-return.children.duplicate-tag: one tag twice is refused with "Duplicate Tag No"', async () => {
     await expectRefusedWithoutWrite(
-      () =>
-        createSaleReturn(runtime, input({ origBook: 'SAL', origVchNo: 1 }), [TAGGED, TAGGED]),
+      () => createSaleReturn(runtime, input({ origBook: 'SAL', origVchNo: 1 }), [TAGGED, TAGGED]),
       /^Duplicate Tag No$/,
     );
   });
@@ -351,11 +358,9 @@ databaseDescribe('WP-27 Sales Return residuals (writer)', () => {
       () => createSaleReturn(runtime, input({ cardAmt: 1000 }), [LINE_R]),
       'Please Select Card Bank Account And Try Because Card Amt <> 0......',
     );
-    const saved = await createSaleReturn(
-      runtime,
-      input({ chequeAmt: 1000, bankAc: 'BANK1' }),
-      [LINE_R],
-    );
+    const saved = await createSaleReturn(runtime, input({ chequeAmt: 1000, bankAc: 'BANK1' }), [
+      LINE_R,
+    ]);
     const [h] = await rows<{ chq: number; bank: string }>(
       `SELECT "CHQ_AMT"::float chq,"BANK_AC" bank FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SRT' AND "VCH_NO"=$2`,
       TENANT,
@@ -437,7 +442,10 @@ databaseDescribe('WP-27 Sales Return residuals (writer)', () => {
     const created = await createSaleReturn(
       runtime,
       input({ origBook: 'SAL', origVchNo: 1, empCode: 'E7', chequeAmt: 1000, bankAc: 'BANK1' }),
-      [{ ...TAGGED, labourType: 'per_gram', labourRate: 12.5 }, { ...LOOSE, labourType: 'fixed', labourFixed: 25 }],
+      [
+        { ...TAGGED, labourType: 'per_gram', labourRate: 12.5 },
+        { ...LOOSE, labourType: 'fixed', labourFixed: 25 },
+      ],
     );
     const voucherNo = String(created.vchNo).padStart(5, '0');
     const before = await writeSet(voucherNo);
@@ -450,9 +458,7 @@ databaseDescribe('WP-27 Sales Return residuals (writer)', () => {
       saved.version,
     );
     expect(await writeSet(voucherNo)).toEqual(before);
-    expect(
-      await rows(`SELECT 1 FROM "USER_DATA" WHERE tenant_id=$1`, TENANT),
-    ).toHaveLength(0);
+    expect(await rows(`SELECT 1 FROM "USER_DATA" WHERE tenant_id=$1`, TENANT)).toHaveLength(0);
   });
 
   it('sales-return.rollback.refused-edit-keeps-voucher', async () => {

@@ -215,7 +215,19 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
       empCode: 'E7',
       chequeAmt: 1000,
       bankAc: 'BANK1',
-      lines: [LINE_R, { itCode: 'LOOSE', pcs: 2, grossWt: 1, netWt: 1, touch: 90, rate: 100, labourType: 'fixed', labourFixed: 25 }],
+      lines: [
+        LINE_R,
+        {
+          itCode: 'LOOSE',
+          pcs: 2,
+          grossWt: 1,
+          netWt: 1,
+          touch: 90,
+          rate: 100,
+          labourType: 'fixed',
+          labourFixed: 25,
+        },
+      ],
     });
     const before = await writeSet(voucherNo);
     const saved = await reopen(voucherNo);

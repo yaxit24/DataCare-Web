@@ -215,6 +215,10 @@ export const salesReturn = {
   inputs: [
     'web/apps/web/app/(app)/txn/sale-return/page.tsx',
     'web/apps/api/src/modules/sales/salesReturn.ts',
+    'web/apps/api/src/modules/sales/saleReturnSaveChecks.ts',
+    'web/apps/api/src/modules/sales/saleReturnReopen.ts',
+    'web/apps/api/src/routes/saleReturnVoucher.ts',
+    'web/apps/web/lib/saleReturnEdit.ts',
     'web/apps/web/test/features/modules/salesReturn.mjs',
     'web/apps/web/test/features/faults.mjs',
     'web/apps/web/test/features/fixtures/catalogue.mjs',
@@ -886,8 +890,7 @@ export const salesReturn = {
         await field(page, 'Open Vch No').fill(vchNo);
         await field(page, 'Open Vch No').press('Enter');
         await page.waitForFunction(
-          () =>
-            document.querySelector('table.grid tbody tr td:nth-child(5) input')?.value === '10',
+          () => document.querySelector('table.grid tbody tr td:nth-child(5) input')?.value === '10',
           null,
           { timeout: 10_000 },
         );
