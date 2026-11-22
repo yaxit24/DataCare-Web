@@ -1024,6 +1024,7 @@ route('Reports/GST Report', [
   'GET /reports/gst-report/export.csv',
   'GET /reports/gst-report/export.xlsx',
   'GET /reports/gst-report/export.pdf',
+  'GET /reports/gst-report/workbook.xlsx',
 ]);
 route('Reports/Delete Data', ['GET /reports/delete-data']);
 route('Reports/Point Report', ['GET /reports/point-report', 'GET /reports/point-report/detail']);
@@ -1093,6 +1094,7 @@ const PRINT_ROUTES = new Set([
   'GET /reports/gst-report/export.csv',
   'GET /reports/gst-report/export.xlsx',
   'GET /reports/gst-report/export.pdf',
+  'GET /reports/gst-report/workbook.xlsx',
   'GET /reports/gstr2-doc',
   'GET /reports/gstr1-doc',
   'GET /reports/gstr3b-doc',

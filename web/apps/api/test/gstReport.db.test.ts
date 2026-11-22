@@ -417,8 +417,10 @@ class CapturingRenderer implements PdfRenderer {
       DAY,
     );
     await exec(
-      `INSERT INTO "LBR_ISU_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","BOOK_NAME","AC_CODE","IT_CODE","ITM_PCS","ITM_NWT","NET_AMT","IT_TAX_AMT","LBR_AMT","IT_LBR_TAX")
-       VALUES($1,'01','01',$2,'GLB','H003',1,$3::date,'LABOUR WORK','CREG','ZO1',2,2,40,'1.2',10,'0.3')`,
+      // RP_GST.cs:2719 sums the post-save shares (IT_NET_AMT/IT_TAX_AMT/IT_DISC_AMT, IT_LBR_AMT/IT_LBR_TAX/IT_LBR_DISC,
+      // TR_SALE_LBR.cs:9748-9830), not the entry columns NET_AMT/LBR_AMT, which differ here on purpose (WP-19).
+      `INSERT INTO "LBR_ISU_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","BOOK_NAME","AC_CODE","IT_CODE","ITM_PCS","ITM_NWT","NET_AMT","IT_NET_AMT","IT_TAX_AMT","IT_DISC_AMT","LBR_AMT","IT_LBR_AMT","IT_LBR_TAX","IT_LBR_DISC")
+       VALUES($1,'01','01',$2,'GLB','H003',1,$3::date,'LABOUR WORK','CREG','ZO1',2,2,47,40,'1.2',0,13,10,'0.3',1.5)`,
       TENANT,
       YEAR,
       DAY,
@@ -602,8 +604,9 @@ class CapturingRenderer implements PdfRenderer {
         description: 'Other',
         uqc: 'PCS',
         totalQuantity: '2.00',
-        totalValue: '10.30',
-        taxableValue: '10.00',
+        // IT_LBR_AMT 10 + IT_LBR_TAX 0.3 - IT_LBR_DISC 1.5 = 8.80; taxable 10 - 1.5 = 8.50 (WP-19 labour discount).
+        totalValue: '8.80',
+        taxableValue: '8.50',
         igstAmount: '0.00',
         cgstAmount: '0.15',
         sgstAmount: '0.15',
@@ -611,18 +614,20 @@ class CapturingRenderer implements PdfRenderer {
       },
     ]);
     expect(response.json().totals).toMatchObject({
-      totalValue: '865.50',
-      taxableValue: '840.00',
+      totalValue: '864.00',
+      taxableValue: '838.50',
       igstAmount: '-6.00',
       cgstAmount: '15.75',
       sgstAmount: '15.75',
     });
   });
 
-  it('returns only the source-settled GSTR-3B rows', async () => {
+  it('returns the desktop GSTR-3B grid with the computed rows, the 3.1 total and 6.1', async () => {
     const response = await get('viewer', url('gstr3b', undefined, '&bookCode=GT3'));
     expect(response.statusCode, response.body).toBe(200);
-    expect(response.json().rows).toEqual([
+    const rows = response.json().rows as Array<Record<string, string>>;
+    const computed = rows.filter((row) => ['(a)', '(d)', '(5)'].includes(row.code));
+    expect(computed).toEqual([
       {
         table: '3.1',
         code: '(a)',
@@ -657,7 +662,27 @@ class CapturingRenderer implements PdfRenderer {
         cessAmount: '',
       },
     ]);
-    expect(response.json().metadata.blockedRows).toContain('6.2');
+    expect(response.json().metadata.blockedRows).toBeUndefined();
+    // 3.1 total = (a) + (d) of the displayed cells; 6.1 Taxpayable is that total, Paid is the 4(A)(5) row.
+    expect(rows[5]).toMatchObject({
+      table: '3.1',
+      code: '',
+      taxableValue: '1500.00',
+      igstAmount: '15.00',
+      cgstAmount: '15.00',
+      sgstAmount: '15.00',
+    });
+    const at = (code: string) => rows.find((row) => row.code === code)!;
+    expect(at('Integrated Tax')).toMatchObject({
+      nature: '15.00',
+      placeOfSupply: '0.00',
+      taxableValue: '6.00',
+      igstAmount: '6.00',
+    });
+    expect(at('Centrel Tax').nature).toBe('15.00');
+    expect(at('State/Ut Tax').nature).toBe('15.00');
+    expect(at('TCS')).toMatchObject({ nature: '', placeOfSupply: '', taxableValue: '' });
+    expect(rows).toHaveLength(38);
   });
 
   it('applies book, party, location, company, year and date scope and refuses location replacement', async () => {
@@ -679,10 +704,7 @@ class CapturingRenderer implements PdfRenderer {
     for (const [target, status, error] of [
       [url('gstr1'), 400, 'missing-section'],
       [url('gstr1', 'WHAT'), 400, 'invalid-section'],
-      [url('gstr1', 'EXP'), 422, 'section-not-supported'],
-      [url('gstr1', 'EXEMP'), 422, 'section-not-supported'],
-      [url('gstr1', 'DOCS'), 422, 'section-not-supported'],
-      [url('gstr1', 'TCS'), 422, 'section-not-supported'],
+      [url('gstr1', 'TCS'), 400, 'invalid-section'],
       [url('gstr2', 'HSN'), 422, 'section-not-supported'],
       [url('gstr1', 'B2B', '&unexpected=x'), 400, 'invalid-query'],
       [url('gstr1', 'B2B', '&bookCode=LONG'), 400, 'invalid-query'],
@@ -756,6 +778,58 @@ class CapturingRenderer implements PdfRenderer {
     expect(pdf.rawPayload.subarray(0, 5).toString('latin1')).toBe('%PDF-');
     expect(renderer.html.at(-1)).toContain(json.rows[0].invoiceNo);
     expect(renderer.html.at(-1)).toContain('Invoice Value');
+  });
+
+  it('shows EXP, EXEMP and DOCS as the desktop caption grid with no query, rows or CSV (WP-19)', async () => {
+    for (const [section, title] of [
+      ['EXP', 'Summary For Exp(6)'],
+      ['EXEMP', 'Summary For Nill Rated,Exmp and Non Gst outword(8)'],
+      ['DOCS', 'Summary of Doc. issued The Tax Period'],
+    ] as const) {
+      const response = await get('viewer', url('gstr1', section));
+      expect(response.statusCode, `${section}: ${response.body}`).toBe(200);
+      expect(response.json()).toMatchObject({ section, title, rows: [], totals: {} });
+      expect(response.json().metadata.headerOnly).toBe(true);
+      const csv = await get(
+        'printer',
+        url('gstr1', section).replace('gst-report?', 'gst-report/export.csv?'),
+      );
+      expect(csv.statusCode, csv.body).toBe(422);
+      expect(csv.json().error).toBe(section === 'EXP' ? 'csv-not-settled' : 'csv-not-emitted');
+    }
+  });
+
+  it('exports every GSTR-1 section B2B..HSN as one workbook in the desktop sheet order (WP-19 Q6)', async () => {
+    const query = `fromDate=${FROM}&toDate=${TO}`;
+    expect((await get('viewer', `/reports/gst-report/workbook.xlsx?${query}`)).statusCode).toBe(
+      403,
+    );
+    const refused = await get('printer', `/reports/gst-report/workbook.xlsx?${query}&section=B2B`);
+    expect(refused.statusCode).toBe(400);
+    const xlsx = await get('printer', `/reports/gst-report/workbook.xlsx?${query}`);
+    expect(xlsx.statusCode, xlsx.body).toBe(200);
+    const parts = unzipSync(new Uint8Array(xlsx.rawPayload));
+    const workbook = strFromU8(parts['xl/workbook.xml']!);
+    const names = [...workbook.matchAll(/<sheet [^>]*name="([^"]+)"/g)].map((m) => m[1]);
+    expect(names).toEqual([
+      'B2B',
+      'B2CL',
+      'B2CS',
+      'CDNR',
+      'CDNUR',
+      'EXP',
+      'AT',
+      'ATADJ',
+      'EXEMP',
+      'HSN',
+    ]);
+    const text = Object.values(parts)
+      .map((part) => strFromU8(part))
+      .join('');
+    const b2cl = (await get('printer', url('gstr1', 'B2CL'))).json();
+    expect(text).toContain(b2cl.rows[0].invoiceNo);
+    expect(text).toContain('Nil Rated Supply');
+    expect(text).not.toContain('Nature Of Document');
   });
 
   it('keeps return amounts numeric in the HSN CSV, as RP_GST.SaveCSV writes them', async () => {

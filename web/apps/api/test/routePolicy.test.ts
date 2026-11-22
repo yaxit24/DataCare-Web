@@ -129,8 +129,9 @@ describe('route policy registry', () => {
     // (POST /admin/users/:loginName/update) and Delete (DELETE /admin/users/:loginName): 757 + 2 = 759.
     // N233 removes POST /sales-orders/:vchNo/cancel-refund and adds Order Cancel's pending-orders, defaults, POST,
     // GET, PUT, DELETE and print: 759 - 1 + 7 = 765.
-    expect(routes).toHaveLength(765);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(765);
+    // WP-19 adds the Gst Report all-sections workbook (GET /reports/gst-report/workbook.xlsx): 765 + 1 = 766.
+    expect(routes).toHaveLength(766);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(766);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -534,6 +535,12 @@ describe('route policy registry', () => {
         businessScope: true,
       });
     }
+    // WP-19: "Gsrt1 Csv", the all-sections workbook (RP_GST.cs:3819-3943), is an export like the others.
+    expect(routePolicyFor('GET', '/reports/gst-report/workbook.xlsx')).toMatchObject({
+      form: 'Reports/GST Report',
+      action: 'print',
+      businessScope: true,
+    });
   });
 
   it('maps RP_ORDER Delete Data and Point Report routes to report rights', () => {

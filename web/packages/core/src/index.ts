@@ -334,3 +334,10 @@ export {
   itemOpeningTotals,
 } from './itemOpening.js';
 export type { ItemOpeningRow, ItemOpeningRowInput, ItemOpeningTypeCode } from './itemOpening.js';
+export {
+  DESKTOP_DATE_MASK,
+  desktopDateMaskText,
+  desktopSetDate,
+  type SetDateMessage,
+  type SetDateResult,
+} from './setDate.js';

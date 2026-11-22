@@ -3511,6 +3511,10 @@ model LBR_ISU_DETL {
   ORD_DBCD        String?   @db.VarChar(3)
   ORD_NO          String?   @db.VarChar(10)
   ORD_SRNO        Float?
+  IT_NET_AMT      Float     @default(0)
+  IT_DISC_AMT     Float     @default(0)
+  IT_LBR_AMT      Float     @default(0)
+  IT_LBR_DISC     Float     @default(0)
 
   @@index([tenantId])
   @@map("LBR_ISU_DETL")

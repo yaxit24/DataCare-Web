@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { inflateRawSync } from 'node:zlib';
 import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
 import { salesScreen } from './salesInvoice.mjs';
 
@@ -218,6 +219,695 @@ async function chooseAndRun(page, sectionName, action = 'Gstr 1') {
   await page.getByRole('button', { name: action, exact: true }).click();
 }
 
+// --- WP-19 helpers: the cases below compute every expectation from the desktop source and the seeded vouchers ----
+
+/** Run one section through the real button and wait for the report request it makes. */
+async function runSection(page, sectionName, action = 'Gstr 1') {
+  if (sectionName)
+    await page
+      .getByRole('combobox', { name: 'Section Type', exact: true })
+      .selectOption({ label: sectionName });
+  const [response] = await Promise.all([
+    page.waitForResponse(
+      (r) =>
+        new URL(r.url()).pathname === '/api/reports/gst-report' && r.request().method() === 'GET',
+    ),
+    page.getByRole('button', { name: action, exact: true }).click(),
+  ]);
+  assert.equal(response.status(), 200, await response.text());
+  await page.locator('table.grid').waitFor();
+  return response;
+}
+
+/** The caption row (the last header row) and the body cells of the on-screen grid. */
+async function screenGrid(page) {
+  const captions = await page.locator('table.grid thead tr').last().locator('th').allTextContents();
+  const groups =
+    (await page.locator('table.grid thead tr').count()) > 1
+      ? await page.locator('table.grid thead tr').first().locator('th').allTextContents()
+      : null;
+  const rows = await page
+    .locator('table.grid tbody tr')
+    .evaluateAll((trs) =>
+      trs.map((tr) => [...tr.querySelectorAll('td')].map((td) => td.textContent)),
+    );
+  return { captions, groups, rows };
+}
+
+/** Row counts of every business table a report could touch; a report run must leave them equal. */
+async function businessFootprint(ctx) {
+  const [row] = await ctx.rows(
+    `SELECT (SELECT COUNT(*) FROM "TAX_DATA" WHERE tenant_id=$1)::int tax,
+            (SELECT COUNT(*) FROM "SL_DATA" WHERE tenant_id=$1)::int sales,
+            (SELECT COUNT(*) FROM "AC_DATA" WHERE tenant_id=$1)::int ledger,
+            (SELECT COUNT(*) FROM "LBR_ISU_DETL" WHERE tenant_id=$1)::int labour`,
+  );
+  return row;
+}
+
+/** A party master the case owns (masters may be seeded; the voucher under test is made on its screen). */
+async function seedParty(ctx, { code, name, gstin = '', gstType = 'L', state = null }) {
+  await ctx.rows(
+    `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GR","AC_GST_TYPE","AC_PANNO","AC_GSTNO","AC_STATE")
+     SELECT $1,'01','01',$2,$3,'10',$4,'WPNOI1234F',$5,$6
+      WHERE NOT EXISTS (SELECT 1 FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "AC_CODE"=$2)
+     RETURNING 1`,
+    code,
+    name,
+    gstType,
+    gstin,
+    state,
+  );
+}
+
+/** One LINE_A sale through the real Sales screen; returns its SL_DATA header. */
+async function saleThroughScreen(ctx, page, party, { interState = false, tcsPct } = {}) {
+  await page.goto('/txn/sales');
+  await salesScreen.openSales(page);
+  await salesScreen.pickParty(page, party);
+  if (interState) await salesScreen.field(page, 'Inter-state').selectOption('y');
+  await salesScreen.fillLine(page, 0, salesScreen.LINE_A);
+  if (tcsPct) await salesScreen.field(page, 'TCS %').fill(tcsPct);
+  const saved = await salesScreen.save(page);
+  assert.equal(saved.status(), 201, await saved.text());
+  const [header] = await ctx.rows(
+    `SELECT "CO_BOOK","VCH_NO","NET_AMT"::text net,"DISC_AMT"::text disc,"TOT_AMT"::text tot,
+            COALESCE("TDS_AMT",0)::text tds,COALESCE("TCS_AMT",0)::text tcs,COALESCE("OTH_AMT",0)::text oth,
+            COALESCE("OTH_TAX_AMT",0)::text oth_tax,COALESCE("HM_AMT",0)::text hm,COALESCE("HM_TAX_AMT",0)::text hm_tax
+       FROM "SL_DATA" WHERE tenant_id=$1 AND "AC_CODE"=$2 ORDER BY row_id DESC LIMIT 1`,
+    party,
+  );
+  assert(header, `the ${party} sale must be saved`);
+  return header;
+}
+
+/** Exact decimal text → cents with `Strings.Format(x, "0.00")` rounding (half away from zero). */
+function cents(text) {
+  const match = /^(-?)(\d+)(?:\.(\d+))?$/.exec(String(text ?? '0').trim() || '0');
+  assert(match, `decimal ${text}`);
+  const fraction = (match[3] ?? '').padEnd(3, '0');
+  let value = BigInt(match[2]) * 100n + BigInt(fraction.slice(0, 2));
+  if (Number(fraction[2]) >= 5) value += 1n;
+  return match[1] === '-' ? -value : value;
+}
+const fmt2 = (c) => {
+  const negative = c < 0n;
+  const abs = negative ? -c : c;
+  return `${negative && abs !== 0n ? '-' : ''}${abs / 100n}.${String(abs % 100n).padStart(2, '0')}`;
+};
+/** `Strings.Format(x, "0")`: the whole number, half away from zero. */
+const fmt0 = (text) => {
+  const c = cents(text);
+  const abs = c < 0n ? -c : c;
+  const whole = abs / 100n + (abs % 100n >= 50n ? 1n : 0n);
+  return `${c < 0n && whole !== 0n ? '-' : ''}${whole}`;
+};
+
+/** Minimal XLSX reader (zip central directory + inflate): sheet name → rows of cell strings, in workbook order. */
+function readXlsx(buffer) {
+  const eocd = buffer.lastIndexOf(Buffer.from([0x50, 0x4b, 0x05, 0x06]));
+  assert(eocd >= 0, 'xlsx end of central directory');
+  const count = buffer.readUInt16LE(eocd + 10);
+  let offset = buffer.readUInt32LE(eocd + 16);
+  const files = {};
+  for (let n = 0; n < count; n++) {
+    const method = buffer.readUInt16LE(offset + 10);
+    const size = buffer.readUInt32LE(offset + 20);
+    const nameLength = buffer.readUInt16LE(offset + 28);
+    const extra = buffer.readUInt16LE(offset + 30);
+    const comment = buffer.readUInt16LE(offset + 32);
+    const local = buffer.readUInt32LE(offset + 42);
+    const name = buffer.toString('utf8', offset + 46, offset + 46 + nameLength);
+    const start = local + 30 + buffer.readUInt16LE(local + 26) + buffer.readUInt16LE(local + 28);
+    const data = buffer.subarray(start, start + size);
+    files[name] = (method === 8 ? inflateRawSync(data) : data).toString('utf8');
+    offset += 46 + nameLength + extra + comment;
+  }
+  const decode = (s) =>
+    s
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&apos;/g, "'")
+      .replace(/&amp;/g, '&');
+  const shared = [...(files['xl/sharedStrings.xml'] ?? '').matchAll(/<si>([\s\S]*?)<\/si>/g)].map(
+    (m) => decode([...m[1].matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map((t) => t[1]).join('')),
+  );
+  const rels = Object.fromEntries(
+    [...(files['xl/_rels/workbook.xml.rels'] ?? '').matchAll(/<Relationship [^>]*>/g)].map((m) => [
+      /Id="([^"]+)"/.exec(m[0])[1],
+      /Target="([^"]+)"/.exec(m[0])[1].replace(/^\/?(xl\/)?/, 'xl/'),
+    ]),
+  );
+  const sheets = [];
+  for (const m of (files['xl/workbook.xml'] ?? '').matchAll(/<sheet [^>]*\/>/g)) {
+    const name = decode(/name="([^"]*)"/.exec(m[0])[1]);
+    const xml = files[rels[/r:id="([^"]+)"/.exec(m[0])[1]]] ?? '';
+    const rows = [...xml.matchAll(/<row[^>]*>([\s\S]*?)<\/row>/g)].map((row) => {
+      const cells = [];
+      for (const c of row[1].matchAll(/<c ([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)) {
+        const column = /r="([A-Z]+)\d+"/.exec(c[1])[1];
+        const index = [...column].reduce((sum, ch) => sum * 26 + ch.charCodeAt(0) - 64, 0) - 1;
+        const v = /<v>([\s\S]*?)<\/v>/.exec(c[2] ?? '')?.[1];
+        const inline = /<t[^>]*>([\s\S]*?)<\/t>/.exec(c[2] ?? '')?.[1];
+        cells[index] = / t="s"/.test(c[1]) ? shared[Number(v)] : decode(inline ?? v ?? '');
+      }
+      return Array.from(cells, (cell) => cell ?? '');
+    });
+    sheets.push({ name, rows });
+  }
+  return sheets;
+}
+
+/** The labels of every RP_GST GSTR-3B row, in order (RP_GST.cs:3511-3817). */
+const GSTR3B_COLUMNS = [
+  'Table No',
+  'Code',
+  'Nature of Supplies',
+  'Place of Supplies',
+  'Total Taxable',
+  'Igst Tax',
+  'Cgst Tax',
+  'Sgst/UT Tax',
+  'Cess',
+];
+
+/** Exact decimal text → integer micro-units, so sums of 2- and 3-decimal TAX_DATA amounts stay exact. */
+function micro(text) {
+  const match = /^(-?)(\d+)(?:\.(\d+))?$/.exec(String(text ?? '0').trim() || '0');
+  assert(match, `decimal ${text}`);
+  const value = BigInt(match[2]) * 1_000_000n + BigInt((match[3] ?? '').padEnd(6, '0').slice(0, 6));
+  return match[1] === '-' ? -value : value;
+}
+/** `Strings.Format(x, "0.00")` of micro-units: half away from zero. */
+function microText(value) {
+  const negative = value < 0n;
+  const abs = negative ? -value : value;
+  const hundredths = abs / 10_000n + (abs % 10_000n >= 5_000n ? 1n : 0n);
+  return `${negative && hundredths !== 0n ? '-' : ''}${hundredths / 100n}.${String(hundredths % 100n).padStart(2, '0')}`;
+}
+
+/**
+ * The GSTR-3B grid computed independently from TAX_DATA and the masters with the RP_GST formula
+ * (RP_GST.cs:3540-3817) and the WP-19 decisions: From..To (Q1), All Other ITC purchases only (Q2), State/Ut Tax =
+ * SGST total (Q3); 3.1(a) and 3.2(1) count sales rows only (the web predicate, open question Q10).
+ */
+async function expectedGstr3b(ctx, { fromDate, toDate }) {
+  const [year] = await ctx.rows(
+    `SELECT "CO_YEAR" FROM "YEAR_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01'
+        AND "OP_DATE"<=$2::date AND "CL_DATE">=$2::date ORDER BY "CO_YEAR" DESC LIMIT 1`,
+    fromDate,
+  );
+  assert(year, `a financial year holds ${fromDate}`);
+  const rows = await ctx.rows(
+    `SELECT a."TRAN_TYPE" tran,a."TAX_SIGN" sign,COALESCE(a."R_CHARG",'') charge,a."TAX_TYPE" type,
+            COALESCE(a."NET_AMT",0)::text net,COALESCE(a."TAX_AMT",0)::text tax,a."AC_CODE" ac,a."LC_CODE" lc
+       FROM "TAX_DATA" a
+      WHERE a.tenant_id=$1 AND a."CO_CODE"='01' AND a."LC_CODE"='01' AND a."CO_YEAR"=$2
+        AND a."VCH_DATE">=$3::date AND a."VCH_DATE"<=$4::date`,
+    year.CO_YEAR,
+    fromDate,
+    toDate,
+  );
+  const parties = await ctx.rows(
+    `SELECT "AC_CODE" ac,"LC_CODE" lc,COALESCE("AC_GSTNO",'') gstin,COALESCE("AC_STATE",'') state
+       FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' ORDER BY row_id`,
+  );
+  const party = (row) =>
+    parties.find((p) => p.ac === row.ac && p.lc === row.lc) ??
+    parties.find((p) => p.ac === row.ac && (p.lc == null || p.lc === '00'));
+  const [company] = await ctx.rows(
+    `SELECT COALESCE("CO_STATE",'') state FROM "CO_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' LIMIT 1`,
+  );
+  const states = await ctx.rows(
+    `SELECT "STATE_CODE" code,"STATE_NAME" name FROM "STATE_MAST" WHERE tenant_id=$1 ORDER BY row_id`,
+  );
+  const charge = (row) => row.charge || 'N';
+  const outward = (row) => row.tran === 'S' && row.sign === '+' && charge(row) !== 'Y';
+  const reverse = (row) => row.tran === 'P' && charge(row) === 'Y';
+  const itc = (row) => row.tran === 'P' && row.sign === '-' && charge(row) === 'N';
+  // SUM(IIF(TAX_TYPE IN ('IGST','SGST'),NET_AMT,0)), SUM(IIF(TAX_TYPE='IGST',TAX_AMT,0)) ...; NULL over no rows.
+  const aggregate = (predicate) => {
+    const hit = rows.filter(predicate);
+    if (!hit.length) return ['', '', '', ''];
+    const sum = (pick) => microText(hit.reduce((s, row) => s + pick(row), 0n));
+    return [
+      sum((r) => (['IGST', 'SGST'].includes(r.type) ? micro(r.net) : 0n)),
+      sum((r) => (r.type === 'IGST' ? micro(r.tax) : 0n)),
+      sum((r) => (r.type === 'CGST' ? micro(r.tax) : 0n)),
+      sum((r) => (r.type === 'SGST' ? micro(r.tax) : 0n)),
+    ];
+  };
+  // Conversion.Val of the displayed cells, re-formatted "0.00".
+  const val = (...cells) => microText(cells.reduce((s, c) => s + micro(c || '0'), 0n));
+  const a = aggregate(outward);
+  const d = aggregate(reverse);
+  const five = aggregate(itc);
+  const total = a.map((cell, i) => val(cell, d[i]));
+  const byState = new Map();
+  for (const row of rows.filter(outward)) {
+    const p = party(row);
+    if (!p || p.gstin !== '' || p.state === '' || p.state === company.state) continue;
+    const entry = byState.get(p.state) ?? { taxable: 0n, igst: 0n };
+    if (['IGST', 'SGST'].includes(row.type)) entry.taxable += micro(row.net);
+    if (row.type === 'IGST') entry.igst += micro(row.tax);
+    byState.set(p.state, entry);
+  }
+  const stateCode = (name) => states.find((s) => s.name === name)?.code ?? '';
+  const stateRows = [...byState.entries()]
+    .map(([name, v]) => [stateCode(name), name, v])
+    .sort((x, y) => (x[0] + '\u0000' + x[1]).localeCompare(y[0] + '\u0000' + y[1]));
+  const r = (table, ...cells) => [table, ...cells, '', '', '', '', '', '', '', ''].slice(0, 9);
+  return [
+    r('3.1', '(a)', 'OutWord Taxable Supplies(Other then Zero rated)', '', ...a),
+    r('3.1', '(b)', 'OutWord Taxable Supplies (Zero rated) '),
+    r('3.1', '(c)', 'Other then OutWord Supplies(Nil rated,Exempted) '),
+    r('3.1', '(d)', 'InWord Supplies(Lible to Reverse Charge)', '', ...d),
+    r('3.1', '(e)', 'Non-Gst OutWord Supplies'),
+    r('3.1', '', '', '', ...total),
+    r(
+      '3.2',
+      '',
+      'Inter State Supplies made to Unregistered Persons Comp',
+      'osition persons and UIN Holders    ',
+    ),
+    r('3.2', '', '', 'Place of Supplies (State/Ut)', 'Taxable Val', 'Igst Tax '),
+    ...(stateRows.length
+      ? stateRows.map(([code, name, v], i) =>
+          r(
+            '3.2',
+            i === 0 ? '(1)' : '',
+            i === 0 ? 'Supplies Made ot Unregester Persons' : '',
+            `${code} - ${name}`,
+            microText(v.taxable),
+            microText(v.igst),
+          ),
+        )
+      : [r('3.2', '(1)', 'Supplies Made ot Unregester Persons')]),
+    r('3.2', '(2)', 'Supplies Made ot Composition Taxable Persons'),
+    r('3.2', '(3)', 'Supplies Made ot UIN Holders'),
+    r('4', '4', 'Eligible ITC'),
+    r('4', '(A)', 'ITC Available(Whether in full of part)'),
+    r('4(A)', '(1)', 'Imprt of goods'),
+    r('4(A)', '(2)', 'Imprt of Service'),
+    r('4(A)', '(3)', 'Inword Supplies Liable to Reverse Charge'),
+    r('4(A)', '(4)', 'Inword Supplies From ISD'),
+    r('4(A)', '(5)', 'All Other ITC)', '', ...five),
+    r('4', '(B)', 'ITC Reversed'),
+    r('4(B)', '(1)', 'As per rules 42 & 43 of CGST Rules'),
+    r('4(B)', '(2)', 'Others'),
+    r('4', '(C)', 'Net ITC Avaible (A)-(B)'),
+    r('4', '(D)', 'Ineligible ITC'),
+    r('4(D)', '(1)', 'As per Section 17(5)'),
+    r('4(D)', '(2)', 'Other'),
+    r('5', '5', 'Values of exempt,nil rated and non GST Inword supplies'),
+    r('5', '', 'Supplier Under Composition and nil rated supplies'),
+    r('5', '', 'Non GST Supplies'),
+    r('6.1', '6.1', 'Payment of Tax'),
+    r(
+      '6.1',
+      'Discription',
+      'Taxpayable',
+      'Paid Igst',
+      'Paid Cgst',
+      'Paid Sgst',
+      'Paid Cess',
+      'TDS Paid',
+      'Tax Paid In Cash',
+    ),
+    r('6.1', 'Integrated Tax', total[1], val(five[1]), val(five[2]), val(five[3])),
+    r('6.1', 'Centrel Tax', total[2]),
+    r('6.1', 'State/Ut Tax', total[3]),
+    r('6.1', 'Cess'),
+    r('6.2', '6.2', 'TDS/TCS Credit'),
+    r('6.2', 'TDS'),
+    r('6.2', 'TCS'),
+  ];
+}
+
+/**
+ * EXP, EXEMP and DOCS: the desktop builds only the caption grid (DGV_CLEAR + the section's captions) and returns
+ * before any query, so the screen shows the title and captions, no rows, no totals and no message.
+ */
+function headerOnlyCase(id, index, source, expected) {
+  return C(id, 'T02', 'read-only', source, async (ctx) => {
+    const page = await openFromNavigation(ctx);
+    await assertRpGstShell(page);
+    const before = await businessFootprint(ctx);
+    const response = await runSection(page, SECTION_OPTIONS[index]);
+    await page.getByRole('heading', { name: expected.title, exact: true }).waitFor();
+    const grid = await screenGrid(page);
+    assert.deepEqual(grid.captions, expected.captions);
+    assert.deepEqual(grid.groups, expected.groups);
+    assert.deepEqual(grid.rows, [], 'no data rows');
+    assert.equal(await page.locator('table.grid tfoot').count(), 0, 'no totals row');
+    assert.equal(await page.getByRole('status').count(), 0, 'no "No Record Found...." message');
+    assert.equal(await page.getByRole('alert').count(), 0, 'no refusal');
+    assert.deepEqual(await businessFootprint(ctx), before, 'a report run writes nothing');
+    await ctx.shot(page, id.replaceAll('.', '-'));
+    return {
+      observation: `${expected.title}: captions ${JSON.stringify(grid.captions)}, 0 rows, no message`,
+      expected,
+      database: { footprint: before },
+      downstream: { request: new URL(response.url()).search, grid },
+    };
+  });
+}
+
+const WP19_CASES = [
+  headerOnlyCase(
+    'section.exp-title-only',
+    6,
+    'RP_GST.cs:2472-2477 sets only the title "Summary For Exp(6)" and one uncaptioned column; :2700-2701 `case 6: return;` before any query',
+    { title: 'Summary For Exp(6)', captions: [''], groups: null },
+  ),
+  headerOnlyCase(
+    'section.exemp-headers-only',
+    9,
+    'RP_GST.cs:2530-2557 captions and group captions; :2716-2717 `case 9: return;` before any query; RP_GST never reads TAX_FREE_AMT/ZERO_RATED_AMT, so no nil/exempt/non-GST figure exists',
+    {
+      title: 'Summary For Nill Rated,Exmp and Non Gst outword(8)',
+      captions: ['Descripition', 'Nil Rated Supply', 'Exmp and Non Gst Supply', 'Non Gst Supply'],
+      groups: ['', 'Total Nil Rated Supplies', 'Total Exempted Supplies', 'Total Non-Gst Supplies'],
+    },
+  ),
+  headerOnlyCase(
+    'section.documents-headers-only',
+    11,
+    'RP_GST.cs:2599-2622 captions; the query switch and the row loop have no case 11 (:2700-2723, 2752-2898), so no document row is ever written. The stale static DC_Main.RsQry the desktop then runs (:2723) is a weakness not ported (WP-19 study)',
+    {
+      title: 'Summary of Doc. issued The Tax Period',
+      captions: ['Nature Of Document', 'Sr. No From', 'Sr. No To', 'Total Number', 'Cancelled'],
+      groups: ['', '', '', 'Total Number', 'Total Cancelled'],
+    },
+  ),
+
+  C(
+    'formula.gstr3b-every-row',
+    'T03',
+    'read-only',
+    'RP_GST.cs:3479-3818 builds every 3B row; figures only for 3.1(a) (:3540-3561), 3.1(d) (:3583-3604), the 3.1 total (:3614-3617), 3.2(1) (:3641-3664), 4(A)(5) (:3702-3725) and 6.1 (:3786-3802). WP-19 decisions: From..To (Q1), ITC purchases only (Q2), State/Ut Tax = SGST total (Q3)',
+    async (ctx) => {
+      // Masters the case owns: an unregistered customer in another state feeds 3.2(1).
+      await seedParty(ctx, {
+        code: 'WP19UNR',
+        name: 'WP19 UNREGISTERED MH',
+        gstType: 'I',
+        state: 'Maharashtra',
+      });
+      const { page } = await ctx.session();
+      await saleThroughScreen(ctx, page, 'E2ELOC');
+      const unregistered = await saleThroughScreen(ctx, page, 'WP19UNR', { interState: true });
+      const page2 = await openFromNavigation(ctx);
+      const before = await businessFootprint(ctx);
+      const response = await runSection(page2, '', 'Gstr 3');
+      await page2.getByRole('heading', { name: 'GSTR 3B', exact: true }).waitFor();
+      const params = new URL(response.url()).searchParams;
+      const expected = await expectedGstr3b(ctx, {
+        fromDate: params.get('fromDate'),
+        toDate: params.get('toDate'),
+      });
+      const grid = await screenGrid(page2);
+      assert.deepEqual(grid.captions, GSTR3B_COLUMNS);
+      assert.deepEqual(grid.rows, expected);
+      // The inter-state unregistered sale this case made is inside 3.2(1): LINE_A taxable 63,609.50.
+      const mh = grid.rows.find((row) => row[3].endsWith(' - Maharashtra'));
+      assert(mh, '3.2(1) shows the Maharashtra place of supply');
+      assert(cents(mh[4]) >= cents(unregistered.net), '3.2(1) includes the 63,609.50 sale');
+      assert.deepEqual(await businessFootprint(ctx), before, 'a report run writes nothing');
+      await ctx.shot(page2, 'formula-gstr3b-every-row');
+      return {
+        observation: `GSTR-3B grid of ${grid.rows.length} rows equals the RP_GST formula over TAX_DATA ${params.get('fromDate')}..${params.get('toDate')}`,
+        expected,
+        database: { footprint: before, unregisteredSale: unregistered },
+        downstream: { grid: grid.rows },
+      };
+    },
+  ),
+
+  C(
+    'invalid.setdate-messages-and-focus',
+    'T06',
+    'refusal',
+    'DC_Main.cs:1561-1683 SetDate via RP_GST.cs:3033-3063: "Date Not Valid..." (:1643, 1655, 1672) and "Month Not Valid..." (:1664) in an OK-only box without caption, text reset to the empty mask and selected, focus kept (no Tab while RongDate); one digit refused silently (:1600-1604); a valid date tabs on',
+    async (ctx) => {
+      const page = await openFromNavigation(ctx);
+      const before = await businessFootprint(ctx);
+      const reportRequests = [];
+      page.on('request', (r) => {
+        if (new URL(r.url()).pathname.startsWith('/api/reports/gst-report'))
+          reportRequests.push(r.url());
+      });
+      const from = page.getByLabel('From Date', { exact: true });
+      const seen = [];
+      const refuse = async (digits, message) => {
+        await from.focus();
+        await from.press('ControlOrMeta+a');
+        await from.pressSequentially(digits);
+        await from.press('Enter');
+        const box = page.getByRole('alertdialog', { name: message });
+        await box.waitFor();
+        assert.equal((await box.innerText()).split('\n')[0].trim(), message);
+        assert.equal(await from.inputValue(), '__/__/____', 'cleared to the empty mask');
+        await box.getByRole('button', { name: 'OK', exact: true }).click();
+        await box.waitFor({ state: 'detached' });
+        assert.equal(
+          await page.evaluate(() => document.activeElement?.id),
+          'gst-from',
+          'focus stays',
+        );
+        seen.push([digits, message]);
+      };
+      await refuse('30022026', 'Date Not Valid...'); // February: day "3x" compares above "29"
+      await refuse('32012026', 'Date Not Valid...'); // day > 31
+      await refuse('01132026', 'Month Not Valid...'); // month > 12
+      // One digit: refused silently, text kept, focus kept.
+      await from.focus();
+      await from.press('ControlOrMeta+a');
+      await from.pressSequentially('3');
+      await from.press('Enter');
+      assert.equal(await page.getByRole('alertdialog').count(), 0, 'no message for one digit');
+      assert.equal(await from.inputValue(), '3_/__/____');
+      assert.equal(await page.evaluate(() => document.activeElement?.id), 'gst-from');
+      // A full valid date is kept as typed and Enter moves on to To Date.
+      await from.press('ControlOrMeta+a');
+      await from.pressSequentially('01042025');
+      await from.press('Enter');
+      assert.equal(await from.inputValue(), '01/04/2025');
+      assert.equal(
+        await page.evaluate(() => document.activeElement?.id),
+        'gst-to',
+        'Enter tabs on',
+      );
+      assert.deepEqual(reportRequests, [], 'no report query is sent while typing dates');
+      assert.deepEqual(await businessFootprint(ctx), before);
+      await ctx.shot(page, 'invalid-setdate-messages-and-focus');
+      return {
+        observation: `SetDate refusals ${JSON.stringify(seen)}; one digit silent; valid date tabs to To Date`,
+        expected: {
+          messages: ['Date Not Valid...', 'Date Not Valid...', 'Month Not Valid...'],
+          cleared: '__/__/____',
+          focus: 'gst-from',
+        },
+        database: { unchanged: true, footprint: before },
+      };
+    },
+  ),
+
+  C(
+    'output.csv-documents-not-emitted',
+    'T16',
+    'output',
+    'RP_GST.cs:3077-3110 BtnCsvFile_Click has cases 1-8 and 10, `case 9: break;`, and no case 11: "Csv Fil" on DOCS writes no file and shows no message',
+    async (ctx) => {
+      const page = await openFromNavigation(ctx);
+      const ran = await runSection(page, SECTION_OPTIONS[11]);
+      const exports = [];
+      page.on('request', (r) => {
+        if (new URL(r.url()).pathname.startsWith('/api/reports/gst-report/export'))
+          exports.push(r.url());
+      });
+      const popups = [];
+      page.on('popup', (p) => popups.push(p));
+      await page.getByRole('button', { name: 'Csv Fil', exact: true }).click();
+      await page.waitForTimeout(1500);
+      assert.deepEqual(exports, [], 'no CSV request');
+      assert.equal(popups.length, 0, 'no download window');
+      assert.equal(await page.getByRole('alert').count(), 0, 'no message');
+      // The API refuses the file too, so no other client can produce it.
+      const direct = await page.request.get(
+        `/api/reports/gst-report/export.csv${new URL(ran.url()).search}`,
+      );
+      assert.equal(direct.status(), 422);
+      assert.equal((await direct.json()).error, 'csv-not-emitted');
+      return {
+        observation:
+          'DOCS: Csv Fil made no request, opened no window and showed nothing; the API refuses DOCS.csv',
+        expected: { section: 'DOCS', downloadCount: 0, message: null },
+        output: Buffer.from(''),
+      };
+    },
+  ),
+
+  C(
+    'output.malformed-csv-values-adaptation',
+    'T16',
+    'output',
+    'RP_GST.cs:3113-3146 SaveCSV joins cells with "," and no quoting. ACCEPTED ADAPTATION (WP-19 decision Q5, G10): the web quotes per RFC 4180 and neutralises a leading = + - @; values without comma, quote, newline or formula lead are byte-identical to the desktop',
+    async (ctx) => {
+      const NAME = '=WP19 "Q", CO';
+      const GSTIN = '24WPNOI1234F1Z5';
+      await seedParty(ctx, { code: 'WP19CSV', name: NAME, gstin: GSTIN, state: null });
+      const { page } = await ctx.session();
+      const sale = await saleThroughScreen(ctx, page, 'WP19CSV');
+      const report = await openFromNavigation(ctx);
+      await report.getByLabel('Party', { exact: true }).fill('WP19CSV');
+      const response = await runSection(report, SECTION_OPTIONS[1]);
+      const query = new URL(response.url()).searchParams;
+      assert.equal(query.get('partyCode'), 'WP19CSV');
+      const csv = await report.request.get(`/api/reports/gst-report/export.csv?${query}`);
+      assert.equal(csv.status(), 200, await csv.text());
+      const lines = (await csv.text()).split('\r\n').filter(Boolean);
+      // Independent expectation: RFC 4180 doubles the quotes and wraps the cell; the leading "=" gets an apostrophe.
+      const escapedName = `"'${NAME.replace(/"/g, '""')}"`;
+      const line = lines.find((l) => l.startsWith(`${GSTIN},`));
+      assert(line, `a B2B line for ${GSTIN}: ${lines.join(' | ')}`);
+      assert(line.startsWith(`${GSTIN},${escapedName},`), line);
+      // The rest of the line is the desktop's plain comma join of display strings.
+      const rest = line.slice(`${GSTIN},${escapedName},`.length).split(',');
+      const [book] = await ctx.rows(
+        `SELECT COALESCE("BOOK_SR_NAME",'') prefix FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 ORDER BY row_id LIMIT 1`,
+        sale.CO_BOOK,
+      );
+      assert.equal(rest[0], [book?.prefix, sale.VCH_NO].filter(Boolean).join('-'), 'Invoice No');
+      assert.equal(rest[2], '65517.79', 'Invoice Value: LINE_A net 63,609.50 + GST 1,908.29');
+      assert.equal(rest.at(-2), fmt0('63609.50'), 'Taxable Value: Format(NET_AMT - DISC_AMT, "0")');
+      await ctx.shot(report, 'output-malformed-csv-values-adaptation');
+      return {
+        observation: `B2B.csv line for the comma/quote/formula party: ${line}`,
+        expected: { receiverCell: escapedName, adaptation: 'WP-19 Q5 / G10' },
+        output: Buffer.from(line),
+      };
+    },
+  ),
+
+  C(
+    'output.all-sections-workbook',
+    'T16',
+    'output',
+    'RP_GST.cs:3819-3943 btnGstrCsv_Click: sheets {"B2B","B2CL","B2CS","CDNR","CDNUR","EXP","AT","ATADJ","EXEMP","HSN"} (:3832-3836) in section order 1..10 (:3911, DOCS not exported), each the grid\'s visible cells as strings; empty sections give caption-only sheets. ACCEPTED ADAPTATION (WP-19 decision Q6): one web XLSX, semantic not byte parity',
+    async (ctx) => {
+      const page = await openFromNavigation(ctx);
+      const documentRequest = page
+        .context()
+        .waitForEvent(
+          'request',
+          (r) => new URL(r.url()).pathname === '/api/reports/gst-report/workbook.xlsx',
+          { timeout: 15_000 },
+        );
+      const [popup] = await Promise.all([
+        page.waitForEvent('popup'),
+        page.getByRole('button', { name: 'Gsrt1 Csv', exact: true }).click(),
+      ]);
+      const url = (await documentRequest).url();
+      await popup.close();
+      const download = await page.request.get(url);
+      assert.equal(download.status(), 200, await download.text());
+      const sheets = readXlsx(await download.body());
+      const order = ['B2B', 'B2CL', 'B2CS', 'CDNR', 'CDNUR', 'EXP', 'AT', 'ATADJ', 'EXEMP', 'HSN'];
+      assert.deepEqual(
+        sheets.map((s) => s.name),
+        order,
+      );
+      // Each sheet holds the same captions and cells as the screen grid of that section.
+      const compared = [];
+      for (const [index, name] of order.entries()) {
+        const sectionIndex = SECTION_OPTIONS.findIndex((label) => label.startsWith(`${name} - `));
+        assert(sectionIndex > 0, name);
+        await runSection(page, SECTION_OPTIONS[sectionIndex]);
+        const grid = await screenGrid(page);
+        const sheet = sheets[index];
+        const width = grid.captions.length;
+        const pad = (row) => Array.from({ length: width }, (_, i) => row[i] ?? '');
+        assert.deepEqual(pad(sheet.rows[0] ?? []), grid.captions, `${name} captions`);
+        assert.deepEqual(
+          sheet.rows.slice(1, 1 + grid.rows.length).map(pad),
+          grid.rows,
+          `${name} cells equal the grid`,
+        );
+        compared.push([name, grid.rows.length]);
+      }
+      return {
+        observation: `workbook sheets ${order.join(',')}; rows per sheet ${JSON.stringify(compared)}`,
+        expected: { sheets: order, cells: 'equal to each section grid' },
+        output: await download.body(),
+      };
+    },
+  ),
+
+  C(
+    'journey.tcs-excluded-from-gst',
+    'T18',
+    'mutation',
+    'Ac_Tax.cs:81 writes TAX_DATA.TOT_AMT = SL_DATA.TOT_AMT + TDS_AMT - (OTH_AMT + OTH_TAX_AMT + HM_AMT + HM_TAX_AMT + TCS_AMT); RP_GST shows that as Invoice Value (:2748-2793) and has no TCS figure (6.2 TDS/TCS are labels, RP_GST.cs:3806-3817). TCS lives only in the ledger (Ac_Ledr.cs:96)',
+    async (ctx) => {
+      await seedParty(ctx, {
+        code: 'WP19TCS',
+        name: 'WP19 TCS CUSTOMER',
+        gstin: '24WPTCS1234F1Z5',
+      });
+      const { page } = await ctx.session();
+      const sale = await saleThroughScreen(ctx, page, 'WP19TCS', { tcsPct: '1' });
+      assert(cents(sale.tcs) > 0n, `the sale must carry TCS: ${JSON.stringify(sale)}`);
+      // Desktop invoice value from the voucher header, by the Ac_Tax.cs:81 formula.
+      const invoiceValue = fmt2(
+        cents(sale.tot) +
+          cents(sale.tds) -
+          (cents(sale.oth) +
+            cents(sale.oth_tax) +
+            cents(sale.hm) +
+            cents(sale.hm_tax) +
+            cents(sale.tcs)),
+      );
+      assert.equal(invoiceValue, '65517.79', 'LINE_A: net 63,609.50 + GST 1,908.29, TCS excluded');
+      const report = await openFromNavigation(ctx);
+      await report.getByLabel('Party', { exact: true }).fill('WP19TCS');
+      await runSection(report, SECTION_OPTIONS[1]);
+      const grid = await screenGrid(report);
+      const col = (caption) => grid.captions.indexOf(caption);
+      const mine = grid.rows.filter((row) => row[col('Receiver Name')] === 'WP19 TCS CUSTOMER');
+      assert.equal(mine.length, 1, 'one B2B row for the TCS sale');
+      assert.equal(mine[0][col('Invoice Value')], invoiceValue);
+      assert.equal(mine[0][col('Taxable Value')], fmt0(fmt2(cents(sale.net) - cents(sale.disc))));
+      const tcsText = fmt2(cents(sale.tcs));
+      assert(
+        !grid.rows.flat().includes(tcsText),
+        `the TCS amount ${tcsText} appears nowhere in B2B`,
+      );
+      // GSTR-3B: 6.2 TDS and TCS are bare labels.
+      await runSection(report, '', 'Gstr 3');
+      const threeB = await screenGrid(report);
+      for (const label of ['TDS', 'TCS']) {
+        const row = threeB.rows.find((r) => r[0] === '6.2' && r[1] === label);
+        assert.deepEqual(row?.slice(2), ['', '', '', '', '', '', ''], `6.2 ${label} has no figure`);
+      }
+      const ledger = await ctx.rows(
+        `SELECT COUNT(*)::int n FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 AND "CR_AMT"=$4::numeric`,
+        sale.CO_BOOK,
+        sale.VCH_NO,
+        sale.tcs,
+      );
+      await ctx.shot(report, 'journey-tcs-excluded-from-gst');
+      return {
+        observation: `sale ${sale.VCH_NO}: TCS ${tcsText} in the ledger, Invoice Value ${invoiceValue} without it, 6.2 blank`,
+        expected: { invoiceValue, tcsInReport: false, threeBTcs: '' },
+        database: { sale, tcsLedgerRows: ledger[0]?.n },
+        downstream: { b2bRow: mine[0] },
+      };
+    },
+  ),
+];
+
 const SECTION_SOURCE = 'RP_GST.cs:2209-3031 (DGV_CLEAR, section SQL, exact projections and totals)';
 const FILTER_SOURCE =
   'RP_GST.cs:1837-1985,2662-2730 (book, party, location, date and section predicates)';
@@ -356,13 +1046,6 @@ export const gstReport = {
       { section: 'CDNUR', columns: SECTION_COLUMNS.CDNUR, registered: false },
       ({ page }) => chooseAndRun(page, SECTION_OPTIONS[5]),
     ),
-    blocked(
-      'section.exp.pending',
-      'T02',
-      'read-only',
-      'RP_GST.cs:2472-2477,2703-2704: EXP creates only a title/header and returns before querying data',
-      'Desktop source does not settle EXP rows or calculations. A Windows observation or accepted decision is required; no export assumptions are frozen.',
-    ),
     desiredCase(
       'section.advance-calculation',
       'T02',
@@ -379,13 +1062,6 @@ export const gstReport = {
       { section: 'ATADJ', columns: SECTION_COLUMNS.ATADJ, amount: 'SUM(TAX_DATA.NET_AMT)' },
       ({ page }) => chooseAndRun(page, SECTION_OPTIONS[8]),
     ),
-    blocked(
-      'section.exemp.pending',
-      'T02',
-      'read-only',
-      'RP_GST.cs:2530-2557,2717-2718: EXEMP defines headers and returns without a data query',
-      'Desktop source does not settle nil-rated, exempt, and non-GST row calculations. Do not infer them from the headings.',
-    ),
     desiredCase(
       'section.hsn-calculation',
       'T02',
@@ -393,13 +1069,6 @@ export const gstReport = {
       'RP_GST.cs:2558-2598,2719-2730,2939-2985: sales, returns, e-credit and labour/making unions grouped by HSN/rate type/item type/GST type',
       { section: 'HSN', columns: SECTION_COLUMNS.HSN, labourHsn: '998892', returns: 'negative' },
       ({ page }) => chooseAndRun(page, SECTION_OPTIONS[10]),
-    ),
-    blocked(
-      'section.documents.pending',
-      'T02',
-      'read-only',
-      'RP_GST.cs:2599-2629,2660-2730: DOCS headers exist but BtnGst1Zoom has no section 11 query branch',
-      'Desktop source does not settle issued/cancelled document rows. A Windows observation or owner decision is required.',
     ),
     desiredCase(
       'section.switch-clears-prior-grid',
@@ -454,13 +1123,6 @@ export const gstReport = {
         reverseCharge: "TAX_SIGN='+' and R_CHARG='Y'",
         itc: "TAX_SIGN='-' and R_CHARG='N'",
       },
-    ),
-    blocked(
-      'formula.gstr3b-incomplete-branches.pending',
-      'T03',
-      'read-only',
-      'RP_GST.cs:3508-3817: 3.1(b), 3.1(c), 3.1(e), later ITC/ineligible and TDS/TCS rows are labels with incomplete/no calculations; grid queries omit year/location/book/party',
-      'RP_GST does not settle all GSTR-3B branches or selector scope, and current web reports.ts explicitly implements outward supply only. Complete totals cannot be assumed.',
     ),
     desiredCase(
       'formula.hsn-quantity-value-tax-split',
@@ -707,13 +1369,6 @@ export const gstReport = {
       'RP_GST.cs:2662-2730 constrains report data to MCo_year; RP_GST.cs:3033-3063 delegates date acceptance to SetDate',
       { refusal: 'date outside selected financial year', database: 'unchanged', crash: false },
     ),
-    blocked(
-      'invalid.setdate-and-malformed-date-message.pending',
-      'T06',
-      'refusal',
-      'RP_GST.cs:3033-3063 delegates From/To Enter validation to DC_Main.SetDate and only checks DC_Main.RongDate',
-      'RP_GST does not contain the exact SetDate malformed/out-of-year message text. The case must remain blocked until that helper is traced and the desktop focus behavior is settled.',
-    ),
 
     desiredCase(
       'snapshot.complete-browser-created-dataset',
@@ -812,15 +1467,15 @@ export const gstReport = {
       'failure.query-or-render-no-write.pending',
       'T14',
       'refusal',
-      'RP_GST.cs:2640-3031,3148-3817 is a read-only query/render path',
-      'The harness has no declared query/render fault injector. Freeze rollback/no-write proof as blocked, not N/A, until a scoped injector exists.',
+      'RP_GST.cs:2640-3031,3148-3817 is a read-only query/render path: no try/catch, no transaction, no table write (WP-19 study G6 settles the expected result: nothing persisted)',
+      'Remaining: the feature harness has no scoped server-side query fault injector (G173 / N166), and a browser-side abort would intercept a business response, which this matrix forbids; a 5xx is also a console error the harness fails on. Executable once the harness injects a report-query fault.',
     ),
     blocked(
       'failure.export-sentinels-intact.pending',
       'T14',
       'refusal',
-      'RP_GST.cs:3077-3146,3819-3943 writes output files/workbooks but no business tables',
-      'The harness has no declared download/export failure injector. Tenant and source-voucher sentinel rollback proof cannot yet be executed.',
+      'RP_GST.cs:3077-3146,3819-3943 writes output files/workbooks but no business tables; the Excel catch only shows "Error Exporting to Excel: " (:3925-3935) (WP-19 study G7)',
+      'Remaining: the feature harness has no scoped download/export failure injector (G173 / N166). Executable once it can fail an export mid-stream.',
     ),
 
     desiredCase(
@@ -896,8 +1551,8 @@ export const gstReport = {
       'output.csv-exp.pending',
       'T16',
       'output',
-      'RP_GST.cs:2472-2477,2703-2704,3077-3098 names EXP.csv but EXP has no data branch',
-      'EXP filename is settled, but its exact columns and rows are not. Do not certify an empty or invented CSV.',
+      'RP_GST.cs:3097 names EXP.csv; SaveCSV (:3113-3146) writes grid rows 3..Rows-1 of visible columns, and the EXP grid (:2472-2477, Rows = 5 from DGV_CLEAR) has one uncaptioned column and no data',
+      'Remaining (WP-19 decision Q9): the EXP.csv bytes (inferred: two empty CR LF lines) are not displayed by any source line; a Windows desktop run must confirm them. Until then the web refuses EXP.csv (422 csv-not-settled) rather than certify an inferred file.',
     ),
     desiredCase(
       'output.csv-exempt-not-emitted',
@@ -905,27 +1560,6 @@ export const gstReport = {
       'output',
       'RP_GST.cs:3077-3110 has no SaveCSV call for section 9 (EXEMP)',
       { section: 'EXEMP', downloadCount: 0, desktopBehavior: 'no file emitted' },
-    ),
-    blocked(
-      'output.csv-documents.pending',
-      'T16',
-      'output',
-      'RP_GST.cs:2599-2629,3077-3110: DOCS has headers but no query or CSV switch case',
-      'The desktop source does not settle a DOCS file name, rows, or byte layout.',
-    ),
-    blocked(
-      'output.malformed-csv-values.pending',
-      'T16',
-      'output',
-      'RP_GST.cs:3113-3146 concatenates displayed cells with commas and performs no quoting or escaping',
-      'Desktop behavior for commas, quotes, and embedded newlines is malformed/ambiguous. Freeze no “corrected” web escaping rule without an accepted adaptation decision.',
-    ),
-    blocked(
-      'output.all-sections-workbook.pending',
-      'T16',
-      'output',
-      'RP_GST.cs:3819-3943 automates Excel sheets B2B through HSN, copies all visible cells as strings, restores selection, and opens Excel',
-      'Headless Linux cannot execute desktop Excel COM. A web XLSX adaptation and its semantic/byte contract require an accepted implementation decision.',
     ),
     desiredCase(
       'output.more-than-one-page-whole-result',
@@ -995,12 +1629,6 @@ export const gstReport = {
         assert(taxRows.length > 0, 'the browser-created source voucher must post TAX_DATA');
       },
     ),
-    blocked(
-      'journey.tcs.pending',
-      'T18',
-      'read-only',
-      'RP_GST.cs:3795-3817 labels TDS/TCS Credit, TDS and TCS rows but the reviewed report branches define no TCS-specific source calculation',
-      'Agent 07 says “TCS where relevant,” but RP_GST does not establish which posting rows feed TCS or how to total them. Keep blocked until posting/report source proves relevance.',
-    ),
+    ...WP19_CASES,
   ],
 };
