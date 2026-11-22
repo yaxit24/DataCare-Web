@@ -185,4 +185,9 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261109150000_login_mast_active_backoff',
     checksum: 'b13f8ce87226403aa889cc662246a7dcdf64d9844cf3cf51ae2d253c5582d910',
   },
+  {
+    // WP-26 (N243, G255): SL_DATA member-commission and RE_TRFR columns, SL_PR_DETL.PR_COST.
+    name: '20261122200000_sale_desktop_residual_columns',
+    checksum: '77b3225983a5fd8f9b41b682896a8154090960796d5af6b66aba915e6f80343c',
+  },
 ];

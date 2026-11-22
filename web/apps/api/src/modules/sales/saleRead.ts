@@ -1,4 +1,4 @@
-import { toIsoDate, type LabourType } from '@datacare/core';
+import { round, toIsoDate, type LabourType } from '@datacare/core';
 import { legacyLabourModeFor } from '../shared/labourDesktop.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import { voucherVersionTx, versionKeyOf } from '../vouchers/version.js';
@@ -13,7 +13,7 @@ import { SALE_WRITE_TABLES, SaleValidationError, completeSaleScope, saleParams }
  */
 const num = (v: unknown): number => (v == null ? 0 : Number(v));
 const text = (value: unknown): string => String(value ?? '').trim();
-const round2s = (n: number): number => Math.round((n + 1e-9) * 100) / 100;
+const round2s = (n: number): number => round(n, 2);
 
 async function taxNameTx(tx: any, coCode: string, taxCode: string): Promise<string> {
   if (!taxCode) return '';
