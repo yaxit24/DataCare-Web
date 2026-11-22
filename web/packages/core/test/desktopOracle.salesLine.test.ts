@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import {
   computeSaleLine,
   fineFor,
-  percentageLabourRate,
   lineTotalDesktop,
   resolveRoundingPolicy,
   round,
@@ -144,12 +143,9 @@ function webStage(v: Vector, stage: Stage, d: Record<string, string>): number | 
       });
     case 'amount':
       return sharedLine(v, d)?.itemAmount;
-    case 'labourRate': {
-      // LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, MsLbrRof) (TR_SALE.cs:11021).
-      const pct = cell(input, 24);
-      if (pct === 0) return undefined;
-      return percentageLabourRate(policy.roundItemRate(cell(input, 22)), pct, policy);
-    }
+    case 'labourRate':
+      // LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, MsLbrRof) when the percentage is not yet applied (:11021).
+      return cell(input, 24) === 0 ? undefined : sharedLine(v, d)?.labourRate;
     case 'labour':
       return sharedLine(v, d)?.labourAmount;
     case 'total':
