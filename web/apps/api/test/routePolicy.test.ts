@@ -129,8 +129,9 @@ describe('route policy registry', () => {
     // (POST /admin/users/:loginName/update) and Delete (DELETE /admin/users/:loginName): 757 + 2 = 759.
     // N233 removes POST /sales-orders/:vchNo/cancel-refund and adds Order Cancel's pending-orders, defaults, POST,
     // GET, PUT, DELETE and print: 759 - 1 + 7 = 765.
-    expect(routes).toHaveLength(765);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(765);
+    // N234 (WP-11) adds the RP_ALL Sales Report GET /reports/sales-report and its CSV/XLSX exports: 765 + 3 = 768.
+    expect(routes).toHaveLength(768);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(768);
 
     const policies = routes.map((route) => ({
       ...route,
