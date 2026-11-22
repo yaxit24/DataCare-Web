@@ -314,7 +314,8 @@ function LegacySaleReturnForm() {
       setAcName(d.acName || '');
       setEmpCode(d.empCode || '');
       setBillNo(d.origVchNo || '');
-      setOrigBook(d.origBook || '');
+      // A free-standing return has no original book; keep the selector's own choice (it is a required select).
+      if (d.origBook) setOrigBook(d.origBook);
       setTaxRatePct(String(d.taxRatePct ?? 3));
       setInterState(!!d.interState);
       setDiscountAmount(d.discountAmount ? String(d.discountAmount) : '');
@@ -497,7 +498,8 @@ function LegacySaleReturnForm() {
               <label>Orig Book</label>
               <BookSelect value={origBook} onChange={setOrigBook} mainBooks={['SALES']} />
             </div>
-            <div className="field">
+            {/* Two buttons (Import, Import remaining) need room beside the bill number. */}
+            <div className="field" style={{ minWidth: 280 }}>
               <label>Orig Bill No</label>
               {/* The input shrinks so Import stays inside this field; at its default width it spilled
                   under the next field (Tax %), which then took the click (G192). */}
