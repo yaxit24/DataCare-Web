@@ -23,6 +23,13 @@
         "web/apps/api/src/routes/rpAllReport.ts"
       ]
     },
+    "stockReport": {
+      "covers": [
+        "web/apps/web/app/(app)/reports/stock-report/",
+        "web/apps/api/src/modules/reports/stockReport/",
+        "web/apps/api/src/routes/stockReport.ts"
+      ]
+    },
     "purchaseReport": {
       "covers": [
         "web/apps/web/app/(app)/reports/purchase-report/page.tsx",

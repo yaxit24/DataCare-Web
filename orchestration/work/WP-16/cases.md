@@ -135,7 +135,7 @@ Status: executable
 Layer: browser
 Steps: 1. Company metal type = Silver (`MsMetalType` not G). 2. Open the screen.
 Expected: gap 16. Item Type defaults to Silver (the `else` of `RP_STOCK.cs:3628 {{if (Operators.CompareString(DC_Main.MsMetalType, "G", false) == 0)}}`); pressing Item shows only item S.
-Status: executable
+Status: blocked: the web has no company metal-type setting (`MsMetalType`); the Item Type default is Gold.
 
 ### stock-report.entry.item-type-list   (T01 Entry/defaults)
 Layer: browser
@@ -149,14 +149,14 @@ Steps: 1. Seed one movement dated tomorrow (book "Sales" voucher 000045, fixture
 Expected: gap 3, 14. A message box `Please Check Voucher Date in Entry Because Entry Date > Curent Date... Book = <book name> And VchNo = <voucher number>....`
 (`RP_STOCK.cs:3713 {{Please Check Voucher Date in Entry Because Entry Date > Curent Date... Book = }}`, tail `RP_STOCK.cs:3713 {{(object)" And VchNo = "}}`); the To date becomes the voucher's date and focus is on the From date.
 With no future-dated row there is no message.
-Status: executable
+Status: blocked: the open-time warning for future-dated vouchers is not built in this PR.
 
 ### stock-report.entry.f3-shortcut   (T01 Entry/defaults)
 Layer: browser
 Steps: 1. From any screen press F3. 2. Repeat with a user whose Stock Report View right is revoked.
 Expected: gap 1, 14. F3 opens the Stock Report (`MDI_FORM.cs:5574 {{"F3     Stock Report "}}`); the window title uses the rights key "Stock Report" (`MDI_FORM.cs:13962 {{((Form)rP_STOCK).Text = DC_Main.MsUserRightForm + " " + Conversions.ToString(DC_Main.TotOpenForm);}}`).
 Without the View right the message is exactly `You Have No Rights.....` (`MDI_FORM.cs:13952 {{You Have No Rights.....}}`, five dots) and the screen does not open.
-Status: executable
+Status: blocked: the F3 shortcut is not built in this PR.
 
 ### stock-report.entry.menu-needs-view-right   (T01 Entry/defaults; T11 Scope/rights)
 Layer: browser
@@ -381,13 +381,13 @@ Status: N/A: the helper's defect is a separate finding reported to the superviso
 Layer: browser
 Steps: 1. In Pr Code type a code that exists and press Enter. 2. Type an unknown code and press Enter. 3. Pick a row in the help list. 4. Repeat in Gr Code, It Code, Design, AcCode.
 Expected: gap 4, 10. A known code stays; an unknown code opens the help list and the chosen code is written back (`RP_STOCK.cs:5730 {{Select * From PRODUCT_MAST WHERE CO_CODE}}`, `RP_STOCK.cs:6188 {{Select DESIGN_NO From MAIN_STOCK WHERE CO_CODE}}`); the list is scoped to the current company and location.
-Status: executable
+Status: blocked: the code boxes are plain text boxes in this PR; the Enter-opens-help lookup is not built.
 
 ### stock-report.lookup.stale-and-cancel   (T04 Lookup)
 Layer: browser
 Steps: 1. Open the Pr Code help, type to filter, delay the first response, type again, cancel with Esc.
 Expected: gap 4. The late first response never overwrites the second; Esc leaves the filter box unchanged and the grid untouched.
-Status: executable
+Status: blocked: the code boxes are plain text boxes in this PR; there is no lookup help whose stale response could be tested.
 
 ### stock-report.lookup.lc-code   (T04 Lookup; T11 Scope/rights)
 Layer: browser
@@ -475,7 +475,7 @@ Steps: 1. Open drill-downs and double-click a row of each book: Tag Opening (M4)
 Expected: gap 9. Each opens the entry screen of its own book on that voucher number with the voucher's data: OPSTK → Tag Opening (`RP_STOCK.cs:5265 {{else if (Operators.CompareString(DC_Main.CurBookMain, "OPSTK", false) == 0)}}`);
 STOCK ADJUST (`RP_STOCK.cs:5288 {{"STOCK ADJUST"}}`) and TAG CANCEL (`RP_STOCK.cs:5281 {{"TAG CANCEL"}}`) → the tag cancel screen; APR ISU (`RP_STOCK.cs:5295 {{"APR ISU"}}`) → approval issue; SALES (`RP_STOCK.cs:5316 {{CompareString(DC_Main.CurBookMain, "SALES", false)}}`); PURCHASE (`RP_STOCK.cs:5333 {{"PURCHASE"}}`);
 PURC RETURN (`RP_STOCK.cs:5350 {{"PURC RETURN"}}`); SALES RETURNE (`RP_STOCK.cs:5423 {{"SALES RETURNE"}}`). The web navigates by voucher key (book + number), not by globals (weakness 10).
-Status: executable
+Status: blocked: no web voucher entry screen opens a voucher by its book and number (no deep link in Sales, Purchase, Tag Opening, Tag Cancel, Approval Issue or the return screens), so the zoom has no target; unblocks when those screens accept a voucher key.
 
 ### stock-report.zoom.non-lite-books   (T05 Children)
 Layer: browser
@@ -488,14 +488,14 @@ Status: N/A: target menus are outside Lite (decision 5).
 Layer: browser
 Steps: 1. Drill into Opening and double-click M1 (voucher number shorter than 3 characters).
 Expected: gap 9, 14. Message exactly `This Is a Item Wise Opening Stock Voucher You Cant Zoom ....` (`RP_STOCK.cs:5263 {{This Is a Item Wise Opening Stock Voucher You Cant Zoom ....}}`); nothing opens; grid stays.
-Status: executable
+Status: blocked: the voucher zoom is not built in this PR (no deep link on the entry screens); the refusal text `This Is a Item Wise Opening Stock Voucher You Cant Zoom ....` belongs to it.
 
 ### stock-report.zoom.needs-target-read-right   (T05 Children; T11 Scope/rights)
 Layer: browser
 Steps: 1. Revoke View on "Sales" for the user. 2. Double-click M10. 3. Grant it and repeat. 4. Delete the user's rights row for Sales and repeat.
 Expected: gap 9, 14. First: message `You Have No Rights...` (three dots, `RP_STOCK.cs:5248 {{You Have No Rights...}}`), stays on the movement grid. After granting: the Sales voucher opens. With no rights row at all the desktop allows the zoom
 (`RP_STOCK.cs:5245 {{dataTable2.Rows.Count > 0 && Operators.ConditionalCompareObjectEqual}}`); the web opens only with the target menu's Read right, so with no row the zoom is refused with the same text (decision 5: deliberate hosted-service difference).
-Status: executable
+Status: blocked: the voucher zoom is not built in this PR (no deep link on the entry screens), so there is no target right to check.
 
 ### stock-report.zoom.not-from-merged-or-other-lc   (T05 Children)
 Layer: browser
@@ -528,7 +528,7 @@ Status: executable
 Layer: browser
 Steps: 1. Press InOut. 2. Press Ok with no item ticked.
 Expected: gap 13, 14. Message exactly `Item Selection Not Done...` (`RP_STOCK.cs:5942 {{Item Selection Not Done...}}`); the picker closes; no print starts.
-Status: executable
+Status: blocked: the InOut item picker and ItemLedger print are not built in this PR; `ItemLedger` is not among the templates the web renders.
 
 ### stock-report.invalid.bad-date-text   (T06 Required/invalid)
 Layer: browser
@@ -740,7 +740,7 @@ Layer: browser
 Steps: 1. W1, Item Type blank, Group dimension, press Print.
 Expected: gap 12. Template `GroupStkRpt` (`RP_STOCK.cs:4032 {{text = "GroupStkRpt";}}`); title `Group Wise Stock From Date  11/04/2026 To 11/05/2026` (two spaces after "Date": `RP_STOCK.cs:4224 {{Cr[(short)0] = "RptTitel = '" + text2 + Strings.Format((object)Conversions.ToDate(mFromDt.Text), "dd/MM/yyyy") + " To "}}`);
 rows `GOLD ORNAMENTS` and `SILVER ARTICLES`; Opening 18 / 176.000 and 100 / 950.000, Closing 20 / 208.000 and 110 / 1045.000, grand Closing 130 / 1253.000 (the same as the grid).
-Status: executable
+Status: blocked: the Crystal template `GroupStkRpt` is not rendered by the web; Print checks the Print right and then prints the grid, so the template title and layout are not asserted.
 
 ### stock-report.output.titles-by-dimension   (T16 Report/output)
 Layer: browser
@@ -753,7 +753,7 @@ Status: blocked: the Safe template `SafeStkRpt` is MISSING from `extraction_outp
 Layer: browser
 Steps: 1. Safe dimension, Print. 2. Answer Yes. 3. Print again, answer No.
 Expected: gap 12. A Yes/No box titled `Safe Wise Summ Report` (`RP_STOCK.cs:4172 {{Safe Wise Summ Report}}`); Yes selects `SafeStkSumm` (`RP_STOCK.cs:4174 {{DC_Main.RptName = "SafeStkSumm";}}`), No keeps `SafeStkRpt`.
-Status: executable
+Status: blocked: the Crystal templates `SafeStkRpt` and `SafeStkSumm` are not rendered by the web (the first is MISSING from `extraction_output/rpt_xml/`); Print is the browser print of the grid.
 
 ### stock-report.output.print-uses-screen-filters   (T16 Report/output)
 Layer: browser
@@ -778,7 +778,7 @@ Status: executable
 Layer: browser
 Steps: 1. Press InOut. 2. The picker lists the items of the chosen Item Type; tick A; press Ok.
 Expected: gap 13. Template `ItemLedger` (`RP_STOCK.cs:5952 {{ItemLedger.RPT}}`) for items in the ticked list with movements dated up to TO (`RP_STOCK.cs:5958 {{CurFormula = CurFormula + " And {MAIN_STOCK.IT_CODE} in [" + SelectIt + "]";}}`): item A's Closing as of D40 is 14 / 138.000; items not ticked are absent. The picker lists only gold items when Item Type is Gold (`RP_STOCK.cs:5879 {{SELECT A.IT_CODE,A.IT_NAME FROM ITEM_MAST  AS A}}`); All ticks every listed item.
-Status: executable
+Status: blocked: the InOut item picker and ItemLedger print are not built in this PR; `ItemLedger` is not among the templates the web renders.
 
 ### stock-report.output.print-title-with-lc   (T16 Report/output)
 Layer: browser

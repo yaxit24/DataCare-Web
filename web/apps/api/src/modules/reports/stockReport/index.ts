@@ -153,7 +153,8 @@ export async function stockSummary(
     });
     return {
       dimension: request.dimension,
-      title: `${TITLE_PREFIX[request.dimension]}${ddmmyyyy(request.filters.fromDate)}`,
+      // RptTitel = text + From + " To " + To (RP_STOCK.cs:4224).
+      title: `${TITLE_PREFIX[request.dimension]}${ddmmyyyy(request.filters.fromDate)} To ${ddmmyyyy(request.filters.toDate)}`,
       weight: gross ? 'gross' : 'net',
       fromDate: request.filters.fromDate,
       toDate: request.filters.toDate,
