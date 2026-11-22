@@ -193,6 +193,6 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
   {
     // WP-23: legacy Year-End Close openings (ACOP / OPENING / voucher 1) carry the carried-opening marker.
     name: '20261122100000_legacy_year_end_openings_carried',
-    checksum: '5975a6b2ac7f6a2595ae441ed12ed6c9d1e6d2d8f833cc6539b9f2f5965afc86',
+    checksum: '705c320177c899478749ca679fb5233e6dd265f26c46a53cc65bfc3f045b5b80',
   },
 ];

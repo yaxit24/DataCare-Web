@@ -31,6 +31,10 @@ import { carryForwardOpenings } from '../src/modules/masters/year.js';
 import { groupSummary } from '../src/modules/reports/reports3.js';
 import { voucherRegister } from '../src/modules/reports/voucherRegister.js';
 import { dataRefresh } from '../src/modules/utilities/dataRefresh.js';
+import { getRepair } from '../src/modules/utilities/dataRepair.js';
+import '../src/modules/utilities/dataRepairOps.js';
+import { deleteParty } from '../src/modules/masters/partyMaster.js';
+import { deleteAddress } from '../src/modules/masters/addressMaster.js';
 import { snapshotTenant } from './support/tenantSnapshot.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
@@ -280,7 +284,39 @@ databaseDescribe('Balance TrFr through the real readers', () => {
     expect(refresh.ledger).toMatchObject({ dr: 7500.75, cr: 7500.75, diff: 0 });
   });
 
-  it('decision 2: the migration relabels a legacy Year-End Close leg as carried, so no reader adds it', async () => {
+  it('decision 2: the migration needs a bypass role, relabels a legacy leg with a carried OP_DATA row only', async () => {
+    const sql = readFileSync(
+      new URL(
+        '../../../packages/db/prisma/migrations/20261122100000_legacy_year_end_openings_carried/migration.sql',
+        import.meta.url,
+      ),
+      'utf8',
+    );
+    const statements: string[] = [];
+    let current: string[] = [];
+    let quoted = false;
+    for (const line of sql.split('\n')) {
+      if (/^\s*--/.test(line)) continue;
+      current.push(line);
+      if ((line.match(/\$preflight\$/g) ?? []).length % 2 === 1) quoted = !quoted;
+      if (!quoted && /;\s*$/.test(line)) {
+        statements.push(current.join('\n').trim().replace(/;\s*$/, ''));
+        current = [];
+      }
+    }
+    expect(statements[0]).toBe('BEGIN');
+    expect(statements.at(-1)).toBe('COMMIT');
+    expect(statements).toContain('SET LOCAL row_security=off');
+    const preflight = statements.find((st) => st.startsWith('DO $preflight$'))!;
+    const update = statements.find((st) => st.startsWith('UPDATE'))!;
+    // Without complete tenant visibility it refuses instead of silently updating nothing.
+    await expect(runtime.$executeRawUnsafe(preflight)).rejects.toThrow(
+      'legacy year-end opening relabel requires a migration role with complete tenant visibility',
+    );
+    await expect(owner.$executeRawUnsafe(preflight)).resolves.toBeDefined();
+
+    // P1: a legacy Year-End Close leg with its carried OP_DATA row. X5: the same leg identity with no carried
+    // OP_DATA row (for example an imported Account Opening), which must stay visible.
     for (const [ac, cr, dr] of [
       ['P1', 3499.25, 0],
       ['X5', 0, 3499.25],
@@ -297,23 +333,27 @@ databaseDescribe('Balance TrFr through the real readers', () => {
         dr,
         `LEGACY-${ac}`,
       );
-    const sql = readFileSync(
-      new URL(
-        '../../../packages/db/prisma/migrations/20261122100000_legacy_year_end_openings_carried/migration.sql',
-        import.meta.url,
-      ),
-      'utf8',
+    await exec(
+      `INSERT INTO "OP_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","AC_CODE","OP_AMT","OP_SIGN","DATA_TYPE","DATA_TRFR")
+       VALUES ($1,$2,$3,$4,'000','00000','P1',3499.25,'C','A','Y')`,
+      TENANT,
+      CO,
+      LC,
+      TO,
     );
-    await owner.$executeRawUnsafe(sql);
-    await owner.$executeRawUnsafe(sql); // idempotent
-    const relabelled = await withTenant(owner, TENANT, (tx) =>
+    await owner.$executeRawUnsafe(update);
+    await owner.$executeRawUnsafe(update); // idempotent
+    const names = await withTenant(owner, TENANT, (tx) =>
       tx.$queryRawUnsafe(
-        `SELECT count(*)::int n FROM "AC_DATA" WHERE tenant_id=$1 AND "BOOK_NAME"='BAL TRFR'`,
+        `SELECT "AC_CODE" ac, "BOOK_NAME" bn FROM "AC_DATA" WHERE tenant_id=$1 AND "VCH_NO"='1' ORDER BY 1`,
         TENANT,
       ),
     );
-    expect(relabelled).toEqual([{ n: 2 }]);
-    // Before any new carry the ledger already shows the opening once (the relabelled leg is excluded).
+    expect(names).toEqual([
+      { ac: 'P1', bn: 'BAL TRFR' },
+      { ac: 'X5', bn: 'OPENING' },
+    ]);
+    // The relabelled leg is now excluded by the cross-year ledger: P1 opens once.
     expect(await ledger('2026-04-01', '2027-03-31')).toEqual({
       opening: 3499.25,
       closing: 2499.25,
@@ -321,6 +361,52 @@ databaseDescribe('Balance TrFr through the real readers', () => {
     await balanceTrfr();
     await yearEnd();
     await expectEachBalanceOnce();
+  });
+
+  it('review item 3: the opening-balance repair is year-scoped and leaves carried openings alone', async () => {
+    await balanceTrfr();
+    await yearEnd();
+    await exec(
+      `INSERT INTO "OP_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","AC_CODE","OP_AMT","OP_SIGN","DATA_TYPE","DATA_TRFR")
+       VALUES ($1,$2,$3,$4,'000','00000','P1',111,'D','A','Y')`,
+      TENANT,
+      CO,
+      LC,
+      FROM,
+    );
+    const before = await snapshotTenant(owner, TENANT, ['OP_DATA']);
+    await withTenant(runtime, TENANT, (tx: any) =>
+      getRepair('opening-balance').apply(tx, {
+        tenantId: TENANT,
+        coCode: CO,
+        lcCode: LC,
+        coYear: TO,
+      }),
+    );
+    expect(await snapshotTenant(owner, TENANT, ['OP_DATA'])).toEqual(before);
+  });
+
+  it('review item 3: a party or address with a carried opening cannot be deleted', async () => {
+    await exec(
+      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_MAIN_GR") VALUES ($1,$2,$3,'P3','ACCOUNT P3','1')`,
+      TENANT,
+      CO,
+      LC,
+    );
+    // P3's only history is a hand-keyed opening of year N (voucher 00000), which the usage check does not count.
+    await savePartyOpening(runtime, {
+      scope: scopeN,
+      acCode: 'P3',
+      amount: 40,
+      sign: 'C',
+      mainUser: USER,
+    });
+    await balanceTrfr();
+    const message = `This opening was carried from ${FROM}; correct the closing year and run Balance TrFr again`;
+    const partyScope = { tenantId: TENANT, coCode: CO, lcCode: LC, coYear: TO };
+    await expect(deleteParty(runtime, partyScope, 'P3')).rejects.toThrow(message);
+    await expect(deleteAddress(runtime, partyScope, 'P3')).rejects.toThrow(message);
+    expect(await getPartyOpening(runtime, scopeN1, 'P3')).toMatchObject({ amount: 40, sign: 'C' });
   });
 
   it('finding 2: Item Stock carry, then Item Opening Save in N+1, change no stock balance; re-runs too', async () => {

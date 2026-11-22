@@ -3,7 +3,11 @@ import { withTxBudget } from '../shared/txBudget.js';
 import { insertRowTx } from '../posting/posting.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
 import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
-import { openingHeads, writeMasterOpeningTx } from '../finance/partyOpening.js';
+import {
+  carriedOpeningDeleteProblemTx,
+  openingHeads,
+  writeMasterOpeningTx,
+} from '../finance/partyOpening.js';
 import { requiredVersion, versionOf } from '../vouchers/version.js';
 
 /**
@@ -724,6 +728,9 @@ export async function deleteParty(
       code,
     );
     if (used) throw new PartyMasterValidationError(PARTY_MESSAGES.IN_USE);
+    // A carried opening (VCH_NO '00000', so the usage check above passes it) is not deleted with the party (WP-23).
+    const carried = await carriedOpeningDeleteProblemTx(tx, scope, code);
+    if (carried) throw new PartyMasterValidationError(carried);
     const rules = await partyRulesTx(tx, scope);
     const problem = defaultAccountProblem(code, rules, Boolean(options.unlocked), 'delete');
     if (problem) throw new PartyMasterValidationError(problem);

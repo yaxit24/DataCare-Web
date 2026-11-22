@@ -530,6 +530,33 @@ export async function writeMasterOpeningTx(
   return true;
 }
 
+/**
+ * The message when an account with a carried opening in any year of the company and location is about to be deleted
+ * (Party master, Address master), or null. Deleting it would orphan or drop a balance carried from the closed year.
+ */
+export async function carriedOpeningDeleteProblemTx(
+  tx: any,
+  scope: { coCode: string; lcCode?: string },
+  acCode: string,
+): Promise<string | null> {
+  const legs: any[] = await tx.$queryRawUnsafe(
+    `SELECT d."CO_YEAR" y FROM "AC_DATA" d
+      WHERE d."CO_CODE"=$1 AND d."LC_CODE"=$2 AND d."AC_CODE"=$3 AND d."CO_BOOK"='000' AND d."BOOK_NAME"=$4
+      ORDER BY d."CO_YEAR" DESC LIMIT 1`,
+    scope.coCode,
+    scope.lcCode ?? '01',
+    acCode,
+    CARRIED_OPENING_BOOK_NAME,
+  );
+  if (!legs.length) return null;
+  const prior: any[] = await tx.$queryRawUnsafe(
+    `SELECT max("CO_YEAR") y FROM "YEAR_MAST" WHERE "CO_CODE"=$1 AND "CO_YEAR" < $2`,
+    scope.coCode,
+    legs[0].y,
+  );
+  return carriedOpeningMessage(String(prior[0]?.y ?? 'the previous year'));
+}
+
 /** The refusal text for an edit or delete of a carried opening (Party Opening and Item Opening). */
 export function carriedOpeningMessage(fromYear: string): string {
   return `This opening was carried from ${fromYear}; correct the closing year and run Balance TrFr again`;
