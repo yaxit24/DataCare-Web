@@ -1,3 +1,15 @@
+## 2026-11-22 — Purchase residuals: lossless reopen, hallmark receive columns, purchase book family (N244 / G256, WP-28)
+
+- 2026-11-22: `GET /purchases/:vchNo` returns every stored value (`purchaseReopen.ts`); the edit keeps the persisted header and line columns the
+  request does not model and the stored `IT_TYPE`; the screens send back what they do not show (`lib/purchaseCarry.ts`). Hallmark receive
+  (`purchaseHallmark.ts`): `HM_ID_AMT` per line, header `HM_AMT` half to even (TR_PURC_HM.cs:9995), `HM_TAX_CODE`, `ITM_COLOR`, `EMP_CODE`,
+  `VCH_DESC`; hallmark ids 2-4, weights and the tag band for `TAG PURCHASE` books only (D5).
+- 2026-11-22: create/edit refuse a non-purchase book; `GET /context/books?family=` filters on the server. `/txn/purchase` opens the hallmark
+  layout when `PURC_WITH_HMTAX` is Y, `/txn/tag-wise-purc` lists `TAG PURCHASE` books, `/txn/purchase-hm` forwards; the nav caption
+  "Hallmark Purchase" now points to `/txn/tag-wise-purc`. Decisions D1-D13 in `orchestration/work/WP-28/cases.md` (architect, owner may override).
+- 2026-11-22: verification: 88 cases: 17 pass at database/unit level (lossless reopen of every tenant row for an earlier-month hallmark voucher with typed amount, fine and stones; TAG PURCHASE ids 2-4, weights, tag band and BAR_DETL rules; HM_AMT half to even; HM tax code with no charge; server family refusal; /context/books?family=), 4 partly, 2 blocked, 3 N/A, the rest executable but not run (browser module extended, not run locally); full API suite with database 4134/4134 after the kernel fix. Browser cases not run locally. Not done: employee-code book shortcut (D9), `WITH_STOCK` blank to Y,
+  `BAR_DATA`/`SRNO_MAST`/`TAG_SET` tag write set, print templates; blocked: the 95-column Enter walk and the `DATA_TYPE` book filter.
+
 ## 2026-11-09 — Order Cancel is the desktop TR_SL_ORD_ADJ voucher (N233 / G245, WP-02)
 
 - 2026-11-09: one voucher cancels the open advance of many orders (SL_ORD_ADJ, Order_Adj_Ledr/Rojmel, held-tag release), version-guarded

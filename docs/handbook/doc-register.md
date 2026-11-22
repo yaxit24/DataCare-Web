@@ -43,7 +43,7 @@ Every Markdown file in the repository, classified by the first matching rule in 
 | `.opencode/agents/*.md` | 1 | agent instructions | current | — | Permission rules for OpenCode sessions started by the orchestration dispatcher. |
 | `orchestration/roles/*.md` | 12 | procedure | current | — | Role contracts: the instructions the dispatcher gives every worker session of a role (study, cases, tests, implement, ui, verify, records, review, fix, lead). |
 | `orchestration/packets/*.md` | 26 | work packet | current | — | Work packets: one file per worker session, with its scope, reading list, checks and brief. |
-| `orchestration/work/*` | 1 | evidence | evidence | — | What dispatched sessions produced per work package (study, case list, red list, verification). Evidence of what was known and checked; not a status or behaviour authority. |
+| `orchestration/work/*` | 3 | evidence | evidence | — | What dispatched sessions produced per work package (study, case list, red list, verification). Evidence of what was known and checked; not a status or behaviour authority. |
 | `orchestration/*.md` | 7 | plan | current | — | The orchestration layer: plan, architecture, quality ladder, packet format, worker tools and providers, machine setup. |
 
 ## Master plan
