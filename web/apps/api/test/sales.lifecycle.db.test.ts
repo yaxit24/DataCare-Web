@@ -965,6 +965,8 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
   });
 
   it("persists unconfigured sale totals with today's 2dp policy in header and ledger", async () => {
+    // An explicit ITM_AMT is kept as entered, formatted "0.00" (TR_SALE.cs:9478, :9495); only an amount computed from
+    // the rate is rounded to the line precision (:10905-10932). 3% of 1000.55 = 30.02.
     const result = await createSale(runtime, saleInput(), [
       { itCode: 'LOOSE', pcs: 1, metalAmount: 1000.55 },
     ]);
@@ -1395,11 +1397,12 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
         grossWt: 10,
         netWt: 10,
         touch: 91.6,
-        // A rate chosen so 3% of the line lands beyond two decimals, which is what makes the precisions
-        // distinguishable at all. The blank company prices net (10 x 7131.11 = 71,311.10), so 3% is
-        // 2,139.333 and the 2dp tax is an odd 2,139.33. (7131.1 was tuned to the former fine basis; on net
-        // it gives 71,311.00 and an exact 2dp tax, which no precision can tell apart.)
-        rate: 7131.11,
+        // A line chosen so 3% of it lands beyond two decimals, which is what makes the precisions
+        // distinguishable at all. ITM_AMT is a whole rupee (TR_SALE.cs:10343-10362: 10 x 7131.1 = 71,311), and 3%
+        // of a whole rupee always has two decimals, so the paise come from OTH_AMT, which NET_AMT adds unrounded
+        // (TR_SALE.cs:11548): 71,311.10, 3% = 2,139.333, an odd 2dp tax of 2,139.33.
+        rate: 7131.1,
+        otherAmount: 0.1,
       },
     ]);
     const vch = String(created.vchNo).padStart(5, '0');

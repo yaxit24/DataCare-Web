@@ -7823,6 +7823,66 @@
       "statusNote": "IMPLEMENTED, not accepted. order-cancel module: 24 cases over T01-T18, none blocked; stock.held-tag-released is a real browser case (the order is made on the Sales Order screen, only the tag hold is seeded because the web Sales Order never saves a tagged line). Desktop match 0%."
     },
     {
+      "id": "N234",
+      "status": "in-progress",
+      "action": "Report → Sales Report is the desktop RP_ALL screen: a shared pure RP_ALL engine (selectors, record order, group bands, count-once totals, titles, exports) with one adapter per branch, Sales first. Phase one: the engine, the Sales adapter for Sales Report, Sales Reg, Item Wise, Group Sales, Employ Sales and Sale With Order (with the Sales Return prompt variants) and GET /reports/sales-report plus CSV/XLSX. Phase two: the dedicated route directory, the remaining seven buttons, PDF in the template layouts and the browser run.",
+      "parentLabels": "P1-core; L6; WP-11; T01-T18",
+      "startAfter": [
+        "N36"
+      ],
+      "requiredProof": "Unit tests compute every total from fixture vouchers with the template formula (never read back from the web) and prove grouping, count-once totals, band suppression, formatting, selector parsing and per-button SQL predicates with no request value in the SQL text. A DB/HTTP test under forced RLS proves the row set per selector, the hand totals per mode, sentinels in another tenant, company, location, year and date never appear, List and Print rights are refused by the API, and the export equals the grid. Phase two adds the screen and runs the frozen sales-report browser cases.",
+      "gapIds": "G06, G246",
+      "entryDefinition": "docs/parity/LITE-MASTER-PLAN.md section 5 (WP-11)",
+      "sourceAndModuleDetail": "docs/parity/rpall-sales-inventory.md; 12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-09",
+      "evidence": [
+        "docs/parity/rpall-sales-inventory.md",
+        "web/apps/api/src/modules/reports/rpAll/engine.ts",
+        "web/apps/api/src/modules/reports/rpAll/filters.ts",
+        "web/apps/api/src/modules/reports/rpAll/salesLayouts.ts",
+        "web/apps/api/src/modules/reports/rpAll/salesQuery.ts",
+        "web/apps/api/src/modules/reports/rpAll/index.ts",
+        "web/apps/api/src/modules/reports/rpAll/exportRows.ts",
+        "web/apps/api/src/routes/rpAllReport.ts",
+        "web/apps/api/test/rpAllEngine.test.ts",
+        "web/apps/api/test/rpAllSales.test.ts",
+        "web/apps/api/test/rpAllSales.db.test.ts",
+        "web/apps/web/test/features/modules/salesReport.mjs"
+      ],
+      "statusNote": "IN PROGRESS (phase one). Engine, Sales adapter and API are built and unit-tested; the DB/HTTP test and the frozen browser module were written without a local stack and run in CI only. No screen yet: every sales-report browser case is blocked. G246 (the web Sales Return writes its amount to NET_AMT instead of RTN_NET_AMT) is open and keeps the return variant empty for web-written returns."
+    },
+    {
+      "id": "N235",
+      "status": "implemented-unverified",
+      "action": "Sales line percentage labour and line precision follow TR_SALE CommPassTotal: LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, MsLbrRof) (TR_SALE.cs:11021) multiplied by the LBR_TYPE basis (:11084-11127; Sales Return :4963, :4975-4993), and ITM_AMT/LBR_AMT each one Math.Round to a hardcoded 0 decimals, 2 under ALL_ROF_REMOVE (:10343-10362), instead of TOT_AMT_ROF; the Sale and Sales Quotation previews use the same kernel.",
+      "parentLabels": "P1-core; L1; T03; WP-41",
+      "startAfter": [
+        "N233"
+      ],
+      "requiredProof": "The desktop oracle sales-line vectors pass with the eight labour.pct.* baseline entries removed; core and web unit tests; a DB test of the persisted LBR_RATE/LBR_AMT and the line precision (TOT_AMT_ROF ignored, ALL_ROF_REMOVE honoured); the sales-invoice browser case formula.percentage-labour; sales-invoice and sales-return modules green.",
+      "gapIds": "G247",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/packages/core/src/calc.ts",
+        "web/packages/core/src/saleAmount.ts",
+        "web/packages/core/src/roundingPolicy.ts",
+        "web/apps/api/src/modules/sales/sales.ts",
+        "web/apps/api/src/modules/sales/salesReturn.ts",
+        "web/apps/web/lib/lineRecalc.ts",
+        "web/packages/core/test/desktopOracle.salesLine.test.ts",
+        "web/packages/core/test/calc.test.ts",
+        "web/apps/api/test/lineComponentRounding.db.test.ts",
+        "web/apps/web/test/features/modules/salesInvoice.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Desktop oracle sales-line: KNOWN_MISMATCHES empty (the eight labour.pct.* entries removed and passing). sales-invoice module 34 applicable, 32 passed, 0 failed, 2 blocked (both pre-existing, unrelated); new case formula.percentage-labour passes. sales-return 25 of 26 (1 blocked, pre-existing; new case config.all-rof-remove-keeps-whole-rupees). gst-report, group-master and item-master expectations moved to whole-rupee lines and pass. Not modelled: the registration-serial branches (DM035NPDM, HM199NEPK). Desktop match 0% beyond the oracle vectors."
+    },
+    {
       "id": "N236",
       "status": "implemented-unverified",
       "action": "Balance TrFr is the desktop BtmSchm form with the five Lite dataset buttons. Ac Balance carries parties to the closing date per AC_CODE and DATA_TYPE into OP_DATA with Party Opening legs (Cr-positive, gold and silver by IT_TYPE, decimal half-away rounding, zero-skip); Item Stock carries untagged MAIN_STOCK into ITM_OPBL (fine = net x AVG_TOUCH / 100); server-computed Transfer Year, target-year replace, one transaction under an advisory lock. Tag Stock, Sales Order and Approval are implicit in the one-database web: the buttons run the desktop selection, report the open count and write nothing.",

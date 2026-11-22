@@ -16,9 +16,9 @@
  * LBR_AMT on 84 of 166, because the desktop grid lets the operator overtype an amount. The rule that survives
  * the data is "whatever the component is, it is rounded", so this test pins the rounding and not the formula.
  *
- * Precision comes from `CO_SET_NEW.TOT_AMT_ROF`, which is 0 for this customer. The second test sets it to 2 to
- * prove the behaviour is configured rather than hardcoded — a whole-rupee assertion alone could be satisfied by
- * a hardcoded `Math.round`.
+ * Precision is the Sale line's own (N235/G247): `CommPassTotal` hardcodes 0 decimals for ITM_AMT and LBR_AMT, or 2
+ * when `CO_SET.ALL_ROF_REMOVE = 'Y'` (TR_SALE.cs:10343-10362). It never reads `CO_SET_NEW.TOT_AMT_ROF` for a line, so
+ * TOT_AMT_ROF = 2 still stores whole rupees, and only ALL_ROF_REMOVE keeps paise.
  */
 import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
@@ -52,14 +52,15 @@ async function wipe() {
 }
 
 /** Seed exactly what a sale on book 027 needs, with the amount precision under the caller's control. */
-async function seed(totAmtRof: number) {
+async function seed(totAmtRof: number, allRofRemove = 'N') {
   const exec = (sql: string, ...p: unknown[]) =>
     withTenant(owner, TENANT, (tx) => tx.$executeRawUnsafe(sql, ...p));
   await exec(
     `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","LBR_TYPE","LBR_ROF","SL_AMT_TYPE","TAX_ROF","ALL_ROF_REMOVE","ITM_RATE_ROF")
-     VALUES ($1,$2,'N',2,'N',2,'N',2)`,
+     VALUES ($1,$2,'N',2,'N',2,$3,2)`,
     TENANT,
     CO,
+    allRofRemove,
   );
   await exec(
     `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","TOT_AMT_ROF","PR_RATE_ROF") VALUES ($1,$2,$3,2)`,
@@ -179,7 +180,7 @@ async function seedTaxed() {
   );
 }
 
-async function postAndRead() {
+async function postAndRead(saleLine: Parameters<typeof createSale>[2][number] = line) {
   await createSale(
     runtime,
     {
@@ -192,13 +193,14 @@ async function postAndRead() {
       interState: false,
       mainUser: 'rounding-test',
     },
-    [line],
+    [saleLine],
   );
   const rows = (await owner.$queryRawUnsafe(
-    `SELECT "ITM_AMT"::float a, "LBR_AMT"::float l, "NET_AMT"::float n
+    `SELECT "ITM_AMT"::float a, "LBR_AMT"::float l, "NET_AMT"::float n,
+            "LBR_RATE"::float lr, "LBR_PRC"::float lp, "LBR_TYPE" lt
        FROM "SL_DETL" WHERE tenant_id=$1 ORDER BY "SR_NO"`,
     TENANT,
-  )) as { a: number; l: number; n: number }[];
+  )) as { a: number; l: number; n: number; lr: number; lp: number; lt: string | null }[];
   return rows[0]!;
 }
 
@@ -376,11 +378,48 @@ describe.runIf(RUN)('persisted line component rounding', () => {
     expect(row.n).toBe(428);
   });
 
-  it('keeps paise when the same setting is 2, so this is configured and not hardcoded', async () => {
+  it('still rounds to whole rupees when TOT_AMT_ROF is 2: the line never reads it', async () => {
     await seed(2);
+    const row = await postAndRead();
+    expect(row.a).toBe(354);
+    expect(row.l).toBe(74);
+    expect(row.n).toBe(428);
+  });
+
+  it('keeps paise under ALL_ROF_REMOVE = Y, the one switch the line reads (TR_SALE.cs:10351)', async () => {
+    await seed(0, 'Y');
     const row = await postAndRead();
     expect(row.a).toBeCloseTo(354.2, 2);
     expect(row.l).toBeCloseTo(74.01, 2);
     expect(row.n).toBeCloseTo(428.21, 2);
+  });
+
+  it('a percentage line derives LBR_RATE from the item rate and multiplies the LBR_TYPE basis (N235)', async () => {
+    // CO_SET.LBR_TYPE 'N', LBR_ROF 2 (seed). TR_SALE.cs:11021: LBR_RATE = Math.Round(85.55 x 12.5 / 100 =
+    // 10.69375, 2) = 10.69; :11119-11123 N basis (net + ghat) x 10.69 = 1000 x 10.69 = 10,690, Math.Round(.., 0).
+    // The old web rule took 12.5 % of the item amount: 85,550 x 12.5 % = 10,693.75 -> 10,694.
+    await seed(0);
+    const row = await postAndRead({
+      itCode: 'ORS',
+      metal: 'S',
+      pcs: 1,
+      grossWt: 1000.4,
+      netWt: 1000,
+      touch: 0,
+      rate: 85.55,
+      labourPct: 12.5,
+      labourType: 'percentage',
+    });
+    expect(row).toEqual({ a: 85550, l: 10690, n: 96240, lr: 10.69, lp: 12.5, lt: 'N' });
+  });
+
+  it('LBR_RATE_GEN = Y regenerates a per-gram LBR_RATE from LBR_AMT (TR_SALE.cs:11139-11186)', async () => {
+    // 3 g x 10.20 = 30.60 -> LBR_AMT 31; LBR_RATE = Math.Round(31 / 3, LBR_ROF 2) = 10.33.
+    await seed(0);
+    await withTenant(owner, TENANT, (tx) =>
+      tx.$executeRawUnsafe(`UPDATE "CO_SET" SET "LBR_RATE_GEN"='Y' WHERE tenant_id=$1`, TENANT),
+    );
+    const row = await postAndRead({ ...line, grossWt: 3, netWt: 3, labourRate: 10.2 });
+    expect([row.l, row.lr]).toEqual([31, 10.33]);
   });
 });

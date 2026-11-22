@@ -1,6 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { recalcLine } from '../lib/lineRecalc';
-import { fineFor, labourCharge, metalAmount, round } from '@datacare/core';
+import {
+  applySaleTagPick,
+  editSaleGridRow,
+  recalcLine,
+  recalcSaleGridRow,
+  saleGridRowLabour,
+  saleLineLabourMode,
+} from '../lib/lineRecalc';
+import {
+  fineFor,
+  labourCharge,
+  metalAmount,
+  resolveRoundingPolicy,
+  round,
+  saleGhatWeight,
+} from '@datacare/core';
 
 /**
  * The client kernel must agree with the server's arithmetic.
@@ -178,5 +192,121 @@ describe('sale ghat percentage (desktop oracle, family 1)', () => {
     );
     expect(r.netWt).toBe(10.055);
     expect(r.ghtWt).toBe(ghat);
+  });
+});
+
+describe('sale percentage labour and line precision (desktop oracle, N235/G247)', () => {
+  // Desktop oracle vector labour.pct.G.rtN (run 42580947381): 3 pcs, gross 10.555, less 0.500, ghat 0.120, touch
+  // 91.6, RtWith N, item rate 6200, LBR_PRC 12, LBR_TYPE G -> LBR_RATE 744.00, LBR_AMT 7853.00.
+  const line = {
+    pcs: '3',
+    grossWt: '10.555',
+    lessWt: '0.500',
+    ghtWt: '0.120',
+    touch: '91.6',
+    rateWith: 'N',
+    rate: '6200',
+    labourPct: '12',
+    labourType: '%',
+  };
+  const policy = resolveRoundingPolicy({ LBR_ROF: '2', TOT_AMT_ROF: '2' });
+
+  it('derives the labour rate from the item rate and multiplies the LBR_TYPE basis', () => {
+    // The desktop formula, worked here: rate = round(6200 x 12 / 100, 2) = 744; amount = round(basis x 744, 0).
+    const rate = Math.round(((6200 * 12) / 100) * 100) / 100;
+    const r = (basis: string) =>
+      recalcLine(line, 'sale', { roundingPolicy: policy, labourBasis: basis });
+    expect(r('G').labourRate).toBe(744);
+    expect(r('G').labourAmount).toBe(Math.round(10.555 * rate)); // 7853
+    expect(r('N').labourAmount).toBe(Math.round((10.055 + 0.12) * rate)); // 7570
+    expect(r('P').labourAmount).toBe(3 * rate); // 2232
+  });
+
+  it('rounds ITM_AMT to whole rupees whatever TOT_AMT_ROF says (TR_SALE.cs:10343-10362)', () => {
+    const plain = { netWt: '10', touch: '91.6', rateWith: 'N', rate: '6123.45' };
+    expect(recalcLine(plain, 'sale', { roundingPolicy: policy }).metalAmount).toBe(61234);
+    expect(
+      recalcLine(plain, 'sale', { roundingPolicy: resolveRoundingPolicy({ ALL_ROF_REMOVE: 'Y' }) })
+        .metalAmount,
+    ).toBe(61234.5);
+  });
+
+  it('a Lbr% row with an item rate is a percentage line; otherwise Making/g is per gram', () => {
+    expect(saleLineLabourMode({ lbrPct: '12', rate: '6200', making: '50' })).toBe('percentage');
+    expect(saleLineLabourMode({ lbrPct: '12', rate: '', making: '50' })).toBe('per_gram');
+    expect(saleLineLabourMode({ lbrPct: '', rate: '6200', making: '' })).toBeUndefined();
+  });
+
+  it('the Sale grid row previews and posts a Lbr% row as a percentage line', () => {
+    // A blank Making/g on a Lbr% row: the rate is derived (as on a row loaded without LBR_RATE).
+    const row = { ...line, labourType: undefined, making: '', lbrPct: '12' };
+    const preview = recalcSaleGridRow(row, { roundingPolicy: policy, labourBasis: 'G' });
+    expect(preview.labourRate).toBe(744);
+    expect(preview.labourAmount).toBe(7853);
+    expect(saleGridRowLabour(row)).toEqual({ labourType: 'percentage' });
+    // Entering the Lbr% writes 744.00 into Making/g, which then posts as the rate.
+    const entered = editSaleGridRow({ ...row, lbrPct: '' }, 'lbrPct', '12', policy);
+    expect(saleGridRowLabour(entered)).toEqual({ labourType: 'percentage', labourRate: 744 });
+    expect(saleGridRowLabour({ making: '50', rate: '6200' })).toEqual({
+      labourType: 'per_gram',
+      labourRate: 50,
+    });
+    expect(recalcSaleGridRow({ netWt: '10', making: '50' }).labourAmount).toBe(500);
+  });
+});
+
+describe('Lbr% then Making/g follows the desktop event order (TR_SALE.cs:10999-11021)', () => {
+  const policy = resolveRoundingPolicy({ LBR_ROF: '2' });
+  const base = { netWt: '10', touch: '91.6', rateWith: 'N', rate: '100', making: '', lbrPct: '' };
+  it('entering Lbr% writes the derived rate into Making/g; a later Making/g stands', () => {
+    const withPct = editSaleGridRow(base, 'lbrPct', '10', policy);
+    expect(withPct.making).toBe('10.00');
+    const edited = editSaleGridRow(withPct, 'making', '50', policy);
+    expect(edited.making).toBe('50');
+    const preview = recalcSaleGridRow(edited, { roundingPolicy: policy, labourBasis: 'N' });
+    expect(preview.labourRate).toBe(50);
+    expect(preview.labourAmount).toBe(500);
+    expect(saleGridRowLabour(edited)).toEqual({ labourType: 'percentage', labourRate: 50 });
+  });
+  it('a re-priced row re-derives (:10876-10880); clearing Lbr% clears the rate (:11033-11048)', () => {
+    const withPct = editSaleGridRow({ ...base, grossWt: '10' }, 'lbrPct', '10', policy);
+    expect(editSaleGridRow(withPct, 'rate', '200', policy).making).toBe('20.00');
+    expect(editSaleGridRow(withPct, 'lbrPct', '', policy).making).toBe('');
+  });
+});
+
+describe('final review of PR #241: a tag pick re-prices the row (TR_SALE.cs:10822-10880)', () => {
+  const policy = resolveRoundingPolicy({ LBR_ROF: '2' });
+  it('re-picking a tag on a reopened row drops the typed amount and re-derives Making from the new rate', () => {
+    // A reopened invoice: ITM_AMT 61234 and LBR_RATE 612.35 restored, column 83 = LBR_PRC 10.
+    const reopened = {
+      tagNo: 'T1',
+      itCode: 'GLD',
+      pcs: '1',
+      grossWt: '10',
+      netWt: '10',
+      touch: '91.6',
+      rate: '6123.45',
+      lbrPct: '10',
+      lbrPctApplied: '10',
+      making: '612.35',
+      metalAmount: '61234',
+    };
+    const picked = applySaleTagPick(
+      reopened,
+      { code: 'T2', name: 'GLD', ITM_NWT: 5, ITM_GWT: 5, ITM_TOUCH: 91.6, ITM_RATE: 6500 },
+      policy,
+    );
+    expect([picked.tagNo, picked.metalAmount, picked.making]).toEqual(['T2', '', '650.00']);
+    const preview = recalcSaleGridRow(picked, { roundingPolicy: policy, labourBasis: 'N' });
+    expect([preview.metalAmount, preview.labourAmount]).toEqual([32500, 3250]);
+  });
+});
+
+describe('ghat by percentage only (final review of PR #241)', () => {
+  it('derives ITM_GHT_WT = Format(ITM_NWT x ITM_GHT_PRC / 100, "0.000") with the core helper', () => {
+    expect(saleGhatWeight(10, 2)).toBe(0.2);
+    // 0.1235 x 100 ... a third-decimal midpoint: 12.35 x 1 / 100 = 0.1235 -> 0.124 (half away from zero)
+    expect(saleGhatWeight(12.35, 1)).toBe(0.124);
   });
 });
