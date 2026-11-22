@@ -7914,6 +7914,31 @@
         "web/packages/db/prisma/migrations/20261122100000_legacy_year_end_openings_carried/migration.sql"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Decisions (decided 2026-11-22 by the architect, owner may override): Q1/Q8 Tag Stock, Sales Order and Approval are implicit in the one-database web (tag stock, open orders and open approvals already read every year), so those buttons run the desktop selection, report the open count with the completion text and write nothing; Q9 no web stock reader adds ITM_OPBL (stock.ts onHandNet reads MAIN_STOCK of every year), so Item Stock writes ITM_OPBL as the desktop does and changes no balance; Q2/Q3 offsetting money/gold and pcs/weight are carried, not dropped (deliberate difference). Cases: 81 executable, 3 blocked (Q6, AvgTouch, tag-counter contradiction), 25 N/A. DB/unit 65/65 locally; browser module green in CI on the previous push. Opening model (decided 2026-11-22 by the architect, owner may override): a carried opening is an AC_DATA leg in book 000 with BOOK_NAME 'BAL TRFR' (shared/carriedOpening.ts) next to its OP_DATA row; year-scoped readers (trial balance/balances/balance sheet/P&L/outstanding with a year, desktopAccountBalance, Party Opening) count it; cross-year readers (Account Ledger, accounting ledger and trial balance without a year, partyBalance, cash book, bank book, Wh Sales balance, consignment opening, graph, day book) exclude it. One writer per account: the party carry (carryPartiesTx) serves Balance TrFr and Year-End Close; Year-End Close writes only non-party accounts, scoped by location, and replaces its legacy ACOP/OPENING/1 legs. Item Stock writes ITM_OPBL with CARRIED_FROM; stock (onHandNet) reads MAIN_STOCK of every year and never ITM_OPBL; Item Opening Save posts no MAIN_STOCK leg for a carried item; the carry replaces a hand-keyed N+1 opening together with its ITOBL stock and DM rows. Re-review decisions (architect, 2026-11-22, owner may override): Year Create's Carry Forward routes through the same single writer (carryOpeningsTx); migration 20261122100000 relabels legacy Year-End Close legs (ACOP/OPENING/1) as carried; editing or deleting a carried opening on Party Opening, the Party master or Item Opening is refused (unchanged master saves pass); group summary, voucher register without a year and Data Refresh totals exclude carried legs; the carries replace only the rows they own. Desktop match 0%."
+    },
+    {
+      "id": "N237",
+      "status": "implemented-unverified",
+      "action": "Data Backup archives the NextMain-equivalent tenant configuration by allowlist (UT_BKP.cs:1198-1251, D-BKP-3, D37): a versioned tenantConfig section (datacare.tenant-config v1) and its manifest descriptor carry this tenant's rows of nine tenant-shared configuration tables, column by column from an explicit allowlist (an unlisted table or column is never read); an explicit excluded-secrets list (LOGIN_MAST.LOGIN_PWD, BOOK_IDTL.SVR_PWD, CO_MAST.URL_PWD, CO_MAST.MAIL_API, DG_GOLD_MAST.API_KEY, E_MAST.ASP_PWD, E_MAST.E_LOGIN_PWD) is written as null, and sessions, refresh-token hashes and idempotency receipts are never read. Restore stays contained.",
+      "parentLabels": "P1-core; L1; T15; WP-08",
+      "startAfter": [
+        "N80"
+      ],
+      "requiredProof": "data-backup.config.nextmain-allowlist leaves baseline.json and passes through the real screen; DB tests: other tenant absent, every excluded secret seeded and absent, a configuration column added after the review is not exported, every secret-looking exported column of the live schema is an excluded secret; unit tests: the integrity check refuses a leaked secret, an unlisted column or a drifted envelope.",
+      "gapIds": "G249",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/apps/api/src/modules/ops/backupTenantConfigPolicy.ts",
+        "web/apps/api/src/modules/ops/backup.ts",
+        "web/apps/api/src/modules/ops/backupManifest.ts",
+        "web/apps/api/test/backupTenantConfig.test.ts",
+        "web/apps/api/test/backupTenantConfig.db.test.ts",
+        "web/apps/web/test/features/modules/dataBackup.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. data-backup module: 18 applicable, 14 passed, 0 failed, 4 blocked (unchanged: rights.desktop-print-handoff, output.physical-save-confirmation, output.full-lite-fixture, journey.scratch-zero-diff). backupTenantConfig unit 10 of 10, DB 5 of 5. Password hashes excluded per D37 as amended on 2026-11-22."
     }
   ],
   "amendments": [

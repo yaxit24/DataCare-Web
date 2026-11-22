@@ -19,7 +19,19 @@ import {
   type BackupTableManifest,
   type CompanyBackupDocument,
   type EncodedBackupRow,
+  type TenantConfigSection,
+  resealTenantConfig,
+  tenantConfigDescriptor,
 } from './backupManifest.js';
+import {
+  BACKUP_EXCLUDED_SECRETS,
+  TENANT_CONFIG_ALLOWLIST,
+  TENANT_CONFIG_EXCLUDED_TABLES,
+  TENANT_CONFIG_KIND,
+  TENANT_CONFIG_VERSION,
+  UNREVIEWED_TENANT_TABLE_REASON,
+  isExcludedSecretColumn,
+} from './backupTenantConfigPolicy.js';
 
 export type { CompanyBackupDocument as CompanyBackup } from './backupManifest.js';
 export {
@@ -42,8 +54,10 @@ const quoteIdentifier = (identifier: string): string => {
 
 const companyFilter = `"tenant_id"=$1 AND "CO_CODE"::text=$2::text`;
 
-const losslessColumnExpression = (column: BackupColumnManifest): string => {
+const losslessColumnExpression = (column: BackupColumnManifest, tableName: string): string => {
   const identifier = quoteIdentifier(column.name);
+  // D37: an excluded secret never leaves the database; the archive carries null in its place.
+  if (isExcludedSecretColumn(tableName, column.name)) return `NULL::text AS ${identifier}`;
   if (column.dataType === 'bytea') return `encode(${identifier},'base64') AS ${identifier}`;
   if (
     column.dataType === 'bigint' ||
@@ -71,13 +85,79 @@ const readEncodedCompanyRows = async (
     ? ` ORDER BY ${table.primaryKey.map(quoteIdentifier).join(',')}`
     : '';
   const rows = await tx.$queryRawUnsafe<Array<Record<string, unknown>>>(
-    `SELECT ${table.columns.map(losslessColumnExpression).join(',')}
+    `SELECT ${table.columns.map((column) => losslessColumnExpression(column, table.name)).join(',')}
        FROM ${quoteIdentifier(table.name)}
       WHERE ${companyFilter}${orderBy}`,
     target.tenantId,
     target.companyCode,
   );
   return rows.map((row) => encodeBackupRow(row, table));
+};
+
+/**
+ * D37 / D-BKP-3 (G64/N80, N237/G249): the NextMain equivalent, i.e. this tenant's rows of the allowlisted
+ * tenant-shared configuration tables, column by column. Unlisted tables and columns are never read (allowlist,
+ * not denylist): a column added to a configuration table later stays out until it is reviewed and listed.
+ * Exported for the unit test only.
+ */
+export const readTenantConfig = async (
+  tx: Tx,
+  manifest: BackupSchemaManifest,
+  tenantId: string,
+): Promise<TenantConfigSection> => {
+  const byName = new Map(manifest.tables.map((table) => [table.name, table]));
+  const allowlist: TenantConfigSection['allowlist'] = [];
+  const tables: TenantConfigSection['tables'] = {};
+  for (const entry of TENANT_CONFIG_ALLOWLIST) {
+    const table = byName.get(entry.table);
+    if (!table || table.scope !== 'tenant-shared')
+      throw new CompanyBackupValidationError(
+        `${entry.table} allowlisted tenant configuration table is absent or not tenant-shared`,
+      );
+    const columns = entry.columns.map((name) => {
+      const column = table.columns.find((candidate) => candidate.name === name);
+      if (!column || isExcludedSecretColumn(entry.table, name))
+        throw new CompanyBackupValidationError(
+          `${entry.table}.${name} allowlisted column is absent or an excluded secret`,
+        );
+      return column;
+    });
+    const scoped: BackupTableManifest = { ...table, columns };
+    const orderBy = table.primaryKey.every((name) => entry.columns.includes(name))
+      ? table.primaryKey
+      : entry.columns;
+    const raw = await tx.$queryRawUnsafe<Array<Record<string, unknown>>>(
+      `SELECT ${columns.map((column) => losslessColumnExpression(column, table.name)).join(',')}
+         FROM ${quoteIdentifier(table.name)}
+        WHERE "tenant_id"=$1
+        ORDER BY ${orderBy.map(quoteIdentifier).join(',')}`,
+      tenantId,
+    );
+    allowlist.push({ table: entry.table, columns: [...entry.columns] });
+    tables[entry.table] = {
+      rows: raw.map((row) => encodeBackupRow(row, scoped)),
+      rowCount: 0,
+      checksum: '',
+    };
+  }
+  const allowlisted = new Set(TENANT_CONFIG_ALLOWLIST.map((entry) => entry.table));
+  const excludedTables = manifest.tables
+    .filter((table) => table.scope === 'tenant-shared' && !allowlisted.has(table.name))
+    .map((table) => ({
+      table: table.name,
+      reason:
+        TENANT_CONFIG_EXCLUDED_TABLES.find((entry) => entry.table === table.name)?.reason ??
+        UNREVIEWED_TENANT_TABLE_REASON,
+    }));
+  return resealTenantConfig({
+    kind: TENANT_CONFIG_KIND,
+    version: TENANT_CONFIG_VERSION,
+    allowlist,
+    excludedTables,
+    excludedSecrets: BACKUP_EXCLUDED_SECRETS.map((entry) => ({ ...entry })),
+    totals: { tables: 0, rows: 0 },
+    tables,
+  });
 };
 
 const assertRestoreDocument = (value: unknown): CompanyBackupDocument => {
@@ -108,7 +188,12 @@ export async function backupCompany(
     async (tx) => {
       await tx.$executeRawUnsafe(`SET LOCAL TIME ZONE 'UTC'`);
       const settings = await resolveSettingsBehaviorTx(tx, { tenantId, coCode });
-      const manifest = await loadBackupSchemaManifest(tx);
+      const schema = await loadBackupSchemaManifest(tx);
+      const tenantConfig = await readTenantConfig(tx, schema, tenantId);
+      const manifest: BackupSchemaManifest = {
+        ...schema,
+        tenantConfig: tenantConfigDescriptor(tenantConfig),
+      };
       const tables: CompanyBackupDocument['tables'] = {};
       for (const table of orderedCompanyTables(manifest)) {
         const rows = await readEncodedCompanyRows(tx, table, {
@@ -137,6 +222,7 @@ export async function backupCompany(
           rows: 0,
         },
         tables,
+        tenantConfig,
         checksum: '',
       };
       const document = resealCompanyBackupDocument(draft);
