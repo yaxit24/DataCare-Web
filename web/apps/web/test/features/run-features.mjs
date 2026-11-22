@@ -17,6 +17,7 @@ import {
 import { seedCatalogue } from './fixtures/catalogue.mjs';
 import { purchaseInvoice } from './modules/purchaseInvoice.mjs';
 import { purchaseReport } from './modules/purchaseReport.mjs';
+import { salesReport } from './modules/salesReport.mjs';
 import { purchaseReturn } from './modules/purchaseReturn.mjs';
 import { salesOrder } from './modules/salesOrder.mjs';
 import { salesInvoice } from './modules/salesInvoice.mjs';
@@ -29,6 +30,7 @@ import { cashBank } from './modules/cashBank.mjs';
 import { contraEntry } from './modules/contraEntry.mjs';
 import { fineJv } from './modules/fineJv.mjs';
 import { orderCancel } from './modules/orderCancel.mjs';
+import { balanceTransfer } from './modules/balanceTransfer.mjs';
 import { partyOpening } from './modules/partyOpening.mjs';
 import { tagOpening } from './modules/tagOpening.mjs';
 import { dailyRate } from './modules/dailyRate.mjs';
@@ -70,6 +72,7 @@ const MODULES = [
   salesInvoice,
   purchaseInvoice,
   purchaseReport,
+  salesReport,
   settingsEffects,
   usersRights,
   salesReturn,
@@ -81,6 +84,7 @@ const MODULES = [
   fineJv,
   salesOrder,
   orderCancel,
+  balanceTransfer,
   partyOpening,
   tagOpening,
   dailyRate,

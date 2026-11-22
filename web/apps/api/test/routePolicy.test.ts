@@ -129,8 +129,11 @@ describe('route policy registry', () => {
     // (POST /admin/users/:loginName/update) and Delete (DELETE /admin/users/:loginName): 757 + 2 = 759.
     // N233 removes POST /sales-orders/:vchNo/cancel-refund and adds Order Cancel's pending-orders, defaults, POST,
     // GET, PUT, DELETE and print: 759 - 1 + 7 = 765.
-    expect(routes).toHaveLength(765);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(765);
+    // N234 (WP-11) adds the RP_ALL Sales Report GET /reports/sales-report and its CSV/XLSX exports: 765 + 3 = 768.
+    // WP-23 replaces Balance TrFr's preview, year-close and openings wrappers with the BtmSchm screen's GET and one
+    // POST per Lite dataset (ac-balance, item-stock, tag-stock, sales-order, approval): 768 - 3 + 6 = 771.
+    expect(routes).toHaveLength(771);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(771);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -280,19 +283,18 @@ describe('route policy registry', () => {
     });
   });
 
-  it('maps the desktop Balance TrFr dashboard wrappers to Company rights', () => {
-    expect(routePolicyFor('POST', '/balance-transfer/preview')).toMatchObject({
+  it('maps every Balance TrFr dataset button to the catalog Create right (BtmSchm, C-----)', () => {
+    expect(routePolicyFor('GET', '/balance-transfer')).toMatchObject({
       form: 'Company/Balance TrFr',
       action: 'read',
     });
-    expect(routePolicyFor('POST', '/balance-transfer/year-close')).toMatchObject({
-      form: 'Company/Balance TrFr',
-      action: 'update',
-    });
-    expect(routePolicyFor('POST', '/balance-transfer/openings')).toMatchObject({
-      form: 'Company/Balance TrFr',
-      action: 'update',
-    });
+    for (const dataset of ['ac-balance', 'item-stock', 'tag-stock', 'sales-order', 'approval'])
+      expect(routePolicyFor('POST', `/balance-transfer/${dataset}`)).toMatchObject({
+        form: 'Company/Balance TrFr',
+        action: 'create',
+      });
+    for (const old of ['preview', 'year-close', 'openings'])
+      expect(routePolicyFor('POST', `/balance-transfer/${old}`)).toBeUndefined();
   });
 
   it('maps the desktop UT_EXPORT utility to data-export rights', () => {

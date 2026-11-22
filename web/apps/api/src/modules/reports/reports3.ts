@@ -1,3 +1,4 @@
+import { carriedOpeningFilter } from '../shared/carriedOpening.js';
 import { dateWhere } from './reports.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import type { ReportScope, ListReport } from './reports.js';
@@ -101,7 +102,7 @@ export async function groupSummary(prisma: any, s: ReportScope): Promise<ListRep
        FROM "AC_DATA" d
        LEFT JOIN "AC_MAST" m ON m."AC_CODE"::text=d."AC_CODE"::text AND m."CO_CODE"::text=d."CO_CODE"::text
        LEFT JOIN "AC_GROUP" g ON g."AC_GR"::text=m."AC_GR"::text AND g."CO_CODE"::text=m."CO_CODE"::text
-       WHERE d."CO_CODE"=$1${yr}${dt}
+       WHERE d."CO_CODE"=$1${yr}${dt}${carriedOpeningFilter(!!s.coYear, 'd')}
        GROUP BY 1 ORDER BY dr DESC`,
       ...params,
     );

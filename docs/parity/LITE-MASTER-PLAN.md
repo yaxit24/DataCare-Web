@@ -403,7 +403,7 @@ browser case per screen first (red), then the hook (green).
 
 | WP | Menu(s) | Desktop form | Pri | Size | Depends | Prompt | State |
 |---|---|---|---|---|---|---|---|
-| WP-11 | Sales Report + the shared RP_ALL engine | `RP_ALL.cs` (12,662) sales branch | P1 | XL | — | 01 | not started |
+| WP-11 | Sales Report + the shared RP_ALL engine | `RP_ALL.cs` (12,662) sales branch | P1 | XL | — | 01 | phase one (engine + Sales API, N234) in PR; screen open |
 | WP-12 | Purchase Rpt (removes 17 G06 baselines) | `RP_ALL` purchase branch | P1 | M | WP-11 | 02 | frozen cases merged |
 | WP-13 | Approval Rpt | `RP_ALL` approval branch | P2 | M | WP-11, WP-01 | 03 | partial |
 | WP-14 | Order Report | `RP_ALL` order branch | P2 | M | WP-11, WP-03 | — (use 01's pattern) | no longer BROKEN once WP-03 (#232) merges |
@@ -434,7 +434,7 @@ sections are part of this WP; the UAE variant is out of scope (Lite India).
 |---|---|---|---|---|---|---|---|
 | WP-21 | Books | `MS_BOOK.cs` (3,122) | P1 | L | — | 13 | not started |
 | WP-22 | Year Create (corrected scope) | `MS_YEAR.cs` (1,596) | P2 | S | — | 14 + GB-07 | not started |
-| WP-23 | Balance TrFr | `BtmSchm.cs` (5,638) | P0 | L | WP-22 | 15 | accounts and parties only |
+| WP-23 | Balance TrFr | `BtmSchm.cs` (5,638) | P0 | L | WP-22 | 15 | PR #243 (N236/G248): Ac Balance and Item Stock carried; Tag Stock, Sales Order, Approval implicit (one database) |
 | WP-24 | Data Refresh PR-2 | `MS_UPDATE.cs` (6 visible buttons) | P1 | L | — | 17 | 12/20 |
 | WP-25 | Data Import (Lite Soft only) | `UT_IMPORT.cs` (Lite path ≈ 535 lines) | P2 | L | everything else; OD-6 | 19 | not started |
 
@@ -481,7 +481,7 @@ A WP in this phase is done when its module has **no blocked case** and its catal
 | WP | Item | Pri | Size | Depends |
 |---|---|---|---|---|
 | WP-40 | Golden-vector harness on `windows-latest` (O1 + O2) | P1 | M | — |
-| WP-41 | Formula families to L2, one PR per family | P1 | M each | WP-40 |
+| WP-41 | Formula families to L2, one PR per family (family 1 sales line: PR #235; percentage labour + line precision N235/G247, oracle baseline emptied) | P1 | M each | WP-40 |
 | WP-42 | Report oracle on a restored desktop database (O3) | P2 | L | owner OK |
 | WP-43 | Screen automation of the desktop executable (O4) | P3 | XL | owner OK |
 

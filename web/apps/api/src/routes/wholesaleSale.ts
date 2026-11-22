@@ -1,3 +1,4 @@
+import { notCarriedOpening } from '../modules/shared/carriedOpening.js';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { round } from '@datacare/core';
 import { formatVoucherNo, type VoucherScope } from '../modules/vouchers/numbering.js';
@@ -56,7 +57,7 @@ const BAND_COLUMNS = [
 const BALANCE_SQL = `SELECT coalesce(sum(coalesce("DR_AMT",0) - coalesce("CR_AMT",0)),0)::float8 AS amount,
     coalesce(sum(CASE WHEN "IT_TYPE"='G' THEN (CASE WHEN "SIGN"='-' THEN -1 ELSE 1 END)*coalesce("FINE_WT",0) ELSE 0 END),0)::float8 AS gold,
     coalesce(sum(CASE WHEN "IT_TYPE"='S' THEN (CASE WHEN "SIGN"='-' THEN -1 ELSE 1 END)*coalesce("FINE_WT",0) ELSE 0 END),0)::float8 AS silver
-  FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "AC_CODE"=$3`;
+  FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "AC_CODE"=$3 AND ${notCarriedOpening()}`;
 
 export function registerWholesaleSaleRoutes(
   app: FastifyInstance,
