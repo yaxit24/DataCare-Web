@@ -2,13 +2,13 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
   fineFor,
+  percentageLabourRate,
   saleLineLabourAmount,
   lineTotalDesktop,
   resolveRoundingPolicy,
   round,
   PRECISION,
   saleAmountBasis,
-  saleItemAmount,
   saleItemAmountRounded,
   vbVal,
   type LabourType,
@@ -28,8 +28,9 @@ import {
  * so a disagreement is attributed to exactly one web function rather than cascading.
  *
  * The web composition mirrors the API's posting path (`apps/api/src/modules/sales/sales.ts` `computeLine`): the item
- * rate is rounded by `ITM_RATE_ROF`, the item and labour amounts are rounded by the company line precision, and the
- * labour charge is `saleLineLabourAmount` (core `labourCharge`, rounded once) in the web's labour vocabulary.
+ * rate is rounded by `ITM_RATE_ROF`, the item and labour amounts are rounded once at the Sale line precision
+ * (`saleLineDecimals`: 0, or 2 under ALL_ROF_REMOVE), and the labour charge is `saleLineLabourAmount` in the web's
+ * labour vocabulary, a percentage line deriving its rate with `percentageLabourRate`.
  */
 
 const oracleDir = new URL('../../../scripts/desktop-oracle/sales-line/', import.meta.url);
@@ -70,28 +71,30 @@ const text = (cells: Record<string, string>, col: number): string =>
   (cells[String(col)] ?? '').trim().toUpperCase();
 
 /**
- * The company settings the vector runs under, as the web resolves them. CommPassTotal never reads TOT_AMT_ROF (it
- * hardcodes 0, or 2 under ALL_ROF_REMOVE, TR_SALE.cs:10343-10362); the web rounds line amounts by TOT_AMT_ROF, so
- * the comparison uses 0, the value measured on the real customer database.
+ * The company settings the vector runs under, as the web resolves them. CommPassTotal never reads TOT_AMT_ROF for a
+ * line (it hardcodes 0, or 2 under ALL_ROF_REMOVE, TR_SALE.cs:10343-10362), and neither does the web since N235/G247.
+ * The policy is therefore built with TOT_AMT_ROF = 2, a value that would change every whole-rupee vector if the web
+ * still read it.
  */
 function webPolicy(v: Vector): RoundingPolicy {
   const s = v.settings ?? {};
   return resolveRoundingPolicy({
     LBR_ROF: String(s.MsLbrRof ?? 2),
     ITM_RATE_ROF: String(s.MsItmRateRof ?? 2),
-    TOT_AMT_ROF: '0',
+    TOT_AMT_ROF: '2',
     ALL_ROF_REMOVE: String(s.MsAllRofRemove ?? 'N'),
   });
 }
 
 /**
- * The desktop labour types the web vocabulary (`per_gram | per_piece | percentage | fixed`) can express. G (gross
- * weight), K (per kilogram) and blank (the default branch, which always adds ghat: TR_SALE.cs:11100) have no web
- * mode, so those vectors document the desktop and are not compared (see UNREPRESENTED below).
+ * The desktop labour types the web vocabulary (`per_gram | per_piece | percentage | fixed`) can express with a TYPED
+ * rate. G (gross weight), K (per kilogram) and blank (the default branch, which always adds ghat: TR_SALE.cs:11100)
+ * have no typed-rate web mode, so those vectors document the desktop and are not compared. A percentage line carries
+ * its LBR_TYPE as the basis of its derived rate, so every basis is compared there.
  */
 const WEB_LABOUR_TYPE: Record<string, LabourType | undefined> = { N: 'per_gram', P: 'per_piece' };
 
-type Stage = 'net' | 'ghat' | 'fine' | 'amount' | 'labour' | 'total';
+type Stage = 'net' | 'ghat' | 'fine' | 'amount' | 'labourRate' | 'labour' | 'total';
 
 /** The web's value for one stage, or undefined when the web has no counterpart for this vector. */
 function webStage(v: Vector, stage: Stage, d: Record<string, string>): number | undefined {
@@ -129,40 +132,34 @@ function webStage(v: Vector, stage: Stage, d: Record<string, string>): number | 
         ? saleItemAmountRounded(basis, policy.roundItemRate(rate), policy)
         : 0;
     }
+    case 'labourRate': {
+      // LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, MsLbrRof) (TR_SALE.cs:11021).
+      const pct = cell(input, 24);
+      if (pct === 0) return undefined;
+      return percentageLabourRate(policy.roundItemRate(cell(input, 22)), pct, policy);
+    }
     case 'labour': {
       const pct = cell(input, 24);
       const withGhat = String(s.MsLbrWithGht ?? 'Y') !== 'N';
       const type: LabourType | undefined =
         pct !== 0 ? 'percentage' : WEB_LABOUR_TYPE[text(input, 25)];
       if (!type) return undefined;
-      const rate = cell(input, 22);
-      const basis = saleAmountBasis(
-        {
-          pcs: cell(input, 11),
-          grossWt: cell(input, 12),
-          netWt: cell(d, 14),
-          ghtWt: cell(d, 17),
-          fineWt: cell(d, 20),
-        },
-        text(input, 21),
-        text(input, 58),
-      );
-      const metal =
-        rate !== 0 && basis.quantity > 0 ? saleItemAmount(basis, policy.roundItemRate(rate)) : 0;
-      const labour = saleLineLabourAmount(
+      return saleLineLabourAmount(
         type,
         {
           netWt: cell(d, 14),
+          grossWt: cell(input, 12),
           ghatWt: cell(d, 17),
           withGhat,
           pcs: cell(input, 11),
           rate: cell(input, 26),
           pct,
-          metalAmount: metal,
+          itemRate: policy.roundItemRate(cell(input, 22)),
+          basis: text(input, 25),
+          basisRule: 'sale',
         },
         policy,
       );
-      return labour;
     }
     case 'total':
       // SL_DETL.TOT_AMT, from the desktop's own components.
@@ -180,6 +177,7 @@ const DESKTOP_COLUMN: Record<Stage, number> = {
   ghat: 17,
   fine: 20,
   amount: 23,
+  labourRate: 26,
   labour: 27,
   total: 35,
 };
@@ -189,8 +187,6 @@ const DESKTOP_COLUMN: Record<Stage, number> = {
  * kept in expected.json as the specification, but there is no web value to compare.
  */
 const UNREPRESENTED: Record<string, string> = {
-  labourRate:
-    'LBR_RATE derived from LBR_PRC lives in the API (labourDesktop.ts effectiveLabourRate), not in core',
   discount: 'the line labour discount (columns 31-33) has no core function',
   mrp: 'MRP lines (column 30) are priced by the desktop from the MRP; the web has no MRP pricing',
   ghat: 'ghat weight from ITM_GHT_PRC has no core function',
@@ -200,22 +196,10 @@ const UNREPRESENTED: Record<string, string> = {
 
 /**
  * Proven disagreements, each with the reason it is open. Rule 4 of the master plan: a failing case is baselined
- * with its finding and removed in the change that fixes it.
+ * with its finding and removed in the change that fixes it. Empty since N235/G247 fixed percentage labour (the
+ * eight `labour.pct.*` vectors).
  */
-const PCT_LABOUR =
-  'OPEN, reported not fixed (changes posted labour on every percentage line): the desktop derives LBR_RATE = ' +
-  'Math.Round(ITM_RATE x LBR_PRC / 100, LBR_ROF) (TR_SALE.cs:11021) and multiplies it by the LBR_TYPE basis ' +
-  '(TR_SALE.cs:11084-11127); core labourCharge("percentage") takes LBR_PRC of the item amount instead';
-const KNOWN_MISMATCHES: Record<string, string> = {
-  'labour.pct.G.rtF:labour': PCT_LABOUR,
-  'labour.pct.G.rtN:labour': PCT_LABOUR,
-  'labour.pct.K.rtF:labour': PCT_LABOUR,
-  'labour.pct.K.rtN:labour': PCT_LABOUR,
-  'labour.pct.N.rtF:labour': PCT_LABOUR,
-  'labour.pct.P.rtF:labour': PCT_LABOUR,
-  'labour.pct.P.rtN:labour': PCT_LABOUR,
-  'labour.pct.rof0:labour': PCT_LABOUR,
-};
+const KNOWN_MISMATCHES: Record<string, string> = {};
 
 describe('desktop oracle: sales line (TR_SALE.cs CommPassTotal)', () => {
   it('Oracle.cs carries TR_SALE.cs:9524-11891 verbatim, except the documented catch clause', () => {

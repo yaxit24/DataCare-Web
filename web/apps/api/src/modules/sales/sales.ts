@@ -44,6 +44,9 @@ import {
   saleAmountBasis,
   saleItemAmount,
   saleItemAmountRounded,
+  percentageLabourRate,
+  roundSaleLineAmount,
+  type LabourBasisRule,
 } from '@datacare/core';
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
 import { gstTaxRows } from '../shared/taxDataRows.js';
@@ -279,6 +282,17 @@ export function lineFine(line: SaleLineInput): number {
   return fineWt(line.netWt, line.ghtWt, line.touch, line.westPct);
 }
 
+/**
+ * The desktop labour basis a line's percentage labour multiplies (`LabourInput.basis` / `basisRule`).
+ *
+ * `basis` is the line's LBR_TYPE: a new Sale row takes the company's (TR_SALE.cs:9135 `mSG[Row,25] = MsLbrType`),
+ * which is what the writer persists for a percentage line (`desktopLabourTypeFor`).
+ */
+export interface LineLabourBasis {
+  basis?: string;
+  rule?: LabourBasisRule;
+}
+
 /** Compute a line's fine/metal/labour/net amounts (pure). */
 export function computeLine(
   line: SaleLineInput,
@@ -286,11 +300,14 @@ export function computeLine(
   amountType: LineAmountType = '',
   /** CO_SET_NEW.LBR_WITH_GHT; defaults to the desktop's blank default of true. */
   labourWithGhat: boolean = true,
+  labourBasis: LineLabourBasis = {},
 ): {
   fine: number;
   metal: number;
   labour: number;
   net: number;
+  /** LBR_RATE derived from LBR_PRC on a percentage line (TR_SALE.cs:11021); undefined otherwise. */
+  labourRate?: number;
 } {
   const fine = lineFine(line);
   const rate =
@@ -321,16 +338,22 @@ export function computeLine(
       `labourType must be one of ${[...SALE_LABOUR_TYPES].join(', ')}: ${String(line.labourType)}`,
     );
   }
-  // LBR_AMT is ONE Math.Round (TR_SALE.cs:11100-11127; desktop oracle vector labour.mid.n0.299xr5.rof2).
+  // LBR_AMT is ONE Math.Round at the Sale line precision (TR_SALE.cs:11100-11127; desktop oracle vector
+  // labour.mid.n0.299xr5.rof2).
   const labourOf = (type: LabourType, input: Parameters<typeof labourCharge>[1]): number =>
     policy ? saleLineLabourAmount(type, input, policy) : labourCharge(type, input);
   const labour = line.labourType
     ? labourOf(line.labourType, {
         netWt: line.netWt,
+        grossWt: line.grossWt,
         pcs: line.pcs,
         rate: line.labourRate,
         pct: line.labourPct,
-        metalAmount: metal,
+        // A percentage derives LBR_RATE from the ITEM RATE and multiplies the LBR_TYPE basis
+        // (TR_SALE.cs:11021, :11084-11127); it is never a percentage of the item amount.
+        itemRate: rate,
+        basis: labourBasis.basis,
+        basisRule: labourBasis.rule,
         fixed: line.labourFixed,
         // P4: (net + ghat) x rate is the desktop's per-gram labour base; the ghat term is
         // dropped only when CO_SET_NEW.LBR_WITH_GHT = 'N' (TR_SALE.cs:11112-11123, blank
@@ -340,21 +363,20 @@ export function computeLine(
         withGhat: labourWithGhat,
       })
     : 0;
-  // Each line COMPONENT is rounded to the bill-amount precision, not just the grand total.
+  const labourRate =
+    line.labourType === 'percentage'
+      ? percentageLabourRate(rate, line.labourPct, policy)
+      : undefined;
+  // Each line COMPONENT is rounded at the Sale line precision, not just the grand total.
   //
-  // Measured on the real customer database: every money column in all 245 SL_DETL rows is a whole rupee, and
-  // NET_AMT = ITM_AMT + LBR_AMT + OTH_AMT holds on 244 of them. So the composition is exact and the components
-  // are individually rounded - 4.600 x 77 = 354.20 is stored as 354.00, and 4.600 x 16.09 = 74.014 as 74.00.
+  // CommPassTotal hardcodes it: 0 decimals for ITM_AMT (`digits`) and LBR_AMT (`digits2`), or 2 when
+  // ALL_ROF_REMOVE = 'Y' (TR_SALE.cs:10343-10362, core `saleLineDecimals`). It never reads TOT_AMT_ROF for a line;
+  // TOT_AMT_ROF rounds the bill totals only (TR_SALE.cs:19192, :19274, :19282; `billTotals`). This matches the real
+  // customer database, where every money column of all 245 SL_DETL rows is a whole rupee.
   //
-  // Deliberately NOT asserting a derivation. ITM_AMT equals ROUND(nwt x rate, 0) on only 134 of 220 candidate
-  // rows and LBR_AMT equals ROUND(nwt x rate, 0) on 84 of 166, because the desktop grid lets the operator
-  // overtype an amount. The rule that survives the data is "whatever the component is, it is rounded" - so the
-  // rounding is applied to the computed value rather than the formula being reimplemented.
-  //
-  // Precision comes from CO_SET_NEW.TOT_AMT_ROF, which is 0 for this customer. It is not hardcoded: the same
-  // policy at 2 leaves 354.20 alone, which is what a customer configured that way would expect.
-  const roundAmount = (v: number): number => (policy ? policy.roundBillTotal(v) : v);
-  // ITM_AMT: one Math.Round (TR_SALE.cs:10905-10932, oracle amount.mid.n3.495xr1); `metal` keeps feeding % labour.
+  // A Sales Return policy (`salesReturnRoundingPolicy`) keeps whole rupees, as TR_SALE_RTN.cs does.
+  const roundAmount = (v: number): number => (policy ? roundSaleLineAmount(v, policy) : v);
+  // ITM_AMT: one Math.Round (TR_SALE.cs:10905-10932, oracle amount.mid.n3.495xr1).
   const metalRounded = (() => {
     if (!policy || line.metalAmount != null || amountType === '' || rate == null)
       return roundAmount(metal);
@@ -369,7 +391,7 @@ export function computeLine(
   // NET_AMT is the 2 dp sum, not re-rounded: TR_SALE.cs:11548/:11570 format it "0.00", so a paise OTH_AMT
   // survives (desktop oracle vector total.stone: 66863.50).
   const net = calcLineNet({ metal: metalRounded, labour: labourRounded, other: line.otherAmount });
-  return { fine, metal: metalRounded, labour: labourRounded, net };
+  return { fine, metal: metalRounded, labour: labourRounded, net, labourRate };
 }
 
 /** Build the balanced double-entry AC_DATA lines for a sale (pure, Req 10.8/13.1).
@@ -851,9 +873,16 @@ async function writeSaleTx(
       roundingPolicy,
       behavior.saleAmountType,
       behavior.labourIncludesGhat,
+      // The basis a percentage line's derived rate multiplies is the LBR_TYPE the writer persists for it.
+      { basis: desktopLabourTypeFor(rounded.labourType, behavior.labourType), rule: 'sale' },
     );
     const basis = rounded.labourType === 'per_piece' ? num(rounded.pcs) : num(rounded.netWt);
-    const generated = generatedLabourRate(calc.labour, basis, behavior.labourRateGeneration);
+    // A percentage line's LBR_RATE is DERIVED (TR_SALE.cs:11021); LBR_GEN only back-computes a rate from a typed
+    // amount when the rate did not change (the else branch after :11211), so it never replaces the derived one.
+    const generated =
+      rounded.labourType === 'percentage'
+        ? null
+        : generatedLabourRate(calc.labour, basis, behavior.labourRateGeneration);
     return {
       in: generated == null ? rounded : { ...rounded, labourRate: generated },
       calc,
@@ -1228,12 +1257,17 @@ async function writeSaleTx(
       // stored 0 on every percentage line — verified live: ITM_RATE 6200, LBR_PRC 12, LBR_RATE 0.00 where the
       // desktop writes 744. The column is read back when a voucher is reopened, so a zero there silently
       // changes the recomputed amount.
-      LBR_RATE: effectiveLabourRate(
-        num(c.in.labourRate),
-        num(c.in.rate),
-        num(c.in.labourPct),
-        roundingPolicy.labourDecimals,
-      ),
+      //
+      // A percentage line stores the rate its amount was computed from (core percentageLabourRate); any other
+      // line keeps the typed rate, or derives it from a percentage as before.
+      LBR_RATE:
+        c.calc.labourRate ??
+        effectiveLabourRate(
+          num(c.in.labourRate),
+          num(c.in.rate),
+          num(c.in.labourPct),
+          roundingPolicy.labourDecimals,
+        ),
       // LBR_TYPE selects the weight BASIS, it is not a pricing mode. CO_SET.LBR_TYPE offers exactly
       // G "Gorss Wise", N "Net Wise", K "Kg Wise", P "Pcs Wise", and the column is varchar(1).
       //

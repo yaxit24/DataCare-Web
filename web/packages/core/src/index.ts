@@ -9,6 +9,8 @@ export {
 export {
   labourCharge,
   saleLineLabourAmount,
+  percentageLabourRate,
+  desktopLabourBasisQuantity,
   metalAmount,
   lineNet,
   lineTotalDesktop,
@@ -18,6 +20,7 @@ export {
 export type {
   LabourType,
   LabourInput,
+  LabourBasisRule,
   GstSplit,
   BillInput,
   BillTotals,
@@ -298,6 +301,8 @@ export type { FiscalYearDates, FiscalYearInput } from './fiscalYear.js';
 export {
   resolveRoundingPolicy,
   roundNearest,
+  saleLineDecimals,
+  roundSaleLineAmount,
   RoundingPolicyValidationError,
 } from './roundingPolicy.js';
 export type {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { recalcLine } from '../lib/lineRecalc';
-import { fineFor, labourCharge, metalAmount, round } from '@datacare/core';
+import { recalcLine, saleLineLabourMode } from '../lib/lineRecalc';
+import { fineFor, labourCharge, metalAmount, resolveRoundingPolicy, round } from '@datacare/core';
 
 /**
  * The client kernel must agree with the server's arithmetic.
@@ -178,5 +178,48 @@ describe('sale ghat percentage (desktop oracle, family 1)', () => {
     );
     expect(r.netWt).toBe(10.055);
     expect(r.ghtWt).toBe(ghat);
+  });
+});
+
+describe('sale percentage labour and line precision (desktop oracle, N235/G247)', () => {
+  // Desktop oracle vector labour.pct.G.rtN (run 42580947381): 3 pcs, gross 10.555, less 0.500, ghat 0.120, touch
+  // 91.6, RtWith N, item rate 6200, LBR_PRC 12, LBR_TYPE G -> LBR_RATE 744.00, LBR_AMT 7853.00.
+  const line = {
+    pcs: '3',
+    grossWt: '10.555',
+    lessWt: '0.500',
+    ghtWt: '0.120',
+    touch: '91.6',
+    rateWith: 'N',
+    rate: '6200',
+    labourPct: '12',
+    labourType: '%',
+  };
+  const policy = resolveRoundingPolicy({ LBR_ROF: '2', TOT_AMT_ROF: '2' });
+
+  it('derives the labour rate from the item rate and multiplies the LBR_TYPE basis', () => {
+    // The desktop formula, worked here: rate = round(6200 x 12 / 100, 2) = 744; amount = round(basis x 744, 0).
+    const rate = Math.round(((6200 * 12) / 100) * 100) / 100;
+    const r = (basis: string) =>
+      recalcLine(line, 'sale', { roundingPolicy: policy, labourBasis: basis });
+    expect(r('G').labourRate).toBe(744);
+    expect(r('G').labourAmount).toBe(Math.round(10.555 * rate)); // 7853
+    expect(r('N').labourAmount).toBe(Math.round((10.055 + 0.12) * rate)); // 7570
+    expect(r('P').labourAmount).toBe(3 * rate); // 2232
+  });
+
+  it('rounds ITM_AMT to whole rupees whatever TOT_AMT_ROF says (TR_SALE.cs:10343-10362)', () => {
+    const plain = { netWt: '10', touch: '91.6', rateWith: 'N', rate: '6123.45' };
+    expect(recalcLine(plain, 'sale', { roundingPolicy: policy }).metalAmount).toBe(61234);
+    expect(
+      recalcLine(plain, 'sale', { roundingPolicy: resolveRoundingPolicy({ ALL_ROF_REMOVE: 'Y' }) })
+        .metalAmount,
+    ).toBe(61234.5);
+  });
+
+  it('a Lbr% row with an item rate is a percentage line; otherwise Making/g is per gram', () => {
+    expect(saleLineLabourMode({ lbrPct: '12', rate: '6200', making: '50' })).toBe('percentage');
+    expect(saleLineLabourMode({ lbrPct: '12', rate: '', making: '50' })).toBe('per_gram');
+    expect(saleLineLabourMode({ lbrPct: '', rate: '6200', making: '' })).toBeUndefined();
   });
 });

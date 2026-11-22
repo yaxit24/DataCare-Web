@@ -1,12 +1,21 @@
 import { Decimal as DecimalJs } from 'decimal.js';
 import { round, PRECISION } from './money.js';
+import { roundSaleLineAmount } from './roundingPolicy.js';
 
 /** Structurally implemented by the API's company rounding policy. */
 export interface MoneyRoundingPolicy {
   taxDecimals?: number;
   billTotalDecimals?: number;
+  /** `CO_SET.ALL_ROF_REMOVE = 'Y'`: the Sale line's own precision switch (`saleLineDecimals`). */
+  allRoundingRemoved?: boolean;
   roundTaxAmount(value: number): number;
   roundLabourAmount(value: number): number;
+  /**
+   * `Math.Round(x, MsLbrRof)` for a DERIVED labour rate (TR_SALE.cs:11021, TR_SALE_RTN.cs:4963). Falls back to
+   * `roundLabourAmount`, which is the same LBR_ROF stage unless a form hardcodes its labour amount precision
+   * (`salesReturnRoundingPolicy`) and keeps this one.
+   */
+  roundLabourRate?(value: number): number;
   roundItemRate(value: number): number;
   roundBillTotal(value: number): number;
   roundPurchaseRate(value: number): number;
@@ -15,13 +24,36 @@ export interface MoneyRoundingPolicy {
 /** Labour/making-charge types (Req 12.2–12.5). */
 export type LabourType = 'per_gram' | 'per_piece' | 'percentage' | 'fixed';
 
+/**
+ * Which desktop form's `LBR_TYPE` switch turns a basis code into a quantity. They differ only in the fallback:
+ *
+ * | LBR_TYPE | 'sale' (TR_SALE.cs:11084-11127)      | 'saleReturn' (TR_SALE_RTN.cs:4975-4993) |
+ * |----------|-------------------------------------|-----------------------------------------|
+ * | P        | ITM_PCS                             | ITM_PCS                                 |
+ * | N        | ITM_NWT (+ ITM_GHT_WT unless LBR_WITH_GHT = N) | same                         |
+ * | K        | (ITM_NWT + ITM_GHT_WT) / 1000       | same                                    |
+ * | G        | ITM_GWT                             | ITM_GWT (the default branch)            |
+ * | other    | ITM_NWT + ITM_GHT_WT                | ITM_GWT                                 |
+ */
+export type LabourBasisRule = 'sale' | 'saleReturn';
+
 export interface LabourInput {
   netWt?: DecimalJs.Value;
   pcs?: DecimalJs.Value;
   rate?: DecimalJs.Value;
   pct?: DecimalJs.Value;
-  metalAmount?: DecimalJs.Value;
   fixed?: DecimalJs.Value;
+  /** `ITM_GWT`: the G basis of a percentage line. */
+  grossWt?: DecimalJs.Value;
+  /** `ITM_RATE`: a percentage line's labour rate is LBR_PRC of it (TR_SALE.cs:11021). */
+  itemRate?: DecimalJs.Value;
+  /**
+   * `LBR_TYPE` (G/N/K/P, else blank): the basis a percentage line's derived rate multiplies. The web's
+   * `per_gram` and `per_piece` modes are the N and P bases with a typed rate.
+   */
+  basis?: string;
+  /** Whose basis switch applies; the Sale's by default. */
+  basisRule?: LabourBasisRule;
   /**
    * `ITM_GHT_WT` — ghat (wastage-carrier) weight, part of the per-gram labour base.
    *
@@ -49,31 +81,78 @@ export function labourCharge(
   i: LabourInput,
   policy?: MoneyRoundingPolicy,
 ): number {
-  const v = labourChargeExact(type, i);
+  const v = labourChargeExact(type, i, policy);
   return policy ? policy.roundLabourAmount(v.toNumber()) : round(v, PRECISION.amount);
 }
 
 /**
- * Sale LBR_AMT rounded ONCE, as `CommPassTotal` does.
+ * `LBR_RATE` of a percentage line: `Math.Round(ITM_RATE x LBR_PRC / 100, MsLbrRof)` (TR_SALE.cs:11021; the Sales
+ * Return grid has the same statement at TR_SALE_RTN.cs:4963), stored in the grid cell as `Format(.., "0.00")`, which
+ * is the value every amount branch then reads back with `Conversion.Val`. A zero percentage gives 0.
  *
- * Every labour branch is a single `Math.Round(basis x LBR_RATE, digits2)` (TR_SALE.cs:11100-11127). The web rounded
- * by LBR_ROF and then by the line precision (TOT_AMT_ROF); with LBR_ROF 2 and a whole-rupee line, 0.299 g x 5 =
- * 1.495 became 1.50 and then 2, where the desktop stores 1 (desktop oracle vectors `labour.mid.n0.299xr5.rof2` and
- * `labour.mid.n3.495xr1.rof2`, run 42580947381). When LBR_ROF is the coarser of the two it still decides the amount,
- * exactly as before; when it is finer, its stage is skipped and only the line precision rounds.
+ * Without a policy the rate keeps the web's 2 dp default.
+ */
+export function percentageLabourRate(
+  itemRate: DecimalJs.Value | null | undefined,
+  pct: DecimalJs.Value | null | undefined,
+  policy?: Pick<MoneyRoundingPolicy, 'roundLabourAmount' | 'roundLabourRate'>,
+): number {
+  const raw = D(itemRate ?? 0)
+    .times(D(pct ?? 0))
+    .div(100)
+    .toNumber();
+  if (raw === 0) return 0;
+  const rounded = policy
+    ? (policy.roundLabourRate ?? policy.roundLabourAmount)(raw)
+    : round(raw, PRECISION.amount);
+  // The cell holds "0.00" text: a 3-decimal LBR_ROF is cut back to 2 when the rate is read again.
+  return round(rounded, PRECISION.amount);
+}
+
+/** The quantity `LBR_RATE` multiplies for a desktop `LBR_TYPE`, and the per-kg divisor (see LabourBasisRule). */
+export function desktopLabourBasisQuantity(
+  basis: string | undefined,
+  i: Pick<LabourInput, 'netWt' | 'pcs' | 'grossWt' | 'ghatWt' | 'withGhat' | 'basisRule'>,
+): DecimalJs {
+  const code = String(basis ?? '')
+    .trim()
+    .toUpperCase()
+    .slice(0, 1);
+  const net = D(i.netWt);
+  const ghat = D(i.ghatWt ?? 0);
+  switch (code) {
+    case 'P':
+      return D(i.pcs);
+    case 'N':
+      return net.plus(i.withGhat === false ? 0 : ghat);
+    case 'K':
+      return net.plus(ghat).div(1000);
+    case 'G':
+      return D(i.grossWt);
+    default:
+      return i.basisRule === 'saleReturn' ? D(i.grossWt) : net.plus(ghat);
+  }
+}
+
+/**
+ * Sale LBR_AMT: ONE `Math.Round(basis x LBR_RATE, digits2)` (TR_SALE.cs:11100-11127), where `digits2` is the Sale
+ * line precision: 0, or 2 under ALL_ROF_REMOVE (TR_SALE.cs:10343-10362, `saleLineDecimals`). Neither LBR_ROF nor
+ * TOT_AMT_ROF rounds the amount: LBR_ROF only rounds a derived RATE (:11021, :11160-11183), and TOT_AMT_ROF only the
+ * bill totals (:19192, :19274). Desktop oracle vectors `labour.mid.*` (run 42580947381) pin the single rounding.
  */
 export function saleLineLabourAmount(
   type: LabourType,
   i: LabourInput,
-  policy: MoneyRoundingPolicy & { labourDecimals: number; billTotalDecimals: number },
+  policy: MoneyRoundingPolicy,
 ): number {
-  const v = labourChargeExact(type, i).toNumber();
-  return policy.labourDecimals <= policy.billTotalDecimals
-    ? policy.roundBillTotal(policy.roundLabourAmount(v))
-    : policy.roundBillTotal(v);
+  return roundSaleLineAmount(labourChargeExact(type, i, policy).toNumber(), policy);
 }
 
-function labourChargeExact(type: LabourType, i: LabourInput): DecimalJs {
+function labourChargeExact(
+  type: LabourType,
+  i: LabourInput,
+  policy?: MoneyRoundingPolicy,
+): DecimalJs {
   let v: DecimalJs;
   switch (type) {
     case 'per_gram':
@@ -86,7 +165,13 @@ function labourChargeExact(type: LabourType, i: LabourInput): DecimalJs {
       v = D(i.pcs).times(D(i.rate));
       break;
     case 'percentage':
-      v = D(i.metalAmount).times(D(i.pct)).div(100);
+      // The desktop never takes a percentage of an amount. LBR_PRC derives LBR_RATE from the ITEM RATE
+      // (TR_SALE.cs:11021), and the LBR_TYPE basis multiplies that rate like any typed rate (:11084-11127).
+      // Desktop oracle vectors labour.pct.* (run 42580947381): G, rtN gives 7853 where LBR_PRC of the item
+      // amount gave 7570.
+      v = desktopLabourBasisQuantity(i.basis, i).times(
+        percentageLabourRate(i.itemRate, i.pct, policy),
+      );
       break;
     case 'fixed':
       v = D(i.fixed);

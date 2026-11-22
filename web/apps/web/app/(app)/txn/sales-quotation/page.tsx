@@ -19,7 +19,7 @@ import { VoucherChrome } from '../../../../components/VoucherChrome';
 import { VoucherList } from '../../../../components/VoucherList';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { companyFlag, useCompanySettings, companySetting } from '../../../../lib/companySettings';
-import { oldGoldRowAmount, recalcLine } from '../../../../lib/lineRecalc';
+import { oldGoldRowAmount, recalcLine, saleLineLabourMode } from '../../../../lib/lineRecalc';
 import { billTotals, lineNet as lineNetAmount } from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
 import { openDocument } from '../../../../lib/openDocument';
@@ -382,11 +382,26 @@ export default function SalesQuotationPage() {
    * Delegating means there is one implementation, so the preview cannot drift from the posting again.
    */
   const calc = (l: Line) => {
-    const r = recalcLine({ ...l, labourRate: l.making, labourType: 'G' }, 'sale', {
-      labourIncludesGhat: companyFlag(companySettings, 'LBR_WITH_GHT', 'Y'),
-      // CO_SET.SL_AMT_TYPE: the basis a line without its own RtWith is priced on (blank = N).
-      saleAmountType: String(companySetting(companySettings, 'SL_AMT_TYPE') ?? ''),
-    });
+    // A Lbr% row derives its labour rate from the item rate (TR_SALE.cs:11021) and multiplies the company
+    // LBR_TYPE basis (:9135, :11084-11127), as the server's computeLine does; amounts round at the Sale line
+    // precision (TR_SALE.cs:10343-10362) through the company policy.
+    const percentage = saleLineLabourMode(l) === 'percentage';
+    const r = recalcLine(
+      {
+        ...l,
+        labourRate: l.making,
+        labourPct: l.lbrPct,
+        labourType: percentage ? '%' : 'G',
+      },
+      'sale',
+      {
+        roundingPolicy,
+        labourBasis: String(companySetting(companySettings, 'LBR_TYPE') ?? ''),
+        labourIncludesGhat: companyFlag(companySettings, 'LBR_WITH_GHT', 'Y'),
+        // CO_SET.SL_AMT_TYPE: the basis a line without its own RtWith is priced on (blank = N).
+        saleAmountType: String(companySetting(companySettings, 'SL_AMT_TYPE') ?? ''),
+      },
+    );
     // G84: metal + GROSS labour + other, as the server composes the line net — not recalcLine.totalAmount,
     // which nets the line discount and adds the ghat amount the server keeps on separate columns.
     const net = lineNetAmount({
@@ -772,15 +787,18 @@ export default function SalesQuotationPage() {
             mrp: n(l.mrp) || undefined,
             metalAmount: n(l.metalAmount) || undefined,
             metal: l.metal === 'S' ? ('S' as const) : l.metal === 'G' ? ('G' as const) : undefined,
-            ...(l.making
-              ? { labourType: 'per_gram' as const, labourRate: n(l.making) }
-              : l.labourType
-                ? {
-                    labourType: l.labourType,
-                    labourRate: l.labourRate,
-                    labourFixed: l.labourFixed,
-                  }
-                : {}),
+            ...(saleLineLabourMode(l) === 'percentage'
+              ? // LBR_RATE is derived on the server from LBR_PRC and the item rate (TR_SALE.cs:11021).
+                { labourType: 'percentage' as const }
+              : l.making
+                ? { labourType: 'per_gram' as const, labourRate: n(l.making) }
+                : l.labourType
+                  ? {
+                      labourType: l.labourType,
+                      labourRate: l.labourRate,
+                      labourFixed: l.labourFixed,
+                    }
+                  : {}),
           })),
       };
       const saved = loadedVchNo
