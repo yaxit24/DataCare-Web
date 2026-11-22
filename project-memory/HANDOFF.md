@@ -1,3 +1,11 @@
+## 2026-11-22 — Sales Return residuals (N242 / G254, WP-27)
+
+- 2026-11-22: the TR_SALE_RTN save refusals in desktop order and texts (employee, cheque/card account, type B, year, lock date, zero
+  value, `Duplicate Tag No`); Import refuses a bill that already has a return, `remaining=1` is the single-item picker; the New return
+  form opens a saved return and saves it with `PUT /sales-returns/:vchNo` + version token, losslessly, with the USER_DATA field audit.
+- 2026-11-22: decisions D1-D14 in `orchestration/work/WP-27/cases.md` (architect, owner may override); new DB tests 18 of 18; return
+  create p95 269 ms in the load profile. Browser module (28 cases, 0 declared blocked) not run locally. G246 (RTN_* columns) stays open.
+
 ## 2026-11-09 — Order Cancel is the desktop TR_SL_ORD_ADJ voucher (N233 / G245, WP-02)
 
 - 2026-11-09: one voucher cancels the open advance of many orders (SL_ORD_ADJ, Order_Adj_Ledr/Rojmel, held-tag release), version-guarded

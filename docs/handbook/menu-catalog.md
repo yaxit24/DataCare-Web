@@ -735,10 +735,10 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Desktop:** `TR_SALE_RTN`, `TR_SALE_RTN_UAE` — CurBookHelp('SALES RETURNE'); TR_SALE_RTN_UAE in the UAE edition ([MDI_FORM.cs:7966-7991](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7966-L7991)).
 - **Does:** Imports a prior invoice, credits or refunds the customer and restores returned stock, tax and outstanding.
 - **Looks:** Credit-note header with source bill; return, component and received-tag grids; refund/credit totals and document.
-- **Writes:** SL_DATA, SL_DETL_RTN, SL_IDTL, BAR_DETL, MAIN_STOCK, DM_DATA, AC_DATA, ROJ_MEL_DATA, TAX_DATA, BILL_OS_DATA.
-- **Web:** `/txn/sale-return`; `POST /sales-returns`, `GET /sales-returns/:vchNo`, `DELETE /sales-returns/:vchNo`, `GET /sales-returns/import`, `PUT /sales-returns/:vchNo/incoming-metadata`, `PUT /sales-returns/:vchNo/incoming-numeric`, `GET /sales/credit-note`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** Saved edit covers bounded metadata and one numeric path; create exceeded the 5 s transaction budget in the audit; lossless edit, admissibility, residuals and UAE branches remain.
-- **Owners:** X13, G26, N50, G46, N63, G30, N53, N51, N77, G71, N85.
+- **Writes:** SL_DATA, SL_DETL_RTN, SL_IDTL, BAR_DETL, MAIN_STOCK, DM_DATA, AC_DATA, ROJ_MEL_DATA, TAX_DATA, BILL_OS_DATA, USER_DATA.
+- **Web:** `/txn/sale-return`; `POST /sales-returns`, `GET /sales-returns/:vchNo`, `PUT /sales-returns/:vchNo`, `DELETE /sales-returns/:vchNo`, `GET /sales-returns/import`, `PUT /sales-returns/:vchNo/incoming-metadata`, `PUT /sales-returns/:vchNo/incoming-numeric`, `GET /sales/credit-note`. Can: create, reopen, edit, delete, print, list.
+- **Remaining:** WP-27 (N242/G254) added the lossless versioned edit from the New return form, the desktop save refusals and Import admissibility; create p95 is 269 ms in the load profile. Open: the RTN_* header columns (G246), the UAE branch, print template choice (G127), a browser run of record and desktop-runtime comparison.
+- **Owners:** X13, G26, N50, G46, N63, G30, N53, N51, N77, G71, N85, N242, G254.
 - **Evidence:** [KB_transaction.md:144-171](../../project-memory/video-research/_kb/KB_transaction.md#L144-L171).
 
 ### Sl Quotation
