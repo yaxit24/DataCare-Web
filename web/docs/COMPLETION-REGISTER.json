@@ -167,7 +167,6 @@
     "surface": "GET /reports/tag-stock"
    },
    "sharedSurfaceWith": [
-    "Report/Stock Report",
     "Report/Tag Stock"
    ]
   },

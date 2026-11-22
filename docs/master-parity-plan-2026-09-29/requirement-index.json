@@ -69,7 +69,7 @@
     {
       "kind": "menu",
       "path": "web/docs/COMPLETION-REGISTER.json",
-      "sha256": "a28749f7cd94ec4a0453aa0d48464733f4f1044805fb37383e5c9cc8f034aef9",
+      "sha256": "3bdb88541ced1b4de968c1e3bd239612d70e0fb917a8945100a3b140449fb91f",
       "count": 198,
       "arrayPointer": "/items",
       "rebaselined": {
