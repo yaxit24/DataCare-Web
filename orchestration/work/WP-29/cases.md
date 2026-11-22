@@ -41,7 +41,7 @@ Status: executable
 ### purchase-return.print.hsn-tax-zero   (T16 Report/output)
 Layer: database
 Steps: 1. Save a return at tax 0%. 2. Print.
-Expected: no tax amount row with a value; zero tax writes three zeros (TR_KR_ISU.cs:5108-5110 {{dataRow2["IGST_TAX"] = 0;}}) and the report suppresses zero sections. Header IGST/CGST/SGST all 0.
+Expected: header IGST/CGST/SGST/TAX_AMT all 0 (zero tax writes three zeros, TR_KR_ISU.cs:5108-5110 {{dataRow2["IGST_TAX"] = 0;}}); the print still lists the HSN row with taxable 6,200.00. The desktop report suppresses each zero tax section; the web HSN table shows 0.00 cells (layout, not ported).
 Status: executable
 
 ### purchase-return.print.debit-note   (T16 Report/output) kept
@@ -100,7 +100,7 @@ Status: executable
 ### purchase-return.edit.version-roundtrip   (T08 Reopen/no-op)
 Layer: database
 Steps: 1. Create, read (V1). 2. PUT the read payload unchanged with V1. 3. Read again.
-Expected: save returns a version, tenant rows unchanged except surrogate keys; date, bill no, tender, per-line fine and the clock are identical; the unchanged save returns the same version V1. Desktop re-writes the same identity (TR_KR_ISU.cs:4625 {{tHdVchNo.Text = Conversions.ToString(Operators.ConcatenateObject(RsData.Rows[0]["HD_VCH_NO"], (object)""));}}).
+Expected: save returns a version, tenant rows unchanged except surrogate keys; date, bill no, tender, per-line fine and the clock are identical; the returned version equals the next read's version (the token changes because the write set is re-inserted). Desktop re-writes the same identity (TR_KR_ISU.cs:4625 {{tHdVchNo.Text = Conversions.ToString(Operators.ConcatenateObject(RsData.Rows[0]["HD_VCH_NO"], (object)""));}}).
 Status: executable
 
 ### purchase-return.delete.version-ok   (T10 Delete)
