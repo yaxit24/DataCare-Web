@@ -264,11 +264,13 @@ export async function resolveBookAccounts(
     coBook,
   );
   const bySr = new Map<number, string>();
+  const slotRows: Record<number, string> = {};
   for (const r of rows) {
     const code = String(r.AC_CODE ?? '').trim();
+    slotRows[Number(r.SR_NO)] = code;
     if (code) bySr.set(Number(r.SR_NO), code);
   }
-  const out: RateCutAccounts = {};
+  const out: RateCutAccounts = { slotRows };
   for (const [field, sr] of Object.entries(BOOK_DETL_SR) as Array<
     [keyof RateCutAccounts, number]
   >) {
@@ -447,6 +449,8 @@ export interface RateCutLine {
   itType?: 'G' | 'S';
   /** Typed item-detail rows of a loose line (WP-30); see wholesaleDetailRows.ts. */
   details?: unknown[];
+  /** Col 47 KrNwt: gross less the rolled-up KrConWt, stored as KR_NET_WT (TR_WH_SALE.cs:7871, :13128). */
+  krNetWt?: number;
   /** original unfixed-sale lot this line fixes (RATE_CUT_ISU.ISU_* / FINE_CUT_*). */
   isuRef?: { yrcd?: string; dbcd?: string; no?: string; srno?: number };
 }
@@ -476,6 +480,8 @@ export interface RateCutAccounts {
   silverPurcAc?: string; // BOOK_DETL SR9 — purchase (silver) control
   othAc?: string; // BOOK_DETL SR11 — other charges
   fineKasarAc?: string; // BOOK_DETL SR12 — fine kasar (Rojmel types 07/08)
+  /** Every BOOK_DETL row by SR_NO as stored, blank codes included: a day book row exists when its slot row does. */
+  slotRows?: Record<number, string>;
 }
 
 export interface RateCutInput {
@@ -857,7 +863,7 @@ export function buildRateCutLedger(key: VoucherKey, ctx: LedgerCtx): LedgerLine[
   const code = (goldLeg: number, silverLeg: number): number => (gold ? goldLeg : silverLeg);
   const saleSlot: keyof RateCutAccounts = gold ? 'goldAc' : 'silverSaleAc';
   const purchaseSlot: keyof RateCutAccounts = gold ? 'purchaseAc' : 'silverPurcAc';
-  const slot = (field: keyof RateCutAccounts): string => {
+  const slot = (field: keyof typeof BOOK_DETL_SR): string => {
     const configured = String(ctx.accounts[field] ?? '').trim();
     if (!configured) {
       throw new RateCutValidationError(
@@ -1280,7 +1286,7 @@ function buildLineRows(
        * The karigar valuation columns, which on these rows track NET WEIGHT rather than fine — measured
        * `KR_NET_WT == ITM_NWT` and `KR_FINE == ITM_NWT` on 19 of 20 rows, the exception being a weightless line.
        */
-      KR_NET_WT: c.netWt,
+      KR_NET_WT: l.krNetWt ?? c.netWt,
       KR_FINE: c.netWt,
       BOOK_NAME: cls.bookName,
       AC_CODE: input.acCode,
@@ -2231,7 +2237,8 @@ export async function writeRateCut(
           headerName: voucherInput.acName ?? '', masterName: party?.name ?? voucherInput.acName ?? '',
           vchDesc: String(voucherInput.vchDesc ?? ''), itType, desktopShape: options.bookGuard === 'wholesale-sale',
           accounts: accounts as Record<string, string | undefined>, figures: figures as any, headerTotals,
-          bankAc: String(p.bankAc ?? rp.bankAc ?? '').trim() || receivedBankAc || String(accounts.cashAc ?? ''),
+          bankAc: String(p.bankAc ?? rp.bankAc ?? '').trim(), cardAc: String(p.cardAc ?? rp.cardAc ?? '').trim(),
+          slots: accounts.slotRows ?? {},
           labourAmount: money2(figures.slLbrAmt + figures.slOthAmt), ksrFineDr, ksrFineCr, issuedRows, receivedRows,
         });
     // The issued tags' stones: SL_IDTL, then DM_DATA (Dm_Wh_Tour_Sale_Detl); wholesaleTagStones.ts.

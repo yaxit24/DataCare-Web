@@ -40,6 +40,10 @@ needs to be safe and correct". Every decision is recorded as **architect, 2026-1
 5. **Four-decimal PcsWt registrations HM437NEHP / HM436NEHP (study Q5).** Registration-specific; N220 excluded the
    same class of check (`TR_WH_SALE.cs:7444 {{HM437NEHP}}`). Out of scope, listed under Not covered.
    **architect, 2026-11-23, owner may override**.
+6. **Con% is a factor, not a percentage (review of PR 256).** `TR_WH_SALE.cs:7762-7766` multiplies Weight by Con% with no division by 100, so
+   wherever a case below writes "Con% 10" and "ConWt 3 x 10% = 0.300" the executed value is Con% 0.1 (ConWt 3 x 0.1 = 0.300); a Con% of 10 would give 30.000.
+   The same holds for KrCon% (0.05 gives KrConWt 0.150) and for the roll-up that follows (col 47 KrNwt is stored as `KR_NET_WT`, `:13128`).
+   **architect, 2026-11-23, owner may override**.
 
 ## Cases
 

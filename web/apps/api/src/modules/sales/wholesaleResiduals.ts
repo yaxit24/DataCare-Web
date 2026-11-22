@@ -29,6 +29,9 @@ export interface RojmelRowsArgs {
   /** Desktop `Wh_Sales_Rojmel` shape (the Wh Sales book, gold). Rate Cut keeps the measured nine-type shape. */
   desktopShape: boolean;
   accounts: Record<string, string | undefined>;
+  /** BOOK_DETL by SR_NO as stored, blank codes included (see `readBookSlots`). */
+  slots: Record<number, string | undefined>;
+  cardAc: string;
   figures: Row;
   headerTotals: { prBillOs: number; slBillOs: number };
   bankAc: string;
@@ -70,16 +73,14 @@ export function rateCutRojmelRows(a: RojmelRowsArgs): any[] {
   };
   const gold = a.itType === 'G';
   if (a.desktopShape && gold) {
-    const acc = a.accounts;
     return buildWholesaleRojmel(ctx, {
-      slots: {
-        sale: acc.goldAc,
-        purchase: acc.purchaseAc,
-        purchaseKasar: acc.purchaseKasarAc,
-        labour: acc.lbrAc,
-        silverSale: acc.silverSaleAc,
-        fineKasar: acc.fineKasarAc,
-      },
+      slots: a.slots,
+      cardAc: a.cardAc,
+      saleChequeAmount: n(f.slChqAmt),
+      saleCardAmount: n(f.slCardAmt),
+      saleKasarAmount: n(f.slKasarAmt),
+      purchaseCardAmount: n(f.prCardAmt),
+      purchaseLabourAmount: money2(n(f.prLbrAmt) + n(f.prOthAmt)),
       headerName: a.headerName,
       masterName: a.masterName,
       vchDesc: a.vchDesc,

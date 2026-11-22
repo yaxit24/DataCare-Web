@@ -11,7 +11,8 @@ const ctx = {
   partyName: 'Cust', partyCode: 'P1',
 };
 const base = {
-  slots: { sale: 'S1', purchase: 'S2', purchaseKasar: 'S5', labour: 'S6', silverSale: 'S8', fineKasar: 'S12' },
+  slots: { 1: 'S1', 2: 'S2', 4: 'S4', 5: 'S5', 6: 'S6', 7: 'S7', 8: 'S8', 12: 'S12' } as Record<number, string>,
+  cardAc: 'CRD', saleChequeAmount: 0, saleCardAmount: 0, saleKasarAmount: 0, purchaseCardAmount: 0, purchaseLabourAmount: 0,
   headerName: 'Cust', masterName: 'Customer Master', vchDesc: 'desc', bankAc: 'BNK', fineRate: 6500,
   drFine: 0, crFine: 0, purchaseBillOs: 0, saleBillOs: 0, purchaseAmount: 0, saleAmount: 0, ksrFineDr: 0, ksrFineCr: 0,
   purchaseChequeAmount: 0, purchaseKasarAmount: 0, labourAmount: 0, issued: [], received: [],
@@ -55,6 +56,28 @@ describe('buildWholesaleRojmel (Wh_Sales_Rojmel)', () => {
     expect([t['04'].AC_CODE, t['04'].CR_AMT]).toEqual(['S1', 200]);
     expect([t['22'].AC_CODE, t['22'].CR_AMT, t['22'].AC_NAME]).toEqual(['BNK', 50, '']);
     expect([t['26'].AC_CODE, t['26'].CR_AMT, t['26'].AC_NAME]).toEqual(['S5', 4, 'KSR - Cust']);
+  });
+});
+
+describe('Wh_Sales_Rojmel sale-side tender, purchase labour and blank slots', () => {
+  it('21 cheque, 23 card, 25 kasar are Dr rows; 24 purchase card is Cr; 28 purchase labour is Dr', () => {
+    const rows = buildWholesaleRojmel(ctx as any, {
+      ...base, saleChequeAmount: 2000, saleCardAmount: 1000, saleKasarAmount: 40, purchaseCardAmount: 70, purchaseLabourAmount: 55,
+    });
+    const t: Record<string, any> = Object.fromEntries(rows.map((r) => [r.LEDR_KEY.slice(-2), r]));
+    expect([t['21'].AC_CODE, t['21'].LD_CODE, t['21'].DR_AMT, t['21'].CR_AMT, t['21'].AC_NAME]).toEqual(['BNK', 'P1', 2000, 0, '']);
+    expect([t['23'].AC_CODE, t['23'].DR_AMT, t['23'].AC_NAME]).toEqual(['CRD', 1000, '']);
+    expect([t['24'].AC_CODE, t['24'].CR_AMT, t['24'].DR_AMT]).toEqual(['CRD', 70, 0]);
+    expect([t['25'].AC_CODE, t['25'].DR_AMT, t['25'].AC_NAME]).toEqual(['S4', 40, 'KSR - Cust']);
+    expect([t['28'].AC_CODE, t['28'].DR_AMT, t['28'].AC_NAME]).toEqual(['S7', 55, 'LBR - Cust']);
+  });
+  it('a slot row with a blank account still writes its row; a missing slot row writes none', () => {
+    const slots = { 1: '', 2: '', 12: '', 6: '' } as Record<number, string>;
+    const line = { srNo: 1, itType: 'G', pcs: 1, grossWt: 1, netWt: 1, touch: 90, westPct: 0, fine: 0.9, itemAmount: 0, remark: '', itCode: 'I' };
+    const rows = buildWholesaleRojmel(ctx as any, { ...base, bankAc: '', slots, ksrFineDr: 0.5, labourAmount: 10, issued: [line] });
+    expect(rows.map((r) => r.LEDR_KEY.slice(21, 23)).sort()).toEqual(['05', '07', '27']);
+    expect(rows.every((r) => ['', 'P1'].includes(String(r.LD_CODE)) || r.LD_CODE === '')).toBe(true);
+    expect(buildWholesaleRojmel(ctx as any, { ...base, slots: {}, ksrFineDr: 0.5, labourAmount: 10, issued: [line] })).toEqual([]);
   });
 });
 

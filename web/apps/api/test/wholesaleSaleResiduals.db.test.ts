@@ -152,6 +152,8 @@ const looseLine = (details: unknown[] = [rowA, rowB]) => ({
     const line = (await rows(`SELECT * FROM "RATE_CUT_ISU" WHERE tenant_id=$1 AND "VCH_NO"=$2`, v))[0];
     expect([Number(line.ITM_OTH_WT), Number(line.ITM_NWT), Number(line.OTH_AMT), Number(line.ITM_FINE)]).toEqual([0.5, 4.5, 1263, 4.122]);
     expect(Number((await header(v)).SL_NET_AMT)).toBe(1263);
+    // Col 47 KrNwt = 5 - (0.15 + 0.2) = 4.65 is KR_NET_WT (TR_WH_SALE.cs:7871, :13128); row B has no KrCon% so Con% stands in.
+    expect(Number(line.KR_NET_WT)).toBe(4.65);
   });
 
   it('skips an empty row, keeps a blank-code row, restarts ISR_NO per line, refuses details on a tagged line', async () => {
@@ -323,5 +325,31 @@ const looseLine = (details: unknown[] = [rowA, rowB]) => ({
     expect(text.indexOf('STUDDED RING')).toBeGreaterThan(-1);
     expect(text).toMatch(/STUDDED RING\|2\|3\.000\|.*101\.00.*\|763\.00/);
     expect(text).toMatch(/Kasar Fine\|0\.250\|0\.500/);
+  });
+
+  it('Rojmel rows 21/23/25 for the sale-side cheque, card and kasar through the day book reader, and 28 purchase labour', async () => {
+    await exec(`UPDATE "AC_MAST" SET "AC_NAME"="AC_NAME" WHERE tenant_id=$1 AND false`, tenantId);
+    await exec(`INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GR") VALUES ($1,'01','01','WHBANK','Wholesale Bank','10'),($1,'01','01','WHCARD','Wholesale Card','10') ON CONFLICT DO NOTHING`, tenantId);
+    // Net 1263 = cheque 500 + card 300 + kasar 40 + cash 423; received lines add 100 labour (28 is purchase-side labour).
+    const v = await create(
+      body([looseLine()], {
+        pay: { cash: 423, chq: 500, bankAc: 'WHBANK', chqNo: '123', card: 300, cardAc: 'WHCARD', kasar: 40 },
+        receivedLines: [{ itCode: 'PLN', grossWt: 1, touch: 91.6, lbrType: 'G', lbrRate: 100 }],
+      }),
+    );
+    const read = await inject('GET', '/reports/rojmel');
+    expect(read.statusCode, read.body).toBe(200);
+    const mine = read.json().rows.filter((r: any) => r.vchNo === v);
+    const r = await roj(v);
+    const by = (t: string) => r.find((x) => x.LEDR_KEY.endsWith(t));
+    expect([by('21').AC_CODE, by('21').LD_CODE, Number(by('21').DR_AMT), Number(by('21').CR_AMT), by('21').AC_NAME]).toEqual(['WHBANK', 'WHCUST', 500, 0, '']);
+    expect([by('23').AC_CODE, Number(by('23').DR_AMT)]).toEqual(['WHCARD', 300]);
+    expect([by('25').AC_CODE, Number(by('25').DR_AMT), by('25').AC_NAME]).toEqual(['KASAR', 40, 'KSR - Wholesale Customer']);
+    expect([by('28').AC_CODE, Number(by('28').DR_AMT), by('28').AC_NAME]).toEqual(['LBREXP', 100, 'LBR - Wholesale Customer']);
+    // The same rows reach the day book reader, which totals Dr and Cr.
+    expect(mine.filter((x: any) => x.dr > 0).map((x: any) => x.dr).sort((a: number, b: number) => a - b)).toEqual(
+      r.filter((x) => Number(x.DR_AMT) > 0).map((x) => Number(x.DR_AMT)).sort((a, b) => a - b),
+    );
+    expect(mine.length).toBe(r.length);
   });
 });

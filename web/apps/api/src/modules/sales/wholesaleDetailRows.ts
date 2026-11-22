@@ -167,6 +167,7 @@ export async function planWholesaleDetails(
         out.othWt = up.othWt;
         out.netWt = up.netWt;
       }
+      if (up.krNwt != null) out.krNetWt = up.krNwt;
       if (up.othAmt != null) out.othAmt = up.othAmt;
       if (up.silverFine != null) out.silverFine = up.silverFine;
       return out;
