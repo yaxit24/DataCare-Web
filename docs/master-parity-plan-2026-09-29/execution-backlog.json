@@ -7821,6 +7821,37 @@
         "web/apps/web/test/features/modules/orderCancel.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. order-cancel module: 24 cases over T01-T18, none blocked; stock.held-tag-released is a real browser case (the order is made on the Sales Order screen, only the tag hold is seeded because the web Sales Order never saves a tagged line). Desktop match 0%."
+    },
+    {
+      "id": "N236",
+      "status": "implemented-unverified",
+      "action": "Balance TrFr is the desktop BtmSchm form: the five Lite dataset buttons; Ac Balance carries parties (AC_MAIN_GR < 3) to the closing date per AC_CODE and DATA_TYPE into OP_DATA with Party Opening legs, Cr-positive, gold and silver by IT_TYPE, decimal half-away rounding, zero-skip; Item Stock carries untagged MAIN_STOCK into ITM_OPBL with fine = net x AVG_TOUCH / 100; the server-computed Transfer Year, target-year replace, one transaction under an advisory lock; Tag Stock, Sales Order and Approval selections and row mappings are ported read-only and their writes refused pending Q1/Q8.",
+      "parentLabels": "P0; L3; T01-T18; WP-23",
+      "startAfter": [
+        "N233"
+      ],
+      "requiredProof": "closing(N) = opening(N+1) database tests per account and DATA_TYPE and per item, worked from the desktop formulas, failing on the previous writer and passing now; re-run, rollback after the first table, scope, concurrency and refusal cases; unit vectors for the rounding half-cases and the tag/order/approval value lists; the balance-transfer browser module in CI; all repository gates.",
+      "gapIds": "G248",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/apps/api/src/modules/ops/balanceTransfer.ts",
+        "web/apps/api/src/modules/ops/balanceTransferRules.ts",
+        "web/apps/api/src/modules/ops/balanceTransferMapping.ts",
+        "web/apps/api/src/modules/ops/balanceTransferSelect.ts",
+        "web/apps/api/src/routes/balanceTransfer.ts",
+        "web/apps/web/app/(app)/company/balance-transfer/page.tsx",
+        "web/apps/api/test/balanceTransfer.db.test.ts",
+        "web/apps/api/test/balanceTransferRules.test.ts",
+        "web/apps/api/test/balanceTransferMapping.test.ts",
+        "web/apps/api/test/balanceTransferSelect.db.test.ts",
+        "web/apps/web/test/features/modules/balanceTransfer.mjs",
+        "orchestration/work/WP-23/cases.md"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Ac Balance and Item Stock carried; Tag Stock (Q8), Sales Order and Approval (Q1/Q5) refused pending owner decisions; Q2 HAVING offset and Q3 signed-sum skip carry instead of dropping until decided; AvgTouch recompute not ported. DB 42/42 and unit 30/30 locally; browser module not run locally (CI). Desktop match 0%."
     }
   ],
   "amendments": [

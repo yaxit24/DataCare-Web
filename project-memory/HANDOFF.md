@@ -1,3 +1,10 @@
+## 2026-11-22 — Balance TrFr carries the desktop BtmSchm datasets (N236 / G248, WP-23)
+
+- 2026-11-22: Ac Balance (Rtl_AcOpbl) and Item Stock (BtnItmStk) carry by the desktop rules into the server-computed Transfer Year;
+  re-run replaces the target year only, one transaction under an advisory lock; closing(N) = opening(N+1) DB tests 42/42.
+- 2026-11-22: Tag Stock (Q8: web tag stock is year-agnostic, a copy would double it), Sales Order and Approval (Q1) are refused with
+  the reason; their selections and value lists are ported read-only. Owner questions Q1-Q9 in `orchestration/work/WP-23/cases.md`.
+
 ## 2026-11-09 — Order Cancel is the desktop TR_SL_ORD_ADJ voucher (N233 / G245, WP-02)
 
 - 2026-11-09: one voucher cancels the open advance of many orders (SL_ORD_ADJ, Order_Adj_Ledr/Rojmel, held-tag release), version-guarded

@@ -86,11 +86,11 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `BtmSchm` — direct constructor ([MDI_FORM.cs:7431-7440](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7431-L7440)).
 - **Does:** Carries account, party, stock, order, scheme, loan, approval, repair, lot and manufacturing balances into the next financial year.
-- **Looks:** Transfer dashboard of module buttons; the web shows years, an account preview grid and three carry-forward actions.
-- **Writes:** OP_DATA, AC_DATA, ITM_OPBL, BAR_DETL, SL_ORD_DATA, APR_DATA, DHRN_DATA, LOT_DETL.
-- **Web:** `/company/balance-transfer`; `POST /balance-transfer/preview`, `POST /balance-transfer/year-close`, `POST /balance-transfer/openings`. Can: create.
-- **Remaining:** Web carries account and party openings only; stock, order, scheme, loan, approval, repair, lot and manufacturing branches, Print and interruption recovery remain.
-- **Owners:** X27, P11-01, X06.
+- **Looks:** The BtmSchm form: title Balance TrFr, Transfer Year (the first later YEAR_MAST year, not typed), the five Lite dataset buttons Ac Balance, Item Stock, Tag Stock, Sales Order, Approval, and Exit / Cancel.
+- **Writes:** OP_DATA, AC_DATA, ITM_OPBL, MAIN_STOCK, YEAR_MAST, AC_MAST, AC_GROUP, ITEM_MAST.
+- **Web:** `/company/balance-transfer`; `GET /balance-transfer`, `POST /balance-transfer/ac-balance`, `POST /balance-transfer/item-stock`, `POST /balance-transfer/tag-stock`, `POST /balance-transfer/sales-order`, `POST /balance-transfer/approval`. Can: create.
+- **Remaining:** G248: Ac Balance and Item Stock carry by the BtmSchm rules (parties only to the closing date, per AC_CODE and DATA_TYPE, gold and silver by IT_TYPE, decimal rounding, target-year replace, one transaction). Tag Stock (Q8: the web counts a tag in stock in every year, so a copy would double it), Sales Order and Approval (Q1: the desktop keeps the old year's key) are refused pending owner decisions; Q2 HAVING offset and Q3 item signed-sum skip carry instead of dropping until decided; the AvgTouch recompute is not ported. Desktop match 0%.
+- **Owners:** G248, N236, P11-01, X06, X27.
 - **Evidence:** [module-map.json:202-260](../../project-memory/catalogs/module-map.json#L202-L260).
 
 ### Books
