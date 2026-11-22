@@ -254,3 +254,48 @@ export function saleLineLabourMode(cells: {
   if (n(cells.lbrPct) !== 0 && n(cells.rate) !== 0) return 'percentage';
   return supplied(cells.making) && n(cells.making) !== 0 ? 'per_gram' : undefined;
 }
+
+/** A Sale or Sales Quotation grid row: its Making/g and Lbr% cells besides the recalculation fields. */
+export interface SaleGridRow extends Omit<RecalcLine, 'labourType' | 'labourRate' | 'labourPct'> {
+  making?: string;
+  lbrPct?: string;
+}
+
+/**
+ * The preview of a Sale / Sales Quotation grid row, as the server's computeLine posts it. A Lbr% row derives its
+ * labour rate from the item rate (TR_SALE.cs:11021) and multiplies `options.labourBasis`, the company LBR_TYPE a new
+ * row takes (:9135, :11084-11127); any other row charges Making/g on net weight.
+ */
+export function recalcSaleGridRow(
+  row: SaleGridRow,
+  options: Parameters<typeof recalcLine>[2] = {},
+): RecalcResult {
+  const percentage = saleLineLabourMode(row) === 'percentage';
+  const line = { ...row, labourRate: row.making, labourPct: row.lbrPct };
+  return recalcLine({ ...line, labourType: percentage ? '%' : 'G' }, 'sale', options);
+}
+
+/**
+ * The labour fields a Sale / Sales Quotation row posts. A Lbr% row posts `percentage` with no rate: the server
+ * derives LBR_RATE from LBR_PRC and the item rate (TR_SALE.cs:11021). Otherwise Making/g is a per-gram rate, and a
+ * row loaded with another labour type keeps it.
+ */
+export function saleGridRowLabour(row: {
+  making?: string;
+  lbrPct?: string;
+  rate?: string;
+  labourType?: 'per_gram' | 'per_piece' | 'percentage' | 'fixed';
+  labourRate?: number;
+  labourFixed?: number;
+}): {
+  labourType?: 'per_gram' | 'per_piece' | 'percentage' | 'fixed';
+  labourRate?: number;
+  labourFixed?: number;
+} {
+  if (saleLineLabourMode(row) === 'percentage') return { labourType: 'percentage' };
+  if (row.making) return { labourType: 'per_gram', labourRate: n(row.making) };
+  if (row.labourType) {
+    return { labourType: row.labourType, labourRate: row.labourRate, labourFixed: row.labourFixed };
+  }
+  return {};
+}

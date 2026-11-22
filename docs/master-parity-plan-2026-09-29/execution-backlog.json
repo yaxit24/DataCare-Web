@@ -7821,6 +7821,35 @@
         "web/apps/web/test/features/modules/orderCancel.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. order-cancel module: 24 cases over T01-T18, none blocked; stock.held-tag-released is a real browser case (the order is made on the Sales Order screen, only the tag hold is seeded because the web Sales Order never saves a tagged line). Desktop match 0%."
+    },
+    {
+      "id": "N235",
+      "status": "implemented-unverified",
+      "action": "Sales line percentage labour and line precision follow TR_SALE CommPassTotal: LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, MsLbrRof) (TR_SALE.cs:11021) multiplied by the LBR_TYPE basis (:11084-11127; Sales Return :4963, :4975-4993), and ITM_AMT/LBR_AMT each one Math.Round to a hardcoded 0 decimals, 2 under ALL_ROF_REMOVE (:10343-10362), instead of TOT_AMT_ROF; the Sale and Sales Quotation previews use the same kernel.",
+      "parentLabels": "P1-core; L1; T03; WP-41",
+      "startAfter": [
+        "N233"
+      ],
+      "requiredProof": "The desktop oracle sales-line vectors pass with the eight labour.pct.* baseline entries removed; core and web unit tests; a DB test of the persisted LBR_RATE/LBR_AMT and the line precision (TOT_AMT_ROF ignored, ALL_ROF_REMOVE honoured); the sales-invoice browser case formula.percentage-labour; sales-invoice and sales-return modules green.",
+      "gapIds": "G247",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/packages/core/src/calc.ts",
+        "web/packages/core/src/saleAmount.ts",
+        "web/packages/core/src/roundingPolicy.ts",
+        "web/apps/api/src/modules/sales/sales.ts",
+        "web/apps/api/src/modules/sales/salesReturn.ts",
+        "web/apps/web/lib/lineRecalc.ts",
+        "web/packages/core/test/desktopOracle.salesLine.test.ts",
+        "web/packages/core/test/calc.test.ts",
+        "web/apps/api/test/lineComponentRounding.db.test.ts",
+        "web/apps/web/test/features/modules/salesInvoice.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Desktop oracle sales-line: KNOWN_MISMATCHES empty (the eight labour.pct.* entries removed and passing). sales-invoice module 34 applicable, 32 passed, 0 failed, 2 blocked (both pre-existing, unrelated); new case formula.percentage-labour passes. sales-return 25 of 26 (1 blocked, pre-existing; new case config.all-rof-remove-keeps-whole-rupees). gst-report, group-master and item-master expectations moved to whole-rupee lines and pass. Not modelled: the registration-serial branches (DM035NPDM, HM199NEPK). Desktop match 0% beyond the oracle vectors."
     }
   ],
   "amendments": [

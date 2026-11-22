@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { recalcLine, saleLineLabourMode } from '../lib/lineRecalc';
+import {
+  recalcLine,
+  recalcSaleGridRow,
+  saleGridRowLabour,
+  saleLineLabourMode,
+} from '../lib/lineRecalc';
 import { fineFor, labourCharge, metalAmount, resolveRoundingPolicy, round } from '@datacare/core';
 
 /**
@@ -221,5 +226,18 @@ describe('sale percentage labour and line precision (desktop oracle, N235/G247)'
     expect(saleLineLabourMode({ lbrPct: '12', rate: '6200', making: '50' })).toBe('percentage');
     expect(saleLineLabourMode({ lbrPct: '12', rate: '', making: '50' })).toBe('per_gram');
     expect(saleLineLabourMode({ lbrPct: '', rate: '6200', making: '' })).toBeUndefined();
+  });
+
+  it('the Sale grid row previews and posts a Lbr% row as a percentage line', () => {
+    const row = { ...line, making: '50', lbrPct: '12' };
+    const preview = recalcSaleGridRow(row, { roundingPolicy: policy, labourBasis: 'G' });
+    expect(preview.labourRate).toBe(744);
+    expect(preview.labourAmount).toBe(7853);
+    expect(saleGridRowLabour(row)).toEqual({ labourType: 'percentage' });
+    expect(saleGridRowLabour({ making: '50', rate: '6200' })).toEqual({
+      labourType: 'per_gram',
+      labourRate: 50,
+    });
+    expect(recalcSaleGridRow({ netWt: '10', making: '50' }).labourAmount).toBe(500);
   });
 });

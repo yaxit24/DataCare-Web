@@ -965,10 +965,12 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
   });
 
   it("persists unconfigured sale totals with today's 2dp policy in header and ledger", async () => {
+    // An explicit ITM_AMT is a line component too, so it is a whole rupee (TR_SALE.cs:10343-10362, half to even:
+    // 1000.55 -> 1001); the bill keeps the 2dp tax and total policy: 3% of 1001 = 30.03.
     const result = await createSale(runtime, saleInput(), [
       { itCode: 'LOOSE', pcs: 1, metalAmount: 1000.55 },
     ]);
-    expect(result.totals).toMatchObject({ taxable: 1000.55, tax: 30.02, total: 1030.57 });
+    expect(result.totals).toMatchObject({ taxable: 1001, tax: 30.03, total: 1031.03 });
 
     const rows = (await owner.$queryRawUnsafe(
       `SELECT s."TOT_AMT"::float total,
@@ -980,7 +982,7 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
          FROM "SL_DATA" s WHERE s.tenant_id=$1 AND s."VCH_NO"='00008'`,
       TENANT,
     )) as Array<{ total: number; ledger_total: number }>;
-    expect(rows[0]).toEqual({ total: 1030.57, ledger_total: 1030.57 });
+    expect(rows[0]).toEqual({ total: 1031.03, ledger_total: 1031.03 });
   });
 
   it('deletes with one configured-book header audit plus one desktop-shaped row per sale line', async () => {
@@ -1395,11 +1397,12 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
         grossWt: 10,
         netWt: 10,
         touch: 91.6,
-        // A rate chosen so 3% of the line lands beyond two decimals, which is what makes the precisions
-        // distinguishable at all. The blank company prices net (10 x 7131.11 = 71,311.10), so 3% is
-        // 2,139.333 and the 2dp tax is an odd 2,139.33. (7131.1 was tuned to the former fine basis; on net
-        // it gives 71,311.00 and an exact 2dp tax, which no precision can tell apart.)
-        rate: 7131.11,
+        // A line chosen so 3% of it lands beyond two decimals, which is what makes the precisions
+        // distinguishable at all. ITM_AMT is a whole rupee (TR_SALE.cs:10343-10362: 10 x 7131.1 = 71,311), and 3%
+        // of a whole rupee always has two decimals, so the paise come from OTH_AMT, which NET_AMT adds unrounded
+        // (TR_SALE.cs:11548): 71,311.10, 3% = 2,139.333, an odd 2dp tax of 2,139.33.
+        rate: 7131.1,
+        otherAmount: 0.1,
       },
     ]);
     const vch = String(created.vchNo).padStart(5, '0');
