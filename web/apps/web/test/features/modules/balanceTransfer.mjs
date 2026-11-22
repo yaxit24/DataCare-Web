@@ -604,21 +604,35 @@ export const balanceTransfer = {
       },
     ),
     C(
-      'blocked-datasets.refused-with-reason',
-      'T06',
-      'refusal',
-      'cases.md Q1 (Sales Order, Approval keep the old year key) and Q8 (tag stock is year-agnostic in the web)',
+      'implicit-datasets.count-and-write-nothing',
+      'T07',
+      'mutation',
+      'BtmSchm.cs:2169, :3003, :4116; Q1/Q8 decided 2026-11-22 by the architect (owner may override): in the one-database web tags, open orders and open approvals already continue into the next year, so these buttons count and write nothing',
       async (ctx) => {
         const { page } = await ctx.session();
         return withNextYears(ctx, page, 1, async ({ next }) => {
+          const onHand = async () =>
+            (
+              await ctx.rows(
+                `SELECT count(*)::int n FROM "BAR_DETL" b WHERE b.tenant_id=$1
+                    AND coalesce((SELECT sum(CASE WHEN m."ITM_SIGN"='+' THEN coalesce(m."VCH_SRNO",1) ELSE -coalesce(m."VCH_SRNO",1) END)
+                                    FROM "MAIN_STOCK" m WHERE m.tenant_id=b.tenant_id AND m."CO_CODE"=b."CO_CODE" AND m."LC_CODE"=b."LC_CODE"
+                                     AND m."TAG_NO"=b."TAG_NO" AND coalesce(m."VCH_SRNO",0)=coalesce(b."VCH_SRNO",0)
+                                     AND coalesce(m."IT_CODE",'')=coalesce(b."IT_CODE",'')),0) > 0`,
+              )
+            )[0].n;
+          const before = await onHand();
           await openScreen(page);
           const seen = [];
           for (const label of ['Tag Stock', 'Sales Order', 'Approval']) {
             const { dialogs, response } = await runDataset(page, label);
             assert.deepEqual(dialogs, [CONFIRM]);
-            assert.equal(response.status(), 409, await response.text());
-            await page.getByRole('alert').filter({ hasText: 'is not carried yet' }).waitFor();
-            seen.push(`${label} ${response.status()}`);
+            assert.equal(response.status(), 200, await response.text());
+            const body = await response.json();
+            assert.equal(body.rows, 0);
+            assert.equal(typeof body.open, 'number');
+            await page.getByText(COMPLETE, { exact: true }).waitFor();
+            seen.push(`${label} open ${body.open}`);
           }
           const rows = await ctx.rows(
             `SELECT (SELECT count(*) FROM "BAR_DETL" WHERE tenant_id=$1 AND "CO_YEAR"=$2)::int
@@ -627,11 +641,57 @@ export const balanceTransfer = {
             next[0].year,
           );
           assert.equal(rows[0].n, 0);
+          assert.equal(await onHand(), before, 'the tag stock is unchanged');
           return {
             observation: seen.join('; '),
-            expected: '409 with the reason, nothing written',
-            database: { rows: rows[0].n },
+            expected: 'Process Are Complete...., nothing written, tag stock unchanged',
+            database: { rowsInTransferYear: rows[0].n },
+            downstream: { tagOnHand: before },
           };
+        });
+      },
+    ),
+    C(
+      'ac.rule.having-offset-money-vs-gold',
+      'T03',
+      'mutation',
+      'BtmSchm.cs:2786 HAVING drops 50.00 Cr + 50.000 gold Dr; Q2 decided 2026-11-22 by the architect (owner may override): the web carries both',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        return withNextYears(ctx, page, 1, async ({ current, clDate }) => {
+          await exec(
+            ctx,
+            `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_MAIN_GR") VALUES ($1,'01','01',$2,$3,'1')`,
+            PARTY.code,
+            PARTY.name,
+          );
+          try {
+            await exec(
+              ctx,
+              `INSERT INTO "AC_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","AC_CODE","CR_AMT","DR_AMT","IT_TYPE","SIGN","FINE_WT","DATA_TYPE","VCH_TYPE","LEDR_KEY")
+               VALUES ($1,'01','01',$2,'JV','BT8',$3::date,$4,50,0,'A','',0,'A','JV','E2E-BT-8'),
+                      ($1,'01','01',$2,'JV','BT9',$3::date,$4,0,0,'G','-',50,'A','JV','E2E-BT-9')`,
+              current,
+              clDate,
+              PARTY.code,
+            );
+            await openScreen(page);
+            const { response } = await runDataset(page, 'Ac Balance');
+            assert.equal(response.status(), 200, await response.text());
+            const rows = await ctx.rows(
+              `SELECT "OP_AMT"::float amt,"OP_SIGN" sg,"FINE_BAL"::float g,"FINE_SIGN" gs FROM "OP_DATA" WHERE tenant_id=$1 AND "AC_CODE"=$2`,
+              PARTY.code,
+            );
+            assert.deepEqual(rows, [{ amt: 50, sg: 'C', g: 50, gs: 'D' }]);
+            return {
+              observation: JSON.stringify(rows),
+              expected: '50.00 C and gold 50.000 D carried',
+              database: rows,
+              downstream: { rows: rows.length },
+            };
+          } finally {
+            await dropParty(ctx);
+          }
         });
       },
     ),
@@ -732,7 +792,7 @@ export const balanceTransfer = {
     blockedCase(
       'journey.item-carry-then-issue',
       'T18',
-      'Q9: the web item stock reads MAIN_STOCK of every year, and the desktop carry writes only ITM_OPBL; whether the N+1 balance counts the carry once depends on that read (owner decision).',
+      'Not built: needs an issue posted in the Transfer Year after a session-year switch. Q9 is decided (stock reads MAIN_STOCK of every year, the carry changes no balance: balanceTransfer.db.test.ts).',
     ),
     blockedCase(
       'rights.create-right-required',
@@ -749,20 +809,27 @@ export const balanceTransfer = {
       'T15',
       'Needs Year Create (WP-22, another machine) in a second tab.',
     ),
-    blockedCase(
-      'tag-stock.carry',
-      'T07',
-      'Q8: the web counts a tag in stock in every year (stockSql.ts barTagAvailableSql, used by tagStock.ts and stock.ts), so the desktop copy of each tag into the Transfer Year would double it; tag.create.footprint, tag.children.stone-rows-follow-tag (database), date-is-day-before-opening, rerun.tag-*, rollback.tag-*, config.opening-date-changes-tag-date, reopen.tag-opening-screen-shows-carry, identity.tag-closing-equals-opening, journey.tag-carry-then-sale and concurrency.tag-sale-during-carry wait on it.',
+    notApplicable(
+      'children',
+      'T05',
+      'BtmSchm has no grid; the stone rows the desktop copies follow the tag and approval carries, which are implicit in the web (Q1/Q8 decided 2026-11-22)',
+      'no child rows are written by the web carry',
+    ),
+    notApplicable(
+      'delete',
+      'T10',
+      'BtmSchm.cs:2720-2723 BtnDelete_Click has an empty body',
+      'the desktop form deletes nothing; a re-run replaces (rerun.ac-balance-replaces)',
     ),
     blockedCase(
-      'sales-order.carry',
-      'T07',
-      'Q1: carried orders keep their old CO_YEAR (BtmSchm.cs:3048), so in one database the carry is the order itself; Q7: the Order Tag Booking pass.',
+      'concurrency.same-button-twice',
+      'T12',
+      'Two simultaneous runs need two browser sessions released at the same instant; run at the database layer (20 rounds, balanceTransfer.db.test.ts): one row per account and type, no error.',
     ),
     blockedCase(
-      'approval.carry',
-      'T07',
-      'Q1 (APR_DETL keeps its old key, BtmSchm.cs:4154) and Q5 (an approved-out tag in both carries).',
+      'rollback.ac-balance-after-first-table',
+      'T14',
+      'The fault is injected by a database trigger in balanceTransfer.db.test.ts (Ac Balance and Item Stock roll back whole); the browser fault hook is not built.',
     ),
     notApplicable(
       'lookup',

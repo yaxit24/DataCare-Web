@@ -1,9 +1,8 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { VoucherScope } from '../modules/vouchers/numbering.js';
 import {
-  balanceTransferBlocked,
   balanceTransferContext,
-  BalanceTransferBlockedError,
+  confirmImplicitCarry,
   carryAcBalance,
   carryItemStock,
   type BalanceTransferScope,
@@ -65,27 +64,20 @@ export function registerBalanceTransferRoutes(
       carryItemStock(prisma, scope(req), { toYear: b.toYear, mainUser: mainUserOf(req) }),
     );
   });
-  const blocked =
+  // Tag Stock, Sales Order, Approval: implicit in the one-database web; the run checks and counts, never writes.
+  const implicit =
     (dataset: 'tag-stock' | 'sales-order' | 'approval') =>
     async (req: FastifyRequest, reply: FastifyReply) => {
       if (!guard(req, reply, 'create')) return;
       const b = body(req);
-      try {
-        return await run(reply, 200, () =>
-          balanceTransferBlocked(prisma, scope(req), dataset, {
-            toYear: b.toYear,
-            mainUser: mainUserOf(req),
-          }),
-        );
-      } catch (e) {
-        if (e instanceof BalanceTransferBlockedError)
-          return reply
-            .code(e.statusCode)
-            .send({ error: 'balance-transfer-blocked', message: e.message });
-        throw e;
-      }
+      return run(reply, 200, () =>
+        confirmImplicitCarry(prisma, scope(req), dataset, {
+          toYear: b.toYear,
+          mainUser: mainUserOf(req),
+        }),
+      );
     };
-  app.post('/balance-transfer/tag-stock', bodyRoute, blocked('tag-stock'));
-  app.post('/balance-transfer/sales-order', bodyRoute, blocked('sales-order'));
-  app.post('/balance-transfer/approval', bodyRoute, blocked('approval'));
+  app.post('/balance-transfer/tag-stock', bodyRoute, implicit('tag-stock'));
+  app.post('/balance-transfer/sales-order', bodyRoute, implicit('sales-order'));
+  app.post('/balance-transfer/approval', bodyRoute, implicit('approval'));
 }

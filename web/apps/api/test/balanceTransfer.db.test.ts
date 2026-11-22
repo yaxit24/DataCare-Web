@@ -20,6 +20,7 @@ import { withTenant } from '@datacare/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { carryAcBalance, carryItemStock } from '../src/modules/ops/balanceTransfer.js';
 import { getPartyOpening, savePartyOpening } from '../src/modules/finance/partyOpening.js';
+import { onHandNet } from '../src/modules/stock/stock.js';
 import { diffTenant, snapshotTenant } from './support/tenantSnapshot.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
@@ -425,6 +426,15 @@ databaseDescribe('Balance TrFr: Ac Balance (Rtl_AcOpbl)', () => {
     expect(await opData()).toEqual([]);
   });
 
+  it('balance-transfer.ac.rule.having-offset-money-vs-gold: 50.00 Cr and 50.000 gold Dr are both carried (Q2, deliberate difference)', async () => {
+    // The desktop HAVING (BtmSchm.cs:2786) adds them to 0 and drops the party; decided 2026-11-22 by the architect,
+    // owner may override: the web carries both balances.
+    await leg('P5', 50, 0);
+    await metal('P5', 'G', '-', 50);
+    await carry.ac(TO);
+    expect(heads(await opData())).toEqual([row('P5', 50, 'C', { gold: 50, gsg: 'D' })]);
+  });
+
   it('balance-transfer.ac.rule.skip-true-zero: a settled party has no row, summed in decimals', async () => {
     await leg('P1', 70, 0);
     await leg('P1', 0, 70);
@@ -774,6 +784,28 @@ databaseDescribe('Balance TrFr: Item Stock (BtnItmStk)', () => {
     const diff = diffTenant(before, await snapshotTenant(owner, TENANT));
     expect(Object.keys(diff.removed)).toEqual([]);
     expect(Object.keys(diff.added)).toEqual(['ITM_OPBL']);
+  });
+
+  it('balance-transfer.item.rule.skip-signed-sum-offset: +5 pcs with −2.500 gross and net is carried (Q3, deliberate difference)', async () => {
+    // The desktop skips it because 5 − 2.5 − 2.5 = 0 (BtmSchm.cs:2964); decided 2026-11-22 by the architect, owner may
+    // override: the web keeps the position.
+    await item('I3', 'G', 0, 0);
+    await stock('I3', '+', 5, 0, 0);
+    await stock('I3', '-', 0, 2.5, 2.5);
+    await carry.item(TO);
+    expect((await itmOpbl()).map((r) => [r.IT_CODE, r.ITM_PCS, r.ITM_GWT, r.ITM_NWT])).toEqual([
+      ['I3', 5, -2.5, -2.5],
+    ]);
+  });
+
+  it('Q9: the Item Stock carry changes no stock balance (stock reads MAIN_STOCK of every year, never ITM_OPBL)', async () => {
+    await seedI1();
+    const stockScope = { CO_CODE: CO, LC_CODE: LC };
+    const before = await onHandNet(runtime, TENANT, stockScope);
+    await carry.item(TO);
+    await carry.item(TO);
+    expect(await onHandNet(runtime, TENANT, stockScope)).toEqual(before);
+    expect(before).toMatchObject({ pcs: 6, gwt: 60.3, nwt: 58.95 });
   });
 
   it('balance-transfer.item.rule.tagged-excluded: a tagged piece is not item stock', async () => {

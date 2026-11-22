@@ -147,7 +147,6 @@
         "web/apps/web/app/(app)/company/balance-transfer/page.tsx",
         "web/apps/api/src/modules/ops/balanceTransfer.ts",
         "web/apps/api/src/modules/ops/balanceTransferRules.ts",
-        "web/apps/api/src/modules/ops/balanceTransferMapping.ts",
         "web/apps/api/src/modules/ops/balanceTransferSelect.ts",
         "web/apps/api/src/routes/balanceTransfer.ts"
       ]

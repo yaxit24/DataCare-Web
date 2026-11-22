@@ -9,12 +9,17 @@ import {
   nextYearOf,
   type YearRow,
 } from './balanceTransferRules.js';
+import { openApprovalLines, openOrders, tagsInStock } from './balanceTransferSelect.js';
 
 /**
  * Company → Balance TrFr (desktop BtmSchm, MDI_FORM.cs:7431-7433): carries the closing balances of the current year
  * into the next year, one button per dataset. Lite has five datasets (orchestration/work/WP-23/study.md, button table):
- * Ac Balance and Item Stock are carried here; Tag Stock, Sales Order and Approval wait on owner decisions (cases.md Q1
- * and Q8) because the web keeps every year in one database, and are refused with a reason (balanceTransferBlocked).
+ * Ac Balance and Item Stock are written here. Tag Stock, Sales Order and Approval are implicit in the web (Q1 and Q8,
+ * decided 2026-11-22 by the architect, owner may override): the web keeps every year in one database, and its tag
+ * stock, open orders and open approvals already read every year (stockSql.ts barTagAvailableSql, the order and approval
+ * open queries), so what is open at the closing date is open in the next year without a copy. Those three buttons run
+ * the desktop selection for the closing year, write nothing and report how many remain open (confirmImplicitCarry).
+ * A copy, as the desktop writes it, would count each tag, order and approval twice.
  *
  * Desktop rules kept: the source rows, grouping, metal, skip and rounding rules of each dataset; a run deletes and
  * rewrites its dataset, so a second run replaces and never doubles (BtmSchm.cs:2764, :2932).
@@ -272,7 +277,9 @@ export async function carryAcBalance(
  * AVG_TOUCH as stored (the desktop first recomputes it with DC_Main.AvgTouch, a write to the closing year that is not
  * ported: cases.md item.rule.touch-is-recomputed-average is blocked on it). The Transfer Year's ITM_OPBL is replaced:
  * book '000', VCH_NO = the item type, SR_NO = the query row + 1 (skipped rows keep their number), rate, labour, other
- * and diamond 0, DATA_TRFR 'Y', DATA_TYPE 'A'. The web's Item Opening screen reads these rows.
+ * and diamond 0, DATA_TRFR 'Y', DATA_TYPE 'A'. The web's Item Opening screen reads these rows. No stock reader adds
+ * ITM_OPBL: stock is MAIN_STOCK of every year (stock.ts onHandNet), so the closing balance already continues into the
+ * next year and the carry changes no balance (Q9, decided 2026-11-22 by the architect, owner may override).
  */
 export async function carryItemStock(
   prisma: any,
@@ -357,34 +364,41 @@ export async function carryItemStock(
   });
 }
 
-/** Why a Lite dataset is not carried yet (each waits on an owner decision recorded in cases.md). */
-export const BLOCKED_DATASETS: Readonly<Record<'tag-stock' | 'sales-order' | 'approval', string>> =
-  {
-    'tag-stock':
-      'Tag Stock is not carried yet: the web keeps every year in one database and counts a tag in stock in any year, so a copy of the tag in the next year would count it twice (owner decision Q8).',
-    'sales-order':
-      'Sales Order is not carried yet: the desktop keeps the order under its old year, which in one database is the order itself (owner decision Q1).',
-    approval:
-      'Approval is not carried yet: the desktop keeps the approval under its old year, which in one database is the approval itself (owner decisions Q1 and Q5).',
-  };
+export type ImplicitDataset = 'tag-stock' | 'sales-order' | 'approval';
 
-/** A blocked dataset: the target year is still checked, then the run is refused and nothing is written. */
-export async function balanceTransferBlocked(
-  prisma: any,
-  scope: BalanceTransferScope,
-  dataset: keyof typeof BLOCKED_DATASETS,
-  input: BalanceTransferInput,
-): Promise<never> {
-  await withTxBudget(prisma, scope.tenantId, 'read', (tx: any) =>
-    checkTargetTx(tx, scope, input.toYear),
-  );
-  throw new BalanceTransferBlockedError(BLOCKED_DATASETS[dataset]);
+export interface ImplicitCarryResult extends BalanceTransferResult {
+  /** Tags in stock / open orders / open approval lines at the closing date, which stay open in the next year. */
+  open: number;
 }
 
-export class BalanceTransferBlockedError extends Error {
-  readonly statusCode = 409;
-  constructor(message: string) {
-    super(message);
-    this.name = 'BalanceTransferBlockedError';
-  }
+/**
+ * Tag Stock, Sales Order and Approval (BtmSchm.cs:2169, :3003, :4116): the Transfer Year is checked as for the other
+ * buttons, the desktop selection runs for the closing year (balanceTransferSelect.ts), nothing is written, and the
+ * answer is the count that remains open in the next year with the desktop completion text. Pressing it twice changes
+ * nothing.
+ */
+export async function confirmImplicitCarry(
+  prisma: any,
+  scope: BalanceTransferScope,
+  dataset: ImplicitDataset,
+  input: BalanceTransferInput,
+): Promise<ImplicitCarryResult> {
+  const target = await withTxBudget(prisma, scope.tenantId, 'read', (tx: any) =>
+    checkTargetTx(tx, scope, input.toYear),
+  );
+  const selection = { ...scope, coYear: target.fromYear, clDate: target.clDate };
+  const open =
+    dataset === 'tag-stock'
+      ? (await tagsInStock(prisma, selection)).length
+      : dataset === 'sales-order'
+        ? (await openOrders(prisma, selection)).length
+        : (await openApprovalLines(prisma, selection)).length;
+  return {
+    dataset,
+    fromYear: target.fromYear,
+    toYear: target.toYear,
+    rows: 0,
+    open,
+    message: BT_MESSAGES.COMPLETE,
+  };
 }

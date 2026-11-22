@@ -2,10 +2,11 @@ import { withTxBudget } from '../shared/txBudget.js';
 import type { BalanceTransferScope } from './balanceTransfer.js';
 
 /**
- * Balance TrFr: which tags, orders and approval lines the desktop would carry (read-only). The writes of these three
- * datasets wait on owner decisions (cases.md Q1, Q5, Q8); the selections are settled by the code, so they are ported
- * and tested now. Each reads the closed year only and writes nothing (the desktop's own approval selection first
- * rewrites APR_DETL.ISU_REC and BAR_DETL.APR_ISU in the closed year, BtmSchm.cs:4123-4128; here that is computed).
+ * Balance TrFr: which tags, orders and approval lines the desktop carries (read-only). In the one-database web these
+ * stay open in the next year without a copy (Q1/Q8, decided 2026-11-22 by the architect, owner may override), so the
+ * Tag Stock, Sales Order and Approval buttons run these selections and report the counts (confirmImplicitCarry). Each
+ * reads the closed year only and writes nothing (the desktop's approval selection first rewrites APR_DETL.ISU_REC and
+ * BAR_DETL.APR_ISU in the closed year, BtmSchm.cs:4123-4128; here that is computed).
  */
 
 export interface SelectionScope extends BalanceTransferScope {

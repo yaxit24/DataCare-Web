@@ -60,8 +60,8 @@ export interface AcClosingSums {
  * its sign is 'C' only when the formatted value is above 0, so a zero head is 'D'.
  *
  * The desktop's HAVING also drops a group whose money, gold, silver and diamond fine add up to exactly 0 although each
- * is not (50.00 Cr and 50.000 gold Dr). That loses two real balances and breaks closing = opening; it waits on the
- * owner (cases.md Q2), and until then the web carries such a party, as the zero-skip rule alone would.
+ * is not (50.00 Cr and 50.000 gold Dr). That loses two real balances and breaks closing = opening, so the web carries
+ * such a party (Q2, decided 2026-11-22 by the architect, owner may override: a deliberate difference).
  */
 export function acOpeningHeads(sums: AcClosingSums): AcOpeningHeads | null {
   const amount = new Decimal(decimalCellText(dec(sums.money), 2));
@@ -111,8 +111,8 @@ export interface ItemOpeningFigures {
  * signed sum (ITM_AMT and NET_AMT, :2985-2994) at the column's two places.
  *
  * Skip: the desktop skips when gross + net + pcs adds to 0 (:2964). That sum is signed, so 5 pcs with −2.500 gross and
- * −2.500 net is skipped and a stock position is lost (weakness 5, cases.md Q3). Until the owner decides, the web
- * skips only an item whose pieces, gross and net are each 0, which is the same for every real sold-out item.
+ * −2.500 net is skipped and a stock position is lost (weakness 5). The web skips only an item whose pieces, gross and
+ * net are each 0 (Q3, decided 2026-11-22 by the architect, owner may override: a deliberate difference).
  */
 export function itemOpeningFigures(sums: ItemClosingSums): ItemOpeningFigures | null {
   const pcs = dec(sums.pcs);

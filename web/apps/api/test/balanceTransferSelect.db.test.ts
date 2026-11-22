@@ -13,6 +13,8 @@ import {
   openOrders,
   tagsInStock,
 } from '../src/modules/ops/balanceTransferSelect.js';
+import { confirmImplicitCarry } from '../src/modules/ops/balanceTransfer.js';
+import { barTagAvailableSql } from '../src/modules/shared/stockSql.js';
 import { diffTenant, snapshotTenant } from './support/tenantSnapshot.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
@@ -21,6 +23,7 @@ const TENANT = 'wp23-balance-trfr-sel';
 const CO = '01';
 const LC = '01';
 const FROM = '2025-2026';
+const TO = '2026-2027';
 const owner = new PrismaClient({
   datasources: { db: { url: process.env.MIGRATE_DATABASE_URL ?? process.env.DATABASE_URL ?? '' } },
 });
@@ -69,6 +72,39 @@ async function barDetl(tag: string, srno: number, it = 'I4') {
   );
 }
 
+/**
+ * The implicit carry (Q1/Q8, decided 2026-11-22 by the architect, owner may override): the button checks the Transfer
+ * Year, counts what stays open, writes nothing; pressing it twice changes nothing.
+ */
+async function pressTwice(dataset: 'tag-stock' | 'sales-order' | 'approval') {
+  const before = await snapshotTenant(owner, TENANT);
+  const first = await confirmImplicitCarry(runtime, scope, dataset, {
+    toYear: TO,
+    mainUser: 'TESTER',
+  });
+  const second = await confirmImplicitCarry(runtime, scope, dataset, {
+    toYear: TO,
+    mainUser: 'TESTER',
+  });
+  expect(second).toEqual(first);
+  expect(first).toMatchObject({ rows: 0, toYear: TO, message: 'Process Are Complete....' });
+  expect(diffTenant(before, await snapshotTenant(owner, TENANT))).toEqual({
+    added: {},
+    removed: {},
+  });
+  return first.open;
+}
+/** The web's own tag on-hand (every reader of tag stock uses barTagAvailableSql; it has no year filter). */
+const tagOnHand = async () =>
+  (
+    (await withTenant(owner, TENANT, (tx) =>
+      tx.$queryRawUnsafe(
+        `SELECT count(*)::int n FROM "BAR_DETL" b WHERE b.tenant_id=$1 AND ${barTagAvailableSql('b')}`,
+        TENANT,
+      ),
+    )) as { n: number }[]
+  )[0]!.n;
+
 databaseDescribe('Balance TrFr selections (read-only)', () => {
   afterAll(async () => {
     await wipe();
@@ -77,6 +113,18 @@ databaseDescribe('Balance TrFr selections (read-only)', () => {
   });
   beforeEach(async () => {
     await wipe();
+    for (const [year, op, cl] of [
+      [FROM, '2025-04-01', '2026-03-31'],
+      [TO, '2026-04-01', '2027-03-31'],
+    ] as const)
+      await exec(
+        `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE") VALUES ($1,$2,$3,$4,$5::timestamp)`,
+        TENANT,
+        CO,
+        year,
+        op,
+        cl,
+      );
     await exec(
       `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE") VALUES ($1,$2,'I4','RING','G')`,
       TENANT,
@@ -102,6 +150,20 @@ databaseDescribe('Balance TrFr selections (read-only)', () => {
       added: {},
       removed: {},
     });
+  });
+
+  it("balance-transfer.identity.tag-closing-equals-opening and rerun (Tag Stock): next year's tag stock is the closing one; two presses write nothing", async () => {
+    await barDetl('T001', 1);
+    await tagMove('T001', '+', 1);
+    await barDetl('T002', 1);
+    await tagMove('T002', '+', 1);
+    await tagMove('T002', '-', 1, '2026-03-28');
+    await barDetl('T003', 1);
+    await tagMove('T003', '+', 1, '2026-02-01');
+    const onHand = await tagOnHand();
+    expect(onHand).toBe(2);
+    expect(await pressTwice('tag-stock')).toBe(2);
+    expect(await tagOnHand()).toBe(onHand);
   });
 
   it('balance-transfer.order.rule.open-selection: O1 and O4 are open; O2, O3, O5, O6 are not', async () => {
@@ -169,6 +231,11 @@ databaseDescribe('Balance TrFr selections (read-only)', () => {
         adjSilver: 0,
       },
     ]);
+    // balance-transfer.identity.order-open-equals-carried and rerun.sales-order-replaces: the button reports the same
+    // two open orders, and the open set is the same before and after two presses.
+    const open = await openOrders(runtime, scope);
+    expect(await pressTwice('sales-order')).toBe(2);
+    expect(await openOrders(runtime, scope)).toEqual(open);
   });
 
   it('balance-transfer.approval.rule.open-selection: A1 open; A2 returned and A3 sold are not; year N unchanged', async () => {
@@ -220,5 +287,9 @@ databaseDescribe('Balance TrFr selections (read-only)', () => {
       added: {},
       removed: {},
     });
+    // balance-transfer.identity.approval-open-equals-carried and rerun.approval-replaces: only A1 stays open, and
+    // two presses write nothing.
+    expect(await pressTwice('approval')).toBe(1);
+    expect(await openApprovalLines(runtime, scope)).toHaveLength(1);
   });
 });
