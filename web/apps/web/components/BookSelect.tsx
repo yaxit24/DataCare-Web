@@ -10,11 +10,18 @@ export interface ScopeBook {
   MAIN_BOOK?: string | null;
 }
 
+const FAMILY_MAIN_BOOK: Record<string, string> = {
+  purchase: 'PURCHASE',
+  'tag-purchase': 'TAG PURCHASE',
+  sales: 'SALES',
+};
+
 export function BookSelect({
   value,
   onChange,
   preferred,
   mainBooks,
+  family,
   disabled = false,
   required = true,
 }: {
@@ -24,6 +31,12 @@ export function BookSelect({
   preferred?: string;
   /** Optional authoritative BOOK_DATA.MAIN_BOOK values accepted by this workflow. */
   mainBooks?: string[];
+  /**
+   * WP-28 (D7, D8): a book family the SERVER filters by MAIN_BOOK (`/context/books?family=`), as the desktop's book
+   * help does (DC_Main.cs:1503). With no book of the family the desktop says "Please Creat Book From <MAIN_BOOK>...."
+   * (DC_Main.cs:1508); the same text is shown here.
+   */
+  family?: 'purchase' | 'tag-purchase' | 'sales';
   disabled?: boolean;
   /**
    * The voucher's own book is required; a reference to another voucher's book may be optional. N189 (G199): a
@@ -52,7 +65,7 @@ export function BookSelect({
 
   useEffect(() => {
     let cancelled = false;
-    get<ScopeBook[]>('/context/books')
+    get<ScopeBook[]>(family ? `/context/books?family=${encodeURIComponent(family)}` : '/context/books')
       .then((rows) => {
         if (cancelled) return;
         const active = rows.filter(
@@ -80,7 +93,8 @@ export function BookSelect({
     return () => {
       cancelled = true;
     };
-  }, [preferred, mainBookFilter]);
+  }, [preferred, mainBookFilter, family]);
+  const familyMainBook = family ? FAMILY_MAIN_BOOK[family] : '';
 
   return (
     <select
@@ -91,7 +105,13 @@ export function BookSelect({
       aria-label="Configured book"
     >
       <option value="">
-        {!loaded ? 'Loading books…' : books.length ? 'Select configured book…' : 'No active books'}
+        {!loaded
+          ? 'Loading books…'
+          : books.length
+            ? 'Select configured book…'
+            : familyMainBook
+              ? `Please Creat Book From ${familyMainBook}....`
+              : 'No active books'}
       </option>
       {books.map((book) => (
         <option key={book.CO_BOOK} value={book.CO_BOOK}>

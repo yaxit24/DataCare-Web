@@ -1,5 +1,6 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { del, get, post, put, ApiError } from '../../../../lib/api';
 import { BookSelect } from '../../../../components/BookSelect';
 import { useBusinessScope } from '../../../../components/BusinessScope';
@@ -8,7 +9,9 @@ import { VoucherList } from '../../../../components/VoucherList';
 import { companyFlag, useCompanySettings } from '../../../../lib/companySettings';
 import { useGridKeyboard } from '../../../../components/GridKeyboard';
 import SubDetailGrid, { stoneRowFromApi, useSubDetail } from '../../../../components/SubDetailGrid';
-import { fineFor, labourCharge } from '@datacare/core';
+import { fineFor, labourCharge, roundHalfEven } from '@datacare/core';
+import { todayLocal } from '../../../../lib/localDate';
+import { carryPurchaseHeader, carryUnmanaged } from '../../../../lib/purchaseCarry';
 import {
   ExtendedBodyCells,
   ExtendedHeaderCells,
@@ -23,6 +26,11 @@ import { openDocument } from '../../../../lib/openDocument';
  *  posts both through the purchase routines (TR_PURC_HM.cs:8426-8441). The page therefore selects a
  *  configured PURCHASE or TAG PURCHASE book and uses the purchase lifecycle (/purchases) to save, reopen,
  *  edit, delete and print. It used to send no book, so every save was refused.
+ *
+ *  WP-28 (D1, D8): this is the 95-column hallmark layout. `Purchase` (/txn/purchase) renders it on PURCHASE books
+ *  when the company's PURC_WITH_HMTAX is Y (MDI_FORM.cs:7866); `Tag Wise Purc` (/txn/tag-wise-purc) renders it on
+ *  TAG PURCHASE books with the tag band (MDI_FORM.cs:8540-8544). The old /txn/purchase-hm address forwards to
+ *  /txn/purchase. A reopened voucher sends back every stored value it does not show (lib/purchaseCarry.ts, D6).
  */
 interface Row {
   itCode: string;
@@ -71,6 +79,28 @@ interface Row {
   fineCutNetWt: string;
   fineCutFine: string;
   prCode: string;
+  // WP-28 (G3): the hallmark receive columns of TR_PURC_HM's MSG_PR.
+  hmIdAmount: string;
+  itmColor: string;
+  hmId2: string;
+  hmId3: string;
+  hmId4: string;
+  hmIdWt: string;
+  hmId2Wt: string;
+  hmId3Wt: string;
+  hmId4Wt: string;
+  tagOthWt: string;
+  tagNwt: string;
+  tagTouch: string;
+  tagRate: string;
+  tagAmount: string;
+  tagCost: string;
+  tagTotCost: string;
+  tagMarginPct: string;
+  tagMrp: string;
+  /** The stored line this row was reopened from, and whether its stored results still stand. */
+  source?: Record<string, unknown>;
+  loaded?: boolean;
 }
 /**
  * P7 extended grid columns: desktop columns this form has and the web did not.
@@ -118,7 +148,46 @@ const extendedLineFields: Array<[keyof Row, string]> = [
   ['fineCutNetWt', 'FcNwt'],
   ['fineCutFine', 'FcFine'],
   ['prCode', 'PrCost'],
+  ['hmIdAmount', 'HmAmt'], // col 39 (TR_PURC_HM.cs:4647)
+  ['itmColor', 'Color'], // col 7 (TR_PURC_HM.cs:4778)
 ];
+
+/** TAG PURCHASE band (TR_PURC_HM.cs:4699-4760): shown and written only on a TAG PURCHASE book (D5). */
+const tagBandFields: Array<[keyof Row, string]> = [
+  ['hmIdWt', 'HmWt'],
+  ['hmId2', 'HmId2'],
+  ['hmId2Wt', 'HmWt2'],
+  ['hmId3', 'HmId3'],
+  ['hmId3Wt', 'HmWt3'],
+  ['hmId4', 'HmId4'],
+  ['hmId4Wt', 'HmWt4'],
+  ['tagOthWt', 'TOthWt'],
+  ['tagNwt', 'TgNwt'],
+  ['tagTouch', 'TgTch'],
+  ['tagRate', 'TagRate'],
+  ['tagAmount', 'TagItAmt'],
+  ['tagCost', 'PrCost'],
+  ['tagTotCost', 'TagCost'],
+  ['tagMarginPct', 'Margin%'],
+  ['tagMrp', 'TgMrp'],
+];
+
+/** Editing one of these on a reopened row drops its stored fine, amount and labour, which are then derived again. */
+const DERIVATION_INPUTS = new Set<string>([
+  'pcs',
+  'grossWt',
+  'netWt',
+  'touch',
+  'rate',
+  'making',
+  'ghtWt',
+  'westPct',
+  'lesTouch',
+  'kunFine',
+  'labourPct',
+  'rateType',
+  'urdRateType',
+]);
 
 /** Fields the API takes as numbers; everything else stays a string so codes are not mangled. */
 const NUMERIC_EXTENDED = new Set<string>([
@@ -147,6 +216,20 @@ const NUMERIC_EXTENDED = new Set<string>([
   'fineCutGrossWt',
   'fineCutNetWt',
   'fineCutFine',
+  'hmIdAmount',
+  'hmIdWt',
+  'hmId2Wt',
+  'hmId3Wt',
+  'hmId4Wt',
+  'tagOthWt',
+  'tagNwt',
+  'tagTouch',
+  'tagRate',
+  'tagAmount',
+  'tagCost',
+  'tagTotCost',
+  'tagMarginPct',
+  'tagMrp',
 ]);
 
 const blank = (): Row => ({
@@ -196,14 +279,41 @@ const blank = (): Row => ({
   fineCutNetWt: '',
   fineCutFine: '',
   prCode: '',
+  hmIdAmount: '',
+  itmColor: '',
+  hmId2: '',
+  hmId3: '',
+  hmId4: '',
+  hmIdWt: '',
+  hmId2Wt: '',
+  hmId3Wt: '',
+  hmId4Wt: '',
+  tagOthWt: '',
+  tagNwt: '',
+  tagTouch: '',
+  tagRate: '',
+  tagAmount: '',
+  tagCost: '',
+  tagTotCost: '',
+  tagMarginPct: '',
+  tagMrp: '',
 });
 const n = (v: string) => Number(v || 0);
 const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
 /** A saved zero is shown as an empty cell, as the entry grid does. */
 const str = (v: unknown) => (v == null || Number(v) === 0 ? '' : String(v));
-const HALLMARK_PURCHASE_BOOKS = ['PURCHASE', 'TAG PURCHASE'];
+/** Stored text as the cell shows it (blank for null), unlike `str`, which also blanks a zero. */
+const cell = (v: unknown) => (v == null ? '' : String(v));
 
 export default function HallmarkPurchasePage() {
+  const pathname = usePathname() ?? '';
+  const router = useRouter();
+  // D1: the old address forwards to the Purchase entry, which opens this layout when PURC_WITH_HMTAX is Y.
+  useEffect(() => {
+    if (pathname.startsWith('/txn/purchase-hm')) router.replace('/txn/purchase');
+  }, [pathname, router]);
+  // D8: Tag Wise Purc lists TAG PURCHASE books only; Purchase lists PURCHASE books only.
+  const tagBook = pathname.startsWith('/txn/tag-wise-purc');
   const { lcCode, coYear } = useBusinessScope();
   const companySettings = useCompanySettings();
   // Desktop MsLbrWithGht: per-gram labour is on (net + ghat) unless the company sets LBR_WITH_GHT='N'.
@@ -212,14 +322,19 @@ export default function HallmarkPurchasePage() {
   const [voucherLookup, setVoucherLookup] = useState('');
   const [loadedVchNo, setLoadedVchNo] = useState('');
   const [loadedVersion, setLoadedVersion] = useState(''); // N51 (D17): sent on update and delete
-  const [f, setF] = useState({
+  const [loadedView, setLoadedView] = useState<Record<string, unknown> | null>(null);
+  const emptyHeader = () => ({
+    vchDate: todayLocal(),
     acCode: '',
     acName: '',
     billNo: '',
     taxRatePct: '3',
     interState: false,
     hmCharge: '',
+    hmTaxCode: '',
+    hmTaxPct: '',
   });
+  const [f, setF] = useState(emptyHeader);
   const [rows, setRows] = useState<Row[]>([blank()]);
   const [fullGrid, setFullGrid] = useState(false);
   // Desktop TR_PURC_HM hangs a 23-column MSG_PR_IDTL row set under each line; the purchase
@@ -245,7 +360,16 @@ export default function HallmarkPurchasePage() {
   const [busy, setBusy] = useState(false);
   const set = (k: keyof typeof f, v: string | boolean) => setF((x) => ({ ...x, [k]: v }));
   const setRow = (i: number, k: keyof Row, v: string) =>
-    setRows((rs) => rs.map((r, j) => (j === i ? { ...r, [k]: v } : r)));
+    setRows((rs) =>
+      rs.map((r, j) => {
+        if (j !== i) return r;
+        const next = { ...r, [k]: v };
+        // A reopened row keeps its stored fine, amount and labour until an input they derive from changes.
+        if (r.loaded && DERIVATION_INPUTS.has(k as string))
+          Object.assign(next, { loaded: false, fineWt: '', metalAmount: '', labourAmount: '' });
+        return next;
+      }),
+    );
 
   const calc = (r: Row) => {
     const fine = fineFor('purchaseItem', { netWt: n(r.netWt), touch: n(r.touch) });
@@ -259,7 +383,10 @@ export default function HallmarkPurchasePage() {
     return r2(fine * n(r.rate) + labour);
   };
   const taxable = r2(rows.reduce((s, r) => s + (r.itCode.trim() ? calc(r) : 0), 0));
-  const hmAmt = n(f.hmCharge);
+  // TR_PURC_HM.cs:9995: the header charge is Math.Round (half to even) of the line HmAmt total, when lines carry one.
+  const lineHm = rows.reduce((s, r) => s + n(r.hmIdAmount), 0);
+  const linesCarryHm = rows.some((r) => n(r.hmIdAmount) !== 0);
+  const hmAmt = linesCarryHm ? roundHalfEven(lineHm, 0) : n(f.hmCharge);
   const tax = r2(((taxable + hmAmt) * n(f.taxRatePct)) / 100);
   const grand = Math.round(taxable + hmAmt + tax);
 
@@ -273,10 +400,11 @@ export default function HallmarkPurchasePage() {
   function newVoucher() {
     setLoadedVchNo('');
     setLoadedVersion('');
+    setLoadedView(null);
     setVoucherLookup('');
     setRes(null);
     setMsg(null);
-    setF({ acCode: '', acName: '', billNo: '', taxRatePct: '3', interState: false, hmCharge: '' });
+    setF(emptyHeader());
     setRows([blank()]);
     sub.reset();
   }
@@ -291,14 +419,19 @@ export default function HallmarkPurchasePage() {
       );
       setLoadedVchNo(String(view.voucherNo));
       setLoadedVersion(String(view.version ?? ''));
+      setLoadedView(view);
       setVoucherLookup(String(view.voucherNo));
       setF({
+        // The STORED date: an edit never re-dates the voucher to today.
+        vchDate: String(view.vchDate ?? ''),
         acCode: String(view.acCode ?? ''),
         acName: String(view.acName ?? ''),
         billNo: String(view.billNo ?? ''),
         taxRatePct: str(view.taxRatePct) || '0',
         interState: !!view.interState,
         hmCharge: str(view.hmAmount),
+        hmTaxCode: cell(view.hmTaxCode),
+        hmTaxPct: str(view.hmTaxPct),
       });
       const loaded: Row[] = (view.lines ?? []).map((line: any) => ({
         ...blank(),
@@ -314,7 +447,12 @@ export default function HallmarkPurchasePage() {
         ghtWt: str(line.ghtWt),
         westPct: str(line.westPct),
         labourPct: str(line.labourPct),
-        labourAmount: line.labourType === 'per_gram' ? '' : str(line.labourAmount),
+        // Stored results stand until an input they derive from is edited (setRow).
+        fineWt: cell(line.fineWt),
+        metalAmount: cell(line.metalAmount),
+        labourAmount: cell(line.labourAmount),
+        loaded: true,
+        source: line,
         otherAmount: str(line.otherAmount),
         otherFineWt: str(line.otherFineWt),
         silverFineWt: str(line.silverFineWt),
@@ -326,6 +464,41 @@ export default function HallmarkPurchasePage() {
         mrp: str(line.mrp),
         otherRate: str(line.otherRate),
         commissionPct: str(line.commissionPct),
+        metal: cell(line.metal),
+        lotNo: cell(line.lotNo),
+        itmLot: cell(line.itmLot),
+        withStock: cell(line.withStock),
+        lossWt: str(line.lossWt),
+        ghtPct: str(line.ghtPct),
+        lessTouch: str(line.lessTouch),
+        convRate: str(line.convRate),
+        convPct: str(line.convPct),
+        rateType: cell(line.rateType),
+        urdRateType: cell(line.urdRateType),
+        commissionAmount: str(line.commissionAmount),
+        fineCutPcs: str(line.fineCutPcs),
+        fineCutGrossWt: str(line.fineCutGrossWt),
+        fineCutNetWt: str(line.fineCutNetWt),
+        fineCutFine: str(line.fineCutFine),
+        prCode: cell(line.prCode),
+        hmIdAmount: str(line.hmIdAmount),
+        itmColor: cell(line.itmColor),
+        hmId2: cell(line.hmId2),
+        hmId3: cell(line.hmId3),
+        hmId4: cell(line.hmId4),
+        hmIdWt: str(line.hmIdWt),
+        hmId2Wt: str(line.hmId2Wt),
+        hmId3Wt: str(line.hmId3Wt),
+        hmId4Wt: str(line.hmId4Wt),
+        tagOthWt: str(line.tagOthWt),
+        tagNwt: str(line.tagNwt),
+        tagTouch: str(line.tagTouch),
+        tagRate: str(line.tagRate),
+        tagAmount: str(line.tagAmount),
+        tagCost: str(line.tagCost),
+        tagTotCost: str(line.tagTotCost),
+        tagMarginPct: str(line.tagMarginPct),
+        tagMrp: str(line.tagMrp),
       }));
       setRows(loaded.length ? loaded : [blank()]);
       // Reload the stones too, or an unchanged save would post none and delete them.
@@ -375,17 +548,15 @@ export default function HallmarkPurchasePage() {
       // Original index carried through the filter so stones attach to the right line.
       .map((r, sourceIndex) => ({ r, sourceIndex }))
       .filter(({ r }) => r.itCode.trim())
-      .map(({ r, sourceIndex }) => ({
-        // P7: writer-verified extended columns. A blank cell is OMITTED, never sent as 0 — an
-        // explicit zero is an override at the writer and defeats the server's own derivation.
+      .map(({ r, sourceIndex }) => carryUnmanaged(r.source, {
+        // P7: writer-verified extended columns. A blank cell is sent as `undefined` (dropped from the JSON), never
+        // as 0 — an explicit zero is an override at the writer. The KEY stays, so the stored value of a cell the
+        // operator cleared is not carried back (WP-28, lib/purchaseCarry.ts).
         ...Object.fromEntries(
-          extendedLineFields
-            .map(([key]) => [
-              key,
-              String((r as unknown as Record<string, unknown>)[key] ?? '').trim(),
-            ])
-            .filter(([, v]) => v !== '')
-            .map(([key, v]) => [key, NUMERIC_EXTENDED.has(key as string) ? Number(v) : v]),
+          [...extendedLineFields, ...(tagBook ? tagBandFields : [])].map(([key]) => {
+            const v = String((r as unknown as Record<string, unknown>)[key] ?? '').trim();
+            return [key, v === '' ? undefined : NUMERIC_EXTENDED.has(key as string) ? Number(v) : v];
+          }),
         ),
         stones: sub.inputsFor(sourceIndex),
         itCode: r.itCode.trim(),
@@ -404,18 +575,21 @@ export default function HallmarkPurchasePage() {
     }
     setBusy(true);
     try {
-      const payload = {
+      const payload = carryPurchaseHeader(loadedVchNo ? loadedView : null, {
         coBook,
         coYear,
         lcCode,
+        vchDate: f.vchDate || undefined,
         acCode: f.acCode.trim(),
         acName: f.acName || undefined,
         billNo: f.billNo || undefined,
         taxRatePct: Number(f.taxRatePct || 0),
         interState: f.interState,
         hmAmount: hmAmt || undefined,
+        hmTaxCode: f.hmTaxCode.trim() || undefined,
+        hmTaxPct: f.hmTaxPct ? n(f.hmTaxPct) : undefined,
         lines,
-      };
+      });
       const r = loadedVchNo
         ? await put<any>(`/purchases/${encodeURIComponent(loadedVchNo)}`, {
             ...payload,
@@ -449,7 +623,11 @@ export default function HallmarkPurchasePage() {
           <div className="row">
             <div className="field">
               <label>Book</label>
-              <BookSelect value={coBook} onChange={setCoBook} mainBooks={HALLMARK_PURCHASE_BOOKS} />
+              <BookSelect
+                value={coBook}
+                onChange={setCoBook}
+                family={tagBook ? 'tag-purchase' : 'purchase'}
+              />
             </div>
             <div className="field">
               <label>Voucher No</label>
@@ -510,6 +688,15 @@ export default function HallmarkPurchasePage() {
               <input value={f.acName} onChange={(e) => set('acName', e.target.value)} />
             </div>
             <div className="field">
+              <label>Vch Date</label>
+              <input
+                type="date"
+                aria-label="Vch Date"
+                value={f.vchDate}
+                onChange={(e) => set('vchDate', e.target.value)}
+              />
+            </div>
+            <div className="field">
               <label>Bill No</label>
               <input value={f.billNo} onChange={(e) => set('billNo', e.target.value)} />
             </div>
@@ -519,7 +706,31 @@ export default function HallmarkPurchasePage() {
             </div>
             <div className="field">
               <label>Hallmark chg ₹</label>
-              <input value={f.hmCharge} onChange={(e) => set('hmCharge', e.target.value)} />
+              <input
+                aria-label="Hallmark charge"
+                value={linesCarryHm ? hmAmt.toFixed(2) : f.hmCharge}
+                readOnly={linesCarryHm}
+                onChange={(e) => set('hmCharge', e.target.value)}
+              />
+            </div>
+            <div className="field">
+              <label>HM Tax Code</label>
+              <input
+                aria-label="HM Tax Code"
+                maxLength={2}
+                value={f.hmTaxCode}
+                onChange={(e) => set('hmTaxCode', e.target.value)}
+                style={{ width: 48 }}
+              />
+            </div>
+            <div className="field">
+              <label>HM Tax %</label>
+              <input
+                aria-label="HM Tax %"
+                value={f.hmTaxPct}
+                onChange={(e) => set('hmTaxPct', e.target.value)}
+                style={{ width: 56 }}
+              />
             </div>
             <div className="field">
               <label>Inter-state</label>
@@ -556,6 +767,7 @@ export default function HallmarkPurchasePage() {
                 <th className="num">Making/g</th>
                 <th className="num">Net Amt</th>
                 <ExtendedHeaderCells full={fullGrid} fields={extendedLineFields} />
+                {tagBook && <ExtendedHeaderCells full fields={tagBandFields} />}
                 <th></th>
               </tr>
             </thead>
@@ -638,6 +850,16 @@ export default function HallmarkPurchasePage() {
                     baseColumns={10}
                     setValue={(row, key, value) => setRow(row, key, value)}
                   />
+                  {tagBook && (
+                    <ExtendedBodyCells
+                      full
+                      fields={tagBandFields}
+                      line={r}
+                      row={i}
+                      baseColumns={10 + (fullGrid ? extendedLineFields.length : 0)}
+                      setValue={(row, key, value) => setRow(row, key, value)}
+                    />
+                  )}
                   <td>
                     <button
                       type="button"

@@ -231,6 +231,7 @@ export const ROUTE_EDITION: Readonly<Record<string, EditionTier>> = Object.freez
   '/txn/tag-split': 'A',
   '/txn/tag-transfer': 'B',
   '/txn/tag-weight-diff': 'B',
+  '/txn/tag-wise-purc': 'E',
   '/txn/tour': 'L',
   '/txn/tour-order': 'E',
   '/txn/tour-return': 'L',
