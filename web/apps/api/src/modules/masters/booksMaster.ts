@@ -484,7 +484,8 @@ function cleanSlots(raw: unknown): Array<{ srNo: number; acCode: string }> {
   return (raw as unknown[]).map((entry: any) => {
     const sr = text(entry?.srNo);
     const srNo = Number(sr);
-    if (!/^\d{1,2}$/.test(sr) || !Number.isInteger(srNo)) fail(`Sr ${sr || '(blank)'} is not a slot number.`);
+    if (!/^\d{1,2}$/.test(sr) || !Number.isInteger(srNo))
+      fail(`Sr ${sr || '(blank)'} is not a slot number.`);
     if (seen.has(srNo)) fail(`Slot ${srNo} is entered twice.`);
     seen.add(srNo);
     const acCode = typed(entry?.acCode);
@@ -511,7 +512,8 @@ export async function saveBook(
     const stored = heads[0];
     if (input.entryMode === 'E') {
       if (!stored) throw new BookNotFoundError();
-      if ((await bookVersionTx(tx, scope, h.code)) !== expected) throw new BookVersionConflictError();
+      if ((await bookVersionTx(tx, scope, h.code)) !== expected)
+        throw new BookVersionConflictError();
     }
     const [sameName] = await tx.$queryRawUnsafe(
       `SELECT "CO_BOOK" FROM "BOOK_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
@@ -674,52 +676,35 @@ export async function deleteBook(
 }
 
 /**
- * The slot account lookup (MSG_KeyDown, MS_BOOK.cs:2310-2337): a code found in the company's accounts is taken; else
- * the help lists every account of the company by name, with no class or location filter (:2318).
+ * The slot account lookup (MSG_KeyDown, MS_BOOK.cs:2310-2337): a code found in the company's accounts is taken (it is
+ * listed first); else the help lists the company's accounts by name, with no class or location filter (:2318).
  */
 export async function bookAccounts(
   prisma: any,
   scope: BooksScope,
   term: unknown,
   limit = 200,
-): Promise<{
-  exact: { code: string; name: string } | null;
-  rows: Array<{ code: string; name: string; group: string }>;
-}> {
+): Promise<Array<{ code: string; name: string; group: string }>> {
   const q = text(term);
-  return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
-    const exactRows: any[] = q
-      ? await tx.$queryRawUnsafe(
-          `SELECT "AC_CODE","AC_NAME" FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "AC_CODE"=$3
-            ORDER BY row_id LIMIT 1`,
-          scope.tenantId,
-          scope.coCode,
-          q.toUpperCase(),
-        )
-      : [];
-    const rows: any[] = await tx.$queryRawUnsafe(
+  const like = q.replace(/[\\%_]/g, (c) => `\\${c}`);
+  const rows: any[] = await withTxBudget(prisma, scope.tenantId, 'read', (tx: any) =>
+    tx.$queryRawUnsafe(
       `SELECT "AC_CODE","AC_NAME","AC_GR" FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2
-          AND ($3='' OR "AC_CODE" ILIKE $4 OR "AC_NAME" ILIKE $5)
-        ORDER BY "AC_NAME","AC_CODE" LIMIT $6`,
+          AND ($3='' OR "AC_CODE"=$3 OR "AC_CODE" ILIKE $4 OR "AC_NAME" ILIKE $5)
+        ORDER BY ("AC_CODE"=$3) DESC,"AC_NAME","AC_CODE" LIMIT $6`,
       scope.tenantId,
       scope.coCode,
-      exactRows.length ? '' : q,
-      `${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`,
-      `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`,
+      q.toUpperCase(),
+      `${like}%`,
+      `%${like}%`,
       Math.min(Math.max(Number(limit) || 200, 1), 500),
-    );
-    const exact = exactRows[0]
-      ? { code: text(exactRows[0].AC_CODE), name: text(exactRows[0].AC_NAME) }
-      : null;
-    return {
-      exact,
-      rows: rows.map((row) => ({
-        code: text(row.AC_CODE),
-        name: text(row.AC_NAME),
-        group: text(row.AC_GR),
-      })),
-    };
-  });
+    ),
+  );
+  return rows.map((row) => ({
+    code: text(row.AC_CODE),
+    name: text(row.AC_NAME),
+    group: text(row.AC_GR),
+  }));
 }
 
 /** The book list behind the Print right (web addition, decision D7): Code, Name, Trfr. */

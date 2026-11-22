@@ -18,10 +18,8 @@ export interface BookTemplateSlot {
   desc: string;
 }
 
-const rows = (
-  inout: 'I' | 'O',
-  slots: Array<[number, string, string]>,
-): BookTemplateSlot[] => slots.map(([srNo, acCode, desc]) => ({ srNo, inout, acCode, desc }));
+const rows = (inout: 'I' | 'O', slots: Array<[number, string, string]>): BookTemplateSlot[] =>
+  slots.map(([srNo, acCode, desc]) => ({ srNo, inout, acCode, desc }));
 
 export const BOOK_TEMPLATES: Readonly<Record<string, readonly BookTemplateSlot[]>> = {
   // MS_UPDATE.cs:7328-7348
