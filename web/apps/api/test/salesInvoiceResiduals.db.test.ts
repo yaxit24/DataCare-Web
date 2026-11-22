@@ -9,6 +9,7 @@ import {
 } from '../src/modules/sales/salePrintChoice.js';
 import { salesBillData } from '../src/modules/sales/salesBill.js';
 import { formatVoucherNo as fmt } from '../src/modules/vouchers/numbering.js';
+import { insertRowTx } from '../src/modules/posting/posting.js';
 import { tenantTables } from './support/tenantSnapshot.js';
 
 /**
@@ -542,23 +543,36 @@ d('WP-26 Sales Invoice residuals (database)', () => {
     const no = fmt(r.vchNo);
     // Desktop-only rows: two stones on line 1, one POINT_DATA, one CARD_DATA.
     await withTenant(prisma, TENANT, async (tx: any) => {
+      // Through insertRowTx, so the columns the desktop never leaves NULL carry its measured defaults.
+      const hd = (await tx.$queryRawUnsafe(`SELECT "HD_VCH_NO" h FROM "SL_DATA" WHERE "CO_BOOK"='SL' AND "VCH_NO"=$1`, no))[0].h;
       for (const [isr, dm] of [
         [1, 'DM01'],
         [2, 'DM02'],
       ] as const)
-        await tx.$executeRawUnsafe(
-          `INSERT INTO "SL_IDTL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","ISR_NO","VCH_DATE",
-             "VCH_TYPE","INOUT_TYPE","ENTRY_TYPE","BOOK_NAME","AC_CODE","TAG_NO","IT_CODE","DM_CODE","DM_NAME","IT_PCS","IT_GWT",
-             "IT_RATE","IT_AMT") VALUES ($1,$2,$3,$4,'SL',$5,1,$6,$7::date,'SL','O','S','SALES','WCUST','','STN',$8,'Stone',2,0.2,500,1000)`,
-          TENANT,
-          CO,
-          LC,
-          YEAR,
-          no,
-          isr,
-          DAY,
-          dm,
-        );
+        await insertRowTx(tx, 'SL_IDTL', TENANT, {
+          CO_CODE: CO,
+          LC_CODE: LC,
+          CO_YEAR: YEAR,
+          CO_BOOK: 'SL',
+          VCH_NO: no,
+          SR_NO: 1,
+          ISR_NO: isr,
+          VCH_DATE: new Date(DAY),
+          HD_VCH_NO: hd,
+          VCH_TYPE: 'SL',
+          INOUT_TYPE: 'O',
+          ENTRY_TYPE: 'S',
+          BOOK_NAME: 'SALES',
+          AC_CODE: 'WCUST',
+          TAG_NO: '',
+          IT_CODE: 'STN',
+          DM_CODE: dm,
+          DM_NAME: 'Stone',
+          IT_PCS: 2,
+          IT_GWT: 0.2,
+          IT_RATE: 500,
+          IT_AMT: 1000,
+        });
       await tx.$executeRawUnsafe(
         `INSERT INTO "POINT_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO") VALUES ($1,$2,$3,$4,'SL',$5,1)`,
         TENANT,
@@ -568,7 +582,7 @@ d('WP-26 Sales Invoice residuals (database)', () => {
         no,
       );
       await tx.$executeRawUnsafe(
-        `INSERT INTO "CARD_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO") VALUES ($1,$2,$3,$4,'SL',$5,1)`,
+        `INSERT INTO "CARD_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","CARD_AMT") VALUES ($1,$2,$3,$4,'SL',$5,10)`,
         TENANT,
         CO,
         LC,
@@ -577,9 +591,10 @@ d('WP-26 Sales Invoice residuals (database)', () => {
       );
     });
     const tables = ['SL_IDTL', 'UPI_DATA', 'CRNT_DATA', 'SL_ORD_ADJ', 'POINT_DATA', 'CARD_DATA'];
+    const orderOf: Record<string, string> = { CARD_DATA: '"VCH_NO"' };
     const dump = async () => {
       const out: Record<string, unknown> = {};
-      for (const t of tables) out[t] = strip(await voucherRows(t, no), ['VCH_TIME']);
+      for (const t of tables) out[t] = strip(await voucherRows(t, no, orderOf[t]), ['VCH_TIME']);
       return out;
     };
     const before = await dump();

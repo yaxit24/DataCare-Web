@@ -311,6 +311,9 @@ export function stonesByLine(
 
 /** Header columns an unchanged save must not touch even though the writer computes them (decision D8). */
 const CARRIED = new Set(['VCH_TIME', 'DATA_TRFR', 'USER_UPDATE', 'USER_DELETE', 'RE_TRFR', 'MOB_ENTRY_SAVE', 'CARD_ADJ']);
+/** Desktop-computed columns the web has no calculation for (member commission, TR_SALE.cs:15265-15266): an edit
+ * keeps the stored value rather than writing 0. */
+const KEPT = ['AC_MEMB_COM_PRC', 'AC_MEMB_COM_VAL'];
 
 const same = (a: unknown, b: unknown): boolean => {
   const norm = (v: unknown): string => {
@@ -339,6 +342,7 @@ export function settleEditedHeader(
   header: Record<string, unknown>,
   persisted: Record<string, unknown>,
 ): 'unchanged' | 'changed' {
+  for (const column of KEPT) if (persisted[column] != null) header[column] = persisted[column];
   const changed = Object.keys(header).some(
     (column) => !CARRIED.has(column) && header[column] != null && !same(header[column], persisted[column]),
   );
