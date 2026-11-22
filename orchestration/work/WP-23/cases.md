@@ -335,7 +335,7 @@ Status: executable (gap 7)
 Layer: database
 Seed: run once; edit P1's opening to 1.00 Dr in the Party Opening screen of N+1; run again.
 Expected: P1 is back to 3499.25 C (the carry replaces the manual edit; as the desktop deletes then rewrites). One row, one set of ledger legs.
-Status: executable (gap 7)
+Status: executable, deliberate difference (architect, 2026-11-22, owner may override): editing or deleting a carried opening on Party Opening (or Item Opening) is refused with "This opening was carried from <year>; correct the closing year and run Balance TrFr again"; the desktop edits OP_DATA freely, the one-database web cannot without showing two balances. Passes at the database layer.
 
 ### balance-transfer.rerun.no-double-ledger-legs   (T09 Edit)
 Layer: database
@@ -385,7 +385,7 @@ Status: executable (gap 7)
 Layer: database
 Seed: N+1 holds a normal sale voucher for P1 and a Party Opening for P2 entered by a user before the carry (P2 is not in year N).
 Expected: P1's sale is untouched. P2's N+1 opening: the desktop deletes all OP_DATA of the company and location, so P2's row disappears on the desktop. Web expectation: target-year `OP_DATA` is replaced, so P2's row is removed too (the carry owns the year's openings).
-Status: blocked: Q4 (does a hand-keyed opening of a party with no year-N balance survive a carry? The desktop removes it; the decision says "target year only", which still removes it).
+Status: executable, deliberate difference (Q4, architect, 2026-11-22, owner may override): the carry replaces only the rows it owns (carried rows, and the hand-keyed opening of an account or item it now writes); a hand-keyed N+1 opening of a party with no closing-year balance stays. The desktop deletes every opening of the year. Passes at the database layer.
 
 ### balance-transfer.delete.print-and-delete-buttons   (T10 Delete/cancel/reverse)
 Layer: browser
