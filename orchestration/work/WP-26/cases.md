@@ -78,7 +78,7 @@ Status: executable
 Layer: browser
 Steps: 1. Seed two sales quotations for party P1 (book `099`: Q1 with 1 line, Q2 with 2 lines) and one for P2. 2. New sale for P1, press the quotation button ("Q"). 3. Cancel the first prompt, press "Q" again, accept, choose Q2.
 Expected: prompt text for the account import: TR_SALE.cs:21029 {{All Quatation Import From  }} (spelling kept) followed by the account code; the pick list holds only P1's quotations (Q1, Q2); choosing Q2 fills 2 lines (G7). Cancel leaves the grid empty (0 lines).
-Status: executable
+Status: blocked: quotation import (study gap 7, "Q" button) is not implemented by this work package's PR; it needs a sales-quotation list by party (GET) that does not exist yet. Unblocks with that read and the "Q" action on the screen.
 
 ### sales-invoice.formula.single-line   (T03 Formula sequence)   **reused**
 Layer: browser. Unchanged from the module (net 63,609.5, fine 9.16). Status: executable
@@ -141,7 +141,7 @@ Status: executable
 Layer: database
 Steps: save the same three rows on a book whose type is not `M`.
 Expected: the header old-metal totals are left blank (0.000 / 0.00): TR_SALE.cs:19333 {{if (Operators.CompareString(DC_Main.MCo_BookType, "M", false) == 0)}}; `SL_PR_DETL` rows are still written (3 rows). (G83, G8)
-Status: executable
+Status: blocked: web-provisioned books carry no BOOK_DATA.BOOK_TYPE (seedCompany writes none), so gating the header totals on type `M` would zero the old-metal settlement on every provisioned company. Question for the owner: provision the sales book with BOOK_TYPE = 'M' first? The desktop also leaves the totals untouched (not blank) on other book types (TR_SALE.cs:19333).
 
 ### sales-invoice.oldmetal.one-figure-detail-header-ledger   (T03 Formula sequence)
 Layer: database
@@ -255,13 +255,13 @@ Status: executable
 Layer: browser
 Steps: user whose `USER_SET` edit right is not Y, voucher with `USER_UPDATE` not Y; reopen and Save.
 Expected: message "You Have No Rights....." and no write. Rule: TR_SALE.cs:15070 {{if (Operators.CompareString(UsUPdate, "Y", false) != 0 && ((Operators.CompareString(UserEdit, "Y", false) != 0)}} then TR_SALE.cs:15072 {{You Have No Rights.....}}. Server returns 403 for a direct call. With the voucher's own `USER_UPDATE = 'Y'` the save is allowed (TR_SALE.cs:14417 {{UsUPdate = Conversions}}).
-Status: executable
+Status: blocked: the shared fixture catalogue has no user without the Sales Invoice edit right, and the per-voucher USER_UPDATE grant (TR_SALE.cs:14417) is not implemented on the web save; needs a catalogue user and that grant.
 
 ### sales-invoice.refusal.quotation-import-edit-mode   (T06 Required/invalid)
 Layer: browser
 Steps: reopen a saved invoice (edit mode), press "Q".
 Expected: nothing happens (no prompt, no lines added): TR_SALE.cs:21021 {{if (Operators.CompareString(EntryMode, "A", false) != 0)}} returns. (G7)
-Status: executable
+Status: blocked: depends on the quotation import above (no "Q" action on the screen yet).
 
 ### sales-invoice.refusal.olocar-before-save   (T06 Required/invalid)
 Layer: browser
@@ -408,7 +408,7 @@ Unchanged. Status: executable
 Layer: database
 Steps: save a sale with UPI rows and credit note; drop the response after commit; resend the same request key.
 Expected: the second call returns the first result (same voucher number) and the table counts are 1 `SL_DATA`, 2 `UPI_DATA`, 1 `CRNT_DATA`, 1 ledger set (no duplicates). Hosted-service rule; the desktop has no retry. (G4, G5)
-Status: executable
+Status: blocked: not exercised in this PR; needs the request-key replay of POST /sales driven with UPI and credit-note rows.
 
 ### sales-invoice.rollback.mid-write   (T14 Rollback)   **reused**
 Unchanged. Status: executable
@@ -417,7 +417,7 @@ Unchanged. Status: executable
 Layer: database
 Steps: fault injection after the `UPI_DATA` insert, then after `CRNT_DATA`, then after `SL_ORD_ADJ`, then after `SL_PR_DETL` on a new sale, and on an edit of an existing sale; sentinel voucher present.
 Expected: for each fault 0 rows of the new voucher in all tables and, for the edit, the original voucher byte-identical (UPI 2, credit-note 1, order 2, old-metal 3 rows kept); sentinel untouched. Rule: the desktop writes everything in one transaction: TR_SALE.cs:15844 {{DELETE FROM UPI_DATA WHERE}} inside `Module_Save.SlTran`; the web must not leave a partial write (compare TR_SALE.cs:11969 {{DC_Main.ExeQuteDc(DC_Main.RsQry);}}, D10). (G2, G4, G5, G6)
-Status: executable
+Status: blocked: not exercised in this PR; the fault matrix (faults.mjs rollbackMatrix) does not yet name UPI_DATA, CRNT_DATA or SL_ORD_ADJ. All rows are written by the one voucher transaction (postVoucherTx).
 
 ### sales-invoice.config.setting-change   (T15 Config/history)
 Layer: browser
@@ -468,7 +468,7 @@ Status: executable
 Layer: browser
 Steps: user whose print right is not Y presses Print.
 Expected: message "You Have No Print Rights....." and no document: TR_SALE.cs:16439 {{You Have No Print Rights.....}}; server `403` on the print endpoint. (G10)
-Status: executable
+Status: blocked: the shared fixture catalogue has no user without the Sales Invoice print right (the clerk has FRM_PRINT = Y). The route now checks the print action (TR_SALE.cs:16439); a catalogue user is needed to prove the 403.
 
 ### sales-invoice.print.duplicate-copies   (T16 Report/output)
 Layer: browser
@@ -483,7 +483,7 @@ Unchanged. Also reused: `keyboard.alt-s-saves`, `entry.no-request-storm`. Status
 Layer: browser
 Steps: focus the totals editor, press Esc; focus a stone editor, press Esc; focus an item cell editor, press Esc; with unchanged totals press Esc on the form.
 Expected: each Esc moves back one level (item cell editor, then stone editor, then totals editor with focus to the employee code box) and the form closes only when the old and new totals are equal: TR_SALE.cs:16397 {{if ((int)e.KeyCode == 27)}}. With a changed total the form stays open (0 closes).
-Status: executable
+Status: blocked: the stepped Esc of TR_SALE_KeyDown (:16397) is not implemented by this PR.
 
 ### sales-invoice.keyboard.upi-f1-adds-type   (T17 Keyboard/usability)
 Layer: browser
@@ -495,7 +495,7 @@ Status: executable
 Layer: browser
 Steps: old-metal grid, Ctrl+D on row 1, answer No, then Yes.
 Expected: the text "This Row Record will Removed permantley ?" (spelling kept) appears each time; No keeps the row, Yes clears it and the totals recompute. Rule: TR_SALE.cs:7539 {{This Row Record will Removed permantley ?}}. (G8)
-Status: executable
+Status: blocked: Ctrl+D with the confirmation is implemented on the UPI grid only; the old-metal grid still removes a row with its button.
 
 ### sales-invoice.journey.sale-to-register-and-ledger   (T18 Full journey)   **reused**
 Unchanged. Status: executable
@@ -504,13 +504,13 @@ Unchanged. Status: executable
 Layer: browser
 Steps: create the bill of `create.old-metal-gold-silver`; run the sales register, the party ledger, the stock report (old gold, old silver), the cash book; reopen and delete.
 Expected: register net 63,609.50 and total 65,517.79; party ledger Dr 65,517.79 then Cr 54,000.00 (old gold) and Cr 8,200.00 (old metal other) and Cr 3,317.79 (cash) = 65,517.79, closing 0.00; stock +10.000 gold and +105.000 silver received; after delete all four reports return to the opening figures. All figures use the single old-metal valuation (TR_SALE.cs:15231 {{dataRow3["OLD_GL_AMT"] = Conversion.Val(MSG2_TOTAL[9, 3]);}}, TR_SALE.cs:15664 {{dataRow7["NET_AMT"] = Conversion.Val(mSG_OLD[DC_Main.i, 13]);}}). (G83)
-Status: executable
+Status: blocked: not exercised in this PR as a browser journey; the parts are proven at the database layer (create.old-metal-gold-silver, oldmetal.one-figure-detail-header-ledger).
 
 ### sales-invoice.journey.order-advance-to-order-balance   (T18 Full journey)
 Layer: browser
 Steps: order ORD7 value 20,000.00 with advance 8,000.00 taken on the order screen; sale adjusts 5,000.00 and 3,000.00 (two rows); open the order balance; delete the sale.
 Expected: balance after the sale = 20,000.00 - 8,000.00 = 12,000.00 outstanding on the order, advance fully adjusted; after the delete the order shows 8,000.00 advance available again (5,000.00 + 3,000.00 released). Rule: TR_SALE.cs:15716 {{dataRow8["ORD_AMT"] = Conversion.Val(mSG_ORD[DC_Main.i, 2]);}}. (G6)
-Status: executable
+Status: blocked: not exercised in this PR as a browser journey; the order balance reads the desktop-shape rows (orderCancel.ts CONSUMED_SQL) and is proven by concurrency.order-advance-double-use.
 
 ### sales-invoice.source.approval-no-import   (T04 Lookup)
 Layer: browser
@@ -522,7 +522,7 @@ Status: blocked: the master plan names this as the third blocked Sales case ("Sa
 Layer: database
 Steps: sale with an approval tag line; delete the line on the grid (no save), read `APR_DETL`; then save.
 Expected: before save `ISU_REC` unchanged (tag still issued); after save the tag is released. The desktop releases at the row delete itself (TR_SALE.cs:11969 {{DC_Main.ExeQuteDc(DC_Main.RsQry);}}), a partial write that is not ported (decision D10, architect, 2026-11-22, owner may override).
-Status: executable
+Status: blocked: not exercised in this PR; the web has no row-delete endpoint, so release happens only inside the save (D10) by construction, but no test drives it with an approval fixture.
 
 ## Coverage table
 
