@@ -833,20 +833,30 @@ const threeRows = (): Line[] => [
 
   // ---- atomicity ------------------------------------------------------------------------------------------
   it('contra.rollback.atomic-write: a fault in any later table leaves create, edit and delete unchanged', async () => {
-    const guard = (table: string, when: string) => `
-      CREATE OR REPLACE FUNCTION wp31_boom() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'wp31 injected fault'; END $$;
-      CREATE TRIGGER wp31_boom BEFORE INSERT ON "${table}" FOR EACH ROW ${when} EXECUTE FUNCTION wp31_boom();`;
+    const guard = async (table: string, when: string) => {
+      await exec(
+        `CREATE OR REPLACE FUNCTION wp31_boom() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'wp31 injected fault'; END $$`,
+      );
+      await exec(
+        `CREATE TRIGGER wp31_boom BEFORE INSERT ON "${table}" FOR EACH ROW ${when} EXECUTE FUNCTION wp31_boom()`,
+      );
+    };
     const drop = (table: string) => exec(`DROP TRIGGER IF EXISTS wp31_boom ON "${table}"`);
+    // A described row, so that REMARK_DATA is written too.
+    const described = (amount: number): Line[] => [
+      { crdr: 'DR', acCode: BANK, amount, itDesc: 'FAULT TEXT' },
+      { crdr: 'CR', acCode: CASH, amount },
+    ];
     const vch = await create(threeRows());
     const before = await writeSet(vch);
     for (const table of ['ROJ_MEL_DATA', 'REMARK_DATA']) {
-      await exec(guard(table, `WHEN (NEW.tenant_id='${tenantId}')`));
+      await guard(table, `WHEN (NEW.tenant_id='${tenantId}')`);
       try {
         const v = (await open(vch)).version;
-        const e = await edit(vch, v, twoRows(1234));
+        const e = await edit(vch, v, described(1234));
         expect(e.statusCode).toBeGreaterThanOrEqual(400);
         expect(await writeSet(vch)).toEqual(before);
-        const c = await asAdmin('POST', `/contra?coBook=${BOOK}`, body(twoRows(77)));
+        const c = await asAdmin('POST', `/contra?coBook=${BOOK}`, body(described(77)));
         expect(c.statusCode).toBeGreaterThanOrEqual(400);
         expect(
           await query(
@@ -859,7 +869,7 @@ const threeRows = (): Line[] => [
         await drop(table);
       }
     }
-    await exec(guard('DELETE_DATA', `WHEN (NEW.tenant_id='${tenantId}')`));
+    await guard('DELETE_DATA', `WHEN (NEW.tenant_id='${tenantId}')`);
     try {
       const d = await remove(vch, (await open(vch)).version);
       expect(d.statusCode).toBeGreaterThanOrEqual(400);

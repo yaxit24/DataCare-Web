@@ -236,7 +236,8 @@ import {
 import { registerTagPrintScreenRoutes } from './tagPrintScreen.js';
 import { tagStockReport, tagStockCsv } from '../modules/reports/tagStock.js';
 import { registerVoucherNavigationRoutes } from './voucherNavigation.js';
-import { postContra, deleteContra, getContra, editContra } from '../modules/finance/contra.js';
+import { getContra } from '../modules/finance/contra.js';
+import { registerContraRoutes } from './contra.js';
 import { registerSaleVoucherRoutes } from './saleVoucher.js';
 import { registerPurchaseVoucherRoutes } from './purchaseVoucher.js';
 import { registerPartyOpeningRoutes } from './partyOpening.js';
@@ -1089,6 +1090,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerVoucherNavigationRoutes(app, extraRouteHelpers);
   registerPartyOpeningRoutes(app, extraRouteHelpers, formMutationCapabilities);
   registerFineJvRoutes(app, extraRouteHelpers);
+  registerContraRoutes(app, extraRouteHelpers);
   registerOrderCancelRoutes(app, extraRouteHelpers);
   registerDailyRateRoutes(app, { ...extraRouteHelpers, formMutationCapabilities });
   registerItemOpeningRoutes(app, extraRouteHelpers, formCapabilities);
@@ -2806,19 +2808,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     if (!guard(req, reply, 'update')) return;
     return run(reply, 200, () =>
       editPayment(prisma, paymentInput(req, body(req)), (req.params as any).vchNo),
-    );
-  });
-  app.post('/contra', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      postContra(prisma, {
-        scope: scopeOf(req),
-        lines: Array.isArray(b.lines) ? b.lines : [], // the desktop grid (TR_CONTRA)
-        vchDate: b.vchDate,
-        itDesc: b.itDesc,
-        mainUser: sess(req).sub,
-      }),
     );
   });
   app.get('/finance/cheque-print', auth, async (req, reply) => {
@@ -7254,16 +7243,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       filename: `journal-${scope.vchNo}`,
     });
   });
-  /**
-   * Contra deletion. `deleteContra` (finance.ts) reads the full CONTRA_DATA detail via editIdentityTx
-   * extraColumns so the DELETE_DATA audit carries the voucher's own amounts (not zeros). REOPENING (F2.1):
-   * the GET /:vchNo routes expose get* lifecycle functions, each `(prisma, scope, voucherNo)`.
-   */
-  app.get('/contra/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    return run(reply, 200, () => getContra(prisma, scopeOf(req), (req.params as any).vchNo));
-  });
-  // G128 (Stage E): the contra voucher print (bank<->cash transfer, desktop ContraVch.rpt).
+  // G128 (Stage E): the contra voucher print; every grid leg and the voucher total (WP-31, G23). The layout of the
+  // desktop ContraBill.rpt is not read yet (study Open question 4).
   app.get('/contra/:vchNo/print', auth, async (req, reply) => {
     if (!guard(req, reply, 'print')) return;
     const q = req.query as any;
@@ -7279,25 +7260,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       format: q.format,
       filename: `contra-${scope.vchNo}`,
     });
-  });
-  app.put('/contra/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'update')) return;
-    const b = body(req);
-    return run(reply, 200, () =>
-      editContra(
-        prisma,
-        {
-          scope: scopeOf(req),
-          lines: Array.isArray(b.lines) ? b.lines : [], // the desktop grid (TR_CONTRA)
-          vchDate: b.vchDate,
-          itDesc: b.itDesc,
-          empCode: b.empCode,
-          itemType: b.itemType,
-          mainUser: sess(req).sub,
-        },
-        (req.params as any).vchNo,
-      ),
-    );
   });
   app.get('/receipts/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
@@ -7401,17 +7363,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         (req.params as any).vchNo,
         book ? String(book) : undefined,
       ),
-    );
-  });
-  app.delete('/contra/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
-      deleteContra(prisma, {
-        scope: scopeOf(req),
-        vchNo: (req.params as any).vchNo,
-        deleteUser: sess(req).sub,
-        book: body(req).book,
-      }),
     );
   });
   // Ledger adjustment (desktop TR_LEDR_ADJ → LDR_ADJ_DATA + balanced AC_DATA).

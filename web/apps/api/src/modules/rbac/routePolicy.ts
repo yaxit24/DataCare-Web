@@ -453,6 +453,7 @@ route('Cash / Bank/Payment', [
 ]);
 route('Cash / Bank/Contra', [
   'POST /contra',
+  'GET /contra/list',
   'GET /contra/:vchNo',
   'GET /contra/:vchNo/print',
   'PUT /contra/:vchNo',

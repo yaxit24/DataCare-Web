@@ -130,8 +130,9 @@ describe('route policy registry', () => {
     // N233 removes POST /sales-orders/:vchNo/cancel-refund and adds Order Cancel's pending-orders, defaults, POST,
     // GET, PUT, DELETE and print: 759 - 1 + 7 = 765.
     // N234 (WP-11) adds the RP_ALL Sales Report GET /reports/sales-report and its CSV/XLSX exports: 765 + 3 = 768.
-    expect(routes).toHaveLength(768);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(768);
+    // N246 (WP-31) adds the Contra Entry F1 list GET /contra/list: 768 + 1 = 769.
+    expect(routes).toHaveLength(769);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(769);
 
     const policies = routes.map((route) => ({
       ...route,
