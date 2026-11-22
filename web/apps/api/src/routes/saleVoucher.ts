@@ -2,6 +2,7 @@ import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { CrmRouteHelpers } from './crm.js';
 import { deleteSale, editSale, getSale } from '../modules/sales/sales.js';
 import { requiredVersion } from '../modules/vouchers/version.js';
+import { salePrintFiles, setSalePrintDefault } from '../modules/sales/salePrintChoice.js';
 
 /**
  * A saved sale: read, update and delete (TR_SALE). The read returns the voucher's `version`; an update sends it in the
@@ -18,6 +19,15 @@ export function registerSaleVoucherRoutes(
   },
 ): void {
   const { prisma, auth, guard, scopeOf, run, body, mainUserOf, saleInput } = h;
+  // WP-26 (D6): the PRINT_MAST file list of the sale book and its "Set" default (TR_SALE.cs:13933, :20618-20624).
+  app.get('/sales/print-files', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'view')) return;
+    return run(reply, 200, () => salePrintFiles(prisma, scopeOf(req)));
+  });
+  app.post('/sales/print-files/default', auth as any, async (req, reply) => {
+    if (!guard(req, reply, 'update')) return;
+    return run(reply, 200, () => setSalePrintDefault(prisma, scopeOf(req), String(body(req).file ?? '')));
+  });
   app.get('/sales/:vchNo', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, () => getSale(prisma, scopeOf(req), (req.params as any).vchNo));
