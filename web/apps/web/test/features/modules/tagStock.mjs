@@ -47,6 +47,12 @@ const blocked = (name, group, reason) => ({
   blocked: reason,
 });
 
+const notApplicable = (name, group, source, reason) => ({
+  ...C(`${name}.not-applicable`, group, 'read-only', source, async () => ({})),
+  applicable: false,
+  reason,
+});
+
 const now = new Date();
 const startYear = now.getMonth() + 1 >= 4 ? now.getFullYear() : now.getFullYear() - 1;
 const YEAR = `${startYear}-${startYear + 1}`;
@@ -674,9 +680,17 @@ const tagStockCases = [
       await filterRows(page, seed.prefix);
       // Enter in From -> To -> Search.
       await page.getByLabel('From', { exact: true }).press('Enter');
-      assert.equal(await page.evaluate(() => document.activeElement?.id), 'ts-to');
+      assert.equal(
+        await page.evaluate(() => document.activeElement?.id),
+        'ts-to',
+        'Enter in From focuses To',
+      );
       await page.getByLabel('To', { exact: true }).press('Enter');
-      assert.equal(await page.evaluate(() => document.activeElement?.id), 'ts-search');
+      assert.equal(
+        await page.evaluate(() => document.activeElement?.id),
+        'ts-search',
+        'Enter in To focuses Search',
+      );
       // Alt+I runs In Tag, Alt+O Out Tag, Alt+M Mrp Tag.
       for (const [key, tab] of [
         ['i', 'in'],
@@ -691,7 +705,7 @@ const tagStockCases = [
           ),
           page.keyboard.press(`Alt+${key}`),
         ]);
-        assert.equal(response.status(), 200);
+        assert.equal(response.status(), 200, `Alt+${key} ${tab}`);
       }
       // Down from a selector box focuses the grid.
       await page.getByLabel('TagNo', { exact: true }).focus();
@@ -704,8 +718,16 @@ const tagStockCases = [
       await page.getByLabel('TagNo', { exact: true }).fill('X1');
       await page.keyboard.press('Alt+c');
       await page.waitForFunction(() => !document.querySelector('[data-testid="tag-stock-grid"]'));
-      assert.equal(await page.getByLabel('TagNo', { exact: true }).inputValue(), '');
-      assert.equal(await page.evaluate(() => document.activeElement?.id), 'ts-from');
+      assert.equal(
+        await page.getByLabel('TagNo', { exact: true }).inputValue(),
+        '',
+        'Cancel clears TagNo',
+      );
+      assert.equal(
+        await page.evaluate(() => document.activeElement?.id),
+        'ts-from',
+        'Cancel focuses From',
+      );
       // Escape leaves the screen.
       await page.goto('/');
       await page.goto('/reports/tag-stock');
@@ -843,6 +865,33 @@ const tagStockCases = [
     'journey.lifecycle-through-screens',
     'T18',
     "Creating the Tag Opening, Sale, Tag Cancel, Sale Return and Approval Issue vouchers through their screens and running Stock after each step needs those modules' helpers; the stock rule is proven on seeded movements by stock.signed-movement-states and tagStock.db.test.ts.",
+  ),
+  C(
+    'scope.leaves-no-rows-for-other-modules',
+    'T11',
+    'read-only',
+    'Fixture hygiene: the seeded gold and silver items and tags would otherwise show up in Item Opening and other screens that list by item type.',
+    async (ctx) => {
+      for (const table of ['APR_DETL', 'MAIN_STOCK', 'BAR_DETL'])
+        await ctx.owner.$executeRawUnsafe(
+          `DELETE FROM "${table}" WHERE tenant_id=$1 AND "TAG_NO" LIKE $2`,
+          TENANT,
+          `T${RUN}%`,
+        );
+      await ctx.owner.$executeRawUnsafe(
+        `DELETE FROM "ITEM_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "IT_CODE" IN ('TS1','TS2')`,
+        TENANT,
+      );
+      await ctx.owner.$executeRawUnsafe(
+        `DELETE FROM "PRODUCT_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "PR_CODE" IN ('T1','T2')`,
+        TENANT,
+      );
+      mastersReady = false;
+      return {
+        observation: 'tag-stock fixtures removed',
+        expected: 'no rows left for other modules',
+      };
+    },
   ),
 ];
 

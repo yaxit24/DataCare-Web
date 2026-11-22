@@ -34,6 +34,7 @@ export default function TagStockPage() {
   const { filters, setFilters, report, error, busy } = t;
   const [selected, setSelected] = useState(0);
   const [sizes, setSizes] = useState<string[]>([]);
+  const [focusFrom, setFocusFrom] = useState(0);
   const grid = useRef<HTMLDivElement | null>(null);
   const fromRef = useRef<HTMLInputElement | null>(null);
   const toRef = useRef<HTMLInputElement | null>(null);
@@ -49,6 +50,11 @@ export default function TagStockPage() {
       live = false;
     };
   }, []);
+
+  // Cancel returns the cursor to From once the cleared screen has rendered (RP_TAG.cs:3741).
+  useEffect(() => {
+    if (focusFrom > 0) fromRef.current?.focus();
+  }, [focusFrom]);
 
   const rows = useMemo(() => {
     if (!report) return [];
@@ -101,7 +107,7 @@ export default function TagStockPage() {
     c: () => {
       t.reset();
       setSelected(0);
-      setTimeout(() => fromRef.current?.focus(), 0);
+      setFocusFrom((n) => n + 1);
     },
     x: exit,
   };
