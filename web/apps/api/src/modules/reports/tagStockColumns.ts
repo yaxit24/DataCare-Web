@@ -3,6 +3,8 @@
  * export, so the three can never disagree. Headers are the desktop column names; the order is the order of the
  * visible columns after DGV_FILL hides CoCode, Book, BookName, AcCode and Remark (RP_TAG.cs:4825-4840).
  */
+import { round } from '@datacare/core';
+
 export type TagStockTab = 'in' | 'out' | 'stock' | 'mrp' | 'apr' | 'all';
 export type TagStockView = 'tag' | 'item' | 'product';
 /** int = plain count, wt = {0:n3}, amt = {0:n0}, text and date are left as stored. */
@@ -196,8 +198,8 @@ export function tagStockColumns(
 }
 
 /** Rounds a footer figure the way the grid shows it (weights n3, amounts n2 so no cent is lost). */
-export const r3 = (n: number): number => Math.round((n + 1e-9) * 1000) / 1000;
-export const r2 = (n: number): number => Math.round((n + 1e-9) * 100) / 100;
+export const r3 = (n: number): number => round(n, 3);
+export const r2 = (n: number): number => round(n, 2);
 
 const csvCell = (v: unknown): string => {
   const s = String(v ?? '');

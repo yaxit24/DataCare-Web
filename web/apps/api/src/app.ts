@@ -404,6 +404,9 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     // area and state are first-class selectors, not the shared RP_ALL dimensions this guard polices. Its own
     // parser validates and fails closed, so exempt its routes rather than refusing their selectors here.
     if (url.startsWith('/reports/account-ledger')) return;
+    // Tag Stock (RP_TAG) likewise owns a typed parser (tagStock.ts parseTagStockQuery) with its own location and
+    // item selectors (lcCode, itType, tblCode); it validates and fails closed itself.
+    if (url.startsWith('/reports/tag-stock')) return;
     const q = (req.query ?? {}) as Record<string, string | undefined>;
     const asked = REPORT_FILTER_KEYS.filter((k) => String(q[k] ?? '').trim());
     if (!asked.length) return;
