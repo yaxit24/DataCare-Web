@@ -175,8 +175,8 @@ const savedLogins = new Map();
 /**
  * Refresh tokens rotate and are single-use: replaying one revokes the session (session.ts 'refresh-reused').
  * A saved state is therefore only reused while its access cookie (15 min, app.ts:115) is comfortably valid, so
- * no case ever needs to refresh. After 10 minutes the slot logs in again — a handful of logins per run, well
- * under the 10/minute limit.
+ * no case ever needs to refresh. After 10 minutes the slot logs in again. A run can still exceed the 10/minute
+ * limit (the usersRights cases sign in often on purpose), so the helper waits out a 429 as a person would.
  */
 const SAVED_LOGIN_MAX_AGE_MS = 10 * 60 * 1000;
 
@@ -200,7 +200,26 @@ async function savedLogin(stack, { user, password, slot }) {
     await page.goto('/login');
     await page.getByLabel('User', { exact: true }).fill(user);
     await page.getByLabel('Password', { exact: true }).fill(password);
-    await page.getByRole('button', { name: 'Sign In', exact: true }).click();
+    // The server limits sign-ins and states when to try again (retry-after). The helper obeys it, at most twice,
+    // as a person would; this is not a retry around a flaky product. Anything else behaves as before.
+    for (let attempt = 0; ; attempt++) {
+      const loginResponse = page
+        .waitForResponse(
+          (response) =>
+            response.request().method() === 'POST' &&
+            new URL(response.url()).pathname === '/api/auth/login',
+          { timeout: 20_000 },
+        )
+        .catch(() => null);
+      await page.getByRole('button', { name: 'Sign In', exact: true }).click();
+      const response = await loginResponse;
+      if (response?.status() !== 429 || attempt >= 2) break;
+      const retryAfter = Number.parseInt(response.headers()['retry-after'] ?? '', 10);
+      const waitSeconds = Number.isFinite(retryAfter) ? Math.min(retryAfter + 1, 75) : 61;
+      await new Promise((resolve) => setTimeout(resolve, waitSeconds * 1000));
+      await page.getByLabel('User', { exact: true }).fill(user);
+      await page.getByLabel('Password', { exact: true }).fill(password);
+    }
     await page
       .getByRole('heading', { name: 'Open Company', exact: true })
       .waitFor({ timeout: 20_000 });

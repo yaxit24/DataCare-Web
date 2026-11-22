@@ -1,6 +1,4 @@
 import { withTxBudget } from '../shared/txBudget.js';
-import { assertStrongPassword, hashPassword } from '../auth/password.js';
-import { FORM_CATALOG } from './formCatalog.js';
 
 /**
  * Users & Rights admin (Phase 13 RBAC).
@@ -13,41 +11,9 @@ import { FORM_CATALOG } from './formCatalog.js';
  * LOGIN_CATG starts with "A" (uppercase) — this is the same rule auth.service.rightsOf uses to
  * grant the full user-right set, so it is the single source of truth for "admin".
  *
- * ── GUARD NOTE (admin-only; the ROUTE LAYER must enforce this) ───────────────────────────────────
- * listUsers / createUser / setUserRole are privileged operations and MUST only run for an admin.
- * These functions DO NOT see the caller's session (their signatures take only prisma/tenantId +
- * data), so enforcement happens where the route is wired — alongside the existing `requireAuth`
- * preHandler in app.ts (the coordinator wires `/admin/users`; do NOT edit app.ts here).
- *
- * The JWT session (`sess(req)` → { sub, tenantId, coCode, rights }) does NOT carry LOGIN_CATG, so
- * the route must re-resolve the caller's role from the DB. Use the helper provided below:
- *
- *     app.get('/admin/users', { preHandler: requireAuth }, async (req, reply) => {
- *       const s = sess(req);
- *       try { await assertAdmin(prisma, s.tenantId, { coCode: s.coCode, loginName: s.sub }); }
- *       catch { return reply.code(403).send({ error: 'forbidden', action: 'admin' }); }
- *       return listUsers(prisma, s.tenantId, s.coCode);
- *     });
- *     app.post('/admin/users', { preHandler: requireAuth }, async (req, reply) => {
- *       const s = sess(req);
- *       try { await assertAdmin(prisma, s.tenantId, { coCode: s.coCode, loginName: s.sub }); }
- *       catch { return reply.code(403).send({ error: 'forbidden', action: 'admin' }); }
- *       const b = (req.body ?? {}) as Record<string, string>;
- *       try {
- *         const r = await createUser(prisma, s.tenantId, { coCode: b.coCode ?? s.coCode, loginName: b.loginName, password: b.password, role: b.role });
- *         return reply.code(201).send(r);
- *       } catch (e) {
- *         if (e instanceof UserValidationError) return reply.code(400).send({ error: 'missing-or-invalid', fields: e.fields });
- *         if (e instanceof DuplicateUserError)  return reply.code(409).send({ error: 'duplicate-user' });
- *         throw e;
- *       }
- *     });
- *
- * (setUserRole maps the same way: UserValidationError → 400, UserNotFoundError → 404.)
- * Note: a fully self-contained `assertAdmin` is provided so no edit to jwt.ts/app.ts session shape
- * is needed. Where the existing rights are sufficient, the route may additionally call
- * `assertRight(sess.rights, 'delete')`; but `assertAdmin` is the authoritative admin-only check.
- * ─────────────────────────────────────────────────────────────────────────────────────────────────
+ * Every function here is admin-only; the route registry enforces it (routePolicy ADMIN_ONLY, 'Utilities/Users &
+ * Rights'). The User Create screen's Save and Delete (desktop MS_USER) live in ./userMaster.ts; deleted logins
+ * (LOGIN_ACTIVE 'N', D35) are left out of every list and role lookup here.
  */
 
 /** Roles offered by the admin UI. They map directly to LOGIN_CATG. */
@@ -62,16 +28,6 @@ export interface UserRow {
   userUpdate: boolean; // USER_UPDATE = 'Y' (Phase 13 rights matrix; create/update)
   userDelete: boolean; // USER_DELETE = 'Y' (delete)
   userPrint: boolean; // USER_PRINT  = 'Y' (print)
-}
-
-export interface CreateUserInput {
-  /** MAIN_USER — the operator creating this account. */
-  mainUser?: string;
-  coCode: string;
-  lcCode: string;
-  loginName: string;
-  password: string;
-  role: UserRole | string;
 }
 
 export interface SetUserRoleInput {
@@ -154,7 +110,7 @@ export async function resolveRole(
 ): Promise<string | null> {
   return withTxBudget(prisma, tenantId, 'read', async (tx: any) => {
     const rows: { LOGIN_CATG: string | null }[] = await tx.$queryRawUnsafe(
-      'SELECT "LOGIN_CATG" FROM "LOGIN_MAST" WHERE "CO_CODE"=$1 AND "LOGIN_NAME"=$2 LIMIT 1',
+      `SELECT "LOGIN_CATG" FROM "LOGIN_MAST" WHERE "CO_CODE"=$1 AND "LOGIN_NAME"=$2 AND "LOGIN_ACTIVE"='Y' LIMIT 1`,
       coCode,
       loginName,
     );
@@ -198,11 +154,11 @@ export async function listUsers(
       : '"LOGIN_NAME","LOGIN_CATG","CO_CODE"';
     const rows: Record<string, string | null>[] = coCode
       ? await tx.$queryRawUnsafe(
-          `SELECT ${cols} FROM "LOGIN_MAST" WHERE "CO_CODE"=$1 ORDER BY "LOGIN_NAME"`,
+          `SELECT ${cols} FROM "LOGIN_MAST" WHERE "CO_CODE"=$1 AND "LOGIN_ACTIVE"='Y' ORDER BY "LOGIN_NAME"`,
           coCode,
         )
       : await tx.$queryRawUnsafe(
-          `SELECT ${cols} FROM "LOGIN_MAST" ORDER BY "CO_CODE","LOGIN_NAME"`,
+          `SELECT ${cols} FROM "LOGIN_MAST" WHERE "LOGIN_ACTIVE"='Y' ORDER BY "CO_CODE","LOGIN_NAME"`,
         );
     return rows.map((r) => ({
       loginName: r.LOGIN_NAME ?? '',
@@ -212,78 +168,6 @@ export async function listUsers(
       userDelete: rightFlag(r.USER_DELETE),
       userPrint: rightFlag(r.USER_PRINT),
     }));
-  });
-}
-
-/**
- * Create a user. Password is hashed with Argon2id via auth/password.ts (hashPassword) — plaintext is
- * never stored. Rejects a duplicate LOGIN_NAME within the company (checked in-tx; the table has no
- * unique key on CO_CODE+LOGIN_NAME). Mirrors masters/master.service.createMaster.
- */
-export async function createUser(
-  prisma: any,
-  tenantId: string,
-  input: CreateUserInput,
-): Promise<{ created: true; loginName: string; role: string }> {
-  const coCode = (input.coCode ?? '').trim();
-  const lcCode = (input.lcCode ?? '').trim();
-  const loginName = (input.loginName ?? '').trim();
-  const password = input.password ?? '';
-  const role = normalizeRole(input.role);
-
-  const invalid: string[] = [];
-  if (!coCode) invalid.push('coCode');
-  if (!lcCode) invalid.push('lcCode');
-  if (!loginName) invalid.push('loginName');
-  if (!password) invalid.push('password');
-  if (!role) invalid.push('role');
-  if (invalid.length) throw new UserValidationError(invalid);
-  assertStrongPassword(password);
-
-  const pwdHash = await hashPassword(password);
-
-  return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
-    const dup: unknown[] = await tx.$queryRawUnsafe(
-      'SELECT 1 FROM "LOGIN_MAST" WHERE "CO_CODE"=$1 AND "LOGIN_NAME"=$2 LIMIT 1',
-      coCode,
-      loginName,
-    );
-    if (dup.length) throw new DuplicateUserError(loginName);
-    await tx.$executeRawUnsafe(
-      // MS_USER.cs writes MAIN_USER on the account row: who created this login.
-      `INSERT INTO "LOGIN_MAST"(
-         tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG",
-         "USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED","PASSWORD_CHANGED_AT",
-         "MAIN_USER"
-       ) VALUES ($1,$2,$3,$4,$5,'Y','Y','Y','N',NOW(),$6)`,
-      tenantId,
-      coCode,
-      loginName,
-      pwdHash,
-      role,
-      // MS_USER.cs records who created the account; absent an acting user the column stays empty rather
-      // than naming someone who did not do it.
-      (input.mainUser ?? '').trim().slice(0, 15) || null,
-    );
-    let index = 0;
-    for (const form of FORM_CATALOG) {
-      index += 1;
-      await tx.$executeRawUnsafe(
-        `INSERT INTO "USER_SET"(
-           tenant_id,"CO_CODE","LC_CODE","MAIN_SRNO","SUB_SRNO","USER_NAME","MAIN_MENU",
-           "SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT"
-         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'Y','Y','Y','Y')`,
-        tenantId,
-        coCode,
-        lcCode,
-        index,
-        String(index),
-        loginName,
-        form.mainMenu,
-        form.subMenu,
-      );
-    }
-    return { created: true as const, loginName, role };
   });
 }
 
@@ -357,7 +241,7 @@ export async function setUserRights(
       // Lock the company's administrators, so two of them demoting each other at once cannot both succeed.
       const admins: { LOGIN_NAME: string | null }[] = await tx.$queryRawUnsafe(
         `SELECT "LOGIN_NAME" FROM "LOGIN_MAST"
-          WHERE "CO_CODE"=$1 AND upper(coalesce("LOGIN_CATG",'')) LIKE 'A%' FOR UPDATE`,
+          WHERE "CO_CODE"=$1 AND "LOGIN_ACTIVE"='Y' AND upper(coalesce("LOGIN_CATG",'')) LIKE 'A%' FOR UPDATE`,
         coCode,
       );
       const same = (name: string | null) =>

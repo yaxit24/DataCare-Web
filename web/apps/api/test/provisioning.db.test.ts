@@ -88,14 +88,14 @@ d('company provisioning produces a postable company', () => {
     );
     expect(rows.length).toBe(38);
     // Three legs per book (1 = control/sales, 2 = cash/bank, 3 = round-off), except the cash books.
-    // RCT and PAY carry the desktop cash-book layout, 1 = cash and 2 = kasar: Ac_Ledr.cs:567-581 joins
+    // RCT, PAY and ORC (order cancel, N233) carry the cash-book layout, 1 = cash and 2 = kasar: Ac_Ledr.cs:567-581 joins
     // BOOK_DETL SR_NO 1 and SR_NO 2 for legs 01-08. Their slot 2 used to be CASH, which would have posted
     // a write-off to the cash account. The TR_WH_SALE books carry the twelve slots Wh_Sales_Ledr joins.
     // TSP (Tag Split) carries the five Tag_Split_Ledr slots (5 labour, 6/7 gold DR/CR, 8/9 silver DR/CR).
     const legs = Object.fromEntries(rows.map((r) => [String(r.CO_BOOK), Number(r.n)]));
     for (const [book, n] of Object.entries(legs))
       expect(n, book).toBe(
-        book === 'RCT' || book === 'PAY'
+        book === 'RCT' || book === 'PAY' || book === 'ORC'
           ? 2
           : book === 'WHS' || book === 'RTC' || book === 'TSL'
             ? 12
@@ -364,7 +364,9 @@ d('company provisioning produces a postable company', () => {
     // + BUL x 3 (bullion booking, N103) + ORC x 3 (order cancel, N113), not doubled; PR and TPR add slot 4
     // (labour and other charges, G184): 130 + 2.
     // 133: the sale book's fourth slot, the order advance (N198).
-    expect(await count('BOOK_DETL')).toBe(133);
+    // 132: ORC carries the order-cancel layout, 1 = cash refund and 2 = kasar (TR_SL_ORD_ADJ.cs:2255-2263,
+    // Ac_Ledr.cs:932-935, N233), not the three sale-book slots.
+    expect(await count('BOOK_DETL')).toBe(132);
   });
 
   /**

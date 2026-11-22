@@ -68,6 +68,8 @@ export const IDEMPOTENT_CREATE_ROUTES: readonly IdempotentRoute[] = Object.freez
     status: 201,
     menus: ['Transaction/Cash Payment', 'Transaction/Bank Payment'],
   },
+  // WP-02: Order Cancel (TR_SL_ORD_ADJ) refunds an advance; a replayed save must not refund it twice.
+  { method: 'POST', url: '/order-cancel', status: 201, menus: ['Other/Order Cancel'] },
 ]);
 
 export const IDEMPOTENCY_KEY_HEADER = 'idempotency-key';
