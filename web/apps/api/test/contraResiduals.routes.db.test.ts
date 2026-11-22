@@ -658,6 +658,16 @@ const threeRows = (): Line[] => [
     );
   });
 
+  it('contra.edit.keeps-employee and top-level itDesc is the row 1 narration', async () => {
+    const vch = await create(twoRows(), { empCode: 'E01', itDesc: 'WIDE NOTE' });
+    expect((await rowsOf('REMARK_DATA', vch)).map((x: any) => x.VCH_REMARK)).toEqual(['WIDE NOTE']);
+    await exec(`UPDATE "CO_SET" SET "EMP_CODE_MANDATORY"='Y' WHERE tenant_id=$1`, tenantId);
+    // The body omits empCode: the saved employee is kept, so the mandatory check passes.
+    const r = await edit(vch, (await open(vch)).version, twoRows(4000));
+    expect(r.statusCode, r.body).toBe(200);
+    expect((await rowsOf('CONTRA_DATA', vch)).every((x: any) => x.EMP_CODE === 'E01')).toBe(true);
+  });
+
   // ---- delete ---------------------------------------------------------------------------------------------
   it('contra.delete.version-required: 400 without a token, 409 when stale, 200 with the current one', async () => {
     const vch = await create();

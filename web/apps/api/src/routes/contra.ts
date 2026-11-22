@@ -45,6 +45,7 @@ const CONTRA_BODY_SCHEMA = {
     vchDate: { type: 'string', pattern: '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' },
     // CONTRA_DATA.EMP_CODE / EMP_MAST.EMP_CODE are varchar(3).
     empCode: { type: 'string', maxLength: 3 },
+    itDesc: { type: 'string', maxLength: 150 },
     expectedVersion: { type: 'string', maxLength: 64 },
   },
 } as const;
@@ -56,7 +57,10 @@ export function registerContraRoutes(app: FastifyInstance, h: ContraRouteHelpers
     const b = body(req);
     return {
       scope: scopeOf(req),
-      lines: Array.isArray(b.lines) ? b.lines : [], // the desktop grid (TR_CONTRA)
+      // The desktop grid (TR_CONTRA). A top-level `itDesc` is the narration of row 1 when row 1 has none.
+      lines: (Array.isArray(b.lines) ? b.lines : []).map((l: any, i: number) =>
+        i === 0 && b.itDesc && !l?.itDesc ? { ...l, itDesc: String(b.itDesc).slice(0, 150) } : l,
+      ),
       vchDate: b.vchDate,
       empCode: b.empCode,
       expectedVersion: b.expectedVersion,

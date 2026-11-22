@@ -496,7 +496,22 @@ export async function editContra(
     });
     // The header rows are locked: the version is read and compared inside the same transaction.
     await assertVoucherVersionTx(tx, CONTRA_WRITE_TABLES, versionKeyOf(scope, voucherNo), expected);
-    const checked = await checkedGridTx(tx, input, { creating: false, vchDate });
+    // A client that omits the employee keeps the saved one (lossless reopen); '' clears it.
+    let withEmp = input;
+    if (input.empCode === undefined) {
+      const saved: Array<{ e: string | null }> = await tx.$queryRawUnsafe(
+        `SELECT "EMP_CODE" e FROM "CONTRA_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
+          AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO" LIMIT 1`,
+        scope.tenantId,
+        scope.coCode,
+        scope.lcCode,
+        scope.coYear,
+        scope.coBook,
+        voucherNo,
+      );
+      withEmp = { ...input, empCode: text(saved[0]?.e) };
+    }
+    const checked = await checkedGridTx(tx, withEmp, { creating: false, vchDate });
     const marks = await captureClearingTx(tx, scope, voucherNo);
     await dropClearingTx(tx, scope, voucherNo);
     await replaceWriteSetTx(
