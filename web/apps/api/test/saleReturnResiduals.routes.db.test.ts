@@ -138,7 +138,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
       tenantId,
     );
     await sql(
-      `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_GROUP","TAX_NAME","TAX_PRC","TAX_AC") VALUES($1,'01','10',1,'GST','GST 3%',3,'GSTLED')`,
+      `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_GROUP","TAX_NAME","TAX_PRC","TAX_AC") VALUES($1,'01','10',0,'GST','GST 3%',3,'GSTLED')`,
       tenantId,
     );
     await sql(
