@@ -7854,12 +7854,41 @@
       "statusNote": "IN PROGRESS (phase one). Engine, Sales adapter and API are built and unit-tested; the DB/HTTP test and the frozen browser module were written without a local stack and run in CI only. No screen yet: every sales-report browser case is blocked. G246 (the web Sales Return writes its amount to NET_AMT instead of RTN_NET_AMT) is open and keeps the return variant empty for web-written returns."
     },
     {
+      "id": "N235",
+      "status": "implemented-unverified",
+      "action": "Sales line percentage labour and line precision follow TR_SALE CommPassTotal: LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, MsLbrRof) (TR_SALE.cs:11021) multiplied by the LBR_TYPE basis (:11084-11127; Sales Return :4963, :4975-4993), and ITM_AMT/LBR_AMT each one Math.Round to a hardcoded 0 decimals, 2 under ALL_ROF_REMOVE (:10343-10362), instead of TOT_AMT_ROF; the Sale and Sales Quotation previews use the same kernel.",
+      "parentLabels": "P1-core; L1; T03; WP-41",
+      "startAfter": [
+        "N233"
+      ],
+      "requiredProof": "The desktop oracle sales-line vectors pass with the eight labour.pct.* baseline entries removed; core and web unit tests; a DB test of the persisted LBR_RATE/LBR_AMT and the line precision (TOT_AMT_ROF ignored, ALL_ROF_REMOVE honoured); the sales-invoice browser case formula.percentage-labour; sales-invoice and sales-return modules green.",
+      "gapIds": "G247",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/packages/core/src/calc.ts",
+        "web/packages/core/src/saleAmount.ts",
+        "web/packages/core/src/roundingPolicy.ts",
+        "web/apps/api/src/modules/sales/sales.ts",
+        "web/apps/api/src/modules/sales/salesReturn.ts",
+        "web/apps/web/lib/lineRecalc.ts",
+        "web/packages/core/test/desktopOracle.salesLine.test.ts",
+        "web/packages/core/test/calc.test.ts",
+        "web/apps/api/test/lineComponentRounding.db.test.ts",
+        "web/apps/web/test/features/modules/salesInvoice.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Desktop oracle sales-line: KNOWN_MISMATCHES empty (the eight labour.pct.* entries removed and passing). sales-invoice module 34 applicable, 32 passed, 0 failed, 2 blocked (both pre-existing, unrelated); new case formula.percentage-labour passes. sales-return 25 of 26 (1 blocked, pre-existing; new case config.all-rof-remove-keeps-whole-rupees). gst-report, group-master and item-master expectations moved to whole-rupee lines and pass. Not modelled: the registration-serial branches (DM035NPDM, HM199NEPK). Desktop match 0% beyond the oracle vectors."
+    },
+    {
       "id": "N243",
       "status": "implemented-unverified",
       "action": "Sales Invoice closes its residual TR_SALE gaps: an unchanged reopen-and-save writes every stored SL_DATA column back (decision D8; a changed save writes DATA_TRFR/USER_UPDATE N and RE_TRFR from the stored transfer flag, TR_SALE.cs:15332-15342); getSale reloads every column and child DISPLAY_DATA reads (MEMB_COM_AC_CODE, WHOUT_COMM_BILL, OLD_GL/OLD_SL, ADV_AMT, SL_IDTL stones, UPI_DATA, CRNT_DATA, SL_ORD_ADJ, SL_PR_DETL.PR_COST); the writer adds UPI_DATA and CRNT_DATA rows (UPI_AMT and CRNT_ADJ_AMT are their sums, D1; the credit note joins BILL_OS, :19390) and writes order advances in the desktop shape (ORD_SIGN '-', ORD_AMT, many rows, D2) under the order lock with a 409 on over-use; old metal splits G from every other type and refuses a rate type other than N/F (:7667-7669, :19343-19351, G83); an edit deletes only the tables it rewrites; the screen sends the reopened tax code back (G82); PRINT_MAST file list, Set default, HUID/099/chosen-file template choice and OpAmt/ClAmt (D6).",
       "parentLabels": "P1-core; L1; WP-26; T01-T18",
       "startAfter": [
-        "N234"
+        "N235"
       ],
       "requiredProof": "Kernel vectors (old-metal grid) and DB tests red before the change and green after, expected values from TR_SALE.cs with arithmetic shown; the sales, sales order, sales return, finance and GST DB tests stay green; the sales-invoice browser module runs the residual cases in CI.",
       "gapIds": "G255, G83, G82",

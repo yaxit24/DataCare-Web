@@ -481,7 +481,7 @@ A WP in this phase is done when its module has **no blocked case** and its catal
 | WP | Item | Pri | Size | Depends |
 |---|---|---|---|---|
 | WP-40 | Golden-vector harness on `windows-latest` (O1 + O2) | P1 | M | — |
-| WP-41 | Formula families to L2, one PR per family | P1 | M each | WP-40 |
+| WP-41 | Formula families to L2, one PR per family (family 1 sales line: PR #235; percentage labour + line precision N235/G247, oracle baseline emptied) | P1 | M each | WP-40 |
 | WP-42 | Report oracle on a restored desktop database (O3) | P2 | L | owner OK |
 | WP-43 | Screen automation of the desktop executable (O4) | P3 | XL | owner OK |
 

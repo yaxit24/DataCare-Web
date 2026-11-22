@@ -3,6 +3,11 @@
 - 2026-11-22: an unchanged reopen-and-save writes the stored SL_DATA row back (D8); getSale reloads the member-commission columns, stones, UPI, credit-note and desktop-shape order rows and PR_COST; UPI_DATA and CRNT_DATA are written (sums = header figures, D1); order advances in the TR_SALE shape (D2, 409 on over-use); old metal G versus every other type, rate type N/F only (G83); the reopened tax code goes back (G82); PRINT_MAST print choice (D6).
 - Open (blocked in cases.md): quotation import, stepped Esc, old-metal Ctrl+D, header totals only for book type M (provisioned books have no BOOK_TYPE: owner question), fixture users without edit/print right, tender retry/rollback, two journeys, approval number import (D5). OpAmt/ClAmt follow the desktop Sum(CR - DR), so a debit balance is negative (the case listed magnitudes).
 
+## 2026-11-22 — Sales line percentage labour and line precision follow TR_SALE (N235 / G247, WP-41)
+
+- 2026-11-22: a Lbr% line derives LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, LBR_ROF) and multiplies the LBR_TYPE basis (`TR_SALE.cs:11021`, `:11084-11127`); it was LBR_PRC of the item amount. The eight `labour.pct.*` oracle baselines are gone and pass.
+- 2026-11-22: ITM_AMT and LBR_AMT round to a hardcoded 0 decimals (2 under ALL_ROF_REMOVE, `TR_SALE.cs:10343-10362`), no longer by TOT_AMT_ROF. Every Sale line on a blank-ALL_ROF_REMOVE company is now whole rupees (61,234.5 -> 61,234), so the sales-invoice, gst-report, group-master and item-master expectations moved; the gst-report midpoint case now sits on 954.135.
+
 ## 2026-11-09 — Order Cancel is the desktop TR_SL_ORD_ADJ voucher (N233 / G245, WP-02)
 
 - 2026-11-09: one voucher cancels the open advance of many orders (SL_ORD_ADJ, Order_Adj_Ledr/Rojmel, held-tag release), version-guarded

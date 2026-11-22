@@ -64,3 +64,20 @@ export function fineWeight(
 ): number {
   return round(new DecimalJs(netWt).times(touch).div(100), dp);
 }
+
+/**
+ * .NET Framework `Math.Round(double, digits)` on an IEEE double, as the desktop's `Conversion.Val` arithmetic runs:
+ * the value is multiplied by 10^digits in double precision and that double is rounded half to even, with no
+ * tolerance (referencesource mscorlib/system/math.cs `InternalRound`). So 11.25 x 2.8 / 100 = 0.31499999999999995
+ * rounds to 0.31, where an exact-decimal rounding of 0.315 gives 0.32.
+ */
+export function dotNetRoundDouble(value: number, digits: number): number {
+  if (!Number.isFinite(value)) throw new Error(`cannot round a non-finite value: ${value}`);
+  const power10 = 10 ** digits;
+  const scaled = value * power10;
+  const floor = Math.floor(scaled);
+  const fraction = scaled - floor;
+  const rounded =
+    fraction > 0.5 ? floor + 1 : fraction < 0.5 ? floor : floor % 2 === 0 ? floor : floor + 1;
+  return rounded / power10;
+}
