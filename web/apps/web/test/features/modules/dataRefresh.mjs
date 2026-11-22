@@ -5,7 +5,7 @@ import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
  * Feature: Company → Data Refresh (desktop MS_UPDATE).
  *
  * PR-1 deliberately proves only Approval Adj as a complete writer. Account and Stock expose exact proven
- * partial anomaly counts but cannot apply the unproved builder graphs. Field Update and Old Field await the
+ * partial anomaly counts but cannot apply the unproved builder graphs. Field Update runs its two class-a repairs; Old Field awaits the
  * PR-2 statement classification. Image Data is schema architecture, not a runtime DDL operation on the web.
  */
 const as = (user, slot) => ({
@@ -452,7 +452,6 @@ export const dataRefresh = {
         for (const id of [
           'data-refresh-account',
           'data-refresh-stock',
-          'data-refresh-field-update',
           'data-refresh-image-data',
           'data-refresh-old-field',
         ]) {
@@ -744,12 +743,6 @@ export const dataRefresh = {
       'T18',
       'MS_UPDATE.cs:2671-3047; playbook J23',
       'X27/P11-01: the remaining StockRefresh and Ac_Stock builder graph is not proved, so Stock remains preview-only.',
-    ),
-    blocked(
-      'journey.field-update-classification',
-      'T18',
-      'MS_UPDATE.cs:3958-8807; D-REF-3',
-      'X27/P11-01: Field Update awaits PR-2 statement-by-statement classification.',
     ),
     blocked(
       'journey.old-field-classification',

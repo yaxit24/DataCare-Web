@@ -555,6 +555,21 @@ Two rows are class a. Both repairs run per tenant, preview first (count plus a s
 - Web cause: column `DEFAULTER_AC` is `VARCHAR(255)` without default (init `migration.sql:117`); `seedCompany.ts:700` and `server.ts:76` insert AC_MAST without it, and the sales checks treat anything but `Y` as not defaulter (`wholesaleSaveChecks.ts:156`), so the NULL is harmless to those checks but is visible in reports and the loader.
 - Selection: `AC_MAST` where `tenant_id = $tenant AND "DEFAULTER_AC" IS NULL` (the desktop has no company filter; add `"CO_CODE"` from the session). New value `'N'`. Key: `row_id`. Second run changes nothing.
 
+## Results (N247 / G259, 2026-11-23)
+
+- **Class a built** in the data-repair registry as `data-refresh-field-update` (`web/apps/api/src/modules/utilities/dataRefreshFieldUpdate.ts`, risk medium). A1 and A2 run as one statement per tenant, company and location, so a row needing both is counted and written once. Preview: count plus up to 20 `AC_CODE` values. Apply: one transaction, audit row in `data_repair_run`, hash-bound to the preview, replay deduplicated. Desktop completion text kept verbatim (`Field Is Update ok....Please Re open Software`); the screen says "No records need adjustment." when the preview is clean.
+- **Decision on the open question:** NULL `AC_MAIN_GR` is left alone (faithful to the desktop `<>`); NULL `AC_GR` match is not repaired.
+- **Repair test** (`web/apps/api/test/dataRefreshFieldUpdate.db.test.ts`): controlled corruption of three AC_MAST rows, preview (3 rows), apply, whole-tenant diff of every tenant table shows only those three rows changed in `AC_MAIN_GR` / `DEFAULTER_AC` (plus the audit rows), a second tenant is byte-identical, second preview clean, replay deduplicated.
+- **Seed:** `web/apps/api/test/wp24FieldSeed.ts` provisions the tenant through `seedCompany`, `saveParty`, `createStockOut`, `createStockIn` and `createLabourInvoice` (the writers the Lite screens call).
+- **Class b queries** (`web/apps/api/test/dataRefreshFieldAnomalies.db.test.ts`):
+  - 169 `UPDATE BOOK_DATA` statements, parsed from `MS_UPDATE.cs` lines 5531-8757 and replayed in source order in a rolled-back transaction: one generic parameterised UPDATE per statement; a row that would change is an anomaly. All 169 parse.
+  - AC_GROUP (6134, with the OR bug fixed): INDIRECT INCOME group with blank or NULL main group: 0 rows.
+  - INOUT_DETL (7706) `DATA_TYPE IS NULL`: 0 rows (tenant has stock in and out rows).
+  - LBR_ISU_DETL (7733) `ORD_TAG_STK_ADD IS NULL`: 0 rows (tenant has a labour invoice).
+- **Findings (not hidden):**
+  - **F1, class a:** 36 web-provisioned books differ from the desktop end state of the `UPDATE BOOK_DATA` statements. Every change is NULL to value (`MENU_NAME` on all 36, `BOOK_TBL_NAME` / `BOOK_TBL_DETL` on many), none overwrites a stored value. Cause: `seedCompany.ts:776` inserts BOOK_DATA without `MENU_NAME`; `bookForms.ts` reads `MENU_NAME` for the rights catalogue. Not built here (needs an owner decision: fix the seed, add repair A3, or both). The test pins the 36 books as a shrink-only baseline.
+  - **F2, covered by A2:** a tenant provisioned by `seedCompany` has NULL `AC_MAST.DEFAULTER_AC` on its system accounts; A2 repairs it.
+
 ## Counts
 
 - Write statements classified: 520
@@ -562,7 +577,7 @@ Two rows are class a. Both repairs run per tenant, preview first (count plus a s
 - class b: 172
 - class c: 219
 - class schema: 127
-- Of class b: 169 are `UPDATE BOOK_DATA` metadata fixes, plus AC_GROUP (6134), INOUT_DETL (7706) and LBR_ISU_DETL (7733). Each needs its anomaly query to return 0 on a tenant populated through every Lite screen; none has been run in this study (no isolated database was started: study only).
+- Of class b: 169 are `UPDATE BOOK_DATA` metadata fixes, plus AC_GROUP (6134), INOUT_DETL (7706) and LBR_ISU_DETL (7733). Each needs its anomaly query to return 0 on a tenant populated through every Lite screen; run in N247, see Results.
 - Class c includes `UPDATE CONV_MAST` (6850, overwrites every row) and `UPDATE ITEM_MAST.APP_ITEM` (6916, column absent in web).
 
 ## Desktop weaknesses seen (do not port)
@@ -577,4 +592,5 @@ Two rows are class a. Both repairs run per tenant, preview first (count plus a s
 - **Old Field handler:** `btnFildUpdate2_Click` (`MS_UPDATE.cs:9412 {{private void btnFildUpdate2_Click(object sender, EventArgs e)}}`) runs from line 9412 to the line before `btnTagDiffSet_Click` (`MS_UPDATE.cs:32333 {{private void btnTagDiffSet_Click(object sender, EventArgs e)}}`), so lines 9412 to 32332 (about 22,900 lines). Caption: `MS_UPDATE.cs:1613 {{btnFildUpdate2.Text = "&Old Field"}}`; wired at `MS_UPDATE.cs:607 {{EventHandler eventHandler = btnFildUpdate2_Click;}}`. Its completion message is `MS_UPDATE.cs:16362 {{Old Field Is Update ok....Please Re open Software}}` (at line 16362, so the handler contains more than one block; not classified).
 - Guard extents not resolved (the IL goto layout hides block ends): vendor serial guards at lines 5907, 6084, 6253, 7018, 7029, 7175 and 8530; `MsItmMfg` at 5974; `MsMfgOneFormEntry` at 6057 and 6230; company short name `UAE` at 6736 and 7218. Statements inside them are listed as "none seen" and need a second pass. Example: `MS_UPDATE.cs:6736 {{if (Operators.CompareString(DC_Main.MCo_SName, "UAE", false) == 0)}}`.
 - Whether web `seedCompany.ts:776` BOOK_DATA seed already carries every MENU_NAME and BOOK_TBL_DETL the 169 class-b UPDATEs set: the anomaly queries must be run on a populated web tenant to settle b versus a.
-- Whether the owner wants NULL `AC_MAST.AC_MAIN_GR` filled in repair A1 (desktop does not).
+- Whether the owner wants NULL `AC_MAST.AC_MAIN_GR` filled in repair A1 (desktop does not): left unfilled for now.
+- F1 (BOOK_DATA metadata backfill): fix `seedCompany` or add repair A3.

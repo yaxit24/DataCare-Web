@@ -435,7 +435,7 @@ sections are part of this WP; the UAE variant is out of scope (Lite India).
 | WP-21 | Books | `MS_BOOK.cs` (3,122) | P1 | L | — | 13 | not started |
 | WP-22 | Year Create (corrected scope) | `MS_YEAR.cs` (1,596) | P2 | S | — | 14 + GB-07 | not started |
 | WP-23 | Balance TrFr | `BtmSchm.cs` (5,638) | P0 | L | WP-22 | 15 | accounts and parties only |
-| WP-24 | Data Refresh PR-2 | `MS_UPDATE.cs` (6 visible buttons) | P1 | L | — | 17 | 12/20 |
+| WP-24 | Data Refresh PR-2 (Field Update class-a repairs N247/G259) | `MS_UPDATE.cs` (6 visible buttons) | P1 | L | — | 17 | 12/20 |
 | WP-25 | Data Import (Lite Soft only) | `UT_IMPORT.cs` (Lite path ≈ 535 lines) | P2 | L | everything else; OD-6 | 19 | not started |
 
 **WP-21 Books.** Wide blast radius: every posting reads book slots. Run the **full** feature suite (on CI) before
