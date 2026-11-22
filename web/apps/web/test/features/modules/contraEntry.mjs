@@ -185,7 +185,10 @@ export const contraEntry = {
   inputs: [
     'web/apps/web/app/(app)/txn/contra/page.tsx',
     'web/apps/api/src/modules/finance/contra.ts',
+    'web/apps/api/src/modules/finance/contraClearing.ts',
     'web/apps/api/src/modules/finance/contraList.ts',
+    'web/apps/api/src/modules/finance/contraVoucher.ts',
+    'web/apps/api/src/routes/contra.ts',
     'web/apps/web/test/features/modules/contraEntry.mjs',
   ],
   fixtureManifest: FIXTURE_MANIFEST,
@@ -1258,7 +1261,7 @@ export const contraEntry = {
       'TR_CONTRA.cs:2902: a saved voucher is printed at once; :3002 without the print right the message is "You Have No Print Rights....."',
       async (ctx) => {
         const { page } = await ctx.session();
-        await enter(page, [
+        const savedNo = await enter(page, [
           { crdr: 'DR', account: 'BANK', amount: 818 },
           { crdr: 'CR', account: 'CASH', amount: 818 },
         ]);
@@ -1267,7 +1270,7 @@ export const contraEntry = {
         assert.ok((await frame.getAttribute('srcdoc')).includes('818'));
         const viewer = await ctx.session(as(USERS.printViewer.user));
         await openContra(viewer.page);
-        await viewer.page.getByLabel('Voucher No', { exact: true }).fill('00001');
+        await viewer.page.getByLabel('Voucher No', { exact: true }).fill(savedNo);
         await viewer.page.getByLabel('Voucher No', { exact: true }).press('Enter');
         await viewer.page.getByRole('button', { name: 'Print', exact: true }).click();
         await viewer.page.getByText('You Have No Print Rights.....', { exact: true }).waitFor();
