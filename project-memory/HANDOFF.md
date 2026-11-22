@@ -1,3 +1,11 @@
+## 2026-11-22 — Balance TrFr carries the desktop BtmSchm datasets (N236 / G248, WP-23)
+
+- 2026-11-22: Ac Balance (Rtl_AcOpbl) and Item Stock (BtnItmStk) carry by the desktop rules into the server-computed Transfer Year;
+  re-run replaces the target year only, one transaction under an advisory lock; closing(N) = opening(N+1) DB tests 42/42.
+- 2026-11-22: Tag Stock, Sales Order and Approval are implicit in the one-database web (Q1/Q8 decided 2026-11-22 by the architect, owner may override): the buttons run
+  the desktop selection, report the open count and write nothing. Q9: ITM_OPBL is read only by Item Opening, so the carry changes no
+  stock balance. Q2/Q3: offsetting balances are carried. Still open: Q4, Q6, AvgTouch.
+
 ## 2026-11-22 — Sales line percentage labour and line precision follow TR_SALE (N235 / G247, WP-41)
 
 - 2026-11-22: a Lbr% line derives LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, LBR_ROF) and multiplies the LBR_TYPE basis (`TR_SALE.cs:11021`, `:11084-11127`); it was LBR_PRC of the item amount. The eight `labour.pct.*` oracle baselines are gone and pass.

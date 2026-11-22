@@ -3059,6 +3059,7 @@ model ITM_OPBL {
   ITM_WEST_PRC Decimal? @db.Decimal(9, 4)
   DATA_TRFR    String?  @db.VarChar(1)
   DATA_TYPE    String?  @db.VarChar(1)
+  CARRIED_FROM String?  @db.VarChar(10)
 
   @@index([tenantId])
   @@map("ITM_OPBL")

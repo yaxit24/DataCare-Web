@@ -150,6 +150,15 @@
         "web/apps/api/src/routes/orderCancel.ts"
       ]
     },
+    "balanceTransfer": {
+      "covers": [
+        "web/apps/web/app/(app)/company/balance-transfer/page.tsx",
+        "web/apps/api/src/modules/ops/balanceTransfer.ts",
+        "web/apps/api/src/modules/ops/balanceTransferRules.ts",
+        "web/apps/api/src/modules/ops/balanceTransferSelect.ts",
+        "web/apps/api/src/routes/balanceTransfer.ts"
+      ]
+    },
     "partyOpening": {
       "covers": [
         "web/apps/web/app/(app)/txn/ac-opbl/page.tsx",
