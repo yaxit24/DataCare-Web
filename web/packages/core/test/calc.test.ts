@@ -105,3 +105,33 @@ describe('billTotals', () => {
     expect(t.roundOff).toBe(-0.3);
   });
 });
+
+describe('percentage labour rate in .NET double arithmetic (TR_SALE.cs:11021, review of PR #241)', () => {
+  // Math.Round(Val(ITM_RATE) * Val(LBR_PRC) / 100.0, MsLbrRof) runs on IEEE doubles; .NET Framework's
+  // Math.Round(double, 2) scales by 100 and rounds that double half to even, with no tolerance. Each raw value
+  // below is the double the desktop computes, written out.
+  const rof2 = resolveRoundingPolicy({ LBR_ROF: '2' });
+  it.each([
+    [11.25, 2.8, 0.31499999999999995, 0.31],
+    [17.4, 22.5, 3.9149999999999996, 3.91],
+    [32.2, 22.5, 7.245000000000001, 7.25],
+    [17.4, 12.5, 2.175, 2.17],
+    [32.2, 12.5, 4.025, 4.03],
+    [35.16, 12.5, 4.395, 4.39],
+    [76.6, 12.5, 9.575, 9.57],
+    [121, 7.5, 9.075, 9.07],
+    [147.64, 12.5, 18.455, 18.45],
+    [6200, 12, 744, 744],
+  ])('%s x %s %% = %s -> %s', (itemRate, pct, raw, rate) => {
+    expect((itemRate * pct) / 100).toBe(raw);
+    expect(percentageLabourRate(itemRate, pct, rof2)).toBe(rate);
+  });
+  it('the review vector: 1000 g net at the derived 0.31 is 310, not 320', () => {
+    const line = { netWt: 1000, ghatWt: 0, itemRate: 11.25, pct: 2.8, basis: 'N' };
+    expect(saleLineLabourAmount('percentage', line, rof2)).toBe(310);
+  });
+  it('a stored LBR_RATE wins over the percentage (TR_SALE.cs:10999 derives only when LBR_PRC changed)', () => {
+    const line = { netWt: 10, ghatWt: 0, itemRate: 100, pct: 10, rate: 50, basis: 'N' };
+    expect(saleLineLabourAmount('percentage', line, rof2)).toBe(500);
+  });
+});

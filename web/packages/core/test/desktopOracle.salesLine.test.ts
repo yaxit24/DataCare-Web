@@ -152,7 +152,8 @@ function webStage(v: Vector, stage: Stage, d: Record<string, string>): number | 
           ghatWt: cell(d, 17),
           withGhat,
           pcs: cell(input, 11),
-          rate: cell(input, 26),
+          // A vector row is new (LBR_PRC differs from the empty col 83), so the percentage derives the rate (:10999).
+          rate: type === 'percentage' ? undefined : cell(input, 26),
           pct,
           itemRate: policy.roundItemRate(cell(input, 22)),
           basis: text(input, 25),

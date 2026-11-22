@@ -6,6 +6,7 @@ import {
   computeLine,
 } from '../src/modules/sales/sales.js';
 import { ledgerBalance } from '../src/modules/posting/posting.js';
+import { resolveRoundingPolicy } from '@datacare/core';
 
 const key = { CO_CODE: '01', LC_CODE: '01', CO_YEAR: '2024', CO_BOOK: 'SAL', VCH_NO: '1' };
 
@@ -35,6 +36,29 @@ describe('sales builders', () => {
       type,
     );
     expect(c.metal).toBe(expected);
+  });
+  // Review of PR #241. A typed ITM_AMT is formatted "0.00" (TR_SALE.cs:9478, :9495); only an amount computed from the
+  // rate is rounded to the line precision (:10905-10932).
+  it('keeps an explicit item amount at 2 dp under a whole-rupee line precision', () => {
+    const policy = resolveRoundingPolicy({ ALL_ROF_REMOVE: 'N', TOT_AMT_ROF: '2' });
+    const c = computeLine({ itCode: 'I1', pcs: 1, metalAmount: 1000.55 }, policy, 'N');
+    expect(c.metal).toBe(1000.55);
+    expect(c.net).toBe(1000.55);
+  });
+  // TR_SALE.cs:10999: LBR_RATE is re-derived only when LBR_PRC changed; a stored or edited rate stands.
+  it('a percentage line with a labour rate uses that rate; without one it derives it', () => {
+    const policy = resolveRoundingPolicy({ LBR_ROF: '2' });
+    const line = {
+      itCode: 'I1',
+      netWt: 10,
+      rate: 100,
+      labourType: 'percentage' as const,
+      labourPct: 10,
+    };
+    const typed = computeLine({ ...line, labourRate: 50 }, policy, 'N', false, { basis: 'N' });
+    expect([typed.labour, typed.labourRate]).toEqual([500, 50]);
+    const derived = computeLine(line, policy, 'N', false, { basis: 'N' });
+    expect([derived.labour, derived.labourRate]).toEqual([100, 10]);
   });
   it('buildSaleLedger balances (no round-off)', () => {
     const lines = buildSaleLedger({

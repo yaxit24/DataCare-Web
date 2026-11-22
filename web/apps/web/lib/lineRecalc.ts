@@ -106,6 +106,8 @@ const n = (v: string | number | undefined): number => {
 /** True when the operator has actually supplied the cell, as opposed to leaving it blank. */
 const supplied = (v: string | number | undefined): boolean =>
   v !== undefined && v !== null && String(v).trim() !== '';
+const labourTypeIsPct = (line: { labourType?: string }): boolean =>
+  ['%', 'A'].includes(String(line.labourType ?? '').toUpperCase());
 
 const LABOUR_TYPES: Record<string, 'per_gram' | 'per_piece' | 'percentage' | 'fixed'> = {
   G: 'per_gram',
@@ -200,7 +202,8 @@ export function recalcLine(
     ghatWt: ghtWt,
     withGhat: options.labourIncludesGhat !== false,
     pcs: n(line.pcs),
-    rate: n(line.labourRate),
+    // A blank rate on a percentage row is derived from LBR_PRC; a typed one stands (TR_SALE.cs:10999).
+    rate: supplied(line.labourRate) ? n(line.labourRate) : labourTypeIsPct(line) ? undefined : 0,
     pct: n(line.labourPct),
     // A percentage derives LBR_RATE from the ITEM RATE and multiplies the LBR_TYPE basis (TR_SALE.cs:11021,
     // :11084-11127), as the API's computeLine does; it is not a percentage of the item amount.
@@ -213,7 +216,7 @@ export function recalcLine(
     : labourCharge(labourType, labourInput);
   const labourRate =
     labourType === 'percentage'
-      ? percentageLabourRate(itemRate, labourInput.pct, rounding)
+      ? (labourInput.rate ?? percentageLabourRate(itemRate, labourInput.pct, rounding))
       : undefined;
 
   // Net labour subtracts the line discount, by percentage or by amount (`TR_SALE.cs:11209`).
@@ -292,10 +295,36 @@ export function saleGridRowLabour(row: {
   labourRate?: number;
   labourFixed?: number;
 } {
-  if (saleLineLabourMode(row) === 'percentage') return { labourType: 'percentage' };
+  if (saleLineLabourMode(row) === 'percentage') {
+    // The Making/g cell holds LBR_RATE: derived when Lbr% was entered (editSaleGridRow) or typed after it.
+    return supplied(row.making)
+      ? { labourType: 'percentage', labourRate: n(row.making) }
+      : { labourType: 'percentage' };
+  }
   if (row.making) return { labourType: 'per_gram', labourRate: n(row.making) };
   if (row.labourType) {
     return { labourType: row.labourType, labourRate: row.labourRate, labourFixed: row.labourFixed };
   }
   return {};
+}
+
+/**
+ * One cell edit of a Sale / Sales Quotation row, in the desktop's event order (TR_SALE.cs:10999-11048).
+ *
+ * Only a CHANGED, non-zero Lbr% on a row with an item rate re-derives LBR_RATE into the Making/g cell, as
+ * `Math.Round(ITM_RATE x LBR_PRC / 100, LBR_ROF)` formatted "0.00" (:11021). A Making/g typed afterwards stands, and
+ * changing the item rate alone does not re-derive. Lbr% set to 0 or blank clears the rate (:11033-11048).
+ */
+export function editSaleGridRow<T extends { lbrPct?: string; making?: string; rate?: string }>(
+  row: T,
+  key: keyof T,
+  value: string,
+  policy?: RoundingPolicy,
+): T {
+  const next = { ...row, [key]: value };
+  if (key !== 'lbrPct' || n(value) === n(row.lbrPct)) return next;
+  if (n(value) === 0) return { ...next, making: '' };
+  if (n(row.rate) === 0) return next;
+  const itemRate = policy ? policy.roundItemRate(n(row.rate)) : n(row.rate);
+  return { ...next, making: percentageLabourRate(itemRate, n(value), policy).toFixed(2) };
 }

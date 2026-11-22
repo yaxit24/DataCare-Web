@@ -1,5 +1,5 @@
 import { Decimal as DecimalJs } from 'decimal.js';
-import { round, PRECISION } from './money.js';
+import { round, dotNetRoundDouble, PRECISION } from './money.js';
 import { roundSaleLineAmount } from './roundingPolicy.js';
 
 /** Structurally implemented by the API's company rounding policy. */
@@ -97,14 +97,12 @@ export function percentageLabourRate(
   pct: DecimalJs.Value | null | undefined,
   policy?: Pick<MoneyRoundingPolicy, 'roundLabourAmount' | 'roundLabourRate'>,
 ): number {
-  const raw = D(itemRate ?? 0)
-    .times(D(pct ?? 0))
-    .div(100)
-    .toNumber();
+  // IEEE double arithmetic, exactly as Val(col 22) * Val(col 24) / 100.0 runs on the desktop (TR_SALE.cs:11021).
+  const raw = (Number(itemRate ?? 0) * Number(pct ?? 0)) / 100;
   if (raw === 0) return 0;
   const rounded = policy
     ? (policy.roundLabourRate ?? policy.roundLabourAmount)(raw)
-    : round(raw, PRECISION.amount);
+    : dotNetRoundDouble(raw, PRECISION.amount);
   // The cell holds "0.00" text: a 3-decimal LBR_ROF is cut back to 2 when the rate is read again.
   return round(rounded, PRECISION.amount);
 }
@@ -169,8 +167,12 @@ function labourChargeExact(
       // (TR_SALE.cs:11021), and the LBR_TYPE basis multiplies that rate like any typed rate (:11084-11127).
       // Desktop oracle vectors labour.pct.* (run 42580947381): G, rtN gives 7853 where LBR_PRC of the item
       // amount gave 7570.
+      // TR_SALE.cs:10999 re-derives LBR_RATE only when LBR_PRC changed in this edit; otherwise the stored or edited
+      // rate stands. A caller that passes `rate` carries that rate; without one the percentage derives it.
       v = desktopLabourBasisQuantity(i.basis, i).times(
-        percentageLabourRate(i.itemRate, i.pct, policy),
+        i.rate != null && i.rate !== ''
+          ? D(i.rate)
+          : percentageLabourRate(i.itemRate, i.pct, policy),
       );
       break;
     case 'fixed':

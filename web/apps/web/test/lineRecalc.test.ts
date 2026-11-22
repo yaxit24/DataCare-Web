@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  editSaleGridRow,
   recalcLine,
   recalcSaleGridRow,
   saleGridRowLabour,
@@ -229,15 +230,39 @@ describe('sale percentage labour and line precision (desktop oracle, N235/G247)'
   });
 
   it('the Sale grid row previews and posts a Lbr% row as a percentage line', () => {
-    const row = { ...line, labourType: undefined, making: '50', lbrPct: '12' };
+    // A blank Making/g on a Lbr% row: the rate is derived (as on a row loaded without LBR_RATE).
+    const row = { ...line, labourType: undefined, making: '', lbrPct: '12' };
     const preview = recalcSaleGridRow(row, { roundingPolicy: policy, labourBasis: 'G' });
     expect(preview.labourRate).toBe(744);
     expect(preview.labourAmount).toBe(7853);
     expect(saleGridRowLabour(row)).toEqual({ labourType: 'percentage' });
+    // Entering the Lbr% writes 744.00 into Making/g, which then posts as the rate.
+    const entered = editSaleGridRow({ ...row, lbrPct: '' }, 'lbrPct', '12', policy);
+    expect(saleGridRowLabour(entered)).toEqual({ labourType: 'percentage', labourRate: 744 });
     expect(saleGridRowLabour({ making: '50', rate: '6200' })).toEqual({
       labourType: 'per_gram',
       labourRate: 50,
     });
     expect(recalcSaleGridRow({ netWt: '10', making: '50' }).labourAmount).toBe(500);
+  });
+});
+
+describe('Lbr% then Making/g follows the desktop event order (TR_SALE.cs:10999-11021)', () => {
+  const policy = resolveRoundingPolicy({ LBR_ROF: '2' });
+  const base = { netWt: '10', touch: '91.6', rateWith: 'N', rate: '100', making: '', lbrPct: '' };
+  it('entering Lbr% writes the derived rate into Making/g; a later Making/g stands', () => {
+    const withPct = editSaleGridRow(base, 'lbrPct', '10', policy);
+    expect(withPct.making).toBe('10.00');
+    const edited = editSaleGridRow(withPct, 'making', '50', policy);
+    expect(edited.making).toBe('50');
+    const preview = recalcSaleGridRow(edited, { roundingPolicy: policy, labourBasis: 'N' });
+    expect(preview.labourRate).toBe(50);
+    expect(preview.labourAmount).toBe(500);
+    expect(saleGridRowLabour(edited)).toEqual({ labourType: 'percentage', labourRate: 50 });
+  });
+  it('changing the item rate alone does not re-derive; clearing Lbr% clears the rate (:11033-11048)', () => {
+    const withPct = editSaleGridRow(base, 'lbrPct', '10', policy);
+    expect(editSaleGridRow(withPct, 'rate', '200', policy).making).toBe('10.00');
+    expect(editSaleGridRow(withPct, 'lbrPct', '', policy).making).toBe('');
   });
 });

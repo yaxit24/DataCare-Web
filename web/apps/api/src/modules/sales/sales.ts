@@ -45,6 +45,7 @@ import {
   saleItemAmount,
   saleItemAmountRounded,
   percentageLabourRate,
+  round,
   roundSaleLineAmount,
   type LabourBasisRule,
 } from '@datacare/core';
@@ -348,16 +349,18 @@ export function computeLine(
         withGhat: labourWithGhat,
       })
     : 0;
-  const labourRate =
-    line.labourType === 'percentage'
-      ? percentageLabourRate(rate, line.labourPct, policy)
-      : undefined;
-  // Each line COMPONENT is rounded at the Sale line precision, hardcoded by CommPassTotal: 0 decimals for ITM_AMT
-  // and LBR_AMT, or 2 under ALL_ROF_REMOVE (TR_SALE.cs:10343-10362, core `saleLineDecimals`). TOT_AMT_ROF rounds the
-  // bill totals only (:19192, :19274). All 245 real SL_DETL rows hold whole rupees. A Sales Return policy keeps 0.
+  // A stored/edited rate stands; LBR_PRC re-derives it only when the percentage changed (TR_SALE.cs:10999-11021).
+  const pct = line.labourType === 'percentage';
+  const labourRate = pct
+    ? (line.labourRate ?? percentageLabourRate(rate, line.labourPct, policy))
+    : undefined;
+  // COMPUTED line components round at the Sale line precision: 0, or 2 under ALL_ROF_REMOVE (TR_SALE.cs:10343-10362,
+  // :10905-10932); TOT_AMT_ROF rounds bill totals only (:19192). A Sales Return policy keeps 0.
   const roundAmount = (v: number): number => (policy ? roundSaleLineAmount(v, policy) : v);
-  // ITM_AMT: one Math.Round (TR_SALE.cs:10905-10932, oracle amount.mid.n3.495xr1).
   const metalRounded = (() => {
+    // A TYPED ITM_AMT stays as entered, "0.00" (TR_SALE.cs:9478, :9495); the Sales Return keeps whole rupees.
+    if (policy && line.metalAmount != null && labourBasis.rule !== 'saleReturn')
+      return round(metal, 2);
     if (!policy || line.metalAmount != null || amountType === '' || rate == null)
       return roundAmount(metal);
     const basis = saleAmountBasis(
@@ -1228,9 +1231,7 @@ async function writeSaleTx(
       ITM_WEST_PRC: num(c.in.westPct),
       ITM_FINE: c.calc.fine,
       LBR_PRC: num(c.in.labourPct),
-      // LBR_RATE is DERIVED for a percentage: Math.Round(ITM_RATE x LBR_PRC / 100, MsLbrRof) (TR_SALE.cs:11021), the
-      // rate the amount was computed from (core percentageLabourRate; ITM_RATE 6200, LBR_PRC 12 -> 744). It is read
-      // back when a voucher is reopened. Any other line keeps the typed rate.
+      // The rate the amount used: typed, or derived from LBR_PRC (TR_SALE.cs:11021); reopening reads it back.
       LBR_RATE:
         c.calc.labourRate ??
         effectiveLabourRate(
@@ -1239,9 +1240,8 @@ async function writeSaleTx(
           num(c.in.labourPct),
           roundingPolicy.labourDecimals,
         ),
-      // LBR_TYPE is the weight BASIS, not a pricing mode: G gross, N net, K kg, P pcs (varchar(1); TR_SALE.cs:11104,
-      // :11119; see shared/labourDesktop.ts). A percentage derives the rate above and keeps the company default
-      // basis, which its amount multiplied (computeLine's labourBasis).
+      // LBR_TYPE is the weight BASIS (G/N/K/P, TR_SALE.cs:11104, :11119; shared/labourDesktop.ts), the company's on
+      // a percentage line, which its amount multiplied (computeLine's labourBasis).
       LBR_TYPE: desktopLabourTypeFor(c.in.labourType, behavior.labourType),
       LBR_AMT: c.calc.labour,
       DISC_PRC: num(c.in.discountPct),

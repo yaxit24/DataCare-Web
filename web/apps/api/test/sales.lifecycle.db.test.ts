@@ -965,12 +965,12 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
   });
 
   it("persists unconfigured sale totals with today's 2dp policy in header and ledger", async () => {
-    // An explicit ITM_AMT is a line component too, so it is a whole rupee (TR_SALE.cs:10343-10362, half to even:
-    // 1000.55 -> 1001); the bill keeps the 2dp tax and total policy: 3% of 1001 = 30.03.
+    // An explicit ITM_AMT is kept as entered, formatted "0.00" (TR_SALE.cs:9478, :9495); only an amount computed from
+    // the rate is rounded to the line precision (:10905-10932). 3% of 1000.55 = 30.02.
     const result = await createSale(runtime, saleInput(), [
       { itCode: 'LOOSE', pcs: 1, metalAmount: 1000.55 },
     ]);
-    expect(result.totals).toMatchObject({ taxable: 1001, tax: 30.03, total: 1031.03 });
+    expect(result.totals).toMatchObject({ taxable: 1000.55, tax: 30.02, total: 1030.57 });
 
     const rows = (await owner.$queryRawUnsafe(
       `SELECT s."TOT_AMT"::float total,
@@ -982,7 +982,7 @@ databaseDescribe('database-backed sales voucher lifecycle', () => {
          FROM "SL_DATA" s WHERE s.tenant_id=$1 AND s."VCH_NO"='00008'`,
       TENANT,
     )) as Array<{ total: number; ledger_total: number }>;
-    expect(rows[0]).toEqual({ total: 1031.03, ledger_total: 1031.03 });
+    expect(rows[0]).toEqual({ total: 1030.57, ledger_total: 1030.57 });
   });
 
   it('deletes with one configured-book header audit plus one desktop-shaped row per sale line', async () => {

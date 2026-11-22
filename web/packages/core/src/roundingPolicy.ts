@@ -1,4 +1,5 @@
 import type { MoneyRoundingPolicy } from './calc.js';
+import { dotNetRoundDouble } from './money.js';
 
 /**
  * The company money-rounding rule, shared by the server (which reads the flags from CO_SET inside the
@@ -150,7 +151,8 @@ export function resolveRoundingPolicy(flags: RoundingFlagValues = {}): RoundingP
     },
     roundTaxAmount: (value) => roundNearest(value, taxDecimals, tax.configured),
     roundLabourAmount: (value) => roundNearest(value, labourDecimals, labour.configured),
-    roundLabourRate: (value) => roundNearest(value, labourDecimals, labour.configured),
+    // A derived LBR_RATE is Math.Round on the desktop's double (TR_SALE.cs:11021), not a decimal rounding.
+    roundLabourRate: (value) => dotNetRoundDouble(value, labourDecimals),
     roundItemRate: (value) => roundNearest(value, itemRateDecimals, itemRate.configured),
     roundBillTotal: (value) => roundNearest(value, billTotalDecimals, billTotal.configured),
     roundPurchaseRate: (value) =>

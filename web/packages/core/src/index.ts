@@ -2,6 +2,7 @@ export {
   PRECISION,
   round,
   roundHalfEven,
+  dotNetRoundDouble,
   fineWeight,
   decimalCellText,
   roundHalfEvenDecimal,

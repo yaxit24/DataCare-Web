@@ -19,7 +19,12 @@ import { VoucherChrome } from '../../../../components/VoucherChrome';
 import { VoucherList } from '../../../../components/VoucherList';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { companyFlag, useCompanySettings, companySetting } from '../../../../lib/companySettings';
-import { oldGoldRowAmount, recalcSaleGridRow, saleGridRowLabour } from '../../../../lib/lineRecalc';
+import {
+  editSaleGridRow,
+  oldGoldRowAmount,
+  recalcSaleGridRow,
+  saleGridRowLabour,
+} from '../../../../lib/lineRecalc';
 import { billTotals, lineNet as lineNetAmount } from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
 import { openDocument } from '../../../../lib/openDocument';
@@ -366,21 +371,11 @@ export default function SalesQuotationPage() {
   });
 
   const setLine = (i: number, k: keyof Line, v: string) =>
-    setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
+    // Lbr% re-derives Making/g only when it changes (TR_SALE.cs:10999-11021).
+    setLines((ls) => ls.map((l, j) => (j === i ? editSaleGridRow(l, k, v, roundingPolicy) : l)));
 
-  // live line preview: fine = net×touch/100, metal = fine×rate, making = net×making/g, net = metal+making
-  /**
-   * P5: the line preview now delegates to the shared recalculation kernel.
-   *
-   * The local arithmetic this replaces disagreed with the server in four ways, so the figures on
-   * screen were not the figures that posted:
-   *   - fine was rounded to 2dp; the server's fine precision is 3dp (`PRECISION.fine`)
-   *   - `westPct` was ignored entirely, while the server's fine base is (touch + wastage)
-   *   - making was `netWt x rate` with no ghat term, the same LBR_WITH_GHT understatement already
-   *     fixed on the server (blank default 'Y', so ghat counts unless switched off)
-   *   - it rounded locally instead of through the money kernel
-   * Delegating means there is one implementation, so the preview cannot drift from the posting again.
-   */
+  // P5: the live line preview delegates to the shared recalculation kernel (lib/lineRecalc.ts), so the figures on
+  // screen are the ones the server posts (fine 3dp with wastage, ghat in the labour base, the money kernel).
   const calc = (l: Line) => {
     // Lbr% rows follow TR_SALE.cs:11021/:11084-11127 and amounts the Sale line precision (:10343-10362).
     const r = recalcSaleGridRow(l, {
