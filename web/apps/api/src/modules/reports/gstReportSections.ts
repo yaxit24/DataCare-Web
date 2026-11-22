@@ -557,7 +557,8 @@ type Gstr3bCells = [
  *
  * Owner decisions (WP-19, 2026-11-22): every figure sums From..To (Q1; the desktop sums only the From date), All
  * Other ITC is purchases only (Q2; the query filters TRAN_TYPE 'P'), and 6.1 State/Ut Tax is the SGST total (Q3;
- * the desktop prints the CGST total there, RP_GST.cs:3800-3802).
+ * the desktop prints the CGST total there, RP_GST.cs:3800-3802). 3.1(a) and 3.2(1) count every TAX_SIGN '+' row as the
+ * desktop does, purchase returns included (architect decision Q10).
  */
 export function presentGstr3b(source: RawGstr3bResult): GstReportResult {
   const rows: GstDisplayRow[] = [];
@@ -674,7 +675,7 @@ export function presentGstr3b(source: RawGstr3bResult): GstReportResult {
       source: 'RP_GST',
       limitations: [
         'Every desktop GSTR-3B row is shown; the desktop computes figures only for 3.1(a), 3.1(d), the 3.1 total, 3.2(1), 4(A)(5) and 6.1, so the other rows are labels.',
-        'Figures sum From..To (owner decision WP-19 Q1); 4(A)(5) is purchases only (Q2); 6.1 State/Ut Tax is the SGST total (Q3).',
+        'Figures sum From..To (owner decision WP-19 Q1); 4(A)(5) is purchases only (Q2); 6.1 State/Ut Tax is the SGST total (Q3); 3.1(a) and 3.2(1) count every + row, purchase returns included (Q10).',
       ],
     },
   };

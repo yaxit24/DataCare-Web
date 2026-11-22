@@ -238,9 +238,10 @@ export async function gstHsnRowsTx(tx: Tx, input: GstReportInput): Promise<RawHs
  * The GSTR-3B figures of RP_GST.cs:3540-3704, each scoped by tenant, company, location, year, From..To (owner
  * decision WP-19 Q1) and the optional book/party filters. `R_CHARG` is read as 'N' when a row left it blank: the
  * desktop writes 'N' on every TAX_DATA row (Ac_Tax.cs), and web rows written before WP-19 left it empty.
- *   3.1(a) outward: TAX_SIGN '+', sales only, not reverse charge (the web predicate; see WP-19 decisions).
+ *   3.1(a) outward: every TAX_SIGN '+' row (RP_GST.cs:3541), which includes purchase returns (Ac_Tax.cs:233 writes
+ *          them 'P'/'+'): a purchase return issues a debit note, an outward supply of the returned goods (WP-19 Q10).
  *   3.1(d) reverse charge: R_CHARG 'Y'.
- *   3.2(1) inter-state to unregistered: the outward rows of a party with no GSTIN whose state is set and differs
+ *   3.2(1) inter-state to unregistered: the '+' rows of a party with no GSTIN whose state is set and differs
  *          from the company's (RP_GST.cs:3641-3642), grouped by state.
  *   4(A)(5) all other ITC: TAX_SIGN '-', R_CHARG 'N', purchases only (owner decision Q2).
  */
@@ -255,7 +256,7 @@ export async function gstGstr3bTx(tx: Tx, input: GstReportInput): Promise<RawGst
   ];
   const optional = optionalScope(input, 'a', params);
   const charge = `COALESCE(NULLIF(a."R_CHARG",''),'N')`;
-  const outward = `a."TRAN_TYPE"='S' AND a."TAX_SIGN"='+' AND ${charge}<>'Y'`;
+  const outward = `a."TAX_SIGN"='+'`;
   const reverse = `a."TRAN_TYPE"='P' AND ${charge}='Y'`;
   const itc = `a."TRAN_TYPE"='P' AND a."TAX_SIGN"='-' AND ${charge}='N'`;
   const aggregate = (prefix: string, predicate: string) => `

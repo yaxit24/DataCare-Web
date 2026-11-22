@@ -365,8 +365,8 @@ class CapturingRenderer implements PdfRenderer {
         reverseCharge: '',
         invoiceValue: 309,
       });
-    // Opposite-side returns must not leak into GSTR-3B outward or ITC: sales return is S/-, purchase
-    // return is P/+. RP_GST's sign-only SQL double-counted these; the web keeps the statutory transaction side.
+    // Opposite-side returns: a sales return is S/- and stays out of ITC (owner decision Q2); a purchase return is
+    // P/+ and counts in 3.1(a) as RP_GST's sign-only SQL counts it (architect decision Q10).
     await insertTax(TENANT, {
       coBook: 'GT3',
       vchNo: '30004',
@@ -679,10 +679,13 @@ class CapturingRenderer implements PdfRenderer {
         code: '(a)',
         nature: 'OutWord Taxable Supplies(Other then Zero rated)',
         placeOfSupply: '',
-        taxableValue: '1000.00',
-        igstAmount: '0.00',
+        // Every '+' row (RP_GST.cs:3541, Q10): NET_AMT on the IGST/SGST rows 1000 (30001 SGST) + 500 (30002 IGST,
+        // reverse charge, counted in (a) and (d) as the desktop does) + 888 (30005 purchase return SGST) = 2388.
+        taxableValue: '2388.00',
+        igstAmount: '15.00',
         cgstAmount: '15.00',
-        sgstAmount: '15.00',
+        // 15 (30001) + 88 (30005 purchase return).
+        sgstAmount: '103.00',
         cessAmount: '',
       },
       {
@@ -713,22 +716,28 @@ class CapturingRenderer implements PdfRenderer {
     expect(rows[5]).toMatchObject({
       table: '3.1',
       code: '',
-      taxableValue: '1500.00',
-      igstAmount: '15.00',
+      taxableValue: '2888.00',
+      igstAmount: '30.00',
       cgstAmount: '15.00',
-      sgstAmount: '15.00',
+      sgstAmount: '103.00',
     });
     const at = (code: string) => rows.find((row) => row.code === code)!;
     expect(at('Integrated Tax')).toMatchObject({
-      nature: '15.00',
+      nature: '30.00',
       placeOfSupply: '0.00',
       taxableValue: '6.00',
       igstAmount: '6.00',
     });
     expect(at('Centrel Tax').nature).toBe('15.00');
-    expect(at('State/Ut Tax').nature).toBe('15.00');
+    expect(at('State/Ut Tax').nature).toBe('103.00');
+    // 3.2(1): the reverse-charge '+' row of the unregistered Maharashtra party UINT.
+    expect(rows.find((row) => row.table === '3.2' && row.code === '(1)')).toMatchObject({
+      placeOfSupply: '27 - Maharashtra',
+      taxableValue: '500.00',
+      igstAmount: '15.00',
+    });
     expect(at('TCS')).toMatchObject({ nature: '', placeOfSupply: '', taxableValue: '' });
-    // 37 desktop rows: no unregistered inter-state party in book GT3, so 3.2(1) is its one label row.
+    // 37 desktop rows: one place of supply in 3.2(1).
     expect(rows).toHaveLength(37);
   });
 

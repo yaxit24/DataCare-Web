@@ -410,7 +410,7 @@ function microText(value) {
 /**
  * The GSTR-3B grid computed independently from TAX_DATA and the masters with the RP_GST formula
  * (RP_GST.cs:3540-3817) and the WP-19 decisions: From..To (Q1), All Other ITC purchases only (Q2), State/Ut Tax =
- * SGST total (Q3); 3.1(a) and 3.2(1) count sales rows only (the web predicate, open question Q10).
+ * SGST total (Q3); 3.1(a) and 3.2(1) count every '+' row, purchase returns included, as the desktop does (Q10).
  */
 async function expectedGstr3b(ctx, { fromDate, toDate }) {
   const [year] = await ctx.rows(
@@ -443,7 +443,8 @@ async function expectedGstr3b(ctx, { fromDate, toDate }) {
     `SELECT "STATE_CODE" code,"STATE_NAME" name FROM "STATE_MAST" WHERE tenant_id=$1 ORDER BY row_id`,
   );
   const charge = (row) => row.charge || 'N';
-  const outward = (row) => row.tran === 'S' && row.sign === '+' && charge(row) !== 'Y';
+  // Every '+' row, purchase returns included (RP_GST.cs:3541, architect decision Q10).
+  const outward = (row) => row.sign === '+';
   const reverse = (row) => row.tran === 'P' && charge(row) === 'Y';
   const itc = (row) => row.tran === 'P' && row.sign === '-' && charge(row) === 'N';
   // SUM(IIF(TAX_TYPE IN ('IGST','SGST'),NET_AMT,0)), SUM(IIF(TAX_TYPE='IGST',TAX_AMT,0)) ...; NULL over no rows.
@@ -606,7 +607,7 @@ const WP19_CASES = [
     'formula.gstr3b-every-row',
     'T03',
     'read-only',
-    'RP_GST.cs:3479-3818 builds every 3B row; figures only for 3.1(a) (:3540-3561), 3.1(d) (:3583-3604), the 3.1 total (:3614-3617), 3.2(1) (:3641-3664), 4(A)(5) (:3702-3725) and 6.1 (:3786-3802). WP-19 decisions: From..To (Q1), ITC purchases only (Q2), State/Ut Tax = SGST total (Q3)',
+    'RP_GST.cs:3479-3818 builds every 3B row; figures only for 3.1(a) (:3540-3561), 3.1(d) (:3583-3604), the 3.1 total (:3614-3617), 3.2(1) (:3641-3664), 4(A)(5) (:3702-3725) and 6.1 (:3786-3802). WP-19 decisions: From..To (Q1), ITC purchases only (Q2), State/Ut Tax = SGST total (Q3), 3.1(a)/3.2(1) every + row incl. purchase returns (Q10)',
     async (ctx) => {
       // Masters the case owns: an unregistered customer in another state feeds 3.2(1).
       await seedParty(ctx, {
