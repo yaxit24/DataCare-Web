@@ -18,7 +18,7 @@
 import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { carryForwardOpenings } from '../src/modules/masters/year.js';
+import { carryAcBalance, carryItemStock } from '../src/modules/ops/balanceTransfer.js';
 import { getPartyOpening, savePartyOpening } from '../src/modules/finance/partyOpening.js';
 import { diffTenant, snapshotTenant } from './support/tenantSnapshot.js';
 
@@ -40,16 +40,12 @@ const runtime = new PrismaClient({ datasources: { db: { url: process.env.DATABAS
 const scope = { tenantId: TENANT, coCode: CO, lcCode: LC, coYear: FROM };
 type Scope = typeof scope;
 
-/**
- * The writers under test. Bound to the web code of the day: the menu's party carry is `carryForwardOpenings`
- * (`POST /balance-transfer/openings`), and no Item Stock carry exists (gap 9).
- */
+/** The writers under test (modules/ops/balanceTransfer.ts), called with the session year being closed. */
 const carry = {
   ac: (toYear: string, s: Scope = scope) =>
-    carryForwardOpenings(runtime, s, s.coYear, toYear, USER) as Promise<unknown>,
-  item: async (_toYear: string, _s: Scope = scope): Promise<unknown> => {
-    throw new Error('the web has no Item Stock carry (gap 9)');
-  },
+    carryAcBalance(runtime, s, { toYear, mainUser: USER }) as Promise<unknown>,
+  item: (toYear: string, s: Scope = scope) =>
+    carryItemStock(runtime, s, { toYear, mainUser: USER }) as Promise<unknown>,
 };
 
 const exec = (tenant: string, sql: string, ...p: unknown[]) =>
@@ -308,7 +304,7 @@ databaseDescribe('Balance TrFr: Ac Balance (Rtl_AcOpbl)', () => {
       ['P8', '1'],
       ['X3', '3'],
       ['X5', '5'],
-    ])
+    ] as const)
       await account(code, gr);
   });
 
@@ -400,10 +396,7 @@ databaseDescribe('Balance TrFr: Ac Balance (Rtl_AcOpbl)', () => {
     await leg('P2', 700, 0, { dataType: 'A' });
     await leg('P2', 0, 200, { dataType: 'B' });
     await carry.ac(TO);
-    expect(heads(await opData())).toEqual([
-      row('P2', 700, 'C'),
-      row('P2', 200, 'D', { dt: 'B' }),
-    ]);
+    expect(heads(await opData())).toEqual([row('P2', 700, 'C'), row('P2', 200, 'D', { dt: 'B' })]);
   });
 
   it('balance-transfer.ac.rule.sign-cr-positive: a credit balance opens Cr and a debit balance Dr', async () => {
@@ -636,8 +629,8 @@ databaseDescribe('Balance TrFr: Ac Balance (Rtl_AcOpbl)', () => {
   it('balance-transfer.delete.target-year-only: openings of other years survive', async () => {
     await exec(
       TENANT,
-      `INSERT INTO "OP_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","AC_CODE","OP_AMT","OP_SIGN","DATA_TYPE")
-       VALUES ($1,$2,$3,$4,'000','00000','P1',123,'C','A'), ($1,$2,$3,$5,'000','00000','P1',456,'D','A')`,
+      `INSERT INTO "OP_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","AC_CODE","OP_AMT","OP_SIGN","FINE_BAL","FINE_SIGN","SL_FINE_BAL","SL_FINE_SIGN","DATA_TYPE")
+       VALUES ($1,$2,$3,$4,'000','00000','P1',123,'C',0,'D',0,'D','A'), ($1,$2,$3,$5,'000','00000','P1',456,'D',0,'D',0,'D','A')`,
       TENANT,
       CO,
       LC,
