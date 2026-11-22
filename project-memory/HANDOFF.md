@@ -2,7 +2,7 @@
 
 - 2026-11-22: the v2 archive and its manifest carry `tenantConfig` (datacare.tenant-config v1): nine tenant-shared configuration tables, column by
   column from an allowlist (unlisted columns are never read), and an excluded-secrets list written as null; sessions and receipts are never read.
-- 2026-11-22: password hashes (`LOGIN_MAST.LOGIN_PWD`) are excluded too, narrower than D37 as recorded: owner to confirm. data-backup module 14 of 18
+- 2026-11-22: password hashes (`LOGIN_MAST.LOGIN_PWD`) are excluded too (D37 amended 2026-11-22: offline-cracking risk; DR uses pg_dump). data-backup module 14 of 18
   applicable (4 blocked), `config.nextmain-allowlist` left the baseline; backup DB tests 31 of 31.
 
 ## 2026-11-09 — Order Cancel is the desktop TR_SL_ORD_ADJ voucher (N233 / G245, WP-02)

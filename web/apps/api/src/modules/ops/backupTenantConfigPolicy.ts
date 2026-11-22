@@ -11,10 +11,9 @@
  * the users' password hashes and every integration credential. Secret columns that live on company tables are
  * written as `null`; an administrator re-enters them (and users reset their passwords) after a restore.
  *
- * Note (N237/G249): D37 as recorded in LITE-MASTER-PLAN OD-4 kept the Argon2id hashes (`LOGIN_MAST.LOGIN_PWD`)
- * so that a restored company logs in as before. The WP-08 brief narrows that: no password hash leaves the
- * database in this downloadable archive. Physical disaster recovery (`pg_dump`, DR runbook) is unaffected.
- * Re-adding the hash is a one-line removal below and needs an owner decision.
+ * D37 as amended on 2026-11-22 (N237/G249): no password hash leaves the database in this downloadable archive,
+ * because an archive holding hashes enables offline cracking, restore from the archive is disabled, and disaster
+ * recovery uses `pg_dump`.
  *
  * `SECRET_COLUMN_PATTERN` is the guard: every column of the live schema whose name matches it must be listed
  * in `BACKUP_EXCLUDED_SECRETS`, live in an excluded table, or be reviewed as not secret in

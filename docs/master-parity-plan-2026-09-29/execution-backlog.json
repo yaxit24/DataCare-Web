@@ -7845,7 +7845,7 @@
         "web/apps/api/test/backupTenantConfig.db.test.ts",
         "web/apps/web/test/features/modules/dataBackup.mjs"
       ],
-      "statusNote": "IMPLEMENTED, not accepted. data-backup module: 18 applicable, 14 passed, 0 failed, 4 blocked (unchanged: rights.desktop-print-handoff, output.physical-save-confirmation, output.full-lite-fixture, journey.scratch-zero-diff). backupTenantConfig unit 10 of 10, DB 5 of 5. Narrower than D37 as recorded: the password hashes are excluded (owner to confirm)."
+      "statusNote": "IMPLEMENTED, not accepted. data-backup module: 18 applicable, 14 passed, 0 failed, 4 blocked (unchanged: rights.desktop-print-handoff, output.physical-save-confirmation, output.full-lite-fixture, journey.scratch-zero-diff). backupTenantConfig unit 10 of 10, DB 5 of 5. Password hashes excluded per D37 as amended on 2026-11-22."
     }
   ],
   "amendments": [
