@@ -1,3 +1,4 @@
+import { round } from '@datacare/core';
 import { buildRateCutRojmel, rojmelMetalFor } from '../shared/rojmel.js';
 import { buildWholesaleRojmel, type WholesaleRojmelLine } from '../shared/rojmelWholesale.js';
 import { versionOf, writeSetStateTx, type VersionedVoucherKey } from '../vouchers/version.js';
@@ -54,7 +55,7 @@ const asLine = (row: Row): WholesaleRojmelLine => ({
 
 /** The ROJ_MEL_DATA rows of one voucher: the desktop's own for a gold Wh Sales, else the earlier nine-type builder. */
 export function rateCutRojmelRows(a: RojmelRowsArgs): any[] {
-  const money2 = (v: unknown): number => Math.round((n(v) + Number.EPSILON) * 100) / 100;
+  const money2 = (v: unknown): number => round(n(v), 2);
   const f = a.figures as any;
   const ctx = {
     scope: a.scope,
