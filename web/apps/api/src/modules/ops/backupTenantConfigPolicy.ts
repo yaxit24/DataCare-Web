@@ -25,14 +25,24 @@
 export const TENANT_CONFIG_KIND = 'datacare.tenant-config' as const;
 export const TENANT_CONFIG_VERSION = 1 as const;
 
-/** Column names that look like a credential, key, token, hash or password (case-insensitive). */
+/**
+ * Column names that look like a credential, key, token, hash or password (case-insensitive), including names
+ * that end in `_KEY` or start with `AUTH_`.
+ */
 export const SECRET_COLUMN_PATTERN =
-  /(PWD|PASSW|PASSCODE|SECRET|TOKEN|API_?KEY|MAIL_API|CREDENTIAL|JTI|HASH|SALT|PRIVATE|OTP)/i;
+  /(PWD|PASSW|PASSCODE|SECRET|TOKEN|API_?KEY|MAIL_API|CREDENTIAL|JTI|HASH|SALT|PRIVATE|OTP|_KEY$|^AUTH_)/i;
 
 /** Columns matching the pattern that are reviewed as not secret (flags and timestamps, a preview digest). */
 export const REVIEWED_NON_SECRET_COLUMNS: readonly string[] = [
   'LOGIN_MAST.PASSWORD_RESET_REQUIRED',
   'LOGIN_MAST.PASSWORD_CHANGED_AT',
+  // Row identifiers and an endpoint URL that the wider `_KEY` / `AUTH_` names also match.
+  'AC_DATA.LEDR_KEY',
+  'BANK_RECONCILE.LEDR_KEY',
+  'ROJ_MEL_DATA.LEDR_KEY',
+  'ENTITY_IMAGE.ENTITY_KEY',
+  'ENTITY_IMAGE_REVISION.ENTITY_KEY',
+  'E_MAST.AUTH_URL',
 ];
 
 export interface TenantConfigAllowlistPolicy {

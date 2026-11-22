@@ -285,16 +285,19 @@ const RECEIPT_BODY = 'WP08-RECEIPT-BODY';
         `UPDATE "CO_MAST" SET "WP08_WEBHOOK_TOKEN"='WP08-NEW-TOKEN' WHERE tenant_id=$1`,
         TENANT_A,
       );
+      // Company tables are copied whole, so a new secret-looking company column refuses the backup at runtime.
+      await expect(backupCompany(runtime, TENANT_A, COMPANY)).rejects.toThrow(
+        /CO_MAST\.WP08_WEBHOOK_TOKEN/,
+      );
+      // Without that column the unreviewed configuration column is still not exported (allowlist, not denylist).
+      await owner.$executeRawUnsafe(`ALTER TABLE "CO_MAST" DROP COLUMN "WP08_WEBHOOK_TOKEN"`);
       const document = await backupCompany(runtime, TENANT_A, COMPANY);
-      const serialized = JSON.stringify(document);
-      // Allowlist, not denylist: the new configuration column is not exported.
       expect(document.tenantConfig!.tables.MENU_DATA?.rows).toHaveLength(1);
       expect(Object.keys(document.tenantConfig!.tables.MENU_DATA!.rows[0]!)).not.toContain(
         'WP08_NEW_SETTING',
       );
-      expect(serialized).not.toContain('WP08-UNREVIEWED-VALUE');
-      // Company tables are copied whole, so a new secret-looking company column must trip the guard.
-      expect(findSecretValuesInArchive(document)).toEqual(['CO_MAST.WP08_WEBHOOK_TOKEN']);
+      expect(JSON.stringify(document)).not.toContain('WP08-UNREVIEWED-VALUE');
+      expect(findSecretValuesInArchive(document)).toEqual([]);
     } finally {
       await owner.$executeRawUnsafe(
         `ALTER TABLE "MENU_DATA" DROP COLUMN IF EXISTS "WP08_NEW_SETTING"`,

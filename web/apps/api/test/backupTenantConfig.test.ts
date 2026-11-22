@@ -225,6 +225,25 @@ describe('Data Backup tenantConfig policy (D37, G64/N80)', () => {
     },
   );
 
+  it('refuses at runtime a company-table row with an unlisted secret-like column carrying a value', () => {
+    // The column is in the manifest (schema drift: a new column the policy never reviewed), so only the runtime
+    // secret check can stop it.
+    const withColumn = (name: string, value: string | null): CompanyBackupDocument => {
+      const document = fixture();
+      const co = document.manifest.tables.find((entry) => entry.name === 'CO_MAST')!;
+      co.columns.push(column(name, co.columns.length + 1));
+      document.manifest.fingerprint = schemaFingerprint(document.manifest.tables);
+      document.tables.CO_MAST!.rows[0]![name] = value;
+      return resealCompanyBackupDocument(document);
+    };
+    for (const name of ['NEW_WEBHOOK_TOKEN', 'SMS_GATEWAY_KEY', 'AUTH_CODE']) {
+      expect(() => assertCompanyBackupIntegrity(withColumn(name, 'leaked'))).toThrow(
+        new RegExp(`CO_MAST\\.${name}`),
+      );
+      expect(() => assertCompanyBackupIntegrity(withColumn(name, null))).not.toThrow();
+    }
+  });
+
   it('refuses a tenantConfig row with an unlisted column or another tenant', () => {
     const extra = fixture();
     extra.tenantConfig!.tables.USER_MAST!.rows[0]!.SVR_PWD = 'leaked';

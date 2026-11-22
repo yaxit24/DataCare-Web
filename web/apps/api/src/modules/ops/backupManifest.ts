@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import {
   BACKUP_EXCLUDED_SECRETS,
+  findSecretValuesInArchive,
   TENANT_CONFIG_ALLOWLIST,
   TENANT_CONFIG_KIND,
   TENANT_CONFIG_VERSION,
@@ -1019,6 +1020,12 @@ export function assertCompanyBackupIntegrity(document: CompanyBackupDocument): v
       });
   }
   assertTenantConfigIntegrity(document);
+  // Risk A at runtime: any value in a column whose name looks secret, listed or not, refuses the archive.
+  const secretValues = findSecretValuesInArchive(document);
+  if (secretValues.length)
+    throw new CompanyBackupValidationError(
+      `backup carries a value in secret-looking columns: ${secretValues.join(', ')}`,
+    );
   const sealed = resealCompanyBackupDocument(document);
   if (stableStringify(document.totals) !== stableStringify(sealed.totals))
     throw new CompanyBackupValidationError('backup totals are invalid');
