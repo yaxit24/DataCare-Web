@@ -162,6 +162,8 @@ export function applyOldMetalAmount<
 /** One reopened sale line as the screen's grid row (moved from txn/sales/page.tsx, size budget). */
 export function saleLineFromView(line: any): Record<string, unknown> {
   const str = (v: unknown) => (v == null || Number(v) === 0 ? '' : String(v));
+  // Stored figures the writer would otherwise re-derive go back as stored, zero included (lossless reopen).
+  const raw = (v: unknown) => (v == null ? '' : String(v));
   return {
     stones: line.stones,
     itCode: String(line.itCode ?? ''),
@@ -172,7 +174,12 @@ export function saleLineFromView(line: any): Record<string, unknown> {
     netWt: str(line.netWt),
     touch: str(line.touch),
     rate: str(line.rate),
-    making: line.labourType === 'per_gram' ? str(line.labourRate) : '',
+    // Reopen restores LBR_RATE, column 83 and ITM_AMT (PR #241), and ITM_FINE, so an unchanged save is identical
+    // (TR_SALE.cs:21091-21096, :14365-14412).
+    making: line.labourType === 'per_gram' || Number(line.labourPct) ? str(line.labourRate) : '',
+    lbrPctApplied: str(line.labourPct),
+    metalAmount: raw(line.metalAmount),
+    fineWt: raw(line.fineWt),
     designNo: String(line.designNo ?? ''),
     itmSize: String(line.itmSize ?? ''),
     lessWt: str(line.lessWt),
@@ -191,10 +198,10 @@ export function saleLineFromView(line: any): Record<string, unknown> {
     rateWith: String(line.rateWith ?? ''),
     rateType: String(line.rateType ?? ''),
     tagCost: str(line.tagCost),
-    karigarNetWt: str(line.karigarNetWt),
-    karigarTouch: str(line.karigarTouch),
-    karigarWestPct: str(line.karigarWestPct),
-    karigarFine: str(line.karigarFine),
+    karigarNetWt: raw(line.karigarNetWt),
+    karigarTouch: raw(line.karigarTouch),
+    karigarWestPct: raw(line.karigarWestPct),
+    karigarFine: raw(line.karigarFine),
     karigarName: String(line.karigarName ?? ''),
     employeeCode: String(line.employeeCode ?? ''),
     prCode: String(line.prCode ?? ''),
@@ -219,4 +226,14 @@ export function saleLineFromView(line: any): Record<string, unknown> {
     isuDbcd: String(line.isuDbcd ?? '') || undefined,
     isuSrno: Number(line.isuSrno ?? 0) || undefined,
   };
+}
+
+/** A reopened stored figure goes back as typed (zero included); a blank cell lets the writer derive it. */
+export const cell = (v: string | undefined): number | undefined =>
+  v == null || String(v).trim() === '' ? undefined : Number(v);
+
+const FINE_INPUTS = new Set(['grossWt', 'lessWt', 'netWt', 'touch', 'westPct', 'ghtWt', 'ghtPct']);
+/** A weight or touch edit drops the reopened ITM_FINE, as column 13 is recomputed on the desktop (TR_SALE.cs CommPassTotal). */
+export function keepFine<T extends { fineWt?: string }>(row: T, key: unknown): T {
+  return FINE_INPUTS.has(String(key)) ? { ...row, fineWt: '' } : row;
 }

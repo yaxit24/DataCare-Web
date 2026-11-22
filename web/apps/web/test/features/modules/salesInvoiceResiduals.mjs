@@ -3,15 +3,15 @@ import { PARTIES } from '../fixtures/catalogue.mjs';
 
 /**
  * WP-26 (N243, G255): Sales Invoice residual cases (orchestration/work/WP-26/cases.md). Expected values are worked by
- * hand from TR_SALE.cs (comments beside them). Line A: 10.000 g x 6,123.45 = 61,234.50 + labour 10.000 x 237.5 =
- * 2,375.00 -> net 63,609.50; GST 3% = 1,908.29; total 65,517.79.
+ * hand from TR_SALE.cs (comments beside them). Line A: metal Math.Round(10.000 x 6,123.45, 0) = 61,234 (Sale line
+ * precision, PR #241) + labour 2,375 -> net 63,609; GST 3% = 1,908.27; total 65,517.27.
  *
  * `h` carries the screen helpers of salesInvoice.mjs (openSales, pickParty, fillLine, save, loadVoucher, field, cell,
  * createOneLine, C, BOOK, LINE_A).
  */
 export function salesInvoiceResidualCases(h) {
   const { C, BOOK, LINE_A } = h;
-  const TOTAL = 65517.79;
+  const TOTAL = 65517.27;
   const one = async (ctx, sql, ...params) =>
     ctx.owner.$executeRawUnsafe(sql, ctx.tenantId, ...params);
   const sl = async (ctx, vchNo) =>
@@ -130,7 +130,7 @@ export function salesInvoiceResidualCases(h) {
             `SELECT "RATE_WITH" rw, "NET_AMT"::float net FROM "SL_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
             vchNo,
           );
-          assert.deepEqual(first, [{ rw: 'N', net: 63609.5 }]);
+          assert.deepEqual(first, [{ rw: 'N', net: 63609 }]); // Sale line precision 0 (PR #241)
           await page.reload(); // the company reopened: the screen now reads F
           await h.openSales(page);
           await h.loadVoucher(page, vchNo);
@@ -361,8 +361,8 @@ export function salesInvoiceResidualCases(h) {
         const vchNo = await saved(page);
         const head = await sl(ctx, vchNo);
         const rows = await child(ctx, 'CRNT_DATA', vchNo);
-        // credit sale (the fixture party is near its cash limit): BILL_OS = 65,517.79 - 4,000.00 = 61,517.79 (:19390)
-        assert.deepEqual([Number(head.CRNT_ADJ_AMT), Number(head.BILL_OS)], [4000, 61517.79]);
+        // credit sale (the fixture party is near its cash limit): BILL_OS = 65,517.27 - 4,000.00 = 61,517.27 (:19390)
+        assert.deepEqual([Number(head.CRNT_ADJ_AMT), Number(head.BILL_OS)], [4000, 61517.27]);
         assert.deepEqual(
           rows.map((r) => [r.CRNT_NO, Number(r.CRNT_AMT)]),
           [['CN1', 4000]],
@@ -374,7 +374,7 @@ export function salesInvoiceResidualCases(h) {
         );
         return {
           observation: `CRNT_ADJ_AMT ${head.CRNT_ADJ_AMT}, BILL_OS ${head.BILL_OS}, rows ${rows.length}`,
-          expected: { crnt: 4000, billOs: 61517.79 },
+          expected: { crnt: 4000, billOs: 61517.27 },
           database: { head: plain(head), rows: rows.map(plain) },
           downstream: { reopened: 'CN1' },
         };

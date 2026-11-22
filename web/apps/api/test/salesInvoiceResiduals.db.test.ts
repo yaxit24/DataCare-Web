@@ -16,8 +16,9 @@ import { tenantTables } from './support/tenantSnapshot.js';
  * WP-26 (N243, G255): Sales Invoice residuals, database layer. Cases are named by their id in
  * `orchestration/work/WP-26/cases.md`; every expected figure is worked by hand from TR_SALE.cs (comment beside it).
  *
- * Company: web-provisioned (`seedCompany`), so the G82 tax shape applies. Line A: 10.000 g x 6,123.45 = 61,234.50
- * metal + 10.000 x 237.5 = 2,375.00 labour = 63,609.50 net; GST 3% = 1,908.285 -> 1,908.29; total 65,517.79.
+ * Company: web-provisioned (`seedCompany`), so the G82 tax shape applies. Line A (Sale line precision 0, PR #241): metal
+ * Math.Round(10.000 x 6,123.45 = 61,234.50, 0) = 61,234 (half to even) + labour 10.000 x 237.5 = 2,375 -> net 63,609;
+ * GST 3% = 1,908.27; total 65,517.27.
  */
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const d = RUN ? describe : describe.skip;
@@ -28,7 +29,7 @@ const CO = '01';
 const LC = '01';
 const YEAR = '2024-2025';
 const DAY = '2024-04-10';
-const TOTAL = 65517.79;
+const TOTAL = 65517.27;
 const scopeOf = (tenantId = TENANT) => ({
   tenantId,
   coCode: CO,
@@ -90,8 +91,10 @@ function inputFromView(view: any, over: Record<string, unknown> = {}) {
     oldGold: view.oldGold,
     ...over,
   });
+  // As the screen sends it: a loose line's blank tag is omitted (the writer stores 'N').
   const lines = view.lines.map((l: any) => ({
     ...l,
+    tagNo: l.tagNo || undefined,
     labourType: l.labourType ?? 'per_gram',
     labourRate: l.labourRate,
   }));
@@ -265,16 +268,16 @@ d('WP-26 Sales Invoice residuals (database)', () => {
       ),
     );
     const view: any = await getSale(prisma, scopeOf(), r.vchNo);
-    // cash 65,517.79 -> 65,516.79 with kasar 1.00: BILL_OS = 65,517.79 - 65,516.79 - 1.00 = 0.00
-    const { input, lines } = inputFromView(view, { cashAmt: 65516.79, kasarAmount: 1 });
+    // cash 65,517.27 -> 65,516.27 with kasar 1.00: BILL_OS = 65,517.27 - 65,516.27 - 1.00 = 0.00
+    const { input, lines } = inputFromView(view, { cashAmt: 65516.27, kasarAmount: 1 });
     await editSale(prisma, input, lines, r.vchNo, view.version);
     const h = await header(r.vchNo);
     expect([h.DATA_TRFR, h.USER_UPDATE, h.RE_TRFR, Number(h.BILL_OS)]).toEqual(['N', 'N', 'Y', 0]);
   });
 
   it('sales-invoice.create.upi-rows: two UPI_DATA rows, UPI_AMT is their sum, BILL_OS 0', async () => {
-    // 1,000.00 + 2,500.50 = 3,500.50; cash = 65,517.79 - 3,500.50 = 62,017.29
-    const r = await createSale(prisma, sale({ upiRows: UPI, cashAmt: 62017.29 }), [LINE_A]);
+    // 1,000.00 + 2,500.50 = 3,500.50; cash = 65,517.27 - 3,500.50 = 62,016.77
+    const r = await createSale(prisma, sale({ upiRows: UPI, cashAmt: 62016.77 }), [LINE_A]);
     const h = await header(r.vchNo);
     expect([Number(h.UPI_AMT), Number(h.BILL_OS)]).toEqual([3500.5, 0]);
     const upi = await voucherRows('UPI_DATA', fmt(r.vchNo));
@@ -303,27 +306,27 @@ d('WP-26 Sales Invoice residuals (database)', () => {
 
   it('sales-invoice.refusal.upi-amount-mismatch: upiAmount 3,000.00 against rows 3,500.50 is refused, nothing written', async () => {
     await expect(
-      createSale(prisma, sale({ upiRows: UPI, upiAmt: 3000, cashAmt: 62517.29 }), [LINE_A]),
+      createSale(prisma, sale({ upiRows: UPI, upiAmt: 3000, cashAmt: 62516.77 }), [LINE_A]),
     ).rejects.toThrow(/upiAmount/);
     for (const t of ['SL_DATA', 'UPI_DATA', 'AC_DATA', 'MAIN_STOCK'])
       expect((await rows(`SELECT count(*)::int n FROM "${t}" WHERE "CO_BOOK"='SL'`))[0].n).toBe(0);
   });
 
   it('sales-invoice.edit.upi-row-amount and children.upi-two-rows-dissimilar: rows rewrite per voucher only', async () => {
-    const x = await createSale(prisma, sale({ upiRows: UPI, cashAmt: 62017.29 }), [LINE_A]);
+    const x = await createSale(prisma, sale({ upiRows: UPI, cashAmt: 62016.77 }), [LINE_A]);
     const y = await createSale(
       prisma,
       sale({
         upiRows: [{ acCode: 'WU1', acName: 'Paytm', type: 'PAYTM', upiId: 'e@f', amount: 700 }],
-        cashAmt: 64817.79,
+        cashAmt: 64817.27,
       }),
       [LINE_A],
     );
     let view: any = await getSale(prisma, scopeOf(), x.vchNo);
-    // row 1 1,000.00 -> 1,200.00: UPI 3,700.50, cash 65,517.79 - 3,700.50 = 61,817.29
+    // row 1 1,000.00 -> 1,200.00: UPI 3,700.50, cash 65,517.27 - 3,700.50 = 61,816.77
     let edit = inputFromView(view, {
       upiRows: [{ ...view.upiRows[0], amount: 1200 }, view.upiRows[1]],
-      cashAmt: 61817.29,
+      cashAmt: 61816.77,
     });
     await editSale(prisma, edit.input, edit.lines, x.vchNo, view.version);
     expect((await voucherRows('UPI_DATA', fmt(x.vchNo))).map((u) => Number(u.UPI_AMT))).toEqual([
@@ -333,9 +336,9 @@ d('WP-26 Sales Invoice residuals (database)', () => {
       Number((await header(x.vchNo)).UPI_AMT),
       Number((await header(x.vchNo)).BILL_OS),
     ]).toEqual([3700.5, 0]);
-    // delete row 1: one row left, renumbered SR_NO 1; cash 65,517.79 - 2,500.50 = 63,017.29
+    // delete row 1: one row left, renumbered SR_NO 1; cash 65,517.27 - 2,500.50 = 63,016.77
     view = await getSale(prisma, scopeOf(), x.vchNo);
-    edit = inputFromView(view, { upiRows: [view.upiRows[1]], cashAmt: 63017.29 });
+    edit = inputFromView(view, { upiRows: [view.upiRows[1]], cashAmt: 63016.77 });
     await editSale(prisma, edit.input, edit.lines, x.vchNo, view.version);
     const left = await voucherRows('UPI_DATA', fmt(x.vchNo));
     expect(left.map((u) => [u.SR_NO, u.UPI_AC_CODE, Number(u.UPI_AMT)])).toEqual([
@@ -347,23 +350,23 @@ d('WP-26 Sales Invoice residuals (database)', () => {
   });
 
   it('sales-invoice.create.credit-note and children.credit-note-two-rows: CRNT_ADJ_AMT joins the bill outstanding', async () => {
-    // CN1 4,000.00 + CN2 1,500.00 = 5,500.00; cash 65,517.79 - 5,500.00 = 60,017.79; BILL_OS 0.00
+    // CN1 4,000.00 + CN2 1,500.00 = 5,500.00; cash 65,517.27 - 5,500.00 = 60,017.27; BILL_OS 0.00
     const notes = [
       { crntNo: 'CN1', amount: 4000 },
       { crntNo: 'CN2', amount: 1500 },
     ];
-    const r = await createSale(prisma, sale({ creditNotes: notes, cashAmt: 60017.79 }), [LINE_A]);
+    const r = await createSale(prisma, sale({ creditNotes: notes, cashAmt: 60017.27 }), [LINE_A]);
     const other = await createSale(
       prisma,
-      sale({ creditNotes: [{ crntNo: 'CN3', amount: 800 }], cashAmt: 64717.79 }),
+      sale({ creditNotes: [{ crntNo: 'CN3', amount: 800 }], cashAmt: 64717.27 }),
       [LINE_A],
     );
     let h = await header(r.vchNo);
     expect([Number(h.CRNT_ADJ_AMT), Number(h.BILL_OS)]).toEqual([5500, 0]);
-    // remove CN2: CRNT_ADJ_AMT 4,000.00, cash 61,517.79 (65,517.79 - 4,000.00), BILL_OS 0.00
+    // remove CN2: CRNT_ADJ_AMT 4,000.00, cash 61,517.27 (65,517.27 - 4,000.00), BILL_OS 0.00
     const view: any = await getSale(prisma, scopeOf(), r.vchNo);
     expect(view.creditNotes.map((c: any) => c.crntNo)).toEqual(['CN1', 'CN2']);
-    const edit = inputFromView(view, { creditNotes: [view.creditNotes[0]], cashAmt: 61517.79 });
+    const edit = inputFromView(view, { creditNotes: [view.creditNotes[0]], cashAmt: 61517.27 });
     await editSale(prisma, edit.input, edit.lines, r.vchNo, view.version);
     h = await header(r.vchNo);
     expect([Number(h.CRNT_ADJ_AMT), Number(h.BILL_OS)]).toEqual([4000, 0]);
@@ -376,7 +379,7 @@ d('WP-26 Sales Invoice residuals (database)', () => {
   });
 
   it('sales-invoice.create.order-advance-two-orders and children.order-advance-two-orders (desktop shape, D2)', async () => {
-    // O1 5,000.00 + O2 3,000.00 = 8,000.00; cash 65,517.79 - 8,000.00 = 57,517.79
+    // O1 5,000.00 + O2 3,000.00 = 8,000.00; cash 65,517.27 - 8,000.00 = 57,517.27
     const r = await createSale(
       prisma,
       sale({
@@ -384,13 +387,13 @@ d('WP-26 Sales Invoice residuals (database)', () => {
           { ordNo: '00001', amount: 5000 },
           { ordNo: '00002', amount: 3000 },
         ],
-        cashAmt: 57517.79,
+        cashAmt: 57517.27,
       }),
       [LINE_A],
     );
     const z = await createSale(
       prisma,
-      sale({ orders: [{ ordNo: '00003', amount: 2000 }], cashAmt: 63517.79 }),
+      sale({ orders: [{ ordNo: '00003', amount: 2000 }], cashAmt: 63517.27 }),
       [LINE_A],
     );
     let h = await header(r.vchNo);
@@ -416,8 +419,8 @@ d('WP-26 Sales Invoice residuals (database)', () => {
       ['00001', 5000],
       ['00002', 3000],
     ]);
-    // remove O2: ADV_AMT 5,000.00, cash 60,517.79 (65,517.79 - 5,000.00)
-    const edit = inputFromView(view, { orders: [view.orders[0]], cashAmt: 60517.79 });
+    // remove O2: ADV_AMT 5,000.00, cash 60,517.27 (65,517.27 - 5,000.00)
+    const edit = inputFromView(view, { orders: [view.orders[0]], cashAmt: 60517.27 });
     await editSale(prisma, edit.input, edit.lines, r.vchNo, view.version);
     h = await header(r.vchNo);
     expect([Number(h.ADV_AMT), Number(h.BILL_OS)]).toEqual([5000, 0]);
@@ -436,7 +439,7 @@ d('WP-26 Sales Invoice residuals (database)', () => {
             { ordNo: '00001', amount: 1000 },
             { ordNo: '00001', amount: 1000 },
           ],
-          cashAmt: 63517.79,
+          cashAmt: 63517.27,
         }),
         [LINE_A],
       ),
@@ -446,7 +449,7 @@ d('WP-26 Sales Invoice residuals (database)', () => {
 
   it('sales-invoice.concurrency.order-advance-double-use: two 4,000.00 uses of a 5,000.00 advance, one wins', async () => {
     const one = () =>
-      createSale(prisma, sale({ orders: [{ ordNo: '00007', amount: 4000 }], cashAmt: 61517.79 }), [
+      createSale(prisma, sale({ orders: [{ ordNo: '00007', amount: 4000 }], cashAmt: 61517.27 }), [
         LINE_A,
       ]);
     const results = await Promise.allSettled([one(), one()]);
@@ -464,11 +467,11 @@ d('WP-26 Sales Invoice residuals (database)', () => {
   it('sales-invoice.create.old-metal-gold-silver and oldmetal.header-gold-silver-split (G83, G8d)', async () => {
     // R1 OLDG type G net 10.000 amount 54,000.00; R2 OLDS type S net 100.000 amount 7,200.00;
     // R3 OLDP type P net 5.000 rate 200 N = 1,000.00; a blank row (net 0, amount 0) is not written.
-    // cash = 65,517.79 - 54,000.00 - 8,200.00 = 3,317.79
+    // cash = 65,517.27 - 54,000.00 - 8,200.00 = 3,317.27
     const r = await createSale(
       prisma,
       sale({
-        cashAmt: 3317.79,
+        cashAmt: 3317.27,
         oldGold: [
           { metal: 'G', itCode: 'OLDG', netWt: 10, amount: 54000, rateType: 'N' },
           { metal: 'S', itCode: 'OLDS', netWt: 100, amount: 7200, rateType: 'N' },
@@ -503,11 +506,11 @@ d('WP-26 Sales Invoice residuals (database)', () => {
   });
 
   it('sales-invoice.oldmetal.one-figure-detail-header-ledger: NET_AMT = OLD_GL_AMT = ledger line = 54,000.00', async () => {
-    // Round(10.000 x 5,400, 0) = 54,000.00; cash 65,517.79 - 54,000.00 = 11,517.79; BILL_OS 0.00
+    // Round(10.000 x 5,400, 0) = 54,000.00; cash 65,517.27 - 54,000.00 = 11,517.27; BILL_OS 0.00
     const r = await createSale(
       prisma,
       sale({
-        cashAmt: 11517.79,
+        cashAmt: 11517.27,
         oldGold: [{ metal: 'G', itCode: 'OLDG', netWt: 10, rate: 5400, rateType: 'N', amount: 0 }],
       }),
       [LINE_A],
@@ -530,7 +533,7 @@ d('WP-26 Sales Invoice residuals (database)', () => {
         createSale(
           prisma,
           sale({
-            cashAmt: 11517.79,
+            cashAmt: 11517.27,
             oldGold: [{ itCode: 'OLDG', netWt: 10, rate: 5400, rateType, amount: 0 }],
           }),
           [LINE_A],
@@ -543,7 +546,7 @@ d('WP-26 Sales Invoice residuals (database)', () => {
     const r = await createSale(
       prisma,
       sale({
-        cashAmt: 3317.79,
+        cashAmt: 3317.27,
         oldGold: [
           { metal: 'G', itCode: 'OLDG', netWt: 10, amount: 54000, rateType: 'N', prCost: 52000 },
           { metal: 'S', itCode: 'OLDS', netWt: 100, amount: 7200, rateType: 'N', prCost: 6000 },
@@ -577,7 +580,7 @@ d('WP-26 Sales Invoice residuals (database)', () => {
     const one = await createSale(
       prisma,
       sale({
-        cashAmt: 11517.79,
+        cashAmt: 11517.27,
         oldGold: [
           { itCode: 'OLDG', netWt: 10, rate: 5400, rateType: 'N', amount: 0, prCost: 52000 },
         ],
@@ -585,10 +588,10 @@ d('WP-26 Sales Invoice residuals (database)', () => {
       [LINE_A],
     );
     view = await getSale(prisma, scopeOf(), one.vchNo);
-    // cash 65,517.79 - 59,400.00 = 6,117.79
+    // cash 65,517.27 - 59,400.00 = 6,117.27
     edit = inputFromView(view, {
       oldGold: [{ ...view.oldGold[0], netWt: 11, amount: 0 }],
-      cashAmt: 6117.79,
+      cashAmt: 6117.27,
     });
     await editSale(prisma, edit.input, edit.lines, one.vchNo, view.version);
     const h = await header(one.vchNo);
@@ -602,7 +605,7 @@ d('WP-26 Sales Invoice residuals (database)', () => {
     const r = await createSale(
       prisma,
       sale({
-        cashAmt: 11517.79,
+        cashAmt: 11517.27,
         oldGold: [
           {
             itCode: 'OLDG',
@@ -642,7 +645,7 @@ d('WP-26 Sales Invoice residuals (database)', () => {
   });
 
   it('sales-invoice.reopen.desktop-saved-stones-and-source-tables: 9 rows in six tables survive an unchanged save', async () => {
-    // UPI 3,500.50 + credit note 4,000.00 + orders 8,000.00 = 15,500.50; cash 65,517.79 - 15,500.50 = 50,017.29
+    // UPI 3,500.50 + credit note 4,000.00 + orders 8,000.00 = 15,500.50; cash 65,517.27 - 15,500.50 = 50,016.77
     const r = await createSale(
       prisma,
       sale({
@@ -652,7 +655,7 @@ d('WP-26 Sales Invoice residuals (database)', () => {
           { ordNo: '00001', amount: 5000 },
           { ordNo: '00002', amount: 3000 },
         ],
-        cashAmt: 50017.29,
+        cashAmt: 50016.77,
       }),
       [LINE_A],
     );
@@ -732,7 +735,7 @@ d('WP-26 Sales Invoice residuals (database)', () => {
     const make = () =>
       createSale(
         prisma,
-        sale({ upiRows: UPI, creditNotes: [{ crntNo: 'CN1', amount: 4000 }], cashAmt: 58017.29 }),
+        sale({ upiRows: UPI, creditNotes: [{ crntNo: 'CN1', amount: 4000 }], cashAmt: 58016.77 }),
         [LINE_A],
       );
     const gone = await make();
@@ -762,10 +765,10 @@ d('WP-26 Sales Invoice residuals (database)', () => {
 
   it('sales-invoice.rights.tender-rows-other-tenant: another tenant cannot read or rewrite the voucher', async () => {
     await seedMasters(OTHER);
-    const theirs = await createSale(prisma, sale({ upiRows: UPI, cashAmt: 62017.29 }, OTHER), [
+    const theirs = await createSale(prisma, sale({ upiRows: UPI, cashAmt: 62016.77 }, OTHER), [
       LINE_A,
     ]);
-    await createSale(prisma, sale({ upiRows: UPI, cashAmt: 62017.29 }, OTHER), [LINE_A]);
+    await createSale(prisma, sale({ upiRows: UPI, cashAmt: 62016.77 }, OTHER), [LINE_A]);
     const count = () =>
       withTenant(prisma, OTHER, (tx: any) =>
         tx.$queryRawUnsafe(`SELECT count(*)::int n FROM "UPI_DATA"`),
@@ -773,7 +776,7 @@ d('WP-26 Sales Invoice residuals (database)', () => {
     const before = await count();
     await expect(getSale(prisma, scopeOf(), theirs.vchNo + 1)).rejects.toThrow(/not found/);
     await expect(
-      editSale(prisma, sale({ upiRows: UPI, cashAmt: 62017.29 }), [LINE_A], theirs.vchNo + 1, 'x'),
+      editSale(prisma, sale({ upiRows: UPI, cashAmt: 62016.77 }), [LINE_A], theirs.vchNo + 1, 'x'),
     ).rejects.toThrow();
     expect(await count()).toEqual(before);
   });
@@ -841,8 +844,8 @@ d('WP-26 Sales Invoice residuals (database)', () => {
   });
 
   it('sales-invoice.print.opening-closing-parameters: OpAmt/ClAmt are Sum(CR - DR) before and up to the voucher', async () => {
-    // Opening 10,000.00 Dr on an earlier day; a credit sale of 65,517.79 Dr. Desktop MsAcBal sums CR - DR, so a debit
-    // balance is negative: OpAmt = -10,000.00; ClAmt = -(10,000.00 + 65,517.79) = -75,517.79.
+    // Opening 10,000.00 Dr on an earlier day; a credit sale of 65,517.27 Dr. Desktop MsAcBal sums CR - DR, so a debit
+    // balance is negative: OpAmt = -10,000.00; ClAmt = -(10,000.00 + 65,517.27) = -75,517.27.
     await withTenant(prisma, TENANT, (tx: any) =>
       tx.$executeRawUnsafe(
         `INSERT INTO "AC_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","AC_CODE","DR_AMT","CR_AMT","ENTRY_TIME")
@@ -857,7 +860,7 @@ d('WP-26 Sales Invoice residuals (database)', () => {
     const data = await salesBillData(prisma, { ...scopeOf(), vchNo: fmt(r.vchNo) } as any, {
       balances: true,
     });
-    expect(data?.balances).toEqual({ opAmt: -10000, clAmt: -75517.79 });
+    expect(data?.balances).toEqual({ opAmt: -10000, clAmt: -75517.27 });
     const direct = await withTenant(prisma, TENANT, (tx: any) =>
       salePartyBalancesTx(tx, scopeOf() as any, 'WCUST', new Date('2024-04-01T00:00:00Z')),
     );
@@ -905,7 +908,7 @@ d('WP-26 Sales Invoice residuals (database)', () => {
     ).rejects.toThrow(/not found/);
   });
 
-  it('cash limit: the fourth cash sale of 65,517.79 is refused (3 x 65,517.79 = 196,553.37; + 65,517.79 > 200,000), UPI rows are not cash', async () => {
+  it('cash limit: the fourth cash sale of 65,517.27 is refused (3 x 65,517.27 = 196,553.37; + 65,517.27 > 200,000), UPI rows are not cash', async () => {
     for (let i = 0; i < 3; i++) await createSale(prisma, sale({ cashAmt: TOTAL }), [LINE_A]);
     await expect(createSale(prisma, sale({ cashAmt: TOTAL }), [LINE_A])).rejects.toThrow(
       /Cash Recieved Limit Amount/,
@@ -914,5 +917,40 @@ d('WP-26 Sales Invoice residuals (database)', () => {
       LINE_A,
     ]);
     expect(Number((await header(upi.vchNo)).UPI_AMT)).toBe(TOTAL);
+  });
+  it('review #250: a line with typed ITM_AMT and ITM_FINE reopens and saves unchanged across SL_DETL, MAIN_STOCK, ROJ_MEL_DATA, AC_DATA, TAX_DATA', async () => {
+    // Desktop typed figures (TR_SALE.cs:14365-14412 reload them): ITM_AMT 61,000.00 instead of 10 x 6,123.45, fine 9.200.
+    const r = await createSale(prisma, sale({ cashAmt: 0 }), [
+      { ...LINE_A, metalAmount: 61000, fineWt: 9.2, karigarNetWt: 0 },
+    ]);
+    const no = fmt(r.vchNo);
+    const tables = ['SL_DATA', 'SL_DETL', 'MAIN_STOCK', 'ROJ_MEL_DATA', 'AC_DATA', 'TAX_DATA'];
+    const dump = async () => {
+      const out: Record<string, unknown> = {};
+      for (const t of tables)
+        out[t] = strip(
+          await rows(
+            `SELECT * FROM "${t}" WHERE "CO_BOOK"='SL' AND "VCH_NO"=$1 ORDER BY 2,3,4`,
+            no,
+          ),
+          ['VCH_TIME', 'ENTRY_TIME'],
+        );
+      return out;
+    };
+    const before = await dump();
+    expect(
+      (before.SL_DETL as any[]).map((d) => [
+        Number(d.ITM_AMT),
+        Number(d.ITM_FINE),
+        Number(d.KR_NET_WT),
+      ]),
+    ).toEqual([[61000, 9.2, 0]]);
+    const view: any = await getSale(prisma, scopeOf(), r.vchNo);
+    expect([view.lines[0].metalAmount, view.lines[0].fineWt, view.lines[0].karigarNetWt]).toEqual([
+      61000, 9.2, 0,
+    ]);
+    const edit = inputFromView(view);
+    await editSale(prisma, edit.input, edit.lines, r.vchNo, view.version);
+    expect(await dump()).toEqual(before);
   });
 });
