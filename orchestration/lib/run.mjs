@@ -121,6 +121,11 @@ export function worktreeFor(branch, base = 'origin/main', { fetch = true } = {})
     return dir;
   }
   fs.mkdirSync(wtRoot, { recursive: true });
+  // A full checkout is about 1-2 GB; a full disk breaks every other session's builds and databases too.
+  const st = fs.statfsSync(wtRoot);
+  const freeGb = (st.bavail * st.bsize) / 1024 ** 3;
+  const minGb = Number(process.env.DATACARE_MIN_FREE_GB || 4);
+  if (freeGb < minGb) throw new Error(`only ${freeGb.toFixed(1)} GB free at ${wtRoot} (need ${minGb}): free disk before creating a worktree`);
   if (fetch) git(['fetch', 'origin', '--prune'], REPO, { allowFail: true });
   const has = (ref) => git(['rev-parse', '--verify', '--quiet', ref], REPO, { allowFail: true }).code === 0;
   // Two runs started together race on .git/config: retry while another git holds its lock.
