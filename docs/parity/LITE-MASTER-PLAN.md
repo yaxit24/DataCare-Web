@@ -465,7 +465,7 @@ at the repair lock; add one that exists only in test builds.
 | WP-26 | Sales | Lossless reopen on the Sales Invoice screen, tender/source branches, G83 old-metal header valuation, G82 tax codes on web-provisioned companies, Crystal variants, 3 blocked cases | P1 | L | 29/32 |
 | WP-27 | Sales Return | Lossless edit, the 5 s transaction budget on create, admissibility, residuals, 2 blocked | P1 | L | 23/25 |
 | WP-28 | Purchase | The 95-column hallmark receive branch, lossless reopen, family-filtered books | P1 | L | 31/31 |
-| WP-29 | Purchase Rtn | G95 (HSN tax on the print), G96 (grid Enter), 2 blocked | P2 | M | 20/22 |
+| WP-29 | Purchase Rtn | G95 (HSN tax on the print), G96 (grid Enter), 2 blocked | P2 | M | PR open (N245/G257): 33 cases, 1 blocked (T15, N166) |
 | WP-30 | Wh Sales | Hand-typed item-detail rows for loose items, SL_IDTL on the print, fine kasar, Rojmel alignment | P2 | M | 27/27 |
 | WP-31 | Contra Entry | Multi-line grid, lifecycle, list, print, account roles (G37) | P2 | M | 25/25 |
 | WP-32 | Tag Opening, Only Tag Entry | 5 blocked cases, tag label print, G217 karigar block sources, COL_MAST grid | P2 | M | 14/19 |
