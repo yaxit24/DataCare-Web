@@ -1,3 +1,10 @@
+## 2026-11-22 — Books is the desktop MS_BOOK screen with its posting slots (N240 / G252, WP-21)
+
+- 2026-11-22: /masters/books is its own page with the slot grid; /masters/books-master writes header and slots in one transaction with the
+  MS_BOOK save/delete checks and texts; generic BOOK_DATA writes are refused. D4 family lock on a book with vouchers is a web message.
+- 2026-11-22: provisioning adds the template slots (OIN/OEX 2-3, TSP 1-9 with 6 SALES / 7 PURCHASE / 8 SLVSALE / 9 SLVPURC, PR/TPR 5 DISCOUNT,
+  LBR 8-11), Data Type A, AC_NAME = account name; only new companies. Fine families and old companies untouched.
+
 ## 2026-11-09 — Order Cancel is the desktop TR_SL_ORD_ADJ voucher (N233 / G245, WP-02)
 
 - 2026-11-09: one voucher cancels the open advance of many orders (SL_ORD_ADJ, Order_Adj_Ledr/Rojmel, held-tag release), version-guarded

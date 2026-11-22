@@ -99,9 +99,9 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Defines voucher series: 3-digit book code, MAIN_BOOK family, in/out direction and the posting-account slots in BOOK_DETL.
 - **Looks:** Search grid; code, name, short name, family, in-use and series fields with an account-slot grid.
 - **Writes:** BOOK_DATA, BOOK_DETL.
-- **Web:** `/masters/books`; `GET /masters/:name`, `POST /masters/:name`, `PUT /masters/:name`, `DELETE /masters/:name`. Can: create, reopen, edit, delete, list.
-- **Remaining:** Slot semantics, desktop 3-digit codes, branch cloning, reference guards, Print and family-filtered behaviour remain.
-- **Owners:** G38, N58, G40, N59, N62, X10.
+- **Web:** `/masters/books`; `GET /masters/books-master`, `GET /masters/books-master/template`, `GET /masters/books-master/accounts`, `GET /masters/books-master/:code`, `POST /masters/books-master`, `PUT /masters/books-master/:code`, `DELETE /masters/books-master/:code`, `GET /masters/books-master/print`. Can: create, reopen, edit, delete, list.
+- **Remaining:** The MS_BOOK screen, its slot grid and a one-transaction header-and-slots writer are built (N240): the save checks and texts, family templates from the MS_UPDATE.cs BOOK_IDTL inserts, slots by SR_NO, the delete guards, a family lock on a book with vouchers (D4, web message) and provisioning of the template slots OTH INC/OTH EXP 2-3, TAG SPLIT 1-9, PURCHASE/TAG PURCHASE 5 and LABOUR WORK 8-11. Open: the baseline BOOK_IDTL of the older families (SALES, PURCHASE 1-4, CASH/BANK REC/PAY, CONTRA, JOURNAL ...) is not in the source, so those grids come from the company's own books; branch cloning on Location add (G6) and the fine families' provisioned slots are not done; companies provisioned before N240 keep their old slots; voucher book help still treats a blank Cur In Use as active; desktop-runtime comparison is 0%.
+- **Owners:** G38, N58, G40, N59, N62, X10, N240, G252.
 - **Evidence:** [KB_transaction.md:176-191](../../project-memory/video-research/_kb/KB_transaction.md#L176-L191).
 
 ### Company

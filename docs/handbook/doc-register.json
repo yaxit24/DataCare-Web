@@ -717,6 +717,13 @@
       "kind": "setup guide",
       "status": "reference",
       "purpose": "Desktop installation guide (three identical copies) and runtime DLL instructions."
+    },
+    {
+      "match": "orchestration/work/*/*.md",
+      "area": "Delivery method",
+      "kind": "work-package study and frozen case list",
+      "status": "evidence",
+      "purpose": "The desktop study and the frozen T01-T18 case list of one Lite work package (docs/parity/LITE-MASTER-PLAN.md), written before its code; the cases are the contract its tests and browser module follow."
     }
   ]
 }
