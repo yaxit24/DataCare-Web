@@ -241,14 +241,20 @@ const DAY = `${startYear}-06-15`;
       expect(created.statusCode, created.body).toBe(201);
       const vchNo = String(created.json().vchNo).padStart(5, '0');
       const before = [await idtl(vchNo), await dm(vchNo)];
+      const opened = await inject('GET', `/wholesale-sales/${vchNo}?coBook=WHS`);
       const edited = await inject(
         'PUT',
         `/wholesale-sales/${vchNo}`,
-        sell(t.tag, 'WHS', { vchDesc: 'edited' }),
+        sell(t.tag, 'WHS', { vchDesc: 'edited', expectedVersion: opened.json().version }),
       );
       expect(edited.statusCode, edited.body).toBe(200);
       expect([await idtl(vchNo), await dm(vchNo)]).toEqual(before);
-      const deleted = await inject('DELETE', `/wholesale-sales/${vchNo}`, { book: 'WHS' });
+      const current = await inject('GET', `/wholesale-sales/${vchNo}?coBook=WHS`);
+      const deleted = await inject(
+        'DELETE',
+        `/wholesale-sales/${vchNo}?expectedVersion=${current.json().version}`,
+        { book: 'WHS' },
+      );
       expect(deleted.statusCode, deleted.body).toBe(200);
       expect(await idtl(vchNo)).toEqual([]);
       expect(await dm(vchNo)).toEqual([]);

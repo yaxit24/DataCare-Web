@@ -1192,6 +1192,10 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     settleCrAmt: b.settleCrAmt,
     settleDrFine: b.settleDrFine,
     settleCrFine: b.settleCrFine,
+    // Wh Sales (WP-30): fine kasar and the version token of an edit.
+    ksrFineDr: b.ksrFineDr,
+    ksrFineCr: b.ksrFineCr,
+    expectedVersion: b.expectedVersion,
     // Party contact snapshot (RATE_CUT_DATA carries its own copy, as the desktop form does).
     add1: b.add1,
     add2: b.add2,
@@ -7097,6 +7101,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         vchNo: (req.params as any).vchNo,
         book: body(req).book,
         deleteUser: sess(req).sub,
+        expectedVersion: (req.query as any)?.expectedVersion,
       }),
     );
   });

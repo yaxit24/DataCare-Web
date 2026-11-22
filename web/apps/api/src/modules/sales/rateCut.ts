@@ -14,9 +14,12 @@ import { settleMoneyMetal, type SettlementResult } from './settlement.js';
 import { wholesaleChecksBeforeWrite, wholesaleChecksOnBand } from './wholesaleSaveChecks.js';
 import { releaseRateCutTagsTx } from './rateCutTags.js';
 import { buildWholesaleStoneRows } from './wholesaleTagStones.js';
+import { readPartyTx, readWholesaleSettingsTx } from './rateCutMasters.js';
 import { applyBookingDrawDownTx } from './rateCutBookingDrawDown.js';
 import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
-import { buildRateCutRojmel, rojmelMetalFor } from '../shared/rojmel.js';
+import { rateCutRojmelRows, readWholesaleExtras, wholesaleVersionKey } from './wholesaleResiduals.js';
+import { assertDetailsSent, kasarFine, planWholesaleDetails, WholesaleDetailValidationError } from './wholesaleDetailRows.js';
+import { assertVoucherVersionTx, requiredVersion } from '../vouchers/version.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import { nextHiddenVoucherNoTx, voucherTimestamp } from '../vouchers/lifecycle.js';
 import {
@@ -442,6 +445,8 @@ export interface RateCutLine {
   mrp?: number;
   taxPct?: number;
   itType?: 'G' | 'S';
+  /** Typed item-detail rows of a loose line (WP-30); see wholesaleDetailRows.ts. */
+  details?: unknown[];
   /** original unfixed-sale lot this line fixes (RATE_CUT_ISU.ISU_* / FINE_CUT_*). */
   isuRef?: { yrcd?: string; dbcd?: string; no?: string; srno?: number };
 }
@@ -519,6 +524,10 @@ export interface RateCutInput {
   settleCrAmt?: number;
   settleDrFine?: number;
   settleCrFine?: number;
+  /** `nFineKsrDr` / `nFineKsrCr` (Wh Sales, WP-30) and the version the voucher was opened with (edit). */
+  ksrFineDr?: number;
+  ksrFineCr?: number;
+  expectedVersion?: string;
 }
 
 export interface RateCutResult {
@@ -781,6 +790,9 @@ export interface RateCutPostingFigures {
   prCardAmt: number;
   prCashAmt: number;
   prKasarAmt: number;
+  /** Fine kasar (legs 27/28 and 33/34). */
+  ksrFineDr?: number;
+  ksrFineCr?: number;
 }
 
 interface LedgerCtx {
@@ -835,7 +847,7 @@ const money2 = (n: unknown): number => round(num(n), 2);
  * A slot is looked up only when a leg that uses it fires; a missing slot refuses the voucher, because the
  * desktop's `INSERT … JOIN BOOK_DETL` would silently drop the leg and leave the voucher unbalanced.
  *
- * Deferred (contract "Open items"): 07/14 silver fine on a gold voucher, 27/28 and 33/34 fine kasar, 53/54
+ * Deferred (contract "Open items"): 07/14 silver fine on a gold voucher, 53/54
  * interest fine, 55/56 tax, 57-60 silver amounts, 61-64 TDS and 65-68 amount-only vouchers.
  */
 export function buildRateCutLedger(key: VoucherKey, ctx: LedgerCtx): LedgerLine[] {
@@ -988,6 +1000,16 @@ export function buildRateCutLedger(key: VoucherKey, ctx: LedgerCtx): LedgerLine[
     }
   }
 
+  // ---- fine kasar (Ac_Ledr.cs:685-705): party +/- and the slot-12 account, metal only ----------------
+  const ksr = (partyLeg: number, contraLeg: number, fine: number, partySign: '+' | '-'): void => {
+    if (!fine) return;
+    const account = slot('fineKasarAc');
+    leg(partyLeg, { AC_CODE: P, LD_CODE: account, IT_TYPE: f.itType, SIGN: partySign, FINE_WT: round3(fine) });
+    leg(contraLeg, { AC_CODE: account, LD_CODE: P, IT_TYPE: f.itType, SIGN: partySign === '+' ? '-' : '+', FINE_WT: round3(fine) });
+  };
+  ksr(27, 28, num(f.ksrFineCr), '+');
+  ksr(33, 34, num(f.ksrFineDr), '-');
+
   // ---- settlement: Received (sale) and Payment (purchase) columns (35-52) ----------------------------
   // Web adaptation kept from before: a cheque or card without its own account falls back to the cash slot.
   const bank = (account: string): string => account.trim() || slot('cashAc');
@@ -1018,7 +1040,7 @@ export interface RateCutHeaderTotals {
   /** `MSG2_TOTAL[7,4]` = net − cheque − card − cash − kasar (the band's "Os Amt" row, derived, not typed). */
   slBillOs: number;
   prBillOs: number;
-  /** `TotDrFine + DR_FINE + KSR_FINE_DR` and `TotCrFine + CR_FINE + KSR_FINE_CR` (fine kasar not modelled: 0). */
+  /** `TotDrFine + DR_FINE + KSR_FINE_DR` and `TotCrFine + CR_FINE + KSR_FINE_CR` */
   totFineDr: number;
   totFineCr: number;
 }
@@ -1047,6 +1069,8 @@ export function rateCutHeaderTotals(
       drFine: figures.drFine,
       crFine: figures.crFine,
     },
+    ksrFineDr: figures.ksrFineDr,
+    ksrFineCr: figures.ksrFineCr,
     issued: { fine: figures.slFine, netAmount: issuedNet },
     received: { fine: figures.prFine, netAmount: receivedNet },
     receivedTender: {
@@ -1150,6 +1174,8 @@ function buildHeader(ctx: HeaderCtx): Record<string, unknown> {
      */
     TOT_FINE_DR: headerTotals.totFineDr,
     TOT_FINE_CR: headerTotals.totFineCr,
+    KSR_FINE_CR: figures.ksrFineCr ?? 0,
+    KSR_FINE_DR: figures.ksrFineDr ?? 0,
     SL_ITM_AMT: totals.totalItmAmt,
     SL_LBR_AMT: totals.totalLbr,
     SL_OTH_AMT: totals.totalOth,
@@ -1700,7 +1726,11 @@ export async function readRateCut(
       key.VCH_NO,
     );
 
+    const extra = ['wholesale-sale', 'wholesale-quotation'].includes(options.bookGuard ?? '')
+      ? await readWholesaleExtras(tx, scope.tenantId, key, RATE_CUT_WRITE_TABLES, options.bookGuard === 'wholesale-sale')
+      : null;
     return {
+      ...(extra ? { ...extra.ksr, ...(extra.version ? { version: extra.version } : {}) } : {}),
       voucherNo: t(h.VCH_NO),
       hiddenVoucherNo: t(h.HD_VCH_NO),
       vchDate: toIsoDate(h.VCH_DATE),
@@ -1762,6 +1792,7 @@ export async function readRateCut(
         cardAc: t(h.CARD_AC),
       },
       lines: lines.map((l) => ({
+        ...(extra ? { details: extra.details.get(n(l.SR_NO)) ?? [] } : {}),
         srNo: n(l.SR_NO),
         vchSrno: n(l.VCH_SRNO),
         itCode: t(l.IT_CODE),
@@ -1912,13 +1943,20 @@ export async function writeRateCut(
   const quotation = options.bookGuard === 'wholesale-quotation';
   const workflow: RateCutWorkflow = options.bookGuard === 'bullion-sale' ? 'bullion' : 'wholesale';
   const itType: 'G' | 'S' = input.itType === 'S' ? 'S' : 'G';
-  const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
+  let vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
   if (Number.isNaN(vchDate.getTime())) {
     throw new RateCutValidationError(`invalid voucher date: ${String(input.vchDate)}`);
   }
   const tenantId = input.scope.tenantId;
   const p = input.pay ?? {};
   const rp = input.receivedPay ?? {};
+  // WP-30: item-detail rows, fine kasar and the version token belong to Wh Sales (and its quotation document).
+  const residual = options.bookGuard === 'wholesale-sale' || options.bookGuard === 'wholesale-quotation';
+  const versioned = options.bookGuard === 'wholesale-sale' && options.vchNo != null;
+  if (!residual && (num(input.ksrFineDr) || num(input.ksrFineCr) || issuedInput.some((l) => l.details?.length)))
+    throw new WholesaleDetailValidationError('fine kasar and item-detail rows are Wh Sales fields');
+  let ksrFineDr = kasarFine(input.ksrFineDr, 'ksrFineDr');
+  let ksrFineCr = kasarFine(input.ksrFineCr, 'ksrFineCr');
 
   return withTxBudget(prisma, tenantId, 'voucher', async (tx: any) => {
     // The metal-rate basis is a company setting, never a request field: it changes every derived figure.
@@ -1961,11 +1999,24 @@ export async function writeRateCut(
     let persistedClock: string | undefined;
     let persistedUser: string | undefined;
     let hiddenVoucherNo = '';
+    let carried: { billNo?: unknown; empCode?: unknown } = {};
     if (options.vchNo != null) {
       const prior = await persistedHeaderTx(tx, tenantId, key);
       persistedClock = prior?.VCH_CLOCK ? String(prior.VCH_CLOCK) : undefined;
       persistedUser = String(prior?.MAIN_USER ?? '').trim() || undefined;
       hiddenVoucherNo = String(prior?.HD_VCH_NO ?? '').trim();
+      if (versioned) {
+        const wk = wholesaleVersionKey(tenantId, key);
+        await assertVoucherVersionTx(tx, RATE_CUT_WRITE_TABLES, wk, requiredVersion(input.expectedVersion));
+      }
+      // An unchanged reopen+save keeps what the body leaves out: the stored date, bill no, employee and kasar.
+      if (!input.vchDate && prior?.VCH_DATE) vchDate = new Date(prior.VCH_DATE as any);
+      carried = { billNo: prior?.BILL_NO, empCode: prior?.EMP_CODE };
+      if (residual) {
+        if (input.ksrFineDr === undefined) ksrFineDr = num(prior?.KSR_FINE_DR);
+        if (input.ksrFineCr === undefined) ksrFineCr = num(prior?.KSR_FINE_CR);
+        await assertDetailsSent(tx, { tenantId, ...key }, issuedInput);
+      }
       const restores = quotation ? [] : await releaseRateCutTagsTx(tx, tenantId, key);
       if (!quotation) await applyBookingDrawDownTx(tx, tenantId, key, -1);
       await reverseVoucherTx(tx, tenantId, { tables: RATE_CUT_WRITE_TABLES, key });
@@ -2007,6 +2058,8 @@ export async function writeRateCut(
     const voucherInput: RateCutInput = {
       ...input,
       hdVchNo: hiddenVoucherNo,
+      billNo: input.billNo ?? (carried.billNo as string | undefined) ?? undefined,
+      empCode: input.empCode ?? (carried.empCode as string | undefined) ?? undefined,
       acName: hasValue(input.acName) ? input.acName : (party?.name ?? input.acName),
       mobile: hasValue(input.mobile) ? input.mobile : (party?.mobile ?? input.mobile),
     };
@@ -2030,7 +2083,9 @@ export async function writeRateCut(
       workflow === 'wholesale' && line.lbrType == null
         ? { ...line, lbrType: companyLabourType(behavior.labourType) as RateCutLine['lbrType'] }
         : line;
-    const effective: EffectiveLine[] = issuedInput.map((line, index) => {
+    const detailPlan = residual ? await planWholesaleDetails(tx, tenantId, key.CO_CODE, issuedInput) : null;
+    const effective: EffectiveLine[] = issuedInput.map((rawLine, index) => {
+      const line = detailPlan ? detailPlan.patch(rawLine, index) : rawLine;
       const tag = tags[index];
       const itCode = String(tag?.IT_CODE ?? line.itCode ?? '').trim();
       return {
@@ -2110,6 +2165,8 @@ export async function writeRateCut(
       prCardAmt: money2(rp.card),
       prCashAmt: money2(rp.cash),
       prKasarAmt: money2(rp.kasar),
+      ksrFineDr,
+      ksrFineCr,
     };
     const postsSomething = [
       figures.slFine,
@@ -2159,63 +2216,31 @@ export async function writeRateCut(
           vchType: classification.vchType,
           bookName: classification.bookName,
           coBook: key.CO_BOOK,
-          billNo: txt(input.billNo, 30) ?? undefined,
+          billNo: txt(voucherInput.billNo, 30) ?? undefined,
           hdVchNo: hiddenVoucherNo,
         });
-    const gold = itType === 'G';
-    // The Rojmel (day book), from the header's settlement figures. `buildRateCutRojmel` documents its inputs as
-    // the SETTLED fine (`DR_FINE` / `CR_FINE`) and the band's outstanding; it was handed the lines' total fine and
-    // the request's bill-outstanding instead. With the settled figures, header-only Live24 064/00004 gives its
-    // four real rows: 01 (Dr fine 2.050 at 7300), 02 (14965), 13 (overpaid 850) and 26 (purchase kasar 15).
-    // Remaining alignment for lined wholesale vouchers (types 05/06/14/27, the book-prefixed name) is open.
-    const rojmelRows = quotation
-      ? []
-      : buildRateCutRojmel(
-          {
-            scope: {
-              coCode: input.scope.coCode,
-              lcCode: input.scope.lcCode,
-              coYear: input.scope.coYear!,
-            },
-            key,
-            coBook: key.CO_BOOK,
-            vchNo: key.VCH_NO,
-            vchDate,
-            vchType: classification.vchType,
-            bookName: classification.bookName,
-            partyName: voucherInput.acName ?? '',
-            partyCode: customer,
-          },
-          {
-            // BOOK_DETL slots are PER-BOOK: on the desktop's 064 slot 1 is 00003 and slot 2 is 00008, where
-            // on book 026 slot 2 is 00001. Resolved rather than hardcoded for that reason.
-            saleAc: String((gold ? accounts.goldAc : accounts.silverSaleAc) ?? ''),
-            purchaseAc: String((gold ? accounts.purchaseAc : accounts.silverPurcAc) ?? ''),
-            kasarFineAc: String(accounts.fineKasarAc ?? accounts.kasarAc ?? ''),
-            purchaseKasarAc: String(accounts.purchaseKasarAc ?? accounts.kasarAc ?? ''),
-            bankAc: receivedBankAc || String(accounts.cashAc ?? ''),
-            metal: rojmelMetalFor(itType),
-            fineRate: figures.fineRate,
-            drFine: figures.drFine,
-            crFine: figures.crFine,
-            purchaseBillOs: headerTotals.prBillOs,
-            saleBillOs: headerTotals.slBillOs,
-            purchaseAmount: money2(figures.crAmt + figures.prItmAmt),
-            saleAmount: money2(figures.drAmt + figures.slItmAmt),
-            kasarFineDr: 0,
-            kasarFineCr: 0,
-            purchaseChequeAmount: figures.prChqAmt,
-            purchaseKasarAmount: figures.prKasarAmt,
-          },
-        );
     const issuedRows = buildLineRows(rowCtx, effective, totals);
     const receivedRows = buildReceivedLineRows(rowCtx, receivedLines, receivedTotals);
+    // The day book (Ac_Rojmel.Wh_Sales_Rojmel): a gold Wh Sales posts the desktop's own rows (rojmelWholesale.ts).
+    const rojmelRows = quotation
+      ? []
+      : rateCutRojmelRows({
+          scope: { coCode: input.scope.coCode, lcCode: input.scope.lcCode, coYear: input.scope.coYear! },
+          key, coBook: key.CO_BOOK, vchNo: key.VCH_NO, vchDate, vchType: classification.vchType,
+          bookName: classification.bookName, dataType: classification.dataType, customer,
+          headerName: voucherInput.acName ?? '', masterName: party?.name ?? voucherInput.acName ?? '',
+          vchDesc: String(voucherInput.vchDesc ?? ''), itType, desktopShape: options.bookGuard === 'wholesale-sale',
+          accounts: accounts as Record<string, string | undefined>, figures: figures as any, headerTotals,
+          bankAc: String(p.bankAc ?? rp.bankAc ?? '').trim() || receivedBankAc || String(accounts.cashAc ?? ''),
+          labourAmount: money2(figures.slLbrAmt + figures.slOthAmt), ksrFineDr, ksrFineCr, issuedRows, receivedRows,
+        });
     // The issued tags' stones: SL_IDTL, then DM_DATA (Dm_Wh_Tour_Sale_Detl); wholesaleTagStones.ts.
     const stones = await buildWholesaleStoneRows(
       tx,
       tenantId,
       { mainBook: classification.bookName, mainUser, hiddenVoucherNo },
       issuedRows,
+      detailPlan?.rows,
     );
     const stockRows = movesStock
       ? buildStockRows(rowCtx, issuedRows, receivedRows, settings.oldGoldType)
@@ -2292,52 +2317,6 @@ const RATE_CUT_WRITE_TABLES = [
   'MAIN_STOCK',
   'DM_DATA',
 ];
-
-/** `CO_SET.TRAD_FINE` (blank → N, MS_OPNCOMP.cs:813-816) and `CO_SET_NEW.OLD_GOLD_TYPE` (blank → N, :1132-1135). */
-async function readWholesaleSettingsTx(
-  tx: any,
-  tenantId: string,
-  coCode: string,
-): Promise<{ tradeFine: boolean; oldGoldType: string }> {
-  const rows: Array<{ trad_fine: string | null; old_gold_type: string | null }> =
-    await tx.$queryRawUnsafe(
-      `SELECT (SELECT upper(btrim(coalesce("TRAD_FINE"::text,''))) FROM "CO_SET"
-                WHERE tenant_id=$1 AND "CO_CODE"::text=$2::text ORDER BY row_id LIMIT 1) AS trad_fine,
-              (SELECT upper(btrim(coalesce("OLD_GOLD_TYPE"::text,''))) FROM "CO_SET_NEW"
-                WHERE tenant_id=$1 AND "CO_CODE"::text=$2::text LIMIT 1) AS old_gold_type`,
-      tenantId,
-      String(coCode),
-    );
-  const row = rows[0];
-  return {
-    tradeFine: String(row?.trad_fine ?? '') === 'Y',
-    oldGoldType: String(row?.old_gold_type ?? '') || 'N',
-  };
-}
-
-/** The party's name and mobile as the account master holds them (TR_WH_SALE.cs:14621-14623). */
-async function readPartyTx(
-  tx: any,
-  tenantId: string,
-  coCode: string,
-  lcCode: string,
-  acCode: string,
-): Promise<{ name?: string; mobile?: string } | undefined> {
-  const rows: Array<{ AC_NAME: string | null; AC_MOBILE: string | null; LC_CODE: string | null }> =
-    await tx.$queryRawUnsafe(
-      `SELECT "AC_NAME","AC_MOBILE","LC_CODE" FROM "AC_MAST"
-        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "AC_CODE"=$3
-        ORDER BY ("LC_CODE"=$4) DESC, row_id LIMIT 1`,
-      tenantId,
-      coCode,
-      acCode,
-      lcCode,
-    );
-  const row = rows[0];
-  if (!row) return undefined;
-  const text = (value: unknown): string | undefined => String(value ?? '').trim() || undefined;
-  return { name: text(row.AC_NAME), mobile: text(row.AC_MOBILE) };
-}
 
 interface ItemInfo {
   name: string;
@@ -2522,7 +2501,7 @@ async function persistedHeaderTx(
     `SELECT "VCH_DATE","VCH_TIME",to_char("VCH_TIME",'HH24:MI:SS.MS') AS "VCH_CLOCK","MAIN_USER",
             "AC_CODE","AC_NAME","SL_NET_AMT"::float8 AS sl_net,"PR_NET_AMT"::float8 AS pr_net,
             "IT_TYPE","TOT_FINE_DR"::float8 AS tot_fine_dr,"TOT_FINE_CR"::float8 AS tot_fine_cr,
-            "HD_VCH_NO","VCH_DESC"
+            "HD_VCH_NO","VCH_DESC","BILL_NO","EMP_CODE","KSR_FINE_DR"::float8 AS "KSR_FINE_DR","KSR_FINE_CR"::float8 AS "KSR_FINE_CR"
        FROM "RATE_CUT_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
         AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6
       ORDER BY row_id LIMIT 1 FOR UPDATE`,
@@ -2624,6 +2603,8 @@ export interface DeleteRateCutInput {
   vchNo: number | string;
   book?: string; // CO_BOOK used at creation (defaults to 'RCT')
   deleteUser?: string;
+  /** Wh Sales: the version the voucher was opened with (a stale or missing token refuses the delete). */
+  expectedVersion?: string;
 }
 
 /**
@@ -2651,6 +2632,8 @@ export async function reverseRateCut(
     );
     assertRateCutBookGuard(classification, key.CO_BOOK, options.bookGuard);
     const header = await persistedHeaderTx(tx, tenantId, key);
+    if (options.bookGuard === 'wholesale-sale')
+      await assertVoucherVersionTx(tx, RATE_CUT_WRITE_TABLES, wholesaleVersionKey(tenantId, key), requiredVersion(input.expectedVersion));
     // Give the voucher's tags back before its stock rows go (see `releaseRateCutTagsTx`).
     const restores = quotation ? [] : await releaseRateCutTagsTx(tx, tenantId, key);
     // Release the booked weight BEFORE the reversal runs: the draw-down joins against

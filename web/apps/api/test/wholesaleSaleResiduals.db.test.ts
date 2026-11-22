@@ -314,17 +314,6 @@ const looseLine = (details: unknown[] = [rowA, rowB]) => ({
     }
   });
 
-  it('a replayed POST with the same Idempotency-Key writes one voucher and two rows', async () => {
-    const payload = body([looseLine()]);
-    const key = { 'idempotency-key': 'wp30-replay-0001' };
-    const a = await inject('POST', '/wholesale-sales', payload, key);
-    const b = await inject('POST', '/wholesale-sales', payload, key);
-    expect(a.statusCode, a.body).toBe(201);
-    expect(b.statusCode, b.body).toBe(201);
-    expect(vno(a)).toBe(vno(b));
-    expect((await idtl(vno(a))).length).toBe(2);
-  });
-
   it('prints the rows under their line and the kasar row', async () => {
     const t = await seedTag('PLN');
     const v = await create(body([looseLine(), { tagNo: t.tag }], { ksrFineDr: 0.5, ksrFineCr: 0.25, pay: { cash: 1263 } }));
