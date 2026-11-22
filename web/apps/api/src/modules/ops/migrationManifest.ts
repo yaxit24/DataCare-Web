@@ -188,6 +188,6 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
   {
     // WP-19: LBR_ISU_DETL per-line GST shares (TR_SALE_LBR.cs:9748-9830) the Gst Report HSN section sums.
     name: '20261122090000_labour_detail_gst_shares',
-    checksum: 'fcd79381b70355b17c0efc54b6dd213960f7926aea20764318b1a4b936cd1dc2',
+    checksum: '0ae86f271fca6186af52f18eed2d877969838c2f53452d1d905e90218a4a0984',
   },
 ];

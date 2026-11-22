@@ -13,6 +13,22 @@ ALTER TABLE "LBR_ISU_DETL"
 -- formula, so the HSN section does not lose those labour bills: the share of NET_AMT (metal) and LBR_AMT (labour)
 -- in the voucher's metal net (SL_NET_AMT) and labour net (LBR_DR_AMT), the tax rounded to 2 decimals half to even
 -- (.NET Math.Round). The web labour invoice takes no labour discount, so IT_DISC_AMT and IT_LBR_DISC stay 0.
+-- LBR_ISU_DETL and LBR_DATA are forced-RLS, so the back-fill needs complete tenant visibility: under an RLS-bound
+-- role the UPDATE would touch 0 rows and leave every older labour row at 0 shares. Refuse instead of doing nothing.
+BEGIN;
+
+DO $preflight$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_roles WHERE rolname=current_user AND (rolsuper OR rolbypassrls)
+  ) THEN
+    RAISE EXCEPTION 'labour GST share backfill requires a migration role with complete tenant visibility';
+  END IF;
+END
+$preflight$;
+
+SET LOCAL row_security=off;
+
 WITH voucher AS (
   SELECT d.row_id,
          d."NET_AMT"::double precision AS net,
@@ -59,3 +75,5 @@ UPDATE "LBR_ISU_DETL" d
                             ELSE round(r.lbr_tax100 / 100, 2) END)::double precision::text
   FROM raw r
  WHERE d.row_id = r.row_id;
+
+COMMIT;

@@ -871,7 +871,11 @@ class CapturingRenderer implements PdfRenderer {
       ),
       'utf8',
     );
-    await exec(migration.slice(migration.indexOf('WITH voucher')));
+    // The back-fill statement alone: the owner role sees every tenant, so the BEGIN/preflight/COMMIT wrapper (covered
+    // by labourGstSharesMigration.db.test.ts) is not needed here.
+    await exec(
+      migration.slice(migration.indexOf('WITH voucher'), migration.lastIndexOf('COMMIT;')),
+    );
     const stored = await owner.$queryRawUnsafe<Array<Record<string, unknown>>>(
       `SELECT "VCH_NO","IT_NET_AMT","IT_TAX_AMT","IT_LBR_AMT","IT_LBR_TAX" FROM "LBR_ISU_DETL"
         WHERE tenant_id=$1 AND "CO_BOOK"='GLX' ORDER BY "VCH_NO"`,
