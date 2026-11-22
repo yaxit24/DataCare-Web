@@ -735,7 +735,10 @@ export default function SalesEntryPage() {
             discountAmount: n(l.discountAmount) || undefined,
             ghatAmount: n(l.ghatAmount) || undefined,
             // TR_SALE.cs:9161: a new line takes SL_AMT_TYPE as the company was opened (D4).
-            rateWith: l.rateWith || String(companySetting(companySettings, 'SL_AMT_TYPE') ?? '') || undefined,
+            rateWith:
+              l.rateWith ||
+              String(companySetting(companySettings, 'SL_AMT_TYPE') ?? '') ||
+              undefined,
             rateType: l.rateType || undefined,
             tagCost: n(l.tagCost) || undefined,
             karigarNetWt: n(l.karigarNetWt) || undefined,

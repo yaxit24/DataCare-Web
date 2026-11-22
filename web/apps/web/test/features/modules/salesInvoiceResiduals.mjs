@@ -12,12 +12,22 @@ import { PARTIES } from '../fixtures/catalogue.mjs';
 export function salesInvoiceResidualCases(h) {
   const { C, BOOK, LINE_A } = h;
   const TOTAL = 65517.79;
-  const one = async (ctx, sql, ...params) => ctx.owner.$executeRawUnsafe(sql, ctx.tenantId, ...params);
+  const one = async (ctx, sql, ...params) =>
+    ctx.owner.$executeRawUnsafe(sql, ctx.tenantId, ...params);
   const sl = async (ctx, vchNo) =>
-    (await ctx.rows(`SELECT * FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`, vchNo))[0];
+    (
+      await ctx.rows(
+        `SELECT * FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+        vchNo,
+      )
+    )[0];
   const child = (ctx, table, vchNo) =>
-    ctx.rows(`SELECT * FROM "${table}" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "SR_NO"`, vchNo);
-  const plain = (row) => JSON.parse(JSON.stringify(row, (_k, v) => (typeof v === 'bigint' ? String(v) : v)));
+    ctx.rows(
+      `SELECT * FROM "${table}" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+      vchNo,
+    );
+  const plain = (row) =>
+    JSON.parse(JSON.stringify(row, (_k, v) => (typeof v === 'bigint' ? String(v) : v)));
   const dialogs = (page) => {
     const seen = [];
     page.removeAllListeners('dialog');
@@ -51,12 +61,17 @@ export function salesInvoiceResidualCases(h) {
     await page.getByLabel(`UPI Amt line ${i}`, { exact: true }).fill(row.amount);
   };
   const exchangeRow = (page, i) =>
-    page.locator('table').filter({ has: page.getByRole('columnheader', { name: 'Touch%' }) }).locator('tbody tr').nth(i);
+    page
+      .locator('table')
+      .filter({ has: page.getByRole('columnheader', { name: 'Touch%' }) })
+      .locator('tbody tr')
+      .nth(i);
   const setBank = async (page) => {
     await page.getByText('Desktop settlement and invoice fields', { exact: true }).click();
     await h.field(page, 'Cheque Bank A/c').fill(PARTIES.bank.code);
   };
-  const openExchangeDetails = (page, i) => page.getByText(`Exchange row ${i + 1} desktop fields`, { exact: true }).click();
+  const openExchangeDetails = (page, i) =>
+    page.getByText(`Exchange row ${i + 1} desktop fields`, { exact: true }).click();
 
   return [
     {
@@ -100,10 +115,16 @@ export function salesInvoiceResidualCases(h) {
       'mutation',
       'D4: a line takes SL_AMT_TYPE when entered (TR_SALE.cs:9161), reopen shows the stored RATE_WITH (:14570), a new line takes the current setting',
       async (ctx) => {
-        await one(ctx, `UPDATE "CO_SET" SET "SL_AMT_TYPE"='N' WHERE tenant_id=$1 AND "CO_CODE"='01'`);
+        await one(
+          ctx,
+          `UPDATE "CO_SET" SET "SL_AMT_TYPE"='N' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        );
         try {
           const page = await newBill(ctx); // the screen opened under N
-          await one(ctx, `UPDATE "CO_SET" SET "SL_AMT_TYPE"='F' WHERE tenant_id=$1 AND "CO_CODE"='01'`);
+          await one(
+            ctx,
+            `UPDATE "CO_SET" SET "SL_AMT_TYPE"='F' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+          );
           const vchNo = await saved(page);
           const first = await ctx.rows(
             `SELECT "RATE_WITH" rw, "NET_AMT"::float net FROM "SL_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
@@ -120,7 +141,10 @@ export function salesInvoiceResidualCases(h) {
             `SELECT "SR_NO"::int sr, "RATE_WITH" rw FROM "SL_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
             vchNo,
           );
-          assert.deepEqual(after.map((r) => r.rw), ['N', 'F']);
+          assert.deepEqual(
+            after.map((r) => r.rw),
+            ['N', 'F'],
+          );
           return {
             observation: `line 1 ${after[0].rw}, new line 2 ${after[1].rw}`,
             expected: 'stored N kept on reopen; new line F',
@@ -128,7 +152,10 @@ export function salesInvoiceResidualCases(h) {
             downstream: { lineNet: first[0].net },
           };
         } finally {
-          await one(ctx, `UPDATE "CO_SET" SET "SL_AMT_TYPE"='N' WHERE tenant_id=$1 AND "CO_CODE"='01'`);
+          await one(
+            ctx,
+            `UPDATE "CO_SET" SET "SL_AMT_TYPE"='N' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+          );
         }
       },
     ),
@@ -177,7 +204,6 @@ export function salesInvoiceResidualCases(h) {
       'Lossless reopen (study gap 1, D8): an unchanged save writes every SL_DATA column back except VCH_TIME',
       async (ctx) => {
         const page = await newBill(ctx);
-        await h.field(page, 'Cash ₹').fill(String(TOTAL));
         const vchNo = await saved(page);
         await one(
           ctx,
@@ -222,21 +248,35 @@ export function salesInvoiceResidualCases(h) {
       'TR_SALE.cs:15869 UPI_DATA.UPI_AMT, :15253 SL_DATA.UPI_AMT, reopen :14291; register UPI',
       async (ctx) => {
         const page = await newBill(ctx);
-        await addUpi(page, 1, { ac: PARTIES.bank.code, type: 'PHONEPE', id: 'a@b', amount: '1000' });
-        await addUpi(page, 2, { ac: PARTIES.bank.code, type: 'GPAY', id: 'c@d', amount: '2500.50' });
+        await addUpi(page, 1, {
+          ac: PARTIES.bank.code,
+          type: 'PHONEPE',
+          id: 'a@b',
+          amount: '1000',
+        });
+        await addUpi(page, 2, {
+          ac: PARTIES.bank.code,
+          type: 'GPAY',
+          id: 'c@d',
+          amount: '2500.50',
+        });
         await setBank(page);
-        await h.field(page, 'Cash ₹').fill('62017.29'); // 65,517.79 - 3,500.50
         const vchNo = await saved(page);
         await reopen(page, vchNo);
         await page.getByLabel('UPI Amt line 1', { exact: true }).fill('1200');
-        await h.field(page, 'Cash ₹').fill('61817.29'); // 65,517.79 - 3,700.50
         await saved(page, 'Update Invoice');
         const rows = await child(ctx, 'UPI_DATA', vchNo);
         const head = await sl(ctx, vchNo);
-        assert.deepEqual(rows.map((r) => Number(r.UPI_AMT)), [1200, 2500.5]);
+        assert.deepEqual(
+          rows.map((r) => Number(r.UPI_AMT)),
+          [1200, 2500.5],
+        );
         assert.equal(Number(head.UPI_AMT), 3700.5); // 1,200.00 + 2,500.50
         await reopen(page, vchNo);
-        assert.equal(Number(await page.getByLabel('UPI Amt line 1', { exact: true }).inputValue()), 1200);
+        assert.equal(
+          Number(await page.getByLabel('UPI Amt line 1', { exact: true }).inputValue()),
+          1200,
+        );
         return {
           observation: `UPI_DATA ${rows.map((r) => r.UPI_AMT).join(', ')}; UPI_AMT ${head.UPI_AMT}`,
           expected: { rows: [1200, 2500.5], header: 3700.5 },
@@ -253,10 +293,19 @@ export function salesInvoiceResidualCases(h) {
       'TR_SALE.cs:6907-6921: Ctrl+D asks, clears the row, says "Please Save This Voucher Then Effect...."; the database changes at Save',
       async (ctx) => {
         const page = await newBill(ctx);
-        await addUpi(page, 1, { ac: PARTIES.bank.code, type: 'PHONEPE', id: 'a@b', amount: '1000' });
-        await addUpi(page, 2, { ac: PARTIES.bank.code, type: 'GPAY', id: 'c@d', amount: '2500.50' });
+        await addUpi(page, 1, {
+          ac: PARTIES.bank.code,
+          type: 'PHONEPE',
+          id: 'a@b',
+          amount: '1000',
+        });
+        await addUpi(page, 2, {
+          ac: PARTIES.bank.code,
+          type: 'GPAY',
+          id: 'c@d',
+          amount: '2500.50',
+        });
         await setBank(page);
-        await h.field(page, 'Cash ₹').fill('62017.29');
         const vchNo = await saved(page);
         await reopen(page, vchNo);
         const seen = dialogs(page);
@@ -265,10 +314,12 @@ export function salesInvoiceResidualCases(h) {
         assert.deepEqual(seen, ['This Row Record will Removed permantley ?']);
         assert.equal(Number(await h.field(page, 'UPI ₹').inputValue()), 1000);
         assert.equal((await child(ctx, 'UPI_DATA', vchNo)).length, 2, 'not written before Save');
-        await h.field(page, 'Cash ₹').fill('64517.79'); // 65,517.79 - 1,000.00
         await saved(page, 'Update Invoice');
         const rows = await child(ctx, 'UPI_DATA', vchNo);
-        assert.deepEqual(rows.map((r) => [Number(r.SR_NO), Number(r.UPI_AMT)]), [[1, 1000]]);
+        assert.deepEqual(
+          rows.map((r) => [Number(r.SR_NO), Number(r.UPI_AMT)]),
+          [[1, 1000]],
+        );
         return {
           observation: `before save 2 rows; after save ${rows.length} row`,
           expected: '2 rows until Save, then 1 row 1,000.00',
@@ -290,7 +341,10 @@ export function salesInvoiceResidualCases(h) {
         assert.equal(await page.getByText('UPI (add type)').count(), 0);
         await page.getByLabel('UPI Type line 1', { exact: true }).press('F1');
         await page.getByText('UPI (add type)').waitFor();
-        return { observation: 'F1 on column 3 starts add type; column 1 does not', expected: 'add type on column 3 only' };
+        return {
+          observation: 'F1 on column 3 starts add type; column 1 does not',
+          expected: 'add type on column 3 only',
+        };
       },
     ),
 
@@ -304,17 +358,23 @@ export function salesInvoiceResidualCases(h) {
         await page.getByRole('button', { name: '+ Credit note', exact: true }).click();
         await page.getByLabel('Credit Note No line 1', { exact: true }).fill('CN1');
         await page.getByLabel('Credit Note Amt line 1', { exact: true }).fill('4000');
-        await h.field(page, 'Cash ₹').fill('61517.79'); // 65,517.79 - 4,000.00
         const vchNo = await saved(page);
         const head = await sl(ctx, vchNo);
         const rows = await child(ctx, 'CRNT_DATA', vchNo);
-        assert.deepEqual([Number(head.CRNT_ADJ_AMT), Number(head.BILL_OS)], [4000, 0]);
-        assert.deepEqual(rows.map((r) => [r.CRNT_NO, Number(r.CRNT_AMT)]), [['CN1', 4000]]);
+        // credit sale (the fixture party is near its cash limit): BILL_OS = 65,517.79 - 4,000.00 = 61,517.79 (:19390)
+        assert.deepEqual([Number(head.CRNT_ADJ_AMT), Number(head.BILL_OS)], [4000, 61517.79]);
+        assert.deepEqual(
+          rows.map((r) => [r.CRNT_NO, Number(r.CRNT_AMT)]),
+          [['CN1', 4000]],
+        );
         await reopen(page, vchNo);
-        assert.equal(await page.getByLabel('Credit Note No line 1', { exact: true }).inputValue(), 'CN1');
+        assert.equal(
+          await page.getByLabel('Credit Note No line 1', { exact: true }).inputValue(),
+          'CN1',
+        );
         return {
           observation: `CRNT_ADJ_AMT ${head.CRNT_ADJ_AMT}, BILL_OS ${head.BILL_OS}, rows ${rows.length}`,
-          expected: { crnt: 4000, billOs: 0 },
+          expected: { crnt: 4000, billOs: 61517.79 },
           database: { head: plain(head), rows: rows.map(plain) },
           downstream: { reopened: 'CN1' },
         };
@@ -330,15 +390,14 @@ export function salesInvoiceResidualCases(h) {
         await one(
           ctx,
           `INSERT INTO "SL_ORD_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","HD_VCH_NO","VCH_DATE","AC_CODE","ADV_AMT")
-           SELECT $1,'01','01','2024-2025','SOR','09071','09071',CURRENT_DATE,$2,5000
-            WHERE NOT EXISTS (SELECT 1 FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "VCH_NO"='09071')`,
+           SELECT $1::text,'01','01','2024-2025','SOR','09071','09071',CURRENT_DATE,$2::text,5000
+            WHERE NOT EXISTS (SELECT 1 FROM "SL_ORD_DATA" WHERE tenant_id=$1::text AND "VCH_NO"='09071')`,
           PARTIES.local.code,
         );
         const page = await newBill(ctx);
         await page.getByRole('button', { name: '+ Order', exact: true }).click();
         await page.getByLabel('Order No line 1', { exact: true }).fill('09071');
         await page.getByLabel('Order Amt line 1', { exact: true }).fill('5000');
-        await h.field(page, 'Cash ₹').fill('60517.79'); // 65,517.79 - 5,000.00
         const vchNo = await saved(page);
         const head = await sl(ctx, vchNo);
         const rows = await child(ctx, 'SL_ORD_ADJ', vchNo);
@@ -348,7 +407,10 @@ export function salesInvoiceResidualCases(h) {
         );
         assert.equal(Number(head.ADV_AMT), 5000);
         await reopen(page, vchNo);
-        assert.equal(Number(await page.getByLabel('Order Amt line 1', { exact: true }).inputValue()), 5000);
+        assert.equal(
+          Number(await page.getByLabel('Order Amt line 1', { exact: true }).inputValue()),
+          5000,
+        );
         return {
           observation: `ADV_AMT ${head.ADV_AMT}; SL_ORD_ADJ ${JSON.stringify(rows.map((r) => [r.ORD_SIGN, r.ORD_AMT]))}`,
           expected: { adv: 5000, sign: '-' },
@@ -400,7 +462,11 @@ export function salesInvoiceResidualCases(h) {
           'Please Slelect Rate type = N - Net Wise Or F - Fine Wise',
           'Please Slelect Rate type = N - Net Wise Or F - Fine Wise',
         ]);
-        return { observation: `messages ${seen.length}`, expected: 'X and n refused, F accepted', database: { unchanged: true } };
+        return {
+          observation: `messages ${seen.length}`,
+          expected: 'X and n refused, F accepted',
+          database: { unchanged: true },
+        };
       },
     ),
 
@@ -423,7 +489,10 @@ export function salesInvoiceResidualCases(h) {
         await page.getByLabel('Exchange 1 Rate Type', { exact: true }).fill('F');
         const fineWise = Number((await row.locator('td').nth(7).innerText()).replace(/,/g, ''));
         assert.deepEqual([netWise, fineWise], [75000, 68700]);
-        return { observation: `N ${netWise}, F ${fineWise}`, expected: { netWise: 75000, fineWise: 68700 } };
+        return {
+          observation: `N ${netWise}, F ${fineWise}`,
+          expected: { netWise: 75000, fineWise: 68700 },
+        };
       },
     ),
 
@@ -452,9 +521,15 @@ export function salesInvoiceResidualCases(h) {
           const rate = Number(await row.locator('input').nth(5).inputValue());
           const touch = Number(await row.locator('input').nth(4).inputValue());
           assert.deepEqual([rate, touch], [5400, 90]);
-          return { observation: `rate ${rate}, touch ${touch}`, expected: { rate: 5400, touch: 90 } };
+          return {
+            observation: `rate ${rate}, touch ${touch}`,
+            expected: { rate: 5400, touch: 90 },
+          };
         } finally {
-          await one(ctx, `DELETE FROM "RATE_MAST" WHERE tenant_id=$1 AND "GR_CODE"='' AND "FINE_GL_RATE"=60000`);
+          await one(
+            ctx,
+            `DELETE FROM "RATE_MAST" WHERE tenant_id=$1 AND "GR_CODE"='' AND "FINE_GL_RATE"=60000`,
+          );
         }
       },
     ),
@@ -481,7 +556,8 @@ export function salesInvoiceResidualCases(h) {
           const { page } = await ctx.session();
           await h.openSales(page);
           const select = page.getByLabel('Print file', { exact: true });
-          for (let i = 0; i < 40 && (await select.inputValue()) !== 'SalesBillGst'; i++) await page.waitForTimeout(100);
+          for (let i = 0; i < 40 && (await select.inputValue()) !== 'SalesBillGst'; i++)
+            await page.waitForTimeout(100);
           const offered = await select.locator('option').allTextContents();
           assert.deepEqual(offered, ['', 'SalesBillA4', 'SalesBillGst']);
           assert.equal(await select.inputValue(), 'SalesBillGst');
@@ -492,12 +568,18 @@ export function salesInvoiceResidualCases(h) {
           const flags = await ctx.rows(
             `SELECT "PRINT_FILE" f, "PRINT_SET_A" s FROM "PRINT_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' ORDER BY "PRINT_FILE"`,
           );
-          assert.deepEqual(flags.map((r) => [r.f, r.s]), [
-            ['OtherType', 'N'],
-            ['SalesBillA4', 'Y'],
-            ['SalesBillGst', 'N'],
-          ]);
-          return { observation: `offered ${JSON.stringify(offered)}; Set -> ${JSON.stringify(flags)}`, expected: 'blank, SalesBillA4, SalesBillGst' };
+          assert.deepEqual(
+            flags.map((r) => [r.f, r.s]),
+            [
+              ['OtherType', 'N'],
+              ['SalesBillA4', 'Y'],
+              ['SalesBillGst', 'N'],
+            ],
+          );
+          return {
+            observation: `offered ${JSON.stringify(offered)}; Set -> ${JSON.stringify(flags)}`,
+            expected: 'blank, SalesBillA4, SalesBillGst',
+          };
         } finally {
           await one(ctx, `DELETE FROM "PRINT_MAST" WHERE tenant_id=$1`);
         }
@@ -511,7 +593,6 @@ export function salesInvoiceResidualCases(h) {
       'TR_SALE.cs:16482-16495, D6: HUID box first, then the chosen file; a file without a web template prints the default',
       async (ctx) => {
         const page = await newBill(ctx);
-        await h.field(page, 'Cash ₹').fill(String(TOTAL));
         const vchNo = await saved(page);
         const template = async (query) => {
           const response = await page.request.get(
@@ -530,7 +611,11 @@ export function salesInvoiceResidualCases(h) {
         assert.equal(seen.gst, 'tax-invoice; file=SalesBillGst');
         assert.equal(seen.unknown, 'tax-invoice; file=NoSuchCrystal; default');
         assert.equal(seen.huid, 'huid; file=RtlHuidPrint');
-        return { observation: JSON.stringify(seen), expected: 'named templates; unknown -> default; HUID wins', output: seen };
+        return {
+          observation: JSON.stringify(seen),
+          expected: 'named templates; unknown -> default; HUID wins',
+          output: seen,
+        };
       },
     ),
   ];

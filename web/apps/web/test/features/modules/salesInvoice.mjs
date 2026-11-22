@@ -960,7 +960,6 @@ export const salesInvoice = {
       },
     ),
 
-
     C(
       'lookup.lower-case-code',
       'T04',
@@ -1367,7 +1366,18 @@ export const salesInvoice = {
     ),
 
     // WP-26 (N243, G255): residual cases, including the two formerly blocked ones (decisions D3, D4).
-    ...salesInvoiceResidualCases({ C, BOOK, LINE_A, openSales, pickParty, fillLine, save, loadVoucher, field, cell }),
+    ...salesInvoiceResidualCases({
+      C,
+      BOOK,
+      LINE_A,
+      openSales,
+      pickParty,
+      fillLine,
+      save,
+      loadVoucher,
+      field,
+      cell,
+    }),
   ],
 };
 
