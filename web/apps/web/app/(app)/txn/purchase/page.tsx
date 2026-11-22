@@ -233,8 +233,7 @@ function loadedLabourDependsOn(line: Line, field: keyof Line, labourWithGhat: bo
  */
 export default function PurchaseEntryPage() {
   const settings = useCompanySettingsState();
-  if (settings.status === 'loading')
-    return <div className="muted">Loading purchase settings…</div>;
+  if (settings.status === 'loading') return <div className="muted">Loading purchase settings…</div>;
   return settings.status === 'ready' && companyFlag(settings.values, 'PURC_WITH_HMTAX', 'N') ? (
     <HallmarkPurchasePage />
   ) : (
@@ -656,64 +655,66 @@ function PlainPurchasePage() {
           // filtered position would attach a stone block to the wrong item.
           .map((l, sourceIndex) => ({ l, sourceIndex }))
           .filter(({ l }) => l.itCode && (l.netWt || l.rate))
-          .map(({ l, sourceIndex }) => carryUnmanaged(l.source, {
-            stones: stones.inputsFor(sourceIndex),
-            itCode: l.itCode,
-            tagNo: l.tagNo || undefined,
-            vchSrno: l.vchSrno,
-            metal: l.metal,
-            pcs: n(l.pcs),
-            grossWt: n(l.grossWt),
-            netWt: n(l.netWt),
-            touch: n(l.touch),
-            rate: n(l.rate),
-            otherFineWt: l.otherFineWt,
-            silverFineWt: l.silverFineWt,
-            otherAmount: optionalNumber(l.otherAmount),
-            tblCode: l.tblCode || undefined,
-            designNo: l.designNo || undefined,
-            itDesc: l.itDesc || undefined,
-            lotNo: l.lotNo || undefined,
-            itmLot: l.itmLot || undefined,
-            withStock: l.withStock || undefined,
-            bagWt: n(l.bagWt) || undefined,
-            lessWt: n(l.lessWt) || undefined,
-            lossWt: n(l.lossWt) || undefined,
-            ghtPct: n(l.ghtPct) || undefined,
-            ghtWt: n(l.ghtWt) || undefined,
-            westPct: n(l.westPct) || undefined,
-            fineWt: optionalNumber(l.fineWt),
-            labourPct: optionalNumber(l.labourPct),
-            labourAmount: optionalNumber(l.labourAmount),
-            lessTouch: n(l.lessTouch) || undefined,
-            lesTouch: optionalNumber(l.lesTouch),
-            kunFine: optionalNumber(l.kunFine),
-            convRate: n(l.convRate) || undefined,
-            convPct: n(l.convPct) || undefined,
-            otherRate: n(l.otherRate) || undefined,
-            mrp: n(l.mrp) || undefined,
-            metalAmount: optionalNumber(l.metalAmount),
-            commissionPct: n(l.commissionPct) || undefined,
-            commissionAmount: n(l.commissionAmount) || undefined,
-            fineCutPcs: n(l.fineCutPcs) || undefined,
-            fineCutGrossWt: n(l.fineCutGrossWt) || undefined,
-            fineCutNetWt: n(l.fineCutNetWt) || undefined,
-            fineCutFine: n(l.fineCutFine) || undefined,
-            prCode: l.prCode || undefined,
-            rateType: l.rateType || undefined,
-            urdRateType: l.urdRateType || undefined,
+          .map(({ l, sourceIndex }) =>
+            carryUnmanaged(l.source, {
+              stones: stones.inputsFor(sourceIndex),
+              itCode: l.itCode,
+              tagNo: l.tagNo || undefined,
+              vchSrno: l.vchSrno,
+              metal: l.metal,
+              pcs: n(l.pcs),
+              grossWt: n(l.grossWt),
+              netWt: n(l.netWt),
+              touch: n(l.touch),
+              rate: n(l.rate),
+              otherFineWt: l.otherFineWt,
+              silverFineWt: l.silverFineWt,
+              otherAmount: optionalNumber(l.otherAmount),
+              tblCode: l.tblCode || undefined,
+              designNo: l.designNo || undefined,
+              itDesc: l.itDesc || undefined,
+              lotNo: l.lotNo || undefined,
+              itmLot: l.itmLot || undefined,
+              withStock: l.withStock || undefined,
+              bagWt: n(l.bagWt) || undefined,
+              lessWt: n(l.lessWt) || undefined,
+              lossWt: n(l.lossWt) || undefined,
+              ghtPct: n(l.ghtPct) || undefined,
+              ghtWt: n(l.ghtWt) || undefined,
+              westPct: n(l.westPct) || undefined,
+              fineWt: optionalNumber(l.fineWt),
+              labourPct: optionalNumber(l.labourPct),
+              labourAmount: optionalNumber(l.labourAmount),
+              lessTouch: n(l.lessTouch) || undefined,
+              lesTouch: optionalNumber(l.lesTouch),
+              kunFine: optionalNumber(l.kunFine),
+              convRate: n(l.convRate) || undefined,
+              convPct: n(l.convPct) || undefined,
+              otherRate: n(l.otherRate) || undefined,
+              mrp: n(l.mrp) || undefined,
+              metalAmount: optionalNumber(l.metalAmount),
+              commissionPct: n(l.commissionPct) || undefined,
+              commissionAmount: n(l.commissionAmount) || undefined,
+              fineCutPcs: n(l.fineCutPcs) || undefined,
+              fineCutGrossWt: n(l.fineCutGrossWt) || undefined,
+              fineCutNetWt: n(l.fineCutNetWt) || undefined,
+              fineCutFine: n(l.fineCutFine) || undefined,
+              prCode: l.prCode || undefined,
+              rateType: l.rateType || undefined,
+              urdRateType: l.urdRateType || undefined,
 
-            huid: l.huid,
-            ...(l.making
-              ? { labourType: 'per_gram' as const, labourRate: n(l.making) }
-              : l.labourType
-                ? {
-                    labourType: l.labourType,
-                    labourRate: l.labourRate,
-                    labourFixed: l.labourFixed,
-                  }
-                : {}),
-          })),
+              huid: l.huid,
+              ...(l.making
+                ? { labourType: 'per_gram' as const, labourRate: n(l.making) }
+                : l.labourType
+                  ? {
+                      labourType: l.labourType,
+                      labourRate: l.labourRate,
+                      labourFixed: l.labourFixed,
+                    }
+                  : {}),
+            }),
+          ),
         cashAmt: Number(tender.cashAmt || 0),
         chequeAmt: Number(tender.chequeAmt || 0),
         cardAmt: Number(tender.cardAmt || 0),
@@ -794,12 +795,7 @@ function PlainPurchasePage() {
               <label>Book</label>
               {/* TR_PURC opens on CurBookHelp("PURCHASE") (MDI_FORM.cs:7868); the writer refuses any other
                   MAIN_BOOK, so only purchase books are offered. */}
-              <BookSelect
-                value={coBook}
-                onChange={setCoBook}
-                preferred="PUR"
-                family="purchase"
-              />
+              <BookSelect value={coBook} onChange={setCoBook} preferred="PUR" family="purchase" />
             </div>
             <div className="field">
               <label>Year</label>

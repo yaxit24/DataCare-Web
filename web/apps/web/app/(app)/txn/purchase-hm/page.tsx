@@ -548,27 +548,32 @@ export default function HallmarkPurchasePage() {
       // Original index carried through the filter so stones attach to the right line.
       .map((r, sourceIndex) => ({ r, sourceIndex }))
       .filter(({ r }) => r.itCode.trim())
-      .map(({ r, sourceIndex }) => carryUnmanaged(r.source, {
-        // P7: writer-verified extended columns. A blank cell is sent as `undefined` (dropped from the JSON), never
-        // as 0 — an explicit zero is an override at the writer. The KEY stays, so the stored value of a cell the
-        // operator cleared is not carried back (WP-28, lib/purchaseCarry.ts).
-        ...Object.fromEntries(
-          [...extendedLineFields, ...(tagBook ? tagBandFields : [])].map(([key]) => {
-            const v = String((r as unknown as Record<string, unknown>)[key] ?? '').trim();
-            return [key, v === '' ? undefined : NUMERIC_EXTENDED.has(key as string) ? Number(v) : v];
-          }),
-        ),
-        stones: sub.inputsFor(sourceIndex),
-        itCode: r.itCode.trim(),
-        tagNo: r.tagNo.trim() || undefined,
-        huid: r.huid.trim() || undefined,
-        pcs: n(r.pcs),
-        grossWt: n(r.grossWt),
-        netWt: n(r.netWt),
-        touch: n(r.touch),
-        rate: n(r.rate),
-        ...(r.making ? { labourType: 'per_gram', labourRate: n(r.making) } : {}),
-      }));
+      .map(({ r, sourceIndex }) =>
+        carryUnmanaged(r.source, {
+          // P7: writer-verified extended columns. A blank cell is sent as `undefined` (dropped from the JSON), never
+          // as 0 — an explicit zero is an override at the writer. The KEY stays, so the stored value of a cell the
+          // operator cleared is not carried back (WP-28, lib/purchaseCarry.ts).
+          ...Object.fromEntries(
+            [...extendedLineFields, ...(tagBook ? tagBandFields : [])].map(([key]) => {
+              const v = String((r as unknown as Record<string, unknown>)[key] ?? '').trim();
+              return [
+                key,
+                v === '' ? undefined : NUMERIC_EXTENDED.has(key as string) ? Number(v) : v,
+              ];
+            }),
+          ),
+          stones: sub.inputsFor(sourceIndex),
+          itCode: r.itCode.trim(),
+          tagNo: r.tagNo.trim() || undefined,
+          huid: r.huid.trim() || undefined,
+          pcs: n(r.pcs),
+          grossWt: n(r.grossWt),
+          netWt: n(r.netWt),
+          touch: n(r.touch),
+          rate: n(r.rate),
+          ...(r.making ? { labourType: 'per_gram', labourRate: n(r.making) } : {}),
+        }),
+      );
     if (!lines.length) {
       setMsg({ kind: 'err', text: 'enter at least one item' });
       return;

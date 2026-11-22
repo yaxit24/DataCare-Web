@@ -945,131 +945,133 @@ async function writePurchaseTx(
   // TR_PURC.cs:12134-12135,13051,13066,13148,13173 preserve the opened wall clock on edit.
   const sharedVoucherTime = voucherTimestamp(vchDate, ctx.persistedClock);
   // WP-28 (D6): a reopened line keeps its persisted columns the writer does not build (carryUnownedColumns).
-  const detl = computed.map((c, idx) => carryUnownedColumns(priorRows[idx], {
-    ...key,
-    VCH_DATE: vchDate,
-    VCH_TIME: sharedVoucherTime,
-    VCH_TYPE: bookPolicy.vchType,
-    INOUT_TYPE: bookPolicy.inout,
-    ENTRY_TYPE: 'P',
-    BOOK_NAME: bookPolicy.bookName,
-    AC_CODE: input.acCode,
-    MAIN_USER: ctx.mainUser || null,
-    HD_VCH_NO: ctx.hdVchNo,
-    SR_NO: idx + 1,
-    // OLD_SRNO carries the line's own serial on original entry — measured equal to SR_NO on all 103 real
-    // PR_DETL rows (0 zero, 0 null). The web wrote 0, breaking any back-reference that joins on it.
-    OLD_SRNO: idx + 1,
-    IT_CODE: c.in.itCode,
-    IT_TYPE: lineItemType(idx),
-    /**
-     * `''` on an untagged purchase LINE, not `'N'`.
-     *
-     * The `'N'` sentinel is a `MAIN_STOCK` convention, verified from `Ac_Stock.cs:54` where the desktop writes
-     * `CASE WHEN A.TAG_NO = '' THEN 'N' ELSE A.TAG_NO END` — the SOURCE rows hold `''` and only the stock row is
-     * converted. `PR_DETL` holds `''` on 78/78 captured rows, and the derived column-default spec agrees.
-     *
-     * So the sentinel is per TABLE, not global. That also puts the WP-08e change to `KR_DETL` in doubt: it was
-     * justified from `TR_KR_ISU.cs:5109`, the karigar form's own save routine, so it is probably right — but it
-     * should be confirmed against captured `KR_DETL` rows rather than assumed from this table.
-     */
-    TAG_NO: c.in.tagNo ?? '',
-    VCH_SRNO: tagSrnos.get(idx) ?? 0,
-    ITM_PCS: num(c.in.pcs),
-    ITM_GWT: num(c.in.grossWt),
-    ITM_NWT: num(c.in.netWt),
-    ITM_TOUCH: num(c.in.touch),
-    ITM_GHT_WT: num(c.in.ghtWt),
-    ITM_WEST_PRC: num(c.in.westPct),
-    ITM_FINE: c.calc.fine,
-    ITM_OTH_FINE: num(c.in.otherFineWt),
-    SILVER_FINE: num(c.in.silverFineWt),
-    ITM_RATE: num(c.in.rate),
-    ITM_AMT: c.calc.metal,
-    // LBR_TYPE selects the weight BASIS: G gross wise, N net wise, K kg wise, P pcs wise
-    // (CO_SET.LBR_TYPE options; TR_SALE.cs:11104/11119/11108/11127). The previous map sent per_gram to 'G',
-    // which is GROSS weight, and emitted '%', which the varchar(1) column never holds.
-    LBR_TYPE: desktopLabourTypeFor(c.in.labourType, behavior.labourType) || null,
-    LBR_PRC: num(c.in.labourPct),
-    // Derived when the operator supplied a percentage rather than a rate (TR_SALE.cs:11021):
-    // LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, MsLbrRof).
-    LBR_RATE: effectiveLabourRate(
-      num(c.in.labourRate),
-      num(c.in.rate),
-      num(c.in.labourPct),
-      roundingPolicy.labourDecimals,
-    ),
-    LBR_AMT: c.calc.labour,
-    OTH_AMT: num(c.in.otherAmount),
-    // TR_PURC.cs:13142 — TOT_AMT <- mSG_PR[i,40], computed as
-    //   mSG_PR[Row,40] = Format(Val([Row,35]) + Val([Row,36]) + Val([Row,31]), "0.00")
-    // where 35 = cPrLbrAmt, 36 = cPrOthAmt, 31 = cPrItAmt. Unlike the SALE line total this uses NO
-    // Math.Round, so paise are preserved at two decimals — do not copy the sale's whole-rupee rule here.
-    TOT_AMT: round2(c.calc.metal + c.calc.labour + num(c.in.otherAmount)),
-    // TR_PURC.cs:13144 — NET_AMT <- mSG_PR[i,44]. With tax% = 0 the desktop sets
-    //   mSG_PR[Row,44] = Format(Val([Row,40]) + Val([Row,42]), "0.00")   // total + commission
-    // A second branch back-calculates a tax-exclusive net from a tax-INCLUSIVE total, but it is gated on
-    // `Val([Row,43]) <> Val([Row,58])` — column 58 is a shadow copy of the previous tax %, i.e. a UI
-    // change-detection flag. Its outcome therefore depends on the operator's edit sequence and is not
-    // reproducible from a request payload, so it is recorded as an ambiguity rather than guessed at.
-    NET_AMT: round2(
-      round2(c.calc.metal + c.calc.labour + num(c.in.otherAmount)) + num(c.in.commissionAmount),
-    ),
-    TAX_PRC: taxPct,
-    HM_ID: c.in.huid ?? null,
-    // Desktop PR_DETL columns (TR_PURC.cs:13100-13192). Grid cells left blank persist as ''/0,
-    // which is what an absent input reproduces here.
-    IT_DESC: text(c.in.itDesc).slice(0, 100) || null, // mSG_PR[i,2]  :13100
-    TBL_CODE: text(c.in.tblCode).slice(0, 3) || null, // mSG_PR[i,3]  :13102
-    DESIGN_NO: text(c.in.designNo).slice(0, 20) || null, // mSG_PR[i,4]  :13103
-    LOT_NO: text(c.in.lotNo).slice(0, 10) || null, // mSG_PR[i,5]  :13104
-    ITM_LOT: text(c.in.itmLot).slice(0, 10) || null, // mSG_PR[i,6]  :13105
-    WITH_STOCK: text(c.in.withStock).slice(0, 1) || null, // mSG_PR[i,7]  :13151
-    BAG_WT: num(c.in.bagWt), // mSG_PR[i,8]  :13107
-    ITM_OTH_WT: num(c.in.lessWt), // mSG_PR[i,13] :13111
-    ITM_LOSS_WT: num(c.in.lossWt), // mSG_PR[i,14] :13112
-    ITM_GHT_PRC: num(c.in.ghtPct), // mSG_PR[i,19] :13117
-    ITM_LESS_TCH: num(c.in.lessTouch ?? c.in.lesTouch), // mSG_PR[i,23] :13121
-    CONV_RATE: num(c.in.convRate), // mSG_PR[i,27] :13131
-    CONV_PRC: num(c.in.convPct), // mSG_PR[i,28] :13132
-    /**
-     * The line's rate basis, `'G'` on 78/78 captured rows.
-     *
-     * `PurchaseLineInput.rateType` existed and was accepted, but no `PR_DETL.RATE_TYPE` was ever written — so a
-     * value the caller supplied was silently dropped. Distinct from `URD_RATE_TYPE` below (the unregistered-dealer
-     * basis) and from `IT_RATE_TYPE` on the stone sub-detail.
-     */
-    RATE_TYPE: c.in.rateType ?? 'G',
-    URD_RATE_TYPE: text(c.in.urdRateType).slice(0, 1) || null, // mSG_PR[i,30] :13137
-    // 'N' on 78/78 captured lines (APR_ISU, EMP_ISU and, via hallmarkDetailColumns, DESIGN_IMG_ID).
-    APR_ISU: 'N',
-    EMP_ISU: 'N',
-    ITM_OTH_RATE: num(c.in.otherRate), // mSG_PR[i,37] :13129
-    ITM_MRP: num(c.in.mrp), // mSG_PR[i,39] :13139
-    COMM_PRC: num(c.in.commissionPct), // mSG_PR[i,41] :13140
-    COMM_AMT: round2(num(c.in.commissionAmount)), // mSG_PR[i,42] :13141
-    FINE_CUT_PCS: num(c.in.fineCutPcs), // mSG_PR[i,60] :13189
-    FINE_CUT_GWT: num(c.in.fineCutGrossWt), // mSG_PR[i,61] :13190
-    FINE_CUT_NWT: num(c.in.fineCutNetWt), // mSG_PR[i,62] :13191
-    FINE_CUT_FINE: num(c.in.fineCutFine), // mSG_PR[i,63] :13192
-    PR_CODE: text(c.in.prCode).slice(0, 2) || null, // mSG_PR[i,64] :13147
-    // Sale/consignment source linkage for TR_PURC and TR_PR_SL_UAE.
-    SL_BILL_NO: linkedSource.vchNo || null, // tSlBill/tConsiNo.Text
-    SL_BILL_LC: linkedSource.lcCode, // MLc_code
-    SL_BILL_YRCD: linkedSource.coYear, // source fiscal year
-    SL_BILL_DBCD: linkedSource.coBook || null, // tSlBill_DbCd/tConsiDbCd.Text
-    CONSI_NO: text(c.in.consiNo ?? input.consiNo).slice(0, 10) || null, // mSG_PR[i,36] :8278
-    CONSI_YRCD: text(c.in.consiYrcd ?? input.consiYrcd).slice(0, 9) || null, // mSG_PR[i,37]
-    CONSI_DBCD: text(c.in.consiDbcd ?? input.consiDbcd).slice(0, 3) || null, // mSG_PR[i,38]
-    CONSI_SRNO: num(c.in.consiSrno), // mSG_PR[i,39]
-    // Desktop writes these as literal blanks/zeros on the purchase book (:13106, :13133-13135).
-    ITM_SIZE: '',
-    MCX_RATE: 0,
-    PRM_AMT: 0,
-    PRM_DISC: 0,
-    // WP-28 (G3, D5): hallmark amount, colour, ids 2-4 and the tag band (zeros unless TAG PURCHASE).
-    ...hallmarkDetailColumns(c.in, isTagBook),
-  }));
+  const detl = computed.map((c, idx) =>
+    carryUnownedColumns(priorRows[idx], {
+      ...key,
+      VCH_DATE: vchDate,
+      VCH_TIME: sharedVoucherTime,
+      VCH_TYPE: bookPolicy.vchType,
+      INOUT_TYPE: bookPolicy.inout,
+      ENTRY_TYPE: 'P',
+      BOOK_NAME: bookPolicy.bookName,
+      AC_CODE: input.acCode,
+      MAIN_USER: ctx.mainUser || null,
+      HD_VCH_NO: ctx.hdVchNo,
+      SR_NO: idx + 1,
+      // OLD_SRNO carries the line's own serial on original entry — measured equal to SR_NO on all 103 real
+      // PR_DETL rows (0 zero, 0 null). The web wrote 0, breaking any back-reference that joins on it.
+      OLD_SRNO: idx + 1,
+      IT_CODE: c.in.itCode,
+      IT_TYPE: lineItemType(idx),
+      /**
+       * `''` on an untagged purchase LINE, not `'N'`.
+       *
+       * The `'N'` sentinel is a `MAIN_STOCK` convention, verified from `Ac_Stock.cs:54` where the desktop writes
+       * `CASE WHEN A.TAG_NO = '' THEN 'N' ELSE A.TAG_NO END` — the SOURCE rows hold `''` and only the stock row is
+       * converted. `PR_DETL` holds `''` on 78/78 captured rows, and the derived column-default spec agrees.
+       *
+       * So the sentinel is per TABLE, not global. That also puts the WP-08e change to `KR_DETL` in doubt: it was
+       * justified from `TR_KR_ISU.cs:5109`, the karigar form's own save routine, so it is probably right — but it
+       * should be confirmed against captured `KR_DETL` rows rather than assumed from this table.
+       */
+      TAG_NO: c.in.tagNo ?? '',
+      VCH_SRNO: tagSrnos.get(idx) ?? 0,
+      ITM_PCS: num(c.in.pcs),
+      ITM_GWT: num(c.in.grossWt),
+      ITM_NWT: num(c.in.netWt),
+      ITM_TOUCH: num(c.in.touch),
+      ITM_GHT_WT: num(c.in.ghtWt),
+      ITM_WEST_PRC: num(c.in.westPct),
+      ITM_FINE: c.calc.fine,
+      ITM_OTH_FINE: num(c.in.otherFineWt),
+      SILVER_FINE: num(c.in.silverFineWt),
+      ITM_RATE: num(c.in.rate),
+      ITM_AMT: c.calc.metal,
+      // LBR_TYPE selects the weight BASIS: G gross wise, N net wise, K kg wise, P pcs wise
+      // (CO_SET.LBR_TYPE options; TR_SALE.cs:11104/11119/11108/11127). The previous map sent per_gram to 'G',
+      // which is GROSS weight, and emitted '%', which the varchar(1) column never holds.
+      LBR_TYPE: desktopLabourTypeFor(c.in.labourType, behavior.labourType) || null,
+      LBR_PRC: num(c.in.labourPct),
+      // Derived when the operator supplied a percentage rather than a rate (TR_SALE.cs:11021):
+      // LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, MsLbrRof).
+      LBR_RATE: effectiveLabourRate(
+        num(c.in.labourRate),
+        num(c.in.rate),
+        num(c.in.labourPct),
+        roundingPolicy.labourDecimals,
+      ),
+      LBR_AMT: c.calc.labour,
+      OTH_AMT: num(c.in.otherAmount),
+      // TR_PURC.cs:13142 — TOT_AMT <- mSG_PR[i,40], computed as
+      //   mSG_PR[Row,40] = Format(Val([Row,35]) + Val([Row,36]) + Val([Row,31]), "0.00")
+      // where 35 = cPrLbrAmt, 36 = cPrOthAmt, 31 = cPrItAmt. Unlike the SALE line total this uses NO
+      // Math.Round, so paise are preserved at two decimals — do not copy the sale's whole-rupee rule here.
+      TOT_AMT: round2(c.calc.metal + c.calc.labour + num(c.in.otherAmount)),
+      // TR_PURC.cs:13144 — NET_AMT <- mSG_PR[i,44]. With tax% = 0 the desktop sets
+      //   mSG_PR[Row,44] = Format(Val([Row,40]) + Val([Row,42]), "0.00")   // total + commission
+      // A second branch back-calculates a tax-exclusive net from a tax-INCLUSIVE total, but it is gated on
+      // `Val([Row,43]) <> Val([Row,58])` — column 58 is a shadow copy of the previous tax %, i.e. a UI
+      // change-detection flag. Its outcome therefore depends on the operator's edit sequence and is not
+      // reproducible from a request payload, so it is recorded as an ambiguity rather than guessed at.
+      NET_AMT: round2(
+        round2(c.calc.metal + c.calc.labour + num(c.in.otherAmount)) + num(c.in.commissionAmount),
+      ),
+      TAX_PRC: taxPct,
+      HM_ID: c.in.huid ?? null,
+      // Desktop PR_DETL columns (TR_PURC.cs:13100-13192). Grid cells left blank persist as ''/0,
+      // which is what an absent input reproduces here.
+      IT_DESC: text(c.in.itDesc).slice(0, 100) || null, // mSG_PR[i,2]  :13100
+      TBL_CODE: text(c.in.tblCode).slice(0, 3) || null, // mSG_PR[i,3]  :13102
+      DESIGN_NO: text(c.in.designNo).slice(0, 20) || null, // mSG_PR[i,4]  :13103
+      LOT_NO: text(c.in.lotNo).slice(0, 10) || null, // mSG_PR[i,5]  :13104
+      ITM_LOT: text(c.in.itmLot).slice(0, 10) || null, // mSG_PR[i,6]  :13105
+      WITH_STOCK: text(c.in.withStock).slice(0, 1) || null, // mSG_PR[i,7]  :13151
+      BAG_WT: num(c.in.bagWt), // mSG_PR[i,8]  :13107
+      ITM_OTH_WT: num(c.in.lessWt), // mSG_PR[i,13] :13111
+      ITM_LOSS_WT: num(c.in.lossWt), // mSG_PR[i,14] :13112
+      ITM_GHT_PRC: num(c.in.ghtPct), // mSG_PR[i,19] :13117
+      ITM_LESS_TCH: num(c.in.lessTouch ?? c.in.lesTouch), // mSG_PR[i,23] :13121
+      CONV_RATE: num(c.in.convRate), // mSG_PR[i,27] :13131
+      CONV_PRC: num(c.in.convPct), // mSG_PR[i,28] :13132
+      /**
+       * The line's rate basis, `'G'` on 78/78 captured rows.
+       *
+       * `PurchaseLineInput.rateType` existed and was accepted, but no `PR_DETL.RATE_TYPE` was ever written — so a
+       * value the caller supplied was silently dropped. Distinct from `URD_RATE_TYPE` below (the unregistered-dealer
+       * basis) and from `IT_RATE_TYPE` on the stone sub-detail.
+       */
+      RATE_TYPE: c.in.rateType ?? 'G',
+      URD_RATE_TYPE: text(c.in.urdRateType).slice(0, 1) || null, // mSG_PR[i,30] :13137
+      // 'N' on 78/78 captured lines (APR_ISU, EMP_ISU and, via hallmarkDetailColumns, DESIGN_IMG_ID).
+      APR_ISU: 'N',
+      EMP_ISU: 'N',
+      ITM_OTH_RATE: num(c.in.otherRate), // mSG_PR[i,37] :13129
+      ITM_MRP: num(c.in.mrp), // mSG_PR[i,39] :13139
+      COMM_PRC: num(c.in.commissionPct), // mSG_PR[i,41] :13140
+      COMM_AMT: round2(num(c.in.commissionAmount)), // mSG_PR[i,42] :13141
+      FINE_CUT_PCS: num(c.in.fineCutPcs), // mSG_PR[i,60] :13189
+      FINE_CUT_GWT: num(c.in.fineCutGrossWt), // mSG_PR[i,61] :13190
+      FINE_CUT_NWT: num(c.in.fineCutNetWt), // mSG_PR[i,62] :13191
+      FINE_CUT_FINE: num(c.in.fineCutFine), // mSG_PR[i,63] :13192
+      PR_CODE: text(c.in.prCode).slice(0, 2) || null, // mSG_PR[i,64] :13147
+      // Sale/consignment source linkage for TR_PURC and TR_PR_SL_UAE.
+      SL_BILL_NO: linkedSource.vchNo || null, // tSlBill/tConsiNo.Text
+      SL_BILL_LC: linkedSource.lcCode, // MLc_code
+      SL_BILL_YRCD: linkedSource.coYear, // source fiscal year
+      SL_BILL_DBCD: linkedSource.coBook || null, // tSlBill_DbCd/tConsiDbCd.Text
+      CONSI_NO: text(c.in.consiNo ?? input.consiNo).slice(0, 10) || null, // mSG_PR[i,36] :8278
+      CONSI_YRCD: text(c.in.consiYrcd ?? input.consiYrcd).slice(0, 9) || null, // mSG_PR[i,37]
+      CONSI_DBCD: text(c.in.consiDbcd ?? input.consiDbcd).slice(0, 3) || null, // mSG_PR[i,38]
+      CONSI_SRNO: num(c.in.consiSrno), // mSG_PR[i,39]
+      // Desktop writes these as literal blanks/zeros on the purchase book (:13106, :13133-13135).
+      ITM_SIZE: '',
+      MCX_RATE: 0,
+      PRM_AMT: 0,
+      PRM_DISC: 0,
+      // WP-28 (G3, D5): hallmark amount, colour, ids 2-4 and the tag band (zeros unless TAG PURCHASE).
+      ...hallmarkDetailColumns(c.in, isTagBook),
+    }),
+  );
 
   /**
    * Stone/diamond sub-detail (TR_PURC.cs:13211-13243). One row per sub-grid row, keyed by the
@@ -1158,7 +1160,9 @@ async function writePurchaseTx(
             IT_TYPE: lineItemType(idx),
             HM_ID: c.in.huid ?? null,
             // TR_PURC_HM.cs:8237-8316: a TAG PURCHASE tag takes its net, rate, amount, cost and margin from the band.
-            ...(isTagBook ? tagBandBarColumns(c.in, { rate: num(c.in.rate), metal: c.calc.metal }) : {}),
+            ...(isTagBook
+              ? tagBandBarColumns(c.in, { rate: num(c.in.rate), metal: c.calc.metal })
+              : {}),
           },
         ];
       });
@@ -2485,17 +2489,16 @@ export async function editPurchase(
     // TR_PURC.cs `ItCodeLock`: a line that already produced a tag has its item code frozen, because the
     // tag is in stock under that item. Compared against the PERSISTED detail rows, never the request.
     // WP-28 (D6, D12): the whole persisted rows, kept for the writer by SR_NO.
-    const priorLines: Array<Record<string, unknown>> =
-      await tx.$queryRawUnsafe(
-        `SELECT * FROM "PR_DETL"
+    const priorLines: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT * FROM "PR_DETL"
            WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5
            ORDER BY "SR_NO"`,
-        scope.coCode,
-        scope.lcCode,
-        scope.coYear,
-        scope.coBook,
-        voucherNo,
-      );
+      scope.coCode,
+      scope.lcCode,
+      scope.coYear,
+      scope.coBook,
+      voucherNo,
+    );
     for (const prior of priorLines) {
       const tagNo = String(prior.TAG_NO ?? '').trim();
       if (!tagNo || tagNo === 'N') continue; // untagged lines may still change item

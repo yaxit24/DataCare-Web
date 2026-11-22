@@ -14,7 +14,8 @@ import { hallmarkLineView } from './purchaseHallmark.js';
 
 const text = (value: unknown): string => String(value ?? '').trim();
 const num = (value: unknown): number => (value == null ? 0 : Number(value));
-const optional = (value: unknown): number | undefined => (value == null ? undefined : Number(value));
+const optional = (value: unknown): number | undefined =>
+  value == null ? undefined : Number(value);
 const round2 = (n: number): number => Math.round((n + Number.EPSILON) * 100) / 100;
 
 export function purchaseStoneView(row: Record<string, unknown>): Record<string, unknown> {

@@ -376,6 +376,27 @@ async function withPurchaseSettings(ctx, { amountType, totalRounding, taxRoundin
 }
 
 /** Narrow browser/DB setup reused by report feature matrices; the voucher still goes through the real screen. */
+/** WP-28: run with CO_SET_NEW.PURC_WITH_HMTAX = 'Y' (the hallmark layout, D1), then restore the previous value. */
+async function withHallmarkTax(ctx, run) {
+  const [before] = await ctx.rows(
+    `SELECT "PURC_WITH_HMTAX" v FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+  );
+  assert(before, 'company 01 needs a CO_SET_NEW row');
+  await ctx.owner.$executeRawUnsafe(
+    `UPDATE "CO_SET_NEW" SET "PURC_WITH_HMTAX"='Y' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+    ctx.tenantId,
+  );
+  try {
+    return await run();
+  } finally {
+    await ctx.owner.$executeRawUnsafe(
+      `UPDATE "CO_SET_NEW" SET "PURC_WITH_HMTAX"=$2 WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+      ctx.tenantId,
+      before.v,
+    );
+  }
+}
+
 export const purchaseInvoiceSetup = Object.freeze({
   BOOK,
   LINE_G,
@@ -420,7 +441,12 @@ export const purchaseInvoice = {
   defaultUser: as(USERS.admin.user),
   inputs: [
     'web/apps/web/app/(app)/txn/purchase/page.tsx',
+    'web/apps/web/app/(app)/txn/purchase-hm/page.tsx',
+    'web/apps/web/app/(app)/txn/tag-wise-purc/page.tsx',
+    'web/apps/web/lib/purchaseCarry.ts',
     'web/apps/api/src/modules/purchase/purchase.ts',
+    'web/apps/api/src/modules/purchase/purchaseHallmark.ts',
+    'web/apps/api/src/modules/purchase/purchaseReopen.ts',
     'web/apps/web/test/features/modules/purchaseInvoice.mjs',
     'web/apps/web/test/features/fixtures/catalogue.mjs',
   ],
@@ -1685,6 +1711,176 @@ export const purchaseInvoice = {
             );
         }
       },
+    ),
+    // ---- WP-28 (N244 / G256): hallmark receive branch, lossless reopen, family-filtered books ----
+    C(
+      'entry.setting-y-opens-hallmark-grid',
+      'T01',
+      'read-only',
+      'D1: Purchase opens TR_PURC_HM when PURC_WITH_HMTAX is Y (MDI_FORM.cs:7866-7871); HmAmt col 39, Color col 7',
+      async (ctx) =>
+        withHallmarkTax(ctx, async () => {
+          const { page } = await ctx.session();
+          await page.goto('/txn/purchase');
+          await page.getByRole('heading', { name: /^Hallmark Purchase/ }).waitFor();
+          const book = page.getByRole('combobox', { name: 'Configured book', exact: true });
+          for (let i = 0; i < 50 && (await book.inputValue()) !== BOOK; i++)
+            await page.waitForTimeout(100);
+          const offered = (await book.locator('option').allTextContents()).filter((t) =>
+            t.includes('—'),
+          );
+          assert.deepEqual(offered, ['PR — Purchase'], 'Purchase lists PURCHASE books only (D8)');
+          await page.getByTestId('purchase-hm-grid-mode').click();
+          const heads = await page.locator('table.grid thead th').allTextContents();
+          assert.ok(heads.includes('HmAmt') && heads.includes('Color'), heads.join('|'));
+          assert.ok(!heads.includes('TagRate'), 'no tag band on a PURCHASE book (D5)');
+          await ctx.shot(page, 'hallmark-layout');
+          return {
+            observation: `books ${JSON.stringify(offered)}; columns include HmAmt, Color; no tag band`,
+            expected: { layout: 'TR_PURC_HM', books: ['PR — Purchase'] },
+          };
+        }),
+    ),
+    C(
+      'entry.tag-wise-purc-opens-tag-books',
+      'T01',
+      'read-only',
+      'D1/D8: Tag Wise Purc opens TR_PURC_HM on TAG PURCHASE books with the tag band (MDI_FORM.cs:8540-8544)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await page.goto('/txn/tag-wise-purc');
+        await page.getByRole('heading', { name: /^Hallmark Purchase/ }).waitFor();
+        const book = page.getByRole('combobox', { name: 'Configured book', exact: true });
+        for (let i = 0; i < 50 && !(await book.inputValue()); i++) await page.waitForTimeout(100);
+        const offered = (await book.locator('option').allTextContents()).filter((t) =>
+          t.includes('—'),
+        );
+        assert.deepEqual(offered, ['TPR — Hallmark Purchase']);
+        const heads = await page.locator('table.grid thead th').allTextContents();
+        for (const caption of ['HmId2', 'HmWt2', 'TgNwt', 'TagRate', 'TagItAmt', 'Margin%'])
+          assert.ok(heads.includes(caption), `${caption} in ${heads.join('|')}`);
+        return {
+          observation: `books ${JSON.stringify(offered)}; tag band shown`,
+          expected: { books: ['TPR — Hallmark Purchase'] },
+        };
+      },
+    ),
+    C(
+      'lookup.books-family-list-server-side',
+      'T04',
+      'read-only',
+      'D7: /context/books?family= filters MAIN_BOOK on the server (DC_Main.cs:1503)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await page.goto('/txn/purchase');
+        const list = (family) =>
+          page.evaluate(async (f) => {
+            const r = await fetch(`/api/context/books?family=${f}`, { credentials: 'include' });
+            return (await r.json()).map((b) => b.CO_BOOK);
+          }, family);
+        const purchase = await list('purchase');
+        const tag = await list('tag-purchase');
+        assert.deepEqual(purchase, ['PR']);
+        assert.deepEqual(tag, ['TPR']);
+        return {
+          observation: `purchase ${JSON.stringify(purchase)}, tag-purchase ${JSON.stringify(tag)}`,
+          expected: { purchase: ['PR'], tag: ['TPR'] },
+        };
+      },
+    ),
+    C(
+      'reopen.hm-lossless-unchanged-save',
+      'T08',
+      'mutation',
+      'D6: an earlier-month hallmark voucher with typed amount and HmAmt survives Load + Update byte for byte',
+      async (ctx) =>
+        withHallmarkTax(ctx, async () => {
+          const { page } = await ctx.session();
+          await page.goto('/txn/purchase');
+          await page.getByRole('heading', { name: /^Hallmark Purchase/ }).waitFor();
+          const book = page.getByRole('combobox', { name: 'Configured book', exact: true });
+          for (let i = 0; i < 50 && (await book.inputValue()) !== BOOK; i++)
+            await page.waitForTimeout(100);
+          const year =
+            new Date().getMonth() + 1 >= 4
+              ? new Date().getFullYear()
+              : new Date().getFullYear() - 1;
+          const earlier = `${year}-04-15`;
+          await page.getByLabel('Vch Date', { exact: true }).fill(earlier);
+          await pickSupplier(page, PARTIES.local.code);
+          const hmCell = (row, n) =>
+            page
+              .locator('table.grid tbody tr')
+              .nth(row)
+              .locator(`td:nth-child(${n}) input`)
+              .first();
+          await hmCell(0, 1).fill(LINE_G.item);
+          await hmCell(0, 1).press('Escape');
+          for (const [n, v] of [
+            [4, LINE_G.pcs],
+            [5, LINE_G.gross],
+            [6, LINE_G.net],
+            [7, LINE_G.touch],
+            [8, LINE_G.rate],
+            [9, LINE_G.making],
+          ])
+            await hmCell(0, n).fill(v);
+          await page.getByTestId('purchase-hm-grid-mode').click();
+          await page.getByLabel('ItAmt row 1', { exact: true }).fill('110800');
+          await page.getByLabel('HmAmt row 1', { exact: true }).fill('36.5');
+          await page.getByLabel('Color row 1', { exact: true }).fill('RED');
+          await page.getByLabel('HM Tax Code', { exact: true }).fill('18');
+          await page.getByLabel('HM Tax %', { exact: true }).fill('18');
+          const created = await save(page, 'Save Hallmark Purchase');
+          assert.equal(created.status(), 201, await created.text());
+          const vchNo = String((await created.json()).vchNo).padStart(5, '0');
+          const dump = async () => {
+            const out = {};
+            for (const table of [
+              'PR_DATA',
+              'PR_DETL',
+              'AC_DATA',
+              'TAX_DATA',
+              'MAIN_STOCK',
+              'ROJ_MEL_DATA',
+            ])
+              out[table] = (
+                await ctx.rows(
+                  `SELECT (to_jsonb(t) - 'row_id')::text r FROM "${table}" t
+                    WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3 ORDER BY 1`,
+                  BOOK,
+                  vchNo,
+                )
+              ).map((x) => x.r);
+            return out;
+          };
+          const before = await dump();
+          const [h] = await ctx.rows(
+            `SELECT "VCH_DATE"::text d,"HM_AMT"::float hm,"HM_TAX_CODE" c FROM "PR_DATA"
+              WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+            BOOK,
+            vchNo,
+          );
+          // Math.Round(36.50, 0) = 36 (half to even), TR_PURC_HM.cs:9995.
+          assert.deepEqual([h.d.slice(0, 10), h.hm, h.c], [earlier, 36, '18']);
+          await page.getByRole('button', { name: 'New', exact: true }).click();
+          await page.getByLabel('Voucher No', { exact: true }).fill(vchNo);
+          await page.getByRole('button', { name: 'Load', exact: true }).click();
+          await page
+            .getByTestId('purchase-hm-loaded')
+            .filter({ hasText: `Loaded #${vchNo}` })
+            .waitFor();
+          const updated = await save(page, 'Update Hallmark Purchase');
+          assert.equal(updated.status(), 200, await updated.text());
+          const after = await dump();
+          assert.deepEqual(after, before, 'every stored row is identical after an unchanged save');
+          return {
+            observation: `voucher ${vchNo} dated ${earlier}: ${Object.values(before).flat().length} rows identical after Load + Update`,
+            expected: { date: earlier, hmAmt: 36, differences: 0 },
+            database: { before, after },
+            downstream: { ledgerRows: before.AC_DATA.length, stockRows: before.MAIN_STOCK.length },
+          };
+        }),
     ),
   ],
 };

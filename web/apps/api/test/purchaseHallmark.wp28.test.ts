@@ -76,20 +76,29 @@ describe('WP-28 hallmark purchase rules', () => {
 
   // purchase-invoice.formula.bar-detl-net-weight-rule
   it('BAR_DETL net weight is the tag net unless zero; KR_NET_WT is the line net (TR_PURC_HM.cs:8237-8246)', () => {
-    expect(tagBandBarColumns({ netWt: 10, tagNwt: 9.8 }, { rate: 6050, metal: 60500 })).toMatchObject(
-      { ITM_NWT: 9.8, KR_NET_WT: 10 },
+    expect(
+      tagBandBarColumns({ netWt: 10, tagNwt: 9.8 }, { rate: 6050, metal: 60500 }),
+    ).toMatchObject({ ITM_NWT: 9.8, KR_NET_WT: 10 });
+    expect(tagBandBarColumns({ netWt: 10, tagNwt: 0 }, { rate: 6050, metal: 60500 })).toMatchObject(
+      {
+        ITM_NWT: 10,
+        KR_NET_WT: 10,
+      },
     );
-    expect(tagBandBarColumns({ netWt: 10, tagNwt: 0 }, { rate: 6050, metal: 60500 })).toMatchObject({
-      ITM_NWT: 10,
-      KR_NET_WT: 10,
-    });
   });
 
   // purchase-invoice.formula.bar-detl-rate-amount-rule
   it('BAR_DETL rate and amount: a typed tag amount wins with its cost and margin (TR_PURC_HM.cs:8304-8316)', () => {
     expect(
       tagBandBarColumns(
-        { netWt: 10, tagRate: 6100, tagAmount: 61000, tagTotCost: 61500, tagMarginPct: 5, tagCost: 60000 },
+        {
+          netWt: 10,
+          tagRate: 6100,
+          tagAmount: 61000,
+          tagTotCost: 61500,
+          tagMarginPct: 5,
+          tagCost: 60000,
+        },
         { rate: 6050, metal: 60500 },
       ),
     ).toMatchObject({ ITM_RATE: 6100, ITM_AMT: 61000, TAG_COST: 61500, ITM_MARGIN: 5 });
@@ -106,7 +115,9 @@ describe('WP-28 hallmark purchase rules', () => {
     expect(() => assertPurchaseFamilyBook('PURCHASE', 'PR')).not.toThrow();
     expect(() => assertPurchaseFamilyBook('TAG PURCHASE', 'TPR')).not.toThrow();
     expect(() => assertPurchaseFamilyBook('CON PUR', 'CP')).not.toThrow();
-    expect(() => assertPurchaseFamilyBook('SALES', 'SL')).toThrow(/SL.*SALES.*PURCHASE or TAG PURCHASE/);
+    expect(() => assertPurchaseFamilyBook('SALES', 'SL')).toThrow(
+      /SL.*SALES.*PURCHASE or TAG PURCHASE/,
+    );
     expect(() => assertPurchaseFamilyBook('', 'PB')).toThrow(/PB/);
   });
 

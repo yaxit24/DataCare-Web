@@ -272,7 +272,10 @@ const SILVER_FULL = { ...SILVER, hmIdAmount: 40, itmColor: 'WHT' };
     expect([n(header.HM_AMT), n(header.HM_TAX_PRC), n(header.HM_TAX_AMT)]).toEqual([76, 18, 13.68]);
     const gold = (await row('PR_DETL', BOOK, vchNo, `ORDER BY "SR_NO"`))[0]!;
     expect([n(gold.ITM_AMT), n(gold.ITM_FINE), n(gold.HM_ID_AMT), gold.ITM_COLOR]).toEqual([
-      110800, 18.3, 36.5, 'RED',
+      110800,
+      18.3,
+      36.5,
+      'RED',
     ]);
 
     const before = await snapshot();
@@ -362,18 +365,18 @@ const SILVER_FULL = { ...SILVER, hmIdAmount: 40, itmColor: 'WHT' };
       ['H1', 'H2', 'H3', 'H4'],
       ['H5', null, null, null],
     ]);
-    expect(lines.map((l) => [n(l.HM_ID_WT), n(l.HM_ID2_WT), n(l.HM_ID3_WT), n(l.HM_ID4_WT)])).toEqual(
-      [
-        [0.1, 0.2, 0.3, 0.4],
-        [0.05, 0, 0, 0],
-      ],
-    );
-    expect(lines.map((l) => [n(l.TAG_OTH_WT), n(l.TAG_NWT), n(l.TAG_MARGIN_PRC), l.WITH_STOCK])).toEqual(
-      [
-        [0.5, 9.8, 5, 'N'],
-        [0, 0, 8, 'N'],
-      ],
-    );
+    expect(
+      lines.map((l) => [n(l.HM_ID_WT), n(l.HM_ID2_WT), n(l.HM_ID3_WT), n(l.HM_ID4_WT)]),
+    ).toEqual([
+      [0.1, 0.2, 0.3, 0.4],
+      [0.05, 0, 0, 0],
+    ]);
+    expect(
+      lines.map((l) => [n(l.TAG_OTH_WT), n(l.TAG_NWT), n(l.TAG_MARGIN_PRC), l.WITH_STOCK]),
+    ).toEqual([
+      [0.5, 9.8, 5, 'N'],
+      [0, 0, 8, 'N'],
+    ]);
     const tags = await row('BAR_DETL', TAG_BOOK, vchNo, `ORDER BY "SR_NO"`);
     // TR_PURC_HM.cs:8237-8246: ITM_NWT is the tag net unless it is zero; KR_NET_WT is the line net.
     expect(tags.map((t) => [t.TAG_NO, n(t.ITM_NWT), n(t.KR_NET_WT)])).toEqual([
@@ -388,40 +391,57 @@ const SILVER_FULL = { ...SILVER, hmIdAmount: 40, itmColor: 'WHT' };
     expect(n(tags[0]!.ITM_AMT)).toBe(61000);
     const before = await snapshot();
     const view = await reopenAndSaveUnchanged(vchNo, TAG_BOOK);
-    expect(view.lines[0]).toMatchObject({ hmId2: 'H2', hmId4Wt: 0.4, tagNwt: 9.8, tagAmount: 61000 });
+    expect(view.lines[0]).toMatchObject({
+      hmId2: 'H2',
+      hmId4Wt: 0.4,
+      tagNwt: 9.8,
+      tagAmount: 61000,
+    });
     expect(await snapshot()).toEqual(before);
   });
 
   // purchase-invoice.refusal.book-family-screen-mismatch (D5): a PURCHASE book never stores tag-band values.
   it('a PURCHASE book stores the tag band as zeros and blanks whatever the request says', async () => {
     const vchNo = await create(
-      purchase([{ ...GOLD, hmId2: 'H2', hmId2Wt: 0.2, tagNwt: 9.8, tagCost: 500, tagMarginPct: 5 }]),
+      purchase([
+        { ...GOLD, hmId2: 'H2', hmId2Wt: 0.2, tagNwt: 9.8, tagCost: 500, tagMarginPct: 5 },
+      ]),
     );
     const line = (await row('PR_DETL', BOOK, vchNo))[0]!;
-    expect([line.HM_ID2, n(line.HM_ID2_WT), n(line.TAG_NWT), n(line.TAG_COST), n(line.TAG_MARGIN_PRC)]).toEqual(
-      [null, 0, 0, 0, 0],
-    );
+    expect([
+      line.HM_ID2,
+      n(line.HM_ID2_WT),
+      n(line.TAG_NWT),
+      n(line.TAG_COST),
+      n(line.TAG_MARGIN_PRC),
+    ]).toEqual([null, 0, 0, 0, 0]);
   });
 
   // purchase-invoice.formula.hm-zero-charge-no-tax
   it('a chosen hallmark tax code is stored even when no line carries a hallmark amount', async () => {
     const vchNo = await create(purchase([GOLD, SILVER], { hmTaxCode: '18', hmTaxPct: 18 }));
     const header = (await row('PR_DATA', BOOK, vchNo))[0]!;
-    expect([header.HM_TAX_CODE, n(header.HM_TAX_PRC), n(header.HM_AMT), n(header.HM_TAX_AMT)]).toEqual([
-      '18',
-      18,
-      0,
-      0,
-    ]);
+    expect([
+      header.HM_TAX_CODE,
+      n(header.HM_TAX_PRC),
+      n(header.HM_AMT),
+      n(header.HM_TAX_AMT),
+    ]).toEqual(['18', 18, 0, 0]);
   });
 
   // purchase-invoice.edit.hm-amount-changes-header-total
   it('editing a line hallmark amount re-derives the header charge and its tax (half to even)', async () => {
     const vchNo = await create(
-      purchase([{ ...GOLD, hmIdAmount: 36.5 }, { ...SILVER, hmIdAmount: 40 }], {
-        hmTaxCode: '18',
-        hmTaxPct: 18,
-      }),
+      purchase(
+        [
+          { ...GOLD, hmIdAmount: 36.5 },
+          { ...SILVER, hmIdAmount: 40 },
+        ],
+        {
+          hmTaxCode: '18',
+          hmTaxPct: 18,
+        },
+      ),
     );
     const view = (await call('GET', `/purchases/${vchNo}?coBook=${BOOK}`)).json();
     const edited = await call('PUT', `/purchases/${vchNo}?coBook=${BOOK}`, {
@@ -494,9 +514,9 @@ const SILVER_FULL = { ...SILVER, hmIdAmount: 40, itmColor: 'WHT' };
   // purchase-invoice.lookup.books-family-list-server-side (D7, D8)
   it('GET /context/books?family= lists only the in-use books of that family, ordered by name', async () => {
     const list = async (family: string) =>
-      ((await call('GET', `/context/books?family=${family}`)).json() as Array<{ CO_BOOK: string }>).map(
-        (b) => b.CO_BOOK,
-      );
+      (
+        (await call('GET', `/context/books?family=${family}`)).json() as Array<{ CO_BOOK: string }>
+      ).map((b) => b.CO_BOOK);
     expect(await list('purchase')).toEqual(['PR']);
     expect(await list('tag-purchase')).toEqual(['TPR']);
     const sales = await list('sales');

@@ -65,7 +65,9 @@ export function BookSelect({
 
   useEffect(() => {
     let cancelled = false;
-    get<ScopeBook[]>(family ? `/context/books?family=${encodeURIComponent(family)}` : '/context/books')
+    get<ScopeBook[]>(
+      family ? `/context/books?family=${encodeURIComponent(family)}` : '/context/books',
+    )
       .then((rows) => {
         if (cancelled) return;
         const active = rows.filter(
