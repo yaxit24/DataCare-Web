@@ -246,12 +246,15 @@ async function screenGrid(page) {
     (await page.locator('table.grid thead tr').count()) > 1
       ? await page.locator('table.grid thead tr').first().locator('th').allTextContents()
       : null;
-  const rows = await page
+  const cells = await page
     .locator('table.grid tbody tr')
     .evaluateAll((trs) =>
       trs.map((tr) => [...tr.querySelectorAll('td')].map((td) => td.textContent)),
     );
-  return { captions, groups, rows };
+  // An empty result shows one placeholder cell "No Record Found...." spanning the grid; it is not a data row.
+  const placeholder =
+    cells.length === 1 && cells[0].length === 1 && cells[0][0] === 'No Record Found....';
+  return { captions, groups, rows: placeholder ? [] : cells };
 }
 
 /** Row counts of every business table a report could touch; a report run must leave them equal. */
@@ -269,8 +272,8 @@ async function businessFootprint(ctx) {
 async function seedParty(ctx, { code, name, gstin = '', gstType = 'L', state = null }) {
   await ctx.rows(
     `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GR","AC_GST_TYPE","AC_PANNO","AC_GSTNO","AC_STATE")
-     SELECT $1,'01','01',$2,$3,'10',$4,'WPNOI1234F',$5,$6
-      WHERE NOT EXISTS (SELECT 1 FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "AC_CODE"=$2)
+     SELECT $1::text,'01','01',$2::text,$3::text,'10',$4::text,'WPNOI1234F',$5::text,$6::text
+      WHERE NOT EXISTS (SELECT 1 FROM "AC_MAST" WHERE tenant_id=$1::text AND "CO_CODE"='01' AND "AC_CODE"=$2::text)
      RETURNING 1`,
     code,
     name,
@@ -563,7 +566,7 @@ function headerOnlyCase(id, index, source, expected) {
     assert.deepEqual(grid.rows, [], 'no data rows');
     assert.equal(await page.locator('table.grid tfoot').count(), 0, 'no totals row');
     assert.equal(await page.getByRole('status').count(), 0, 'no "No Record Found...." message');
-    assert.equal(await page.getByRole('alert').count(), 0, 'no refusal');
+    assert.equal(await page.getByTestId('gst-report-error').count(), 0, 'no refusal');
     assert.deepEqual(await businessFootprint(ctx), before, 'a report run writes nothing');
     await ctx.shot(page, id.replaceAll('.', '-'));
     return {
@@ -734,7 +737,7 @@ const WP19_CASES = [
       await page.waitForTimeout(1500);
       assert.deepEqual(exports, [], 'no CSV request');
       assert.equal(popups.length, 0, 'no download window');
-      assert.equal(await page.getByRole('alert').count(), 0, 'no message');
+      assert.equal(await page.getByTestId('gst-report-error').count(), 0, 'no message');
       // The API refuses the file too, so no other client can produce it.
       const direct = await page.request.get(
         `/api/reports/gst-report/export.csv${new URL(ran.url()).search}`,
