@@ -10,6 +10,13 @@
 - 2026-11-22: verification: 88 cases: 17 pass at database/unit level (lossless reopen of every tenant row for an earlier-month hallmark voucher with typed amount, fine and stones; TAG PURCHASE ids 2-4, weights, tag band and BAR_DETL rules; HM_AMT half to even; HM tax code with no charge; server family refusal; /context/books?family=), 4 partly, 2 blocked, 3 N/A, the rest executable but not run (browser module extended, not run locally); full API suite with database 4134/4134 after the kernel fix. Browser cases not run locally. Not done: employee-code book shortcut (D9), `WITH_STOCK` blank to Y,
   `BAR_DATA`/`SRNO_MAST`/`TAG_SET` tag write set, print templates; blocked: the 95-column Enter walk and the `DATA_TYPE` book filter.
 
+## 2026-11-22 — Data Backup archives the tenant configuration by allowlist (N237 / G249, WP-08, D37)
+
+- 2026-11-22: the v2 archive and its manifest carry `tenantConfig` (datacare.tenant-config v1): nine tenant-shared configuration tables, column by
+  column from an allowlist (unlisted columns are never read), and an excluded-secrets list written as null; sessions and receipts are never read.
+- 2026-11-22: password hashes (`LOGIN_MAST.LOGIN_PWD`) are excluded too (D37 amended 2026-11-22: offline-cracking risk; DR uses pg_dump). data-backup module 14 of 18
+  applicable (4 blocked), `config.nextmain-allowlist` left the baseline; backup DB tests 31 of 31.
+
 ## 2026-11-22 — Balance TrFr carries the desktop BtmSchm datasets (N236 / G248, WP-23)
 
 - 2026-11-22: Ac Balance (Rtl_AcOpbl) and Item Stock (BtnItmStk) carry by the desktop rules into the server-computed Transfer Year;
