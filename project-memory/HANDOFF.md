@@ -1,3 +1,8 @@
+## 2026-11-22 — Tag Stock follows the desktop RP_TAG selections and totals (N238 / G250, WP-15)
+
+- 2026-11-22: In = BAR_DETL creation rows, Out = minus movements, Stock/Mrp = positive signed-movement sum of the year up to To (Mrp <> 0), Apr = APR ISU / ISU_REC N joined to BAR_DETL, All = signed history; tag N excluded; no 5,000-row cap in rows, footer, CSV or Excel; Tag Summ / Product Stk; the page is the RP_TAG form (selectors, columns, keys). CSV and Excel need the Print right.
+- 2026-11-22: tagStock.db.test.ts (28) and tagStock.routes.db.test.ts (6) pass on an isolated database; the tagStock browser module and the edited tagCancel/tagOpening helpers were NOT run locally (8 GB machine): CI is the first run. Open: voucher zoom, Print window/Crystal, approval other-item columns, edition-E Emp Isu Less, summary Mrp/Size, year rollover.
+
 ## 2026-11-09 — Order Cancel is the desktop TR_SL_ORD_ADJ voucher (N233 / G245, WP-02)
 
 - 2026-11-09: one voucher cancels the open advance of many orders (SL_ORD_ADJ, Order_Adj_Ledr/Rojmel, held-tag release), version-guarded

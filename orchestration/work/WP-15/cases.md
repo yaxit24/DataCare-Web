@@ -366,31 +366,31 @@ Status: blocked: not decided in the packet (decision 4 lists MRP and size only);
 Layer: browser
 Steps: 1. In Product, type a missing code and Enter. 2. In the help dialog choose P2. 3. Repeat for Group and Item. 4. Press Escape in the help, then retype a valid code.
 Expected: a missing code opens the help list; selecting fills code and name and selects the code text; a valid code fills the name directly; Escape leaves the field unchanged. Focus is not advanced to the next field. RP_TAG.cs:9565 {{((Form)MyProject.Forms.MS_HELP).ShowDialog();}} RP_TAG.cs:9601 {{((Form)MyProject.Forms.MS_HELP).ShowDialog();}} RP_TAG.cs:9609 {{((TextBoxBase)tPrCode).SelectAll();}} Fails today: gap 8.
-Status: executable
+Status: blocked: the desktop MS_HELP dialog flow (missing code opens the help, Escape keeps the field) is not reproduced; the web uses the type-ahead LookupPicker.
 
 ### tag-stock.lookup.item-keeps-focus   (T04)
 Layer: browser
 Steps: 1. Type a non-existent item code, Enter, close help without choosing.
 Expected: focus returns to the Item box; a valid item fills its name. RP_TAG.cs:9731 {{((Control)tItCode).Focus();}} Fails today: gap 8.
-Status: executable
+Status: blocked: the desktop MS_HELP dialog flow is not reproduced; the web uses the type-ahead LookupPicker.
 
 ### tag-stock.lookup.location   (T04)
 Layer: browser
 Steps: 1. Enter a valid location L2 in Location and press Enter. 2. Enter a non-existent one.
 Expected: a valid or blank location clears the grid (previous results are not shown against the new location); an invalid one opens location help. RP_TAG.cs:9695 {{DGV_CLEAR();}} Fails today: gap 8.
-Status: executable
+Status: blocked: the location help for an invalid code is not built; a Location Enter only clears the grid.
 
 ### tag-stock.lookup.book-keeps-valid-value   (T04; decision 4)
 Layer: browser
 Steps: 1. In Book enter the existing book code TOP and press Enter. 2. Read the box. 3. Enter a non-existent book code and Enter.
 Expected: the box keeps "TOP". For a missing code the book help opens and focus stays in Book. The desktop clears a valid book: RP_TAG.cs:9783 {{tBookCode.Text = "";}} **DELIBERATE** (decision 4: a valid Book lookup keeps the chosen value). Fails today: gap 8.
-Status: executable
+Status: blocked: the book help for a missing code is not built; the Book type-ahead keeps the chosen value.
 
 ### tag-stock.lookup.tagno-existing-runs-all   (T04)
 Layer: browser
 Steps: 1. In TagNo type A005 and Enter. 2. Repeat with RptType Tag Summ. 3. Type a missing tag and Enter.
 Expected: an existing tag runs the All Tag report for that tag (3 movements, dates bypassed); with Tag Summ it runs Product Stk; a missing tag opens the tag/design help. RP_TAG.cs:10789 {{BtnAll_Click(BtnAll, new EventArgs());}} Fails today: gap 8, gap 12.
-Status: executable
+Status: blocked: TagNo Enter runs All Tag (Product Stk in Tag Summ) without the existing-tag check and the missing-tag help.
 
 ### tag-stock.lookup.stale-response   (T04)
 Layer: browser
@@ -406,25 +406,25 @@ Status: executable
 Layer: browser
 Steps: 1. Stock Tag, To 31/05. 2. Double-click the row A001. 3. Repeat on an Out row for the sale of A003 and on All rows for the return of A005 and the approval issue of A006, with a user holding Read on each target menu.
 Expected: the Tag Opening voucher (TR_TAG_OPBL) opens at A001's VchNo; the Out sale row opens the Sale voucher (TR_SALE); the return row opens the Sale Return voucher (TR_SALE_RTN); the approval row opens the Approval Issue voucher (TR_APR_ISU); the voucher number equals the row's VchNo. RP_TAG.cs:8946 {{DC_Main.CurBookVch = ((ColumnView)GridView1).GetFocusedRowCellValue("VchNo").ToString() ?? "";}} RP_TAG.cs:8955 {{((Form)MyProject.Forms.TR_TAG_OPBL).MdiParent = (Form)(object)MyProject.Forms.MDI_FORM;}} RP_TAG.cs:9013 {{TR_SALE tR_SALE = new TR_SALE();}} RP_TAG.cs:9120 {{TR_SALE_RTN tR_SALE_RTN = new TR_SALE_RTN();}} RP_TAG.cs:8990 {{TR_APR_ISU tR_APR_ISU2 = new TR_APR_ISU();}} Fails today: gap 10.
-Status: executable
+Status: blocked: voucher double-click zoom is not built: the voucher screens have no open-by-number entry from a report (gap 10 stays open).
 
 ### tag-stock.drill.voucher-zoom-no-right   (T05; T11; gap 10; decision 4)
 Layer: browser
 Steps: 1. Sign in as a user with the Tag Stock rights but without Read on the Sale menu. 2. Double-click the A003 sale row in Out. 3. Repeat with a user whose rights row for the Sale menu is absent.
 Expected: refused with the text "You Have No Rights..." and no voucher opens, for both the explicit-denied and the missing-right user. Desktop refuses only explicit N: RP_TAG.cs:8943 {{"You Have No Rights..."}} **DELIBERATE**: the web also refuses when the right is missing (decision 4: fail-closed). Also asserted at the API: the voucher read endpoint returns 403 for that user.
-Status: executable
+Status: blocked: depends on the voucher zoom, which is not built (gap 10 stays open).
 
 ### tag-stock.drill.zoom-refusals   (T05; gap 10)
 Layer: browser
 Steps: 1. In Tag Summ mode double-click a summary row. 2. Set Location to L2 (different from current) and double-click a row.
 Expected: no voucher opens in either case. RP_TAG.cs:8920 {{if (cboRptType.SelectedIndex == 1}}
-Status: executable
+Status: blocked: depends on the voucher zoom, which is not built (gap 10 stays open).
 
 ### tag-stock.drill.approval-other-items   (T05; gap 13)
 Layer: browser
 Steps: 1. Seed X: A006 has BAR_IDTL rows ISR_NO 1 (item ST1, pcs 2, weight 0.500) and ISR_NO 2 (item ST2, pcs 1, weight 0.250). 2. Apr Pending, answer "Yes" to "Report With Other Detail Item Name...".
 Expected: A006 row also shows It1 = ST1, It1P = 2, It1Wt = 0.500, It2 = ST2, It2P = 1, It2Wt = 0.250, and It3–It5 blank/zero, plus HM_ID and GR_CODE columns; values are summed per tag instance without rounding. RP_TAG.cs:4221 {{"Report With Other Detail Item Name..."}} RP_TAG.cs:3892 {{L.ISR_NO = 1 GROUP BY L.IT_CODE ) As It1}} RP_TAG.cs:3892 {{K.ISR_NO = 5) As It5Wt}} Fails today: gap 13. (The detail-only lower grid stays out of scope, see Not covered.)
-Status: executable
+Status: blocked: the BAR_IDTL other-item columns It1..It5 (gap 13) are not built.
 
 ### tag-stock.drill.tour-prompt   (T05; gap 6)
 Layer: browser
