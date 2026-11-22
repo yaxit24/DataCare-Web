@@ -1,3 +1,8 @@
+## 2026-11-22 — Sales Invoice residuals (N243 / G255, WP-26)
+
+- 2026-11-22: an unchanged reopen-and-save writes the stored SL_DATA row back (D8); getSale reloads the member-commission columns, stones, UPI, credit-note and desktop-shape order rows and PR_COST; UPI_DATA and CRNT_DATA are written (sums = header figures, D1); order advances in the TR_SALE shape (D2, 409 on over-use); old metal G versus every other type, rate type N/F only (G83); the reopened tax code goes back (G82); PRINT_MAST print choice (D6).
+- Open (blocked in cases.md): quotation import, stepped Esc, old-metal Ctrl+D, header totals only for book type M (provisioned books have no BOOK_TYPE: owner question), fixture users without edit/print right, tender retry/rollback, two journeys, approval number import (D5). OpAmt/ClAmt follow the desktop Sum(CR - DR), so a debit balance is negative (the case listed magnitudes).
+
 ## 2026-11-09 — Order Cancel is the desktop TR_SL_ORD_ADJ voucher (N233 / G245, WP-02)
 
 - 2026-11-09: one voucher cancels the open advance of many orders (SL_ORD_ADJ, Order_Adj_Ledr/Rojmel, held-tag release), version-guarded
