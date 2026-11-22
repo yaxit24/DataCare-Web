@@ -15,9 +15,10 @@ import { diffTenant, snapshotTenant } from './support/tenantSnapshot.js';
  * `GROUP_MAST.SALE_AC` with `A.NET_AMT`, keyed `VCH_NO + STR(A.SR_NO) + <code>`.
  *
  * Expected rows are hand-computed from the desktop rules (the feature suite's lines A and B):
- *   gold   10 g net × 6,123.45 = 61,234.50 + making 237.50/g × 10 g = 2,375.00 → line net 63,609.50 (SALES)
- *   silver 50 g net × 85.50    =  4,275.00                                → line net  4,275.00 (SLVSALE)
- *   taxable 67,884.50; GST 3% = 2,036.535 → 2,036.54 (half-up); total 69,921.04; no round-off (2 dp policy)
+ *   gold   10 g net × 6,123.45 = 61,234.5 → 61,234 + making 237.50/g × 10 g = 2,375 → line net 63,609 (SALES)
+ *   silver 50 g net × 85.50    =  4,275                                     → line net  4,275 (SLVSALE)
+ *   (line amounts are whole rupees, Math.Round half to even: TR_SALE.cs:10343-10362)
+ *   taxable 67,884; GST 3% = 2,036.52; total 69,920.52; no round-off (2 dp policy)
  */
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const tenantId = 'sale-2grp-revenue-db';
@@ -163,11 +164,11 @@ const headOf = (vchNo: string) => `0101${YEAR}${BOOK}${vchNo}`;
       })),
     ).toEqual([
       // Party leg: the measured 2-character tail 01; its contra is the book's slot-1 account (Ac_Ledr.cs:64).
-      { tail: '01', tailLength: 2, ac: 'CUST01', ld: 'SALES', dr: 69921.04, cr: 0 },
+      { tail: '01', tailLength: 2, ac: 'CUST01', ld: 'SALES', dr: 69920.52, cr: 0 },
       // Tax leg: measured tail 04 (account: the documented GST default while TAX_MAST.TAX_AC is unset).
-      { tail: '04', tailLength: 2, ac: 'GST', ld: 'CUST01', dr: 0, cr: 2036.54 },
+      { tail: '04', tailLength: 2, ac: 'GST', ld: 'CUST01', dr: 0, cr: 2036.52 },
       // Per-line revenue legs: STR(SR_NO) right-aligned in 10, then the revenue code 03 (12-character tail).
-      { tail: '         103', tailLength: 12, ac: 'SALES', ld: 'CUST01', dr: 0, cr: 63609.5 },
+      { tail: '         103', tailLength: 12, ac: 'SALES', ld: 'CUST01', dr: 0, cr: 63609 },
       { tail: '         203', tailLength: 12, ac: 'SLVSALE', ld: 'CUST01', dr: 0, cr: 4275 },
     ]);
     const dr = rows.reduce((s, r) => s + r.dr, 0);
@@ -182,7 +183,7 @@ const headOf = (vchNo: string) => `0101${YEAR}${BOOK}${vchNo}`;
       vchNo,
     )) as Array<{ sr: number; it: string; net: number }>;
     expect(details).toEqual([
-      { sr: 1, it: 'GLD01', net: 63609.5 },
+      { sr: 1, it: 'GLD01', net: 63609 },
       { sr: 2, it: 'SLV01', net: 4275 },
     ]);
   });
@@ -204,8 +205,7 @@ const headOf = (vchNo: string) => `0101${YEAR}${BOOK}${vchNo}`;
 
   it('T09 edit: re-pricing the silver line moves only its own revenue leg, the tax and the party leg', async () => {
     const vchNo = await create(sale([GOLD_LINE, SILVER_LINE]));
-    // Silver rate 85.50 → 90.00: 50 g × 90 = 4,500.00; taxable 68,109.50; GST 3% = 2,043.285 → 2,043.29;
-    // total 70,152.79.
+    // Silver rate 85.50 → 90.00: 50 g × 90 = 4,500.00; taxable 68,109; GST 3% = 2,043.27; total 70,152.27.
     const { version } = (await call('GET', `/sales/${vchNo}?coBook=${BOOK}`)).json();
     const edited = await call('PUT', `/sales/${vchNo}`, {
       ...sale([GOLD_LINE, { ...SILVER_LINE, rate: 90 }]),
@@ -214,35 +214,36 @@ const headOf = (vchNo: string) => `0101${YEAR}${BOOK}${vchNo}`;
     expect(edited.statusCode, edited.body).toBe(200);
     const rows = await ledger(vchNo);
     expect(rows.map((r) => [r.tail, r.ac, r.dr, r.cr])).toEqual([
-      ['01', 'CUST01', 70152.79, 0],
-      ['04', 'GST', 0, 2043.29],
-      ['         103', 'SALES', 0, 63609.5],
+      ['01', 'CUST01', 70152.27, 0],
+      ['04', 'GST', 0, 2043.27],
+      ['         103', 'SALES', 0, 63609],
       ['         203', 'SLVSALE', 0, 4500],
     ]);
   });
 
   it('T03 bill discount: the per-line legs share the taxable amount and still sum to it exactly', async () => {
-    // Discount 884.50 → taxable 67,000.00; GST 3% = 2,010.00; total 69,010.00.
-    // Gold 67,000 × 63,609.50 / 67,884.50 = 62,780.7010… → 62,780.70; silver the remainder 4,219.30
-    // (independently 4,219.2990… → 4,219.30).
-    const vchNo = await create(sale([GOLD_LINE, SILVER_LINE], { discountAmount: 884.5 }));
+    // Line amounts are whole rupees (TR_SALE.cs:10343-10362): gold 63,609, silver 4,275, net 67,884.
+    // Discount 884 → taxable 67,000.00; GST 3% = 2,010.00; total 69,010.00.
+    // Gold 67,000 × 63,609 / 67,884 = 62,780.6699… → 62,780.67; silver the remainder 4,219.33
+    // (independently 4,219.3300… → 4,219.33).
+    const vchNo = await create(sale([GOLD_LINE, SILVER_LINE], { discountAmount: 884 }));
     const rows = await ledger(vchNo);
     expect(rows.map((r) => [r.tail, r.ac, r.dr, r.cr])).toEqual([
       ['01', 'CUST01', 69010, 0],
       ['04', 'GST', 0, 2010],
-      ['         103', 'SALES', 0, 62780.7],
-      ['         203', 'SLVSALE', 0, 4219.3],
+      ['         103', 'SALES', 0, 62780.67],
+      ['         203', 'SLVSALE', 0, 4219.33],
     ]);
   });
 
   it('control: two lines on ONE account keep the measured single revenue leg (2-character tail 03)', async () => {
-    // Two gold lines in group E1: 63,609.50 + 63,609.50 = 127,219.00; GST 3% = 3,816.57; total 131,035.57.
+    // Two gold lines in group E1: 63,609 + 63,609 = 127,218.00; GST 3% = 3,816.54; total 131,034.54.
     const vchNo = await create(sale([GOLD_LINE, { ...GOLD_LINE, itCode: 'GLD02' }]));
     const rows = await ledger(vchNo);
     expect(rows.map((r) => [r.tail, r.ac, r.dr, r.cr])).toEqual([
-      ['01', 'CUST01', 131035.57, 0],
-      ['03', 'SALES', 0, 127219],
-      ['04', 'GST', 0, 3816.57],
+      ['01', 'CUST01', 131034.54, 0],
+      ['03', 'SALES', 0, 127218],
+      ['04', 'GST', 0, 3816.54],
     ]);
   });
 
@@ -250,11 +251,11 @@ const headOf = (vchNo: string) => `0101${YEAR}${BOOK}${vchNo}`;
     const vchNo = await create(sale([GOLD_LINE, SILVER_LINE], { cashAmt: 10000 }));
     const rows = await ledger(vchNo);
     expect(rows.map((r) => [r.tail, r.ac, r.dr, r.cr])).toEqual([
-      ['01', 'CUST01', 69921.04, 0],
-      ['04', 'GST', 0, 2036.54],
+      ['01', 'CUST01', 69920.52, 0],
+      ['04', 'GST', 0, 2036.52],
       ['19', 'CUST01', 0, 10000],
       ['20', 'CASH', 10000, 0],
-      ['         103', 'SALES', 0, 63609.5],
+      ['         103', 'SALES', 0, 63609],
       ['         203', 'SLVSALE', 0, 4275],
     ]);
   });
