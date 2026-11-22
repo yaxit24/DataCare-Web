@@ -248,6 +248,18 @@ Steps: 1. Create a return of tagged `TAGRT` (line R values) and loose line `LOOS
 Expected: snapshots equal column for column (clock, hidden number `HD_VCH_NO`, creator `MAIN_USER`, `ISU_*`, `ENTRY_TIME` included); zero `USER_DATA` rows (D5: no column differs, so the loop at `TR_SALE_RTN.cs:13512 {{Operators.ConditionalCompareObjectNotEqual}}` writes nothing). Fails today: no PUT route and the GET drops line inputs (Gap 1).
 Status: executable
 
+### sales-return.reopen.keeps-stored-date   (T08 Reopen/no-op; added after review, 2026-11-22)
+Layer: database
+Steps: 1. Create line R dated 2024-05-15. 2. Reopen; save with no date in the request.
+Expected: every column of the write set identical; `VCH_DATE` stays 2024-05-15 (`TR_SALE_RTN.cs:10104 {{mVchDate.Text = Conversions.ToString(Operators.ConcatenateObject(RsData.Rows[0]["VCH_DATE"], (object)""));}}`, `TR_SALE_RTN.cs:12607 {{dataRow2["VCH_DATE"] = mVchDate.Text;}}`). The form shows and sends `Vch Date`.
+Status: executable
+
+### sales-return.reopen.keeps-typed-amount-and-fine   (T08 Reopen/no-op; added after review, 2026-11-22)
+Layer: database
+Steps: 1. Create a line net 2, rate 100 with a typed amount 555 (round(2 x 100) = 200 otherwise) and a line net 1, touch 90 with a typed fine 0.95 (1 x 90% = 0.9 otherwise). 2. Reopen, save unchanged.
+Expected: reopen returns amounts 555 and 100, fines 1.8 and 0.95; every column of every table identical (`TR_SALE_RTN.cs:10411 {{mSG_PR[DC_Main.i + 1, 20] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["ITM_AMT"])), "0.00");}}`, `TR_SALE_RTN.cs:10388 {{mSG_PR[DC_Main.i + 1, 18] = Strings.Format((object)Conversion.Val(RuntimeHelpers.GetObjectValue(RsPrDetl.Rows[DC_Main.i]["ITM_FINE"])), "0.000");}}`). A changed weight, touch or rate drops the stored amount (and weight/touch/wastage the fine) in the grid.
+Status: executable
+
 ### sales-return.reopen.saved-panel   (T08 Reopen/no-op)
 Layer: browser (existing case, unchanged)
 Status: executable
@@ -295,6 +307,12 @@ Status: executable
 Layer: database (HTTP route)
 Steps: 1. Two sessions GET the same return (same `version`). 2. The first PUTs R'. 3. The second PUTs R with the old version.
 Expected: the second is `409 voucher-version-conflict`; the voucher keeps R' (D12, web multi-user guard; the desktop has none).
+Status: executable
+
+### sales-return.concurrency.stale-delete   (T12 Concurrency; added after review, 2026-11-22)
+Layer: database (HTTP route)
+Steps: 1. GET a return. 2. DELETE without `expectedVersion`; with a stale one; with the current one.
+Expected: 400, then `409 voucher-version-conflict` with the write set unchanged, then 200 (N51/D17, as Sale and Purchase).
 Status: executable
 
 ### sales-return.concurrency.double-delete   (T12 Concurrency)
@@ -372,18 +390,18 @@ Status: executable
 | T05 Children | 2 | 0 | 1 |
 | T06 Required/invalid | 10 | 0 | 9 |
 | T07 Create | 5 | 0 | 0 |
-| T08 Reopen/no-op | 2 | 0 | 1 |
+| T08 Reopen/no-op | 4 | 0 | 3 |
 | T09 Edit | 3 | 0 | 2 (edit.numeric unblocked) |
 | T10 Delete/cancel | 2 | 0 | 0 |
 | T11 Scope/rights | 2 | 0 | 1 |
-| T12 Concurrency | 2 | 0 | 1 |
+| T12 Concurrency | 3 | 0 | 2 |
 | T13 Retry | 2 | 0 | 1 |
 | T14 Rollback | 2 | 0 | 1 |
 | T15 Config/history | 1 | 0 | 0 |
 | T16 Report/output | 2 | 0 | 0 |
 | T17 Keyboard | 2 | 0 | 1 |
 | T18 Journey | 2 | 0 | 1 |
-| **Total** | **50** | **0** | **28** |
+| **Total** | **53** | **0** | **31** |
 
 ## Test data
 
@@ -405,5 +423,5 @@ Status: executable
 - Print template name (Gap 7, G127): `SalesRtnA4Gst.RPT` / `SalesRtnA4.RPT` by book type `T` (`TR_SALE_RTN.cs:15198 {{if (Operators.CompareString(FormBookType, "T", false) == 0)}}`); print is out of scope.
 - Percentage labour (PR #241); the UAE form; the saved-incoming-return pipeline; ledger book slots (G116).
 - Tab order and enabled rules of the screen (study open question 6): not read in this package.
-- Stale delete (T12): `DELETE /sales-returns/:vchNo` takes no version yet; the double-delete case covers the
-  observable risk. Left to the N51 programme.
+- `rateWith` is not stored on `SL_DETL_RTN`, so a line saved with a non-default rate basis is re-priced on its
+  default basis when a weight or the rate is changed after reopening.
