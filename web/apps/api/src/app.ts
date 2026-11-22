@@ -408,6 +408,10 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     // employ, product and group are its own selectors (RP_ALL.cs:7629-7631 `{SL_DATA.AC_CODE}`), and the engine
     // refuses one its template lacks with `filter-not-in-template` (rpAll/index.ts), so this guard must not.
     if (url.startsWith('/reports/sales-report')) return;
+    // The Stock Report (RP_STOCK) owns a typed parser (modules/reports/stockReport/parse.ts): group, product, item,
+    // design, safe, counter, tag and account are its own selectors (RP_STOCK.cs:4287-4327), and it refuses any
+    // other key itself (400 unknown-filter), so this guard, which only knows the shared RP_ALL panel, must not.
+    if (url.startsWith('/reports/stock-report')) return;
     const q = (req.query ?? {}) as Record<string, string | undefined>;
     const asked = REPORT_FILTER_KEYS.filter((k) => String(q[k] ?? '').trim());
     if (!asked.length) return;

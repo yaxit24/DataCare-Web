@@ -996,6 +996,14 @@ route('Reports/Pledge Outstanding', ['GET /reports/dhrn-outstanding', 'GET /dhrn
 route('Reports/Karigar Balances', ['GET /reports/karigar-balances']);
 route('Reports/Stock Valuation', ['GET /reports/stock-valuation']);
 route('Reports/Tag-Stock Report', ['GET /reports/tag-stock', 'GET /reports/tag-stock.csv']);
+// WP-16: the RP_STOCK Stock Report screen, its drill-down and exports (routes/stockReport.ts), its own rights key.
+route('Reports/Stock Report', [
+  'GET /reports/stock-report',
+  'GET /reports/stock-report/defaults',
+  'GET /reports/stock-report/movements',
+  'GET /reports/stock-report/export.csv',
+  'GET /reports/stock-report/export.xlsx',
+]);
 route('Reports/HuId Report', ['GET /reports/huid']);
 route('Reports/ItStk Level', ['GET /reports/item-weight-levels']);
 route('Reports/Bill Wise Profit', ['GET /reports/bill-profit']);
@@ -1101,6 +1109,8 @@ const PRINT_ROUTES = new Set([
   'GET /reports/gst-report/export.pdf',
   'GET /reports/sales-report/export.csv',
   'GET /reports/sales-report/export.xlsx',
+  'GET /reports/stock-report/export.csv',
+  'GET /reports/stock-report/export.xlsx',
   'GET /reports/gstr2-doc',
   'GET /reports/gstr1-doc',
   'GET /reports/gstr3b-doc',

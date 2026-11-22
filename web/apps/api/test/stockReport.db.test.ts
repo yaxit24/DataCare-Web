@@ -998,7 +998,7 @@ const W3 = { from: D(10), to: D(14) };
           );
         const [a, b] = await Promise.all([mine(W1), mine(W3)]);
         const total = (body: string) =>
-          body.split(/\r?\n/).find((l) => l.startsWith('Total :')) ?? '';
+          body.split(/\r?\n/).find((l) => l.includes('Total :')) ?? '';
         expect(total(a.body)).not.toEqual(total(b.body));
         const e1 = expected('group', MOVES, W1.from, W1.to).totals;
         const e3 = expected('group', MOVES, W3.from, W3.to).totals;
