@@ -121,16 +121,16 @@ const LINE = {
         printed.body.indexOf('class="tot"'),
       );
     };
-    const footprint = async () =>
+    const footprint = async (): Promise<Record<string, number>> =>
       (
-        await query<Array<Record<string, unknown>>>(
+        await query<Array<Record<string, number>>>(
           `SELECT (SELECT count(*)::int FROM "PR_DATA" WHERE tenant_id=$1) pr,
                 (SELECT count(*)::int FROM "PR_DETL" WHERE tenant_id=$1) detl,
                 (SELECT count(*)::int FROM "AC_DATA" WHERE tenant_id=$1) ledger,
                 (SELECT count(*)::int FROM "DELETE_DATA" WHERE tenant_id=$1) audit`,
           tenantId,
         )
-      )[0];
+      )[0] as Record<string, number>;
 
     beforeAll(async () => {
       assertIsolatedTestDatabase();
@@ -367,8 +367,8 @@ const LINE = {
       );
       expect(removed.statusCode, removed.body).toBe(200);
       const after = await footprint();
-      expect(after.pr).toBe(Number(before.pr) - 1);
-      expect(after.audit).toBe(Number(before.audit) + 1);
+      expect(after.pr).toBe(before.pr! - 1);
+      expect(after.audit).toBe(before.audit! + 1);
       const gone = await request(FULL, 'GET', `/purchase-returns/${vchNo}?${Q}`);
       expect(gone.statusCode).toBeGreaterThanOrEqual(400);
     });
