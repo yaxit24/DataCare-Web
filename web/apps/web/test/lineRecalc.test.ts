@@ -229,7 +229,7 @@ describe('sale percentage labour and line precision (desktop oracle, N235/G247)'
   });
 
   it('the Sale grid row previews and posts a Lbr% row as a percentage line', () => {
-    const row = { ...line, making: '50', lbrPct: '12' };
+    const row = { ...line, labourType: undefined, making: '50', lbrPct: '12' };
     const preview = recalcSaleGridRow(row, { roundingPolicy: policy, labourBasis: 'G' });
     expect(preview.labourRate).toBe(744);
     expect(preview.labourAmount).toBe(7853);
