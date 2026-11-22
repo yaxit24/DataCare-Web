@@ -77,9 +77,10 @@ Status: executable
 
 ### contra.grid.row1-positional   (T06 Required/invalid)
 Layer: unit
-Steps: 1. contraLines with row 1 empty (no account, no amount), row 2 CR 00001 100, row 3 DR 00008 100.
-Expected: the grid is not re-based: the call is refused with `You Cant Save This Voucher Becouse Cr Value and Dr Value is not same....` because row 1 is zero: totals Cr = 100 and Dr = 100 would balance only after promoting row 3 to row 1, which the desktop never does
-(TR_CONTRA.cs:2781 {{dataRow2["LD_CODE"] = mSG[1, 2];}}; row 1 is always the head). Arithmetic with row 1 as typed: Dr total = 0 (row 1) + 0, Cr total = 100 (row 2) + 0; 0 != 100. Fails today (G3): the filter drops row 1 and the voucher saves with row 3 as head.
+Steps: 1. contraLines with row 1 empty (no account, no amount) and row 2 CR 00001 100.
+Expected: the grid is not re-based: refused with `You Cant Save This Voucher Becouse Cr Value and Dr Value is not same....` because row 1 is zero: Dr total = 0 (row 1) and Cr total = 100 (row 2), 0 != 100
+(TR_CONTRA.cs:2781 {{dataRow2["LD_CODE"] = mSG[1, 2];}}; row 1 is always the head, so a blank row 1 is not skipped and row 2 never becomes the head). Fails today (G3): the filter drops row 1, one filled row remains and the thin-grid web text is shown;
+with three rows the voucher would save with row 2 as head.
 Status: executable
 
 ### contra.grid.empty-refused   (T06 Required/invalid)
@@ -403,10 +404,11 @@ Expected: one line per voucher × account × description with that group's sums:
 Fails today: no such route; the shared list returns one line per voucher (G17).
 Status: executable
 
-### contra.list.recent-list-total   (T04 Lookup)
+### contra.list.f1-groups   (T04 Lookup)
 Layer: browser
-Steps: 1. Open the form and press F1 in the number box.
-Expected: the F1 list opens with the desktop columns and the three-row voucher's three lines, and Load fills the grid with the voucher (TR_CONTRA.cs:3162 {{tVchNo.Text = DC_Main.ColValue[0];}}). Replaces the existing `reopen.recent-list-total` assertion (that case read the web's one-line-per-voucher total); the old id is kept for the reopen part.
+Steps: 1. Save the three-row voucher. 2. Press F1 in the Vch No box.
+Expected: the F1 list opens with the columns `Vch No, Vch Date, Party Name, Vch Desc, User, CrAmt, DrAmt` and exactly three lines for the voucher (one per account and description, TR_CONTRA.cs:3144 {{GROUP BY A.VCH_NO,A.VCH_DATE,B.AC_NAME,A.IT_DESC,A.MAIN_USER ORDER BY A.VCH_NO}});
+Load fills the grid with the voucher (TR_CONTRA.cs:3162 {{tVchNo.Text = DC_Main.ColValue[0];}}). The shared "Recent vouchers" list stays and its existing case `reopen.recent-list-total` (one line per voucher, 12,345.67) is kept unchanged. Fails today: F1 opens the shared list (G17).
 Status: executable
 
 ### contra.keyboard.voucher-number-keys   (T17 Keyboard/usability)

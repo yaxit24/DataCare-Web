@@ -65,7 +65,10 @@ async function pickAccount(page, row, code) {
 async function fillRow(page, row, { crdr, account, amount }) {
   if (!(await page.getByLabel(`Account row ${row}`, { exact: true }).count()))
     await page.getByRole('button', { name: '+ Add line', exact: true }).click();
-  await page.getByLabel(`Dr/Cr row ${row}`, { exact: true }).selectOption(crdr);
+  // TR_CONTRA.cs:1538, :1630: only row 1 takes a side; every later row is read-only and opposite.
+  const side = page.getByLabel(`Dr/Cr row ${row}`, { exact: true });
+  if (row === 1) await side.selectOption(crdr);
+  else assert.equal(await side.inputValue(), crdr, `row ${row} side`);
   await pickAccount(page, row, account);
   await page.getByLabel(`Amount row ${row}`, { exact: true }).fill(String(amount));
 }
@@ -151,16 +154,10 @@ const deleteLoaded = async (page, vchNo) => {
   ]);
   return response;
 };
+/** A delete carries the voucher version, so it is done from the opened voucher (D7), as the desktop does. */
 const deleteFromList = async (page, vchNo) => {
-  const row = await recentRow(page, vchNo);
-  const [response] = await Promise.all([
-    page.waitForResponse(
-      (r) =>
-        new URL(r.url()).pathname === `/api/contra/${vchNo}` && r.request().method() === 'DELETE',
-    ),
-    row.getByRole('button', { name: 'Delete', exact: true }).click(),
-  ]);
-  return response;
+  await loadFromList(page, vchNo);
+  return deleteLoaded(page, vchNo);
 };
 /** Clicks Save and reports the response, or null when the screen sent nothing within 4 s. */
 const trySave = async (page) => {
@@ -188,6 +185,7 @@ export const contraEntry = {
   inputs: [
     'web/apps/web/app/(app)/txn/contra/page.tsx',
     'web/apps/api/src/modules/finance/contra.ts',
+    'web/apps/api/src/modules/finance/contraList.ts',
     'web/apps/web/test/features/modules/contraEntry.mjs',
   ],
   fixtureManifest: FIXTURE_MANIFEST,
@@ -525,6 +523,19 @@ export const contraEntry = {
         sides.push(await page.getByLabel('Dr/Cr row 3', { exact: true }).inputValue());
         assert.equal(book, BOOK);
         assert.deepEqual(sides, ['DR', 'CR', 'CR']);
+        // TR_CONTRA.cs:2367-2368 date and time at clear; :1140 the time box is read-only; :1345 Employee; :1504 Total row.
+        assert.equal(await page.getByLabel('Time', { exact: true }).isEditable(), false);
+        assert.match(
+          await page.getByLabel('Time', { exact: true }).inputValue(),
+          /^\d\d:\d\d:\d\d$/,
+        );
+        assert.match(
+          await page.getByLabel('Day', { exact: true }).inputValue(),
+          /^[A-Z][a-z]+day$/,
+        );
+        assert.equal(await page.getByLabel('Employee', { exact: true }).count(), 1);
+        assert.equal((await page.locator('[aria-label="Total CrAmt"]').innerText()).trim(), '0.00');
+        assert.equal((await page.locator('[aria-label="Total DrAmt"]').innerText()).trim(), '0.00');
         return {
           observation: `book ${book}, rows ${sides.join('/')}`,
           expected: 'CON, DR/CR, and a new row opposite row 1',
@@ -584,8 +595,13 @@ export const contraEntry = {
         const { page } = await ctx.session();
         const cash0 = await balance(ctx, 'CASH');
         const vchNo = await enter(page, DEPOSIT);
+        const said = [];
+        page.on('dialog', (dialog) => said.push(dialog.message()));
         const removed = await deleteFromList(page, vchNo);
         assert.equal(removed.status(), 200, await removed.text());
+        // TR_CONTRA.cs:2959 asks, :2969 reports.
+        await page.waitForTimeout(300);
+        assert.deepEqual(said, ['Are You Sure To Delete This Voucher now?', 'Delete Success.']);
         assert.deepEqual([await contraRows(ctx, vchNo), await legs(ctx, vchNo)], [[], []]);
         assert.equal(Math.round(((await balance(ctx, 'CASH')) - cash0) * 100) / 100, 0);
         const audit = await ctx.rows(
@@ -966,6 +982,298 @@ export const contraEntry = {
           expected: { bankDelta: 10000, cashDelta: -10000 },
           database: { cash0, cash1, bank0, bank1 },
           downstream: { bankDelta: delta(bank1, bank0) },
+        };
+      },
+    ),
+    C(
+      'entry.header-captions',
+      'T01',
+      'read-only',
+      'TR_CONTRA.cs:1426-1455: the grid columns are Sr, Cr/Dr, AcCode, Ac Name, It Desc, CrAmt, DrAmt; buttons Print, Save, Cancel, Delete (:1155-1195)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openContra(page);
+        const heads = (await page.locator('table.grid thead th').allInnerTexts()).map((t) =>
+          t.trim(),
+        );
+        assert.deepEqual(heads.slice(0, 7), [
+          'Sr',
+          'Cr/Dr',
+          'AcCode',
+          'Ac Name',
+          'It Desc',
+          'CrAmt',
+          'DrAmt',
+        ]);
+        for (const name of ['Cancel', 'Save Contra'])
+          assert.equal(await page.getByRole('button', { name, exact: true }).count(), 1, name);
+        return { observation: heads.join(' | '), expected: 'the desktop captions' };
+      },
+    ),
+    C(
+      'entry.side-readonly',
+      'T01',
+      'read-only',
+      'TR_CONTRA.cs:1538 and :1630: rows after row 1 take the opposite side and are read-only; :1643-1661 the other side amount cell is read-only',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openContra(page);
+        await page.getByRole('button', { name: '+ Add line', exact: true }).click();
+        for (const row of [2, 3])
+          assert.equal(
+            await page.getByLabel(`Dr/Cr row ${row}`, { exact: true }).isEditable(),
+            false,
+          );
+        await page.getByLabel('Dr/Cr row 1', { exact: true }).selectOption('CR');
+        const sides = [];
+        for (const row of [1, 2, 3])
+          sides.push(await page.getByLabel(`Dr/Cr row ${row}`, { exact: true }).inputValue());
+        assert.deepEqual(sides, ['CR', 'DR', 'DR']);
+        // In a DR row the CrAmt cell has no input; in a CR row the DrAmt cell has none.
+        assert.equal(await page.locator('[data-cell="cr-2"] input').count(), 0);
+        assert.equal(await page.locator('[data-cell="dr-1"] input').count(), 0);
+        assert.equal(await page.locator('[data-cell="cr-1"] input').count(), 1);
+        return {
+          observation: `sides ${sides.join('/')}`,
+          expected: 'CR/DR/DR, side cells read-only',
+        };
+      },
+    ),
+    C(
+      'grid.totals-formula',
+      'T03',
+      'read-only',
+      'TR_CONTRA.cs:1516-1522: the total row sums CrAmt and DrAmt in "0.00": DR 3,000.50 against CR 1,000.25 + 2,000.25 = 3,000.50 on each side',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openContra(page);
+        await fillRow(page, 1, { crdr: 'DR', account: 'BANK', amount: 3000.5 });
+        const read = async () => [
+          (await page.locator('[aria-label="Total CrAmt"]').innerText()).trim(),
+          (await page.locator('[aria-label="Total DrAmt"]').innerText()).trim(),
+        ];
+        const after1 = await read();
+        await fillRow(page, 2, { crdr: 'CR', account: 'CASH', amount: 1000.25 });
+        const after2 = await read();
+        await fillRow(page, 3, { crdr: 'CR', account: PARTIES.bank.code, amount: 2000.25 });
+        const after3 = await read();
+        assert.deepEqual(
+          [after1, after2, after3],
+          [
+            ['0.00', '3000.50'],
+            ['1000.25', '3000.50'],
+            ['3000.50', '3000.50'],
+          ],
+        );
+        await page.getByText('Balanced ✓', { exact: true }).waitFor();
+        return {
+          observation: JSON.stringify([after1, after2, after3]),
+          expected: 'Cr 0.00/1000.25/3000.50 against Dr 3000.50',
+        };
+      },
+    ),
+    C(
+      'create.employee',
+      'T02',
+      'mutation',
+      'TR_CONTRA.cs:2803: every CONTRA_DATA row carries the typed employee code',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await ctx.owner.$executeRawUnsafe(
+          `DELETE FROM "EMP_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "EMP_CODE"='E31'`,
+          'feature-e2e',
+        );
+        await ctx.owner.$executeRawUnsafe(
+          `INSERT INTO "EMP_MAST"(tenant_id,"CO_CODE","EMP_CODE","EMP_NAME") VALUES ($1,'01','E31','WP31 EMPLOYEE')`,
+          'feature-e2e',
+        );
+        const employee = [{ code: 'E31' }];
+        await openContra(page);
+        await page.getByLabel('Employee', { exact: true }).fill(employee[0].code);
+        await page.getByLabel('Employee', { exact: true }).press('Enter');
+        await page.getByText('WP31 EMPLOYEE', { exact: true }).waitFor();
+        for (const [i, row] of DEPOSIT.entries()) await fillRow(page, i + 1, row);
+        const response = await save(page);
+        assert.equal(response.status(), 201, await response.text());
+        const vchNo = String((await response.json()).vchNo).padStart(5, '0');
+        const codes = await ctx.rows(
+          `SELECT DISTINCT btrim("EMP_CODE") c FROM "CONTRA_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
+          vchNo,
+        );
+        assert.deepEqual(
+          codes.map((r) => r.c),
+          [employee[0].code],
+        );
+        return {
+          observation: `voucher ${vchNo} employee ${employee[0].code}`,
+          expected: 'EMP_CODE on every row',
+        };
+      },
+    ),
+    C(
+      'lifecycle.cancel',
+      'T10',
+      'read-only',
+      'TR_CONTRA.cs:3103: Cancel clears the voucher and writes nothing',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const vchNo = await enter(page, DEPOSIT);
+        const before = await contraRows(ctx, vchNo);
+        await loadFromList(page, vchNo);
+        await page.getByLabel('Amount row 1', { exact: true }).fill('99');
+        await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+        await page.getByRole('button', { name: 'Save Contra', exact: true }).waitFor();
+        assert.equal(await page.getByLabel('Amount row 1', { exact: true }).inputValue(), '');
+        assert.deepEqual(await contraRows(ctx, vchNo), before);
+        return {
+          observation: `cancelled; voucher ${vchNo} unchanged`,
+          expected: 'form cleared, rows unchanged',
+        };
+      },
+    ),
+    C(
+      'keyboard.ctrl-d-row',
+      'T17',
+      'mutation',
+      'TR_CONTRA.cs:1814-1828: Ctrl+D asks "This Row Record will Removed permantley ?", blanks the row, then says "Please Save This Voucher Then Effect...."',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openContra(page);
+        await fillRow(page, 1, { crdr: 'DR', account: 'BANK', amount: 700 });
+        await fillRow(page, 2, { crdr: 'CR', account: 'CASH', amount: 300 });
+        await fillRow(page, 3, { crdr: 'CR', account: PARTIES.bank.code, amount: 400 });
+        const said = [];
+        page.on('dialog', (dialog) => said.push(dialog.message()));
+        await page.getByLabel('Amount row 2', { exact: true }).press('Control+d');
+        await page.waitForTimeout(300);
+        assert.deepEqual(said, [
+          'This Row Record will Removed permantley ?',
+          'Please Save This Voucher Then Effect....',
+        ]);
+        assert.equal(await page.getByLabel('Amount row 2', { exact: true }).inputValue(), '');
+        const response = await save(page);
+        assert.equal(
+          response.status(),
+          400,
+          'Dr 700 against Cr 400 is not balanced after the row is blanked',
+        );
+        assert.match(await response.text(), /Cr Value and Dr Value is not same/);
+        return {
+          observation: said.join(' / '),
+          expected: 'both desktop messages; the blank row is skipped on save',
+        };
+      },
+    ),
+    C(
+      'keyboard.enter-flow',
+      'T17',
+      'read-only',
+      'TR_CONTRA.cs:2055: Enter in the amount of the last row adds a row; :2032 a zero CrAmt in a CR row keeps the focus',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openContra(page);
+        await fillRow(page, 1, { crdr: 'DR', account: 'BANK', amount: 50 });
+        const credit = page.getByLabel('Amount row 2', { exact: true });
+        await credit.fill('0');
+        await credit.press('Enter');
+        assert.equal(
+          await page.getByLabel('Account row 3', { exact: true }).count(),
+          0,
+          'a zero amount keeps the focus',
+        );
+        await credit.fill('50');
+        await credit.press('Enter');
+        await page.getByLabel('Account row 3', { exact: true }).waitFor();
+        return {
+          observation: 'zero amount held, 50 added row 3',
+          expected: 'Enter adds the next row after a non-zero last amount',
+        };
+      },
+    ),
+    C(
+      'keyboard.esc',
+      'T17',
+      'read-only',
+      'TR_CONTRA.cs:2978-2991: Esc on an untouched grid closes the screen; after typing it commits the cell and focuses the employee box',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openContra(page);
+        await fillRow(page, 1, { crdr: 'DR', account: 'BANK', amount: 25 });
+        await page.getByLabel('Amount row 1', { exact: true }).press('Escape');
+        await page.waitForFunction(
+          () => document.activeElement?.getAttribute('aria-label') === 'Employee',
+        );
+        const second = await ctx.session(as(USERS.admin.user, 'operator-esc'));
+        await openContra(second.page);
+        await second.page.getByLabel('Amount row 1', { exact: true }).press('Escape');
+        await second.page.waitForFunction(() => !location.pathname.endsWith('/txn/contra'));
+        return {
+          observation: 'touched Esc focused Employee; untouched Esc left the screen',
+          expected: 'the desktop Esc rules',
+        };
+      },
+    ),
+    C(
+      'list.f1-groups',
+      'T04',
+      'read-only',
+      'TR_CONTRA.cs:3144: F1 lists one line per voucher, account and description with CrAmt and DrAmt; Load fills the grid (:3162)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        const vchNo = await enter(page, [
+          { crdr: 'DR', account: 'BANK', amount: 3000.5 },
+          { crdr: 'CR', account: 'CASH', amount: 1000.25 },
+          { crdr: 'CR', account: PARTIES.bank.code, amount: 2000.25 },
+        ]);
+        await openContra(page);
+        await page.getByLabel('Voucher No', { exact: true }).press('F1');
+        const heads = (await page.locator('[data-f1-list] thead th').allInnerTexts()).map((t) =>
+          t.trim(),
+        );
+        assert.deepEqual(heads, [
+          'Vch No',
+          'Vch Date',
+          'Party Name',
+          'Vch Desc',
+          'User',
+          'CrAmt',
+          'DrAmt',
+          '',
+        ]);
+        const mine = page.locator('[data-f1-list] tbody tr', { hasText: vchNo });
+        assert.equal(await mine.count(), 3);
+        await mine.first().getByRole('button', { name: 'Load' }).click();
+        await page.getByRole('button', { name: `Update #${vchNo}`, exact: true }).waitFor();
+        assert.equal(await page.getByLabel('Amount row 1', { exact: true }).inputValue(), '3000.5');
+        return {
+          observation: `voucher ${vchNo}: 3 list lines, Load reopened it`,
+          expected: 'desktop F1 shape',
+        };
+      },
+    ),
+    C(
+      'print.after-save',
+      'T16',
+      'output',
+      'TR_CONTRA.cs:2902: a saved voucher is printed at once; :3002 without the print right the message is "You Have No Print Rights....."',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await enter(page, [
+          { crdr: 'DR', account: 'BANK', amount: 818 },
+          { crdr: 'CR', account: 'CASH', amount: 818 },
+        ]);
+        const frame = page.locator('iframe[title="Contra voucher print"]');
+        await frame.waitFor();
+        assert.ok((await frame.getAttribute('srcdoc')).includes('818'));
+        const viewer = await ctx.session(as(USERS.printViewer.user));
+        await openContra(viewer.page);
+        await viewer.page.getByLabel('Voucher No', { exact: true }).fill('00001');
+        await viewer.page.getByLabel('Voucher No', { exact: true }).press('Enter');
+        await viewer.page.getByRole('button', { name: 'Print', exact: true }).click();
+        await viewer.page.getByText('You Have No Print Rights.....', { exact: true }).waitFor();
+        return {
+          observation: 'preview shown after save; viewer got the desktop refusal',
+          expected: 'print after save and the right message',
         };
       },
     ),
