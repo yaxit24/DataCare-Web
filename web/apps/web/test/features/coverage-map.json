@@ -5,6 +5,11 @@
       "covers": [
         "web/apps/web/app/(app)/txn/sales/page.tsx",
         "web/apps/api/src/modules/sales/sales.ts",
+        "web/apps/api/src/modules/sales/saleRead.ts",
+        "web/apps/api/src/modules/sales/saleResiduals.ts",
+        "web/apps/api/src/modules/sales/salePrintChoice.ts",
+        "web/apps/web/components/SaleResidualPanel.tsx",
+        "web/apps/web/lib/saleResidual.ts",
         "web/packages/core/src/saleAmount.ts",
         "web/packages/core/src/calc.ts",
         "web/apps/api/src/modules/posting/lineLegs.ts",
