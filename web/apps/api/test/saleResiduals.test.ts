@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { balanceFormulas, chooseSaleTemplate } from '../src/modules/sales/salePrintChoice.js';
 import {
+  orderLockKeys,
   resolveSaleTenders,
   settleEditedHeader,
   stonesByLine,
@@ -130,5 +131,22 @@ describe('lossless reopen (decision D8)', () => {
       [{ srNo: 1, tagNo: 'T1', itCode: 'GOLD' }],
     );
     expect(byLine.get(1)?.map((s) => s.DM_CODE)).toEqual(['DM1']);
+  });
+});
+
+describe('order lock order (review of #250)', () => {
+  it('A,B and B,A give the same sorted, unique lock keys', () => {
+    expect(orderLockKeys([{ ordNo: '2' }, { ordNo: '00001' }, { ordNo: 2 }])).toEqual([
+      '00001',
+      '00002',
+    ]);
+    expect(orderLockKeys([{ ordNo: '1' }, { ordNo: '2' }])).toEqual(
+      orderLockKeys([{ ordNo: '2' }, { ordNo: '1' }]),
+    );
+  });
+  it('refuses negative rows', () => {
+    expect(() => resolveSaleTenders({ creditNotes: [{ crntNo: 'C', amount: -1 }] }, fail)).toThrow(
+      /cannot be negative/,
+    );
   });
 });

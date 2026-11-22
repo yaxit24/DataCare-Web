@@ -90,6 +90,16 @@ export function resolveSaleTenders<T extends TenderInput>(
     if (error) throw fail(error);
   }
   const out: T & TenderInput = { ...input };
+  // A negative tender or adjustment row would raise the bill outstanding instead of settling it (review of #250).
+  const negative = (rows: Array<{ amount?: unknown }> | undefined, what: string) => {
+    const i = (rows ?? []).findIndex((r) => num(r?.amount) < 0);
+    if (i >= 0) throw fail(`${what} row ${i + 1}: the amount cannot be negative`);
+  };
+  negative(input.upiRows, 'UPI');
+  negative(input.creditNotes, 'Credit note');
+  negative(input.orders, 'Order');
+  if (input.orderRef?.adjustAmt != null && num(input.orderRef.adjustAmt) < 0)
+    throw fail('Order row 1: the amount cannot be negative');
   if (input.upiRows) {
     const rows = input.upiRows.filter((r) => text(r?.acCode) !== '' && num(r?.amount) !== 0);
     const sum = r2(rows.reduce((s, r) => s + num(r.amount), 0));
@@ -144,6 +154,37 @@ export interface CheckedOrderRow {
   ordHdVchNo: string;
 }
 
+/** The order numbers of the rows, unique and sorted: the one lock order every writer uses (no A,B / B,A deadlock). */
+export const orderLockKeys = (rows: readonly SaleOrderRow[]): string[] =>
+  [...new Set(rows.map((r) => formatVoucherNo(text(r.ordNo))))].sort();
+
+const RETRYABLE = /40P01|40001|deadlock detected|could not serialize/;
+
+/** Lock every named order in one statement in key order, before any of them is read. */
+async function lockSaleOrdersTx(tx: any, scope: VoucherScope, rows: readonly SaleOrderRow[]) {
+  const keys = orderLockKeys(rows);
+  if (!keys.length) return;
+  try {
+    await tx.$queryRawUnsafe(
+      `SELECT 1 FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "VCH_NO" = ANY($4::text[])
+        ORDER BY "CO_YEAR","CO_BOOK","VCH_NO" FOR UPDATE`,
+      scope.tenantId,
+      scope.coCode,
+      scope.lcCode,
+      keys,
+    );
+  } catch (error: any) {
+    const code = `${error?.code ?? ''} ${error?.meta?.code ?? ''} ${error?.message ?? ''}`;
+    if (RETRYABLE.test(code))
+      throw new SessionCommandError(
+        'order-advance-conflict',
+        409,
+        'the order is being used by another voucher; try again',
+      );
+    throw error;
+  }
+}
+
 /**
  * Check each order row against the order's open advance, locking the order (same lock as the order cancel, so a
  * sale and a cancel never use one advance twice). The desktop has no lock (single user); a row asking more than
@@ -159,6 +200,7 @@ export async function checkSaleOrdersTx(
 ): Promise<CheckedOrderRow[]> {
   const out: CheckedOrderRow[] = [];
   let left = remaining;
+  await lockSaleOrdersTx(tx, scope, rows);
   for (const row of rows) {
     const ordNo = formatVoucherNo(text(row.ordNo));
     const order = await openAdvanceOfOrderTx(tx, scope, ordNo, text(row.ordBook) || 'SOR');

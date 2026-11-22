@@ -863,4 +863,56 @@ d('WP-26 Sales Invoice residuals (database)', () => {
     );
     expect(direct.opAmt).toBe(0);
   });
+  it('review #250: negative UPI, credit-note and order amounts are refused, nothing written', async () => {
+    for (const over of [
+      { upiRows: [{ acCode: 'WU1', amount: -100 }] },
+      { creditNotes: [{ crntNo: 'CN1', amount: -100 }] },
+      { orders: [{ ordNo: '00001', amount: -100 }] },
+    ])
+      await expect(createSale(prisma, sale(over), [LINE_A])).rejects.toThrow(/cannot be negative/);
+    expect((await rows(`SELECT count(*)::int n FROM "SL_DATA"`))[0].n).toBe(0);
+  });
+
+  it('review #250: orders named in opposite order by two concurrent invoices both save (one lock order)', async () => {
+    const make = (a: string, b: string) =>
+      createSale(
+        prisma,
+        sale({
+          orders: [
+            { ordNo: a, amount: 1000 },
+            { ordNo: b, amount: 1000 },
+          ],
+        }),
+        [LINE_A],
+      );
+    const results = await Promise.allSettled([make('00001', '00002'), make('00002', '00001')]);
+    expect(results.map((r) => r.status)).toEqual(['fulfilled', 'fulfilled']);
+    // 2 x 1,000.00 from each order: 00001 5,000 -> 3,000 open, 00002 3,000 -> 1,000 open
+    const used = await rows(
+      `SELECT "ORD_NO", sum("ORD_AMT")::float s FROM "SL_ORD_ADJ" GROUP BY "ORD_NO" ORDER BY 1`,
+    );
+    expect(used.map((u) => [u.ORD_NO, u.s])).toEqual([
+      ['00001', 2000],
+      ['00002', 2000],
+    ]);
+  });
+
+  it('review #250: an order of another book is not used in place of the named one', async () => {
+    await expect(
+      createSale(prisma, sale({ orders: [{ ordNo: '00001', ordBook: 'XX', amount: 100 }] }), [
+        LINE_A,
+      ]),
+    ).rejects.toThrow(/not found/);
+  });
+
+  it('cash limit: the fourth cash sale of 65,517.79 is refused (3 x 65,517.79 = 196,553.37; + 65,517.79 > 200,000), UPI rows are not cash', async () => {
+    for (let i = 0; i < 3; i++) await createSale(prisma, sale({ cashAmt: TOTAL }), [LINE_A]);
+    await expect(createSale(prisma, sale({ cashAmt: TOTAL }), [LINE_A])).rejects.toThrow(
+      /Cash Recieved Limit Amount/,
+    );
+    const upi = await createSale(prisma, sale({ upiRows: [{ acCode: 'WU1', amount: TOTAL }] }), [
+      LINE_A,
+    ]);
+    expect(Number((await header(upi.vchNo)).UPI_AMT)).toBe(TOTAL);
+  });
 });
