@@ -117,7 +117,8 @@ export default function TagStockPage() {
   const onKeyDown = (e: ReactKeyEvent<HTMLDivElement>) => {
     onScreenKey(e);
     if (e.altKey && !e.ctrlKey && !e.metaKey) {
-      const fn = alt[e.key.toLowerCase()];
+      const letter = e.code.startsWith('Key') ? e.code.slice(3).toLowerCase() : e.key.toLowerCase();
+      const fn = alt[letter];
       if (fn) {
         e.preventDefault();
         fn();

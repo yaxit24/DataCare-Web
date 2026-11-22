@@ -1,4 +1,5 @@
 'use client';
+import { formatDesktopDate } from '@datacare/core';
 import type { RefObject } from 'react';
 import type { TagStockColumn, TagStockRow } from './types';
 
@@ -14,10 +15,7 @@ const fmt = (kind: TagStockColumn['kind'], v: unknown): string => {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     });
-  if (kind === 'date') {
-    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v));
-    return m ? `${m[3]}/${m[2]}/${m[1]}` : String(v);
-  }
+  if (kind === 'date') return formatDesktopDate(v);
   return String(v);
 };
 
