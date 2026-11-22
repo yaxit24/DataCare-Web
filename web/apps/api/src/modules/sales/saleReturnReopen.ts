@@ -8,12 +8,11 @@ import type { SaleLineInput } from './sales.js';
  * The desktop reopens a voucher by loading its stored rows into the grid and saves it again by deleting and
  * rewriting them (TR_SALE_RTN.cs:12496-13463). The web edit does the same in one transaction, so a reopened return
  * saved unchanged must produce the same rows: every column the writer stores is mapped back to the input field it
- * came from. Blank text comes back as `undefined` so that a NULL stays NULL and '' stays ''. Two values are derived
- * instead of copied:
- *  - the item amount is re-priced from the stored rate and weights, as the desktop grid re-prices column 20 from
- *    column 19 (TR_SALE_RTN.cs:4955); only a line with no rate keeps its stored amount;
- *  - labour is read from `LBR_PRC` (percentage), else the desktop `LBR_TYPE` basis with `LBR_RATE`, else the stored
- *    `LBR_AMT` as a fixed charge.
+ * came from. Blank text comes back as `undefined` so that a NULL stays NULL and '' stays ''. The stored item amount
+ * and fine come back as given values, as the desktop loads them into grid columns 20 and 18 (TR_SALE_RTN.cs:10411,
+ * :10388); the form drops them when the operator changes a weight or the rate, and the server then re-prices. Labour is
+ * read from `LBR_PRC` (percentage), else the desktop `LBR_TYPE` basis with `LBR_RATE`, else the stored `LBR_AMT` as a
+ * fixed charge.
  */
 const text = (value: unknown): string => String(value ?? '').trim();
 const optionalText = (value: unknown): string | undefined => text(value) || undefined;
@@ -51,7 +50,10 @@ export function savedReturnLine(
     otherWt: num(row.ITM_OTH_WT),
     ghtWt: num(row.ITM_GHT_WT),
     rate,
-    ...(rate === 0 && num(row.ITM_AMT) !== 0 ? { metalAmount: num(row.ITM_AMT) } : {}),
+    // The desktop reloads the stored amount and fine into the grid (TR_SALE_RTN.cs:10411, :10388), so a typed amount
+    // or fine survives an unchanged save. The grid drops them when the operator changes a weight or the rate.
+    metalAmount: num(row.ITM_AMT),
+    fineWt: num(row.ITM_FINE),
     ...labour,
     otherAmount: num(row.OTH_AMT),
     designNo: optionalText(row.DESIGN_NO),

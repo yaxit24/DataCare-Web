@@ -1,7 +1,12 @@
 'use client';
 import { useState } from 'react';
 import { get, post, put, ApiError } from '../../../../lib/api';
-import { editedLinePayload, savedLineCells } from '../../../../lib/saleReturnEdit';
+import {
+  billNoForSave,
+  derivedCellsToClear,
+  editedLinePayload,
+  savedLineCells,
+} from '../../../../lib/saleReturnEdit';
 import { useBusinessScope, useRoundingPolicy } from '../../../../components/BusinessScope';
 import { companyFlag, companySetting, useCompanySettings } from '../../../../lib/companySettings';
 import { BookSelect } from '../../../../components/BookSelect';
@@ -257,12 +262,29 @@ function LegacySaleReturnForm() {
   const [empCode, setEmpCode] = useState('');
   // WP-27: a saved return opened into this form is saved back as an edit (PUT with its version).
   const [openVch, setOpenVch] = useState('');
-  const [editing, setEditing] = useState<{ vchNo: string; version: string } | null>(null);
+  const [editing, setEditing] = useState<{
+    vchNo: string;
+    version: string;
+    billNo?: string;
+  } | null>(null);
+  // TR_SALE_RTN.cs:2345 "Vch Date"; a reopened return keeps its stored date (:10104, :12607). Blank = today.
+  const [vchDate, setVchDate] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
 
+  // A changed weight or rate drops a reopened line's stored amount/fine so the server re-prices it (WP-27).
   const setLine = (i: number, k: keyof Line, v: string) =>
-    setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
+    setLines((ls) =>
+      ls.map((l, j) =>
+        j === i
+          ? {
+              ...l,
+              ...Object.fromEntries(derivedCellsToClear(k).map((key) => [key, ''])),
+              [k]: v,
+            }
+          : l,
+      ),
+    );
 
   // Import-from-bill: pull the original sale's customer + items so the return is a click away.
   // `remaining` is the desktop's single-item picker (TR_SALE_RTN.cs:3882): the lines not yet returned. The whole-bill
@@ -313,6 +335,7 @@ function LegacySaleReturnForm() {
       setAcCode(d.acCode || '');
       setAcName(d.acName || '');
       setEmpCode(d.empCode || '');
+      setVchDate(d.vchDate || '');
       setBillNo(d.origVchNo || '');
       // A free-standing return has no original book; keep the selector's own choice (it is a required select).
       if (d.origBook) setOrigBook(d.origBook);
@@ -333,7 +356,11 @@ function LegacySaleReturnForm() {
         saved,
       }));
       setLines(ls.length ? ls : [blank()]);
-      setEditing({ vchNo: String(d.voucherNo), version: String(d.version) });
+      setEditing({
+        vchNo: String(d.voucherNo),
+        version: String(d.version),
+        billNo: d.billNo,
+      });
     } catch (e) {
       setEditing(null);
       setErr(
@@ -370,7 +397,8 @@ function LegacySaleReturnForm() {
         acCode,
         empCode: empCode.trim() || undefined,
         acName: acName || undefined,
-        billNo: billNo || undefined,
+        billNo: billNoForSave(editing?.billNo, billNo),
+        vchDate: vchDate || undefined,
         origVchNo: billNo || undefined,
         origBook: billNo ? origBook || undefined : undefined,
         taxRatePct: Number(taxRatePct),
@@ -474,6 +502,10 @@ function LegacySaleReturnForm() {
               </div>
             </div>
             <div className="field">
+              <label>Vch Date</label>
+              <input type="date" value={vchDate} onChange={(e) => setVchDate(e.target.value)} />
+            </div>
+            <div className="field">
               <label>Employee</label>
               <input value={empCode} onChange={(e) => setEmpCode(e.target.value)} />
             </div>
@@ -521,6 +553,8 @@ function LegacySaleReturnForm() {
                   type="button"
                   className="ghost"
                   onClick={() => importBill(true)}
+                  title="Lines already returned are not offered. As on the desktop picker, once one loose line of this bill is returned its other loose lines are not offered either."
+
                   style={{ flex: 'none' }}
                 >
                   Import remaining

@@ -858,7 +858,6 @@ export async function editSaleReturn(
   completeReturnScope(input.scope);
   const scope = input.scope;
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const persisted = await persistedVoucherHeaderTx(tx, {
       table: 'SL_DATA',
@@ -866,6 +865,10 @@ export async function editSaleReturn(
       voucherNo,
       extraColumns: ['ISU_NO', 'ISU_DBCD'],
     });
+    // The desktop reloads the stored date into mVchDate (TR_SALE_RTN.cs:10104) and writes it back (:12607): an edit
+    // that sends no date keeps the voucher's own date, never today's (WP-27 review).
+    const vchDate = input.vchDate ?? toIsoDate(persisted.VCH_DATE);
+    const requestedDate = new Date(vchDate);
     if (expectedVersion !== undefined)
       await assertVoucherVersionTx(
         tx,
@@ -907,7 +910,7 @@ export async function editSaleReturn(
       key: { scope, voucherNo },
       tempBook: { voucherNo: hiddenVoucherNo },
     });
-    return createSaleReturn(prisma, input, lines, {
+    return createSaleReturn(prisma, { ...input, vchDate }, lines, {
       tx,
       vchNo: Number(voucherNo),
       hdVchNo: hiddenVoucherNo,
@@ -923,6 +926,8 @@ export interface DeleteSaleReturnInput {
   scope: VoucherScope;
   vchNo: number | string;
   deleteUser?: string;
+  /** N51/D17: the `version` the operator read; a stale one is `409 voucher-version-conflict`. */
+  expectedVersion?: string;
 }
 export async function deleteSaleReturn(
   prisma: any,
@@ -940,6 +945,13 @@ export async function deleteSaleReturn(
       voucherNo,
       extraColumns: ['AC_CODE', 'AC_NAME', 'TOT_AMT', 'RTN_TOT_AMT'],
     });
+    if (input.expectedVersion !== undefined)
+      await assertVoucherVersionTx(
+        tx,
+        SALE_RETURN_WRITE_TABLES,
+        versionKeyOf(scope, voucherNo),
+        input.expectedVersion,
+      );
     await assertPeriodOpen(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: header.VCH_DATE }] },
     });

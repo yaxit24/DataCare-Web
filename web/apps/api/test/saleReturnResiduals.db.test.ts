@@ -479,7 +479,11 @@ databaseDescribe('WP-27 Sales Return residuals (writer)', () => {
     const created = await createSaleReturn(runtime, input({ vchDate: '2024-05-15' }), [LINE_R]);
     const voucherNo = String(created.vchNo).padStart(5, '0');
     const before = await writeSet(voucherNo);
-    const { vchDate: _dropped, ...saved }: any = await getSaleReturn(runtime, scope('SRT'), voucherNo);
+    const { vchDate: _dropped, ...saved }: any = await getSaleReturn(
+      runtime,
+      scope('SRT'),
+      voucherNo,
+    );
     expect(_dropped).toBe('2024-05-15');
     const { vchDate: _none, ...withoutDate } = input();
     await editSaleReturn(

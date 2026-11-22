@@ -96,11 +96,13 @@ export function registerSaleReturnVoucherRoutes(
   });
   app.delete('/sales-returns/:vchNo', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
+    return run(reply, 200, async () =>
       deleteSaleReturn(prisma, {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
         deleteUser: mainUserOf(req),
+        // N51 (D17), like the Sale and Purchase deletes: the version read before the delete.
+        expectedVersion: requiredVersion((req.query as any)?.expectedVersion),
       }),
     );
   });

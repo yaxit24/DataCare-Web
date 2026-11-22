@@ -40,3 +40,23 @@ export function editedLinePayload(
         : {};
   return { ...kept, ...labour, ...gridValues };
 }
+
+/** An edit keeps the stored BILL_NO (the bill box shows the padded original number, which is ISU_NO, not BILL_NO). */
+export function billNoForSave(storedBillNo: string | undefined, typed: string): string | undefined {
+  if (storedBillNo !== undefined) return storedBillNo;
+  return typed.trim() || undefined;
+}
+
+const PRICE_KEYS = ['pcs', 'grossWt', 'netWt', 'touch', 'rate', 'ghtWt', 'westPct', 'otherWt'];
+const FINE_KEYS = ['netWt', 'touch', 'ghtWt', 'westPct'];
+
+/**
+ * The reopened cells a grid edit invalidates: a changed weight, touch or rate re-prices the line (the desktop recomputes
+ * column 20 from column 19, TR_SALE_RTN.cs:4955), and a changed weight, touch or wastage re-derives its fine.
+ */
+export function derivedCellsToClear(key: string): string[] {
+  return [
+    ...(PRICE_KEYS.includes(key) ? ['metalAmount'] : []),
+    ...(FINE_KEYS.includes(key) ? ['fineWt'] : []),
+  ];
+}

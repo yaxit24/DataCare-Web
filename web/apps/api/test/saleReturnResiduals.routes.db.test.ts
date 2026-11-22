@@ -252,7 +252,10 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
       coBook: 'SRT',
       coYear: YEAR,
       // As the grid does: changing the weight re-prices the line, so the stored amount and fine are not sent.
-      lines: first.lines.map(({ metalAmount: _a, fineWt: _f, ...line }: any) => ({ ...line, netWt: 9 })),
+      lines: first.lines.map(({ metalAmount: _a, fineWt: _f, ...line }: any) => ({
+        ...line,
+        netWt: 9,
+      })),
       expectedVersion: first.version,
     });
     expect(edited.statusCode, edited.body).toBe(200);
