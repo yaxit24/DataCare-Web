@@ -130,8 +130,9 @@ describe('route policy registry', () => {
     // N233 removes POST /sales-orders/:vchNo/cancel-refund and adds Order Cancel's pending-orders, defaults, POST,
     // GET, PUT, DELETE and print: 759 - 1 + 7 = 765.
     // N234 (WP-11) adds the RP_ALL Sales Report GET /reports/sales-report and its CSV/XLSX exports: 765 + 3 = 768.
-    expect(routes).toHaveLength(768);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(768);
+    // N240 (WP-21) adds Books (MS_BOOK): list, print, template, accounts, one, POST, PUT and DELETE: 768 + 8 = 776.
+    expect(routes).toHaveLength(776);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(776);
 
     const policies = routes.map((route) => ({
       ...route,

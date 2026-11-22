@@ -450,14 +450,30 @@ interface DetlRow {
       expect(response.statusCode, response.body).toBe(200);
       const body = response.json();
       expect(body.inout, family).toBe(template.inout);
+      // The template's slots, with their accounts and descriptions. A slot number the template does not define (the
+      // baseline rows the study records as MISSING, e.g. PURCHASE 1 to 4, LABOUR WORK 1 and 6) comes from the
+      // location's provisioned book of the family, never from another family.
+      const numbers = new Set(template.slots.map(([sr]) => sr));
       expect(
-        body.slots.map((slot: any) => [slot.srNo, slot.acCode, slot.desc]),
+        body.slots
+          .filter((slot: any) => numbers.has(slot.srNo))
+          .map((slot: any) => [slot.srNo, slot.acCode, slot.desc, slot.acName]),
         family,
-      ).toEqual(template.slots);
+      ).toEqual(template.slots.map(([sr, code, desc]) => [sr, code, desc, accountName(code)]));
+      const extra = body.slots.filter((slot: any) => !numbers.has(slot.srNo));
+      const provisioned: Array<{ sr: number; ac: string }> = await query(
+        `SELECT d."SR_NO"::int sr,d."AC_CODE" ac FROM "BOOK_DETL" d
+          WHERE d.tenant_id=$1 AND d."CO_CODE"='01' AND d."LC_CODE"='01'
+            AND d."CO_BOOK"=(SELECT min("CO_BOOK") FROM "BOOK_DATA" b WHERE b.tenant_id=$1 AND b."CO_CODE"='01'
+                               AND b."LC_CODE"='01' AND b."MAIN_BOOK"=$2)
+          ORDER BY 1`,
+        tenantId,
+        family,
+      );
       expect(
-        body.slots.map((slot: any) => slot.acName),
+        extra.map((slot: any) => [slot.srNo, slot.acCode]),
         family,
-      ).toEqual(template.slots.map(([, code]) => accountName(code)));
+      ).toEqual(provisioned.filter((row) => !numbers.has(row.sr)).map((row) => [row.sr, row.ac]));
     }
   });
 
@@ -897,7 +913,7 @@ interface DetlRow {
   it('T09 the direction and invoice type of a saved book cannot be changed', async () => {
     const opened = (await admin('GET', `${API}/Z05`)).json();
     const before = await footprint();
-    for (const change of [{ inout: 'I' }, { bookType: 'T' }]) {
+    for (const change of [{ inout: 'I' }, { bookType: 'M' }]) {
       const response = await admin('PUT', `${API}/Z05`, {
         ...opened,
         ...change,
