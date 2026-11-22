@@ -726,18 +726,57 @@ d('Tag Stock report (RP_TAG) selections, stock state and totals', () => {
     });
   });
 
-  it('location selects one location, blank selects all of the company', async () => {
+  it('location: the session location unless the desktop location box is allowed (MsLcBoxShow)', async () => {
     const al1 = T('AL1', 801, 'GR', 1, 1, 1, 10, 5, 1, 1, '7', 'C1', '2026-04-05');
     await seedWith(al1, [open(al1)], { lc: '02' });
-    expect(tagsOf(await run('stock'))).toEqual(['A001', 'A002', 'A005', 'A007']);
-    expect(tagsOf(await run('stock', { lcCode: '02' }))).toEqual(['AL1']);
-    expect(tagsOf(await run('stock', { lcCode: '' }))).toEqual([
-      'A001',
-      'A002',
-      'A005',
-      'A007',
-      'AL1',
+    const base = ['A001', 'A002', 'A005', 'A007'];
+    expect(tagsOf(await run('stock'))).toEqual(base);
+    // Without the box a blank or foreign location never widens the read.
+    expect(tagsOf(await run('stock', { lcCode: '' }))).toEqual(base);
+    expect(tagsOf(await run('stock', { lcCode: '02' }))).toEqual(base);
+    const box = { ...scope, allowAllLocations: true };
+    expect(tagsOf(await run('stock', { lcCode: '02' }, box))).toEqual(['AL1']);
+    expect(tagsOf(await run('stock', { lcCode: '' }, box))).toEqual([...base, 'AL1']);
+  });
+
+  it('a tag in two financial years joins its own year row only (no duplicate rows)', async () => {
+    const t = T('AY2', 861, 'GR', 1, 2, 1.5, 100, 80, 5, 1, '7', 'C1', '2026-04-05');
+    await seedWith(t, [open(t)]);
+    const prev = { ...t, stk: '2025-06-05' };
+    await seedWith(prev, [open(prev)], { year: '2025-2026' });
+    // Same tag, same id, in 2025-26 as well; the movements of each year join their own year's BAR_DETL row.
+    for (const tab of ['stock', 'all'])
+      expect((await run(tab, { fromDate: '2026-04-01', tagNo: 'AY2' })).rows.length, tab).toBe(1);
+    const apr = T('AY3', 862, 'GR', 1, 1, 1, 10, 5, 1, 1, '7', 'C1', '2026-04-05');
+    await seedWith(apr, [
+      open(apr),
+      {
+        sign: '-',
+        date: '2026-05-16',
+        type: 'AI',
+        book: 'AIS',
+        vchNo: '0077',
+        bookName: 'APR ISU',
+      },
     ]);
+    await seedTag(apr, { year: '2025-2026' });
+    // One pending issue in this year; the tag's BAR_DETL exists in both years.
+    for (const y of ['2026-2027'])
+      await ins(TENANT, 'APR_DETL', {
+        CO_CODE: CO,
+        LC_CODE: LC,
+        CO_YEAR: y,
+        CO_BOOK: 'AIS',
+        VCH_NO: '0077',
+        VCH_DATE: iso('2026-05-16'),
+        BOOK_NAME: 'APR ISU',
+        AC_CODE: 'P001',
+        IT_CODE: 'GR',
+        TAG_NO: 'AY3',
+        VCH_SRNO: 862,
+        ISU_REC: 'N',
+      });
+    expect((await run('apr', { tagNo: 'AY3' })).rows).toHaveLength(1);
   });
 
   // ---------------------------------------------------------------- sort orders
@@ -915,7 +954,10 @@ d('Tag Stock report (RP_TAG) selections, stock state and totals', () => {
 
   it('totals never disagree with the rows (one consistent snapshot)', async () => {
     const rep = await run('stock');
-    expect(rep.totals.qty).toBe(rep.rows.length);
-    expect(rep.totals.mrp).toBe(sum(rep.rows, 'mrp'));
+    // Hand sums of the seed's four stock tags A001, A002, A005, A007.
+    expect(rep.rows).toHaveLength(4);
+    expect(rep.totals.qty).toBe(4);
+    expect(rep.totals.mrp).toBe(30000 + 20000 + 12000 + 0);
+    expect(rep.totals.grossWt).toBe(5 + 3 + 2 + 10);
   });
 });

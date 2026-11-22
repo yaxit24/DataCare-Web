@@ -1,3 +1,5 @@
+import { csvCell } from './reportCsv.js';
+
 /**
  * Tag Stock (desktop RP_TAG) grid columns per mode. One definition feeds the screen, the CSV and the Excel
  * export, so the three can never disagree. Headers are the desktop column names; the order is the order of the
@@ -200,11 +202,6 @@ export function tagStockColumns(
 /** Rounds a footer figure the way the grid shows it (weights n3, amounts n2 so no cent is lost). */
 export const r3 = (n: number): number => round(n, 3);
 export const r2 = (n: number): number => round(n, 2);
-
-const csvCell = (v: unknown): string => {
-  const s = String(v ?? '');
-  return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
-};
 
 /** CSV of the grid: the same columns and rows as the screen, then one TOTAL row of the footer sums. */
 export function tagStockCsv(rep: {

@@ -41,9 +41,15 @@ export interface TagStockScope {
   LC_CODE: string;
   /** The session financial year; movements of another year never balance a tag (RP_TAG.cs:4124 A.CO_YEAR). */
   CO_YEAR?: string;
+  /** The desktop location box is shown (MsLcBoxShow); no web setting carries it yet, so routes leave it off. */
+  allowAllLocations?: boolean;
 }
 export interface TagStockFilters {
-  /** Location selector: undefined = the session location, '' = every location of the company. */
+  /**
+   * Location selector. Honoured only when the scope allows it (`allowAllLocations`, the desktop MsLcBoxShow box,
+   * RP_TAG.cs:3311, :3701): then '' = every location of the company and a code = that location. Otherwise the
+   * session location is always used, so a blank or foreign value never widens the read.
+   */
   lcCode?: string;
   fromDate?: string;
   toDate?: string;
@@ -164,10 +170,35 @@ const isoDate = (v: unknown, name: string): string | undefined => {
 };
 
 /** Validates the raw query of the HTTP routes (fail closed: an unknown mode or grouping is a 400, not stock). */
+const QUERY_KEYS = new Set([
+  'tab',
+  'view',
+  'aprKind',
+  'dataType',
+  'fromDate',
+  'toDate',
+  'sysDate',
+  'tblCode',
+  'itCode',
+  'prCode',
+  'grCode',
+  'itType',
+  'tagNo',
+  'size',
+  'bookCode',
+  'search',
+  'empIsuLess',
+  'designHelp',
+  'lcCode',
+]);
+
 export function parseTagStockQuery(q: Record<string, unknown>): {
   tab: TagStockTab;
   filters: TagStockFilters;
 } {
+  const unknown = Object.keys(q).filter((k) => !QUERY_KEYS.has(k) && q[k] !== undefined);
+  if (unknown.length)
+    throw new TagStockValidationError(`Tag Stock cannot filter by ${unknown.join(', ')}`);
   const tabRaw = String(q.tab ?? 'stock');
   if (!(TAG_STOCK_TABS as readonly string[]).includes(tabRaw))
     throw new TagStockValidationError(`tab must be one of ${TAG_STOCK_TABS.join(', ')}`);
@@ -320,7 +351,7 @@ export async function tagStockReport(
     throw new TagStockValidationError(`view must be one of ${VIEWS.join(', ')}`);
   const f = filtersIn;
   const aprKind = f.aprKind === 'employee' ? 'employee' : 'party';
-  const lc = f.lcCode === undefined ? scope.LC_CODE : f.lcCode;
+  const lc = scope.allowAllLocations && f.lcCode !== undefined ? f.lcCode : scope.LC_CODE;
 
   return withTxBudget(prisma, tenantId, 'heavy', async (tx: any) => {
     const p = new Params();
@@ -414,6 +445,7 @@ export async function tagStockReport(
         FROM "MAIN_STOCK" a
         JOIN "BAR_DETL" c ON a."CO_CODE"=c."CO_CODE" AND a."LC_CODE"=c."LC_CODE" AND a."TAG_NO"=c."TAG_NO"
           AND a."VCH_SRNO"=c."VCH_SRNO" AND a."IT_CODE"=c."IT_CODE"
+          AND a."CO_YEAR"=c."CO_YEAR"
         ${itemJoin('a')}`;
       where.push(`a."CO_CODE"=${co}`);
       lcWhere('a');
@@ -464,6 +496,7 @@ export async function tagStockReport(
         FROM "APR_DETL" a
         JOIN "BAR_DETL" c ON a."CO_CODE"=c."CO_CODE" AND a."LC_CODE"=c."LC_CODE" AND a."TAG_NO"=c."TAG_NO"
           AND a."VCH_SRNO"=c."VCH_SRNO" AND a."IT_CODE"=c."IT_CODE"
+          AND a."CO_YEAR"=c."CO_YEAR"
         ${itemJoin('a')}`;
       where.push(`a."CO_CODE"=${co}`);
       lcWhere('a');
@@ -496,6 +529,7 @@ export async function tagStockReport(
         `m."TAG_NO"=c."TAG_NO"`,
         `m."VCH_SRNO"=c."VCH_SRNO"`,
         `m."IT_CODE"=c."IT_CODE"`,
+        `m."CO_YEAR"=c."CO_YEAR"`,
         `m."TAG_NO"<>'N'`,
       ];
       if (year) mv.push(`m."CO_YEAR"=${p.add(year)}`);
