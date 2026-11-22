@@ -404,6 +404,10 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     // area and state are first-class selectors, not the shared RP_ALL dimensions this guard polices. Its own
     // parser validates and fails closed, so exempt its routes rather than refusing their selectors here.
     if (url.startsWith('/reports/account-ledger')) return;
+    // The Sales Report (RP_ALL) likewise owns its parser (modules/reports/rpAll/filters.ts): party, city, area,
+    // employ, product and group are its own selectors (RP_ALL.cs:7629-7631 `{SL_DATA.AC_CODE}`), and the engine
+    // refuses one its template lacks with `filter-not-in-template` (rpAll/index.ts), so this guard must not.
+    if (url.startsWith('/reports/sales-report')) return;
     const q = (req.query ?? {}) as Record<string, string | undefined>;
     const asked = REPORT_FILTER_KEYS.filter((k) => String(q[k] ?? '').trim());
     if (!asked.length) return;
