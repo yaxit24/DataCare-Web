@@ -123,9 +123,26 @@ export function worktreeFor(branch, base = 'origin/main', { fetch = true } = {})
   fs.mkdirSync(wtRoot, { recursive: true });
   if (fetch) git(['fetch', 'origin', '--prune'], REPO, { allowFail: true });
   const has = (ref) => git(['rev-parse', '--verify', '--quiet', ref], REPO, { allowFail: true }).code === 0;
-  if (has(`refs/heads/${branch}`)) git(['worktree', 'add', dir, branch]);
-  else if (has(`refs/remotes/origin/${branch}`)) git(['worktree', 'add', dir, '-b', branch, `origin/${branch}`]);
-  else git(['worktree', 'add', dir, '-b', branch, base]);
+  // Two runs started together race on .git/config: retry while another git holds its lock.
+  const add = (pick) => {
+    for (let attempt = 1; ; attempt++) {
+      const args = pick();
+      const r = git(['worktree', 'add', ...args], REPO, { allowFail: true });
+      if (r.code === 0) return;
+      if (attempt >= 6 || !/could not lock|\.lock': File exists|unable to write upstream/.test(r.err)) {
+        throw new Error(`git worktree add ${args.join(' ')} failed: ${r.err || r.out}`);
+      }
+      git(['worktree', 'prune'], REPO, { allowFail: true });
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 1000 * attempt);
+    }
+  };
+  // Re-decided on every attempt: a failed attempt may already have created the branch.
+  add(() => {
+    if (has(`refs/heads/${branch}`)) return [dir, branch];
+    if (has(`refs/remotes/origin/${branch}`)) return [dir, '-b', branch, `origin/${branch}`];
+    // --no-track: a work-package branch must not track main, or a bare push would aim at main.
+    return ['--no-track', dir, '-b', branch, base];
+  });
   return dir;
 }
 

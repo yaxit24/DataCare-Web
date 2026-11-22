@@ -4,15 +4,40 @@
     "bin": "claude",
     "install": "https://claude.com/claude-code",
     "prompt": "stdin",
-    "defaults": { "effort": "medium", "permissionMode": "acceptEdits" },
+    "defaults": {
+      "effort": "medium",
+      "permissionMode": "acceptEdits"
+    },
     "args": [
       "-p",
-      "--model", "{model}",
-      "--effort", "{effort}",
-      "--permission-mode", "{permissionMode}",
-      "--output-format", "json",
-      "--allowedTools", "Read", "Glob", "Grep", "Edit", "Write", "Bash",
-      "--disallowedTools", "Bash(git push:*)", "Bash(git commit:*)", "Bash(git reset:*)", "Bash(git clean:*)", "Bash(git checkout:*)", "Bash(git switch:*)", "Bash(git worktree:*)", "Bash(git stash:*)", "Bash(gh pr:*)", "Bash(gh repo:*)", "WebFetch", "WebSearch"
+      "--model",
+      "{model}",
+      "--effort",
+      "{effort}",
+      "--permission-mode",
+      "{permissionMode}",
+      "--output-format",
+      "json",
+      "--allowedTools",
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit",
+      "Write",
+      "Bash",
+      "--disallowedTools",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(git reset:*)",
+      "Bash(git clean:*)",
+      "Bash(git checkout:*)",
+      "Bash(git switch:*)",
+      "Bash(git worktree:*)",
+      "Bash(git stash:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh repo:*)",
+      "WebFetch",
+      "WebSearch"
     ]
   },
   "opencode": {
@@ -20,7 +45,20 @@
     "bin": "opencode",
     "install": "npm install --global @opencode/cli",
     "prompt": "pointer",
-    "args": ["run", "--standalone", "--auto", "--agent", "dc-worker", "--format", "json", "--title", "{runId}", "--model", "{model}", "{pointer}"]
+    "args": [
+      "run",
+      "--standalone",
+      "--auto",
+      "--agent",
+      "dc-worker",
+      "--format",
+      "json",
+      "--title",
+      "{runId}",
+      "--model",
+      "{model}",
+      "{pointer}"
+    ]
   },
   "codex": {
     "name": "Codex CLI, headless (codex exec). ChatGPT plan sign-in or an API key",
@@ -28,6 +66,22 @@
     "install": "npm install --global @openai/codex",
     "prompt": "stdin",
     "modelRequired": false,
-    "args": ["exec", "--sandbox", "workspace-write", "--json", ["-m", "{model}"], "-C", "{worktree}", "-o", "{lastMessage}", "-"]
+    "args": [
+      "exec",
+      "-c",
+      "model_reasoning_effort=\"medium\"",
+      "--sandbox",
+      "workspace-write",
+      "--json",
+      [
+        "-m",
+        "{model}"
+      ],
+      "-C",
+      "{worktree}",
+      "-o",
+      "{lastMessage}",
+      "-"
+    ]
   }
 }
