@@ -1377,7 +1377,13 @@ async function writeSaleTx(
     if (!c.in.stones?.length) return;
     const line = { ...key, VCH_DATE: voucherDate, HD_VCH_NO: ctx.hdVchNo, AC_CODE: input.acCode };
     const at = { VCH_TYPE: bookPolicy.vchType, INOUT_TYPE: bookPolicy.inout, ENTRY_TYPE: 'S' };
-    const row = { ...line, ...at, BOOK_NAME: bookPolicy.bookName, SR_NO: li + 1, TAG_NO: c.in.tagNo ?? '' };
+    const row = {
+      ...line,
+      ...at,
+      BOOK_NAME: bookPolicy.bookName,
+      SR_NO: li + 1,
+      TAG_NO: c.in.tagNo ?? '',
+    };
     idtl.push(...(stoneRowsFor(c.in.stones, row) as any[]));
   });
 
@@ -1422,7 +1428,9 @@ async function writeSaleTx(
   });
 
   // TR_SALE.cs:15636: a row is written only with a non-zero net or amount.
-  const oldMetalRows = (input.oldGold ?? []).filter((g) => num(g.netWt) !== 0 || num(g.amount) !== 0);
+  const oldMetalRows = (input.oldGold ?? []).filter(
+    (g) => num(g.netWt) !== 0 || num(g.amount) !== 0,
+  );
   // G83: value each old-metal (exchange) row ONCE, the way TR_SALE.cs's mSG_OLD grid does, and use that one
   // figure everywhere. The desktop stores the grid's recomputed amount (column 13) in BOTH SL_PR_DETL.NET_AMT
   // and SL_DATA.OLD_GL_AMT, so the detail, the header, the settlement, the ledger and BILL_OS must all carry

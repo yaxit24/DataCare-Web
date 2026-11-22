@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { balanceFormulas, chooseSaleTemplate } from '../src/modules/sales/salePrintChoice.js';
-import { resolveSaleTenders, settleEditedHeader, stonesByLine } from '../src/modules/sales/saleResiduals.js';
+import {
+  resolveSaleTenders,
+  settleEditedHeader,
+  stonesByLine,
+} from '../src/modules/sales/saleResiduals.js';
 
 /** WP-26 unit rules (cases.md ids in the test names); the database cases are in salesInvoiceResiduals.db.test.ts. */
 const fail = (msg: string) => new Error(msg);
@@ -14,7 +18,10 @@ describe('Sales Invoice print choice (TR_SALE.cs:16482-16507, decision D6)', () 
       passBalances: true,
     });
     expect(chooseSaleTemplate({ coBook: 'SL', file: 'SalesBillGst' }).file).toBe('SalesBillGst');
-    expect(chooseSaleTemplate({ coBook: 'SL', file: 'NoSuchCrystal' })).toMatchObject({ isDefault: true, title: 'Tax Invoice' });
+    expect(chooseSaleTemplate({ coBook: 'SL', file: 'NoSuchCrystal' })).toMatchObject({
+      isDefault: true,
+      title: 'Tax Invoice',
+    });
   });
 
   it('sales-invoice.print.template-huid: HUID wins over the file and passes no balances (:16484, :16503)', () => {
@@ -34,7 +41,10 @@ describe('Sales Invoice print choice (TR_SALE.cs:16482-16507, decision D6)', () 
   });
 
   it('print.opening-closing-parameters formula text is two decimals (:16505-16506)', () => {
-    expect(balanceFormulas({ opAmt: -10000, clAmt: -75517.79 })).toEqual(['OpAmt = -10000.00', 'ClAmt = -75517.79']);
+    expect(balanceFormulas({ opAmt: -10000, clAmt: -75517.79 })).toEqual([
+      'OpAmt = -10000.00',
+      'ClAmt = -75517.79',
+    ]);
   });
 });
 
@@ -54,13 +64,31 @@ describe('tender rows (D1, D2, G8a)', () => {
   });
 
   it('refuses a second UPI figure, a duplicate order and a rate type other than N/F', () => {
-    expect(() => resolveSaleTenders({ upiRows: [{ acCode: 'U1', amount: 1000 }], upiAmt: 900 }, fail)).toThrow(/upiAmount/);
     expect(() =>
-      resolveSaleTenders({ orders: [{ ordNo: '7', amount: 1 }, { ordNo: '00007', amount: 2 }] }, fail),
+      resolveSaleTenders({ upiRows: [{ acCode: 'U1', amount: 1000 }], upiAmt: 900 }, fail),
+    ).toThrow(/upiAmount/);
+    expect(() =>
+      resolveSaleTenders(
+        {
+          orders: [
+            { ordNo: '7', amount: 1 },
+            { ordNo: '00007', amount: 2 },
+          ],
+        },
+        fail,
+      ),
     ).toThrow('Duplicate Order No');
     // A different book is a different order (:7324 compares book + number).
     expect(
-      resolveSaleTenders({ orders: [{ ordNo: '7', amount: 1 }, { ordNo: '7', ordBook: 'SO2', amount: 2 }] }, fail).orders,
+      resolveSaleTenders(
+        {
+          orders: [
+            { ordNo: '7', amount: 1 },
+            { ordNo: '7', ordBook: 'SO2', amount: 2 },
+          ],
+        },
+        fail,
+      ).orders,
     ).toHaveLength(2);
     expect(() => resolveSaleTenders({ oldGold: [{ rateType: 'X' }] }, fail)).toThrow(
       'Please Slelect Rate type = N - Net Wise Or F - Fine Wise',
@@ -76,7 +104,15 @@ describe('tender rows (D1, D2, G8a)', () => {
 
 describe('lossless reopen (decision D8)', () => {
   it('an unchanged header takes every stored column back; a changed one marks RE_TRFR from DATA_TRFR', () => {
-    const stored = { tenant_id: 't', row_id: 1n, VCH_TIME: 'x', NET_AMT: '100.00', DATA_TRFR: 'Y', IRN_NO: 'I1', ADD1: null };
+    const stored = {
+      tenant_id: 't',
+      row_id: 1n,
+      VCH_TIME: 'x',
+      NET_AMT: '100.00',
+      DATA_TRFR: 'Y',
+      IRN_NO: 'I1',
+      ADD1: null,
+    };
     const same: Record<string, unknown> = { NET_AMT: 100, DATA_TRFR: 'N', ADD1: '', IRN_NO: null };
     expect(settleEditedHeader(same, stored)).toBe('unchanged');
     expect([same.DATA_TRFR, same.IRN_NO, 'tenant_id' in same]).toEqual(['Y', 'I1', false]);

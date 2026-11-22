@@ -26,7 +26,9 @@ export function registerSaleVoucherRoutes(
   });
   app.post('/sales/print-files/default', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'update')) return;
-    return run(reply, 200, () => setSalePrintDefault(prisma, scopeOf(req), String(body(req).file ?? '')));
+    return run(reply, 200, () =>
+      setSalePrintDefault(prisma, scopeOf(req), String(body(req).file ?? '')),
+    );
   });
   app.get('/sales/:vchNo', auth as any, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;

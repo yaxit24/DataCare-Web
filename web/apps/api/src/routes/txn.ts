@@ -1418,10 +1418,17 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     if (!scope) return reply;
     await getSale(prisma, scope, scope.vchNo);
     // WP-26 (D6): HUID box, then book 099, then the chosen PRINT_MAST file, each mapped to a web template.
-    const choice = chooseSaleTemplate({ huid: q.huid === '1' || q.huid === 'true', coBook: scope.coBook, file: q.file });
+    const choice = chooseSaleTemplate({
+      huid: q.huid === '1' || q.huid === 'true',
+      coBook: scope.coBook,
+      file: q.file,
+    });
     const data = await salesBillData(prisma, scope, { balances: choice.passBalances });
     if (!data) return reply.code(404).send({ error: 'sale-not-found' });
-    reply.header('X-Print-Template', `${choice.template}; file=${choice.file}${choice.isDefault ? '; default' : ''}`);
+    reply.header(
+      'X-Print-Template',
+      `${choice.template}; file=${choice.file}${choice.isDefault ? '; default' : ''}`,
+    );
     const html = salesBillHtml(data.header, data.lines, {
       company: data.company,
       party: data.party,

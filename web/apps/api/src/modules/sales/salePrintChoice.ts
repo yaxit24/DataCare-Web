@@ -35,7 +35,11 @@ export interface SaleTemplateChoice extends SaleTemplate {
   passBalances: boolean;
 }
 
-export function chooseSaleTemplate(input: { huid?: boolean; coBook: string; file?: string }): SaleTemplateChoice {
+export function chooseSaleTemplate(input: {
+  huid?: boolean;
+  coBook: string;
+  file?: string;
+}): SaleTemplateChoice {
   const file = input.huid
     ? 'RtlHuidPrint' // TR_SALE.cs:16484
     : String(input.coBook ?? '').trim() === '099'
@@ -48,7 +52,10 @@ export function chooseSaleTemplate(input: { huid?: boolean; coBook: string; file
 /** TR_SALE.cs:16439 */
 export const NO_PRINT_RIGHTS = 'You Have No Print Rights.....';
 
-async function bookTypeTx(tx: any, scope: VoucherScope): Promise<{ mainBook: string; bookType: string }> {
+async function bookTypeTx(
+  tx: any,
+  scope: VoucherScope,
+): Promise<{ mainBook: string; bookType: string }> {
   const rows: any[] = await tx.$queryRawUnsafe(
     `SELECT "MAIN_BOOK"::text AS m, coalesce("BOOK_TYPE"::text,'') AS t FROM "BOOK_DATA"
       WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4 ORDER BY row_id LIMIT 1`,
@@ -75,10 +82,22 @@ export async function salePrintFiles(
   return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const book = await bookTypeTx(tx, scope);
     let fromCompany = scope.coCode;
-    let rows: any[] = await tx.$queryRawUnsafe(FILES_SQL, scope.tenantId, scope.coCode, book.mainBook, book.bookType);
+    let rows: any[] = await tx.$queryRawUnsafe(
+      FILES_SQL,
+      scope.tenantId,
+      scope.coCode,
+      book.mainBook,
+      book.bookType,
+    );
     if (!rows.length && scope.coCode !== '01') {
       fromCompany = '01';
-      rows = await tx.$queryRawUnsafe(FILES_SQL, scope.tenantId, '01', book.mainBook, book.bookType);
+      rows = await tx.$queryRawUnsafe(
+        FILES_SQL,
+        scope.tenantId,
+        '01',
+        book.mainBook,
+        book.bookType,
+      );
     }
     const files = rows.map((r) => String(r.f ?? '').trim());
     const selected = String(rows.find((r) => String(r.s).trim() === 'Y')?.f ?? '').trim();
@@ -90,20 +109,32 @@ export async function salePrintFiles(
  * "Set" (`btnTagSet_Click`, TR_SALE.cs:20618-20624): the chosen file becomes the book's default. Both updates run in
  * one transaction (the desktop runs two separate statements). An unknown file name is refused.
  */
-export async function setSalePrintDefault(prisma: any, scope: VoucherScope, file: string): Promise<{ message: string }> {
+export async function setSalePrintDefault(
+  prisma: any,
+  scope: VoucherScope,
+  file: string,
+): Promise<{ message: string }> {
   const name = String(file ?? '').trim();
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const book = await bookTypeTx(tx, scope);
     const args = [scope.tenantId, scope.coCode, book.mainBook, book.bookType];
     const where = `tenant_id=$1 AND "CO_CODE"=$2 AND "PRINT_TYPE"=$3 AND coalesce("BOOK_TYPE",'')=$4`;
-    const hit: any[] = await tx.$queryRawUnsafe(`SELECT 1 FROM "PRINT_MAST" WHERE ${where} AND "PRINT_FILE"=$5`, ...args, name);
+    const hit: any[] = await tx.$queryRawUnsafe(
+      `SELECT 1 FROM "PRINT_MAST" WHERE ${where} AND "PRINT_FILE"=$5`,
+      ...args,
+      name,
+    );
     if (!name || !hit.length) {
       const error = new Error(`print file not found: ${name}`);
       error.name = 'SaleValidationError';
       throw error;
     }
     await tx.$executeRawUnsafe(`UPDATE "PRINT_MAST" SET "PRINT_SET_A"='N' WHERE ${where}`, ...args);
-    await tx.$executeRawUnsafe(`UPDATE "PRINT_MAST" SET "PRINT_SET_A"='Y' WHERE ${where} AND "PRINT_FILE"=$5`, ...args, name);
+    await tx.$executeRawUnsafe(
+      `UPDATE "PRINT_MAST" SET "PRINT_SET_A"='Y' WHERE ${where} AND "PRINT_FILE"=$5`,
+      ...args,
+      name,
+    );
     return { message: 'Print Report Default Set' }; // TR_SALE.cs:20625
   });
 }

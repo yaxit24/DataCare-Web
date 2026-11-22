@@ -81,17 +81,22 @@ type TenderInput = SaleResidualInput & {
  * Duplicate order (book + number) is refused with the desktop text (:7324-7326). An old-metal rate type other
  * than N/F is refused with the desktop text (:7667-7669).
  */
-export function resolveSaleTenders<T extends TenderInput>(input: T, fail: (msg: string) => Error): T {
+export function resolveSaleTenders<T extends TenderInput>(
+  input: T,
+  fail: (msg: string) => Error,
+): T & TenderInput {
   for (const row of input.oldGold ?? []) {
     const error = oldMetalRateTypeError(row?.rateType);
     if (error) throw fail(error);
   }
-  const out: T = { ...input };
+  const out: T & TenderInput = { ...input };
   if (input.upiRows) {
     const rows = input.upiRows.filter((r) => text(r?.acCode) !== '' && num(r?.amount) !== 0);
     const sum = r2(rows.reduce((s, r) => s + num(r.amount), 0));
     if (input.upiAmt != null && Math.abs(num(input.upiAmt) - sum) > TOLERANCE)
-      throw fail(`upiAmount ${r2(num(input.upiAmt)).toFixed(2)} differs from the UPI rows total ${sum.toFixed(2)}`);
+      throw fail(
+        `upiAmount ${r2(num(input.upiAmt)).toFixed(2)} differs from the UPI rows total ${sum.toFixed(2)}`,
+      );
     out.upiRows = rows;
     out.upiAmt = sum;
   }
@@ -111,7 +116,13 @@ export function resolveSaleTenders<T extends TenderInput>(input: T, fail: (msg: 
   const orders: SaleOrderRow[] = input.orders
     ? input.orders.filter((r) => text(r?.ordNo) !== '' && (r.amount == null || num(r.amount) !== 0))
     : input.orderRef?.ordNo != null && text(input.orderRef.ordNo) !== ''
-      ? [{ ordNo: input.orderRef.ordNo, amount: input.orderRef.adjustAmt, ordBook: input.orderRef.ordBook }]
+      ? [
+          {
+            ordNo: input.orderRef.ordNo,
+            amount: input.orderRef.adjustAmt,
+            ordBook: input.orderRef.ordBook,
+          },
+        ]
       : [];
   const seen = new Set<string>();
   for (const row of orders) {
@@ -152,7 +163,9 @@ export async function checkSaleOrdersTx(
     const ordNo = formatVoucherNo(text(row.ordNo));
     const order = await openAdvanceOfOrderTx(tx, scope, ordNo, text(row.ordBook) || 'SOR');
     if (!order) throw fail(`sales order #${ordNo} not found`);
-    const amount = r2(row.amount == null ? Math.max(0, Math.min(order.openAmt, left)) : num(row.amount));
+    const amount = r2(
+      row.amount == null ? Math.max(0, Math.min(order.openAmt, left)) : num(row.amount),
+    );
     if (amount > order.openAmt + TOLERANCE)
       throw new SessionCommandError(
         'order-advance-conflict',
@@ -269,11 +282,45 @@ export function saleTenderWrites(
 
 /** `SL_IDTL` columns a stone row carries beyond the voucher key (TR_SALE.cs:15583-15620). */
 const STONE_COLUMNS = [
-  'TAG_NO', 'VCH_SRNO', 'ISR_NO', 'IT_CODE', 'IT_TYPE', 'DM_CODE', 'DM_SIZE', 'DM_SFNO', 'DM_LEB', 'IT_PCS', 'IT_PCS_WT', 'KR_WT',
-  'KR_LESS_PRC', 'IT_GWT', 'IT_CON_PRC', 'IT_CON_WT', 'IT_RATE_TYPE', 'IT_RATE', 'IT_AMT', 'IT_LBR_RATE',
-  'IT_LBR_AMT', 'IT_NET_AMT', 'KR_CON_PRC', 'KR_CON_WT', 'KR_RATE', 'KR_AMT', 'KR_LBR_RATE', 'KR_LBR_AMT',
-  'KR_NET_AMT', 'DM_ORIGIN', 'DM_REMARK', 'DM_COLOR', 'DM_NAME', 'KR_RATE_TYPE', 'IT_DISC_PRC', 'IT_DISC_AMT',
-  'OLD_VCH_NO', 'NEW_VCH_NO', 'MAIN_USER',
+  'TAG_NO',
+  'VCH_SRNO',
+  'ISR_NO',
+  'IT_CODE',
+  'IT_TYPE',
+  'DM_CODE',
+  'DM_SIZE',
+  'DM_SFNO',
+  'DM_LEB',
+  'IT_PCS',
+  'IT_PCS_WT',
+  'KR_WT',
+  'KR_LESS_PRC',
+  'IT_GWT',
+  'IT_CON_PRC',
+  'IT_CON_WT',
+  'IT_RATE_TYPE',
+  'IT_RATE',
+  'IT_AMT',
+  'IT_LBR_RATE',
+  'IT_LBR_AMT',
+  'IT_NET_AMT',
+  'KR_CON_PRC',
+  'KR_CON_WT',
+  'KR_RATE',
+  'KR_AMT',
+  'KR_LBR_RATE',
+  'KR_LBR_AMT',
+  'KR_NET_AMT',
+  'DM_ORIGIN',
+  'DM_REMARK',
+  'DM_COLOR',
+  'DM_NAME',
+  'KR_RATE_TYPE',
+  'IT_DISC_PRC',
+  'IT_DISC_AMT',
+  'OLD_VCH_NO',
+  'NEW_VCH_NO',
+  'MAIN_USER',
 ] as const;
 
 /** A line's stone rows as the request carries them back (from `getSale`), rebuilt on the voucher key. */
@@ -299,7 +346,9 @@ export function stonesByLine(
   const out = new Map<number, Record<string, unknown>[]>();
   for (const row of idtl) {
     const tag = text(row.TAG_NO);
-    const own = lines.some((l) => l.tagNo !== '' && l.tagNo === tag && l.itCode === text(row.IT_CODE));
+    const own = lines.some(
+      (l) => l.tagNo !== '' && l.tagNo === tag && l.itCode === text(row.IT_CODE),
+    );
     if (own && num(row.ISR_NO) === 1 && text(row.DM_CODE) === '') continue;
     const srNo = num(row.SR_NO);
     const stone: Record<string, unknown> = {};
@@ -310,7 +359,15 @@ export function stonesByLine(
 }
 
 /** Header columns an unchanged save must not touch even though the writer computes them (decision D8). */
-const CARRIED = new Set(['VCH_TIME', 'DATA_TRFR', 'USER_UPDATE', 'USER_DELETE', 'RE_TRFR', 'MOB_ENTRY_SAVE', 'CARD_ADJ']);
+const CARRIED = new Set([
+  'VCH_TIME',
+  'DATA_TRFR',
+  'USER_UPDATE',
+  'USER_DELETE',
+  'RE_TRFR',
+  'MOB_ENTRY_SAVE',
+  'CARD_ADJ',
+]);
 /** Desktop-computed columns the web has no calculation for (member commission, TR_SALE.cs:15265-15266): an edit
  * keeps the stored value rather than writing 0. */
 const KEPT = ['AC_MEMB_COM_PRC', 'AC_MEMB_COM_VAL'];
@@ -329,7 +386,9 @@ const same = (a: unknown, b: unknown): boolean => {
   if (x === y) return true;
   const nx = Number(x || 0);
   const ny = Number(y || 0);
-  return x !== '' && y !== '' && Number.isFinite(nx) && Number.isFinite(ny) && Math.abs(nx - ny) < 1e-6;
+  return (
+    x !== '' && y !== '' && Number.isFinite(nx) && Number.isFinite(ny) && Math.abs(nx - ny) < 1e-6
+  );
 };
 
 /**
@@ -344,7 +403,8 @@ export function settleEditedHeader(
 ): 'unchanged' | 'changed' {
   for (const column of KEPT) if (persisted[column] != null) header[column] = persisted[column];
   const changed = Object.keys(header).some(
-    (column) => !CARRIED.has(column) && header[column] != null && !same(header[column], persisted[column]),
+    (column) =>
+      !CARRIED.has(column) && header[column] != null && !same(header[column], persisted[column]),
   );
   if (!changed) {
     for (const [column, value] of Object.entries(persisted)) {

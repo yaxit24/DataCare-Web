@@ -25,7 +25,9 @@ export function oldMetalRateTypeError(rateType: unknown): string | null {
  * Today's per-gram rates from the newest `RATE_MAST` row on or before the voucher date
  * (TR_SALE.cs:20833 `FINE_GL_RATE / 10`, :20854 `FINE_SL_RATE / 1000`, two decimals). A missing row gives 0.
  */
-export function oldMetalTodayRates(row: { fineGoldRate?: unknown; fineSilverRate?: unknown } | null): {
+export function oldMetalTodayRates(
+  row: { fineGoldRate?: unknown; fineSilverRate?: unknown } | null,
+): {
   gold: number;
   silver: number;
 } {
@@ -51,7 +53,12 @@ export function oldMetalTouchFromAmount(input: {
 }): { touch: number; fine: number } | null {
   if (String(input.rateType ?? '') !== 'N') return null;
   const code = String(input.itCode ?? '');
-  const today = code === 'OG' ? Number(input.todayGoldRate ?? 0) : code === 'OS' ? Number(input.todaySilverRate ?? 0) : 0;
+  const today =
+    code === 'OG'
+      ? Number(input.todayGoldRate ?? 0)
+      : code === 'OS'
+        ? Number(input.todaySilverRate ?? 0)
+        : 0;
   const net = Number(input.netWt ?? 0);
   const amount = Number(input.amount ?? 0);
   if (today === 0 || net === 0 || amount === 0) return null;

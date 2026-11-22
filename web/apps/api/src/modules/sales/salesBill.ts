@@ -23,7 +23,13 @@ export async function salesBillData(
   prisma: any,
   scope: SalesBillScope,
   opts: { balances?: boolean } = {},
-): Promise<{ header: any; lines: any[]; company: any; party: any; balances?: { opAmt: number; clAmt: number } } | null> {
+): Promise<{
+  header: any;
+  lines: any[];
+  company: any;
+  party: any;
+  balances?: { opAmt: number; clAmt: number };
+} | null> {
   const s = requireVoucherDocumentScope(scope);
   return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const params = voucherKeyParams(s);
@@ -45,7 +51,9 @@ export async function salesBillData(
     const party = await documentPartyTx(tx, s, header.AC_CODE);
     // WP-26: OpAmt/ClAmt of the party at the voucher time (TR_SALE.cs:16259-16261, :16505-16506).
     const at = header.VCH_TIME instanceof Date ? header.VCH_TIME : new Date(header.VCH_DATE);
-    const balances = opts.balances ? await salePartyBalancesTx(tx, s as any, String(header.AC_CODE), at) : undefined;
+    const balances = opts.balances
+      ? await salePartyBalancesTx(tx, s as any, String(header.AC_CODE), at)
+      : undefined;
     return { header, lines, company, party, balances };
   });
 }

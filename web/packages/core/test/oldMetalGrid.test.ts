@@ -28,7 +28,13 @@ describe('sales-invoice.oldmetal.amount-half-to-even (TR_SALE.cs:7959)', () => {
 
 describe('sales-invoice.oldmetal.conversion-weight-above-100 (TR_SALE.cs:7917, :7921)', () => {
   it('fine 9.160, Con% 120: weight Round(10.992, 3) = 10.992, amount Round(65,952.000, 0) = 65,952', () => {
-    const v = valueOldGoldLine({ netWt: 10, touch: 91.6, conversionPct: 120, rate: 6000, rateType: 'N' });
+    const v = valueOldGoldLine({
+      netWt: 10,
+      touch: 91.6,
+      conversionPct: 120,
+      rate: 6000,
+      rateType: 'N',
+    });
     expect(v.fine).toBe(9.16);
     expect(v.conversionWt).toBe(10.992);
     expect(v.amount).toBe(65952);
@@ -37,7 +43,9 @@ describe('sales-invoice.oldmetal.conversion-weight-above-100 (TR_SALE.cs:7917, :
 
 describe('sales-invoice.oldmetal.rate-type-refusal-text (TR_SALE.cs:7667-7669)', () => {
   it('refuses anything but N or F, case-sensitive, with the desktop text', () => {
-    expect(OLD_METAL_RATE_TYPE_MESSAGE).toBe('Please Slelect Rate type = N - Net Wise Or F - Fine Wise');
+    expect(OLD_METAL_RATE_TYPE_MESSAGE).toBe(
+      'Please Slelect Rate type = N - Net Wise Or F - Fine Wise',
+    );
     expect(oldMetalRateTypeError('X')).toBe(OLD_METAL_RATE_TYPE_MESSAGE);
     expect(oldMetalRateTypeError('n')).toBe(OLD_METAL_RATE_TYPE_MESSAGE);
     expect(oldMetalRateTypeError('N')).toBeNull();
@@ -48,7 +56,10 @@ describe('sales-invoice.oldmetal.rate-type-refusal-text (TR_SALE.cs:7667-7669)',
 
 describe("today's per-gram rates (TR_SALE.cs:20833, :20854)", () => {
   it('FINE_GL_RATE 60,000 / 10 = 6,000.00; FINE_SL_RATE 80,000 / 1000 = 80.00; no row = 0', () => {
-    expect(oldMetalTodayRates({ fineGoldRate: 60000, fineSilverRate: 80000 })).toEqual({ gold: 6000, silver: 80 });
+    expect(oldMetalTodayRates({ fineGoldRate: 60000, fineSilverRate: 80000 })).toEqual({
+      gold: 6000,
+      silver: 80,
+    });
     expect(oldMetalTodayRates(null)).toEqual({ gold: 0, silver: 0 });
   });
 });
@@ -58,7 +69,13 @@ describe('sales-invoice.oldmetal.touch-from-amount-* (TR_SALE.cs:7970, :7981-799
     const valued = valueOldGoldLine({ netWt: 10, amount: 54000, rateType: 'N' });
     expect(valued.rate).toBe(5400); // 54,000.00 / 10.000
     expect(
-      oldMetalTouchFromAmount({ itCode: 'OG', rateType: 'N', netWt: 10, amount: valued.amount, todayGoldRate: 6000 }),
+      oldMetalTouchFromAmount({
+        itCode: 'OG',
+        rateType: 'N',
+        netWt: 10,
+        amount: valued.amount,
+        todayGoldRate: 6000,
+      }),
     ).toEqual({ touch: 90, fine: 9 });
   });
 
@@ -66,17 +83,47 @@ describe('sales-invoice.oldmetal.touch-from-amount-* (TR_SALE.cs:7970, :7981-799
     const valued = valueOldGoldLine({ netWt: 100, amount: 7200, rateType: 'N' });
     expect(valued.rate).toBe(72);
     expect(
-      oldMetalTouchFromAmount({ itCode: 'OS', rateType: 'N', netWt: 100, amount: 7200, todaySilverRate: 80 }),
+      oldMetalTouchFromAmount({
+        itCode: 'OS',
+        rateType: 'N',
+        netWt: 100,
+        amount: 7200,
+        todaySilverRate: 80,
+      }),
     ).toEqual({ touch: 90, fine: 90 });
   });
 
   it("needs today's rate: ToDayGlRate = 0 leaves the touch as typed (null)", () => {
-    expect(oldMetalTouchFromAmount({ itCode: 'OG', rateType: 'N', netWt: 10, amount: 54000, todayGoldRate: 0 })).toBeNull();
+    expect(
+      oldMetalTouchFromAmount({
+        itCode: 'OG',
+        rateType: 'N',
+        netWt: 10,
+        amount: 54000,
+        todayGoldRate: 0,
+      }),
+    ).toBeNull();
   });
 
   it('applies only to codes OG/OS on a net-wise row', () => {
-    expect(oldMetalTouchFromAmount({ itCode: 'OLDG', rateType: 'N', netWt: 10, amount: 54000, todayGoldRate: 6000 })).toBeNull();
-    expect(oldMetalTouchFromAmount({ itCode: 'OG', rateType: 'F', netWt: 10, amount: 54000, todayGoldRate: 6000 })).toBeNull();
+    expect(
+      oldMetalTouchFromAmount({
+        itCode: 'OLDG',
+        rateType: 'N',
+        netWt: 10,
+        amount: 54000,
+        todayGoldRate: 6000,
+      }),
+    ).toBeNull();
+    expect(
+      oldMetalTouchFromAmount({
+        itCode: 'OG',
+        rateType: 'F',
+        netWt: 10,
+        amount: 54000,
+        todayGoldRate: 6000,
+      }),
+    ).toBeNull();
   });
 });
 
