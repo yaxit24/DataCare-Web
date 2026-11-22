@@ -38,7 +38,7 @@ describe('buildWholesaleRojmel (Wh_Sales_Rojmel)', () => {
   });
   it('14, 27 and 13 follow the source: Cr ABS(SL_BILL_OS) on slot 8, Cr labour on slot 6, Dr ABS(PR_BILL_OS)', () => {
     const rows = buildWholesaleRojmel(ctx as any, { ...base, saleBillOs: -40, purchaseBillOs: -9, labourAmount: 2375 });
-    const byType = Object.fromEntries(rows.map((r) => [r.LEDR_KEY.slice(-2), r]));
+    const byType: Record<string, any> = Object.fromEntries(rows.map((r) => [r.LEDR_KEY.slice(-2), r]));
     expect([byType['14'].AC_CODE, byType['14'].LD_CODE, byType['14'].CR_AMT, byType['14'].AC_NAME]).toEqual(['P1', 'S8', 40, 'WSALE - Cust']);
     expect([byType['27'].AC_CODE, byType['27'].LD_CODE, byType['27'].CR_AMT, byType['27'].AC_NAME]).toEqual(['S6', 'P1', 2375, 'LBR - Cust']);
     expect([byType['13'].DR_AMT, byType['13'].ITM_FINE, byType['13'].SIGN]).toEqual([9, 0, '']);
@@ -48,7 +48,7 @@ describe('buildWholesaleRojmel (Wh_Sales_Rojmel)', () => {
       ...base, drFine: 2, crFine: 3, purchaseBillOs: 5, saleBillOs: 7, purchaseAmount: 100, saleAmount: 200,
       purchaseChequeAmount: 50, purchaseKasarAmount: 4,
     });
-    const t = Object.fromEntries(rows.map((r) => [r.LEDR_KEY.slice(-2), r]));
+    const t: Record<string, any> = Object.fromEntries(rows.map((r) => [r.LEDR_KEY.slice(-2), r]));
     expect([t['01'].CR_AMT, t['01'].SIGN, t['01'].ITM_FINE, t['01'].ITM_RATE]).toEqual([5, '-', 2, 6500]);
     expect([t['02'].AC_CODE, t['02'].DR_AMT]).toEqual(['S2', 100]);
     expect([t['03'].DR_AMT, t['03'].SIGN, t['03'].ITM_FINE]).toEqual([7, '+', 3]);

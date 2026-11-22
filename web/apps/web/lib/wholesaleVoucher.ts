@@ -12,6 +12,9 @@
  * posts.
  */
 import {
+  commPassTotalIdtl,
+  detailRowIsWritten,
+  rollupWholesaleDetails,
   round,
   settleMoneyMetal,
   toIsoDate,
@@ -138,9 +141,53 @@ export interface VoucherLine {
    * the server fill the tag's own value back in, so the row saved would not be the row on screen.
    */
   explicit: boolean;
+  /** The line's typed item-detail rows (`MSG_IDTL`, WP-30): loose lines only; a tagged line takes its stones from the tag. */
+  details: DetailRow[];
 }
 
-export type LineField = Exclude<keyof VoucherLine, 'lbrTypeFromCompany' | 'explicit'>;
+/** One `MSG_IDTL` row as typed (strings, so a blank stays distinguishable from 0). */
+export interface DetailRow {
+  itCode: string;
+  itemName: string;
+  dmCode: string;
+  dmName: string;
+  dmColor: string;
+  dmSize: string;
+  dmOrigin: string;
+  dmRemark: string;
+  dmSfNo: string;
+  pcs: string;
+  pcsWt: string;
+  /** col 12 KrWt and col 13 KrLs%: they only decide the weight (:7511-7517); the weight is what is stored. */
+  krWt: string;
+  krLessPrc: string;
+  grossWt: string;
+  tagWt: string;
+  conPct: string;
+  krConPct: string;
+  rateType: string;
+  rate: string;
+  itAmt: string;
+  discPct: string;
+  discAmt: string;
+  lbrRate: string;
+  lbrAmt: string;
+  netAmt: string;
+  itType: string;
+}
+
+export type DetailField = Exclude<keyof DetailRow, 'itemName'>;
+
+export const blankDetail = (): DetailRow => ({
+  itCode: '', itemName: '', dmCode: '', dmName: '', dmColor: '', dmSize: '', dmOrigin: '', dmRemark: '', dmSfNo: '',
+  pcs: '', pcsWt: '', krWt: '', krLessPrc: '', grossWt: '', tagWt: '', conPct: '', krConPct: '', rateType: '',
+  rate: '', itAmt: '', discPct: '', discAmt: '', lbrRate: '', lbrAmt: '', netAmt: '', itType: '',
+});
+
+export type LineField = Exclude<
+  keyof VoucherLine,
+  'lbrTypeFromCompany' | 'explicit' | 'details'
+>;
 
 export const blankLine = (): VoucherLine => ({
   tagNo: '',
@@ -194,6 +241,7 @@ export const blankLine = (): VoucherLine => ({
   storedFine: '',
   storedFineKey: '',
   explicit: false,
+  details: [],
 });
 
 export interface VoucherHeader {
@@ -219,6 +267,9 @@ export interface VoucherHeader {
   settleCrAmt: string;
   settleDrFine: string;
   settleCrFine: string;
+  /** "Ksr Fine Dr" / "Ksr Fine Cr" (nFineKsrDr, nFineKsrCr): fine kasar, added into Tot Fine Dr / Cr. */
+  ksrFineDr: string;
+  ksrFineCr: string;
 }
 
 /** One column of the settlement band: rows Cheque, Card, Cash and Kasar. */
@@ -241,6 +292,8 @@ export interface VoucherState {
   bankAc: string;
   chqNo: string;
   cardAc: string;
+  /** The version the saved voucher was opened with; an edit or a delete sends it back (N51). */
+  version: string;
 }
 
 /** The operator's local calendar day, not UTC's: before 05:30 IST the UTC date is still yesterday. */
@@ -272,6 +325,8 @@ export const blankVoucher = (vchDate = todayLocal()): VoucherState => ({
     settleCrAmt: '',
     settleDrFine: '',
     settleCrFine: '',
+    ksrFineDr: '',
+    ksrFineCr: '',
   },
   issued: [blankLine()],
   received: [blankLine()],
@@ -280,6 +335,7 @@ export const blankVoucher = (vchDate = todayLocal()): VoucherState => ({
   bankAc: '',
   chqNo: '',
   cardAc: '',
+  version: '',
 });
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -563,6 +619,9 @@ export function linePayload(line: VoucherLine, side: 'issue' | 'receive'): LineP
     if (tagNo && tagNo.toUpperCase() !== 'N') {
       out.tagNo = tagNo;
       if (filled(line.vchSrno) && n(line.vchSrno) !== 0) out.vchSrno = n(line.vchSrno);
+    } else if (line.details.length > 0 || line.explicit) {
+      // A reopened loose line always sends its rows (an empty list removes them): the server refuses silence.
+      (out as Record<string, unknown>).details = writtenDetailRows(line.details).map(detailPayload);
     }
   }
   if ([line.issueYear, line.issueBook, line.issueNo, line.issueSrno].some(filled)) {
@@ -577,6 +636,51 @@ export function linePayload(line: VoucherLine, side: 'issue' | 'receive'): LineP
 }
 
 const amount = (value: string): number | undefined => (filled(value) ? n(value) : undefined);
+
+/** `Strings.Format(Val(text), "0.000")` of the kasar boxes (Enter, TR_WH_SALE.cs:16035): "12.3456" shows "12.346". */
+export const formatKasar = (text: string): string => {
+  const x = Number(/^\s*[+-]?(\d+\.?\d*|\.\d+)/.exec(text)?.[0] ?? 0);
+  return round(Number.isFinite(x) ? x : 0, 3).toFixed(3);
+};
+
+/** A detail row through the desktop arithmetic, as the panel shows it and the server will store it. */
+export function computeDetail(row: DetailRow) {
+  return commPassTotalIdtl({
+    pcs: n(row.pcs), pcsWt: n(row.pcsWt), weight: n(row.grossWt), tagWt: n(row.tagWt), conPct: n(row.conPct),
+    krConPct: n(row.krConPct), rateType: row.rateType, rate: n(row.rate), itAmt: n(row.itAmt),
+    discPct: n(row.discPct), discAmt: n(row.discAmt), lbrRate: n(row.lbrRate), lbrAmt: n(row.lbrAmt),
+    netAmt: n(row.netAmt), itType: row.itType,
+  });
+}
+
+/** The rows the save will keep: pieces, weight, tag weight or net amount non-zero (:13175-13190). */
+export const writtenDetailRows = (rows: DetailRow[]): DetailRow[] =>
+  rows.filter((row) => detailRowIsWritten(computeDetail(row)));
+
+/** The roll-up of the rows into the line's OthWt (16), NetWt (17), OthAmt (37) and SlvrFine (28) cells (:7821-7880). */
+export function withRollup(line: VoucherLine): VoucherLine {
+  const rows = writtenDetailRows(line.details);
+  if (!rows.length) return line;
+  const up = rollupWholesaleDetails(rows.map(computeDetail), n(line.grossWt));
+  const out = { ...line };
+  if (up.othWt != null) {
+    out.othWt = String(up.othWt);
+    out.netWt = String(up.netWt);
+  }
+  if (up.othAmt != null) out.othAmt = String(up.othAmt);
+  if (up.silverFine != null) out.silverFine = String(up.silverFine);
+  return out;
+}
+
+/** The request form of a detail row (the server recomputes with the same kernel). */
+export function detailPayload(row: DetailRow): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const field of ['itCode', 'dmCode', 'dmName', 'dmColor', 'dmSize', 'dmOrigin', 'dmRemark', 'dmSfNo', 'rateType', 'itType'] as const)
+    out[field] = row[field].trim();
+  for (const field of ['pcs', 'pcsWt', 'krLessPrc', 'grossWt', 'tagWt', 'conPct', 'krConPct', 'rate', 'itAmt', 'discPct', 'discAmt', 'lbrRate', 'lbrAmt', 'netAmt'] as const)
+    out[field] = n(row[field]);
+  return out;
+}
 
 /** The request body for POST/PUT `/wholesale-sales` or `/rate-cut`. */
 export function voucherPayload(
@@ -614,6 +718,8 @@ export function voucherPayload(
     settleCrAmt: amount(h.settleCrAmt),
     settleDrFine: amount(h.settleDrFine),
     settleCrFine: amount(h.settleCrFine),
+    ksrFineDr: amount(h.ksrFineDr),
+    ksrFineCr: amount(h.ksrFineCr),
     lines: state.issued.filter(isActiveLine).map((line) => linePayload(line, 'issue')),
     receivedLines: state.received.filter(isActiveLine).map((line) => linePayload(line, 'receive')),
     // BANK_AC / CHQ_NO / CARD_AC are one per voucher; the server applies them to both columns.
@@ -679,11 +785,18 @@ export function previewGrid(
   settings: WholesaleSettings,
 ): GridPreview {
   const compute = side === 'receive' ? wholesaleReceiveLine : wholesaleIssueLine;
-  const results = lines.map((line) =>
-    isActiveLine(line)
-      ? compute(lineInput(linePayload(line, side), settings), settings.line)
-      : null,
-  );
+  const results = lines.map((line) => {
+    if (!isActiveLine(line)) return null;
+    const payload: Record<string, unknown> = { ...linePayload(line, side) };
+    // The detail rows roll into the line as the server does: OthWt (col 16), NetWt (17) and OthAmt (37).
+    const rows = side === 'issue' ? writtenDetailRows(line.details) : [];
+    if (rows.length) {
+      const up = rollupWholesaleDetails(rows.map(computeDetail), n(line.grossWt));
+      if (up.othWt != null) Object.assign(payload, { othWt: up.othWt, netWt: up.netWt });
+      if (up.othAmt != null) payload.othAmt = up.othAmt;
+    }
+    return compute(lineInput(payload as LinePayload, settings), settings.line);
+  });
   return {
     lines: results,
     totals: wholesaleGridTotals(results.filter((r): r is WholesaleLineResult => r !== null)),
@@ -724,6 +837,8 @@ export function previewVoucher(state: VoucherState, settings: WholesaleSettings)
     received: received.totals,
     receivedTender: tender(state.receivedTender),
     paymentTender: tender(state.paymentTender),
+    ksrFineDr: n(h.ksrFineDr),
+    ksrFineCr: n(h.ksrFineCr),
   });
   return { issued, received, settlement, band };
 }
@@ -753,6 +868,9 @@ export interface SavedVoucher {
   settleCrAmt?: number;
   settleDrFine?: number;
   settleCrFine?: number;
+  ksrFineDr?: number;
+  ksrFineCr?: number;
+  version?: string;
   pay?: Row;
   receivedPay?: Row;
   lines?: Row[];
@@ -760,6 +878,20 @@ export interface SavedVoucher {
 }
 
 /** A saved row back into the grid: every figure explicit, and its saved fine kept until weight or purity moves. */
+/** A stored SL_IDTL row back into the panel (DISPLAY_DATA, TR_WH_SALE.cs:12590-12630). */
+export function detailFromSaved(row: Row): DetailRow {
+  return {
+    ...blankDetail(),
+    itCode: cell(row.itCode), itemName: cell(row.itemName), dmCode: cell(row.dmCode), dmName: cell(row.dmName),
+    dmColor: cell(row.dmColor), dmSize: cell(row.dmSize), dmOrigin: cell(row.dmOrigin), dmRemark: cell(row.dmRemark),
+    dmSfNo: cell(row.dmSfNo), pcs: cell(row.pcs), pcsWt: cell(row.pcsWt), krLessPrc: cell(row.krLessPrc),
+    grossWt: cell(row.grossWt), tagWt: cell(row.tagWt), krWt: cell(row.tagWt), conPct: cell(row.conPct),
+    krConPct: cell(row.krConPct), rateType: cell(row.rateType), rate: cell(row.rate), itAmt: cell(row.itAmt),
+    discPct: cell(row.discPct), discAmt: cell(row.discAmt), lbrRate: cell(row.lbrRate), lbrAmt: cell(row.lbrAmt),
+    netAmt: cell(row.netAmt), itType: cell(row.itType),
+  };
+}
+
 export function lineFromSaved(row: Row, side: 'issue' | 'receive'): VoucherLine {
   const tag = cell(row.tagNo);
   const ref = (row.isuRef ?? {}) as Row;
@@ -817,6 +949,10 @@ export function lineFromSaved(row: Row, side: 'issue' | 'receive'): VoucherLine 
     issueSrno: cell(ref.srno),
     storedFine: row.fine == null ? '' : String(row.fine),
     explicit: true,
+    details:
+      side === 'issue' && (!tag || tag.toUpperCase() === 'N')
+        ? ((row.details as Row[] | undefined) ?? []).map(detailFromSaved)
+        : [],
   };
   line.storedFineKey = fineKey(line, side);
   return line;
@@ -853,6 +989,8 @@ export function voucherFromSaved(view: SavedVoucher): VoucherState {
       settleCrAmt: cell(view.settleCrAmt),
       settleDrFine: cell(view.settleDrFine),
       settleCrFine: cell(view.settleCrFine),
+      ksrFineDr: view.ksrFineDr ? formatKasar(String(view.ksrFineDr)) : '',
+      ksrFineCr: view.ksrFineCr ? formatKasar(String(view.ksrFineCr)) : '',
     },
     // A spare row after the saved ones, as the desktop grid always leaves one.
     issued: [...issued, blankLine()],
@@ -862,6 +1000,7 @@ export function voucherFromSaved(view: SavedVoucher): VoucherState {
     bankAc: text(view.pay?.bankAc),
     chqNo: text(view.pay?.chqNo),
     cardAc: text(view.pay?.cardAc),
+    version: text(view.version),
   };
 }
 

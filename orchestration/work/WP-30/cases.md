@@ -153,7 +153,7 @@ Applies. The residual items add a row-delete right and an absence of kasar valid
 Layer: browser
 Steps: 1. Sign in as a user whose `UserDelete` is not "Y" (clerk). 2. Open a voucher with a loose detail row, put focus in the detail box and press Ctrl+D. 3. Confirm no dialog or row removal, then repeat as admin and answer the question.
 Expected: without the right, Ctrl+D answers `TR_WH_SALE.cs:7328 {{You Have No Rights.....}}` — condition `TR_WH_SALE.cs:7326 {{(Operators.CompareString(UserDelete, "Y", false) != 0)}}` — focus stays in the box and the row remains. With the right the question is `TR_WH_SALE.cs:7331 {{This Row Record will Removed permantley ?}}` and after Yes the message is `TR_WH_SALE.cs:7356 {{Record is Deleted....}}`. Gap 1.
-Status: executable
+Status: blocked: the web has no client-side source for `UserDelete` (rights are enforced by the server on save, not on a key press); unblocked by a session-rights hook, which belongs to another work package.
 
 #### wholesale-sale.refusal.kasar-any-number   (T06 Required/invalid)
 Layer: browser + database
@@ -225,7 +225,7 @@ Applies. The detail-row delete and the print each have their own right.
 Layer: browser + database
 Steps: 1. As admin, make a voucher with a loose detail row. 2. As a clerk with `UserDelete` and `UserPrint` absent, call the detail-delete key and a direct print request; then try a direct POST with `details[]` and kasar. 3. Confirm no cross-scope write or read.
 Expected: the clerk receives `TR_WH_SALE.cs:7328 {{You Have No Rights.....}}` for the row delete (right from `TR_WH_SALE.cs:11512 {{Select * From USER_SET WHERE LC_CODE}}`) and `TR_WH_SALE.cs:13660 {{You Have No Print Rights.....}}` guarded by `TR_WH_SALE.cs:13658 {{if (Operators.CompareString(UserPrint, "Y", false) != 0)}}`; the direct POST is refused with no rows written in any tenant. Edit-save by a user without the update or edit right is refused `TR_WH_SALE.cs:12848 {{You Have No Rights.....}}` under `TR_WH_SALE.cs:12846 {{if (Operators.CompareString(UsUPdate, "Y", false) != 0 && ((Operators.CompareString(UserEdit, "Y", false) != 0)}}`. Gaps 1, 6.
-Status: executable
+Status: blocked: its Ctrl+D half needs the same client-side `UserDelete` source; its direct-POST and print-right halves are covered by the reused `rights.clerk-no-wh-sales` and `output.print-rights`.
 
 ### T12 Concurrency
 
@@ -249,7 +249,7 @@ Applies. A duplicate submit must not duplicate the detail set.
 Layer: browser + database
 Steps: 1. Fill a voucher with two loose detail rows and kasar, then submit the same POST twice (double-click and a replayed request after losing the reply). 2. Count vouchers and `SL_IDTL` rows. 3. Reconnect and reload the resulting voucher.
 Expected: exactly one voucher exists with exactly two `SL_IDTL` rows (`ISR_NO = 1, 2`), one `KSR_FINE_DR = 0.5` header and one ledger/day-book set; the replay does not insert a second financial effect or a second audit row. The set is written once from `TR_WH_SALE.cs:13162 {{SELECT * FROM SL_IDTL WHERE CO_CODE}}` inside the single transaction of `TR_WH_SALE.cs:12756-13520 {{private void BtnSave_Click(object sender, EventArgs e)}}`. Gap 3.
-Status: executable
+Status: blocked: `POST /wholesale-sales` is not yet idempotency-guarded (listed in `NOT_YET_GUARDED`, `web/apps/api/test/idempotencyRoutePolicy.test.ts`, a WP-04 follow-up); unblocked when the route takes `Idempotency-Key`.
 
 ### T14 Rollback
 
@@ -363,23 +363,23 @@ Status: blocked: no owner decision on whether to build types 21/23/24/25/28/29�
 | T03 | Formula sequence | 4 | 1 | 3 | 0 | 0 |
 | T04 | Lookup | 2 | 1 | 1 | 0 | 0 |
 | T05 | Children | 3 | 2 | 1 | 0 | 0 |
-| T06 | Required/invalid | 11 | 8 | 3 | 0 | 0 |
+| T06 | Required/invalid | 11 | 8 | 3 | 1 | 0 |
 | T07 | Create | 2 | 1 | 1 | 0 | 0 |
 | T08 | Reopen/no-op | 2 | 1 | 1 | 0 | 0 |
 | T09 | Edit | 2 | 1 | 1 | 0 | 0 |
 | T10 | Delete/cancel/reverse | 2 | 1 | 1 | 0 | 0 |
-| T11 | Scope/rights | 2 | 1 | 1 | 0 | 0 |
+| T11 | Scope/rights | 2 | 1 | 1 | 1 | 0 |
 | T12 | Concurrency | 2 | 1 | 1 | 0 | 0 |
-| T13 | Retry/unknown | 2 | 1 | 1 | 0 | 0 |
+| T13 | Retry/unknown | 2 | 1 | 1 | 1 | 0 |
 | T14 | Rollback | 2 | 1 | 1 | 0 | 0 |
 | T15 | Config/history | 2 | 1 | 1 | 0 | 0 |
 | T16 | Report/output | 4 | 1 | 3 | 0 | 0 |
 | T17 | Keyboard/usability | 4 | 2 | 2 | 0 | 0 |
 | T18 | Full journey | 6 | 1 | 5 | 1 | 0 |
-| **Total** | | **58** | **27** | **31** | **1** | **0** |
+| **Total** | | **58** | **27** | **31** | **4** | **0** |
 
 Every T01–T18 kind applies to this menu, so none is N/A. All 58 case ids (27 reused, 31 new) are frozen here; the
-single blocked case is blocked on a decision and a seed outside this menu, not on missing code. Gap 17's twelve
+four blocked cases are blocked on a decision, a seed, the shared rights source or the idempotency guard, none on missing code of this menu. Gap 17's twelve
 requested ids are all present: `create.loose-item-detail-rows`, `reopen.loose-detail-rows-return`,
 `edit.loose-detail-row-change`, `delete.removes-detail-rows`, `output.print-detail-under-line`,
 `keyboard.detail-grid-enter-esc-ctrl-d`, `field.ksr-fine-dr-cr`, `formula.ksr-fine-totals`,

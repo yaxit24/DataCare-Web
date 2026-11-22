@@ -5,8 +5,12 @@ import {
   WHOLESALE_WORKFLOWS,
   blankLine,
   blankVoucher,
+  blankDetail,
+  computeDetail,
+  detailFromSaved,
   editLine,
   fineRateCaption,
+  formatKasar,
   isActiveLine,
   lineFromTag,
   lineWithItem,
@@ -439,5 +443,56 @@ describe('reopen: a saved voucher comes back exactly as stored', () => {
     expect(received).not.toHaveProperty('tagNo');
     const { band } = previewVoucher(voucherFromSaved(saved), desktop);
     expect(band).toMatchObject({ receivedNet: 3517, receivedOs: 0, totFineDr: 11.52 });
+  });
+});
+
+describe('WP-30: fine kasar and the item-detail rows', () => {
+  it('formats the kasar boxes "0.000" like Enter does (TR_WH_SALE.cs:16035): -1, 12.3456 and text', () => {
+    expect([formatKasar('0.5'), formatKasar('-1'), formatKasar('12.3456'), formatKasar('abc'), formatKasar('')]).toEqual([
+      '0.500', '-1.000', '12.346', '0.000', '0.000',
+    ]);
+  });
+
+  it('adds the kasar into Tot Fine Dr and Cr and so Os Fine: 9.160 + 0.500, 9.160 + 0.250, 0.250', () => {
+    const state = blankVoucher('2026-07-15');
+    state.header.settleCrFine = '9.16';
+    state.header.settleDrFine = '9.16';
+    state.header.ksrFineDr = '0.500';
+    state.header.ksrFineCr = '0.250';
+    const { band } = previewVoucher(state, desktop);
+    expect([band.totFineDr, band.totFineCr, band.osFine]).toEqual([9.66, 9.41, 0.25]);
+    const payload = voucherPayload(state, { coBook: 'WHS' });
+    expect([payload.ksrFineDr, payload.ksrFineCr]).toEqual([0.5, 0.25]);
+  });
+
+  const typed = { ...blankDetail(), itCode: 'DST', pcs: '2', pcsWt: '1.5', conPct: '0.1', rate: '101', discPct: '5', lbrRate: '237.5' };
+
+  it('a detail row computes as the desktop does and rolls into the loose line in the preview', () => {
+    expect(computeDetail(typed)).toMatchObject({ weight: 3, conWt: 0.3, itAmt: 303, discAmt: 15, lbrAmt: 475, netAmt: 763 });
+    const state = blankVoucher('2026-07-15');
+    state.issued = [{ ...blankLine(), itCode: 'PLN', pcs: '2', grossWt: '5', touch: '91.6', details: [typed] }, blankLine()];
+    const { issued } = previewVoucher(state, desktop);
+    // gross 5 - 0.3 = net 4.7; OthAmt 763.
+    expect(issued.lines[0]).toMatchObject({ netWt: 4.7, otherAmount: 763 });
+  });
+
+  it('posts a loose line\'s written rows only and a reopened loose line always sends its rows', () => {
+    const line = { ...blankLine(), itCode: 'PLN', grossWt: '5', details: [typed, blankDetail()] };
+    const out = linePayload(line, 'issue') as any;
+    expect(out.details).toHaveLength(1);
+    expect(out.details[0]).toMatchObject({ itCode: 'DST', pcs: 2, pcsWt: 1.5, conPct: 0.1, rate: 101 });
+    expect((linePayload({ ...blankLine(), itCode: 'PLN' }, 'issue') as any).details).toBeUndefined();
+    expect((linePayload({ ...blankLine(), itCode: 'PLN', explicit: true }, 'issue') as any).details).toEqual([]);
+    expect((linePayload({ ...line, tagNo: 'T1' }, 'issue') as any).details).toBeUndefined();
+  });
+
+  it('reopen puts the stored rows, the kasar and the version back on screen', () => {
+    const state = voucherFromSaved({
+      voucherNo: '00007', ksrFineDr: 0.5, ksrFineCr: 0.25, version: 'a'.repeat(64),
+      lines: [{ itCode: 'PLN', tagNo: 'N', details: [{ isrNo: 1, itCode: 'DST', pcs: 2, grossWt: 3, netAmt: 763, tagWt: 3 }] }],
+    });
+    expect([state.header.ksrFineDr, state.header.ksrFineCr, state.version]).toEqual(['0.500', '0.250', 'a'.repeat(64)]);
+    expect(state.issued[0]!.details[0]).toMatchObject({ itCode: 'DST', pcs: '2', grossWt: '3', netAmt: '763' });
+    expect(detailFromSaved({}).pcs).toBe('');
   });
 });

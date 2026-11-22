@@ -105,7 +105,7 @@ const DAY = `${startYear}-06-15`;
       pay: { cash: 56563 },
       ...extra,
     });
-    const inject = (method: 'POST' | 'PUT' | 'DELETE', url: string, payload?: unknown) =>
+    const inject = (method: 'POST' | 'PUT' | 'DELETE' | 'GET', url: string, payload?: unknown) =>
       app.inject({ method, url, headers: { cookie }, payload: payload as any });
     const idtl = (vchNo: string) =>
       rows(

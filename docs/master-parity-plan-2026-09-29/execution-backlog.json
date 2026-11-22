@@ -7881,6 +7881,45 @@
         "web/apps/web/test/features/modules/salesInvoice.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Desktop oracle sales-line: KNOWN_MISMATCHES empty (the eight labour.pct.* entries removed and passing). sales-invoice module 34 applicable, 32 passed, 0 failed, 2 blocked (both pre-existing, unrelated); new case formula.percentage-labour passes. sales-return 25 of 26 (1 blocked, pre-existing; new case config.all-rof-remove-keeps-whole-rupees). gst-report, group-master and item-master expectations moved to whole-rupee lines and pass. Not modelled: the registration-serial branches (DM035NPDM, HM199NEPK). Desktop match 0% beyond the oracle vectors."
+    },
+    {
+      "id": "N248",
+      "status": "implemented-unverified",
+      "action": "Wh Sales like TR_WH_SALE: hand-typed item-detail rows for a loose line (CommPassTotal_Idtl, SL_IDTL, DM_DATA, roll-up), fine kasar (Ksr Fine boxes, Tot Fine, ledger legs 27/28/33/34, day book 07/08), SL_IDTL rows under the printed line, the desktop Wh_Sales_Rojmel rows for a gold voucher (05/06/14/27, names, keys) and the version token on edit and delete.",
+      "parentLabels": "P1-core; L1; T01-T18; WP-30",
+      "startAfter": [
+        "N228"
+      ],
+      "requiredProof": "wholesaleDetail, wholesaleResiduals, wholesaleSaleBill and wholesaleSaleResiduals.db tests pass under forced RLS; the wholesale, rate-cut, tour, bullion, finance, stock and GST DB suites stay green; the wholesale-sale browser module cases for the new ids pass in CI.",
+      "gapIds": "G260",
+      "entryDefinition": "02-execution-plan.md section 4",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "web/packages/core/src/wholesaleDetail.ts",
+        "web/packages/core/src/wholesaleLine.ts",
+        "web/apps/api/src/modules/sales/wholesaleDetailRows.ts",
+        "web/apps/api/src/modules/sales/wholesaleResiduals.ts",
+        "web/apps/api/src/modules/sales/wholesaleTagStones.ts",
+        "web/apps/api/src/modules/sales/wholesaleSaleBill.ts",
+        "web/apps/api/src/modules/sales/rateCut.ts",
+        "web/apps/api/src/modules/sales/rateCutMasters.ts",
+        "web/apps/api/src/modules/shared/rojmelWholesale.ts",
+        "web/apps/web/components/WholesaleDetailPanel.tsx",
+        "web/apps/web/components/WholesaleVoucherForm.tsx",
+        "web/apps/web/lib/wholesaleVoucher.ts",
+        "web/packages/core/test/wholesaleDetail.test.ts",
+        "web/apps/api/test/wholesaleResiduals.test.ts",
+        "web/apps/api/test/wholesaleSaleResiduals.db.test.ts",
+        "web/apps/api/test/wholesaleSaleBill.test.ts",
+        "web/apps/web/test/wholesaleVoucher.test.ts",
+        "web/apps/web/test/features/modules/wholesaleSale.mjs",
+        "orchestration/work/WP-30/study.md",
+        "orchestration/work/WP-30/cases.md"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Built and unit/DB-tested; the new browser cases were written without a local browser stack and run in CI. Blocked cases: rojmel.missing-types-and-silver, refusal.detail-row-delete-right, rights.detail-delete-and-print, retry.detail-row-double-post. Open: silver Rojmel and ledger families, Rojmel types 21/23-25/28/29-40, typed rows on a tagged line, desktop-runtime comparison and parent acceptance."
     }
   ],
   "amendments": [
