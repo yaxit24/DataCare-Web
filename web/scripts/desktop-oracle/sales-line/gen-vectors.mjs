@@ -327,6 +327,9 @@ for (const [a, b] of [
     },
   );
 }
+// The shadow columns a reopened row also restores (:12100-12175): pieces 107, gross 66, net 67, RtWith 102. Equal
+// shadows mean nothing was re-priced, so CommPassTotal keeps columns 82/83 (:10413-10790).
+const shadowsOf = (pcs) => ({ 107: pcs, 66: w(10), 67: w(10), 102: 'N' });
 // Column 83 already holds LBR_PRC and column 82 the rate (a row whose percentage was applied, then its rate typed
 // over, or a reopened row: :12134-12142): LBR_RATE 50 stands.
 add(
