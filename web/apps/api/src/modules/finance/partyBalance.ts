@@ -1,3 +1,4 @@
+import { notCarriedOpening } from '../shared/carriedOpening.js';
 import { withTxBudget } from '../shared/txBudget.js';
 
 /**
@@ -32,7 +33,7 @@ export async function partyBalance(
               coalesce(sum(coalesce(NULLIF("CR_AMT"::text,'')::numeric,0)),0)::float cr,
               coalesce(sum(CASE WHEN "IT_TYPE"='G' THEN (CASE WHEN "SIGN"='-' THEN -1 ELSE 1 END)*coalesce(NULLIF("FINE_WT"::text,'')::numeric,0) ELSE 0 END),0)::float gold,
               coalesce(sum(CASE WHEN "IT_TYPE"='S' THEN (CASE WHEN "SIGN"='-' THEN -1 ELSE 1 END)*coalesce(NULLIF("FINE_WT"::text,'')::numeric,0) ELSE 0 END),0)::float silver
-       FROM "AC_DATA" WHERE "CO_CODE"=$1 AND "AC_CODE"=$2`,
+       FROM "AC_DATA" WHERE "CO_CODE"=$1 AND "AC_CODE"=$2 AND ${notCarriedOpening()}`,
       scope.coCode,
       acCode,
     );

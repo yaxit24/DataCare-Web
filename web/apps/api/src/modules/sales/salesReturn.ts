@@ -1,4 +1,5 @@
 import { withTxBudget } from '../shared/txBudget.js';
+import { desktopLabourTypeFor } from '../shared/labourDesktop.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
 import {
   postVoucherTx,
@@ -323,6 +324,12 @@ export async function createSaleReturn(
           returnRoundingPolicy,
           amountType,
           behavior.labourIncludesGhat,
+          // TR_SALE_RTN.cs:4963 derives a percentage line's rate from the item rate like the Sale, but its basis
+          // switch falls back to GROSS weight (:4975-4993), not to net + ghat.
+          {
+            basis: desktopLabourTypeFor(rounded.labourType, behavior.labourType),
+            rule: 'saleReturn',
+          },
         ),
       };
     });
@@ -432,7 +439,7 @@ export async function createSaleReturn(
       ITM_GHT_WT: num(line.in.ghtWt),
       LBR_TYPE: str(line.in.labourType).slice(0, 1) || null,
       LBR_PRC: num(line.in.labourPct),
-      LBR_RATE: num(line.in.labourRate),
+      LBR_RATE: line.calc.labourRate ?? num(line.in.labourRate),
       TAG_LBR_PRC: num(line.in.tagLabourPct),
       TAG_LBR_RATE: num(line.in.tagLabourRate),
       TAG_LBR_AMT: num(line.in.tagLabourAmount),

@@ -7,6 +7,8 @@
         "web/apps/api/src/modules/sales/sales.ts",
         "web/packages/core/src/saleAmount.ts",
         "web/packages/core/src/calc.ts",
+        "web/packages/core/src/roundingPolicy.ts",
+        "web/apps/web/lib/lineRecalc.ts",
         "web/apps/api/src/modules/posting/lineLegs.ts",
         "web/apps/web/components/LookupPicker.tsx",
         "web/apps/web/lib/lookupEnter.ts",
@@ -146,6 +148,15 @@
         "web/apps/api/src/modules/sales/orderCancelTags.ts",
         "web/apps/api/src/modules/sales/orderCancelPrint.ts",
         "web/apps/api/src/routes/orderCancel.ts"
+      ]
+    },
+    "balanceTransfer": {
+      "covers": [
+        "web/apps/web/app/(app)/company/balance-transfer/page.tsx",
+        "web/apps/api/src/modules/ops/balanceTransfer.ts",
+        "web/apps/api/src/modules/ops/balanceTransferRules.ts",
+        "web/apps/api/src/modules/ops/balanceTransferSelect.ts",
+        "web/apps/api/src/routes/balanceTransfer.ts"
       ]
     },
     "partyOpening": {

@@ -86,11 +86,11 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `BtmSchm` — direct constructor ([MDI_FORM.cs:7431-7440](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7431-L7440)).
 - **Does:** Carries account, party, stock, order, scheme, loan, approval, repair, lot and manufacturing balances into the next financial year.
-- **Looks:** Transfer dashboard of module buttons; the web shows years, an account preview grid and three carry-forward actions.
-- **Writes:** OP_DATA, AC_DATA, ITM_OPBL, BAR_DETL, SL_ORD_DATA, APR_DATA, DHRN_DATA, LOT_DETL.
-- **Web:** `/company/balance-transfer`; `POST /balance-transfer/preview`, `POST /balance-transfer/year-close`, `POST /balance-transfer/openings`. Can: create.
-- **Remaining:** Web carries account and party openings only; stock, order, scheme, loan, approval, repair, lot and manufacturing branches, Print and interruption recovery remain.
-- **Owners:** X27, P11-01, X06.
+- **Looks:** The BtmSchm form: title Balance TrFr, Transfer Year (the first later YEAR_MAST year, not typed), the five Lite dataset buttons Ac Balance, Item Stock, Tag Stock, Sales Order, Approval, and Exit / Cancel.
+- **Writes:** OP_DATA, AC_DATA, ITM_OPBL, MAIN_STOCK, YEAR_MAST, AC_MAST, AC_GROUP, ITEM_MAST.
+- **Web:** `/company/balance-transfer`; `GET /balance-transfer`, `POST /balance-transfer/ac-balance`, `POST /balance-transfer/item-stock`, `POST /balance-transfer/tag-stock`, `POST /balance-transfer/sales-order`, `POST /balance-transfer/approval`. Can: create.
+- **Remaining:** G248: Ac Balance and Item Stock carry by the BtmSchm rules (parties only to the closing date, per AC_CODE and DATA_TYPE, gold and silver by IT_TYPE, decimal rounding, target-year replace, one transaction); Tag Stock, Sales Order and Approval are implicit in the one-database web and their buttons count and write nothing. Q1/Q8/Q9/Q2/Q3 decided 2026-11-22 by the architect, owner may override. Open: Q4, Q6, the AvgTouch recompute. Desktop match 0%.
+- **Owners:** G248, N236, P11-01, X06, X27.
 - **Evidence:** [module-map.json:202-260](../../project-memory/catalogs/module-map.json#L202-L260).
 
 ### Books
@@ -715,8 +715,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/party header, item, charge and old-metal grids, a 16-field tender panel, totals, item image and print controls.
 - **Writes:** SL_DATA, SL_DETL, SL_IDTL, SL_PR_DETL, MAIN_STOCK, DM_DATA, AC_DATA, ROJ_MEL_DATA, TAX_DATA, BILL_OS_DATA.
 - **Web:** `/txn/sales`, `/txn/hallmark-sale`; `POST /sales`, `GET /sales/:vchNo`, `PUT /sales/:vchNo`, `DELETE /sales/:vchNo`, `GET /sales/invoice`, `GET /vouchers/recent`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** Lossless reopen on the Sales Invoice screen (the Hallmark Sale screen is lossless since N40), configured companion columns and books, tender/source branches, old-metal header vs detail valuation (G83), tax codes on web-provisioned companies (G82), Crystal variants, COL_MAST layout and the printed date year remain.
-- **Owners:** X13, G46, N63, G45, N40, G42, N61, G43, N62, N56, N73, N74, N77, G82, G83.
+- **Remaining:** Lossless reopen on the Sales Invoice screen (the Hallmark Sale screen is lossless since N40), configured companion columns and books, tender/source branches, old-metal header vs detail valuation (G83), tax codes on web-provisioned companies (G82), Crystal variants, COL_MAST layout and the printed date year remain. Percentage labour and the line precision follow CommPassTotal (N235/G247); the registration-serial branches are not modelled.
+- **Owners:** X13, G46, N63, G45, N40, G42, N61, G43, N62, N56, N73, N74, N77, G82, G83, G247, N235.
 - **Evidence:** [KB_transaction.md:43-109](../../project-memory/video-research/_kb/KB_transaction.md#L43-L109).
 
 ### Sales Order
