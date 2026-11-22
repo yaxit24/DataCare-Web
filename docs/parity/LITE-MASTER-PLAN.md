@@ -434,7 +434,7 @@ sections are part of this WP; the UAE variant is out of scope (Lite India).
 |---|---|---|---|---|---|---|---|
 | WP-21 | Books | `MS_BOOK.cs` (3,122) | P1 | L | — | 13 | not started |
 | WP-22 | Year Create (corrected scope) | `MS_YEAR.cs` (1,596) | P2 | S | — | 14 + GB-07 | not started |
-| WP-23 | Balance TrFr | `BtmSchm.cs` (5,638) | P0 | L | WP-22 | 15 | PR (N236/G248): Ac Balance and Item Stock carried; Tag Stock, Sales Order, Approval wait on Q1/Q8 |
+| WP-23 | Balance TrFr | `BtmSchm.cs` (5,638) | P0 | L | WP-22 | 15 | PR #243 (N236/G248): Ac Balance and Item Stock carried; Tag Stock, Sales Order, Approval implicit (one database) |
 | WP-24 | Data Refresh PR-2 | `MS_UPDATE.cs` (6 visible buttons) | P1 | L | — | 17 | 12/20 |
 | WP-25 | Data Import (Lite Soft only) | `UT_IMPORT.cs` (Lite path ≈ 535 lines) | P2 | L | everything else; OD-6 | 19 | not started |
 

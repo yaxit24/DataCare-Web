@@ -2,8 +2,9 @@
 
 - 2026-11-22: Ac Balance (Rtl_AcOpbl) and Item Stock (BtnItmStk) carry by the desktop rules into the server-computed Transfer Year;
   re-run replaces the target year only, one transaction under an advisory lock; closing(N) = opening(N+1) DB tests 42/42.
-- 2026-11-22: Tag Stock (Q8: web tag stock is year-agnostic, a copy would double it), Sales Order and Approval (Q1) are refused with
-  the reason; their selections and value lists are ported read-only. Owner questions Q1-Q9 in `orchestration/work/WP-23/cases.md`.
+- 2026-11-22: Tag Stock, Sales Order and Approval are implicit in the one-database web (Q1/Q8 decided 2026-11-22 by the architect, owner may override): the buttons run
+  the desktop selection, report the open count and write nothing. Q9: ITM_OPBL is read only by Item Opening, so the carry changes no
+  stock balance. Q2/Q3: offsetting balances are carried. Still open: Q4, Q6, AvgTouch.
 
 ## 2026-11-09 — Order Cancel is the desktop TR_SL_ORD_ADJ voucher (N233 / G245, WP-02)
 

@@ -141,7 +141,7 @@ Status: executable (gap 4, gap 6)
 Layer: database
 Seed: P5 money Cr 50.00 and gold Dr 50.000 (net money +50.00, gold −50.000).
 Expected by the desktop code: HAVING sum = 50.00 − 50.000 = 0, so P5 is **dropped** (BtmSchm.cs:2786 {{HAVING (Sum(A.CR_AMT-A.DR_AMT)+ SUM(}}), which loses two real balances and breaks closing(N) = opening(N+1).
-Status: blocked: decision (Q2): port the desktop result (drop) or carry the two balances (the identity rule says carry). Needs the owner.
+Status: executable, deliberate difference (Q2 decided 2026-11-22 by the architect, owner may override): the web carries both balances (50.00 C and gold 50.000 D); dropping loses data. Passes at the database layer and in the browser module.
 
 ### balance-transfer.ac.round.money-half-up-positive   (T03 Formula sequence)
 Layer: unit and database
@@ -207,7 +207,7 @@ Status: executable (gap 9)
 Layer: database
 Seed: item I3 closing pcs +5, gross −2.500, net −2.500 (a data error: more weight issued than received).
 Expected by the desktop code: signed sum 5 − 2.5 − 2.5 = 0, skipped. Silently loses a stock position (weakness 5).
-Status: blocked: decision (Q3): port the skip or carry the row.
+Status: executable, deliberate difference (Q3 decided 2026-11-22 by the architect, owner may override): the web carries the row (5 pcs, −2.500, −2.500). Passes at the database layer.
 
 ### balance-transfer.item.rule.closing-date-and-year   (T03 Formula sequence)
 Layer: database
@@ -222,19 +222,19 @@ Layer: database
 Seed: items I4 with tag T010 (two BAR_IDTL rows: diamond 0.250 ct, stone 0.100 ct) and tag T011 (one BAR_IDTL row 0.050 ct), both in stock.
 Steps: 1. Run `Tag Stock`.
 Expected: next-year BAR_IDTL has 2 rows owned by T010 with `ISR_NO` 1 and 2 and 1 row owned by T011 with `ISR_NO` 1 (BtmSchm.cs:2520 {{INSERT INTO BAR_IDTL(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,ISR_NO}} insert; `ISR_NO` = R+1 per tag, study §C). No stone row moved to the other tag.
-Status: blocked at the database layer (WP-23 build): Q8, see `tag.create.footprint`. The mapping layer (ISR_NO renumbered 1.. per tag, parent voucher and SR_NO; BtmSchm.cs:2520) passes in balanceTransferMapping.test.ts.
+Status: N/A: Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing; this case only checks the desktop's copied rows/columns.
 
 ### balance-transfer.order.children.lines-and-stones   (T05 Children)
 Layer: unit
 Seed: two open orders O1 (2 detail lines, 1 stone row on line 2) and O4 (1 line).
 Expected: the mapped lines keep their order's `CO_YEAR`, `CO_BOOK`, `VCH_NO` and `SR_NO`; the stone row stays on O1 line 2 (BtmSchm.cs:3137 {{INSERT INTO SL_ORD_DETL(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,OLD_SRNO,VCH_DATE,VCH_TIME,}}).
-Status: executable (gap 11)
+Status: N/A: Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing; this case only checks the desktop's copied rows/columns.
 
 ### balance-transfer.approval.children.stones-follow-line   (T05 Children)
 Layer: unit
 Seed: two open approval lines A1 (two stone rows) and A2 (none).
 Expected: APR_IDTL carries 2 rows for A1, with their `ISR_NO`, 0 for A2 (BtmSchm.cs:4291 {{INSERT INTO APR_IDTL(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,ISR_NO,VCH_DATE,}}).
-Status: executable (gap 12)
+Status: N/A: Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing; this case only checks the desktop's copied rows/columns.
 
 ## T06 Required and invalid
 
@@ -283,13 +283,13 @@ Layer: database
 Seed: item I4 (type G) with tags T001 and T002 in stock and item I5 with tag T003 in stock; next year has no book-000 vouchers. T001: 5.000 gross, 4.800 net, touch 91.600, fine 4.397; T002: 7.000 / 6.500 / 91.600 / 5.954.
 Steps: 1. Click `Tag Stock`; confirm.
 Expected: 3 BAR_DETL rows (CO_YEAR 2026-27, CO_BOOK '000', INOUT 'I', ENTRY 'O', VCH_DATE 2026-03-31, STK_DATE copied, all weights/fine/touch copied unchanged); BAR_DATA headers: I4 → VCH_NO 00001, I5 → 00002, OP_STK 'Y' (BtmSchm.cs:2324 {{string text = "00001";}}, BtmSchm.cs:2627 {{INSERT INTO BAR_DATA (CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,VCH_DATE, AC}}). BAR_DETL for I4 carry VCH_NO 00001, SR_NO 1 and 2; I5 carries VCH_NO 00002.
-Status: blocked (WP-23 build, 2026-11-22): Q8: the web keeps every year in one database and counts a tag in stock in any year (`web/apps/api/src/modules/shared/stockSql.ts:3-16` barTagAvailableSql has no CO_YEAR filter; used by `reports/tagStock.ts:57` and `stock/stock.ts:340`), so writing the desktop copy of each tag into year N+1 would count every carried tag twice (count 3 becomes 6). Owner: year-scope tag availability, mark carried copies, or decide that one database needs no tag carry. The selection (tag.rule.carried-when-positive) and the column mapping are ported and pass.
+Status: N/A: Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing; this case only checks the desktop's copied rows/columns.
 
 ### balance-transfer.tag.create.date-is-day-before-opening   (T07 Create)
 Layer: database
 Seed: as above.
 Expected: VCH_DATE on every carried BAR_DETL and BAR_DATA row is 2026-03-31 = `OP_DATE` 2026-04-01 minus one day (BtmSchm.cs:2378 {{mTrfr_dt.AddDays(-1.0)}}).
-Status: blocked (WP-23 build): Q8, see `tag.create.footprint`. The day-before-opening date is pinned by the unit layer (`dayBefore`, tag mapping).
+Status: N/A: Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing; this case only checks the desktop's copied rows/columns.
 
 ## T08 Reopen and no-op
 
@@ -309,13 +309,13 @@ Status: executable (gap 21)
 Layer: browser
 Steps: 1. Run `Tag Stock`. 2. Year N+1, Tag Opening and Tag Stock report.
 Expected: T001, T002, T003 listed with their original weights and fines; count 3.
-Status: blocked (WP-23 build): Q8, see `tag.create.footprint`. The day-before-opening date is pinned by the unit layer (`dayBefore`, tag mapping).
+Status: executable (Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing); browser case not built yet (needs a session-year switch).
 
 ### balance-transfer.reopen.rerun-unchanged-is-identical   (T08 Reopen/no-op)
 Layer: database
 Steps: 1. Run each of the five buttons twice with nothing changed in between. 2. Compare a full dump of the carried rows (all columns, including NULLs and `ADD_DATE`) between run 1 and run 2.
 Expected: identical, row for row; `ADD_DATE` NULL stays NULL (study §A.6).
-Status: executable for Ac Balance and Item Stock (pass at the database layer). blocked for Tag Stock (Q8, see `tag.create.footprint`), Sales Order and Approval (Q1).
+Status: executable for all five buttons: Ac Balance and Item Stock rewrite identical rows; Tag Stock, Sales Order and Approval write nothing (Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing). Passes at the database layer.
 
 ## T09 Edit (re-run after a change replaces, never doubles)
 
@@ -353,7 +353,7 @@ Status: executable (gap 9)
 Layer: database
 Seed: `tag.create.footprint` once; sell T002 in year N dated 2026-03-28; run again.
 Expected: BAR_DETL carry rows 2 (T001, T003), BAR_DATA 2 headers: I4 → 00001, I5 → 00002 (counter restarts at 00001: BtmSchm.cs:2321 {{DELETE FROM BAR_DATA WHERE CO_CODE}}, :2322 and :2323 delete the day's rows; BtmSchm.cs:2324 {{string text = "00001";}}). No row for T002.
-Status: blocked (WP-23 build): Q8, see `tag.create.footprint`. The day-before-opening date is pinned by the unit layer (`dayBefore`, tag mapping).
+Status: N/A: Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing; no voucher counter exists. Pressing Tag Stock twice changes nothing (balanceTransferSelect.db.test.ts, passes).
 
 ### balance-transfer.rerun.tag-counter-continues-after-other-vouchers   (T09 Edit)
 Layer: database
@@ -365,13 +365,13 @@ Status: blocked (WP-23 build): Q8, see `tag.create.footprint`. Also the expectat
 Layer: database
 Seed: `order.create.carried-set`, run twice.
 Expected: the set of carried orders is the same after run 2 as after run 1; no order appears twice.
-Status: blocked: Q1 (how a carried order is stored and told apart from its source in a one-database web).
+Status: executable (Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing); passes at the database layer: next year's open set equals the closing year's and two presses change nothing (balanceTransferSelect.db.test.ts).
 
 ### balance-transfer.rerun.approval-replaces   (T09 Edit)
 Layer: database
 Seed: `approval.create.carried-set`, run twice.
 Expected: APR_DETL carried set unchanged; the book-'218' BAR_DETL rows exist once each (BtmSchm.cs:4140 {{DELETE FROM BAR_DETL WHERE CO_CODE}} and :4141 delete CO_BOOK '218' rows, then reinsert).
-Status: blocked: Q1.
+Status: executable (Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing); passes at the database layer: next year's open set equals the closing year's and two presses change nothing (balanceTransferSelect.db.test.ts).
 
 ## T10 Delete, cancel, reverse
 
@@ -436,7 +436,7 @@ Status: executable
 Layer: database
 Steps: 1. Start `Tag Stock` while another session sells T001 in year N.
 Expected: T001 is carried in a run that read it as in stock and not carried after the sale commits; never carried twice, and the opening is consistent with a rerun.
-Status: blocked (WP-23 build): Q8, see `tag.create.footprint`. The day-before-opening date is pinned by the unit layer (`dayBefore`, tag mapping).
+Status: N/A: Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing; the button only reads, so a sale during it cannot be half-carried.
 
 ## T13 Retry and unknown outcome
 
@@ -469,17 +469,17 @@ Status: executable (gap 15)
 Layer: database
 Steps: 1. Inject a failure after the first BAR_DETL insert, once after BAR_IDTL, once after BAR_DATA.
 Expected: after each: no carry rows at all (BAR_DATA, BAR_DETL, BAR_IDTL for the opening day all as before the run); a pre-existing 2026-04-10 sentinel voucher untouched.
-Status: blocked (WP-23 build): Q8, see `tag.create.footprint`. The day-before-opening date is pinned by the unit layer (`dayBefore`, tag mapping).
+Status: N/A: Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing; nothing is written, so there is nothing to roll back.
 
 ### balance-transfer.rollback.sales-order-after-header   (T14 Rollback)
 Layer: database
 Expected: failure after SL_ORD_DATA, after SL_ORD_DETL, after the tag-booking pass: nothing of the carry remains and the earlier carry is intact.
-Status: executable at unit/write-set layer; the database layer is blocked on Q1.
+Status: N/A: Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing; nothing is written, so there is nothing to roll back.
 
 ### balance-transfer.rollback.approval-after-apr-detl   (T14 Rollback)
 Layer: database
 Expected: failure after APR_DETL, after APR_IDTL, after the book-'218' BAR_DETL: no part of the carry remains.
-Status: blocked: Q1.
+Status: N/A: Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing; nothing is written, so there is nothing to roll back.
 
 ### balance-transfer.rollback.closing-year-untouched   (T14 Rollback)
 Layer: database
@@ -493,7 +493,7 @@ Status: executable (gap 16)
 Layer: database
 Steps: 1. Load the page (target 2026-27, `OP_DATE` 2026-04-01). 2. Change that year's `OP_DATE` to 2026-04-05 before the click. 3. Click `Tag Stock`.
 Expected: VCH_DATE of carried rows is 2026-04-04 (the current `OP_DATE` minus one day), not 2026-03-31: no stale value from page load.
-Status: blocked (WP-23 build): Q8, see `tag.create.footprint`. The day-before-opening date is pinned by the unit layer (`dayBefore`, tag mapping).
+Status: N/A: Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing; this case only checks the desktop's copied rows/columns.
 
 ### balance-transfer.config.new-year-created-after-load   (T15 Config/history)
 Layer: browser
@@ -547,19 +547,19 @@ Status: executable (gap 21)
 Layer: database
 Seed: the tags of `tag.create.footprint`.
 Expected: per tag: carried BAR_DETL count 3, Σ gross 5.000 + 7.000 + (T003's gross), Σ fine 4.397 + 5.954 + T003 fine; every tag number carried exactly once; the Tag Stock report of N closing lists the same 3 tags with the same weights.
-Status: blocked (WP-23 build): Q8, see `tag.create.footprint`. The day-before-opening date is pinned by the unit layer (`dayBefore`, tag mapping).
+Status: executable (Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing); passes at the database layer: next year's open set equals the closing year's and two presses change nothing (balanceTransferSelect.db.test.ts).
 
 ### balance-transfer.identity.order-open-equals-carried   (T16 Report/output)
 Layer: database
 Seed: O1 open (ordered 10,000.00, adjusted 4,000.00, advance 500.00), O2 fully adjusted (8,000.00 / 8,000.00), O3 dated 2026-04-02, O4 gold-only (5.000 ordered, 2.000 adjusted).
 Expected: pending-order list of N at the closing date = {O1 balance 6,000.00, O4 gold 3.000}; the carried set = {O1, O4}; their adjusted-so-far = 4,000.00 and gold 2.000.
-Status: blocked: Q1 (storage of the carried order).
+Status: executable (Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing); passes at the database layer: next year's open set equals the closing year's and two presses change nothing (balanceTransferSelect.db.test.ts).
 
 ### balance-transfer.identity.approval-open-equals-carried   (T16 Report/output)
 Layer: database
 Seed: three approval-issue lines A1, A2, A3 out; A2 returned by an APR RTN line in N; A3 sold.
 Expected: only A1 is open; carried set = {A1}; the Approval pending list at N+1 start = {A1}.
-Status: blocked: Q1 and Q5.
+Status: executable (Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing); passes at the database layer: next year's open set equals the closing year's and two presses change nothing (balanceTransferSelect.db.test.ts).
 
 ## T03 continued: Tag, Order, Approval column mapping (D6)
 
@@ -579,13 +579,13 @@ Status: blocked: Q6 (port the serial counter or carry on the real in-stock state
 Layer: unit
 Seed: one `BAR_DETL` source row with every column of the list filled with a distinct value (IT_CODE, TAG_NO, DESIGN_NO, TBL_CODE, ITM_SIZE, ITM_PCS 1, BAG_WT, ITM_GWT 5.000, ITM_OTH_WT, ITM_NWT 4.800, ITM_GHT_PRC, ITM_GHT_WT, ITM_TOUCH 91.600, ITM_WEST_PRC, ITM_FINE 4.397, LBR_PRC, LBR_RATE, LBR_TYPE, LBR_AMT, OTH_AMT, ITM_RATE, ITM_AMT, TAG_COST, ITM_MARGIN, ITM_MRP, ITM_REMARK, SF_NO, KR_*, TAG_SRNO, VCH_SRNO, RATE_TYPE, IT_TYPE, TAG_TYPE, PR_CODE, ORD_NO, ORD_SRNO, ORD_YRCD, ORD_DBCD, ORD_AC, OLD_VCH_NO, NEW_VCH_NO, HM_ID..HM_ID4_WT, DATA_TYPE, APP_TRFR, ITM_COLOR, MAIN_MARGIN_PRC, MAIN_MRP, JDT_*, KR_WAX_WT, EMP_ISU, LBR_CODE, DESIGN_IMG_ID, SL_TYPE, KR_OTH_RATE, KR_OTH_FINE, KR_TOT_FINE, KR_GWT_TOUCH, ITM_STYLE, ORD_LC_CODE, MFG_*).
 Expected: output equals the source in every column except these changes: CO_YEAR = target year; CO_BOOK '000'; VCH_NO = counter; SR_NO and OLD_SRNO = running number; VCH_DATE = `OP_DATE` − 1 day (BtmSchm.cs:2378 {{mTrfr_dt.AddDays(-1.0)}}); INOUT_TYPE 'I' and ENTRY_TYPE 'O' (BtmSchm.cs:2378 {{(object)"','I','O','"}}); APR_ISU 'N' (BtmSchm.cs:2475 {{["PR_CODE"]), (object)"','N','"), dataView2[0]["ORD_NO"]}}); ITM_PCS, LBR_AMT, OTH_AMT, ITM_RATE, ITM_AMT, TAG_COST, ITM_MARGIN, ITM_MRP and the KR_* amounts pass through `Fnv` (NULL → 0). VCH_TYPE and BOOK_NAME are copied from the source row; `STK_DATE` copied twice (stock date and time slot as the desktop does).
-Status: executable (gap 10)
+Status: N/A: Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing; this case only checks the desktop's copied rows/columns.
 
 ### balance-transfer.tag.columns.null-to-zero   (T03 Formula sequence)
 Layer: unit
 Seed: source tag with NULL `ITM_MARGIN`, `KR_OTH_AMT`, `TAG_COST`.
 Expected: carried 0 in each (the `Fnv` pass: BtmSchm.cs:2381 {{double num2 = DC_Main.Fnv(ref Value);}}).
-Status: executable (gap 10)
+Status: N/A: Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing; this case only checks the desktop's copied rows/columns.
 
 ### balance-transfer.tag.rule.multi-location-merge   (T03 Formula sequence)
 Layer: database
@@ -602,19 +602,19 @@ Status: executable (gap 11). Whether a saved order can lack a '+' row (O6) is no
 Layer: unit
 Seed: open order O1: ADV_AMT 500.00; SL_ORD_ADJ '-' amount 4,000.00 and 1,000.00 (two adjustments) gold 0.500; silver 0.
 Expected: header row keeps original CO_YEAR, CO_BOOK, VCH_NO and AC_CODE; ADV_AMT 500.00 unchanged; ORD_ADJ_AMT = 4,000.00 + 1,000.00 = 5,000.00; ADJ_GOLD 0.500; ADJ_SILVER 0.000. BtmSchm.cs:3024 {{SUM(CASE WHEN B.ORD_SIGN = '-' THEN B.ORD_AMT ELSE 0 END) AS AdjAmount}}.
-Status: executable (gap 11)
+Status: N/A: Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing; this case only checks the desktop's copied rows/columns.
 
 ### balance-transfer.order.columns.detail-mapping   (T02 Field route)
 Layer: unit
 Seed: a SL_ORD_DETL line with all list columns filled.
 Expected: copied: CO_YEAR, CO_BOOK, VCH_NO, SR_NO (also into OLD_SRNO), VCH_DATE (twice, date and time slot), VCH_TYPE = the book's `BOOK_SNAME`, INOUT_TYPE = the book's `BOOK_INOUT`, ENTRY_TYPE 'O', BOOK_NAME = `MAIN_BOOK`, AC_CODE, IT_CODE, TAG_NO, DESIGN_NO, ITM_SIZE, ITM_PCS (`Fnv`), ITM_GWT, ITM_NWT, ITM_GHT_WT, LBR_PRC, LBR_RATE, LBR_AMT, OTH_AMT, ITM_RATE, ITM_AMT, TOT_AMT, TAX_PRC, NET_AMT, ITM_REMARK, PR_CODE, DESIGN_ISU, TAG_GEN, TAG_SALE, ITM_GHT_PRC, HM_ID..HM_ID4_WT, OLD_TBL_CODE, ITM_COLOR, ORD_DEL_DATE, ORD_REC_AMT, EMP_CODE, TAG_STK_LESS, RATE_FIX, DESIGN_IMG_ID. Constants: LOT_NO, TBL_CODE blank, ITM_TOUCH 0, ITM_WEST_PRC 0, ITM_FINE 0, KR_NET_WT 0, KR_TOUCH 0, KR_WEST_PRC 0, KR_FINE 0, KR_NAME '' , RATE_TYPE '', IT_TYPE '', HD_VCH_NO = the order's VCH_NO, DATA_TRFR 'N', OLD_VCH_NO '' and NEW_VCH_NO ''. BtmSchm.cs:3137 {{INSERT INTO SL_ORD_DETL(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,OLD_SRNO,VCH_DATE,VCH_TIME,}}; BtmSchm.cs:3139 {{double num20 = DC_Main.Fnv(ref Value);}}.
-Status: executable (gap 11). Constant columns are read from the value list `0,0,0,0,0,'','','','` with PR_CODE following; the unit test must read the list from the source line when it is written, and any column that differs is reported, not guessed.
+Status: N/A: Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing; this case only checks the desktop's copied rows/columns.
 
 ### balance-transfer.order.rule.tag-booking-pass   (T03 Formula sequence)
 Layer: database or unit
 Seed: closed order O2 (fully adjusted) with a detail line `TAG_SALE = 'N'` and an open order O1 whose line is `TAG_SALE = 'N'` and already carried by the first pass.
 Expected by the code: the second pass selects every line with `TAG_SALE = 'N'` regardless of openness (BtmSchm.cs:3226 {{AND TAG_SALE = 'N' ORDER BY A.SR_NO}}) and inserts it unless the next year already has that voucher number (BtmSchm.cs:3241 {{SELECT VCH_NO FROM SL_ORD_DETL WHERE CO_CODE}}): O2's line is carried (although O2's header is not), O1's line is not duplicated.
-Status: blocked: Q7 (is carrying a closed order's detail line without its header intended, and can the existence test see the first pass in a one-database web?).
+Status: N/A: Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing; no order line is copied, so the Order Tag Booking pass (Q7) writes nothing in the web.
 
 ### balance-transfer.approval.rule.open-selection   (T03 Formula sequence)
 Layer: database or unit
@@ -626,19 +626,19 @@ Status: executable (gap 12, gap 16)
 Layer: unit
 Seed: one open APR_DETL line with every listed column filled.
 Expected: copied unchanged (including original CO_YEAR, CO_BOOK, VCH_NO, SR_NO, OLD_SRNO, VCH_DATE, AC_CODE, VCH_TIME, VCH_TYPE, INOUT_TYPE, ENTRY_TYPE, BOOK_NAME, IT_CODE, TAG_NO, ITM_PCS (`Fnv`), weights, touch, fine, rates, amounts, KR_*, VCH_SRNO, RATE_TYPE, IT_TYPE, PR_CODE, HD_VCH_NO, MAIN_USER, ISU_REC, ISU_NO, ISU_YRCD, ISU_DBCD, ISU_SRNO, ISU_AC_CODE, ISU_AC_NAME, MTL_COLOR, ADJ_GWT, ADJ_NWT, HM_*, ITM_COLOR, EMP_CODE, ITM_LESS_TCH, ITM_LOSS_WT, EMP_SALE, DESIGN_IMG_ID); `LOT_NO`-type blanks and the `NULL` before EMP_CODE come from the list. BtmSchm.cs:4154 {{INSERT INTO APR_DETL(CO_CODE,LC_CODE,CO_YEAR,CO_BOOK,VCH_NO,SR_NO,OLD_SRNO,VCH_DATE,AC_CODE,VCH_TIME,}}.
-Status: executable (gap 12). The unit test reads the value list from the source before writing it, as for orders.
+Status: N/A: Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing; this case only checks the desktop's copied rows/columns.
 
 ### balance-transfer.approval.columns.tag-line-book-218   (T02 Field route)
 Layer: unit
 Seed: the open line A1 whose tag T030 has a BAR_DETL row.
 Expected: a next-year BAR_DETL row for T030 with CO_BOOK '218', VCH_NO '00001', SR_NO and OLD_SRNO = the running number, VCH_DATE = `OP_DATE` − 1 day, VCH_TYPE `APRTG`, BOOK_NAME `APR TAG`, all numbers copied from the current BAR_DETL row of that tag; one BAR_IDTL row set the same way. BtmSchm.cs:4388 {{'218','00001'}}; BtmSchm.cs:4551 {{'218','00001'}}.
-Status: executable (gap 12)
+Status: N/A: Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing; this case only checks the desktop's copied rows/columns.
 
 ### balance-transfer.approval.rule.tag-in-both-carries   (T03 Formula sequence)
 Layer: database
 Seed: tag T030 issued on approval before the closing date, still out; its MAIN_STOCK rows as the web writes them for an `APR ISU`.
 Expected: either T030 is carried by Tag Stock only, by Approval only, or by both. The two carries write BAR_DETL rows in different books ('000' vs '218'), so the web's total on-hand tag count after both carries could double count it.
-Status: blocked: Q5 (the code does not settle it: Tag Stock reads `MAIN_STOCK` (BtmSchm.cs:2327 {{SELECT B.IT_TYPE,A.IT_CODE FROM MAIN_STOCK AS A LEFT JOIN ITEM_MAST AS B ON A.CO_CODE = B.CO_COD}}) and `MAIN_STOCK` is defined outside BtmSchm.cs; whether an APR ISU line writes an out-movement into it is not visible here).
+Status: N/A: Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing; neither button writes BAR_DETL, so no tag can be counted in both (Q5 settled).
 
 ## T17 Keyboard and usability
 
@@ -677,25 +677,25 @@ Status: executable (gap 21)
 Layer: browser
 Steps: 1. Run `Tag Stock`. 2. In N+1 sell T001 at the counter.
 Expected: the tag is found at the carried weights, sale accepted, T001 gone from the Tag Stock report of N+1, T002 still there, count 3 → 2.
-Status: blocked (WP-23 build): Q8, see `tag.create.footprint`. The day-before-opening date is pinned by the unit layer (`dayBefore`, tag mapping).
+Status: executable (Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing); browser case not built yet (needs a session-year switch).
 
 ### balance-transfer.journey.item-carry-then-issue   (T18 Full journey)
 Layer: browser
 Steps: 1. Run `Item Stock`. 2. In N+1 issue 2 pcs of I1 (gross 20.000, net 19.600).
 Expected: I1 balance 6 − 2 = 4 pcs, net 58.950 − 19.600 = 39.350.
-Status: blocked (WP-23 build): Q9: the desktop Item Stock writes only ITM_OPBL (BtmSchm.cs:2966) and the web stock reads MAIN_STOCK of every year, while the web Item Opening screen also writes MAIN_STOCK 'ITOBL' rows for its year; whether the N+1 item balance should count the carried opening (and how, without doubling year N's movements) is an owner decision. The ITM_OPBL row itself passes (item.create.footprint).
+Status: executable (Q9 decided 2026-11-22 by the architect, owner may override): no web stock reader adds ITM_OPBL (stock is MAIN_STOCK of every year, `stock.ts` onHandNet), so the carry writes ITM_OPBL as the desktop does and changes no balance (database test passes); browser journey not built yet.
 
 ### balance-transfer.journey.order-carry-then-adjust   (T18 Full journey)
 Layer: browser
 Steps: 1. Run `Sales Order`. 2. In N+1 adjust O1 by a sale of 6,000.00.
 Expected: O1 balance 6,000.00 → 0.00 and drops from the pending list; its adjusted-so-far 4,000.00 + 6,000.00 = 10,000.00.
-Status: blocked: Q1.
+Status: executable (Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing); browser case not built yet (needs a session-year switch).
 
 ### balance-transfer.journey.approval-carry-then-return   (T18 Full journey)
 Layer: browser
 Steps: 1. Run `Approval`. 2. In N+1 return A1 by an APR RTN voucher.
 Expected: A1 closes; the book-'218' tag line leaves stock position (tag back in the Tag Stock count once).
-Status: blocked: Q1, Q5.
+Status: executable (Q1/Q8 decided 2026-11-22 by the architect, owner may override: the web is one database whose tag stock, open orders and open approvals already read every year (`stockSql.ts` barTagAvailableSql; the order and approval open queries), so these carries are implicit and the buttons write nothing); browser case not built yet (needs a session-year switch).
 
 ## Not-applicable kinds
 
