@@ -22,6 +22,11 @@
         {
           "runner": "codex",
           "model": "gpt-6-astra"
+        },
+        {
+          "runner": "opencode",
+          "provider": "openrouter",
+          "model": "openrouter/qwen/qwen4-max"
         }
       ]
     },
@@ -39,17 +44,22 @@
         },
         {
           "runner": "opencode",
+          "provider": "openrouter",
+          "model": "openrouter/deepseek/deepseek-v4.1-flash"
+        },
+        {
+          "runner": "opencode",
+          "provider": "openrouter",
+          "model": "openrouter/tencent/hy4-flash"
+        },
+        {
+          "runner": "opencode",
           "provider": "opencode-go",
           "model": ""
         },
         {
           "runner": "opencode",
           "provider": "deepseek",
-          "model": ""
-        },
-        {
-          "runner": "opencode",
-          "provider": "openrouter",
           "model": ""
         },
         {

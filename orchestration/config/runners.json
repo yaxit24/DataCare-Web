@@ -43,11 +43,10 @@
   "opencode": {
     "name": "OpenCode, headless (opencode run). Any provider OpenCode can connect: OpenCode Go, DeepSeek, OpenRouter, OpenAI-compatible endpoints",
     "bin": "opencode",
-    "install": "npm install --global @opencode/cli",
+    "install": "npm install --global opencode-ai",
     "prompt": "pointer",
     "args": [
       "run",
-      "--standalone",
       "--auto",
       "--agent",
       "dc-worker",
@@ -55,6 +54,8 @@
       "json",
       "--title",
       "{runId}",
+      "--dir",
+      "{worktree}",
       "--model",
       "{model}",
       "{pointer}"
