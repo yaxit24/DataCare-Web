@@ -1468,14 +1468,14 @@ export const gstReport = {
       'T14',
       'refusal',
       'RP_GST.cs:2640-3031,3148-3817 is a read-only query/render path: no try/catch, no transaction, no table write (WP-19 study G6 settles the expected result: nothing persisted)',
-      'Remaining: the feature harness has no scoped server-side query fault injector (G173 / N166), and a browser-side abort would intercept a business response, which this matrix forbids; a 5xx is also a console error the harness fails on. Executable once the harness injects a report-query fault.',
+      'Remaining: faults.mjs injects write faults only (a trigger on a voucher table); a report writes nothing, so a report-read fault needs a new scoped injector (G173 / N166), and a browser-side abort would intercept a business response, which this matrix forbids; a 5xx is also a console error the harness fails on. Executable once the harness injects a report-query fault.',
     ),
     blocked(
       'failure.export-sentinels-intact.pending',
       'T14',
       'refusal',
       'RP_GST.cs:3077-3146,3819-3943 writes output files/workbooks but no business tables; the Excel catch only shows "Error Exporting to Excel: " (:3925-3935) (WP-19 study G7)',
-      'Remaining: the feature harness has no scoped download/export failure injector (G173 / N166). Executable once it can fail an export mid-stream.',
+      'Remaining: faults.mjs injects write faults only; there is no scoped download/export failure injector (G173 / N166). Executable once it can fail an export mid-stream.',
     ),
 
     desiredCase(
