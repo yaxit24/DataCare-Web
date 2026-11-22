@@ -1,3 +1,4 @@
+import { notCarriedOpening } from '../shared/carriedOpening.js';
 import { round, PRECISION } from '@datacare/core';
 
 /**
@@ -266,6 +267,8 @@ export function acDataScope(
     params.push(s.lcCode);
     parts.push(`${alias}."LC_CODE"=$${params.length}`);
   }
+  // The ledger reads every year, so a carried opening (Balance TrFr / Year-End Close) would repeat history.
+  parts.push(notCarriedOpening(alias));
   // DATA_TYPE: the desktop omits the filter only for type 'C' (RP_LEDR.cs:6408). Otherwise filter exactly.
   if (q.dataType && q.dataType !== 'C') {
     params.push(q.dataType);

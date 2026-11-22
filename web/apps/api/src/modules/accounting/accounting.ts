@@ -1,3 +1,4 @@
+import { notCarriedOpening } from '../shared/carriedOpening.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
 
@@ -89,6 +90,9 @@ function scopeSql(s: ScopeFilter, startIdx: number): { sql: string; params: unkn
   if (s.coYear) {
     parts.push('"CO_YEAR"=$' + i++);
     params.push(s.coYear);
+  } else {
+    // Every year is read, so a carried opening would repeat the previous years' history (carriedOpening.ts).
+    parts.push(notCarriedOpening());
   }
   return { sql: parts.join(' AND '), params };
 }

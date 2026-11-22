@@ -2,6 +2,7 @@ import { toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { insertRowTx } from '../posting/posting.js';
 import { openingLegs } from '../finance/partyOpening.js';
+import { CARRIED_OPENING_BOOK_NAME } from '../shared/carriedOpening.js';
 import {
   acOpeningHeads,
   dayBefore,
@@ -146,7 +147,7 @@ async function checkTargetTx(
 }
 
 /** One run of one dataset at a time per company, location and Transfer Year (cases.md concurrency.same-button-twice). */
-async function lockTx(
+export async function lockTx(
   tx: any,
   scope: BalanceTransferScope,
   toYear: string,
@@ -163,17 +164,129 @@ export interface BalanceTransferInput {
   mainUser: string;
 }
 
-/** The Party Opening writer's ledger legs (TR_AC_OPBL via AcOp_Ledr), which a carried OP_DATA row owns. */
+/** The Party Opening writer's hand-keyed legs (TR_AC_OPBL via AcOp_Ledr); a carry replaces them with its own. */
 const PARTY_OPENING_LEG_BOOK_NAME = 'TR_AC_OPBL';
 
 /**
- * Ac Balance (BtnAcBalence → Rtl_AcOpbl, BtmSchm.cs:2724-2812). Closing per AC_CODE and DATA_TYPE of the parties
- * (`B.AC_MAIN_GR < '3'`, the main group taken from AC_GROUP as BtmSchm.cs:2733 copies it), company and location, the
- * year being closed, VCH_DATE up to its closing date; money Σ(CR − DR), gold and silver Σ ±FINE_WT by IT_TYPE; a blank
- * DATA_TYPE is 'A' (:2765). The Transfer Year's OP_DATA is replaced by one row per group (:2764, :2801), each with the
- * Party Opening ledger legs (Ac_Ledr.cs:9-28) so the ledger of the new year opens at the same figure: the web's Party
- * Opening screen and its ledger read exactly these rows (finance/partyOpening.ts).
+ * SQL: the account behind `alias` (an AC_DATA-like row with CO_CODE and AC_CODE) is a party, `AC_MAIN_GR < '3'`, the main
+ * group taken from AC_GROUP when the account has a group (BtmSchm.cs:2733 copies it into AC_MAST before reading). An
+ * account with no AC_MAST row is not a party.
  */
+export function isPartySql(alias: string): string {
+  return `coalesce((SELECT CASE WHEN g."AC_GR" IS NOT NULL THEN g."AC_MAIN_GR" ELSE m."AC_MAIN_GR" END
+                 FROM "AC_MAST" m
+                 LEFT JOIN LATERAL (SELECT x."AC_GR", x."AC_MAIN_GR" FROM "AC_GROUP" x
+                                     WHERE x."CO_CODE"=m."CO_CODE" AND x."AC_GR"=m."AC_GR" LIMIT 1) g ON true
+                WHERE m."CO_CODE"=${alias}."CO_CODE" AND m."AC_CODE"=${alias}."AC_CODE" LIMIT 1) < '3', false)`;
+}
+
+/** The years a party carry runs between, with the closing date and the Transfer Year's opening date. */
+export interface CarryTarget {
+  fromYear: string;
+  toYear: string;
+  clDate: string;
+  opDate: string;
+}
+
+/**
+ * The one writer of party openings for a Transfer Year and location, used by Balance TrFr (Ac Balance) and by
+ * Year-End Close (WP-23, decided 2026-11-22 by the architect, owner may override), so the two never both write one.
+ *
+ * Rtl_AcOpbl (BtmSchm.cs:2759-2812): parties, company and location, the closed year up to its closing date; one OP_DATA
+ * row per AC_CODE and DATA_TYPE (blank = 'A', :2765); money Σ(CR − DR), gold and silver Σ ±FINE_WT by IT_TYPE; rounding,
+ * zero-skip and signs by acOpeningHeads. The Transfer Year's OP_DATA of the location is replaced (target year only).
+ *
+ * Each row gets the Party Opening legs (Ac_Ledr.cs:9-28) marked as a carried opening (BOOK_NAME 'BAL TRFR',
+ * shared/carriedOpening.ts): the year-scoped readers (Party Opening, trial balance, the voucher screens' balance) read
+ * them; the cross-year readers (Account Ledger and the others) exclude them, because they already sum the closed
+ * year's history. Replaced before writing: the hand-keyed party legs (TR_AC_OPBL), every carried leg of a party, and
+ * the legacy Year-End Close legs of a party (ACOP / 'OPENING' / voucher '1').
+ */
+export async function carryPartiesTx(
+  tx: any,
+  scope: BalanceTransferScope,
+  target: CarryTarget,
+  mainUser: string,
+): Promise<number> {
+  const lc = lcOf(scope);
+  const groups: any[] = await tx.$queryRawUnsafe(
+    `SELECT a."AC_CODE" ac,
+            coalesce(NULLIF(a."DATA_TYPE",''),'A') dt,
+            coalesce(sum(coalesce(a."CR_AMT",0) - coalesce(a."DR_AMT",0)),0)::text money,
+            coalesce(sum(CASE WHEN a."IT_TYPE"='G' THEN CASE WHEN a."SIGN"='+' THEN coalesce(a."FINE_WT",0) ELSE -coalesce(a."FINE_WT",0) END ELSE 0 END),0)::text gold,
+            coalesce(sum(CASE WHEN a."IT_TYPE"='S' THEN CASE WHEN a."SIGN"='+' THEN coalesce(a."FINE_WT",0) ELSE -coalesce(a."FINE_WT",0) END ELSE 0 END),0)::text silver
+       FROM "AC_DATA" a
+      WHERE a."CO_CODE"=$1 AND a."LC_CODE"=$2 AND a."CO_YEAR"=$3 AND a."VCH_DATE" <= $4::date
+        AND coalesce(a."AC_CODE",'') <> '' AND ${isPartySql('a')}
+      GROUP BY a."AC_CODE", coalesce(NULLIF(a."DATA_TYPE",''),'A')
+      ORDER BY a."AC_CODE", 2`,
+    scope.coCode,
+    lc,
+    target.fromYear,
+    target.clDate,
+  );
+  const where = `"CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3`;
+  await tx.$executeRawUnsafe(
+    `DELETE FROM "OP_DATA" WHERE ${where}`,
+    scope.coCode,
+    lc,
+    target.toYear,
+  );
+  await tx.$executeRawUnsafe(
+    `DELETE FROM "AC_DATA" d WHERE d."CO_CODE"=$1 AND d."LC_CODE"=$2 AND d."CO_YEAR"=$3 AND d."CO_BOOK"='000'
+        AND (d."BOOK_NAME"=$4
+             OR (${isPartySql('d')}
+                 AND (d."BOOK_NAME"=$5 OR (d."VCH_TYPE"='ACOP' AND d."BOOK_NAME"='OPENING' AND d."VCH_NO"='1'))))`,
+    scope.coCode,
+    lc,
+    target.toYear,
+    PARTY_OPENING_LEG_BOOK_NAME,
+    CARRIED_OPENING_BOOK_NAME,
+  );
+  const legDate = new Date(`${dayBefore(target.opDate)}T00:00:00.000Z`);
+  const user = mainUser.slice(0, 15);
+  const toScope = {
+    tenantId: scope.tenantId,
+    coCode: scope.coCode,
+    lcCode: lc,
+    coYear: target.toYear,
+  };
+  let rows = 0;
+  for (const g of groups) {
+    const heads = acOpeningHeads({ money: g.money, gold: g.gold, silver: g.silver });
+    if (!heads) continue;
+    const acCode = String(g.ac);
+    const dataType = String(g.dt);
+    await insertRowTx(tx, 'OP_DATA', scope.tenantId, {
+      CO_CODE: scope.coCode,
+      LC_CODE: lc,
+      CO_YEAR: target.toYear,
+      CO_BOOK: '000',
+      VCH_NO: '00000',
+      AC_CODE: acCode,
+      OP_AMT: heads.amount,
+      OP_SIGN: heads.sign,
+      FINE_BAL: heads.gold,
+      FINE_SIGN: heads.goldSign,
+      SL_FINE_BAL: heads.silver,
+      SL_FINE_SIGN: heads.silverSign,
+      DATA_TYPE: dataType,
+      MAIN_USER: user,
+      ADD_USER: '',
+      ADD_DATE: null,
+      DATA_TRFR: 'Y',
+    });
+    for (const leg of openingLegs(toScope, acCode, heads, legDate, user, dataType))
+      await insertRowTx(tx, 'AC_DATA', scope.tenantId, {
+        ...leg,
+        BOOK_NAME: CARRIED_OPENING_BOOK_NAME,
+      });
+    rows += 1;
+  }
+  return rows;
+}
+
+/** Ac Balance (BtnAcBalence, BtmSchm.cs:2724-2758): the Transfer Year is checked, then the party carry runs. */
 export async function carryAcBalance(
   prisma: any,
   scope: BalanceTransferScope,
@@ -182,85 +295,7 @@ export async function carryAcBalance(
   return withTxBudget(prisma, scope.tenantId, 'heavy', async (tx: any) => {
     const target = await checkTargetTx(tx, scope, input.toYear);
     await lockTx(tx, scope, target.toYear, 'ac-balance');
-    const lc = lcOf(scope);
-    const groups: any[] = await tx.$queryRawUnsafe(
-      `SELECT a."AC_CODE" ac,
-              coalesce(NULLIF(a."DATA_TYPE",''),'A') dt,
-              coalesce(sum(coalesce(a."CR_AMT",0) - coalesce(a."DR_AMT",0)),0)::text money,
-              coalesce(sum(CASE WHEN a."IT_TYPE"='G' THEN CASE WHEN a."SIGN"='+' THEN coalesce(a."FINE_WT",0) ELSE -coalesce(a."FINE_WT",0) END ELSE 0 END),0)::text gold,
-              coalesce(sum(CASE WHEN a."IT_TYPE"='S' THEN CASE WHEN a."SIGN"='+' THEN coalesce(a."FINE_WT",0) ELSE -coalesce(a."FINE_WT",0) END ELSE 0 END),0)::text silver
-         FROM "AC_DATA" a
-        WHERE a."CO_CODE"=$1 AND a."LC_CODE"=$2 AND a."CO_YEAR"=$3 AND a."VCH_DATE" <= $4::date
-          AND coalesce(a."AC_CODE",'') <> ''
-          AND (SELECT CASE WHEN g."AC_GR" IS NOT NULL THEN g."AC_MAIN_GR" ELSE m."AC_MAIN_GR" END
-                 FROM "AC_MAST" m
-                 LEFT JOIN LATERAL (SELECT x."AC_GR", x."AC_MAIN_GR" FROM "AC_GROUP" x
-                                     WHERE x."CO_CODE"=m."CO_CODE" AND x."AC_GR"=m."AC_GR" LIMIT 1) g ON true
-                WHERE m."CO_CODE"=a."CO_CODE" AND m."AC_CODE"=a."AC_CODE" LIMIT 1) < '3'
-        GROUP BY a."AC_CODE", coalesce(NULLIF(a."DATA_TYPE",''),'A')
-        ORDER BY a."AC_CODE", 2`,
-      scope.coCode,
-      lc,
-      target.fromYear,
-      target.clDate,
-    );
-    const where = `"CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3`;
-    await tx.$executeRawUnsafe(
-      `DELETE FROM "OP_DATA" WHERE ${where}`,
-      scope.coCode,
-      lc,
-      target.toYear,
-    );
-    await tx.$executeRawUnsafe(
-      `DELETE FROM "AC_DATA" WHERE ${where} AND "CO_BOOK"='000' AND "BOOK_NAME"=$4`,
-      scope.coCode,
-      lc,
-      target.toYear,
-      PARTY_OPENING_LEG_BOOK_NAME,
-    );
-    const legDate = new Date(`${dayBefore(target.opDate)}T00:00:00.000Z`);
-    const toScope = {
-      tenantId: scope.tenantId,
-      coCode: scope.coCode,
-      lcCode: lc,
-      coYear: target.toYear,
-    };
-    let rows = 0;
-    for (const g of groups) {
-      const heads = acOpeningHeads({ money: g.money, gold: g.gold, silver: g.silver });
-      if (!heads) continue;
-      const acCode = String(g.ac);
-      const dataType = String(g.dt);
-      await insertRowTx(tx, 'OP_DATA', scope.tenantId, {
-        CO_CODE: scope.coCode,
-        LC_CODE: lc,
-        CO_YEAR: target.toYear,
-        CO_BOOK: '000',
-        VCH_NO: '00000',
-        AC_CODE: acCode,
-        OP_AMT: heads.amount,
-        OP_SIGN: heads.sign,
-        FINE_BAL: heads.gold,
-        FINE_SIGN: heads.goldSign,
-        SL_FINE_BAL: heads.silver,
-        SL_FINE_SIGN: heads.silverSign,
-        DATA_TYPE: dataType,
-        MAIN_USER: input.mainUser.slice(0, 15),
-        ADD_USER: '',
-        ADD_DATE: null,
-        DATA_TRFR: 'Y',
-      });
-      for (const leg of openingLegs(
-        toScope,
-        acCode,
-        heads,
-        legDate,
-        input.mainUser.slice(0, 15),
-        dataType,
-      ))
-        await insertRowTx(tx, 'AC_DATA', scope.tenantId, leg);
-      rows += 1;
-    }
+    const rows = await carryPartiesTx(tx, scope, target, input.mainUser);
     return {
       dataset: 'ac-balance' as const,
       fromYear: target.fromYear,
@@ -308,6 +343,22 @@ export async function carryItemStock(
       target.fromYear,
       target.clDate,
     );
+    // The Transfer Year's openings of the location are replaced (target year only, BtmSchm.cs:2932). A hand-keyed
+    // Item Opening's stock and other-detail rows go with it (stock/itemOpening.ts deleteTypeTx), so no stock leg is
+    // left without its opening.
+    const yearWhere = `"CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"='000'`;
+    await tx.$executeRawUnsafe(
+      `DELETE FROM "MAIN_STOCK" WHERE ${yearWhere} AND "VCH_TYPE"='ITOBL'`,
+      scope.coCode,
+      lc,
+      target.toYear,
+    );
+    await tx.$executeRawUnsafe(
+      `DELETE FROM "DM_DATA" WHERE ${yearWhere} AND "BOOK_NAME"='ITOBL'`,
+      scope.coCode,
+      lc,
+      target.toYear,
+    );
     await tx.$executeRawUnsafe(
       `DELETE FROM "ITM_OPBL" WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3`,
       scope.coCode,
@@ -351,6 +402,9 @@ export async function carryItemStock(
         LBR_RATE: 0,
         DATA_TRFR: 'Y',
         DATA_TYPE: 'A',
+        // Marks the row as carried: stock already holds it through the closed year's MAIN_STOCK, so no reader adds it
+        // and Item Opening Save posts no stock leg for it.
+        CARRIED_FROM: target.fromYear,
       });
       rows += 1;
     }

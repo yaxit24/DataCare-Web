@@ -252,8 +252,8 @@ databaseDescribe('Balance TrFr selections (read-only)', () => {
       [3, 'A3'],
     ] as const)
       await exec(
-        `INSERT INTO "APR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","OLD_SRNO","TAG_NO","BOOK_NAME","ISU_REC")
-         VALUES ($1,$2,$3,$4,'AIS','00003',$5,$5,$6,'APR ISU','N')`,
+        `INSERT INTO "APR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","OLD_SRNO","TAG_NO","BOOK_NAME","ISU_REC","VCH_DATE")
+         VALUES ($1,$2,$3,$4,'AIS','00003',$5,$5,$6,'APR ISU','N','2025-11-01')`,
         TENANT,
         CO,
         LC,
@@ -262,8 +262,8 @@ databaseDescribe('Balance TrFr selections (read-only)', () => {
         tag,
       );
     await exec(
-      `INSERT INTO "APR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","OLD_SRNO","TAG_NO","BOOK_NAME","ISU_NO","ISU_YRCD","ISU_DBCD","ISU_SRNO")
-       VALUES ($1,$2,$3,$4,'ARN','00001',1,1,'A2','APR RTN','00003',$5,'AIS',2)`,
+      `INSERT INTO "APR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","OLD_SRNO","TAG_NO","BOOK_NAME","ISU_NO","ISU_YRCD","ISU_DBCD","ISU_SRNO","VCH_DATE")
+       VALUES ($1,$2,$3,$4,'ARN','00001',1,1,'A2','APR RTN','00003',$5,'AIS',2,'2025-12-01')`,
       TENANT,
       CO,
       LC,
@@ -271,8 +271,8 @@ databaseDescribe('Balance TrFr selections (read-only)', () => {
       FROM,
     );
     await exec(
-      `INSERT INTO "SL_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","TAG_NO","BOOK_NAME","ISU_NO","ISU_YRCD","ISU_DBCD","ISU_SRNO")
-       VALUES ($1,$2,$3,$4,'SAL','00009',1,'A3','SALES','00003',$5,'AIS',3)`,
+      `INSERT INTO "SL_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","TAG_NO","BOOK_NAME","ISU_NO","ISU_YRCD","ISU_DBCD","ISU_SRNO","VCH_DATE")
+       VALUES ($1,$2,$3,$4,'SAL','00009',1,'A3','SALES','00003',$5,'AIS',3,'2026-01-15')`,
       TENANT,
       CO,
       LC,
@@ -287,6 +287,28 @@ databaseDescribe('Balance TrFr selections (read-only)', () => {
       added: {},
       removed: {},
     });
+    // Finding 4: an issue dated after the closing date is not open at the close, and a return dated after the closing
+    // date does not close a line that was out at the close.
+    await exec(
+      `INSERT INTO "APR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","OLD_SRNO","TAG_NO","BOOK_NAME","ISU_REC","VCH_DATE")
+       VALUES ($1,$2,$3,$4,'AIS','00004',1,1,'A4','APR ISU','N','2026-04-05')`,
+      TENANT,
+      CO,
+      LC,
+      TO,
+    );
+    await exec(
+      `INSERT INTO "APR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","OLD_SRNO","TAG_NO","BOOK_NAME","ISU_NO","ISU_YRCD","ISU_DBCD","ISU_SRNO","VCH_DATE")
+       VALUES ($1,$2,$3,$4,'ARN','00002',1,1,'A1','APR RTN','00003',$5,'AIS',1,'2026-04-10')`,
+      TENANT,
+      CO,
+      LC,
+      TO,
+      FROM,
+    );
+    expect(await openApprovalLines(runtime, scope)).toEqual([
+      { coYear: FROM, coBook: 'AIS', vchNo: '00003', srNo: 1, tagNo: 'A1' },
+    ]);
     // balance-transfer.identity.approval-open-equals-carried and rerun.approval-replaces: only A1 stays open, and
     // two presses write nothing.
     expect(await pressTwice('approval')).toBe(1);

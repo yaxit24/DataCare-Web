@@ -2,6 +2,9 @@ import { withTxBudget } from '../shared/txBudget.js';
 import { insertRowTx } from '../posting/posting.js';
 import { barTagAvailableSql } from '../shared/stockSql.js';
 import type { VoucherScope } from '../vouchers/numbering.js';
+import { toIsoDate } from '@datacare/core';
+import { CARRIED_OPENING_BOOK_NAME } from '../shared/carriedOpening.js';
+import { carryPartiesTx, isPartySql, lockTx } from './balanceTransfer.js';
 
 /**
  * Year-End Close (Phase 12 / UT) — web port of the desktop Ac_Final.cs final-accounts close
@@ -31,8 +34,13 @@ const ACOP_TYPE = 'ACOP';
 /** Carry-forward opening book. Desktop closing valuation lives in CO_BOOK '999'; the next-year
  *  opening batch we write is isolated under CO_BOOK '000' so it is idempotently replaceable. */
 const YE_BOOK = '000';
-/** BOOK_NAME stamped on each opening leg (matches acOpening's 'OPENING'). */
-const YE_BOOK_NAME = 'OPENING';
+/**
+ * BOOK_NAME of each carried opening leg: the carried-opening marker shared with Balance TrFr (shared/carriedOpening.ts),
+ * so the cross-year readers do not add it to the history they already hold. Older runs wrote 'OPENING' with voucher '1';
+ * a run replaces those too.
+ */
+const YE_BOOK_NAME = CARRIED_OPENING_BOOK_NAME;
+const LEGACY_BOOK_NAME = 'OPENING';
 /** All carried opening legs share one voucher number; individual legs are keyed by LD_CODE/LEDR_KEY. */
 const YE_VCH_NO = '1';
 /** Desktop closing-stock valuation book — excluded from the carry so injected closing stock (the
@@ -122,13 +130,15 @@ async function computeClosingsTx(
             coalesce(sum(${NN('"CR_AMT"')}),0) AS cr,
             coalesce(sum(${fineSigned}),0) AS fine,
             max(NULLIF("IT_TYPE"::text,'')) FILTER (WHERE "IT_TYPE"::text IN ('G','S')) AS "itType"
-       FROM "AC_DATA"
+       FROM "AC_DATA" a
       WHERE "CO_CODE"=$1 AND "CO_YEAR"=$2 AND coalesce("CO_BOOK"::text,'') <> $3
+        AND ($4::text IS NULL OR "LC_CODE"=$4) AND NOT ${isPartySql('a')}
       GROUP BY "AC_CODE"
       ORDER BY "AC_CODE"`,
     scope.coCode,
     fromYear,
     CLOSING_BOOK,
+    scope.lcCode ?? null,
   );
   const closings: AccountClosing[] = [];
   for (const r of rows) {
@@ -251,16 +261,27 @@ export async function yearEndClose(prisma: any, input: YearEndInput): Promise<Ye
     const closings = await computeClosingsTx(tx, scope, fromYear);
     const closingStockFine = await closingStockFineTx(tx, scope, fromYear);
 
-    // Idempotent re-run: clear any prior carry-forward opening for toYear (CO_BOOK '000' / VCH_TYPE 'ACOP').
+    // One writer per account and Transfer Year (WP-23, decided 2026-11-22 by the architect, owner may override): the
+    // parties' openings come from the Balance TrFr party carry, the other accounts' from here, under the same lock.
+    await lockTx(tx, scope as any, toYear, 'ac-balance');
+    // Idempotent re-run: clear this writer's earlier non-party carried legs of toYear and location, and the legacy
+    // ACOP/'OPENING'/'1' legs of older runs; hand-keyed openings (Account Opening, Party Opening) are left alone.
     const deletedRaw = await tx.$executeRawUnsafe(
-      `DELETE FROM "AC_DATA"
-        WHERE "CO_CODE"=$1 AND "CO_YEAR"=$2 AND coalesce("CO_BOOK"::text,'')=$3 AND "VCH_TYPE"::text=$4`,
+      `DELETE FROM "AC_DATA" d
+        WHERE d."CO_CODE"=$1 AND d."CO_YEAR"=$2 AND coalesce(d."CO_BOOK"::text,'')=$3
+          AND ($6::text IS NULL OR d."LC_CODE"=$6) AND NOT ${isPartySql('d')}
+          AND (d."BOOK_NAME"=$4 OR (d."VCH_TYPE"::text=$5 AND d."BOOK_NAME"=$7 AND d."VCH_NO"=$8))`,
       scope.coCode,
       toYear,
       YE_BOOK,
+      YE_BOOK_NAME,
       ACOP_TYPE,
+      scope.lcCode ?? null,
+      LEGACY_BOOK_NAME,
+      YE_VCH_NO,
     );
     const deleted = num(deletedRaw);
+    const parties = await yearEndPartiesTx(tx, scope, fromYear, toYear);
 
     let srno = 0;
     for (const c of closings) {
@@ -271,10 +292,54 @@ export async function yearEndClose(prisma: any, input: YearEndInput): Promise<Ye
     return {
       fromYear,
       toYear,
-      accounts: closings.length,
-      carried: srno,
+      accounts: closings.length + parties,
+      carried: srno + parties,
       deleted,
       closingStockFine,
     };
   });
+}
+
+/**
+ * The parties' share of a Year-End Close: the Balance TrFr party carry for the same years, so the two menus write one
+ * set of party openings whatever their order. It needs the closed year's closing date and the next year's opening
+ * date; without them a company that has party balances is refused rather than left without openings.
+ */
+async function yearEndPartiesTx(
+  tx: any,
+  scope: VoucherScope,
+  fromYear: string,
+  toYear: string,
+): Promise<number> {
+  const years: any[] = await tx.$queryRawUnsafe(
+    `SELECT "CO_YEAR" y, "OP_DATE"::text op, "CL_DATE"::text cl FROM "YEAR_MAST" WHERE "CO_CODE"=$1 AND "CO_YEAR" IN ($2,$3)`,
+    scope.coCode,
+    fromYear,
+    toYear,
+  );
+  const clDate = toIsoDate(years.find((y) => y.y === fromYear)?.cl);
+  const opDate = toIsoDate(years.find((y) => y.y === toYear)?.op);
+  if (!clDate || !opDate) {
+    const any: any[] = await tx.$queryRawUnsafe(
+      `SELECT 1 FROM "AC_DATA" a WHERE a."CO_CODE"=$1 AND a."CO_YEAR"=$2 AND ${isPartySql('a')} LIMIT 1`,
+      scope.coCode,
+      fromYear,
+    );
+    if (any.length)
+      throw new YearEndValidationError(
+        `years ${fromYear} and ${toYear} need a closing and an opening date to carry the party balances`,
+      );
+    return 0;
+  }
+  return carryPartiesTx(
+    tx,
+    {
+      tenantId: scope.tenantId,
+      coCode: scope.coCode ?? '',
+      lcCode: scope.lcCode ?? undefined,
+      coYear: fromYear,
+    },
+    { fromYear, toYear, clDate, opDate },
+    'YEAR END',
+  );
 }

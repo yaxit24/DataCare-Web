@@ -319,6 +319,22 @@ export async function saveItemOpening(
       throw new ItemOpeningValidationError(
         `year ${coYear || '(none)'} has no opening date; open the company year first`,
       );
+    // An item carried by Balance TrFr (ITM_OPBL.CARRIED_FROM) is already in stock through the closing year's MAIN_STOCK,
+    // which the web reads across years; its row keeps the marker and posts no stock leg (WP-23, decided 2026-11-22 by
+    // the architect, owner may override).
+    const carried = new Map<string, string>(
+      (
+        (await tx.$queryRawUnsafe(
+          `SELECT "IT_CODE" it, "CARRIED_FROM" cf FROM "ITM_OPBL"
+            WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5 AND "CARRIED_FROM" IS NOT NULL`,
+          coCode,
+          lcCode,
+          coYear,
+          ITEM_OPENING_BOOK,
+          type,
+        )) as Array<{ it: string; cf: string }>
+      ).map((r) => [String(r.it), String(r.cf)]),
+    );
     await deleteTypeTx(tx, input.scope, type);
     const key = {
       CO_CODE: coCode,
@@ -349,9 +365,11 @@ export async function saveItemOpening(
         DATA_TYPE,
         // The save leaves DATA_TRFR to the column default 'Y' (MS_UPDATE.cs:21658); the migrated rows all hold 'Y'.
         DATA_TRFR: 'Y',
+        ...(carried.has(itCode) ? { CARRIED_FROM: carried.get(itCode) } : {}),
       });
     }
     for (const { srNo, itCode, row, oth } of lines) {
+      if (carried.has(itCode)) continue;
       // Ac_Stock.Itm_Opbl_Stk (Ac_Stock.cs:11-21). The decompiled source writes SR_NO 1 and ISR_NO = A.SR_NO; the
       // desktop's own rows (72 in the migrated data) carry SR_NO = A.SR_NO and ISR_NO 1, and the web follows the data.
       await insertRowTx(tx, 'MAIN_STOCK', input.scope.tenantId, {

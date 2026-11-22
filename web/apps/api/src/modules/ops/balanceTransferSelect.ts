@@ -111,7 +111,8 @@ export interface OpenApprovalLine {
 }
 
 /**
- * Approval issue lines still out (BtmSchm.cs:4123-4125 and :4142): lines of a book whose MAIN_BOOK is 'APR ISU' that no
+ * Approval issue lines still out at the closing date (BtmSchm.cs:4123-4125 and :4142; the desktop's database holds only
+ * the closed year, so the web bounds issues and their closing lines by the closing date and the year): lines of a book whose MAIN_BOOK is 'APR ISU' that no
  * APR RTN line (APR_DETL), SALES line (SL_DETL) or WH SALES / RATE CUT issue (RATE_CUT_ISU) names through
  * ISU_YRCD / ISU_DBCD / ISU_NO / ISU_SRNO = the line's CO_YEAR / CO_BOOK / VCH_NO / OLD_SRNO. ISU_REC is computed, not
  * written to the closed year.
@@ -122,18 +123,22 @@ export function openApprovalLines(prisma: any, scope: SelectionScope): Promise<O
       `SELECT 1 FROM "${table}" ${alias} WHERE ${alias}."CO_CODE"=a."CO_CODE" AND ${alias}."LC_CODE"=a."LC_CODE"
           AND ${alias}."BOOK_NAME" IN (${books}) AND coalesce(${alias}."ISU_NO",'') <> ''
           AND ${alias}."ISU_YRCD"=a."CO_YEAR" AND ${alias}."ISU_DBCD"=a."CO_BOOK" AND ${alias}."ISU_NO"=a."VCH_NO"
-          AND ${alias}."ISU_SRNO"::numeric = NULLIF(a."OLD_SRNO"::text,'')::numeric`;
+          AND ${alias}."ISU_SRNO"::numeric = NULLIF(a."OLD_SRNO"::text,'')::numeric
+          AND ${alias}."VCH_DATE" <= $3::date`;
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT a."CO_YEAR" yr, a."CO_BOOK" book, a."VCH_NO" no, a."SR_NO"::float sr, coalesce(a."TAG_NO",'') tag
          FROM "APR_DETL" a
          JOIN "BOOK_DATA" k ON k."CO_CODE"=a."CO_CODE" AND k."LC_CODE"=a."LC_CODE" AND k."CO_BOOK"=a."CO_BOOK"
         WHERE a."CO_CODE"=$1 AND a."LC_CODE"=$2 AND k."MAIN_BOOK"='APR ISU'
+          AND a."CO_YEAR" <= $4 AND a."VCH_DATE" <= $3::date
           AND NOT EXISTS (${closer('APR_DETL', 'r', `'APR RTN'`)})
           AND NOT EXISTS (${closer('SL_DETL', 's', `'SALES'`)})
           AND NOT EXISTS (${closer('RATE_CUT_ISU', 'w', `'WH SALES','RATE CUT'`)})
         ORDER BY a."CO_YEAR", a."CO_BOOK", a."VCH_NO", a."SR_NO"`,
       scope.coCode,
       lcOf(scope),
+      scope.clDate,
+      scope.coYear,
     );
     return rows.map((r) => ({
       coYear: String(r.yr),

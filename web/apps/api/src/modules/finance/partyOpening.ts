@@ -2,6 +2,7 @@ import { round, toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { insertRowTx } from '../posting/posting.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
+import { CARRIED_OPENING_BOOK_NAME } from '../shared/carriedOpening.js';
 
 /**
  * Party Opening (desktop TR_AC_OPBL, menu Master → Party Opening). The Party master's inline opening (MS_ACCT.cs:7856-7905)
@@ -370,6 +371,17 @@ export async function writePartyOpeningTx(
     DATA_TRFR: transfer,
     MAIN_USER: owner,
   });
+  // A carried opening (Balance TrFr, shared/carriedOpening.ts) stays carried when it is edited here: the cross-year
+  // readers already hold the closed year's history, so its legs must stay invisible to them (WP-23).
+  const carriedLegs: any[] = await tx.$queryRawUnsafe(
+    `SELECT 1 FROM "AC_DATA" WHERE ${opDataWhere} AND "DATA_TYPE"=$5 AND "BOOK_NAME"=$6 LIMIT 1`,
+    coCode,
+    lcCode,
+    coYear,
+    acCode,
+    DATA_TYPE,
+    CARRIED_OPENING_BOOK_NAME,
+  );
   await tx.$executeRawUnsafe(
     `DELETE FROM "AC_DATA" WHERE ${opDataWhere} AND "DATA_TYPE"=$5`,
     coCode,
@@ -380,7 +392,12 @@ export async function writePartyOpeningTx(
   );
   const legDate = await openingLegDateTx(tx, scope);
   for (const leg of openingLegs(scope, acCode, heads, legDate, owner))
-    await insertRowTx(tx, 'AC_DATA', scope.tenantId, leg);
+    await insertRowTx(
+      tx,
+      'AC_DATA',
+      scope.tenantId,
+      carriedLegs.length ? { ...leg, BOOK_NAME: CARRIED_OPENING_BOOK_NAME } : leg,
+    );
   if (!bills) return;
   // TR_AC_OPBL.cs:2696 and :2724-2760: the party's OP_DETL rows are replaced by the grid's rows.
   await tx.$executeRawUnsafe(
