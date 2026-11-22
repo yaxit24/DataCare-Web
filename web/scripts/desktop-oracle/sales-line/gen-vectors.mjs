@@ -346,6 +346,7 @@ add(
     26: m(50),
     82: m(100),
     83: m(10),
+    ...shadowsOf(1),
   },
   { checks: ['labourRate', 'labour'] },
 );
@@ -363,6 +364,7 @@ add(
     26: m(50),
     82: m(100),
     83: m(10),
+    ...shadowsOf(2),
   },
   { checks: ['labourRate', 'labour'] },
 );
