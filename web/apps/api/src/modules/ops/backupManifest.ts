@@ -1,4 +1,10 @@
 import { createHash } from 'node:crypto';
+import {
+  BACKUP_EXCLUDED_SECRETS,
+  TENANT_CONFIG_ALLOWLIST,
+  TENANT_CONFIG_KIND,
+  TENANT_CONFIG_VERSION,
+} from './backupTenantConfigPolicy.js';
 
 export const COMPANY_BACKUP_KIND = 'datacare.company-backup' as const;
 export const COMPANY_BACKUP_VERSION = 2 as const;
@@ -76,10 +82,21 @@ export interface BackupTableManifest {
   columns: BackupColumnManifest[];
 }
 
+/** D37 tenant-config envelope descriptor (G64/N80): what is exported and what is deliberately left out. */
+export interface TenantConfigManifest {
+  kind: typeof TENANT_CONFIG_KIND;
+  version: typeof TENANT_CONFIG_VERSION;
+  allowlist: Array<{ table: string; columns: string[] }>;
+  excludedTables: Array<{ table: string; reason: string }>;
+  excludedSecrets: Array<{ table: string; column: string; reason: string }>;
+}
+
 export interface BackupSchemaManifest {
   kind: typeof BACKUP_SCHEMA_KIND;
   fingerprint: string;
   tables: BackupTableManifest[];
+  /** Absent on archives made before D37; always present on new ones. */
+  tenantConfig?: TenantConfigManifest;
 }
 
 export type EncodedCell =
@@ -102,6 +119,11 @@ export interface BackupTableData {
   rows: EncodedBackupRow[];
 }
 
+export interface TenantConfigSection extends TenantConfigManifest {
+  totals: { tables: number; rows: number };
+  tables: Record<string, BackupTableData>;
+}
+
 export interface CompanyBackupDocument {
   kind: typeof COMPANY_BACKUP_KIND;
   version: typeof COMPANY_BACKUP_VERSION;
@@ -121,6 +143,8 @@ export interface CompanyBackupDocument {
     rows: number;
   };
   tables: Record<string, BackupTableData>;
+  /** D37 NextMain-equivalent tenant configuration (G64/N80). Not restored by the contained logical restore. */
+  tenantConfig?: TenantConfigSection;
   checksum: string;
 }
 
@@ -696,8 +720,112 @@ export function resealCompanyBackupDocument(
     rows: Object.values(tables).reduce((sum, table) => sum + table.rowCount, 0),
   };
   const unsigned: CompanyBackupDocument = { ...document, tables, totals, checksum: '' };
+  if (document.tenantConfig) unsigned.tenantConfig = resealTenantConfig(document.tenantConfig);
   return { ...unsigned, checksum: documentChecksum(unsigned) };
 }
+
+export function resealTenantConfig(section: TenantConfigSection): TenantConfigSection {
+  const tables: Record<string, BackupTableData> = {};
+  for (const { table } of section.allowlist) {
+    const rows = section.tables[table]?.rows ?? [];
+    tables[table] = { rows, rowCount: rows.length, checksum: checksumBackupRows(rows) };
+  }
+  return {
+    ...section,
+    tables,
+    totals: {
+      tables: Object.keys(tables).length,
+      rows: Object.values(tables).reduce((sum, table) => sum + table.rowCount, 0),
+    },
+  };
+}
+
+export const tenantConfigDescriptor = (section: TenantConfigManifest): TenantConfigManifest => ({
+  kind: section.kind,
+  version: section.version,
+  allowlist: section.allowlist,
+  excludedTables: section.excludedTables,
+  excludedSecrets: section.excludedSecrets,
+});
+
+/**
+ * D37: the tenant-config envelope matches its manifest descriptor, exports only allowlisted columns of this
+ * tenant, and no excluded secret carries a value anywhere in the archive.
+ */
+const assertTenantConfigIntegrity = (document: CompanyBackupDocument): void => {
+  for (const secret of BACKUP_EXCLUDED_SECRETS)
+    for (const row of document.tables[secret.table]?.rows ?? [])
+      if (row[secret.column] !== null && row[secret.column] !== undefined)
+        throw new CompanyBackupValidationError(
+          `${secret.table}.${secret.column} is an excluded secret and must not carry a value`,
+        );
+  const section = document.tenantConfig;
+  const descriptor = document.manifest.tenantConfig;
+  if (section === undefined && descriptor === undefined) return;
+  if (!isRecord(section) || !isRecord(descriptor))
+    throw new CompanyBackupValidationError(
+      'tenantConfig section and manifest must both be present',
+    );
+  if (
+    section.kind !== TENANT_CONFIG_KIND ||
+    section.version !== TENANT_CONFIG_VERSION ||
+    !Array.isArray(section.allowlist) ||
+    !Array.isArray(section.excludedTables) ||
+    !Array.isArray(section.excludedSecrets) ||
+    !isRecord(section.tables) ||
+    !isRecord(section.totals)
+  )
+    throw new CompanyBackupValidationError('unsupported tenantConfig kind, version or shape');
+  if (stableStringify(tenantConfigDescriptor(section)) !== stableStringify(descriptor))
+    throw new CompanyBackupValidationError('tenantConfig section does not match its manifest');
+  if (stableStringify(section.excludedSecrets) !== stableStringify(BACKUP_EXCLUDED_SECRETS))
+    throw new CompanyBackupValidationError('tenantConfig excluded-secrets list is invalid');
+  const listed = section.allowlist.map((entry) => entry?.table);
+  if (stableStringify(Object.keys(section.tables).sort()) !== stableStringify([...listed].sort()))
+    throw new CompanyBackupValidationError(
+      'tenantConfig table data set does not match the allowlist',
+    );
+  for (const entry of section.allowlist) {
+    const policy = TENANT_CONFIG_ALLOWLIST.find((candidate) => candidate.table === entry.table);
+    if (
+      !policy ||
+      !isStringArray(entry.columns) ||
+      entry.columns.some((column) => !policy.columns.includes(column))
+    )
+      throw new CompanyBackupValidationError(`${String(entry.table)} is not an allowlisted entry`);
+    const table = document.manifest.tables.find((candidate) => candidate.name === entry.table);
+    if (!table || table.scope !== 'tenant-shared')
+      throw new CompanyBackupValidationError(`${entry.table} is not a tenant-shared table`);
+    const data = section.tables[entry.table]!;
+    if (!Array.isArray(data.rows) || data.rowCount !== data.rows.length)
+      throw new CompanyBackupValidationError(`tenantConfig ${entry.table} row count is invalid`);
+    if (data.checksum !== checksumBackupRows(data.rows))
+      throw new CompanyBackupValidationError(`tenantConfig ${entry.table} checksum is invalid`);
+    const columns = entry.columns.map((name) => {
+      const column = table.columns.find((candidate) => candidate.name === name);
+      if (!column)
+        throw new CompanyBackupValidationError(
+          `${entry.table}.${name} is absent from the manifest`,
+        );
+      return column;
+    });
+    const expected = stableStringify([...entry.columns].sort());
+    for (const row of data.rows) {
+      if (!isRecord(row) || stableStringify(Object.keys(row).sort()) !== expected)
+        throw new CompanyBackupValidationError(
+          `tenantConfig ${entry.table} row columns do not match the allowlist`,
+        );
+      if (row.tenant_id !== document.source.tenantId)
+        throw new CompanyBackupValidationError(
+          `tenantConfig ${entry.table} row tenant does not match the document`,
+        );
+      for (const column of columns) decodeBackupCell(row[column.name] ?? null, column);
+    }
+  }
+  const sealed = resealTenantConfig(section);
+  if (stableStringify(section.totals) !== stableStringify(sealed.totals))
+    throw new CompanyBackupValidationError('tenantConfig totals are invalid');
+};
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -890,6 +1018,7 @@ export function assertCompanyBackupIntegrity(document: CompanyBackupDocument): v
         companyCode: document.source.companyCode,
       });
   }
+  assertTenantConfigIntegrity(document);
   const sealed = resealCompanyBackupDocument(document);
   if (stableStringify(document.totals) !== stableStringify(sealed.totals))
     throw new CompanyBackupValidationError('backup totals are invalid');
