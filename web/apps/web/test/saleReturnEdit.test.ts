@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { editedLinePayload, savedLineCells } from '../lib/saleReturnEdit';
+import {
+  billNoForSave,
+  derivedCellsToClear,
+  editedLinePayload,
+  savedLineCells,
+} from '../lib/saleReturnEdit';
 
 /**
  * WP-27 (N242): a reopened Sales Return line goes back to the server as the input that saved it, with the grid's
@@ -61,5 +66,17 @@ describe('sales return reopen payload', () => {
 
   it('a new line is sent as the grid shows it', () => {
     expect(editedLinePayload(undefined, { itCode: 'GOLD' }, GRID)).toEqual({ itCode: 'GOLD' });
+  });
+
+  it('keeps the stored BILL_NO on an edit (12 stays 12, not the padded 00012 of the bill box)', () => {
+    expect(billNoForSave('12', '00012')).toBe('12');
+    expect(billNoForSave(undefined, '12')).toBe('12');
+    expect(billNoForSave(undefined, '')).toBeUndefined();
+  });
+
+  it('a changed weight or rate re-prices the line; only weight, touch and wastage re-derive the fine', () => {
+    expect(derivedCellsToClear('netWt')).toEqual(['metalAmount', 'fineWt']);
+    expect(derivedCellsToClear('rate')).toEqual(['metalAmount']);
+    expect(derivedCellsToClear('remark')).toEqual([]);
   });
 });

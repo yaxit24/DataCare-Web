@@ -475,4 +475,44 @@ databaseDescribe('WP-27 Sales Return residuals (writer)', () => {
     ).rejects.toThrow('Please Insert Item Value and try');
     expect(await writeSet(voucherNo)).toEqual(before);
   });
+  it('sales-return.reopen.keeps-stored-date: an edit that sends no date keeps the stored VCH_DATE (TR_SALE_RTN.cs:10104, :12607)', async () => {
+    const created = await createSaleReturn(runtime, input({ vchDate: '2024-05-15' }), [LINE_R]);
+    const voucherNo = String(created.vchNo).padStart(5, '0');
+    const before = await writeSet(voucherNo);
+    const { vchDate: _dropped, ...saved }: any = await getSaleReturn(runtime, scope('SRT'), voucherNo);
+    expect(_dropped).toBe('2024-05-15');
+    const { vchDate: _none, ...withoutDate } = input();
+    await editSaleReturn(
+      runtime,
+      { ...withoutDate, ...saved, scope: scope('SRT'), mainUser: 'editor' } as any,
+      saved.lines,
+      voucherNo,
+      saved.version,
+    );
+    expect(await writeSet(voucherNo)).toEqual(before);
+  });
+
+  it('sales-return.reopen.keeps-typed-amount-and-fine: stored ITM_AMT and ITM_FINE come back (TR_SALE_RTN.cs:10388, :10411)', async () => {
+    const created = await createSaleReturn(runtime, input(), [
+      // A typed item amount over a rate: round(2 x 100) would be 200, the operator typed 555.
+      { itCode: 'LOOSE', pcs: 1, grossWt: 2, netWt: 2, touch: 90, rate: 100, metalAmount: 555 },
+      // A typed fine: 1 x 90% would be 0.9, the operator typed 0.95.
+      { itCode: 'LOOSE', pcs: 1, grossWt: 1, netWt: 1, touch: 90, rate: 100, fineWt: 0.95 },
+    ]);
+    const voucherNo = String(created.vchNo).padStart(5, '0');
+    const before = await writeSet(voucherNo);
+    const saved: any = await getSaleReturn(runtime, scope('SRT'), voucherNo);
+    expect(saved.lines.map((l: any) => [l.metalAmount, l.fineWt])).toEqual([
+      [555, 1.8],
+      [100, 0.95],
+    ]);
+    await editSaleReturn(
+      runtime,
+      { ...input(), ...saved, scope: scope('SRT'), mainUser: 'editor' },
+      saved.lines,
+      voucherNo,
+      saved.version,
+    );
+    expect(await writeSet(voucherNo)).toEqual(before);
+  });
 });

@@ -167,7 +167,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     ] as const) {
       await sql(
         `INSERT INTO "LOGIN_MAST"(tenant_id,"CO_CODE","LOGIN_NAME","LOGIN_PWD","LOGIN_CATG","USER_UPDATE","USER_DELETE","USER_PRINT","PASSWORD_RESET_REQUIRED")
-         VALUES($1,'01',$2,$3,'USER',$4,'N','Y','N')`,
+         VALUES($1,'01',$2,$3,'USER',$4,$4,'Y','N')`,
         tenantId,
         name,
         hashed,
@@ -175,7 +175,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
       );
       await sql(
         `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
-         VALUES($1,'01','01',$2,'Sales','Sales Return','Y',$3,'N','Y')`,
+         VALUES($1,'01','01',$2,'Sales','Sales Return','Y',$3,$3,'Y')`,
         tenantId,
         name,
         edit,
@@ -251,7 +251,8 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
       ...first,
       coBook: 'SRT',
       coYear: YEAR,
-      lines: first.lines.map((line: any) => ({ ...line, netWt: 9 })),
+      // As the grid does: changing the weight re-prices the line, so the stored amount and fine are not sent.
+      lines: first.lines.map(({ metalAmount: _a, fineWt: _f, ...line }: any) => ({ ...line, netWt: 9 })),
       expectedVersion: first.version,
     });
     expect(edited.statusCode, edited.body).toBe(200);
@@ -272,6 +273,29 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     expect(stale.statusCode, stale.body).toBe(409);
     expect(stale.json().error).toBe('voucher-version-conflict');
     expect(await writeSet(voucherNo)).toEqual(afterEdit);
+  });
+
+  it('sales-return.concurrency.stale-delete: DELETE needs the current version (N51/D17)', async () => {
+    const voucherNo = await create();
+    const saved = await reopen(voucherNo);
+    const before = await writeSet(voucherNo);
+    const url = `/sales-returns/${voucherNo}?coBook=SRT&coYear=${YEAR}`;
+    const missing = await app.inject({ method: 'DELETE', url, headers: { cookie: cookies.full } });
+    expect(missing.statusCode, missing.body).toBe(400);
+    const stale = await app.inject({
+      method: 'DELETE',
+      url: `${url}&expectedVersion=${'0'.repeat(64)}`,
+      headers: { cookie: cookies.full },
+    });
+    expect(stale.statusCode, stale.body).toBe(409);
+    expect(stale.json().error).toBe('voucher-version-conflict');
+    expect(await writeSet(voucherNo)).toEqual(before);
+    const ok = await app.inject({
+      method: 'DELETE',
+      url: `${url}&expectedVersion=${saved.version}`,
+      headers: { cookie: cookies.full },
+    });
+    expect(ok.statusCode, ok.body).toBe(200);
   });
 
   it('sales-return.rights.edit-needs-update: a user without the edit right is refused and nothing changes', async () => {
