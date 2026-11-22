@@ -102,7 +102,7 @@ export default function BalanceTransferPage() {
 
   const disabled = !ctx?.toYear || busy !== null;
   return (
-    <div ref={screenRef} onKeyDown={onScreenKeyDown}>
+    <div ref={screenRef} onKeyDown={onScreenKeyDown} data-testid="balance-transfer-screen">
       <h1>Balance TrFr</h1>
       {msg && (
         <div className={`msg ${msg.kind}`} role={msg.kind === 'err' ? 'alert' : 'status'}>

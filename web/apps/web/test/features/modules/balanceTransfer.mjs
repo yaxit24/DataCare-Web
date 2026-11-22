@@ -238,9 +238,22 @@ export const balanceTransfer = {
             .getByRole('button')
             .allInnerTexts();
           assert.deepEqual(names, LITE);
-          assert.equal(await page.getByRole('link', { name: 'Year Create' }).count(), 0);
+          // The page itself, not the application menu (which lists Year Create under Company).
+          const screen = page.getByTestId('balance-transfer-screen');
+          for (const link of [
+            'Year Create',
+            'Year-End Close',
+            'Pledge / Dhiran',
+            'Loan Issue',
+            'MFG Issue',
+          ])
+            assert.equal(await screen.getByRole('link', { name: link }).count(), 0, `${link} link`);
           for (const absent of ['Delete', 'Print'])
-            assert.equal(await button(page, absent).count(), 0, `${absent} is not offered`);
+            assert.equal(
+              await screen.getByRole('button', { name: absent, exact: true }).count(),
+              0,
+              `${absent} is not offered`,
+            );
           return { observation: `buttons ${names.join(', ')}`, expected: LITE.join(', ') };
         });
       },
