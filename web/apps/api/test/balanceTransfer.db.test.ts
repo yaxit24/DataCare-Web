@@ -584,19 +584,42 @@ databaseDescribe('Balance TrFr: Ac Balance (Rtl_AcOpbl)', () => {
     expect(await openingLegs('P1')).toMatchObject({ n: 0 });
   });
 
-  it('balance-transfer.rerun.manual-opening-edit-is-replaced: the carry overwrites a hand edit of N+1', async () => {
+  it('balance-transfer.rerun.manual-opening-edit-is-replaced: a hand edit of a carried opening is refused (architect, 2026-11-22)', async () => {
+    // Deliberate difference: the desktop edits OP_DATA freely; in the one-database web the closed year is the balance.
     await leg('P1', 3499.25, 0);
     await carry.ac(TO);
-    await savePartyOpening(runtime, {
+    const edit = savePartyOpening(runtime, {
       scope: { ...scope, coYear: TO },
       acCode: 'P1',
       amount: 1,
       sign: 'D',
       mainUser: USER,
     });
+    await expect(edit).rejects.toThrow(
+      `This opening was carried from ${FROM}; correct the closing year and run Balance TrFr again`,
+    );
     await carry.ac(TO);
     expect(heads(await opData())).toEqual([row('P1', 3499.25, 'C')]);
     expect(await openingLegs('P1')).toMatchObject({ n: 1, money: 3499.25 });
+  });
+
+  it('balance-transfer.delete.user-vouchers-in-next-year-survive: a hand-keyed N+1 opening of a party with no year-N balance stays (Q4, architect, 2026-11-22)', async () => {
+    await leg('P1', 600, 0);
+    await savePartyOpening(runtime, {
+      scope: { ...scope, coYear: TO },
+      acCode: 'P2',
+      amount: 75,
+      sign: 'D',
+      mainUser: USER,
+    });
+    await carry.ac(TO);
+    await carry.ac(TO);
+    // The hand-keyed opening keeps the screen's own signs (the metal heads default to Cr).
+    expect(heads(await opData())).toEqual([
+      row('P1', 600, 'C'),
+      row('P2', 75, 'D', { gsg: 'C', ssg: 'C' }),
+    ]);
+    expect(await openingLegs('P2')).toMatchObject({ n: 1, money: -75 });
   });
 
   it('balance-transfer.rerun.no-double-ledger-legs: two runs leave one set of opening legs', async () => {

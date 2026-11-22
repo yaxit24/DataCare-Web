@@ -256,48 +256,60 @@ export async function yearEndClose(prisma: any, input: YearEndInput): Promise<Ye
   if (fromYear === toYear) throw new YearEndValidationError('toYear must differ from fromYear');
 
   const { scope } = input;
+  return withTxBudget(prisma, scope.tenantId, 'heavy', (tx: any) =>
+    carryOpeningsTx(tx, scope, fromYear, toYear),
+  );
+}
+
+/**
+ * The single writer of a Transfer Year's carried openings (WP-23; architect, 2026-11-22, owner may override), used by
+ * Utilities → Year-End Close and Year Create's Carry Forward (masters/year.ts). Parties come from the Balance TrFr party
+ * carry (carryPartiesTx, the same function the Balance TrFr menu runs), every other account from here, under the one
+ * advisory lock, so whatever order the three menus run in, each account has one carried opening.
+ */
+export async function carryOpeningsTx(
+  tx: any,
+  scope: VoucherScope,
+  fromYear: string,
+  toYear: string,
+  mainUser = 'YEAR END',
+): Promise<YearEndResult> {
   const tenantId = scope.tenantId;
-  return withTxBudget(prisma, tenantId, 'heavy', async (tx: any) => {
-    const closings = await computeClosingsTx(tx, scope, fromYear);
-    const closingStockFine = await closingStockFineTx(tx, scope, fromYear);
-
-    // One writer per account and Transfer Year (WP-23, decided 2026-11-22 by the architect, owner may override): the
-    // parties' openings come from the Balance TrFr party carry, the other accounts' from here, under the same lock.
-    await lockTx(tx, scope as any, toYear, 'ac-balance');
-    // Idempotent re-run: clear this writer's earlier non-party carried legs of toYear and location, and the legacy
-    // ACOP/'OPENING'/'1' legs of older runs; hand-keyed openings (Account Opening, Party Opening) are left alone.
-    const deletedRaw = await tx.$executeRawUnsafe(
-      `DELETE FROM "AC_DATA" d
-        WHERE d."CO_CODE"=$1 AND d."CO_YEAR"=$2 AND coalesce(d."CO_BOOK"::text,'')=$3
-          AND ($6::text IS NULL OR d."LC_CODE"=$6) AND NOT ${isPartySql('d')}
-          AND (d."BOOK_NAME"=$4 OR (d."VCH_TYPE"::text=$5 AND d."BOOK_NAME"=$7 AND d."VCH_NO"=$8))`,
-      scope.coCode,
-      toYear,
-      YE_BOOK,
-      YE_BOOK_NAME,
-      ACOP_TYPE,
-      scope.lcCode ?? null,
-      LEGACY_BOOK_NAME,
-      YE_VCH_NO,
-    );
-    const deleted = num(deletedRaw);
-    const parties = await yearEndPartiesTx(tx, scope, fromYear, toYear);
-
-    let srno = 0;
-    for (const c of closings) {
-      srno++;
-      await insertRowTx(tx, 'AC_DATA', tenantId, buildOpeningRow(scope, toYear, c, srno));
-    }
-
-    return {
-      fromYear,
-      toYear,
-      accounts: closings.length + parties,
-      carried: srno + parties,
-      deleted,
-      closingStockFine,
-    };
-  });
+  const closings = await computeClosingsTx(tx, scope, fromYear);
+  const closingStockFine = await closingStockFineTx(tx, scope, fromYear);
+  await lockTx(tx, scope as any, toYear, 'ac-balance');
+  // Idempotent re-run: clear this writer's earlier non-party carried legs of toYear and location; hand-keyed openings
+  // (Party Opening) are left alone. Legacy ACOP / 'OPENING' / '1' legs are relabelled carried by migration
+  // 20261122100000 and so fall under the first condition; the second keeps a database restored from before it exact.
+  const deletedRaw = await tx.$executeRawUnsafe(
+    `DELETE FROM "AC_DATA" d
+      WHERE d."CO_CODE"=$1 AND d."CO_YEAR"=$2 AND coalesce(d."CO_BOOK"::text,'')=$3
+        AND ($6::text IS NULL OR d."LC_CODE"=$6) AND NOT ${isPartySql('d')}
+        AND (d."BOOK_NAME"=$4 OR (d."VCH_TYPE"::text=$5 AND d."BOOK_NAME"=$7 AND d."VCH_NO"=$8))`,
+    scope.coCode,
+    toYear,
+    YE_BOOK,
+    YE_BOOK_NAME,
+    ACOP_TYPE,
+    scope.lcCode ?? null,
+    LEGACY_BOOK_NAME,
+    YE_VCH_NO,
+  );
+  const deleted = num(deletedRaw);
+  const parties = await yearEndPartiesTx(tx, scope, fromYear, toYear, mainUser);
+  let srno = 0;
+  for (const c of closings) {
+    srno++;
+    await insertRowTx(tx, 'AC_DATA', tenantId, buildOpeningRow(scope, toYear, c, srno));
+  }
+  return {
+    fromYear,
+    toYear,
+    accounts: closings.length + parties,
+    carried: srno + parties,
+    deleted,
+    closingStockFine,
+  };
 }
 
 /**
@@ -310,6 +322,7 @@ async function yearEndPartiesTx(
   scope: VoucherScope,
   fromYear: string,
   toYear: string,
+  mainUser: string,
 ): Promise<number> {
   const years: any[] = await tx.$queryRawUnsafe(
     `SELECT "CO_YEAR" y, "OP_DATE"::text op, "CL_DATE"::text cl FROM "YEAR_MAST" WHERE "CO_CODE"=$1 AND "CO_YEAR" IN ($2,$3)`,
@@ -340,6 +353,6 @@ async function yearEndPartiesTx(
       coYear: fromYear,
     },
     { fromYear, toYear, clDate, opDate },
-    'YEAR END',
+    mainUser,
   );
 }

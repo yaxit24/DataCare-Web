@@ -225,16 +225,32 @@ export async function carryPartiesTx(
     target.fromYear,
     target.clDate,
   );
-  const where = `"CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3`;
+  // Replace only what the carry owns (architect, 2026-11-22, owner may override; the desktop deletes every opening of
+  // the year first, BtmSchm.cs:2764): the earlier carried rows of the location (their legs carry 'BAL TRFR'), and the
+  // hand-keyed opening of an account the carry now writes. A hand-keyed opening of a party with no closing-year
+  // balance stays.
+  const written = groups
+    .map((g) => ({ g, heads: acOpeningHeads({ money: g.money, gold: g.gold, silver: g.silver }) }))
+    .filter((x) => x.heads !== null);
+  const keys = written.map((x) => `${String(x.g.ac)}|${String(x.g.dt)}`);
   await tx.$executeRawUnsafe(
-    `DELETE FROM "OP_DATA" WHERE ${where}`,
+    `DELETE FROM "OP_DATA" o
+      WHERE o."CO_CODE"=$1 AND o."LC_CODE"=$2 AND o."CO_YEAR"=$3
+        AND (o."AC_CODE" || '|' || coalesce(NULLIF(o."DATA_TYPE",''),'A') = ANY($4::text[])
+             OR EXISTS (SELECT 1 FROM "AC_DATA" d
+                         WHERE d."CO_CODE"=o."CO_CODE" AND d."LC_CODE"=o."LC_CODE" AND d."CO_YEAR"=o."CO_YEAR"
+                           AND d."CO_BOOK"='000' AND d."AC_CODE"=o."AC_CODE"
+                           AND coalesce(NULLIF(d."DATA_TYPE",''),'A')=coalesce(NULLIF(o."DATA_TYPE",''),'A')
+                           AND d."BOOK_NAME"=$5))`,
     scope.coCode,
     lc,
     target.toYear,
+    keys,
+    CARRIED_OPENING_BOOK_NAME,
   );
   await tx.$executeRawUnsafe(
     `DELETE FROM "AC_DATA" d WHERE d."CO_CODE"=$1 AND d."LC_CODE"=$2 AND d."CO_YEAR"=$3 AND d."CO_BOOK"='000'
-        AND (d."BOOK_NAME"=$4
+        AND ((d."BOOK_NAME"=$4 AND d."AC_CODE" || '|' || coalesce(NULLIF(d."DATA_TYPE",''),'A') = ANY($6::text[]))
              OR (${isPartySql('d')}
                  AND (d."BOOK_NAME"=$5 OR (d."VCH_TYPE"='ACOP' AND d."BOOK_NAME"='OPENING' AND d."VCH_NO"='1'))))`,
     scope.coCode,
@@ -242,6 +258,7 @@ export async function carryPartiesTx(
     target.toYear,
     PARTY_OPENING_LEG_BOOK_NAME,
     CARRIED_OPENING_BOOK_NAME,
+    keys,
   );
   const legDate = new Date(`${dayBefore(target.opDate)}T00:00:00.000Z`);
   const user = mainUser.slice(0, 15);
@@ -252,9 +269,8 @@ export async function carryPartiesTx(
     coYear: target.toYear,
   };
   let rows = 0;
-  for (const g of groups) {
-    const heads = acOpeningHeads({ money: g.money, gold: g.gold, silver: g.silver });
-    if (!heads) continue;
+  for (const { g, heads: h } of written) {
+    const heads = h!;
     const acCode = String(g.ac);
     const dataType = String(g.dt);
     await insertRowTx(tx, 'OP_DATA', scope.tenantId, {
@@ -343,31 +359,14 @@ export async function carryItemStock(
       target.fromYear,
       target.clDate,
     );
-    // The Transfer Year's openings of the location are replaced (target year only, BtmSchm.cs:2932). A hand-keyed
-    // Item Opening's stock and other-detail rows go with it (stock/itemOpening.ts deleteTypeTx), so no stock leg is
-    // left without its opening.
-    const yearWhere = `"CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"='000'`;
-    await tx.$executeRawUnsafe(
-      `DELETE FROM "MAIN_STOCK" WHERE ${yearWhere} AND "VCH_TYPE"='ITOBL'`,
-      scope.coCode,
-      lc,
-      target.toYear,
-    );
-    await tx.$executeRawUnsafe(
-      `DELETE FROM "DM_DATA" WHERE ${yearWhere} AND "BOOK_NAME"='ITOBL'`,
-      scope.coCode,
-      lc,
-      target.toYear,
-    );
-    await tx.$executeRawUnsafe(
-      `DELETE FROM "ITM_OPBL" WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3`,
-      scope.coCode,
-      lc,
-      target.toYear,
-    );
-    let rows = 0;
-    for (const [index, g] of groups.entries()) {
-      const f = itemOpeningFigures({
+    // Replace only what the carry owns (architect, 2026-11-22, owner may override; the desktop deletes every ITM_OPBL
+    // row of the year first, BtmSchm.cs:2932): the earlier carried rows of the location (CARRIED_FROM set, book '000'),
+    // and the hand-keyed book-'000' opening of an item the carry now writes, with that opening's ITOBL stock and
+    // other-detail rows (stock/itemOpening.ts deleteTypeTx). Openings on other books, and of items with no closing-year
+    // stock, stay.
+    const figures = groups.map((g) => ({
+      g,
+      f: itemOpeningFigures({
         itCode: String(g.it),
         itType: g.ty ?? null,
         pcs: g.pcs,
@@ -375,7 +374,18 @@ export async function carryItemStock(
         net: g.net,
         amount: g.amt,
         touch: g.touch,
-      });
+      }),
+    }));
+    const items = figures.filter((x) => x.f !== null).map((x) => String(x.g.it));
+    const yearWhere = `"CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"='000'`;
+    for (const sql of [
+      `DELETE FROM "MAIN_STOCK" WHERE ${yearWhere} AND "VCH_TYPE"='ITOBL' AND "IT_CODE" = ANY($4::text[])`,
+      `DELETE FROM "DM_DATA" WHERE ${yearWhere} AND "BOOK_NAME"='ITOBL' AND "IT_CODE" = ANY($4::text[])`,
+      `DELETE FROM "ITM_OPBL" WHERE ${yearWhere} AND ("CARRIED_FROM" IS NOT NULL OR "IT_CODE" = ANY($4::text[]))`,
+    ])
+      await tx.$executeRawUnsafe(sql, scope.coCode, lc, target.toYear, items);
+    let rows = 0;
+    for (const [index, { g, f }] of figures.entries()) {
       if (!f) continue;
       await insertRowTx(tx, 'ITM_OPBL', scope.tenantId, {
         CO_CODE: scope.coCode,

@@ -14,10 +14,23 @@ import { carryAcBalance, carryItemStock } from '../src/modules/ops/balanceTransf
 import { yearEndClose } from '../src/modules/ops/yearEnd.js';
 import { accountLedgerReport } from '../src/modules/reports/accountLedgerReport.js';
 import { trialBalanceFull } from '../src/modules/reports/reports8.js';
-import { getPartyOpening, savePartyOpening } from '../src/modules/finance/partyOpening.js';
+import {
+  deletePartyOpening,
+  getPartyOpening,
+  savePartyOpening,
+} from '../src/modules/finance/partyOpening.js';
 import { partyBalance } from '../src/modules/finance/partyBalance.js';
 import { onHandNet } from '../src/modules/stock/stock.js';
-import { getItemOpening, saveItemOpening } from '../src/modules/stock/itemOpening.js';
+import {
+  deleteItemOpening,
+  getItemOpening,
+  saveItemOpening,
+} from '../src/modules/stock/itemOpening.js';
+import { readFileSync } from 'node:fs';
+import { carryForwardOpenings } from '../src/modules/masters/year.js';
+import { groupSummary } from '../src/modules/reports/reports3.js';
+import { voucherRegister } from '../src/modules/reports/voucherRegister.js';
+import { dataRefresh } from '../src/modules/utilities/dataRefresh.js';
 import { snapshotTenant } from './support/tenantSnapshot.js';
 
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
@@ -225,20 +238,49 @@ databaseDescribe('Balance TrFr through the real readers', () => {
     await expectEachBalanceOnce();
   });
 
-  it('a hand edit of the carried opening in Party Opening stays a carried opening (the ledger does not double it)', async () => {
+  it('finding 3 (decision 3): a carried opening cannot be edited or deleted on Party Opening; the balances stay once', async () => {
     await balanceTrfr();
     await yearEnd();
-    await savePartyOpening(runtime, {
-      scope: scopeN1,
-      acCode: 'P1',
-      amount: 3499.25,
-      sign: 'C',
-      mainUser: USER,
-    });
+    const message = `This opening was carried from ${FROM}; correct the closing year and run Balance TrFr again`;
+    await expect(
+      savePartyOpening(runtime, {
+        scope: scopeN1,
+        acCode: 'P1',
+        amount: 10,
+        sign: 'C',
+        mainUser: USER,
+      }),
+    ).rejects.toThrow(message);
+    await expect(deletePartyOpening(runtime, scopeN1, 'P1', USER)).rejects.toThrow(message);
     await expectEachBalanceOnce();
   });
 
-  it('a legacy Year-End Close opening (ACOP / OPENING / voucher 1) is replaced, not added', async () => {
+  it('decision 1: Year Create Carry Forward is the same single writer, in any order with the other two menus', async () => {
+    await carryForwardOpenings(runtime, scopeN, FROM, TO, USER);
+    const viaYearCreate = await openings();
+    await expectEachBalanceOnce();
+    await balanceTrfr();
+    await yearEnd();
+    await carryForwardOpenings(runtime, scopeN, FROM, TO, USER);
+    expect(await openings()).toEqual(viaYearCreate);
+    await expectEachBalanceOnce();
+  });
+
+  it('finding 4 (decision 4): group summary, voucher register and Data Refresh totals across years ignore carried openings', async () => {
+    await balanceTrfr();
+    await yearEnd();
+    // History: Dr 5000.00 + 1500.75 + 1000.00 = 7500.75, Cr the same.
+    const groups = await groupSummary(runtime, { tenantId: TENANT, coCode: CO } as any);
+    expect(Math.round(groups.rows.reduce((t: number, r: any) => t + Number(r.dr), 0) * 100)).toBe(
+      750075,
+    );
+    const register = await voucherRegister(runtime, { tenantId: TENANT, coCode: CO } as any);
+    expect(register.rows.filter((r: any) => r.book === '000')).toEqual([]);
+    const refresh = await dataRefresh(runtime, { tenantId: TENANT, coCode: CO });
+    expect(refresh.ledger).toMatchObject({ dr: 7500.75, cr: 7500.75, diff: 0 });
+  });
+
+  it('decision 2: the migration relabels a legacy Year-End Close leg as carried, so no reader adds it', async () => {
     for (const [ac, cr, dr] of [
       ['P1', 3499.25, 0],
       ['X5', 0, 3499.25],
@@ -255,6 +297,27 @@ databaseDescribe('Balance TrFr through the real readers', () => {
         dr,
         `LEGACY-${ac}`,
       );
+    const sql = readFileSync(
+      new URL(
+        '../../../packages/db/prisma/migrations/20261122100000_legacy_year_end_openings_carried/migration.sql',
+        import.meta.url,
+      ),
+      'utf8',
+    );
+    await owner.$executeRawUnsafe(sql);
+    await owner.$executeRawUnsafe(sql); // idempotent
+    const relabelled = await withTenant(owner, TENANT, (tx) =>
+      tx.$queryRawUnsafe(
+        `SELECT count(*)::int n FROM "AC_DATA" WHERE tenant_id=$1 AND "BOOK_NAME"='BAL TRFR'`,
+        TENANT,
+      ),
+    );
+    expect(relabelled).toEqual([{ n: 2 }]);
+    // Before any new carry the ledger already shows the opening once (the relabelled leg is excluded).
+    expect(await ledger('2026-04-01', '2027-03-31')).toEqual({
+      opening: 3499.25,
+      closing: 2499.25,
+    });
     await balanceTrfr();
     await yearEnd();
     await expectEachBalanceOnce();
@@ -286,6 +349,46 @@ databaseDescribe('Balance TrFr through the real readers', () => {
       mainUser: USER,
     });
     expect(await onHandNet(runtime, TENANT, stockScope)).toEqual(before);
+    // Decision 3: a change or removal of the carried row, and a delete of the type, are refused.
+    const message = `This opening was carried from ${FROM}; correct the closing year and run Balance TrFr again`;
+    const latest = await getItemOpening(runtime, scopeN1, 'G');
+    await expect(
+      saveItemOpening(runtime, {
+        scope: scopeN1,
+        type: 'G',
+        rows: latest.rows.map((r) => (r.itCode === 'I1' ? { ...r, pcs: 7 } : r)),
+        expectedVersion: latest.version,
+        mainUser: USER,
+      }),
+    ).rejects.toThrow(message);
+    await expect(deleteItemOpening(runtime, scopeN1, 'G', latest.version)).rejects.toThrow(message);
+    expect(await onHandNet(runtime, TENANT, stockScope)).toEqual(before);
+  });
+
+  it('decision 5: a hand-keyed N+1 Item Opening of an item with no closing-year stock stays through the carry', async () => {
+    await exec(
+      `INSERT INTO "ITEM_MAST"(tenant_id,"CO_CODE","IT_CODE","IT_NAME","IT_TYPE","GR_CODE","ITEM_RATE") VALUES ($1,$2,'I9','ITEM I9','G','GR1',0)`,
+      TENANT,
+      CO,
+    );
+    const stockScope = { CO_CODE: CO, LC_CODE: LC };
+    const grid = await getItemOpening(runtime, scopeN1, 'G');
+    await saveItemOpening(runtime, {
+      scope: scopeN1,
+      type: 'G',
+      rows: grid.rows.map((r) => (r.itCode === 'I9' ? { ...r, pcs: 2, grossWt: 8, netWt: 8 } : r)),
+      expectedVersion: grid.version,
+      mainUser: USER,
+    });
+    const withHandKeyed = await onHandNet(runtime, TENANT, stockScope);
+    await carryItemStock(runtime, scopeN, { toYear: TO, mainUser: USER });
+    await carryItemStock(runtime, scopeN, { toYear: TO, mainUser: USER });
+    expect(await onHandNet(runtime, TENANT, stockScope)).toEqual(withHandKeyed);
+    const after = await getItemOpening(runtime, scopeN1, 'G');
+    expect(after.rows.filter((r) => r.saved).map((r) => [r.itCode, r.pcs])).toEqual([
+      ['I1', 6],
+      ['I9', 2],
+    ]);
   });
 
   it('finding 2: a hand-keyed N+1 Item Opening is replaced by the carry with its stock legs (none left behind)', async () => {
