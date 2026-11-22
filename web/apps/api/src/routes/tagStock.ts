@@ -7,6 +7,7 @@ import {
   type TagStockColumn,
   type TagStockReport,
 } from '../modules/reports/tagStock.js';
+import { withTxBudget } from '../modules/shared/txBudget.js';
 import { renderXlsx, type XlsxColumn } from '../modules/reports/xlsx.js';
 
 /**
@@ -26,7 +27,12 @@ export interface TagStockRouteHelpers {
     reply: FastifyReply,
     action: 'view' | 'create' | 'update' | 'delete' | 'print',
   ) => boolean;
-  scopeOf: (req: FastifyRequest) => { tenantId: string; coCode: string; lcCode: string; coYear?: string };
+  scopeOf: (req: FastifyRequest) => {
+    tenantId: string;
+    coCode: string;
+    lcCode: string;
+    coYear?: string;
+  };
 }
 
 const xlsxColumn = (c: TagStockColumn): XlsxColumn => ({
@@ -67,6 +73,22 @@ export function registerTagStockRoutes(app: FastifyInstance, h: TagStockRouteHel
       if (fail(reply, error)) return reply;
       throw error;
     }
+  });
+
+  // The Size list of the form (RP_TAG.cs:3645): distinct non-empty tag sizes of the company and location,
+  // sorted as text ("18" < "7" < "8"). Read right of the report, like the report itself.
+  app.get('/reports/tag-stock/sizes', auth as any, async (req) => {
+    const s = scopeOf(req);
+    return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
+      const rows: Array<{ size: string }> = await tx.$queryRawUnsafe(
+        `SELECT "ITM_SIZE" AS size FROM "BAR_DETL"
+          WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND btrim(coalesce("ITM_SIZE",''))<>''
+          GROUP BY "ITM_SIZE" ORDER BY "ITM_SIZE" COLLATE "C"`,
+        s.coCode,
+        s.lcCode,
+      );
+      return rows.map((r) => r.size);
+    });
   });
 
   app.get('/reports/tag-stock.csv', auth as any, async (req, reply) => {

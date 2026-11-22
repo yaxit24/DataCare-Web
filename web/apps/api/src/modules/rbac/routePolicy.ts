@@ -993,6 +993,7 @@ route('Reports/Tag-Stock Report', [
   'GET /reports/tag-stock',
   'GET /reports/tag-stock.csv',
   'GET /reports/tag-stock.xlsx',
+  'GET /reports/tag-stock/sizes',
 ]);
 route('Reports/HuId Report', ['GET /reports/huid']);
 route('Reports/ItStk Level', ['GET /reports/item-weight-levels']);

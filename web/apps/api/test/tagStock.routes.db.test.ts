@@ -99,6 +99,10 @@ const YEAR = '2026-2027';
       tenantId,
       YEAR,
     );
+    await exec(
+      `UPDATE "BAR_DETL" SET "ITM_SIZE"=(ARRAY['7','8','18'])[1+(row_id % 3)::int] WHERE tenant_id=$1`,
+      tenantId,
+    );
     app = await buildApp({ prisma: runtime, secret: SECRET, secureCookies: false });
     for (const user of ['tsprint', 'tslist', 'tsnone']) cookies.set(user, await login(user));
   });
@@ -149,6 +153,12 @@ const YEAR = '2026-2027';
     expect(Number(total[header.indexOf('Mrp')])).toBe(510000);
     const xlsx = await get('tsprint', '/reports/tag-stock.xlsx?tab=stock&toDate=2026-05-31');
     expect(xlsx.statusCode).toBe(200);
+  });
+
+  it('the Size list is the distinct tag sizes sorted as text', async () => {
+    const res = await get('tslist', '/reports/tag-stock/sizes');
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toEqual(['18', '7', '8']);
   });
 
   it('an unknown mode, view or date is a 400, never a silent stock report', async () => {
