@@ -256,7 +256,7 @@ const SILVER_FULL = { ...SILVER, hmIdAmount: 40, itmColor: 'WHT' };
         tdsAmount: 12,
         empCode: 'E7',
         vchDesc: 'wp28 lossless',
-        hmTaxCode: 'HMT18',
+        hmTaxCode: '18',
         hmTaxPct: 18,
         cashAmt: 1000,
         chequeAmt: 500,
@@ -267,7 +267,7 @@ const SILVER_FULL = { ...SILVER, hmIdAmount: 40, itmColor: 'WHT' };
     // Stored as typed, before any reopen.
     expect(header.BILL_NO).toBe('SB 0077 ');
     expect(header.EMP_CODE).toBe('E7');
-    expect(header.HM_TAX_CODE).toBe('HMT18');
+    expect(header.HM_TAX_CODE).toBe('18');
     // TR_PURC_HM.cs:9995 Math.Round(36.50 + 40.00, 0) = 76 (half to even); tax Round(76 x 18 / 100, 2) = 13.68.
     expect([n(header.HM_AMT), n(header.HM_TAX_PRC), n(header.HM_TAX_AMT)]).toEqual([76, 18, 13.68]);
     const gold = (await row('PR_DETL', BOOK, vchNo, `ORDER BY "SR_NO"`))[0]!;
@@ -405,10 +405,10 @@ const SILVER_FULL = { ...SILVER, hmIdAmount: 40, itmColor: 'WHT' };
 
   // purchase-invoice.formula.hm-zero-charge-no-tax
   it('a chosen hallmark tax code is stored even when no line carries a hallmark amount', async () => {
-    const vchNo = await create(purchase([GOLD, SILVER], { hmTaxCode: 'HMT18', hmTaxPct: 18 }));
+    const vchNo = await create(purchase([GOLD, SILVER], { hmTaxCode: '18', hmTaxPct: 18 }));
     const header = (await row('PR_DATA', BOOK, vchNo))[0]!;
     expect([header.HM_TAX_CODE, n(header.HM_TAX_PRC), n(header.HM_AMT), n(header.HM_TAX_AMT)]).toEqual([
-      'HMT18',
+      '18',
       18,
       0,
       0,
@@ -419,7 +419,7 @@ const SILVER_FULL = { ...SILVER, hmIdAmount: 40, itmColor: 'WHT' };
   it('editing a line hallmark amount re-derives the header charge and its tax (half to even)', async () => {
     const vchNo = await create(
       purchase([{ ...GOLD, hmIdAmount: 36.5 }, { ...SILVER, hmIdAmount: 40 }], {
-        hmTaxCode: 'HMT18',
+        hmTaxCode: '18',
         hmTaxPct: 18,
       }),
     );
