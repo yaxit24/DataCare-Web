@@ -639,227 +639,248 @@ export interface SeedResult {
   };
 }
 
+export interface SeedOptions {
+  coName?: string;
+  lcCode?: string;
+}
+
 export async function seedCompany(
   prisma: any,
   tenantId: string,
   coCode: string,
-  opts?: { coName?: string; lcCode?: string },
+  opts?: SeedOptions,
+): Promise<SeedResult> {
+  if (!coCode) throw new Error('coCode is required');
+  return withTxBudget(prisma, tenantId, 'heavy', (tx: any) =>
+    seedCompanyTx(tx, tenantId, coCode, opts),
+  );
+}
+
+/**
+ * The provisioning seed inside the caller's transaction. Shared by `seedCompany` (Admin → Provision Company, the
+ * demo and the test fixtures) and the Company master's first-year provisioning (`masters/companyMaster.ts`, WP-07),
+ * which runs it after Year Create's copy (`masters/year.ts` `createYearTx`) so that a new company holds every row the
+ * web posting needs even when the copy source lacks one. Insert-if-absent throughout: it never overwrites a copied row.
+ */
+export async function seedCompanyTx(
+  tx: any,
+  tenantId: string,
+  coCode: string,
+  opts?: SeedOptions,
 ): Promise<SeedResult> {
   if (!coCode) throw new Error('coCode is required');
   const lcCode = opts?.lcCode ?? '01';
   // The fiscal year the desktop would open: April-to-March around today.
   const y = new Date().getFullYear();
-  return withTxBudget(prisma, tenantId, 'heavy', async (tx: any) => {
-    /**
-     * Does this company lack the row we are about to create?
-     *
-     * The tenant predicate is written into every query explicitly rather than left to RLS. Relying on
-     * RLS made this function silently do nothing when handed an owner connection: the owner bypasses
-     * row-level security, so `WHERE "CO_CODE"='01'` matched some OTHER tenant's company, every check
-     * reported "already present", nothing was inserted, and the result came back
-     * `created: {…all false}` — indistinguishable from a company that was genuinely already
-     * provisioned. It worked in the running application only because the app connects as a non-owner.
-     *
-     * Same defect class as the message-log isolation bug: a query that filters on a business key and
-     * leans on RLS for the tenant is correct under one connection type only. An explicit predicate is
-     * correct under both.
-     */
-    const absent = async (table: string, where: string, ...p: unknown[]): Promise<boolean> => {
-      const sql = `SELECT count(*)::int n FROM "${table}" WHERE tenant_id=$1 AND ${where}`;
-      return Number((await tx.$queryRawUnsafe(sql, tenantId, ...p))[0]?.n ?? 0) === 0;
-    };
-    let coMast = false,
-      accounts = 0,
-      taxes = 0,
-      books = 0,
-      srno = false,
-      coSet = false,
-      locality = false,
-      year = false;
+  /**
+   * Does this company lack the row we are about to create?
+   *
+   * The tenant predicate is written into every query explicitly rather than left to RLS. Relying on
+   * RLS made this function silently do nothing when handed an owner connection: the owner bypasses
+   * row-level security, so `WHERE "CO_CODE"='01'` matched some OTHER tenant's company, every check
+   * reported "already present", nothing was inserted, and the result came back
+   * `created: {…all false}` — indistinguishable from a company that was genuinely already
+   * provisioned. It worked in the running application only because the app connects as a non-owner.
+   *
+   * Same defect class as the message-log isolation bug: a query that filters on a business key and
+   * leans on RLS for the tenant is correct under one connection type only. An explicit predicate is
+   * correct under both.
+   */
+  const absent = async (table: string, where: string, ...p: unknown[]): Promise<boolean> => {
+    const sql = `SELECT count(*)::int n FROM "${table}" WHERE tenant_id=$1 AND ${where}`;
+    return Number((await tx.$queryRawUnsafe(sql, tenantId, ...p))[0]?.n ?? 0) === 0;
+  };
+  let coMast = false,
+    accounts = 0,
+    taxes = 0,
+    books = 0,
+    srno = false,
+    coSet = false,
+    locality = false,
+    year = false;
 
-    if (await absent('CO_MAST', '"CO_CODE"=$2', coCode)) {
+  if (await absent('CO_MAST', '"CO_CODE"=$2', coCode)) {
+    await tx.$executeRawUnsafe(
+      `INSERT INTO "CO_MAST"(tenant_id,"CO_CODE","CO_NAME","LC_CODE") VALUES ($1,$2,$3,$4)`,
+      tenantId,
+      coCode,
+      opts?.coName ?? `Company ${coCode}`,
+      lcCode,
+    );
+    coMast = true;
+  }
+  for (const a of SYSTEM_ACCOUNTS) {
+    if (await absent('AC_MAST', '"CO_CODE"=$2 AND "AC_CODE"=$3', coCode, a.code)) {
       await tx.$executeRawUnsafe(
-        `INSERT INTO "CO_MAST"(tenant_id,"CO_CODE","CO_NAME","LC_CODE") VALUES ($1,$2,$3,$4)`,
+        `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GR","AC_GST_TYPE") VALUES ($1,$2,$3,$4,$5,$6,$7)`,
         tenantId,
         coCode,
-        opts?.coName ?? `Company ${coCode}`,
         lcCode,
+        a.code,
+        a.name,
+        a.gr,
+        a.gstType ?? null,
       );
-      coMast = true;
+      accounts += 1;
     }
-    for (const a of SYSTEM_ACCOUNTS) {
-      if (await absent('AC_MAST', '"CO_CODE"=$2 AND "AC_CODE"=$3', coCode, a.code)) {
-        await tx.$executeRawUnsafe(
-          `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GR","AC_GST_TYPE") VALUES ($1,$2,$3,$4,$5,$6,$7)`,
-          tenantId,
-          coCode,
-          lcCode,
-          a.code,
-          a.name,
-          a.gr,
-          a.gstType ?? null,
-        );
-        accounts += 1;
-      }
+  }
+  for (const t of TAXES) {
+    // Parent row at SR_NO 0 — the row the resolver pins a named code to (G82).
+    if (
+      await absent(
+        'TAX_MAST',
+        '"CO_CODE"=$2 AND "TAX_CODE"=$3 AND coalesce("SR_NO",0)=0',
+        coCode,
+        t.code,
+      )
+    ) {
+      await tx.$executeRawUnsafe(
+        `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_PRC","TAX_GROUP") VALUES ($1,$2,$3,0,$4,$5,'N')`,
+        tenantId,
+        coCode,
+        t.code,
+        t.name,
+        t.prc,
+      );
+      taxes += 1;
     }
-    for (const t of TAXES) {
-      // Parent row at SR_NO 0 — the row the resolver pins a named code to (G82).
-      if (
-        await absent(
-          'TAX_MAST',
-          '"CO_CODE"=$2 AND "TAX_CODE"=$3 AND coalesce("SR_NO",0)=0',
-          coCode,
-          t.code,
-        )
-      ) {
-        await tx.$executeRawUnsafe(
-          `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_PRC","TAX_GROUP") VALUES ($1,$2,$3,0,$4,$5,'N')`,
-          tenantId,
-          coCode,
-          t.code,
-          t.name,
-          t.prc,
-        );
-        taxes += 1;
-      }
-      // SGST / CGST / IGST component rows at SR_NO 1..3 for a GST code.
-      if (t.isGst) {
-        for (const c of gstComponents(t.prc)) {
-          if (
-            await absent(
-              'TAX_MAST',
-              '"CO_CODE"=$2 AND "TAX_CODE"=$3 AND coalesce("SR_NO",0)=$4',
-              coCode,
-              t.code,
-              c.srNo,
-            )
-          ) {
-            await tx.$executeRawUnsafe(
-              `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_PRC","TAX_GROUP") VALUES ($1,$2,$3,$4,$5,$6,$7)`,
-              tenantId,
-              coCode,
-              t.code,
-              c.srNo,
-              `${t.name} ${c.group}`,
-              c.prc,
-              c.group,
-            );
-            taxes += 1;
-          }
+    // SGST / CGST / IGST component rows at SR_NO 1..3 for a GST code.
+    if (t.isGst) {
+      for (const c of gstComponents(t.prc)) {
+        if (
+          await absent(
+            'TAX_MAST',
+            '"CO_CODE"=$2 AND "TAX_CODE"=$3 AND coalesce("SR_NO",0)=$4',
+            coCode,
+            t.code,
+            c.srNo,
+          )
+        ) {
+          await tx.$executeRawUnsafe(
+            `INSERT INTO "TAX_MAST"(tenant_id,"CO_CODE","TAX_CODE","SR_NO","TAX_NAME","TAX_PRC","TAX_GROUP") VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+            tenantId,
+            coCode,
+            t.code,
+            c.srNo,
+            `${t.name} ${c.group}`,
+            c.prc,
+            c.group,
+          );
+          taxes += 1;
         }
       }
     }
-    for (const b of BOOKS) {
-      // MAIN_BOOK / direction come from workflowPolicy when the book backs a workflow, so provisioning
-      // cannot spell them differently from the resolver that validates them.
-      const wf = b.workflow ? workflowPolicy[b.workflow] : undefined;
-      const mainBook = wf?.mainBook ?? b.mainBook ?? b.name.toUpperCase();
-      const inout = wf?.inout ?? b.inout ?? 'I';
-      const desktopTables = DESKTOP_BOOK_TABLES[mainBook];
-      if (
-        await absent(
-          'BOOK_DATA',
-          '"CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4',
-          coCode,
-          lcCode,
-          b.book,
-        )
-      ) {
-        await tx.$executeRawUnsafe(
-          `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME",
+  }
+  for (const b of BOOKS) {
+    // MAIN_BOOK / direction come from workflowPolicy when the book backs a workflow, so provisioning
+    // cannot spell them differently from the resolver that validates them.
+    const wf = b.workflow ? workflowPolicy[b.workflow] : undefined;
+    const mainBook = wf?.mainBook ?? b.mainBook ?? b.name.toUpperCase();
+    const inout = wf?.inout ?? b.inout ?? 'I';
+    const desktopTables = DESKTOP_BOOK_TABLES[mainBook];
+    if (
+      await absent(
+        'BOOK_DATA',
+        '"CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_BOOK"=$4',
+        coCode,
+        lcCode,
+        b.book,
+      )
+    ) {
+      await tx.$executeRawUnsafe(
+        `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME",
              "MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","BOOK_TBL_DETL")
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'Y',$9,$10)`,
+        tenantId,
+        coCode,
+        lcCode,
+        b.book,
+        b.name,
+        b.shortName ?? b.book,
+        mainBook,
+        inout,
+        b.table ?? desktopTables?.table ?? null,
+        b.table ? null : (desktopTables?.detail ?? null),
+      );
+      // BOOK_DETL carries ONE ROW PER POSTING LEG, and `bookPolicy.resolveBookAccountTx` asks for a
+      // specific SR_NO. The sale path alone resolves three: 1 = the control/sales account, 2 = the
+      // cash/bank account a settlement lands in, 3 = the round-off / kasar account. Creating only row 1
+      // produced `book SL account row 2 is missing` on the first cash sale.
+      const legs: Array<{ srNo: number; acCode: string }> = b.slots ?? [
+        { srNo: 1, acCode: b.acCode },
+        { srNo: 2, acCode: 'CASH' },
+        { srNo: 3, acCode: 'ROUNDOFF' },
+      ];
+      for (const leg of legs) {
+        await tx.$executeRawUnsafe(
+          `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","BOOK_NAME",
+               "BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","AC_CODE","AC_NAME","DATA_TYPE")
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'L')`,
           tenantId,
           coCode,
           lcCode,
           b.book,
+          leg.srNo,
           b.name,
           b.shortName ?? b.book,
           mainBook,
           inout,
-          b.table ?? desktopTables?.table ?? null,
-          b.table ? null : (desktopTables?.detail ?? null),
+          leg.acCode,
+          leg.acCode,
         );
-        // BOOK_DETL carries ONE ROW PER POSTING LEG, and `bookPolicy.resolveBookAccountTx` asks for a
-        // specific SR_NO. The sale path alone resolves three: 1 = the control/sales account, 2 = the
-        // cash/bank account a settlement lands in, 3 = the round-off / kasar account. Creating only row 1
-        // produced `book SL account row 2 is missing` on the first cash sale.
-        const legs: Array<{ srNo: number; acCode: string }> = b.slots ?? [
-          { srNo: 1, acCode: b.acCode },
-          { srNo: 2, acCode: 'CASH' },
-          { srNo: 3, acCode: 'ROUNDOFF' },
-        ];
-        for (const leg of legs) {
-          await tx.$executeRawUnsafe(
-            `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","BOOK_NAME",
-               "BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","AC_CODE","AC_NAME","DATA_TYPE")
-             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'L')`,
-            tenantId,
-            coCode,
-            lcCode,
-            b.book,
-            leg.srNo,
-            b.name,
-            b.shortName ?? b.book,
-            mainBook,
-            inout,
-            leg.acCode,
-            leg.acCode,
-          );
-        }
-        books += 1;
       }
+      books += 1;
     }
-    if (await absent('SRNO_MAST', '"CO_CODE"=$2 AND "LC_CODE"=$3', coCode, lcCode)) {
-      await tx.$executeRawUnsafe(
-        `INSERT INTO "SRNO_MAST"(tenant_id,"CO_CODE","LC_CODE","VCH_SRNO","TAG_SRNO") VALUES ($1,$2,$3,0,0)`,
-        tenantId,
-        coCode,
-        lcCode,
-      );
-      srno = true;
-    }
-    // A company with no LOCATION cannot be selected: resolveLoginScope() cannot build a scope without
-    // one, and /context/select answers `location-unavailable`. Provisioning previously created the books
-    // and accounts but not the location, so a provisioned company was unreachable through the UI.
-    if (await absent('LOCT_MAST', '"CO_CODE"=$2 AND "LC_CODE"=$3', coCode, lcCode)) {
-      await tx.$executeRawUnsafe(
-        `INSERT INTO "LOCT_MAST"(tenant_id,"CO_CODE","LC_CODE","LC_NAME","AC_CODE") VALUES ($1,$2,$3,$4,$5)`,
-        tenantId,
-        coCode,
-        lcCode,
-        'Main Counter',
-        // The branch account TR_INOUT posts stock in/out against (MS_LOCT.cs:3458; N91/G105).
-        'BRANCH',
-      );
-      locality = true;
-    }
-    // Likewise a fiscal year: businessScope.year() filters by company, and without a row every business
-    // endpoint answers `scope-incomplete`.
-    if (await absent('YEAR_MAST', '"CO_CODE"=$2', coCode)) {
-      const startYear = new Date().getMonth() + 1 >= 4 ? y : y - 1;
-      await tx.$executeRawUnsafe(
-        `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE") VALUES ($1,$2,$3,$4,$5)`,
-        tenantId,
-        coCode,
-        `${startYear}-${startYear + 1}`,
-        new Date(Date.UTC(startYear, 3, 1)),
-        new Date(Date.UTC(startYear + 1, 2, 31)),
-      );
-      year = true;
-    }
-    if (await absent('CO_SET', '"CO_CODE"=$2', coCode)) {
-      // The desktop never leaves the amount types NULL. The schema upgrade backfills them
-      // (Ac_Image.cs:6221 `SL_AMT_TYPE = 'N'`, :7101 `PR_AMT_TYPE = 'F'`) and company open repeats
-      // it in memory (MS_OPNCOMP.cs:881-888). The loader applies the same defaults to a blank
-      // value, but storing them here makes a web company's CO_SET read like a desktop one.
-      await tx.$executeRawUnsafe(
-        `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","SL_AMT_TYPE","PR_AMT_TYPE") VALUES ($1,$2,'N','F')`,
-        tenantId,
-        coCode,
-      );
-      coSet = true;
-    }
-    return { coCode, created: { coMast, accounts, taxes, books, srno, coSet, locality, year } };
-  });
+  }
+  if (await absent('SRNO_MAST', '"CO_CODE"=$2 AND "LC_CODE"=$3', coCode, lcCode)) {
+    await tx.$executeRawUnsafe(
+      `INSERT INTO "SRNO_MAST"(tenant_id,"CO_CODE","LC_CODE","VCH_SRNO","TAG_SRNO") VALUES ($1,$2,$3,0,0)`,
+      tenantId,
+      coCode,
+      lcCode,
+    );
+    srno = true;
+  }
+  // A company with no LOCATION cannot be selected: resolveLoginScope() cannot build a scope without
+  // one, and /context/select answers `location-unavailable`. Provisioning previously created the books
+  // and accounts but not the location, so a provisioned company was unreachable through the UI.
+  if (await absent('LOCT_MAST', '"CO_CODE"=$2 AND "LC_CODE"=$3', coCode, lcCode)) {
+    await tx.$executeRawUnsafe(
+      `INSERT INTO "LOCT_MAST"(tenant_id,"CO_CODE","LC_CODE","LC_NAME","AC_CODE") VALUES ($1,$2,$3,$4,$5)`,
+      tenantId,
+      coCode,
+      lcCode,
+      'Main Counter',
+      // The branch account TR_INOUT posts stock in/out against (MS_LOCT.cs:3458; N91/G105).
+      'BRANCH',
+    );
+    locality = true;
+  }
+  // Likewise a fiscal year: businessScope.year() filters by company, and without a row every business
+  // endpoint answers `scope-incomplete`.
+  if (await absent('YEAR_MAST', '"CO_CODE"=$2', coCode)) {
+    const startYear = new Date().getMonth() + 1 >= 4 ? y : y - 1;
+    await tx.$executeRawUnsafe(
+      `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE") VALUES ($1,$2,$3,$4,$5)`,
+      tenantId,
+      coCode,
+      `${startYear}-${startYear + 1}`,
+      new Date(Date.UTC(startYear, 3, 1)),
+      new Date(Date.UTC(startYear + 1, 2, 31)),
+    );
+    year = true;
+  }
+  if (await absent('CO_SET', '"CO_CODE"=$2', coCode)) {
+    // The desktop never leaves the amount types NULL. The schema upgrade backfills them
+    // (Ac_Image.cs:6221 `SL_AMT_TYPE = 'N'`, :7101 `PR_AMT_TYPE = 'F'`) and company open repeats
+    // it in memory (MS_OPNCOMP.cs:881-888). The loader applies the same defaults to a blank
+    // value, but storing them here makes a web company's CO_SET read like a desktop one.
+    await tx.$executeRawUnsafe(
+      `INSERT INTO "CO_SET"(tenant_id,"CO_CODE","SL_AMT_TYPE","PR_AMT_TYPE") VALUES ($1,$2,'N','F')`,
+      tenantId,
+      coCode,
+    );
+    coSet = true;
+  }
+  return { coCode, created: { coMast, accounts, taxes, books, srno, coSet, locality, year } };
 }

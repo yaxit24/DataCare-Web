@@ -60,53 +60,82 @@ export function resolveYearDates(input: {
   return dates;
 }
 
+export interface CreateYearInput {
+  coYear: string;
+  opDate?: string;
+  clDate?: string;
+  yearMonth?: string;
+  oldMethod?: string;
+  mainUser?: string;
+  /**
+   * The company the first year's masters are copied from: MS_COMPANY's "With Old Company Master" choice
+   * (`cboWithOldCoMast`, MS_COMPANY.cs:7291-7301 sets `MsOldCoCode`), or blank for the template company 01
+   * (MS_YEAR.cs:1504-1595).
+   */
+  sourceCoCode?: string;
+}
+
 export async function createYear(
   prisma: any,
   scope: { tenantId: string; coCode: string },
-  input: {
-    coYear: string;
-    opDate?: string;
-    clDate?: string;
-    yearMonth?: string;
-    oldMethod?: string;
-    mainUser?: string;
-  },
+  input: CreateYearInput,
 ): Promise<{ coYear: string; opDate: string; clDate: string }> {
-  const coYear = String(input.coYear ?? '').trim();
+  const coYear = validYearCode(input.coYear);
+  const dates = resolveYearDates({ ...input, coYear });
+  return withTxBudget(prisma, scope.tenantId, 'heavy', (tx: any) =>
+    createYearTx(tx, scope, { ...input, coYear }, dates),
+  );
+}
+
+/** The trimmed year code, or the operator-facing refusal. */
+export function validYearCode(raw: unknown): string {
+  const coYear = String(raw ?? '').trim();
   if (!coYear) throw new YearValidationError('coYear is required');
   if (coYear.length > 9) throw new YearValidationError('year code is at most 9 characters');
-  const dates = resolveYearDates({ ...input, coYear });
-  return withTxBudget(prisma, scope.tenantId, 'heavy', async (tx: any) => {
-    const ex: any[] = await tx.$queryRawUnsafe(
-      `SELECT count(*) FILTER (WHERE "CO_YEAR"=$2)::int n, count(*)::int years
-         FROM "YEAR_MAST" WHERE "CO_CODE"=$1`,
-      scope.coCode,
-      coYear,
-    );
-    if (ex[0]?.n > 0) throw new YearValidationError(`year ${coYear} already exists`);
-    const firstYear = Number(ex[0]?.years ?? 0) === 0;
-    // OP_DATE is varchar in the migrated schema and CL_DATE a timestamp; both carry the ISO day.
-    // OLD_METHOD 'Y' is what the standard (non alter-year) desktop save writes (MS_YEAR.cs:1197).
-    await tx.$executeRawUnsafe(
-      `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE","YEAR_MONTH","OLD_METHOD","MAIN_USER")
-       VALUES ($1,$2,$3,$4,$5::date,$6,$7,$8)`,
-      scope.tenantId,
-      scope.coCode,
-      coYear,
-      dates.opDate,
-      dates.clDate,
-      dates.yearMonth,
-      input.oldMethod ?? 'Y',
-      input.mainUser ? String(input.mainUser).slice(0, 15) : null,
-    );
-    // The desktop copies the company's masters and configuration only when a NEW company gets its first year
-    // (`MS_YEAR.cs:1357-1363` runs `NewCompParmCreat` when `NewCompCode` is set by `MS_COMPANY.cs:6196`).
-    // Opening the next year of an existing company copies nothing, and the template company (01) is the copy
-    // source, so it is never cloned into itself. Non-destructive: each table is skipped when it already has rows.
-    if (firstYear && scope.coCode !== CLONE_TEMPLATE_CO_CODE)
-      await cloneCompanyTx(tx, scope.tenantId, scope.coCode);
-    return { coYear, opDate: dates.opDate, clDate: dates.clDate };
-  });
+  return coYear;
+}
+
+/**
+ * Year Create inside the caller's transaction (shared with the Company master's first-year provisioning, WP-07):
+ * the YEAR_MAST row and, for a company's first year, the desktop's master copy (`NewCompParmCreat`).
+ */
+export async function createYearTx(
+  tx: any,
+  scope: { tenantId: string; coCode: string },
+  input: CreateYearInput,
+  dates: { opDate: string; clDate: string; yearMonth: string },
+): Promise<{ coYear: string; opDate: string; clDate: string }> {
+  const coYear = validYearCode(input.coYear);
+  const ex: any[] = await tx.$queryRawUnsafe(
+    `SELECT count(*) FILTER (WHERE "CO_YEAR"=$2)::int n, count(*)::int years
+       FROM "YEAR_MAST" WHERE "CO_CODE"=$1`,
+    scope.coCode,
+    coYear,
+  );
+  if (ex[0]?.n > 0) throw new YearValidationError(`year ${coYear} already exists`);
+  const firstYear = Number(ex[0]?.years ?? 0) === 0;
+  // OP_DATE is varchar in the migrated schema and CL_DATE a timestamp; both carry the ISO day.
+  // OLD_METHOD 'Y' is what the standard (non alter-year) desktop save writes (MS_YEAR.cs:1197).
+  await tx.$executeRawUnsafe(
+    `INSERT INTO "YEAR_MAST"(tenant_id,"CO_CODE","CO_YEAR","OP_DATE","CL_DATE","YEAR_MONTH","OLD_METHOD","MAIN_USER")
+     VALUES ($1,$2,$3,$4,$5::date,$6,$7,$8)`,
+    scope.tenantId,
+    scope.coCode,
+    coYear,
+    dates.opDate,
+    dates.clDate,
+    dates.yearMonth,
+    input.oldMethod ?? 'Y',
+    input.mainUser ? String(input.mainUser).slice(0, 15) : null,
+  );
+  // The desktop copies the company's masters and configuration only when a NEW company gets its first year
+  // (`MS_YEAR.cs:1357-1363` runs `NewCompParmCreat` when `NewCompCode` is set by `MS_COMPANY.cs:6196`).
+  // Opening the next year of an existing company copies nothing, and the template company (01) is the copy
+  // source, so it is never cloned into itself. Non-destructive: each table is skipped when it already has rows.
+  const source = String(input.sourceCoCode ?? '').trim() || CLONE_TEMPLATE_CO_CODE;
+  if (firstYear && scope.coCode !== source)
+    await cloneCompanyTx(tx, scope.tenantId, scope.coCode, { sourceCoCode: source });
+  return { coYear, opDate: dates.opDate, clDate: dates.clDate };
 }
 
 /**

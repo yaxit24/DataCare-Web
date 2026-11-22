@@ -7185,6 +7185,23 @@ model ApiCommandReceipt {
   @@map("api_command_receipt")
 }
 
+/// WP-07 (D38): a soft-deleted company, hidden at once and purged after `purge_after` by modules/ops/companyPurge.ts.
+/// The partial unique index (one pending deletion per company) and RLS remain migration-owned.
+model CompanyDeletion {
+  tenantId   String    @map("tenant_id") @db.VarChar(24)
+  coCode     String    @map("co_code") @db.VarChar(2)
+  coName     String?   @map("co_name") @db.VarChar(50)
+  deletedBy  String    @map("deleted_by") @db.VarChar(255)
+  deletedAt  DateTime  @default(now()) @map("deleted_at") @db.Timestamptz(6)
+  purgeAfter DateTime  @map("purge_after") @db.Timestamptz(6)
+  purgedAt   DateTime? @map("purged_at") @db.Timestamptz(6)
+  purgedRows Int?      @map("purged_rows")
+
+  @@id([tenantId, coCode, deletedAt])
+  @@index([tenantId, purgeAfter], map: "company_deletion_due_idx")
+  @@map("company_deletion")
+}
+
 /// Append-only repair audit evidence. Partial uniqueness, immutability trigger, comments, and RLS remain migration-owned.
 model DataRepairRun {
   rowId             BigInt    @id @default(autoincrement()) @map("row_id")
