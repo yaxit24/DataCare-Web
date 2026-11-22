@@ -1,3 +1,10 @@
+## 2026-11-22 — Gst Report runs the desktop RP_GST rules for the blocked cases (N239 / G251, WP-19)
+
+- 2026-11-22: EXP/EXEMP/DOCS are the desktop caption grids; GSTR-3B is the whole desktop grid (3.1 total, 3.2(1), 6.1) under owner decisions
+  Q1-Q3; SetDate on the date boxes; no CSV for EXEMP/DOCS; Gsrt1 Csv = one XLSX B2B..HSN; TCS proven out of every GST figure.
+- 2026-11-22: migration 20261122090000 adds the LBR_ISU_DETL GST shares (labour writer now stores them; labour HSN tax was 0 before) and
+  TAX_DATA writers set R_CHARG 'N'. Still blocked: EXP.csv bytes (Q9, Windows run), two T14 fault cases (no read/export injector).
+
 ## 2026-11-09 — Order Cancel is the desktop TR_SL_ORD_ADJ voucher (N233 / G245, WP-02)
 
 - 2026-11-09: one voucher cancels the open advance of many orders (SL_ORD_ADJ, Order_Adj_Ledr/Rojmel, held-tag release), version-guarded

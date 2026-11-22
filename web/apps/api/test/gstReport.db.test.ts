@@ -136,6 +136,7 @@ class CapturingRenderer implements PdfRenderer {
       ['GLB', 'LABOUR WORK', 'LW'],
       ['GEC', 'E CRNT', 'EC'],
       ['GT3', 'TAX 3B', 'T3'],
+      ['GT4', 'TAX 3B', 'T4'],
     ];
     for (const [code, main, prefix] of books) {
       await exec(
@@ -319,6 +320,51 @@ class CapturingRenderer implements PdfRenderer {
       taxSign: '-',
       invoiceValue: 412,
     });
+    // WP-19: book GT4 feeds 3.2(1), the From..To range (owner decision Q1) and a blank R_CHARG read as 'N'.
+    await insertTax(TENANT, {
+      coBook: 'GT4',
+      vchNo: '40001',
+      bookName: 'TAX 3B',
+      acCode: 'UINT',
+      taxType: 'IGST',
+      netAmount: 250,
+      taxAmount: 7.5,
+      invoiceValue: 257.5,
+    });
+    for (const [srNo, taxType] of [
+      [1, 'SGST'],
+      [2, 'CGST'],
+    ] as const)
+      await insertTax(TENANT, {
+        coBook: 'GT4',
+        vchNo: '40002',
+        srNo,
+        bookName: 'TAX 3B',
+        acCode: 'UREG',
+        taxType,
+        netAmount: 100,
+        taxAmount: 1.5,
+        invoiceValue: 103,
+        vchDate: `${startYear}-04-20`,
+      });
+    for (const [srNo, taxType] of [
+      [1, 'SGST'],
+      [2, 'CGST'],
+    ] as const)
+      await insertTax(TENANT, {
+        coBook: 'GT4',
+        vchNo: '40003',
+        srNo,
+        bookName: 'TAX 3B',
+        tranType: 'P',
+        acCode: 'CREG',
+        taxType,
+        netAmount: 300,
+        taxAmount: 4.5,
+        taxSign: '-',
+        reverseCharge: '',
+        invoiceValue: 309,
+      });
     // Opposite-side returns must not leak into GSTR-3B outward or ITC: sales return is S/-, purchase
     // return is P/+. RP_GST's sign-only SQL double-counted these; the web keeps the statutory transaction side.
     await insertTax(TENANT, {
@@ -626,7 +672,7 @@ class CapturingRenderer implements PdfRenderer {
     const response = await get('viewer', url('gstr3b', undefined, '&bookCode=GT3'));
     expect(response.statusCode, response.body).toBe(200);
     const rows = response.json().rows as Array<Record<string, string>>;
-    const computed = rows.filter((row) => ['(a)', '(d)', '(5)'].includes(row.code));
+    const computed = rows.filter((row) => ['(a)', '(d)', '(5)'].includes(row.code ?? ''));
     expect(computed).toEqual([
       {
         table: '3.1',
@@ -682,7 +728,53 @@ class CapturingRenderer implements PdfRenderer {
     expect(at('Centrel Tax').nature).toBe('15.00');
     expect(at('State/Ut Tax').nature).toBe('15.00');
     expect(at('TCS')).toMatchObject({ nature: '', placeOfSupply: '', taxableValue: '' });
-    expect(rows).toHaveLength(38);
+    // 37 desktop rows: no unregistered inter-state party in book GT3, so 3.2(1) is its one label row.
+    expect(rows).toHaveLength(37);
+  });
+
+  it('computes 3.2(1), sums From..To and reads a blank R_CHARG as N (WP-19)', async () => {
+    const response = await get('viewer', url('gstr3b', undefined, '&bookCode=GT4'));
+    expect(response.statusCode, response.body).toBe(200);
+    const rows = response.json().rows as Array<Record<string, string>>;
+    const line = (row: Record<string, string>) => [
+      row.table,
+      row.code,
+      row.placeOfSupply,
+      row.taxableValue,
+      row.igstAmount,
+      row.cgstAmount,
+      row.sgstAmount,
+    ];
+    const at = (table: string, code: string) =>
+      line(rows.find((row) => row.table === table && row.code === code)!);
+    // (a): the IGST row (250) and the SGST row (100, dated 20 April, inside From..To) count the taxable once each.
+    expect(at('3.1', '(a)')).toEqual(['3.1', '(a)', '', '350.00', '7.50', '1.50', '1.50']);
+    expect(at('3.1', '(d)')).toEqual(['3.1', '(d)', '', '', '', '', '']);
+    expect(line(rows[5]!)).toEqual(['3.1', '', '', '350.00', '7.50', '1.50', '1.50']);
+    // Only the unregistered party outside Gujarat (the company state) is an inter-state supply to it.
+    expect(
+      rows.filter((row) => row.table === '3.2' && (row.placeOfSupply ?? '').includes(' - ')),
+    ).toEqual([
+      expect.objectContaining({
+        code: '(1)',
+        placeOfSupply: '27 - Maharashtra',
+        taxableValue: '250.00',
+        igstAmount: '7.50',
+      }),
+    ]);
+    expect(at('4(A)', '(5)')).toEqual(['4(A)', '(5)', '', '300.00', '0.00', '4.50', '4.50']);
+    expect(at('6.1', 'Integrated Tax')).toEqual([
+      '6.1',
+      'Integrated Tax',
+      '0.00',
+      '4.50',
+      '4.50',
+      '',
+      '',
+    ]);
+    expect(rows.find((row) => row.code === 'Integrated Tax')!.nature).toBe('7.50');
+    expect(rows.find((row) => row.code === 'Centrel Tax')!.nature).toBe('1.50');
+    expect(rows.find((row) => row.code === 'State/Ut Tax')!.nature).toBe('1.50');
   });
 
   it('applies book, party, location, company, year and date scope and refuses location replacement', async () => {

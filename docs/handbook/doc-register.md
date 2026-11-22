@@ -131,3 +131,9 @@ Every Markdown file in the repository, classified by the first matching rule in 
 | `unified/MANIFEST.md`<br>`unified/docs/report.md` | 2 | sign-off | evidence | — | Phase-0 artifact completeness sign-off and extraction report. |
 | `unified/docs/*`<br>`docs/WINDOWS_BUILD_GUIDE.md`<br>`docs/fidelity-acceptance.md`<br>`docs/next1106-target-artifacts.md`<br>`docs/package-parity.md`<br>`docs/report-md-review.md`<br>`docs/report-template-parity.md`<br>`docs/runtime-config-parity.md`<br>`docs/runtime-smoke-test.md`<br>`docs/windows-build-environment.md`<br>`docs/superpowers/plans/*.md` | 20 | reconstruction note | historical | — | June desktop reconstruction and Windows build notes (the docs/ copies are byte-identical to unified/docs). |
 | `*/Setup/SETUP_README.md`<br>`extracted_code/*/libs/original/README.md` | 5 | setup guide | reference | — | Desktop installation guide (three identical copies) and runtime DLL instructions. |
+
+## Orchestration
+
+| Path | Files | Kind | Status | Superseded by / see | Purpose |
+|---|---:|---|---|---|---|
+| `orchestration/work/*/*.md` | 2 | work-package study and decisions | reference | — | Per work package: the desktop study (cited source facts behind each case) and the owner and architect decisions it rests on. |

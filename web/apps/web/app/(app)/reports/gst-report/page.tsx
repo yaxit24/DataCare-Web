@@ -43,9 +43,9 @@ export default function GstReportPage() {
   const toDate = useRef<DesktopDateInputHandle>(null);
   // RP_GST runs Conversions.ToDate on both boxes; the web runs SetDate on them first and stops on a refusal.
   const dates = () => {
-    const from = fromDate.current?.commit() ?? filters.fromDate;
+    const from = fromDate.current ? fromDate.current.commit() : filters.fromDate;
     if (!from) return null;
-    const to = toDate.current?.commit() ?? filters.toDate;
+    const to = toDate.current ? toDate.current.commit() : filters.toDate;
     return to ? { fromDate: from, toDate: to } : null;
   };
   const runView = (view: 'gstr1' | 'gstr2' | 'gstr3b') => {
@@ -57,6 +57,8 @@ export default function GstReportPage() {
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== 'Escape' || event.defaultPrevented) return;
       if (document.querySelector('[data-lookup-open]')) return;
+      // A SetDate message box is modal: Esc does not close the form under it.
+      if (document.querySelector('[role="alertdialog"]')) return;
       router.back();
     };
     document.addEventListener('keydown', onKey);

@@ -411,7 +411,7 @@ browser case per screen first (red), then the hook (green).
 | WP-16 | Stock Report (new route) | `RP_STOCK.cs` (6,407) | P1 | L | WP-15 | 05 | not started |
 | WP-17 | Cash Bank | `RP_CASH_BANK.cs` (4,813) | P1 | L | — | 06 | not started |
 | WP-18 | HuId Report | `RP_HUID.cs` (2,731) | P2 | M | — | 08 | filters only |
-| WP-19 | Gst Report: the 13 blocked cases | `RP_GST.cs` (3,944) | P1 | M | — | 07 | 57/70 |
+| WP-19 | Gst Report: the 12 blocked cases | `RP_GST.cs` (3,944) | P1 | M | — | 07 | PR (N239/G251): 9 of 12 executable; 3 blocked (EXP.csv Q9, T14 injector x2) |
 | WP-20 | Ledger Report: OP_LDR opening-ledger ageing union, fine prints | `RP_LEDR.cs` | P2 | S | — | 21 | 10/10 |
 
 Rules for every report WP (from `00b-REPORT-ADDENDUM.md`): read-only resolver in its own module, its own route

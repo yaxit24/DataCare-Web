@@ -7821,6 +7821,37 @@
         "web/apps/web/test/features/modules/orderCancel.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. order-cancel module: 24 cases over T01-T18, none blocked; stock.held-tag-released is a real browser case (the order is made on the Sales Order screen, only the tag hold is seeded because the web Sales Order never saves a tagged line). Desktop match 0%."
+    },
+    {
+      "id": "N239",
+      "status": "implemented-unverified",
+      "action": "Gst Report runs the desktop RP_GST rules for the twelve blocked cases: EXP, EXEMP and DOCS show their caption grids with no query, rows or message; GSTR-3B shows every desktop row with figures for 3.1(a)/(d), the 3.1 total, 3.2(1), 4(A)(5) and 6.1 under the owner decisions (From..To, ITC purchases only, State/Ut Tax = SGST); the date boxes run DC_Main.SetDate; Csv Fil writes nothing for EXEMP and DOCS; Gsrt1 Csv is one workbook B2B..HSN; TCS stays out of every GST figure; LBR_ISU_DETL carries the per-line GST shares (migration + labour writer) the HSN section sums; TAX_DATA rows say R_CHARG 'N'.",
+      "parentLabels": "P1-edition; L6; T02; T03; T06; T16; T18; WP-19",
+      "startAfter": [
+        "N233"
+      ],
+      "requiredProof": "Unit vectors for the 3B grid, the header-only sections, SetDate and the labour GST allocation; DB tests for the 3B figures (3.2(1), From..To, blank R_CHARG), the header-only and CSV refusals, the workbook and the labour writer's shares; the gst-report browser module with every settled case executable and the 57 earlier cases green; all repository gates.",
+      "gapIds": "G251",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/apps/api/src/modules/reports/gstReport.ts",
+        "web/apps/api/src/modules/reports/gstReportSections.ts",
+        "web/apps/api/src/modules/reports/gstReportQueries.ts",
+        "web/apps/api/src/routes/gstReport.ts",
+        "web/apps/api/src/modules/sales/labourGstAllocation.ts",
+        "web/packages/db/prisma/migrations/20261122090000_labour_detail_gst_shares/migration.sql",
+        "web/packages/core/src/setDate.ts",
+        "web/apps/web/components/DesktopDateInput.tsx",
+        "web/apps/web/app/(app)/reports/gst-report/page.tsx",
+        "web/apps/api/test/gstReport.test.ts",
+        "web/apps/api/test/gstReport.db.test.ts",
+        "web/apps/web/test/features/modules/gstReport.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. gst-report module: 9 of the 12 blocked cases are executable; 3 stay blocked with the exact remaining item (EXP.csv bytes need a Windows run, decision Q9; no harness read/export fault injector for T14). Desktop match 0%."
     }
   ],
   "amendments": [
