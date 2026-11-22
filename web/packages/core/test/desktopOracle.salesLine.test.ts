@@ -1,17 +1,14 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
+  computeSaleLine,
   fineFor,
   percentageLabourRate,
-  saleLineLabourAmount,
   lineTotalDesktop,
   resolveRoundingPolicy,
   round,
   PRECISION,
-  saleAmountBasis,
-  saleItemAmountRounded,
   vbVal,
-  type LabourType,
   type RoundingPolicy,
 } from '../src/index.js';
 
@@ -27,10 +24,9 @@ import {
  * inputs and compares every stage. Each stage is fed the DESKTOP's upstream cells (net, ghat, fine, item amount),
  * so a disagreement is attributed to exactly one web function rather than cascading.
  *
- * The web composition mirrors the API's posting path (`apps/api/src/modules/sales/sales.ts` `computeLine`): the item
- * rate is rounded by `ITM_RATE_ROF`, the item and labour amounts are rounded once at the Sale line precision
- * (`saleLineDecimals`: 0, or 2 under ALL_ROF_REMOVE), and the labour charge is `saleLineLabourAmount` in the web's
- * labour vocabulary, a percentage line deriving its rate with `percentageLabourRate`.
+ * The item amount and labour stages run `computeSaleLine`, the one Sale line function the page preview and the API's
+ * `computeLine` both call: IEEE double arithmetic in CommPassTotal's order, .NET Math.Round at the line precision (0,
+ * or 2 under ALL_ROF_REMOVE), every LBR_TYPE basis (G, N, K, P, blank) compared.
  */
 
 const oracleDir = new URL('../../../scripts/desktop-oracle/sales-line/', import.meta.url);
@@ -86,15 +82,47 @@ function webPolicy(v: Vector): RoundingPolicy {
   });
 }
 
-/**
- * The desktop labour types the web vocabulary (`per_gram | per_piece | percentage | fixed`) can express with a TYPED
- * rate. G (gross weight), K (per kilogram) and blank (the default branch, which always adds ghat: TR_SALE.cs:11100)
- * have no typed-rate web mode, so those vectors document the desktop and are not compared. A percentage line carries
- * its LBR_TYPE as the basis of its derived rate, so every basis is compared there.
- */
-const WEB_LABOUR_TYPE: Record<string, LabourType | undefined> = { N: 'per_gram', P: 'per_piece' };
-
 type Stage = 'net' | 'ghat' | 'fine' | 'amount' | 'labourRate' | 'labour' | 'total';
+
+/**
+ * The shared Sale line (`computeSaleLine`, the function the preview and the API both call) on the vector's cells.
+ * Upstream cells (net, ghat, fine) are the desktop's own, so a mismatch is attributed to this stage alone. A row is
+ * new, so a non-zero LBR_PRC differs from the empty column 83 and derives LBR_RATE (TR_SALE.cs:10999-11021).
+ */
+function sharedLine(v: Vector, d: Record<string, string>) {
+  const s = v.settings ?? {};
+  const policy = webPolicy(v);
+  const input = v.cells;
+  const pct = cell(input, 24);
+  const typedRate = cell(input, 26);
+  // Column 83 holding LBR_PRC and column 82 the rate (an applied percentage, or a reopened row) keep LBR_RATE.
+  const applied =
+    (input['83'] ?? '').trim() !== '' &&
+    cell(input, 83) === pct &&
+    cell(input, 82) === cell(input, 22);
+  return computeSaleLine(
+    {
+      pcs: cell(input, 11),
+      grossWt: cell(input, 12),
+      netWt: cell(d, 14),
+      ghtWt: cell(d, 17),
+      fineWt: cell(d, 20),
+      rateWith: text(input, 21),
+      rateType: text(input, 58),
+      itemRate: policy.roundItemRate(cell(input, 22)),
+      labourMode: pct !== 0 ? 'percentage' : typedRate !== 0 ? 'rate' : 'none',
+      labourBasis: text(input, 25),
+      labourPct: pct,
+      labourRate: pct !== 0 && !applied ? null : typedRate,
+      otherAmount: cell(input, 29),
+    },
+    {
+      labourRateDecimals: policy.labourDecimals,
+      allRoundingRemoved: policy.allRoundingRemoved === true,
+      labourWithGhat: String(s.MsLbrWithGht ?? 'Y') !== 'N',
+    },
+  );
+}
 
 /** The web's value for one stage, or undefined when the web has no counterpart for this vector. */
 function webStage(v: Vector, stage: Stage, d: Record<string, string>): number | undefined {
@@ -114,54 +142,16 @@ function webStage(v: Vector, stage: Stage, d: Record<string, string>): number | 
         touch: cell(input, 18),
         westPct: cell(input, 19),
       });
-    case 'amount': {
-      const rate = cell(input, 22);
-      if (rate === 0) return 0;
-      const basis = saleAmountBasis(
-        {
-          pcs: cell(input, 11),
-          grossWt: cell(input, 12),
-          netWt: cell(d, 14),
-          ghtWt: cell(d, 17),
-          fineWt: cell(d, 20),
-        },
-        text(input, 21),
-        text(input, 58),
-      );
-      return basis.quantity > 0
-        ? saleItemAmountRounded(basis, policy.roundItemRate(rate), policy)
-        : 0;
-    }
+    case 'amount':
+      return sharedLine(v, d)?.itemAmount;
     case 'labourRate': {
       // LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, MsLbrRof) (TR_SALE.cs:11021).
       const pct = cell(input, 24);
       if (pct === 0) return undefined;
       return percentageLabourRate(policy.roundItemRate(cell(input, 22)), pct, policy);
     }
-    case 'labour': {
-      const pct = cell(input, 24);
-      const withGhat = String(s.MsLbrWithGht ?? 'Y') !== 'N';
-      const type: LabourType | undefined =
-        pct !== 0 ? 'percentage' : WEB_LABOUR_TYPE[text(input, 25)];
-      if (!type) return undefined;
-      return saleLineLabourAmount(
-        type,
-        {
-          netWt: cell(d, 14),
-          grossWt: cell(input, 12),
-          ghatWt: cell(d, 17),
-          withGhat,
-          pcs: cell(input, 11),
-          // A vector row is new (LBR_PRC differs from the empty col 83), so the percentage derives the rate (:10999).
-          rate: type === 'percentage' ? undefined : cell(input, 26),
-          pct,
-          itemRate: policy.roundItemRate(cell(input, 22)),
-          basis: text(input, 25),
-          basisRule: 'sale',
-        },
-        policy,
-      );
-    }
+    case 'labour':
+      return sharedLine(v, d)?.labourAmount;
     case 'total':
       // SL_DETL.TOT_AMT, from the desktop's own components.
       return lineTotalDesktop({

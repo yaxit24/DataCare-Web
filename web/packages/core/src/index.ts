@@ -340,3 +340,16 @@ export {
   itemOpeningTotals,
 } from './itemOpening.js';
 export type { ItemOpeningRow, ItemOpeningRowInput, ItemOpeningTypeCode } from './itemOpening.js';
+export {
+  computeSaleLine,
+  derivedLabourRate,
+  formatCell2,
+  applySaleGridEdit,
+} from './saleLine.js';
+export type {
+  SaleLineCells,
+  SaleLineSettings,
+  SaleLineResult,
+  SaleLineLabourMode,
+  SaleGridLabourCells,
+} from './saleLine.js';

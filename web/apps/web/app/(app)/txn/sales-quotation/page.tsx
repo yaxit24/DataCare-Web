@@ -54,6 +54,7 @@ interface Line {
   itmSize: string;
   lessWt: string;
   lbrPct: string;
+  lbrPctApplied?: string; // column 83 (TR_SALE.cs:10999-11021)
   othAmt: string;
   bagWt: string;
   tagGrossWt: string;
@@ -550,7 +551,11 @@ export default function SalesQuotationPage() {
         netWt: str(line.netWt),
         touch: str(line.touch),
         rate: str(line.rate),
-        making: line.labourType === 'per_gram' ? str(line.labourRate) : '',
+        // Reopen restores LBR_RATE, column 83 and ITM_AMT, so an unchanged save is identical (TR_SALE.cs:21091-21096).
+        making:
+          line.labourType === 'per_gram' || Number(line.labourPct) ? str(line.labourRate) : '',
+        lbrPctApplied: str(line.labourPct),
+        metalAmount: str(line.metalAmount),
         designNo: String(line.designNo ?? ''),
         itmSize: String(line.itmSize ?? ''),
         lessWt: str(line.lessWt),

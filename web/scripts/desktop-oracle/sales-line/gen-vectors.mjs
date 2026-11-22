@@ -293,6 +293,83 @@ add(
   { checks: ['net', 'mrp'] },
 );
 
+// ---- 5b. Review of PR #241 (Codex, two rounds): double midpoints and the column-83 percentage tracker ---------
+// Fresh rows: LBR_PRC differs from the empty column 83, so LBR_RATE is derived from the item rate (:10999-11021).
+add(
+  'review.pct.double-mid.rof2',
+  { 11: 1, 12: w(1000), 14: w(1000), 21: 'N', 22: m(11.25), 24: m(2.8), 25: 'N' },
+  {
+    // 11.25 * 2.8 / 100 = 0.31499999999999995 -> 0.31; 1000 x 0.31 = 310.
+    checks: ['amount', 'labourRate', 'labour'],
+  },
+);
+add(
+  'review.pct.amount-mid.allrof',
+  { 11: 1, 12: w(0.29), 14: w(0.29), 21: 'N', 22: m(75), 24: m(10), 25: 'N' },
+  {
+    // ALL_ROF_REMOVE: 0.29 x 7.50 = 2.1749999999999998 -> 2.17.
+    settings: { MsAllRofRemove: 'Y' },
+    checks: ['amount', 'labourRate', 'labour'],
+  },
+);
+for (const [a, b] of [
+  [17.4, 22.5],
+  [32.2, 22.5],
+  [17.4, 12.5],
+  [35.16, 12.5],
+  [147.64, 12.5],
+]) {
+  add(
+    `review.pct.rate-mid.${a}x${b}`,
+    { 11: 1, 12: w(100), 14: w(100), 21: 'N', 22: m(a), 24: m(b), 25: 'N' },
+    {
+      checks: ['amount', 'labourRate', 'labour'],
+    },
+  );
+}
+// Column 83 already holds LBR_PRC and column 82 the rate (a row whose percentage was applied, then its rate typed
+// over, or a reopened row: :12134-12142): LBR_RATE 50 stands.
+add(
+  'review.pct.typed-rate-stands.N',
+  {
+    11: 1,
+    12: w(10),
+    14: w(10),
+    21: 'N',
+    22: m(100),
+    23: m(1000),
+    24: m(10),
+    25: 'N',
+    26: m(50),
+    82: m(100),
+    83: m(10),
+  },
+  { checks: ['labourRate', 'labour'] },
+);
+add(
+  'review.pct.typed-rate-stands.P',
+  {
+    11: 2,
+    12: w(10),
+    14: w(10),
+    21: 'N',
+    22: m(100),
+    23: m(1000),
+    24: m(10),
+    25: 'P',
+    26: m(50),
+    82: m(100),
+    83: m(10),
+  },
+  { checks: ['labourRate', 'labour'] },
+);
+// A percentage typed while the item rate was 0 is still pending (column 83 empty): the rate arrives and derives it.
+add(
+  'review.pct.pending-until-rate',
+  { 11: 1, 12: w(10), 14: w(10), 21: 'N', 22: m(100), 24: m(10), 25: 'N', 26: m(50) },
+  { checks: ['amount', 'labourRate', 'labour'] },
+);
+
 // ---- 6. Path dependence (documentation only, not compared): a second pass over an unchanged G row ---------------
 add('path.second-pass.G', { ...base, 21: 'G', 22: m(5432.1) }, { passes: 2 });
 

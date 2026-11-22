@@ -260,9 +260,9 @@ describe('Lbr% then Making/g follows the desktop event order (TR_SALE.cs:10999-1
     expect(preview.labourAmount).toBe(500);
     expect(saleGridRowLabour(edited)).toEqual({ labourType: 'percentage', labourRate: 50 });
   });
-  it('changing the item rate alone does not re-derive; clearing Lbr% clears the rate (:11033-11048)', () => {
-    const withPct = editSaleGridRow(base, 'lbrPct', '10', policy);
-    expect(editSaleGridRow(withPct, 'rate', '200', policy).making).toBe('10.00');
+  it('a re-priced row re-derives (:10876-10880); clearing Lbr% clears the rate (:11033-11048)', () => {
+    const withPct = editSaleGridRow({ ...base, grossWt: '10' }, 'lbrPct', '10', policy);
+    expect(editSaleGridRow(withPct, 'rate', '200', policy).making).toBe('20.00');
     expect(editSaleGridRow(withPct, 'lbrPct', '', policy).making).toBe('');
   });
 });

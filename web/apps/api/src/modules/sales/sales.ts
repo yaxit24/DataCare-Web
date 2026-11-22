@@ -45,11 +45,11 @@ import {
   saleItemAmount,
   saleItemAmountRounded,
   percentageLabourRate,
-  round,
   roundSaleLineAmount,
   type LabourBasisRule,
 } from '@datacare/core';
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
+import { postedSaleLine } from './saleLinePosting.js';
 import { gstTaxRows } from '../shared/taxDataRows.js';
 import { orderAdvanceAvailableTx, adjustOrderIntoSaleTx } from './salesOrder.js';
 import { fineWt } from '../shared/fine.js';
@@ -303,12 +303,7 @@ export function computeLine(
   const fine = lineFine(line);
   const rate =
     line.rate == null ? undefined : policy ? policy.roundItemRate(line.rate) : Number(line.rate);
-  // TR_SALE.cs CommPassTotal (10716-10936) prices each line by its OWN RtWith, which a new row
-  // copies from CO_SET.SL_AMT_TYPE (:9161), and by the item's RATE_TYPE (:12833). An explicit
-  // metalAmount is still the desktop-style authoritative line value.
-  //
-  // `amountType === ''` is the legacy default for callers that do not resolve CO_SET, which is the
-  // legacy Sale Return writer. That path keeps its fine basis (see saleAmountBase).
+  // Legacy and Sales Return pricing; `amountType === ''` (no CO_SET resolved) keeps the fine basis (saleAmountBase).
   const metal = (() => {
     if (line.metalAmount != null) return Number(line.metalAmount);
     if (amountType === '') {
@@ -329,7 +324,12 @@ export function computeLine(
       `labourType must be one of ${[...SALE_LABOUR_TYPES].join(', ')}: ${String(line.labourType)}`,
     );
   }
-  // LBR_AMT is ONE Math.Round at the Sale line precision (TR_SALE.cs:11100-11127; oracle labour.mid.n0.299xr5.rof2).
+  // The Sale posts the ONE shared Sale line, the function the page preview runs too (saleLinePosting.ts).
+  if (policy && amountType !== '' && labourBasis.rule !== 'saleReturn') {
+    const rw = effectiveSaleRateWith(line.rateWith, amountType);
+    return postedSaleLine(line, fine, rate ?? 0, rw, labourBasis.basis, policy, labourWithGhat);
+  }
+  // Sales Return and legacy callers: LBR_AMT is ONE Math.Round at the line precision (TR_SALE.cs:11100-11127).
   const labourOf = (type: LabourType, input: Parameters<typeof labourCharge>[1]): number =>
     policy ? saleLineLabourAmount(type, input, policy) : labourCharge(type, input);
   const labour = line.labourType
@@ -343,24 +343,18 @@ export function computeLine(
         basis: labourBasis.basis,
         basisRule: labourBasis.rule,
         fixed: line.labourFixed,
-        // P4: (net + ghat) x rate; ghat is dropped only when CO_SET_NEW.LBR_WITH_GHT = 'N' (TR_SALE.cs:11112-11123,
-        // blank default 'Y' at MS_OPNCOMP.cs:1224-1226).
+        // P4: (net + ghat) x rate; ghat dropped only when LBR_WITH_GHT = 'N' (TR_SALE.cs:11112-11123).
         ghatWt: line.ghtWt,
         withGhat: labourWithGhat,
       })
     : 0;
-  // A stored/edited rate stands; LBR_PRC re-derives it only when the percentage changed (TR_SALE.cs:10999-11021).
-  const pct = line.labourType === 'percentage';
-  const labourRate = pct
+  const pctLine = line.labourType === 'percentage';
+  const labourRate = pctLine
     ? (line.labourRate ?? percentageLabourRate(rate, line.labourPct, policy))
     : undefined;
-  // COMPUTED line components round at the Sale line precision: 0, or 2 under ALL_ROF_REMOVE (TR_SALE.cs:10343-10362,
-  // :10905-10932); TOT_AMT_ROF rounds bill totals only (:19192). A Sales Return policy keeps 0.
+  // Line components round at the return policy's whole rupee (TR_SALE_RTN.cs); TOT_AMT_ROF is for bill totals only.
   const roundAmount = (v: number): number => (policy ? roundSaleLineAmount(v, policy) : v);
   const metalRounded = (() => {
-    // A TYPED ITM_AMT stays as entered, "0.00" (TR_SALE.cs:9478, :9495); the Sales Return keeps whole rupees.
-    if (policy && line.metalAmount != null && labourBasis.rule !== 'saleReturn')
-      return round(metal, 2);
     if (!policy || line.metalAmount != null || amountType === '' || rate == null)
       return roundAmount(metal);
     const basis = saleAmountBasis(
@@ -371,8 +365,7 @@ export function computeLine(
     return basis.quantity > 0 ? saleItemAmountRounded(basis, rate, policy) : roundAmount(metal);
   })();
   const labourRounded = roundAmount(labour);
-  // NET_AMT is the 2 dp sum, not re-rounded: TR_SALE.cs:11548/:11570 format it "0.00", so a paise OTH_AMT
-  // survives (desktop oracle vector total.stone: 66863.50).
+  // NET_AMT is the 2 dp sum, not re-rounded (TR_SALE.cs:11548/:11570; oracle total.stone 66863.50).
   const net = calcLineNet({ metal: metalRounded, labour: labourRounded, other: line.otherAmount });
   return { fine, metal: metalRounded, labour: labourRounded, net, labourRate };
 }
