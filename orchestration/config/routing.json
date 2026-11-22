@@ -63,6 +63,16 @@
           "model": "gpt-6-astra"
         },
         {
+          "runner": "opencode",
+          "provider": "openrouter",
+          "model": "openrouter/tencent/hy4-flash"
+        },
+        {
+          "runner": "opencode",
+          "provider": "openrouter",
+          "model": "openrouter/baidu/ernie-5.5-flash-preview:free"
+        },
+        {
           "runner": "claude",
           "model": "sonnet",
           "effort": "medium"
@@ -71,11 +81,6 @@
           "runner": "opencode",
           "provider": "openrouter",
           "model": "openrouter/deepseek/deepseek-v4.1-flash"
-        },
-        {
-          "runner": "opencode",
-          "provider": "openrouter",
-          "model": "openrouter/tencent/hy4-flash"
         },
         {
           "runner": "opencode",
