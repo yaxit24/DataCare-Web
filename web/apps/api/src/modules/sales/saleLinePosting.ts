@@ -1,4 +1,4 @@
-import { computeSaleLine, type RoundingPolicy } from '@datacare/core';
+import { computeSaleLine, saleGhatWeight, type RoundingPolicy } from '@datacare/core';
 import type { SaleLineInput } from './sales.js';
 
 /**
@@ -60,4 +60,15 @@ export function postedSaleLine(
     net: r.netAmount,
     labourRate: r.labourRate,
   };
+}
+
+/**
+ * A Sale line that sends Ghat % without a ghat weight takes the grid's own derivation, ITM_GHT_WT =
+ * Format(ITM_NWT x ITM_GHT_PRC / 100, "0.000") (TR_SALE.cs:10581), as the page preview does; a sent weight wins.
+ */
+export function withSaleGhat<T extends Pick<SaleLineInput, 'ghtWt' | 'ghtPct' | 'netWt'>>(
+  line: T,
+): T {
+  if (line.ghtWt != null || !line.ghtPct) return line;
+  return { ...line, ghtWt: saleGhatWeight(Number(line.netWt ?? 0), Number(line.ghtPct)) };
 }

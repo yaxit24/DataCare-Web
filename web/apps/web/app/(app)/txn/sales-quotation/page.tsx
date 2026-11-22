@@ -20,6 +20,7 @@ import { VoucherList } from '../../../../components/VoucherList';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { companyFlag, useCompanySettings, companySetting } from '../../../../lib/companySettings';
 import {
+  applySaleTagPick,
   editSaleGridRow,
   oldGoldRowAmount,
   recalcSaleGridRow,
@@ -1245,19 +1246,10 @@ export default function SalesQuotationPage() {
                         onChange={(v) => setLine(i, 'tagNo', v)}
                         style={{ width: 110 }}
                         onPick={(r) =>
+                          // Through the grid's edit rules: a new rate or weight re-prices (TR_SALE.cs:10822-10880).
                           setLines((ls) =>
                             ls.map((x, j) =>
-                              j === i
-                                ? {
-                                    ...x,
-                                    tagNo: String(r.code),
-                                    itCode: String(r.name || x.itCode),
-                                    netWt: String(r.ITM_NWT ?? x.netWt),
-                                    grossWt: String(r.ITM_GWT ?? x.grossWt),
-                                    touch: String(r.ITM_TOUCH ?? x.touch),
-                                    rate: String(r.ITM_RATE ?? x.rate),
-                                  }
-                                : x,
+                              j === i ? applySaleTagPick(x, r, roundingPolicy) : x,
                             ),
                           )
                         }

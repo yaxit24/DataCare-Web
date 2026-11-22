@@ -344,6 +344,8 @@ export {
   computeSaleLine,
   derivedLabourRate,
   formatCell2,
+  formatCell,
+  saleGhatWeight,
   applySaleGridEdit,
 } from './saleLine.js';
 export type {

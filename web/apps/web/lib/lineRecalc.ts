@@ -13,6 +13,7 @@ import {
   PRECISION,
   applySaleGridEdit,
   computeSaleLine,
+  saleGhatWeight,
 } from '@datacare/core';
 import type { FineWorkflow, RoundingPolicy, SaleGridLabourCells } from '@datacare/core';
 
@@ -163,7 +164,9 @@ export function recalcLine(
   const ghtWt = supplied(line.ghtWt)
     ? n(line.ghtWt)
     : ghtPct > 0
-      ? round((ghtBase * ghtPct) / 100, PRECISION.weight)
+      ? policy === 'sale'
+        ? saleGhatWeight(netWt, ghtPct) // the API's own derivation (core, TR_SALE.cs:10581)
+        : round((ghtBase * ghtPct) / 100, PRECISION.weight)
       : 0;
 
   // Fine comes from the server's own policy table, so the preview cannot disagree with the posting.
@@ -365,4 +368,40 @@ export function editSaleGridRow<T extends SaleGridLabourCells>(
   return applySaleGridEdit(row, key, value, policy?.labourDecimals ?? 2, (v) =>
     policy ? policy.roundItemRate(v) : v,
   );
+}
+
+/** The tag cells a Sale / Sales Quotation tag pick fills. */
+export interface PickedTag {
+  code: unknown;
+  name?: unknown;
+  ITM_NWT?: unknown;
+  ITM_GWT?: unknown;
+  ITM_TOUCH?: unknown;
+  ITM_RATE?: unknown;
+}
+
+/**
+ * A tag pick fills the row's weights, touch and rate THROUGH the grid's edit rules, so a changed rate or weight
+ * re-prices the row as CommPassTotal does (column 22 against tracker 82, TR_SALE.cs:10822-10880): a typed or
+ * reopened ITM_AMT is dropped and a percentage re-derives Making/g from the new rate.
+ */
+export function applySaleTagPick<
+  T extends SaleGridLabourCells & {
+    tagNo?: string;
+    itCode?: string;
+    netWt?: string;
+    touch?: string;
+  },
+>(row: T, tag: PickedTag, policy?: RoundingPolicy): T {
+  let next: T = { ...row, tagNo: String(tag.code), itCode: String(tag.name || row.itCode) };
+  const cells: [keyof T, unknown][] = [
+    ['netWt', tag.ITM_NWT],
+    ['grossWt', tag.ITM_GWT],
+    ['touch', tag.ITM_TOUCH],
+    ['rate', tag.ITM_RATE],
+  ];
+  for (const [key, value] of cells) {
+    if (value != null) next = editSaleGridRow(next, key, String(value), policy);
+  }
+  return next;
 }

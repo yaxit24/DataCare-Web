@@ -1,12 +1,20 @@
 import { describe, expect, it } from 'vitest';
 import {
+  applySaleTagPick,
   editSaleGridRow,
   recalcLine,
   recalcSaleGridRow,
   saleGridRowLabour,
   saleLineLabourMode,
 } from '../lib/lineRecalc';
-import { fineFor, labourCharge, metalAmount, resolveRoundingPolicy, round } from '@datacare/core';
+import {
+  fineFor,
+  labourCharge,
+  metalAmount,
+  resolveRoundingPolicy,
+  round,
+  saleGhatWeight,
+} from '@datacare/core';
 
 /**
  * The client kernel must agree with the server's arithmetic.
@@ -264,5 +272,41 @@ describe('Lbr% then Making/g follows the desktop event order (TR_SALE.cs:10999-1
     const withPct = editSaleGridRow({ ...base, grossWt: '10' }, 'lbrPct', '10', policy);
     expect(editSaleGridRow(withPct, 'rate', '200', policy).making).toBe('20.00');
     expect(editSaleGridRow(withPct, 'lbrPct', '', policy).making).toBe('');
+  });
+});
+
+describe('final review of PR #241: a tag pick re-prices the row (TR_SALE.cs:10822-10880)', () => {
+  const policy = resolveRoundingPolicy({ LBR_ROF: '2' });
+  it('re-picking a tag on a reopened row drops the typed amount and re-derives Making from the new rate', () => {
+    // A reopened invoice: ITM_AMT 61234 and LBR_RATE 612.35 restored, column 83 = LBR_PRC 10.
+    const reopened = {
+      tagNo: 'T1',
+      itCode: 'GLD',
+      pcs: '1',
+      grossWt: '10',
+      netWt: '10',
+      touch: '91.6',
+      rate: '6123.45',
+      lbrPct: '10',
+      lbrPctApplied: '10',
+      making: '612.35',
+      metalAmount: '61234',
+    };
+    const picked = applySaleTagPick(
+      reopened,
+      { code: 'T2', name: 'GLD', ITM_NWT: 5, ITM_GWT: 5, ITM_TOUCH: 91.6, ITM_RATE: 6500 },
+      policy,
+    );
+    expect([picked.tagNo, picked.metalAmount, picked.making]).toEqual(['T2', '', '650.00']);
+    const preview = recalcSaleGridRow(picked, { roundingPolicy: policy, labourBasis: 'N' });
+    expect([preview.metalAmount, preview.labourAmount]).toEqual([32500, 3250]);
+  });
+});
+
+describe('ghat by percentage only (final review of PR #241)', () => {
+  it('derives ITM_GHT_WT = Format(ITM_NWT x ITM_GHT_PRC / 100, "0.000") with the core helper', () => {
+    expect(saleGhatWeight(10, 2)).toBe(0.2);
+    // 0.1235 x 100 ... a third-decimal midpoint: 12.35 x 1 / 100 = 0.1235 -> 0.124 (half away from zero)
+    expect(saleGhatWeight(12.35, 1)).toBe(0.124);
   });
 });

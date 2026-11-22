@@ -49,7 +49,7 @@ import {
   type LabourBasisRule,
 } from '@datacare/core';
 import { resolveTaxPolicyTx } from '../shared/taxPolicy.js';
-import { postedSaleLine } from './saleLinePosting.js';
+import { postedSaleLine, withSaleGhat } from './saleLinePosting.js';
 import { gstTaxRows } from '../shared/taxDataRows.js';
 import { orderAdvanceAvailableTx, adjustOrderIntoSaleTx } from './salesOrder.js';
 import { fineWt } from '../shared/fine.js';
@@ -300,6 +300,7 @@ export function computeLine(
   /** LBR_RATE derived from LBR_PRC on a percentage line (TR_SALE.cs:11021); undefined otherwise. */
   labourRate?: number;
 } {
+  if (labourBasis.rule === 'sale') line = withSaleGhat(line);
   const fine = lineFine(line);
   const rate =
     line.rate == null ? undefined : policy ? policy.roundItemRate(line.rate) : Number(line.rate);
@@ -841,8 +842,9 @@ async function writeSaleTx(
 
   // compute lines + totals
   const computed = lines.map((line) => {
+    const ghat = withSaleGhat(line); // persisted as ITM_GHT_WT too
     const rounded =
-      line.rate == null ? line : { ...line, rate: roundingPolicy.roundItemRate(line.rate) };
+      ghat.rate == null ? ghat : { ...ghat, rate: roundingPolicy.roundItemRate(ghat.rate) };
     const effective = input.rateUnfix ? { ...rounded, metalAmount: 0, rate: undefined } : rounded;
     const calc = computeLine(
       effective,
@@ -852,7 +854,7 @@ async function writeSaleTx(
       { basis: desktopLabourTypeFor(rounded.labourType, behavior.labourType), rule: 'sale' }, // the LBR_TYPE written
     );
     const basis = rounded.labourType === 'per_piece' ? num(rounded.pcs) : num(rounded.netWt);
-    // LBR_GEN never replaces a percentage line's derived rate (TR_SALE.cs:11021; it runs only after :11211).
+    // LBR_RATE_GEN = Y: LBR_RATE = LBR_AMT / basis (TR_SALE.cs:11139-11186). Not yet for a percentage line (G247).
     const generated =
       rounded.labourType === 'percentage'
         ? null
@@ -1226,7 +1228,7 @@ async function writeSaleTx(
       LBR_PRC: num(c.in.labourPct),
       // The rate the amount used: typed, or derived from LBR_PRC (TR_SALE.cs:11021); reopening reads it back.
       LBR_RATE:
-        c.calc.labourRate ??
+        (c.in.labourType === 'percentage' ? c.calc.labourRate : undefined) ??
         effectiveLabourRate(
           num(c.in.labourRate),
           num(c.in.rate),

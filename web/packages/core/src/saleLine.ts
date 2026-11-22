@@ -16,8 +16,23 @@ import { dotNetRoundDouble } from './money.js';
  * the labour rate cell, :9478/:9495 for the amount cell).
  */
 export function formatCell2(value: number): number {
+  return formatCell(value, 2);
+}
+
+/** `Strings.Format(x, "0.000")` (or any fixed places) read back with `Val`, as `formatCell2`. */
+export function formatCell(value: number, places: number): number {
   if (!Number.isFinite(value)) return 0;
-  return new Decimal(value.toPrecision(15)).toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toNumber();
+  return new Decimal(value.toPrecision(15))
+    .toDecimalPlaces(places, Decimal.ROUND_HALF_UP)
+    .toNumber();
+}
+
+/**
+ * The Sale grid's ghat weight from Ghat %: `ITM_GHT_WT = Format(ITM_NWT * ITM_GHT_PRC / 100, "0.000")`
+ * (TR_SALE.cs:10581). Used by the preview and by the API for a line that sends Ghat % without a ghat weight.
+ */
+export function saleGhatWeight(netWt: number, ghtPct: number): number {
+  return formatCell((netWt * ghtPct) / 100, 3);
 }
 
 /** How the row's labour is priced. `rate` and `percentage` multiply an LBR_TYPE basis; `fixed` is a web amount. */

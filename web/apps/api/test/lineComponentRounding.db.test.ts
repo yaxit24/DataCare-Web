@@ -412,4 +412,14 @@ describe.runIf(RUN)('persisted line component rounding', () => {
     });
     expect(row).toEqual({ a: 85550, l: 10690, n: 96240, lr: 10.69, lp: 12.5, lt: 'N' });
   });
+
+  it('LBR_RATE_GEN = Y regenerates a per-gram LBR_RATE from LBR_AMT (TR_SALE.cs:11139-11186)', async () => {
+    // 3 g x 10.20 = 30.60 -> LBR_AMT 31; LBR_RATE = Math.Round(31 / 3, LBR_ROF 2) = 10.33.
+    await seed(0);
+    await withTenant(owner, TENANT, (tx) =>
+      tx.$executeRawUnsafe(`UPDATE "CO_SET" SET "LBR_RATE_GEN"='Y' WHERE tenant_id=$1`, TENANT),
+    );
+    const row = await postAndRead({ ...line, grossWt: 3, netWt: 3, labourRate: 10.2 });
+    expect([row.l, row.lr]).toEqual([31, 10.33]);
+  });
 });

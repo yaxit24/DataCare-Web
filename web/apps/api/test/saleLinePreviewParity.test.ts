@@ -65,6 +65,9 @@ describe('Sale preview = API posting (200 random rows)', () => {
       lbrPctApplied: '',
       metalAmount: '',
       otherAmount: rnd() < 0.2 ? fixed(500, 2) : '',
+      // Ghat by percentage (derived by both sides, TR_SALE.cs:10581) or as a typed weight.
+      ghtPct: rnd() < 0.3 ? fixed(5, 2) : '',
+      ghtWt: rnd() < 0.15 ? fixed(2, 3) : '',
     };
     // Cell by cell, in an order an operator may use: sometimes Lbr% before the rate, sometimes a typed Making/g after.
     const steps: [keyof typeof row, string][] = [];
@@ -96,6 +99,8 @@ describe('Sale preview = API posting (200 random rows)', () => {
       labourPct: n(row.lbrPct),
       metalAmount: n(row.metalAmount),
       otherAmount: n(row.otherAmount),
+      ghtPct: n(row.ghtPct),
+      ghtWt: n(row.ghtWt),
       ...labour,
     };
     const posted = computeLine(payload, policy, amountType as 'N', withGhat, {

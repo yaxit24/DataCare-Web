@@ -60,6 +60,28 @@ describe('sales builders', () => {
     const derived = computeLine(line, policy, 'N', false, { basis: 'N' });
     expect([derived.labour, derived.labourRate]).toEqual([100, 10]);
   });
+  // Final review of PR #241: the Sale derives ghat weight from Ghat % as its grid does (TR_SALE.cs:10581).
+  it('a Sale line with Ghat % only derives the ghat weight: gross 10, 2 %, rate 6000, making 500', () => {
+    const policy = resolveRoundingPolicy({});
+    const c = computeLine(
+      {
+        itCode: 'I1',
+        pcs: 1,
+        grossWt: 10,
+        netWt: 10,
+        touch: 91.6,
+        ghtPct: 2,
+        rate: 6000,
+        labourType: 'per_gram',
+        labourRate: 500,
+      },
+      policy,
+      'N',
+      true,
+      { rule: 'sale' },
+    );
+    expect([c.metal, c.labour]).toEqual([61200, 5100]);
+  });
   it('buildSaleLedger balances (no round-off)', () => {
     const lines = buildSaleLedger({
       key,
