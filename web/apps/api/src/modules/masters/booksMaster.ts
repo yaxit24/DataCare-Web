@@ -686,20 +686,25 @@ export async function bookAccounts(
   limit = 200,
 ): Promise<Array<{ code: string; name: string; group: string }>> {
   const q = text(term);
-  const like = q.replace(/[\\%_]/g, (c) => `\\${c}`);
-  const rows: any[] = await withTxBudget(prisma, scope.tenantId, 'read', (tx: any) =>
-    tx.$queryRawUnsafe(
-      `SELECT "AC_CODE","AC_NAME","AC_GR" FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2
-          AND ($3='' OR "AC_CODE"=$3 OR "AC_CODE" ILIKE $4 OR "AC_NAME" ILIKE $5)
-        ORDER BY ("AC_CODE"=$3) DESC,"AC_NAME","AC_CODE" LIMIT $6`,
-      scope.tenantId,
-      scope.coCode,
-      q.toUpperCase(),
-      `${like}%`,
-      `%${like}%`,
-      Math.min(Math.max(Number(limit) || 200, 1), 500),
-    ),
-  );
+  const search = (wanted: string): Promise<any[]> => {
+    const like = wanted.replace(/[\\%_]/g, (c) => `\\${c}`);
+    return withTxBudget(prisma, scope.tenantId, 'read', (tx: any) =>
+      tx.$queryRawUnsafe(
+        `SELECT "AC_CODE","AC_NAME","AC_GR" FROM "AC_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2
+            AND ($3='' OR "AC_CODE"=$3 OR "AC_CODE" ILIKE $4 OR "AC_NAME" ILIKE $5)
+          ORDER BY ("AC_CODE"=$3) DESC,"AC_NAME","AC_CODE" LIMIT $6`,
+        scope.tenantId,
+        scope.coCode,
+        wanted.toUpperCase(),
+        `${like}%`,
+        `%${like}%`,
+        Math.min(Math.max(Number(limit) || 200, 1), 500),
+      ),
+    );
+  };
+  // An unknown code opens the help of every company account by name (MS_BOOK.cs:2318), not an empty list.
+  let rows = await search(q);
+  if (!rows.length && q) rows = await search('');
   return rows.map((row) => ({
     code: text(row.AC_CODE),
     name: text(row.AC_NAME),

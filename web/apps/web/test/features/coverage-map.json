@@ -210,6 +210,17 @@
         "web/apps/api/src/routes/groupMaster.ts"
       ]
     },
+    "books": {
+      "covers": [
+        "web/apps/web/app/(app)/masters/books/page.tsx",
+        "web/apps/web/app/(app)/masters/books/bookScreen.ts",
+        "web/apps/web/components/BookSlotGrid.tsx",
+        "web/apps/api/src/modules/masters/booksMaster.ts",
+        "web/apps/api/src/modules/masters/bookTemplates.ts",
+        "web/apps/api/src/routes/booksMaster.ts",
+        "web/apps/api/src/modules/ops/seedCompany.ts"
+      ]
+    },
     "productMaster": {
       "covers": [
         "web/apps/web/app/(app)/masters/products/page.tsx",

@@ -144,5 +144,6 @@
       "gap": "G06",
       "reason": "Purchase Rpt (RP_ALL.cs:6656-6707, MDI_FORM.cs:8911-8920) has no dedicated screen yet: the Reports navigation offers no Purchase Rpt link. The shared RP_ALL selector, filter and grouping engine comes first with the Sales Report (prompt 01); this frozen case then turns green and its entry is removed."
     }
-  ]
+  ],
+  "books": []
 }

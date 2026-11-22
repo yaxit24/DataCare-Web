@@ -40,6 +40,7 @@ import { employeeMaster } from './modules/employeeMaster.mjs';
 import { taxMaster } from './modules/taxMaster.mjs';
 import { autoItem } from './modules/autoItem.mjs';
 import { groupMaster } from './modules/groupMaster.mjs';
+import { books } from './modules/books.mjs';
 import { productMaster } from './modules/productMaster.mjs';
 import { addressMaster } from './modules/addressMaster.mjs';
 import { partyMaster } from './modules/partyMaster.mjs';
@@ -93,6 +94,7 @@ const MODULES = [
   taxMaster,
   autoItem,
   groupMaster,
+  books,
   productMaster,
   addressMaster,
   partyMaster,

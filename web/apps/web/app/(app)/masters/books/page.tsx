@@ -474,7 +474,7 @@ export default function BooksPage() {
                 onKeyDown={enterTo(() => refs.itemType.current?.focus())}
               >
                 <option value="" />
-                {[...new Set([...families, header.family].filter(Boolean))].sort().map((family) => (
+                {[...new Set([...families, header.family].filter(Boolean))].map((family) => (
                   <option key={family} value={family}>
                     {family}
                   </option>
