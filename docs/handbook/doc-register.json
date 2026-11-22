@@ -77,6 +77,58 @@
       "purpose": "Rules and entry points for AI coding agents working in this repository."
     },
     {
+      "match": "CLAUDE.md",
+      "area": "Orchestration",
+      "kind": "agent instructions",
+      "status": "current",
+      "purpose": "Entry file Claude Code reads: tells a session whether it is a dispatched worker, the architect or a lane lead, and points to AGENTS.md."
+    },
+    {
+      "match": [
+        ".claude/skills/*/SKILL.md",
+        ".claude/agents/*.md"
+      ],
+      "area": "Orchestration",
+      "kind": "agent skill",
+      "status": "current",
+      "purpose": "Claude Code skills for the supervising session and lane leads (architect loop, packet writing, review) and the two subagents for second reads and lookups."
+    },
+    {
+      "match": ".opencode/agents/*.md",
+      "area": "Orchestration",
+      "kind": "agent instructions",
+      "status": "current",
+      "purpose": "Permission rules for OpenCode sessions started by the orchestration dispatcher."
+    },
+    {
+      "match": "orchestration/roles/*.md",
+      "area": "Orchestration",
+      "kind": "procedure",
+      "status": "current",
+      "purpose": "Role contracts: the instructions the dispatcher gives every worker session of a role (study, cases, tests, implement, ui, verify, records, review, fix, lead)."
+    },
+    {
+      "match": "orchestration/packets/*.md",
+      "area": "Orchestration",
+      "kind": "work packet",
+      "status": "current",
+      "purpose": "Work packets: one file per worker session, with its scope, reading list, checks and brief."
+    },
+    {
+      "match": "orchestration/work/*",
+      "area": "Orchestration",
+      "kind": "evidence",
+      "status": "evidence",
+      "purpose": "What dispatched sessions produced per work package (study, case list, red list, verification). Evidence of what was known and checked; not a status or behaviour authority."
+    },
+    {
+      "match": "orchestration/*.md",
+      "area": "Orchestration",
+      "kind": "plan",
+      "status": "current",
+      "purpose": "The orchestration layer: plan, architecture, quality ladder, packet format, worker tools and providers, machine setup."
+    },
+    {
       "match": ".kiro/skills/third-party/README.md",
       "area": "Documentation hub",
       "kind": "attribution",

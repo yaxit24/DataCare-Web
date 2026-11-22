@@ -258,6 +258,8 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G243 | High | User Create answered with web texts (`missing-or-invalid`, `duplicate-user`), had no Confirm Password, no delete and no edit-mode Save, demanded 12 mixed characters and always showed the rights grid | `unified/src/csharp/DataCareNext/MS_USER.cs:1489-1495,1786-1810,1811-1818,1820-2065,2067-2093,2131-2150,2205-2253,2478-2498`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7451-7460` | `web/apps/api/src/modules/rbac/userMaster.ts`; `web/apps/api/src/routes/userMaster.ts`; `web/apps/api/src/modules/auth/password.ts`; `web/apps/web/app/(app)/admin/users/page.tsx`; `web/apps/api/test/userMaster.routes.db.test.ts` | Implemented-unverified in N231 under D34-D36 (GB-10). The desktop texts, the tab order and Enter walk, the upper-cased 15-character name, Confirm Password checked on leaving the box, the edit-mode Old Password check, Save and Delete; Delete deactivates and revokes every session in the same transaction (D35), the last administrator is kept (N169), a deleted administrator's open session is refused on its next request; 8+ characters with deny-lists and a per-account back-off (D34); the Lite edition hides the rights grid and Update User Right (D36). Not ported: plaintext LOGIN_PWD (`:1981`), F1 revealing the stored password (`:2159-2167`), the ABC reset tool (`:5269-5307`), string-built SQL. Open: action-level enforcement of the stored rights on every route, desktop-runtime comparison and operator acceptance. | N231 |
 | G244 | High | Cash/Bank vouchers differed from the desktop TR_CASH calculations: a Bank Payment with kasar reused the cash kasar leg codes 07/08 (its own amount legs) and was refused on the ledger-key constraint; a multi-line receipt wrote one aggregate CASH_DATA row plus PAY_DETL; the grid totals row printed an en-IN amount and no kasar total | `unified/src/csharp/DataCareNext/TR_CASH.cs:1832-1859,1962-1988,2995-3060`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs:565-610` | `web/apps/api/src/modules/finance/finance.ts`; `web/apps/api/src/modules/finance/legCodes.ts`; `web/packages/core/src/cashGridTotals.ts`; `web/apps/web/components/PaymentForm.tsx`; `web/apps/api/test/cashReceiptLegs.db.test.ts` | Implemented-unverified in N232. Still open: card/UPI modes have no TR_CASH counterpart (owner call); bank Charges column and Clearing Dt; payments in PAY_DATA instead of CASH_DATA; desktop-runtime comparison. | N232 |
 | G245 | High | Order Cancel was a per-order void/refund (`POST /sales-orders/:vchNo/cancel-refund`) that wrote without checking the open advance, so a sale and a cancel could use the same advance twice, and it had no voucher, grid, tag release, lifecycle or print | `unified/src/csharp/DataCareNext/TR_SL_ORD_ADJ.cs:2140-2263,2447,2481-2850,3184-3378,3410-3756,3794-3849`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs:928-937`; `unified/src/csharp/DataCareNext/Ac_Rojmel.cs:392-400`; `unified/src/csharp/DataCareNext/Ac_Stock.cs:610-622` | `web/apps/api/src/modules/sales/orderCancel.ts`; `web/apps/api/src/modules/sales/orderCancelTags.ts`; `web/apps/api/src/modules/sales/orderCancelPrint.ts`; `web/apps/api/src/routes/orderCancel.ts`; `web/apps/web/app/(app)/txn/order-cancel/page.tsx`; `web/apps/api/test/orderCancel.db.test.ts`; `web/apps/web/test/features/modules/orderCancel.mjs` | Implemented-unverified in N233 (WP-02). One TR_SL_ORD_ADJ voucher cancels any number of orders: SL_ORD_ADJ ENTRY_TYPE C / ORD_SIGN -, Order_Adj_Ledr legs 01-04, Order_Adj_Rojmel without the cash row, TEMP_BOOK_DATA, and for orders that hold a tag APR_DETL, BAR_DETL/BAR_IDTL copies, SL_ORD_DETL.TAG_SALE and MAIN_STOCK '+', in one transaction. The open-advance rule is shared with the sale and both lock the order row. Edit/delete are version-guarded; create takes the Idempotency-Key. Web hardening the desktop lacks: AdjAmt above zero and at most the open advance, KsarAmt between 0 and AdjAmt (web texts). The ORDER CANCEL book is provisioned with slot 1 CASH, slot 2 KASAR (was SALES/CASH). Open: the tag release has no browser case (the web Sales Order cannot hold a tag), LOpAmt party balance label, original-Windows comparison. | N233 |
+| G246 | High | The web Sales Return stores the returned amount in `SL_DATA.NET_AMT`/`TOT_AMT` and leaves `RTN_NET_AMT`/`RTN_TOT_AMT` zero, so by the desktop Sales Report rule a web return lists as a sale and the return (Creditnote) variant is empty | `unified/src/csharp/DataCareNext/TR_SALE_RTN.cs:12623,12707,12789,16385-16386`; `unified/src/csharp/DataCareNext/RP_ALL.cs:7584-7597,7618,7747,7768,7851,7872` | `web/apps/api/src/modules/sales/salesReturn.ts` (header: `NET_AMT: totals.net`, `TOT_AMT: totals.total`); `web/apps/api/src/modules/posting/desktopColumnDefaults.ts` (`RTN_NET_AMT: 0`) | Found while inventorying RP_ALL (docs/parity/rpall-sales-inventory.md §6.9). TR_SALE_RTN is the desktop return/exchange form: the sold part goes to `NET_AMT` (`nAcDrAmt`, the sale grid total) and the returned part to `RTN_NET_AMT`/`RTN_TOT_AMT`/`RTN_*` (`nAcCrAmt`, the return grid total). Every RP_ALL sales button selects sales by `NET_AMT <> 0` and returns by `RTN_NET_AMT <> 0`. The return writer must store the desktop columns (and its readers, reversal and the registers that read them must follow) before the report's return variant can show web-written returns; the report is not bent around the writer. | N234 |
+| G247 | High | Sales line percentage labour took LBR_PRC of the item amount and the line amounts were rounded by TOT_AMT_ROF; the desktop derives LBR_RATE from the item rate and rounds ITM_AMT/LBR_AMT at a hardcoded 0 (2 under ALL_ROF_REMOVE) | `unified/src/csharp/DataCareNext/TR_SALE.cs:10343-10362,10905-10932,10996-11021,11084-11127,9135`; `unified/src/csharp/DataCareNext/TR_SALE_RTN.cs:4963,4975-4993` | `web/packages/core/src/calc.ts`; `web/packages/core/src/saleAmount.ts`; `web/packages/core/src/roundingPolicy.ts`; `web/apps/api/src/modules/sales/sales.ts`; `web/apps/api/src/modules/sales/salesReturn.ts`; `web/apps/web/lib/lineRecalc.ts`; `web/packages/core/test/desktopOracle.salesLine.test.ts`; `web/apps/api/test/lineComponentRounding.db.test.ts`; `web/apps/web/test/features/modules/salesInvoice.mjs` | Implemented-unverified in N235 (WP-41 family 1 follow-up). `CommPassTotal` sets `LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, MsLbrRof)` (`:11021`) and multiplies it by the LBR_TYPE basis (P pcs, N net + ghat unless LBR_WITH_GHT = N, K (net + ghat)/1000, G gross, blank net + ghat; `:11084-11127`); the web took LBR_PRC of the item amount. ITM_AMT and LBR_AMT are each one `Math.Round(.., digits)` with digits hardcoded 0, or 2 when ALL_ROF_REMOVE = Y (`:10343-10362`); the web rounded them by TOT_AMT_ROF, which the desktop uses only for bill totals. The eight `labour.pct.*` oracle baselines are removed and pass; the Sales Return keeps whole rupees and its gross-weight fallback basis (TR_SALE_RTN.cs:4975-4993). Consequence: on a company with blank ALL_ROF_REMOVE every Sale line amount is now a whole rupee (61,234.5 -> 61,234, half to even), so feature expectations in sales-invoice, gst-report, group-master and item-master moved with it. Open: the registration-serial branches (`DM035NPDM`, `HM199NEPK` today's-gold-rate percentage) are not modelled; desktop-runtime comparison of a full voucher. Open, recorded at the final review of PR #241: Sales Return amounts are still decimal arithmetic with a tolerance rounding (0.545 x 100: web 54, desktop 55; `TR_SALE_RTN.cs:4946-4993`); a typed item rate goes through ITM_RATE_ROF where the desktop only formats it "0.00" (`TR_SALE.cs:9470-9476`; ROF applies only to an amount-derived rate, `:10975-10991`); LBR_RATE_GEN = Y does not yet regenerate a percentage line's LBR_RATE from LBR_AMT and its LBR_TYPE basis (`:11139-11186`). | N235 |
 
 ## 4. Decisions D23–D28
 
@@ -3689,6 +3691,69 @@ The card/UPI case (T06) stays blocked for an owner call: `TR_CASH` has no card o
 settlement is the separate Pro menu Card Rec, whose commission is rounded to a whole rupee and added
 (`TR_CARD_REC.cs:3796-3799`), while the web modes subtract a two-place commission.
 
+### N234 — Report → Sales Report on the shared RP_ALL engine, phase one (G06, G246, Lite L6, WP-11)
+
+`RP_ALL` serves Sales Report, Purchase Rpt, Approval Rpt and Order Report with one form: the caption picks a button
+panel (`RP_ALL.cs:6656-6707`), each button appends the shared selectors to a Crystal record-selection formula and opens
+a named template, and the template groups and totals. `docs/parity/rpall-sales-inventory.md` inventories the Sales
+branch with citations: 13 selectors, 15 buttons (13 in Lite), and 9 templates column by column (133 columns, 61
+totals).
+
+Phase one builds the shared engine as pure logic in `web/apps/api/src/modules/reports/rpAll/`: `engine.ts` (Crystal
+record order, group bands with header or footer subtotals, band suppression, totals that count each value once per
+voucher, line or sub-line key, `dd/MM/yyyy` titles), `filters.ts` (the selectors, fail-closed; the location is locked
+to the session unless it is `00`, `RP_ALL.cs:6660-6671`; From after To is an empty report, as on the desktop),
+`salesLayouts.ts` (six Sales modes and three return variants read from the templates) and `salesQuery.ts` (one
+read-only SELECT per mode built from constant fragments, every value a bound parameter, inside
+`withTxBudget(..., 'read')` under forced RLS). `GET /reports/sales-report` and its CSV/XLSX exports
+(`web/apps/api/src/routes/rpAllReport.ts`) share one result, so the export cannot disagree with the screen; rights are the Sales Report
+caption's. The shared report-filter guard in `app.ts` exempts `/reports/sales-report`, as it does the Account
+Ledger, because the RP_ALL parser owns those selectors (the party filter is `{SL_DATA.AC_CODE}`, `RP_ALL.cs:7629-7631`)
+and refuses one a template lacks itself. Another location in the query is refused centrally with 409
+`scope-mismatch`, as on every scoped route (the desktop disables `tLcCode`, `RP_ALL.cs:6660-6665`).
+
+Proof: `rpAllEngine.test.ts` and `rpAllSales.test.ts` add every total up from fixture vouchers with the template
+formula. `rpAllSales.db.test.ts` (written without a local stack, run in CI) proves the row set per selector, the hand
+totals per mode, the sentinels in another tenant, company, location, year and date, the List and Print refusals and the
+export's GRAND TOTAL. The `sales-report` browser module is frozen T01-T18 with every case blocked until the screen
+exists.
+
+Reported, not guessed (inventory §6): the running-total evaluation group is not in the extracted XML; SalesSumm's
+plain `Sum()` counts a multi-line bill once per joined record and the web counts it once (deliberate difference);
+the employee filter's `Mid(text, 1, 3)` truncation is not ported; city/area/state on Item Wise and Group Sales are
+refused because those templates hold no `AC_MAST`; `MsDataType` waits for an owner decision; G246 is recorded.
+
+Open work remains explicit:
+
+- The dedicated route directory `web/apps/web/app/(app)/reports/sales-report/` (page, grid, hook, types) and the
+  browser run of the frozen cases.
+- The other seven buttons (Sales Bill, Cash/Bank Bill, Wh Sales, Wh Summ, Emp WhSales, Counter Sales, Labour Work).
+- PDF in the template layouts and drill-down to the voucher.
+- G246 in the Sales Return writer; `SalesRtnA4Print` is missing from the repository.
+- Desktop-runtime comparison; N234 is in progress, not accepted.
+
+### N235 — Sales line percentage labour and line precision follow TR_SALE CommPassTotal (G247, Lite L1, WP-41)
+
+The desktop oracle (PR #235, run 42580947381) baselined eight `labour.pct.*` vectors on which the web disagreed.
+`CommPassTotal` never takes a percentage of an amount: a non-zero LBR_PRC on a row with an item rate sets
+`LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, MsLbrRof)` (`TR_SALE.cs:10996-11021`; the Sales Return has the same
+statement at `TR_SALE_RTN.cs:4963`), and every LBR_TYPE branch then multiplies that rate by its basis
+(`TR_SALE.cs:11084-11127`). A new row takes the company LBR_TYPE (`:9135`). Core `percentageLabourRate` and
+`desktopLabourBasisQuantity` implement this; `computeLine` passes the LBR_TYPE it persists, writes the derived LBR_RATE,
+and LBR_GEN no longer replaces it.
+
+The line precision is hardcoded in the same method: `digits = 0; digits2 = 0`, both 2 when ALL_ROF_REMOVE = 'Y'
+(`TR_SALE.cs:10343-10362`), `digits` rounding ITM_AMT (`:10905-10932`) and `digits2` LBR_AMT (`:11100-11127`).
+TOT_AMT_ROF rounds the bill totals only (`:19192`, `:19274`). Core `saleLineDecimals`/`roundSaleLineAmount` replace the
+TOT_AMT_ROF rounding of the line components. On a company whose ALL_ROF_REMOVE is blank (every web-provisioned one) a
+line amount is therefore a whole rupee, as all 245 real SL_DETL rows are.
+
+The Sale and Sales Quotation screens preview the same arithmetic (`web/apps/web/lib/lineRecalc.ts` `recalcSaleGridRow`) and post a
+Lbr% row as a percentage line (`saleGridRowLabour`). New browser case `sales-invoice.formula.percentage-labour` (silver
+1000 g at 85.55, Lbr% 12.5: LBR_RATE 10.69, LBR_AMT 10,690 where the old rule gave 10,694) and DB case
+`lineComponentRounding.db.test.ts` "a percentage line derives LBR_RATE ...". Not modelled: the registration-serial
+branches (`DM035NPDM` line precision, `HM199NEPK` today's-gold-rate percentage).
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -3847,6 +3912,7 @@ settlement is the separate Pro menu Card Rec, whose commission is rounded to a w
 | N229 | — | implemented-unverified, evidence in this change (G242: exact source/BAR checks precede return create and unchanged PUT; `/sales` matches stable OLD_SRNO plus party/item/tag/instance/quantities and updates the locked BAR row; max-plus-one line/stone IDs reject duplicate/zero/fraction values; LDisc-derived discount and one-decimal NET_AMT; strict company stone codes; existing lifecycle/audit/print coverage. Operator Apr No import, Wh Sales continuation, licence/image/idempotency/fault-injection/Crystal pagination, Windows comparison and acceptance remain open) |
 | N230 | — | implemented-unverified, evidence in this change (G206 scheme part, owner decision to follow the source: the typed Scheme Amt joins ADV_AMT and writes Order_Rojmel type 05 to the MEMB ADJUST book's slot-1 account; the non-Lite MEMB ADJUST voucher path stays open) |
 | N231 | — | implemented-unverified, evidence in this change (G243: User Create is MS_USER with the desktop texts, Confirm Password, edit-mode Save and Delete; D34 passwords, D35 delete = deactivate with every session revoked, D36 Lite hides the rights screen) |
+| N234 | — | in-progress, evidence in this change (G06 part, G246 recorded: the shared RP_ALL engine and the Sales adapter with GET /reports/sales-report and CSV/XLSX, unit- and DB-tested; screen, seven buttons and the browser run remain) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 

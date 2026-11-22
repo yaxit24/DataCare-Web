@@ -715,8 +715,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/party header, item, charge and old-metal grids, a 16-field tender panel, totals, item image and print controls.
 - **Writes:** SL_DATA, SL_DETL, SL_IDTL, SL_PR_DETL, MAIN_STOCK, DM_DATA, AC_DATA, ROJ_MEL_DATA, TAX_DATA, BILL_OS_DATA.
 - **Web:** `/txn/sales`, `/txn/hallmark-sale`; `POST /sales`, `GET /sales/:vchNo`, `PUT /sales/:vchNo`, `DELETE /sales/:vchNo`, `GET /sales/invoice`, `GET /vouchers/recent`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** Lossless reopen on the Sales Invoice screen (the Hallmark Sale screen is lossless since N40), configured companion columns and books, tender/source branches, old-metal header vs detail valuation (G83), tax codes on web-provisioned companies (G82), Crystal variants, COL_MAST layout and the printed date year remain.
-- **Owners:** X13, G46, N63, G45, N40, G42, N61, G43, N62, N56, N73, N74, N77, G82, G83.
+- **Remaining:** Lossless reopen on the Sales Invoice screen (the Hallmark Sale screen is lossless since N40), configured companion columns and books, tender/source branches, old-metal header vs detail valuation (G83), tax codes on web-provisioned companies (G82), Crystal variants, COL_MAST layout and the printed date year remain. Percentage labour and the line precision follow CommPassTotal (N235/G247); the registration-serial branches are not modelled.
+- **Owners:** X13, G46, N63, G45, N40, G42, N61, G43, N62, N56, N73, N74, N77, G82, G83, G247, N235.
 - **Evidence:** [KB_transaction.md:43-109](../../project-memory/video-research/_kb/KB_transaction.md#L43-L109).
 
 ### Sales Order
@@ -1815,10 +1815,10 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Runs sales register, party, item, group, employee, order-linked and summary variants.
 - **Looks:** Shared date/book/party/location/product/group/item/employee filters with many sales mode buttons.
 - **Reads:** SL_DATA, SL_DETL, SL_DETL_RTN, AC_MAST, ITEM_MAST, BOOK_DATA.
-- **Web:** `/reports/sales-register`; `GET /reports/sales-register`, `GET /reports/sales-by-party`, `GET /reports/sales-by-item`, `GET /reports/sales-by-group`. Can: print, list.
-- **Remaining:** A register exists; the RP_ALL sales variants, the MAIN_BOOK classification remainder, filters and Crystal templates remain.
-- **Owners:** N36, G06, G48, N24, X26, N57, N75, G225, N212.
-- **Evidence:** [RP_ALL.cs:7572-7945](../../unified/src/csharp/DataCareNext/RP_ALL.cs#L7572-L7945).
+- **Web:** `/reports/sales-register`; `GET /reports/sales-register`, `GET /reports/sales-by-party`, `GET /reports/sales-by-item`, `GET /reports/sales-by-group`, `GET /reports/sales-report`, `GET /reports/sales-report/export.csv`, `GET /reports/sales-report/export.xlsx`. Can: print, list.
+- **Remaining:** The shared RP_ALL engine and the Sales adapter serve GET /reports/sales-report (Sales Report, Sales Reg, Item Wise, Group Sales, Employ Sales, Sale With Order and the Sales Return prompt variants) with CSV/XLSX (N234 phase one, inventory docs/parity/rpall-sales-inventory.md); the dedicated screen, the other seven buttons, PDF in the template layouts, drill-down and the browser run remain; G246: the web Sales Return writes NET_AMT instead of RTN_NET_AMT, so web returns list as sales.
+- **Owners:** N36, G06, G48, N24, X26, N57, N75, G225, N212, N234, G246.
+- **Evidence:** [RP_ALL.cs:6656-6707](../../unified/src/csharp/DataCareNext/RP_ALL.cs#L6656-L6707), [RP_ALL.cs:7572-7945](../../unified/src/csharp/DataCareNext/RP_ALL.cs#L7572-L7945), [RP_ALL.cs:8913-12110](../../unified/src/csharp/DataCareNext/RP_ALL.cs#L8913-L12110).
 
 ### Stock Report
 

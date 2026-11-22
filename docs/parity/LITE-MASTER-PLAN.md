@@ -403,7 +403,7 @@ browser case per screen first (red), then the hook (green).
 
 | WP | Menu(s) | Desktop form | Pri | Size | Depends | Prompt | State |
 |---|---|---|---|---|---|---|---|
-| WP-11 | Sales Report + the shared RP_ALL engine | `RP_ALL.cs` (12,662) sales branch | P1 | XL | — | 01 | not started |
+| WP-11 | Sales Report + the shared RP_ALL engine | `RP_ALL.cs` (12,662) sales branch | P1 | XL | — | 01 | phase one (engine + Sales API, N234) in PR; screen open |
 | WP-12 | Purchase Rpt (removes 17 G06 baselines) | `RP_ALL` purchase branch | P1 | M | WP-11 | 02 | frozen cases merged |
 | WP-13 | Approval Rpt | `RP_ALL` approval branch | P2 | M | WP-11, WP-01 | 03 | partial |
 | WP-14 | Order Report | `RP_ALL` order branch | P2 | M | WP-11, WP-03 | — (use 01's pattern) | no longer BROKEN once WP-03 (#232) merges |
@@ -481,7 +481,7 @@ A WP in this phase is done when its module has **no blocked case** and its catal
 | WP | Item | Pri | Size | Depends |
 |---|---|---|---|---|
 | WP-40 | Golden-vector harness on `windows-latest` (O1 + O2) | P1 | M | — |
-| WP-41 | Formula families to L2, one PR per family | P1 | M each | WP-40 |
+| WP-41 | Formula families to L2, one PR per family (family 1 sales line: PR #235; percentage labour + line precision N235/G247, oracle baseline emptied) | P1 | M each | WP-40 |
 | WP-42 | Report oracle on a restored desktop database (O3) | P2 | L | owner OK |
 | WP-43 | Screen automation of the desktop executable (O4) | P3 | XL | owner OK |
 
