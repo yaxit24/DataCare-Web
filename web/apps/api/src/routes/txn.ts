@@ -147,15 +147,6 @@ import {
   listOpenConsignmentPurchaseReceipts,
 } from '../modules/purchase/purchase.js';
 import {
-  createPurchaseReturn,
-  purchaseReturnInputFromBody,
-} from '../modules/purchase/purchaseReturn.js';
-import {
-  deletePurchaseReturn,
-  editPurchaseReturn,
-  getPurchaseReturn,
-} from '../modules/purchase/purchaseReturnLifecycle.js';
-import {
   postReceipt,
   postPayment,
   editPayment,
@@ -239,6 +230,7 @@ import { registerVoucherNavigationRoutes } from './voucherNavigation.js';
 import { postContra, deleteContra, getContra, editContra } from '../modules/finance/contra.js';
 import { registerSaleVoucherRoutes } from './saleVoucher.js';
 import { registerPurchaseVoucherRoutes } from './purchaseVoucher.js';
+import { registerPurchaseReturnRoutes } from './purchaseReturn.js';
 import { registerPartyOpeningRoutes } from './partyOpening.js';
 import { registerFineJvRoutes } from './fineJv.js';
 import { registerOrderCancelRoutes } from './orderCancel.js';
@@ -2701,61 +2693,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.delete('/other-income/:vchNo', auth, otherIncome.remove);
   app.get('/other-income/:vchNo/print', auth, otherIncome.print);
 
-  // ---- Purchase return ----
-  // No JSON Schema yet: no route in this file has one until decision D16 is accepted (N50).
-  app.post('/purchase-returns', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    const input = purchaseReturnInputFromBody(scopeOf(req), sess(req).sub, b);
-    return run(reply, 201, () => createPurchaseReturn(prisma, input, b.lines ?? []));
-  });
-  app.put('/purchase-returns/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'update')) return;
-    const b = body(req);
-    const input = purchaseReturnInputFromBody(scopeOf(req), sess(req).sub, b);
-    return run(reply, 200, () =>
-      editPurchaseReturn(prisma, input, b.lines ?? [], (req.params as any).vchNo),
-    );
-  });
-  app.get('/purchase-returns/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    return run(reply, 200, () =>
-      getPurchaseReturn(prisma, scopeOf(req), (req.params as any).vchNo),
-    );
-  });
-  app.get('/purchase-returns/:vchNo/print', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    const q = req.query as any;
-    const copyLabel = standardDocumentCopy(q.copy, reply);
-    if (copyLabel === null) return reply;
-    const scope = resolvePrintScope(reply, readScope(req), (req.params as any).vchNo);
-    if (!scope) return reply;
-    await getPurchaseReturn(prisma, scope, scope.vchNo);
-    const data = await purchaseBillData(prisma, scope);
-    if (!data) return reply.code(404).send({ error: 'purchase-return-not-found' });
-    const html = purchaseBillHtml(data.header, data.lines, {
-      company: data.company,
-      party: data.party,
-      copy: copyLabel,
-      title: 'Purchase Return',
-      partyCaption: 'Supplier',
-      footerText: 'Purchase return — goods and value returned to supplier.',
-    });
-    return sendVoucherDocument(reply, html, {
-      format: q.format,
-      filename: `purchase-return-${scope.vchNo}`,
-    });
-  });
-  app.delete('/purchase-returns/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
-      deletePurchaseReturn(prisma, {
-        scope: scopeOf(req),
-        vchNo: (req.params as any).vchNo,
-        deleteUser: sess(req).sub,
-      }),
-    );
-  });
+  // ---- Purchase return: routes/purchaseReturn.ts (N245) ----
+  registerPurchaseReturnRoutes(app, extraRouteHelpers);
 
   // ---- Finance (receipt / payment / contra) ----
   const receiptInput = (req: FastifyRequest, b: Record<string, any>) => ({

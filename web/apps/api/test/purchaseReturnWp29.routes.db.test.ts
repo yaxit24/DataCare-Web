@@ -256,7 +256,8 @@ const LINE = {
         `/purchase-returns/${vchNo}/print?${Q}&format=html`,
       );
       expect(denied.statusCode, denied.body).toBe(403);
-      expect(denied.body).not.toContain('Purchase Return');
+      expect(denied.body).not.toContain('<!doctype');
+      expect(denied.json()).toMatchObject({ error: 'forbidden', action: 'print' });
       const allowed = await request(
         FULL,
         'GET',

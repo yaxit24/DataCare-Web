@@ -1108,6 +1108,8 @@ const PRINT_ROUTES = new Set([
   'GET /reports/balance-sheet-doc',
   'GET /reports/render',
   'GET /fine-jv/:vchNo/print',
+  // Purchase Rtn prints on FRM_PRINT (TR_KR_ISU.cs:5434 {{UserPrint}}), not on view (N245, G257).
+  'GET /purchase-returns/:vchNo/print',
   // TR_SL_ORD_ADJ.cs:3796-3800: OrderCancelVch needs the print right.
   'GET /order-cancel/:vchNo/print',
   // TR_CONTRA.cs:3000-3004: Contra and Journal documents are printed from the same form as Fine JV.
