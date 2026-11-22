@@ -381,19 +381,32 @@ async function withHallmarkTax(ctx, run) {
   const [before] = await ctx.rows(
     `SELECT "PURC_WITH_HMTAX" v FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
   );
-  assert(before, 'company 01 needs a CO_SET_NEW row');
-  await ctx.owner.$executeRawUnsafe(
-    `UPDATE "CO_SET_NEW" SET "PURC_WITH_HMTAX"='Y' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
-    ctx.tenantId,
-  );
+  // A company provisioned without CO_SET_NEW reads every flag as blank (settingsBehavior.ts); the row is added
+  // for the case and removed afterwards.
+  if (before)
+    await ctx.owner.$executeRawUnsafe(
+      `UPDATE "CO_SET_NEW" SET "PURC_WITH_HMTAX"='Y' WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+      ctx.tenantId,
+    );
+  else
+    await ctx.owner.$executeRawUnsafe(
+      `INSERT INTO "CO_SET_NEW"(tenant_id,"CO_CODE","PURC_WITH_HMTAX") VALUES ($1,'01','Y')`,
+      ctx.tenantId,
+    );
   try {
     return await run();
   } finally {
-    await ctx.owner.$executeRawUnsafe(
-      `UPDATE "CO_SET_NEW" SET "PURC_WITH_HMTAX"=$2 WHERE tenant_id=$1 AND "CO_CODE"='01'`,
-      ctx.tenantId,
-      before.v,
-    );
+    if (before)
+      await ctx.owner.$executeRawUnsafe(
+        `UPDATE "CO_SET_NEW" SET "PURC_WITH_HMTAX"=$2 WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        ctx.tenantId,
+        before.v,
+      );
+    else
+      await ctx.owner.$executeRawUnsafe(
+        `DELETE FROM "CO_SET_NEW" WHERE tenant_id=$1 AND "CO_CODE"='01'`,
+        ctx.tenantId,
+      );
   }
 }
 

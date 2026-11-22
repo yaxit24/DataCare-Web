@@ -92,12 +92,21 @@ interface Row {
   tagOthWt: string;
   tagNwt: string;
   tagTouch: string;
+  tagWestPct: string;
+  tagFine: string;
   tagRate: string;
   tagAmount: string;
+  tagLbrPct: string;
+  tagLbrRate: string;
+  tagLbrAmt: string;
+  tagOthAmt: string;
   tagCost: string;
   tagTotCost: string;
   tagMarginPct: string;
   tagMrp: string;
+  /** Hidden grid columns 86 (design image) and 83 (tag serial), kept from the stored line (TR_PURC_HM.cs:7522, :7572). */
+  designImgId: string;
+  tagSrno: string;
   /** The stored line this row was reopened from, and whether its stored results still stand. */
   source?: Record<string, unknown>;
   loaded?: boolean;
@@ -164,8 +173,14 @@ const tagBandFields: Array<[keyof Row, string]> = [
   ['tagOthWt', 'TOthWt'],
   ['tagNwt', 'TgNwt'],
   ['tagTouch', 'TgTch'],
+  ['tagWestPct', 'TgW%'],
+  ['tagFine', 'TgFine'],
   ['tagRate', 'TagRate'],
   ['tagAmount', 'TagItAmt'],
+  ['tagLbrPct', 'TgLbr%'],
+  ['tagLbrRate', 'TgLRat'],
+  ['tagLbrAmt', 'TgLAmt'],
+  ['tagOthAmt', 'TgOth'],
   ['tagCost', 'PrCost'],
   ['tagTotCost', 'TagCost'],
   ['tagMarginPct', 'Margin%'],
@@ -224,6 +239,12 @@ const NUMERIC_EXTENDED = new Set<string>([
   'tagOthWt',
   'tagNwt',
   'tagTouch',
+  'tagWestPct',
+  'tagFine',
+  'tagLbrPct',
+  'tagLbrRate',
+  'tagLbrAmt',
+  'tagOthAmt',
   'tagRate',
   'tagAmount',
   'tagCost',
@@ -291,6 +312,14 @@ const blank = (): Row => ({
   tagOthWt: '',
   tagNwt: '',
   tagTouch: '',
+  tagWestPct: '',
+  tagFine: '',
+  tagLbrPct: '',
+  tagLbrRate: '',
+  tagLbrAmt: '',
+  tagOthAmt: '',
+  designImgId: '',
+  tagSrno: '',
   tagRate: '',
   tagAmount: '',
   tagCost: '',
@@ -493,6 +522,14 @@ export default function HallmarkPurchasePage() {
         tagOthWt: str(line.tagOthWt),
         tagNwt: str(line.tagNwt),
         tagTouch: str(line.tagTouch),
+        tagWestPct: str(line.tagWestPct),
+        tagFine: str(line.tagFine),
+        tagLbrPct: str(line.tagLbrPct),
+        tagLbrRate: str(line.tagLbrRate),
+        tagLbrAmt: str(line.tagLbrAmt),
+        tagOthAmt: str(line.tagOthAmt),
+        designImgId: cell(line.designImgId),
+        tagSrno: str(line.tagSrno),
         tagRate: str(line.tagRate),
         tagAmount: str(line.tagAmount),
         tagCost: str(line.tagCost),
@@ -563,6 +600,9 @@ export default function HallmarkPurchasePage() {
             }),
           ),
           stones: sub.inputsFor(sourceIndex),
+          // Hidden columns 86 and 83 go back as they were read.
+          designImgId: r.designImgId || undefined,
+          tagSrno: r.tagSrno ? n(r.tagSrno) : undefined,
           itCode: r.itCode.trim(),
           tagNo: r.tagNo.trim() || undefined,
           huid: r.huid.trim() || undefined,
