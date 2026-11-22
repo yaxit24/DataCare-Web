@@ -1596,7 +1596,7 @@ async function writePurchaseTx(
       vchDate,
       vchType: bookPolicy.vchType,
       bookName: bookPolicy.bookName,
-      partyName: input.acName ?? '',
+      partyName: supplierName || input.acName || '', // AC_MAST name, so a reopen cannot change it (WP-28)
       partyCode: input.acCode,
     },
     computed.map((c, idx) => {
