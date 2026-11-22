@@ -1,0 +1,88 @@
+{
+  "claude": {
+    "name": "Claude Code, headless (claude -p). Anthropic models on the subscription, or any Anthropic-compatible endpoint through a provider entry",
+    "bin": "claude",
+    "install": "https://claude.com/claude-code",
+    "prompt": "stdin",
+    "defaults": {
+      "effort": "medium",
+      "permissionMode": "acceptEdits"
+    },
+    "args": [
+      "-p",
+      "--model",
+      "{model}",
+      "--effort",
+      "{effort}",
+      "--permission-mode",
+      "{permissionMode}",
+      "--output-format",
+      "json",
+      "--allowedTools",
+      "Read",
+      "Glob",
+      "Grep",
+      "Edit",
+      "Write",
+      "Bash",
+      "--disallowedTools",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(git reset:*)",
+      "Bash(git clean:*)",
+      "Bash(git checkout:*)",
+      "Bash(git switch:*)",
+      "Bash(git worktree:*)",
+      "Bash(git stash:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh repo:*)",
+      "WebFetch",
+      "WebSearch"
+    ]
+  },
+  "opencode": {
+    "name": "OpenCode, headless (opencode run). Any provider OpenCode can connect: OpenCode Go, DeepSeek, OpenRouter, OpenAI-compatible endpoints",
+    "bin": "opencode",
+    "install": "npm install --global opencode-ai",
+    "prompt": "pointer",
+    "args": [
+      "run",
+      "--auto",
+      "--agent",
+      "dc-worker",
+      "--format",
+      "json",
+      "--title",
+      "{runId}",
+      "--dir",
+      "{worktree}",
+      "--model",
+      "{model}",
+      "{pointer}"
+    ]
+  },
+  "codex": {
+    "name": "Codex CLI, headless (codex exec). ChatGPT plan sign-in or an API key",
+    "bin": "codex",
+    "install": "npm install --global @openai/codex",
+    "prompt": "stdin",
+    "modelRequired": false,
+    "args": [
+      "exec",
+      "-c",
+      "model_reasoning_effort=\"medium\"",
+      "--sandbox",
+      "workspace-write",
+      "--json",
+      [
+        "-m",
+        "{model}"
+      ],
+      "-C",
+      "{worktree}",
+      "-o",
+      "{lastMessage}",
+      "-"
+    ]
+  }
+}

@@ -1,0 +1,195 @@
+{
+  "_comment": "Which worker runs which role. A tier lists candidates in order of preference; the dispatcher uses the first one whose tool is installed, whose provider key is present and whose model is set. A candidate with an empty model is a slot waiting for a provider decision. Edit this file to change providers: nothing else in the repository names a model. See orchestration/RUNNERS.md.",
+  "tiers": {
+    "A": {
+      "use": "Architect grade: decomposition, hard debugging, review of money, stock, tenant-isolation, auth and migration changes",
+      "candidates": [
+        {
+          "runner": "claude",
+          "model": "opus",
+          "effort": "high"
+        }
+      ]
+    },
+    "B": {
+      "use": "Lead grade: complex implementation, cross-review, repair of a failed worker run",
+      "candidates": [
+        {
+          "runner": "claude",
+          "model": "sonnet",
+          "effort": "medium"
+        },
+        {
+          "runner": "opencode",
+          "provider": "opencode-go",
+          "model": "opencode-go/kimi-k2.7-code"
+        },
+        {
+          "runner": "opencode",
+          "provider": "opencode-go",
+          "model": "opencode-go/qwen4-max"
+        },
+        {
+          "runner": "opencode",
+          "provider": "opencode-go",
+          "model": "opencode-go/deepseek-v4-pro"
+        },
+        {
+          "runner": "codex",
+          "model": "gpt-6-astra"
+        },
+        {
+          "runner": "opencode",
+          "provider": "openrouter",
+          "model": "openrouter/qwen/qwen4-max"
+        }
+      ]
+    },
+    "C": {
+      "use": "Bulk grade: desktop study, case lists, tests, routine implementation, records",
+      "candidates": [
+        {
+          "runner": "opencode",
+          "provider": "opencode-go",
+          "model": "opencode-go/deepseek-v4.1-flash"
+        },
+        {
+          "runner": "opencode",
+          "provider": "opencode-go",
+          "model": "opencode-go/mimo-v2.6-flash"
+        },
+        {
+          "runner": "opencode",
+          "provider": "opencode-go",
+          "model": "opencode-go/hy4-flash-free"
+        },
+        {
+          "runner": "codex",
+          "model": "gpt-6-astra"
+        },
+        {
+          "runner": "claude",
+          "model": "sonnet",
+          "effort": "medium"
+        },
+        {
+          "runner": "opencode",
+          "provider": "openrouter",
+          "model": "openrouter/deepseek/deepseek-v4.1-flash"
+        },
+        {
+          "runner": "opencode",
+          "provider": "openrouter",
+          "model": "openrouter/tencent/hy4-flash"
+        },
+        {
+          "runner": "opencode",
+          "provider": "deepseek",
+          "model": ""
+        },
+        {
+          "runner": "claude",
+          "provider": "anthropic-compatible",
+          "model": ""
+        },
+        {
+          "runner": "claude",
+          "model": "haiku",
+          "effort": "medium"
+        }
+      ]
+    }
+  },
+  "escalation": [
+    "C",
+    "B",
+    "A"
+  ],
+  "roles": {
+    "study": {
+      "tier": "C",
+      "limits": {
+        "minutes": 60,
+        "maxChangedFiles": 4,
+        "maxDiffLines": 2500
+      }
+    },
+    "cases": {
+      "tier": "C",
+      "limits": {
+        "minutes": 40,
+        "maxChangedFiles": 3,
+        "maxDiffLines": 1200
+      }
+    },
+    "tests": {
+      "tier": "C",
+      "limits": {
+        "minutes": 60
+      }
+    },
+    "implement": {
+      "tier": "C",
+      "deny": [
+        "web/apps/api/test/**",
+        "web/apps/web/test/**",
+        "web/packages/*/test/**",
+        "orchestration/work/**"
+      ],
+      "limits": {
+        "minutes": 90
+      }
+    },
+    "ui": {
+      "tier": "C",
+      "deny": [
+        "web/apps/api/**",
+        "web/apps/web/test/**",
+        "web/packages/*/test/**",
+        "orchestration/work/**"
+      ],
+      "limits": {
+        "minutes": 90
+      }
+    },
+    "verify": {
+      "tier": "B",
+      "limits": {
+        "minutes": 60,
+        "maxChangedFiles": 6
+      }
+    },
+    "records": {
+      "tier": "C",
+      "deny": [
+        "web/apps/**/src/**",
+        "web/packages/**/src/**"
+      ],
+      "limits": {
+        "minutes": 30
+      }
+    },
+    "review": {
+      "tier": "B",
+      "readOnly": true,
+      "limits": {
+        "minutes": 30
+      }
+    },
+    "fix": {
+      "tier": "B",
+      "deny": [
+        "orchestration/work/**"
+      ],
+      "limits": {
+        "minutes": 90
+      }
+    },
+    "lead": {
+      "tier": "B",
+      "limits": {
+        "minutes": 120
+      }
+    }
+  }
+}
