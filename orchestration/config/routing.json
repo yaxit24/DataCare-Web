@@ -51,17 +51,12 @@
         {
           "runner": "opencode",
           "provider": "opencode-go",
-          "model": "opencode-go/deepseek-v4.1-flash"
+          "model": "opencode-go/qwen4-max"
         },
         {
           "runner": "opencode",
           "provider": "opencode-go",
-          "model": "opencode-go/mimo-v2.6-flash"
-        },
-        {
-          "runner": "opencode",
-          "provider": "opencode-go",
-          "model": "opencode-go/hy4-flash-free"
+          "model": "opencode-go/kimi-k2.7-code"
         },
         {
           "runner": "codex",
@@ -96,6 +91,11 @@
           "runner": "claude",
           "model": "haiku",
           "effort": "medium"
+        },
+        {
+          "runner": "opencode",
+          "provider": "opencode-go",
+          "model": "opencode-go/deepseek-v4.1-flash"
         }
       ]
     }
