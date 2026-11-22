@@ -257,7 +257,7 @@ export async function gstGstr3bTx(tx: Tx, input: GstReportInput): Promise<RawGst
   const optional = optionalScope(input, 'a', params);
   const charge = `COALESCE(NULLIF(a."R_CHARG",''),'N')`;
   const outward = `a."TAX_SIGN"='+'`;
-  const reverse = `a."TRAN_TYPE"='P' AND ${charge}='Y'`;
+  const reverse = `a."TAX_SIGN"='+' AND ${charge}='Y'`;
   const itc = `a."TRAN_TYPE"='P' AND a."TAX_SIGN"='-' AND ${charge}='N'`;
   const aggregate = (prefix: string, predicate: string) => `
        COUNT(*) FILTER (WHERE ${predicate})::text AS ${prefix}_count,

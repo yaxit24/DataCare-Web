@@ -26,3 +26,7 @@ Raised during implementation (N239, 2026-11-22):
   `TAX_SIGN '+'` row as `RP_GST.cs:3541` and `:3642` do, including purchase returns (`Ac_Tax.cs:233` writes them
   `'P'`/`'+'`): a purchase return issues a debit note and is an outward supply of the returned goods. Proven by
   `gstReportPurchaseReturn.db.test.ts` (a return made by the Purchase Return writer, counted with the desktop arithmetic).
+- **Q11 (architect, 2026-11-22, owner may override):** 3.2(1) keeps the web rule `COALESCE(AC_GSTNO,'')=''`, so a party
+  with a NULL GSTIN counts as unregistered. The desktop `B.AC_GSTNO = ''` (`RP_GST.cs:3642`) drops NULL GSTINs from 3.2(1);
+  that is a deliberate difference, because a party with no GSTIN is an unregistered buyer whatever the column holds.
+  3.1(d) follows the desktop: `TAX_SIGN '+' AND R_CHARG 'Y'` (`RP_GST.cs:3583`), not `TRAN_TYPE 'P'`.

@@ -7,6 +7,8 @@ ALTER TABLE "LBR_ISU_DETL"
   ADD COLUMN IF NOT EXISTS "IT_LBR_AMT" DOUBLE PRECISION NOT NULL DEFAULT 0,
   ADD COLUMN IF NOT EXISTS "IT_LBR_DISC" DOUBLE PRECISION NOT NULL DEFAULT 0;
 
+-- Rows are selected with the join the HSN reader uses (BOOK_DATA.MAIN_BOOK='LABOUR WORK'), and only rows still at the
+-- column defaults are filled, so a share a writer already stored is never overwritten.
 -- Rows the web wrote before this migration carry no shares. Recompute them from their voucher with the desktop
 -- formula, so the HSN section does not lose those labour bills: the share of NET_AMT (metal) and LBR_AMT (labour)
 -- in the voucher's metal net (SL_NET_AMT) and labour net (LBR_DR_AMT), the tax rounded to 2 decimals half to even
@@ -22,10 +24,14 @@ WITH voucher AS (
          h."LBR_DR_AMT"::double precision AS labour_net,
          h."LBR_TAX_AMT"::double precision AS labour_tax
     FROM "LBR_ISU_DETL" d
+    JOIN "BOOK_DATA" bk
+      ON bk.tenant_id=d.tenant_id AND bk."CO_CODE"=d."CO_CODE" AND bk."LC_CODE"=d."LC_CODE" AND bk."CO_BOOK"=d."CO_BOOK"
     JOIN "LBR_DATA" h
       ON h.tenant_id=d.tenant_id AND h."CO_CODE"=d."CO_CODE" AND h."LC_CODE"=d."LC_CODE"
      AND h."CO_YEAR"=d."CO_YEAR" AND h."CO_BOOK"=d."CO_BOOK" AND h."VCH_NO"=d."VCH_NO"
-   WHERE d."BOOK_NAME"='LABOUR' AND d."VCH_TYPE"='LBRI'
+   WHERE bk."BOOK_TYPE"='T' AND bk."MAIN_BOOK"='LABOUR WORK'
+     AND d."IT_NET_AMT"=0 AND d."IT_LBR_AMT"=0
+     AND COALESCE(NULLIF(d."IT_TAX_AMT",''),'0')::numeric=0 AND COALESCE(NULLIF(d."IT_LBR_TAX",''),'0')::numeric=0
   WINDOW w AS (PARTITION BY d.tenant_id,d."CO_CODE",d."LC_CODE",d."CO_YEAR",d."CO_BOOK",d."VCH_NO")
 ), share AS (
   SELECT row_id,

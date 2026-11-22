@@ -1,5 +1,6 @@
 import { PrismaClient } from '@datacare/db';
 import type { FastifyInstance } from 'fastify';
+import { readFileSync } from 'node:fs';
 import { strFromU8, unzipSync } from 'fflate';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
@@ -784,6 +785,107 @@ class CapturingRenderer implements PdfRenderer {
     expect(rows.find((row) => row.code === 'Integrated Tax')!.nature).toBe('7.50');
     expect(rows.find((row) => row.code === 'Centrel Tax')!.nature).toBe('1.50');
     expect(rows.find((row) => row.code === 'State/Ut Tax')!.nature).toBe('1.50');
+  });
+
+  it('3.1(d) takes TAX_SIGN + with R_CHARG Y, not TRAN_TYPE P (RP_GST.cs:3583)', async () => {
+    await exec(
+      `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","MAIN_BOOK","BOOK_TYPE","BOOK_SR_NAME","CUR_USE")
+       VALUES($1,'01','01','GT5','TAX 3B','TAX 3B','T','T5','Y')`,
+      TENANT,
+    );
+    // A sale-type '+' row under reverse charge is in (d); a purchase-type '-' row under reverse charge is not.
+    await insertTax(TENANT, {
+      coBook: 'GT5',
+      vchNo: '50001',
+      bookName: 'TAX 3B',
+      tranType: 'S',
+      acCode: 'CREG',
+      taxType: 'SGST',
+      netAmount: 700,
+      taxAmount: 10,
+      invoiceValue: 710,
+      taxSign: '+',
+      reverseCharge: 'Y',
+    });
+    await insertTax(TENANT, {
+      coBook: 'GT5',
+      vchNo: '50002',
+      bookName: 'TAX 3B',
+      tranType: 'P',
+      acCode: 'CREG',
+      taxType: 'SGST',
+      netAmount: 300,
+      taxAmount: 5,
+      invoiceValue: 305,
+      taxSign: '-',
+      reverseCharge: 'Y',
+    });
+    const response = await get('viewer', url('gstr3b', undefined, '&bookCode=GT5'));
+    expect(response.statusCode, response.body).toBe(200);
+    const d = (response.json().rows as Array<Record<string, string>>).find(
+      (row) => row.code === '(d)',
+    )!;
+    expect([d.taxableValue, d.sgstAmount]).toEqual(['700.00', '10.00']);
+  });
+
+  it('back-fills labour rows of any book under a LABOUR WORK main book, only where still at the default (WP-19)', async () => {
+    await exec(
+      `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","MAIN_BOOK","BOOK_TYPE","BOOK_SR_NAME","CUR_USE")
+       VALUES($1,'01','01','GLX','JOB WORK LABOUR','LABOUR WORK','T','LX','Y')`,
+      TENANT,
+    );
+    for (const [vch, metalTax, labourTax] of [
+      ['LX001', 3, 0.6],
+      ['LX002', 3, 0.6],
+    ] as const) {
+      await exec(
+        `INSERT INTO "LBR_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SL_NET_AMT","TAX_AMT","LBR_DR_AMT","LBR_TAX_AMT")
+         VALUES($1,'01','01',$2,'GLX',$3,100,$4,20,$5)`,
+        TENANT,
+        YEAR,
+        vch,
+        metalTax,
+        labourTax,
+      );
+    }
+    // BOOK_NAME is not 'LABOUR' and the voucher type is not LBRI: the old predicate skipped this row.
+    await exec(
+      `INSERT INTO "LBR_ISU_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","BOOK_NAME","AC_CODE","IT_CODE","ITM_PCS","ITM_NWT","NET_AMT","LBR_AMT")
+       VALUES($1,'01','01',$2,'GLX','LX001',1,$3::date,'JOB WORK LABOUR','CREG','ZO1',1,1,100,20)`,
+      TENANT,
+      YEAR,
+      DAY,
+    );
+    // Already holds a share (a writer stored it): must not be overwritten.
+    await exec(
+      `INSERT INTO "LBR_ISU_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","BOOK_NAME","AC_CODE","IT_CODE","ITM_PCS","ITM_NWT","NET_AMT","LBR_AMT","IT_NET_AMT","IT_TAX_AMT")
+       VALUES($1,'01','01',$2,'GLX','LX002',1,$3::date,'JOB WORK LABOUR','CREG','ZO1',1,1,100,20,40,'1.2')`,
+      TENANT,
+      YEAR,
+      DAY,
+    );
+    const migration = readFileSync(
+      new URL(
+        '../../../packages/db/prisma/migrations/20261122090000_labour_detail_gst_shares/migration.sql',
+        import.meta.url,
+      ),
+      'utf8',
+    );
+    await exec(migration.slice(migration.indexOf('WITH voucher')));
+    const stored = await owner.$queryRawUnsafe<Array<Record<string, unknown>>>(
+      `SELECT "VCH_NO","IT_NET_AMT","IT_TAX_AMT","IT_LBR_AMT","IT_LBR_TAX" FROM "LBR_ISU_DETL"
+        WHERE tenant_id=$1 AND "CO_BOOK"='GLX' ORDER BY "VCH_NO"`,
+      TENANT,
+    );
+    expect(stored).toEqual([
+      { VCH_NO: 'LX001', IT_NET_AMT: 100, IT_TAX_AMT: '3', IT_LBR_AMT: 20, IT_LBR_TAX: '0.6' },
+      { VCH_NO: 'LX002', IT_NET_AMT: 40, IT_TAX_AMT: '1.2', IT_LBR_AMT: 0, IT_LBR_TAX: null },
+    ]);
+    const response = await get('viewer', url('gstr1', 'HSN', '&bookCode=GLX'));
+    expect(response.statusCode, response.body).toBe(200);
+    const rows = response.json().rows as Array<Record<string, string>>;
+    expect(rows.find((row) => row.hsn === '9983')).toMatchObject({ taxableValue: '140.00' });
+    expect(rows.find((row) => row.hsn === '998892')).toMatchObject({ taxableValue: '20.00' });
   });
 
   it('applies book, party, location, company, year and date scope and refuses location replacement', async () => {
