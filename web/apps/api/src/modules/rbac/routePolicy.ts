@@ -155,10 +155,14 @@ route('Utilities/e-Invoice (IRN)', [
   'POST /einvoice/:vchNo/cancel',
 ]);
 route('Utilities/Year-End Close', ['POST /year-end/preview', 'POST /year-end/close']);
+// BtmSchm: the catalog right is Create (`C-----`); every dataset button is a create (WP-23).
 route('Company/Balance TrFr', [
-  'POST /balance-transfer/preview',
-  'POST /balance-transfer/year-close',
-  'POST /balance-transfer/openings',
+  'GET /balance-transfer',
+  'POST /balance-transfer/ac-balance',
+  'POST /balance-transfer/item-stock',
+  'POST /balance-transfer/tag-stock',
+  'POST /balance-transfer/sales-order',
+  'POST /balance-transfer/approval',
 ]);
 route('Utilities/Reminders', [
   'GET /reminders/overdue',
@@ -931,7 +935,13 @@ route('Masters/Accounts', [
   'GET /party/:acCode/family',
 ]);
 
-route('Reports/Sales Register', ['GET /reports/sales-register']);
+route('Reports/Sales Register', [
+  'GET /reports/sales-register',
+  // WP-11: the RP_ALL Sales Report screen and its exports (routes/rpAllReport.ts), the "Sales Report" caption.
+  'GET /reports/sales-report',
+  'GET /reports/sales-report/export.csv',
+  'GET /reports/sales-report/export.xlsx',
+]);
 route('Reports/Purchase Register', ['GET /reports/purchase-register']);
 route('Reports/Day Book', ['GET /reports/day-book']);
 route('Reports/Rojmel', ['GET /reports/rojmel']);
@@ -1099,6 +1109,8 @@ const PRINT_ROUTES = new Set([
   'GET /reports/gst-report/export.csv',
   'GET /reports/gst-report/export.xlsx',
   'GET /reports/gst-report/export.pdf',
+  'GET /reports/sales-report/export.csv',
+  'GET /reports/sales-report/export.xlsx',
   'GET /reports/gstr2-doc',
   'GET /reports/gstr1-doc',
   'GET /reports/gstr3b-doc',
@@ -1155,8 +1167,6 @@ const UPDATE_POST_ROUTES = new Set([
   'POST /einvoice/gsp-test',
   'POST /einvoice/:vchNo/cancel',
   'POST /year-end/close',
-  'POST /balance-transfer/year-close',
-  'POST /balance-transfer/openings',
   'POST /reports/entry-check/mark-checked',
 ]);
 
@@ -1166,7 +1176,6 @@ const READ_POST_ROUTES = new Set([
   'POST /sales-returns/:vchNo/incoming-bill-replay',
   'POST /sales-returns/:vchNo/incoming-replay',
   'POST /year-end/preview',
-  'POST /balance-transfer/preview',
   'POST /utilities/estimate-reset/preview',
   // Reads only: the framework asserts a preview writes nothing, and the diff it returns is what the operator
   // reviews before any apply exists.

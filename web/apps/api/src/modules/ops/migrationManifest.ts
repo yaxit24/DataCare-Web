@@ -185,4 +185,14 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261109150000_login_mast_active_backoff',
     checksum: 'b13f8ce87226403aa889cc662246a7dcdf64d9844cf3cf51ae2d253c5582d910',
   },
+  {
+    // WP-23 Balance TrFr: ITM_OPBL.CARRIED_FROM marks an Item Stock carry, which no stock reader adds.
+    name: '20261122090000_itm_opbl_carried_from',
+    checksum: 'd93584d312de4c25abd3cbde8ae75088a0116620392647d448fbb30d29c31116',
+  },
+  {
+    // WP-23: legacy Year-End Close openings (ACOP / OPENING / voucher 1) carry the carried-opening marker.
+    name: '20261122100000_legacy_year_end_openings_carried',
+    checksum: '705c320177c899478749ca679fb5233e6dd265f26c46a53cc65bfc3f045b5b80',
+  },
 ];

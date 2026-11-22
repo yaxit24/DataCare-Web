@@ -241,6 +241,7 @@ import { registerPurchaseVoucherRoutes } from './purchaseVoucher.js';
 import { registerPartyOpeningRoutes } from './partyOpening.js';
 import { registerFineJvRoutes } from './fineJv.js';
 import { registerOrderCancelRoutes } from './orderCancel.js';
+import { registerBalanceTransferRoutes } from './balanceTransfer.js';
 import { registerItemOpeningRoutes } from './itemOpening.js';
 import { registerEmployeeMasterRoutes } from './employeeMaster.js';
 import { registerTaxMasterRoutes } from './taxMaster.js';
@@ -678,6 +679,7 @@ import { addressPrintReport, lastVisitReport } from '../modules/reports/customer
 import { dhrnLoanReport } from '../modules/reports/dhrnLoanReports.js';
 import { gstLauncherReport } from '../modules/reports/gstLauncherReport.js';
 import { registerGstReportRoutes } from './gstReport.js';
+import { registerRpAllReportRoutes } from './rpAllReport.js';
 import {
   approvalReport,
   bullionReport,
@@ -1089,6 +1091,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerPartyOpeningRoutes(app, extraRouteHelpers, formMutationCapabilities);
   registerFineJvRoutes(app, extraRouteHelpers);
   registerOrderCancelRoutes(app, extraRouteHelpers);
+  registerBalanceTransferRoutes(app, extraRouteHelpers);
   registerDailyRateRoutes(app, { ...extraRouteHelpers, formMutationCapabilities });
   registerItemOpeningRoutes(app, extraRouteHelpers, formCapabilities);
   registerEmployeeMasterRoutes(app, extraRouteHelpers, formCapabilities);
@@ -4477,6 +4480,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // debit ageing, and its Excel/CSV/PDF outputs. The resolver feeds the screen and every export from
   // one path. Registered here (not with the other plugins above) because it needs `sendReportPdf`.
   registerAccountLedgerRoutes(app, { prisma, auth, guard, readScope, sendReportPdf });
+  registerRpAllReportRoutes(app, { prisma, auth, guard, readScope }); // WP-11 Sales Report (RP_ALL)
   registerTagStockRoutes(app, { prisma, auth, guard, scopeOf });
 
   // Screens for five reports registered only in REPORT_BUILDERS (exports worked, screens 404'd —
@@ -7955,43 +7959,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         fromYear: b.fromYear ?? s.coYear,
         toYear: b.toYear,
       }),
-    );
-  });
-  app.post('/balance-transfer/preview', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    const b = body(req);
-    const s = sess(req);
-    return run(reply, 200, () =>
-      yearEndPreview(prisma, {
-        scope: scopeOf(req) as any,
-        fromYear: b.fromYear ?? s.coYear,
-      }),
-    );
-  });
-  app.post('/balance-transfer/year-close', auth, async (req, reply) => {
-    if (!guard(req, reply, 'update')) return;
-    const b = body(req);
-    const s = sess(req);
-    return run(reply, 201, () =>
-      yearEndClose(prisma, {
-        scope: scopeOf(req) as any,
-        fromYear: b.fromYear ?? s.coYear,
-        toYear: b.toYear,
-      }),
-    );
-  });
-  app.post('/balance-transfer/openings', auth, async (req, reply) => {
-    if (!guard(req, reply, 'update')) return;
-    const s = readScope(req);
-    const b = body(req);
-    return run(reply, 200, () =>
-      carryForwardOpenings(
-        prisma,
-        { tenantId: s.tenantId, coCode: s.coCode, lcCode: s.lcCode },
-        String(b.fromYear),
-        String(b.toYear),
-        sess(req).sub,
-      ),
     );
   });
   app.post('/tour/:vchNo/bill', auth, async (req, reply) => {
