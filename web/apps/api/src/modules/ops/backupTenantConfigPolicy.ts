@@ -7,16 +7,34 @@
  * equivalent is this tenant's rows of the tenant-shared configuration tables below, exported column by column
  * from an explicit allowlist. A tenant-shared table or a column that is not listed here is never exported.
  *
- * Secrets are never written to the archive (D37): sessions, refresh-token hashes, idempotency receipts and
- * every integration credential. Credential columns that live on company tables are written as `null`; an
- * administrator re-enters them after a restore. The users' Argon2id password hashes (`LOGIN_MAST.LOGIN_PWD`)
- * are kept on purpose so that a restored company logs in as before, as the desktop's SQL Server backup does.
+ * Secrets are never written to the archive (D37, risk A): sessions, refresh-token hashes, idempotency receipts,
+ * the users' password hashes and every integration credential. Secret columns that live on company tables are
+ * written as `null`; an administrator re-enters them (and users reset their passwords) after a restore.
+ *
+ * Note (N237/G249): D37 as recorded in LITE-MASTER-PLAN OD-4 kept the Argon2id hashes (`LOGIN_MAST.LOGIN_PWD`)
+ * so that a restored company logs in as before. The WP-08 brief narrows that: no password hash leaves the
+ * database in this downloadable archive. Physical disaster recovery (`pg_dump`, DR runbook) is unaffected.
+ * Re-adding the hash is a one-line removal below and needs an owner decision.
+ *
+ * `SECRET_COLUMN_PATTERN` is the guard: every column of the live schema whose name matches it must be listed
+ * in `BACKUP_EXCLUDED_SECRETS`, live in an excluded table, or be reviewed as not secret in
+ * `REVIEWED_NON_SECRET_COLUMNS` (tests fail otherwise).
  *
  * Bump `TENANT_CONFIG_VERSION` whenever an entry below changes.
  */
 
 export const TENANT_CONFIG_KIND = 'datacare.tenant-config' as const;
 export const TENANT_CONFIG_VERSION = 1 as const;
+
+/** Column names that look like a credential, key, token, hash or password (case-insensitive). */
+export const SECRET_COLUMN_PATTERN =
+  /(PWD|PASSW|PASSCODE|SECRET|TOKEN|API_?KEY|MAIL_API|CREDENTIAL|JTI|HASH|SALT|PRIVATE|OTP)/i;
+
+/** Columns matching the pattern that are reviewed as not secret (flags and timestamps, a preview digest). */
+export const REVIEWED_NON_SECRET_COLUMNS: readonly string[] = [
+  'LOGIN_MAST.PASSWORD_RESET_REQUIRED',
+  'LOGIN_MAST.PASSWORD_CHANGED_AT',
+];
 
 export interface TenantConfigAllowlistPolicy {
   readonly table: string;
@@ -120,6 +138,7 @@ export const UNREVIEWED_TENANT_TABLE_REASON =
 
 export const BACKUP_EXCLUDED_SECRETS: readonly BackupExcludedSecretPolicy[] = [
   { table: 'BOOK_IDTL', column: 'SVR_PWD', reason: 'D37 integration secret: server password' },
+  { table: 'LOGIN_MAST', column: 'LOGIN_PWD', reason: 'D37 secret: user password hash (Argon2id)' },
   { table: 'CO_MAST', column: 'URL_PWD', reason: 'D37 integration secret: web URL password' },
   { table: 'CO_MAST', column: 'MAIL_API', reason: 'D37 integration secret: SMTP mail key' },
   { table: 'DG_GOLD_MAST', column: 'API_KEY', reason: 'D37 integration secret: rate API key' },
@@ -133,3 +152,33 @@ export const BACKUP_EXCLUDED_SECRETS: readonly BackupExcludedSecretPolicy[] = [
 
 export const isExcludedSecretColumn = (table: string, column: string): boolean =>
   BACKUP_EXCLUDED_SECRETS.some((entry) => entry.table === table && entry.column === column);
+
+export const isReviewedNonSecretColumn = (table: string, column: string): boolean =>
+  REVIEWED_NON_SECRET_COLUMNS.includes(`${table}.${column}`);
+
+/** A column whose name looks secret and that nobody reviewed as harmless. */
+export const looksSecret = (table: string, column: string): boolean =>
+  SECRET_COLUMN_PATTERN.test(column) && !isReviewedNonSecretColumn(table, column);
+
+type ScannedTables = Record<string, { rows: ReadonlyArray<Record<string, unknown>> }>;
+
+/**
+ * Risk A guard (N237/G249): every `table.column` of an archive whose name looks secret and that carries a value.
+ * A correct archive returns `[]`; tests fail on anything else.
+ */
+export const findSecretValuesInArchive = (document: {
+  tables: ScannedTables;
+  tenantConfig?: { tables: ScannedTables };
+}): string[] => {
+  const leaks = new Set<string>();
+  const scan = (tables: ScannedTables): void => {
+    for (const [table, data] of Object.entries(tables))
+      for (const row of data.rows)
+        for (const [column, value] of Object.entries(row))
+          if (value !== null && value !== undefined && looksSecret(table, column))
+            leaks.add(`${table}.${column}`);
+  };
+  scan(document.tables);
+  if (document.tenantConfig) scan(document.tenantConfig.tables);
+  return [...leaks].sort();
+};

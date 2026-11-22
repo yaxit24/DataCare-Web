@@ -9,12 +9,15 @@ import {
   TENANT_CONFIG_EXCLUDED_TABLES,
   TENANT_CONFIG_KIND,
   TENANT_CONFIG_VERSION,
+  findSecretValuesInArchive,
+  isExcludedSecretColumn,
+  looksSecret,
 } from '../src/modules/ops/backupTenantConfigPolicy.js';
 import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 /**
- * D37 (OD-4, D-BKP-3; G64/N80): the real v2 archive carries the versioned NextMain-equivalent tenantConfig
- * section, keeps the users' password hashes, and never carries a secret.
+ * D37 (OD-4, D-BKP-3; G64/N80, N237/G249): the real v2 archive carries the versioned NextMain-equivalent
+ * tenantConfig section and never carries a secret, the users' password hashes included (risk A).
  */
 const RUN = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const TENANT_A = 'wp08-tenant-config-a';
@@ -23,6 +26,7 @@ const COMPANY = '01';
 
 /** One distinct sentinel per excluded secret column; none may appear anywhere in the archive. */
 const SECRET_VALUES: Record<string, string> = {
+  'LOGIN_MAST.LOGIN_PWD': 'unused: the seeded value is the Argon2id hash',
   'BOOK_IDTL.SVR_PWD': 'WP08-SVR-PWD',
   'CO_MAST.URL_PWD': 'WP08-URL-PWD',
   'CO_MAST.MAIL_API': 'WP08-MAIL-API',
@@ -209,27 +213,29 @@ const RECEIPT_BODY = 'WP08-RECEIPT-BODY';
     expect(() => assertCompanyBackupIntegrity(document)).not.toThrow();
   });
 
-  it('keeps the Argon2id password hash but proves every excluded secret is absent', async () => {
+  it('leaves out the Argon2id password hash and every other excluded secret', async () => {
     await seed(TENANT_A, 'A');
     const document = await backupCompany(runtime, TENANT_A, COMPANY);
     const serialized = JSON.stringify(document);
 
-    // D37: a restored company logs in as before.
-    expect(document.tables.LOGIN_MAST?.rows.map((row) => row.LOGIN_PWD)).toEqual([passwordHash]);
     expect(passwordHash).toMatch(/^\$argon2id\$/);
+    expect(document.tables.LOGIN_MAST?.rows.map((row) => row.LOGIN_NAME)).toEqual(['admin-A']);
+    expect(document.tables.LOGIN_MAST?.rows.map((row) => row.LOGIN_PWD)).toEqual([null]);
+    expect(serialized).not.toContain(passwordHash);
+    expect(serialized).not.toContain('$argon2');
 
     expect(document.tenantConfig!.excludedSecrets).toEqual(
       BACKUP_EXCLUDED_SECRETS.map((entry) => ({ ...entry })),
     );
     for (const secret of BACKUP_EXCLUDED_SECRETS) {
       const key = `${secret.table}.${secret.column}`;
-      const value = SECRET_VALUES[key];
-      expect(value, `${key} has a seeded sentinel`).toBeTruthy();
+      const value = key === 'LOGIN_MAST.LOGIN_PWD' ? passwordHash : `${SECRET_VALUES[key]}-A`;
+      expect(SECRET_VALUES[key], `${key} has a seeded sentinel`).toBeTruthy();
       const [stored] = await owner.$queryRawUnsafe<Array<{ value: string | null }>>(
         `SELECT "${secret.column}" AS value FROM "${secret.table}" WHERE tenant_id=$1`,
         TENANT_A,
       );
-      expect(stored?.value, `${key} was seeded`).toBe(`${value}-A`);
+      expect(stored?.value, `${key} was seeded`).toBe(value);
       expect(serialized, `${key} must not be in the archive`).not.toContain(value);
       const companyRows = document.tables[secret.table]?.rows;
       const configRows = document.tenantConfig!.tables[secret.table]?.rows;
@@ -244,5 +250,58 @@ const RECEIPT_BODY = 'WP08-RECEIPT-BODY';
     expect(serialized).not.toContain(RECEIPT_BODY);
     expect(document.tenantConfig!.tables.auth_session).toBeUndefined();
     expect(document.tenantConfig!.tables.api_command_receipt).toBeUndefined();
+    // Risk A guard: no secret-looking column carries a value anywhere in the archive.
+    expect(findSecretValuesInArchive(document)).toEqual([]);
+  });
+
+  it('lists every secret-looking exported column of the live schema as an excluded secret', async () => {
+    const manifest = await loadBackupSchemaManifest(owner);
+    const allowlisted = new Map(
+      TENANT_CONFIG_ALLOWLIST.map((entry) => [entry.table, entry.columns]),
+    );
+    const exported: string[] = [];
+    for (const table of manifest.tables) {
+      const columns =
+        table.scope === 'company' && table.included
+          ? table.columns.map((column) => column.name)
+          : (allowlisted.get(table.name) ?? []);
+      for (const name of columns)
+        if (looksSecret(table.name, name) && !isExcludedSecretColumn(table.name, name))
+          exported.push(`${table.name}.${name}`);
+    }
+    expect(exported).toEqual([]);
+  });
+
+  it('excludes a configuration column added after the review, and the guard catches a new secret', async () => {
+    await seed(TENANT_A, 'A');
+    try {
+      await owner.$executeRawUnsafe(`ALTER TABLE "MENU_DATA" ADD COLUMN "WP08_NEW_SETTING" text`);
+      await owner.$executeRawUnsafe(`ALTER TABLE "CO_MAST" ADD COLUMN "WP08_WEBHOOK_TOKEN" text`);
+      await owner.$executeRawUnsafe(
+        `UPDATE "MENU_DATA" SET "WP08_NEW_SETTING"='WP08-UNREVIEWED-VALUE' WHERE tenant_id=$1`,
+        TENANT_A,
+      );
+      await owner.$executeRawUnsafe(
+        `UPDATE "CO_MAST" SET "WP08_WEBHOOK_TOKEN"='WP08-NEW-TOKEN' WHERE tenant_id=$1`,
+        TENANT_A,
+      );
+      const document = await backupCompany(runtime, TENANT_A, COMPANY);
+      const serialized = JSON.stringify(document);
+      // Allowlist, not denylist: the new configuration column is not exported.
+      expect(document.tenantConfig!.tables.MENU_DATA?.rows).toHaveLength(1);
+      expect(Object.keys(document.tenantConfig!.tables.MENU_DATA!.rows[0]!)).not.toContain(
+        'WP08_NEW_SETTING',
+      );
+      expect(serialized).not.toContain('WP08-UNREVIEWED-VALUE');
+      // Company tables are copied whole, so a new secret-looking company column must trip the guard.
+      expect(findSecretValuesInArchive(document)).toEqual(['CO_MAST.WP08_WEBHOOK_TOKEN']);
+    } finally {
+      await owner.$executeRawUnsafe(
+        `ALTER TABLE "MENU_DATA" DROP COLUMN IF EXISTS "WP08_NEW_SETTING"`,
+      );
+      await owner.$executeRawUnsafe(
+        `ALTER TABLE "CO_MAST" DROP COLUMN IF EXISTS "WP08_WEBHOOK_TOKEN"`,
+      );
+    }
   });
 });

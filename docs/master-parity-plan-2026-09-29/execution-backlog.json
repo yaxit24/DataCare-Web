@@ -7821,6 +7821,31 @@
         "web/apps/web/test/features/modules/orderCancel.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. order-cancel module: 24 cases over T01-T18, none blocked; stock.held-tag-released is a real browser case (the order is made on the Sales Order screen, only the tag hold is seeded because the web Sales Order never saves a tagged line). Desktop match 0%."
+    },
+    {
+      "id": "N237",
+      "status": "implemented-unverified",
+      "action": "Data Backup archives the NextMain-equivalent tenant configuration by allowlist (UT_BKP.cs:1198-1251, D-BKP-3, D37): a versioned tenantConfig section (datacare.tenant-config v1) and its manifest descriptor carry this tenant's rows of nine tenant-shared configuration tables, column by column from an explicit allowlist (an unlisted table or column is never read); an explicit excluded-secrets list (LOGIN_MAST.LOGIN_PWD, BOOK_IDTL.SVR_PWD, CO_MAST.URL_PWD, CO_MAST.MAIL_API, DG_GOLD_MAST.API_KEY, E_MAST.ASP_PWD, E_MAST.E_LOGIN_PWD) is written as null, and sessions, refresh-token hashes and idempotency receipts are never read. Restore stays contained.",
+      "parentLabels": "P1-core; L1; T15; WP-08",
+      "startAfter": [
+        "N80"
+      ],
+      "requiredProof": "data-backup.config.nextmain-allowlist leaves baseline.json and passes through the real screen; DB tests: other tenant absent, every excluded secret seeded and absent, a configuration column added after the review is not exported, every secret-looking exported column of the live schema is an excluded secret; unit tests: the integrity check refuses a leaked secret, an unlisted column or a drifted envelope.",
+      "gapIds": "G249",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/apps/api/src/modules/ops/backupTenantConfigPolicy.ts",
+        "web/apps/api/src/modules/ops/backup.ts",
+        "web/apps/api/src/modules/ops/backupManifest.ts",
+        "web/apps/api/test/backupTenantConfig.test.ts",
+        "web/apps/api/test/backupTenantConfig.db.test.ts",
+        "web/apps/web/test/features/modules/dataBackup.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. data-backup module: 18 applicable, 14 passed, 0 failed, 4 blocked (unchanged: rights.desktop-print-handoff, output.physical-save-confirmation, output.full-lite-fixture, journey.scratch-zero-diff). backupTenantConfig unit 10 of 10, DB 5 of 5. Narrower than D37 as recorded: the password hashes are excluded (owner to confirm)."
     }
   ],
   "amendments": [

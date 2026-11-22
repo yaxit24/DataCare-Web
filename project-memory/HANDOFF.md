@@ -1,3 +1,10 @@
+## 2026-11-22 — Data Backup archives the tenant configuration by allowlist (N237 / G249, WP-08, D37)
+
+- 2026-11-22: the v2 archive and its manifest carry `tenantConfig` (datacare.tenant-config v1): nine tenant-shared configuration tables, column by
+  column from an allowlist (unlisted columns are never read), and an excluded-secrets list written as null; sessions and receipts are never read.
+- 2026-11-22: password hashes (`LOGIN_MAST.LOGIN_PWD`) are excluded too, narrower than D37 as recorded: owner to confirm. data-backup module 14 of 18
+  applicable (4 blocked), `config.nextmain-allowlist` left the baseline; backup DB tests 31 of 31.
+
 ## 2026-11-09 — Order Cancel is the desktop TR_SL_ORD_ADJ voucher (N233 / G245, WP-02)
 
 - 2026-11-09: one voucher cancels the open advance of many orders (SL_ORD_ADJ, Order_Adj_Ledr/Rojmel, held-tag release), version-guarded

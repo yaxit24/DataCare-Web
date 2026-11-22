@@ -313,7 +313,7 @@ schedule the fix in WP-26/27.
 | WP-05 | Cash Received/Payment, Bank Received/Payment | T03 calculations, T06 card/UPI settlement | P1 | M | — | — | N232/G244: T03 executed and passing; T06 blocked for an owner call (TR_CASH has no card/UPI mode) |
 | WP-06 | User Create | MS_USER with OD-1..OD-3 | P0 | L | — | — (see card) | PR #234 (N231/G243); users 22 of 22, none blocked; action-level rights open |
 | WP-07 | Company | Identity workflow (G38, N58), delete per OD-5 | P1 | L | — | 16 | BROKEN |
-| WP-08 | Data Backup | D-BKP-3 allowlist per OD-4 (G64/N80) | P1 | M | — | 18 | BROKEN |
+| WP-08 | Data Backup | D-BKP-3 allowlist per OD-4 (G64/N80) | P1 | M | — | 18 | N237/G249: tenantConfig allowlist and excluded secrets; `config.nextmain-allowlist` passes and left the baseline (password hashes excluded, narrower than D37: owner to confirm) |
 | WP-09 | Party, Item, Item Group, Product, Tax, Address, Employee, Auto Item, Item Opening | Esc with no focused control (GB-02) | P2 | S | — | — | open |
 | WP-10 | Every voucher form with a "next number" read | Typed-number race audit (the G241 pattern) | P2 | M | — | — | open |
 
@@ -590,7 +590,7 @@ it, the owner triggers it.
 | Books | NOT YET VERIFIED | WP-21 |
 | User Create | PARTIAL (N231: 22 of 22 browser cases) | WP-06 |
 | Data Refresh | PARTIAL | WP-24 |
-| Data Backup | BROKEN | WP-08 |
+| Data Backup | PARTIAL (N237: 14 of 18 applicable browser cases, 4 blocked, none failing) | WP-08 |
 | Approval Isu | NOT YET VERIFIED | WP-01 |
 | Approval Rtn | NOT YET VERIFIED | WP-01 |
 | Fine Jv Entry | PARTIAL | WP-35 |

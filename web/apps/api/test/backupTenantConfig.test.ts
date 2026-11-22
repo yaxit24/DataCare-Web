@@ -15,12 +15,17 @@ import {
 } from '../src/modules/ops/backupManifest.js';
 import {
   BACKUP_EXCLUDED_SECRETS,
+  REVIEWED_NON_SECRET_COLUMNS,
+  SECRET_COLUMN_PATTERN,
   TENANT_CONFIG_ALLOWLIST,
   TENANT_CONFIG_EXCLUDED_TABLES,
   TENANT_CONFIG_KIND,
   TENANT_CONFIG_VERSION,
+  findSecretValuesInArchive,
   isExcludedSecretColumn,
 } from '../src/modules/ops/backupTenantConfigPolicy.js';
+import { readTenantConfig } from '../src/modules/ops/backup.js';
+import type { Tx } from '@datacare/db';
 
 /** D37 (OD-4, D-BKP-3; G64/N80) policy and validator, without a database. */
 
@@ -125,27 +130,84 @@ describe('Data Backup tenantConfig policy (D37, G64/N80)', () => {
     }
   });
 
-  it('covers every credential-like column in the Prisma schema except the kept password hash', () => {
+  it('lists every secret-looking column of the Prisma schema as excluded, excluded-table or reviewed', () => {
     const schema = readFileSync(
       new URL('../../../packages/db/prisma/schema.prisma', import.meta.url),
       'utf8',
     );
-    const credentialLike = /(PWD|PASSWORD$|API_KEY|MAIL_API|SECRET|TOKEN)/i;
+    const excludedTables = new Set(TENANT_CONFIG_EXCLUDED_TABLES.map((entry) => entry.table));
     const found: string[] = [];
     for (const model of schema.matchAll(/^model (\w+) \{([\s\S]*?)^\}/gm)) {
       const body = model[2]!;
       const name = /@@map\("([^"]+)"\)/.exec(body)?.[1] ?? model[1]!;
+      if (excludedTables.has(name)) continue;
       for (const line of body.split('\n')) {
         const field = line.trim();
         if (!field || field.startsWith('//') || field.startsWith('@@')) continue;
         const columnName = /@map\("([^"]+)"\)/.exec(field)?.[1] ?? field.split(/\s+/)[0]!;
-        if (credentialLike.test(columnName)) found.push(`${name}.${columnName}`);
+        if (SECRET_COLUMN_PATTERN.test(columnName)) found.push(`${name}.${columnName}`);
       }
     }
-    // D37 keeps the users' Argon2id hashes so that a restored company logs in as before.
-    const kept = ['LOGIN_MAST.LOGIN_PWD'];
     const listed = BACKUP_EXCLUDED_SECRETS.map((entry) => `${entry.table}.${entry.column}`);
-    expect(found.filter((entry) => !kept.includes(entry)).sort()).toEqual([...listed].sort());
+    expect(found.filter((entry) => !REVIEWED_NON_SECRET_COLUMNS.includes(entry)).sort()).toEqual(
+      [...listed].sort(),
+    );
+    // Risk A: the users' password hashes are an excluded secret (N237/G249).
+    expect(listed).toContain('LOGIN_MAST.LOGIN_PWD');
+  });
+
+  it('fails the secret guard when any secret-looking column carries a value', () => {
+    expect(findSecretValuesInArchive(fixture())).toEqual([]);
+    const leaked = fixture();
+    leaked.tables.CO_MAST!.rows[0]!.NEW_WEBHOOK_TOKEN = 'leaked';
+    leaked.tenantConfig!.tables.USER_MAST!.rows[0]!.SMTP_PASSWORD = 'leaked';
+    expect(findSecretValuesInArchive(leaked)).toEqual([
+      'CO_MAST.NEW_WEBHOOK_TOKEN',
+      'USER_MAST.SMTP_PASSWORD',
+    ]);
+    const reviewed = fixture();
+    reviewed.tables.LOGIN_MAST = {
+      rows: [{ PASSWORD_RESET_REQUIRED: 'N', LOGIN_PWD: null }],
+    } as never;
+    expect(findSecretValuesInArchive(reviewed)).toEqual([]);
+  });
+
+  it('reads only allowlisted columns: a new configuration column is excluded by default', async () => {
+    const tables = TENANT_CONFIG_ALLOWLIST.map((entry) => {
+      const secrets = BACKUP_EXCLUDED_SECRETS.filter((secret) => secret.table === entry.table).map(
+        (secret) => secret.column,
+      );
+      return {
+        ...table(entry.table, 'tenant-shared', [
+          ...entry.columns,
+          ...secrets,
+          'NEW_CONFIG_SETTING',
+        ]),
+        primaryKey: [entry.columns.includes('row_id') ? 'row_id' : 'tenant_id'],
+      };
+    });
+    tables.push(table('auth_session', 'tenant-shared', ['tenant_id', 'refresh_jti_hash']));
+    const statements: string[] = [];
+    const tx = {
+      $queryRawUnsafe: async (sql: string) => {
+        statements.push(sql);
+        return [];
+      },
+    } as unknown as Tx;
+    const section = await readTenantConfig(
+      tx,
+      { kind: BACKUP_SCHEMA_KIND, fingerprint: schemaFingerprint(tables), tables },
+      TENANT,
+    );
+    expect(statements).toHaveLength(TENANT_CONFIG_ALLOWLIST.length);
+    for (const sql of statements) {
+      expect(sql).not.toContain('NEW_CONFIG_SETTING');
+      expect(sql).not.toContain('SVR_PWD');
+      expect(sql).not.toContain('auth_session');
+    }
+    for (const entry of section.allowlist)
+      expect(entry.columns).not.toContain('NEW_CONFIG_SETTING');
+    expect(section.excludedTables.map((entry) => entry.table)).toEqual(['auth_session']);
   });
 
   it('accepts a sealed archive whose secrets are null and whose envelope matches its manifest', () => {

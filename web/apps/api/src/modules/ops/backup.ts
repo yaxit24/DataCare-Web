@@ -95,10 +95,12 @@ const readEncodedCompanyRows = async (
 };
 
 /**
- * D37 / D-BKP-3 (G64/N80): the NextMain equivalent, i.e. this tenant's rows of the allowlisted tenant-shared
- * configuration tables, column by column. Unlisted tables and columns are never read.
+ * D37 / D-BKP-3 (G64/N80, N237/G249): the NextMain equivalent, i.e. this tenant's rows of the allowlisted
+ * tenant-shared configuration tables, column by column. Unlisted tables and columns are never read (allowlist,
+ * not denylist): a column added to a configuration table later stays out until it is reviewed and listed.
+ * Exported for the unit test only.
  */
-const readTenantConfig = async (
+export const readTenantConfig = async (
   tx: Tx,
   manifest: BackupSchemaManifest,
   tenantId: string,

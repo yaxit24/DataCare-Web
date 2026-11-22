@@ -258,6 +258,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G243 | High | User Create answered with web texts (`missing-or-invalid`, `duplicate-user`), had no Confirm Password, no delete and no edit-mode Save, demanded 12 mixed characters and always showed the rights grid | `unified/src/csharp/DataCareNext/MS_USER.cs:1489-1495,1786-1810,1811-1818,1820-2065,2067-2093,2131-2150,2205-2253,2478-2498`; `unified/src/csharp/DataCareNext/MDI_FORM.cs:7451-7460` | `web/apps/api/src/modules/rbac/userMaster.ts`; `web/apps/api/src/routes/userMaster.ts`; `web/apps/api/src/modules/auth/password.ts`; `web/apps/web/app/(app)/admin/users/page.tsx`; `web/apps/api/test/userMaster.routes.db.test.ts` | Implemented-unverified in N231 under D34-D36 (GB-10). The desktop texts, the tab order and Enter walk, the upper-cased 15-character name, Confirm Password checked on leaving the box, the edit-mode Old Password check, Save and Delete; Delete deactivates and revokes every session in the same transaction (D35), the last administrator is kept (N169), a deleted administrator's open session is refused on its next request; 8+ characters with deny-lists and a per-account back-off (D34); the Lite edition hides the rights grid and Update User Right (D36). Not ported: plaintext LOGIN_PWD (`:1981`), F1 revealing the stored password (`:2159-2167`), the ABC reset tool (`:5269-5307`), string-built SQL. Open: action-level enforcement of the stored rights on every route, desktop-runtime comparison and operator acceptance. | N231 |
 | G244 | High | Cash/Bank vouchers differed from the desktop TR_CASH calculations: a Bank Payment with kasar reused the cash kasar leg codes 07/08 (its own amount legs) and was refused on the ledger-key constraint; a multi-line receipt wrote one aggregate CASH_DATA row plus PAY_DETL; the grid totals row printed an en-IN amount and no kasar total | `unified/src/csharp/DataCareNext/TR_CASH.cs:1832-1859,1962-1988,2995-3060`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs:565-610` | `web/apps/api/src/modules/finance/finance.ts`; `web/apps/api/src/modules/finance/legCodes.ts`; `web/packages/core/src/cashGridTotals.ts`; `web/apps/web/components/PaymentForm.tsx`; `web/apps/api/test/cashReceiptLegs.db.test.ts` | Implemented-unverified in N232. Still open: card/UPI modes have no TR_CASH counterpart (owner call); bank Charges column and Clearing Dt; payments in PAY_DATA instead of CASH_DATA; desktop-runtime comparison. | N232 |
 | G245 | High | Order Cancel was a per-order void/refund (`POST /sales-orders/:vchNo/cancel-refund`) that wrote without checking the open advance, so a sale and a cancel could use the same advance twice, and it had no voucher, grid, tag release, lifecycle or print | `unified/src/csharp/DataCareNext/TR_SL_ORD_ADJ.cs:2140-2263,2447,2481-2850,3184-3378,3410-3756,3794-3849`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs:928-937`; `unified/src/csharp/DataCareNext/Ac_Rojmel.cs:392-400`; `unified/src/csharp/DataCareNext/Ac_Stock.cs:610-622` | `web/apps/api/src/modules/sales/orderCancel.ts`; `web/apps/api/src/modules/sales/orderCancelTags.ts`; `web/apps/api/src/modules/sales/orderCancelPrint.ts`; `web/apps/api/src/routes/orderCancel.ts`; `web/apps/web/app/(app)/txn/order-cancel/page.tsx`; `web/apps/api/test/orderCancel.db.test.ts`; `web/apps/web/test/features/modules/orderCancel.mjs` | Implemented-unverified in N233 (WP-02). One TR_SL_ORD_ADJ voucher cancels any number of orders: SL_ORD_ADJ ENTRY_TYPE C / ORD_SIGN -, Order_Adj_Ledr legs 01-04, Order_Adj_Rojmel without the cash row, TEMP_BOOK_DATA, and for orders that hold a tag APR_DETL, BAR_DETL/BAR_IDTL copies, SL_ORD_DETL.TAG_SALE and MAIN_STOCK '+', in one transaction. The open-advance rule is shared with the sale and both lock the order row. Edit/delete are version-guarded; create takes the Idempotency-Key. Web hardening the desktop lacks: AdjAmt above zero and at most the open advance, KsarAmt between 0 and AdjAmt (web texts). The ORDER CANCEL book is provisioned with slot 1 CASH, slot 2 KASAR (was SALES/CASH). Open: the tag release has no browser case (the web Sales Order cannot hold a tag), LOpAmt party balance label, original-Windows comparison. | N233 |
+| G249 | High | The Data Backup v2 archive had no versioned NextMain-equivalent tenant configuration and no explicit secret policy: D-BKP-3/D37 configuration was absent and credential columns of company tables (integration passwords and keys, user password hashes) were copied with the company rows | `unified/src/csharp/DataCareNext/UT_BKP.cs:1198-1251` (company database plus `NextMain.BAK`); `MS_COMPANY.cs:6174` (MENU_DATA); `MS_LOGIN.cs:525` (TILE_DATA) | N237 |
 
 ## 4. Decisions D23–D28
 
@@ -3688,6 +3689,33 @@ moved to `web/apps/api/src/modules/finance/legCodes.ts`.
 The card/UPI case (T06) stays blocked for an owner call: `TR_CASH` has no card or UPI mode, and the desktop's card
 settlement is the separate Pro menu Card Rec, whose commission is rounded to a whole rupee and added
 (`TR_CARD_REC.cs:3796-3799`), while the web modes subtract a two-place commission.
+
+### N237 — Data Backup archives the tenant configuration by allowlist (G249, G64/N80, D37, Lite L1, WP-08)
+
+`UT_BKP` Backup writes the company database and `NextMain.BAK`, the master/configuration database
+(`UT_BKP.cs:1198-1251`). The web keeps one PostgreSQL database keyed by `tenant_id`; the company tables were already
+in the v2 archive. The archive now carries a versioned `tenantConfig` section (`datacare.tenant-config`, version 1)
+and the same descriptor in `manifest.tenantConfig`: this tenant's rows of nine tenant-shared configuration tables
+(MENU_DATA, TILE_DATA, USER_MAST, APP_USER_DATA, BOOK_IDTL, WEIGHT_MAST, HDD_MAST, STATE_MAST, COUNTRY_MAST), read
+column by column from an explicit allowlist in `web/apps/api/src/modules/ops/backupTenantConfigPolicy.ts`. A table
+or column that is not listed is never read (allowlist, not denylist); unreviewed tenant-shared tables are named in
+`excludedTables` with a reason.
+
+Excluded secrets, listed by name in the archive and written as `null`: `LOGIN_MAST.LOGIN_PWD` (Argon2id user
+password hashes), `BOOK_IDTL.SVR_PWD`, `CO_MAST.URL_PWD`, `CO_MAST.MAIL_API`, `DG_GOLD_MAST.API_KEY`,
+`E_MAST.ASP_PWD`, `E_MAST.E_LOGIN_PWD`. Never read: `auth_session` (sessions, refresh-token hashes),
+`api_command_receipt` (idempotency receipts), `message_attempt_log`, `audit_log`, `company_backup_run`,
+`data_repair_run`. The integrity check refuses an archive in which an excluded secret carries a value, a config
+row with an unlisted column or another tenant, or an envelope that differs from its manifest.
+
+Narrower than D37 as recorded: D37 kept the password hashes so that a restored company logs in as before. The WP-08
+brief (risk A) excludes them from this downloadable archive; physical recovery (`pg_dump`, DR runbook) is unchanged
+and restore stays contained. Keeping the hashes again is one policy entry and needs an owner decision.
+
+Risk A guard: `SECRET_COLUMN_PATTERN` (PWD, PASSW, SECRET, TOKEN, API_KEY, MAIL_API, CREDENTIAL, JTI, HASH, SALT,
+PRIVATE, OTP). Tests fail if a column of the live schema that matches it and is exported is not an excluded secret,
+if any archive column that matches it carries a value, or if a configuration column added after the review is
+exported (unit test on the SQL, DB test with an added column).
 
 ## 6. Status corrections
 
