@@ -8198,6 +8198,30 @@
         "web/apps/web/test/features/modules/contraEntry.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. 74 cases written (71 executable, 2 blocked: the opening-balance label needs a balance-as-of-date API; the ContraBill.rpt layout and copy labels need a text export of the Crystal file; 1 N/A). Unit 12 and database 28 of 28 pass; the finance and contra DB suites (32 files, 359 tests) pass. The browser module changes are not run locally. Desktop match 0%: decisions D1-D16 in cases.md are architect decisions for the owner to confirm."
+    },
+    {
+      "id": "N247",
+      "status": "implemented-unverified",
+      "action": "Data Refresh Field Update runs its two desktop repairs preview-first: AC_MAST.AC_MAIN_GR re-aligned to AC_GROUP (MS_UPDATE.cs:7214) and a blank AC_MAST.DEFAULTER_AC set to N (:8608), in the existing data-repair registry (preview with counts and sample keys, one transaction, audit row, tenant-scoped, idempotent). The other 518 writes are classified in orchestration/work/WP-24/field-update.md: 172 class b anomaly queries (169 BOOK_DATA metadata checks grouped into one parameterised replay), 219 migration loader, 127 schema.",
+      "parentLabels": "P1-core; L4; WP-24",
+      "startAfter": [
+        "N235"
+      ],
+      "requiredProof": "DB test: controlled AC_MAST corruption, preview, apply, full tenant diff shows only the intended rows, other tenant untouched, audit row, replay deduplicated; DB test of the class b anomaly queries on a tenant seeded through the Lite writers.",
+      "gapIds": "G259",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "web/apps/api/src/modules/utilities/dataRefreshFieldUpdate.ts",
+        "web/apps/api/test/dataRefreshFieldUpdate.db.test.ts",
+        "web/apps/api/test/dataRefreshFieldAnomalies.db.test.ts",
+        "web/apps/api/test/wp24FieldSeed.ts",
+        "orchestration/work/WP-24/field-update.md"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Class a repairs and class b anomaly queries have DB tests. Finding F1 (G259): web-provisioned BOOK_DATA lacks MENU_NAME and, for many books, BOOK_TBL_NAME/BOOK_TBL_DETL on 36 books; the desktop UPDATEs fill them. Pinned in the anomaly test as a shrink-only baseline; the repair is not built here."
     }
   ],
   "amendments": [

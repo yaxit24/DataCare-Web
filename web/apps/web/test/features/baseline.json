@@ -37,11 +37,6 @@
       "reason": "The remaining StockRefresh and Ac_Stock builder graph is unproved; Stock is explicitly preview-only."
     },
     {
-      "case": "data-refresh.journey.field-update-classification",
-      "gap": "X27/P11-01",
-      "reason": "Field Update awaits PR-2 statement-by-statement classification under D-REF-3."
-    },
-    {
       "case": "data-refresh.journey.old-field-classification",
       "gap": "X27/P11-01",
       "reason": "Old Field awaits PR-2 statement-by-statement classification under D-REF-3."

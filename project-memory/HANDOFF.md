@@ -563,3 +563,8 @@ DONE (create/reopen/edit/delete/print in the UI via the VoucherList template): c
 REMAINING frontend lifecycle: payment (PaymentForm.tsx, POST-only; add reopen/edit/delete — needs PUT /payments/:vchNo which may not exist yet — check finance.ts editReceipt/editPayment), receipt (same), fine-jv (FINE_JV header table — add to allow-list), batch-receipt grid missing body cells.
 REMAINING new-workflow frontend PAGES (backend done, NO page yet): card-receipt (/card-receipts, CARD_DATA), customer-entry (/crm/customer-entries), tour-sales (/tour-sales, RATE_CUT_DATA book TSL — can reuse the wholesale-sale page pattern), dhrn-os-letter (a report/letter — add a page under reports or a print button). loan-interest page exists but is create-only -> wire reopen/edit/delete (GET/PUT/DELETE /dhrn/interest/:vchNo exist from N125).
 Next slice N132.
+
+## 2026-11-23 — Data Refresh Field Update runs its two desktop repairs preview-first (N247 / G259, WP-24)
+
+- 2026-11-23: `data-refresh-field-update` is now an applicable repair: AC_MAST.AC_MAIN_GR re-aligned to AC_GROUP (`MS_UPDATE.cs:7214`) and NULL DEFAULTER_AC set to N (`:8608`), preview-first, one transaction, audited, idempotent. The other 518 writes are classified in `orchestration/work/WP-24/field-update.md`; the 172 class b anomaly queries run in `dataRefreshFieldAnomalies.db.test.ts`.
+- 2026-11-23: finding F1 (class a, not built): seedCompany leaves BOOK_DATA.MENU_NAME (and for many books BOOK_TBL_NAME / BOOK_TBL_DETL) NULL on 36 books; owner decides seed fix or repair A3.
