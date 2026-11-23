@@ -155,10 +155,14 @@ route('Utilities/e-Invoice (IRN)', [
   'POST /einvoice/:vchNo/cancel',
 ]);
 route('Utilities/Year-End Close', ['POST /year-end/preview', 'POST /year-end/close']);
+// BtmSchm: the catalog right is Create (`C-----`); every dataset button is a create (WP-23).
 route('Company/Balance TrFr', [
-  'POST /balance-transfer/preview',
-  'POST /balance-transfer/year-close',
-  'POST /balance-transfer/openings',
+  'GET /balance-transfer',
+  'POST /balance-transfer/ac-balance',
+  'POST /balance-transfer/item-stock',
+  'POST /balance-transfer/tag-stock',
+  'POST /balance-transfer/sales-order',
+  'POST /balance-transfer/approval',
 ]);
 route('Utilities/Reminders', [
   'GET /reminders/overdue',
@@ -995,7 +999,12 @@ route('Reports/GST Input Register', ['GET /reports/gst-input-register']);
 route('Reports/Pledge Outstanding', ['GET /reports/dhrn-outstanding', 'GET /dhrn/os-letter']);
 route('Reports/Karigar Balances', ['GET /reports/karigar-balances']);
 route('Reports/Stock Valuation', ['GET /reports/stock-valuation']);
-route('Reports/Tag-Stock Report', ['GET /reports/tag-stock', 'GET /reports/tag-stock.csv']);
+route('Reports/Tag-Stock Report', [
+  'GET /reports/tag-stock',
+  'GET /reports/tag-stock.csv',
+  'GET /reports/tag-stock.xlsx',
+  'GET /reports/tag-stock/sizes',
+]);
 route('Reports/HuId Report', ['GET /reports/huid']);
 route('Reports/ItStk Level', ['GET /reports/item-weight-levels']);
 route('Reports/Bill Wise Profit', ['GET /reports/bill-profit']);
@@ -1030,6 +1039,7 @@ route('Reports/GST Report', [
   'GET /reports/gst-report/export.csv',
   'GET /reports/gst-report/export.xlsx',
   'GET /reports/gst-report/export.pdf',
+  'GET /reports/gst-report/workbook.xlsx',
 ]);
 route('Reports/Delete Data', ['GET /reports/delete-data']);
 route('Reports/Point Report', ['GET /reports/point-report', 'GET /reports/point-report/detail']);
@@ -1095,12 +1105,14 @@ const PRINT_ROUTES = new Set([
   'GET /stock/tag-print-screen/labels',
   'POST /integrations/notify',
   'GET /reports/tag-stock.csv',
+  'GET /reports/tag-stock.xlsx',
   'GET /reports/karigar-ledger.print',
   'GET /reports/gst-report/export.csv',
   'GET /reports/gst-report/export.xlsx',
   'GET /reports/gst-report/export.pdf',
   'GET /reports/sales-report/export.csv',
   'GET /reports/sales-report/export.xlsx',
+  'GET /reports/gst-report/workbook.xlsx',
   'GET /reports/gstr2-doc',
   'GET /reports/gstr1-doc',
   'GET /reports/gstr3b-doc',
@@ -1157,8 +1169,6 @@ const UPDATE_POST_ROUTES = new Set([
   'POST /einvoice/gsp-test',
   'POST /einvoice/:vchNo/cancel',
   'POST /year-end/close',
-  'POST /balance-transfer/year-close',
-  'POST /balance-transfer/openings',
   'POST /reports/entry-check/mark-checked',
 ]);
 
@@ -1168,7 +1178,6 @@ const READ_POST_ROUTES = new Set([
   'POST /sales-returns/:vchNo/incoming-bill-replay',
   'POST /sales-returns/:vchNo/incoming-replay',
   'POST /year-end/preview',
-  'POST /balance-transfer/preview',
   'POST /utilities/estimate-reset/preview',
   // Reads only: the framework asserts a preview writes nothing, and the diff it returns is what the operator
   // reviews before any apply exists.

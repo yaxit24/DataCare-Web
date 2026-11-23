@@ -1,3 +1,4 @@
+import { notCarriedOpening } from '../shared/carriedOpening.js';
 import { round } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import type { ListReport, ReportScope } from './reports.js';
@@ -265,7 +266,11 @@ export async function graphReport(
       mode === 'last-30-day-sales' ? addDays(toDate, -30) : (s.fromDate ?? fiscalStart(s.coYear));
 
     const params: unknown[] = [s.coCode];
-    const where = [`a.tenant_id=current_setting('app.tenant_id', true)`, `a."CO_CODE"=$1`];
+    const where = [
+      `a.tenant_id=current_setting('app.tenant_id', true)`,
+      `a."CO_CODE"=$1`,
+      notCarriedOpening('a'),
+    ];
 
     if (mode === 'expense-by-day' || mode === 'expense-by-type') {
       where.push(`a."LC_CODE"=${pushParam(params, lcCode)}`);

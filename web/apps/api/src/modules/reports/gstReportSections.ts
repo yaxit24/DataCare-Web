@@ -6,6 +6,8 @@ import type {
   GstReportResult,
   GstSection,
   GstView,
+  HeaderOnlyGstSection,
+  RawGstr3bAggregate,
   RawGstr3bResult,
   RawHsnReportRow,
   RawTaxReportRow,
@@ -174,6 +176,24 @@ const HSN_COLUMNS: readonly GstColumn[] = [
   ['cessAmount', 'Total Cess'],
 ].map(([key, header]) => ({ key: key!, header: header! }));
 
+/** EXP: one visible column (width 2000) and no caption, RP_GST.cs:2472-2477. */
+const EXP_COLUMNS: readonly GstColumn[] = [{ key: 'export', header: '' }];
+/** EXEMP captions, RP_GST.cs:2530-2557. */
+const EXEMP_COLUMNS: readonly GstColumn[] = [
+  ['description', 'Descripition'],
+  ['nilRated', 'Nil Rated Supply'],
+  ['exempt', 'Exmp and Non Gst Supply'],
+  ['nonGst', 'Non Gst Supply'],
+].map(([key, header]) => ({ key: key!, header: header! }));
+/** DOCS captions, RP_GST.cs:2599-2622. */
+const DOCS_COLUMNS: readonly GstColumn[] = [
+  ['nature', 'Nature Of Document'],
+  ['serialFrom', 'Sr. No From'],
+  ['serialTo', 'Sr. No To'],
+  ['totalNumber', 'Total Number'],
+  ['cancelled', 'Cancelled'],
+].map(([key, header]) => ({ key: key!, header: header! }));
+
 const sectionColumns = (section: GstSection): readonly GstColumn[] =>
   ({
     B2B: B2B_COLUMNS,
@@ -181,11 +201,14 @@ const sectionColumns = (section: GstSection): readonly GstColumn[] =>
     B2CS: B2CS_COLUMNS,
     CDNR: CDNR_COLUMNS,
     CDNUR: CDNUR_COLUMNS,
+    EXP: EXP_COLUMNS,
     AT: ADVANCE_COLUMNS,
     ATADJ: ADVANCE_COLUMNS.map((column) =>
       column.key === 'grossAdvance' ? { ...column, header: 'Gross Advance Adj' } : column,
     ),
+    EXEMP: EXEMP_COLUMNS,
     HSN: HSN_COLUMNS,
+    DOCS: DOCS_COLUMNS,
   })[section];
 
 const sectionTitle = (section: GstSection): string =>
@@ -195,10 +218,49 @@ const sectionTitle = (section: GstSection): string =>
     B2CS: 'Summary For B2CS(7)',
     CDNR: 'Summary For CDNR(9B)',
     CDNUR: 'Summary For CDNUR(9B)',
+    EXP: 'Summary For Exp(6)',
     AT: 'Summary For Advance(11B)',
     ATADJ: 'Summary For Adv Adjust(11B)',
+    EXEMP: 'Summary For Nill Rated,Exmp and Non Gst outword(8)',
     HSN: 'Summary For HSN(12)',
+    DOCS: 'Summary of Doc. issued The Tax Period',
   })[section];
+
+export const HEADER_ONLY_SECTIONS: ReadonlySet<GstSection> = new Set<HeaderOnlyGstSection>([
+  'EXP',
+  'EXEMP',
+  'DOCS',
+]);
+
+/**
+ * EXP, EXEMP and DOCS: the desktop builds the caption grid (DGV_CLEAR) and then returns before any query - EXP at
+ * `case 6: return;` (RP_GST.cs:2700-2701), EXEMP at `case 9: return;` (:2716-2717) - or, for DOCS, runs no query of
+ * its own (the switch has no case 11, :2723) and has no row-writing branch. So the screen is the title and captions,
+ * with no rows, no totals and no "No Record Found...." message. The web does not run DOCS' stale static query
+ * (a desktop weakness, WP-19 study) and computes no nil/exempt/document figures, because the desktop computes none.
+ */
+export function presentHeaderOnly(view: GstView, section: HeaderOnlyGstSection): GstReportResult {
+  const groupCaptions: Record<string, string> | undefined =
+    section === 'EXEMP'
+      ? {
+          nilRated: 'Total Nil Rated Supplies',
+          exempt: 'Total Exempted Supplies',
+          nonGst: 'Total Non-Gst Supplies',
+        }
+      : section === 'DOCS'
+        ? { totalNumber: 'Total Number', cancelled: 'Total Cancelled' }
+        : undefined;
+  return {
+    view,
+    section,
+    title: sectionTitle(section),
+    fileName: section,
+    columns: sectionColumns(section),
+    rows: [],
+    totals: {},
+    metadata: { source: 'RP_GST', headerOnly: true, ...(groupCaptions ? { groupCaptions } : {}) },
+  };
+}
 
 function place(row: RawTaxReportRow): string {
   return [text(row.stateCode), text(row.stateName)].filter(Boolean).join(' - ');
@@ -371,6 +433,7 @@ export function presentTaxSection(
   source: RawTaxReportRow[],
 ): GstReportResult {
   if (section === 'HSN') throw new RangeError('Use presentHsn for HSN');
+  if (HEADER_ONLY_SECTIONS.has(section)) throw new RangeError('Use presentHeaderOnly');
   const rows = rowsForSection(view, section, source);
   const totals: GstDisplayRow = {};
   if (section === 'B2B' || section === 'B2CL') {
@@ -470,28 +533,136 @@ const GSTR3B_COLUMNS: readonly GstColumn[] = [
   ['cessAmount', 'Cess'],
 ].map(([key, header]) => ({ key: key!, header: header! }));
 
+/** `Strings.Format(SUM(...) & "", "0.00")`: an aggregate over no rows is NULL, so the desktop cell is blank. */
+const aggregateCell = (amounts: RawGstr3bAggregate, value: string): string =>
+  Number(amounts.rowCount) > 0 ? money(value) : '';
+
+type Gstr3bCells = [
+  code?: string,
+  nature?: string,
+  place?: string,
+  taxable?: string,
+  igst?: string,
+  cgst?: string,
+  sgst?: string,
+  cess?: string,
+];
+
+/**
+ * The GSTR-3B grid of `BtnGst3Zoom_Click` (RP_GST.cs:3479-3818), row for row. The desktop grid's eight columns are
+ * positional: column 0 holds the code ("(a)") or the description ("Integrated Tax"), and the 6.1 block reuses
+ * columns 1-4 for Taxpayable and Paid Igst/Cgst/Sgst. The web keeps those positions (desktop column k is web column
+ * k + 1) and adds a leading Table No so every row says which table it belongs to. Label rows stay blank: the desktop
+ * computes only 3.1(a), 3.1(d), the 3.1 total, 3.2(1), 4(A)(5) and the 6.1 figures.
+ *
+ * Owner decisions (WP-19, 2026-11-22): every figure sums From..To (Q1; the desktop sums only the From date), All
+ * Other ITC is purchases only (Q2; the query filters TRAN_TYPE 'P'), and 6.1 State/Ut Tax is the SGST total (Q3;
+ * the desktop prints the CGST total there, RP_GST.cs:3800-3802). 3.1(a) and 3.2(1) count every TAX_SIGN '+' row as the
+ * desktop does, purchase returns included (architect decision Q10).
+ */
 export function presentGstr3b(source: RawGstr3bResult): GstReportResult {
-  const row = (
-    table: string,
-    code: string,
-    nature: string,
-    amounts: RawGstr3bResult['outward'],
-  ): GstDisplayRow => ({
-    table,
-    code,
-    nature,
-    placeOfSupply: '',
-    taxableValue: money(amounts.taxable),
-    igstAmount: money(amounts.igst),
-    cgstAmount: money(amounts.cgst),
-    sgstAmount: money(amounts.sgst),
-    cessAmount: '',
-  });
-  const rows = [
-    row('3.1', '(a)', 'OutWord Taxable Supplies(Other then Zero rated)', source.outward),
-    row('3.1', '(d)', 'InWord Supplies(Lible to Reverse Charge)', source.reverseCharge),
-    row('4(A)', '(5)', 'All Other ITC)', source.otherItc),
+  const rows: GstDisplayRow[] = [];
+  const add = (table: string, cells: Gstr3bCells): void => {
+    const [code, nature, place, taxable, igst, cgst, sgst, cess] = cells;
+    rows.push({
+      table,
+      code: code ?? '',
+      nature: nature ?? '',
+      placeOfSupply: place ?? '',
+      taxableValue: taxable ?? '',
+      igstAmount: igst ?? '',
+      cgstAmount: cgst ?? '',
+      sgstAmount: sgst ?? '',
+      cessAmount: cess ?? '',
+    });
+  };
+  const figures = (amounts: RawGstr3bAggregate): [string, string, string, string] => [
+    aggregateCell(amounts, amounts.taxable),
+    aggregateCell(amounts, amounts.igst),
+    aggregateCell(amounts, amounts.cgst),
+    aggregateCell(amounts, amounts.sgst),
   ];
+  // The running totals add the displayed cells through Conversion.Val, so a blank cell counts 0 (RP_GST.cs:3555-3558).
+  const shown = (...cells: string[]): string => money(addDecimal(...cells.map((c) => c || '0')));
+
+  const outward = figures(source.outward);
+  const reverse = figures(source.reverseCharge);
+  add('3.1', ['(a)', 'OutWord Taxable Supplies(Other then Zero rated)', '', ...outward]);
+  add('3.1', ['(b)', 'OutWord Taxable Supplies (Zero rated) ']);
+  add('3.1', ['(c)', 'Other then OutWord Supplies(Nil rated,Exempted) ']);
+  add('3.1', ['(d)', 'InWord Supplies(Lible to Reverse Charge)', '', ...reverse]);
+  add('3.1', ['(e)', 'Non-Gst OutWord Supplies']);
+  const payable = outward.map((cell, index) => shown(cell, reverse[index]!)) as [
+    string,
+    string,
+    string,
+    string,
+  ];
+  add('3.1', ['', '', '', ...payable]);
+
+  add('3.2', [
+    '',
+    'Inter State Supplies made to Unregistered Persons Comp',
+    'osition persons and UIN Holders    ',
+  ]);
+  add('3.2', ['', '', 'Place of Supplies (State/Ut)', 'Taxable Val', 'Igst Tax ']);
+  if (source.unregisteredInterState.length) {
+    source.unregisteredInterState.forEach((state, index) => {
+      add('3.2', [
+        index === 0 ? '(1)' : '',
+        index === 0 ? 'Supplies Made ot Unregester Persons' : '',
+        `${text(state.stateCode)} - ${text(state.stateName)}`,
+        money(state.taxable),
+        money(state.igst),
+      ]);
+    });
+  } else {
+    add('3.2', ['(1)', 'Supplies Made ot Unregester Persons']);
+  }
+  add('3.2', ['(2)', 'Supplies Made ot Composition Taxable Persons', '']);
+  add('3.2', ['(3)', 'Supplies Made ot UIN Holders', '']);
+
+  add('4', ['4', 'Eligible ITC']);
+  add('4', ['(A)', 'ITC Available(Whether in full of part)']);
+  add('4(A)', ['(1)', 'Imprt of goods']);
+  add('4(A)', ['(2)', 'Imprt of Service']);
+  add('4(A)', ['(3)', 'Inword Supplies Liable to Reverse Charge']);
+  add('4(A)', ['(4)', 'Inword Supplies From ISD']);
+  const itc = figures(source.otherItc);
+  add('4(A)', ['(5)', 'All Other ITC)', '', ...itc]);
+  add('4', ['(B)', 'ITC Reversed']);
+  add('4(B)', ['(1)', 'As per rules 42 & 43 of CGST Rules']);
+  add('4(B)', ['(2)', 'Others']);
+  add('4', ['(C)', 'Net ITC Avaible (A)-(B)']);
+  add('4', ['(D)', 'Ineligible ITC']);
+  add('4(D)', ['(1)', 'As per Section 17(5)']);
+  add('4(D)', ['(2)', 'Other']);
+
+  add('5', ['5', 'Values of exempt,nil rated and non GST Inword supplies']);
+  add('5', ['', 'Supplier Under Composition and nil rated supplies']);
+  add('5', ['', 'Non GST Supplies']);
+
+  const paid = itc.map((cell) => shown(cell));
+  add('6.1', ['6.1', 'Payment of Tax']);
+  // Desktop columns 8 and 9 ("Interest", "Late Fee") have width 0 in this grid and are never visible.
+  add('6.1', [
+    'Discription',
+    'Taxpayable',
+    'Paid Igst',
+    'Paid Cgst',
+    'Paid Sgst',
+    'Paid Cess',
+    'TDS Paid',
+    'Tax Paid In Cash',
+  ]);
+  add('6.1', ['Integrated Tax', payable[1], paid[1], paid[2], paid[3]]);
+  add('6.1', ['Centrel Tax', payable[2]]);
+  add('6.1', ['State/Ut Tax', payable[3]]);
+  add('6.1', ['Cess']);
+  add('6.2', ['6.2', 'TDS/TCS Credit']);
+  add('6.2', ['TDS']);
+  add('6.2', ['TCS']);
+
   return {
     view: 'gstr3b',
     section: null,
@@ -502,25 +673,9 @@ export function presentGstr3b(source: RawGstr3bResult): GstReportResult {
     totals: {},
     metadata: {
       source: 'RP_GST',
-      blockedRows: [
-        '3.1(b)',
-        '3.1(c)',
-        '3.1(e)',
-        '3.2(2)',
-        '3.2(3)',
-        '4(A)(1)',
-        '4(A)(2)',
-        '4(A)(3)',
-        '4(A)(4)',
-        '4(B)',
-        '4(C)',
-        '4(D)',
-        '5',
-        '6.1',
-        '6.2',
-      ],
       limitations: [
-        'Only desktop-computed outward, reverse-charge and all-other-ITC rows are emitted.',
+        'Every desktop GSTR-3B row is shown; the desktop computes figures only for 3.1(a), 3.1(d), the 3.1 total, 3.2(1), 4(A)(5) and 6.1, so the other rows are labels.',
+        'Figures sum From..To (owner decision WP-19 Q1); 4(A)(5) is purchases only (Q2); 6.1 State/Ut Tax is the SGST total (Q3); 3.1(a) and 3.2(1) count every + row, purchase returns included (Q10).',
       ],
     },
   };
