@@ -385,7 +385,11 @@ const lines = (vs: Voucher[]) => vs.flatMap((v) => v.lines);
     it('Group Purc leaves out NET_AMT = 0 and sums the lines under GOLD and SILVER', async () => {
       const body = await report('mode=group');
       expect(body.template).toBe('PurcGroupWise');
-      expect(vouchersOf(body)).toEqual(['00001', '00002']);
+      // PurcGroupWise suppresses its Detail band (Section8): no voucher line prints, only the group sums. The
+      // vouchers behind them are the in-scope three; the NET_AMT = 0 voucher V0 is left out.
+      expect(vouchersOf(body)).toEqual([]);
+      expect(body.selection.voucherCount).toBe(IN_SCOPE.length);
+      expect(body.selection.netAmt).toBe(sum(IN_SCOPE, (v) => v.net));
       expect(body.totals.lineNetAmt).toBe(sum(lines(IN_SCOPE), (l) => l.net));
       const gold = body.table.lines.find((l: any) => l._band === 'GOLD');
       expect(Number(gold.nwt)).toBe(30); // V1 20 g + the return's 10 g, as the template sums raw lines

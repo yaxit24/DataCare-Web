@@ -361,9 +361,10 @@ const groupLayout: RpAllLayout = {
   ],
   sort: [{ key: 'vchDate' }, { key: 'acCode' }],
   keys: { voucher: VOUCHER_KEY, line: ['srNo'] },
-  // PurcGroupWise suppresses its Detail band (Section8). The web prints it under its group so that every
-  // group sum can be reconciled to the vouchers behind it (a Crystal operator cannot see them either).
-  rowLevels: ['line'],
+  // PurcGroupWise suppresses its Detail band (Section8, EnableSuppress=True), so it prints only the item-type and
+  // group header sums and the grand total, as SalesGroupWise does in the Sales branch. The line columns below
+  // name what those sums add up.
+  rowLevels: [],
   columns: [
     col('vchDate', 'Bill Date', 'date', 'line'),
     col('vchNo', 'Vch No', 'text', 'line'),

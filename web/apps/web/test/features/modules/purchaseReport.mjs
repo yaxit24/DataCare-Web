@@ -269,23 +269,34 @@ export const purchaseReport = {
         await openReport(page);
         // The company accumulates vouchers across cases and modules, so the pair's own contribution is the
         // difference of the server's selection totals before and after it was created.
-        const selection = async () =>
-          (await (await page.request.get(`/api${API}?mode=register`)).json()).selection;
-        const before = await selection();
+        const MODES = ['register', 'item', 'party', 'group', 'party-summary'];
+        const selection = async (mode) =>
+          (await (await page.request.get(`/api${API}?mode=${mode}`)).json()).selection;
+        const before = {};
+        for (const mode of MODES) before[mode] = await selection(mode);
         const vouchers = await createPair(ctx, page);
-        const after = await selection();
         const round2 = (x) => Math.round(x * 100) / 100;
-        assert.equal(round2(after.netAmt - before.netAmt), TOTAL_TWO.net);
-        assert.equal(round2(after.taxAmt - before.taxAmt), TOTAL_TWO.tax);
-        assert.equal(round2(after.totAmt - before.totAmt), TOTAL_TWO.total);
+        const afterOf = {};
+        // Each mode reads its own record set (Group Purc adds NET_AMT <> 0), so each must add exactly the pair.
+        for (const mode of MODES) {
+          const after = (afterOf[mode] = await selection(mode));
+          assert.equal(round2(after.netAmt - before[mode].netAmt), TOTAL_TWO.net, `${mode} net`);
+          assert.equal(round2(after.taxAmt - before[mode].taxAmt), TOTAL_TWO.tax, `${mode} tax`);
+          assert.equal(
+            round2(after.totAmt - before[mode].totAmt),
+            TOTAL_TWO.total,
+            `${mode} total`,
+          );
+        }
         await openReport(page);
         const observations = {};
         const inr = (n) =>
           n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        for (const mode of ['register', 'item', 'party', 'group', 'party-summary']) {
+        for (const mode of MODES) {
           await runMode(page, mode);
           const text = await reportText(page);
           const foot = await page.getByTestId('purchase-report-selection').innerText();
+          const after = afterOf[mode];
           for (const expected of [after.netAmt, after.taxAmt, after.totAmt])
             assert.ok(foot.includes(inr(expected)), `${mode}: ${inr(expected)} in ${foot}`);
           observations[mode] = text;
@@ -423,12 +434,18 @@ export const purchaseReport = {
         const database = await snapshotVoucher(ctx, vchNo);
         await openReport(page);
         const downstream = {};
-        for (const mode of ['report', 'register', 'item', 'party', 'group', 'party-summary']) {
+        // Group Purc prints no voucher line: PurcGroupWise suppresses its Detail band (Section8,
+        // EnableSuppress=True; RP_ALL.cs:12121), so the voucher shows only through its group sums.
+        for (const mode of ['report', 'register', 'item', 'party', 'party-summary']) {
           await runMode(page, mode);
           downstream[mode] = await reportRowFor(page, vchNo);
         }
+        await runMode(page, 'group');
+        assert.equal(await reportRows(page).filter({ hasText: vchNo }).count(), 0);
+        assert.ok((await reportRows(page).count()) > 0, 'group bands print');
+        downstream.group = await reportText(page);
         return {
-          observation: `purchase ${vchNo} appears exactly once in six data-grid variants`,
+          observation: `purchase ${vchNo} appears in five voucher-printing data-grid variants; Group Purc prints group sums only`,
           expected: { vchNo, occurrencesPerMode: 1 },
           database,
           downstream,
@@ -724,7 +741,8 @@ export const purchaseReport = {
         const returned = await purchaseReturn.createReturn(ctx, page);
         await openReport(page);
         const downstream = {};
-        for (const mode of ['report', 'register', 'item', 'party', 'group', 'party-summary']) {
+        // Group Purc prints group sums only (PurcGroupWise Section8 suppressed, RP_ALL.cs:12121): no voucher numbers.
+        for (const mode of ['report', 'register', 'item', 'party', 'party-summary']) {
           await runMode(page, mode);
           const text = await reportText(page);
           assert.match(text, new RegExp(gold));

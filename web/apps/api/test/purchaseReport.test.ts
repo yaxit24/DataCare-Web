@@ -395,6 +395,12 @@ describe('Group Purc → PurcGroupWise', () => {
       lineNetAmt: '113836.00',
     });
   });
+  it('suppresses the Detail band like PurcGroupWise Section8 (EnableSuppress=True): group bands only', () => {
+    // RP_ALL.cs:12121 opens PurcGroupWise.RPT; its Detail section (Section8) is suppressed, so no voucher line
+    // prints, only the item-type and group header sums and the grand total (as SalesGroupWise in the Sales branch).
+    expect(r.table.lines.filter((l) => l._kind === 'line')).toEqual([]);
+    expect(JSON.stringify(r.table.lines)).not.toContain(V1.vch);
+  });
   it('totals Net Amt of the lines: 113836 + 7400 = 121236', () => {
     expect(r.totals).toMatchObject({
       nwt: 120,
