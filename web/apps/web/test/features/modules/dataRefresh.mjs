@@ -46,7 +46,6 @@ const captions = ['Account', 'Stock', 'Field Update', 'Approval Adj', 'Image Dat
 const previewOnlyOperations = [
   ['data-refresh-account', 'Account'],
   ['data-refresh-stock', 'Stock'],
-  ['data-refresh-field-update', 'Field Update'],
   ['data-refresh-image-data', 'Image Data'],
   ['data-refresh-old-field', 'Old Field'],
 ];
@@ -530,10 +529,28 @@ export const dataRefresh = {
             0,
           );
         }
+        // Field Update is no longer a preview-only classification: its two class-a repairs
+        // (MS_UPDATE.cs:7214 AC_MAIN_GR, MS_UPDATE.cs:8608 DEFAULTER_AC) apply after a preview.
+        const [fieldResponse] = await Promise.all([
+          page.waitForResponse((value) =>
+            isApi(value, '/utilities/data-repair/data-refresh-field-update/preview'),
+          ),
+          page.getByRole('button', { name: 'Field Update', exact: true }).click(),
+        ]);
+        assert.equal(fieldResponse.status(), 200, await fieldResponse.text());
+        const field = await fieldResponse.json();
+        assert.equal(field.applyAvailable, true);
+        await page.getByRole('heading', { name: 'Field Update preview', exact: true }).waitFor();
+        await (
+          field.clean
+            ? page.getByText('No records need adjustment.', { exact: true })
+            : page.getByRole('button', { name: 'Apply Field Update', exact: true })
+        ).waitFor();
+        assert.equal(await page.getByText(/Preview only:/).count(), 0);
         return {
           observation:
-            'all five classifications state the unproved work and show no Apply or authority inputs',
-          expected: 'preview-only',
+            'the four unproved classifications show no Apply or authority inputs; Field Update previews as an applicable repair',
+          expected: { previewOnly: previewOnlyOperations.map(([id]) => id), field: true },
         };
       },
     ),
@@ -571,7 +588,7 @@ export const dataRefresh = {
           assert.match(history, /applied/);
           return {
             observation:
-              'advanced Data Repair shows shared history and suppresses Apply and authority inputs for all five preview-only operations',
+              'advanced Data Repair shows shared history and suppresses Apply and authority inputs for all four preview-only operations',
             expected: 'history retained; preview-only capability honored',
           };
         }),
