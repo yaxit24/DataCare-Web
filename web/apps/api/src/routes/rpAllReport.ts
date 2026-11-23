@@ -1,5 +1,6 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import {
+  approvalReport,
   RpAllRequestError,
   salesReport,
   type RpAllResult,
@@ -32,6 +33,9 @@ export interface RpAllRouteHelpers {
     coCode: string;
     lcCode?: string;
     coYear?: string;
+    fromDate?: string;
+    toDate?: string;
+    filters?: unknown;
   };
 }
 
@@ -57,6 +61,37 @@ export function registerRpAllReportRoutes(app: FastifyInstance, h: RpAllRouteHel
   };
   const fileName = (r: RpAllResult) =>
     `sales-report-${r.mode}${r.variant === 'return' ? '-return' : ''}-${r.filters.fromDate}-${r.filters.toDate}`;
+
+  /**
+   * Report → Approval Rpt (RP_ALL.cs:6707-6711). The screen route is declared in routes/txn.ts and two GET
+   * routes with the same literal path cannot coexist in Fastify, so the Approval branch of the shared engine
+   * is served by this pre-handler (added after the central auth/rights/report-filter hooks). The three
+   * buttons select AprPartyWise, AprInOut and AprPan (RP_ALL.cs:8199, 8274, 8349). Rights are still the
+   * "Reports/Approval Report" caption policy already registered in routePolicy.ts.
+   */
+  app.addHook('preHandler', async (req: FastifyRequest, reply: FastifyReply) => {
+    if (req.method !== 'GET' || (req.routeOptions.url ?? '') !== '/reports/approval-report') return;
+    const s = readScope(req);
+    try {
+      const result = await approvalReport(
+        prisma,
+        {
+          tenantId: s.tenantId,
+          coCode: s.coCode,
+          lcCode: s.lcCode ?? '',
+          coYear: s.coYear ?? '',
+          fromDate: s.fromDate,
+          toDate: s.toDate,
+          filters: s.filters,
+        },
+        (req.query ?? {}) as Record<string, unknown>,
+      );
+      return reply.send(result);
+    } catch (error) {
+      if (fail(reply, error)) return reply;
+      throw error;
+    }
+  });
 
   app.get('/reports/sales-report', auth as any, async (req, reply) => {
     try {

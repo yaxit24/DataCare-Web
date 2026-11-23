@@ -13,8 +13,8 @@
  * query, and the grouping, totalling and formatting rules are written and tested once.
  */
 
-/** The menu captions RP_ALL serves (RP_ALL.cs:6676-6770). Only Sales has an adapter so far. */
-export type RpAllBranch = 'sales';
+/** The menu captions RP_ALL serves (RP_ALL.cs:6676-6770). */
+export type RpAllBranch = 'sales' | 'approval';
 
 /** Kind of a cell: decides precision, alignment and how a total is rounded. */
 export type RpAllColumnKind = 'text' | 'date' | 'money' | 'weight' | 'pcs' | 'rate';
@@ -58,6 +58,11 @@ export interface RpAllGroupLevel {
   /** Map raw key values to a printed label (Crystal formula such as @ItemType). */
   labelMap?: Readonly<Record<string, string>>;
   labelDefault?: string;
+  /**
+   * Conditional footer suppression (Crystal `EnableSuppress`, e.g. AprPan.xml:936
+   * `Sum ({@PanPcs}, {@Group}) = 0`). Suppression hides the band and never removes its records or totals.
+   */
+  footerSuppressedWhen?: (records: readonly RpAllRecord[]) => boolean;
 }
 
 /** One record-sort key; groups are always sorted ascending first, in group order (Crystal GroupSortField). */
@@ -104,6 +109,8 @@ export interface RpAllGroup {
   label: string;
   groupPath: string[];
   rowCount: number;
+  /** Effective subtotal placement after conditional suppression (a suppressed footer becomes 'none'). */
+  subtotal: 'header' | 'footer' | 'none';
   totals: Record<string, number>;
 }
 
