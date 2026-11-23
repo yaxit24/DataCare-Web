@@ -1270,7 +1270,8 @@ export const itemMaster = {
           assert.equal(sold.status(), 201, await sold.text());
           const vchNo = String((await sold.json()).vchNo).padStart(5, '0');
           try {
-            // 10 g × 6,123.45 + 10 g × 237.50 = 63,609.50 credited to group IMG's sales account (SALES).
+            // 10 g × 6,123.45 + 10 g × 237.50 = 61,234 + 2,375 = 63,609 (each line amount Math.Round(.., 0), half to even:
+            // TR_SALE.cs:10343-10362) credited to group IMG's sales account (SALES).
             const lines = await ctx.rows(
               `SELECT "IT_CODE" it FROM "SL_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2`,
               vchNo,
@@ -1280,7 +1281,7 @@ export const itemMaster = {
               `SELECT "AC_CODE" ac,"CR_AMT"::float cr FROM "AC_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2 AND "AC_CODE"='SALES'`,
               vchNo,
             );
-            assert.deepEqual(legs, [{ ac: 'SALES', cr: 63609.5 }]);
+            assert.deepEqual(legs, [{ ac: 'SALES', cr: 63609 }]);
             const me = await (await page.request.get('/api/me')).json();
             const invoice = await page.request.get(
               `/api/sales/invoice?coBook=SL&coYear=${encodeURIComponent(me.coYear)}&vchNo=${vchNo}&format=html&copy=O`,
@@ -1291,8 +1292,8 @@ export const itemMaster = {
               "the invoice prints the item's HSN code",
             );
             return {
-              observation: `sale ${vchNo} of IMIMG credited 63609.50 to SALES; the invoice prints HSN 711311`,
-              expected: { leg: 63609.5, hsn: '711311' },
+              observation: `sale ${vchNo} of IMIMG credited 63609.00 to SALES; the invoice prints HSN 711311`,
+              expected: { leg: 63609, hsn: '711311' },
               database: { lines, legs },
               downstream: { vchNo },
             };

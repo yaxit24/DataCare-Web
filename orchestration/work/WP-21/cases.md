@@ -739,7 +739,7 @@ Smallest seed the cases need, described not as SQL:
 - Defaults for baseline families (SALES, SALES RETURNE, PURCHASE slots 1 to 4, PURC RETURN, CASH REC/PAY, BANK REC/PAY, SALES ORDER, ORDER CANCEL, CONTRA, JOURNAL, approval, stock): MISSING, the baseline BOOK_IDTL is not in the study; no default account is asserted for them.
 - Which posting leg uses which slot in the baseline families is not desktop-proven (T18 preface); the journeys assert only that the configured account is used.
 - Provisioned books already in a company that miss slots (OEX, OIN, TSP, FPR and others): no repair path is specified; only newly created books are covered.
-  Since review: migration 20261122090000_book_template_slots repairs the web-seeded OEX/OIN/PR/TPR/TSP/LBR books of existing companies (exact old-seed slots only); fine families (FSL/FPR) stay open.
+  Since review: migration 20261122120000_book_template_slots repairs the web-seeded OEX/OIN/PR/TPR/TSP/LBR books of existing companies (exact old-seed slots only); fine families (FSL/FPR) stay open.
 - Ctrl+O and the A/E reset are absent by decision (D6); only absence is asserted.
 - Edition A/E and E employee controls: not Lite.
 - Cases blocked for external reasons: books.children.template-sr0-excluded (baseline table), books.delete.atomic and books.rollback.detail-failure-keeps-old (failpoint harness), books.history.branch-clone (Location add), books.journey.tag-split-slots (Tag Split study).

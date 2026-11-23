@@ -4,12 +4,18 @@ import {
   effectiveSaleRateWith,
   fineFor,
   labourCharge,
+  percentageLabourRate,
   round,
   saleAmountBasis,
   saleItemAmount,
+  saleItemAmountRounded,
+  saleLineLabourAmount,
   PRECISION,
+  applySaleGridEdit,
+  computeSaleLine,
+  saleGhatWeight,
 } from '@datacare/core';
-import type { FineWorkflow } from '@datacare/core';
+import type { FineWorkflow, RoundingPolicy, SaleGridLabourCells } from '@datacare/core';
 
 /** The exchange-row valuation the sale screens preview (G83); re-exported so a page needs one import. */
 export { oldGoldRowAmount, type OldGoldCells } from './oldGoldRow';
@@ -72,6 +78,8 @@ export interface RecalcResult {
   fineWt: number;
   metalAmount: number;
   labourAmount: number;
+  /** LBR_RATE derived from LBR_PRC on a percentage line (TR_SALE.cs:11021); undefined otherwise. */
+  labourRate?: number;
   netLabourAmount: number;
   otherAmount: number;
   totalAmount: number;
@@ -101,6 +109,8 @@ const n = (v: string | number | undefined): number => {
 /** True when the operator has actually supplied the cell, as opposed to leaving it blank. */
 const supplied = (v: string | number | undefined): boolean =>
   v !== undefined && v !== null && String(v).trim() !== '';
+const labourTypeIsPct = (line: { labourType?: string }): boolean =>
+  ['%', 'A'].includes(String(line.labourType ?? '').toUpperCase());
 
 const LABOUR_TYPES: Record<string, 'per_gram' | 'per_piece' | 'percentage' | 'fixed'> = {
   G: 'per_gram',
@@ -119,11 +129,23 @@ const LABOUR_TYPES: Record<string, 'per_gram' | 'per_piece' | 'percentage' | 'fi
  *
  * `saleAmountType` is the company's `CO_SET.SL_AMT_TYPE`. A line with no RtWith of its own takes it
  * (TR_SALE.cs:9161), and blank means N (MS_OPNCOMP.cs:881-884).
+ *
+ * `roundingPolicy`, when given, makes the item and labour amounts the ones the API posts (`computeLine`): the item
+ * rate rounded by ITM_RATE_ROF, ITM_AMT and LBR_AMT each rounded once at the Sale line precision (0, or 2 under
+ * ALL_ROF_REMOVE: TR_SALE.cs:10343-10362), and a percentage's derived rate by LBR_ROF (:11021).
+ *
+ * `labourBasis` is the line's LBR_TYPE, the basis a percentage line's derived rate multiplies: a new Sale row takes
+ * the company's CO_SET.LBR_TYPE (TR_SALE.cs:9135).
  */
 export function recalcLine(
   line: RecalcLine,
   policy: RecalcPolicy = 'sale',
-  options: { labourIncludesGhat?: boolean; saleAmountType?: string } = {},
+  options: {
+    labourIncludesGhat?: boolean;
+    saleAmountType?: string;
+    roundingPolicy?: RoundingPolicy;
+    labourBasis?: string;
+  } = {},
 ): RecalcResult {
   const gross = n(line.grossWt);
   const less = n(line.lessWt);
@@ -142,7 +164,9 @@ export function recalcLine(
   const ghtWt = supplied(line.ghtWt)
     ? n(line.ghtWt)
     : ghtPct > 0
-      ? round((ghtBase * ghtPct) / 100, PRECISION.weight)
+      ? policy === 'sale'
+        ? saleGhatWeight(netWt, ghtPct) // the API's own derivation (core, TR_SALE.cs:10581)
+        : round((ghtBase * ghtPct) / 100, PRECISION.weight)
       : 0;
 
   // Fine comes from the server's own policy table, so the preview cannot disagree with the posting.
@@ -170,19 +194,35 @@ export function recalcLine(
     effectiveSaleRateWith(line.rateWith, options.saleAmountType),
     line.rateType,
   );
-  const metal = saleItemAmount(basis, n(line.rate));
+  const rounding = options.roundingPolicy;
+  const itemRate = rounding ? rounding.roundItemRate(n(line.rate)) : n(line.rate);
+  const metal = rounding
+    ? saleItemAmountRounded(basis, itemRate, rounding)
+    : saleItemAmount(basis, itemRate);
 
   const labourType = LABOUR_TYPES[(line.labourType ?? 'G').toUpperCase()] ?? 'per_gram';
-  const labour = labourCharge(labourType, {
+  const labourInput = {
     netWt,
+    grossWt: gross,
     ghatWt: ghtWt,
     withGhat: options.labourIncludesGhat !== false,
     pcs: n(line.pcs),
-    rate: n(line.labourRate),
+    // A blank rate on a percentage row is derived from LBR_PRC; a typed one stands (TR_SALE.cs:10999).
+    rate: supplied(line.labourRate) ? n(line.labourRate) : labourTypeIsPct(line) ? undefined : 0,
     pct: n(line.labourPct),
-    metalAmount: metal,
+    // A percentage derives LBR_RATE from the ITEM RATE and multiplies the LBR_TYPE basis (TR_SALE.cs:11021,
+    // :11084-11127), as the API's computeLine does; it is not a percentage of the item amount.
+    itemRate,
+    basis: options.labourBasis,
     fixed: n(line.labourFixed),
-  });
+  };
+  const labour = rounding
+    ? saleLineLabourAmount(labourType, labourInput, rounding)
+    : labourCharge(labourType, labourInput);
+  const labourRate =
+    labourType === 'percentage'
+      ? (labourInput.rate ?? percentageLabourRate(itemRate, labourInput.pct, rounding))
+      : undefined;
 
   // Net labour subtracts the line discount, by percentage or by amount (`TR_SALE.cs:11209`).
   const discount = supplied(line.discountAmount)
@@ -200,8 +240,168 @@ export function recalcLine(
     fineWt: fine,
     metalAmount: metal,
     labourAmount: labour,
+    labourRate,
     netLabourAmount: netLabour,
     otherAmount: other,
     totalAmount: total,
   };
+}
+
+/**
+ * The labour mode a Sale grid row posts, from its Lbr% and Making/g cells.
+ *
+ * TR_SALE.cs:10996-11021: when LBR_PRC is non-zero (and changed) and the row has an item rate, CommPassTotal derives
+ * LBR_RATE from it, overwriting a typed rate; with no item rate it leaves the typed rate alone. So a row with both a
+ * percentage and a rate is a percentage line, and otherwise a typed Making/g is a per-gram (net-weight) rate.
+ */
+export function saleLineLabourMode(cells: {
+  lbrPct?: string | number;
+  rate?: string | number;
+  making?: string | number;
+}): 'percentage' | 'per_gram' | undefined {
+  if (n(cells.lbrPct) !== 0 && n(cells.rate) !== 0) return 'percentage';
+  return supplied(cells.making) && n(cells.making) !== 0 ? 'per_gram' : undefined;
+}
+
+/** A Sale or Sales Quotation grid row: its Making/g and Lbr% cells besides the recalculation fields. */
+export interface SaleGridRow extends Omit<RecalcLine, 'labourType' | 'labourRate' | 'labourPct'> {
+  making?: string;
+  lbrPct?: string;
+  /** Column 83, the LBR_PRC the Making/g rate came from (`applySaleGridEdit`). */
+  lbrPctApplied?: string;
+  /** A typed ITM_AMT (detail panel). */
+  metalAmount?: string;
+}
+
+/**
+ * The preview of a Sale / Sales Quotation grid row: weights and fine from `recalcLine`, and the item amount, labour
+ * rate and labour from core `computeSaleLine`, the ONE Sale line function the API's computeLine posts with (IEEE
+ * double, .NET Math.Round, "0.00" cells; TR_SALE.cs CommPassTotal). A Lbr% row multiplies `options.labourBasis`, the
+ * company LBR_TYPE a new row takes (:9135); a Making/g row without Lbr% is the per-gram N basis the API posts.
+ */
+export function recalcSaleGridRow(
+  row: SaleGridRow,
+  options: Parameters<typeof recalcLine>[2] = {},
+): RecalcResult {
+  const percentage = saleLineLabourMode(row) === 'percentage';
+  const r = recalcLine({ ...row, labourRate: row.making, labourType: 'G' }, 'sale', options);
+  const policy = options.roundingPolicy;
+  const typedMaking = supplied(row.making) ? n(row.making) : null;
+  const line = computeSaleLine(
+    {
+      pcs: n(row.pcs),
+      grossWt: n(row.grossWt),
+      netWt: r.netWt,
+      ghtWt: r.ghtWt,
+      fineWt: r.fineWt,
+      rateWith: effectiveSaleRateWith(row.rateWith, options.saleAmountType),
+      rateType: row.rateType,
+      itemRate: policy ? policy.roundItemRate(n(row.rate)) : n(row.rate),
+      itemAmount: supplied(row.metalAmount) && n(row.metalAmount) !== 0 ? n(row.metalAmount) : null,
+      labourMode: percentage ? 'percentage' : typedMaking ? 'rate' : 'none',
+      labourBasis: percentage ? (options.labourBasis ?? '') : 'N',
+      labourPct: n(row.lbrPct),
+      labourRate: percentage ? typedMaking : (typedMaking ?? 0),
+      otherAmount: n(row.otherAmount),
+    },
+    {
+      labourRateDecimals: policy?.labourDecimals ?? 2,
+      allRoundingRemoved: policy?.allRoundingRemoved === true,
+      labourWithGhat: options.labourIncludesGhat !== false,
+    },
+  );
+  const discount = supplied(row.discountAmount)
+    ? n(row.discountAmount)
+    : round((line.labourAmount * n(row.discountPct)) / 100, PRECISION.amount);
+  const netLabour = round(line.labourAmount - discount, PRECISION.amount);
+  const total = round(
+    line.itemAmount + netLabour + r.otherAmount + n(row.ghatAmount),
+    PRECISION.amount,
+  );
+  return {
+    ...r,
+    metalAmount: line.itemAmount,
+    labourAmount: line.labourAmount,
+    labourRate: line.labourRate,
+    netLabourAmount: netLabour,
+    totalAmount: total,
+  };
+}
+
+/**
+ * The labour fields a Sale / Sales Quotation row posts. A Lbr% row posts `percentage` with its Making/g cell, which is
+ * LBR_RATE as the grid holds it (derived when Lbr% was applied, or typed after it, or restored on reopen); the server
+ * derives the rate only when the cell is blank (TR_SALE.cs:10999-11021). Otherwise Making/g is a per-gram rate, and a
+ * row loaded with another labour type keeps it.
+ */
+export function saleGridRowLabour(row: {
+  making?: string;
+  lbrPct?: string;
+  rate?: string;
+  labourType?: 'per_gram' | 'per_piece' | 'percentage' | 'fixed';
+  labourRate?: number;
+  labourFixed?: number;
+}): {
+  labourType?: 'per_gram' | 'per_piece' | 'percentage' | 'fixed';
+  labourRate?: number;
+  labourFixed?: number;
+} {
+  if (saleLineLabourMode(row) === 'percentage') {
+    return supplied(row.making)
+      ? { labourType: 'percentage', labourRate: n(row.making) }
+      : { labourType: 'percentage' };
+  }
+  if (row.making) return { labourType: 'per_gram', labourRate: n(row.making) };
+  if (row.labourType) {
+    return { labourType: row.labourType, labourRate: row.labourRate, labourFixed: row.labourFixed };
+  }
+  return {};
+}
+
+/** One cell edit of a Sale / Sales Quotation row in the desktop's event order (core `applySaleGridEdit`). */
+export function editSaleGridRow<T extends SaleGridLabourCells>(
+  row: T,
+  key: keyof T,
+  value: string,
+  policy?: RoundingPolicy,
+): T {
+  return applySaleGridEdit(row, key, value, policy?.labourDecimals ?? 2, (v) =>
+    policy ? policy.roundItemRate(v) : v,
+  );
+}
+
+/** The tag cells a Sale / Sales Quotation tag pick fills. */
+export interface PickedTag {
+  code: unknown;
+  name?: unknown;
+  ITM_NWT?: unknown;
+  ITM_GWT?: unknown;
+  ITM_TOUCH?: unknown;
+  ITM_RATE?: unknown;
+}
+
+/**
+ * A tag pick fills the row's weights, touch and rate THROUGH the grid's edit rules, so a changed rate or weight
+ * re-prices the row as CommPassTotal does (column 22 against tracker 82, TR_SALE.cs:10822-10880): a typed or
+ * reopened ITM_AMT is dropped and a percentage re-derives Making/g from the new rate.
+ */
+export function applySaleTagPick<
+  T extends SaleGridLabourCells & {
+    tagNo?: string;
+    itCode?: string;
+    netWt?: string;
+    touch?: string;
+  },
+>(row: T, tag: PickedTag, policy?: RoundingPolicy): T {
+  let next: T = { ...row, tagNo: String(tag.code), itCode: String(tag.name || row.itCode) };
+  const cells: [keyof T, unknown][] = [
+    ['netWt', tag.ITM_NWT],
+    ['grossWt', tag.ITM_GWT],
+    ['touch', tag.ITM_TOUCH],
+    ['rate', tag.ITM_RATE],
+  ];
+  for (const [key, value] of cells) {
+    if (value != null) next = editSaleGridRow(next, key, String(value), policy);
+  }
+  return next;
 }

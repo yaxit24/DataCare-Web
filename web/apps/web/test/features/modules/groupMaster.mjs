@@ -1406,13 +1406,14 @@ export const groupMaster = {
           assert.equal(sold.status(), 201, await sold.text());
           const vchNo = String((await sold.json()).vchNo).padStart(5, '0');
           try {
-            // 10 g × 6,123.45 + 10 g × 237.50 making = 63,609.50 credited to the group's sales account.
+            // 10 g × 6,123.45 + 10 g × 237.50 making: 61,234 + 2,375 = 63,609 (each line amount Math.Round(.., 0), half to even:
+            // TR_SALE.cs:10343-10362) credited to the group's sales account.
             const legs = await ctx.rows(
               `SELECT "AC_CODE" ac,"CR_AMT"::float cr FROM "AC_DATA"
                 WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2 AND "AC_CODE"='GMSAL'`,
               vchNo,
             );
-            assert.deepEqual(legs, [{ ac: 'GMSAL', cr: 63609.5 }]);
+            assert.deepEqual(legs, [{ ac: 'GMSAL', cr: 63609 }]);
             const me = await (await page.request.get('/api/me')).json();
             const invoice = await page.request.get(
               `/api/sales/invoice?coBook=SL&coYear=${encodeURIComponent(me.coYear)}&vchNo=${vchNo}&format=html&copy=O`,
@@ -1422,8 +1423,8 @@ export const groupMaster = {
             assert.ok(html.includes('711319'), 'the invoice prints the HSN code from the group');
             assert.ok(!html.includes('>0000<'), 'not the HSN the item had before');
             return {
-              observation: `sale ${vchNo} credited 63609.50 to GMSAL; the invoice prints HSN 711319`,
-              expected: { leg: 63609.5, hsn: '711319' },
+              observation: `sale ${vchNo} credited 63609.00 to GMSAL; the invoice prints HSN 711319`,
+              expected: { leg: 63609, hsn: '711319' },
               database: { legs, item: await itemRows(ctx) },
               downstream: { vchNo },
             };

@@ -8,7 +8,7 @@ import { seedCompany } from '../src/modules/ops/seedCompany.js';
 import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
 
 /**
- * N240 (G252) data migration 20261122090000_book_template_slots, run against companies provisioned the OLD way.
+ * N240 (G252) data migration 20261122120000_book_template_slots, run against companies provisioned the OLD way.
  *
  * seedCompany only seeds an absent book, so a company provisioned before N240 kept the old web slots: TAG SPLIT
  * 6 PURCHASE / 7 SALES / 8 PURCHASE / 9 SALES (the desktop template MS_UPDATE.cs:32078-32110 is 6 sales gold,
@@ -31,7 +31,7 @@ const DAY = `${startYear}-06-15`;
 const TAG = 'RNG00001';
 const sql = readFileSync(
   new URL(
-    '../../../packages/db/prisma/migrations/20261122090000_book_template_slots/migration.sql',
+    '../../../packages/db/prisma/migrations/20261122120000_book_template_slots/migration.sql',
     import.meta.url,
   ),
   'utf8',

@@ -1,8 +1,12 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { useBusinessScope } from '../../../../components/BusinessScope';
+import {
+  DesktopDateInput,
+  type DesktopDateInputHandle,
+} from '../../../../components/DesktopDateInput';
 import { GstReportGrid } from './GstReportGrid';
 import { useGstReport } from './useGstReport';
 import type { GstSection } from './types';
@@ -35,11 +39,26 @@ export default function GstReportPage() {
   const { coYear } = useBusinessScope();
   const report = useGstReport(coYear);
   const { filters, setFilters } = report;
+  const fromDate = useRef<DesktopDateInputHandle>(null);
+  const toDate = useRef<DesktopDateInputHandle>(null);
+  // RP_GST runs Conversions.ToDate on both boxes; the web runs SetDate on them first and stops on a refusal.
+  const dates = () => {
+    const from = fromDate.current ? fromDate.current.commit() : filters.fromDate;
+    if (!from) return null;
+    const to = toDate.current ? toDate.current.commit() : filters.toDate;
+    return to ? { fromDate: from, toDate: to } : null;
+  };
+  const runView = (view: 'gstr1' | 'gstr2' | 'gstr3b') => {
+    const range = dates();
+    if (range) void report.run(view, range);
+  };
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== 'Escape' || event.defaultPrevented) return;
       if (document.querySelector('[data-lookup-open]')) return;
+      // A SetDate message box is modal: Esc does not close the form under it.
+      if (document.querySelector('[role="alertdialog"]')) return;
       router.back();
     };
     document.addEventListener('keydown', onKey);
@@ -52,26 +71,28 @@ export default function GstReportPage() {
       <div className="panel">
         <div className="row">
           <div className="field">
-            <label htmlFor="gst-from">From Date</label>
-            <input
+            <DesktopDateInput
+              ref={fromDate}
               id="gst-from"
-              type="date"
-              min={report.bounds.start}
-              max={report.bounds.end}
+              label="From Date"
+              coYear={coYear}
               value={filters.fromDate}
               autoFocus
-              onChange={(event) => setFilters({ fromDate: event.target.value })}
+              onChange={(iso) => setFilters({ fromDate: iso })}
+              onAdvance={() => toDate.current?.focus()}
             />
           </div>
           <div className="field">
-            <label htmlFor="gst-to">To Date</label>
-            <input
+            <DesktopDateInput
+              ref={toDate}
               id="gst-to"
-              type="date"
-              min={report.bounds.start}
-              max={report.bounds.end}
+              label="To Date"
+              coYear={coYear}
               value={filters.toDate}
-              onChange={(event) => setFilters({ toDate: event.target.value })}
+              onChange={(iso) => setFilters({ toDate: iso })}
+              onAdvance={() =>
+                document.querySelector<HTMLInputElement>('input[aria-label="Book"]')?.focus()
+              }
             />
           </div>
           <div className="field" style={{ minWidth: 150 }}>
@@ -117,7 +138,7 @@ export default function GstReportPage() {
             type="button"
             className="primary"
             disabled={report.busyView !== null}
-            onClick={() => void report.run('gstr1')}
+            onClick={() => runView('gstr1')}
           >
             {report.busyView === 'gstr1' ? 'Running…' : 'Gstr 1'}
           </button>
@@ -125,7 +146,7 @@ export default function GstReportPage() {
             type="button"
             className="ghost"
             disabled={report.busyView !== null}
-            onClick={() => void report.run('gstr2')}
+            onClick={() => runView('gstr2')}
           >
             {report.busyView === 'gstr2' ? 'Running…' : 'Gstr 2'}
           </button>
@@ -133,7 +154,7 @@ export default function GstReportPage() {
             type="button"
             className="ghost"
             disabled={report.busyView !== null}
-            onClick={() => void report.run('gstr3b')}
+            onClick={() => runView('gstr3b')}
           >
             {report.busyView === 'gstr3b' ? 'Running…' : 'Gstr 3'}
           </button>
@@ -141,7 +162,14 @@ export default function GstReportPage() {
           <button type="button" className="ghost" disabled={!report.ranQuery} onClick={report.csv}>
             Csv Fil
           </button>
-          <button type="button" className="ghost" disabled={!report.ranQuery} onClick={report.xlsx}>
+          <button
+            type="button"
+            className="ghost"
+            onClick={() => {
+              const range = dates();
+              if (range) report.workbook(range);
+            }}
+          >
             Gsrt1 Csv
           </button>
           <button
