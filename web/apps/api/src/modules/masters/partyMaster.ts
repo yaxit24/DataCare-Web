@@ -3,7 +3,11 @@ import { withTxBudget } from '../shared/txBudget.js';
 import { insertRowTx } from '../posting/posting.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
 import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
-import { openingHeads, writePartyOpeningTx } from '../finance/partyOpening.js';
+import {
+  carriedOpeningDeleteProblemTx,
+  openingHeads,
+  writeMasterOpeningTx,
+} from '../finance/partyOpening.js';
 import { requiredVersion, versionOf } from '../vouchers/version.js';
 
 /**
@@ -666,7 +670,8 @@ export async function saveParty(
     });
     let opening = false;
     if (heads && heads.amount + heads.gold + heads.silver !== 0) {
-      await writePartyOpeningTx(tx, scope, code, heads, mainUser);
+      // A carried opening is kept unchanged or refused (WP-23, finance/partyOpening.ts writeMasterOpeningTx).
+      await writeMasterOpeningTx(tx, scope, code, heads, mainUser);
       // MS_ACCT writes its opening row with DATA_TRFR 'Y' (:7884).
       await tx.$executeRawUnsafe(
         `UPDATE "OP_DATA" SET "DATA_TRFR"='Y' WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
@@ -723,6 +728,9 @@ export async function deleteParty(
       code,
     );
     if (used) throw new PartyMasterValidationError(PARTY_MESSAGES.IN_USE);
+    // A carried opening (VCH_NO '00000', so the usage check above passes it) is not deleted with the party (WP-23).
+    const carried = await carriedOpeningDeleteProblemTx(tx, scope, code);
+    if (carried) throw new PartyMasterValidationError(carried);
     const rules = await partyRulesTx(tx, scope);
     const problem = defaultAccountProblem(code, rules, Boolean(options.unlocked), 'delete');
     if (problem) throw new PartyMasterValidationError(problem);

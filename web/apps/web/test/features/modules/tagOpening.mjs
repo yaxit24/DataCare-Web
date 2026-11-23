@@ -633,25 +633,30 @@ export const tagOpening = {
         const saved = await enter(page, [{ gross: '10.5', net: '10', touch: '91.6' }]);
         try {
           await page.goto('/reports/tag-stock');
-          await page.getByRole('heading', { name: 'Tag-Stock Report' }).waitFor();
-          const row = page.locator('tbody tr', { hasText: saved.tagNos[0] }).first();
+          await page.getByRole('heading', { name: 'Tag Stock', exact: true }).waitFor();
+          await page.getByLabel('TagNo', { exact: true }).fill(saved.tagNos[0]);
+          await page.getByRole('button', { name: 'Stock Tag', exact: true }).click();
+          const grid = page.getByTestId('tag-stock-grid');
+          const row = grid.locator('tbody tr', { hasText: saved.tagNos[0] }).first();
           await row.waitFor();
-          const cells = (await row.locator('td').allInnerTexts()).map((t) => t.trim());
-          // Tag, item, design, counter, pcs, gross, net, fine (9.16 = 10 × 91.6 / 100), MRP.
-          assert.deepEqual(cells.slice(0, 8), [
-            saved.tagNos[0],
-            GOLD,
-            '',
-            '001',
-            '1',
-            '10.5',
-            '10',
-            '9.16',
-          ]);
+          const heads = (await grid.locator('thead th').allInnerTexts()).map((t) => t.trim());
+          const all = (await row.locator('td').allInnerTexts()).map((t) => t.trim());
+          const at = (name) => all[heads.indexOf(name)];
+          // RP_TAG Stock columns: tag, item, counter, design, pieces, gross and net weight (n3).
+          const cells = [
+            at('TagNo'),
+            at('ItCode'),
+            at('Design'),
+            at('Counter'),
+            at('Pcs'),
+            at('Grwt'),
+            at('NetWt'),
+          ];
+          assert.deepEqual(cells, [saved.tagNos[0], GOLD, '', '001', '1', '10.500', '10.000']);
           const text = cells.join(' | ');
           return {
             observation: `report row: ${text}`,
-            expected: `${saved.tagNos[0]} | ${GOLD} | | 001 | 1 | 10.5 | 10 | 9.16`,
+            expected: `${saved.tagNos[0]} | ${GOLD} | | 001 | 1 | 10.500 | 10.000`,
             output: Buffer.from(text),
           };
         } finally {
