@@ -29,19 +29,19 @@ caption:
 - MDI_FORM.cs:7660 {{case "Employee":}} → MDI_FORM.cs:7662 {{MS_EMP mS_EMP = new MS_EMP();}} (1,729)
 - MDI_FORM.cs:7670 {{case "Tax":}} → MDI_FORM.cs:7672 {{MS_TAX mS_TAX = new MS_TAX();}} (2,114)
 
-**Shared forms.** MS_PRODUCT is also opened by two non-Lite menus: MDI_FORM.cs:7731 {{case "Counter":}} (MDI_FORM.cs:7733
+**Shared forms.** MS_PRODUCT is also opened by two non-Lite menus: MDI_FORM.cs:7731 {{case "Counter":}} (MDI_FORM.cs:7733 {{MS_PRODUCT mS_PRODUCT = new MS_PRODUCT();}}
 {{MS_PRODUCT mS_PRODUCT = new MS_PRODUCT();}}) and MDI_FORM.cs:9374 {{case "Scheme Mast":}}. The form branches on the menu
-caption it was opened from: MS_PRODUCT.cs:1944 {{CurMast = DC_Main.MsUserRightForm;}}, MS_PRODUCT.cs:2100
-{{if (Operators.CompareString(CurMast, "Counter", false) == 0)}}, MS_PRODUCT.cs:2105
+caption it was opened from: MS_PRODUCT.cs:1944 {{CurMast = DC_Main.MsUserRightForm;}}, MS_PRODUCT.cs:2100 {{if (Operators.CompareString(CurMast, "Counter", false) == 0)}}
+{{if (Operators.CompareString(CurMast, "Counter", false) == 0)}}, MS_PRODUCT.cs:2105 {{else if (Operators.CompareString(CurMast, "Scheme Mast", false) == 0)}}
 {{else if (Operators.CompareString(CurMast, "Scheme Mast", false) == 0)}}. MS_AUTO_ITEM likewise serves Labour Disc,
-Labour Update, Labour and Item Touch (MS_AUTO_ITEM.cs:2001 {{CurMast = DC_Main.MsUserRightForm;}}, MS_AUTO_ITEM.cs:1526
+Labour Update, Labour and Item Touch (MS_AUTO_ITEM.cs:2001 {{CurMast = DC_Main.MsUserRightForm;}}, MS_AUTO_ITEM.cs:1526 {{if (Operators.CompareString(CurMast, "Item Touch", false) == 0)}}
 {{if (Operators.CompareString(CurMast, "Item Touch", false) == 0)}}). Those modes belong to other menus and are out of scope;
 they matter here only because the `EMP_COM_PRC` grid column lives in one of them (R3).
 
 **Edition checks (`MsSoftType`).** None in MS_ADD_MAST, MS_GROUP, MS_TAX, MS_EMP, MS_PRODUCT (grep count 0). MS_ACCT has
 one (MS_ACCT.cs:5971 {{DC_Main.MsSoftType, "A", false) == 0) | (Operators.CompareString(DC_Main.MsSoftType, "E"}}), MS_ITEM
 two (MS_ITEM.cs:2753 {{DC_Main.MsSoftType, "P", false) == 0) | (Operators.CompareString(DC_Main.MsSoftType, "A"}},
-MS_ITEM.cs:2757 {{if (Operators.CompareString(DC_Main.MsSoftType, "E", false) == 0)}}), MS_AUTO_ITEM two (MS_AUTO_ITEM.cs:1584
+MS_ITEM.cs:2757 {{if (Operators.CompareString(DC_Main.MsSoftType, "E", false) == 0)}}), MS_AUTO_ITEM two (MS_AUTO_ITEM.cs:1584 {{if (Operators.CompareString(DC_Main.MsSoftType, "E", false) == 0)}}
 {{if (Operators.CompareString(DC_Main.MsSoftType, "E", false) == 0)}} in the Item Touch grid). Lite (`L`) takes none of
 these branches, so every box behind them is correctly absent from the web (R5).
 
@@ -81,22 +81,22 @@ browser modules record (`Sales Ac`, `Purchase Ac`, `Ac Code`, ...).
 Keys that drive the residuals only (the full key maps are in the browser module headers).
 - Enter on an account box runs the help: MS_GROUP.cs:2200 {{if ((int)e.KeyCode != 13)}} (Sales Ac; Purchase Ac the same
   at :2238), MS_TAX.cs:2031 {{if ((int)e.KeyCode != 13)}}, MS_EMP.cs:1636 {{if ((int)e.KeyCode != 13)}}.
-- Inside the help, **F1** (key 112) is "create": MS_HELP.cs:2240 {{else if ((int)e.KeyCode == 112)}} → MS_HELP.cs:2252
-  {{DC_Main.MsCreat = true;}} and the help closes. Esc closes the help (MS_HELP.cs:2236-2238).
+- Inside the help, **F1** (key 112) is "create": MS_HELP.cs:2240 {{else if ((int)e.KeyCode == 112)}} → MS_HELP.cs:2252 {{DC_Main.MsCreat = true;}}
+  {{DC_Main.MsCreat = true;}} and the help closes. Esc closes the help (MS_HELP.cs:2236-2238 {{if ((int)e.KeyCode == 27)}}).
 - Ctrl+O / Ctrl+Y on the Party form reveal the two import buttons (MS_ACCT.cs:6752 {{if (((int)e.KeyCode == 79) & e.Control)}},
   MS_ACCT.cs:6756 {{if (((int)e.KeyCode == 89) & e.Control)}}). Not ported (R5, weakness 4).
-- Esc closes each form (MS_ACCT.cs:6760, MS_ADD_MAST.cs:3734, MS_PRODUCT.cs:2539, MS_GROUP.cs:2077 {{KeyCode == 27}},
-  MS_ITEM.cs:3147, MS_EMP.cs:1444, MS_TAX.cs:1810; MS_AUTO_ITEM has none at form level in the AutoItem mode, Esc in its
+- Esc closes each form (MS_ACCT.cs:6760 {{if ((int)e.KeyCode == 27)}}, MS_ADD_MAST.cs:3734 {{if ((int)e.KeyCode == 27)}}, MS_PRODUCT.cs:2539 {{if ((int)e.KeyCode == 27)}}, MS_GROUP.cs:2077 {{KeyCode == 27}},
+  MS_ITEM.cs:3147 {{if ((int)e.KeyCode == 27)}}, MS_EMP.cs:1444 {{if ((int)e.KeyCode == 27)}}, MS_TAX.cs:1810 {{if ((int)e.KeyCode == 27)}}; MS_AUTO_ITEM has none at form level in the AutoItem mode, Esc in its
   grid goes to Save). The no-focus case is WP-09.
 
 ## Rules
 
 Rules that bear on the residuals, with the exact texts.
 
-**Group account helps (R1).** Enter on Sales Ac first looks the typed code up **inside group 25**: MS_GROUP.cs:2204
+**Group account helps (R1).** Enter on Sales Ac first looks the typed code up **inside group 25**: MS_GROUP.cs:2204 {{DC_Main.RsQry = "Select * From AC_MAST WHERE CO_CODE = '" + DC_Main.MC}}
 {{AND AC_GR = '25' AND AC_CODE = '" + tSalesAc.Text}}. If not found, the help lists group 25 without the sales total
-account: MS_GROUP.cs:2208 {{AND AC_CODE <> '00099' AND AC_GR = '25' ORDER BY AC_NAME}} and opens MS_GROUP.cs:2214
-{{((Form)MyProject.Forms.MS_HELP).ShowDialog();}}; after a pick the form goes to edit mode, MS_GROUP.cs:2222
+account: MS_GROUP.cs:2208 {{AND AC_CODE <> '00099' AND AC_GR = '25' ORDER BY AC_NAME}} and opens MS_GROUP.cs:2214 {{((Form)MyProject.Forms.MS_HELP).ShowDialog();}}
+{{((Form)MyProject.Forms.MS_HELP).ShowDialog();}}; after a pick the form goes to edit mode, MS_GROUP.cs:2222 {{EntryMode = "E";}}
 {{EntryMode = "E";}}. Purchase Ac is the same over group 30: MS_GROUP.cs:2242 {{AND AC_GR = '30' AND AC_CODE = '" + tPurcAc.Text}},
 MS_GROUP.cs:2246 {{AND AC_GR = '30' ORDER BY AC_NAME}}. So a code typed into Sales Ac that sits in another group is **refused**
 (the help opens instead). Save needs both: MS_GROUP.cs:1851 {{Please Select Sales and Purchase Account And Try}} (focus
@@ -105,65 +105,65 @@ The Trading master uses the same two groups for the same two roles (MS_TRADE.cs:
 MS_TRADE.cs:1213 {{AND AC_GR = '30' AND AC_CODE = '" + TEXT_ENTRY.Text}}), which fixes the meaning of 25 = sales accounts and
 30 = purchase accounts in the desktop chart.
 
-**Tax account helps (R1).** The header account takes a typed code **from any group** (MS_TAX.cs:2035
-{{AND AC_CODE = '" + tTaxAcCode.Text}}); only the list is filtered: MS_TAX.cs:2039
-{{AND (AC_GR = '12' OR  AC_CODE = '00013') ORDER BY AC_NAME}} (two spaces after `OR` in the source), MS_TAX.cs:2045
-{{((Form)MyProject.Forms.MS_HELP).ShowDialog();}}. The input-tax box is identical (MS_TAX.cs:2086
+**Tax account helps (R1).** The header account takes a typed code **from any group** (MS_TAX.cs:2035 {{DC_Main.RsQry = "Select * From AC_MAST WHERE CO_CODE = '" + DC_Main.MC}}
+{{AND AC_CODE = '" + tTaxAcCode.Text}}); only the list is filtered: MS_TAX.cs:2039 {{DC_Main.RsQry = "SELECT AC_NAME As AcNameL,AC_CODE as AcCodeL, AC_GR A}}
+{{AND (AC_GR = '12' OR  AC_CODE = '00013') ORDER BY AC_NAME}} (two spaces after `OR` in the source), MS_TAX.cs:2045 {{((Form)MyProject.Forms.MS_HELP).ShowDialog();}}
+{{((Form)MyProject.Forms.MS_HELP).ShowDialog();}}. The input-tax box is identical (MS_TAX.cs:2086 {{DC_Main.RsQry = "Select * From AC_MAST WHERE CO_CODE = '" + DC_Main.MC}}
 {{AND AC_CODE = '" + tInputTax.Text}}, MS_TAX.cs:2090 {{AND (AC_GR = '12' OR  AC_CODE = '00013')}}). The component grid's
-account help has **no group filter**: MS_TAX.cs:1252
+account help has **no group filter**: MS_TAX.cs:1252 {{DC_Main.RsQry = "SELECT A.AC_NAME As AcNameL,A.AC_CODE as AcCodeL, B.A}}
 {{FROM AC_MAST AS A LEFT JOIN AC_GROUP AS B ON A.CO_CODE = B.CO_CODE AND A.AC_GR = B.AC_GR WHERE A.CO_CODE}}. So group 12 =
 tax accounts in the desktop chart (the template's `00085`-`00087` GST, CGST, IGST per `desktop-conventions.json`).
 
 **Employee account help (R1, R4).** Typed code from any group: MS_EMP.cs:1640 {{AND AC_CODE = '" + tEmpAc.Text}}; the list:
-MS_EMP.cs:1644 {{AND AC_CODE <> '00020' AND AC_GR IN ('09','10','45') ORDER BY AC_GR,AC_NAME}}; MS_EMP.cs:1651
-{{((Form)MyProject.Forms.MS_HELP).ShowDialog();}}. After the help: MS_EMP.cs:1656 {{if (DC_Main.MsCreat)}} → MS_EMP.cs:1658
+MS_EMP.cs:1644 {{AND AC_CODE <> '00020' AND AC_GR IN ('09','10','45') ORDER BY AC_GR,AC_NAME}}; MS_EMP.cs:1651 {{((Form)MyProject.Forms.MS_HELP).ShowDialog();}}
+{{((Form)MyProject.Forms.MS_HELP).ShowDialog();}}. After the help: MS_EMP.cs:1656 {{if (DC_Main.MsCreat)}} → MS_EMP.cs:1658 {{DC_Main.MsGrCode = "10";}}
 {{DC_Main.MsGrCode = "10";}} → MS_EMP.cs:1659 {{MS_ACCT mS_ACCT = new MS_ACCT();}} (the Party form opens as a child of the MDI
-with group 10 preset). The Party form applies the preset at load: MS_ACCT.cs:5961
+with group 10 preset). The Party form applies the preset at load: MS_ACCT.cs:5961 {{if (Operators.CompareString(DC_Main.MsGrCode, "", false) != 0)}}
 {{if (Operators.CompareString(DC_Main.MsGrCode, "", false) != 0)}}, MS_ACCT.cs:5963 {{tAcGrCode.Text = DC_Main.MsGrCode;}}.
-On Save it hands the new code back and closes: MS_ACCT.cs:7930 {{if (DC_Main.MsCreat)}}, MS_ACCT.cs:7932
+On Save it hands the new code back and closes: MS_ACCT.cs:7930 {{if (DC_Main.MsCreat)}}, MS_ACCT.cs:7932 {{DC_Main.MsCode = tAcCode.Text;}}
 {{DC_Main.MsCode = tAcCode.Text;}}, MS_ACCT.cs:7933 {{DC_Main.MsName = tAcName.Text;}}, MS_ACCT.cs:7934 {{((Form)this).Close();}}.
 The Employee form picks it up when it is activated again: MS_EMP.cs:1179 {{private void MS_EMP_Activated(object sender, EventArgs e)}},
-MS_EMP.cs:1181 {{if (DC_Main.MsCreat)}}, MS_EMP.cs:1184 {{tEmpAc.Text = DC_Main.MsCode;}}, MS_EMP.cs:1185
+MS_EMP.cs:1181 {{if (DC_Main.MsCreat)}}, MS_EMP.cs:1184 {{tEmpAc.Text = DC_Main.MsCode;}}, MS_EMP.cs:1185 {{tEmpAcName.Text = DC_Main.MsName;}}
 {{tEmpAcName.Text = DC_Main.MsName;}}. Group 10 is the customer (sundry debtor) group; `00020` is excluded by code.
 
-**Party account group (R1).** The group must exist in `AC_GROUP`: MS_ACCT.cs:7039
+**Party account group (R1).** The group must exist in `AC_GROUP`: MS_ACCT.cs:7039 {{DC_Main.RsQry = "Select * From AC_GROUP WHERE CO_CODE = '" + DC_Main.M}}
 {{Select * From AC_GROUP WHERE CO_CODE = '" + DC_Main.MCo_code + "'  AND AC_GR = '" + tAcGrCode.Text}}; else the help lists
 MS_ACCT.cs:7043 {{FROM AC_GROUP WHERE CO_CODE = '" + DC_Main.MCo_code + "'  ORDER BY AC_GR}}. Save refuses a blank group:
 MS_ACCT.cs:7712 {{Enter Party Name and Account group Detail}}. `AC_GROUP` is copied, all 35 rows, into every new company by
 Year Create: MS_YEAR.cs:1511 {{INSERT INTO AC_GROUP (CO_CODE,AC_GR,AC_GR_NAME,AC_MAIN_GR,AC_SUB_GR,MAIN_USER)}}
 (`desktop-conventions.json` `accountGroups.rule`: the same 35 rows in every company, checksum 551216197).
 
-**Item hidden boxes (R3, R5).** A new item clears them: MS_ITEM.cs:2866 {{EmpComPrc = 0.0;}}, MS_ITEM.cs:2871
-{{chktaxfreeItem.Checked = false;}}. Reopen reads them: MS_ITEM.cs:2986
-{{Value = RuntimeHelpers.GetObjectValue((dataRowView = dataView2[0])["EMP_COM_PRC"]);}}, MS_ITEM.cs:2989
-{{EmpComPrc = Conversions.ToDouble(Strings.Format((object)num9, "0.00"));}}, MS_ITEM.cs:3024
+**Item hidden boxes (R3, R5).** A new item clears them: MS_ITEM.cs:2866 {{EmpComPrc = 0.0;}}, MS_ITEM.cs:2871 {{chktaxfreeItem.Checked = false;}}
+{{chktaxfreeItem.Checked = false;}}. Reopen reads them: MS_ITEM.cs:2986 {{Value = RuntimeHelpers.GetObjectValue((dataRowView = dataView2[0])["EM}}
+{{Value = RuntimeHelpers.GetObjectValue((dataRowView = dataView2[0])["EMP_COM_PRC"]);}}, MS_ITEM.cs:2989 {{EmpComPrc = Conversions.ToDouble(Strings.Format((object)num9, "0.00"))}}
+{{EmpComPrc = Conversions.ToDouble(Strings.Format((object)num9, "0.00"));}}, MS_ITEM.cs:3024 {{if (Operators.ConditionalCompareObjectEqual(Operators.ConcatenateObjec}}
 {{dataView2[0]["TAX_FREE_ITEM"], (object)""), (object)"Y", false))}}. Save writes them back whatever the edition:
 MS_ITEM.cs:3261 {{dataRow["TAX_FREE_ITEM"] = RuntimeHelpers.GetObjectValue(Interaction.IIf(chktaxfreeItem.Checked, (object)"Y", (object)"N"));}},
-MS_ITEM.cs:3262 {{dataRow["APP_ITEM"] = RuntimeHelpers.GetObjectValue(Interaction.IIf(chkAppItem.Checked}}, MS_ITEM.cs:3263
+MS_ITEM.cs:3262 {{dataRow["APP_ITEM"] = RuntimeHelpers.GetObjectValue(Interaction.IIf(chkAppItem.Checked}}, MS_ITEM.cs:3263 {{dataRow["EMP_COM_PRC"] = EmpComPrc;}}
 {{dataRow["EMP_COM_PRC"] = EmpComPrc;}}. In Lite the three values are therefore always `N`, `N`, `0` for a web-created item and
 whatever the migrated row holds for a desktop-created one (the form preserves them).
 
-**AutoItem (R3).** The AutoItem mode's insert sets 22 columns including MS_AUTO_ITEM.cs:2893
+**AutoItem (R3).** The AutoItem mode's insert sets 22 columns including MS_AUTO_ITEM.cs:2893 {{dataRow2["IT_CODE"] = MSG[DC_Main.i, 1] + tGrCode.Text;}}
 {{dataRow2["IT_CODE"] = MSG[DC_Main.i, 1] + tGrCode.Text;}}, MS_AUTO_ITEM.cs:2904 {{dataRow2["EMP_COM_PRC"] = 0;}} and
 MS_AUTO_ITEM.cs:2912 {{dataRow2["TAX_FREE_ITEM"] = "N";}}, then MS_AUTO_ITEM.cs:2922 {{Data Are Saved.}}. The column is typed
 only in the Item Touch mode: MS_AUTO_ITEM.cs:2461 {{else if (Operators.CompareString(CurMast, "Item Touch", false) == 0)}} lists
-MS_AUTO_ITEM.cs:2463 {{APP_ITEM,EMP_COM_PRC,AC_MEMB_COM_PRC FROM ITEM_MAST WHERE CO_CODE}} and its save runs MS_AUTO_ITEM.cs:2835
-{{EMP_COM_PRC = " + Conversions.ToString(Conversion.Val(MSG[DC_Main.i, 16]))}} under MS_AUTO_ITEM.cs:2829
+MS_AUTO_ITEM.cs:2463 {{APP_ITEM,EMP_COM_PRC,AC_MEMB_COM_PRC FROM ITEM_MAST WHERE CO_CODE}} and its save runs MS_AUTO_ITEM.cs:2835 {{DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Opera}}
+{{EMP_COM_PRC = " + Conversions.ToString(Conversion.Val(MSG[DC_Main.i, 16]))}} under MS_AUTO_ITEM.cs:2829 {{if (Operators.CompareString(CurMast, "Item Touch", false) == 0)}}
 {{if (Operators.CompareString(CurMast, "Item Touch", false) == 0)}} — a column that exists only when :1584 (Enterprise) built it.
 
 ## Calculations
 
-None in the residual scope. `EMP_COM_PRC` is formatted `0.00` on reopen (MS_ITEM.cs:2989, above) and `Val` on the Item
-Touch grid (MS_AUTO_ITEM.cs:2835, above); no formula reads it in any Lite form (consumers: `RP_EMP.cs`, `MS_UPDATE.cs`,
-`Ac_Image.cs` only). `TAX_FREE_ITEM` is read by the UAE and hallmark sale forms only: TR_SALE_HM.cs:11634
-{{C.TAX_FREE_ITEM = 'Y'}} (sum of zero-rated lines into `SL_DATA.ZERO_RATED_AMT`) and TR_SL_PR_ITEM.cs:5071
+None in the residual scope. `EMP_COM_PRC` is formatted `0.00` on reopen (MS_ITEM.cs:2989 {{EmpComPrc = Conversions.ToDouble(Strings.Format((object)num9, "0.00"))}}, above) and `Val` on the Item
+Touch grid (MS_AUTO_ITEM.cs:2835 {{DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Opera}}, above); no formula reads it in any Lite form (consumers: `RP_EMP.cs`, `MS_UPDATE.cs`,
+`Ac_Image.cs` only). `TAX_FREE_ITEM` is read by the UAE and hallmark sale forms only: TR_SALE_HM.cs:11634 {{DC_Main.RsQry = "UPDATE A SET  A.ZERO_RATED_AMT = B.ZeroRated FROM SL_}}
+{{C.TAX_FREE_ITEM = 'Y'}} (sum of zero-rated lines into `SL_DATA.ZERO_RATED_AMT`) and TR_SL_PR_ITEM.cs:5071 {{DC_Main.RsQry = Conversions.ToString(Operators.ConcatenateObject(Opera}}
 {{B.TAX_FREE_ITEM FROM BAR_DETL AS A LEFT JOIN ITEM_MAST}}; `TR_SALE.cs` never reads it.
 
 ## Lifecycle and write set
 
 Covered by N211-N218/N236 and the browser modules; here only the schema facts for R3.
-- Desktop `ITEM_MAST` gains the columns by upgrade script: Ac_Image.cs:8044
-  {{ALTER TABLE ITEM_MAST ADD TAX_FREE_ITEM VARCHAR(1)Not NULL DEFAULT 'N'}} and Ac_Image.cs:8258
+- Desktop `ITEM_MAST` gains the columns by upgrade script: Ac_Image.cs:8044 {{DC_Main.ExeQuteDc("ALTER TABLE ITEM_MAST ADD TAX_FREE_ITEM VARCHAR(1)N}}
+  {{ALTER TABLE ITEM_MAST ADD TAX_FREE_ITEM VARCHAR(1)Not NULL DEFAULT 'N'}} and Ac_Image.cs:8258 {{DC_Main.ExeQuteDc("ALTER TABLE ITEM_MAST ADD AC_MEMB_COM_PRC FLOAT Not}}
   {{ALTER TABLE ITEM_MAST ADD AC_MEMB_COM_PRC FLOAT Not NULL Default 0}}. The `EMP_COM_PRC` add in `Ac_Image.cs` is for
   `TOUCH_MAST` (Ac_Image.cs:8228 {{ALTER TABLE TOUCH_MAST ADD EMP_COM_PRC FLOAT Not NULL Default 0}}); the `ITEM_MAST`
   column predates the upgrade script (open question 2) but is written by MS_ITEM and MS_AUTO_ITEM (above), so it is a
@@ -179,12 +179,12 @@ Covered by N211-N218/N236 and the browser modules; here only the schema facts fo
 
 ## Print
 
-Every form reads `FRM_PRINT` from `USER_SET` at load (MS_ACCT.cs:5630 {{SUB_MENU = 'Party' }}; MS_ACCT.cs:5637
+Every form reads `FRM_PRINT` from `USER_SET` at load (MS_ACCT.cs:5630 {{SUB_MENU = 'Party' }}; MS_ACCT.cs:5637 {{UserPrint = Conversions.ToString(Operators.ConcatenateObject(dataTable}}
 {{UserPrint = Conversions.ToString(Operators.ConcatenateObject(dataTable.Rows[0]["FRM_PRINT"]}}; the same three lines at
-MS_ADD_MAST.cs:3166, MS_GROUP.cs:1494, MS_EMP.cs:1007, MS_TAX.cs:1349, MS_ITEM.cs:2582, MS_PRODUCT.cs:1951,
-MS_AUTO_ITEM.cs:2007) and refuses with one text: MS_GROUP.cs:1813 {{if (Operators.CompareString(UserPrint, "Y", false) != 0)}},
-MS_GROUP.cs:1815 {{You Have No Print Rights.....}} (identical at MS_ACCT.cs:6694, MS_ADD_MAST.cs:3680, MS_EMP.cs:1590,
-MS_TAX.cs:1963, MS_ITEM.cs:3702, MS_AUTO_ITEM.cs:2657).
+MS_ADD_MAST.cs:3166 {{UserPrint = Conversions.ToString(Operators.ConcatenateObject(dataTable}}, MS_GROUP.cs:1494 {{UserPrint = Conversions.ToString(Operators.ConcatenateObject(dataTable}}, MS_EMP.cs:1007 {{UserPrint = Conversions.ToString(Operators.ConcatenateObject(dataTable}}, MS_TAX.cs:1349 {{UserPrint = Conversions.ToString(Operators.ConcatenateObject(dataTable}}, MS_ITEM.cs:2582 {{UserPrint = Conversions.ToString(Operators.ConcatenateObject(dataTable}}, MS_PRODUCT.cs:1951 {{UserPrint = Conversions.ToString(Operators.ConcatenateObject(dataTable}},
+MS_AUTO_ITEM.cs:2007 {{UserPrint = Conversions.ToString(Operators.ConcatenateObject(dataTable}}) and refuses with one text: MS_GROUP.cs:1813 {{if (Operators.CompareString(UserPrint, "Y", false) != 0)}},
+MS_GROUP.cs:1815 {{You Have No Print Rights.....}} (identical at MS_ACCT.cs:6694 {{Interaction.MsgBox((object)"You Have No Print Rights.....", (MsgBoxSty}}, MS_ADD_MAST.cs:3680 {{Interaction.MsgBox((object)"You Have No Print Rights.....", (MsgBoxSty}}, MS_EMP.cs:1590 {{Interaction.MsgBox((object)"You Have No Print Rights.....", (MsgBoxSty}},
+MS_TAX.cs:1963 {{Interaction.MsgBox((object)"You Have No Print Rights.....", (MsgBoxSty}}, MS_ITEM.cs:3702 {{Interaction.MsgBox((object)"You Have No Print Rights.....", (MsgBoxSty}}, MS_AUTO_ITEM.cs:2657 {{Interaction.MsgBox((object)"You Have No Print Rights.....", (MsgBoxSty}}).
 
 | Form | Template (`DC_Main.RptName`) | Selection formula | In repo? |
 |---|---|---|---|
@@ -197,7 +197,7 @@ MS_TAX.cs:1963, MS_ITEM.cs:3702, MS_AUTO_ITEM.cs:2657).
 | MS_AUTO_ITEM | none; MS_AUTO_ITEM.cs:2655 {{if (Operators.CompareString(UserPrint, "Y", false) != 0)}} then nothing | — | — |
 | MS_PRODUCT | MS_PRODUCT.cs:1914 {{private void BtnPrint_Click(object sender, EventArgs e)}} is empty (body :1915-1916) | — | — |
 
-The viewer loads the template by name from the executable's folder: UT_REPORT.cs:254
+The viewer loads the template by name from the executable's folder: UT_REPORT.cs:254 {{ReportDc.Load(((ApplicationBase)MyProject.Application).Info.DirectoryP}}
 {{"\\Report\\" + DC_Main.RptName + ".rpt"}}. The repository holds 254 extracted layouts in `extraction_output/rpt_xml/`
 and 724 lines of `all_rpt_fields.txt`; a case-insensitive search for AcMast, PartyMast, GroupMast, EmpMast, TaxMast and
 ItemMast finds **nothing** in either, and `find -iname '*.rpt'` outside `node_modules` finds nothing. The five layouts are
@@ -209,7 +209,7 @@ by location like the desktop formula (`apps/api/src/modules/masters/addressMaste
 ## Rights
 
 `USER_SET` row per menu caption (above). Texts in the residual scope: Print `You Have No Print Rights.....` (all eight
-forms, lines above); Save/edit `You Have No Rights.....` (MS_GROUP.cs:1846 for Group; the others are in the module
+forms, lines above); Save/edit `You Have No Rights.....` (MS_GROUP.cs:1846 {{Interaction.MsgBox((object)"You Have No Rights.....", (MsgBoxStyle)0,}} for Group; the others are in the module
 headers). Web: each route file exposes `guard(req, reply, action)` with `action: 'view' | 'create' | 'update' | 'delete' | 'print'`
 (`apps/api/src/routes/partyMaster.ts:51`) and the pages hold `NO_PRINT_RIGHTS = 'You Have No Print Rights.....'`
 (`apps/web/app/(app)/masters/taxes/page.tsx:37`, employees :41, items :37, auto-item :30, party :38).
@@ -219,9 +219,9 @@ headers). Web: each route file exposes `guard(req, reply, action)` with `action:
 1. Hard-coded WhatsApp number on Party Print (MS_ACCT.cs:6698 {{DC_Main.MsCustWappNo = "919879966455";}}).
 2. Group Save deletes and re-inserts the row (MS_GROUP.cs:1862 {{DELETE FROM GROUP_MAST WHERE CO_CODE}}), wiping columns the
    form does not set (G98; the web updates in place, `groupMaster.ts`).
-3. Item Print is dead code (MS_ITEM.cs:990 binds `BtnPrint_Click_1`); the web rightly checks the right and stops.
-4. Hidden key-chords that reveal bulk imports on the Party form (MS_ACCT.cs:6752-6758), and the admin panel that reloads the
-   whole chart under group 20 (MS_ACCT.cs:9079 {{private void BtnAdminSet_Click(object sender, EventArgs e)}}, MS_ACCT.cs:9081
+3. Item Print is dead code (MS_ITEM.cs:990 {{EventHandler eventHandler = BtnPrint_Click_1;}} binds `BtnPrint_Click_1`); the web rightly checks the right and stops.
+4. Hidden key-chords that reveal bulk imports on the Party form (MS_ACCT.cs:6752-6758 {{if (((int)e.KeyCode == 79) & e.Control)}}), and the admin panel that reloads the
+   whole chart under group 20 (MS_ACCT.cs:9079 {{private void BtnAdminSet_Click(object sender, EventArgs e)}}, MS_ACCT.cs:9081 {{tPartyGroup.Text = "20";}}
    {{tPartyGroup.Text = "20";}}).
 5. The `MsCreat` round trip is global mutable state (`DC_Main.MsCreat`, `MsCode`, `MsName`, `MsGrCode`) across three forms;
    port the *behaviour* (create an account from the Employee help and return with it), not the mechanism.
@@ -276,11 +276,11 @@ headers). Web: each route file exposes `guard(req, reply, action)` with `action:
    the same, so the module is faithful, but it hides the empty list). **Fix:** provision `GST`, `GSTINPUT`, `TCS` (or the
    template's `00085`-`00087`) in group 12 and set `TAX_MAST.TAX_AC`; add a case that opens the header help with an empty
    term on a provisioned company and expects the tax accounts.
-3. **R1c Employee help (wrong result, narrower).** Desktop lists groups 09/10/45 (MS_EMP.cs:1644). Web the same
+3. **R1c Employee help (wrong result, narrower).** Desktop lists groups 09/10/45 (MS_EMP.cs:1644 {{DC_Main.RsQry = "SELECT AC_NAME As AcNameL,AC_CODE as AcCodeL,AC_GR AS}}). Web the same
    (`employeeMaster.ts:340`). `seedCompany.ts:20` seeds only `WALKIN` in `'10'`, so a fresh company's help offers the
    walk-in customer as the employee ledger and nothing else; the fix is the N58 chart (groups 09 employee/karigar, 45) plus
    the create path (gap 4).
-4. **R1d Party group help (missing data, wrong result).** Desktop requires the group in `AC_GROUP` (MS_ACCT.cs:7039) and
+4. **R1d Party group help (missing data, wrong result).** Desktop requires the group in `AC_GROUP` (MS_ACCT.cs:7039 {{DC_Main.RsQry = "Select * From AC_GROUP WHERE CO_CODE = '" + DC_Main.M}}) and
    Year Create copies 35 rows (MS_YEAR.cs:1511 {{INSERT INTO AC_GROUP (CO_CODE,AC_GR,AC_GR_NAME,AC_MAIN_GR,AC_SUB_GR,MAIN_USER)}}).
    `seedCompany.ts` writes none, so on a web-provisioned company the Party group help is empty, `AC_MAIN_GR` stays blank
    (`partyMaster.ts:646-650`), and the browser module has to insert its own group (`partyMaster.mjs:182`). **Fix:** seed the
@@ -289,13 +289,13 @@ headers). Web: each route file exposes `guard(req, reply, action)` with `action:
 5. **R2 Print layouts (missing feature, recorded).** Desktop prints Crystal `AcMast`, `PartyMast`, `GroupMast`, `EmpMast`,
    `TaxMast` (table above) from `\Report\<name>.rpt` (UT_REPORT.cs:254 {{"\\Report\\" + DC_Main.RptName + ".rpt"}}). None of
    the five is in the repository; the web shows the list on screen behind the print right. **No fix possible from the
-   source**; keep the five catalog "Remaining" sentences, and record that `ItemMast` is dead code (MS_ITEM.cs:990) and
-   Product/AutoItem print nothing (MS_PRODUCT.cs:1914-1916, MS_AUTO_ITEM.cs:2655), so those three rows carry **no** print
+   source**; keep the five catalog "Remaining" sentences, and record that `ItemMast` is dead code (MS_ITEM.cs:990 {{EventHandler eventHandler = BtnPrint_Click_1;}}) and
+   Product/AutoItem print nothing (MS_PRODUCT.cs:1914-1916 {{private void BtnPrint_Click(object sender, EventArgs e)}}, MS_AUTO_ITEM.cs:2655 {{if (Operators.CompareString(UserPrint, "Y", false) != 0)}}), so those three rows carry **no** print
    gap. Owner decision (open question 1) whether a web-designed layout replaces the on-screen list; until then the rows
    can go `FULL` with the sentence kept, because the desktop file itself is unavailable, not the behaviour.
 6. **R3 `TAX_FREE_ITEM`, `EMP_COM_PRC` (and `APP_ITEM`, `AC_MEMB_COM_PRC`) columns (missing columns).** Desktop writes them on
-   every item save (MS_ITEM.cs:3261-3263) and on every AutoItem insert (MS_AUTO_ITEM.cs:2904 {{dataRow2["EMP_COM_PRC"] = 0;}},
-   :2912 {{dataRow2["TAX_FREE_ITEM"] = "N";}}); schema: Ac_Image.cs:8044
+   every item save (MS_ITEM.cs:3261-3263 {{dataRow["EMP_COM_PRC"] = EmpComPrc;}}) and on every AutoItem insert (MS_AUTO_ITEM.cs:2904 {{dataRow2["EMP_COM_PRC"] = 0;}},
+   :2912 {{dataRow2["TAX_FREE_ITEM"] = "N";}}); schema: Ac_Image.cs:8044 {{DC_Main.ExeQuteDc("ALTER TABLE ITEM_MAST ADD TAX_FREE_ITEM VARCHAR(1)N}}
    {{ALTER TABLE ITEM_MAST ADD TAX_FREE_ITEM VARCHAR(1)Not NULL DEFAULT 'N'}}, :8258 `AC_MEMB_COM_PRC FLOAT`. Web
    `schema.prisma` model `ITEM_MAST` lacks all four; `itemMaster.ts:124-129` and `autoItem.ts:196-215` cannot write them. No
    Lite form shows or reads them (Screen table; Calculations), so **no Lite behaviour is wrong today**; the cost is a lossy
@@ -304,23 +304,23 @@ headers). Web: each route file exposes `guard(req, reply, action)` with `action:
    desktop defaults (`'N'`, `0`, `'N'`, `0`); write them from `itemMaster.ts` (`HIDDEN_DEFAULTS`) and `autoItem.ts` as the
    desktop does; carry them in the migration loader; a DB test that a new item and an AutoItem item store `N/0/N/0` and
    that an edit preserves a migrated `Y`. Do **not** add boxes to the Lite screens (R5).
-7. **R4 Employee help cannot create an account (missing feature).** Desktop: F1 in the help (MS_HELP.cs:2240
+7. **R4 Employee help cannot create an account (missing feature).** Desktop: F1 in the help (MS_HELP.cs:2240 {{else if ((int)e.KeyCode == 112)}}
    {{else if ((int)e.KeyCode == 112)}}, :2252 {{DC_Main.MsCreat = true;}}) opens the Party form with group 10 preset
    (MS_EMP.cs:1658 {{DC_Main.MsGrCode = "10";}}, MS_ACCT.cs:5963 {{tAcGrCode.Text = DC_Main.MsGrCode;}}); Save returns the code
-   and name (MS_ACCT.cs:7932-7934) and the Employee form fills `tEmpAc`/`tEmpAcName` on activation (MS_EMP.cs:1184-1185).
+   and name (MS_ACCT.cs:7932-7934 {{DC_Main.MsCode = tAcCode.Text;}}) and the Employee form fills `tEmpAc`/`tEmpAcName` on activation (MS_EMP.cs:1184-1185 {{tEmpAc.Text = DC_Main.MsCode;}}).
    Web: `employees/page.tsx:38` records "The account help cannot create an account"; the party page takes no preset
    (`party/page.tsx` has no group query parameter). **Fix:** F1 in the employee account help opens `/masters/party` in
    create mode with `group=10` and a return target; on Save the party page returns the new code and name to the employee
-   box (query parameter or `sessionStorage` hand-back), focus stays on the account box as MS_EMP.cs:1189 restores
+   box (query parameter or `sessionStorage` hand-back), focus stays on the account box as MS_EMP.cs:1189 {{((ContainerControl)this).ActiveControl = CurActCtrl;}} restores
    `CurActCtrl`. Browser case: create an employee whose ledger did not exist, through the help.
-8. **R5 Edition boxes (not a gap; record as verified).** Item: `chktaxfreeItem`/`tItUniCode` UAE only (MS_ITEM.cs:2743, :2747),
+8. **R5 Edition boxes (not a gap; record as verified).** Item: `chktaxfreeItem`/`tItUniCode` UAE only (MS_ITEM.cs:2743 {{if (Operators.CompareString(DC_Main.MCo_SName, "UAE", false) == 0)}}, :2747),
    `chkTagOthDetail` P/A/E (:2753-2755), `chkOthItmPosting` E (:2757-2759), `tAcItem` company type P (:2761-2763), `chkAppItem`
-   on `MsAppSchem` (:2770-2772). Party: admin panel, defaulter and limits A/E/UAE (MS_ACCT.cs:5971-5978), UAE relabels
+   on `MsAppSchem` (:2770-2772). Party: admin panel, defaulter and limits A/E/UAE (MS_ACCT.cs:5971-5978 {{if ((Operators.CompareString(DC_Main.MsSoftType, "A", false) == 0) | (}}), UAE relabels
    (:5982-5984), imports on Ctrl+O/Ctrl+Y (:6752-6758). Product: Counter and Scheme Mast modes are other menus
-   (MS_PRODUCT.cs:2100, :2105; MDI_FORM.cs:7731, :9374). The catalog "Remaining" sentences for Item, Party and Product can be
+   (MS_PRODUCT.cs:2100 {{if (Operators.CompareString(CurMast, "Counter", false) == 0)}}, :2105; MDI_FORM.cs:7731 {{case "Counter":}}, :9374). The catalog "Remaining" sentences for Item, Party and Product can be
    closed as **verified absent by design** once the row is proposed FULL; nothing to build.
 9. **R6 Sales tax code by rate (cross-reference, wrong result elsewhere).** Desktop MS_TAX gives the code; the Sales screen
-   picks the code from the header rows (lineage :2735, `TR_SALE.cs:18668`), while the web resolves by `TAX_PRC`
+   picks the code from the header rows (lineage :2735, `TR_SALE.cs:18668 {{DC_Main.RsQry = "SELECT A.TAX_NAME As TaxNameL,A.TAX_PRC as TaxPrcR, T}}`), while the web resolves by `TAX_PRC`
    (`apps/api/src/modules/shared/taxPolicy.ts:91` `coalesce("TAX_PRC",0)::numeric=$n`). Owned by WP-26 (G82); the Tax row's
    "Remaining" sentence should point there rather than stay on the Tax master.
 10. **Test honesty (missing case).** No browser or DB case runs any of the four helps against the company exactly as
