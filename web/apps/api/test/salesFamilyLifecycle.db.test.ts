@@ -143,6 +143,9 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
 
   const cleanup = async (): Promise<void> => {
     for (const table of [
+      // An edit writes the USER_DATA field audit (TR_SALE_RTN.cs:13541, WP-27); left behind, it shows up in the
+      // next test's footprint under the same voucher number.
+      'USER_DATA',
       'DELETE_DATA',
       'REMARK_DATA',
       'DM_DATA',
