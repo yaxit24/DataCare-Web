@@ -1,3 +1,8 @@
+## 2026-11-23 — Ledger Report fine prints and Lite ageing (N255 / G267, WP-20)
+
+- 2026-11-23: JmaUdr, Gold and Silver in the drill-down print server-built PDF/Excel from every RP_LEDR FINE_DATA source, read in memory (no staging write, D5); balances from AC_DATA only; Debit Ageing hidden and refused in Lite and Basic. Two locked tests corrected from RP_LEDR.cs:8900 (zero-amount silver sale) and router registration.
+- Open: OP_LDR ageing union (Gaps 1-4), In Out/Ac Sale, summary Hz choice, voucher-wise summaries (D6), zoom, half-month toggle, Crystal region comparison; the Silver empty-location refusal belongs to Silver_Summ only (case-list correction proposed); manufacturing/registration-serial sources not ported.
+
 ## 2026-11-22 — Purchase residuals: lossless reopen, hallmark receive columns, purchase book family (N244 / G256, WP-28)
 
 - 2026-11-22: `GET /purchases/:vchNo` returns every stored value (`purchaseReopen.ts`); the edit keeps the persisted header and line columns the
