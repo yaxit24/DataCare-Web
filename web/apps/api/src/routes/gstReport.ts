@@ -2,9 +2,11 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { PdfRenderer } from '../modules/reports/render.js';
 import { pdfRenderFailure, PlaywrightPdfRenderer, renderToPdf } from '../modules/reports/render.js';
 import {
+  assertGstCsvSection,
   gstReport,
   gstReportHtml,
   gstReportSheet,
+  gstWorkbook,
   parseGstReportQuery,
 } from '../modules/reports/gstReport.js';
 import { serializeGstCsv } from '../modules/reports/gstReportCsv.js';
@@ -25,19 +27,19 @@ interface GstRouteHelpers {
 
 export function registerGstReportRoutes(app: FastifyInstance, helpers: GstRouteHelpers): void {
   const { prisma, auth } = helpers;
-  const build = async (req: FastifyRequest) => {
+  const parse = (req: FastifyRequest, override: Record<string, unknown> = {}) => {
     const scope = helpers.scopeOf(req);
-    const input = parseGstReportQuery(
+    return parseGstReportQuery(
       {
         tenantId: scope.tenantId,
         coCode: scope.coCode,
         lcCode: scope.lcCode,
         coYear: scope.coYear ?? '',
       },
-      (req.query ?? {}) as Record<string, unknown>,
+      { ...((req.query ?? {}) as Record<string, unknown>), ...override },
     );
-    return gstReport(prisma, input);
   };
+  const build = async (req: FastifyRequest) => gstReport(prisma, parse(req));
   const handle = async (reply: FastifyReply, operation: () => Promise<unknown>) => {
     try {
       return await operation();
@@ -55,6 +57,7 @@ export function registerGstReportRoutes(app: FastifyInstance, helpers: GstRouteH
   app.get('/reports/gst-report/export.csv', auth, async (req, reply) =>
     handle(reply, async () => {
       const report = await build(req);
+      assertGstCsvSection(report);
       return reply
         .header('content-type', 'text/csv; charset=utf-8')
         .header('content-disposition', `attachment; filename="${report.fileName}.csv"`)
@@ -65,6 +68,29 @@ export function registerGstReportRoutes(app: FastifyInstance, helpers: GstRouteH
     handle(reply, async () => {
       const report = await build(req);
       const output = await renderXlsx([gstReportSheet(report)], report.fileName);
+      return reply
+        .header('content-type', output.contentType)
+        .header('content-disposition', `attachment; filename="${output.fileName}"`)
+        .send(output.buffer);
+    }),
+  );
+  // "Gsrt1 Csv": every GSTR-1 section B2B..HSN as one workbook; the dates/book/party are the screen's filters.
+  app.get('/reports/gst-report/workbook.xlsx', auth, async (req, reply) =>
+    handle(reply, async () => {
+      const query = (req.query ?? {}) as Record<string, unknown>;
+      if (query.view != null || query.section != null) {
+        throw new GstReportRequestError('invalid-query', 400, { fields: ['section', 'view'] });
+      }
+      const {
+        view: _view,
+        section: _section,
+        ...input
+      } = parse(req, {
+        view: 'gstr1',
+        section: 'B2B',
+      });
+      const reports = await gstWorkbook(prisma, input);
+      const output = await renderXlsx(reports.map(gstReportSheet), 'GSTR1');
       return reply
         .header('content-type', output.contentType)
         .header('content-disposition', `attachment; filename="${output.fileName}"`)

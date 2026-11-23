@@ -205,10 +205,9 @@ export async function gstHsnRowsTx(tx: Tx, input: GstReportInput): Promise<RawHs
        UNION ALL
        SELECT i."HSN_CODE",i."RATE_TYPE",i."IT_TYPE",ac."AC_GST_TYPE",
               (CASE WHEN i."RATE_TYPE"='P' THEN COALESCE(l."ITM_PCS",0) ELSE COALESCE(l."ITM_NWT",0) END)::numeric,
-              COALESCE(l."NET_AMT",0)::numeric,
+              COALESCE(l."IT_NET_AMT",0)::numeric,
               COALESCE(NULLIF(l."IT_TAX_AMT",''),'0')::numeric,
-              -- RP_GST.cs:2719 sums IT_DISC_AMT; the web LBR_ISU_DETL has no discount column, so a labour row carries none.
-              0::numeric
+              COALESCE(l."IT_DISC_AMT",0)::numeric
          FROM "LBR_ISU_DETL" l
          JOIN "ITEM_MAST" i ON i.tenant_id=l.tenant_id AND i."CO_CODE"=l."CO_CODE" AND i."IT_CODE"=l."IT_CODE"
          JOIN "BOOK_DATA" bk ON bk.tenant_id=l.tenant_id AND bk."CO_CODE"=l."CO_CODE" AND bk."LC_CODE"=l."LC_CODE" AND bk."CO_BOOK"=l."CO_BOOK"
@@ -216,7 +215,8 @@ export async function gstHsnRowsTx(tx: Tx, input: GstReportInput): Promise<RawHs
         WHERE ${scope('l')} AND bk.tenant_id=$1 AND bk."BOOK_TYPE"='T' AND bk."MAIN_BOOK"='LABOUR WORK'
        UNION ALL
        SELECT '998892',i."RATE_TYPE",i."IT_TYPE",ac."AC_GST_TYPE",COALESCE(l."ITM_NWT",0)::numeric,
-              COALESCE(l."LBR_AMT",0)::numeric,COALESCE(NULLIF(l."IT_LBR_TAX",''),'0')::numeric,0::numeric
+              COALESCE(l."IT_LBR_AMT",0)::numeric,COALESCE(NULLIF(l."IT_LBR_TAX",''),'0')::numeric,
+              COALESCE(l."IT_LBR_DISC",0)::numeric
          FROM "LBR_ISU_DETL" l
          JOIN "ITEM_MAST" i ON i.tenant_id=l.tenant_id AND i."CO_CODE"=l."CO_CODE" AND i."IT_CODE"=l."IT_CODE"
          JOIN "BOOK_DATA" bk ON bk.tenant_id=l.tenant_id AND bk."CO_CODE"=l."CO_CODE" AND bk."LC_CODE"=l."LC_CODE" AND bk."CO_BOOK"=l."CO_BOOK"
@@ -234,7 +234,17 @@ export async function gstHsnRowsTx(tx: Tx, input: GstReportInput): Promise<RawHs
   );
 }
 
-/** Desktop-computed GSTR-3B rows only: 3.1(a), 3.1(d), and 4(A)(5). */
+/**
+ * The GSTR-3B figures of RP_GST.cs:3540-3704, each scoped by tenant, company, location, year, From..To (owner
+ * decision WP-19 Q1) and the optional book/party filters. `R_CHARG` is read as 'N' when a row left it blank: the
+ * desktop writes 'N' on every TAX_DATA row (Ac_Tax.cs), and web rows written before WP-19 left it empty.
+ *   3.1(a) outward: every TAX_SIGN '+' row (RP_GST.cs:3541), which includes purchase returns (Ac_Tax.cs:233 writes
+ *          them 'P'/'+'): a purchase return issues a debit note, an outward supply of the returned goods (WP-19 Q10).
+ *   3.1(d) reverse charge: R_CHARG 'Y'.
+ *   3.2(1) inter-state to unregistered: the '+' rows of a party with no GSTIN whose state is set and differs
+ *          from the company's (RP_GST.cs:3641-3642), grouped by state.
+ *   4(A)(5) all other ITC: TAX_SIGN '-', R_CHARG 'N', purchases only (owner decision Q2).
+ */
 export async function gstGstr3bTx(tx: Tx, input: GstReportInput): Promise<RawGstr3bResult> {
   const params: unknown[] = [
     input.tenantId,
@@ -245,27 +255,56 @@ export async function gstGstr3bTx(tx: Tx, input: GstReportInput): Promise<RawGst
     input.toDate,
   ];
   const optional = optionalScope(input, 'a', params);
+  const charge = `COALESCE(NULLIF(a."R_CHARG",''),'N')`;
+  const outward = `a."TAX_SIGN"='+'`;
+  const reverse = `a."TAX_SIGN"='+' AND ${charge}='Y'`;
+  const itc = `a."TRAN_TYPE"='P' AND a."TAX_SIGN"='-' AND ${charge}='N'`;
+  const aggregate = (prefix: string, predicate: string) => `
+       COUNT(*) FILTER (WHERE ${predicate})::text AS ${prefix}_count,
+       COALESCE(SUM(CASE WHEN ${predicate} AND a."TAX_TYPE" IN ('IGST','SGST') THEN a."NET_AMT" ELSE 0 END),0)::text AS ${prefix}_taxable,
+       COALESCE(SUM(CASE WHEN ${predicate} AND a."TAX_TYPE"='IGST' THEN a."TAX_AMT" ELSE 0 END),0)::text AS ${prefix}_igst,
+       COALESCE(SUM(CASE WHEN ${predicate} AND a."TAX_TYPE"='CGST' THEN a."TAX_AMT" ELSE 0 END),0)::text AS ${prefix}_cgst,
+       COALESCE(SUM(CASE WHEN ${predicate} AND a."TAX_TYPE"='SGST' THEN a."TAX_AMT" ELSE 0 END),0)::text AS ${prefix}_sgst`;
+  const scopeSql = `a.tenant_id=$1 AND a."CO_CODE"=$2 AND a."LC_CODE"=$3 AND a."CO_YEAR"=$4
+       AND a."VCH_DATE">=$5::date AND a."VCH_DATE"<=$6::date${optional}`;
   const rows = await tx.$queryRawUnsafe<Array<Record<string, string>>>(
-    `SELECT
-       COALESCE(SUM(CASE WHEN a."TRAN_TYPE"='S' AND a."TAX_SIGN"='+' AND COALESCE(a."R_CHARG",'N')<>'Y' AND a."TAX_TYPE" IN ('IGST','SGST') THEN a."NET_AMT" ELSE 0 END),0)::text AS outward_taxable,
-       COALESCE(SUM(CASE WHEN a."TRAN_TYPE"='S' AND a."TAX_SIGN"='+' AND COALESCE(a."R_CHARG",'N')<>'Y' AND a."TAX_TYPE"='IGST' THEN a."TAX_AMT" ELSE 0 END),0)::text AS outward_igst,
-       COALESCE(SUM(CASE WHEN a."TRAN_TYPE"='S' AND a."TAX_SIGN"='+' AND COALESCE(a."R_CHARG",'N')<>'Y' AND a."TAX_TYPE"='CGST' THEN a."TAX_AMT" ELSE 0 END),0)::text AS outward_cgst,
-       COALESCE(SUM(CASE WHEN a."TRAN_TYPE"='S' AND a."TAX_SIGN"='+' AND COALESCE(a."R_CHARG",'N')<>'Y' AND a."TAX_TYPE"='SGST' THEN a."TAX_AMT" ELSE 0 END),0)::text AS outward_sgst,
-       COALESCE(SUM(CASE WHEN a."TRAN_TYPE"='P' AND a."R_CHARG"='Y' AND a."TAX_TYPE" IN ('IGST','SGST') THEN a."NET_AMT" ELSE 0 END),0)::text AS reverse_taxable,
-       COALESCE(SUM(CASE WHEN a."TRAN_TYPE"='P' AND a."R_CHARG"='Y' AND a."TAX_TYPE"='IGST' THEN a."TAX_AMT" ELSE 0 END),0)::text AS reverse_igst,
-       COALESCE(SUM(CASE WHEN a."TRAN_TYPE"='P' AND a."R_CHARG"='Y' AND a."TAX_TYPE"='CGST' THEN a."TAX_AMT" ELSE 0 END),0)::text AS reverse_cgst,
-       COALESCE(SUM(CASE WHEN a."TRAN_TYPE"='P' AND a."R_CHARG"='Y' AND a."TAX_TYPE"='SGST' THEN a."TAX_AMT" ELSE 0 END),0)::text AS reverse_sgst,
-       COALESCE(SUM(CASE WHEN a."TRAN_TYPE"='P' AND a."TAX_SIGN"='-' AND a."R_CHARG"='N' AND a."TAX_TYPE" IN ('IGST','SGST') THEN a."NET_AMT" ELSE 0 END),0)::text AS itc_taxable,
-       COALESCE(SUM(CASE WHEN a."TRAN_TYPE"='P' AND a."TAX_SIGN"='-' AND a."R_CHARG"='N' AND a."TAX_TYPE"='IGST' THEN a."TAX_AMT" ELSE 0 END),0)::text AS itc_igst,
-       COALESCE(SUM(CASE WHEN a."TRAN_TYPE"='P' AND a."TAX_SIGN"='-' AND a."R_CHARG"='N' AND a."TAX_TYPE"='CGST' THEN a."TAX_AMT" ELSE 0 END),0)::text AS itc_cgst,
-       COALESCE(SUM(CASE WHEN a."TRAN_TYPE"='P' AND a."TAX_SIGN"='-' AND a."R_CHARG"='N' AND a."TAX_TYPE"='SGST' THEN a."TAX_AMT" ELSE 0 END),0)::text AS itc_sgst
+    `SELECT ${aggregate('outward', outward)},${aggregate('reverse', reverse)},${aggregate('itc', itc)}
       FROM "TAX_DATA" a
-     WHERE a.tenant_id=$1 AND a."CO_CODE"=$2 AND a."LC_CODE"=$3 AND a."CO_YEAR"=$4
-       AND a."VCH_DATE">=$5::date AND a."VCH_DATE"<=$6::date${optional}`,
+     WHERE ${scopeSql}`,
+    ...params,
+  );
+  const states = await tx.$queryRawUnsafe<
+    Array<{ stateCode: string; stateName: string; taxable: string; igst: string }>
+  >(
+    `SELECT COALESCE(st."STATE_CODE",'') AS "stateCode",b."AC_STATE" AS "stateName",
+            COALESCE(SUM(CASE WHEN a."TAX_TYPE" IN ('IGST','SGST') THEN a."NET_AMT" ELSE 0 END),0)::text AS taxable,
+            COALESCE(SUM(CASE WHEN a."TAX_TYPE"='IGST' THEN a."TAX_AMT" ELSE 0 END),0)::text AS igst
+       FROM "TAX_DATA" a
+       JOIN LATERAL (
+         SELECT m."AC_GSTNO",m."AC_STATE"
+           FROM "AC_MAST" m
+          WHERE m.tenant_id=a.tenant_id AND m."CO_CODE"=a."CO_CODE" AND m."AC_CODE"=a."AC_CODE"
+            AND (m."LC_CODE"=a."LC_CODE" OR m."LC_CODE" IS NULL OR m."LC_CODE"='00')
+          ORDER BY CASE WHEN m."LC_CODE"=a."LC_CODE" THEN 0 ELSE 1 END,m.row_id
+          LIMIT 1
+       ) b ON TRUE
+       JOIN "CO_MAST" c ON c.tenant_id=a.tenant_id AND c."CO_CODE"=a."CO_CODE"
+       LEFT JOIN LATERAL (
+         SELECT s."STATE_CODE"
+           FROM "STATE_MAST" s
+          WHERE s.tenant_id=a.tenant_id AND s."STATE_NAME"=b."AC_STATE"
+          ORDER BY s.row_id LIMIT 1
+       ) st ON TRUE
+      WHERE ${scopeSql} AND ${outward}
+        AND COALESCE(b."AC_GSTNO",'')='' AND COALESCE(b."AC_STATE",'')<>''
+        AND b."AC_STATE"<>COALESCE(c."CO_STATE",'')
+      GROUP BY st."STATE_CODE",b."AC_STATE"
+      ORDER BY st."STATE_CODE",b."AC_STATE"`,
     ...params,
   );
   const row = rows[0] ?? {};
   const amounts = (prefix: string) => ({
+    rowCount: row[`${prefix}_count`] ?? '0',
     taxable: row[`${prefix}_taxable`] ?? '0',
     igst: row[`${prefix}_igst`] ?? '0',
     cgst: row[`${prefix}_cgst`] ?? '0',
@@ -275,5 +314,11 @@ export async function gstGstr3bTx(tx: Tx, input: GstReportInput): Promise<RawGst
     outward: amounts('outward'),
     reverseCharge: amounts('reverse'),
     otherItc: amounts('itc'),
+    unregisteredInterState: states.map((state) => ({
+      stateCode: String(state.stateCode ?? ''),
+      stateName: String(state.stateName ?? ''),
+      taxable: String(state.taxable ?? '0'),
+      igst: String(state.igst ?? '0'),
+    })),
   };
 }
