@@ -1107,9 +1107,36 @@ export const contraEntry = {
           codes.map((r) => r.c),
           [employee[0].code],
         );
+        const rows = await contraRows(ctx, vchNo);
+        assert.deepEqual(
+          rows.map((r) => [r.sr, r.ldr, r.ac, r.ld, r.dr, r.cr]),
+          [
+            [1, '0', 'CASH', 'BANK', 0, 12345.67],
+            [2, '1', 'BANK', 'CASH', 12345.67, 0],
+          ],
+          JSON.stringify(rows),
+        );
+        // Contra_Ledr (Ac_Ledr.cs:840-) and Contra_Rojmel (Ac_Rojmel.cs:336-): one leg and one day-book row per row.
+        const posted = await legs(ctx, vchNo);
+        assert.deepEqual(
+          posted.map((r) => [r.sr, r.code, r.ac, r.dr, r.cr]),
+          [
+            ['1', '01', 'CASH', 0, 12345.67],
+            ['2', '02', 'BANK', 12345.67, 0],
+          ],
+          JSON.stringify(posted),
+        );
+        const daybook = await ctx.rows(
+          `SELECT btrim("AC_CODE") ac,"DR_AMT"::float dr,"CR_AMT"::float cr FROM "ROJ_MEL_DATA"
+            WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 ORDER BY "LEDR_KEY"`,
+          vchNo,
+        );
+        assert.equal(daybook.length, 2, JSON.stringify(daybook));
         return {
-          observation: `voucher ${vchNo} employee ${employee[0].code}`,
-          expected: 'EMP_CODE on every row',
+          observation: `voucher ${vchNo} employee ${employee[0].code}; ${posted.length} legs, ${daybook.length} day-book rows`,
+          expected: 'EMP_CODE on every row; the deposit posts its legs and day-book rows',
+          database: { codes, rows },
+          downstream: { legs: posted, daybook },
         };
       },
     ),
@@ -1161,9 +1188,34 @@ export const contraEntry = {
           'Dr 700 against Cr 400 is not balanced after the row is blanked',
         );
         assert.match(await response.text(), /Cr Value and Dr Value is not same/);
+        // Rebalance row 1 to the remaining credit; the blanked row is skipped (TR_CONTRA.cs:2765).
+        await page.getByLabel('Amount row 1', { exact: true }).fill('400');
+        const saved = await save(page);
+        assert.equal(saved.status(), 201, await saved.text());
+        const vchNo = String((await saved.json()).vchNo).padStart(5, '0');
+        const rows = await contraRows(ctx, vchNo);
+        assert.deepEqual(
+          rows.map((r) => [r.sr, r.ldr, r.ac, r.ld, r.dr, r.cr]),
+          [
+            [1, '0', PARTIES.bank.code, 'BANK', 0, 400],
+            [2, '1', 'BANK', PARTIES.bank.code, 400, 0],
+          ],
+          JSON.stringify(rows),
+        );
+        const posted = await legs(ctx, vchNo);
+        assert.deepEqual(
+          posted.map((r) => [r.sr, r.code, r.ac, r.dr, r.cr]),
+          [
+            ['1', '01', PARTIES.bank.code, 0, 400],
+            ['2', '02', 'BANK', 400, 0],
+          ],
+          JSON.stringify(posted),
+        );
         return {
-          observation: said.join(' / '),
+          observation: `${said.join(' / ')}; voucher ${vchNo} saved without the blanked row`,
           expected: 'both desktop messages; the blank row is skipped on save',
+          database: { rows },
+          downstream: { legs: posted },
         };
       },
     ),
@@ -1230,6 +1282,7 @@ export const contraEntry = {
         ]);
         await openContra(page);
         await page.getByLabel('Voucher No', { exact: true }).press('F1');
+        await page.locator('[data-f1-list] thead th').first().waitFor();
         const heads = (await page.locator('[data-f1-list] thead th').allInnerTexts()).map((t) =>
           t.trim(),
         );
@@ -1267,7 +1320,8 @@ export const contraEntry = {
         ]);
         const frame = page.locator('iframe[title="Contra voucher print"]');
         await frame.waitFor();
-        assert.ok((await frame.getAttribute('srcdoc')).includes('818'));
+        const printed = await frame.getAttribute('srcdoc');
+        assert.ok(printed.includes('818'), printed.slice(0, 200));
         const viewer = await ctx.session(as(USERS.printViewer.user));
         await openContra(viewer.page);
         await viewer.page.getByLabel('Voucher No', { exact: true }).fill(savedNo);
@@ -1275,8 +1329,9 @@ export const contraEntry = {
         await viewer.page.getByRole('button', { name: 'Print', exact: true }).click();
         await viewer.page.getByText('You Have No Print Rights.....', { exact: true }).waitFor();
         return {
-          observation: 'preview shown after save; viewer got the desktop refusal',
+          observation: `preview of voucher ${savedNo} (${printed.length} bytes) shown after save; viewer got the desktop refusal`,
           expected: 'print after save and the right message',
+          output: Buffer.from(printed),
         };
       },
     ),
