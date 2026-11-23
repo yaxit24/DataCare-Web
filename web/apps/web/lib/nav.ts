@@ -113,7 +113,10 @@ export const NAV: NavGroup[] = [
       { label: 'Purchase Invoice', href: '/txn/purchase', ready: true },
       { label: 'Purchase Quotation', href: '/txn/purchase-quotation', ready: true },
       { label: 'Purchase Return', href: '/txn/purchase-return', ready: true },
-      { label: 'Hallmark Purchase', href: '/txn/purchase-hm', ready: true },
+      // WP-28 (D1, D3): the desktop's "Tag Wise Purc" (TR_PURC_HM on TAG PURCHASE books, Enterprise). The hallmark
+      // layout on PURCHASE books opens from "Purchase Invoice" when PURC_WITH_HMTAX is Y. The caption stays, because
+      // rights and editions are keyed by it (formCatalog.ts, editionTable.ts).
+      { label: 'Hallmark Purchase', href: '/txn/tag-wise-purc', ready: true },
       { label: 'Consignment Purchase', href: '/txn/consi-purchase', ready: true },
       { label: 'Other Expenses', href: '/txn/other-purchase', ready: true },
       { label: 'Other Income', href: '/txn/other-income', ready: true },
