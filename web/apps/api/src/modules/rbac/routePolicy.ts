@@ -865,6 +865,17 @@ route('Masters/Item Groups', [
   'PUT /masters/group-master/:code',
   'DELETE /masters/group-master/:code',
 ]);
+// MS_BOOK (N240): Company → Books, the book header with its posting-account slots.
+route('Masters/Books / Series', [
+  'GET /masters/books-master',
+  'GET /masters/books-master/print',
+  'GET /masters/books-master/template',
+  'GET /masters/books-master/accounts',
+  'GET /masters/books-master/:code',
+  'POST /masters/books-master',
+  'PUT /masters/books-master/:code',
+  'DELETE /masters/books-master/:code',
+]);
 // MS_PRODUCT with CurMast 'Product' (N215): the Product master's own screen.
 route('Masters/Products', [
   'GET /masters/product-master',
@@ -1076,6 +1087,7 @@ const PRINT_ROUTES = new Set([
   'GET /masters/employee-master/print',
   'GET /masters/tax-master/print',
   'GET /masters/group-master/print',
+  'GET /masters/books-master/print',
   'GET /masters/address-master/print',
   'POST /estimate/pdf',
   'GET /reports/account-ledger/export.pdf',

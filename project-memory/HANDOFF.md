@@ -7,6 +7,15 @@
 - 2026-11-22: not built: voucher zoom (no entry screen opens a voucher by key), InOut item-ledger print, code lookups, Crystal layouts,
   EMP ISU adjustment, Item Lot, LC box. The browser module was not run locally (8 GB machine); CI runs it.
 
+## 2026-11-22 — Books is the desktop MS_BOOK screen with its posting slots (N240 / G252, WP-21)
+
+- 2026-11-22: /masters/books is its own page with the slot grid; /masters/books-master writes header and slots in one transaction with the
+  MS_BOOK save/delete checks and texts; generic BOOK_DATA writes are refused. D4 family lock on a book with vouchers is a web message.
+- 2026-11-22: provisioning adds the template slots (OIN/OEX 2-3, TSP 1-9 with 6 SALES / 7 PURCHASE / 8 SLVSALE / 9 SLVPURC, PR/TPR 5 DISCOUNT,
+  LBR 8-11), Data Type A, AC_NAME = account name; only new companies. Fine families untouched.
+- 2026-11-22: existing companies: migration 20261122120000_book_template_slots rewrites a web-seeded slot only while it still holds the old seed's account
+  (TSP 6/7/8/9), inserts absent template slots and the DISCOUNT account; operator-changed slots kept; idempotent.
+
 ## 2026-11-22 — Gst Report runs the desktop RP_GST rules for the blocked cases (N239 / G251, WP-19)
 
 - 2026-11-22: EXP/EXEMP/DOCS are the desktop caption grids; GSTR-3B is the whole desktop grid (3.1 total, 3.2(1), 6.1) under owner decisions
