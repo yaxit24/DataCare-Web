@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useBusinessScope } from '../../../../components/BusinessScope';
 import { get } from '../../../../lib/api';
@@ -22,6 +22,18 @@ const BUTTONS: ReadonlyArray<{ mode: OrderReportMode; caption: string }> = [
   { mode: 'bill-wise', caption: 'Bill Wise Adjust' },
 ];
 
+/** cboItemTyp items for every caption but Scheme Report (RP_ALL.cs:7097-7104); the combo is dead here (D8). */
+const ITEM_TYPES = [
+  '',
+  'Gold',
+  'Silver',
+  'Diamond',
+  'Real Stone',
+  'Emitation',
+  'Other',
+  'Platinum',
+];
+
 const DATE_MESSAGE = 'Enter a valid date in dd/MM/yyyy format (for example 01/01/2026).';
 
 export default function OrderReportPage() {
@@ -32,6 +44,8 @@ export default function OrderReportPage() {
   const [validationError, setValidationError] = useState('');
   const [prompt, setPrompt] = useState(false);
   const locations = useRef<Promise<HelpRow[]> | null>(null);
+  const [cities, setCities] = useState<string[]>([]);
+  const [areas, setAreas] = useState<string[]>([]);
   const summaryButton = useRef<HTMLButtonElement | null>(null);
 
   const onEscape = useCallback(
@@ -94,9 +108,26 @@ export default function OrderReportPage() {
       });
     return locations.current;
   }, []);
-  // MISSING: a company-scoped SL_ORD_DATA name lookup. A date-filtered report is not that help list.
-  const loadCustomers = useCallback(async (): Promise<HelpRow[]> => {
-    throw new Error('Customer name help is unavailable. Enter the full customer name to filter.');
+  // Cust Name help lists the names stored on the orders in every mode (RP_ALL.cs:9693, D9).
+  const loadCustomers = useCallback(
+    (term: string) =>
+      get<HelpRow[]>(`/lookup/order-customers?q=${encodeURIComponent(term)}&limit=50`),
+    [],
+  );
+  // The City and Area combos load the distinct AC_MAST values once, when the form opens (RP_ALL.cs:7019, :7053).
+  useEffect(() => {
+    let live = true;
+    const distinct = (rows: Array<{ code: unknown }>) =>
+      [...new Set(rows.map((row) => String(row.code ?? '').trim()).filter(Boolean))].sort();
+    get<Array<{ code: unknown }>>('/lookup/cities?limit=50')
+      .then((rows) => live && setCities(distinct(rows)))
+      .catch(() => undefined);
+    get<Array<{ code: unknown }>>('/lookup/areas?limit=50')
+      .then((rows) => live && setAreas(distinct(rows)))
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
   }, []);
 
   const error = validationError || report.error;
@@ -185,28 +216,35 @@ export default function OrderReportPage() {
               load={loadCustomers}
               maxLength={50}
               focusAfter="City"
+              showName={false}
             />
             <ListField
               label="City"
               value={filters.city}
-              options={[]}
+              options={cities}
               onChange={(value) => setFilters({ city: value })}
             />
             <ListField
               label="Area"
               value={filters.area}
-              options={[]}
+              options={areas}
               onChange={(value) => setFilters({ area: value })}
             />
             <div className="field" style={{ minWidth: 130 }}>
               <label htmlFor="or-item-type">Item Type</label>
-              <input
+              <select
                 id="or-item-type"
                 aria-label="Item Type"
                 value={filters.itemType}
                 disabled
                 onChange={(event) => setFilters({ itemType: event.target.value })}
-              />
+              >
+                {ITEM_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <div className="row" data-panel="order" style={{ marginTop: 10 }}>
@@ -230,7 +268,12 @@ export default function OrderReportPage() {
                 {button.caption}
               </button>
             ))}
-            <span className="spacer" />
+          </div>
+          <div className="row" style={{ marginTop: 8 }}>
+            {/* Form-level buttons, outside PanelOrder: &Print, &Cancel, E&xit (RP_ALL.cs:4290, :4317). */}
+            <button type="button" className="ghost">
+              <u>P</u>rint
+            </button>
             <button
               type="button"
               className="ghost"
@@ -241,14 +284,12 @@ export default function OrderReportPage() {
                 focusControl('From');
               }}
             >
-              Cancel
-            </button>
-            <button type="button" className="ghost">
-              Print
+              <u>C</u>ancel
             </button>
             <button type="button" className="ghost" onClick={() => router.back()}>
-              Exit
+              E<u>x</u>it
             </button>
+            <span className="spacer" />
           </div>
           <div className="row" style={{ marginTop: 8 }}>
             <button

@@ -497,6 +497,12 @@ describe('Shared selectors for the Order branch', () => {
     expect(parseRpAllFilters({ ...Q, lcCode: '' }, ho).lcCode).toBeNull();
   });
 
+  it('reads the Book box from bookCode as well as coBook (coBook is also the session scope book)', () => {
+    expect(parseRpAllFilters({ ...Q, bookCode: 'ZZ' }, SESSION).coBook).toBe('ZZ');
+    expect(parseRpAllFilters({ ...Q, coBook: 'B1' }, SESSION).coBook).toBe('B1');
+    expect(parseRpAllFilters({ ...Q, bookCode: 'B2', coBook: 'B1' }, SESSION).coBook).toBe('B2');
+  });
+
   it('ignores Pr Code, Gr Code and Item Type for Order handlers, exactly as the desktop does (D4, D8)', () => {
     const f = parseRpAllFilters({ ...Q, prCode: 'I1', grCode: 'G1', itemType: 'Gold' }, SESSION);
     expect(f.prCode).toBe('I1');

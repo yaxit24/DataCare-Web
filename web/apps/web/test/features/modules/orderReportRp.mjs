@@ -4,12 +4,14 @@ import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
 /**
  * Frozen browser matrix: Report → Order Report (desktop RP_ALL in its "Order Report" caption).
  *
- * WP-14 PHASE ONE — FROZEN CASE PLAN, NOT YET RUNNABLE.
- * The case list is orchestration/work/WP-14/cases.md: 28 cases across T01–T18, each with a desktop quote and
- * a status of executable. Three of those cases are database-layer and are covered by
+ * The case list is orchestration/work/WP-14/cases.md (T01-T18); three cases are database-layer and are covered by
  * web/apps/api/test/rpAllOrder.db.test.ts, so they are recorded here as N/A rather than duplicated.
- * The dedicated /reports/order-report screen and its "Order Report" navigation link do not exist yet
- * (study gap 1 and gap 14), so every executable case below fails red at navigation for that reason.
+ * The module follows the API as reviewed in 69bd05e7: Order Report and Making Panding return voucher plus line
+ * rows, Order Adjust returns group bands only (one null group for the orders without adjustments), Order Wise
+ * Bill and Bill Wise Adjust carry the bill columns, and Making Panding/Summ list every stored DESIGN_ISU = N line
+ * (the fully-adjusted write is HM310NEPK-only, RP_ALL.cs:10925, so D2 reads as the general behaviour).
+ * The Sales Order screen writes no "+" SL_ORD_ADJ advance row (TR_SALE_ORD.cs:9503 does): the lifecycle and
+ * journey cases seed it (seedAdvanceAdjustment) and report that as a Sales Order gap.
  *
  * Desktop authority (all quotes copied from cases.md, which verifies against the source):
  * - MDI_FORM.cs:8931 {{case "Order Report":}} opens RP_ALL; the caption selects the mode
@@ -199,20 +201,29 @@ const ORDERS = Object.freeze({
   },
 });
 
+/**
+ * An SL_ORD_ADJ row's own keys (book, vch, sr) are the voucher that wrote it: the order for its `+` advance row,
+ * the sale bill for a `-` adjustment; ORD_LC/ORD_YRCD/ORD_DBCD/ORD_NO always point at the order
+ * (Ac_Tax.cs:71-73; the Crystal templates link ORD_NO/ORD_LC/ORD_YRCD/ORD_DBCD, extraction_output/rpt_xml/OrdAdvAdj.xml:13-31
+ * and BillWiseOrderAdjust.xml). The first draft stored the bill rows the other way round.
+ */
+const adj = (book, vch, sr, date, sign, amt, ord) => ({ book, vch, sr, date, sign, amt, ord });
 const ADJUSTMENTS = Object.freeze([
-  { vch: 'O1', sr: 1, date: '2026-01-05', sign: '+', amt: 5000, ord: 'O1', bill: '' },
-  { vch: 'O1', sr: 2, date: '2026-01-18', sign: '-', amt: 1500, ord: 'S1', bill: 'S1' },
-  { vch: 'O1', sr: 3, date: '2026-01-18', sign: '-', amt: 500, ord: 'S1', bill: 'S1' },
-  { vch: 'O3', sr: 1, date: '2026-01-15', sign: '+', amt: 3000, ord: 'O3', bill: '' },
-  { vch: 'O3', sr: 2, date: '2026-01-22', sign: '-', amt: 1500, ord: 'S2', bill: 'S2' },
-  { vch: 'O3', sr: 3, date: '2026-01-22', sign: '-', amt: 1500, ord: 'S2', bill: 'S2' },
-  { vch: 'O5', sr: 1, date: '2025-12-20', sign: '+', amt: 1000, ord: 'O5', bill: '' },
-  { vch: 'O5', sr: 2, date: '2025-12-20', sign: '-', amt: 1000, ord: 'O5', bill: '' },
+  adj('B1', 'O1', 1, '2026-01-05', '+', 5000, 'O1'),
+  adj('SB', 'S1', 1, '2026-01-18', '-', 1500, 'O1'),
+  adj('SB', 'S1', 2, '2026-01-18', '-', 500, 'O1'),
+  adj('B1', 'O3', 1, '2026-01-15', '+', 3000, 'O3'),
+  adj('SB', 'S2', 1, '2026-01-22', '-', 1500, 'O3'),
+  adj('SB', 'S2', 2, '2026-01-22', '-', 1500, 'O3'),
+  adj('B1', 'O5', 1, '2025-12-20', '+', 1000, 'O5'),
+  adj('SB', 'S0', 1, '2025-12-20', '-', 1000, 'O5'),
 ]);
 
+/** S3 has no adjustment row: BillWiseOrderAdjust links SL_DATA to SL_ORD_ADJ with an Equal join. */
 const BILLS = Object.freeze([
-  { vch: 'S1', date: '2026-01-18', party: 'P1', acName: 'ALPHA JEWELS', tot: 12000 },
-  { vch: 'S2', date: '2026-01-22', party: 'P1', acName: 'ALPHA JEWELS', tot: 9000 },
+  { vch: 'S1', date: '2026-01-18', party: 'P1', acName: 'ALPHA JEWELS', tot: 12000, adv: 2000 },
+  { vch: 'S2', date: '2026-01-22', party: 'P1', acName: 'ALPHA JEWELS', tot: 9000, adv: 3000 },
+  { vch: 'S3', date: '2026-01-25', party: 'P2', acName: 'BETA TRADERS', tot: 5000, adv: 0 },
 ]);
 
 const VOUCHERS = Object.freeze([
@@ -223,6 +234,7 @@ const VOUCHERS = Object.freeze([
   'O5',
   'O6',
   'O8',
+  'S0',
   'S1',
   'S2',
   'S3',
@@ -245,27 +257,20 @@ const inDefaultRange = (o) =>
 const sumPcs = (lines) => lines.reduce((total, line) => total + line.pcs, 0);
 const sumNwt = (lines) =>
   Math.round(lines.reduce((total, line) => total + line.nwt, 0) * 1000) / 1000;
-const adjustmentsOf = (vch) => ADJUSTMENTS.filter((adj) => adj.vch === vch);
+const adjustmentsOf = (order) => ADJUSTMENTS.filter((a) => a.ord === order);
 const netOf = (vch) =>
   adjustmentsOf(vch).reduce((total, adj) => total + (adj.sign === '+' ? adj.amt : -adj.amt), 0);
 
 /**
- * The desktop's "fully adjusted" set (RP_ALL.cs:10927 {{HAVING SUM(CASE WHEN B.ORD_SIGN = '+' THEN B.ORD_AMT ELSE - B.ORD_AMT END)  = 0}})
- * has no row for an order without adjustments: its LEFT JOIN sum is NULL, so O2 is pending.
+ * Making Panding / Making Summ list every line whose stored DESIGN_ISU is 'N'. The desktop's fully-adjusted write
+ * (RP_ALL.cs:10925, only for registration HM310NEPK) does not run on a general installation, so a fully adjusted
+ * order such as O3 still lists (API review 69bd05e7, changing D2 to the general behaviour).
  */
-const fullyAdjusted = (vch) => {
-  const rows = adjustmentsOf(vch);
-  return rows.length > 0 && netOf(vch) === 0;
-};
-
-/** Pending lines: stored DESIGN_ISU N and not fully adjusted (RP_ALL.cs:10940 {{AND {SL_ORD_DETL.DESIGN_ISU} = 'N'}}). */
 const pendingKeys = () =>
   Object.values(ORDERS)
     .filter(inDefaultRange)
     .flatMap((o) =>
-      o.lines
-        .filter((line) => line.isu === 'N' && !fullyAdjusted(o.vch))
-        .map((line) => `${o.vch}:${line.sr}`),
+      o.lines.filter((line) => line.isu === 'N').map((line) => `${o.vch}:${line.sr}`),
     );
 
 const EXPECT = Object.freeze({
@@ -284,12 +289,12 @@ const EXPECT = Object.freeze({
   pendingPcs: sumPcs(
     Object.values(ORDERS)
       .filter(inDefaultRange)
-      .flatMap((o) => o.lines.filter((line) => line.isu === 'N' && !fullyAdjusted(o.vch))),
+      .flatMap((o) => o.lines.filter((line) => line.isu === 'N')),
   ),
   pendingNwt: sumNwt(
     Object.values(ORDERS)
       .filter(inDefaultRange)
-      .flatMap((o) => o.lines.filter((line) => line.isu === 'N' && !fullyAdjusted(o.vch))),
+      .flatMap((o) => o.lines.filter((line) => line.isu === 'N')),
   ),
   adjust: {
     O1: {
@@ -415,27 +420,30 @@ async function seedFixture(ctx) {
   for (const adj of ADJUSTMENTS)
     await put(
       `INSERT INTO "SL_ORD_ADJ"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE",
-       "ORD_SIGN","ORD_AMT","ORD_LC","ORD_YRCD","ORD_DBCD","ORD_NO")
-       VALUES($1,'01','01',$2,'B1',$3,$4,$5::date,$6,$7,'01',$2,$8,$9)`,
+       "ORD_SIGN","ORD_AMT","ORD_LC","ORD_YRCD","ORD_DBCD","ORD_NO","ORD_AC_CODE")
+       VALUES($1,'01','01',$2,$3,$4,$5,$6::date,$7,$8,'01',$2,$9,$10,$11)`,
       YEAR,
+      adj.book,
       adj.vch,
       adj.sr,
       adj.date,
       adj.sign,
       adj.amt,
-      adj.bill ? 'SB' : 'B1',
+      ORDERS[adj.ord].book,
       adj.ord,
+      ORDERS[adj.ord].party,
     );
   for (const bill of BILLS)
     await put(
-      `INSERT INTO "SL_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","AC_CODE","AC_NAME","TOT_AMT")
-       VALUES($1,'01','01',$2,'SB',$3,$4::date,$5,$6,$7)`,
+      `INSERT INTO "SL_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","AC_CODE","AC_NAME","TOT_AMT","ADV_AMT")
+       VALUES($1,'01','01',$2,'SB',$3,$4::date,$5,$6,$7,$8)`,
       YEAR,
       bill.vch,
       bill.date,
       bill.party,
       bill.acName,
       bill.tot,
+      bill.adv,
     );
 }
 
@@ -448,9 +456,18 @@ async function withFixture(ctx, exercise) {
   }
 }
 
-async function openReport(ctx, credentials) {
+/**
+ * Open Report → Order Report from the menu. A session always starts at the company's default location (01); the
+ * head-office run (`lcCode: '00'`) then switches the location on the Open Company screen, as an operator does.
+ */
+async function openReport(ctx, credentials, { lcCode } = {}) {
   const { page } = await ctx.session(credentials);
-  await page.goto('/dashboard');
+  if (lcCode && lcCode !== '01') {
+    await page.goto('/select');
+    await page.getByLabel('Location', { exact: true }).selectOption(lcCode);
+    await page.getByRole('button', { name: 'Open', exact: true }).click();
+    await page.waitForURL('**/dashboard', { timeout: 20000 });
+  } else await page.goto('/dashboard');
   const link = page.getByRole('link', { name: 'Order Report', exact: true });
   await link.waitFor({ timeout: 8000 });
   await link.click();
@@ -460,44 +477,43 @@ async function openReport(ctx, credentials) {
 }
 
 /** The web label is the desktop caption without the WinForms & accelerator. */
-async function field(page, caption) {
+function field(page, caption) {
   const plain = caption.replaceAll('&', '').trim();
-  for (const label of [plain, caption]) {
-    const locator = page.getByLabel(label, { exact: true });
-    if (await locator.count()) return locator;
-  }
-  throw new Error(`Order Report selector "${plain}" is not on the screen`);
+  const byPlain = page.getByLabel(plain, { exact: true });
+  return plain === caption ? byPlain : byPlain.or(page.getByLabel(caption, { exact: true }));
 }
 
-async function panelButton(page, caption) {
+function panelButton(page, caption) {
   const plain = caption.replaceAll('&', '').trim();
-  for (const name of [plain, caption]) {
-    const locator = page.getByRole('button', { name, exact: true });
-    if (await locator.count()) return locator;
-  }
-  throw new Error(`Order Report button "${plain}" is not on the screen`);
+  const byPlain = page.getByRole('button', { name: plain, exact: true });
+  return plain === caption
+    ? byPlain
+    : byPlain.or(page.getByRole('button', { name: caption, exact: true }));
 }
 
+/**
+ * Blank every live selector before a run. City and Area are editable combos on the desktop (RP_ALL.cs:7567
+ * reads `cboCity.Text`; no DropDownStyle is set, so the WinForms default DropDown applies), so the web shows
+ * an input with a list and the module types into it. Pr Code, Gr Code and Item Type are disabled (D8).
+ */
 async function clearSelectors(page) {
-  for (const caption of ['Book', 'Pr Code', 'Gr Code', 'Party Code', 'Cust Name']) {
-    const locator = await field(page, caption);
+  for (const caption of ['Book', 'Pr Code', 'Gr Code', 'Party Code', 'Cust Name', 'City', 'Area']) {
+    const locator = field(page, caption);
     if ((await locator.count()) && !(await locator.isDisabled())) await locator.fill('');
   }
-  for (const caption of ['City', 'Area', 'Item Type']) {
-    const locator = await field(page, caption);
-    if (!(await locator.count()) || (await locator.evaluate((el) => el.tagName)) !== 'SELECT')
-      continue;
-    await locator.selectOption({ index: 0 });
-  }
 }
 
-async function runMode(page, mode, { from = FROM, to = TO, ...filters } = {}) {
+/**
+ * Fill the From/To boxes and the selectors, press one of the seven buttons and return the answer of the API.
+ * Making Summ asks "Only Design Summery Report.." first (RP_ALL.cs:11889): `onlySummary` answers Yes, otherwise No.
+ */
+async function runMode(page, mode, { from = FROM, to = TO, onlySummary = false, ...filters } = {}) {
   await clearSelectors(page);
   await field(page, 'From').fill(from);
   await field(page, 'To').fill(to);
   for (const [caption, value] of Object.entries(filters)) {
     if (value === undefined || value === null || value === '') continue;
-    const locator = await field(page, caption);
+    const locator = field(page, caption);
     if ((await locator.count()) && !(await locator.isDisabled())) await locator.fill(String(value));
   }
   const received = page.waitForResponse(
@@ -505,7 +521,12 @@ async function runMode(page, mode, { from = FROM, to = TO, ...filters } = {}) {
       new URL(response.url()).pathname === API_PATH && response.request().method() === 'GET',
     { timeout: 15000 },
   );
-  await (await panelButton(page, BUTTONS[mode])).click();
+  await panelButton(page, BUTTONS[mode]).click();
+  if (mode === 'summary')
+    await page
+      .getByRole('dialog', { name: 'DataCareNext' })
+      .getByRole('button', { name: onlySummary ? 'Yes' : 'No', exact: true })
+      .click();
   const response = await received;
   assert.equal(response.status(), 200, `mode ${mode}: ${await response.text()}`);
   return {
@@ -539,6 +560,66 @@ function assertCodes(grid, expected, absent = []) {
     );
 }
 
+/** Wait for the focus to land on the control with this accessible label (the lookups answer asynchronously). */
+const focusIs = (page, label) =>
+  page.waitForFunction(
+    (wanted) => document.activeElement?.getAttribute('aria-label') === wanted,
+    label,
+    { timeout: 8000 },
+  );
+
+/** The printed lines whose band label starts with `label` (a group band, or a voucher row's first cell). */
+const gridRow = (grid, label) => {
+  const row = grid.rows.find((cells) => cells[0].startsWith(label));
+  assert(row, `a printed line "${label}" in ${grid.rows.map((cells) => cells[0]).join(' | ')}`);
+  return row;
+};
+
+/** The cell of a printed line under a column caption (the first match when a caption repeats). */
+const cellOf = (grid, row, caption, { last = false } = {}) => {
+  const index = last ? grid.headers.lastIndexOf(caption) : grid.headers.indexOf(caption);
+  assert(index >= 0, `column "${caption}" in ${grid.headers.join(' | ')}`);
+  return row[index];
+};
+
+/** RFC 4180 reader for the CSV export (quoted cells, doubled quotes). */
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let cell = '';
+  let quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (quoted) {
+      if (ch === '"' && text[i + 1] === '"') {
+        cell += '"';
+        i++;
+      } else if (ch === '"') quoted = false;
+      else cell += ch;
+    } else if (ch === '"') quoted = true;
+    else if (ch === ',') {
+      row.push(cell);
+      cell = '';
+    } else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && text[i + 1] === '\n') i++;
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = '';
+    } else cell += ch;
+  }
+  if (cell !== '' || row.length) {
+    row.push(cell);
+    rows.push(row);
+  }
+  return rows;
+}
+
+const isoDay = (offsetDays = 0) => {
+  const d = new Date(Date.now() + offsetDays * 86400000);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
 async function observeCurrent(ctx) {
   const { page } = await ctx.session();
   await page.goto('/reports/order-report');
@@ -549,6 +630,111 @@ async function observeCurrent(ctx) {
     tableHeaders: await page.locator('table thead th').allTextContents(),
   };
 }
+
+/** The Sales Order screen (TR_SALE_ORD) as the source document of the lifecycle and journey cases. */
+const SO_LINE = (pcs, net) => ({
+  item: 'GLD22',
+  pcs: String(pcs),
+  gross: String(net),
+  net: String(net),
+  touch: '100',
+  rate: '1500',
+  labour: '40',
+});
+async function openSalesOrder(page) {
+  await page.goto('/txn/sales-order');
+  await page.getByRole('heading', { name: 'Sales Order', exact: true }).waitFor();
+  await page.waitForFunction(() => {
+    const input = document.querySelector('[aria-label="Labour rate item 1"]');
+    return input && !input.matches(':disabled');
+  });
+}
+async function fillSalesOrderLine(page, n, line) {
+  const item = page.getByLabel(`Item code ${n}`, { exact: true });
+  await item.fill(line.item);
+  await item.press('Escape');
+  for (const [label, key] of [
+    ['Pieces', 'pcs'],
+    ['Gross weight', 'gross'],
+    ['Net weight', 'net'],
+    ['Touch', 'touch'],
+    ['Rate', 'rate'],
+    ['Labour rate', 'labour'],
+  ])
+    await page.getByLabel(`${label} item ${n}`, { exact: true }).fill(line[key]);
+  await page.getByLabel(`Labour rate item ${n}`, { exact: true }).press('Tab');
+}
+async function saveSalesOrder(page, label) {
+  const [response] = await Promise.all([
+    page.waitForResponse(
+      (r) =>
+        /^\/api\/sales-orders(\/\d+)?$/.test(new URL(r.url()).pathname) &&
+        ['POST', 'PUT'].includes(r.request().method()),
+    ),
+    page.getByRole('button', { name: label, exact: true }).click(),
+  ]);
+  return response;
+}
+/** Enter and save a Sales Order for party E2ELOC with a cash advance; returns the stored header. */
+async function createSalesOrder(ctx, page, { lines, advance }) {
+  await openSalesOrder(page);
+  const customer = page.getByLabel('Customer account', { exact: true });
+  await customer.fill('E2ELOC');
+  await customer.locator('xpath=..').getByText('E2ELOC', { exact: true }).first().waitFor();
+  await customer.press('Enter');
+  for (const [i, line] of lines.entries()) {
+    if (i) await page.getByRole('button', { name: '+ Add line', exact: true }).click();
+    await fillSalesOrderLine(page, i + 1, line);
+  }
+  await page.getByLabel('Advance ₹', { exact: true }).fill(String(advance));
+  const response = await saveSalesOrder(page, 'Save Sales Order');
+  assert.equal(response.status(), 201, await response.text());
+  const { vchNo } = await response.json();
+  const [header] = await ctx.rows(
+    `SELECT "CO_YEAR" "year","CO_BOOK" "book","VCH_NO" "vch","TOT_AMT"::float8 "tot","ADV_AMT"::float8 "adv","CASH_AMT"::float8 "cash"
+       FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "VCH_NO" = ANY($2::text[])`,
+    [String(vchNo), String(vchNo).padStart(5, '0')],
+  );
+  assert(header, `the saved order ${vchNo} is stored`);
+  return header;
+}
+
+/**
+ * TR_SALE_ORD.cs:9503 {{dataRow7["ORD_SIGN"] = "+";}} writes the advance as a "+" SL_ORD_ADJ row under the order's
+ * own keys, but the web Sales Order writes no SL_ORD_ADJ at all (ORDER_WRITE_SET in salesOrder.mjs measures
+ * AC_DATA, ROJ_MEL_DATA, SL_ORD_DATA, SL_ORD_DETL, TEMP_BOOK_DATA). That is a gap of the Sales Order screen, not
+ * of this report, so the row it should have written is seeded here and the report is judged on it. Any such row
+ * makes the order "adjusted", which the Sales Order edit and delete refuse (salesOrder.ts assertOrderUnconsumedTx),
+ * so a case seeds it after its edits and drops it before its delete.
+ */
+async function seedAdvanceAdjustment(ctx, header) {
+  await ctx.rows(
+    `INSERT INTO "SL_ORD_ADJ"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","ORD_SIGN","ORD_AMT","ORD_LC","ORD_YRCD","ORD_DBCD","ORD_NO","ORD_AC_CODE")
+     SELECT $1::text,'01','01',$2::text,$3::text,$4::text,1,"VCH_DATE",'+',"ADV_AMT",'01',$2::text,$3::text,$4::text,'E2ELOC'
+       FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$3 AND "VCH_NO"=$4 AND "CO_YEAR"=$2`,
+    header.year,
+    header.book,
+    header.vch,
+  );
+}
+
+/** Everything one saved order writes (ORDER_WRITE_SET of salesOrder.mjs), for a case that fails midway. */
+async function removeSalesOrder(ctx, vch) {
+  for (const table of [
+    'SL_ORD_ADJ',
+    'SL_ORD_DETL',
+    'SL_ORD_DATA',
+    'AC_DATA',
+    'ROJ_MEL_DATA',
+    'TEMP_BOOK_DATA',
+  ])
+    await ctx.rows(
+      `DELETE FROM "${table}" WHERE tenant_id=$1 AND "CO_BOOK"='SOR' AND "VCH_NO" = $2`,
+      vch,
+    );
+}
+/** Every mode over the whole life of the books, to include an order dated today. */
+const WHOLE_LIFE = () => ({ from: '2010-01-01', to: isoDay(1) });
 
 function desiredCase(id, group, kind, source, expected, exercise, extra = {}) {
   return C(
@@ -583,15 +769,18 @@ async function ensureUser(ctx, { user, subMenu, lcCode = '01', print = 'Y' }) {
     await ctx.stack.hashPassword(process.env.FEATURE_E2E_PASSWORD),
     print,
   );
-  await ctx.rows(
-    `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
-     SELECT $1::text,'01',$2::text,$3::text,'Report',$4::text,'Y','N','N',$5::text
-      WHERE NOT EXISTS (SELECT 1 FROM "USER_SET" WHERE tenant_id=$1 AND "USER_NAME"=$3::text AND "SUB_MENU"=$4::text)`,
-    lcCode,
-    user,
-    subMenu,
-    print,
-  );
+  // Rights are keyed by the session location; every session opens at the company default (01) and a head-office
+  // user then switches to 00, so the user holds the row at both.
+  for (const lc of new Set(['01', lcCode]))
+    await ctx.rows(
+      `INSERT INTO "USER_SET"(tenant_id,"CO_CODE","LC_CODE","USER_NAME","MAIN_MENU","SUB_MENU","FRM_VIEW","FRM_EDIT","FRM_DELETE","FRM_PRINT")
+       SELECT $1::text,'01',$2::text,$3::text,'Report',$4::text,'Y','N','N',$5::text
+        WHERE NOT EXISTS (SELECT 1 FROM "USER_SET" WHERE tenant_id=$1 AND "LC_CODE"=$2::text AND "USER_NAME"=$3::text AND "SUB_MENU"=$4::text)`,
+      lc,
+      user,
+      subMenu,
+      print,
+    );
 }
 
 const DB_LAYER =
@@ -711,12 +900,15 @@ export const orderReportRp = {
         await withFixture(ctx, async () => {
           const user = 'e2eorderloc00';
           await ensureUser(ctx, { user, subMenu: 'Order Report', lcCode: '00' });
-          const page00 = await openReport(ctx, as(user));
+          const page00 = await openReport(ctx, as(user), { lcCode: '00' });
           assert.equal(await field(page00, 'lc Code').inputValue(), '00');
           assert.equal(await field(page00, 'lc Code').isDisabled(), false);
           await field(page00, 'lc Code').fill('');
           await runMode(page00, 'report', { from: WIDE_FROM });
-          assertCodes(await readGrid(page00), ['O6'], []);
+          assertCodes(await readGrid(page00), ['O6', 'O1'], ['O7']);
+          // Typing the own location back lists only the head office's own order (RP_ALL.cs:8383).
+          await runMode(page00, 'report', { from: WIDE_FROM, 'lc Code': '00' });
+          assertCodes(await readGrid(page00), ['O6'], ['O1', 'O2', 'O3']);
         });
       },
     ),
@@ -833,20 +1025,52 @@ export const orderReportRp = {
       'read-only',
       `RP_ALL.cs:8550 {{DC_Main.RptName = "OrdAdvAdj";}}; RP_ALL.cs:10927 {{HAVING SUM(CASE WHEN B.ORD_SIGN = '+' THEN B.ORD_AMT ELSE - B.ORD_AMT END)  = 0}}`,
       {
-        O1: { rows: ['+ 5000', '- 1500', '- 500'], ...EXPECT.adjust.O1 },
-        O3: { rows: ['+ 3000', '- 1500', '- 1500'], ...EXPECT.adjust.O3 },
+        O1: EXPECT.adjust.O1,
+        O3: EXPECT.adjust.O3,
         grand: { ord: 8000, adj: 5000, bal: 3000 },
-        noDetailFor: ['O2', 'O4', 'O8'],
+        withoutAdjustments: ['O2', 'O4', 'O8'],
+        detailBand: 'suppressed (OrdAdvAdj prints the per-order sums only)',
       },
       async ({ ctx, page }) => {
         await withFixture(ctx, async () => {
           const mode = await runMode(page, 'adjust');
           const grid = await readGrid(page);
-          assertCodes(grid, ['O1', 'O3'], ['O2', 'O4', 'O8']);
-          const text = grid.rows.map((row) => row.join(' ')).join('\n');
-          for (const row of ['+ 5000', '- 1500', '- 500', '+ 3000'])
-            assert(text.includes(row), `signed amount ${row} is printed: ${text.slice(0, 400)}`);
           assert.equal(mode.body.title, TITLES.adjust);
+          // OrdAdvAdj.xml:13-31 links SL_ORD_DATA to SL_ORD_ADJ with LeftOuter joins, so an order in range
+          // without adjustments still reaches the report. The group is @OrdGroup = ORD_LC+ORD_YRCD+ORD_DBCD+ORD_NO
+          // (OrdAdvAdj.xml:231,252): an order without adjustment rows has NULL ORD_* fields, so every such order
+          // falls into ONE null group headed by the first of them in the record sort (CO_YEAR, VCH_DATE,
+          // VCH_NO, OrdAdvAdj.xml:234-237), here O2. The detail band is suppressed; each band carries
+          // Sum(@OrdAmt), Sum(@OrdAdjAmt), Sum(@BalAmt), @OrdAmt/@OrdAdjAmt chosen by ORD_SIGN.
+          const money = (n) => n.toFixed(2);
+          for (const [vch, date, name, expected] of [
+            ['O1', '05/01/2026', 'ALPHA JEWELS', EXPECT.adjust.O1],
+            ['O3', '15/01/2026', 'ALPHA JEWELS', EXPECT.adjust.O3],
+            ['O2', '10/01/2026', 'BETA TRADERS', { ord: 0, adj: 0, bal: 0 }],
+          ]) {
+            const row = gridRow(grid, `${vch} ${date} ${name}`);
+            assert.deepEqual(
+              ['Order Adv', 'Order Adjust', 'Panding Amt'].map((caption) =>
+                cellOf(grid, row, caption),
+              ),
+              [money(expected.ord), money(expected.adj), money(expected.bal)],
+              `${vch} advance, adjustment and pending`,
+            );
+          }
+          assert.equal(
+            grid.rows.length,
+            3,
+            'O1, O3 and the one null group of the unadjusted orders',
+          );
+          assertCodes(grid, [], ['O4', 'O8']);
+          assertCodes(grid, [], ['O5', 'O6']);
+          assert.deepEqual(
+            ['Order Adv', 'Order Adjust', 'Panding Amt'].map((caption) =>
+              cellOf(grid, grid.footer, caption),
+            ),
+            ['8000.00', '5000.00', '3000.00'],
+          );
+          assert.equal(grid.footer[0], 'TOTAL :');
         });
       },
     ),
@@ -860,31 +1084,29 @@ export const orderReportRp = {
         lines: EXPECT.reportKeys,
         grand: { pcs: EXPECT.reportPcs, nwt: EXPECT.reportNwt },
         pending: EXPECT.pendingKeys,
+        pendingRule:
+          'stored DESIGN_ISU = N only; the HM310NEPK-only write is not ported (API review 69bd05e7)',
         pendingGrand: { pcs: EXPECT.pendingPcs, nwt: EXPECT.pendingNwt },
         noStatusFilter: true,
       },
       async ({ ctx, page }) => {
         assert.deepEqual(EXPECT.reportPcs, 9);
         assert.deepEqual(EXPECT.reportNwt, 31.875);
-        assert.deepEqual(EXPECT.pendingPcs, 7);
-        assert.deepEqual(EXPECT.pendingNwt, 24.875);
+        assert.deepEqual(EXPECT.pendingPcs, 8);
+        assert.deepEqual(EXPECT.pendingNwt, 28.875);
         await withFixture(ctx, async () => {
           await runMode(page, 'report');
           const all = await readGrid(page);
           assertCodes(all, ['O1', 'O2', 'O3', 'O4', 'O8'], ['O5', 'O6']);
-          for (const total of ['9', '31.875'])
-            assert(
-              all.footer.some((cell) => cell.includes(total)),
-              `grand total ${total}`,
-            );
+          assert.equal(all.footer[0], 'Total :');
+          assert.equal(cellOf(all, all.footer, 'Pcs'), String(EXPECT.reportPcs));
+          assert.equal(cellOf(all, all.footer, 'Net Wt'), EXPECT.reportNwt.toFixed(3));
           await runMode(page, 'pending');
           const pending = await readGrid(page);
-          assertCodes(pending, ['O1', 'O2', 'O4'], ['O3', 'O5', 'O8']);
-          for (const total of ['7', '24.875'])
-            assert(
-              pending.footer.some((cell) => cell.includes(total)),
-              `pending total ${total}`,
-            );
+          // Every line stored with DESIGN_ISU N lists, so the fully adjusted O3 stays; O8 is stored Y.
+          assertCodes(pending, ['O1', 'O2', 'O3', 'O4'], ['O5', 'O8']);
+          assert.equal(cellOf(pending, pending.footer, 'Pcs'), String(EXPECT.pendingPcs));
+          assert.equal(cellOf(pending, pending.footer, 'Net Wt'), EXPECT.pendingNwt.toFixed(3));
         });
       },
     ),
@@ -918,22 +1140,74 @@ export const orderReportRp = {
       'formula.order-wise-bill-total',
       'T03',
       'read-only',
-      'RP_ALL.cs:9776 {{DC_Main.RptName = "OrdAdjBillWise";}}; Sum ({@AdjAmt}, {SL_ORD_DATA.VCH_NO}) with @AdjAmt = - rows only',
+      'RP_ALL.cs:9776 {{DC_Main.RptName = "OrdAdjBillWise";}}; extraction_output/rpt_xml/OrdAdjBillWise.xml:399-401 @AdjAmt = ORD_SIGN "-" rows only; @PandingTot = ADV_AMT - Sum(@AdjAmt, VCH_NO)',
       {
-        O1: { advanceRow: 5000, bill: 'S1', billTotal: 12000, total: EXPECT.withBill.O1 },
-        O3: { advanceRow: 3000, bill: 'S2', billTotal: 9000, total: EXPECT.withBill.O3 },
-        O2_O4_O8: { total: 0 },
+        O1: {
+          advance: 5000,
+          adjusted: 2000,
+          pending: 3000,
+          bills: [
+            ['S1', 12000, 1500],
+            ['S1', 12000, 500],
+          ],
+        },
+        O3: {
+          advance: 3000,
+          adjusted: 3000,
+          pending: 0,
+          bills: [
+            ['S2', 9000, 1500],
+            ['S2', 9000, 1500],
+          ],
+        },
+        withoutBills: ['O2', 'O4', 'O8'],
         grandBand: false,
       },
       async ({ ctx, page }) => {
-        assert.deepEqual([EXPECT.withBill.O1, EXPECT.withBill.O3], [2000, 3000]);
         await withFixture(ctx, async () => {
           const mode = await runMode(page, 'with-bill');
           const grid = await readGrid(page);
-          assertCodes(grid, ['O1', 'O2', 'O3', 'O4', 'O8', 'S1', 'S2'], []);
           assert.equal(mode.body.title, TITLES['with-bill']);
-          const text = grid.rows.map((row) => row.join(' ')).join('\n');
-          for (const amount of ['5000', '1500', '500', '3000']) assert(text.includes(amount));
+          assert.equal(grid.footer.length, 0, 'OrdAdjBillWise has no report-footer sum (D13)');
+          const money = (n) => n.toFixed(2);
+          // Per-order band: ADV_AMT, Sum(@AdjAmt) over the "-" rows and @PandingTot.
+          for (const [label, adv, adjusted] of [
+            ['O1 05/01/2026', 5000, 2000],
+            ['O3 15/01/2026', 3000, 3000],
+            ['O2 10/01/2026', 0, 0],
+            ['O4 12/01/2026', 0, 0],
+            ['O8 20/01/2026', 0, 0],
+          ]) {
+            const row = gridRow(grid, label);
+            assert.deepEqual(
+              ['Total Adv.', 'Adjust Amt', 'Panding Amt'].map((caption) =>
+                cellOf(grid, row, caption),
+              ),
+              [money(adv), money(adjusted), money(adv - adjusted)],
+              `${label} advance, adjusted and pending`,
+            );
+          }
+          // Detail band: the "+" advance row of the order itself (no bill) and one line per "-" adjustment
+          // with the bill's own voucher, party and bill total.
+          const detail = grid.rows.filter((cells) => cells[0] === 'line');
+          const shape = detail.map((cells) =>
+            ['Book', 'Vch No', 'Bill Party Name', 'Bill Amt', 'Adjust Amt'].map((caption) =>
+              cellOf(grid, cells, caption),
+            ),
+          );
+          for (const expected of [
+            ['B1', 'O1', '', '0.00', '0.00'],
+            ['SB', 'S1', 'ALPHA JEWELS', '12000.00', '1500.00'],
+            ['SB', 'S1', 'ALPHA JEWELS', '12000.00', '500.00'],
+            ['B1', 'O3', '', '0.00', '0.00'],
+            ['SB', 'S2', 'ALPHA JEWELS', '9000.00', '1500.00'],
+            ['SB', 'S2', 'ALPHA JEWELS', '9000.00', '1500.00'],
+          ])
+            assert(
+              shape.some((cells) => cells.join('|') === expected.join('|')),
+              `detail line ${expected.join('|')} in ${shape.map((cells) => cells.join('|')).join(' ; ')}`,
+            );
+          assertCodes(grid, [], ['O5', 'O6', 'S3']);
         });
       },
     ),
@@ -956,6 +1230,7 @@ export const orderReportRp = {
           { bill: 'S1', amounts: [1500, 500] },
           { bill: 'S2', amounts: [1500, 1500] },
         ],
+        billWithoutAdjustment: 'S3 does not list (Equal join)',
         custNameFiltersBill: true,
         grandBand: false,
       },
@@ -963,11 +1238,37 @@ export const orderReportRp = {
         await withFixture(ctx, async () => {
           const mode = await runMode(page, 'bill-wise');
           const grid = await readGrid(page);
-          assertCodes(grid, ['S1', 'S2', 'O1', 'O3'], ['O2', 'O4', 'O8']);
           assert.equal(grid.footer.length, 0, 'no total band (D13)');
           assert.equal(mode.body.title, TITLES['bill-wise']);
+          // The bill is the base (Equal join to SL_ORD_ADJ, BillWiseOrderAdjust.xml): S3 has no adjustment row
+          // and does not list; each bill prints its total and advance, then the raw ORD_AMT of every row.
+          const bills = grid.rows.filter((cells) => cells[0] === 'voucher');
+          assert.deepEqual(
+            bills.map((cells) =>
+              ['Vch No', 'Bill Amt'].map((caption) => cellOf(grid, cells, caption)).join(':'),
+            ),
+            ['S1:12000.00', 'S2:9000.00'],
+          );
+          const orders = grid.rows
+            .filter((cells) => cells[0] === 'line')
+            .map((cells) =>
+              ['Order Book', 'Order No', 'Order Party', 'Adv Amt']
+                .map((caption) => cellOf(grid, cells, caption, { last: true }))
+                .join(':'),
+            );
+          assert.deepEqual(orders, [
+            'B1:O1:ALPHA JEWELS:1500.00',
+            'B1:O1:ALPHA JEWELS:500.00',
+            'B1:O3:ALPHA JEWELS:1500.00',
+            'B1:O3:ALPHA JEWELS:1500.00',
+          ]);
+          assertCodes(grid, [], ['S3', 'O2', 'O4', 'O8', 'S0', 'O5']);
           await runMode(page, 'bill-wise', { 'Cust Name': 'ALPHA JEWELS' });
-          assertCodes(await readGrid(page), ['S1', 'S2'], []);
+          assertCodes(await readGrid(page), ['S1', 'S2'], ['S3']);
+          await runMode(page, 'bill-wise', { 'Party Code': 'P2' });
+          assertCodes(await readGrid(page), [], ['S1', 'S2', 'S3']);
+          await runMode(page, 'bill-wise', { City: 'BARODA' });
+          assertCodes(await readGrid(page), [], ['S1', 'S2']);
         });
       },
     ),
@@ -985,25 +1286,27 @@ export const orderReportRp = {
         staleResponse: 'never overwrites a newer selection',
       },
       async ({ ctx, page }) => {
-        for (const [caption, code, name] of [
-          ['Book', 'B1', 'Order Book 1'],
-          ['Party Code', 'P1', 'ALPHA JEWELS'],
-        ]) {
-          const input = await field(page, caption);
-          await input.fill(code);
-          await input.press('Enter');
-          await page.getByText(name, { exact: true }).first().waitFor();
-          await input.fill('ZZ');
-          await input.press('Enter');
-          await page.getByRole('dialog').waitFor();
-          await page.keyboard.press('Escape');
-          assert.equal(await input.inputValue(), 'ZZ', 'cancel keeps the typed text');
-        }
         await withFixture(ctx, async () => {
+          for (const [caption, code, name, next] of [
+            ['Book', 'B1', 'Order Book 1', 'Party Code'],
+            ['Party Code', 'P1', 'ALPHA JEWELS', 'Cust Name'],
+          ]) {
+            const input = field(page, caption);
+            await input.fill(code);
+            await input.press('Enter');
+            await page.getByText(name, { exact: true }).first().waitFor();
+            await focusIs(page, next); // a known code fills its name and tabs on (RP_ALL.cs:7322-7328, :7421)
+            await input.fill('ZZ');
+            await input.press('Enter');
+            await page.getByRole('dialog').waitFor();
+            await page.keyboard.press('Escape');
+            assert.equal(await input.inputValue(), 'ZZ', 'cancel keeps the typed text');
+            assert.equal(await page.getByRole('dialog').count(), 0, 'the help closed');
+          }
           const user = 'e2eorderloc00b';
           await ensureUser(ctx, { user, subMenu: 'Order Report', lcCode: '00' });
-          const page00 = await openReport(ctx, as(user));
-          const lc = await field(page00, 'lc Code');
+          const page00 = await openReport(ctx, as(user), { lcCode: '00' });
+          const lc = field(page00, 'lc Code');
           assert.equal(await lc.isDisabled(), false);
           await lc.fill('00');
           await lc.press('Enter');
@@ -1029,17 +1332,26 @@ export const orderReportRp = {
       },
       async ({ ctx, page }) => {
         await withFixture(ctx, async () => {
-          const input = await field(page, 'Cust Name');
+          const input = field(page, 'Cust Name');
           await input.fill('ALPHA JEWELS');
           await input.press('Enter');
           assert.equal(await input.inputValue(), 'ALPHA JEWELS', 'copied back exactly as stored');
+          await focusIs(page, 'City'); // a found name moves to City (RP_ALL.cs:9712)
           await input.fill('NO SUCH NAME');
           await input.press('Enter');
           await page.getByRole('dialog').waitFor();
           await page.keyboard.press('Escape');
           assert.equal(await input.inputValue(), 'NO SUCH NAME');
+          await input.press('Enter');
+          await page
+            .getByRole('dialog')
+            .getByRole('button', { name: /BETA TRADERS/ })
+            .click();
+          assert.equal(await input.inputValue(), 'BETA TRADERS', 'picking writes the name');
+          await focusIs(page, 'Cust Name'); // the focus returns after the help (RP_ALL.cs:9693)
           await input.fill('');
           await input.press('Enter');
+          await focusIs(page, 'City'); // an empty name moves to City (RP_ALL.cs:9723)
           await runMode(page, 'bill-wise', { 'Cust Name': 'ALPHA JEWELS' });
           assertCodes(await readGrid(page), ['S1', 'S2'], []);
         });
@@ -1136,7 +1448,7 @@ export const orderReportRp = {
             );
             await panelButton(page, BUTTONS.report).click();
             const response = await received;
-            assert.equal(response.status(), 200);
+            assert.equal(response.status(), 200, await response.text());
             assert.equal((await readGrid(page)).rows.length, 0);
           }
           const party = await field(page, 'Party Code');
@@ -1156,39 +1468,91 @@ export const orderReportRp = {
       'mutation',
       'TR_SALE_ORD.cs:9503 {{dataRow7["ORD_SIGN"] = "+";}}; TR_SALE_ORD.cs:9504 {{dataRow7["ORD_AMT"] = RuntimeHelpers.GetObjectValue(Interaction.IIf(Conversion.Val(MSG2_TOTAL[9, 1]) == 0.0}}',
       {
-        created: { pcs: 1, nwt: 10.5, secondNwt: 5.25, cash: 5000, total: 20000 },
+        created: { pcs: 3, nwt: 15.75, cash: 5000 },
         editedNwt: 6,
         nwtDelta: 0.75,
         afterDelete: 'no rows in any mode',
         advanceAdjustment: '+ 5000',
       },
       async ({ ctx, page }) => {
-        await page.goto('/txn/sales-order');
-        await page.getByRole('heading', { name: 'Sales Order', exact: true }).waitFor();
-        await page.getByLabel('Customer account', { exact: true }).fill('E2ELOC');
-        await page.getByLabel('Customer account', { exact: true }).press('Enter');
-        await page.getByLabel('Item code 1', { exact: true }).fill('GLD22');
-        await page.getByLabel('Net weight item 1', { exact: true }).fill('10.5');
-        await page.getByRole('button', { name: '+ Add line', exact: true }).click();
-        await page.getByLabel('Item code 2', { exact: true }).fill('GLD22');
-        await page.getByLabel('Net weight item 2', { exact: true }).fill('5.25');
-        await page.getByLabel('Advance ₹', { exact: true }).fill('5000');
-        const saved = await page.waitForResponse(
-          (r) =>
-            /^\/api\/sales-orders(\/\d+)?$/.test(new URL(r.url()).pathname) &&
-            r.request().method() === 'POST',
-        );
-        await page.getByRole('button', { name: 'Save Sales Order', exact: true }).click();
-        assert.equal((await saved).status(), 201);
-        const page2 = await openReport(ctx);
-        await runMode(page2, 'report');
-        assertCodes(await readGrid(page2), ['10.500', '5.250'], []);
-        await runMode(page2, 'advance');
-        assertCodes(await readGrid(page2), ['5000', '20000'], []);
-        await runMode(page2, 'adjust');
-        assertCodes(await readGrid(page2), ['+ 5000'], []);
-        await runMode(page2, 'pending');
-        assertCodes(await readGrid(page2), ['10.500', '5.250'], []);
+        const whole = WHOLE_LIFE();
+        const report = await openReport(ctx);
+        await runMode(report, 'report', whole);
+        const before = await readGrid(report);
+        const beforePcs = Number(cellOf(before, before.footer, 'Pcs'));
+        const beforeNwt = Number(cellOf(before, before.footer, 'Net Wt'));
+        let header;
+        try {
+          header = await createSalesOrder(ctx, page, {
+            lines: [SO_LINE(1, 10.5), SO_LINE(2, 5.25)],
+            advance: 5000,
+          });
+          assert.equal(header.adv, 5000, 'the advance is stored on the order');
+          // Step 2: modes 1 and 2 follow the new order.
+          await runMode(report, 'report', whole);
+          const created = await readGrid(report);
+          const voucher = created.rows.find(
+            (cells) => cells[0] === 'voucher' && cellOf(created, cells, 'Ord No') === header.vch,
+          );
+          assert(voucher, `order ${header.vch} voucher row`);
+          assert.equal(cellOf(created, voucher, 'Advance Amt'), '5000.00');
+          assert.equal(cellOf(created, created.footer, 'Pcs'), String(beforePcs + 3));
+          assert.equal(cellOf(created, created.footer, 'Net Wt'), (beforeNwt + 15.75).toFixed(3));
+          assertCodes(created, ['10.500', '5.250'], []);
+          await runMode(report, 'advance', whole);
+          const advance = await readGrid(report);
+          const advRow = advance.rows.find((cells) => cells.includes(header.vch));
+          assert(advRow, `order ${header.vch} in the Order Advance report`);
+          assert.equal(cellOf(advance, advRow, 'Total Adv.'), '5000.00');
+          assert.equal(cellOf(advance, advRow, 'Order Amt'), header.tot.toFixed(2));
+          await runMode(report, 'pending', whole);
+          assertCodes(await readGrid(report), [header.vch, '10.500', '5.250'], []);
+          // Step 3: edit line 2 to 6.000 on the Sales Order screen; mode 1 rises by 0.750.
+          await openSalesOrder(page);
+          await page.getByLabel('Order number', { exact: true }).fill(header.vch);
+          await page.getByRole('button', { name: 'Load order', exact: true }).click();
+          await page.getByText(`Editing order #${header.vch}`, { exact: true }).waitFor();
+          await page.waitForFunction(() => {
+            const input = document.querySelector('[aria-label="Net weight item 2"]');
+            return input && !input.matches(':disabled');
+          });
+          await page.getByLabel('Net weight item 2', { exact: true }).fill('6');
+          await page.getByLabel('Gross weight item 2', { exact: true }).fill('6');
+          await page.getByLabel('Labour rate item 2', { exact: true }).press('Tab');
+          const edited = await saveSalesOrder(page, 'Update Sales Order');
+          assert.equal(edited.status(), 200, await edited.text());
+          await runMode(report, 'report', whole);
+          const after = await readGrid(report);
+          assert.equal(cellOf(after, after.footer, 'Net Wt'), (beforeNwt + 16.5).toFixed(3));
+          // The advance row (see seedAdvanceAdjustment): Order Adjust shows the "+" 5000 and the pending 5000.
+          await seedAdvanceAdjustment(ctx, header);
+          await runMode(report, 'adjust', whole);
+          const adjusted = await readGrid(report);
+          const band = adjusted.rows.find((cells) => cells[0].startsWith(header.vch));
+          assert(band, `order ${header.vch} in the Order Adjust report`);
+          assert.equal(cellOf(adjusted, band, 'Order Adv'), '5000.00');
+          assert.equal(cellOf(adjusted, band, 'Panding Amt'), '5000.00');
+          await ctx.rows(`DELETE FROM "SL_ORD_ADJ" WHERE tenant_id=$1 AND "VCH_NO"=$2`, header.vch);
+          // Step 4: delete the order on its own screen; every mode drops it.
+          await openSalesOrder(page);
+          await page.getByLabel('Order number', { exact: true }).fill(header.vch);
+          await page.getByRole('button', { name: 'Load order', exact: true }).click();
+          await page.getByText(`Editing order #${header.vch}`, { exact: true }).waitFor();
+          const [deleted] = await Promise.all([
+            page.waitForResponse(
+              (r) => r.request().method() === 'DELETE' && r.url().includes('/api/sales-orders/'),
+            ),
+            page.getByRole('button', { name: 'Delete order', exact: true }).click(),
+          ]);
+          assert(deleted.status() < 300, `delete answered ${deleted.status()}`);
+          for (const mode of ['report', 'advance', 'adjust', 'with-bill', 'pending', 'summary']) {
+            await runMode(report, mode, whole);
+            assertCodes(await readGrid(report), [], [header.vch]);
+          }
+        } finally {
+          // The screen's delete leaves the seeded advance row behind; remove whatever is left.
+          if (header) await removeSalesOrder(ctx, header.vch);
+        }
       },
     ),
 
@@ -1217,9 +1581,9 @@ export const orderReportRp = {
         orderRightWithPrint: { export: 200 },
       },
       async ({ ctx, page }) => {
-        await ensureUser(ctx, { user: 'e2eordersalesonly', subMenu: 'Sales Order', print: 'N' });
+        await ensureUser(ctx, { user: 'e2eordsalesonly', subMenu: 'Sales Order', print: 'N' });
         await ensureUser(ctx, { user: 'e2eorderprintno', subMenu: 'Order Report', print: 'N' });
-        const { page: salesPage } = await ctx.session(as('e2eordersalesonly'));
+        const { page: salesPage } = await ctx.session(as('e2eordsalesonly'));
         await salesPage.goto('/dashboard');
         assert.equal(
           await salesPage.getByRole('link', { name: 'Order Report', exact: true }).count(),
@@ -1355,6 +1719,21 @@ export const orderReportRp = {
               vch,
               '2026-01-06',
             );
+            // A sale bill (own keys SB/vch) that adjusts the order, so Order Wise Bill and Bill Wise Adjust overflow too.
+            await ctx.rows(
+              `INSERT INTO "SL_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","AC_CODE","AC_NAME","TOT_AMT","ADV_AMT")
+               VALUES($1,'01','01',$2,'SB',$3,$4::date,'P1','ALPHA JEWELS',100,0)`,
+              YEAR,
+              vch,
+              '2026-01-06',
+            );
+            await ctx.rows(
+              `INSERT INTO "SL_ORD_ADJ"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","ORD_SIGN","ORD_AMT","ORD_LC","ORD_YRCD","ORD_DBCD","ORD_NO","ORD_AC_CODE")
+               VALUES($1,'01','01',$2,'SB',$3,1,$4::date,'-',100,'01',$2,'B1',$3,'P1')`,
+              YEAR,
+              vch,
+              '2026-01-06',
+            );
           }
           for (const mode of Object.keys(BUTTONS)) {
             const run = await runMode(page, mode);
@@ -1369,14 +1748,23 @@ export const orderReportRp = {
             );
             assert.equal(xlsx.status(), 200, `XLSX of mode ${mode}`);
             assert.equal(csv.headers()['content-type']?.includes('text/csv'), true);
-            const csvLines = (await csv.text()).split('\r\n').filter((line) => line.length > 0);
+            // exportRows.ts prints the same lines as the grid body and then the grand total, which the
+            // grid shows in its footer (OrdDetlRpt "Total :", OrdAdvAdj "TOTAL :").
+            const csvRows = parseCsv(await csv.text()).filter((cells) => cells.some(Boolean));
+            const printed = [...grid.rows, ...(grid.footer.length ? [grid.footer] : [])];
             assert.equal(
-              csvLines.length,
-              grid.rows.length + 1,
-              `mode ${mode}: CSV has one header plus every grid row`,
+              csvRows.length,
+              printed.length + 1,
+              `mode ${mode}: CSV has one header plus every grid row and the total`,
             );
-            for (const caption of grid.headers)
-              assert(csvLines[0].includes(caption), `CSV column "${caption}" matches the grid`);
+            assert.deepEqual(csvRows[0], grid.headers, `mode ${mode}: CSV columns match the grid`);
+            printed.forEach((cells, i) =>
+              assert.deepEqual(
+                csvRows[i + 1].map((cell) => cell.trim()),
+                cells,
+                `mode ${mode}: CSV line ${i + 1} equals the grid line`,
+              ),
+            );
           }
         });
       },
@@ -1434,11 +1822,27 @@ export const orderReportRp = {
       },
       async ({ ctx, page }) => {
         await page.getByLabel('From', { exact: true }).focus();
-        for (const caption of SELECTORS) {
-          assert.equal(await field(page, caption).count(), 1, `${caption} is reachable by Tab`);
+        // Enter walks the enabled selectors in tab order; disabled ones (lc Code at 01, Pr Code, Gr Code,
+        // Item Type) are skipped, as the browser skips them (RP_ALL.cs:7506 jumps Pr Code to City).
+        const walked = [];
+        for (let step = 0; step < 8; step++) {
+          walked.push(
+            await page.evaluate(() => document.activeElement?.getAttribute('aria-label') ?? ''),
+          );
           await page.keyboard.press('Enter');
         }
-        const party = await field(page, 'Party Code');
+        assert.deepEqual(walked.slice(0, 7), [
+          'From',
+          'To',
+          'Book',
+          'Party Code',
+          'Cust Name',
+          'City',
+          'Area',
+        ]);
+        for (const caption of SELECTORS)
+          assert.equal(await field(page, caption).count(), 1, `${caption} is on the screen`);
+        const party = field(page, 'Party Code');
         await party.fill("ab'c");
         assert.equal(
           await party.inputValue(),
@@ -1448,11 +1852,16 @@ export const orderReportRp = {
         await page.keyboard.press('Escape');
         await page.waitForURL((url) => !url.pathname.startsWith('/reports/order-report'));
         const reopened = await openReport(ctx);
-        const city = await field(reopened, 'City');
-        await city.selectOption({ label: 'SURAT' });
+        const city = field(reopened, 'City');
+        // City is an editable combo (RP_ALL.cs:7567 reads cboCity.Text), typed in lower case here.
+        await city.fill('surat');
         await reopened.getByRole('button', { name: 'Cancel', exact: true }).click();
         assert.equal(await field(reopened, 'From').inputValue(), '', 'Cancel clears the dates');
-        assert.equal(await city.inputValue(), 'SURAT', 'Cancel keeps the combo selection');
+        assert.equal(
+          await city.inputValue(),
+          'SURAT',
+          'upper-cased, and Cancel keeps the combo text',
+        );
         await reopened.getByRole('button', { name: 'Print', exact: true }).click();
         assert.equal(
           new URL(reopened.url()).pathname,
@@ -1470,57 +1879,105 @@ export const orderReportRp = {
       'mutation',
       `TR_SALE_ORD.cs:9503 {{dataRow7["ORD_SIGN"] = "+";}}; RP_ALL.cs:10927 {{HAVING SUM(CASE WHEN B.ORD_SIGN = '+' THEN B.ORD_AMT ELSE - B.ORD_AMT END)  = 0}}; RP_ALL.cs:10933 {{UPDATE SL_ORD_DETL SET DESIGN_ISU = 'Y' WHERE CO_CODE = '}} (never written by the web)`,
       {
-        created: { total: 12000, advance: 5000, pcs: 2, nwt: 15 },
-        afterFirstAdjustment: { net: 2000, mode4Total: 3000, mode7Amount: 3000 },
-        afterSecondAdjustment: { net: 0, pending: false, stillInModes1And2: true },
-        flag: 'DESIGN_ISU remains N (D2)',
+        created: { advance: 5000, pcs: 2, nwt: 15 },
+        afterFirstAdjustment: { orderAdv: 5000, adjusted: 3000, pending: 2000, mode7Amount: 3000 },
+        afterSecondAdjustment: { adjusted: 5000, pending: 0, stillInModes1And2: true },
+        flag: 'DESIGN_ISU remains N (D2); Making Panding lists the line either way',
       },
       async ({ ctx, page }) => {
-        await withFixture(ctx, async () => {
-          await page.goto('/txn/sales-order');
-          await page.getByLabel('Customer account', { exact: true }).fill('P1');
-          await page.getByLabel('Customer account', { exact: true }).press('Enter');
-          await page.getByLabel('Item code 1', { exact: true }).fill('I1');
-          await page.getByLabel('Pieces item 1', { exact: true }).fill('2');
-          await page.getByLabel('Net weight item 1', { exact: true }).fill('15');
-          await page.getByLabel('Advance ₹', { exact: true }).fill('5000');
-          const created = page.waitForResponse(
-            (r) =>
-              /^\/api\/sales-orders(\/\d+)?$/.test(new URL(r.url()).pathname) &&
-              r.request().method() === 'POST',
-          );
-          await page.getByRole('button', { name: 'Save Sales Order', exact: true }).click();
-          assert.equal((await created).status(), 201);
+        const whole = WHOLE_LIFE();
+        let header;
+        try {
+          header = await createSalesOrder(ctx, page, { lines: [SO_LINE(2, 15)], advance: 5000 });
+          await seedAdvanceAdjustment(ctx, header);
           const report = await openReport(ctx);
-          for (const mode of ['report', 'advance', 'adjust', 'pending'])
-            await runMode(report, mode);
-          assertCodes(await readGrid(report), ['15.000'], []);
-          for (const [amount, net] of [
-            [3000, 2000],
-            [2000, 0],
-          ]) {
-            await ctx.rows(
-              `INSERT INTO "SL_ORD_ADJ"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","ORD_SIGN","ORD_AMT","ORD_LC","ORD_YRCD","ORD_DBCD","ORD_NO")
-               VALUES($1,'01','01',$2,'SB','S3',1,$3::date,'-',$4,'01',$2,'SB','S3')`,
-              YEAR,
-              '2026-01-24',
+          const money = (n) => n.toFixed(2);
+          const adjustBand = async () => {
+            await runMode(report, 'adjust', whole);
+            const grid = await readGrid(report);
+            const band = grid.rows.find((cells) => cells[0].startsWith(header.vch));
+            assert(band, `order ${header.vch} in Order Adjust`);
+            return ['Order Adv', 'Order Adjust', 'Panding Amt'].map((caption) =>
+              cellOf(grid, band, caption),
+            );
+          };
+          // Step 2: the order, its "+" advance row and its stored total.
+          await runMode(report, 'report', whole);
+          const first = await readGrid(report);
+          assertCodes(first, [header.vch, '15.000'], []);
+          await runMode(report, 'advance', whole);
+          const advance = await readGrid(report);
+          const advRow = advance.rows.find((cells) => cells.includes(header.vch));
+          assert.equal(cellOf(advance, advRow, 'Total Adv.'), money(5000));
+          assert.equal(cellOf(advance, advRow, 'Order Amt'), money(header.tot));
+          assert.deepEqual(await adjustBand(), [money(5000), money(0), money(5000)]);
+          await runMode(report, 'pending', whole);
+          assertCodes(await readGrid(report), [header.vch], []);
+          // Step 3 and 4: bill S9 (total 8000) adjusts the order; the bill's own keys are (SB, S9),
+          // ORD_* point at the order (Ac_Tax.cs:71-73).
+          await ctx.rows(
+            `INSERT INTO "SL_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","VCH_DATE","AC_CODE","AC_NAME","TOT_AMT","ADV_AMT")
+             SELECT $1,'01','01',$2,'SB','S9',$3::date,'E2ELOC','E2E LOCAL CUSTOMER',8000,5000`,
+            header.year,
+            isoDay(),
+          );
+          const adjustment = async (sr, amount) =>
+            ctx.rows(
+              `INSERT INTO "SL_ORD_ADJ"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","ORD_SIGN","ORD_AMT","ORD_LC","ORD_YRCD","ORD_DBCD","ORD_NO","ORD_AC_CODE")
+               VALUES($1,'01','01',$2,'SB','S9',$3,$4::date,'-',$5,'01',$2,$6,$7,'E2ELOC')`,
+              header.year,
+              sr,
+              isoDay(),
               amount,
+              header.book,
+              header.vch,
             );
-            await runMode(report, 'adjust');
-            await runMode(report, 'pending');
-            const flags = await ctx.rows(
-              `SELECT "DESIGN_ISU" "designIsu" FROM "SL_ORD_DETL" WHERE tenant_id=$1 AND "ITM_NWT"=15`,
-            );
-            assert(
-              flags.every((row) => row.designIsu === 'N'),
-              'the web never writes DESIGN_ISU (D2)',
-            );
+          await adjustment(1, 3000);
+          assert.deepEqual(await adjustBand(), [money(5000), money(3000), money(2000)]);
+          await runMode(report, 'with-bill', whole);
+          const withBill = await readGrid(report);
+          const orderBand = gridRow(withBill, header.vch);
+          assert.equal(cellOf(withBill, orderBand, 'Adjust Amt'), money(3000));
+          assert.equal(cellOf(withBill, orderBand, 'Panding Amt'), money(2000));
+          const billLine = withBill.rows.find(
+            (cells) => cells[0] === 'line' && cellOf(withBill, cells, 'Vch No') === 'S9',
+          );
+          assert.equal(cellOf(withBill, billLine, 'Bill Amt'), money(8000));
+          await runMode(report, 'pending', whole);
+          assertCodes(await readGrid(report), [header.vch], []);
+          await runMode(report, 'bill-wise', whole);
+          const billWise = await readGrid(report);
+          const billRow = billWise.rows.find((cells) => cellOf(billWise, cells, 'Vch No') === 'S9');
+          assert.equal(cellOf(billWise, billRow, 'Bill Amt'), money(8000));
+          const orderLine = billWise.rows.find(
+            (cells) =>
+              cells[0] === 'line' &&
+              cellOf(billWise, cells, 'Order No', { last: true }) === header.vch,
+          );
+          assert.equal(cellOf(billWise, orderLine, 'Adv Amt', { last: true }), money(3000));
+          // Step 4: the second adjustment nets the order to zero. The web never writes DESIGN_ISU, so the
+          // line still lists in Making Panding, and modes 1 and 2 list it as always (D2, D3).
+          await adjustment(2, 2000);
+          assert.deepEqual(await adjustBand(), [money(5000), money(5000), money(0)]);
+          for (const mode of ['report', 'advance', 'pending', 'summary']) {
+            await runMode(report, mode, whole);
+            assertCodes(await readGrid(report), [header.vch], []);
           }
-          await runMode(report, 'report');
-          assertCodes(await readGrid(report), ['15.000'], []);
-          await runMode(report, 'advance');
-          assertCodes(await readGrid(report), ['12000', '5000'], []);
-        });
+          const flags = await ctx.rows(
+            `SELECT "DESIGN_ISU" "designIsu" FROM "SL_ORD_DETL" WHERE tenant_id=$1 AND "VCH_NO"=$2`,
+            header.vch,
+          );
+          assert(
+            flags.length > 0 && flags.every((row) => row.designIsu === 'N'),
+            'D2: never written',
+          );
+        } finally {
+          if (header) {
+            await removeSalesOrder(ctx, header.vch);
+            await ctx.rows(`DELETE FROM "SL_DATA" WHERE tenant_id=$1 AND "VCH_NO"='S9'`);
+            await ctx.rows(`DELETE FROM "SL_ORD_ADJ" WHERE tenant_id=$1 AND "VCH_NO"='S9'`);
+          }
+        }
       },
     ),
 

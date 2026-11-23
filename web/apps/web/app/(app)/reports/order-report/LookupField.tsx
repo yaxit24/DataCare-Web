@@ -29,6 +29,7 @@ export function LookupField({
   disabled = false,
   focusAfter,
   onName,
+  showName = true,
 }: {
   label: string;
   value: string;
@@ -38,6 +39,8 @@ export function LookupField({
   disabled?: boolean;
   focusAfter?: string;
   onName?: (name: string) => void;
+  /** The desktop shows a name box beside Book, Party and lc; Cust Name has none. */
+  showName?: boolean;
 }) {
   const [error, setError] = useState('');
   const [rows, setRows] = useState<HelpRow[]>([]);
@@ -139,7 +142,7 @@ export function LookupField({
           {error}
         </span>
       )}
-      {name && !open && (
+      {showName && name && !open && (
         <span className="muted" data-lookup-name={label} style={{ fontSize: 11 }}>
           {name}
         </span>

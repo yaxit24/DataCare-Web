@@ -35,7 +35,9 @@ export function orderQuery(
     };
   const query = new URLSearchParams({ mode, fromDate, toDate });
   query.set('lcCode', sessionLcCode !== '00' ? sessionLcCode : filters.lcCode);
-  if (filters.bookCode.trim()) query.set('coBook', filters.bookCode.trim());
+  // `bookCode`, not `coBook`: the API reads `coBook` as the session's book and refuses an unknown one with 409,
+  // while the desktop never re-checks a typed book on the button click (RP_ALL.cs:8387, study Rules).
+  if (filters.bookCode.trim()) query.set('bookCode', filters.bookCode.trim());
   if (filters.partyCode.trim()) query.set('acCode', filters.partyCode.trim());
   if (filters.custName.trim()) query.set('custName', filters.custName.trim());
   if (filters.city) query.set('city', filters.city);
