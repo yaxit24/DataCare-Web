@@ -125,15 +125,20 @@ async function prepareFilterMasters(ctx) {
     PARTIES.local.code,
     PARTIES.interState.code,
   );
+  // PRODUCT_MAST has no unique key: replace, never add, so the Product master's own cases see two rows at most,
+  // and keep the names off the Product master's E2E search prefix.
   await exec(
     ctx,
-    `INSERT INTO "PRODUCT_MAST"(tenant_id,"CO_CODE","PR_CODE","PR_NAME") VALUES
-       ($1,'01','P1','E2E GOLD PRODUCT'),($1,'01','P2','E2E SILVER PRODUCT')
-     ON CONFLICT DO NOTHING`,
+    `DELETE FROM "PRODUCT_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "PR_CODE" IN ('Y1','Y2')`,
   );
   await exec(
     ctx,
-    `UPDATE "ITEM_MAST" SET "PR_CODE"=CASE WHEN "IT_CODE"=$2 THEN 'P1' ELSE 'P2' END
+    `INSERT INTO "PRODUCT_MAST"(tenant_id,"CO_CODE","PR_CODE","PR_NAME") VALUES
+       ($1,'01','Y1','PURCHASE RPT GOLD'),($1,'01','Y2','PURCHASE RPT SILVER')`,
+  );
+  await exec(
+    ctx,
+    `UPDATE "ITEM_MAST" SET "PR_CODE"=CASE WHEN "IT_CODE"=$2 THEN 'Y1' ELSE 'Y2' END
       WHERE tenant_id=$1 AND "CO_CODE"='01' AND "IT_CODE" IN ($2,$3)`,
     ITEMS.gold.code,
     ITEMS.silver.code,
@@ -239,7 +244,7 @@ export const purchaseReport = {
         await prepareFilterMasters(ctx);
         const vouchers = await createPair(ctx, page);
         await openReport(page);
-        await field(page, 'product').fill('P2');
+        await field(page, 'product').fill('Y2');
         await field(page, 'group').fill(ITEMS.silver.group);
         await field(page, 'item-type').selectOption('S');
         await runMode(page, 'item');
@@ -247,7 +252,7 @@ export const purchaseReport = {
         assert.match(text, new RegExp(vouchers.silver));
         assert.doesNotMatch(text, new RegExp(vouchers.gold));
         return {
-          observation: `P2/S/${ITEMS.silver.group} selected only ${vouchers.silver}`,
+          observation: `Y2/S/${ITEMS.silver.group} selected only ${vouchers.silver}`,
           expected: { included: [vouchers.silver], excluded: [vouchers.gold] },
           database: { vouchers },
           downstream: { grid: text },
@@ -332,7 +337,7 @@ export const purchaseReport = {
         const { page } = await ctx.session();
         await openReport(page);
         for (const [id, code] of [
-          ['product', 'P1'],
+          ['product', 'Y1'],
           ['group', ITEMS.gold.group],
         ]) {
           const lookup = field(page, id);
@@ -482,7 +487,12 @@ export const purchaseReport = {
         assert.equal(database.header[0].tot, EDITED_GOLD.total);
         await openReport(page);
         await runMode(page, 'register');
-        const row = await reportRowFor(page, vchNo);
+        // Other books of the company can carry the same voucher number: take the row of the Purchase book.
+        const own = reportRows(page).filter({
+          has: page.locator(`td:text-is("${purchase.BOOK}") + td:text-is("${vchNo}")`),
+        });
+        await own.first().waitFor();
+        const row = await own.first().innerText();
         assert.match(row, /1,20,081\.52|120,081\.52/);
         return {
           observation: `edited ${vchNo} reaggregated to ${EDITED_GOLD.total}`,
