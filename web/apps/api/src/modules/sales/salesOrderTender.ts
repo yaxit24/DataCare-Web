@@ -109,8 +109,10 @@ export function orderHeaderFields(
   fields: Record<string, string>,
   salesOrder: boolean,
   oldMetalSent = false,
+  rateCut = false,
 ): Record<string, string> {
-  if (!salesOrder) return fields;
+  // A rate-cut Tour Order keeps its cash advance in RCUT_AMT (ADV_AMT is 0, TR_TOUR_ORD.cs:7295-7303).
+  if (!salesOrder) return rateCut ? { ...fields, advanceAmount: 'RCUT_AMT' } : fields;
   const withCash = { ...fields, advanceAmount: 'CASH_AMT' };
   if (!oldMetalSent) return withCash;
   // The old gold and old silver totals are the grid's (BILL_TOTAL), so a request that carries it cannot set them.
@@ -150,11 +152,13 @@ export function orderTenderView(
   const cashLeg = tendered
     ? ledger.find((row) => /^.{21}02$/.test(String(row.LEDR_KEY ?? '')) && num(row.DR_AMT) > 0)
     : ledger.find((row) => num(row.DR_AMT) > 0);
+  // An untendered order's advance is its tender total: ADV_AMT, or RCUT_AMT on a rate-cut order (`:9124-9133`).
+  const advanceColumn = isRateCutOrder(header) ? 'RCUT_AMT' : 'ADV_AMT';
   return {
     tendered,
     cashAc: String(cashLeg?.AC_CODE ?? '').trim() || undefined,
     fields: {
-      advanceAmount: tendered ? num(header.CASH_AMT) : num(header.ADV_AMT),
+      advanceAmount: tendered ? num(header.CASH_AMT) : num(header[advanceColumn]),
       ...(salesOrder
         ? {
             chequeAmount: num(header.CHQ_AMT),
@@ -174,7 +178,7 @@ export function orderTenderView(
         : {}),
     },
     /** The column each reopened tender field keeps its exact saved decimal from. */
-    exactFields: (tendered || !salesOrder ? {} : { advanceAmount: 'ADV_AMT' }) as Record<
+    exactFields: (tendered || !salesOrder ? {} : { advanceAmount: advanceColumn }) as Record<
       string,
       string
     >,
@@ -268,15 +272,31 @@ export function orderOldMetalColumns(tender: OrderTender, salesOrder = true) {
   return salesOrder && tender.oldMetalSent ? oldMetalHeader(tender.oldMetal) : {};
 }
 
+/**
+ * Where the tender total goes (`TR_SALE_ORD.cs:9124-9133`, `TR_TOUR_ORD.cs:7295-7303`): with a rate-cut rate
+ * (MSG2_TOTAL[9,1] != 0) the desktop files it as RCUT_AMT and writes ADV_AMT 0, so the advance is metal, not money;
+ * otherwise it is ADV_AMT and RCUT_AMT is 0. The typed rate-cut amount is not stored: MSG2_TOTAL[9,3] is always the
+ * tender total (`:11368`).
+ */
+export function orderAdvanceColumns(tender: OrderTender, rateCutRate: number) {
+  const total = orderAdvanceTotal(tender);
+  return rateCutRate ? { ADV_AMT: 0, RCUT_AMT: total } : { ADV_AMT: total, RCUT_AMT: 0 };
+}
+
+/** True when the order's advance is a rate-cut (metal) advance, MSG2_TOTAL[9,1] != 0. */
+export const isRateCutOrder = (header: Record<string, unknown>): boolean =>
+  num(header.RCUT_RATE) !== 0;
+
 /** The header's tender columns (`TR_SALE_ORD.cs:9131-9150`); the Tour Order writes ADV_AMT alone, as before. */
-export function orderTenderColumns(tender: OrderTender, salesOrder = true) {
-  if (!salesOrder) return { ADV_AMT: orderAdvanceTotal(tender), UPI_AMT: tender.upiColumn };
+export function orderTenderColumns(tender: OrderTender, salesOrder = true, rateCutRate = 0) {
+  if (!salesOrder)
+    return { ...orderAdvanceColumns(tender, rateCutRate), UPI_AMT: tender.upiColumn };
   return {
     CASH_AMT: tender.cash,
     CHQ_AMT: tender.cheque,
     CARD_AMT: tender.card,
     UPI_AMT: tender.upiColumn,
-    ADV_AMT: orderAdvanceTotal(tender),
+    ...orderAdvanceColumns(tender, rateCutRate),
   };
 }
 
@@ -469,7 +489,11 @@ export function assertUpiRowsSent(saved: readonly unknown[], input: { upiRows?: 
  * The order's whole day book. Slot 1 is the book's advance contra: `cashAc` is what the ledger already debits for the
  * advance, which is the same account the desktop names in LD_CODE. Type 01 credits ADV_AMT, 02 debits the cheque's
  * bank, 03 the card (Ac_Rojmel.cs:11-16), 04/06 each old metal row (:17-21), 05 the scheme (:19, salesOrderScheme.ts)
- * and 08 each UPI row (:25). Not written: type 07 rate-cut fine (rate cut is not taken on this screen).
+ * and 08 each UPI row (:25).
+ * Not written yet, pending an owner decision: on a rate-cut order the desktop posts no type 01 (it reads ADV_AMT, which
+ * is 0, :11) and instead type 07 (:23) and ledger key 11 (Ac_Ledr.cs:53): party Dr the tender total less UPI against
+ * the literal 00008, IT_TYPE 'G', SIGN '+', FINE_WT RCUT_FINE, with no money counter-leg. The web keeps type 01 for the
+ * tender total and its balanced ledger; the advance is still never spent as money (orderCancel.ts MONEY_ADVANCE_SQL).
  */
 export function orderRojmelRows(
   context: RojmelContext,
