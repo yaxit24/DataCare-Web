@@ -105,6 +105,7 @@ export function sortRecords(layout: RpAllLayout, records: readonly RpAllRecord[]
 export function countOnceTotals(
   layout: RpAllLayout,
   records: readonly RpAllRecord[],
+  totalKeys?: Readonly<Record<string, string>>,
 ): Record<string, number> {
   const totals: Record<string, number> = {};
   for (const column of layout.columns) {
@@ -116,7 +117,7 @@ export function countOnceTotals(
       const key = levelKey(record, fields);
       if (key === null || seen.has(key)) continue;
       seen.add(key);
-      sum = addExact(sum, num(record[column.key] ?? null));
+      sum = addExact(sum, num(record[totalKeys?.[column.key] ?? column.key] ?? null));
     }
     const dp = PRECISION[column.kind];
     totals[column.key] = dp === null ? sum : round(sum, dp);
@@ -173,7 +174,8 @@ export function runLayout(layout: RpAllLayout, records: readonly RpAllRecord[]):
     while (open.length > depth) {
       const band = open.pop()!;
       const level = layout.groups[band.group.depth]!;
-      if (level.subtotal !== 'none') band.group.totals = countOnceTotals(layout, band.records);
+      if (level.subtotal !== 'none')
+        band.group.totals = countOnceTotals(layout, band.records, level.totalKeys);
       band.group.rowCount = band.records.length;
     }
   };
@@ -250,7 +252,34 @@ export function runLayout(layout: RpAllLayout, records: readonly RpAllRecord[]):
     const key = levelKey(record, voucherFields);
     if (key !== null) vouchers.add(key);
   }
-  return { rows, groups, totals: countOnceTotals(layout, sorted), voucherCount: vouchers.size };
+  return {
+    rows: layout.voucherRowAfter ? voucherRowsAfterLines(rows) : rows,
+    groups,
+    totals: countOnceTotals(layout, sorted, layout.grandTotalKeys),
+    voucherCount: vouchers.size,
+  };
+}
+
+/** Move each voucher band behind its own line rows (rows of one voucher are contiguous). */
+function voucherRowsAfterLines(rows: readonly RpAllRow[]): RpAllRow[] {
+  const out: RpAllRow[] = [];
+  let held: RpAllRow | null = null;
+  let heldKey: string | null = null;
+  for (const row of rows) {
+    if (row.level === 'voucher') {
+      if (held) out.push(held);
+      held = row;
+      heldKey = row.voucherKey;
+      continue;
+    }
+    if (held && row.voucherKey !== heldKey) {
+      out.push(held);
+      held = null;
+    }
+    out.push(row);
+  }
+  if (held) out.push(held);
+  return out;
 }
 
 /** dd/MM/yyyy, the format every RP_ALL title and date column uses (RP_ALL.cs:7604). */

@@ -680,6 +680,7 @@ import { dhrnLoanReport } from '../modules/reports/dhrnLoanReports.js';
 import { gstLauncherReport } from '../modules/reports/gstLauncherReport.js';
 import { registerGstReportRoutes } from './gstReport.js';
 import { registerRpAllReportRoutes } from './rpAllReport.js';
+import { registerPurchaseReportRoutes } from './purchaseReport.js';
 import {
   approvalReport,
   bullionReport,
@@ -4481,6 +4482,13 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // one path. Registered here (not with the other plugins above) because it needs `sendReportPdf`.
   registerAccountLedgerRoutes(app, { prisma, auth, guard, readScope, sendReportPdf });
   registerRpAllReportRoutes(app, { prisma, auth, guard, readScope }); // WP-11 Sales Report (RP_ALL)
+  registerPurchaseReportRoutes(app, {
+    prisma,
+    auth,
+    guard,
+    readScope,
+    pdfRenderer: deps.pdfRenderer,
+  }); // WP-12 Purchase Rpt (RP_ALL)
   registerTagStockRoutes(app, { prisma, auth, guard, scopeOf });
 
   // Screens for five reports registered only in REPORT_BUILDERS (exports worked, screens 404'd —

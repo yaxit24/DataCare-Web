@@ -134,8 +134,10 @@ describe('route policy registry', () => {
     // POST per Lite dataset (ac-balance, item-stock, tag-stock, sales-order, approval): 768 - 3 + 6 = 771.
     // WP-15 adds the Tag Stock Excel export (GET /reports/tag-stock.xlsx) and its Size list
     // (GET /reports/tag-stock/sizes): 771 + 2 = 773.
-    expect(routes).toHaveLength(773);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(773);
+    // N250 (WP-12) adds the RP_ALL Purchase Rpt GET /reports/purchase-report, its City/Area options and the CSV, XLSX
+    // and PDF exports: 773 + 5 = 778.
+    expect(routes).toHaveLength(778);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(778);
 
     const policies = routes.map((route) => ({
       ...route,

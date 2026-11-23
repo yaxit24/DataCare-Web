@@ -943,6 +943,15 @@ route('Reports/Sales Register', [
   'GET /reports/sales-report/export.xlsx',
 ]);
 route('Reports/Purchase Register', ['GET /reports/purchase-register']);
+// WP-12: the RP_ALL Purchase Rpt screen, its City/Area options and its exports (routes/purchaseReport.ts), the
+// "Purchase Rpt" caption.
+route('Reports/Purchase Rpt', [
+  'GET /reports/purchase-report',
+  'GET /reports/purchase-report/options',
+  'GET /reports/purchase-report/export.csv',
+  'GET /reports/purchase-report/export.xlsx',
+  'GET /reports/purchase-report/export.pdf',
+]);
 route('Reports/Day Book', ['GET /reports/day-book']);
 route('Reports/Rojmel', ['GET /reports/rojmel']);
 route('Reports/Final Reports', ['GET /reports/final-reports', 'GET /reports/profit-loss']);
@@ -1111,6 +1120,9 @@ const PRINT_ROUTES = new Set([
   'GET /reports/gst-report/export.pdf',
   'GET /reports/sales-report/export.csv',
   'GET /reports/sales-report/export.xlsx',
+  'GET /reports/purchase-report/export.csv',
+  'GET /reports/purchase-report/export.xlsx',
+  'GET /reports/purchase-report/export.pdf',
   'GET /reports/gstr2-doc',
   'GET /reports/gstr1-doc',
   'GET /reports/gstr3b-doc',

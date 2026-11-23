@@ -20,6 +20,8 @@ const SOURCES: Record<string, { table: string; code: string; name: string; extra
   groups: { table: 'GROUP_MAST', code: 'GR_CODE', name: 'GR_NAME' },
   'ac-groups': { table: 'AC_GROUP', code: 'AC_GR', name: 'AC_GR_NAME', extra: ['AC_MAIN_GR'] },
   products: { table: 'PRODUCT_MAST', code: 'PR_CODE', name: 'PR_NAME' },
+  // Purchase Rpt's lc Code help (RP_ALL.cs:7680-7717 reads LOCT_MAST).
+  locations: { table: 'LOCT_MAST', code: 'LC_CODE', name: 'LC_NAME' },
   employees: { table: 'EMP_MAST', code: 'EMP_CODE', name: 'EMP_NAME' },
   designs: { table: 'DESIGN_MAST', code: 'DESIGN_NO', name: 'DESIGN_NO' },
   /**

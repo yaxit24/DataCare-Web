@@ -408,6 +408,8 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     // employ, product and group are its own selectors (RP_ALL.cs:7629-7631 `{SL_DATA.AC_CODE}`), and the engine
     // refuses one its template lacks with `filter-not-in-template` (rpAll/index.ts), so this guard must not.
     if (url.startsWith('/reports/sales-report')) return;
+    // Purchase Rpt shares the RP_ALL parser and its refusals (modules/reports/purchaseReport.ts).
+    if (url.startsWith('/reports/purchase-report')) return;
     // Tag Stock (RP_TAG) likewise owns a typed parser (tagStock.ts parseTagStockQuery) with its own location and
     // item selectors (lcCode, itType, tblCode); it validates, refuses unknown keys and fails closed itself.
     if (url.startsWith('/reports/tag-stock')) return;
