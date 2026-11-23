@@ -7966,6 +7966,34 @@
         "web/apps/web/test/features/modules/tagStock.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. 28 DB cases and 6 route cases pass locally on an isolated database; the tagStock browser module (15 cases, 5 pending with reasons) was written but not run locally (8 GB machine), CI runs it. Still open: voucher zoom (gap 10), the Print window and Crystal layouts (gap 11), the approval other-item columns (gap 13), edition-E Emp Isu Less, summary Mrp/Size and alternate-location staging, year rollover. Desktop match 0%."
+    },
+    {
+      "id": "N250",
+      "status": "implemented-unverified",
+      "action": "Report > Purchase Rpt is the desktop RP_ALL form in its Purchase Rpt caption on the shared RP_ALL engine: the seven PanelPurc buttons (Purc Report, Purc Reg, Item Wise, Purchase Bill, Party Purc, Group Purc, Party Summ) with their templates' groups, sorts and totals, the shared selectors (dates, lc Code, Book, Pr Code, Gr Code, Party, City, Area, Item Type), signed party totals by BOOK_DATA.BOOK_INOUT, count-once voucher totals, and CSV, Excel and PDF behind the Print right; a dedicated /reports/purchase-report screen with Enter flow, F1 help and Esc.",
+      "parentLabels": "P1-core; L6; T01-T18; WP-12",
+      "startAfter": [
+        "N234"
+      ],
+      "requiredProof": "Unit and DB tests whose expected values are added up from fixture vouchers with each template's formula; route tests for the List and Print rights, scope sentinels and refusals; the purchase-report browser module (17 applicable cases) green, baseline entries removed.",
+      "gapIds": "G262",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "web/apps/api/src/modules/reports/purchaseReport.ts",
+        "web/apps/api/src/modules/reports/rpAll/purchaseLayouts.ts",
+        "web/apps/api/src/modules/reports/rpAll/purchaseQuery.ts",
+        "web/apps/api/src/routes/purchaseReport.ts",
+        "web/apps/web/app/(app)/reports/purchase-report/page.tsx",
+        "web/apps/web/app/(app)/reports/purchase-report/PurchaseReportGrid.tsx",
+        "web/apps/api/test/purchaseReport.test.ts",
+        "web/apps/api/test/purchaseReport.db.test.ts",
+        "web/apps/web/test/features/modules/purchaseReport.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. purchase-report module: 17 applicable, 17 passed locally for this module only, 3 not applicable (read-only). Unit 25 of 25, DB 11 of 11. Open: voucher zoom, the Crystal print layouts, the session data type filter, UAE and State variants. Desktop match 0%."
     }
   ],
   "amendments": [

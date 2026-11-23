@@ -1,3 +1,8 @@
+## 2026-11-23 — Purchase Rpt is the desktop RP_ALL purchase branch (N250 / G262, WP-12)
+
+- 2026-11-23: seven buttons (Purc Report, Purc Reg, Item Wise, Purchase Bill, Party Purc, Group Purc, Party Summ) on the shared RP_ALL engine; `GET /reports/purchase-report` with CSV/Excel/PDF behind Print; screen at `/reports/purchase-report`; the 17 baselined purchase-report cases pass and are removed from baseline.json. Unit 25, DB 11 pass on an isolated database; the purchase-report module ran locally alone (17 of 17).
+- 2026-11-23: five frozen-case edits, all synchronisation or schema fixes (sidebar wait, F1 wait, formula case uses the pair's delta because the company accumulates vouchers, PR_CODE is two characters, screen-specific role=alert). Open: voucher zoom, Crystal print layouts, session data type filter, UAE/State variants.
+
 ## 2026-11-22 — Tag Stock follows the desktop RP_TAG selections and totals (N238 / G250, WP-15)
 
 - 2026-11-22: In = BAR_DETL creation rows, Out = minus movements, Stock/Mrp = positive signed-movement sum of the year up to To (Mrp <> 0), Apr = APR ISU / ISU_REC N joined to BAR_DETL, All = signed history; tag N excluded; no 5,000-row cap in rows, footer, CSV or Excel; Tag Summ / Product Stk; the page is the RP_TAG form (selectors, columns, keys). CSV and Excel need the Print right.
