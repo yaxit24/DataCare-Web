@@ -18,7 +18,11 @@ import { applyBookingDrawDownTx } from './rateCutBookingDrawDown.js';
 import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
 import { buildRateCutRojmel, rojmelMetalFor } from '../shared/rojmel.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
-import { nextHiddenVoucherNoTx, voucherTimestamp } from '../vouchers/lifecycle.js';
+import {
+  assertSavedVoucherTx,
+  nextHiddenVoucherNoTx,
+  voucherTimestamp,
+} from '../vouchers/lifecycle.js';
 import {
   insertRowTx,
   postVoucherTx,
@@ -1947,6 +1951,25 @@ export async function writeRateCut(
       key.CO_BOOK,
     );
     assertRateCutBookGuard(classification, key.CO_BOOK, options.bookGuard);
+    /**
+     * WP-10: a PUT only edits a saved voucher. RATE_CUT_DATA has no unique key on the voucher number, so a PUT that
+     * created at the typed URL number (outside the `nextVoucherNoTx` lock) could duplicate a number a concurrent POST
+     * was taking. An unused number answers `404 voucher-not-found`; a new voucher is a POST.
+     */
+    if (options.vchNo != null) {
+      await assertSavedVoucherTx(
+        tx,
+        'RATE_CUT_DATA',
+        {
+          tenantId,
+          coCode: key.CO_CODE,
+          lcCode: key.LC_CODE,
+          coYear: key.CO_YEAR,
+          coBook: key.CO_BOOK,
+        },
+        key.VCH_NO,
+      );
+    }
     const movesStock = bookMovesStock(classification);
     // TR_WH_SALE save refusals without figures, before the edit reversal (wholesaleSaveChecks.ts).
     if (desktopSaveChecks)
