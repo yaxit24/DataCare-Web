@@ -10,7 +10,7 @@ import { ApprovalReportGrid } from './ApprovalReportGrid';
 import { ListField } from './ListField';
 import { LookupField, desktopText, focusControl, type HelpRow } from './LookupField';
 import { ITEM_TYPES, setDate, type ApprovalReportMode } from './types';
-import { approvalQuery, todayDisplay, useApprovalReport } from './useApprovalReport';
+import { approvalQuery, useApprovalReport } from './useApprovalReport';
 
 /**
  * Report → Approval Rpt: the desktop RP_ALL form opened with the "Approval Rpt" menu caption
@@ -79,7 +79,7 @@ export default function ApprovalReportPage() {
     if (event.key !== 'Enter') return;
     event.preventDefault();
     const input = event.currentTarget;
-    const outcome = setDate(filters[field], { coYear, today: todayDisplay() });
+    const outcome = setDate(filters[field], { coYear, today: new Date() });
     setFilters({ [field]: outcome.text });
     if (!outcome.ok) {
       setMessage(outcome.message ?? '');
