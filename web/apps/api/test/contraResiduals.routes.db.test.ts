@@ -958,7 +958,14 @@ const threeRows = (): Line[] => [
       3000.5, 3000.5,
     ]);
     const bank = await bankReconList(runtime, { tenantId, coCode: '01' }, BANK);
-    expect(bank.rows.filter((x) => x.vchNo === vch).map((x) => x.dr)).toEqual([1000.25, 2000.25]);
+    // The bank book orders by date, book and voucher only (UT_BANK.cs:2059), so the legs of one voucher are compared
+    // without their order.
+    expect(
+      bank.rows
+        .filter((x) => x.vchNo === vch)
+        .map((x) => x.dr)
+        .sort((a, b) => a - b),
+    ).toEqual([1000.25, 2000.25]);
     expect([bank.book, bank.cleared, bank.uncleared]).toEqual([3000.5, 0, 3000.5]);
     const day = await dayBook(runtime, scope as never);
     const mine = day.rows.filter((x) => x.vchNo === vch);
