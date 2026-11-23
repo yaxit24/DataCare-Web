@@ -304,11 +304,12 @@ databaseDescribe('database-backed purchase voucher lifecycle', () => {
         'ROJ_MEL_DATA',
       ]) {
         out[table] = (await owner.$queryRawUnsafe(
+          // WITH_STOCK differs by design: a TAG PURCHASE line stores 'N' (TR_PURC_HM.cs:8025, WP-28 D5).
           `SELECT to_jsonb(t) - ARRAY['row_id','CO_BOOK','VCH_NO','LEDR_KEY','HD_VCH_NO','VCH_TIME',
-                  'ENTRY_TIME','BOOK_NAME','MAIN_BOOK'] AS r
+                  'ENTRY_TIME','BOOK_NAME','MAIN_BOOK','WITH_STOCK'] AS r
              FROM "${table}" t WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3
             ORDER BY to_jsonb(t) - ARRAY['row_id','CO_BOOK','VCH_NO','LEDR_KEY','HD_VCH_NO','VCH_TIME',
-                  'ENTRY_TIME','BOOK_NAME','MAIN_BOOK']`,
+                  'ENTRY_TIME','BOOK_NAME','MAIN_BOOK','WITH_STOCK']`,
           TENANT,
           book,
           String(vchNo).padStart(5, '0'),

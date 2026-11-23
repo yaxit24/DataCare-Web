@@ -319,6 +319,8 @@ export function preserveOrderRow(
  * Why a saved order cannot be edited or deleted here: a settlement (SL_ORD_ADJ) or a stock allocation (MAIN_STOCK). The
  * cash, cheque and card tenders (N197) and, on a Sales Order, the UPI rows and the old metal rows (G206) are edited on
  * the screen, so they do not block. A Tour Order takes neither grid, so its UPI_DATA and SL_PR_DETL still block.
+ * The order's own '+' SL_ORD_ADJ row is the advance the screen itself rewrites on every save (TR_SALE_ORD.cs:9475-9516,
+ * TR_TOUR_ORD.cs:7560-7600), not a settlement, so it does not block either.
  */
 export function unsupportedOrderEdit(
   state: Readonly<Record<string, readonly unknown[] | undefined>>,
@@ -327,7 +329,13 @@ export function unsupportedOrderEdit(
   const blocking = ['SL_ORD_ADJ', 'MAIN_STOCK', ...(salesOrder ? [] : ['SL_PR_DETL', 'UPI_DATA'])];
   const blocked =
     'This order has metal, settlement or stock allocations that must be resolved before editing.';
-  if (blocking.some((table) => state[table]?.length)) return blocked;
+  const rowsOf = (table: string) =>
+    table === 'SL_ORD_ADJ'
+      ? (state[table] ?? []).filter(
+          (row) => String((row as Record<string, unknown>).ORD_SIGN ?? '').trim() !== '+',
+        )
+      : (state[table] ?? []);
+  if (blocking.some((table) => rowsOf(table).length)) return blocked;
   // Old metal amounts without grid rows (the desktop's 'T' book types them and opens an URD purchase) cannot be
   // rebuilt from the grid, so an edit would zero them.
   const header = (state.SL_ORD_DATA?.[0] ?? {}) as Record<string, unknown>;

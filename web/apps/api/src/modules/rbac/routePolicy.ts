@@ -199,6 +199,9 @@ route('Sales/Sales Invoice', [
   'GET /sales/:vchNo',
   'GET /sales/:vchNo/print',
   'PUT /sales/:vchNo',
+  // WP-26 (D6): the sale book's PRINT_MAST file list and its "Set" default.
+  'GET /sales/print-files',
+  'POST /sales/print-files/default',
   'DELETE /sales/:vchNo',
   'GET /sales/invoice',
   // Contained pending an atomic Sales Invoice import + approval closure transaction.
@@ -230,6 +233,7 @@ route('Sales/Sales Return', [
   'POST /sales-returns',
   'GET /sales-returns/import',
   'GET /sales-returns/:vchNo',
+  'PUT /sales-returns/:vchNo',
   'GET /sales-returns/:vchNo/print',
   'DELETE /sales-returns/:vchNo',
   'GET /sales/credit-note',
@@ -457,6 +461,7 @@ route('Cash / Bank/Payment', [
 ]);
 route('Cash / Bank/Contra', [
   'POST /contra',
+  'GET /contra/list',
   'GET /contra/:vchNo',
   'GET /contra/:vchNo/print',
   'PUT /contra/:vchNo',
@@ -865,6 +870,17 @@ route('Masters/Item Groups', [
   'PUT /masters/group-master/:code',
   'DELETE /masters/group-master/:code',
 ]);
+// MS_BOOK (N240): Company → Books, the book header with its posting-account slots.
+route('Masters/Books / Series', [
+  'GET /masters/books-master',
+  'GET /masters/books-master/print',
+  'GET /masters/books-master/template',
+  'GET /masters/books-master/accounts',
+  'GET /masters/books-master/:code',
+  'POST /masters/books-master',
+  'PUT /masters/books-master/:code',
+  'DELETE /masters/books-master/:code',
+]);
 // MS_PRODUCT with CurMast 'Product' (N215): the Product master's own screen.
 route('Masters/Products', [
   'GET /masters/product-master',
@@ -999,7 +1015,20 @@ route('Reports/GST Input Register', ['GET /reports/gst-input-register']);
 route('Reports/Pledge Outstanding', ['GET /reports/dhrn-outstanding', 'GET /dhrn/os-letter']);
 route('Reports/Karigar Balances', ['GET /reports/karigar-balances']);
 route('Reports/Stock Valuation', ['GET /reports/stock-valuation']);
-route('Reports/Tag-Stock Report', ['GET /reports/tag-stock', 'GET /reports/tag-stock.csv']);
+route('Reports/Tag-Stock Report', [
+  'GET /reports/tag-stock',
+  'GET /reports/tag-stock.csv',
+  'GET /reports/tag-stock.xlsx',
+  'GET /reports/tag-stock/sizes',
+]);
+// WP-16: the RP_STOCK Stock Report screen, its drill-down and exports (routes/stockReport.ts), its own rights key.
+route('Reports/Stock Report', [
+  'GET /reports/stock-report',
+  'GET /reports/stock-report/defaults',
+  'GET /reports/stock-report/movements',
+  'GET /reports/stock-report/export.csv',
+  'GET /reports/stock-report/export.xlsx',
+]);
 route('Reports/HuId Report', ['GET /reports/huid']);
 route('Reports/ItStk Level', ['GET /reports/item-weight-levels']);
 route('Reports/Bill Wise Profit', ['GET /reports/bill-profit']);
@@ -1034,6 +1063,7 @@ route('Reports/GST Report', [
   'GET /reports/gst-report/export.csv',
   'GET /reports/gst-report/export.xlsx',
   'GET /reports/gst-report/export.pdf',
+  'GET /reports/gst-report/workbook.xlsx',
 ]);
 route('Reports/Delete Data', ['GET /reports/delete-data']);
 route('Reports/Point Report', ['GET /reports/point-report', 'GET /reports/point-report/detail']);
@@ -1062,6 +1092,7 @@ const PRINT_ROUTES = new Set([
   'GET /masters/employee-master/print',
   'GET /masters/tax-master/print',
   'GET /masters/group-master/print',
+  'GET /masters/books-master/print',
   'GET /masters/address-master/print',
   'POST /estimate/pdf',
   'GET /reports/account-ledger/export.pdf',
@@ -1099,12 +1130,16 @@ const PRINT_ROUTES = new Set([
   'GET /stock/tag-print-screen/labels',
   'POST /integrations/notify',
   'GET /reports/tag-stock.csv',
+  'GET /reports/tag-stock.xlsx',
   'GET /reports/karigar-ledger.print',
   'GET /reports/gst-report/export.csv',
   'GET /reports/gst-report/export.xlsx',
   'GET /reports/gst-report/export.pdf',
   'GET /reports/sales-report/export.csv',
   'GET /reports/sales-report/export.xlsx',
+  'GET /reports/gst-report/workbook.xlsx',
+  'GET /reports/stock-report/export.csv',
+  'GET /reports/stock-report/export.xlsx',
   'GET /reports/gstr2-doc',
   'GET /reports/gstr1-doc',
   'GET /reports/gstr3b-doc',
@@ -1112,6 +1147,8 @@ const PRINT_ROUTES = new Set([
   'GET /reports/balance-sheet-doc',
   'GET /reports/render',
   'GET /fine-jv/:vchNo/print',
+  // Purchase Rtn prints on FRM_PRINT (TR_KR_ISU.cs:5434 {{UserPrint}}), not on view (N245, G257).
+  'GET /purchase-returns/:vchNo/print',
   // TR_SL_ORD_ADJ.cs:3796-3800: OrderCancelVch needs the print right.
   'GET /order-cancel/:vchNo/print',
   // TR_CONTRA.cs:3000-3004: Contra and Journal documents are printed from the same form as Fine JV.
@@ -1128,6 +1165,7 @@ const PRINT_ROUTES = new Set([
 ]);
 
 const UPDATE_POST_ROUTES = new Set([
+  'POST /sales/print-files/default',
   'POST /stock/tag-print-screen/hm-update',
   'POST /stock/tag-print-screen/default-file',
   'POST /masters/item-master/:code/tag-values',
