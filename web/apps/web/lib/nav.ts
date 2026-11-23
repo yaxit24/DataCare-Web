@@ -300,6 +300,13 @@ export const NAV: NavGroup[] = [
       { label: 'Location-wise Sales', href: '/reports/location-wise-sales', ready: true },
       { label: 'GST Input Register', href: '/reports/gst-input-register', ready: true },
       { label: 'GST Report', href: '/reports/gst-report', ready: true },
+      // RP_ALL's own caption (MDI_FORM.cs:8901-8910 {{case "Sales Report":}}), not the Sales Register screens.
+      {
+        label: 'Sales Report',
+        href: '/reports/sales-report',
+        ready: true,
+        form: 'Reports/Sales Report',
+      },
       { label: 'Delete Data', href: '/reports/delete-data', ready: true },
       { label: 'Point Report', href: '/reports/point-report', ready: true },
       { label: 'Approval Report', href: '/reports/approval-report', ready: true },

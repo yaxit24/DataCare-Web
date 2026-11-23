@@ -51,7 +51,8 @@ export function exportTable(result: RpAllResult): ExportTable {
     const isLeaf = group.depth === result.groupLevels.length - 1;
     const label = `${'  '.repeat(group.depth)}${group.label}`;
     if (level.subtotal === 'header') lines.push({ ...totalLine(label, group.totals) });
-    else lines.push({ _band: label });
+    // A band whose label is blank (Employ Sales without an employee) prints nothing; a blank line also cannot survive Excel.
+    else if (label.trim() !== '') lines.push({ _band: label });
     if (isLeaf) {
       flushRowsFor(pathKey(group.groupPath));
       if (level.subtotal === 'footer')

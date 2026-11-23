@@ -179,7 +179,10 @@ export function parseRpAllFilters(
   const set = <K extends keyof RpAllFilters>(key: K, value: RpAllFilters[K] | undefined) => {
     if (value !== undefined) filters[key] = value;
   };
-  set('coBook', code(query, 'coBook'));
+  // `bookCode` is the web screens' name for the Book box: a query named `coBook` is also the session scope's
+  // book (businessScope.ts), which refuses a book the operator merely typed with `book-unavailable`, while the
+  // desktop never re-checks it and prints an empty report (RP_ALL.cs:8387; study Rules). `coBook` stays accepted.
+  set('coBook', code(query, 'bookCode') ?? code(query, 'coBook'));
   set('books', books);
   set('acCode', code(query, 'acCode'));
   set('prCode', code(query, 'prCode'));

@@ -199,6 +199,7 @@ const groups: Record<string, readonly string[]> = {
     'Location-wise Sales',
     'GST Input Register',
     'GST Report',
+    'Sales Report',
     'Delete Data',
     'Point Report',
     'Approval Report',
@@ -292,6 +293,8 @@ const aliases: Record<string, readonly string[]> = {
   'Purchase/Purchase Return': ['Purchase Rtn'],
   'Cash / Bank/Fine JV (metal transfer)': ['Fine Jv Entry'],
   'Reports/Sales Register': ['Sales Report'],
+  // WP-11 phase two: the dedicated RP_ALL screen shares the Sales Report caption's USER_SET row with Sales Register.
+  'Reports/Sales Report': ['Sales Report'],
   'Reports/Sales by Party': ['Sales Report'],
   'Reports/Sales by Item': ['Sales Report'],
   'Reports/Sales by Group': ['Sales Report'],

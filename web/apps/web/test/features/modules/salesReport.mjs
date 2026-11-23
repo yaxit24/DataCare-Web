@@ -83,9 +83,13 @@ const today = () => {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
+// RP_ALL.cs:5619 {{mFromDt.Mask = "00/00/0000";}}: the date boxes are dd/MM/yyyy masks, not ISO inputs.
+const display = (iso) => iso.replace(/^(\d{4})-(\d{2})-(\d{2})$/, '$3/$2/$1');
 async function openReport(page) {
   await page.goto('/dashboard');
   const link = page.getByRole('link', { name: 'Sales Report', exact: true });
+  // The sidebar is drawn after /me answers (gstReport.mjs waits the same way); count() alone races the render.
+  await link.waitFor();
   assert.equal(await link.count(), 1, 'Reports navigation must expose Sales Report');
   assert.equal(
     await link.getAttribute('href'),
@@ -98,6 +102,7 @@ async function openReport(page) {
 }
 async function setField(page, label, value) {
   const input = field(page, label);
+  if (label === 'From Date' || label === 'To Date') value = display(value);
   if (await input.evaluate((el) => el.tagName === 'SELECT')) await input.selectOption(value);
   else {
     await input.fill(value);
@@ -242,7 +247,8 @@ async function removeSale(page, voucher) {
   assert.equal(deleted.status(), 200, 'cleanup deletes only its own voucher');
 }
 async function fixture(ctx, page, work) {
-  const code = `W11${randomUUID().replaceAll('-', '').slice(0, 10)}`;
+  // AC_MAST.AC_CODE is varchar(8): 'W11' + 5 hex digits is the longest unique code that fits.
+  const code = `W11${randomUUID().replaceAll('-', '').slice(0, 5).toUpperCase()}`;
   const vouchers = [];
   await ctx.rows(
     `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GR","AC_GST_TYPE","AC_CITY","AC_AREA")
@@ -301,8 +307,8 @@ const exercises = {
     await openReport(page);
     // RP_ALL.cs:7197 {{mFromDt.Text = Conversions.ToString(DC_Main.MsSysDate);}}
     // RP_ALL.cs:7203 {{mToDt.Text = Conversions.ToString(DC_Main.MsSysDate);}}
-    assert.equal(await field(page, 'From Date').inputValue(), today());
-    assert.equal(await field(page, 'To Date').inputValue(), today());
+    assert.equal(await field(page, 'From Date').inputValue(), display(today()));
+    assert.equal(await field(page, 'To Date').inputValue(), display(today()));
     // RP_ALL.cs:6664 {{((Control)tLcCode).Enabled = false;}}
     assert.equal(await field(page, 'lc Code').inputValue(), '01');
     assert.equal(await field(page, 'lc Code').isDisabled(), true);
@@ -357,7 +363,8 @@ const exercises = {
       await setField(page, 'Gr Code', '');
       // RP_ALL.cs:11398 {{Interaction.MsgBox((object)"Book Selection is Ok...", (MsgBoxStyle)0, (object)null);}}
       await field(page, 'Select Book').check();
-      await page.getByRole('checkbox', { name: /SL/ }).check();
+      // FSL Fine Sale, SL Sales and TSL Tour Sales all contain "SL": pick the book whose code is SL.
+      await page.getByRole('checkbox', { name: /^SL / }).check();
       await button(page, 'Ok').click();
       await page.getByText('Book Selection is Ok...', { exact: true }).waitFor();
       assertIds((await runReport(page)).result, [a, b]);
@@ -498,6 +505,10 @@ const exercises = {
       await runReport(page);
       await page.getByRole('cell', { name: v.no, exact: true }).first().dblclick();
       await page.waitForURL('**/txn/sales**');
+      // The Sales Invoice screen loads the voucher after the route opens (GET /sales/:no).
+      const voucherNo = page.getByLabel('Voucher No', { exact: true });
+      for (let i = 0; i < 50 && (await voucherNo.inputValue()) !== v.no; i++)
+        await page.waitForTimeout(100);
       assert.equal(await page.getByLabel('Voucher No', { exact: true }).inputValue(), v.no);
       await page.goBack();
       await page.waitForURL(`**${ROUTE}`);
@@ -514,11 +525,14 @@ const exercises = {
       if (new URL(r.url()).pathname === `/api${ROUTE}`) requests.push(r.url());
     };
     page.on('request', listener);
-    await field(page, 'From Date').fill('');
+    // RP_ALL.cs:7510-7524 mFromDt_KeyDown runs DC_Main.SetDate (DC_Main.cs:1561-1683): an impossible day is refused with
+    // "Date Not Valid..." and nothing runs. (An empty box is not invalid: SetDate completes it to today.)
+    await field(page, 'From Date').fill('32/01/2026');
     await button(page, 'Sales Report').click();
-    assert.equal(await field(page, 'From Date').evaluate((el) => el.validity.valid), false);
+    await page.getByRole('alertdialog', { name: 'Date Not Valid...' }).waitFor();
     assert.deepEqual(requests, []);
     page.removeListener('request', listener);
+    await page.getByRole('alertdialog').getByRole('button', { name: 'OK', exact: true }).click();
     await scoped(page, 'WP11-NONE', '2026-04-02', '2026-04-01');
     const { result } = await runReport(page);
     assert.deepEqual(result.rows, []);
@@ -585,26 +599,21 @@ const exercises = {
   async 'keyboard.selector-run-flow'(ctx) {
     const { page } = await ctx.session();
     await openReport(page);
-    const flow = [
-      'From Date',
-      'To Date',
-      'Book',
-      'Pr Code',
-      'Gr Code',
-      'Party Code',
-      'City',
-      'Area',
-      'Item Type',
-    ];
-    await field(page, flow[0]).focus();
-    for (let i = 1; i < flow.length; i++) {
-      await page.keyboard.press('Enter');
-      assert.equal(
-        await field(page, flow[i]).evaluate((el) => el === document.activeElement),
-        true,
-        flow[i],
-      );
-    }
+    // Enter on an empty Pr Code jumps straight to City (RP_ALL.cs:7505 {{((Control)cboCity).Focus();}}); Gr Code and Party
+    // Code send {tab} (:9291, :7427), so they are walked from their own boxes. lc Code is disabled for a location user.
+    const walk = async (flow) => {
+      await field(page, flow[0]).focus();
+      for (let i = 1; i < flow.length; i++) {
+        await page.keyboard.press('Enter');
+        assert.equal(
+          await field(page, flow[i]).evaluate((el) => el === document.activeElement),
+          true,
+          flow[i],
+        );
+      }
+    };
+    await walk(['From Date', 'To Date', 'Book', 'Pr Code', 'City', 'Area', 'Item Type']);
+    await walk(['Gr Code', 'Party Code', 'City']);
     const accesskey = await button(page, 'Sales Report').getAttribute('accesskey');
     assert.ok(accesskey, 'Sales Report access key');
     const response = page.waitForResponse((r) => new URL(r.url()).pathname === `/api${ROUTE}`);
@@ -639,6 +648,7 @@ async function lifecycle(ctx, reconcile) {
       rate: '6000',
       making: '50',
     });
+    await button(page, '+ Add line').click();
     await salesScreen.fillLine(page, 1, {
       item: 'SLV92',
       pcs: '2',
@@ -810,7 +820,14 @@ async function outputs(ctx) {
         .evaluateAll((rows) =>
           rows.map((row) => [...row.querySelectorAll('td')].map((cell) => cell.textContent.trim())),
         );
-      assert.deepEqual([...gridRows, ...footer], csv.slice(1), 'grid pages and output rows match');
+      // The export indents a nested band label with spaces (exportRows.ts); a table cell's text is trimmed, so only that
+      // leading indent of the Band column is ignored in this comparison. Everything else is compared exactly.
+      const unindent = (rows) => rows.map(([band, ...rest]) => [band.trimStart(), ...rest]);
+      assert.deepEqual(
+        [...gridRows, ...footer],
+        unindent(csv.slice(1)),
+        'grid pages and output rows match',
+      );
       const [popup] = await Promise.all([
         page.waitForEvent('popup'),
         button(page, 'Print').click(),
@@ -823,7 +840,11 @@ async function outputs(ctx) {
             [...row.querySelectorAll('th,td')].map((cell) => cell.textContent.trim()),
           ),
         );
-      assert.deepEqual(printRows, csv, 'print includes the complete report');
+      assert.deepEqual(
+        printRows,
+        [csv[0], ...unindent(csv.slice(1))],
+        'print includes the complete report',
+      );
       const pdf = await popup.pdf({ format: 'A4' });
       assert.ok(pdf.subarray(0, 5).equals(Buffer.from('%PDF-')));
       captures.push({
