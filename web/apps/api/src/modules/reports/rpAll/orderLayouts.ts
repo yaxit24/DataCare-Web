@@ -30,20 +30,21 @@ export const ORDER_MODES: readonly OrderMode[] = [
 export type OrderFilterKey = keyof Omit<RpAllFilters, 'fromDate' | 'toDate'>;
 
 export interface OrderQueryShape {
-  /** Which base table drives the query. */
-  base: 'SL_ORD_DATA' | 'SL_DATA';
-  /** Whether the query reads order lines (SL_ORD_DETL). */
-  lines: boolean;
-  /** Whether the query reads adjustments (SL_ORD_ADJ). */
-  adjustments: boolean;
-  /** Whether the query needs the fully-adjusted exclusion (modes 5 and 6, D2). */
-  fullyAdjustedExclusion: boolean;
+  /** Which template record set the query reproduces (see orderQuery.ts). */
+  kind: 'header' | 'lines' | 'adjust' | 'withBill' | 'billWise';
+  /** Making Panding / Making Summ: only lines with DESIGN_ISU = 'N' (RP_ALL.cs:10940). */
+  designPending?: boolean;
 }
 
 export interface OrderVariant {
   layout: RpAllLayout;
   query: OrderQueryShape;
   derive?: (record: RpAllRecord) => Record<string, number | string | null>;
+  /**
+   * Group-header formulas that are not sums (OrdAdjBillWise @PandingTot = ADV_AMT - Sum(@AdjAmt, VCH_NO)),
+   * computed from a band's count-once totals. Applied to every band that prints totals.
+   */
+  bandFormulas?: (totals: Readonly<Record<string, number>>) => Record<string, number>;
   cite: string;
 }
 
@@ -67,32 +68,39 @@ const col = (
   level: RpAllColumn['level'],
   extra: Partial<RpAllColumn> = {},
 ): RpAllColumn => ({ key, caption, kind, level, captionSource: 'template', ...extra });
-const derived = (
-  key: string,
-  caption: string,
-  kind: RpAllColumn['kind'],
-  level: RpAllColumn['level'],
-) => col(key, caption, kind, level, { captionSource: 'field' });
+/** An order is keyed by location, year, book and number (a 00 user may list every location). */
+const ORDER_KEY = ['lcCode', 'coYear', 'coBook', 'vchNo'] as const;
+/** An SL_ORD_ADJ row is keyed by its own voucher (order or bill) and serial; SR_NO alone repeats. */
+const ADJ_KEY = ['adjLc', 'adjYear', 'adjBook', 'adjVchNo', 'adjSr'] as const;
 
-const VOUCHER_KEY = ['coBook', 'vchNo'] as const;
+const txt = (r: RpAllRecord, key: string): string | null => {
+  const v = r[key];
+  return v === null || v === undefined ? null : String(v);
+};
+/** Crystal string `+`/`&` of fields: NULL when any part is NULL (no default-value conversion). */
+const concat = (r: RpAllRecord, keys: readonly string[]): string | null => {
+  const parts = keys.map((k) => txt(r, k));
+  return parts.some((x) => x === null) ? null : parts.join('');
+};
 
 // ---- Order Report (BtnOrdRpt, RP_ALL.cs:8366-8434) → OrdDetlRpt ----------------------------
+// Group header: VCH_NO, VCH_DATE, AC_NAME, ADV_AMT, DEL_DATE; detail: the line; report footer
+// Sum(ITM_PCS), Sum(ITM_NWT) "Total :".
 
 const orderReportLayout: RpAllLayout = {
   template: 'OrdDetlRpt',
   titlePrefix: 'Order Report',
-  // OrdDetlRpt.xml: group by SL_ORD_DATA.VCH_NO ascending.
+  // OrdDetlRpt.xml: group by SL_ORD_DATA.VCH_NO ascending, record sort AC_CODE.
   groups: [{ key: 'vchNo', labelKeys: ['vchNo'], subtotal: 'none' }],
-  // OrdDetlRpt.xml: record sort AC_CODE ascending.
   sort: [{ key: 'acCode' }],
-  keys: { voucher: VOUCHER_KEY, line: ['srNo'] },
-  rowLevels: ['line'],
+  keys: { voucher: ORDER_KEY, line: ['srNo'] },
+  rowLevels: ['voucher', 'line'],
   columns: [
-    derived('vchNo', 'Ord No', 'text', 'voucher'),
-    derived('vchDate', 'Ord Date', 'date', 'voucher'),
-    derived('acName', 'Customer Name', 'text', 'voucher'),
-    derived('advAmt', 'Advance Amt', 'money', 'voucher'),
-    derived('delDate', 'Del.Date', 'date', 'voucher'),
+    col('vchNo', 'Ord No', 'text', 'voucher'),
+    col('vchDate', 'Ord Date', 'date', 'voucher'),
+    col('acName', 'Customer Name', 'text', 'voucher'),
+    col('advAmt', 'Advance Amt', 'money', 'voucher'),
+    col('delDate', 'Del.Date', 'date', 'voucher'),
     col('itCode', 'It.Code', 'text', 'line'),
     col('itName', 'Item Name', 'text', 'line'),
     col('designNo', 'Design No', 'text', 'line'),
@@ -108,6 +116,7 @@ const orderReportLayout: RpAllLayout = {
     col('rateFix', 'Rt Booked', 'text', 'line'),
   ],
   grandTotal: true,
+  grandTotalCaption: 'Total :',
 };
 
 // ---- Order Advance (BtnOrdAdvance, RP_ALL.cs:8435-8500) → OrdAdvRpt ------------------------
@@ -115,10 +124,10 @@ const orderReportLayout: RpAllLayout = {
 const orderAdvanceLayout: RpAllLayout = {
   template: 'OrdAdvRpt',
   titlePrefix: 'Order Advance Report',
-  // OrdAdvRpt.xml: group by SL_ORD_DATA.AC_NAME ascending.
+  // OrdAdvRpt.xml: group by SL_ORD_DATA.AC_NAME ascending, record sort AC_CODE.
   groups: [{ key: 'acName', labelKeys: ['acName'], subtotal: 'none' }],
   sort: [{ key: 'acCode' }],
-  keys: { voucher: VOUCHER_KEY },
+  keys: { voucher: ORDER_KEY },
   rowLevels: ['voucher'],
   columns: [
     col('vchNo', 'Ord.No.', 'text', 'voucher'),
@@ -136,28 +145,21 @@ const orderAdvanceLayout: RpAllLayout = {
 };
 
 // ---- Order Adjust (BtnOrdAdj, RP_ALL.cs:8501-8566) → OrdAdvAdj -----------------------------
+// The detail band (one adjustment row) is suppressed; each order prints as its @OrdGroup header with
+// VCH_NO, VCH_DATE, AC_NAME and Sum(@OrdAmt), Sum(@OrdAdjAmt), Sum(@BalAmt); the report footer prints
+// "TOTAL :" with the three grand sums.
 
 const orderAdjustLayout: RpAllLayout = {
   template: 'OrdAdvAdj',
   titlePrefix: 'Order Adjust Report',
-  // OrdAdvAdj.xml: group by @OrdGroup ascending.
-  groups: [
-    {
-      key: 'ordGroup',
-      labelKeys: ['vchNo'],
-      subtotal: 'footer',
-      subtotalCaption: 'TOTAL :',
-    },
-  ],
+  groups: [{ key: 'ordGroup', labelKeys: ['vchNo', 'vchDate', 'acName'], subtotal: 'header' }],
   sort: [{ key: 'coYear' }, { key: 'vchDate' }, { key: 'vchNo' }],
-  keys: { voucher: VOUCHER_KEY, line: ['adjSr'] },
-  rowLevels: ['line'],
+  keys: { voucher: ORDER_KEY, line: ADJ_KEY },
+  rowLevels: [],
   columns: [
-    derived('vchNo', 'Order No', 'text', 'line'),
-    derived('vchDate', 'Order Date', 'date', 'line'),
-    derived('acName', 'Name', 'text', 'line'),
-    col('ordSign', 'Sign', 'text', 'line'),
-    col('ordAmt', 'Amount', 'money', 'line'),
+    col('vchNo', 'Order No', 'text', 'voucher'),
+    col('vchDate', 'Order Date', 'date', 'voucher'),
+    col('acName', 'Name', 'text', 'voucher'),
     col('plusAmt', 'Order Adv', 'money', 'line', { total: true }),
     col('minusAmt', 'Order Adjust', 'money', 'line', { total: true }),
     col('balAmt', 'Panding Amt', 'money', 'line', { total: true }),
@@ -167,60 +169,53 @@ const orderAdjustLayout: RpAllLayout = {
 };
 
 // ---- Order Wise Bill (BtnOrdWithBill, RP_ALL.cs:9727-9792) → OrdAdjBillWise ----------------
+// Group 1 header: SL_ORD_DATA.AC_NAME. Group 2 header (VCH_NO): VCH_NO, VCH_DATE, ADV_AMT,
+// Sum(@AdjAmt, VCH_NO), @PandingTot. Detail: SL_ORD_ADJ.CO_BOOK, VCH_NO, VCH_DATE, @AcName, SL_DATA.TOT_AMT,
+// @AdjAmt. No report-footer sums.
 
 const orderWiseBillLayout: RpAllLayout = {
   template: 'OrdAdjBillWise',
   titlePrefix: 'Bill Wise Order Adjust Report',
-  // OrdAdjBillWise.xml: groups by SL_ORD_DATA.AC_NAME then SL_ORD_DATA.VCH_NO.
   groups: [
     { key: 'acName', labelKeys: ['acName'], subtotal: 'none' },
-    {
-      key: 'vchNo',
-      labelKeys: ['vchNo'],
-      subtotal: 'footer',
-      subtotalCaption: 'Total',
-    },
+    { key: 'vchNo', labelKeys: ['vchNo', 'vchDate'], subtotal: 'header' },
   ],
   sort: [{ key: 'acCode' }],
-  keys: { voucher: VOUCHER_KEY, line: ['adjSr'] },
+  keys: { voucher: ORDER_KEY, line: ADJ_KEY },
   rowLevels: ['line'],
   columns: [
-    derived('acName', 'Bill Party Name', 'text', 'line'),
-    derived('vchNo', 'Ord.No.', 'text', 'line'),
-    derived('vchDate', 'Ord.Date', 'date', 'line'),
-    col('ordSign', 'Sign', 'text', 'line'),
-    col('ordAmt', 'Total Adv.', 'money', 'line'),
-    col('billNo', 'Bill No', 'text', 'line'),
-    col('billTotAmt', 'Bill Amt', 'money', 'line'),
+    col('vchNo', 'Ord.No.', 'text', 'voucher'),
+    col('vchDate', 'Ord.Date', 'date', 'voucher'),
+    col('advAmt', 'Total Adv.', 'money', 'voucher', { total: true }),
+    col('adjBook', 'Book', 'text', 'line', { captionSource: 'field' }),
+    col('adjVchNo', 'Vch No', 'text', 'line', { captionSource: 'field' }),
+    col('adjVchDate', 'Vch Date', 'date', 'line', { captionSource: 'field' }),
+    col('billParty', 'Bill Party Name', 'text', 'line'),
+    col('billTotAmt', 'Bill Amt', 'money', 'line', { captionSource: 'field' }),
     col('adjAmt', 'Adjust Amt', 'money', 'line', { total: true }),
+    col('pendingAmt', 'Panding Amt', 'money', 'voucher', { total: true }),
   ],
-  // OrdAdjBillWise.xml has no grand total.
   grandTotal: false,
 };
 
 // ---- Making Panding (BtnOrdMakePan, RP_ALL.cs:10912-10995) → OrdDetlPanding ---------------
+// Group header (@VchGroup): BOOK_SNAME, VCH_DATE, VCH_NO, AC_NAME, OLD_GL, ADV_AMT; detail: the line;
+// report footer "Total :" Sum(ITM_PCS), Sum(ITM_NWT).
 
 const orderPendingLayout: RpAllLayout = {
   template: 'OrdDetlPanding',
   titlePrefix: 'Order Design Issue Panding Report',
-  // OrdDetlPanding.xml: group by @VchGroup = CO_YEAR&CO_BOOK&VCH_NO.
-  groups: [
-    {
-      key: 'vchGroup',
-      labelKeys: ['bookSName', 'vchDate', 'vchNo', 'acName'],
-      subtotal: 'none',
-    },
-  ],
+  groups: [{ key: 'vchGroup', labelKeys: ['bookSName', 'vchNo'], subtotal: 'none' }],
   sort: [{ key: 'acCode' }],
-  keys: { voucher: VOUCHER_KEY, line: ['srNo'] },
-  rowLevels: ['line'],
+  keys: { voucher: ORDER_KEY, line: ['srNo'] },
+  rowLevels: ['voucher', 'line'],
   columns: [
-    derived('bookSName', 'Book', 'text', 'voucher'),
-    derived('vchDate', 'Ord Date', 'date', 'voucher'),
-    derived('vchNo', 'Ord No', 'text', 'voucher'),
-    derived('acName', 'Customer', 'text', 'voucher'),
-    derived('oldGlAmt', 'Old Gold', 'money', 'voucher'),
-    derived('advAmt', 'Advance', 'money', 'voucher'),
+    col('bookSName', 'Book', 'text', 'voucher', { captionSource: 'field' }),
+    col('vchDate', 'Ord Date', 'date', 'voucher'),
+    col('vchNo', 'Ord No', 'text', 'voucher'),
+    col('acName', 'Customer', 'text', 'voucher', { captionSource: 'field' }),
+    col('oldGl', 'Old Gold', 'weight', 'voucher', { captionSource: 'field' }),
+    col('advAmt', 'Advance', 'money', 'voucher', { captionSource: 'field' }),
     col('itCode', 'It.Code', 'text', 'line'),
     col('itName', 'Item Name', 'text', 'line'),
     col('design', 'Design No', 'text', 'line'),
@@ -233,20 +228,15 @@ const orderPendingLayout: RpAllLayout = {
 };
 
 // ---- Making Summ (BtnDesignSumm, RP_ALL.cs:11818-11923) → OrdDesignSumm -------------------
+// Group header (@VchGroup = TAG_NO&DESIGN_NO): the @VchGroup text and its Sum(ITM_PCS), Sum(ITM_NWT);
+// detail suppressed when @OnlySumm = "Y"; report footer "Total :".
 
 const orderSummaryLayout = (onlySummary: boolean): RpAllLayout => ({
   template: 'OrdDesignSumm',
   titlePrefix: 'Order Design Issue Panding Report',
-  // OrdDesignSumm.xml: group by @VchGroup = TAG_NO&DESIGN_NO.
-  groups: [
-    {
-      key: 'vchGroup',
-      labelKeys: ['design'],
-      subtotal: 'header',
-    },
-  ],
+  groups: [{ key: 'vchGroup', labelKeys: ['vchGroup'], subtotal: 'header' }],
   sort: [{ key: 'acCode' }],
-  keys: { voucher: VOUCHER_KEY, line: ['srNo'] },
+  keys: { voucher: ORDER_KEY, line: ['srNo'] },
   rowLevels: ['line'],
   columns: [
     col('design', 'Design No', 'text', 'line'),
@@ -254,101 +244,101 @@ const orderSummaryLayout = (onlySummary: boolean): RpAllLayout => ({
     col('bookSName', 'Book', 'text', 'line'),
     col('vchNo', 'Ord No', 'text', 'line'),
     col('vchDate', 'Ord Date', 'date', 'line'),
-    col('acName', 'Customer', 'text', 'line'),
+    col('acName', 'Customer', 'text', 'line', { captionSource: 'field' }),
     col('itmSize', 'Size', 'text', 'line'),
     col('pcs', 'Pcs', 'pcs', 'line', { total: true }),
     col('nwt', 'Net Wt', 'weight', 'line', { total: true }),
   ],
   grandTotal: true,
   grandTotalCaption: 'Total :',
-  // OrdDesignSumm.xml Section5 EnableSuppress "{@OnlySumm} = \"Y\"".
+  // OrdDesignSumm.xml:685 Section5 EnableSuppress "{@OnlySumm} = \"Y\"".
   suppress: { line: () => onlySummary },
 });
 
 // ---- Bill Wise Adjust (btnbillwiseordadj, RP_ALL.cs:12597-12663) → BillWiseOrderAdjust ----
+// Group 1 header: SL_DATA.AC_NAME (grouped on SL_DATA.AC_CODE). Group 2 (@VchGroup, the bill) header:
+// BOOK_NAME, VCH_NO, VCH_DATE, TOT_AMT, ADV_AMT. Detail: ORD_YRCD, ORD_DBCD, ORD_NO, the order party's
+// AC_MAST.AC_NAME (via ORD_AC_CODE), ORD_AMT. No summary fields (D13).
 
 const billWiseAdjustLayout: RpAllLayout = {
   template: 'BillWiseOrderAdjust',
   titlePrefix: 'Bill Wise Order Adjust Report',
-  // BillWiseOrderAdjust.xml: group by SL_DATA.AC_CODE then @VchGroup.
-  groups: [
-    { key: 'billAcCode', labelKeys: ['billAcName'], subtotal: 'none' },
-    { key: 'billVchGroup', labelKeys: ['vchNo'], subtotal: 'none' },
-  ],
-  sort: [{ key: 'vchNo' }],
-  keys: { voucher: ['coBook', 'vchNo'], line: ['adjSr'] },
-  rowLevels: ['line'],
+  groups: [{ key: 'billAcCode', labelKeys: ['billAcName'], subtotal: 'none' }],
+  // The bill band is the voucher row, ordered by @VchGroup within the party.
+  sort: [{ key: 'billVchGroup' }],
+  keys: { voucher: ['coCode', 'lcCode', 'coYear', 'coBook', 'vchNo'], line: ['adjSr'] },
+  rowLevels: ['voucher', 'line'],
   columns: [
-    derived('billAcName', 'Bill Party Name', 'text', 'line'),
-    col('coBook', 'Book', 'text', 'line'),
-    col('vchNo', 'Vch No', 'text', 'line'),
-    col('vchDate', 'Date', 'date', 'line'),
-    col('billTotAmt', 'Bill Amt', 'money', 'line'),
-    col('ordYrcd', 'Order Year', 'text', 'line'),
-    col('ordDbcd', 'Order Book', 'text', 'line'),
-    col('ordNo', 'Order No', 'text', 'line'),
-    col('orderAcName', 'Order Party', 'text', 'line'),
-    col('adjAmt', 'Adv Amt', 'money', 'line'),
+    col('billAcName', 'Bill Party Name', 'text', 'voucher'),
+    col('bookName', 'Book', 'text', 'voucher', { captionSource: 'field' }),
+    col('vchNo', 'Vch No', 'text', 'voucher'),
+    col('vchDate', 'Vch Date', 'date', 'voucher'),
+    col('billTotAmt', 'Bill Amt', 'money', 'voucher'),
+    col('billAdvAmt', 'Adv Amt', 'money', 'voucher'),
+    col('ordYrcd', 'Order Year', 'text', 'line', { captionSource: 'field' }),
+    col('ordDbcd', 'Order Book', 'text', 'line', { captionSource: 'field' }),
+    col('ordNo', 'Order No', 'text', 'line', { captionSource: 'field' }),
+    col('orderPartyName', 'Order Party', 'text', 'line', { captionSource: 'field' }),
+    col('ordAmt', 'Adv Amt', 'money', 'line'),
   ],
-  // BillWiseOrderAdjust.xml has no summary fields (D13).
   grandTotal: false,
 };
 
-const designOf = (r: RpAllRecord): string =>
-  (r.designNo === '' || r.designNo === null ? r.tagNo : r.designNo) as string;
+/** @Design = if DESIGN_NO = "" then TAG_NO else DESIGN_NO (OrdDetlPanding.xml, OrdDesignSumm.xml). */
+const designOf = (r: RpAllRecord): string | null =>
+  r.designNo === '' ? txt(r, 'tagNo') : txt(r, 'designNo');
+
+/** @AcName of OrdAdjBillWise / BillWiseOrderAdjust: fixed texts for the cancel and cash-payment books. */
+const billPartyOf = (r: RpAllRecord): string | null => {
+  if (r.adjBook === '081') return 'ORDER CANCEL';
+  if (r.adjBook === '001') return 'CASH PAYMENT';
+  if (r.adjBook === '088') return txt(r, 'adjAcName');
+  return txt(r, 'billPartyName');
+};
+
+const ALL_FILTERS: readonly OrderFilterKey[] = ['lcCode', 'coBook', 'acCode', 'city', 'area', 'custName'];
 
 export const ORDER_SPECS: Readonly<Record<OrderMode, OrderModeSpec>> = {
   report: {
     mode: 'report',
     caption: 'Order Report',
-    filters: ['lcCode', 'coBook', 'acCode', 'city', 'area', 'custName'],
+    filters: ALL_FILTERS,
     variant: {
       layout: orderReportLayout,
-      query: {
-        base: 'SL_ORD_DATA',
-        lines: true,
-        adjustments: false,
-        fullyAdjustedExclusion: false,
-      },
+      query: { kind: 'lines' },
+      // OrdDetlRpt.xml @RateFix = ''.
+      derive: () => ({ rateFix: '' }),
       cite: 'RP_ALL.cs:8366-8434; OrdDetlRpt.xml',
     },
   },
   advance: {
     mode: 'advance',
     caption: 'Order Advance',
-    filters: ['lcCode', 'coBook', 'acCode', 'city', 'area', 'custName'],
+    filters: ALL_FILTERS,
     variant: {
       layout: orderAdvanceLayout,
-      query: {
-        base: 'SL_ORD_DATA',
-        lines: false,
-        adjustments: false,
-        fullyAdjustedExclusion: false,
-      },
+      query: { kind: 'header' },
       cite: 'RP_ALL.cs:8435-8500; OrdAdvRpt.xml',
     },
   },
   adjust: {
     mode: 'adjust',
     caption: 'Order Adjust',
-    filters: ['lcCode', 'coBook', 'acCode', 'city', 'area', 'custName'],
+    filters: ALL_FILTERS,
     variant: {
       layout: orderAdjustLayout,
-      query: {
-        base: 'SL_ORD_DATA',
-        lines: false,
-        adjustments: true,
-        fullyAdjustedExclusion: false,
-      },
-      // OrdAdvAdj.xml formulas @OrdAmt, @OrdAdjAmt, @BalAmt.
+      query: { kind: 'adjust' },
+      // OrdAdvAdj.xml: @OrdAmt = if ORD_SIGN = '+' then ORD_AMT; @OrdAdjAmt = if ORD_SIGN = '-' then ORD_AMT;
+      // @BalAmt = @OrdAmt - @OrdAdjAmt; @OrdGroup = ORD_LC+ORD_YRCD+ORD_DBCD+ORD_NO.
       derive: (r) => {
         const amt = n(r, 'ordAmt');
-        const isPlus = r.ordSign === '+';
+        const plusAmt = r.ordSign === '+' ? amt : 0;
+        const minusAmt = r.ordSign === '-' ? amt : 0;
         return {
-          ordGroup: `${r.ordLc ?? ''}${r.ordYrcd ?? ''}${r.ordDbcd ?? ''}${r.ordNo ?? ''}`,
-          plusAmt: isPlus ? amt : 0,
-          minusAmt: isPlus ? 0 : amt,
-          balAmt: isPlus ? amt : -amt,
+          ordGroup: concat(r, ['ordLc', 'ordYrcd', 'ordDbcd', 'ordNo']),
+          plusAmt,
+          minusAmt,
+          balAmt: plusAmt - minusAmt,
         };
       },
       cite: 'RP_ALL.cs:8501-8566; OrdAdvAdj.xml',
@@ -357,38 +347,30 @@ export const ORDER_SPECS: Readonly<Record<OrderMode, OrderModeSpec>> = {
   'with-bill': {
     mode: 'with-bill',
     caption: 'Order Wise Bill',
-    filters: ['lcCode', 'coBook', 'acCode', 'city', 'area', 'custName'],
+    filters: ALL_FILTERS,
     variant: {
       layout: orderWiseBillLayout,
-      query: {
-        base: 'SL_ORD_DATA',
-        lines: false,
-        adjustments: true,
-        fullyAdjustedExclusion: false,
-      },
-      // OrdAdjBillWise.xml formula @AdjAmt counts minus rows only.
+      query: { kind: 'withBill' },
+      // OrdAdjBillWise.xml: @AdjAmt = if ORD_SIGN = '-' then ORD_AMT; @AcName as billPartyOf.
       derive: (r) => ({
         adjAmt: r.ordSign === '-' ? n(r, 'ordAmt') : 0,
+        billParty: billPartyOf(r),
       }),
+      // @PandingTot = ADV_AMT - Sum(@AdjAmt, SL_ORD_DATA.VCH_NO).
+      bandFormulas: (t) => ({ pendingAmt: (t.advAmt ?? 0) - (t.adjAmt ?? 0) }),
       cite: 'RP_ALL.cs:9727-9792; OrdAdjBillWise.xml',
     },
   },
   pending: {
     mode: 'pending',
     caption: 'Making Panding',
-    filters: ['lcCode', 'coBook', 'acCode', 'city', 'area', 'custName'],
+    filters: ALL_FILTERS,
     variant: {
       layout: orderPendingLayout,
-      query: {
-        base: 'SL_ORD_DATA',
-        lines: true,
-        adjustments: false,
-        fullyAdjustedExclusion: true,
-      },
-      // OrdDetlPanding.xml formula @Design = DESIGN_NO else TAG_NO.
+      query: { kind: 'lines', designPending: true },
       derive: (r) => ({
         design: designOf(r),
-        vchGroup: `${r.coYear ?? ''}${r.coBook ?? ''}${r.vchNo ?? ''}`,
+        vchGroup: concat(r, ['coYear', 'coBook', 'vchNo']),
       }),
       cite: 'RP_ALL.cs:10912-10995; OrdDetlPanding.xml',
     },
@@ -396,19 +378,14 @@ export const ORDER_SPECS: Readonly<Record<OrderMode, OrderModeSpec>> = {
   summary: {
     mode: 'summary',
     caption: 'Making Summ',
-    filters: ['lcCode', 'coBook', 'acCode', 'city', 'area', 'custName'],
+    filters: ALL_FILTERS,
     variant: {
       // Layout depends on the Yes/No prompt answer; resolved at request time.
       layout: orderSummaryLayout(false),
-      query: {
-        base: 'SL_ORD_DATA',
-        lines: true,
-        adjustments: false,
-        fullyAdjustedExclusion: true,
-      },
+      query: { kind: 'lines', designPending: true },
       derive: (r) => ({
         design: designOf(r),
-        vchGroup: `${r.tagNo ?? ''}${r.designNo ?? ''}`,
+        vchGroup: concat(r, ['tagNo', 'designNo']),
       }),
       cite: 'RP_ALL.cs:11818-11923; OrdDesignSumm.xml',
     },
@@ -416,19 +393,14 @@ export const ORDER_SPECS: Readonly<Record<OrderMode, OrderModeSpec>> = {
   'bill-wise': {
     mode: 'bill-wise',
     caption: 'Bill Wise Adjust',
-    filters: ['lcCode', 'custName'],
+    // RP_ALL.cs:12609-12632 appends location, book, party code, city, area and name, all on SL_DATA
+    // except city/area on the order party's AC_MAST.
+    filters: ALL_FILTERS,
     variant: {
       layout: billWiseAdjustLayout,
-      query: {
-        base: 'SL_DATA',
-        lines: false,
-        adjustments: true,
-        fullyAdjustedExclusion: false,
-      },
-      // BillWiseOrderAdjust.xml prints the raw adjustment amount (D13).
+      query: { kind: 'billWise' },
       derive: (r) => ({
-        billVchGroup: `${r.coCode ?? ''}${r.lcCode ?? ''}${r.coYear ?? ''}${r.coBook ?? ''}${r.vchNo ?? ''}`,
-        adjAmt: n(r, 'ordAmt'),
+        billVchGroup: concat(r, ['coCode', 'lcCode', 'coYear', 'coBook', 'vchNo']),
       }),
       cite: 'RP_ALL.cs:12597-12663; BillWiseOrderAdjust.xml',
     },

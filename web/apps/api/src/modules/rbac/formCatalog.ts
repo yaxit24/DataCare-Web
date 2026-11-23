@@ -202,6 +202,7 @@ const groups: Record<string, readonly string[]> = {
     'Delete Data',
     'Point Report',
     'Approval Report',
+    'Order Report',
     'VP Report',
     'Bullion Report',
     'Karigar Report',
@@ -403,6 +404,8 @@ const aliases: Record<string, readonly string[]> = {
   'Reports/Delete Data': ['Delete Data', 'RP_ORDER'],
   'Reports/Point Report': ['Point Report', 'Member Point Report', 'RP_ORDER'],
   'Reports/Approval Report': ['Approval Rpt', 'RP_ALL'],
+  // WP-14 D6: the RP_ALL "Order Report" caption (MDI_FORM.cs:8931 {{case "Order Report":}}).
+  'Reports/Order Report': ['Order Report'],
   'Reports/VP Report': ['Vp Report', 'VP Report', 'RP_ALL'],
   'Reports/Bullion Report': ['Bul Report', 'Bullion Report', 'RP_ALL'],
   'Reports/Karigar Report': ['Kr Report', 'Karigar Report', 'RP_ALL'],

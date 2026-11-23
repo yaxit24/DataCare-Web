@@ -4,9 +4,27 @@ import type { OrderFilterKey, OrderQueryShape } from './orderLayouts.js';
 /**
  * Read-only SQL for the Order branch of RP_ALL.
  *
- * Every fragment is a constant chosen by the query SHAPE; request values are bound.
- * The desktop builds Crystal formulas by concatenating control text (RP_ALL.cs:8380-8403,
- * :12608-12631) — that weakness is not ported.
+ * Every fragment is a constant chosen by the query SHAPE (from the mode table, never from the request);
+ * request values are bound as `$n`. The desktop builds Crystal formulas by concatenating control text
+ * (RP_ALL.cs:8380-8403, :12608-12631) — that weakness is not ported.
+ *
+ * Each shape reproduces the record set of its template's TableLinks (extraction_output/rpt_xml/*.xml):
+ *   header   OrdAdvRpt       SL_ORD_DATA → AC_MAST, BOOK_DATA
+ *   lines    OrdDetlRpt, OrdDetlPanding, OrdDesignSumm
+ *                            SL_ORD_DATA ⟕ SL_ORD_DETL (5 keys) ⟕ ITEM_MAST, → AC_MAST, BOOK_DATA
+ *   adjust   OrdAdvAdj       SL_ORD_DATA ⟕ SL_ORD_ADJ ON CO_CODE, ORD_NO, ORD_LC, ORD_YRCD, ORD_DBCD
+ *   withBill OrdAdjBillWise  SL_ORD_DATA ⟕ SL_ORD_ADJ ON CO_CODE, ORD_NO, ORD_YRCD, ORD_DBCD (no ORD_LC)
+ *                            ⟕ SL_DATA ON the adjustment's own 5 keys ⟕ AC_MAST ON SL_DATA.AC_CODE
+ *   billWise BillWiseOrderAdjust
+ *                            SL_DATA ⋈ SL_ORD_ADJ (Equal join) ON the 5 voucher keys,
+ *                            ⟕ AC_MAST ON SL_ORD_ADJ.ORD_AC_CODE, ⟕ BOOK_DATA ON SL_DATA
+ * An SL_ORD_ADJ row's own keys are the voucher that wrote it (the order for its `+` advance row, the sale
+ * bill for a `-` adjustment, Ac_Tax.cs:71-73) and ORD_* point at the order — so an order reaches its
+ * adjustments through ORD_*, never through the adjustment's own keys.
+ *
+ * Masters are looked up once per row (LATERAL ... LIMIT 1, as the Sales adapter does: AC_MAST and BOOK_DATA
+ * have no unique key in the schema). Tenant isolation comes from forced RLS on every table read inside
+ * withTxBudget; company and location are explicit predicates as well.
  */
 
 export interface SqlQuery {
@@ -23,13 +41,15 @@ export interface OrderQueryArgs {
 }
 
 const NUM = (expr: string) => `COALESCE(${expr}, 0)::float8`;
+const DATE = (expr: string) => `to_char(${expr}, 'YYYY-MM-DD')`;
 
-const HEADER_COLUMNS: readonly [string, string][] = [
+const ORDER_HEADER: readonly [string, string][] = [
+  ['coCode', 'd."CO_CODE"'],
   ['lcCode', 'd."LC_CODE"'],
-  ['coBook', 'd."CO_BOOK"'],
   ['coYear', 'd."CO_YEAR"'],
+  ['coBook', 'd."CO_BOOK"'],
   ['vchNo', 'd."VCH_NO"'],
-  ['vchDate', `to_char(d."VCH_DATE", 'YYYY-MM-DD')`],
+  ['vchDate', DATE('d."VCH_DATE"')],
   ['acCode', 'd."AC_CODE"'],
   ['acName', 'd."AC_NAME"'],
   ['totAmt', NUM('d."TOT_AMT"')],
@@ -39,8 +59,12 @@ const HEADER_COLUMNS: readonly [string, string][] = [
   ['chqAmt', NUM('d."CHQ_AMT"')],
   ['oldGlAmt', NUM('d."OLD_GL_AMT"')],
   ['oldSlAmt', NUM('d."OLD_SL_AMT"')],
-  // DEL_DATE is a varchar on SL_ORD_DATA (schema.prisma:6102), not a date: select it as stored text.
+  // OrdDetlPanding prints {SL_ORD_DATA.OLD_GL} (the old-gold weight column), not OLD_GL_AMT.
+  ['oldGl', NUM('d."OLD_GL"')],
+  // DEL_DATE is a varchar on SL_ORD_DATA (schema.prisma), not a date: select it as stored text.
   ['delDate', 'd."DEL_DATE"'],
+  ['bookName', 'bk."BOOK_NAME"'],
+  ['bookSName', 'bk."BOOK_SNAME"'],
 ];
 
 const LINE_COLUMNS: readonly [string, string][] = [
@@ -61,72 +85,53 @@ const LINE_COLUMNS: readonly [string, string][] = [
   ['designIsu', 'l."DESIGN_ISU"'],
 ];
 
+/** The adjustment row: its own keys (the writing voucher) and its ORD_* reference to the order. */
 const ADJUSTMENT_COLUMNS: readonly [string, string][] = [
+  ['adjLc', 'a."LC_CODE"'],
+  ['adjYear', 'a."CO_YEAR"'],
+  ['adjBook', 'a."CO_BOOK"'],
+  ['adjVchNo', 'a."VCH_NO"'],
   ['adjSr', 'a."SR_NO"::float8'],
+  ['adjVchDate', DATE('a."VCH_DATE"')],
+  ['adjAcName', 'a."AC_NAME"'],
   ['ordSign', 'a."ORD_SIGN"'],
-  ['ordAmt', NUM('a."ORD_AMT"')],
+  // NULL stays NULL: an order without adjustment rows has no amount (Crystal prints a blank, sums skip it).
+  ['ordAmt', 'a."ORD_AMT"::float8'],
   ['ordLc', 'a."ORD_LC"'],
   ['ordYrcd', 'a."ORD_YRCD"'],
   ['ordDbcd', 'a."ORD_DBCD"'],
   ['ordNo', 'a."ORD_NO"'],
+  ['ordAcCode', 'a."ORD_AC_CODE"'],
 ];
 
-const BILL_COLUMNS: readonly [string, string][] = [
-  ['billNo', 'b."VCH_NO"'],
-  ['billDate', `to_char(b."VCH_DATE", 'YYYY-MM-DD')`],
-  ['billTotAmt', NUM('b."TOT_AMT"')],
-  ['billAdvAmt', NUM('b."ADV_AMT"')],
-  ['billAcCode', 'b."AC_CODE"'],
-  ['billAcName', 'b."AC_NAME"'],
-];
-
-const PARTY_COLUMNS: readonly [string, string][] = [
-  ['partyName', 'ac."AC_NAME"'],
-  ['city', 'ac."AC_CITY"'],
-  ['area', 'ac."AC_AREA"'],
-];
-
-const BOOK_COLUMNS: readonly [string, string][] = [
-  ['bookName', 'bk."BOOK_NAME"'],
-  ['bookSName', 'bk."BOOK_SNAME"'],
-];
-
-const itemJoins = `LEFT JOIN "ITEM_MAST" im ON im."CO_CODE" = l."CO_CODE" AND im."IT_CODE" = l."IT_CODE"`;
-const partyJoin = (h: string) =>
-  `LEFT JOIN LATERAL (SELECT a."AC_NAME", a."AC_CITY", a."AC_AREA"
-       FROM "AC_MAST" a WHERE a."CO_CODE" = ${h}."CO_CODE" AND a."AC_CODE" = ${h}."AC_CODE"
-       ORDER BY (a."LC_CODE" = ${h}."LC_CODE") DESC NULLS LAST, a."row_id" LIMIT 1) ac ON true`;
-const bookJoin = (h: string) =>
-  `LEFT JOIN LATERAL (SELECT b."BOOK_NAME", b."BOOK_SNAME"
-       FROM "BOOK_DATA" b WHERE b."CO_CODE" = ${h}."CO_CODE" AND b."CO_BOOK" = ${h}."CO_BOOK"
-       ORDER BY (b."LC_CODE" = ${h}."LC_CODE") DESC NULLS LAST, b."row_id" LIMIT 1) bk ON true`;
-const lineJoin =
-  `LEFT JOIN "SL_ORD_DETL" l ON l."CO_CODE" = d."CO_CODE" AND l."LC_CODE" = d."LC_CODE" AND l."CO_YEAR" = d."CO_YEAR"
-       AND l."CO_BOOK" = d."CO_BOOK" AND l."VCH_NO" = d."VCH_NO"`;
-const adjustmentJoin =
-  `LEFT JOIN "SL_ORD_ADJ" a ON a."CO_CODE" = d."CO_CODE" AND a."LC_CODE" = d."LC_CODE" AND a."CO_YEAR" = d."CO_YEAR"
-       AND a."CO_BOOK" = d."CO_BOOK" AND a."VCH_NO" = d."VCH_NO"`;
-const billFromAdjustmentJoin =
-  `LEFT JOIN "SL_DATA" b ON b."CO_CODE" = a."ORD_LC"::text AND b."LC_CODE" = a."ORD_LC"
-       AND b."CO_YEAR" = a."ORD_YRCD" AND b."CO_BOOK" = a."ORD_DBCD" AND b."VCH_NO" = a."ORD_NO"`;
-const orderFromAdjustmentJoin =
-  `LEFT JOIN "SL_ORD_DATA" o ON o."CO_CODE" = a."CO_CODE" AND o."LC_CODE" = a."LC_CODE" AND o."CO_YEAR" = a."CO_YEAR"
-       AND o."CO_BOOK" = a."CO_BOOK" AND o."VCH_NO" = a."VCH_NO"`;
+const masterJoin = (alias: string, co: string, code: string, lc: string) =>
+  `LEFT JOIN LATERAL (SELECT m."AC_NAME", m."AC_CITY", m."AC_AREA"
+       FROM "AC_MAST" m WHERE m."CO_CODE" = ${co} AND m."AC_CODE" = ${code}
+       ORDER BY (m."LC_CODE" = ${lc}) DESC NULLS LAST, m."row_id" LIMIT 1) ${alias} ON true`;
+const bookJoin = `LEFT JOIN LATERAL (SELECT b."BOOK_NAME", b."BOOK_SNAME"
+       FROM "BOOK_DATA" b WHERE b."CO_CODE" = d."CO_CODE" AND b."LC_CODE" = d."LC_CODE" AND b."CO_BOOK" = d."CO_BOOK"
+       ORDER BY b."row_id" LIMIT 1) bk ON true`;
+const lineJoin = `LEFT JOIN "SL_ORD_DETL" l ON l."CO_CODE" = d."CO_CODE" AND l."LC_CODE" = d."LC_CODE"
+       AND l."CO_YEAR" = d."CO_YEAR" AND l."CO_BOOK" = d."CO_BOOK" AND l."VCH_NO" = d."VCH_NO"
+     LEFT JOIN "ITEM_MAST" im ON im."CO_CODE" = l."CO_CODE" AND im."IT_CODE" = l."IT_CODE"`;
+// OrdAdvAdj.xml TableLink: SL_ORD_DATA (CO_CODE, VCH_NO, LC_CODE, CO_YEAR, CO_BOOK)
+//   → SL_ORD_ADJ (CO_CODE, ORD_NO, ORD_LC, ORD_YRCD, ORD_DBCD).
+const adjustByOrderJoin = `LEFT JOIN "SL_ORD_ADJ" a ON a."CO_CODE" = d."CO_CODE" AND a."ORD_NO" = d."VCH_NO"
+       AND a."ORD_LC" = d."LC_CODE" AND a."ORD_YRCD" = d."CO_YEAR" AND a."ORD_DBCD" = d."CO_BOOK"`;
+// OrdAdjBillWise.xml TableLink: the same without the location (SL_ORD_DATA.LC_CODE is not linked).
+const adjustByOrderNoLcJoin = `LEFT JOIN "SL_ORD_ADJ" a ON a."CO_CODE" = d."CO_CODE" AND a."ORD_NO" = d."VCH_NO"
+       AND a."ORD_YRCD" = d."CO_YEAR" AND a."ORD_DBCD" = d."CO_BOOK"`;
+// OrdAdjBillWise.xml TableLink: SL_ORD_ADJ (5 own keys) → SL_DATA (5 keys).
+const billOfAdjustmentJoin = `LEFT JOIN "SL_DATA" s ON s."CO_CODE" = a."CO_CODE" AND s."LC_CODE" = a."LC_CODE"
+       AND s."CO_YEAR" = a."CO_YEAR" AND s."CO_BOOK" = a."CO_BOOK" AND s."VCH_NO" = a."VCH_NO"`;
+// BillWiseOrderAdjust.xml TableLink JoinType="Equal": SL_DATA (5 keys) → SL_ORD_ADJ (5 own keys).
+const adjustOfBillJoin = `JOIN "SL_ORD_ADJ" a ON a."CO_CODE" = d."CO_CODE" AND a."LC_CODE" = d."LC_CODE"
+       AND a."CO_YEAR" = d."CO_YEAR" AND a."CO_BOOK" = d."CO_BOOK" AND a."VCH_NO" = d."VCH_NO"`;
 
 const select = (columns: readonly [string, string][]) =>
   columns.map(([alias, expr]) => `${expr} AS "${alias}"`).join(',\n       ');
 
-const fullyAdjustedExclusion = (h: string) =>
-  `NOT EXISTS (
-       SELECT 1 FROM "SL_ORD_DATA" a2
-       LEFT JOIN "SL_ORD_ADJ" b2
-         ON a2."CO_CODE" = b2."CO_CODE" AND a2."LC_CODE" = b2."LC_CODE" AND a2."CO_YEAR" = b2."CO_YEAR"
-         AND a2."CO_BOOK" = b2."CO_BOOK" AND a2."VCH_NO" = b2."VCH_NO"
-       WHERE a2."CO_CODE" = ${h}."CO_CODE" AND a2."LC_CODE" = ${h}."LC_CODE"
-         AND a2."CO_YEAR" = ${h}."CO_YEAR" AND a2."CO_BOOK" = ${h}."CO_BOOK" AND a2."VCH_NO" = ${h}."VCH_NO"
-       GROUP BY a2."CO_YEAR", a2."CO_BOOK", a2."VCH_NO"
-       HAVING SUM(CASE WHEN b2."ORD_SIGN" = '+' THEN b2."ORD_AMT" ELSE -b2."ORD_AMT" END) = 0
-     )`;
+const ORDER_KEY_SORT = 'd."CO_CODE", d."LC_CODE", d."CO_YEAR", d."CO_BOOK", d."VCH_NO"';
 
 export function buildOrderQuery(input: OrderQueryArgs): SqlQuery {
   const { shape, scope, filters, applied } = input;
@@ -135,81 +140,93 @@ export function buildOrderQuery(input: OrderQueryArgs): SqlQuery {
     values.push(value);
     return `$${values.length}${cast}`;
   };
-
   const has = (key: OrderFilterKey) => applied.has(key) && filters[key] !== undefined;
 
   const columns: [string, string][] = [];
   const joins: string[] = [];
   let from: string;
-  let dateAlias: string;
+  let orderBy: string;
+  /** Alias of the AC_MAST row the template's {AC_MAST.AC_CITY}/{AC_MAST.AC_AREA} filters read. */
+  let party: string;
 
-  if (shape.base === 'SL_ORD_DATA') {
-    from = '"SL_ORD_DATA" d';
-    dateAlias = 'd';
-    columns.push(...HEADER_COLUMNS);
-    joins.push(partyJoin('d'), bookJoin('d'));
-    if (shape.lines) {
-      columns.push(...LINE_COLUMNS);
-      joins.push(lineJoin, itemJoins);
-    }
-    if (shape.adjustments) {
-      columns.push(...ADJUSTMENT_COLUMNS);
-      joins.push(adjustmentJoin);
-      if (shape.base === 'SL_ORD_DATA') {
-        // Order Wise Bill left-joins the bill referenced by the adjustment.
-        columns.push(...BILL_COLUMNS);
-        joins.push(billFromAdjustmentJoin);
-      }
-    }
-  } else {
-    // Bill Wise Adjust: base is the sale bill table SL_DATA (RP_ALL.cs:12608).
+  if (shape.kind === 'billWise') {
+    // Bill Wise Adjust: SL_DATA is the base table (RP_ALL.cs:12608 {{CurFormula = "{SL_DATA.CO_CODE} = '"}}).
     from = '"SL_DATA" d';
-    dateAlias = 'd';
     columns.push(
-      ['lcCode', 'd."LC_CODE"'],
-      ['coBook', 'd."CO_BOOK"'],
-      ['coYear', 'd."CO_YEAR"'],
-      ['vchNo', 'd."VCH_NO"'],
-      ['vchDate', `to_char(d."VCH_DATE", 'YYYY-MM-DD')`],
       ['coCode', 'd."CO_CODE"'],
+      ['lcCode', 'd."LC_CODE"'],
+      ['coYear', 'd."CO_YEAR"'],
+      ['coBook', 'd."CO_BOOK"'],
+      ['vchNo', 'd."VCH_NO"'],
+      ['vchDate', DATE('d."VCH_DATE"')],
       ['billAcCode', 'd."AC_CODE"'],
       ['billAcName', 'd."AC_NAME"'],
       ['billTotAmt', NUM('d."TOT_AMT"')],
       ['billAdvAmt', NUM('d."ADV_AMT"')],
-    );
-    joins.push(adjustmentJoin, orderFromAdjustmentJoin, bookJoin('d'));
-    columns.push(
+      ['bookName', 'bk."BOOK_NAME"'],
       ...ADJUSTMENT_COLUMNS,
-      ['orderAcName', 'o."AC_NAME"'],
-      ['orderAcCode', 'o."AC_CODE"'],
+      ['orderPartyName', 'ac."AC_NAME"'],
     );
+    joins.push(adjustOfBillJoin, bookJoin, masterJoin('ac', 'a."CO_CODE"', 'a."ORD_AC_CODE"', 'a."LC_CODE"'));
+    party = 'ac';
+    orderBy = `${ORDER_KEY_SORT}, a."SR_NO"`;
+  } else {
+    from = '"SL_ORD_DATA" d';
+    columns.push(...ORDER_HEADER);
+    joins.push(bookJoin);
+    orderBy = ORDER_KEY_SORT;
+    if (shape.kind === 'withBill') {
+      // OrdAdjBillWise links AC_MAST to the BILL's party, not the order's.
+      columns.push(
+        ...ADJUSTMENT_COLUMNS,
+        ['billTotAmt', NUM('s."TOT_AMT"')],
+        ['billAcCode', 's."AC_CODE"'],
+        ['billPartyName', 'ac."AC_NAME"'],
+      );
+      joins.push(
+        adjustByOrderNoLcJoin,
+        billOfAdjustmentJoin,
+        masterJoin('ac', 's."CO_CODE"', 's."AC_CODE"', 's."LC_CODE"'),
+      );
+      orderBy += ', a."CO_YEAR", a."VCH_DATE", a."CO_BOOK", a."VCH_NO", a."SR_NO"';
+    } else {
+      joins.push(masterJoin('ac', 'd."CO_CODE"', 'd."AC_CODE"', 'd."LC_CODE"'));
+      if (shape.kind === 'lines') {
+        columns.push(...LINE_COLUMNS);
+        joins.push(lineJoin);
+        orderBy += ', l."SR_NO"';
+      } else if (shape.kind === 'adjust') {
+        columns.push(...ADJUSTMENT_COLUMNS);
+        joins.push(adjustByOrderJoin);
+        orderBy += ', a."CO_YEAR", a."VCH_DATE", a."CO_BOOK", a."VCH_NO", a."SR_NO"';
+      }
+    }
+    party = 'ac';
   }
 
   const where: string[] = [
-    `${dateAlias}."CO_CODE" = ${p(scope.coCode)}`,
-    `${dateAlias}."VCH_DATE"::date >= ${p(filters.fromDate, '::date')}`,
-    `${dateAlias}."VCH_DATE"::date <= ${p(filters.toDate, '::date')}`,
+    `d."CO_CODE" = ${p(scope.coCode)}`,
+    `d."VCH_DATE"::date >= ${p(filters.fromDate, '::date')}`,
+    `d."VCH_DATE"::date <= ${p(filters.toDate, '::date')}`,
   ];
-
-  // Location filter is applied whenever a location is set (RP_ALL.cs:8383).
-  if (applied.has('lcCode') && filters.lcCode !== null)
-    where.push(`${dateAlias}."LC_CODE" = ${p(filters.lcCode)}`);
-  if (has('coBook')) where.push(`${dateAlias}."CO_BOOK" = ${p(filters.coBook)}`);
-  if (has('acCode')) where.push(`${dateAlias}."AC_CODE" = ${p(filters.acCode)}`);
-  if (has('custName')) where.push(`${dateAlias}."AC_NAME" = ${p(filters.custName)}`);
-
-  // City/Area filter on AC_MAST joined to the order header (RP_ALL.cs:8395-8399).
-  if (has('city')) where.push(`ac."AC_CITY" = ${p(filters.city)}`);
-  if (has('area')) where.push(`ac."AC_AREA" = ${p(filters.area)}`);
-
-  if (shape.lines && shape.fullyAdjustedExclusion) {
-    where.push(`l."DESIGN_ISU" = 'N'`);
-    where.push(fullyAdjustedExclusion('d'));
-  }
+  // Every handler appends its location/book/party/name clause on its base table when the box is not empty
+  // (RP_ALL.cs:8383 {{CurFormula = CurFormula + " And {SL_ORD_DATA.LC_CODE} = '" + tLcCode.Text + "'";}},
+  //  RP_ALL.cs:12611 {{CurFormula = CurFormula + " And {SL_DATA.LC_CODE} = '" + tLcCode.Text + "'";}}).
+  if (applied.has('lcCode') && filters.lcCode !== null && filters.lcCode !== undefined)
+    where.push(`d."LC_CODE" = ${p(filters.lcCode)}`);
+  if (has('coBook')) where.push(`d."CO_BOOK" = ${p(filters.coBook)}`);
+  if (has('acCode')) where.push(`d."AC_CODE" = ${p(filters.acCode)}`);
+  if (has('city')) where.push(`${party}."AC_CITY" = ${p(filters.city)}`);
+  if (has('area')) where.push(`${party}."AC_AREA" = ${p(filters.area)}`);
+  if (has('custName')) where.push(`d."AC_NAME" = ${p(filters.custName)}`);
+  // Making Panding / Making Summ print only lines not yet issued for making
+  // (RP_ALL.cs:10940 {{AND {SL_ORD_DETL.DESIGN_ISU} = 'N' }}).
+  if (shape.kind === 'lines' && shape.designPending) where.push(`l."DESIGN_ISU" = 'N'`);
 
   const text = `SELECT ${select(columns)}
   FROM ${from}
      ${joins.join('\n     ')}
- WHERE ${where.join('\n   AND ')}`;
+ WHERE ${where.join('\n   AND ')}
+ ORDER BY ${orderBy}`;
   return { text, values };
 }
