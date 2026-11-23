@@ -1866,6 +1866,8 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
       'AC_DATA',
       // The day book. Added when the order projection was implemented from the real book-020 rows.
       'ROJ_MEL_DATA',
+      // The order's own '+' advance row (TR_SALE_ORD.cs:9475-9516).
+      'SL_ORD_ADJ',
       'SL_ORD_DATA',
       'SL_ORD_DETL',
       // The fixture's line carries a stone sub-detail, so the order writes SL_ORD_IDTL too. Pinned

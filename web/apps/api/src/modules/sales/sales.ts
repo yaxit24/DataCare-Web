@@ -1644,6 +1644,7 @@ async function writeSaleTx(
   // Sales-Order advance consumed into this bill (P0-3): the order's advance (already Cr customer)
   // settles part of this receivable → reduces BILL_OS. Clamped to the available advance + bill balance.
   let orderAdjust = 0;
+  let adjustedOrder: Awaited<ReturnType<typeof orderAdvanceAvailableTx>> | undefined;
   if (!isSalesQuotation && input.orderRef?.ordNo != null) {
     const av = await orderAdvanceAvailableTx(
       tx,
@@ -1657,6 +1658,7 @@ async function writeSaleTx(
       0,
       Math.min(want, av.available, round2s(grandWithTcs - paidNow - kasar)),
     );
+    adjustedOrder = av;
   }
   const billOS = round2s(grandWithTcs - paidNow - kasar - orderAdjust);
   // TR_SALE.cs: MsDefaulterAc = 'Y' AND outstanding > 0 -> credit to a flagged party is blocked.
@@ -2013,10 +2015,13 @@ async function writeSaleTx(
   await consumeSaleReferencesTx(tx, input.scope, key.VCH_NO, approvalSources, SaleValidationError);
 
   // Consume the order advance into this sale (P0-3): record SL_ORD_ADJ linking order → this bill.
-  if (orderAdjust > 0 && input.orderRef?.ordNo != null) {
+  if (orderAdjust > 0 && input.orderRef?.ordNo != null && adjustedOrder) {
     await adjustOrderIntoSaleTx(tx, tenantId, input.scope, {
       saleVchNo: formatVoucherNo(vchNo),
       ordNo: input.orderRef.ordNo,
+      ordYear: adjustedOrder.ordYear,
+      ordBook: adjustedOrder.ordBook,
+      ordHiddenVchNo: adjustedOrder.hdVchNo || null,
       custAc: input.acCode,
       custName: input.acName,
       adjustAmt: orderAdjust,
@@ -2380,7 +2385,7 @@ export async function getSale(
       ...params,
     );
     const adjustments: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-      `SELECT "ORD_NO","PAID_AMT" FROM "SL_ORD_ADJ"
+      `SELECT "ORD_NO",CASE WHEN "ORD_SIGN"='-' THEN "ORD_AMT" ELSE "PAID_AMT" END AS "PAID_AMT" FROM "SL_ORD_ADJ"
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
           AND "NEW_VCH_NO"::text=$6 AND "OLD_VCH_NO"::text=$5 ORDER BY "SR_NO" LIMIT 1`,
       ...params,

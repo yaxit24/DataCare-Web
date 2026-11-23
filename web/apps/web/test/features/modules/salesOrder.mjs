@@ -23,7 +23,15 @@ import { rollbackMatrix } from '../faults.mjs';
  */
 const BOOK = 'SOR';
 /** Measured on the first run: one saved order with an advance changes exactly these tables. */
-const ORDER_WRITE_SET = ['AC_DATA', 'ROJ_MEL_DATA', 'SL_ORD_DATA', 'SL_ORD_DETL', 'TEMP_BOOK_DATA'];
+// An order with an advance also writes its own '+' SL_ORD_ADJ row (TR_SALE_ORD.cs:9475-9516).
+const ORDER_WRITE_SET = [
+  'AC_DATA',
+  'ROJ_MEL_DATA',
+  'SL_ORD_ADJ',
+  'SL_ORD_DATA',
+  'SL_ORD_DETL',
+  'TEMP_BOOK_DATA',
+];
 const CASH = 'CASH';
 const as = (user, slot) => ({
   user,
@@ -1685,7 +1693,7 @@ export const salesOrder = {
           sale,
         );
         const adj = await ctx.rows(
-          `SELECT "PAID_AMT"::float paid FROM "SL_ORD_ADJ" WHERE tenant_id=$1 AND "ORD_NO"=$2`,
+          `SELECT "ORD_SIGN" sign,"ORD_AMT"::float paid FROM "SL_ORD_ADJ" WHERE tenant_id=$1 AND "ORD_NO"=$2 ORDER BY "ORD_SIGN"`,
           order,
         );
         const party1 = await balance(ctx, PARTIES.local.code);
@@ -1695,9 +1703,13 @@ export const salesOrder = {
           round2(s.tot - ADVANCE),
           `customer moved by ${party1 - party0}`,
         );
+        // The order's '+' advance row (TR_SALE_ORD.cs:9503) and the sale's '-' use of it (TR_SALE.cs:15712-15725).
         assert.deepEqual(
-          adj.map((a) => a.paid),
-          [ADVANCE],
+          adj.map((a) => [a.sign, a.paid]),
+          [
+            ['+', ADVANCE],
+            ['-', ADVANCE],
+          ],
         );
         return {
           observation: `order ${order} + sale ${sale}: total ${s.tot}, outstanding ${s.os}, customer Δ ${round2(party1 - party0)}`,
@@ -1721,7 +1733,7 @@ export const salesOrder = {
             `SELECT "VCH_NO","TOT_AMT"::float tot,"BILL_OS"::float os,"ADV_AMT"::float adv FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SL' ORDER BY "VCH_NO" DESC LIMIT 1`,
           ),
           adjustments: await ctx.rows(
-            `SELECT "ORD_NO","PAID_AMT"::float paid FROM "SL_ORD_ADJ" WHERE tenant_id=$1 ORDER BY row_id DESC LIMIT 2`,
+            `SELECT "ORD_NO","ORD_SIGN","ORD_AMT"::float amt FROM "SL_ORD_ADJ" WHERE tenant_id=$1 ORDER BY row_id DESC LIMIT 2`,
           ),
         }),
       },
