@@ -509,8 +509,9 @@ const groupsOf = (b: any): any[] => (Array.isArray(b?.groups) ? b.groups : []);
         .map((r) => Number(field(r, 'netAmount', 'netAmt') ?? 0))
         .sort((a, b) => a - b),
     ).toEqual([560, 900, 1680]);
-    // AprPartyWise has no report-footer grand total (RP_ALL.cs:8199 selects it).
-    expect(totalsOf(body).pcs).toBeUndefined();
+    // AprPartyWise has no report-footer grand total (RP_ALL.cs:8199 selects it): the report-footer band
+    // Section11 holds no field, so the result must not print one (Pcs is still summed at both bands).
+    expect(body.grandTotal).toBe(false);
   });
 
   it('approval-report.formula.inout-out-in-pending: issue-line status before and after resolution', async () => {
@@ -650,10 +651,58 @@ const groupsOf = (b: any): any[] => (Array.isArray(b?.groups) ? b.groups : []);
     const body = await report('mode=issue');
     expect(rowsOf(body).map(vchOf)).toEqual(['V1', 'V1', 'V2']);
     const levels = body.groupLevels as any[] | undefined;
-    expect(levels?.map((l) => l.subtotal)).toEqual(['none', 'footer']);
+    // AprPartyWise prints both footers: the voucher footer Section9 with Sum (..., {@Group}) and the party
+    // footer Section10 "Party Total :" with Sum (..., {APR_DETL.AC_CODE}); the report footer is empty.
+    expect(levels?.map((l) => l.subtotal)).toEqual(['footer', 'footer']);
     expect(levels?.[0]?.key).toBe('acCode');
+    expect(levels?.[0]?.subtotalCaption).toBe('Party Total :');
     expect(levels?.[1]?.key).toContain('vch');
+    expect(levels?.[1]?.subtotalCaption, 'the voucher footer has no caption').toBeUndefined();
     expect(body.grandTotal).toBe(false);
+  });
+
+  it('approval-report.formula.issue-band-totals: voucher and party footers sum the printed lines', async () => {
+    await reset(['V1', 'V2', 'V11']);
+    const body = await report('mode=issue');
+    const groups = groupsOf(body);
+    const party = (ac: string) => groups.find((g) => g.depth === 0 && g.key === ac);
+    const voucher = (vch: string) =>
+      groups.find((g) => g.depth === 1 && String(g.key).endsWith(vch));
+    // P1 holds V1 (two lines) and V11 (one line); P2 holds V2.
+    const p1Lines = [...FIXTURES.V1!, ...FIXTURES.V11!];
+    const expectBand = (g: any, lines: LineSeed[]) => {
+      expect(g, 'band exists').toBeDefined();
+      expect(g.subtotal).toBe('footer');
+      expect(g.totals.pcs, 'Sum ({APR_DETL.ITM_PCS}, ...)').toBe(sum(lines, (l) => l.pcs, 3));
+      expect(g.totals.grossWt).toBe(sum(lines, (l) => l.gwt, 3));
+      expect(g.totals.netWt).toBe(sum(lines, (l) => l.nwt, 3));
+      expect(g.totals.itemAmount).toBe(sum(lines, (l) => l.itmAmt));
+      expect(g.totals.labourAmount).toBe(sum(lines, (l) => l.lbr));
+      expect(g.totals.otherAmount).toBe(sum(lines, (l) => l.oth));
+      expect(g.totals.netAmount, 'NET_AMT has no summary field').toBeUndefined();
+    };
+    expectBand(party('P1'), p1Lines);
+    expectBand(party('P2'), FIXTURES.V2!);
+    expectBand(voucher('V1'), FIXTURES.V1!);
+    expectBand(voucher('V11'), FIXTURES.V11!);
+    // Detail prints IT_CODE and ITEM_MAST.IT_NAME (AprPartyWise.xml Detail Section8).
+    const v1l2 = rowsOf(body).find((r) => vchOf(r) === 'V1' && Number(field(r, 'srNo')) === 2)!;
+    expect(field(v1l2, 'itemCode')).toBe('I2');
+    expect(field(v1l2, 'itemName')).toBe('Silver Item');
+  });
+
+  it('approval-report.formula.pending-band-totals: Pcs and Panding print at every band, Grand Total caption', async () => {
+    await reset(['V1', 'V2']);
+    const body = await report('mode=pending');
+    const lines = [...FIXTURES.V1!, ...FIXTURES.V2!];
+    // AprPan.xml report footer: Text21 "Grand Total :", Sum ({@TagPcs}) and Sum ({@PanPcs}).
+    expect(body.grandTotalCaption).toBe('Grand Total :');
+    expect(totalsOf(body).pcs).toBe(sum(lines, (l) => l.pcs, 3));
+    expect(totalsOf(body).pendingPcs).toBe(sum(lines, (l) => l.pcs, 3));
+    const p1 = groupsOf(body).find((g) => g.depth === 0 && g.key === 'P1');
+    expect(p1?.totals.pcs).toBe(sum(FIXTURES.V1!, (l) => l.pcs, 3));
+    const inout = await report('mode=inout');
+    expect(inout.grandTotalCaption).toBe('Grand Total :');
   });
 
   it('approval-report.grouping.inout-party-product-date-tag: four nesting levels', async () => {

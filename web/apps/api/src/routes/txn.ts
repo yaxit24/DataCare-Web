@@ -681,6 +681,11 @@ import { gstLauncherReport } from '../modules/reports/gstLauncherReport.js';
 import { registerGstReportRoutes } from './gstReport.js';
 import { registerRpAllReportRoutes } from './rpAllReport.js';
 import {
+  approvalReport as rpAllApprovalReport,
+  RpAllRequestError,
+} from '../modules/reports/rpAll/index.js';
+import { exportTable } from '../modules/reports/rpAll/exportRows.js';
+import {
   approvalReport,
   bullionReport,
   karigarReport,
@@ -4257,6 +4262,38 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   const isReportFamilySlug = (slug: ReportSlug): slug is keyof typeof REPORT_FAMILY_BUILDERS =>
     Object.prototype.hasOwnProperty.call(REPORT_FAMILY_BUILDERS, slug);
   /**
+   * WP-13: Report → Approval Rpt runs on the shared RP_ALL engine (rpAll/index.ts). The screen and every
+   * export (CSV, XLSX, PDF) are built from that one result and flattened exactly like the Sales Report export
+   * (rpAll/exportRows.ts: rows in report order, each printed band subtotal as its own line, the grand total
+   * last), so an export can never show figures the screen does not (AprPartyWise / AprInOut / AprPan,
+   * RP_ALL.cs:8199, 8274, 8349). The band lines already carry the totals, so no separate totals row is added.
+   */
+  const runApprovalReport = (req: FastifyRequest) => {
+    const s = readScope(req);
+    return rpAllApprovalReport(
+      prisma,
+      {
+        tenantId: s.tenantId,
+        coCode: s.coCode,
+        lcCode: s.lcCode ?? '',
+        coYear: s.coYear ?? '',
+        fromDate: s.fromDate,
+        toDate: s.toDate,
+        filters: s.filters,
+      },
+      (req.query ?? {}) as Record<string, unknown>,
+    );
+  };
+  const resolveApprovalReport = async (req: FastifyRequest) => {
+    const result = await runApprovalReport(req);
+    const table = exportTable(result);
+    const rows = table.lines.map((line) =>
+      Object.fromEntries(table.columns.map((c) => [c.caption, line[c.key] ?? ''])),
+    );
+    return { rows, totals: undefined, result: { title: result.title, rows } };
+  };
+
+  /**
    * Resolve a report to its rows and totals. Shared by the XLSX and CSV exports so the two cannot
    * disagree about what a report contains, and so the filter handling below (which the shared builder
    * signature cannot express) is applied identically to both formats.
@@ -4270,6 +4307,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     /** The builder's own result, as the report screen receives it. */
     result: unknown;
   }> => {
+    if (slug === 'approval-report') return resolveApprovalReport(req);
     const build = REPORT_BUILDERS[slug]!;
     const scope = readScope(req);
     const q = (req.query ?? {}) as Record<string, string | undefined>;
@@ -6106,8 +6144,15 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     );
   });
   app.get('/reports/approval-report', auth, async (req, reply) => {
-    const q = (req.query ?? {}) as Record<string, string | undefined>;
-    return run(reply, 200, () => approvalReport(prisma, readScope(req), { mode: q.mode }));
+    try {
+      return reply.send(await runApprovalReport(req));
+    } catch (error) {
+      if (error instanceof RpAllRequestError)
+        return reply
+          .code(error.statusCode)
+          .send({ error: error.code, message: error.message, ...error.details });
+      throw error;
+    }
   });
   app.get('/reports/vp-report', auth, async (req, reply) => {
     const q = (req.query ?? {}) as Record<string, string | undefined>;

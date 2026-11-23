@@ -13,7 +13,13 @@ export interface ExportTable {
   lines: Record<string, string>[];
 }
 
-export function exportTable(result: RpAllResult): ExportTable {
+/** The parts of a result the flattening reads; the Approval branch's result has the same band shape. */
+export type ExportableResult = Pick<
+  RpAllResult,
+  'columns' | 'groupLevels' | 'groups' | 'rows' | 'totals' | 'grandTotal' | 'grandTotalCaption'
+>;
+
+export function exportTable(result: ExportableResult): ExportTable {
   const columns = [
     { key: '_band', caption: 'Band', kind: 'text' },
     ...result.columns.map((c) => ({ key: c.key, caption: c.caption, kind: c.kind })),
