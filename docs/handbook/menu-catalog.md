@@ -671,8 +671,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/party header, rich item and component grids, totals/tender panel, images and document controls.
 - **Writes:** PR_DATA, PR_DETL, PR_IDTL, BAR_DETL, MAIN_STOCK, DM_DATA, AC_DATA, ROJ_MEL_DATA, TAX_DATA, SL_PR_DETL, LOT_DETL.
 - **Web:** `/txn/purchase`; `POST /purchases`, `GET /purchases/:vchNo`, `PUT /purchases/:vchNo`, `DELETE /purchases/:vchNo`, `GET /purchases/invoice`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** Lossless reopen, the 95-column hallmark receive branch, family-filtered books, tender/source chains, Crystal variants and the Next25 columns remain.
-- **Owners:** X12, G46, N63, G43, N62, N32, N74, G70, N84.
+- **Remaining:** WP-28 (N244/G256): lossless reopen and edit (every stored value read back, unmodelled columns and the stored IT_TYPE kept), the hallmark receive columns (HM_ID_AMT, header HM_AMT half to even, HM_TAX_CODE, ITM_COLOR, EMP_CODE; hallmark ids 2-4, weights and tag band on TAG PURCHASE books), a server-side purchase book family and one entry that follows PURC_WITH_HMTAX are built. Open: the employee-code book shortcut, WITH_STOCK blank to Y, the TAG PURCHASE BAR_DATA/SRNO_MAST/TAG_SET write set, the 95-column Enter walk, the DATA_TYPE book filter, tender/source chains, Crystal variants, the Next25 columns and a browser run of record.
+- **Owners:** X12, G46, N63, G43, N62, N32, N74, G70, N84, N244, G256.
 - **Evidence:** [KB_transaction.md:240-265](../../project-memory/video-research/_kb/KB_transaction.md#L240-L265).
 
 ### Purchase Rtn
@@ -829,7 +829,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Other Expenses | `TR_OTH_PURC` | `/txn/other-purchase` | `C R E D P -` | PARTIAL | P1-core |
 | Other Income | `TR_OTH_PURC` | `/txn/other-income` | `C R E D P -` | PARTIAL | P1-core |
 | Service Comm | `TR_OTH_COMM` | `/txn/other-commission` | `C R E D - -` | PARTIAL | P1-edition |
-| Tag Wise Purc | `TR_PURC_HM` | `/txn/purchase-hm` | `C R E D P L` | PARTIAL | P1-core |
+| Tag Wise Purc | `TR_PURC_HM` | `/txn/tag-wise-purc` | `C R E D P L` | PARTIAL | P1-core |
 | Vp Adjust | `TR_VP_ADJ` | `/txn/vp-adjustment` | `C R E D - -` | PARTIAL | P1-edition |
 | Vp Parcel | `TR_VP` | `/txn/vp-parcel` | `C R E D - -` | PARTIAL | P1-edition |
 
@@ -1037,9 +1037,9 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Purchases already tagged or hallmarked items with HUID, components, costs, tax and stock intake.
 - **Looks:** Supplier/bill header, 95-column receive band, tag/HUID and stone grids, image panel, totals and print.
 - **Writes:** BAR_DATA, BAR_DETL, BAR_IDTL, MAIN_STOCK, AC_DATA, TAX_DATA, DM_DATA, LOT_DETL, TAG_SET.
-- **Web:** `/txn/purchase-hm`; `POST /purchases`, `GET /purchases/:vchNo`, `PUT /purchases/:vchNo`, `DELETE /purchases/:vchNo`, `GET /purchases/invoice`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** The lifecycle works, but the 95-column receive band and a lossless unchanged reopen remain.
-- **Owners:** N32, G02, G19, X12, G46, N63.
+- **Web:** `/txn/tag-wise-purc`; `POST /purchases`, `GET /purchases/:vchNo`, `PUT /purchases/:vchNo`, `DELETE /purchases/:vchNo`, `GET /purchases/invoice`. Can: create, reopen, edit, delete, print, list.
+- **Remaining:** WP-28 (N244/G256): /txn/tag-wise-purc opens the hallmark layout on TAG PURCHASE books only; hallmark ids 2-4, their weights and the tag band are stored per line and BAR_DETL net, rate, amount, cost and margin come from the tag band; an unchanged reopen and save is lossless. Open: the BAR_DATA/SRNO_MAST/TAG_SET write set, the 95-column Enter walk, tag and bill print templates and a browser run of record.
+- **Owners:** N32, G02, G19, X12, G46, N63, N244, G256.
 - **Evidence:** [TR_PURC_HM.initcomp.json](../../web/apps/api/form-specs/TR_PURC_HM.initcomp.json).
 
 ### Vp Adjust

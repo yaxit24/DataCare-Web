@@ -1019,11 +1019,11 @@
    ],
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
-   "evidence": null,
-   "note": "hallmark purchase page.",
+   "evidence": "apps/web/app/(app)/txn/tag-wise-purc/page.tsx; apps/api/src/modules/purchase/purchaseHallmark.ts; desktop source MDI_FORM.cs:8540-8544, TR_PURC_HM.cs:8023-8063",
+   "note": "hallmark purchase on the TAG PURCHASE books (WP-28, N244/G256): the hallmark layout at /txn/tag-wise-purc lists TAG PURCHASE books only; /txn/purchase-hm forwards to /txn/purchase. Engineering evidence only.",
    "webSurface": {
     "kind": "page",
-    "surface": "web/apps/web/app/(app)/txn/purchase-hm/page.tsx"
+    "surface": "web/apps/web/app/(app)/txn/tag-wise-purc/page.tsx"
    },
    "sharedSurfaceWith": []
   },
@@ -3303,8 +3303,8 @@
    ],
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
-   "evidence": null,
-   "note": "purchase invoice workflow.",
+   "evidence": "apps/api/src/modules/purchase/purchase.ts; apps/api/src/modules/purchase/purchaseReopen.ts; apps/api/src/modules/purchase/purchaseHallmark.ts; apps/web/app/(app)/txn/purchase/page.tsx; desktop source MDI_FORM.cs:7866-7884, TR_PURC.cs:12120-12458, TR_PURC_HM.cs:7216-8087",
+   "note": "purchase invoice workflow. WP-28 (N244/G256): lossless reopen and edit, the hallmark receive columns, a server-side purchase book family; the screen opens the hallmark layout when PURC_WITH_HMTAX is Y. Engineering evidence only.",
    "webSurface": {
     "kind": "route",
     "surface": "POST /purchases"
