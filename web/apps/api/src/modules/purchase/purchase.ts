@@ -1,6 +1,20 @@
 import { type StoneSubDetailInput } from '../shared/stoneSubDetail.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
 import { withTxBudget } from '../shared/txBudget.js';
+import {
+  assertPurchaseFamilyBook,
+  carryUnownedColumns,
+  hallmarkDetailColumns,
+  hallmarkHeaderAmount,
+  tagBandBarColumns,
+  type HallmarkLineInput,
+} from './purchaseHallmark.js';
+import {
+  purchaseHeaderView,
+  purchaseLineView,
+  purchaseStoneView,
+  purchaseTagView,
+} from './purchaseReopen.js';
 import { recordFieldChangesTx } from '../vouchers/fieldAudit.js';
 import { stagePurchaseLotDetailTx } from '../stock/lotRegister.js';
 import {
@@ -62,7 +76,9 @@ export class PurchaseValidationError extends Error {
   }
 }
 
-export interface PurchaseLineInput {
+export interface PurchaseLineInput extends HallmarkLineInput {
+  /** WP-28: the persisted SR_NO this line was reopened from (keeps its unmodelled columns and IT_TYPE). */
+  srNo?: number;
   itCode: string;
   tagNo?: string; // tagged item -> created in stock on save (stock-IN), removed on delete
   vchSrno?: number; // persisted BAR_DETL identity; server verifies it for returns/issues
@@ -212,6 +228,9 @@ export interface PurchaseInput {
   hmAmount?: number; // HM_AMT — hallmark charge (0/absent ⇒ a normal purchase)
   hmChargeAc?: string; // hallmark-expense ledger (default 'HMCHRG')
   hmTaxPct?: number; // GST% on the hallmark charge (defaults to the bill taxRatePct)
+  hmTaxCode?: string; // HM_TAX_CODE (TR_PURC_HM.cs:7854), stored even with no charge (G91)
+  empCode?: string; // EMP_CODE (TR_PURC_HM.cs:7897)
+  vchDesc?: string; // VCH_DESC
   // Settlement/tender (desktop PR_DATA CASH_AMT/CHQ_AMT/CARD_AMT/KASAR_AMT/BILL_OS) — pay the supplier now.
   cashAmt?: number;
   chequeAmt?: number;
@@ -533,6 +552,8 @@ interface WritePurchaseContext {
    * with the same field name, and this mirrors it.
    */
   persistedTagSrnos?: Map<string, number>;
+  /** WP-28 (D6, D12): this voucher's PR_DETL rows read before the rewrite, by SR_NO. */
+  persistedLines?: Map<number, Record<string, unknown>>;
 }
 
 function completePurchaseScope(
@@ -668,6 +689,7 @@ async function writePurchaseTx(
     input.scope,
     isPurchaseQuotation ? 'PURCHASE QUOTATION' : purchaseWorkflowFor(actualMainBook),
   );
+  const isTagBook = actualMainBook === 'TAG PURCHASE';
   const roundingPolicy = await resolveRoundingPolicyTx(tx, input.scope);
 
   // Resolve the purchase expense account now the book is known: explicit request wins, else BOOK_DETL
@@ -708,9 +730,8 @@ async function writePurchaseTx(
     counterPolicy,
     lines.map((l) => ({ itCode: l.itCode, tblCode: l.tblCode })),
   );
-  // TR_PURC's HmId2..4 weight rule lives on header controls (tHmId2/nHmWt2), which the purchase input
-  // does not carry: PR_DETL keeps a single HM_ID per line. Enforced on sales, where the four ID slots
-  // and their weights both exist.
+  // TR_PURC's HmId2..4 weight rule belongs to the plain form's tag boxes; TR_PURC_HM has none, so the
+  // hallmark grid accepts an id with a zero weight (WP-28 D4).
   const configuredBookName = await configuredPurchaseBookNameTx(
     tx,
     input.scope as VoucherScope & { coBook: string },
@@ -756,7 +777,9 @@ async function writePurchaseTx(
 
   // Hallmark purchase (TR_PURC_HM): a hallmarking charge + its own input GST. 0 ⇒ a normal purchase
   // (identical output). Mirror of the sale-HM: here Dr hallmark-expense + Dr input-GST / Cr supplier.
-  const hmAmt = round2(num(input.hmAmount));
+  // WP-28: the header charge is Math.Round of the line column 39 total (TR_PURC_HM.cs:9995).
+  const hmAmt = round2(hallmarkHeaderAmount(lines, input.hmAmount));
+  const hmTaxCode = text(input.hmTaxCode).slice(0, 2);
   /**
    * `PURC_WITH_HMTAX` — whether GST applies to the hallmark charge (P4).
    *
@@ -849,6 +872,22 @@ async function writePurchaseTx(
         `item/group posting configuration missing: ${missing.join(', ')}`,
       );
   }
+  // WP-28 (D6, D12): a reopened line claims its persisted row once, by the SR_NO it was read from. It keeps the
+  // row's unmodelled columns and its STORED item type, not the master's current one (TR_PURC_HM.cs:7462 reads the
+  // master and would rewrite it: a desktop weakness not ported).
+  const claimed = new Set<number>();
+  const priorRows = computed.map((c) => {
+    const srNo = num(c.in.srNo);
+    const prior = srNo ? ctx.persistedLines?.get(srNo) : undefined;
+    if (!prior || claimed.has(srNo)) return undefined;
+    claimed.add(srNo);
+    return text(prior.IT_CODE) === text(c.in.itCode) ? prior : undefined;
+  });
+  const lineItemType = (idx: number): 'G' | 'S' => {
+    const stored = text(priorRows[idx]?.IT_TYPE).toUpperCase();
+    if (stored === 'G' || stored === 'S') return stored;
+    return itemTypeByItem[text(computed[idx]?.in.itCode)]!;
+  };
   // Ac_Ledr.cs:520-532: PURC_WITH_LBR='Y' keeps labour/other in the primary purchase leg; 'N'
   // separates those charges to BOOK_DETL row 4. Discount remains in the primary allocation so the
   // web ledger remains exactly balanced without inventing an additional desktop discount account.
@@ -905,147 +944,134 @@ async function writePurchaseTx(
   const vchDate = input.vchDate ? new Date(input.vchDate) : new Date();
   // TR_PURC.cs:12134-12135,13051,13066,13148,13173 preserve the opened wall clock on edit.
   const sharedVoucherTime = voucherTimestamp(vchDate, ctx.persistedClock);
-  const detl = computed.map((c, idx) => ({
-    ...key,
-    VCH_DATE: vchDate,
-    VCH_TIME: sharedVoucherTime,
-    VCH_TYPE: bookPolicy.vchType,
-    INOUT_TYPE: bookPolicy.inout,
-    ENTRY_TYPE: 'P',
-    BOOK_NAME: bookPolicy.bookName,
-    AC_CODE: input.acCode,
-    MAIN_USER: ctx.mainUser || null,
-    HD_VCH_NO: ctx.hdVchNo,
-    SR_NO: idx + 1,
-    // OLD_SRNO carries the line's own serial on original entry — measured equal to SR_NO on all 103 real
-    // PR_DETL rows (0 zero, 0 null). The web wrote 0, breaking any back-reference that joins on it.
-    OLD_SRNO: idx + 1,
-    IT_CODE: c.in.itCode,
-    IT_TYPE: itemTypeByItem[String(c.in.itCode ?? '').trim()],
-    /**
-     * `''` on an untagged purchase LINE, not `'N'`.
-     *
-     * The `'N'` sentinel is a `MAIN_STOCK` convention, verified from `Ac_Stock.cs:54` where the desktop writes
-     * `CASE WHEN A.TAG_NO = '' THEN 'N' ELSE A.TAG_NO END` — the SOURCE rows hold `''` and only the stock row is
-     * converted. `PR_DETL` holds `''` on 78/78 captured rows, and the derived column-default spec agrees.
-     *
-     * So the sentinel is per TABLE, not global. That also puts the WP-08e change to `KR_DETL` in doubt: it was
-     * justified from `TR_KR_ISU.cs:5109`, the karigar form's own save routine, so it is probably right — but it
-     * should be confirmed against captured `KR_DETL` rows rather than assumed from this table.
-     */
-    TAG_NO: c.in.tagNo ?? '',
-    VCH_SRNO: tagSrnos.get(idx) ?? 0,
-    ITM_PCS: num(c.in.pcs),
-    ITM_GWT: num(c.in.grossWt),
-    ITM_NWT: num(c.in.netWt),
-    ITM_TOUCH: num(c.in.touch),
-    ITM_GHT_WT: num(c.in.ghtWt),
-    ITM_WEST_PRC: num(c.in.westPct),
-    ITM_FINE: c.calc.fine,
-    ITM_OTH_FINE: num(c.in.otherFineWt),
-    SILVER_FINE: num(c.in.silverFineWt),
-    ITM_RATE: num(c.in.rate),
-    ITM_AMT: c.calc.metal,
-    // LBR_TYPE selects the weight BASIS: G gross wise, N net wise, K kg wise, P pcs wise
-    // (CO_SET.LBR_TYPE options; TR_SALE.cs:11104/11119/11108/11127). The previous map sent per_gram to 'G',
-    // which is GROSS weight, and emitted '%', which the varchar(1) column never holds.
-    LBR_TYPE: desktopLabourTypeFor(c.in.labourType, behavior.labourType) || null,
-    LBR_PRC: num(c.in.labourPct),
-    // Derived when the operator supplied a percentage rather than a rate (TR_SALE.cs:11021):
-    // LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, MsLbrRof).
-    LBR_RATE: effectiveLabourRate(
-      num(c.in.labourRate),
-      num(c.in.rate),
-      num(c.in.labourPct),
-      roundingPolicy.labourDecimals,
-    ),
-    LBR_AMT: c.calc.labour,
-    OTH_AMT: num(c.in.otherAmount),
-    // TR_PURC.cs:13142 — TOT_AMT <- mSG_PR[i,40], computed as
-    //   mSG_PR[Row,40] = Format(Val([Row,35]) + Val([Row,36]) + Val([Row,31]), "0.00")
-    // where 35 = cPrLbrAmt, 36 = cPrOthAmt, 31 = cPrItAmt. Unlike the SALE line total this uses NO
-    // Math.Round, so paise are preserved at two decimals — do not copy the sale's whole-rupee rule here.
-    TOT_AMT: round2(c.calc.metal + c.calc.labour + num(c.in.otherAmount)),
-    // TR_PURC.cs:13144 — NET_AMT <- mSG_PR[i,44]. With tax% = 0 the desktop sets
-    //   mSG_PR[Row,44] = Format(Val([Row,40]) + Val([Row,42]), "0.00")   // total + commission
-    // A second branch back-calculates a tax-exclusive net from a tax-INCLUSIVE total, but it is gated on
-    // `Val([Row,43]) <> Val([Row,58])` — column 58 is a shadow copy of the previous tax %, i.e. a UI
-    // change-detection flag. Its outcome therefore depends on the operator's edit sequence and is not
-    // reproducible from a request payload, so it is recorded as an ambiguity rather than guessed at.
-    NET_AMT: round2(
-      round2(c.calc.metal + c.calc.labour + num(c.in.otherAmount)) + num(c.in.commissionAmount),
-    ),
-    TAX_PRC: taxPct,
-    HM_ID: c.in.huid ?? null,
-    // Desktop PR_DETL columns (TR_PURC.cs:13100-13192). Grid cells left blank persist as ''/0,
-    // which is what an absent input reproduces here.
-    IT_DESC: text(c.in.itDesc).slice(0, 100) || null, // mSG_PR[i,2]  :13100
-    TBL_CODE: text(c.in.tblCode).slice(0, 3) || null, // mSG_PR[i,3]  :13102
-    DESIGN_NO: text(c.in.designNo).slice(0, 20) || null, // mSG_PR[i,4]  :13103
-    LOT_NO: text(c.in.lotNo).slice(0, 10) || null, // mSG_PR[i,5]  :13104
-    ITM_LOT: text(c.in.itmLot).slice(0, 10) || null, // mSG_PR[i,6]  :13105
-    WITH_STOCK: text(c.in.withStock).slice(0, 1) || null, // mSG_PR[i,7]  :13151
-    BAG_WT: num(c.in.bagWt), // mSG_PR[i,8]  :13107
-    ITM_OTH_WT: num(c.in.lessWt), // mSG_PR[i,13] :13111
-    ITM_LOSS_WT: num(c.in.lossWt), // mSG_PR[i,14] :13112
-    ITM_GHT_PRC: num(c.in.ghtPct), // mSG_PR[i,19] :13117
-    ITM_LESS_TCH: num(c.in.lessTouch ?? c.in.lesTouch), // mSG_PR[i,23] :13121
-    CONV_RATE: num(c.in.convRate), // mSG_PR[i,27] :13131
-    CONV_PRC: num(c.in.convPct), // mSG_PR[i,28] :13132
-    /**
-     * The line's rate basis, `'G'` on 78/78 captured rows.
-     *
-     * `PurchaseLineInput.rateType` existed and was accepted, but no `PR_DETL.RATE_TYPE` was ever written — so a
-     * value the caller supplied was silently dropped. Distinct from `URD_RATE_TYPE` below (the unregistered-dealer
-     * basis) and from `IT_RATE_TYPE` on the stone sub-detail.
-     */
-    RATE_TYPE: c.in.rateType ?? 'G',
-    URD_RATE_TYPE: text(c.in.urdRateType).slice(0, 1) || null, // mSG_PR[i,30] :13137
-    /**
-     * Three flags the desktop writes as 'N' on every purchase line, and the builder wrote not at all.
-     *
-     * 78/78 in the retained capture. They are not inputs — no `designImgId` / `aprIsu` / `empIsu` exists on
-     * `PurchaseLineInput` — so the form sets them, which means the builder must. The derived column-default spec
-     * carries `''` for all three, which is its GLOBAL default across every PR_DETL row in the database; it cannot
-     * express "a purchase line writes 'N'", so the value belongs here rather than in the spec.
-     */
-    DESIGN_IMG_ID: 'N',
-    APR_ISU: 'N',
-    EMP_ISU: 'N',
-    ITM_OTH_RATE: num(c.in.otherRate), // mSG_PR[i,37] :13129
-    ITM_MRP: num(c.in.mrp), // mSG_PR[i,39] :13139
-    COMM_PRC: num(c.in.commissionPct), // mSG_PR[i,41] :13140
-    COMM_AMT: round2(num(c.in.commissionAmount)), // mSG_PR[i,42] :13141
-    FINE_CUT_PCS: num(c.in.fineCutPcs), // mSG_PR[i,60] :13189
-    FINE_CUT_GWT: num(c.in.fineCutGrossWt), // mSG_PR[i,61] :13190
-    FINE_CUT_NWT: num(c.in.fineCutNetWt), // mSG_PR[i,62] :13191
-    FINE_CUT_FINE: num(c.in.fineCutFine), // mSG_PR[i,63] :13192
-    PR_CODE: text(c.in.prCode).slice(0, 2) || null, // mSG_PR[i,64] :13147
-    // Sale/consignment source linkage for TR_PURC and TR_PR_SL_UAE.
-    SL_BILL_NO: linkedSource.vchNo || null, // tSlBill/tConsiNo.Text
-    SL_BILL_LC: linkedSource.lcCode, // MLc_code
-    SL_BILL_YRCD: linkedSource.coYear, // source fiscal year
-    SL_BILL_DBCD: linkedSource.coBook || null, // tSlBill_DbCd/tConsiDbCd.Text
-    CONSI_NO: text(c.in.consiNo ?? input.consiNo).slice(0, 10) || null, // mSG_PR[i,36] :8278
-    CONSI_YRCD: text(c.in.consiYrcd ?? input.consiYrcd).slice(0, 9) || null, // mSG_PR[i,37]
-    CONSI_DBCD: text(c.in.consiDbcd ?? input.consiDbcd).slice(0, 3) || null, // mSG_PR[i,38]
-    CONSI_SRNO: num(c.in.consiSrno), // mSG_PR[i,39]
-    // Desktop writes these as literal blanks/zeros on the purchase book.
-    ITM_SIZE: '', // literal :13106
-    KR_NAME: '', // literal :13186
-    MCX_RATE: 0, // literal :13133
-    PRM_AMT: 0, // literal :13134
-    PRM_DISC: 0, // literal :13135
-    TAG_TOUCH: 0, // literal :13177
-    TAG_WEST_PRC: 0, // literal :13178
-    TAG_FINE: 0, // literal :13179
-    TAG_LBR_PRC: 0, // literal :13180
-    TAG_LBR_RATE: 0, // literal :13181
-    TAG_LBR_AMT: 0, // literal :13182
-    TAG_OTH_AMT: 0, // literal :13183
-    TAG_COST: 0, // literal :13184
-    TAG_MRP: 0, // literal :13185
-  }));
+  // WP-28 (D6): a reopened line keeps its persisted columns the writer does not build (carryUnownedColumns).
+  const detl = computed.map((c, idx) =>
+    carryUnownedColumns(priorRows[idx], {
+      ...key,
+      VCH_DATE: vchDate,
+      VCH_TIME: sharedVoucherTime,
+      VCH_TYPE: bookPolicy.vchType,
+      INOUT_TYPE: bookPolicy.inout,
+      ENTRY_TYPE: 'P',
+      BOOK_NAME: bookPolicy.bookName,
+      AC_CODE: input.acCode,
+      MAIN_USER: ctx.mainUser || null,
+      HD_VCH_NO: ctx.hdVchNo,
+      SR_NO: idx + 1,
+      // OLD_SRNO carries the line's own serial on original entry — measured equal to SR_NO on all 103 real
+      // PR_DETL rows (0 zero, 0 null). The web wrote 0, breaking any back-reference that joins on it.
+      OLD_SRNO: idx + 1,
+      IT_CODE: c.in.itCode,
+      IT_TYPE: lineItemType(idx),
+      /**
+       * `''` on an untagged purchase LINE, not `'N'`.
+       *
+       * The `'N'` sentinel is a `MAIN_STOCK` convention, verified from `Ac_Stock.cs:54` where the desktop writes
+       * `CASE WHEN A.TAG_NO = '' THEN 'N' ELSE A.TAG_NO END` — the SOURCE rows hold `''` and only the stock row is
+       * converted. `PR_DETL` holds `''` on 78/78 captured rows, and the derived column-default spec agrees.
+       *
+       * So the sentinel is per TABLE, not global. That also puts the WP-08e change to `KR_DETL` in doubt: it was
+       * justified from `TR_KR_ISU.cs:5109`, the karigar form's own save routine, so it is probably right — but it
+       * should be confirmed against captured `KR_DETL` rows rather than assumed from this table.
+       */
+      TAG_NO: c.in.tagNo ?? '',
+      VCH_SRNO: tagSrnos.get(idx) ?? 0,
+      ITM_PCS: num(c.in.pcs),
+      ITM_GWT: num(c.in.grossWt),
+      ITM_NWT: num(c.in.netWt),
+      ITM_TOUCH: num(c.in.touch),
+      ITM_GHT_WT: num(c.in.ghtWt),
+      ITM_WEST_PRC: num(c.in.westPct),
+      ITM_FINE: c.calc.fine,
+      ITM_OTH_FINE: num(c.in.otherFineWt),
+      SILVER_FINE: num(c.in.silverFineWt),
+      ITM_RATE: num(c.in.rate),
+      ITM_AMT: c.calc.metal,
+      // LBR_TYPE selects the weight BASIS: G gross wise, N net wise, K kg wise, P pcs wise
+      // (CO_SET.LBR_TYPE options; TR_SALE.cs:11104/11119/11108/11127). The previous map sent per_gram to 'G',
+      // which is GROSS weight, and emitted '%', which the varchar(1) column never holds.
+      LBR_TYPE: desktopLabourTypeFor(c.in.labourType, behavior.labourType) || null,
+      LBR_PRC: num(c.in.labourPct),
+      // Derived when the operator supplied a percentage rather than a rate (TR_SALE.cs:11021):
+      // LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, MsLbrRof).
+      LBR_RATE: effectiveLabourRate(
+        num(c.in.labourRate),
+        num(c.in.rate),
+        num(c.in.labourPct),
+        roundingPolicy.labourDecimals,
+      ),
+      LBR_AMT: c.calc.labour,
+      OTH_AMT: num(c.in.otherAmount),
+      // TR_PURC.cs:13142 — TOT_AMT <- mSG_PR[i,40], computed as
+      //   mSG_PR[Row,40] = Format(Val([Row,35]) + Val([Row,36]) + Val([Row,31]), "0.00")
+      // where 35 = cPrLbrAmt, 36 = cPrOthAmt, 31 = cPrItAmt. Unlike the SALE line total this uses NO
+      // Math.Round, so paise are preserved at two decimals — do not copy the sale's whole-rupee rule here.
+      TOT_AMT: round2(c.calc.metal + c.calc.labour + num(c.in.otherAmount)),
+      // TR_PURC.cs:13144 — NET_AMT <- mSG_PR[i,44]. With tax% = 0 the desktop sets
+      //   mSG_PR[Row,44] = Format(Val([Row,40]) + Val([Row,42]), "0.00")   // total + commission
+      // A second branch back-calculates a tax-exclusive net from a tax-INCLUSIVE total, but it is gated on
+      // `Val([Row,43]) <> Val([Row,58])` — column 58 is a shadow copy of the previous tax %, i.e. a UI
+      // change-detection flag. Its outcome therefore depends on the operator's edit sequence and is not
+      // reproducible from a request payload, so it is recorded as an ambiguity rather than guessed at.
+      NET_AMT: round2(
+        round2(c.calc.metal + c.calc.labour + num(c.in.otherAmount)) + num(c.in.commissionAmount),
+      ),
+      TAX_PRC: taxPct,
+      HM_ID: text(c.in.huid) || null, // a reopened blank HUID stays NULL (WP-28)
+      // Desktop PR_DETL columns (TR_PURC.cs:13100-13192). Grid cells left blank persist as ''/0,
+      // which is what an absent input reproduces here.
+      IT_DESC: text(c.in.itDesc).slice(0, 100) || null, // mSG_PR[i,2]  :13100
+      TBL_CODE: text(c.in.tblCode).slice(0, 3) || null, // mSG_PR[i,3]  :13102
+      DESIGN_NO: text(c.in.designNo).slice(0, 20) || null, // mSG_PR[i,4]  :13103
+      LOT_NO: text(c.in.lotNo).slice(0, 10) || null, // mSG_PR[i,5]  :13104
+      ITM_LOT: text(c.in.itmLot).slice(0, 10) || null, // mSG_PR[i,6]  :13105
+      WITH_STOCK: text(c.in.withStock).slice(0, 1) || null, // mSG_PR[i,7]  :13151
+      BAG_WT: num(c.in.bagWt), // mSG_PR[i,8]  :13107
+      ITM_OTH_WT: num(c.in.lessWt), // mSG_PR[i,13] :13111
+      ITM_LOSS_WT: num(c.in.lossWt), // mSG_PR[i,14] :13112
+      ITM_GHT_PRC: num(c.in.ghtPct), // mSG_PR[i,19] :13117
+      ITM_LESS_TCH: num(c.in.lessTouch ?? c.in.lesTouch), // mSG_PR[i,23] :13121
+      CONV_RATE: num(c.in.convRate), // mSG_PR[i,27] :13131
+      CONV_PRC: num(c.in.convPct), // mSG_PR[i,28] :13132
+      /**
+       * The line's rate basis, `'G'` on 78/78 captured rows.
+       *
+       * `PurchaseLineInput.rateType` existed and was accepted, but no `PR_DETL.RATE_TYPE` was ever written — so a
+       * value the caller supplied was silently dropped. Distinct from `URD_RATE_TYPE` below (the unregistered-dealer
+       * basis) and from `IT_RATE_TYPE` on the stone sub-detail.
+       */
+      RATE_TYPE: c.in.rateType ?? 'G',
+      URD_RATE_TYPE: text(c.in.urdRateType).slice(0, 1) || null, // mSG_PR[i,30] :13137
+      // 'N' on 78/78 captured lines (APR_ISU, EMP_ISU and, via hallmarkDetailColumns, DESIGN_IMG_ID).
+      APR_ISU: 'N',
+      EMP_ISU: 'N',
+      ITM_OTH_RATE: num(c.in.otherRate), // mSG_PR[i,37] :13129
+      ITM_MRP: num(c.in.mrp), // mSG_PR[i,39] :13139
+      COMM_PRC: num(c.in.commissionPct), // mSG_PR[i,41] :13140
+      COMM_AMT: round2(num(c.in.commissionAmount)), // mSG_PR[i,42] :13141
+      FINE_CUT_PCS: num(c.in.fineCutPcs), // mSG_PR[i,60] :13189
+      FINE_CUT_GWT: num(c.in.fineCutGrossWt), // mSG_PR[i,61] :13190
+      FINE_CUT_NWT: num(c.in.fineCutNetWt), // mSG_PR[i,62] :13191
+      FINE_CUT_FINE: num(c.in.fineCutFine), // mSG_PR[i,63] :13192
+      PR_CODE: text(c.in.prCode).slice(0, 2) || null, // mSG_PR[i,64] :13147
+      // Sale/consignment source linkage for TR_PURC and TR_PR_SL_UAE.
+      SL_BILL_NO: linkedSource.vchNo || null, // tSlBill/tConsiNo.Text
+      SL_BILL_LC: linkedSource.lcCode, // MLc_code
+      SL_BILL_YRCD: linkedSource.coYear, // source fiscal year
+      SL_BILL_DBCD: linkedSource.coBook || null, // tSlBill_DbCd/tConsiDbCd.Text
+      CONSI_NO: text(c.in.consiNo ?? input.consiNo).slice(0, 10) || null, // mSG_PR[i,36] :8278
+      CONSI_YRCD: text(c.in.consiYrcd ?? input.consiYrcd).slice(0, 9) || null, // mSG_PR[i,37]
+      CONSI_DBCD: text(c.in.consiDbcd ?? input.consiDbcd).slice(0, 3) || null, // mSG_PR[i,38]
+      CONSI_SRNO: num(c.in.consiSrno), // mSG_PR[i,39]
+      // Desktop writes these as literal blanks/zeros on the purchase book (:13106, :13133-13135).
+      ITM_SIZE: '',
+      MCX_RATE: 0,
+      PRM_AMT: 0,
+      PRM_DISC: 0,
+      // WP-28 (G3, D5): hallmark amount, colour, ids 2-4 and the tag band (zeros unless TAG PURCHASE).
+      ...hallmarkDetailColumns(c.in, isTagBook),
+    }),
+  );
 
   /**
    * Stone/diamond sub-detail (TR_PURC.cs:13211-13243). One row per sub-grid row, keyed by the
@@ -1130,9 +1156,24 @@ async function writePurchaseTx(
             ITM_AMT: c.calc.metal,
             LBR_AMT: c.calc.labour,
             OTH_AMT: num(c.in.otherAmount),
-            RATE_TYPE: c.in.metalAmount != null ? 'A' : 'P',
-            IT_TYPE: itemTypeByItem[String(c.in.itCode ?? '').trim()],
-            HM_ID: c.in.huid ?? null,
+            // 'A' only when the amount was typed over the computed one: a reopened line always sends its stored
+            // amount back and must keep its 'P' (WP-28, D6).
+            RATE_TYPE:
+              c.in.metalAmount != null &&
+              computeLine(
+                { ...c.in, metalAmount: undefined },
+                roundingPolicy,
+                behavior.purchaseAmountType,
+                behavior.labourIncludesGhat,
+              ).metal !== c.calc.metal
+                ? 'A'
+                : 'P',
+            IT_TYPE: lineItemType(idx),
+            HM_ID: text(c.in.huid) || null, // a reopened blank HUID stays NULL (WP-28)
+            // TR_PURC_HM.cs:8237-8316: a TAG PURCHASE tag takes its net, rate, amount, cost and margin from the band.
+            ...(isTagBook
+              ? tagBandBarColumns(c.in, { rate: num(c.in.rate), metal: c.calc.metal })
+              : {}),
           },
         ];
       });
@@ -1154,7 +1195,7 @@ async function writePurchaseTx(
             TAG_NO: c.in.tagNo,
             VCH_SRNO: tagSrnos.get(idx) ?? 0,
             IT_CODE: c.in.itCode,
-            IT_TYPE: itemTypeByItem[String(c.in.itCode ?? '').trim()],
+            IT_TYPE: lineItemType(idx),
             IT_PCS: num(c.in.pcs),
             IT_GWT: num(c.in.grossWt),
             IT_RATE: num(c.in.rate),
@@ -1165,7 +1206,8 @@ async function writePurchaseTx(
         ];
       });
 
-  const header = {
+  // WP-28 (D6): on an edit the persisted header keeps every column the writer does not build.
+  const header = carryUnownedColumns(ctx.persistedHeader, {
     ...key,
     /**
      * `''` when the operator supplied no bill number — NOT the voucher number.
@@ -1194,7 +1236,7 @@ async function writePurchaseTx(
     VCH_TIME: sharedVoucherTime,
     HD_VCH_NO: ctx.hdVchNo,
     MAIN_USER: ctx.mainUser || null,
-    IT_TYPE: itemTypeByItem[String(computed[0]?.in.itCode ?? '').trim()] ?? 'G',
+    IT_TYPE: computed.length ? lineItemType(0) : 'G',
     /**
      * The party's metal position moves only when the metal came in UNPRICED.
      *
@@ -1255,8 +1297,14 @@ async function writePurchaseTx(
     FX_RATE: 0, // literal            :13054
     FX_CODE: '', // literal            :13055
     MTL_RATE: 0, // literal            :13056
-    ...(hmAmt > 0 ? { HM_AMT: hmAmt, HM_TAX_PRC: hmTaxPct, HM_TAX_AMT: hmTax } : {}),
-  };
+    // G4/G91: stored with a charge or a chosen hallmark tax code, even a zero charge (TR_PURC_HM.cs:7854-7856).
+    HM_AMT: hmAmt,
+    HM_TAX_CODE: hmTaxCode || null,
+    HM_TAX_PRC: hmAmt > 0 || hmTaxCode ? hmTaxPct : 0, // 0 = the stored default
+    HM_TAX_AMT: hmAmt > 0 || hmTaxCode ? hmTax : 0,
+    EMP_CODE: text(input.empCode).slice(0, 10) || null, // tEmpCode (TR_PURC_HM.cs:7897)
+    VCH_DESC: text(input.vchDesc) || null,
+  });
 
   const ledger = buildPurchaseLedger({
     key,
@@ -1340,9 +1388,9 @@ async function writePurchaseTx(
         vchType: bookPolicy.vchType,
         rateUnfix: input.rateUnfix,
         purcAcByItem,
-        lines: computed.map((c) => ({
+        lines: computed.map((c, idx) => ({
           itCode: c.in.itCode,
-          metal: itemTypeByItem[String(c.in.itCode ?? '').trim()],
+          metal: lineItemType(idx),
           fine: c.calc.fine,
           metalAmount: c.calc.metal,
           otherFineWt: c.in.otherFineWt,
@@ -1479,7 +1527,7 @@ async function writePurchaseTx(
     BOOK_NAME: bookPolicy.bookName,
     AC_CODE: input.acCode,
     IT_CODE: c.in.itCode,
-    TAG_NO: c.in.tagNo ?? 'N',
+    TAG_NO: c.in.tagNo || 'N', // '' from a reopened untagged line is still the 'N' sentinel (WP-28)
     VCH_SRNO: tagSrnos.get(idx) ?? 0,
     TR_TYPE: 'P',
     ITM_SIGN: '+',
@@ -1559,7 +1607,7 @@ async function writePurchaseTx(
       vchDate,
       vchType: bookPolicy.vchType,
       bookName: bookPolicy.bookName,
-      partyName: input.acName ?? '',
+      partyName: supplierName || input.acName || '', // AC_MAST name, so a reopen cannot change it (WP-28)
       partyCode: input.acCode,
     },
     computed.map((c, idx) => {
@@ -1578,7 +1626,7 @@ async function writePurchaseTx(
         // The builder's field is `itemName` (it writes IT_DESC from it); `itemDesc` silently did nothing,
         // since the line type's optional fields make a typo a no-op rather than an error.
         itemName: itemNameByItem[item] ?? '',
-        metal: rojmelMetalFor(itemTypeByItem[item]),
+        metal: rojmelMetalFor(lineItemType(idx)),
         pcs: num(c.in.pcs),
         grossWt: num(c.in.grossWt),
         netWt: num(c.in.netWt),
@@ -1714,7 +1762,9 @@ export async function createPurchase(
   input.taxRatePct = requirePurchaseNumber(input.taxRatePct, 'taxRatePct');
   const scope = input.scope;
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
-    const isConsignmentPurchase = (await purchaseMainBookTx(tx, scope)) === 'CON PUR';
+    const mainBook = await purchaseMainBookTx(tx, scope);
+    assertPurchaseFamilyBook(mainBook, scope.coBook); // WP-28 D7: refused on the server, not only in the list
+    const isConsignmentPurchase = mainBook === 'CON PUR';
     let writeInput = input;
     let writeLines = lines;
     if (isConsignmentPurchase) {
@@ -2177,16 +2227,11 @@ export async function getPurchase(
   const voucherNo = formatVoucherNo(requestedVoucherNo);
   return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
     const params = purchaseParams(scope, voucherNo);
+    const where = `WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+          AND "CO_BOOK"=$5 AND "VCH_NO"=$6`;
+    // WP-28 (D6): every column, as the desktop reopens (TR_PURC_HM.cs:7216 `SELECT *`); see purchaseReopen.ts.
     const headers: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-      `SELECT "VCH_NO","VCH_DATE"::text,"VCH_TIME","BILL_NO","HD_VCH_NO","MAIN_USER",
-               "AC_CODE","AC_NAME","NET_AMT","DISC_AMT","TAX_CODE","TAX_PRC","TAX_AMT",
-               "AC_GST_TYPE","CGST_TAX","SGST_TAX","IGST_TAX","ROF_AMT","TOT_AMT",
-               "RATE_UNFIX","CASH_AMT","CARD_AMT","CHQ_AMT","KASAR_AMT","BILL_OS",
-               "BANK_AC","HM_AMT","HM_TAX_PRC","HM_TAX_AMT","IT_TYPE","PARTY_FINE","VCH_DESC",
-               "SL_BILL_NO","SL_BILL_LC","SL_BILL_YRCD","SL_BILL_DBCD"
-          FROM "PR_DATA"
-        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
-          AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
+      `SELECT *,"VCH_DATE"::text AS "VCH_DATE_TEXT" FROM "PR_DATA" ${where}`,
       ...params,
     );
     if (headers.length !== 1) {
@@ -2197,202 +2242,28 @@ export async function getPurchase(
       );
     }
     const details: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-      `SELECT "SR_NO","IT_CODE","IT_TYPE","TAG_NO","VCH_SRNO","ITM_PCS","ITM_GWT",
-              "ITM_NWT","ITM_TOUCH","ITM_GHT_WT","ITM_WEST_PRC","ITM_FINE",
-              "ITM_OTH_FINE","SILVER_FINE","ITM_RATE","ITM_AMT","LBR_TYPE","LBR_PRC",
-              "LBR_RATE","LBR_AMT","OTH_AMT","NET_AMT","HM_ID","RATE_TYPE","URD_RATE_TYPE",
-               -- WP-08: selecting a column is half the job; the mapping below must read it. Both halves
-               -- were missing for these, so an unchanged save wiped them.
-               "DESIGN_NO","TBL_CODE","IT_DESC","BAG_WT","ITM_MRP","ITM_OTH_RATE","COMM_PRC","ITM_OTH_WT",
-               "SL_BILL_NO","SL_BILL_LC","SL_BILL_YRCD","SL_BILL_DBCD",
-               "CONSI_NO","CONSI_YRCD","CONSI_DBCD","CONSI_SRNO"
-          FROM "PR_DETL"
-        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
-          AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO"`,
+      `SELECT * FROM "PR_DETL" ${where} ORDER BY "SR_NO"`,
       ...params,
     );
     const tags: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-      `SELECT "SR_NO","IT_CODE","IT_TYPE","TAG_NO","VCH_SRNO","ITM_PCS","ITM_GWT",
-              "ITM_NWT","ITM_TOUCH","ITM_WEST_PRC","ITM_FINE","ITM_RATE","ITM_AMT",
-              "LBR_AMT","OTH_AMT","HM_ID"
-         FROM "BAR_DETL"
-        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
-          AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO"`,
+      `SELECT * FROM "BAR_DETL" ${where} ORDER BY "SR_NO"`,
       ...params,
     );
-    /**
-     * Stone sub-detail (`PR_IDTL`). Selected AND mapped, because the writer persists these rows
-     * (`:953`) and `PR_IDTL` is in `PURCHASE_WRITE_TABLES`, so an edit deletes and rebuilds them
-     * from its input. A reader that omitted them meant a reopen-and-save silently destroyed every
-     * stone on the voucher — the same defect class WP-08 found on `BAR_DETL`, where an unchanged
-     * save wiped 43 of 109 columns. Asserted by the sub-detail case in
-     * `test/operatorDepth.roundtrip.db.test.ts`.
-     */
+    // Stone sub-detail (PR_IDTL): an edit rebuilds it from the request, so the reader must return every row.
     const stoneRows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-      `SELECT "SR_NO","ISR_NO","IT_CODE","DM_CODE","DM_NAME","DM_COLOR","DM_SIZE","DM_ORIGIN",
-              "DM_REMARK","DM_SFNO","IT_PCS","IT_GWT","IT_PCS_WT","IT_CON_PRC","IT_CON_WT",
-              "IT_RATE_TYPE","IT_RATE","IT_AMT","IT_LBR_RATE","IT_LBR_AMT","IT_NET_AMT","IT_TYPE",
-              "KR_WT","KR_LESS_PRC","KR_CON_PRC","KR_CON_WT","KR_RATE","KR_AMT","KR_LBR_RATE",
-              "KR_LBR_AMT","KR_NET_AMT"
-         FROM "PR_IDTL"
-        WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
-          AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO","ISR_NO"`,
+      `SELECT * FROM "PR_IDTL" ${where} ORDER BY "SR_NO","ISR_NO"`,
       ...params,
     );
     const stonesBySrNo = new Map<number, Array<Record<string, unknown>>>();
     for (const row of stoneRows) {
-      const srNo = num(row.SR_NO);
-      const list = stonesBySrNo.get(srNo) ?? [];
-      list.push({
-        isrNo: num(row.ISR_NO),
-        itCode: text(row.IT_CODE),
-        dmCode: text(row.DM_CODE),
-        dmName: text(row.DM_NAME),
-        dmColor: text(row.DM_COLOR),
-        dmSize: text(row.DM_SIZE),
-        dmOrigin: text(row.DM_ORIGIN),
-        dmRemark: text(row.DM_REMARK),
-        dmSfNo: text(row.DM_SFNO),
-        pcs: num(row.IT_PCS),
-        grossWt: num(row.IT_GWT),
-        pcsWt: num(row.IT_PCS_WT),
-        conPct: num(row.IT_CON_PRC),
-        conWt: num(row.IT_CON_WT),
-        rateType: text(row.IT_RATE_TYPE),
-        rate: num(row.IT_RATE),
-        amount: num(row.IT_AMT),
-        lbrRate: num(row.IT_LBR_RATE),
-        lbrAmount: num(row.IT_LBR_AMT),
-        netAmount: num(row.IT_NET_AMT),
-        itType: text(row.IT_TYPE),
-        karigarWt: num(row.KR_WT),
-        karigarLessPct: num(row.KR_LESS_PRC),
-        karigarConPct: num(row.KR_CON_PRC),
-        karigarConWt: num(row.KR_CON_WT),
-        karigarRate: num(row.KR_RATE),
-        karigarAmount: num(row.KR_AMT),
-        karigarLabourRate: num(row.KR_LBR_RATE),
-        karigarLabourAmount: num(row.KR_LBR_AMT),
-        karigarNetAmount: num(row.KR_NET_AMT),
-      });
-      stonesBySrNo.set(srNo, list);
+      const list = stonesBySrNo.get(num(row.SR_NO)) ?? [];
+      list.push(purchaseStoneView(row));
+      stonesBySrNo.set(num(row.SR_NO), list);
     }
-    const h = headers[0]!;
-    const labourType = (value: unknown): LabourType | undefined =>
-      legacyLabourModeFor(value) as LabourType | undefined;
     return {
-      voucherNo: text(h.VCH_NO),
-      hiddenVoucherNo: text(h.HD_VCH_NO),
-      mainUser: text(h.MAIN_USER),
-      vchDate: toIsoDate(h.VCH_DATE),
-      billNo: text(h.BILL_NO),
-      saleBillNo: text(h.SL_BILL_NO),
-      saleBillLc: text(h.SL_BILL_LC),
-      saleBillYear: text(h.SL_BILL_YRCD),
-      saleBillBook: text(h.SL_BILL_DBCD),
-      consiNo: text(h.SL_BILL_NO),
-      consiLcCode: text(h.SL_BILL_LC),
-      consiYrcd: text(h.SL_BILL_YRCD),
-      consiDbcd: text(h.SL_BILL_DBCD),
-      acCode: text(h.AC_CODE),
-      acName: text(h.AC_NAME),
-      taxCode: text(h.TAX_CODE),
-      taxRatePct: num(h.TAX_PRC),
-      interState: num(h.IGST_TAX) !== 0 || text(h.AC_GST_TYPE).toUpperCase() !== 'L',
-      urd: num(h.TAX_PRC) === 0 && num(h.TAX_AMT) === 0,
-      discountAmount: num(h.DISC_AMT),
-      rateUnfix: text(h.RATE_UNFIX).toUpperCase() === 'Y',
-      cashAmt: num(h.CASH_AMT),
-      cardAmt: num(h.CARD_AMT),
-      upiAmt: 0,
-      chequeAmt: num(h.CHQ_AMT),
-      kasar: num(h.KASAR_AMT),
-      billOutstanding: num(h.BILL_OS),
-      bankAc: text(h.BANK_AC),
-      hmAmount: num(h.HM_AMT),
-      hmTaxPct: num(h.HM_TAX_PRC),
-      hmTaxAmount: num(h.HM_TAX_AMT),
-      metal: text(h.IT_TYPE) === 'S' ? 'S' : 'G',
-      partyFine: num(h.PARTY_FINE),
-      description: text(h.VCH_DESC),
-      totals: {
-        net: num(h.NET_AMT),
-        discount: num(h.DISC_AMT),
-        taxable: round2(num(h.NET_AMT) - num(h.DISC_AMT)),
-        tax: num(h.TAX_AMT),
-        cgst: num(h.CGST_TAX),
-        sgst: num(h.SGST_TAX),
-        igst: num(h.IGST_TAX),
-        roundOff: num(h.ROF_AMT),
-        total: num(h.TOT_AMT),
-      },
-      lines: details.map((row) => ({
-        srNo: num(row.SR_NO),
-        itCode: text(row.IT_CODE),
-        metal: text(row.IT_TYPE) === 'S' ? 'S' : 'G',
-        tagNo: text(row.TAG_NO) === 'N' ? '' : text(row.TAG_NO),
-        vchSrno: num(row.VCH_SRNO),
-        pcs: num(row.ITM_PCS),
-        grossWt: num(row.ITM_GWT),
-        netWt: num(row.ITM_NWT),
-        touch: num(row.ITM_TOUCH),
-        ghtWt: num(row.ITM_GHT_WT),
-        westPct: num(row.ITM_WEST_PRC),
-        fineWt: num(row.ITM_FINE),
-        otherFineWt: num(row.ITM_OTH_FINE),
-        silverFineWt: num(row.SILVER_FINE),
-        rate: num(row.ITM_RATE),
-        rateType: text(row.RATE_TYPE),
-        urdRateType: text(row.URD_RATE_TYPE),
-        metalAmount: num(row.ITM_AMT),
-        labourType: labourType(row.LBR_TYPE),
-        labourPct: num(row.LBR_PRC),
-        labourRate: num(row.LBR_RATE),
-        labourFixed: text(row.LBR_TYPE) === 'N' ? num(row.LBR_AMT) : undefined,
-        labourAmount: num(row.LBR_AMT),
-        otherAmount: num(row.OTH_AMT),
-        netAmount: num(row.NET_AMT),
-        huid: text(row.HM_ID),
-        // WP-08: descriptive and rate fields the writer persists and the reader used to drop. Because
-        // `editPurchase` rebuilds PR_DETL from its input, an unchanged save wiped each of these — measured as
-        // DESIGN_NO, TBL_CODE, IT_DESC and COMM_PRC to null/0, and BAG_WT, ITM_OTH_WT, ITM_MRP, ITM_OTH_RATE
-        // to 0. Asserted by the round-trip test in purchase.lifecycle.db.test.ts.
-        designNo: text(row.DESIGN_NO),
-        tblCode: text(row.TBL_CODE),
-        itDesc: text(row.IT_DESC),
-        bagWt: num(row.BAG_WT),
-        lessWt: num(row.ITM_OTH_WT),
-        mrp: num(row.ITM_MRP),
-        otherRate: num(row.ITM_OTH_RATE),
-        commissionPct: num(row.COMM_PRC),
-        saleBillNo: text(row.SL_BILL_NO),
-        saleBillLc: text(row.SL_BILL_LC),
-        saleBillYear: text(row.SL_BILL_YRCD),
-        saleBillBook: text(row.SL_BILL_DBCD),
-        consiNo: text(row.CONSI_NO),
-        consiYrcd: text(row.CONSI_YRCD),
-        consiDbcd: text(row.CONSI_DBCD),
-        consiSrno: num(row.CONSI_SRNO),
-        // Stone rows for this line, keyed by the parent SR_NO the writer used.
-        stones: stonesBySrNo.get(num(row.SR_NO)) ?? [],
-      })),
-      tags: tags.map((row) => ({
-        srNo: num(row.SR_NO),
-        itCode: text(row.IT_CODE),
-        metal: text(row.IT_TYPE) === 'S' ? 'S' : 'G',
-        tagNo: text(row.TAG_NO),
-        vchSrno: num(row.VCH_SRNO),
-        pcs: num(row.ITM_PCS),
-        grossWt: num(row.ITM_GWT),
-        netWt: num(row.ITM_NWT),
-        touch: num(row.ITM_TOUCH),
-        fineWt: num(row.ITM_FINE),
-        rate: num(row.ITM_RATE),
-        metalAmount: num(row.ITM_AMT),
-        labourAmount: num(row.LBR_AMT),
-        otherAmount: num(row.OTH_AMT),
-        huid: text(row.HM_ID),
-      })),
+      ...purchaseHeaderView(headers[0]!),
+      lines: details.map((row) => purchaseLineView(row, stonesBySrNo.get(num(row.SR_NO)) ?? [])),
+      tags: tags.map(purchaseTagView),
       version: await purchaseVersionTx(tx, scope, voucherNo), // N51: sent back as expectedVersion
     };
   });
@@ -2605,11 +2476,15 @@ export async function editPurchase(
   input.taxRatePct = requirePurchaseNumber(input.taxRatePct, 'taxRatePct');
   const scope = input.scope;
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
-    const isConsignmentPurchase = (await purchaseMainBookTx(tx, scope)) === 'CON PUR';
+    const mainBook = await purchaseMainBookTx(tx, scope);
+    assertPurchaseFamilyBook(mainBook, scope.coBook); // WP-28 D7
+    const isConsignmentPurchase = mainBook === 'CON PUR';
     const persisted = await persistedPurchaseHeaderTx(tx, scope, voucherNo, ['SL_BILL_NO']);
     await assertPurchaseVersionTx(tx, scope, voucherNo, expectedVersion); // G170: before any write
+    // WP-28: an edit without a date keeps the STORED date; it never defaults to today.
+    if (!input.vchDate) input = { ...input, vchDate: persisted.VCH_DATE as Date };
+    const requestedDate = new Date(input.vchDate as Date | string);
     // Full prior header for the USER_DATA edit audit, read BEFORE the write set is replaced.
     const priorHeaderRow: Record<string, unknown> | undefined = (
       await tx.$queryRawUnsafe(
@@ -2624,17 +2499,17 @@ export async function editPurchase(
     )[0];
     // TR_PURC.cs `ItCodeLock`: a line that already produced a tag has its item code frozen, because the
     // tag is in stock under that item. Compared against the PERSISTED detail rows, never the request.
-    const priorLines: Array<{ SR_NO: unknown; IT_CODE: unknown; TAG_NO: unknown }> =
-      await tx.$queryRawUnsafe(
-        `SELECT "SR_NO","IT_CODE","TAG_NO" FROM "PR_DETL"
+    // WP-28 (D6, D12): the whole persisted rows, kept for the writer by SR_NO.
+    const priorLines: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
+      `SELECT * FROM "PR_DETL"
            WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5
            ORDER BY "SR_NO"`,
-        scope.coCode,
-        scope.lcCode,
-        scope.coYear,
-        scope.coBook,
-        voucherNo,
-      );
+      scope.coCode,
+      scope.lcCode,
+      scope.coYear,
+      scope.coBook,
+      voucherNo,
+    );
     for (const prior of priorLines) {
       const tagNo = String(prior.TAG_NO ?? '').trim();
       if (!tagNo || tagNo === 'N') continue; // untagged lines may still change item
@@ -2694,6 +2569,7 @@ export async function editPurchase(
       editingUser: input.mainUser ?? null,
       // Keeps each tag's identity across the rewrite; see WritePurchaseContext.persistedTagSrnos.
       persistedTagSrnos,
+      persistedLines: new Map(priorLines.map((row) => [num(row.SR_NO), row])),
     });
     if (isConsignmentPurchase) {
       await applyConsignmentPurchaseAdjustmentsTx(tx, scope, voucherNo, 1);

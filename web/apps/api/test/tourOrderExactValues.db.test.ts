@@ -249,8 +249,12 @@ db('Tour exact mapped saved values retain existing writer guards', () => {
       LD_CODE: 'CASH',
       CR_AMT: '40.00',
     });
+    // The order's own '+' row follows the advance (TR_TOUR_ORD.cs:7560-7600) and changes nothing else.
+    expect(after.SL_ORD_ADJ).toEqual(
+      before.SL_ORD_ADJ!.map((row) => ({ ...row, ORD_AMT: '40.00' })),
+    );
     for (const table of writes.filter(
-      (table) => !['SL_ORD_DATA', 'AC_DATA', 'ROJ_MEL_DATA'].includes(table),
+      (table) => !['SL_ORD_DATA', 'AC_DATA', 'ROJ_MEL_DATA', 'SL_ORD_ADJ'].includes(table),
     ))
       expect(after[table]).toEqual(before[table]);
   });
