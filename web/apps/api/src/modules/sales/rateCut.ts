@@ -18,11 +18,8 @@ import { applyBookingDrawDownTx } from './rateCutBookingDrawDown.js';
 import { resolveSettingsBehaviorTx } from '../shared/settingsBehavior.js';
 import { buildRateCutRojmel, rojmelMetalFor } from '../shared/rojmel.js';
 import { formatVoucherNo, nextVoucherNoTx, type VoucherScope } from '../vouchers/numbering.js';
-import {
-  assertSavedVoucherTx,
-  nextHiddenVoucherNoTx,
-  voucherTimestamp,
-} from '../vouchers/lifecycle.js';
+import { nextHiddenVoucherNoTx, voucherTimestamp } from '../vouchers/lifecycle.js';
+import { assertSavedRateCutTx, persistedHeaderTx } from './rateCutHeader.js';
 import {
   insertRowTx,
   postVoucherTx,
@@ -1951,25 +1948,8 @@ export async function writeRateCut(
       key.CO_BOOK,
     );
     assertRateCutBookGuard(classification, key.CO_BOOK, options.bookGuard);
-    /**
-     * WP-10: a PUT only edits a saved voucher. RATE_CUT_DATA has no unique key on the voucher number, so a PUT that
-     * created at the typed URL number (outside the `nextVoucherNoTx` lock) could duplicate a number a concurrent POST
-     * was taking. An unused number answers `404 voucher-not-found`; a new voucher is a POST.
-     */
-    if (options.vchNo != null) {
-      await assertSavedVoucherTx(
-        tx,
-        'RATE_CUT_DATA',
-        {
-          tenantId,
-          coCode: key.CO_CODE,
-          lcCode: key.LC_CODE,
-          coYear: key.CO_YEAR,
-          coBook: key.CO_BOOK,
-        },
-        key.VCH_NO,
-      );
-    }
+    // WP-10: a PUT edits a saved voucher only; an unused number is a 404 (rateCutHeader.ts).
+    if (options.vchNo != null) await assertSavedRateCutTx(tx, tenantId, key);
     const movesStock = bookMovesStock(classification);
     // TR_WH_SALE save refusals without figures, before the edit reversal (wholesaleSaveChecks.ts).
     if (desktopSaveChecks)
@@ -2533,30 +2513,6 @@ async function reserveIssuedTagsTx(
     out.push({ ...identity, IT_CODE: itCode });
   }
   return out;
-}
-
-/** The stored header of one voucher, locked for the rewrite or delete that follows. */
-async function persistedHeaderTx(
-  tx: any,
-  tenantId: string,
-  key: VoucherKey,
-): Promise<Record<string, unknown> | undefined> {
-  const rows: Array<Record<string, unknown>> = await tx.$queryRawUnsafe(
-    `SELECT "VCH_DATE","VCH_TIME",to_char("VCH_TIME",'HH24:MI:SS.MS') AS "VCH_CLOCK","MAIN_USER",
-            "AC_CODE","AC_NAME","SL_NET_AMT"::float8 AS sl_net,"PR_NET_AMT"::float8 AS pr_net,
-            "IT_TYPE","TOT_FINE_DR"::float8 AS tot_fine_dr,"TOT_FINE_CR"::float8 AS tot_fine_cr,
-            "HD_VCH_NO","VCH_DESC"
-       FROM "RATE_CUT_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
-        AND "CO_YEAR"=$4 AND "CO_BOOK"=$5 AND "VCH_NO"=$6
-      ORDER BY row_id LIMIT 1 FOR UPDATE`,
-    tenantId,
-    key.CO_CODE,
-    key.LC_CODE,
-    key.CO_YEAR,
-    key.CO_BOOK,
-    key.VCH_NO,
-  );
-  return rows[0];
 }
 
 export async function postRateCut(prisma: any, input: RateCutInput): Promise<RateCutResult> {
