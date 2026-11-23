@@ -121,6 +121,7 @@ const splitAudit = (diff: TenantDiff) => {
     kasar: view.kasar,
     bankAc: view.bankAc || undefined,
     lines: view.lines,
+    expectedVersion: view.version,
     ...overrides,
   });
   const header = async () =>
@@ -634,7 +635,11 @@ const splitAudit = (diff: TenantDiff) => {
     );
     expect(left).toEqual({ lines: 1, issued: 0 });
 
-    const removed = await request(CREATOR, 'DELETE', `/purchase-returns/${vchNo}?${scopeQuery}`);
+    const removed = await request(
+      CREATOR,
+      'DELETE',
+      `/purchase-returns/${vchNo}?${scopeQuery}&expectedVersion=${(await reopen()).version}`,
+    );
     expect(removed.statusCode, removed.body).toBe(200);
     const [after] = await query<Array<Record<string, number>>>(
       `SELECT ${[

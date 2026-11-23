@@ -176,6 +176,34 @@ function focusEditableCell(container: HTMLElement, row: number, column: number):
  * Enter stopped in front of the first read-only cell, or landed on the delete button where a second Enter
  * removed the line.
  */
+export type EnterWalkPlan =
+  { type: 'focus'; row: number; column: number } | { type: 'append'; row: number };
+
+/**
+ * The pure decision behind `walkEnter`: from the first cell to examine, the next cell with an editable control, or
+ * an append when the walk runs off the last row. A cell with no control is stepped over, as the desktop's
+ * `MSG_PR_EnterCell` steps over a zero-width column (`TR_KR_ISU.cs:3743` `while (mSG[mSG.Col] == 0)`); the guard
+ * bounds the walk the way its ten-step limit does (`TR_KR_ISU.cs:3757`).
+ */
+export function planEnterWalk(
+  isEditable: (column: number, row: number) => boolean,
+  from: { row: number; column: number },
+  rowCount: number,
+  columnCount: number,
+): EnterWalkPlan {
+  let { row, column } = from;
+  for (let guard = 0; guard < rowCount * Math.max(columnCount, 1) + 1; guard++) {
+    if (column >= columnCount) {
+      row += 1;
+      column = 0;
+    }
+    if (row >= rowCount) return { type: 'append', row };
+    if (isEditable(column, row)) return { type: 'focus', row, column };
+    column += 1;
+  }
+  return { type: 'append', row: rowCount };
+}
+
 function walkEnter(
   container: HTMLElement,
   from: { row: number; column: number },
@@ -183,20 +211,19 @@ function walkEnter(
   columnCount: number,
   onAppendRow: () => void,
 ): void {
-  let { row, column } = from;
-  for (let guard = 0; guard < rowCount * Math.max(columnCount, 1) + 1; guard++) {
-    if (column >= columnCount) {
-      row += 1;
-      column = 0;
-    }
-    if (row >= rowCount) {
-      onAppendRow();
-      focusAfterRender(container, row, 0);
-      return;
-    }
-    if (focusEditableCell(container, row, column)) return;
-    column += 1;
+  const plan = planEnterWalk(
+    (column, row) =>
+      !!gridCellElement(container, row, column)?.querySelector<HTMLElement>(EDITABLE_CONTROL),
+    from,
+    rowCount,
+    columnCount,
+  );
+  if (plan.type === 'append') {
+    onAppendRow();
+    focusAfterRender(container, plan.row, 0);
+    return;
   }
+  focusEditableCell(container, plan.row, plan.column);
 }
 
 function focusAfterRender(container: HTMLElement, row: number, column: number): void {

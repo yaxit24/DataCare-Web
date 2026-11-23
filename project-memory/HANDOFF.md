@@ -1,3 +1,8 @@
+## 2026-11-23 — Purchase Rtn prints on FRM_PRINT and carries a version token (N245 / G257, WP-29)
+
+- 2026-11-23: architect decisions (owner may override): the Purchase Return print guards the print right (sales print unchanged); line TAX_PRC is 0 as the desktop writes it (no migration; no reader of the line column); edit and delete need `expectedVersion` like purchases; Fine/Amount stay computed cells.
+- 2026-11-23: routes moved to `routes/purchaseReturn.ts` (txn.ts ceiling 7974); `planEnterWalk` is the tested pure Enter walk; `purchaseReturnWp29.routes.db.test.ts` pins HSN 6,200/93/93/186, the refusal, the token and lossless save. Browser cases `print.hsn-tax-intra`, `print.hsn-tax-inter`, `keyboard.enter-walk` were written with no local browser stack; CI runs them. `config.setting-variant` stays blocked on N166.
+
 ## 2026-11-22 — Purchase residuals: lossless reopen, hallmark receive columns, purchase book family (N244 / G256, WP-28)
 
 - 2026-11-22: `GET /purchases/:vchNo` returns every stored value (`purchaseReopen.ts`); the edit keeps the persisted header and line columns the
