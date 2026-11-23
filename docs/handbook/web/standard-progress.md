@@ -46,7 +46,7 @@ Order (D31, D32): every Lite menu works end to end like the desktop first, then 
 | Report | Ledger Report | `/reports/account-ledger` | REPORT | account-ledger | module green | — |
 | Report | Stock Report | `/reports/stock-report` | REPORT | — | no module | — |
 | Report | Tag Stock | `/reports/tag-stock` | REPORT | tag-cancel | module green | — |
-| Report | Sales Report | `/reports/sales-report` | REPORT | — | no module | — |
+| Report | Sales Report | `/reports/sales-report`, `/reports/sales-register` | REPORT | — | no module | — |
 | Report | Purchase Rpt | `/reports/purchase-register` | REPORT | — | no module | — |
 | Report | Approval Rpt | `/reports/approval-report` | REPORT | — | no module | — |
 | Report | Order Report | `/txn/sales-order` | REPORT | sales-order | module green | — |

@@ -252,11 +252,6 @@
    "menu": "Report/Gst Report",
    "reason": "A mode of the Gst Report report menu."
   },
-  "/reports/sales-report": {
-   "edition": "L",
-   "menu": "Report/Sales Report",
-   "reason": "The dedicated RP_ALL Sales Report screen (WP-11 phase two): the Sales Report menu's own caption."
-  },
   "/reports/sales-return-register": {
    "edition": "L",
    "menu": "Report/Sales Report",
