@@ -12,6 +12,7 @@ import {
   type KeyboardEvent,
 } from 'react';
 import { ApiError, del, get, postCommand, put } from '../lib/api';
+import { renumberNotice } from '../lib/voucherRenumber';
 import { useIdempotencyKey } from '../lib/idempotencyKey';
 import { useCompanySettings } from '../lib/companySettings';
 import {
@@ -463,6 +464,9 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
     try {
       const body = voucherPayload(header, rows, mode, { coBook, coYear, lcCode });
       const verb = loaded ? 'Updated' : 'Saved';
+      // The number this screen showed for a new voucher. The server numbers a create at save, under the book's lock;
+      // when that is not the number shown, the desktop's save-time notice says so (TR_TAG_CAN.cs:5046 {{New Voucher No: }}).
+      const shown = loaded ? '' : voucherNo;
       const result = loaded
         ? await put<{ vchNo: number; voucherNo: string }>(
             `${cfg.endpoint}/${encodeURIComponent(loaded.voucherNo)}`,
@@ -471,12 +475,13 @@ export function TagCancelForm({ mode }: { mode: TagCancelMode }) {
         : await postCommand<{ vchNo: number; voucherNo: string }>(cfg.endpoint, body, command.key);
       if (!loaded) command.renew();
       const saved = result.voucherNo ?? String(result.vchNo).padStart(5, '0');
+      const notice = renumberNotice(shown, saved, 'tag-cancel');
       try {
         // Reload what was stored, so every figure on screen is the saved one.
         const view = await open(saved);
-        setStatus(`${verb} voucher ${view.voucherNo}`);
+        setStatus(notice ?? `${verb} voucher ${view.voucherNo}`);
       } catch (caught) {
-        setStatus(`${verb} voucher ${saved}`);
+        setStatus(notice ?? `${verb} voucher ${saved}`);
         setError(`Saved, but reloading it failed: ${message(caught, 'reload failed')}`);
       }
       void refreshListing(coBook);

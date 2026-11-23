@@ -2459,6 +2459,9 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     hmAmount: b.hmAmount != null ? Number(b.hmAmount) : undefined,
     hmChargeAc: b.hmChargeAc,
     hmTaxPct: b.hmTaxPct != null ? Number(b.hmTaxPct) : undefined,
+    hmTaxCode: b.hmTaxCode,
+    empCode: b.empCode,
+    vchDesc: b.vchDesc,
     cashAmt: b.cashAmt != null ? Number(b.cashAmt) : undefined,
     chequeAmt: b.chequeAmt != null ? Number(b.chequeAmt) : undefined,
     cardAmt: b.cardAmt != null ? Number(b.cardAmt) : undefined,
@@ -5144,6 +5147,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       saveTagAdjust(prisma, {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
+        expectedVersion: b.expectedVersion,
         vchDate: b.vchDate,
         book: b.book,
         acCode: b.acCode,
