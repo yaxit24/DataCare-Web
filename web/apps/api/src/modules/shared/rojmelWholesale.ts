@@ -40,7 +40,8 @@ export interface WholesaleRojmelLine {
   itCode: string;
 }
 
-export interface WholesaleRojmelInput {
+/** The stored voucher's figures the day book is built from: derived on the server at save, never an API input. */
+export interface WholesaleRojmelFigures {
   /**
    * The book's BOOK_DETL by SR_NO. A row joins `B.SR_NO = n`, so it is written whenever the slot row EXISTS, even
    * with a blank AC_CODE (the value is then ''); a slot with no row writes nothing.
@@ -77,7 +78,10 @@ export interface WholesaleRojmelInput {
   received: WholesaleRojmelLine[];
 }
 
-export function buildWholesaleRojmel(ctx: RojmelContext, input: WholesaleRojmelInput): RojmelRow[] {
+export function buildWholesaleRojmel(
+  ctx: RojmelContext,
+  input: WholesaleRojmelFigures,
+): RojmelRow[] {
   const rows: RojmelRow[] = [];
   const bookPrefixed = `${ctx.vchType} - ${input.headerName}`;
   const base = (type: string, srNo?: number): RojmelRow => ({
