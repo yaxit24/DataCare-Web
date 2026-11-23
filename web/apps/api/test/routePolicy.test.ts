@@ -138,8 +138,9 @@ describe('route policy registry', () => {
     // N240 (WP-21) adds Books (MS_BOOK): list, print, template, accounts, one, POST, PUT and DELETE: 774 + 8 = 782.
     // N241 (WP-16) adds the RP_STOCK Stock Report GET /reports/stock-report, /defaults, /movements and the CSV/XLSX
     // exports: 768 + 5 = 773. [774 on main + 5 here = 779] [782 on main + 5 here = 787]
-    expect(routes).toHaveLength(787);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(787);
+    // N242 (WP-27) adds the Sales Return edit PUT /sales-returns/:vchNo: 768 + 1 = 769. [774 on main + 1 here = 775] [787 on main + 1 here = 788]
+    expect(routes).toHaveLength(788);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(788);
 
     const policies = routes.map((route) => ({
       ...route,
