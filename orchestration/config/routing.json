@@ -51,16 +51,31 @@
         {
           "runner": "opencode",
           "provider": "opencode-go",
-          "model": "opencode-go/qwen4-max"
+          "model": "opencode-go/kimi-k2.7-code"
         },
         {
           "runner": "opencode",
           "provider": "opencode-go",
-          "model": "opencode-go/kimi-k2.7-code"
+          "model": "opencode-go/qwen4-max"
         },
         {
           "runner": "codex",
           "model": "gpt-6-astra"
+        },
+        {
+          "runner": "opencode",
+          "provider": "opencode-go",
+          "model": "opencode-go/hy4"
+        },
+        {
+          "runner": "opencode",
+          "provider": "opencode-go",
+          "model": "opencode-go/deepseek-v4.1-flash"
+        },
+        {
+          "runner": "opencode",
+          "provider": "opencode-go",
+          "model": "opencode-go/hy4-flash-free"
         },
         {
           "runner": "opencode",
@@ -78,31 +93,12 @@
           "effort": "medium"
         },
         {
-          "runner": "opencode",
-          "provider": "openrouter",
-          "model": "openrouter/deepseek/deepseek-v4.1-flash"
-        },
-        {
-          "runner": "opencode",
-          "provider": "deepseek",
-          "model": ""
-        },
-        {
-          "runner": "claude",
-          "provider": "anthropic-compatible",
-          "model": ""
-        },
-        {
           "runner": "claude",
           "model": "haiku",
           "effort": "medium"
-        },
-        {
-          "runner": "opencode",
-          "provider": "opencode-go",
-          "model": "opencode-go/deepseek-v4.1-flash"
         }
-      ]
+      ],
+      "_order": "By Go allowance and bake-off quality (2026-11-23): Kimi K2.7 Code, Qwen4 Max, Codex, Hy4, DeepSeek V4.1 Flash, Hy4 Flash Free; OpenRouter and Claude last."
     }
   },
   "escalation": [
