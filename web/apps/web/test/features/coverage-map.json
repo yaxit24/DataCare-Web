@@ -27,6 +27,7 @@
     "salesReport": {
       "covers": [
         "web/apps/web/app/(app)/reports/sales-report/",
+        "web/apps/api/src/modules/masters/lookup.ts",
         "web/apps/api/src/modules/reports/rpAll/",
         "web/apps/api/src/routes/rpAllReport.ts"
       ]

@@ -1,3 +1,10 @@
+## 2026-11-23 — Sales Report gets its dedicated RP_ALL screen (N253 / G265, WP-11 phase two)
+
+- 2026-11-23: `/reports/sales-report` (`reports/sales-report/`) drives GET /reports/sales-report: thirteen buttons, RP_ALL lookups (cities, areas,
+  order-customers entities in `masters/lookup.ts`, `bookCode` in `rpAll/filters.ts`), zoom, keyboard flow, grid/CSV/XLSX/PDF. Module 11 pass, 3 blocked.
+- 2026-11-23: blocked: T07/T18 Sales Return variant (G246, RTN_NET_AMT) and T13 return-bill print (SalesRtnA4Print missing). WP-14 adds the same
+  lookup entities and `bookCode`; the second of the two PRs to merge resolves that conflict.
+
 ## 2026-11-22 — Sales Invoice residuals (N243 / G255, WP-26)
 
 - 2026-11-22: an unchanged reopen-and-save writes the stored SL_DATA row back (D8); getSale reloads the member-commission columns, stones, UPI, credit-note and desktop-shape order rows and PR_COST; UPI_DATA and CRNT_DATA are written (sums = header figures, D1); order advances in the TR_SALE shape (D2, 409 on over-use); old metal G versus every other type, rate type N/F only (G83); the reopened tax code goes back (G82); PRINT_MAST print choice (D6).

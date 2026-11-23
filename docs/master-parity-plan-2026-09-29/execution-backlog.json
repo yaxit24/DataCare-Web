@@ -8106,6 +8106,32 @@
         "web/apps/api/test/salesInvoiceResiduals.db.test.ts",
         "web/apps/web/test/features/modules/salesInvoiceResiduals.mjs"
       ]
+    },
+    {
+      "id": "N253",
+      "status": "implemented-unverified",
+      "action": "Report → Sales Report gets its dedicated RP_ALL screen on /reports/sales-report (phase two of N234): the thirteen sales buttons with the desktop captions and defaults, the party/book/product/group/city/area lookups, Select Book, template grouping and zoom, the Enter flow, and grid, CSV, XLSX and PDF output behind the Print right over GET /reports/sales-report.",
+      "parentLabels": "P1-core; L6; WP-11; T01-T18",
+      "startAfter": [
+        "N234"
+      ],
+      "requiredProof": "The frozen sales-report browser module through the real screen with expected values computed from seeded vouchers: defaults, filters, register/report/item/group/employee/order totals, lookups, grouping, invalid input, scope and rights, history, output match and keyboard flow.",
+      "gapIds": "G265, G246",
+      "entryDefinition": "docs/parity/LITE-MASTER-PLAN.md section 5 (WP-11)",
+      "sourceAndModuleDetail": "docs/parity/rpall-sales-inventory.md; 12-lineage-verification-2026-10-01.md; orchestration/work/WP-11/red-browser.md; orchestration/work/WP-11/verify.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "web/apps/web/app/(app)/reports/sales-report/page.tsx",
+        "web/apps/web/app/(app)/reports/sales-report/useSalesReport.ts",
+        "web/apps/web/app/(app)/reports/sales-report/SalesReportGrid.tsx",
+        "web/apps/api/src/modules/masters/lookup.ts",
+        "web/apps/api/src/modules/reports/rpAll/filters.ts",
+        "web/apps/web/test/features/modules/salesReport.mjs",
+        "orchestration/work/WP-11/verify.md"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. sales-report browser module on a fresh local build (2026-11-23): 14 applicable, 11 pass, 3 blocked, 0 fail. Blocked: T07/T18 Sales Return variant (G246, the web return writes NET_AMT instead of RTN_NET_AMT) and T13 return-bill print (SalesRtnA4Print template missing from the repository). Desktop match 0%."
     }
   ],
   "amendments": [
