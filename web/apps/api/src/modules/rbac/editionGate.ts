@@ -56,7 +56,7 @@ export function aboveLiteRefusal(
 
 /**
  * The Ledger Report's Debit Ageing is a view of `GET /reports/account-ledger` (and its exports), not a path of its own, so
- * the route table cannot classify it. Lite refuses it: the desktop hides the Time Wise button there
+ * the route table cannot classify it. Lite and Basic refuse it: the desktop hides the Time Wise button there
  * (`RP_LEDR.cs:4589 {{((Control)BtnTimeWise).Visible = false;}}`, WP-20 D-20-1). The two account-in-path aliases force the
  * detail view and are never ageing.
  */
@@ -77,7 +77,9 @@ export function ledgerAgeingRefusal(
   const view = String((query as Record<string, unknown> | null | undefined)?.view ?? '')
     .trim()
     .toLowerCase();
-  return view === 'ageing' ? aboveLiteRefusal('Reports/Account Ledger', policy) : null;
+  // Lite and Basic both hide it: RP_LEDR.cs:4587 {{if ((Operators.CompareString(DC_Main.MsSoftType, "L", false) == 0) | (Operators.CompareString(DC_Main.MsSoftType, "B", false) == 0))}}
+  if (view !== 'ageing' || !policy || (policy.code !== 'L' && policy.code !== 'B')) return null;
+  return { error: 'edition-unavailable', form: 'Reports/Account Ledger', edition: policy.code };
 }
 
 /** A route's static rights form must be classified, or a gated deployment refuses to start. */

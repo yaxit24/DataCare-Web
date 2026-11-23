@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { buildApp } from '../src/app.js';
+import { ledgerAgeingRefusal } from '../src/modules/rbac/editionGate.js';
 import { issueAccess } from '../src/modules/auth/jwt.js';
 
 /**
@@ -123,6 +124,21 @@ describe('account-ledger.config.lite-ageing-hidden — Debit Ageing is gated in 
     });
     expect(response.statusCode, response.body).toBe(403);
     expect(response.json().error, response.body).toBe('edition-unavailable');
+  });
+});
+
+describe('account-ledger.config.lite-ageing-hidden — the edition table for the ageing view', () => {
+  // RP_LEDR.cs:4587 hides Time Wise for MsSoftType "L" and "B" alike; every other edition keeps it.
+  it('refuses Basic like Lite and offers Advance', () => {
+    const url = '/reports/account-ledger';
+    expect(ledgerAgeingRefusal(url, { view: 'ageing' }, { code: 'B', beta: false })?.error).toBe(
+      'edition-unavailable',
+    );
+    expect(ledgerAgeingRefusal(url, { view: 'ageing' }, { code: 'L', beta: false })?.edition).toBe(
+      'L',
+    );
+    expect(ledgerAgeingRefusal(url, { view: 'ageing' }, { code: 'A', beta: false })).toBeNull();
+    expect(ledgerAgeingRefusal(url, { view: 'detail' }, { code: 'L', beta: false })).toBeNull();
   });
 });
 
