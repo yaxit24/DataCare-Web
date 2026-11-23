@@ -201,6 +201,11 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     checksum: '0ae86f271fca6186af52f18eed2d877969838c2f53452d1d905e90218a4a0984',
   },
   {
+    // N240/G252: existing companies' web-seeded books get the desktop template slots (TAG SPLIT 6-9 sale/purchase).
+    name: '20261122120000_book_template_slots',
+    checksum: '5d31ad3136d6d02a24da51d789e3ad3ef30724303756b3921b549df2bfb735ca',
+  },
+  {
     // WP-26 (N243, G255): SL_DATA member-commission and RE_TRFR columns, SL_PR_DETL.PR_COST.
     name: '20261122200000_sale_desktop_residual_columns',
     checksum: '77b3225983a5fd8f9b41b682896a8154090960796d5af6b66aba915e6f80343c',

@@ -233,6 +233,7 @@ route('Sales/Sales Return', [
   'POST /sales-returns',
   'GET /sales-returns/import',
   'GET /sales-returns/:vchNo',
+  'PUT /sales-returns/:vchNo',
   'GET /sales-returns/:vchNo/print',
   'DELETE /sales-returns/:vchNo',
   'GET /sales/credit-note',
@@ -868,6 +869,17 @@ route('Masters/Item Groups', [
   'PUT /masters/group-master/:code',
   'DELETE /masters/group-master/:code',
 ]);
+// MS_BOOK (N240): Company → Books, the book header with its posting-account slots.
+route('Masters/Books / Series', [
+  'GET /masters/books-master',
+  'GET /masters/books-master/print',
+  'GET /masters/books-master/template',
+  'GET /masters/books-master/accounts',
+  'GET /masters/books-master/:code',
+  'POST /masters/books-master',
+  'PUT /masters/books-master/:code',
+  'DELETE /masters/books-master/:code',
+]);
 // MS_PRODUCT with CurMast 'Product' (N215): the Product master's own screen.
 route('Masters/Products', [
   'GET /masters/product-master',
@@ -1008,6 +1020,14 @@ route('Reports/Tag-Stock Report', [
   'GET /reports/tag-stock.xlsx',
   'GET /reports/tag-stock/sizes',
 ]);
+// WP-16: the RP_STOCK Stock Report screen, its drill-down and exports (routes/stockReport.ts), its own rights key.
+route('Reports/Stock Report', [
+  'GET /reports/stock-report',
+  'GET /reports/stock-report/defaults',
+  'GET /reports/stock-report/movements',
+  'GET /reports/stock-report/export.csv',
+  'GET /reports/stock-report/export.xlsx',
+]);
 route('Reports/HuId Report', ['GET /reports/huid']);
 route('Reports/ItStk Level', ['GET /reports/item-weight-levels']);
 route('Reports/Bill Wise Profit', ['GET /reports/bill-profit']);
@@ -1071,6 +1091,7 @@ const PRINT_ROUTES = new Set([
   'GET /masters/employee-master/print',
   'GET /masters/tax-master/print',
   'GET /masters/group-master/print',
+  'GET /masters/books-master/print',
   'GET /masters/address-master/print',
   'POST /estimate/pdf',
   'GET /reports/account-ledger/export.pdf',
@@ -1116,6 +1137,8 @@ const PRINT_ROUTES = new Set([
   'GET /reports/sales-report/export.csv',
   'GET /reports/sales-report/export.xlsx',
   'GET /reports/gst-report/workbook.xlsx',
+  'GET /reports/stock-report/export.csv',
+  'GET /reports/stock-report/export.xlsx',
   'GET /reports/gstr2-doc',
   'GET /reports/gstr1-doc',
   'GET /reports/gstr3b-doc',

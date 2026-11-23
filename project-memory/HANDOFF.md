@@ -3,6 +3,32 @@
 - 2026-11-22: an unchanged reopen-and-save writes the stored SL_DATA row back (D8); getSale reloads the member-commission columns, stones, UPI, credit-note and desktop-shape order rows and PR_COST; UPI_DATA and CRNT_DATA are written (sums = header figures, D1); order advances in the TR_SALE shape (D2, 409 on over-use); old metal G versus every other type, rate type N/F only (G83); the reopened tax code goes back (G82); PRINT_MAST print choice (D6).
 - Open (blocked in cases.md): quotation import, stepped Esc, old-metal Ctrl+D, header totals only for book type M (provisioned books have no BOOK_TYPE: owner question), fixture users without edit/print right, tender retry/rollback, two journeys, approval number import (D5). OpAmt/ClAmt follow the desktop Sum(CR - DR), so a debit balance is negative (the case listed magnitudes).
 
+## 2026-11-22 — Sales Return residuals (N242 / G254, WP-27)
+
+- 2026-11-22: the TR_SALE_RTN save refusals in desktop order and texts (employee, cheque/card account, type B, year, lock date, zero
+  value, `Duplicate Tag No`); Import refuses a bill that already has a return, `remaining=1` is the single-item picker; the New return
+  form opens a saved return and saves it with `PUT /sales-returns/:vchNo` + version token, losslessly, with the USER_DATA field audit.
+- 2026-11-22: decisions D1-D14 in `orchestration/work/WP-27/cases.md` (architect, owner may override); new DB tests 18 of 18; return
+  create p95 269 ms in the load profile. Browser module (28 cases, 0 declared blocked) not run locally. G246 (RTN_* columns) stays open.
+
+## 2026-11-22 — Stock Report is the desktop RP_STOCK form on its own route (N241 / G253, WP-16)
+
+- 2026-11-22: `/reports/stock-report` (`modules/reports/stockReport/`, `routes/stockReport.ts`, `reports/stock-report/`) sums signed MAIN_STOCK
+  movements for eight dimensions; Closing = Opening + every movement; drill-down fine is KR_FINE for + rows and ITM_FINE for - rows. Own rights
+  key `Reports/Stock Report` (the old `Stock Report` alias left Tag-Stock). Print/Excel need the Print right. The report writes nothing.
+- 2026-11-22: separate defect, not fixed: `onHandNet()` in `modules/stock/stock.ts` signs `ITM_FINE` for both signs and ignores dates and year.
+- 2026-11-22: not built: voucher zoom (no entry screen opens a voucher by key), InOut item-ledger print, code lookups, Crystal layouts,
+  EMP ISU adjustment, Item Lot, LC box. The browser module was not run locally (8 GB machine); CI runs it.
+
+## 2026-11-22 — Books is the desktop MS_BOOK screen with its posting slots (N240 / G252, WP-21)
+
+- 2026-11-22: /masters/books is its own page with the slot grid; /masters/books-master writes header and slots in one transaction with the
+  MS_BOOK save/delete checks and texts; generic BOOK_DATA writes are refused. D4 family lock on a book with vouchers is a web message.
+- 2026-11-22: provisioning adds the template slots (OIN/OEX 2-3, TSP 1-9 with 6 SALES / 7 PURCHASE / 8 SLVSALE / 9 SLVPURC, PR/TPR 5 DISCOUNT,
+  LBR 8-11), Data Type A, AC_NAME = account name; only new companies. Fine families untouched.
+- 2026-11-22: existing companies: migration 20261122120000_book_template_slots rewrites a web-seeded slot only while it still holds the old seed's account
+  (TSP 6/7/8/9), inserts absent template slots and the DISCOUNT account; operator-changed slots kept; idempotent.
+
 ## 2026-11-22 — Gst Report runs the desktop RP_GST rules for the blocked cases (N239 / G251, WP-19)
 
 - 2026-11-22: EXP/EXEMP/DOCS are the desktop caption grids; GSTR-3B is the whole desktop grid (3.1 total, 3.2(1), 6.1) under owner decisions
