@@ -25,6 +25,15 @@
         "web/apps/api/src/routes/rpAllReport.ts"
       ]
     },
+    "orderReportRp": {
+      "covers": [
+        "web/apps/web/app/(app)/reports/order-report/",
+        "web/apps/api/src/modules/reports/rpAll/orderLayouts.ts",
+        "web/apps/api/src/modules/reports/rpAll/orderQuery.ts",
+        "web/apps/api/src/modules/reports/rpAll/index.ts",
+        "web/apps/api/src/routes/rpAllReport.ts"
+      ]
+    },
     "purchaseReport": {
       "covers": [
         "web/apps/web/app/(app)/reports/purchase-report/page.tsx",
