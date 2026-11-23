@@ -127,6 +127,10 @@
       "covers": [
         "web/apps/web/app/(app)/txn/contra/page.tsx",
         "web/apps/api/src/modules/finance/contra.ts",
+        "web/apps/api/src/modules/finance/contraClearing.ts",
+        "web/apps/api/src/modules/finance/contraList.ts",
+        "web/apps/api/src/modules/finance/contraVoucher.ts",
+        "web/apps/api/src/routes/contra.ts",
         "web/apps/api/src/modules/finance/lifecycle.ts",
         "web/apps/api/src/modules/vouchers/list.ts"
       ]

@@ -1,3 +1,9 @@
+## 2026-11-23 — Contra Entry is the TR_CONTRA voucher with its grid and lifecycle (N246 / G258, WP-31)
+
+- 2026-11-23: row 1 holds the side, later rows are the opposite and read-only; the mirror record carries row 1's description (`TR_CONTRA.cs:1538`, `:1630`, `:2868`); REMARK_DATA is written and deleted; INOUT_TYPE is the book's flag; employee, company type B, year, lock date and totals are refused in the desktop order (`:2668-2694`).
+- 2026-11-23: edit and delete need the voucher version (`expectedVersion`; GET returns `version`), are serialised per voucher, and move the bank clearing marks with their leg. The Contra routes live in `routes/contra.ts`; `GET /contra/list` is the desktop F1 list (policy count 769).
+- 2026-11-23: decisions D1-D16 in `orchestration/work/WP-31/cases.md` are architect decisions (owner may override). Blocked: opening-balance label, ContraBill.rpt layout. The browser module was extended but not run locally.
+
 ## 2026-11-23 — Purchase Rtn prints on FRM_PRINT and carries a version token (N245 / G257, WP-29)
 
 - 2026-11-23: architect decisions (owner may override): the Purchase Return print guards the print right (sales print unchanged); line TAX_PRC is 0 as the desktop writes it (no migration; no reader of the line column); edit and delete need `expectedVersion` like purchases; Fine/Amount stay computed cells.

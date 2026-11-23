@@ -524,7 +524,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Bul Sales | `TR_BUL_SALE` | `/txn/bullion-sale` | `C - - - - -` | PARTIAL | P1-edition |
 | Cash Payment | `TR_CASH` | `/txn/payment` | `C - - - P -` | PARTIAL | P1-core |
 | Cash Received | `TR_CASH` | `/txn/receipt` | `C - - - P -` | PARTIAL | P1-core |
-| Contra Entry | `TR_CONTRA` | `/txn/contra` | `C - - - - -` | PARTIAL | P1-core |
+| Contra Entry | `TR_CONTRA` | `/txn/contra` | `C R E D P L` | PARTIAL | P1-core |
 | E CrntNote | `TR_SL_EBILL` | `/txn/e-crnt-note` | `C R E D P L` | PARTIAL | P1-edition |
 | E Invoice | `TR_SL_EBILL` | `/txn/e-invoice` | `C R E D P L` | PARTIAL | P1-edition |
 | Pr Quotation | `TR_PURC` | `/txn/purchase-quotation` | `C R E D P L` | PARTIAL | P1-edition |
@@ -615,9 +615,9 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Transfers equal amounts between cash and bank accounts without stock or tax.
 - **Looks:** Voucher/date header and a balanced Cr/Dr account grid with description, totals and employee.
 - **Writes:** CONTRA_DATA, AC_DATA, ROJ_MEL_DATA, REMARK_DATA, TEMP_BOOK_DATA.
-- **Web:** `/txn/contra`; `POST /contra`, `GET /contra/:vchNo`, `PUT /contra/:vchNo`, `DELETE /contra/:vchNo`. Can: create.
-- **Remaining:** The page only creates simplified lines; lifecycle, list, Print, the multi-line grid, account roles, versions and idempotency remain.
-- **Owners:** G53, N67, X16, N51, N52, N59, N74.
+- **Web:** `/txn/contra`; `POST /contra`, `GET /contra/list`, `GET /contra/:vchNo`, `PUT /contra/:vchNo`, `DELETE /contra/:vchNo`, `GET /contra/:vchNo/print`. Can: create, reopen, edit, delete, print, list.
+- **Remaining:** Opening-balance label (needs a balance-as-of-date API), ContraBill.rpt layout and copy labels (no text export of the Crystal file), the per-voucher permission request and licence refusal (not ported), desktop-run comparison and operator acceptance. Grid, lifecycle with versions, F1 list and full print are implemented-unverified in N246/G258.
+- **Owners:** G53, N67, X16, N51, N52, N59, N74, N246, G258.
 - **Evidence:** [KB_transaction.md:299-323](../../project-memory/video-research/_kb/KB_transaction.md#L299-L323).
 
 ### E CrntNote

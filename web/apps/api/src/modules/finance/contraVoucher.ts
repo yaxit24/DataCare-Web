@@ -10,6 +10,7 @@ import {
   billFooter,
   type DocMeta,
 } from '../documents/docChrome.js';
+import { gridOfRows } from './contra.js';
 import {
   documentCompanyTx,
   requireVoucherDocumentScope,
@@ -19,9 +20,10 @@ import {
 } from '../documents/voucherDocument.js';
 
 /**
- * Contra voucher document (G128): a bank↔cash (or inter-account) transfer. The desktop writes two
- * CONTRA_DATA rows — Cr the from-account (SR_NO 1) and Dr the to-account (SR_NO 2) — of equal value.
- * Rendered on the shared docShell chrome as a From → To transfer voucher, mirroring ContraVch.rpt.
+ * Contra voucher document (G128): a bank↔cash (or inter-account) transfer. The desktop writes a pair of CONTRA_DATA
+ * rows per grid row after row 1 (TR_CONTRA.cs:2760-2866) and prints the whole voucher with `ContraBill.rpt`
+ * (TR_CONTRA.cs:3021; there is no ContraVch.rpt). Rendered on the shared docShell chrome as the voucher's legs with
+ * Dr and Cr columns and totals; the Crystal layout itself is blocked on a text export of the template.
  */
 export type ContraVoucherScope = VoucherDocumentScope;
 
@@ -60,22 +62,31 @@ export interface ContraVoucherCtx {
 }
 
 export function contraVoucherHtml(rows: any[], ctx: ContraVoucherCtx = {}): string {
-  // Cr row = money leaves the "from" account; Dr row = money enters the "to" account.
-  const crRow = rows.find((r) => num(r.CR_AMT) > 0) ?? rows[0];
-  const drRow = rows.find((r) => num(r.DR_AMT) > 0) ?? rows[rows.length - 1];
-  const amount = num(crRow?.CR_AMT) || num(drRow?.DR_AMT);
   const h = rows[0] ?? {};
-  const acName = (r: any) => esc(r?.RESOLVED_NAME ?? r?.AC_NAME ?? r?.AC_CODE ?? '');
-  const narration = h.IT_DESC ?? '';
+  const names = new Map<string, string>();
+  for (const r of rows) {
+    const code = String(r.AC_CODE ?? '').trim();
+    if (code && !names.has(code)) names.set(code, String(r.RESOLVED_NAME ?? r.AC_NAME ?? code));
+  }
+  const acName = (code: string) => esc(names.get(code) ?? code);
+  // The desktop prints the whole voucher (TR_CONTRA.cs:3026): the main account (row 1) and every grid row with its own
+  // Dr or Cr, then the totals. A voucher saved before the grid existed is a single two-account row (gridOfRows).
+  const legs = gridOfRows(rows);
+  const total = (side: 'DR' | 'CR') =>
+    legs.filter((l) => l.crdr === side).reduce((sum, l) => sum + l.amount, 0);
+  const amount = total('DR');
   const vchDate = formatDesktopDate(h.VCH_DATE); // N56 (D19): dd/MM/yyyy, always with the year
-
+  const lineRows = legs
+    .map(
+      (l, i) =>
+        `<tr><td class="c">${i + 1}</td><td>${acName(l.acCode)}</td><td>${esc(l.itDesc ?? '')}</td>` +
+        `<td class="r">${l.crdr === 'DR' ? money(l.amount) : ''}</td><td class="r">${l.crdr === 'CR' ? money(l.amount) : ''}</td></tr>`,
+    )
+    .join('');
   const body =
-    `<table class="items"><thead><tr><th style="width:50%">From (credited)</th><th style="width:50%">To (debited)</th></tr></thead>` +
-    `<tbody><tr><td>${acName(crRow)}</td><td>${acName(drRow)}</td></tr></tbody></table>` +
-    `<div class="lower"><div class="hsn"><div style="border:1px solid #94a3b8;border-radius:4px;padding:6px 8px;font-size:11px">` +
-    `<b>Transfer:</b> ${acName(crRow)} &rarr; ${acName(drRow)}` +
-    `${narration ? `<br/><b>Narration:</b> ${esc(narration)}` : ''}</div></div>` +
-    `<div class="tot"><table><tr class="grand"><td>Amount</td><td class="r">&#8377; ${money(amount)}</td></tr></table></div></div>` +
+    `<table class="items"><thead><tr><th>Sr</th><th style="width:36%">Account</th><th>Description</th><th class="r">Dr</th><th class="r">Cr</th></tr></thead>` +
+    `<tbody>${lineRows}</tbody>` +
+    `<tfoot><tr><td class="c" colspan="3">Total</td><td class="r">${money(total('DR'))}</td><td class="r">${money(total('CR'))}</td></tr></tfoot></table>` +
     `<div class="words"><b>Amount in words:</b> ${esc(rupeesInWords(amount))} only.</div>`;
 
   const meta: DocMeta[] = [

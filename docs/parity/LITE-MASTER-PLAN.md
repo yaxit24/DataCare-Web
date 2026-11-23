@@ -467,7 +467,7 @@ at the repair lock; add one that exists only in test builds.
 | WP-28 | Purchase | The 95-column hallmark receive branch, lossless reopen, family-filtered books | P1 | L | PR (N244/G256): frozen cases in `orchestration/work/WP-28/cases.md`, 2 blocked; 88 cases: 17 pass at database/unit level (lossless reopen of every tenant row for an earlier-month hallmark voucher with typed amount, fine and stones; TAG PURCHASE ids 2-4, weights, tag band and BAR_DETL rules; HM_AMT half to even; HM tax code with no charge; server family refusal; /context/books?family=), 4 partly, 2 blocked, 3 N/A, the rest executable but not run (browser module extended, not run locally); full API suite with database 4134/4134 after the kernel fix |
 | WP-29 | Purchase Rtn | G95 (HSN tax on the print), G96 (grid Enter), 2 blocked | P2 | M | PR open (N245/G257): 33 cases, 1 blocked (T15, N166) |
 | WP-30 | Wh Sales | Hand-typed item-detail rows for loose items, SL_IDTL on the print, fine kasar, Rojmel alignment | P2 | M | 27/27 |
-| WP-31 | Contra Entry | Multi-line grid, lifecycle, list, print, account roles (G37) | P2 | M | 25/25 |
+| WP-31 | Contra Entry | Multi-line grid, lifecycle, list, print, account roles (G37) | P2 | M | 25/25; N246/G258: desktop grid, versioned lifecycle, F1 list, full print (2 blocked: balance label, ContraBill layout) |
 | WP-32 | Tag Opening, Only Tag Entry | 5 blocked cases, tag label print, G217 karigar block sources, COL_MAST grid | P2 | M | 14/19 |
 | WP-33 | Daily Rate | Location-00 session in the harness (T15), the per-location copy, MDI rate labels | P2 | S | 15/16 |
 | WP-34 | Tag Print | PRINT_MAST label-file choice (QrPrint10, BarPrint10, BarPrint13, GhatTagPrnt), SubTagPrint sub-report | P3 | M | 18/18 |

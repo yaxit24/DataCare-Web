@@ -8167,6 +8167,37 @@
         "orchestration/work/WP-29/cases.md"
       ],
       "statusNote": "IMPLEMENTED, not accepted. Decisions (architect, 2026-11-23, owner may override): D1 the Purchase Return print guards the print right (the sales print keeps view until a cross-family decision); D2 line TAX_PRC 0 as TR_KR_ISU.cs:5206, no data migration (no reader uses the line column); D3 Fine/Amount stay computed cells (layout residual N77); D4 config.setting-variant stays blocked on N166; D5 edit and delete carry the version token like purchases. DB: purchaseReturn* and transaction.integrity files pass (26 tests), full API suite 4126 tests passed after the token was added to two callers. Browser cases print.hsn-tax-intra, print.hsn-tax-inter and keyboard.enter-walk were written without a local browser stack and run in CI. Still open: the UAE variant, Fine/Amount override cells, G174 fixture."
+    },
+    {
+      "id": "N246",
+      "status": "implemented-unverified",
+      "action": "Contra Entry is the desktop TR_CONTRA voucher: row 1 positional with its own side and every later row the opposite (TR_CONTRA.cs:1538, :1630), the mirror record carries row 1's description (:2868), the empty or thin grid, unequal totals, employee, company type B, year and lock date are refused in the desktop order, REMARK_DATA is written and deleted (Ac_Tax.cs:686; :2963-2968), INOUT_TYPE is the book's flag (:2774), the F1 list is one line per voucher, account and description (:3144), and the printed voucher lists every leg. Web additions for a hosted service: all legs or none in one transaction, the voucher version token on edit and delete, the bank clearing marks follow their leg, an unchanged reopen and save keeps every stored column, and accounts must exist in the company.",
+      "parentLabels": "P2; L1; T01-T18; WP-31",
+      "startAfter": [
+        "N232"
+      ],
+      "requiredProof": "contraGrid unit tests; contraResiduals.routes.db.test.ts through the real routes and the account ledger, cash book, bank reconciliation list, day book and Rojmel readers; the contraEntry browser module with the new cases (not run locally; CI runs it).",
+      "gapIds": "G258",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "orchestration/work/WP-31/study.md",
+        "orchestration/work/WP-31/cases.md",
+        "web/apps/api/src/modules/finance/contra.ts",
+        "web/apps/api/src/modules/finance/contraClearing.ts",
+        "web/apps/api/src/modules/finance/contraList.ts",
+        "web/apps/api/src/modules/finance/contraVoucher.ts",
+        "web/apps/api/src/routes/contra.ts",
+        "web/apps/web/app/(app)/txn/contra/page.tsx",
+        "web/apps/api/test/contraGrid.test.ts",
+        "web/apps/api/test/contraResiduals.routes.db.test.ts",
+        "web/apps/api/test/contraDelete.db.test.ts",
+        "web/apps/web/test/features/modules/contraEntry.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. 74 cases written (71 executable, 2 blocked: the opening-balance label needs a balance-as-of-date API; the ContraBill.rpt layout and copy labels need a text export of the Crystal file; 1 N/A). Unit 12 and database 28 of 28 pass; the finance and contra DB suites (32 files, 359 tests) pass. The browser module changes are not run locally. Desktop match 0%: decisions D1-D16 in cases.md are architect decisions for the owner to confirm."
     }
   ],
   "amendments": [
