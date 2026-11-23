@@ -1,6 +1,12 @@
 'use client';
 import { useState } from 'react';
-import { get, post, ApiError } from '../../../../lib/api';
+import { get, post, put, ApiError } from '../../../../lib/api';
+import {
+  billNoForSave,
+  derivedCellsToClear,
+  editedLinePayload,
+  savedLineCells,
+} from '../../../../lib/saleReturnEdit';
 import { useBusinessScope, useRoundingPolicy } from '../../../../components/BusinessScope';
 import { companyFlag, companySetting, useCompanySettings } from '../../../../lib/companySettings';
 import { BookSelect } from '../../../../components/BookSelect';
@@ -64,6 +70,8 @@ interface Line {
   hallmarkId2Wt: string;
   hallmarkId3Wt: string;
   hallmarkId4Wt: string;
+  /** WP-27: the stored input of a reopened line; the grid's cells overlay it on save. */
+  saved?: Record<string, unknown>;
 }
 const extendedLineFields: Array<[keyof Line, string]> = [
   ['ghtWt', 'GhtWt'],
@@ -169,6 +177,17 @@ const blank = (): Line => ({
   hallmarkId3Wt: '',
   hallmarkId4Wt: '',
 });
+/** The keys the grid owns (WP-27 edit: everything else of a reopened line is carried from `saved`). */
+const GRID_KEYS = [
+  'itCode',
+  'tagNo',
+  'pcs',
+  'grossWt',
+  'netWt',
+  'touch',
+  'rate',
+  ...extendedLineFields.map(([key]) => key as string),
+];
 const n = (v: string) => Number(v || 0);
 const r2 = (x: number) => Math.round((x + 1e-9) * 100) / 100;
 
@@ -239,14 +258,38 @@ function LegacySaleReturnForm() {
     onEscape: () => {},
   });
   const [result, setResult] = useState<any>(null);
+  // TR_SALE_RTN.cs:2647 "Employee" (tEmpCode), stored as EMP_CODE (:12877).
+  const [empCode, setEmpCode] = useState('');
+  // WP-27: a saved return opened into this form is saved back as an edit (PUT with its version).
+  const [openVch, setOpenVch] = useState('');
+  const [editing, setEditing] = useState<{
+    vchNo: string;
+    version: string;
+    billNo?: string;
+  } | null>(null);
+  // TR_SALE_RTN.cs:2345 "Vch Date"; a reopened return keeps its stored date (:10104, :12607). Blank = today.
+  const [vchDate, setVchDate] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
 
+  // A changed weight or rate drops a reopened line's stored amount/fine so the server re-prices it (WP-27).
   const setLine = (i: number, k: keyof Line, v: string) =>
-    setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
+    setLines((ls) =>
+      ls.map((l, j) =>
+        j === i
+          ? {
+              ...l,
+              ...Object.fromEntries(derivedCellsToClear(k).map((key) => [key, ''])),
+              [k]: v,
+            }
+          : l,
+      ),
+    );
 
   // Import-from-bill: pull the original sale's customer + items so the return is a click away.
-  async function importBill() {
+  // `remaining` is the desktop's single-item picker (TR_SALE_RTN.cs:3882): the lines not yet returned. The whole-bill
+  // Import is refused once the bill has a return (:16540), and its message points the operator here.
+  async function importBill(remaining = false) {
     if (!origBook || !billNo.trim()) {
       setErr('select the original sale book and enter its bill no first');
       return;
@@ -254,7 +297,7 @@ function LegacySaleReturnForm() {
     setErr('');
     try {
       const d: any = await get(
-        `/sales-returns/import?vchNo=${encodeURIComponent(billNo.trim())}&coBook=${encodeURIComponent(origBook)}`,
+        `/sales-returns/import?vchNo=${encodeURIComponent(billNo.trim())}&coBook=${encodeURIComponent(origBook)}${remaining ? '&remaining=1' : ''}`,
       );
       setAcCode(d.acCode || '');
       setAcName(d.acName || '');
@@ -276,6 +319,52 @@ function LegacySaleReturnForm() {
         e instanceof ApiError
           ? e.body?.message || e.body?.error || 'import failed'
           : 'import failed',
+      );
+    }
+  }
+
+  async function openSaved() {
+    const vch = openVch.trim();
+    if (!coBook || !vch) return;
+    setErr('');
+    setResult(null);
+    try {
+      const d: any = await get(
+        `/sales-returns/${encodeURIComponent(vch)}?coBook=${encodeURIComponent(coBook)}&coYear=${encodeURIComponent(coYear)}`,
+      );
+      setAcCode(d.acCode || '');
+      setAcName(d.acName || '');
+      setEmpCode(d.empCode || '');
+      setVchDate(d.vchDate || '');
+      setBillNo(d.origVchNo || '');
+      // A free-standing return has no original book; keep the selector's own choice (it is a required select).
+      if (d.origBook) setOrigBook(d.origBook);
+      setTaxRatePct(String(d.taxRatePct ?? 3));
+      setInterState(!!d.interState);
+      setDiscountAmount(d.discountAmount ? String(d.discountAmount) : '');
+      setTender({
+        cashAmt: d.cashAmt || '',
+        chequeAmt: d.chequeAmt || '',
+        cardAmt: d.cardAmt || '',
+        upiAmt: d.upiAmt || '',
+        kasar: d.kasar || '',
+        bankAc: d.bankAc || '',
+      });
+      const ls: Line[] = (d.lines || []).map((saved: Record<string, unknown>) => ({
+        ...blank(),
+        ...savedLineCells(saved, GRID_KEYS),
+        saved,
+      }));
+      setLines(ls.length ? ls : [blank()]);
+      setEditing({
+        vchNo: String(d.voucherNo),
+        version: String(d.version),
+        billNo: d.billNo,
+      });
+    } catch (e) {
+      setEditing(null);
+      setErr(
+        e instanceof ApiError ? e.body?.message || e.body?.error || 'open failed' : 'open failed',
       );
     }
   }
@@ -306,8 +395,10 @@ function LegacySaleReturnForm() {
         coBook,
         coYear,
         acCode,
+        empCode: empCode.trim() || undefined,
         acName: acName || undefined,
-        billNo: billNo || undefined,
+        billNo: billNoForSave(editing?.billNo, billNo),
+        vchDate: vchDate || undefined,
         origVchNo: billNo || undefined,
         origBook: billNo ? origBook || undefined : undefined,
         taxRatePct: Number(taxRatePct),
@@ -323,28 +414,42 @@ function LegacySaleReturnForm() {
         kasarAc: tender.kasarAc || undefined,
         lines: lines
           .filter((l) => l.itCode && (l.netWt || l.rate))
-          .map((l) => ({
-            itCode: l.itCode,
-            tagNo: l.tagNo || undefined,
-            pcs: n(l.pcs),
-            grossWt: n(l.grossWt),
-            netWt: n(l.netWt),
-            touch: n(l.touch),
-            rate: n(l.rate),
-            ...(l.making ? { labourType: 'per_gram', labourRate: n(l.making) } : {}),
-            // P7: writer-verified extended columns; a blank cell is OMITTED, never sent as 0.
-            ...Object.fromEntries(
-              extendedLineFields
-                .map(([key]) => [
-                  key,
-                  String((l as unknown as Record<string, unknown>)[key] ?? '').trim(),
-                ])
-                .filter(([, v]) => v !== '')
-                .map(([key, v]) => [key, NUMERIC_EXTENDED.has(key as string) ? Number(v) : v]),
+          .map((l) =>
+            editedLinePayload(
+              l.saved,
+              {
+                itCode: l.itCode,
+                tagNo: l.tagNo || undefined,
+                pcs: n(l.pcs),
+                grossWt: n(l.grossWt),
+                netWt: n(l.netWt),
+                touch: n(l.touch),
+                rate: n(l.rate),
+                ...(l.making ? { labourType: 'per_gram', labourRate: n(l.making) } : {}),
+                // P7: writer-verified extended columns; a blank cell is OMITTED, never sent as 0.
+                ...Object.fromEntries(
+                  extendedLineFields
+                    .map(([key]) => [
+                      key,
+                      String((l as unknown as Record<string, unknown>)[key] ?? '').trim(),
+                    ])
+                    .filter(([, v]) => v !== '')
+                    .map(([key, v]) => [key, NUMERIC_EXTENDED.has(key as string) ? Number(v) : v]),
+                ),
+              },
+              GRID_KEYS,
             ),
-          })),
+          ),
       };
-      setResult(await post('/sales-returns', body));
+      setResult(
+        editing
+          ? await put(`/sales-returns/${encodeURIComponent(editing.vchNo)}`, {
+              ...body,
+              expectedVersion: editing.version,
+            })
+          : await post('/sales-returns', body),
+      );
+      setEditing(null);
     } catch (e) {
       setErr(e instanceof ApiError ? e.body?.message || e.body?.error || e.message : 'failed');
     } finally {
@@ -355,6 +460,7 @@ function LegacySaleReturnForm() {
   return (
     <div>
       <form onSubmit={submit}>
+        {editing && <div className="msg">Editing return #{Number(editing.vchNo)}</div>}
         <div className="panel">
           <div className="row">
             <div className="field">
@@ -370,6 +476,38 @@ function LegacySaleReturnForm() {
             <div className="field">
               <label>Year</label>
               <input value={coYear} readOnly />
+            </div>
+            <div className="field">
+              <label>Open Vch No</label>
+              <div style={{ display: 'flex', gap: 4, minWidth: 0 }}>
+                <input
+                  value={openVch}
+                  onChange={(e) => setOpenVch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      void openSaved();
+                    }
+                  }}
+                  style={{ flex: 1, minWidth: 0 }}
+                />
+                <button
+                  type="button"
+                  className="ghost"
+                  onClick={openSaved}
+                  style={{ flex: 'none' }}
+                >
+                  Open
+                </button>
+              </div>
+            </div>
+            <div className="field">
+              <label>Vch Date</label>
+              <input type="date" value={vchDate} onChange={(e) => setVchDate(e.target.value)} />
+            </div>
+            <div className="field">
+              <label>Employee</label>
+              <input value={empCode} onChange={(e) => setEmpCode(e.target.value)} />
             </div>
             <div className="field">
               <label>Party (AC_CODE)</label>
@@ -392,7 +530,8 @@ function LegacySaleReturnForm() {
               <label>Orig Book</label>
               <BookSelect value={origBook} onChange={setOrigBook} mainBooks={['SALES']} />
             </div>
-            <div className="field">
+            {/* Two buttons (Import, Import remaining) need room beside the bill number. */}
+            <div className="field" style={{ minWidth: 280 }}>
               <label>Orig Bill No</label>
               {/* The input shrinks so Import stays inside this field; at its default width it spilled
                   under the next field (Tax %), which then took the click (G192). */}
@@ -405,10 +544,20 @@ function LegacySaleReturnForm() {
                 <button
                   type="button"
                   className="ghost"
-                  onClick={importBill}
+                  onClick={() => importBill()}
                   style={{ flex: 'none' }}
                 >
                   Import
+                </button>
+                <button
+                  type="button"
+                  className="ghost"
+                  onClick={() => importBill(true)}
+                  title="Lines already returned are not offered. As on the desktop picker, once one loose line of this bill is returned its other loose lines are not offered either."
+
+                  style={{ flex: 'none' }}
+                >
+                  Import remaining
                 </button>
               </div>
             </div>

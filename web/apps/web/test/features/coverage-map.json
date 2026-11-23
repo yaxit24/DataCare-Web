@@ -5,6 +5,11 @@
       "covers": [
         "web/apps/web/app/(app)/txn/sales/page.tsx",
         "web/apps/api/src/modules/sales/sales.ts",
+        "web/apps/api/src/modules/sales/saleRead.ts",
+        "web/apps/api/src/modules/sales/saleResiduals.ts",
+        "web/apps/api/src/modules/sales/salePrintChoice.ts",
+        "web/apps/web/components/SaleResidualPanel.tsx",
+        "web/apps/web/lib/saleResidual.ts",
         "web/packages/core/src/saleAmount.ts",
         "web/packages/core/src/calc.ts",
         "web/packages/core/src/roundingPolicy.ts",
@@ -23,6 +28,13 @@
       "covers": [
         "web/apps/api/src/modules/reports/rpAll/",
         "web/apps/api/src/routes/rpAllReport.ts"
+      ]
+    },
+    "stockReport": {
+      "covers": [
+        "web/apps/web/app/(app)/reports/stock-report/",
+        "web/apps/api/src/modules/reports/stockReport/",
+        "web/apps/api/src/routes/stockReport.ts"
       ]
     },
     "purchaseReport": {
@@ -78,7 +90,11 @@
       "covers": [
         "web/apps/web/app/(app)/txn/sale-return/page.tsx",
         "web/apps/web/lib/salesReturnCalculation.ts",
+        "web/apps/web/lib/saleReturnEdit.ts",
         "web/apps/api/src/modules/sales/salesReturn.ts",
+        "web/apps/api/src/modules/sales/saleReturnSaveChecks.ts",
+        "web/apps/api/src/modules/sales/saleReturnReopen.ts",
+        "web/apps/api/src/routes/saleReturnVoucher.ts",
         "web/packages/core/src/saleAmount.ts"
       ]
     },
@@ -230,6 +246,17 @@
         "web/apps/web/app/(app)/masters/groups/page.tsx",
         "web/apps/api/src/modules/masters/groupMaster.ts",
         "web/apps/api/src/routes/groupMaster.ts"
+      ]
+    },
+    "books": {
+      "covers": [
+        "web/apps/web/app/(app)/masters/books/page.tsx",
+        "web/apps/web/app/(app)/masters/books/bookScreen.ts",
+        "web/apps/web/components/BookSlotGrid.tsx",
+        "web/apps/api/src/modules/masters/booksMaster.ts",
+        "web/apps/api/src/modules/masters/bookTemplates.ts",
+        "web/apps/api/src/routes/booksMaster.ts",
+        "web/apps/api/src/modules/ops/seedCompany.ts"
       ]
     },
     "productMaster": {

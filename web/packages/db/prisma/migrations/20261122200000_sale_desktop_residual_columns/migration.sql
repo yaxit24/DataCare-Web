@@ -1,0 +1,13 @@
+-- WP-26 (N243, G255): Sales Invoice lossless reopen. Desktop TR_SALE writes these columns and reads them back on
+-- reopen (TR_SALE.cs:15264-15267 MEMB_COM_AC_CODE, AC_MEMB_COM_PRC, AC_MEMB_COM_VAL, WHOUT_COMM_BILL; :15333-15339
+-- RE_TRFR; :15665 SL_PR_DETL.PR_COST, read at :14365, :14404, :14412, :14724). The web schema lacked them, so a
+-- desktop-saved voucher lost them on an unchanged save. Nullable, no default: existing rows keep NULL.
+ALTER TABLE "SL_DATA"
+  ADD COLUMN IF NOT EXISTS "MEMB_COM_AC_CODE" VARCHAR(10),
+  ADD COLUMN IF NOT EXISTS "AC_MEMB_COM_PRC" DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS "AC_MEMB_COM_VAL" DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS "WHOUT_COMM_BILL" VARCHAR(1),
+  ADD COLUMN IF NOT EXISTS "RE_TRFR" VARCHAR(1);
+
+ALTER TABLE "SL_PR_DETL"
+  ADD COLUMN IF NOT EXISTS "PR_COST" DECIMAL(18, 2);
