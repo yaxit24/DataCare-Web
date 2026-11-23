@@ -50,6 +50,8 @@ const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string; gstType?: strin
   { code: 'OTHCHRG', name: 'OTHER CHARGES A/C', gr: '23' },
   { code: 'CARDCOMM', name: 'CARD / BANK COMMISSION A/C', gr: '22' },
   { code: 'FINEKSR', name: 'FINE KASAR A/C', gr: '31' },
+  // N240 (G252): the discount slot 5 of the purchase books (MS_UPDATE.cs:25022, :30221 template 00076 DISCOUNT A/C).
+  { code: 'DISCOUNT', name: 'DISCOUNT A/C', gr: '22' },
   // Stock In/Out (TR_INOUT) posts the signed metal rows against the branch account the location carries
   // (`MS_LOCT.cs:3458` binds `LOCT_MAST.AC_CODE`; `stockInout.ts:344-355` reads it). A current-asset
   // stock-in-hand control holds the branch's inter-location metal (N91/G105).
@@ -60,12 +62,14 @@ const SYSTEM_ACCOUNTS: { code: string; name: string; gr: string; gstType?: strin
  * BOOK_DETL of a purchase-family book (PURCHASE, TAG PURCHASE): 1 purchase, 2 cash, 3 round-off and 4 labour and
  * other charges. With CO_SET.PURC_WITH_LBR = 'N' the desktop posts a line's labour and other charges to slot 4
  * (Ac_Ledr.cs:419-421); without it the writer's fail-closed slot lookup refused every such purchase (G184).
+ * Slot 5 is the template's discount account (MS_UPDATE.cs:25022 PURCHASE, :30221 TAG PURCHASE; N240, G252).
  */
 const PURCHASE_BOOK_SLOTS: Array<{ srNo: number; acCode: string }> = [
   { srNo: 1, acCode: 'PURCHASE' },
   { srNo: 2, acCode: 'CASH' },
   { srNo: 3, acCode: 'ROUNDOFF' },
   { srNo: 4, acCode: 'LBREXP' },
+  { srNo: 5, acCode: 'DISCOUNT' },
 ];
 
 /**
@@ -156,7 +160,7 @@ const SALE_BOOK_SLOTS: Array<{ srNo: number; acCode: string }> = [
  * TAG PURCHASE, `:7897` FINE JV, `:7933` OTH INC and OTH EXP). Reports and numbering route by it; the Purchase
  * Return Register lists nothing for a book without it. Only families whose web writer uses the same header table.
  */
-const DESKTOP_BOOK_TABLES: Record<string, { table: string; detail: string }> = {
+export const DESKTOP_BOOK_TABLES: Record<string, { table: string; detail: string }> = {
   SALES: { table: 'SL_DATA', detail: 'SL_DETL' },
   'SALES RETURNE': { table: 'SL_DATA', detail: 'SL_DETL' },
   PURCHASE: { table: 'PR_DATA', detail: 'PR_DETL' },
@@ -215,7 +219,12 @@ const BOOKS: {
     inout: 'I',
     acCode: 'INTINC',
     shortName: 'OTINC',
-    slots: [{ srNo: 1, acCode: 'INTINC' }],
+    // Slots 2 cash and 3 kasar of the OTH INC template (MS_UPDATE.cs:22884, :22892; N240, G252).
+    slots: [
+      { srNo: 1, acCode: 'INTINC' },
+      { srNo: 2, acCode: 'CASH' },
+      { srNo: 3, acCode: 'KASAR' },
+    ],
   },
   {
     book: 'OEX',
@@ -224,7 +233,12 @@ const BOOKS: {
     inout: 'O',
     acCode: 'OTHCHRG',
     shortName: 'OTEXP',
-    slots: [{ srNo: 1, acCode: 'OTHCHRG' }],
+    // Slots 2 cash and 3 kasar of the OTH EXP template (MS_UPDATE.cs:22860, :22868; N240, G252).
+    slots: [
+      { srNo: 1, acCode: 'OTHCHRG' },
+      { srNo: 2, acCode: 'CASH' },
+      { srNo: 3, acCode: 'KASAR' },
+    ],
   },
   { book: 'SRT', name: 'Sales Return', workflow: 'SALES RETURN', acCode: 'SALES' },
   { book: 'PRT', name: 'Purchase Return', workflow: 'PURCHASE RETURN', acCode: 'PURCHASE' },
@@ -421,12 +435,19 @@ const BOOKS: {
     acCode: 'KASAR',
     shortName: 'TGSPL',
     table: 'LBR_DATA',
+    // N240 (G252): the TAG SPLIT template (MS_UPDATE.cs:32078-32110): 1 cash, 2 kasar javk, 3 kasar avak, 4 labour
+    // income, 5 labour expense, 6 sales gold, 7 purchase gold, 8 sales silver, 9 purchase silver. The earlier seed
+    // swapped 6/7 and gave the silver slots 8/9 the gold accounts.
     slots: [
+      { srNo: 1, acCode: 'CASH' },
+      { srNo: 2, acCode: 'KASAR' },
+      { srNo: 3, acCode: 'KASAR' },
+      { srNo: 4, acCode: 'LBRINC' },
       { srNo: 5, acCode: 'LBREXP' },
-      { srNo: 6, acCode: 'PURCHASE' },
-      { srNo: 7, acCode: 'SALES' },
-      { srNo: 8, acCode: 'PURCHASE' },
-      { srNo: 9, acCode: 'SALES' },
+      { srNo: 6, acCode: 'SALES' },
+      { srNo: 7, acCode: 'PURCHASE' },
+      { srNo: 8, acCode: 'SLVSALE' },
+      { srNo: 9, acCode: 'SLVPURC' },
     ],
   },
   { book: 'ILT', name: 'Item Lot', mainBook: 'ITEM LOT', inout: 'I', acCode: 'PURCHASE' },
@@ -517,9 +538,15 @@ const BOOKS: {
     // Desktop Ac_Ledr.cs:1203 credits the labour amount to BOOK_DETL SR_NO 6 and the metal to
     // SR_NO 1. We provision both so the labour writer resolves the income account from the book
     // (G115 / P0-04) instead of a literal.
+    // Slots 8 to 11 of the LABOUR WORK template (MS_UPDATE.cs:23749-23761; N240, G252): sales silver, purchase
+    // silver, sales old gold and sales old silver.
     slots: [
       { srNo: 1, acCode: 'LBRINC' },
       { srNo: 6, acCode: 'LBRINC' },
+      { srNo: 8, acCode: 'SLVSALE' },
+      { srNo: 9, acCode: 'SLVPURC' },
+      { srNo: 10, acCode: 'OG' },
+      { srNo: 11, acCode: 'OS' },
     ],
   },
   {
@@ -774,8 +801,8 @@ export async function seedCompany(
       ) {
         await tx.$executeRawUnsafe(
           `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","BOOK_NAME","BOOK_SNAME",
-             "MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","BOOK_TBL_DETL")
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'Y',$9,$10)`,
+             "MAIN_BOOK","BOOK_INOUT","CUR_USE","BOOK_TBL_NAME","BOOK_TBL_DETL","DATA_TYPE")
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'Y',$9,$10,'A')`,
           tenantId,
           coCode,
           lcCode,
@@ -796,11 +823,14 @@ export async function seedCompany(
           { srNo: 2, acCode: 'CASH' },
           { srNo: 3, acCode: 'ROUNDOFF' },
         ];
+        // N240 (G252): Data Type 'A' and the account's name, as MS_BOOK's save writes them (MS_BOOK.cs:2663, :2667).
         for (const leg of legs) {
           await tx.$executeRawUnsafe(
             `INSERT INTO "BOOK_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","SR_NO","BOOK_NAME",
                "BOOK_SNAME","MAIN_BOOK","BOOK_INOUT","AC_CODE","AC_NAME","DATA_TYPE")
-             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'L')`,
+             VALUES ($1::text,$2::text,$3,$4,$5,$6,$7,$8,$9,$10::text,
+                     coalesce((SELECT "AC_NAME" FROM "AC_MAST" WHERE tenant_id=$1::text AND "CO_CODE"=$2::text
+                                 AND "AC_CODE"=$10::text ORDER BY row_id LIMIT 1),''),'A')`,
             tenantId,
             coCode,
             lcCode,
@@ -810,7 +840,6 @@ export async function seedCompany(
             b.shortName ?? b.book,
             mainBook,
             inout,
-            leg.acCode,
             leg.acCode,
           );
         }

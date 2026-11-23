@@ -56,6 +56,13 @@ export {
   valueOldGoldLine,
 } from './oldGold.js';
 export type { OldGoldLineInput, OldGoldRateType, OldGoldValuationInput } from './oldGold.js';
+export {
+  OLD_METAL_RATE_TYPE_MESSAGE,
+  oldMetalHeaderTotals,
+  oldMetalRateTypeError,
+  oldMetalTodayRates,
+  oldMetalTouchFromAmount,
+} from './oldMetalGrid.js';
 export { orderLabourAmount, orderLabourTransition, orderLabourReplay } from './orderLabour.js';
 export type {
   OrderLabourState,

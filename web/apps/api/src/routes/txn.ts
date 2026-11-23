@@ -1,3 +1,5 @@
+import { saleResidualInput } from '../modules/sales/saleResiduals.js';
+import { chooseSaleTemplate } from '../modules/sales/salePrintChoice.js';
 import { SessionReadSnapshotError } from '../modules/auth/sessionContextReadSnapshot.js';
 import { isTransactionTimeout, withTxBudget } from '../modules/shared/txBudget.js';
 import {
@@ -37,12 +39,6 @@ import {
   parityContainmentProblem,
   type ParityContainmentOperation,
 } from '@datacare/core/containment';
-import {
-  createSaleReturn,
-  deleteSaleReturn,
-  getSaleReturn,
-  saleForReturn,
-} from '../modules/sales/salesReturn.js';
 import {
   getSavedSaleReturnIncoming,
   listSavedSaleReturnIncoming,
@@ -237,6 +233,8 @@ import { registerTagPrintScreenRoutes } from './tagPrintScreen.js';
 import { registerVoucherNavigationRoutes } from './voucherNavigation.js';
 import { postContra, deleteContra, getContra, editContra } from '../modules/finance/contra.js';
 import { registerSaleVoucherRoutes } from './saleVoucher.js';
+import { registerSaleReturnVoucherRoutes } from './saleReturnVoucher.js';
+import { getSaleReturn } from '../modules/sales/salesReturn.js';
 import { registerPurchaseVoucherRoutes } from './purchaseVoucher.js';
 import { registerPartyOpeningRoutes } from './partyOpening.js';
 import { registerFineJvRoutes } from './fineJv.js';
@@ -680,6 +678,7 @@ import { dhrnLoanReport } from '../modules/reports/dhrnLoanReports.js';
 import { gstLauncherReport } from '../modules/reports/gstLauncherReport.js';
 import { registerGstReportRoutes } from './gstReport.js';
 import { registerRpAllReportRoutes } from './rpAllReport.js';
+import { registerStockReportRoutes } from './stockReport.js';
 import {
   approvalReport,
   bullionReport,
@@ -1398,6 +1397,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     issueBook: b.issueBook,
     description: b.description,
     ornamentIssued: b.ornamentIssued == null ? undefined : !!b.ornamentIssued,
+    ...saleResidualInput(b), // WP-26: UPI, credit-note and order rows, member commission
   });
   app.post('/sales', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
@@ -1409,19 +1409,31 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // G125 (Stage E): the retail Tax Invoice print (desktop SaleBillA4Gst.rpt). Every sale needs a
   // printable bill; builds the shared GST-bill HTML and renders it to PDF (or returns raw HTML).
   app.get('/sales/:vchNo/print', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
+    if (!guard(req, reply, 'print')) return; // TR_SALE.cs:16437-16439 print right
     const q = req.query as any;
     const copyLabel = standardDocumentCopy(q.copy, reply);
     if (copyLabel === null) return reply;
     const scope = resolvePrintScope(reply, readScope(req), (req.params as any).vchNo);
     if (!scope) return reply;
     await getSale(prisma, scope, scope.vchNo);
-    const data = await salesBillData(prisma, scope);
+    // WP-26 (D6): HUID box, then book 099, then the chosen PRINT_MAST file, each mapped to a web template.
+    const choice = chooseSaleTemplate({
+      huid: q.huid === '1' || q.huid === 'true',
+      coBook: scope.coBook,
+      file: q.file,
+    });
+    const data = await salesBillData(prisma, scope, { balances: choice.passBalances });
     if (!data) return reply.code(404).send({ error: 'sale-not-found' });
+    reply.header(
+      'X-Print-Template',
+      `${choice.template}; file=${choice.file}${choice.isDefault ? '; default' : ''}`,
+    );
     const html = salesBillHtml(data.header, data.lines, {
       company: data.company,
       party: data.party,
       copy: copyLabel,
+      title: choice.title,
+      balances: data.balances,
     });
     return sendVoucherDocument(reply, html, { format: q.format, filename: `sale-${scope.vchNo}` });
   });
@@ -1809,63 +1821,8 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       };
     });
   });
-  app.post('/sales-returns', auth, async (req, reply) => {
-    if (!guard(req, reply, 'create')) return;
-    const b = body(req);
-    return run(reply, 201, () =>
-      createSaleReturn(
-        prisma,
-        {
-          scope: scopeOf(req),
-          acCode: b.acCode,
-          acName: b.acName,
-          billNo: b.billNo,
-          origVchNo: b.origVchNo,
-          origBook: b.origBook,
-          vchDate: b.vchDate,
-          discountAmount: b.discountAmount,
-          taxRatePct: b.taxRatePct,
-          taxCode: b.taxCode,
-          interState: !!b.interState,
-          cashAmt: b.cashAmt != null ? Number(b.cashAmt) : undefined,
-          chequeAmt: b.chequeAmt != null ? Number(b.chequeAmt) : undefined,
-          cardAmt: b.cardAmt != null ? Number(b.cardAmt) : undefined,
-          upiAmt: b.upiAmt != null ? Number(b.upiAmt) : undefined,
-          kasar: b.kasar != null ? Number(b.kasar) : undefined,
-          cashAc: b.cashAc,
-          bankAc: b.bankAc,
-          kasarAc: b.kasarAc,
-          mainUser: sess(req).sub, // N183 (G194): TR_SALE_RTN.cs:9966 stores MCo_User
-        },
-        b.lines ?? [],
-      ),
-    );
-  });
-  // G05: the original SALE book is the request's validated book. The page sends it as `coBook`; this
-  // route used to ignore that and read `qs.book ?? 'SAL'`, so every import came from a book named SAL.
-  app.get('/sales-returns/import', auth, async (req, reply) => {
-    const qs = (req.query as any) || {};
-    const scope = scopeOf(req);
-    if (!scope.coBook) {
-      return reply.code(400).send({
-        error: 'SaleValidationError',
-        message: 'Select the book of the original sale before importing it.',
-      });
-    }
-    return run(reply, 200, () =>
-      saleForReturn(prisma, { scope, origVchNo: qs.vchNo, origBook: scope.coBook }),
-    );
-  });
-  app.delete('/sales-returns/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'delete')) return;
-    return run(reply, 200, () =>
-      deleteSaleReturn(prisma, {
-        scope: scopeOf(req),
-        vchNo: (req.params as any).vchNo,
-        deleteUser: sess(req).sub,
-      }),
-    );
-  });
+  // POST/import/GET/PUT/DELETE /sales-returns live in routes/saleReturnVoucher.ts (WP-27 adds the edit).
+  registerSaleReturnVoucherRoutes(app, extraRouteHelpers);
 
   // ---- Sales order ----
   // Retained authenticated request context, never body/query authority or a later cookie.
@@ -4482,6 +4439,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerAccountLedgerRoutes(app, { prisma, auth, guard, readScope, sendReportPdf });
   registerRpAllReportRoutes(app, { prisma, auth, guard, readScope }); // WP-11 Sales Report (RP_ALL)
   registerTagStockRoutes(app, { prisma, auth, guard, scopeOf });
+  registerStockReportRoutes(app, { prisma, auth, guard, readScope }); // WP-16 Stock Report (RP_STOCK)
 
   // Screens for five reports registered only in REPORT_BUILDERS (exports worked, screens 404'd —
   // PARITY-EVALUATION-2026-09-28 D3). Each calls the export's own builder with its own inputs (so the
@@ -7304,10 +7262,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   app.get('/labour-invoice/:vchNo', auth, async (req, reply) => {
     if (!guard(req, reply, 'view')) return;
     return run(reply, 200, () => getLabourInvoice(prisma, scopeOf(req), (req.params as any).vchNo));
-  });
-  app.get('/sales-returns/:vchNo', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    return run(reply, 200, () => getSaleReturn(prisma, scopeOf(req), (req.params as any).vchNo));
   });
   // G127 (Stage E): the sales-return Credit Note print (desktop SaleRtnBillA4Gst.rpt). Reads SL_DATA +
   // SL_DETL_RTN via saleReturnBill and renders the shared GST-bill chrome, marked as a credit note.
