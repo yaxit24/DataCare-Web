@@ -195,4 +195,9 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261122100000_legacy_year_end_openings_carried',
     checksum: '705c320177c899478749ca679fb5233e6dd265f26c46a53cc65bfc3f045b5b80',
   },
+  {
+    // WP-33 Daily Rate: per-company entitlement for the location-00 copy (MS_RATE.cs:1937), operator-provisioned.
+    name: '20261123090000_daily_rate_copy_entitlement',
+    checksum: '003ab85656b77e4b3a64220ab0c6a2e30704dd849d0d1f2df8578042e4e6662d',
+  },
 ];

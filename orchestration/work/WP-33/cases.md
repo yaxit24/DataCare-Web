@@ -1,489 +1,393 @@
-# WP-33 cases: Master → Daily Rate residuals — frozen T01–T18 case list
+# WP-33 frozen residual cases
 
-This is the frozen case list for WP-33, derived from `orchestration/work/WP-33/study.md` and the eighteen case
-kinds in `docs/master-parity-plan-2026-09-29/04-verification-playbook.md` §3. It covers three residuals: a real,
-authorized location-00 browser session; the conditional per-location copy; and the main-window group rate labels.
-It changes no code. Case ids from `web/apps/web/test/features/modules/dailyRate.mjs` are reused where the behaviour
-is the same; those ids are marked `[reuse]`.
+This is the frozen contract for the study of Master → Daily Rate. It is test design, not execution evidence or desktop acceptance. The repository menu is Other → Daily Rate; dispatch opens MS_RATE: MDI_FORM.cs:8566 {{MS_RATE mS_RATE = new MS_RATE();}}
 
-Every `Expected` value is the desktop rule with its citation copied verbatim from the study. The study's 342
-citations were checked against `unified/src/csharp/DataCareNext/` before this list was written; every quote below
-is one of those verified quotes.
+The current playbook T01–T18 meanings govern this document. Matching dailyRate.mjs IDs are retained even where that module uses older group numbers: create.desktop-rows moves T05→T07, reopen.f1-list T07→T04, and refusal.negative-rate-no-write T04→T06. settings.pending keeps its ID but is now executable; missing implementation or fixtures inside this menu are work to perform, not external blockers. “Executable” means a specified test can be implemented and run, not that it passes today. All browser mutations require before/after database evidence in addition to UI evidence. Use only synthetic data in the isolated test database.
 
-## Decisions on the study's open questions
+## Architect decisions
 
-The owner's standing rule is "the desktop first; the web adds only what a hosted multi-user service needs to be
-safe and correct". Each open question is decided below. Each decision is recorded exactly as
-**architect, 2026-11-23, owner may override**. A case whose expected value still cannot be settled by source or by
-one of these decisions is written as `blocked` with the exact question.
+Each decision is **architect, 2026-11-23, owner may override**, under the packet's standing desktop-first and hosted-safety rule.
 
-1. **Hosted equivalent of the registration-gated copy eligibility.** Decision: keep the desktop behaviour (copy
-   only from a location-00 source, enumerating non-00 company locations) but replace the hardcoded serial-number
-   gate with an explicit, authorized per-company configuration flag controlled by an operator with company scope.
-   No fan-out for other 00 sessions by default; no hidden customer backdoor. This is the hosted-safe form of
-   `MS_RATE.cs:1937 {{if (Operators.CompareString(DC_Main.SSRegSrNo, "VK142NEVK", false) == 0 && Operators.CompareString(DC_Main.MLc_code, "00", false) == 0)}}`.
-   **architect, 2026-11-23, owner may override**. Cases: `daily-rate.copy.gate-false-no-fanout`,
-   `daily-rate.settings.copy-eligibility-setting`, `daily-rate.scope.copy-authorized-company-only`.
-2. **Copy-side date collisions across CO_YEAR.** Decision: the copy replacement key is company + location + full
-   VCH_DATE + the source CO_YEAR; a destination row carrying a different CO_YEAR is neither deleted nor
-   overwritten. This keeps all tenant/company/location bounds and avoids silently broadening the delete. The
-   desktop reads company/location/date and copies CO_YEAR as data
-   (`MS_RATE.cs:1945 {{',CO_YEAR,VCH_DATE,SR_NO,GR_CODE,FINE_GL_RATE,FINE_SL_RATE, }}`), which is not safe on its own.
-   **architect, 2026-11-23, owner may override**. Case: `daily-rate.copy.cross-year-collision`.
-3. **Web placement of the main-window labels and stale-label treatment.** Decision: mount the scoped
-   current-system-date display projection on the web main-window equivalent, show only the first seven
-   RATE_DISPLAY=Y groups in SR_NO order with exact name + `"  -  "` + GR_RATE `"0.00"`, show `"ToDays Rate :"` in
-   the first slot when empty, and clear every surplus/obsolete slot on each refresh so no stale label remains.
-   This replaces the desktop's one-sided visibility weakness. Source establishes the labels and one-sided changes
-   (`MDI_FORM.cs:6920 {{Rate_1.Text = "Ac Group";}}`, `MS_RATE.cs:1967 {{((Control)MyProject.Forms.MDI_FORM.Rate_2).Visible = true;}}`)
-   but not a web design. **architect, 2026-11-23, owner may override**. Cases: `daily-rate.labels.*`.
-4. **MISSING `orchestration/bin/orch.mjs`.** Not a behaviour decision: the required checker is absent from this
-   worktree. Evidence uses an equivalent literal citation audit (parse every `File.cs:N {{text}}` and compare to
-   the cited source lines). No case blocked by this; it is a verification-tooling gap recorded in the report.
-5. **MISSING `.orch/index/DC_Main.md`.** Not needed for these residuals: all residual code is located in the
-   supplied MS_RATE/MDI_FORM indexes. The one behaviour it would settle — full shared date validation — is
-   explicitly outside WP-33 and is the subject of one blocked case (`daily-rate.lookup.invalid-date-validation`).
+- A1 — Copy remains restricted to the legacy eligible company entitlement, represented by explicit server-managed company configuration, default off. A privileged administrator may provision that entitlement; ordinary Daily Rate users cannot set it through requests. Do not enable it for every company or treat the registration literal as an authentication secret. Source location must still be 00. Enabling the entitlement authorizes the company-wide destination write; individual target login rights do not narrow the target set. Desktop gate: MS_RATE.cs:1937 {{if (Operators.CompareString(DC_Main.SSRegSrNo, "VK142NEVK", false) == 0 && Operators.CompareString(DC_Main.MLc_code, "00", false) == 0)}}
+- A2 — Preserve stored CO_YEAR in the copy projection. For ordinary dates with one year, copy replaces the destination day. Cross-year collision business resolution remains blocked: “When the same company/date exists under more than one CO_YEAR at source or destination, should copy replace all years, isolate the active year, or refuse the operation?” The source omits a year predicate, but cannot settle the hosted destructive-collision policy. Do not silently ship cross-year overwrite; retain the blocked case until the owner or responsible policy package chooses. Desktop projection: MS_RATE.cs:1945 {{',CO_YEAR,VCH_DATE,SR_NO,GR_CODE,FINE_GL_RATE,FINE_SL_RATE, }}
+- A3 — Mount today's group labels on the authenticated dashboard, the main-window equivalent. Keep the transaction ticker separate. Refresh on dashboard entry and after committed saves without waiting for the minute poll. Replace the entire visible label set; hide unused slots. After delete, invalidate the read projection too so users cannot mistake stale quotes for saved rates; this changes no persisted business value. Desktop placement and empty state: MDI_FORM.cs:6827 {{((Control)PanelImage).Controls.Add((Control)(object)Rate_1);}} MS_RATE.cs:1956 {{MyProject.Forms.MDI_FORM.Rate_1.Text = "ToDays Rate :";}}
+- A4 — Enforce server tenant/company/location scope and current rights. Source replacement, group updates and all destination replacements form one transaction. Serialize intersecting write sets in deterministic order, including local destination saves/deletes; allow complete serial last-writer results or explicit conflicts, never a mixed result. Retry without an intervening edit replaces the same business set. These are hosted safety rules, not claimed desktop transaction guarantees. Desktop write boundaries: MS_RATE.cs:1928 {{((DbDataAdapter)(object)DC_Main.Da).Update(RsDetl);}} MS_RATE.cs:1946 {{DC_Main.ExeQuteDc(DC_Main.RsQry);}}
+- A5 — Read company copy configuration at save inside the transaction; a setting changed before save governs that save. Use posted, validated grid values for group rates; do not secretly reprice from changed master defaults. Reject invalid references, non-finite/negative rates and unauthorized writes before any effects as hosted validation, not invented desktop messages. The actual value written by the desktop is: MS_RATE.cs:1920 {{dataRow["GR_RATE"] = Conversion.Val(MSG[DC_Main.i, 5]);}}
+- A6 — MISSING: orchestration/bin/orch.mjs. Verify every literal quotation against its cited source lines with a local audit, but report the dispatcher checker as not run. MISSING: .orch/index/DC_Main.md. Do not infer shared date-helper behaviour; full date validation remains outside this residual contract.
 
----
+## Common evidence and values
 
-## T01 Entry/defaults
+D = controlled system date 2026-11-23; H = 2026-11-22. Both use the configured fiscal year containing these dates. Use genuine authenticated company 01 sessions at locations 00, 01 and 02, with distinct login cache slots. Assert the server session scope before opening or saving; never simulate 00 by adding a location to the POST. Compare full affected-day row multisets, every GROUP_MAST column, and unrelated synthetic sentinels before/after. Before each case restore isolated fixtures; cases must not depend on execution order.
 
-### daily-rate.entry.rate-master-grid (T01 Entry/defaults) [reuse]
+Vector A uses gold 72000 and silver 85000. R18 is Gold 18K (touch 75, tax 0, purchase touch 76): TaxRate = Rate10gm = 75×72000/100 = 54000; PrRate = 76×72000/100 = 54720. R22 is Gold 22K (91.6, 3, 92): TaxRate = 91.6×72000/100 = 65952; Rate10gm = round(65952/103×100) = round(64031.067961…) = 64031; PrRate = 92×72000/100 = 66240. RSV is Silver 925 (92.5, 3, 90): TaxRate = round(92.5×85000/10000) = round(786.25) = 786; Rate10gm = round(786/103×100) = round(763.106796…) = 763; PrRate = 90×85000/10000 = 765. All displayed results use two decimals. Desktop formulas: MS_RATE.cs:2340 {{mSG[DC_Main.M, 5] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 3]) * Conversion.Val(nGoldRate.Text) / 100.0), "0.00");}} MS_RATE.cs:2341 {{mSG[DC_Main.M, 6] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 3]) * Conversion.Val(nGoldRate.Text) / 100.0), "0.00");}} MS_RATE.cs:2344 {{mSG[DC_Main.M, 5] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 6]) / (Conversion.Val(mSG[DC_Main.M, 4]) + 100.0) * 100.0, 0), "0.00");}} MS_RATE.cs:2346 {{mSG[DC_Main.M, 8] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 7]) * Conversion.Val(nGoldRate.Text) / 100.0), "0.00");}} MS_RATE.cs:2352 {{mSG[DC_Main.M, 6] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 3]) * Conversion.Val(nSilverRate.Text) / 10000.0), "0.00");}} MS_RATE.cs:2355 {{mSG[DC_Main.M, 5] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 6]) / (Conversion.Val(mSG[DC_Main.M, 4]) + 100.0) * 100.0, 0), "0.00");}} MS_RATE.cs:2357 {{mSG[DC_Main.M, 8] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 7]) * Conversion.Val(nSilverRate.Text) / 10000.0), "0.00");}}
+
+Vector B uses gold 73000, silver 86000: R18 [TaxRate, Rate10gm, PrRate] = [54750,54750,55480]; R22 = [66868,64920,67160], since 66868/103×100 = 64920.388349…; RSV = [796,773,774], since round(795.5) = 796 and round(796/103×100) = 773. These use the same cited formulas. Original group GR_RATE values are R18=111, R22=222, RSV=333. Other group attributes must remain equal to their fixture values.
+
+Projection P is the exact copy column list quoted below, with LC_CODE replaced by the destination. Compare every value, preserving NULL versus zero, numeric scale where the database supports it, and stored metadata. Do not substitute GR_TAX_RATE for GR_RATE or invent new ADD_USER/ADD_DATE values in copied columns. GR_NAME is not projected. Any hosted audit is separate from these business columns. MS_RATE.cs:1945 {{INSERT INTO RATE_MAST(CO_CODE,LC_CODE,CO_YEAR,VCH_DATE,SR_NO,GR_CODE,FINE_GL_RATE,FINE_SL_RATE,  GR_RATE,GR_TOUCH,GR_TYPE,EMP_CODE,CASH_AMT,MAIN_USER,ADD_USER,ADD_DATE,GR_PR_TOUCH,GR_PR_RATE,  FINE_GL_PR_RATE,FINE_SL_PR_RATE,DOLLAR_GL_RATE,DOLLAR_SL_RATE,AND_TRFR,GR_TAX_RATE,GR_TAX_PRC,OP_GL_RATE)}}
+
+### daily-rate.entry.rate-master-grid   (T01 Entry/defaults)
 Layer: browser
-Steps: 1. Open Other → Daily Rate through the menu. 2. Read the title, Vch Date, mask and grid column order. 3. Read the three rate groups' touch values.
-Expected: The caption is `MS_RATE.cs:1043 {{lblBook.Text = "Rate Master";}}`. The grid lists groups with nonzero touch ordered GR_TYPE then GR_NAME (`MS_RATE.cs:1781 {{AND GR_TOUCH <> 0 ORDER BY GR_TYPE,GR_NAME}}`), so groups R18, R22, RSV appear in that order with `Touch R22` = 91.6; Vch Date has mask `MS_RATE.cs:1182 {{mVchDate.Mask = "00/00/0000";}}` and tab 0 `MS_RATE.cs:1185 {{((Control)mVchDate).TabIndex = 0;}}`.
+Steps: 1. Sign in at 00 through the real selector. 2. Open the Daily Rate menu with a fresh D. 3. Capture scope, heading, date, focus and grid.
+Expected: Session location is 00; heading is “Rate Master”; date is D and focused. Header inputs are blank on clear. Rows are R18, R22, RSV in type/name order; zero-touch group Z00 is absent. Columns are Sr., GrCode, GrName, Touch, Tax%, Rate10gm, TaxRate, PrTouch, PrRate; GrType is hidden. (the desktop rule: MS_RATE.cs:1043 {{lblBook.Text = "Rate Master";}} MS_RATE.cs:1737 {{val.Text = "";}} MS_RATE.cs:1741 {{mVchDate.Text = Conversions.ToString(DC_Main.MsSysDate);}} MS_RATE.cs:1749 {{((Control)mVchDate).Focus();}} MS_RATE.cs:1781 {{AND GR_TOUCH <> 0 ORDER BY GR_TYPE,GR_NAME}} MS_RATE.cs:1402 {{mSG[9] = 0;}})
+Gap: 1. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
 Status: executable
 
-### daily-rate.entry.location-00-session (T01 Entry/defaults)
+### daily-rate.entry.shortcut-rights   (T01 Entry/defaults)
 Layer: browser
-Steps: 1. Using a distinct login cache slot, sign in as a user scoped to an authorized location-00 session (Gap 1). 2. Assert the established session location is `00` before opening the screen. 3. Open the screen and confirm location-derived defaults.
-Expected: Location comes from the session, not the request body: `MS_RATE.cs:1907 {{dataRow["LC_CODE"] = DC_Main.MLc_code;}}`. On CLEAR_DATA inputs are blank (`MS_RATE.cs:1737 {{val.Text = "";}}`), Vch Date is `MS_RATE.cs:1741 {{mVchDate.Text = Conversions.ToString(DC_Main.MsSysDate);}}` and focus is date `MS_RATE.cs:1749 {{((Control)mVchDate).Focus();}}`. Changing a POST body is not equivalent to this session state.
+Steps: 1. Open using Ctrl+F1 with view rights. 2. Repeat with no view rights.
+Expected: Authorized route opens Rate Master; refused route shows “You Have No Rights.....” and does not open an editable form. (the desktop rule: MDI_FORM.cs:14405 {{MS_RATE mS_RATE = new MS_RATE();}} MDI_FORM.cs:14395 {{AND FRM_VIEW = 'Y'}} MDI_FORM.cs:14400 {{Interaction.MsgBox((object)"You Have No Rights.....", (MsgBoxStyle)0, (object)null);}})
 Status: executable
 
-### daily-rate.entry.mdi-labels-initial (T01 Entry/defaults)
+### daily-rate.field.net-rate-route   (T02 Field route)
 Layer: browser
-Steps: 1. Seed today's RATE_MAST with RATE_DISPLAY=Y groups. 2. Open the main window. 3. Read Rate_1..Rate_7.
-Expected: Main-window load runs the same scoped query `MDI_FORM.cs:11416 {{AND B.RATE_DISPLAY = 'Y' ORDER BY A.SR_NO}}`; labels start hidden with placeholder `MDI_FORM.cs:6920 {{Rate_1.Text = "Ac Group";}}` and `MDI_FORM.cs:6922 {{((Control)Rate_1).Visible = false;}}`. Populated labels read `MDI_FORM.cs:11429 {{["GR_NAME"}}, (object)"  -  "), (object)Strings.Format(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[DC_Main.M]["GR_RATE"]), "0.00")].`
+Steps: 1. Price A at 00. 2. Change only R22 Rate10gm to 64032 and employee to synthetic E01. 3. Save, inspect request and all rows, reopen, view dashboard.
+Expected: R22 GR_RATE and group GR_RATE are 64032; GR_TAX_RATE remains 65952; EMP_CODE is E01. Label is exactly “Rate Gold 22K  -  64032.00”. No recomputation to 64031 occurs. (the desktop rule: MS_RATE.cs:1920 {{dataRow["GR_RATE"] = Conversion.Val(MSG[DC_Main.i, 5]);}} MS_RATE.cs:1921 {{dataRow["GR_TAX_RATE"] = Conversion.Val(MSG[DC_Main.i, 6]);}} MS_RATE.cs:1925 {{dataRow["EMP_CODE"] = tEmpCode.Text;}} MS_RATE.cs:1932 {{UPDATE GROUP_MAST SET GR_RATE = }} MS_RATE.cs:1963 {{MyProject.Forms.MDI_FORM.Rate_1.Text = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(DC_Main.Rshlp.Rows[DC_Main.M]["GR_NAME"], (object)"  -  "), (object)Strings.Format(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[DC_Main.M]["GR_RATE"]), "0.00")));}})
+Gap: 1, 3. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
 Status: executable
 
-## T02 Field route
-
-### daily-rate.branches.not-applicable (T02 Field route) [reuse]
-Layer: browser
-Steps: n/a.
-Expected: The four optional fields are shown only for a UAE company (`MS_RATE.cs:1705 {{if (Operators.CompareString(DC_Main.MCo_SName, "UAE", false) == 0)}}`), which makes them visible (`MS_RATE.cs:1711 {{((Control)nGoldOzRate).Visible = true;}}`). The fixture company is not UAE, so there is no UAE field route to exercise through that UI; the hidden defaults are `MS_RATE.cs:1259 {{((Control)nGoldOzRate).Visible = false;}}` and `MS_RATE.cs:1316 {{((Control)nPrGoldRate).Visible = false;}}`.
-Status: N/A: the fixture company is not UAE; the UAE recalculation is covered by packages/core/test/dailyRate.test.ts. The copied optional numeric columns are still compared through a controlled UAE fixture in `daily-rate.field-route.copied-optional-numeric-columns` (Gap 6).
-
-### daily-rate.field-route.copied-optional-numeric-columns (T02 Field route)
-Layer: browser
-Steps: 1. Using a controlled UAE company fixture, set Gold Purc 10gm, Silver Purc 1Kg, Gold USD Pr Oz and Silver USD Pr Oz through their controls. 2. Save at location 00 with copy enabled. 3. Trace each value from request → RATE_MAST source row → destination row → reopened header, and assert the six header fields map to their own columns (Gap 6).
-Expected: The UAE branch makes all four visible (`MS_RATE.cs:1712 {{((Control)nSilverOzRate).Visible = true;}}`, `MS_RATE.cs:1713 {{((Control)nPrGoldRate).Visible = true;}}`, `MS_RATE.cs:1714 {{((Control)nPrSilverRate).Visible = true;}}`) and each writes to its own column: `MS_RATE.cs:1912 {{dataRow["FINE_GL_PR_RATE"] = Conversion.Val(nPrGoldRate.Text);}}`, `MS_RATE.cs:1913 {{dataRow["FINE_SL_PR_RATE"] = Conversion.Val(nPrSilverRate.Text);}}`, `MS_RATE.cs:1914 {{dataRow["DOLLAR_GL_RATE"] = Conversion.Val(nGoldOzRate.Text);}}`, `MS_RATE.cs:1915 {{dataRow["DOLLAR_SL_RATE"] = Conversion.Val(nSilverOzRate.Text);}}`. The copy projects them unchanged (`MS_RATE.cs:1945 {{FINE_GL_PR_RATE,FINE_SL_PR_RATE,DOLLAR_GL_RATE,DOLLAR_SL_RATE,AND_TRFR,GR_TAX_RATE,GR_TAX_PRC,OP_GL_RATE)}}`). A core calculation test is not UI coverage.
-Status: executable
-
-## T03 Formula sequence
-
-### daily-rate.formula.enter-on-silver-recomputes (T03 Formula sequence) [reuse]
-Layer: unit
-Steps: 1. Set Gold Rate 10gm = 72000 and Silver Rate 1Kg = 85000. 2. Press Enter on silver. 3. Record TaxRate, Rate10gm and PrRate for R18, R22, RSV.
-Expected: Worked arithmetic: R18 (G, touch 75, tax 0) TaxRate = Round(75×72000/100) = 54000, tax 0 so Rate10gm stays 54000, PrRate = Round(76×72000/100) = 54720 (`MS_RATE.cs:2340 {{mSG[DC_Main.M, 5] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 3]) * Conversion.Val(nGoldRate.Text) / 100.0), "0.00");}}`). R22 (G, touch 91.6, tax 3) TaxRate = Round(91.6×72000/100) = 65952, Rate10gm = Round(65952/(3+100)×100, 0) = 64031, PrRate = Round(92×72000/100) = 66240 (`MS_RATE.cs:2344 {{mSG[DC_Main.M, 5] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 6]) / (Conversion.Val(mSG[DC_Main.M, 4]) + 100.0) * 100.0, 0), "0.00");}}`). RSV (S, touch 92.5, tax 3) TaxRate = Round(92.5×85000/10000) = Round(786.25) = 786 (to even), Rate10gm = Round(786/103×100, 0) = 763, PrRate = Round(90×85000/10000) = 765 (`MS_RATE.cs:2355 {{mSG[DC_Main.M, 5] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 6]) / (Conversion.Val(mSG[DC_Main.M, 4]) + 100.0) * 100.0, 0), "0.00");}}`). The resulting grid is R18 [54000,54000,54720], R22 [65952,64031,66240], RSV [786,763,765].
-Status: executable
-
-### daily-rate.formula.gold-enter-tax-precedence (T03 Formula sequence)
-Layer: unit
-Steps: 1. Change only Gold Rate 10gm from 72000 to 73000 with a nonzero touch and tax. 2. Press Enter on gold. 3. Check the intermediate TaxRate and the overridden Rate10gm.
-Expected: Only a changed nonzero header recomputes (`MS_RATE.cs:2338 {{if ((Conversion.Val(nGoldRate.Text) != 0.0) & (OldGoldRate != Conversion.Val(nGoldRate.Text)))}}`); TaxRate is set first (`MS_RATE.cs:2341 {{mSG[DC_Main.M, 6] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 3]) * Conversion.Val(nGoldRate.Text) / 100.0), "0.00");}}`) and, when tax is nonzero, Rate10gm is replaced by the tax-divided value (`MS_RATE.cs:2344 {{mSG[DC_Main.M, 5] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 6]) / (Conversion.Val(mSG[DC_Main.M, 4]) + 100.0) * 100.0, 0), "0.00");}}`). For R22: TaxRate = Round(91.6×73000/100) = 66868, Rate10gm = Round(66868/103×100, 0) = 64920. PrRate = Round(92×73000/100) = 67160 (`MS_RATE.cs:2346 {{mSG[DC_Main.M, 8] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 7]) * Conversion.Val(nGoldRate.Text) / 100.0), "0.00");}}`). Math.Round is to-even on midpoint.
-Status: executable
-
-### daily-rate.formula.uae-purchase-override (T03 Formula sequence)
-Layer: unit
-Steps: 1. In the UAE fixture, set sale gold/silver and then change only Gold Purc 10gm. 2. Confirm PrRate is overridden from the purchase header. 3. Repeat with Silver Purc 1Kg.
-Expected: After the sale formulas, a changed nonzero purchase header overrides PrRate with divisor 100 for gold (`MS_RATE.cs:2428 {{mSG[DC_Main.M, 8] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 7]) * Conversion.Val(nPrGoldRate.Text) / 100.0), "0.00");}}`) and 10000 for silver (`MS_RATE.cs:2445 {{mSG[DC_Main.M, 8] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 7]) * Conversion.Val(nPrSilverRate.Text) / 10000.0), "0.00");}}`). This overrides only when the purchase header changed (`MS_RATE.cs:2426 {{if ((Conversion.Val(nPrGoldRate.Text) != 0.0) & (OldPrGoldRate != Conversion.Val(nPrGoldRate.Text)))}}`). No new residual arithmetic is needed.
-Status: executable
-
-## T04 Lookup
-
-### daily-rate.lookup.f1-saved-dates (T04 Lookup)
-Layer: browser
-Steps: 1. Save two different days. 2. Click F1, cancel once, reopen F1, choose the older day. 3. Confirm the chosen day's grid and headers load.
-Expected: F1 lists saved dates/users/gold/silver grouped without a year predicate, newest first (`MS_RATE.cs:2373 {{GROUP BY VCH_DATE,MAIN_USER,FINE_GL_RATE,FINE_SL_RATE  ORDER BY VCH_DATE DESC}}`); after selection focus returns to date (`MS_RATE.cs:2388 {{((Control)mVchDate).Focus();}}`). Saved values come from RATE_MAST by company, location and date (`MS_RATE.cs:1756 {{VCH_DATE = '}}`), with FINE_GL_RATE formatted `"0.00"` on reopen (`MS_RATE.cs:1761 {{nGoldRate.Text = Strings.Format(RuntimeHelpers.GetObjectValue(RsDetl.Rows[0]["FINE_GL_RATE"]), "0.00");}}`).
-Status: executable
-
-### daily-rate.lookup.date-enter-reload (T04 Lookup)
-Layer: browser
-Steps: 1. Fill Vch Date with a saved date and press Enter. 2. Confirm the grid reloads and focus advances with Tab.
-Expected: Date Enter calls the shared setter (`MS_RATE.cs:2293 {{DC_Main.SetDate(ref MsDate);}}`); on a valid date only, it reloads and sends Tab (`MS_RATE.cs:2295 {{if (!DC_Main.RongDate)}}`, `MS_RATE.cs:2297 {{DISPLAY_DATA();}}`, `MS_RATE.cs:2298 {{SendKeys.Send("{TAB}");}}`). On an invalid date RongDate suppresses the reload.
-Status: executable
-
-### daily-rate.lookup.invalid-date-validation (T04 Lookup)
-Layer: browser
-Steps: 1. Enter malformed, out-of-range and boundary dates and press Enter. 2. Record the message, refusal and focus (if any).
-Expected: The branch is `MS_RATE.cs:2295 {{if (!DC_Main.RongDate)}}` after `MS_RATE.cs:2293 {{DC_Main.SetDate(ref MsDate);}}`, but the study does not contain the full shared date-validation rule.
-Status: blocked: MISSING `.orch/index/DC_Main.md`. Exact question: what message text, refusal and focus does the shared `DC_Main.SetDate`/`RongDate` validation produce for an invalid date, and is any RATE_MAST write suppressed? Full date-helper parity is explicitly outside WP-33; unblocks when the shared date-helper study is supplied.
-
-### daily-rate.lookup.group-membership (T04 Lookup)
-Layer: browser
-Steps: 1. Add a zero-touch group and an RATE_MAST row for a group no longer in GROUP_MAST. 2. Open the day and read the grid. 3. Confirm which rows appear.
-Expected: Grid membership is current company groups with `MS_RATE.cs:1781 {{AND GR_TOUCH <> 0 ORDER BY GR_TYPE,GR_NAME}}`; saved values are matched by code only (`MS_RATE.cs:1802 {{dataView.RowFilter = "GR_CODE = '" + mSG[DC_Main.i + 1, 1] + "'";}}`). A zero-touch group is absent; an orphan saved row has no grid cell and is not written back.
-Status: executable
-
-## T05 Children
-
-### daily-rate.children.two-days-independent (T05 Children)
-Layer: browser
-Steps: 1. Save day A with groups R18+R22 priced and day B with RSV priced. 2. Edit A's R18 rate. 3. Query both days.
-Expected: A replace-day save deletes only its own company/location/year/date set (`MS_RATE.cs:1894 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}}`) before inserting qualifying rows (`MS_RATE.cs:1904 {{if ((Conversion.Val(MSG[DC_Main.i, 3]) != 0.0) & (Conversion.Val(MSG[DC_Main.i, 5]) != 0.0))}}`). Day B keeps its single RSV row; no child moves between parents.
-Status: executable
-
-### daily-rate.children.sr-no-order (T05 Children)
-Layer: browser
-Steps: 1. Price all three groups and save. 2. Read SR_NO against grid row. 3. Reorder the grid inputs and re-save.
-Expected: SR_NO is the grid row (`MS_RATE.cs:1916 {{dataRow["SR_NO"] = DC_Main.i;}}`); R18=1, R22=2, RSV=3 in the seeded order, with GR_CODE from `MS_RATE.cs:1917 {{dataRow["GR_CODE"] = MSG[DC_Main.i, 1];}}`. Re-save follows the new order and writes no duplicate rows.
-Status: executable
-
-## T06 Required/invalid
-
-### daily-rate.refusal.negative-rate-no-write (T06 Required/invalid) [reuse]
-Layer: browser
-Steps: 1. Price the day, then set `Rate10gm R18` = -5. 2. Save. 3. Query the day.
-Expected: A negative rate is refused with HTTP 400 and no business write; qualifying rows require both touch and Rate10gm nonzero (`MS_RATE.cs:1904 {{if ((Conversion.Val(MSG[DC_Main.i, 3]) != 0.0) & (Conversion.Val(MSG[DC_Main.i, 5]) != 0.0))}}`), so the day holds no rows.
-Status: executable
-
-### daily-rate.refusal.save-no-rights (T06 Required/invalid)
-Layer: browser
-Steps: 1. As a user with FRM_EDIT != Y and an existing day (EntryMode E), attempt Save. 2. Record the message and focus. 3. Query the day.
-Expected: The exact gate is `MS_RATE.cs:1886 {{if ((Operators.CompareString(UserEdit, "Y", false) != 0) & (Operators.CompareString(EntryMode, "E", false) == 0))}}` and the message is `MS_RATE.cs:1888 {{Interaction.MsgBox((object)"You Have No Rights.....", (MsgBoxStyle)0, (object)null);}}`, then `MS_RATE.cs:1889 {{goto end_IL_0001;}}` exits with no explicit focus assignment and no partial write. DISPLAY_DATA sets EntryMode E unconditionally (`MS_RATE.cs:1830 {{EntryMode = "E";}}`), so the gate is active on every reopened day.
-Status: executable
-
-### daily-rate.refusal.delete-no-rights-and-confirm (T06 Required/invalid)
-Layer: browser
-Steps: 1. As a user without delete right, click Delete; record the message. 2. As a user with delete right, click Delete and answer No, then Yes.
-Expected: Refusal is `MS_RATE.cs:2102 {{Interaction.MsgBox((object)"You Have No Rights.....", (MsgBoxStyle)0, (object)null);}}` under `MS_RATE.cs:2100 {{if (Operators.CompareString(UserDelete, "Y", false) != 0)}}`; permitted delete asks `MS_RATE.cs:2104 {{else if ((int)Interaction.MsgBox((object)"Are You Sure To Delete This Day Rate?", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6)}}` and only Yes runs `MS_RATE.cs:2107 {{CLEAR_DATA();}}`; No has no focus assignment.
-Status: executable
-
-### daily-rate.refusal.print-no-rights (T06 Required/invalid)
-Layer: browser
-Steps: 1. As a user without print right, click Print. 2. Record the message, focus and absence of output.
-Expected: `MS_RATE.cs:1837 {{if (Operators.CompareString(UserPrint, "Y", false) != 0)}}` then `MS_RATE.cs:1839 {{Interaction.MsgBox((object)"You Have No Print Rights.....", (MsgBoxStyle)0, (object)null);}}`; no focus assignment follows in that branch and no report is produced.
-Status: executable
-
-### daily-rate.settlement.not-applicable (T06 Required/invalid) [reuse]
-Layer: browser
-Steps: n/a.
-Expected: The source description is corrected for Gap 7: MS_RATE also updates GROUP_MAST at 00 (`MS_RATE.cs:1932 {{UPDATE GROUP_MAST SET GR_RATE = }}`) and can write destination RATE_MAST rows (`MS_RATE.cs:1945 {{INSERT INTO RATE_MAST}}`), so the old summary "writes RATE_MAST only" is inaccurate; the full footprint is asserted in `daily-rate.write-set.full-footprint`.
-Status: N/A: a daily rate has no tender, ledger or stock effect; no settlement workflow is created from the corrected summary.
-
-### daily-rate.write-set.full-footprint (T06 Required/invalid)
+### daily-rate.field.copy-optional-projection   (T02 Field route)
 Layer: database
-Steps: 1. Seed sentinels in another tenant, company, location and date. 2. Save at location 00 with copy enabled. 3. Compare every affected row in RATE_MAST, GROUP_MAST and destinations before/after (Gap 7).
-Expected: Source rows are inserted with all header and detail fields (`MS_RATE.cs:1910 {{dataRow["FINE_GL_RATE"] = Conversion.Val(nGoldRate.Text);}}`, `MS_RATE.cs:1920 {{dataRow["GR_RATE"] = Conversion.Val(MSG[DC_Main.i, 5]);}}`, `MS_RATE.cs:1926 {{dataRow["MAIN_USER"] = MainUser;}}`); GROUP_MAST is updated only for location 00 (`MS_RATE.cs:1930 {{if (Operators.CompareString(DC_Main.MLc_code, "00", false) == 0)}}`); destinations are inserted by `MS_RATE.cs:1945 {{INSERT INTO RATE_MAST(CO_CODE,LC_CODE,CO_YEAR,VCH_DATE,SR_NO,GR_CODE,FINE_GL_RATE,FINE_SL_RATE,  GR_RATE,GR_TOUCH,GR_TYPE,EMP_CODE,CASH_AMT,MAIN_USER,ADD_USER,ADD_DATE,GR_PR_TOUCH,GR_PR_RATE,  FINE_GL_PR_RATE,FINE_SL_PR_RATE,DOLLAR_GL_RATE,DOLLAR_SL_RATE,AND_TRFR,GR_TAX_RATE,GR_TAX_PRC,OP_GL_RATE)}}`. All sentinels are byte-identical.
+Steps: 1. Provision a controlled source projection fixture with distinct optional values as defined in Test data. 2. Exercise the same copy operation used by save in the isolated database. 3. Compare P at 01 and 02.
+Expected: Both destination copies preserve all 26 P columns exactly except LC_CODE, including the four distinct optional rates and NULL/zero variants. No conversion or recalculation occurs. This is database projection coverage, not UAE UI execution. (the desktop rule: MS_RATE.cs:1945 {{INSERT INTO RATE_MAST(CO_CODE,LC_CODE,CO_YEAR,VCH_DATE,SR_NO,GR_CODE,FINE_GL_RATE,FINE_SL_RATE,  GR_RATE,GR_TOUCH,GR_TYPE,EMP_CODE,CASH_AMT,MAIN_USER,ADD_USER,ADD_DATE,GR_PR_TOUCH,GR_PR_RATE,  FINE_GL_PR_RATE,FINE_SL_PR_RATE,DOLLAR_GL_RATE,DOLLAR_SL_RATE,AND_TRFR,GR_TAX_RATE,GR_TAX_PRC,OP_GL_RATE)}})
+Gap: 2, 6. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
 Status: executable
 
-## T07 Create
-
-### daily-rate.create.desktop-rows (T07 Create) [reuse]
+### daily-rate.formula.enter-on-silver-recomputes   (T03 Formula sequence)
 Layer: browser
-Steps: 1. Price the day (72000/85000). 2. Save once. 3. Query the complete RATE_MAST footprint.
-Expected: One row per priced group with SR_NO = grid row, the six header rates, GR_TYPE and MainUser, and no GR_NAME: `MS_RATE.cs:1908 {{dataRow["CO_YEAR"] = DC_Main.MCo_year;}}`, `MS_RATE.cs:1911 {{dataRow["FINE_SL_RATE"] = Conversion.Val(nSilverRate.Text);}}`, `MS_RATE.cs:1924 {{dataRow["GR_TYPE"] = MSG[DC_Main.i, 9];}}`, inserted via `MS_RATE.cs:1928 {{((DbDataAdapter)(object)DC_Main.Da).Update(RsDetl);}}`. Rows: R18 [54000,54000,54720], R22 [65952,64031,66240], RSV [786,763,765].
+Steps: 1. Enter A headers in an unsaved non-UAE form. 2. Press Silver Enter. 3. Record TaxRate, Rate10gm and PrRate. 4. Press Enter again unchanged.
+Expected: Rows equal A: R18 [54000,54000,54720], R22 [65952,64031,66240], RSV [786,763,765]. Repeated unchanged headers leave those values unchanged; focus is row 1 Rate10gm. (the desktop rule: MS_RATE.cs:2338 {{if ((Conversion.Val(nGoldRate.Text) != 0.0) & (OldGoldRate != Conversion.Val(nGoldRate.Text)))}} MS_RATE.cs:2344 {{mSG[DC_Main.M, 5] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 6]) / (Conversion.Val(mSG[DC_Main.M, 4]) + 100.0) * 100.0, 0), "0.00");}} MS_RATE.cs:2349 {{else if (Operators.CompareString(mSG[DC_Main.M, 9], "S", false) == 0 && ((Conversion.Val(nSilverRate.Text) != 0.0) & (OldSlRate != Conversion.Val(nSilverRate.Text))))}} MS_RATE.cs:2355 {{mSG[DC_Main.M, 5] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 6]) / (Conversion.Val(mSG[DC_Main.M, 4]) + 100.0) * 100.0, 0), "0.00");}} MS_RATE.cs:2362 {{MSG.Col = 5;}} MS_RATE.cs:2363 {{MSG.Row = 1;}} MS_RATE.cs:2366 {{((Control)TEXT_ENTRY).Focus();}})
 Status: executable
 
-### daily-rate.create.group-rate-at-00 (T07 Create)
+### daily-rate.reopen.f1-list   (T04 Lookup)
+Layer: browser
+Steps: 1. Save A at H and B at D. 2. Open F1 saved-date help. 3. Cancel without selection. 4. Reopen help and choose H, then D.
+Expected: List is descending D then H with saved user/gold/silver; cancel leaves the current date unchanged. Selecting H gives gold 72000.00 and R22 64031; selecting D gives gold 73000.00 and R22 64920; selection returns focus to date. (the desktop rule: MS_RATE.cs:2373 {{GROUP BY VCH_DATE,MAIN_USER,FINE_GL_RATE,FINE_SL_RATE  ORDER BY VCH_DATE DESC}} MS_RATE.cs:2386 {{mVchDate.Text = DC_Main.ColValue[0];}} MS_RATE.cs:2388 {{((Control)mVchDate).Focus();}} MS_RATE.cs:1761 {{nGoldRate.Text = Strings.Format(RuntimeHelpers.GetObjectValue(RsDetl.Rows[0]["FINE_GL_RATE"]), "0.00");}})
+Status: executable
+
+### daily-rate.children.destination-ownership   (T05 Children)
+Layer: browser
+Steps: 1. Seed 01 with one old row and 02 with two different rows. 2. Save A at eligible 00. 3. Inspect each destination and unrelated day.
+Expected: Each destination has exactly R18, R22, RSV, SR_NO 1,2,3 and its own LC_CODE. Old destination-only rows are gone; source remains at 00. The unrelated day is byte-for-byte unchanged. No append or cross-parent row movement occurs. (the desktop rule: MS_RATE.cs:1916 {{dataRow["SR_NO"] = DC_Main.i;}} MS_RATE.cs:1939 {{SELECT LC_CODE FROM LOCT_MAST}} MS_RATE.cs:1944 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}} MS_RATE.cs:1945 {{INSERT INTO RATE_MAST(CO_CODE,LC_CODE,CO_YEAR,VCH_DATE,SR_NO,GR_CODE,FINE_GL_RATE,FINE_SL_RATE,  GR_RATE,GR_TOUCH,GR_TYPE,EMP_CODE,CASH_AMT,MAIN_USER,ADD_USER,ADD_DATE,GR_PR_TOUCH,GR_PR_RATE,  FINE_GL_PR_RATE,FINE_SL_PR_RATE,DOLLAR_GL_RATE,DOLLAR_SL_RATE,AND_TRFR,GR_TAX_RATE,GR_TAX_PRC,OP_GL_RATE)}})
+Gap: 2. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.refusal.zero-touch-or-rate   (T06 Required/invalid)
+Layer: browser
+Steps: 1. Set R18 Touch to 0, R22 Rate10gm to 0 and keep RSV from A. 2. Save at 00. 3. Repeat with blank numeric entries for the first two rows.
+Expected: Only RSV is stored and group RSV becomes 763; R18 and R22 groups remain 111 and 222. Zero or blank qualification does not create rows or zero out skipped groups. (the desktop rule: MS_RATE.cs:1904 {{if ((Conversion.Val(MSG[DC_Main.i, 3]) != 0.0) & (Conversion.Val(MSG[DC_Main.i, 5]) != 0.0))}} MS_RATE.cs:1930 {{if (Operators.CompareString(DC_Main.MLc_code, "00", false) == 0)}} MS_RATE.cs:1932 {{UPDATE GROUP_MAST SET GR_RATE = }})
+Gap: 1, 7. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.refusal.negative-rate-no-write   (T06 Required/invalid)
+Layer: browser
+Steps: 1. Price A. 2. Set R18 Rate10gm to -5. 3. Save through UI and inspect all scopes.
+Expected: Hosted A5 validation returns HTTP 400 and zero business writes; source/destinations/groups stay at their snapshots. No desktop negative-rate refusal text is asserted: its nonzero predicate alone does not reject negatives. (the desktop rule: MS_RATE.cs:1904 {{if ((Conversion.Val(MSG[DC_Main.i, 3]) != 0.0) & (Conversion.Val(MSG[DC_Main.i, 5]) != 0.0))}})
+Status: executable
+
+### daily-rate.refusal.invalid-payload   (T06 Required/invalid)
+Layer: browser
+Steps: 1. Submit non-finite and overflowing numeric values, an unknown group and an employee code longer than three characters as separate attempts. 2. Inspect source/groups/destinations.
+Expected: Hosted A5 returns HTTP 400 for each malformed request and leaves all snapshots unchanged. Employee UI accepts at most three characters. Exact new web error wording is not a desktop claim. (the desktop rule: MS_RATE.cs:1199 {{((TextBoxBase)tEmpCode).MaxLength = 3;}} MS_RATE.cs:1917 {{dataRow["GR_CODE"] = MSG[DC_Main.i, 1];}} MS_RATE.cs:1925 {{dataRow["EMP_CODE"] = tEmpCode.Text;}})
+Status: executable
+
+### daily-rate.create.desktop-rows   (T07 Create)
+Layer: browser
+Steps: 1. Use a genuine 00 session with copy off. 2. Price A at D and save once. 3. Query all source columns and group fields.
+Expected: Exactly three source rows have A values, SR_NO 1/2/3, CO_CODE 01, LC_CODE 00, current CO_YEAR, date D, EMP_CODE blank and MAIN_USER equal to the synthetic actor. Six header fields are [72000,85000,0,0,0,0]. Group GR_RATE becomes [54000,64031,763]; every other group field and destination row is unchanged. Success text is “Data Are Saved.”; ordinary mode clears and focuses date. (the desktop rule: MS_RATE.cs:1906 {{dataRow["CO_CODE"] = DC_Main.MCo_code;}} MS_RATE.cs:1907 {{dataRow["LC_CODE"] = DC_Main.MLc_code;}} MS_RATE.cs:1908 {{dataRow["CO_YEAR"] = DC_Main.MCo_year;}} MS_RATE.cs:1909 {{dataRow["VCH_DATE"] = mVchDate.Text;}} MS_RATE.cs:1910 {{dataRow["FINE_GL_RATE"] = Conversion.Val(nGoldRate.Text);}} MS_RATE.cs:1911 {{dataRow["FINE_SL_RATE"] = Conversion.Val(nSilverRate.Text);}} MS_RATE.cs:1912 {{dataRow["FINE_GL_PR_RATE"] = Conversion.Val(nPrGoldRate.Text);}} MS_RATE.cs:1913 {{dataRow["FINE_SL_PR_RATE"] = Conversion.Val(nPrSilverRate.Text);}} MS_RATE.cs:1914 {{dataRow["DOLLAR_GL_RATE"] = Conversion.Val(nGoldOzRate.Text);}} MS_RATE.cs:1915 {{dataRow["DOLLAR_SL_RATE"] = Conversion.Val(nSilverOzRate.Text);}} MS_RATE.cs:1916 {{dataRow["SR_NO"] = DC_Main.i;}} MS_RATE.cs:1925 {{dataRow["EMP_CODE"] = tEmpCode.Text;}} MS_RATE.cs:1926 {{dataRow["MAIN_USER"] = MainUser;}} MS_RATE.cs:1932 {{UPDATE GROUP_MAST SET GR_RATE = }} MS_RATE.cs:2007 {{Interaction.MsgBox((object)"Data Are Saved.", (MsgBoxStyle)0, (object)DC_Main.MsgTitle);}} MS_RATE.cs:2015 {{CLEAR_DATA();}} MS_RATE.cs:1749 {{((Control)mVchDate).Focus();}})
+Gap: 1, 7. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.copy.eligible-two-destinations   (T07 Create)
+Layer: browser
+Steps: 1. Provision A1 eligibility for company 01. 2. Sign in at 00 and save A. 3. Inspect 00, 01, 02 and sentinels.
+Expected: Exactly three rows at each location, nine total; each destination equals source P with its location substituted. Groups equal [54000,64031,763]. Listed destinations are included even without an operator login there; unlisted 98, other tenant/company and H stay unchanged. No copy confirmation is required. (the desktop rule: MS_RATE.cs:1937 {{if (Operators.CompareString(DC_Main.SSRegSrNo, "VK142NEVK", false) == 0 && Operators.CompareString(DC_Main.MLc_code, "00", false) == 0)}} MS_RATE.cs:1939 {{SELECT LC_CODE FROM LOCT_MAST}} MS_RATE.cs:1945 {{INSERT INTO RATE_MAST(CO_CODE,LC_CODE,CO_YEAR,VCH_DATE,SR_NO,GR_CODE,FINE_GL_RATE,FINE_SL_RATE,  GR_RATE,GR_TOUCH,GR_TYPE,EMP_CODE,CASH_AMT,MAIN_USER,ADD_USER,ADD_DATE,GR_PR_TOUCH,GR_PR_RATE,  FINE_GL_PR_RATE,FINE_SL_PR_RATE,DOLLAR_GL_RATE,DOLLAR_SL_RATE,AND_TRFR,GR_TAX_RATE,GR_TAX_PRC,OP_GL_RATE)}} MS_RATE.cs:1946 {{DC_Main.ExeQuteDc(DC_Main.RsQry);}})
+Gap: 2. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.copy.disabled-at-zero   (T07 Create)
+Layer: browser
+Steps: 1. Disable A1 eligibility. 2. Save A from real 00.
+Expected: Source has three A rows and groups [54000,64031,763]; 01 and 02 retain their old row multisets. Eligibility false prevents fan-out, not the group update. (the desktop rule: MS_RATE.cs:1930 {{if (Operators.CompareString(DC_Main.MLc_code, "00", false) == 0)}} MS_RATE.cs:1937 {{if (Operators.CompareString(DC_Main.SSRegSrNo, "VK142NEVK", false) == 0 && Operators.CompareString(DC_Main.MLc_code, "00", false) == 0)}})
+Gap: 2. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.copy.enabled-away-from-zero   (T07 Create)
+Layer: browser
+Steps: 1. Enable A1. 2. Save A from real 01.
+Expected: 01 has three A rows; groups remain [111,222,333]; 00 and 02 remain at snapshots. Eligibility alone is insufficient. (the desktop rule: MS_RATE.cs:1930 {{if (Operators.CompareString(DC_Main.MLc_code, "00", false) == 0)}} MS_RATE.cs:1937 {{if (Operators.CompareString(DC_Main.SSRegSrNo, "VK142NEVK", false) == 0 && Operators.CompareString(DC_Main.MLc_code, "00", false) == 0)}})
+Gap: 2. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.edit.unchanged-save   (T08 Reopen/no-op)
+Layer: browser
+Steps: 1. Save A with eligible 00. 2. Close/reopen that day. 3. Save unchanged.
+Expected: Source and both targets each retain exactly three A rows and groups [54000,64031,763]. Business columns retain A; there is no duplicated day or altered rate. Separately record any hosted audit event, without asserting opaque row identities survive a replace-day operation. (the desktop rule: MS_RATE.cs:1756 {{AND LC_CODE = '}} MS_RATE.cs:1894 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}} MS_RATE.cs:1928 {{((DbDataAdapter)(object)DC_Main.Da).Update(RsDetl);}} MS_RATE.cs:1945 {{INSERT INTO RATE_MAST(CO_CODE,LC_CODE,CO_YEAR,VCH_DATE,SR_NO,GR_CODE,FINE_GL_RATE,FINE_SL_RATE,  GR_RATE,GR_TOUCH,GR_TYPE,EMP_CODE,CASH_AMT,MAIN_USER,ADD_USER,ADD_DATE,GR_PR_TOUCH,GR_PR_RATE,  FINE_GL_PR_RATE,FINE_SL_PR_RATE,DOLLAR_GL_RATE,DOLLAR_SL_RATE,AND_TRFR,GR_TAX_RATE,GR_TAX_PRC,OP_GL_RATE)}})
+Status: executable
+
+### daily-rate.reopen.imported-projection   (T08 Reopen/no-op)
+Layer: browser
+Steps: 1. Provision the imported optional-value fixture. 2. Reopen it through the destination session without saving. 3. Compare the database before/after.
+Expected: Stored P, NULL metadata, date, year and numeric values are unchanged by reading. Gold displays 72000.00 and the saved R22 Rate10gm is 64031. Imported no-op save of unsupported hidden fields is not certified by this read-only case. (the desktop rule: MS_RATE.cs:1756 {{AND LC_CODE = '}} MS_RATE.cs:1761 {{nGoldRate.Text = Strings.Format(RuntimeHelpers.GetObjectValue(RsDetl.Rows[0]["FINE_GL_RATE"]), "0.00");}} MS_RATE.cs:1802 {{dataView.RowFilter = "GR_CODE = '" + mSG[DC_Main.i + 1, 1] + "'";}})
+Status: executable
+
+### daily-rate.edit.unpriced-group-skipped   (T09 Edit)
+Layer: browser
+Steps: 1. Save A with eligible 00. 2. Reopen and blank R18 Rate10gm; set R22 to 64032. 3. Save and reopen all locations.
+Expected: Each location now has R22=64032 and RSV=763 only; no R18 row remains. Group R18 stays 54000 from the first save, R22 becomes 64032 and RSV remains 763. Other group columns are unchanged. (the desktop rule: MS_RATE.cs:1894 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}} MS_RATE.cs:1904 {{if ((Conversion.Val(MSG[DC_Main.i, 3]) != 0.0) & (Conversion.Val(MSG[DC_Main.i, 5]) != 0.0))}} MS_RATE.cs:1932 {{UPDATE GROUP_MAST SET GR_RATE = }} MS_RATE.cs:1944 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}})
+Gap: 1, 2. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.edit.all-unpriced-clears-copies   (T09 Edit)
+Layer: browser
+Steps: 1. Save A with eligible 00. 2. Set all Rate10gm cells to zero and save.
+Expected: Source, 01 and 02 each have zero rows for D. Group rates remain [54000,64031,763]; zero-row save does not reverse them. Unrelated days/scopes remain intact. (the desktop rule: MS_RATE.cs:1894 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}} MS_RATE.cs:1904 {{if ((Conversion.Val(MSG[DC_Main.i, 3]) != 0.0) & (Conversion.Val(MSG[DC_Main.i, 5]) != 0.0))}} MS_RATE.cs:1944 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}} MS_RATE.cs:1945 {{AND LC_CODE = '00' AND VCH_DATE = '}})
+Gap: 1, 2. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.delete.day   (T10 Delete/cancel/reverse)
+Layer: browser
+Steps: 1. Save A at eligible 00. 2. Click Delete and answer No. 3. Repeat and answer Yes.
+Expected: Prompt is exactly “Are You Sure To Delete This Day Rate?”. No keeps all rows. Yes removes only 00 day rows, leaves target A rows and group rates [54000,64031,763], clears the form and focuses date. A3 refresh clears current-day dashboard labels without reversing group/copy business effects. (the desktop rule: MS_RATE.cs:2104 {{else if ((int)Interaction.MsgBox((object)"Are You Sure To Delete This Day Rate?", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6)}} MS_RATE.cs:2106 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}} MS_RATE.cs:2107 {{CLEAR_DATA();}} MS_RATE.cs:1749 {{((Control)mVchDate).Focus();}})
+Gap: 1, 5. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.cancel.no-reversal   (T10 Delete/cancel/reverse)
+Layer: browser
+Steps: 1. Save A at eligible 00. 2. Enter B without saving. 3. Cancel; then repeat unsaved edits and Exit.
+Expected: All three locations retain A and group rates [54000,64031,763]. Cancel clears and returns focus to date; Exit closes. No B rows or group changes exist. (the desktop rule: MS_RATE.cs:2118 {{CLEAR_DATA();}} MS_RATE.cs:2113 {{((Form)this).Close();}} MS_RATE.cs:1749 {{((Control)mVchDate).Focus();}})
+Gap: 1. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.scope.no-rights-user   (T11 Scope/rights)
+Layer: browser
+Steps: 1. Create A as admin. 2. Use a session without view/edit/delete/print rights and call the read/save/delete/print endpoints directly. 3. Repeat save on a previously empty day.
+Expected: Hosted rights return 403 on all four and on new-day save; there are zero writes or leaked rows. UI save/delete denial text is “You Have No Rights.....”; print denial is “You Have No Print Rights.....”. (the desktop rule: MS_RATE.cs:1830 {{EntryMode = "E";}} MS_RATE.cs:1886 {{if ((Operators.CompareString(UserEdit, "Y", false) != 0) & (Operators.CompareString(EntryMode, "E", false) == 0))}} MS_RATE.cs:1888 {{Interaction.MsgBox((object)"You Have No Rights.....", (MsgBoxStyle)0, (object)null);}} MS_RATE.cs:2102 {{Interaction.MsgBox((object)"You Have No Rights.....", (MsgBoxStyle)0, (object)null);}} MS_RATE.cs:1839 {{Interaction.MsgBox((object)"You Have No Print Rights.....", (MsgBoxStyle)0, (object)null);}} MDI_FORM.cs:14395 {{AND FRM_VIEW = 'Y'}})
+Status: executable
+
+### daily-rate.scope.copy-entitlement-forgery   (T11 Scope/rights)
+Layer: browser
+Steps: 1. Use an ordinary 01 session and forge tenant/company/location/eligibility fields in save/config requests. 2. Repeat with revoked rights before saving from 00.
+Expected: Forged authority never enables copying or reaches another scope; requests attempting authority changes are refused. Revoked edit rights return 403. No target/group changes occur. A1 authorization is server-managed, not a client registration bypass. (the desktop rule: MS_RATE.cs:1906 {{dataRow["CO_CODE"] = DC_Main.MCo_code;}} MS_RATE.cs:1907 {{dataRow["LC_CODE"] = DC_Main.MLc_code;}} MS_RATE.cs:1937 {{if (Operators.CompareString(DC_Main.SSRegSrNo, "VK142NEVK", false) == 0 && Operators.CompareString(DC_Main.MLc_code, "00", false) == 0)}} MS_RATE.cs:1565 {{UserEdit = Conversions.ToString(Operators.ConcatenateObject(dataTable.Rows[0]["FRM_EDIT"], (object)""));}})
+Gap: 2. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.concurrency.two-operators-same-day   (T12 Concurrency)
+Layer: browser
+Steps: 1. Two genuine 00 sessions load D. 2. Price A and B respectively. 3. Race eligible saves and inspect all rows/groups.
+Expected: A serial winner yields exactly three rows per location, all A or all B, never a mixture. Group rates equal the winner: [54000,64031,763] or [54750,64920,773]. At least one request succeeds; another may be an explicit conflict. This atomic result is A4 hosted safety. (the desktop rule: MS_RATE.cs:1894 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}} MS_RATE.cs:1932 {{UPDATE GROUP_MAST SET GR_RATE = }} MS_RATE.cs:1946 {{DC_Main.ExeQuteDc(DC_Main.RsQry);}})
+Gap: 2, 4. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.concurrency.copy-versus-local-save   (T12 Concurrency)
+Layer: browser
+Steps: 1. Race eligible 00 save A with direct 01 save B. 2. Repeat with 01 delete.
+Expected: For local save: 00/02 are A; 01 is all A if copy commits last, all B if local save commits last. Groups are A. For delete: 01 is either zero rows or all A according to commit order. No partial day or duplicate group exists; explicit conflicts are allowed under A4. (the desktop rule: MS_RATE.cs:1937 {{if (Operators.CompareString(DC_Main.SSRegSrNo, "VK142NEVK", false) == 0 && Operators.CompareString(DC_Main.MLc_code, "00", false) == 0)}} MS_RATE.cs:1944 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}} MS_RATE.cs:1946 {{DC_Main.ExeQuteDc(DC_Main.RsQry);}} MS_RATE.cs:2106 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}})
+Gap: 2, 4. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.retry.replayed-save   (T13 Retry/unknown)
+Layer: browser
+Steps: 1. Save A at eligible 00 and lose acknowledgment after commit. 2. Reconnect, reread D and replay identical save with no intervening edit.
+Expected: Read recovers A; after replay all locations still contain exactly three A rows and groups [54000,64031,763]. No append or duplicate financial effect occurs. Hosted audit records may distinguish attempts. (the desktop rule: MS_RATE.cs:1894 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}} MS_RATE.cs:1944 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}} MS_RATE.cs:1945 {{INSERT INTO RATE_MAST(CO_CODE,LC_CODE,CO_YEAR,VCH_DATE,SR_NO,GR_CODE,FINE_GL_RATE,FINE_SL_RATE,  GR_RATE,GR_TOUCH,GR_TYPE,EMP_CODE,CASH_AMT,MAIN_USER,ADD_USER,ADD_DATE,GR_PR_TOUCH,GR_PR_RATE,  FINE_GL_PR_RATE,FINE_SL_PR_RATE,DOLLAR_GL_RATE,DOLLAR_SL_RATE,AND_TRFR,GR_TAX_RATE,GR_TAX_PRC,OP_GL_RATE)}})
+Gap: 2. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.rollback.rate-write-fault   (T14 Rollback)
+Layer: browser
+Steps: 1. Establish A at eligible 00. 2. Attempt B with an isolated test fault after source deletion, after a source insert, then after a group update in separate runs.
+Expected: Each failed request leaves the entire source/destination/group snapshot equal to A, including sentinels. No success message or B label appears. A4 deliberately makes all write families atomic. (the desktop rule: MS_RATE.cs:1895 {{DC_Main.ExeQuteDc(DC_Main.RsQry);}} MS_RATE.cs:1928 {{((DbDataAdapter)(object)DC_Main.Da).Update(RsDetl);}} MS_RATE.cs:1932 {{UPDATE GROUP_MAST SET GR_RATE = }})
+Gap: 1, 2. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.rollback.last-destination-fault   (T14 Rollback)
+Layer: browser
+Steps: 1. Establish A. 2. Attempt B with faults after 01 replacement, after 02 deletion, after 02 insertion, and immediately before commit, as separate runs.
+Expected: All four attempts fail with zero durable changes: each location keeps three A rows and all group values remain A. UI retains the last committed A labels. No partial target copy survives. (the desktop rule: MS_RATE.cs:1944 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}} MS_RATE.cs:1946 {{DC_Main.ExeQuteDc(DC_Main.RsQry);}} MS_RATE.cs:2024 {{Interaction.MsgBox((object)("Error Found: " + Information.Err().Description + "\rClick Ok to Exit."), (MsgBoxStyle)48, (object)DC_Main.MsgTitle);}})
+Gap: 2. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.settings.pending   (T15 Config/history)
+Layer: browser
+Steps: 1. Sign in at 00 via UI using its own login slot and assert session scope. 2. Save A at D. 3. Save B at H, then reopen D.
+Expected: Group rates are [54750,64920,773] after the backdated save; D rows remain A. Today labels remain A. This replaces the misleading claim of HTTP/browser evidence with real required browser and complete write-set proof. (the desktop rule: MS_RATE.cs:1907 {{dataRow["LC_CODE"] = DC_Main.MLc_code;}} MS_RATE.cs:1930 {{if (Operators.CompareString(DC_Main.MLc_code, "00", false) == 0)}} MS_RATE.cs:1932 {{UPDATE GROUP_MAST SET GR_RATE = }} MS_RATE.cs:1950 {{Strings.Format((object)DC_Main.MsSysDate, "MM/dd/yyyy")}})
+Gap: 1. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.settings.changed-before-save   (T15 Config/history)
+Layer: browser
+Steps: 1. Load A with eligibility on, disable it using authorized configuration before save, then save. 2. Restore; load with it off, enable before save, then save. 3. In a separate run change master touch after preview without altering submitted grid.
+Expected: A5 uses committed configuration at save: first attempt changes source/groups only; second copies A to 01/02. A posted R22 rate of 64031 remains 64031 despite a changed master default; group touch is not overwritten by saving its rate. (the desktop rule: MS_RATE.cs:1937 {{if (Operators.CompareString(DC_Main.SSRegSrNo, "VK142NEVK", false) == 0 && Operators.CompareString(DC_Main.MLc_code, "00", false) == 0)}} MS_RATE.cs:1920 {{dataRow["GR_RATE"] = Conversion.Val(MSG[DC_Main.i, 5]);}} MS_RATE.cs:1932 {{UPDATE GROUP_MAST SET GR_RATE = }})
+Gap: 2. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.copy.cross-year-collision   (T15 Config/history)
 Layer: database
-Steps: 1. At location 00 save a day with R18 and R22 priced and RSV skipped. 2. Read GROUP_MAST.GR_RATE for all three. 3. Seed a non-00 location and repeat.
-Expected: For each qualifying insert, location 00 sets GR_RATE from the displayed Rate10gm, not TaxRate or a header: `MS_RATE.cs:1920 {{dataRow["GR_RATE"] = Conversion.Val(MSG[DC_Main.i, 5]);}}` and `MS_RATE.cs:1932 {{UPDATE GROUP_MAST SET GR_RATE = }}`. So R18.GR_RATE = 54000.00 and R22.GR_RATE = 64031.00, while skipped RSV retains its prior value; touch/tax/purchase rate are unchanged. At a non-00 location the update does not run (`MS_RATE.cs:1930 {{if (Operators.CompareString(DC_Main.MLc_code, "00", false) == 0)}}`).
-Status: executable
+Steps: 1. Seed company/date D under two distinct CO_YEAR values at 00 and a destination. 2. Attempt the eligible copy after an external policy decision supplies the expected result.
+Expected: Pending decision must select an exact resulting row multiset; until then this case cannot claim either deletion or preservation across years as accepted hosted behaviour. Preserve this case in the coverage denominator. (the desktop rule: MS_RATE.cs:1945 {{',CO_YEAR,VCH_DATE,SR_NO,GR_CODE,FINE_GL_RATE,FINE_SL_RATE, }})
+Gap: 2. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: blocked: external owner/policy decision required — when company/date collides across CO_YEAR, replace all years, isolate active year, or refuse? Unblocks when that choice and exact expected footprint are recorded.
 
-## T08 Reopen/no-op
-
-### daily-rate.reopen.f1-list (T08 Reopen/no-op) [reuse]
+### daily-rate.print.rate-report   (T16 Report/output)
 Layer: browser
-Steps: 1. Save a day, close the form, reopen through F1. 2. Confirm raw values, scale and identities are preserved. 3. Save unchanged.
-Expected: Reopen selects by company/location/year/date (`MS_RATE.cs:1756 {{AND LC_CODE = '}}`, `MS_RATE.cs:1756 {{AND CO_YEAR = '}}`), so the day's six header fields and per-group values return unchanged; gold is formatted to two places (`MS_RATE.cs:1761 {{nGoldRate.Text = Strings.Format(RuntimeHelpers.GetObjectValue(RsDetl.Rows[0]["FINE_GL_RATE"]), "0.00");}}`), giving 72000.00.
+Steps: 1. Save A at eligible 00. 2. Open destination 01 through its own session and print D. 3. Repeat after the dropped-group edit.
+Expected: Report title is “Daily Rate Report 23/11/2026”; dataset contains only 01/D rows: initially R18=54000, R22=64031, RSV=763, then only R22=64032 and RSV=763. No 00/H/foreign rows appear. Template internals and physical print layout remain outside this packet. (the desktop rule: MS_RATE.cs:1843 {{string rptName = "RateRpt";}} MS_RATE.cs:1845 {{DC_Main.MsRptTitelStr = "'Daily Rate Report " + Strings.Format((object)Conversions.ToDate(mVchDate.Text), "dd/MM/yyyy") + "'";}} MS_RATE.cs:1846 {{DC_Main.MsWappPrintType = "All";}} MS_RATE.cs:1848 {{{RATE_MAST.LC_CODE} = '}})
+Gap: 2. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
 Status: executable
 
-### daily-rate.edit.unchanged-save (T08 Reopen/no-op) [reuse]
+### daily-rate.labels.0-eligible   (T16 Report/output)
 Layer: browser
-Steps: 1. Save a day. 2. Save the same day again without edits. 3. Compare all rows and clocks.
-Expected: An unchanged re-save still deletes and rewrites the day (`MS_RATE.cs:1894 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}}`) but produces an identical set of rows; success is `MS_RATE.cs:2007 {{Interaction.MsgBox((object)"Data Are Saved.", (MsgBoxStyle)0, (object)DC_Main.MsgTitle);}}` followed by `MS_RATE.cs:2015 {{CLEAR_DATA();}}` in normal mode.
+Steps: 1. Seed D with 0 eligible display rows using the display fixture. 2. Include a RATE_DISPLAY=N row ahead of them and different header/tax values. 3. Enter dashboard.
+Expected: Only “ToDays Rate :” is visible; there are no group-value labels. (the desktop rule: MDI_FORM.cs:11416 {{AND B.RATE_DISPLAY = 'Y' ORDER BY A.SR_NO}} MDI_FORM.cs:11422 {{Rate_1.Text = "ToDays Rate :";}} MDI_FORM.cs:11429 {{Rate_1.Text = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(DC_Main.Rshlp.Rows[DC_Main.M]["GR_NAME"], (object)"  -  "), (object)Strings.Format(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[DC_Main.M]["GR_RATE"]), "0.00")));}} MS_RATE.cs:1990 {{if (DC_Main.M == 6)}})
+Gap: 3. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
 Status: executable
 
-## T09 Edit
-
-### daily-rate.edit.unpriced-group-skipped (T09 Edit) [reuse]
+### daily-rate.labels.1-eligible   (T16 Report/output)
 Layer: browser
-Steps: 1. Save all three groups. 2. Clear `Rate10gm R18` and re-save. 3. Query the day.
-Expected: Re-save deletes the whole day first (`MS_RATE.cs:1896 {{SELECT * FROM RATE_MAST}}`) and inserts only rows where both touch and Rate10gm are nonzero (`MS_RATE.cs:1904 {{if ((Conversion.Val(MSG[DC_Main.i, 3]) != 0.0) & (Conversion.Val(MSG[DC_Main.i, 5]) != 0.0))}}`), leaving R22 and RSV and dropping R18; no orphan R18 row remains.
+Steps: 1. Seed D with 1 eligible display rows using the display fixture. 2. Include a RATE_DISPLAY=N row ahead of them and different header/tax values. 3. Enter dashboard.
+Expected: Visible labels in order are “Display 1  -  101.00”. All texts use net GR_RATE and exactly two spaces on each side of the hyphen. (the desktop rule: MDI_FORM.cs:11416 {{AND B.RATE_DISPLAY = 'Y' ORDER BY A.SR_NO}} MDI_FORM.cs:11422 {{Rate_1.Text = "ToDays Rate :";}} MDI_FORM.cs:11429 {{Rate_1.Text = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(DC_Main.Rshlp.Rows[DC_Main.M]["GR_NAME"], (object)"  -  "), (object)Strings.Format(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[DC_Main.M]["GR_RATE"]), "0.00")));}} MS_RATE.cs:1990 {{if (DC_Main.M == 6)}})
+Gap: 3. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
 Status: executable
 
-### daily-rate.edit.dropped-group (T09 Edit)
+### daily-rate.labels.7-eligible   (T16 Report/output)
+Layer: browser
+Steps: 1. Seed D with 7 eligible display rows using the display fixture. 2. Include a RATE_DISPLAY=N row ahead of them and different header/tax values. 3. Enter dashboard.
+Expected: Visible labels in order are “Display 1  -  101.00”, “Display 2  -  102.00”, “Display 3  -  103.00”, “Display 4  -  104.00”, “Display 5  -  105.00”, “Display 6  -  106.00”, “Display 7  -  107.00”. All texts use net GR_RATE and exactly two spaces on each side of the hyphen. (the desktop rule: MDI_FORM.cs:11416 {{AND B.RATE_DISPLAY = 'Y' ORDER BY A.SR_NO}} MDI_FORM.cs:11422 {{Rate_1.Text = "ToDays Rate :";}} MDI_FORM.cs:11429 {{Rate_1.Text = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(DC_Main.Rshlp.Rows[DC_Main.M]["GR_NAME"], (object)"  -  "), (object)Strings.Format(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[DC_Main.M]["GR_RATE"]), "0.00")));}} MS_RATE.cs:1990 {{if (DC_Main.M == 6)}})
+Gap: 3. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.labels.8-eligible   (T16 Report/output)
+Layer: browser
+Steps: 1. Seed D with 8 eligible display rows using the display fixture. 2. Include a RATE_DISPLAY=N row ahead of them and different header/tax values. 3. Enter dashboard.
+Expected: Visible labels in order are “Display 1  -  101.00”, “Display 2  -  102.00”, “Display 3  -  103.00”, “Display 4  -  104.00”, “Display 5  -  105.00”, “Display 6  -  106.00”, “Display 7  -  107.00”. Display 8 is absent; the limit is seven. All texts use net GR_RATE and exactly two spaces on each side of the hyphen. (the desktop rule: MDI_FORM.cs:11416 {{AND B.RATE_DISPLAY = 'Y' ORDER BY A.SR_NO}} MDI_FORM.cs:11422 {{Rate_1.Text = "ToDays Rate :";}} MDI_FORM.cs:11429 {{Rate_1.Text = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(DC_Main.Rshlp.Rows[DC_Main.M]["GR_NAME"], (object)"  -  "), (object)Strings.Format(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[DC_Main.M]["GR_RATE"]), "0.00")));}} MS_RATE.cs:1990 {{if (DC_Main.M == 6)}})
+Gap: 3. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.labels.no-fallback-foreign-location   (T16 Report/output)
+Layer: browser
+Steps: 1. Clear own-location D rows and seed today rows only at 02. 2. Enter dashboard as 01 and inspect the display response.
+Expected: Projection is empty and only “ToDays Rate :” is shown. No rate from another location, past date or future date is substituted. Sentinels are unread and unchanged. (the desktop rule: MS_RATE.cs:1950 {{AND A.LC_CODE = '}} MS_RATE.cs:1950 {{Strings.Format((object)DC_Main.MsSysDate, "MM/dd/yyyy")}} MS_RATE.cs:1956 {{MyProject.Forms.MDI_FORM.Rate_1.Text = "ToDays Rate :";}})
+Gap: 3, 4 (G238). This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.labels.no-fallback-past-day   (T16 Report/output)
+Layer: browser
+Steps: 1. Clear own-location D rows and seed own-location rows only at H. 2. Enter dashboard as 01 and inspect the display response.
+Expected: Projection is empty and only “ToDays Rate :” is shown. No rate from another location, past date or future date is substituted. Sentinels are unread and unchanged. (the desktop rule: MS_RATE.cs:1950 {{AND A.LC_CODE = '}} MS_RATE.cs:1950 {{Strings.Format((object)DC_Main.MsSysDate, "MM/dd/yyyy")}} MS_RATE.cs:1956 {{MyProject.Forms.MDI_FORM.Rate_1.Text = "ToDays Rate :";}})
+Gap: 3, 4 (G238). This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.labels.no-fallback-future-day   (T16 Report/output)
+Layer: browser
+Steps: 1. Clear own-location D rows and seed own-location rows only at 2026-11-24. 2. Enter dashboard as 01 and inspect the display response.
+Expected: Projection is empty and only “ToDays Rate :” is shown. No rate from another location, past date or future date is substituted. Sentinels are unread and unchanged. (the desktop rule: MS_RATE.cs:1950 {{AND A.LC_CODE = '}} MS_RATE.cs:1950 {{Strings.Format((object)DC_Main.MsSysDate, "MM/dd/yyyy")}} MS_RATE.cs:1956 {{MyProject.Forms.MDI_FORM.Rate_1.Text = "ToDays Rate :";}})
+Gap: 3, 4 (G238). This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.labels.no-fallback-absent-own-day   (T16 Report/output)
+Layer: browser
+Steps: 1. Clear own-location D rows and seed own-location H rows plus foreign-location D rows. 2. Enter dashboard as 01 and inspect the display response.
+Expected: Projection is empty and only “ToDays Rate :” is shown. No rate from another location, past date or future date is substituted. Sentinels are unread and unchanged. (the desktop rule: MS_RATE.cs:1950 {{AND A.LC_CODE = '}} MS_RATE.cs:1950 {{Strings.Format((object)DC_Main.MsSysDate, "MM/dd/yyyy")}} MS_RATE.cs:1956 {{MyProject.Forms.MDI_FORM.Rate_1.Text = "ToDays Rate :";}})
+Gap: 3, 4 (G238). This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.labels.refresh-today   (T16 Report/output)
+Layer: browser
+Steps: 1. Display A at D. 2. Save B at D. 3. Inspect dashboard as soon as save finishes, before the 60-second ticker poll.
+Expected: Labels immediately show “Rate Gold 18K  -  54750.00”, “Rate Gold 22K  -  64920.00”, “Rate Silver 925  -  773.00”. No stale A or header rates remain. (the desktop rule: MS_RATE.cs:1950 {{Strings.Format((object)DC_Main.MsSysDate, "MM/dd/yyyy")}} MS_RATE.cs:1963 {{MyProject.Forms.MDI_FORM.Rate_1.Text = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(DC_Main.Rshlp.Rows[DC_Main.M]["GR_NAME"], (object)"  -  "), (object)Strings.Format(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[DC_Main.M]["GR_RATE"]), "0.00")));}})
+Gap: 3, 5. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.labels.refresh-historical   (T16 Report/output)
+Layer: browser
+Steps: 1. Keep A rows at D. 2. Save B at H. 3. Inspect refreshed display and GROUP_MAST.
+Expected: Today labels remain “Rate Gold 18K  -  54000.00”, “Rate Gold 22K  -  64031.00”, “Rate Silver 925  -  763.00”, while group rates become [54750,64920,773]. Display is based on D RATE_MAST, not H or GROUP_MAST.GR_RATE. (the desktop rule: MS_RATE.cs:1950 {{Strings.Format((object)DC_Main.MsSysDate, "MM/dd/yyyy")}} MS_RATE.cs:1963 {{MyProject.Forms.MDI_FORM.Rate_1.Text = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(DC_Main.Rshlp.Rows[DC_Main.M]["GR_NAME"], (object)"  -  "), (object)Strings.Format(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[DC_Main.M]["GR_RATE"]), "0.00")));}} MS_RATE.cs:1932 {{UPDATE GROUP_MAST SET GR_RATE = }})
+Gap: 1, 5. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.labels.shrink-clears-surplus   (T16 Report/output)
+Layer: browser
+Steps: 1. Display seven eligible rows. 2. Replace D with only Display 1, then zero eligible rows. 3. Refresh via committed save each time.
+Expected: After shrink there is only “Display 1  -  101.00”; after empty there is only “ToDays Rate :”. Slots 2–7 are hidden in both results. A3 removes stale-label weakness, rather than preserving one-sided visibility updates. (the desktop rule: MS_RATE.cs:1956 {{MyProject.Forms.MDI_FORM.Rate_1.Text = "ToDays Rate :";}} MS_RATE.cs:1967 {{((Control)MyProject.Forms.MDI_FORM.Rate_2).Visible = true;}})
+Gap: 3, 5. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+### daily-rate.keyboard.alt-s-saves   (T17 Keyboard/usability)
+Layer: browser
+Steps: 1. Enter A using keyboard in an eligible 00 session. 2. Press Alt+S. 3. Inspect source/group/target rows.
+Expected: Alt+S performs one save: three A rows at each location and groups [54000,64031,763], with “Data Are Saved.”. Ordinary mode returns date focus. (the desktop rule: MS_RATE.cs:1124 {{BtnSave.Text = "&Save";}} MS_RATE.cs:2007 {{Interaction.MsgBox((object)"Data Are Saved.", (MsgBoxStyle)0, (object)DC_Main.MsgTitle);}} MS_RATE.cs:2015 {{CLEAR_DATA();}} MS_RATE.cs:1749 {{((Control)mVchDate).Focus();}})
+Status: executable
+
+### daily-rate.keyboard.grid-and-escape   (T17 Keyboard/usability)
+Layer: browser
+Steps: 1. Enter gold 72000 and press Enter, then enter silver 85000 and press Enter. 2. Use arrows and Enter through the grid. 3. Escape while editing, then Escape outside the editor.
+Expected: Gold becomes 72000.00; Silver Enter enters row 1 Rate10gm. Enter in Rate10gm/PrRate advances to next row Rate10gm, or Save at last row. Escape from editor commits the cell, hides editor and focuses Save; subsequent Escape closes the form. No save occurs until explicitly invoked. (the desktop rule: MS_RATE.cs:2309 {{nGoldRate.Text = Strings.Format((object)Convert.ToDouble(Conversion.Val(nGoldRate.Text)), "0.00");}} MS_RATE.cs:2310 {{SendKeys.Send("{TAB}");}} MS_RATE.cs:2362 {{MSG.Col = 5;}} MS_RATE.cs:2363 {{MSG.Row = 1;}} MS_RATE.cs:2244 {{if (col == 5 || col == 8)}} MS_RATE.cs:2248 {{((Control)BtnSave).Focus();}} MS_RATE.cs:2251 {{mSG.Row += 1;}} MS_RATE.cs:2252 {{mSG.Col = 5;}} MS_RATE.cs:2153 {{MSG_LeaveCell(MSG, new EventArgs());}} MS_RATE.cs:2156 {{((Control)TEXT_ENTRY).Visible = false;}} MS_RATE.cs:2157 {{((Control)BtnSave).Focus();}} MS_RATE.cs:2161 {{((Form)this).Close();}})
+Status: executable
+
+### daily-rate.downstream.copy-reopen-display   (T18 Full journey)
+Layer: browser
+Steps: 1. Save A at eligible 00. 2. Sign into 01 and 02 independently. 3. Reopen D, print and enter each dashboard. 4. Edit 00 R22 to 64032 and repeat.
+Expected: Both destinations reopen A, report A and display R22 “Rate Gold 22K  -  64031.00”; after source edit both reopen/report/display 64032. Source group R22 equals 64032; foreign scopes stay unchanged. This journey covers the residual chain, not a sale posting or external app transfer. (the desktop rule: MS_RATE.cs:1756 {{AND LC_CODE = '}} MS_RATE.cs:1945 {{INSERT INTO RATE_MAST(CO_CODE,LC_CODE,CO_YEAR,VCH_DATE,SR_NO,GR_CODE,FINE_GL_RATE,FINE_SL_RATE,  GR_RATE,GR_TOUCH,GR_TYPE,EMP_CODE,CASH_AMT,MAIN_USER,ADD_USER,ADD_DATE,GR_PR_TOUCH,GR_PR_RATE,  FINE_GL_PR_RATE,FINE_SL_PR_RATE,DOLLAR_GL_RATE,DOLLAR_SL_RATE,AND_TRFR,GR_TAX_RATE,GR_TAX_PRC,OP_GL_RATE)}} MS_RATE.cs:1848 {{{RATE_MAST.LC_CODE} = '}} MS_RATE.cs:1963 {{MyProject.Forms.MDI_FORM.Rate_1.Text = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(DC_Main.Rshlp.Rows[DC_Main.M]["GR_NAME"], (object)"  -  "), (object)Strings.Format(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[DC_Main.M]["GR_RATE"]), "0.00")));}})
+Gap: 1, 2, 3, 5. This is an expected missing-behaviour/evidence assertion from the study, not a recorded failing run.
+Status: executable
+
+## Retained subcase exclusions
+
+### daily-rate.branches.not-applicable   (T02 Field route)
+Layer: browser
+Steps: 1. Record that this packet's interactive fixture is non-UAE.
+Expected: Full UAE optional-input recalculation is excluded from this residual packet; copied optional values remain required in field.copy-optional-projection. No unit test counts as UAE browser coverage. (the desktop rule: MS_RATE.cs:1705 {{if (Operators.CompareString(DC_Main.MCo_SName, "UAE", false) == 0)}} MS_RATE.cs:1711 {{((Control)nGoldOzRate).Visible = true;}} MS_RATE.cs:2428 {{mSG[DC_Main.M, 8] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 7]) * Conversion.Val(nPrGoldRate.Text) / 100.0), "0.00");}} MS_RATE.cs:2445 {{mSG[DC_Main.M, 8] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 7]) * Conversion.Val(nPrSilverRate.Text) / 10000.0), "0.00");}})
+Gap: 6, retained scope boundary; not a product failure or a passing UI branch.
+Status: N/A: full UAE workflow belongs to its own scope; T02 itself applies.
+
+### daily-rate.settlement.not-applicable   (T06 Required/invalid)
 Layer: database
-Steps: 1. Save a day with all three groups at 00 (group GR_RATEs set). 2. Remove R22 from GROUP_MAST (or set its touch to 0) and re-save. 3. Compare RATE_MAST and GROUP_MAST.
-Expected: The dropped group is absent from the grid (`MS_RATE.cs:1781 {{AND GR_TOUCH <> 0 ORDER BY GR_TYPE,GR_NAME}}`) so no row is written for it, and the group update runs only inside the qualifying insert loop (`MS_RATE.cs:1930 {{if (Operators.CompareString(DC_Main.MLc_code, "00", false) == 0)}}`, `MS_RATE.cs:1932 {{UPDATE GROUP_MAST SET GR_RATE = }}`): R22 retains its previous GR_RATE while R18 and R22's RATE_MAST history is replaced correctly.
-Status: executable
-
-### daily-rate.edit.backdated-group-update (T09 Edit)
-Layer: database
-Steps: 1. At 00, first save today's date, then save an older date with different rates. 2. Read GROUP_MAST.GR_RATE after each. 3. Confirm the backdated save updates the group.
-Expected: The location-00 group update has no newest-date condition (`MS_RATE.cs:1932 {{UPDATE GROUP_MAST SET GR_RATE = }}` inside `MS_RATE.cs:1930 {{if (Operators.CompareString(DC_Main.MLc_code, "00", false) == 0)}}`), so a backdated save still overwrites GR_RATE with that day's Rate10gm (`MS_RATE.cs:1920 {{dataRow["GR_RATE"] = Conversion.Val(MSG[DC_Main.i, 5]);}}`) — the last save wins regardless of date.
-Status: executable
-
-## T10 Delete/cancel/reverse
-
-### daily-rate.delete.day (T10 Delete/cancel/reverse) [reuse]
-Layer: browser
-Steps: 1. Save a day. 2. Click Delete and answer Yes. 3. Query the day.
-Expected: The confirm text is `MS_RATE.cs:2104 {{else if ((int)Interaction.MsgBox((object)"Are You Sure To Delete This Day Rate?", (MsgBoxStyle)4, (object)DC_Main.MsgTitle) == 6)}}`; Yes runs `MS_RATE.cs:2106 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}}` and `MS_RATE.cs:2107 {{CLEAR_DATA();}}`, so the day has no rows.
-Status: executable
-
-### daily-rate.delete.non-reversal (T10 Delete/cancel/reverse)
-Layer: database
-Steps: 1. At 00 save with copy enabled (group GR_RATE updated, destinations written). 2. Delete the source day. 3. Check GROUP_MAST, destinations and labels.
-Expected: Delete is only the company/location/date RATE_MAST deletion plus clear (`MS_RATE.cs:2106 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}}`, `MS_RATE.cs:2107 {{CLEAR_DATA();}}`). It does not undo GROUP_MAST.GR_RATE, does not run the copy (`MS_RATE.cs:1937 {{if (Operators.CompareString(DC_Main.SSRegSrNo, "VK142NEVK", false) == 0 && Operators.CompareString(DC_Main.MLc_code, "00", false) == 0)}}`), and does not refresh labels; those values remain as after the save.
-Status: executable
-
-### daily-rate.cancel-and-exit (T10 Delete/cancel/reverse)
-Layer: browser
-Steps: 1. Dirty a grid, click Cancel; confirm clear only. 2. Click Exit; confirm close only. 3. Open/close enough forms to cross the three-form boundary and observe PanelImage.
-Expected: Cancel is `MS_RATE.cs:2118 {{CLEAR_DATA();}}` with no delete; Exit is `MS_RATE.cs:2113 {{((Form)this).Close();}}` with no clear. On closing, PanelImage is shown only when open forms are at most three (`MS_RATE.cs:2270 {{if (((ReadOnlyCollectionBase)(object)((WindowsFormsApplicationBase)MyProject.Application).OpenForms).Count <= 3)}}`, `MS_RATE.cs:2272 {{((Control)MyProject.Forms.MDI_FORM.PanelImage).Visible = true;}}`), else hidden (`MS_RATE.cs:2276 {{((Control)MyProject.Forms.MDI_FORM.PanelImage).Visible = false;}}`).
-Status: executable
-
-## T11 Scope/rights
-
-### daily-rate.scope.no-rights-user (T11 Scope/rights) [reuse]
-Layer: browser
-Steps: 1. Save a day as admin. 2. As clerk without Daily Rate rights, call GET, GET print, DELETE and POST directly. 3. Compare the day.
-Expected: Rights come from USER_SET by location/user/form (`MS_RATE.cs:1560 {{Select * From USER_SET WHERE LC_CODE = '}}`, `MS_RATE.cs:1565 {{UserEdit = Conversions.ToString(Operators.ConcatenateObject(dataTable.Rows[0]["FRM_EDIT"], (object)""));}}`); all four calls are refused with HTTP 403 and the day is byte-identical, matching the save/delete/print gates above.
-Status: executable
-
-### daily-rate.scope.mdi-shortcut-view-rights (T11 Scope/rights)
-Layer: browser
-Steps: 1. Invoke the F1+Ctrl Daily Rate shortcut as a user without FRM_VIEW. 2. Record the refusal and PanelImage. 3. Repeat with FRM_VIEW=Y.
-Expected: The shortcut is advertised as `MDI_FORM.cs:5604 {{((ToolStripItem)F1CtrlDailyRateToolStripMenuItem).Text = "F1 + Ctrl Daily Rate";}}`; its handler requires `MDI_FORM.cs:14395 {{AND FRM_VIEW = 'Y'}}`, refuses with `MDI_FORM.cs:14400 {{Interaction.MsgBox((object)"You Have No Rights.....", (MsgBoxStyle)0, (object)null);}}` and shows `MDI_FORM.cs:14401 {{((Control)PanelImage).Visible = true;}}`; with the right it opens `MDI_FORM.cs:14405 {{MS_RATE mS_RATE = new MS_RATE();}}`.
-Status: executable
-
-### daily-rate.scope.copy-authorized-company-only (T11 Scope/rights)
-Layer: database
-Steps: 1. With copy enabled at 00, seed another tenant/company and a location outside the authorized company. 2. Save. 3. Confirm neither is a copy destination (decision 1).
-Expected: The desktop enumerates only non-00 locations of the current company (`MS_RATE.cs:1939 {{AND LC_CODE <> '00' ORDER BY LC_CODE}}`) and executes per destination (`MS_RATE.cs:1946 {{DC_Main.ExeQuteDc(DC_Main.RsQry);}}`); the hosted form adds an explicit authorized company scope so no client-supplied registration value can fan out to another tenant/company. Foreign sentinels are untouched.
-Status: executable
-
-## T12 Concurrency
-
-### daily-rate.concurrency.two-operators-same-day (T12 Concurrency) [reuse]
-Layer: browser
-Steps: 1. Two sessions load the same day (72000/85000 vs 73000/86000). 2. Save both concurrently. 3. Query the day.
-Expected: The desktop deletes and rewrites with no version check, so the hosted result must be one valid outcome — statuses 201/201 or 201/409 with at least one 201 — and exactly three rows from a single writer (all gold 72000 or all 73000), never a mixture or duplicates (`MS_RATE.cs:1894 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}}`, `MS_RATE.cs:1928 {{((DbDataAdapter)(object)DC_Main.Da).Update(RsDetl);}}`).
-Status: executable
-
-### daily-rate.copy.overlapping-save-locks (T12 Concurrency)
-Layer: database
-Steps: 1. Configure two source companies whose copy destinations overlap. 2. Save both concurrently. 3. Confirm each destination holds one complete set from a single source.
-Expected: The copy loop advances one location at a time (`MS_RATE.cs:1947 {{DC_Main.R++;}}`) with no cross-destination coordination, so the hosted service must use deterministic overlapping-save locks (extending the same-day serialization at `web/apps/api/src/modules/masters/dailyRate.ts:231–234`): one complete set per destination, no interleaved or duplicate rows.
-Status: executable
-
-## T13 Retry/unknown
-
-### daily-rate.retry.replayed-save (T13 Retry/unknown) [reuse]
-Layer: browser
-Steps: 1. Save a day (201). 2. Replay the identical POST after the acknowledgment is "lost". 3. Compare the day.
-Expected: Replay is an idempotent replace-day: delete then rewrite (`MS_RATE.cs:1894 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}}`), success `MS_RATE.cs:2007 {{Interaction.MsgBox((object)"Data Are Saved.", (MsgBoxStyle)0, (object)DC_Main.MsgTitle);}}`, and identical rows with no duplicates and no second group update effect.
-Status: executable
-
-### daily-rate.copy.replayed-no-duplicate (T13 Retry/unknown)
-Layer: database
-Steps: 1. Save at 00 with copy enabled (201). 2.Replay the same request. 3. Count destination rows in every location.
-Expected: The copy is a replacement, not an append: each destination day is deleted before insert (`MS_RATE.cs:1944 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}}`), so a replay yields the same single set per destination and the same GROUP_MAST.GR_RATE (`MS_RATE.cs:1932 {{UPDATE GROUP_MAST SET GR_RATE = }}`), with no duplicate financial effect.
-Status: executable
-
-## T14 Rollback
-
-### daily-rate.rollback.rate-write-fault (T14 Rollback) [reuse]
-Layer: database
-Steps: 1. Save a day. 2. Install a trigger that fails an INSERT for RSV at that date. 3. Edit gold and re-save; compare before/after.
-Expected: The desktop has no enclosing transaction (`MS_RATE.cs:1895 {{DC_Main.ExeQuteDc(DC_Main.RsQry);}}`, `MS_RATE.cs:1928 {{((DbDataAdapter)(object)DC_Main.Da).Update(RsDetl);}}`) and only shows `MS_RATE.cs:2024 {{Interaction.MsgBox((object)("Error Found: " + Information.Err().Description + "\rClick Ok to Exit."), (MsgBoxStyle)48, (object)DC_Main.MsgTitle);}}`; the hosted service must roll the delete back completely, so the day keeps its earlier three rows and unrelated sentinels are intact.
-Status: executable
-
-### daily-rate.copy.atomic-all-locations-rollback (T14 Rollback)
-Layer: database
-Steps: 1. Configure three copy destinations; make the second fail on insert. 2. Save at 00 with copy enabled. 3. Check source day, GROUP_MAST, first/second/third destinations and sentinels.
-Expected: The desktop executes source, each group update and each destination separately (`MS_RATE.cs:1895 {{DC_Main.ExeQuteDc(DC_Main.RsQry);}}`, `MS_RATE.cs:1932 {{DC_Main.ExeQuteDc(}}, `MS_RATE.cs:1946 {{DC_Main.ExeQuteDc(DC_Main.RsQry);}}`) with the error handler above. The hosted service must wrap all of them in one transaction: a later failure rolls back the source rewrite, every group update and every destination replacement, leaving all tables as before.
-Status: executable
-
-## T15 Config/history
-
-### daily-rate.settings.pending (T15 Config/history) [reuse — replaces the original blocked declaration]
-Layer: browser
-Steps: 1. Provision/choose an authorized 00 session through the real UI and assert its scope (Gap 1). 2. Save and edit a day through the page. 3. Assert the full RATE_MAST and GROUP_MAST writes plus other-location/tenant sentinels; include skipped groups, a backdated save, cancel/delete non-reversal and rollback.
-Expected: Location 00 writes the saved Rate10gm to company/group GR_RATE (`MS_RATE.cs:1930 {{if (Operators.CompareString(DC_Main.MLc_code, "00", false) == 0)}}`, `MS_RATE.cs:1932 {{UPDATE GROUP_MAST SET GR_RATE = }}`) as verified in `daily-rate.create.group-rate-at-00`. The original blocked reason — "Location 00 also sets GROUP_MAST.GR_RATE; covered in the HTTP test." — is corrected: that test calls the writer directly, not through an HTTP or browser session. Use a distinct login cache slot; do not spoof scope in the POST.
-Status: executable
-
-### daily-rate.settings.copy-eligibility-setting (T15 Config/history)
-Layer: browser
-Steps: 1. With copy disabled, save a priced day at 00; assert no destinations written. 2. Enable the explicit authorized setting and save a different day; assert destinations written. 3. Toggle between preview and save and record which snapshot applies (decision 1).
-Expected: The desktop gate is `MS_RATE.cs:1937 {{if (Operators.CompareString(DC_Main.SSRegSrNo, "VK142NEVK", false) == 0 && Operators.CompareString(DC_Main.MLc_code, "00", false) == 0)}}`; the hosted form substitutes an authorized company setting while keeping the location-00 source requirement. Both false-gate cases (setting off, or source location not 00) produce no fan-out.
-Status: executable
-
-### daily-rate.copy.gate-false-no-fanout (T15 Config/history)
-Layer: database
-Steps: 1. Case A: authorized setting on but source location 01. Case B: source location 00 but setting off. 2. Save priced days in each. 3. Query all non-00 locations.
-Expected: No destination rows are written in either case and GROUP_MAST is updated only in the 00 case (`MS_RATE.cs:1930 {{if (Operators.CompareString(DC_Main.MLc_code, "00", false) == 0)}}`). The gate requires both predicates together (`MS_RATE.cs:1937 {{if (Operators.CompareString(DC_Main.SSRegSrNo, "VK142NEVK", false) == 0 && Operators.CompareString(DC_Main.MLc_code, "00", false) == 0)}}`).
-Status: executable
-
-### daily-rate.copy.destination-enumeration (T15 Config/history)
-Layer: database
-Steps: 1. Seed locations 01, 02, 98 for the company, a non-00 location for another company and an inactive location. 2. Save at 00 with copy on. 3. List every location that received rows.
-Expected: Destinations are exactly the non-00 locations of the same company, ordered LC_CODE (`MS_RATE.cs:1939 {{AND LC_CODE <> '00' ORDER BY LC_CODE}}`), each written by `MS_RATE.cs:1946 {{DC_Main.ExeQuteDc(DC_Main.RsQry);}}`. No active-location or rights filter exists in the desktop loop, but the hosted form adds authorized company scope (decision 1); no other company/location is a target.
-Status: executable
-
-### daily-rate.copy.full-column-projection (T15 Config/history)
-Layer: database
-Steps: 1. Save a source day at 00 with all optional fields set. 2. Read one destination row. 3. Compare every column to the source.
-Expected: Copy projects all columns verbatim with no arithmetic and no GR_NAME: `MS_RATE.cs:1945 {{INSERT INTO RATE_MAST(CO_CODE,LC_CODE,CO_YEAR,VCH_DATE,SR_NO,GR_CODE,FINE_GL_RATE,FINE_SL_RATE,  GR_RATE,GR_TOUCH,GR_TYPE,EMP_CODE,CASH_AMT,MAIN_USER,ADD_USER,ADD_DATE,GR_PR_TOUCH,GR_PR_RATE,  FINE_GL_PR_RATE,FINE_SL_PR_RATE,DOLLAR_GL_RATE,DOLLAR_SL_RATE,AND_TRFR,GR_TAX_RATE,GR_TAX_PRC,OP_GL_RATE)}}`. The projected rate is the stored GR_RATE (`MS_RATE.cs:1945 {{GR_RATE,GR_TOUCH,GR_TYPE,EMP_CODE,CASH_AMT,MAIN_USER,ADD_USER,ADD_DATE,GR_PR_TOUCH,GR_PR_RATE}}`); only LC_CODE is substituted.
-Status: executable
-
-### daily-rate.copy.replaces-not-appends (T15 Config/history)
-Layer: database
-Steps: 1. Pre-seed a destination day with old rows. 2. Save a new source day at 00 with copy on. 3. Count and compare destination rows.
-Expected: Each destination day is deleted before insert (`MS_RATE.cs:1944 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}}`, `MS_RATE.cs:1944 {{AND VCH_DATE = '}}`), then replaced from source (`MS_RATE.cs:1945 {{AND LC_CODE = '00' AND VCH_DATE = '}}`). The destination holds exactly the new source set, with no old rows appended.
-Status: executable
-
-### daily-rate.copy.zero-source-deletion (T15 Config/history)
-Layer: database
-Steps: 1. Pre-seed a destination day with old rows but leave source location 00 empty for that date. 2. Save at 00 with copy on (or with an empty grid). 3. Query the destination.
-Expected: An empty source selection still deletes the destination day because the delete is unconditional before the insert-select (`MS_RATE.cs:1944 {{DELETE FROM RATE_MAST WHERE CO_CODE = '}}`, `MS_RATE.cs:1945 {{AND LC_CODE = '00' AND VCH_DATE = '}}`). The destination ends with zero rows.
-Status: executable
-
-### daily-rate.copy.cross-year-collision (T15 Config/history)
-Layer: database
-Steps: 1. Seed a destination row for the same company/location/date but a different CO_YEAR. 2. Save the source day at 00 with copy on. 3. Compare both CO_YEAR rows (decision 2).
-Expected: The hosted replacement key includes CO_YEAR so the different-year sentinel is not deleted or overwritten: it remains byte-identical, while the same-year destination day is replaced. The desktop omits CO_YEAR from the copy predicates (`MS_RATE.cs:1944 {{AND VCH_DATE = '}}`) and copies it as data (`MS_RATE.cs:1945 {{',CO_YEAR,VCH_DATE,SR_NO,GR_CODE,FINE_GL_RATE,FINE_SL_RATE, }}`); the hosted form keeps all required tenant/company/location bounds.
-Status: executable
-
-### daily-rate.labels.historical-save-refresh (T15 Config/history)
-Layer: browser
-Steps: 1. Establish today's labels with one rate set. 2. Save a historical date at 00 with a different rate set. 3. Read the labels without a manual reload (Gap 5).
-Expected: The desktop refreshes today's display after every successful save using MsSysDate, not the voucher date (`MS_RATE.cs:1950 {{Strings.Format((object)DC_Main.MsSysDate, "MM/dd/yyyy")}}`), so the labels update to the new values immediately even though the saved voucher date is historical; the web must invalidate the display projection on commit rather than wait for the 60000 ms poll.
-Status: executable
-
-## T16 Report/output
-
-### daily-rate.print.rate-report (T16 Report/output) [reuse]
-Layer: browser
-Steps: 1. Save a day. 2. Run Print and capture the RateRpt HTML/print output. 3. Check title, columns and rates. Also check the print-right refusal above.
-Expected: New path rptName is `MS_RATE.cs:1843 {{string rptName = "RateRpt";}}` with `MS_RATE.cs:1845 {{DC_Main.MsRptTitelStr = "'Daily Rate Report " + Strings.Format((object)Conversions.ToDate(mVchDate.Text), "dd/MM/yyyy") + "'";}}` and `MS_RATE.cs:1846 {{DC_Main.MsWappPrintType = "All";}}`; old path uses `MS_RATE.cs:1857 {{Cr.ReportFileName = ((ApplicationBase)MyProject.Application).Info.DirectoryPath + "\\Report\\RateRpt.RPT";}}` with preview destination `MS_RATE.cs:1860 {{Cr.Destination = (DestinationConstants)0;}}`. For date YYYY-MM-DD the title is `Daily Rate Report DD/MM/YYYY` and R22/R SV show 64,031.00 and 763.00.
-Status: executable
-
-## T17 Keyboard/usability
-
-### daily-rate.keyboard.alt-s-saves (T17 Keyboard/usability) [reuse]
-Layer: browser
-Steps: 1. Price a day using keyboard only. 2. Press Alt+S. 3. Query the day.
-Expected: `MS_RATE.cs:1124 {{BtnSave.Text = "&Save";}}` makes Alt+S the Save mnemonic; the save writes three rows with `MS_RATE.cs:2007 {{Interaction.MsgBox((object)"Data Are Saved.", (MsgBoxStyle)0, (object)DC_Main.MsgTitle);}}`. The sibling mnemonics are `MS_RATE.cs:1137 {{BtnPrint.Text = "&Print";}}`, `MS_RATE.cs:1111 {{BtnCancel.Text = "&Cancel";}}`, `MS_RATE.cs:1097 {{BtnDelete.Text = "&Delete";}}`, `MS_RATE.cs:1084 {{BtnExit.Text = "E&xit";}}`.
-Status: executable
-
-### daily-rate.keyboard.editor-navigation (T17 Keyboard/usability)
-Layer: browser
-Steps: 1. Focus the grid editor and drive it with arrow keys, Enter and Esc. 2. Record cell movements and editor visibility.
-Expected: Left/right/up/down change column/row within bounds (`MS_RATE.cs:2218 {{mSG.Col -= 1;}}`, `MS_RATE.cs:2224 {{mSG.Col += 1;}}`, `MS_RATE.cs:2230 {{mSG.Row -= 1;}}`, `MS_RATE.cs:2236 {{mSG.Row += 1;}}`); Enter in rate column 5 or 8 advances to the next row column 5 (`MS_RATE.cs:2251 {{mSG.Row += 1;}}`, `MS_RATE.cs:2252 {{mSG.Col = 5;}}`) or focuses Save at the last row (`MS_RATE.cs:2248 {{((Control)BtnSave).Focus();}}`); other Enter advances a column (`MS_RATE.cs:2259 {{MSG.Col += 1;}}`). Esc with a visible editor commits, moves to final row column 0, hides the editor and focuses Save (`MS_RATE.cs:2156 {{((Control)TEXT_ENTRY).Visible = false;}}`, `MS_RATE.cs:2157 {{((Control)BtnSave).Focus();}}`), otherwise closes the form (`MS_RATE.cs:2161 {{((Form)this).Close();}}`). Key-up selects editor text (`MS_RATE.cs:2178 {{if ((Operators.CompareString(((ContainerControl)this).ActiveControl.Name, "TEXT_ENTRY", false) == 0) & (((int)e.KeyCode == 39) | ((int)e.KeyCode == 37) | ((int)e.KeyCode == 38) | ((int)e.KeyCode == 40) | ((int)e.KeyCode == 13)))}}`).
-Status: executable
-
-### daily-rate.keyboard.enter-formatting-and-f1 (T17 Keyboard/usability)
-Layer: browser
-Steps: 1. Enter gold 72000 and press Enter; observe "0.00" formatting and Tab. 2. Enter gold 72 (whole) and silver 85000 with Enter and observe the editor target. 3. Click F1 help, choose a saved date, observe focus.
-Expected: Gold Enter formats then tabs (`MS_RATE.cs:2309 {{nGoldRate.Text = Strings.Format((object)Convert.ToDouble(Conversion.Val(nGoldRate.Text)), "0.00");}}`, `MS_RATE.cs:2310 {{SendKeys.Send("{TAB}");}}`); non-UAE silver recalculation ends at row 1 column 5 (`MS_RATE.cs:2362 {{MSG.Col = 5;}}`, `MS_RATE.cs:2363 {{MSG.Row = 1;}}`); visible USD inputs make silver Enter just Tab (`MS_RATE.cs:2323 {{if (((Control)nGoldOzRate).Visible)}}`, `MS_RATE.cs:2325 {{SendKeys.Send("{TAB}");}}`). F1 help opens `MS_RATE.cs:2381 {{((Form)MyProject.Forms.MS_HELP).ShowDialog();}}`, copies the chosen date (`MS_RATE.cs:2386 {{mVchDate.Text = DC_Main.ColValue[0];}}`) and refocuses date (`MS_RATE.cs:2388 {{((Control)mVchDate).Focus();}}`). Form KeyPress uppercases input (`MS_RATE.cs:2136 {{num = (short)Strings.Asc(Strings.UCase(Strings.Chr(unchecked((int)num))));}}`).
-Status: executable
-
-## T18 Full journey
-
-### daily-rate.downstream.rate-lookup-own-location (T18 Full journey) [reuse]
-Layer: browser
-Steps: 1. Save a R22 rate at location 01. 2. Seed a later rate at another location with GR_RATE=11111. 3. Request the rate for that later day through the downstream lookup.
-Expected: The lookup returns this location's 64031.00 dated the saved date, not 11111 from the other location; the display projection requires own location and exactly MsSysDate (`MS_RATE.cs:1950 {{AND A.LC_CODE = '}}`, `MS_RATE.cs:1950 {{Strings.Format((object)DC_Main.MsSysDate, "MM/dd/yyyy")}}`) and RtView is replaced from the saved-date query only when it has rows (`MS_RATE.cs:2003 {{if (DC_Main.Rshlp.Rows.Count > 0)}}`, `MS_RATE.cs:2005 {{DC_Main.RtView = new DataView(DC_Main.Rshlp);}}`).
-Status: executable
-
-### daily-rate.labels.system-date-display (T18 Full journey)
-Layer: browser
-Steps: 1. Seed eight RATE_DISPLAY=Y groups with distinct GR_RATE, GR_TAX_RATE and header rates; include one hidden group. 2. Open the main window. 3. Read Rate_1..Rate_7 (Gap 3).
-Expected: The query joins RATE_MAST to GROUP_MAST by company/group with `MS_RATE.cs:1950 {{ON A.CO_CODE = B.CO_CODE AND A.GR_CODE = B.GR_CODE}}`, filters `MS_RATE.cs:1950 {{AND B.RATE_DISPLAY = 'Y' ORDER BY A.SR_NO}}`, and the first seven rows populate slots 0..6 (`MS_RATE.cs:1960 {{if (DC_Main.M == 0)}}` … `MS_RATE.cs:1990 {{if (DC_Main.M == 6)}}`). For R22 the label reads `Rate Gold 22K  -  64031.00` — GR_RATE, not GR_TAX_RATE 65952 or header gold 72000, formatted `MS_RATE.cs:1963 {{["GR_RATE"}}), "0.00")]`. Hidden groups are absent and row 8 has no slot.
-Status: executable
-
-### daily-rate.labels.empty-and-count-boundaries (T18 Full journey)
-Layer: browser
-Steps: 1. With 0 eligible rows open the main window. 2. Repeat with 1, 7 and 8 eligible rows. 3. Read every label slot.
-Expected: With no rows, Rate_1 is exactly `MDI_FORM.cs:11422 {{Rate_1.Text = "ToDays Rate :";}}` and the rest hidden (`MDI_FORM.cs:6912 {{((Control)Rate_2).Visible = false;}}`); with 1/7/8 rows exactly min(n,7) labels are visible, each using `MDI_FORM.cs:11429 {{["GR_NAME"}}, (object)"  -  "), (object)Strings.Format(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[DC_Main.M]["GR_RATE"]), "0.00")].`, and all seven slots obey the tab order `MDI_FORM.cs:6919 {{((Control)Rate_1).TabIndex = 1137;}}`.
-Status: executable
-
-### daily-rate.labels.no-fallback (T18 Full journey)
-Layer: browser
-Steps: 1. Absent own-day: no RATE_MAST for the session location on system date. 2. Only foreign location has rows. 3. Rows exist only on a past day and only on a future day. 4. Read labels each time (Gap 4).
-Expected: The MDI projection requires own location and exactly MsSysDate (`MS_RATE.cs:1950 {{AND A.LC_CODE = '}}`, `MS_RATE.cs:1950 {{Strings.Format((object)DC_Main.MsSysDate, "MM/dd/yyyy")}}`), so all four scenarios return no rows and show the empty state `MS_RATE.cs:1956 {{MyProject.Forms.MDI_FORM.Rate_1.Text = "ToDays Rate :";}}` — no "latest available" or another-location fallback. Existing same-day serialization (`web/apps/api/src/modules/masters/dailyRate.ts:231–234`) is preserved and is distinct from this read path.
-Status: executable
-
-### daily-rate.labels.surplus-cleared (T18 Full journey)
-Layer: browser
-Steps: 1. Display seven labels. 2. Save a day whose projection has two rows. 3. Read all seven slots after refresh (decision 3).
-Expected: The desktop refresh only sets populated labels visible and never clears the remaining ones (`MS_RATE.cs:1967 {{((Control)MyProject.Forms.MDI_FORM.Rate_2).Visible = true;}}`, `MS_RATE.cs:1995 {{DC_Main.M++;}}`), leaving stale Rate_3..Rate_7. The hosted form must clear every surplus slot so exactly two labels are visible and the others hidden/blank, with the empty wording `MS_RATE.cs:1956 {{MyProject.Forms.MDI_FORM.Rate_1.Text = "ToDays Rate :";}}` when appropriate.
-Status: executable
-
-### daily-rate.labels.refresh-after-save (T18 Full journey)
-Layer: browser
-Steps: 1. Establish today's labels with rate set A (R22=64031.00). 2. Save today with set B (R22=64920.00). 3. Read labels immediately, without waiting for the poll (Gap 5).
-Expected: After the commit the labels show 64920.00 for R22 using `MS_RATE.cs:1963 {{["GR_RATE"}}), "0.00")]`, derived from `MS_RATE.cs:1920 {{dataRow["GR_RATE"] = Conversion.Val(MSG[DC_Main.i, 5]);}}` and the MsSysDate query `MS_RATE.cs:1950 {{Strings.Format((object)DC_Main.MsSysDate, "MM/dd/yyyy")}}`. A historical save is covered separately in `daily-rate.labels.historical-save-refresh`.
-Status: executable
-
-### daily-rate.transfer.external-scheme.pending (T18 Full journey)
-Layer: browser
-Steps: 1. Set MsAppSchem=Y and save. 2. Observe the external transfer and its downstream effects.
-Expected: Save invokes it separately under the flag `MS_RATE.cs:1997 {{if (Operators.CompareString(DC_Main.MsAppSchem, "Y", false) == 0)}}` via `MS_RATE.cs:1999 {{AppSchemeTrfr();}}`, after labels and before the success message.
-Status: blocked: "External app transfer and full UAE/date-helper parity are outside this residual packet" (study Scope). Exact question: what contract and downstream effects must AppSchemeTrfr satisfy in the hosted service, and which tables/outputs does it own? This is another work package; unblocks when that work package defines its contract.
-
----
+Steps: 1. Record the residual write-set boundary.
+Expected: The relevant writes include RATE_MAST source and copies plus GROUP_MAST rates, not merely RATE_MAST. No tender/stock/ledger workflow is added to this packet. (the desktop rule: MS_RATE.cs:1932 {{UPDATE GROUP_MAST SET GR_RATE = }} MS_RATE.cs:1945 {{INSERT INTO RATE_MAST(CO_CODE,LC_CODE,CO_YEAR,VCH_DATE,SR_NO,GR_CODE,FINE_GL_RATE,FINE_SL_RATE,  GR_RATE,GR_TOUCH,GR_TYPE,EMP_CODE,CASH_AMT,MAIN_USER,ADD_USER,ADD_DATE,GR_PR_TOUCH,GR_PR_RATE,  FINE_GL_PR_RATE,FINE_SL_PR_RATE,DOLLAR_GL_RATE,DOLLAR_SL_RATE,AND_TRFR,GR_TAX_RATE,GR_TAX_PRC,OP_GL_RATE)}})
+Gap: 7, inaccurate existing evidence text; covered by create.desktop-rows and copy cases, not a missing tender feature.
+Status: N/A: tender/settlement is outside Daily Rate; T06 validation itself applies.
 
 ## Coverage table
 
-| Kind | Meaning | Cases | Blocked | N/A |
-|---|---|---|---|---|
-| T01 | Entry/defaults | 3 | 0 | 0 |
-| T02 | Field route | 2 | 0 | 1 |
-| T03 | Formula sequence | 3 | 0 | 0 |
-| T04 | Lookup | 4 | 1 | 0 |
-| T05 | Children | 2 | 0 | 0 |
-| T06 | Required/invalid | 6 | 0 | 1 |
-| T07 | Create | 2 | 0 | 0 |
-| T08 | Reopen/no-op | 2 | 0 | 0 |
-| T09 | Edit | 3 | 0 | 0 |
-| T10 | Delete/cancel/reverse | 3 | 0 | 0 |
-| T11 | Scope/rights | 3 | 0 | 0 |
-| T12 | Concurrency | 2 | 0 | 0 |
-| T13 | Retry/unknown | 2 | 0 | 0 |
-| T14 | Rollback | 2 | 0 | 0 |
-| T15 | Config/history | 9 | 0 | 0 |
-| T16 | Report/output | 1 | 0 | 0 |
-| T17 | Keyboard/usability | 3 | 0 | 0 |
-| T18 | Full journey | 7 | 1 | 0 |
-| **Total** | | **59** | **2** | **2** |
+Counts include only applicable cases; the two N/A subcases above are separately noted. Blocked cases stay in the denominator. Every kind applies to these residuals.
 
-Every kind T01–T18 is either applied with at least one case or justified as N/A above; none is silently dropped.
+| Kind | Applicability | Cases | Blocked |
+|---|---|---:|---:|
+| T01 Entry/defaults | Applied | 2 | 0 |
+| T02 Field route | Applied | 2 | 0 |
+| T03 Formula sequence | Applied | 1 | 0 |
+| T04 Lookup | Applied | 1 | 0 |
+| T05 Children | Applied | 1 | 0 |
+| T06 Required/invalid | Applied | 3 | 0 |
+| T07 Create | Applied | 4 | 0 |
+| T08 Reopen/no-op | Applied | 2 | 0 |
+| T09 Edit | Applied | 2 | 0 |
+| T10 Delete/cancel/reverse | Applied | 2 | 0 |
+| T11 Scope/rights | Applied | 2 | 0 |
+| T12 Concurrency | Applied | 2 | 0 |
+| T13 Retry/unknown | Applied | 1 | 0 |
+| T14 Rollback | Applied | 2 | 0 |
+| T15 Config/history | Applied | 3 | 1 |
+| T16 Report/output | Applied | 12 | 0 |
+| T17 Keyboard/usability | Applied | 2 | 0 |
+| T18 Full journey | Applied | 1 | 0 |
 
-Gap coverage: Gap 1 → `daily-rate.entry.location-00-session`, `daily-rate.create.group-rate-at-00`, `daily-rate.settings.pending`, `daily-rate.edit.backdated-group-update`; Gap 2 → `daily-rate.copy.gate-false-no-fanout`, `daily-rate.copy.destination-enumeration`, `daily-rate.copy.full-column-projection`, `daily-rate.copy.replaces-not-appends`, `daily-rate.copy.zero-source-deletion`, `daily-rate.copy.cross-year-collision`, `daily-rate.copy.overlapping-save-locks`, `daily-rate.copy.atomic-all-locations-rollback`; Gap 3 → `daily-rate.entry.mdi-labels-initial`, `daily-rate.labels.system-date-display`, `daily-rate.labels.empty-and-count-boundaries`, `daily-rate.labels.surplus-cleared`; Gap 4 → `daily-rate.labels.no-fallback`, `daily-rate.downstream.rate-lookup-own-location`; Gap 5 → `daily-rate.labels.historical-save-refresh`, `daily-rate.labels.refresh-after-save`; Gap 6 → `daily-rate.field-route.copied-optional-numeric-columns`, `daily-rate.branches.not-applicable`; Gap 7 → `daily-rate.write-set.full-footprint`, `daily-rate.settlement.not-applicable`.
+Total: 45 applicable cases, 1 blocked; two explicitly N/A subcases.
 
 ## Test data
 
-Smallest seed needed, described not as SQL:
-
-- **Company/tenant fixtures.** Tenant `feature-e2e`, company `01` (non-UAE, LC `01`), an authorized location-00 session for a distinct login cache slot, and locations `02`, `98` for company `01` (one inactive) plus one location under another company/tenant as sentinels.
-- **Groups.** Three groups with 3-character codes R18 (Gold 18K, type G, touch 75, tax 0, purchase touch 76), R22 (Gold 22K, G, 91.6, tax 3, purchase touch 92), RSV (Silver 925, S, 92.5, tax 3, purchase touch 90); one zero-touch group and one group with RATE_DISPLAY=N; for the labels case, eight RATE_DISPLAY=Y groups with distinct GR_RATE/GR_TAX_RATE/header rates and distinct SR_NO, one labelled `Rate Gold 22K`.
-- **UAE fixture.** A separate company with short name `UAE` and nonblank Gold Purc, Silver Purc, Gold USD and Silver USD inputs so the optional columns and purchase override can be routed and copied.
-- **Opening balances.** Prior GROUP_MAST.GR_RATE for all groups (so skipped/backdated non-reversal is observable) and prior destination-day rows for replacement and zero-source deletion.
-- **Vouchers/prices.** Header Gold 72000 / Silver 85000 (R22→64031, RSV→763), alternative 73000 / 86000 (R22→64920), a historical date distinct from MsSysDate, a past date and a future date for fallback, and one saved day with all optional fields set for column projection.
-- **Faults.** A before-INSERT trigger raising an error for one group at one date, and a copy destination configured to fail on insert at the second of three locations.
-- **Rights.** A user with FRM_EDIT/DELETE/PRINT and FRM_VIEW=Y; a clerk with none; a user with FRM_EDIT≠Y on an existing day; copy setting on/off.
-- **No real data.** All values are synthetic; tests run only on the isolated database started by `web/scripts/parity-test-env.mjs`.
+- One synthetic tenant/company with locations 00, 01 and 02 listed in LOCT_MAST. One synthetic rate sentinel at unlisted location 98; other-company and other-tenant sentinels share group codes and D. Use fresh independent login slots for every scope and concurrent operator. Include full-rights, no-rights and revoked-rights actors, plus an authorized configuration administrator. No real user data is needed.
+- Non-UAE company and synthetic employee E01. Groups R18 “Rate Gold 18K”, R22 “Rate Gold 22K”, RSV “Rate Silver 925” have the touches, taxes and purchase touches specified in A; original group rates are 111/222/333. Z00 has zero touch and rate 444. Turn RATE_DISPLAY on for the three priced groups. No opening balances, tender or stock vouchers are needed.
+- D, H and tomorrow as defined above. Source and destination old-day rows use deliberately different groups/rates so replacement can be distinguished from append. Current fiscal-year identifier comes from fixture configuration, not a guessed schema literal. Cross-year case additionally needs a second valid year identifier for the same synthetic date.
+- Optional projection fixture: FINE_GL_RATE=72000, FINE_SL_RATE=85000, FINE_GL_PR_RATE=71000, FINE_SL_PR_RATE=84000, DOLLAR_GL_RATE=2301.25, DOLLAR_SL_RATE=27.75; R22 carries A group values, EMP_CODE=E01 and synthetic MAIN_USER. Supply controlled nullable stored metadata variants: CASH_AMT NULL versus 0, ADD_USER NULL versus a synthetic actor, ADD_DATE NULL versus 2026-11-23 10:00:00, AND_TRFR NULL versus Y, OP_GL_RATE NULL versus 123.45. Each variant must retain its own exact stored value through P. Do not require ordinary save to manufacture imported metadata. Seed through an isolated fixture helper and exercise the production copy primitive; unsupported fixture construction is implementation work, not evidence that the UI passed.
+- Display fixture reuses at most eight groups, named “Display 1” through “Display 8”, SR_NO 1–8, GR_RATE 101–108. Their GR_TAX_RATE is 901–908, header gold 72000, and group-master default 999 so wrong value sources are distinguishable. Add a RATE_DISPLAY=N row ahead of them. Vary eligible count per case and restore after each run.
 
 ## Not covered
 
-- **External app transfer (AppSchemeTrfr / MsAppSchem).** Explicitly outside WP-33 per the study Scope; blocked case `daily-rate.transfer.external-scheme.pending` records the exact question.
-- **Full shared date validation (DC_Main.SetDate / RongDate).** Outside the residuals; no `.orch/index/DC_Main.md`. Blocked case `daily-rate.lookup.invalid-date-validation` records the exact question.
-- **Full UAE workflow execution.** Belongs to its own case scope (Gap 6); only the field route, copied optional numeric columns and purchase-rate formula are covered here.
-- **General voucher rate fallback in `web/apps/api/src/modules/masters/rate.ts`.** Changing it is a separate scope decision (Gap 4); the new MDI projection is specified to return no rows instead, and the existing G238 same-day serialization is preserved, not redefined.
-- **Report-template internals of RateRpt.** The study excludes them; only selection, title and displayed rates are specified.
-- **Print/drilldown of the copy destination through its own session.** The study directs downstream copy tests to print/reopen the destination through its own session; that belongs to the destination's menu cases, not WP-33.
+- Gap 6 full UAE workflow stays excluded; optional-column copying is covered by field.copy-optional-projection. Source purchase override context: MS_RATE.cs:2428 {{mSG[DC_Main.M, 8] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 7]) * Conversion.Val(nPrGoldRate.Text) / 100.0), "0.00");}} MS_RATE.cs:2445 {{mSG[DC_Main.M, 8] = Strings.Format((object)Math.Round(Conversion.Val(mSG[DC_Main.M, 7]) * Conversion.Val(nPrSilverRate.Text) / 10000.0), "0.00");}}
+- Gap 7 settlement stays N/A, but the inaccurate write-set summary is explicitly corrected in this contract and checked by create/copy cases. No study gap is silently omitted. Gaps 1–5 have required cases above; gap 2's cross-year collision remains blocked, not passed.
+- General voucher /rate fallback and the existing daily-rate.downstream.rate-lookup-own-location case are outside the residual projection contract. The existing ID tests a different latest-date voucher behaviour; it is not reused for exact-system-date labels. No TR_SALE citation was supplied by the study, so none is invented here.
+- External AppSchemeTrfr remains excluded as the study directs. Its invocation is conditional: MS_RATE.cs:1997 {{if (Operators.CompareString(DC_Main.MsAppSchem, "Y", false) == 0)}} MS_RATE.cs:1999 {{AppSchemeTrfr();}}
+- Full shared date validation is not specified: MISSING .orch/index/DC_Main.md. The local handler delegates to SetDate: MS_RATE.cs:2293 {{DC_Main.SetDate(ref MsDate);}}
+- Crystal template internals, physical printer layout, employee-help internals, every character-filter edge case, all optional UAE keyboard controls, generated-daily-rate launch integration, and desktop MDI child-count visibility are context outside this residual packet. Source anchors for the latter two are MS_RATE.cs:2008 {{if (DC_Main.MsDailyRateGen)}} MS_RATE.cs:2011 {{((Form)this).Close();}} MS_RATE.cs:2270 {{if (((ReadOnlyCollectionBase)(object)((WindowsFormsApplicationBase)MyProject.Application).OpenForms).Count <= 3)}} MS_RATE.cs:2272 {{((Control)MyProject.Forms.MDI_FORM.PanelImage).Visible = true;}} MS_RATE.cs:2276 {{((Control)MyProject.Forms.MDI_FORM.PanelImage).Visible = false;}}. None is claimed as browser-certified here.
+- Imported unchanged-save preservation of hidden optional values and metadata needs its own full-form contract; this packet verifies imported reopen without writes and exact P copying, not preservation through a destructive source re-save.
+- MISSING orchestration/bin/orch.mjs prevents running that checker here. A literal source audit may validate quotes, but is not represented as execution of the missing dispatcher tool.

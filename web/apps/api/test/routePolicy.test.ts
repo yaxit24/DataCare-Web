@@ -134,8 +134,9 @@ describe('route policy registry', () => {
     // POST per Lite dataset (ac-balance, item-stock, tag-stock, sales-order, approval): 768 - 3 + 6 = 771.
     // WP-15 adds the Tag Stock Excel export (GET /reports/tag-stock.xlsx) and its Size list
     // (GET /reports/tag-stock/sizes): 771 + 2 = 773.
-    expect(routes).toHaveLength(773);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(773);
+    // WP-33 adds the MDI main-window rate labels (GET /daily-rate/labels): 773 + 1 = 774.
+    expect(routes).toHaveLength(774);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(774);
 
     const policies = routes.map((route) => ({
       ...route,

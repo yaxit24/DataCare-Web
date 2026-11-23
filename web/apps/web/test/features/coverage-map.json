@@ -189,6 +189,7 @@
         "web/apps/web/app/(app)/txn/daily-rate/page.tsx",
         "web/apps/api/src/modules/masters/dailyRate.ts",
         "web/apps/api/src/routes/dailyRate.ts",
+        "web/apps/web/components/DailyRateLabels.tsx",
         "web/packages/core/src/dailyRate.ts"
       ]
     },

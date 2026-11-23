@@ -7966,6 +7966,31 @@
         "web/apps/web/test/features/modules/tagStock.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. 28 DB cases and 6 route cases pass locally on an isolated database; the tagStock browser module (15 cases, 5 pending with reasons) was written but not run locally (8 GB machine), CI runs it. Still open: voucher zoom (gap 10), the Print window and Crystal layouts (gap 11), the approval other-item columns (gap 13), edition-E Emp Isu Less, summary Mrp/Size and alternate-location staging, year rollover. Desktop match 0%."
+    },
+    {
+      "id": "N251",
+      "status": "implemented-unverified",
+      "action": "Other > Daily Rate closes its residual MS_RATE gaps: a save at location 00 copies the day to every other location of the company (delete the destination day, insert the 00 rows with only LC_CODE replaced) when the company holds the operator-provisioned copy entitlement (the hosted form of the SSRegSrNo gate, default off, no API route writes it); the copy, the source rows and the GROUP_MAST.GR_RATE update are one transaction with the day locks of every destination taken in sorted order; GET /daily-rate/labels serves the MDI Rate_1 to Rate_7 labels (today, own company and location, RATE_DISPLAY = Y, SR_NO order, seven at most, 'ToDays Rate :' when empty, no fallback) and the dashboard shows them and refreshes after a committed save or delete; the browser harness can sign in at another location through the Open Company selector.",
+      "parentLabels": "P1-core; L3; T01-T18; WP-33",
+      "startAfter": [
+        "N208"
+      ],
+      "requiredProof": "DB tests for the copy projection, the entitlement gate, replacement and clearing, rollback on a destination fault, the 00 versus local-save race, forged-field refusal and the label rules; routePolicy count; the daily-rate browser module run by CI with the location-00 session.",
+      "gapIds": "G263",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "web/apps/api/src/modules/masters/dailyRate.ts",
+        "web/apps/api/src/routes/dailyRate.ts",
+        "web/packages/db/prisma/migrations/20261123090000_daily_rate_copy_entitlement/migration.sql",
+        "web/apps/web/components/DailyRateLabels.tsx",
+        "web/apps/api/test/dailyRate.copy.db.test.ts",
+        "web/apps/web/test/features/modules/dailyRate.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. 14 DB cases (11 for the copy, 3 for the labels) pass locally on an isolated database; the daily-rate browser module ran locally: 46 applicable cases, 42 passed, 4 blocked with reasons (Ctrl+F1, grid Enter/Escape keys, the optional-column projection which is a database case, the cross-year collision which waits for the owner), 0 failed. Open: the cross-year collision policy (owner), Ctrl+F1 and grid keys, an operator screen for the entitlement, UAE optional fields in a browser. Desktop match 0%."
     }
   ],
   "amendments": [

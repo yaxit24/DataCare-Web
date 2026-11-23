@@ -22,10 +22,12 @@ const GROUPS = [
   ['RSV', 'Rate Silver 925', 'S', 92.5, 3, 90],
 ];
 /** Gold 72000 / Silver 85000 after Enter: [TaxRate, Rate10gm, PrRate] per group (see core dailyRate.test.ts). */
+const ORIGINAL_RATE = { R18: 111, R22: 222, RSV: 333 };
 const DERIVED = { R18: [54000, 54000, 54720], R22: [65952, 64031, 66240], RSV: [786, 763, 765] };
-const as = (user, slot) => ({
+const as = (user, slot, location) => ({
   user,
   slot,
+  location,
   get password() {
     return process.env.FEATURE_E2E_PASSWORD;
   },
@@ -47,8 +49,8 @@ const C = (id, group, kind, source, run, extra = {}) => ({
   run,
   ...extra,
 });
-const blocked = (name, group, reason) => ({
-  ...C(`${name}.pending`, group, 'read-only', `Playbook ${group}`, async () => ({})),
+const blocked = (id, group, source, reason) => ({
+  ...C(id, group, 'read-only', source, async () => ({})),
   blocked: reason,
 });
 const notApplicable = (name, group, source, reason) => ({
@@ -69,8 +71,8 @@ function nextDay() {
 async function ensureGroups(ctx) {
   for (const [code, name, type, touch, tax, prTouch] of GROUPS)
     await ctx.owner.$executeRawUnsafe(
-      `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","GR_TYPE","GR_TOUCH","TAX_PRC","GR_PURC_TOUCH")
-       SELECT $1::text,'01',$2::text,$3::text,$4::text,$5::float8,$6::numeric,$7::float8
+      `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","GR_TYPE","GR_TOUCH","TAX_PRC","GR_PURC_TOUCH","RATE_DISPLAY","GR_RATE")
+       SELECT $1::text,'01',$2::text,$3::text,$4::text,$5::float8,$6::numeric,$7::float8,'Y',${ORIGINAL_RATE[code]}
         WHERE NOT EXISTS (SELECT 1 FROM "GROUP_MAST" WHERE tenant_id=$1::text AND "CO_CODE"='01' AND "GR_CODE"=$2::text)`,
       'feature-e2e',
       code,
@@ -82,17 +84,22 @@ async function ensureGroups(ctx) {
     );
 }
 
-async function open(ctx, date) {
-  await ensureGroups(ctx);
-  const { page } = await ctx.session();
+/** Type the day; the screen reads it only when it differs from the day it already shows. */
+async function selectDay(page, date) {
+  if ((await label(page, 'Vch Date').inputValue()) === date) return;
+  await Promise.all([
+    page.waitForResponse((r) => r.url().includes(`/api/daily-rate?date=${date}`)),
+    label(page, 'Vch Date').fill(date),
+  ]);
+}
+
+async function open(ctx, date, who) {
+  await ensureWorld(ctx);
+  const { page } = await ctx.session(who);
   await page.goto('/txn/daily-rate');
   await page.getByRole('heading', { name: 'Rate Master', exact: true }).waitFor();
   await label(page, 'Touch R22').waitFor();
-  if (date)
-    await Promise.all([
-      page.waitForResponse((r) => r.url().includes(`/api/daily-rate?date=${date}`)),
-      label(page, 'Vch Date').fill(date),
-    ]);
+  if (date) await selectDay(page, date);
   return page;
 }
 
@@ -148,6 +155,220 @@ const savedRows = (ctx, date) =>
     date,
   );
 
+// ---- WP-33 residuals: location sessions, the company copy entitlement, the main-window labels ------------------
+const AT_00 = as(USERS.admin.user, `${USERS.admin.user}@00`, '00');
+const AT_00B = as(USERS.admin.user, `${USERS.admin.user}@00#2`, '00');
+const AT_01 = as(USERS.admin.user, `${USERS.admin.user}@01`, '01');
+const AT_02 = as(USERS.admin.user, `${USERS.admin.user}@02`, '02');
+const LOCATIONS = ['00', '01', '02'];
+
+/** Groups, the locations 00 and 02 beside the fixture's 01, and the synthetic employee. */
+async function ensureWorld(ctx) {
+  await ensureGroups(ctx);
+  for (const lc of ['00', '02'])
+    await ctx.owner.$executeRawUnsafe(
+      `INSERT INTO "LOCT_MAST"(tenant_id,"CO_CODE","LC_CODE","LC_NAME")
+       SELECT 'feature-e2e','01',$1::text,$2::text
+        WHERE NOT EXISTS (SELECT 1 FROM "LOCT_MAST" WHERE tenant_id='feature-e2e' AND "CO_CODE"='01' AND "LC_CODE"=$1::text)`,
+      lc,
+      `E2E LOCATION ${lc}`,
+    );
+  await ctx.owner.$executeRawUnsafe(
+    `INSERT INTO "EMP_MAST"(tenant_id,"CO_CODE","EMP_CODE","EMP_NAME")
+     SELECT 'feature-e2e','01','E01','E2E RATE CLERK'
+      WHERE NOT EXISTS (SELECT 1 FROM "EMP_MAST" WHERE tenant_id='feature-e2e' AND "CO_CODE"='01' AND "EMP_CODE"='E01')`,
+  );
+}
+
+/** The operator-provisioned entitlement (A1); no API route writes it. */
+const setEntitlement = (ctx, enabled) =>
+  ctx.owner.$executeRawUnsafe(
+    `INSERT INTO "daily_rate_copy_entitlement"(tenant_id,co_code,enabled) VALUES ('feature-e2e','01',$1)
+     ON CONFLICT (tenant_id,co_code) DO UPDATE SET enabled=EXCLUDED.enabled`,
+    enabled,
+  );
+
+/** A clean slate for the cases that read whole-tenant state: no rates, the original group rates, entitlement set. */
+async function resetWorld(ctx, entitled) {
+  await ensureWorld(ctx);
+  await ctx.owner.$executeRawUnsafe(`DELETE FROM "RATE_MAST" WHERE tenant_id='feature-e2e'`);
+  for (const [code, rate] of Object.entries(ORIGINAL_RATE))
+    await ctx.owner.$executeRawUnsafe(
+      `UPDATE "GROUP_MAST" SET "GR_RATE"=$2 WHERE tenant_id='feature-e2e' AND "CO_CODE"='01' AND "GR_CODE"=$1`,
+      code,
+      rate,
+    );
+  await setEntitlement(ctx, entitled);
+}
+
+const allRates = (ctx) =>
+  ctx.rows(
+    `SELECT "LC_CODE" lc,to_char("VCH_DATE",'YYYY-MM-DD') d,"SR_NO"::int sr,"GR_CODE" gr,"GR_RATE"::float rate,
+            "GR_TAX_RATE"::float taxrate,"GR_PR_RATE"::float prrate,"FINE_GL_RATE"::float gold,
+            "FINE_SL_RATE"::float silver,coalesce("EMP_CODE",'') emp,coalesce("MAIN_USER",'') usr,"CO_YEAR" yr
+       FROM "RATE_MAST" WHERE tenant_id=$1 ORDER BY 1,2,3`,
+  );
+const rowsAt = async (ctx, lc, date) =>
+  (await allRates(ctx)).filter((r) => r.lc === lc && r.d === date);
+const groupRates = async (ctx) =>
+  (
+    await ctx.rows(
+      `SELECT "GR_CODE" gr,"GR_RATE"::float rate FROM "GROUP_MAST"
+        WHERE tenant_id=$1 AND "GR_CODE" IN ('R18','R22','RSV') ORDER BY 1`,
+    )
+  ).map((r) => [r.gr, r.rate]);
+const rateOf = (rows) => rows.map((r) => r.rate);
+const A_RATES = [54000, 64031, 763];
+const B_RATES = [54750, 64920, 773];
+const A_GROUPS = [
+  ['R18', 54000],
+  ['R22', 64031],
+  ['RSV', 763],
+];
+const B_GROUPS = [
+  ['R18', 54750],
+  ['R22', 64920],
+  ['RSV', 773],
+];
+const ORIGINAL_GROUPS = [
+  ['R18', 111],
+  ['R22', 222],
+  ['RSV', 333],
+];
+
+async function priceAt(page, gold, silver, taxRateR22) {
+  await label(page, 'Gold Rate 10gm').fill(String(gold));
+  await label(page, 'Silver Rate 1Kg').fill(String(silver));
+  await label(page, 'Silver Rate 1Kg').press('Enter');
+  await page.waitForFunction((expected) => {
+    const el = document.querySelector('input[aria-label="TaxRate R22"]');
+    return el && el.value === expected;
+  }, String(taxRateR22));
+}
+const priceB = (page) => priceAt(page, 73000, 86000, 66868);
+
+/** The server's own view of the session scope: the case must not simulate 00 by editing a request. */
+async function sessionLocation(page) {
+  return page.evaluate(
+    async () => (await (await fetch('/api/me', { credentials: 'include' })).json()).lcCode,
+  );
+}
+
+const todayLocal = () => {
+  const now = new Date();
+  const pad = (v) => String(v).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+};
+const addDays = (iso, n) => {
+  const d = new Date(`${iso}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+};
+const fiscalYearOf = async (ctx) =>
+  (
+    await ctx.rows(
+      `SELECT "CO_YEAR" y FROM "YEAR_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "CO_YEAR"<>'2024-2025' LIMIT 1`,
+    )
+  )[0].y;
+
+/** The display fixture (cases.md Test data): groups Display 1..8 with no touch, so they never reach the Rate grid. */
+async function seedDisplay(ctx, { count, lc = '01', date = todayLocal(), ahead = true }) {
+  await ensureWorld(ctx);
+  const year = await fiscalYearOf(ctx);
+  const codes = ['DN0', ...Array.from({ length: 8 }, (_, i) => `D0${i + 1}`)];
+  for (const [i, code] of codes.entries())
+    await ctx.owner.$executeRawUnsafe(
+      `INSERT INTO "GROUP_MAST"(tenant_id,"CO_CODE","GR_CODE","GR_NAME","GR_TYPE","GR_TOUCH","GR_RATE","RATE_DISPLAY")
+       SELECT 'feature-e2e','01',$1::text,$2::text,'G',0,999,$3::text
+        WHERE NOT EXISTS (SELECT 1 FROM "GROUP_MAST" WHERE tenant_id='feature-e2e' AND "CO_CODE"='01' AND "GR_CODE"=$1::text)`,
+      code,
+      i === 0 ? 'Hidden Row' : `Display ${i}`,
+      i === 0 ? 'N' : 'Y',
+    );
+  const insert = (sr, code, rate, tax) =>
+    ctx.owner.$executeRawUnsafe(
+      `INSERT INTO "RATE_MAST"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","VCH_DATE","SR_NO","GR_CODE","GR_RATE","GR_TAX_RATE","FINE_GL_RATE","MAIN_USER")
+       VALUES ('feature-e2e','01',$1,$2,$3::date,$4,$5,$6,$7,72000,'e2eseed')`,
+      lc,
+      year,
+      date,
+      sr,
+      code,
+      rate,
+      tax,
+    );
+  if (ahead) await insert(0, 'DN0', 555, 955);
+  for (let i = 1; i <= count; i += 1) await insert(i, `D0${i}`, 100 + i, 900 + i);
+}
+
+async function dashboardLabels(page) {
+  await page.goto('/dashboard');
+  await page.getByTestId('daily-rate-labels').waitFor();
+  return page.locator('[data-rate-label]').evaluateAll((els) => els.map((e) => e.textContent));
+}
+const displayTexts = (n) =>
+  Array.from({ length: n }, (_, i) => `Display ${i + 1}  -  ${101 + i}.00`);
+const A_LABELS = [
+  'Rate Gold 18K  -  54000.00',
+  'Rate Gold 22K  -  64031.00',
+  'Rate Silver 925  -  763.00',
+];
+const B_LABELS = [
+  'Rate Gold 18K  -  54750.00',
+  'Rate Gold 22K  -  64920.00',
+  'Rate Silver 925  -  773.00',
+];
+const EMPTY_LABEL = ['ToDays Rate :'];
+
+/** Save today's A from a location session, return the session page. */
+async function saveDay(ctx, who, date, price = priceDay) {
+  const page = await open(ctx, date, who);
+  await price(page);
+  const response = await save(page, date);
+  assert.equal(response.status(), 201, await response.text());
+  return page;
+}
+
+const POST_ERRORS = async (page, payload, raw) =>
+  page.evaluate(
+    async ({ body, rawText }) =>
+      (
+        await fetch('/api/daily-rate', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'content-type': 'application/json' },
+          body: rawText ?? JSON.stringify(body),
+        })
+      ).status,
+    { body: payload, rawText: raw },
+  );
+const gridRows = (grid) => [
+  {
+    grCode: 'R18',
+    touch: 75,
+    taxPct: 0,
+    rate: grid.R18[1],
+    taxRate: grid.R18[0],
+    prRate: grid.R18[2],
+  },
+  {
+    grCode: 'R22',
+    touch: 91.6,
+    taxPct: 3,
+    rate: grid.R22[1],
+    taxRate: grid.R22[0],
+    prRate: grid.R22[2],
+  },
+  {
+    grCode: 'RSV',
+    touch: 92.5,
+    taxPct: 3,
+    rate: grid.RSV[1],
+    taxRate: grid.RSV[0],
+    prRate: grid.RSV[2],
+  },
+];
+
 export const dailyRate = {
   feature: 'daily-rate',
   title: 'Other → Daily Rate (MS_RATE)',
@@ -157,11 +378,14 @@ export const dailyRate = {
     'web/apps/api/src/modules/masters/dailyRate.ts',
     'web/apps/api/src/routes/dailyRate.ts',
     'web/packages/core/src/dailyRate.ts',
+    'web/apps/web/components/DailyRateLabels.tsx',
+    'web/apps/web/app/(app)/dashboard/page.tsx',
     'web/apps/web/test/features/modules/dailyRate.mjs',
   ],
   fixtureManifest: FIXTURE_MANIFEST,
   settingsManifest: {
-    companySettings: 'catalogue defaults; the module adds three rate groups R18, R22 and RSV',
+    companySettings:
+      'catalogue defaults; the module adds three rate groups R18, R22 and RSV, locations 00 and 02, employee E01 and the Daily Rate copy entitlement',
   },
   cases: [
     C(
@@ -202,7 +426,7 @@ export const dailyRate = {
     ),
     C(
       'refusal.negative-rate-no-write',
-      'T04',
+      'T06',
       'refusal',
       'MS_RATE grid cells take a rate; a negative rate is refused before anything is written.',
       async (ctx) => {
@@ -223,12 +447,13 @@ export const dailyRate = {
     ),
     C(
       'create.desktop-rows',
-      'T05',
+      'T07',
       'mutation',
       'MS_RATE.cs:1890-1928: one row per priced group, SR_NO the grid row, the header rates, GR_TYPE and MainUser; no GR_NAME.',
       async (ctx) => {
         const date = nextDay();
-        const page = await open(ctx, date);
+        await setEntitlement(ctx, false);
+        const page = await open(ctx, date, AT_00);
         await priceDay(page);
         const response = await save(page);
         assert.equal(response.status(), 201, await response.text());
@@ -247,17 +472,24 @@ export const dailyRate = {
             r.name,
           ]),
           [
-            ['R18', 'G', 54000, 54000, 54720, 72000, 85000, USERS.admin.user, '01', null],
-            ['R22', 'G', 65952, 64031, 66240, 72000, 85000, USERS.admin.user, '01', null],
-            ['RSV', 'S', 786, 763, 765, 72000, 85000, USERS.admin.user, '01', null],
+            ['R18', 'G', 54000, 54000, 54720, 72000, 85000, USERS.admin.user, '00', null],
+            ['R22', 'G', 65952, 64031, 66240, 72000, 85000, USERS.admin.user, '00', null],
+            ['RSV', 'S', 786, 763, 765, 72000, 85000, USERS.admin.user, '00', null],
           ],
         );
         assert(rows[0].sr < rows[1].sr && rows[1].sr < rows[2].sr, 'SR_NO follows the grid order');
+        assert.deepEqual(await groupRates(ctx), [
+          ['R18', 54000],
+          ['R22', 64031],
+          ['RSV', 763],
+        ]);
+        assert.equal((await allRates(ctx)).filter((r) => r.d === date && r.lc !== '00').length, 0);
         await ctx.shot(page, 'saved');
         return {
-          observation: `${rows.length} rows saved for ${date}`,
-          expected: 'three priced rows in grid order',
-          database: { rows },
+          observation: `${rows.length} rows saved for ${date} at location 00, group rates updated, no copy`,
+          expected:
+            'three priced rows in grid order at 00, groups [54000,64031,763], no destination row',
+          database: { rows, groups: await groupRates(ctx) },
           downstream: { rows },
         };
       },
@@ -270,7 +502,7 @@ export const dailyRate = {
     ),
     C(
       'reopen.f1-list',
-      'T07',
+      'T04',
       'mutation',
       'MS_RATE.cs:2370-2396: F1 lists saved days (date, user, gold, silver); choosing one shows its grid.',
       async (ctx) => {
@@ -527,11 +759,6 @@ export const dailyRate = {
         }
       },
     ),
-    blocked(
-      'settings',
-      'T15',
-      'Location 00 also sets GROUP_MAST.GR_RATE; covered in the HTTP test.',
-    ),
     C(
       'print.rate-report',
       'T16',
@@ -631,6 +858,730 @@ export const dailyRate = {
             `DELETE FROM "RATE_MAST" WHERE tenant_id='feature-e2e' AND "CO_CODE"='01' AND "LC_CODE"='98'`,
           );
         }
+      },
+    ),
+    // ---- WP-33 residuals ------------------------------------------------------------------------------------
+    blocked(
+      'entry.shortcut-rights',
+      'T01',
+      'MDI_FORM.cs:12526-12528 and :14395-14405: Ctrl+F1 opens Daily Rate behind view rights.',
+      'The web has no Ctrl+F1 shortcut for Daily Rate (GlobalFormKeys binds other chords); the menu route and its view-right 403 are covered by scope.no-rights-user. Needs a shortcut slice before this can run.',
+    ),
+    C(
+      'field.net-rate-route',
+      'T02',
+      'mutation',
+      'MS_RATE.cs:1920: GR_RATE is the displayed net Rate10gm, not TaxRate; MDI_FORM.cs:11429 shows GR_NAME, two spaces, hyphen, two spaces, GR_RATE.',
+      async (ctx) => {
+        await resetWorld(ctx, false);
+        const date = todayLocal();
+        const page = await open(ctx, date, AT_00);
+        assert.equal(await sessionLocation(page), '00');
+        await priceDay(page);
+        await label(page, 'Rate10gm R22').fill('64032');
+        await label(page, 'Employee').fill('E01');
+        await label(page, 'Employee').blur();
+        const response = await save(page, date);
+        assert.equal(response.status(), 201, await response.text());
+        const rows = await rowsAt(ctx, '00', date);
+        const r22 = rows.find((r) => r.gr === 'R22');
+        assert.deepEqual([r22.rate, r22.taxrate, r22.emp], [64032, 65952, 'E01']);
+        assert.deepEqual(await groupRates(ctx), [
+          ['R18', 54000],
+          ['R22', 64032],
+          ['RSV', 763],
+        ]);
+        const labels = await dashboardLabels(page);
+        assert.equal(labels[1], 'Rate Gold 22K  -  64032.00');
+        return {
+          observation: `R22 stored ${r22.rate}, tax rate ${r22.taxrate}; label ${labels[1]}`,
+          expected: 'GR_RATE 64032 (not recomputed), GR_TAX_RATE 65952, EMP_CODE E01',
+          database: { rows, groups: await groupRates(ctx) },
+          downstream: { labels },
+        };
+      },
+    ),
+    blocked(
+      'field.copy-optional-projection',
+      'T02',
+      'MS_RATE.cs:1945: the copy projects the optional rate and metadata columns unchanged.',
+      'Database-layer case: it runs in apps/api/test/dailyRate.copy.db.test.ts (all 26 projected columns, NULL versus zero), not in the browser module, and a UAE form cannot be driven from the non-UAE fixture company.',
+    ),
+    C(
+      'children.destination-ownership',
+      'T05',
+      'mutation',
+      'MS_RATE.cs:1944-1946: each destination location is deleted for the day and refilled from 00; nothing is appended.',
+      async (ctx) => {
+        await resetWorld(ctx, true);
+        const date = todayLocal();
+        const year = await fiscalYearOf(ctx);
+        const seed = (lc, d, sr, code, rate) =>
+          ctx.owner.$executeRawUnsafe(
+            `INSERT INTO "RATE_MAST"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","VCH_DATE","SR_NO","GR_CODE","GR_RATE","MAIN_USER")
+             VALUES ('feature-e2e','01',$1,$2,$3::date,$4,$5,$6,'e2eseed')`,
+            lc,
+            year,
+            d,
+            sr,
+            code,
+            rate,
+          );
+        await seed('01', date, 1, 'R18', 1);
+        await seed('02', date, 1, 'R22', 2);
+        await seed('02', date, 2, 'RSV', 3);
+        await seed('98', date, 1, 'R18', 98);
+        await seed('01', addDays(date, -1), 1, 'R18', 7);
+        const unrelatedBefore = (await allRates(ctx)).filter((r) => r.lc === '98' || r.d !== date);
+        await saveDay(ctx, AT_00, date);
+        const all = await allRates(ctx);
+        for (const lc of LOCATIONS) {
+          const rows = all.filter((r) => r.lc === lc && r.d === date);
+          assert.deepEqual(
+            rows.map((r) => [r.sr, r.gr, r.rate]),
+            [
+              [1, 'R18', 54000],
+              [2, 'R22', 64031],
+              [3, 'RSV', 763],
+            ],
+            `location ${lc}`,
+          );
+        }
+        assert.deepEqual(
+          all.filter((r) => r.lc === '98' || r.d !== date),
+          unrelatedBefore,
+        );
+        return {
+          observation:
+            'three rows per location, old destination rows gone, unrelated day and location 98 unchanged',
+          expected: 'replace, never append',
+          database: { rows: all },
+          downstream: { unrelated: unrelatedBefore.length },
+        };
+      },
+    ),
+    C(
+      'refusal.zero-touch-or-rate',
+      'T06',
+      'mutation',
+      'MS_RATE.cs:1900-1912: a row is stored only when Touch and Rate10gm are both non-zero; skipped groups keep their rate.',
+      async (ctx) => {
+        await resetWorld(ctx, false);
+        const date = todayLocal();
+        const page = await open(ctx, date, AT_00);
+        await priceDay(page);
+        await label(page, 'Touch R18').fill('0');
+        await label(page, 'Rate10gm R22').fill('0');
+        assert.equal((await save(page, date)).status(), 201);
+        const rows = await rowsAt(ctx, '00', date);
+        assert.deepEqual(
+          rows.map((r) => [r.gr, r.rate]),
+          [['RSV', 763]],
+        );
+        const groups = await groupRates(ctx);
+        assert.deepEqual(groups, [
+          ['R18', 111],
+          ['R22', 222],
+          ['RSV', 763],
+        ]);
+        return {
+          observation: 'only RSV stored; R18 and R22 groups keep 111 and 222',
+          expected: 'zero touch or rate stores nothing and zeroes nothing',
+          database: { rows, groups },
+          downstream: { groups },
+        };
+      },
+    ),
+    C(
+      'refusal.invalid-payload',
+      'T06',
+      'refusal',
+      'Hosted validation (A5): malformed rates, unknown groups and over-long employee codes are refused with no write.',
+      async (ctx) => {
+        await resetWorld(ctx, true);
+        const date = todayLocal();
+        const page = await open(ctx, date, AT_00);
+        const before = { rates: await allRates(ctx), groups: await groupRates(ctx) };
+        const rows = gridRows(DERIVED);
+        const base = { date, goldRate: 72000, silverRate: 85000, rows };
+        const attempts = {
+          overflow: await POST_ERRORS(
+            page,
+            null,
+            `{"date":"${date}","goldRate":1e999,"silverRate":1,"rows":[]}`,
+          ),
+          nan: await POST_ERRORS(page, { ...base, goldRate: 'abc' }),
+          unknownGroup: await POST_ERRORS(page, { ...base, rows: [{ ...rows[0], grCode: 'ZZZ' }] }),
+          longEmployee: await POST_ERRORS(page, { ...base, empCode: 'ABCD' }),
+          negative: await POST_ERRORS(page, { ...base, rows: [{ ...rows[0], rate: -1 }] }),
+        };
+        for (const [what, status] of Object.entries(attempts)) assert.equal(status, 400, what);
+        assert.deepEqual({ rates: await allRates(ctx), groups: await groupRates(ctx) }, before);
+        return {
+          observation: JSON.stringify(attempts),
+          expected: '400 for each, nothing written',
+          database: before,
+        };
+      },
+    ),
+    C(
+      'copy.eligible-two-destinations',
+      'T07',
+      'mutation',
+      'MS_RATE.cs:1937-1949: from location 00 the day is copied to every other location of the company.',
+      async (ctx) => {
+        await resetWorld(ctx, true);
+        const date = todayLocal();
+        const year = await fiscalYearOf(ctx);
+        await ctx.owner.$executeRawUnsafe(
+          `INSERT INTO "RATE_MAST"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","VCH_DATE","SR_NO","GR_CODE","GR_RATE","MAIN_USER")
+           VALUES ('feature-e2e','01','98',$1,$2::date,1,'R18',98,'sentinel')`,
+          year,
+          date,
+        );
+        const sentinels = (await allRates(ctx)).filter((r) => r.lc === '98');
+        const page = await saveDay(ctx, AT_00, date);
+        assert.equal(await sessionLocation(page), '00');
+        const all = await allRates(ctx);
+        const source = all.filter((r) => r.lc === '00');
+        assert.equal(source.length, 3);
+        for (const lc of ['01', '02'])
+          assert.deepEqual(
+            all.filter((r) => r.lc === lc).map(({ lc: _lc, ...rest }) => rest),
+            source.map(({ lc: _lc, ...rest }) => rest),
+            `location ${lc} equals the source`,
+          );
+        assert.equal(all.filter((r) => r.d === date && r.lc !== '98').length, 9);
+        assert.deepEqual(
+          all.filter((r) => r.lc === '98'),
+          sentinels,
+        );
+        assert.deepEqual(await groupRates(ctx), A_GROUPS);
+        return {
+          observation: 'nine rows, three per location; location 98 untouched',
+          expected: 'each destination equals the 00 day with its own LC_CODE',
+          database: { rows: all, groups: await groupRates(ctx) },
+          downstream: { copied: ['01', '02'] },
+        };
+      },
+    ),
+    C(
+      'copy.disabled-at-zero',
+      'T07',
+      'mutation',
+      'The company entitlement (hosted form of MS_RATE.cs:1937) is off: the 00 save changes the source and the groups only.',
+      async (ctx) => {
+        await resetWorld(ctx, false);
+        const date = todayLocal();
+        const year = await fiscalYearOf(ctx);
+        await ctx.owner.$executeRawUnsafe(
+          `INSERT INTO "RATE_MAST"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","VCH_DATE","SR_NO","GR_CODE","GR_RATE","MAIN_USER")
+           VALUES ('feature-e2e','01','01',$1,$2::date,1,'R18',1,'old'),('feature-e2e','01','02',$1,$2::date,1,'R22',2,'old')`,
+          year,
+          date,
+        );
+        const before = (await allRates(ctx)).filter((r) => r.lc !== '00');
+        await saveDay(ctx, AT_00, date);
+        const all = await allRates(ctx);
+        assert.equal(all.filter((r) => r.lc === '00').length, 3);
+        assert.deepEqual(
+          all.filter((r) => r.lc !== '00'),
+          before,
+        );
+        assert.deepEqual(await groupRates(ctx), A_GROUPS);
+        return {
+          observation: 'source and groups written; 01 and 02 keep their old rows',
+          expected: 'no fan-out',
+          database: { rows: all },
+          downstream: { untouched: before.length },
+        };
+      },
+    ),
+    C(
+      'copy.enabled-away-from-zero',
+      'T07',
+      'mutation',
+      'MS_RATE.cs:1937: the copy needs location 00; the entitlement alone is not enough.',
+      async (ctx) => {
+        await resetWorld(ctx, true);
+        const date = todayLocal();
+        await saveDay(ctx, AT_01, date);
+        const all = await allRates(ctx);
+        assert.deepEqual(
+          all.map((r) => r.lc),
+          ['01', '01', '01'],
+        );
+        assert.deepEqual(await groupRates(ctx), ORIGINAL_GROUPS);
+        return {
+          observation: 'only location 01 has rows; groups unchanged',
+          expected: 'no copy, no group update away from 00',
+          database: { rows: all, groups: await groupRates(ctx) },
+          downstream: { groups: await groupRates(ctx) },
+        };
+      },
+    ),
+    C(
+      'reopen.imported-projection',
+      'T08',
+      'read-only',
+      'MS_RATE.cs:1752-1832: reopening a saved day reads it and writes nothing.',
+      async (ctx) => {
+        await resetWorld(ctx, false);
+        const date = todayLocal();
+        const year = await fiscalYearOf(ctx);
+        await ctx.owner.$executeRawUnsafe(
+          `INSERT INTO "RATE_MAST"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","VCH_DATE","SR_NO","GR_CODE","GR_TYPE","GR_TOUCH","GR_TAX_PRC",
+             "GR_RATE","GR_TAX_RATE","GR_PR_TOUCH","GR_PR_RATE","FINE_GL_RATE","FINE_SL_RATE","FINE_GL_PR_RATE","FINE_SL_PR_RATE",
+             "DOLLAR_GL_RATE","DOLLAR_SL_RATE","EMP_CODE","MAIN_USER","CASH_AMT","ADD_USER","ADD_DATE","AND_TRFR","OP_GL_RATE")
+           VALUES ('feature-e2e','01','01',$1,$2::date,2,'R22','G',91.6,3,64031,65952,92,66240,72000,85000,71000,84000,2301.25,27.75,
+             'E01','imported',NULL,NULL,NULL,'Y',123.45)`,
+          year,
+          date,
+        );
+        const dump = () =>
+          ctx.rows(`SELECT * FROM "RATE_MAST" WHERE tenant_id=$1 ORDER BY "LC_CODE","SR_NO"`);
+        const before = JSON.stringify(await dump());
+        const page = await open(ctx, date, AT_01);
+        await page.waitForFunction(
+          () => document.querySelector('input[aria-label="Rate10gm R22"]')?.value === '64031',
+        );
+        assert.equal(await label(page, 'Gold Rate 10gm').inputValue(), '72000.00');
+        assert.equal(JSON.stringify(await dump()), before);
+        return {
+          observation: 'gold 72000.00, R22 64031; the stored row is byte-identical after the read',
+          expected: 'read-only',
+        };
+      },
+    ),
+    C(
+      'edit.all-unpriced-clears-copies',
+      'T09',
+      'mutation',
+      'MS_RATE.cs:1888-1893 and :1937-1949: a save with no priced group deletes the day, and the copy deletes the destinations.',
+      async (ctx) => {
+        await resetWorld(ctx, true);
+        const date = todayLocal();
+        const page = await saveDay(ctx, AT_00, date);
+        for (const code of ['R18', 'R22', 'RSV']) await label(page, `Rate10gm ${code}`).fill('0');
+        assert.equal((await save(page, date)).status(), 201);
+        const all = await allRates(ctx);
+        assert.deepEqual(all, []);
+        assert.deepEqual(await groupRates(ctx), A_GROUPS);
+        return {
+          observation: 'no rows at 00, 01 or 02; group rates stay at A',
+          expected: 'zero rows everywhere, groups not reversed',
+          database: { rows: all, groups: await groupRates(ctx) },
+          downstream: { groups: await groupRates(ctx) },
+        };
+      },
+    ),
+    C(
+      'cancel.no-reversal',
+      'T10',
+      'mutation',
+      'MS_RATE Cancel only clears the form; nothing already saved is reversed.',
+      async (ctx) => {
+        await resetWorld(ctx, true);
+        const date = todayLocal();
+        const page = await saveDay(ctx, AT_00, date);
+        const before = { rows: await allRates(ctx), groups: await groupRates(ctx) };
+        await priceB(page);
+        await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+        assert.deepEqual({ rows: await allRates(ctx), groups: await groupRates(ctx) }, before);
+        return {
+          observation: 'unsaved B discarded; A rows at all three locations and group rates intact',
+          expected: 'no reversal',
+          database: before,
+          downstream: { groups: before.groups },
+        };
+      },
+    ),
+    C(
+      'scope.copy-entitlement-forgery',
+      'T11',
+      'refusal',
+      'A1: the entitlement is server-managed; no request field can grant it or widen the scope.',
+      async (ctx) => {
+        await resetWorld(ctx, false);
+        const date = todayLocal();
+        const page = await open(ctx, date, AT_00);
+        const before = { rates: await allRates(ctx), groups: await groupRates(ctx) };
+        const rows = gridRows(DERIVED);
+        const forged = {};
+        for (const field of [
+          'copyToLocations',
+          'copyEnabled',
+          'tenantId',
+          'coCode',
+          'lcCode',
+          'eligible',
+        ])
+          forged[field] = await POST_ERRORS(page, {
+            date,
+            goldRate: 72000,
+            silverRate: 85000,
+            rows,
+            [field]: field === 'lcCode' ? '01' : true,
+          });
+        for (const [field, status] of Object.entries(forged)) assert.equal(status, 400, field);
+        const config = await page.evaluate(
+          async () =>
+            (
+              await fetch('/api/daily-rate/copy-entitlement', {
+                method: 'PUT',
+                credentials: 'include',
+                headers: { 'content-type': 'application/json' },
+                body: '{"enabled":true}',
+              })
+            ).status,
+        );
+        assert.ok([403, 404].includes(config), `no route grants the entitlement: ${config}`);
+        assert.deepEqual({ rates: await allRates(ctx), groups: await groupRates(ctx) }, before);
+        const [entitlement] = await ctx.rows(
+          `SELECT enabled FROM "daily_rate_copy_entitlement" WHERE tenant_id=$1`,
+        );
+        assert.equal(entitlement.enabled, false);
+        return {
+          observation: `forged fields ${JSON.stringify(forged)}; entitlement route ${config}`,
+          expected: 'every forged request refused, entitlement still off, no write',
+          database: before,
+        };
+      },
+    ),
+    C(
+      'concurrency.copy-versus-local-save',
+      'T12',
+      'mutation',
+      'A4 (hosted safety): a 00 copy and a local save of a destination run one after the other; the day is never half of each.',
+      async (ctx) => {
+        await resetWorld(ctx, true);
+        const date = todayLocal();
+        const a = await open(ctx, date, AT_00);
+        const b = await open(ctx, date, AT_01);
+        await priceDay(a);
+        await priceB(b);
+        const [first, second] = await Promise.all([save(a), save(b)]);
+        const statuses = [first.status(), second.status()];
+        assert.ok(
+          statuses.every((v) => v === 201 || v === 409),
+          `statuses ${statuses}`,
+        );
+        assert.equal(statuses[0], 201, 'the 00 save commits');
+        const all = await allRates(ctx);
+        for (const lc of ['00', '02'])
+          assert.deepEqual(rateOf(all.filter((r) => r.lc === lc)), A_RATES, `location ${lc}`);
+        const own = all.filter((r) => r.lc === '01');
+        assert.ok(
+          JSON.stringify(rateOf(own)) === JSON.stringify(A_RATES) ||
+            JSON.stringify(rateOf(own)) === JSON.stringify(B_RATES),
+          `01 holds one complete set: ${JSON.stringify(rateOf(own))}`,
+        );
+        assert.equal(new Set(own.map((r) => r.gold)).size, 1);
+        assert.deepEqual(await groupRates(ctx), A_GROUPS);
+        return {
+          observation: `statuses ${statuses}; 01 holds ${own[0].gold}`,
+          expected: '00 and 02 hold A; 01 holds all A or all B',
+          database: { rows: all },
+          downstream: { groups: await groupRates(ctx) },
+        };
+      },
+    ),
+    C(
+      'rollback.last-destination-fault',
+      'T14',
+      'mutation',
+      'A4: a fault while writing the last destination rolls the whole save back: no source, group or copy change survives.',
+      async (ctx) => {
+        await resetWorld(ctx, true);
+        const date = todayLocal();
+        const page = await saveDay(ctx, AT_00, date);
+        const before = { rows: await allRates(ctx), groups: await groupRates(ctx) };
+        await ctx.owner.$executeRawUnsafe(
+          `CREATE OR REPLACE FUNCTION e2e_copy_fault() RETURNS trigger LANGUAGE plpgsql AS $f$
+           BEGIN IF NEW."LC_CODE" = '02' AND NEW."GR_CODE" = 'RSV' AND NEW."GR_RATE" = 773 THEN RAISE EXCEPTION 'e2e copy fault'; END IF; RETURN NEW; END $f$`,
+        );
+        await ctx.owner.$executeRawUnsafe(
+          `CREATE TRIGGER e2e_copy_fault BEFORE INSERT ON "RATE_MAST" FOR EACH ROW EXECUTE FUNCTION e2e_copy_fault()`,
+        );
+        try {
+          await priceB(page);
+          const response = await save(page);
+          assert.ok(response.status() >= 400, `the save failed: ${response.status()}`);
+          assert.deepEqual({ rows: await allRates(ctx), groups: await groupRates(ctx) }, before);
+          return {
+            observation: `the save answered ${response.status()}; every location and group kept A`,
+            expected: 'the A snapshot',
+            database: before,
+            downstream: { groups: before.groups },
+          };
+        } finally {
+          await ctx.owner.$executeRawUnsafe(`DROP TRIGGER IF EXISTS e2e_copy_fault ON "RATE_MAST"`);
+          await ctx.owner.$executeRawUnsafe(`DROP FUNCTION IF EXISTS e2e_copy_fault()`);
+        }
+      },
+    ),
+    C(
+      'settings.pending',
+      'T15',
+      'mutation',
+      'MS_RATE.cs:1907-1933 and MS_RATE.cs:1950: a backdated save at 00 sets the group rates, but the main window shows only today.',
+      async (ctx) => {
+        await resetWorld(ctx, false);
+        const today = todayLocal();
+        const yesterday = addDays(today, -1);
+        const a = await open(ctx, today, AT_00);
+        assert.equal(await sessionLocation(a), '00');
+        await priceDay(a);
+        assert.equal((await save(a, today)).status(), 201);
+        const b = await open(ctx, yesterday, AT_00);
+        await priceB(b);
+        assert.equal((await save(b, yesterday)).status(), 201);
+        assert.deepEqual(await groupRates(ctx), B_GROUPS);
+        assert.deepEqual(rateOf(await rowsAt(ctx, '00', today)), A_RATES);
+        assert.deepEqual(rateOf(await rowsAt(ctx, '00', yesterday)), B_RATES);
+        const labels = await dashboardLabels(b);
+        assert.deepEqual(labels, A_LABELS);
+        return {
+          observation: 'groups [54750,64920,773]; today still A; labels show today only',
+          expected: 'backdated save changes groups, not today labels',
+          database: { rows: await allRates(ctx), groups: await groupRates(ctx) },
+          downstream: { labels },
+        };
+      },
+    ),
+    C(
+      'settings.changed-before-save',
+      'T15',
+      'mutation',
+      'A5: the entitlement is read at save, so a change committed before the save governs that save; posted rates are never repriced.',
+      async (ctx) => {
+        await resetWorld(ctx, true);
+        const date = todayLocal();
+        const page = await open(ctx, date, AT_00);
+        await priceDay(page);
+        await setEntitlement(ctx, false);
+        assert.equal((await save(page, date)).status(), 201);
+        assert.deepEqual(
+          (await allRates(ctx)).map((r) => r.lc),
+          ['00', '00', '00'],
+        );
+        await setEntitlement(ctx, true);
+        await ctx.owner.$executeRawUnsafe(
+          `UPDATE "GROUP_MAST" SET "GR_TOUCH"=90 WHERE tenant_id='feature-e2e' AND "GR_CODE"='R22'`,
+        );
+        try {
+          assert.equal((await save(page, date)).status(), 201);
+        } finally {
+          await ctx.owner.$executeRawUnsafe(
+            `UPDATE "GROUP_MAST" SET "GR_TOUCH"=91.6 WHERE tenant_id='feature-e2e' AND "GR_CODE"='R22'`,
+          );
+        }
+        const all = await allRates(ctx);
+        for (const lc of LOCATIONS)
+          assert.deepEqual(rateOf(all.filter((r) => r.lc === lc)), A_RATES, lc);
+        return {
+          observation:
+            'first save did not copy, the second (entitlement now on) copied to 01 and 02; R22 stayed 64031',
+          expected: 'configuration read at save',
+          database: { rows: all },
+          downstream: { groups: await groupRates(ctx) },
+        };
+      },
+    ),
+    blocked(
+      'copy.cross-year-collision',
+      'T15',
+      'MS_RATE.cs:1944-1945 names no CO_YEAR in either statement.',
+      'External owner or policy decision required: when company and date collide across CO_YEAR, replace all years, isolate the active year, or refuse? Unblocks when the choice and its exact row footprint are recorded. (RATE_MAST here has no CO_YEAR in its key, so the collision is not constructible until the choice also fixes the key.)',
+    ),
+    ...[
+      ['0-eligible', 0],
+      ['1-eligible', 1],
+      ['7-eligible', 7],
+      ['8-eligible', 8],
+    ].map(([name, count]) =>
+      C(
+        `labels.${name}`,
+        'T16',
+        'output',
+        'MDI_FORM.cs:11421-11500 and MS_RATE.cs:1950: today, own location, RATE_DISPLAY = Y, ORDER BY SR_NO, seven labels at most.',
+        async (ctx) => {
+          await resetWorld(ctx, false);
+          await seedDisplay(ctx, { count });
+          const { page } = await ctx.session(AT_01);
+          const labels = await dashboardLabels(page);
+          const expected = count === 0 ? EMPTY_LABEL : displayTexts(Math.min(count, 7));
+          assert.deepEqual(labels, expected);
+          await ctx.shot(page, 'labels');
+          return {
+            observation: JSON.stringify(labels),
+            expected,
+            output: Buffer.from(JSON.stringify(labels)),
+          };
+        },
+      ),
+    ),
+    ...[
+      [
+        'foreign-location',
+        async (ctx, today) => seedDisplay(ctx, { count: 3, lc: '02', date: today }),
+      ],
+      ['past-day', async (ctx, today) => seedDisplay(ctx, { count: 3, date: addDays(today, -1) })],
+      ['future-day', async (ctx, today) => seedDisplay(ctx, { count: 3, date: addDays(today, 1) })],
+      [
+        'absent-own-day',
+        async (ctx, today) => {
+          await seedDisplay(ctx, { count: 3, date: addDays(today, -1) });
+          await seedDisplay(ctx, { count: 3, lc: '02', date: today });
+        },
+      ],
+    ].map(([name, seed]) =>
+      C(
+        `labels.no-fallback-${name}`,
+        'T16',
+        'output',
+        'MDI_FORM.cs:11421-11424: with no row for today at this location the label reads ToDays Rate :, never another day or location.',
+        async (ctx) => {
+          await resetWorld(ctx, false);
+          await seed(ctx, todayLocal());
+          const before = await allRates(ctx);
+          const { page } = await ctx.session(AT_01);
+          const labels = await dashboardLabels(page);
+          assert.deepEqual(labels, EMPTY_LABEL);
+          assert.deepEqual(await allRates(ctx), before);
+          return {
+            observation: JSON.stringify(labels),
+            expected: EMPTY_LABEL,
+            output: Buffer.from(JSON.stringify(labels)),
+          };
+        },
+      ),
+    ),
+    C(
+      'labels.refresh-today',
+      'T16',
+      'output',
+      'A3: the labels read the stored day again after a committed save, without waiting for any poll.',
+      async (ctx) => {
+        await resetWorld(ctx, false);
+        const today = todayLocal();
+        const page = await saveDay(ctx, AT_01, today);
+        assert.deepEqual(await dashboardLabels(page), A_LABELS);
+        await page.goto('/txn/daily-rate');
+        await label(page, 'Touch R22').waitFor();
+        await priceB(page);
+        assert.equal((await save(page, today)).status(), 201);
+        const labels = await dashboardLabels(page);
+        assert.deepEqual(labels, B_LABELS);
+        return {
+          observation: JSON.stringify(labels),
+          expected: B_LABELS,
+          output: Buffer.from(JSON.stringify(labels)),
+        };
+      },
+    ),
+    C(
+      'labels.refresh-historical',
+      'T16',
+      'output',
+      'MS_RATE.cs:1950: the labels are today RATE_MAST rows, not a backdated day and not GROUP_MAST.GR_RATE.',
+      async (ctx) => {
+        await resetWorld(ctx, false);
+        const today = todayLocal();
+        const yesterday = addDays(today, -1);
+        await saveDay(ctx, AT_00, today);
+        const page = await open(ctx, yesterday, AT_00);
+        await priceB(page);
+        assert.equal((await save(page, yesterday)).status(), 201);
+        const labels = await dashboardLabels(page);
+        assert.deepEqual(labels, A_LABELS);
+        assert.deepEqual(await groupRates(ctx), B_GROUPS);
+        return {
+          observation: JSON.stringify(labels),
+          expected: A_LABELS,
+          output: Buffer.from(JSON.stringify(labels)),
+        };
+      },
+    ),
+    C(
+      'labels.shrink-clears-surplus',
+      'T16',
+      'output',
+      'A3: each refresh replaces the whole label set; slots with no group are hidden, never left stale.',
+      async (ctx) => {
+        await resetWorld(ctx, false);
+        const today = todayLocal();
+        await seedDisplay(ctx, { count: 7 });
+        const { page } = await ctx.session(AT_01);
+        assert.deepEqual(await dashboardLabels(page), displayTexts(7));
+        await ctx.owner.$executeRawUnsafe(
+          `DELETE FROM "RATE_MAST" WHERE tenant_id='feature-e2e' AND "GR_CODE" NOT IN ('DN0','D01')`,
+        );
+        const one = await dashboardLabels(page);
+        assert.deepEqual(one, displayTexts(1));
+        await ctx.owner.$executeRawUnsafe(`DELETE FROM "RATE_MAST" WHERE tenant_id='feature-e2e'`);
+        const none = await dashboardLabels(page);
+        assert.deepEqual(none, EMPTY_LABEL);
+        assert.equal(await page.locator('[data-rate-label]').count(), 1);
+        void today;
+        return {
+          observation: `${JSON.stringify(one)} then ${JSON.stringify(none)}`,
+          expected: 'one label, then the empty text',
+          output: Buffer.from(JSON.stringify([one, none])),
+        };
+      },
+    ),
+    blocked(
+      'keyboard.grid-and-escape',
+      'T17',
+      'MS_RATE.cs:2149-2161, :2178-2259: Enter/arrow movement through the grid editor and Escape commit then close.',
+      'The web grid is a table of ordinary inputs with no desktop Enter-advance or Escape-commit handling and no close-on-Escape; that is a Daily Rate form-keyboard slice outside the three residuals (copy, session, labels). Alt+S is covered by keyboard.alt-s-saves.',
+    ),
+    C(
+      'downstream.copy-reopen-display',
+      'T18',
+      'mutation',
+      'The residual chain: a 00 save reaches 01 and 02 as rows, as a printed day and as the main-window label.',
+      async (ctx) => {
+        await resetWorld(ctx, true);
+        const today = todayLocal();
+        const source = await saveDay(ctx, AT_00, today);
+        const check = async (r22) => {
+          for (const who of [AT_01, AT_02]) {
+            const { page } = await ctx.session(who);
+            await page.goto('/txn/daily-rate');
+            await label(page, 'Touch R22').waitFor();
+            await selectDay(page, today);
+            await page.waitForFunction(
+              (v) => document.querySelector('input[aria-label="Rate10gm R22"]')?.value === v,
+              String(r22),
+            );
+            const html = await (
+              await page.request.get(`/api/daily-rate/print?date=${today}&format=html`)
+            ).text();
+            assert(html.includes(`${r22.toLocaleString('en-IN')}.00`), `RateRpt shows ${r22}`);
+            const labels = await dashboardLabels(page);
+            assert.equal(labels[1], `Rate Gold 22K  -  ${r22}.00`);
+          }
+        };
+        await check(64031);
+        await source.goto('/txn/daily-rate');
+        await label(source, 'Touch R22').waitFor();
+        await selectDay(source, today);
+        await source.waitForFunction(
+          () => document.querySelector('input[aria-label="Rate10gm R22"]')?.value === '64031',
+        );
+        await label(source, 'Rate10gm R22').fill('64032');
+        assert.equal((await save(source, today)).status(), 201);
+        await check(64032);
+        assert.deepEqual((await groupRates(ctx))[1], ['R22', 64032]);
+        return {
+          observation:
+            '01 and 02 reopened, printed and displayed 64031, then 64032 after the 00 edit',
+          expected: 'copy, reopen, report and label agree',
+          database: { rows: await allRates(ctx), groups: await groupRates(ctx) },
+          downstream: { r22: 64032 },
+        };
       },
     ),
   ],

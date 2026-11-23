@@ -1,3 +1,8 @@
+## 2026-11-23 — Daily Rate closes its residual MS_RATE gaps (N251 / G263, WP-33)
+
+- 2026-11-23: a save at location 00 copies the day to every other location of the company in the same transaction when the company holds the operator-provisioned `daily_rate_copy_entitlement` (the hosted form of the SSRegSrNo gate; default off; no API route writes it, so provision it by SQL). `GET /daily-rate/labels` and `DailyRateLabels` on the dashboard show the Rate_1 to Rate_7 labels (today, own location, RATE_DISPLAY = Y, seven at most, "ToDays Rate :" when empty). The browser harness `session()` takes a `location`.
+- 2026-11-23: dailyRate.copy.db.test.ts passes on an isolated database; the daily-rate browser module ran locally: 46 applicable, 42 passed, 4 blocked with reasons (cross-year collision waits for the owner; Ctrl+F1, grid keys and the optional-column projection, which is a DB case, are recorded as blocked). Open: the entitlement screen, those keys.
+
 ## 2026-11-22 — Tag Stock follows the desktop RP_TAG selections and totals (N238 / G250, WP-15)
 
 - 2026-11-22: In = BAR_DETL creation rows, Out = minus movements, Stock/Mrp = positive signed-movement sum of the year up to To (Mrp <> 0), Apr = APR ISU / ISU_REC N joined to BAR_DETL, All = signed history; tag N excluded; no 5,000-row cap in rows, footer, CSV or Excel; Tag Summ / Product Stk; the page is the RP_TAG form (selectors, columns, keys). CSV and Excel need the Print right.

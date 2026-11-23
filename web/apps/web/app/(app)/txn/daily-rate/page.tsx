@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { formatDesktopDate, recalcDailyRateGrid } from '@datacare/core';
 import { get, post, del, ApiError } from '../../../../lib/api';
 import { RateTicker } from '../../../../components/RateTicker';
+import { DAILY_RATE_CHANGED } from '../../../../components/DailyRateLabels';
 import { LookupPicker } from '../../../../components/LookupPicker';
 import { todayLocal } from '../../../../lib/localDate';
 
@@ -152,6 +153,7 @@ export default function DailyRatePage() {
         kind: 'ok',
         text: `Saved ${saved.saved} group rate(s) for ${formatDesktopDate(saved.date)}`,
       });
+      window.dispatchEvent(new Event(DAILY_RATE_CHANGED));
       await load(date);
     } catch (err) {
       setMsg({ kind: 'err', text: errText(err, 'failed') });
@@ -167,6 +169,7 @@ export default function DailyRatePage() {
     try {
       await del(`/daily-rate?date=${encodeURIComponent(date)}`);
       setMsg({ kind: 'ok', text: 'Deleted.' });
+      window.dispatchEvent(new Event(DAILY_RATE_CHANGED));
       await load(date);
     } catch (err) {
       setMsg({ kind: 'err', text: errText(err, 'delete failed') });
