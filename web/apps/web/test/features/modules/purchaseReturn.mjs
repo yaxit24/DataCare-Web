@@ -185,16 +185,31 @@ async function printedHsnTable(page, vchNo) {
   await printed.close();
   return html.slice(html.indexOf('class="hsn"'), html.indexOf('class="tot"'));
 }
-/** The fixture's HSN code for the gold item (item first, then its group), read rather than assumed. */
-const goldHsn = async (ctx) =>
-  (
-    await ctx.rows(
-      `SELECT COALESCE(NULLIF(i."HSN_CODE",''), g."HSN_CODE") h FROM "ITEM_MAST" i
-         LEFT JOIN "GROUP_MAST" g ON g.tenant_id=i.tenant_id AND g."CO_CODE"=i."CO_CODE" AND g."GR_CODE"=i."GR_CODE"
-        WHERE i.tenant_id=$1 AND i."IT_CODE"=$2 LIMIT 1`,
+/**
+ * The shared fixture's gold item and its group carry no HSN code, so a print case sets one on the item for its own
+ * run and puts the previous value back afterwards. A return saves no HSN (the print joins ITEM_MAST/GROUP_MAST when
+ * it renders, purchaseBill.ts), so nothing this leaves behind carries the code into a later module.
+ */
+const GOLD_HSN = '711320';
+async function withGoldHsn(ctx, fn) {
+  const [prior] = await ctx.rows(
+    `SELECT "HSN_CODE" h FROM "ITEM_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01' AND "IT_CODE"=$2`,
+    ITEMS.gold.code,
+  );
+  assert(prior, 'the fixture gold item exists');
+  const setHsn = (value) =>
+    ctx.rows(
+      `UPDATE "ITEM_MAST" SET "HSN_CODE"=$3 WHERE tenant_id=$1 AND "CO_CODE"='01' AND "IT_CODE"=$2 RETURNING 1`,
       ITEMS.gold.code,
-    )
-  )[0].h;
+      value,
+    );
+  await setHsn(GOLD_HSN);
+  try {
+    return await fn(GOLD_HSN);
+  } finally {
+    await setHsn(prior.h ?? null);
+  }
+}
 
 async function loadReturn(page, vchNo) {
   await page.getByLabel('Voucher No', { exact: true }).fill(vchNo);
@@ -758,9 +773,10 @@ export const purchaseReturn = {
       async (ctx) => {
         const { page } = await ctx.session();
         const vchNo = await createReturn(ctx, page);
-        const hsn = await goldHsn(ctx);
-        assert(hsn, 'the fixture gold item has an HSN code');
-        const table = await printedHsnTable(page, vchNo);
+        const { hsn, table } = await withGoldHsn(ctx, async (hsn) => ({
+          hsn,
+          table: await printedHsnTable(page, vchNo),
+        }));
         assert(
           table.includes(
             `<td>${hsn}</td><td>6,200.00</td><td>93.00</td><td>93.00</td><td>186.00</td>`,
@@ -784,8 +800,10 @@ export const purchaseReturn = {
       async (ctx) => {
         const { page } = await ctx.session();
         const vchNo = await createReturn(ctx, page, { supplier: PARTIES.interState.code });
-        const hsn = await goldHsn(ctx);
-        const table = await printedHsnTable(page, vchNo);
+        const { hsn, table } = await withGoldHsn(ctx, async (hsn) => ({
+          hsn,
+          table: await printedHsnTable(page, vchNo),
+        }));
         assert(
           table.includes(`<td>${hsn}</td><td>6,200.00</td><td>186.00</td><td>186.00</td>`),
           `HSN row for ${hsn}: ${table}`,
@@ -973,6 +991,15 @@ export const purchaseReturn = {
             },
             [row, n],
           );
+        // An appended row mounts only after React commits, and GridKeyboard focuses it on a later animation frame,
+        // so the append checks wait (bounded) for focus to arrive rather than reading it in the same tick.
+        const reaches = async (row, n) => {
+          for (let i = 0; i < 40; i++) {
+            if (await at(row, n)) return true;
+            await page.waitForTimeout(50);
+          }
+          return false;
+        };
         await cell(page, 0, 1).fill(LINE_W.item);
         await cell(page, 0, 1).press('Escape');
         await cell(page, 0, 1).focus();
@@ -993,7 +1020,7 @@ export const purchaseReturn = {
         // Fine, Amount and the delete button are not stops: Enter on Making/g appends row 2 at Item.
         await page.keyboard.press('Enter');
         assert.equal(await grid(page).locator('tbody tr').count(), 2, 'a second row was added');
-        assert(await at(1, 1), 'focus is on row 2 Item');
+        assert(await reaches(1, 1), 'focus is on row 2 Item');
         // A middle row: Enter from row 1 Making/g goes to row 2 Item and adds no row.
         await cell(page, 0, 8).focus();
         await page.keyboard.press('Enter');
