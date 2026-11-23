@@ -1,3 +1,10 @@
+## 2026-11-23 — Order Report is the desktop RP_ALL order branch (N252 / G264, WP-14)
+
+- 2026-11-23: `/reports/order-report` (`rpAll/orderQuery.ts`, `rpAll/orderLayouts.ts`, `reports/order-report/`) runs the seven RP_ALL order
+  buttons; SL_ORD_ADJ joins through ORD_*; rights key `Reports/Order Report` (alias "Order Report"), exports need Print; writes nothing. Module 25/25.
+- 2026-11-23: open: web Sales Order writes no `+` SL_ORD_ADJ row (PR #262); Making Panding/Summ print stored DESIGN_ISU='N' because the desktop
+  write runs only for HM310NEPK (RP_ALL.cs:10925), owner question. Shares lookup entities and `bookCode` in filters.ts with WP-11 (merge conflict).
+
 ## 2026-11-22 — Sales Invoice residuals (N243 / G255, WP-26)
 
 - 2026-11-22: an unchanged reopen-and-save writes the stored SL_DATA row back (D8); getSale reloads the member-commission columns, stones, UPI, credit-note and desktop-shape order rows and PR_COST; UPI_DATA and CRNT_DATA are written (sums = header figures, D1); order advances in the TR_SALE shape (D2, 409 on over-use); old metal G versus every other type, rate type N/F only (G83); the reopened tax code goes back (G82); PRINT_MAST print choice (D6).

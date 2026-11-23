@@ -1595,7 +1595,7 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 | Item InOut | `RP_ALL` | `/reports/item-stock-ledger` | `- - - - P L` | REPORT | P1-core |
 | Ledger Report | `RP_LEDR` | `/reports/account-ledger` | `- - - - P L` | REPORT | P1-core |
 | Old Stock | `RP_SLPR_ZOOM` | `/reports/old-stock` | `- - - - P L` | REPORT | P1-core |
-| Order Report | `RP_ALL` | `/txn/sales-order` | `- - - - - L` | REPORT | P1-core |
+| Order Report | `RP_ALL` | `/reports/order-report` | `- - - - - L` | REPORT | P1-core |
 | Party Os | `RP_OS` | `/reports/outstanding` | `- - - - P L` | REPORT | P1-core |
 | Purc Zoom | `RP_SLPR_ZOOM` | `/reports/purchase-register` | `- - - - P L` | REPORT | P1-core |
 | Purchase Rpt | `RP_ALL` | `/reports/purchase-register` | `- - - - P L` | REPORT | P1-core |
@@ -1736,11 +1736,11 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `RP_ALL` — constructor caption 'Order Report' ([MDI_FORM.cs:8931-8940](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8931-L8940)).
 - **Does:** Reports orders, advances, adjustments, pending details, design summaries and billed fulfilment.
-- **Looks:** Shared date/book/party/item filters with order, advance, adjustment and design report buttons.
+- **Looks:** Shared date/book/party/city/area/cust-name filters with seven order buttons (Order Report, Order Advance, Order Adjust, Order Wise Bill, Making Panding, Making Summ, Bill Wise Adjust).
 - **Reads:** SL_ORD_DATA, SL_ORD_DETL, SL_ORD_ADJ, SL_DATA, AC_MAST, BOOK_DATA.
-- **Web:** `/txn/sales-order`; `GET /sales-orders`, `GET /sales/order-confirmation`. Can: list.
-- **Remaining:** Only the Sales Order transaction list exists; it prints individual order confirmations, not the report. RP_ALL order report modes, cross-book filters, summaries and Crystal layouts are missing.
-- **Owners:** N22, X14, N24, X26, N57, N75.
+- **Web:** `/reports/order-report`; `GET /reports/order-report`, `GET /reports/order-report/export.csv`, `GET /reports/order-report/export.xlsx`. Can: list.
+- **Remaining:** RP_ALL order branch on its own route /reports/order-report: seven buttons over SL_ORD_DATA/SL_ORD_DETL/SL_ORD_ADJ/SL_DATA with adjustments joined through ORD_*, template titles and bands, Cust Name help, City/Area lookups, CSV/XLSX behind the Print right, the caption's own rights row (N252, G264); browser module 25/25. Remaining: the web Sales Order writes no '+' SL_ORD_ADJ advance row (PR #262); Making Panding/Summ print stored DESIGN_ISU='N' lines (the HM310NEPK-only write, RP_ALL.cs:10925, is an owner question); Crystal PDF layouts; desktop match 0%.
+- **Owners:** N22, X14, N24, X26, N57, N75, N252, G264.
 - **Evidence:** [RP_ALL.cs:8366-8501](../../unified/src/csharp/DataCareNext/RP_ALL.cs#L8366-L8501).
 
 ### Party Os

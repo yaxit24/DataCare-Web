@@ -8106,6 +8106,33 @@
         "web/apps/api/test/salesInvoiceResiduals.db.test.ts",
         "web/apps/web/test/features/modules/salesInvoiceResiduals.mjs"
       ]
+    },
+    {
+      "id": "N252",
+      "status": "implemented-unverified",
+      "action": "Report → Order Report is the desktop RP_ALL order branch on its own route /reports/order-report: Order Report, Order Advance, Order Adjust, Order Wise Bill, Making Panding, Making Summ and Bill Wise Adjust over SL_ORD_DATA/SL_ORD_DETL/SL_ORD_ADJ/SL_DATA with SL_ORD_ADJ joined through ORD_NO/ORD_LC/ORD_YRCD/ORD_DBCD, the template titles and bands, Cust Name help from SL_ORD_DATA, City/Area lookups, CSV/XLSX behind the Print right and the caption's own USER_SET row. The report writes nothing.",
+      "parentLabels": "P1-core; L6; WP-14; T01-T18",
+      "startAfter": [
+        "N234"
+      ],
+      "requiredProof": "Unit and DB/HTTP tests under forced RLS that run the real adapter with expected values computed from seeded orders, adjustments and bills for all seven modes, sentinels in another tenant, company and location, no writes, List and Print rights; browser module cases through the real screen.",
+      "gapIds": "G264",
+      "entryDefinition": "docs/parity/LITE-MASTER-PLAN.md section 5 (WP-14)",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md; orchestration/work/WP-14/study.md; orchestration/work/WP-14/cases.md; orchestration/work/WP-14/verify.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "web/apps/api/src/modules/reports/rpAll/orderQuery.ts",
+        "web/apps/api/src/modules/reports/rpAll/orderLayouts.ts",
+        "web/apps/api/src/routes/rpAllReport.ts",
+        "web/apps/web/app/(app)/reports/order-report/page.tsx",
+        "web/apps/api/test/rpAllOrder.test.ts",
+        "web/apps/api/test/rpAllOrder.db.test.ts",
+        "web/apps/web/test/features/modules/orderReportRp.mjs",
+        "orchestration/work/WP-14/verify.md"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. order-report browser module 25 of 25 applicable cases pass on a fresh local build (2026-11-23); pending-set, writes-nothing and sentinels are DB-layer cases in rpAllOrder.db.test.ts. Open: the web Sales Order writes no '+' SL_ORD_ADJ row (PR #262); Making Panding/Summ print stored DESIGN_ISU = 'N' lines because the desktop's fully-adjusted write runs only for registration HM310NEPK (RP_ALL.cs:10925), owner question against decision D2. Desktop match 0%."
     }
   ],
   "amendments": [

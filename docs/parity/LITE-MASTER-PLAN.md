@@ -406,7 +406,7 @@ browser case per screen first (red), then the hook (green).
 | WP-11 | Sales Report + the shared RP_ALL engine | `RP_ALL.cs` (12,662) sales branch | P1 | XL | — | 01 | phase one (engine + Sales API, N234) in PR; screen open |
 | WP-12 | Purchase Rpt (removes 17 G06 baselines) | `RP_ALL` purchase branch | P1 | M | WP-11 | 02 | frozen cases merged |
 | WP-13 | Approval Rpt | `RP_ALL` approval branch | P2 | M | WP-11, WP-01 | 03 | partial |
-| WP-14 | Order Report | `RP_ALL` order branch | P2 | M | WP-11, WP-03 | — (use 01's pattern) | no longer BROKEN once WP-03 (#232) merges |
+| WP-14 | Order Report | `RP_ALL` order branch | P2 | M | WP-11, WP-03 | — (use 01's pattern) | PR open (N252, G264) |
 | WP-15 | Tag Stock | `RP_TAG.cs` (10,813) | P1 | L | — | 04 | N238/G250: selections, stock rule, totals and keys implemented (DB tests pass); zoom, Print window, other-item columns open; browser module not yet run |
 | WP-16 | Stock Report (new route) | `RP_STOCK.cs` (6,407) | P1 | L | WP-15 | 05 | PR open (N241, G253) |
 | WP-17 | Cash Bank | `RP_CASH_BANK.cs` (4,813) | P1 | L | — | 06 | not started |
@@ -618,7 +618,7 @@ it, the owner triggers it.
 | Sales Report | NOT YET VERIFIED | WP-11 |
 | Purchase Rpt | NOT YET VERIFIED | WP-12 |
 | Approval Rpt | NOT YET VERIFIED | WP-13 |
-| Order Report | BROKEN | WP-14 (after WP-03) |
+| Order Report | PARTIAL | WP-14 (advance row after WP-03, #262) |
 | Cash Bank | NOT YET VERIFIED | WP-17 |
 | Gst Report | PARTIAL | WP-19 |
 | HuId Report | NOT YET VERIFIED | WP-18 |

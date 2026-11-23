@@ -2635,10 +2635,10 @@
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "differently-named order listing.",
+   "note": "RP_ALL order branch on its own route (N252, G264): seven order buttons, Cust Name help, CSV/XLSX; the web Sales Order '+' SL_ORD_ADJ row (PR #262) and the DESIGN_ISU owner question remain.",
    "webSurface": {
     "kind": "route",
-    "surface": "GET /sales-orders"
+    "surface": "GET /reports/order-report"
    },
    "sharedSurfaceWith": []
   },

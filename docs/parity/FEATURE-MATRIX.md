@@ -10,11 +10,11 @@ Status authority stays in `docs/master-parity-plan-2026-09-29/execution-backlog.
 | Status | Menus |
 |---|---:|
 | VERIFIED PARITY | 0 |
-| PARTIAL | 33 |
+| PARTIAL | 32 |
 | MISSING | 0 |
 | BROKEN | 2 |
 | BLOCKED | 1 |
-| NOT YET VERIFIED | 13 |
+| NOT YET VERIFIED | 14 |
 | **Lite menus** | **49** |
 
 NOT YET VERIFIED is not counted as complete. VERIFIED PARITY is 0 because no catalog row is FULL and no case has run on the desktop.
@@ -57,7 +57,7 @@ NOT YET VERIFIED is not counted as complete. VERIFIED PARITY is 0 because no cat
 | Sales Report | Runs sales register, party, item, group, employee, order-linked and summary variants. | /reports/sales-register | The shared RP_ALL engine and the Sales adapter serve GET /reports/sales-report (Sales Report, Sales Reg, Item Wise, Group Sales, Employ Sales, Sale With Order and the Sales Return prompt variants) with CSV/XLSX (N234 phase one, inventory docs/parity/rpall-sal… | P1: RP_ALL sales variants absent; shared engine blocks two more reports | WP-11 agent, branch agent/wp11-rpall-engine (N234 phase one: engine + Sales API); screen… | NOT YET VERIFIED | no browser feature module |
 | Purchase Rpt | Runs purchase register, party, item, bill, group and summary report variants. | /reports/purchase-register | A register exists; the RP_ALL purchase variants, the MAIN_BOOK classification remainder, filters and Crystal templates remain. | P1: Waits for the RP_ALL engine | none active (frozen cases merged #202); waits for the RP_ALL engine | NOT YET VERIFIED | no browser feature module |
 | Approval Rpt | Reports approval issue, in/out and pending custody by party and item. | /reports/approval-report | Three data modes exist; InOut calculates the desktop Out/In/Pending piece formulas per APR_DETL issue line (AprInOut.spec.json): Out=ITM_PCS, In=ITM_PCS when ISU_REC is resolved, Pending=Out-In. The desktop writes only 'N' and 'Y' (TR_APR_ISU.cs:6414, TR_SALE… | P2: Selectors, grouping and layouts uncertified | none active (merged #203) | NOT YET VERIFIED | no browser feature module |
-| Order Report | Reports orders, advances, adjustments, pending details, design summaries and billed fulfilment. | /txn/sales-order | Only the Sales Order transaction list exists; it prints individual order confirmations, not the report. RP_ALL order report modes, cross-book filters, summaries and Crystal layouts are missing. | P2: Only the order list exists, not the RP_ALL order report | unowned beyond the Sales Order list (RP_ALL order modes) | PARTIAL | `sales-order`: 32 passed, 0 failed, 1 blocked of 33 applicable |
+| Order Report | Reports orders, advances, adjustments, pending details, design summaries and billed fulfilment. | /reports/order-report | RP_ALL order branch on its own route /reports/order-report: seven buttons over SL_ORD_DATA/SL_ORD_DETL/SL_ORD_ADJ/SL_DATA with adjustments joined through ORD_*, template titles and bands, Cust Name help, City/Area lookups, CSV/XLSX behind the Print right, the… | P2: Only the order list exists, not the RP_ALL order report | WP-14 agent, branch agent/wp14-order-report (N252: RP_ALL order branch on /reports/order-… | NOT YET VERIFIED | no browser feature module |
 | Cash Bank | Shows cash/bank or scheme-member balances and drills into account movements. | /reports/cash-book | Cash Book does not prove the RP_CASH_BANK scheme/pending/member modes, drill-down or the AcLedger/PassBook layouts. | P1: Daily cash and bank book; modes, drill-down and layouts unproven | unowned | NOT YET VERIFIED | no browser feature module |
 | Gst Report | Launches GST/tax registers, summaries, returns and CSV outputs for the jurisdiction. | /reports/gst-report | The RP_GST screen exists: GSTR-1 B2B, B2CL, B2CS, CDNR, CDNUR, AT, ATADJ and HSN, GSTR-2 equivalents, EXP, EXEMP and DOCS as the desktop's caption-only grids (no query, no rows, no message), and the whole desktop GSTR-3B grid with figures for 3.1(a), 3.1(d),… | P1: Statutory output; jurisdiction modes and exact grids uncertified | none active on the screen (merged #206); follow-up PR #217 (CSV negative amounts) is open | PARTIAL | `gst-report`: 57 passed, 0 failed, 13 blocked of 70 applicable |
 | HuId Report | Lists tags by HUID status across stock, inward, outward and all views. | /reports/huid | PR #23 added the HUID filters; exact tabs, remaining filters and the TagHuIdRpt layout remain uncertified. | P2: Hallmark register exists; tabs, filters and layout uncertified | unowned | NOT YET VERIFIED | no browser feature module |
