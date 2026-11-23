@@ -60,6 +60,10 @@ export function BookSlotGrid({
     input.select();
     return true;
   }, []);
+  const cellHasFocus = (row: number, column: number) =>
+    !!bodyRef.current
+      ?.querySelector(`[data-grid-row="${row}"][data-grid-column="${column}"]`)
+      ?.contains(document.activeElement);
   useEffect(() => {
     handleRef.current = { start: () => rows.length > 0 && focusCell(0, DESC) };
   }, [handleRef, rows.length, focusCell]);
@@ -138,7 +142,10 @@ export function BookSlotGrid({
                         acCode: String(picked.code),
                         acName: String(picked.name ?? ''),
                       });
-                      nextRow(i);
+                      // Only Enter in the cell moves on (MS_BOOK.cs:2348-2358). The lookup also resolves the code
+                      // when the cell is left (an arrow, a click); that late answer must not pull the focus back
+                      // from where the operator went, since the desktop arrows only move the cell (:2283-2301).
+                      if (cellHasFocus(i, AC_CODE)) nextRow(i);
                     }}
                     style={{ width: column.width }}
                   />

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { FIXTURE_MANIFEST, ITEMS, PARTIES, USERS } from '../fixtures/catalogue.mjs';
+import { FIXTURE_MANIFEST, ITEMS, USERS } from '../fixtures/catalogue.mjs';
 
 /**
  * Feature: Company → Books (desktop MS_BOOK, web /masters/books). Case ids and expectations are the frozen case list
@@ -24,7 +24,8 @@ import { FIXTURE_MANIFEST, ITEMS, PARTIES, USERS } from '../fixtures/catalogue.m
  * Web rules on purpose (G252): Ctrl+O and the A/E reset are not ported (D6); a book with vouchers keeps its family
  * (D4, plain web text); blank slots allowed (D5); the CSV export behind the Print right is a web addition (D7).
  * The catalogue company is web-provisioned (CASH, SALES, ...), so each case seeds the desktop template accounts
- * (00001 ...) and the marker accounts M1 to M5 (90001 to 90005) it needs, and removes what it added.
+ * (00001 ...), the marker accounts M1 to M5 (90001 to 90005) and its own sale party (90006) it needs, and removes what
+ * it added.
  */
 const as = (user, slot) => ({
   user,
@@ -98,8 +99,14 @@ const ACCOUNTS = [
   ['90003', 'BK MARKER THREE', '31'],
   ['90004', 'BK MARKER FOUR', '02'],
   ['90005', 'BK MARKER FIVE', '02'],
+  ['90006', 'BK SALE PARTY', '10', 'L', 'ABCDE1234F'],
 ];
 const M = ['90001', '90002', '90003', '90004', '90005'];
+/**
+ * The customer of this module's sales, receipts and payments. It is the module's own so that the cash already
+ * received from the shared catalogue party by modules that ran earlier cannot trip the cash limit (DC_Main.cs:2149-2165).
+ */
+const PARTY = { code: '90006' };
 /** MS_UPDATE.cs:7328-7348 and :7360-7376. */
 const ITEM_SALES = ['00003', '00001', '00041', '00057', '00076', '00020'];
 const ITEM_PURC = ['00008', '00001', '00056', '00042', '00076'];
@@ -199,15 +206,17 @@ async function sweep(ctx) {
 /** The accounts, the helper headers and a clean slate; everything added is removed afterwards. */
 async function withBooks(ctx, run) {
   const added = [];
-  for (const [code, name, group] of ACCOUNTS) {
+  for (const [code, name, group, gstType = null, pan = null] of ACCOUNTS) {
     const inserted = await exec(
       ctx,
-      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GR")
-       SELECT $1::text,'01','01',$2::text,$3::text,$4::text
+      `INSERT INTO "AC_MAST"(tenant_id,"CO_CODE","LC_CODE","AC_CODE","AC_NAME","AC_GR","AC_GST_TYPE","AC_PANNO")
+       SELECT $1::text,'01','01',$2::text,$3::text,$4::text,$5::text,$6::text
         WHERE NOT EXISTS (SELECT 1 FROM "AC_MAST" WHERE tenant_id=$1::text AND "CO_CODE"='01' AND "AC_CODE"=$2::text)`,
       code,
       name,
       group,
+      gstType,
+      pan,
     );
     if (inserted) added.push(code);
   }
@@ -406,7 +415,7 @@ async function createOnScreen(page, header, accounts = {}) {
 }
 const saleBody = (coBook) => ({
   coBook,
-  acCode: PARTIES.local.code,
+  acCode: PARTY.code,
   vchDate: today(),
   taxRatePct: 0,
   interState: false,
@@ -853,13 +862,13 @@ export const books = {
           await createOnScreen(
             page,
             { code: 'Z34', name: 'Zeta Cash Rec', short: 'Z34', family: 'CASH REC' },
-            { 1: PARTIES.local.code },
+            { 1: PARTY.code },
           );
           const slots = await slotRows(ctx, 'Z34');
-          assert.equal(slots[0].ac, PARTIES.local.code);
+          assert.equal(slots[0].ac, PARTY.code);
           return {
-            observation: `CASH REC slot 1 saved as party ${PARTIES.local.code}`,
-            expected: PARTIES.local.code,
+            observation: `CASH REC slot 1 saved as party ${PARTY.code}`,
+            expected: PARTY.code,
             database: { slots },
             downstream: { header: await headerRows(ctx, 'Z34') },
           };
@@ -2141,7 +2150,7 @@ export const books = {
             const legs = await legsOf(ctx, 'JS1', vch);
             balanced(legs);
             noProvisioned(legs);
-            assert.equal(legs.find((l) => l.ac === PARTIES.local.code && l.dr === 1000)?.ld, M[0]);
+            assert.equal(legs.find((l) => l.ac === PARTY.code && l.dr === 1000)?.ld, M[0]);
             assert.deepEqual(
               legs.filter((l) => l.ac === M[1]).map((l) => l.dr),
               [995],
@@ -2225,7 +2234,7 @@ export const books = {
             const legs = await legsOf(ctx, 'JP1', vch);
             balanced(legs);
             noProvisioned(legs);
-            assert.equal(legs.find((l) => l.ac === PARTIES.local.code && l.cr === 1000)?.ld, M[0]);
+            assert.equal(legs.find((l) => l.ac === PARTY.code && l.cr === 1000)?.ld, M[0]);
             assert.deepEqual(
               legs.filter((l) => l.ac === M[1]).map((l) => l.cr),
               [995],
@@ -2262,7 +2271,7 @@ export const books = {
             const rec = await page.request.post('/api/receipts', {
               data: {
                 coBook: 'JC1',
-                partyAc: PARTIES.local.code,
+                partyAc: PARTY.code,
                 amount: 5000,
                 kasar: 50,
                 mode: 'cash',
@@ -2271,9 +2280,9 @@ export const books = {
             assert.equal(rec.status(), 201, await rec.text());
             const legs = (await legsOf(ctx, 'JC1')).map(({ ac, dr, cr }) => ({ ac, dr, cr }));
             assert.deepEqual(legs, [
-              { ac: PARTIES.local.code, dr: 0, cr: 5000 },
+              { ac: PARTY.code, dr: 0, cr: 5000 },
               { ac: M[0], dr: 5000, cr: 0 },
-              { ac: PARTIES.local.code, dr: 0, cr: 50 },
+              { ac: PARTY.code, dr: 0, cr: 50 },
               { ac: M[1], dr: 50, cr: 0 },
             ]);
             await apiBook(page, 'JC2', 'Journey Bank Pay', 'BANK PAY', [
@@ -2281,7 +2290,7 @@ export const books = {
               [2, M[2]],
             ]);
             const pay = await page.request.post('/api/payments', {
-              data: { coBook: 'JC2', partyAc: PARTIES.local.code, amount: 700, mode: 'bank' },
+              data: { coBook: 'JC2', partyAc: PARTY.code, amount: 700, mode: 'bank' },
             });
             assert.equal(pay.status(), 201, await pay.text());
             const paid = await legsOf(ctx, 'JC2');
