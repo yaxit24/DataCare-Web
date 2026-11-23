@@ -38,6 +38,14 @@ import {
   persistedVoucherHeaderTx,
   voucherTimestamp,
 } from '../vouchers/lifecycle.js';
+import { recordFieldChangesTx } from '../vouchers/fieldAudit.js';
+import { assertVoucherVersionTx, versionKeyOf, voucherVersionTx } from '../vouchers/version.js';
+import {
+  assertSaleReturnSaveTx,
+  assertSaleReturnValue,
+  SALE_RETURN_MESSAGES,
+} from './saleReturnSaveChecks.js';
+import { savedReturnHeader, savedReturnLine } from './saleReturnReopen.js';
 
 export interface SaleReturnInput {
   scope: VoucherScope;
@@ -63,6 +71,8 @@ export interface SaleReturnInput {
   bankAc?: string;
   kasarAc?: string;
   mainUser?: string;
+  /** TR_SALE_RTN.cs:12877 `EMP_CODE = tEmpCode.Text`; required when CO_SET.EMP_CODE_MANDATORY = 'Y'. */
+  empCode?: string;
 }
 
 type VoucherKey = {
@@ -216,7 +226,8 @@ async function resolveReturnedTagIdentities(
     }
     const vchSrno = Number(identityRows[0]?.VCH_SRNO ?? 0);
     const identity = `${tagNo}|${vchSrno}|${line.itCode}`;
-    if (seen.has(identity)) throw new SaleValidationError(`duplicate returned tag: ${tagNo}`);
+    // WP-27 D8: the desktop's own text for a repeated tag (TR_SALE_RTN.cs:9313).
+    if (seen.has(identity)) throw new SaleValidationError(SALE_RETURN_MESSAGES.duplicateTag);
     seen.add(identity);
     await tx.$executeRawUnsafe(
       'SELECT pg_advisory_xact_lock(hashtext($1))',
@@ -262,6 +273,9 @@ type SaleReturnWriteContext = {
   hdVchNo: string;
   mainUser: string;
   persistedClock?: unknown;
+  /** The stored header read before the rewrite, for the USER_DATA edit audit (TR_SALE_RTN.cs:13512-13541). */
+  persistedHeader?: Record<string, unknown>;
+  editingUser?: string;
 };
 
 export async function createSaleReturn(
@@ -271,11 +285,19 @@ export async function createSaleReturn(
   lifecycle?: SaleReturnWriteContext,
 ): Promise<SaleReturnResult> {
   if (!input.acCode) throw new SaleValidationError('customer account (acCode) is required');
-  if (!lines?.length) throw new SaleValidationError('at least one return line is required');
   assertSaleTaxRate(input.taxRatePct);
   const tenantId = input.scope.tenantId;
 
   const run = async (tx: any): Promise<SaleReturnResult> => {
+    // WP-27 (N242): the desktop's save refusals, in its order, before anything is numbered or written.
+    await assertSaleReturnSaveTx(tx, input.scope, {
+      vchDate: input.vchDate ? new Date(input.vchDate) : new Date(),
+      empCode: input.empCode,
+      chequeAmt: input.chequeAmt,
+      cardAmt: input.cardAmt,
+      bankAc: input.bankAc,
+      isNew: !lifecycle,
+    });
     const vchNo = lifecycle?.vchNo ?? (await nextVoucherNoTx(tx, input.scope));
     const hdVchNo =
       lifecycle?.hdVchNo ??
@@ -334,6 +356,7 @@ export async function createSaleReturn(
       };
     });
     const lineNetTotal = computed.reduce((sum, line) => sum + line.calc.net, 0);
+    assertSaleReturnValue(lineNetTotal); // TR_SALE_RTN.cs:12398-12405 (WP-27 D9)
     const totals = billTotals(
       {
         lineNetTotal,
@@ -414,7 +437,7 @@ export async function createSaleReturn(
       AC_CODE: input.acCode,
       SR_NO: index + 1,
       IT_CODE: line.in.itCode,
-      TAG_NO: line.in.tagNo ?? 'N',
+      TAG_NO: str(line.in.tagNo) || 'N',
       VCH_SRNO: identities.get(index)?.VCH_SRNO ?? 0,
       ITM_PCS: num(line.in.pcs),
       ITM_GWT: num(line.in.grossWt),
@@ -437,7 +460,8 @@ export async function createSaleReturn(
       OLD_SRNO: num(line.in.oldSrNo),
       ITM_OTH_WT: num(line.in.otherWt),
       ITM_GHT_WT: num(line.in.ghtWt),
-      LBR_TYPE: str(line.in.labourType).slice(0, 1) || null,
+      // The desktop basis code (G/N/K/P) as Sale stores it; the old first letter ('p') could not be read back.
+      LBR_TYPE: desktopLabourTypeFor(line.in.labourType, behavior.labourType) || null,
       LBR_PRC: num(line.in.labourPct),
       LBR_RATE: line.calc.labourRate ?? num(line.in.labourRate),
       TAG_LBR_PRC: num(line.in.tagLabourPct),
@@ -487,6 +511,8 @@ export async function createSaleReturn(
       ISU_YRCD: originalNo ? (input.scope.coYear ?? '') : null,
       AC_CODE: input.acCode,
       AC_NAME: input.acName ?? null,
+      EMP_CODE: str(input.empCode) || null,
+      BANK_AC: str(input.bankAc) || null,
       VCH_DATE: vchDate,
       NET_AMT: totals.net,
       DISC_AMT: totals.discount,
@@ -539,6 +565,24 @@ export async function createSaleReturn(
       KASAR_AMT: refund.kasar,
       BILL_OS: round2(totals.total - refund.paidNow - refund.kasar),
     });
+    // TR_SALE_RTN.cs:13512-13541: an edit writes one USER_DATA row per changed header column (WP-27 D5).
+    if (lifecycle?.persistedHeader)
+      await recordFieldChangesTx(tx, tenantId, {
+        key: {
+          CO_CODE: key.CO_CODE,
+          LC_CODE: key.LC_CODE,
+          CO_YEAR: key.CO_YEAR,
+          CO_BOOK: key.CO_BOOK,
+          VCH_NO: key.VCH_NO,
+        },
+        acCode: input.acCode,
+        vchDate,
+        bookName: bookPolicy.bookName,
+        originalUser: mainUser,
+        editingUser: lifecycle.editingUser ?? null,
+        before: lifecycle.persistedHeader,
+        after: header,
+      });
 
     const taxBase = {
       ...key,
@@ -571,7 +615,7 @@ export async function createSaleReturn(
       BOOK_NAME: bookPolicy.bookName,
       AC_CODE: input.acCode,
       IT_CODE: line.in.itCode,
-      TAG_NO: line.in.tagNo ?? 'N',
+      TAG_NO: str(line.in.tagNo) || 'N',
       VCH_SRNO: identities.get(index)?.VCH_SRNO ?? 0,
       TBL_CODE: line.in.tblCode ?? null,
       DESIGN_NO: line.in.designNo ?? null,
@@ -649,7 +693,16 @@ export async function createSaleReturn(
 
 export async function saleForReturn(
   prisma: any,
-  input: { scope: VoucherScope; origVchNo: string | number; origBook?: string },
+  input: {
+    scope: VoucherScope;
+    origVchNo: string | number;
+    origBook?: string;
+    /**
+     * false (the Import box, TR_SALE_RTN.cs:16528-16545): the whole bill, refused once any return of it exists
+     * (:16534-16540). true (the single-item picker, :3882): only the lines whose tag is not on a return of it.
+     */
+    remaining?: boolean;
+  },
 ): Promise<{
   acCode: string;
   acName: string | null;
@@ -675,6 +728,32 @@ export async function saleForReturn(
       formatVoucherNo(input.origVchNo),
     );
     if (!hdr.length) throw new SaleValidationError('original bill not found');
+    // WP-27 D6/D7. The desktop keys a return to its bill by company, location and ISU_YRCD/ISU_DBCD/ISU_NO, with no
+    // book or year of its own; the web keeps that key and takes the lowest voucher number (Rows[0] is unordered).
+    // Parameters $1-$6 are the bill's own key; ISU_YRCD/ISU_DBCD/ISU_NO name the same year, book and number.
+    const returnOfBill = `a.tenant_id=$1 AND a."CO_CODE"=$2 AND a."LC_CODE"=$3
+        AND a."ISU_YRCD"=$4 AND a."ISU_DBCD"=$5 AND a."ISU_NO"=$6`;
+    const returnKey = `FROM "SL_DATA" a WHERE ${returnOfBill}`;
+    // TR_SALE_RTN.cs:3882 `TAG_NO NOT IN (returned tags of this bill)`, literally including the loose 'N' (D7).
+    const returnedTagFilter = `AND NOT EXISTS (SELECT 1 FROM "SL_DATA" a JOIN "SL_DETL_RTN" r
+          ON r.tenant_id=a.tenant_id AND r."CO_CODE"=a."CO_CODE" AND r."LC_CODE"=a."LC_CODE"
+         AND r."CO_YEAR"=a."CO_YEAR" AND r."CO_BOOK"=a."CO_BOOK" AND r."VCH_NO"=a."VCH_NO"
+       WHERE ${returnOfBill} AND r."TAG_NO"=d."TAG_NO")`;
+    if (!input.remaining) {
+      const earlier: Array<{ VCH_NO: unknown }> = await tx.$queryRawUnsafe(
+        `SELECT a."VCH_NO" ${returnKey} ORDER BY a."VCH_NO" LIMIT 1`,
+        tenantId,
+        input.scope.coCode,
+        input.scope.lcCode,
+        input.scope.coYear ?? '',
+        book,
+        formatVoucherNo(input.origVchNo),
+      );
+      if (earlier.length)
+        throw new SaleValidationError(
+          SALE_RETURN_MESSAGES.alreadyImported(String(earlier[0]?.VCH_NO ?? '').trim()),
+        );
+    }
     const detail: any[] = await tx.$queryRawUnsafe(
       `SELECT "IT_CODE","TAG_NO","VCH_SRNO",
               coalesce(NULLIF("ITM_PCS"::text,'')::numeric,0)::float "pcs",
@@ -685,9 +764,11 @@ export async function saleForReturn(
               coalesce(NULLIF("ITM_AMT"::text,'')::numeric,0)::float "metalAmount",
               coalesce(NULLIF("LBR_AMT"::text,'')::numeric,0)::float "labourAmount",
               coalesce(NULLIF("NET_AMT"::text,'')::numeric,0)::float "net"
-         FROM "SL_DETL"
+         FROM "SL_DETL" d
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
-          AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO"`,
+          AND "CO_BOOK"=$5 AND "VCH_NO"=$6
+          ${input.remaining ? returnedTagFilter : ''}
+        ORDER BY "SR_NO"`,
       tenantId,
       input.scope.coCode,
       input.scope.lcCode,
@@ -743,7 +824,7 @@ export async function getSaleReturn(
     const params = returnParams(scope, voucherNo);
     const headers: any[] = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO","VCH_DATE"::text,"VCH_TIME","BILL_NO","HD_VCH_NO","MAIN_USER",
-              "AC_CODE","AC_NAME","ISU_NO","ISU_DBCD","DISC_AMT","TAX_CODE","TAX_PRC",
+              "AC_CODE","AC_NAME","ISU_NO","ISU_DBCD","EMP_CODE","BANK_AC","DISC_AMT","TAX_CODE","TAX_PRC",
               "IGST_TAX","CASH_AMT","CHQ_AMT","CARD_AMT","UPI_AMT","KASAR_AMT",
               "NET_AMT","TAX_AMT","TOT_AMT"
          FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3
@@ -756,53 +837,18 @@ export async function getSaleReturn(
           ? `sales return voucher is ambiguous: ${voucherNo}`
           : `sales return voucher not found: ${voucherNo}`,
       );
+    // Every stored column, so the reopened voucher saves back to the same rows (WP-27 D12, saleReturnReopen.ts).
     const details: any[] = await tx.$queryRawUnsafe(
-      `SELECT "SR_NO","IT_CODE","TAG_NO","VCH_SRNO","ITM_PCS","ITM_GWT","ITM_NWT",
-              "ITM_TOUCH","ITM_WEST_PRC","ITM_RATE","LBR_AMT","OTH_AMT","DESIGN_NO",
-              "ITM_SIZE","TBL_CODE","NET_AMT" FROM "SL_DETL_RTN"
+      `SELECT * FROM "SL_DETL_RTN"
         WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
           AND "CO_BOOK"=$5 AND "VCH_NO"=$6 ORDER BY "SR_NO"`,
       ...params,
     );
-    const h = headers[0];
     return {
-      voucherNo: text(h.VCH_NO),
-      hiddenVoucherNo: text(h.HD_VCH_NO),
-      mainUser: text(h.MAIN_USER),
-      vchDate: toIsoDate(h.VCH_DATE),
-      billNo: text(h.BILL_NO),
-      acCode: text(h.AC_CODE),
-      acName: text(h.AC_NAME),
-      origVchNo: text(h.ISU_NO),
-      origBook: text(h.ISU_DBCD),
-      discountAmount: num(h.DISC_AMT),
-      taxCode: text(h.TAX_CODE),
-      taxRatePct: num(h.TAX_PRC),
-      interState: num(h.IGST_TAX) !== 0,
-      cashAmt: num(h.CASH_AMT),
-      chequeAmt: num(h.CHQ_AMT),
-      cardAmt: num(h.CARD_AMT),
-      upiAmt: num(h.UPI_AMT),
-      kasar: num(h.KASAR_AMT),
-      totals: { net: num(h.NET_AMT), tax: num(h.TAX_AMT), total: num(h.TOT_AMT) },
-      lines: details.map((r) => ({
-        srNo: num(r.SR_NO),
-        itCode: text(r.IT_CODE),
-        tagNo: text(r.TAG_NO) === 'N' ? '' : text(r.TAG_NO),
-        vchSrno: num(r.VCH_SRNO),
-        pcs: num(r.ITM_PCS),
-        grossWt: num(r.ITM_GWT),
-        netWt: num(r.ITM_NWT),
-        touch: num(r.ITM_TOUCH),
-        westPct: num(r.ITM_WEST_PRC),
-        rate: num(r.ITM_RATE),
-        labourFixed: num(r.LBR_AMT),
-        otherAmount: num(r.OTH_AMT),
-        designNo: text(r.DESIGN_NO),
-        itmSize: text(r.ITM_SIZE),
-        tblCode: text(r.TBL_CODE),
-        netAmount: num(r.NET_AMT),
-      })),
+      ...savedReturnHeader(headers[0]),
+      lines: details.map(savedReturnLine),
+      // N51/D17: PUT sends this back as expectedVersion; a stale copy is 409 voucher-version-conflict.
+      version: await voucherVersionTx(tx, SALE_RETURN_WRITE_TABLES, versionKeyOf(scope, voucherNo)),
     };
   });
 }
@@ -812,11 +858,12 @@ export async function editSaleReturn(
   input: SaleReturnInput,
   lines: SaleLineInput[],
   requestedVoucherNo: number | string,
+  /** The `version` the editor read; the HTTP route always sends it. A stale one is refused before any write. */
+  expectedVersion?: string,
 ): Promise<SaleReturnResult> {
   completeReturnScope(input.scope);
   const scope = input.scope;
   const voucherNo = formatVoucherNo(requestedVoucherNo);
-  const requestedDate = input.vchDate ? new Date(input.vchDate) : new Date();
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
     const persisted = await persistedVoucherHeaderTx(tx, {
       table: 'SL_DATA',
@@ -824,6 +871,25 @@ export async function editSaleReturn(
       voucherNo,
       extraColumns: ['ISU_NO', 'ISU_DBCD'],
     });
+    // The desktop reloads the stored date into mVchDate (TR_SALE_RTN.cs:10104) and writes it back (:12607): an edit
+    // that sends no date keeps the voucher's own date, never today's (WP-27 review).
+    const vchDate = input.vchDate ?? toIsoDate(persisted.VCH_DATE);
+    const requestedDate = new Date(vchDate);
+    if (expectedVersion !== undefined)
+      await assertVoucherVersionTx(
+        tx,
+        SALE_RETURN_WRITE_TABLES,
+        versionKeyOf(scope, voucherNo),
+        expectedVersion,
+      );
+    // The whole stored header, read before the rewrite, for the USER_DATA edit audit (WP-27 D5).
+    const priorHeader: Record<string, unknown> | undefined = (
+      await tx.$queryRawUnsafe(
+        `SELECT * FROM "SL_DATA" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "CO_YEAR"=$4
+            AND "CO_BOOK"=$5 AND "VCH_NO"=$6`,
+        ...returnParams(scope, voucherNo),
+      )
+    )[0];
     for (const date of [persisted.VCH_DATE, requestedDate])
       await assertPeriodOpen(tx, scope.tenantId, {
         ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: date }] },
@@ -850,12 +916,14 @@ export async function editSaleReturn(
       key: { scope, voucherNo },
       tempBook: { voucherNo: hiddenVoucherNo },
     });
-    return createSaleReturn(prisma, input, lines, {
+    return createSaleReturn(prisma, { ...input, vchDate }, lines, {
       tx,
       vchNo: Number(voucherNo),
       hdVchNo: hiddenVoucherNo,
       mainUser: text(persisted.MAIN_USER),
       persistedClock: persisted.VCH_CLOCK,
+      persistedHeader: priorHeader,
+      editingUser: text(input.mainUser) || undefined,
     });
   });
 }
@@ -864,6 +932,8 @@ export interface DeleteSaleReturnInput {
   scope: VoucherScope;
   vchNo: number | string;
   deleteUser?: string;
+  /** N51/D17: the `version` the operator read; a stale one is `409 voucher-version-conflict`. */
+  expectedVersion?: string;
 }
 export async function deleteSaleReturn(
   prisma: any,
@@ -881,6 +951,13 @@ export async function deleteSaleReturn(
       voucherNo,
       extraColumns: ['AC_CODE', 'AC_NAME', 'TOT_AMT', 'RTN_TOT_AMT'],
     });
+    if (input.expectedVersion !== undefined)
+      await assertVoucherVersionTx(
+        tx,
+        SALE_RETURN_WRITE_TABLES,
+        versionKeyOf(scope, voucherNo),
+        input.expectedVersion,
+      );
     await assertPeriodOpen(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: [{ CO_CODE: scope.coCode, VCH_DATE: header.VCH_DATE }] },
     });

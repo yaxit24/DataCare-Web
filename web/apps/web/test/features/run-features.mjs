@@ -18,6 +18,7 @@ import { seedCatalogue } from './fixtures/catalogue.mjs';
 import { purchaseInvoice } from './modules/purchaseInvoice.mjs';
 import { purchaseReport } from './modules/purchaseReport.mjs';
 import { salesReport } from './modules/salesReport.mjs';
+import { stockReport } from './modules/stockReport.mjs';
 import { purchaseReturn } from './modules/purchaseReturn.mjs';
 import { salesOrder } from './modules/salesOrder.mjs';
 import { salesInvoice } from './modules/salesInvoice.mjs';
@@ -33,6 +34,7 @@ import { orderCancel } from './modules/orderCancel.mjs';
 import { balanceTransfer } from './modules/balanceTransfer.mjs';
 import { partyOpening } from './modules/partyOpening.mjs';
 import { tagOpening } from './modules/tagOpening.mjs';
+import { tagStock } from './modules/tagStock.mjs';
 import { dailyRate } from './modules/dailyRate.mjs';
 import { itemOpening } from './modules/itemOpening.mjs';
 import { tagCancel } from './modules/tagCancel.mjs';
@@ -41,6 +43,7 @@ import { employeeMaster } from './modules/employeeMaster.mjs';
 import { taxMaster } from './modules/taxMaster.mjs';
 import { autoItem } from './modules/autoItem.mjs';
 import { groupMaster } from './modules/groupMaster.mjs';
+import { books } from './modules/books.mjs';
 import { productMaster } from './modules/productMaster.mjs';
 import { addressMaster } from './modules/addressMaster.mjs';
 import { partyMaster } from './modules/partyMaster.mjs';
@@ -74,6 +77,7 @@ const MODULES = [
   purchaseInvoice,
   purchaseReport,
   salesReport,
+  stockReport,
   settingsEffects,
   usersRights,
   salesReturn,
@@ -88,6 +92,7 @@ const MODULES = [
   balanceTransfer,
   partyOpening,
   tagOpening,
+  tagStock,
   dailyRate,
   itemOpening,
   tagCancel,
@@ -96,6 +101,7 @@ const MODULES = [
   taxMaster,
   autoItem,
   groupMaster,
+  books,
   productMaster,
   addressMaster,
   partyMaster,

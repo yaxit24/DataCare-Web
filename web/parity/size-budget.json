@@ -9,7 +9,7 @@
     "apps/api/src/modules/sales/rateCut.ts": 2732,
     "apps/api/src/modules/sales/salesOrder.ts": 2354,
     "apps/api/src/modules/membership/scheme.ts": 2205,
-    "apps/api/src/modules/posting/desktopColumnDefaults.ts": 2010,
+    "apps/api/src/modules/posting/desktopColumnDefaults.ts": 2014,
     "apps/api/src/modules/manufacturing/karigar.ts": 1947,
     "apps/api/src/modules/einvoice/eBillWriter.ts": 1896,
     "apps/web/app/(app)/reports/[report]/page.tsx": 1743,
