@@ -1,3 +1,16 @@
+## 2026-11-22 — Sales Invoice residuals (N243 / G255, WP-26)
+
+- 2026-11-22: an unchanged reopen-and-save writes the stored SL_DATA row back (D8); getSale reloads the member-commission columns, stones, UPI, credit-note and desktop-shape order rows and PR_COST; UPI_DATA and CRNT_DATA are written (sums = header figures, D1); order advances in the TR_SALE shape (D2, 409 on over-use); old metal G versus every other type, rate type N/F only (G83); the reopened tax code goes back (G82); PRINT_MAST print choice (D6).
+- Open (blocked in cases.md): quotation import, stepped Esc, old-metal Ctrl+D, header totals only for book type M (provisioned books have no BOOK_TYPE: owner question), fixture users without edit/print right, tender retry/rollback, two journeys, approval number import (D5). OpAmt/ClAmt follow the desktop Sum(CR - DR), so a debit balance is negative (the case listed magnitudes).
+
+## 2026-11-22 — Sales Return residuals (N242 / G254, WP-27)
+
+- 2026-11-22: the TR_SALE_RTN save refusals in desktop order and texts (employee, cheque/card account, type B, year, lock date, zero
+  value, `Duplicate Tag No`); Import refuses a bill that already has a return, `remaining=1` is the single-item picker; the New return
+  form opens a saved return and saves it with `PUT /sales-returns/:vchNo` + version token, losslessly, with the USER_DATA field audit.
+- 2026-11-22: decisions D1-D14 in `orchestration/work/WP-27/cases.md` (architect, owner may override); new DB tests 18 of 18; return
+  create p95 269 ms in the load profile. Browser module (28 cases, 0 declared blocked) not run locally. G246 (RTN_* columns) stays open.
+
 ## 2026-11-22 — Stock Report is the desktop RP_STOCK form on its own route (N241 / G253, WP-16)
 
 - 2026-11-22: `/reports/stock-report` (`modules/reports/stockReport/`, `routes/stockReport.ts`, `reports/stock-report/`) sums signed MAIN_STOCK
