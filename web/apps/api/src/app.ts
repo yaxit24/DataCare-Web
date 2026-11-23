@@ -36,6 +36,7 @@ import { PasswordPolicyError } from './modules/auth/password.js';
 import {
   enforceRequestScope,
   listScopeBooks,
+  bookFamilyMainBooks,
   listScopeCompanies,
   listScopeLocations,
   listScopeYears,
@@ -740,12 +741,16 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     return listScopeYears(prisma, { tenantId: s.tenantId, coCode: s.coCode });
   });
 
-  app.get('/context/books', { preHandler: requireAuth }, async (req: FastifyRequest) => {
+  app.get('/context/books', { preHandler: requireAuth }, async (req: FastifyRequest, reply) => {
     const s = sess(req);
+    // WP-28: `?family=purchase` filters by MAIN_BOOK on the server (DC_Main.cs:1503).
+    const mainBooks = bookFamilyMainBooks((req.query as Record<string, unknown>)?.family);
+    if (mainBooks === null) return reply.code(400).send({ error: 'unknown-book-family' });
     return listScopeBooks(prisma, {
       tenantId: s.tenantId,
       coCode: s.coCode,
       lcCode: s.lcCode,
+      mainBooks,
     });
   });
 

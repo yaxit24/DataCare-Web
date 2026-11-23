@@ -759,9 +759,13 @@ dbDescribe('Tour Order configured-book and complete editor round trip', () => {
       expect(await listTourOrders(runtime, current)).toEqual([]);
     }
     expect((await getTourOrder(runtime, scope(), '00001')).version).toBe(allocated.version);
-    expect(await query(`SELECT "ORD_DBCD" FROM "SL_ORD_ADJ" WHERE tenant_id=$1`, tenantId)).toEqual(
-      [{ ORD_DBCD: '511' }],
-    );
+    // The settlement row is untouched. (The blocked order keeps its own '+' advance row, TR_TOUR_ORD.cs:7560-7600.)
+    expect(
+      await query(
+        `SELECT "ORD_DBCD" FROM "SL_ORD_ADJ" WHERE tenant_id=$1 AND "CO_BOOK"='ADJ'`,
+        tenantId,
+      ),
+    ).toEqual([{ ORD_DBCD: '511' }]);
   });
 
   it('treats missing legacy allocation dimensions conservatively but respects an explicit different source dimension', async () => {
@@ -789,7 +793,10 @@ dbDescribe('Tour Order configured-book and complete editor round trip', () => {
     ).rejects.toThrow('already been');
     expect(await businessSnapshot()).toEqual(before);
     // Missing branch/year cannot turn a known other book into a match for this order.
-    await exec(`UPDATE "SL_ORD_ADJ" SET "ORD_DBCD"='Z09' WHERE tenant_id=$1`, tenantId);
+    await exec(
+      `UPDATE "SL_ORD_ADJ" SET "ORD_DBCD"='Z09' WHERE tenant_id=$1 AND "CO_BOOK"='ADJ'`,
+      tenantId,
+    );
     await editTourOrder(
       runtime,
       { ...document, scope: scope(), expectedVersion: document.version },

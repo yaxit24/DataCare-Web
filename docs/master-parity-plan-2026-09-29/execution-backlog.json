@@ -8106,6 +8106,67 @@
         "web/apps/api/test/salesInvoiceResiduals.db.test.ts",
         "web/apps/web/test/features/modules/salesInvoiceResiduals.mjs"
       ]
+    },
+    {
+      "id": "N244",
+      "status": "implemented-unverified",
+      "action": "Purchase residuals (WP-28): a lossless reopen and edit of a purchase (GET /purchases/:vchNo returns every stored value; the edit keeps the persisted columns the screen does not model and the stored IT_TYPE), the TR_PURC_HM hallmark receive columns (HM_ID_AMT per line, header HM_AMT rounded half to even, HM_TAX_CODE, ITM_COLOR, EMP_CODE, VCH_DESC; hallmark ids 2-4, their weights and the tag band for TAG PURCHASE books only), a server-side purchase book family on create, edit and GET /context/books?family=, and one Purchase entry that opens the hallmark layout when PURC_WITH_HMTAX is Y, with Tag Wise Purc on the TAG PURCHASE books.",
+      "parentLabels": "P1-core; L1; T01-T18; WP-28",
+      "startAfter": [
+        "N227"
+      ],
+      "requiredProof": "DB tests derived from the desktop rules: GET then PUT unchanged leaves every row of every purchase table identical (earlier-month voucher, desktop-only columns, item master changed after save); TAG PURCHASE stores four hallmark ids, weights and the tag band and a PURCHASE book stores them as zeros and blanks; HM_TAX_CODE stored with a zero charge; a line hallmark edit re-derives HM_AMT half to even and its tax; a book outside the purchase family is refused on create and edit with nothing written; /context/books?family= lists only in-use books of that family. Unit tests for the pure hallmark rules. The purchase-invoice browser module with the new hallmark-layout, Tag Wise Purc book, server-side book list and lossless-reopen cases; all repository gates.",
+      "gapIds": "G02, G46, G91, G101, G256",
+      "entryDefinition": "docs/parity/LITE-MASTER-PLAN.md section 5 (WP-28)",
+      "sourceAndModuleDetail": "orchestration/work/WP-28/study.md; orchestration/work/WP-28/cases.md; 12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/apps/api/src/modules/purchase/purchase.ts",
+        "web/apps/api/src/modules/purchase/purchaseHallmark.ts",
+        "web/apps/api/src/modules/purchase/purchaseReopen.ts",
+        "web/apps/api/src/modules/auth/businessScope.ts",
+        "web/apps/api/src/app.ts",
+        "web/apps/web/app/(app)/txn/purchase/page.tsx",
+        "web/apps/web/app/(app)/txn/purchase-hm/page.tsx",
+        "web/apps/web/app/(app)/txn/tag-wise-purc/page.tsx",
+        "web/apps/web/components/BookSelect.tsx",
+        "web/apps/web/lib/purchaseCarry.ts",
+        "web/apps/api/test/purchaseHallmark.wp28.test.ts",
+        "web/apps/api/test/purchaseResiduals.wp28.routes.db.test.ts",
+        "web/apps/web/test/features/modules/purchaseInvoice.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. 88 cases: 17 pass at database/unit level (lossless reopen of every tenant row for an earlier-month hallmark voucher with typed amount, fine and stones; TAG PURCHASE ids 2-4, weights, tag band and BAR_DETL rules; HM_AMT half to even; HM tax code with no charge; server family refusal; /context/books?family=), 4 partly, 2 blocked, 3 N/A, the rest executable but not run (browser module extended, not run locally); full API suite with database 4134/4134 after the kernel fix. Frozen cases and decisions D1-D13 in orchestration/work/WP-28/cases.md; 2 cases blocked: lookup.books-data-type-filter (the web has no company data type, D10) and keyboard.hm-grid-enter-walk (the 95-column TEXT_PR_KeyDown walk is not transcribed). The new purchase-invoice browser cases were not run locally (machine rule); CI's feature job is the run of record. Not done: the employee-code book shortcut (D9), WITH_STOCK blank to Y, the TAG PURCHASE BAR_DATA/SRNO_MAST/TAG_SET write set, the print templates. Desktop match 0%."
+    },
+    {
+      "id": "N245",
+      "status": "implemented-unverified",
+      "action": "Purchase Rtn residuals (TR_KR_ISU, PURC RETURN): the print is gated on the desktop's print right FRM_PRINT, not on view; a return line stores TAX_PRC 0 as the desktop does while the header keeps rate and heads; reopen returns a version token and edit and delete require it (409 voucher-version-conflict, nothing changed); the grid Enter walk is a pure plan (planEnterWalk) with unit tests; the browser module gains the HSN-tax print cases and the Enter-walk case.",
+      "parentLabels": "P2; L1; T01-T18; WP-29",
+      "startAfter": [
+        "N34"
+      ],
+      "requiredProof": "DB tests derived from the desktop rules: HSN row 6,200.00 / 93.00 / 93.00 / 186.00 (intra) and IGST 186.00 (inter), FRM_PRINT refusal, line TAX_PRC 0 with header 3 / 186, 400 without and 409 with a stale token, lossless unchanged save; unit tests for the Enter walk; the browser module cases run in CI; all repository gates.",
+      "gapIds": "G257",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "web/apps/api/src/routes/purchaseReturn.ts",
+        "web/apps/api/src/modules/purchase/purchaseReturn.ts",
+        "web/apps/api/src/modules/purchase/purchaseReturnLifecycle.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/web/components/GridKeyboard.tsx",
+        "web/apps/web/app/(app)/txn/purchase-return/page.tsx",
+        "web/apps/api/test/purchaseReturnWp29.routes.db.test.ts",
+        "web/apps/web/test/gridKeyboard.test.ts",
+        "web/apps/web/test/features/modules/purchaseReturn.mjs",
+        "orchestration/work/WP-29/cases.md"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Decisions (architect, 2026-11-23, owner may override): D1 the Purchase Return print guards the print right (the sales print keeps view until a cross-family decision); D2 line TAX_PRC 0 as TR_KR_ISU.cs:5206, no data migration (no reader uses the line column); D3 Fine/Amount stay computed cells (layout residual N77); D4 config.setting-variant stays blocked on N166; D5 edit and delete carry the version token like purchases. DB: purchaseReturn* and transaction.integrity files pass (26 tests), full API suite 4126 tests passed after the token was added to two callers. Browser cases print.hsn-tax-intra, print.hsn-tax-inter and keyboard.enter-walk were written without a local browser stack and run in CI. Still open: the UAE variant, Fine/Amount override cells, G174 fixture."
     }
   ],
   "amendments": [
