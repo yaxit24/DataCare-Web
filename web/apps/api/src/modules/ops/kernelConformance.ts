@@ -98,7 +98,12 @@ export const KERNEL_CONCERNS: readonly KernelConcern[] = Object.freeze([
     why:
       'the shared resolvers fail closed on a missing, blank or duplicated slot; an inline LIMIT 1 read ' +
       'silently takes the first row and often falls back to a literal',
-    exempt: Object.freeze(['modules/shared/bookPolicy.ts', 'modules/shared/postingAccounts.ts']),
+    exempt: Object.freeze([
+      'modules/shared/bookPolicy.ts',
+      'modules/shared/postingAccounts.ts',
+      // N240: the Books master (MS_BOOK) is the slots' writer; it reads them to show and replace them, never to post.
+      'modules/masters/booksMaster.ts',
+    ]),
   }),
   Object.freeze({
     id: 'date-normalization',

@@ -200,4 +200,9 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261122110000_labour_detail_gst_shares',
     checksum: '0ae86f271fca6186af52f18eed2d877969838c2f53452d1d905e90218a4a0984',
   },
+  {
+    // N240/G252: existing companies' web-seeded books get the desktop template slots (TAG SPLIT 6-9 sale/purchase).
+    name: '20261122120000_book_template_slots',
+    checksum: '5d31ad3136d6d02a24da51d789e3ad3ef30724303756b3921b549df2bfb735ca',
+  },
 ];

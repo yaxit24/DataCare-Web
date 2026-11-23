@@ -135,8 +135,9 @@ describe('route policy registry', () => {
     // WP-15 adds the Tag Stock Excel export (GET /reports/tag-stock.xlsx) and its Size list
     // (GET /reports/tag-stock/sizes): 771 + 2 = 773.
     // WP-19 adds the Gst Report all-sections workbook (GET /reports/gst-report/workbook.xlsx): 773 + 1 = 774.
-    expect(routes).toHaveLength(774);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(774);
+    // N240 (WP-21) adds Books (MS_BOOK): list, print, template, accounts, one, POST, PUT and DELETE: 774 + 8 = 782.
+    expect(routes).toHaveLength(782);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(782);
 
     const policies = routes.map((route) => ({
       ...route,

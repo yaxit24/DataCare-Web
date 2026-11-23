@@ -7997,6 +7997,35 @@
         "web/apps/web/test/features/modules/gstReport.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. gst-report module: 9 of the 12 blocked cases are executable; 3 stay blocked with the exact remaining item (EXP.csv bytes need a Windows run, decision Q9; no harness read/export fault injector for T14). Desktop match 0%."
+    },
+    {
+      "id": "N240",
+      "status": "implemented-unverified",
+      "action": "Company → Books is the desktop MS_BOOK screen: a dedicated Books module and routes (/masters/books-master) write the BOOK_DATA header and its BOOK_DETL posting slots in one transaction (the generic master CRUD now refuses BOOK_DATA writes); BtnSave_Click's checks and texts in order (reserved 218/888/999, short name, code/name), duplicate code/name texts, box limits and first-letter combos; family templates from the MS_UPDATE.cs BOOK_IDTL inserts (decision D1) matched by SR_NO; blank slots allowed with Data Type A (D5); direction and invoice type locked on a saved book (Ctrl+O not ported, D6); a book with vouchers keeps its family (D4); the desktop delete guards inside the deleting transaction; version tokens; provisioning gives the template slots the seed missed (OTH INC/OTH EXP 2-3, TAG SPLIT 1-9, PURCHASE/TAG PURCHASE 5 with a DISCOUNT account, LABOUR WORK 8-11), Data Type A and the account's name; existing companies: migration 20261122120000_book_template_slots (a web-seeded slot still at the old seed's account takes the template account, absent template slots are added, operator changes kept). The page is its own route with a slot-grid component.",
+      "parentLabels": "P1-core; L5; WP-21; T01-T18",
+      "startAfter": [
+        "N234"
+      ],
+      "requiredProof": "DB tests written first and red on the old web (27 of 28) for slots per family, codes, guards, delete, seed-vs-template differences and the T18 journeys (a book made through POST /masters/books-master, a sale, purchase, cash receipt, bank payment and contra posted through their own routes, ledger legs on the configured slot accounts, an older voucher unchanged after a slot change); the posting modules' DB tests still green; the books browser module through the real screen in CI.",
+      "gapIds": "G252",
+      "entryDefinition": "docs/parity/LITE-MASTER-PLAN.md section 5 (WP-21)",
+      "sourceAndModuleDetail": "orchestration/work/WP-21/study.md; orchestration/work/WP-21/cases.md; 12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/apps/api/src/modules/masters/booksMaster.ts",
+        "web/apps/api/src/modules/masters/bookTemplates.ts",
+        "web/apps/api/src/routes/booksMaster.ts",
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/apps/web/app/(app)/masters/books/page.tsx",
+        "web/apps/web/components/BookSlotGrid.tsx",
+        "web/apps/api/test/booksMaster.db.test.ts",
+        "web/apps/api/test/booksPosting.routes.db.test.ts",
+        "web/packages/db/prisma/migrations/20261122120000_book_template_slots/migration.sql",
+        "web/apps/api/test/bookTemplateSlotsMigration.db.test.ts",
+        "web/apps/web/test/features/modules/books.mjs"
+      ]
     }
   ],
   "amendments": [
