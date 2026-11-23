@@ -8052,6 +8052,35 @@
         "web/apps/web/test/features/modules/stockReport.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. stockReport.db.test.ts 51 cases green on a local database; the stock-report browser module runs 16 cases, 15 are proven at the API layer and the rest (voucher zoom, InOut item-ledger print, lookups, Crystal layouts, screen-built stock journeys, EMP ISU, Item Lot, LC box) are listed blocked. Not run locally (8 GB): the browser module. Desktop match 0%."
+    },
+    {
+      "id": "N242",
+      "status": "implemented-unverified",
+      "action": "Sales Return residuals (WP-27): the TR_SALE_RTN save refusals in desktop order and texts (employee, cheque/card account, company type B, year, lock date, zero value, Duplicate Tag No), Import admissibility (a bill with a return is refused; the remaining-lines picker), a lossless version-guarded edit from the New return form with the USER_DATA field audit, EMP_CODE/BANK_AC stored, LBR_TYPE as the desktop code, and a return create in the load profile.",
+      "parentLabels": "P1-core; L1; T01-T18; WP-27",
+      "startAfter": [
+        "N181"
+      ],
+      "requiredProof": "DB tests derived from the desktop rules: every refusal writes nothing and consumes no number; GET then PUT unchanged leaves every column of the ten write-set tables identical with no USER_DATA row; an edit writes USER_DATA for exactly the changed header columns; a stale version is 409; a user without the edit right is 403; a create held past its budget is a retryable 503 with no write; p95 of 20 creates under 5 s. The sales-return browser module with edit.numeric executable and no declared blocked case.",
+      "gapIds": "G254, G26",
+      "entryDefinition": "docs/parity/LITE-MASTER-PLAN.md section 5 (WP-27)",
+      "sourceAndModuleDetail": "orchestration/work/WP-27/study.md; orchestration/work/WP-27/cases.md; 12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/apps/api/src/modules/sales/salesReturn.ts",
+        "web/apps/api/src/modules/sales/saleReturnSaveChecks.ts",
+        "web/apps/api/src/modules/sales/saleReturnReopen.ts",
+        "web/apps/api/src/routes/saleReturnVoucher.ts",
+        "web/apps/web/app/(app)/txn/sale-return/page.tsx",
+        "web/apps/web/lib/saleReturnEdit.ts",
+        "web/apps/api/test/saleReturnResiduals.db.test.ts",
+        "web/apps/api/test/saleReturnResiduals.routes.db.test.ts",
+        "web/apps/web/test/features/modules/salesReturn.mjs",
+        "web/scripts/load-profile.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. 50 frozen cases (cases.md), 0 blocked; the new DB tests 18 of 18 locally, red before the fix for the study's reasons. The sales-return browser module (28 cases, 0 declared blocked) was not run locally (machine rule); CI's feature job is the run of record. Desktop match 0%. G246 (RTN_* columns) is open under N234."
     }
   ],
   "amendments": [
