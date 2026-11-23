@@ -358,7 +358,9 @@
         "web/apps/api/src/modules/reports/statementDocs.ts",
         "web/apps/api/src/modules/rbac/routePolicy.ts",
         "web/apps/api/src/routes/gstReport.ts",
-        "web/apps/api/src/routes/txn.ts"
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/web/components/DesktopDateInput.tsx",
+        "web/apps/api/src/modules/sales/labourGstAllocation.ts"
       ]
     },
     "approvalIssue": {

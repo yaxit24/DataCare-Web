@@ -1,3 +1,10 @@
+## 2026-11-22 — Gst Report runs the desktop RP_GST rules for the blocked cases (N239 / G251, WP-19)
+
+- 2026-11-22: EXP/EXEMP/DOCS are the desktop caption grids; GSTR-3B is the whole desktop grid (3.1 total, 3.2(1), 6.1) under owner decisions
+  Q1-Q3; SetDate on the date boxes; no CSV for EXEMP/DOCS; Gsrt1 Csv = one XLSX B2B..HSN; TCS proven out of every GST figure.
+- 2026-11-22: migration 20261122090000 adds the LBR_ISU_DETL GST shares (labour writer now stores them; labour HSN tax was 0 before) and
+  TAX_DATA writers set R_CHARG 'N'. Still blocked: EXP.csv bytes (Q9, Windows run), two T14 fault cases (no read/export injector).
+
 ## 2026-11-22 — Tag Stock follows the desktop RP_TAG selections and totals (N238 / G250, WP-15)
 
 - 2026-11-22: In = BAR_DETL creation rows, Out = minus movements, Stock/Mrp = positive signed-movement sum of the year up to To (Mrp <> 0), Apr = APR ISU / ISU_REC N joined to BAR_DETL, All = signed history; tag N excluded; no 5,000-row cap in rows, footer, CSV or Excel; Tag Summ / Product Stk; the page is the RP_TAG form (selectors, columns, keys). CSV and Excel need the Print right.
