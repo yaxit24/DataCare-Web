@@ -865,7 +865,7 @@ export const dailyRate = {
       'entry.shortcut-rights',
       'T01',
       'MDI_FORM.cs:12526-12528 and :14395-14405: Ctrl+F1 opens Daily Rate behind view rights.',
-      'The web has no Ctrl+F1 shortcut for Daily Rate (GlobalFormKeys binds other chords); the menu route and its view-right 403 are covered by scope.no-rights-user. Needs a shortcut slice before this can run.',
+      'Ctrl+F1 is bound to /txn/daily-rate (FormKeys, navigation covered by browser.smoke.mjs), but this module does not yet drive the chord or the view-right refusal text; the 403 behind it is covered by scope.no-rights-user.',
     ),
     C(
       'field.net-rate-route',
