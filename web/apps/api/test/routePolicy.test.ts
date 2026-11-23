@@ -140,8 +140,9 @@ describe('route policy registry', () => {
     // exports: 768 + 5 = 773. [774 on main + 5 here = 779] [782 on main + 5 here = 787]
     // N242 (WP-27) adds the Sales Return edit PUT /sales-returns/:vchNo: 768 + 1 = 769. [774 on main + 1 here = 775] [787 on main + 1 here = 788]
     // N243 (WP-26) adds the Sales Invoice print-file list and its default: 768 + 2 = 770. [774 on main + 2 here = 776] [788 on main + 2 here = 790]
-    expect(routes).toHaveLength(790);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(790);
+    // N255 (WP-20) adds the Ledger Report JmaUdr, Gold and Silver prints with PDF and Excel: 790 + 9 = 799.
+    expect(routes).toHaveLength(799);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(799);
 
     const policies = routes.map((route) => ({
       ...route,
