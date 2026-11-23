@@ -21,6 +21,14 @@ describe('WP-28 hallmark purchase rules', () => {
     // No line amount: the header charge typed on the plain layout stays as typed.
     expect(hallmarkHeaderAmount([{}, { hmIdAmount: 0 }], 50.25)).toBe(50.25);
     expect(hallmarkHeaderAmount([{}], undefined)).toBe(0);
+    // Review finding: the column total is a running sum kept as "0.000" text (TR_PURC_HM.cs:6544), so 0.1 + 5.3 + 0.1
+    // is 5.500 and Math.Round gives 6 (half to even). A plain double sum is 5.499999999999999 and would give 5.
+    expect(
+      hallmarkHeaderAmount(
+        [{ hmIdAmount: 0.1 }, { hmIdAmount: 5.3 }, { hmIdAmount: 0.1 }],
+        undefined,
+      ),
+    ).toBe(6);
   });
 
   // purchase-invoice.children.hm-ids-four-with-weights, refusal.book-family-screen-mismatch (D5)
@@ -136,5 +144,20 @@ describe('WP-28 hallmark purchase rules', () => {
       HM_AMT: null,
     });
     expect(carryUnownedColumns(undefined, { NET_AMT: 1 })).toEqual({ NET_AMT: 1 });
+  });
+
+  // Review finding: a stored blank keeps its stored form ('' from the desktop, NULL from an older web save).
+  it('keeps the stored form of a blank when the built value is blank too, and only then', () => {
+    const prior = { EMP_CODE: '', HM_AMT: null, ITM_COLOR: '', TAG_SRNO: 0, HM_ID: 'H1', OTH: '' };
+    expect(
+      carryUnownedColumns(prior, {
+        EMP_CODE: null,
+        HM_AMT: 0,
+        ITM_COLOR: 'RED',
+        TAG_SRNO: null,
+        HM_ID: null,
+        OTH: null,
+      }),
+    ).toEqual({ EMP_CODE: '', HM_AMT: null, ITM_COLOR: 'RED', TAG_SRNO: 0, HM_ID: null, OTH: '' });
   });
 });

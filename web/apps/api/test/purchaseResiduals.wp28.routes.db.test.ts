@@ -328,6 +328,33 @@ const SILVER_FULL = { ...SILVER, hmIdAmount: 40, itmColor: 'WHT' };
     expect(await snapshot()).toEqual(before);
   });
 
+  // Review finding (D6): the desktop stores a blank text box as '' (TR_PURC_HM.cs:7897 EMP_CODE = tEmpCode.Text,
+  // :7898 VCH_DESC, :7854 HM_TAX_CODE, :7968-7973 IT_DESC/TBL_CODE/ITM_COLOR). The writer builds NULL for a blank,
+  // so without care an unchanged save of a desktop-written voucher rewrote every '' as NULL. (A numeric NULL is
+  // written as the column default 0 by the shared insert path; that is the repository's column-default rule.)
+  it('lossless reopen keeps a desktop-stored empty string as stored', async () => {
+    const vchNo = await create(purchase([GOLD, SILVER]));
+    await exec(
+      `UPDATE "PR_DATA" SET "EMP_CODE"='',"VCH_DESC"='',"HM_TAX_CODE"=''
+        WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+      tenantId,
+      BOOK,
+      vchNo,
+    );
+    await exec(
+      `UPDATE "PR_DETL" SET "IT_DESC"='',"TBL_CODE"='',"DESIGN_NO"='',"ITM_COLOR"='',"TAG_TYPE"='',"HM_ID"='',
+              "HM_ID2"='',"HM_ID3"='',"HM_ID4"='',"LOT_NO"='',"ITM_LOT"='',"WITH_STOCK"='',"PR_CODE"='',
+              "URD_RATE_TYPE"=''
+        WHERE tenant_id=$1 AND "CO_BOOK"=$2 AND "VCH_NO"=$3`,
+      tenantId,
+      BOOK,
+      vchNo,
+    );
+    const before = await snapshot();
+    await reopenAndSaveUnchanged(vchNo);
+    expect(await snapshot()).toEqual(before);
+  });
+
   // purchase-invoice.children.hm-ids-four-with-weights, children.tag-band-two-lines,
   // reopen.tag-band-from-pr-detl, formula.bar-detl-net-weight-rule, formula.bar-detl-rate-amount-rule
   it('TAG PURCHASE: four hallmark ids, weights and the tag band are stored per line and survive an unchanged save', async () => {

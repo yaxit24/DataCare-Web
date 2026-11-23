@@ -1839,9 +1839,11 @@ export const purchaseInvoice = {
           ])
             await hmCell(0, n).fill(v);
           await page.getByTestId('purchase-hm-grid-mode').click();
-          await page.getByLabel('ItAmt row 1', { exact: true }).fill('110800');
-          await page.getByLabel('HmAmt row 1', { exact: true }).fill('36.5');
-          await page.getByLabel('Color row 1', { exact: true }).fill('RED');
+          // The stone sub-grid below also labels its cells "ItAmt row 1"; the item grid is the first grid table.
+          const itemGrid = page.locator('table.grid').first();
+          await itemGrid.getByLabel('ItAmt row 1', { exact: true }).fill('110800');
+          await itemGrid.getByLabel('HmAmt row 1', { exact: true }).fill('36.5');
+          await itemGrid.getByLabel('Color row 1', { exact: true }).fill('RED');
           await page.getByLabel('HM Tax Code', { exact: true }).fill('18');
           await page.getByLabel('HM Tax %', { exact: true }).fill('18');
           const created = await save(page, 'Save Hallmark Purchase');

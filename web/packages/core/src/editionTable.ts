@@ -203,7 +203,7 @@ export const ROUTE_EDITION: Readonly<Record<string, EditionTier>> = Object.freez
   '/txn/payment': 'L',
   '/txn/physical-stock': 'B',
   '/txn/purchase': 'L',
-  '/txn/purchase-hm': 'E',
+  '/txn/purchase-hm': 'L',
   '/txn/purchase-quotation': 'S',
   '/txn/purchase-return': 'L',
   '/txn/rate-cut': 'B',

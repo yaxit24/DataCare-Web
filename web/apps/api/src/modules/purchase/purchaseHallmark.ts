@@ -1,4 +1,4 @@
-import { roundHalfEven } from '@datacare/core';
+import { round, roundHalfEven } from '@datacare/core';
 
 /**
  * WP-28 (N244 / G256): the hallmark receive branch of the desktop purchase (TR_PURC_HM, the 95-column `MSG_PR` grid),
@@ -63,7 +63,9 @@ export function hallmarkHeaderAmount(
   lines: ReadonlyArray<Pick<HallmarkLineInput, 'hmIdAmount'>>,
   headerAmount: number | undefined,
 ): number {
-  const total = lines.reduce((sum, line) => sum + num(line.hmIdAmount), 0);
+  // The column total is a running sum kept as text, each step `Format(Val(total) + Val(cell), "0.000")`
+  // (TR_PURC_HM.cs:6544): a half-up 3-decimal round per step, so a double sum's drift never reaches Math.Round.
+  const total = lines.reduce((sum, line) => round(sum + num(line.hmIdAmount), 3), 0);
   if (lines.some((line) => num(line.hmIdAmount) !== 0)) return roundHalfEven(total, 0);
   return num(headerAmount);
 }
@@ -226,6 +228,20 @@ export function assertPurchaseFamilyBook(mainBook: string, coBook: string): void
 
 const NEVER_CARRIED = new Set(['tenant_id', 'row_id']);
 
+/** NULL, '' or a numeric zero (number or a driver Decimal): the stored forms of an empty grid cell or text box. */
+function isBlankCell(value: unknown): boolean {
+  if (value == null || value === '' || value === 0) return true;
+  if (
+    typeof value === 'object' &&
+    !(value instanceof Date) &&
+    typeof value.toString === 'function'
+  ) {
+    const text = value.toString();
+    return text !== '' && Number(text) === 0;
+  }
+  return false;
+}
+
 /**
  * D6: the persisted row's columns the writer does not own, under the row the writer built.
  *
@@ -233,6 +249,12 @@ const NEVER_CARRIED = new Set(['tenant_id', 'row_id']);
  * write set from the request, so a column it does not model (a desktop-written `OS_ADJ_AMT`, `DATA_TRFR`,
  * `OLD_VCH_NO`, ...) would fall to its default. Carrying the persisted value keeps it. A column the writer builds
  * always wins, even when it builds `null`, so a value the operator removed is never resurrected.
+ *
+ * One exception keeps the stored FORM of a blank: when the stored value and the built value are both blank (NULL, ''
+ * or zero), the stored one is kept. The desktop writes a blank text box as '' (TR_PURC_HM.cs:7897 `EMP_CODE =
+ * tEmpCode.Text`, :7968-7973), a voucher saved before WP-28 has NULL in the hallmark columns, and the writer builds
+ * NULL or 0 for a blank; without this an unchanged save rewrote '' as NULL and NULL as 0. A non-blank value is never
+ * kept over a built one, so this cannot resurrect anything.
  */
 export function carryUnownedColumns(
   prior: Record<string, unknown> | undefined,
@@ -240,9 +262,11 @@ export function carryUnownedColumns(
 ): Record<string, unknown> {
   if (!prior) return built;
   const carried: Record<string, unknown> = {};
+  const blanks: Record<string, unknown> = {};
   for (const [column, value] of Object.entries(prior)) {
-    if (NEVER_CARRIED.has(column) || column in built) continue;
-    carried[column] = value;
+    if (NEVER_CARRIED.has(column)) continue;
+    if (!(column in built)) carried[column] = value;
+    else if (isBlankCell(value) && isBlankCell(built[column])) blanks[column] = value;
   }
-  return { ...carried, ...built };
+  return { ...carried, ...built, ...blanks };
 }
