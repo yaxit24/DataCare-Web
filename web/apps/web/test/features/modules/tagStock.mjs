@@ -866,6 +866,51 @@ const tagStockCases = [
     'T18',
     "Creating the Tag Opening, Sale, Tag Cancel, Sale Return and Approval Issue vouchers through their screens and running Stock after each step needs those modules' helpers; the stock rule is proven on seeded movements by stock.signed-movement-states and tagStock.db.test.ts.",
   ),
+  notApplicable(
+    'create',
+    'T07',
+    'WP-15 cases tag-stock.na.create',
+    'Read-only report: it writes nothing; the desktop print staging (TAG_STOCK_PRINT, TAG_SUM_DATA) is a Crystal feed the web does not port.',
+  ),
+  notApplicable(
+    'reopen',
+    'T08',
+    'WP-15 cases tag-stock.na.reopen',
+    'Read-only report: nothing is saved, so there is no reopen or unchanged save; reopening the screen re-runs on demand.',
+  ),
+  notApplicable(
+    'edit',
+    'T09',
+    'WP-15 cases tag-stock.na.edit',
+    'Read-only grid (RP_TAG.cs:2475 Editable = false); the effect of editing a source voucher is a T18 journey.',
+  ),
+  blocked(
+    'reverse.delete-source-vouchers',
+    'T10',
+    "Deleting a Tag Cancel, Sale or Sale Return through its screen and re-running Stock needs those modules' helpers; the signed sum after cancel, sale and return is proven by tagStock.db.test.ts (cancelled, sold, returned-sale and approval-pending tags follow the signed sum).",
+  ),
+  blocked(
+    'concurrent.read-during-write',
+    'T12',
+    'A browser cannot time a report read against a committing sale; the single-snapshot rule is proven by tagStock.db.test.ts (totals never disagree with the rows), and the web stages nothing in shared tables.',
+  ),
+  notApplicable(
+    'retry',
+    'T13',
+    'WP-15 cases tag-stock.na.retry',
+    'Read-only report: the endpoints are idempotent GETs; repeating a request changes no data.',
+  ),
+  notApplicable(
+    'rollback',
+    'T14',
+    'WP-15 cases tag-stock.na.rollback',
+    'Read-only report: there is no write to roll back.',
+  ),
+  blocked(
+    'history.master-rename-and-older-year',
+    'T15',
+    'Item-master rename through the screen and the older-year carry (gap 3, needs a desktop year-rollover study) are not built in this module; the year scope is proven by tagStock.db.test.ts (only the session year and data type count).',
+  ),
   C(
     'scope.leaves-no-rows-for-other-modules',
     'T11',
