@@ -152,10 +152,10 @@ export function orderTenderView(
   const cashLeg = tendered
     ? ledger.find((row) => /^.{21}02$/.test(String(row.LEDR_KEY ?? '')) && num(row.DR_AMT) > 0)
     : ledger.find((row) => num(row.DR_AMT) > 0);
-  // An untendered order's advance is its tender total: ADV_AMT, or RCUT_AMT on a rate-cut order (`:9124-9133`).
-  const advanceColumn = isRateCutOrder(header) ? 'RCUT_AMT' : 'ADV_AMT';
+  const advanceColumn = advanceColumnOf(header, ledger);
   return {
     tendered,
+    advanceColumn,
     cashAc: String(cashLeg?.AC_CODE ?? '').trim() || undefined,
     fields: {
       advanceAmount: tendered ? num(header.CASH_AMT) : num(header[advanceColumn]),
@@ -286,6 +286,21 @@ export function orderAdvanceColumns(tender: OrderTender, rateCutRate: number) {
 /** True when the order's advance is a rate-cut (metal) advance, MSG2_TOTAL[9,1] != 0. */
 export const isRateCutOrder = (header: Record<string, unknown>): boolean =>
   num(header.RCUT_RATE) !== 0;
+
+/**
+ * The column an untendered order (every Tour Order, a Sales Order saved before N197) keeps its advance in. A rate-cut
+ * order files it as RCUT_AMT with ADV_AMT 0 (`:9124-9133`). A web order saved before that split kept the advance in
+ * ADV_AMT and the typed rate-cut amount in RCUT_AMT, so a non-zero ADV_AMT is still the advance; and one with no
+ * advance posted no ledger, so its typed RCUT_AMT is not money either.
+ */
+export function advanceColumnOf(
+  header: Record<string, unknown>,
+  ledger: ReadonlyArray<unknown>,
+): 'ADV_AMT' | 'RCUT_AMT' {
+  return isRateCutOrder(header) && num(header.ADV_AMT) === 0 && ledger.length > 0
+    ? 'RCUT_AMT'
+    : 'ADV_AMT';
+}
 
 /** The header's tender columns (`TR_SALE_ORD.cs:9131-9150`); the Tour Order writes ADV_AMT alone, as before. */
 export function orderTenderColumns(tender: OrderTender, salesOrder = true, rateCutRate = 0) {

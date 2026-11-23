@@ -1557,7 +1557,7 @@ export async function getSalesOrder(
         ORDER_HEADER_FIELDS,
         salesOrderForm,
         false,
-        tenders.isRateCutOrder(x),
+        tenderView.advanceColumn === 'RCUT_AMT',
       ),
     );
     exactOrderValues(dto, x, tenderView.exactFields);
