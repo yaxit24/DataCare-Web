@@ -33,6 +33,7 @@ import { orderCancel } from './modules/orderCancel.mjs';
 import { balanceTransfer } from './modules/balanceTransfer.mjs';
 import { partyOpening } from './modules/partyOpening.mjs';
 import { tagOpening } from './modules/tagOpening.mjs';
+import { tagStock } from './modules/tagStock.mjs';
 import { dailyRate } from './modules/dailyRate.mjs';
 import { itemOpening } from './modules/itemOpening.mjs';
 import { tagCancel } from './modules/tagCancel.mjs';
@@ -87,6 +88,7 @@ const MODULES = [
   balanceTransfer,
   partyOpening,
   tagOpening,
+  tagStock,
   dailyRate,
   itemOpening,
   tagCancel,

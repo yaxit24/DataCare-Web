@@ -10,6 +10,18 @@
 - 2026-11-22: verification: 88 cases: 17 pass at database/unit level (lossless reopen of every tenant row for an earlier-month hallmark voucher with typed amount, fine and stones; TAG PURCHASE ids 2-4, weights, tag band and BAR_DETL rules; HM_AMT half to even; HM tax code with no charge; server family refusal; /context/books?family=), 4 partly, 2 blocked, 3 N/A, the rest executable but not run (browser module extended, not run locally); full API suite with database 4134/4134 after the kernel fix. Browser cases not run locally. Not done: employee-code book shortcut (D9), `WITH_STOCK` blank to Y,
   `BAR_DATA`/`SRNO_MAST`/`TAG_SET` tag write set, print templates; blocked: the 95-column Enter walk and the `DATA_TYPE` book filter.
 
+## 2026-11-22 — Gst Report runs the desktop RP_GST rules for the blocked cases (N239 / G251, WP-19)
+
+- 2026-11-22: EXP/EXEMP/DOCS are the desktop caption grids; GSTR-3B is the whole desktop grid (3.1 total, 3.2(1), 6.1) under owner decisions
+  Q1-Q3; SetDate on the date boxes; no CSV for EXEMP/DOCS; Gsrt1 Csv = one XLSX B2B..HSN; TCS proven out of every GST figure.
+- 2026-11-22: migration 20261122090000 adds the LBR_ISU_DETL GST shares (labour writer now stores them; labour HSN tax was 0 before) and
+  TAX_DATA writers set R_CHARG 'N'. Still blocked: EXP.csv bytes (Q9, Windows run), two T14 fault cases (no read/export injector).
+
+## 2026-11-22 — Tag Stock follows the desktop RP_TAG selections and totals (N238 / G250, WP-15)
+
+- 2026-11-22: In = BAR_DETL creation rows, Out = minus movements, Stock/Mrp = positive signed-movement sum of the year up to To (Mrp <> 0), Apr = APR ISU / ISU_REC N joined to BAR_DETL, All = signed history; tag N excluded; no 5,000-row cap in rows, footer, CSV or Excel; Tag Summ / Product Stk; the page is the RP_TAG form (selectors, columns, keys). CSV and Excel need the Print right.
+- 2026-11-22: tagStock.db.test.ts (28) and tagStock.routes.db.test.ts (6) pass on an isolated database; the tagStock browser module and the edited tagCancel/tagOpening helpers were NOT run locally (8 GB machine): CI is the first run. Open: voucher zoom, Print window/Crystal, approval other-item columns, edition-E Emp Isu Less, summary Mrp/Size, year rollover.
+
 ## 2026-11-22 — Data Backup archives the tenant configuration by allowlist (N237 / G249, WP-08, D37)
 
 - 2026-11-22: the v2 archive and its manifest carry `tenantConfig` (datacare.tenant-config v1): nine tenant-shared configuration tables, column by

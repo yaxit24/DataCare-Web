@@ -132,8 +132,11 @@ describe('route policy registry', () => {
     // N234 (WP-11) adds the RP_ALL Sales Report GET /reports/sales-report and its CSV/XLSX exports: 765 + 3 = 768.
     // WP-23 replaces Balance TrFr's preview, year-close and openings wrappers with the BtmSchm screen's GET and one
     // POST per Lite dataset (ac-balance, item-stock, tag-stock, sales-order, approval): 768 - 3 + 6 = 771.
-    expect(routes).toHaveLength(771);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(771);
+    // WP-15 adds the Tag Stock Excel export (GET /reports/tag-stock.xlsx) and its Size list
+    // (GET /reports/tag-stock/sizes): 771 + 2 = 773.
+    // WP-19 adds the Gst Report all-sections workbook (GET /reports/gst-report/workbook.xlsx): 773 + 1 = 774.
+    expect(routes).toHaveLength(774);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(774);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -536,6 +539,12 @@ describe('route policy registry', () => {
         businessScope: true,
       });
     }
+    // WP-19: "Gsrt1 Csv", the all-sections workbook (RP_GST.cs:3819-3943), is an export like the others.
+    expect(routePolicyFor('GET', '/reports/gst-report/workbook.xlsx')).toMatchObject({
+      form: 'Reports/GST Report',
+      action: 'print',
+      businessScope: true,
+    });
   });
 
   it('maps RP_ORDER Delete Data and Point Report routes to report rights', () => {
