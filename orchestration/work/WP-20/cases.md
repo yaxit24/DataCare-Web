@@ -92,9 +92,7 @@ correct". Every decision below is recorded as **architect, 2026-11-23, owner may
   decimals and the silver balance at two (`RP_LEDR.cs:8332 {{num2 = Conversions.ToDouble(Strings.Format(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0]["GoldWt"]), "0.000"));}}`,
   `RP_LEDR.cs:8333 {{num3 = Conversions.ToDouble(Strings.Format(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0]["SilverWt"]), "0.00"));}}`).
   A display rounding of a business figure: desktop-first, reproduce and record; owner may override.
-- **D15 (Gap 12) — opening-ledger zoom refusal is server-side.** Once OP_LDR rows appear in a grid, the row carries
-  an opening flag and zoom returns the exact desktop text
-  (`RP_LEDR.cs:10665 {{This Is a Opening Ledger Voucher You Cant Zoom ....}}`).
+- **D15 (Gap 12) — opening-ledger zoom opens nothing.** The desktop text is behind a never-true test (`Len < 0`, `RP_LEDR.cs:10654`), so the desktop shows no message. The web opens no voucher for an opening row and shows no error; showing the text is an owner option (corrected after Claude review).
 - **D16 (Gap 14) — desktop-runtime comparison is blocked on the device.** The lineage note still says
   "Desktop-runtime comparison and parent acceptance remain open" (`12-lineage-verification-2026-10-01.md:3085`).
   The comparison case below is blocked until a desktop runtime with OP_LDR rows loaded is available.
@@ -234,9 +232,10 @@ Expected: the OP_LDR debit arm reads silver from the gold credit column
 (`RP_LEDR.cs:9716 {{Sum(A.DR_AMT) as Amount,SUM(A.DR_GL_FINE) as GoldWt,SUM(A.CR_GL_FINE) as SilverWt FROM OP_LDR AS A}}`),
 and the credit arm does the same (`RP_LEDR.cs:9713 {{SUM(A.CR_GL_FINE) As GoldWt,SUM(A.CR_GL_FINE) As SilverWt FROM OP_LDR AS A}}`).
 Silver credits = 2.000 (O1 CR_GL_FINE); silver 61-90 debit = 2.000 (the same column, not DR_SL_FINE 60). FIFO:
-2.000 - 2.000 = 0 → the bucket is fully consumed and shows blank (a zero fine cell is blanked,
-`RP_LEDR.cs:9835 {{((DataGridView)dGV_MONTH)[20, num7].Value = "";}}`). Every silver bucket is blank and the silver
-total is 0.000. A "correct" DR_SL_FINE implementation would show 61-90 = 58.000 (60 - 2) — assert it does not.
+credit equals bucket, so the code takes the branch `credit - bucket <= 0` and writes |bucket - credit| formatted
+"0.000" (`RP_LEDR.cs:9908 {{((DataGridView)dGV_MONTH)[19, num7].Value = Strings.Format((object)Math.Abs(num15 - num12), "0.000");}}`):
+the 61-90 silver cell shows "0.000" (not blank; the blanking at 9835 is only for the account balance column 20).
+Every other silver bucket is untouched (blank) and the silver total is 0.000. A "correct" DR_SL_FINE implementation would show 61-90 = 58.000 (60 - 2) — assert it does not.
 This is the deliberate desktop quirk of D1.
 Status: executable
 
@@ -249,7 +248,7 @@ Expected: credits consume the oldest bucket first and the remainder carries to t
 (`RP_LEDR.cs:9886 {{if (num13 != 0.0)}}`, `RP_LEDR.cs:9894 {{((DataGridView)dGV_MONTH)[10, num7].Value = Strings.Format((object)Math.Abs(num13 - num10), "0.00");}}`).
 Money: credits 700; 61-90 debit 500 is fully consumed (credits left 200); 0-15 debit 300 - 200 = 100.00 remains.
 Gold: credits 6; 61-90 10 - 6 = 4.000 remains, credits exhausted; 0-15 3.000. Grid: 0-15 = 100.00 / 3.000,
-61-90 blank, total 100.00 / 7.000. Money carries format "0.00", fine "0.000"
+61-90 money blank (consumed) but gold 4.000, total money 100.00 / gold 7.000. Money carries format "0.00", fine "0.000"
 (`RP_LEDR.cs:9908 {{((DataGridView)dGV_MONTH)[19, num7].Value = Strings.Format((object)Math.Abs(num15 - num12), "0.000");}}`).
 Status: executable
 
@@ -348,19 +347,27 @@ Status: executable
 
 ### account-ledger.refuse.zoom-opening   (T06 Required/invalid · Gap 12)
 Layer: browser + database
-Steps: 1. Seed an OP_LDR opening row for Z500 so it appears in the ledger grids once Gap 1 lands. 2. Open the
-detail/voucher grid for Z500. 3. Double-click (zoom) the opening row.
-Expected: the exact refusal "This Is a Opening Ledger Voucher You Cant Zoom ...."
-(`RP_LEDR.cs:10665 {{This Is a Opening Ledger Voucher You Cant Zoom ....}}`); no voucher form opens. The row carries
-a server-side opening flag (D15). Fails today: OP_LDR rows are in no grid and the message does not exist.
+Steps: 1. Seed an OP_LDR opening row for Z500 so it appears in the voucher grid once Gap 1 lands. 2. Open the
+voucher grid for Z500 with the location box equal to the session location. 3. Double-click (zoom) the opening row.
+4. Repeat with the location box set to another location.
+Expected: no voucher form opens in either run. The desktop refusal text "This Is a Opening Ledger Voucher You Cant Zoom ...."
+(`RP_LEDR.cs:10665 {{This Is a Opening Ledger Voucher You Cant Zoom ....}}`) sits behind
+`RP_LEDR.cs:10654 {{if ((double)Strings.Len(DC_Main.CurBookVch) < Conversions.ToDouble("00000"))}}`, a length below
+zero, which never holds: the desktop message is dead code. Decision (architect review): the web returns a
+"no voucher" result without opening anything and without an error; the owner may choose to show the text as a
+deliberate extension. With the box different from the session location the desktop returns silently before anything
+(`RP_LEDR.cs:10628 {{if (Operators.CompareString(tLcCode.Text, DC_Main.MLc_code, false) != 0)}}`); the web must also
+not open a voucher then. Fails today: OP_LDR rows are in no grid.
 Status: executable
 
 ### account-ledger.refuse.zoom-rights   (T06 Required/invalid · Gap 12)
 Layer: browser
-Steps: 1. Sign in as a user without the zoom target menu's view right. 2. Drill into an account with a normal
-voucher row. 3. Zoom the row.
-Expected: the exact message "You Have No Rights..." (`RP_LEDR.cs:10650 {{Interaction.MsgBox((object)"You Have No Rights...", (MsgBoxStyle)0, (object)null);}}`);
-zoom uses the other menu's view right, not the print right.
+Steps: 1. Seed a USER_SET row for the voucher's menu with FRM_VIEW "N" for the user. 2. Drill into an account with a
+normal voucher row. 3. Zoom the row. 4. Delete the USER_SET row and zoom again.
+Expected: step 3 shows the exact message "You Have No Rights..." (`RP_LEDR.cs:10650 {{Interaction.MsgBox((object)"You Have No Rights...", (MsgBoxStyle)0, (object)null);}}`)
+and opens nothing; the test is on a row existing and its FRM_VIEW equal to "N"
+(`RP_LEDR.cs:10647 {{if (dataTable2.Rows.Count > 0 && Operators.ConditionalCompareObjectEqual(Operators.ConcatenateObject(dataTable2.Rows[0]["FRM_VIEW"], (object)""), (object)"N", false))}}`),
+so in step 4 (no row) the zoom is allowed and opens the voucher. Zoom uses the other menu's view right, not the print right.
 Status: executable
 
 ### account-ledger.refuse.empty-ageing-silent   (T06 Required/invalid · Gap 1)
@@ -489,7 +496,7 @@ Expected: default off hides the six half-month columns 3, 4, 5, 12, 13, 14
 columns 4/5/12/13/14 at 9694-9698); AC_CODE and Add1 (21, 22) are always hidden
 (`RP_LEDR.cs:9688 {{((DataGridView)DGV_MONTH).Columns[21].Visible = false;}}`,
 `RP_LEDR.cs:9690 {{((DataGridView)DGV_MONTH).Columns[22].Visible = false;}}`). Of 23 columns, 15 are visible by
-default and 17 with the tick. Ticking re-runs the ageing (`RP_LEDR.cs:10374 {{TimeLedr_Dr();}}`) with identical
+default and 21 with the tick. Ticking re-runs the ageing (`RP_LEDR.cs:10374 {{TimeLedr_Dr();}}`) with identical
 bucket totals. The tick caption is " Half Month Show" (`RP_LEDR.cs:2863 {{((ButtonBase)chkHalfMonth).Text = " Half Month Show";}}`).
 Fails today: the web has no toggle and always prints all buckets (`accountLedger.ts:103`). Decision D13.
 Status: executable
@@ -513,11 +520,13 @@ Status: executable
 
 ### account-ledger.output.gold-figures   (T16 Report/output · Gap 5)
 Layer: browser + database
-Steps: 1. Seed Z600: book-000 opening dated 2024-04-01 CR_AMT 100, G '+' FINE_WT 1.5, S '+' FINE_WT 2.256;
+Steps: 1. Seed Z600: book-000 opening dated 2024-03-31 CR_AMT 100, G '+' FINE_WT 1.5, S '+' FINE_WT 2.256;
 SALES 2024-05-10 DR_AMT 40 (G '-' 0.5); SALES 2024-06-15 CR_AMT 60 (G '+' 2.0, S '-' 1.0); an OP_LDR row for Z600
 DR_AMT 999 dated 2024-04-21. 2. Drill into Z600, from 2024-04-01 to 2024-06-30, click Gold, answer the layout
 question No. 3. Read the output's opening/closing figures, title and parameters. 4. Answer Yes and compare figures.
-Expected: opening/closing come from AC_DATA only and never touch OP_LDR (study Calculations B): money
+Expected: opening/closing come from AC_DATA only and never touch OP_LDR (study Calculations B). Opening is every leg strictly
+before the from-date (`RP_LEDR.cs:8327 {{and VCH_DATE < '}}`; hence the opening leg is dated 2024-03-31, a leg dated on
+the from-date would be in the period, not the opening), closing is every leg up to the to-date (`RP_LEDR.cs:8335 {{and VCH_DATE <= '}}`): money
 Sum(CR-DR) → opening 100.00, closing 100 - 40 + 60 = 120.00; gold opening 1.500, closing 1.5 - 0.5 + 2.0 = 3.000
 (`RP_LEDR.cs:8332 {{num2 = Conversions.ToDouble(Strings.Format(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0]["GoldWt"]), "0.000"));}}`,
 `RP_LEDR.cs:8340 {{num5 = Conversions.ToDouble(Strings.Format(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0]["GoldWt"]), "0.000"));}}`);
@@ -590,14 +599,18 @@ Status: executable
 
 ### account-ledger.output.summary-hz-choice   (T16 Report/output · Gap 5)
 Layer: browser
-Steps: 1. Run the summary with metal rows seeded. 2. Click Print and answer the layout question No. 3. Read the
-output. 4. Click Print again and answer Yes.
-Expected: the question text is exactly "Hz Repor With Gold and Silver...."
-(`RP_LEDR.cs:6226 {{Hz Repor With Gold and Silver....}}`); No prints the plain AcSummLdr
-(`RP_LEDR.cs:6179 {{DC_Main.RptName = "AcSummLdr";}}`); Yes prints the metal-weighted summary AcWithWtSumm
-(`RP_LEDR.cs:6256 {{DC_Main.RptName = "AcWithWtSumm";}}`) or the gold-only AcWithWtGold
-(`RP_LEDR.cs:6260 {{DC_Main.RptName = "AcWithWtGold";}}`) per the metal setting, adding the gold/silver fine
-columns to the same account rows. The detail print remains AcLedger (`RP_LEDR.cs:6313 {{DC_Main.RptName = "AcLedger";}}`).
+Steps: 1. Run the summary with metal rows seeded and click Print: no question is asked. 2. Drill into Z600 (detail
+level) and click Print, answer the layout question No. 3. Click Print again and answer Yes with "Vch Summ" unticked.
+4. Repeat with "Vch Summ" ticked.
+Expected: at summary level (button caption "E&xit") Print goes straight to the plain summary AcSummLdr with no
+question (`RP_LEDR.cs:6179 {{DC_Main.RptName = "AcSummLdr";}}`, then `return`, so the question below is never reached).
+At detail level the question text is exactly "Hz Repor With Gold and Silver...."
+(`RP_LEDR.cs:6226 {{Hz Repor With Gold and Silver....}}`). Yes prints the metal-weighted ledger: AcWithWtSumm when
+the "Vch Summ" tick is on (`RP_LEDR.cs:6256 {{DC_Main.RptName = "AcWithWtSumm";}}`), AcWithWtGold when it is off
+(`RP_LEDR.cs:6260 {{DC_Main.RptName = "AcWithWtGold";}}`), the choice is the tick, not the metal setting; the three
+opening parameters are AcOpGold (3 decimals), AcOPAmt (2) and AcOpSilver (3 decimals). No prints the plain detail
+ledger AcLedger (`RP_LEDR.cs:6313 {{DC_Main.RptName = "AcLedger";}}`). Corrected after Claude review: the first
+version put the question on the summary and made the metal setting choose the template.
 Status: executable
 
 ### account-ledger.output.voucher-wise-summ   (T16 Report/output · Gap 7)
@@ -673,7 +686,7 @@ Status: executable
 
 ### account-ledger.journey.op-ldr-to-print   (T18 Full journey · Gaps 1, 5)
 Layer: browser + database
-Steps: 1. Seed Z600: book-000 opening CR_AMT 100 (G '+' 1.5) dated 2024-04-01; OP_LDR row DR_AMT 30
+Steps: 1. Seed Z600: book-000 opening CR_AMT 100 (G '+' 1.5) dated 2024-03-31; OP_LDR row DR_AMT 30
 (DR_GL_FINE 1.000, CR_GL_FINE 0) dated 2024-04-21; SALES DR_AMT 40 (G '-' 0.5) dated 2024-05-10; SALES CR_AMT 60
 (G '+' 2.0) dated 2024-06-15. 2. Run the summary and read Z600's net. 3. Run ageing (to-date 2024-06-30) and read
 the buckets. 4. Drill into Z600 and run the Gold print (from 2024-04-01). 5. Compare all three.
