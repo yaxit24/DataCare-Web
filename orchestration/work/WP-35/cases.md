@@ -17,11 +17,11 @@ Each decision is recorded as: architect, 2026-11-23, owner may override.
 
 | # | Study gap / open question | Decision | Basis |
 |---|---|---|---|
-| D1 | Gap 3, open question 5: Fine Jv T13 retry | A replayed new save is treated as the desktop treats a used number: it takes the next voucher number, and the first voucher is left intact. No idempotency key is added. | TR_CONTRA.cs:2723 {{Current Voucher No has been changd New Voucher No is  '}} |
-| D2 | Gap 2, G170: Fine Jv T12 concurrency | The web must use the existing version token; the case is frozen now and blocked until the version-token wiring slice lands. | The desktop has no check, but a hosted multi-user service must not let two operators overwrite each other; N51 version tokens exist in `modules/vouchers/version.ts`. |
+| D1 | Gap 3, open question 5: Fine Jv T13 retry | A lost-acknowledgement replay must not create a second financial voucher: the create takes an `Idempotency-Key` (accepted D18, document 11 section 4, `api_command_receipt`); the same key and body replays the first answer, the same key with another body is `409 idempotency-key-reused`. The desktop renumbering of a taken number stays as the answer for two different requests that meet the same number. Corrected after Claude review: the first version chose the desktop renumber for a replay, which writes the fine legs twice. | TR_CONTRA.cs:2723 {{Current Voucher No has been changd New Voucher No is  '}} (a used number only; the desktop has no replay control) and the hosted-safety rule |
+| D2 | Gap 2, G170: Fine Jv T12 concurrency | The web must use the existing version token. The wiring is missing code inside this menu, so the case is executable and fails today (not blocked). | The desktop has no check, but a hosted multi-user service must not let two operators overwrite each other; N51 version tokens exist in `modules/vouchers/version.ts`. |
 | D3 | Gap 7, G209/G211: Party Opening T15 | The A/B data type and the A/B Merge are an Advance/Enterprise feature, not Lite. Lite is frozen as data type A only, with no B choice and no Merge button. | TR_AC_OPBL.cs:2519 {{tDataType.Text = "A";}} and MS_OPNCOMP.cs:612 {{DC_Main.MsSoftType = "L";}} |
 | D4 | Gap 11: Settings T12 concurrency | The desktop rule is decided, not unknown: each button writes one column, so different settings by two administrators both survive and the same setting ends with the later value. The stale blocked reason is replaced by a real case. | UT_SETTING.cs:5014 {{DC_Main.RsQry = "UPDATE CO_SET SET LBR_ROF = " + Conversions.ToString(Conversion.Val(cbolbrrof.Text)) + " WHERE CO_CODE = '" + DC_Main.MCo_code + "'";}} |
-| D5 | Gap 10, open question 4: Open Company last-day lock | The web does write `CO_SET.LOCK_DATE`, set to the system date minus one day on open, exactly as the desktop does. The case is therefore executable. | MS_OPNCOMP.cs:1505 {{DC_Main.ExeQuteDc("UPDATE CO_SET SET LOCK_DATE = '}} |
+| D5 | Gap 10, open question 4: Open Company last-day lock | The web does write `CO_SET.LOCK_DATE`, set to the system date minus one day on open, exactly as the desktop does. The case is therefore executable. Deviation to record: the desktop writes yesterday unconditionally; the web moves the lock forward only (`lastDayLock.ts`, an existing later lock date is kept), a hosted safety rule so opening a company cannot reopen a closed period. | MS_OPNCOMP.cs:1505 {{DC_Main.ExeQuteDc("UPDATE CO_SET SET LOCK_DATE = '}} |
 | D6 | Gap 9: Open Company T02–T18 mapping | Refusals are the web's choice lists plus the server's `year-unavailable` / `location-unavailable` answers; the desktop "wrong code opens the help list" has no web text box, so it is not frozen as a typing case. | MS_OPNCOMP.cs:536 {{Select * From YEAR_MAST WHERE CO_CODE}} |
 | D7 | Open question 6: registration and licence checks | Open Company's registration ids and phone number are not a Lite web feature and stay out of scope. | MS_OPNCOMP.cs:1999 {{Yor Regester Id Is Not Valid Please Contact  9879966455}} |
 | D8 | Open question 3: RP_LEDR physical print for Fine Jv | The Fine Jv T18 case asserts the web ledger dataset and drill-down, which belong to this menu's frozen cases; the RP_LEDR physical layout belongs to the L6 report cases and is not re-frozen here. | TR_CONTRA.cs:2886 {{Ac_Ledr.Contra_Ledr(DC_Main.MCo_Book, tVchNo.Text);}} |
@@ -36,7 +36,7 @@ Every gap in the study has at least one case that fails today because of it, or 
 |---|---|
 | 1 Fine Jv T14 rollback | `fine-jv.rollback.save`, `fine-jv.rollback.edit`, `fine-jv.rollback.delete` |
 | 2 Fine Jv T12 concurrency | `fine-jv.concurrency.stale-second-save` (blocked, D2) |
-| 3 Fine Jv T13 retry | `fine-jv.retry.replayed-post-renumbers` (D1) |
+| 3 Fine Jv T13 retry | `fine-jv.retry.idempotent-replay` (D1) |
 | 4 Fine Jv T18 downstream report | `fine-jv.downstream-report` |
 | 5 Party Opening T12 concurrency | `party-opening.concurrency.last-save-wins` |
 | 6 Party Opening T14 rollback | `party-opening.rollback.save` |
@@ -66,7 +66,7 @@ The blocked rows of `web/apps/web/test/features/modules/fineJv.mjs` are T12, T13
 | T09 Edit | N/A | Green `fine-jv.edit.unchanged-write-set` and `fine-jv.edit.reprice-metal`. |
 | T10 Delete | N/A | Green `fine-jv.delete.audit-and-reversal`. |
 | T11 Scope/rights | N/A | Green `fine-jv.scope.sentinel-tenant`, `rights.print-denied`, `rights.journal-routes-refuse-fine-jv-book`. |
-| T12 Concurrency | Applied | One case, blocked on the version-token wiring (D2). |
+| T12 Concurrency | Applied | One case, executable and failing until the version-token wiring lands (D2). |
 | T13 Retry | Applied | One case (D1). |
 | T14 Rollback | Applied | Three cases: save, edit, delete. |
 | T15 Config/history | N/A | Green `fine-jv.settings.lock-date`. |
@@ -84,20 +84,23 @@ else after you opened it. Reload it before saving or deleting."; the stored CONT
 (A's save survives) and B reads 11.0000 after reload. The desktop lets the later save overwrite because it has no
 check: TR_CONTRA.cs:2739 {{DC_Main.ExeQuteDc("DELETE FROM CONTRA_DATA WHERE CO_CODE}} rewrites the rows; the web
 adds the version token because a hosted service must not lose a save.
-Status: blocked: missing feature, study gap 2 / G170 — `web/apps/api/src/routes/fineJv.ts` GET/PUT/DELETE do not
-carry `expectedVersion` and the page does not send it. Unblocks when the version-token wiring slice lands (N51;
-`modules/vouchers/version.ts` and the 409 mapping already exist).
+Status: executable. Fails today: `web/apps/api/src/routes/fineJv.ts` GET/PUT/DELETE do not carry `expectedVersion` and
+the page does not send it (study gap 2 / G170); the wiring is part of this menu (N51; `modules/vouchers/version.ts`
+and the 409 mapping already exist). Corrected after Claude review: a missing feature of this menu is an expected
+failure, not a block.
 Gap: 2.
 
-### fine-jv.retry.replayed-post-renumbers   (T13 Retry)
+### fine-jv.retry.idempotent-replay   (T13 Retry)
 Layer: browser
-Steps: 1. Post a new Fine Jv (DR E2ELOC 12.3456, CR E2EINT 12.3456, metal G); record the returned `vchNo`, N.
-2. Re-send the exact same request (same body, same session) as a lost acknowledgement would. 3. Read `CONTRA_DATA`
-and `AC_DATA` for both vouchers.
-Expected: the replay creates a second voucher with number N+1, not a second copy of N. Voucher N keeps its two source
-rows and its two ledger legs (A's first save is intact); no number is reused and no voucher is renumbered silently.
-The desktop resolves a used number by assigning another number: TR_CONTRA.cs:2723 {{Current Voucher No has been changd New Voucher No is  '}}. Arithmetic: after a fresh book, N = 00001 and N+1 = 00002; if the book already ends at 00007, the replay is 00008.
-Status: executable (D1).
+Steps: 1. Post a new Fine Jv (DR E2ELOC 12.3456, CR E2EINT 12.3456, metal G) with `Idempotency-Key` K1; record the
+returned `vchNo` N. 2. Re-send the exact same request with K1 as a lost acknowledgement would. 3. Re-send K1 with
+the fine changed to 11.0000. 4. Post the same body with a new key K2. 5. Read `CONTRA_DATA` and `AC_DATA`.
+Expected: step 2 returns the first answer (same `vchNo` N) and there is exactly one voucher N with its two source rows
+and its two ledger legs (fine 12.3456 once, not twice); step 3 is HTTP 409 `idempotency-key-reused` and writes
+nothing; step 4 is a new request and takes the next number N+1 (after a fresh book N = 00001, N+1 = 00002), as the
+desktop gives a new number when the typed one is taken: TR_CONTRA.cs:2723 {{Current Voucher No has been changd New Voucher No is  '}}.
+Total fine legs after step 5: 2 vouchers x 12.3456 on each side, never 3.
+Status: executable. Fails today: `POST /fine-jv` takes no idempotency key (`routes/fineJv.ts:105`). Decision D1.
 Gap: 3.
 
 ### fine-jv.rollback.save   (T14 Rollback)
@@ -204,12 +207,11 @@ Gap: 6.
 
 ### party-opening.config.data-type-a-only   (T15 Config/history)
 Layer: browser
-Steps: 1. Open `/txn/ac-opbl` in the Lite edition. 2. Look for the desktop A/B data-type control: a Balance Type
-choice offering B, and an A/B Merge button. 3. Save an opening for E2EINT (amount 100 Cr) and read
+Steps: 1. Open `/txn/ac-opbl` in the Lite edition. 2. Look for the desktop A/B data-type box (`tDataType`, A or B) and an A/B Merge button. 3. Save an opening for E2EINT (amount 100 Cr) and read
 `OP_DATA.DATA_TYPE`.
 Expected: there is no B data-type choice and no A/B Merge button; the stored `DATA_TYPE` is 'A'. This is Lite, where
 the desktop sets the edition first — MS_OPNCOMP.cs:612 {{DC_Main.MsSoftType = "L";}} — and forces the single type —
-TR_AC_OPBL.cs:2519 {{tDataType.Text = "A";}} — because the A/B box exists only for Advance and Enterprise: TR_AC_OPBL.cs:2499 {{if ((Operators.CompareString(DC_Main.MsSoftType, "A", false) == 0) | (Operators.CompareString(DC_Main.MsSoftType, "E", false) == 0))}}. The web page's "Balance Type" select is the opening list's Amount/Gold/Silver display filter, not the A/B data type.
+TR_AC_OPBL.cs:2519 {{tDataType.Text = "A";}} — because the A/B box exists only for Advance and Enterprise: TR_AC_OPBL.cs:2499 {{if ((Operators.CompareString(DC_Main.MsSoftType, "A", false) == 0) | (Operators.CompareString(DC_Main.MsSoftType, "E", false) == 0))}}.
 Status: executable (D3).
 Gap: 7.
 
@@ -222,8 +224,8 @@ Gap: 7.
 
 ### party-opening.keyboard.esc-and-keys   (T17 Keyboard/usability)
 Layer: browser
-Steps: 1. Open `/txn/ac-opbl`, pick E2EINT and type into Opening Amount without saving; press Esc with focus in the
-box. 2. With unsaved changes (amount changed from the loaded value) press Esc again. 3. Type a lower-case letter and
+Steps: 1. Open `/txn/ac-opbl`, pick E2EINT, change nothing and press Esc. 2. Reopen, change Opening Amount
+from the loaded value without saving and press Esc. 3. Type a lower-case letter and
 an apostrophe into a text field.
 Expected: with nothing changed Esc closes the form; with a changed total Esc leaves the cell editor and puts focus on
 Save instead of closing — TR_AC_OPBL.cs:2924 {{if ((int)e.KeyCode == 27)}} (the form closes only when the changed
@@ -349,15 +351,18 @@ Gap: 9.
 
 ### company-open.rights.location-scope   (T11 Scope/rights)
 Layer: browser
-Steps: 1. Provision a second location LC2 for company 01 and give a non-A user type. 2. Sign in as the non-A user
-and open `/select`; read the Location options. 3. Sign in as an administrator (user type A) and read them again.
-Expected: the non-A user sees only the location it owns (01); the A user sees every location (01 and LC2). The desktop
-picks the location list by user type: the A branch builds the query without the current-location restriction —
-MS_OPNCOMP.cs:4405 {{else if (Operators.CompareString(DC_Main.MCo_UserType, "A", false) == 0)}} — while every other
-user type is narrowed to its own location. Today `listScopeLocations` returns every location of the company, so this
-case fails once it can run.
-Status: blocked: the catalogue has one location and no non-A `MCo_UserType`; unblocks when the fixture pack adds a
-second location and a user-type-B user (fixtures work package, outside this case list).
+Steps: 1. Provision a second location LC2 for company 01. 2. Sign in as a user whose home location is 01 (user type
+B) and open `/select`; read the Location options. 3. Repeat as an administrator (user type A) whose home location is 01.
+4. Repeat as an administrator whose home location is the company-wide "00".
+Expected: the desktop tests the home location first. With a home location other than "00" the user, of any type,
+may open only that location (`MS_OPNCOMP.cs:4401 {{if ((Operators.CompareString(DC_Main.CurLc, "00", false) != 0) & (Operators.CompareString(tlcCode.Text, "", false) != 0))}}`):
+steps 2 and 3 list only 01. Only with home "00" does user type A reach every location
+(`MS_OPNCOMP.cs:4405 {{else if (Operators.CompareString(DC_Main.MCo_UserType, "A", false) == 0)}}`): step 4 lists 01 and
+LC2; a non-A user with home "00" is held to location "00" by the last branch. Corrected after Claude review: the first
+version said an A user always sees every location. Today `listScopeLocations` returns every location of the company, so
+steps 2 and 3 fail once the case can run.
+Status: blocked: the catalogue has one location and no non-A user type or home-location setting; unblocks when the
+fixture pack adds a second location and a user-type-B user (fixtures work package, outside this case list).
 Gap: 9.
 
 ### company-open.retry.replayed-selection   (T13 Retry)
@@ -510,14 +515,14 @@ counts those whose Status is blocked.
 | T09 Edit | 0 | 0 (all green; Open Company has none) |
 | T10 Delete | 0 | 0 (all green; Open Company has none) |
 | T11 Scope/rights | 1 | 1 (company-open needs fixture) |
-| T12 Concurrency | 4 | 1 (fine-jv needs the version slice) |
+| T12 Concurrency | 4 | 0 (fine-jv fails until the version slice lands) |
 | T13 Retry | 2 | 0 |
 | T14 Rollback | 8 | 3 (party/item opening need the harness override) |
 | T15 Config/history | 3 | 1 (company-open needs the second company) |
 | T16 Report/output | 0 | 0 (all green) |
 | T17 Keyboard | 2 | 0 |
 | T18 Full journey | 2 | 0 |
-| **Total** | **25** | **6** |
+| **Total** | **25** | **5** |
 
 N/A rows are not counted as cases; they are listed in each module's disposition table with the green case or the
 reason they do not apply.
