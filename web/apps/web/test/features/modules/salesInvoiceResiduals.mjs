@@ -11,7 +11,6 @@ import { PARTIES } from '../fixtures/catalogue.mjs';
  */
 export function salesInvoiceResidualCases(h) {
   const { C, BOOK, LINE_A } = h;
-  const TOTAL = 65517.27;
   const one = async (ctx, sql, ...params) =>
     ctx.owner.$executeRawUnsafe(sql, ctx.tenantId, ...params);
   const sl = async (ctx, vchNo) =>
@@ -172,7 +171,6 @@ export function salesInvoiceResidualCases(h) {
         await page.getByText('Desktop posting accounts and flags', { exact: true }).click();
         await h.field(page, 'Rate Unfix').fill('Y');
         await h.field(page, 'Tax Code').fill('10');
-        await h.field(page, 'Cash ₹').fill(String(TOTAL));
         const vchNo = await saved(page);
         const row = await sl(ctx, vchNo);
         assert.deepEqual(
@@ -203,11 +201,15 @@ export function salesInvoiceResidualCases(h) {
       'mutation',
       'Lossless reopen (study gap 1, D8): an unchanged save writes every SL_DATA column back except VCH_TIME',
       async (ctx) => {
+        // Rate unfixed is entered on the screen, as the desktop stores it: a RATE_UNFIX bill carries no metal amount
+        // (sales.ts rate-unfix path), so planting 'Y' on a fixed-rate bill would make the reopen a real change.
         const page = await newBill(ctx);
+        await page.getByText('Desktop posting accounts and flags', { exact: true }).click();
+        await h.field(page, 'Rate Unfix').fill('Y');
         const vchNo = await saved(page);
         await one(
           ctx,
-          `UPDATE "SL_DATA" SET "MEMB_COM_AC_CODE"='M1',"WHOUT_COMM_BILL"='Y',"RATE_UNFIX"='Y',"DATA_TRFR"='Y',
+          `UPDATE "SL_DATA" SET "MEMB_COM_AC_CODE"='M1',"WHOUT_COMM_BILL"='Y',"DATA_TRFR"='Y',
              "USER_UPDATE"='Y',"USER_DELETE"='Y' WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2`,
           vchNo,
         );
@@ -394,29 +396,38 @@ export function salesInvoiceResidualCases(h) {
             WHERE NOT EXISTS (SELECT 1 FROM "SL_ORD_DATA" WHERE tenant_id=$1::text AND "VCH_NO"='09071')`,
           PARTIES.local.code,
         );
-        const page = await newBill(ctx);
-        await page.getByRole('button', { name: '+ Order', exact: true }).click();
-        await page.getByLabel('Order No line 1', { exact: true }).fill('09071');
-        await page.getByLabel('Order Amt line 1', { exact: true }).fill('5000');
-        const vchNo = await saved(page);
-        const head = await sl(ctx, vchNo);
-        const rows = await child(ctx, 'SL_ORD_ADJ', vchNo);
-        assert.deepEqual(
-          rows.map((r) => [r.ORD_SIGN, Number(r.ORD_AMT), Number(r.PAID_AMT), r.ENTRY_TYPE]),
-          [['-', 5000, 0, 'S']],
-        );
-        assert.equal(Number(head.ADV_AMT), 5000);
-        await reopen(page, vchNo);
-        assert.equal(
-          Number(await page.getByLabel('Order Amt line 1', { exact: true }).inputValue()),
-          5000,
-        );
-        return {
-          observation: `ADV_AMT ${head.ADV_AMT}; SL_ORD_ADJ ${JSON.stringify(rows.map((r) => [r.ORD_SIGN, r.ORD_AMT]))}`,
-          expected: { adv: 5000, sign: '-' },
-          database: { rows: rows.map(plain) },
-          downstream: { reopened: 5000 },
-        };
+        // The case owns its order: the SOR header it planted is removed again, so book SOR's numbering
+        // (max VCH_NO + 1) and its pending-order lists are as the Sales Order suite expects.
+        try {
+          const page = await newBill(ctx);
+          await page.getByRole('button', { name: '+ Order', exact: true }).click();
+          await page.getByLabel('Order No line 1', { exact: true }).fill('09071');
+          await page.getByLabel('Order Amt line 1', { exact: true }).fill('5000');
+          const vchNo = await saved(page);
+          const head = await sl(ctx, vchNo);
+          const rows = await child(ctx, 'SL_ORD_ADJ', vchNo);
+          assert.deepEqual(
+            rows.map((r) => [r.ORD_SIGN, Number(r.ORD_AMT), Number(r.PAID_AMT), r.ENTRY_TYPE]),
+            [['-', 5000, 0, 'S']],
+          );
+          assert.equal(Number(head.ADV_AMT), 5000);
+          await reopen(page, vchNo);
+          assert.equal(
+            Number(await page.getByLabel('Order Amt line 1', { exact: true }).inputValue()),
+            5000,
+          );
+          return {
+            observation: `ADV_AMT ${head.ADV_AMT}; SL_ORD_ADJ ${JSON.stringify(rows.map((r) => [r.ORD_SIGN, r.ORD_AMT]))}`,
+            expected: { adv: 5000, sign: '-' },
+            database: { rows: rows.map(plain) },
+            downstream: { reopened: 5000 },
+          };
+        } finally {
+          await one(
+            ctx,
+            `DELETE FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SOR' AND "VCH_NO"='09071'`,
+          );
+        }
       },
     ),
 
