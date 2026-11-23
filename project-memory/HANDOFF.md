@@ -1,3 +1,12 @@
+## 2026-11-22 — Stock Report is the desktop RP_STOCK form on its own route (N241 / G253, WP-16)
+
+- 2026-11-22: `/reports/stock-report` (`modules/reports/stockReport/`, `routes/stockReport.ts`, `reports/stock-report/`) sums signed MAIN_STOCK
+  movements for eight dimensions; Closing = Opening + every movement; drill-down fine is KR_FINE for + rows and ITM_FINE for - rows. Own rights
+  key `Reports/Stock Report` (the old `Stock Report` alias left Tag-Stock). Print/Excel need the Print right. The report writes nothing.
+- 2026-11-22: separate defect, not fixed: `onHandNet()` in `modules/stock/stock.ts` signs `ITM_FINE` for both signs and ignores dates and year.
+- 2026-11-22: not built: voucher zoom (no entry screen opens a voucher by key), InOut item-ledger print, code lookups, Crystal layouts,
+  EMP ISU adjustment, Item Lot, LC box. The browser module was not run locally (8 GB machine); CI runs it.
+
 ## 2026-11-22 — Books is the desktop MS_BOOK screen with its posting slots (N240 / G252, WP-21)
 
 - 2026-11-22: /masters/books is its own page with the slot grid; /masters/books-master writes header and slots in one transaction with the
