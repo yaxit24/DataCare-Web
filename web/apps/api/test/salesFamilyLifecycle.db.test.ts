@@ -143,6 +143,9 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
 
   const cleanup = async (): Promise<void> => {
     for (const table of [
+      // An edit writes the USER_DATA field audit (TR_SALE_RTN.cs:13541, WP-27); left behind, it shows up in the
+      // next test's footprint under the same voucher number.
+      'USER_DATA',
       'DELETE_DATA',
       'REMARK_DATA',
       'DM_DATA',
@@ -1344,6 +1347,45 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
       ],
     });
     expect(labour.vchNo).toBe(8);
+    // WP-19: the post-save GST shares TR_SALE_LBR.cs:9748-9830 stores per line and RP_GST.cs:2719 sums. Hand-worked:
+    // metal net 250 at 3% = 7.50 tax, labour 50 at 5% = 2.50 tax; line NET_AMT 240 + 60 = 300, so
+    // IT_NET_AMT = 240 + 240/300 x (250 - 300) = 200 and 60 - 10 = 50; IT_TAX_AMT = 200 x 7.5/250 = 6 and 1.5;
+    // IT_LBR_AMT = 40 and 10 (DR_LBR 50 = SUM(LBR_AMT)); IT_LBR_TAX = 2 and 0.5; no labour discount on the web.
+    const shares = async () =>
+      owner.$queryRawUnsafe(
+        `SELECT "SR_NO","IT_NET_AMT","IT_TAX_AMT","IT_DISC_AMT","IT_LBR_AMT","IT_LBR_TAX","IT_LBR_DISC"
+           FROM "LBR_ISU_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='LBR' AND "VCH_NO"=$2 ORDER BY "SR_NO"`,
+        TENANT,
+        '00008',
+      );
+    expect(await shares()).toEqual([
+      {
+        SR_NO: 1,
+        IT_NET_AMT: 200,
+        IT_TAX_AMT: '6',
+        IT_DISC_AMT: 0,
+        IT_LBR_AMT: 40,
+        IT_LBR_TAX: '2',
+        IT_LBR_DISC: 0,
+      },
+      {
+        SR_NO: 2,
+        IT_NET_AMT: 50,
+        IT_TAX_AMT: '1.5',
+        IT_DISC_AMT: 0,
+        IT_LBR_AMT: 10,
+        IT_LBR_TAX: '0.5',
+        IT_LBR_DISC: 0,
+      },
+    ]);
+    // Every TAX_DATA row the labour invoice writes says R_CHARG 'N', as Ac_Tax.LbrWork_GST does.
+    expect(
+      await owner.$queryRawUnsafe(
+        `SELECT DISTINCT "R_CHARG" FROM "TAX_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='LBR' AND "VCH_NO"=$2`,
+        TENANT,
+        '00008',
+      ),
+    ).toEqual([{ R_CHARG: 'N' }]);
     const labourClock = await clock('LBR_DATA', 'LBR');
     await expect(getLabourInvoice(runtime, scope('LBR'), 8)).resolves.toMatchObject({
       hiddenVoucherNo: '00041',
@@ -1367,6 +1409,18 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
       vchDate: EDIT_DAY,
       lines: [{ itCode: 'GOLD', netWt: 3, metalAmount: 330, labourAmount: 75 }],
     });
+    // The edit rewrites the shares: one line, NET_AMT 405 against metal 330 (tax 9.90), labour 75 (tax 3.75).
+    expect(await shares()).toEqual([
+      {
+        SR_NO: 1,
+        IT_NET_AMT: 330,
+        IT_TAX_AMT: '9.9',
+        IT_DISC_AMT: 0,
+        IT_LBR_AMT: 75,
+        IT_LBR_TAX: '3.75',
+        IT_LBR_DISC: 0,
+      },
+    ]);
     expect(await clock('LBR_DATA', 'LBR')).toBe(labourClock);
     let [dr, cr] = await ledgerBalance('LBR');
     expect(dr).toBeCloseTo(cr, 6);
@@ -1815,6 +1869,8 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
       'AC_DATA',
       // The day book. Added when the order projection was implemented from the real book-020 rows.
       'ROJ_MEL_DATA',
+      // The order's own '+' advance row (TR_SALE_ORD.cs:9475-9516).
+      'SL_ORD_ADJ',
       'SL_ORD_DATA',
       'SL_ORD_DETL',
       // The fixture's line carries a stone sub-detail, so the order writes SL_ORD_IDTL too. Pinned

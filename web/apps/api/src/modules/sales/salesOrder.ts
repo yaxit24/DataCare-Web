@@ -1,5 +1,4 @@
 import { withTxBudget, SNAPSHOT_READ, type TxBudgetPrisma, type Tx } from '../shared/txBudget.js';
-import { openAdvanceOfOrderTx } from './orderCancel.js';
 import { withSessionContextCommand } from '../auth/sessionContextCommand.js';
 import { createHash } from 'node:crypto';
 import {
@@ -1238,10 +1237,19 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
       VCH_NO: hdVchNo,
       BOOK_NAME: book.bookName,
     });
+    // The order's own '+' advance row, SR_NO 1 (TR_SALE_ORD.cs:9475-9516). An edit has already deleted the old one
+    // with the rest of the write set, as the desktop's delete-then-insert does (`:9475`).
+    const advanceAdj = oldMetal.orderAdvanceAdjRow(key, header, tender.oldMetal, book, {
+      partyAc: input.acCode,
+      vchDate,
+      hdVchNo,
+      mainUser,
+    });
     await postVoucherTx(tx, tenantId, {
       ledger: { table: 'AC_DATA', lines: ledger },
       writes: [
         { table: 'SL_ORD_DATA', rows: [header] },
+        ...(advanceAdj ? [{ table: 'SL_ORD_ADJ', rows: [advanceAdj] }] : []),
         ...(detl.length ? [{ table: 'SL_ORD_DETL', rows: detl }] : []),
         ...(idtl.length ? [{ table: 'SL_ORD_IDTL', rows: idtl }] : []),
         ...(rojmelRows.length ? [{ table: 'ROJ_MEL_DATA', rows: rojmelRows }] : []),
@@ -1298,6 +1306,7 @@ function prepareSalesOrderCreate(input: SalesOrderInput, lifecycle?: OrderWriteC
             : ['VCH_TIME', 'ENTRY_TIME'],
         ],
         ['SL_ORD_DETL', ['VCH_TIME']],
+        ['SL_ORD_ADJ', ['VCH_TIME']],
         ['AC_DATA', ['ENTRY_TIME']],
       ] as const)
         await tx.$executeRawUnsafe(
@@ -1575,6 +1584,8 @@ async function assertOrderUnconsumedTx(
   // the later settlement voucher. A missing legacy dimension is unknown, so it can still
   // block a possible match. An explicitly different dimension must not block another order
   // merely because voucher numbers are reused across books, financial years or branches.
+  // A '+' row is the order's own advance (TR_SALE_ORD.cs:9503), not a use of it: the desktop counts only '-' rows as
+  // adjusted (AdjAmtR, :10092), so the '+' row alone never blocks.
   const blocked: any[] = await tx.$queryRawUnsafe(
     `SELECT 1 FROM "SL_ORD_DETL" d
       WHERE d.tenant_id=$1 AND d."CO_CODE"=$2 AND d."LC_CODE"=$3
@@ -1584,6 +1595,7 @@ async function assertOrderUnconsumedTx(
           OR EXISTS (SELECT 1 FROM "SL_ORD_ADJ" a
             WHERE a.tenant_id=d.tenant_id AND a."CO_CODE"=d."CO_CODE"
               AND a."ORD_NO"=d."VCH_NO"
+              AND coalesce(a."ORD_SIGN",'')<>'+'
               AND (nullif(trim(a."ORD_LC"),'') IS NULL OR trim(a."ORD_LC")=d."LC_CODE")
               AND (nullif(trim(a."ORD_YRCD"),'') IS NULL OR trim(a."ORD_YRCD")=d."CO_YEAR")
               AND (nullif(trim(a."ORD_DBCD"),'') IS NULL OR trim(a."ORD_DBCD")=d."CO_BOOK")))
@@ -2003,89 +2015,7 @@ export async function editTourOrderInSession(
 
 // ───────────────────────── F4 · SL_ORD_ADJ order-adjust helpers ─────────────────────────
 
-/**
- * Advance still available on an order to consume into a sale. The rule is shared with Order Cancel
- * (`openAdvanceOfOrderTx`), so a sale and a cancellation can never use the same advance twice: it counts what earlier
- * sales and cancellations used, including a cancellation's kasar.
- */
-export async function orderAdvanceAvailableTx(
-  tx: any,
-  scope: VoucherScope,
-  ordNo: number | string,
-  ordBook = 'SOR',
-): Promise<{ custAc: string; custName: string | null; advance: number; available: number }> {
-  const ord = await openAdvanceOfOrderTx(tx, scope, ordNo, ordBook);
-  if (!ord) throw new SaleValidationError(`sales order #${ordNo} not found`);
-  return {
-    custAc: ord.acCode,
-    custName: ord.acName || null,
-    advance: ord.advAmt,
-    available: ord.openAmt,
-  };
-}
-
-/** Write an SL_ORD_ADJ row consuming `adjustAmt` of an order's advance into a sale (within the sale's tx).
- *  No ledger here — the sale (createSale) reduces the customer Dr by adjustAmt (the advance is applied). */
-export async function adjustOrderIntoSaleTx(
-  tx: any,
-  tenantId: string,
-  scope: VoucherScope,
-  args: {
-    saleVchNo: string;
-    ordNo: number | string;
-    custAc: string;
-    custName?: string | null;
-    adjustAmt: number;
-    vchDate: Date;
-    /** ORD_HD_VCH_NO — the order's hidden book number, so the adjustment ties to the exact order row. */
-    ordHiddenVchNo?: string | null;
-    /** EMP_CODE — varchar(3); the salesperson credited with the order. */
-    empCode?: string | null;
-  },
-): Promise<{ vchNo: number }> {
-  const no = await nextVoucherNoTx(tx, { ...scope, coBook: 'ORA' });
-  const key: VoucherKey = {
-    CO_CODE: scope.coCode,
-    LC_CODE: scope.lcCode,
-    CO_YEAR: scope.coYear ?? '',
-    CO_BOOK: 'ORA',
-    VCH_NO: formatVoucherNo(no),
-  };
-  const row = {
-    ...key,
-    SR_NO: 1,
-    VCH_DATE: args.vchDate,
-    VCH_TYPE: 'SADJ',
-    INOUT_TYPE: 'O',
-    ENTRY_TYPE: 'A',
-    BOOK_NAME: 'ORDER ADJUST',
-    AC_CODE: args.custAc,
-    AC_NAME: args.custName ?? null,
-    ORD_NO: formatVoucherNo(args.ordNo),
-    ORD_AC_CODE: args.custAc,
-    ORD_SIGN: 'C',
-    PAID_AMT: round2(args.adjustAmt),
-    OLD_VCH_NO: scope.coBook,
-    NEW_VCH_NO: args.saleVchNo,
-    IT_DESC: `Advance adjusted into sale ${args.saleVchNo}`,
-    // TR_SALE_HM.cs carries the full ORDER key on the adjustment so the advance can be traced back to the
-    // exact order line: location, year and book alongside the order number, plus its hidden book number.
-    ORD_LC: scope.lcCode,
-    ORD_YRCD: scope.coYear ?? null,
-    ORD_DBCD: scope.coBook ?? null,
-    ORD_HD_VCH_NO: args.ordHiddenVchNo ?? null,
-    // Metal advances are tracked separately from the money advance; a pure cash advance leaves both 0,
-    // which is what the desktop writes.
-    ORD_GOLD: 0,
-    ORD_SILVER: 0,
-    EMP_CODE: args.empCode ?? null,
-  };
-  await postVoucherTx(tx, tenantId, {
-    ledger: { table: 'AC_DATA', lines: [] },
-    writes: [{ table: 'SL_ORD_ADJ', rows: [row] }],
-  });
-  return { vchNo: no };
-}
+export { orderAdvanceAvailableTx, adjustOrderIntoSaleTx } from './orderAdvanceAdjust.js';
 
 /**
  * Order Cancel with refund (desktop TR_SL_ORD_ADJ): refund the advance through an operator-chosen

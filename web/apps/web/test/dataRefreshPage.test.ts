@@ -48,7 +48,6 @@ describe('Data Refresh operator surface', () => {
     for (const id of [
       'data-refresh-account',
       'data-refresh-stock',
-      'data-refresh-field-update',
       'data-refresh-image-data',
       'data-refresh-old-field',
     ]) {
@@ -57,6 +56,8 @@ describe('Data Refresh operator surface', () => {
       expect(operations.slice(start, start + 900), id).toContain('applyAvailable: false');
     }
     expect(operations).toContain("completionText: 'Approval Refersh Process Complete.'");
+    // Field Update runs its two class-a repairs (N247) from dataRefreshFieldUpdate.ts.
+    expect(operations).toContain("import './dataRefreshFieldUpdate.js'");
     expect(page).toContain('Preview only: {preview.blockedReason}');
   });
 

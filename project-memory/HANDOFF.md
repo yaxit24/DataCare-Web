@@ -1,3 +1,69 @@
+## 2026-11-23 — Contra Entry is the TR_CONTRA voucher with its grid and lifecycle (N246 / G258, WP-31)
+
+- 2026-11-23: row 1 holds the side, later rows are the opposite and read-only; the mirror record carries row 1's description (`TR_CONTRA.cs:1538`, `:1630`, `:2868`); REMARK_DATA is written and deleted; INOUT_TYPE is the book's flag; employee, company type B, year, lock date and totals are refused in the desktop order (`:2668-2694`).
+- 2026-11-23: edit and delete need the voucher version (`expectedVersion`; GET returns `version`), are serialised per voucher, and move the bank clearing marks with their leg. The Contra routes live in `routes/contra.ts`; `GET /contra/list` is the desktop F1 list (policy count 769).
+- 2026-11-23: decisions D1-D16 in `orchestration/work/WP-31/cases.md` are architect decisions (owner may override). Blocked: opening-balance label, ContraBill.rpt layout. The browser module was extended but not run locally.
+
+## 2026-11-23 — Purchase Rtn prints on FRM_PRINT and carries a version token (N245 / G257, WP-29)
+
+- 2026-11-23: architect decisions (owner may override): the Purchase Return print guards the print right (sales print unchanged); line TAX_PRC is 0 as the desktop writes it (no migration; no reader of the line column); edit and delete need `expectedVersion` like purchases; Fine/Amount stay computed cells.
+- 2026-11-23: routes moved to `routes/purchaseReturn.ts` (txn.ts ceiling 7974); `planEnterWalk` is the tested pure Enter walk; `purchaseReturnWp29.routes.db.test.ts` pins HSN 6,200/93/93/186, the refusal, the token and lossless save. Browser cases `print.hsn-tax-intra`, `print.hsn-tax-inter`, `keyboard.enter-walk` were written with no local browser stack; CI runs them. `config.setting-variant` stays blocked on N166.
+
+## 2026-11-22 — Purchase residuals: lossless reopen, hallmark receive columns, purchase book family (N244 / G256, WP-28)
+
+- 2026-11-22: `GET /purchases/:vchNo` returns every stored value (`purchaseReopen.ts`); the edit keeps the persisted header and line columns the
+  request does not model and the stored `IT_TYPE`; the screens send back what they do not show (`lib/purchaseCarry.ts`). Hallmark receive
+  (`purchaseHallmark.ts`): `HM_ID_AMT` per line, header `HM_AMT` half to even (TR_PURC_HM.cs:9995), `HM_TAX_CODE`, `ITM_COLOR`, `EMP_CODE`,
+  `VCH_DESC`; hallmark ids 2-4, weights and the tag band for `TAG PURCHASE` books only (D5).
+- 2026-11-22: create/edit refuse a non-purchase book; `GET /context/books?family=` filters on the server. `/txn/purchase` opens the hallmark
+  layout when `PURC_WITH_HMTAX` is Y, `/txn/tag-wise-purc` lists `TAG PURCHASE` books, `/txn/purchase-hm` forwards; the nav caption
+  "Hallmark Purchase" now points to `/txn/tag-wise-purc`. Decisions D1-D13 in `orchestration/work/WP-28/cases.md` (architect, owner may override).
+- 2026-11-22: verification: 88 cases: 17 pass at database/unit level (lossless reopen of every tenant row for an earlier-month hallmark voucher with typed amount, fine and stones; TAG PURCHASE ids 2-4, weights, tag band and BAR_DETL rules; HM_AMT half to even; HM tax code with no charge; server family refusal; /context/books?family=), 4 partly, 2 blocked, 3 N/A, the rest executable but not run (browser module extended, not run locally); full API suite with database 4134/4134 after the kernel fix. Browser cases not run locally. Not done: employee-code book shortcut (D9), `WITH_STOCK` blank to Y,
+  `BAR_DATA`/`SRNO_MAST`/`TAG_SET` tag write set, print templates; blocked: the 95-column Enter walk and the `DATA_TYPE` book filter.
+
+## 2026-11-22 — Sales Invoice residuals (N243 / G255, WP-26)
+
+- 2026-11-22: an unchanged reopen-and-save writes the stored SL_DATA row back (D8); getSale reloads the member-commission columns, stones, UPI, credit-note and desktop-shape order rows and PR_COST; UPI_DATA and CRNT_DATA are written (sums = header figures, D1); order advances in the TR_SALE shape (D2, 409 on over-use); old metal G versus every other type, rate type N/F only (G83); the reopened tax code goes back (G82); PRINT_MAST print choice (D6).
+- Open (blocked in cases.md): quotation import, stepped Esc, old-metal Ctrl+D, header totals only for book type M (provisioned books have no BOOK_TYPE: owner question), fixture users without edit/print right, tender retry/rollback, two journeys, approval number import (D5). OpAmt/ClAmt follow the desktop Sum(CR - DR), so a debit balance is negative (the case listed magnitudes).
+
+## 2026-11-22 — Sales Return residuals (N242 / G254, WP-27)
+
+- 2026-11-22: the TR_SALE_RTN save refusals in desktop order and texts (employee, cheque/card account, type B, year, lock date, zero
+  value, `Duplicate Tag No`); Import refuses a bill that already has a return, `remaining=1` is the single-item picker; the New return
+  form opens a saved return and saves it with `PUT /sales-returns/:vchNo` + version token, losslessly, with the USER_DATA field audit.
+- 2026-11-22: decisions D1-D14 in `orchestration/work/WP-27/cases.md` (architect, owner may override); new DB tests 18 of 18; return
+  create p95 269 ms in the load profile. Browser module (28 cases, 0 declared blocked) not run locally. G246 (RTN_* columns) stays open.
+
+## 2026-11-22 — Stock Report is the desktop RP_STOCK form on its own route (N241 / G253, WP-16)
+
+- 2026-11-22: `/reports/stock-report` (`modules/reports/stockReport/`, `routes/stockReport.ts`, `reports/stock-report/`) sums signed MAIN_STOCK
+  movements for eight dimensions; Closing = Opening + every movement; drill-down fine is KR_FINE for + rows and ITM_FINE for - rows. Own rights
+  key `Reports/Stock Report` (the old `Stock Report` alias left Tag-Stock). Print/Excel need the Print right. The report writes nothing.
+- 2026-11-22: separate defect, not fixed: `onHandNet()` in `modules/stock/stock.ts` signs `ITM_FINE` for both signs and ignores dates and year.
+- 2026-11-22: not built: voucher zoom (no entry screen opens a voucher by key), InOut item-ledger print, code lookups, Crystal layouts,
+  EMP ISU adjustment, Item Lot, LC box. The browser module was not run locally (8 GB machine); CI runs it.
+
+## 2026-11-22 — Books is the desktop MS_BOOK screen with its posting slots (N240 / G252, WP-21)
+
+- 2026-11-22: /masters/books is its own page with the slot grid; /masters/books-master writes header and slots in one transaction with the
+  MS_BOOK save/delete checks and texts; generic BOOK_DATA writes are refused. D4 family lock on a book with vouchers is a web message.
+- 2026-11-22: provisioning adds the template slots (OIN/OEX 2-3, TSP 1-9 with 6 SALES / 7 PURCHASE / 8 SLVSALE / 9 SLVPURC, PR/TPR 5 DISCOUNT,
+  LBR 8-11), Data Type A, AC_NAME = account name; only new companies. Fine families untouched.
+- 2026-11-22: existing companies: migration 20261122120000_book_template_slots rewrites a web-seeded slot only while it still holds the old seed's account
+  (TSP 6/7/8/9), inserts absent template slots and the DISCOUNT account; operator-changed slots kept; idempotent.
+
+## 2026-11-22 — Gst Report runs the desktop RP_GST rules for the blocked cases (N239 / G251, WP-19)
+
+- 2026-11-22: EXP/EXEMP/DOCS are the desktop caption grids; GSTR-3B is the whole desktop grid (3.1 total, 3.2(1), 6.1) under owner decisions
+  Q1-Q3; SetDate on the date boxes; no CSV for EXEMP/DOCS; Gsrt1 Csv = one XLSX B2B..HSN; TCS proven out of every GST figure.
+- 2026-11-22: migration 20261122090000 adds the LBR_ISU_DETL GST shares (labour writer now stores them; labour HSN tax was 0 before) and
+  TAX_DATA writers set R_CHARG 'N'. Still blocked: EXP.csv bytes (Q9, Windows run), two T14 fault cases (no read/export injector).
+
+## 2026-11-22 — Tag Stock follows the desktop RP_TAG selections and totals (N238 / G250, WP-15)
+
+- 2026-11-22: In = BAR_DETL creation rows, Out = minus movements, Stock/Mrp = positive signed-movement sum of the year up to To (Mrp <> 0), Apr = APR ISU / ISU_REC N joined to BAR_DETL, All = signed history; tag N excluded; no 5,000-row cap in rows, footer, CSV or Excel; Tag Summ / Product Stk; the page is the RP_TAG form (selectors, columns, keys). CSV and Excel need the Print right.
+- 2026-11-22: tagStock.db.test.ts (28) and tagStock.routes.db.test.ts (6) pass on an isolated database; the tagStock browser module and the edited tagCancel/tagOpening helpers were NOT run locally (8 GB machine): CI is the first run. Open: voucher zoom, Print window/Crystal, approval other-item columns, edition-E Emp Isu Less, summary Mrp/Size, year rollover.
+
 ## 2026-11-22 — Data Backup archives the tenant configuration by allowlist (N237 / G249, WP-08, D37)
 
 - 2026-11-22: the v2 archive and its manifest carry `tenantConfig` (datacare.tenant-config v1): nine tenant-shared configuration tables, column by
@@ -497,3 +563,8 @@ DONE (create/reopen/edit/delete/print in the UI via the VoucherList template): c
 REMAINING frontend lifecycle: payment (PaymentForm.tsx, POST-only; add reopen/edit/delete — needs PUT /payments/:vchNo which may not exist yet — check finance.ts editReceipt/editPayment), receipt (same), fine-jv (FINE_JV header table — add to allow-list), batch-receipt grid missing body cells.
 REMAINING new-workflow frontend PAGES (backend done, NO page yet): card-receipt (/card-receipts, CARD_DATA), customer-entry (/crm/customer-entries), tour-sales (/tour-sales, RATE_CUT_DATA book TSL — can reuse the wholesale-sale page pattern), dhrn-os-letter (a report/letter — add a page under reports or a print button). loan-interest page exists but is create-only -> wire reopen/edit/delete (GET/PUT/DELETE /dhrn/interest/:vchNo exist from N125).
 Next slice N132.
+
+## 2026-11-23 — Data Refresh Field Update runs its two desktop repairs preview-first (N247 / G259, WP-24)
+
+- 2026-11-23: `data-refresh-field-update` is now an applicable repair: AC_MAST.AC_MAIN_GR re-aligned to AC_GROUP (`MS_UPDATE.cs:7214`) and NULL DEFAULTER_AC set to N (`:8608`), preview-first, one transaction, audited, idempotent. The other 518 writes are classified in `orchestration/work/WP-24/field-update.md`; the 172 class b anomaly queries run in `dataRefreshFieldAnomalies.db.test.ts`.
+- 2026-11-23: finding F1 (class a, not built): seedCompany leaves BOOK_DATA.MENU_NAME (and for many books BOOK_TBL_NAME / BOOK_TBL_DETL) NULL on 36 books; owner decides seed fix or repair A3.

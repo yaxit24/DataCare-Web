@@ -407,11 +407,11 @@ browser case per screen first (red), then the hook (green).
 | WP-12 | Purchase Rpt (removes 17 G06 baselines) | `RP_ALL` purchase branch | P1 | M | WP-11 | 02 | frozen cases merged |
 | WP-13 | Approval Rpt | `RP_ALL` approval branch | P2 | M | WP-11, WP-01 | 03 | partial |
 | WP-14 | Order Report | `RP_ALL` order branch | P2 | M | WP-11, WP-03 | — (use 01's pattern) | no longer BROKEN once WP-03 (#232) merges |
-| WP-15 | Tag Stock | `RP_TAG.cs` (10,813) | P1 | L | — | 04 | partial |
-| WP-16 | Stock Report (new route) | `RP_STOCK.cs` (6,407) | P1 | L | WP-15 | 05 | not started |
+| WP-15 | Tag Stock | `RP_TAG.cs` (10,813) | P1 | L | — | 04 | N238/G250: selections, stock rule, totals and keys implemented (DB tests pass); zoom, Print window, other-item columns open; browser module not yet run |
+| WP-16 | Stock Report (new route) | `RP_STOCK.cs` (6,407) | P1 | L | WP-15 | 05 | PR open (N241, G253) |
 | WP-17 | Cash Bank | `RP_CASH_BANK.cs` (4,813) | P1 | L | — | 06 | not started |
 | WP-18 | HuId Report | `RP_HUID.cs` (2,731) | P2 | M | — | 08 | filters only |
-| WP-19 | Gst Report: the 13 blocked cases | `RP_GST.cs` (3,944) | P1 | M | — | 07 | 57/70 |
+| WP-19 | Gst Report: the 12 blocked cases | `RP_GST.cs` (3,944) | P1 | M | — | 07 | PR (N239/G251): 9 of 12 executable; 3 blocked (EXP.csv Q9, T14 injector x2) |
 | WP-20 | Ledger Report: OP_LDR opening-ledger ageing union, fine prints | `RP_LEDR.cs` | P2 | S | — | 21 | 10/10 |
 
 Rules for every report WP (from `00b-REPORT-ADDENDUM.md`): read-only resolver in its own module, its own route
@@ -432,10 +432,10 @@ sections are part of this WP; the UAE variant is out of scope (Lite India).
 
 | WP | Menu | Desktop form | Pri | Size | Depends | Prompt | State |
 |---|---|---|---|---|---|---|---|
-| WP-21 | Books | `MS_BOOK.cs` (3,122) | P1 | L | — | 13 | not started |
+| WP-21 | Books | `MS_BOOK.cs` (3,122) | P1 | L | — | 13 | PR open (N240/G252) |
 | WP-22 | Year Create (corrected scope) | `MS_YEAR.cs` (1,596) | P2 | S | — | 14 + GB-07 | not started |
 | WP-23 | Balance TrFr | `BtmSchm.cs` (5,638) | P0 | L | WP-22 | 15 | PR #243 (N236/G248): Ac Balance and Item Stock carried; Tag Stock, Sales Order, Approval implicit (one database) |
-| WP-24 | Data Refresh PR-2 | `MS_UPDATE.cs` (6 visible buttons) | P1 | L | — | 17 | 12/20 |
+| WP-24 | Data Refresh PR-2 (Field Update class-a repairs N247/G259) | `MS_UPDATE.cs` (6 visible buttons) | P1 | L | — | 17 | 12/20 |
 | WP-25 | Data Import (Lite Soft only) | `UT_IMPORT.cs` (Lite path ≈ 535 lines) | P2 | L | everything else; OD-6 | 19 | not started |
 
 **WP-21 Books.** Wide blast radius: every posting reads book slots. Run the **full** feature suite (on CI) before
@@ -462,12 +462,12 @@ at the repair lock; add one that exists only in test builds.
 
 | WP | Menu(s) | Item | Pri | Size | State |
 |---|---|---|---|---|---|
-| WP-26 | Sales | Lossless reopen on the Sales Invoice screen, tender/source branches, G83 old-metal header valuation, G82 tax codes on web-provisioned companies, Crystal variants, 3 blocked cases | P1 | L | 29/32 |
-| WP-27 | Sales Return | Lossless edit, the 5 s transaction budget on create, admissibility, residuals, 2 blocked | P1 | L | 23/25 |
-| WP-28 | Purchase | The 95-column hallmark receive branch, lossless reopen, family-filtered books | P1 | L | 31/31 |
-| WP-29 | Purchase Rtn | G95 (HSN tax on the print), G96 (grid Enter), 2 blocked | P2 | M | 20/22 |
+| WP-26 | Sales | Lossless reopen on the Sales Invoice screen, tender/source branches, G83 old-metal header valuation, G82 tax codes on web-provisioned companies, Crystal variants, 3 blocked cases | P1 | L | 29/32  N243/G255: implemented-unverified; 71 cases covered, 13 blocked with reasons, 3 N/A |
+| WP-27 | Sales Return | Lossless edit, the 5 s transaction budget on create, admissibility, residuals, 2 blocked | P1 | L | PR (N242/G254): 50 frozen cases, 0 blocked; module 28 cases, 0 declared blocked |
+| WP-28 | Purchase | The 95-column hallmark receive branch, lossless reopen, family-filtered books | P1 | L | PR (N244/G256): frozen cases in `orchestration/work/WP-28/cases.md`, 2 blocked; 88 cases: 17 pass at database/unit level (lossless reopen of every tenant row for an earlier-month hallmark voucher with typed amount, fine and stones; TAG PURCHASE ids 2-4, weights, tag band and BAR_DETL rules; HM_AMT half to even; HM tax code with no charge; server family refusal; /context/books?family=), 4 partly, 2 blocked, 3 N/A, the rest executable but not run (browser module extended, not run locally); full API suite with database 4134/4134 after the kernel fix |
+| WP-29 | Purchase Rtn | G95 (HSN tax on the print), G96 (grid Enter), 2 blocked | P2 | M | PR open (N245/G257): 33 cases, 1 blocked (T15, N166) |
 | WP-30 | Wh Sales | Hand-typed item-detail rows for loose items, SL_IDTL on the print, fine kasar, Rojmel alignment | P2 | M | 27/27 |
-| WP-31 | Contra Entry | Multi-line grid, lifecycle, list, print, account roles (G37) | P2 | M | 25/25 |
+| WP-31 | Contra Entry | Multi-line grid, lifecycle, list, print, account roles (G37) | P2 | M | 25/25; N246/G258: desktop grid, versioned lifecycle, F1 list, full print (2 blocked: balance label, ContraBill layout) |
 | WP-32 | Tag Opening, Only Tag Entry | 5 blocked cases, tag label print, G217 karigar block sources, COL_MAST grid | P2 | M | 14/19 |
 | WP-33 | Daily Rate | Location-00 session in the harness (T15), the per-location copy, MDI rate labels | P2 | S | 15/16 |
 | WP-34 | Tag Print | PRINT_MAST label-file choice (QrPrint10, BarPrint10, BarPrint13, GhatTagPrnt), SubTagPrint sub-report | P3 | M | 18/18 |

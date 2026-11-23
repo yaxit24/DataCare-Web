@@ -207,6 +207,7 @@ databaseDescribe('TR_TAG_CAN Tag Adjust mode', () => {
       stones: 1,
       barDetlUpdated: 1,
       mainStockUpdated: 1,
+      version: expect.stringMatching(/^[0-9a-f]{64}$/),
     });
     expect(await currentState()).toMatchObject({
       headers: 1,
@@ -231,9 +232,11 @@ databaseDescribe('TR_TAG_CAN Tag Adjust mode', () => {
     expect(loaded?.stones).toHaveLength(1);
     expect(loaded?.stones[0]).toMatchObject({ TAG_NO: TAG, VCH_SRNO, DM_CODE: 'DMD001' });
 
+    expect(loaded?.version).toBe(created.version);
     const edited = await saveTagAdjust(runtime, {
       scope,
       vchNo: 1,
+      expectedVersion: loaded?.version,
       vchDate: DAY,
       acCode: 'AC001',
       vchDesc: 'Change data type again',
@@ -246,6 +249,7 @@ databaseDescribe('TR_TAG_CAN Tag Adjust mode', () => {
       stones: 1,
       barDetlUpdated: 1,
       mainStockUpdated: 1,
+      version: expect.stringMatching(/^[0-9a-f]{64}$/),
     });
     expect(await currentState()).toMatchObject({
       headers: 1,
@@ -269,6 +273,65 @@ databaseDescribe('TR_TAG_CAN Tag Adjust mode', () => {
       bar_type: 'R',
       stock_type: 'R',
     });
+  });
+
+  it('WP-10: an edit of an unused number is refused and writes nothing; a stale version is refused', async () => {
+    const line = { tagNo: TAG, itCode: 'ORN', vchSrno: VCH_SRNO, dataType: 'N' };
+    const unused = saveTagAdjust(runtime, {
+      scope,
+      vchNo: 500,
+      expectedVersion: 'a'.repeat(64),
+      vchDate: DAY,
+      mainUser: 'web-user',
+      lines: [line],
+    });
+    await expect(unused).rejects.toMatchObject({ code: 'voucher-not-found', statusCode: 404 });
+    const [none] = await query<{ n: number }>(
+      `SELECT count(*)::int n FROM "BAR_CAN_DATA" WHERE tenant_id=$1 AND "VCH_NO"='00500'`,
+      TENANT,
+    );
+    expect(none?.n).toBe(0);
+
+    const created = await saveTagAdjust(runtime, {
+      scope,
+      vchDate: DAY,
+      mainUser: 'web-user',
+      lines: [line],
+    });
+    const stale = saveTagAdjust(runtime, {
+      scope,
+      vchNo: created.vchNo,
+      expectedVersion: 'b'.repeat(64),
+      vchDate: DAY,
+      mainUser: 'web-user',
+      lines: [{ ...line, dataType: 'R' }],
+    });
+    await expect(stale).rejects.toMatchObject({ code: 'voucher-version-conflict' });
+    await expect(deleteTagAdjust(runtime, scope, created.vchNo)).resolves.toEqual({
+      deleted: true,
+    });
+  });
+
+  it('WP-10: two concurrent creates of one book get two different numbers', async () => {
+    const create = () =>
+      saveTagAdjust(runtime, {
+        scope,
+        vchDate: DAY,
+        mainUser: 'web-user',
+        lines: [{ tagNo: TAG, itCode: 'ORN', vchSrno: VCH_SRNO, dataType: 'N' }],
+      });
+    const saved = await Promise.all([create(), create()]);
+    expect(saved.map((row) => row.vchNo).sort()).toEqual([1, 2]);
+    const headers = await query<{ vch: string; n: number }>(
+      `SELECT "VCH_NO" vch,count(*)::int n FROM "BAR_CAN_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$2
+        GROUP BY "VCH_NO" ORDER BY "VCH_NO"`,
+      TENANT,
+      BOOK,
+    );
+    expect(headers).toEqual([
+      { vch: '00001', n: 1 },
+      { vch: '00002', n: 1 },
+    ]);
   });
 
   it('rejects non-TAG ADJ books that share the TR_TAG_CAN form', async () => {

@@ -27,7 +27,7 @@ const displayOwners: Record<string, number> = {
   'components/TagSplitForm.tsx': 1,
   'app/(app)/masters/year-create/page.tsx': 6,
   'app/(app)/reports/karigar-ledger/page.tsx': 1,
-  'app/(app)/reports/tag-stock/page.tsx': 1,
+  'app/(app)/reports/tag-stock/TagStockGrid.tsx': 1,
   'app/(app)/reports/voucher-register/page.tsx': 1,
   'app/(app)/txn/bank-recon/page.tsx': 2,
   'app/(app)/txn/consi-purchase/page.tsx': 1,

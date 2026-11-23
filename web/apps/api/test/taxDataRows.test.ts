@@ -14,6 +14,8 @@ const provisioned = {
   ]),
 };
 const base = { TRAN_TYPE: 'P', TAX_SIGN: '-', TAX_CODE: '10', NET_AMT: 1000 };
+/** Every Ac_Tax.cs TAX_DATA insert writes R_CHARG 'N' (e.g. :111); RP_GST's All Other ITC reads it (:3703). */
+const written = { R_CHARG: 'N', ...base };
 
 describe('gstTaxRows', () => {
   it('intra-state: SR_NO 1 and 2 from components 1 and 2, each carrying its own half', () => {
@@ -26,15 +28,15 @@ describe('gstTaxRows', () => {
         cgst: 15,
       }),
     ).toEqual([
-      { ...base, SR_NO: 1, TAX_TYPE: 'SGST', TAX_PRC: 1.5, TAX_AMT: 15.01 },
-      { ...base, SR_NO: 2, TAX_TYPE: 'CGST', TAX_PRC: 1.5, TAX_AMT: 15 },
+      { ...written, SR_NO: 1, TAX_TYPE: 'SGST', TAX_PRC: 1.5, TAX_AMT: 15.01 },
+      { ...written, SR_NO: 2, TAX_TYPE: 'CGST', TAX_PRC: 1.5, TAX_AMT: 15 },
     ]);
   });
 
   it('inter-state: one row at SR_NO 3 from component 3 with the full tax', () => {
     expect(
       gstTaxRows(base, provisioned, { interState: true, ratePct: 3, igst: 30, sgst: 0, cgst: 0 }),
-    ).toEqual([{ ...base, SR_NO: 3, TAX_TYPE: 'IGST', TAX_PRC: 3, TAX_AMT: 30 }]);
+    ).toEqual([{ ...written, SR_NO: 3, TAX_TYPE: 'IGST', TAX_PRC: 3, TAX_AMT: 30 }]);
   });
 
   it("TAX_PRC is the component's rate, not the voucher's", () => {
@@ -59,12 +61,12 @@ describe('gstTaxRows', () => {
         cgst: 1.25,
       }),
     ).toEqual([
-      { ...base, SR_NO: 1, TAX_TYPE: 'GST', TAX_PRC: 0.13, TAX_AMT: 1.25 },
-      { ...base, SR_NO: 2, TAX_TYPE: 'GST', TAX_PRC: 0.13, TAX_AMT: 1.25 },
+      { ...written, SR_NO: 1, TAX_TYPE: 'GST', TAX_PRC: 0.13, TAX_AMT: 1.25 },
+      { ...written, SR_NO: 2, TAX_TYPE: 'GST', TAX_PRC: 0.13, TAX_AMT: 1.25 },
     ]);
     expect(
       gstTaxRows(base, legacy, { interState: true, ratePct: 7, igst: 70, sgst: 0, cgst: 0 }),
-    ).toEqual([{ ...base, SR_NO: 3, TAX_TYPE: 'GST', TAX_PRC: 7, TAX_AMT: 70 }]);
+    ).toEqual([{ ...written, SR_NO: 3, TAX_TYPE: 'GST', TAX_PRC: 7, TAX_AMT: 70 }]);
   });
 
   it('numbers a second code (the labour part) at SR_NO 10/20/30 from the same components 1/2/3', () => {
@@ -77,8 +79,8 @@ describe('gstTaxRows', () => {
         [10, 20, 30],
       ),
     ).toEqual([
-      { ...base, SR_NO: 10, TAX_TYPE: 'SGST', TAX_PRC: 1.5, TAX_AMT: 5 },
-      { ...base, SR_NO: 20, TAX_TYPE: 'CGST', TAX_PRC: 1.5, TAX_AMT: 5 },
+      { ...written, SR_NO: 10, TAX_TYPE: 'SGST', TAX_PRC: 1.5, TAX_AMT: 5 },
+      { ...written, SR_NO: 20, TAX_TYPE: 'CGST', TAX_PRC: 1.5, TAX_AMT: 5 },
     ]);
     expect(
       gstTaxRows(
@@ -87,7 +89,7 @@ describe('gstTaxRows', () => {
         { interState: true, ratePct: 3, igst: 10, sgst: 0, cgst: 0 },
         [10, 20, 30],
       ),
-    ).toEqual([{ ...base, SR_NO: 30, TAX_TYPE: 'IGST', TAX_PRC: 3, TAX_AMT: 10 }]);
+    ).toEqual([{ ...written, SR_NO: 30, TAX_TYPE: 'IGST', TAX_PRC: 3, TAX_AMT: 10 }]);
   });
 
   it('a component with a blank group falls back to the master group, not an empty type', () => {
@@ -103,5 +105,15 @@ describe('gstTaxRows', () => {
         (row) => row.TAX_TYPE,
       ),
     ).toEqual(['GST', 'CGST']);
+  });
+  it('lets a family that writes a reverse-charge row override R_CHARG', () => {
+    const rows = gstTaxRows({ ...base, R_CHARG: 'Y' }, provisioned, {
+      interState: true,
+      ratePct: 3,
+      igst: 30,
+      sgst: 0,
+      cgst: 0,
+    });
+    expect(rows.map((row) => row.R_CHARG)).toEqual(['Y']);
   });
 });

@@ -25,7 +25,7 @@ import { PrismaClient } from '@datacare/db';
 import { withTenant } from '@datacare/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 // deleteContra is what DELETE /contra/:vchNo calls, so the test exercises the route's real path.
-import { postContra, editContra, deleteContra } from '../src/modules/finance/finance.js';
+import { postContra, editContra, deleteContra, getContra } from '../src/modules/finance/finance.js';
 import { FINANCE_DATE_OUTSIDE_YEAR_MESSAGE } from '../src/modules/finance/lifecycle.js';
 import { PeriodLockValidationError } from '../src/modules/posting/posting.js';
 
@@ -108,6 +108,9 @@ async function seed() {
 
 const scope = { tenantId: TENANT, coCode: CO, lcCode: LC, coYear: YEAR, coBook: BOOK };
 
+// WP-31 (D7): edit and delete carry the version the voucher was opened with.
+const version = async (vchNo: string | number) => (await getContra(runtime, scope, vchNo)).version;
+
 /** Row counts for the contra write set: ['CONTRA_DATA','AC_DATA','ROJ_MEL_DATA'] (journal.ts:50). */
 async function footprint(vchNo: string) {
   const out: Record<string, number> = {};
@@ -172,7 +175,12 @@ describe.runIf(RUN)('contra deletion (plan F1.1)', () => {
     // Guard against a vacuous post-delete assertion: there must be day-book rows to clear.
     expect(before.ROJ_MEL_DATA, 'contra must project into the day book').toBeGreaterThan(0);
 
-    await deleteContra(runtime, { scope, vchNo, deleteUser: 'contra-del' });
+    await deleteContra(runtime, {
+      scope,
+      vchNo,
+      deleteUser: 'contra-del',
+      expectedVersion: await version(vchNo),
+    });
 
     const after = await footprint(vchNo);
     expect(after.CONTRA_DATA, 'header must be gone').toBe(0);
@@ -264,7 +272,12 @@ describe.runIf(RUN)('contra deletion (plan F1.1)', () => {
       mainUser: 'contra-del',
     } as never);
     const vchNo = String(created.vchNo).padStart(5, '0');
-    await deleteContra(runtime, { scope, vchNo, deleteUser: 'contra-del' });
+    await deleteContra(runtime, {
+      scope,
+      vchNo,
+      deleteUser: 'contra-del',
+      expectedVersion: await version(vchNo),
+    });
 
     const audit: Array<{ n: number }> = await owner.$queryRawUnsafe(
       `SELECT count(*)::int AS n FROM "DELETE_DATA"
@@ -304,7 +317,12 @@ describe.runIf(RUN)('contra deletion (plan F1.1)', () => {
     const dropNo = String(drop.vchNo).padStart(5, '0');
     const keptBefore = await footprint(keepNo);
 
-    await deleteContra(runtime, { scope, vchNo: dropNo, deleteUser: 'contra-del' });
+    await deleteContra(runtime, {
+      scope,
+      vchNo: dropNo,
+      deleteUser: 'contra-del',
+      expectedVersion: await version(dropNo),
+    });
 
     expect(await footprint(keepNo)).toEqual(keptBefore);
     expect((await footprint(dropNo)).CONTRA_DATA).toBe(0);
@@ -337,6 +355,7 @@ describe.runIf(RUN)('contra deletion (plan F1.1)', () => {
           vchDate: outside,
           lines: lines.map((line) => ({ ...line, amount: 900 })),
           mainUser: 'another-user',
+          expectedVersion: await version(created.vchNo),
         },
         created.vchNo,
       ),
@@ -365,7 +384,13 @@ describe.runIf(RUN)('contra deletion (plan F1.1)', () => {
       await expect(
         editContra(
           runtime,
-          { scope, vchDate: '2024-03-31', lines, mainUser: 'contra-order' },
+          {
+            scope,
+            vchDate: '2024-03-31',
+            lines,
+            mainUser: 'contra-order',
+            expectedVersion: await version(created.vchNo),
+          },
           created.vchNo,
         ),
       ).rejects.toThrow(FINANCE_DATE_OUTSIDE_YEAR_MESSAGE);
@@ -373,7 +398,13 @@ describe.runIf(RUN)('contra deletion (plan F1.1)', () => {
       await expect(
         editContra(
           runtime,
-          { scope, vchDate: '2024-04-03', lines, mainUser: 'contra-order' },
+          {
+            scope,
+            vchDate: '2024-04-03',
+            lines,
+            mainUser: 'contra-order',
+            expectedVersion: await version(created.vchNo),
+          },
           created.vchNo,
         ),
       ).rejects.toBeInstanceOf(PeriodLockValidationError);
