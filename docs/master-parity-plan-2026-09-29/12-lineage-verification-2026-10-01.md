@@ -272,6 +272,7 @@ Phase 2 (the sellable SaaS product, [document 14](14-phase2-saas-plan.md)) and a
 | G257 | Medium | Purchase Rtn printed on the view right, not the desktop's print right (FRM_PRINT); a return line stored the header tax rate where the desktop stores 0; edit and delete had no version token, so a stale second session could overwrite or delete; no case pinned the HSN tax on the printed return or the Enter walk | `unified/src/csharp/DataCareNext/TR_KR_ISU.cs:5206,5434-5436,5519,5095,5102,3697-3699,3743,3670-3691` | `web/apps/api/src/routes/purchaseReturn.ts`; `web/apps/api/src/modules/purchase/purchaseReturnLifecycle.ts`; `web/apps/api/src/modules/rbac/routePolicy.ts`; `web/apps/web/components/GridKeyboard.tsx`; `web/apps/api/test/purchaseReturnWp29.routes.db.test.ts` | Implemented-unverified in N245. Open: UAE variant, editable Fine/Amount cells (N77), the settings-variant fixture (G174/N166), the sales print right. |
 | G258 | High | Contra Entry differed from the desktop TR_CONTRA in the grid and the lifecycle: the web let every row pick its side, dropped a blank first row, copied row i's description onto the mirror record, wrote no REMARK_DATA, hard-coded INOUT_TYPE and IT_TYPE, had no employee, company type B refusal, version token, clearing marks or Cancel, listed one line per voucher, printed only the first two accounts of a multi-row voucher and could edit a reopened voucher to today's date | `unified/src/csharp/DataCareNext/TR_CONTRA.cs:1538,1630,2668-2694,2765,2774,2794,2868,2890,2902,2961-2968,3144`; `unified/src/csharp/DataCareNext/Ac_Tax.cs:686`; `unified/src/csharp/DataCareNext/Ac_Rojmel.cs:336-344` | `web/apps/api/src/modules/finance/contra.ts`; `web/apps/api/src/modules/finance/contraClearing.ts`; `web/apps/api/src/modules/finance/contraList.ts`; `web/apps/api/src/routes/contra.ts`; `web/apps/web/app/(app)/txn/contra/page.tsx`; `web/apps/api/test/contraResiduals.routes.db.test.ts` | Implemented-unverified in N246 under the architect decisions D1-D16 in `orchestration/work/WP-31/cases.md` (owner may override). Blocked: opening-balance label, ContraBill.rpt layout. |
 | G259 | High | Field Update (`btnFildUpdate_Click`) was a classification-only preview; its two web-reachable repairs did not run and 36 web-provisioned BOOK_DATA books lack the MENU_NAME / BOOK_TBL_NAME / BOOK_TBL_DETL the desktop statements set | `unified/src/csharp/DataCareNext/MS_UPDATE.cs:7214,8608,5531-8757` | `web/apps/api/src/modules/utilities/dataRefreshFieldUpdate.ts`; `web/apps/api/test/dataRefreshFieldUpdate.db.test.ts`; `web/apps/api/test/dataRefreshFieldAnomalies.db.test.ts`; `orchestration/work/WP-24/field-update.md` | Implemented-unverified in N247 (WP-24). Repairs A1 and A2 run through the data-repair registry. The class b anomaly queries return 0 rows except finding F1: seedCompany writes BOOK_DATA without MENU_NAME (read by bookForms.ts for rights) and, for many books, without the table names. Repair for F1 not built. |
+| G260 | High | Wh Sales (TR_WH_SALE) had no hand-typed item-detail rows for a loose line, no fine kasar (Ksr Fine Dr/Cr stored 0, left out of Tot Fine, no ledger legs 27/28/33/34, no day book rows 07/08), no SL_IDTL rows under the printed bill line, the day book followed 66 old rows instead of `Wh_Sales_Rojmel` (no rows 05/06/14/27, names and `IT_DESC` unlike the source) and an edit or delete carried no version token | `unified/src/csharp/DataCareNext/TR_WH_SALE.cs:7389-7530,7750-7971,12230,12588-12630,12980-12981,13162-13250,15633-15635,16035`; `unified/src/csharp/DataCareNext/Ac_Ledr.cs:685-705`; `unified/src/csharp/DataCareNext/Ac_Rojmel.cs:221-310`; `unified/src/csharp/DataCareNext/Ac_Stock.cs:857-861` | `web/packages/core/src/wholesaleDetail.ts`; `web/packages/core/src/wholesaleLine.ts`; `web/apps/api/src/modules/sales/wholesaleDetailRows.ts`; `web/apps/api/src/modules/sales/wholesaleResiduals.ts`; `web/apps/api/src/modules/sales/wholesaleTagStones.ts`; `web/apps/api/src/modules/sales/wholesaleSaleBill.ts`; `web/apps/api/src/modules/sales/rateCut.ts`; `web/apps/api/src/modules/shared/rojmelWholesale.ts`; `web/apps/web/components/WholesaleDetailPanel.tsx`; `web/apps/web/components/WholesaleVoucherForm.tsx`; `web/apps/api/test/wholesaleSaleResiduals.db.test.ts`; `web/apps/web/test/features/modules/wholesaleSale.mjs` | Implemented-unverified in N248 (WP-30). See the N248 section. |
 
 ## 4. Decisions D23–D28
 
@@ -3876,6 +3877,43 @@ Finding F1 (class a, not built): `seedCompany` writes `BOOK_DATA` without `MENU_
 `BOOK_TBL_DETL` for many books; 36 books differ from the desktop's end state, every change NULL to value, never an
 overwrite. The anomaly test pins the list so it can only shrink.
 
+### N248 — Wh Sales item-detail rows, fine kasar, SL_IDTL on the print and the Rojmel (G260, Lite L1, WP-30)
+
+Transaction → Wh Sales (TR_WH_SALE) kept four residuals after N228. The frozen contract is `orchestration/work/WP-30/study.md` and `cases.md` (118
+verified citations, five decisions). What was built:
+
+- **Item-detail rows for a loose line.** `commPassTotalIdtl` in `@datacare/core` is `CommPassTotal_Idtl` (`TR_WH_SALE.cs:7750-7971`): weight from pieces,
+  tag weight, ConWt, KrConWt, ItAmt by rate type (`Math.Round` on the double), labour, discount and net amount, with the typed cell kept where the desktop keeps it,
+  and the roll-up into the line's OthWt, NetWt, OthAmt and SlvrFine (`:7821-7880`). The screen panel (`WholesaleDetailPanel.tsx`: Enter, Ctrl+D with the desktop
+  question, Esc) and the writer use the same function. `details[]` on an issued line is validated (a negative or non-numeric figure is refused, which the desktop
+  does not do; a tagged line takes its stones from the tag and refuses typed rows), written to SL_IDTL in the voucher transaction (`:13162-13250`: ENTRY_TYPE W,
+  ISR_NO from 1 per line, an empty row skipped, `KR_CON_WT` 0 by decision 2, a blank item code written as is by decision 4), projected into DM_DATA for an
+  OTH_DETL_POSTING item, returned on GET and reversed with the voucher. An edit that sends no `details` for a line that has stored rows is refused.
+- **Fine kasar.** Ksr Fine Dr/Cr boxes (Enter formats `0.000`), stored in `KSR_FINE_DR/CR`, added into Tot Fine Dr/Cr and Os Fine (`:15633-15635`; `SL_FINE` is
+  untouched), ledger legs 27/28 and 33/34 (`Ac_Ledr.cs:685-705`, metal only, so the voucher stays balanced) and day book rows 07/08 (`Ac_Rojmel.cs:235-237`).
+  The hosted service refuses a negative kasar.
+- **SL_IDTL on the print.** The WhSalesBill prints a line's rows under it in ISR_NO order (name, pieces, weight, rate, net amount) and the Kasar Fine row prints the
+  stored kasar.
+- **Rojmel.** By decision 1 the source wins: a gold Wh Sales posts `Wh_Sales_Rojmel` row for row (`rojmelWholesale.ts`): keys with the line number on 05/06, the
+  `BOOK_SNAME - AC_NAME`, `KSR -` and `LBR -` names, `A.VCH_DESC` in IT_DESC, rows 05/06/14/27 added, row 13 without the fine the old builder repeated. The insert
+  lists CR_AMT before DR_AMT, and reading it that way agrees with the stored directions of the old builder. Silver and the types 21, 23-25, 28 and 29-40 stay open
+  (blocked case `rojmel.missing-types-and-silver`).
+- **Version token.** Wh Sales GET returns `version`; PUT sends `expectedVersion` and DELETE `?expectedVersion=`; a missing token is 400 and a stale one 409
+  `voucher-version-conflict` before any write, as N51 does for the other vouchers. An unchanged save keeps VCH_DATE, BILL_NO, EMP_CODE and the kasar when the body omits them.
+
+Source reading, recorded because the frozen case values rest on it: the source writes Con% (col 15) as a factor (ConWt = Weight x Con%, no division by 100), so the
+cases' "Con% 10 gives 0.300" is exercised as Con% 0.1; the two guards written `Val(mSG_IDTL[24]) > 0` and `[19] > 0` are read as the row's KrCon% and Disc%; the cases'
+name for rows 05/06 is `E.AC_NAME` in the source, not the book-prefixed name.
+
+Deliberate differences and what stays open: typed rows on a tagged line; the F1 fine refresh (`:17973-17995`); the HM437NEHP/HM436NEHP four-decimal PcsWt registrations;
+the silver Rojmel and ledger families; the client has no UserDelete source, so `refusal.detail-row-delete-right` and `rights.detail-delete-and-print` are blocked;
+`POST /wholesale-sales` is not yet idempotency-guarded (`retry.detail-row-double-post` blocked). Edit and delete of other rate-cut family vouchers (Rate Cut, Tour
+Sales, Wh Quotation) carry no token.
+
+Evidence: `wholesaleDetail.test.ts` (kernel vectors), `wholesaleResiduals.test.ts` and `wholesaleSaleBill.test.ts` (day book rows, legs, plan, print) and
+`wholesaleSaleResiduals.db.test.ts` (write set, reopen identity, edit, delete, version, rollback, print) written before the writer; the wholesale, rate-cut, tour and
+bullion DB files and the wholesale-sale browser module (written without a local browser stack; run in CI). Desktop-runtime comparison and operator acceptance are not claimed.
+
 ## 6. Status corrections
 
 | Item | Before | Now |
@@ -4036,6 +4074,7 @@ overwrite. The anomaly test pins the list so it can only shrink.
 | N231 | — | implemented-unverified, evidence in this change (G243: User Create is MS_USER with the desktop texts, Confirm Password, edit-mode Save and Delete; D34 passwords, D35 delete = deactivate with every session revoked, D36 Lite hides the rights screen) |
 | N234 | — | in-progress, evidence in this change (G06 part, G246 recorded: the shared RP_ALL engine and the Sales adapter with GET /reports/sales-report and CSV/XLSX, unit- and DB-tested; screen, seven buttons and the browser run remain) |
 | N238 | — | implemented-unverified, evidence in this change (G250: Tag Stock follows the RP_TAG selections, stock rule, totals without a row cap, columns, sort orders and keys; CSV and Excel need the Print right) |
+| N248 | — | implemented-unverified, evidence in this change (G260: Wh Sales item-detail rows for a loose line, fine kasar with ledger legs 27/28/33/34 and day book 07/08, SL_IDTL under the printed line, the desktop Rojmel rows and the version token on edit and delete) |
 | Decisions D23, D24, D26, D27 | Recommended, awaiting approval | Accepted as recommended by the owner, 1 October 2026; D28 added (Phase 2 waits for Phase 1) |
 | Decisions D15–D22, D30 and D01–D14 starting positions | Recommended, awaiting the owner | Accepted as recommended on 30 October 2026, when the owner delegated the open decisions to the implementer; D01–D14 starting positions recorded in document 08 §1 |
 
