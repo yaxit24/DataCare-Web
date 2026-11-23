@@ -1,3 +1,4 @@
+import { notCarriedOpening } from '../shared/carriedOpening.js';
 import { round } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import type { ListReport, ReportScope } from './reports.js';
@@ -108,7 +109,7 @@ export async function consiDetailReport(
               ${fineExpr('G')} AS "goldBal",
               ${fineExpr('S')} AS "silverBal"
          FROM "AC_DATA" a
-        WHERE a."CO_CODE"=$1 AND a."LC_CODE"=$2 AND a."AC_CODE"=$3 AND a."VCH_DATE" < $4::date`,
+        WHERE a."CO_CODE"=$1 AND a."LC_CODE"=$2 AND a."AC_CODE"=$3 AND a."VCH_DATE" < $4::date AND ${notCarriedOpening('a')}`,
       s.coCode,
       s.lcCode ?? '',
       partyCode,

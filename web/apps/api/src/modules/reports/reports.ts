@@ -1,3 +1,4 @@
+import { carriedOpeningFilter } from '../shared/carriedOpening.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import { applyFilters, type ReportFilters } from './reportFilters.js';
 import { closingStockValuationTx } from './closingStock.js';
@@ -299,7 +300,7 @@ export async function accountBalances(prisma: any, s: ReportScope): Promise<List
     const dt = dateWhere(s, '"VCH_DATE"', params);
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "AC_CODE" AS "acCode", sum(${NN('"DR_AMT"')}) AS dr, sum(${NN('"CR_AMT"')}) AS cr
-       FROM "AC_DATA" WHERE "CO_CODE"=$1${yr}${dt} GROUP BY "AC_CODE" ORDER BY "AC_CODE"`,
+       FROM "AC_DATA" WHERE "CO_CODE"=$1${yr}${dt}${carriedOpeningFilter(!!s.coYear)} GROUP BY "AC_CODE" ORDER BY "AC_CODE"`,
       ...params,
     );
     const out = rows.map((r) => ({
@@ -556,7 +557,7 @@ export async function balanceSheet(
   return withTxBudget(prisma, s.tenantId, 'read', async (tx: any) => {
     const { yr, params } = coParams(s);
     const r: any[] = await tx.$queryRawUnsafe(
-      `SELECT coalesce(sum(${NN('"DR_AMT"')}),0) AS dr, coalesce(sum(${NN('"CR_AMT"')}),0) AS cr FROM "AC_DATA" WHERE "CO_CODE"=$1${yr}`,
+      `SELECT coalesce(sum(${NN('"DR_AMT"')}),0) AS dr, coalesce(sum(${NN('"CR_AMT"')}),0) AS cr FROM "AC_DATA" WHERE "CO_CODE"=$1${yr}${carriedOpeningFilter(!!s.coYear)}`,
       ...params,
     );
     const dr = round2(num(r[0].dr));
@@ -621,7 +622,7 @@ export async function profitAndLoss(prisma: any, s: ReportScope): Promise<ListRe
               round(sum(${NN('d."CR_AMT"')}) - sum(${NN('d."DR_AMT"')}),2) AS balance
          FROM "AC_DATA" d
          LEFT JOIN "AC_MAST" m ON m."CO_CODE"::text=d."CO_CODE"::text AND m."AC_CODE"::text=d."AC_CODE"::text
-        WHERE ${conditions.join(' AND ')}${dt}
+        WHERE ${conditions.join(' AND ')}${dt}${carriedOpeningFilter(!!s.coYear, 'd')}
         GROUP BY d."AC_CODE"
        HAVING abs(sum(${NN('d."CR_AMT"')}) - sum(${NN('d."DR_AMT"')})) > 0.005
         ORDER BY max(coalesce(m."AC_MAIN_GR",'')), max(coalesce(m."AC_GR",'')), d."AC_CODE"`,
@@ -732,7 +733,7 @@ export async function outstandingReport(prisma: any, s: ReportScope): Promise<Li
       `SELECT d."AC_CODE" AS "acCode", max(m."AC_NAME") AS party,
               round(sum(${NN('d."DR_AMT"')}) - sum(${NN('d."CR_AMT"')}), 2) AS balance
        FROM "AC_DATA" d LEFT JOIN "AC_MAST" m ON m."CO_CODE"=d."CO_CODE" AND m."AC_CODE"=d."AC_CODE"
-       WHERE d."CO_CODE"=$1${yr}${dt}
+       WHERE d."CO_CODE"=$1${yr}${dt}${carriedOpeningFilter(!!s.coYear, 'd')}
        GROUP BY d."AC_CODE" HAVING abs(sum(${NN('d."DR_AMT"')}) - sum(${NN('d."CR_AMT"')})) > 0.005
        ORDER BY balance DESC`,
       ...params,
@@ -797,7 +798,7 @@ export async function dayBook(prisma: any, s: ReportScope, r: DateRange = {}): P
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "VCH_NO" AS "vchNo", "VCH_TYPE" AS "vchType", "AC_CODE" AS "acCode",
               ${NN('"DR_AMT"')} AS dr, ${NN('"CR_AMT"')} AS cr
-       FROM "AC_DATA" WHERE ${w.sql} ORDER BY "VCH_DATE","VCH_NO"`,
+       FROM "AC_DATA" WHERE ${w.sql}${carriedOpeningFilter(!!s.coYear)} ORDER BY "VCH_DATE","VCH_NO"`,
       ...w.params,
     );
     const out: DayBookRow[] = rows.map((x) => ({
