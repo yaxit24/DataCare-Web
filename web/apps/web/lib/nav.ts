@@ -305,7 +305,7 @@ export const NAV: NavGroup[] = [
         label: 'Order Report',
         href: '/reports/order-report',
         ready: true,
-        form: 'Report/Order Report',
+        form: 'Reports/Order Report',
       },
       { label: 'Delete Data', href: '/reports/delete-data', ready: true },
       { label: 'Point Report', href: '/reports/point-report', ready: true },
