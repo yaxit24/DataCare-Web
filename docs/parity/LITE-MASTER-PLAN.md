@@ -464,7 +464,7 @@ at the repair lock; add one that exists only in test builds.
 |---|---|---|---|---|---|
 | WP-26 | Sales | Lossless reopen on the Sales Invoice screen, tender/source branches, G83 old-metal header valuation, G82 tax codes on web-provisioned companies, Crystal variants, 3 blocked cases | P1 | L | 29/32  N243/G255: implemented-unverified; 71 cases covered, 13 blocked with reasons, 3 N/A |
 | WP-27 | Sales Return | Lossless edit, the 5 s transaction budget on create, admissibility, residuals, 2 blocked | P1 | L | PR (N242/G254): 50 frozen cases, 0 blocked; module 28 cases, 0 declared blocked |
-| WP-28 | Purchase | The 95-column hallmark receive branch, lossless reopen, family-filtered books | P1 | L | 31/31 |
+| WP-28 | Purchase | The 95-column hallmark receive branch, lossless reopen, family-filtered books | P1 | L | PR (N244/G256): frozen cases in `orchestration/work/WP-28/cases.md`, 2 blocked; 88 cases: 17 pass at database/unit level (lossless reopen of every tenant row for an earlier-month hallmark voucher with typed amount, fine and stones; TAG PURCHASE ids 2-4, weights, tag band and BAR_DETL rules; HM_AMT half to even; HM tax code with no charge; server family refusal; /context/books?family=), 4 partly, 2 blocked, 3 N/A, the rest executable but not run (browser module extended, not run locally); full API suite with database 4134/4134 after the kernel fix |
 | WP-29 | Purchase Rtn | G95 (HSN tax on the print), G96 (grid Enter), 2 blocked | P2 | M | 20/22 |
 | WP-30 | Wh Sales | Hand-typed item-detail rows for loose items, SL_IDTL on the print, fine kasar, Rojmel alignment | P2 | M | 27/27 |
 | WP-31 | Contra Entry | Multi-line grid, lifecycle, list, print, account roles (G37) | P2 | M | 25/25 |
