@@ -283,7 +283,10 @@ async function seedParty(ctx, { code, name, gstin = '', gstType = 'L', state = n
   );
 }
 
-/** One LINE_A sale through the real Sales screen; returns its SL_DATA header. */
+/**
+ * One LINE_A sale through the real Sales screen; returns its SL_DATA header. SL_DATA has no OTH_TAX_AMT (a column of
+ * the UAE sale TR_PR_SL_UAE only; the web stores no other-charge tax), so `oth_tax` is 0.
+ */
 async function saleThroughScreen(ctx, page, party, { interState = false, tcsPct } = {}) {
   await page.goto('/txn/sales');
   await salesScreen.openSales(page);
@@ -296,7 +299,7 @@ async function saleThroughScreen(ctx, page, party, { interState = false, tcsPct 
   const [header] = await ctx.rows(
     `SELECT "CO_BOOK","VCH_NO","NET_AMT"::text net,"DISC_AMT"::text disc,"TOT_AMT"::text tot,
             COALESCE("TDS_AMT",0)::text tds,COALESCE("TCS_AMT",0)::text tcs,COALESCE("OTH_AMT",0)::text oth,
-            COALESCE("OTH_TAX_AMT",0)::text oth_tax,COALESCE("HM_AMT",0)::text hm,COALESCE("HM_TAX_AMT",0)::text hm_tax
+            0::text oth_tax,COALESCE("HM_AMT",0)::text hm,COALESCE("HM_TAX_AMT",0)::text hm_tax
        FROM "SL_DATA" WHERE tenant_id=$1 AND "AC_CODE"=$2 ORDER BY row_id DESC LIMIT 1`,
     party,
   );
@@ -418,7 +421,7 @@ function microText(value) {
 async function expectedGstr3b(ctx, { fromDate, toDate }) {
   const [year] = await ctx.rows(
     `SELECT "CO_YEAR" FROM "YEAR_MAST" WHERE tenant_id=$1 AND "CO_CODE"='01'
-        AND "OP_DATE"<=$2::date AND "CL_DATE">=$2::date ORDER BY "CO_YEAR" DESC LIMIT 1`,
+        AND left("OP_DATE",10)::date<=$2::date AND "CL_DATE"::date>=$2::date ORDER BY "CO_YEAR" DESC LIMIT 1`,
     fromDate,
   );
   assert(year, `a financial year holds ${fromDate}`);
@@ -634,10 +637,10 @@ const WP19_CASES = [
       const grid = await screenGrid(page2);
       assert.deepEqual(grid.captions, GSTR3B_COLUMNS);
       assert.deepEqual(grid.rows, expected);
-      // The inter-state unregistered sale this case made is inside 3.2(1): LINE_A taxable 63,609.50.
+      // The inter-state unregistered sale this case made is inside 3.2(1): LINE_A taxable 63,609.00.
       const mh = grid.rows.find((row) => row[3].endsWith(' - Maharashtra'));
       assert(mh, '3.2(1) shows the Maharashtra place of supply');
-      assert(cents(mh[4]) >= cents(unregistered.net), '3.2(1) includes the 63,609.50 sale');
+      assert(cents(mh[4]) >= cents(unregistered.net), '3.2(1) includes the 63,609.00 sale');
       assert.deepEqual(await businessFootprint(ctx), before, 'a report run writes nothing');
       await ctx.shot(page2, 'formula-gstr3b-every-row');
       return {
@@ -784,8 +787,12 @@ const WP19_CASES = [
         sale.CO_BOOK,
       );
       assert.equal(rest[0], [book?.prefix, sale.VCH_NO].filter(Boolean).join('-'), 'Invoice No');
-      assert.equal(rest[2], '65517.79', 'Invoice Value: LINE_A net 63,609.50 + GST 1,908.29');
-      assert.equal(rest.at(-2), fmt0('63609.50'), 'Taxable Value: Format(NET_AMT - DISC_AMT, "0")');
+      assert.equal(
+        rest[2],
+        '65517.27',
+        'Invoice Value: LINE_A net 63,609 (whole-rupee line, TR_SALE.cs:10343-10362) + GST 3% 1,908.27',
+      );
+      assert.equal(rest.at(-2), fmt0('63609.00'), 'Taxable Value: Format(NET_AMT - DISC_AMT, "0")');
       await ctx.shot(report, 'output-malformed-csv-values-adaptation');
       return {
         observation: `B2B.csv line for the comma/quote/formula party: ${line}`,
@@ -873,7 +880,7 @@ const WP19_CASES = [
             cents(sale.hm_tax) +
             cents(sale.tcs)),
       );
-      assert.equal(invoiceValue, '65517.79', 'LINE_A: net 63,609.50 + GST 1,908.29, TCS excluded');
+      assert.equal(invoiceValue, '65517.27', 'LINE_A: net 63,609 + GST 1,908.27, TCS excluded');
       const report = await openFromNavigation(ctx);
       await report.getByLabel('Party', { exact: true }).fill('WP19TCS');
       await runSection(report, SECTION_OPTIONS[1]);

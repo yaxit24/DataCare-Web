@@ -300,6 +300,11 @@ async function openScreen(page) {
   const book = page.getByRole('combobox', { name: 'Configured book', exact: true });
   for (let i = 0; i < 50 && (await book.inputValue()) !== BOOK; i++) await page.waitForTimeout(100);
   assert.equal(await book.inputValue(), BOOK, 'the provisioned TAG CANCEL book is selected');
+  // The book's CLEAR_DATA next-number read fills Vch No once it answers. Wait for it, so a number a case types
+  // right after opening (reopen) is not replaced by that answer when the book's effect runs after the typing.
+  const vchNo = page.getByLabel('Vch No', { exact: true });
+  for (let i = 0; i < 100 && !(await vchNo.inputValue()); i++) await page.waitForTimeout(100);
+  assert.ok(await vchNo.inputValue(), 'the next voucher number is shown');
   return page;
 }
 

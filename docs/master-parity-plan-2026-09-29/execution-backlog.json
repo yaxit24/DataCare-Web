@@ -7988,7 +7988,7 @@
         "web/apps/api/src/modules/reports/gstReportQueries.ts",
         "web/apps/api/src/routes/gstReport.ts",
         "web/apps/api/src/modules/sales/labourGstAllocation.ts",
-        "web/packages/db/prisma/migrations/20261122090000_labour_detail_gst_shares/migration.sql",
+        "web/packages/db/prisma/migrations/20261122110000_labour_detail_gst_shares/migration.sql",
         "web/packages/core/src/setDate.ts",
         "web/apps/web/components/DesktopDateInput.tsx",
         "web/apps/web/app/(app)/reports/gst-report/page.tsx",
