@@ -1,3 +1,5 @@
+import { saleResidualInput } from '../modules/sales/saleResiduals.js';
+import { chooseSaleTemplate } from '../modules/sales/salePrintChoice.js';
 import { SessionReadSnapshotError } from '../modules/auth/sessionContextReadSnapshot.js';
 import { isTransactionTimeout, withTxBudget } from '../modules/shared/txBudget.js';
 import {
@@ -1395,6 +1397,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     issueBook: b.issueBook,
     description: b.description,
     ornamentIssued: b.ornamentIssued == null ? undefined : !!b.ornamentIssued,
+    ...saleResidualInput(b), // WP-26: UPI, credit-note and order rows, member commission
   });
   app.post('/sales', auth, async (req, reply) => {
     if (!guard(req, reply, 'create')) return;
@@ -1406,19 +1409,31 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // G125 (Stage E): the retail Tax Invoice print (desktop SaleBillA4Gst.rpt). Every sale needs a
   // printable bill; builds the shared GST-bill HTML and renders it to PDF (or returns raw HTML).
   app.get('/sales/:vchNo/print', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
+    if (!guard(req, reply, 'print')) return; // TR_SALE.cs:16437-16439 print right
     const q = req.query as any;
     const copyLabel = standardDocumentCopy(q.copy, reply);
     if (copyLabel === null) return reply;
     const scope = resolvePrintScope(reply, readScope(req), (req.params as any).vchNo);
     if (!scope) return reply;
     await getSale(prisma, scope, scope.vchNo);
-    const data = await salesBillData(prisma, scope);
+    // WP-26 (D6): HUID box, then book 099, then the chosen PRINT_MAST file, each mapped to a web template.
+    const choice = chooseSaleTemplate({
+      huid: q.huid === '1' || q.huid === 'true',
+      coBook: scope.coBook,
+      file: q.file,
+    });
+    const data = await salesBillData(prisma, scope, { balances: choice.passBalances });
     if (!data) return reply.code(404).send({ error: 'sale-not-found' });
+    reply.header(
+      'X-Print-Template',
+      `${choice.template}; file=${choice.file}${choice.isDefault ? '; default' : ''}`,
+    );
     const html = salesBillHtml(data.header, data.lines, {
       company: data.company,
       party: data.party,
       copy: copyLabel,
+      title: choice.title,
+      balances: data.balances,
     });
     return sendVoucherDocument(reply, html, { format: q.format, filename: `sale-${scope.vchNo}` });
   });

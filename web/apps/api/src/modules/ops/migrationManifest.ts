@@ -205,4 +205,9 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     name: '20261122120000_book_template_slots',
     checksum: '5d31ad3136d6d02a24da51d789e3ad3ef30724303756b3921b549df2bfb735ca',
   },
+  {
+    // WP-26 (N243, G255): SL_DATA member-commission and RE_TRFR columns, SL_PR_DETL.PR_COST.
+    name: '20261122200000_sale_desktop_residual_columns',
+    checksum: '77b3225983a5fd8f9b41b682896a8154090960796d5af6b66aba915e6f80343c',
+  },
 ];

@@ -5766,6 +5766,11 @@ model SL_DATA {
   TOT_TAX_FREE_AMT Float?
   ZERO_RATED_AMT   String?   @db.VarChar(255)
   RATE_UNFIX       String?   @db.VarChar(255)
+  MEMB_COM_AC_CODE String?   @db.VarChar(10)
+  AC_MEMB_COM_PRC  Float?
+  AC_MEMB_COM_VAL  Float?
+  WHOUT_COMM_BILL  String?   @db.VarChar(1)
+  RE_TRFR          String?   @db.VarChar(1)
 
   @@index([tenantId])
   @@index([tenantId, CO_CODE, VCH_DATE], map: "idx_sl_data_scope")
@@ -6331,6 +6336,7 @@ model SL_PR_DETL {
   CON_WT        Decimal?  @db.Decimal(14, 3)
   ITM_RATE_TYPE String?   @db.VarChar(1)
   ITM_LOT       String?   @db.VarChar(10)
+  PR_COST       Decimal?  @db.Decimal(18, 2)
 
   @@index([tenantId])
   @@map("SL_PR_DETL")
