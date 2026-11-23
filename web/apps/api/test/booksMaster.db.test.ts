@@ -693,7 +693,7 @@ interface DetlRow {
       for (const [typed, stored] of [
         ['ab1', 'AB1'],
         ['Q', 'Q'],
-      ]) {
+      ] as const) {
         const response = await admin(
           'POST',
           API,
