@@ -269,8 +269,19 @@ const TO = '2024-06-30';
       bookName: 'SALES',
       date: '2024-06-02',
       itCode: 'SRNG',
-      fine: 3.5,
+      fine: 4.75,
       amount: 250,
+      sign: '-',
+    });
+    // Silver sales print only with a zero amount: RP_LEDR.cs:8900 {{AND ITM_AMT = 0 AND ITM_FINE <> 0 AND B.IT_TYPE = 'S' AND A.SR_NO <> 7 AND BOOK_NAME IN ('SALES ORDER','SALES','WH SALES','RATE CUT','KARIGAR ISSUE')}}
+    await seedStock(tenantId, {
+      vchNo: '00013',
+      book: 'SL',
+      bookName: 'SALES',
+      date: '2024-06-03',
+      itCode: 'SRNG',
+      fine: 3.5,
+      amount: 0,
       sign: '-',
     });
     await seedStock(tenantId, {
@@ -365,11 +376,11 @@ const TO = '2024-06-30';
   ];
 
   it('registers the three fine-print data routes and their export siblings', () => {
-    const printed = app.printRoutes();
+    // printRoutes() prints a compressed radix tree that splits paths, so ask the router directly.
     for (const route of routes) {
-      expect(printed, `${route} is not registered`).toContain(route);
-      expect(printed, `${route}/export.pdf is not registered`).toContain(`${route}/export.pdf`);
-      expect(printed, `${route}/export.xlsx is not registered`).toContain(`${route}/export.xlsx`);
+      for (const url of [route, `${route}/export.pdf`, `${route}/export.xlsx`]) {
+        expect(app.hasRoute({ method: 'GET', url }), `${url} is not registered`).toBe(true);
+      }
     }
   });
 
@@ -414,6 +425,68 @@ const TO = '2024-06-30';
     expect(await stagingCounts()).toEqual({ fine: 0, ledr: 0 });
   });
 
+  it('account-ledger.output.gold-rows: purchase, rate-cut issue and fine-JV sources print; silver and priced lines do not', async () => {
+    // RP_LEDR.cs:8258 {{AND ITM_AMT = 0 AND ITM_FINE <> 0 AND B.IT_TYPE = 'G' AND C.MAIN_BOOK = 'PURCHASE'}}
+    await exec(
+      `INSERT INTO "BOOK_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_BOOK","MAIN_BOOK","DATA_TYPE") VALUES($1,'01','01','PR','PURCHASE','A')`,
+      tenantId,
+    );
+    const prLine = (vchNo: string, itCode: string, fine: number, amount: number) =>
+      exec(
+        `INSERT INTO "PR_DETL"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","AC_CODE","IT_CODE","ITM_FINE","ITM_AMT","ITM_OTH_FINE","SILVER_FINE")
+         VALUES($1,'01','01',$2,'PR',$3,1,'2024-05-20'::date,'Z600',$4,$5,$6,0,0)`,
+        tenantId,
+        YEAR,
+        vchNo,
+        itCode,
+        fine,
+        amount,
+      );
+    await prLine('P0001', 'GRNG', 2.125, 0);
+    await prLine('P0002', 'GRNG', 6.125, 900); // priced: excluded
+    await prLine('P0003', 'SRNG', 7.125, 0); // silver item: excluded from Gold
+    // RP_LEDR.cs:8280 {{FROM RATE_CUT_ISU}} with {{AND IT_TYPE <> 'S'}} and {{AND ITM_OTH_FINE <> 0}}
+    await exec(
+      `INSERT INTO "RATE_CUT_ISU"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","BOOK_NAME","AC_CODE","IT_TYPE","ITM_OTH_FINE","ITM_OTH_RATE")
+       VALUES($1,'01','01',$2,'RC','R0001',1,'2024-05-21'::date,'RATE CUT','Z600','G',0.375,5000)`,
+      tenantId,
+      YEAR,
+    );
+    // RP_LEDR.cs:8272 {{AND IT_TYPE = 'G' AND BOOK_NAME = 'FINE JV' AND AC_CODE = '}}
+    await seedLeg(tenantId, 'Z600', {
+      book: 'JV',
+      bookName: 'FINE JV',
+      vchNo: 'J0001',
+      date: '2024-05-22',
+      itType: 'G',
+      sign: '+',
+      fine: 0.625,
+    });
+    const res = await get(`${routes[1]}?${query}`);
+    expect(res.statusCode, res.body).toBe(200);
+    const body = res.json();
+    expect(hasNumber(body, 2.125)).toBe(true);
+    expect(hasNumber(body, 0.375)).toBe(true);
+    expect(hasNumber(body, 0.625)).toBe(true);
+    expect(hasNumber(body, 6.125)).toBe(false);
+    expect(hasNumber(body, 7.125)).toBe(false);
+    // The Silver print takes the silver purchase line and not the gold ones.
+    const silver = (await get(`${routes[2]}?${query}`)).json();
+    expect(hasNumber(silver, 7.125)).toBe(true);
+    expect(hasNumber(silver, 2.125)).toBe(false);
+  });
+
+  it('account-ledger.output.jmaudr-print: the account legs inside the dates are the rows', async () => {
+    // RP_LEDR.cs:4017 {{CurFormula = "{AC_DATA.CO_CODE} = '"}}: AC_DATA of the account between the dates.
+    const body = (await get(`${routes[0]}?${query}`)).json() as {
+      rows: Array<{ crAmt: number; drAmt: number }>;
+    };
+    expect(body.rows.some((r) => r.crAmt === 60)).toBe(true);
+    expect(body.rows.some((r) => r.drAmt === 40)).toBe(true);
+    // The opening leg dated before the from date is not a row.
+    expect(body.rows.some((r) => r.crAmt === 100)).toBe(false);
+  });
+
   it('account-ledger.output.silver-print: JmUdFineSl rows and two-decimal balance', async () => {
     const before = await stagingCounts();
     const res = await get(`${routes[2]}?${query}&dataType=A`);
@@ -424,6 +497,8 @@ const TO = '2024-06-30';
     // Desktop: RP_LEDR.cs:9019 {{DC_Main.RptName = "JmUdFineSl";}}
     expect(hasText(body, 'JmUdFineSl')).toBe(true);
     expect(hasNumber(body, 3.5)).toBe(true);
+    // The priced silver sale (ITM_AMT 250) is excluded by RP_LEDR.cs:8900 {{AND ITM_AMT = 0}}.
+    expect(hasNumber(body, 4.75)).toBe(false);
     // D14: silver balance is formatted "0.00", opening 2.256 -> 2.26, closing 1.256 -> 1.26.
     // Desktop: RP_LEDR.cs:8333 {{num3 = Conversions.ToDouble(Strings.Format(RuntimeHelpers.GetObjectValue(DC_Main.Rshlp.Rows[0]["SilverWt"]), "0.00"));}}
     expect(hasText(body, '2.26')).toBe(true);

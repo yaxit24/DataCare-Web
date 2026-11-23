@@ -958,6 +958,16 @@ route('Reports/Account Ledger', [
   'GET /reports/account-ledger/export.csv',
   'GET /reports/account-ledger/:acCode',
   'GET /reports/account-ledger/:acCode/export.pdf',
+  // WP-20: the JmaUdr, Gold and Silver prints (RP_LEDR): view right for the data, print right for the exports.
+  'GET /reports/account-ledger/jama-udhar',
+  'GET /reports/account-ledger/jama-udhar/export.pdf',
+  'GET /reports/account-ledger/jama-udhar/export.xlsx',
+  'GET /reports/account-ledger/gold-fine',
+  'GET /reports/account-ledger/gold-fine/export.pdf',
+  'GET /reports/account-ledger/gold-fine/export.xlsx',
+  'GET /reports/account-ledger/silver-fine',
+  'GET /reports/account-ledger/silver-fine/export.pdf',
+  'GET /reports/account-ledger/silver-fine/export.xlsx',
 ]);
 route('Reports/Account Balances', ['GET /reports/account-balances']);
 route('Reports/Outstanding (Debtors/Creditors)', ['GET /reports/outstanding']);
@@ -1074,6 +1084,12 @@ const PRINT_ROUTES = new Set([
   'GET /reports/account-ledger/export.xlsx',
   'GET /reports/account-ledger/export.csv',
   'GET /reports/account-ledger/:acCode/export.pdf',
+  'GET /reports/account-ledger/jama-udhar/export.pdf',
+  'GET /reports/account-ledger/jama-udhar/export.xlsx',
+  'GET /reports/account-ledger/gold-fine/export.pdf',
+  'GET /reports/account-ledger/gold-fine/export.xlsx',
+  'GET /reports/account-ledger/silver-fine/export.pdf',
+  'GET /reports/account-ledger/silver-fine/export.xlsx',
   'GET /tour-orders/confirmation',
   'GET /sales/invoice',
   'GET /sales-quotations/quotation',

@@ -4,6 +4,7 @@ import {
   EDITION_EXEMPT_ROUTES,
   editionDescriptor,
   editionRefusal,
+  ledgerAgeingRefusal,
 } from './modules/rbac/editionGate.js';
 import { LastDayLockConfigurationError } from './modules/shared/lastDayLock.js';
 import { loginSessionContext } from './modules/auth/sessionContextLogin.js';
@@ -94,6 +95,7 @@ import {
   supportedFilters,
 } from './modules/reports/reportFilters.js';
 import { reportFormForSlug } from './modules/reports/reportAuthorization.js';
+import { finePrintRefusalText } from './modules/reports/ledgerFinePrints.js';
 
 export interface BuildOpts {
   prisma: any;
@@ -469,7 +471,10 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
       !EDITION_EXEMPT_ROUTES.has(`${req.method} ${req.routeOptions.url}`)
     ) {
       const form = resolvePolicyForm(policy, req.params as Record<string, unknown>);
-      const refusal = form ? editionRefusal(form, opts.edition) : null;
+      const refusal = form
+        ? (editionRefusal(form, opts.edition) ??
+          ledgerAgeingRefusal(req.routeOptions.url, req.query, opts.edition))
+        : null;
       if (refusal) return reply.code(403).send(refusal);
     }
 
@@ -505,7 +510,13 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
         return reply.code(error.statusCode).send({ error: error.code });
       }
       if (error instanceof FormForbiddenError) {
-        return reply.code(403).send({ error: 'forbidden', form: error.form, action: error.action });
+        const message = finePrintRefusalText(req.routeOptions.url ?? '', error.action);
+        return reply.code(403).send({
+          error: 'forbidden',
+          form: error.form,
+          action: error.action,
+          ...(message && { message }),
+        });
       }
       throw error;
     }
