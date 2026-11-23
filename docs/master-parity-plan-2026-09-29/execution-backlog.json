@@ -7999,6 +7999,207 @@
       "statusNote": "IMPLEMENTED, not accepted. gst-report module: 9 of the 12 blocked cases are executable; 3 stay blocked with the exact remaining item (EXP.csv bytes need a Windows run, decision Q9; no harness read/export fault injector for T14). Desktop match 0%."
     },
     {
+      "id": "N240",
+      "status": "implemented-unverified",
+      "action": "Company → Books is the desktop MS_BOOK screen: a dedicated Books module and routes (/masters/books-master) write the BOOK_DATA header and its BOOK_DETL posting slots in one transaction (the generic master CRUD now refuses BOOK_DATA writes); BtnSave_Click's checks and texts in order (reserved 218/888/999, short name, code/name), duplicate code/name texts, box limits and first-letter combos; family templates from the MS_UPDATE.cs BOOK_IDTL inserts (decision D1) matched by SR_NO; blank slots allowed with Data Type A (D5); direction and invoice type locked on a saved book (Ctrl+O not ported, D6); a book with vouchers keeps its family (D4); the desktop delete guards inside the deleting transaction; version tokens; provisioning gives the template slots the seed missed (OTH INC/OTH EXP 2-3, TAG SPLIT 1-9, PURCHASE/TAG PURCHASE 5 with a DISCOUNT account, LABOUR WORK 8-11), Data Type A and the account's name; existing companies: migration 20261122120000_book_template_slots (a web-seeded slot still at the old seed's account takes the template account, absent template slots are added, operator changes kept). The page is its own route with a slot-grid component.",
+      "parentLabels": "P1-core; L5; WP-21; T01-T18",
+      "startAfter": [
+        "N234"
+      ],
+      "requiredProof": "DB tests written first and red on the old web (27 of 28) for slots per family, codes, guards, delete, seed-vs-template differences and the T18 journeys (a book made through POST /masters/books-master, a sale, purchase, cash receipt, bank payment and contra posted through their own routes, ledger legs on the configured slot accounts, an older voucher unchanged after a slot change); the posting modules' DB tests still green; the books browser module through the real screen in CI.",
+      "gapIds": "G252",
+      "entryDefinition": "docs/parity/LITE-MASTER-PLAN.md section 5 (WP-21)",
+      "sourceAndModuleDetail": "orchestration/work/WP-21/study.md; orchestration/work/WP-21/cases.md; 12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/apps/api/src/modules/masters/booksMaster.ts",
+        "web/apps/api/src/modules/masters/bookTemplates.ts",
+        "web/apps/api/src/routes/booksMaster.ts",
+        "web/apps/api/src/modules/ops/seedCompany.ts",
+        "web/apps/web/app/(app)/masters/books/page.tsx",
+        "web/apps/web/components/BookSlotGrid.tsx",
+        "web/apps/api/test/booksMaster.db.test.ts",
+        "web/apps/api/test/booksPosting.routes.db.test.ts",
+        "web/packages/db/prisma/migrations/20261122120000_book_template_slots/migration.sql",
+        "web/apps/api/test/bookTemplateSlotsMigration.db.test.ts",
+        "web/apps/web/test/features/modules/books.mjs"
+      ]
+    },
+    {
+      "id": "N241",
+      "status": "implemented-unverified",
+      "action": "Report → Stock Report is the desktop RP_STOCK form on its own route /reports/stock-report: eight summary dimensions over the signed MAIN_STOCK movements (Opening, Purchase, Inward, Outward, Sale, Closing and the hidden transfer columns), net or gross weight, the desktop filters, the drill-down behind every figure with KR_FINE for + rows and ITM_FINE for - rows, the Total row, name search, G/I/P keys, and Print/Excel behind the Print right. Tag Stock stays on /reports/tag-stock.",
+      "parentLabels": "P1-core; L6; WP-16; T01-T18",
+      "startAfter": [
+        "N24"
+      ],
+      "requiredProof": "DB/HTTP test under forced RLS whose expected figures are added up in the test from seeded movements with the desktop formula: all eight dimensions, every filter, gross, windows, the closing identity per row and total, drill-down equal to its cell, tenant/company/location/year sentinels, company merge, hidden items, data type, no writes, Print right and SQL metacharacters; browser module cases through the real screen.",
+      "gapIds": "G253",
+      "entryDefinition": "docs/parity/LITE-MASTER-PLAN.md section 5 (WP-16)",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md; orchestration/work/WP-16/study.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/apps/api/src/modules/reports/stockReport/index.ts",
+        "web/apps/api/src/modules/reports/stockReport/parse.ts",
+        "web/apps/api/src/modules/reports/stockReport/sql.ts",
+        "web/apps/api/src/routes/stockReport.ts",
+        "web/apps/web/app/(app)/reports/stock-report/page.tsx",
+        "web/apps/api/test/stockReport.db.test.ts",
+        "web/apps/web/test/features/modules/stockReport.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. stockReport.db.test.ts 51 cases green on a local database; the stock-report browser module runs 16 cases, 15 are proven at the API layer and the rest (voucher zoom, InOut item-ledger print, lookups, Crystal layouts, screen-built stock journeys, EMP ISU, Item Lot, LC box) are listed blocked. Not run locally (8 GB): the browser module. Desktop match 0%."
+    },
+    {
+      "id": "N242",
+      "status": "implemented-unverified",
+      "action": "Sales Return residuals (WP-27): the TR_SALE_RTN save refusals in desktop order and texts (employee, cheque/card account, company type B, year, lock date, zero value, Duplicate Tag No), Import admissibility (a bill with a return is refused; the remaining-lines picker), a lossless version-guarded edit from the New return form with the USER_DATA field audit, EMP_CODE/BANK_AC stored, LBR_TYPE as the desktop code, and a return create in the load profile.",
+      "parentLabels": "P1-core; L1; T01-T18; WP-27",
+      "startAfter": [
+        "N181"
+      ],
+      "requiredProof": "DB tests derived from the desktop rules: every refusal writes nothing and consumes no number; GET then PUT unchanged leaves every column of the ten write-set tables identical with no USER_DATA row; an edit writes USER_DATA for exactly the changed header columns; a stale version is 409; a user without the edit right is 403; a create held past its budget is a retryable 503 with no write; p95 of 20 creates under 5 s. The sales-return browser module with edit.numeric executable and no declared blocked case.",
+      "gapIds": "G254, G26",
+      "entryDefinition": "docs/parity/LITE-MASTER-PLAN.md section 5 (WP-27)",
+      "sourceAndModuleDetail": "orchestration/work/WP-27/study.md; orchestration/work/WP-27/cases.md; 12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/apps/api/src/modules/sales/salesReturn.ts",
+        "web/apps/api/src/modules/sales/saleReturnSaveChecks.ts",
+        "web/apps/api/src/modules/sales/saleReturnReopen.ts",
+        "web/apps/api/src/routes/saleReturnVoucher.ts",
+        "web/apps/web/app/(app)/txn/sale-return/page.tsx",
+        "web/apps/web/lib/saleReturnEdit.ts",
+        "web/apps/api/test/saleReturnResiduals.db.test.ts",
+        "web/apps/api/test/saleReturnResiduals.routes.db.test.ts",
+        "web/apps/web/test/features/modules/salesReturn.mjs",
+        "web/scripts/load-profile.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. 50 frozen cases (cases.md), 0 blocked; the new DB tests 18 of 18 locally, red before the fix for the study's reasons. The sales-return browser module (28 cases, 0 declared blocked) was not run locally (machine rule); CI's feature job is the run of record. Desktop match 0%. G246 (RTN_* columns) is open under N234."
+    },
+    {
+      "id": "N243",
+      "status": "implemented-unverified",
+      "action": "Sales Invoice closes its residual TR_SALE gaps: an unchanged reopen-and-save writes every stored SL_DATA column back (decision D8; a changed save writes DATA_TRFR/USER_UPDATE N and RE_TRFR from the stored transfer flag, TR_SALE.cs:15332-15342); getSale reloads every column and child DISPLAY_DATA reads (MEMB_COM_AC_CODE, WHOUT_COMM_BILL, OLD_GL/OLD_SL, ADV_AMT, SL_IDTL stones, UPI_DATA, CRNT_DATA, SL_ORD_ADJ, SL_PR_DETL.PR_COST); the writer adds UPI_DATA and CRNT_DATA rows (UPI_AMT and CRNT_ADJ_AMT are their sums, D1; the credit note joins BILL_OS, :19390) and writes order advances in the desktop shape (ORD_SIGN '-', ORD_AMT, many rows, D2) under the order lock with a 409 on over-use; old metal splits G from every other type and refuses a rate type other than N/F (:7667-7669, :19343-19351, G83); an edit deletes only the tables it rewrites; the screen sends the reopened tax code back (G82); PRINT_MAST file list, Set default, HUID/099/chosen-file template choice and OpAmt/ClAmt (D6).",
+      "parentLabels": "P1-core; L1; WP-26; T01-T18",
+      "startAfter": [
+        "N235"
+      ],
+      "requiredProof": "Kernel vectors (old-metal grid) and DB tests red before the change and green after, expected values from TR_SALE.cs with arithmetic shown; the sales, sales order, sales return, finance and GST DB tests stay green; the sales-invoice browser module runs the residual cases in CI.",
+      "gapIds": "G255, G83, G82",
+      "entryDefinition": "docs/parity/LITE-MASTER-PLAN.md section 5 (WP-26)",
+      "sourceAndModuleDetail": "orchestration/work/WP-26/study.md; orchestration/work/WP-26/cases.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/apps/api/src/modules/sales/saleResiduals.ts",
+        "web/apps/api/src/modules/sales/saleRead.ts",
+        "web/apps/api/src/modules/sales/salePrintChoice.ts",
+        "web/packages/core/src/oldMetalGrid.ts",
+        "web/apps/web/components/SaleResidualPanel.tsx",
+        "web/apps/api/test/salesInvoiceResiduals.db.test.ts",
+        "web/apps/web/test/features/modules/salesInvoiceResiduals.mjs"
+      ]
+    },
+    {
+      "id": "N244",
+      "status": "implemented-unverified",
+      "action": "Purchase residuals (WP-28): a lossless reopen and edit of a purchase (GET /purchases/:vchNo returns every stored value; the edit keeps the persisted columns the screen does not model and the stored IT_TYPE), the TR_PURC_HM hallmark receive columns (HM_ID_AMT per line, header HM_AMT rounded half to even, HM_TAX_CODE, ITM_COLOR, EMP_CODE, VCH_DESC; hallmark ids 2-4, their weights and the tag band for TAG PURCHASE books only), a server-side purchase book family on create, edit and GET /context/books?family=, and one Purchase entry that opens the hallmark layout when PURC_WITH_HMTAX is Y, with Tag Wise Purc on the TAG PURCHASE books.",
+      "parentLabels": "P1-core; L1; T01-T18; WP-28",
+      "startAfter": [
+        "N227"
+      ],
+      "requiredProof": "DB tests derived from the desktop rules: GET then PUT unchanged leaves every row of every purchase table identical (earlier-month voucher, desktop-only columns, item master changed after save); TAG PURCHASE stores four hallmark ids, weights and the tag band and a PURCHASE book stores them as zeros and blanks; HM_TAX_CODE stored with a zero charge; a line hallmark edit re-derives HM_AMT half to even and its tax; a book outside the purchase family is refused on create and edit with nothing written; /context/books?family= lists only in-use books of that family. Unit tests for the pure hallmark rules. The purchase-invoice browser module with the new hallmark-layout, Tag Wise Purc book, server-side book list and lossless-reopen cases; all repository gates.",
+      "gapIds": "G02, G46, G91, G101, G256",
+      "entryDefinition": "docs/parity/LITE-MASTER-PLAN.md section 5 (WP-28)",
+      "sourceAndModuleDetail": "orchestration/work/WP-28/study.md; orchestration/work/WP-28/cases.md; 12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/apps/api/src/modules/purchase/purchase.ts",
+        "web/apps/api/src/modules/purchase/purchaseHallmark.ts",
+        "web/apps/api/src/modules/purchase/purchaseReopen.ts",
+        "web/apps/api/src/modules/auth/businessScope.ts",
+        "web/apps/api/src/app.ts",
+        "web/apps/web/app/(app)/txn/purchase/page.tsx",
+        "web/apps/web/app/(app)/txn/purchase-hm/page.tsx",
+        "web/apps/web/app/(app)/txn/tag-wise-purc/page.tsx",
+        "web/apps/web/components/BookSelect.tsx",
+        "web/apps/web/lib/purchaseCarry.ts",
+        "web/apps/api/test/purchaseHallmark.wp28.test.ts",
+        "web/apps/api/test/purchaseResiduals.wp28.routes.db.test.ts",
+        "web/apps/web/test/features/modules/purchaseInvoice.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. 88 cases: 17 pass at database/unit level (lossless reopen of every tenant row for an earlier-month hallmark voucher with typed amount, fine and stones; TAG PURCHASE ids 2-4, weights, tag band and BAR_DETL rules; HM_AMT half to even; HM tax code with no charge; server family refusal; /context/books?family=), 4 partly, 2 blocked, 3 N/A, the rest executable but not run (browser module extended, not run locally); full API suite with database 4134/4134 after the kernel fix. Frozen cases and decisions D1-D13 in orchestration/work/WP-28/cases.md; 2 cases blocked: lookup.books-data-type-filter (the web has no company data type, D10) and keyboard.hm-grid-enter-walk (the 95-column TEXT_PR_KeyDown walk is not transcribed). The new purchase-invoice browser cases were not run locally (machine rule); CI's feature job is the run of record. Not done: the employee-code book shortcut (D9), WITH_STOCK blank to Y, the TAG PURCHASE BAR_DATA/SRNO_MAST/TAG_SET write set, the print templates. Desktop match 0%."
+    },
+    {
+      "id": "N245",
+      "status": "implemented-unverified",
+      "action": "Purchase Rtn residuals (TR_KR_ISU, PURC RETURN): the print is gated on the desktop's print right FRM_PRINT, not on view; a return line stores TAX_PRC 0 as the desktop does while the header keeps rate and heads; reopen returns a version token and edit and delete require it (409 voucher-version-conflict, nothing changed); the grid Enter walk is a pure plan (planEnterWalk) with unit tests; the browser module gains the HSN-tax print cases and the Enter-walk case.",
+      "parentLabels": "P2; L1; T01-T18; WP-29",
+      "startAfter": [
+        "N34"
+      ],
+      "requiredProof": "DB tests derived from the desktop rules: HSN row 6,200.00 / 93.00 / 93.00 / 186.00 (intra) and IGST 186.00 (inter), FRM_PRINT refusal, line TAX_PRC 0 with header 3 / 186, 400 without and 409 with a stale token, lossless unchanged save; unit tests for the Enter walk; the browser module cases run in CI; all repository gates.",
+      "gapIds": "G257",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "web/apps/api/src/routes/purchaseReturn.ts",
+        "web/apps/api/src/modules/purchase/purchaseReturn.ts",
+        "web/apps/api/src/modules/purchase/purchaseReturnLifecycle.ts",
+        "web/apps/api/src/modules/rbac/routePolicy.ts",
+        "web/apps/web/components/GridKeyboard.tsx",
+        "web/apps/web/app/(app)/txn/purchase-return/page.tsx",
+        "web/apps/api/test/purchaseReturnWp29.routes.db.test.ts",
+        "web/apps/web/test/gridKeyboard.test.ts",
+        "web/apps/web/test/features/modules/purchaseReturn.mjs",
+        "orchestration/work/WP-29/cases.md"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Decisions (architect, 2026-11-23, owner may override): D1 the Purchase Return print guards the print right (the sales print keeps view until a cross-family decision); D2 line TAX_PRC 0 as TR_KR_ISU.cs:5206, no data migration (no reader uses the line column); D3 Fine/Amount stay computed cells (layout residual N77); D4 config.setting-variant stays blocked on N166; D5 edit and delete carry the version token like purchases. DB: purchaseReturn* and transaction.integrity files pass (26 tests), full API suite 4126 tests passed after the token was added to two callers. Browser cases print.hsn-tax-intra, print.hsn-tax-inter and keyboard.enter-walk were written without a local browser stack and run in CI. Still open: the UAE variant, Fine/Amount override cells, G174 fixture."
+    },
+    {
+      "id": "N246",
+      "status": "implemented-unverified",
+      "action": "Contra Entry is the desktop TR_CONTRA voucher: row 1 positional with its own side and every later row the opposite (TR_CONTRA.cs:1538, :1630), the mirror record carries row 1's description (:2868), the empty or thin grid, unequal totals, employee, company type B, year and lock date are refused in the desktop order, REMARK_DATA is written and deleted (Ac_Tax.cs:686; :2963-2968), INOUT_TYPE is the book's flag (:2774), the F1 list is one line per voucher, account and description (:3144), and the printed voucher lists every leg. Web additions for a hosted service: all legs or none in one transaction, the voucher version token on edit and delete, the bank clearing marks follow their leg, an unchanged reopen and save keeps every stored column, and accounts must exist in the company.",
+      "parentLabels": "P2; L1; T01-T18; WP-31",
+      "startAfter": [
+        "N232"
+      ],
+      "requiredProof": "contraGrid unit tests; contraResiduals.routes.db.test.ts through the real routes and the account ledger, cash book, bank reconciliation list, day book and Rojmel readers; the contraEntry browser module with the new cases (not run locally; CI runs it).",
+      "gapIds": "G258",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-23",
+      "evidence": [
+        "orchestration/work/WP-31/study.md",
+        "orchestration/work/WP-31/cases.md",
+        "web/apps/api/src/modules/finance/contra.ts",
+        "web/apps/api/src/modules/finance/contraClearing.ts",
+        "web/apps/api/src/modules/finance/contraList.ts",
+        "web/apps/api/src/modules/finance/contraVoucher.ts",
+        "web/apps/api/src/routes/contra.ts",
+        "web/apps/web/app/(app)/txn/contra/page.tsx",
+        "web/apps/api/test/contraGrid.test.ts",
+        "web/apps/api/test/contraResiduals.routes.db.test.ts",
+        "web/apps/api/test/contraDelete.db.test.ts",
+        "web/apps/web/test/features/modules/contraEntry.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. 74 cases written (71 executable, 2 blocked: the opening-balance label needs a balance-as-of-date API; the ContraBill.rpt layout and copy labels need a text export of the Crystal file; 1 N/A). Unit 12 and database 28 of 28 pass; the finance and contra DB suites (32 files, 359 tests) pass. The browser module changes are not run locally. Desktop match 0%: decisions D1-D16 in cases.md are architect decisions for the owner to confirm."
+    },
+    {
       "id": "N247",
       "status": "implemented-unverified",
       "action": "Data Refresh Field Update runs its two desktop repairs preview-first: AC_MAST.AC_MAIN_GR re-aligned to AC_GROUP (MS_UPDATE.cs:7214) and a blank AC_MAST.DEFAULTER_AC set to N (:8608), in the existing data-repair registry (preview with counts and sample keys, one transaction, audit row, tenant-scoped, idempotent). The other 518 writes are classified in orchestration/work/WP-24/field-update.md: 172 class b anomaly queries (169 BOOK_DATA metadata checks grouped into one parameterised replay), 219 migration loader, 127 schema.",

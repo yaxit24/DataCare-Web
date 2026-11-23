@@ -347,6 +347,32 @@ type Cookie = string;
     expect(await allItems()).toEqual(saved);
   });
 
+  it('stores the hidden desktop columns N/0/N/0 on a new item and keeps migrated values on an edit', async () => {
+    const flags = async (code: string) =>
+      (
+        await owner.$queryRawUnsafe<Array<Record<string, unknown>>>(
+          `SELECT "TAX_FREE_ITEM" tf,"APP_ITEM" app,"EMP_COM_PRC" emp,"AC_MEMB_COM_PRC" memb
+             FROM "ITEM_MAST" WHERE tenant_id=$1 AND "IT_CODE"=$2`,
+          tenantId,
+          code,
+        )
+      )[0];
+    // MS_ITEM.cs:3261-3263 writes TAX_FREE_ITEM, APP_ITEM and EMP_COM_PRC from the cleared hidden boxes.
+    expect(await flags('RGGLD')).toEqual({ tf: 'N', app: 'N', emp: 0, memb: 0 });
+    // A migrated desktop item: DISPLAY_DATA reloads the stored values, so an unchanged Lite save keeps them.
+    await exec(
+      `UPDATE "ITEM_MAST" SET "TAX_FREE_ITEM"='Y',"APP_ITEM"='Y',"EMP_COM_PRC"=2.5,"AC_MEMB_COM_PRC"=1.25
+        WHERE tenant_id=$1 AND "IT_CODE"='RGGLD'`,
+      tenantId,
+    );
+    const response = await request(adminCookie, 'PUT', '/masters/item-master/RGGLD', {
+      ...ring({ lbrPrc: '14', othItmWtRemove: false, lotStock: true }),
+      expectedVersion: await versionOf('RGGLD'),
+    });
+    expect(response.statusCode, response.body).toBe(200);
+    expect(await flags('RGGLD')).toEqual({ tf: 'Y', app: 'Y', emp: 2.5, memb: 1.25 });
+  });
+
   it("follows the clerk's view-only rights row: list and add, but no edit, delete or tag update", async () => {
     let response = await request(clerkCookie, 'GET', '/masters/item-master');
     expect(response.json().rights).toEqual({ canUpdate: false, canDelete: false, canPrint: false });

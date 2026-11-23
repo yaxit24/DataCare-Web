@@ -126,8 +126,9 @@ const TOLERANCE = 0.004;
  * How much of an order's advance is already used. The desktop stores a use as an SL_ORD_ADJ row with ORD_SIGN '-' and
  * the amount in ORD_AMT (TR_SALE.cs:15715, TR_SL_ORD_ADJ.cs:3552). The web's earlier writers stored it with ORD_SIGN
  * 'C' (sale) or 'D' (cancel) and the amount in PAID_AMT (+ KASAR_AMT for a cancel); those rows are read the same way.
- * ORD_SIGN '+' is the advance itself (TR_SALE_ORD.cs:9503); the web reads the advance from SL_ORD_DATA.ADV_AMT
- * because the web Sales Order writes no '+' row, so a '+' row is not counted twice.
+ * ORD_SIGN '+' is the advance itself (TR_SALE_ORD.cs:9503), which the Sales Order save now writes; the web reads the
+ * advance from SL_ORD_DATA.ADV_AMT and never counts a '+' row as used. The web sale now stores its use as the desktop
+ * does ('-', ORD_AMT, the order's own ORD_YRCD / ORD_DBCD).
  */
 const CONSUMED_SQL = `
   CASE
@@ -255,7 +256,8 @@ export async function openAdvanceOfOrderTx(
 ): Promise<PendingOrder | null> {
   const no = formatVoucherNo(ordNo);
   const orders = await ordersWithAdvanceTx(tx, scope, [no]);
-  return orders.find((o) => o.ordBook === ordBook) ?? orders[0] ?? null;
+  // The named book only: another book's order of the same number is a different order (review of #250).
+  return orders.find((o) => o.ordBook === ordBook) ?? null;
 }
 
 interface CheckedRow {

@@ -143,6 +143,9 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
 
   const cleanup = async (): Promise<void> => {
     for (const table of [
+      // An edit writes the USER_DATA field audit (TR_SALE_RTN.cs:13541, WP-27); left behind, it shows up in the
+      // next test's footprint under the same voucher number.
+      'USER_DATA',
       'DELETE_DATA',
       'REMARK_DATA',
       'DM_DATA',
@@ -1866,6 +1869,8 @@ databaseDescribe('database-backed sales-family voucher lifecycles', () => {
       'AC_DATA',
       // The day book. Added when the order projection was implemented from the real book-020 rows.
       'ROJ_MEL_DATA',
+      // The order's own '+' advance row (TR_SALE_ORD.cs:9475-9516).
+      'SL_ORD_ADJ',
       'SL_ORD_DATA',
       'SL_ORD_DETL',
       // The fixture's line carries a stone sub-detail, so the order writes SL_ORD_IDTL too. Pinned

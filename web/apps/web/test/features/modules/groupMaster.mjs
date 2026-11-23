@@ -633,6 +633,47 @@ export const groupMaster = {
         }),
     ),
     C(
+      'lookup.provisioned-ledgers',
+      'T04',
+      'read-only',
+      'WP-36: on a company exactly as seedCompany leaves it, the Sales Ac help lists the provisioned sale ledgers (group 25, tSalesAc_KeyDown :2204-2208) and the Purchase Ac help the purchase ledgers (group 30, :2242-2246); the tax ledgers are in neither',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await openScreen(page);
+        const helpCodes = async (box, waitFor) => {
+          await box.focus();
+          await box.press('F1');
+          const help = box.locator('xpath=..');
+          await help.getByText(waitFor, { exact: true }).waitFor();
+          return (await help.locator('b').allInnerTexts()).map((t) => t.trim());
+        };
+        const PROVISIONED = ['FINESALE', 'SALES', 'SLVSALE', 'FINEPURC', 'PURCHASE', 'SLVPURC'];
+        const TAX = ['GST', 'GSTINPUT', 'TCS'];
+        const sale = await helpCodes(label(page, 'Sales Ac'), 'SALES');
+        const purc = await helpCodes(label(page, 'Purchase Ac'), 'PURCHASE');
+        const ours = (codes) => codes.filter((c) => PROVISIONED.includes(c));
+        // By AC_NAME: FINE METAL SALE, SALES A/C, SALES SILVER A/C; FINE METAL PURCHASE, PURCHASE A/C, PURCHASE SILVER A/C.
+        assert.deepEqual(ours(sale), ['FINESALE', 'SALES', 'SLVSALE'], 'group 25 sale ledgers');
+        assert.deepEqual(
+          ours(purc),
+          ['FINEPURC', 'PURCHASE', 'SLVPURC'],
+          'group 30 purchase ledgers',
+        );
+        assert.deepEqual(
+          [...sale, ...purc].filter((c) => TAX.includes(c)),
+          [],
+          'the tax ledgers are group 12',
+        );
+        return {
+          observation: `sales help ${sale.join(',')}; purchase help ${purc.join(',')}`,
+          expected: {
+            sale: ['FINESALE', 'SALES', 'SLVSALE'],
+            purchase: ['FINEPURC', 'PURCHASE', 'SLVPURC'],
+          },
+        };
+      },
+    ),
+    C(
       'children.items-take-the-group',
       'T05',
       'mutation',
