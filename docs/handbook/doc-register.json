@@ -49,6 +49,13 @@
       "purpose": "Web handbook: stack, architecture, modules, engineering standards and testing."
     },
     {
+      "match": "orchestration/work/*/*.md",
+      "area": "Delivery method",
+      "kind": "work package contract",
+      "status": "reference",
+      "purpose": "Frozen desktop study and case list of one Lite work package (orchestration/work/WP-nn); the case list is the contract the package is measured against, the catalog and backlog stay the status authority."
+    },
+    {
       "match": "docs/agent-prompts/lite/*.md",
       "area": "Delivery method",
       "kind": "agent prompts",

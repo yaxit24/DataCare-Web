@@ -1,4 +1,5 @@
 import type { MoneyRoundingPolicy } from './calc.js';
+import { dotNetRoundDouble } from './money.js';
 
 /**
  * The company money-rounding rule, shared by the server (which reads the flags from CO_SET inside the
@@ -28,6 +29,12 @@ export interface RoundingPolicy extends MoneyRoundingPolicy {
   itemRateDecimals: StandardRoundingDecimals;
   billTotalDecimals: StandardRoundingDecimals;
   purchaseRateDecimals: StandardRoundingDecimals;
+  /**
+   * `CO_SET.ALL_ROF_REMOVE = 'Y'` (`DC_Main.MsAllRofRemove`). Besides forcing the four flags above to 2, it is the
+   * only company setting the Sale line reads for its own precision (`saleLineDecimals`, TR_SALE.cs:10343-10362).
+   * Optional so that a hand-built policy (tests, a return form's hardcoded policy) reads as "not set".
+   */
+  allRoundingRemoved?: boolean;
   /** Which flags the company actually configured (the server's PARITY_STRICT gate needs this). */
   configured: {
     tax: boolean;
@@ -38,6 +45,7 @@ export interface RoundingPolicy extends MoneyRoundingPolicy {
   };
   roundTaxAmount(value: number): number;
   roundLabourAmount(value: number): number;
+  roundLabourRate(value: number): number;
   roundItemRate(value: number): number;
   roundBillTotal(value: number): number;
   roundPurchaseRate(value: number): number;
@@ -133,6 +141,7 @@ export function resolveRoundingPolicy(flags: RoundingFlagValues = {}): RoundingP
     itemRateDecimals,
     billTotalDecimals,
     purchaseRateDecimals,
+    allRoundingRemoved,
     configured: {
       tax: tax.configured,
       labour: labour.configured,
@@ -142,9 +151,37 @@ export function resolveRoundingPolicy(flags: RoundingFlagValues = {}): RoundingP
     },
     roundTaxAmount: (value) => roundNearest(value, taxDecimals, tax.configured),
     roundLabourAmount: (value) => roundNearest(value, labourDecimals, labour.configured),
+    // A derived LBR_RATE is Math.Round on the desktop's double (TR_SALE.cs:11021), not a decimal rounding.
+    roundLabourRate: (value) => dotNetRoundDouble(value, labourDecimals),
     roundItemRate: (value) => roundNearest(value, itemRateDecimals, itemRate.configured),
     roundBillTotal: (value) => roundNearest(value, billTotalDecimals, billTotal.configured),
     roundPurchaseRate: (value) =>
       roundNearest(value, purchaseRateDecimals, purchaseRate.configured),
   };
+}
+
+/**
+ * Decimal places of the Sale grid's ITM_AMT and LBR_AMT.
+ *
+ * `CommPassTotal` hardcodes them and never reads TOT_AMT_ROF for a line (TR_SALE.cs:10343-10362):
+ *
+ *     digits = 0; digits2 = 0;
+ *     if (SSRegSrNo == "DM035NPDM" | MsAllRofRemove == "Y") { digits = 2; digits2 = 2; }
+ *
+ * `digits` rounds the item amount (:10905-10932) and `digits2` the labour amount (:11100-11127). The registration
+ * serial is one customer's licence and is not modelled. TR_SALE_HM.cs:7344-7359 (Hallmark Sale) has the same rule.
+ *
+ * TOT_AMT_ROF keeps the role the desktop gives it: the BILL totals (TR_SALE.cs:19192 the totals grid's net,
+ * :19274/:19282 the bill total), which the web applies through `roundBillTotal` in `billTotals`.
+ */
+export function saleLineDecimals(policy: Pick<RoundingPolicy, 'allRoundingRemoved'>): 0 | 2 {
+  return policy.allRoundingRemoved ? 2 : 0;
+}
+
+/** `Math.Round(value, digits)` at the Sale line precision: .NET's default midpoint rule, to even. */
+export function roundSaleLineAmount(
+  value: number,
+  policy: Pick<RoundingPolicy, 'allRoundingRemoved'>,
+): number {
+  return roundNearest(value, saleLineDecimals(policy), true);
 }

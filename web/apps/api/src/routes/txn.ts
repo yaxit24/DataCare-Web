@@ -225,7 +225,6 @@ import {
   scaleCaptureEnabled,
 } from '../modules/integrations/scaleProtocol.js';
 import { registerTagPrintScreenRoutes } from './tagPrintScreen.js';
-import { tagStockReport, tagStockCsv } from '../modules/reports/tagStock.js';
 import { registerVoucherNavigationRoutes } from './voucherNavigation.js';
 import { postContra, deleteContra, getContra, editContra } from '../modules/finance/contra.js';
 import { registerSaleVoucherRoutes } from './saleVoucher.js';
@@ -234,6 +233,7 @@ import { registerPurchaseReturnRoutes } from './purchaseReturn.js';
 import { registerPartyOpeningRoutes } from './partyOpening.js';
 import { registerFineJvRoutes } from './fineJv.js';
 import { registerOrderCancelRoutes } from './orderCancel.js';
+import { registerBalanceTransferRoutes } from './balanceTransfer.js';
 import { registerItemOpeningRoutes } from './itemOpening.js';
 import { registerEmployeeMasterRoutes } from './employeeMaster.js';
 import { registerTaxMasterRoutes } from './taxMaster.js';
@@ -243,6 +243,7 @@ import { registerProductMasterRoutes } from './productMaster.js';
 import { registerMasterScreenRoutes } from './masterScreens.js';
 import { registerWholesaleSaleRoutes } from './wholesaleSale.js';
 import { registerAccountLedgerRoutes } from './accountLedger.js';
+import { registerTagStockRoutes } from './tagStock.js';
 import { registerApprovalRoutes } from './approval.js';
 import { VoucherVersionConflictError } from '../modules/vouchers/version.js';
 import { listYears, createYear, carryForwardOpenings } from '../modules/masters/year.js';
@@ -1082,6 +1083,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   registerPartyOpeningRoutes(app, extraRouteHelpers, formMutationCapabilities);
   registerFineJvRoutes(app, extraRouteHelpers);
   registerOrderCancelRoutes(app, extraRouteHelpers);
+  registerBalanceTransferRoutes(app, extraRouteHelpers);
   registerDailyRateRoutes(app, { ...extraRouteHelpers, formMutationCapabilities });
   registerItemOpeningRoutes(app, extraRouteHelpers, formCapabilities);
   registerEmployeeMasterRoutes(app, extraRouteHelpers, formCapabilities);
@@ -4418,6 +4420,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
   // one path. Registered here (not with the other plugins above) because it needs `sendReportPdf`.
   registerAccountLedgerRoutes(app, { prisma, auth, guard, readScope, sendReportPdf });
   registerRpAllReportRoutes(app, { prisma, auth, guard, readScope }); // WP-11 Sales Report (RP_ALL)
+  registerTagStockRoutes(app, { prisma, auth, guard, scopeOf });
 
   // Screens for five reports registered only in REPORT_BUILDERS (exports worked, screens 404'd —
   // PARITY-EVALUATION-2026-09-28 D3). Each calls the export's own builder with its own inputs (so the
@@ -6310,32 +6313,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
     const q = (req.query ?? {}) as Record<string, string | undefined>;
     return run(reply, 200, () => orderLotZoom(prisma, readScope(req), q.lotNo ?? ''));
   });
-  app.get('/reports/tag-stock', auth, async (req) => {
-    const s = scopeOf(req);
-    const qy = (req.query as any) || {};
-    return tagStockReport(
-      prisma,
-      s.tenantId,
-      { CO_CODE: s.coCode, LC_CODE: s.lcCode },
-      (qy.tab || 'stock') as any,
-      { tblCode: qy.tblCode || undefined, itCode: qy.itCode || undefined },
-    );
-  });
-  app.get('/reports/tag-stock.csv', auth, async (req, reply) => {
-    const s = scopeOf(req);
-    const qy = (req.query as any) || {};
-    const rep = await tagStockReport(
-      prisma,
-      s.tenantId,
-      { CO_CODE: s.coCode, LC_CODE: s.lcCode },
-      (qy.tab || 'stock') as any,
-      { tblCode: qy.tblCode || undefined, itCode: qy.itCode || undefined },
-    );
-    return reply
-      .type('text/csv')
-      .header('content-disposition', `attachment; filename="tag-stock-${qy.tab || 'stock'}.csv"`)
-      .send(tagStockCsv(rep));
-  });
+  // GET /reports/tag-stock, .csv and .xlsx live in routes/tagStock.ts (the RP_TAG report), registered below.
   app.get('/reports/karigar-balances', auth, async (req) =>
     karigarBalances(prisma, readScope(req)),
   );
@@ -7920,43 +7898,6 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
         fromYear: b.fromYear ?? s.coYear,
         toYear: b.toYear,
       }),
-    );
-  });
-  app.post('/balance-transfer/preview', auth, async (req, reply) => {
-    if (!guard(req, reply, 'view')) return;
-    const b = body(req);
-    const s = sess(req);
-    return run(reply, 200, () =>
-      yearEndPreview(prisma, {
-        scope: scopeOf(req) as any,
-        fromYear: b.fromYear ?? s.coYear,
-      }),
-    );
-  });
-  app.post('/balance-transfer/year-close', auth, async (req, reply) => {
-    if (!guard(req, reply, 'update')) return;
-    const b = body(req);
-    const s = sess(req);
-    return run(reply, 201, () =>
-      yearEndClose(prisma, {
-        scope: scopeOf(req) as any,
-        fromYear: b.fromYear ?? s.coYear,
-        toYear: b.toYear,
-      }),
-    );
-  });
-  app.post('/balance-transfer/openings', auth, async (req, reply) => {
-    if (!guard(req, reply, 'update')) return;
-    const s = readScope(req);
-    const b = body(req);
-    return run(reply, 200, () =>
-      carryForwardOpenings(
-        prisma,
-        { tenantId: s.tenantId, coCode: s.coCode, lcCode: s.lcCode },
-        String(b.fromYear),
-        String(b.toYear),
-        sess(req).sub,
-      ),
     );
   });
   app.post('/tour/:vchNo/bill', auth, async (req, reply) => {

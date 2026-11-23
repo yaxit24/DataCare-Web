@@ -1,6 +1,6 @@
 import { Decimal } from 'decimal.js';
 import { round, roundHalfEven, PRECISION } from './money.js';
-import type { RoundingPolicy } from './roundingPolicy.js';
+import { roundSaleLineAmount, type RoundingPolicy } from './roundingPolicy.js';
 
 /**
  * Retail sale (TR_SALE) item amount: which quantity the item rate multiplies.
@@ -147,23 +147,23 @@ export function saleItemAmount(
 }
 
 /**
- * Sale ITM_AMT as `CommPassTotal` stores it: ONE rounding of the raw quantity x rate.
+ * Sale ITM_AMT as `CommPassTotal` stores it: ONE `Math.Round(quantity x rate, digits)` of the raw product.
  *
  * Every pricing branch is `Math.Round(quantity x rate, digits)` (TR_SALE.cs:10905, :10916, :10920, :10924, :10928,
- * :10932). Rounding `saleItemAmount`'s 2 dp result again to the line precision rounds twice, and an amount whose
- * third decimal is 5 crosses a rupee: 3.495 becomes 3.50 and then 4, where the desktop stores 3 (desktop oracle
- * vector `amount.mid.n3.495xr1`, run 42580947381). The raw product is therefore handed straight to the line rounding.
- * A company line precision finer than 2 dp keeps the 2 dp stage, which is then not a double rounding of the result.
+ * :10932), and `digits` is hardcoded: 0, or 2 under ALL_ROF_REMOVE (TR_SALE.cs:10343-10362, `saleLineDecimals`).
+ * TOT_AMT_ROF is never read for a line. Rounding at 2 dp first would cross a rupee on a third-decimal 5: 3.495
+ * becomes 3.50 and then 4, where the desktop stores 3 (desktop oracle vector `amount.mid.n3.495xr1`, run
+ * 42580947381).
  */
 export function saleItemAmountRounded(
   basis: SaleAmountBasis,
   rate: Decimal.Value | null | undefined,
-  policy: Pick<RoundingPolicy, 'billTotalDecimals' | 'roundBillTotal'>,
+  policy: Pick<RoundingPolicy, 'allRoundingRemoved'>,
 ): number {
-  if (policy.billTotalDecimals > PRECISION.amount) {
-    return policy.roundBillTotal(saleItemAmount(basis, rate));
-  }
-  return policy.roundBillTotal(D(basis.quantity).times(D(rate).div(basis.rateDivisor)).toNumber());
+  return roundSaleLineAmount(
+    D(basis.quantity).times(D(rate).div(basis.rateDivisor)).toNumber(),
+    policy,
+  );
 }
 
 /**
@@ -187,6 +187,9 @@ export function salesReturnRoundingPolicy(policy: RoundingPolicy): RoundingPolic
     ...policy,
     labourDecimals: 0,
     billTotalDecimals: 0,
+    // TR_SALE_RTN.cs has no ALL_ROF_REMOVE branch: its line amounts are always whole rupees. The derived labour
+    // RATE keeps LBR_ROF (TR_SALE_RTN.cs:4963), so `roundLabourRate` is inherited unchanged.
+    allRoundingRemoved: false,
     roundLabourAmount: (value) => roundHalfEven(value, 0),
     roundBillTotal: (value) => roundHalfEven(value, 0),
   };

@@ -200,7 +200,7 @@ export const settingsEffects = {
       'effect.sale-amount-fine',
       'T15',
       'mutation',
-      'SL_AMT_TYPE=F (TR_SALE.cs CommPassTotal): a new line is priced on fine — 9.160 × 6,123.45 = 56,090.80 + making 2,375 = 58,465.80, RATE_WITH F',
+      'SL_AMT_TYPE=F (TR_SALE.cs CommPassTotal): a new line is priced on fine — Math.Round(9.160 × 6,123.45 = 56,090.80, 0) = 56,091 (whole-rupee line, TR_SALE.cs:10343-10362) + making 2,375 = 58,466, RATE_WITH F',
       async (ctx) => {
         const { page } = await ctx.session();
         await mustSet(page, 'CO_SET.SL_AMT_TYPE', 'F');
@@ -211,10 +211,10 @@ export const settingsEffects = {
             `SELECT "ITM_AMT"::float amt,"NET_AMT"::float net,"RATE_WITH" rw FROM "SL_DETL" WHERE tenant_id=$1 AND "CO_BOOK"='SL' AND "VCH_NO"=$2`,
             vchNo,
           );
-          assert.deepEqual([l.amt, l.net, l.rw], [56090.8, 58465.8, 'F']);
+          assert.deepEqual([l.amt, l.net, l.rw], [56091, 58466, 'F']);
           return {
             observation: `voucher ${vchNo}: ITM_AMT ${l.amt}, NET_AMT ${l.net}, RATE_WITH ${l.rw}`,
-            expected: { metal: 56090.8, net: 58465.8, rateWith: 'F' },
+            expected: { metal: 56091, net: 58466, rateWith: 'F' },
             database: { line: l },
             downstream: { rateWith: l.rw },
           };

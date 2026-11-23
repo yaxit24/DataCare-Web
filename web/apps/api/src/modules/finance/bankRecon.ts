@@ -1,3 +1,4 @@
+import { notCarriedOpening } from '../shared/carriedOpening.js';
 import { toIsoDate } from '@datacare/core';
 import { formatVoucherNo } from '../vouchers/numbering.js';
 import { withTxBudget } from '../shared/txBudget.js';
@@ -39,7 +40,7 @@ export async function bankReconList(
   range?: { from?: string; to?: string },
 ): Promise<BankReconList> {
   return withTxBudget(prisma, scope.tenantId, 'read', async (tx: any) => {
-    const cond: string[] = [`a."CO_CODE"=$1`, `a."AC_CODE"=$2`];
+    const cond: string[] = [`a."CO_CODE"=$1`, `a."AC_CODE"=$2`, notCarriedOpening('a')];
     const params: unknown[] = [scope.coCode, bankAc];
     if (range?.from) {
       params.push(range.from);
@@ -64,7 +65,7 @@ export async function bankReconList(
     let openingBal = 0;
     if (range?.from) {
       const pr: any[] = await tx.$queryRawUnsafe(
-        `SELECT coalesce(sum(coalesce(NULLIF("DR_AMT"::text,'')::numeric,0)-coalesce(NULLIF("CR_AMT"::text,'')::numeric,0)),0)::float n FROM "AC_DATA" WHERE "CO_CODE"=$1 AND "AC_CODE"=$2 AND "VCH_DATE"::date < $3::date`,
+        `SELECT coalesce(sum(coalesce(NULLIF("DR_AMT"::text,'')::numeric,0)-coalesce(NULLIF("CR_AMT"::text,'')::numeric,0)),0)::float n FROM "AC_DATA" WHERE "CO_CODE"=$1 AND "AC_CODE"=$2 AND "VCH_DATE"::date < $3::date AND ${notCarriedOpening()}`,
         scope.coCode,
         bankAc,
         range.from,

@@ -7,6 +7,8 @@
         "web/apps/api/src/modules/sales/sales.ts",
         "web/packages/core/src/saleAmount.ts",
         "web/packages/core/src/calc.ts",
+        "web/packages/core/src/roundingPolicy.ts",
+        "web/apps/web/lib/lineRecalc.ts",
         "web/apps/api/src/modules/posting/lineLegs.ts",
         "web/apps/web/components/LookupPicker.tsx",
         "web/apps/web/lib/lookupEnter.ts",
@@ -148,11 +150,31 @@
         "web/apps/api/src/routes/orderCancel.ts"
       ]
     },
+    "balanceTransfer": {
+      "covers": [
+        "web/apps/web/app/(app)/company/balance-transfer/page.tsx",
+        "web/apps/api/src/modules/ops/balanceTransfer.ts",
+        "web/apps/api/src/modules/ops/balanceTransferRules.ts",
+        "web/apps/api/src/modules/ops/balanceTransferSelect.ts",
+        "web/apps/api/src/routes/balanceTransfer.ts"
+      ]
+    },
     "partyOpening": {
       "covers": [
         "web/apps/web/app/(app)/txn/ac-opbl/page.tsx",
         "web/apps/api/src/modules/finance/partyOpening.ts",
         "web/apps/api/src/routes/partyOpening.ts"
+      ]
+    },
+    "tagStock": {
+      "covers": [
+        "web/apps/web/app/(app)/reports/tag-stock/page.tsx",
+        "web/apps/web/app/(app)/reports/tag-stock/TagStockGrid.tsx",
+        "web/apps/web/app/(app)/reports/tag-stock/useTagStock.ts",
+        "web/apps/web/app/(app)/reports/tag-stock/dateText.ts",
+        "web/apps/api/src/modules/reports/tagStock.ts",
+        "web/apps/api/src/modules/reports/tagStockColumns.ts",
+        "web/apps/api/src/routes/tagStock.ts"
       ]
     },
     "tagOpening": {
@@ -336,7 +358,9 @@
         "web/apps/api/src/modules/reports/statementDocs.ts",
         "web/apps/api/src/modules/rbac/routePolicy.ts",
         "web/apps/api/src/routes/gstReport.ts",
-        "web/apps/api/src/routes/txn.ts"
+        "web/apps/api/src/routes/txn.ts",
+        "web/apps/web/components/DesktopDateInput.tsx",
+        "web/apps/api/src/modules/sales/labourGstAllocation.ts"
       ]
     },
     "approvalIssue": {
