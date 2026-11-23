@@ -294,9 +294,9 @@ function approvalInput(s: any, options: Record<string, unknown>): ApprovalReques
     }
     return undefined;
   };
-  const dataType = [s?.dataType, supplied.dataType, options.dataType].find(
-    (v): v is string => v === 'A' || v === 'B',
-  );
+  // D3: the A/B setting is the desktop session's MsDataType (RP_ALL.cs:8186), never a request value. Only a
+  // server-built scope may carry it; the query string and the shared filter parse are ignored.
+  const dataType = s?.dataType === 'A' || s?.dataType === 'B' ? (s.dataType as string) : undefined;
 
   const filters: NormalizedApprovalFilters = {};
   const coBook = pick('coBook', 'bookCode');
@@ -390,10 +390,16 @@ export async function approvalReport(
   options: Record<string, unknown> = {},
 ): Promise<ApprovalResult> {
   const request = approvalInput(s, options);
+  const sessionLc = String(s?.lcCode ?? '');
+  // Only a head-office (00) session may edit the lc box (RP_ALL.cs:6660
+  // {{if (Operators.CompareString(DC_Main.MLc_code, "00", false) != 0)}}); a cleared box appends no location
+  // clause (RP_ALL.cs:8154 {{if (Operators.CompareString(tLcCode.Text, "", false) != 0)}}), so a 00 user who
+  // clears it lists every location, as on the Sales branch (filters.ts). Any other session stays locked (D9).
+  const lcCode = sessionLc === '00' && options.lcCode === '' ? '' : sessionLc;
   const session: RpAllSessionScope = {
     tenantId: String(s?.tenantId ?? ''),
     coCode: String(s?.coCode ?? ''),
-    lcCode: String(s?.lcCode ?? ''),
+    lcCode,
     coYear: String(s?.coYear ?? ''),
   };
   const records = await fetchApprovalRecords(prisma, session, request);

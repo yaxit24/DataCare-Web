@@ -49,8 +49,6 @@ const num = (record: RpAllRecord, key: string): number => {
   return typeof v === 'number' ? v : v === null || v === undefined || v === '' ? 0 : Number(v);
 };
 
-/** Voucher group of AprPartyWise/AprPan: CO_YEAR + CO_BOOK + VCH_NO (AprPartyWise.xml:268). */
-const VCH_GROUP = ['coYear', 'coBook', 'vchNo'] as const;
 const VOUCHER_KEY = ['coYear', 'coBook', 'vchNo'] as const;
 
 // ---- Approval Isu → AprPartyWise -------------------------------------------------------------------------
@@ -64,14 +62,17 @@ const VOUCHER_KEY = ['coYear', 'coBook', 'vchNo'] as const;
 const issueLayout: RpAllLayout = {
   template: 'AprPartyWise',
   titlePrefix: 'Party Wise Approval Issue',
+  // Party footer Section10 prints "Party Total :" (Text20) and Sum (..., {APR_DETL.AC_CODE}); the voucher
+  // footer Section9 prints Sum (..., {@Group}) with no caption; the voucher header Section7 prints
+  // BOOK_DATA.BOOK_NAME, APR_DETL.VCH_NO and APR_DETL.VCH_DATE (AprPartyWise.xml Areas).
   groups: [
-    { key: 'acCode', labelKeys: ['acCode', 'acName'], subtotal: 'none' },
     {
-      key: 'vchGroup',
-      labelKeys: ['coBook', 'vchNo'],
+      key: 'acCode',
+      labelKeys: ['acCode', 'acName'],
       subtotal: 'footer',
       subtotalCaption: 'Party Total :',
     },
+    { key: 'vchGroup', labelKeys: ['bookName', 'vchNo', 'vchDate'], subtotal: 'footer' },
   ],
   sort: [{ key: 'srNo' }],
   keys: { voucher: VOUCHER_KEY, line: ['srNo'] },
@@ -81,8 +82,11 @@ const issueLayout: RpAllLayout = {
     col('vchNo', 'Vch No', 'text', 'line'),
     col('vchDate', 'Date', 'date', 'line'),
     col('acName', 'Party_Name', 'text', 'line'),
+    col('itemCode', 'It Code', 'text', 'line', { captionSource: 'field' }),
+    col('itemName', 'Item Name', 'text', 'line', { captionSource: 'field' }),
     col('tagNo', 'Tag No', 'text', 'line'),
-    col('pcs', 'Pcs', 'pcs', 'line'),
+    // Sum ({APR_DETL.ITM_PCS}, {@Group}) and Sum ({APR_DETL.ITM_PCS}, {APR_DETL.AC_CODE}) both print.
+    col('pcs', 'Pcs', 'pcs', 'line', { total: true }),
     col('grossWt', 'Gr Wt', 'weight', 'line', { total: true }),
     col('netWt', 'Net Wt', 'weight', 'line', { total: true }),
     col('itemAmount', 'ItmAmt', 'money', 'line', { total: true }),
@@ -127,6 +131,8 @@ const inoutLayout: RpAllLayout = {
     col('vchNo', 'Vch No', 'text', 'line'),
     col('vchDate', 'Date', 'date', 'line'),
     col('acName', 'Party_Name', 'text', 'line'),
+    // The tag footer Section9 prints ITEM_MAST.IT_NAME beside the voucher and tag (AprInOut.xml Areas).
+    col('itemName', 'Item Name', 'text', 'line', { captionSource: 'field' }),
     col('pcs', 'Pcs', 'pcs', 'line', { total: true }),
     col('grossWt', 'Gr Wt', 'weight', 'line', { total: true }),
     col('netWt', 'Net Wt', 'weight', 'line', { total: true }),
@@ -143,7 +149,8 @@ const inoutLayout: RpAllLayout = {
     col('bookName', 'Book', 'text', 'line'),
   ],
   grandTotal: true,
-  grandTotalCaption: 'GRAND TOTAL :',
+  // Text21 "Grand Total :" in the report footer.
+  grandTotalCaption: 'Grand Total :',
 };
 
 // ---- Approval Panding → AprPan ---------------------------------------------------------------------------
@@ -165,7 +172,8 @@ const pendingLayout: RpAllLayout = {
       subtotal: 'footer',
       subtotalCaption: 'Party Total :',
     },
-    { key: 'vchGroup', labelKeys: [...VCH_GROUP], subtotal: 'none' },
+    // The voucher header Section15 prints APR_DETL.VCH_NO only; the group key stays @VchGroup.
+    { key: 'vchGroup', labelKeys: ['vchNo'], subtotal: 'none' },
     { key: 'prCode', labelKeys: ['prCode', 'productName'], subtotal: 'header' },
     {
       key: 'tagNo',
@@ -185,7 +193,8 @@ const pendingLayout: RpAllLayout = {
     col('designNo', 'Design', 'text', 'line'),
     col('itemCode', 'It Code', 'text', 'line'),
     col('itemName', 'Item Name', 'text', 'line'),
-    col('pcs', 'Pcs', 'pcs', 'line'),
+    // Sum ({@TagPcs}, ...) prints at product, tag, party and report level (AprPan.xml:393-412).
+    col('pcs', 'Pcs', 'pcs', 'line', { total: true }),
     col('grossWt', 'Gr Wt', 'weight', 'line', { total: true }),
     col('netWt', 'Net Wt', 'weight', 'line', { total: true }),
     col('otherAmount', 'Oth Amt', 'money', 'line', { total: true }),
@@ -198,7 +207,8 @@ const pendingLayout: RpAllLayout = {
     col('bookName', 'Book', 'text', 'line'),
   ],
   grandTotal: true,
-  grandTotalCaption: 'GRAND TOTAL :',
+  // Text21 "Grand Total :" in the report footer.
+  grandTotalCaption: 'Grand Total :',
 };
 
 export const APPROVAL_SPECS: Readonly<Record<ApprovalMode, ApprovalModeSpec>> = {

@@ -39,7 +39,11 @@ interface Selection {
 }
 
 /** Run the builder with a fake tenant transaction and capture its one parameterised SELECT. */
-async function selection(dataType?: string, mode = 'issue'): Promise<Selection> {
+async function selection(
+  dataType?: string,
+  mode = 'issue',
+  over: { lcCode?: string; options?: Record<string, unknown>; filters?: Record<string, unknown> } = {},
+): Promise<Selection> {
   let captured: Selection = { text: '', values: [] };
   const tx = {
     $executeRawUnsafe: async () => 1,
@@ -53,10 +57,11 @@ async function selection(dataType?: string, mode = 'issue'): Promise<Selection> 
   };
   const scope = {
     ...SCOPE,
+    ...(over.lcCode !== undefined ? { lcCode: over.lcCode } : {}),
     dataType,
-    filters: { ...(dataType ? { dataType } : {}) },
+    filters: { ...(dataType ? { dataType } : {}), ...(over.filters ?? {}) },
   };
-  await builder(prisma, scope, { mode });
+  await builder(prisma, scope, { mode, ...(over.options ?? {}) });
   return captured;
 }
 
@@ -88,5 +93,33 @@ describe('Approval Rpt selection builder (RP_ALL, three approval buttons)', () =
         `setting ${JSON.stringify(other)} must append no DATA_TYPE predicate`,
       ).not.toMatch(/DATA_TYPE/);
     }
+  });
+
+  it('approval-report.filters.data-type-client-ignored: a request cannot choose the A/B setting (D3)', async () => {
+    // RP_ALL.cs:8186 {{if (Operators.CompareString(DC_Main.MsDataType, "A", false) == 0)}} reads the
+    // session value; a query or filter value must append nothing.
+    const viaQuery = await selection(undefined, 'issue', { options: { dataType: 'A' } });
+    expect(viaQuery.text).not.toMatch(/DATA_TYPE/);
+    const viaFilters = await selection(undefined, 'issue', { filters: { dataType: 'B' } });
+    expect(viaFilters.text).not.toMatch(/DATA_TYPE/);
+  });
+
+  it('approval-report.entry.location-scope-lock: only a 00 session may clear lc Code', async () => {
+    const lcPredicate = /"LC_CODE"::text=\$(\d+)/;
+    // RP_ALL.cs:6660 {{if (Operators.CompareString(DC_Main.MLc_code, "00", false) != 0)}} locks the box.
+    const locked = await selection(undefined, 'issue', { options: { lcCode: '' } });
+    const m = lcPredicate.exec(locked.text);
+    expect(m, 'a location-01 session keeps its location even when the box is cleared').not.toBeNull();
+    expect(locked.values[Number(m![1]) - 1]).toBe('01');
+
+    const headOffice = await selection(undefined, 'issue', { lcCode: '00' });
+    const h = lcPredicate.exec(headOffice.text);
+    expect(h, 'the 00 default still filters its own location').not.toBeNull();
+    expect(headOffice.values[Number(h![1]) - 1]).toBe('00');
+
+    // RP_ALL.cs:8154 {{if (Operators.CompareString(tLcCode.Text, "", false) != 0)}}: a cleared box at 00
+    // appends no location clause.
+    const cleared = await selection(undefined, 'issue', { lcCode: '00', options: { lcCode: '' } });
+    expect(cleared.text).not.toMatch(lcPredicate);
   });
 });
