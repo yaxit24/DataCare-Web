@@ -80,6 +80,8 @@ export const BOOK_DATA_CONFIG: MasterConfig = {
   requiredColumns: ['CO_CODE', 'LC_CODE', 'CO_BOOK', 'BOOK_NAME', 'BOOK_SNAME'],
   columnMessages: { BOOK_SNAME: DESKTOP_MESSAGES.BOOK_SHORT_NAME_REQUIRED },
   references: [],
+  dedicatedWriter:
+    'Books has its own screen (Company → Books, /masters/books-master): the header and its posting-account slots are written together there; generic create, update, delete and CSV import are unavailable.',
 };
 
 // ---- Phase C additional masters (derived from desktop MS_* forms + live schema) ----

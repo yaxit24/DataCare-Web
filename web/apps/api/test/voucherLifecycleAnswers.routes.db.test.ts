@@ -40,7 +40,7 @@ const DAY = `${startYear}-06-15`;
     for (const row of rows)
       await owner.$executeRawUnsafe(`DELETE FROM "${row.table_name}" WHERE tenant_id=$1`, tenantId);
   };
-  const request = (method: 'POST' | 'DELETE', url: string, payload?: unknown) =>
+  const request = (method: 'GET' | 'POST' | 'DELETE', url: string, payload?: unknown) =>
     app.inject({
       method,
       url,
@@ -110,7 +110,14 @@ const DAY = `${startYear}-06-15`;
     );
     expect(header?.mu).toBe(LOGIN);
 
-    const first = await request('DELETE', `/sales-returns/${vchNo}?coBook=SRT`);
+    // N51/D17 (WP-27): a Sales Return delete carries the version read just before it, as the voucher list does.
+    const opened = await request('GET', `/sales-returns/${vchNo}?coBook=SRT`);
+    expect(opened.statusCode, opened.body).toBe(200);
+    const version = encodeURIComponent(opened.json().version);
+    const first = await request(
+      'DELETE',
+      `/sales-returns/${vchNo}?coBook=SRT&expectedVersion=${version}`,
+    );
     expect(first.statusCode, first.body).toBe(200);
     const audit = await query<Array<{ du: string }>>(
       `SELECT btrim("DELETE_USER"::text) du FROM "DELETE_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='SRT' AND "VCH_NO"=$2`,
@@ -119,7 +126,10 @@ const DAY = `${startYear}-06-15`;
     );
     expect(audit.map((row) => row.du)).toEqual([LOGIN]);
 
-    const second = await request('DELETE', `/sales-returns/${vchNo}?coBook=SRT`);
+    const second = await request(
+      'DELETE',
+      `/sales-returns/${vchNo}?coBook=SRT&expectedVersion=${version}`,
+    );
     expect(second.statusCode, second.body).toBe(404);
     expect(second.json()).toMatchObject({ error: 'voucher-not-found' });
     const counted = await query<Array<{ n: number }>>(

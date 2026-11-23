@@ -161,13 +161,12 @@
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "differently-named tag detail. Shares this surface with 3 other menu entries: Report/HuId Report, Report/Stock Report, Report/Tag Stock.",
+   "note": "differently-named tag detail. Shares this surface with 2 other menu entries: Report/HuId Report, Report/Tag Stock.",
    "webSurface": {
     "kind": "route",
     "surface": "GET /reports/tag-stock"
    },
    "sharedSurfaceWith": [
-    "Report/Stock Report",
     "Report/Tag Stock"
    ]
   },
@@ -1020,11 +1019,11 @@
    ],
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
-   "evidence": null,
-   "note": "hallmark purchase page.",
+   "evidence": "apps/web/app/(app)/txn/tag-wise-purc/page.tsx; apps/api/src/modules/purchase/purchaseHallmark.ts; desktop source MDI_FORM.cs:8540-8544, TR_PURC_HM.cs:8023-8063",
+   "note": "hallmark purchase on the TAG PURCHASE books (WP-28, N244/G256): the hallmark layout at /txn/tag-wise-purc lists TAG PURCHASE books only; /txn/purchase-hm forwards to /txn/purchase. Engineering evidence only.",
    "webSurface": {
     "kind": "page",
-    "surface": "web/apps/web/app/(app)/txn/purchase-hm/page.tsx"
+    "surface": "web/apps/web/app/(app)/txn/tag-wise-purc/page.tsx"
    },
    "sharedSurfaceWith": []
   },
@@ -2565,7 +2564,7 @@
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "differently-named HUID tag listing. Shares this surface with 3 other menu entries: Analysis/Tag Detail, Report/Stock Report, Report/Tag Stock. Desktop form or web surface corrected by N85 (G71).",
+   "note": "differently-named HUID tag listing. Shares this surface with 2 other menu entries: Analysis/Tag Detail, Report/Tag Stock. Desktop form or web surface corrected by N85 (G71).",
    "webSurface": {
     "kind": "route",
     "surface": "GET /reports/huid"
@@ -2782,15 +2781,12 @@
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "Partial: GET /reports/tag-stock covers tag stock only; RP_STOCK dimension summaries remain (item-group-stock and stock-by-location are partial candidates). Corrected by N85 (G71).",
+   "note": "RP_STOCK on its own route (N241, G253): eight summary dimensions, date-range columns, drill-down and print/export; voucher zoom and the EMP ISU adjustment remain.",
    "webSurface": {
     "kind": "route",
-    "surface": "GET /reports/tag-stock"
+    "surface": "GET /reports/stock-report"
    },
-   "sharedSurfaceWith": [
-    "Analysis/Tag Detail",
-    "Report/Tag Stock"
-   ]
+   "sharedSurfaceWith": []
   },
   {
    "tab": "Report",
@@ -2853,14 +2849,13 @@
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
    "evidence": null,
-   "note": "RP_TAG stock report. Shares this surface with 3 other menu entries: Analysis/Tag Detail, Report/HuId Report, Report/Stock Report.",
+   "note": "RP_TAG stock report. Shares this surface with 2 other menu entries: Analysis/Tag Detail, Report/HuId Report.",
    "webSurface": {
     "kind": "route",
     "surface": "GET /reports/tag-stock"
    },
    "sharedSurfaceWith": [
-    "Analysis/Tag Detail",
-    "Report/Stock Report"
+    "Analysis/Tag Detail"
    ]
   },
   {
@@ -3308,8 +3303,8 @@
    ],
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
-   "evidence": null,
-   "note": "purchase invoice workflow.",
+   "evidence": "apps/api/src/modules/purchase/purchase.ts; apps/api/src/modules/purchase/purchaseReopen.ts; apps/api/src/modules/purchase/purchaseHallmark.ts; apps/web/app/(app)/txn/purchase/page.tsx; desktop source MDI_FORM.cs:7866-7884, TR_PURC.cs:12120-12458, TR_PURC_HM.cs:7216-8087",
+   "note": "purchase invoice workflow. WP-28 (N244/G256): lossless reopen and edit, the hallmark receive columns, a server-side purchase book family; the screen opens the hallmark layout when PURC_WITH_HMTAX is Y. Engineering evidence only.",
    "webSurface": {
     "kind": "route",
     "surface": "POST /purchases"

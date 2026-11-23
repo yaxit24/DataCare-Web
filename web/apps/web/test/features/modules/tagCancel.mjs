@@ -620,6 +620,42 @@ export const tagCancel = {
       },
     ),
     C(
+      'save.renumber-notice-when-shown-number-taken',
+      'T12',
+      'mutation',
+      'TR_TAG_CAN.cs:5038-5046: in add mode the save re-checks the shown number; when another operator has saved it, the voucher takes MAX+1 and the operator is told {{New Voucher No: }} with the new number',
+      async (ctx) => {
+        const first = await seedTag(ctx);
+        const second = await seedTag(ctx);
+        const page = await open(ctx);
+        const shown = await page.getByLabel('Vch No', { exact: true }).inputValue();
+        // Another operator saves first and takes the number this screen shows.
+        const other = await ctx.session(
+          as(USERS.admin.user, `${USERS.admin.user}#tag-cancel-renumber`),
+        );
+        await openScreen(other.page);
+        await pickTag(other.page, 1, first.tag);
+        const taken = await save(other.page);
+        assert.equal(taken.status(), 201, await taken.text());
+        const takenNo = Number((await taken.json()).voucherNo);
+        assert.equal(takenNo, Number(shown), 'the other operator took the shown number');
+        await pickTag(page, 1, second.tag);
+        const response = await save(page);
+        assert.equal(response.status(), 201, await response.text());
+        const savedNo = String(Number((await response.json()).voucherNo)).padStart(5, '0');
+        assert.equal(Number(savedNo), takenNo + 1);
+        const notice = `New Voucher No: ${savedNo}`;
+        await page.getByTestId('tag-cancel-status').filter({ hasText: notice }).waitFor();
+        await ctx.shot(page, 'renumber-notice');
+        return {
+          observation: `screen showed ${shown}, another operator saved it, this save got ${savedNo} with the notice`,
+          expected: notice,
+          database: { lines: await cancelRows(ctx, savedNo) },
+          downstream: { shown, taken: takenNo, saved: savedNo },
+        };
+      },
+    ),
+    C(
       'edit.add-a-tag',
       'T09',
       'mutation',

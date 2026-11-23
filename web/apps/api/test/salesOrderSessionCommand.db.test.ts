@@ -388,7 +388,10 @@ run('Sales Order financial edit joins the admitted HTTP session transaction', ()
             ['ADV_AMT', 'CASH_AMT']
           : table === 'AC_DATA' || table === 'ROJ_MEL_DATA'
             ? ['DR_AMT', 'CR_AMT']
-            : [];
+            : table === 'SL_ORD_ADJ'
+              ? // The order's own '+' row carries the advance in ORD_AMT (TR_SALE_ORD.cs:9504).
+                ['ORD_AMT']
+              : [];
       const unchanged = (rows: Raw[]) =>
         rows
           .map((row) =>

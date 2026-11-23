@@ -36,6 +36,7 @@ import { PasswordPolicyError } from './modules/auth/password.js';
 import {
   enforceRequestScope,
   listScopeBooks,
+  bookFamilyMainBooks,
   listScopeCompanies,
   listScopeLocations,
   listScopeYears,
@@ -411,6 +412,10 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     // Tag Stock (RP_TAG) likewise owns a typed parser (tagStock.ts parseTagStockQuery) with its own location and
     // item selectors (lcCode, itType, tblCode); it validates, refuses unknown keys and fails closed itself.
     if (url.startsWith('/reports/tag-stock')) return;
+    // The Stock Report (RP_STOCK) owns a typed parser (modules/reports/stockReport/parse.ts): group, product, item,
+    // design, safe, counter, tag and account are its own selectors (RP_STOCK.cs:4287-4327), and it refuses any
+    // other key itself (400 unknown-filter), so this guard, which only knows the shared RP_ALL panel, must not.
+    if (url.startsWith('/reports/stock-report')) return;
     const q = (req.query ?? {}) as Record<string, string | undefined>;
     const asked = REPORT_FILTER_KEYS.filter((k) => String(q[k] ?? '').trim());
     if (!asked.length) return;
@@ -736,12 +741,16 @@ export async function buildApp(opts: BuildOpts): Promise<FastifyInstance> {
     return listScopeYears(prisma, { tenantId: s.tenantId, coCode: s.coCode });
   });
 
-  app.get('/context/books', { preHandler: requireAuth }, async (req: FastifyRequest) => {
+  app.get('/context/books', { preHandler: requireAuth }, async (req: FastifyRequest, reply) => {
     const s = sess(req);
+    // WP-28: `?family=purchase` filters by MAIN_BOOK on the server (DC_Main.cs:1503).
+    const mainBooks = bookFamilyMainBooks((req.query as Record<string, unknown>)?.family);
+    if (mainBooks === null) return reply.code(400).send({ error: 'unknown-book-family' });
     return listScopeBooks(prisma, {
       tenantId: s.tenantId,
       coCode: s.coCode,
       lcCode: s.lcCode,
+      mainBooks,
     });
   });
 
