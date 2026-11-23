@@ -54,14 +54,15 @@ export default function PurchaseReportPage() {
     return () => document.removeEventListener('keydown', onKey);
   }, []);
 
-  /** Enter walks the selectors in tab order; Enter on the last one runs the report. */
+  /**
+   * Enter walks the selectors in tab order at once, as the desktop's KeyDown moves on while its code lookup runs
+   * (RP_ALL.cs:7291-7545); Enter on the last selector runs the report. A lookup box resolves its typed code in the
+   * background (LookupPicker) and never moves the focus itself, so a slow answer cannot pull the focus back.
+   */
   const onEnter = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key !== 'Enter' || e.defaultPrevented) return;
+    if (e.key !== 'Enter') return;
     const target = e.target as HTMLElement;
     if (target instanceof HTMLButtonElement) return;
-    // A lookup box with text resolves it itself (LookupPicker); an empty one just moves on.
-    if (target instanceof HTMLInputElement && target.type === 'text' && target.value.trim() !== '')
-      return;
     e.preventDefault();
     if (target.id === fieldId('item-type')) {
       void r.run();
@@ -85,6 +86,7 @@ export default function PurchaseReportPage() {
         value={filters[spec.key]}
         placeholder="F1"
         resolveTypedCode
+        advanceOnPick={false}
         openOnFocus={false}
         onChange={(v) => setFilters({ [spec.key]: v.toUpperCase() } as Partial<PurchaseFilters>)}
         onPick={(row) => setFilters({ [spec.key]: String(row.code) } as Partial<PurchaseFilters>)}

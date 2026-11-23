@@ -251,7 +251,9 @@ const inOutName = (inout: string) =>
 const partyColumns = (): RpAllColumn[] => [
   col('vchNo', 'Vch No', 'text', 'voucher', { slot: 'Vch No / Item Code' }),
   col('vchDate', 'Date', 'date', 'voucher', { slot: 'Date / Item Name' }),
-  col('bookName', 'Party_Name', 'text', 'voucher', { slot: 'Party_Name' }),
+  // Section7 prints BOOK_NAME under Party_Name; the web adds the party's live master name beside it, because the
+  // party band that carries it in the template is a separate line.
+  field('bookParty', 'Party_Name', 'text', 'voucher', { slot: 'Party_Name' }),
   col('vPcs', 'Pcs', 'pcs', 'voucher', { slot: 'Pcs' }),
   col('vGwt', 'Gr Wt', 'weight', 'voucher', { slot: 'Gr Wt' }),
   col('vNwt', 'Net Wt', 'weight', 'voucher', { slot: 'Net Wt' }),
@@ -332,6 +334,7 @@ const partyDerive = (r: RpAllRecord): Record<string, number | string | null> => 
     inOut: inout,
     inOutName: inOutName(inout),
     lbrOth,
+    bookParty: `${t(r, 'bookName')} ${t(r, 'partyName')}`.trim(),
     pcsS: sign * n(r, 'pcs'),
     gwtS: sign * n(r, 'gwt'),
     nwtS: sign * n(r, 'nwt'),

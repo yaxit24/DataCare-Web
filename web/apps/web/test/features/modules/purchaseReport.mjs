@@ -78,6 +78,8 @@ const exec = (ctx, sql, ...params) => ctx.owner.$executeRawUnsafe(sql, ctx.tenan
 
 async function openReport(page) {
   await page.goto('/dashboard');
+  // The sidebar is drawn once the session has loaded; count the links only after it is there.
+  await page.locator('nav.sidebar a').first().waitFor();
   const link = page.locator(`a[href="${ROUTE}"]`);
   assert.equal(
     await link.count(),
@@ -126,12 +128,12 @@ async function prepareFilterMasters(ctx) {
   await exec(
     ctx,
     `INSERT INTO "PRODUCT_MAST"(tenant_id,"CO_CODE","PR_CODE","PR_NAME") VALUES
-       ($1,'01','P01','E2E GOLD PRODUCT'),($1,'01','P02','E2E SILVER PRODUCT')
+       ($1,'01','P1','E2E GOLD PRODUCT'),($1,'01','P2','E2E SILVER PRODUCT')
      ON CONFLICT DO NOTHING`,
   );
   await exec(
     ctx,
-    `UPDATE "ITEM_MAST" SET "PR_CODE"=CASE WHEN "IT_CODE"=$2 THEN 'P01' ELSE 'P02' END
+    `UPDATE "ITEM_MAST" SET "PR_CODE"=CASE WHEN "IT_CODE"=$2 THEN 'P1' ELSE 'P2' END
       WHERE tenant_id=$1 AND "CO_CODE"='01' AND "IT_CODE" IN ($2,$3)`,
     ITEMS.gold.code,
     ITEMS.silver.code,
@@ -237,7 +239,7 @@ export const purchaseReport = {
         await prepareFilterMasters(ctx);
         const vouchers = await createPair(ctx, page);
         await openReport(page);
-        await field(page, 'product').fill('P02');
+        await field(page, 'product').fill('P2');
         await field(page, 'group').fill(ITEMS.silver.group);
         await field(page, 'item-type').selectOption('S');
         await runMode(page, 'item');
@@ -245,7 +247,7 @@ export const purchaseReport = {
         assert.match(text, new RegExp(vouchers.silver));
         assert.doesNotMatch(text, new RegExp(vouchers.gold));
         return {
-          observation: `P02/S/${ITEMS.silver.group} selected only ${vouchers.silver}`,
+          observation: `P2/S/${ITEMS.silver.group} selected only ${vouchers.silver}`,
           expected: { included: [vouchers.silver], excluded: [vouchers.gold] },
           database: { vouchers },
           downstream: { grid: text },
@@ -260,19 +262,32 @@ export const purchaseReport = {
       async (ctx) => {
         const { page } = await ctx.session();
         await openReport(page);
+        // The company accumulates vouchers across cases and modules, so the pair's own contribution is the
+        // difference of the server's selection totals before and after it was created.
+        const selection = async () =>
+          (await (await page.request.get(`/api${API}?mode=register`)).json()).selection;
+        const before = await selection();
         const vouchers = await createPair(ctx, page);
+        const after = await selection();
+        const round2 = (x) => Math.round(x * 100) / 100;
+        assert.equal(round2(after.netAmt - before.netAmt), TOTAL_TWO.net);
+        assert.equal(round2(after.taxAmt - before.taxAmt), TOTAL_TWO.tax);
+        assert.equal(round2(after.totAmt - before.totAmt), TOTAL_TWO.total);
         await openReport(page);
         const observations = {};
+        const inr = (n) =>
+          n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         for (const mode of ['register', 'item', 'party', 'group', 'party-summary']) {
           await runMode(page, mode);
           const text = await reportText(page);
-          for (const expected of ['1,21,236.00', '3,637.08', '1,24,873.08'])
-            assert.match(text, new RegExp(expected.replace(/[.]/g, '\\.')));
+          const foot = await page.getByTestId('purchase-report-selection').innerText();
+          for (const expected of [after.netAmt, after.taxAmt, after.totAmt])
+            assert.ok(foot.includes(inr(expected)), `${mode}: ${inr(expected)} in ${foot}`);
           observations[mode] = text;
         }
         return {
           observation:
-            'register/item/party/group/summary reconcile to the hand-computed two-voucher totals',
+            'register/item/party/group/summary print the voucher totals of the selection; the pair adds exactly the hand-computed two-voucher totals',
           expected: TOTAL_TWO,
           database: { vouchers },
           downstream: observations,
@@ -298,6 +313,8 @@ export const purchaseReport = {
           await lookup.press('Enter');
           assert.equal((await lookup.inputValue()).toUpperCase(), code);
           await lookup.press('F1');
+          // The help list is fetched after the key; wait for it before counting the open lists.
+          await page.locator('[data-lookup-open]').waitFor();
           assert.equal(await page.locator('[data-lookup-open]').count(), 1);
           await lookup.press('Escape');
           observed.push(`${id}:${code}`);
@@ -315,7 +332,7 @@ export const purchaseReport = {
         const { page } = await ctx.session();
         await openReport(page);
         for (const [id, code] of [
-          ['product', 'P01'],
+          ['product', 'P1'],
           ['group', ITEMS.gold.group],
         ]) {
           const lookup = field(page, id);
@@ -377,7 +394,8 @@ export const purchaseReport = {
         await field(page, 'from').fill('2026-12-31');
         await field(page, 'to').fill('2026-01-01');
         await button(page, 'Run').click();
-        const alert = page.getByRole('alert');
+        // Next's route announcer is a second role=alert on every page; address the screen's own.
+        const alert = page.locator('[role="alert"][data-testid="purchase-report-error"]');
         await alert.waitFor();
         assert.match(await alert.innerText(), /from.*to|date range/i);
         assert.deepEqual(await purchase.counts(ctx), before);
