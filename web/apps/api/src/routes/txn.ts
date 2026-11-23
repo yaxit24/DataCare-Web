@@ -5144,6 +5144,7 @@ export function registerTxnRoutes(app: FastifyInstance, deps: TxnDeps): void {
       saveTagAdjust(prisma, {
         scope: scopeOf(req),
         vchNo: (req.params as any).vchNo,
+        expectedVersion: b.expectedVersion,
         vchDate: b.vchDate,
         book: b.book,
         acCode: b.acCode,
