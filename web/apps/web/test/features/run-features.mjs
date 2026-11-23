@@ -31,8 +31,10 @@ import { cashBank } from './modules/cashBank.mjs';
 import { contraEntry } from './modules/contraEntry.mjs';
 import { fineJv } from './modules/fineJv.mjs';
 import { orderCancel } from './modules/orderCancel.mjs';
+import { balanceTransfer } from './modules/balanceTransfer.mjs';
 import { partyOpening } from './modules/partyOpening.mjs';
 import { tagOpening } from './modules/tagOpening.mjs';
+import { tagStock } from './modules/tagStock.mjs';
 import { dailyRate } from './modules/dailyRate.mjs';
 import { itemOpening } from './modules/itemOpening.mjs';
 import { tagCancel } from './modules/tagCancel.mjs';
@@ -85,8 +87,10 @@ const MODULES = [
   fineJv,
   salesOrder,
   orderCancel,
+  balanceTransfer,
   partyOpening,
   tagOpening,
+  tagStock,
   dailyRate,
   itemOpening,
   tagCancel,

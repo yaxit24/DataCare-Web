@@ -1,9 +1,15 @@
 import { toIsoDate } from '@datacare/core';
-import { withTxBudget, SNAPSHOT_READ } from '../shared/txBudget.js';
+import { withTxBudget, SNAPSHOT_READ, type Tx, type TxProfile } from '../shared/txBudget.js';
 import { escapeHtml } from './render.js';
 import type { XlsxSheet } from './xlsx.js';
 import { gstCompanyNameTx, gstGstr3bTx, gstHsnRowsTx, gstTaxRowsTx } from './gstReportQueries.js';
-import { presentGstr3b, presentHsn, presentTaxSection } from './gstReportSections.js';
+import {
+  HEADER_ONLY_SECTIONS,
+  presentGstr3b,
+  presentHeaderOnly,
+  presentHsn,
+  presentTaxSection,
+} from './gstReportSections.js';
 import {
   GstReportRequestError,
   type GstReportInput,
@@ -11,20 +17,25 @@ import {
   type GstReportScope,
   type GstSection,
   type GstView,
+  type HeaderOnlyGstSection,
 } from './gstReportTypes.js';
 
 const VIEWS = new Set<GstView>(['gstr1', 'gstr2', 'gstr3b']);
-const SECTIONS = new Set<GstSection>([
+/** RP_GST.cs:1662-1673, in the section combo's order (index 1..11). */
+export const GST_SECTIONS: readonly GstSection[] = [
   'B2B',
   'B2CL',
   'B2CS',
   'CDNR',
   'CDNUR',
+  'EXP',
   'AT',
   'ATADJ',
+  'EXEMP',
   'HSN',
-]);
-const BLOCKED = new Set(['EXP', 'EXEMP', 'DOCS', 'TCS']);
+  'DOCS',
+];
+const SECTIONS = new Set<GstSection>(GST_SECTIONS);
 const GSTR2_SUPPORTED = new Set<GstSection>(['B2B', 'B2CL', 'B2CS', 'CDNR', 'CDNUR']);
 
 const ALLOWED_QUERY_FIELDS = new Set([
@@ -80,9 +91,6 @@ export function parseGstReportQuery(
   let section: GstSection | undefined;
   if (view !== 'gstr3b') {
     if (!rawSection) throw new GstReportRequestError('missing-section', 400);
-    if (BLOCKED.has(rawSection)) {
-      throw new GstReportRequestError('section-not-supported', 422, { view, section: rawSection });
-    }
     if (!SECTIONS.has(rawSection as GstSection)) {
       throw new GstReportRequestError('invalid-section', 400, { section: rawSection });
     }
@@ -128,11 +136,18 @@ export function parseGstReportQuery(
 
 /** Build one report from one tenant-bound REPEATABLE READ snapshot. */
 export async function gstReport(prisma: any, input: GstReportInput): Promise<GstReportResult> {
-  return withTxBudget(prisma, input.tenantId, SNAPSHOT_READ, async (tx) => {
+  return withTxBudget(prisma, input.tenantId, SNAPSHOT_READ, (tx) => gstReportTx(tx, input));
+}
+
+async function gstReportTx(tx: Tx, input: GstReportInput): Promise<GstReportResult> {
+  {
     const companyName = await gstCompanyNameTx(tx, input);
     let result: GstReportResult;
     if (input.view === 'gstr3b') {
       result = presentGstr3b(await gstGstr3bTx(tx, input));
+    } else if (HEADER_ONLY_SECTIONS.has(input.section!)) {
+      // No query: the desktop returns before one (EXP, EXEMP) or has none of its own (DOCS).
+      result = presentHeaderOnly(input.view, input.section as HeaderOnlyGstSection);
     } else if (input.section === 'HSN') {
       result = presentHsn(await gstHsnRowsTx(tx, input));
     } else {
@@ -143,14 +158,57 @@ export async function gstReport(prisma: any, input: GstReportInput): Promise<Gst
       companyName,
       fromDate: input.fromDate,
       toDate: input.toDate,
-      blockedSections:
-        input.view === 'gstr1'
-          ? ['EXP', 'EXEMP', 'DOCS', 'TCS']
-          : input.view === 'gstr2'
-            ? ['AT', 'ATADJ', 'HSN', 'EXP', 'EXEMP', 'DOCS', 'TCS']
-            : ['unsupported GSTR-3B rows are listed in blockedRows'],
+      ...(input.view === 'gstr2'
+        ? { blockedSections: ['EXP', 'AT', 'ATADJ', 'EXEMP', 'HSN', 'DOCS'] }
+        : {}),
     };
     return result;
+  }
+}
+
+/**
+ * "Csv Fil" (BtnCsvFile_Click, RP_GST.cs:3077-3146) writes one file per section, named B2B.csv … HSNSUM.csv. EXEMP has
+ * `case 9: break;` and DOCS no case at all, so for them the button writes nothing and says nothing (:3108-3110). The
+ * EXP file is named (:3097) but its bytes come from an empty one-column grid the source never displays; it stays
+ * refused until a Windows run confirms it (WP-19 decision Q9).
+ */
+export function assertGstCsvSection(report: GstReportResult): void {
+  if (report.view !== 'gstr1' || !report.section) return;
+  if (report.section === 'EXEMP' || report.section === 'DOCS') {
+    throw new GstReportRequestError('csv-not-emitted', 422, { section: report.section });
+  }
+  if (report.section === 'EXP') {
+    throw new GstReportRequestError('csv-not-settled', 422, { section: report.section });
+  }
+}
+
+/**
+ * "Gsrt1 Csv" (btnGstrCsv_Click, RP_GST.cs:3819-3943): one workbook, sections 1..10 in combo order, one sheet each
+ * named from `{"", "B2B", "B2CL", "B2CS", "CDNR", "CDNUR", "EXP", "AT", "ATADJ", "EXEMP", "HSN"}` (:3832-3836); DOCS is
+ * not exported (`while (num2 <= 10)`, :3911). Each section is run with "No Record Found...." suppressed, so an empty
+ * section is a caption-only sheet. The web writes the same sheets from the same report builder in one snapshot
+ * (accepted adaptation of the Excel COM automation, WP-19 decision Q6).
+ */
+export const GST_WORKBOOK_SECTIONS: readonly GstSection[] = GST_SECTIONS.filter(
+  (section) => section !== 'DOCS',
+);
+
+/** Ten section reads in one REPEATABLE READ snapshot, so every sheet sees the same vouchers. */
+const WORKBOOK_READ: TxProfile = Object.freeze({
+  budget: 'heavy',
+  isolationLevel: 'RepeatableRead',
+});
+
+export async function gstWorkbook(
+  prisma: any,
+  input: Omit<GstReportInput, 'view' | 'section'>,
+): Promise<GstReportResult[]> {
+  return withTxBudget(prisma, input.tenantId, WORKBOOK_READ, async (tx) => {
+    const reports: GstReportResult[] = [];
+    for (const section of GST_WORKBOOK_SECTIONS) {
+      reports.push(await gstReportTx(tx, { ...input, view: 'gstr1', section }));
+    }
+    return reports;
   });
 }
 

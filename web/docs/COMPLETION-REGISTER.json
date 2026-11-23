@@ -216,11 +216,11 @@
    ],
    "formReferencedInWeb": true,
    "state": "implemented-unverified",
-   "evidence": "Desktop MDI_FORM.cs:7431-7438 opens BtmSchm for Balance TrFr; web adds Company/Balance TrFr rights, POST /balance-transfer/preview, POST /balance-transfer/year-close, POST /balance-transfer/openings wrappers over the existing carry-forward/year-end engines, and apps/web/app/(app)/company/balance-transfer/page.tsx operator dashboard. Covered by routePolicy.test.ts and completionRegister.test.ts; independent desktop transfer comparison remains required.",
+   "evidence": "Desktop MDI_FORM.cs:7431-7438 opens BtmSchm for Balance TrFr; web (WP-23) serves GET /balance-transfer and one POST per Lite dataset (ac-balance, item-stock carried by the BtmSchm rules; tag-stock, sales-order, approval refused pending owner decisions Q1/Q8) from routes/balanceTransfer.ts and modules/ops/balanceTransfer.ts, and apps/web/app/(app)/company/balance-transfer/page.tsx. Covered by balanceTransfer.db.test.ts, balanceTransferRules.test.ts, routePolicy.test.ts and completionRegister.test.ts; independent desktop transfer comparison remains required.",
    "note": "Implemented-unverified: desktop BtmSchm Balance Transfer dashboard now has a dedicated web operator surface for account balance transfer and party-opening carry-forward; stock/order/loan/repair/lot/MFG transfer branches are exposed through their dedicated web modules and still require side-by-side certification.",
    "webSurface": {
     "kind": "route",
-    "surface": "POST /balance-transfer/preview"
+    "surface": "POST /balance-transfer/ac-balance"
    },
    "sharedSurfaceWith": []
   },

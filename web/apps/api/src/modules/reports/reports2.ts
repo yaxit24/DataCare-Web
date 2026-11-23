@@ -1,3 +1,4 @@
+import { notCarriedOpening } from '../shared/carriedOpening.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import type { ReportScope, ListReport } from './reports.js';
 
@@ -28,7 +29,7 @@ export async function cashBook(prisma: any, s: ReportScope): Promise<ListReport>
                  WHERE m."AC_CODE"::text=d."AC_CODE"::text AND m."CO_CODE"::text=d."CO_CODE"::text LIMIT 1) AS particulars,
               ${NN('d."DR_AMT"')} AS dr, ${NN('d."CR_AMT"')} AS cr
        FROM "AC_DATA" d
-       WHERE d."CO_CODE"=$1
+       WHERE d."CO_CODE"=$1 AND ${notCarriedOpening('d')}
          AND (d."AC_CODE"::text ILIKE '%CASH%'
               OR EXISTS (SELECT 1 FROM "AC_MAST" m
                            WHERE m."AC_CODE"::text=d."AC_CODE"::text AND m."CO_CODE"::text=d."CO_CODE"::text
@@ -74,7 +75,7 @@ export async function partyStatement(prisma: any, s: ReportScope): Promise<ListR
     const rows: any[] = await tx.$queryRawUnsafe(
       `SELECT "VCH_DATE" AS date, "CO_BOOK"||'/'||"VCH_NO" AS voucher, "VCH_TYPE" AS "vchType",
               ${NN('"DR_AMT"')} AS dr, ${NN('"CR_AMT"')} AS cr
-       FROM "AC_DATA" WHERE "CO_CODE"=$1 AND "AC_CODE"::text=$2::text ORDER BY "VCH_DATE", "VCH_NO"`,
+       FROM "AC_DATA" WHERE "CO_CODE"=$1 AND "AC_CODE"::text=$2::text AND ${notCarriedOpening()} ORDER BY "VCH_DATE", "VCH_NO"`,
       s.coCode,
       acCode,
     );

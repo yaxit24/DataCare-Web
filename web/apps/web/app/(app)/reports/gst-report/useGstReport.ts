@@ -40,8 +40,13 @@ const messageOf = (error: unknown): string => {
   if (code === 'invalid-date-range') return 'From Date must not be after To Date.';
   if (code === 'section-not-supported')
     return `The ${String(error.body?.section ?? 'selected')} section is not settled by the desktop source.`;
+  if (code === 'csv-not-settled') return EXP_CSV_BLOCKED;
   return error.body?.message || code || error.message;
 };
+
+/** WP-19 decision Q9: the EXP.csv bytes wait for a Windows desktop run; the web writes no invented file. */
+const EXP_CSV_BLOCKED =
+  'EXP.csv is not produced: its desktop byte layout is not yet confirmed on Windows.';
 
 export function useGstReport(coYear: string) {
   const bounds = useMemo(() => fiscalBounds(coYear), [coYear]);
@@ -64,16 +69,17 @@ export function useGstReport(coYear: string) {
   }, []);
 
   const run = useCallback(
-    async (view: GstView) => {
+    async (view: GstView, dates: Partial<Pick<GstFilters, 'fromDate' | 'toDate'>> = {}) => {
       setError('');
       setMessage('');
-      if (view !== 'gstr3b' && !filters.section) {
+      const current = { ...filters, ...dates };
+      if (view !== 'gstr3b' && !current.section) {
         setReport(null);
         setRanQuery(null);
         setError('Please Select Section Type And Try...');
         return;
       }
-      const query = gstQuery(view, filters);
+      const query = gstQuery(view, current);
       const ticket = ++sequence.current;
       setBusyView(view);
       try {
@@ -81,7 +87,9 @@ export function useGstReport(coYear: string) {
         if (ticket !== sequence.current) return;
         setReport(result);
         setRanQuery(query);
-        if (result.rows.length === 0) setMessage('No Record Found....');
+        // EXP and EXEMP return before their query and DOCS has none (RP_GST.cs:2700-2723): no message.
+        if (result.rows.length === 0 && !result.metadata.headerOnly)
+          setMessage('No Record Found....');
       } catch (cause) {
         if (ticket !== sequence.current) return;
         setReport(null);
@@ -100,13 +108,26 @@ export function useGstReport(coYear: string) {
     [ranQuery],
   );
   const csv = useCallback(() => {
+    // BtnCsvFile_Click (RP_GST.cs:3077-3110) writes nothing and says nothing for EXEMP (`case 9: break;`) and DOCS.
+    if (report?.section === 'EXEMP' || report?.section === 'DOCS') return;
+    if (report?.section === 'EXP') {
+      setError(EXP_CSV_BLOCKED);
+      return;
+    }
     const path = exportPath('csv');
     if (path) openDocument(`/api${path}`);
-  }, [exportPath]);
-  const xlsx = useCallback(() => {
-    const path = exportPath('xlsx');
-    if (path) openDocument(`/api${path}`);
-  }, [exportPath]);
+  }, [exportPath, report?.section]);
+  /** "Gsrt1 Csv" (btnGstrCsv_Click, RP_GST.cs:3819-3943): every section B2B..HSN for the screen's filters. */
+  const workbook = useCallback(
+    (dates: Partial<Pick<GstFilters, 'fromDate' | 'toDate'>> = {}) => {
+      const current = { ...filters, ...dates };
+      const query = new URLSearchParams({ fromDate: current.fromDate, toDate: current.toDate });
+      if (current.bookCode.trim()) query.set('bookCode', current.bookCode.trim());
+      if (current.partyCode.trim()) query.set('partyCode', current.partyCode.trim());
+      openDocument(`/api/reports/gst-report/workbook.xlsx?${query.toString()}`);
+    },
+    [filters],
+  );
   const pdf = useCallback(async () => {
     const path = exportPath('pdf');
     if (path) await downloadPdf(path, report?.fileName || 'gst-report');
@@ -123,7 +144,7 @@ export function useGstReport(coYear: string) {
     ranQuery,
     run,
     csv,
-    xlsx,
+    workbook,
     pdf,
   };
 }

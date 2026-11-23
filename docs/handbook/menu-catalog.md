@@ -86,11 +86,11 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `BtmSchm` — direct constructor ([MDI_FORM.cs:7431-7440](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L7431-L7440)).
 - **Does:** Carries account, party, stock, order, scheme, loan, approval, repair, lot and manufacturing balances into the next financial year.
-- **Looks:** Transfer dashboard of module buttons; the web shows years, an account preview grid and three carry-forward actions.
-- **Writes:** OP_DATA, AC_DATA, ITM_OPBL, BAR_DETL, SL_ORD_DATA, APR_DATA, DHRN_DATA, LOT_DETL.
-- **Web:** `/company/balance-transfer`; `POST /balance-transfer/preview`, `POST /balance-transfer/year-close`, `POST /balance-transfer/openings`. Can: create.
-- **Remaining:** Web carries account and party openings only; stock, order, scheme, loan, approval, repair, lot and manufacturing branches, Print and interruption recovery remain.
-- **Owners:** X27, P11-01, X06.
+- **Looks:** The BtmSchm form: title Balance TrFr, Transfer Year (the first later YEAR_MAST year, not typed), the five Lite dataset buttons Ac Balance, Item Stock, Tag Stock, Sales Order, Approval, and Exit / Cancel.
+- **Writes:** OP_DATA, AC_DATA, ITM_OPBL, MAIN_STOCK, YEAR_MAST, AC_MAST, AC_GROUP, ITEM_MAST.
+- **Web:** `/company/balance-transfer`; `GET /balance-transfer`, `POST /balance-transfer/ac-balance`, `POST /balance-transfer/item-stock`, `POST /balance-transfer/tag-stock`, `POST /balance-transfer/sales-order`, `POST /balance-transfer/approval`. Can: create.
+- **Remaining:** G248: Ac Balance and Item Stock carry by the BtmSchm rules (parties only to the closing date, per AC_CODE and DATA_TYPE, gold and silver by IT_TYPE, decimal rounding, target-year replace, one transaction); Tag Stock, Sales Order and Approval are implicit in the one-database web and their buttons count and write nothing. Q1/Q8/Q9/Q2/Q3 decided 2026-11-22 by the architect, owner may override. Open: Q4, Q6, the AvgTouch recompute. Desktop match 0%.
+- **Owners:** G248, N236, P11-01, X06, X27.
 - **Evidence:** [module-map.json:202-260](../../project-memory/catalogs/module-map.json#L202-L260).
 
 ### Books
@@ -121,8 +121,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Does:** Creates full SQL Server backups (yearly database plus NextMain) on a chosen drive and restores them.
 - **Looks:** Backup Data header, read-only browser destination, Select, accessible progress, Backup and Cancel; no operator Restore or Dattach.
 - **Web:** `/backup`; `GET /backup`, `POST /backup/restore`. Can: create.
-- **Remaining:** Milestone 1 implements the scoped v2 download, desktop-visible Backup flow, pre-generation source-backed filename, operator recovery-boundary warning and audit. The executable data-backup.config.nextmain-allowlist archive-scope case remains baselined under G64/N80 because D-BKP-3 has no approved versioned tenant-config/credential envelope. G225 Print-right policy, actual-browser scratch zero-diff, physical overwrite confirmation, full-Lite fixture, production DR and desktop-runtime comparison remain blocked; restore stays contained.
-- **Owners:** G64, N80, X31, P12-05, G225.
+- **Remaining:** Milestone 1 implements the scoped v2 download, desktop-visible Backup flow, pre-generation source-backed filename, operator recovery-boundary warning and audit. N237/G249 adds the versioned tenantConfig section (datacare.tenant-config v1) to the archive and its manifest: an explicit allowlist of nine tenant-shared configuration tables, column by column (a column not listed is never read), and an explicit excluded-secrets list (user password hashes, integration passwords and keys written as null; sessions, refresh-token hashes and idempotency receipts never read); data-backup.config.nextmain-allowlist passes and left the baseline. G225 Print-right policy, actual-browser scratch zero-diff, physical overwrite confirmation, full-Lite fixture, production DR and desktop-runtime comparison remain blocked; restore stays contained.
+- **Owners:** G64, N80, X31, P12-05, G225, G249, N237.
 - **Evidence:** [KB_master.md:225-253](../../project-memory/video-research/_kb/KB_master.md#L225-L253), [data-backup.md](../../docs/handbook/web/data-backup.md).
 
 ### Data Refresh
@@ -715,8 +715,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Voucher/party header, item, charge and old-metal grids, a 16-field tender panel, totals, item image and print controls.
 - **Writes:** SL_DATA, SL_DETL, SL_IDTL, SL_PR_DETL, MAIN_STOCK, DM_DATA, AC_DATA, ROJ_MEL_DATA, TAX_DATA, BILL_OS_DATA.
 - **Web:** `/txn/sales`, `/txn/hallmark-sale`; `POST /sales`, `GET /sales/:vchNo`, `PUT /sales/:vchNo`, `DELETE /sales/:vchNo`, `GET /sales/invoice`, `GET /vouchers/recent`. Can: create, reopen, edit, delete, print, list.
-- **Remaining:** Lossless reopen on the Sales Invoice screen (the Hallmark Sale screen is lossless since N40), configured companion columns and books, tender/source branches, old-metal header vs detail valuation (G83), tax codes on web-provisioned companies (G82), Crystal variants, COL_MAST layout and the printed date year remain.
-- **Owners:** X13, G46, N63, G45, N40, G42, N61, G43, N62, N56, N73, N74, N77, G82, G83.
+- **Remaining:** Lossless reopen on the Sales Invoice screen (the Hallmark Sale screen is lossless since N40), configured companion columns and books, tender/source branches, old-metal header vs detail valuation (G83), tax codes on web-provisioned companies (G82), Crystal variants, COL_MAST layout and the printed date year remain. Percentage labour and the line precision follow CommPassTotal (N235/G247); the registration-serial branches are not modelled.
+- **Owners:** X13, G46, N63, G45, N40, G42, N61, G43, N62, N56, N73, N74, N77, G82, G83, G247, N235.
 - **Evidence:** [KB_transaction.md:43-109](../../project-memory/video-research/_kb/KB_transaction.md#L43-L109).
 
 ### Sales Order
@@ -1684,8 +1684,8 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 - **Looks:** Date/book/account/location/section filters with return, zoom, summary and CSV buttons.
 - **Reads:** TAX_DATA, TAX_MAST, BOOK_DATA, AC_MAST, LOCT_MAST.
 - **Web:** `/reports/gst-report`; `GET /reports/gst-report`, `GET /reports/gstr1`, `GET /reports/gstr2`, `GET /reports/gstr3b`, `GET /reports/hsn-summary`. Can: print, list.
-- **Remaining:** The RP_GST screen exists: GSTR-1 B2B, B2CL, B2CS, CDNR, CDNUR, AT, ATADJ and HSN, GSTR-2 equivalents and the three settled GSTR-3B rows, with CSV, XLSX and PDF exports. EXP, EXEMP, DOCS and TCS are blocked, and the UAE variant is out of scope (the page is the non-UAE RP_GST screen). A sale made on the Sales screen reconciles with the hand-computed tax in B2CS and GSTR-3B. The HSN local CGST/SGST halves round half away from zero and print 0.00 for a tiny negative, as the desktop's .NET Framework 4.8 does (measured on a windows-latest runner by web/scripts/dotnet-fx-probe: 2.5 M positive and 2 M negative midpoints, 0 differences), so a bill with an odd-paise tax such as 1,908.29 gives 954.15 and 954.15 instead of the earlier 422 refusal. Open: HSN is empty for a web-provisioned company because no book sets BOOK_TYPE 'T' (MS_BOOK.cs:2109-2111) and the Books screen has no Invoice Type control; labour HSN rows carry no discount because LBR_ISU_DETL has no discount column (RP_GST.cs:2719); most gst-report browser cases only open the screen and do not compare numbers; the desktop CSV and Crystal outputs were never compared at runtime.
-- **Owners:** N24, X26, P10-03, N36, G48, N57, N75, G225, N212.
+- **Remaining:** The RP_GST screen exists: GSTR-1 B2B, B2CL, B2CS, CDNR, CDNUR, AT, ATADJ and HSN, GSTR-2 equivalents, EXP, EXEMP and DOCS as the desktop's caption-only grids (no query, no rows, no message), and the whole desktop GSTR-3B grid with figures for 3.1(a), 3.1(d), the 3.1 total, 3.2(1), 4(A)(5) and 6.1 under the owner decisions of WP-19 (From..To, All Other ITC purchases only, 6.1 State/Ut Tax = SGST total; 3.1(a) and 3.2(1) count every '+' row, purchase returns included, as the desktop does). The date boxes run DC_Main.SetDate ("Date Not Valid...", "Month Not Valid...", focus kept); Csv Fil writes nothing for EXEMP and DOCS; Gsrt1 Csv is one XLSX with the sheets B2B..HSN (accepted adaptation); CSV quoting is RFC 4180 with formula neutralisation (accepted adaptation); TCS never enters a GST figure (a TCS sale's Invoice Value excludes it, 6.2 is blank). Labour HSN rows sum the desktop per-line GST shares, which the labour writer now stores (migration 20261122090000). The HSN local CGST/SGST halves round half away from zero, as the .NET Framework 4.8 desktop does (web/scripts/dotnet-fx-probe). The UAE variant is out of scope. Open: EXP.csv bytes wait for a Windows run (WP-19 Q9); the T14 read/export fault cases wait for a harness injector; the web labour invoice takes no labour discount; HSN is empty for a web-provisioned company until a book sets BOOK_TYPE 'T' (MS_BOOK.cs:2109-2111); several older gst-report cases only open the screen; desktop CSV and Crystal outputs were never compared at runtime.
+- **Owners:** N24, X26, P10-03, N36, G48, N57, N75, G225, N212, N239, G251.
 - **Evidence:** [gst-engine.md:8-45](../../web-implementation-spec/04_Cross_Cutting_Engines/gst-engine.md#L8-L45).
 
 ### HuId Report
@@ -1868,11 +1868,11 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `RP_TAG` — constructor caption 'Tag Stock' ([MDI_FORM.cs:8891-8900](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8891-L8900)).
 - **Does:** Lists inward, outward, in-stock, MRP, approval-pending and all tags with totals.
-- **Looks:** Six mode tabs, date/tag/item/product/group/counter filters, a tag grid, totals and an image preview.
+- **Looks:** From/To, Search, It Type, Item, Product, Group, TagNo, Size, Location and Book selectors, RptType Tag Wise / Tag Summ, six mode buttons, the RP_TAG tag grid with n3/n0 footer, Excel and CSV; nothing runs on open.
 - **Reads:** MAIN_STOCK, BAR_DETL, BAR_IDTL, APR_DETL, TAG_IMAGE_DATA, TAG_STOCK_PRINT.
-- **Web:** `/reports/tag-stock`; `GET /reports/tag-stock`, `GET /reports/tag-stock.csv`. Can: print, list.
-- **Remaining:** Tabs and totals exist; date/tag/product/group filters, full columns and sub-details, Excel/PDF and Crystal layouts are incomplete.
-- **Owners:** N24, X26, P10-04, N57, N75, G225, N212.
+- **Web:** `/reports/tag-stock`; `GET /reports/tag-stock`, `GET /reports/tag-stock.csv`, `GET /reports/tag-stock.xlsx`, `GET /reports/tag-stock/sizes`. Can: print, list.
+- **Remaining:** Implemented from source (N238, G250): per-mode selections, signed-movement stock rule, sentinel N, no row cap, columns, sort orders, keys, CSV/Excel behind the Print right. Open: voucher zoom, Print window and Crystal layouts (TagStkRpt), approval other-item columns, edition-E Emp Isu Less, summary Mrp/Size, year rollover, desktop-runtime comparison; the browser module was written but not run locally.
+- **Owners:** N24, X26, P10-04, N57, N75, G225, N212, G250, N238.
 - **Evidence:** [RP_TAG.cs:3977-4325](../../unified/src/csharp/DataCareNext/RP_TAG.cs#L3977-L4325).
 
 ### Trading Report

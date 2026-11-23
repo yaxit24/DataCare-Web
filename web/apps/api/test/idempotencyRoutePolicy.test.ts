@@ -143,6 +143,19 @@ const NOT_YET_GUARDED = [
 const routePattern = /\b(?:app|server)\.(post)\(\s*(['"`])([^'"`]+)\2/g;
 
 /** POST routes whose policy is a create right on a voucher form (not a master, `@master` or a utility). */
+/**
+ * Creates that are not vouchers and are replay-safe by their own rule: a Balance TrFr run deletes and rewrites its
+ * dataset in the Transfer Year (BtmSchm.cs:2764, :2932), so a replayed request leaves the same rows (WP-23, cases.md
+ * retry.duplicate-request). The refused datasets write nothing.
+ */
+const REPLAY_SAFE = new Set([
+  'POST /balance-transfer/ac-balance',
+  'POST /balance-transfer/item-stock',
+  'POST /balance-transfer/tag-stock',
+  'POST /balance-transfer/sales-order',
+  'POST /balance-transfer/approval',
+]);
+
 function voucherCreateRoutes(): string[] {
   const routeDir = resolve(here, '../src/routes');
   const found = new Set<string>();
@@ -157,7 +170,8 @@ function voucherCreateRoutes(): string[] {
       if (
         policy?.kind === 'form' &&
         policy.action === 'create' &&
-        !/^(Masters\/|Utilities\/|@master$)/.test(String(policy.form))
+        !/^(Masters\/|Utilities\/|@master$)/.test(String(policy.form)) &&
+        !REPLAY_SAFE.has(`POST ${match[3]}`)
       )
         found.add(`POST ${match[3]}`);
     }

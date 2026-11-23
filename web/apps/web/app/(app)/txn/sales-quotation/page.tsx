@@ -19,7 +19,13 @@ import { VoucherChrome } from '../../../../components/VoucherChrome';
 import { VoucherList } from '../../../../components/VoucherList';
 import { desktopGlobalFormKeyActions, FormKeyHints } from '../../../../components/FormKeys';
 import { companyFlag, useCompanySettings, companySetting } from '../../../../lib/companySettings';
-import { oldGoldRowAmount, recalcLine } from '../../../../lib/lineRecalc';
+import {
+  applySaleTagPick,
+  editSaleGridRow,
+  oldGoldRowAmount,
+  recalcSaleGridRow,
+  saleGridRowLabour,
+} from '../../../../lib/lineRecalc';
 import { billTotals, lineNet as lineNetAmount } from '@datacare/core';
 import { todayLocal } from '../../../../lib/localDate';
 import { openDocument } from '../../../../lib/openDocument';
@@ -49,6 +55,7 @@ interface Line {
   itmSize: string;
   lessWt: string;
   lbrPct: string;
+  lbrPctApplied?: string; // column 83 (TR_SALE.cs:10999-11021)
   othAmt: string;
   bagWt: string;
   tagGrossWt: string;
@@ -366,23 +373,16 @@ export default function SalesQuotationPage() {
   });
 
   const setLine = (i: number, k: keyof Line, v: string) =>
-    setLines((ls) => ls.map((l, j) => (j === i ? { ...l, [k]: v } : l)));
+    // Lbr% re-derives Making/g only when it changes (TR_SALE.cs:10999-11021).
+    setLines((ls) => ls.map((l, j) => (j === i ? editSaleGridRow(l, k, v, roundingPolicy) : l)));
 
-  // live line preview: fine = net×touch/100, metal = fine×rate, making = net×making/g, net = metal+making
-  /**
-   * P5: the line preview now delegates to the shared recalculation kernel.
-   *
-   * The local arithmetic this replaces disagreed with the server in four ways, so the figures on
-   * screen were not the figures that posted:
-   *   - fine was rounded to 2dp; the server's fine precision is 3dp (`PRECISION.fine`)
-   *   - `westPct` was ignored entirely, while the server's fine base is (touch + wastage)
-   *   - making was `netWt x rate` with no ghat term, the same LBR_WITH_GHT understatement already
-   *     fixed on the server (blank default 'Y', so ghat counts unless switched off)
-   *   - it rounded locally instead of through the money kernel
-   * Delegating means there is one implementation, so the preview cannot drift from the posting again.
-   */
+  // P5: the live line preview delegates to the shared recalculation kernel (lib/lineRecalc.ts), so the figures on
+  // screen are the ones the server posts (fine 3dp with wastage, ghat in the labour base, the money kernel).
   const calc = (l: Line) => {
-    const r = recalcLine({ ...l, labourRate: l.making, labourType: 'G' }, 'sale', {
+    // Lbr% rows follow TR_SALE.cs:11021/:11084-11127 and amounts the Sale line precision (:10343-10362).
+    const r = recalcSaleGridRow(l, {
+      roundingPolicy,
+      labourBasis: String(companySetting(companySettings, 'LBR_TYPE') ?? ''),
       labourIncludesGhat: companyFlag(companySettings, 'LBR_WITH_GHT', 'Y'),
       // CO_SET.SL_AMT_TYPE: the basis a line without its own RtWith is priced on (blank = N).
       saleAmountType: String(companySetting(companySettings, 'SL_AMT_TYPE') ?? ''),
@@ -552,7 +552,11 @@ export default function SalesQuotationPage() {
         netWt: str(line.netWt),
         touch: str(line.touch),
         rate: str(line.rate),
-        making: line.labourType === 'per_gram' ? str(line.labourRate) : '',
+        // Reopen restores LBR_RATE, column 83 and ITM_AMT, so an unchanged save is identical (TR_SALE.cs:21091-21096).
+        making:
+          line.labourType === 'per_gram' || Number(line.labourPct) ? str(line.labourRate) : '',
+        lbrPctApplied: str(line.labourPct),
+        metalAmount: str(line.metalAmount),
         designNo: String(line.designNo ?? ''),
         itmSize: String(line.itmSize ?? ''),
         lessWt: str(line.lessWt),
@@ -772,15 +776,7 @@ export default function SalesQuotationPage() {
             mrp: n(l.mrp) || undefined,
             metalAmount: n(l.metalAmount) || undefined,
             metal: l.metal === 'S' ? ('S' as const) : l.metal === 'G' ? ('G' as const) : undefined,
-            ...(l.making
-              ? { labourType: 'per_gram' as const, labourRate: n(l.making) }
-              : l.labourType
-                ? {
-                    labourType: l.labourType,
-                    labourRate: l.labourRate,
-                    labourFixed: l.labourFixed,
-                  }
-                : {}),
+            ...saleGridRowLabour(l),
           })),
       };
       const saved = loadedVchNo
@@ -1250,19 +1246,10 @@ export default function SalesQuotationPage() {
                         onChange={(v) => setLine(i, 'tagNo', v)}
                         style={{ width: 110 }}
                         onPick={(r) =>
+                          // Through the grid's edit rules: a new rate or weight re-prices (TR_SALE.cs:10822-10880).
                           setLines((ls) =>
                             ls.map((x, j) =>
-                              j === i
-                                ? {
-                                    ...x,
-                                    tagNo: String(r.code),
-                                    itCode: String(r.name || x.itCode),
-                                    netWt: String(r.ITM_NWT ?? x.netWt),
-                                    grossWt: String(r.ITM_GWT ?? x.grossWt),
-                                    touch: String(r.ITM_TOUCH ?? x.touch),
-                                    rate: String(r.ITM_RATE ?? x.rate),
-                                  }
-                                : x,
+                              j === i ? applySaleTagPick(x, r, roundingPolicy) : x,
                             ),
                           )
                         }

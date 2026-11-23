@@ -2249,7 +2249,7 @@
       "verificationCases": [
         "All required report IDs return a result, including valid empty datasets; missing/skipped/duplicated reports fail.",
         "Different party/group/location/year/metals/valuation filters select the independently expected rows and totals.",
-        "Transactions from X12\u2013X24 reconcile to daybook, stock, outstanding, financial and specialist reports.",
+        "Transactions from X12–X24 reconcile to daybook, stock, outstanding, financial and specialist reports.",
         "View/print/export permissions and drill-back preserve original scope and filter context.",
         "Removing one mandatory report from an otherwise all-pass result must fail certification."
       ],
@@ -2935,7 +2935,7 @@
       "id": "N13",
       "status": "planned",
       "action": "Prove complete identity/default/NULL/clock/numeric contracts for purchase, sale, finance, stock and loan families before wider edits",
-      "parentLabels": "P01-01\u201305, X05/X06",
+      "parentLabels": "P01-01–05, X05/X06",
       "startAfter": [
         "N03"
       ],
@@ -3093,7 +3093,7 @@
       "id": "N22",
       "status": "planned",
       "action": "Join order/approval/consignment/tour/parcel/repair chains with billing and custody",
-      "parentLabels": "P05-04\u201307, X14/X17",
+      "parentLabels": "P05-04–07, X14/X17",
       "startAfter": [
         "N15",
         "N18"
@@ -3175,7 +3175,7 @@
       "id": "N27",
       "status": "planned",
       "action": "Implement complete staged migration and historical business continuation; retain cutover containment until its gate closes",
-      "parentLabels": "P12-01\u201303, X30",
+      "parentLabels": "P12-01–03, X30",
       "startAfter": [
         "N02",
         "N05",
@@ -3233,7 +3233,7 @@
       "id": "N30",
       "status": "planned",
       "action": "Strengthen exact semantic-leaf and mode enforcement, freeze release inputs, certify and perform controlled rollout",
-      "parentLabels": "P14-02/04\u201306, X34",
+      "parentLabels": "P14-02/04–06, X34",
       "startAfter": [
         "N29"
       ],
@@ -3282,7 +3282,7 @@
         "web/apps/api/test/jobworkBook.routes.db.test.ts"
       ],
       "statusAsOf": "2026-10-01",
-      "statusNote": "TAG PURCHASE book lifecycle and karigar/jobwork books landed (PR #11, PR #16, PR #19). The 95-column TR_PURC_HM receive band and lossless reopen (G46) remain; see document 11 \u00a72."
+      "statusNote": "TAG PURCHASE book lifecycle and karigar/jobwork books landed (PR #11, PR #16, PR #19). The 95-column TR_PURC_HM receive band and lossless reopen (G46) remain; see document 11 §2."
     },
     {
       "id": "N33",
@@ -3603,7 +3603,7 @@
         "web/apps/api/test/kernelConformance.test.ts",
         ".github/workflows/ci.yml"
       ],
-      "statusNote": "The total-count ratchet is replaced by a checked-in baseline of site IDENTITIES (parity/kernel-conformance-baseline.json, 109 sites: 104 rounding, 5 book-account). The script and the mirror test load the same baseline and run the same compareToBaseline across apps/api/src + packages/core/src, so the old scope/ceiling disagreement (script 108 over API only, test 125 over API+core) is gone; a site not in the baseline fails and a burned-down site must have its ID deleted. The 21 helpers added since the reviewed tree (41a7ba4) are migrated to @datacare/core: 9 report builders, einvoiceExport, scheme, stockInout and tagSplitRows to half-up round (desktop Strings.Format); otherIncome to roundHalfEven for the Math.Round figures (discount TR_OTH_PURC.cs:2872, TDS :5001, reverse-charge back-calc :2876) and round for the Strings.Format line taxes (:2889-2900). integerMoney changed from half-up Math.round to half-to-even per the desktop. Signed midpoint vectors and the touched writers\u2019 write-set DB tests pass (otherIncome, stockInout, scheme, tagSplitLifecycle). The script is a blocking static-gates gate. Burn-down of the remaining 104 grandfathered rounding sites and 5 BOOK_DETL reads is owned by whichever slice next touches each file (N59 for the five BOOK_DETL reads)."
+      "statusNote": "The total-count ratchet is replaced by a checked-in baseline of site IDENTITIES (parity/kernel-conformance-baseline.json, 109 sites: 104 rounding, 5 book-account). The script and the mirror test load the same baseline and run the same compareToBaseline across apps/api/src + packages/core/src, so the old scope/ceiling disagreement (script 108 over API only, test 125 over API+core) is gone; a site not in the baseline fails and a burned-down site must have its ID deleted. The 21 helpers added since the reviewed tree (41a7ba4) are migrated to @datacare/core: 9 report builders, einvoiceExport, scheme, stockInout and tagSplitRows to half-up round (desktop Strings.Format); otherIncome to roundHalfEven for the Math.Round figures (discount TR_OTH_PURC.cs:2872, TDS :5001, reverse-charge back-calc :2876) and round for the Strings.Format line taxes (:2889-2900). integerMoney changed from half-up Math.round to half-to-even per the desktop. Signed midpoint vectors and the touched writers’ write-set DB tests pass (otherIncome, stockInout, scheme, tagSplitLifecycle). The script is a blocking static-gates gate. Burn-down of the remaining 104 grandfathered rounding sites and 5 BOOK_DETL reads is owned by whichever slice next touches each file (N59 for the five BOOK_DETL reads)."
     },
     {
       "id": "N49",
@@ -4309,7 +4309,7 @@
         "web/security/next16-rehearsal.json",
         ".github/workflows/ci.yml"
       ],
-      "statusNote": "Steps 1-3 (prior): next 15.5.27, react/react-dom 19.0.8, Node 24 in both CI workflows, Dockerfile.web, apps/api/Dockerfile and engines; blocking advisory gate. Step 4 (Prisma 7, D26): upgraded to Prisma 7.10.0 with the PostgreSQL driver adapter \u2014 new prisma-client generator with ESM output and a custom generated path, datasource URL moved to packages/db/prisma.config.ts, one adapter-backed PrismaClient boundary in @datacare/db consumed by all 232 API files (no @prisma/client in @datacare/api). Adapted three Prisma 7 raw-query behaviour changes without changing business results: parameter-type casts (::text/::numeric/::text[]) at untyped INSERT..SELECT and reused-placeholder positions in production (backupManifest, tagPrint, companyClone, companySettings, lotRegister, passbook) and in db-test fixtures; distinct placeholders for the dataRepairOps SL_DETL_RTN update; a shared prismaError.ts (postgresErrorCodes/hasPostgresErrorCode) reading the Prisma 7 driverAdapterError SQLSTATE path, used by the four sessionContext conflict detectors and txBudget timeout detection. Vitest 4.1.11 clears the last moderate advisory GHSA-82fw-gwwq-j7x9. New blocking runtime:check gate (pure validator + node:test controls) in static-gates. Step 5: Next.js 16.3.8 rehearsal recorded in web/security/next16-rehearsal.json (React fixed) \u2014 typecheck, build, web unit 631+9 and route reachability 126/126 pass; mocked-browser smoke regresses on /txn/tag-opening under Next 16, so the supported baseline stays on patched 15.5.27 and the Next 16 migration is deferred (status regressions-found with a disposition, which D26 permits). Verified on the isolated branch: typecheck, typecheck:tests, lint, format, build, advisories 0/0, the full isolated DB suite 309 files/3446 tests 0 failures on a per-worktree port, both self-contained real-stack browser runners, and a Chrome DevTools visual pass against the live Prisma 7 stack (login, dashboard KPIs balanced, Sales Invoice, a posted sale 201 with the trial balance still balanced). The 24-journey harness still stops at the pre-existing non-hermetic tag-split cross-seed (G23/N49), unrelated to this slice. 2026-10-26 (PR #55): new critical/high advisories against the unchanged lockfile turned the gate red; next 15.5.28 (GHSA-2464-fhr4-w9xw), vitest 4.1.12 with vite 6.4.5, source-map-js 1.2.2, zod 4.6.7, @azure/msal-node 7.1.1 by override, fastify 5.12.7 and fast-uri 3.1.9 bring it back to 0/0/0/0; the Next.js 16 rehearsal was re-run on 16.4.3 against the 15.5.28 baseline and passes."
+      "statusNote": "Steps 1-3 (prior): next 15.5.27, react/react-dom 19.0.8, Node 24 in both CI workflows, Dockerfile.web, apps/api/Dockerfile and engines; blocking advisory gate. Step 4 (Prisma 7, D26): upgraded to Prisma 7.10.0 with the PostgreSQL driver adapter — new prisma-client generator with ESM output and a custom generated path, datasource URL moved to packages/db/prisma.config.ts, one adapter-backed PrismaClient boundary in @datacare/db consumed by all 232 API files (no @prisma/client in @datacare/api). Adapted three Prisma 7 raw-query behaviour changes without changing business results: parameter-type casts (::text/::numeric/::text[]) at untyped INSERT..SELECT and reused-placeholder positions in production (backupManifest, tagPrint, companyClone, companySettings, lotRegister, passbook) and in db-test fixtures; distinct placeholders for the dataRepairOps SL_DETL_RTN update; a shared prismaError.ts (postgresErrorCodes/hasPostgresErrorCode) reading the Prisma 7 driverAdapterError SQLSTATE path, used by the four sessionContext conflict detectors and txBudget timeout detection. Vitest 4.1.11 clears the last moderate advisory GHSA-82fw-gwwq-j7x9. New blocking runtime:check gate (pure validator + node:test controls) in static-gates. Step 5: Next.js 16.3.8 rehearsal recorded in web/security/next16-rehearsal.json (React fixed) — typecheck, build, web unit 631+9 and route reachability 126/126 pass; mocked-browser smoke regresses on /txn/tag-opening under Next 16, so the supported baseline stays on patched 15.5.27 and the Next 16 migration is deferred (status regressions-found with a disposition, which D26 permits). Verified on the isolated branch: typecheck, typecheck:tests, lint, format, build, advisories 0/0, the full isolated DB suite 309 files/3446 tests 0 failures on a per-worktree port, both self-contained real-stack browser runners, and a Chrome DevTools visual pass against the live Prisma 7 stack (login, dashboard KPIs balanced, Sales Invoice, a posted sale 201 with the trial balance still balanced). The 24-journey harness still stops at the pre-existing non-hermetic tag-split cross-seed (G23/N49), unrelated to this slice. 2026-10-26 (PR #55): new critical/high advisories against the unchanged lockfile turned the gate red; next 15.5.28 (GHSA-2464-fhr4-w9xw), vitest 4.1.12 with vite 6.4.5, source-map-js 1.2.2, zod 4.6.7, @azure/msal-node 7.1.1 by override, fastify 5.12.7 and fast-uri 3.1.9 bring it back to 0/0/0/0; the Next.js 16 rehearsal was re-run on 16.4.3 against the 15.5.28 baseline and passes."
     },
     {
       "id": "N87",
@@ -4730,7 +4730,7 @@
         "web/apps/web/app/(app)/txn/item-opening/page.tsx",
         "web/apps/web/test/browser.smoke.mjs"
       ],
-      "statusNote": "The provision-then-filter sweep continued to Item Opening (TR_ITM_OPBL, CurBookHelp OPSTK, MDI_FORM.cs:7701). It opens non-tag item stock (ITM_OPBL + positive MAIN_STOCK, empty AC_DATA), but seedCompany provisioned no Item Opening book. seedCompany now provisions IOP (OPSTK -> BAR_DATA) as a ledger-less book (empty slots); the seedCompleteness orphans allowance is now [FIO, IOP, TOP, WHQ]. The Item Opening list is filtered to OPSTK; the browser-smoke IOP book mock was aligned to the real OPSTK MAIN_BOOK. Verified: seedCompleteness asserts the IOP book + BAR_DATA routing; provisioning counts unchanged (no BOOK_DETL legs); full API+DB 313/3483, web unit 646, browser smoke, all gates. END-TO-END VERIFIED (2026-10-28): on the seedCompany demo, logged in via the API, POST /stock/item-opening with coBook IOP returned 201 {vchNo:1,items:1} and the voucher reloaded (GET 200 with its line + header) \u2014 proving the provisioned IOP book actually posts and persists a voucher, not merely that the book appears. This confirms the whole provision-then-filter sweep (Stock In/Out, Dhiran, Labour/Fine, Tag/Item Opening, Fine In/Out, Bullion) enables real voucher posting on a fresh company."
+      "statusNote": "The provision-then-filter sweep continued to Item Opening (TR_ITM_OPBL, CurBookHelp OPSTK, MDI_FORM.cs:7701). It opens non-tag item stock (ITM_OPBL + positive MAIN_STOCK, empty AC_DATA), but seedCompany provisioned no Item Opening book. seedCompany now provisions IOP (OPSTK -> BAR_DATA) as a ledger-less book (empty slots); the seedCompleteness orphans allowance is now [FIO, IOP, TOP, WHQ]. The Item Opening list is filtered to OPSTK; the browser-smoke IOP book mock was aligned to the real OPSTK MAIN_BOOK. Verified: seedCompleteness asserts the IOP book + BAR_DATA routing; provisioning counts unchanged (no BOOK_DETL legs); full API+DB 313/3483, web unit 646, browser smoke, all gates. END-TO-END VERIFIED (2026-10-28): on the seedCompany demo, logged in via the API, POST /stock/item-opening with coBook IOP returned 201 {vchNo:1,items:1} and the voucher reloaded (GET 200 with its line + header) — proving the provisioned IOP book actually posts and persists a voucher, not merely that the book appears. This confirms the whole provision-then-filter sweep (Stock In/Out, Dhiran, Labour/Fine, Tag/Item Opening, Fine In/Out, Bullion) enables real voucher posting on a fresh company."
     },
     {
       "id": "N105",
@@ -4945,7 +4945,7 @@
         "web/apps/api/src/modules/bullion/fineSalePurchase.ts",
         "web/apps/api/test/postingAccountLiterals.test.ts"
       ],
-      "statusNote": "Fine Settlement metal leg used literal FINESALE/FINEPURC; now resolved from the FSL/FPR book BOOK_DETL slot 1 (seed already names FINESALE/FINEPURC, N100) via resolveBookAccountTx fail-closed, override honoured. fineSalePurchase.ts cleared from the register; GST/GSTINPUT tax account is a separate tax-config concern (not matched by the scan). total 46->44. NOTE: salesOrder P0-04 (advance/cancel) was attempted but reverted \u2014 the file is at its size ceiling (2350) and the fix overflowed; deferred. Verified locally: typecheck/typecheck:tests/lint/format/size/kernel; routes 126; web 646; full API+DB 313/3483."
+      "statusNote": "Fine Settlement metal leg used literal FINESALE/FINEPURC; now resolved from the FSL/FPR book BOOK_DETL slot 1 (seed already names FINESALE/FINEPURC, N100) via resolveBookAccountTx fail-closed, override honoured. fineSalePurchase.ts cleared from the register; GST/GSTINPUT tax account is a separate tax-config concern (not matched by the scan). total 46->44. NOTE: salesOrder P0-04 (advance/cancel) was attempted but reverted — the file is at its size ceiling (2350) and the fix overflowed; deferred. Verified locally: typecheck/typecheck:tests/lint/format/size/kernel; routes 126; web 646; full API+DB 313/3483."
     },
     {
       "id": "N115",
@@ -4970,7 +4970,7 @@
     {
       "id": "N116",
       "status": "implemented-unverified",
-      "action": "Add the retail sales Tax Invoice print (GET /sales/:vchNo/print) \u2014 the highest-value missing Stage E document",
+      "action": "Add the retail sales Tax Invoice print (GET /sales/:vchNo/print) — the highest-value missing Stage E document",
       "parentLabels": "P03-04; E-documents",
       "startAfter": [
         "N115"
@@ -5998,7 +5998,7 @@
       "startAfter": [
         "N161"
       ],
-      "requiredProof": "feature E2E sales-invoice.create.two-lines-dissimilar and purchase-invoice.create.two-groups pass (\u03a3 income/expense legs = taxable, balanced ledger); sales and purchase DB suites green; both baseline entries are removed in the same PR.",
+      "requiredProof": "feature E2E sales-invoice.create.two-lines-dissimilar and purchase-invoice.create.two-groups pass (Σ income/expense legs = taxable, balanced ledger); sales and purchase DB suites green; both baseline entries are removed in the same PR.",
       "gapIds": "G169, G176",
       "entryDefinition": "12-lineage-verification-2026-10-01.md section 5",
       "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
@@ -6040,7 +6040,7 @@
         "web/apps/web/test/saveMnemonic.test.ts",
         "web/apps/web/test/features/baseline.json"
       ],
-      "statusNote": "IMPLEMENTED. The shell's global key handler (GlobalFormKeys) presses the first enabled, on-screen button marked data-save-mnemonic when Alt+S is pressed (physical key KeyS, so Option+S on a Mac works; Ctrl, Meta and Shift chords and auto-repeat are refused, so a held key cannot submit twice). Marked: the VoucherChrome Save button (Sales Invoice, Purchase Invoice, Sales and Purchase Quotation, Physical Stock, the four repair screens, and two deferred screens), the shared forms (PaymentForm for cash and bank receipt and payment, KarigarForm, WholesaleVoucherForm, StockInoutForm, TagCancelForm, TagSplitForm, EBillEntry) and the single Save button of Sales Return, Sales Order, Approval Issue and Return, Fine JV, Contra, Journal, Tag and Item Opening, Counter Transfer, Stock Adjust, Daily Rate, Party Opening, Bill-wise Receipt, Labour Sale, Bullion Booking and Sale, Order Issue and Hallmark Sale. Their desktop forms (TR_SALE_RTN, TR_SALE_ORD, TR_APR_ISU, TR_CONTRA, TR_TAG_OPBL, TR_ITM_OPBL, TR_PHYSTK, TR_TAG_CAN, MS_RATE, TR_AC_OPBL, TR_BILL_TO, TR_SALE_LBR, TR_BUL_BOOKING, TR_BUL_SALE, TR_SALE_HM) all caption &Save. Not marked: Order Cancel (its primary button is the per-order Refund & Cancel confirmation) and Tag Print (Load / Print labels). Verified: web unit 12 passed (saveMnemonic + formKeys); feature E2E sales-invoice.keyboard.alt-s-saves and purchase-invoice.keyboard.alt-s-saves pass through the real screen (Sales 18 passed, Purchase 17 passed, FEATURE_E2E_PASSED) and leave the baseline; Chrome DevTools run on Contra (a screen without a feature module yet): Alt+S from the Cr amount box saved voucher CON 00001 (BANK Dr 5,000, CASH Cr 5,000). Each remaining screen's Alt+S case is added with its feature module (document 15 \u00a75)."
+      "statusNote": "IMPLEMENTED. The shell's global key handler (GlobalFormKeys) presses the first enabled, on-screen button marked data-save-mnemonic when Alt+S is pressed (physical key KeyS, so Option+S on a Mac works; Ctrl, Meta and Shift chords and auto-repeat are refused, so a held key cannot submit twice). Marked: the VoucherChrome Save button (Sales Invoice, Purchase Invoice, Sales and Purchase Quotation, Physical Stock, the four repair screens, and two deferred screens), the shared forms (PaymentForm for cash and bank receipt and payment, KarigarForm, WholesaleVoucherForm, StockInoutForm, TagCancelForm, TagSplitForm, EBillEntry) and the single Save button of Sales Return, Sales Order, Approval Issue and Return, Fine JV, Contra, Journal, Tag and Item Opening, Counter Transfer, Stock Adjust, Daily Rate, Party Opening, Bill-wise Receipt, Labour Sale, Bullion Booking and Sale, Order Issue and Hallmark Sale. Their desktop forms (TR_SALE_RTN, TR_SALE_ORD, TR_APR_ISU, TR_CONTRA, TR_TAG_OPBL, TR_ITM_OPBL, TR_PHYSTK, TR_TAG_CAN, MS_RATE, TR_AC_OPBL, TR_BILL_TO, TR_SALE_LBR, TR_BUL_BOOKING, TR_BUL_SALE, TR_SALE_HM) all caption &Save. Not marked: Order Cancel (its primary button is the per-order Refund & Cancel confirmation) and Tag Print (Load / Print labels). Verified: web unit 12 passed (saveMnemonic + formKeys); feature E2E sales-invoice.keyboard.alt-s-saves and purchase-invoice.keyboard.alt-s-saves pass through the real screen (Sales 18 passed, Purchase 17 passed, FEATURE_E2E_PASSED) and leave the baseline; Chrome DevTools run on Contra (a screen without a feature module yet): Alt+S from the Cr amount box saved voucher CON 00001 (BANK Dr 5,000, CASH Cr 5,000). Each remaining screen's Alt+S case is added with its feature module (document 15 §5)."
     },
     {
       "id": "N164",
@@ -6554,7 +6554,7 @@
         "web/apps/web/test/clearRouteCache.test.ts",
         "web/apps/web/package.json"
       ],
-      "statusNote": "IMPLEMENTED. `pnpm build` in apps/web now runs `next build && node scripts/clearRouteCache.mjs`. Found while checking N172 in Chrome: after a rebuild, next start answered /txn/sales with x-nextjs-cache: HIT and the previous build's page chunk (page-257b5\u2026 instead of page-7a879\u2026) because the previous server's pages stayed in .next/server/route-cache; deleting it made the same server serve the new chunk. Verified: clearRouteCache.test.ts 2 passed; a real `pnpm --filter @datacare/web build` removed 13 cached route entries. CI builds from a clean checkout and was not affected; local feature and real-stack runs were."
+      "statusNote": "IMPLEMENTED. `pnpm build` in apps/web now runs `next build && node scripts/clearRouteCache.mjs`. Found while checking N172 in Chrome: after a rebuild, next start answered /txn/sales with x-nextjs-cache: HIT and the previous build's page chunk (page-257b5… instead of page-7a879…) because the previous server's pages stayed in .next/server/route-cache; deleting it made the same server serve the new chunk. Verified: clearRouteCache.test.ts 2 passed; a real `pnpm --filter @datacare/web build` removed 13 cached route entries. CI builds from a clean checkout and was not affected; local feature and real-stack runs were."
     },
     {
       "id": "N187",
@@ -6772,7 +6772,7 @@
     {
       "id": "N196",
       "status": "implemented-unverified",
-      "action": "Price a sales-order line like TR_SALE_ORD: metal = round(weight \u00d7 rate, 0) with the weight from SL_AMT_TYPE (F fine, G gross, else net + ghat); tax = round(net \u00d7 %, 0); total = round(net + tax, 0). Server writer and the screen preview.",
+      "action": "Price a sales-order line like TR_SALE_ORD: metal = round(weight × rate, 0) with the weight from SL_AMT_TYPE (F fine, G gross, else net + ghat); tax = round(net × %, 0); total = round(net + tax, 0). Server writer and the screen preview.",
       "startAfter": [
         "N195"
       ],
@@ -6866,7 +6866,7 @@
     {
       "id": "N200",
       "status": "implemented-unverified",
-      "action": "The bill-wise opening grid of TR_AC_OPBL: OP_DETL rows (voucher, date, bill, credit days, item, weights, touch, wastage, fines, diamond and amount with Cr/Dr) whose signed totals set the opening heads (MSG_TOT_FILL), the fine from net weight \u00d7 (touch + wastage) (CommPassTotal), and the row refusals with the desktop messages.",
+      "action": "The bill-wise opening grid of TR_AC_OPBL: OP_DETL rows (voucher, date, bill, credit days, item, weights, touch, wastage, fines, diamond and amount with Cr/Dr) whose signed totals set the opening heads (MSG_TOT_FILL), the fine from net weight × (touch + wastage) (CommPassTotal), and the row refusals with the desktop messages.",
       "parentLabels": "P9; L2",
       "startAfter": [
         "N199"
@@ -7495,7 +7495,7 @@
     {
       "id": "N223",
       "status": "implemented-unverified",
-      "action": "The Ledger Report is the desktop RP_LEDR screen: the account summary (money=\u03a3(CR\u2212DR), signed gold/silver fine, a negative net to Dr and a positive net to Cr, display-zero rows dropped unless With Zero), the per-voucher and per-ledger-key drill-down with a running \u03a3(Cr)\u2212\u03a3(Dr) balance and its side, the voucher-summary gross Dr/Cr, the debit ageing with oldest-first FIFO over the 0-15..151+ buckets for money and the selected fine, totals, the selectors (view, account, dates, data type, With Zero, fine type), one primary Run action, and Print/PDF/Excel/CSV \u2014 all from one read-only resolver, keeping the account-in-path aliases.",
+      "action": "The Ledger Report is the desktop RP_LEDR screen: the account summary (money=Σ(CR−DR), signed gold/silver fine, a negative net to Dr and a positive net to Cr, display-zero rows dropped unless With Zero), the per-voucher and per-ledger-key drill-down with a running Σ(Cr)−Σ(Dr) balance and its side, the voucher-summary gross Dr/Cr, the debit ageing with oldest-first FIFO over the 0-15..151+ buckets for money and the selected fine, totals, the selectors (view, account, dates, data type, With Zero, fine type), one primary Run action, and Print/PDF/Excel/CSV — all from one read-only resolver, keeping the account-in-path aliases.",
       "parentLabels": "P1-core; L-report; T01-T18",
       "startAfter": [
         "N222"
@@ -7771,7 +7771,7 @@
     {
       "id": "N232",
       "status": "implemented-unverified",
-      "action": "Cash Received, Cash Payment, Bank Received and Bank Payment follow desktop TR_CASH calculations: the multi-line grid's totals row prints \u03a3 Amount as \"0.00\" and \u03a3 Kasar as \"0.000\" after rounding each cell to two places (TR_CASH.cs:1832-1859,1962-1988); a multi-line receipt writes one CASH_DATA row per grid line with SR_NO, party, amount, kasar and remark and no PAY_DETL (TR_CASH.cs:2995-3060); a Bank Payment's kasar posts on legs 09/10 (Ac_Ledr.cs:585-610) instead of colliding with its amount legs 07/08.",
+      "action": "Cash Received, Cash Payment, Bank Received and Bank Payment follow desktop TR_CASH calculations: the multi-line grid's totals row prints Σ Amount as \"0.00\" and Σ Kasar as \"0.000\" after rounding each cell to two places (TR_CASH.cs:1832-1859,1962-1988); a multi-line receipt writes one CASH_DATA row per grid line with SR_NO, party, amount, kasar and remark and no PAY_DETL (TR_CASH.cs:2995-3060); a Bank Payment's kasar posts on legs 09/10 (Ac_Ledr.cs:585-610) instead of colliding with its amount legs 07/08.",
       "parentLabels": "P1-core; L1; T03",
       "startAfter": [
         "N229"
@@ -7825,7 +7825,7 @@
     {
       "id": "N234",
       "status": "in-progress",
-      "action": "Report \u2192 Sales Report is the desktop RP_ALL screen: a shared pure RP_ALL engine (selectors, record order, group bands, count-once totals, titles, exports) with one adapter per branch, Sales first. Phase one: the engine, the Sales adapter for Sales Report, Sales Reg, Item Wise, Group Sales, Employ Sales and Sale With Order (with the Sales Return prompt variants) and GET /reports/sales-report plus CSV/XLSX. Phase two: the dedicated route directory, the remaining seven buttons, PDF in the template layouts and the browser run.",
+      "action": "Report → Sales Report is the desktop RP_ALL screen: a shared pure RP_ALL engine (selectors, record order, group bands, count-once totals, titles, exports) with one adapter per branch, Sales first. Phase one: the engine, the Sales adapter for Sales Report, Sales Reg, Item Wise, Group Sales, Employ Sales and Sale With Order (with the Sales Return prompt variants) and GET /reports/sales-report plus CSV/XLSX. Phase two: the dedicated route directory, the remaining seven buttons, PDF in the template layouts and the browser run.",
       "parentLabels": "P1-core; L6; WP-11; T01-T18",
       "startAfter": [
         "N36"
@@ -7854,9 +7854,154 @@
       "statusNote": "IN PROGRESS (phase one). Engine, Sales adapter and API are built and unit-tested; the DB/HTTP test and the frozen browser module were written without a local stack and run in CI only. No screen yet: every sales-report browser case is blocked. G246 (the web Sales Return writes its amount to NET_AMT instead of RTN_NET_AMT) is open and keeps the return variant empty for web-written returns."
     },
     {
+      "id": "N235",
+      "status": "implemented-unverified",
+      "action": "Sales line percentage labour and line precision follow TR_SALE CommPassTotal: LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, MsLbrRof) (TR_SALE.cs:11021) multiplied by the LBR_TYPE basis (:11084-11127; Sales Return :4963, :4975-4993), and ITM_AMT/LBR_AMT each one Math.Round to a hardcoded 0 decimals, 2 under ALL_ROF_REMOVE (:10343-10362), instead of TOT_AMT_ROF; the Sale and Sales Quotation previews use the same kernel.",
+      "parentLabels": "P1-core; L1; T03; WP-41",
+      "startAfter": [
+        "N233"
+      ],
+      "requiredProof": "The desktop oracle sales-line vectors pass with the eight labour.pct.* baseline entries removed; core and web unit tests; a DB test of the persisted LBR_RATE/LBR_AMT and the line precision (TOT_AMT_ROF ignored, ALL_ROF_REMOVE honoured); the sales-invoice browser case formula.percentage-labour; sales-invoice and sales-return modules green.",
+      "gapIds": "G247",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/packages/core/src/calc.ts",
+        "web/packages/core/src/saleAmount.ts",
+        "web/packages/core/src/roundingPolicy.ts",
+        "web/apps/api/src/modules/sales/sales.ts",
+        "web/apps/api/src/modules/sales/salesReturn.ts",
+        "web/apps/web/lib/lineRecalc.ts",
+        "web/packages/core/test/desktopOracle.salesLine.test.ts",
+        "web/packages/core/test/calc.test.ts",
+        "web/apps/api/test/lineComponentRounding.db.test.ts",
+        "web/apps/web/test/features/modules/salesInvoice.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Desktop oracle sales-line: KNOWN_MISMATCHES empty (the eight labour.pct.* entries removed and passing). sales-invoice module 34 applicable, 32 passed, 0 failed, 2 blocked (both pre-existing, unrelated); new case formula.percentage-labour passes. sales-return 25 of 26 (1 blocked, pre-existing; new case config.all-rof-remove-keeps-whole-rupees). gst-report, group-master and item-master expectations moved to whole-rupee lines and pass. Not modelled: the registration-serial branches (DM035NPDM, HM199NEPK). Desktop match 0% beyond the oracle vectors."
+    },
+    {
+      "id": "N236",
+      "status": "implemented-unverified",
+      "action": "Balance TrFr is the desktop BtmSchm form with the five Lite dataset buttons. Ac Balance carries parties to the closing date per AC_CODE and DATA_TYPE into OP_DATA with Party Opening legs (Cr-positive, gold and silver by IT_TYPE, decimal half-away rounding, zero-skip); Item Stock carries untagged MAIN_STOCK into ITM_OPBL (fine = net x AVG_TOUCH / 100); server-computed Transfer Year, target-year replace, one transaction under an advisory lock. Tag Stock, Sales Order and Approval are implicit in the one-database web: the buttons run the desktop selection, report the open count and write nothing.",
+      "parentLabels": "P0; L3; T01-T18; WP-23",
+      "startAfter": [
+        "N233"
+      ],
+      "requiredProof": "closing(N) = opening(N+1) database tests per account and DATA_TYPE and per item, worked from the desktop formulas, failing on the previous writer and passing now; re-run, rollback after the first table, scope, concurrency and refusal cases; unit vectors for the rounding half-cases and the tag/order/approval value lists; the balance-transfer browser module in CI; all repository gates.",
+      "gapIds": "G248",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/apps/api/src/modules/ops/balanceTransfer.ts",
+        "web/apps/api/src/modules/ops/balanceTransferRules.ts",
+        "web/apps/api/src/modules/ops/balanceTransferSelect.ts",
+        "web/apps/api/src/routes/balanceTransfer.ts",
+        "web/apps/web/app/(app)/company/balance-transfer/page.tsx",
+        "web/apps/api/test/balanceTransfer.db.test.ts",
+        "web/apps/api/test/balanceTransferRules.test.ts",
+        "web/apps/api/test/balanceTransferSelect.db.test.ts",
+        "web/apps/web/test/features/modules/balanceTransfer.mjs",
+        "orchestration/work/WP-23/cases.md",
+        "web/apps/api/src/modules/shared/carriedOpening.ts",
+        "web/apps/api/test/balanceTransferReaders.db.test.ts",
+        "web/packages/db/prisma/migrations/20261122090000_itm_opbl_carried_from/migration.sql",
+        "web/packages/db/prisma/migrations/20261122100000_legacy_year_end_openings_carried/migration.sql"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Decisions (decided 2026-11-22 by the architect, owner may override): Q1/Q8 Tag Stock, Sales Order and Approval are implicit in the one-database web (tag stock, open orders and open approvals already read every year), so those buttons run the desktop selection, report the open count with the completion text and write nothing; Q9 no web stock reader adds ITM_OPBL (stock.ts onHandNet reads MAIN_STOCK of every year), so Item Stock writes ITM_OPBL as the desktop does and changes no balance; Q2/Q3 offsetting money/gold and pcs/weight are carried, not dropped (deliberate difference). Cases: 81 executable, 3 blocked (Q6, AvgTouch, tag-counter contradiction), 25 N/A. DB/unit 65/65 locally; browser module green in CI on the previous push. Opening model (decided 2026-11-22 by the architect, owner may override): a carried opening is an AC_DATA leg in book 000 with BOOK_NAME 'BAL TRFR' (shared/carriedOpening.ts) next to its OP_DATA row; year-scoped readers (trial balance/balances/balance sheet/P&L/outstanding with a year, desktopAccountBalance, Party Opening) count it; cross-year readers (Account Ledger, accounting ledger and trial balance without a year, partyBalance, cash book, bank book, Wh Sales balance, consignment opening, graph, day book) exclude it. One writer per account: the party carry (carryPartiesTx) serves Balance TrFr and Year-End Close; Year-End Close writes only non-party accounts, scoped by location, and replaces its legacy ACOP/OPENING/1 legs. Item Stock writes ITM_OPBL with CARRIED_FROM; stock (onHandNet) reads MAIN_STOCK of every year and never ITM_OPBL; Item Opening Save posts no MAIN_STOCK leg for a carried item; the carry replaces a hand-keyed N+1 opening together with its ITOBL stock and DM rows. Re-review decisions (architect, 2026-11-22, owner may override): Year Create's Carry Forward routes through the same single writer (carryOpeningsTx); migration 20261122100000 relabels legacy Year-End Close legs (ACOP/OPENING/1) as carried; editing or deleting a carried opening on Party Opening, the Party master or Item Opening is refused (unchanged master saves pass); group summary, voucher register without a year and Data Refresh totals exclude carried legs; the carries replace only the rows they own. Desktop match 0%."
+    },
+    {
+      "id": "N237",
+      "status": "implemented-unverified",
+      "action": "Data Backup archives the NextMain-equivalent tenant configuration by allowlist (UT_BKP.cs:1198-1251, D-BKP-3, D37): a versioned tenantConfig section (datacare.tenant-config v1) and its manifest descriptor carry this tenant's rows of nine tenant-shared configuration tables, column by column from an explicit allowlist (an unlisted table or column is never read); an explicit excluded-secrets list (LOGIN_MAST.LOGIN_PWD, BOOK_IDTL.SVR_PWD, CO_MAST.URL_PWD, CO_MAST.MAIL_API, DG_GOLD_MAST.API_KEY, E_MAST.ASP_PWD, E_MAST.E_LOGIN_PWD) is written as null, and sessions, refresh-token hashes and idempotency receipts are never read. Restore stays contained.",
+      "parentLabels": "P1-core; L1; T15; WP-08",
+      "startAfter": [
+        "N80"
+      ],
+      "requiredProof": "data-backup.config.nextmain-allowlist leaves baseline.json and passes through the real screen; DB tests: other tenant absent, every excluded secret seeded and absent, a configuration column added after the review is not exported, every secret-looking exported column of the live schema is an excluded secret; unit tests: the integrity check refuses a leaked secret, an unlisted column or a drifted envelope.",
+      "gapIds": "G249",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/apps/api/src/modules/ops/backupTenantConfigPolicy.ts",
+        "web/apps/api/src/modules/ops/backup.ts",
+        "web/apps/api/src/modules/ops/backupManifest.ts",
+        "web/apps/api/test/backupTenantConfig.test.ts",
+        "web/apps/api/test/backupTenantConfig.db.test.ts",
+        "web/apps/web/test/features/modules/dataBackup.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. data-backup module: 18 applicable, 14 passed, 0 failed, 4 blocked (unchanged: rights.desktop-print-handoff, output.physical-save-confirmation, output.full-lite-fixture, journey.scratch-zero-diff). backupTenantConfig unit 10 of 10, DB 5 of 5. Password hashes excluded per D37 as amended on 2026-11-22."
+    },
+    {
+      "id": "N238",
+      "status": "implemented-unverified",
+      "action": "Report > Tag Stock is the desktop RP_TAG report: In reads the BAR_DETL creation rows of From..To, Out the minus movements, Stock and Mrp the positive signed-movement balance of the session year up to To (Mrp <> 0), Apr the exact APR ISU / ISU_REC N approvals joined to BAR_DETL, All the signed movement history; sentinel tag N excluded; no 5000-row cap, so the footer and the CSV/Excel cover every row; Tag Summ and Product Stk groupings; date, tag, item, product, group, type, size, location, book and search selectors; the desktop columns, n3/n0 formats and sort orders; Escape, Down/Up, date-mask Enter and Alt mnemonics; CSV and Excel behind the Print right.",
+      "parentLabels": "P1-core; L6; T01-T18; WP-15",
+      "startAfter": [
+        "N229"
+      ],
+      "requiredProof": "DB tests whose expected values are computed from seeded movements with the desktop signed-sum rule, red on the old resolver and green on the new one; route tests for the List and Print rights, 400 on an unknown mode and the 5,100-row CSV; the tag-stock browser module run by CI (not run locally).",
+      "gapIds": "G250",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/apps/api/src/modules/reports/tagStock.ts",
+        "web/apps/api/src/modules/reports/tagStockColumns.ts",
+        "web/apps/api/src/routes/tagStock.ts",
+        "web/apps/web/app/(app)/reports/tag-stock/page.tsx",
+        "web/apps/web/app/(app)/reports/tag-stock/TagStockGrid.tsx",
+        "web/apps/api/test/tagStock.db.test.ts",
+        "web/apps/api/test/tagStock.routes.db.test.ts",
+        "web/apps/web/test/features/modules/tagStock.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. 28 DB cases and 6 route cases pass locally on an isolated database; the tagStock browser module (15 cases, 5 pending with reasons) was written but not run locally (8 GB machine), CI runs it. Still open: voucher zoom (gap 10), the Print window and Crystal layouts (gap 11), the approval other-item columns (gap 13), edition-E Emp Isu Less, summary Mrp/Size and alternate-location staging, year rollover. Desktop match 0%."
+    },
+    {
+      "id": "N239",
+      "status": "implemented-unverified",
+      "action": "Gst Report runs the desktop RP_GST rules for the twelve blocked cases: EXP, EXEMP and DOCS show their caption grids with no query, rows or message; GSTR-3B shows every desktop row with figures for 3.1(a)/(d), the 3.1 total, 3.2(1), 4(A)(5) and 6.1 under the owner decisions (From..To, ITC purchases only, State/Ut Tax = SGST); the date boxes run DC_Main.SetDate; Csv Fil writes nothing for EXEMP and DOCS; Gsrt1 Csv is one workbook B2B..HSN; TCS stays out of every GST figure; LBR_ISU_DETL carries the per-line GST shares (migration + labour writer) the HSN section sums; TAX_DATA rows say R_CHARG 'N'.",
+      "parentLabels": "P1-edition; L6; T02; T03; T06; T16; T18; WP-19",
+      "startAfter": [
+        "N233"
+      ],
+      "requiredProof": "Unit vectors for the 3B grid, the header-only sections, SetDate and the labour GST allocation; DB tests for the 3B figures (3.2(1), From..To, blank R_CHARG), the header-only and CSV refusals, the workbook and the labour writer's shares; the gst-report browser module with every settled case executable and the 57 earlier cases green; all repository gates.",
+      "gapIds": "G251",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/apps/api/src/modules/reports/gstReport.ts",
+        "web/apps/api/src/modules/reports/gstReportSections.ts",
+        "web/apps/api/src/modules/reports/gstReportQueries.ts",
+        "web/apps/api/src/routes/gstReport.ts",
+        "web/apps/api/src/modules/sales/labourGstAllocation.ts",
+        "web/packages/db/prisma/migrations/20261122110000_labour_detail_gst_shares/migration.sql",
+        "web/packages/core/src/setDate.ts",
+        "web/apps/web/components/DesktopDateInput.tsx",
+        "web/apps/web/app/(app)/reports/gst-report/page.tsx",
+        "web/apps/api/test/gstReport.test.ts",
+        "web/apps/api/test/gstReport.db.test.ts",
+        "web/apps/web/test/features/modules/gstReport.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. gst-report module: 9 of the 12 blocked cases are executable; 3 stay blocked with the exact remaining item (EXP.csv bytes need a Windows run, decision Q9; no harness read/export fault injector for T14). Desktop match 0%."
+    },
+    {
       "id": "N241",
       "status": "implemented-unverified",
-      "action": "Report \u2192 Stock Report is the desktop RP_STOCK form on its own route /reports/stock-report: eight summary dimensions over the signed MAIN_STOCK movements (Opening, Purchase, Inward, Outward, Sale, Closing and the hidden transfer columns), net or gross weight, the desktop filters, the drill-down behind every figure with KR_FINE for + rows and ITM_FINE for - rows, the Total row, name search, G/I/P keys, and Print/Excel behind the Print right. Tag Stock stays on /reports/tag-stock.",
+      "action": "Report → Stock Report is the desktop RP_STOCK form on its own route /reports/stock-report: eight summary dimensions over the signed MAIN_STOCK movements (Opening, Purchase, Inward, Outward, Sale, Closing and the hidden transfer columns), net or gross weight, the desktop filters, the drill-down behind every figure with KR_FINE for + rows and ITM_FINE for - rows, the Total row, name search, G/I/P keys, and Print/Excel behind the Print right. Tag Stock stays on /reports/tag-stock.",
       "parentLabels": "P1-core; L6; WP-16; T01-T18",
       "startAfter": [
         "N24"
@@ -7889,7 +8034,7 @@
     },
     {
       "date": "2026-10-01",
-      "document": "10-gap-register-2026-10-01.md \u00a72b",
+      "document": "10-gap-register-2026-10-01.md §2b",
       "mainBaseline": "14ce35e",
       "meaning": "G18 fixed on main (PR #10). N31/N32/N33/N35 landed on main (PR #3, PR #11) and are implemented-unverified with evidence; G17 (Other Income print) and partial G19 (book provisioning) shipped with them. Adds gap G19 (book-less screens). No acceptance is closed; G04 and the remaining gaps stay open."
     },
@@ -7910,13 +8055,13 @@
     },
     {
       "date": "2026-10-01",
-      "document": "12-lineage-verification-2026-10-01.md \u00a74",
+      "document": "12-lineage-verification-2026-10-01.md §4",
       "mainBaseline": "93986ef",
       "meaning": "Owner decisions: D23, D24, D26 and D27 accepted as recommended; D28 added: nothing in Phase 2, including its M0 decisions, starts until Phase 1 is complete and certified (N30), enforced by SP dependencies and validate_plan.py. N86 now lands Prisma 7 before 19 November 2026. Requirements 19.2 and 21.1 move from decision to carried in lineage-register.json. Builds on PR #33 (G82, G83). No acceptance is closed."
     },
     {
       "date": "2026-10-01",
-      "document": "12-lineage-verification-2026-10-01.md \u00a74",
+      "document": "12-lineage-verification-2026-10-01.md §4",
       "mainBaseline": "5f8439c",
       "meaning": "Owner decision D29: Phase 1 is built and tested with device fakes (recorded sample inputs) and the desktop source, screenshots and transcripts as oracle; Odoo IoT is a device-protocol reference only; real hardware and live providers deferred to acceptance (N25). Adds slice N89 (device-fake test harness). Also adds the developer setup and supported-devices handbook pages. No acceptance closed."
     }

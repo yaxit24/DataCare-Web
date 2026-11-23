@@ -130,10 +130,15 @@ describe('route policy registry', () => {
     // N233 removes POST /sales-orders/:vchNo/cancel-refund and adds Order Cancel's pending-orders, defaults, POST,
     // GET, PUT, DELETE and print: 759 - 1 + 7 = 765.
     // N234 (WP-11) adds the RP_ALL Sales Report GET /reports/sales-report and its CSV/XLSX exports: 765 + 3 = 768.
+    // WP-23 replaces Balance TrFr's preview, year-close and openings wrappers with the BtmSchm screen's GET and one
+    // POST per Lite dataset (ac-balance, item-stock, tag-stock, sales-order, approval): 768 - 3 + 6 = 771.
+    // WP-15 adds the Tag Stock Excel export (GET /reports/tag-stock.xlsx) and its Size list
+    // (GET /reports/tag-stock/sizes): 771 + 2 = 773.
+    // WP-19 adds the Gst Report all-sections workbook (GET /reports/gst-report/workbook.xlsx): 773 + 1 = 774.
     // N241 (WP-16) adds the RP_STOCK Stock Report GET /reports/stock-report, /defaults, /movements and the CSV/XLSX
-    // exports: 768 + 5 = 773.
-    expect(routes).toHaveLength(773);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(773);
+    // exports: 768 + 5 = 773. [774 on main + 5 here = 779]
+    expect(routes).toHaveLength(779);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(779);
 
     const policies = routes.map((route) => ({
       ...route,
@@ -283,19 +288,18 @@ describe('route policy registry', () => {
     });
   });
 
-  it('maps the desktop Balance TrFr dashboard wrappers to Company rights', () => {
-    expect(routePolicyFor('POST', '/balance-transfer/preview')).toMatchObject({
+  it('maps every Balance TrFr dataset button to the catalog Create right (BtmSchm, C-----)', () => {
+    expect(routePolicyFor('GET', '/balance-transfer')).toMatchObject({
       form: 'Company/Balance TrFr',
       action: 'read',
     });
-    expect(routePolicyFor('POST', '/balance-transfer/year-close')).toMatchObject({
-      form: 'Company/Balance TrFr',
-      action: 'update',
-    });
-    expect(routePolicyFor('POST', '/balance-transfer/openings')).toMatchObject({
-      form: 'Company/Balance TrFr',
-      action: 'update',
-    });
+    for (const dataset of ['ac-balance', 'item-stock', 'tag-stock', 'sales-order', 'approval'])
+      expect(routePolicyFor('POST', `/balance-transfer/${dataset}`)).toMatchObject({
+        form: 'Company/Balance TrFr',
+        action: 'create',
+      });
+    for (const old of ['preview', 'year-close', 'openings'])
+      expect(routePolicyFor('POST', `/balance-transfer/${old}`)).toBeUndefined();
   });
 
   it('maps the desktop UT_EXPORT utility to data-export rights', () => {
@@ -537,6 +541,12 @@ describe('route policy registry', () => {
         businessScope: true,
       });
     }
+    // WP-19: "Gsrt1 Csv", the all-sections workbook (RP_GST.cs:3819-3943), is an export like the others.
+    expect(routePolicyFor('GET', '/reports/gst-report/workbook.xlsx')).toMatchObject({
+      form: 'Reports/GST Report',
+      action: 'print',
+      businessScope: true,
+    });
   });
 
   it('maps RP_ORDER Delete Data and Point Report routes to report rights', () => {

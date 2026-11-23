@@ -1,3 +1,4 @@
+import { carriedOpeningFilter, notCarriedOpening } from '../shared/carriedOpening.js';
 import { dateWhere } from './reports.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import type { ReportScope, ListReport } from './reports.js';
@@ -44,7 +45,7 @@ export async function trialBalanceFull(prisma: any, s: ReportScope): Promise<Lis
               (SELECT m."AC_NAME" FROM "AC_MAST" m
                  WHERE m."AC_CODE"::text=d."AC_CODE"::text AND m."CO_CODE"::text=d."CO_CODE"::text LIMIT 1) AS name,
               sum(${NN('d."DR_AMT"')}) AS dr, sum(${NN('d."CR_AMT"')}) AS cr
-       FROM "AC_DATA" d WHERE d."CO_CODE"=$1${yr}${dt}
+       FROM "AC_DATA" d WHERE d."CO_CODE"=$1${yr}${dt}${carriedOpeningFilter(!!s.coYear, 'd')}
        GROUP BY d."AC_CODE", d."CO_CODE"
        ORDER BY abs(sum(${NN('d."DR_AMT"')}) - sum(${NN('d."CR_AMT"')})) DESC`,
       ...params,
@@ -120,7 +121,7 @@ export async function cashDaySummary(prisma: any, s: ReportScope): Promise<ListR
               sum(${NN('d."DR_AMT"')}) AS "inAmt",
               sum(${NN('d."CR_AMT"')}) AS "outAmt"
        FROM "AC_DATA" d
-       WHERE d."CO_CODE"=$1
+       WHERE d."CO_CODE"=$1 AND ${notCarriedOpening('d')}
          AND (d."AC_CODE"::text ILIKE '%CASH%' OR d."AC_CODE"::text ILIKE '%BANK%'
               OR EXISTS (SELECT 1 FROM "AC_MAST" m
                            WHERE m."AC_CODE"::text=d."AC_CODE"::text AND m."CO_CODE"::text=d."CO_CODE"::text
