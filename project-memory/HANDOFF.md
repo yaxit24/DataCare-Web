@@ -2,7 +2,7 @@
 
 - 2026-11-23: `/reports/order-report` (`rpAll/orderQuery.ts`, `rpAll/orderLayouts.ts`, `reports/order-report/`) runs the seven RP_ALL order
   buttons; SL_ORD_ADJ joins through ORD_*; rights key `Reports/Order Report` (alias "Order Report"), exports need Print; writes nothing. Module 25/25.
-- 2026-11-23: open: web Sales Order writes no `+` SL_ORD_ADJ row (PR #262); Making Panding/Summ print stored DESIGN_ISU='N' because the desktop
+- 2026-11-23: the `+` SL_ORD_ADJ row comes from the Sales Order since #262 (module checks it). Open: Making Panding/Summ print stored DESIGN_ISU='N' because the desktop
   write runs only for HM310NEPK (RP_ALL.cs:10925), owner question. Shares lookup entities and `bookCode` in filters.ts with WP-11 (merge conflict).
 
 ## 2026-11-22 — Purchase residuals: lossless reopen, hallmark receive columns, purchase book family (N244 / G256, WP-28)

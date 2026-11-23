@@ -8164,7 +8164,7 @@
         "web/apps/web/test/features/modules/orderReportRp.mjs",
         "orchestration/work/WP-14/verify.md"
       ],
-      "statusNote": "IMPLEMENTED, not accepted. order-report browser module 25 of 25 applicable cases pass on a fresh local build (2026-11-23); pending-set, writes-nothing and sentinels are DB-layer cases in rpAllOrder.db.test.ts. Open: the web Sales Order writes no '+' SL_ORD_ADJ row (PR #262); Making Panding/Summ print stored DESIGN_ISU = 'N' lines because the desktop's fully-adjusted write runs only for registration HM310NEPK (RP_ALL.cs:10925), owner question against decision D2. Desktop match 0%."
+      "statusNote": "IMPLEMENTED, not accepted. order-report browser module 25 of 25 applicable cases pass on a fresh local build (2026-11-23); pending-set, writes-nothing and sentinels are DB-layer cases in rpAllOrder.db.test.ts. The web Sales Order's '+' SL_ORD_ADJ row (#262, merged) is checked by the lifecycle and journey cases. Open: Making Panding/Summ print stored DESIGN_ISU = 'N' lines because the desktop's fully-adjusted write runs only for registration HM310NEPK (RP_ALL.cs:10925), owner question against decision D2. Desktop match 0%."
     }
   ],
   "amendments": [

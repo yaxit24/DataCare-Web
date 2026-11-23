@@ -1,7 +1,8 @@
 # WP-14 verify — Order Report (`orderReportRp.mjs`)
 
-Run on 2026-11-23 19:30 IST in `~/dc-wt/orchwt/wp14-order-report` (branch `agent/wp14-order-report`, candidate
-`13a50549`, after merging `origin/main` at `fa460c55`). Fresh build first:
+Run on 2026-11-23 20:07 IST in `~/dc-wt/orchwt/wp14-order-report` (branch `agent/wp14-order-report`, candidate
+`f286750a` plus the module change below, after merging `origin/main` at `bb633980`, which includes #262). Fresh
+build first:
 
 ```bash
 cd web
@@ -13,8 +14,14 @@ PARITY_TEST_PORT=55700 PARITY_API_PORT=4700 PARITY_WEB_PORT=4701 FEATURE_E2E_MOD
 
 Result line: `order-report: Report → Order Report (RP_ALL) (34 cases) -> applicable 25, passed 25, failed 0,
 blocked 0, untested 0; browser pass 100%` and `FEATURE_E2E_PASSED`. Evidence:
-`web/test-results/feature-e2e/order-report/run.json` (inputs hash `72d9fcf5…`, no business-response mocks, no
+`web/test-results/feature-e2e/order-report/run.json` (inputs hash `c64ce34e…`, no business-response mocks, no
 request interceptions), one folder per case with screenshots and `browser.json`/`database.json`/`expected.json`.
+
+History: the first run at 19:30 (before #262, candidate `13a50549`) also passed 25 of 25. After merging #262 the
+lifecycle and journey cases failed with `duplicate key value violates unique constraint "SL_ORD_ADJ_pkey"`: they
+seeded the `+` advance row that the web Sales Order now writes itself. The module now checks that row
+(`expectAdvanceAdjustment`: one `+` row whose `ORD_AMT` is the order's `ADV_AMT`) instead of seeding it, and no
+longer deletes it before the order delete. No expected report value changed.
 
 ## Coverage
 
@@ -81,8 +88,8 @@ template titles (`Order Report From …`, `Order Design Issue Panding Report Fro
 
 ## Known gaps this run does not close
 
-- The web Sales Order writes no `+` `SL_ORD_ADJ` advance row, so a web-written order shows no advance in Order
-  Adjust / Order Wise Bill until PR #262 (WP-03) merges. The lifecycle and journey cases seed that row.
+- Closed during this run: the web Sales Order now writes the `+` `SL_ORD_ADJ` advance row (#262, WP-03, merged);
+  the lifecycle and journey cases prove the report reads the row the screen wrote.
 - Making Panding / Making Summ print the stored `DESIGN_ISU = 'N'` lines, the general desktop behaviour: the
   desktop's fully-adjusted `DESIGN_ISU` write runs only for registration `HM310NEPK` (`RP_ALL.cs:10925`). This
   replaces decision D2's derived set and is an owner question.

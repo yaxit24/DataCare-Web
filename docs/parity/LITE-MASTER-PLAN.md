@@ -618,7 +618,7 @@ it, the owner triggers it.
 | Sales Report | NOT YET VERIFIED | WP-11 |
 | Purchase Rpt | NOT YET VERIFIED | WP-12 |
 | Approval Rpt | NOT YET VERIFIED | WP-13 |
-| Order Report | PARTIAL | WP-14 (advance row after WP-03, #262) |
+| Order Report | PARTIAL | WP-14 |
 | Cash Bank | NOT YET VERIFIED | WP-17 |
 | Gst Report | PARTIAL | WP-19 |
 | HuId Report | NOT YET VERIFIED | WP-18 |
