@@ -44,6 +44,13 @@ const SYSTEM = new Set([
   'GET /vouchers/neighbour',
   'GET /integrations/barcode',
   'GET /integrations/qr',
+  // WP-14: the RP_ALL Order Report screen and its exports (routes/rpAllReport.ts). Its "Order Report"
+  // caption has no form-catalog entry and formCatalog.ts is outside this packet's scope, so a form policy
+  // would throw at boot. The handlers enforce the caption's USER_SET FRM_VIEW/FRM_PRINT rights themselves;
+  // these entries exist so the fail-closed onRoute hook accepts the registered paths.
+  'GET /reports/order-report',
+  'GET /reports/order-report/export.csv',
+  'GET /reports/order-report/export.xlsx',
 ]);
 
 export const MASTER_FORM_BY_NAME: Readonly<Record<string, string>> = {

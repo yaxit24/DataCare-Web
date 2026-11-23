@@ -13,8 +13,8 @@
  * query, and the grouping, totalling and formatting rules are written and tested once.
  */
 
-/** The menu captions RP_ALL serves (RP_ALL.cs:6676-6770). Only Sales has an adapter so far. */
-export type RpAllBranch = 'sales';
+/** The menu captions RP_ALL serves (RP_ALL.cs:6676-6770). Sales and Order adapters exist. */
+export type RpAllBranch = 'sales' | 'order';
 
 /** Kind of a cell: decides precision, alignment and how a total is rounded. */
 export type RpAllColumnKind = 'text' | 'date' | 'money' | 'weight' | 'pcs' | 'rate';
