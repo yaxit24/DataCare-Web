@@ -151,7 +151,7 @@ interface Balance {
 /**
  * Opening is before the from date, closing is up to the to date. RP_LEDR.cs:8327 {{SELECT Sum(CR_AMT - DR_AMT) as BalAmt}}
  * The Gold balance has no data-type condition; the Silver and Jama/Udhar balances drop it only for type C
- * (RP_LEDR.cs:8942 {{Interaction.IIf(Operators.CompareString(DC_Main.MsDataType, "C", false) == 0, "", ("AND DATA_TYPE = '" + DC_Main.MsDataType + "'"))}}).
+ * (RP_LEDR.cs:8942 {{Interaction.IIf(Operators.CompareString(DC_Main.MsDataType, "C", false) == 0, (object)"", (object)("AND DATA_TYPE = '"}}).
  */
 async function balanceAt(
   tx: any,
@@ -186,7 +186,7 @@ const SOURCES: Record<FinePrintKind, readonly string[]> = {
 
 /**
  * The print rows: every desktop source, then the Crystal selection: account, dates, location, and the data type
- * only when it is A or B (RP_LEDR.cs:8347 {{if (Operators.CompareString(DC_Main.MsDataType, "A", false) == 0)}}).
+ * only when it is A or B (RP_LEDR.cs:8348 {{if (Operators.CompareString(DC_Main.MsDataType, "A", false) == 0)}}).
  */
 async function printRows(
   tx: any,
