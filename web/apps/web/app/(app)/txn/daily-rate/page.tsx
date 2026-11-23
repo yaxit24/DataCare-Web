@@ -127,7 +127,7 @@ export default function DailyRatePage() {
     setMsg(null);
     setBusy(true);
     try {
-      const saved = await post<{ date: string; saved: number }>('/daily-rate', {
+      await post<{ date: string; saved: number }>('/daily-rate', {
         date,
         goldRate: n(header.goldRate),
         silverRate: n(header.silverRate),
@@ -149,10 +149,8 @@ export default function DailyRatePage() {
           prRate: r.prRate,
         })),
       });
-      setMsg({
-        kind: 'ok',
-        text: `Saved ${saved.saved} group rate(s) for ${formatDesktopDate(saved.date)}`,
-      });
+      // MS_RATE.cs:2007: the desktop's own text, character for character.
+      setMsg({ kind: 'ok', text: 'Data Are Saved.' });
       window.dispatchEvent(new Event(DAILY_RATE_CHANGED));
       await load(date);
     } catch (err) {

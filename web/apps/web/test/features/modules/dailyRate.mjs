@@ -457,6 +457,10 @@ export const dailyRate = {
         await priceDay(page);
         const response = await save(page);
         assert.equal(response.status(), 201, await response.text());
+        // MS_RATE.cs:2007 {{Interaction.MsgBox((object)"Data Are Saved.", ...}}: the desktop text, verbatim.
+        const savedMsg = page.locator('.msg.ok');
+        await savedMsg.waitFor();
+        assert.equal((await savedMsg.innerText()).trim(), 'Data Are Saved.');
         const rows = await savedRows(ctx, date);
         assert.deepEqual(
           rows.map((r) => [
