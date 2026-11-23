@@ -81,7 +81,11 @@ describe('calc engine — edge cases', () => {
     expect(metalAmount(100, 7000)).toBe(700000);
     expect(labourCharge('fixed', { fixed: 2000 })).toBe(2000);
     expect(labourCharge('per_gram', { netWt: 10, rate: 300 })).toBe(3000);
-    expect(labourCharge('percentage', { metalAmount: 50000, pct: 8 })).toBe(4000);
+    // A percentage derives LBR_RATE = ITM_RATE x LBR_PRC / 100 and multiplies the LBR_TYPE basis (TR_SALE.cs:11021,
+    // :11084-11127): 6250 x 8 % = 500 per gram x 8 g net.
+    expect(
+      labourCharge('percentage', { netWt: 8, itemRate: 6250, pct: 8, basis: 'N', withGhat: false }),
+    ).toBe(4000);
     expect(lineNet({ metal: 50000, labour: 2000, other: 500 })).toBe(52500);
   });
 });

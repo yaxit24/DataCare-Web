@@ -1,7 +1,7 @@
 import { fiscalYearDates, toIsoDate } from '@datacare/core';
 import { withTxBudget } from '../shared/txBudget.js';
 import { CLONE_TEMPLATE_CO_CODE, cloneCompanyTx } from './companyClone.js';
-import { OPENING_BOOK, writePartyOpeningTx } from '../finance/partyOpening.js';
+import { carryOpeningsTx } from '../ops/yearEnd.js';
 
 /**
  * Financial-year master (desktop "Year Create", `MS_YEAR`): create a company year (YEAR_MAST: OP_DATE opening,
@@ -110,11 +110,10 @@ export async function createYear(
 }
 
 /**
- * Carry-forward (Balance TrFr, BtmSchm.cs:2764-2801): each party's CLOSING balance in `fromYear` becomes its `toYear`
- * opening. The closing is read from AC_DATA alone, which already holds the fromYear opening as its AcOp_Ledr legs:
- * money = Σ(DR−CR), gold and silver = Σ signed FINE_WT on IT_TYPE 'G' and 'S' ('+' is Cr). Each opening is written
- * through the Party Opening writer, so it lands in OP_DATA book '000' with its ledger legs, as the desktop's openings do.
- * Idempotent: the toYear openings and their legs are cleared first, as BtmSchm clears OP_DATA.
+ * Year Create's Carry Forward. It runs the single carried-opening writer of WP-23 (ops/yearEnd.ts carryOpeningsTx: the
+ * Balance TrFr party carry for parties, Year-End Close's writer for the other accounts; architect, 2026-11-22, owner
+ * may override), so Year Create, Year-End Close and Balance TrFr never write two openings for one account. Changed here
+ * only to route through that writer (WP-22 owns the rest of this file).
  */
 export async function carryForwardOpenings(
   prisma: any,
@@ -123,50 +122,10 @@ export async function carryForwardOpenings(
   toYear: string,
   mainUser = 'system',
 ): Promise<{ parties: number }> {
+  if (!String(fromYear ?? '').trim() || !String(toYear ?? '').trim() || fromYear === toYear)
+    throw new YearValidationError('a From Year and a different To Year are required');
   return withTxBudget(prisma, scope.tenantId, 'heavy', async (tx: any) => {
-    await tx.$executeRawUnsafe(
-      `DELETE FROM "OP_DATA" WHERE "CO_CODE"=$1 AND "CO_YEAR"=$2`,
-      scope.coCode,
-      toYear,
-    );
-    await tx.$executeRawUnsafe(
-      `DELETE FROM "AC_DATA" WHERE "CO_CODE"=$1 AND "CO_YEAR"=$2 AND "CO_BOOK"=$3 AND "BOOK_NAME"='TR_AC_OPBL'`,
-      scope.coCode,
-      toYear,
-      OPENING_BOOK,
-    );
-    const closings: any[] = await tx.$queryRawUnsafe(
-      `SELECT "AC_CODE" ac,
-              coalesce(sum(coalesce("DR_AMT",0)-coalesce("CR_AMT",0)),0)::float money,
-              coalesce(sum(CASE WHEN "IT_TYPE"='G' THEN (CASE WHEN "SIGN"='+' THEN 1 ELSE -1 END)*coalesce("FINE_WT",0) ELSE 0 END),0)::float gold,
-              coalesce(sum(CASE WHEN "IT_TYPE"='S' THEN (CASE WHEN "SIGN"='+' THEN 1 ELSE -1 END)*coalesce("FINE_WT",0) ELSE 0 END),0)::float silver
-         FROM "AC_DATA" WHERE "CO_CODE"=$1 AND "CO_YEAR"=$2 AND coalesce("AC_CODE",'')<>''
-        GROUP BY "AC_CODE" ORDER BY "AC_CODE"`,
-      scope.coCode,
-      fromYear,
-    );
-    let parties = 0;
-    for (const c of closings) {
-      const money = r2(num(c.money));
-      const gold = r3(num(c.gold));
-      const silver = r3(num(c.silver));
-      if (money === 0 && gold === 0 && silver === 0) continue; // a settled party carries nothing
-      parties += 1;
-      await writePartyOpeningTx(
-        tx,
-        { tenantId: scope.tenantId, coCode: scope.coCode, lcCode: scope.lcCode, coYear: toYear },
-        String(c.ac),
-        {
-          amount: Math.abs(money),
-          sign: money >= 0 ? 'D' : 'C',
-          gold: Math.abs(gold),
-          goldSign: gold >= 0 ? 'C' : 'D',
-          silver: Math.abs(silver),
-          silverSign: silver >= 0 ? 'C' : 'D',
-        },
-        mainUser,
-      );
-    }
-    return { parties };
+    const result = await carryOpeningsTx(tx, scope as any, fromYear, toYear, mainUser);
+    return { parties: result.carried };
   });
 }

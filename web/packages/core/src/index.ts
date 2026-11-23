@@ -2,6 +2,7 @@ export {
   PRECISION,
   round,
   roundHalfEven,
+  dotNetRoundDouble,
   fineWeight,
   decimalCellText,
   roundHalfEvenDecimal,
@@ -9,6 +10,8 @@ export {
 export {
   labourCharge,
   saleLineLabourAmount,
+  percentageLabourRate,
+  desktopLabourBasisQuantity,
   metalAmount,
   lineNet,
   lineTotalDesktop,
@@ -18,6 +21,7 @@ export {
 export type {
   LabourType,
   LabourInput,
+  LabourBasisRule,
   GstSplit,
   BillInput,
   BillTotals,
@@ -298,6 +302,8 @@ export type { FiscalYearDates, FiscalYearInput } from './fiscalYear.js';
 export {
   resolveRoundingPolicy,
   roundNearest,
+  saleLineDecimals,
+  roundSaleLineAmount,
   RoundingPolicyValidationError,
 } from './roundingPolicy.js';
 export type {
@@ -334,3 +340,25 @@ export {
   itemOpeningTotals,
 } from './itemOpening.js';
 export type { ItemOpeningRow, ItemOpeningRowInput, ItemOpeningTypeCode } from './itemOpening.js';
+export {
+  DESKTOP_DATE_MASK,
+  desktopDateMaskText,
+  desktopSetDate,
+  type SetDateMessage,
+  type SetDateResult,
+} from './setDate.js';
+export {
+  computeSaleLine,
+  derivedLabourRate,
+  formatCell2,
+  formatCell,
+  saleGhatWeight,
+  applySaleGridEdit,
+} from './saleLine.js';
+export type {
+  SaleLineCells,
+  SaleLineSettings,
+  SaleLineResult,
+  SaleLineLabourMode,
+  SaleGridLabourCells,
+} from './saleLine.js';

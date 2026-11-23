@@ -9,6 +9,7 @@ import {
 import { withTxBudget } from '../shared/txBudget.js';
 import { insertRowTx } from '../posting/posting.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
+import { carriedOpeningMessage } from '../finance/partyOpening.js';
 import { assertVoucherVersionTx, versionKeyOf, voucherVersionTx } from '../vouchers/version.js';
 
 /**
@@ -267,6 +268,34 @@ export async function getItemOpening(
   });
 }
 
+/** The type's rows carried by Balance TrFr (ITM_OPBL.CARRIED_FROM), with the figures the screen must not change. */
+async function carriedRowsTx(
+  tx: any,
+  scope: ItemOpeningScope,
+  type: string,
+): Promise<
+  Map<string, { from: string; pcs: number; gwt: number; nwt: number; fine: number; amt: number }>
+> {
+  const { coCode, lcCode, coYear } = scopeOf(scope);
+  const rows: any[] = await tx.$queryRawUnsafe(
+    `SELECT "IT_CODE" it, "CARRIED_FROM" cf, coalesce("ITM_PCS",0)::float pcs, coalesce("ITM_GWT",0)::float gwt,
+            coalesce("ITM_NWT",0)::float nwt, coalesce("ITM_FINE",0)::float fine, coalesce("ITM_AMT",0)::float amt
+       FROM "ITM_OPBL"
+      WHERE "CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5 AND "CARRIED_FROM" IS NOT NULL`,
+    coCode,
+    lcCode,
+    coYear,
+    ITEM_OPENING_BOOK,
+    type,
+  );
+  return new Map(
+    rows.map((r) => [
+      String(r.it),
+      { from: String(r.cf), pcs: r.pcs, gwt: r.gwt, nwt: r.nwt, fine: r.fine, amt: r.amt },
+    ]),
+  );
+}
+
 async function deleteTypeTx(tx: any, scope: ItemOpeningScope, type: string): Promise<number> {
   const { coCode, lcCode, coYear } = scopeOf(scope);
   const where = `"CO_CODE"=$1 AND "LC_CODE"=$2 AND "CO_YEAR"=$3 AND "CO_BOOK"=$4 AND "VCH_NO"=$5`;
@@ -319,6 +348,21 @@ export async function saveItemOpening(
       throw new ItemOpeningValidationError(
         `year ${coYear || '(none)'} has no opening date; open the company year first`,
       );
+    // An item carried by Balance TrFr (ITM_OPBL.CARRIED_FROM) is already in stock through the closing year's MAIN_STOCK,
+    // which the web reads across years: its row is kept unchanged with its marker and posts no stock leg, and a change
+    // or removal of it is refused (WP-23; architect, 2026-11-22, owner may override; the desktop edits it freely).
+    const carried = await carriedRowsTx(tx, input.scope, type);
+    for (const [itCode, c] of carried) {
+      const line = lines.find((l) => l.itCode === itCode);
+      const same =
+        line &&
+        line.row.pcs === c.pcs &&
+        line.row.grossWt === c.gwt &&
+        line.row.netWt === c.nwt &&
+        line.row.fineWt === c.fine &&
+        line.row.amount === c.amt;
+      if (!same) throw new ItemOpeningValidationError(carriedOpeningMessage(c.from));
+    }
     await deleteTypeTx(tx, input.scope, type);
     const key = {
       CO_CODE: coCode,
@@ -349,9 +393,11 @@ export async function saveItemOpening(
         DATA_TYPE,
         // The save leaves DATA_TRFR to the column default 'Y' (MS_UPDATE.cs:21658); the migrated rows all hold 'Y'.
         DATA_TRFR: 'Y',
+        ...(carried.has(itCode) ? { CARRIED_FROM: carried.get(itCode)!.from } : {}),
       });
     }
     for (const { srNo, itCode, row, oth } of lines) {
+      if (carried.has(itCode)) continue;
       // Ac_Stock.Itm_Opbl_Stk (Ac_Stock.cs:11-21). The decompiled source writes SR_NO 1 and ISR_NO = A.SR_NO; the
       // desktop's own rows (72 in the migrated data) carry SR_NO = A.SR_NO and ISR_NO 1, and the web follows the data.
       await insertRowTx(tx, 'MAIN_STOCK', input.scope.tenantId, {
@@ -445,6 +491,9 @@ export async function deleteItemOpening(
   if (!isItemOpeningType(type))
     throw new ItemOpeningValidationError(DESKTOP_MESSAGES.ITEM_SELECT_FOR_DELETE);
   return withTxBudget(prisma, scope.tenantId, 'voucher', async (tx: any) => {
+    const carried = await carriedRowsTx(tx, scope, typeOf(typeRaw));
+    const first = carried.values().next().value;
+    if (first) throw new ItemOpeningValidationError(carriedOpeningMessage(first.from));
     await lockTx(tx, scope, type, expectedVersion);
     return { type, deleted: await deleteTypeTx(tx, scope, type) };
   });

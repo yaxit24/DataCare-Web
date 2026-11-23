@@ -1,6 +1,8 @@
 export type GstView = 'gstr1' | 'gstr2' | 'gstr3b';
-export type GstSection = 'B2B' | 'B2CL' | 'B2CS' | 'CDNR' | 'CDNUR' | 'AT' | 'ATADJ' | 'HSN';
-export type BlockedGstSection = 'EXP' | 'EXEMP' | 'DOCS' | 'TCS';
+export type GstSection =
+  'B2B' | 'B2CL' | 'B2CS' | 'CDNR' | 'CDNUR' | 'EXP' | 'AT' | 'ATADJ' | 'EXEMP' | 'HSN' | 'DOCS';
+/** RP_GST sections whose zoom builds the caption grid and returns before any query (EXP, EXEMP) or has no query (DOCS). */
+export type HeaderOnlyGstSection = 'EXP' | 'EXEMP' | 'DOCS';
 
 export interface GstReportScope {
   tenantId: string;
@@ -41,6 +43,10 @@ export interface GstReportResult {
     blockedSections?: readonly string[];
     blockedRows?: readonly string[];
     limitations?: readonly string[];
+    /** RP_GST grid row 1 group captions, by column key, where the desktop sets them. */
+    groupCaptions?: Readonly<Record<string, string>>;
+    /** True when the desktop shows only the caption grid: no query, no rows and no "No Record Found...." message. */
+    headerOnly?: boolean;
   };
 }
 
@@ -85,10 +91,24 @@ export interface RawGstr3bAmounts {
   sgst: string;
 }
 
+/** A desktop aggregate over no rows is NULL and `Strings.Format(NULL & "", "0.00")` prints a blank cell. */
+export interface RawGstr3bAggregate extends RawGstr3bAmounts {
+  rowCount: string;
+}
+
+export interface RawGstr3bStateRow {
+  stateCode: string;
+  stateName: string;
+  taxable: string;
+  igst: string;
+}
+
 export interface RawGstr3bResult {
-  outward: RawGstr3bAmounts;
-  reverseCharge: RawGstr3bAmounts;
-  otherItc: RawGstr3bAmounts;
+  outward: RawGstr3bAggregate;
+  reverseCharge: RawGstr3bAggregate;
+  otherItc: RawGstr3bAggregate;
+  /** 3.2(1): inter-state supplies to unregistered persons, one row per place of supply. */
+  unregisteredInterState: RawGstr3bStateRow[];
 }
 
 export class GstReportRequestError extends Error {
@@ -99,6 +119,8 @@ export class GstReportRequestError extends Error {
       | 'missing-section'
       | 'invalid-section'
       | 'section-not-supported'
+      | 'csv-not-emitted'
+      | 'csv-not-settled'
       | 'invalid-date'
       | 'invalid-date-range'
       | 'date-outside-year'

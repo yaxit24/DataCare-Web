@@ -6,6 +6,38 @@
 - 2026-11-22: decisions D1-D14 in `orchestration/work/WP-27/cases.md` (architect, owner may override); new DB tests 18 of 18; return
   create p95 269 ms in the load profile. Browser module (28 cases, 0 declared blocked) not run locally. G246 (RTN_* columns) stays open.
 
+## 2026-11-22 — Gst Report runs the desktop RP_GST rules for the blocked cases (N239 / G251, WP-19)
+
+- 2026-11-22: EXP/EXEMP/DOCS are the desktop caption grids; GSTR-3B is the whole desktop grid (3.1 total, 3.2(1), 6.1) under owner decisions
+  Q1-Q3; SetDate on the date boxes; no CSV for EXEMP/DOCS; Gsrt1 Csv = one XLSX B2B..HSN; TCS proven out of every GST figure.
+- 2026-11-22: migration 20261122090000 adds the LBR_ISU_DETL GST shares (labour writer now stores them; labour HSN tax was 0 before) and
+  TAX_DATA writers set R_CHARG 'N'. Still blocked: EXP.csv bytes (Q9, Windows run), two T14 fault cases (no read/export injector).
+
+## 2026-11-22 — Tag Stock follows the desktop RP_TAG selections and totals (N238 / G250, WP-15)
+
+- 2026-11-22: In = BAR_DETL creation rows, Out = minus movements, Stock/Mrp = positive signed-movement sum of the year up to To (Mrp <> 0), Apr = APR ISU / ISU_REC N joined to BAR_DETL, All = signed history; tag N excluded; no 5,000-row cap in rows, footer, CSV or Excel; Tag Summ / Product Stk; the page is the RP_TAG form (selectors, columns, keys). CSV and Excel need the Print right.
+- 2026-11-22: tagStock.db.test.ts (28) and tagStock.routes.db.test.ts (6) pass on an isolated database; the tagStock browser module and the edited tagCancel/tagOpening helpers were NOT run locally (8 GB machine): CI is the first run. Open: voucher zoom, Print window/Crystal, approval other-item columns, edition-E Emp Isu Less, summary Mrp/Size, year rollover.
+
+## 2026-11-22 — Data Backup archives the tenant configuration by allowlist (N237 / G249, WP-08, D37)
+
+- 2026-11-22: the v2 archive and its manifest carry `tenantConfig` (datacare.tenant-config v1): nine tenant-shared configuration tables, column by
+  column from an allowlist (unlisted columns are never read), and an excluded-secrets list written as null; sessions and receipts are never read.
+- 2026-11-22: password hashes (`LOGIN_MAST.LOGIN_PWD`) are excluded too (D37 amended 2026-11-22: offline-cracking risk; DR uses pg_dump). data-backup module 14 of 18
+  applicable (4 blocked), `config.nextmain-allowlist` left the baseline; backup DB tests 31 of 31.
+
+## 2026-11-22 — Balance TrFr carries the desktop BtmSchm datasets (N236 / G248, WP-23)
+
+- 2026-11-22: Ac Balance (Rtl_AcOpbl) and Item Stock (BtnItmStk) carry by the desktop rules into the server-computed Transfer Year;
+  re-run replaces the target year only, one transaction under an advisory lock; closing(N) = opening(N+1) DB tests 42/42.
+- 2026-11-22: Tag Stock, Sales Order and Approval are implicit in the one-database web (Q1/Q8 decided 2026-11-22 by the architect, owner may override): the buttons run
+  the desktop selection, report the open count and write nothing. Q9: ITM_OPBL is read only by Item Opening, so the carry changes no
+  stock balance. Q2/Q3: offsetting balances are carried. Still open: Q4, Q6, AvgTouch.
+
+## 2026-11-22 — Sales line percentage labour and line precision follow TR_SALE (N235 / G247, WP-41)
+
+- 2026-11-22: a Lbr% line derives LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, LBR_ROF) and multiplies the LBR_TYPE basis (`TR_SALE.cs:11021`, `:11084-11127`); it was LBR_PRC of the item amount. The eight `labour.pct.*` oracle baselines are gone and pass.
+- 2026-11-22: ITM_AMT and LBR_AMT round to a hardcoded 0 decimals (2 under ALL_ROF_REMOVE, `TR_SALE.cs:10343-10362`), no longer by TOT_AMT_ROF. Every Sale line on a blank-ALL_ROF_REMOVE company is now whole rupees (61,234.5 -> 61,234), so the sales-invoice, gst-report, group-master and item-master expectations moved; the gst-report midpoint case now sits on 954.135.
+
 ## 2026-11-09 — Order Cancel is the desktop TR_SL_ORD_ADJ voucher (N233 / G245, WP-02)
 
 - 2026-11-09: one voucher cancels the open advance of many orders (SL_ORD_ADJ, Order_Adj_Ledr/Rojmel, held-tag release), version-guarded

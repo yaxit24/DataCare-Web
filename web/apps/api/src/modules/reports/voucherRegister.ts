@@ -1,3 +1,4 @@
+import { notCarriedOpening } from '../shared/carriedOpening.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import type { ReportScope, ListReport } from './reports.js';
 
@@ -32,6 +33,9 @@ export async function voucherRegister(
     if (s.coYear) {
       parts.push(`"CO_YEAR"=$${i++}`);
       params.push(s.coYear);
+    } else {
+      // Across years a carried opening would repeat the closed year's history (shared/carriedOpening.ts).
+      parts.push(notCarriedOpening());
     }
     if (s.book) {
       parts.push(`"CO_BOOK"=$${i++}`);
