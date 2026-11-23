@@ -1626,11 +1626,11 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `RP_ALL` — constructor caption 'Approval Rpt' ([MDI_FORM.cs:8921-8930](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8921-L8930)).
 - **Does:** Reports approval issue, in/out and pending custody by party and item.
-- **Looks:** Shared date/book/party/location/item filters with Issue, InOut and Pending buttons.
+- **Looks:** The RP_ALL form in its Approval Rpt caption: From / To Date (01/01/2010 to the system date, SetDate on Enter), lc Code locked outside head office, Book, Pr Code, Gr Code, Party Code, Cust Name, City, Area, Item Type; PanelApr with &Approval Isu, &Approval InOut and &Approval Panding; Save, Delete, Cancel, Print, Exit. Each button prints its Crystal layout (AprPartyWise, AprInOut, AprPan) as a banded grid with CSV, XLSX and PDF.
 - **Reads:** APR_DATA, APR_DETL, BOOK_DATA, AC_MAST, ITEM_MAST, PRODUCT_MAST.
 - **Web:** `/reports/approval-report`; `GET /reports/approval-report`. Can: print, list.
-- **Remaining:** Three data modes exist; InOut calculates the desktop Out/In/Pending piece formulas per APR_DETL issue line (AprInOut.spec.json): Out=ITM_PCS, In=ITM_PCS when ISU_REC is resolved, Pending=Out-In. The desktop writes only 'N' and 'Y' (TR_APR_ISU.cs:6414, TR_SALE.cs:16113); the web Approval Rtn screen runs on the Tour return writer, which closes a returned line with 'R', so 'Y' and 'R' both count as In and the Pending mode agrees. Grid, CSV, XLSX and PDF carry the same totals but print raw field names, not the Crystal AprInOut layout. RP_ALL selectors, grouping, Crystal layouts and custody-state reconciliation remain uncertified.
-- **Owners:** N22, X17, N24, X26, N57, N75.
+- **Remaining:** N254/G266 (WP-13): dedicated screen on the shared RP_ALL engine. Issue groups party then voucher with Party Total and no grand total; InOut and Pending group party, product and tag with Grand Total; Pending selects exact ISU_REC N; live master names; reversed dates give an empty report; screen and exports come from one result. The browser module passes 28 of 28 applicable cases and rpAllApproval.db.test.ts covers the database cases. Open: owner questions on the MsDataType source (D3) and MsAllBranchAcShow (party help); the NULL-tag footer, printed decimal format and Crystal drill-down need original-Windows evidence; the Sales Invoice approval import does not exist yet, so sale consumption is not operator-driven. The web keeps the session-year filter (D4) and counts legacy R as resolved (D6). Desktop match 0%.
+- **Owners:** N22, X17, N24, X26, N57, N75, N254, G266.
 - **Evidence:** [RP_ALL.cs:8141-8365](../../unified/src/csharp/DataCareNext/RP_ALL.cs#L8141-L8365).
 
 ### Bul Report

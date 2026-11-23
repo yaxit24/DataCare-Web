@@ -1,3 +1,10 @@
+## 2026-11-23 — Approval Rpt is the desktop RP_ALL approval branch (N254 / G266, WP-13)
+
+- 2026-11-23: `/reports/approval-report` is its own screen (`reports/approval-report/`) over the shared RP_ALL engine (`rpAll/approvalLayouts.ts`,
+  `approvalQuery.ts`); browser module `approval-report` 28/28 applicable, 7 blocked; exports honour the AprPan zero tag-footer suppression.
+- 2026-11-23: open owner questions: the MsDataType A/B source (D3) and MsAllBranchAcShow for party help; sale consumption waits for the Sales
+  Invoice approval import (the /tour/:vchNo/bill route stays a 409). Merge note: `cities`/`areas` lookup lines are identical to WP-14's.
+
 ## 2026-11-22 — Sales Invoice residuals (N243 / G255, WP-26)
 
 - 2026-11-22: an unchanged reopen-and-save writes the stored SL_DATA row back (D8); getSale reloads the member-commission columns, stones, UPI, credit-note and desktop-shape order rows and PR_COST; UPI_DATA and CRNT_DATA are written (sums = header figures, D1); order advances in the TR_SALE shape (D2, 409 on over-use); old metal G versus every other type, rate type N/F only (G83); the reopened tax code goes back (G82); PRINT_MAST print choice (D6).

@@ -405,7 +405,7 @@ browser case per screen first (red), then the hook (green).
 |---|---|---|---|---|---|---|---|
 | WP-11 | Sales Report + the shared RP_ALL engine | `RP_ALL.cs` (12,662) sales branch | P1 | XL | — | 01 | phase one (engine + Sales API, N234) in PR; screen open |
 | WP-12 | Purchase Rpt (removes 17 G06 baselines) | `RP_ALL` purchase branch | P1 | M | WP-11 | 02 | frozen cases merged |
-| WP-13 | Approval Rpt | `RP_ALL` approval branch | P2 | M | WP-11, WP-01 | 03 | partial |
+| WP-13 | Approval Rpt | `RP_ALL` approval branch | P2 | M | WP-11, WP-01 | 03 | PR open (N254, G266): screen + RP_ALL API; browser 28/28 applicable, 7 blocked (owner questions D3, MsAllBranchAcShow; Windows evidence; Sales Invoice approval import) |
 | WP-14 | Order Report | `RP_ALL` order branch | P2 | M | WP-11, WP-03 | — (use 01's pattern) | no longer BROKEN once WP-03 (#232) merges |
 | WP-15 | Tag Stock | `RP_TAG.cs` (10,813) | P1 | L | — | 04 | N238/G250: selections, stock rule, totals and keys implemented (DB tests pass); zoom, Print window, other-item columns open; browser module not yet run |
 | WP-16 | Stock Report (new route) | `RP_STOCK.cs` (6,407) | P1 | L | WP-15 | 05 | PR open (N241, G253) |
