@@ -206,6 +206,11 @@ export const EXPECTED_MIGRATIONS: ReadonlyArray<{
     checksum: '5d31ad3136d6d02a24da51d789e3ad3ef30724303756b3921b549df2bfb735ca',
   },
   {
+    // WP-26 (N243, G255): SL_DATA member-commission and RE_TRFR columns, SL_PR_DETL.PR_COST.
+    name: '20261122200000_sale_desktop_residual_columns',
+    checksum: '77b3225983a5fd8f9b41b682896a8154090960796d5af6b66aba915e6f80343c',
+  },
+  {
     // WP-36: ITEM_MAST TAX_FREE_ITEM / APP_ITEM / EMP_COM_PRC / AC_MEMB_COM_PRC with the desktop defaults.
     name: '20261123100000_item_mast_desktop_flags',
     checksum: '71a4dcc133ca035479477651c22a8a3c7769990a295150256c005b45e5b99c15',

@@ -8081,6 +8081,31 @@
         "web/scripts/load-profile.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. 50 frozen cases (cases.md), 0 blocked; the new DB tests 18 of 18 locally, red before the fix for the study's reasons. The sales-return browser module (28 cases, 0 declared blocked) was not run locally (machine rule); CI's feature job is the run of record. Desktop match 0%. G246 (RTN_* columns) is open under N234."
+    },
+    {
+      "id": "N243",
+      "status": "implemented-unverified",
+      "action": "Sales Invoice closes its residual TR_SALE gaps: an unchanged reopen-and-save writes every stored SL_DATA column back (decision D8; a changed save writes DATA_TRFR/USER_UPDATE N and RE_TRFR from the stored transfer flag, TR_SALE.cs:15332-15342); getSale reloads every column and child DISPLAY_DATA reads (MEMB_COM_AC_CODE, WHOUT_COMM_BILL, OLD_GL/OLD_SL, ADV_AMT, SL_IDTL stones, UPI_DATA, CRNT_DATA, SL_ORD_ADJ, SL_PR_DETL.PR_COST); the writer adds UPI_DATA and CRNT_DATA rows (UPI_AMT and CRNT_ADJ_AMT are their sums, D1; the credit note joins BILL_OS, :19390) and writes order advances in the desktop shape (ORD_SIGN '-', ORD_AMT, many rows, D2) under the order lock with a 409 on over-use; old metal splits G from every other type and refuses a rate type other than N/F (:7667-7669, :19343-19351, G83); an edit deletes only the tables it rewrites; the screen sends the reopened tax code back (G82); PRINT_MAST file list, Set default, HUID/099/chosen-file template choice and OpAmt/ClAmt (D6).",
+      "parentLabels": "P1-core; L1; WP-26; T01-T18",
+      "startAfter": [
+        "N235"
+      ],
+      "requiredProof": "Kernel vectors (old-metal grid) and DB tests red before the change and green after, expected values from TR_SALE.cs with arithmetic shown; the sales, sales order, sales return, finance and GST DB tests stay green; the sales-invoice browser module runs the residual cases in CI.",
+      "gapIds": "G255, G83, G82",
+      "entryDefinition": "docs/parity/LITE-MASTER-PLAN.md section 5 (WP-26)",
+      "sourceAndModuleDetail": "orchestration/work/WP-26/study.md; orchestration/work/WP-26/cases.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/apps/api/src/modules/sales/saleResiduals.ts",
+        "web/apps/api/src/modules/sales/saleRead.ts",
+        "web/apps/api/src/modules/sales/salePrintChoice.ts",
+        "web/packages/core/src/oldMetalGrid.ts",
+        "web/apps/web/components/SaleResidualPanel.tsx",
+        "web/apps/api/test/salesInvoiceResiduals.db.test.ts",
+        "web/apps/web/test/features/modules/salesInvoiceResiduals.mjs"
+      ]
     }
   ],
   "amendments": [

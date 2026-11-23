@@ -462,7 +462,7 @@ at the repair lock; add one that exists only in test builds.
 
 | WP | Menu(s) | Item | Pri | Size | State |
 |---|---|---|---|---|---|
-| WP-26 | Sales | Lossless reopen on the Sales Invoice screen, tender/source branches, G83 old-metal header valuation, G82 tax codes on web-provisioned companies, Crystal variants, 3 blocked cases | P1 | L | 29/32 |
+| WP-26 | Sales | Lossless reopen on the Sales Invoice screen, tender/source branches, G83 old-metal header valuation, G82 tax codes on web-provisioned companies, Crystal variants, 3 blocked cases | P1 | L | 29/32  N243/G255: implemented-unverified; 71 cases covered, 13 blocked with reasons, 3 N/A |
 | WP-27 | Sales Return | Lossless edit, the 5 s transaction budget on create, admissibility, residuals, 2 blocked | P1 | L | PR (N242/G254): 50 frozen cases, 0 blocked; module 28 cases, 0 declared blocked |
 | WP-28 | Purchase | The 95-column hallmark receive branch, lossless reopen, family-filtered books | P1 | L | 31/31 |
 | WP-29 | Purchase Rtn | G95 (HSN tax on the print), G96 (grid Enter), 2 blocked | P2 | M | 20/22 |
