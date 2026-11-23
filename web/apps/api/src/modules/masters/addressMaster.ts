@@ -1,3 +1,4 @@
+import { carriedOpeningDeleteProblemTx } from '../finance/partyOpening.js';
 import { withTxBudget } from '../shared/txBudget.js';
 import { insertRowTx } from '../posting/posting.js';
 import { DESKTOP_MESSAGES } from '../shared/desktopMessages.js';
@@ -397,6 +398,9 @@ export async function deleteAddress(
     await lockTx(tx, scope);
     if (expected && (await addressVersionTx(tx, scope, code)) !== expected)
       throw new AddressVersionConflictError();
+    // A carried opening is not deleted with the address (WP-23; architect, 2026-11-22, owner may override).
+    const carried = await carriedOpeningDeleteProblemTx(tx, scope, code);
+    if (carried) throw new AddressMasterValidationError(carried);
     const n = await tx.$executeRawUnsafe(
       `DELETE FROM "ADD_MAST" WHERE tenant_id=$1 AND "CO_CODE"=$2 AND "LC_CODE"=$3 AND "AC_CODE"=$4`,
       scope.tenantId,

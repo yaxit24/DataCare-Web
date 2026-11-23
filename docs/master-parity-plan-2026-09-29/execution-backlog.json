@@ -7852,6 +7852,93 @@
         "web/apps/web/test/features/modules/salesReport.mjs"
       ],
       "statusNote": "IN PROGRESS (phase one). Engine, Sales adapter and API are built and unit-tested; the DB/HTTP test and the frozen browser module were written without a local stack and run in CI only. No screen yet: every sales-report browser case is blocked. G246 (the web Sales Return writes its amount to NET_AMT instead of RTN_NET_AMT) is open and keeps the return variant empty for web-written returns."
+    },
+    {
+      "id": "N235",
+      "status": "implemented-unverified",
+      "action": "Sales line percentage labour and line precision follow TR_SALE CommPassTotal: LBR_RATE = Math.Round(ITM_RATE x LBR_PRC / 100, MsLbrRof) (TR_SALE.cs:11021) multiplied by the LBR_TYPE basis (:11084-11127; Sales Return :4963, :4975-4993), and ITM_AMT/LBR_AMT each one Math.Round to a hardcoded 0 decimals, 2 under ALL_ROF_REMOVE (:10343-10362), instead of TOT_AMT_ROF; the Sale and Sales Quotation previews use the same kernel.",
+      "parentLabels": "P1-core; L1; T03; WP-41",
+      "startAfter": [
+        "N233"
+      ],
+      "requiredProof": "The desktop oracle sales-line vectors pass with the eight labour.pct.* baseline entries removed; core and web unit tests; a DB test of the persisted LBR_RATE/LBR_AMT and the line precision (TOT_AMT_ROF ignored, ALL_ROF_REMOVE honoured); the sales-invoice browser case formula.percentage-labour; sales-invoice and sales-return modules green.",
+      "gapIds": "G247",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/packages/core/src/calc.ts",
+        "web/packages/core/src/saleAmount.ts",
+        "web/packages/core/src/roundingPolicy.ts",
+        "web/apps/api/src/modules/sales/sales.ts",
+        "web/apps/api/src/modules/sales/salesReturn.ts",
+        "web/apps/web/lib/lineRecalc.ts",
+        "web/packages/core/test/desktopOracle.salesLine.test.ts",
+        "web/packages/core/test/calc.test.ts",
+        "web/apps/api/test/lineComponentRounding.db.test.ts",
+        "web/apps/web/test/features/modules/salesInvoice.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Desktop oracle sales-line: KNOWN_MISMATCHES empty (the eight labour.pct.* entries removed and passing). sales-invoice module 34 applicable, 32 passed, 0 failed, 2 blocked (both pre-existing, unrelated); new case formula.percentage-labour passes. sales-return 25 of 26 (1 blocked, pre-existing; new case config.all-rof-remove-keeps-whole-rupees). gst-report, group-master and item-master expectations moved to whole-rupee lines and pass. Not modelled: the registration-serial branches (DM035NPDM, HM199NEPK). Desktop match 0% beyond the oracle vectors."
+    },
+    {
+      "id": "N236",
+      "status": "implemented-unverified",
+      "action": "Balance TrFr is the desktop BtmSchm form with the five Lite dataset buttons. Ac Balance carries parties to the closing date per AC_CODE and DATA_TYPE into OP_DATA with Party Opening legs (Cr-positive, gold and silver by IT_TYPE, decimal half-away rounding, zero-skip); Item Stock carries untagged MAIN_STOCK into ITM_OPBL (fine = net x AVG_TOUCH / 100); server-computed Transfer Year, target-year replace, one transaction under an advisory lock. Tag Stock, Sales Order and Approval are implicit in the one-database web: the buttons run the desktop selection, report the open count and write nothing.",
+      "parentLabels": "P0; L3; T01-T18; WP-23",
+      "startAfter": [
+        "N233"
+      ],
+      "requiredProof": "closing(N) = opening(N+1) database tests per account and DATA_TYPE and per item, worked from the desktop formulas, failing on the previous writer and passing now; re-run, rollback after the first table, scope, concurrency and refusal cases; unit vectors for the rounding half-cases and the tag/order/approval value lists; the balance-transfer browser module in CI; all repository gates.",
+      "gapIds": "G248",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/apps/api/src/modules/ops/balanceTransfer.ts",
+        "web/apps/api/src/modules/ops/balanceTransferRules.ts",
+        "web/apps/api/src/modules/ops/balanceTransferSelect.ts",
+        "web/apps/api/src/routes/balanceTransfer.ts",
+        "web/apps/web/app/(app)/company/balance-transfer/page.tsx",
+        "web/apps/api/test/balanceTransfer.db.test.ts",
+        "web/apps/api/test/balanceTransferRules.test.ts",
+        "web/apps/api/test/balanceTransferSelect.db.test.ts",
+        "web/apps/web/test/features/modules/balanceTransfer.mjs",
+        "orchestration/work/WP-23/cases.md",
+        "web/apps/api/src/modules/shared/carriedOpening.ts",
+        "web/apps/api/test/balanceTransferReaders.db.test.ts",
+        "web/packages/db/prisma/migrations/20261122090000_itm_opbl_carried_from/migration.sql",
+        "web/packages/db/prisma/migrations/20261122100000_legacy_year_end_openings_carried/migration.sql"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. Decisions (decided 2026-11-22 by the architect, owner may override): Q1/Q8 Tag Stock, Sales Order and Approval are implicit in the one-database web (tag stock, open orders and open approvals already read every year), so those buttons run the desktop selection, report the open count with the completion text and write nothing; Q9 no web stock reader adds ITM_OPBL (stock.ts onHandNet reads MAIN_STOCK of every year), so Item Stock writes ITM_OPBL as the desktop does and changes no balance; Q2/Q3 offsetting money/gold and pcs/weight are carried, not dropped (deliberate difference). Cases: 81 executable, 3 blocked (Q6, AvgTouch, tag-counter contradiction), 25 N/A. DB/unit 65/65 locally; browser module green in CI on the previous push. Opening model (decided 2026-11-22 by the architect, owner may override): a carried opening is an AC_DATA leg in book 000 with BOOK_NAME 'BAL TRFR' (shared/carriedOpening.ts) next to its OP_DATA row; year-scoped readers (trial balance/balances/balance sheet/P&L/outstanding with a year, desktopAccountBalance, Party Opening) count it; cross-year readers (Account Ledger, accounting ledger and trial balance without a year, partyBalance, cash book, bank book, Wh Sales balance, consignment opening, graph, day book) exclude it. One writer per account: the party carry (carryPartiesTx) serves Balance TrFr and Year-End Close; Year-End Close writes only non-party accounts, scoped by location, and replaces its legacy ACOP/OPENING/1 legs. Item Stock writes ITM_OPBL with CARRIED_FROM; stock (onHandNet) reads MAIN_STOCK of every year and never ITM_OPBL; Item Opening Save posts no MAIN_STOCK leg for a carried item; the carry replaces a hand-keyed N+1 opening together with its ITOBL stock and DM rows. Re-review decisions (architect, 2026-11-22, owner may override): Year Create's Carry Forward routes through the same single writer (carryOpeningsTx); migration 20261122100000 relabels legacy Year-End Close legs (ACOP/OPENING/1) as carried; editing or deleting a carried opening on Party Opening, the Party master or Item Opening is refused (unchanged master saves pass); group summary, voucher register without a year and Data Refresh totals exclude carried legs; the carries replace only the rows they own. Desktop match 0%."
+    },
+    {
+      "id": "N237",
+      "status": "implemented-unverified",
+      "action": "Data Backup archives the NextMain-equivalent tenant configuration by allowlist (UT_BKP.cs:1198-1251, D-BKP-3, D37): a versioned tenantConfig section (datacare.tenant-config v1) and its manifest descriptor carry this tenant's rows of nine tenant-shared configuration tables, column by column from an explicit allowlist (an unlisted table or column is never read); an explicit excluded-secrets list (LOGIN_MAST.LOGIN_PWD, BOOK_IDTL.SVR_PWD, CO_MAST.URL_PWD, CO_MAST.MAIL_API, DG_GOLD_MAST.API_KEY, E_MAST.ASP_PWD, E_MAST.E_LOGIN_PWD) is written as null, and sessions, refresh-token hashes and idempotency receipts are never read. Restore stays contained.",
+      "parentLabels": "P1-core; L1; T15; WP-08",
+      "startAfter": [
+        "N80"
+      ],
+      "requiredProof": "data-backup.config.nextmain-allowlist leaves baseline.json and passes through the real screen; DB tests: other tenant absent, every excluded secret seeded and absent, a configuration column added after the review is not exported, every secret-looking exported column of the live schema is an excluded secret; unit tests: the integrity check refuses a leaked secret, an unlisted column or a drifted envelope.",
+      "gapIds": "G249",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/apps/api/src/modules/ops/backupTenantConfigPolicy.ts",
+        "web/apps/api/src/modules/ops/backup.ts",
+        "web/apps/api/src/modules/ops/backupManifest.ts",
+        "web/apps/api/test/backupTenantConfig.test.ts",
+        "web/apps/api/test/backupTenantConfig.db.test.ts",
+        "web/apps/web/test/features/modules/dataBackup.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. data-backup module: 18 applicable, 14 passed, 0 failed, 4 blocked (unchanged: rights.desktop-print-handoff, output.physical-save-confirmation, output.full-lite-fixture, journey.scratch-zero-diff). backupTenantConfig unit 10 of 10, DB 5 of 5. Password hashes excluded per D37 as amended on 2026-11-22."
     }
   ],
   "amendments": [

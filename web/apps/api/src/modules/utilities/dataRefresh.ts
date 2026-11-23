@@ -1,3 +1,4 @@
+import { notCarriedOpening } from '../shared/carriedOpening.js';
 import { withTxBudget } from '../shared/txBudget.js';
 
 /**
@@ -34,7 +35,7 @@ export async function dataRefresh(
     // ledger totals (informational only)
     const led = (
       await q(
-        `SELECT COALESCE(SUM("DR_AMT"),0)::float AS dr, COALESCE(SUM("CR_AMT"),0)::float AS cr FROM "AC_DATA" WHERE "CO_CODE"=$1`,
+        `SELECT COALESCE(SUM("DR_AMT"),0)::float AS dr, COALESCE(SUM("CR_AMT"),0)::float AS cr FROM "AC_DATA" WHERE "CO_CODE"=$1 AND ${notCarriedOpening()}`,
         s.coCode,
       )
     )[0] || { dr: 0, cr: 0 };

@@ -155,10 +155,14 @@ route('Utilities/e-Invoice (IRN)', [
   'POST /einvoice/:vchNo/cancel',
 ]);
 route('Utilities/Year-End Close', ['POST /year-end/preview', 'POST /year-end/close']);
+// BtmSchm: the catalog right is Create (`C-----`); every dataset button is a create (WP-23).
 route('Company/Balance TrFr', [
-  'POST /balance-transfer/preview',
-  'POST /balance-transfer/year-close',
-  'POST /balance-transfer/openings',
+  'GET /balance-transfer',
+  'POST /balance-transfer/ac-balance',
+  'POST /balance-transfer/item-stock',
+  'POST /balance-transfer/tag-stock',
+  'POST /balance-transfer/sales-order',
+  'POST /balance-transfer/approval',
 ]);
 route('Utilities/Reminders', [
   'GET /reminders/overdue',
@@ -1157,8 +1161,6 @@ const UPDATE_POST_ROUTES = new Set([
   'POST /einvoice/gsp-test',
   'POST /einvoice/:vchNo/cancel',
   'POST /year-end/close',
-  'POST /balance-transfer/year-close',
-  'POST /balance-transfer/openings',
   'POST /reports/entry-check/mark-checked',
 ]);
 
@@ -1168,7 +1170,6 @@ const READ_POST_ROUTES = new Set([
   'POST /sales-returns/:vchNo/incoming-bill-replay',
   'POST /sales-returns/:vchNo/incoming-replay',
   'POST /year-end/preview',
-  'POST /balance-transfer/preview',
   'POST /utilities/estimate-reset/preview',
   // Reads only: the framework asserts a preview writes nothing, and the diff it returns is what the operator
   // reviews before any apply exists.
