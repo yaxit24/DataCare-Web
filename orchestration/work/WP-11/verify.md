@@ -14,7 +14,12 @@ PARITY_TEST_PORT=55700 PARITY_API_PORT=4700 PARITY_WEB_PORT=4701 FEATURE_E2E_MOD
 Result line: `sales-report: Reports → Sales Report (RP_ALL) (20 cases) -> applicable 14, passed 11, failed 0,
 blocked 3, untested 0; browser pass 78.57%` and `FEATURE_E2E_PASSED`. Evidence:
 `web/test-results/feature-e2e/sales-report/run.json` (inputs hash `71b320b5…`), one folder per case with
-screenshots and observations. Phase one (engine, Sales adapter, API, N234) is recorded in the backlog; this file
+screenshots and observations.
+
+Re-run at 20:09 IST after merging `origin/main` at `bb633980` (#255, #261, #262), candidate `10abe2e5`, inputs hash
+`71b320b5…`, on a fresh build: the same result, 14 applicable, 11 pass, 3 blocked, 0 fail.
+
+Phase one (engine, Sales adapter, API, N234) is recorded in the backlog; this file
 covers the dedicated screen on `/reports/sales-report`.
 
 ## Coverage
