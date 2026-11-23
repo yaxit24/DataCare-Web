@@ -429,10 +429,14 @@ type TaxRow = {
   it('lists the header help of group 12 and 00013 by name, the component help of every account', async () => {
     let response = await request(adminCookie, 'GET', '/masters/tax-master/accounts?kind=header&q=');
     expect(response.statusCode, response.body).toBe(200);
+    // The provisioned tax ledgers GST, GSTINPUT and TCS sit in group 12 (seedCompany.ts, WP-36), so they are listed.
     expect(response.json().map((r: { code: string }) => r.code)).toEqual([
       '00086',
+      'GSTINPUT',
+      'GST',
       '00085',
       '00087',
+      'TCS',
       '00013',
     ]);
     response = await request(
