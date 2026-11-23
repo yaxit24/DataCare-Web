@@ -5,7 +5,7 @@
   "ceilings": {
     "apps/api/src/routes/txn.ts": 8290,
     "apps/api/src/modules/purchase/purchase.ts": 2908,
-    "apps/api/src/modules/sales/sales.ts": 2865,
+    "apps/api/src/modules/sales/sales.ts": 2864,
     "apps/api/src/modules/sales/rateCut.ts": 2732,
     "apps/api/src/modules/sales/salesOrder.ts": 2354,
     "apps/api/src/modules/membership/scheme.ts": 2205,
@@ -18,9 +18,8 @@
     "apps/api/src/modules/shared/rojmel.ts": 1636,
     "apps/api/src/modules/repair/repairKarigarReceipt.ts": 1582,
     "apps/api/src/modules/settings/settingsCatalog.ts": 1574,
-    "apps/web/app/(app)/txn/sales/page.tsx": 1541,
+    "apps/web/app/(app)/txn/sales/page.tsx": 1536,
     "apps/api/src/modules/manufacturing/mfg.ts": 1516,
-    "apps/api/src/modules/sales/wholesaleSaleReturn.ts": 1510,
-    "apps/web/app/(app)/txn/sales-quotation/page.tsx": 1501
+    "apps/api/src/modules/sales/wholesaleSaleReturn.ts": 1510
   }
 }

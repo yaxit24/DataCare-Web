@@ -12,7 +12,7 @@ import { assertIsolatedTestDatabase } from './support/isolatedDatabase.js';
  */
 const enabled = process.env.RUN_DB_INTEGRITY_TESTS === '1';
 const migrationUrl = new URL(
-  '../../../packages/db/prisma/migrations/20261122090000_labour_detail_gst_shares/migration.sql',
+  '../../../packages/db/prisma/migrations/20261122110000_labour_detail_gst_shares/migration.sql',
   import.meta.url,
 );
 const sql = existsSync(migrationUrl) ? readFileSync(migrationUrl, 'utf8') : '';

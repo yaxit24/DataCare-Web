@@ -1,3 +1,4 @@
+import { CARRIED_OPENING_BOOK_NAME, notCarriedOpening } from '../shared/carriedOpening.js';
 import {
   selectDataRefreshAccountCandidatesTx,
   type DataRefreshAccountCandidate,
@@ -280,6 +281,7 @@ const OPBAL_SELECT = `
      WHERE a.tenant_id=current_setting('app.tenant_id', true)
        AND a."CO_CODE"=$1 AND a."LC_CODE"=$2
        AND a."VCH_DATE" < $3::date
+       AND ${notCarriedOpening('a')}
      GROUP BY a."AC_CODE"
     HAVING (sum(coalesce(a."CR_AMT",0) - coalesce(a."DR_AMT",0))
           + sum(CASE WHEN a."IT_TYPE"='G' THEN (CASE WHEN a."SIGN"='+' THEN coalesce(a."FINE_WT",0) ELSE -coalesce(a."FINE_WT",0) END) ELSE 0 END)
@@ -294,6 +296,23 @@ const OPBAL_SELECT = `
     FROM pre`;
 
 /** Fiscal opening date (`MOp_dt`) from YEAR_MAST.OP_DATE — the boundary the derivation depends on. */
+/**
+ * The accounts with a carried opening in the scope year and location: any carried leg (shared/carriedOpening.ts), with
+ * or without an OP_DATA row (Year-End Close carries non-party accounts as legs only).
+ */
+async function carriedAccountsTx(tx: any, scope: RepairScope, lc: string): Promise<Set<string>> {
+  const rows: any[] = await tx.$queryRawUnsafe(
+    `SELECT DISTINCT c."AC_CODE" ac FROM "AC_DATA" c
+      WHERE c.tenant_id=current_setting('app.tenant_id', true) AND c."CO_CODE"=$1 AND c."LC_CODE"=$2
+        AND c."CO_YEAR"=$3 AND c."CO_BOOK"='000' AND c."BOOK_NAME"=$4`,
+    scope.coCode,
+    lc,
+    scope.coYear,
+    CARRIED_OPENING_BOOK_NAME,
+  );
+  return new Set(rows.map((r) => String(r.ac)));
+}
+
 async function openingDate(tx: any, scope: RepairScope): Promise<string | null> {
   // OP_DATE is a VARCHAR holding an ISO date, and some rows hold an EMPTY STRING. A blank must yield no
   // derivation rather than an empty `::date` cast, which would abort the whole repair.
@@ -312,6 +331,16 @@ async function openingDate(tx: any, scope: RepairScope): Promise<string | null> 
   return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : null;
 }
 
+/**
+ * An OP_DATA row carried by Balance TrFr / Year-End Close / Carry Forward (its ledger legs carry the carried-opening
+ * marker, shared/carriedOpening.ts). The repair leaves such a row alone: it is derived from the closed year, and a
+ * rewrite here would bypass the refusal that Party Opening applies (WP-23; architect, 2026-11-22, owner may override).
+ */
+const CARRIED_OP = (alias: string) => `EXISTS (SELECT 1 FROM "AC_DATA" c
+    WHERE c.tenant_id=${alias}.tenant_id AND c."CO_CODE"=${alias}."CO_CODE" AND c."LC_CODE"=${alias}."LC_CODE"
+      AND c."CO_YEAR"=${alias}."CO_YEAR" AND c."AC_CODE"=${alias}."AC_CODE" AND c."CO_BOOK"='000'
+      AND c."BOOK_NAME"='${CARRIED_OPENING_BOOK_NAME}')`;
+
 const sign = (v: number): string => (v > 0 ? 'C' : 'D'); // desktop: `> 0 ? 'C' : 'D'`, so zero is 'D'
 
 registerRepair({
@@ -325,6 +354,8 @@ registerRepair({
   risk: 'high',
   tables: ['OP_DATA'],
   async preview(tx, scope) {
+    if (!scope.coYear)
+      return { diffs: [], samples: ['no year selected; openings are rebuilt per year'] };
     const opDate = await openingDate(tx, scope);
     if (!opDate)
       return { diffs: [], samples: ['no fiscal opening date configured; nothing to derive'] };
@@ -332,17 +363,21 @@ registerRepair({
     const expected: any[] = await tx.$queryRawUnsafe(OPBAL_SELECT, scope.coCode, lc, opDate);
     const existing: any[] = await tx.$queryRawUnsafe(
       `SELECT "AC_CODE","OP_AMT","OP_SIGN","FINE_BAL","FINE_SIGN","SL_FINE_BAL","SL_FINE_SIGN"
-         FROM "OP_DATA"
-        WHERE tenant_id=current_setting('app.tenant_id', true) AND "CO_CODE"=$1 AND "LC_CODE"=$2`,
+         FROM "OP_DATA" o
+        WHERE tenant_id=current_setting('app.tenant_id', true) AND "CO_CODE"=$1 AND "LC_CODE"=$2
+          AND "CO_YEAR"=$3`,
       scope.coCode,
       lc,
+      scope.coYear,
     );
+    const carried = await carriedAccountsTx(tx, scope, lc);
     const cur = new Map(existing.map((r) => [String(r.AC_CODE), r]));
     const want = new Map(expected.map((r) => [String(r.AC_CODE), r]));
     let insert = 0;
     let update = 0;
     const samples: string[] = [];
     for (const [ac, e] of want) {
+      if (carried.has(ac)) continue;
       const c = cur.get(ac);
       const target = {
         OP_AMT: Number(Math.abs(Number(e.amount)).toFixed(2)) || 0,
@@ -369,31 +404,35 @@ registerRepair({
           );
       }
     }
-    const remove = [...cur.keys()].filter((ac) => !want.has(ac));
+    const remove = [...cur.keys()].filter((ac) => !want.has(ac) && !carried.has(ac));
     for (const ac of remove.slice(0, 3))
       samples.push(`OP_DATA ${ac}: removed (ledger shows no opening)`);
     const d = diff('OP_DATA', { insert, update, delete: remove.length });
     return { diffs: insert + update + remove.length ? [d] : [], samples };
   },
   async apply(tx, scope) {
+    if (!scope.coYear) return [];
     const opDate = await openingDate(tx, scope);
     if (!opDate) return [];
     const lc = scope.lcCode ?? '';
+    const carried = await carriedAccountsTx(tx, scope, lc);
     const expected: any[] = await tx.$queryRawUnsafe(OPBAL_SELECT, scope.coCode, lc, opDate);
     const keep = expected.map((r) => String(r.AC_CODE));
     // Remove openings the ledger no longer justifies, exactly as the desktop's blanket delete would.
     const removed: number = await tx.$executeRawUnsafe(
-      `DELETE FROM "OP_DATA"
+      `DELETE FROM "OP_DATA" o
         WHERE tenant_id=current_setting('app.tenant_id', true) AND "CO_CODE"=$1 AND "LC_CODE"=$2
-          AND NOT ("AC_CODE" = ANY($3::text[]))`,
+          AND "CO_YEAR"=$4 AND NOT ("AC_CODE" = ANY($3::text[])) AND NOT ${CARRIED_OP('o')}`,
       scope.coCode,
       lc,
       keep,
+      scope.coYear,
     );
     let insert = 0;
     let update = 0;
     for (const e of expected) {
       const ac = String(e.AC_CODE);
+      if (carried.has(ac)) continue;
       const amt = Math.abs(Number(e.amount)).toFixed(2);
       const gold = Math.abs(Number(e.gold)).toFixed(3);
       const silver = Math.abs(Number(e.silver)).toFixed(3);
@@ -404,7 +443,7 @@ registerRepair({
                 "SL_FINE_BAL"=$8::double precision,"SL_FINE_SIGN"=$9,
                 "DATA_TYPE"='B',"DATA_TRFR"='Y'
           WHERE tenant_id=current_setting('app.tenant_id', true)
-            AND "CO_CODE"=$1 AND "LC_CODE"=$2 AND "AC_CODE"=$3
+            AND "CO_CODE"=$1 AND "LC_CODE"=$2 AND "AC_CODE"=$3 AND "CO_YEAR"=$10
             AND (coalesce("OP_AMT",0)<>$4::double precision OR coalesce("OP_SIGN",'')<>$5
               OR coalesce("FINE_BAL",0)<>$6::double precision
               OR coalesce("SL_FINE_BAL",0)<>$8::double precision)`,
@@ -417,6 +456,7 @@ registerRepair({
         sign(Number(e.gold)),
         silver,
         sign(Number(e.silver)),
+        scope.coYear,
       );
       if (n > 0) {
         update += n;
@@ -425,10 +465,11 @@ registerRepair({
       const exists: unknown[] = await tx.$queryRawUnsafe(
         `SELECT 1 FROM "OP_DATA"
           WHERE tenant_id=current_setting('app.tenant_id', true)
-            AND "CO_CODE"=$1 AND "LC_CODE"=$2 AND "AC_CODE"=$3 LIMIT 1`,
+            AND "CO_CODE"=$1 AND "LC_CODE"=$2 AND "AC_CODE"=$3 AND "CO_YEAR"=$4 LIMIT 1`,
         scope.coCode,
         lc,
         ac,
+        scope.coYear,
       );
       if (exists.length) continue; // already correct — untouched
       await tx.$executeRawUnsafe(

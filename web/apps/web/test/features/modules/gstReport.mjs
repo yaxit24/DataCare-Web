@@ -1144,7 +1144,7 @@ export const gstReport = {
       'formula.hsn-fnv-midpoint',
       'T03',
       'mutation',
-      'RP_GST.cs:2951-2964 formats Strings.Format(DC_Main.Fnv(tax) / 2.0, "0.00") for local CGST/SGST and Strings.Format(Fnv(tax), "0.00") for IGST; DC_Main.cs:2088-2102 Fnv = Conversion.Val. Measured on .NET Framework 4.8 (windows-latest, web/scripts/dotnet-fx-probe): half away from zero at every 2-decimal midpoint, so 1908.29 -> 954.15',
+      'RP_GST.cs:2951-2964 formats Strings.Format(DC_Main.Fnv(tax) / 2.0, "0.00") for local CGST/SGST and Strings.Format(Fnv(tax), "0.00") for IGST; DC_Main.cs:2088-2102 Fnv = Conversion.Val. Measured on .NET Framework 4.8 (windows-latest, web/scripts/dotnet-fx-probe): half away from zero at every 2-decimal midpoint, so 1908.27 -> 954.14',
       async (ctx) => {
         // The case owns its item and HSN code, so the grid row it checks cannot include any other module's sales.
         const ITEM = 'HSNM1';
@@ -1170,8 +1170,9 @@ export const gstReport = {
         );
         try {
           const page = await openFromNavigation(ctx);
-          // Two real sales of the same gold line (net 63,609.50, GST 3% = 1,908.285 -> 1,908.29): one local, which the
-          // desktop stores as 954.145 CGST + 954.145 SGST (an exact midpoint at two decimals), one inter-state (IGST).
+          // Two real sales of the same gold line (net 63,609: whole-rupee line amounts, TR_SALE.cs:10343-10362; GST 3% =
+          // 1,908.27): one local, which the desktop stores as 954.135 CGST + 954.135 SGST (an exact midpoint at two
+          // decimals), one inter-state (IGST).
           const line = { ...salesScreen.LINE_A, item: ITEM };
           for (const [party, interState] of [
             ['E2ELOC', false],
@@ -1193,8 +1194,8 @@ export const gstReport = {
           assert.deepEqual(
             lines.map((r) => [r.net, r.tax]),
             [
-              ['63609.50', '1908.29'],
-              ['63609.50', '1908.29'],
+              ['63609.00', '1908.27'],
+              ['63609.00', '1908.27'],
             ],
           );
           const taxRows = await ctx.rows(
@@ -1206,7 +1207,7 @@ export const gstReport = {
           const stored = taxRows.map((r) => `${r.TAX_TYPE}=${r.tax}`).sort();
           assert.deepEqual(
             stored,
-            ['CGST=954.145', 'IGST=1908.290', 'SGST=954.145'],
+            ['CGST=954.135', 'IGST=1908.270', 'SGST=954.135'],
             `the local sale must really sit on the midpoint, or this case proves nothing; found ${JSON.stringify(taxRows)} for ${JSON.stringify(lines)}`,
           );
 
@@ -1238,14 +1239,15 @@ export const gstReport = {
           const local = mine.find((row) => row[col('IGST Amount')] === '0.00');
           const inter = mine.find((row) => row[col('IGST Amount')] !== '0.00');
           assert.ok(local && inter, 'a local row and an inter-state row');
-          // Windows-measured: Format(Val("1908.29") / 2.0, "0.00") = 954.15; Format(Val("1908.29"), "0.00") = 1908.29.
-          assert.equal(local[col('CGST Amount')], '954.15');
-          assert.equal(local[col('SGST Amount')], '954.15');
-          assert.equal(inter[col('IGST Amount')], '1908.29');
+          // The Windows-measured rule (half away from zero at a 2-decimal midpoint): Format(Val("1908.27") / 2.0, "0.00")
+          // = 954.14; Format(Val("1908.27"), "0.00") = 1908.27.
+          assert.equal(local[col('CGST Amount')], '954.14');
+          assert.equal(local[col('SGST Amount')], '954.14');
+          assert.equal(inter[col('IGST Amount')], '1908.27');
           assert.equal(inter[col('CGST Amount')], '0.00');
           for (const row of [local, inter]) {
-            assert.equal(row[col('Taxable Value')], '63609.50');
-            assert.equal(row[col('Total Value')], '65517.79');
+            assert.equal(row[col('Taxable Value')], '63609.00');
+            assert.equal(row[col('Total Value')], '65517.27');
             assert.equal(row[col('UQC')], 'GMS-GRAMMES');
             assert.equal(row[col('Total Qty')], '10.00');
           }
@@ -1283,13 +1285,13 @@ export const gstReport = {
           const csvLocal = csvRows.find((c) => c[0] === HSN && c[col('IGST Amount')] === '0.00');
           assert.equal(
             csvLocal?.[col('CGST Amount')],
-            '954.15',
+            '954.14',
             'HSNSUM.csv carries the displayed halves',
           );
           return {
             observation:
-              'HSN answered 200; the local row shows CGST and SGST 954.15 each for a 1,908.29 tax, the inter-state row IGST 1,908.29, and the footer adds the rows',
-            expected: { cgst: '954.15', sgst: '954.15', igst: '1908.29', stored: '954.145 each' },
+              'HSN answered 200; the local row shows CGST and SGST 954.14 each for a 1,908.27 tax, the inter-state row IGST 1,908.27, and the footer adds the rows',
+            expected: { cgst: '954.14', sgst: '954.14', igst: '1908.27', stored: '954.135 each' },
             database: { sales: lines, taxRows: stored },
             downstream: { gridRows: mine, csvRow: csvLocal },
           };

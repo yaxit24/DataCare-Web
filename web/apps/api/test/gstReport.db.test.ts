@@ -866,7 +866,7 @@ class CapturingRenderer implements PdfRenderer {
     );
     const migration = readFileSync(
       new URL(
-        '../../../packages/db/prisma/migrations/20261122090000_labour_detail_gst_shares/migration.sql',
+        '../../../packages/db/prisma/migrations/20261122110000_labour_detail_gst_shares/migration.sql',
         import.meta.url,
       ),
       'utf8',
