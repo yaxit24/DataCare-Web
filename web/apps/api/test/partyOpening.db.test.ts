@@ -424,6 +424,19 @@ describe.skipIf(!RUN)(
     });
 
     it('the year carry-forward reads the legs once and writes the next year in the same shape', async () => {
+      // Year Create's Carry Forward runs the WP-23 single opening writer (architect, 2026-11-22, owner may override):
+      // the BtmSchm party rules (AC_MAIN_GR < '3', up to the closing date) and a carried opening (DATA_TRFR 'Y', legs
+      // marked 'BAL TRFR'), so the party is a party and the year has its closing date.
+      await exec(
+        `UPDATE "AC_MAST" SET "AC_MAIN_GR"='1' WHERE tenant_id=$1 AND "AC_CODE"=$2`,
+        TENANT,
+        PARTY,
+      );
+      await exec(
+        `UPDATE "YEAR_MAST" SET "CL_DATE"='2027-03-31'::timestamp WHERE tenant_id=$1 AND "CO_YEAR"=$2`,
+        TENANT,
+        YEAR,
+      );
       await savePartyOpening(runtime, {
         scope,
         acCode: PARTY,
@@ -436,8 +449,8 @@ describe.skipIf(!RUN)(
       });
       // A receipt of 10,000 from the party during the year.
       await exec(
-        `INSERT INTO "AC_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","LEDR_KEY","AC_CODE","DR_AMT","CR_AMT","IT_TYPE")
-       VALUES ($1,$2,$3,$4,'001','00001','rcpt-01',$5,0,10000,'A')`,
+        `INSERT INTO "AC_DATA"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","LEDR_KEY","AC_CODE","DR_AMT","CR_AMT","IT_TYPE","VCH_DATE")
+       VALUES ($1,$2,$3,$4,'001','00001','rcpt-01',$5,0,10000,'A','2026-06-01')`,
         TENANT,
         CO,
         LC,
@@ -458,7 +471,7 @@ describe.skipIf(!RUN)(
           s: 2,
           ssg: 'D',
           dt: 'A',
-          tr: 'N',
+          tr: 'Y',
           mu: 'ADMIN',
         },
       ]);

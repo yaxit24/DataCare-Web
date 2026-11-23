@@ -1048,5 +1048,40 @@ export const salesReturn = {
         }
       },
     ),
+    C(
+      'config.all-rof-remove-keeps-whole-rupees',
+      'T15',
+      'mutation',
+      'TR_SALE_RTN.cs:4955, :4985 round item and labour to 0 decimals with no ALL_ROF_REMOVE branch (the Sale has one, TR_SALE.cs:10343-10362; N235/G247)',
+      async (ctx) => {
+        const { page } = await ctx.session();
+        await mustSet(page, 'CO_SET.ALL_ROF_REMOVE', 'Y');
+        try {
+          const vchNo = await createReturn(ctx, page);
+          const [h] = await header(ctx, vchNo);
+          const [l] = await lines(ctx, vchNo);
+          // ALL_ROF_REMOVE = Y would keep 61,234.50 on a Sale line; the return still stores 61,234.
+          assert.deepEqual(
+            [l.amt, l.lbr, l.net, h.net, h.tax, h.tot],
+            [
+              EXPECT_R.metal,
+              EXPECT_R.labour,
+              EXPECT_R.net,
+              EXPECT_R.net,
+              EXPECT_R.tax,
+              EXPECT_R.total,
+            ],
+          );
+          return {
+            observation: `ALL_ROF_REMOVE=Y return ${vchNo}: item ${l.amt}, labour ${l.lbr}, net ${l.net}, total ${h.tot}`,
+            expected: EXPECT_R,
+            database: { header: h, line: l },
+            downstream: { total: h.tot },
+          };
+        } finally {
+          await mustSet(page, 'CO_SET.ALL_ROF_REMOVE', 'N');
+        }
+      },
+    ),
   ],
 };

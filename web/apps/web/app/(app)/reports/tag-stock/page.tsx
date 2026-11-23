@@ -1,210 +1,383 @@
 'use client';
-import { formatDesktopDate } from '@datacare/core';
-import { useCallback, useEffect, useState } from 'react';
-import { get, ApiError } from '../../../../lib/api';
+import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyEvent } from 'react';
+import { get } from '../../../../lib/api';
 import { LookupPicker } from '../../../../components/LookupPicker';
-import { EntityImagePanel } from '../../../../components/EntityImagePanel';
+import { useScreenEscape, type ScreenKeyEvent } from '../../../../lib/screenEscape';
+import { isoToDesktop, parseDesktopDate } from './dateText';
+import { TagStockGrid } from './TagStockGrid';
+import { useTagStock } from './useTagStock';
+import { IT_TYPES, type TagStockFilters, type TagStockTab, type TagStockView } from './types';
+import { todayLocal } from '../../../../lib/localDate';
 
-/** Tag-Stock report — In / Out / Stock / MRP / Apr-Pending / All tabs over MAIN_STOCK/BAR_DETL/APR_DETL. */
-type Tab = 'in' | 'out' | 'stock' | 'mrp' | 'apr' | 'all';
-const TABS: { id: Tab; label: string }[] = [
-  { id: 'stock', label: 'In Stock' },
-  { id: 'in', label: 'In' },
-  { id: 'out', label: 'Out' },
-  { id: 'mrp', label: 'MRP' },
-  { id: 'apr', label: 'Apr-Pending' },
-  { id: 'all', label: 'All' },
+/**
+ * Report → Tag Stock: the desktop RP_TAG form (MDI_FORM.cs:8891-8900), "Tag Wise" and "Tag Summ".
+ *
+ * Nothing runs on open; each mode button runs its own query (RP_TAG.cs:3977-4325): In/Out read the dated rows,
+ * Stock/Mrp the signed-movement balance as of To (From is ignored), Apr the pending approvals, All the movement
+ * history. Footer sums cover every row of the report (the API has no row cap) and follow the search box.
+ * Keys: Escape closes (RP_TAG.cs:3865), Down/Up on a selector moves to the grid (:3871), Enter in a date moves on
+ * after the date mask check (DC_Main.cs:1641), Alt+I/O/M/E/C/X and the first-letter mnemonics run the buttons.
+ * Not here: the voucher zoom, Print window and Crystal layouts, the approval other-item columns (study gaps 10, 11, 13).
+ */
+const MODES: Array<{ tab: TagStockTab; label: string; alt: string }> = [
+  { tab: 'stock', label: 'Stock Tag', alt: 's' },
+  { tab: 'in', label: 'In Tag', alt: 'i' },
+  { tab: 'out', label: 'Out Tag', alt: 'o' },
+  { tab: 'mrp', label: 'Mrp Tag', alt: 'm' },
+  { tab: 'apr', label: 'Apr Pending', alt: 'a' },
 ];
-interface Row {
-  tagNo: string;
-  itCode: string;
-  designNo: string | null;
-  tblCode: string | null;
-  vchType: string | null;
-  vchDate: string | null;
-  pcs: number;
-  grossWt: number;
-  netWt: number;
-  fine: number;
-  mrp: number;
-}
-interface Rep {
-  tab: Tab;
-  rows: Row[];
-  totals: { count: number; pcs: number; netWt: number; fine: number; mrp: number };
-}
 
-export default function TagStockReportPage() {
-  const [tab, setTab] = useState<Tab>('stock');
-  const [tblCode, setTblCode] = useState('');
-  const [itCode, setItCode] = useState('');
-  const [rep, setRep] = useState<Rep | null>(null);
-  const [err, setErr] = useState('');
-  const [busy, setBusy] = useState(false);
-  // RP_TAG_IMAGE is a tag-image report: the desktop shows the photograph of the selected tag. Clicking a
-  // row selects it, which is the closest honest equivalent on a list surface.
-  const [imageRow, setImageRow] = useState(0);
+export default function TagStockPage() {
+  const router = useRouter();
+  const t = useTagStock();
+  const { filters, setFilters, report, error, busy } = t;
+  const [selected, setSelected] = useState(0);
+  const [sizes, setSizes] = useState<string[]>([]);
+  const [focusFrom, setFocusFrom] = useState(0);
+  const grid = useRef<HTMLDivElement | null>(null);
+  const fromRef = useRef<HTMLInputElement | null>(null);
+  const toRef = useRef<HTMLInputElement | null>(null);
+  const searchRef = useRef<HTMLInputElement | null>(null);
+  const summ = filters.rptType === 'summ';
 
-  const qs = useCallback(() => {
-    const q = new URLSearchParams({ tab });
-    if (tblCode) q.set('tblCode', tblCode);
-    if (itCode) q.set('itCode', itCode);
-    return q;
-  }, [tab, tblCode, itCode]);
-  const load = useCallback(async () => {
-    setBusy(true);
-    setErr('');
-    try {
-      setRep(await get<Rep>(`/reports/tag-stock?${qs().toString()}`));
-    } catch (e) {
-      setErr(e instanceof ApiError ? e.body?.error || e.message : 'failed');
-    } finally {
-      setBusy(false);
-    }
-  }, [qs]);
   useEffect(() => {
-    void load();
-  }, [load]);
+    let live = true;
+    get<string[]>('/reports/tag-stock/sizes')
+      .then((s) => live && setSizes(Array.isArray(s) ? s : []))
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, []);
 
-  const num = (n: number) => Number(n || 0).toLocaleString('en-IN');
+  // Cancel returns the cursor to From once the cleared screen has rendered (RP_TAG.cs:3741).
+  useEffect(() => {
+    if (focusFrom > 0) fromRef.current?.focus();
+  }, [focusFrom]);
+
+  const rows = useMemo(() => {
+    if (!report) return [];
+    const q = filters.search.trim().toUpperCase();
+    if (!q || report.view !== 'tag') return report.rows;
+    return report.rows.filter((r) =>
+      String(r.tagNo ?? '')
+        .toUpperCase()
+        .includes(q),
+    );
+  }, [report, filters.search]);
+
+  const go = (tab: TagStockTab, view: TagStockView = 'tag') => {
+    setSelected(0);
+    void t.run(tab, summ && view === 'tag' ? 'item' : view);
+  };
+  const productStock = () => {
+    setSelected(0);
+    void t.run('stock', 'product');
+  };
+  const sixth = () => (summ ? productStock() : go('all'));
+  const exit = () => router.back();
+
+  /** The date mask: a typed date is checked on Enter; a bad one is refused, reset and kept selected. */
+  const dateKey =
+    (field: 'from' | 'to', next: React.RefObject<HTMLInputElement | null>) =>
+    (e: ReactKeyEvent<HTMLInputElement>) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      const parsed = parseDesktopDate(filters[field]);
+      if ('error' in parsed) {
+        t.setError(parsed.error);
+        setFilters({ [field]: isoToDesktop(todayLocal()) } as Partial<TagStockFilters>);
+        const input = e.currentTarget;
+        setTimeout(() => input.select(), 0);
+        return;
+      }
+      t.setError('');
+      next.current?.focus();
+    };
+
+  const alt: Record<string, () => void> = {
+    s: () => go('stock'),
+    i: () => go('in'),
+    o: () => go('out'),
+    m: () => go('mrp'),
+    a: () => go('apr'),
+    l: sixth,
+    e: () => t.exportAs('xlsx', filters.search),
+    c: () => {
+      t.reset();
+      setSelected(0);
+      setFocusFrom((n) => n + 1);
+    },
+    x: exit,
+  };
+  const onScreenKey = (e: ScreenKeyEvent) => {
+    if (e.defaultPrevented) return;
+    if (e.key === 'Escape') {
+      if (document.querySelector('[data-lookup-open]')) return;
+      e.preventDefault();
+      exit();
+    }
+  };
+  const screenRef = useScreenEscape<HTMLDivElement>(onScreenKey);
+  const onKeyDown = (e: ReactKeyEvent<HTMLDivElement>) => {
+    onScreenKey(e);
+    if (e.altKey && !e.ctrlKey && !e.metaKey) {
+      const letter = e.code.startsWith('Key') ? e.code.slice(3).toLowerCase() : e.key.toLowerCase();
+      const fn = alt[letter];
+      if (fn) {
+        e.preventDefault();
+        fn();
+        return;
+      }
+    }
+    if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !e.defaultPrevented) {
+      const el = e.target as HTMLElement;
+      const textual = el.tagName === 'INPUT' && (el as HTMLInputElement).type === 'text';
+      if (
+        textual &&
+        !document.querySelector('[data-lookup-open]') &&
+        el.closest('[data-tag-stock-filters]')
+      ) {
+        e.preventDefault();
+        grid.current?.focus();
+      }
+    }
+  };
+
+  const field = (label: string, id: string, node: React.ReactNode, wide = false) => (
+    <div className="field" style={wide ? { flex: 2 } : undefined}>
+      <label htmlFor={id}>{label}</label>
+      {node}
+    </div>
+  );
 
   return (
-    <div>
-      <h1>Tag-Stock Report</h1>
-      <div className="panel">
-        <div className="row">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              className={tab === t.id ? 'primary' : 'ghost'}
-              onClick={() => setTab(t.id)}
-            >
-              {t.label}
-            </button>
-          ))}
-          <span className="spacer" />
-          <div className="field">
-            <label htmlFor="tag-stock-counter">Counter</label>
+    <div ref={screenRef} onKeyDown={onKeyDown}>
+      <h1>Tag Stock</h1>
+      <div className="panel" data-tag-stock-filters>
+        <div className="row" style={{ flexWrap: 'wrap' }}>
+          {field(
+            'From',
+            'ts-from',
             <input
-              id="tag-stock-counter"
-              value={tblCode}
-              onChange={(e) => setTblCode(e.target.value)}
-              style={{ width: 64 }}
+              id="ts-from"
+              ref={fromRef}
+              type="text"
+              inputMode="numeric"
+              autoFocus
+              value={filters.from}
+              onChange={(e) => setFilters({ from: e.target.value })}
+              onKeyDown={dateKey('from', toRef)}
+              style={{ width: 110 }}
+            />,
+          )}
+          {field(
+            'To',
+            'ts-to',
+            <input
+              id="ts-to"
+              ref={toRef}
+              type="text"
+              inputMode="numeric"
+              value={filters.to}
+              onChange={(e) => setFilters({ to: e.target.value })}
+              onKeyDown={dateKey('to', searchRef)}
+              style={{ width: 110 }}
+            />,
+          )}
+          {field(
+            'Search',
+            'ts-search',
+            <input
+              id="ts-search"
+              ref={searchRef}
+              type="text"
+              value={filters.search}
+              onChange={(e) =>
+                setFilters({ search: e.target.value.toUpperCase().replace(/'/g, '') })
+              }
+              style={{ width: 120 }}
+            />,
+          )}
+          {field(
+            'It Type',
+            'ts-ittype',
+            <select
+              id="ts-ittype"
+              value={filters.itType}
+              onChange={(e) => setFilters({ itType: e.target.value })}
+            >
+              {IT_TYPES.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>,
+          )}
+          <div className="field">
+            <label>Item</label>
+            <LookupPicker
+              entity="items"
+              ariaLabel="Item"
+              value={filters.itCode}
+              onChange={(v) => setFilters({ itCode: v })}
+              onPick={(r) => setFilters({ itCode: String(r.code) })}
+              advanceOnPick={false}
             />
           </div>
           <div className="field">
-            <label>Item</label>
-            <LookupPicker entity="items" value={itCode} onChange={setItCode} />
+            <label>Product</label>
+            <LookupPicker
+              entity="products"
+              ariaLabel="Product"
+              value={filters.prCode}
+              onChange={(v) => setFilters({ prCode: v })}
+              onPick={(r) => setFilters({ prCode: String(r.code) })}
+              advanceOnPick={false}
+            />
           </div>
-          <div className="field" style={{ alignSelf: 'end' }}>
-            <button type="button" className="ghost" onClick={load} disabled={busy}>
-              {busy ? '…' : 'Apply'}
-            </button>
-          </div>
-          <div className="field" style={{ alignSelf: 'end' }}>
-            <a
+          {field(
+            'TagNo',
+            'ts-tagno',
+            <input
+              id="ts-tagno"
+              type="text"
+              value={filters.tagNo}
+              onChange={(e) =>
+                setFilters({ tagNo: e.target.value.toUpperCase().replace(/'/g, '') })
+              }
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && filters.tagNo.trim()) {
+                  e.preventDefault();
+                  sixth();
+                }
+              }}
+              style={{ width: 110 }}
+            />,
+          )}
+        </div>
+        <div className="row" style={{ marginTop: 8, flexWrap: 'wrap' }}>
+          {MODES.map((m) => (
+            <button
+              key={m.tab}
+              type="button"
               className="ghost"
-              href={`/api/reports/tag-stock.csv?${qs().toString()}`}
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                padding: '6px 10px',
-                border: '1px solid var(--border,#ccc)',
-                borderRadius: 4,
-                textDecoration: 'none',
+              onClick={() => go(m.tab)}
+              disabled={busy}
+            >
+              {m.label}
+            </button>
+          ))}
+          <button type="button" className="ghost" onClick={sixth} disabled={busy}>
+            {summ ? 'Product Stk' : 'All Tag'}
+          </button>
+          <button
+            type="button"
+            className="ghost"
+            onClick={() => t.exportAs('xlsx', filters.search)}
+          >
+            Excel
+          </button>
+          <button type="button" className="ghost" onClick={() => t.exportAs('csv', filters.search)}>
+            CSV
+          </button>
+          <button type="button" className="ghost" onClick={alt.c}>
+            Cancel
+          </button>
+          <button type="button" className="ghost" onClick={exit}>
+            Exit
+          </button>
+        </div>
+        <div className="row" style={{ marginTop: 8, flexWrap: 'wrap' }}>
+          <div className="field">
+            <label>Group</label>
+            <LookupPicker
+              entity="groups"
+              ariaLabel="Group"
+              value={filters.grCode}
+              onChange={(v) => setFilters({ grCode: v })}
+              onPick={(r) => setFilters({ grCode: String(r.code) })}
+              advanceOnPick={false}
+            />
+          </div>
+          {field(
+            'Size',
+            'ts-size',
+            <select
+              id="ts-size"
+              value={filters.size}
+              onChange={(e) => setFilters({ size: e.target.value })}
+            >
+              <option value="" />
+              {sizes.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>,
+          )}
+          {field(
+            'Location',
+            'ts-location',
+            <input
+              id="ts-location"
+              type="text"
+              value={filters.lcCode}
+              onChange={(e) =>
+                setFilters({ lcCode: e.target.value.toUpperCase().replace(/'/g, '') })
+              }
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  t.clearGrid();
+                }
+              }}
+              style={{ width: 60 }}
+            />,
+          )}
+          <div className="field">
+            <label>Book</label>
+            <LookupPicker
+              entity="books"
+              ariaLabel="Book"
+              value={filters.bookCode}
+              onChange={(v) => setFilters({ bookCode: v })}
+              onPick={(r) => setFilters({ bookCode: String(r.code) })}
+              advanceOnPick={false}
+            />
+          </div>
+          {field(
+            'RptType',
+            'ts-rpttype',
+            <select
+              id="ts-rpttype"
+              value={filters.rptType}
+              onChange={(e) => {
+                setFilters({ rptType: e.target.value as 'tag' | 'summ' });
+                t.clearGrid();
               }}
             >
-              Export CSV
-            </a>
-          </div>
+              <option value="tag">Tag Wise</option>
+              <option value="summ">Tag Summ</option>
+            </select>,
+          )}
         </div>
       </div>
-      {err && <div className="msg err">{err}</div>}
-      {rep && (
-        <div className="panel" style={{ overflow: 'auto' }}>
-          <div className="tiles" style={{ marginBottom: 8 }}>
-            <div className="tile">
-              <div className="muted">Tags</div>
-              <div className="big kpi">{rep.totals.count}</div>
-            </div>
-            <div className="tile">
-              <div className="muted">Net Wt</div>
-              <div className="big kpi">{num(rep.totals.netWt)}</div>
-            </div>
-            <div className="tile">
-              <div className="muted">Fine</div>
-              <div className="big kpi">{num(rep.totals.fine)}</div>
-            </div>
-            <div className="tile">
-              <div className="muted">MRP</div>
-              <div className="big kpi">{num(rep.totals.mrp)}</div>
-            </div>
-          </div>
-          <table className="grid">
-            <thead>
-              <tr>
-                <th>Tag</th>
-                <th>Item</th>
-                <th>Design</th>
-                <th>Ctr</th>
-                {(tab === 'in' || tab === 'out' || tab === 'apr') && (
-                  <>
-                    <th>Type</th>
-                    <th>Date</th>
-                  </>
-                )}
-                <th className="num">Pcs</th>
-                <th className="num">Gross</th>
-                <th className="num">Net</th>
-                <th className="num">Fine</th>
-                <th className="num">MRP</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rep.rows.map((r, i) => (
-                <tr
-                  key={i}
-                  onClick={() => setImageRow(i)}
-                  className={i === imageRow ? 'active' : undefined}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <td>{r.tagNo}</td>
-                  <td>{r.itCode}</td>
-                  <td>{r.designNo || ''}</td>
-                  <td>{r.tblCode || ''}</td>
-                  {(tab === 'in' || tab === 'out' || tab === 'apr') && (
-                    <>
-                      <td>{r.vchType || ''}</td>
-                      <td>{formatDesktopDate(r.vchDate)}</td>
-                    </>
-                  )}
-                  <td className="num">{r.pcs || ''}</td>
-                  <td className="num">{r.grossWt || ''}</td>
-                  <td className="num">{r.netWt || ''}</td>
-                  <td className="num">{r.fine || ''}</td>
-                  <td className="num">{r.mrp ? num(r.mrp) : ''}</td>
-                </tr>
-              ))}
-              {rep.rows.length === 0 && (
-                <tr>
-                  <td colSpan={11} className="muted">
-                    No tags for this view.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+      {error && (
+        <div className="msg err" role="alert">
+          {error}
         </div>
       )}
-      {/* RP_TAG_IMAGE / RP_TAG_ESTMATE show the selected tag's photograph. */}
-      <EntityImagePanel
-        entityType="TAG"
-        entityKey={rep?.rows[imageRow]?.tagNo ?? ''}
-        instance={0}
-        label="Tag image"
-        testId="tag-stock-image"
-      />
+      {report && (
+        <TagStockGrid
+          columns={report.columns}
+          rows={rows}
+          selected={selected}
+          onSelect={setSelected}
+          gridRef={grid}
+        />
+      )}
     </div>
   );
 }
