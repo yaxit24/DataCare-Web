@@ -1,53 +1,41 @@
 'use client';
-import { useState } from 'react';
+import { focusNext } from '../../../../components/focus';
+import { desktopText } from './LookupField';
 
-/**
- * cboCity / cboArea are combo boxes on the desktop (RP_ALL.cs:4842, :4861) with a blank first item.
- * The web keeps them as selects; contentEditable additionally lets a typed city be committed by the
- * keyboard matrix, which fills the control as text, while selectOption and index-0 reset still work.
- */
+/** Editable combo fallback until the report API supplies AC_MAST city/area choices. */
 export function ListField({
   label,
   value,
   options,
   onChange,
-  disabled = false,
 }: {
   label: string;
   value: string;
   options: readonly string[];
   onChange: (value: string) => void;
-  disabled?: boolean;
 }) {
-  const [typed, setTyped] = useState<string[]>([]);
-  const all = [...new Set([...options, ...typed])];
-  const commit = (next: string) => {
-    if (next && !all.includes(next)) setTyped((current) => [...current, next]);
-    onChange(next);
-  };
+  const id = `or-${label.replaceAll(' ', '-')}`;
   return (
     <div className="field" style={{ minWidth: 130 }}>
-      <label htmlFor={`or-${label.replaceAll(' ', '-')}`}>{label}</label>
-      <select
-        id={`or-${label.replaceAll(' ', '-')}`}
+      <label htmlFor={id}>{label}</label>
+      <input
+        id={id}
         aria-label={label}
-        contentEditable
+        list={`${id}-options`}
         value={value}
-        disabled={disabled}
-        onChange={(event) => onChange(event.target.value)}
-        onBeforeInput={(event) => {
-          event.preventDefault();
-          const data = (event.nativeEvent as InputEvent).data ?? '';
-          if (data) commit(data);
+        onChange={(event) => onChange(desktopText(event.target.value))}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            focusNext(event.currentTarget);
+          }
         }}
-      >
-        <option value=""></option>
-        {all.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
+      />
+      <datalist id={`${id}-options`}>
+        {options.map((option) => (
+          <option key={option} value={option} />
         ))}
-      </select>
+      </datalist>
     </div>
   );
 }

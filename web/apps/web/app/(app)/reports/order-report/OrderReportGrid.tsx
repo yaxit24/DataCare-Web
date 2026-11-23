@@ -1,4 +1,4 @@
-import { formatCell, type OrderColumn, type OrderResult, type OrderRowLevel } from './types';
+import { formatCell, type OrderResult, type OrderRowLevel } from './types';
 
 /**
  * The grid, CSV and XLSX are built from one server result. These display lines follow the same order as
@@ -66,12 +66,6 @@ function buildLines(report: OrderResult): DisplayLine[] {
   return lines;
 }
 
-function firstCell(column: OrderColumn, line: DisplayLine): string {
-  if (line.kind === 'band') return line.label ?? '';
-  if (line.kind === 'subtotal') return line.label ?? '';
-  return line.cells[column.key] ?? '';
-}
-
 export function OrderReportGrid({ report }: { report: OrderResult }) {
   const lines = buildLines(report);
   return (
@@ -80,6 +74,7 @@ export function OrderReportGrid({ report }: { report: OrderResult }) {
       <table className="grid">
         <thead>
           <tr>
+            <th>Band</th>
             {report.columns.map((column) => (
               <th key={column.key}>{column.caption}</th>
             ))}
@@ -88,23 +83,17 @@ export function OrderReportGrid({ report }: { report: OrderResult }) {
         <tbody>
           {lines.map((line, index) => (
             <tr key={`${line.kind}-${index}`} className={line.kind}>
-              {line.kind === 'band' ? (
-                <td colSpan={report.columns.length || 1}>{line.label}</td>
-              ) : (
-                report.columns.map((column, columnIndex) => (
-                  <td key={column.key}>
-                    {columnIndex === 0 && line.kind === 'subtotal'
-                      ? firstCell(column, line)
-                      : (line.cells[column.key] ?? '')}
-                  </td>
-                ))
-              )}
+              <td>{line.label ?? line.level ?? ''}</td>
+              {report.columns.map((column) => (
+                <td key={column.key}>{line.cells[column.key] ?? ''}</td>
+              ))}
             </tr>
           ))}
         </tbody>
         {report.grandTotal && (
           <tfoot>
             <tr className="totals">
+              <td>{lines.length ? (report.grandTotalCaption ?? 'Total') : ''}</td>
               {report.columns.map((column) => (
                 <td key={column.key}>
                   {column.total ? formatCell(column.kind, report.totals[column.key] ?? 0) : ''}

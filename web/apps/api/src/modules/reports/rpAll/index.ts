@@ -167,9 +167,7 @@ export function parseRpAllRequest(
   session: RpAllSessionScope,
 ): RpAllRequest {
   const base =
-    branch === 'order'
-      ? parseOrderRequest(query, session)
-      : parseSalesRequest(query, session);
+    branch === 'order' ? parseOrderRequest(query, session) : parseSalesRequest(query, session);
   return { branch, ...base };
 }
 
@@ -332,7 +330,9 @@ export function shapeOrderResult(
     ...(layout.grandTotalCaption ? { grandTotalCaption: layout.grandTotalCaption } : {}),
     voucherCount: result.voucherCount,
     filters: request.filters,
-    ignoredFilters: presentFilters(request.filters).filter((key) => !spec.filters.includes(key as OrderFilterKey)),
+    ignoredFilters: presentFilters(request.filters).filter(
+      (key) => !spec.filters.includes(key as OrderFilterKey),
+    ),
     cite: variant.cite,
   };
 }

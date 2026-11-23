@@ -217,12 +217,35 @@ const ADJUSTMENTS: Adjustment[] = [
 ];
 
 const BILLS: Bill[] = [
-  { book: 'SB', vch: 'S1', date: '2026-01-18', acCode: 'P1', acName: 'ALPHA JEWELS', totAmt: 12000, advAmt: 2000 },
-  { book: 'SB', vch: 'S2', date: '2026-01-22', acCode: 'P1', acName: 'ALPHA JEWELS', totAmt: 9000, advAmt: 3000 },
+  {
+    book: 'SB',
+    vch: 'S1',
+    date: '2026-01-18',
+    acCode: 'P1',
+    acName: 'ALPHA JEWELS',
+    totAmt: 12000,
+    advAmt: 2000,
+  },
+  {
+    book: 'SB',
+    vch: 'S2',
+    date: '2026-01-22',
+    acCode: 'P1',
+    acName: 'ALPHA JEWELS',
+    totAmt: 9000,
+    advAmt: 3000,
+  },
   // A bill with no adjustment row: BillWiseOrderAdjust's SL_DATA → SL_ORD_ADJ link is an Equal join.
-  { book: 'SB', vch: 'S3', date: '2026-01-25', acCode: 'P2', acName: 'BETA TRADERS', totAmt: 5000, advAmt: 0 },
+  {
+    book: 'SB',
+    vch: 'S3',
+    date: '2026-01-25',
+    acCode: 'P2',
+    acName: 'BETA TRADERS',
+    totAmt: 5000,
+    advAmt: 0,
+  },
 ];
-
 
 (enabled ? describe : describe.skip)(
   'RP_ALL Order Report over HTTP under forced RLS (WP-14)',
@@ -520,7 +543,9 @@ const BILLS: Bill[] = [
     });
 
     const inRange = (o: Order) => o.date >= FROM && o.date <= TO;
-    const visible = ORDERS.filter((o) => (o.co ?? '01') === '01' && (o.lc ?? '01') === '01' && inRange(o));
+    const visible = ORDERS.filter(
+      (o) => (o.co ?? '01') === '01' && (o.lc ?? '01') === '01' && inRange(o),
+    );
     const dmy = (iso: string) => iso.split('-').reverse().join('/');
     const sumOf = (xs: number[], dp: number) => Number(xs.reduce((a, b) => a + b, 0).toFixed(dp));
     const adjOf = (o: Order, sign: string) =>
@@ -530,13 +555,29 @@ const BILLS: Bill[] = [
     it('order-report.output.report: header and line rows of every order in range, totals from the seeded lines', async () => {
       const r = await report('report');
       const headers = r.rows.filter((x: any) => x.level === 'voucher');
-      expect(headers.map((x: any) => x.cells.vchNo).sort()).toEqual(visible.map((o) => o.vch).sort());
+      expect(headers.map((x: any) => x.cells.vchNo).sort()).toEqual(
+        visible.map((o) => o.vch).sort(),
+      );
       const lines = visible.flatMap((o) => o.lines);
       expect(r.rows.filter((x: any) => x.level === 'line')).toHaveLength(lines.length);
-      expect(r.totals.pcs).toBe(sumOf(lines.map((l) => l.pcs), 0));
-      expect(r.totals.nwt).toBe(sumOf(lines.map((l) => l.nwt), 3));
+      expect(r.totals.pcs).toBe(
+        sumOf(
+          lines.map((l) => l.pcs),
+          0,
+        ),
+      );
+      expect(r.totals.nwt).toBe(
+        sumOf(
+          lines.map((l) => l.nwt),
+          3,
+        ),
+      );
       const o1 = headers.find((x: any) => x.cells.vchNo === 'O1');
-      expect(o1.cells).toMatchObject({ acName: ORDER_O1.acName, advAmt: ORDER_O1.advAmt, vchDate: ORDER_O1.date });
+      expect(o1.cells).toMatchObject({
+        acName: ORDER_O1.acName,
+        advAmt: ORDER_O1.advAmt,
+        vchDate: ORDER_O1.date,
+      });
       const ring = r.rows.find((x: any) => x.level === 'line' && x.cells.designNo === 'D1');
       expect(ring.cells.itName).toBe('Gold Ring');
     });
@@ -551,7 +592,9 @@ const BILLS: Bill[] = [
         const minus = amt(adjOf(o, '-'));
         expect(g.totals).toEqual({ plusAmt: plus, minusAmt: minus, balAmt: plus - minus });
       }
-      const all = visible.flatMap((o) => ADJUSTMENTS.filter((a) => a.ordNo === o.vch && a.ordDbcd === o.book));
+      const all = visible.flatMap((o) =>
+        ADJUSTMENTS.filter((a) => a.ordNo === o.vch && a.ordDbcd === o.book),
+      );
       const plus = amt(all.filter((a) => a.sign === '+'));
       const minus = amt(all.filter((a) => a.sign === '-'));
       expect(r.totals).toEqual({ plusAmt: plus, minusAmt: minus, balAmt: plus - minus });
@@ -565,16 +608,42 @@ const BILLS: Bill[] = [
         const minus = amt(adjOf(o, '-'));
         expect(g.totals).toEqual({ advAmt: o.advAmt, adjAmt: minus, pendingAmt: o.advAmt - minus });
       }
-      const o1 = r.rows.filter((x: any) => x.voucherKey === `01|${YEAR}|B1|O1`).map((x: any) => x.cells);
+      const o1 = r.rows
+        .filter((x: any) => x.voucherKey === `01|${YEAR}|B1|O1`)
+        .map((x: any) => x.cells);
       expect(o1).toEqual([
-        { adjBook: 'B1', adjVchNo: 'O1', adjVchDate: '2026-01-05', billParty: null, billTotAmt: 0, adjAmt: 0 },
-        { adjBook: 'SB', adjVchNo: 'S1', adjVchDate: '2026-01-18', billParty: 'ALPHA JEWELS', billTotAmt: 12000, adjAmt: 1500 },
-        { adjBook: 'SB', adjVchNo: 'S1', adjVchDate: '2026-01-18', billParty: 'ALPHA JEWELS', billTotAmt: 12000, adjAmt: 500 },
+        {
+          adjBook: 'B1',
+          adjVchNo: 'O1',
+          adjVchDate: '2026-01-05',
+          billParty: null,
+          billTotAmt: 0,
+          adjAmt: 0,
+        },
+        {
+          adjBook: 'SB',
+          adjVchNo: 'S1',
+          adjVchDate: '2026-01-18',
+          billParty: 'ALPHA JEWELS',
+          billTotAmt: 12000,
+          adjAmt: 1500,
+        },
+        {
+          adjBook: 'SB',
+          adjVchNo: 'S1',
+          adjVchDate: '2026-01-18',
+          billParty: 'ALPHA JEWELS',
+          billTotAmt: 12000,
+          adjAmt: 500,
+        },
       ]);
       // City/Area read the BILL party's AC_MAST in this template: only rows with a bill of a SURAT party remain.
       const surat = await report('with-bill', 'city=SURAT');
       expect(surat.rows.map((x: any) => `${x.cells.adjVchNo}:${x.cells.adjAmt}`)).toEqual([
-        'S1:1500', 'S1:500', 'S2:1500', 'S2:1500',
+        'S1:1500',
+        'S1:500',
+        'S2:1500',
+        'S2:1500',
       ]);
     });
 
@@ -597,7 +666,9 @@ const BILLS: Bill[] = [
       expect(r.grandTotal).toBe(false);
       expect((await report('bill-wise', 'city=BARODA')).rows).toHaveLength(0);
       expect((await report('bill-wise', 'acCode=P2')).rows).toHaveLength(0);
-      expect((await report('bill-wise', 'coBook=SB&custName=ALPHA%20JEWELS')).rows).toHaveLength(shape.length);
+      expect((await report('bill-wise', 'coBook=SB&custName=ALPHA%20JEWELS')).rows).toHaveLength(
+        shape.length,
+      );
     });
 
     it('order-report.formula.pending-set: Making Panding lists every DESIGN_ISU = N line in range (RP_ALL.cs:10940)', async () => {
@@ -606,25 +677,53 @@ const BILLS: Bill[] = [
       const r = await report('pending');
       const expected = visible
         .flatMap((o) => o.lines.filter((l) => l.designIsu === 'N').map((l) => ({ o, l })))
-        .sort((a, b) => `${a.o.book}${a.o.vch}`.localeCompare(`${b.o.book}${b.o.vch}`) || a.l.sr - b.l.sr);
+        .sort(
+          (a, b) =>
+            `${a.o.book}${a.o.vch}`.localeCompare(`${b.o.book}${b.o.vch}`) || a.l.sr - b.l.sr,
+        );
       const lines = r.rows.filter((x: any) => x.level === 'line');
-      expect(lines.map((x: any) => x.cells.design)).toEqual(expected.map((x) => x.l.designNo || x.l.tagNo));
-      expect(r.totals.pcs).toBe(sumOf(expected.map((x) => x.l.pcs), 0));
-      expect(r.totals.nwt).toBe(sumOf(expected.map((x) => x.l.nwt), 3));
+      expect(lines.map((x: any) => x.cells.design)).toEqual(
+        expected.map((x) => x.l.designNo || x.l.tagNo),
+      );
+      expect(r.totals.pcs).toBe(
+        sumOf(
+          expected.map((x) => x.l.pcs),
+          0,
+        ),
+      );
+      expect(r.totals.nwt).toBe(
+        sumOf(
+          expected.map((x) => x.l.nwt),
+          3,
+        ),
+      );
       expect(lines.map((x: any) => x.cells.design)).not.toContain('D8');
 
       const summ = await report('summary');
       const yes = await report('summary', 'onlySummary=yes');
       expect(summ.rows).toHaveLength(expected.length);
       expect(yes.rows).toHaveLength(0);
-      expect(yes.groups.map((g: any) => [g.key, g.totals])).toEqual(summ.groups.map((g: any) => [g.key, g.totals]));
+      expect(yes.groups.map((g: any) => [g.key, g.totals])).toEqual(
+        summ.groups.map((g: any) => [g.key, g.totals]),
+      );
       expect(summ.groups.find((g: any) => g.key === 'T1D1').totals).toEqual({ pcs: 1, nwt: 10.5 });
     });
 
     it('order-report.lifecycle.writes-nothing: running all seven modes writes zero rows (D2)', async () => {
       const before = await snapshot();
-      for (const mode of ['report', 'advance', 'adjust', 'with-bill', 'pending', 'summary', 'bill-wise']) {
-        const r = await get('admin01', `/reports/order-report?fromDate=${FROM}&toDate=${TO}&mode=${mode}`);
+      for (const mode of [
+        'report',
+        'advance',
+        'adjust',
+        'with-bill',
+        'pending',
+        'summary',
+        'bill-wise',
+      ]) {
+        const r = await get(
+          'admin01',
+          `/reports/order-report?fromDate=${FROM}&toDate=${TO}&mode=${mode}`,
+        );
         expect(r.statusCode, `${mode}: ${r.body}`).toBe(200);
       }
       const after = await snapshot();
@@ -633,25 +732,50 @@ const BILLS: Bill[] = [
     });
 
     it('order-report.scope.sentinels: another location, company or tenant never appears; a 00 user may list all', async () => {
-      for (const mode of ['report', 'advance', 'adjust', 'with-bill', 'pending', 'summary', 'bill-wise']) {
-        const r = await get('admin01', `/reports/order-report?fromDate=${FROM}&toDate=${TO}&mode=${mode}`);
+      for (const mode of [
+        'report',
+        'advance',
+        'adjust',
+        'with-bill',
+        'pending',
+        'summary',
+        'bill-wise',
+      ]) {
+        const r = await get(
+          'admin01',
+          `/reports/order-report?fromDate=${FROM}&toDate=${TO}&mode=${mode}`,
+        );
         expect(r.statusCode).toBe(200);
         expect(r.body).not.toContain('"O6"');
         expect(r.body).not.toContain('D7'); // O7: company C2, same book/number as O1
         expect(r.body).not.toContain('ZO1');
       }
-      const all = await get('admin00', `/reports/order-report?fromDate=${FROM}&toDate=${TO}&mode=report&lcCode=`);
+      const all = await get(
+        'admin00',
+        `/reports/order-report?fromDate=${FROM}&toDate=${TO}&mode=report&lcCode=`,
+      );
       expect(all.statusCode, all.body).toBe(200);
       expect(all.json().rows.map((x: any) => x.cells.vchNo)).toContain('O6');
-      const own = await get('admin00', `/reports/order-report?fromDate=${FROM}&toDate=${TO}&mode=report`);
-      expect(own.json().rows.filter((x: any) => x.level === 'voucher').map((x: any) => x.cells.vchNo)).toEqual(['O6']);
+      const own = await get(
+        'admin00',
+        `/reports/order-report?fromDate=${FROM}&toDate=${TO}&mode=report`,
+      );
+      expect(
+        own
+          .json()
+          .rows.filter((x: any) => x.level === 'voucher')
+          .map((x: any) => x.cells.vchNo),
+      ).toEqual(['O6']);
     });
 
     it('order-report.rights.caption-and-print: rights key on the Order Report caption (D6, D7)', async () => {
       const url = `/reports/order-report?fromDate=${FROM}&toDate=${TO}`;
       expect((await get('sales-only', url)).statusCode).toBe(403);
       expect((await get('order-viewer', url)).statusCode).toBe(200);
-      expect((await get('order-viewer', url.replace('order-report?', 'order-report/export.csv?'))).statusCode).toBe(403);
+      expect(
+        (await get('order-viewer', url.replace('order-report?', 'order-report/export.csv?')))
+          .statusCode,
+      ).toBe(403);
       const csv = await get('admin01', url.replace('order-report?', 'order-report/export.csv?'));
       expect(csv.statusCode).toBe(200);
       expect(csv.headers['content-type']).toContain('text/csv');
@@ -660,7 +784,9 @@ const BILLS: Bill[] = [
       expect(xlsx.statusCode).toBe(200);
       // An administrator needs no USER_SET row, as on every other form (authorization.ts admin bypass).
       expect((await get('boss', url)).statusCode).toBe(200);
-      expect((await get('boss', url.replace('order-report?', 'order-report/export.csv?'))).statusCode).toBe(200);
+      expect(
+        (await get('boss', url.replace('order-report?', 'order-report/export.csv?'))).statusCode,
+      ).toBe(200);
     });
   },
 );

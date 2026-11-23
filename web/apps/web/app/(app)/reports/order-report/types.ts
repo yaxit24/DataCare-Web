@@ -1,3 +1,5 @@
+import { round } from '@datacare/core';
+
 /**
  * Web-side shape of the RP_ALL Order result (`GET /reports/order-report`).
  *
@@ -116,5 +118,5 @@ export function formatCell(kind: OrderColumnKind, value: string | number | null)
   if (places === null) return String(value);
   const number = Number(value);
   if (!Number.isFinite(number)) return '';
-  return number.toFixed(places);
+  return round(number, places).toFixed(places);
 }

@@ -167,7 +167,11 @@ export function buildOrderQuery(input: OrderQueryArgs): SqlQuery {
       ...ADJUSTMENT_COLUMNS,
       ['orderPartyName', 'ac."AC_NAME"'],
     );
-    joins.push(adjustOfBillJoin, bookJoin, masterJoin('ac', 'a."CO_CODE"', 'a."ORD_AC_CODE"', 'a."LC_CODE"'));
+    joins.push(
+      adjustOfBillJoin,
+      bookJoin,
+      masterJoin('ac', 'a."CO_CODE"', 'a."ORD_AC_CODE"', 'a."LC_CODE"'),
+    );
     party = 'ac';
     orderBy = `${ORDER_KEY_SORT}, a."SR_NO"`;
   } else {

@@ -39,6 +39,7 @@ export function LookupField({
   focusAfter?: string;
   onName?: (name: string) => void;
 }) {
+  const [error, setError] = useState('');
   const [rows, setRows] = useState<HelpRow[]>([]);
   const [open, setOpen] = useState(false);
   const [rowsFor, setRowsFor] = useState<string | null>(null);
@@ -56,11 +57,20 @@ export function LookupField({
     onName?.(row.name);
     setOpen(false);
     if (advance && focusAfter) focusControl(focusAfter);
+    else focusControl(label);
   };
 
   const resolveEnter = async (typed: string) => {
     const requested = typed.trim();
-    const found = await load(requested);
+    setError('');
+    let found: HelpRow[];
+    try {
+      found = await load(requested);
+    } catch (cause) {
+      if (isCurrentAnswer(requested, latest.current))
+        setError(cause instanceof Error ? cause.message : 'Unable to open help.');
+      return;
+    }
     // A late answer must never overwrite a newer selection.
     if (!isCurrentAnswer(requested, latest.current)) return;
     const exact =
@@ -70,8 +80,15 @@ export function LookupField({
       accept(exact, true);
       return;
     }
+    try {
+      const choices = await load('');
+      if (!isCurrentAnswer(requested, latest.current)) return;
+      setRows(choices);
+    } catch {
+      setError('Unable to open help.');
+      return;
+    }
     setRowsFor(typed);
-    setRows(found);
     setOpen(true);
   };
 
@@ -84,7 +101,12 @@ export function LookupField({
         value={value}
         maxLength={maxLength}
         disabled={disabled}
-        onChange={(event) => onChange(desktopText(event.target.value))}
+        onChange={(event) => {
+          setName('');
+          setError('');
+          setOpen(false);
+          onChange(desktopText(event.target.value));
+        }}
         onKeyDown={(event) => {
           if (event.key === 'Escape' && open) {
             event.preventDefault();
@@ -99,6 +121,11 @@ export function LookupField({
             rowsFor,
             value,
           });
+          event.preventDefault();
+          if (action === 'pick-highlighted' && rows[0]) {
+            accept(rows[0], false);
+            return;
+          }
           if (action === 'none') {
             if (focusAfter) focusControl(focusAfter);
             return;
@@ -107,6 +134,11 @@ export function LookupField({
           void resolveEnter(value);
         }}
       />
+      {error && (
+        <span role="alert" className="msg err">
+          {error}
+        </span>
+      )}
       {name && !open && (
         <span className="muted" data-lookup-name={label} style={{ fontSize: 11 }}>
           {name}
@@ -121,6 +153,7 @@ export function LookupField({
               event.preventDefault();
               event.stopPropagation();
               setOpen(false);
+              focusControl(label);
             }
           }}
           style={{
@@ -140,7 +173,7 @@ export function LookupField({
             <button
               type="button"
               key={`${row.code}-${index}`}
-              onClick={() => accept(row, true)}
+              onClick={() => accept(row, false)}
               style={{ display: 'block', width: '100%', textAlign: 'left' }}
             >
               {row.code} · {row.name}

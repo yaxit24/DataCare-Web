@@ -8,13 +8,7 @@ import type { RpAllColumn, RpAllLayout, RpAllRecord } from './types.js';
  */
 
 export type OrderMode =
-  | 'report'
-  | 'advance'
-  | 'adjust'
-  | 'with-bill'
-  | 'pending'
-  | 'summary'
-  | 'bill-wise';
+  'report' | 'advance' | 'adjust' | 'with-bill' | 'pending' | 'summary' | 'bill-wise';
 
 export const ORDER_MODES: readonly OrderMode[] = [
   'report',
@@ -296,7 +290,14 @@ const billPartyOf = (r: RpAllRecord): string | null => {
   return txt(r, 'billPartyName');
 };
 
-const ALL_FILTERS: readonly OrderFilterKey[] = ['lcCode', 'coBook', 'acCode', 'city', 'area', 'custName'];
+const ALL_FILTERS: readonly OrderFilterKey[] = [
+  'lcCode',
+  'coBook',
+  'acCode',
+  'city',
+  'area',
+  'custName',
+];
 
 export const ORDER_SPECS: Readonly<Record<OrderMode, OrderModeSpec>> = {
   report: {

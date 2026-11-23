@@ -34,10 +34,7 @@ export function orderQuery(
       error: 'Enter a valid date in dd/MM/yyyy format (for example 01/01/2026).',
     };
   const query = new URLSearchParams({ mode, fromDate, toDate });
-  // The session already supplies the location to parseRpAllFilters. Sending the same value would be refused
-  // by the /reports/* filter guard (REPORT_FILTER_KEYS contains lcCode but the Order adapter is not exempt);
-  // only a head-office operator's changed or cleared location needs to travel explicitly.
-  if (filters.lcCode !== sessionLcCode) query.set('lcCode', filters.lcCode);
+  query.set('lcCode', sessionLcCode !== '00' ? sessionLcCode : filters.lcCode);
   if (filters.bookCode.trim()) query.set('coBook', filters.bookCode.trim());
   if (filters.partyCode.trim()) query.set('acCode', filters.partyCode.trim());
   if (filters.custName.trim()) query.set('custName', filters.custName.trim());
@@ -112,6 +109,7 @@ export function useOrderReport(lcCode: string) {
     sequence.current += 1;
     setFiltersState((current) => ({
       ...current,
+      lcCode: '',
       fromDate: '',
       toDate: '',
       bookCode: '',
