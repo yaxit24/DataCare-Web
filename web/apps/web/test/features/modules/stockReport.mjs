@@ -259,8 +259,10 @@ const RUNNABLE = [
     async (ctx) => {
       const { page } = await ctx.session();
       await page.goto('/dashboard');
-      const stock = page.locator('a[href="/reports/stock-report"]');
-      const tag = page.locator('a[href="/reports/tag-stock"]');
+      const stock = page.locator('nav.sidebar a[href="/reports/stock-report"]');
+      const tag = page.locator('nav.sidebar a[href="/reports/tag-stock"]');
+      await stock.first().waitFor();
+      await tag.first().waitFor();
       assert.equal(await stock.count(), 1);
       assert.equal(((await stock.first().textContent()) ?? '').trim(), 'Stock Report');
       assert.equal(await tag.count(), 1);
@@ -693,6 +695,13 @@ const RUNNABLE = [
         await page.locator('[data-testid="stock-grid"]').waitFor();
         await button(page, 'Cancel').click();
         await page.waitForFunction(() => !document.querySelector('[data-testid="stock-grid"]'));
+        // CLEAR_DATA (RP_STOCK.cs:3721) resets the filters to the form defaults, which the
+        // screen re-reads from /defaults after the grid is gone, so wait for them to land.
+        await page.waitForFunction(
+          () =>
+            document.querySelector('#sr-tag')?.value === '' &&
+            document.querySelector('#sr-ittype')?.value === 'G',
+        );
         assert.equal(await page.locator('#sr-tag').inputValue(), '');
         assert.equal(await page.locator('#sr-ittype').inputValue(), 'G');
         return {
