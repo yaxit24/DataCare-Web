@@ -53,7 +53,10 @@ export function exportTable(result: ExportableResult): ExportTable {
   const groups = result.groups;
   for (let i = 0; i < groups.length; i += 1) {
     const group = groups[i]!;
-    const level = subtotalOf.get(group.depth)!;
+    const declared = subtotalOf.get(group.depth)!;
+    // A conditionally suppressed footer (AprPan.xml:936) prints no band line, as on the screen; the engine
+    // records the effective placement on the group (engine.ts closeFrom).
+    const level = { ...declared, subtotal: group.subtotal ?? declared.subtotal };
     const isLeaf = group.depth === result.groupLevels.length - 1;
     const label = `${'  '.repeat(group.depth)}${group.label}`;
     if (level.subtotal === 'header') lines.push({ ...totalLine(label, group.totals) });

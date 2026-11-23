@@ -42,7 +42,11 @@ interface Selection {
 async function selection(
   dataType?: string,
   mode = 'issue',
-  over: { lcCode?: string; options?: Record<string, unknown>; filters?: Record<string, unknown> } = {},
+  over: {
+    lcCode?: string;
+    options?: Record<string, unknown>;
+    filters?: Record<string, unknown>;
+  } = {},
 ): Promise<Selection> {
   let captured: Selection = { text: '', values: [] };
   const tx = {
@@ -109,7 +113,10 @@ describe('Approval Rpt selection builder (RP_ALL, three approval buttons)', () =
     // RP_ALL.cs:6660 {{if (Operators.CompareString(DC_Main.MLc_code, "00", false) != 0)}} locks the box.
     const locked = await selection(undefined, 'issue', { options: { lcCode: '' } });
     const m = lcPredicate.exec(locked.text);
-    expect(m, 'a location-01 session keeps its location even when the box is cleared').not.toBeNull();
+    expect(
+      m,
+      'a location-01 session keeps its location even when the box is cleared',
+    ).not.toBeNull();
     expect(locked.values[Number(m![1]) - 1]).toBe('01');
 
     const headOffice = await selection(undefined, 'issue', { lcCode: '00' });
