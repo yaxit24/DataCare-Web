@@ -49,18 +49,18 @@
       "purpose": "Web handbook: stack, architecture, modules, engineering standards and testing."
     },
     {
+      "match": "orchestration/work/*/*.md",
+      "area": "Delivery method",
+      "kind": "work package contract",
+      "status": "reference",
+      "purpose": "Frozen desktop study and case list of one Lite work package (orchestration/work/WP-nn); the case list is the contract the package is measured against, the catalog and backlog stay the status authority."
+    },
+    {
       "match": "docs/agent-prompts/lite/*.md",
       "area": "Delivery method",
       "kind": "agent prompts",
       "status": "reference",
       "purpose": "Prompt pack for independent agents that take one Lite menu each to done (generic method, report addendum, 22 menu prompts, launch bundles). Facts are generated from the menu catalog by build.py; the catalog and backlog stay the status authority."
-    },
-    {
-      "match": "orchestration/work/*/*.md",
-      "area": "Delivery method",
-      "kind": "work package",
-      "status": "reference",
-      "purpose": "One work package's frozen desktop study and case list (for example WP-23 Balance TrFr). The case list is the contract its tests implement; the backlog and the catalog stay the status authority."
     },
     {
       "match": "docs/parity/FEATURE-MATRIX.md",

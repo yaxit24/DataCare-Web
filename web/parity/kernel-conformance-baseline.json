@@ -86,8 +86,6 @@
     "rounding:modules/reports/rojmelReport.ts#round2",
     "rounding:modules/reports/rojmelReport.ts#round3",
     "rounding:modules/reports/statementDocs.ts#round2",
-    "rounding:modules/reports/tagStock.ts#r2",
-    "rounding:modules/reports/tagStock.ts#r3",
     "rounding:modules/reports/voucherRegister.ts#round2",
     "rounding:modules/sales/labourInvoice.ts#r2",
     "rounding:modules/sales/rateCut.ts#round0",

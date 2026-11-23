@@ -1868,11 +1868,11 @@ None. Slice N85 (gap G71) corrected the register to this catalog; `pnpm register
 
 - **Desktop:** `RP_TAG` — constructor caption 'Tag Stock' ([MDI_FORM.cs:8891-8900](../../unified/src/csharp/DataCareNext/MDI_FORM.cs#L8891-L8900)).
 - **Does:** Lists inward, outward, in-stock, MRP, approval-pending and all tags with totals.
-- **Looks:** Six mode tabs, date/tag/item/product/group/counter filters, a tag grid, totals and an image preview.
+- **Looks:** From/To, Search, It Type, Item, Product, Group, TagNo, Size, Location and Book selectors, RptType Tag Wise / Tag Summ, six mode buttons, the RP_TAG tag grid with n3/n0 footer, Excel and CSV; nothing runs on open.
 - **Reads:** MAIN_STOCK, BAR_DETL, BAR_IDTL, APR_DETL, TAG_IMAGE_DATA, TAG_STOCK_PRINT.
-- **Web:** `/reports/tag-stock`; `GET /reports/tag-stock`, `GET /reports/tag-stock.csv`. Can: print, list.
-- **Remaining:** Tabs and totals exist; date/tag/product/group filters, full columns and sub-details, Excel/PDF and Crystal layouts are incomplete.
-- **Owners:** N24, X26, P10-04, N57, N75, G225, N212.
+- **Web:** `/reports/tag-stock`; `GET /reports/tag-stock`, `GET /reports/tag-stock.csv`, `GET /reports/tag-stock.xlsx`, `GET /reports/tag-stock/sizes`. Can: print, list.
+- **Remaining:** Implemented from source (N238, G250): per-mode selections, signed-movement stock rule, sentinel N, no row cap, columns, sort orders, keys, CSV/Excel behind the Print right. Open: voucher zoom, Print window and Crystal layouts (TagStkRpt), approval other-item columns, edition-E Emp Isu Less, summary Mrp/Size, year rollover, desktop-runtime comparison; the browser module was written but not run locally.
+- **Owners:** N24, X26, P10-04, N57, N75, G225, N212, G250, N238.
 - **Evidence:** [RP_TAG.cs:3977-4325](../../unified/src/csharp/DataCareNext/RP_TAG.cs#L3977-L4325).
 
 ### Trading Report

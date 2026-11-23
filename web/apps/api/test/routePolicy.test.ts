@@ -132,8 +132,10 @@ describe('route policy registry', () => {
     // N234 (WP-11) adds the RP_ALL Sales Report GET /reports/sales-report and its CSV/XLSX exports: 765 + 3 = 768.
     // WP-23 replaces Balance TrFr's preview, year-close and openings wrappers with the BtmSchm screen's GET and one
     // POST per Lite dataset (ac-balance, item-stock, tag-stock, sales-order, approval): 768 - 3 + 6 = 771.
-    expect(routes).toHaveLength(771);
-    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(771);
+    // WP-15 adds the Tag Stock Excel export (GET /reports/tag-stock.xlsx) and its Size list
+    // (GET /reports/tag-stock/sizes): 771 + 2 = 773.
+    expect(routes).toHaveLength(773);
+    expect(new Set(routes.map((route) => `${route.method} ${route.path}`)).size).toBe(773);
 
     const policies = routes.map((route) => ({
       ...route,

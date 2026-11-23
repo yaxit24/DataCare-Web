@@ -166,6 +166,17 @@
         "web/apps/api/src/routes/partyOpening.ts"
       ]
     },
+    "tagStock": {
+      "covers": [
+        "web/apps/web/app/(app)/reports/tag-stock/page.tsx",
+        "web/apps/web/app/(app)/reports/tag-stock/TagStockGrid.tsx",
+        "web/apps/web/app/(app)/reports/tag-stock/useTagStock.ts",
+        "web/apps/web/app/(app)/reports/tag-stock/dateText.ts",
+        "web/apps/api/src/modules/reports/tagStock.ts",
+        "web/apps/api/src/modules/reports/tagStockColumns.ts",
+        "web/apps/api/src/routes/tagStock.ts"
+      ]
+    },
     "tagOpening": {
       "covers": [
         "web/apps/web/app/(app)/txn/tag-opening/page.tsx",

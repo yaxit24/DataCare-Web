@@ -7939,6 +7939,33 @@
         "web/apps/web/test/features/modules/dataBackup.mjs"
       ],
       "statusNote": "IMPLEMENTED, not accepted. data-backup module: 18 applicable, 14 passed, 0 failed, 4 blocked (unchanged: rights.desktop-print-handoff, output.physical-save-confirmation, output.full-lite-fixture, journey.scratch-zero-diff). backupTenantConfig unit 10 of 10, DB 5 of 5. Password hashes excluded per D37 as amended on 2026-11-22."
+    },
+    {
+      "id": "N238",
+      "status": "implemented-unverified",
+      "action": "Report > Tag Stock is the desktop RP_TAG report: In reads the BAR_DETL creation rows of From..To, Out the minus movements, Stock and Mrp the positive signed-movement balance of the session year up to To (Mrp <> 0), Apr the exact APR ISU / ISU_REC N approvals joined to BAR_DETL, All the signed movement history; sentinel tag N excluded; no 5000-row cap, so the footer and the CSV/Excel cover every row; Tag Summ and Product Stk groupings; date, tag, item, product, group, type, size, location, book and search selectors; the desktop columns, n3/n0 formats and sort orders; Escape, Down/Up, date-mask Enter and Alt mnemonics; CSV and Excel behind the Print right.",
+      "parentLabels": "P1-core; L6; T01-T18; WP-15",
+      "startAfter": [
+        "N229"
+      ],
+      "requiredProof": "DB tests whose expected values are computed from seeded movements with the desktop signed-sum rule, red on the old resolver and green on the new one; route tests for the List and Print rights, 400 on an unknown mode and the 5,100-row CSV; the tag-stock browser module run by CI (not run locally).",
+      "gapIds": "G250",
+      "entryDefinition": "15-standard-edition-plan.md section 5",
+      "sourceAndModuleDetail": "12-lineage-verification-2026-10-01.md",
+      "universalContract": "03-shared-contracts.md",
+      "verification": "04-verification-playbook.md",
+      "statusAsOf": "2026-11-22",
+      "evidence": [
+        "web/apps/api/src/modules/reports/tagStock.ts",
+        "web/apps/api/src/modules/reports/tagStockColumns.ts",
+        "web/apps/api/src/routes/tagStock.ts",
+        "web/apps/web/app/(app)/reports/tag-stock/page.tsx",
+        "web/apps/web/app/(app)/reports/tag-stock/TagStockGrid.tsx",
+        "web/apps/api/test/tagStock.db.test.ts",
+        "web/apps/api/test/tagStock.routes.db.test.ts",
+        "web/apps/web/test/features/modules/tagStock.mjs"
+      ],
+      "statusNote": "IMPLEMENTED, not accepted. 28 DB cases and 6 route cases pass locally on an isolated database; the tagStock browser module (15 cases, 5 pending with reasons) was written but not run locally (8 GB machine), CI runs it. Still open: voucher zoom (gap 10), the Print window and Crystal layouts (gap 11), the approval other-item columns (gap 13), edition-E Emp Isu Less, summary Mrp/Size and alternate-location staging, year rollover. Desktop match 0%."
     }
   ],
   "amendments": [

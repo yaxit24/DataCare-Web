@@ -251,86 +251,46 @@ async function tagStockApi(page, tab, counter) {
   assert.equal(response.status(), 200, await response.text());
   return response.json();
 }
-async function openTagStock(page, counter) {
-  await Promise.all([
-    page.waitForResponse(
-      (r) =>
-        new URL(r.url()).pathname === '/api/reports/tag-stock' && r.request().method() === 'GET',
-    ),
-    page.keyboard.press('F12'),
-  ]);
-  await page.getByRole('heading', { name: 'Tag-Stock Report', exact: true }).waitFor();
-  await page.getByLabel('Counter', { exact: true }).fill(counter);
-  await Promise.all([
+// WP-15: the screen is the desktop RP_TAG form: it opens empty and each mode button runs its query. It has no
+// Counter box (the desktop has none), so the counter isolates this case's tags in the API call and in the grid's
+// Counter column.
+async function openTagStock(page) {
+  await page.keyboard.press('F12');
+  await page.getByRole('heading', { name: 'Tag Stock', exact: true }).waitFor();
+}
+async function runTagStockMode(page, tab, label) {
+  // The whole financial year, so the seeded tag's date (and the voucher's) is inside From..To on any run date.
+  await page.getByLabel('From', { exact: true }).fill(`01/04/${startYear}`);
+  await page.getByLabel('To', { exact: true }).fill(`31/03/${startYear + 1}`);
+  const [response] = await Promise.all([
     page.waitForResponse((r) => {
       const url = new URL(r.url());
-      return (
-        url.pathname === '/api/reports/tag-stock' && url.searchParams.get('tblCode') === counter
-      );
+      return url.pathname === '/api/reports/tag-stock' && url.searchParams.get('tab') === tab;
     }),
-    page.getByRole('button', { name: 'Apply', exact: true }).click(),
+    page.getByRole('button', { name: label, exact: true }).click(),
   ]);
+  assert.equal(response.status(), 200, await response.text());
+  await page.getByTestId('tag-stock-grid').waitFor();
 }
-async function selectTagStockTab(page, tab, label, counter) {
-  const button = page.getByRole('button', { name: label, exact: true });
-  const alreadySelected = ((await button.getAttribute('class')) ?? '')
-    .split(/\s+/)
-    .includes('primary');
-  await Promise.all([
-    page.waitForResponse((r) => {
-      const url = new URL(r.url());
-      return (
-        url.pathname === '/api/reports/tag-stock' &&
-        url.searchParams.get('tab') === tab &&
-        url.searchParams.get('tblCode') === counter
-      );
-    }),
-    alreadySelected
-      ? page.getByRole('button', { name: 'Apply', exact: true }).click()
-      : button.click(),
-  ]);
-}
+const TOTAL_KEYS = ['count', 'pcs', 'netWt', 'fine', 'mrp'];
 async function assertTagStock(page, tab, label, counter, expectedTags, expectedTotals) {
-  await selectTagStockTab(page, tab, label, counter);
+  await runTagStockMode(page, tab, label);
   const report = await tagStockApi(page, tab, counter);
   assert.deepEqual(report.rows.map((row) => row.tagNo).sort(), [...expectedTags].sort());
-  assert.deepEqual(report.totals, expectedTotals);
-  await page.waitForFunction(
-    ({ activeLabel, tags, totals }) => {
-      const active = [...document.querySelectorAll('button.primary')].some(
-        (button) => button.textContent?.trim() === activeLabel,
-      );
-      const renderedTags = [...document.querySelectorAll('table.grid tbody tr')]
-        .map((row) => row.querySelector('td')?.textContent?.trim() ?? '')
-        .filter((tag) => tag && tag !== 'No tags for this view.')
-        .sort();
-      const kpis = [...document.querySelectorAll('.tile .kpi')].map((node) =>
-        Number((node.textContent ?? '').replaceAll(',', '')),
-      );
-      return (
-        active &&
-        JSON.stringify(renderedTags) === JSON.stringify([...tags].sort()) &&
-        kpis[0] === totals.count &&
-        kpis[1] === totals.netWt &&
-        kpis[2] === totals.fine &&
-        kpis[3] === totals.mrp
-      );
-    },
-    { activeLabel: label, tags: expectedTags, totals: expectedTotals },
+  assert.deepEqual(
+    Object.fromEntries(TOTAL_KEYS.map((k) => [k, report.totals[k]])),
+    expectedTotals,
   );
-  const visible = await page
-    .locator('table.grid tbody tr')
-    .evaluateAll((rows) =>
-      rows
-        .map((row) => [...row.querySelectorAll('td')].map((cell) => cell.textContent.trim()))
-        .filter((row) => row[0] && row[0] !== 'No tags for this view.'),
-    );
+  const visible = await page.getByTestId('tag-stock-grid').evaluate((grid, ctr) => {
+    const heads = [...grid.querySelectorAll('thead th')].map((h) => h.textContent.trim());
+    const tagAt = heads.indexOf('TagNo');
+    const ctrAt = heads.indexOf('Counter');
+    return [...grid.querySelectorAll('tbody tr')]
+      .map((row) => [...row.querySelectorAll('td')].map((cell) => cell.textContent.trim()))
+      .filter((cells) => cells[ctrAt] === ctr)
+      .map((cells) => [cells[tagAt]]);
+  }, counter);
   assert.deepEqual(visible.map((row) => row[0]).sort(), [...expectedTags].sort());
-  const kpis = await page.locator('.tile .kpi').allInnerTexts();
-  assert.equal(Number(kpis[0].replaceAll(',', '')), expectedTotals.count);
-  assert.equal(Number(kpis[1].replaceAll(',', '')), expectedTotals.netWt);
-  assert.equal(Number(kpis[2].replaceAll(',', '')), expectedTotals.fine);
-  assert.equal(Number(kpis[3].replaceAll(',', '')), expectedTotals.mrp);
   return { report, visible };
 }
 
@@ -1271,15 +1231,15 @@ export const tagCancel = {
         const counter = 'C16';
         const tag = await seedTag(ctx, { gross: 7.5, net: 7.25, touch: 80, counter });
         const { page, voucherNo } = await create(ctx, [tag]);
-        await openTagStock(page, counter);
-        const stock = await assertTagStock(page, 'stock', 'In Stock', counter, [], {
+        await openTagStock(page);
+        const stock = await assertTagStock(page, 'stock', 'Stock Tag', counter, [], {
           count: 0,
           pcs: 0,
           netWt: 0,
           fine: 0,
           mrp: 0,
         });
-        const out = await assertTagStock(page, 'out', 'Out', counter, [tag.tag], {
+        const out = await assertTagStock(page, 'out', 'Out Tag', counter, [tag.tag], {
           count: 1,
           pcs: 1,
           netWt: 7.25,
@@ -1290,21 +1250,36 @@ export const tagCancel = {
           `SELECT "VCH_DATE"::date::text d FROM "BAR_CAN_DATA" WHERE tenant_id=$1 AND "CO_BOOK"='${BOOK}' AND "VCH_NO"=$2 LIMIT 1`,
           voucherNo,
         );
-        assert.deepEqual(out.report.rows, [
-          {
-            tagNo: tag.tag,
-            itCode: ITEMS.gold.code,
-            designNo: '',
-            tblCode: counter,
-            vchType: 'TGCAN',
-            vchDate: savedDate,
-            pcs: 1,
-            grossWt: 7.5,
-            netWt: 7.25,
-            fine: 5.8,
-            mrp: 0,
-          },
-        ]);
+        assert.deepEqual(
+          out.report.rows.map((row) => ({
+            tagNo: row.tagNo,
+            itCode: row.itCode,
+            designNo: row.designNo ?? '',
+            tblCode: row.tblCode,
+            vchType: row.vchType,
+            vchDate: row.vchDate,
+            pcs: row.pcs,
+            grossWt: row.grossWt,
+            netWt: row.netWt,
+            fine: row.fine,
+            mrp: row.mrp,
+          })),
+          [
+            {
+              tagNo: tag.tag,
+              itCode: ITEMS.gold.code,
+              designNo: '',
+              tblCode: counter,
+              vchType: 'TGCAN',
+              vchDate: savedDate,
+              pcs: 1,
+              grossWt: 7.5,
+              netWt: 7.25,
+              fine: 5.8,
+              mrp: 0,
+            },
+          ],
+        );
         return {
           observation: `${tag.tag} absent from In Stock and present once in Out as TGCAN for ${voucherNo}`,
           expected: 'In Stock zero; Out one tag, 7.25 net and 5.8 fine',
@@ -1349,8 +1324,8 @@ export const tagCancel = {
         const first = await seedTag(ctx, { gross: 4.5, net: 4, touch: 91.6, counter });
         const kept = await seedTag(ctx, { gross: 6.25, net: 6, touch: 75, counter });
         const { page, voucherNo } = await create(ctx, [first, kept]);
-        await openTagStock(page, counter);
-        const createdStock = await assertTagStock(page, 'stock', 'In Stock', counter, [], {
+        await openTagStock(page);
+        const createdStock = await assertTagStock(page, 'stock', 'Stock Tag', counter, [], {
           count: 0,
           pcs: 0,
           netWt: 0,
@@ -1360,7 +1335,7 @@ export const tagCancel = {
         const createdOut = await assertTagStock(
           page,
           'out',
-          'Out',
+          'Out Tag',
           counter,
           [first.tag, kept.tag],
           { count: 2, pcs: 2, netWt: 10, fine: 8.164, mrp: 0 },
@@ -1377,21 +1352,28 @@ export const tagCancel = {
         await pickTag(page, 2, added.tag);
         const edited = await save(page, 'PUT');
         assert.equal(edited.status(), 200, await edited.text());
-        await openTagStock(page, counter);
-        const editedStock = await assertTagStock(page, 'stock', 'In Stock', counter, [first.tag], {
+        await openTagStock(page);
+        const editedStock = await assertTagStock(page, 'stock', 'Stock Tag', counter, [first.tag], {
           count: 1,
           pcs: 1,
           netWt: 4,
           fine: 3.664,
           mrp: 0,
         });
-        const editedOut = await assertTagStock(page, 'out', 'Out', counter, [kept.tag, added.tag], {
-          count: 2,
-          pcs: 2,
-          netWt: 13.5,
-          fine: 10.5,
-          mrp: 0,
-        });
+        const editedOut = await assertTagStock(
+          page,
+          'out',
+          'Out Tag',
+          counter,
+          [kept.tag, added.tag],
+          {
+            count: 2,
+            pcs: 2,
+            netWt: 13.5,
+            fine: 10.5,
+            mrp: 0,
+          },
+        );
         assert.ok(editedOut.report.rows.every((row) => row.vchType === 'TGCAN'));
 
         await openScreen(page);
@@ -1405,16 +1387,16 @@ export const tagCancel = {
           page.getByTestId('tag-cancel-delete').click(),
         ]);
         assert.equal(removed.status(), 200, await removed.text());
-        await openTagStock(page, counter);
+        await openTagStock(page);
         const deletedStock = await assertTagStock(
           page,
           'stock',
-          'In Stock',
+          'Stock Tag',
           counter,
           [first.tag, kept.tag, added.tag],
           { count: 3, pcs: 3, netWt: 17.5, fine: 14.164, mrp: 0 },
         );
-        const deletedOut = await assertTagStock(page, 'out', 'Out', counter, [], {
+        const deletedOut = await assertTagStock(page, 'out', 'Out Tag', counter, [], {
           count: 0,
           pcs: 0,
           netWt: 0,
