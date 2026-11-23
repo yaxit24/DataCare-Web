@@ -267,6 +267,13 @@ run('Sales Order advance row in SL_ORD_ADJ', () => {
     ]);
   });
 
+  it('a rate-cut order with no typed rate-cut amount still writes the row from the tender total (:9481, :11368)', async () => {
+    // The desktop's [9,3] is the tender total whether or not a rate-cut rate is set, so cash alone makes the row.
+    const rateCut = { rateCutRate: 6000, rateCutFine: 0.25, rateCutAmount: 0 };
+    await createSalesOrder(runtime, input(rateCut) as any);
+    expect(await adjRows()).toEqual([expectedPlus({ amt: 0, gold: rateCut.rateCutFine })]);
+  });
+
   it('an order with no advance and no unvalued metal writes no row (:9481)', async () => {
     await createSalesOrder(runtime, input({ advanceAmount: 0 }) as any);
     expect(await adjRows()).toEqual([]);
@@ -344,8 +351,11 @@ run('Sales Order advance row in SL_ORD_ADJ', () => {
     );
     const minus = (await adjRows()).filter((row) => row.sign === '-');
     expect(minus).toHaveLength(1);
+    // TR_SALE.cs:15695-15727: the '-' row is under the sale's own key, with the order's key in ORD_*.
     expect(minus[0]).toMatchObject({
-      book: 'ORA',
+      book: 'SAL',
+      vch: String(sale.vchNo).padStart(5, '0'),
+      entry: 'S',
       ordno: '00001',
       ordlc: '01',
       ordyr: YEAR,
