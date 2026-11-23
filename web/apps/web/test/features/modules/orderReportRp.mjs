@@ -10,8 +10,8 @@ import { FIXTURE_MANIFEST, USERS } from '../fixtures/catalogue.mjs';
  * rows, Order Adjust returns group bands only (one null group for the orders without adjustments), Order Wise
  * Bill and Bill Wise Adjust carry the bill columns, and Making Panding/Summ list every stored DESIGN_ISU = N line
  * (the fully-adjusted write is HM310NEPK-only, RP_ALL.cs:10925, so D2 reads as the general behaviour).
- * The Sales Order screen writes no "+" SL_ORD_ADJ advance row (TR_SALE_ORD.cs:9503 does): the lifecycle and
- * journey cases seed it (seedAdvanceAdjustment) and report that as a Sales Order gap.
+ * The Sales Order screen writes the "+" SL_ORD_ADJ advance row (TR_SALE_ORD.cs:9503, web since #262): the
+ * lifecycle and journey cases check it (expectAdvanceAdjustment) instead of seeding it.
  *
  * Desktop authority (all quotes copied from cases.md, which verifies against the source):
  * - MDI_FORM.cs:8931 {{case "Order Report":}} opens RP_ALL; the caption selects the mode
@@ -701,21 +701,31 @@ async function createSalesOrder(ctx, page, { lines, advance }) {
 
 /**
  * TR_SALE_ORD.cs:9503 {{dataRow7["ORD_SIGN"] = "+";}} writes the advance as a "+" SL_ORD_ADJ row under the order's
- * own keys, but the web Sales Order writes no SL_ORD_ADJ at all (ORDER_WRITE_SET in salesOrder.mjs measures
- * AC_DATA, ROJ_MEL_DATA, SL_ORD_DATA, SL_ORD_DETL, TEMP_BOOK_DATA). That is a gap of the Sales Order screen, not
- * of this report, so the row it should have written is seeded here and the report is judged on it. Any such row
- * makes the order "adjusted", which the Sales Order edit and delete refuse (salesOrder.ts assertOrderUnconsumedTx),
- * so a case seeds it after its edits and drops it before its delete.
+ * own keys. The web Sales Order writes it too since #262 (SR_NO 1, ORD_SIGN '+', ORD_AMT the advance), and its edit
+ * and delete replace or remove it with the rest of the write set; the '+' row alone never blocks an edit. The case
+ * checks that the saved order carries that row, so the report is judged on what the Sales Order screen wrote.
  */
-async function seedAdvanceAdjustment(ctx, header) {
-  await ctx.rows(
-    `INSERT INTO "SL_ORD_ADJ"(tenant_id,"CO_CODE","LC_CODE","CO_YEAR","CO_BOOK","VCH_NO","SR_NO","VCH_DATE","ORD_SIGN","ORD_AMT","ORD_LC","ORD_YRCD","ORD_DBCD","ORD_NO","ORD_AC_CODE")
-     SELECT $1::text,'01','01',$2::text,$3::text,$4::text,1,"VCH_DATE",'+',"ADV_AMT",'01',$2::text,$3::text,$4::text,'E2ELOC'
-       FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_BOOK"=$3 AND "VCH_NO"=$4 AND "CO_YEAR"=$2`,
+async function expectAdvanceAdjustment(ctx, header) {
+  const rows = await ctx.rows(
+    `SELECT "ORD_SIGN" AS sign, "ORD_AMT"::float8 AS amt FROM "SL_ORD_ADJ"
+      WHERE tenant_id=$1 AND "CO_YEAR"=$2 AND "CO_BOOK"=$3 AND "VCH_NO"=$4 AND "ORD_NO"=$4`,
     header.year,
     header.book,
     header.vch,
   );
+  const plus = rows.filter((row) => row.sign === '+');
+  assert.equal(
+    plus.length,
+    1,
+    `one "+" SL_ORD_ADJ row for order ${header.vch}: ${JSON.stringify(rows)}`,
+  );
+  const order = await ctx.rows(
+    `SELECT "ADV_AMT"::float8 AS adv FROM "SL_ORD_DATA" WHERE tenant_id=$1 AND "CO_YEAR"=$2 AND "CO_BOOK"=$3 AND "VCH_NO"=$4`,
+    header.year,
+    header.book,
+    header.vch,
+  );
+  assert.equal(Number(plus[0].amt), Number(order[0].adv), 'the "+" row carries the order advance');
 }
 
 /** Everything one saved order writes (ORDER_WRITE_SET of salesOrder.mjs), for a case that fails midway. */
@@ -1524,15 +1534,15 @@ export const orderReportRp = {
           await runMode(report, 'report', whole);
           const after = await readGrid(report);
           assert.equal(cellOf(after, after.footer, 'Net Wt'), (beforeNwt + 16.5).toFixed(3));
-          // The advance row (see seedAdvanceAdjustment): Order Adjust shows the "+" 5000 and the pending 5000.
-          await seedAdvanceAdjustment(ctx, header);
+          // The advance row the Sales Order wrote (see expectAdvanceAdjustment): Order Adjust shows the "+" 5000 and
+          // the pending 5000.
+          await expectAdvanceAdjustment(ctx, header);
           await runMode(report, 'adjust', whole);
           const adjusted = await readGrid(report);
           const band = adjusted.rows.find((cells) => cells[0].startsWith(header.vch));
           assert(band, `order ${header.vch} in the Order Adjust report`);
           assert.equal(cellOf(adjusted, band, 'Order Adv'), '5000.00');
           assert.equal(cellOf(adjusted, band, 'Panding Amt'), '5000.00');
-          await ctx.rows(`DELETE FROM "SL_ORD_ADJ" WHERE tenant_id=$1 AND "VCH_NO"=$2`, header.vch);
           // Step 4: delete the order on its own screen; every mode drops it.
           await openSalesOrder(page);
           await page.getByLabel('Order number', { exact: true }).fill(header.vch);
@@ -1889,7 +1899,7 @@ export const orderReportRp = {
         let header;
         try {
           header = await createSalesOrder(ctx, page, { lines: [SO_LINE(2, 15)], advance: 5000 });
-          await seedAdvanceAdjustment(ctx, header);
+          await expectAdvanceAdjustment(ctx, header);
           const report = await openReport(ctx);
           const money = (n) => n.toFixed(2);
           const adjustBand = async () => {
